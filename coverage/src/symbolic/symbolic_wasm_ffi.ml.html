@@ -484,9 +484,9 @@ end = struct
 
   module Value = Symbolic_value
 
-  let covered_labels = Hashtbl.creat<span data-count="874">e</span> 16
+  let covered_labels = Hashtbl.creat<span data-count="879">e</span> 16
 
-  let cov_lock = Mutex.creat<span data-count="874">e</span> ()
+  let cov_lock = Mutex.creat<span data-count="879">e</span> ()
 
   let add_pc_wrapper e = <span data-count="607">C</span>hoice.add_pc e
 
@@ -494,7 +494,7 @@ end = struct
     <span data-count="583">a</span>dd_pc_wrapper @@ Value.I32.to_boo<span data-count="583">l</span> i
 
   let assert' (i : Value.int32) : unit Choice.t =
-    <span data-count="96958">C</span>hoice.assertion @@ Value.I32.to_boo<span data-count="96958">l</span> i
+    <span data-count="96962">C</span>hoice.assertion @@ Value.I32.to_boo<span data-count="96961">l</span> i
 
   let symbol_bool () =
     <span data-count="4">C</span>hoice.with_new_symbol (Ty_bitv 1) (fun sym -&gt;
@@ -512,7 +512,7 @@ end = struct
     <span data-count="0">C</span>hoice.with_new_symbol (Ty_bitv 16) (fun sym -&gt;
       <span data-count="0">E</span>xpr.cvtop (Ty_bitv 32) (Zero_extend 16) (Expr.symbo<span data-count="0">l</span> sym) )
 
-  let symbol_i32 () = <span data-count="1169">C</span>hoice.with_new_symbol (Ty_bitv 32) Expr.symbol
+  let symbol_i32 () = <span data-count="1174">C</span>hoice.with_new_symbol (Ty_bitv 32) Expr.symbol
 
   let symbol_i32_constant v =
     <span data-count="0">l</span>et open Choice in
@@ -542,7 +542,7 @@ end = struct
     <span data-count="9918">C</span>hoice.lift_mem @@ Memory.reallo<span data-count="9918">c</span> m ~ptr:base ~size
 
   let free m (ptr : Value.int32) : Value.int32 Choice.t =
-    <span data-count="2536">C</span>hoice.lift_mem @@ Memory.fre<span data-count="2540">e</span> m ptr
+    <span data-count="2542">C</span>hoice.lift_mem @@ Memory.fre<span data-count="2542">e</span> m ptr
 
   let exit (_p : Value.int32) : unit Choice.t = <span data-count="1">a</span>bort ()
 
@@ -616,31 +616,31 @@ open Symbolic.Extern_func.Syntax
 
 let symbolic_extern_module =
   let functions =
-    [ ("i8_symbol", Extern_func (unit ^-&gt;<span data-count="874">.</span> i32, symbol_i8))
-    ; ("i16_symbol", Extern_func (unit ^-&gt;<span data-count="874">.</span> i32, symbol_i16))
-    ; ("i32_symbol", Extern_func (unit ^-&gt;<span data-count="874">.</span> i32, symbol_i32))
-    ; ("i32_symbol_constant", Extern_func (i32 ^-&gt;<span data-count="874">.</span> i32, symbol_i32_constant))
-    ; ("i64_symbol", Extern_func (unit ^-&gt;<span data-count="874">.</span> i64, symbol_i64))
-    ; ("f32_symbol", Extern_func (unit ^-&gt;<span data-count="874">.</span> f32, symbol_f32))
-    ; ("f64_symbol", Extern_func (unit ^-&gt;<span data-count="874">.</span> f64, symbol_f64))
-    ; ("v128_symbol", Extern_func (unit ^-&gt;<span data-count="874">.</span> v128, symbol_v128))
-    ; ("bool_symbol", Extern_func (unit ^-&gt;<span data-count="874">.</span> i32, symbol_bool))
+    [ ("i8_symbol", Extern_func (unit ^-&gt;<span data-count="879">.</span> i32, symbol_i8))
+    ; ("i16_symbol", Extern_func (unit ^-&gt;<span data-count="879">.</span> i32, symbol_i16))
+    ; ("i32_symbol", Extern_func (unit ^-&gt;<span data-count="879">.</span> i32, symbol_i32))
+    ; ("i32_symbol_constant", Extern_func (i32 ^-&gt;<span data-count="879">.</span> i32, symbol_i32_constant))
+    ; ("i64_symbol", Extern_func (unit ^-&gt;<span data-count="879">.</span> i64, symbol_i64))
+    ; ("f32_symbol", Extern_func (unit ^-&gt;<span data-count="879">.</span> f32, symbol_f32))
+    ; ("f64_symbol", Extern_func (unit ^-&gt;<span data-count="879">.</span> f64, symbol_f64))
+    ; ("v128_symbol", Extern_func (unit ^-&gt;<span data-count="879">.</span> v128, symbol_v128))
+    ; ("bool_symbol", Extern_func (unit ^-&gt;<span data-count="879">.</span> i32, symbol_bool))
     ; ( "invisible_bool_symbol"
-      , Extern_func (unit ^-&gt;<span data-count="874">.</span> i32, symbol_invisible_bool) )
-    ; ("range_symbol", Extern_func (i32 ^-<span data-count="874">&gt;</span> i32 ^-&gt;<span data-count="874">.</span> i32, symbol_range))
-    ; ("assume", Extern_func (i32 ^-&gt;<span data-count="874">.</span> unit, assume))
-    ; ("assert", Extern_func (i32 ^-&gt;<span data-count="874">.</span> unit, assert'))
-    ; ("in_replay_mode", Extern_func (unit ^-&gt;<span data-count="874">.</span> i32, in_replay_mode))
-    ; ("print_char", Extern_func (i32 ^-&gt;<span data-count="874">.</span> unit, print_char))
+      , Extern_func (unit ^-&gt;<span data-count="879">.</span> i32, symbol_invisible_bool) )
+    ; ("range_symbol", Extern_func (i32 ^-<span data-count="879">&gt;</span> i32 ^-&gt;<span data-count="879">.</span> i32, symbol_range))
+    ; ("assume", Extern_func (i32 ^-&gt;<span data-count="879">.</span> unit, assume))
+    ; ("assert", Extern_func (i32 ^-&gt;<span data-count="879">.</span> unit, assert'))
+    ; ("in_replay_mode", Extern_func (unit ^-&gt;<span data-count="879">.</span> i32, in_replay_mode))
+    ; ("print_char", Extern_func (i32 ^-&gt;<span data-count="879">.</span> unit, print_char))
     ; ( "cov_label_set"
-      , Extern_func (memory ^-<span data-count="874">&gt;</span> i32 ^-<span data-count="874">&gt;</span> i32 ^-&gt;<span data-count="874">.</span> unit, cov_label_set) )
-    ; ("cov_label_is_covered", Extern_func (i32 ^-&gt;<span data-count="874">.</span> i32, cov_label_is_covered))
-    ; ("open_scope", Extern_func (memory ^-<span data-count="874">&gt;</span> i32 ^-&gt;<span data-count="874">.</span> unit, open_scope))
-    ; ("close_scope", Extern_func (unit ^-&gt;<span data-count="874">.</span> unit, close_scope))
-    ; ("alloc", Extern_func (memory ^-<span data-count="874">&gt;</span> i32 ^-<span data-count="874">&gt;</span> i32 ^-&gt;<span data-count="874">.</span> i32, alloc))
-    ; ("dealloc", Extern_func (memory ^-<span data-count="874">&gt;</span> i32 ^-&gt;<span data-count="874">.</span> i32, free))
-    ; ("abort", Extern_func (unit ^-&gt;<span data-count="874">.</span> unit, abort))
-    ; ("exit", Extern_func (i32 ^-&gt;<span data-count="874">.</span> unit, exit))
+      , Extern_func (memory ^-<span data-count="879">&gt;</span> i32 ^-<span data-count="879">&gt;</span> i32 ^-&gt;<span data-count="879">.</span> unit, cov_label_set) )
+    ; ("cov_label_is_covered", Extern_func (i32 ^-&gt;<span data-count="879">.</span> i32, cov_label_is_covered))
+    ; ("open_scope", Extern_func (memory ^-<span data-count="879">&gt;</span> i32 ^-&gt;<span data-count="879">.</span> unit, open_scope))
+    ; ("close_scope", Extern_func (unit ^-&gt;<span data-count="879">.</span> unit, close_scope))
+    ; ("alloc", Extern_func (memory ^-<span data-count="879">&gt;</span> i32 ^-<span data-count="879">&gt;</span> i32 ^-&gt;<span data-count="879">.</span> i32, alloc))
+    ; ("dealloc", Extern_func (memory ^-<span data-count="879">&gt;</span> i32 ^-&gt;<span data-count="879">.</span> i32, free))
+    ; ("abort", Extern_func (unit ^-&gt;<span data-count="879">.</span> unit, abort))
+    ; ("exit", Extern_func (i32 ^-&gt;<span data-count="879">.</span> unit, exit))
     ]
   in
   { Link.functions }
@@ -657,9 +657,9 @@ let random_get _ _ =
 
 let wasi_snapshot_preview1 =
   let functions =
-    [ ("fd_write", Extern_func (i32 ^-<span data-count="874">&gt;</span> i32 ^-<span data-count="874">&gt;</span> i32 ^-<span data-count="874">&gt;</span> i32 ^-&gt;<span data-count="874">.</span> i32, fd_write))
-    ; ("proc_exit", Extern_func (i32 ^-&gt;<span data-count="874">.</span> unit, proc_exit))
-    ; ("random_get", Extern_func (i32 ^-<span data-count="874">&gt;</span> i32 ^-&gt;<span data-count="874">.</span> i32, random_get))
+    [ ("fd_write", Extern_func (i32 ^-<span data-count="879">&gt;</span> i32 ^-<span data-count="879">&gt;</span> i32 ^-<span data-count="879">&gt;</span> i32 ^-&gt;<span data-count="879">.</span> i32, fd_write))
+    ; ("proc_exit", Extern_func (i32 ^-&gt;<span data-count="879">.</span> unit, proc_exit))
+    ; ("random_get", Extern_func (i32 ^-<span data-count="879">&gt;</span> i32 ^-&gt;<span data-count="879">.</span> i32, random_get))
     ]
   in
   { Link.functions }

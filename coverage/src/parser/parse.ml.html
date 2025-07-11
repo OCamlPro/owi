@@ -1527,14 +1527,14 @@ end) =
 struct
   let from_lexbuf =
     let parser = MenhirLib.Convert.Simplified.traditional2revised M.rule in
-    <span data-count="2622">f</span>un buf -&gt;
-      <span data-count="1193">L</span>ogs.info (fun m -&gt; <span data-count="20">m</span> "parsing      ...");
-      <span data-count="1193">l</span>et provider () =
-        <span data-count="728269">l</span>et tok = Text_lexer.token buf in
-        <span data-count="727918">l</span>et start, stop = Sedlexing.lexing_positions buf in
-        <span data-count="727918">(</span>tok, start, stop)
+    <span data-count="2637">f</span>un buf -&gt;
+      <span data-count="1194">L</span>ogs.info (fun m -&gt; <span data-count="20">m</span> "parsing      ...");
+      <span data-count="1194">l</span>et provider () =
+        <span data-count="728423">l</span>et tok = Text_lexer.token buf in
+        <span data-count="728072">l</span>et start, stop = Sedlexing.lexing_positions buf in
+        <span data-count="728072">(</span>tok, start, stop)
       in
-      try Ok (parse<span data-count="455">r</span> provider) with
+      try Ok (parse<span data-count="456">r</span> provider) with
       | <span data-count="305">T</span>ypes.Parse_fail msg -&gt; Error (`Parse_fail msg)
       | <span data-count="0">T</span>ext_lexer.Empty_annotation_id -&gt; Error `Empty_annotation_id
       | <span data-count="0">T</span>ext_lexer.Empty_identifier -&gt; Error `Empty_identifier
@@ -1550,16 +1550,16 @@ struct
       | <span data-count="0">S</span>edlexing.MalFormed -&gt; Error (`Malformed_utf8_encoding "")
 
   let from_file filename =
-    <span data-count="401">l</span>et open Syntax in
+    <span data-count="402">l</span>et open Syntax in
     let* res =
-      Bos.OS.File.with_i<span data-count="401">c</span> filename
+      Bos.OS.File.with_i<span data-count="402">c</span> filename
         (fun chan () -&gt;
-          <span data-count="401">l</span>et lb = Sedlexing.Utf8.from_channel chan in
-          <span data-count="401">S</span>edlexing.set_filename lb (Fpath.to_strin<span data-count="401">g</span> filename);
-          <span data-count="401">f</span>rom_lexbuf lb )
+          <span data-count="402">l</span>et lb = Sedlexing.Utf8.from_channel chan in
+          <span data-count="402">S</span>edlexing.set_filename lb (Fpath.to_strin<span data-count="402">g</span> filename);
+          <span data-count="402">f</span>rom_lexbuf lb )
         ()
     in
-    <span data-count="401">r</span>es
+    <span data-count="402">r</span>es
 
   let from_string s = <span data-count="792">f</span>rom_lexbuf (Sedlexing.Utf8.from_strin<span data-count="792">g</span> s)
 
@@ -1591,16 +1591,16 @@ module Binary = struct
 end
 
 let guess_from_file file =
-  <span data-count="613">m</span>atch Fpath.get_ext ~multi:false file with
-  | <span data-count="229">"</span>.wat" -&gt;
-    let+ m = Text.Module.from_fil<span data-count="229">e</span> file in
-    <span data-count="228">K</span>ind.Wat m
+  <span data-count="618">m</span>atch Fpath.get_ext ~multi:false file with
+  | <span data-count="230">"</span>.wat" -&gt;
+    let+ m = Text.Module.from_fil<span data-count="230">e</span> file in
+    <span data-count="229">K</span>ind.Wat m
   | <span data-count="0">"</span>.wast" -&gt;
     let+ m = Text.Script.from_fil<span data-count="0">e</span> file in
     <span data-count="0">K</span>ind.Wast m
-  | <span data-count="384">"</span>.wasm" -&gt;
-    let+ m = Binary.Module.from_fil<span data-count="384">e</span> file in
-    <span data-count="384">K</span>ind.Wasm m
+  | <span data-count="388">"</span>.wasm" -&gt;
+    let+ m = Binary.Module.from_fil<span data-count="388">e</span> file in
+    <span data-count="388">K</span>ind.Wasm m
   | <span data-count="0">e</span>xt -&gt; Error (`Unsupported_file_extension ext)
 </code></pre>
       </div>

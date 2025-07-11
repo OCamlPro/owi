@@ -304,15 +304,15 @@ open Syntax
 
 let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file
   (files : Fpath.t list) : Fpath.t Result.t =
-  <span data-count="5">l</span>et* clangpp_bin = OS.Cmd.resolv<span data-count="5">e</span> @@ Cmd.<span data-count="5">v</span> "clang++" in
-  <span data-count="5">l</span>et opt_lvl = Fmt.str "-O%s" opt_lvl in
+  <span data-count="6">l</span>et* clangpp_bin = OS.Cmd.resolv<span data-count="6">e</span> @@ Cmd.<span data-count="6">v</span> "clang++" in
+  <span data-count="6">l</span>et opt_lvl = Fmt.str "-O%s" opt_lvl in
 
-  <span data-count="5">l</span>et includes = Cmd.of_list ~slip:"-I" (List.ma<span data-count="5">p</span> Cmd.p includes) in
+  <span data-count="6">l</span>et includes = Cmd.of_list ~slip:"-I" (List.ma<span data-count="6">p</span> Cmd.p includes) in
 
-  <span data-count="5">l</span>et err =
+  <span data-count="6">l</span>et err =
     match Logs.level () with
     | Some (<span data-count="0">L</span>ogs.Debug | <span data-count="0">L</span>ogs.Info) -&gt; OS.Cmd.err_run_out
-    | <span data-count="0">N</span>one | <span data-count="5">S</span>ome _ -&gt; OS.Cmd.err_null
+    | <span data-count="0">N</span>one | <span data-count="6">S</span>ome _ -&gt; OS.Cmd.err_null
   in
   let* () =
     (* TODO: we use this recursive function in order to be able to use `-o` on
@@ -320,81 +320,81 @@ let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file
        compiler and the linker in the same step as it is done for C - then
        there would be a single output file and we could use `-o` more easily. *)
     let rec compile_files = function
-      | <span data-count="5">[</span>] -&gt; Ok ()
-      | <span data-count="5">f</span>ile :: rest -&gt; (
-        let out_bc = Fpath.(workspace /<span data-count="5">/</span> Fpath.bas<span data-count="5">e</span> (file -<span data-count="5">+</span> ".bc")) in
+      | <span data-count="6">[</span>] -&gt; Ok ()
+      | <span data-count="6">f</span>ile :: rest -&gt; (
+        let out_bc = Fpath.(workspace /<span data-count="6">/</span> Fpath.bas<span data-count="6">e</span> (file -<span data-count="6">+</span> ".bc")) in
         let clang_cmd =
           Cmd.(
-            clangpp_bin <span data-count="5">%</span> "-Wno-everything" <span data-count="5">%</span> opt_lvl <span data-count="5">%</span> "-emit-llvm"
-            <span data-count="5">%</span> "--target=wasm32" <span data-count="5">%</span> "-m32" <span data-count="5">%</span> "-c" %<span data-count="5">%</span> includes <span data-count="5">%</span> "-o" <span data-count="5">%</span> <span data-count="5">p</span> out_bc
-            <span data-count="5">%</span> <span data-count="5">p</span> file )
+            clangpp_bin <span data-count="6">%</span> "-Wno-everything" <span data-count="6">%</span> opt_lvl <span data-count="6">%</span> "-emit-llvm"
+            <span data-count="6">%</span> "--target=wasm32" <span data-count="6">%</span> "-m32" <span data-count="6">%</span> "-c" %<span data-count="6">%</span> includes <span data-count="6">%</span> "-o" <span data-count="6">%</span> <span data-count="6">p</span> out_bc
+            <span data-count="6">%</span> <span data-count="6">p</span> file )
         in
         match OS.Cmd.run ~err clang_cmd with
-        | <span data-count="5">O</span>k _ -&gt; compile_files rest
+        | <span data-count="6">O</span>k _ -&gt; compile_files rest
         | <span data-count="0">E</span>rror (`Msg e) -&gt;
           Logs.debug (fun m -&gt; <span data-count="0">m</span> "clang++ failed: %s" e);
           <span data-count="0">F</span>mt.error_msg
             "clang++ failed: run with -vv if the error is not displayed above" )
     in
-    compile_file<span data-count="5">s</span> files
+    compile_file<span data-count="6">s</span> files
   in
 
-  <span data-count="5">l</span>et* llc_bin = OS.Cmd.resolv<span data-count="5">e</span> @@ Cmd.<span data-count="5">v</span> "llc" in
+  <span data-count="6">l</span>et* llc_bin = OS.Cmd.resolv<span data-count="6">e</span> @@ Cmd.<span data-count="6">v</span> "llc" in
 
-  <span data-count="5">l</span>et files_bc =
+  <span data-count="6">l</span>et files_bc =
     Cmd.of_list
-    @@ List.ma<span data-count="5">p</span>
-         (fun file -&gt; <span data-count="5">F</span>path.(workspace /<span data-count="5">/</span> Fpath.bas<span data-count="5">e</span> (file -<span data-count="5">+</span> ".bc")) |&gt; Cmd.p)
+    @@ List.ma<span data-count="6">p</span>
+         (fun file -&gt; <span data-count="6">F</span>path.(workspace /<span data-count="6">/</span> Fpath.bas<span data-count="6">e</span> (file -<span data-count="6">+</span> ".bc")) |&gt; Cmd.p)
          files
   in
 
-  <span data-count="5">l</span>et llc_cmd : Cmd.t =
+  <span data-count="6">l</span>et llc_cmd : Cmd.t =
     Cmd.(
       llc_bin
-      <span data-count="5">%</span>
+      <span data-count="6">%</span>
       (* TODO: configure this ? *)
-      "-O0" <span data-count="5">%</span> "-march=wasm32" <span data-count="5">%</span> "-filetype=obj" %<span data-count="5">%</span> files_bc )
+      "-O0" <span data-count="6">%</span> "-march=wasm32" <span data-count="6">%</span> "-filetype=obj" %<span data-count="6">%</span> files_bc )
   in
 
   let* () =
     match OS.Cmd.run ~err llc_cmd with
-    | <span data-count="5">O</span>k _ as v -&gt; v
+    | <span data-count="6">O</span>k _ as v -&gt; v
     | <span data-count="0">E</span>rror (`Msg e) -&gt;
       Logs.debug (fun m -&gt; <span data-count="0">m</span> "llc failed: %s" e);
       <span data-count="0">F</span>mt.error_ms<span data-count="0">g</span> "llc failed: run with --debug to get the full error message"
   in
-  <span data-count="5">l</span>et* wasmld_bin = OS.Cmd.resolv<span data-count="5">e</span> @@ Cmd.<span data-count="5">v</span> "wasm-ld" in
+  <span data-count="6">l</span>et* wasmld_bin = OS.Cmd.resolv<span data-count="6">e</span> @@ Cmd.<span data-count="6">v</span> "wasm-ld" in
 
-  <span data-count="5">l</span>et files_o =
+  <span data-count="6">l</span>et files_o =
     List.map
-      (fun file -&gt; <span data-count="5">F</span>path.(workspace /<span data-count="5">/</span> Fpath.bas<span data-count="5">e</span> (file -<span data-count="5">+</span> ".o")) |&gt; Cmd.p)
+      (fun file -&gt; <span data-count="6">F</span>path.(workspace /<span data-count="6">/</span> Fpath.bas<span data-count="6">e</span> (file -<span data-count="6">+</span> ".o")) |&gt; Cmd.p)
       files
   in
 
-  <span data-count="5">l</span>et out =
-    Option.value ~default:Fpath.(workspace /<span data-count="5">/</span> <span data-count="5">v</span> "a.out.wasm") out_file
+  <span data-count="6">l</span>et out =
+    Option.value ~default:Fpath.(workspace /<span data-count="6">/</span> <span data-count="6">v</span> "a.out.wasm") out_file
   in
 
-  <span data-count="5">l</span>et* libc = Cmd_utils.find_installed_c_fil<span data-count="5">e</span> (Fpath.<span data-count="5">v</span> "libc.wasm") in
-  <span data-count="5">l</span>et* libowi = Cmd_utils.find_installed_c_fil<span data-count="5">e</span> (Fpath.<span data-count="5">v</span> "libowi.wasm") in
-  <span data-count="5">l</span>et wasmld_cmd : Cmd.t =
+  <span data-count="6">l</span>et* libc = Cmd_utils.find_installed_c_fil<span data-count="6">e</span> (Fpath.<span data-count="6">v</span> "libc.wasm") in
+  <span data-count="6">l</span>et* libowi = Cmd_utils.find_installed_c_fil<span data-count="6">e</span> (Fpath.<span data-count="6">v</span> "libowi.wasm") in
+  <span data-count="6">l</span>et wasmld_cmd : Cmd.t =
     Cmd.(
       wasmld_bin
-      %<span data-count="5">%</span> of_lis<span data-count="5">t</span>
+      %<span data-count="6">%</span> of_lis<span data-count="6">t</span>
            ( [ "-z"; "stack-size=8388608" ]
            @ ( match entry_point with
              | <span data-count="0">N</span>one -&gt; []
-             | <span data-count="5">S</span>ome entry_point -&gt;
-               [ Fmt.st<span data-count="5">r</span> "--export=%s" entry_point
-               ; Fmt.st<span data-count="5">r</span> "--entry=%s" entry_point
+             | <span data-count="6">S</span>ome entry_point -&gt;
+               [ Fmt.st<span data-count="6">r</span> "--export=%s" entry_point
+               ; Fmt.st<span data-count="6">r</span> "--entry=%s" entry_point
                ] )
            @ files_o
-           @ [ <span data-count="5">p</span> libc; <span data-count="5">p</span> libowi; "-o"; <span data-count="5">p</span> out ] ) )
+           @ [ <span data-count="6">p</span> libc; <span data-count="6">p</span> libowi; "-o"; <span data-count="6">p</span> out ] ) )
   in
 
   let+ () =
     match OS.Cmd.run ~err wasmld_cmd with
-    | <span data-count="4">O</span>k _ as v -&gt; v
+    | <span data-count="5">O</span>k _ as v -&gt; v
     | <span data-count="1">E</span>rror (`Msg e) -&gt;
       Logs.debug (fun m -&gt; <span data-count="0">m</span> "wasm-ld failed: %s" e);
       <span data-count="1">F</span>mt.error_ms<span data-count="1">g</span>
@@ -402,27 +402,27 @@ let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file
          not displayed above"
   in
 
-  <span data-count="4">o</span>ut
+  <span data-count="5">o</span>ut
 
 let cmd ~symbolic_parameters ~arch:_ ~opt_lvl ~includes ~files ~concolic
   ~out_file : unit Result.t =
-  <span data-count="5">l</span>et* workspace =
+  <span data-count="6">l</span>et* workspace =
     match symbolic_parameters.Cmd_sym.workspace with
     | <span data-count="0">S</span>ome path -&gt; Ok path
-    | <span data-count="5">N</span>one -&gt; OS.Dir.tm<span data-count="5">p</span> "owi_cpp_%s"
+    | <span data-count="6">N</span>one -&gt; OS.Dir.tm<span data-count="6">p</span> "owi_cpp_%s"
   in
-  <span data-count="5">l</span>et* _did_create : bool = OS.Dir.creat<span data-count="5">e</span> ~path:true workspace in
+  <span data-count="6">l</span>et* _did_create : bool = OS.Dir.creat<span data-count="6">e</span> ~path:true workspace in
 
-  <span data-count="5">l</span>et includes = Cmd_utils.c_files_location @ includes in
+  <span data-count="6">l</span>et includes = Cmd_utils.c_files_location @ includes in
   let* source_file =
-    compil<span data-count="5">e</span> ~workspace ~entry_point:symbolic_parameters.entry_point ~includes
+    compil<span data-count="6">e</span> ~workspace ~entry_point:symbolic_parameters.entry_point ~includes
       ~opt_lvl ~out_file files
   in
-  <span data-count="4">l</span>et workspace = Some workspace in
+  <span data-count="5">l</span>et workspace = Some workspace in
 
   let parameters = { symbolic_parameters with workspace } in
 
-  (if concolic then <span data-count="0">C</span>md_conc.cmd else <span data-count="4">C</span>md_sym.cmd) ~parameters ~source_file
+  (if concolic then <span data-count="0">C</span>md_conc.cmd else <span data-count="5">C</span>md_sym.cmd) ~parameters ~source_file
 </code></pre>
       </div>
     </div>
