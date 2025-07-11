@@ -8,5 +8,6 @@ title = "Owi"
 [preprocessor.tabs]
 
 [output.html]
-additional-css = ["theme/tabs.css"]
+additional-css = [ "theme/catppuccin.css", "theme/tabs.css" ]
 additional-js = ["theme/tabs.js"]
+default-theme = "frappe" # latte, frappe, macchiato or mocha
