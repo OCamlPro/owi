@@ -14,6 +14,7 @@
 .mdbook-tab.active {
     background-color: var(--table-header-bg);
     font-weight: bold;
+    color: #f5a97f;
 }
 
 .mdbook-tab-content {
