@@ -15,6 +15,7 @@ type exploration_strategy =
   | FIFO
   | LIFO
   | Random
+  | Smart
 
 type parameters =
   { unsafe : bool
@@ -232,7 +233,8 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
       ( match exploration_strategy with
       | LIFO -> (module Wq)
       | FIFO -> (module Ws)
-      | Random -> (module Wpq) )
+      | Random -> (module Wpq)
+      | Smart -> (module Wpq) )
       ~workers solver result thread ~callback
       ~callback_init:(fun () -> Ws.make_pledge res_stack)
       ~callback_end:(fun () -> Ws.end_pledge res_stack)

@@ -940,7 +940,7 @@ module Make (P : Interpret_intf.P) :
           match state.pc.raw with
           | [] -> Int.max_int
           | h :: _ -> Atomic.get h.Annotated.instr_counter
-        in 
+        in
         pop_choice stack ~counter_next_true:0 ~counter_next_false
       in
       let state = { state with stack } in
