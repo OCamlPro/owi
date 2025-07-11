@@ -169,7 +169,7 @@ Owi says he reached a *trap*, which corresponds to a *programming error*. The ex
 
 Then Owi gives us a *model*, that is, the set of input values of the program leading to this *trap*. The model is a list of *symbols*, each symbols representing an input.
 
-Here we have a single symbol in the model, whose name is `symbol_0`, of type `i32 and whose value is `2`. And indeed, if we use `2` as the input value of the function `f`, there will be a crash in the program because of a division by zero!
+Here we have a single symbol in the model, whose name is `symbol_0`, of type `i32` and whose value is `2`. And indeed, if we use `2` as the input value of the function `f`, there will be a crash in the program because of a division by zero!
 
 ## Defining symbols by hand
 
