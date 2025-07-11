@@ -140,7 +140,7 @@ pub extern "C" fn check(x : i32, y: i32) {
 {{#endtab }}
 {{#tab name="Zig" }}
 <!-- $MDX file=mean.zig -->
-```zig
+```rs
 extern "owi" fn i32_symbol() i32;
 extern "owi" fn assert(bool) void;
 
@@ -159,7 +159,7 @@ export fn check(x: i32, y: i32) void {
 {{#endtab }}
 {{#tab name="Wasm" }}
 <!-- $MDX file=mean.wat -->
-```wat
+```wasm
 (module
   (func $mean1 (param $x i32) (param $y i32) (result i32)
     local.get $x

@@ -9,5 +9,5 @@ title = "Owi"
 
 [output.html]
 additional-css = [ "theme/catppuccin.css", "theme/tabs.css" ]
-additional-js = ["theme/tabs.js"]
+additional-js = ["theme/tabs.js", "theme/highlight.js"]
 default-theme = "frappe" # latte, frappe, macchiato or mocha
