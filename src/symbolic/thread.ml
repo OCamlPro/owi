@@ -13,6 +13,7 @@ struct
     { num_symbols : int
     ; symbol_scopes : Symbol_scope.t
     ; pc : Symbolic_path_condition.t
+    ; pending_pc : Symbolic_value.bool list
     ; memories : Memory.collection
     ; tables : Symbolic_table.collection
     ; globals : Symbolic_global.collection
@@ -22,11 +23,12 @@ struct
     ; labels : (int * string) list
     }
 
-  let create num_symbols symbol_scopes pc memories tables globals breadcrumbs
-    labels =
+  let create num_symbols symbol_scopes pc pending_pc memories tables globals
+    breadcrumbs labels =
     { num_symbols
     ; symbol_scopes
     ; pc
+    ; pending_pc
     ; memories
     ; tables
     ; globals
@@ -38,19 +40,24 @@ struct
     let num_symbols = 0 in
     let symbol_scopes = Symbol_scope.empty in
     let pc = Symbolic_path_condition.empty in
+    let pending_pc = [] in
     let memories = Memory.init () in
     let tables = Symbolic_table.init () in
     let globals = Symbolic_global.init () in
     let breadcrumbs = [] in
     let labels = [] in
-    create num_symbols symbol_scopes pc memories tables globals breadcrumbs
-      labels
+    create num_symbols symbol_scopes pc pending_pc memories tables globals
+      breadcrumbs labels
 
   let num_symbols t = t.num_symbols
 
   let symbol_scopes t = t.symbol_scopes
 
   let pc t = t.pc
+
+  let pending_pc t = t.pending_pc
+
+  let mark_pending_pc_done t = { t with pending_pc = [] }
 
   let memories t = t.memories
 
@@ -68,7 +75,7 @@ struct
 
   let add_pc t c =
     let pc = Symbolic_path_condition.add t.pc c in
-    { t with pc }
+    { t with pc; pending_pc = c :: t.pending_pc }
 
   let add_breadcrumb t crumb =
     let breadcrumbs = crumb :: t.breadcrumbs in
@@ -92,18 +99,22 @@ struct
     { num_symbols
     ; symbol_scopes
     ; pc
+    ; pending_pc
     ; memories
     ; tables
     ; globals
     ; breadcrumbs
     ; labels
     } =
+    if not @@ List.is_empty pending_pc then
+      Fmt.epr "Warning: cloning thread with a non empty pending pc";
     let memories = Memory.clone memories in
     let tables = Symbolic_table.clone tables in
     let globals = Symbolic_global.clone globals in
     { num_symbols
     ; symbol_scopes
     ; pc
+    ; pending_pc
     ; memories
     ; tables
     ; globals

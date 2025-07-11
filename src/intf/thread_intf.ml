@@ -21,6 +21,7 @@ module type S = sig
        int
     -> Symbol_scope.t
     -> Symbolic_path_condition.t
+    -> Symbolic_value.bool list
     -> Memory.collection
     -> Symbolic_table.collection
     -> Symbolic_global.collection
@@ -29,6 +30,10 @@ module type S = sig
     -> t
 
   val pc : t -> Symbolic_path_condition.t
+
+  val pending_pc : t -> Symbolic_value.bool list
+
+  val mark_pending_pc_done : t -> t
 
   val memories : t -> Memory.collection
 
