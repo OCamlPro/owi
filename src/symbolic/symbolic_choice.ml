@@ -378,20 +378,29 @@ module Make (Thread : Thread_intf.S) = struct
     in
     f sym
 
+  let stop_if_unreachable pc =
+    let* () = yield in
+    let* solver in
+    match Solver.check solver pc with
+    | `Sat -> modify_thread Thread.mark_pending_pc_done
+    | `Unsat -> stop
+    | `Unknown -> assert false
+
   (*
     Yielding is currently done each time the solver is about to be called,
     in check_reachability and get_model.
   *)
-  let check_reachability v =
-    let* () = yield in
+  let check_reachability =
     let* thread in
-    let* solver in
-    let pc = Thread.pc thread in
-    let sliced_pc = Symbolic_path_condition.slice pc v in
-    match Solver.check solver sliced_pc with
-    | `Sat -> return ()
-    | `Unsat -> stop
-    | `Unknown -> assert false
+    match Thread.pending_pc thread with
+    | [] -> return ()
+    | hd :: tl -> begin
+      let pc_to_check = List.fold_left Symbolic_value.Bool.and_ hd tl in
+      let pc_to_check =
+        Symbolic_path_condition.slice (Thread.pc thread) pc_to_check
+      in
+      stop_if_unreachable pc_to_check
+    end
 
   let get_model_or_stop symbol =
     let* () = yield in
@@ -402,6 +411,7 @@ module Make (Thread : Thread_intf.S) = struct
     | `Unsat -> stop
     | `Sat -> begin
       let symbol_scopes = Symbol_scope.of_symbol symbol in
+      let* () = modify_thread Thread.mark_pending_pc_done in
       (* TODO: we are doing the check two times here, because Solver.model is also doing it, we should remove it! *)
       let model = Solver.model solver ~symbol_scopes ~pc in
       match Smtml.Model.evaluate model symbol with
@@ -420,18 +430,19 @@ module Make (Thread : Thread_intf.S) = struct
     | Val (Bitv _bv) -> Fmt.failwith "unreachable (type error)"
     | _ ->
       let true_branch =
-        let* () = add_pc v in
         let* () = add_breadcrumb 1 in
-        let+ () = check_reachability v in
+        let* () = add_pc v in
+        let+ () = check_reachability in
         true
       in
       let false_branch =
         let neg_v = Symbolic_value.Bool.not v in
-        let* () = add_pc neg_v in
         let* () = add_breadcrumb 0 in
-        let+ () = check_reachability neg_v in
+        let* () = add_pc neg_v in
+        let+ () = check_reachability in
         false
       in
+      let* () = check_reachability in
       if explore_first then choose true_branch false_branch
       else choose false_branch true_branch
   [@@inline]
@@ -484,18 +495,22 @@ module Make (Thread : Thread_intf.S) = struct
         in
         let this_val_branch =
           let* () = add_breadcrumb (Int32.to_int i) in
-          let+ () = add_pc this_value_cond in
+          let* () = add_pc this_value_cond in
+          let+ () = modify_thread Thread.mark_pending_pc_done in
           i
         in
         let not_this_val_branch =
           let* () = add_pc not_this_value_cond in
+          let* () = modify_thread Thread.mark_pending_pc_done in
           generator ()
         in
         choose this_val_branch not_this_val_branch
       in
+      let* () = check_reachability in
       generator ()
 
   let assertion c =
+    let* () = check_reachability in
     let* assertion_true = select_inner c ~explore_first:false in
     if assertion_true then return ()
     else
