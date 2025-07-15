@@ -18,16 +18,18 @@ let increase x =
 let rec build_graph (l : binary expr) nodes n node edges
   (edges_to_add : (int * to_add * string option) list) continue =
   match l with
-  | [] ->
-   (match node with
-    | [] -> if continue then 
-    let nodes = (n, node) :: nodes in
-    let edges_to_add = (n, Next, None) :: edges_to_add in
-    (nodes, edges, n + 1, edges_to_add, true)
-else (nodes,edges,n,edges_to_add,true)
-| _ -> let nodes = (n, node) :: nodes in
-    let edges_to_add = (n, Next, None) :: edges_to_add in
-    (nodes, edges, n + 1, edges_to_add, true))
+  | [] -> (
+    match node with
+    | [] ->
+      if continue then
+        let nodes = (n, node) :: nodes in
+        let edges_to_add = (n, Next, None) :: edges_to_add in
+        (nodes, edges, n + 1, edges_to_add, true)
+      else (nodes, edges, n, edges_to_add, true)
+    | _ ->
+      let nodes = (n, node) :: nodes in
+      let edges_to_add = (n, Next, None) :: edges_to_add in
+      (nodes, edges, n + 1, edges_to_add, true) )
   | instr :: l -> (
     match instr.raw with
     | Block (_, _, exp) ->
@@ -91,7 +93,7 @@ let build_cfg instr =
   let nodes, edges, _, _, _ = build_graph instr [] 0 [] [] [] true in
   (nodes, edges)
 
-let pp_inst fmt i = Fmt.pf fmt "%a" (pp_instr ~short:true) i.Annotated.raw
+(*let pp_inst fmt i = Fmt.pf fmt "%a" (pp_instr ~short:true) i.Annotated.raw
 
 let pp_exp fmt l = Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt " | ") pp_inst fmt l
 
@@ -113,7 +115,7 @@ let pp_edges fmt l =
 
 let pp_graph fmt (nodes, edges) =
   Fmt.pf fmt "digraph cfg {\n rankdir=LR;\n node [shape=record];\n %a;\n %a}"
-    pp_nodes nodes pp_edges edges
+    pp_nodes nodes pp_edges edges*)
 
 let cmd ~source_file ~entry_point =
   let* m =
@@ -136,10 +138,10 @@ let cmd ~source_file ~entry_point =
   in
   (* add a parameter later *)
   let nodes, edges = build_cfg f.body.raw in
+  let graph = Cf_graph.init nodes edges in
   let* () =
     Bos.OS.File.writef
       (Fpath.set_ext ".dot" source_file)
-      "%a" pp_graph
-      (List.rev nodes, List.rev edges)
+      "%a" Cf_graph.pp_graph graph
   in
   Ok ()

@@ -12,6 +12,7 @@
   binary_to_text
   binary_types
   binary_validate
+  cf_graph
   choice_intf
   cmd_utils
   cmd_c
