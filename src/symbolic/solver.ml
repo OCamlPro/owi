@@ -31,12 +31,7 @@ let model (S (solver_module, s)) ~symbol_scopes ~pc =
         m "symbols: %a"
           (Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt ", ") Smtml.Symbol.pp)
           symbols );
-      Logs.err (fun m ->
-        m "pc:@\n  @[<v>%a@]"
-          (Smtml.Expr.Set.pretty
-             ~pp_sep:(fun fmt () -> Fmt.pf fmt " ;@\n")
-             Smtml.Expr.pp )
-          pc );
+      Logs.err (fun m -> m "pc:@\n  @[<v>%a@]" Smtml.Expr.Set.pp pc);
       assert false
     | `Model model -> model
   in

@@ -1,4 +1,0 @@
-(library
- (name tool)
- (modules tool)
- (libraries bos extunix fpath report rusage unix smtml))

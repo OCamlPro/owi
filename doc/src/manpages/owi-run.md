@@ -16,9 +16,6 @@ OPTIONS
        --color=WHEN (absent=auto)
            Colorize the output. WHEN must be one of auto, always or never.
 
-       --optimize
-           optimize mode
-
        -q, --quiet
            Be quiet. Takes over -v and --verbosity.
 

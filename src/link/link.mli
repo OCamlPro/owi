@@ -13,7 +13,7 @@ open Types
 type 'f module_to_run =
   { id : string option
   ; env : 'f Link_env.t
-  ; to_run : binary expr list
+  ; to_run : binary expr Annotated.t list
   }
 
 module StringMap : Map.S with type key = string

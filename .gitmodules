@@ -1,22 +1,8 @@
-[submodule "bench/testcomp/sv-benchmarks"]
-	path = bench/testcomp/sv-benchmarks
-	url = https://gitlab.com/sosy-lab/benchmarking/sv-benchmarks.git
-	shallow = true
 [submodule "test/script/reference"]
 	path = test/script/reference
 	url = https://github.com/WebAssembly/testsuite.git
-	shallow = true
-[submodule "bench/klee"]
-	path = bench/klee
-	url = https://github.com/zapashcanon/klee-testcomp.git
 	shallow = true
 [submodule "test/c/collections-c/files"]
 	path = test/c/collections-c/files
 	url = https://github.com/zapashcanon/Collections-C.git
 	shallow = true
-[submodule "bench/btree"]
-	path = bench/btree
-	url = https://github.com/filipeom/wasm-dataset.git
-[submodule "bench/symbiotic"]
-	path = bench/symbiotic
-	url = https://github.com/filipeom/symbiotic-testcomp.git

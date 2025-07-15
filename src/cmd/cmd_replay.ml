@@ -4,8 +4,7 @@
 
 open Syntax
 
-let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
-    =
+let run_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
   let next =
     let next = ref ~-1 in
     fun () ->
@@ -222,7 +221,7 @@ let run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols filename model
   in
   let* m = Cmd_utils.set_entry_point entry_point invoke_with_symbols m in
   let* m, link_state =
-    Compile.Binary.until_link ~unsafe link_state ~optimize ~name:None m
+    Compile.Binary.until_link ~unsafe link_state ~name:None m
   in
   Interpret.Concrete.modul ~timeout:None ~timeout_instr:None link_state.envs m
 
@@ -266,11 +265,9 @@ let parse_model replay_file =
     in
     Array.of_list model
 
-let cmd ~unsafe ~optimize ~replay_file ~source_file ~entry_point
-  ~invoke_with_symbols =
+let cmd ~unsafe ~replay_file ~source_file ~entry_point ~invoke_with_symbols =
   let* model = parse_model replay_file in
   let+ () =
-    run_file ~unsafe ~optimize ~entry_point ~invoke_with_symbols source_file
-      model
+    run_file ~unsafe ~entry_point ~invoke_with_symbols source_file model
   in
   Logs.app (fun m -> m "All OK!")

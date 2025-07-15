@@ -9,6 +9,9 @@ SYNOPSIS
        owi [COMMAND] …
 
 COMMANDS
+       analyze COMMAND …
+           Analyze a program in different possible ways
+
        c [OPTION]… FILE…
            Compile a C file to Wasm and run the symbolic interpreter on it
 
@@ -28,9 +31,6 @@ COMMANDS
        iso [OPTION]… FILE…
            Check the iso-functionnality of two Wasm modules by comparing the
            output when calling their exports.
-
-       opt [OPTION]… FILE
-           Optimize a module
 
        replay [OPTION]… FILE
            Replay a module containing symbols with concrete values in a

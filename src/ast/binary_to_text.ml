@@ -50,7 +50,7 @@ let convert_block_type (bt : binary block_type) : text block_type =
 let convert_type_def ((name, func_type) : binary type_def) : text type_def =
   (name, convert_func_type func_type)
 
-let convert_expr (e : binary expr) : text expr =
+let convert_expr (e : binary expr Annotated.t) : text expr Annotated.t =
   (* TODO: proper conversion ! *)
   Obj.magic e
 

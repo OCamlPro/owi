@@ -1,0 +1,16 @@
+(mdx
+ (libraries owi)
+ (deps
+  %{bin:owi}
+  (file f.c)
+  (file f.cpp)
+  (file f.rs)
+  (file f.zig)
+  (file f.wat)
+  (file mean.c)
+  (file mean.cpp)
+  (file mean.rs)
+  (file mean.zig)
+  (file mean.wat)
+  (package owi))
+ (files quickstart.md))

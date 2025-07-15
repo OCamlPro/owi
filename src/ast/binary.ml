@@ -20,14 +20,14 @@ type exports =
 
 type global =
   { typ : binary global_type (* TODO: init : binary+const expr*)
-  ; init : binary expr
+  ; init : binary expr Annotated.t
   ; id : string option
   }
 
 type data_mode =
   | Data_passive
   (* TODO: Data_active binary+const expr*)
-  | Data_active of int * binary expr
+  | Data_active of int * binary expr Annotated.t
 
 type data =
   { id : string option
@@ -38,13 +38,13 @@ type data =
 type elem_mode =
   | Elem_passive
   (* TODO: Elem_active binary+const expr*)
-  | Elem_active of int option * binary expr
+  | Elem_active of int option * binary expr Annotated.t
   | Elem_declarative
 
 type elem =
   { id : string option
   ; typ : binary ref_type (* TODO: init : binary+const expr*)
-  ; init : binary expr list
+  ; init : binary expr Annotated.t list
   ; mode : elem_mode
   }
 

@@ -9,11 +9,6 @@
 - [Overview](symex/overview.md)
     - [Symbolic Execution 101](symex/symbolic-execution-101.md)
     - [Quickstart](symex/quickstart.md)
-        - [C](symex/quickstart/c.md)
-        - [C++](symex/quickstart/cpp.md)
-        - [Rust](symex/quickstart/rust.md)
-        - [Zig](symex/quickstart/zig.md)
-        - [Wasm](symex/quickstart/wasm.md)
 - [Bug-Finding, Testing & Pen-testing](symex/bugfinding.md)
     - [Examples of Bug Finding](symex/bugfinding/examples.md)
     - [How to Speed it Up](symex/bugfinding/optimizations.md)
@@ -47,13 +42,13 @@
 
 # Man pages
 - [`owi`](manpages/owi.md)
+    - [`owi analyze`](manpages/owi-analyze.md)
     - [`owi c`](manpages/owi-c.md)
     - [`owi c++`](manpages/owi-cpp.md)
     - [`owi conc`](manpages/owi-conc.md)
     - [`owi fmt`](manpages/owi-fmt.md)
     - [`owi instrument`](manpages/owi-instrument.md)
     - [`owi iso`](manpages/owi-iso.md)
-    - [`owi opt`](manpages/owi-opt.md)
     - [`owi replay`](manpages/owi-replay.md)
     - [`owi run`](manpages/owi-run.md)
     - [`owi rust`](manpages/owi-rust.md)
@@ -68,7 +63,6 @@
 # Public OCaml API
 - [Overview](ocaml-api/overview.md)
 - [How to Define Custom Functions](ocaml-api/custom-functions.md)
-- [Game Of Life](ocaml-api/game-of-life/README.md)
 - [Generated API Documentation](ocaml-api/odoc.md)
 
 # Hacking

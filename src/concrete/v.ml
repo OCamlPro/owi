@@ -36,7 +36,8 @@ let of_instr (i : binary instr) : t =
   | V128_const c -> V128 c
   | _ -> assert false
 
-let to_instr = function
+let to_instr v =
+  match v with
   | I32 c -> I32_const c
   | I64 c -> I64_const c
   | F32 c -> F32_const c

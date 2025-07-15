@@ -162,7 +162,10 @@ module M :
 
   let ptr ((_c, s) : Value.int32) : int32 Concolic_choice.t =
     match view s with
-    | Ptr { base; _ } -> Concolic_choice.return base
+    | Ptr { base; _ } ->
+      (* TODO: why don't we use offset here ? *)
+      let base = Smtml.Bitvector.to_int32 base in
+      Concolic_choice.return base
     | _ ->
       Logs.err (fun m ->
         m {|free: cannot fetch pointer base of "%a"|} Expr.pp s );

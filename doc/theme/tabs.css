@@ -1,0 +1,32 @@
+.mdbook-tabs {
+    display: flex;
+}
+
+.mdbook-tab {
+  background-color: var(--ctp-surface0);
+  color: var(--ctp-subtext0);
+  border-style: solid;
+  padding: 0.5rem 2rem;
+  margin: 0.5rem;
+  border-radius: 1rem;
+  border-color: #b3673d;
+  cursor: pointer;
+  font-family: monospace;
+  font-size: 1.6rem;
+  line-height: 1.45em;
+}
+
+.mdbook-tab:hover {
+  color: #f5a97f;
+}
+
+.mdbook-tab.active {
+  color: #f5a97f;
+  border-color: #f5a97f;
+  background-color: var(--ctp-surface0);
+}
+
+.mdbook-tab-content {
+  padding: 1rem 0rem;
+  border: 2px;
+}

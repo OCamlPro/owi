@@ -38,7 +38,7 @@ depends: [
   "prelude" {>= "0.5"}
   "processor" {>= "0.2"}
   "sedlex" {>= "3.3"}
-  "smtml" {>= "0.7.0"}
+  "smtml" {>= "0.8.0"}
   "uutf" {>= "1.0.3"}
   "xmlm" {>= "1.4.0"}
   "odoc" {>= "3.0.0" & with-doc}
@@ -46,21 +46,10 @@ depends: [
   "frama-c" {>= "29.0" & with-test}
   "z3" {with-test}
   "bisect_ppx" {>= "2.5" & with-dev-setup}
-  "cohttp" {with-dev-setup}
-  "cohttp-lwt-unix" {with-dev-setup}
   "crowbar" {with-dev-setup}
-  "extunix" {with-dev-setup}
-  "gnuplot" {with-dev-setup}
-  "graphics" {with-dev-setup}
   "landmarks-ppx" {with-dev-setup}
-  "lwt" {with-dev-setup}
-  "lwt_ssl" {with-dev-setup}
   "ocamlformat" {with-dev-setup}
   "ocb" {>= "0.1" & with-dev-setup}
-  "rusage" {with-dev-setup}
-  "tiny_httpd" {with-dev-setup}
-  "tyxml" {with-dev-setup}
-  "yaml" {with-dev-setup}
 ]
 build: [
   ["dune" "subst"] {dev}
@@ -88,4 +77,10 @@ depexts: [
 ]
 pin-depends: [
   [ "crowbar.dev" "git+https://github.com/stedolan/crowbar#1ab53fb088d56578b48301bc4cfb859331a10d78"]
+]
+post-messages: [
+  "Thank you for installing Owi!"
+  "To fully utilize Owi, consider installing a solver such as Z3"
+  "Join our community on Zulip: https://owi.zulipchat.com/"
+  "Explore tutorials and documentation here: https://ocamlpro.github.io/owi/"
 ]

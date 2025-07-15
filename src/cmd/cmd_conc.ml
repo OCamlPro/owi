@@ -9,14 +9,7 @@ open Syntax
 let () = Random.init 42
 
 let simplify_then_link ~parameters source_file =
-  let { Cmd_sym.unsafe
-      ; rac
-      ; srac
-      ; entry_point
-      ; invoke_with_symbols
-      ; optimize
-      ; _
-      } =
+  let { Cmd_sym.unsafe; rac; srac; entry_point; invoke_with_symbols; _ } =
     parameters
   in
 
@@ -29,7 +22,7 @@ let simplify_then_link ~parameters source_file =
   in
 
   let+ m, link_state =
-    Compile.Binary.until_link ~unsafe ~optimize ~name:None link_state m
+    Compile.Binary.until_link ~unsafe ~name:None link_state m
   in
   let module_to_run = Concolic.convert_module_to_run m in
   (link_state, module_to_run)

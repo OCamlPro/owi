@@ -7,6 +7,19 @@ open Cmdliner
 
 (* Helpers *)
 
+let call_graph_mode_conv =
+  let of_string s =
+    match String.lowercase_ascii s with
+    | "complete" -> Ok Cmd_call_graph.Complete
+    | "sound" -> Ok Cmd_call_graph.Sound
+    | _ -> Fmt.error_msg {|Expected "complete" or "sound" but got "%s"|} s
+  in
+  let pp fmt = function
+    | Cmd_call_graph.Complete -> Fmt.string fmt "complete"
+    | Cmd_call_graph.Sound -> Fmt.string fmt "sound"
+  in
+  Arg.conv (of_string, pp)
+
 let existing_file_conv =
   let parse s =
     match Fpath.of_string s with
@@ -94,6 +107,10 @@ let deterministic_result_order =
   in
   Arg.(value & flag & info [ "deterministic-result-order" ] ~doc)
 
+let call_graph_mode =
+  let doc = {| The call graph is either "complete" or "sound" |} in
+  Arg.(value & opt call_graph_mode_conv Sound & info [ "call-graph-mode" ] ~doc)
+
 let entry_point default =
   let doc = "entry point of the executable" in
   Arg.(
@@ -145,10 +162,6 @@ let no_stop_at_failure =
 let no_value =
   let doc = "do not display a value for each symbol" in
   Arg.(value & flag & info [ "no-value" ] ~doc)
-
-let optimize =
-  let doc = "optimize mode" in
-  Arg.(value & flag & info [ "optimize" ] ~doc)
 
 let opt_lvl =
   let doc = "specify which optimization level to use" in
@@ -235,7 +248,6 @@ let symbolic_parameters default_entry_point =
   let+ unsafe
   and+ rac
   and+ srac
-  and+ optimize
   and+ workers
   and+ no_stop_at_failure
   and+ no_value
@@ -253,7 +265,6 @@ let symbolic_parameters default_entry_point =
   { Cmd_sym.unsafe
   ; rac
   ; srac
-  ; optimize
   ; workers
   ; no_stop_at_failure
   ; no_value
@@ -269,6 +280,13 @@ let symbolic_parameters default_entry_point =
   ; with_breadcrumbs
   ; invoke_with_symbols
   }
+
+(* owi analyze *)
+
+let analyze_info =
+  let doc = "Analyze a program in different possible ways" in
+  let man = [] @ shared_man in
+  Cmd.info "analyze" ~version ~doc ~sdocs ~man
 
 (* owi c *)
 
@@ -305,6 +323,36 @@ let c_cmd =
 
   Cmd_c.cmd ~symbolic_parameters ~arch ~property ~includes ~opt_lvl ~out_file
     ~testcomp ~concolic ~files ~eacsl
+
+(* owi analyze cfg *)
+
+let cfg_info =
+  let doc = "Build a Control-Flow Graph" in
+  let man = [] @ shared_man in
+  Cmd.info "cfg" ~version ~doc ~sdocs ~man
+
+let cfg_cmd =
+  let+ source_file
+  and+ entry_point = entry_point None
+  and+ () = setup_log in
+  Cmd_cfg.cmd ~source_file ~entry_point
+
+(* owi analyze cg *)
+
+let cg_info =
+  let doc = "Build a call graph" in
+
+  let man = [] @ shared_man in
+
+  Cmd.info "cg" ~version ~doc ~sdocs ~man
+
+let cg_cmd =
+  let+ call_graph_mode
+  and+ source_file
+  and+ entry_point = entry_point None
+  and+ () = setup_log in
+
+  Cmd_call_graph.cmd ~call_graph_mode ~source_file ~entry_point
 
 (* owi cpp *)
 
@@ -410,20 +458,6 @@ let iso_cmd =
     ~no_stop_at_failure ~no_value ~solver ~unsafe ~workers ~workspace
     ~model_out_file ~with_breadcrumbs
 
-(* owi opt *)
-
-let opt_info =
-  let doc = "Optimize a module" in
-  let man = [] @ shared_man in
-  Cmd.info "opt" ~version ~doc ~sdocs ~man
-
-let opt_cmd =
-  let+ unsafe
-  and+ () = setup_log
-  and+ source_file
-  and+ out_file in
-  Cmd_opt.cmd ~unsafe ~source_file ~out_file
-
 (* owi replay *)
 
 let replay_info =
@@ -436,7 +470,6 @@ let replay_info =
 
 let replay_cmd =
   let+ unsafe
-  and+ optimize
   and+ replay_file =
     let doc = "Which replay file to use" in
     Arg.(
@@ -447,7 +480,7 @@ let replay_cmd =
   and+ source_file
   and+ invoke_with_symbols
   and+ entry_point = entry_point None in
-  Cmd_replay.cmd ~unsafe ~optimize ~replay_file ~source_file ~entry_point
+  Cmd_replay.cmd ~unsafe ~replay_file ~source_file ~entry_point
     ~invoke_with_symbols
 
 (* owi run *)
@@ -462,10 +495,9 @@ let run_cmd =
   and+ timeout
   and+ timeout_instr
   and+ rac
-  and+ optimize
   and+ () = setup_log
   and+ source_file in
-  Cmd_run.cmd ~unsafe ~timeout ~timeout_instr ~rac ~optimize ~source_file
+  Cmd_run.cmd ~unsafe ~timeout ~timeout_instr ~rac ~source_file
 
 (* owi rust *)
 
@@ -497,14 +529,13 @@ let script_info =
   Cmd.info "script" ~version ~doc ~sdocs ~man
 
 let script_cmd =
-  let+ optimize
-  and+ files
+  let+ files
   and+ () = setup_log
   and+ no_exhaustion =
     let doc = "no exhaustion tests" in
     Arg.(value & flag & info [ "no-exhaustion" ] ~doc)
   in
-  Cmd_script.cmd ~optimize ~files ~no_exhaustion
+  Cmd_script.cmd ~files ~no_exhaustion
 
 (* owi sym *)
 
@@ -590,11 +621,10 @@ let wat2wasm_info =
 
 let wat2wasm_cmd =
   let+ unsafe
-  and+ optimize
   and+ out_file
   and+ () = setup_log
   and+ source_file in
-  Cmd_wat2wasm.cmd ~unsafe ~optimize ~out_file ~source_file
+  Cmd_wat2wasm.cmd ~unsafe ~out_file ~source_file
 
 (* owi zig *)
 
@@ -627,13 +657,13 @@ let cli =
     Term.(ret (const (fun (_ : _ list) -> `Help (`Plain, None)) $ copts_t))
   in
   Cmd.group info ~default
-    [ Cmd.v c_info c_cmd
+    [ Cmd.group analyze_info [ Cmd.v cg_info cg_cmd; Cmd.v cfg_info cfg_cmd ]
+    ; Cmd.v c_info c_cmd
     ; Cmd.v conc_info conc_cmd
     ; Cmd.v cpp_info cpp_cmd
     ; Cmd.v fmt_info fmt_cmd
     ; Cmd.v instrument_info instrument_cmd
     ; Cmd.v iso_info iso_cmd
-    ; Cmd.v opt_info opt_cmd
     ; Cmd.v replay_info replay_cmd
     ; Cmd.v run_info run_cmd
     ; Cmd.v rust_info rust_cmd

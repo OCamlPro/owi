@@ -4,6 +4,7 @@
  (public_name owi)
  (modules
   annot
+  annotated
   assigned
   binary
   binary_encoder
@@ -14,12 +15,13 @@
   choice_intf
   cmd_utils
   cmd_c
+  cmd_call_graph
+  cmd_cfg
   cmd_conc
   cmd_cpp
   cmd_fmt
   cmd_instrument
   cmd_iso
-  cmd_opt
   cmd_replay
   cmd_run
   cmd_rust
@@ -55,6 +57,7 @@
   contract
   func_id
   func_intf
+  graph
   grouped
   imported
   indexed
@@ -69,7 +72,6 @@
   minimalist_symbolic
   minimalist_symbolic_choice
   named
-  optimize
   parse
   pq_imperative
   prio

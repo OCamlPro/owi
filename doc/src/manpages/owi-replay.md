@@ -24,9 +24,6 @@ OPTIONS
            Invoke the entry point of the program with symbolic values instead
            of dummy constants.
 
-       --optimize
-           optimize mode
-
        -q, --quiet
            Be quiet. Takes over -v and --verbosity.
 

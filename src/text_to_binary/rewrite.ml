@@ -40,7 +40,8 @@ let rewrite_block_type (typemap : binary indice TypeMap.t) (modul : Assigned.t)
     Bt_raw (Some idx, t)
 
 let rewrite_expr (typemap : binary indice TypeMap.t) (modul : Assigned.t)
-  (locals : binary param list) (iexpr : text expr) : binary expr Result.t =
+  (locals : binary param list) (iexpr : text expr Annotated.t) :
+  binary expr Annotated.t Result.t =
   (* block_ids handling *)
   let block_id_to_raw (loop_count, block_ids) id =
     let* id =
@@ -89,8 +90,9 @@ let rewrite_expr (typemap : binary indice TypeMap.t) (modul : Assigned.t)
       | Some id -> Raw id )
   in
 
-  let rec body (loop_count, block_ids) : text instr -> binary instr Result.t =
-    function
+  let rec body (loop_count, block_ids) (instr : text instr Annotated.t) :
+    binary instr Result.t =
+    match instr.Annotated.raw with
     | Br_table (ids, id) ->
       let block_id_to_raw = block_id_to_raw (loop_count, block_ids) in
       let* ids = array_map block_id_to_raw ids in
@@ -208,8 +210,16 @@ let rewrite_expr (typemap : binary indice TypeMap.t) (modul : Assigned.t)
     | Ref_null t ->
       let+ t = Binary_types.convert_heap_type t in
       Ref_null t
-  and expr (e : text expr) (loop_count, block_ids) : binary expr Result.t =
-    list_map (fun i -> body (loop_count, block_ids) i) e
+  and expr (e : text expr Annotated.t) (loop_count, block_ids) :
+    binary expr Annotated.t Result.t =
+    let+ e =
+      list_map
+        (fun i ->
+          let+ i = body (loop_count, block_ids) i in
+          Annotated.dummy i )
+        e.Annotated.raw
+    in
+    Annotated.dummy e
   in
   expr iexpr (0, [])
 

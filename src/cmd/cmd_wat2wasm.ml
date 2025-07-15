@@ -4,13 +4,12 @@
 
 open Syntax
 
-let cmd_one ~unsafe ~optimize ~out_file ~source_file =
+let cmd_one ~unsafe ~out_file ~source_file =
   let ext = Fpath.get_ext source_file in
   match ext with
   | ".wat" ->
     let* modul = Parse.Text.Module.from_file source_file in
-    Binary_encoder.convert out_file source_file ~unsafe ~optimize modul
+    Binary_encoder.convert out_file source_file ~unsafe modul
   | ext -> Error (`Unsupported_file_extension ext)
 
-let cmd ~unsafe ~optimize ~out_file ~source_file =
-  cmd_one ~unsafe ~optimize ~out_file ~source_file
+let cmd ~unsafe ~out_file ~source_file = cmd_one ~unsafe ~out_file ~source_file
