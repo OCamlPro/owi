@@ -1,9 +1,12 @@
 module S = Set.Make (Int)
+module S_int = Set.Make(Set.Make(Int))
+module M = Map.Make (Int)
 
 type node =
   { ind : int
   ; info : string option
   ; children : int list
+  ; parents : int list
   }
 
 type t =
@@ -13,9 +16,23 @@ type t =
 
 let init l entry_points =
   let l' = List.sort (fun (n1, _, _) (n2, _, _) -> compare n1 n2) l in
+
+  let parents_map =
+    List.fold_left
+      (fun map (ind, _, children) ->
+        List.fold_left (fun map c -> M.add_to_list c ind map) map children )
+      M.empty l
+  in
   let nodes =
     Array.of_list
-      (List.map (fun (ind, info, children) -> { ind; info; children }) l')
+      (List.map
+         (fun (ind, info, children) ->
+           { ind
+           ; info
+           ; children
+           ; parents = Option.value (M.find_opt ind parents_map) ~default:[]
+           } )
+         l' )
   in
   { nodes; entry_points }
 
@@ -80,3 +97,130 @@ let is_subgraph graph subgraph =
   && res
 
 let get_info graph = (Array.get graph.nodes 1).info (* just to use info *)
+
+let rec first_explore graph acc node =
+  let visited, post_order = acc in
+  let visited = S.add node visited in
+  let parents = (Array.get graph.nodes node).parents in
+  let visited, post_order =
+    List.fold_left
+      (fun acc u ->
+        let visited = fst acc in
+        if not (S.mem u visited) then first_explore graph acc u else acc )
+      (visited, post_order) parents
+  in
+  (visited, node :: post_order)
+
+let rec snd_explore graph acc node =
+  let visited, component = acc in
+  let visited = S.add node visited in
+  let children = (Array.get graph.nodes node).children in
+  let visited, component =
+    List.fold_left
+      (fun acc u ->
+        let visited = fst acc in
+        if not (S.mem u visited) then snd_explore graph acc u else acc )
+      (visited, component) children
+  in
+  (visited, node :: component)
+
+let kosaraju graph =
+  let _, post_order =
+    Array.fold_left
+      (fun acc u ->
+        let visited = fst acc in
+        if not (S.mem u.ind visited) then first_explore graph acc u.ind else acc )
+      (S.empty, []) graph.nodes
+  in
+  let _, partition =
+    List.fold_left
+      (fun acc u ->
+        let visited, partition = acc in
+        if not (S.mem u visited) then
+          let visited, component = snd_explore graph (visited, []) u in
+          (visited, component :: partition)
+        else acc )
+      (S.empty, []) post_order
+  in
+  S_int.of_list (List.map (fun l -> S.of_list l) partition)
+
+type infos =
+  { num : int
+  ; num_accessible : int
+  ; in_stack : bool
+  }
+
+let rec explore graph acc node =
+  let children = (Array.get graph.nodes node).children in
+  let num, stack, partition, visited = acc in
+  let visited =
+    M.add node { num; num_accessible = num; in_stack = true } visited
+  in
+  let stack = node :: stack in
+  let num = num + 1 in
+
+  let num, stack, partition, visited =
+    List.fold_left
+      (fun acc w ->
+        let num, stack, partition, visited = acc in
+        match M.find_opt w visited with
+        | None ->
+          let num, stack, partition, visited = explore graph acc w in
+          let w =
+            match M.find_opt w visited with Some w -> w | None -> assert false
+          in
+          let visited =
+            M.update node
+              (fun v_opt ->
+                Option.bind v_opt (fun v ->
+                  Some
+                    { v with
+                      num_accessible = min v.num_accessible w.num_accessible
+                    } ) )
+              visited
+          in
+          (num, stack, partition, visited)
+        | Some w ->
+          if w.in_stack then
+            let visited =
+              M.update node
+                (fun v_opt ->
+                  Option.bind v_opt (fun v ->
+                    Some { v with num_accessible = min v.num_accessible w.num } ) )
+                visited
+            in
+            (num, stack, partition, visited)
+          else (num, stack, partition, visited) )
+      (num, stack, partition, visited)
+      children
+  in
+
+  let v =
+    match M.find_opt node visited with Some v -> v | None -> assert false
+  in
+  if v.num_accessible = v.num then
+    let rec build_component stack visited component =
+      let w, stack = match stack with [] -> assert false | h :: t -> (h, t) in
+      let visited =
+        M.update w
+          (fun w_opt ->
+            Option.bind w_opt (fun w -> Some { w with in_stack = false }) )
+          visited
+      in
+      let component = w :: component in
+      if node = w then (stack, visited, component)
+      else build_component stack visited component
+    in
+    let stack, visited, component = build_component stack visited [] in
+    (num, stack, component :: partition, visited)
+  else (num, stack, partition, visited)
+
+let trajan graph =
+  let _, _, partition, _ =
+    Array.fold_left
+      (fun acc u ->
+        let _, _, _, visited = acc in
+        if not (M.mem u.ind visited) then explore graph acc u.ind else acc )
+      (0, [], [], M.empty) graph.nodes
+  in
+  S_int.of_list (List.map (fun l -> S.of_list l) partition)
