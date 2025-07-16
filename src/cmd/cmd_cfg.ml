@@ -83,6 +83,16 @@ let rec build_graph (l : binary expr) nodes n node edges
       let edges_to_add = (n, Ind i, Some "true") :: edges_to_add in
       let edges = (n, n + 1, Some "false") :: edges in
       build_graph l nodes (n + 1) [] edges edges_to_add continue
+    | Br_table (inds, Raw i) ->
+      let nodes = (n, instr :: node) :: nodes in
+      let edges_to_add = (n, Ind i, Some "default") :: edges_to_add in
+      let edges_to_add, _ =
+        Array.fold_left
+          (fun (acc, x) (Raw i : binary indice) ->
+            ((n, Ind i, Some (string_of_int x)) :: acc, x + 1) )
+          (edges_to_add, 0) inds
+      in
+      (nodes, edges, n + 1, edges_to_add, false)
     | Return | Return_call _ | Return_call_indirect _ | Return_call_ref _
     | Unreachable ->
       let nodes = (n, instr :: node) :: nodes in
