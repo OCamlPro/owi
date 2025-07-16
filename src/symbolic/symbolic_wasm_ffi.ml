@@ -26,10 +26,8 @@ end = struct
 
   let cov_lock = Mutex.create ()
 
-  let add_pc_wrapper e = Choice.add_pc e
-
   let assume (i : Value.int32) : unit Choice.t =
-    add_pc_wrapper @@ Value.I32.to_bool i
+    Choice.assume @@ Value.I32.to_bool i
 
   let assert' (i : Value.int32) : unit Choice.t =
     Choice.assertion @@ Value.I32.to_bool i
@@ -70,8 +68,9 @@ end = struct
   let symbol_range (lo : Value.int32) (hi : Value.int32) =
     let open Choice in
     let* x = symbol_i32 () in
-    let* () = add_pc_wrapper (Value.I32.le lo x) in
-    let+ () = add_pc_wrapper (Value.I32.gt hi x) in
+    (* TODO: do we need to check reachability here? *)
+    let* () = Choice.add_pc (Value.I32.le lo x) in
+    let+ () = Choice.add_pc (Value.I32.gt hi x) in
     x
 
   let abort () : unit Choice.t = Choice.stop
