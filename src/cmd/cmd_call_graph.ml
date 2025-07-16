@@ -211,7 +211,7 @@ let build_call_graph call_graph_mode (m : Binary.Module.t) entry_point =
     Array.fold_left (build_graph call_graph_mode tables funcs) ([], 0) funcs
   in
   let entries = find_entries entry_point m in
-  Graph.init l entries
+  Graph.init_cg l entries
 
 let build_call_graph_from_text_module call_graph_mode modul entry_point =
   let m =
@@ -232,7 +232,7 @@ let cmd ~call_graph_mode ~source_file ~entry_point ~scc =
     let* () =
       Bos.OS.File.writef
         (Fpath.set_ext ".dot" source_file)
-        "%a" Graph.pp_scc (call_graph, scc)
+        "%a" Graph.pp_scc_cg (call_graph, scc)
     in
 
     Ok ()
@@ -240,7 +240,7 @@ let cmd ~call_graph_mode ~source_file ~entry_point ~scc =
     let* () =
       Bos.OS.File.writef
         (Fpath.set_ext ".dot" source_file)
-        "%a" Graph.pp_dot call_graph
+        "%a" Graph.pp_cg call_graph
     in
 
     Ok ()

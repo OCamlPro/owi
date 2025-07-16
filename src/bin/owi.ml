@@ -339,9 +339,10 @@ let cfg_info =
 
 let cfg_cmd =
   let+ source_file
+  and+ scc
   and+ entry_point = entry_point None
   and+ () = setup_log in
-  Cmd_cfg.cmd ~source_file ~entry_point
+  Cmd_cfg.cmd ~source_file ~entry_point ~scc
 
 (* owi analyze cg *)
 
