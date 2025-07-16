@@ -132,7 +132,7 @@ let prepare_for_sym (modul : Owi.Text.modul) =
   let updated_fields = List.map process_field modul.fields in
   { modul with fields = updated_fields }
 
-module S = Set.Make(Set.Make(Int))
+module S = Set.Make (Set.Make (Int))
 
 let () =
   let open Interprets in
@@ -169,7 +169,5 @@ let () =
           build_call_graph_from_text_module Complete m None
         in
         let scc_kosaraju = Owi.Graph.kosaraju graph_complete in
-        let scc_trajan = Owi.Graph.trajan graph_complete in
-        Crowbar.check
-          (S.equal
-             scc_kosaraju scc_trajan ) )
+        let scc_tarjan = Owi.Graph.tarjan graph_complete in
+        Crowbar.check (S.equal scc_kosaraju scc_tarjan) )
