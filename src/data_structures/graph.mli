@@ -1,15 +1,22 @@
-type t
+type 'a t
 
-val init : (int * string option * int list) list -> int list -> t
+val init_cg : (int * 'a * int list) list -> int list -> 'a t
 
-val pp_dot : Format.formatter -> t -> unit
+val pp_cg : Format.formatter -> 'a t -> unit
 
-val is_subgraph : t -> t -> bool
+val init_cfg : (int * 'a) list -> (int * int * string option) list -> 'a t
 
-val get_info : t -> string option
+val pp_cfg : Format.formatter -> 'a Types.instr Annotated.t list t -> unit
 
-val kosaraju : t -> Set.Make(Set.Make(Int)).t
+val is_subgraph : 'a t -> 'a t -> bool
 
-val tarjan : t -> Set.Make(Set.Make(Int)).t
+val kosaraju : 'a t -> Set.Make(Set.Make(Int)).t
 
-val pp_scc : Format.formatter -> t * Set.Make(Set.Make(Int)).t -> unit
+val tarjan : 'a t -> Set.Make(Set.Make(Int)).t
+
+val pp_scc_cg : Format.formatter -> 'a t * Set.Make(Set.Make(Int)).t -> unit
+
+val pp_scc_cfg :
+     Format.formatter
+  -> 'a Types.instr Annotated.t list t * Set.Make(Set.Make(Int)).t
+  -> unit

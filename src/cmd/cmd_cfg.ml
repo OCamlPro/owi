@@ -93,31 +93,20 @@ let build_cfg instr =
   let nodes, edges, _, _, _ = build_graph instr [] 0 [] [] [] true in
   (nodes, edges)
 
-(*let pp_inst fmt i = Fmt.pf fmt "%a" (pp_instr ~short:true) i.Annotated.raw
+let build_cfg_from_text_module modul =
+  let m =
+    Compile.Text.until_validate ~unsafe:false ~rac:false ~srac:false modul
+  in
+  match m with
+  | Ok m ->
+    let f =
+      match Array.get m.func 0 with Runtime.Local f -> f | _ -> assert false
+    in
+    let nodes, edges = build_cfg f.body.raw in
+    Graph.init_cfg nodes edges
+  | _ -> assert false
 
-let pp_exp fmt l = Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt " | ") pp_inst fmt l
-
-let pp_node fmt (n, exp) =
-  Fmt.pf fmt {|%a [label="%a"]|} Fmt.int n pp_exp (List.rev exp)
-
-let pp_nodes fmt l =
-  Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt ";\n") pp_node fmt l
-
-let pp_label fmt s = Fmt.pf fmt {|[label="%a"]|} Fmt.string s
-
-let pp_label_opt fmt s_opt = Fmt.option pp_label fmt s_opt
-
-let pp_edge fmt (n1, n2, s) =
-  Fmt.pf fmt "%a -> %a %a" Fmt.int n1 Fmt.int n2 pp_label_opt s
-
-let pp_edges fmt l =
-  Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt ";\n") pp_edge fmt l
-
-let pp_graph fmt (nodes, edges) =
-  Fmt.pf fmt "digraph cfg {\n rankdir=LR;\n node [shape=record];\n %a;\n %a}"
-    pp_nodes nodes pp_edges edges*)
-
-let cmd ~source_file ~entry_point =
+let cmd ~source_file ~entry_point ~scc =
   let* m =
     Compile.File.until_validate ~unsafe:false ~rac:false ~srac:false source_file
   in
@@ -136,12 +125,21 @@ let cmd ~source_file ~entry_point =
   let f =
     match Array.get m.func entry with Runtime.Local f -> f | _ -> assert false
   in
-  (* add a parameter later *)
   let nodes, edges = build_cfg f.body.raw in
-  let graph = Cf_graph.init nodes edges in
-  let* () =
-    Bos.OS.File.writef
-      (Fpath.set_ext ".dot" source_file)
-      "%a" Cf_graph.pp_graph graph
-  in
-  Ok ()
+  let graph = Graph.init_cfg nodes edges in
+
+  if scc then
+    let scc = Graph.tarjan graph in
+    let* () =
+      Bos.OS.File.writef
+        (Fpath.set_ext ".dot" source_file)
+        "%a" Graph.pp_scc_cfg (graph, scc)
+    in
+    Ok ()
+  else
+    let* () =
+      Bos.OS.File.writef
+        (Fpath.set_ext ".dot" source_file)
+        "%a" Graph.pp_cfg graph
+    in
+    Ok ()
