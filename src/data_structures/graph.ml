@@ -1,5 +1,5 @@
 module S = Set.Make (Int)
-module S_int = Set.Make(Set.Make(Int))
+module Partition = Set.Make (Set.Make(Int))
 module M = Map.Make (Int)
 
 type node =
@@ -122,7 +122,7 @@ let rec snd_explore graph acc node =
         if not (S.mem u visited) then snd_explore graph acc u else acc )
       (visited, component) children
   in
-  (visited, node :: component)
+  (visited, S.add node component)
 
 let kosaraju graph =
   let _, post_order =
@@ -137,12 +137,12 @@ let kosaraju graph =
       (fun acc u ->
         let visited, partition = acc in
         if not (S.mem u visited) then
-          let visited, component = snd_explore graph (visited, []) u in
-          (visited, component :: partition)
+          let visited, component = snd_explore graph (visited, S.empty) u in
+          (visited, Partition.add component partition)
         else acc )
-      (S.empty, []) post_order
+      (S.empty, Partition.empty) post_order
   in
-  S_int.of_list (List.map (fun l -> S.of_list l) partition)
+  partition
 
 type infos =
   { num : int
@@ -207,20 +207,20 @@ let rec explore graph acc node =
             Option.bind w_opt (fun w -> Some { w with in_stack = false }) )
           visited
       in
-      let component = w :: component in
+      let component = S.add w component in
       if node = w then (stack, visited, component)
       else build_component stack visited component
     in
-    let stack, visited, component = build_component stack visited [] in
-    (num, stack, component :: partition, visited)
+    let stack, visited, component = build_component stack visited S.empty in
+    (num, stack, Partition.add component partition, visited)
   else (num, stack, partition, visited)
 
-let trajan graph =
-  let _, _, partition, _ =
+let tarjan graph =
+  let _, _, partition, _ = 
     Array.fold_left
       (fun acc u ->
         let _, _, _, visited = acc in
         if not (M.mem u.ind visited) then explore graph acc u.ind else acc )
-      (0, [], [], M.empty) graph.nodes
+      (0, [], Partition.empty, M.empty) graph.nodes
   in
-  S_int.of_list (List.map (fun l -> S.of_list l) partition)
+  partition
