@@ -13,4 +13,5 @@ val cmd :
      call_graph_mode:mode
   -> source_file:Fpath.t
   -> entry_point:string option
+  -> scc:bool
   -> unit Result.t

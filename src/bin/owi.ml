@@ -188,6 +188,10 @@ let rac =
   let doc = "runtime assertion checking mode" in
   Arg.(value & flag & info [ "rac" ] ~doc)
 
+let scc =
+  let doc = "build graph with strongly connected components" in
+  Arg.(value & flag & info [ "scc" ] ~doc)
+
 let solver =
   let doc = "SMT solver to use" in
   Arg.(
@@ -351,10 +355,11 @@ let cg_info =
 let cg_cmd =
   let+ call_graph_mode
   and+ source_file
+  and+ scc
   and+ entry_point = entry_point None
   and+ () = setup_log in
 
-  Cmd_call_graph.cmd ~call_graph_mode ~source_file ~entry_point
+  Cmd_call_graph.cmd ~call_graph_mode ~source_file ~entry_point ~scc
 
 (* owi cpp *)
 
