@@ -221,15 +221,26 @@ let build_call_graph_from_text_module call_graph_mode modul entry_point =
   | Ok m -> build_call_graph call_graph_mode m entry_point
   | _ -> assert false
 
-let cmd ~call_graph_mode ~source_file ~entry_point =
+let cmd ~call_graph_mode ~source_file ~entry_point ~scc =
   let* m =
     Compile.File.until_validate ~unsafe:false ~rac:false ~srac:false source_file
   in
   let call_graph = build_call_graph call_graph_mode m entry_point in
-  let* () =
-    Bos.OS.File.writef
-      (Fpath.set_ext ".dot" source_file)
-      "%a" Graph.pp_dot call_graph
-  in
 
-  Ok ()
+  if scc then
+    let scc = Graph.tarjan call_graph in
+    let* () =
+      Bos.OS.File.writef
+        (Fpath.set_ext ".dot" source_file)
+        "%a" Graph.pp_scc (call_graph, scc)
+    in
+
+    Ok ()
+  else
+    let* () =
+      Bos.OS.File.writef
+        (Fpath.set_ext ".dot" source_file)
+        "%a" Graph.pp_dot call_graph
+    in
+
+    Ok ()

@@ -11,3 +11,5 @@ val get_info : t -> string option
 val kosaraju : t -> Set.Make(Set.Make(Int)).t
 
 val tarjan : t -> Set.Make(Set.Make(Int)).t
+
+val pp_scc : Format.formatter -> t * Set.Make(Set.Make(Int)).t -> unit
