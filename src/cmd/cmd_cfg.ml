@@ -4,12 +4,19 @@ open Types
 type to_add =
   | Ind of int
   | Next
+  | End
 
 let update_edges x next (edges, acc) (n, m, s) =
   match m with
   | Next -> ((n, next, s) :: edges, acc)
   | Ind 0 -> ((n, x, s) :: edges, acc)
   | Ind m -> (edges, (n, Ind (m - 1), s) :: acc)
+  | _ -> edges,(n,m,s)::acc
+
+let update_edges_end x edges (n, m, s) =
+  match m with
+  | End -> (n,x,s)::edges
+  | _ -> edges
 
 let increase x =
   let n, m, s = x in
@@ -93,14 +100,22 @@ let rec build_graph (l : binary expr) nodes n node edges
           (edges_to_add, 0) inds
       in
       (nodes, edges, n + 1, edges_to_add, false)
-    | Return | Return_call _ | Return_call_indirect _ | Return_call_ref _
+    | Return | Return_call _ | Return_call_indirect _ | Return_call_ref _ -> 
+      let nodes = (n, node) :: nodes in
+      let edges_to_add = (n,End,None)::edges_to_add in
+      (nodes, edges, n + 1, edges_to_add, false)
     | Unreachable ->
       let nodes = (n, instr :: node) :: nodes in
       (nodes, edges, n + 1, edges_to_add, false)
     | _ -> build_graph l nodes n (instr :: node) edges edges_to_add continue )
 
 let build_cfg instr =
-  let nodes, edges, _, _, _ = build_graph instr [] 0 [] [] [] true in
+  let nodes, edges, n, edges_to_add, _ = build_graph instr [] 0 [] [] [] true in
+  let nodes = (n,[Annotated.dummy Return])::nodes in
+  let edges, edges_to_add =
+        List.fold_left (update_edges n n) (edges, []) edges_to_add in
+  let edges = 
+        List.fold_left (update_edges_end n) edges edges_to_add in
   (nodes, edges)
 
 let build_cfg_from_text_module modul =
