@@ -228,11 +228,11 @@ let cmd ~call_graph_mode ~source_file ~entry_point ~scc =
   let call_graph = build_call_graph call_graph_mode m entry_point in
 
   if scc then
-    let scc = Graph.tarjan call_graph in
+    let scc = Graph.build_scc_graph call_graph in
     let* () =
       Bos.OS.File.writef
         (Fpath.set_ext ".dot" source_file)
-        "%a" Graph.pp_scc_cg (call_graph, scc)
+        "%a" Graph.pp_scc_graph (scc, Graph.Cg)
     in
 
     Ok ()
