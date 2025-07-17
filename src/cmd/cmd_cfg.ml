@@ -11,12 +11,10 @@ let update_edges x next (edges, acc) (n, m, s) =
   | Next -> ((n, next, s) :: edges, acc)
   | Ind 0 -> ((n, x, s) :: edges, acc)
   | Ind m -> (edges, (n, Ind (m - 1), s) :: acc)
-  | _ -> edges,(n,m,s)::acc
+  | _ -> (edges, (n, m, s) :: acc)
 
 let update_edges_end x edges (n, m, s) =
-  match m with
-  | End -> (n,x,s)::edges
-  | _ -> edges
+  match m with End -> (n, x, s) :: edges | _ -> edges
 
 let increase x =
   let n, m, s = x in
@@ -100,9 +98,9 @@ let rec build_graph (l : binary expr) nodes n node edges
           (edges_to_add, 0) inds
       in
       (nodes, edges, n + 1, edges_to_add, false)
-    | Return | Return_call _ | Return_call_indirect _ | Return_call_ref _ -> 
+    | Return | Return_call _ | Return_call_indirect _ | Return_call_ref _ ->
       let nodes = (n, node) :: nodes in
-      let edges_to_add = (n,End,None)::edges_to_add in
+      let edges_to_add = (n, End, None) :: edges_to_add in
       (nodes, edges, n + 1, edges_to_add, false)
     | Unreachable ->
       let nodes = (n, instr :: node) :: nodes in
@@ -111,11 +109,11 @@ let rec build_graph (l : binary expr) nodes n node edges
 
 let build_cfg instr =
   let nodes, edges, n, edges_to_add, _ = build_graph instr [] 0 [] [] [] true in
-  let nodes = (n,[Annotated.dummy Return])::nodes in
+  let nodes = (n, [ Annotated.dummy Return ]) :: nodes in
   let edges, edges_to_add =
-        List.fold_left (update_edges n n) (edges, []) edges_to_add in
-  let edges = 
-        List.fold_left (update_edges_end n) edges edges_to_add in
+    List.fold_left (update_edges n n) (edges, []) edges_to_add
+  in
+  let edges = List.fold_left (update_edges_end n) edges edges_to_add in
   (nodes, edges)
 
 let build_cfg_from_text_module modul =
@@ -138,13 +136,16 @@ let cmd ~source_file ~entry_point ~scc =
   let entry =
     Option.value
       (Option.bind entry_point (fun x ->
-         Array.find_index
-           (fun f ->
-             match f with
-             | Runtime.Local y ->
-               Option.compare String.compare (Some x) y.id = 0
-             | _ -> false )
-           m.func ) )
+         match int_of_string_opt x with
+         | Some x -> Some x
+         | None ->
+           Array.find_index
+             (fun f ->
+               match f with
+               | Runtime.Local y ->
+                 Option.compare String.compare (Some x) y.id = 0
+               | _ -> false )
+             m.func ) )
       ~default:0
   in
   let f =
@@ -154,11 +155,11 @@ let cmd ~source_file ~entry_point ~scc =
   let graph = Graph.init_cfg nodes edges in
 
   if scc then
-    let scc = Graph.tarjan graph in
+    let scc = Graph.build_scc_graph graph in
     let* () =
       Bos.OS.File.writef
         (Fpath.set_ext ".dot" source_file)
-        "%a" Graph.pp_scc_cfg (graph, scc)
+        "%a" Graph.pp_scc_graph (scc, Graph.Cfg)
     in
     Ok ()
   else

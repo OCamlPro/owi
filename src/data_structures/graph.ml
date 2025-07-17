@@ -14,6 +14,10 @@ type 'a t =
   ; entry_points : int list
   }
 
+type _ g =
+  | Cg : string option t g
+  | Cfg : Types.binary Types.instr Annotated.t list t g
+
 let init_cg l entry_points =
   let l' = List.sort (fun (n1, _, _) (n2, _, _) -> compare n1 n2) l in
 
@@ -57,7 +61,7 @@ let pp_edge_cg fmt (n1, n2) = Fmt.pf fmt "%a -> %a" Fmt.int n1 Fmt.int n2
 let pp_edges_cg fmt l =
   Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt ";\n") pp_edge_cg fmt l
 
-let pp_cg fmt g =
+let pp_cg fmt (g : string option t) =
   let entry_points =
     List.concat_map
       (fun x ->
@@ -176,61 +180,11 @@ let pp_node fmt (n : 'a node) =
 let pp_nodes fmt g =
   Fmt.array ~sep:(fun fmt () -> Fmt.pf fmt "\n") pp_node fmt g
 
+let pp_cfg_graph fmt g = Fmt.pf fmt "%a" pp_nodes g.nodes
+
 let pp_cfg fmt g =
-  Fmt.pf fmt "digraph cfg {\n rankdir=LR;\n node [shape=record] ;\n %a}"
-    pp_nodes g.nodes
-
-let pp_node_scc (subgraphs, n) fmt (node : 'a node) =
-  let children =
-    List.filter (fun (i, _) -> Array.get subgraphs i = n) node.children
-  in
-  Fmt.pf fmt {|%a [label="%a"]; %a|} Fmt.int node.ind pp_exp
-    (List.rev node.info) pp_edges_cfg (node.ind, children)
-
-let pp_nodes_scc (subgraphs, n) fmt g =
-  Fmt.list
-    ~sep:(fun fmt () -> Fmt.pf fmt "\n")
-    (pp_node_scc (subgraphs, n))
-    fmt g
-
-let pp_subgraph_cfg (subgraphs, nodes) fmt n =
-  let nodes = List.filter (fun e -> Array.get subgraphs e.ind = n) nodes in
-  Fmt.pf fmt "subgraph cluster_%a {\n %a }" Fmt.int n
-    (pp_nodes_scc (subgraphs, n))
-    nodes
-
-let pp_subgraphs_cfg fmt (subgraphs, nodes, len) =
-  Fmt.list
-    ~sep:(fun fmt () -> Fmt.pf fmt ";\n ")
-    (pp_subgraph_cfg (subgraphs, nodes))
-    fmt len
-
-let pp_scc_cfg fmt (g, partition) =
-  let partition = Partition.to_list partition in
-
-  let nb_clusters = List.length partition in
-  let subgraphs =
-    Array.init (Array.length g.nodes) (fun i ->
-      match List.find_index (fun s -> S.mem i s) partition with
-      | Some g -> g
-      | None -> assert false )
-  in
-  let l =
-    Array.fold_left
-      (fun acc n ->
-        List.fold_left (fun acc (n2, _) -> (n.ind, n2) :: acc) acc n.children )
-      [] g.nodes
-  in
-  Fmt.pf fmt
-    "digraph cfg {\n\
-    \ rankdir=LR;\n\
-    \ node [shape=record];\n\
-    \ graph [compound=true];\n\
-    \ %a;\n\
-    \ %a}"
-    pp_subgraphs_cfg
-    (subgraphs, Array.to_list g.nodes, List.init nb_clusters (fun i -> i))
-    pp_edges_scc (subgraphs, l)
+  Fmt.pf fmt "digraph cfg {\n rankdir=LR;\n node [shape=record] ; %a}"
+    pp_cfg_graph g
 
 let rec compare_children l1 l2 =
   match (l1, l2) with
@@ -387,3 +341,100 @@ let tarjan graph =
       graph.nodes
   in
   partition
+
+let build_subgraph subgraphs subgraph_head graph n =
+  let nodes = Array.to_list graph.nodes in
+  let nodes = List.filter (fun e -> Array.get subgraphs e.ind = n) nodes in
+  let nodes, children, parents =
+    List.fold_left
+      (fun (nodes, children, parents) node ->
+        let children_in, children_out =
+          List.fold_left
+            (fun (in_c, out_c) (x, s) ->
+              let sg = Array.get subgraphs x in
+              if sg = n then ((x, s) :: in_c, out_c)
+              else (in_c, (Array.get subgraph_head sg, None) :: out_c) )
+            ([], []) node.children
+        in
+
+        let parents_in, parents_out =
+          List.fold_left
+            (fun (in_p, out_p) x ->
+              let sg = Array.get subgraphs x in
+              if sg = n then (x :: in_p, out_p)
+              else (in_p, Array.get subgraph_head sg :: out_p) )
+            ([], []) node.parents
+        in
+
+        ( { node with children = children_in; parents = parents_in } :: nodes
+        , children_out :: children
+        , parents_out :: parents ) )
+      ([], [], []) nodes
+  in
+
+  let entry_points =
+    List.filter (fun x -> Array.get subgraphs x = n) graph.entry_points
+  in
+  let children =
+    List.sort_uniq (fun x y -> compare (fst x) (fst y)) (List.concat children)
+  in
+  let parents = List.sort_uniq (fun x y -> compare x y) (List.concat parents) in
+
+  let ind = Array.get subgraph_head n in
+  let sgraph = { nodes = Array.of_list (List.rev nodes); entry_points } in
+  (* List.rev ? *)
+  { ind; info = sgraph; children; parents }
+
+let build_scc_graph graph =
+  let partition = Partition.to_list (tarjan graph) in
+  let nb_subgraphs = List.length partition in
+
+  let subgraph_head =
+    let partition = Array.of_list partition in
+    Array.init nb_subgraphs (fun i ->
+      let e = Array.get partition i in
+      match S.choose_opt e with Some i -> i | None -> assert false )
+  in
+
+  let subgraphs =
+    Array.init (Array.length graph.nodes) (fun i ->
+      match List.find_index (fun s -> S.mem i s) partition with
+      | Some g -> g
+      | None -> assert false )
+  in
+
+  let nodes =
+    List.map
+      (fun n -> build_subgraph subgraphs subgraph_head graph n)
+      (List.init nb_subgraphs (fun i -> i))
+  in
+  let entry_points =
+    List.map (fun n -> Array.get subgraphs n) graph.entry_points
+  in
+  let entry_points = List.sort_uniq compare entry_points in
+  { nodes = Array.of_list nodes; entry_points }
+
+let pp_scc_edge n1 fmt (n2, _) =
+  Fmt.pf fmt "%a -> %a [ltail=cluster_%a,lhead=cluster_%a]" Fmt.int n1 Fmt.int
+    n2 Fmt.int n1 Fmt.int n2
+
+let pp_scc_edges fmt (n, l) =
+  Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt "\n") (pp_scc_edge n) fmt l
+
+let pp_scc_node pp fmt n =
+  Fmt.pf fmt "subgraph cluster_%a {\n %a };\n %a" Fmt.int n.ind pp n.info
+    pp_scc_edges (n.ind, n.children)
+
+let pp_scc_nodes fmt (n, pp) =
+  Fmt.array ~sep:(fun fmt () -> Fmt.pf fmt "\n") (pp_scc_node pp) fmt n
+
+let pp_scc_graph (type a) fmt ((graph : a t), (g_type : a g)) =
+  let (pp : Format.formatter -> a -> unit) =
+    match g_type with Cg -> pp_cg | Cfg -> pp_cfg_graph
+  in
+  Fmt.pf fmt
+    "digraph scc_graph {\n\
+    \ graph [compound=true];\n\
+    \ rankdir=LR;\n\
+    \ node [shape=record] ; %a}"
+    pp_scc_nodes (graph.nodes, pp)

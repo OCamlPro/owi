@@ -2,8 +2,7 @@
   $ cat test_cfg.dot
   digraph cfg {
    rankdir=LR;
-   node [shape=record] ;
-   0 [label="local.get 0 | i32.eqz | br_if 0"]; 0 -> 1 [label="false"];
+   node [shape=record] ; 0 [label="local.get 0 | i32.eqz | br_if 0"]; 0 -> 1 [label="false"];
   0 -> 3 [label="true"];
   1 [label="local.get 0 | i32.const 1 | i32.eq | br_if 1"]; 1 -> 2 [label="false"];
   1 -> 4 [label="true"];
@@ -17,8 +16,7 @@
   $ cat loop.dot
   digraph cfg {
    rankdir=LR;
-   node [shape=record] ;
-   0 [label="i64.const 1 | local.set 1 | local.get 0 | i64.eqz | br_if 0"]; 0 -> 1 [label="false"];
+   node [shape=record] ; 0 [label="i64.const 1 | local.set 1 | local.get 0 | i64.eqz | br_if 0"]; 0 -> 1 [label="false"];
   0 -> 4 [label="true"];
   1 [label="loop"]; 1 -> 2 ;
   2 [label="local.get 1 | local.get 0 | i64.mul | local.set 1 | local.get 0 | i64.const -1 | i64.add | local.tee 0 | i64.eqz | br_if 1"]; 2 -> 3 [label="false"];
@@ -31,8 +29,7 @@
   $ cat fib.dot
   digraph cfg {
    rankdir=LR;
-   node [shape=record] ;
-   0 [label="local.get 0 | i32.const 2 | i32.lt_u | if"]; 0 -> 1 [label="true"];
+   node [shape=record] ; 0 [label="local.get 0 | i32.const 2 | i32.lt_u | if"]; 0 -> 1 [label="true"];
   0 -> 2 [label="false"];
   1 [label="local.get 0"]; 1 -> 10 ;
   2 [label=""]; 2 -> 3 ;
@@ -51,8 +48,7 @@
   $ cat fib.dot
   digraph cfg {
    rankdir=LR;
-   node [shape=record] ;
-   0 [label="local.get 0 | i32.const 2 | i32.lt_u | if"]; 0 -> 1 [label="true"];
+   node [shape=record] ; 0 [label="local.get 0 | i32.const 2 | i32.lt_u | if"]; 0 -> 1 [label="true"];
   0 -> 2 [label="false"];
   1 [label="local.get 0"]; 1 -> 10 ;
   2 [label=""]; 2 -> 3 ;
