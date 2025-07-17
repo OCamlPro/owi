@@ -15,7 +15,7 @@ type 'a t =
   }
 
 type _ g =
-  | Cg : string option t g
+  | Cg : (string option * bool) t g
   | Cfg : Types.binary Types.instr Annotated.t list t g
 
 let init_cg l entry_points =
@@ -32,112 +32,36 @@ let init_cg l entry_points =
       (List.map
          (fun (ind, info, children) ->
            let children = List.map (fun x -> (x, None)) children in
+           let parents = Option.value (M.find_opt ind parents_map) ~default:[] in
+
+           let b = match parents with 
+            | [] -> List.exists (fun n -> ind = n) entry_points
+            | _ -> true in
            { ind
-           ; info
+           ; info = info,b
            ; children
-           ; parents = Option.value (M.find_opt ind parents_map) ~default:[]
+           ; parents
            } )
          l' )
   in
   { nodes; entry_points }
 
-let rec print_graph nodes (acc, visited) n =
-  if S.mem n.ind visited then (acc, visited)
-  else
-    let visited = S.add n.ind visited in
-    List.fold_left
-      (fun (acc, visited) (x, _) ->
-        if x < Array.length nodes then
-          let i = Array.get nodes x in
-          print_graph nodes ((n.ind, i.ind) :: acc, visited) i
-        else (acc, visited) )
-      (acc, visited) n.children
+let pp_edge_cg n1 fmt (n2, _) = Fmt.pf fmt "%a -> %a;\n " Fmt.int n1 Fmt.int n2
 
-let pp_entry_points fmt l =
-  Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt ";") Fmt.int fmt l
+let pp_edges_cg fmt (n, l) =
+  Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt "") (pp_edge_cg n) fmt l
 
-let pp_edge_cg fmt (n1, n2) = Fmt.pf fmt "%a -> %a" Fmt.int n1 Fmt.int n2
+let pp_node_cg fmt (n : 'a node) =
+  if (snd n.info) then 
+  Fmt.pf fmt "%a;\n %a" Fmt.int n.ind pp_edges_cg (n.ind, n.children)
 
-let pp_edges_cg fmt l =
-  Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt ";\n") pp_edge_cg fmt l
+let pp_nodes_cg fmt n =
+  Fmt.array ~sep:(fun fmt () -> Fmt.pf fmt "") pp_node_cg fmt n
 
-let pp_cg fmt (g : string option t) =
-  let entry_points =
-    List.concat_map
-      (fun x ->
-        Option.to_list
-          (if x < Array.length g.nodes then Some (Array.get g.nodes x) else None) )
-      g.entry_points
-  in
-  let l, _ = List.fold_left (print_graph g.nodes) ([], S.empty) entry_points in
-  Fmt.pf fmt "digraph call_graph {\n%a;\n%a}" pp_entry_points g.entry_points
-    pp_edges_cg l
+let pp_cg_graph fmt g = Fmt.pf fmt "%a" pp_nodes_cg g.nodes
 
-let pp_subgraph_cg (subgraphs, l, nodes) fmt n =
-  let nodes = List.filter (fun e -> Array.get subgraphs e.ind = n) nodes in
-  let l =
-    List.filter
-      (fun (n1, n2) -> Array.get subgraphs n1 = n && Array.get subgraphs n2 = n)
-      l
-  in
-  let nodes = List.map (fun n -> n.ind) nodes in
-  Fmt.pf fmt "subgraph cluster_%a {\n %a;\n %a}" Fmt.int n pp_entry_points nodes
-    pp_edges_cg l
-
-let pp_subgraphs_cg fmt (subgraphs, l, nodes, len) =
-  Fmt.list
-    ~sep:(fun fmt () -> Fmt.pf fmt ";\n ")
-    (pp_subgraph_cg (subgraphs, l, nodes))
-    fmt len
-
-let pp_edge_scc fmt (n1, n2, c1, c2) =
-  Fmt.pf fmt "%a -> %a [ltail=cluster_%a,lhead=cluster_%a]" Fmt.int n1 Fmt.int
-    n2 Fmt.int c1 Fmt.int c2
-
-let pp_edges_scc fmt (subgraphs, l) =
-  let l =
-    List.filter
-      (fun (n1, n2) -> not (Array.get subgraphs n1 = Array.get subgraphs n2))
-      l
-  in
-  let l =
-    List.map
-      (fun (n1, n2) ->
-        let c1 = Array.get subgraphs n1
-        and c2 = Array.get subgraphs n2 in
-        (n1, n2, c1, c2) )
-      l
-  in
-  let l =
-    List.sort_uniq
-      (fun (_, _, x1, y1) (_, _, x2, y2) ->
-        match compare x1 x2 with 0 -> compare y1 y2 | x -> x )
-      l
-  in
-  Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt ";\n ") pp_edge_scc fmt l
-
-let pp_scc_cg fmt (g, partition) =
-  let partition = Partition.to_list partition in
-
-  let nb_clusters = List.length partition in
-  let subgraphs =
-    Array.init (Array.length g.nodes) (fun i ->
-      match List.find_index (fun s -> S.mem i s) partition with
-      | Some g -> g
-      | None -> assert false )
-  in
-
-  let entry_points =
-    List.concat_map
-      (fun x ->
-        Option.to_list
-          (if x < Array.length g.nodes then Some (Array.get g.nodes x) else None) )
-      g.entry_points
-  in
-  let l, _ = List.fold_left (print_graph g.nodes) ([], S.empty) entry_points in
-  Fmt.pf fmt "digraph g {\n graph [compound=true];\n %a;\n %a}" pp_subgraphs_cg
-    (subgraphs, l, Array.to_list g.nodes, List.init nb_clusters (fun i -> i))
-    pp_edges_scc (subgraphs, l)
+let pp_cg fmt (g : (string option * bool) t) =
+  Fmt.pf fmt "digraph call_graph {\n %a}" pp_cg_graph g
 
 let init_cfg nodes edges =
   let children_map, parents_map =
@@ -173,14 +97,14 @@ let pp_edge_cfg n1 fmt (n2, s) =
 let pp_edges_cfg fmt (n, l) =
   Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt "\n") (pp_edge_cfg n) fmt l
 
-let pp_node fmt (n : 'a node) =
+let pp_node_cfg fmt (n : 'a node) =
   Fmt.pf fmt {|%a [label="%a"]; %a|} Fmt.int n.ind pp_exp (List.rev n.info)
     pp_edges_cfg (n.ind, n.children)
 
-let pp_nodes fmt g =
-  Fmt.array ~sep:(fun fmt () -> Fmt.pf fmt "\n") pp_node fmt g
+let pp_nodes_cfg fmt g =
+  Fmt.array ~sep:(fun fmt () -> Fmt.pf fmt "\n") pp_node_cfg fmt g
 
-let pp_cfg_graph fmt g = Fmt.pf fmt "%a" pp_nodes g.nodes
+let pp_cfg_graph fmt g = Fmt.pf fmt "%a" pp_nodes_cfg g.nodes
 
 let pp_cfg fmt g =
   Fmt.pf fmt "digraph cfg {\n rankdir=LR;\n node [shape=record] ; %a}"
@@ -429,12 +353,17 @@ let pp_scc_nodes fmt (n, pp) =
   Fmt.array ~sep:(fun fmt () -> Fmt.pf fmt "\n") (pp_scc_node pp) fmt n
 
 let pp_scc_graph (type a) fmt ((graph : a t), (g_type : a g)) =
-  let (pp : Format.formatter -> a -> unit) =
-    match g_type with Cg -> pp_cg | Cfg -> pp_cfg_graph
-  in
+  match g_type with 
+  | Cg -> Fmt.pf fmt
+    "digraph scc_graph {\n\
+    \ graph [compound=true];\n\
+    \ %a}"
+    pp_scc_nodes (graph.nodes, pp_cg_graph)
+
+  | Cfg -> 
   Fmt.pf fmt
     "digraph scc_graph {\n\
     \ graph [compound=true];\n\
     \ rankdir=LR;\n\
     \ node [shape=record] ; %a}"
-    pp_scc_nodes (graph.nodes, pp)
+    pp_scc_nodes (graph.nodes, pp_cfg_graph)
