@@ -107,7 +107,7 @@ let pp_edges_scc fmt (subgraphs, l) =
   let l =
     List.sort_uniq
       (fun (_, _, x1, y1) (_, _, x2, y2) ->
-        compare ((x1 * 10) + y1) ((x2 * 10) + y2) )
+        match compare x1 x2 with 0 -> compare y1 y2 | x -> x )
       l
   in
   Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt ";\n ") pp_edge_scc fmt l
