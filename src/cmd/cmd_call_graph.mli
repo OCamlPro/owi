@@ -7,10 +7,11 @@ type mode =
   | Sound
 
 val build_call_graph_from_text_module :
-  mode -> Text.modul -> string option -> Graph.t
+  mode -> Text.modul -> string option -> (string option * bool) Graph.t
 
 val cmd :
      call_graph_mode:mode
   -> source_file:Fpath.t
   -> entry_point:string option
+  -> scc:bool
   -> unit Result.t
