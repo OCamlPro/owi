@@ -37,6 +37,8 @@ let init_cg l entry_points =
            let b = match parents with 
             | [] -> List.exists (fun n -> ind = n) entry_points
             | _ -> true in
+
+            let children,parents = if b then children,parents else [],[] in
            { ind
            ; info = info,b
            ; children
@@ -51,9 +53,13 @@ let pp_edge_cg n1 fmt (n2, _) = Fmt.pf fmt "%a -> %a;\n " Fmt.int n1 Fmt.int n2
 let pp_edges_cg fmt (n, l) =
   Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt "") (pp_edge_cg n) fmt l
 
+let pp_label fmt s = Fmt.pf fmt {|[label="%a"]|} Fmt.string s
+
+let pp_label_opt fmt s_opt = Fmt.option pp_label fmt s_opt
+
 let pp_node_cg fmt (n : 'a node) =
-  if (snd n.info) then 
-  Fmt.pf fmt "%a;\n %a" Fmt.int n.ind pp_edges_cg (n.ind, n.children)
+  if (snd n.info) then
+  Fmt.pf fmt "%a %a ;\n %a" Fmt.int n.ind pp_label_opt (fst n.info) pp_edges_cg (n.ind, n.children)
 
 let pp_nodes_cg fmt n =
   Fmt.array ~sep:(fun fmt () -> Fmt.pf fmt "") pp_node_cg fmt n
@@ -86,10 +92,6 @@ let init_cfg nodes edges =
 let pp_inst fmt i = Fmt.pf fmt "%a" (Types.pp_instr ~short:true) i.Annotated.raw
 
 let pp_exp fmt l = Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt " | ") pp_inst fmt l
-
-let pp_label fmt s = Fmt.pf fmt {|[label="%a"]|} Fmt.string s
-
-let pp_label_opt fmt s_opt = Fmt.option pp_label fmt s_opt
 
 let pp_edge_cfg n1 fmt (n2, s) =
   Fmt.pf fmt "%a -> %a %a;" Fmt.int n1 Fmt.int n2 pp_label_opt s
