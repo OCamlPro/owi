@@ -4,7 +4,8 @@ type _ g =
   | Cg : (string option * bool) t g
   | Cfg : Types.binary Types.instr Annotated.t list t g
 
-val init_cg : (int * string option * int list) list -> int list -> (string option * bool) t
+val init_cg :
+  (int * string option * int list) list -> int list -> (string option * bool) t
 
 val pp_cg : Format.formatter -> (string option * bool) t -> unit
 

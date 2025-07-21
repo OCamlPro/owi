@@ -10,7 +10,7 @@ let full_symbolic_fuzzing = false
 
 let call_graph_fuzzing = false
 
-let call_graph_scc_fuzzing = false
+let call_graph_scc_fuzzing = true
 
 let control_flow_graph_scc_fuzzing = true
 
