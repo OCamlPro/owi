@@ -32,18 +32,20 @@ let init_cg l entry_points =
       (List.map
          (fun (ind, info, children) ->
            let children = List.map (fun x -> (x, None)) children in
-           let parents = Option.value (M.find_opt ind parents_map) ~default:[] in
+           let parents =
+             Option.value (M.find_opt ind parents_map) ~default:[]
+           in
 
-           let b = match parents with 
-            | [] -> List.exists (fun n -> ind = n) entry_points
-            | _ -> true in
+           let b =
+             match parents with
+             | [] -> List.exists (fun n -> ind = n) entry_points
+             | _ -> true
+           in
 
-            let children,parents = if b then children,parents else [],[] in
-           { ind
-           ; info = info,b
-           ; children
-           ; parents
-           } )
+           let children, parents =
+             if b then (children, parents) else ([], [])
+           in
+           { ind; info = (info, b); children; parents } )
          l' )
   in
   { nodes; entry_points }
@@ -58,8 +60,9 @@ let pp_label fmt s = Fmt.pf fmt {|[label="%a"]|} Fmt.string s
 let pp_label_opt fmt s_opt = Fmt.option pp_label fmt s_opt
 
 let pp_node_cg fmt (n : 'a node) =
-  if (snd n.info) then
-  Fmt.pf fmt "%a %a ;\n %a" Fmt.int n.ind pp_label_opt (fst n.info) pp_edges_cg (n.ind, n.children)
+  if snd n.info then
+    Fmt.pf fmt "%a %a ;\n %a" Fmt.int n.ind pp_label_opt (fst n.info)
+      pp_edges_cg (n.ind, n.children)
 
 let pp_nodes_cg fmt n =
   Fmt.array ~sep:(fun fmt () -> Fmt.pf fmt "") pp_node_cg fmt n
@@ -355,17 +358,15 @@ let pp_scc_nodes fmt (n, pp) =
   Fmt.array ~sep:(fun fmt () -> Fmt.pf fmt "\n") (pp_scc_node pp) fmt n
 
 let pp_scc_graph (type a) fmt ((graph : a t), (g_type : a g)) =
-  match g_type with 
-  | Cg -> Fmt.pf fmt
-    "digraph scc_graph {\n\
-    \ graph [compound=true];\n\
-    \ %a}"
-    pp_scc_nodes (graph.nodes, pp_cg_graph)
-
-  | Cfg -> 
-  Fmt.pf fmt
-    "digraph scc_graph {\n\
-    \ graph [compound=true];\n\
-    \ rankdir=LR;\n\
-    \ node [shape=record] ; %a}"
-    pp_scc_nodes (graph.nodes, pp_cfg_graph)
+  match g_type with
+  | Cg ->
+    Fmt.pf fmt "digraph scc_graph {\n graph [compound=true];\n %a}" pp_scc_nodes
+      (graph.nodes, pp_cg_graph)
+  | Cfg ->
+    Fmt.pf fmt
+      "digraph scc_graph {\n\
+      \ graph [compound=true];\n\
+      \ rankdir=LR;\n\
+      \ node [shape=record] ; %a}"
+      pp_scc_nodes
+      (graph.nodes, pp_cfg_graph)
