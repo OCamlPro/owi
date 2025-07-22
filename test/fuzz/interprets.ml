@@ -38,9 +38,14 @@ module Owi_regular : INTERPRET = struct
     let* regular, link_state =
       Link.modul Link.empty_state ~name:None simplified
     in
-    timeout_call_run (fun () ->
-      Interpret.Concrete.modul link_state.envs regular ~timeout:None
-        ~timeout_instr:None )
+    let module I = Interpret.Concrete (struct
+      let timeout = None
+
+      let timeout_instr = None
+
+      let throw_away_trap = false
+    end) in
+    timeout_call_run (fun () -> I.modul link_state.envs regular)
 
   let name = "owi_concrete"
 end
@@ -57,11 +62,16 @@ module Owi_minimalist_symbolic : INTERPRET = struct
       Link.modul Link.empty_state ~name:None simplified
     in
     let regular = Minimalist_symbolic.convert_module_to_run regular in
+
+    let module I = Interpret.Minimalist_symbolic (struct
+      let timeout = None
+
+      let timeout_instr = None
+
+      let throw_away_trap = false
+    end) in
     timeout_call_run (fun () ->
-      let c =
-        Interpret.Minimalist_symbolic.modul link_state.envs regular
-          ~timeout:None ~timeout_instr:None
-      in
+      let c = I.modul link_state.envs regular in
       let init_thread = Thread_with_memory.init () in
       let res, _ =
         Minimalist_symbolic_choice.run ~workers:dummy_workers_count
@@ -116,11 +126,15 @@ end) : INTERPRET = struct
       Link.modul Link.empty_state ~name:None simplified
     in
     let regular = Symbolic.convert_module_to_run regular in
+    let module I = Interpret.Symbolic (struct
+      let timeout = None
+
+      let timeout_instr = None
+
+      let throw_away_trap = false
+    end) in
     timeout_call_run (fun () ->
-      let c =
-        Interpret.Symbolic.modul link_state.envs regular ~timeout:None
-          ~timeout_instr:None
-      in
+      let c = I.modul link_state.envs regular in
       let init_thread = Thread_with_memory.init () in
       let res_acc = ref [] in
       let res_acc_mutex = Mutex.create () in

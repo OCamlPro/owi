@@ -261,7 +261,9 @@ let symbolic_parameters default_entry_point =
   and+ entry_point = entry_point default_entry_point
   and+ model_out_file
   and+ with_breadcrumbs
-  and+ invoke_with_symbols in
+  and+ invoke_with_symbols
+  and+ timeout
+  and+ timeout_instr in
   { Cmd_sym.unsafe
   ; rac
   ; srac
@@ -279,6 +281,8 @@ let symbolic_parameters default_entry_point =
   ; model_out_file
   ; with_breadcrumbs
   ; invoke_with_symbols
+  ; timeout
+  ; timeout_instr
   }
 
 (* owi analyze *)

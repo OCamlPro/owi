@@ -65,6 +65,12 @@ OPTIONS
        --srac
            symbolic runtime assertion checking mode
 
+       --timeout=S
+           Stop execution after S seconds.
+
+       --timeout-instr=I
+           Stop execution after running I instructions.
+
        -u, --unsafe
            skip typechecking pass
 

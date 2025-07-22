@@ -30,6 +30,8 @@ type parameters =
   ; invoke_with_symbols : bool
   ; model_out_file : Fpath.t option
   ; with_breadcrumbs : bool
+  ; timeout : float option
+  ; timeout_instr : int option
   }
 
 val handle_result :
