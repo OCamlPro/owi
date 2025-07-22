@@ -16,13 +16,12 @@
   digraph cfg {
    rankdir=LR;
    node [shape=record] ; 0 [label="i64.const 1 | local.set 1 | local.get 0 | i64.eqz | br_if 0"]; 0 -> 1 [label="false"];
-   0 -> 4 [label="true"];
-   1 [label="loop"]; 1 -> 2 ;
-   2 [label="local.get 1 | local.get 0 | i64.mul | local.set 1 | local.get 0 | i64.const -1 | i64.add | local.tee 0 | i64.eqz | br_if 1"]; 2 -> 3 [label="false"];
-   2 -> 4 [label="true"];
-   3 [label="br 0"]; 3 -> 1 ;
-   4 [label="local.get 1"]; 4 -> 5 ;
-   5 [label="return"]; }
+   0 -> 3 [label="true"];
+   1 [label="loop | local.get 1 | local.get 0 | i64.mul | local.set 1 | local.get 0 | i64.const -1 | i64.add | local.tee 0 | i64.eqz | br_if 1"]; 1 -> 2 [label="false"];
+   1 -> 3 [label="true"];
+   2 [label="br 0"]; 2 -> 1 ;
+   3 [label="local.get 1"]; 3 -> 4 ;
+   4 [label="return"]; }
 
   $ owi analyze cfg fib.wat
   $ cat fib.dot

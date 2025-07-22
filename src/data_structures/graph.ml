@@ -62,8 +62,8 @@ let pp_edges fmt (n, l) =
 
 let pp_node_cg fmt (n : 'a node) =
   if snd n.info then
-    Fmt.pf fmt "%a %a;\n %a" Fmt.int n.ind pp_label_opt (fst n.info)
-      pp_edges (n.ind, n.children)
+    Fmt.pf fmt "%a %a;\n %a" Fmt.int n.ind pp_label_opt (fst n.info) pp_edges
+      (n.ind, n.children)
 
 let pp_nodes_cg fmt n =
   Fmt.array ~sep:(fun fmt () -> Fmt.pf fmt "") pp_node_cg fmt n
