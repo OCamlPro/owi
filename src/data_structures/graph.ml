@@ -50,19 +50,20 @@ let init_cg l entry_points =
   in
   { nodes; entry_points }
 
-let pp_edge_cg n1 fmt (n2, _) = Fmt.pf fmt "%a -> %a;\n " Fmt.int n1 Fmt.int n2
-
-let pp_edges_cg fmt (n, l) =
-  Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt "") (pp_edge_cg n) fmt l
-
 let pp_label fmt s = Fmt.pf fmt {|[label="%a"]|} Fmt.string s
 
 let pp_label_opt fmt s_opt = Fmt.option pp_label fmt s_opt
 
+let pp_edge n1 fmt (n2, s) =
+  Fmt.pf fmt "%a -> %a %a;\n " Fmt.int n1 Fmt.int n2 pp_label_opt s
+
+let pp_edges fmt (n, l) =
+  Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt "") (pp_edge n) fmt l
+
 let pp_node_cg fmt (n : 'a node) =
   if snd n.info then
-    Fmt.pf fmt "%a %a ;\n %a" Fmt.int n.ind pp_label_opt (fst n.info)
-      pp_edges_cg (n.ind, n.children)
+    Fmt.pf fmt "%a %a;\n %a" Fmt.int n.ind pp_label_opt (fst n.info)
+      pp_edges (n.ind, n.children)
 
 let pp_nodes_cg fmt n =
   Fmt.array ~sep:(fun fmt () -> Fmt.pf fmt "") pp_node_cg fmt n
@@ -96,18 +97,12 @@ let pp_inst fmt i = Fmt.pf fmt "%a" (Types.pp_instr ~short:true) i.Annotated.raw
 
 let pp_exp fmt l = Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt " | ") pp_inst fmt l
 
-let pp_edge_cfg n1 fmt (n2, s) =
-  Fmt.pf fmt "%a -> %a %a;" Fmt.int n1 Fmt.int n2 pp_label_opt s
-
-let pp_edges_cfg fmt (n, l) =
-  Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt "\n") (pp_edge_cfg n) fmt l
-
 let pp_node_cfg fmt (n : 'a node) =
   Fmt.pf fmt {|%a [label="%a"]; %a|} Fmt.int n.ind pp_exp (List.rev n.info)
-    pp_edges_cfg (n.ind, n.children)
+    pp_edges (n.ind, n.children)
 
 let pp_nodes_cfg fmt g =
-  Fmt.array ~sep:(fun fmt () -> Fmt.pf fmt "\n") pp_node_cfg fmt g
+  Fmt.array ~sep:(fun fmt () -> Fmt.pf fmt "") pp_node_cfg fmt g
 
 let pp_cfg_graph fmt g = Fmt.pf fmt "%a" pp_nodes_cfg g.nodes
 
@@ -311,7 +306,6 @@ let build_subgraph subgraphs subgraph_head graph n =
 
   let ind = Array.get subgraph_head n in
   let sgraph = { nodes = Array.of_list (List.rev nodes); entry_points } in
-  (* List.rev ? *)
   { ind; info = sgraph; children; parents }
 
 let build_scc_graph graph =
