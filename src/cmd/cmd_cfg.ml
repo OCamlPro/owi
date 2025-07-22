@@ -48,10 +48,13 @@ let rec build_graph (l : binary expr) nodes n node edges
       in
       build_graph l nodes n [] edges edges_to_add continue
     | Loop (_, _, exp) ->
-      let nodes = (n, instr :: node) :: nodes in
-      let edges = (n, n + 1, None) :: edges in
+      let nodes, edges, n = (match node with 
+      | [] -> nodes, edges, n
+      | _ -> let nodes = (n, node) :: nodes in
+      let edges = (n, n + 1, None) :: edges in nodes, edges, n+1 )
+      in
       let nodes, edges, n', edges_to_add, continue =
-        build_graph exp.raw nodes (n + 1) [] edges
+        build_graph exp.raw nodes n [instr] edges
           (List.map increase edges_to_add)
           continue
       in
