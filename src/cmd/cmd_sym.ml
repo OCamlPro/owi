@@ -231,8 +231,8 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
   let join_handles =
     Symbolic_choice_with_memory.run
       ( match exploration_strategy with
-      | LIFO -> (module Wq)
-      | FIFO -> (module Ws)
+      | LIFO -> (module Ws)
+      | FIFO -> (module Wq)
       | Random -> (module Wpq)
       | Smart -> (module Wpq) )
       ~workers solver result thread ~callback
