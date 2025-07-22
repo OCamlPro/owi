@@ -233,7 +233,7 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
       ( match exploration_strategy with
       | LIFO -> (module Ws)
       | FIFO -> (module Wq)
-      | Random -> (module Wpq)
+      | Random -> (module Wq_random)
       | Smart -> (module Wpq) )
       ~workers solver result thread ~callback
       ~callback_init:(fun () -> Ws.make_pledge res_stack)
