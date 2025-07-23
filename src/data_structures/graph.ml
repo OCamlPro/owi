@@ -107,7 +107,7 @@ let pp_nodes_cfg fmt g =
 let pp_cfg_graph fmt g = Fmt.pf fmt "%a" pp_nodes_cfg g.nodes
 
 let pp_cfg fmt g =
-  Fmt.pf fmt "digraph cfg {\n rankdir=LR;\n node [shape=record] ; %a}"
+  Fmt.pf fmt "digraph cfg {\n rankdir=LR;\n node [shape=record] ;\n %a}"
     pp_cfg_graph g
 
 let rec compare_children l1 l2 =
@@ -137,6 +137,34 @@ let is_subgraph graph subgraph =
   in
   compare_nodes (Array.to_list graph.nodes) (Array.to_list subgraph.nodes)
   && res
+
+let find_unreachables (graph : Types.binary Types.instr Annotated.t list t)  = 
+  let res,_ = Array.fold_left (fun (acc,i) node -> 
+    match node.info with 
+    | {Annotated.raw = Types.Unreachable;_}::_ -> (i::acc, i+1)
+    | _ -> acc, i+1
+    ) ([],0) graph.nodes in res
+
+let rec aux nodes v distances x n =
+  let node = nodes.(n) in
+  let v =( match node.children with 
+  | [] | [_] -> v
+  | _ -> v+1 ) in 
+  let d = distances.(n).(x) in 
+  if v < d then (distances.(n).(x) <- v ; List.iter (aux nodes v distances x) node.parents)
+
+let compute_distance_to_unreachable graph unreachables = 
+  let distances = Array.make_matrix (Array.length graph.nodes) (List.length unreachables) Int.max_int in
+  List.iteri (aux graph.nodes 0 distances) unreachables; 
+  List.map Array.to_list (Array.to_list distances)
+
+
+let pp_unreachables unreachables = Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt "-") Fmt.int unreachables
+
+let pp_distances distances = 
+  Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt " ; ") pp_unreachables distances
+
+(* functions to compute scc *)
 
 let rec first_explore graph acc node =
   let visited, post_order = acc in
