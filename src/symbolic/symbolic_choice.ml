@@ -285,20 +285,22 @@ module CoreImpl = struct
 
     let solver = lift_schedulable Schedulable.worker_local
 
+    let yield = lift_schedulable @@ Schedulable.yield Prio.random
+
+    let stop = lift_schedulable Schedulable.stop
+
     let choose a b =
       let a =
         let* () = clone_thread in
+        let* () = yield in
         a
       in
       let b =
         let* () = clone_thread in
+        let* () = yield in
         b
       in
       State.liftF2 Schedulable.choose a b
-
-    let yield = lift_schedulable @@ Schedulable.yield Prio.random
-
-    let stop = lift_schedulable Schedulable.stop
 
     type 'a run_result = ('a eval * Thread.t) Seq.t
 
@@ -383,13 +385,15 @@ module Make (Thread : Thread_intf.S) = struct
     in check_reachability and get_model.
   *)
   let check_reachability v =
-    let* () = yield in
     let* thread in
     let* solver in
+    let* () = yield in
     let pc = Thread.pc thread in
     let sliced_pc = Symbolic_path_condition.slice pc v in
     match Solver.check solver sliced_pc with
-    | `Sat -> return ()
+    | `Sat ->
+      let* () = yield in
+      return ()
     | `Unsat -> stop
     | `Unknown -> assert false
 
@@ -412,33 +416,33 @@ module Make (Thread : Thread_intf.S) = struct
     end
     | `Unknown -> assert false
 
-  let select_inner ~explore_first ?(with_breadcrumbs = true)
-    (cond : Symbolic_value.bool) =
-    let v = Smtml.Expr.simplify cond in
-    match Smtml.Expr.view v with
+  let select_inner ~explore_first ?(check_only_true_branch = false)
+    ?(with_breadcrumbs = true) (cond : Symbolic_value.bool) =
+    let condition = Smtml.Expr.simplify cond in
+    match Smtml.Expr.view condition with
     | Val True -> return true
     | Val False -> return false
-    | Val (Bitv _bv) -> Fmt.failwith "unreachable (type error)"
-    | _ ->
-      let true_branch =
-        let* () = add_pc v in
-        let* () = if with_breadcrumbs then add_breadcrumb 1 else return () in
-        let+ () = check_reachability v in
-        true
+    | _ -> (
+      let branch condition final_value =
+        let* () = add_pc condition in
+        let* () =
+          if with_breadcrumbs then add_breadcrumb (if final_value then 1 else 0)
+          else return ()
+        in
+        let* () = check_reachability condition in
+        return final_value
       in
-      let false_branch =
-        let neg_v = Symbolic_value.Bool.not v in
-        let* () = add_pc neg_v in
-        let* () = if with_breadcrumbs then add_breadcrumb 0 else return () in
-        let+ () = check_reachability neg_v in
-        false
-      in
-      if explore_first then choose true_branch false_branch
-      else choose false_branch true_branch
+      let true_branch = branch condition true in
+      match check_only_true_branch with
+      | true -> true_branch
+      | false ->
+        let false_branch = branch (Symbolic_value.Bool.not condition) false in
+        if explore_first then choose true_branch false_branch
+        else choose false_branch true_branch )
   [@@inline]
 
   let select (cond : Symbolic_value.bool) =
-    select_inner cond ~explore_first:true
+    select_inner cond ~explore_first:true ~check_only_true_branch:false
   [@@inline]
 
   let summary_symbol (e : Smtml.Expr.t) =
@@ -514,6 +518,7 @@ module Make (Thread : Thread_intf.S) = struct
   let assume c =
     let* assertion_true =
       select_inner c ~with_breadcrumbs:false ~explore_first:false
+        ~check_only_true_branch:true
     in
     if assertion_true then return () else stop
 end

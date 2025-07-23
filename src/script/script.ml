@@ -6,6 +6,14 @@ open Types
 open Syntax
 module Stack = Stack.Make [@inlined hint] (Concrete_value)
 
+module I = Interpret.Concrete (struct
+  let timeout = None
+
+  let timeout_instr = None
+
+  let throw_away_trap = false
+end)
+
 module Host_externref = struct
   type t = int
 
@@ -135,8 +143,7 @@ let action (link_state : Concrete_extern_func.extern_func Link.state) = function
     let* f, env_id = load_func_from_module link_state mod_id f in
     let* stack = list_map value_of_const args in
     let stack = List.rev stack in
-    Interpret.Concrete.exec_vfunc_from_outside ~locals:stack ~env:env_id
-      ~envs:link_state.envs f
+    I.exec_vfunc_from_outside ~locals:stack ~env:env_id ~envs:link_state.envs f
   end
   | Get (mod_id, name) ->
     Logs.info (fun m -> m "get...");
@@ -165,10 +172,7 @@ let run ~no_exhaustion script =
           Compile.Text.until_link link_state ~unsafe ~rac:false ~srac:false
             ~name:None m
         in
-        let+ () =
-          Interpret.Concrete.modul ~timeout:None ~timeout_instr:None
-            link_state.envs m
-        in
+        let+ () = I.modul link_state.envs m in
         (* TODO: enable printing again! *)
         link_state
       | Text.Quoted_module m ->
@@ -179,10 +183,7 @@ let run ~no_exhaustion script =
           Compile.Text.until_link link_state ~unsafe ~rac:false ~srac:false
             ~name:None m
         in
-        let+ () =
-          Interpret.Concrete.modul ~timeout:None ~timeout_instr:None
-            link_state.envs m
-        in
+        let+ () = I.modul link_state.envs m in
         link_state
       | Text.Binary_module (id, m) ->
         Logs.info (fun m -> m "*** binary module");
@@ -192,10 +193,7 @@ let run ~no_exhaustion script =
         let* m, link_state =
           Compile.Binary.until_link link_state ~unsafe ~name:None m
         in
-        let+ () =
-          Interpret.Concrete.modul ~timeout:None ~timeout_instr:None
-            link_state.envs m
-        in
+        let+ () = I.modul link_state.envs m in
         link_state
       | Assert (Assert_trap_module (m, expected)) ->
         Logs.info (fun m -> m "*** assert_trap");
@@ -204,10 +202,7 @@ let run ~no_exhaustion script =
           Compile.Text.until_link link_state ~unsafe ~rac:false ~srac:false
             ~name:None m
         in
-        let got =
-          Interpret.Concrete.modul ~timeout:None ~timeout_instr:None
-            link_state.envs m
-        in
+        let got = I.modul link_state.envs m in
         let+ () = check_error_result expected got in
         link_state
       | Assert (Assert_malformed_binary (m, expected)) ->

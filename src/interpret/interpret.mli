@@ -2,12 +2,18 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-module Concrete : sig
+module type Parameters = sig
+  val throw_away_trap : bool
+
+  val timeout : float option
+
+  val timeout_instr : int option
+end
+
+module Concrete (_ : Parameters) : sig
   val modul :
-       timeout:float option
-    -> timeout_instr:int option
-         (* TODO: replace this by a Concrete_extern_func.extern_func Link.state ? *)
-    -> Concrete.Env.t Env_id.collection
+       (* TODO: replace this by a Concrete_extern_func.extern_func Link.state ? *)
+       Concrete.Env.t Env_id.collection
     -> Concrete.Module_to_run.t
     -> unit Concrete_choice.t
 
@@ -45,29 +51,23 @@ module Concrete : sig
   val exec_freinterpreti : V.t list -> Types.nn -> Types.nn -> V.t list
 end
 
-module Symbolic : sig
+module Symbolic (_ : Parameters) : sig
   val modul :
-       timeout:float option
-    -> timeout_instr:int option
-    -> Symbolic.Env.t Env_id.collection
+       Symbolic.Env.t Env_id.collection
     -> Symbolic.Module_to_run.t
     -> unit Symbolic.Choice.t
 end
 
-module Minimalist_symbolic : sig
+module Minimalist_symbolic (_ : Parameters) : sig
   val modul :
-       timeout:float option
-    -> timeout_instr:int option
-    -> Minimalist_symbolic.Env.t Env_id.collection
+       Minimalist_symbolic.Env.t Env_id.collection
     -> Minimalist_symbolic.Module_to_run.t
     -> unit Minimalist_symbolic.Choice.t
 end
 
-module Concolic : sig
+module Concolic (_ : Parameters) : sig
   val modul :
-       timeout:float option
-    -> timeout_instr:int option
-    -> Concolic.Env.t Env_id.collection
+       Concolic.Env.t Env_id.collection
     -> Concolic.Module_to_run.t
     -> unit Concolic.Choice.t
 end
