@@ -383,13 +383,14 @@ module Make (Thread : Thread_intf.S) = struct
     in check_reachability and get_model.
   *)
   let check_reachability v =
-    let* () = yield in
     let* thread in
     let* solver in
     let pc = Thread.pc thread in
     let sliced_pc = Symbolic_path_condition.slice pc v in
     match Solver.check solver sliced_pc with
-    | `Sat -> return ()
+    | `Sat ->
+      let* () = yield in
+      return ()
     | `Unsat -> stop
     | `Unknown -> assert false
 
@@ -421,7 +422,10 @@ module Make (Thread : Thread_intf.S) = struct
     | _ -> (
       let branch condition final_value =
         let* () = add_pc condition in
-        let* () = if with_breadcrumbs then add_breadcrumb (if final_value then 1 else 0) else return () in
+        let* () =
+          if with_breadcrumbs then add_breadcrumb (if final_value then 1 else 0)
+          else return ()
+        in
         let* () = check_reachability condition in
         return final_value
       in
