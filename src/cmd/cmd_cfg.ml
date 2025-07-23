@@ -111,6 +111,10 @@ let rec build_graph (l : binary expr) nodes n node edges
     | Unreachable ->
       let nodes = (n, instr :: node) :: nodes in
       (nodes, edges, n + 1, edges_to_add, false)
+    | Call _ | Call_indirect _ ->
+       let nodes = (n, instr::node) :: nodes in
+      let edges = (n, n+1, None) :: edges in
+      build_graph l nodes (n+1) [] edges edges_to_add continue
     | _ -> build_graph l nodes n (instr :: node) edges edges_to_add continue )
 
 let build_cfg instr =
