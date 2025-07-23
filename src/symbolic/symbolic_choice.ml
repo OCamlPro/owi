@@ -285,20 +285,22 @@ module CoreImpl = struct
 
     let solver = lift_schedulable Schedulable.worker_local
 
+    let yield = lift_schedulable @@ Schedulable.yield Prio.random
+
+    let stop = lift_schedulable Schedulable.stop
+
     let choose a b =
       let a =
         let* () = clone_thread in
+        let* () = yield in
         a
       in
       let b =
         let* () = clone_thread in
+        let* () = yield in
         b
       in
       State.liftF2 Schedulable.choose a b
-
-    let yield = lift_schedulable @@ Schedulable.yield Prio.random
-
-    let stop = lift_schedulable Schedulable.stop
 
     type 'a run_result = ('a eval * Thread.t) Seq.t
 
@@ -385,6 +387,7 @@ module Make (Thread : Thread_intf.S) = struct
   let check_reachability v =
     let* thread in
     let* solver in
+    let* () = yield in
     let pc = Thread.pc thread in
     let sliced_pc = Symbolic_path_condition.slice pc v in
     match Solver.check solver sliced_pc with
