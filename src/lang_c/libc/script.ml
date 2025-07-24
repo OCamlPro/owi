@@ -16,7 +16,7 @@ let () =
         Format.ksprintf Sys.command
           "clang -ffreestanding --no-standard-libraries --target=wasm32 -c \
            -m32 -Iinclude -Wall -Werror -Wno-int-conversion \
-           -Wno-unsupported-floating-point-opt -Wno-return-type -O0 -Xclang \
+           -Wno-unsupported-floating-point-opt -Wno-return-type -O3 -Xclang \
            -disable-O0-optnone -fno-builtin -fno-approx-func -fno-math-errno \
            -fno-unsafe-math-optimizations -fno-signed-zeros \
            -fno-finite-math-only -fno-vectorize -fno-unroll-loops \

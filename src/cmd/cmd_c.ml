@@ -83,11 +83,10 @@ let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file
   let flags =
     let stack_size = 8 * 1024 * 1024 |> string_of_int in
     let includes = Cmd.of_list ~slip:"-I" (List.map Fpath.to_string includes) in
-    let _ = opt_lvl in
     Cmd.(
       of_list
         ( [ (* optimization flags*)
-            "-O0"
+            Fmt.str "-O%s" opt_lvl
           ; "-Xclang"
           ; "-disable-O0-optnone"
           ; "-fno-builtin"
