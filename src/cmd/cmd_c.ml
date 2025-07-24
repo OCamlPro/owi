@@ -85,8 +85,27 @@ let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file
     let includes = Cmd.of_list ~slip:"-I" (List.map Fpath.to_string includes) in
     Cmd.(
       of_list
-        ( [ Fmt.str "-O%s" opt_lvl
-          ; "--target=wasm32"
+        ( [ (* optimization flags*)
+            Fmt.str "-O%s" opt_lvl
+          ; "-Xclang"
+          ; "-disable-O0-optnone"
+          ; "-fno-builtin"
+          ; "-fno-approx-func"
+          ; "-fno-math-errno"
+          ; "-fno-unsafe-math-optimizations"
+          ; "-fno-signed-zeros"
+          ; "-fno-finite-math-only"
+          ; "-fno-vectorize"
+          ; "-fno-unroll-loops"
+          ; "-fno-inline-functions"
+          ; "-fno-jump-tables"
+          ; "-finline-hint-functions"
+          ; "-fslp-vectorize"
+          ; "-fstrict-enums"
+          ; "-fstrict-aliasing"
+          ; "-fwrapv"
+          ; (* linker + compilation flags *)
+            "--target=wasm32"
           ; "-m32"
           ; "-ffreestanding"
           ; "--no-standard-libraries"
