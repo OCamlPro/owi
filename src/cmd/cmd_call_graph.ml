@@ -74,8 +74,9 @@ let build_graph mode tables funcs (g, i) (f : (binary func, 'a) Runtime.t) =
     let l =
       List.sort_uniq compare (find_children mode tables funcs [] x.body.raw)
     in
-    ((i, x.id, l) :: g, i + 1)
-  | Runtime.Imported x -> ((i, x.assigned_name, []) :: g, i + 1)
+    let cfg = Cmd_cfg.build_cfg_from_func x in
+    ((i, Some cfg, l) :: g, i + 1)
+  | Runtime.Imported _ -> ((i, None, []) :: g, i + 1)
 
 let eval_ibinop stack nn (op : ibinop) =
   match nn with

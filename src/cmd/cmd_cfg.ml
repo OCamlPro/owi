@@ -139,6 +139,10 @@ let build_cfg_from_text_module modul =
     Graph.init_cfg nodes edges
   | _ -> assert false
 
+let build_cfg_from_func f =
+  let nodes, edges = build_cfg f.body.raw in
+  Graph.init_cfg nodes edges
+
 let cmd ~source_file ~entry_point ~scc =
   let* m =
     Compile.File.until_validate ~unsafe:false ~rac:false ~srac:false source_file
