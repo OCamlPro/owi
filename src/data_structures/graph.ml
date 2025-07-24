@@ -15,7 +15,7 @@ type 'a t =
   }
 
 type _ g =
-  | Cg : (string option * bool) t g
+  | Cg : ('a option * bool) t g
   | Cfg : Types.binary Types.instr Annotated.t list t g
 
 let init_cg l entry_points =
@@ -42,8 +42,8 @@ let init_cg l entry_points =
              | _ -> true
            in
 
-           let children, parents =
-             if b then (children, parents) else ([], [])
+           let children, parents, info =
+             if b then (children, parents, info) else ([], [], None)
            in
            { ind; info = (info, b); children; parents } )
          l' )
@@ -62,16 +62,14 @@ let pp_edges fmt (n, l) =
 
 let pp_node_cg fmt (n : 'a node) =
   if snd n.info then
-    Fmt.pf fmt "%a %a;\n %a" Fmt.int n.ind pp_label_opt (fst n.info) pp_edges
-      (n.ind, n.children)
+    Fmt.pf fmt "%a ;\n %a" Fmt.int n.ind pp_edges (n.ind, n.children)
 
 let pp_nodes_cg fmt n =
   Fmt.array ~sep:(fun fmt () -> Fmt.pf fmt "") pp_node_cg fmt n
 
 let pp_cg_graph fmt g = Fmt.pf fmt "%a" pp_nodes_cg g.nodes
 
-let pp_cg fmt (g : (string option * bool) t) =
-  Fmt.pf fmt "digraph call_graph {\n %a}" pp_cg_graph g
+let pp_cg fmt g = Fmt.pf fmt "digraph call_graph {\n %a}" pp_cg_graph g
 
 let init_cfg nodes edges =
   let children_map, parents_map =

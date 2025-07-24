@@ -1,13 +1,13 @@
 type 'a t
 
 type _ g =
-  | Cg : (string option * bool) t g
+  | Cg : ('a option * bool) t g
   | Cfg : Types.binary Types.instr Annotated.t list t g
 
 val init_cg :
-  (int * string option * int list) list -> int list -> (string option * bool) t
+  (int * 'a option * int list) list -> int list -> ('a option * bool) t
 
-val pp_cg : Format.formatter -> (string option * bool) t -> unit
+val pp_cg : Format.formatter -> ('a option * bool) t -> unit
 
 val init_cfg : (int * 'a) list -> (int * int * string option) list -> 'a t
 

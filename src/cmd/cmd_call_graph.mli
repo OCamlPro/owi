@@ -7,7 +7,10 @@ type mode =
   | Sound
 
 val build_call_graph_from_text_module :
-  mode -> Text.modul -> string option -> (string option * bool) Graph.t
+     mode
+  -> Text.modul
+  -> string option
+  -> (Types.binary Types.instr Annotated.t list Graph.t option * bool) Graph.t
 
 val cmd :
      call_graph_mode:mode
