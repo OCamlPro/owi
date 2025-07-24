@@ -138,30 +138,37 @@ let is_subgraph graph subgraph =
   compare_nodes (Array.to_list graph.nodes) (Array.to_list subgraph.nodes)
   && res
 
-let find_unreachables (graph : Types.binary Types.instr Annotated.t list t)  = 
-  let res,_ = Array.fold_left (fun (acc,i) node -> 
-    match node.info with 
-    | {Annotated.raw = Types.Unreachable;_}::_ -> (i::acc, i+1)
-    | _ -> acc, i+1
-    ) ([],0) graph.nodes in res
+let find_unreachables (graph : Types.binary Types.instr Annotated.t list t) =
+  let res, _ =
+    Array.fold_left
+      (fun (acc, i) node ->
+        match node.info with
+        | { Annotated.raw = Types.Unreachable; _ } :: _ -> (i :: acc, i + 1)
+        | _ -> (acc, i + 1) )
+      ([], 0) graph.nodes
+  in
+  res
 
 let rec aux nodes v distances x n =
   let node = nodes.(n) in
-  let v =( match node.children with 
-  | [] | [_] -> v
-  | _ -> v+1 ) in 
-  let d = distances.(n).(x) in 
-  if v < d then (distances.(n).(x) <- v ; List.iter (aux nodes v distances x) node.parents)
+  let v = match node.children with [] | [ _ ] -> v | _ -> v + 1 in
+  let d = distances.(n).(x) in
+  if v < d then (
+    distances.(n).(x) <- v;
+    List.iter (aux nodes v distances x) node.parents )
 
-let compute_distance_to_unreachable graph unreachables = 
-  let distances = Array.make_matrix (Array.length graph.nodes) (List.length unreachables) Int.max_int in
-  List.iteri (aux graph.nodes 0 distances) unreachables; 
+let compute_distance_to_unreachable graph unreachables =
+  let distances =
+    Array.make_matrix (Array.length graph.nodes) (List.length unreachables)
+      Int.max_int
+  in
+  List.iteri (aux graph.nodes 0 distances) unreachables;
   List.map Array.to_list (Array.to_list distances)
 
+let pp_unreachables unreachables =
+  Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt "-") Fmt.int unreachables
 
-let pp_unreachables unreachables = Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt "-") Fmt.int unreachables
-
-let pp_distances distances = 
+let pp_distances distances =
   Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt " ; ") pp_unreachables distances
 
 (* functions to compute scc *)

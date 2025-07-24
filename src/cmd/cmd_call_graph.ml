@@ -24,21 +24,27 @@ let rec find_children mode tables funcs acc (l : binary instr Annotated.t list)
     =
   match (l, mode) with
   | [], _ -> acc
-  | { raw = Call (Raw i) | Return_call (Raw i); _ } :: l, _ ->
+  | ({ raw = Call (Raw i) | Return_call (Raw i); _ } as instr) :: l, _ ->
+    Annotated.update_functions_called instr [ i ];
+    (* faire la même chose pour les call_indirect *)
     find_children mode tables funcs (i :: acc) l
-  | ( { raw =
-          ( Call_indirect (_, Bt_raw (_, ft))
-          | Return_call_indirect (_, Bt_raw (_, ft)) )
-      ; _
-      }
+  | ( ( { raw =
+            ( Call_indirect (_, Bt_raw (_, ft))
+            | Return_call_indirect (_, Bt_raw (_, ft)) )
+        ; _
+        } as instr )
       :: l
     , Complete ) ->
-    let acc, _ =
-      Array.fold_left (find_functions_with_func_type ft) (acc, 0) funcs
+    let children, _ =
+      Array.fold_left (find_functions_with_func_type ft) ([], 0) funcs
     in
+    Annotated.update_functions_called instr children;
+    let acc = children @ acc in
     find_children mode tables funcs acc l
   | ( { raw = I32_const x; _ }
-      :: { raw = Call_indirect (Raw i, _) | Return_call_indirect (Raw i, _); _ }
+      :: ( { raw = Call_indirect (Raw i, _) | Return_call_indirect (Raw i, _)
+           ; _
+           } as instr )
       :: l
     , Sound ) -> (
     let t_opt = M.find_opt i tables in
@@ -49,7 +55,9 @@ let rec find_children mode tables funcs acc (l : binary instr Annotated.t list)
         | _ -> None )
     in
     match f with
-    | Some f -> find_children mode tables funcs (f :: acc) l
+    | Some f ->
+      Annotated.update_functions_called instr [ f ];
+      find_children mode tables funcs (f :: acc) l
     | None -> find_children mode tables funcs acc l )
   | { raw = Block (_, _, exp) | Loop (_, _, exp); _ } :: l, _ ->
     let x = find_children mode tables funcs acc exp.raw in
