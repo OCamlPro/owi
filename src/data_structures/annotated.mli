@@ -2,6 +2,7 @@
 type 'a t = private
   { raw : 'a
   ; instr_counter : int Atomic.t
+  ; mutable functions_called : int list
   }
 
 val dummy : 'a -> 'a t
@@ -13,3 +14,5 @@ val dummy_deep : 'a list -> 'a t list t
 val map : ('a -> 'b) -> 'a t -> 'b t
 
 val iter : ('a -> Unit.t) -> 'a t -> Unit.t
+
+val update_functions_called : 'a t -> int list -> unit
