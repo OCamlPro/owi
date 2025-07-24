@@ -14,8 +14,14 @@ let () =
       let out = Format.sprintf "%s.o" filename in
       let n =
         Format.ksprintf Sys.command
-          "clang -O3 -ffreestanding --no-standard-libraries --target=wasm32 -c \
-           -m32 -Iinclude -Wall -Werror -Wno-int-conversion -Wno-return-type \
+          "clang -ffreestanding --no-standard-libraries --target=wasm32 -c \
+           -m32 -Iinclude -Wall -Werror -Wno-int-conversion \
+           -Wno-unsupported-floating-point-opt -Wno-return-type -O0 -Xclang \
+           -disable-O0-optnone -fno-builtin -fno-approx-func -fno-math-errno \
+           -fno-unsafe-math-optimizations -fno-signed-zeros \
+           -fno-finite-math-only -fno-vectorize -fno-unroll-loops \
+           -fno-inline-functions -fno-jump-tables -finline-hint-functions \
+           -fslp-vectorize -fstrict-enums -fstrict-aliasing -fwrapv \
            -fbracket-depth=512 -DWANT_STRTOD_WITHOUT_LONG_DOUBLE -o %s %s"
           out c_filename
       in
