@@ -56,17 +56,17 @@ let pp_label fmt s = Fmt.pf fmt {|[label="%a"]|} Fmt.string s
 let pp_label_opt fmt s_opt = Fmt.option pp_label fmt s_opt
 
 let pp_edge n1 fmt (n2, s) =
-  Fmt.pf fmt "%a -> %a %a;\n " Fmt.int n1 Fmt.int n2 pp_label_opt s
+  Fmt.pf fmt "%d -> %d %a;\n " n1 n2 pp_label_opt s
 
 let pp_edges fmt (n, l) =
-  Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt "") (pp_edge n) fmt l
+  Fmt.list ~sep:Fmt.nop (pp_edge n) fmt l
 
 let pp_node_cg fmt (n : 'a node) =
   if snd n.info then
-    Fmt.pf fmt "%a ;\n %a" Fmt.int n.ind pp_edges (n.ind, n.children)
+    Fmt.pf fmt "%d ;\n %a" n.ind pp_edges (n.ind, n.children)
 
 let pp_nodes_cg fmt n =
-  Fmt.array ~sep:(fun fmt () -> Fmt.pf fmt "") pp_node_cg fmt n
+  Fmt.array ~sep:Fmt.nop pp_node_cg fmt n
 
 let pp_cg_graph fmt g = Fmt.pf fmt "%a" pp_nodes_cg g.nodes
 
@@ -80,28 +80,27 @@ let init_cfg nodes edges =
       (M.empty, M.empty) edges
   in
   let l =
-    List.rev
-      (List.map
+    List.rev_map
          (fun (ind, info) ->
            { ind
            ; info
            ; children = Option.value (M.find_opt ind children_map) ~default:[]
            ; parents = Option.value (M.find_opt ind parents_map) ~default:[]
            } )
-         nodes )
+         nodes 
   in
   { nodes = Array.of_list l; entry_points = [] }
 
 let pp_inst fmt i = Fmt.pf fmt "%a" (Types.pp_instr ~short:true) i.Annotated.raw
 
-let pp_exp fmt l = Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt " | ") pp_inst fmt l
+let pp_exp fmt l = Fmt.list ~sep:(fun fmt () -> Fmt.string fmt " | ") pp_inst fmt l
 
 let pp_node_cfg fmt (n : 'a node) =
-  Fmt.pf fmt {|%a [label="%a"]; %a|} Fmt.int n.ind pp_exp (List.rev n.info)
+  Fmt.pf fmt {|%d [label="%a"]; %a|} n.ind pp_exp (List.rev n.info)
     pp_edges (n.ind, n.children)
 
 let pp_nodes_cfg fmt g =
-  Fmt.array ~sep:(fun fmt () -> Fmt.pf fmt "") pp_node_cfg fmt g
+  Fmt.array ~sep:Fmt.nop pp_node_cfg fmt g
 
 let pp_cfg_graph fmt g = Fmt.pf fmt "%a" pp_nodes_cfg g.nodes
 
@@ -204,8 +203,8 @@ let set_instr_distances node distances cg =
     match h.Annotated.raw with
     | Types.(If_else _ | Br_if _) ->
       let t, f = get_children_true_false node in
-      Annotated.init_d_true h distances.(cg).(t);
-      Annotated.init_d_false h distances.(cg).(f)
+      Annotated.set_d_true h distances.(cg).(t);
+      Annotated.set_d_false h distances.(cg).(f)
     | _ -> () )
 
 let rec distance_unreachable_cfg nodes d distances unreachable cg cfg =
@@ -261,13 +260,13 @@ let compute_distance_to_unreachable_cg graph =
   distances
 
 let pp_unreachables unreachables =
-  Fmt.array ~sep:(fun fmt () -> Fmt.pf fmt " - ") Fmt.int unreachables
+  Fmt.array ~sep:(fun fmt () -> Fmt.string fmt " - ") Fmt.int unreachables
 
 let pp_distances2 fmt d =
   if Array.length d > 0 then Fmt.pf fmt "-> %a" pp_unreachables d.(0)
 
 let pp_distances fmt distances =
-  Fmt.array ~sep:(fun fmt () -> Fmt.pf fmt "\n") pp_distances2 fmt distances
+  Fmt.array ~sep:(fun fmt () -> Fmt.string fmt "\n") pp_distances2 fmt distances
 
 (* functions to compute scc *)
 
@@ -471,18 +470,17 @@ let build_scc_graph graph =
   { nodes = Array.of_list nodes; entry_points }
 
 let pp_scc_edge n1 fmt (n2, _) =
-  Fmt.pf fmt "%a -> %a [ltail=cluster_%a,lhead=cluster_%a]" Fmt.int n1 Fmt.int
-    n2 Fmt.int n1 Fmt.int n2
+  Fmt.pf fmt "%d -> %d [ltail=cluster_%d,lhead=cluster_%d]" n1 n2 n1 n2
 
 let pp_scc_edges fmt (n, l) =
-  Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt "\n") (pp_scc_edge n) fmt l
+  Fmt.list ~sep:(fun fmt () -> Fmt.string fmt "\n") (pp_scc_edge n) fmt l
 
 let pp_scc_node pp fmt n =
-  Fmt.pf fmt "subgraph cluster_%a {\n %a };\n %a" Fmt.int n.ind pp n.info
+  Fmt.pf fmt "subgraph cluster_%d {\n %a };\n %a" n.ind pp n.info
     pp_scc_edges (n.ind, n.children)
 
 let pp_scc_nodes fmt (n, pp) =
-  Fmt.array ~sep:(fun fmt () -> Fmt.pf fmt "\n") (pp_scc_node pp) fmt n
+  Fmt.array ~sep:(fun fmt () -> Fmt.string fmt "\n") (pp_scc_node pp) fmt n
 
 let pp_scc_graph (type a) fmt ((graph : a t), (g_type : a g)) =
   match g_type with

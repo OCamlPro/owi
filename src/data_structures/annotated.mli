@@ -19,6 +19,6 @@ val iter : ('a -> Unit.t) -> 'a t -> Unit.t
 
 val update_functions_called : 'a t -> Set.Make(Int).t -> unit
 
-val init_d_true : 'a t -> int array -> unit
+val set_d_true : 'a t -> int array -> unit
 
-val init_d_false : 'a t -> int array -> unit
+val set_d_false : 'a t -> int array -> unit
