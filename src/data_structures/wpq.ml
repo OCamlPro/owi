@@ -29,7 +29,7 @@ let make () =
   let writter prio_v condvar =
     let prio, v = prio_v in
     (*Logs.app (fun log -> log "(prio : %a)" Fmt.int (Prio.to_int prio));*)
-    Pq_imperative.push (Prio.to_int prio, v) q;
+    Pq_imperative.push (prio, v) q;
     Condition.signal condvar
   in
   Synchronizer.init (fun () -> Pq_imperative.pop q) writter

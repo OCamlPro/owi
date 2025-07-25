@@ -6,4 +6,4 @@ val default : t
 
 val compute : instr_counter:int -> t
 
-val to_int : t -> int
+val compare : t -> t -> int
