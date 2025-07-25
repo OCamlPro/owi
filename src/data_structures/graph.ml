@@ -197,13 +197,11 @@ let get_children_true_false node =
     (t, f)
   | _ -> assert false
 
-let set_instr_distances node distances cg cfg =
+let set_instr_distances node distances cg =
   match node.info with
   | [] -> ()
   | h :: _ -> (
-    if Array.length h.Annotated.distances = 0 then
-      Annotated.init_distances h distances.(cg).(cfg);
-    match h.raw with
+    match h.Annotated.raw with
     | Types.(If_else _ | Br_if _) ->
       let t, f = get_children_true_false node in
       Annotated.init_d_true h distances.(cg).(t);
@@ -218,7 +216,7 @@ let rec distance_unreachable_cfg nodes d distances unreachable cg cfg =
   (* compare avec la distance déjà calculée *)
   if d < d' then (
     distances.(cg).(cfg).(unreachable) <- d;
-    set_instr_distances node distances cg cfg;
+    set_instr_distances node distances cg;
     List.iter
       (distance_unreachable_cfg nodes d distances unreachable cg)
       node.parents )

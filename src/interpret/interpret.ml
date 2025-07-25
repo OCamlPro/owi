@@ -914,11 +914,11 @@ module Make (P : Interpret_intf.P) :
       let* b, stack =
         let prio_true =
           Prio.from_annotated instr.Annotated.instr_counter
-            instr.Annotated.d_true
+            !(instr.Annotated.d_true)
         in
         let prio_false =
           Prio.from_annotated instr.Annotated.instr_counter
-            instr.Annotated.d_false
+            !(instr.Annotated.d_false)
         in
         pop_choice stack ~prio_true ~prio_false
       in
@@ -937,11 +937,11 @@ module Make (P : Interpret_intf.P) :
       let* b, stack =
         let prio_true =
           Prio.from_annotated instr.Annotated.instr_counter
-            instr.Annotated.d_true
+            !(instr.Annotated.d_true)
         in
         let prio_false =
           Prio.from_annotated instr.Annotated.instr_counter
-            instr.Annotated.d_false
+            !(instr.Annotated.d_false)
         in
         pop_choice stack ~prio_true ~prio_false
       in
