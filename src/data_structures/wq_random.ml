@@ -24,7 +24,7 @@ let make () =
   let q = Pq_imperative.empty () in
   Random.init 0;
   let writter prio_v condvar =
-    Pq_imperative.push (Prio.to_int Prio.random, snd prio_v) q;
+    Pq_imperative.push (Prio.random, snd prio_v) q;
     Condition.signal condvar
   in
   Synchronizer.init (fun () -> Pq_imperative.pop q) writter

@@ -1,11 +1,9 @@
-type t =
-  | Random
-  | Val of int
+type t = int
 
-let random = Random
+let random = Random.int 10000000
 
-let default = Val Int.max_int
+let default = Int.max_int
 
-let compute ~instr_counter = Val instr_counter
+let compute ~instr_counter = instr_counter
 
-let to_int = function Random -> Random.int 10000000 | Val n -> n
+let compare  = compare

@@ -6,4 +6,4 @@ val is_empty : 'a t -> bool
 
 val pop : 'a t -> 'a option
 
-val push : int * 'a -> 'a t -> unit
+val push : Prio.t * 'a -> 'a t -> unit
