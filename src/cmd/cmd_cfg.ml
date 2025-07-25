@@ -167,11 +167,6 @@ let cmd ~source_file ~entry_point ~scc =
   in
   let nodes, edges = build_cfg f.body.raw in
   let graph = Graph.init_cfg nodes edges in
-
-  let unreachables = Graph.find_unreachables graph in
-  let distances = Graph.compute_distance_to_unreachable graph unreachables in
-  Logs.app (fun app -> app "%a" Graph.pp_distances distances);
-
   if scc then
     let scc = Graph.build_scc_graph graph in
     let* () =

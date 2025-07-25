@@ -136,38 +136,117 @@ let is_subgraph graph subgraph =
   compare_nodes (Array.to_list graph.nodes) (Array.to_list subgraph.nodes)
   && res
 
-let find_unreachables (graph : Types.binary Types.instr Annotated.t list t) =
-  let res, _ =
+module IntPair = struct
+  type t = int * int
+
+  let compare (x1, y1) (x2, y2) =
+    let c = compare x1 x2 in
+    if c <> 0 then c else compare y1 y2
+end
+
+module Calls = Map.Make (IntPair)
+
+let find_unreachables_cfg cg acc calls
+  (graph : Types.binary Types.instr Annotated.t list t) =
+  let res, calls, _ =
     Array.fold_left
-      (fun (acc, i) node ->
+      (fun (acc, calls, i) node ->
         match node.info with
-        | { Annotated.raw = Types.Unreachable; _ } :: _ -> (i :: acc, i + 1)
-        | _ -> (acc, i + 1) )
-      ([], 0) graph.nodes
+        | { Annotated.raw = Types.Unreachable; _ } :: _ -> (
+          match node.parents with
+          | [] ->
+            if i = 0 then ((cg, i) :: acc, calls, i + 1) else (acc, calls, i + 1)
+          | _ -> ((cg, i) :: acc, calls, i + 1) )
+        | { Annotated.raw =
+              Types.(
+                ( Call _ | Call_indirect _ | Return_call _
+                | Return_call_indirect _ ))
+          ; Annotated.functions_called = funcs
+          ; _
+          }
+          :: _ ->
+          let calls =
+            List.fold_left
+              (fun acc f -> Calls.add_to_list (cg, f) i acc)
+              calls funcs
+          in
+          (acc, calls, i + 1)
+        | _ -> (acc, calls, i + 1) )
+      (acc, calls, 0) graph.nodes
   in
-  res
+  (res, calls)
 
-let rec aux nodes v distances x n =
-  let node = nodes.(n) in
-  let v = match node.children with [] | [ _ ] -> v | _ -> v + 1 in
-  let d = distances.(n).(x) in
-  if v < d then (
-    distances.(n).(x) <- v;
-    List.iter (aux nodes v distances x) node.parents )
+let find_unreachables_cg graph =
+  let res, calls, _ =
+    Array.fold_left
+      (fun (acc, calls, i) node ->
+        match node.info with
+        | Some g, _ ->
+          let acc, calls = find_unreachables_cfg i acc calls g in
+          (acc, calls, i + 1)
+        | _ -> (acc, calls, i + 1) )
+      ([], Calls.empty, 0) graph.nodes
+  in
+  (res, calls)
 
-let compute_distance_to_unreachable graph unreachables =
+let rec distance_unreachable_cfg nodes d distances unreachable cg cfg =
+  let node = nodes.(cfg) in
+  let d = match node.children with [] | [ _ ] -> d | _ -> d + 1 in
+  (* regarde si on est dans un embranchement *)
+  let d' = distances.(cg).(cfg).(unreachable) in
+  (* compare avec la distance déjà calculée *)
+  if d < d' then (
+    distances.(cg).(cfg).(unreachable) <- d;
+    List.iter
+      (distance_unreachable_cfg nodes d distances unreachable cg)
+      node.parents )
+
+let rec distance_unreachable_cg nodes calls d distances unreachable (cg, cfg) =
+  let node = nodes.(cg) in
+
+  match node.info with
+  | Some g, _ ->
+    distance_unreachable_cfg g.nodes d distances unreachable cg cfg;
+    List.iter
+      (fun p ->
+        match Calls.find_opt (p, cg) calls with
+        | Some l ->
+          List.iter
+            (fun node ->
+              let d = distances.(cg).(0).(unreachable) in
+              let d' = distances.(p).(node).(unreachable) in
+              if d < d' then
+                distance_unreachable_cg nodes calls d distances unreachable
+                  (p, node) )
+            l
+        | None -> () )
+      node.parents
+  | None, _ -> assert false
+
+let compute_distance_to_unreachable_cg graph =
+  let unreachables, calls = find_unreachables_cg graph in
   let distances =
-    Array.make_matrix (Array.length graph.nodes) (List.length unreachables)
-      Int.max_int
+    Array.init (Array.length graph.nodes) (fun i ->
+      let length =
+        match graph.nodes.(i).info with
+        | Some g, _ -> Array.length g.nodes
+        | None, _ -> 0
+      in
+      Array.make_matrix length (List.length unreachables) Int.max_int )
   in
-  List.iteri (aux graph.nodes 0 distances) unreachables;
-  List.map Array.to_list (Array.to_list distances)
+  List.iteri
+    (distance_unreachable_cg graph.nodes calls 0 distances)
+    unreachables;
+  distances
 
 let pp_unreachables unreachables =
-  Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt "-") Fmt.int unreachables
+  Fmt.array ~sep:(fun fmt () -> Fmt.pf fmt " - ") Fmt.int unreachables
 
-let pp_distances distances =
-  Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt " ; ") pp_unreachables distances
+let pp_distances2 fmt d =
+  if Array.length d > 0 then Fmt.pf fmt "-> %a" pp_unreachables d.(0)
+
+let pp_distances fmt distances =
+  Fmt.array ~sep:(fun fmt () -> Fmt.pf fmt "\n") pp_distances2 fmt distances
 
 (* functions to compute scc *)
 

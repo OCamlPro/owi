@@ -15,11 +15,11 @@ val pp_cfg : Format.formatter -> 'a Types.instr Annotated.t list t -> unit
 
 val is_subgraph : 'a t -> 'a t -> bool
 
-val find_unreachables : Types.binary Types.instr Annotated.t list t -> int list
+val compute_distance_to_unreachable_cg :
+     (Types.binary Types.instr Annotated.t list t option * bool) t
+  -> int array array array
 
-val compute_distance_to_unreachable : 'a t -> int list -> int list list
-
-val pp_distances : Format.formatter -> int list list -> unit
+val pp_distances : Format.formatter -> int array array array -> unit
 
 val kosaraju : 'a t -> Set.Make(Set.Make(Int)).t
 
