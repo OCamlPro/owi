@@ -44,8 +44,8 @@ let iter f { raw; _ } = f raw
 
 let update_functions_called annot l = annot.functions_called <- l
 
-let init_d_true annot a =
+let set_d_true annot a =
   match !(annot.d_true) with None -> annot.d_true := Some a | _ -> ()
 
-let init_d_false annot a =
+let set_d_false annot a =
   match !(annot.d_false) with None -> annot.d_false := Some a | _ -> ()
