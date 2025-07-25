@@ -4,7 +4,7 @@ let empty = Dynarray.create
 
 let is_empty h = Dynarray.length h = 0
 
-let rec move_up (h: 'a t) x i =
+let rec move_up (h : 'a t) x i =
   if i = 0 then Dynarray.set h i x
   else
     let fi = (i - 1) / 2 in

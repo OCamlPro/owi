@@ -83,13 +83,13 @@ module Make (P : Interpret_intf.P) :
 
   let page_size = const_i64 65_536L
 
-  let pop_choice stack ~counter_next_true ~counter_next_false =
+  let pop_choice stack ~prio_true ~prio_false =
     let b, stack = Stack.pop_bool stack in
-    let* b = select b ~counter_next_true ~counter_next_false in
+    let* b = select b ~prio_true ~prio_false in
     return (b, stack)
 
   let ( let> ) v f =
-    let* v = select v ~counter_next_true:0 ~counter_next_false:0 in
+    let* v = select v ~prio_true:Prio.Default ~prio_false:Prio.Default in
     f v
 
   let const = const_i32
@@ -812,10 +812,13 @@ module Make (P : Interpret_intf.P) :
     let st stack = Choice.return (State.Continue { state with stack }) in
     Logs.info (fun m -> m "stack         : [ %a ]" Stack.pp stack);
     Logs.info (fun m ->
-      m "running instr : %a (%a)"
+      m "running instr : %a"
         (Types.pp_instr ~short:true)
-        instr.Annotated.raw Fmt.int
-        (Atomic.get instr.Annotated.instr_counter) );
+        instr.Annotated.raw
+       (* (Fmt.array ~sep:(fun fmt () -> Fmt.pf fmt "\n") Fmt.int)
+        instr.Annotated.d_true
+        (Fmt.array ~sep:(fun fmt () -> Fmt.pf fmt "\n") Fmt.int)
+        instr.Annotated.d_false*) );
     let* () =
       match Logs.level () with
       | Some Logs.Debug ->
@@ -911,17 +914,13 @@ module Make (P : Interpret_intf.P) :
       Choice.return (State.Continue { state with locals; stack })
     | If_else (_id, bt, e1, e2) ->
       let* b, stack =
-        let counter_next_true =
-          match e1.raw with
-          | [] -> 0
-          | h :: _ -> Atomic.get h.Annotated.instr_counter
+        let prio_true =
+          Prio.from_annotated instr.Annotated.instr_counter instr.Annotated.d_true
         in
-        let counter_next_false =
-          match e2.raw with
-          | [] -> 0
-          | h :: _ -> Atomic.get h.Annotated.instr_counter
+        let prio_false =
+          Prio.from_annotated instr.Annotated.instr_counter instr.Annotated.d_false
         in
-        pop_choice stack ~counter_next_true ~counter_next_false
+        pop_choice stack ~prio_true ~prio_false
       in
       let state = { state with stack } in
       exec_block state ~is_loop:false bt (if b then e1 else e2)
@@ -936,12 +935,13 @@ module Make (P : Interpret_intf.P) :
     | Br (Raw i) -> State.branch state i
     | Br_if (Raw i) ->
       let* b, stack =
-        let counter_next_false =
-          match state.pc.raw with
-          | [] -> Int.max_int
-          | h :: _ -> Atomic.get h.Annotated.instr_counter
+        let prio_true =
+          Prio.from_annotated instr.Annotated.instr_counter instr.Annotated.d_true
         in
-        pop_choice stack ~counter_next_true:0 ~counter_next_false
+        let prio_false =
+          Prio.from_annotated instr.Annotated.instr_counter instr.Annotated.d_false
+        in
+        pop_choice stack ~prio_true  ~prio_false
       in
       let state = { state with stack } in
       if b then State.branch state i else Choice.return (State.Continue state)
@@ -1049,7 +1049,7 @@ module Make (P : Interpret_intf.P) :
       end
       else begin
         let* b, stack =
-          pop_choice stack ~counter_next_true:0 ~counter_next_false:0
+          pop_choice stack ~prio_true:Prio.Default ~prio_false:Prio.Default
         in
         let o2, stack = Stack.pop stack in
         let o1, stack = Stack.pop stack in

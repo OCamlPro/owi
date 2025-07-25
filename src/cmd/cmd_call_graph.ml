@@ -230,6 +230,11 @@ let build_call_graph_from_text_module call_graph_mode modul entry_point =
   | Ok m -> build_call_graph call_graph_mode m entry_point
   | _ -> assert false
 
+let compute_distances m entry_point =
+  let call_graph = build_call_graph Sound m entry_point in
+  let _ = Graph.compute_distance_to_unreachable_cg call_graph in
+  ()
+
 let cmd ~call_graph_mode ~source_file ~entry_point ~scc =
   let* m =
     Compile.File.until_validate ~unsafe:false ~rac:false ~srac:false source_file
