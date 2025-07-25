@@ -412,8 +412,8 @@ module Make (Thread : Thread_intf.S) = struct
     end
     | `Unknown -> assert false
 
-  let select_inner ~explore_first (cond : Symbolic_value.bool)
-    ~prio_true ~prio_false =
+  let select_inner ~explore_first (cond : Symbolic_value.bool) ~prio_true
+    ~prio_false =
     let v = Smtml.Expr.simplify cond in
     match Smtml.Expr.view v with
     | Val True -> return true
@@ -423,26 +423,21 @@ module Make (Thread : Thread_intf.S) = struct
       let true_branch =
         let* () = add_pc v in
         let* () = add_breadcrumb 1 in
-        let+ () =
-          check_reachability v prio_true
-        in
+        let+ () = check_reachability v prio_true in
         true
       in
       let false_branch =
         let neg_v = Symbolic_value.Bool.not v in
         let* () = add_pc neg_v in
         let* () = add_breadcrumb 0 in
-        let+ () =
-          check_reachability neg_v prio_false
-        in
+        let+ () = check_reachability neg_v prio_false in
         false
       in
       if explore_first then choose true_branch false_branch
       else choose false_branch true_branch
   [@@inline]
 
-  let select (cond : Symbolic_value.bool) ~prio_true ~prio_false
-      =
+  let select (cond : Symbolic_value.bool) ~prio_true ~prio_false =
     select_inner cond ~explore_first:true ~prio_true ~prio_false
   [@@inline]
 

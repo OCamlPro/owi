@@ -6,6 +6,7 @@ open Syntax
 open Types
 module Stack = Stack.Make (Concrete_value)
 module M = Map.Make (Int)
+module S = Set.Make (Int)
 
 type mode =
   | Complete
@@ -18,16 +19,15 @@ let find_functions_with_func_type func_type (acc, i)
     | Runtime.Local x -> x.type_f
     | Runtime.Imported imp -> imp.desc
   in
-  if func_type_eq func_type ft then (i :: acc, i + 1) else (acc, i + 1)
+  if func_type_eq func_type ft then (S.add i acc, i + 1) else (acc, i + 1)
 
-let rec find_children mode tables funcs acc (l : binary instr Annotated.t list)
-    =
+let rec find_children mode tables (funcs : 'a array) acc
+  (l : binary instr Annotated.t list) =
   match (l, mode) with
   | [], _ -> acc
   | ({ raw = Call (Raw i) | Return_call (Raw i); _ } as instr) :: l, _ ->
-    Annotated.update_functions_called instr [ i ];
-    (* faire la même chose pour les call_indirect *)
-    find_children mode tables funcs (i :: acc) l
+    Annotated.update_functions_called instr (S.singleton i);
+    find_children mode tables funcs (S.add i acc) l
   | ( ( { raw =
             ( Call_indirect (_, Bt_raw (_, ft))
             | Return_call_indirect (_, Bt_raw (_, ft)) )
@@ -36,10 +36,10 @@ let rec find_children mode tables funcs acc (l : binary instr Annotated.t list)
       :: l
     , Complete ) ->
     let children, _ =
-      Array.fold_left (find_functions_with_func_type ft) ([], 0) funcs
+      Array.fold_left (find_functions_with_func_type ft) (S.empty, 0) funcs
     in
     Annotated.update_functions_called instr children;
-    let acc = children @ acc in
+    let acc = S.union children acc in
     find_children mode tables funcs acc l
   | ( { raw = I32_const x; _ }
       :: ( { raw = Call_indirect (Raw i, _) | Return_call_indirect (Raw i, _)
@@ -56,8 +56,8 @@ let rec find_children mode tables funcs acc (l : binary instr Annotated.t list)
     in
     match f with
     | Some f ->
-      Annotated.update_functions_called instr [ f ];
-      find_children mode tables funcs (f :: acc) l
+      Annotated.update_functions_called instr (S.singleton f);
+      find_children mode tables funcs (S.add f acc) l
     | None -> find_children mode tables funcs acc l )
   | { raw = Block (_, _, exp) | Loop (_, _, exp); _ } :: l, _ ->
     let x = find_children mode tables funcs acc exp.raw in
@@ -71,12 +71,10 @@ let rec find_children mode tables funcs acc (l : binary instr Annotated.t list)
 let build_graph mode tables funcs (g, i) (f : (binary func, 'a) Runtime.t) =
   match f with
   | Runtime.Local x ->
-    let l =
-      List.sort_uniq compare (find_children mode tables funcs [] x.body.raw)
-    in
+    let s = find_children mode tables funcs S.empty x.body.raw in
     let cfg = Cmd_cfg.build_cfg_from_func x in
-    ((i, Some cfg, l) :: g, i + 1)
-  | Runtime.Imported _ -> ((i, None, []) :: g, i + 1)
+    ((i, Some cfg, s) :: g, i + 1)
+  | Runtime.Imported _ -> ((i, None, S.empty) :: g, i + 1)
 
 let eval_ibinop stack nn (op : ibinop) =
   match nn with
@@ -232,7 +230,9 @@ let build_call_graph_from_text_module call_graph_mode modul entry_point =
 
 let compute_distances m entry_point =
   let call_graph = build_call_graph Sound m entry_point in
-  let _ = Graph.compute_distance_to_unreachable_cg call_graph in
+  let _ : int array array array =
+    Graph.compute_distance_to_unreachable_cg call_graph
+  in
   ()
 
 let cmd ~call_graph_mode ~source_file ~entry_point ~scc =
@@ -246,18 +246,10 @@ let cmd ~call_graph_mode ~source_file ~entry_point ~scc =
 
   if scc then
     let scc = Graph.build_scc_graph call_graph in
-    let* () =
-      Bos.OS.File.writef
-        (Fpath.set_ext ".dot" source_file)
-        "%a" Graph.pp_scc_graph (scc, Graph.Cg)
-    in
-
-    Ok ()
+    Bos.OS.File.writef
+      (Fpath.set_ext ".dot" source_file)
+      "%a" Graph.pp_scc_graph (scc, Graph.Cg)
   else
-    let* () =
-      Bos.OS.File.writef
-        (Fpath.set_ext ".dot" source_file)
-        "%a" Graph.pp_cg call_graph
-    in
-
-    Ok ()
+    Bos.OS.File.writef
+      (Fpath.set_ext ".dot" source_file)
+      "%a" Graph.pp_cg call_graph

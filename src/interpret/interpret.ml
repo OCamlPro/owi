@@ -812,10 +812,8 @@ module Make (P : Interpret_intf.P) :
     let st stack = Choice.return (State.Continue { state with stack }) in
     Logs.info (fun m -> m "stack         : [ %a ]" Stack.pp stack);
     Logs.info (fun m ->
-      m "running instr : %a"
-        (Types.pp_instr ~short:true)
-        instr.Annotated.raw
-       (* (Fmt.array ~sep:(fun fmt () -> Fmt.pf fmt "\n") Fmt.int)
+      m "running instr : %a" (Types.pp_instr ~short:true) instr.Annotated.raw
+      (* (Fmt.array ~sep:(fun fmt () -> Fmt.pf fmt "\n") Fmt.int)
         instr.Annotated.d_true
         (Fmt.array ~sep:(fun fmt () -> Fmt.pf fmt "\n") Fmt.int)
         instr.Annotated.d_false*) );
@@ -915,10 +913,12 @@ module Make (P : Interpret_intf.P) :
     | If_else (_id, bt, e1, e2) ->
       let* b, stack =
         let prio_true =
-          Prio.from_annotated instr.Annotated.instr_counter instr.Annotated.d_true
+          Prio.from_annotated instr.Annotated.instr_counter
+            instr.Annotated.d_true
         in
         let prio_false =
-          Prio.from_annotated instr.Annotated.instr_counter instr.Annotated.d_false
+          Prio.from_annotated instr.Annotated.instr_counter
+            instr.Annotated.d_false
         in
         pop_choice stack ~prio_true ~prio_false
       in
@@ -936,12 +936,14 @@ module Make (P : Interpret_intf.P) :
     | Br_if (Raw i) ->
       let* b, stack =
         let prio_true =
-          Prio.from_annotated instr.Annotated.instr_counter instr.Annotated.d_true
+          Prio.from_annotated instr.Annotated.instr_counter
+            instr.Annotated.d_true
         in
         let prio_false =
-          Prio.from_annotated instr.Annotated.instr_counter instr.Annotated.d_false
+          Prio.from_annotated instr.Annotated.instr_counter
+            instr.Annotated.d_false
         in
-        pop_choice stack ~prio_true  ~prio_false
+        pop_choice stack ~prio_true ~prio_false
       in
       let state = { state with stack } in
       if b then State.branch state i else Choice.return (State.Continue state)
