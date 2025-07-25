@@ -126,14 +126,16 @@ let build_cfg instr =
   let edges = List.fold_left (update_edges_end n) edges edges_to_add in
   (nodes, edges)
 
-let build_cfg_from_text_module modul =
+let build_cfg_from_text_module modul entry =
   let m =
     Compile.Text.until_validate ~unsafe:false ~rac:false ~srac:false modul
   in
   match m with
   | Ok m ->
     let f =
-      match Array.get m.func 0 with Runtime.Local f -> f | _ -> assert false
+      match Array.get m.func entry with
+      | Runtime.Local f -> f
+      | _ -> assert false
     in
     let nodes, edges = build_cfg f.body.raw in
     Graph.init_cfg nodes edges
@@ -151,11 +153,10 @@ let cmd ~source_file ~entry_point ~scc =
     Option.value
       (Option.bind entry_point (fun x ->
          match int_of_string_opt x with
-         | Some x -> Some x
+         | Some _ as x -> x
          | None ->
            Array.find_index
-             (fun f ->
-               match f with
+             (function
                | Runtime.Local y ->
                  Option.compare String.compare (Some x) y.id = 0
                | _ -> false )
@@ -169,16 +170,11 @@ let cmd ~source_file ~entry_point ~scc =
   let graph = Graph.init_cfg nodes edges in
   if scc then
     let scc = Graph.build_scc_graph graph in
-    let* () =
-      Bos.OS.File.writef
-        (Fpath.set_ext ".dot" source_file)
-        "%a" Graph.pp_scc_graph (scc, Graph.Cfg)
-    in
-    Ok ()
+
+    Bos.OS.File.writef
+      (Fpath.set_ext ".dot" source_file)
+      "%a" Graph.pp_scc_graph (scc, Graph.Cfg)
   else
-    let* () =
-      Bos.OS.File.writef
-        (Fpath.set_ext ".dot" source_file)
-        "%a" Graph.pp_cfg graph
-    in
-    Ok ()
+    Bos.OS.File.writef
+      (Fpath.set_ext ".dot" source_file)
+      "%a" Graph.pp_cfg graph

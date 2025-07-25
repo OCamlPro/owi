@@ -184,7 +184,7 @@ let () =
       [ gen Env.Concrete ]
       (fun m ->
         let open Owi.Cmd_cfg in
-        let graph_complete = build_cfg_from_text_module m in
+        let graph_complete = build_cfg_from_text_module m 0 in
         let scc_kosaraju = Owi.Graph.kosaraju graph_complete in
         let scc_tarjan = Owi.Graph.tarjan graph_complete in
         Crowbar.check (S.equal scc_kosaraju scc_tarjan) )
