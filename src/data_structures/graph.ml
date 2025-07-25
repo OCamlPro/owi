@@ -16,7 +16,7 @@ type 'a t =
 
 type _ g =
   | Cg : ('a option * bool) t g
-  | Cfg : Types.binary Types.instr Annotated.t list t g
+  | Cfg : Types.binary Types.expr t g
 
 let init_cg (l : (int * 'a option * Set.Make(Int).t) list) entry_points =
   let l' = List.sort (fun (n1, _, _) (n2, _, _) -> compare n1 n2) l in
