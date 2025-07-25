@@ -236,6 +236,9 @@ let cmd ~call_graph_mode ~source_file ~entry_point ~scc =
   in
   let call_graph = build_call_graph call_graph_mode m entry_point in
 
+  let distances = Graph.compute_distance_to_unreachable_cg call_graph in
+  Logs.app (fun log -> log "%a" Graph.pp_distances distances);
+
   if scc then
     let scc = Graph.build_scc_graph call_graph in
     let* () =
