@@ -55,18 +55,14 @@ let pp_label fmt s = Fmt.pf fmt {|[label="%a"]|} Fmt.string s
 
 let pp_label_opt fmt s_opt = Fmt.option pp_label fmt s_opt
 
-let pp_edge n1 fmt (n2, s) =
-  Fmt.pf fmt "%d -> %d %a;\n " n1 n2 pp_label_opt s
+let pp_edge n1 fmt (n2, s) = Fmt.pf fmt "%d -> %d %a;\n " n1 n2 pp_label_opt s
 
-let pp_edges fmt (n, l) =
-  Fmt.list ~sep:Fmt.nop (pp_edge n) fmt l
+let pp_edges fmt (n, l) = Fmt.list ~sep:Fmt.nop (pp_edge n) fmt l
 
 let pp_node_cg fmt (n : 'a node) =
-  if snd n.info then
-    Fmt.pf fmt "%d ;\n %a" n.ind pp_edges (n.ind, n.children)
+  if snd n.info then Fmt.pf fmt "%d ;\n %a" n.ind pp_edges (n.ind, n.children)
 
-let pp_nodes_cg fmt n =
-  Fmt.array ~sep:Fmt.nop pp_node_cg fmt n
+let pp_nodes_cg fmt n = Fmt.array ~sep:Fmt.nop pp_node_cg fmt n
 
 let pp_cg_graph fmt g = Fmt.pf fmt "%a" pp_nodes_cg g.nodes
 
@@ -81,26 +77,26 @@ let init_cfg nodes edges =
   in
   let l =
     List.rev_map
-         (fun (ind, info) ->
-           { ind
-           ; info
-           ; children = Option.value (M.find_opt ind children_map) ~default:[]
-           ; parents = Option.value (M.find_opt ind parents_map) ~default:[]
-           } )
-         nodes 
+      (fun (ind, info) ->
+        { ind
+        ; info
+        ; children = Option.value (M.find_opt ind children_map) ~default:[]
+        ; parents = Option.value (M.find_opt ind parents_map) ~default:[]
+        } )
+      nodes
   in
   { nodes = Array.of_list l; entry_points = [] }
 
 let pp_inst fmt i = Fmt.pf fmt "%a" (Types.pp_instr ~short:true) i.Annotated.raw
 
-let pp_exp fmt l = Fmt.list ~sep:(fun fmt () -> Fmt.string fmt " | ") pp_inst fmt l
+let pp_exp fmt l =
+  Fmt.list ~sep:(fun fmt () -> Fmt.string fmt " | ") pp_inst fmt l
 
 let pp_node_cfg fmt (n : 'a node) =
-  Fmt.pf fmt {|%d [label="%a"]; %a|} n.ind pp_exp (List.rev n.info)
-    pp_edges (n.ind, n.children)
+  Fmt.pf fmt {|%d [label="%a"]; %a|} n.ind pp_exp (List.rev n.info) pp_edges
+    (n.ind, n.children)
 
-let pp_nodes_cfg fmt g =
-  Fmt.array ~sep:Fmt.nop pp_node_cfg fmt g
+let pp_nodes_cfg fmt g = Fmt.array ~sep:Fmt.nop pp_node_cfg fmt g
 
 let pp_cfg_graph fmt g = Fmt.pf fmt "%a" pp_nodes_cfg g.nodes
 
@@ -137,14 +133,13 @@ let is_subgraph graph subgraph =
   && res
 
 module IntPair = struct
+  (* this should be replaced by Pair module in 5.4 *)
   type t = int * int
 
   let compare (x1, y1) (x2, y2) =
     let c = compare x1 x2 in
     if c <> 0 then c else compare y1 y2
 end
-
-(* compute the distance from each node to unreachable instruction *)
 
 module Calls = Map.Make (IntPair)
 
@@ -210,9 +205,7 @@ let set_instr_distances node distances cg =
 let rec distance_unreachable_cfg nodes d distances unreachable cg cfg =
   let node = nodes.(cfg) in
   let d = match node.children with [] | [ _ ] -> d | _ -> d + 1 in
-  (* regarde si on est dans un embranchement *)
   let d' = distances.(cg).(cfg).(unreachable) in
-  (* compare avec la distance déjà calculée *)
   if d < d' then (
     distances.(cg).(cfg).(unreachable) <- d;
     set_instr_distances node distances cg;
@@ -267,8 +260,6 @@ let pp_distances2 fmt d =
 
 let pp_distances fmt distances =
   Fmt.array ~sep:(fun fmt () -> Fmt.string fmt "\n") pp_distances2 fmt distances
-
-(* functions to compute scc *)
 
 let rec first_explore graph acc node =
   let visited, post_order = acc in
@@ -356,9 +347,10 @@ let rec explore graph acc node =
           if w.in_stack then
             let visited =
               M.update node
-                (fun v_opt ->
-                  Option.bind v_opt (fun v ->
-                    Some { v with num_accessible = min v.num_accessible w.num } ) )
+                (function
+                  | None -> None
+                  | Some v ->
+                    Some { v with num_accessible = min v.num_accessible w.num } )
                 visited
             in
             (num, stack, partition, visited)
@@ -375,8 +367,7 @@ let rec explore graph acc node =
       let w, stack = match stack with [] -> assert false | h :: t -> (h, t) in
       let visited =
         M.update w
-          (fun w_opt ->
-            Option.bind w_opt (fun w -> Some { w with in_stack = false }) )
+          (function None -> None | Some w -> Some { w with in_stack = false })
           visited
       in
       let component = S.add w component in
@@ -476,8 +467,8 @@ let pp_scc_edges fmt (n, l) =
   Fmt.list ~sep:(fun fmt () -> Fmt.string fmt "\n") (pp_scc_edge n) fmt l
 
 let pp_scc_node pp fmt n =
-  Fmt.pf fmt "subgraph cluster_%d {\n %a };\n %a" n.ind pp n.info
-    pp_scc_edges (n.ind, n.children)
+  Fmt.pf fmt "subgraph cluster_%d {\n %a };\n %a" n.ind pp n.info pp_scc_edges
+    (n.ind, n.children)
 
 let pp_scc_nodes fmt (n, pp) =
   Fmt.array ~sep:(fun fmt () -> Fmt.string fmt "\n") (pp_scc_node pp) fmt n
