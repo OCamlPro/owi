@@ -144,6 +144,8 @@ module IntPair = struct
     if c <> 0 then c else compare y1 y2
 end
 
+(* compute the distance from each node to unreachable instruction *)
+
 module Calls = Map.Make (IntPair)
 
 let find_unreachables_cfg cg acc calls
@@ -189,6 +191,26 @@ let find_unreachables_cg graph =
   in
   (res, calls)
 
+let get_children_true_false node =
+  match node.children with
+  | [ (t, Some "true"); (f, Some "false") ]
+  | [ (f, Some "false"); (t, Some "true") ] ->
+    (t, f)
+  | _ -> assert false
+
+let set_instr_distances node distances cg cfg =
+  match node.info with
+  | [] -> ()
+  | h :: _ -> (
+    if Array.length h.Annotated.distances = 0 then
+      Annotated.init_distances h distances.(cg).(cfg);
+    match h.raw with
+    | Types.(If_else _ | Br_if _) ->
+      let t, f = get_children_true_false node in
+      Annotated.init_d_true h distances.(cg).(t);
+      Annotated.init_d_false h distances.(cg).(f)
+    | _ -> () )
+
 let rec distance_unreachable_cfg nodes d distances unreachable cg cfg =
   let node = nodes.(cfg) in
   let d = match node.children with [] | [ _ ] -> d | _ -> d + 1 in
@@ -197,6 +219,7 @@ let rec distance_unreachable_cfg nodes d distances unreachable cg cfg =
   (* compare avec la distance déjà calculée *)
   if d < d' then (
     distances.(cg).(cfg).(unreachable) <- d;
+    set_instr_distances node distances cg cfg;
     List.iter
       (distance_unreachable_cfg nodes d distances unreachable cg)
       node.parents )
@@ -225,6 +248,7 @@ let rec distance_unreachable_cg nodes calls d distances unreachable (cg, cfg) =
 
 let compute_distance_to_unreachable_cg graph =
   let unreachables, calls = find_unreachables_cg graph in
+  let nb_unr = List.length unreachables in
   let distances =
     Array.init (Array.length graph.nodes) (fun i ->
       let length =
@@ -232,7 +256,7 @@ let compute_distance_to_unreachable_cg graph =
         | Some g, _ -> Array.length g.nodes
         | None, _ -> 0
       in
-      Array.make_matrix length (List.length unreachables) Int.max_int )
+      Array.make_matrix length nb_unr Int.max_int )
   in
   List.iteri
     (distance_unreachable_cg graph.nodes calls 0 distances)

@@ -40,6 +40,7 @@ type parameters =
 let run_file ~parameters ~source_file =
   let { unsafe; rac; srac; entry_point; invoke_with_symbols; _ } = parameters in
   let* m = Compile.File.until_validate ~unsafe ~rac ~srac source_file in
+  Cmd_call_graph.compute_distances m entry_point;
   let* m = Cmd_utils.set_entry_point entry_point invoke_with_symbols m in
   let link_state =
     let func_typ = Symbolic.Extern_func.extern_type in

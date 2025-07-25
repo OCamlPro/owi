@@ -12,6 +12,8 @@ val build_call_graph_from_text_module :
   -> string option
   -> (Types.binary Types.instr Annotated.t list Graph.t option * bool) Graph.t
 
+val compute_distances : Binary.Module.t -> string option -> unit
+
 val cmd :
      call_graph_mode:mode
   -> source_file:Fpath.t
