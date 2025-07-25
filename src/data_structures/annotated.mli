@@ -2,7 +2,7 @@
 type 'a t = private
   { raw : 'a
   ; instr_counter : int Atomic.t
-  ; mutable functions_called : int list
+  ; mutable functions_called : Set.Make(Int).t
   ; mutable distances : int array
   ; mutable d_true : int array
   ; mutable d_false : int array
@@ -18,7 +18,7 @@ val map : ('a -> 'b) -> 'a t -> 'b t
 
 val iter : ('a -> Unit.t) -> 'a t -> Unit.t
 
-val update_functions_called : 'a t -> int list -> unit
+val update_functions_called : 'a t -> Set.Make(Int).t -> unit
 
 val init_distances : 'a t -> int array -> unit
 

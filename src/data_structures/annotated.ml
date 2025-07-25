@@ -1,7 +1,9 @@
+module S = Set.Make (Int)
+
 type 'a t =
   { raw : 'a
   ; instr_counter : int Atomic.t
-  ; mutable functions_called : int list
+  ; mutable functions_called : S.t
   ; mutable distances : int array
   ; mutable d_true : int array
   ; mutable d_false : int array
@@ -10,7 +12,7 @@ type 'a t =
 let dummy raw =
   { raw
   ; instr_counter = Atomic.make 0
-  ; functions_called = []
+  ; functions_called = S.empty
   ; distances = Array.make 0 0
   ; d_true = Array.make 0 0
   ; d_false = Array.make 0 0
@@ -21,7 +23,7 @@ let dummies l =
     (fun raw ->
       { raw
       ; instr_counter = Atomic.make 0
-      ; functions_called = []
+      ; functions_called = S.empty
       ; distances = Array.make 0 0
       ; d_true = Array.make 0 0
       ; d_false = Array.make 0 0
@@ -32,7 +34,7 @@ let dummy_deep raw =
   let raw = dummies raw in
   { raw
   ; instr_counter = Atomic.make 0
-  ; functions_called = []
+  ; functions_called = S.empty
   ; distances = Array.make 0 0
   ; d_true = Array.make 0 0
   ; d_false = Array.make 0 0

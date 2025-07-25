@@ -18,19 +18,20 @@ type _ g =
   | Cg : ('a option * bool) t g
   | Cfg : Types.binary Types.instr Annotated.t list t g
 
-let init_cg l entry_points =
+let init_cg (l : (int * 'a option * Set.Make(Int).t) list) entry_points =
   let l' = List.sort (fun (n1, _, _) (n2, _, _) -> compare n1 n2) l in
 
   let parents_map =
     List.fold_left
       (fun map (ind, _, children) ->
-        List.fold_left (fun map c -> M.add_to_list c ind map) map children )
+        S.fold (fun c map -> M.add_to_list c ind map) children map )
       M.empty l
   in
   let nodes =
     Array.of_list
       (List.map
          (fun (ind, info, children) ->
+           let children = S.to_list children in
            let children = List.map (fun x -> (x, None)) children in
            let parents =
              Option.value (M.find_opt ind parents_map) ~default:[]
@@ -168,9 +169,7 @@ let find_unreachables_cfg cg acc calls
           }
           :: _ ->
           let calls =
-            List.fold_left
-              (fun acc f -> Calls.add_to_list (cg, f) i acc)
-              calls funcs
+            S.fold (fun f acc -> Calls.add_to_list (cg, f) i acc) funcs calls
           in
           (acc, calls, i + 1)
         | _ -> (acc, calls, i + 1) )

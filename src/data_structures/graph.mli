@@ -5,7 +5,7 @@ type _ g =
   | Cfg : Types.binary Types.instr Annotated.t list t g
 
 val init_cg :
-  (int * 'a option * int list) list -> int list -> ('a option * bool) t
+  (int * 'a option * Set.Make(Int).t) list -> int list -> ('a option * bool) t
 
 val pp_cg : Format.formatter -> ('a option * bool) t -> unit
 
