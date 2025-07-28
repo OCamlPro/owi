@@ -149,14 +149,19 @@ let find_unreachables_cfg cg acc calls
     Array.fold_left
       (fun (acc, calls, i) node ->
         match node.info with
-        | { Annotated.raw = Types.Unreachable; _ } :: _ -> (
+       (* | { Annotated.raw = Types.Unreachable; _ } :: _ -> (
           match node.parents with
+          | [] ->
+            if i = 0 then ((cg, i) :: acc, calls, i + 1) else (acc, calls, i + 1)
+          | _ -> ((cg, i) :: acc, calls, i + 1) ) *)
+        | { Annotated.raw = Types.Call (Raw 1); _} :: _ -> (* only to test with the benchs *)
+          (match node.parents with
           | [] ->
             if i = 0 then ((cg, i) :: acc, calls, i + 1) else (acc, calls, i + 1)
           | _ -> ((cg, i) :: acc, calls, i + 1) )
         | { Annotated.raw =
               Types.(
-                ( Call _ | Call_indirect _ | Return_call _
+                ( Call _ | Call_indirect _| Return_call _
                 | Return_call_indirect _ ))
           ; Annotated.functions_called = funcs
           ; _
@@ -334,12 +339,13 @@ let rec explore graph acc node =
           in
           let visited =
             M.update node
-              (fun v_opt ->
-                Option.bind v_opt (fun v ->
+              (function
+                | None -> None
+                | Some v ->
                   Some
                     { v with
                       num_accessible = min v.num_accessible w.num_accessible
-                    } ) )
+                    } )
               visited
           in
           (num, stack, partition, visited)
