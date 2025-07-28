@@ -809,14 +809,16 @@ module Make (P : Interpret_intf.P) :
     let locals = state.locals in
 
     Atomic.incr instr.Annotated.instr_counter;
+    let d_true = Option.value !(instr.Annotated.d_true) ~default:[||] in
+    let d_false = Option.value !(instr.Annotated.d_false) ~default:[||] in
     let st stack = Choice.return (State.Continue { state with stack }) in
     Logs.info (fun m -> m "stack         : [ %a ]" Stack.pp stack);
     Logs.info (fun m ->
-      m "running instr : %a" (Types.pp_instr ~short:true) instr.Annotated.raw
-      (* (Fmt.array ~sep:(fun fmt () -> Fmt.pf fmt "\n") Fmt.int)
-        instr.Annotated.d_true
+      m "running instr : %a true : %a false : %a " (Types.pp_instr ~short:true) instr.Annotated.raw
+       (Fmt.array ~sep:(fun fmt () -> Fmt.pf fmt "\n") Fmt.int)
+        d_true
         (Fmt.array ~sep:(fun fmt () -> Fmt.pf fmt "\n") Fmt.int)
-        instr.Annotated.d_false*) );
+        d_false );
     let* () =
       match Logs.level () with
       | Some Logs.Debug ->
@@ -912,12 +914,22 @@ module Make (P : Interpret_intf.P) :
       Choice.return (State.Continue { state with locals; stack })
     | If_else (_id, bt, e1, e2) ->
       let* b, stack =
+          let counter_next_true =
+          match e1.raw with
+          | [] -> Atomic.make Int.max_int
+          | h :: _ ->  h.Annotated.instr_counter
+        in
+        let counter_next_false =
+          match e2.raw with
+          | [] -> Atomic.make Int.max_int
+          | h :: _ -> h.Annotated.instr_counter
+        in
         let prio_true =
-          Prio.from_annotated instr.Annotated.instr_counter
+          Prio.from_annotated counter_next_true
             !(instr.Annotated.d_true)
         in
         let prio_false =
-          Prio.from_annotated instr.Annotated.instr_counter
+          Prio.from_annotated counter_next_false
             !(instr.Annotated.d_false)
         in
         pop_choice stack ~prio_true ~prio_false
@@ -935,12 +947,17 @@ module Make (P : Interpret_intf.P) :
     | Br (Raw i) -> State.branch state i
     | Br_if (Raw i) ->
       let* b, stack =
+        let counter_next_false =
+          match state.pc.raw with
+          | [] -> Atomic.make Int.max_int
+          | h :: _ -> h.Annotated.instr_counter
+        in
         let prio_true =
-          Prio.from_annotated instr.Annotated.instr_counter
+          Prio.from_annotated (Atomic.make Int.max_int)
             !(instr.Annotated.d_true)
         in
         let prio_false =
-          Prio.from_annotated instr.Annotated.instr_counter
+          Prio.from_annotated counter_next_false
             !(instr.Annotated.d_false)
         in
         pop_choice stack ~prio_true ~prio_false
