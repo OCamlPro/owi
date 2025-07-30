@@ -814,8 +814,10 @@ module Make (P : Interpret_intf.P) :
     let st stack = Choice.return (State.Continue { state with stack }) in
     Logs.info (fun m -> m "stack         : [ %a ]" Stack.pp stack);
     Logs.info (fun m ->
-      m "running instr : %a true : %a false : %a " (Types.pp_instr ~short:true) instr.Annotated.raw
-       (Fmt.array ~sep:(fun fmt () -> Fmt.pf fmt "\n") Fmt.int)
+      m "running instr : %a true : %a false : %a "
+        (Types.pp_instr ~short:true)
+        instr.Annotated.raw
+        (Fmt.array ~sep:(fun fmt () -> Fmt.pf fmt "\n") Fmt.int)
         d_true
         (Fmt.array ~sep:(fun fmt () -> Fmt.pf fmt "\n") Fmt.int)
         d_false );
@@ -914,10 +916,10 @@ module Make (P : Interpret_intf.P) :
       Choice.return (State.Continue { state with locals; stack })
     | If_else (_id, bt, e1, e2) ->
       let* b, stack =
-          let counter_next_true =
+        let counter_next_true =
           match e1.raw with
           | [] -> Atomic.make Int.max_int
-          | h :: _ ->  h.Annotated.instr_counter
+          | h :: _ -> h.Annotated.instr_counter
         in
         let counter_next_false =
           match e2.raw with
@@ -925,12 +927,10 @@ module Make (P : Interpret_intf.P) :
           | h :: _ -> h.Annotated.instr_counter
         in
         let prio_true =
-          Prio.from_annotated counter_next_true
-            !(instr.Annotated.d_true)
+          Prio.from_annotated counter_next_true !(instr.Annotated.d_true)
         in
         let prio_false =
-          Prio.from_annotated counter_next_false
-            !(instr.Annotated.d_false)
+          Prio.from_annotated counter_next_false !(instr.Annotated.d_false)
         in
         pop_choice stack ~prio_true ~prio_false
       in
@@ -953,12 +953,10 @@ module Make (P : Interpret_intf.P) :
           | h :: _ -> h.Annotated.instr_counter
         in
         let prio_true =
-          Prio.from_annotated (Atomic.make Int.max_int)
-            !(instr.Annotated.d_true)
+          Prio.from_annotated (Atomic.make Int.max_int) !(instr.Annotated.d_true)
         in
         let prio_false =
-          Prio.from_annotated counter_next_false
-            !(instr.Annotated.d_false)
+          Prio.from_annotated counter_next_false !(instr.Annotated.d_false)
         in
         pop_choice stack ~prio_true ~prio_false
       in
