@@ -25,9 +25,9 @@ let compare p1 p2 =
     | None, _ -> 1
     | _, None -> -1
     | Some l1, Some l2 ->
-      if Int.abs (v1.instr_counter - v2.instr_counter) mod 2 = 0 then
-        compare v1.instr_counter v2.instr_counter
-      else List.compare compare l1 l2 )
+         if Int.abs (v1.instr_counter - v2.instr_counter) > 5 then 
+            compare v1.instr_counter v2.instr_counter 
+          else List.compare compare l1 l2)
   | Default, Default -> 0
   | Default, _ -> -1
   | _, Default -> 1
