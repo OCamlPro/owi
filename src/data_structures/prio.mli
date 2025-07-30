@@ -4,7 +4,7 @@ type t =
       ; distances_to_unreachable : int list option
       }
   | Default
-  | Random
+  | Random of int
 
 val random : t
 

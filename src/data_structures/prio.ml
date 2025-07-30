@@ -4,9 +4,9 @@ type t =
       ; distances_to_unreachable : int list option
       }
   | Default
-  | Random
+  | Random of int
 
-let random = Random
+let random = Random (Random.int 10000)
 
 let default = Default
 
@@ -19,15 +19,17 @@ let from_annotated instr_counter distances =
 
 let compare p1 p2 =
   match (p1, p2) with
-  | Val v1, Val v2 ->
-    if Int.abs (v1.instr_counter - v2.instr_counter) > 5 then compare v1.instr_counter v2.instr_counter else
-     ( match (v1.distances_to_unreachable, v2.distances_to_unreachable) with
-      | None, None -> 0
-      | None, _ -> 1
-      | _, None -> -1
-      | Some l1, Some l2 -> if Int.abs (v1.instr_counter - v2.instr_counter) > 5 then compare v1.instr_counter v2.instr_counter else List.compare compare l1 l2
-     )
+  | Val v1, Val v2 -> (
+    match (v1.distances_to_unreachable, v2.distances_to_unreachable) with
+    | None, None -> 0
+    | None, _ -> 1
+    | _, None -> -1
+    | Some l1, Some l2 ->
+      if Int.abs (v1.instr_counter - v2.instr_counter) mod 2 = 0 then
+        compare v1.instr_counter v2.instr_counter
+      else List.compare compare l1 l2 )
   | Default, Default -> 0
   | Default, _ -> -1
   | _, Default -> 1
-  | _ -> 0 (* à modifier *)
+  | Random x, Random y -> compare x y
+  | _ -> assert false

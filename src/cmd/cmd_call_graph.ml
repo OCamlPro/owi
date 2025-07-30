@@ -154,13 +154,13 @@ let rec find_tables acc (e : binary instr Annotated.t) =
   | _ -> acc
 
 let find_tables_to_remove export_tables funcs =
-  List.map (fun (x : Binary.export) -> x.id) export_tables
-  @ Array.fold_left
-      (fun acc f ->
-        match f with
-        | Runtime.Local x -> List.fold_left find_tables acc x.body.raw
-        | _ -> acc )
-      [] funcs
+  let l = List.map (fun (x : Binary.export) -> x.id) export_tables in
+  Array.fold_left
+    (fun acc f ->
+      match f with
+      | Runtime.Local x -> List.fold_left find_tables acc x.body.raw
+      | _ -> acc )
+    l funcs
 
 let rec remove_tables (l1 : (int * Binary.elem) list) l2 acc =
   match (l1, l2) with
@@ -195,24 +195,27 @@ let build_call_graph call_graph_mode (m : Binary.Module.t) entry_point =
   let funcs = m.func in
 
   let tables =
-    let elems =
-      List.filter_map
-        (fun e ->
-          match e.Binary.mode with
-          | Elem_active (Some n, _) -> Some (n, e)
-          | _ -> None )
-        (Array.to_list m.elem)
-    in
+    match call_graph_mode with
+    | Complete -> M.empty
+    | Sound ->
+      let tables =
+        let elems =
+          List.filter_map
+            (fun e ->
+              match e.Binary.mode with
+              | Elem_active (Some n, _) -> Some (n, e)
+              | _ -> None )
+            (Array.to_list m.elem)
+        in
+        let t = find_tables_to_remove m.exports.table funcs in
+        remove_tables
+          (List.sort_uniq (fun x y -> compare (fst x) (fst y)) elems)
+          (List.sort_uniq compare t) []
+      in
+      let env, _ = Array.fold_left build_env (M.empty, 0) m.global in
 
-    let t = find_tables_to_remove m.exports.table funcs in
-    remove_tables
-      (List.sort_uniq (fun x y -> compare (fst x) (fst y)) elems)
-      (List.sort_uniq compare t) []
+      eval_tables tables env
   in
-
-  let env, _ = Array.fold_left build_env (M.empty, 0) m.global in
-
-  let tables = eval_tables tables env in
 
   let l, _ =
     Array.fold_left (build_graph call_graph_mode tables funcs) ([], 0) funcs
