@@ -918,13 +918,13 @@ module Make (P : Interpret_intf.P) :
       let* b, stack =
         let counter_next_true =
           match e1.raw with
-          | [] -> Atomic.make Int.max_int
-          | h :: _ -> h.Annotated.instr_counter
+          | [] -> Int.max_int
+          | h :: _ -> Atomic.get h.Annotated.instr_counter
         in
         let counter_next_false =
           match e2.raw with
-          | [] -> Atomic.make Int.max_int
-          | h :: _ -> h.Annotated.instr_counter
+          | [] -> Int.max_int
+          | h :: _ -> Atomic.get h.Annotated.instr_counter
         in
         let prio_true =
           Prio.from_annotated counter_next_true !(instr.Annotated.d_true)
@@ -947,13 +947,13 @@ module Make (P : Interpret_intf.P) :
     | Br (Raw i) -> State.branch state i
     | Br_if (Raw i) ->
       let* b, stack =
-        let counter_next_false =
+        let counter_next_false, counter_next_true =
           match state.pc.raw with
-          | [] -> Atomic.make Int.max_int
-          | h :: _ -> h.Annotated.instr_counter
+          | [] -> Int.max_int, Atomic.get instr.Annotated.instr_counter -1
+          | h :: _ -> let v = Atomic.get h.Annotated.instr_counter in v , Atomic.get instr.Annotated.instr_counter -1 -  v
         in
         let prio_true =
-          Prio.from_annotated (Atomic.make Int.max_int) !(instr.Annotated.d_true)
+          Prio.from_annotated counter_next_true !(instr.Annotated.d_true)
         in
         let prio_false =
           Prio.from_annotated counter_next_false !(instr.Annotated.d_false)

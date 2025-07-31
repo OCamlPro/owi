@@ -10,6 +10,6 @@ val random : t
 
 val default : t
 
-val from_annotated : int Atomic.t -> int array option -> t
+val from_annotated : int -> int array option -> t
 
 val compare : t -> t -> int
