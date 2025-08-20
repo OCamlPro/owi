@@ -22,6 +22,41 @@ module M :
 
   let cov_lock = Mutex.create ()
 
+  let in_seacoral_store =
+    let seacoral_store =
+      Option.bind (Bos.OS.Env.var "SC_STORE_MAP_FILE") @@ fun path ->
+      let seacoral_size =
+        match Bos.OS.Env.var "SC_LABEL_COUNT" with
+        | Some s -> begin
+          match int_of_string_opt s with
+          | Some i -> i
+          | None -> Fmt.failwith "SC_LABEL_COUNT should be a number"
+        end
+        | None ->
+          Fmt.failwith "SC_STORE_MAP_FILE specified but not SC_LABEL_COUNT"
+      in
+      (* we should only read from this fd, but we have to open it in O_RDWR
+         because map_file needs it for resizing the array to fit seacoral_size elements *)
+      let fd = Unix.openfile path [ O_RDWR ] 0o600 in
+      at_exit (fun () -> Unix.close fd);
+      let res =
+        Unix.map_file fd Int8_unsigned Bigarray.c_layout true
+          [| seacoral_size |]
+      in
+      Logs.app (fun m -> m "SC_STORE_MAP_FILE successfully mapped : %s" path);
+      Some (fd, res)
+    in
+    fun i ->
+      match seacoral_store with
+      | None -> false
+      | Some (fd, arr) -> (
+        try
+          Unix.lockf fd F_RLOCK 0;
+          let lbl_status = Bigarray.Genarray.get arr [| Int32.to_int i |] in
+          Unix.lockf fd F_ULOCK 0;
+          lbl_status <> 0
+        with Invalid_argument _ -> false )
+
   let assume (i : Value.int32) : unit Choice.t =
     Choice.assume @@ Value.I32.to_bool i
 
@@ -95,32 +130,30 @@ module M :
   let cov_label_is_covered id =
     let open Choice in
     let* id = select_i32 id in
-    return @@ Value.const_i32
-    @@ Mutex.protect cov_lock (fun () ->
-         if Hashtbl.mem covered_labels id then 1l else 0l )
+    return @@ Value.const_i32 @@ Mutex.protect cov_lock
+    @@ fun () ->
+    if Hashtbl.mem covered_labels id || in_seacoral_store id then 1l else 0l
 
   let cov_label_set m id ptr =
     let open Choice in
-    let id = Smtml.Expr.simplify id in
-    let ptr = Smtml.Expr.simplify ptr in
-    match (Smtml.Expr.view id, Smtml.Expr.view ptr) with
+    let open Smtml in
+    let id = Expr.simplify id in
+    let ptr = Expr.simplify ptr in
+    match (Expr.view id, Expr.view ptr) with
     | Val (Bitv id), Val (Bitv ptr)
-      when Smtml.Bitvector.numbits id = 32 && Smtml.Bitvector.numbits ptr = 32
-      ->
-      let id = Smtml.Bitvector.to_int32 id in
-      let ptr = Smtml.Bitvector.to_int32 ptr in
-      Mutex.protect cov_lock (fun () ->
-        if Hashtbl.mem covered_labels id then abort ()
-        else
-          let* chars = make_str m [] ptr in
-          let str = String.init (Array.length chars) (Array.get chars) in
-          Hashtbl.add covered_labels id str;
-          let* () = add_label (Int32.to_int id, str) in
-          return () )
+      when Bitvector.numbits id = 32 && Bitvector.numbits ptr = 32 ->
+      let id = Bitvector.to_int32 id in
+      let ptr = Bitvector.to_int32 ptr in
+      Mutex.protect cov_lock @@ fun () ->
+      if Hashtbl.mem covered_labels id || in_seacoral_store id then abort ()
+      else
+        let* chars = make_str m [] ptr in
+        let str = String.init (Array.length chars) (Array.get chars) in
+        Hashtbl.add covered_labels id str;
+        add_label (Int32.to_int id, str)
     | _ ->
       Logs.err (fun m ->
-        m "cov_label_set: invalid type id:%a ptr:%a" Smtml.Expr.pp id
-          Smtml.Expr.pp ptr );
+        m "cov_label_set: invalid type id:%a ptr:%a" Expr.pp id Expr.pp ptr );
       assert false
 
   let open_scope m ptr =
