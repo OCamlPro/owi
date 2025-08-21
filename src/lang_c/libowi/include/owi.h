@@ -56,7 +56,7 @@ __attribute__((import_module("owi"), import_name("range_symbol"))) int owi_range
 __attribute__((import_module("owi"), import_name("alloc"))) void *owi_malloc(void *, unsigned int);
 __attribute__((import_module("owi"), import_name("print_char"))) void owi_print_char(int);
 
-__attribute__((import_module("owi"), import_name("cov_label_is_covered"))) void owi_label_is_covered(int id);
+__attribute__((import_module("owi"), import_name("cov_label_is_covered"))) int owi_label_is_covered(int id);
 __attribute__((import_module("owi"), import_name("cov_label_set"))) void owi_label_set(int id, char * name);
 
 #ifdef __OWI_INTERNALS
