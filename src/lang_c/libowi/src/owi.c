@@ -57,3 +57,15 @@ long long owi_long_long(void) {
 unsigned long long owi_unsigned_long_long(void) {
   return magic_size_unsigned(unsigned long long);
 }
+
+__int128 owi_int128(void) {
+  int64_t high = owi_int64();
+  int64_t low = owi_int64();
+  return (__int128_t) high << 64 | (__uint128_t) low;
+}
+
+unsigned __int128 owi_uint128(void) {
+  int64_t high = owi_int64();
+  int64_t low = owi_int64();
+  return (__uint128_t) high << 64 | (__uint128_t) low;
+}
