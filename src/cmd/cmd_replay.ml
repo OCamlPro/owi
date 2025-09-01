@@ -223,7 +223,14 @@ let run_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
   let* m, link_state =
     Compile.Binary.until_link ~unsafe link_state ~name:None m
   in
-  Interpret.Concrete.modul ~timeout:None ~timeout_instr:None link_state.envs m
+  let module I = Interpret.Concrete (struct
+    let timeout = None
+
+    let timeout_instr = None
+
+    let throw_away_trap = false
+  end) in
+  I.modul link_state.envs m
 
 let parse_model replay_file =
   let* parse_fn =

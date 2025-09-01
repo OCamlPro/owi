@@ -228,10 +228,14 @@ let add_trace tree trace =
 
 let run_once link_state module_to_run (forced_values : Smtml.Model.t) =
   let backup = Concolic.backup module_to_run in
-  let result =
-    Interpret.Concolic.modul ~timeout:None ~timeout_instr:None
-      link_state.Link.envs module_to_run
-  in
+  let module I = Interpret.Concolic (struct
+    let timeout = None
+
+    let timeout_instr = None
+
+    let throw_away_trap = false
+  end) in
+  let result = I.modul link_state.Link.envs module_to_run in
   let ( result
       , Concolic_choice.
           { pc

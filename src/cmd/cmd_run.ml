@@ -24,7 +24,12 @@ let cmd ~unsafe ~timeout ~timeout_instr ~rac ~source_file =
     Compile.File.until_link ~unsafe ~rac ~srac:false ~name link_state
       source_file
   in
-  let+ () =
-    Interpret.Concrete.modul ~timeout ~timeout_instr link_state.envs m
-  in
+  let module I = Interpret.Concrete (struct
+    let timeout = timeout
+
+    let timeout_instr = timeout_instr
+
+    let throw_away_trap = false
+  end) in
+  let+ () = I.modul link_state.envs m in
   ()

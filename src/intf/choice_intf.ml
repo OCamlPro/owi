@@ -24,6 +24,8 @@ module type Base = sig
   val ( let+ ) : 'a t -> ('a -> 'b) -> 'b t
 
   val get_pc : unit -> Smtml.Expr.Set.t t
+
+  val assume : V.bool -> unit t
 end
 
 module type Complete = sig
@@ -34,8 +36,6 @@ module type Complete = sig
   type 'a run_result
 
   val assertion : V.bool -> unit t
-
-  val assume : V.bool -> unit t
 
   val with_thread : (thread -> 'b) -> 'b t
 

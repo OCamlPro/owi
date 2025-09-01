@@ -23,3 +23,5 @@ let trap t = Error t
 let run m = m
 
 let get_pc () = return Smtml.Expr.Set.empty
+
+let assume _ = assert false
