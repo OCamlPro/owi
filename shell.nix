@@ -1,4 +1,7 @@
-{ pkgs ? import <nixpkgs> { } }:
+{ pkgs ? import (builtins.fetchTarball {
+    url = "https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz";
+  }) {}
+}:
 
 let
   ocamlPackages = pkgs.ocaml-ng.ocamlPackages_5_3.overrideScope (self: super: {
