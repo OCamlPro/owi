@@ -3,8 +3,11 @@
 (map_workspace_root false)
 
 (using menhir 2.1)
+
 (using dune_site 0.1)
+
 (using mdx 0.2)
+
 (using directory-targets 0.1)
 
 (cram enable)
@@ -31,20 +34,12 @@
  (name owi)
  (synopsis
   "Symbolic execution engine and WebAssembly toolkit for research and engineering")
- (description "\
-Owi is an open-source framework for symbolic execution and WebAssembly analysis.
-It supports the analysis of programs written in WebAssembly, C, C++, Rust, and Zig.
-Owi provides symbolic execution for bug finding, solver-aided programming, test case generation, and program verification.
-
-The framework includes tools for formatting, optimizing, interpreting, validating, and translating WebAssembly modules.
-It also provides a generator for random valid WebAssembly modules.
-
-An OCaml library is available to embed WebAssembly modules and import OCaml functions in a type-safe manner."
- )
+ (description
+  "Owi is an open-source framework for symbolic execution and WebAssembly analysis.\nIt supports the analysis of programs written in WebAssembly, C, C++, Rust, and Zig.\nOwi provides symbolic execution for bug finding, solver-aided programming, test case generation, and program verification.\n\nThe framework includes tools for formatting, optimizing, interpreting, validating, and translating WebAssembly modules.\nIt also provides a generator for random valid WebAssembly modules.\n\nAn OCaml library is available to embed WebAssembly modules and import OCaml functions in a type-safe manner.")
  (tags
   (owi ocaml webassembly wasm interpreter compiler))
  (depends
-   ;; build
+  ;; build
   (ocaml
    (>= 5.2))
   (menhir
@@ -62,34 +57,41 @@ An OCaml library is available to embed WebAssembly modules and import OCaml func
   ;;conf-zig
   ;; runtime
   (bos
-    (>= 0.2.1))
+   (>= 0.2.1))
   (cmdliner
-    (>= 1.3.0))
+   (>= 1.3.0))
   (digestif
-    (>= 1.2.0))
+   (>= 1.2.0))
   (logs
-    (>= 0.8.0))
+   (>= 0.8.0))
   (ocaml_intrinsics
-    (>= "v0.16.1"))
+   (>= "v0.16.1"))
   (prelude
-    (>= 0.5))
+   (>= 0.5))
   (processor
-    (>= 0.2))
+   (>= 0.2))
   (sedlex
-    (>= 3.3))
+   (>= 3.3))
   (smtml
-    (>= 0.8.0))
+   (>= 0.10.0))
   (uutf
-    (>= 1.0.3))
-  (xmlm (>= 1.4.0))
+   (>= 1.0.3))
+  (xmlm
+   (>= 1.4.0))
   ;; doc
-  (odoc (and (>= 3.0.0) :with-doc))
+  (odoc
+   (and
+    (>= 3.0.0)
+    :with-doc))
   ;; test
   (mdx
    (and
     :with-test
     (>= 2.1)))
-  (frama-c (and (>= 29.0) :with-test))
+  (frama-c
+   (and
+    (>= 29.0)
+    :with-test))
   (z3 :with-test)
   ;; dev
   (bisect_ppx
@@ -102,6 +104,8 @@ An OCaml library is available to embed WebAssembly modules and import OCaml func
   (ocb
    (and
     (>= 0.1)
-    :with-dev-setup))
-  )
- (sites (share c_files) (share rust_files) (share zig_files)))
+    :with-dev-setup)))
+ (sites
+  (share c_files)
+  (share rust_files)
+  (share zig_files)))
