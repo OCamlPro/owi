@@ -25,6 +25,7 @@ pkgs.mkShell {
   nativeBuildInputs = with pkgs.ocaml-ng.ocamlPackages; [
     dune_3
     findlib
+    bisect_ppx
     pkgs.framac
     pkgs.mdbook
     mdbookTabs
