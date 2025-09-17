@@ -39,12 +39,12 @@ jobs:
           nix-shell --run "
             dune build @doc &&
             mv _build/default/_doc/_html doc/api &&
-            BISECT_FILE=$(pwd)/bisect dune runtest --force --instrument-with bisect_ppx &&
+            BISECT_FILE=\$(pwd)/bisect dune runtest --force --instrument-with bisect_ppx &&
             bisect-ppx-report html -o doc/coverage &&
             label=coverage &&
-            percentage=$(bisect-ppx-report summary | sed -E 's/.*\((..).*/\1/g') &&
-            color=$(printf "%x%x%x" $((255-$percentage)) $((155+$percentage)) 85) &&
-            ocb --style classic --label $label --status $percentage'%' --color $color > doc/coverage/badge.svg &&
+            percentage=\$(bisect-ppx-report summary | sed -E 's/.*\\((..).*/\\1/g') &&
+            color=\$(printf '%x%x%x' \$((255-\$percentage)) \$((155+\$percentage)) 85) &&
+            ocb --style classic --label \$label --status \${percentage}'%' --color \$color > doc/coverage/badge.svg &&
             cd doc &&
             mdbook build &&
             mv api book/api &&
