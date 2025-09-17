@@ -12,11 +12,7 @@ jobs:
         uses: actions/checkout@v5
         with:
           persist-credentials: false
-      - name: checkout-submodules
-        run: |
-          git submodule update --init test/script/reference
-          git submodule update --init test/c/collections-c/files
-          mv .git .git.tmp # prevent opam from checking-out submodules
+          submodules: recursive
       - name: setup-ocaml
         uses: ocaml/setup-ocaml@v3
         with:
@@ -46,7 +42,6 @@ jobs:
           mv _build/default/_doc/_html doc/api
       - name: coverage
         run: |
-          mv .git.tmp .git # bring it back, we won't call opam anymore from now on
           BISECT_FILE=$(pwd)/bisect opam exec -- dune runtest --force --instrument-with bisect_ppx
           opam exec -- bisect-ppx-report html -o doc/coverage
       - name: coverage-badge
