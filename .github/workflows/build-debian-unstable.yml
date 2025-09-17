@@ -1,4 +1,4 @@
-name: build-debian-unstable-ocaml-latest
+name: build-debian-unstable
 on:
   pull_request:
     branches:
@@ -59,8 +59,7 @@ jobs:
           opam install . --deps-only --with-test --with-doc --with-dev-setup
 
           # Fetching submodules (done after calling opam to prevent it from checking them out)
-          git submodule update --init test/script/reference
-          git submodule update --init test/c/collections-c/files
+          git submodule update --init --recursive
 
           # Build and test
           dune build @install

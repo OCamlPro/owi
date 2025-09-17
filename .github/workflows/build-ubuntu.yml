@@ -14,16 +14,12 @@ jobs:
       matrix:
         ocaml-compiler:
           - "5.3"
-          - "5.2"
     runs-on: ubuntu-latest
     steps:
       - name: checkout
         uses: actions/checkout@v5
-      - name: checkout-submodules
-        run: |
-          git submodule update --init test/script/reference
-          git submodule update --init test/c/collections-c/files
-          mv .git .git.tmp # prevents opam from checking-out submodules
+        with:
+          submodules: recursive
       - name: cache
         id: cache-opam
         uses: actions/cache@v4
@@ -59,7 +55,6 @@ jobs:
       - name: build
         run: |
           opam exec -- dune build @install
-          mv .git.tmp .git # bring it back, we won't call opam anymore from now on
           opam exec -- dune runtest
           ODOC_WARN_ERROR=true opam exec -- dune build @doc 2> output.txt || true
           $(exit $(wc -l output.txt | cut -d " " -f1))
