@@ -42,7 +42,7 @@ jobs:
           rustup target add wasm32-unknown-unknown
           brew update
           brew upgrade
-          brew install pkgconf zig # TODO: remove zig once the conf-zig package works
+          brew install zig # TODO: remove zig once the conf-zig package works
           opam install . --depext-only --with-test --with-doc
       - name: setup
         if: steps.cache-opam.outputs.cache-hit != 'true'
@@ -51,7 +51,7 @@ jobs:
           opam clean --switch-cleanup
       - name: build
         run: |
-          export PATH="$(brew --prefix llvm@15)/bin/:$PATH" # macossucks
+          export PATH="$(brew --prefix llvm)/bin/:$PATH" # macossucks
           opam exec -- dune build @install
           opam exec -- dune runtest
           ODOC_WARN_ERROR=true opam exec -- dune build @doc 2> output.txt || true
