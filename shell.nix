@@ -4,17 +4,6 @@
 }:
 
 let
-  ocamlPackages = pkgs.ocaml-ng.ocamlPackages_5_3.overrideScope (self: super: {
-    smtml = super.smtml.overrideAttrs (oldsmtml: {
-      src = pkgs.fetchFromGitHub {
-        owner = "formalsec";
-        repo = "smtml";
-        rev = "6f98c49bcbb6a8be36e29eaa1e2191456e67503d";
-        fetchSubmodules = true;
-        hash = "sha256-1/P8zQIUBy17dA8ZdrzIEy7N5LAvIykOE+7WGX/ma1M=";
-      };
-    });
-  });
   mdbookTabs = pkgs.rustPlatform.buildRustPackage rec {
     pname = "cargo-mdbook-tabs";
     version = "v0.2.3";
@@ -33,7 +22,7 @@ in
 pkgs.mkShell {
   name = "owi-dev-shell";
   dontDetectOcamlConflicts = true;
-  nativeBuildInputs = with ocamlPackages; [
+  nativeBuildInputs = with pkgs.ocaml-ng.ocamlPackages; [
     dune_3
     findlib
     pkgs.framac
@@ -53,7 +42,7 @@ pkgs.mkShell {
     pkgs.zig
     pkgs.makeWrapper
   ];
-  buildInputs = with ocamlPackages; [
+  buildInputs = with pkgs.ocaml-ng.ocamlPackages; [
     bos
     cmdliner
     crowbar
