@@ -3,63 +3,64 @@ on:
   push:
     branches:
       - main
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    container:
+      image: nixos/nix:latest
     steps:
-      - name: checkout
-        uses: actions/checkout@v5
-        with:
-          persist-credentials: false
-          submodules: recursive
-      - name: setup-ocaml
-        uses: ocaml/setup-ocaml@v3
-        with:
-          ocaml-compiler: "5.3"
-          dune-cache: false
-          opam-pin: true
-          allow-prerelease-opam: false
-      - name: depext
-        run: |
-          # Installs rust-wasm
-          rustup update
-          rustup target add wasm32-unknown-unknown
-          sudo apt update
-          cargo install mdbook mdbook-tabs
-          wget https://ziglang.org/download/0.14.0/zig-linux-x86_64-0.14.0.tar.xz # TODO: remove this and the following once the conf-zig package works
-          mkdir zig
-          tar xf zig-*.tar.xz -C zig --strip-components 1
-          sudo mv zig/* /usr/local/bin/
-          opam install . --depext-only --with-test --with-doc
-      - name: setup-deploy
-        run: |
-          opam install . --deps-only --with-test --with-doc --with-dev-setup
-      - name: api
-        run: |
-          touch doc/.nojekyll
-          opam exec -- dune build @doc
-          mv _build/default/_doc/_html doc/api
-      - name: coverage
-        run: |
-          BISECT_FILE=$(pwd)/bisect opam exec -- dune runtest --force --instrument-with bisect_ppx
-          opam exec -- bisect-ppx-report html -o doc/coverage
-      - name: coverage-badge
-        run: |
-          label=coverage
-          percentage=$(opam exec -- bisect-ppx-report summary | sed -E 's/.*\((..).*/\1/g')
-          color=$(printf "%x%x%x" $((255-$percentage)) $((155+$percentage)) 85)
-          opam exec -- ocb --style classic --label $label --status $percentage'%' --color $color > doc/coverage/badge.svg
-      - name: book
-        run: |
-          cd doc
-          mdbook build
-          mv api book/api
-          mv coverage book/coverage
       - name: deploy
-        uses: JamesIves/github-pages-deploy-action@v4.7.3
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH: gh-pages
-          FOLDER: doc/book/
-          CLEAN: true
+        run: |
+          set -x
+
+          # GitHub sucks
+          export HOME=/root
+          cd $HOME
+
+          git clone https://github.com/${{ github.repository }}.git
+          cd $(basename ${{ github.repository }})
+
+          echo "github.event_name is ${{ github.event_name }}"
+
+          # fetch the current PR/branch
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "Fetching PR branch"
+            git fetch origin pull/${{ github.event.pull_request.number }}/head:pr-${{ github.event.pull_request.number }}
+            git checkout pr-${{ github.event.pull_request.number }}
+          else
+            echo "Fetching current branch"
+            git checkout ${{ github.ref_name }}
+          fi
+
+          git submodule update --init --recursive
+
+          touch doc/.nojekyll
+
+          nix-shell --run "
+            dune build @doc &&
+            mv _build/default/_doc/_html doc/api &&
+            BISECT_FILE=$(pwd)/bisect dune runtest --force --instrument-with bisect_ppx &&
+            bisect-ppx-report html -o doc/coverage &&
+            label=coverage &&
+            percentage=$(bisect-ppx-report summary | sed -E 's/.*\((..).*/\1/g') &&
+            color=$(printf "%x%x%x" $((255-$percentage)) $((155+$percentage)) 85) &&
+            ocb --style classic --label $label --status $percentage'%' --color $color > doc/coverage/badge.svg &&
+            cd doc &&
+            mdbook build &&
+            mv api book/api &&
+            mv coverage book/coverage
+          "
+
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} gh-pages
+          cd gh-pages
+          git checkout gh-pages || git checkout --orphan gh-pages
+
+          rm -rf ./*
+          cp -r ../doc/book/* ./
+
+          git add .
+          git commit -m "Deploy docs from ${GITHUB_SHA}" || echo "No changes to commit"
+          git push origin gh-pages
