@@ -38,6 +38,7 @@
             const path_to_root = "";
             const default_light_theme = "frappe";
             const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc.js"></script>
@@ -94,10 +95,13 @@
                 sidebar = sidebar || 'visible';
             } else {
                 sidebar = 'hidden';
+                sidebar_toggle.checked = false;
             }
-            sidebar_toggle.checked = sidebar === 'visible';
-            html.classList.remove('sidebar-visible');
-            html.classList.add("sidebar-" + sidebar);
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
         </script>
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
@@ -148,7 +152,12 @@
 
                 <div id="search-wrapper" class="hidden">
                     <form id="searchbar-outer" class="searchbar-outer">
-                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
                     </form>
                     <div id="searchresults-outer" class="searchresults-outer hidden">
                         <div id="searchresults-header" class="searchresults-header"></div>
@@ -606,8 +615,8 @@ export fn check(x: i32, y: i32) void {
 <pre><code class="language-sh">$ owi c ./mean.c --entry-point=check --invoke-with-symbols --no-assert-failure-expression-printing
 owi: [ERROR] Assert failure
 model {
-  symbol symbol_0 i32 -990380032
-  symbol symbol_1 i32 -2145908736
+  symbol symbol_0 i32 -1744830464
+  symbol symbol_1 i32 -1744830464
 }
 owi: [ERROR] Reached problem!
 [13]
@@ -628,8 +637,8 @@ owi: [ERROR] Reached problem!
 <pre><code class="language-sh">$ owi rust ./mean.rs --entry-point=check --invoke-with-symbols -w1 --fail-on-assertion-only --no-assert-failure-expression-printing --deterministic-result-order
 owi: [ERROR] Assert failure
 model {
-  symbol symbol_0 i32 -1052888556
-  symbol symbol_1 i32 -808758763
+  symbol symbol_0 i32 -1470102455
+  symbol symbol_1 i32 908070184
 }
 
 owi: [ERROR] Reached problem!
@@ -640,8 +649,8 @@ owi: [ERROR] Reached problem!
 <pre><code class="language-sh">$ owi zig ./mean.zig --entry-point=check --invoke-with-symbols -w1 --fail-on-assertion-only --no-assert-failure-expression-printing --deterministic-result-order
 owi: [ERROR] Assert failure
 model {
-  symbol symbol_0 i32 -1023139840
-  symbol symbol_1 i32 -1073471487
+  symbol symbol_0 i32 -1004015877
+  symbol symbol_1 i32 -405288734
 }
 
 owi: [ERROR] Reached problem!
@@ -1908,8 +1917,9 @@ OPTIONS
        --rac
            runtime assertion checking mode
 
-       -s VAL, --solver=VAL (absent=Z3)
-           SMT solver to use
+       -s VALUE, --solver=VALUE (absent=Z3)
+           SMT solver to use. VALUE must be one of the 5 available solvers:
+           Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo
 
        --srac
            symbolic runtime assertion checking mode
@@ -2046,8 +2056,9 @@ OPTIONS
        --rac
            runtime assertion checking mode
 
-       -s VAL, --solver=VAL (absent=Z3)
-           SMT solver to use
+       -s VALUE, --solver=VALUE (absent=Z3)
+           SMT solver to use. VALUE must be one of the 5 available solvers:
+           Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo
 
        --srac
            symbolic runtime assertion checking mode
@@ -2165,8 +2176,9 @@ OPTIONS
        --rac
            runtime assertion checking mode
 
-       -s VAL, --solver=VAL (absent=Z3)
-           SMT solver to use
+       -s VALUE, --solver=VALUE (absent=Z3)
+           SMT solver to use. VALUE must be one of the 5 available solvers:
+           Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo
 
        --srac
            symbolic runtime assertion checking mode
@@ -2405,8 +2417,9 @@ OPTIONS
        -q, --quiet
            Be quiet. Takes over -v and --verbosity.
 
-       -s VAL, --solver=VAL (absent=Z3)
-           SMT solver to use
+       -s VALUE, --solver=VALUE (absent=Z3)
+           SMT solver to use. VALUE must be one of the 5 available solvers:
+           Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo
 
        -u, --unsafe
            skip typechecking pass
@@ -2683,8 +2696,9 @@ OPTIONS
        --rac
            runtime assertion checking mode
 
-       -s VAL, --solver=VAL (absent=Z3)
-           SMT solver to use
+       -s VALUE, --solver=VALUE (absent=Z3)
+           SMT solver to use. VALUE must be one of the 5 available solvers:
+           Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo
 
        --srac
            symbolic runtime assertion checking mode
@@ -2865,8 +2879,9 @@ OPTIONS
        --rac
            runtime assertion checking mode
 
-       -s VAL, --solver=VAL (absent=Z3)
-           SMT solver to use
+       -s VALUE, --solver=VALUE (absent=Z3)
+           SMT solver to use. VALUE must be one of the 5 available solvers:
+           Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo
 
        --srac
            symbolic runtime assertion checking mode
@@ -3244,8 +3259,9 @@ OPTIONS
        --rac
            runtime assertion checking mode
 
-       -s VAL, --solver=VAL (absent=Z3)
-           SMT solver to use
+       -s VALUE, --solver=VALUE (absent=Z3)
+           SMT solver to use. VALUE must be one of the 5 available solvers:
+           Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo
 
        --srac
            symbolic runtime assertion checking mode
@@ -3687,6 +3703,7 @@ along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
             window.setTimeout(window.print, 100);
         });
         </script>
+
 
     </div>
     </body>

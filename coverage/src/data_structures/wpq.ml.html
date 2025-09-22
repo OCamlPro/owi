@@ -19,7 +19,6 @@
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:20.59%"></span>
-      <span class="unvisited" style="top:41.18%"></span>
       <span class="unvisited" style="top:44.12%"></span>
       <span class="unvisited" style="top:47.06%"></span>
       <span class="unvisited" style="bottom:47.06%"></span>
@@ -49,7 +48,7 @@
 <a id="L11"></a><span > </span>
 <a id="L12"></a><span > </span>
 <a id="L13"></a><span > </span>
-<a id="L14"></a><span class="unvisited"> </span>
+<a id="L14"></a><span > </span>
 <a id="L15"></a><span class="unvisited"> </span>
 <a id="L16"></a><span class="unvisited"> </span>
 <a id="L17"></a><span > </span>
@@ -122,7 +121,7 @@ let make_pledge = Synchronizer.make_pledge
 let end_pledge = Synchronizer.end_pledge
 
 let rec read_as_seq (q : 'a t) ~finalizer : 'a Seq.t =
- <span data-count="0">f</span>un () -&gt;
+ fun () -&gt;
   <span data-count="0">m</span>atch pop q false with
   | <span data-count="0">N</span>one -&gt;
     finalizer ();

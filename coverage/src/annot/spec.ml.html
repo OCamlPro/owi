@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>spec.ml &mdash; Coverage report</title>
-    <meta name="description" content="30.04% coverage in src/annot/spec.ml">
+    <meta name="description" content="30.57% coverage in src/annot/spec.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">src/annot/</span>spec.ml
         </a>
       </h1>
-      <h2>30.04%</h2>
+      <h2>30.57%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:32.11%"></span>
@@ -339,7 +339,7 @@
 <a id="L179"></a><span class="unvisited"> </span>
 <a id="L180"></a><span > </span>
 <a id="L181"></a><span > </span>
-<a id="L182"></a><span > </span>
+<a id="L182"></a><span class="visited"> </span>
 <a id="L183"></a><span class="visited"> </span>
 <a id="L184"></a><span class="visited"> </span>
 <a id="L185"></a><span class="unvisited"> </span>
@@ -467,7 +467,7 @@
 <a id="L307"></a><span > </span>
 <a id="L308"></a><span > </span>
 <a id="L309"></a><span > </span>
-<a id="L310"></a><span > </span>
+<a id="L310"></a><span class="visited"> </span>
 <a id="L311"></a><span > </span>
 <a id="L312"></a><span class="unvisited"> </span>
 <a id="L313"></a><span class="unvisited"> </span>
@@ -1104,7 +1104,7 @@ let rec pp_prop : type a. Format.formatter -&gt; a prop -&gt; unit =
     | <span data-count="0">N</span>one -&gt;
       pf fmt "@[&lt;hv 2&gt;(%a %a@ %a)@]" pp_binder b pp_binder_type bt pp_prop pr1 )
 
-let valid_text_indice_char = function
+let valid_text_indice_char = <span data-count="188">f</span>unction
   | <span data-count="16">'</span>0' .. '9'
   | <span data-count="117">'</span>a' .. 'z'
   | <span data-count="0">'</span>A' .. 'Z'
@@ -1232,7 +1232,7 @@ let rec parse_term =
 
 let rec parse_prop =
   let open Sexp in
-  function
+  <span data-count="35">f</span>unction
   (* Const *)
   | <span data-count="0">A</span>tom "true" -&gt; ok @@ Const true
   | <span data-count="0">A</span>tom "false" -&gt; ok @@ Const false

@@ -113,13 +113,13 @@ type 'a t =
   ; value : 'a
   }
 
-let get v = <span data-count="35851">v</span>.value
+let get v = <span data-count="35850">v</span>.value
 
 let get_index v = <span data-count="27901">v</span>.index
 
 let map f v = <span data-count="0">{</span> index = v.index; value = <span data-count="0">f</span> v.value }
 
-let return index value = <span data-count="35376">{</span> index; value }
+let return index value = <span data-count="35375">{</span> index; value }
 
 let has_index idx { index; _ } = <span data-count="178">i</span>dx = index
 
@@ -133,7 +133,7 @@ let list_to_array l =
     (fun { index = i1; value = _ } { index = i2; value = _ } -&gt;
       <span data-count="20163">I</span>nt.compare i1 i2 )
     l
-  |&gt; <span data-count="25312">L</span>ist.map (fun { value; _ } -&gt; <span data-count="18401">v</span>alue)
+  |&gt; <span data-count="25312">L</span>ist.map (fun { value; _ } -&gt; <span data-count="18400">v</span>alue)
   |&gt; <span data-count="25312">A</span>rray.of_list
 
 let pp pp_v fmt { index; value } =

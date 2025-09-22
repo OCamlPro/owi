@@ -259,7 +259,7 @@ let modul m =
   let add_table =
     let seen = Hashtbl.create 512 in
     <span data-count="3710">f</span>unction
-    | <span data-count="400">N</span>one -&gt; Ok ()
+    | <span data-count="399">N</span>one -&gt; Ok ()
     | <span data-count="366">S</span>ome id -&gt;
       if Hashtbl.mem seen id then <span data-count="3">E</span>rror (`Duplicate_table id)
       else <span data-count="363">O</span>k (Hashtbl.replac<span data-count="363">e</span> seen id ())
@@ -276,7 +276,7 @@ let modul m =
   let+ (_env : env) =
     list_fold_lef<span data-count="3710">t</span>
       (fun env field -&gt;
-        <span data-count="20236">m</span>atch field with
+        <span data-count="20235">m</span>atch field with
         | <span data-count="6624">M</span>Export _e -&gt; Ok env
         | <span data-count="7149">M</span>Func _f -&gt; Ok { env with funcs = true }
         | <span data-count="260">M</span>Start _start -&gt;
@@ -311,9 +311,9 @@ let modul m =
         | <span data-count="730">M</span>Global { id; _ } -&gt;
           let+ () = add_globa<span data-count="730">l</span> id in
           <span data-count="726">{</span> env with globals = true }
-        | <span data-count="679">M</span>Table (id, _) -&gt;
-          let+ () = add_tabl<span data-count="679">e</span> id in
-          <span data-count="677">{</span> env with tables = true } )
+        | <span data-count="678">M</span>Table (id, _) -&gt;
+          let+ () = add_tabl<span data-count="678">e</span> id in
+          <span data-count="676">{</span> env with tables = true } )
       (empty_en<span data-count="3710">v</span> ()) m.fields
   in
 

@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>float64.ml &mdash; Coverage report</title>
-    <meta name="description" content="95.89% coverage in src/primitives/float64.ml">
+    <meta name="description" content="95.90% coverage in src/primitives/float64.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">src/primitives/</span>float64.ml
         </a>
       </h1>
-      <h2>95.89%</h2>
+      <h2>95.90%</h2>
     </div>
     <div id="navbar">
       <span class="some-visited" style="bottom:31.18%"></span>
@@ -792,13 +792,13 @@ let neg_nan = 0xfff8_0000_0000_0000L
 
 let bare_nan = 0x7ff0_0000_0000_0000L
 
-let to_hex_string = Fmt.st<span data-count="879">r</span> "%Lx"
+let to_hex_string = Fmt.st<span data-count="880">r</span> "%Lx"
 
 type t = Int64.t
 
-let pos_inf = Int64.bits_of_floa<span data-count="879">t</span> (1.0 /. 0.0)
+let pos_inf = Int64.bits_of_floa<span data-count="880">t</span> (1.0 /. 0.0)
 
-let neg_inf = Int64.bits_of_floa<span data-count="879">t</span> (-<span data-count="879">.</span>(1.0 /. 0.0))
+let neg_inf = Int64.bits_of_floa<span data-count="880">t</span> (-<span data-count="880">.</span>(1.0 /. 0.0))
 
 let of_float = Int64.bits_of_float
 
@@ -806,7 +806,7 @@ let to_float = Int64.float_of_bits
 
 let of_bits x = <span data-count="628">x</span>
 
-let to_bits x = <span data-count="2408">x</span>
+let to_bits x = <span data-count="2409">x</span>
 
 let is_inf x = <span data-count="12410">I</span>nt64.e<span data-count="12410">q</span> x pos_in<span data-count="10">f</span> || Int64.eq x neg_inf
 
@@ -863,7 +863,7 @@ let unary op x =
   <span data-count="157">l</span>et t = op (to_floa<span data-count="157">t</span> x) in
   <span data-count="157">i</span>f not @@ Float.is_na<span data-count="157">n</span> t then <span data-count="133">o</span>f_float t else <span data-count="24">d</span>etermine_unary_nan x
 
-let zero = of_floa<span data-count="879">t</span> 0.0
+let zero = of_floa<span data-count="880">t</span> 0.0
 
 let add x y = <span data-count="12486">b</span>inary x ( +. ) y
 
@@ -977,7 +977,7 @@ let ge x y =
  * Compare mantissa of two floats in string representation (hex or dec).
  * This is a gross hack to detect rounding during parsing of floats.
  *)
-let is_hex = function <span data-count="260782">'</span>0' .. '9' | <span data-count="54806">'</span>A' .. 'F' -&gt; true | <span data-count="30013">_</span> -&gt; false
+let is_hex = <span data-count="345601">f</span>unction <span data-count="260782">'</span>0' .. '9' | <span data-count="54806">'</span>A' .. 'F' -&gt; true | <span data-count="30013">_</span> -&gt; false
 
 let is_exp hex c = <span data-count="690608">C</span>har.compar<span data-count="690608">e</span> c (if hex then <span data-count="678134">'</span>P' else <span data-count="12474">'</span>E') = 0
 
@@ -1144,7 +1144,7 @@ let to_string' convert is_digit n x =
           (if Char.equal s.[String.lengt<span data-count="15">h</span> s - 1] '.' then <span data-count="0">F</span>mt.st<span data-count="0">r</span> "%s0" s else <span data-count="15">s</span>)
     )
 
-let to_string = to_string<span data-count="879">'</span> (Fmt.st<span data-count="879">r</span> "%.17g") is_digit 3
+let to_string = to_string<span data-count="880">'</span> (Fmt.st<span data-count="880">r</span> "%.17g") is_digit 3
 
 let to_hex_string x =
   <span data-count="0">i</span>f is_inf x then <span data-count="0">t</span>o_string x else <span data-count="0">t</span>o_string' (Fmt.st<span data-count="0">r</span> "%h") is_hex_digit 4 x

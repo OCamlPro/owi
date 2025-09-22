@@ -670,33 +670,33 @@ type parameters =
   }
 
 let run_file ~parameters ~source_file =
-  <span data-count="405">l</span>et { unsafe; rac; srac; entry_point; invoke_with_symbols; _ } = parameters in
-  let* m = Compile.File.until_validat<span data-count="405">e</span> ~unsafe ~rac ~srac source_file in
-  <span data-count="404">l</span>et* m = Cmd_utils.set_entry_poin<span data-count="404">t</span> entry_point invoke_with_symbols m in
-  <span data-count="403">l</span>et link_state =
+  <span data-count="406">l</span>et { unsafe; rac; srac; entry_point; invoke_with_symbols; _ } = parameters in
+  let* m = Compile.File.until_validat<span data-count="406">e</span> ~unsafe ~rac ~srac source_file in
+  <span data-count="405">l</span>et* m = Cmd_utils.set_entry_poin<span data-count="405">t</span> entry_point invoke_with_symbols m in
+  <span data-count="404">l</span>et link_state =
     let func_typ = Symbolic.Extern_func.extern_type in
     let link_state = Link.empty_state in
     let link_state =
       Link.extern_module' link_state ~name:"wasi_snapshot_preview1" ~func_typ
         Symbolic_wasm_ffi.wasi_snapshot_preview1
     in
-    <span data-count="403">l</span>et link_state =
+    <span data-count="404">l</span>et link_state =
       Link.extern_module' link_state ~name:"owi" ~func_typ
         Symbolic_wasm_ffi.symbolic_extern_module
     in
-    <span data-count="403">l</span>ink_state
+    <span data-count="404">l</span>ink_state
   in
 
   let+ m, link_state =
-    Compile.Binary.until_lin<span data-count="403">k</span> ~unsafe ~name:None link_state m
+    Compile.Binary.until_lin<span data-count="404">k</span> ~unsafe ~name:None link_state m
   in
-  <span data-count="403">l</span>et m = Symbolic.convert_module_to_run m in
-  <span data-count="403">I</span>nterpret.Symbolic.modul ~timeout:None ~timeout_instr:None link_state.envs m
+  <span data-count="404">l</span>et m = Symbolic.convert_module_to_run m in
+  <span data-count="404">I</span>nterpret.Symbolic.modul ~timeout:None ~timeout_instr:None link_state.envs m
 
 let print_bug ~model_format ~model_out_file ~id ~no_value ~no_stop_at_failure
   ~no_assert_failure_expression_printing ~with_breadcrumbs bug =
-  <span data-count="233">l</span>et pp fmt (model, labels, breadcrumbs, scoped_values) =
-    <span data-count="233">m</span>atch model_format with
+  <span data-count="235">l</span>et pp fmt (model, labels, breadcrumbs, scoped_values) =
+    <span data-count="235">m</span>atch model_format with
     | <span data-count="0">C</span>md_utils.Json -&gt;
       let json = Symbol_scope.to_json ~no_value model scoped_values in
       <span data-count="0">l</span>et labels_json =
@@ -720,14 +720,14 @@ let print_bug ~model_format ~model_out_file ~id ~no_value ~no_stop_at_failure
         else <span data-count="0">j</span>son
       in
       Yojson.Basic.pretty_print fmt json
-    | <span data-count="233">S</span>cfg -&gt;
+    | <span data-count="235">S</span>cfg -&gt;
       let scfg = Symbol_scope.to_scfg ~no_value model scoped_values in
-      <span data-count="233">l</span>et model = Scfg.Query.get_dir_exn "model" scfg in
-      <span data-count="233">l</span>et lbls =
+      <span data-count="235">l</span>et model = Scfg.Query.get_dir_exn "model" scfg in
+      <span data-count="235">l</span>et lbls =
         { Scfg.Types.name = "labels"
         ; params = []
         ; children =
-            List.ma<span data-count="233">p</span>
+            List.ma<span data-count="235">p</span>
               (fun (id, lbl_name) -&gt;
                 <span data-count="2">{</span> Scfg.Types.name = "label"
                 ; params = [ string_of_in<span data-count="2">t</span> id; lbl_name ]
@@ -743,11 +743,11 @@ let print_bug ~model_format ~model_out_file ~id ~no_value ~no_stop_at_failure
             ; children = []
             }
           ]
-        else <span data-count="232">[</span>]
+        else <span data-count="234">[</span>]
       in
       let ret =
         model
-        :: (if List.lengt<span data-count="233">h</span> lbls.children &gt; 0 then <span data-count="2">l</span>bls :: bcrumbs else <span data-count="231">b</span>crumbs)
+        :: (if List.lengt<span data-count="235">h</span> lbls.children &gt; 0 then <span data-count="2">l</span>bls :: bcrumbs else <span data-count="233">b</span>crumbs)
       in
       Scfg.Pp.config fmt ret
   in
@@ -773,19 +773,19 @@ let print_bug ~model_format ~model_out_file ~id ~no_value ~no_stop_at_failure
     <span data-count="3">B</span>os.OS.File.writef path "%a" pp (model, labels, breadcrumbs, symbol_scopes)
   in
   let output model labels breadcrumbs symbol_scopes =
-    <span data-count="233">m</span>atch model_out_file with
+    <span data-count="235">m</span>atch model_out_file with
     | <span data-count="3">S</span>ome path -&gt; to_file path model labels breadcrumbs symbol_scopes
-    | <span data-count="230">N</span>one -&gt; begin
+    | <span data-count="232">N</span>one -&gt; begin
       Logs.app (fun m -&gt;
-        <span data-count="230">l</span>et fmt = m (if no_stop_at_failure then <span data-count="176">"</span>%a@." else <span data-count="54">"</span>%a") in
-        <span data-count="230">f</span>mt pp (model, labels, breadcrumbs, symbol_scopes) );
-      <span data-count="230">O</span>k ()
+        <span data-count="232">l</span>et fmt = m (if no_stop_at_failure then <span data-count="179">"</span>%a@." else <span data-count="53">"</span>%a") in
+        <span data-count="232">f</span>mt pp (model, labels, breadcrumbs, symbol_scopes) );
+      <span data-count="232">O</span>k ()
     end
   in
   match bug with
-  | <span data-count="170">`</span>ETrap (tr, model, labels, breadcrumbs, symbol_scopes) -&gt;
-    Logs.err (fun m -&gt; <span data-count="170">m</span> "Trap: %s" (Result.err_to_strin<span data-count="170">g</span> tr));
-    <span data-count="170">o</span>utput model labels breadcrumbs symbol_scopes
+  | <span data-count="172">`</span>ETrap (tr, model, labels, breadcrumbs, symbol_scopes) -&gt;
+    Logs.err (fun m -&gt; <span data-count="172">m</span> "Trap: %s" (Result.err_to_strin<span data-count="172">g</span> tr));
+    <span data-count="172">o</span>utput model labels breadcrumbs symbol_scopes
   | <span data-count="63">`</span>EAssert (assertion, model, labels, breadcrumbs, symbol_scopes) -&gt;
     if no_assert_failure_expression_printing then
       <span data-count="11">L</span>ogs.er<span data-count="11">r</span> (fun m -&gt; <span data-count="11">m</span> "Assert failure")
@@ -795,60 +795,60 @@ let print_bug ~model_format ~model_out_file ~id ~no_value ~no_stop_at_failure
 let print_and_count_failures ~model_format ~model_out_file ~no_value
   ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
   ~count_acc ~results ~with_breadcrumbs =
-  <span data-count="406">l</span>et test_suite_dir = Fpath.(workspace / "test-suite") in
+  <span data-count="407">l</span>et test_suite_dir = Fpath.(workspace / "test-suite") in
   let* (_created : bool) =
-    if not no_value then <span data-count="294">O</span>S.Dir.creat<span data-count="294">e</span> test_suite_dir else <span data-count="112">O</span>k false
+    if not no_value then <span data-count="295">O</span>S.Dir.creat<span data-count="295">e</span> test_suite_dir else <span data-count="112">O</span>k false
   in
 
-  <span data-count="406">l</span>et rec aux count_acc results =
-    <span data-count="584">m</span>atch results () with
-    | <span data-count="351">S</span>eq.Nil -&gt; Ok count_acc
-    | <span data-count="233">S</span>eq.Cons ((result, _thread), tl) -&gt;
+  <span data-count="407">l</span>et rec aux count_acc results =
+    <span data-count="588">m</span>atch results () with
+    | <span data-count="353">S</span>eq.Nil -&gt; Ok count_acc
+    | <span data-count="235">S</span>eq.Cons ((result, _thread), tl) -&gt;
       let* model =
         match result with
-        | (<span data-count="63">`</span>EAssert (_, model, _, _, _) | <span data-count="170">`</span>ETrap (_, model, _, _, _)) as bug -&gt;
+        | (<span data-count="63">`</span>EAssert (_, model, _, _, _) | <span data-count="172">`</span>ETrap (_, model, _, _, _)) as bug -&gt;
           let* () =
-            print_bu<span data-count="233">g</span> ~model_format ~model_out_file ~id:count_acc ~no_value
+            print_bu<span data-count="235">g</span> ~model_format ~model_out_file ~id:count_acc ~no_value
               ~no_stop_at_failure ~no_assert_failure_expression_printing
               ~with_breadcrumbs bug
           in
-          <span data-count="233">O</span>k model
+          <span data-count="235">O</span>k model
         | <span data-count="0">`</span>Error e -&gt; Error e
       in
-      <span data-count="233">l</span>et count_acc = succ count_acc in
-      <span data-count="233">l</span>et* () =
+      <span data-count="235">l</span>et count_acc = succ count_acc in
+      <span data-count="235">l</span>et* () =
         if not no_value then
           <span data-count="119">l</span>et testcase = Smtml.Model.get_bindings model |&gt; <span data-count="119">L</span>ist.map snd in
           <span data-count="119">C</span>md_utils.write_testcas<span data-count="119">e</span> ~dir:test_suite_dir testcase
-        else <span data-count="114">O</span>k ()
+        else <span data-count="116">O</span>k ()
       in
-      <span data-count="233">i</span>f no_stop_at_failure then <span data-count="178">a</span>ux count_acc tl else <span data-count="55">O</span>k count_acc
+      <span data-count="235">i</span>f no_stop_at_failure then <span data-count="181">a</span>ux count_acc tl else <span data-count="54">O</span>k count_acc
   in
   aux count_acc results
 
 let sort_results deterministic_result_order results =
-  <span data-count="406">i</span>f deterministic_result_order then
-    <span data-count="33">r</span>esults
-    |&gt; Seq.map (function <span data-count="39">(</span>_, thread) as x -&gt;
-         (x, List.re<span data-count="39">v</span> @@ Thread_with_memory.breadcrumb<span data-count="39">s</span> thread) )
-    |&gt; <span data-count="33">L</span>ist.of_seq
-    |&gt; <span data-count="33">L</span>ist.sort (fun (_, bc1) (_, bc2) -&gt; <span data-count="10">L</span>ist.compare compare bc1 bc2)
-    |&gt; <span data-count="33">L</span>ist.to_seq |&gt; <span data-count="33">S</span>eq.map fst
+  <span data-count="407">i</span>f deterministic_result_order then
+    <span data-count="34">r</span>esults
+    |&gt; Seq.map (function <span data-count="42">(</span>_, thread) as x -&gt;
+         (x, List.re<span data-count="42">v</span> @@ Thread_with_memory.breadcrumb<span data-count="42">s</span> thread) )
+    |&gt; <span data-count="34">L</span>ist.of_seq
+    |&gt; <span data-count="34">L</span>ist.sort (fun (_, bc1) (_, bc2) -&gt; <span data-count="13">L</span>ist.compare compare bc1 bc2)
+    |&gt; <span data-count="34">L</span>ist.to_seq |&gt; <span data-count="34">S</span>eq.map fst
   else <span data-count="373">r</span>esults
 
 let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
   ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
   ~workspace ~solver ~model_format ~model_out_file ~with_breadcrumbs
   (result : unit Symbolic.Choice.t) =
-  <span data-count="406">l</span>et thread = Thread_with_memory.init () in
-  <span data-count="406">l</span>et res_stack = Ws.make () in
-  <span data-count="406">l</span>et path_count = Atomic.make 0 in
-  <span data-count="406">l</span>et callback v =
-    <span data-count="1821">l</span>et open Symbolic_choice_intf in
+  <span data-count="407">l</span>et thread = Thread_with_memory.init () in
+  <span data-count="407">l</span>et res_stack = Ws.make () in
+  <span data-count="407">l</span>et path_count = Atomic.make 0 in
+  <span data-count="407">l</span>et callback v =
+    <span data-count="1656">l</span>et open Symbolic_choice_intf in
     Atomic.incr path_count;
-    <span data-count="1821">m</span>atch (fail_mode, v) with
-    | <span data-count="1584">_</span>, (EVal (), _) -&gt; ()
-    | <span data-count="171">(</span> (<span data-count="171">B</span>oth | <span data-count="0">T</span>rap_only)
+    <span data-count="1657">m</span>atch (fail_mode, v) with
+    | <span data-count="1420">_</span>, (EVal (), _) -&gt; ()
+    | <span data-count="172">(</span> (<span data-count="172">B</span>oth | <span data-count="0">T</span>rap_only)
       , (ETrap (t, m, labels, breadcrumbs, symbol_scopes), thread) ) -&gt;
       Ws.push
         (`ETrap (t, m, labels, breadcrumbs, symbol_scopes), thread)
@@ -863,35 +863,35 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
   let join_handles =
     Symbolic_choice_with_memory.run
       ( match exploration_strategy with
-      | <span data-count="406">L</span>IFO -&gt; (module Wq)
+      | <span data-count="407">L</span>IFO -&gt; (module Wq)
       | <span data-count="0">F</span>IFO -&gt; (module Ws)
       | <span data-count="0">R</span>andom -&gt; (module Wpq) )
       ~workers solver result thread ~callback
-      ~callback_init:(fun () -&gt; <span data-count="788">W</span>s.make_pledge res_stack)
-      ~callback_end:(fun () -&gt; <span data-count="762">W</span>s.end_pledge res_stack)
+      ~callback_init:(fun () -&gt; <span data-count="789">W</span>s.make_pledge res_stack)
+      ~callback_end:(fun () -&gt; <span data-count="759">W</span>s.end_pledge res_stack)
   in
-  <span data-count="406">l</span>et results =
+  <span data-count="407">l</span>et results =
     Ws.read_as_seq res_stack ~finalizer:(fun () -&gt;
-      <span data-count="351">A</span>rray.iter Domain.join join_handles )
+      <span data-count="353">A</span>rray.iter Domain.join join_handles )
   in
-  <span data-count="406">l</span>et results = sort_results deterministic_result_order results in
-  <span data-count="406">l</span>et* count =
+  <span data-count="407">l</span>et results = sort_results deterministic_result_order results in
+  <span data-count="407">l</span>et* count =
     print_and_count_failures ~model_format ~model_out_file ~no_value
       ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
       ~count_acc:0 ~results ~with_breadcrumbs
   in
-  <span data-count="406">L</span>ogs.info (fun m -&gt; <span data-count="8">m</span> "Completed paths: %d" (Atomic.ge<span data-count="8">t</span> path_count));
-  <span data-count="406">l</span>et+ () = if count &gt; 0 then <span data-count="221">E</span>rror (`Found_bug count) else <span data-count="185">O</span>k () in
-  <span data-count="185">L</span>ogs.app (fun m -&gt; <span data-count="185">m</span> "All OK!")
+  <span data-count="407">L</span>ogs.info (fun m -&gt; <span data-count="8">m</span> "Completed paths: %d" (Atomic.ge<span data-count="8">t</span> path_count));
+  <span data-count="407">l</span>et+ () = if count &gt; 0 then <span data-count="221">E</span>rror (`Found_bug count) else <span data-count="186">O</span>k () in
+  <span data-count="186">L</span>ogs.app (fun m -&gt; <span data-count="186">m</span> "All OK!")
 
 (* NB: This function propagates potential errors (Result.err) occurring
              during evaluation (OS, syntax error, etc.), except for Trap and Assert,
              which are handled here. Most of the computations are done in the Result
              monad, hence the let*. *)
 let cmd ~parameters ~source_file =
-  <span data-count="405">l</span>et* result : unit Symbolic.Choice.t = run_file ~parameters ~source_file in
+  <span data-count="406">l</span>et* result : unit Symbolic.Choice.t = run_file ~parameters ~source_file in
 
-  <span data-count="403">l</span>et { exploration_strategy
+  <span data-count="404">l</span>et { exploration_strategy
       ; fail_mode
       ; workers
       ; solver
@@ -909,17 +909,17 @@ let cmd ~parameters ~source_file =
 
   (* deterministic_result_order implies no_stop_at_failure *)
   let no_stop_at_failure =
-    parameters.deterministic_result_orde<span data-count="33">r</span> || parameters.no_stop_at_failur<span data-count="137">e</span>
+    parameters.deterministic_result_orde<span data-count="34">r</span> || parameters.no_stop_at_failur<span data-count="137">e</span>
   in
 
   (* TODO: can we handle this at the cmdliner level? *)
   let* workspace =
     match workspace with
-    | <span data-count="213">S</span>ome path -&gt; Ok path
+    | <span data-count="214">S</span>ome path -&gt; Ok path
     | <span data-count="190">N</span>one -&gt; OS.Dir.tm<span data-count="190">p</span> "owi_sym_%s"
   in
 
-  <span data-count="403">h</span>andle_result ~exploration_strategy ~fail_mode ~workers ~solver
+  <span data-count="404">h</span>andle_result ~exploration_strategy ~fail_mode ~workers ~solver
     ~deterministic_result_order ~model_format ~no_value
     ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
     ~model_out_file ~with_breadcrumbs result

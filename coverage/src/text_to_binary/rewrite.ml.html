@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>rewrite.ml &mdash; Coverage report</title>
-    <meta name="description" content="88.51% coverage in src/text_to_binary/rewrite.ml">
+    <meta name="description" content="88.45% coverage in src/text_to_binary/rewrite.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">src/text_to_binary/</span>rewrite.ml
         </a>
       </h1>
-      <h2>88.51%</h2>
+      <h2>88.45%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:28.35%"></span>
@@ -477,7 +477,7 @@
 <a id="L410"></a><span > </span>
 <a id="L411"></a><span > </span>
 <a id="L412"></a><span > </span>
-<a id="L413"></a><span class="visited"> </span>
+<a id="L413"></a><span > </span>
 <a id="L414"></a><span class="visited"> </span>
 <a id="L415"></a><span class="visited"> </span>
 <a id="L416"></a><span > </span>
@@ -512,7 +512,7 @@
 <a id="L445"></a><span class="visited"> </span>
 <a id="L446"></a><span > </span>
 <a id="L447"></a><span > </span>
-<a id="L448"></a><span class="visited"> </span>
+<a id="L448"></a><span > </span>
 <a id="L449"></a><span class="visited"> </span>
 <a id="L450"></a><span class="visited"> </span>
 <a id="L451"></a><span class="visited"> </span>
@@ -1498,7 +1498,7 @@ let rec rewrite_prop ~(binder_list : string option list) ~(modul : Assigned.t)
 
 let rewrite_contract (modul : Assigned.t) :
   text Contract.t -&gt; binary Contract.t Result.t =
- <span data-count="15">f</span>un { Contract.funcid; preconditions; postconditions } -&gt;
+ fun { Contract.funcid; preconditions; postconditions } -&gt;
   <span data-count="15">l</span>et* funcid = Assigned.find_fun<span data-count="15">c</span> modul funcid in
   <span data-count="15">l</span>et* func =
     let (Raw i) = funcid in
@@ -1533,7 +1533,7 @@ let rewrite_contract (modul : Assigned.t) :
   <span data-count="15">{</span> Contract.funcid; preconditions; postconditions }
 
 let rewrite_annot (modul : Assigned.t) :
-  text Annot.annot -&gt; Binary.custom Result.t = <span data-count="3616">f</span>unction
+  text Annot.annot -&gt; Binary.custom Result.t = function
   | <span data-count="15">C</span>ontract contract -&gt;
     let+ contract = rewrite_contrac<span data-count="15">t</span> modul contract in
     <span data-count="15">B</span>inary.From_annot (Contract contract)

@@ -158,13 +158,13 @@ module type Complete = sig
 
   val assertion : V.bool -&gt; unit t
 
+  val assume : V.bool -&gt; unit t
+
   val with_thread : (thread -&gt; 'b) -&gt; 'b t
 
   val solver : Solver.t t
 
   val thread : thread t
-
-  val add_pc : V.bool -&gt; unit t
 
   val lift_mem : 'a Symbolic_choice_without_memory.t -&gt; 'a t
 end

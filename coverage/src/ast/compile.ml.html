@@ -237,14 +237,14 @@ end
 
 module Binary = struct
   let until_validate ~unsafe m =
-    <span data-count="1021">i</span>f unsafe then <span data-count="0">O</span>k m
+    <span data-count="1023">i</span>f unsafe then <span data-count="0">O</span>k m
     else
-      <span data-count="1021">l</span>et+ () = Binary_validate.modu<span data-count="1021">l</span> m in
-      <span data-count="1021">m</span>
+      <span data-count="1023">l</span>et+ () = Binary_validate.modu<span data-count="1023">l</span> m in
+      <span data-count="1023">m</span>
 
   let until_link ~unsafe ~name link_state m =
-    <span data-count="643">l</span>et* m = until_validat<span data-count="643">e</span> ~unsafe m in
-    <span data-count="643">L</span>ink.modul link_state ~name m
+    <span data-count="644">l</span>et* m = until_validat<span data-count="644">e</span> ~unsafe m in
+    <span data-count="644">L</span>ink.modul link_state ~name m
 end
 
 module Any = struct
@@ -265,10 +265,10 @@ end
 
 module File = struct
   let until_validate ~unsafe ~rac ~srac filename =
-    <span data-count="598">l</span>et* m = Parse.guess_from_fil<span data-count="598">e</span> filename in
-    <span data-count="597">m</span>atch m with
+    <span data-count="599">l</span>et* m = Parse.guess_from_fil<span data-count="599">e</span> filename in
+    <span data-count="598">m</span>atch m with
     | <span data-count="219">K</span>ind.Wat m -&gt; Text.until_validate ~unsafe ~rac ~srac m
-    | <span data-count="378">W</span>asm m -&gt; Binary.until_validate ~unsafe m
+    | <span data-count="379">W</span>asm m -&gt; Binary.until_validate ~unsafe m
     | Wast _ | Ocaml _ -&gt; assert false
 
   let until_link ~unsafe ~rac ~srac ~name link_state filename =

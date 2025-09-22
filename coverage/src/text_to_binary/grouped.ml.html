@@ -296,7 +296,7 @@
 <a id="L270"></a><span > </span>
 <a id="L271"></a><span class="visited"> </span>
 <a id="L272"></a><span class="visited"> </span>
-<a id="L273"></a><span class="visited"> </span>
+<a id="L273"></a><span > </span>
 <a id="L274"></a><span class="visited"> </span>
 <a id="L275"></a><span class="visited"> </span>
 <a id="L276"></a><span > </span>
@@ -831,9 +831,9 @@ let add_global value (fields : t) (curr : curr) =
   <span data-count="840">{</span> fields with global = Indexed.retur<span data-count="840">n</span> index value :: fields.global }
 
 let add_table value (fields : t) (curr : curr) =
-  <span data-count="756">l</span>et index = !(curr.table) in
+  <span data-count="755">l</span>et index = !(curr.table) in
   incr curr.table;
-  <span data-count="756">{</span> fields with table = Indexed.retur<span data-count="756">n</span> index value :: fields.table }
+  <span data-count="755">{</span> fields with table = Indexed.retur<span data-count="755">n</span> index value :: fields.table }
 
 let add_mem value (fields : t) (curr : curr) =
   <span data-count="860">l</span>et index = !(curr.mem) in
@@ -892,10 +892,10 @@ let add_field curr (fields : t) = function
       { fields.exports with global = { name; id } :: fields.exports.global }
     in
     Ok { fields with exports }
-  | <span data-count="672">M</span>Table table -&gt;
+  | <span data-count="671">M</span>Table table -&gt;
     let id, table_type = table in
-    let+ table_type = Binary_types.convert_table_typ<span data-count="672">e</span> table_type in
-    <span data-count="672">l</span>et table = (id, table_type) in
+    let+ table_type = Binary_types.convert_table_typ<span data-count="671">e</span> table_type in
+    <span data-count="671">l</span>et table = (id, table_type) in
     add_table (Local table) fields curr
   | <span data-count="84">M</span>Import ({ desc = Import_table (id, table_type); _ } as import) -&gt;
     let+ table_type = Binary_types.convert_table_typ<span data-count="84">e</span> table_type in
@@ -919,8 +919,8 @@ let add_field curr (fields : t) = function
     Ok { fields with exports }
   | <span data-count="7143">M</span>Func func -&gt; ok @@ add_fun<span data-count="7143">c</span> (Runtime.Local func) fields curr
   | <span data-count="1922">M</span>Import ({ desc = Import_func (a, type_f); _ } as import) -&gt;
-    let imported : text block_type Imported.t = im<span data-count="1922">p</span> import (a, type_f) in
-    ok @@ add_fun<span data-count="1922">c</span> (Imported imported) fields curr
+    let imported : text block_type Imported.t = imp import (a, type_f) in
+    <span data-count="1922">o</span>k @@ add_fun<span data-count="1922">c</span> (Imported imported) fields curr
   | <span data-count="5707">M</span>Export { name; desc = Export_func id } -&gt;
     let id = curr_id curr.func id in
     <span data-count="5707">l</span>et exports =

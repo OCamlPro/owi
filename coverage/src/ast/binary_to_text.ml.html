@@ -517,11 +517,11 @@ let convert_indice (t : binary indice) : text indice =
   <span data-count="30">m</span>atch t with <span data-count="30">R</span>aw _ as t -&gt; t
 
 let convert_heap_type (t : binary heap_type) : text heap_type =
-  <span data-count="3">m</span>atch t with (<span data-count="3">F</span>unc_ht | <span data-count="0">E</span>xtern_ht) as t -&gt; t
+  <span data-count="2">m</span>atch t with (<span data-count="2">F</span>unc_ht | <span data-count="0">E</span>xtern_ht) as t -&gt; t
 
 let convert_ref_type (t : binary ref_type) : text ref_type =
-  <span data-count="3">l</span>et nullable, heap_type = t in
-  (nullable, convert_heap_typ<span data-count="3">e</span> heap_type)
+  <span data-count="2">l</span>et nullable, heap_type = t in
+  (nullable, convert_heap_typ<span data-count="2">e</span> heap_type)
 
 let convert_val_type (t : binary val_type) : text val_type =
   <span data-count="325">m</span>atch t with
@@ -562,12 +562,12 @@ let convert_expr (e : binary expr Annotated.t) : text expr Annotated.t =
   <span data-count="84">O</span>bj.magic e
 
 let convert_table_type (t : binary table_type) : text table_type =
-  <span data-count="2">l</span>et limits, t = t in
-  (limits, convert_ref_typ<span data-count="2">e</span> t)
+  <span data-count="1">l</span>et limits, t = t in
+  (limits, convert_ref_typ<span data-count="1">e</span> t)
 
 let convert_table (t : binary table) : text table =
-  <span data-count="2">l</span>et id, t = t in
-  (id, convert_table_typ<span data-count="2">e</span> t)
+  <span data-count="1">l</span>et id, t = t in
+  (id, convert_table_typ<span data-count="1">e</span> t)
 
 let convert_elem_mode (e : Binary.elem_mode) : Text.elem_mode =
   <span data-count="1">m</span>atch e with
@@ -622,9 +622,9 @@ let from_global global : Text.module_field list =
 let from_table table : Text.module_field list =
   <span data-count="30">A</span>rray.map
     (function
-      | <span data-count="2">R</span>untime.Local t -&gt;
+      | <span data-count="1">R</span>untime.Local t -&gt;
         let t = convert_table t in
-        <span data-count="2">M</span>Table t
+        <span data-count="1">M</span>Table t
       | <span data-count="0">I</span>mported { modul; name; assigned_name; desc } -&gt;
         let desc = Import_table (assigned_name, convert_table_typ<span data-count="0">e</span> desc) in
         MImport { modul; name; desc } )
@@ -731,7 +731,7 @@ let modul
     List.partition_map
       (function
         | <span data-count="31">M</span>Import _ as import -&gt; Either.Left import
-        | <span data-count="193">l</span>ocal -&gt; Either.Right local )
+        | <span data-count="192">l</span>ocal -&gt; Either.Right local )
       fields
   in
   <span data-count="30">l</span>et fields = imported @ locals in
