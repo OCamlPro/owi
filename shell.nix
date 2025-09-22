@@ -4,6 +4,27 @@
 }:
 
 let
+  ocamlPackages = pkgs.ocaml-ng.ocamlPackages_5_3.overrideScope (self: super: {
+    ocb = self.buildDunePackage {
+      pname = "ocb";
+      version = "master";
+      src = pkgs.fetchgit {
+        url = "https://github.com/ocamlpro/ocb.git";
+        hash = "sha256-IuVP1moJpnbctYGv7X1aKq0elUQ/Zmn81MD/zBPqwno=";
+      };
+      propagatedNativeBuildInputs = with ocamlPackages; [
+        dune_3
+        findlib
+        ocaml
+      ];
+      propagatedBuildInputs = with ocamlPackages; [
+        cmdliner
+        fmt
+        prelude
+      ];
+    };
+  });
+
   mdbookTabs = pkgs.rustPlatform.buildRustPackage rec {
     pname = "cargo-mdbook-tabs";
     version = "v0.2.3";
@@ -22,7 +43,7 @@ in
 pkgs.mkShell {
   name = "owi-dev-shell";
   dontDetectOcamlConflicts = true;
-  nativeBuildInputs = with pkgs.ocaml-ng.ocamlPackages; [
+  nativeBuildInputs = with ocamlPackages; [
     dune_3
     findlib
     bisect_ppx
@@ -33,6 +54,7 @@ pkgs.mkShell {
     menhir
     ocaml
     ocamlformat
+    ocb
     odoc
     sedlex
     # unwrapped because wrapped tries to enforce a target and the build script wants to do its own thing
@@ -43,7 +65,7 @@ pkgs.mkShell {
     pkgs.zig
     pkgs.makeWrapper
   ];
-  buildInputs = with pkgs.ocaml-ng.ocamlPackages; [
+  buildInputs = with ocamlPackages; [
     bos
     cmdliner
     crowbar
