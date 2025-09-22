@@ -132,7 +132,7 @@ let fail_mode =
 
 let exploration_strategy =
   let doc = {|exploration strategy to use ("fifo", "lifo" or "random")|} in
-  Arg.(value & opt exploration_conv Cmd_sym.LIFO & info [ "exploration" ] ~doc)
+  Arg.(value & opt exploration_conv Cmd_sym.FIFO & info [ "exploration" ] ~doc)
 
 let files =
   let doc = "source files" in

@@ -62,9 +62,10 @@ let pp_edge n1 fmt (n2, s) = Fmt.pf fmt "%d -> %d%a" n1 n2 pp_label_opt s
 let pp_edges fmt (n, l) = Fmt.list ~sep:pp_sep (pp_edge n) fmt l
 
 let pp_node_cg fmt (n : 'a node) =
-  if snd n.info then Fmt.pf fmt "%d%a%a" n.ind pp_sep () pp_edges (n.ind, n.children) 
+  if snd n.info then
+    Fmt.pf fmt "%d%a%a" n.ind pp_sep () pp_edges (n.ind, n.children)
 
-let pp_nodes_cg fmt n = 
+let pp_nodes_cg fmt n =
   let nodes = List.filter (fun n -> snd n.info) (Array.to_list n) in
   Fmt.list ~sep:pp_sep pp_node_cg fmt nodes
 
@@ -97,8 +98,8 @@ let pp_exp fmt l =
   Fmt.list ~sep:(fun fmt () -> Fmt.string fmt " | ") pp_inst fmt l
 
 let pp_node_cfg fmt (n : 'a node) =
-  Fmt.pf fmt {|%d [label="%a"]%a%a|} n.ind pp_exp (List.rev n.info) pp_sep () pp_edges
-    (n.ind, n.children)
+  Fmt.pf fmt {|%d [label="%a"]%a%a|} n.ind pp_exp (List.rev n.info) pp_sep ()
+    pp_edges (n.ind, n.children)
 
 let pp_nodes_cfg fmt g = Fmt.array ~sep:pp_sep pp_node_cfg fmt g
 
@@ -474,23 +475,25 @@ let build_scc_graph graph =
 let pp_scc_edge n1 fmt (n2, _) =
   Fmt.pf fmt "%d -> %d [ltail=cluster_%d,lhead=cluster_%d]" n1 n2 n1 n2
 
-let pp_scc_edges fmt (n, l) =
-  Fmt.list ~sep:pp_sep (pp_scc_edge n) fmt l
+let pp_scc_edges fmt (n, l) = Fmt.list ~sep:pp_sep (pp_scc_edge n) fmt l
 
 let pp_scc_node pp fmt n =
   Fmt.pf fmt "subgraph cluster_%d {@,%a};@,%a" n.ind pp n.info pp_scc_edges
     (n.ind, n.children)
 
-let pp_scc_nodes fmt (n, pp) =
-  Fmt.array ~sep:pp_sep (pp_scc_node pp) fmt n
+let pp_scc_nodes fmt (n, pp) = Fmt.array ~sep:pp_sep (pp_scc_node pp) fmt n
 
 let pp_scc_graph (type a) fmt ((graph : a t), (g_type : a g)) =
   match g_type with
   | Cg ->
-    Fmt.pf fmt "@[<v 2>digraph scc_graph {@,graph [compound=true];@,%a}@]" pp_scc_nodes
-      (graph.nodes, pp_cg_graph)
+    Fmt.pf fmt "@[<v 2>digraph scc_graph {@,graph [compound=true];@,%a}@]"
+      pp_scc_nodes (graph.nodes, pp_cg_graph)
   | Cfg ->
     Fmt.pf fmt
-      "@[<v 2>digraph scc_graph {@,graph [compound=true];@,rankdir=LR;@,node [shape=record];@,%a}@]"
+      "@[<v 2>digraph scc_graph {@,\
+       graph [compound=true];@,\
+       rankdir=LR;@,\
+       node [shape=record];@,\
+       %a}@]"
       pp_scc_nodes
       (graph.nodes, pp_cfg_graph)
