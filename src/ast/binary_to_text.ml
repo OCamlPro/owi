@@ -9,31 +9,11 @@ open Types
 let convert_indice (t : binary indice) : text indice =
   match t with Raw _ as t -> t
 
-let convert_heap_type (t : binary heap_type) : text heap_type =
-  match t with (Func_ht | Extern_ht) as t -> t
+let convert_global_type (t : binary global_type) : text global_type = t
 
-let convert_ref_type (t : binary ref_type) : text ref_type =
-  let nullable, heap_type = t in
-  (nullable, convert_heap_type heap_type)
+let convert_param_type (pt : binary param_type) : text param_type = pt
 
-let convert_val_type (t : binary val_type) : text val_type =
-  match t with
-  | Num_type _ as t -> t
-  | Ref_type t -> Ref_type (convert_ref_type t)
-
-let convert_global_type (t : binary global_type) : text global_type =
-  let mut, vt = t in
-  (mut, convert_val_type vt)
-
-let convert_param (p : binary param) : text param =
-  let id, vt = p in
-  (id, convert_val_type vt)
-
-let convert_param_type (pt : binary param_type) : text param_type =
-  List.map convert_param pt
-
-let convert_result_type (rt : binary result_type) : text result_type =
-  List.map convert_val_type rt
+let convert_result_type (rt : binary result_type) : text result_type = rt
 
 let convert_func_type ((pt, rt) : binary func_type) : text func_type =
   (convert_param_type pt, convert_result_type rt)
@@ -54,13 +34,9 @@ let convert_expr (e : binary expr Annotated.t) : text expr Annotated.t =
   (* TODO: proper conversion ! *)
   Obj.magic e
 
-let convert_table_type (t : binary table_type) : text table_type =
-  let limits, t = t in
-  (limits, convert_ref_type t)
-
 let convert_table (t : binary table) : text table =
   let id, t = t in
-  (id, convert_table_type t)
+  (id, t)
 
 let convert_elem_mode (e : Binary.elem_mode) : Text.elem_mode =
   match e with
@@ -73,7 +49,6 @@ let convert_elem_mode (e : Binary.elem_mode) : Text.elem_mode =
 
 let convert_elem (e : Binary.elem) : Text.elem =
   let { Binary.id; typ; init; mode } = e in
-  let typ = convert_ref_type typ in
   let init = List.map convert_expr init in
   let mode = convert_elem_mode mode in
   { id; typ; init; mode }
@@ -119,7 +94,7 @@ let from_table table : Text.module_field list =
         let t = convert_table t in
         MTable t
       | Imported { modul; name; assigned_name; desc } ->
-        let desc = Import_table (assigned_name, convert_table_type desc) in
+        let desc = Import_table (assigned_name, desc) in
         MImport { modul; name; desc } )
     table
   |> Array.to_list

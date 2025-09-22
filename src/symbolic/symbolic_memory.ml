@@ -6,12 +6,7 @@
 
 let page_size = Symbolic_value.const_i32 65_536l
 
-module Map = Map.Make (struct
-  include Int32
-
-  (* TODO: define this in Int32 directly? *)
-  let compare i1 i2 = compare (Int32.to_int i1) (Int32.to_int i2)
-end)
+module Map = Map.Make (Int32)
 
 type t =
   { mutable data : Symbolic_value.int32 Map.t

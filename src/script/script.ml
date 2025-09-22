@@ -111,16 +111,14 @@ let compare_result_const result (const : V.t) =
     Log.err (fun m -> m "TODO: unimplemented Script.compare_result_const");
     assert false
 
-let value_of_const : text const -> V.t Result.t = function
-  | Const_I32 v -> ok @@ V.I32 v
-  | Const_I64 v -> ok @@ V.I64 v
-  | Const_F32 v -> ok @@ V.F32 v
-  | Const_F64 v -> ok @@ V.F64 v
-  | Const_V128 v -> ok @@ V.V128 v
-  | Const_null rt ->
-    let+ rt = Binary_types.convert_heap_type rt in
-    V.ref_null rt
-  | Const_extern i -> ok @@ V.Ref (Host_externref.value i)
+let value_of_const : const -> V.t = function
+  | Const_I32 v -> V.I32 v
+  | Const_I64 v -> V.I64 v
+  | Const_F32 v -> V.F32 v
+  | Const_F64 v -> V.F64 v
+  | Const_V128 v -> V.V128 v
+  | Const_null rt -> V.ref_null rt
+  | Const_extern i -> V.Ref (Host_externref.value i)
   | i ->
     Log.err (fun m ->
       m "TODO: unimplemented Script.value_of_const %a)" Types.pp_const i );
@@ -133,8 +131,7 @@ let action (link_state : Concrete_extern_func.extern_func Link.state) = function
         (Fmt.option ~none:Fmt.nop Fmt.string)
         mod_id f Types.pp_consts args );
     let* f, env_id = load_func_from_module link_state mod_id f in
-    let* stack = list_map value_of_const args in
-    let stack = List.rev stack in
+    let stack = List.rev_map value_of_const args in
     Interpret.Concrete.exec_vfunc_from_outside ~locals:stack ~env:env_id
       ~envs:link_state.envs f
   end

@@ -809,11 +809,9 @@ module Make (P : Interpret_intf.P) :
     let locals = state.locals in
 
     Atomic.incr instr.Annotated.instr_counter;
-    let d_true = Option.value !(instr.Annotated.d_true) ~default:[||] in
-    let d_false = Option.value !(instr.Annotated.d_false) ~default:[||] in
     let st stack = Choice.return (State.Continue { state with stack }) in
-    Log.info (fun m -> m "stack         : [ %a ]" Stack.pp stack);
-    Log.info (fun m ->
+    Logs.info (fun m -> m "stack        : [ %a ]" Stack.pp stack);
+    Logs.info (fun m ->
       m "running instr : %a" (Types.pp_instr ~short:true) instr.Annotated.raw );
     let* () =
       match Logs.level () with
@@ -943,8 +941,10 @@ module Make (P : Interpret_intf.P) :
       let* b, stack =
         let counter_next_false, counter_next_true =
           match state.pc.raw with
-          | [] -> Int.max_int, Atomic.get instr.Annotated.instr_counter -1
-          | h :: _ -> let v = Atomic.get h.Annotated.instr_counter in v , Atomic.get instr.Annotated.instr_counter -1 -  v
+          | [] -> (Int.max_int, Atomic.get instr.Annotated.instr_counter - 1)
+          | h :: _ ->
+            let v = Atomic.get h.Annotated.instr_counter in
+            (v, Atomic.get instr.Annotated.instr_counter - 1 - v)
         in
         let prio_true =
           Prio.from_annotated counter_next_true !(instr.Annotated.d_true)

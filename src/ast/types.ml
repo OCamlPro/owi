@@ -104,6 +104,12 @@ type nonrec nn =
   | S32
   | S64
 
+let compare_nn v1 v2 =
+  match (v1, v2) with
+  | S32, S32 | S64, S64 -> 0
+  | S32, S64 -> -1
+  | S64, S32 -> 1
+
 let pp_nn fmt = function S32 -> pf fmt "32" | S64 -> pf fmt "64"
 
 type nonrec ishape =
@@ -111,6 +117,10 @@ type nonrec ishape =
   | I16x8
   | I32x4
   | I64x2
+
+let ishape_to_int = function I8x16 -> 0 | I16x8 -> 1 | I32x4 -> 2 | I64x2 -> 3
+
+let compare_ishape s1 s2 = compare (ishape_to_int s1) (ishape_to_int s2)
 
 let pp_ishape fmt = function
   | I8x16 -> pf fmt "i8x16"
@@ -128,12 +138,20 @@ type nonrec sx =
   | U
   | S
 
+let sx_to_int = function U -> 0 | S -> 1
+
+let compare_sx sx1 sx2 = compare (sx_to_int sx1) (sx_to_int sx2)
+
 let pp_sx fmt = function U -> pf fmt "u" | S -> pf fmt "s"
 
 type nonrec iunop =
   | Clz
   | Ctz
   | Popcnt
+
+let iunop_to_int = function Clz -> 0 | Ctz -> 1 | Popcnt -> 2
+
+let compare_iunop o1 o2 = compare (iunop_to_int o1) (iunop_to_int o2)
 
 let pp_iunop fmt = function
   | Clz -> pf fmt "clz"
@@ -149,6 +167,17 @@ type nonrec funop =
   | Trunc
   | Nearest
 
+let funop_to_int = function
+  | Abs -> 0
+  | Neg -> 1
+  | Sqrt -> 2
+  | Ceil -> 3
+  | Floor -> 4
+  | Trunc -> 5
+  | Nearest -> 6
+
+let compare_funop o1 o2 = compare (funop_to_int o1) (funop_to_int o2)
+
 let pp_funop fmt = function
   | Abs -> pf fmt "abs"
   | Neg -> pf fmt "neg"
@@ -161,6 +190,10 @@ let pp_funop fmt = function
 type nonrec vibinop =
   | Add
   | Sub
+
+let vibinop_to_int = function Add -> 0 | Sub -> 1
+
+let compare_vibinop o1 o2 = compare (vibinop_to_int o1) (vibinop_to_int o2)
 
 let pp_vibinop fmt = function Add -> pf fmt "add" | Sub -> pf fmt "sub"
 
@@ -177,6 +210,25 @@ type nonrec ibinop =
   | Shr of sx
   | Rotl
   | Rotr
+
+let ibinop_to_int = function
+  | Add -> 0
+  | Sub -> 1
+  | Mul -> 2
+  | Div S -> 3
+  | Div U -> 4
+  | Rem S -> 5
+  | Rem U -> 6
+  | And -> 7
+  | Or -> 8
+  | Xor -> 9
+  | Shl -> 10
+  | Shr S -> 11
+  | Shr U -> 12
+  | Rotl -> 13
+  | Rotr -> 14
+
+let compare_ibinop o1 o2 = compare (ibinop_to_int o1) (ibinop_to_int o2)
 
 let pp_ibinop fmt = function
   | (Add : ibinop) -> pf fmt "add"
@@ -201,6 +253,17 @@ type nonrec fbinop =
   | Max
   | Copysign
 
+let fbinop_to_int = function
+  | Add -> 0
+  | Sub -> 1
+  | Mul -> 2
+  | Div -> 3
+  | Min -> 4
+  | Max -> 5
+  | Copysign -> 6
+
+let compare_fbinop o1 o2 = compare (fbinop_to_int o1) (fbinop_to_int o2)
+
 let pp_fbinop fmt = function
   | (Add : fbinop) -> pf fmt "add"
   | Sub -> pf fmt "sub"
@@ -212,6 +275,8 @@ let pp_fbinop fmt = function
 
 type nonrec itestop = Eqz
 
+let compare_itestop Eqz Eqz = 0
+
 let pp_itestop fmt = function Eqz -> pf fmt "eqz"
 
 type nonrec irelop =
@@ -221,6 +286,20 @@ type nonrec irelop =
   | Gt of sx
   | Le of sx
   | Ge of sx
+
+let irelop_to_int = function
+  | Eq -> 0
+  | Ne -> 1
+  | Lt S -> 2
+  | Lt U -> 3
+  | Gt S -> 4
+  | Gt U -> 5
+  | Le S -> 6
+  | Le U -> 7
+  | Ge S -> 8
+  | Ge U -> 9
+
+let compare_irelop o1 o2 = compare (irelop_to_int o1) (irelop_to_int o2)
 
 let pp_irelop fmt : irelop -> Unit.t = function
   | Eq -> pf fmt "eq"
@@ -238,6 +317,16 @@ type nonrec frelop =
   | Le
   | Ge
 
+let frelop_to_int = function
+  | Eq -> 0
+  | Ne -> 1
+  | Lt -> 2
+  | Gt -> 3
+  | Le -> 4
+  | Ge -> 5
+
+let compare_frelop o1 o2 = compare (frelop_to_int o1) (frelop_to_int o2)
+
 let frelop fmt : frelop -> Unit.t = function
   | Eq -> pf fmt "eq"
   | Ne -> pf fmt "ne"
@@ -250,6 +339,10 @@ type nonrec memarg =
   { offset : Int32.t
   ; align : Int32.t
   }
+
+let compare_memarg a1 a2 =
+  let cmp = Int32.compare a1.offset a2.offset in
+  if cmp <> 0 then cmp else Int32.compare a1.align a2.align
 
 let pp_memarg =
   let pow_2 n =
@@ -278,7 +371,7 @@ let pp_mem fmt (id, ty) = pf fmt "(memory%a %a)" pp_id_opt id pp_limits ty
 
 (** Types *)
 
-type 'a heap_type =
+type heap_type =
   | Func_ht
   | Extern_ht
 
@@ -301,7 +394,7 @@ let compare_heap_type t1 t2 =
   let to_int = function Func_ht -> 0 | Extern_ht -> 1 in
   Int.compare (to_int t1) (to_int t2)
 
-type nonrec 'a ref_type = nullable * 'a heap_type
+type nonrec ref_type = nullable * heap_type
 
 let pp_ref_type fmt (n, ht) =
   match n with
@@ -320,9 +413,9 @@ let compare_ref_type t1 t2 =
   | (Null, _), (No_null, _) -> -1
   | (No_null, _), (Null, _) -> 1
 
-type nonrec 'a val_type =
+type nonrec val_type =
   | Num_type of num_type
-  | Ref_type of 'a ref_type
+  | Ref_type of ref_type
 
 let pp_val_type fmt = function
   | Num_type t -> pp_num_type fmt t
@@ -341,7 +434,7 @@ let compare_val_type t1 t2 =
   | Num_type _, _ -> 1
   | Ref_type _, _ -> -1
 
-type nonrec 'a param = string option * 'a val_type
+type nonrec 'a param = string option * val_type
 
 let pp_param fmt (id, vt) = pf fmt "(param%a %a)" pp_id_opt id pp_val_type vt
 
@@ -357,7 +450,7 @@ let param_type_eq t1 t2 = List.equal param_eq t1 t2
 
 let compare_param_type t1 t2 = List.compare compare_param t1 t2
 
-type nonrec 'a result_type = 'a val_type list
+type nonrec 'a result_type = val_type list
 
 let pp_result_ fmt vt = pf fmt "(result %a)" pp_val_type vt
 
@@ -374,6 +467,10 @@ let with_space_list printer fmt l =
 
 type nonrec 'a func_type = 'a param_type * 'a result_type
 
+let compare_func_type (pt1, rt1) (pt2, rt2) =
+  let cmp = compare_param_type pt1 pt2 in
+  if cmp <> 0 then cmp else compare_result_type rt1 rt2
+
 let pp_func_type fmt (params, results) =
   pf fmt "(func%a%a)"
     (with_space_list pp_param_type)
@@ -388,6 +485,14 @@ let func_type_eq (pt1, rt1) (pt2, rt2) =
 type 'a block_type =
   | Bt_ind : 'a indice -> (< with_ind_bt ; .. > as 'a) block_type
   | Bt_raw : ('a indice option * 'a func_type) -> (< .. > as 'a) block_type
+
+let compare_block_type :
+  (< raw_bt : no ; .. > as 'a) block_type -> 'a block_type -> int =
+ fun t1 t2 ->
+  match (t1, t2) with
+  | Bt_raw (o1, ft1), Bt_raw (o2, ft2) ->
+    let cmp = Option.compare compare_indice o1 o2 in
+    if cmp <> 0 then cmp else compare_func_type ft1 ft2
 
 let pp_block_type (type kind) fmt : kind block_type -> unit = function
   | Bt_ind ind -> pf fmt "(type %a)" pp_indice ind
@@ -406,12 +511,12 @@ let compare_func_type (pt1, rt1) (pt2, rt2) =
   let pt = compare_param_type pt1 pt2 in
   if pt = 0 then compare_result_type rt1 rt2 else pt
 
-type nonrec 'a table_type = limits * 'a ref_type
+type nonrec table_type = limits * ref_type
 
 let pp_table_type fmt (limits, ref_type) =
   pf fmt "%a %a" pp_limits limits pp_ref_type ref_type
 
-type nonrec 'a global_type = mut * 'a val_type
+type nonrec 'a global_type = mut * val_type
 
 let pp_global_type fmt (mut, val_type) =
   match mut with
@@ -420,7 +525,7 @@ let pp_global_type fmt (mut, val_type) =
 
 type nonrec 'a extern_type =
   | Func of string option * 'a func_type
-  | Table of string option * 'a table_type
+  | Table of string option * table_type
   | Mem of string option * limits
   | Global of string option * 'a global_type
 
@@ -454,12 +559,12 @@ type 'a instr =
   | I_reinterpret_f of nn * nn
   | F_reinterpret_i of nn * nn
   (* Reference instructions *)
-  | Ref_null of 'a heap_type
+  | Ref_null of heap_type
   | Ref_is_null
   | Ref_func of 'a indice
   (* Parametric instructions *)
   | Drop
-  | Select of 'a val_type list option
+  | Select of val_type list option
   (* Variable instructions *)
   | Local_get of 'a indice
   | Local_set of 'a indice
@@ -639,6 +744,259 @@ and pp_expr ~short fmt instrs =
         fmt instrs )
     instrs
 
+let instr_tag = function
+  | I32_const _ -> 0
+  | I64_const _ -> 1
+  | F32_const _ -> 2
+  | F64_const _ -> 3
+  | V128_const _ -> 4
+  | I_unop _ -> 5
+  | F_unop _ -> 6
+  | I_binop _ -> 7
+  | F_binop _ -> 8
+  | V_ibinop _ -> 9
+  | I_testop _ -> 10
+  | I_relop _ -> 11
+  | F_relop _ -> 12
+  | I_extend8_s _ -> 13
+  | I_extend16_s _ -> 14
+  | I64_extend32_s -> 15
+  | I32_wrap_i64 -> 16
+  | I64_extend_i32 _ -> 17
+  | I_trunc_f _ -> 18
+  | I_trunc_sat_f _ -> 19
+  | F32_demote_f64 -> 20
+  | F64_promote_f32 -> 21
+  | F_convert_i _ -> 22
+  | I_reinterpret_f _ -> 23
+  | F_reinterpret_i _ -> 24
+  | Ref_null _ -> 25
+  | Ref_is_null -> 26
+  | Ref_func _ -> 27
+  | Drop -> 28
+  | Select _ -> 29
+  | Local_get _ -> 30
+  | Local_set _ -> 31
+  | Local_tee _ -> 32
+  | Global_get _ -> 33
+  | Global_set _ -> 34
+  | Table_get _ -> 35
+  | Table_set _ -> 36
+  | Table_size _ -> 37
+  | Table_grow _ -> 38
+  | Table_fill _ -> 39
+  | Table_copy _ -> 40
+  | Table_init _ -> 41
+  | Elem_drop _ -> 42
+  | I_load _ -> 43
+  | F_load _ -> 44
+  | I_store _ -> 45
+  | F_store _ -> 46
+  | I_load8 _ -> 47
+  | I_load16 _ -> 48
+  | I64_load32 _ -> 49
+  | I_store8 _ -> 50
+  | I_store16 _ -> 51
+  | I64_store32 _ -> 52
+  | Memory_size -> 53
+  | Memory_grow -> 54
+  | Memory_fill -> 55
+  | Memory_copy -> 56
+  | Memory_init _ -> 57
+  | Data_drop _ -> 58
+  | Nop -> 59
+  | Unreachable -> 60
+  | Block _ -> 61
+  | Loop _ -> 62
+  | If_else _ -> 63
+  | Br _ -> 64
+  | Br_if _ -> 65
+  | Br_table _ -> 66
+  | Return -> 67
+  | Return_call _ -> 68
+  | Return_call_indirect _ -> 69
+  | Return_call_ref _ -> 70
+  | Call _ -> 71
+  | Call_indirect _ -> 72
+  | Call_ref _ -> 73
+  | Extern_externalize -> 74
+  | Extern_internalize -> 75
+
+let rec compare_instr i1 i2 =
+  let cmp_tag = Int.compare (instr_tag i1) (instr_tag i2) in
+  if cmp_tag <> 0 then cmp_tag
+  else
+    match (i1, i2) with
+    | I32_const a, I32_const b -> Int32.compare a b
+    | I64_const a, I64_const b -> Int64.compare a b
+    | F32_const a, F32_const b -> Float32.compare a b
+    | F64_const a, F64_const b -> Float64.compare a b
+    | V128_const a, V128_const b -> V128.compare a b
+    | I_unop (n1, o1), I_unop (n2, o2) ->
+      let c = compare_nn n1 n2 in
+      if c <> 0 then c else compare_iunop o1 o2
+    | F_unop (n1, o1), F_unop (n2, o2) ->
+      let c = compare_nn n1 n2 in
+      if c <> 0 then c else compare_funop o1 o2
+    | I_binop (n1, o1), I_binop (n2, o2) ->
+      let c = compare_nn n1 n2 in
+      if c <> 0 then c else compare_ibinop o1 o2
+    | F_binop (n1, o1), F_binop (n2, o2) ->
+      let c = compare_nn n1 n2 in
+      if c <> 0 then c else compare_fbinop o1 o2
+    | I_testop (n1, o1), I_testop (n2, o2) ->
+      let c = compare_nn n1 n2 in
+      if c <> 0 then c else compare_itestop o1 o2
+    | I_relop (n1, o1), I_relop (n2, o2) ->
+      let c = compare_nn n1 n2 in
+      if c <> 0 then c else compare_irelop o1 o2
+    | F_relop (n1, o1), F_relop (n2, o2) ->
+      let c = compare_nn n1 n2 in
+      if c <> 0 then c else compare_frelop o1 o2
+    | V_ibinop (s1, o1), V_ibinop (s2, o2) ->
+      let c = compare_ishape s1 s2 in
+      if c <> 0 then c else compare_vibinop o1 o2
+    | I_extend8_s n1, I_extend8_s n2 | I_extend16_s n1, I_extend16_s n2 ->
+      compare_nn n1 n2
+    | I64_extend32_s, I64_extend32_s
+    | I32_wrap_i64, I32_wrap_i64
+    | F32_demote_f64, F32_demote_f64
+    | F64_promote_f32, F64_promote_f32
+    | Drop, Drop
+    | Ref_is_null, Ref_is_null
+    | Memory_size, Memory_size
+    | Memory_grow, Memory_grow
+    | Memory_fill, Memory_fill
+    | Memory_copy, Memory_copy
+    | Nop, Nop
+    | Unreachable, Unreachable ->
+      0
+    | I64_extend_i32 sx1, I64_extend_i32 sx2 -> compare_sx sx1 sx2
+    | I_trunc_f (a1, b1, sx1), I_trunc_f (a2, b2, sx2)
+    | I_trunc_sat_f (a1, b1, sx1), I_trunc_sat_f (a2, b2, sx2) ->
+      let c = compare_nn a1 a2 in
+      if c <> 0 then c
+      else
+        let c = compare_nn b1 b2 in
+        if c <> 0 then c else compare_sx sx1 sx2
+    | F_convert_i (a1, b1, sx1), F_convert_i (a2, b2, sx2) ->
+      let c = compare_nn a1 a2 in
+      if c <> 0 then c
+      else
+        let c = compare_nn b1 b2 in
+        if c <> 0 then c else compare_sx sx1 sx2
+    | I_reinterpret_f (a1, b1), I_reinterpret_f (a2, b2)
+    | F_reinterpret_i (a1, b1), F_reinterpret_i (a2, b2) ->
+      let c = compare_nn a1 a2 in
+      if c <> 0 then c else compare_nn b1 b2
+    | Ref_null ht1, Ref_null ht2 -> compare_heap_type ht1 ht2
+    | Select s1, Select s2 ->
+      Option.compare (List.compare compare_val_type) s1 s2
+    | Ref_func i1, Ref_func i2
+    | Local_get i1, Local_get i2
+    | Local_set i1, Local_set i2
+    | Local_tee i1, Local_tee i2
+    | Global_get i1, Global_get i2
+    | Global_set i1, Global_set i2
+    | Table_get i1, Table_get i2
+    | Table_set i1, Table_set i2
+    | Table_size i1, Table_size i2
+    | Table_grow i1, Table_grow i2
+    | Table_fill i1, Table_fill i2
+    | Elem_drop i1, Elem_drop i2
+    | Memory_init i1, Memory_init i2
+    | Data_drop i1, Data_drop i2
+    | Br i1, Br i2
+    | Br_if i1, Br_if i2
+    | Return_call i1, Return_call i2
+    | Call i1, Call i2
+    | Call_ref i1, Call_ref i2 ->
+      compare_indice i1 i2
+    | Table_copy (i1, j1), Table_copy (i2, j2)
+    | Table_init (i1, j1), Table_init (i2, j2) ->
+      let c = compare_indice i1 i2 in
+      if c <> 0 then c else compare_indice j1 j2
+    | I_load (n1, m1), I_load (n2, m2)
+    | F_load (n1, m1), F_load (n2, m2)
+    | I_store (n1, m1), I_store (n2, m2)
+    | F_store (n1, m1), F_store (n2, m2) ->
+      let c = compare_nn n1 n2 in
+      if c <> 0 then c else compare_memarg m1 m2
+    | I_load8 (n1, sx1, m1), I_load8 (n2, sx2, m2)
+    | I_load16 (n1, sx1, m1), I_load16 (n2, sx2, m2) ->
+      let c = compare_nn n1 n2 in
+      if c <> 0 then c
+      else
+        let c = compare_sx sx1 sx2 in
+        if c <> 0 then c else compare_memarg m1 m2
+    | I64_load32 (sx1, m1), I64_load32 (sx2, m2) ->
+      let c = compare_sx sx1 sx2 in
+      if c <> 0 then c else compare_memarg m1 m2
+    | I_store8 (n1, m1), I_store8 (n2, m2)
+    | I_store16 (n1, m1), I_store16 (n2, m2) ->
+      let c = compare_nn n1 n2 in
+      if c <> 0 then c else compare_memarg m1 m2
+    | I64_store32 m1, I64_store32 m2 -> compare_memarg m1 m2
+    | Block (s1, bt1, e1), Block (s2, bt2, e2)
+    | Loop (s1, bt1, e1), Loop (s2, bt2, e2) ->
+      let c = Option.compare String.compare s1 s2 in
+      if c <> 0 then c
+      else
+        let c = Option.compare compare_block_type bt1 bt2 in
+        if c <> 0 then c else Annotated.compare compare_expr e1 e2
+    | If_else (s1, bt1, e1a, e1b), If_else (s2, bt2, e2a, e2b) ->
+      let c = Option.compare String.compare s1 s2 in
+      if c <> 0 then c
+      else
+        let c = Option.compare compare_block_type bt1 bt2 in
+        if c <> 0 then c
+        else
+          let c = Annotated.compare compare_expr e1a e2a in
+          if c <> 0 then c else Annotated.compare compare_expr e1b e2b
+    | Br_table (arr1, d1), Br_table (arr2, d2) ->
+      (* TODO: use Array.compare once we switch to 5.4 *)
+      let rec cmp i =
+        if i = Array.length arr1 && i = Array.length arr2 then 0
+        else if i = Array.length arr1 then -1
+        else if i = Array.length arr2 then 1
+        else
+          let c = compare_indice arr1.(i) arr2.(i) in
+          if c <> 0 then c else cmp (i + 1)
+      in
+      let c = cmp 0 in
+      if c <> 0 then c else compare_indice d1 d2
+    | Return, Return -> 0
+    | Return_call_indirect (i1, bt1), Return_call_indirect (i2, bt2)
+    | Call_indirect (i1, bt1), Call_indirect (i2, bt2) ->
+      let c = compare_indice i1 i2 in
+      if c <> 0 then c else compare_block_type bt1 bt2
+    | Return_call_ref bt1, Return_call_ref bt2 -> compare_block_type bt1 bt2
+    | Extern_externalize, Extern_externalize -> 0
+    | Extern_internalize, Extern_internalize -> 0
+    | ( ( I32_const _ | I64_const _ | F32_const _ | F64_const _ | V128_const _
+        | I_unop _ | F_unop _ | I_binop _ | F_binop _ | V_ibinop _ | I_testop _
+        | I_relop _ | F_relop _ | I_extend8_s _ | I_extend16_s _
+        | I64_extend32_s | I32_wrap_i64 | I64_extend_i32 _ | I_trunc_f _
+        | I_trunc_sat_f _ | F32_demote_f64 | F64_promote_f32 | F_convert_i _
+        | I_reinterpret_f _ | F_reinterpret_i _ | Ref_null _ | Ref_is_null
+        | Ref_func _ | Drop | Select _ | Local_get _ | Local_set _ | Local_tee _
+        | Global_get _ | Global_set _ | Table_get _ | Table_set _ | Table_size _
+        | Table_grow _ | Table_fill _ | Table_copy _ | Table_init _
+        | Elem_drop _ | I_load _ | F_load _ | I_store _ | F_store _ | I_load8 _
+        | I_load16 _ | I64_load32 _ | I_store8 _ | I_store16 _ | I64_store32 _
+        | Memory_size | Memory_grow | Memory_fill | Memory_copy | Memory_init _
+        | Data_drop _ | Nop | Unreachable | Block _ | Loop _ | If_else _ | Br _
+        | Br_if _ | Br_table _ | Return | Return_call _ | Return_call_indirect _
+        | Return_call_ref _ | Call _ | Call_indirect _ | Call_ref _
+        | Extern_externalize | Extern_internalize )
+      , _ ) ->
+      (* Impossible because either :
+         - the two instructions are not the same and the call to `tag` exited early
+         - they are the same and we should have made a more precise comparison in the current match *)
+      assert false
+
+and compare_expr e1 e2 = List.compare (Annotated.compare compare_instr) e1 e2
+
 let rec iter_expr f (e : _ expr Annotated.t) =
   Annotated.iter (List.iter (iter_instr f)) e
 
@@ -717,7 +1075,7 @@ let pp_funcs fmt (funcs : 'a func list) = list ~sep:pp_newline pp_func fmt funcs
 
 (* Tables & Memories *)
 
-type 'a table = string option * 'a table_type
+type 'a table = string option * table_type
 
 let pp_table fmt (id, ty) = pf fmt "(table%a %a)" pp_id_opt id pp_table_type ty
 
@@ -725,7 +1083,7 @@ let pp_table fmt (id, ty) = pf fmt "(table%a %a)" pp_id_opt id pp_table_type ty
 
 type 'a import_desc =
   | Import_func of string option * 'a block_type
-  | Import_table of string option * 'a table_type
+  | Import_table of string option * table_type
   | Import_mem of string option * limits
   | Import_global of string option * 'a global_type
 
@@ -778,13 +1136,13 @@ let type_def_eq (id1, t1) (id2, t2) =
 
 let pp_start fmt start = pf fmt "(start %a)" pp_indice start
 
-type 'a const =
+type const =
   | Const_I32 of Int32.t
   | Const_I64 of Int64.t
   | Const_F32 of Float32.t
   | Const_F64 of Float64.t
   | Const_V128 of V128.t
-  | Const_null of 'a heap_type
+  | Const_null of heap_type
   | Const_host of int
   | Const_extern of int
 

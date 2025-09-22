@@ -161,7 +161,7 @@ let write_table buf ((_so, (limits, (_nullable, heaptype))) : _ table) =
 
 let write_table_import buf
   ({ Imported.modul; name; desc = limits, (_nullable, heaptype); _ } :
-    _ table_type Imported.t ) =
+    table_type Imported.t ) =
   write_string buf modul;
   write_string buf name;
   Buffer.add_char buf '\x01';

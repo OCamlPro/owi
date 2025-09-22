@@ -57,7 +57,7 @@ let pp_elem_mode fmt = function
 
 type elem =
   { id : string option
-  ; typ : text ref_type
+  ; typ : ref_type
   ; init : text expr Annotated.t list
   ; mode : elem_mode
   }
@@ -108,7 +108,7 @@ let pp_modul fmt (m : modul) =
     m.fields
 
 type action =
-  | Invoke of string option * string * text const list
+  | Invoke of string option * string * const list
   | Get of string option * string
 
 let pp_action fmt = function
@@ -117,7 +117,7 @@ let pp_action fmt = function
   | Get _ -> pf fmt "<action_get TODO>"
 
 type result_const =
-  | Literal of text const
+  | Literal of const
   | Nan_canon of nn
   | Nan_arith of nn
 

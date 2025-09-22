@@ -79,3 +79,26 @@ let pp ppf v =
   | F32x4 (a, b, c, d) ->
     Fmt.pf ppf "f32x4 %a %a %a %a" Float32.pp a Float32.pp b Float32.pp c
       Float32.pp d
+
+let tag = function F32x4 _ -> 0 | F64x2 _ -> 1 | I32x4 _ -> 2 | I64x2 _ -> 3
+
+let compare v1 v2 =
+  let cmp = compare (tag v1) (tag v2) in
+  if cmp <> 0 then cmp
+  else
+    match (v1, v2) with
+    | F32x4 (l1, l2, l3, l4), F32x4 (r1, r2, r3, r4) ->
+      List.compare Float32.compare [ l1; l2; l3; l4 ] [ r1; r2; r3; r4 ]
+    | F64x2 (l1, l2), F64x2 (r1, r2) ->
+      let cmp = Float64.compare l1 r1 in
+      if cmp <> 0 then cmp else Float64.compare l2 r2
+    | I32x4 (l1, l2, l3, l4), I32x4 (r1, r2, r3, r4) ->
+      List.compare Int32.compare [ l1; l2; l3; l4 ] [ r1; r2; r3; r4 ]
+    | I64x2 (l1, l2), I64x2 (r1, r2) ->
+      let cmp = Int64.compare l1 r1 in
+      if cmp <> 0 then cmp else Int64.compare l2 r2
+    | (F32x4 _ | F64x2 _ | I32x4 _ | I64x2 _), _ ->
+      (* Safe because either:
+          - the two variant are not the same and the early tag check ruled the case out
+          - they are the same and we handled it before! *)
+      assert false

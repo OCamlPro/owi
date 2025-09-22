@@ -38,3 +38,7 @@ val to_i32x4 : t -> int32 * int32 * int32 * int32
 val eq : t -> t -> bool
 
 val pp : Format.formatter -> t -> unit
+
+(* Other stuff not related to Wasm but added here for convenience *)
+
+val compare : t -> t -> int

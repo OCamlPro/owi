@@ -297,6 +297,11 @@ You can then create a file `useless.dot` containing the call graph of the progra
 
 ```sh
 $ owi analyze cg useless.wat
+-> 4611686018427387903
+-> 4611686018427387903
+-> 4611686018427387903
+-> 4611686018427387903
+-> 0
 ```
 ![image](call_graph.svg)
 

@@ -1,6 +1,6 @@
 open Owi.Types
 
-type elem = text val_type
+type elem = val_type
 
 type stack_op =
   | Pop

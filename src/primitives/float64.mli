@@ -73,3 +73,7 @@ val to_float : t -> Float.t
 val of_float : Float.t -> t
 
 val pp : Format.formatter -> t -> unit
+
+(* Other stuff not related to Wasm but added here for convenience *)
+
+val compare : t -> t -> int

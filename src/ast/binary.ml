@@ -43,7 +43,7 @@ type elem_mode =
 
 type elem =
   { id : string option
-  ; typ : binary ref_type (* TODO: init : binary+const expr*)
+  ; typ : ref_type (* TODO: init : binary+const expr*)
   ; init : binary expr Annotated.t list
   ; mode : elem_mode
   }
@@ -57,7 +57,7 @@ module Module = struct
     { id : string option
     ; types : binary type_def array
     ; global : (global, binary global_type) Runtime.t array
-    ; table : (binary table, binary table_type) Runtime.t array
+    ; table : (binary table, table_type) Runtime.t array
     ; mem : (mem, limits) Runtime.t array
     ; func : (binary func, binary block_type) Runtime.t array
         (* TODO: switch to func_type *)
