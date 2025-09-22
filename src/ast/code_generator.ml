@@ -8,10 +8,10 @@ open Spec
 open Syntax
 
 type type_env =
-  { param_types : binary val_type array
-  ; binder_types : binary val_type array
-  ; global_types : binary val_type array
-  ; result_types : binary val_type array
+  { param_types : val_type array
+  ; binder_types : val_type array
+  ; global_types : val_type array
+  ; result_types : val_type array
   ; binder : int -> binary indice
   ; result : int -> binary indice
   ; copy : binary expr
@@ -82,8 +82,8 @@ let prop_true = I32_const (Int32.of_int 1) |> Annotated.dummy
 
 let prop_false = I32_const (Int32.of_int 0) |> Annotated.dummy
 
-let unop_generate (u : unop) (expr1 : binary expr) (ty1 : binary val_type) :
-  (binary expr * binary val_type) Result.t =
+let unop_generate (u : unop) (expr1 : binary expr) (ty1 : val_type) :
+  (binary expr * val_type) Result.t =
   match u with
   | Neg -> (
     match ty1 with
@@ -114,9 +114,8 @@ let unop_generate (u : unop) (expr1 : binary expr) (ty1 : binary val_type) :
     | Num_type V128 -> Error (`Spec_type_error Fmt.(str "%a" pp_unop u))
     | Ref_type _ -> Error (`Spec_type_error Fmt.(str "%a" pp_unop u)) )
 
-let binop_generate (b : binop) (expr1 : binary expr) (ty1 : binary val_type)
-  (expr2 : binary expr) (ty2 : binary val_type) :
-  (binary expr * binary val_type) Result.t =
+let binop_generate (b : binop) (expr1 : binary expr) (ty1 : val_type)
+  (expr2 : binary expr) (ty2 : val_type) : (binary expr * val_type) Result.t =
   match b with
   | Plus -> (
     match (ty1, ty2) with
@@ -180,7 +179,7 @@ let binop_generate (b : binop) (expr1 : binary expr) (ty1 : binary val_type)
     | _, _ -> Error (`Spec_type_error Fmt.(str "%a" pp_binop b)) )
 
 let rec term_generate tenv (term : binary term) :
-  (binary expr * binary val_type) Result.t =
+  (binary expr * val_type) Result.t =
   match term with
   | Int32 i32 -> Ok ([ I32_const i32 |> Annotated.dummy ], Num_type I32)
   | Int64 i64 -> Ok ([ I64_const i64 |> Annotated.dummy ], Num_type I64)
@@ -230,8 +229,8 @@ let rec term_generate tenv (term : binary term) :
         , Num_type I32 )
     | _ -> Error (`Spec_type_error Fmt.(str "%a" pp_term tm1)) )
 
-let binpred_generate (b : binpred) (expr1 : binary expr) (ty1 : binary val_type)
-  (expr2 : binary expr) (ty2 : binary val_type) : binary expr Result.t =
+let binpred_generate (b : binpred) (expr1 : binary expr) (ty1 : val_type)
+  (expr2 : binary expr) (ty2 : val_type) : binary expr Result.t =
   match b with
   | Ge -> (
     match (ty1, ty2) with

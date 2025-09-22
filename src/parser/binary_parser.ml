@@ -700,11 +700,11 @@ let read_const types input =
   let+ input = check_end_opcode input in
   (c, input)
 
-type ('a, 'b) import =
+type import =
   | Func of int
-  | Table of limits * 'a ref_type
+  | Table of limits * ref_type
   | Mem of limits
-  | Global of mut * 'b val_type
+  | Global of mut * val_type
 
 let magic_check str =
   if String.length str < 4 then parse_fail "unexpected end"

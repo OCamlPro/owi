@@ -9,7 +9,7 @@ open Types
 type t =
   { mutable data : Symbolic_value.ref_value array
   ; limits : limits
-  ; typ : binary ref_type
+  ; typ : ref_type
   }
 
 let clone_t { limits; data; typ } = { typ; limits; data = Array.copy data }

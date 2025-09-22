@@ -3,7 +3,6 @@
 (* Written by the Owi programmers *)
 
 open Types
-open Syntax
 
 let sep fmt () = Fmt.pf fmt " ; "
 
@@ -46,7 +45,7 @@ type t =
       (* Types checks to perform after assignment.
      Come from function declarations with type indicies *)
   ; global : (Text.global, binary global_type) Runtime.t Indexed.t list
-  ; table : (binary table, binary table_type) Runtime.t Indexed.t list
+  ; table : (binary table, table_type) Runtime.t Indexed.t list
   ; mem : (mem, limits) Runtime.t Indexed.t list
   ; func : (text func, text block_type) Runtime.t Indexed.t list
   ; elem : Text.elem Indexed.t list
@@ -230,10 +229,9 @@ let add_data value (fields : t) (curr : curr) =
 let add_field curr (fields : t) = function
   | Text.MType typ ->
     let typ = typ :: fields.typ in
-    Ok { fields with typ }
-  | MGlobal global -> ok @@ add_global (Local global) fields curr
+    { fields with typ }
+  | MGlobal global -> add_global (Local global) fields curr
   | MImport ({ desc = Import_global (a, (mut, val_type)); _ } as import) ->
-    let+ val_type = Binary_types.convert_val_type val_type in
     let b = (mut, val_type) in
     let imported = imp import (a, b) in
     add_global (Imported imported) fields curr
@@ -242,14 +240,12 @@ let add_field curr (fields : t) = function
     let exports =
       { fields.exports with global = { name; id } :: fields.exports.global }
     in
-    Ok { fields with exports }
+    { fields with exports }
   | MTable table ->
     let id, table_type = table in
-    let+ table_type = Binary_types.convert_table_type table_type in
     let table = (id, table_type) in
     add_table (Local table) fields curr
   | MImport ({ desc = Import_table (id, table_type); _ } as import) ->
-    let+ table_type = Binary_types.convert_table_type table_type in
     let imported = imp import (id, table_type) in
     add_table (Imported imported) fields curr
   | MExport { name; desc = Export_table id } ->
@@ -257,27 +253,27 @@ let add_field curr (fields : t) = function
     let exports =
       { fields.exports with table = { name; id } :: fields.exports.table }
     in
-    Ok { fields with exports }
-  | MMem mem -> ok @@ add_mem (Local mem) fields curr
+    { fields with exports }
+  | MMem mem -> add_mem (Local mem) fields curr
   | MImport ({ desc = Import_mem (id, limits); _ } as import) ->
     let imported = imp import (id, limits) in
-    ok @@ add_mem (Imported imported) fields curr
+    add_mem (Imported imported) fields curr
   | MExport { name; desc = Export_mem id } ->
     let id = curr_id curr.mem id in
     let exports =
       { fields.exports with mem = { name; id } :: fields.exports.mem }
     in
-    Ok { fields with exports }
-  | MFunc func -> ok @@ add_func (Runtime.Local func) fields curr
+    { fields with exports }
+  | MFunc func -> add_func (Runtime.Local func) fields curr
   | MImport ({ desc = Import_func (a, type_f); _ } as import) ->
     let imported : text block_type Imported.t = imp import (a, type_f) in
-    ok @@ add_func (Imported imported) fields curr
+    add_func (Imported imported) fields curr
   | MExport { name; desc = Export_func id } ->
     let id = curr_id curr.func id in
     let exports =
       { fields.exports with func = { name; id } :: fields.exports.func }
     in
-    Ok { fields with exports }
+    { fields with exports }
   | MElem elem ->
     let mode =
       match elem.mode with
@@ -286,7 +282,7 @@ let add_field curr (fields : t) = function
         let id = curr_id curr.table id in
         Elem_active (Some id, expr)
     in
-    ok @@ add_elem { elem with mode } fields curr
+    add_elem { elem with mode } fields curr
   | MData data ->
     let mode =
       match data.mode with
@@ -296,13 +292,13 @@ let add_field curr (fields : t) = function
         Data_active (Some id, expr)
     in
     let data : Text.data = { id = data.id; init = data.init; mode } in
-    ok @@ add_data data fields curr
-  | MStart start -> Ok { fields with start = Some start }
+    add_data data fields curr
+  | MStart start -> { fields with start = Some start }
 
 let of_text { Text.fields; id; annots } =
   Log.debug (fun m -> m "grouping     ...");
-  let+ modul =
-    list_fold_left (add_field (init_curr ())) (empty_module id) fields
+  let modul =
+    List.fold_left (add_field (init_curr ())) (empty_module id) fields
   in
   let modul = { modul with annots } in
   Log.debug (fun m -> m "%a" pp modul);

@@ -1,8 +1,5 @@
-val build_cfg_from_text_module :
-  Text.modul -> int -> Types.binary Types.expr Graph.t
+val build_cfg_from_text_module : Text.modul -> int -> Control_flow_graph.t
 
-val build_cfg_from_func :
-  Types.binary Types.func -> Types.binary Types.expr Graph.t
+val build_cfg_from_func : Types.binary Types.func -> Control_flow_graph.t
 
-val cmd :
-  source_file:Fpath.t -> entry_point:string option -> scc:bool -> unit Result.t
+val cmd : source_file:Fpath.t -> entry_point:string option -> unit Result.t

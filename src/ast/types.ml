@@ -278,7 +278,7 @@ let pp_mem fmt (id, ty) = pf fmt "(memory%a %a)" pp_id_opt id pp_limits ty
 
 (** Types *)
 
-type 'a heap_type =
+type heap_type =
   | Func_ht
   | Extern_ht
 
@@ -301,7 +301,7 @@ let compare_heap_type t1 t2 =
   let to_int = function Func_ht -> 0 | Extern_ht -> 1 in
   Int.compare (to_int t1) (to_int t2)
 
-type nonrec 'a ref_type = nullable * 'a heap_type
+type nonrec ref_type = nullable * heap_type
 
 let pp_ref_type fmt (n, ht) =
   match n with
@@ -320,9 +320,9 @@ let compare_ref_type t1 t2 =
   | (Null, _), (No_null, _) -> -1
   | (No_null, _), (Null, _) -> 1
 
-type nonrec 'a val_type =
+type nonrec val_type =
   | Num_type of num_type
-  | Ref_type of 'a ref_type
+  | Ref_type of ref_type
 
 let pp_val_type fmt = function
   | Num_type t -> pp_num_type fmt t
@@ -341,7 +341,7 @@ let compare_val_type t1 t2 =
   | Num_type _, _ -> 1
   | Ref_type _, _ -> -1
 
-type nonrec 'a param = string option * 'a val_type
+type nonrec 'a param = string option * val_type
 
 let pp_param fmt (id, vt) = pf fmt "(param%a %a)" pp_id_opt id pp_val_type vt
 
@@ -357,7 +357,7 @@ let param_type_eq t1 t2 = List.equal param_eq t1 t2
 
 let compare_param_type t1 t2 = List.compare compare_param t1 t2
 
-type nonrec 'a result_type = 'a val_type list
+type nonrec 'a result_type = val_type list
 
 let pp_result_ fmt vt = pf fmt "(result %a)" pp_val_type vt
 
@@ -406,12 +406,12 @@ let compare_func_type (pt1, rt1) (pt2, rt2) =
   let pt = compare_param_type pt1 pt2 in
   if pt = 0 then compare_result_type rt1 rt2 else pt
 
-type nonrec 'a table_type = limits * 'a ref_type
+type nonrec table_type = limits * ref_type
 
 let pp_table_type fmt (limits, ref_type) =
   pf fmt "%a %a" pp_limits limits pp_ref_type ref_type
 
-type nonrec 'a global_type = mut * 'a val_type
+type nonrec 'a global_type = mut * val_type
 
 let pp_global_type fmt (mut, val_type) =
   match mut with
@@ -420,7 +420,7 @@ let pp_global_type fmt (mut, val_type) =
 
 type nonrec 'a extern_type =
   | Func of string option * 'a func_type
-  | Table of string option * 'a table_type
+  | Table of string option * table_type
   | Mem of string option * limits
   | Global of string option * 'a global_type
 
@@ -454,12 +454,12 @@ type 'a instr =
   | I_reinterpret_f of nn * nn
   | F_reinterpret_i of nn * nn
   (* Reference instructions *)
-  | Ref_null of 'a heap_type
+  | Ref_null of heap_type
   | Ref_is_null
   | Ref_func of 'a indice
   (* Parametric instructions *)
   | Drop
-  | Select of 'a val_type list option
+  | Select of val_type list option
   (* Variable instructions *)
   | Local_get of 'a indice
   | Local_set of 'a indice
@@ -717,7 +717,7 @@ let pp_funcs fmt (funcs : 'a func list) = list ~sep:pp_newline pp_func fmt funcs
 
 (* Tables & Memories *)
 
-type 'a table = string option * 'a table_type
+type 'a table = string option * table_type
 
 let pp_table fmt (id, ty) = pf fmt "(table%a %a)" pp_id_opt id pp_table_type ty
 
@@ -725,7 +725,7 @@ let pp_table fmt (id, ty) = pf fmt "(table%a %a)" pp_id_opt id pp_table_type ty
 
 type 'a import_desc =
   | Import_func of string option * 'a block_type
-  | Import_table of string option * 'a table_type
+  | Import_table of string option * table_type
   | Import_mem of string option * limits
   | Import_global of string option * 'a global_type
 
@@ -778,13 +778,13 @@ let type_def_eq (id1, t1) (id2, t2) =
 
 let pp_start fmt start = pf fmt "(start %a)" pp_indice start
 
-type 'a const =
+type const =
   | Const_I32 of Int32.t
   | Const_I64 of Int64.t
   | Const_F32 of Float32.t
   | Const_F64 of Float64.t
   | Const_V128 of V128.t
-  | Const_null of 'a heap_type
+  | Const_null of heap_type
   | Const_host of int
   | Const_extern of int
 
