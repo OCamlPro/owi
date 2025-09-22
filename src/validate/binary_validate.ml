@@ -11,7 +11,7 @@ open Fmt
 
 type typ =
   | Num_type of num_type
-  | Ref_type of binary heap_type
+  | Ref_type of heap_type
   | Any
   | Something
 
@@ -142,7 +142,7 @@ module Stack : sig
 
   val equal : t -> t -> bool
 
-  val match_ref_type : binary heap_type -> binary heap_type -> bool
+  val match_ref_type : heap_type -> heap_type -> bool
 
   val match_types : typ -> typ -> bool
 
@@ -217,7 +217,7 @@ end = struct
 
   let push t stack = ok @@ t @ stack
 
-  let pop_push (Bt_raw (_, (pt, rt))) stack =
+  let pop_push (Bt_raw (_, (pt, rt)) : binary block_type) stack =
     let pt, rt = (List.rev_map typ_of_pt pt, List.rev_map typ_of_val_type rt) in
     let* stack = pop pt stack in
     push rt stack

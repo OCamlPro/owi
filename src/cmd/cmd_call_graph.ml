@@ -221,7 +221,7 @@ let build_call_graph call_graph_mode (m : Binary.Module.t) entry_point =
     Array.fold_left (build_graph call_graph_mode tables funcs) ([], 0) funcs
   in
   let entries = find_entries entry_point m in
-  Graph.init_cg l entries
+  Call_graph.init l entries
 
 let build_call_graph_from_text_module call_graph_mode modul entry_point =
   let m =
@@ -233,26 +233,14 @@ let build_call_graph_from_text_module call_graph_mode modul entry_point =
 
 let compute_distances m entry_point =
   let call_graph = build_call_graph Sound m entry_point in
-  let _ : int array array array =
-    Graph.compute_distance_to_unreachable_cg call_graph
-  in
-  ()
+  Exploration_smart.compute_distance_to_unreachable call_graph
 
-let cmd ~call_graph_mode ~source_file ~entry_point ~scc =
+let cmd ~call_graph_mode ~source_file ~entry_point =
   let* m =
     Compile.File.until_validate ~unsafe:false ~rac:false ~srac:false source_file
   in
   let call_graph = build_call_graph call_graph_mode m entry_point in
 
-  let distances = Graph.compute_distance_to_unreachable_cg call_graph in
-  Logs.app (fun log -> log "%a" Graph.pp_distances distances);
-
-  if scc then
-    let scc = Graph.build_scc_graph call_graph in
-    Bos.OS.File.writef
-      (Fpath.set_ext ".dot" source_file)
-      "%a" Graph.pp_scc_graph (scc, Graph.Cg)
-  else
-    Bos.OS.File.writef
-      (Fpath.set_ext ".dot" source_file)
-      "%a" Graph.pp_cg call_graph
+  Bos.OS.File.writef
+    (Fpath.set_ext ".dot" source_file)
+    "%a" Call_graph.pp call_graph

@@ -30,7 +30,7 @@ type t =
       (* Types checks to perform after assignment.
          Come from function declarations with type indicies *)
   ; global : (Text.global, binary global_type) Runtime.t Indexed.t list
-  ; table : (binary table, binary table_type) Runtime.t Indexed.t list
+  ; table : (binary table, table_type) Runtime.t Indexed.t list
   ; mem : (mem, Types.limits) Runtime.t Indexed.t list
   ; func : (text func, text block_type) Runtime.t Indexed.t list
   ; elem : Text.elem Indexed.t list
@@ -40,6 +40,6 @@ type t =
   ; annots : text Annot.annot list
   }
 
-val of_text : Text.modul -> t Result.t
+val of_text : Text.modul -> t
 
 val pp : Format.formatter -> t -> unit

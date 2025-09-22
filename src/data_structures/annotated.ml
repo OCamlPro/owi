@@ -49,3 +49,5 @@ let set_d_true annot a =
 
 let set_d_false annot a =
   match !(annot.d_false) with None -> annot.d_false := Some a | _ -> ()
+
+let compare compare_f a1 a2 = compare_f a1.raw a2.raw

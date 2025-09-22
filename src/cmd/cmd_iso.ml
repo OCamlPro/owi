@@ -248,7 +248,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
     in
     let body = Annotated.dummies body |> Annotated.dummy in
     let type_f =
-      let (Bt_raw (_, typ)) = typ in
+      let (Bt_raw (_, typ) : Types.binary Types.block_type) = typ in
       Types.Bt_raw (None, (fst typ, []))
     in
     Runtime.Local { Types.type_f; locals; body; id }

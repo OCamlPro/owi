@@ -9,7 +9,7 @@ module Text = struct
     if unsafe then Ok m else Text_validate.modul m
 
   let until_group ~unsafe m =
-    let* m = until_text_validate ~unsafe m in
+    let+ m = until_text_validate ~unsafe m in
     Grouped.of_text m
 
   let until_assign ~unsafe m =

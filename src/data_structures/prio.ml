@@ -24,10 +24,10 @@ let compare p1 p2 =
     | None, _ -> 1
     | _, None -> -1
     | Some l1, Some l2 ->
-       if v1.instr_counter = v2.instr_counter then List.compare compare l1 l2
-          else if v1.instr_counter = 0 then -1
-          else if v2.instr_counter = 0 then 1 else
-            List.compare compare l1 l2)
+      if v1.instr_counter = v2.instr_counter then List.compare compare l1 l2
+      else if v1.instr_counter = 0 then -1
+      else if v2.instr_counter = 0 then 1
+      else List.compare compare l1 l2 )
   | Default, Default -> 0
   | Default, _ -> -1
   | _, Default -> 1
