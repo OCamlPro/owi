@@ -530,7 +530,10 @@ module Make (Thread : Thread_intf.S) = struct
 
   let assume c =
     let* assertion_true =
-      select_inner c ~with_breadcrumbs:false ~explore_first:false
+      select_inner c ~with_breadcrumbs:false
+        ~explore_first:false
+          (* TODO: make the prio false very low, we are not interested in such branches *)
+        ~prio_true:Prio.Default ~prio_false:Prio.Default
     in
     if assertion_true then return () else stop
 end

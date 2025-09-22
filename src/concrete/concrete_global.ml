@@ -8,7 +8,7 @@ type t =
   { mutable value : Concrete_value.t
   ; label : string option
   ; mut : mut
-  ; typ : binary val_type
+  ; typ : val_type
   }
 
 let value g = g.value

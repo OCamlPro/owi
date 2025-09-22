@@ -31,13 +31,12 @@ let rewrite_block_type (typemap : binary indice TypeMap.t) (modul : Assigned.t)
       Ok (Bt_raw (Some (Raw idx), t'))
   end
   | Bt_raw (_, func_type) ->
-    let+ t = Binary_types.convert_func_type func_type in
     let idx =
-      match TypeMap.find_opt t typemap with
+      match TypeMap.find_opt func_type typemap with
       | None -> assert false
       | Some idx -> idx
     in
-    Bt_raw (Some idx, t)
+    Ok (Bt_raw (Some idx, func_type))
 
 let rewrite_expr (typemap : binary indice TypeMap.t) (modul : Assigned.t)
   (locals : binary param list) (iexpr : text expr Annotated.t) :
@@ -191,9 +190,7 @@ let rewrite_expr (typemap : binary indice TypeMap.t) (modul : Assigned.t)
     | Select typ -> begin
       match typ with
       | None -> Ok (Select None)
-      | Some [ t ] ->
-        let+ t = Binary_types.convert_val_type t in
-        Select (Some [ t ])
+      | Some [ t ] -> Ok (Select (Some [ t ]))
       | Some [] | Some (_ :: _ :: _) -> Error `Invalid_result_arity
     end
     | ( I_unop _ | I_binop _ | I_testop _ | I_relop _ | F_unop _ | F_relop _
@@ -207,9 +204,7 @@ let rewrite_expr (typemap : binary indice TypeMap.t) (modul : Assigned.t)
       | F_load _ | F_store _ | I_store _ | Memory_copy | Memory_size
       | Memory_fill | Memory_grow | V_ibinop _ ) as i ->
       Ok i
-    | Ref_null t ->
-      let+ t = Binary_types.convert_heap_type t in
-      Ref_null t
+    | Ref_null t -> Ok (Ref_null t)
   and expr (e : text expr Annotated.t) (loop_count, block_ids) :
     binary expr Annotated.t Result.t =
     let+ e =
@@ -225,9 +220,8 @@ let rewrite_expr (typemap : binary indice TypeMap.t) (modul : Assigned.t)
 
 let rewrite_global (typemap : binary indice TypeMap.t) (modul : Assigned.t)
   (global : Text.global) : Binary.global Result.t =
-  let* init = rewrite_expr typemap modul [] global.init in
+  let+ init = rewrite_expr typemap modul [] global.init in
   let mut, val_type = global.typ in
-  let+ val_type = Binary_types.convert_val_type val_type in
   let typ = (mut, val_type) in
   { Binary.id = global.id; init; typ }
 
@@ -243,9 +237,8 @@ let rewrite_elem (typemap : binary indice TypeMap.t) (modul : Assigned.t)
       let+ expr = rewrite_expr typemap modul [] expr in
       Binary.Elem_active (Some indice, expr)
   in
-  let* init = list_map (rewrite_expr typemap modul []) elem.init in
-  let+ typ = Binary_types.convert_ref_type elem.typ in
-  { Binary.init; mode; id = elem.id; typ }
+  let+ init = list_map (rewrite_expr typemap modul []) elem.init in
+  { Binary.init; mode; id = elem.id; typ = elem.typ }
 
 let rewrite_data (typemap : binary indice TypeMap.t) (modul : Assigned.t)
   (data : Text.data) : Binary.data Result.t =
@@ -290,7 +283,6 @@ let rewrite_func (typemap : binary indice TypeMap.t) (modul : Assigned.t)
   let* (Bt_raw (_, (params, _)) as type_f) =
     rewrite_block_type typemap modul type_f
   in
-  let* locals = list_map Binary_types.convert_param locals in
   let+ body = rewrite_expr typemap modul (params @ locals) body in
   { body; type_f; id; locals }
 

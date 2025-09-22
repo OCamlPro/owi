@@ -169,9 +169,7 @@ let set_entry_point entry_point invoke_with_symbols (m : Binary.Module.t) =
               default t )
             pt
         in
-        let after_call =
-          List.map (fun (_ : _ Types.val_type) -> Types.Drop) rt
-        in
+        let after_call = List.map (fun (_ : Types.val_type) -> Types.Drop) rt in
         args @ [ Types.Call (Raw export.id) ] @ after_call
         |> Annotated.dummies |> Annotated.dummy
       in

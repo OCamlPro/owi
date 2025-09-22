@@ -7,10 +7,7 @@ type mode =
   | Sound
 
 val build_call_graph_from_text_module :
-     mode
-  -> Text.modul
-  -> string option
-  -> (Types.binary Types.instr Annotated.t list Graph.t option * bool) Graph.t
+  mode -> Text.modul -> string option -> Call_graph.t
 
 val compute_distances : Binary.Module.t -> string option -> unit
 
@@ -18,5 +15,4 @@ val cmd :
      call_graph_mode:mode
   -> source_file:Fpath.t
   -> entry_point:string option
-  -> scc:bool
   -> unit Result.t

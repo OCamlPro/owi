@@ -20,7 +20,7 @@ OPTIONS
        --entry-point=FUNCTION
            entry point of the executable
 
-       --exploration=VAL (absent=lifo)
+       --exploration=VAL (absent=fifo)
            exploration strategy to use ("fifo", "lifo" or "random")
 
        --fail-on-assertion-only

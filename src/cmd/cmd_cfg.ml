@@ -21,7 +21,7 @@ let increase x =
   match m with Ind m -> (n, Ind (m + 1), s) | _ -> x
 
 let rec build_graph (l : binary expr) nodes n node edges
-  (edges_to_add : (int * to_add * string option) list) continue =
+  (edges_to_add : (int * to_add * Int32.t option) list) continue =
   match l with
   | [] -> (
     match node with
@@ -68,14 +68,14 @@ let rec build_graph (l : binary expr) nodes n node edges
     | If_else (_, _, e1, e2) ->
       let nodes = (n, instr :: node) :: nodes in
 
-      let edges = (n, n + 1, Some "true") :: edges in
+      let edges = (n, n + 1, Some 1l) :: edges in
       let nodes, edges, n1, edges_to_add, continue' =
         build_graph e1.raw nodes (n + 1) [] edges
           (List.map increase edges_to_add)
           continue
       in
 
-      let edges = (n, n1, Some "false") :: edges in
+      let edges = (n, n1, Some 0l) :: edges in
       let nodes, edges, n2, edges_to_add', continue =
         build_graph e2.raw nodes n1 [] edges [] continue
       in
@@ -91,16 +91,16 @@ let rec build_graph (l : binary expr) nodes n node edges
       (nodes, edges, n + 1, edges_to_add, false)
     | Br_if (Raw i) ->
       let nodes = (n, instr :: node) :: nodes in
-      let edges_to_add = (n, Ind i, Some "true") :: edges_to_add in
-      let edges = (n, n + 1, Some "false") :: edges in
+      let edges_to_add = (n, Ind i, Some 1l) :: edges_to_add in
+      let edges = (n, n + 1, Some 0l) :: edges in
       build_graph l nodes (n + 1) [] edges edges_to_add continue
     | Br_table (inds, Raw i) ->
       let nodes = (n, instr :: node) :: nodes in
-      let edges_to_add = (n, Ind i, Some "default") :: edges_to_add in
+      let edges_to_add = (n, Ind i, None) :: edges_to_add in
       let edges_to_add, _ =
         Array.fold_left
           (fun (acc, x) (Raw i : binary indice) ->
-            ((n, Ind i, Some (string_of_int x)) :: acc, x + 1) )
+            ((n, Ind i, Some (Int32.of_int x)) :: acc, x + 1) )
           (edges_to_add, 0) inds
       in
       (nodes, edges, n + 1, edges_to_add, false)
@@ -138,14 +138,14 @@ let build_cfg_from_text_module modul entry =
       | _ -> assert false
     in
     let nodes, edges = build_cfg f.body.raw in
-    Graph.init_cfg nodes edges
+    Control_flow_graph.init nodes edges
   | _ -> assert false
 
 let build_cfg_from_func f =
   let nodes, edges = build_cfg f.body.raw in
-  Graph.init_cfg nodes edges
+  Control_flow_graph.init nodes edges
 
-let cmd ~source_file ~entry_point ~scc =
+let cmd ~source_file ~entry_point =
   let* m =
     Compile.File.until_validate ~unsafe:false ~rac:false ~srac:false source_file
   in
@@ -167,14 +167,7 @@ let cmd ~source_file ~entry_point ~scc =
     match Array.get m.func entry with Runtime.Local f -> f | _ -> assert false
   in
   let nodes, edges = build_cfg f.body.raw in
-  let graph = Graph.init_cfg nodes edges in
-  if scc then
-    let scc = Graph.build_scc_graph graph in
-
-    Bos.OS.File.writef
-      (Fpath.set_ext ".dot" source_file)
-      "%a" Graph.pp_scc_graph (scc, Graph.Cfg)
-  else
-    Bos.OS.File.writef
-      (Fpath.set_ext ".dot" source_file)
-      "%a" Graph.pp_cfg graph
+  let graph = Control_flow_graph.init nodes edges in
+  Bos.OS.File.writef
+    (Fpath.set_ext ".dot" source_file)
+    "%a" Control_flow_graph.pp graph

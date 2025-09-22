@@ -9,7 +9,7 @@ module Text = struct
     if unsafe then Ok m else Text_validate.modul m
 
   let until_group ~unsafe m =
-    let* m = until_text_validate ~unsafe m in
+    let+ m = until_text_validate ~unsafe m in
     Grouped.of_text m
 
   let until_assign ~unsafe m =
@@ -73,7 +73,7 @@ module File = struct
 
   let until_validate ~unsafe ~rac ~srac filename =
     let* m = Parse.guess_from_file filename in
-    Log.bench_fn "Validation time" @@ fun () ->
+    Log.bench_fn "validation time" @@ fun () ->
     match m with
     | Kind.Wat m -> Text.until_validate ~unsafe ~rac ~srac m
     | Wasm m -> Binary.until_validate ~unsafe m

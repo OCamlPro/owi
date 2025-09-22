@@ -17,7 +17,7 @@ type t =
   { id : string option
   ; typ : Type.t Named.t
   ; global : (Text.global, binary global_type) Runtime.t Named.t
-  ; table : (binary table, binary table_type) Runtime.t Named.t
+  ; table : (binary table, table_type) Runtime.t Named.t
   ; mem : (mem, limits) Runtime.t Named.t
   ; func : (text func, text block_type) Runtime.t Named.t
   ; elem : Text.elem Named.t
@@ -88,31 +88,29 @@ type type_acc =
   ; all_types : int TypeMap.t
   }
 
-let assign_type (acc : type_acc) (name, func_type) : type_acc Result.t =
+let assign_type (acc : type_acc) (name, func_type) : type_acc =
   let { declared_types; func_types; named_types; last_assigned_int; all_types }
       =
     acc
   in
-  let+ last_assigned_int, declared_types, named_types, all_types =
-    let+ str_type = Binary_types.convert_func_type func_type in
+  let last_assigned_int, declared_types, named_types, all_types =
     let id = last_assigned_int in
     let last_assigned_int = succ last_assigned_int in
-    let declared_types = Indexed.return id str_type :: declared_types in
+    let declared_types = Indexed.return id func_type :: declared_types in
     let named_types =
       match name with
       | None -> named_types
       | Some name -> String_map.add name id named_types
     in
-    let all_types = TypeMap.add str_type id all_types in
+    let all_types = TypeMap.add func_type id all_types in
     (last_assigned_int, declared_types, named_types, all_types)
   in
 
   (* Is there something to do/check when a type is already declared ? *)
   { declared_types; func_types; named_types; last_assigned_int; all_types }
 
-let assign_heap_type (acc : type_acc) typ : type_acc Result.t =
+let assign_heap_type (acc : type_acc) typ : type_acc =
   let { func_types; last_assigned_int; all_types; _ } = acc in
-  let+ typ = Binary_types.convert_func_type typ in
   match TypeMap.find_opt typ all_types with
   | Some _id -> acc
   | None ->
@@ -122,7 +120,7 @@ let assign_heap_type (acc : type_acc) typ : type_acc Result.t =
     let func_types = Indexed.return id typ :: func_types in
     { acc with func_types; last_assigned_int; all_types }
 
-let assign_types (modul : Grouped.t) : binary func_type Named.t Result.t =
+let assign_types (modul : Grouped.t) : binary func_type Named.t =
   let empty_acc : type_acc =
     { declared_types = []
     ; func_types = []
@@ -131,9 +129,9 @@ let assign_types (modul : Grouped.t) : binary func_type Named.t Result.t =
     ; all_types = TypeMap.empty
     }
   in
-  let* acc = list_fold_left assign_type empty_acc (List.rev modul.typ) in
-  let+ acc =
-    list_fold_left assign_heap_type acc (List.rev modul.function_type)
+  let acc = List.fold_left assign_type empty_acc (List.rev modul.typ) in
+  let acc =
+    List.fold_left assign_heap_type acc (List.rev modul.function_type)
   in
   let values = List.rev acc.declared_types @ List.rev acc.func_types in
   Named.create values acc.named_types
@@ -172,14 +170,13 @@ let check_type_id (types : binary func_type Named.t)
   match Indexed.get_at id types.values with
   | None -> Error (`Unknown_type (Raw id))
   | Some func_type' ->
-    let* func_type = Binary_types.convert_func_type func_type in
     if not (Types.func_type_eq func_type func_type') then
       Error `Inline_function_type
     else Ok ()
 
 let of_grouped (modul : Grouped.t) : t Result.t =
   Log.debug (fun m -> m "assigning    ...");
-  let* typ = assign_types modul in
+  let typ = assign_types modul in
   let* global =
     name "global"
       ~get_name:(get_runtime_name (fun ({ id; _ } : Text.global) -> id))

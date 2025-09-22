@@ -103,3 +103,7 @@ val unsigned_div : t -> t -> t
 val rem : t -> t -> t
 
 val unsigned_rem : t -> t -> t
+
+(* Other stuff not related to Wasm but added here for convenience *)
+
+val compare : t -> t -> int
