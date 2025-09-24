@@ -1,0 +1,76 @@
+name: build-fedora
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+      options: --user root
+    steps:
+      - name: test
+        run: |
+          set -x
+
+          # GitHub sucks
+          export HOME=/root
+          cd $HOME
+
+          # Install basic dependencies
+          dnf update -y
+          dnf install -y ca-certificates sed gzip grep git wget tar xz opam lld llvm
+
+          # Rustup
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --profile minimal --default-toolchain nightly -y
+          . "$HOME/.cargo/env"
+          rustup target add wasm32-unknown-unknown
+
+          # Clone the repository
+          git clone https://github.com/${{ github.repository }}.git
+          cd $(basename ${{ github.repository }})
+
+          # Print stuff
+          echo "github.event_name is ${{ github.event_name }}"
+
+          # Fetch the PR or the current branch
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "Fetching PR branch"
+            git fetch origin pull/${{ github.event.pull_request.number }}/head:pr-${{ github.event.pull_request.number }}
+            git checkout pr-${{ github.event.pull_request.number }}
+          else
+            echo "Fetching current branch"
+            git checkout ${{ github.ref_name }}
+          fi
+
+          # Prepare OCaml stuff
+          opam init --disable-sandboxing --bare -ya
+          opam switch create ocaml ocaml-base-compiler --criteria="-notuptodate"
+          eval "$(opam env)"
+          export OPAMCONFIRMLEVEL=unsafe-yes
+          opam update
+
+          # Install zig
+          # TODO: remove the following once the conf-zig package works
+          wget  https://ziglang.org/download/0.14.0/zig-linux-x86_64-0.14.0.tar.xz
+          mkdir zig
+          tar xf zig-*.tar.xz -C zig --strip-components 1
+          mv zig/* /usr/local/bin/
+
+          # Install system dependencies
+          opam install . --depext-only --with-test --with-doc --with-dev-setup
+
+          # Install opam-repo dependencies
+          opam install . --deps-only --with-test --with-doc --with-dev-setup
+
+          # Fetching submodules (done after calling opam to prevent it from checking them out)
+          git submodule update --init --recursive
+
+          # Build and test
+          dune build @install
+          dune runtest
