@@ -525,7 +525,7 @@ let rec typecheck_instr (env : Env.t) (stack : stack)
     let* _null, t = Env.table_type_get i env.modul in
     Stack.pop [ Ref_type t; i32 ] stack
   | (Extern_externalize | Extern_internalize) as i ->
-    Logs.err (fun m ->
+    Log.err (fun m ->
       m "TODO: unimplemented instruction typecheking %a" (pp_instr ~short:false)
         i );
     assert false
@@ -737,7 +737,8 @@ let validate_mem modul =
     modul.mem
 
 let modul (modul : Module.t) =
-  Logs.info (fun m -> m "typechecking ...");
+  Log.info (fun m -> m "typechecking ...");
+  Log.bench_fn "Typechecking time" @@ fun () ->
   let refs = Hashtbl.create 512 in
   let* () = array_iter (typecheck_global modul refs) modul.global in
   let* () = array_iter (typecheck_elem modul refs) modul.elem in

@@ -273,7 +273,7 @@ let find_node_to_run tree =
         | false, false -> Some (Random.bool ()) (* Unexplored in both *)
         | true, true -> None (* No unexplored remain *)
       in
-      Logs.debug (fun m -> m "select bool %b" b);
+      Log.debug (fun m -> m "select bool %b" b);
       loop (if b then if_true else if_false) (tree :: to_update)
     | Select_i32 { value = _; branches } ->
       (* TODO: better ! *)
@@ -289,7 +289,7 @@ let find_node_to_run tree =
         match List.nth_opt branches i with
         | None -> assert false
         | Some (i, branch) ->
-          Logs.debug (fun m -> m "select_i32 %li" i);
+          Log.debug (fun m -> m "select_i32 %li" i);
           loop branch (tree :: to_update)
       end
     | Assume { cond = _; cont } -> loop cont (tree :: to_update)
@@ -351,12 +351,12 @@ let run solver tree link_state modules_to_run =
       | Error (Assume_fail c) -> (
         decr count_path;
         (* Current path condition led to assume failure, try to satisfy *)
-        Logs.debug (fun m -> m "assume_fail: %a" Smtml.Expr.pp c);
-        Logs.debug (fun m ->
+        Log.debug (fun m -> m "assume_fail: %a" Smtml.Expr.pp c);
+        Log.debug (fun m ->
           m "Assignments:@.%a"
             (Concolic_choice.pp_assignments ~no_value:false)
             trace.assignments );
-        Logs.debug (fun m -> m "Retry !");
+        Log.debug (fun m -> m "Retry !");
         match pc_model solver (Assume c :: trace.remaining_pc) with
         | Some model -> loop model
         | None -> Ok None )
@@ -451,22 +451,22 @@ let cmd ~parameters ~source_file =
       Cmd_utils.write_testcase ~dir:Fpath.(workspace / "test-suite") testcase
     else Ok ()
   in
-  Logs.info (fun m -> m "completed paths: %d" !count_path);
+  Log.info (fun m -> m "completed paths: %d" !count_path);
   let to_file path assignements =
     Bos.OS.File.write path (to_string assignements)
   in
   match result with
   | None ->
-    Logs.app (fun m -> m "All OK!");
+    Log.app (fun m -> m "All OK!");
     Ok ()
   | Some (`Trap trap, { assignments; _ }) ->
     let assignments = List.rev assignments in
-    Logs.err (fun m -> m "Trap: %s" (Result.err_to_string trap));
+    Log.err (fun m -> m "Trap: %s" (Result.err_to_string trap));
     let* () =
       match model_out_file with
       | Some path -> to_file path assignments
       | None ->
-        Logs.app (fun m -> m "Model:@\n @[<v>%s@]" (to_string assignments));
+        Log.app (fun m -> m "Model:@\n @[<v>%s@]" (to_string assignments));
         Ok ()
     in
     let* () = testcase assignments in
@@ -474,17 +474,17 @@ let cmd ~parameters ~source_file =
   | Some (`Assert_fail, { assignments; _ }) ->
     let assignments = List.rev assignments in
     if no_assert_failure_expression_printing then begin
-      Logs.err (fun m -> m "Assert failure")
+      Log.err (fun m -> m "Assert failure")
     end
     else begin
       (* TODO: print the assert failure expression ! *)
-      Logs.err (fun m -> m "Assert failure")
+      Log.err (fun m -> m "Assert failure")
     end;
     let* () =
       match model_out_file with
       | Some path -> to_file path assignments
       | None ->
-        Logs.app (fun m -> m "Model:@\n @[<v>%s@]" (to_string assignments));
+        Log.app (fun m -> m "Model:@\n @[<v>%s@]" (to_string assignments));
         Ok ()
     in
     let* () = testcase assignments in

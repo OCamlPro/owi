@@ -143,7 +143,7 @@ let print_bug ~model_format ~model_out_file ~id ~no_value ~no_stop_at_failure
     match model_out_file with
     | Some path -> to_file path model labels breadcrumbs symbol_scopes
     | None -> begin
-      Logs.app (fun m ->
+      Log.app (fun m ->
         let fmt = m (if no_stop_at_failure then "%a@." else "%a") in
         fmt pp (model, labels, breadcrumbs, symbol_scopes) );
       Ok ()
@@ -151,12 +151,12 @@ let print_bug ~model_format ~model_out_file ~id ~no_value ~no_stop_at_failure
   in
   match bug with
   | `ETrap (tr, model, labels, breadcrumbs, symbol_scopes) ->
-    Logs.err (fun m -> m "Trap: %s" (Result.err_to_string tr));
+    Log.err (fun m -> m "Trap: %s" (Result.err_to_string tr));
     output model labels breadcrumbs symbol_scopes
   | `EAssert (assertion, model, labels, breadcrumbs, symbol_scopes) ->
     if no_assert_failure_expression_printing then
-      Logs.err (fun m -> m "Assert failure")
-    else Logs.err (fun m -> m "Assert failure: %a" Expr.pp assertion);
+      Log.err (fun m -> m "Assert failure")
+    else Log.err (fun m -> m "Assert failure: %a" Expr.pp assertion);
     output model labels breadcrumbs symbol_scopes
 
 let print_and_count_failures ~model_format ~model_out_file ~no_value
@@ -227,6 +227,7 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
         Prio.default res_stack
     | (Trap_only | Assertion_only), _ -> ()
   in
+  let time_counter = Mtime_clock.counter () in
   let join_handles =
     Symbolic_choice_with_memory.run
       ( match exploration_strategy with
@@ -242,14 +243,16 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
       Array.iter Domain.join join_handles )
   in
   let results = sort_results deterministic_result_order results in
+  Log.bench (fun m ->
+    m "execution time: %a" Mtime.Span.pp (Mtime_clock.count time_counter) );
   let* count =
     print_and_count_failures ~model_format ~model_out_file ~no_value
       ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
       ~count_acc:0 ~results ~with_breadcrumbs
   in
-  Logs.info (fun m -> m "Completed paths: %d" (Atomic.get path_count));
+  Log.info (fun m -> m "Completed paths: %d" (Atomic.get path_count));
   let+ () = if count > 0 then Error (`Found_bug count) else Ok () in
-  Logs.app (fun m -> m "All OK!")
+  Log.app (fun m -> m "All OK!")
 
 (* NB: This function propagates potential errors (Result.err) occurring
              during evaluation (OS, syntax error, etc.), except for Trap and Assert,

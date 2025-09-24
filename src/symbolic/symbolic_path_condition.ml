@@ -20,7 +20,7 @@ let add ({ uf; set } : t) (c : Symbolic_value.bool) : t =
   match Smtml.Expr.get_symbols [ c ] with
   | [] ->
     (* It means Smt.ml did not properly simplified a expression! *)
-    Logs.err (fun m ->
+    Log.err (fun m ->
       m "an expression was not simplified by smtml: %a" Symbolic_value.pp_int32
         c );
     assert false
@@ -48,7 +48,7 @@ let slice ({ uf; set = _ } : t) (c : Symbolic_value.bool) : Smtml.Expr.Set.t =
   match Smtml.Expr.get_symbols [ c ] with
   | [] ->
     (* It means Smt.ml did not properly simplified a expression... *)
-    Logs.err (fun m ->
+    Log.err (fun m ->
       m "an expression was not simplified by smtml: %a" Symbolic_value.pp_int32
         c );
     assert false

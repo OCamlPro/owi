@@ -768,7 +768,7 @@ let write_file outfile filename content =
   Bos.OS.File.write (Option.value outfile ~default:filename) content
 
 let convert (outfile : Fpath.t option) (filename : Fpath.t) ~unsafe m =
-  Logs.info (fun m -> m "binary encoding ...");
+  Log.info (fun m -> m "binary encoding ...");
   let* m = Compile.Text.until_validate ~unsafe ~rac:false ~srac:false m in
   let content = encode m in
   write_file outfile filename content

@@ -32,10 +32,11 @@ let compile ~workspace ~out_file (files : Fpath.t list) : Fpath.t Result.t =
   in
 
   let+ () =
+    Log.bench_fn "Compiling time" @@ fun () ->
     match OS.Cmd.run ~err tinygo with
     | Ok _ as v -> v
     | Error (`Msg e) ->
-      Logs.debug (fun m -> m "tinygo failed: %s" e);
+      Log.debug (fun m -> m "tinygo failed: %s" e);
       Fmt.error_msg
         "tinygo failed: run with -vv to get the full error message if it was \
          not displayed above"

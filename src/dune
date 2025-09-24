@@ -121,7 +121,8 @@
   wpq
   wq
   ws
-  wutf8)
+  wutf8
+  log)
  (private_modules
   binary_parser
   convert
@@ -151,6 +152,8 @@
   sedlex
   uutf
   runtime_events
+  mtime
+  mtime.clock
   xmlm)
  (flags
   (:standard -open Prelude))

@@ -178,7 +178,7 @@ let check_type_id (types : binary func_type Named.t)
     else Ok ()
 
 let of_grouped (modul : Grouped.t) : t Result.t =
-  Logs.debug (fun m -> m "assigning    ...");
+  Log.debug (fun m -> m "assigning    ...");
   let* typ = assign_types modul in
   let* global =
     name "global"
@@ -221,7 +221,7 @@ let of_grouped (modul : Grouped.t) : t Result.t =
     ; annots = modul.annots
     }
   in
-  Logs.debug (fun m -> m "%a" pp modul);
+  Log.debug (fun m -> m "%a" pp modul);
   modul
 
 let find (named : 'a Named.t) err : _ -> binary indice Result.t = function

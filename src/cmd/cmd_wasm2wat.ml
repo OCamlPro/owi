@@ -23,7 +23,7 @@ let cmd ~source_file ~emit_file ~out_file =
     if emit_file || output then
       Bos.OS.File.writef outname "%a@\n" Text.pp_modul m
     else begin
-      Logs.app (fun log -> log "%a" Text.pp_modul m);
+      Log.app (fun log -> log "%a" Text.pp_modul m);
       Ok ()
     end
   | ext -> Error (`Unsupported_file_extension ext)

@@ -340,7 +340,7 @@ struct
   let from_lexbuf =
     let parser = MenhirLib.Convert.Simplified.traditional2revised M.rule in
     fun buf ->
-      Logs.info (fun m -> m "parsing      ...");
+      Log.info (fun m -> m "parsing      ...");
       let provider () =
         let tok = Text_lexer.token buf in
         let start, stop = Sedlexing.lexing_positions buf in
@@ -403,6 +403,7 @@ module Binary = struct
 end
 
 let guess_from_file file =
+  Log.bench_fn "Parsing time" @@ fun () ->
   match Fpath.get_ext ~multi:false file with
   | ".wat" ->
     let+ m = Text.Module.from_file file in

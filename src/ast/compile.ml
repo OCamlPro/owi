@@ -73,6 +73,7 @@ module File = struct
 
   let until_validate ~unsafe ~rac ~srac filename =
     let* m = Parse.guess_from_file filename in
+    Log.bench_fn "Validation time" @@ fun () ->
     match m with
     | Kind.Wat m -> Text.until_validate ~unsafe ~rac ~srac m
     | Wasm m -> Binary.until_validate ~unsafe m

@@ -355,7 +355,7 @@ let populate_exports env (exports : Binary.exports) : exports Result.t =
   Ok { globals; memories; tables; functions; defined_names = names }
 
 let modul (ls : 'f state) ~name (modul : Binary.Module.t) =
-  Logs.info (fun m -> m "linking      ...");
+  Log.info (fun m -> m "linking      ...");
   let* envs, (env, init_active_data, init_active_elem) =
     Env_id.with_fresh_id
       (fun env_id ->
