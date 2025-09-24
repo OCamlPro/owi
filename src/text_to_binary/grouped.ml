@@ -300,10 +300,10 @@ let add_field curr (fields : t) = function
   | MStart start -> Ok { fields with start = Some start }
 
 let of_text { Text.fields; id; annots } =
-  Logs.debug (fun m -> m "grouping     ...");
+  Log.debug (fun m -> m "grouping     ...");
   let+ modul =
     list_fold_left (add_field (init_curr ())) (empty_module id) fields
   in
   let modul = { modul with annots } in
-  Logs.debug (fun m -> m "%a" pp modul);
+  Log.debug (fun m -> m "%a" pp modul);
   modul

@@ -41,10 +41,11 @@ let compile ~entry_point ~includes:_ ~opt_lvl:_ ~out_file (files : Fpath.t list)
   let* () = Bos.OS.Env.set_var "RUSTFLAGS" (Some "-Zcrate-attr=no_main") in
   *)
   let+ () =
+    Log.bench_fn "Compiling time" @@ fun () ->
     match OS.Cmd.run ~err rustc_cmd with
     | Ok _ as v -> v
     | Error (`Msg e) ->
-      Logs.debug (fun m -> m "rustc failed: %s" e);
+      Log.debug (fun m -> m "rustc failed: %s" e);
       Fmt.error_msg
         "rustc failed: run with -vv to get the full error message if it was \
          not displayed above"

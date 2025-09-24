@@ -82,7 +82,7 @@ module Backend = struct
         if is_out_of_bounds then Error `Memory_heap_buffer_overflow else Ok a )
     | _ ->
       (* A symbolic expression is valid, but we print to check if Ptr's are passing through here  *)
-      Logs.warn (fun m -> m "Saw a symbolic address: %a" Smtml.Expr.pp a);
+      Log.warn (fun m -> m "Saw a symbolic address: %a" Smtml.Expr.pp a);
       return (Ok a)
 
   let ptr v =
@@ -92,7 +92,7 @@ module Backend = struct
       let base = Smtml.Bitvector.to_int32 base in
       return base
     | _ ->
-      Logs.err (fun m ->
+      Log.err (fun m ->
         m {|free: cannot fetch pointer base of "%a"|} Smtml.Expr.pp v );
       assert false
 

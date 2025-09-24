@@ -46,10 +46,11 @@ let compile ~workspace ~entry_point ~includes ~out_file (files : Fpath.t list) :
   in
 
   let+ () =
+    Log.bench_fn "Compiling time" @@ fun () ->
     match OS.Cmd.run ~err zig with
     | Ok _ as v -> v
     | Error (`Msg e) ->
-      Logs.debug (fun m -> m "zig failed: %s" e);
+      Log.debug (fun m -> m "zig failed: %s" e);
       Fmt.error_msg
         "zig failed: run with -vv to get the full error message if it was not \
          displayed above"

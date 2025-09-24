@@ -10,24 +10,24 @@ let module_name2 = "owi_iso_module2"
 
 let binaryen_fuzzing_support_module weird_log_i64 =
   let log_i32 x =
-    Logs.app (fun m -> m "%a@?" Symbolic.Value.pp_int32 x);
+    Log.app (fun m -> m "%a@?" Symbolic.Value.pp_int32 x);
     Symbolic_choice_with_memory.return ()
   in
   let log_i64 x =
-    Logs.app (fun m -> m "%a@?" Symbolic.Value.pp_int64 x);
+    Log.app (fun m -> m "%a@?" Symbolic.Value.pp_int64 x);
     Symbolic_choice_with_memory.return ()
   in
   let log_i64_weird x y =
-    Logs.app (fun m ->
+    Log.app (fun m ->
       m "%a%a@?" Symbolic.Value.pp_int32 x Symbolic.Value.pp_int32 y );
     Symbolic_choice_with_memory.return ()
   in
   let log_f32 x =
-    Logs.app (fun m -> m "%a@?" Symbolic.Value.pp_float32 x);
+    Log.app (fun m -> m "%a@?" Symbolic.Value.pp_float32 x);
     Symbolic_choice_with_memory.return ()
   in
   let log_f64 x =
-    Logs.app (fun m -> m "%a@?" Symbolic.Value.pp_float64 x);
+    Log.app (fun m -> m "%a@?" Symbolic.Value.pp_float64 x);
     Symbolic_choice_with_memory.return ()
   in
   let call_export _n1 _n2 = Symbolic_choice_with_memory.return () in
@@ -326,7 +326,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
   let start = Some index in
   let modul = { iso_modul with start } in
   let text_modul = Binary_to_text.modul modul in
-  Logs.debug (fun m ->
+  Log.debug (fun m ->
     m "generated module:@\n  @[<v>%a@]" Text.pp_modul text_modul );
   let+ m, link_state =
     Compile.Binary.until_link ~unsafe:false ~name:None link_state modul
@@ -354,18 +354,18 @@ let cmd ~deterministic_result_order ~fail_mode ~exploration_strategy ~files
     | _ -> Fmt.error_msg "require at most two modules"
   in
 
-  Logs.info (fun m -> m "comparing %a and %a" Fpath.pp file1 Fpath.pp file2);
-  Logs.info (fun m -> m "module %s is %a" module_name1 Fpath.pp file1);
-  Logs.info (fun m -> m "module %s is %a" module_name2 Fpath.pp file2);
+  Log.info (fun m -> m "comparing %a and %a" Fpath.pp file1 Fpath.pp file2);
+  Log.info (fun m -> m "module %s is %a" module_name1 Fpath.pp file1);
+  Log.info (fun m -> m "module %s is %a" module_name2 Fpath.pp file2);
 
   let compile ~unsafe file =
     Compile.File.until_validate ~unsafe ~rac:false ~srac:false file
   in
 
-  Logs.info (fun m -> m "Compiling %a" Fpath.pp file1);
+  Log.info (fun m -> m "Compiling %a" Fpath.pp file1);
   let* module1 = compile ~unsafe file1 in
 
-  Logs.info (fun m -> m "Compiling %a" Fpath.pp file2);
+  Log.info (fun m -> m "Compiling %a" Fpath.pp file2);
   let* module2 = compile ~unsafe file2 in
 
   let funcexports1 =
@@ -384,12 +384,12 @@ let cmd ~deterministic_result_order ~fail_mode ~exploration_strategy ~files
   let exports_name_1 = List.map fst funcexports1 in
   let exports_name_2 = List.map fst funcexports2 in
 
-  Logs.debug (fun m ->
+  Log.debug (fun m ->
     m "%a exports: %a" Fpath.pp file1
       (Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt " ") Fmt.string)
       exports_name_1 );
 
-  Logs.debug (fun m ->
+  Log.debug (fun m ->
     m "%a exports: %a" Fpath.pp file2
       (Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt " ") Fmt.string)
       exports_name_2 );
@@ -423,7 +423,7 @@ let cmd ~deterministic_result_order ~fail_mode ~exploration_strategy ~files
         in
         if Types.func_type_eq typ1 typ2 then (name, typ1) :: common_exports
         else begin
-          Logs.warn (fun m ->
+          Log.warn (fun m ->
             m
               "Removing %s from common exports because they have a different \
                type in each module."
@@ -433,7 +433,7 @@ let cmd ~deterministic_result_order ~fail_mode ~exploration_strategy ~files
       [] common_exports
   in
 
-  Logs.info (fun m ->
+  Log.info (fun m ->
     m "common exports: %a"
       (Fmt.list
          ~sep:(fun fmt () -> Fmt.pf fmt " ")
@@ -442,7 +442,7 @@ let cmd ~deterministic_result_order ~fail_mode ~exploration_strategy ~files
 
   list_fold_left
     (fun () (export_name, export_type) ->
-      Logs.info (fun m -> m "checking export %s" export_name);
+      Log.info (fun m -> m "checking export %s" export_name);
       let* result = check_iso ~unsafe export_name export_type module1 module2 in
 
       Cmd_sym.handle_result ~exploration_strategy ~fail_mode ~workers ~solver

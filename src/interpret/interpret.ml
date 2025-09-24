@@ -715,7 +715,7 @@ module Make (P : Interpret_intf.P) :
 
   let exec_func ~return (state : State.exec_state) env (func : binary Types.func)
       =
-    Logs.info (fun m ->
+    Log.info (fun m ->
       m "calling func  : func %s" (Option.value func.id ~default:"anonymous") );
     let (Bt_raw ((None | Some _), (param_type, result_type))) = func.type_f in
     let args, stack = Stack.pop_n state.stack (List.length param_type) in
@@ -808,14 +808,14 @@ module Make (P : Interpret_intf.P) :
     let env = state.env in
     let locals = state.locals in
     let st stack = Choice.return (State.Continue { state with stack }) in
-    Logs.info (fun m -> m "stack         : [ %a ]" Stack.pp stack);
-    Logs.info (fun m ->
+    Log.info (fun m -> m "stack         : [ %a ]" Stack.pp stack);
+    Log.info (fun m ->
       m "running instr : %a" (Types.pp_instr ~short:true) instr.Annotated.raw );
     let* () =
       match Logs.level () with
       | Some Logs.Debug ->
         let+ pc = Choice.get_pc () in
-        Logs.debug (fun m ->
+        Log.debug (fun m ->
           m "path condition: [ %a ]" Smtml.Expr.pp_list
             (Smtml.Expr.Set.to_list pc) )
       | None | Some _ -> return ()
@@ -1504,7 +1504,7 @@ module Make (P : Interpret_intf.P) :
     | Call_ref typ_i -> call_ref ~return:false state typ_i
     | Return_call_ref typ_i -> call_ref ~return:true state typ_i
     | (Extern_externalize | Extern_internalize) as i ->
-      Logs.err (fun m ->
+      Log.err (fun m ->
         m "unimplemented instruction: %a" (Types.pp_instr ~short:false) i );
       assert false
 
@@ -1582,7 +1582,7 @@ module Make (P : Interpret_intf.P) :
   let modul ~timeout ~timeout_instr envs (modul : Module_to_run.t) :
     unit P.Choice.t =
     let heartbeat = make_heartbeat ~timeout ~timeout_instr () in
-    Logs.info (fun m -> m "interpreting ...");
+    Log.info (fun m -> m "interpreting ...");
     try
       begin
         let* () =

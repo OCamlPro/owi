@@ -68,7 +68,7 @@ let eacsl_instrument eacsl ~includes (files : Fpath.t list) :
           match OS.Cmd.run ~err @@ framac file out with
           | Ok _ as v -> v
           | Error (`Msg e) ->
-            Logs.debug (fun m -> m "frama-c failed: %s" e);
+            Log.debug (fun m -> m "frama-c failed: %s" e);
             Fmt.error_msg
               "Frama-C failed: run with -vv to get the full error message if \
                it was not displayed above" )
@@ -125,10 +125,11 @@ let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file
   in
 
   let+ () =
+    Log.bench_fn "Compiling time" @@ fun () ->
     match OS.Cmd.run ~err clang with
     | Ok _ as v -> v
     | Error (`Msg msg) ->
-      Logs.debug (fun m -> m "clang failed: %s" msg);
+      Log.debug (fun m -> m "clang failed: %s" msg);
       Fmt.error_msg
         "clang failed (run with -vv if the full error message is not displayed \
          above)"

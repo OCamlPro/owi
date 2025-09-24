@@ -19,7 +19,7 @@ let cmd_one inplace file =
   let* pp = get_printer file in
   if inplace then Bos.OS.File.writef file "%a@\n" pp ()
   else begin
-    Logs.app (fun m -> m "%a" pp ());
+    Log.app (fun m -> m "%a" pp ());
     Ok ()
   end
 

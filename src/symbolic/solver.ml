@@ -26,12 +26,12 @@ let model (S (solver_module, s)) ~symbol_scopes ~pc =
     | `Unknown -> assert false
     | `Unsat ->
       (* Should not happen because we checked just before that is must be true. *)
-      Logs.err (fun m -> m "something is wrong... I can not get a model");
-      Logs.err (fun m ->
+      Log.err (fun m -> m "something is wrong... I can not get a model");
+      Log.err (fun m ->
         m "symbols: %a"
           (Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt ", ") Smtml.Symbol.pp)
           symbols );
-      Logs.err (fun m -> m "pc:@\n  @[<v>%a@]" Smtml.Expr.Set.pp pc);
+      Log.err (fun m -> m "pc:@\n  @[<v>%a@]" Smtml.Expr.Set.pp pc);
       assert false
     | `Model model -> model
   in

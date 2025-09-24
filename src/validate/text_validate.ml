@@ -24,7 +24,7 @@ let empty_env () =
   }
 
 let modul m =
-  Logs.info (fun m -> m "checking     ...");
+  Log.info (fun m -> m "checking     ...");
   let add_global =
     let seen = Hashtbl.create 512 in
     function

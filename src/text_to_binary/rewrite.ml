@@ -456,7 +456,7 @@ let rewrite_annots (modul : Assigned.t) :
   list_map (rewrite_annot modul)
 
 let modul (modul : Assigned.t) : Binary.Module.t Result.t =
-  Logs.debug (fun m -> m "rewriting    ...");
+  Log.debug (fun m -> m "rewriting    ...");
   let typemap = typemap modul.typ in
   let* global =
     let+ { Named.named; values } =

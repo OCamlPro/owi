@@ -35,11 +35,11 @@ let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file
         match OS.Cmd.run ~err clang_cmd with
         | Ok _ -> compile_files rest
         | Error (`Msg e) ->
-          Logs.debug (fun m -> m "clang++ failed: %s" e);
+          Log.debug (fun m -> m "clang++ failed: %s" e);
           Fmt.error_msg
             "clang++ failed: run with -vv if the error is not displayed above" )
     in
-    compile_files files
+    Log.bench_fn "Compiling time" (fun () -> compile_files files)
   in
 
   let* llc_bin = OS.Cmd.resolve @@ Cmd.v "llc" in
@@ -60,10 +60,11 @@ let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file
   in
 
   let* () =
+    Log.bench_fn "llc time" @@ fun () ->
     match OS.Cmd.run ~err llc_cmd with
     | Ok _ as v -> v
     | Error (`Msg e) ->
-      Logs.debug (fun m -> m "llc failed: %s" e);
+      Log.debug (fun m -> m "llc failed: %s" e);
       Fmt.error_msg "llc failed: run with --debug to get the full error message"
   in
   let* wasmld_bin = OS.Cmd.resolve @@ Cmd.v "wasm-ld" in
@@ -96,10 +97,11 @@ let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file
   in
 
   let+ () =
+    Log.bench_fn "wasm_ld time" @@ fun () ->
     match OS.Cmd.run ~err wasmld_cmd with
     | Ok _ as v -> v
     | Error (`Msg e) ->
-      Logs.debug (fun m -> m "wasm-ld failed: %s" e);
+      Log.debug (fun m -> m "wasm-ld failed: %s" e);
       Fmt.error_msg
         "wasm-ld failed: run with -vv to get the full error message if it was \
          not displayed above"

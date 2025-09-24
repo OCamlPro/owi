@@ -43,7 +43,7 @@ module M :
         Unix.map_file fd Int8_unsigned Bigarray.c_layout true
           [| seacoral_size |]
       in
-      Logs.app (fun m -> m "SC_STORE_MAP_FILE successfully mapped : %s" path);
+      Log.app (fun m -> m "SC_STORE_MAP_FILE successfully mapped : %s" path);
       Some (fd, res)
     in
     fun i ->
@@ -111,7 +111,7 @@ module M :
   let print_char (c : Value.int32) =
     let open Choice in
     let* c = select_i32 c in
-    Logs.app (fun m -> m "%c@?" (char_of_int (Int32.to_int c)));
+    Log.app (fun m -> m "%c@?" (char_of_int (Int32.to_int c)));
     return ()
 
   let rec make_str m accu i =
@@ -152,7 +152,7 @@ module M :
         Hashtbl.add covered_labels id str;
         add_label (Int32.to_int id, str)
     | _ ->
-      Logs.err (fun m ->
+      Log.err (fun m ->
         m "cov_label_set: invalid type id:%a ptr:%a" Expr.pp id Expr.pp ptr );
       assert false
 
@@ -205,11 +205,11 @@ let symbolic_extern_module =
 let fd_write _ _ _ _ = assert false
 
 let proc_exit _ =
-  Logs.warn (fun m -> m "used dummy proc_exit implementation");
+  Log.warn (fun m -> m "used dummy proc_exit implementation");
   Choice.return ()
 
 let random_get _ _ =
-  Logs.warn (fun m -> m "used dummy random_get implementation");
+  Log.warn (fun m -> m "used dummy random_get implementation");
   Choice.return @@ Symbolic_value.const_i32 0l
 
 let wasi_snapshot_preview1 =

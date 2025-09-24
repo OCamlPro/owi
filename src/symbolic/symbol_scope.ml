@@ -60,7 +60,7 @@ let to_scfg ~no_value model scope_tokens =
     let rec collect_items acc tokens =
       match tokens with
       | [] ->
-        Logs.err (fun m -> m "Reached end without closing scope: %s" name);
+        Log.err (fun m -> m "Reached end without closing scope: %s" name);
         assert false
       | Close_scope :: rest -> (List.rev acc, rest)
       | Open_scope name :: rest ->
@@ -94,7 +94,7 @@ let to_scfg ~no_value model scope_tokens =
   in
 
   let rev_scope_tokens = List.rev scope_tokens in
-  Logs.debug (fun m -> m "Current scope tokens: [%a]" pp rev_scope_tokens);
+  Log.debug (fun m -> m "Current scope tokens: [%a]" pp rev_scope_tokens);
   let children = process_tokens rev_scope_tokens [] in
   [ { name = "model"; params = []; children } ]
 
@@ -114,7 +114,7 @@ let to_json ~no_value model scope_tokens =
     let rec collect_items acc tokens =
       match tokens with
       | [] ->
-        Logs.err (fun m -> m "Reached end without closing scope: %s" scope_name);
+        Log.err (fun m -> m "Reached end without closing scope: %s" scope_name);
         assert false
       | Open_scope scope_name :: rest ->
         (* Nested scope *)
@@ -159,7 +159,7 @@ let to_json ~no_value model scope_tokens =
   in
 
   let rev_scope_tokens = List.rev scope_tokens in
-  Logs.debug (fun m -> m "Current scope tokens: [%a]" pp rev_scope_tokens);
+  Log.debug (fun m -> m "Current scope tokens: [%a]" pp rev_scope_tokens);
   let result = process_tokens rev_scope_tokens [] in
   `Assoc [ ("model", `List result) ]
 

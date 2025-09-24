@@ -156,7 +156,7 @@ module M :
     match view s with
     | Val (Bitv bv) -> Concolic_choice.return (Smtml.Bitvector.to_int32 bv)
     | _ ->
-      Logs.err (fun m ->
+      Log.err (fun m ->
         m {|alloc: cannot allocate base pointer "%a"|} Expr.pp s );
       Concolic_choice.bind (abort ()) (fun () -> assert false)
 
@@ -167,7 +167,7 @@ module M :
       let base = Smtml.Bitvector.to_int32 base in
       Concolic_choice.return base
     | _ ->
-      Logs.err (fun m ->
+      Log.err (fun m ->
         m {|free: cannot fetch pointer base of "%a"|} Expr.pp s );
       Concolic_choice.bind (abort ()) (fun () -> assert false)
 
@@ -188,15 +188,15 @@ module M :
     Concolic_choice.return (0l, Smtml.Expr.value (Smtml.Value.Int 1))
 
   let print_char ((c, _s) : Value.int32) =
-    Logs.app (fun m -> m "%c" (char_of_int (Int32.to_int c)));
+    Log.app (fun m -> m "%c" (char_of_int (Int32.to_int c)));
     Concolic_choice.return ()
 
   let cov_label_set _ _ _ =
-    Logs.err (fun m -> m "labels are not implemented in concolic mode");
+    Log.err (fun m -> m "labels are not implemented in concolic mode");
     assert false
 
   let cov_label_is_covered _ =
-    Logs.err (fun m -> m "labels are not implemented in concolic mode");
+    Log.err (fun m -> m "labels are not implemented in concolic mode");
     assert false
 
   let open_scope _m _strptr = assert false

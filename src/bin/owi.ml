@@ -210,13 +210,8 @@ let source_file =
 
 (* TODO: move this as a common option ? *)
 let setup_log =
-  let setup_log style_renderer level =
-    Fmt_tty.setup_std_outputs ?style_renderer ();
-    Logs.set_level level;
-    Logs.set_reporter (Logs_fmt.reporter ())
-  in
   let env = Cmd.Env.info "OWI_VERBOSITY" in
-  Term.(const setup_log $ Fmt_cli.style_renderer () $ Logs_cli.level ~env ())
+  Term.(const Log.setup $ Fmt_cli.style_renderer () $ Logs_cli.level ~env ())
 
 let srac =
   let doc = "symbolic runtime assertion checking mode" in
@@ -695,7 +690,7 @@ let exit_code =
     match result with
     | Ok () -> ok
     | Error e -> begin
-      Logs.err (fun m -> m "%s" (Result.err_to_string e));
+      Log.err (fun m -> m "%s" (Result.err_to_string e));
       Result.err_to_exit_code e
     end
   end

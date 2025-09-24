@@ -36,8 +36,8 @@ let run_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
 
     let assert' n =
       if Prelude.Int32.equal n 0l then begin
-        Logs.info (fun m -> m "scopes : [%a]" Symbol_scope.pp !scopes);
-        Logs.app (fun m -> m "Assertion failure was correctly reached!");
+        Log.info (fun m -> m "scopes : [%a]" Symbol_scope.pp !scopes);
+        Log.app (fun m -> m "Assertion failure was correctly reached!");
         exit 0
       end;
       Ok ()
@@ -49,7 +49,7 @@ let run_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
         add_sym i;
         Ok n
       | v ->
-        Logs.err (fun m ->
+        Log.err (fun m ->
           m "Got value %a but expected a i8 (i32) value." V.pp v );
         assert false
 
@@ -64,7 +64,7 @@ let run_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
         add_sym i;
         Ok n
       | v ->
-        Logs.err (fun m ->
+        Log.err (fun m ->
           m "Got value %a but expected a i16 (i32) value." V.pp v );
         assert false
 
@@ -75,7 +75,7 @@ let run_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
         add_sym i;
         Ok n
       | v ->
-        Logs.err (fun m -> m "Got value %a but expected a i32 value." V.pp v);
+        Log.err (fun m -> m "Got value %a but expected a i32 value." V.pp v);
         assert false
 
     let symbol_i64 () =
@@ -85,7 +85,7 @@ let run_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
         add_sym i;
         Ok n
       | v ->
-        Logs.err (fun m -> m "Got value %a but expected a i64 value." V.pp v);
+        Log.err (fun m -> m "Got value %a but expected a i64 value." V.pp v);
         assert false
 
     let symbol_f32 () =
@@ -95,7 +95,7 @@ let run_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
         add_sym i;
         Ok n
       | v ->
-        Logs.err (fun m -> m "Got value %a but expected a f32 value." V.pp v);
+        Log.err (fun m -> m "Got value %a but expected a f32 value." V.pp v);
         assert false
 
     let symbol_f64 () =
@@ -105,7 +105,7 @@ let run_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
         add_sym i;
         Ok n
       | v ->
-        Logs.err (fun m -> m "Got value %a but expected a f64 value." V.pp v);
+        Log.err (fun m -> m "Got value %a but expected a f64 value." V.pp v);
         assert false
 
     let symbol_v128 () =
@@ -115,11 +115,11 @@ let run_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
         add_sym i;
         Ok n
       | v ->
-        Logs.err (fun m -> m "Got value %a but expected a v128 value." V.pp v);
+        Log.err (fun m -> m "Got value %a but expected a v128 value." V.pp v);
         assert false
 
     let abort () =
-      Logs.err (fun m -> m "Unexpected abort call.");
+      Log.err (fun m -> m "Unexpected abort call.");
       exit 121
 
     let alloc _m _addr size =
@@ -138,11 +138,11 @@ let run_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
         add_sym i;
         Ok n
       | v ->
-        Logs.err (fun m -> m "Got value %a but expected a i32 value." V.pp v);
+        Log.err (fun m -> m "Got value %a but expected a i32 value." V.pp v);
         assert false
 
     let print_char c =
-      Logs.app (fun m -> m "%c" (char_of_int (Int32.to_int c)));
+      Log.app (fun m -> m "%c" (char_of_int (Int32.to_int c)));
       Ok ()
 
     let in_replay_mode () = Ok 1l
@@ -166,7 +166,7 @@ let run_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
       let* chars = make_str m [] str_ptr in
       let str = String.init (Array.length chars) (Array.get chars) in
       Hashtbl.add covered_labels id str;
-      Logs.debug (fun m -> m "reached %ld@." id);
+      Log.debug (fun m -> m "reached %ld@." id);
       Ok ()
 
     let open_scope m strptr =
@@ -267,4 +267,4 @@ let cmd ~unsafe ~replay_file ~source_file ~entry_point ~invoke_with_symbols =
   let+ () =
     run_file ~unsafe ~entry_point ~invoke_with_symbols source_file model
   in
-  Logs.app (fun m -> m "All OK!")
+  Log.app (fun m -> m "All OK!")
