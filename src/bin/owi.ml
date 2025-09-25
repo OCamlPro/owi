@@ -56,12 +56,14 @@ let exploration_conv =
     | "fifo" -> Ok Cmd_sym.FIFO
     | "lifo" -> Ok Cmd_sym.LIFO
     | "random" -> Ok Cmd_sym.Random
+    | "smart" -> Ok Cmd_sym.Smart
     | _ -> Fmt.error_msg {|Expected "fifo", "lifo" or "random" but got "%s"|} s
   in
   let pp fmt = function
     | Cmd_sym.FIFO -> Fmt.string fmt "fifo"
     | Cmd_sym.LIFO -> Fmt.string fmt "lifo"
     | Cmd_sym.Random -> Fmt.string fmt "random"
+    | Cmd_sym.Smart -> Fmt.string fmt "smart"
   in
   Arg.conv (of_string, pp)
 
@@ -130,7 +132,7 @@ let fail_mode =
 
 let exploration_strategy =
   let doc = {|exploration strategy to use ("fifo", "lifo" or "random")|} in
-  Arg.(value & opt exploration_conv Cmd_sym.LIFO & info [ "exploration" ] ~doc)
+  Arg.(value & opt exploration_conv Cmd_sym.FIFO & info [ "exploration" ] ~doc)
 
 let files =
   let doc = "source files" in
@@ -185,6 +187,10 @@ let model_out_file =
 let rac =
   let doc = "runtime assertion checking mode" in
   Arg.(value & flag & info [ "rac" ] ~doc)
+
+let scc =
+  let doc = "build graph with strongly connected components" in
+  Arg.(value & flag & info [ "scc" ] ~doc)
 
 let solver =
   let docv = Arg.conv_docv solver_conv in
@@ -343,9 +349,10 @@ let cfg_info =
 
 let cfg_cmd =
   let+ source_file
+  and+ scc
   and+ entry_point = entry_point None
   and+ () = setup_log in
-  Cmd_cfg.cmd ~source_file ~entry_point
+  Cmd_cfg.cmd ~source_file ~entry_point ~scc
 
 (* owi analyze cg *)
 
@@ -359,10 +366,11 @@ let cg_info =
 let cg_cmd =
   let+ call_graph_mode
   and+ source_file
+  and+ scc
   and+ entry_point = entry_point None
   and+ () = setup_log in
 
-  Cmd_call_graph.cmd ~call_graph_mode ~source_file ~entry_point
+  Cmd_call_graph.cmd ~call_graph_mode ~source_file ~entry_point ~scc
 
 (* owi cpp *)
 

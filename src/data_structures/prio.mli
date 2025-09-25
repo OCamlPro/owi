@@ -1,9 +1,15 @@
-type t
+type t =
+  | Val of
+      { instr_counter : int
+      ; distances_to_unreachable : int list option
+      }
+  | Default
+  | Random of int
 
 val random : t
 
 val default : t
 
-val of_int : int -> t
+val from_annotated : int -> int array option -> t
 
-val to_int : t -> int
+val compare : t -> t -> int
