@@ -52,6 +52,7 @@ pkgs.mkShell {
     mdbookTabs
     mdx
     menhir
+    merlin
     ocaml
     ocamlformat
     ocb
