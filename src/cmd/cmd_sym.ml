@@ -34,6 +34,8 @@ type parameters =
   ; invoke_with_symbols : bool
   ; model_out_file : Fpath.t option
   ; with_breadcrumbs : bool
+  ; timeout : float option
+  ; timeout_instr : int option
   }
 
 let run_file ~parameters ~source_file =
@@ -58,7 +60,17 @@ let run_file ~parameters ~source_file =
     Compile.Binary.until_link ~unsafe ~name:None link_state m
   in
   let m = Symbolic.convert_module_to_run m in
-  Interpret.Symbolic.modul ~timeout:None ~timeout_instr:None link_state.envs m
+  let module I = Interpret.Symbolic (struct
+    let timeout = parameters.timeout
+
+    let timeout_instr = parameters.timeout_instr
+
+    let throw_away_trap =
+      match parameters.fail_mode with
+      | Assertion_only -> true
+      | Both | Trap_only -> false
+  end) in
+  I.modul link_state.envs m
 
 let print_bug ~model_format ~model_out_file ~id ~no_value ~no_stop_at_failure
   ~no_assert_failure_expression_printing ~with_breadcrumbs bug =
