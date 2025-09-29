@@ -74,6 +74,7 @@
    (>= 3.3))
   (smtml
    (>= 0.10.0))
+  synchronizer
   (uutf
    (>= 1.0.3))
   (xmlm

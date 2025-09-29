@@ -102,7 +102,7 @@ module CoreImpl = struct
             try work wls sched callback
             with e ->
               let bt = Printexc.get_raw_backtrace () in
-              Work_datastructure.fail sched.work_queue;
+              Work_datastructure.close sched.work_queue;
               Printexc.raise_with_backtrace e bt ) )
   end
 
