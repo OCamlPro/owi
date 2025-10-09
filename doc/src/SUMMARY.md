@@ -3,6 +3,7 @@
 [Home](index.md)
 [Installation](installation.md)
 [Supported Wasm proposals](proposals.md)
+[Comparison with other tools](comparison.md)
 
 # Symbolic Execution Engine
 
@@ -31,7 +32,6 @@
     - [Weasel](symex/verification/weasel.md)
 
 - [Going Further](symex/further.md)
-    - [Comparison with Other Engines](symex/further/comparison.md)
     - [Talks and Papers](symex/further/talks-papers.md)
     - [Commands and Options](symex/further/commands.md)
     - [API: Symbols and Helpers](symex/further/api.md)
