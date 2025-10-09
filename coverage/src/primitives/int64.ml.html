@@ -440,25 +440,25 @@ let popcnt =
 (*
  * Unsigned comparison in terms of signed comparison.
  *)
-let cmp_u x op y = <span data-count="1091574">o</span>p (ad<span data-count="1091574">d</span> x min_int) (ad<span data-count="1091574">d</span> y min_int) [@@inline]
+let cmp_u x op y = <span data-count="1090987">o</span>p (ad<span data-count="1090987">d</span> x min_int) (ad<span data-count="1090987">d</span> y min_int) [@@inline]
 
 let eq (x : int64) y = <span data-count="5030934">e</span>qual x y [@@inline]
 
 let ne (x : int64) y = <span data-count="25823">n</span>ot (equa<span data-count="25823">l</span> x y) [@@inline]
 
-let lt (x : int64) y = <span data-count="1022426">c</span>ompar<span data-count="1022426">e</span> x y &lt; 0 [@@inline]
+let lt (x : int64) y = <span data-count="1021831">c</span>ompar<span data-count="1021831">e</span> x y &lt; 0 [@@inline]
 
-let gt (x : int64) y = <span data-count="4370">c</span>ompar<span data-count="4370">e</span> x y &gt; 0 [@@inline]
+let gt (x : int64) y = <span data-count="4378">c</span>ompar<span data-count="4378">e</span> x y &gt; 0 [@@inline]
 
 let le (x : int64) y = <span data-count="76350">c</span>ompar<span data-count="76350">e</span> x y &lt;= 0 [@@inline]
 
-let ge (x : int64) y = <span data-count="10728">c</span>ompar<span data-count="10728">e</span> x y &gt;= 0 [@@inline]
+let ge (x : int64) y = <span data-count="11145">c</span>ompar<span data-count="11145">e</span> x y &gt;= 0 [@@inline]
 
-let lt_u x y = <span data-count="1019204">c</span>mp_u x lt y [@@inline]
+let lt_u x y = <span data-count="1018609">c</span>mp_u x lt y [@@inline]
 
 let le_u x y = <span data-count="67034">c</span>mp_u x le y [@@inline]
 
-let gt_u x y = <span data-count="4330">c</span>mp_u x gt y [@@inline]
+let gt_u x y = <span data-count="4338">c</span>mp_u x gt y [@@inline]
 
 let ge_u x y = <span data-count="126">c</span>mp_u x ge y [@@inline]
 
@@ -486,9 +486,9 @@ let low_int = shift_lef<span data-count="880">t</span> minus_one 63
 let high_int = logxo<span data-count="880">r</span> low_int minus_one
 
 (* WebAssembly's shifts mask the shift count according to the bitwidth. *)
-let shift f x y = <span data-count="144798">f</span> x (to_in<span data-count="144798">t</span> (logan<span data-count="144798">d</span> y (of_in<span data-count="144798">t</span> 63)))
+let shift f x y = <span data-count="145012">f</span> x (to_in<span data-count="145012">t</span> (logan<span data-count="145012">d</span> y (of_in<span data-count="145012">t</span> 63)))
 
-let shl x y = <span data-count="121659">s</span>hift shift_left x y
+let shl x y = <span data-count="121873">s</span>hift shift_left x y
 
 let shr_s x y = <span data-count="20">s</span>hift shift_right x y
 

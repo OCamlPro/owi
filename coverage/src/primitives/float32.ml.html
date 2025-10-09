@@ -802,9 +802,9 @@ let of_float = Int32.bits_of_float
 
 let to_float = Int32.float_of_bits
 
-let of_bits x = <span data-count="1172">x</span>
+let of_bits x = <span data-count="1042">x</span>
 
-let to_bits x = <span data-count="2849">x</span>
+let to_bits x = <span data-count="2819">x</span>
 
 let is_inf x = <span data-count="12250">I</span>nt32.e<span data-count="12250">q</span> x pos_in<span data-count="14">f</span> || Int32.eq x neg_inf
 
@@ -953,9 +953,9 @@ let ne x y =
   <span data-count="614">i</span>f Float.is_na<span data-count="614">n</span> <span data-count="117">x</span> || Float.is_na<span data-count="497">n</span> <span data-count="64">y</span> then <span data-count="181">t</span>rue else <span data-count="433">F</span>loat.compar<span data-count="433">e</span> x y &lt;&gt; 0
 
 let lt x y =
-  <span data-count="1019">l</span>et x = to_float x in
-  <span data-count="1019">l</span>et y = to_float y in
-  <span data-count="1019">i</span>f Float.is_na<span data-count="1019">n</span> <span data-count="87">x</span> || Float.is_na<span data-count="932">n</span> <span data-count="69">y</span> then <span data-count="156">f</span>alse else <span data-count="863">F</span>loat.compar<span data-count="863">e</span> x y &lt; 0
+  <span data-count="1007">l</span>et x = to_float x in
+  <span data-count="1007">l</span>et y = to_float y in
+  <span data-count="1007">i</span>f Float.is_na<span data-count="1007">n</span> <span data-count="87">x</span> || Float.is_na<span data-count="920">n</span> <span data-count="69">y</span> then <span data-count="156">f</span>alse else <span data-count="851">F</span>loat.compar<span data-count="851">e</span> x y &lt; 0
 
 let gt x y =
   <span data-count="459">l</span>et x = to_float x in
@@ -968,9 +968,9 @@ let le x y =
   <span data-count="22577">i</span>f Float.is_na<span data-count="22577">n</span> <span data-count="88">x</span> || Float.is_na<span data-count="22489">n</span> <span data-count="70">y</span> then <span data-count="158">f</span>alse else <span data-count="22419">F</span>loat.compar<span data-count="22419">e</span> x y &lt;= 0
 
 let ge x y =
-  <span data-count="633">l</span>et x = to_float x in
-  <span data-count="633">l</span>et y = to_float y in
-  <span data-count="633">i</span>f Float.is_na<span data-count="633">n</span> <span data-count="87">x</span> || Float.is_na<span data-count="546">n</span> <span data-count="69">y</span> then <span data-count="156">f</span>alse else <span data-count="477">F</span>loat.compar<span data-count="477">e</span> x y &gt;= 0
+  <span data-count="621">l</span>et x = to_float x in
+  <span data-count="621">l</span>et y = to_float y in
+  <span data-count="621">i</span>f Float.is_na<span data-count="621">n</span> <span data-count="87">x</span> || Float.is_na<span data-count="534">n</span> <span data-count="69">y</span> then <span data-count="156">f</span>alse else <span data-count="465">F</span>loat.compar<span data-count="465">e</span> x y &gt;= 0
 
 (*
  * Compare mantissa of two floats in string representation (hex or dec).

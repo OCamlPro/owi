@@ -262,6 +262,15 @@ $ dune install
 <tr><td><a href="https://github.com/WebAssembly/js-promise-integration">JS Promise Integration</a></td><td>🐌</td></tr>
 <tr><td><a href="https://github.com/WebAssembly/js-types">Type Reflection for WebAssembly JavaScript API</a></td><td>🐌</td></tr>
 </tbody></table>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="comparison-with-other-tools"><a class="header" href="#comparison-with-other-tools">Comparison with other tools</a></h1>
+<div class="table-wrapper"><table><thead><tr><th>Tool</th><th>Supported languages</th><th>Automatic</th><th>Falses positives</th><th>Falses negatives</th><th>Bug-finding</th><th>Proof of Program</th><th>Code Coverage</th><th>Licence</th><th>Category</th></tr></thead><tbody>
+<tr><td>Owi</td><td>C, C++, Rust, TinyGo, Wasm, Zig</td><td>Yes</td><td>No</td><td>Only when non terminating</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Free</td><td>Symbolic Execution</td></tr>
+<tr><td>KLEE</td><td>C</td><td>Yes</td><td>No</td><td>Yes</td><td>Yes</td><td>No</td><td>Yes</td><td>Free</td><td>Symbolic Execution</td></tr>
+<tr><td>Frama-C WP</td><td>C</td><td>No</td><td>No</td><td>No</td><td>No</td><td>Yes</td><td>No</td><td>Free</td><td>Deductive Verification</td></tr>
+<tr><td>Frama-C EVA</td><td>C</td><td>Yes</td><td>Yes</td><td>No</td><td>Yes</td><td>Yes</td><td>No</td><td>Free</td><td>Abstract Interpretation</td></tr>
+<tr><td>Astrée</td><td>C, C++</td><td>Yes</td><td>Yes</td><td>No</td><td>Yes</td><td>Yes</td><td>No</td><td>Proprietary</td><td>Abstract Interpretation</td></tr>
+<tr><td>Mopsa</td><td>C, Python3</td><td>Yes</td><td>Yes</td><td>No</td><td>Yes</td><td>Yes</td><td>No</td><td>Free</td><td>Abstract Interpretation</td></tr>
+</tbody></table>
 </div><div style="break-before: page; page-break-before: always;"></div><h1 id="overview"><a class="header" href="#overview">Overview</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="symbolic-execution-101"><a class="header" href="#symbolic-execution-101">Symbolic Execution 101</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="quickstart"><a class="header" href="#quickstart">Quickstart</a></h1>
@@ -626,8 +635,8 @@ owi: [ERROR] Reached problem!
 <pre><code class="language-sh">$ owi c++ ./mean.cpp --entry-point=check --invoke-with-symbols --no-assert-failure-expression-printing
 owi: [ERROR] Assert failure
 model {
-  symbol symbol_0 i32 -990380032
-  symbol symbol_1 i32 -2145908736
+  symbol symbol_0 i32 -1744830464
+  symbol symbol_1 i32 -1744830464
 }
 owi: [ERROR] Reached problem!
 [13]
@@ -1395,7 +1404,6 @@ $ owi sym --rac plus_three.wat
 All OK!
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="going-further"><a class="header" href="#going-further">Going Further</a></h1>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="comparison-with-other-engines"><a class="header" href="#comparison-with-other-engines">Comparison with Other Engines</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="talks-and-papers"><a class="header" href="#talks-and-papers">Talks and Papers</a></h1>
 <h2 id="publications"><a class="header" href="#publications">Publications</a></h2>
 <ul>
@@ -1698,7 +1706,7 @@ owi: [INFO] running instr : drop
 <pre><code class="language-sh">$ owi analyze cfg useless.wat --entry-point=foo
 </code></pre>
 <p><img src="wasm-toolkit/control-flow_graph.svg" alt="image" /></p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="comparison-with-other-tools"><a class="header" href="#comparison-with-other-tools">Comparison with Other Tools</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="comparison-with-other-tools-1"><a class="header" href="#comparison-with-other-tools-1">Comparison with Other Tools</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="owi"><a class="header" href="#owi"><code>owi</code></a></h1>
 <pre><code class="language-sh">$ owi --help=plain
 NAME

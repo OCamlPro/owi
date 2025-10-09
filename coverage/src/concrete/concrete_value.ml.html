@@ -252,11 +252,11 @@ type v128 = V128.t
 
 let pp_v128 = V128.pp
 
-let const_i32 x = <span data-count="5777444">x</span>
+let const_i32 x = <span data-count="5777720">x</span>
 
-let const_i64 x = <span data-count="5146509">x</span>
+let const_i64 x = <span data-count="5146398">x</span>
 
-let const_f32 x = <span data-count="57707">x</span>
+let const_f32 x = <span data-count="57683">x</span>
 
 let const_f64 x = <span data-count="56241">x</span>
 
@@ -266,8 +266,8 @@ include V
 
 module Ref = struct
   let get_func (r : ref_value) : Func_intf.t Value_intf.get_ref =
-    <span data-count="807072">m</span>atch r with
-    | <span data-count="805301">F</span>uncref (Some f) -&gt; Ref_value f
+    <span data-count="807053">m</span>atch r with
+    | <span data-count="805282">F</span>uncref (Some f) -&gt; Ref_value f
     | <span data-count="1771">F</span>uncref None -&gt; Null
     | <span data-count="0">_</span> -&gt; Type_mismatch
 
@@ -290,7 +290,7 @@ module Bool = struct
 
   let or_ = ( || )
 
-  let int32 = function <span data-count="986721">t</span>rue -&gt; 1l | <span data-count="7094743">f</span>alse -&gt; 0l
+  let int32 = function <span data-count="986188">t</span>rue -&gt; 1l | <span data-count="7094911">f</span>alse -&gt; 0l
 
   let pp = Fmt.bool
 end
@@ -299,7 +299,7 @@ module I32 = struct
   include Int32
   include Convert.Int32
 
-  let to_bool i = <span data-count="8089275">I</span>nt32.ne i 0l
+  let to_bool i = <span data-count="8088218">I</span>nt32.ne i 0l
 
   let eq_const = eq
 end

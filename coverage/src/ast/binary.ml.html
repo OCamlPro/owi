@@ -424,7 +424,7 @@ module Module = struct
         | <span data-count="10110">R</span>untime.Imported { Imported.modul; name; assigned_name = _; desc = _ }
           -&gt;
           String.equa<span data-count="10110">l</span> modul_name modul &amp;&amp; <span data-count="10110">S</span>tring.equal func_name name
-        | <span data-count="20965">L</span>ocal _ -&gt; false )
+        | <span data-count="20951">L</span>ocal _ -&gt; false )
       m.func
 
   (** Look for an imported function index, adding it if not already imported. *)
@@ -454,7 +454,7 @@ module Module = struct
     <span data-count="408">l</span>et func =
       Array.init
         (Array.lengt<span data-count="408">h</span> m.func + 1)
-        (fun i -&gt; <span data-count="8818">i</span>f i = len then <span data-count="408">f</span> else <span data-count="8410">m</span>.func.(i))
+        (fun i -&gt; <span data-count="8815">i</span>f i = len then <span data-count="408">f</span> else <span data-count="8407">m</span>.func.(i))
     in
 
     <span data-count="408">(</span>{ m with func }, len)

@@ -374,7 +374,7 @@ module Map = Map.Make (struct
   include Int32
 
   (* TODO: define this in Int32 directly? *)
-  let compare i1 i2 = <span data-count="2048818">c</span>ompare (Int32.to_in<span data-count="2048818">t</span> i1) (Int32.to_in<span data-count="2048818">t</span> i2)
+  let compare i1 i2 = <span data-count="2040007">c</span>ompare (Int32.to_in<span data-count="2040007">t</span> i1) (Int32.to_in<span data-count="2040007">t</span> i2)
 end)
 
 type t =
@@ -382,12 +382,12 @@ type t =
   ; mutable size : Symbolic_value.int32
   }
 
-let create size = <span data-count="521">{</span> data = Map.empty; size = Symbolic_value.const_i3<span data-count="521">2</span> size }
+let create size = <span data-count="523">{</span> data = Map.empty; size = Symbolic_value.const_i3<span data-count="523">2</span> size }
 
 let i32 v =
-  <span data-count="84385">m</span>atch Smtml.Expr.view v with
-  | <span data-count="84385">V</span>al (Bitv i) when Smtml.Bitvector.numbit<span data-count="84385">s</span> i = 32 -&gt;
-    <span data-count="84385">S</span>mtml.Bitvector.to_int32 i
+  <span data-count="83799">m</span>atch Smtml.Expr.view v with
+  | <span data-count="83799">V</span>al (Bitv i) when Smtml.Bitvector.numbit<span data-count="83799">s</span> i = 32 -&gt;
+    <span data-count="83799">S</span>mtml.Bitvector.to_int32 i
   | _ -&gt; assert false
 
 let grow m delta =
@@ -398,41 +398,41 @@ let grow m delta =
       (Symbolic_value.I32.g<span data-count="0">t</span> new_size m.size)
       ~if_true:new_size ~if_false:m.size
 
-let size { size; _ } = <span data-count="83317">S</span>ymbolic_value.I32.mul size page_size
+let size { size; _ } = <span data-count="82727">S</span>ymbolic_value.I32.mul size page_size
 
 let size_in_pages { size; _ } = <span data-count="0">s</span>ize
 
-let replace m k v = <span data-count="122438">m</span>.data &lt;- Map.ad<span data-count="122438">d</span> k v m.data
+let replace m k v = <span data-count="121847">m</span>.data &lt;- Map.ad<span data-count="121847">d</span> k v m.data
 
 let blit_string m str ~src ~dst ~len =
   (* This function is only used in memory init so everything will be concrete *)
   (* TODO: I am not sure this is completely true... this should be investigated and fixed at some point *)
-  <span data-count="534">l</span>et src = Int32.to_int @@ i3<span data-count="534">2</span> src in
-  <span data-count="534">l</span>et dst = Int32.to_int @@ i3<span data-count="534">2</span> dst in
-  <span data-count="534">l</span>et len = Int32.to_int @@ i3<span data-count="534">2</span> len in
-  <span data-count="534">b</span>egin
+  <span data-count="536">l</span>et src = Int32.to_int @@ i3<span data-count="536">2</span> src in
+  <span data-count="536">l</span>et dst = Int32.to_int @@ i3<span data-count="536">2</span> dst in
+  <span data-count="536">l</span>et len = Int32.to_int @@ i3<span data-count="536">2</span> len in
+  <span data-count="536">b</span>egin
     for i = 0 to len - 1 do
-      <span data-count="2097">l</span>et byte = Char.code @@ String.ge<span data-count="2097">t</span> str (src + i) in
-      <span data-count="2097">l</span>et dst = Int32.of_int (dst + i) in
-      <span data-count="2097">r</span>eplac<span data-count="2097">e</span> m dst (Smtml.Expr.valu<span data-count="2097">e</span> (Bitv (Smtml.Bitvector.of_int<span data-count="2097">8</span> byte)))
+      <span data-count="2105">l</span>et byte = Char.code @@ String.ge<span data-count="2105">t</span> str (src + i) in
+      <span data-count="2105">l</span>et dst = Int32.of_int (dst + i) in
+      <span data-count="2105">r</span>eplac<span data-count="2105">e</span> m dst (Smtml.Expr.valu<span data-count="2105">e</span> (Bitv (Smtml.Bitvector.of_int<span data-count="2105">8</span> byte)))
     done
   end
 
 let load_byte a { data; _ } =
-  <span data-count="183835">m</span>atch Map.find_opt a data with
-  | <span data-count="4136">N</span>one -&gt; Smtml.Expr.value (Bitv (Smtml.Bitvector.of_int<span data-count="4136">8</span> 0))
-  | <span data-count="179699">S</span>ome v -&gt; v
+  <span data-count="183067">m</span>atch Map.find_opt a data with
+  | <span data-count="4064">N</span>one -&gt; Smtml.Expr.value (Bitv (Smtml.Bitvector.of_int<span data-count="4064">8</span> 0))
+  | <span data-count="179003">S</span>ome v -&gt; v
 
 let loadn m a n =
-  <span data-count="48846">l</span>et rec loop addr size i acc =
-    <span data-count="183835">i</span>f i = size then <span data-count="48846">a</span>cc
+  <span data-count="48513">l</span>et rec loop addr size i acc =
+    <span data-count="183067">i</span>f i = size then <span data-count="48513">a</span>cc
     else
-      <span data-count="134989">l</span>et addr' = Int32.(ad<span data-count="134989">d</span> addr (of_in<span data-count="134989">t</span> i)) in
+      <span data-count="134554">l</span>et addr' = Int32.(ad<span data-count="134554">d</span> addr (of_in<span data-count="134554">t</span> i)) in
       let byte = load_byte addr' m in
-      <span data-count="134989">l</span>oop addr size (i + 1) (Smtml.Expr.conca<span data-count="134989">t</span> byte acc)
+      <span data-count="134554">l</span>oop addr size (i + 1) (Smtml.Expr.conca<span data-count="134554">t</span> byte acc)
   in
   let v0 = load_byte a m in
-  <span data-count="48846">l</span>oop a n 1 v0
+  <span data-count="48513">l</span>oop a n 1 v0
 
 let load_8_s m a =
   <span data-count="380">l</span>et v = loadn m (i3<span data-count="380">2</span> a) 1 in
@@ -443,11 +443,11 @@ let load_8_s m a =
   | <span data-count="215">_</span> -&gt; Smtml.Expr.cvtop (Ty_bitv 32) (Sign_extend 24) v
 
 let load_8_u m a =
-  <span data-count="3607">l</span>et v = loadn m (i3<span data-count="3607">2</span> a) 1 in
-  <span data-count="3607">m</span>atch Smtml.Expr.view v with
-  | <span data-count="2534">V</span>al (Bitv i) when Smtml.Bitvector.numbit<span data-count="2534">s</span> i = 8 -&gt;
-    <span data-count="2534">l</span>et i = Smtml.Bitvector.to_int32 i in
-    <span data-count="2534">S</span>ymbolic_value.const_i32 i
+  <span data-count="3419">l</span>et v = loadn m (i3<span data-count="3419">2</span> a) 1 in
+  <span data-count="3419">m</span>atch Smtml.Expr.view v with
+  | <span data-count="2346">V</span>al (Bitv i) when Smtml.Bitvector.numbit<span data-count="2346">s</span> i = 8 -&gt;
+    <span data-count="2346">l</span>et i = Smtml.Bitvector.to_int32 i in
+    <span data-count="2346">S</span>ymbolic_value.const_i32 i
   | <span data-count="1073">_</span> -&gt; Smtml.Expr.cvtop (Ty_bitv 32) (Zero_extend 24) v
 
 let load_16_s m a =
@@ -466,25 +466,25 @@ let load_16_u m a =
     <span data-count="0">S</span>ymbolic_value.const_i32 i16
   | <span data-count="0">_</span> -&gt; Smtml.Expr.cvtop (Ty_bitv 32) (Zero_extend 16) v
 
-let load_32 m a = <span data-count="44756">l</span>oadn m (i3<span data-count="44756">2</span> a) 4
+let load_32 m a = <span data-count="44611">l</span>oadn m (i3<span data-count="44611">2</span> a) 4
 
 let load_64 m a = <span data-count="103">l</span>oadn m (i3<span data-count="103">2</span> a) 8
 
 let storen m ~addr v n =
-  <span data-count="33937">l</span>et a0 = i32 addr in
-  <span data-count="33937">f</span>or i = 0 to n - 1 do
-    <span data-count="120341">l</span>et addr' = Int32.add a0 (Int32.of_in<span data-count="120341">t</span> i) in
-    <span data-count="120341">l</span>et v' = Smtml.Expr.extract v ~low:i ~high:(i + 1) in
-    <span data-count="120341">r</span>eplac<span data-count="120341">e</span> m addr' v'
+  <span data-count="33678">l</span>et a0 = i32 addr in
+  <span data-count="33678">f</span>or i = 0 to n - 1 do
+    <span data-count="119742">l</span>et addr' = Int32.add a0 (Int32.of_in<span data-count="119742">t</span> i) in
+    <span data-count="119742">l</span>et v' = Smtml.Expr.extract v ~low:i ~high:(i + 1) in
+    <span data-count="119742">r</span>eplac<span data-count="119742">e</span> m addr' v'
   done
 
-let store_8 m ~addr v = <span data-count="6045">s</span>toren m ~addr v 1
+let store_8 m ~addr v = <span data-count="5898">s</span>toren m ~addr v 1
 
 let store_16 m ~addr v = <span data-count="0">s</span>toren m ~addr v 2
 
-let store_32 m ~addr v = <span data-count="27210">s</span>toren m ~addr v 4
+let store_32 m ~addr v = <span data-count="27099">s</span>toren m ~addr v 4
 
-let store_64 m ~addr v = <span data-count="682">s</span>toren m ~addr v 8
+let store_64 m ~addr v = <span data-count="681">s</span>toren m ~addr v 8
 
 let get_limit_max _m = <span data-count="0">N</span>one (* TODO *)
 
@@ -493,33 +493,33 @@ let get_limit_max _m = <span data-count="0">N</span>one (* TODO *)
 module ITbl = Hashtbl.Make (struct
   include Int
 
-  let hash x = <span data-count="171887">x</span>
+  let hash x = <span data-count="170703">x</span>
 end)
 
 type collection = t ITbl.t Env_id.Tbl.t
 
-let init () = <span data-count="533">E</span>nv_id.Tbl.create 0
+let init () = <span data-count="535">E</span>nv_id.Tbl.create 0
 
 let convert (orig_mem : Concrete_memory.t) : t =
-  <span data-count="521">l</span>et s = Concrete_memory.size_in_pages orig_mem in
-  <span data-count="521">c</span>reate s
+  <span data-count="523">l</span>et s = Concrete_memory.size_in_pages orig_mem in
+  <span data-count="523">c</span>reate s
 
 let get_env env_id memories =
-  <span data-count="171366">m</span>atch Env_id.Tbl.find_opt memories env_id with
-  | <span data-count="170845">S</span>ome env -&gt; env
-  | <span data-count="521">N</span>one -&gt;
+  <span data-count="170180">m</span>atch Env_id.Tbl.find_opt memories env_id with
+  | <span data-count="169657">S</span>ome env -&gt; env
+  | <span data-count="523">N</span>one -&gt;
     let t = ITbl.create 0 in
-    <span data-count="521">E</span>nv_id.Tbl.add memories env_id t;
-    <span data-count="521">t</span>
+    <span data-count="523">E</span>nv_id.Tbl.add memories env_id t;
+    <span data-count="523">t</span>
 
 let get_memory env_id (orig_memory : Concrete_memory.t) collection g_id =
-  <span data-count="171366">l</span>et env = get_env env_id collection in
-  <span data-count="171366">m</span>atch ITbl.find_opt env g_id with
-  | <span data-count="170845">S</span>ome t -&gt; t
-  | <span data-count="521">N</span>one -&gt;
+  <span data-count="170180">l</span>et env = get_env env_id collection in
+  <span data-count="170180">m</span>atch ITbl.find_opt env g_id with
+  | <span data-count="169657">S</span>ome t -&gt; t
+  | <span data-count="523">N</span>one -&gt;
     let t = convert orig_memory in
-    <span data-count="521">I</span>Tbl.add env g_id t;
-    <span data-count="521">t</span>
+    <span data-count="523">I</span>Tbl.add env g_id t;
+    <span data-count="523">t</span>
 </code></pre>
       </div>
     </div>
