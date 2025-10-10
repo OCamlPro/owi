@@ -370,3 +370,8 @@ let to_hex_string x =
   if is_inf x then to_string x else to_string' (Fmt.str "%h") is_hex_digit 4 x
 
 let pp fmt v = Fmt.string fmt (to_string v)
+
+let compare f1 f2 =
+  let f1 = to_float f1 in
+  let f2 = to_float f2 in
+  Float.compare f1 f2

@@ -29,9 +29,9 @@ val of_instr : binary instr -> t
 
 val to_instr : t -> binary instr
 
-val ref_null' : binary heap_type -> ref_value
+val ref_null' : heap_type -> ref_value
 
-val ref_null : binary heap_type -> t
+val ref_null : heap_type -> t
 
 val ref_func : Concrete_extern_func.t -> t
 

@@ -23,7 +23,7 @@ module type P = sig
 
     val mut : t -> Types.mut
 
-    val typ : t -> binary val_type
+    val typ : t -> val_type
   end
 
   module Table : sig
@@ -35,7 +35,7 @@ module type P = sig
 
     val size : t -> int
 
-    val typ : t -> binary ref_type
+    val typ : t -> ref_type
 
     val max_size : t -> int option
 

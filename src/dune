@@ -10,9 +10,9 @@
   binary_encoder
   binary_parser
   binary_to_text
-  binary_types
   binary_validate
   choice_intf
+  call_graph
   cmd_utils
   cmd_c
   cmd_call_graph
@@ -49,15 +49,16 @@
   concrete_table
   concrete_value
   concrete_wasm_ffi
+  control_flow_graph
   convert
   env_id
+  exploration_smart
   float32
   float64
   v128
   contract
   func_id
   func_intf
-  graph
   grouped
   imported
   indexed
@@ -119,6 +120,7 @@
   wasm_ffi_intf
   work_ds_intf
   wpq
+  wq_random
   wq
   ws
   wutf8)
@@ -144,6 +146,7 @@
   logs.fmt
   logs.threaded
   menhirLib
+  ocamlgraph
   ocaml_intrinsics
   ppxlib
   prelude
