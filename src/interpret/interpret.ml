@@ -943,13 +943,12 @@ module Make (P : Interpret_intf.P) :
           (* TODO: replace by false... *)
           I64.(const_i64 0L <> const_i64 0L)
       in
-      st
-      @@
-      if too_big then Stack.push_i32 stack I32.(sub (const 0l) (const 1l))
+      if too_big then st @@ Stack.push_i32 stack I32.(sub (const 0l) (const 1l))
       else begin
+        let* mem = Env.get_memory env mem_0 in
         Memory.grow mem I64.(to_int32 delta);
         let res = I64.(to_int32 @@ (old_size / page_size)) in
-        Stack.push_i32 stack res
+        st @@ Stack.push_i32 stack res
       end
     end
     | Memory_fill ->
@@ -972,6 +971,7 @@ module Make (P : Interpret_intf.P) :
           let c = Int.abs c mod 256 in
           Char.chr c
         in
+        let* mem = Env.get_memory env mem_0 in
         let* () = Memory.fill mem ~pos ~len c in
         st stack
     | Memory_copy ->
@@ -990,6 +990,7 @@ module Make (P : Interpret_intf.P) :
       in
       if out_of_bounds then Choice.trap `Out_of_bounds_memory_access
       else begin
+        let* mem = Env.get_memory env mem_0 in
         let* () = Memory.blit mem ~src ~dst ~len in
         st stack
       end
@@ -1012,6 +1013,7 @@ module Make (P : Interpret_intf.P) :
       if out_of_bounds then Choice.trap `Out_of_bounds_memory_access
       else begin
         let data = Data.value data in
+        let* mem = Env.get_memory env mem_0 in
         Memory.blit_string mem data ~src ~dst ~len;
         st stack
       end
