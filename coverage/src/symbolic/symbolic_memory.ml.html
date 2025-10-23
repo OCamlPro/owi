@@ -493,7 +493,7 @@ let get_limit_max _m = <span data-count="0">N</span>one (* TODO *)
 module ITbl = Hashtbl.Make (struct
   include Int
 
-  let hash x = <span data-count="170703">x</span>
+  let hash x = <span data-count="171239">x</span>
 end)
 
 type collection = t ITbl.t Env_id.Tbl.t
@@ -505,17 +505,17 @@ let convert (orig_mem : Concrete_memory.t) : t =
   <span data-count="523">c</span>reate s
 
 let get_env env_id memories =
-  <span data-count="170180">m</span>atch Env_id.Tbl.find_opt memories env_id with
-  | <span data-count="169657">S</span>ome env -&gt; env
+  <span data-count="170716">m</span>atch Env_id.Tbl.find_opt memories env_id with
+  | <span data-count="170193">S</span>ome env -&gt; env
   | <span data-count="523">N</span>one -&gt;
     let t = ITbl.create 0 in
     <span data-count="523">E</span>nv_id.Tbl.add memories env_id t;
     <span data-count="523">t</span>
 
 let get_memory env_id (orig_memory : Concrete_memory.t) collection g_id =
-  <span data-count="170180">l</span>et env = get_env env_id collection in
-  <span data-count="170180">m</span>atch ITbl.find_opt env g_id with
-  | <span data-count="169657">S</span>ome t -&gt; t
+  <span data-count="170716">l</span>et env = get_env env_id collection in
+  <span data-count="170716">m</span>atch ITbl.find_opt env g_id with
+  | <span data-count="170193">S</span>ome t -&gt; t
   | <span data-count="523">N</span>one -&gt;
     let t = convert orig_memory in
     <span data-count="523">I</span>Tbl.add env g_id t;

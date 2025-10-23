@@ -2885,16 +2885,16 @@ end = struct
     <span data-count="1078">{</span> bytes = str; pt = 0; size }
 
   let sub ~pos ~len input =
-    <span data-count="1107367">i</span>f pos &lt;= input.size &amp;&amp; <span data-count="1107367">l</span>en &lt;= input.size - pos then
-      <span data-count="1107367">O</span>k { input with pt = input.pt + pos; size = len }
+    <span data-count="1107363">i</span>f pos &lt;= input.size &amp;&amp; <span data-count="1107363">l</span>en &lt;= input.size - pos then
+      <span data-count="1107363">O</span>k { input with pt = input.pt + pos; size = len }
     else <span data-count="0">p</span>arse_fail "length out of bounds in section"
 
-  let sub_suffix pos input = <span data-count="1094976">s</span>ub ~pos ~len:(input.size - pos) input
+  let sub_suffix pos input = <span data-count="1094972">s</span>ub ~pos ~len:(input.size - pos) input
 
   let sub_prefix len input = <span data-count="11202">s</span>ub ~pos:0 ~len input
 
   let get n input =
-    <span data-count="1092142">i</span>f n &lt; input.size then <span data-count="1091126">S</span>ome (String.ge<span data-count="1091126">t</span> input.bytes (input.pt + n))
+    <span data-count="1092138">i</span>f n &lt; input.size then <span data-count="1091122">S</span>ome (String.ge<span data-count="1091122">t</span> input.bytes (input.pt + n))
     else <span data-count="1016">N</span>one
 
   let as_string input = <span data-count="6">S</span>tring.sub input.bytes input.pt input.size
@@ -2906,33 +2906,33 @@ let string_of_char_list char_list =
   <span data-count="6191">B</span>uffer.contents buf
 
 let read_byte ~msg input =
-  <span data-count="1076767">m</span>atch Input.get 0 input with
+  <span data-count="1076763">m</span>atch Input.get 0 input with
   | <span data-count="3">N</span>one -&gt; parse_fail "%s" msg
-  | <span data-count="1076764">S</span>ome c -&gt;
-    let+ next_input = Input.sub_suffi<span data-count="1076764">x</span> 1 input in
-    <span data-count="1076764">(</span>c, next_input)
+  | <span data-count="1076760">S</span>ome c -&gt;
+    let+ next_input = Input.sub_suffi<span data-count="1076760">x</span> 1 input in
+    <span data-count="1076760">(</span>c, next_input)
 
 (* https://en.wikipedia.org/wiki/LEB128#Unsigned_LEB128 *)
 let read_UN n input =
   <span data-count="262656">l</span>et rec aux n input =
-    <span data-count="370119">l</span>et* () =
+    <span data-count="370118">l</span>et* () =
       if n &lt;= 0 then <span data-count="23">p</span>arse_fai<span data-count="23">l</span> "integer representation too long (read_UN 1)"
-      else <span data-count="370096">O</span>k ()
+      else <span data-count="370095">O</span>k ()
     in
-    <span data-count="370096">l</span>et* b, input =
-      read_byt<span data-count="370096">e</span> ~msg:"integer representation too long (read_UN 2)" input
+    <span data-count="370095">l</span>et* b, input =
+      read_byt<span data-count="370095">e</span> ~msg:"integer representation too long (read_UN 2)" input
     in
-    <span data-count="370095">l</span>et b = Char.code b in
-    <span data-count="370095">l</span>et* () =
-      if n &gt;= <span data-count="344300">7</span> || b land 0x7f &lt; 1 lsl <span data-count="25774">n</span> then <span data-count="370074">O</span>k ()
+    <span data-count="370094">l</span>et b = Char.code b in
+    <span data-count="370094">l</span>et* () =
+      if n &gt;= <span data-count="344299">7</span> || b land 0x7f &lt; 1 lsl <span data-count="25774">n</span> then <span data-count="370073">O</span>k ()
       else <span data-count="21">p</span>arse_fai<span data-count="21">l</span> "integer too large"
     in
-    <span data-count="370074">l</span>et x = Int64.of_int (b land 0x7f) in
-    <span data-count="370074">i</span>f b land 0x80 = 0 then <span data-count="262611">O</span>k (x, input)
+    <span data-count="370073">l</span>et x = Int64.of_int (b land 0x7f) in
+    <span data-count="370073">i</span>f b land 0x80 = 0 then <span data-count="262611">O</span>k (x, input)
     else
       (* TODO: make this tail-rec *)
-      <span data-count="107463">l</span>et+ i64, input = au<span data-count="107463">x</span> (n - 7) input in
-      <span data-count="107262">(</span>Int64.logo<span data-count="107262">r</span> x (Int64.sh<span data-count="107262">l</span> i64 7L), input)
+      <span data-count="107462">l</span>et+ i64, input = au<span data-count="107462">x</span> (n - 7) input in
+      <span data-count="107261">(</span>Int64.logo<span data-count="107261">r</span> x (Int64.sh<span data-count="107261">l</span> i64 7L), input)
   in
   aux n input
 
@@ -2943,29 +2943,29 @@ let read_U32 input =
 (* https://en.wikipedia.org/wiki/LEB128#Signed_LEB128 *)
 let read_SN n input =
   <span data-count="62134">l</span>et rec aux n input =
-    <span data-count="76398">l</span>et* () =
+    <span data-count="76395">l</span>et* () =
       if n &lt;= 0 then <span data-count="4">p</span>arse_fai<span data-count="4">l</span> "integer representation too long (read_SN 1)"
-      else <span data-count="76394">O</span>k ()
+      else <span data-count="76391">O</span>k ()
     in
-    <span data-count="76394">l</span>et* b, input =
-      read_byt<span data-count="76394">e</span> ~msg:"integer representation too long (read_SN 2)" input
+    <span data-count="76391">l</span>et* b, input =
+      read_byt<span data-count="76391">e</span> ~msg:"integer representation too long (read_SN 2)" input
     in
-    <span data-count="76394">l</span>et b = Char.code b in
-    <span data-count="76394">l</span>et mask = (-1 lsl (n - 1)) land 0x7f in
+    <span data-count="76391">l</span>et b = Char.code b in
+    <span data-count="76391">l</span>et mask = (-1 lsl (n - 1)) land 0x7f in
     let* () =
-      if n &gt;= <span data-count="73930">7</span> || b land mask = <span data-count="2303">0</span> || b land mask = mas<span data-count="153">k</span> then <span data-count="76386">O</span>k ()
+      if n &gt;= <span data-count="73930">7</span> || b land mask = <span data-count="2306">0</span> || b land mask = mas<span data-count="147">k</span> then <span data-count="76383">O</span>k ()
       else <span data-count="8">p</span>arse_fai<span data-count="8">l</span> "integer too large"
     in
-    <span data-count="76386">l</span>et x = Int64.of_int (b land 0x7f) in
-    <span data-count="76386">i</span>f b land 0x80 = 0 then
+    <span data-count="76383">l</span>et x = Int64.of_int (b land 0x7f) in
+    <span data-count="76383">i</span>f b land 0x80 = 0 then
       <span data-count="62122">l</span>et x =
-        if b land 0x40 = 0 then <span data-count="39585">x</span> else <span data-count="22537">I</span>nt64.(logo<span data-count="22537">r</span> x (logxo<span data-count="22537">r</span> (-1L) 0x7fL))
+        if b land 0x40 = 0 then <span data-count="39591">x</span> else <span data-count="22531">I</span>nt64.(logo<span data-count="22531">r</span> x (logxo<span data-count="22531">r</span> (-1L) 0x7fL))
       in
       Ok (x, input)
     else
       (* TODO: make this tail-rec *)
-      <span data-count="14264">l</span>et+ i64, input = au<span data-count="14264">x</span> (n - 7) input in
-      <span data-count="14182">(</span>Int64.logo<span data-count="14182">r</span> x (Int64.sh<span data-count="14182">l</span> i64 7L), input)
+      <span data-count="14261">l</span>et+ i64, input = au<span data-count="14261">x</span> (n - 7) input in
+      <span data-count="14179">(</span>Int64.logo<span data-count="14179">r</span> x (Int64.sh<span data-count="14179">l</span> i64 7L), input)
   in
   aux n input
 

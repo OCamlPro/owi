@@ -537,15 +537,15 @@ module Env = struct
   type t = Extern_func.extern_func Link_env.t
 
   let get_memory env id : Memory.t Choice.t =
-    <span data-count="170180">m</span>atch Link_env.get_memory env id with
+    <span data-count="170716">m</span>atch Link_env.get_memory env id with
     | <span data-count="0">E</span>rror t -&gt; Choice.trap t
-    | <span data-count="170180">O</span>k orig_mem -&gt;
+    | <span data-count="170716">O</span>k orig_mem -&gt;
       let f (t : thread) : Memory.t =
-        <span data-count="170180">l</span>et sym_mem =
-          Symbolic_memory.get_memory (Link_env.i<span data-count="170180">d</span> env) orig_mem
+        <span data-count="170716">l</span>et sym_mem =
+          Symbolic_memory.get_memory (Link_env.i<span data-count="170716">d</span> env) orig_mem
             t.shared.memories id
         in
-        <span data-count="170180">(</span>orig_mem, sym_mem)
+        <span data-count="170716">(</span>orig_mem, sym_mem)
       in
       Choice.with_thread f
 
