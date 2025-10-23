@@ -25,6 +25,9 @@ module Any : sig
 end
 
 module File : sig
+  val until_binary :
+    unsafe:bool -> rac:bool -> srac:bool -> Fpath.t -> Binary.Module.t Result.t
+
   val until_validate :
     unsafe:bool -> rac:bool -> srac:bool -> Fpath.t -> Binary.Module.t Result.t
 
