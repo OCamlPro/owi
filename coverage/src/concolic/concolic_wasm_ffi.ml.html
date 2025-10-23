@@ -713,7 +713,7 @@ module M :
     <span data-count="3332">m</span>atch view s with
     | <span data-count="3332">V</span>al (Bitv bv) -&gt; Concolic_choice.return (Smtml.Bitvector.to_int3<span data-count="3332">2</span> bv)
     | <span data-count="0">_</span> -&gt;
-      Logs.err (fun m -&gt;
+      Log.err (fun m -&gt;
         <span data-count="0">m</span> {|alloc: cannot allocate base pointer "%a"|} Expr.pp s );
       <span data-count="0">C</span>oncolic_choice.bind (abor<span data-count="0">t</span> ()) (fun () -&gt; <span data-count="0">a</span>ssert false)
 
@@ -724,7 +724,7 @@ module M :
       let base = Smtml.Bitvector.to_int32 base in
       <span data-count="1930">C</span>oncolic_choice.return base
     | <span data-count="0">_</span> -&gt;
-      Logs.err (fun m -&gt;
+      Log.err (fun m -&gt;
         <span data-count="0">m</span> {|free: cannot fetch pointer base of "%a"|} Expr.pp s );
       <span data-count="0">C</span>oncolic_choice.bind (abor<span data-count="0">t</span> ()) (fun () -&gt; <span data-count="0">a</span>ssert false)
 
@@ -745,15 +745,15 @@ module M :
     <span data-count="0">C</span>oncolic_choice.return (0l, Smtml.Expr.valu<span data-count="0">e</span> (Smtml.Value.Int 1))
 
   let print_char ((c, _s) : Value.int32) =
-    <span data-count="0">L</span>ogs.app (fun m -&gt; <span data-count="0">m</span> "%c" (char_of_in<span data-count="0">t</span> (Int32.to_in<span data-count="0">t</span> c)));
+    <span data-count="0">L</span>og.app (fun m -&gt; <span data-count="0">m</span> "%c" (char_of_in<span data-count="0">t</span> (Int32.to_in<span data-count="0">t</span> c)));
     <span data-count="0">C</span>oncolic_choice.return ()
 
   let cov_label_set _ _ _ =
-    <span data-count="0">L</span>ogs.err (fun m -&gt; <span data-count="0">m</span> "labels are not implemented in concolic mode");
+    <span data-count="0">L</span>og.err (fun m -&gt; <span data-count="0">m</span> "labels are not implemented in concolic mode");
     <span data-count="0">a</span>ssert false
 
   let cov_label_is_covered _ =
-    <span data-count="0">L</span>ogs.err (fun m -&gt; <span data-count="0">m</span> "labels are not implemented in concolic mode");
+    <span data-count="0">L</span>og.err (fun m -&gt; <span data-count="0">m</span> "labels are not implemented in concolic mode");
     <span data-count="0">a</span>ssert false
 
   let open_scope _m _strptr = <span data-count="0">a</span>ssert false

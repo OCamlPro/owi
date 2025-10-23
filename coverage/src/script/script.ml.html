@@ -837,7 +837,7 @@ let compare_result_const result (const : V.t) =
   | <span data-count="0">R</span>esult_const (Literal (Const_host _)), _ -&gt;
     false
   | <span data-count="0">_</span> -&gt;
-    Logs.err (fun m -&gt; <span data-count="0">m</span> "TODO: unimplemented Script.compare_result_const");
+    Log.err (fun m -&gt; <span data-count="0">m</span> "TODO: unimplemented Script.compare_result_const");
     <span data-count="0">a</span>ssert false
 
 let value_of_const : text const -&gt; V.t Result.t = function
@@ -851,13 +851,13 @@ let value_of_const : text const -&gt; V.t Result.t = function
     <span data-count="14">V</span>.ref_null rt
   | <span data-count="34">C</span>onst_extern i -&gt; ok @@ V.Ref (Host_externref.valu<span data-count="34">e</span> i)
   | <span data-count="0">i</span> -&gt;
-    Logs.err (fun m -&gt;
+    Log.err (fun m -&gt;
       <span data-count="0">m</span> "TODO: unimplemented Script.value_of_const %a)" Types.pp_const i );
     <span data-count="0">a</span>ssert false
 
 let action (link_state : Concrete_extern_func.extern_func Link.state) = function
   | <span data-count="24432">T</span>ext.Invoke (mod_id, f, args) -&gt; begin
-    Logs.info (fun m -&gt;
+    Log.info (fun m -&gt;
       <span data-count="0">m</span> "invoke %a %s %a..."
         (Fmt.optio<span data-count="0">n</span> ~none:Fmt.nop Fmt.string)
         mod_id f Types.pp_consts args );
@@ -868,7 +868,7 @@ let action (link_state : Concrete_extern_func.extern_func Link.state) = function
       ~envs:link_state.envs f
   end
   | <span data-count="11">G</span>et (mod_id, name) -&gt;
-    Logs.info (fun m -&gt; <span data-count="0">m</span> "get...");
+    Log.info (fun m -&gt; <span data-count="0">m</span> "get...");
     <span data-count="11">l</span>et+ global = load_global_from_modul<span data-count="11">e</span> link_state mod_id name in
     <span data-count="11">[</span> global.value ]
 
@@ -888,7 +888,7 @@ let run ~no_exhaustion script =
         if !curr_module = 0 then
           (* TODO: disable printing*)
           <span data-count="129">(</span>);
-        <span data-count="1659">L</span>ogs.info (fun m -&gt; <span data-count="0">m</span> "*** module");
+        <span data-count="1659">L</span>og.info (fun m -&gt; <span data-count="0">m</span> "*** module");
         <span data-count="1659">i</span>ncr curr_module;
         <span data-count="1659">l</span>et* m, link_state =
           Compile.Text.until_lin<span data-count="1659">k</span> link_state ~unsafe ~rac:false ~srac:false
@@ -901,7 +901,7 @@ let run ~no_exhaustion script =
         (* TODO: enable printing again! *)
         <span data-count="1659">l</span>ink_state
       | <span data-count="2">T</span>ext.Quoted_module m -&gt;
-        Logs.info (fun m -&gt; <span data-count="0">m</span> "*** quoted module");
+        Log.info (fun m -&gt; <span data-count="0">m</span> "*** quoted module");
         <span data-count="2">i</span>ncr curr_module;
         <span data-count="2">l</span>et* m = Parse.Text.Inline_module.from_strin<span data-count="2">g</span> m in
         <span data-count="2">l</span>et* m, link_state =
@@ -914,7 +914,7 @@ let run ~no_exhaustion script =
         in
         <span data-count="2">l</span>ink_state
       | <span data-count="47">T</span>ext.Binary_module (id, m) -&gt;
-        Logs.info (fun m -&gt; <span data-count="0">m</span> "*** binary module");
+        Log.info (fun m -&gt; <span data-count="0">m</span> "*** binary module");
         <span data-count="47">i</span>ncr curr_module;
         <span data-count="47">l</span>et* m = Parse.Binary.Module.from_strin<span data-count="47">g</span> m in
         <span data-count="47">l</span>et m = { m with id } in
@@ -927,7 +927,7 @@ let run ~no_exhaustion script =
         in
         <span data-count="47">l</span>ink_state
       | <span data-count="60">A</span>ssert (Assert_trap_module (m, expected)) -&gt;
-        Logs.info (fun m -&gt; <span data-count="0">m</span> "*** assert_trap");
+        Log.info (fun m -&gt; <span data-count="0">m</span> "*** assert_trap");
         <span data-count="60">i</span>ncr curr_module;
         <span data-count="60">l</span>et* m, link_state =
           Compile.Text.until_lin<span data-count="60">k</span> link_state ~unsafe ~rac:false ~srac:false
@@ -940,12 +940,12 @@ let run ~no_exhaustion script =
         <span data-count="60">l</span>et+ () = check_error_resul<span data-count="60">t</span> expected got in
         <span data-count="60">l</span>ink_state
       | <span data-count="641">A</span>ssert (Assert_malformed_binary (m, expected)) -&gt;
-        Logs.info (fun m -&gt; <span data-count="0">m</span> "*** assert_malformed_binary");
+        Log.info (fun m -&gt; <span data-count="0">m</span> "*** assert_malformed_binary");
         <span data-count="641">l</span>et got = Parse.Binary.Module.from_string m in
         <span data-count="641">l</span>et+ () = check_error_resul<span data-count="641">t</span> expected got in
         <span data-count="640">l</span>ink_state
       | <span data-count="789">A</span>ssert (Assert_malformed_quote (m, expected)) -&gt;
-        Logs.info (fun m -&gt; <span data-count="0">m</span> "*** assert_malformed_quote");
+        Log.info (fun m -&gt; <span data-count="0">m</span> "*** assert_malformed_quote");
         (* TODO: use Parse.Text.Module.from_string instead *)
         <span data-count="789">l</span>et got = Parse.Text.Script.from_string m in
         <span data-count="789">l</span>et+ () =
@@ -960,7 +960,7 @@ let run ~no_exhaustion script =
         in
         <span data-count="789">l</span>ink_state
       | <span data-count="11">A</span>ssert (Assert_invalid_binary (m, expected)) -&gt;
-        Logs.info (fun m -&gt; <span data-count="0">m</span> "*** assert_invalid_binary");
+        Log.info (fun m -&gt; <span data-count="0">m</span> "*** assert_invalid_binary");
         <span data-count="11">l</span>et got = Parse.Binary.Module.from_string m in
         <span data-count="11">l</span>et+ () =
           match got with
@@ -975,7 +975,7 @@ let run ~no_exhaustion script =
         in
         <span data-count="11">l</span>ink_state
       | <span data-count="1581">A</span>ssert (Assert_invalid (m, expected)) -&gt;
-        Logs.info (fun m -&gt; <span data-count="0">m</span> "*** assert_invalid");
+        Log.info (fun m -&gt; <span data-count="0">m</span> "*** assert_invalid");
         <span data-count="1581">l</span>et got =
           Compile.Text.until_link link_state ~unsafe ~rac:false ~srac:false
             ~name:None m
@@ -983,12 +983,12 @@ let run ~no_exhaustion script =
         <span data-count="1581">l</span>et+ () = check_error_resul<span data-count="1581">t</span> expected got in
         <span data-count="1581">l</span>ink_state
       | <span data-count="0">A</span>ssert (Assert_invalid_quote (m, expected)) -&gt;
-        Logs.info (fun m -&gt; <span data-count="0">m</span> "*** assert_invalid_quote");
+        Log.info (fun m -&gt; <span data-count="0">m</span> "*** assert_invalid_quote");
         <span data-count="0">l</span>et got = Parse.Text.Module.from_string m in
         <span data-count="0">l</span>et+ () = check_error_resul<span data-count="0">t</span> expected got in
         <span data-count="0">l</span>ink_state
       | <span data-count="83">A</span>ssert (Assert_unlinkable (m, expected)) -&gt;
-        Logs.info (fun m -&gt; <span data-count="0">m</span> "*** assert_unlinkable");
+        Log.info (fun m -&gt; <span data-count="0">m</span> "*** assert_unlinkable");
         <span data-count="83">l</span>et got =
           Compile.Text.until_link link_state ~unsafe ~rac:false ~srac:false
             ~name:None m
@@ -996,7 +996,7 @@ let run ~no_exhaustion script =
         <span data-count="83">l</span>et+ () = check_error_resul<span data-count="83">t</span> expected got in
         <span data-count="83">l</span>ink_state
       | <span data-count="0">A</span>ssert (Assert_malformed (m, expected)) -&gt;
-        Logs.info (fun m -&gt; <span data-count="0">m</span> "*** assert_malformed");
+        Log.info (fun m -&gt; <span data-count="0">m</span> "*** assert_malformed");
         <span data-count="0">l</span>et got =
           Compile.Text.until_link ~unsafe ~rac:false ~srac:false ~name:None
             link_state m
@@ -1004,25 +1004,25 @@ let run ~no_exhaustion script =
         <span data-count="0">l</span>et+ () = check_error_resul<span data-count="0">t</span> expected got in
         <span data-count="0">a</span>ssert false
       | <span data-count="21903">A</span>ssert (Assert_return (a, res)) -&gt;
-        Logs.info (fun m -&gt; <span data-count="0">m</span> "*** assert_return");
+        Log.info (fun m -&gt; <span data-count="0">m</span> "*** assert_return");
         <span data-count="21903">l</span>et* stack = actio<span data-count="21903">n</span> link_state a in
         <span data-count="21903">l</span>et stack = List.rev stack in
         <span data-count="21903">i</span>f
           List.compare_length<span data-count="21903">s</span> res stack &lt;&gt; <span data-count="0">0</span>
           || not (List.for_all<span data-count="21903">2</span> compare_result_const res stack<span data-count="0">)</span>
         then <span data-count="0">b</span>egin
-          Logs.err (fun m -&gt;
+          Log.err (fun m -&gt;
             <span data-count="0">m</span> "got:      %a@.expected: %a" Stack.pp stack Text.pp_results res );
           <span data-count="0">E</span>rror `Bad_result
         end
         else <span data-count="21903">O</span>k link_state
       | <span data-count="2383">A</span>ssert (Assert_trap (a, expected)) -&gt;
-        Logs.info (fun m -&gt; <span data-count="0">m</span> "*** assert_trap");
+        Log.info (fun m -&gt; <span data-count="0">m</span> "*** assert_trap");
         <span data-count="2383">l</span>et got = action link_state a in
         <span data-count="2383">l</span>et+ () = check_error_resul<span data-count="2383">t</span> expected got in
         <span data-count="2383">l</span>ink_state
       | <span data-count="15">A</span>ssert (Assert_exhaustion (a, expected)) -&gt;
-        Logs.info (fun m -&gt; <span data-count="0">m</span> "*** assert_exhaustion");
+        Log.info (fun m -&gt; <span data-count="0">m</span> "*** assert_exhaustion");
         <span data-count="15">l</span>et+ () =
           if no_exhaustion then <span data-count="15">O</span>k ()
           else
@@ -1032,12 +1032,12 @@ let run ~no_exhaustion script =
         <span data-count="15">l</span>ink_state
       | <span data-count="157">R</span>egister (name, mod_name) -&gt;
         if !curr_module = 1 &amp;&amp; <span data-count="129">n</span>ot !registered then (* TODO: disable debug *) <span data-count="129">(</span>);
-        <span data-count="157">L</span>ogs.info (fun m -&gt; <span data-count="0">m</span> "*** register");
+        <span data-count="157">L</span>og.info (fun m -&gt; <span data-count="0">m</span> "*** register");
         <span data-count="157">l</span>et+ state = Link.register_modul<span data-count="157">e</span> link_state ~name ~id:mod_name in
         (* TODO: enable debug again! *)
         <span data-count="157">s</span>tate
       | <span data-count="157">A</span>ction a -&gt;
-        Logs.info (fun m -&gt; <span data-count="0">m</span> "*** action");
+        Log.info (fun m -&gt; <span data-count="0">m</span> "*** action");
         <span data-count="157">l</span>et+ _stack = actio<span data-count="157">n</span> link_state a in
         <span data-count="157">l</span>ink_state )
     state script

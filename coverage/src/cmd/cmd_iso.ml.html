@@ -994,24 +994,24 @@ let module_name2 = "owi_iso_module2"
 
 let binaryen_fuzzing_support_module weird_log_i64 =
   <span data-count="3">l</span>et log_i32 x =
-    <span data-count="0">L</span>ogs.app (fun m -&gt; <span data-count="0">m</span> "%a@?" Symbolic.Value.pp_int32 x);
+    <span data-count="0">L</span>og.app (fun m -&gt; <span data-count="0">m</span> "%a@?" Symbolic.Value.pp_int32 x);
     <span data-count="0">S</span>ymbolic_choice_with_memory.return ()
   in
   let log_i64 x =
-    <span data-count="0">L</span>ogs.app (fun m -&gt; <span data-count="0">m</span> "%a@?" Symbolic.Value.pp_int64 x);
+    <span data-count="0">L</span>og.app (fun m -&gt; <span data-count="0">m</span> "%a@?" Symbolic.Value.pp_int64 x);
     <span data-count="0">S</span>ymbolic_choice_with_memory.return ()
   in
   let log_i64_weird x y =
-    <span data-count="0">L</span>ogs.app (fun m -&gt;
+    <span data-count="0">L</span>og.app (fun m -&gt;
       <span data-count="0">m</span> "%a%a@?" Symbolic.Value.pp_int32 x Symbolic.Value.pp_int32 y );
     <span data-count="0">S</span>ymbolic_choice_with_memory.return ()
   in
   let log_f32 x =
-    <span data-count="0">L</span>ogs.app (fun m -&gt; <span data-count="0">m</span> "%a@?" Symbolic.Value.pp_float32 x);
+    <span data-count="0">L</span>og.app (fun m -&gt; <span data-count="0">m</span> "%a@?" Symbolic.Value.pp_float32 x);
     <span data-count="0">S</span>ymbolic_choice_with_memory.return ()
   in
   let log_f64 x =
-    <span data-count="0">L</span>ogs.app (fun m -&gt; <span data-count="0">m</span> "%a@?" Symbolic.Value.pp_float64 x);
+    <span data-count="0">L</span>og.app (fun m -&gt; <span data-count="0">m</span> "%a@?" Symbolic.Value.pp_float64 x);
     <span data-count="0">S</span>ymbolic_choice_with_memory.return ()
   in
   let call_export _n1 _n2 = <span data-count="0">S</span>ymbolic_choice_with_memory.return () in
@@ -1310,7 +1310,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
   <span data-count="3">l</span>et start = Some index in
   let modul = { iso_modul with start } in
   let text_modul = Binary_to_text.modul modul in
-  <span data-count="3">L</span>ogs.debug (fun m -&gt;
+  <span data-count="3">L</span>og.debug (fun m -&gt;
     <span data-count="0">m</span> "generated module:@\n  @[&lt;v&gt;%a@]" Text.pp_modul text_modul );
   <span data-count="3">l</span>et+ m, link_state =
     Compile.Binary.until_lin<span data-count="3">k</span> ~unsafe:false ~name:None link_state modul
@@ -1338,18 +1338,18 @@ let cmd ~deterministic_result_order ~fail_mode ~exploration_strategy ~files
     | <span data-count="0">_</span> -&gt; Fmt.error_ms<span data-count="0">g</span> "require at most two modules"
   in
 
-  <span data-count="3">L</span>ogs.info (fun m -&gt; <span data-count="1">m</span> "comparing %a and %a" Fpath.pp file1 Fpath.pp file2);
-  <span data-count="3">L</span>ogs.info (fun m -&gt; <span data-count="1">m</span> "module %s is %a" module_name1 Fpath.pp file1);
-  <span data-count="3">L</span>ogs.info (fun m -&gt; <span data-count="1">m</span> "module %s is %a" module_name2 Fpath.pp file2);
+  <span data-count="3">L</span>og.info (fun m -&gt; <span data-count="1">m</span> "comparing %a and %a" Fpath.pp file1 Fpath.pp file2);
+  <span data-count="3">L</span>og.info (fun m -&gt; <span data-count="1">m</span> "module %s is %a" module_name1 Fpath.pp file1);
+  <span data-count="3">L</span>og.info (fun m -&gt; <span data-count="1">m</span> "module %s is %a" module_name2 Fpath.pp file2);
 
   <span data-count="3">l</span>et compile ~unsafe file =
     <span data-count="6">C</span>ompile.File.until_validate ~unsafe ~rac:false ~srac:false file
   in
 
-  Logs.info (fun m -&gt; <span data-count="1">m</span> "Compiling %a" Fpath.pp file1);
+  Log.info (fun m -&gt; <span data-count="1">m</span> "Compiling %a" Fpath.pp file1);
   <span data-count="3">l</span>et* module1 = compil<span data-count="3">e</span> ~unsafe file1 in
 
-  <span data-count="3">L</span>ogs.info (fun m -&gt; <span data-count="1">m</span> "Compiling %a" Fpath.pp file2);
+  <span data-count="3">L</span>og.info (fun m -&gt; <span data-count="1">m</span> "Compiling %a" Fpath.pp file2);
   <span data-count="3">l</span>et* module2 = compil<span data-count="3">e</span> ~unsafe file2 in
 
   <span data-count="3">l</span>et funcexports1 =
@@ -1368,12 +1368,12 @@ let cmd ~deterministic_result_order ~fail_mode ~exploration_strategy ~files
   <span data-count="3">l</span>et exports_name_1 = List.map fst funcexports1 in
   <span data-count="3">l</span>et exports_name_2 = List.map fst funcexports2 in
 
-  <span data-count="3">L</span>ogs.debug (fun m -&gt;
+  <span data-count="3">L</span>og.debug (fun m -&gt;
     <span data-count="0">m</span> "%a exports: %a" Fpath.pp file1
       (Fmt.lis<span data-count="0">t</span> ~sep:(fun fmt () -&gt; <span data-count="0">F</span>mt.pf fmt " ") Fmt.string)
       exports_name_1 );
 
-  <span data-count="3">L</span>ogs.debug (fun m -&gt;
+  <span data-count="3">L</span>og.debug (fun m -&gt;
     <span data-count="0">m</span> "%a exports: %a" Fpath.pp file2
       (Fmt.lis<span data-count="0">t</span> ~sep:(fun fmt () -&gt; <span data-count="0">F</span>mt.pf fmt " ") Fmt.string)
       exports_name_2 );
@@ -1407,7 +1407,7 @@ let cmd ~deterministic_result_order ~fail_mode ~exploration_strategy ~files
         in
         if Types.func_type_eq typ1 typ2 then <span data-count="3">(</span>name, typ1) :: common_exports
         else <span data-count="0">b</span>egin
-          Logs.warn (fun m -&gt;
+          Log.warn (fun m -&gt;
             <span data-count="0">m</span>
               "Removing %s from common exports because they have a different \
                type in each module."
@@ -1417,7 +1417,7 @@ let cmd ~deterministic_result_order ~fail_mode ~exploration_strategy ~files
       [] common_exports
   in
 
-  <span data-count="3">L</span>ogs.info (fun m -&gt;
+  <span data-count="3">L</span>og.info (fun m -&gt;
     <span data-count="1">m</span> "common exports: %a"
       (Fmt.lis<span data-count="1">t</span>
          ~sep:(fun fmt () -&gt; <span data-count="0">F</span>mt.pf fmt " ")
@@ -1426,7 +1426,7 @@ let cmd ~deterministic_result_order ~fail_mode ~exploration_strategy ~files
 
   <span data-count="3">l</span>ist_fold_left
     (fun () (export_name, export_type) -&gt;
-      <span data-count="3">L</span>ogs.info (fun m -&gt; <span data-count="1">m</span> "checking export %s" export_name);
+      <span data-count="3">L</span>og.info (fun m -&gt; <span data-count="1">m</span> "checking export %s" export_name);
       <span data-count="3">l</span>et* result = check_is<span data-count="3">o</span> ~unsafe export_name export_type module1 module2 in
 
       <span data-count="3">C</span>md_sym.handle_result ~exploration_strategy ~fail_mode ~workers ~solver

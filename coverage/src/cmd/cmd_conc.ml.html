@@ -1316,7 +1316,7 @@ let find_node_to_run tree =
         | <span data-count="2006">f</span>alse, false -&gt; Some (Random.boo<span data-count="2006">l</span> ()) (* Unexplored in both *)
         | <span data-count="46">t</span>rue, true -&gt; None (* No unexplored remain *)
       in
-      <span data-count="4999">L</span>ogs.debug (fun m -&gt; <span data-count="0">m</span> "select bool %b" b);
+      <span data-count="4999">L</span>og.debug (fun m -&gt; <span data-count="0">m</span> "select bool %b" b);
       <span data-count="4999">l</span>oop (if b then <span data-count="2832">i</span>f_true else <span data-count="2167">i</span>f_false) (tree :: to_update)
     | <span data-count="82">S</span>elect_i32 { value = _; branches } -&gt;
       (* TODO: better ! *)
@@ -1332,7 +1332,7 @@ let find_node_to_run tree =
         <span data-count="82">m</span>atch List.nth_opt branches i with
         | None -&gt; assert false
         | <span data-count="82">S</span>ome (i, branch) -&gt;
-          Logs.debug (fun m -&gt; <span data-count="0">m</span> "select_i32 %li" i);
+          Log.debug (fun m -&gt; <span data-count="0">m</span> "select_i32 %li" i);
           <span data-count="82">l</span>oop branch (tree :: to_update)
       end
     | <span data-count="6359">A</span>ssume { cond = _; cont } -&gt; loop cont (tree :: to_update)
@@ -1394,12 +1394,12 @@ let run solver tree link_state modules_to_run =
       | <span data-count="220">E</span>rror (Assume_fail c) -&gt; (
         decr count_path;
         (* Current path condition led to assume failure, try to satisfy *)
-        <span data-count="220">L</span>ogs.debug (fun m -&gt; <span data-count="0">m</span> "assume_fail: %a" Smtml.Expr.pp c);
-        <span data-count="220">L</span>ogs.debug (fun m -&gt;
+        <span data-count="220">L</span>og.debug (fun m -&gt; <span data-count="0">m</span> "assume_fail: %a" Smtml.Expr.pp c);
+        <span data-count="220">L</span>og.debug (fun m -&gt;
           <span data-count="0">m</span> "Assignments:@.%a"
             (Concolic_choice.pp_assignments ~no_value:false)
             trace.assignments );
-        <span data-count="220">L</span>ogs.debug (fun m -&gt; <span data-count="0">m</span> "Retry !");
+        <span data-count="220">L</span>og.debug (fun m -&gt; <span data-count="0">m</span> "Retry !");
         <span data-count="220">m</span>atch pc_model solver (Assume c :: trace.remaining_pc) with
         | <span data-count="139">S</span>ome model -&gt; loo<span data-count="139">p</span> model
         | <span data-count="81">N</span>one -&gt; Ok None )
@@ -1494,22 +1494,22 @@ let cmd ~parameters ~source_file =
       <span data-count="4">C</span>md_utils.write_testcase ~dir:Fpath.(workspace / "test-suite") testcase
     else <span data-count="1">O</span>k ()
   in
-  Logs.info (fun m -&gt; <span data-count="0">m</span> "completed paths: %d" !count_path);
+  Log.info (fun m -&gt; <span data-count="0">m</span> "completed paths: %d" !count_path);
   <span data-count="164">l</span>et to_file path assignements =
     <span data-count="0">B</span>os.OS.File.write path (to_strin<span data-count="0">g</span> assignements)
   in
   match result with
   | <span data-count="159">N</span>one -&gt;
-    Logs.app (fun m -&gt; <span data-count="159">m</span> "All OK!");
+    Log.app (fun m -&gt; <span data-count="159">m</span> "All OK!");
     <span data-count="159">O</span>k ()
   | <span data-count="1">S</span>ome (`Trap trap, { assignments; _ }) -&gt;
     let assignments = List.rev assignments in
-    <span data-count="1">L</span>ogs.err (fun m -&gt; <span data-count="1">m</span> "Trap: %s" (Result.err_to_strin<span data-count="1">g</span> trap));
+    <span data-count="1">L</span>og.err (fun m -&gt; <span data-count="1">m</span> "Trap: %s" (Result.err_to_strin<span data-count="1">g</span> trap));
     <span data-count="1">l</span>et* () =
       match model_out_file with
       | <span data-count="0">S</span>ome path -&gt; to_fil<span data-count="0">e</span> path assignments
       | <span data-count="1">N</span>one -&gt;
-        Logs.app (fun m -&gt; <span data-count="1">m</span> "Model:@\n @[&lt;v&gt;%s@]" (to_strin<span data-count="1">g</span> assignments));
+        Log.app (fun m -&gt; <span data-count="1">m</span> "Model:@\n @[&lt;v&gt;%s@]" (to_strin<span data-count="1">g</span> assignments));
         <span data-count="1">O</span>k ()
     in
     <span data-count="1">l</span>et* () = testcas<span data-count="1">e</span> assignments in
@@ -1517,17 +1517,17 @@ let cmd ~parameters ~source_file =
   | <span data-count="4">S</span>ome (`Assert_fail, { assignments; _ }) -&gt;
     let assignments = List.rev assignments in
     <span data-count="4">i</span>f no_assert_failure_expression_printing then begin
-      <span data-count="0">L</span>ogs.er<span data-count="0">r</span> (fun m -&gt; <span data-count="0">m</span> "Assert failure")
+      <span data-count="0">L</span>og.er<span data-count="0">r</span> (fun m -&gt; <span data-count="0">m</span> "Assert failure")
     end
     else begin
       (* TODO: print the assert failure expression ! *)
-      <span data-count="4">L</span>ogs.er<span data-count="4">r</span> (fun m -&gt; <span data-count="4">m</span> "Assert failure")
+      <span data-count="4">L</span>og.er<span data-count="4">r</span> (fun m -&gt; <span data-count="4">m</span> "Assert failure")
     end;
     let* () =
       match model_out_file with
       | <span data-count="0">S</span>ome path -&gt; to_fil<span data-count="0">e</span> path assignments
       | <span data-count="4">N</span>one -&gt;
-        Logs.app (fun m -&gt; <span data-count="4">m</span> "Model:@\n @[&lt;v&gt;%s@]" (to_strin<span data-count="4">g</span> assignments));
+        Log.app (fun m -&gt; <span data-count="4">m</span> "Model:@\n @[&lt;v&gt;%s@]" (to_strin<span data-count="4">g</span> assignments));
         <span data-count="4">O</span>k ()
     in
     <span data-count="4">l</span>et* () = testcas<span data-count="4">e</span> assignments in

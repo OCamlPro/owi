@@ -507,7 +507,7 @@ let trap t = <span data-count="1">M</span> (fun th -&gt; <span data-count="1">(<
 let with_thread f = <span data-count="178361">M</span> (fun st -&gt; <span data-count="178361">(</span>Ok (<span data-count="178361">f</span> st), st))
 
 let with_new_invisible_symbol (_ty : Smtml.Ty.t) _fn =
-  <span data-count="0">L</span>ogs.err (fun m -&gt; <span data-count="0">m</span> "Not implemented in concolic mode");
+  <span data-count="0">L</span>og.err (fun m -&gt; <span data-count="0">m</span> "Not implemented in concolic mode");
   <span data-count="0">a</span>ssert false
 
 let with_new_symbol ty f =

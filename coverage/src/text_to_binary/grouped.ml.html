@@ -949,12 +949,12 @@ let add_field curr (fields : t) = function
   | <span data-count="258">M</span>Start start -&gt; Ok { fields with start = Some start }
 
 let of_text { Text.fields; id; annots } =
-  <span data-count="3676">L</span>ogs.debug (fun m -&gt; <span data-count="1">m</span> "grouping     ...");
+  <span data-count="3676">L</span>og.debug (fun m -&gt; <span data-count="1">m</span> "grouping     ...");
   <span data-count="3676">l</span>et+ modul =
     list_fold_lef<span data-count="3676">t</span> (add_fiel<span data-count="3676">d</span> (init_cur<span data-count="3676">r</span> ())) (empty_modul<span data-count="3676">e</span> id) fields
   in
   <span data-count="3676">l</span>et modul = { modul with annots } in
-  Logs.debug (fun m -&gt; <span data-count="1">m</span> "%a" pp modul);
+  Log.debug (fun m -&gt; <span data-count="1">m</span> "%a" pp modul);
   <span data-count="3676">m</span>odul
 </code></pre>
       </div>

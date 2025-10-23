@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>log.ml &mdash; Coverage report</title>
+    <meta name="description" content="63.16% coverage in src/utils/log.ml">
+    <link rel="stylesheet" href="../../coverage.css"/>
+    <script src="../../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../../index.html">
+          <span class="dirname">src/utils/</span>log.ml
+        </a>
+      </h1>
+      <h2>63.16%</h2>
+    </div>
+    <div id="navbar">
+      <span class="some-visited" style="top:46.15%"></span>
+      <span class="unvisited" style="bottom:46.15%"></span>
+      <span class="unvisited" style="bottom:42.31%"></span>
+      <span class="unvisited" style="bottom:38.46%"></span>
+      <span class="unvisited" style="bottom:34.62%"></span>
+      <span class="some-visited" style="bottom:23.08%"></span>
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span class="visited"> </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span class="visited"> </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span class="visited"> </span>
+<a id="L6"></a><span > </span>
+<a id="L7"></a><span class="visited"> </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span > </span>
+<a id="L10"></a><span > </span>
+<a id="L11"></a><span > </span>
+<a id="L12"></a><span class="some-visited"> </span>
+<a id="L13"></a><span > </span>
+<a id="L14"></a><span class="unvisited"> </span>
+<a id="L15"></a><span class="unvisited"> </span>
+<a id="L16"></a><span class="unvisited"> </span>
+<a id="L17"></a><span class="unvisited"> </span>
+<a id="L18"></a><span class="visited"> </span>
+<a id="L19"></a><span > </span>
+<a id="L20"></a><span class="some-visited"> </span>
+<a id="L21"></a><span > </span>
+<a id="L22"></a><span > </span>
+<a id="L23"></a><span class="visited"> </span>
+<a id="L24"></a><span > </span>
+<a id="L25"></a><span class="visited"> </span>
+<a id="L26"></a><span class="visited"> </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1"> 1</a>
+<a href="#L2"> 2</a>
+<a href="#L3"> 3</a>
+<a href="#L4"> 4</a>
+<a href="#L5"> 5</a>
+<a href="#L6"> 6</a>
+<a href="#L7"> 7</a>
+<a href="#L8"> 8</a>
+<a href="#L9"> 9</a>
+<a href="#L10">10</a>
+<a href="#L11">11</a>
+<a href="#L12">12</a>
+<a href="#L13">13</a>
+<a href="#L14">14</a>
+<a href="#L15">15</a>
+<a href="#L16">16</a>
+<a href="#L17">17</a>
+<a href="#L18">18</a>
+<a href="#L19">19</a>
+<a href="#L20">20</a>
+<a href="#L21">21</a>
+<a href="#L22">22</a>
+<a href="#L23">23</a>
+<a href="#L24">24</a>
+<a href="#L25">25</a>
+<a href="#L26">26</a>
+</pre>
+<pre><code class="ocaml">let main_src = Logs.Src.creat<span data-count="880">e</span> "owi" ~doc:"Owi's main logs"
+
+let bench_src = Logs.Src.creat<span data-count="880">e</span> "owi-bench" ~doc:"Owi's benchmark logs"
+
+include (val Logs.src_lo<span data-count="880">g</span> main_src : Logs.LOG)
+
+module Bench_log = (val Logs.src_lo<span data-count="880">g</span> bench_src : Logs.LOG)
+
+let bench_enabled = ref false
+
+let bench_fn str fn =
+  <span data-count="6228">i</span>f !bench_enabled then <span data-count="0">(</span>
+    let c = Mtime_clock.counter () in
+    <span data-count="0">l</span>et r = fn () in
+    <span data-count="0">B</span>ench_log.info (fun m -&gt;
+      <span data-count="0">m</span> "%s : %a" str Mtime.Span.pp (Mtime_clock.coun<span data-count="0">t</span> c) );
+    <span data-count="0">r</span> )
+  else <span data-count="6228">f</span>n ()
+
+let bench f = <span data-count="407">i</span>f !bench_enabled then <span data-count="0">B</span>ench_log.info f else <span data-count="407">(</span>)
+
+let setup style_renderer level ~with_timings =
+  <span data-count="811">b</span>ench_enabled := with_timings;
+  Fmt_tty.setup_std_outputs ?style_renderer ();
+  <span data-count="811">L</span>ogs.set_level level;
+  <span data-count="811">L</span>ogs.set_reporter (Logs.format_reporte<span data-count="811">r</span> ())
+</code></pre>
+      </div>
+    </div>
+    <script src="../../coverage.js"></script>
+  </body>
+</html>

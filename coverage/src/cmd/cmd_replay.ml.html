@@ -679,8 +679,8 @@ let run_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
 
     let assert' n =
       <span data-count="7">i</span>f Prelude.Int32.equal n 0l then <span data-count="4">b</span>egin
-        Logs.info (fun m -&gt; <span data-count="3">m</span> "scopes : [%a]" Symbol_scope.pp !scopes);
-        <span data-count="4">L</span>ogs.app (fun m -&gt; <span data-count="4">m</span> "Assertion failure was correctly reached!");
+        Log.info (fun m -&gt; <span data-count="3">m</span> "scopes : [%a]" Symbol_scope.pp !scopes);
+        <span data-count="4">L</span>og.app (fun m -&gt; <span data-count="4">m</span> "Assertion failure was correctly reached!");
         <span data-count="4">e</span>xi<span data-count="0">t</span> 0
       end;
       <span data-count="3">O</span>k ()
@@ -692,7 +692,7 @@ let run_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
         add_sym i;
         <span data-count="0">O</span>k n
       | <span data-count="0">v</span> -&gt;
-        Logs.err (fun m -&gt;
+        Log.err (fun m -&gt;
           <span data-count="0">m</span> "Got value %a but expected a i8 (i32) value." V.pp v );
         <span data-count="0">a</span>ssert false
 
@@ -707,7 +707,7 @@ let run_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
         add_sym i;
         <span data-count="0">O</span>k n
       | <span data-count="0">v</span> -&gt;
-        Logs.err (fun m -&gt;
+        Log.err (fun m -&gt;
           <span data-count="0">m</span> "Got value %a but expected a i16 (i32) value." V.pp v );
         <span data-count="0">a</span>ssert false
 
@@ -718,7 +718,7 @@ let run_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
         add_sym i;
         <span data-count="7">O</span>k n
       | <span data-count="0">v</span> -&gt;
-        Logs.err (fun m -&gt; <span data-count="0">m</span> "Got value %a but expected a i32 value." V.pp v);
+        Log.err (fun m -&gt; <span data-count="0">m</span> "Got value %a but expected a i32 value." V.pp v);
         <span data-count="0">a</span>ssert false
 
     let symbol_i64 () =
@@ -728,7 +728,7 @@ let run_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
         add_sym i;
         <span data-count="1">O</span>k n
       | <span data-count="0">v</span> -&gt;
-        Logs.err (fun m -&gt; <span data-count="0">m</span> "Got value %a but expected a i64 value." V.pp v);
+        Log.err (fun m -&gt; <span data-count="0">m</span> "Got value %a but expected a i64 value." V.pp v);
         <span data-count="0">a</span>ssert false
 
     let symbol_f32 () =
@@ -738,7 +738,7 @@ let run_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
         add_sym i;
         <span data-count="1">O</span>k n
       | <span data-count="0">v</span> -&gt;
-        Logs.err (fun m -&gt; <span data-count="0">m</span> "Got value %a but expected a f32 value." V.pp v);
+        Log.err (fun m -&gt; <span data-count="0">m</span> "Got value %a but expected a f32 value." V.pp v);
         <span data-count="0">a</span>ssert false
 
     let symbol_f64 () =
@@ -748,7 +748,7 @@ let run_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
         add_sym i;
         <span data-count="1">O</span>k n
       | <span data-count="0">v</span> -&gt;
-        Logs.err (fun m -&gt; <span data-count="0">m</span> "Got value %a but expected a f64 value." V.pp v);
+        Log.err (fun m -&gt; <span data-count="0">m</span> "Got value %a but expected a f64 value." V.pp v);
         <span data-count="0">a</span>ssert false
 
     let symbol_v128 () =
@@ -758,11 +758,11 @@ let run_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
         add_sym i;
         <span data-count="0">O</span>k n
       | <span data-count="0">v</span> -&gt;
-        Logs.err (fun m -&gt; <span data-count="0">m</span> "Got value %a but expected a v128 value." V.pp v);
+        Log.err (fun m -&gt; <span data-count="0">m</span> "Got value %a but expected a v128 value." V.pp v);
         <span data-count="0">a</span>ssert false
 
     let abort () =
-      <span data-count="0">L</span>ogs.err (fun m -&gt; <span data-count="0">m</span> "Unexpected abort call.");
+      <span data-count="0">L</span>og.err (fun m -&gt; <span data-count="0">m</span> "Unexpected abort call.");
       <span data-count="0">e</span>xit 121
 
     let alloc _m _addr size =
@@ -781,11 +781,11 @@ let run_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
         add_sym i;
         <span data-count="3">O</span>k n
       | <span data-count="0">v</span> -&gt;
-        Logs.err (fun m -&gt; <span data-count="0">m</span> "Got value %a but expected a i32 value." V.pp v);
+        Log.err (fun m -&gt; <span data-count="0">m</span> "Got value %a but expected a i32 value." V.pp v);
         <span data-count="0">a</span>ssert false
 
     let print_char c =
-      <span data-count="0">L</span>ogs.app (fun m -&gt; <span data-count="0">m</span> "%c" (char_of_in<span data-count="0">t</span> (Int32.to_in<span data-count="0">t</span> c)));
+      <span data-count="0">L</span>og.app (fun m -&gt; <span data-count="0">m</span> "%c" (char_of_in<span data-count="0">t</span> (Int32.to_in<span data-count="0">t</span> c)));
       <span data-count="0">O</span>k ()
 
     let in_replay_mode () = <span data-count="0">O</span>k 1l
@@ -809,7 +809,7 @@ let run_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
       <span data-count="0">l</span>et* chars = make_st<span data-count="0">r</span> m [] str_ptr in
       <span data-count="0">l</span>et str = String.init (Array.lengt<span data-count="0">h</span> chars) (Array.ge<span data-count="0">t</span> chars) in
       <span data-count="0">H</span>ashtbl.add covered_labels id str;
-      <span data-count="0">L</span>ogs.debug (fun m -&gt; <span data-count="0">m</span> "reached %ld@." id);
+      <span data-count="0">L</span>og.debug (fun m -&gt; <span data-count="0">m</span> "reached %ld@." id);
       <span data-count="0">O</span>k ()
 
     let open_scope m strptr =
@@ -910,7 +910,7 @@ let cmd ~unsafe ~replay_file ~source_file ~entry_point ~invoke_with_symbols =
   <span data-count="10">l</span>et+ () =
     run_fil<span data-count="6">e</span> ~unsafe ~entry_point ~invoke_with_symbols source_file model
   in
-  <span data-count="2">L</span>ogs.app (fun m -&gt; <span data-count="2">m</span> "All OK!")
+  <span data-count="2">L</span>og.app (fun m -&gt; <span data-count="2">m</span> "All OK!")
 </code></pre>
       </div>
     </div>

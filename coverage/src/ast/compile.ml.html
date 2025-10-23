@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>compile.ml &mdash; Coverage report</title>
-    <meta name="description" content="81.36% coverage in src/ast/compile.ml">
+    <meta name="description" content="81.67% coverage in src/ast/compile.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,20 +15,20 @@
           <span class="dirname">src/ast/</span>compile.ml
         </a>
       </h1>
-      <h2>81.36%</h2>
+      <h2>81.67%</h2>
     </div>
     <div id="navbar">
-      <span class="some-visited" style="top:10.34%"></span>
-      <span class="some-visited" style="top:32.18%"></span>
-      <span class="some-visited" style="top:45.98%"></span>
-      <span class="unvisited" style="bottom:40.23%"></span>
-      <span class="unvisited" style="bottom:39.08%"></span>
-      <span class="unvisited" style="bottom:37.93%"></span>
-      <span class="unvisited" style="bottom:36.78%"></span>
-      <span class="unvisited" style="bottom:33.33%"></span>
-      <span class="unvisited" style="bottom:32.18%"></span>
-      <span class="unvisited" style="bottom:31.03%"></span>
-      <span class="unvisited" style="bottom:27.59%"></span>
+      <span class="some-visited" style="top:10.23%"></span>
+      <span class="some-visited" style="top:31.82%"></span>
+      <span class="some-visited" style="top:45.45%"></span>
+      <span class="unvisited" style="bottom:40.91%"></span>
+      <span class="unvisited" style="bottom:39.77%"></span>
+      <span class="unvisited" style="bottom:38.64%"></span>
+      <span class="unvisited" style="bottom:37.50%"></span>
+      <span class="unvisited" style="bottom:34.09%"></span>
+      <span class="unvisited" style="bottom:32.95%"></span>
+      <span class="unvisited" style="bottom:31.82%"></span>
+      <span class="unvisited" style="bottom:28.41%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -111,15 +111,16 @@
 <a id="L76"></a><span class="visited"> </span>
 <a id="L77"></a><span class="visited"> </span>
 <a id="L78"></a><span class="visited"> </span>
-<a id="L79"></a><span > </span>
+<a id="L79"></a><span class="visited"> </span>
 <a id="L80"></a><span > </span>
 <a id="L81"></a><span > </span>
-<a id="L82"></a><span class="visited"> </span>
+<a id="L82"></a><span > </span>
 <a id="L83"></a><span class="visited"> </span>
 <a id="L84"></a><span class="visited"> </span>
 <a id="L85"></a><span class="visited"> </span>
-<a id="L86"></a><span > </span>
+<a id="L86"></a><span class="visited"> </span>
 <a id="L87"></a><span > </span>
+<a id="L88"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -211,6 +212,7 @@
 <a href="#L85">85</a>
 <a href="#L86">86</a>
 <a href="#L87">87</a>
+<a href="#L88">88</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -287,6 +289,7 @@ module File = struct
 
   let until_validate ~unsafe ~rac ~srac filename =
     <span data-count="589">l</span>et* m = Parse.guess_from_fil<span data-count="589">e</span> filename in
+    <span data-count="588">L</span>og.bench_fn "Validation time" @@ fun () -&gt;
     <span data-count="588">m</span>atch m with
     | <span data-count="210">K</span>ind.Wat m -&gt; Text.until_validate ~unsafe ~rac ~srac m
     | <span data-count="378">W</span>asm m -&gt; Binary.until_validate ~unsafe m

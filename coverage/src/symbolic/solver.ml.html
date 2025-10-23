@@ -124,28 +124,28 @@ let fresh solver () =
   let module Mapping = Mapping.Fresh.Make () in
   let module Batch = Smtml.Solver.Cached (Mapping) in
   let solver = Batch.create ~logic:QF_BVFP () in
-  <span data-count="945">S</span> ((module Batch), solver)
+  <span data-count="943">S</span> ((module Batch), solver)
 
 let check (S (solver_module, s)) pc =
-  <span data-count="28422">l</span>et module Solver = (val solver_module) in
+  <span data-count="28719">l</span>et module Solver = (val solver_module) in
   Solver.check_set s pc
 
 let model (S (solver_module, s)) ~symbol_scopes ~pc =
-  <span data-count="1311">l</span>et module Solver = (val solver_module) in
+  <span data-count="1576">l</span>et module Solver = (val solver_module) in
   let symbols = Symbol_scope.only_symbols symbol_scopes in
-  <span data-count="1311">l</span>et model =
+  <span data-count="1576">l</span>et model =
     match Solver.get_sat_model ~symbols s pc with
     | `Unknown -&gt; assert false
     | <span data-count="0">`</span>Unsat -&gt;
       (* Should not happen because we checked just before that is must be true. *)
-      Logs.err (fun m -&gt; <span data-count="0">m</span> "something is wrong... I can not get a model");
-      <span data-count="0">L</span>ogs.err (fun m -&gt;
+      Log.err (fun m -&gt; <span data-count="0">m</span> "something is wrong... I can not get a model");
+      <span data-count="0">L</span>og.err (fun m -&gt;
         <span data-count="0">m</span> "symbols: %a"
           (Fmt.lis<span data-count="0">t</span> ~sep:(fun fmt () -&gt; <span data-count="0">F</span>mt.pf fmt ", ") Smtml.Symbol.pp)
           symbols );
-      <span data-count="0">L</span>ogs.err (fun m -&gt; <span data-count="0">m</span> "pc:@\n  @[&lt;v&gt;%a@]" Smtml.Expr.Set.pp pc);
+      <span data-count="0">L</span>og.err (fun m -&gt; <span data-count="0">m</span> "pc:@\n  @[&lt;v&gt;%a@]" Smtml.Expr.Set.pp pc);
       <span data-count="0">a</span>ssert false
-    | <span data-count="1310">`</span>Model model -&gt; model
+    | <span data-count="1570">`</span>Model model -&gt; model
   in
   model
 </code></pre>

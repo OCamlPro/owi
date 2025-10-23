@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>cmd_zig.ml &mdash; Coverage report</title>
-    <meta name="description" content="77.27% coverage in src/cmd/cmd_zig.ml">
+    <meta name="description" content="77.78% coverage in src/cmd/cmd_zig.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,17 +15,17 @@
           <span class="dirname">src/cmd/</span>cmd_zig.ml
         </a>
       </h1>
-      <h2>77.27%</h2>
+      <h2>77.78%</h2>
     </div>
     <div id="navbar">
-      <span class="some-visited" style="top:13.25%"></span>
-      <span class="unvisited" style="top:20.48%"></span>
-      <span class="unvisited" style="top:21.69%"></span>
-      <span class="unvisited" style="top:36.14%"></span>
-      <span class="unvisited" style="bottom:46.99%"></span>
-      <span class="some-visited" style="bottom:45.78%"></span>
-      <span class="unvisited" style="bottom:37.35%"></span>
-      <span class="unvisited" style="bottom:22.89%"></span>
+      <span class="some-visited" style="top:13.10%"></span>
+      <span class="unvisited" style="top:20.24%"></span>
+      <span class="unvisited" style="top:21.43%"></span>
+      <span class="unvisited" style="top:35.71%"></span>
+      <span class="unvisited" style="bottom:47.62%"></span>
+      <span class="some-visited" style="bottom:46.43%"></span>
+      <span class="unvisited" style="bottom:36.90%"></span>
+      <span class="unvisited" style="bottom:22.62%"></span>
       <span class="some-visited" style="bottom:0.00%"></span>
     </div>
     <div id="report">
@@ -79,41 +79,42 @@
 <a id="L46"></a><span > </span>
 <a id="L47"></a><span > </span>
 <a id="L48"></a><span > </span>
-<a id="L49"></a><span > </span>
+<a id="L49"></a><span class="visited"> </span>
 <a id="L50"></a><span class="visited"> </span>
 <a id="L51"></a><span class="visited"> </span>
-<a id="L52"></a><span class="unvisited"> </span>
-<a id="L53"></a><span class="visited"> </span>
-<a id="L54"></a><span > </span>
+<a id="L52"></a><span class="visited"> </span>
+<a id="L53"></a><span class="unvisited"> </span>
+<a id="L54"></a><span class="visited"> </span>
 <a id="L55"></a><span > </span>
 <a id="L56"></a><span > </span>
 <a id="L57"></a><span > </span>
-<a id="L58"></a><span class="visited"> </span>
-<a id="L59"></a><span > </span>
+<a id="L58"></a><span > </span>
+<a id="L59"></a><span class="visited"> </span>
 <a id="L60"></a><span > </span>
 <a id="L61"></a><span > </span>
-<a id="L62"></a><span class="visited"> </span>
-<a id="L63"></a><span > </span>
-<a id="L64"></a><span class="unvisited"> </span>
-<a id="L65"></a><span class="visited"> </span>
-<a id="L66"></a><span > </span>
-<a id="L67"></a><span class="visited"> </span>
-<a id="L68"></a><span > </span>
-<a id="L69"></a><span class="visited"> </span>
-<a id="L70"></a><span > </span>
+<a id="L62"></a><span > </span>
+<a id="L63"></a><span class="visited"> </span>
+<a id="L64"></a><span > </span>
+<a id="L65"></a><span class="unvisited"> </span>
+<a id="L66"></a><span class="visited"> </span>
+<a id="L67"></a><span > </span>
+<a id="L68"></a><span class="visited"> </span>
+<a id="L69"></a><span > </span>
+<a id="L70"></a><span class="visited"> </span>
 <a id="L71"></a><span > </span>
 <a id="L72"></a><span > </span>
 <a id="L73"></a><span > </span>
 <a id="L74"></a><span > </span>
 <a id="L75"></a><span > </span>
-<a id="L76"></a><span class="visited"> </span>
-<a id="L77"></a><span > </span>
+<a id="L76"></a><span > </span>
+<a id="L77"></a><span class="visited"> </span>
 <a id="L78"></a><span > </span>
-<a id="L79"></a><span class="visited"> </span>
-<a id="L80"></a><span > </span>
+<a id="L79"></a><span > </span>
+<a id="L80"></a><span class="visited"> </span>
 <a id="L81"></a><span > </span>
 <a id="L82"></a><span > </span>
-<a id="L83"></a><span class="some-visited"> </span>
+<a id="L83"></a><span > </span>
+<a id="L84"></a><span class="some-visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -201,6 +202,7 @@
 <a href="#L81">81</a>
 <a href="#L82">82</a>
 <a href="#L83">83</a>
+<a href="#L84">84</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -250,11 +252,12 @@ let compile ~workspace ~entry_point ~includes ~out_file (files : Fpath.t list) :
   in
 
   let+ () =
-    match OS.Cmd.run ~err zig with
+    Log.bench_fn "Compiling time<span data-count="4">"</span> @@ fun () -&gt;
+    <span data-count="4">m</span>atch OS.Cmd.run ~err zig with
     | <span data-count="3">O</span>k _ as v -&gt; v
     | <span data-count="1">E</span>rror (`Msg e) -&gt;
-      Logs.debug (fun m -&gt; <span data-count="0">m</span> "zig failed: %s" e);
-      <span data-count="1">F</span>mt.error_ms<span data-count="1">g</span>
+      Log.debug (fun m -&gt; <span data-count="0">m</span> "zig failed: %s" e);
+      <span data-count="1">F</span>mt.error_msg
         "zig failed: run with -vv to get the full error message if it was not \
          displayed above"
   in

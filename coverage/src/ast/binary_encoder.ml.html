@@ -2615,7 +2615,7 @@ let write_file outfile filename content =
   <span data-count="20">B</span>os.OS.File.write (Option.valu<span data-count="20">e</span> outfile ~default:filename) content
 
 let convert (outfile : Fpath.t option) (filename : Fpath.t) ~unsafe m =
-  <span data-count="20">L</span>ogs.info (fun m -&gt; <span data-count="0">m</span> "binary encoding ...");
+  <span data-count="20">L</span>og.info (fun m -&gt; <span data-count="0">m</span> "binary encoding ...");
   <span data-count="20">l</span>et* m = Compile.Text.until_validat<span data-count="20">e</span> ~unsafe ~rac:false ~srac:false m in
   <span data-count="20">l</span>et content = encode m in
   <span data-count="20">w</span>rite_file outfile filename content

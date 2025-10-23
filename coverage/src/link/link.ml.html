@@ -1277,7 +1277,7 @@ let populate_exports env (exports : Binary.exports) : exports Result.t =
   <span data-count="2378">O</span>k { globals; memories; tables; functions; defined_names = names }
 
 let modul (ls : 'f state) ~name (modul : Binary.Module.t) =
-  <span data-count="2489">L</span>ogs.info (fun m -&gt; <span data-count="28">m</span> "linking      ...");
+  <span data-count="2489">L</span>og.info (fun m -&gt; <span data-count="28">m</span> "linking      ...");
   <span data-count="2489">l</span>et* envs, (env, init_active_data, init_active_elem) =
     Env_id.with_fresh_i<span data-count="2489">d</span>
       (fun env_id -&gt;

@@ -700,7 +700,7 @@ let check_type_id (types : binary func_type Named.t)
     else <span data-count="46">O</span>k ()
 
 let of_grouped (modul : Grouped.t) : t Result.t =
-  <span data-count="3676">L</span>ogs.debug (fun m -&gt; <span data-count="1">m</span> "assigning    ...");
+  <span data-count="3676">L</span>og.debug (fun m -&gt; <span data-count="1">m</span> "assigning    ...");
   <span data-count="3676">l</span>et* typ = assign_type<span data-count="3676">s</span> modul in
   <span data-count="3676">l</span>et* global =
     nam<span data-count="3676">e</span> "global"
@@ -743,7 +743,7 @@ let of_grouped (modul : Grouped.t) : t Result.t =
     ; annots = modul.annots
     }
   in
-  Logs.debug (fun m -&gt; <span data-count="1">m</span> "%a" pp modul);
+  Log.debug (fun m -&gt; <span data-count="1">m</span> "%a" pp modul);
   <span data-count="3648">m</span>odul
 
 let find (named : 'a Named.t) err : _ -&gt; binary indice Result.t = function

@@ -552,7 +552,7 @@ module M :
         Unix.map_file fd Int8_unsigned Bigarray.c_layout true
           [| seacoral_size |]
       in
-      <span data-count="0">L</span>ogs.app (fun m -&gt; <span data-count="0">m</span> "SC_STORE_MAP_FILE successfully mapped : %s" path);
+      <span data-count="0">L</span>og.app (fun m -&gt; <span data-count="0">m</span> "SC_STORE_MAP_FILE successfully mapped : %s" path);
       <span data-count="0">S</span>ome (fd, res)
     in
     <span data-count="880">f</span>un i -&gt;
@@ -567,7 +567,7 @@ module M :
         with <span data-count="0">I</span>nvalid_argument _ -&gt; false )
 
   let assume (i : Value.int32) : unit Choice.t =
-    <span data-count="591">C</span>hoice.assume @@ Value.I32.to_boo<span data-count="591">l</span> i
+    <span data-count="589">C</span>hoice.assume @@ Value.I32.to_boo<span data-count="589">l</span> i
 
   let assert' (i : Value.int32) : unit Choice.t =
     <span data-count="96961">C</span>hoice.assertion @@ Value.I32.to_boo<span data-count="96961">l</span> i
@@ -611,7 +611,7 @@ module M :
     <span data-count="9918">C</span>hoice.lift_mem @@ Memory.reallo<span data-count="9918">c</span> m ~ptr:base ~size
 
   let free m (ptr : Value.int32) : Value.int32 Choice.t =
-    <span data-count="2541">C</span>hoice.lift_mem @@ Memory.fre<span data-count="2541">e</span> m ptr
+    <span data-count="2540">C</span>hoice.lift_mem @@ Memory.fre<span data-count="2541">e</span> m ptr
 
   let exit (_p : Value.int32) : unit Choice.t = <span data-count="1">a</span>bort ()
 
@@ -620,7 +620,7 @@ module M :
   let print_char (c : Value.int32) =
     <span data-count="0">l</span>et open Choice in
     let* c = select_i3<span data-count="0">2</span> c in
-    <span data-count="0">L</span>ogs.app (fun m -&gt; <span data-count="0">m</span> "%c@?" (char_of_in<span data-count="0">t</span> (Int32.to_in<span data-count="0">t</span> c)));
+    <span data-count="0">L</span>og.app (fun m -&gt; <span data-count="0">m</span> "%c@?" (char_of_in<span data-count="0">t</span> (Int32.to_in<span data-count="0">t</span> c)));
     <span data-count="0">r</span>eturn ()
 
   let rec make_str m accu i =
@@ -661,7 +661,7 @@ module M :
         <span data-count="2">H</span>ashtbl.add covered_labels id str;
         <span data-count="2">a</span>dd_label (Int32.to_in<span data-count="2">t</span> id, str)
     | <span data-count="0">_</span> -&gt;
-      Logs.err (fun m -&gt;
+      Log.err (fun m -&gt;
         <span data-count="0">m</span> "cov_label_set: invalid type id:%a ptr:%a" Expr.pp id Expr.pp ptr );
       <span data-count="0">a</span>ssert false
 
@@ -714,11 +714,11 @@ let symbolic_extern_module =
 let fd_write _ _ _ _ = <span data-count="0">a</span>ssert false
 
 let proc_exit _ =
-  <span data-count="0">L</span>ogs.warn (fun m -&gt; <span data-count="0">m</span> "used dummy proc_exit implementation");
+  <span data-count="0">L</span>og.warn (fun m -&gt; <span data-count="0">m</span> "used dummy proc_exit implementation");
   <span data-count="0">C</span>hoice.return ()
 
 let random_get _ _ =
-  <span data-count="0">L</span>ogs.warn (fun m -&gt; <span data-count="0">m</span> "used dummy random_get implementation");
+  <span data-count="0">L</span>og.warn (fun m -&gt; <span data-count="0">m</span> "used dummy random_get implementation");
   <span data-count="0">C</span>hoice.return @@ Symbolic_value.const_i3<span data-count="0">2</span> 0l
 
 let wasi_snapshot_preview1 =

@@ -18,30 +18,30 @@
       <h2>94.96%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:2.93%"></span>
-      <span class="unvisited" style="top:3.06%"></span>
-      <span class="some-visited" style="top:23.27%"></span>
-      <span class="unvisited" style="top:23.40%"></span>
-      <span class="unvisited" style="top:24.47%"></span>
-      <span class="some-visited" style="top:24.73%"></span>
-      <span class="some-visited" style="top:25.13%"></span>
-      <span class="unvisited" style="top:27.79%"></span>
-      <span class="unvisited" style="bottom:46.54%"></span>
-      <span class="unvisited" style="bottom:46.41%"></span>
-      <span class="unvisited" style="bottom:45.74%"></span>
-      <span class="unvisited" style="bottom:42.55%"></span>
-      <span class="unvisited" style="bottom:42.15%"></span>
-      <span class="unvisited" style="bottom:42.02%"></span>
-      <span class="unvisited" style="bottom:41.89%"></span>
-      <span class="unvisited" style="bottom:41.76%"></span>
-      <span class="unvisited" style="bottom:41.49%"></span>
-      <span class="unvisited" style="bottom:41.36%"></span>
-      <span class="unvisited" style="bottom:41.22%"></span>
-      <span class="unvisited" style="bottom:29.92%"></span>
-      <span class="unvisited" style="bottom:29.65%"></span>
-      <span class="unvisited" style="bottom:29.39%"></span>
-      <span class="unvisited" style="bottom:23.80%"></span>
-      <span class="unvisited" style="bottom:12.90%"></span>
+      <span class="unvisited" style="top:2.92%"></span>
+      <span class="unvisited" style="top:3.05%"></span>
+      <span class="some-visited" style="top:23.24%"></span>
+      <span class="unvisited" style="top:23.37%"></span>
+      <span class="unvisited" style="top:24.44%"></span>
+      <span class="some-visited" style="top:24.70%"></span>
+      <span class="some-visited" style="top:25.10%"></span>
+      <span class="unvisited" style="top:27.76%"></span>
+      <span class="unvisited" style="bottom:46.61%"></span>
+      <span class="unvisited" style="bottom:46.48%"></span>
+      <span class="unvisited" style="bottom:45.82%"></span>
+      <span class="unvisited" style="bottom:42.63%"></span>
+      <span class="unvisited" style="bottom:42.23%"></span>
+      <span class="unvisited" style="bottom:42.10%"></span>
+      <span class="unvisited" style="bottom:41.97%"></span>
+      <span class="unvisited" style="bottom:41.83%"></span>
+      <span class="unvisited" style="bottom:41.57%"></span>
+      <span class="unvisited" style="bottom:41.43%"></span>
+      <span class="unvisited" style="bottom:41.30%"></span>
+      <span class="unvisited" style="bottom:30.01%"></span>
+      <span class="unvisited" style="bottom:29.75%"></span>
+      <span class="unvisited" style="bottom:29.48%"></span>
+      <span class="unvisited" style="bottom:23.90%"></span>
+      <span class="unvisited" style="bottom:13.01%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -796,8 +796,9 @@
 <a id="L748"></a><span class="visited"> </span>
 <a id="L749"></a><span class="visited"> </span>
 <a id="L750"></a><span class="visited"> </span>
-<a id="L751"></a><span > </span>
-<a id="L752"></a><span class="visited"> </span>
+<a id="L751"></a><span class="visited"> </span>
+<a id="L752"></a><span > </span>
+<a id="L753"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -1554,6 +1555,7 @@
 <a href="#L750">750</a>
 <a href="#L751">751</a>
 <a href="#L752">752</a>
+<a href="#L753">753</a>
 </pre>
 <pre><code class="ocaml">4 (* SPDX-License-Identifier: AGPL-3.0-or-later *)
 
@@ -2082,7 +2084,7 @@ let rec typecheck_instr (env : Env.t) (stack : stack)
     let* _null, t = Env.table_type_ge<span data-count="23">t</span> i env.modul in
     <span data-count="23">S</span>tack.pop [ Ref_type t; i32 ] stack
   | (<span data-count="0">E</span>xtern_externalize | <span data-count="0">E</span>xtern_internalize) as i -&gt;
-    Logs.err (fun m -&gt;
+    Log.err (fun m -&gt;
       <span data-count="0">m</span> "TODO: unimplemented instruction typecheking %a" (pp_instr ~short:false)
         i );
     <span data-count="0">a</span>ssert false
@@ -2294,7 +2296,8 @@ let validate_mem modul =
     modul.mem
 
 let modul (modul : Module.t) =
-  <span data-count="4631">L</span>ogs.info (fun m -&gt; <span data-count="38">m</span> "typechecking ...");
+  <span data-count="4631">L</span>og.info (fun m -&gt; <span data-count="38">m</span> "typechecking ...");
+  <span data-count="4631">L</span>og.bench_fn "Typechecking time" @@ fun () -&gt;
   <span data-count="4631">l</span>et refs = Hashtbl.create 512 in
   <span data-count="4631">l</span>et* () = array_ite<span data-count="4631">r</span> (typecheck_globa<span data-count="4631">l</span> modul refs) modul.global in
   <span data-count="4594">l</span>et* () = array_ite<span data-count="4594">r</span> (typecheck_ele<span data-count="4594">m</span> modul refs) modul.elem in
