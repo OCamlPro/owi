@@ -6,7 +6,7 @@ module Stack = Prelude.Stack
 
 type 'a t = ('a, Prio.t * 'a) Synchronizer.t
 
-let pop s pledge = Synchronizer.get s pledge
+let pop s ~pledge = Synchronizer.get s ~pledge
 
 let make_pledge = Synchronizer.make_pledge
 
@@ -14,7 +14,7 @@ let end_pledge = Synchronizer.end_pledge
 
 let rec read_as_seq (s : 'a t) ~finalizer : 'a Seq.t =
  fun () ->
-  match pop s false with
+  match pop s ~pledge:false with
   | None ->
     finalizer ();
     Nil
@@ -24,7 +24,7 @@ let push v prio s = Synchronizer.write (prio, v) s
 
 let work_while f s = Synchronizer.work_while f s
 
-let fail = Synchronizer.fail
+let close = Synchronizer.close
 
 let make () =
   let s = Stack.create () in

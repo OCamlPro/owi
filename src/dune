@@ -104,7 +104,6 @@
   stack
   string_map
   syntax
-  synchronizer
   text
   text_lexer
   text_parser
@@ -150,6 +149,7 @@
   prelude
   processor
   sedlex
+  synchronizer
   uutf
   runtime_events
   mtime

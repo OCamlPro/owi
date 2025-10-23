@@ -39,6 +39,7 @@ depends: [
   "processor" {>= "0.2"}
   "sedlex" {>= "3.3"}
   "smtml" {>= "0.10.0"}
+  "synchronizer"
   "uutf" {>= "1.0.3"}
   "xmlm" {>= "1.4.0"}
   "odoc" {>= "3.0.0" & with-doc}

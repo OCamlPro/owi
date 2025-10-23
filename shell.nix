@@ -82,6 +82,7 @@ pkgs.mkShell {
     processor
     scfg
     smtml
+    synchronizer
     uutf
     xmlm
     yojson
