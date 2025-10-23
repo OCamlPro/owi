@@ -94,9 +94,13 @@
   )
   $ owi sym sum.wat --rac -v
   owi: [INFO] parsing      ...
+  owi: [INFO] Parsing time : 370μs
   owi: [INFO] checking     ...
   owi: [INFO] typechecking ...
+  owi: [INFO] Typechecking time : 22.4μs
+  owi: [INFO] Validation time : 140μs
   owi: [INFO] typechecking ...
+  owi: [INFO] Typechecking time : 13.8μs
   owi: [INFO] linking      ...
   owi: [INFO] interpreting ...
   owi: [INFO] stack         : [  ]
@@ -123,6 +127,7 @@
   owi: [INFO] running instr : local.get 3
   owi: [INFO] stack         : [ 42 ; 42 ; 42 ; 42 ]
   owi: [INFO] running instr : call 1
+  owi: [INFO] execution time: 20.6ms
   owi: [INFO] calling func  : func sum
   owi: [INFO] stack         : [  ]
   owi: [INFO] running instr : local.get 0
@@ -168,9 +173,13 @@
   All OK!
   $ owi sym sum.wat --srac -v
   owi: [INFO] parsing      ...
+  owi: [INFO] Parsing time : 363μs
   owi: [INFO] checking     ...
   owi: [INFO] typechecking ...
+  owi: [INFO] Typechecking time : 24.3μs
+  owi: [INFO] Validation time : 148μs
   owi: [INFO] typechecking ...
+  owi: [INFO] Typechecking time : 14.2μs
   owi: [INFO] linking      ...
   owi: [INFO] interpreting ...
   owi: [INFO] stack         : [  ]
@@ -238,5 +247,6 @@
   owi: [INFO] running instr : local.get 5
   owi: [INFO] stack         : [ 168 ]
   owi: [INFO] running instr : drop
+  owi: [INFO] execution time: 72.4ms
   owi: [INFO] Completed paths: 1
   All OK!
