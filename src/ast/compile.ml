@@ -64,6 +64,13 @@ module Any = struct
 end
 
 module File = struct
+  let until_binary ~unsafe ~rac ~srac filename =
+    let* m = Parse.guess_from_file filename in
+    match m with
+    | Kind.Wat m -> Text.until_binary ~unsafe ~rac ~srac m
+    | Wasm m -> Ok m
+    | Wast _ | Ocaml _ -> assert false
+
   let until_validate ~unsafe ~rac ~srac filename =
     let* m = Parse.guess_from_file filename in
     match m with
