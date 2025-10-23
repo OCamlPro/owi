@@ -343,8 +343,8 @@ We can now run Owi on our program to check if they are the same:
 $ owi c ./mean.c --entry-point=check --invoke-with-symbols --no-assert-failure-expression-printing
 owi: [ERROR] Assert failure
 model {
-  symbol symbol_0 i32 -990380032
-  symbol symbol_1 i32 -2145908736
+  symbol symbol_0 i32 -1744830464
+  symbol symbol_1 i32 -1744830464
 }
 owi: [ERROR] Reached problem!
 [13]
@@ -355,8 +355,8 @@ owi: [ERROR] Reached problem!
 $ owi c++ ./mean.cpp --entry-point=check --invoke-with-symbols --no-assert-failure-expression-printing
 owi: [ERROR] Assert failure
 model {
-  symbol symbol_0 i32 -990380032
-  symbol symbol_1 i32 -2145908736
+  symbol symbol_0 i32 -1744830464
+  symbol symbol_1 i32 -1744830464
 }
 owi: [ERROR] Reached problem!
 [13]

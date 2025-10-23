@@ -78,13 +78,9 @@
   )
   $ owi sym forall.wat --rac -v
   owi: [INFO] parsing      ...
-  owi: [INFO] Parsing time : 258μs
   owi: [INFO] checking     ...
   owi: [INFO] typechecking ...
-  owi: [INFO] Typechecking time : 23.4μs
-  owi: [INFO] Validation time : 128μs
   owi: [INFO] typechecking ...
-  owi: [INFO] Typechecking time : 15.8μs
   owi: [INFO] linking      ...
   owi: [INFO] interpreting ...
   owi: [INFO] stack         : [  ]
@@ -445,18 +441,13 @@
   owi: [INFO] stack         : [  ]
   owi: [INFO] running instr : call 1
   owi: [INFO] calling func  : func start
-  owi: [INFO] execution time: 104ms
   owi: [INFO] Completed paths: 1
   All OK!
   $ owi sym forall.wat --srac -v
   owi: [INFO] parsing      ...
-  owi: [INFO] Parsing time : 250μs
   owi: [INFO] checking     ...
   owi: [INFO] typechecking ...
-  owi: [INFO] Typechecking time : 21.9μs
-  owi: [INFO] Validation time : 144μs
   owi: [INFO] typechecking ...
-  owi: [INFO] Typechecking time : 12.3μs
   owi: [INFO] linking      ...
   owi: [INFO] interpreting ...
   owi: [INFO] stack         : [  ]
@@ -466,7 +457,6 @@
   owi: [INFO] running instr : block $__weasel_forall (result i32)
   owi: [INFO] stack         : [  ]
   owi: [INFO] running instr : i32.const 1
-  owi: [INFO] execution time: 32.9ms
   owi: [INFO] stack         : [ 1 ]
   owi: [INFO] running instr : local.set 1
   owi: [INFO] stack         : [  ]
