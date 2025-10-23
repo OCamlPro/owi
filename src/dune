@@ -69,6 +69,7 @@
   spec
   link
   link_env
+  log
   minimalist_symbolic
   minimalist_symbolic_choice
   named
@@ -121,8 +122,7 @@
   wpq
   wq
   ws
-  wutf8
-  log)
+  wutf8)
  (private_modules
   binary_parser
   convert

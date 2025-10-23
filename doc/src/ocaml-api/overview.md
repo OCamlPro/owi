@@ -26,21 +26,8 @@ mdx_gen.bc.exe: [INFO] parsing      ...
     | Error _ -> assert false;;
 mdx_gen.bc.exe: [INFO] checking     ...
 mdx_gen.bc.exe: [INFO] typechecking ...
-mdx_gen.bc.exe: [INFO] Typechecking time : 18.6μs
 mdx_gen.bc.exe: [INFO] linking      ...
-val module_to_run : '_weak1 Link.module_to_run =
-  {Owi.Link.id = Some "quickstart"; env = <abstr>;
-   to_run =
-    [{Owi.Annotated.raw =
-       [{Owi.Annotated.raw = Owi.Types.Call (Owi.Types.Raw 0)}]}]}
-val link_state : '_weak1 Link.state =
-  {Owi.Link.by_name = <abstr>; by_id = <abstr>;
-   last =
-    Some
-     ({Owi.Link.globals = <abstr>; memories = <abstr>; tables = <abstr>;
-       functions = <abstr>; defined_names = <abstr>},
-      <abstr>);
-   collection = <abstr>; envs = <abstr>}
+...
 # let () =
     match Interpret.Concrete.modul ~timeout:None ~timeout_instr:None link_state.envs module_to_run with
     | Ok () -> ()
