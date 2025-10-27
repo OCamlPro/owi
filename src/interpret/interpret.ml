@@ -816,7 +816,10 @@ module Make (P : Interpret_intf.P) :
       | Some Logs.Debug ->
         let+ pc = Choice.get_pc () in
         Log.debug (fun m ->
-          m "path condition: [ %a ]" Smtml.Expr.pp_list
+          m "path condition smt query:%a"
+            (fun fmt -> function
+              | [] -> Fmt.pf fmt " empty"
+              | l -> Fmt.pf fmt "@\n @[<v>%a@]" Smtml.Expr.pp_smtml l )
             (Smtml.Expr.Set.to_list pc) )
       | None | Some _ -> return ()
     in

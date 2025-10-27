@@ -86,30 +86,33 @@
   owi: [INFO] interpreting ...
   owi: [INFO] stack         : [  ]
   owi: [INFO] running instr : call 6
-  owi: [DEBUG] path condition: [  ]
+  owi: [DEBUG] path condition smt query: empty
   owi: [INFO] calling func  : func anonymous
   owi: [INFO] stack         : [  ]
   owi: [INFO] running instr : call 0
-  owi: [DEBUG] path condition: [  ]
+  owi: [DEBUG] path condition smt query: empty
   owi: [INFO] stack         : [ symbol_0 ]
   owi: [INFO] running instr : call 5
-  owi: [DEBUG] path condition: [  ]
+  owi: [DEBUG] path condition smt query: empty
   owi: [INFO] calling func  : func f
   owi: [INFO] stack         : [  ]
   owi: [INFO] running instr : local.get 0
-  owi: [DEBUG] path condition: [  ]
+  owi: [DEBUG] path condition smt query: empty
   owi: [INFO] stack         : [ symbol_0 ]
   owi: [INFO] running instr : i32.const 1
-  owi: [DEBUG] path condition: [  ]
+  owi: [DEBUG] path condition smt query: empty
   owi: [INFO] stack         : [ 1 ; symbol_0 ]
   owi: [INFO] running instr : i32.lt_u
-  owi: [DEBUG] path condition: [  ]
+  owi: [DEBUG] path condition smt query: empty
   owi: [INFO] stack         : [ (i32.of_bool (i32.lt_u symbol_0 1)) ]
   owi: [INFO] running instr : if
-  owi: [DEBUG] path condition: [  ]
+  owi: [DEBUG] path condition smt query: empty
   owi: [INFO] stack         : [  ]
   owi: [INFO] running instr : unreachable
-  owi: [DEBUG] path condition: [ (i32.lt_u symbol_0 1) ]
+  owi: [DEBUG] path condition smt query:
+                (let-const symbol_0 i32)
+                (assert (i32.lt_u symbol_0 (i32 1)))
+                (check-sat)
   owi: [ERROR] Trap: unreachable
   owi: [DEBUG] scope tokens: [symbol symbol_0]
   model {
