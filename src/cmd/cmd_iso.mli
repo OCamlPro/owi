@@ -13,4 +13,5 @@ val cmd :
   -> workspace:Fpath.t option
   -> model_out_file:Fpath.t option
   -> with_breadcrumbs:bool
+  -> solver_stats:bool
   -> unit Result.t

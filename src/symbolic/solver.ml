@@ -42,8 +42,10 @@ let empty_stats = Smtml.Statistics.Map.empty
 let stats_are_empty = Smtml.Statistics.Map.is_empty
 
 let get_stats (S (solver_module, s)) =
-  let module Solver = (val solver_module) in
-  Solver.get_statistics s
+  if Log.get_record_stats () then
+    let module Solver = (val solver_module) in
+    Solver.get_statistics s
+  else empty_stats
 
 let merge_stats = Smtml.Statistics.merge
 

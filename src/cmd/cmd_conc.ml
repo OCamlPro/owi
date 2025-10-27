@@ -37,6 +37,7 @@ type trace =
   { assignments : Concolic_choice.assignments
   ; remaining_pc : Concolic_choice.pc_elt list
   ; end_of_trace : end_of_trace
+  ; stats : Smtml.Statistics.t
   }
 
 module IMap = Map.Make (Prelude.Int32)
@@ -226,7 +227,7 @@ let add_trace tree trace =
   let to_update = add_trace [] tree trace [] in
   List.iter update_unexplored to_update
 
-let run_once link_state module_to_run (forced_values : Smtml.Model.t) =
+let run_once link_state module_to_run (forced_values : Smtml.Model.t) stats =
   let backup = Concolic.backup module_to_run in
   let result =
     Interpret.Concolic.modul ~timeout:None ~timeout_instr:None
@@ -252,7 +253,11 @@ let run_once link_state module_to_run (forced_values : Smtml.Model.t) =
     | Error ErrExplicitStop -> Ok Normal
   in
   let trace =
-    { assignments = symbols_value; remaining_pc = List.rev pc; end_of_trace }
+    { assignments = symbols_value
+    ; remaining_pc = List.rev pc
+    ; end_of_trace
+    ; stats
+    }
   in
   (result, trace)
 
@@ -305,10 +310,14 @@ let find_node_to_run tree =
 let pc_model solver pc =
   let pc = Concolic_choice.pc_to_exprs pc in
   match Solver.check solver pc with
-  | `Unsat | `Unknown -> None
+  | `Unsat | `Unknown ->
+    (* TODO: fetch stats in this case as well? *)
+    None
   | `Sat ->
     let symbol_scopes = Symbol_scope.of_expressions pc in
-    Some (Solver.model ~symbol_scopes ~pc solver)
+    let model = Solver.model ~symbol_scopes ~pc solver in
+    let stats = Solver.get_stats solver in
+    Some (model, stats)
 
 let rec find_model_to_run solver tree =
   let ( let* ) = Option.bind in
@@ -325,12 +334,12 @@ let rec find_model_to_run solver tree =
         | Assert assert_ -> assert_.status <- Valid
         | _ -> assert false (* Sanity check *) );
         find_model_to_run solver tree
-      | Some model ->
+      | Some (model, stats) ->
         ( match node.node with
         | Not_explored -> node.node <- Being_explored
         | Assert assert_ -> assert_.status <- Invalid [] (* TODO: assignments *)
         | _ -> assert false (* Sanity check *) );
-        Some model )
+        Some (model, stats) )
   in
   (* Have to update tree because of the paths trimmed above *)
   List.iter update_unexplored to_update;
@@ -341,9 +350,9 @@ let count_path = ref 0
 let run solver tree link_state modules_to_run =
   (* Initial model is empty (no symbolic variables yet) *)
   let initial_model = Hashtbl.create 0 in
-  let rec loop model =
+  let rec loop model stats =
     incr count_path;
-    let* result, trace = run_once link_state modules_to_run model in
+    let* result, trace = run_once link_state modules_to_run model stats in
     add_trace tree trace;
     let* error =
       match result with
@@ -358,7 +367,7 @@ let run solver tree link_state modules_to_run =
             trace.assignments );
         Log.debug (fun m -> m "Retry !");
         match pc_model solver (Assume c :: trace.remaining_pc) with
-        | Some model -> loop model
+        | Some (model, stats) -> loop model stats
         | None -> Ok None )
       | Error (Trap trap) ->
         (* TODO: Check if we want to report this *)
@@ -374,9 +383,9 @@ let run solver tree link_state modules_to_run =
       (* No error, we can go again if we still have stuff to explore *)
       match find_model_to_run solver tree with
       | None -> Ok None
-      | Some model -> loop model )
+      | Some (model, stats) -> loop model stats )
   in
-  loop initial_model
+  loop initial_model Solver.empty_stats
 
 let assignments_to_model (assignments : (Smtml.Symbol.t * V.t) list) :
   Smtml.Model.t =
@@ -409,6 +418,7 @@ let cmd ~parameters ~source_file =
       ; solver
       ; model_out_file
       ; no_assert_failure_expression_printing
+      ; solver_stats
       ; _
       } =
     parameters
@@ -459,7 +469,7 @@ let cmd ~parameters ~source_file =
   | None ->
     Log.app (fun m -> m "All OK!");
     Ok ()
-  | Some (`Trap trap, { assignments; _ }) ->
+  | Some (`Trap trap, { assignments; stats; _ }) ->
     let assignments = List.rev assignments in
     Log.err (fun m -> m "Trap: %s" (Result.err_to_string trap));
     let* () =
@@ -469,9 +479,12 @@ let cmd ~parameters ~source_file =
         Log.app (fun m -> m "Model:@\n @[<v>%s@]" (to_string assignments));
         Ok ()
     in
+    if solver_stats then
+      Log.debug (fun m ->
+        m "Total solver statistics:@\n @[<v>%a@]" Solver.pp_stats stats );
     let* () = testcase assignments in
     Error (`Found_bug 1)
-  | Some (`Assert_fail, { assignments; _ }) ->
+  | Some (`Assert_fail, { assignments; stats; _ }) ->
     let assignments = List.rev assignments in
     if no_assert_failure_expression_printing then begin
       Log.err (fun m -> m "Assert failure")
@@ -487,5 +500,8 @@ let cmd ~parameters ~source_file =
         Log.app (fun m -> m "Model:@\n @[<v>%s@]" (to_string assignments));
         Ok ()
     in
+    if solver_stats then
+      Log.debug (fun m ->
+        m "Total solver statistics:@\n @[<v>%a@]" Solver.pp_stats stats );
     let* () = testcase assignments in
     Error (`Found_bug 1)
