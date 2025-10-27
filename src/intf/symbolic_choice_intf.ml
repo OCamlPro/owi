@@ -10,12 +10,14 @@ type 'a eval =
       * (int * string) list
       * int list
       * Symbol_scope.t
+      * Smtml.Statistics.t
   | EAssert of
       Smtml.Expr.t
       * Smtml.Model.t
       * (int * string) list
       * int list
       * Symbol_scope.t
+      * Smtml.Statistics.t
 
 module type S = sig
   module V : Func_intf.Value_types

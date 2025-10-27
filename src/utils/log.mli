@@ -8,4 +8,11 @@ val bench_fn : string -> (unit -> 'a) -> 'a
 
 val bench : 'a Logs.log
 
-val setup : Fmt.style_renderer option -> Logs.level option -> bench:bool -> unit
+val setup :
+     ?solver_stats:bool
+  -> Fmt.style_renderer option
+  -> Logs.level option
+  -> bench:bool
+  -> unit
+
+val get_record_stats : unit -> bool

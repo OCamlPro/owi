@@ -34,6 +34,7 @@ type parameters =
   ; invoke_with_symbols : bool
   ; model_out_file : Fpath.t option
   ; with_breadcrumbs : bool
+  ; solver_stats : bool
   }
 
 let run_file ~parameters ~source_file =
@@ -62,7 +63,7 @@ let run_file ~parameters ~source_file =
 
 let print_bug ~model_format ~model_out_file ~id ~no_value ~no_stop_at_failure
   ~no_assert_failure_expression_printing ~with_breadcrumbs bug =
-  let pp fmt (model, labels, breadcrumbs, scoped_values) =
+  let pp fmt (model, labels, breadcrumbs, scoped_values, stats) =
     match model_format with
     | Cmd_utils.Json ->
       let json = Symbol_scope.to_json ~no_value model scoped_values in
@@ -85,6 +86,21 @@ let print_bug ~model_format ~model_out_file ~id ~no_value ~no_stop_at_failure
           | `Assoc fields -> `Assoc (fields @ [ ("breadcrumbs", `List crumbs) ])
           | _ -> json
         else json
+      in
+      let json =
+        match json with
+        | `Assoc fields when Log.get_record_stats () ->
+          let solver_stats_json : Yojson.Basic.t =
+            `Assoc
+              (Solver.fold_stats
+                 (fun id v acc ->
+                   match v with
+                   | `Int i -> (id, `Int i) :: acc
+                   | `Float f -> (id, `Float f) :: acc )
+                 stats [] )
+          in
+          `Assoc (("solver_stats", solver_stats_json) :: fields)
+        | _ -> json
       in
       Yojson.Basic.pretty_print fmt json
     | Scfg ->
@@ -112,13 +128,33 @@ let print_bug ~model_format ~model_out_file ~id ~no_value ~no_stop_at_failure
           ]
         else []
       in
+      let bcrumbs =
+        if Log.get_record_stats () then
+          let stats =
+            { Scfg.Types.name = "stats"
+            ; params = []
+            ; children =
+                Solver.fold_stats
+                  (fun id v acc ->
+                    let params =
+                      match v with
+                      | `Int i -> [ id; string_of_int i ]
+                      | `Float f -> [ id; string_of_float f ]
+                    in
+                    { Scfg.Types.name = "stat"; params; children = [] } :: acc )
+                  stats []
+            }
+          in
+          stats :: bcrumbs
+        else bcrumbs
+      in
       let ret =
         model
         :: (if List.length lbls.children > 0 then lbls :: bcrumbs else bcrumbs)
       in
       Scfg.Pp.config fmt ret
   in
-  let to_file path model labels breadcrumbs symbol_scopes =
+  let to_file path model labels breadcrumbs symbol_scopes stats =
     let model_ext = match model_format with Json -> "json" | Scfg -> "scfg" in
     let contains_ext =
       Fpath.has_ext ".json" path || Fpath.has_ext ".scfg" path
@@ -137,51 +173,54 @@ let print_bug ~model_format ~model_out_file ~id ~no_value ~no_stop_at_failure
       in
       Ok (Fpath.add_ext model_ext base)
     in
-    Bos.OS.File.writef path "%a" pp (model, labels, breadcrumbs, symbol_scopes)
+    Bos.OS.File.writef path "%a" pp
+      (model, labels, breadcrumbs, symbol_scopes, stats)
   in
-  let output model labels breadcrumbs symbol_scopes =
+  let output model labels breadcrumbs symbol_scopes stats =
     match model_out_file with
-    | Some path -> to_file path model labels breadcrumbs symbol_scopes
+    | Some path -> to_file path model labels breadcrumbs symbol_scopes stats
     | None -> begin
       Log.app (fun m ->
         let fmt = m (if no_stop_at_failure then "%a@." else "%a") in
-        fmt pp (model, labels, breadcrumbs, symbol_scopes) );
+        fmt pp (model, labels, breadcrumbs, symbol_scopes, stats) );
       Ok ()
     end
   in
   match bug with
-  | `ETrap (tr, model, labels, breadcrumbs, symbol_scopes) ->
+  | `ETrap (tr, model, labels, breadcrumbs, symbol_scopes, stats) ->
     Log.err (fun m -> m "Trap: %s" (Result.err_to_string tr));
-    output model labels breadcrumbs symbol_scopes
-  | `EAssert (assertion, model, labels, breadcrumbs, symbol_scopes) ->
+    output model labels breadcrumbs symbol_scopes stats
+  | `EAssert (assertion, model, labels, breadcrumbs, symbol_scopes, stats) ->
     if no_assert_failure_expression_printing then
       Log.err (fun m -> m "Assert failure")
     else Log.err (fun m -> m "Assert failure: %a" Expr.pp assertion);
-    output model labels breadcrumbs symbol_scopes
+    output model labels breadcrumbs symbol_scopes stats
 
 let print_and_count_failures ~model_format ~model_out_file ~no_value
   ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
-  ~count_acc ~results ~with_breadcrumbs =
+  ~count_acc ~stats_acc ~results ~with_breadcrumbs =
   let test_suite_dir = Fpath.(workspace / "test-suite") in
   let* (_created : bool) =
     if not no_value then OS.Dir.create test_suite_dir else Ok false
   in
 
-  let rec aux count_acc results =
+  let rec aux count_acc stats_acc results =
     match results () with
-    | Seq.Nil -> Ok count_acc
+    | Seq.Nil -> Ok (count_acc, stats_acc)
     | Seq.Cons ((result, _thread), tl) ->
-      let* model =
+      let* model, stats =
         match result with
-        | (`EAssert (_, model, _, _, _) | `ETrap (_, model, _, _, _)) as bug ->
+        | ( `EAssert (_, model, _, _, _, stats)
+          | `ETrap (_, model, _, _, _, stats) ) as bug ->
           let* () =
             print_bug ~model_format ~model_out_file ~id:count_acc ~no_value
               ~no_stop_at_failure ~no_assert_failure_expression_printing
               ~with_breadcrumbs bug
           in
-          Ok model
+          Ok (model, stats)
         | `Error e -> Error e
       in
+      let stats_acc = Solver.merge_stats stats stats_acc in
       let count_acc = succ count_acc in
       let* () =
         if not no_value then
@@ -189,9 +228,10 @@ let print_and_count_failures ~model_format ~model_out_file ~no_value
           Cmd_utils.write_testcase ~dir:test_suite_dir testcase
         else Ok ()
       in
-      if no_stop_at_failure then aux count_acc tl else Ok count_acc
+      if no_stop_at_failure then aux count_acc stats_acc tl
+      else Ok (count_acc, stats_acc)
   in
-  aux count_acc results
+  aux count_acc stats_acc results
 
 let sort_results deterministic_result_order results =
   if deterministic_result_order then
@@ -206,7 +246,7 @@ let sort_results deterministic_result_order results =
 let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
   ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
   ~workspace ~solver ~model_format ~model_out_file ~with_breadcrumbs
-  (result : unit Symbolic.Choice.t) =
+  ~solver_stats (result : unit Symbolic.Choice.t) =
   let thread = Thread_with_memory.init () in
   let res_stack = Ws.make () in
   let path_count = Atomic.make 0 in
@@ -216,14 +256,14 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
     match (fail_mode, v) with
     | _, (EVal (), _) -> ()
     | ( (Both | Trap_only)
-      , (ETrap (t, m, labels, breadcrumbs, symbol_scopes), thread) ) ->
+      , (ETrap (t, m, labels, breadcrumbs, symbol_scopes, stats), thread) ) ->
       Ws.push
-        (`ETrap (t, m, labels, breadcrumbs, symbol_scopes), thread)
+        (`ETrap (t, m, labels, breadcrumbs, symbol_scopes, stats), thread)
         Prio.default res_stack
     | ( (Both | Assertion_only)
-      , (EAssert (e, m, labels, breadcrumbs, symbol_scopes), thread) ) ->
+      , (EAssert (e, m, labels, breadcrumbs, symbol_scopes, stats), thread) ) ->
       Ws.push
-        (`EAssert (e, m, labels, breadcrumbs, symbol_scopes), thread)
+        (`EAssert (e, m, labels, breadcrumbs, symbol_scopes, stats), thread)
         Prio.default res_stack
     | (Trap_only | Assertion_only), _ -> ()
   in
@@ -245,12 +285,15 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
   let results = sort_results deterministic_result_order results in
   Log.bench (fun m ->
     m "execution time: %a" Mtime.Span.pp (Mtime_clock.count time_counter) );
-  let* count =
+  let* count, stats =
     print_and_count_failures ~model_format ~model_out_file ~no_value
       ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
-      ~count_acc:0 ~results ~with_breadcrumbs
+      ~count_acc:0 ~stats_acc:Solver.empty_stats ~results ~with_breadcrumbs
   in
   Log.info (fun m -> m "Completed paths: %d" (Atomic.get path_count));
+  if solver_stats then
+    Log.debug (fun m ->
+      m "Total solver statistics:@\n @[<v>%a@]" Solver.pp_stats stats );
   let+ () = if count > 0 then Error (`Found_bug count) else Ok () in
   Log.app (fun m -> m "All OK!")
 
@@ -272,6 +315,7 @@ let cmd ~parameters ~source_file =
       ; workspace
       ; model_out_file
       ; with_breadcrumbs
+      ; solver_stats
       ; _
       } =
     parameters
@@ -292,4 +336,4 @@ let cmd ~parameters ~source_file =
   handle_result ~exploration_strategy ~fail_mode ~workers ~solver
     ~deterministic_result_order ~model_format ~no_value
     ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
-    ~model_out_file ~with_breadcrumbs result
+    ~model_out_file ~with_breadcrumbs ~solver_stats result

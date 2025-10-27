@@ -139,8 +139,10 @@ end) : INTERPRET = struct
       | [ v ] -> begin
         match v with
         | EVal r -> Ok r
-        | ETrap (t, _mdl, _labels, _breadcrumbs, _symbol_scopes) -> Error t
-        | EAssert (_expr, _mdl, _labels, _breadcrumbs, _symbol_scopes) ->
+        | ETrap (t, _mdl, _labels, _breadcrumbs, _symbol_scopes, _stats) ->
+          Error t
+        | EAssert (_expr, _mdl, _labels, _breadcrumbs, _symbol_scopes, _stats)
+          ->
           Error `Assert_failure
       end
       | _ -> Fmt.failwith "Unexpected multiple results." )
