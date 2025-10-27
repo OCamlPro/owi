@@ -43,6 +43,7 @@
 - start support for simd instructions
 - add `--exploration` option
 - add `--bench` option
+- add `--solver-stats` option
 
 ## 0.2 - 2024-04-24
 
