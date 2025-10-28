@@ -51,10 +51,6 @@
 <a id="L27"></a><span > </span>
 <a id="L28"></a><span > </span>
 <a id="L29"></a><span > </span>
-<a id="L30"></a><span > </span>
-<a id="L31"></a><span > </span>
-<a id="L32"></a><span > </span>
-<a id="L33"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -88,10 +84,6 @@
 <a href="#L27">27</a>
 <a href="#L28">28</a>
 <a href="#L29">29</a>
-<a href="#L30">30</a>
-<a href="#L31">31</a>
-<a href="#L32">32</a>
-<a href="#L33">33</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -106,10 +98,6 @@ module type S = sig
   (** Add a new element to the queue *)
   val push : 'a -&gt; Prio.t -&gt; 'a t -&gt; unit
 
-  (** Get an element from the queue. The boolean shall be true to atomically
-      start a new pledge (cf make_pledge) while popping. *)
-  val pop : 'a t -&gt; bool -&gt; 'a option
-
   (** Make a new pledge, ie indicate that new elements may be pushed to the
       queue and that calls to pop should block waitting for them. *)
   val make_pledge : 'a t -&gt; unit
@@ -117,9 +105,9 @@ module type S = sig
   (** End one pledge. *)
   val end_pledge : 'a t -&gt; unit
 
-  (** Mark the queue as failed: all threads trying to pop from it will get no
+  (** Mark the queue as closed: all threads trying to pop from it will get no
       element. *)
-  val fail : 'a t -&gt; unit
+  val close : 'a t -&gt; unit
 
   (** Pop all elements from the queue in a lazy Seq.t, *)
   val read_as_seq : 'a t -&gt; finalizer:(unit -&gt; unit) -&gt; 'a Seq.t

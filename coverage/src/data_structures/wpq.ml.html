@@ -114,7 +114,7 @@
 
 type 'a t = ('a, Prio.t * 'a) Synchronizer.t
 
-let pop q pledge = <span data-count="0">S</span>ynchronizer.get q pledge
+let pop q ~pledge = <span data-count="0">S</span>ynchronizer.get q ~pledge
 
 let make_pledge = Synchronizer.make_pledge
 
@@ -122,7 +122,7 @@ let end_pledge = Synchronizer.end_pledge
 
 let rec read_as_seq (q : 'a t) ~finalizer : 'a Seq.t =
  fun () -&gt;
-  <span data-count="0">m</span>atch pop q false with
+  <span data-count="0">m</span>atch pop q ~pledge:false with
   | <span data-count="0">N</span>one -&gt;
     finalizer ();
     <span data-count="0">N</span>il
@@ -132,7 +132,7 @@ let push v prio q = <span data-count="0">S</span>ynchronizer.write (prio, v) q
 
 let work_while f q = <span data-count="0">S</span>ynchronizer.work_while f q
 
-let fail = Synchronizer.fail
+let close = Synchronizer.close
 
 let make () =
   <span data-count="0">l</span>et q = Pq_imperative.empty () in
