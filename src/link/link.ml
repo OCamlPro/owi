@@ -192,17 +192,17 @@ let eval_memories ls env memories =
   in
   env
 
-let table_types_are_compatible (import, (t1 : binary ref_type)) (imported, t2) =
+let table_types_are_compatible (import, (t1 : ref_type)) (imported, t2) =
   limit_is_included ~import ~imported && Types.ref_type_eq t1 t2
 
-let load_table (ls : 'f state) (import : binary table_type Imported.t) :
-  table Result.t =
-  let typ : binary table_type = import.desc in
+let load_table (ls : 'f state) (import : table_type Imported.t) : table Result.t
+    =
+  let typ : table_type = import.desc in
   let* t = load_from_module ls (fun (e : exports) -> e.tables) import in
   if table_types_are_compatible typ (t.limits, t.typ) then Ok t
   else Error (`Incompatible_import_type import.name)
 
-let eval_table ls (table : (_, binary table_type) Runtime.t) : table Result.t =
+let eval_table ls (table : (_, table_type) Runtime.t) : table Result.t =
   match table with
   | Local (label, table_type) -> ok @@ Concrete_table.init ?label table_type
   | Imported import -> load_table ls import

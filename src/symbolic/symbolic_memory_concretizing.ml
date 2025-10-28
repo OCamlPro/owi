@@ -1,12 +1,7 @@
 module Backend = struct
   type address = Int32.t
 
-  module Map = Map.Make (struct
-    include Int32
-
-    (* TODO: define this in Int32 directly? *)
-    let compare i1 i2 = compare (Int32.to_int i1) (Int32.to_int i2)
-  end)
+  module Map = Map.Make (Int32)
 
   type t =
     { mutable data : Symbolic_value.int32 Map.t
@@ -78,6 +73,7 @@ module Backend = struct
             (Bool.or_
                (I32.ge_u start_offset chunk_size)
                (I32.ge_u end_offset chunk_size) )
+            ~prio_true:Prio.Default ~prio_false:Prio.Default
         in
         if is_out_of_bounds then Error `Memory_heap_buffer_overflow else Ok a )
     | _ ->

@@ -56,12 +56,14 @@ let exploration_conv =
     | "fifo" -> Ok Cmd_sym.FIFO
     | "lifo" -> Ok Cmd_sym.LIFO
     | "random" -> Ok Cmd_sym.Random
+    | "smart" -> Ok Cmd_sym.Smart
     | _ -> Fmt.error_msg {|Expected "fifo", "lifo" or "random" but got "%s"|} s
   in
   let pp fmt = function
     | Cmd_sym.FIFO -> Fmt.string fmt "fifo"
     | Cmd_sym.LIFO -> Fmt.string fmt "lifo"
     | Cmd_sym.Random -> Fmt.string fmt "random"
+    | Cmd_sym.Smart -> Fmt.string fmt "smart"
   in
   Arg.conv (of_string, pp)
 
@@ -130,7 +132,7 @@ let fail_mode =
 
 let exploration_strategy =
   let doc = {|exploration strategy to use ("fifo", "lifo" or "random")|} in
-  Arg.(value & opt exploration_conv Cmd_sym.LIFO & info [ "exploration" ] ~doc)
+  Arg.(value & opt exploration_conv Cmd_sym.FIFO & info [ "exploration" ] ~doc)
 
 let files =
   let doc = "source files" in

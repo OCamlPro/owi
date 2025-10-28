@@ -8,8 +8,6 @@ let symbolic_fuzzing = false
 
 let full_symbolic_fuzzing = false
 
-let call_graph_fuzzing = true
-
 (** Enable debug mode, will slow down things. *)
 let debug = false
 

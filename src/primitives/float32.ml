@@ -368,3 +368,8 @@ let to_string' convert is_digit n x =
 let to_string = to_string' (Fmt.str "%.17g") is_digit 3
 
 let pp fmt v = Fmt.string fmt (to_string v)
+
+let compare f1 f2 =
+  let f1 = to_float f1 in
+  let f2 = to_float f2 in
+  Float.compare f1 f2

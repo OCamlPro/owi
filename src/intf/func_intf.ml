@@ -191,7 +191,7 @@ end = struct
 
   type extern_func = Extern_func : 'a func_type * 'a -> extern_func
 
-  let elt_type (type t) (e : t telt) : binary val_type =
+  let elt_type (type t) (e : t telt) : val_type =
     match e with
     | I32 -> Num_type I32
     | I64 -> Num_type I64

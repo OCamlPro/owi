@@ -52,8 +52,10 @@ pkgs.mkShell {
     mdbookTabs
     mdx
     menhir
+    merlin
     ocaml
     ocamlformat
+    ocp-index
     ocb
     odoc
     sedlex
@@ -76,6 +78,7 @@ pkgs.mkShell {
     hc
     integers
     menhirLib
+    ocamlgraph
     ocaml_intrinsics
     patricia-tree
     prelude
