@@ -371,14 +371,14 @@ let cmd ~deterministic_result_order ~fail_mode ~exploration_strategy ~files
   let funcexports1 =
     module1.exports.func
     |> List.map (fun { Binary.name; id } ->
-      let typ = Binary.Module.get_func_type id module1 in
-      (name, typ) )
+         let typ = Binary.Module.get_func_type id module1 in
+         (name, typ) )
   in
   let funcexports2 =
     module2.exports.func
     |> List.map (fun { Binary.name; id } ->
-      let typ = Binary.Module.get_func_type id module2 in
-      (name, typ) )
+         let typ = Binary.Module.get_func_type id module2 in
+         (name, typ) )
   in
 
   let exports_name_1 = List.map fst funcexports1 in

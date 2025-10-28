@@ -130,7 +130,7 @@ let print_bug ~model_format ~model_out_file ~id ~no_value ~no_stop_at_failure
       let bcrumbs =
         if Log.is_bench_enabled () then
           let stats =
-            { Scfg.Types.name = "stats"
+            { Scfg.Types.name = "solver_stats"
             ; params = []
             ; children =
                 Solver.fold_stats
@@ -197,29 +197,28 @@ let print_bug ~model_format ~model_out_file ~id ~no_value ~no_stop_at_failure
 
 let print_and_count_failures ~model_format ~model_out_file ~no_value
   ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
-  ~count_acc ~stats_acc ~results ~with_breadcrumbs =
+  ~count_acc ~results ~with_breadcrumbs =
   let test_suite_dir = Fpath.(workspace / "test-suite") in
   let* (_created : bool) =
     if not no_value then OS.Dir.create test_suite_dir else Ok false
   in
 
-  let rec aux count_acc stats_acc results =
+  let rec aux count_acc results =
     match results () with
-    | Seq.Nil -> Ok (count_acc, stats_acc)
+    | Seq.Nil -> Ok count_acc
     | Seq.Cons ((result, _thread), tl) ->
-      let* model, stats =
+      let* model =
         match result with
-        | ( `EAssert (_, model, _, _, _, stats)
-          | `ETrap (_, model, _, _, _, stats) ) as bug ->
+        | (`EAssert (_, model, _, _, _, _) | `ETrap (_, model, _, _, _, _)) as
+          bug ->
           let* () =
             print_bug ~model_format ~model_out_file ~id:count_acc ~no_value
               ~no_stop_at_failure ~no_assert_failure_expression_printing
               ~with_breadcrumbs bug
           in
-          Ok (model, stats)
+          Ok model
         | `Error e -> Error e
       in
-      let stats_acc = Solver.merge_stats stats stats_acc in
       let count_acc = succ count_acc in
       let* () =
         if not no_value then
@@ -227,10 +226,9 @@ let print_and_count_failures ~model_format ~model_out_file ~no_value
           Cmd_utils.write_testcase ~dir:test_suite_dir testcase
         else Ok ()
       in
-      if no_stop_at_failure then aux count_acc stats_acc tl
-      else Ok (count_acc, stats_acc)
+      if no_stop_at_failure then aux count_acc tl else Ok count_acc
   in
-  aux count_acc stats_acc results
+  aux count_acc results
 
 let sort_results deterministic_result_order results =
   if deterministic_result_order then
@@ -284,14 +282,12 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
   let results = sort_results deterministic_result_order results in
   Log.bench (fun m ->
     m "execution time: %a" Mtime.Span.pp (Mtime_clock.count time_counter) );
-  let* count, stats =
+  let* count =
     print_and_count_failures ~model_format ~model_out_file ~no_value
       ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
-      ~count_acc:0 ~stats_acc:Solver.empty_stats ~results ~with_breadcrumbs
+      ~count_acc:0 ~results ~with_breadcrumbs
   in
   Log.info (fun m -> m "Completed paths: %d" (Atomic.get path_count));
-  Log.bench (fun m ->
-    m "Total solver statistics:@\n @[<v>%a@]" Solver.pp_stats stats );
   let+ () = if count > 0 then Error (`Found_bug count) else Ok () in
   Log.app (fun m -> m "All OK!")
 
