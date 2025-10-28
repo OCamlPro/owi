@@ -208,17 +208,17 @@ let source_file =
   Arg.(
     required & pos 0 (some existing_file_conv) None (info [] ~doc ~docv:"FILE") )
 
-let with_timings =
-  let doc = "show timings for some execution cycles" in
-  Arg.(value & flag & info [ "with-timings" ] ~doc)
+let bench =
+  let doc = "enable benchmarks" in
+  Arg.(value & flag & info [ "bench" ] ~doc)
 
 (* TODO: move this as a common option ? *)
 let setup_log =
   let env = Cmd.Env.info "OWI_VERBOSITY" in
-  let+ with_timings
+  let+ bench
   and+ style_renderer = Fmt_cli.style_renderer ()
   and+ log_level = Logs_cli.level ~env () in
-  Log.setup ~with_timings style_renderer log_level
+  Log.setup ~bench style_renderer log_level
 
 let srac =
   let doc = "symbolic runtime assertion checking mode" in
