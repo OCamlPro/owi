@@ -416,7 +416,6 @@ let cmd ~parameters ~source_file =
       ; solver
       ; model_out_file
       ; no_assert_failure_expression_printing
-      ; solver_stats
       ; _
       } =
     parameters
@@ -477,9 +476,8 @@ let cmd ~parameters ~source_file =
         Log.app (fun m -> m "Model:@\n @[<v>%s@]" (to_string assignments));
         Ok ()
     in
-    if solver_stats then
-      Log.debug (fun m ->
-        m "Total solver statistics:@\n @[<v>%a@]" Solver.pp_stats stats );
+    Log.bench (fun m ->
+      m "Total solver statistics:@\n @[<v>%a@]" Solver.pp_stats stats );
     let* () = testcase assignments in
     Error (`Found_bug 1)
   | Some (`Assert_fail, { assignments; stats; _ }) ->
@@ -498,8 +496,7 @@ let cmd ~parameters ~source_file =
         Log.app (fun m -> m "Model:@\n @[<v>%s@]" (to_string assignments));
         Ok ()
     in
-    if solver_stats then
-      Log.debug (fun m ->
-        m "Total solver statistics:@\n @[<v>%a@]" Solver.pp_stats stats );
+    Log.bench (fun m ->
+      m "Total solver statistics:@\n @[<v>%a@]" Solver.pp_stats stats );
     let* () = testcase assignments in
     Error (`Found_bug 1)

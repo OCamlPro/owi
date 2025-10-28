@@ -30,7 +30,6 @@ type parameters =
   ; invoke_with_symbols : bool
   ; model_out_file : Fpath.t option
   ; with_breadcrumbs : bool
-  ; solver_stats : bool
   }
 
 val handle_result :
@@ -46,7 +45,6 @@ val handle_result :
   -> model_format:Cmd_utils.model_format
   -> model_out_file:Fpath.t option
   -> with_breadcrumbs:bool
-  -> solver_stats:bool
   -> unit Symbolic.Choice.t
   -> unit Result.t
 
