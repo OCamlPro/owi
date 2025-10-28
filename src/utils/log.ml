@@ -4,23 +4,26 @@ let bench_src = Logs.Src.create "owi-bench" ~doc:"Owi's benchmark logs"
 
 include (val Logs.src_log main_src : Logs.LOG)
 
-module Bench_log = (val Logs.src_log bench_src : Logs.LOG)
-
-let bench_enabled = ref false
+let is_bench_enabled () =
+  match Logs.Src.level bench_src with None -> false | Some _ -> true
 
 let bench_fn str fn =
-  if !bench_enabled then (
+  match Logs.Src.level bench_src with
+  | None -> fn ()
+  | Some _ ->
     let c = Mtime_clock.counter () in
     let r = fn () in
-    Bench_log.info (fun m ->
+    Logs.info ~src:bench_src (fun m ->
       m "%s : %a" str Mtime.Span.pp (Mtime_clock.count c) );
-    r )
-  else fn ()
+    r
 
-let bench f = if !bench_enabled then Bench_log.info f else ()
+let bench f =
+  match Logs.Src.level bench_src with
+  | None -> ()
+  | Some _ -> Logs.info ~src:bench_src f
 
-let setup style_renderer level ~with_timings =
-  bench_enabled := with_timings;
+let setup style_renderer level ~bench =
+  if bench then Logs.Src.set_level bench_src (Some Logs.Info);
   Fmt_tty.setup_std_outputs ?style_renderer ();
   Logs.set_level level;
   Logs.set_reporter (Logs.format_reporter ())

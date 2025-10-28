@@ -42,6 +42,7 @@
 - add scopes with `owi_open_scope` and `owi_close_scope` primitives
 - start support for simd instructions
 - add `--exploration` option
+- add `--bench` option
 
 ## 0.2 - 2024-04-24
 
