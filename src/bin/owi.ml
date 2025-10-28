@@ -223,18 +223,13 @@ let bench =
   let doc = "enable benchmarks" in
   Arg.(value & flag & info [ "bench" ] ~doc)
 
-let solver_stats =
-  let doc = "Get statistics from the used solver." in
-  Arg.(value & flag & info [ "solver-stats" ] ~doc)
-
 (* TODO: move this as a common option ? *)
 let setup_log =
   let env = Cmd.Env.info "OWI_VERBOSITY" in
   let+ bench
   and+ style_renderer = Fmt_cli.style_renderer ()
-  and+ log_level = Logs_cli.level ~env ()
-  and+ solver_stats in
-  Log.setup ~solver_stats ~bench style_renderer log_level
+  and+ log_level = Logs_cli.level ~env () in
+  Log.setup ~bench style_renderer log_level
 
 let srac =
   let doc = "symbolic runtime assertion checking mode" in
@@ -289,7 +284,6 @@ let symbolic_parameters default_entry_point =
   and+ entry_point = entry_point default_entry_point
   and+ model_out_file
   and+ with_breadcrumbs
-  and+ solver_stats
   and+ invoke_with_symbols in
   { Cmd_sym.unsafe
   ; rac
@@ -307,7 +301,6 @@ let symbolic_parameters default_entry_point =
   ; entry_point
   ; model_out_file
   ; with_breadcrumbs
-  ; solver_stats
   ; invoke_with_symbols
   }
 
@@ -503,13 +496,12 @@ let iso_cmd =
   and+ workers
   and+ model_out_file
   and+ with_breadcrumbs
-  and+ solver_stats
   and+ workspace in
 
   Cmd_iso.cmd ~deterministic_result_order ~fail_mode ~exploration_strategy
     ~files ~model_format ~no_assert_failure_expression_printing
     ~no_stop_at_failure ~no_value ~solver ~unsafe ~workers ~workspace
-    ~model_out_file ~with_breadcrumbs ~solver_stats
+    ~model_out_file ~with_breadcrumbs
 
 (* owi replay *)
 

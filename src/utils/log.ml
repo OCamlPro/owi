@@ -7,8 +7,6 @@ include (val Logs.src_log main_src : Logs.LOG)
 let is_bench_enabled () =
   match Logs.Src.level bench_src with None -> false | Some _ -> true
 
-let record_stats = ref false
-
 let bench_fn str fn =
   match Logs.Src.level bench_src with
   | None -> fn ()

@@ -34,7 +34,6 @@ type parameters =
   ; invoke_with_symbols : bool
   ; model_out_file : Fpath.t option
   ; with_breadcrumbs : bool
-  ; solver_stats : bool
   }
 
 let run_file ~parameters ~source_file =
@@ -89,7 +88,7 @@ let print_bug ~model_format ~model_out_file ~id ~no_value ~no_stop_at_failure
       in
       let json =
         match json with
-        | `Assoc fields when Log.get_record_stats () ->
+        | `Assoc fields when Log.is_bench_enabled () ->
           let solver_stats_json : Yojson.Basic.t =
             `Assoc
               (Solver.fold_stats
@@ -129,7 +128,7 @@ let print_bug ~model_format ~model_out_file ~id ~no_value ~no_stop_at_failure
         else []
       in
       let bcrumbs =
-        if Log.get_record_stats () then
+        if Log.is_bench_enabled () then
           let stats =
             { Scfg.Types.name = "stats"
             ; params = []
@@ -246,7 +245,7 @@ let sort_results deterministic_result_order results =
 let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
   ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
   ~workspace ~solver ~model_format ~model_out_file ~with_breadcrumbs
-  ~solver_stats (result : unit Symbolic.Choice.t) =
+  (result : unit Symbolic.Choice.t) =
   let thread = Thread_with_memory.init () in
   let res_stack = Ws.make () in
   let path_count = Atomic.make 0 in
@@ -291,9 +290,8 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
       ~count_acc:0 ~stats_acc:Solver.empty_stats ~results ~with_breadcrumbs
   in
   Log.info (fun m -> m "Completed paths: %d" (Atomic.get path_count));
-  if solver_stats then
-    Log.debug (fun m ->
-      m "Total solver statistics:@\n @[<v>%a@]" Solver.pp_stats stats );
+  Log.bench (fun m ->
+    m "Total solver statistics:@\n @[<v>%a@]" Solver.pp_stats stats );
   let+ () = if count > 0 then Error (`Found_bug count) else Ok () in
   Log.app (fun m -> m "All OK!")
 
@@ -315,7 +313,6 @@ let cmd ~parameters ~source_file =
       ; workspace
       ; model_out_file
       ; with_breadcrumbs
-      ; solver_stats
       ; _
       } =
     parameters
@@ -336,4 +333,4 @@ let cmd ~parameters ~source_file =
   handle_result ~exploration_strategy ~fail_mode ~workers ~solver
     ~deterministic_result_order ~model_format ~no_value
     ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
-    ~model_out_file ~with_breadcrumbs ~solver_stats result
+    ~model_out_file ~with_breadcrumbs result

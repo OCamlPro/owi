@@ -340,7 +340,7 @@ module String_set = Set.Make (String)
 let cmd ~deterministic_result_order ~fail_mode ~exploration_strategy ~files
   ~model_format ~no_assert_failure_expression_printing ~no_stop_at_failure
   ~no_value ~solver ~unsafe ~workers ~workspace ~model_out_file
-  ~with_breadcrumbs ~solver_stats =
+  ~with_breadcrumbs =
   let* workspace =
     match workspace with
     | Some path -> Ok path
@@ -371,14 +371,14 @@ let cmd ~deterministic_result_order ~fail_mode ~exploration_strategy ~files
   let funcexports1 =
     module1.exports.func
     |> List.map (fun { Binary.name; id } ->
-         let typ = Binary.Module.get_func_type id module1 in
-         (name, typ) )
+      let typ = Binary.Module.get_func_type id module1 in
+      (name, typ) )
   in
   let funcexports2 =
     module2.exports.func
     |> List.map (fun { Binary.name; id } ->
-         let typ = Binary.Module.get_func_type id module2 in
-         (name, typ) )
+      let typ = Binary.Module.get_func_type id module2 in
+      (name, typ) )
   in
 
   let exports_name_1 = List.map fst funcexports1 in
@@ -448,5 +448,5 @@ let cmd ~deterministic_result_order ~fail_mode ~exploration_strategy ~files
       Cmd_sym.handle_result ~exploration_strategy ~fail_mode ~workers ~solver
         ~deterministic_result_order ~model_format ~no_value
         ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
-        ~model_out_file ~with_breadcrumbs ~solver_stats result )
+        ~model_out_file ~with_breadcrumbs result )
     () common_exports
