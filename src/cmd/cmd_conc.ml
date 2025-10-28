@@ -310,9 +310,7 @@ let find_node_to_run tree =
 let pc_model solver pc =
   let pc = Concolic_choice.pc_to_exprs pc in
   match Solver.check solver pc with
-  | `Unsat | `Unknown ->
-    (* TODO: fetch stats in this case as well? *)
-    None
+  | `Unsat | `Unknown -> None
   | `Sat ->
     let symbol_scopes = Symbol_scope.of_expressions pc in
     let model = Solver.model ~symbol_scopes ~pc solver in
