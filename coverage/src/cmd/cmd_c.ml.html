@@ -479,7 +479,7 @@ let eacsl_instrument eacsl ~includes (files : Fpath.t list) :
       in
 
       <span data-count="11">l</span>et framac_verbosity_level =
-        match Logs.level () with
+        match Logs.Src.level Log.main_src with
         | Some (<span data-count="0">L</span>ogs.Debug | <span data-count="0">L</span>ogs.Info) -&gt; "2"
         | <span data-count="0">N</span>one | <span data-count="11">S</span>ome _ -&gt; "0"
       in
@@ -513,7 +513,7 @@ let eacsl_instrument eacsl ~includes (files : Fpath.t list) :
     in
 
     let err =
-      match Logs.level () with
+      match Logs.Src.level Log.main_src with
       | Some (<span data-count="0">L</span>ogs.Debug | <span data-count="0">L</span>ogs.Info) -&gt; OS.Cmd.err_run_out
       | <span data-count="0">N</span>one | <span data-count="11">S</span>ome _ -&gt; OS.Cmd.err_null
     in
@@ -575,7 +575,7 @@ let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file
   <span data-count="364">l</span>et clang : Cmd.t = Cmd.(clang_bin %<span data-count="364">%</span> flags <span data-count="364">%</span> "-o" <span data-count="364">%</span> <span data-count="364">p</span> out %<span data-count="364">%</span> files) in
 
   let err =
-    match Logs.level () with
+    match Logs.Src.level Log.main_src with
     | Some (<span data-count="0">L</span>ogs.Debug | <span data-count="0">L</span>ogs.Info) -&gt; OS.Cmd.err_run_out
     | <span data-count="0">N</span>one | <span data-count="364">S</span>ome _ -&gt; OS.Cmd.err_null
   in

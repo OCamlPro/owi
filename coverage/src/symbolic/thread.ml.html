@@ -279,7 +279,7 @@ struct
 
   let create num_symbols symbol_scopes pc memories tables globals breadcrumbs
     labels =
-    <span data-count="2169175">{</span> num_symbols
+    <span data-count="2168882">{</span> num_symbols
     ; symbol_scopes
     ; pc
     ; memories
@@ -301,37 +301,37 @@ struct
     create num_symbols symbol_scopes pc memories tables globals breadcrumbs
       labels
 
-  let num_symbols t = <span data-count="2170310">t</span>.num_symbols
+  let num_symbols t = <span data-count="2170010">t</span>.num_symbols
 
-  let symbol_scopes t = <span data-count="2169012">t</span>.symbol_scopes
+  let symbol_scopes t = <span data-count="2168696">t</span>.symbol_scopes
 
-  let pc t = <span data-count="2196811">t</span>.pc
+  let pc t = <span data-count="2196305">t</span>.pc
 
-  let memories t = <span data-count="4325216">t</span>.memories
+  let memories t = <span data-count="4324716">t</span>.memories
 
-  let tables t = <span data-count="2172814">t</span>.tables
+  let tables t = <span data-count="2172481">t</span>.tables
 
-  let globals t = <span data-count="2170978">t</span>.globals
+  let globals t = <span data-count="2170512">t</span>.globals
 
-  let breadcrumbs t = <span data-count="2169048">t</span>.breadcrumbs
+  let breadcrumbs t = <span data-count="2168734">t</span>.breadcrumbs
 
-  let labels t = <span data-count="2169010">t</span>.labels
+  let labels t = <span data-count="2168708">t</span>.labels
 
   let add_symbol t s =
     <span data-count="1390">l</span>et open Symbol_scope in
     { t with symbol_scopes = symbo<span data-count="1390">l</span> s t.symbol_scopes }
 
   let add_pc t c =
-    <span data-count="28719">l</span>et pc = Symbolic_path_condition.add t.pc c in
-    <span data-count="28724">{</span> t with pc }
+    <span data-count="28369">l</span>et pc = Symbolic_path_condition.add t.pc c in
+    <span data-count="28369">{</span> t with pc }
 
   let add_breadcrumb t crumb =
-    <span data-count="25963">l</span>et breadcrumbs = crumb :: t.breadcrumbs in
+    <span data-count="25786">l</span>et breadcrumbs = crumb :: t.breadcrumbs in
     { t with breadcrumbs }
 
   let incr_num_symbols t =
-    <span data-count="1541">l</span>et num_symbols = succ t.num_symbols in
-    <span data-count="1541">{</span> t with num_symbols }
+    <span data-count="1532">l</span>et num_symbols = succ t.num_symbols in
+    <span data-count="1532">{</span> t with num_symbols }
 
   let add_label t label = <span data-count="2">{</span> t with labels = label :: t.labels }
 
@@ -353,10 +353,10 @@ struct
     ; breadcrumbs
     ; labels
     } =
-    <span data-count="28570">l</span>et memories = Memory.clone memories in
-    <span data-count="28572">l</span>et tables = Symbolic_table.clone tables in
-    <span data-count="28573">l</span>et globals = Symbolic_global.clone globals in
-    <span data-count="28573">{</span> num_symbols
+    <span data-count="28225">l</span>et memories = Memory.clone memories in
+    <span data-count="28229">l</span>et tables = Symbolic_table.clone tables in
+    <span data-count="28229">l</span>et globals = Symbolic_global.clone globals in
+    <span data-count="28229">{</span> num_symbols
     ; symbol_scopes
     ; pc
     ; memories

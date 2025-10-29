@@ -140,8 +140,8 @@
 <a id="L43"></a><span > </span>
 <a id="L44"></a><span class="visited"> </span>
 <a id="L45"></a><span > </span>
-<a id="L46"></a><span > </span>
-<a id="L47"></a><span class="visited"> </span>
+<a id="L46"></a><span class="visited"> </span>
+<a id="L47"></a><span > </span>
 <a id="L48"></a><span class="visited"> </span>
 <a id="L49"></a><span class="visited"> </span>
 <a id="L50"></a><span class="visited"> </span>
@@ -607,7 +607,7 @@ let of_expressions exprs =
     []
     (Smtml.Expr.Set.get_symbol<span data-count="371">s</span> exprs)
 
-let of_symbol sym = <span data-count="902">[</span> Symbol sym ]
+let of_symbol sym = <span data-count="744">[</span> Symbol sym ]
 
 let pp_token fmt token =
   <span data-count="6">m</span>atch token with
@@ -619,8 +619,8 @@ let pp fmt tokens =
   <span data-count="4">F</span>mt.list ~sep:(fun fmt () -&gt; <span data-count="2">F</span>mt.pf fmt " ; ") pp_token fmt tokens
 
 let only_symbols tokens =
-  <span data-count="1512">L</span>ist.filter_map
-    (<span data-count="2873">f</span>unction <span data-count="2859">S</span>ymbol s -&gt; Some s | <span data-count="7">O</span>pen_scope _ | <span data-count="7">C</span>lose_scope -&gt; None)
+  <span data-count="1352">L</span>ist.filter_map
+    (<span data-count="2701">f</span>unction <span data-count="2687">S</span>ymbol s -&gt; Some s | <span data-count="7">O</span>pen_scope _ | <span data-count="7">C</span>lose_scope -&gt; None)
     tokens
 
 let get_value model sym =
@@ -630,9 +630,9 @@ let get_value model sym =
 
 let to_scfg ~no_value model scope_tokens =
   <span data-count="235">l</span>et open Scfg.Types in
-  let open Smtml in
   let symbol_to_scfg symbol =
-    <span data-count="385">l</span>et p0 = Symbol.to_string symbol in
+    <span data-count="385">l</span>et open Smtml in
+    let p0 = Symbol.to_string symbol in
     <span data-count="385">l</span>et p1 = Symbol.type_of symbol |&gt; <span data-count="385">T</span>y.string_of_type in
     <span data-count="385">l</span>et params =
       if no_value then <span data-count="230">[</span> p0; p1 ]
@@ -682,7 +682,7 @@ let to_scfg ~no_value model scope_tokens =
   in
 
   let rev_scope_tokens = List.rev scope_tokens in
-  <span data-count="235">L</span>og.debug (fun m -&gt; <span data-count="1">m</span> "Current scope tokens: [%a]" pp rev_scope_tokens);
+  <span data-count="235">L</span>og.debug (fun m -&gt; <span data-count="1">m</span> "scope tokens: [%a]" pp rev_scope_tokens);
   <span data-count="235">l</span>et children = process_tokens rev_scope_tokens [] in
   <span data-count="235">[</span> { name = "model"; params = []; children } ]
 
@@ -747,7 +747,7 @@ let to_json ~no_value model scope_tokens =
   in
 
   let rev_scope_tokens = List.rev scope_tokens in
-  <span data-count="0">L</span>og.debug (fun m -&gt; <span data-count="0">m</span> "Current scope tokens: [%a]" pp rev_scope_tokens);
+  <span data-count="0">L</span>og.debug (fun m -&gt; <span data-count="0">m</span> "scope tokens: [%a]" pp rev_scope_tokens);
   <span data-count="0">l</span>et result = process_tokens rev_scope_tokens [] in
   <span data-count="0">`</span>Assoc [ ("model", `List result) ]
 

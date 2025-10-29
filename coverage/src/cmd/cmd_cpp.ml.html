@@ -314,7 +314,7 @@ let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file
   <span data-count="6">l</span>et includes = Cmd.of_list ~slip:"-I" (List.ma<span data-count="6">p</span> Cmd.p includes) in
 
   <span data-count="6">l</span>et err =
-    match Logs.level () with
+    match Logs.Src.level Log.main_src with
     | Some (<span data-count="0">L</span>ogs.Debug | <span data-count="0">L</span>ogs.Info) -&gt; OS.Cmd.err_run_out
     | <span data-count="0">N</span>one | <span data-count="6">S</span>ome _ -&gt; OS.Cmd.err_null
   in
