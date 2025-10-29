@@ -82,6 +82,118 @@ module Module = struct
     ; custom = []
     }
 
+  (** Functions *)
+
+  (** Insert a function [f] to a module [m] at index [i] and returns the module.
+      It will update all function indices accordingly. *)
+  let insert_func_at_idx ?(update_function_itself = true) f m i =
+    (* TODO: we should also update elements and everything... *)
+    (*
+    Log.warn (fun m ->
+      m "insert_func_at_idx is still incomplete and you may run into issues" );
+    *)
+    let update_idx (Raw idx as raw : Types.binary Types.indice) :
+      Types.binary Types.indice =
+      if idx >= i then Raw (idx + 1) else raw
+    in
+
+    let rec handle_instr instr =
+      Annotated.map
+        (function
+          | Types.Call idx -> Types.Call (update_idx idx)
+          | Types.Return_call idx -> Types.Return_call (update_idx idx)
+          | Types.Ref_func idx -> Types.Ref_func (update_idx idx)
+          | Types.Block (id, typ, body) ->
+            let body = handle_expr body in
+            Types.Block (id, typ, body)
+          | Types.Loop (id, typ, body) ->
+            let body = handle_expr body in
+            Types.Loop (id, typ, body)
+          | Types.If_else (id, typ, true_branch, false_branch) ->
+            let true_branch = handle_expr true_branch in
+            let false_branch = handle_expr false_branch in
+            Types.If_else (id, typ, true_branch, false_branch)
+          | instr ->
+            (* TODO: make this match non fragile *)
+            instr )
+        instr
+    and handle_expr expr =
+      Annotated.map (fun expr -> List.map handle_instr expr) expr
+    in
+    let update_function = function
+      | Runtime.Imported _ as f -> f
+      | Runtime.Local f ->
+        let body = handle_expr f.Types.body in
+        Runtime.Local { f with body }
+    in
+    let func =
+      Array.init
+        (Array.length m.func + 1)
+        (fun j ->
+          if i = j then if update_function_itself then update_function f else f
+          else begin
+            update_function @@ if i < j then m.func.(j - 1) else m.func.(j)
+          end )
+    in
+    let elem =
+      Array.map
+        (fun elem ->
+          let init = List.map handle_expr elem.init in
+          { elem with init } )
+        m.elem
+    in
+    let global =
+      Array.map
+        (function
+          | Runtime.Imported _ as v -> v
+          | Local (global : global) ->
+            let init = handle_expr global.init in
+            Local { global with init } )
+        m.global
+    in
+
+    let start =
+      match m.start with
+      | None -> None
+      | Some idx ->
+        let (Raw start) = update_idx (Raw idx) in
+        Some start
+    in
+
+    let exports =
+      let func =
+        List.map
+          (fun export ->
+            let id : int = (export : export).id in
+            let (Raw id) = update_idx (Raw id) in
+            { export with id } )
+          m.exports.func
+      in
+      { m.exports with func }
+    in
+
+    { m with func; elem; start; global; exports }
+
+  (** Add a function [f] at the end of a module [m] and returns the module and
+      the index of the added function. *)
+  let add_func f m =
+    let len = Array.length m.func in
+    let func =
+      Array.init
+        (Array.length m.func + 1)
+        (fun i -> if i = len then f else m.func.(i))
+    in
+
+    ({ m with func }, len)
+
+  (** Return the type of the function at index [id]. *)
+  let get_func_type id m =
+    if id >= Array.length m.func then None
+    else
+      match m.func.(id) with
+      | Local f -> Some f.type_f
+      | Imported i -> Some i.desc
+
   (** Exports *)
 
   (** Return the first function exported as [name] if it exists. Return [None]
@@ -104,10 +216,21 @@ module Module = struct
         | Local _ -> false )
       m.func
 
+  (** Finds the index of the last imported function. Will be `~-1` if there are
+      no imported functions. *)
+  let find_last_import_index m =
+    let _i, last =
+      Array.fold_left
+        (fun (i, last) -> function
+          | Runtime.Imported _ -> (succ i, i) | Runtime.Local _ -> (succ i, last) )
+        (0, ~-1) m.func
+    in
+    last
+
   (** Look for an imported function index, adding it if not already imported. *)
   let add_import_if_not_present ~modul_name ~func_name ~desc m =
     match find_imported_func_index ~modul_name ~func_name m with
-    | Some i -> (Types.Raw i, m)
+    | Some _i -> m
     | None ->
       let f =
         Runtime.Imported
@@ -117,30 +240,8 @@ module Module = struct
           ; desc
           }
       in
-      let func = Array.append m.func [| f |] in
-      let m = { m with func } in
-      let i = Array.length func - 1 in
-      (Types.Raw i, m)
 
-  (** Functions *)
+      let idx = find_last_import_index m + 1 in
 
-  (** Add a function [f] to a module [m] and returns the module and the index of
-      the added function. *)
-  let add_func f m =
-    let len = Array.length m.func in
-    let func =
-      Array.init
-        (Array.length m.func + 1)
-        (fun i -> if i = len then f else m.func.(i))
-    in
-
-    ({ m with func }, len)
-
-  (** Return the type of the function at index [id]. *)
-  let get_func_type id m =
-    if id >= Array.length m.func then None
-    else
-      match m.func.(id) with
-      | Local f -> Some f.type_f
-      | Imported i -> Some i.desc
+      insert_func_at_idx f m idx
 end

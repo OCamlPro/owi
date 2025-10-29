@@ -53,30 +53,70 @@ let dummy_value_of_t = function
 let default_symbol_of_t m =
   (* TODO: make this lazy to avoid adding unused imports to the module *)
   let modul_name = "owi" in
-  let i32_symbol, m =
+  let m =
     let func_name = "i32_symbol" in
     let desc = Types.Bt_raw (None, ([], [ Types.Num_type Types.I32 ])) in
     Binary.Module.add_import_if_not_present ~modul_name ~func_name ~desc m
   in
-  let i64_symbol, m =
+  let m =
     let func_name = "i64_symbol" in
     let desc = Types.Bt_raw (None, ([], [ Types.Num_type Types.I64 ])) in
     Binary.Module.add_import_if_not_present ~modul_name ~func_name ~desc m
   in
-  let f32_symbol, m =
+  let m =
     let func_name = "f32_symbol" in
     let desc = Types.Bt_raw (None, ([], [ Types.Num_type Types.F32 ])) in
     Binary.Module.add_import_if_not_present ~modul_name ~func_name ~desc m
   in
-  let f64_symbol, m =
+  let m =
     let func_name = "f64_symbol" in
     let desc = Types.Bt_raw (None, ([], [ Types.Num_type Types.F64 ])) in
     Binary.Module.add_import_if_not_present ~modul_name ~func_name ~desc m
   in
-  let v128_symbol, m =
+  let m =
     let func_name = "v128_symbol" in
     let desc = Types.Bt_raw (None, ([], [ Types.Num_type Types.V128 ])) in
     Binary.Module.add_import_if_not_present ~modul_name ~func_name ~desc m
+  in
+  let i32_symbol =
+    match
+      Binary.Module.find_imported_func_index ~modul_name ~func_name:"i32_symbol"
+        m
+    with
+    | None -> assert false
+    | Some idx -> Types.Raw idx
+  in
+  let i64_symbol =
+    match
+      Binary.Module.find_imported_func_index ~modul_name ~func_name:"i64_symbol"
+        m
+    with
+    | None -> assert false
+    | Some idx -> Types.Raw idx
+  in
+  let f32_symbol =
+    match
+      Binary.Module.find_imported_func_index ~modul_name ~func_name:"f32_symbol"
+        m
+    with
+    | None -> assert false
+    | Some idx -> Types.Raw idx
+  in
+  let f64_symbol =
+    match
+      Binary.Module.find_imported_func_index ~modul_name ~func_name:"f64_symbol"
+        m
+    with
+    | None -> assert false
+    | Some idx -> Types.Raw idx
+  in
+  let v128_symbol =
+    match
+      Binary.Module.find_imported_func_index ~modul_name
+        ~func_name:"v128_symbol" m
+    with
+    | None -> assert false
+    | Some idx -> Types.Raw idx
   in
   ( m
   , function
@@ -98,6 +138,7 @@ let set_entry_point entry_point invoke_with_symbols (m : Binary.Module.t) =
          start function for now. Please open a bug report."
     else Ok m
   else
+    let m, default_symbol_of_t = default_symbol_of_t m in
     (* If there is none and we have an entry point passed in argument we search for it *)
     let* export =
       match entry_point with
@@ -116,7 +157,6 @@ let set_entry_point entry_point invoke_with_symbols (m : Binary.Module.t) =
     match Binary.Module.get_func_type export.id m with
     | None -> Fmt.error_msg "can't find a main function"
     | Some (Bt_raw main_type) ->
-      let m, default_symbol_of_t = default_symbol_of_t m in
       let+ body =
         let pt, rt = snd main_type in
         let+ args =
