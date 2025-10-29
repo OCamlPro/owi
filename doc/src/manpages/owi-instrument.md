@@ -3,39 +3,15 @@
 ```sh
 $ owi instrument --help=plain
 NAME
-       owi-instrument - Generate an instrumented file with runtime assertion
-       checking coming from Weasel specifications
+       owi-instrument - Instrument a program in various ways
 
 SYNOPSIS
-       owi instrument [OPTION]… FILE…
+       owi instrument COMMAND …
 
-ARGUMENTS
-       FILE (required)
-           source files
-
-OPTIONS
-       --bench
-           enable benchmarks
-
-       --color=WHEN (absent=auto)
-           Colorize the output. WHEN must be one of auto, always or never.
-
-       -q, --quiet
-           Be quiet. Takes over -v and --verbosity.
-
-       --symbolic
-           generate instrumented module that depends on symbolic execution
-
-       -u, --unsafe
-           skip typechecking pass
-
-       -v, --verbose
-           Increase verbosity. Repeatable, but more than twice does not bring
-           more.
-
-       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
-           Be more or less verbose. LEVEL must be one of quiet, error,
-           warning, info or debug. Takes over -v.
+COMMANDS
+       rac [OPTION]… FILE…
+           Generate an instrumented file with runtime assertion checking
+           coming from Weasel specifications
 
 COMMON OPTIONS
        --help[=FMT] (default=auto)
@@ -56,12 +32,6 @@ EXIT STATUS
        124 on command line parsing errors.
 
        125 on unexpected internal errors (bugs).
-
-ENVIRONMENT
-       These environment variables affect the execution of owi instrument:
-
-       OWI_VERBOSITY
-           See option --verbosity.
 
 BUGS
        Email them to <contact@ndrs.fr>.

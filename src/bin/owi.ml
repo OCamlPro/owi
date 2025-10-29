@@ -300,6 +300,36 @@ let analyze_info =
   let man = [] @ shared_man in
   Cmd.info "analyze" ~version ~doc ~sdocs ~man
 
+(* owi analyze cfg *)
+
+let cfg_info =
+  let doc = "Build a Control-Flow Graph" in
+  let man = [] @ shared_man in
+  Cmd.info "cfg" ~version ~doc ~sdocs ~man
+
+let cfg_cmd =
+  let+ source_file
+  and+ entry_point = entry_point None
+  and+ () = setup_log in
+  Cmd_cfg.cmd ~source_file ~entry_point
+
+(* owi analyze cg *)
+
+let cg_info =
+  let doc = "Build a call graph" in
+
+  let man = [] @ shared_man in
+
+  Cmd.info "cg" ~version ~doc ~sdocs ~man
+
+let cg_cmd =
+  let+ call_graph_mode
+  and+ source_file
+  and+ entry_point = entry_point None
+  and+ () = setup_log in
+
+  Cmd_call_graph.cmd ~call_graph_mode ~source_file ~entry_point
+
 (* owi c *)
 
 let c_info =
@@ -335,36 +365,6 @@ let c_cmd =
 
   Cmd_c.cmd ~symbolic_parameters ~arch ~property ~includes ~opt_lvl ~out_file
     ~testcomp ~concolic ~files ~eacsl
-
-(* owi analyze cfg *)
-
-let cfg_info =
-  let doc = "Build a Control-Flow Graph" in
-  let man = [] @ shared_man in
-  Cmd.info "cfg" ~version ~doc ~sdocs ~man
-
-let cfg_cmd =
-  let+ source_file
-  and+ entry_point = entry_point None
-  and+ () = setup_log in
-  Cmd_cfg.cmd ~source_file ~entry_point
-
-(* owi analyze cg *)
-
-let cg_info =
-  let doc = "Build a call graph" in
-
-  let man = [] @ shared_man in
-
-  Cmd.info "cg" ~version ~doc ~sdocs ~man
-
-let cg_cmd =
-  let+ call_graph_mode
-  and+ source_file
-  and+ entry_point = entry_point None
-  and+ () = setup_log in
-
-  Cmd_call_graph.cmd ~call_graph_mode ~source_file ~entry_point
 
 (* owi cpp *)
 
@@ -420,14 +420,20 @@ let fmt_cmd =
 (* owi instrument *)
 
 let instrument_info =
+  let doc = "Instrument a program in various ways" in
+  let man = [] @ shared_man in
+  Cmd.info "instrument" ~version ~doc ~sdocs ~man
+
+(* owi instrument rac *)
+let instrument_rac_info =
   let doc =
     "Generate an instrumented file with runtime assertion checking coming from \
      Weasel specifications"
   in
   let man = [] @ shared_man in
-  Cmd.info "instrument" ~version ~doc ~sdocs ~man
+  Cmd.info "rac" ~version ~doc ~sdocs ~man
 
-let instrument_cmd =
+let instrument_rac_cmd =
   let+ unsafe
   and+ symbolic =
     let doc =
@@ -436,7 +442,7 @@ let instrument_cmd =
     Arg.(value & flag & info [ "symbolic" ] ~doc)
   and+ () = setup_log
   and+ files in
-  Cmd_instrument.cmd ~unsafe ~symbolic ~files
+  Cmd_instrument_rac.cmd ~unsafe ~symbolic ~files
 
 (* owi iso *)
 
@@ -674,7 +680,7 @@ let cli =
     ; Cmd.v conc_info conc_cmd
     ; Cmd.v cpp_info cpp_cmd
     ; Cmd.v fmt_info fmt_cmd
-    ; Cmd.v instrument_info instrument_cmd
+    ; Cmd.group instrument_info [ Cmd.v instrument_rac_info instrument_rac_cmd ]
     ; Cmd.v iso_info iso_cmd
     ; Cmd.v replay_info replay_cmd
     ; Cmd.v run_info run_cmd

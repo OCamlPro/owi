@@ -20,7 +20,7 @@
   cmd_conc
   cmd_cpp
   cmd_fmt
-  cmd_instrument
+  cmd_instrument_rac
   cmd_iso
   cmd_replay
   cmd_run
