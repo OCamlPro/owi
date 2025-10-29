@@ -126,6 +126,8 @@
 <a id="L102"></a><span > </span>
 <a id="L103"></a><span > </span>
 <a id="L104"></a><span > </span>
+<a id="L105"></a><span > </span>
+<a id="L106"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -234,6 +236,8 @@
 <a href="#L102">102</a>
 <a href="#L103">103</a>
 <a href="#L104">104</a>
+<a href="#L105">105</a>
+<a href="#L106">106</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -247,12 +251,14 @@ type 'a eval =
       * (int * string) list
       * int list
       * Symbol_scope.t
+      * Smtml.Statistics.t
   | EAssert of
       Smtml.Expr.t
       * Smtml.Model.t
       * (int * string) list
       * int list
       * Symbol_scope.t
+      * Smtml.Statistics.t
 
 module type S = sig
   module V : Func_intf.Value_types
