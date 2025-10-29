@@ -122,7 +122,7 @@ let annotate_dc m cov_label_set_idx =
                       , Annotated.dummy_deep
                           [ Types.I32_const (Int32.of_int count_true)
                           ; Call cov_label_set_idx
-                          ; Br_if (Raw (idx + 1))
+                          ; Br (Raw (idx + 1))
                           ]
                       , Annotated.dummy_deep
                           [ Types.I32_const (Int32.of_int count_false)
