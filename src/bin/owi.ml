@@ -20,6 +20,10 @@ let call_graph_mode_conv =
   in
   Arg.conv (of_string, pp)
 
+let coverage_criteria_conv =
+  let open Label.Coverage_criteria in
+  Arg.conv (of_string, pp)
+
 let existing_file_conv =
   let parse s =
     match Fpath.of_string s with
@@ -110,6 +114,13 @@ let deterministic_result_order =
 let call_graph_mode =
   let doc = {| The call graph is either "complete" or "sound" |} in
   Arg.(value & opt call_graph_mode_conv Sound & info [ "call-graph-mode" ] ~doc)
+
+let coverage_criteria =
+  let doc = {|Coverage criteria to use ("fc", "sc" or "dc").|} in
+  Arg.(
+    value
+    & opt coverage_criteria_conv Label.Coverage_criteria.Statement_coverage
+    & info [ "criteria" ] ~doc )
 
 let entry_point default =
   let doc = "entry point of the executable" in
@@ -424,6 +435,22 @@ let instrument_info =
   let man = [] @ shared_man in
   Cmd.info "instrument" ~version ~doc ~sdocs ~man
 
+(* owi instrument label *)
+let instrument_label_info =
+  let doc =
+    "Generate an instrumented file with labels corresponding to test \
+     objectives for a given coverage criteria."
+  in
+  let man = [] @ shared_man in
+  Cmd.info "label" ~version ~doc ~sdocs ~man
+
+let instrument_label_cmd =
+  let+ unsafe
+  and+ coverage_criteria
+  and+ () = setup_log
+  and+ source_file in
+  Cmd_instrument_label.cmd ~unsafe ~source_file ~coverage_criteria
+
 (* owi instrument rac *)
 let instrument_rac_info =
   let doc =
@@ -680,7 +707,10 @@ let cli =
     ; Cmd.v conc_info conc_cmd
     ; Cmd.v cpp_info cpp_cmd
     ; Cmd.v fmt_info fmt_cmd
-    ; Cmd.group instrument_info [ Cmd.v instrument_rac_info instrument_rac_cmd ]
+    ; Cmd.group instrument_info
+        [ Cmd.v instrument_label_info instrument_label_cmd
+        ; Cmd.v instrument_rac_info instrument_rac_cmd
+        ]
     ; Cmd.v iso_info iso_cmd
     ; Cmd.v replay_info replay_cmd
     ; Cmd.v run_info run_cmd
