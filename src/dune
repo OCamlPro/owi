@@ -20,6 +20,7 @@
   cmd_conc
   cmd_cpp
   cmd_fmt
+  cmd_instrument_label
   cmd_instrument_rac
   cmd_iso
   cmd_replay
@@ -67,6 +68,7 @@
   interpret_intf
   kind
   spec
+  label
   link
   link_env
   log
