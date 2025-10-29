@@ -390,7 +390,12 @@ module Make (Thread : Thread_intf.S) = struct
     let* solver in
     let pc = Thread.pc thread in
     let sliced_pc = Symbolic_path_condition.slice pc v in
-    match Solver.check solver sliced_pc with
+    let stats = Thread.bench_stats thread in
+    let checked =
+      Benchmark.handle_solver_time stats @@ fun () ->
+      Solver.check solver sliced_pc
+    in
+    match checked with
     | `Sat -> return ()
     | `Unsat -> stop
     | `Unknown -> assert false
@@ -400,12 +405,19 @@ module Make (Thread : Thread_intf.S) = struct
     let* solver in
     let+ thread in
     let pc = Thread.pc thread |> Symbolic_path_condition.to_set in
-    match Solver.check solver pc with
+    let stats = Thread.bench_stats thread in
+    let checked =
+      Benchmark.handle_solver_time stats (fun () -> Solver.check solver pc)
+    in
+    match checked with
     | `Unsat -> stop
     | `Sat -> begin
       let symbol_scopes = Symbol_scope.of_symbol symbol in
       (* TODO: we are doing the check two times here, because Solver.model is also doing it, we should remove it! *)
-      let model = Solver.model solver ~symbol_scopes ~pc in
+      let model =
+        Benchmark.handle_solver_time stats @@ fun () ->
+        Solver.model solver ~symbol_scopes ~pc
+      in
       match Smtml.Model.evaluate model symbol with
       | None ->
         Fmt.failwith

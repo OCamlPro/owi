@@ -26,6 +26,7 @@ module type S = sig
     -> Symbolic_global.collection
     -> int list
     -> (int * string) list
+    -> Benchmark.stats
     -> t
 
   val pc : t -> Symbolic_path_condition.t
@@ -43,6 +44,8 @@ module type S = sig
   val num_symbols : t -> int
 
   val labels : t -> (int * string) list
+
+  val bench_stats : t -> Benchmark.stats
 
   val clone : t -> t
 

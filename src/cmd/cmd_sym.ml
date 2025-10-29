@@ -288,6 +288,11 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
       ~count_acc:0 ~results ~with_breadcrumbs
   in
   Log.info (fun m -> m "Completed paths: %d" (Atomic.get path_count));
+
+  Log.bench (fun m -> m "Benchmark : ");
+  Log.bench (fun m ->
+    let bench_stats = Thread_with_memory.bench_stats thread in
+    m "solver time: %a" Mtime.Span.pp (Atomic.get bench_stats.solver_time) );
   let+ () = if count > 0 then Error (`Found_bug count) else Ok () in
   Log.app (fun m -> m "All OK!")
 

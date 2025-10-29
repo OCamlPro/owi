@@ -6,6 +6,7 @@
   annot
   annotated
   assigned
+  benchmark
   binary
   binary_encoder
   binary_parser
