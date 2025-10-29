@@ -82,7 +82,6 @@
                }
   owi: [DEBUG] rewriting    ...
   owi: [INFO] typechecking ...
-  owi: [INFO] typechecking ...
   owi: [INFO] linking      ...
   owi: [INFO] interpreting ...
   owi: [INFO] stack         : [  ]
@@ -93,7 +92,7 @@
   owi: [INFO] running instr : call 0
   owi: [DEBUG] path condition: [  ]
   owi: [INFO] stack         : [ symbol_0 ]
-  owi: [INFO] running instr : call 1
+  owi: [INFO] running instr : call 5
   owi: [DEBUG] path condition: [  ]
   owi: [INFO] calling func  : func f
   owi: [INFO] stack         : [  ]
