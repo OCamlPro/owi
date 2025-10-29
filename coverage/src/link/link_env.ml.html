@@ -511,25 +511,25 @@ let recover backup into =
   <span data-count="535">l</span>et _ : _ IMap.t = IMap.merge (appl<span data-count="535">y</span> recover_elem) backup.elem into.elem in
   <span data-count="535">(</span>)
 
-let id (env : _ t) = <span data-count="2343729">e</span>nv.id
+let id (env : _ t) = <span data-count="2343984">e</span>nv.id
 
 let get_global (env : _ t) id =
-  <span data-count="5867">m</span>atch IMap.find_opt id env.globals with
+  <span data-count="5916">m</span>atch IMap.find_opt id env.globals with
   | None -&gt; assert false
-  | <span data-count="5867">S</span>ome v -&gt; Concrete_choice.return v
+  | <span data-count="5916">S</span>ome v -&gt; Concrete_choice.return v
 
 let get_memory (env : _ t) id =
-  <span data-count="4180955">m</span>atch IMap.find_opt id env.memories with
+  <span data-count="4181147">m</span>atch IMap.find_opt id env.memories with
   | None -&gt; assert false
-  | <span data-count="4180931">S</span>ome v -&gt; Concrete_choice.return v
+  | <span data-count="4181138">S</span>ome v -&gt; Concrete_choice.return v
 
 let get_table (env : _ t) id =
-  <span data-count="812664">m</span>atch IMap.find_opt id env.tables with
+  <span data-count="812669">m</span>atch IMap.find_opt id env.tables with
   | None -&gt; assert false
-  | <span data-count="812664">S</span>ome v -&gt; Concrete_choice.return v
+  | <span data-count="812669">S</span>ome v -&gt; Concrete_choice.return v
 
 let get_func (env : _ t) id =
-  <span data-count="5542593">m</span>atch IMap.find_opt id env.functions with None -&gt; assert false | <span data-count="5542593">S</span>ome v -&gt; v
+  <span data-count="5533378">m</span>atch IMap.find_opt id env.functions with None -&gt; assert false | <span data-count="5533375">S</span>ome v -&gt; v
 
 let get_data (env : _ t) id =
   <span data-count="1962">m</span>atch IMap.find_opt id env.data with
@@ -542,7 +542,7 @@ let get_elem (env : _ t) id =
 let get_extern_func env id =
   <span data-count="123058">m</span>atch Func_id.get id env.extern_funcs with
   | None -&gt; assert false
-  | <span data-count="123058">S</span>ome v -&gt; v
+  | <span data-count="123057">S</span>ome v -&gt; v
 
 module Build = struct
   type t =

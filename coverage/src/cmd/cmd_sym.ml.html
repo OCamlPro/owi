@@ -851,16 +851,16 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
   <span data-count="407">l</span>et res_stack = Ws.make () in
   <span data-count="407">l</span>et path_count = Atomic.make 0 in
   <span data-count="407">l</span>et callback v =
-    <span data-count="1766">l</span>et open Symbolic_choice_intf in
+    <span data-count="1816">l</span>et open Symbolic_choice_intf in
     Atomic.incr path_count;
-    <span data-count="1767">m</span>atch (fail_mode, v) with
-    | <span data-count="1528">_</span>, (EVal (), _) -&gt; ()
+    <span data-count="1817">m</span>atch (fail_mode, v) with
+    | <span data-count="1578">_</span>, (EVal (), _) -&gt; ()
     | <span data-count="172">(</span> (<span data-count="172">B</span>oth | <span data-count="0">T</span>rap_only)
       , (ETrap (t, m, labels, breadcrumbs, symbol_scopes), thread) ) -&gt;
       Ws.push
         (`ETrap (t, m, labels, breadcrumbs, symbol_scopes), thread)
         Prio.default res_stack
-    | <span data-count="63">(</span> (<span data-count="60">B</span>oth | <span data-count="3">A</span>ssertion_only)
+    | <span data-count="64">(</span> (<span data-count="61">B</span>oth | <span data-count="3">A</span>ssertion_only)
       , (EAssert (e, m, labels, breadcrumbs, symbol_scopes), thread) ) -&gt;
       Ws.push
         (`EAssert (e, m, labels, breadcrumbs, symbol_scopes), thread)
@@ -876,7 +876,7 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
       | <span data-count="0">R</span>andom -&gt; (module Wpq) )
       ~workers solver result thread ~callback
       ~callback_init:(fun () -&gt; <span data-count="789">W</span>s.make_pledge res_stack)
-      ~callback_end:(fun () -&gt; <span data-count="754">W</span>s.end_pledge res_stack)
+      ~callback_end:(fun () -&gt; <span data-count="755">W</span>s.end_pledge res_stack)
   in
   <span data-count="407">l</span>et results =
     Ws.read_as_seq res_stack ~finalizer:(fun () -&gt;

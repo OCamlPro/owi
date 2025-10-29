@@ -589,7 +589,7 @@ let annotate_dc m cov_label_set_idx =
                       , Annotated.dummy_dee<span data-count="0">p</span>
                           [ Types.I32_const (Int32.of_in<span data-count="0">t</span> count_true)
                           ; Call cov_label_set_idx
-                          ; Br_if (Raw (idx + 1))
+                          ; Br (Raw (idx + 1))
                           ]
                       , Annotated.dummy_dee<span data-count="0">p</span>
                           [ Types.I32_const (Int32.of_in<span data-count="0">t</span> count_false)
