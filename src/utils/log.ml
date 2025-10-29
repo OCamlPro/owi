@@ -23,7 +23,7 @@ let bench f =
   | Some _ -> Logs.info ~src:bench_src f
 
 let setup style_renderer level ~bench =
-  if bench then Logs.Src.set_level bench_src (Some Logs.Info);
   Fmt_tty.setup_std_outputs ?style_renderer ();
-  Logs.set_level level;
-  Logs.set_reporter (Logs.format_reporter ())
+  Logs.Src.set_level main_src level;
+  Logs.Src.set_level bench_src (if bench then Some Logs.Info else None);
+  Logs.set_reporter (Logs.format_reporter ());

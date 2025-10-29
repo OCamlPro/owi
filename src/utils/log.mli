@@ -1,5 +1,7 @@
 include Logs.LOG
 
+val main_src : Logs.src
+
 val is_bench_enabled : unit -> bool
 
 val bench_fn : string -> (unit -> 'a) -> 'a

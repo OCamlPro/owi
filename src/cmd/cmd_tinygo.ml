@@ -26,7 +26,7 @@ let compile ~workspace ~out_file (files : Fpath.t list) : Fpath.t Result.t =
   in
 
   let err =
-    match Logs.level () with
+    match Logs.Src.level Log.main_src with
     | Some (Logs.Debug | Logs.Info) -> OS.Cmd.err_run_out
     | None | Some _ -> OS.Cmd.err_null
   in
