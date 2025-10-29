@@ -20,10 +20,11 @@ struct
             They identify one given symbolic execution trace. *)
     ; breadcrumbs : int list
     ; labels : (int * string) list
+    ; bench_stats : Benchmark.stats
     }
 
   let create num_symbols symbol_scopes pc memories tables globals breadcrumbs
-    labels =
+    labels bench_stats =
     { num_symbols
     ; symbol_scopes
     ; pc
@@ -32,6 +33,7 @@ struct
     ; globals
     ; breadcrumbs
     ; labels
+    ; bench_stats
     }
 
   let init () =
@@ -43,8 +45,11 @@ struct
     let globals = Symbolic_global.init () in
     let breadcrumbs = [] in
     let labels = [] in
+    let bench_stats : Benchmark.stats =
+      { solver_time = Atomic.make Mtime.Span.min_span }
+    in
     create num_symbols symbol_scopes pc memories tables globals breadcrumbs
-      labels
+      labels bench_stats
 
   let num_symbols t = t.num_symbols
 
@@ -61,6 +66,8 @@ struct
   let breadcrumbs t = t.breadcrumbs
 
   let labels t = t.labels
+
+  let bench_stats t = t.bench_stats
 
   let add_symbol t s =
     let open Symbol_scope in
@@ -97,10 +104,14 @@ struct
     ; globals
     ; breadcrumbs
     ; labels
+    ; bench_stats
     } =
     let memories = Memory.clone memories in
     let tables = Symbolic_table.clone tables in
     let globals = Symbolic_global.clone globals in
+    let bench_stats : Benchmark.stats =
+      { solver_time = bench_stats.solver_time }
+    in
     { num_symbols
     ; symbol_scopes
     ; pc
@@ -109,5 +120,6 @@ struct
     ; globals
     ; breadcrumbs
     ; labels
+    ; bench_stats
     }
 end
