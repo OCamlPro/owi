@@ -1,4 +1,4 @@
-  $ owi instrument forall.wat
+  $ owi instrument rac forall.wat
   $ cat forall.instrumented.wat
   (module
     (import "owi" "assert" (func $assert  (param i32)))
@@ -37,7 +37,7 @@
     )
     (start 2)
   )
-  $ owi instrument forall.wat --symbolic
+  $ owi instrument rac forall.wat --symbolic
   $ cat forall.instrumented.wat
   (module
     (import "owi" "assert" (func $assert  (param i32)))

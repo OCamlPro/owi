@@ -1,4 +1,4 @@
-  $ owi instrument sum.wat
+  $ owi instrument rac sum.wat
   $ cat sum.instrumented.wat
   (module
     (import "owi" "assert" (func $assert  (param i32)))
@@ -45,7 +45,7 @@
     )
     (start 2)
   )
-  $ owi instrument sum.wat --symbolic
+  $ owi instrument rac sum.wat --symbolic
   $ cat sum.instrumented.wat
   (module
     (import "owi" "assert" (func $assert  (param i32)))

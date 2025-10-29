@@ -3,7 +3,7 @@
 Weasel stands for WEbAssembly Specification Language, it can be used to annotate Webassembly text modules in [custom annotation](https://github.com/WebAssembly/annotations). Annotated modules can be instrumented to perform runtime assertion checking thanks to owi's code generator.
 
 Commands and options related to Weasel:
-- `owi instrument` to instrument an annotated text module.
+- `owi instrument rac` to instrument an annotated text module.
 - `--rac` for `run`, `sym` and `conc` to instrument an annotated text module and perform runtime assertion checking.
 - `--srac` for `sym` and `conc` to instrument an annotated text module and perform runtime assertion checking symbolically.
 
@@ -42,10 +42,10 @@ With Weasel, we can annotate this function by specifying its postconditions:
 )
 ```
 
-`owi instrument` generates a new wrapper function checking this postcondition:
+`owi instrument rac` generates a new wrapper function checking this postcondition:
 
 ```sh
-$ owi instrument plus_three.wat
+$ owi instrument rac plus_three.wat
 $ cat plus_three.instrumented.wat
 (module
   (import "owi" "assert" (func $assert  (param i32)))
