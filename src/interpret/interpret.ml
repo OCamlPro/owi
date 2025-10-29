@@ -812,7 +812,7 @@ module Make (P : Interpret_intf.P) :
     Log.info (fun m ->
       m "running instr : %a" (Types.pp_instr ~short:true) instr.Annotated.raw );
     let* () =
-      match Logs.level () with
+      match Logs.Src.level Log.main_src with
       | Some Logs.Debug ->
         let+ pc = Choice.get_pc () in
         Log.debug (fun m ->

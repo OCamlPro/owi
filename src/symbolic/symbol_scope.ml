@@ -42,8 +42,8 @@ let get_value model sym =
 
 let to_scfg ~no_value model scope_tokens =
   let open Scfg.Types in
-  let open Smtml in
   let symbol_to_scfg symbol =
+    let open Smtml in
     let p0 = Symbol.to_string symbol in
     let p1 = Symbol.type_of symbol |> Ty.string_of_type in
     let params =
@@ -94,7 +94,7 @@ let to_scfg ~no_value model scope_tokens =
   in
 
   let rev_scope_tokens = List.rev scope_tokens in
-  Log.debug (fun m -> m "Current scope tokens: [%a]" pp rev_scope_tokens);
+  Log.debug (fun m -> m "scope tokens: [%a]" pp rev_scope_tokens);
   let children = process_tokens rev_scope_tokens [] in
   [ { name = "model"; params = []; children } ]
 
@@ -159,7 +159,7 @@ let to_json ~no_value model scope_tokens =
   in
 
   let rev_scope_tokens = List.rev scope_tokens in
-  Log.debug (fun m -> m "Current scope tokens: [%a]" pp rev_scope_tokens);
+  Log.debug (fun m -> m "scope tokens: [%a]" pp rev_scope_tokens);
   let result = process_tokens rev_scope_tokens [] in
   `Assoc [ ("model", `List result) ]
 

@@ -112,7 +112,7 @@
   owi: [INFO] running instr : unreachable
   owi: [DEBUG] path condition: [ (i32.lt_u symbol_0 1) ]
   owi: [ERROR] Trap: unreachable
-  owi: [DEBUG] Current scope tokens: [symbol symbol_0]
+  owi: [DEBUG] scope tokens: [symbol symbol_0]
   model {
     symbol symbol_0 i32 0
   }

@@ -13,6 +13,9 @@ ARGUMENTS
            source file
 
 OPTIONS
+       --bench
+           enable benchmarks
+
        --color=WHEN (absent=auto)
            Colorize the output. WHEN must be one of auto, always or never.
 
@@ -83,9 +86,6 @@ OPTIONS
 
        --with-breadcrumbs
            add breadcrumbs to the generated model
-
-       --with-timings
-           show timings for some execution cycles
 
        --workspace=DIR
            write results and intermediate compilation artifacts to dir

@@ -23,7 +23,7 @@ let eacsl_instrument eacsl ~includes (files : Fpath.t list) :
       in
 
       let framac_verbosity_level =
-        match Logs.level () with
+        match Logs.Src.level Log.main_src with
         | Some (Logs.Debug | Logs.Info) -> "2"
         | None | Some _ -> "0"
       in
@@ -57,7 +57,7 @@ let eacsl_instrument eacsl ~includes (files : Fpath.t list) :
     in
 
     let err =
-      match Logs.level () with
+      match Logs.Src.level Log.main_src with
       | Some (Logs.Debug | Logs.Info) -> OS.Cmd.err_run_out
       | None | Some _ -> OS.Cmd.err_null
     in
@@ -119,7 +119,7 @@ let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file
   let clang : Cmd.t = Cmd.(clang_bin %% flags % "-o" % p out %% files) in
 
   let err =
-    match Logs.level () with
+    match Logs.Src.level Log.main_src with
     | Some (Logs.Debug | Logs.Info) -> OS.Cmd.err_run_out
     | None | Some _ -> OS.Cmd.err_null
   in
