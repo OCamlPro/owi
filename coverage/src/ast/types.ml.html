@@ -1782,7 +1782,7 @@ type text = &lt; with_string_indices ; with_ind_bt &gt;
 
 type binary = &lt; without_string_indices ; without_ind_bt &gt;
 
-let sp ppf () = <span data-count="511">F</span>mt.char ppf ' '
+let sp ppf () = <span data-count="514">F</span>mt.char ppf ' '
 
 (* identifiers *)
 
@@ -1790,12 +1790,12 @@ type _ indice =
   | Text : string -&gt; &lt; with_string_indices ; .. &gt; indice
   | Raw : int -&gt; &lt; .. &gt; indice
 
-let pp_id fmt id = <span data-count="467">p</span>f fmt "$%s" id
+let pp_id fmt id = <span data-count="470">p</span>f fmt "$%s" id
 
-let pp_id_opt fmt = function <span data-count="951">N</span>one -&gt; () | <span data-count="328">S</span>ome i -&gt; pf fmt " %a" pp_id i
+let pp_id_opt fmt = function <span data-count="972">N</span>one -&gt; () | <span data-count="331">S</span>ome i -&gt; pf fmt " %a" pp_id i
 
 let pp_indice (type kind) fmt : kind indice -&gt; unit = function
-  | <span data-count="914">R</span>aw u -&gt; int fmt u
+  | <span data-count="924">R</span>aw u -&gt; int fmt u
   | <span data-count="139">T</span>ext i -&gt; pp_id fmt i
 
 let compare_indice (type a) (id1 : a indice) (id2 : a indice) =
@@ -1819,26 +1819,26 @@ type nonrec num_type =
   | V128
 
 let pp_num_type fmt = function
-  | <span data-count="2572">I</span>32 -&gt; pf fmt "i32"
+  | <span data-count="2584">I</span>32 -&gt; pf fmt "i32"
   | <span data-count="503">I</span>64 -&gt; pf fmt "i64"
   | <span data-count="508">F</span>32 -&gt; pf fmt "f32"
   | <span data-count="357">F</span>64 -&gt; pf fmt "f64"
   | <span data-count="0">V</span>128 -&gt; pf fmt "v128"
 
 let num_type_eq t1 t2 =
-  <span data-count="1624474">m</span>atch (t1, t2) with
-  | <span data-count="1488908">I</span>32, I32 | <span data-count="45098">I</span>64, I64 | <span data-count="44953">F</span>32, F32 | <span data-count="45096">F</span>64, F64 | <span data-count="394">V</span>128, V128 -&gt; true
+  <span data-count="1624283">m</span>atch (t1, t2) with
+  | <span data-count="1488719">I</span>32, I32 | <span data-count="45097">I</span>64, I64 | <span data-count="44952">F</span>32, F32 | <span data-count="45095">F</span>64, F64 | <span data-count="394">V</span>128, V128 -&gt; true
   | <span data-count="25">(</span><span data-count="10">I</span>32 | <span data-count="6">I</span>64 | <span data-count="5">F</span>32 | <span data-count="4">F</span>64 | <span data-count="0">V</span>128), _ -&gt; false
 
 let compare_num_type t1 t2 =
-  <span data-count="32527">l</span>et to_int = function
-    | <span data-count="37431">I</span>32 -&gt; 0
+  <span data-count="32530">l</span>et to_int = function
+    | <span data-count="37437">I</span>32 -&gt; 0
     | <span data-count="9526">I</span>64 -&gt; 1
     | <span data-count="8083">F</span>32 -&gt; 2
     | <span data-count="9362">F</span>64 -&gt; 3
     | <span data-count="652">V</span>128 -&gt; 4
   in
-  compare (to_in<span data-count="32527">t</span> t1) (to_in<span data-count="32527">t</span> t2)
+  compare (to_in<span data-count="32530">t</span> t1) (to_in<span data-count="32530">t</span> t2)
 
 type nullable =
   | No_null
@@ -1862,7 +1862,7 @@ type nonrec nn =
   | S32
   | S64
 
-let pp_nn fmt = function <span data-count="424">S</span>32 -&gt; pf fmt "32" | <span data-count="12">S</span>64 -&gt; pf fmt "64"
+let pp_nn fmt = function <span data-count="427">S</span>32 -&gt; pf fmt "32" | <span data-count="12">S</span>64 -&gt; pf fmt "64"
 
 type nonrec ishape =
   | I8x16
@@ -1939,7 +1939,7 @@ type nonrec ibinop =
 let pp_ibinop fmt = function
   | <span data-count="141">(</span>Add : ibinop) -&gt; pf fmt "add"
   | <span data-count="15">S</span>ub -&gt; pf fmt "sub"
-  | <span data-count="16">M</span>ul -&gt; pf fmt "mul"
+  | <span data-count="19">M</span>ul -&gt; pf fmt "mul"
   | <span data-count="6">D</span>iv s -&gt; pf fmt "div_%a" pp_sx s
   | <span data-count="6">R</span>em s -&gt; pf fmt "rem_%a" pp_sx s
   | <span data-count="28">A</span>nd -&gt; pf fmt "and"
@@ -2050,8 +2050,8 @@ let pp_heap_type_short fmt = function
 
 let heap_type_eq t1 t2 =
   (* TODO: this is wrong *)
-  <span data-count="5875">m</span>atch (t1, t2) with
-  | <span data-count="5837">F</span>unc_ht, Func_ht | <span data-count="23">E</span>xtern_ht, Extern_ht -&gt; true
+  <span data-count="5101">m</span>atch (t1, t2) with
+  | <span data-count="5063">F</span>unc_ht, Func_ht | <span data-count="23">E</span>xtern_ht, Extern_ht -&gt; true
   | <span data-count="15">_</span>, _ -&gt; false
 
 let compare_heap_type t1 t2 =
@@ -2083,64 +2083,64 @@ type nonrec 'a val_type =
   | Ref_type of 'a ref_type
 
 let pp_val_type fmt = function
-  | <span data-count="549">N</span>um_type t -&gt; pp_num_type fmt t
+  | <span data-count="561">N</span>um_type t -&gt; pp_num_type fmt t
   | <span data-count="0">R</span>ef_type t -&gt; pp_ref_type fmt t
 
 let val_type_eq t1 t2 =
-  <span data-count="1623047">m</span>atch (t1, t2) with
-  | <span data-count="1623034">N</span>um_type t1, Num_type t2 -&gt; num_type_eq t1 t2
+  <span data-count="1623077">m</span>atch (t1, t2) with
+  | <span data-count="1623064">N</span>um_type t1, Num_type t2 -&gt; num_type_eq t1 t2
   | <span data-count="13">R</span>ef_type t1, Ref_type t2 -&gt; ref_type_eq t1 t2
   | <span data-count="0">_</span>, _ -&gt; false
 
 let compare_val_type t1 t2 =
-  <span data-count="32905">m</span>atch (t1, t2) with
-  | <span data-count="32527">N</span>um_type t1, Num_type t2 -&gt; compare_num_type t1 t2
+  <span data-count="32908">m</span>atch (t1, t2) with
+  | <span data-count="32530">N</span>um_type t1, Num_type t2 -&gt; compare_num_type t1 t2
   | <span data-count="104">R</span>ef_type t1, Ref_type t2 -&gt; compare_ref_type t1 t2
   | <span data-count="210">N</span>um_type _, _ -&gt; 1
   | <span data-count="64">R</span>ef_type _, _ -&gt; -1
 
 type nonrec 'a param = string option * 'a val_type
 
-let pp_param fmt (id, vt) = <span data-count="297">p</span>f fmt "(param%a %a)" pp_id_opt id pp_val_type vt
+let pp_param fmt (id, vt) = <span data-count="303">p</span>f fmt "(param%a %a)" pp_id_opt id pp_val_type vt
 
-let param_eq (_, t1) (_, t2) = <span data-count="814941">v</span>al_type_eq t1 t2
+let param_eq (_, t1) (_, t2) = <span data-count="814963">v</span>al_type_eq t1 t2
 
 let compare_param (_, t1) (_, t2) = <span data-count="18525">c</span>ompare_val_type t1 t2
 
 type nonrec 'a param_type = 'a param list
 
-let pp_param_type fmt params = <span data-count="158">l</span>ist ~sep:sp pp_param fmt params
+let pp_param_type fmt params = <span data-count="161">l</span>ist ~sep:sp pp_param fmt params
 
-let param_type_eq t1 t2 = <span data-count="814375">L</span>ist.equal param_eq t1 t2
+let param_type_eq t1 t2 = <span data-count="814383">L</span>ist.equal param_eq t1 t2
 
-let compare_param_type t1 t2 = <span data-count="41072">L</span>ist.compare compare_param t1 t2
+let compare_param_type t1 t2 = <span data-count="41090">L</span>ist.compare compare_param t1 t2
 
 type nonrec 'a result_type = 'a val_type list
 
-let pp_result_ fmt vt = <span data-count="157">p</span>f fmt "(result %a)" pp_val_type vt
+let pp_result_ fmt vt = <span data-count="163">p</span>f fmt "(result %a)" pp_val_type vt
 
-let pp_result_type fmt results = <span data-count="157">l</span>ist ~sep:sp pp_result_ fmt results
+let pp_result_type fmt results = <span data-count="163">l</span>ist ~sep:sp pp_result_ fmt results
 
-let result_type_eq t1 t2 = <span data-count="814262">L</span>ist.equal val_type_eq t1 t2
+let result_type_eq t1 t2 = <span data-count="814272">L</span>ist.equal val_type_eq t1 t2
 
-let compare_result_type t1 t2 = <span data-count="22175">L</span>ist.compare compare_val_type t1 t2
+let compare_result_type t1 t2 = <span data-count="22193">L</span>ist.compare compare_val_type t1 t2
 
 (* wrap printer to print a space before a non empty list *)
 (* TODO or make it an optional arg of pp_list? *)
 let with_space_list printer fmt l =
-  <span data-count="907">m</span>atch l with <span data-count="542">[</span>] -&gt; () | <span data-count="365">_</span>l -&gt; pf fmt " %a" printer l
+  <span data-count="940">m</span>atch l with <span data-count="566">[</span>] -&gt; () | <span data-count="374">_</span>l -&gt; pf fmt " %a" printer l
 
 type nonrec 'a func_type = 'a param_type * 'a result_type
 
 let pp_func_type fmt (params, results) =
-  <span data-count="83">p</span>f fmt "(func%a%a)"
-    (with_space_lis<span data-count="83">t</span> pp_param_type)
+  <span data-count="89">p</span>f fmt "(func%a%a)"
+    (with_space_lis<span data-count="89">t</span> pp_param_type)
     params
-    (with_space_lis<span data-count="83">t</span> pp_result_type)
+    (with_space_lis<span data-count="89">t</span> pp_result_type)
     results
 
 let func_type_eq (pt1, rt1) (pt2, rt2) =
-  <span data-count="814375">p</span>aram_type_e<span data-count="814375">q</span> pt1 pt2 &amp;&amp; <span data-count="814262">r</span>esult_type_eq rt1 rt2
+  <span data-count="814385">p</span>aram_type_e<span data-count="814385">q</span> pt1 pt2 &amp;&amp; <span data-count="814272">r</span>esult_type_eq rt1 rt2
 
 (* TODO: add a third case that only has (pt * rt) and is the only one used in simplified *)
 type 'a block_type =
@@ -2149,20 +2149,20 @@ type 'a block_type =
 
 let pp_block_type (type kind) fmt : kind block_type -&gt; unit = function
   | <span data-count="3">B</span>t_ind ind -&gt; pf fmt "(type %a)" pp_indice ind
-  | <span data-count="261">B</span>t_raw (_ind, (pt, rt)) -&gt;
+  | <span data-count="270">B</span>t_raw (_ind, (pt, rt)) -&gt;
     pf fmt "%a%a"
-      (with_space_lis<span data-count="261">t</span> pp_param_type)
+      (with_space_lis<span data-count="270">t</span> pp_param_type)
       pt
-      (with_space_lis<span data-count="261">t</span> pp_result_type)
+      (with_space_lis<span data-count="270">t</span> pp_result_type)
       rt
 
 let pp_block_type_opt fmt = function
   | <span data-count="34">N</span>one -&gt; ()
-  | <span data-count="28">S</span>ome bt -&gt; pp_block_type fmt bt
+  | <span data-count="31">S</span>ome bt -&gt; pp_block_type fmt bt
 
 let compare_func_type (pt1, rt1) (pt2, rt2) =
-  <span data-count="41072">l</span>et pt = compare_param_type pt1 pt2 in
-  <span data-count="41072">i</span>f pt = 0 then <span data-count="22175">c</span>ompare_result_type rt1 rt2 else <span data-count="18897">p</span>t
+  <span data-count="41090">l</span>et pt = compare_param_type pt1 pt2 in
+  <span data-count="41090">i</span>f pt = 0 then <span data-count="22193">c</span>ompare_result_type rt1 rt2 else <span data-count="18897">p</span>t
 
 type nonrec 'a table_type = limits * 'a ref_type
 
@@ -2276,17 +2276,17 @@ type 'a instr =
 
 and 'a expr = 'a instr Annotated.t list
 
-let pp_newline ppf () = <span data-count="1555">p</span>f ppf "@\n"
+let pp_newline ppf () = <span data-count="1596">p</span>f ppf "@\n"
 
 let rec pp_instr ~short fmt = function
-  | <span data-count="490">I</span>32_const i -&gt; pf fmt "i32.const %ld" i
+  | <span data-count="512">I</span>32_const i -&gt; pf fmt "i32.const %ld" i
   | <span data-count="42">I</span>64_const i -&gt; pf fmt "i64.const %Ld" i
   | <span data-count="33">F</span>32_const f -&gt; pf fmt "f32.const %a" Float32.pp f
   | <span data-count="2">F</span>64_const f -&gt; pf fmt "f64.const %a" Float64.pp f
   | <span data-count="0">V</span>128_const f -&gt; pf fmt "v128.const %a" V128.pp f
   | <span data-count="7">I</span>_unop (n, op) -&gt; pf fmt "i%a.%a" pp_nn n pp_iunop op
   | <span data-count="0">F</span>_unop (n, op) -&gt; pf fmt "f%a.%a" pp_nn n pp_funop op
-  | <span data-count="257">I</span>_binop (n, op) -&gt; pf fmt "i%a.%a" pp_nn n pp_ibinop op
+  | <span data-count="260">I</span>_binop (n, op) -&gt; pf fmt "i%a.%a" pp_nn n pp_ibinop op
   | <span data-count="3">F</span>_binop (n, op) -&gt; pf fmt "f%a.%a" pp_nn n pp_fbinop op
   | <span data-count="0">V</span>_ibinop (shape, op) -&gt; pf fmt "%a.%a" pp_ishape shape pp_vibinop op
   | <span data-count="25">I</span>_testop (n, op) -&gt; pf fmt "i%a.%a" pp_nn n pp_itestop op
@@ -2350,7 +2350,7 @@ let rec pp_instr ~short fmt = function
   | <span data-count="1">M</span>emory_init id -&gt; pf fmt "memory.init %a" pp_indice id
   | <span data-count="1">D</span>ata_drop id -&gt; pf fmt "data.drop %a" pp_indice id
   | <span data-count="2">N</span>op -&gt; pf fmt "nop"
-  | <span data-count="11">U</span>nreachable -&gt; pf fmt "unreachable"
+  | <span data-count="14">U</span>nreachable -&gt; pf fmt "unreachable"
   | <span data-count="21">B</span>lock (id, bt, e) -&gt;
     if short then <span data-count="3">p</span>f fmt "block%a%a" pp_id_opt id pp_block_type_opt bt
     else
@@ -2361,17 +2361,17 @@ let rec pp_instr ~short fmt = function
     else
       <span data-count="7">p</span>f fmt "(loop%a%a@\n  @[&lt;v&gt;%a@])" pp_id_opt id pp_block_type_opt bt
         (pp_expr ~short) e
-  | <span data-count="30">I</span>f_else (id, bt, e1, e2) -&gt;
+  | <span data-count="33">I</span>f_else (id, bt, e1, e2) -&gt;
     let pp_else fmt e =
-      <span data-count="17">A</span>nnotated.iter
+      <span data-count="20">A</span>nnotated.iter
         (function
           | <span data-count="12">[</span>] -&gt; ()
-          | <span data-count="5">_</span> -&gt; pf fmt "@\n(else@\n  @[&lt;v&gt;%a@]@\n)" (pp_expr ~short) e )
+          | <span data-count="8">_</span> -&gt; pf fmt "@\n(else@\n  @[&lt;v&gt;%a@]@\n)" (pp_expr ~short) e )
         e
     in
     if short then <span data-count="13">p</span>f fmt "if%a%a" pp_id_opt id pp_block_type_opt bt
     else
-      <span data-count="17">p</span>f fmt "(if%a%a@\n  @[&lt;v&gt;(then@\n  @[&lt;v&gt;%a@]@\n)%a@]@\n)" pp_id_opt id
+      <span data-count="20">p</span>f fmt "(if%a%a@\n  @[&lt;v&gt;(then@\n  @[&lt;v&gt;%a@]@\n)%a@]@\n)" pp_id_opt id
         pp_block_type_opt bt (pp_expr ~short) e1 pp_else e2
   | <span data-count="8">B</span>r id -&gt; pf fmt "br %a" pp_indice id
   | <span data-count="53">B</span>r_if id -&gt; pf fmt "br_if %a" pp_indice id
@@ -2382,7 +2382,7 @@ let rec pp_instr ~short fmt = function
   | <span data-count="0">R</span>eturn_call_indirect (tbl_id, ty_id) -&gt;
     pf fmt "return_call_indirect %a %a" pp_indice tbl_id pp_block_type ty_id
   | <span data-count="0">R</span>eturn_call_ref ty_id -&gt; pf fmt "return_call_ref %a" pp_block_type ty_id
-  | <span data-count="162">C</span>all id -&gt; pf fmt "call %a" pp_indice id
+  | <span data-count="172">C</span>all id -&gt; pf fmt "call %a" pp_indice id
   | <span data-count="5">C</span>all_indirect (tbl_id, ty_id) -&gt;
     pf fmt "call_indirect %a %a" pp_indice tbl_id pp_block_type ty_id
   | <span data-count="0">C</span>all_ref ty_id -&gt; pf fmt "call_ref %a" pp_indice ty_id
@@ -2390,10 +2390,10 @@ let rec pp_instr ~short fmt = function
   | <span data-count="0">E</span>xtern_internalize -&gt; pf fmt "extern.internalize"
 
 and pp_expr ~short fmt instrs =
-  <span data-count="281">A</span>nnotated.iter
+  <span data-count="290">A</span>nnotated.iter
     (fun instrs -&gt;
-      <span data-count="281">l</span>ist ~sep:pp_newline
-        (fun fmt i -&gt; <span data-count="1094">A</span>nnotated.iter (pp_inst<span data-count="1094">r</span> ~short fmt) i)
+      <span data-count="290">l</span>ist ~sep:pp_newline
+        (fun fmt i -&gt; <span data-count="1135">A</span>nnotated.iter (pp_inst<span data-count="1135">r</span> ~short fmt) i)
         fmt instrs )
     instrs
 
@@ -2467,8 +2467,8 @@ let pp_locals fmt locals = <span data-count="50">l</span>ist ~sep:sp pp_local fm
 let pp_func : type kind. Format.formatter -&gt; kind func -&gt; unit =
  fun fmt f -&gt;
   (* TODO: typeuse ? *)
-  <span data-count="219">p</span>f fmt "(func%a%a%a@\n  @[&lt;v&gt;%a@]@\n)" pp_id_opt f.id pp_block_type f.type_f
-    (with_space_lis<span data-count="219">t</span> pp_locals)
+  <span data-count="222">p</span>f fmt "(func%a%a%a@\n  @[&lt;v&gt;%a@]@\n)" pp_id_opt f.id pp_block_type f.type_f
+    (with_space_lis<span data-count="222">t</span> pp_locals)
     f.locals (pp_expr ~short:false) f.body
 
 let pp_funcs fmt (funcs : 'a func list) = <span data-count="0">l</span>ist ~sep:pp_newline pp_func fmt funcs
@@ -2488,7 +2488,7 @@ type 'a import_desc =
   | Import_global of string option * 'a global_type
 
 let import_desc fmt : 'a import_desc -&gt; Unit.t = function
-  | <span data-count="10">I</span>mport_func (id, t) -&gt; pf fmt "(func%a %a)" pp_id_opt id pp_block_type t
+  | <span data-count="13">I</span>mport_func (id, t) -&gt; pf fmt "(func%a %a)" pp_id_opt id pp_block_type t
   | <span data-count="0">I</span>mport_table (id, t) -&gt; pf fmt "(table%a %a)" pp_id_opt id pp_table_type t
   | <span data-count="0">I</span>mport_mem (id, t) -&gt; pf fmt "(memory%a %a)" pp_id_opt id pp_limits t
   | <span data-count="0">I</span>mport_global (id, t) -&gt;
@@ -2504,7 +2504,7 @@ type 'a import =
   }
 
 let pp_import fmt i =
-  <span data-count="10">p</span>f fmt {|(import "%a" "%a" %a)|} string i.modul string i.name import_desc
+  <span data-count="13">p</span>f fmt {|(import "%a" "%a" %a)|} string i.modul string i.name import_desc
     i.desc
 
 type 'a export_desc =
@@ -2529,7 +2529,7 @@ let pp_export fmt (e : text export) =
 
 type 'a type_def = string option * 'a func_type
 
-let pp_type_def fmt (id, t) = <span data-count="79">p</span>f fmt "(type%a %a)" pp_id_opt id pp_func_type t
+let pp_type_def fmt (id, t) = <span data-count="85">p</span>f fmt "(type%a %a)" pp_id_opt id pp_func_type t
 
 let type_def_eq (id1, t1) (id2, t2) =
   <span data-count="102">O</span>ption.equa<span data-count="102">l</span> String.equal id1 id2 &amp;&amp; <span data-count="102">f</span>unc_type_eq t1 t2

@@ -1321,21 +1321,21 @@ let modul (ls : 'f state) ~name (modul : Binary.Module.t) =
 
 let extern_module' (ls : 'f state) ~name ~(func_typ : 'f -&gt; binary func_type)
   (module_ : 'f extern_module) =
-  <span data-count="2002">l</span>et functions, collection =
+  <span data-count="2009">l</span>et functions, collection =
     List.fold_left
       (fun (functions, collection) (name, func) -&gt;
-        <span data-count="15496">l</span>et typ = func_typ func in
-        <span data-count="15496">l</span>et id, collection = Func_id.add func typ collection in
-        <span data-count="15496">(</span>(name, Func_intf.Extern id) :: functions, collection) )
+        <span data-count="15549">l</span>et typ = func_typ func in
+        <span data-count="15549">l</span>et id, collection = Func_id.add func typ collection in
+        <span data-count="15549">(</span>(name, Func_intf.Extern id) :: functions, collection) )
       ([], ls.collection) module_.functions
   in
-  <span data-count="2002">l</span>et functions = StringMap.of_seq (List.to_se<span data-count="2002">q</span> functions) in
-  <span data-count="2002">l</span>et defined_names =
+  <span data-count="2009">l</span>et functions = StringMap.of_seq (List.to_se<span data-count="2009">q</span> functions) in
+  <span data-count="2009">l</span>et defined_names =
     StringMap.fold
-      (fun name _ set -&gt; <span data-count="15496">S</span>tringSet.add name set)
+      (fun name _ set -&gt; <span data-count="15549">S</span>tringSet.add name set)
       functions StringSet.empty
   in
-  <span data-count="2002">l</span>et exports =
+  <span data-count="2009">l</span>et exports =
     { functions
     ; globals = StringMap.empty
     ; memories = StringMap.empty
@@ -1343,10 +1343,10 @@ let extern_module' (ls : 'f state) ~name ~(func_typ : 'f -&gt; binary func_type)
     ; defined_names
     }
   in
-  { ls with by_name = StringMap.ad<span data-count="2002">d</span> name exports ls.by_name; collection }
+  { ls with by_name = StringMap.ad<span data-count="2009">d</span> name exports ls.by_name; collection }
 
 let extern_module ls ~name modul =
-  <span data-count="1021">e</span>xtern_module' ls ~name ~func_typ:Concrete_extern_func.extern_type modul
+  <span data-count="1024">e</span>xtern_module' ls ~name ~func_typ:Concrete_extern_func.extern_type modul
 
 let register_module (ls : 'f state) ~name ~(id : string option) :
   'f state Result.t =

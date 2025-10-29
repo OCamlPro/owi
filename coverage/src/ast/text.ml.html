@@ -459,13 +459,13 @@
 open Fmt
 open Types
 
-let symbolic v = <span data-count="9139">T</span>ext v
+let symbolic v = <span data-count="9142">T</span>ext v
 
-let raw v = <span data-count="31418">R</span>aw v
+let raw v = <span data-count="31421">R</span>aw v
 
-let bt_ind i = <span data-count="7990">B</span>t_ind i
+let bt_ind i = <span data-count="7993">B</span>t_ind i
 
-let bt_raw i t = <span data-count="9044">B</span>t_raw (i, t)
+let bt_raw i t = <span data-count="9050">B</span>t_raw (i, t)
 
 type global =
   { typ : text global_type
@@ -537,15 +537,15 @@ type module_field =
   | MExport of text export
 
 let pp_module_field fmt = function
-  | <span data-count="79">M</span>Type t -&gt; pp_type_def fmt t
+  | <span data-count="85">M</span>Type t -&gt; pp_type_def fmt t
   | <span data-count="6">M</span>Global g -&gt; pp_global fmt g
   | <span data-count="4">M</span>Table t -&gt; pp_table fmt t
   | <span data-count="13">M</span>Mem m -&gt; pp_mem fmt m
-  | <span data-count="217">M</span>Func f -&gt; pp_func fmt f
+  | <span data-count="220">M</span>Func f -&gt; pp_func fmt f
   | <span data-count="4">M</span>Elem e -&gt; pp_elem fmt e
   | <span data-count="1">M</span>Data d -&gt; pp_data fmt d
   | <span data-count="31">M</span>Start s -&gt; pp_start fmt s
-  | <span data-count="10">M</span>Import i -&gt; pp_import fmt i
+  | <span data-count="13">M</span>Import i -&gt; pp_import fmt i
   | <span data-count="33">M</span>Export e -&gt; pp_export fmt e
 
 type modul =
@@ -555,10 +555,10 @@ type modul =
   }
 
 let pp_modul fmt (m : modul) =
-  <span data-count="117">p</span>f fmt "%a(module%a@\n  @[&lt;v&gt;%a@]@\n)"
-    (lis<span data-count="117">t</span> ~sep:pp_newline Annot.pp_annot)
+  <span data-count="120">p</span>f fmt "%a(module%a@\n  @[&lt;v&gt;%a@]@\n)"
+    (lis<span data-count="120">t</span> ~sep:pp_newline Annot.pp_annot)
     m.annots pp_id_opt m.id
-    (lis<span data-count="117">t</span> ~sep:pp_newline pp_module_field)
+    (lis<span data-count="120">t</span> ~sep:pp_newline pp_module_field)
     m.fields
 
 type action =

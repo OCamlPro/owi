@@ -271,8 +271,7 @@ $ dune install
 <tr><td>Astrée</td><td>C, C++</td><td>Yes</td><td>Yes</td><td>No</td><td>Yes</td><td>Yes</td><td>No</td><td>Proprietary</td><td>Abstract Interpretation</td></tr>
 <tr><td>Mopsa</td><td>C, Python3</td><td>Yes</td><td>Yes</td><td>No</td><td>Yes</td><td>Yes</td><td>No</td><td>Free</td><td>Abstract Interpretation</td></tr>
 </tbody></table>
-</div><div style="break-before: page; page-break-before: always;"></div><h1 id="overview"><a class="header" href="#overview">Overview</a></h1>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="symbolic-execution-101"><a class="header" href="#symbolic-execution-101">Symbolic Execution 101</a></h1>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="symbolic-execution-101"><a class="header" href="#symbolic-execution-101">Symbolic Execution 101</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="quickstart"><a class="header" href="#quickstart">Quickstart</a></h1>
 <h2 id="finding-a-crash-in-a-function"><a class="header" href="#finding-a-crash-in-a-function">Finding a crash in a function</a></h2>
 <p>Let's say you wrote a function <code>f</code> and want to check if it can crash for some input. The function could for instance be the following one (choose your programming language to get a specialized example):</p>
@@ -679,9 +678,7 @@ owi: [ERROR] Reached problem!
 </div>
 </div>
 <p>And indeed, in the <code>mean1</code> function, when using these values, there will be an overflow, leading to a wrong result.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="bug-finding-testing--pen-testing"><a class="header" href="#bug-finding-testing--pen-testing">Bug-Finding, Testing &amp; Pen-testing</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="examples-of-bug-finding"><a class="header" href="#examples-of-bug-finding">Examples of Bug Finding</a></h1>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="how-to-speed-it-up"><a class="header" href="#how-to-speed-it-up">How to Speed it Up</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="replaying-a-model"><a class="header" href="#replaying-a-model">Replaying a model</a></h1>
 <p>Let's say you found a bug and want to check what is going on with the concrete input it contains.
 The <code>replay</code> commands can help with that.</p>
@@ -853,12 +850,278 @@ owi: [INFO] Completed paths: 1
 owi: [ERROR] Reached problem!
 [13]
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="comparison-to-fuzzing-and-abstract-interpretation"><a class="header" href="#comparison-to-fuzzing-and-abstract-interpretation">Comparison to Fuzzing and Abstract Interpretation</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="bugs-found-by-owi"><a class="header" href="#bugs-found-by-owi">Bugs Found by Owi</a></h1>
 <ul>
 <li><a href="https://github.com/rust-lang/rust/pull/129321">Wrong neutral element of <code>&lt;fNN as iter::Sum&gt;</code> in the Rust standard library</a></li>
 </ul>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="solver-aided-programming"><a class="header" href="#solver-aided-programming">Solver-Aided Programming</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="code-coverage-criteria"><a class="header" href="#code-coverage-criteria">Code Coverage Criteria</a></h1>
+<p>When we write tests for a codebase, it is common to wonder how good is the test-suite. One way to measure it is through <em>code coverage</em>. That is: how much how the code base is covered by the tests? Most of the time, this notion is not precise. Most tools measuring code coverage can give you a percentage of the coverage, without a clear definition.</p>
+<p>Yet there exists some precise definitions for various ways of measuring code coverage. They are called <em>code coverage criteria</em>.</p>
+<h2 id="function-coverage"><a class="header" href="#function-coverage">Function Coverage</a></h2>
+<p>The easiest one is called <em>function coverage</em> (FC). It measure the percentage of the functions of your programs that are called by the test-suite. For instance, if your whole code base has only two functions, and in your test-suite, only one of them gets execution, then it means you have a function coverage of 50%.</p>
+<h2 id="statement-coverage"><a class="header" href="#statement-coverage">Statement Coverage</a></h2>
+<p>This criteria (SC) measure the percentage of instructions of your program that are executed.</p>
+<h2 id="decision-coverage"><a class="header" href="#decision-coverage">Decision Coverage</a></h2>
+<p>This criteria (DC) measure the percentage of decisions covered for you test-suite. For instance, if you have some code looking like the following:</p>
+<pre><code class="language-c">void f(int x) {
+  if (x) {
+    // A
+  } else {
+    // B
+  }
+}
+</code></pre>
+<p>When the conditional is reached, there are two possible decisions. If <code>x</code> is <code>true</code>, then, we execute <code>A</code>. If <code>x</code> is false, then, we execute <code>B</code>.</p>
+<h2 id="condition-coverage"><a class="header" href="#condition-coverage">Condition Coverage</a></h2>
+<p>This criteria (CC) ... TODO</p>
+<h2 id="todo"><a class="header" href="#todo">TODO</a></h2>
+<p>All the others (MC/DC)</p>
+<h2 id="todo-explain-that-there-is-a-correspondence-with-the-cfg-covering-nodes-versus-covering-edges-and-such"><a class="header" href="#todo-explain-that-there-is-a-correspondence-with-the-cfg-covering-nodes-versus-covering-edges-and-such">TODO: explain that there is a correspondence with the CFG (covering nodes versus covering edges and such)</a></h2>
+<h2 id="references"><a class="header" href="#references">References</a></h2>
+<p>TODO</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="labels"><a class="header" href="#labels">Labels</a></h1>
+<p>There exists many code coverage criteria. Having to implement a different mechanism for all of them is tedious. This is a problem solved by <code>labels</code>.</p>
+<p>Labels are annotations added to a program (often via an instrumentation pass). Each label correspond to a point that must be reached by the test-suite. The percentage of labels reached by the test-suite is the percentage of code coverage for the criteria that was chosen when adding labels.</p>
+<h2 id="example"><a class="header" href="#example">Example</a></h2>
+<p>For instance, if we are interested in the following program:</p>
+<pre><code class="language-c">void f(void) {
+  // A
+}
+
+void g(void) {
+  // B
+}
+</code></pre>
+<p>We could instrument the program to add labels for the FC criteria this way:</p>
+<pre><code class="language-c">void f(void) {
+  label_reached(0);
+  // A
+}
+
+void g(void) {
+  label_reached(1);
+  // B
+}
+</code></pre>
+<p>Then, by providing an appropriate definition of <code>label_reached</code> and knowing how many of them are in the program, we can count how many of them are reached by the test-suite by running it on the instrumented program. Then, we can compute the percentage of code coverage for the FC criteria.</p>
+<h2 id="labels-in-owi"><a class="header" href="#labels-in-owi">Labels in Owi</a></h2>
+<p>Owi has the ability to :</p>
+<ol>
+<li>Annotate a Wasm program with labels for a few criteria (see the <code>owi instrument label</code> sub-command).</li>
+<li>Generate tests for annotated programs in order to automatically get a high code coverage percentage (run your program with <code>owi sym instrumented.wasm</code>.</li>
+</ol>
+<p>TODO: complete example with more details on test-case generation</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="e-acsl"><a class="header" href="#e-acsl">E-ACSL</a></h1>
+<h1 id="combining-symbolic-execution-with-runtime-assertion-checking-rac"><a class="header" href="#combining-symbolic-execution-with-runtime-assertion-checking-rac">Combining symbolic execution with runtime assertion checking (RAC)</a></h1>
+<p>E-ACSL is a specification language of C codes, as well as a runtime assertion checking tool within Frama-C. It works by consuming a C program annotated with E-ACSL specifications, it generates a monitored C program which aborts its execution when the specified properties are violated at runtime.</p>
+<p>Generally, such a C program runs on concrete values. Yet we can combine symbolic execution with runtime assertion checking, in order to check the properties using symbolic values. This will lead to better coverage of potential execution paths and scenarios.</p>
+<h2 id="finding-primes"><a class="header" href="#finding-primes">Finding primes</a></h2>
+<p>Consider the following (faulty) function <code>primes</code>, it implements the algorithm of the <strong>Sieve of Eratosthenes</strong> to find all the prime numbers smaller than <code>n</code>:</p>
+<pre><code class="language-c">void primes(int *is_prime, int n) {
+    for (int i = 1; i &lt; n; ++i) is_prime[i] = 1;
+    for (int i = 2; i * i &lt; n; ++i) {
+        if (!is_prime[i]) continue;
+        for (int j = i; i * j &lt; n; ++j) {
+            is_prime[i * j] = 0;
+        }
+    }
+}
+</code></pre>
+<p>Initially, it marks each number as prime. It then marks as composite the multiples of each prime, iterating in an ascending order. If a number is still marked as prime at the point of iteration, then it does not admit a nontrivial factor and should be a prime.</p>
+<p>In order to verify the implementation, we annotate the function <code>primes</code> using the E-ACSL specification language. The annotations should be written immediately above the function and surrounded by <code>/*@ ... */</code>.</p>
+<pre><code class="language-c">#define MAX_SIZE 100
+
+/*@ requires 2 &lt;= n &lt;= MAX_SIZE;
+    requires \valid(is_prime + (0 .. (n - 1)));
+    ensures  \forall integer i; 0 &lt;= i &lt; n ==&gt;
+        (is_prime[i] &lt;==&gt;
+            (i &gt;= 2 &amp;&amp; \forall integer j; 2 &lt;= j &lt; i ==&gt; i % j != 0));
+*/
+void primes(int *is_prime, int n) {
+    for (int i = 0; i &lt; n; ++i) is_prime[i] = 1;
+    for (int i = 2; i * i &lt; n; ++i) {
+        if (!is_prime[i]) continue;
+        for (int j = i; i * j &lt; n; ++j) {
+            is_prime[i * j] = 0;
+        }
+    }
+}
+</code></pre>
+<p>Here, <code>requires</code> and <code>ensures</code> specify the pre-condition and post-condition of the function. The annotation means:</p>
+<ul>
+<li>When the function is called,
+<ul>
+<li>the argument <code>n</code> should be between <code>2</code> and <code>MAX_SIZE</code></li>
+<li>for all <code>i</code> between <code>0</code> and <code>n - 1</code>, <code>is_prime + i</code> should be memory locations safe to read and write</li>
+</ul>
+</li>
+<li>When the function returns,
+<ul>
+<li>for all <code>i</code> between <code>0</code> and <code>n - 1</code>, <code>is_prime[i]</code> evaluates to <code>true</code> if and only if <code>i</code> is larger than <code>2</code> and does not have a factor between <code>2</code> and <code>i - 1</code> (which indicates the primality of <code>i</code>)</li>
+</ul>
+</li>
+</ul>
+<p>We can then call the function with symbolic values and see what happens. We should pass the option <code>--e-acsl</code> to let owi invoke the E-ACSL plugin.</p>
+<!-- $MDX file=primes.c -->
+<pre><code class="language-c">#define MAX_SIZE 100
+
+#include &lt;owi.h&gt;
+#include &lt;stdlib.h&gt;
+
+/*@ requires 2 &lt;= n &lt;= MAX_SIZE;
+    requires \valid(is_prime + (0 .. (n - 1)));
+    ensures  \forall integer i; 0 &lt;= i &lt; n ==&gt;
+        (is_prime[i] &lt;==&gt;
+            (i &gt;= 2 &amp;&amp; \forall integer j; 2 &lt;= j &lt; i ==&gt; i % j != 0));
+*/
+void primes(int *is_prime, int n) {
+    for (int i = 0; i &lt; n; ++i) is_prime[i] = 1;
+    for (int i = 2; i * i &lt; n; ++i) {
+        if (!is_prime[i]) continue;
+        for (int j = i; i * j &lt; n; ++j) {
+            is_prime[i * j] = 0;
+        }
+    }
+}
+
+int main(void) {
+    int *is_prime;
+    is_prime = malloc(MAX_SIZE * sizeof(int));
+
+    int n = owi_int();
+    owi_assume(n &gt;= 2);
+    owi_assume(n &lt;= MAX_SIZE);
+
+    primes(is_prime, n);
+    free(is_prime);
+    return 0;
+}
+</code></pre>
+<pre><code class="language-sh">$ owi c --e-acsl primes.c -w1
+owi: [ERROR] Assert failure: false
+model {
+  symbol symbol_0 i32 2
+}
+owi: [ERROR] Reached problem!
+[13]
+</code></pre>
+<p>The execution got aborted because one of the specifications has been violated with <code>n = 2</code>. (The error message is not so informative for the time being, extra information aiding the diagnostic of errors may be added in the future.)</p>
+<p>The problem is that we should mark <code>0</code> and <code>1</code> as non-prime during the initialization. Let's fix it and rerun the program.</p>
+<!-- $MDX file=primes2.c -->
+<pre><code class="language-c">#define MAX_SIZE 100
+
+#include &lt;owi.h&gt;
+#include &lt;stdlib.h&gt;
+
+/*@ requires 2 &lt;= n &lt;= MAX_SIZE;
+    requires \valid(is_prime + (0 .. (n - 1)));
+    ensures  \forall integer i; 0 &lt;= i &lt; n ==&gt;
+        (is_prime[i] &lt;==&gt;
+            (i &gt;= 2 &amp;&amp; \forall integer j; 2 &lt;= j &lt; i ==&gt; i % j != 0));
+*/
+void primes(int *is_prime, int n) {
+    for (int i = 0; i &lt; n; ++i) is_prime[i] = 1;
+    is_prime[0] = is_prime[1] = 0;
+    for (int i = 2; i * i &lt; n; ++i) {
+        if (!is_prime[i]) continue;
+        for (int j = i; i * j &lt; n; ++j) {
+            is_prime[i * j] = 0;
+        }
+    }
+}
+
+int main(void) {
+    int *is_prime;
+    is_prime = malloc(MAX_SIZE * sizeof(int));
+
+    int n = owi_int();
+    owi_assume(n &gt;= 2);
+    owi_assume(n &lt;= MAX_SIZE);
+
+    primes(is_prime, n);
+    free(is_prime);
+    return 0;
+}
+</code></pre>
+<pre><code class="language-sh">$ owi c --e-acsl primes2.c -w1
+All OK!
+</code></pre>
+<p>All the specified properties have been satisfied during the execution.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="weasel"><a class="header" href="#weasel">Weasel</a></h1>
+<p>Weasel stands for WEbAssembly Specification Language, it can be used to annotate Webassembly text modules in <a href="https://github.com/WebAssembly/annotations">custom annotation</a>. Annotated modules can be instrumented to perform runtime assertion checking thanks to owi's code generator.</p>
+<p>Commands and options related to Weasel:</p>
+<ul>
+<li><code>owi instrument rac</code> to instrument an annotated text module.</li>
+<li><code>--rac</code> for <code>run</code>, <code>sym</code> and <code>conc</code> to instrument an annotated text module and perform runtime assertion checking.</li>
+<li><code>--srac</code> for <code>sym</code> and <code>conc</code> to instrument an annotated text module and perform runtime assertion checking symbolically.</li>
+</ul>
+<p>The formal specification of Weasel can be found in <code>src/annot/spec.ml</code>.</p>
+<h2 id="basic-example"><a class="header" href="#basic-example">Basic example</a></h2>
+<p>Suppose we have a function returning its parameter plus three:</p>
+<pre><code class="language-wast">(module
+  (;...;)
+  (func $plus_three (param $x i32) (result i32)
+    local.get $x
+    i32.const 3
+    i32.add
+  )
+  (;...;)
+)
+</code></pre>
+<p>With Weasel, we can annotate this function by specifying its postconditions:</p>
+<pre><code class="language-wast">(module
+  (;...;)
+  (@contract $plus_three
+    (ensures (= result (+ $x 3)))
+  )
+  (func $plus_three (param $x i32) (result i32)
+    local.get $x
+    i32.const 3
+    i32.add
+  )
+  (;...;)
+)
+</code></pre>
+<p><code>owi instrument rac</code> generates a new wrapper function checking this postcondition:</p>
+<pre><code class="language-sh">$ owi instrument rac plus_three.wat
+$ cat plus_three.instrumented.wat
+(module
+  (import "owi" "assert" (func $assert  (param i32)))
+  (type (func (param $x i32) (result i32)))
+  (type (func))
+  (type (func (param i32)))
+  (type (func (result i32)))
+  (func $plus_three (param $x i32) (result i32)
+    local.get 0
+    i32.const 3
+    i32.add
+  )
+  (func $start
+    i32.const 42
+    call 3
+    drop
+  )
+  (func $__weasel_plus_three (param $x i32) (result i32) (local $__weasel_temp i32) (local $__weasel_res_0 i32)
+    local.get 0
+    call 1
+    local.set 2
+    local.get 2
+    local.get 0
+    i32.const 3
+    i32.add
+    i32.eq
+    call 0
+    local.get 2
+  )
+  (start 2)
+)
+</code></pre>
+<p>We can perform runtime assertion checking either by <code>owi sym plus_three.instrumented.wat</code> or by <code>owi sym --rac plus_three.wat</code>.</p>
+<pre><code class="language-sh">$ owi sym plus_three.instrumented.wat
+All OK!
+$ owi sym --rac plus_three.wat
+All OK!
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="examples-of-problem-solving"><a class="header" href="#examples-of-problem-solving">Examples of Problem Solving</a></h1>
 <h2 id="solving-polynomials"><a class="header" href="#solving-polynomials">Solving polynomials</a></h2>
 <details>
@@ -1185,224 +1448,8 @@ model {
 owi: [ERROR] Reached problem!
 [13]
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="how-to-speed-it-up-1"><a class="header" href="#how-to-speed-it-up-1">How to Speed it Up</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="how-to-speed-it-up"><a class="header" href="#how-to-speed-it-up">How to Speed it Up</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="comparison-to-rosette-prolog-etc"><a class="header" href="#comparison-to-rosette-prolog-etc">Comparison to Rosette, Prolog, etc.</a></h1>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="test-case-generation"><a class="header" href="#test-case-generation">Test-Case Generation</a></h1>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="labels"><a class="header" href="#labels">Labels</a></h1>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="verification-and-proof-of-programs"><a class="header" href="#verification-and-proof-of-programs">Verification and Proof of Programs</a></h1>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="comparison-with-deductive-verification-and-abstract-interpretation"><a class="header" href="#comparison-with-deductive-verification-and-abstract-interpretation">Comparison with Deductive Verification and Abstract Interpretation</a></h1>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="e-acsl"><a class="header" href="#e-acsl">E-ACSL</a></h1>
-<h1 id="combining-symbolic-execution-with-runtime-assertion-checking-rac"><a class="header" href="#combining-symbolic-execution-with-runtime-assertion-checking-rac">Combining symbolic execution with runtime assertion checking (RAC)</a></h1>
-<p>E-ACSL is a specification language of C codes, as well as a runtime assertion checking tool within Frama-C. It works by consuming a C program annotated with E-ACSL specifications, it generates a monitored C program which aborts its execution when the specified properties are violated at runtime.</p>
-<p>Generally, such a C program runs on concrete values. Yet we can combine symbolic execution with runtime assertion checking, in order to check the properties using symbolic values. This will lead to better coverage of potential execution paths and scenarios.</p>
-<h2 id="finding-primes"><a class="header" href="#finding-primes">Finding primes</a></h2>
-<p>Consider the following (faulty) function <code>primes</code>, it implements the algorithm of the <strong>Sieve of Eratosthenes</strong> to find all the prime numbers smaller than <code>n</code>:</p>
-<pre><code class="language-c">void primes(int *is_prime, int n) {
-    for (int i = 1; i &lt; n; ++i) is_prime[i] = 1;
-    for (int i = 2; i * i &lt; n; ++i) {
-        if (!is_prime[i]) continue;
-        for (int j = i; i * j &lt; n; ++j) {
-            is_prime[i * j] = 0;
-        }
-    }
-}
-</code></pre>
-<p>Initially, it marks each number as prime. It then marks as composite the multiples of each prime, iterating in an ascending order. If a number is still marked as prime at the point of iteration, then it does not admit a nontrivial factor and should be a prime.</p>
-<p>In order to verify the implementation, we annotate the function <code>primes</code> using the E-ACSL specification language. The annotations should be written immediately above the function and surrounded by <code>/*@ ... */</code>.</p>
-<pre><code class="language-c">#define MAX_SIZE 100
-
-/*@ requires 2 &lt;= n &lt;= MAX_SIZE;
-    requires \valid(is_prime + (0 .. (n - 1)));
-    ensures  \forall integer i; 0 &lt;= i &lt; n ==&gt;
-        (is_prime[i] &lt;==&gt;
-            (i &gt;= 2 &amp;&amp; \forall integer j; 2 &lt;= j &lt; i ==&gt; i % j != 0));
-*/
-void primes(int *is_prime, int n) {
-    for (int i = 0; i &lt; n; ++i) is_prime[i] = 1;
-    for (int i = 2; i * i &lt; n; ++i) {
-        if (!is_prime[i]) continue;
-        for (int j = i; i * j &lt; n; ++j) {
-            is_prime[i * j] = 0;
-        }
-    }
-}
-</code></pre>
-<p>Here, <code>requires</code> and <code>ensures</code> specify the pre-condition and post-condition of the function. The annotation means:</p>
-<ul>
-<li>When the function is called,
-<ul>
-<li>the argument <code>n</code> should be between <code>2</code> and <code>MAX_SIZE</code></li>
-<li>for all <code>i</code> between <code>0</code> and <code>n - 1</code>, <code>is_prime + i</code> should be memory locations safe to read and write</li>
-</ul>
-</li>
-<li>When the function returns,
-<ul>
-<li>for all <code>i</code> between <code>0</code> and <code>n - 1</code>, <code>is_prime[i]</code> evaluates to <code>true</code> if and only if <code>i</code> is larger than <code>2</code> and does not have a factor between <code>2</code> and <code>i - 1</code> (which indicates the primality of <code>i</code>)</li>
-</ul>
-</li>
-</ul>
-<p>We can then call the function with symbolic values and see what happens. We should pass the option <code>--e-acsl</code> to let owi invoke the E-ACSL plugin.</p>
-<!-- $MDX file=primes.c -->
-<pre><code class="language-c">#define MAX_SIZE 100
-
-#include &lt;owi.h&gt;
-#include &lt;stdlib.h&gt;
-
-/*@ requires 2 &lt;= n &lt;= MAX_SIZE;
-    requires \valid(is_prime + (0 .. (n - 1)));
-    ensures  \forall integer i; 0 &lt;= i &lt; n ==&gt;
-        (is_prime[i] &lt;==&gt;
-            (i &gt;= 2 &amp;&amp; \forall integer j; 2 &lt;= j &lt; i ==&gt; i % j != 0));
-*/
-void primes(int *is_prime, int n) {
-    for (int i = 0; i &lt; n; ++i) is_prime[i] = 1;
-    for (int i = 2; i * i &lt; n; ++i) {
-        if (!is_prime[i]) continue;
-        for (int j = i; i * j &lt; n; ++j) {
-            is_prime[i * j] = 0;
-        }
-    }
-}
-
-int main(void) {
-    int *is_prime;
-    is_prime = malloc(MAX_SIZE * sizeof(int));
-
-    int n = owi_int();
-    owi_assume(n &gt;= 2);
-    owi_assume(n &lt;= MAX_SIZE);
-
-    primes(is_prime, n);
-    free(is_prime);
-    return 0;
-}
-</code></pre>
-<pre><code class="language-sh">$ owi c --e-acsl primes.c -w1
-owi: [ERROR] Assert failure: false
-model {
-  symbol symbol_0 i32 2
-}
-owi: [ERROR] Reached problem!
-[13]
-</code></pre>
-<p>The execution got aborted because one of the specifications has been violated with <code>n = 2</code>. (The error message is not so informative for the time being, extra information aiding the diagnostic of errors may be added in the future.)</p>
-<p>The problem is that we should mark <code>0</code> and <code>1</code> as non-prime during the initialization. Let's fix it and rerun the program.</p>
-<!-- $MDX file=primes2.c -->
-<pre><code class="language-c">#define MAX_SIZE 100
-
-#include &lt;owi.h&gt;
-#include &lt;stdlib.h&gt;
-
-/*@ requires 2 &lt;= n &lt;= MAX_SIZE;
-    requires \valid(is_prime + (0 .. (n - 1)));
-    ensures  \forall integer i; 0 &lt;= i &lt; n ==&gt;
-        (is_prime[i] &lt;==&gt;
-            (i &gt;= 2 &amp;&amp; \forall integer j; 2 &lt;= j &lt; i ==&gt; i % j != 0));
-*/
-void primes(int *is_prime, int n) {
-    for (int i = 0; i &lt; n; ++i) is_prime[i] = 1;
-    is_prime[0] = is_prime[1] = 0;
-    for (int i = 2; i * i &lt; n; ++i) {
-        if (!is_prime[i]) continue;
-        for (int j = i; i * j &lt; n; ++j) {
-            is_prime[i * j] = 0;
-        }
-    }
-}
-
-int main(void) {
-    int *is_prime;
-    is_prime = malloc(MAX_SIZE * sizeof(int));
-
-    int n = owi_int();
-    owi_assume(n &gt;= 2);
-    owi_assume(n &lt;= MAX_SIZE);
-
-    primes(is_prime, n);
-    free(is_prime);
-    return 0;
-}
-</code></pre>
-<pre><code class="language-sh">$ owi c --e-acsl primes2.c -w1
-All OK!
-</code></pre>
-<p>All the specified properties have been satisfied during the execution.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="weasel"><a class="header" href="#weasel">Weasel</a></h1>
-<p>Weasel stands for WEbAssembly Specification Language, it can be used to annotate Webassembly text modules in <a href="https://github.com/WebAssembly/annotations">custom annotation</a>. Annotated modules can be instrumented to perform runtime assertion checking thanks to owi's code generator.</p>
-<p>Commands and options related to Weasel:</p>
-<ul>
-<li><code>owi instrument</code> to instrument an annotated text module.</li>
-<li><code>--rac</code> for <code>run</code>, <code>sym</code> and <code>conc</code> to instrument an annotated text module and perform runtime assertion checking.</li>
-<li><code>--srac</code> for <code>sym</code> and <code>conc</code> to instrument an annotated text module and perform runtime assertion checking symbolically.</li>
-</ul>
-<p>The formal specification of Weasel can be found in <code>src/annot/spec.ml</code>.</p>
-<h2 id="basic-example"><a class="header" href="#basic-example">Basic example</a></h2>
-<p>Suppose we have a function returning its parameter plus three:</p>
-<pre><code class="language-wast">(module
-  (;...;)
-  (func $plus_three (param $x i32) (result i32)
-    local.get $x
-    i32.const 3
-    i32.add
-  )
-  (;...;)
-)
-</code></pre>
-<p>With Weasel, we can annotate this function by specifying its postconditions:</p>
-<pre><code class="language-wast">(module
-  (;...;)
-  (@contract $plus_three
-    (ensures (= result (+ $x 3)))
-  )
-  (func $plus_three (param $x i32) (result i32)
-    local.get $x
-    i32.const 3
-    i32.add
-  )
-  (;...;)
-)
-</code></pre>
-<p><code>owi instrument</code> generates a new wrapper function checking this postcondition:</p>
-<pre><code class="language-sh">$ owi instrument plus_three.wat
-$ cat plus_three.instrumented.wat
-(module
-  (import "owi" "assert" (func $assert  (param i32)))
-  (type (func (param $x i32) (result i32)))
-  (type (func))
-  (type (func (param i32)))
-  (type (func (result i32)))
-  (func $plus_three (param $x i32) (result i32)
-    local.get 0
-    i32.const 3
-    i32.add
-  )
-  (func $start
-    i32.const 42
-    call 3
-    drop
-  )
-  (func $__weasel_plus_three (param $x i32) (result i32) (local $__weasel_temp i32) (local $__weasel_res_0 i32)
-    local.get 0
-    call 1
-    local.set 2
-    local.get 2
-    local.get 0
-    i32.const 3
-    i32.add
-    i32.eq
-    call 0
-    local.get 2
-  )
-  (start 2)
-)
-</code></pre>
-<p>We can perform runtime assertion checking either by <code>owi sym plus_three.instrumented.wat</code> or by <code>owi sym --rac plus_three.wat</code>.</p>
-<pre><code class="language-sh">$ owi sym plus_three.instrumented.wat
-All OK!
-$ owi sym --rac plus_three.wat
-All OK!
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="going-further"><a class="header" href="#going-further">Going Further</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="talks-and-papers"><a class="header" href="#talks-and-papers">Talks and Papers</a></h1>
 <h2 id="publications"><a class="header" href="#publications">Publications</a></h2>
 <ul>
@@ -1424,7 +1471,7 @@ All OK!
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="commands-and-options"><a class="header" href="#commands-and-options">Commands and Options</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="api-symbols-and-helpers"><a class="header" href="#api-symbols-and-helpers">API: Symbols and Helpers</a></h1>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="overview-1"><a class="header" href="#overview-1">Overview</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="overview"><a class="header" href="#overview">Overview</a></h1>
 <h2 id="formatter"><a class="header" href="#formatter">Formatter</a></h2>
 <p>Given a file <code>horrible.wat</code>:</p>
 <details>
@@ -1730,9 +1777,8 @@ COMMANDS
        fmt [OPTION]… FILE…
            Format a .wat or .wast file
 
-       instrument [OPTION]… FILE…
-           Generate an instrumented file with runtime assertion checking
-           coming from Weasel specifications
+       instrument COMMAND …
+           Instrument a program in various ways
 
        iso [OPTION]… FILE…
            Check the iso-functionnality of two Wasm modules by comparing the
@@ -2322,39 +2368,19 @@ SEE ALSO
 <div style="break-before: page; page-break-before: always;"></div><h1 id="owi-instrument"><a class="header" href="#owi-instrument"><code>owi instrument</code></a></h1>
 <pre><code class="language-sh">$ owi instrument --help=plain
 NAME
-       owi-instrument - Generate an instrumented file with runtime assertion
-       checking coming from Weasel specifications
+       owi-instrument - Instrument a program in various ways
 
 SYNOPSIS
-       owi instrument [OPTION]… FILE…
+       owi instrument COMMAND …
 
-ARGUMENTS
-       FILE (required)
-           source files
+COMMANDS
+       label [OPTION]… FILE
+           Generate an instrumented file with labels corresponding to test
+           objectives for a given coverage criteria.
 
-OPTIONS
-       --bench
-           enable benchmarks
-
-       --color=WHEN (absent=auto)
-           Colorize the output. WHEN must be one of auto, always or never.
-
-       -q, --quiet
-           Be quiet. Takes over -v and --verbosity.
-
-       --symbolic
-           generate instrumented module that depends on symbolic execution
-
-       -u, --unsafe
-           skip typechecking pass
-
-       -v, --verbose
-           Increase verbosity. Repeatable, but more than twice does not bring
-           more.
-
-       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
-           Be more or less verbose. LEVEL must be one of quiet, error,
-           warning, info or debug. Takes over -v.
+       rac [OPTION]… FILE…
+           Generate an instrumented file with runtime assertion checking
+           coming from Weasel specifications
 
 COMMON OPTIONS
        --help[=FMT] (default=auto)
@@ -2375,12 +2401,6 @@ EXIT STATUS
        124 on command line parsing errors.
 
        125 on unexpected internal errors (bugs).
-
-ENVIRONMENT
-       These environment variables affect the execution of owi instrument:
-
-       OWI_VERBOSITY
-           See option --verbosity.
 
 BUGS
        Email them to &lt;contact@ndrs.fr&gt;.
@@ -3375,7 +3395,7 @@ SEE ALSO
        owi(1)
 
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="overview-2"><a class="header" href="#overview-2">Overview</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="overview-1"><a class="header" href="#overview-1">Overview</a></h1>
 <p>Given a file <code>quickstart.wat</code>, here's how to parse and run this file:</p>
 <pre><code class="language-ocaml"># open Prelude;;
 # open Owi;;

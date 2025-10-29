@@ -101,10 +101,10 @@ let extern_module : Concrete_extern_func.extern_func Link.extern_module =
   in
   let open Concrete.Extern_func in
   let open Concrete.Extern_func.Syntax in
-  let functions = [ ("assert", Extern_func (i32 ^-&gt;<span data-count="880">.</span> unit, assert_i32)) ] in
+  let functions = [ ("assert", Extern_func (i32 ^-&gt;<span data-count="883">.</span> unit, assert_i32)) ] in
   { functions }
 
-let link_state = Link.extern_modul<span data-count="880">e</span> Link.empty_state ~name:"owi" extern_module
+let link_state = Link.extern_modul<span data-count="883">e</span> Link.empty_state ~name:"owi" extern_module
 
 let cmd ~unsafe ~timeout ~timeout_instr ~rac ~source_file =
   <span data-count="20">l</span>et name = None in

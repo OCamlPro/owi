@@ -792,13 +792,13 @@ let neg_nan = 0xfff8_0000_0000_0000L
 
 let bare_nan = 0x7ff0_0000_0000_0000L
 
-let to_hex_string = Fmt.st<span data-count="880">r</span> "%Lx"
+let to_hex_string = Fmt.st<span data-count="883">r</span> "%Lx"
 
 type t = Int64.t
 
-let pos_inf = Int64.bits_of_floa<span data-count="880">t</span> (1.0 /. 0.0)
+let pos_inf = Int64.bits_of_floa<span data-count="883">t</span> (1.0 /. 0.0)
 
-let neg_inf = Int64.bits_of_floa<span data-count="880">t</span> (-<span data-count="880">.</span>(1.0 /. 0.0))
+let neg_inf = Int64.bits_of_floa<span data-count="883">t</span> (-<span data-count="883">.</span>(1.0 /. 0.0))
 
 let of_float = Int64.bits_of_float
 
@@ -806,7 +806,7 @@ let to_float = Int64.float_of_bits
 
 let of_bits x = <span data-count="628">x</span>
 
-let to_bits x = <span data-count="2409">x</span>
+let to_bits x = <span data-count="2412">x</span>
 
 let is_inf x = <span data-count="12410">I</span>nt64.e<span data-count="12410">q</span> x pos_in<span data-count="10">f</span> || Int64.eq x neg_inf
 
@@ -863,7 +863,7 @@ let unary op x =
   <span data-count="157">l</span>et t = op (to_floa<span data-count="157">t</span> x) in
   <span data-count="157">i</span>f not @@ Float.is_na<span data-count="157">n</span> t then <span data-count="133">o</span>f_float t else <span data-count="24">d</span>etermine_unary_nan x
 
-let zero = of_floa<span data-count="880">t</span> 0.0
+let zero = of_floa<span data-count="883">t</span> 0.0
 
 let add x y = <span data-count="12486">b</span>inary x ( +. ) y
 
@@ -1144,7 +1144,7 @@ let to_string' convert is_digit n x =
           (if Char.equal s.[String.lengt<span data-count="15">h</span> s - 1] '.' then <span data-count="0">F</span>mt.st<span data-count="0">r</span> "%s0" s else <span data-count="15">s</span>)
     )
 
-let to_string = to_string<span data-count="880">'</span> (Fmt.st<span data-count="880">r</span> "%.17g") is_digit 3
+let to_string = to_string<span data-count="883">'</span> (Fmt.st<span data-count="883">r</span> "%.17g") is_digit 3
 
 let to_hex_string x =
   <span data-count="0">i</span>f is_inf x then <span data-count="0">t</span>o_string x else <span data-count="0">t</span>o_string' (Fmt.st<span data-count="0">r</span> "%h") is_hex_digit 4 x

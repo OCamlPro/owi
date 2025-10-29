@@ -88,18 +88,18 @@
 <a href="#L28">28</a>
 <a href="#L29">29</a>
 </pre>
-<pre><code class="ocaml">let main_src = Logs.Src.creat<span data-count="880">e</span> "owi" ~doc:"Owi's main logs"
+<pre><code class="ocaml">let main_src = Logs.Src.creat<span data-count="883">e</span> "owi" ~doc:"Owi's main logs"
 
-let bench_src = Logs.Src.creat<span data-count="880">e</span> "owi-bench" ~doc:"Owi's benchmark logs"
+let bench_src = Logs.Src.creat<span data-count="883">e</span> "owi-bench" ~doc:"Owi's benchmark logs"
 
-include (val Logs.src_lo<span data-count="880">g</span> main_src : Logs.LOG)
+include (val Logs.src_lo<span data-count="883">g</span> main_src : Logs.LOG)
 
 let is_bench_enabled () =
   <span data-count="0">m</span>atch Logs.Src.level bench_src with <span data-count="0">N</span>one -&gt; false | <span data-count="0">S</span>ome _ -&gt; true
 
 let bench_fn str fn =
-  <span data-count="6228">m</span>atch Logs.Src.level bench_src with
-  | <span data-count="6225">N</span>one -&gt; fn ()
+  <span data-count="5421">m</span>atch Logs.Src.level bench_src with
+  | <span data-count="5418">N</span>one -&gt; fn ()
   | <span data-count="3">S</span>ome _ -&gt;
     let c = Mtime_clock.counter () in
     <span data-count="3">l</span>et r = fn () in
@@ -113,10 +113,10 @@ let bench f =
   | <span data-count="0">S</span>ome _ -&gt; Logs.info ~src:bench_src f
 
 let setup style_renderer level ~bench =
-  <span data-count="811">F</span>mt_tty.setup_std_outputs ?style_renderer ();
-  <span data-count="811">L</span>ogs.Src.set_level main_src level;
-  <span data-count="811">L</span>ogs.Src.set_level bench_src (if bench then <span data-count="0">S</span>ome Logs.Info else <span data-count="811">N</span>one);
-  <span data-count="811">L</span>ogs.set_reporter (Logs.format_reporte<span data-count="811">r</span> ());
+  <span data-count="814">F</span>mt_tty.setup_std_outputs ?style_renderer ();
+  <span data-count="814">L</span>ogs.Src.set_level main_src level;
+  <span data-count="814">L</span>ogs.Src.set_level bench_src (if bench then <span data-count="0">S</span>ome Logs.Info else <span data-count="814">N</span>one);
+  <span data-count="814">L</span>ogs.set_reporter (Logs.format_reporte<span data-count="814">r</span> ());
 </code></pre>
       </div>
     </div>

@@ -59,19 +59,19 @@
 </pre>
 <pre><code class="ocaml">type 'a t = { raw : 'a }
 
-let dummy raw = <span data-count="65695568">{</span> raw }
+let dummy raw = <span data-count="65695408">{</span> raw }
 
-let dummies l = <span data-count="20548">L</span>ist.map (fun raw -&gt; <span data-count="51577">{</span> raw }) l
+let dummies l = <span data-count="20579">L</span>ist.map (fun raw -&gt; <span data-count="51630">{</span> raw }) l
 
 let dummy_deep raw =
-  <span data-count="17988">l</span>et raw = dummies raw in
-  <span data-count="17988">{</span> raw }
+  <span data-count="18009">l</span>et raw = dummies raw in
+  <span data-count="18009">{</span> raw }
 
 let map f { raw } =
-  <span data-count="226">l</span>et raw = f raw in
-  <span data-count="226">{</span> raw }
+  <span data-count="1167038">l</span>et raw = f raw in
+  <span data-count="1167038">{</span> raw }
 
-let iter f { raw } = <span data-count="544126">f</span> raw
+let iter f { raw } = <span data-count="544179">f</span> raw
 </code></pre>
       </div>
     </div>

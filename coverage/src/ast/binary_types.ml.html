@@ -117,7 +117,7 @@ let convert_ref_type (null, heap_type) =
   <span data-count="1827">(</span>null, heap_type)
 
 let convert_val_type : text val_type -&gt; binary val_type Result.t = function
-  | <span data-count="24521">N</span>um_type _t as t -&gt; Ok t
+  | <span data-count="24527">N</span>um_type _t as t -&gt; Ok t
   | <span data-count="153">R</span>ef_type rt -&gt;
     let+ rt = convert_ref_typ<span data-count="153">e</span> rt in
     <span data-count="153">R</span>ef_type rt
@@ -126,14 +126,14 @@ let convert_param (n, t) =
   <span data-count="10129">l</span>et+ t = convert_val_typ<span data-count="10129">e</span> t in
   <span data-count="10129">(</span>n, t)
 
-let convert_pt l = <span data-count="20621">l</span>ist_map convert_param l
+let convert_pt l = <span data-count="20633">l</span>ist_map convert_param l
 
-let convert_rt l = <span data-count="20621">l</span>ist_map convert_val_type l
+let convert_rt l = <span data-count="20633">l</span>ist_map convert_val_type l
 
 let convert_func_type (pt, rt) =
-  <span data-count="20621">l</span>et* pt = convert_p<span data-count="20621">t</span> pt in
-  <span data-count="20621">l</span>et+ rt = convert_r<span data-count="20621">t</span> rt in
-  <span data-count="20621">(</span>pt, rt)
+  <span data-count="20633">l</span>et* pt = convert_p<span data-count="20633">t</span> pt in
+  <span data-count="20633">l</span>et+ rt = convert_r<span data-count="20633">t</span> rt in
+  <span data-count="20633">(</span>pt, rt)
 
 let convert_table_type (limits, ref_type) =
   <span data-count="755">l</span>et+ ref_type = convert_ref_typ<span data-count="755">e</span> ref_type in

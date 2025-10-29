@@ -1194,19 +1194,19 @@ let f_pair_1_4 fc fs (c, s) =
   <span data-count="0">(</span>(c1, s1), (c2, s2), (c3, s3), (c4, s4))
 [@@inline always]
 
-let f_pair_1_cst fc fs v = <span data-count="260078">(</span>f<span data-count="260078">c</span> v, f<span data-count="260078">s</span> v) [@@inline always]
+let f_pair_1_cst fc fs v = <span data-count="260090">(</span>f<span data-count="260090">c</span> v, f<span data-count="260090">s</span> v) [@@inline always]
 
 let f_pair_2_cst' fc fs (c, s) v2 = <span data-count="5217">(</span>f<span data-count="5217">c</span> c v2, f<span data-count="5217">s</span> s v2) [@@inline always]
 
-let const_i32 v = <span data-count="228352">f</span>_pair_1_cst C.const_i32 S.const_i32 v
+let const_i32 v = <span data-count="228355">f</span>_pair_1_cst C.const_i32 S.const_i32 v
 
-let const_i64 v = <span data-count="30654">f</span>_pair_1_cst C.const_i64 S.const_i64 v
+let const_i64 v = <span data-count="30660">f</span>_pair_1_cst C.const_i64 S.const_i64 v
 
 let const_f32 v = <span data-count="192">f</span>_pair_1_cst C.const_f32 S.const_f32 v
 
 let const_f64 v = <span data-count="0">f</span>_pair_1_cst C.const_f64 S.const_f64 v
 
-let const_v128 v = <span data-count="880">f</span>_pair_1_cst C.const_v128 S.const_v128 v
+let const_v128 v = <span data-count="883">f</span>_pair_1_cst C.const_v128 S.const_v128 v
 
 let assert_ref_c = function <span data-count="0">C</span>.Ref r -&gt; r | _ -&gt; assert false
 
@@ -1257,17 +1257,17 @@ module Ref = struct
 end
 
 module Bool = struct
-  let const = f_pair_1_cs<span data-count="880">t</span> C.Bool.const S.Bool.const
+  let const = f_pair_1_cs<span data-count="883">t</span> C.Bool.const S.Bool.const
 
-  let not = f_pair_<span data-count="880">1</span> C.Bool.not S.Bool.not
+  let not = f_pair_<span data-count="883">1</span> C.Bool.not S.Bool.not
 
-  let or_ = f_pair_<span data-count="880">2</span> C.Bool.or_ S.Bool.or_
+  let or_ = f_pair_<span data-count="883">2</span> C.Bool.or_ S.Bool.or_
 
-  let and_ = f_pair_<span data-count="880">2</span> C.Bool.and_ S.Bool.and_
+  let and_ = f_pair_<span data-count="883">2</span> C.Bool.and_ S.Bool.and_
 
-  let int32 = f_pair_<span data-count="880">1</span> C.Bool.int32 S.Bool.int32
+  let int32 = f_pair_<span data-count="883">1</span> C.Bool.int32 S.Bool.int32
 
-  let pp = mk_p<span data-count="880">p</span> C.Bool.pp S.Bool.pp
+  let pp = mk_p<span data-count="883">p</span> C.Bool.pp S.Bool.pp
 end
 
 module type CFop = sig
@@ -1317,57 +1317,57 @@ module MK_Fop
      and type same_size_int := CIT.t * SIT.t = struct
   let zero = (CFop.zero, SFop.zero)
 
-  let abs = f_pair_<span data-count="1760">1</span> CFop.abs SFop.abs
+  let abs = f_pair_<span data-count="1766">1</span> CFop.abs SFop.abs
 
-  let neg = f_pair_<span data-count="1760">1</span> CFop.neg SFop.neg
+  let neg = f_pair_<span data-count="1766">1</span> CFop.neg SFop.neg
 
-  let sqrt = f_pair_<span data-count="1760">1</span> CFop.sqrt SFop.sqrt
+  let sqrt = f_pair_<span data-count="1766">1</span> CFop.sqrt SFop.sqrt
 
-  let ceil = f_pair_<span data-count="1760">1</span> CFop.ceil SFop.ceil
+  let ceil = f_pair_<span data-count="1766">1</span> CFop.ceil SFop.ceil
 
-  let floor = f_pair_<span data-count="1760">1</span> CFop.floor SFop.floor
+  let floor = f_pair_<span data-count="1766">1</span> CFop.floor SFop.floor
 
-  let trunc = f_pair_<span data-count="1760">1</span> CFop.trunc SFop.trunc
+  let trunc = f_pair_<span data-count="1766">1</span> CFop.trunc SFop.trunc
 
-  let nearest = f_pair_<span data-count="1760">1</span> CFop.nearest SFop.nearest
+  let nearest = f_pair_<span data-count="1766">1</span> CFop.nearest SFop.nearest
 
-  let add = f_pair_<span data-count="1760">2</span> CFop.add SFop.add
+  let add = f_pair_<span data-count="1766">2</span> CFop.add SFop.add
 
-  let sub = f_pair_<span data-count="1760">2</span> CFop.sub SFop.sub
+  let sub = f_pair_<span data-count="1766">2</span> CFop.sub SFop.sub
 
-  let mul = f_pair_<span data-count="1760">2</span> CFop.mul SFop.mul
+  let mul = f_pair_<span data-count="1766">2</span> CFop.mul SFop.mul
 
-  let div = f_pair_<span data-count="1760">2</span> CFop.div SFop.div
+  let div = f_pair_<span data-count="1766">2</span> CFop.div SFop.div
 
-  let min = f_pair_<span data-count="1760">2</span> CFop.min SFop.min
+  let min = f_pair_<span data-count="1766">2</span> CFop.min SFop.min
 
-  let max = f_pair_<span data-count="1760">2</span> CFop.max SFop.max
+  let max = f_pair_<span data-count="1766">2</span> CFop.max SFop.max
 
-  let copy_sign = f_pair_<span data-count="1760">2</span> CFop.copy_sign SFop.copy_sign
+  let copy_sign = f_pair_<span data-count="1766">2</span> CFop.copy_sign SFop.copy_sign
 
-  let eq = f_pair_<span data-count="1760">2</span> CFop.eq SFop.eq
+  let eq = f_pair_<span data-count="1766">2</span> CFop.eq SFop.eq
 
-  let ne = f_pair_<span data-count="1760">2</span> CFop.ne SFop.ne
+  let ne = f_pair_<span data-count="1766">2</span> CFop.ne SFop.ne
 
-  let lt = f_pair_<span data-count="1760">2</span> CFop.lt SFop.lt
+  let lt = f_pair_<span data-count="1766">2</span> CFop.lt SFop.lt
 
-  let gt = f_pair_<span data-count="1760">2</span> CFop.gt SFop.gt
+  let gt = f_pair_<span data-count="1766">2</span> CFop.gt SFop.gt
 
-  let le = f_pair_<span data-count="1760">2</span> CFop.le SFop.le
+  let le = f_pair_<span data-count="1766">2</span> CFop.le SFop.le
 
-  let ge = f_pair_<span data-count="1760">2</span> CFop.ge SFop.ge
+  let ge = f_pair_<span data-count="1766">2</span> CFop.ge SFop.ge
 
-  let convert_i32_s = f_pair_<span data-count="1760">1</span> CFop.convert_i32_s SFop.convert_i32_s
+  let convert_i32_s = f_pair_<span data-count="1766">1</span> CFop.convert_i32_s SFop.convert_i32_s
 
-  let convert_i32_u = f_pair_<span data-count="1760">1</span> CFop.convert_i32_u SFop.convert_i32_u
+  let convert_i32_u = f_pair_<span data-count="1766">1</span> CFop.convert_i32_u SFop.convert_i32_u
 
-  let convert_i64_s = f_pair_<span data-count="1760">1</span> CFop.convert_i64_s SFop.convert_i64_s
+  let convert_i64_s = f_pair_<span data-count="1766">1</span> CFop.convert_i64_s SFop.convert_i64_s
 
-  let convert_i64_u = f_pair_<span data-count="1760">1</span> CFop.convert_i64_u SFop.convert_i64_u
+  let convert_i64_u = f_pair_<span data-count="1766">1</span> CFop.convert_i64_u SFop.convert_i64_u
 
-  let of_bits = f_pair_<span data-count="1760">1</span> CFop.of_bits SFop.of_bits
+  let of_bits = f_pair_<span data-count="1766">1</span> CFop.of_bits SFop.of_bits
 
-  let to_bits = f_pair_<span data-count="1760">1</span> CFop.to_bits SFop.to_bits
+  let to_bits = f_pair_<span data-count="1766">1</span> CFop.to_bits SFop.to_bits
 end
 
 module type CIop = sig
@@ -1412,79 +1412,79 @@ module MK_Iop
      and type float64 := float64 = struct
   let zero = (CIop.zero, SIop.zero)
 
-  let clz = f_pair_<span data-count="1760">1</span> CIop.clz SIop.clz
+  let clz = f_pair_<span data-count="1766">1</span> CIop.clz SIop.clz
 
-  let ctz = f_pair_<span data-count="1760">1</span> CIop.ctz SIop.ctz
+  let ctz = f_pair_<span data-count="1766">1</span> CIop.ctz SIop.ctz
 
-  let popcnt = f_pair_<span data-count="1760">1</span> CIop.popcnt SIop.popcnt
+  let popcnt = f_pair_<span data-count="1766">1</span> CIop.popcnt SIop.popcnt
 
-  let add = f_pair_<span data-count="1760">2</span> CIop.add SIop.add
+  let add = f_pair_<span data-count="1766">2</span> CIop.add SIop.add
 
-  let sub = f_pair_<span data-count="1760">2</span> CIop.sub SIop.sub
+  let sub = f_pair_<span data-count="1766">2</span> CIop.sub SIop.sub
 
-  let mul = f_pair_<span data-count="1760">2</span> CIop.mul SIop.mul
+  let mul = f_pair_<span data-count="1766">2</span> CIop.mul SIop.mul
 
-  let div = f_pair_<span data-count="1760">2</span> CIop.div SIop.div
+  let div = f_pair_<span data-count="1766">2</span> CIop.div SIop.div
 
-  let unsigned_div = f_pair_<span data-count="1760">2</span> CIop.unsigned_div SIop.unsigned_div
+  let unsigned_div = f_pair_<span data-count="1766">2</span> CIop.unsigned_div SIop.unsigned_div
 
-  let rem = f_pair_<span data-count="1760">2</span> CIop.rem SIop.rem
+  let rem = f_pair_<span data-count="1766">2</span> CIop.rem SIop.rem
 
-  let unsigned_rem = f_pair_<span data-count="1760">2</span> CIop.unsigned_rem SIop.unsigned_rem
+  let unsigned_rem = f_pair_<span data-count="1766">2</span> CIop.unsigned_rem SIop.unsigned_rem
 
-  let logand = f_pair_<span data-count="1760">2</span> CIop.logand SIop.logand
+  let logand = f_pair_<span data-count="1766">2</span> CIop.logand SIop.logand
 
-  let logor = f_pair_<span data-count="1760">2</span> CIop.logor SIop.logor
+  let logor = f_pair_<span data-count="1766">2</span> CIop.logor SIop.logor
 
-  let logxor = f_pair_<span data-count="1760">2</span> CIop.logxor SIop.logxor
+  let logxor = f_pair_<span data-count="1766">2</span> CIop.logxor SIop.logxor
 
-  let shl = f_pair_<span data-count="1760">2</span> CIop.shl SIop.shl
+  let shl = f_pair_<span data-count="1766">2</span> CIop.shl SIop.shl
 
-  let shr_s = f_pair_<span data-count="1760">2</span> CIop.shr_s SIop.shr_s
+  let shr_s = f_pair_<span data-count="1766">2</span> CIop.shr_s SIop.shr_s
 
-  let shr_u = f_pair_<span data-count="1760">2</span> CIop.shr_u SIop.shr_u
+  let shr_u = f_pair_<span data-count="1766">2</span> CIop.shr_u SIop.shr_u
 
-  let rotl = f_pair_<span data-count="1760">2</span> CIop.rotl SIop.rotl
+  let rotl = f_pair_<span data-count="1766">2</span> CIop.rotl SIop.rotl
 
-  let rotr = f_pair_<span data-count="1760">2</span> CIop.rotr SIop.rotr
+  let rotr = f_pair_<span data-count="1766">2</span> CIop.rotr SIop.rotr
 
-  let eq_const = f_pair_2_cst<span data-count="1760">'</span> CIop.eq_const SIop.eq_const
+  let eq_const = f_pair_2_cst<span data-count="1766">'</span> CIop.eq_const SIop.eq_const
 
-  let eq = f_pair_<span data-count="1760">2</span> CIop.eq SIop.eq
+  let eq = f_pair_<span data-count="1766">2</span> CIop.eq SIop.eq
 
-  let ne = f_pair_<span data-count="1760">2</span> CIop.ne SIop.ne
+  let ne = f_pair_<span data-count="1766">2</span> CIop.ne SIop.ne
 
-  let lt = f_pair_<span data-count="1760">2</span> CIop.lt SIop.lt
+  let lt = f_pair_<span data-count="1766">2</span> CIop.lt SIop.lt
 
-  let gt = f_pair_<span data-count="1760">2</span> CIop.gt SIop.gt
+  let gt = f_pair_<span data-count="1766">2</span> CIop.gt SIop.gt
 
-  let lt_u = f_pair_<span data-count="1760">2</span> CIop.lt_u SIop.lt_u
+  let lt_u = f_pair_<span data-count="1766">2</span> CIop.lt_u SIop.lt_u
 
-  let gt_u = f_pair_<span data-count="1760">2</span> CIop.gt_u SIop.gt_u
+  let gt_u = f_pair_<span data-count="1766">2</span> CIop.gt_u SIop.gt_u
 
-  let le = f_pair_<span data-count="1760">2</span> CIop.le SIop.le
+  let le = f_pair_<span data-count="1766">2</span> CIop.le SIop.le
 
-  let ge = f_pair_<span data-count="1760">2</span> CIop.ge SIop.ge
+  let ge = f_pair_<span data-count="1766">2</span> CIop.ge SIop.ge
 
-  let le_u = f_pair_<span data-count="1760">2</span> CIop.le_u SIop.le_u
+  let le_u = f_pair_<span data-count="1766">2</span> CIop.le_u SIop.le_u
 
-  let ge_u = f_pair_<span data-count="1760">2</span> CIop.ge_u SIop.ge_u
+  let ge_u = f_pair_<span data-count="1766">2</span> CIop.ge_u SIop.ge_u
 
-  let trunc_f32_s = f_pair_1<span data-count="1760">'</span> CIop.trunc_f32_s SIop.trunc_f32_s
+  let trunc_f32_s = f_pair_1<span data-count="1766">'</span> CIop.trunc_f32_s SIop.trunc_f32_s
 
-  let trunc_f32_u = f_pair_1<span data-count="1760">'</span> CIop.trunc_f32_u SIop.trunc_f32_u
+  let trunc_f32_u = f_pair_1<span data-count="1766">'</span> CIop.trunc_f32_u SIop.trunc_f32_u
 
-  let trunc_f64_s = f_pair_1<span data-count="1760">'</span> CIop.trunc_f64_s SIop.trunc_f64_s
+  let trunc_f64_s = f_pair_1<span data-count="1766">'</span> CIop.trunc_f64_s SIop.trunc_f64_s
 
-  let trunc_f64_u = f_pair_1<span data-count="1760">'</span> CIop.trunc_f64_u SIop.trunc_f64_u
+  let trunc_f64_u = f_pair_1<span data-count="1766">'</span> CIop.trunc_f64_u SIop.trunc_f64_u
 
-  let trunc_sat_f32_s = f_pair_<span data-count="1760">1</span> CIop.trunc_sat_f32_s SIop.trunc_sat_f32_s
+  let trunc_sat_f32_s = f_pair_<span data-count="1766">1</span> CIop.trunc_sat_f32_s SIop.trunc_sat_f32_s
 
-  let trunc_sat_f32_u = f_pair_<span data-count="1760">1</span> CIop.trunc_sat_f32_u SIop.trunc_sat_f32_u
+  let trunc_sat_f32_u = f_pair_<span data-count="1766">1</span> CIop.trunc_sat_f32_u SIop.trunc_sat_f32_u
 
-  let trunc_sat_f64_s = f_pair_<span data-count="1760">1</span> CIop.trunc_sat_f64_s SIop.trunc_sat_f64_s
+  let trunc_sat_f64_s = f_pair_<span data-count="1766">1</span> CIop.trunc_sat_f64_s SIop.trunc_sat_f64_s
 
-  let trunc_sat_f64_u = f_pair_<span data-count="1760">1</span> CIop.trunc_sat_f64_u SIop.trunc_sat_f64_u
+  let trunc_sat_f64_u = f_pair_<span data-count="1766">1</span> CIop.trunc_sat_f64_u SIop.trunc_sat_f64_u
 
   let extend_s symbolic (c, s) =
     <span data-count="257">(</span>CIop.extend_<span data-count="257">s</span> symbolic c, SIop.extend_<span data-count="257">s</span> symbolic s)
@@ -1508,9 +1508,9 @@ module F32 = struct
       (C.F32)
       (S.F32)
 
-  let demote_f64 = f_pair_<span data-count="880">1</span> C.F32.demote_f64 S.F32.demote_f64
+  let demote_f64 = f_pair_<span data-count="883">1</span> C.F32.demote_f64 S.F32.demote_f64
 
-  let reinterpret_i32 = f_pair_<span data-count="880">1</span> C.F32.reinterpret_i32 S.F32.reinterpret_i32
+  let reinterpret_i32 = f_pair_<span data-count="883">1</span> C.F32.reinterpret_i32 S.F32.reinterpret_i32
 end
 
 module F64 = struct
@@ -1531,9 +1531,9 @@ module F64 = struct
       (C.F64)
       (S.F64)
 
-  let promote_f32 = f_pair_<span data-count="880">1</span> C.F64.promote_f32 S.F64.promote_f32
+  let promote_f32 = f_pair_<span data-count="883">1</span> C.F64.promote_f32 S.F64.promote_f32
 
-  let reinterpret_i64 = f_pair_<span data-count="880">1</span> C.F64.reinterpret_i64 S.F64.reinterpret_i64
+  let reinterpret_i64 = f_pair_<span data-count="883">1</span> C.F64.reinterpret_i64 S.F64.reinterpret_i64
 end
 
 module I32 = struct
@@ -1551,11 +1551,11 @@ module I32 = struct
       (C.I32)
       (S.I32)
 
-  let to_bool = f_pair_<span data-count="880">1</span> C.I32.to_bool S.I32.to_bool
+  let to_bool = f_pair_<span data-count="883">1</span> C.I32.to_bool S.I32.to_bool
 
-  let reinterpret_f32 = f_pair_<span data-count="880">1</span> C.I32.reinterpret_f32 S.I32.reinterpret_f32
+  let reinterpret_f32 = f_pair_<span data-count="883">1</span> C.I32.reinterpret_f32 S.I32.reinterpret_f32
 
-  let wrap_i64 = f_pair_<span data-count="880">1</span> C.I32.wrap_i64 S.I32.wrap_i64
+  let wrap_i64 = f_pair_<span data-count="883">1</span> C.I32.wrap_i64 S.I32.wrap_i64
 end
 
 module I64 = struct
@@ -1573,27 +1573,27 @@ module I64 = struct
       (C.I64)
       (S.I64)
 
-  let of_int32 = f_pair_<span data-count="880">1</span> C.I64.of_int32 S.I64.of_int32
+  let of_int32 = f_pair_<span data-count="883">1</span> C.I64.of_int32 S.I64.of_int32
 
-  let to_int32 = f_pair_<span data-count="880">1</span> C.I64.to_int32 S.I64.to_int32
+  let to_int32 = f_pair_<span data-count="883">1</span> C.I64.to_int32 S.I64.to_int32
 
-  let reinterpret_f64 = f_pair_<span data-count="880">1</span> C.I64.reinterpret_f64 S.I64.reinterpret_f64
+  let reinterpret_f64 = f_pair_<span data-count="883">1</span> C.I64.reinterpret_f64 S.I64.reinterpret_f64
 
-  let extend_i32_s = f_pair_<span data-count="880">1</span> C.I64.extend_i32_s S.I64.extend_i32_s
+  let extend_i32_s = f_pair_<span data-count="883">1</span> C.I64.extend_i32_s S.I64.extend_i32_s
 
-  let extend_i32_u = f_pair_<span data-count="880">1</span> C.I64.extend_i32_u S.I64.extend_i32_u
+  let extend_i32_u = f_pair_<span data-count="883">1</span> C.I64.extend_i32_u S.I64.extend_i32_u
 end
 
 module V128 = struct
-  let zero = const_v12<span data-count="880">8</span> V128.zero
+  let zero = const_v12<span data-count="883">8</span> V128.zero
 
-  let of_i32x4 = f_pair_<span data-count="880">4</span> C.V128.of_i32x4 S.V128.of_i32x4
+  let of_i32x4 = f_pair_<span data-count="883">4</span> C.V128.of_i32x4 S.V128.of_i32x4
 
-  let to_i32x4 = f_pair_1_<span data-count="880">4</span> C.V128.to_i32x4 S.V128.to_i32x4
+  let to_i32x4 = f_pair_1_<span data-count="883">4</span> C.V128.to_i32x4 S.V128.to_i32x4
 
-  let of_i64x2 = f_pair_<span data-count="880">2</span> C.V128.of_i64x2 S.V128.of_i64x2
+  let of_i64x2 = f_pair_<span data-count="883">2</span> C.V128.of_i64x2 S.V128.of_i64x2
 
-  let to_i64x2 = f_pair_1_<span data-count="880">2</span> C.V128.to_i64x2 S.V128.to_i64x2
+  let to_i64x2 = f_pair_1_<span data-count="883">2</span> C.V128.to_i64x2 S.V128.to_i64x2
 end
 </code></pre>
       </div>
