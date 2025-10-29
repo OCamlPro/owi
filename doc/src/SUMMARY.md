@@ -7,34 +7,37 @@
 
 # Symbolic Execution Engine
 
-- [Overview](symex/overview.md)
-    - [Symbolic Execution 101](symex/symbolic-execution-101.md)
-    - [Quickstart](symex/quickstart.md)
-- [Bug-Finding, Testing & Pen-testing](symex/bugfinding.md)
-    - [Examples of Bug Finding](symex/bugfinding/examples.md)
-    - [How to Speed it Up](symex/bugfinding/optimizations.md)
-    - [Replaying a model](symex/bugfinding/replay.md)
-    - [Checking iso-behaviour of two modules](symex/bugfinding/iso.md)
-    - [Comparison to Fuzzing and Abstract Interpretation](symex/bugfinding/comparison.md)
-    - [Bugs Found by Owi](symex/bugfinding/bugs-found.md)
+- [Symbolic Execution 101](symex/symbolic-execution-101.md)
+- [Quickstart](symex/quickstart.md)
 
-- [Solver-Aided Programming](symex/sap.md)
-    - [Examples of Problem Solving](symex/sap/examples.md)
-    - [How to Speed it Up](symex/sap/optimizations.md)
-    - [Comparison to Rosette, Prolog, etc.](symex/sap/comparison.md)
+# Bug-Finding, Testing & Pen-testing
 
-- [Test-Case Generation](symex/testcase-generation.md)
-    - [Labels](symex/testcase-generation/labels.md)
+- [Examples of Bug Finding](bugfinding/examples.md)
+- [Replaying a model](bugfinding/replay.md)
+- [Checking iso-behaviour of two modules](bugfinding/iso.md)
+- [Bugs Found by Owi](bugfinding/bugs-found.md)
 
-- [Verification and Proof of Programs](symex/verification.md)
-    - [Comparison with Deductive Verification and Abstract Interpretation](symex/verification/comparison.md)
-    - [E-ACSL](symex/verification/eacsl.md)
-    - [Weasel](symex/verification/weasel.md)
+# Test-Case Generation
 
-- [Going Further](symex/further.md)
-    - [Talks and Papers](symex/further/talks-papers.md)
-    - [Commands and Options](symex/further/commands.md)
-    - [API: Symbols and Helpers](symex/further/api.md)
+- [Code Coverage Criteria](testcase-generation/code-coverage-criteria.md)
+- [Labels](testcase-generation/labels.md)
+
+# Verification and Proof of Programs
+
+- [E-ACSL](verification/eacsl.md)
+- [Weasel](verification/weasel.md)
+
+# Solver-Aided Programming
+
+- [Examples of Problem Solving](sap/examples.md)
+- [How to Speed it Up](sap/optimizations.md)
+- [Comparison to Rosette, Prolog, etc.](sap/comparison.md)
+
+# Going Further
+
+- [Talks and Papers](further/talks-papers.md)
+- [Commands and Options](further/commands.md)
+- [API: Symbols and Helpers](further/api.md)
 
 # WebAssembly Toolkit
 - [Overview](wasm-toolkit/overview.md)
