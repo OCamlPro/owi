@@ -2,3 +2,8 @@
  (libraries owi)
  (deps %{bin:owi})
  (files README.md))
+
+(alias
+ (name runtest)
+ (deps
+  (alias quicktest)))

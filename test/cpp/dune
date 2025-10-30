@@ -1,2 +1,3 @@
 (cram
- (deps %{bin:owi} entry_point.cpp))
+ (deps %{bin:owi} entry_point.cpp)
+ (alias quicktest))

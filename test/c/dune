@@ -19,4 +19,5 @@
   malloc_zero.c
   multi_model.c
   range.c
-  scopes.c))
+  scopes.c)
+ (alias quicktest))
