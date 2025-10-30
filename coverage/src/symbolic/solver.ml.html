@@ -158,16 +158,16 @@ let fresh solver () =
   let module Mapping = Mapping.Fresh.Make () in
   let module Batch = Smtml.Solver.Cached (Mapping) in
   let solver = Batch.create ~logic:QF_BVFP () in
-  <span data-count="943">S</span> ((module Batch), solver)
+  <span data-count="947">S</span> ((module Batch), solver)
 
 let check (S (solver_module, s)) pc =
-  <span data-count="28373">l</span>et module Solver = (val solver_module) in
+  <span data-count="28675">l</span>et module Solver = (val solver_module) in
   Solver.check_set s pc
 
 let model (S (solver_module, s)) ~symbol_scopes ~pc =
-  <span data-count="1264">l</span>et module Solver = (val solver_module) in
+  <span data-count="1533">l</span>et module Solver = (val solver_module) in
   let symbols = Symbol_scope.only_symbols symbol_scopes in
-  <span data-count="1264">l</span>et model =
+  <span data-count="1533">l</span>et model =
     match Solver.get_sat_model ~symbols s pc with
     | `Unknown -&gt; assert false
     | <span data-count="0">`</span>Unsat -&gt;
@@ -179,7 +179,7 @@ let model (S (solver_module, s)) ~symbol_scopes ~pc =
           symbols );
       <span data-count="0">L</span>og.err (fun m -&gt; <span data-count="0">m</span> "pc:@\n  @[&lt;v&gt;%a@]" Smtml.Expr.Set.pp pc);
       <span data-count="0">a</span>ssert false
-    | <span data-count="1262">`</span>Model model -&gt; model
+    | <span data-count="1530">`</span>Model model -&gt; model
   in
   model
 
@@ -188,10 +188,10 @@ let empty_stats = Smtml.Statistics.Map.empty
 let stats_are_empty = Smtml.Statistics.Map.is_empty
 
 let get_stats (S (solver_module, s)) =
-  <span data-count="608">i</span>f Log.is_bench_enabled () then
+  <span data-count="609">i</span>f Log.is_bench_enabled () then
     <span data-count="0">l</span>et module Solver = (val solver_module) in
     Solver.get_statistics s
-  else <span data-count="608">e</span>mpty_stats
+  else <span data-count="609">e</span>mpty_stats
 
 let merge_stats = Smtml.Statistics.merge
 

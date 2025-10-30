@@ -89,6 +89,9 @@
 <a id="L65"></a><span > </span>
 <a id="L66"></a><span > </span>
 <a id="L67"></a><span > </span>
+<a id="L68"></a><span > </span>
+<a id="L69"></a><span > </span>
+<a id="L70"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -160,6 +163,9 @@
 <a href="#L65">65</a>
 <a href="#L66">66</a>
 <a href="#L67">67</a>
+<a href="#L68">68</a>
+<a href="#L69">69</a>
+<a href="#L70">70</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -189,6 +195,7 @@ module type S = sig
     -&gt; Symbolic_global.collection
     -&gt; int list
     -&gt; (int * string) list
+    -&gt; Benchmark.stats
     -&gt; t
 
   val pc : t -&gt; Symbolic_path_condition.t
@@ -206,6 +213,8 @@ module type S = sig
   val num_symbols : t -&gt; int
 
   val labels : t -&gt; (int * string) list
+
+  val bench_stats : t -&gt; Benchmark.stats
 
   val clone : t -&gt; t
 
