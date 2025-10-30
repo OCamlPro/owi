@@ -39,6 +39,9 @@ let
       perl
     ];
   };
+
+  # TODO: remove this (and the corresponding variable set in deploy CI) once mdbooktabs is part of nixpkgs and don't make everything so slow...
+  enableMdbookTabs = builtins.getEnv "MDBOOK_TABS" != "";
 in
 pkgs.mkShell {
   name = "owi-dev-shell";
@@ -49,7 +52,6 @@ pkgs.mkShell {
     bisect_ppx
     pkgs.framac
     pkgs.mdbook
-    mdbookTabs
     mdx
     menhir
     ocaml
@@ -64,7 +66,7 @@ pkgs.mkShell {
     pkgs.rustc
     pkgs.zig
     pkgs.makeWrapper
-  ];
+  ] ++ pkgs.lib.optional enableMdbookTabs mdbookTabs;
   buildInputs = with ocamlPackages; [
     bos
     cmdliner
