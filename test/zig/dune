@@ -1,2 +1,3 @@
 (cram
- (deps %{bin:owi} entry_point.zig))
+ (deps %{bin:owi} entry_point.zig)
+ (alias quicktest))

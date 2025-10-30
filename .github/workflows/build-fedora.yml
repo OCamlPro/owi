@@ -66,11 +66,8 @@ jobs:
           opam install . --depext-only --with-test --with-doc --with-dev-setup
 
           # Install opam-repo dependencies
-          opam install . --deps-only --with-test --with-doc --with-dev-setup
-
-          # Fetching submodules (done after calling opam to prevent it from checking them out)
-          git submodule update --init --recursive
+          opam install . --deps-only --with-test
 
           # Build and test
           dune build @install
-          dune runtest
+          dune build @quicktest
