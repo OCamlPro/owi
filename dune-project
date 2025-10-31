@@ -101,7 +101,10 @@
     :with-dev-setup))
   (crowbar :with-dev-setup)
   (landmarks-ppx :with-dev-setup)
-  (ocamlformat :with-dev-setup)
+  (ocamlformat
+   (and
+    (>= 0.27)
+    :with-dev-setup))
   (ocb
    (and
     (>= 0.1)
