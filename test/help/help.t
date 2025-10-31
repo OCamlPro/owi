@@ -19,7 +19,7 @@ no subcommand should print help
          conc [OPTION]… FILE
              Run the concolic interpreter
   
-         fmt [OPTION]… FILE…
+         fmt [--inplace] [OPTION]… FILE…
              Format a .wat or .wast file
   
          instrument COMMAND …
@@ -39,7 +39,7 @@ no subcommand should print help
          rust [OPTION]… FILE…
              Compile a Rust file to Wasm and run the symbolic interpreter on it
   
-         script [OPTION]… FILE…
+         script [--no-exhaustion] [OPTION]… FILE…
              Run a reference test suite script
   
          sym [OPTION]… FILE
@@ -55,11 +55,11 @@ no subcommand should print help
          version [OPTION]…
              Print some version informations
   
-         wasm2wat [OPTION]… FILE
+         wasm2wat [--emit-file] [--output=FILE] [OPTION]… FILE
              Generate a text format file (.wat) from a binary format file
              (.wasm)
   
-         wat2wasm [OPTION]… FILE
+         wat2wasm [--output=FILE] [--unsafe] [OPTION]… FILE
              Generate a binary format file (.wasm) from a text format file
              (.wat)
   

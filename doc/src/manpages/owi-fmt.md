@@ -6,21 +6,27 @@ NAME
        owi-fmt - Format a .wat or .wast file
 
 SYNOPSIS
-       owi fmt [OPTION]… FILE…
+       owi fmt [--inplace] [OPTION]… FILE…
 
 ARGUMENTS
        FILE (required)
            source files
 
 OPTIONS
+       -i, --inplace
+           Format in-place, overwriting input file
+
+COMMON OPTIONS
        --bench
            enable benchmarks
 
        --color=WHEN (absent=auto)
            Colorize the output. WHEN must be one of auto, always or never.
 
-       -i, --inplace
-           Format in-place, overwriting input file
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
+           whenever the TERM env var is dumb or undefined.
 
        -q, --quiet
            Be quiet. Takes over -v and --verbosity.
@@ -32,12 +38,6 @@ OPTIONS
        --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
            Be more or less verbose. LEVEL must be one of quiet, error,
            warning, info or debug. Takes over -v.
-
-COMMON OPTIONS
-       --help[=FMT] (default=auto)
-           Show this help in format FMT. The value FMT must be one of auto,
-           pager, groff or plain. With auto, the format is pager or plain
-           whenever the TERM env var is dumb or undefined.
 
        --version
            Show version information.

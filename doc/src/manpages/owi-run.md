@@ -13,15 +13,6 @@ ARGUMENTS
            source file
 
 OPTIONS
-       --bench
-           enable benchmarks
-
-       --color=WHEN (absent=auto)
-           Colorize the output. WHEN must be one of auto, always or never.
-
-       -q, --quiet
-           Be quiet. Takes over -v and --verbosity.
-
        --rac
            runtime assertion checking mode
 
@@ -34,6 +25,21 @@ OPTIONS
        -u, --unsafe
            skip typechecking pass
 
+COMMON OPTIONS
+       --bench
+           enable benchmarks
+
+       --color=WHEN (absent=auto)
+           Colorize the output. WHEN must be one of auto, always or never.
+
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
+           whenever the TERM env var is dumb or undefined.
+
+       -q, --quiet
+           Be quiet. Takes over -v and --verbosity.
+
        -v, --verbose
            Increase verbosity. Repeatable, but more than twice does not bring
            more.
@@ -41,12 +47,6 @@ OPTIONS
        --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
            Be more or less verbose. LEVEL must be one of quiet, error,
            warning, info or debug. Takes over -v.
-
-COMMON OPTIONS
-       --help[=FMT] (default=auto)
-           Show this help in format FMT. The value FMT must be one of auto,
-           pager, groff or plain. With auto, the format is pager or plain
-           whenever the TERM env var is dumb or undefined.
 
        --version
            Show version information.
