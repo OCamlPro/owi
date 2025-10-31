@@ -40,6 +40,13 @@ jobs:
 
           set -x
           nix-shell --run "
+            ODOC_WARN_ERROR=true
+            dune build @fmt &&
+            dune build @doc &&
             dune build @install &&
             dune runtest
+          "
+
+          nix-shell -p git --run "
+            git diff --exit-code owi.opam
           "
