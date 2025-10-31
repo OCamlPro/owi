@@ -815,9 +815,10 @@ module Make (P : Interpret_intf.P) :
       match Logs.Src.level Log.main_src with
       | Some Logs.Debug ->
         let+ pc = Choice.get_pc () in
-        Log.debug (fun m ->
-          m "path condition: [ %a ]" Smtml.Expr.pp_list
-            (Smtml.Expr.Set.to_list pc) )
+        if not (Smtml.Expr.Set.is_empty pc) then
+          Log.debug (fun m ->
+            m "path condition smt query:@\n @[<v>%a@]" Smtml.Expr.pp_smtml
+              (Smtml.Expr.Set.to_list pc) )
       | None | Some _ -> return ()
     in
     match instr.raw with
