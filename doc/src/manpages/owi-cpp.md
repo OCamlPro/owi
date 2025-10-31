@@ -14,12 +14,6 @@ ARGUMENTS
            source files
 
 OPTIONS
-       --bench
-           enable benchmarks
-
-       --color=WHEN (absent=auto)
-           Colorize the output. WHEN must be one of auto, always or never.
-
        --concolic
            concolic mode
 
@@ -72,9 +66,6 @@ OPTIONS
        -O VAL (absent=3)
            specify which optimization level to use
 
-       -q, --quiet
-           Be quiet. Takes over -v and --verbosity.
-
        --rac
            runtime assertion checking mode
 
@@ -88,14 +79,6 @@ OPTIONS
        -u, --unsafe
            skip typechecking pass
 
-       -v, --verbose
-           Increase verbosity. Repeatable, but more than twice does not bring
-           more.
-
-       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
-           Be more or less verbose. LEVEL must be one of quiet, error,
-           warning, info or debug. Takes over -v.
-
        -w VAL, --workers=VAL (absent=n)
            number of workers for symbolic execution. Defaults to the number
            of physical cores.
@@ -107,10 +90,27 @@ OPTIONS
            write results and intermediate compilation artifacts to dir
 
 COMMON OPTIONS
+       --bench
+           enable benchmarks
+
+       --color=WHEN (absent=auto)
+           Colorize the output. WHEN must be one of auto, always or never.
+
        --help[=FMT] (default=auto)
            Show this help in format FMT. The value FMT must be one of auto,
            pager, groff or plain. With auto, the format is pager or plain
            whenever the TERM env var is dumb or undefined.
+
+       -q, --quiet
+           Be quiet. Takes over -v and --verbosity.
+
+       -v, --verbose
+           Increase verbosity. Repeatable, but more than twice does not bring
+           more.
+
+       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
+           Be more or less verbose. LEVEL must be one of quiet, error,
+           warning, info or debug. Takes over -v.
 
        --version
            Show version information.

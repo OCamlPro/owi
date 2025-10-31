@@ -92,6 +92,14 @@ let shared_man = [ `S Manpage.s_bugs; `P "Email them to <contact@ndrs.fr>." ]
 
 let version = Cmd_version.owi_version ()
 
+let log_level =
+  let env = Cmd.Env.info "OWI_VERBOSITY" in
+  Logs_cli.level ~env ~docs:sdocs ()
+
+let bench =
+  let doc = "enable benchmarks" in
+  Arg.(value & flag & info [ "bench" ] ~doc ~docs:sdocs)
+
 (* Common terms *)
 
 open Term.Syntax
@@ -219,16 +227,10 @@ let source_file =
   Arg.(
     required & pos 0 (some existing_file_conv) None (info [] ~doc ~docv:"FILE") )
 
-let bench =
-  let doc = "enable benchmarks" in
-  Arg.(value & flag & info [ "bench" ] ~doc)
-
-(* TODO: move this as a common option ? *)
 let setup_log =
-  let env = Cmd.Env.info "OWI_VERBOSITY" in
   let+ bench
-  and+ style_renderer = Fmt_cli.style_renderer ()
-  and+ log_level = Logs_cli.level ~env () in
+  and+ log_level
+  and+ style_renderer = Fmt_cli.style_renderer ~docs:sdocs () in
   Log.setup ~bench style_renderer log_level
 
 let srac =
@@ -694,7 +696,6 @@ let zig_cmd =
 let cli =
   let info =
     let doc = "OCaml WebAssembly Interpreter" in
-    let sdocs = Manpage.s_common_options in
     let man = [ `S Manpage.s_bugs; `P "Email them to <contact@ndrs.fr>." ] in
     Cmd.info "owi" ~version ~doc ~sdocs ~man
   in

@@ -9,11 +9,11 @@ SYNOPSIS
        owi instrument COMMAND …
 
 COMMANDS
-       label [OPTION]… FILE
+       label [--criteria=VAL] [--unsafe] [OPTION]… FILE
            Generate an instrumented file with labels corresponding to test
            objectives for a given coverage criteria.
 
-       rac [OPTION]… FILE…
+       rac [--symbolic] [--unsafe] [OPTION]… FILE…
            Generate an instrumented file with runtime assertion checking
            coming from Weasel specifications
 
