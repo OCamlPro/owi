@@ -88,6 +88,9 @@ OPTIONS
        -u, --unsafe
            skip typechecking pass
 
+       --use-ite-for-select
+           Use ite for select
+
        -v, --verbose
            Increase verbosity. Repeatable, but more than twice does not bring
            more.

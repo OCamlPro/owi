@@ -2,6 +2,8 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
+val set_use_ite_for_select : unit -> unit
+
 module Concrete : sig
   val modul :
        timeout:float option

@@ -43,6 +43,7 @@
 - start support for simd instructions
 - add `--exploration` option
 - add `--bench` option
+- add `--use-ite-for-select` option
 
 ## 0.2 - 2024-04-24
 
