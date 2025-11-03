@@ -36,7 +36,7 @@ jobs:
 
           touch doc/.nojekyll
 
-          MDBOOK_TABS=1 nix-shell --run "
+          nix-shell --run "
             dune build @doc &&
             mv _build/default/_doc/_html doc/api &&
             BISECT_FILE=\$(pwd)/bisect dune runtest --force --instrument-with bisect_ppx &&

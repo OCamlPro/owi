@@ -24,24 +24,6 @@ let
       ];
     };
   });
-
-  mdbookTabs = pkgs.rustPlatform.buildRustPackage rec {
-    pname = "cargo-mdbook-tabs";
-    version = "v0.2.3";
-    src = pkgs.fetchFromGitHub {
-      owner = "RustForWeb";
-      repo = "mdbook-plugins";
-      rev = version;
-      hash = "sha256-IyIUJH5pbuvDarQf7yvrStMIb5HdimudYF+Tq/+OtvY=";
-    };
-    cargoHash = "sha256-/UM85Lhq52MFTjczPRuXENPJOQkjiHLWGPPW/VD9kBQ=";
-    nativeBuildInputs = with pkgs; [
-      perl
-    ];
-  };
-
-  # TODO: remove this (and the corresponding variable set in deploy CI) once mdbooktabs is part of nixpkgs and don't make everything so slow...
-  enableMdbookTabs = builtins.getEnv "MDBOOK_TABS" != "";
 in
 pkgs.mkShell {
   name = "owi-dev-shell";
@@ -52,6 +34,7 @@ pkgs.mkShell {
     bisect_ppx
     pkgs.framac
     pkgs.mdbook
+    pkgs.mdbook-plugins
     mdx
     menhir
     ocaml
@@ -66,7 +49,7 @@ pkgs.mkShell {
     pkgs.rustc
     pkgs.zig
     pkgs.makeWrapper
-  ] ++ pkgs.lib.optional enableMdbookTabs mdbookTabs;
+  ];
   buildInputs = with ocamlPackages; [
     bos
     cmdliner
