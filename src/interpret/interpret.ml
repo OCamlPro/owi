@@ -7,8 +7,9 @@
 open Types
 open Binary
 
-(* TODO: make this a CLI parameter *)
-let use_ite_for_select = true
+let use_ite_for_select = ref true
+
+let unset_use_ite_for_select () = use_ite_for_select := false
 
 module Make (P : Interpret_intf.P) :
   Interpret_intf.S
@@ -1019,7 +1020,7 @@ module Make (P : Interpret_intf.P) :
         st stack
       end
     | Select _t ->
-      if use_ite_for_select then begin
+      if !use_ite_for_select then begin
         let b, stack = Stack.pop_bool stack in
         let o2, stack = Stack.pop stack in
         let o1, stack = Stack.pop stack in
