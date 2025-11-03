@@ -65,9 +65,6 @@ OPTIONS
        --no-assert-failure-expression-printing
            do not display the expression in the assert failure
 
-       --no-ite-for-select
-           do not use ite for select
-
        --no-stop-at-failure
            do not stop when a program failure is encountered
 
@@ -101,6 +98,9 @@ OPTIONS
 
        -u, --unsafe
            skip typechecking pass
+
+       --use-ite-for-select
+           Use ite for select
 
        -v, --verbose
            Increase verbosity. Repeatable, but more than twice does not bring

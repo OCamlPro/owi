@@ -265,9 +265,9 @@ let with_breadcrumbs =
   let doc = "add breadcrumbs to the generated model" in
   Arg.(value & flag & info [ "with-breadcrumbs" ] ~doc)
 
-let no_ite_for_select =
-  let doc = "do not use ite for select" in
-  Arg.(value & flag & info [ "no-ite-for-select" ] ~doc)
+let use_ite_for_select =
+  let doc = "Use ite for select" in
+  Arg.(value & flag & info [ "use-ite-for-select" ] ~doc)
 
 (* shared symbolic parameters *)
 
@@ -289,8 +289,8 @@ let symbolic_parameters default_entry_point =
   and+ model_out_file
   and+ with_breadcrumbs
   and+ invoke_with_symbols
-  and+ no_ite_for_select in
-  if no_ite_for_select then Interpret.unset_use_ite_for_select ();
+  and+ use_ite_for_select in
+  if use_ite_for_select then Interpret.set_use_ite_for_select ();
   { Cmd_sym.unsafe
   ; rac
   ; srac

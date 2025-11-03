@@ -7,9 +7,9 @@
 open Types
 open Binary
 
-let use_ite_for_select = ref true
+let use_ite_for_select = ref false
 
-let unset_use_ite_for_select () = use_ite_for_select := false
+let set_use_ite_for_select () = use_ite_for_select := true
 
 module Make (P : Interpret_intf.P) :
   Interpret_intf.S
