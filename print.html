@@ -1777,7 +1777,7 @@ COMMANDS
        conc [OPTION]… FILE
            Run the concolic interpreter
 
-       fmt [OPTION]… FILE…
+       fmt [--inplace] [OPTION]… FILE…
            Format a .wat or .wast file
 
        instrument COMMAND …
@@ -1797,7 +1797,7 @@ COMMANDS
        rust [OPTION]… FILE…
            Compile a Rust file to Wasm and run the symbolic interpreter on it
 
-       script [OPTION]… FILE…
+       script [--no-exhaustion] [OPTION]… FILE…
            Run a reference test suite script
 
        sym [OPTION]… FILE
@@ -1813,11 +1813,11 @@ COMMANDS
        version [OPTION]…
            Print some version informations
 
-       wasm2wat [OPTION]… FILE
+       wasm2wat [--emit-file] [--output=FILE] [OPTION]… FILE
            Generate a text format file (.wat) from a binary format file
            (.wasm)
 
-       wat2wasm [OPTION]… FILE
+       wat2wasm [--output=FILE] [--unsafe] [OPTION]… FILE
            Generate a binary format file (.wasm) from a text format file
            (.wat)
 
@@ -1857,10 +1857,10 @@ SYNOPSIS
        owi analyze COMMAND …
 
 COMMANDS
-       cfg [OPTION]… FILE
+       cfg [--entry-point=FUNCTION] [OPTION]… FILE
            Build a Control-Flow Graph
 
-       cg [OPTION]… FILE
+       cg [--call-graph-mode=VAL] [--entry-point=FUNCTION] [OPTION]… FILE
            Build a call graph
 
 COMMON OPTIONS
@@ -1904,12 +1904,6 @@ ARGUMENTS
            source files
 
 OPTIONS
-       --bench
-           enable benchmarks
-
-       --color=WHEN (absent=auto)
-           Colorize the output. WHEN must be one of auto, always or never.
-
        --concolic
            concolic mode
 
@@ -1970,9 +1964,6 @@ OPTIONS
        --property=FILE
            property file
 
-       -q, --quiet
-           Be quiet. Takes over -v and --verbosity.
-
        --rac
            runtime assertion checking mode
 
@@ -1989,14 +1980,6 @@ OPTIONS
        -u, --unsafe
            skip typechecking pass
 
-       -v, --verbose
-           Increase verbosity. Repeatable, but more than twice does not bring
-           more.
-
-       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
-           Be more or less verbose. LEVEL must be one of quiet, error,
-           warning, info or debug. Takes over -v.
-
        -w VAL, --workers=VAL (absent=n)
            number of workers for symbolic execution. Defaults to the number
            of physical cores.
@@ -2008,10 +1991,27 @@ OPTIONS
            write results and intermediate compilation artifacts to dir
 
 COMMON OPTIONS
+       --bench
+           enable benchmarks
+
+       --color=WHEN (absent=auto)
+           Colorize the output. WHEN must be one of auto, always or never.
+
        --help[=FMT] (default=auto)
            Show this help in format FMT. The value FMT must be one of auto,
            pager, groff or plain. With auto, the format is pager or plain
            whenever the TERM env var is dumb or undefined.
+
+       -q, --quiet
+           Be quiet. Takes over -v and --verbosity.
+
+       -v, --verbose
+           Increase verbosity. Repeatable, but more than twice does not bring
+           more.
+
+       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
+           Be more or less verbose. LEVEL must be one of quiet, error,
+           warning, info or debug. Takes over -v.
 
        --version
            Show version information.
@@ -2054,12 +2054,6 @@ ARGUMENTS
            source files
 
 OPTIONS
-       --bench
-           enable benchmarks
-
-       --color=WHEN (absent=auto)
-           Colorize the output. WHEN must be one of auto, always or never.
-
        --concolic
            concolic mode
 
@@ -2112,9 +2106,6 @@ OPTIONS
        -O VAL (absent=3)
            specify which optimization level to use
 
-       -q, --quiet
-           Be quiet. Takes over -v and --verbosity.
-
        --rac
            runtime assertion checking mode
 
@@ -2128,14 +2119,6 @@ OPTIONS
        -u, --unsafe
            skip typechecking pass
 
-       -v, --verbose
-           Increase verbosity. Repeatable, but more than twice does not bring
-           more.
-
-       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
-           Be more or less verbose. LEVEL must be one of quiet, error,
-           warning, info or debug. Takes over -v.
-
        -w VAL, --workers=VAL (absent=n)
            number of workers for symbolic execution. Defaults to the number
            of physical cores.
@@ -2147,10 +2130,27 @@ OPTIONS
            write results and intermediate compilation artifacts to dir
 
 COMMON OPTIONS
+       --bench
+           enable benchmarks
+
+       --color=WHEN (absent=auto)
+           Colorize the output. WHEN must be one of auto, always or never.
+
        --help[=FMT] (default=auto)
            Show this help in format FMT. The value FMT must be one of auto,
            pager, groff or plain. With auto, the format is pager or plain
            whenever the TERM env var is dumb or undefined.
+
+       -q, --quiet
+           Be quiet. Takes over -v and --verbosity.
+
+       -v, --verbose
+           Increase verbosity. Repeatable, but more than twice does not bring
+           more.
+
+       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
+           Be more or less verbose. LEVEL must be one of quiet, error,
+           warning, info or debug. Takes over -v.
 
        --version
            Show version information.
@@ -2192,12 +2192,6 @@ ARGUMENTS
            source file
 
 OPTIONS
-       --bench
-           enable benchmarks
-
-       --color=WHEN (absent=auto)
-           Colorize the output. WHEN must be one of auto, always or never.
-
        --deterministic-result-order
            Guarantee a fixed deterministic order of found failures. This
            implies --no-stop-at-failure.
@@ -2235,9 +2229,6 @@ OPTIONS
        --no-value
            do not display a value for each symbol
 
-       -q, --quiet
-           Be quiet. Takes over -v and --verbosity.
-
        --rac
            runtime assertion checking mode
 
@@ -2251,14 +2242,6 @@ OPTIONS
        -u, --unsafe
            skip typechecking pass
 
-       -v, --verbose
-           Increase verbosity. Repeatable, but more than twice does not bring
-           more.
-
-       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
-           Be more or less verbose. LEVEL must be one of quiet, error,
-           warning, info or debug. Takes over -v.
-
        -w VAL, --workers=VAL (absent=n)
            number of workers for symbolic execution. Defaults to the number
            of physical cores.
@@ -2270,10 +2253,27 @@ OPTIONS
            write results and intermediate compilation artifacts to dir
 
 COMMON OPTIONS
+       --bench
+           enable benchmarks
+
+       --color=WHEN (absent=auto)
+           Colorize the output. WHEN must be one of auto, always or never.
+
        --help[=FMT] (default=auto)
            Show this help in format FMT. The value FMT must be one of auto,
            pager, groff or plain. With auto, the format is pager or plain
            whenever the TERM env var is dumb or undefined.
+
+       -q, --quiet
+           Be quiet. Takes over -v and --verbosity.
+
+       -v, --verbose
+           Increase verbosity. Repeatable, but more than twice does not bring
+           more.
+
+       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
+           Be more or less verbose. LEVEL must be one of quiet, error,
+           warning, info or debug. Takes over -v.
 
        --version
            Show version information.
@@ -2308,21 +2308,27 @@ NAME
        owi-fmt - Format a .wat or .wast file
 
 SYNOPSIS
-       owi fmt [OPTION]… FILE…
+       owi fmt [--inplace] [OPTION]… FILE…
 
 ARGUMENTS
        FILE (required)
            source files
 
 OPTIONS
+       -i, --inplace
+           Format in-place, overwriting input file
+
+COMMON OPTIONS
        --bench
            enable benchmarks
 
        --color=WHEN (absent=auto)
            Colorize the output. WHEN must be one of auto, always or never.
 
-       -i, --inplace
-           Format in-place, overwriting input file
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
+           whenever the TERM env var is dumb or undefined.
 
        -q, --quiet
            Be quiet. Takes over -v and --verbosity.
@@ -2334,12 +2340,6 @@ OPTIONS
        --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
            Be more or less verbose. LEVEL must be one of quiet, error,
            warning, info or debug. Takes over -v.
-
-COMMON OPTIONS
-       --help[=FMT] (default=auto)
-           Show this help in format FMT. The value FMT must be one of auto,
-           pager, groff or plain. With auto, the format is pager or plain
-           whenever the TERM env var is dumb or undefined.
 
        --version
            Show version information.
@@ -2377,11 +2377,11 @@ SYNOPSIS
        owi instrument COMMAND …
 
 COMMANDS
-       label [OPTION]… FILE
+       label [--criteria=VAL] [--unsafe] [OPTION]… FILE
            Generate an instrumented file with labels corresponding to test
            objectives for a given coverage criteria.
 
-       rac [OPTION]… FILE…
+       rac [--symbolic] [--unsafe] [OPTION]… FILE…
            Generate an instrumented file with runtime assertion checking
            coming from Weasel specifications
 
@@ -2426,12 +2426,6 @@ ARGUMENTS
            source files
 
 OPTIONS
-       --bench
-           enable benchmarks
-
-       --color=WHEN (absent=auto)
-           Colorize the output. WHEN must be one of auto, always or never.
-
        --deterministic-result-order
            Guarantee a fixed deterministic order of found failures. This
            implies --no-stop-at-failure.
@@ -2462,23 +2456,12 @@ OPTIONS
        --no-value
            do not display a value for each symbol
 
-       -q, --quiet
-           Be quiet. Takes over -v and --verbosity.
-
        -s VALUE, --solver=VALUE (absent=Z3)
            SMT solver to use. VALUE must be one of the 5 available solvers:
            Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo
 
        -u, --unsafe
            skip typechecking pass
-
-       -v, --verbose
-           Increase verbosity. Repeatable, but more than twice does not bring
-           more.
-
-       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
-           Be more or less verbose. LEVEL must be one of quiet, error,
-           warning, info or debug. Takes over -v.
 
        -w VAL, --workers=VAL (absent=n)
            number of workers for symbolic execution. Defaults to the number
@@ -2491,10 +2474,27 @@ OPTIONS
            write results and intermediate compilation artifacts to dir
 
 COMMON OPTIONS
+       --bench
+           enable benchmarks
+
+       --color=WHEN (absent=auto)
+           Colorize the output. WHEN must be one of auto, always or never.
+
        --help[=FMT] (default=auto)
            Show this help in format FMT. The value FMT must be one of auto,
            pager, groff or plain. With auto, the format is pager or plain
            whenever the TERM env var is dumb or undefined.
+
+       -q, --quiet
+           Be quiet. Takes over -v and --verbosity.
+
+       -v, --verbose
+           Increase verbosity. Repeatable, but more than twice does not bring
+           more.
+
+       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
+           Be more or less verbose. LEVEL must be one of quiet, error,
+           warning, info or debug. Takes over -v.
 
        --version
            Show version information.
@@ -2537,12 +2537,6 @@ ARGUMENTS
            source file
 
 OPTIONS
-       --bench
-           enable benchmarks
-
-       --color=WHEN (absent=auto)
-           Colorize the output. WHEN must be one of auto, always or never.
-
        --entry-point=FUNCTION
            entry point of the executable
 
@@ -2550,14 +2544,26 @@ OPTIONS
            Invoke the entry point of the program with symbolic values instead
            of dummy constants.
 
-       -q, --quiet
-           Be quiet. Takes over -v and --verbosity.
-
        --replay-file=FILE (required)
            Which replay file to use
 
        -u, --unsafe
            skip typechecking pass
+
+COMMON OPTIONS
+       --bench
+           enable benchmarks
+
+       --color=WHEN (absent=auto)
+           Colorize the output. WHEN must be one of auto, always or never.
+
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
+           whenever the TERM env var is dumb or undefined.
+
+       -q, --quiet
+           Be quiet. Takes over -v and --verbosity.
 
        -v, --verbose
            Increase verbosity. Repeatable, but more than twice does not bring
@@ -2566,12 +2572,6 @@ OPTIONS
        --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
            Be more or less verbose. LEVEL must be one of quiet, error,
            warning, info or debug. Takes over -v.
-
-COMMON OPTIONS
-       --help[=FMT] (default=auto)
-           Show this help in format FMT. The value FMT must be one of auto,
-           pager, groff or plain. With auto, the format is pager or plain
-           whenever the TERM env var is dumb or undefined.
 
        --version
            Show version information.
@@ -2613,15 +2613,6 @@ ARGUMENTS
            source file
 
 OPTIONS
-       --bench
-           enable benchmarks
-
-       --color=WHEN (absent=auto)
-           Colorize the output. WHEN must be one of auto, always or never.
-
-       -q, --quiet
-           Be quiet. Takes over -v and --verbosity.
-
        --rac
            runtime assertion checking mode
 
@@ -2634,6 +2625,21 @@ OPTIONS
        -u, --unsafe
            skip typechecking pass
 
+COMMON OPTIONS
+       --bench
+           enable benchmarks
+
+       --color=WHEN (absent=auto)
+           Colorize the output. WHEN must be one of auto, always or never.
+
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
+           whenever the TERM env var is dumb or undefined.
+
+       -q, --quiet
+           Be quiet. Takes over -v and --verbosity.
+
        -v, --verbose
            Increase verbosity. Repeatable, but more than twice does not bring
            more.
@@ -2641,12 +2647,6 @@ OPTIONS
        --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
            Be more or less verbose. LEVEL must be one of quiet, error,
            warning, info or debug. Takes over -v.
-
-COMMON OPTIONS
-       --help[=FMT] (default=auto)
-           Show this help in format FMT. The value FMT must be one of auto,
-           pager, groff or plain. With auto, the format is pager or plain
-           whenever the TERM env var is dumb or undefined.
 
        --version
            Show version information.
@@ -2689,12 +2689,6 @@ ARGUMENTS
            source files
 
 OPTIONS
-       --bench
-           enable benchmarks
-
-       --color=WHEN (absent=auto)
-           Colorize the output. WHEN must be one of auto, always or never.
-
        --concolic
            concolic mode
 
@@ -2747,9 +2741,6 @@ OPTIONS
        -O VAL (absent=3)
            specify which optimization level to use
 
-       -q, --quiet
-           Be quiet. Takes over -v and --verbosity.
-
        --rac
            runtime assertion checking mode
 
@@ -2763,14 +2754,6 @@ OPTIONS
        -u, --unsafe
            skip typechecking pass
 
-       -v, --verbose
-           Increase verbosity. Repeatable, but more than twice does not bring
-           more.
-
-       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
-           Be more or less verbose. LEVEL must be one of quiet, error,
-           warning, info or debug. Takes over -v.
-
        -w VAL, --workers=VAL (absent=n)
            number of workers for symbolic execution. Defaults to the number
            of physical cores.
@@ -2782,10 +2765,27 @@ OPTIONS
            write results and intermediate compilation artifacts to dir
 
 COMMON OPTIONS
+       --bench
+           enable benchmarks
+
+       --color=WHEN (absent=auto)
+           Colorize the output. WHEN must be one of auto, always or never.
+
        --help[=FMT] (default=auto)
            Show this help in format FMT. The value FMT must be one of auto,
            pager, groff or plain. With auto, the format is pager or plain
            whenever the TERM env var is dumb or undefined.
+
+       -q, --quiet
+           Be quiet. Takes over -v and --verbosity.
+
+       -v, --verbose
+           Increase verbosity. Repeatable, but more than twice does not bring
+           more.
+
+       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
+           Be more or less verbose. LEVEL must be one of quiet, error,
+           warning, info or debug. Takes over -v.
 
        --version
            Show version information.
@@ -2820,21 +2820,27 @@ NAME
        owi-script - Run a reference test suite script
 
 SYNOPSIS
-       owi script [OPTION]… FILE…
+       owi script [--no-exhaustion] [OPTION]… FILE…
 
 ARGUMENTS
        FILE (required)
            source files
 
 OPTIONS
+       --no-exhaustion
+           no exhaustion tests
+
+COMMON OPTIONS
        --bench
            enable benchmarks
 
        --color=WHEN (absent=auto)
            Colorize the output. WHEN must be one of auto, always or never.
 
-       --no-exhaustion
-           no exhaustion tests
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
+           whenever the TERM env var is dumb or undefined.
 
        -q, --quiet
            Be quiet. Takes over -v and --verbosity.
@@ -2846,12 +2852,6 @@ OPTIONS
        --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
            Be more or less verbose. LEVEL must be one of quiet, error,
            warning, info or debug. Takes over -v.
-
-COMMON OPTIONS
-       --help[=FMT] (default=auto)
-           Show this help in format FMT. The value FMT must be one of auto,
-           pager, groff or plain. With auto, the format is pager or plain
-           whenever the TERM env var is dumb or undefined.
 
        --version
            Show version information.
@@ -2893,12 +2893,6 @@ ARGUMENTS
            source file
 
 OPTIONS
-       --bench
-           enable benchmarks
-
-       --color=WHEN (absent=auto)
-           Colorize the output. WHEN must be one of auto, always or never.
-
        --deterministic-result-order
            Guarantee a fixed deterministic order of found failures. This
            implies --no-stop-at-failure.
@@ -2936,9 +2930,6 @@ OPTIONS
        --no-value
            do not display a value for each symbol
 
-       -q, --quiet
-           Be quiet. Takes over -v and --verbosity.
-
        --rac
            runtime assertion checking mode
 
@@ -2952,14 +2943,6 @@ OPTIONS
        -u, --unsafe
            skip typechecking pass
 
-       -v, --verbose
-           Increase verbosity. Repeatable, but more than twice does not bring
-           more.
-
-       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
-           Be more or less verbose. LEVEL must be one of quiet, error,
-           warning, info or debug. Takes over -v.
-
        -w VAL, --workers=VAL (absent=n)
            number of workers for symbolic execution. Defaults to the number
            of physical cores.
@@ -2971,10 +2954,27 @@ OPTIONS
            write results and intermediate compilation artifacts to dir
 
 COMMON OPTIONS
+       --bench
+           enable benchmarks
+
+       --color=WHEN (absent=auto)
+           Colorize the output. WHEN must be one of auto, always or never.
+
        --help[=FMT] (default=auto)
            Show this help in format FMT. The value FMT must be one of auto,
            pager, groff or plain. With auto, the format is pager or plain
            whenever the TERM env var is dumb or undefined.
+
+       -q, --quiet
+           Be quiet. Takes over -v and --verbosity.
+
+       -v, --verbose
+           Increase verbosity. Repeatable, but more than twice does not bring
+           more.
+
+       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
+           Be more or less verbose. LEVEL must be one of quiet, error,
+           warning, info or debug. Takes over -v.
 
        --version
            Show version information.
@@ -3015,12 +3015,17 @@ ARGUMENTS
        FILE (required)
            source files
 
-OPTIONS
+COMMON OPTIONS
        --bench
            enable benchmarks
 
        --color=WHEN (absent=auto)
            Colorize the output. WHEN must be one of auto, always or never.
+
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
+           whenever the TERM env var is dumb or undefined.
 
        -q, --quiet
            Be quiet. Takes over -v and --verbosity.
@@ -3032,12 +3037,6 @@ OPTIONS
        --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
            Be more or less verbose. LEVEL must be one of quiet, error,
            warning, info or debug. Takes over -v.
-
-COMMON OPTIONS
-       --help[=FMT] (default=auto)
-           Show this help in format FMT. The value FMT must be one of auto,
-           pager, groff or plain. With auto, the format is pager or plain
-           whenever the TERM env var is dumb or undefined.
 
        --version
            Show version information.
@@ -3074,12 +3073,17 @@ NAME
 SYNOPSIS
        owi version [OPTION]…
 
-OPTIONS
+COMMON OPTIONS
        --bench
            enable benchmarks
 
        --color=WHEN (absent=auto)
            Colorize the output. WHEN must be one of auto, always or never.
+
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
+           whenever the TERM env var is dumb or undefined.
 
        -q, --quiet
            Be quiet. Takes over -v and --verbosity.
@@ -3091,12 +3095,6 @@ OPTIONS
        --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
            Be more or less verbose. LEVEL must be one of quiet, error,
            warning, info or debug. Takes over -v.
-
-COMMON OPTIONS
-       --help[=FMT] (default=auto)
-           Show this help in format FMT. The value FMT must be one of auto,
-           pager, groff or plain. With auto, the format is pager or plain
-           whenever the TERM env var is dumb or undefined.
 
        --version
            Show version information.
@@ -3132,24 +3130,30 @@ NAME
        file (.wasm)
 
 SYNOPSIS
-       owi wasm2wat [OPTION]… FILE
+       owi wasm2wat [--emit-file] [--output=FILE] [OPTION]… FILE
 
 ARGUMENTS
        FILE (required)
            source file
 
 OPTIONS
+       --emit-file
+           Emit (.wat) files from corresponding (.wasm) files.
+
+       -o FILE, --output=FILE
+           Output the generated .wasm or .wat to FILE.
+
+COMMON OPTIONS
        --bench
            enable benchmarks
 
        --color=WHEN (absent=auto)
            Colorize the output. WHEN must be one of auto, always or never.
 
-       --emit-file
-           Emit (.wat) files from corresponding (.wasm) files.
-
-       -o FILE, --output=FILE
-           Output the generated .wasm or .wat to FILE.
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
+           whenever the TERM env var is dumb or undefined.
 
        -q, --quiet
            Be quiet. Takes over -v and --verbosity.
@@ -3161,12 +3165,6 @@ OPTIONS
        --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
            Be more or less verbose. LEVEL must be one of quiet, error,
            warning, info or debug. Takes over -v.
-
-COMMON OPTIONS
-       --help[=FMT] (default=auto)
-           Show this help in format FMT. The value FMT must be one of auto,
-           pager, groff or plain. With auto, the format is pager or plain
-           whenever the TERM env var is dumb or undefined.
 
        --version
            Show version information.
@@ -3202,27 +3200,33 @@ NAME
        format file (.wat)
 
 SYNOPSIS
-       owi wat2wasm [OPTION]… FILE
+       owi wat2wasm [--output=FILE] [--unsafe] [OPTION]… FILE
 
 ARGUMENTS
        FILE (required)
            source file
 
 OPTIONS
+       -o FILE, --output=FILE
+           Output the generated .wasm or .wat to FILE.
+
+       -u, --unsafe
+           skip typechecking pass
+
+COMMON OPTIONS
        --bench
            enable benchmarks
 
        --color=WHEN (absent=auto)
            Colorize the output. WHEN must be one of auto, always or never.
 
-       -o FILE, --output=FILE
-           Output the generated .wasm or .wat to FILE.
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
+           whenever the TERM env var is dumb or undefined.
 
        -q, --quiet
            Be quiet. Takes over -v and --verbosity.
-
-       -u, --unsafe
-           skip typechecking pass
 
        -v, --verbose
            Increase verbosity. Repeatable, but more than twice does not bring
@@ -3231,12 +3235,6 @@ OPTIONS
        --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
            Be more or less verbose. LEVEL must be one of quiet, error,
            warning, info or debug. Takes over -v.
-
-COMMON OPTIONS
-       --help[=FMT] (default=auto)
-           Show this help in format FMT. The value FMT must be one of auto,
-           pager, groff or plain. With auto, the format is pager or plain
-           whenever the TERM env var is dumb or undefined.
 
        --version
            Show version information.
@@ -3279,12 +3277,6 @@ ARGUMENTS
            source files
 
 OPTIONS
-       --bench
-           enable benchmarks
-
-       --color=WHEN (absent=auto)
-           Colorize the output. WHEN must be one of auto, always or never.
-
        --concolic
            concolic mode
 
@@ -3331,9 +3323,6 @@ OPTIONS
        -o FILE, --output=FILE
            Output the generated .wasm or .wat to FILE.
 
-       -q, --quiet
-           Be quiet. Takes over -v and --verbosity.
-
        --rac
            runtime assertion checking mode
 
@@ -3347,14 +3336,6 @@ OPTIONS
        -u, --unsafe
            skip typechecking pass
 
-       -v, --verbose
-           Increase verbosity. Repeatable, but more than twice does not bring
-           more.
-
-       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
-           Be more or less verbose. LEVEL must be one of quiet, error,
-           warning, info or debug. Takes over -v.
-
        -w VAL, --workers=VAL (absent=n)
            number of workers for symbolic execution. Defaults to the number
            of physical cores.
@@ -3366,10 +3347,27 @@ OPTIONS
            write results and intermediate compilation artifacts to dir
 
 COMMON OPTIONS
+       --bench
+           enable benchmarks
+
+       --color=WHEN (absent=auto)
+           Colorize the output. WHEN must be one of auto, always or never.
+
        --help[=FMT] (default=auto)
            Show this help in format FMT. The value FMT must be one of auto,
            pager, groff or plain. With auto, the format is pager or plain
            whenever the TERM env var is dumb or undefined.
+
+       -q, --quiet
+           Be quiet. Takes over -v and --verbosity.
+
+       -v, --verbose
+           Increase verbosity. Repeatable, but more than twice does not bring
+           more.
+
+       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
+           Be more or less verbose. LEVEL must be one of quiet, error,
+           warning, info or debug. Takes over -v.
 
        --version
            Show version information.

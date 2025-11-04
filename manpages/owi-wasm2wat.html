@@ -183,24 +183,30 @@ NAME
        file (.wasm)
 
 SYNOPSIS
-       owi wasm2wat [OPTION]… FILE
+       owi wasm2wat [--emit-file] [--output=FILE] [OPTION]… FILE
 
 ARGUMENTS
        FILE (required)
            source file
 
 OPTIONS
+       --emit-file
+           Emit (.wat) files from corresponding (.wasm) files.
+
+       -o FILE, --output=FILE
+           Output the generated .wasm or .wat to FILE.
+
+COMMON OPTIONS
        --bench
            enable benchmarks
 
        --color=WHEN (absent=auto)
            Colorize the output. WHEN must be one of auto, always or never.
 
-       --emit-file
-           Emit (.wat) files from corresponding (.wasm) files.
-
-       -o FILE, --output=FILE
-           Output the generated .wasm or .wat to FILE.
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
+           whenever the TERM env var is dumb or undefined.
 
        -q, --quiet
            Be quiet. Takes over -v and --verbosity.
@@ -212,12 +218,6 @@ OPTIONS
        --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
            Be more or less verbose. LEVEL must be one of quiet, error,
            warning, info or debug. Takes over -v.
-
-COMMON OPTIONS
-       --help[=FMT] (default=auto)
-           Show this help in format FMT. The value FMT must be one of auto,
-           pager, groff or plain. With auto, the format is pager or plain
-           whenever the TERM env var is dumb or undefined.
 
        --version
            Show version information.
