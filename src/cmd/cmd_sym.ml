@@ -58,7 +58,18 @@ let run_file ~parameters ~source_file =
     Compile.Binary.until_link ~unsafe ~name:None link_state m
   in
   let m = Symbolic.convert_module_to_run m in
-  Interpret.Symbolic.modul ~timeout:None ~timeout_instr:None link_state.envs m
+  if Log.is_bench_enabled () then
+    let ctime_before = (Unix.times ()).tms_utime in
+    let r =
+      Interpret.Symbolic.modul ~timeout:None ~timeout_instr:None link_state.envs
+        m
+    in
+    let ctime_after = (Unix.times ()).tms_utime -. ctime_before in
+    (r, Some ctime_after)
+  else
+    ( Interpret.Symbolic.modul ~timeout:None ~timeout_instr:None link_state.envs
+        m
+    , None )
 
 let print_bug ~model_format ~model_out_file ~id ~no_value ~no_stop_at_failure
   ~no_assert_failure_expression_printing ~with_breadcrumbs bug =
@@ -242,7 +253,7 @@ let sort_results deterministic_result_order results =
 
 let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
   ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
-  ~workspace ~solver ~model_format ~model_out_file ~with_breadcrumbs
+  ~workspace ~solver ~model_format ~model_out_file ~with_breadcrumbs ~run_time
   (result : unit Symbolic.Choice.t) =
   let thread = Thread_with_memory.init () in
   let res_stack = Ws.make () in
@@ -265,19 +276,24 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
     | (Trap_only | Assertion_only), _ -> ()
   in
   let time_counter = Mtime_clock.counter () in
-  let join_handles =
-    Symbolic_choice_with_memory.run
-      ( match exploration_strategy with
-      | LIFO -> (module Wq)
-      | FIFO -> (module Ws)
-      | Random -> (module Wpq) )
-      ~workers solver result thread ~callback
-      ~callback_init:(fun () -> Ws.make_pledge res_stack)
-      ~callback_end:(fun () -> Ws.end_pledge res_stack)
-  in
-  let results =
-    Ws.read_as_seq res_stack ~finalizer:(fun () ->
-      Array.iter Domain.join join_handles )
+  let results, interpreter_time =
+    let time_before = (Unix.times ()).tms_utime in
+    let join_handles =
+      Symbolic_choice_with_memory.run
+        ( match exploration_strategy with
+        | LIFO -> (module Wq)
+        | FIFO -> (module Ws)
+        | Random -> (module Wpq) )
+        ~workers solver result thread ~callback
+        ~callback_init:(fun () -> Ws.make_pledge res_stack)
+        ~callback_end:(fun () -> Ws.end_pledge res_stack)
+    in
+    let results =
+      Ws.read_as_seq res_stack ~finalizer:(fun () ->
+        Array.iter Domain.join join_handles )
+    in
+    let time_after = (Unix.times ()).tms_utime in
+    (results, time_after -. time_before)
   in
   let results = sort_results deterministic_result_order results in
   Log.bench (fun m ->
@@ -289,10 +305,13 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
   in
   Log.info (fun m -> m "Completed paths: %d" (Atomic.get path_count));
 
-  Log.bench (fun m -> m "Benchmark : ");
   Log.bench (fun m ->
     let bench_stats = Thread_with_memory.bench_stats thread in
-    m "solver time: %a" Mtime.Span.pp (Atomic.get bench_stats.solver_time) );
+    let run_time = Option.value ~default:0. run_time in
+    m "Benchmarks:@\n@[<v>solver time: %a@;interpreter time: %f@;@]"
+      Mtime.Span.pp
+      (Atomic.get bench_stats.solver_time)
+      (interpreter_time +. run_time) );
   let+ () = if count > 0 then Error (`Found_bug count) else Ok () in
   Log.app (fun m -> m "All OK!")
 
@@ -301,7 +320,7 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
              which are handled here. Most of the computations are done in the Result
              monad, hence the let*. *)
 let cmd ~parameters ~source_file =
-  let* result : unit Symbolic.Choice.t = run_file ~parameters ~source_file in
+  let* result, run_time = run_file ~parameters ~source_file in
 
   let { exploration_strategy
       ; fail_mode
@@ -334,4 +353,4 @@ let cmd ~parameters ~source_file =
   handle_result ~exploration_strategy ~fail_mode ~workers ~solver
     ~deterministic_result_order ~model_format ~no_value
     ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
-    ~model_out_file ~with_breadcrumbs result
+    ~model_out_file ~with_breadcrumbs ~run_time result

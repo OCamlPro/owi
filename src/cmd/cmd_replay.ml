@@ -221,7 +221,20 @@ let run_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
   let* m, link_state =
     Compile.Binary.until_link ~unsafe link_state ~name:None m
   in
-  Interpret.Concrete.modul ~timeout:None ~timeout_instr:None link_state.envs m
+  if Log.is_bench_enabled () then
+    let before_time = (Unix.times ()).tms_utime in
+    let+ () =
+      Interpret.Concrete.modul ~timeout:None ~timeout_instr:None link_state.envs
+        m
+    in
+    let after_time = (Unix.times ()).tms_utime in
+    Some (after_time -. before_time)
+  else
+    let+ () =
+      Interpret.Concrete.modul ~timeout:None ~timeout_instr:None link_state.envs
+        m
+    in
+    None
 
 let parse_model replay_file =
   let* parse_fn =
@@ -264,7 +277,11 @@ let parse_model replay_file =
 
 let cmd ~unsafe ~replay_file ~source_file ~entry_point ~invoke_with_symbols =
   let* model = parse_model replay_file in
-  let+ () =
+  let+ run_time =
     run_file ~unsafe ~entry_point ~invoke_with_symbols source_file model
   in
-  Log.app (fun m -> m "All OK!")
+  Log.app (fun m -> m "All OK!");
+  Log.bench (fun m ->
+    match run_time with
+    | None -> ()
+    | Some t -> m "Benchmarks:@[<v>interpreter time:%f@]" t )
