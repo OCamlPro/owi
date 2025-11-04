@@ -45,6 +45,7 @@ val handle_result :
   -> model_format:Cmd_utils.model_format
   -> model_out_file:Fpath.t option
   -> with_breadcrumbs:bool
+  -> run_time:float option
   -> unit Symbolic.Choice.t
   -> unit Result.t
 
