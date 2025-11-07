@@ -679,7 +679,7 @@ let contract_generate (owi_funcs : (string * int) array) (m : Module.t)
       Local_get (Raw i) |> Annotated.dummy )
     @ [ Call (Raw old_index) |> Annotated.dummy ]
     @ List.init (Array.length tenv.result_types) (fun i ->
-        Local_set (tenv.result i) |> Annotated.dummy )
+      Local_set (tenv.result i) |> Annotated.dummy )
   in
   let return =
     List.init (Array.length tenv.result_types) (fun i ->

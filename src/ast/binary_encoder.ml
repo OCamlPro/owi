@@ -199,12 +199,11 @@ let rec write_instr buf instr =
   | If_else (_str, bt, expr1, expr2) ->
     add_char '\x04';
     write_block_type buf bt;
-    begin
-      match expr2.raw with
-      | [] -> write_expr buf expr1 ~end_op_code:None
-      | _ ->
-        write_expr buf expr1 ~end_op_code:(Some '\x05');
-        write_expr buf expr2 ~end_op_code:None
+    begin match expr2.raw with
+    | [] -> write_expr buf expr1 ~end_op_code:None
+    | _ ->
+      write_expr buf expr1 ~end_op_code:(Some '\x05');
+      write_expr buf expr2 ~end_op_code:None
     end
   | Br idx -> write_char_indice buf '\x0C' idx
   | Br_if idx -> write_char_indice buf '\x0D' idx

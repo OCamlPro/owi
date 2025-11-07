@@ -49,7 +49,7 @@ depends: [
   "bisect_ppx" {>= "2.5" & with-dev-setup}
   "crowbar" {with-dev-setup}
   "landmarks-ppx" {with-dev-setup}
-  "ocamlformat" {>= "0.27" & with-dev-setup}
+  "ocamlformat" {>= "0.28" & with-dev-setup}
   "ocb" {>= "0.1" & with-dev-setup}
 ]
 build: [

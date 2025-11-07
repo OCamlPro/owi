@@ -13,32 +13,31 @@ let select ((c, s) : Value.bool) ~(if_true : Value.t) ~(if_false : Value.t) :
   Value.t Choice.t =
   (* TODO / Think: this should probably be an ite expression in the symbolic part ? *)
   let select if_true if_false = if c then fst if_true else fst if_false in
-  begin
-    match (if_true, if_false) with
-    | I32 if_true, I32 if_false ->
-      Value.I32
-        ( select if_true if_false
-        , Symbolic_value.Bool.select_expr s ~if_true:(snd if_true)
-            ~if_false:(snd if_false) )
-    | I64 if_true, I64 if_false ->
-      Value.I64
-        ( select if_true if_false
-        , Symbolic_value.Bool.select_expr s ~if_true:(snd if_true)
-            ~if_false:(snd if_false) )
-    | F32 if_true, F32 if_false ->
-      Value.F32
-        ( select if_true if_false
-        , Symbolic_value.Bool.select_expr s ~if_true:(snd if_true)
-            ~if_false:(snd if_false) )
-    | F64 if_true, F64 if_false ->
-      Value.F64
-        ( select if_true if_false
-        , Symbolic_value.Bool.select_expr s ~if_true:(snd if_true)
-            ~if_false:(snd if_false) )
-    | Ref _, Ref _ ->
-      (* Concretization: add something to the PC *)
-      Fmt.failwith "TODO"
-    | _, _ -> assert false
+  begin match (if_true, if_false) with
+  | I32 if_true, I32 if_false ->
+    Value.I32
+      ( select if_true if_false
+      , Symbolic_value.Bool.select_expr s ~if_true:(snd if_true)
+          ~if_false:(snd if_false) )
+  | I64 if_true, I64 if_false ->
+    Value.I64
+      ( select if_true if_false
+      , Symbolic_value.Bool.select_expr s ~if_true:(snd if_true)
+          ~if_false:(snd if_false) )
+  | F32 if_true, F32 if_false ->
+    Value.F32
+      ( select if_true if_false
+      , Symbolic_value.Bool.select_expr s ~if_true:(snd if_true)
+          ~if_false:(snd if_false) )
+  | F64 if_true, F64 if_false ->
+    Value.F64
+      ( select if_true if_false
+      , Symbolic_value.Bool.select_expr s ~if_true:(snd if_true)
+          ~if_false:(snd if_false) )
+  | Ref _, Ref _ ->
+    (* Concretization: add something to the PC *)
+    Fmt.failwith "TODO"
+  | _, _ -> assert false
   end
   |> Choice.return
 

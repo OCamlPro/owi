@@ -14,10 +14,9 @@ let cmd ~source_file ~emit_file ~out_file =
     let* m = Parse.Binary.Module.from_file source_file in
     let m = Binary_to_text.modul m in
     let outname, output =
-      begin
-        match out_file with
-        | Some name -> (name, true)
-        | None -> (wat_file, false)
+      begin match out_file with
+      | Some name -> (name, true)
+      | None -> (wat_file, false)
       end
     in
     if emit_file || output then
