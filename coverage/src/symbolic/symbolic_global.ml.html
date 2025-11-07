@@ -175,16 +175,16 @@ type collection = t ITbl.t Env_id.Tbl.t
 
 let init () = <span data-count="942">E</span>nv_id.Tbl.create 0
 
-let global_copy r = <span data-count="28017">{</span> r with value = r.value }
+let global_copy r = <span data-count="27510">{</span> r with value = r.value }
 
 let clone collection =
   (* TODO: this is ugly and should be rewritten... *)
-  <span data-count="28896">l</span>et s = Env_id.Tbl.to_seq collection in
-  <span data-count="28892">E</span>nv_id.Tbl.of_seq
-  @@ Seq.ma<span data-count="28890">p</span>
+  <span data-count="28388">l</span>et s = Env_id.Tbl.to_seq collection in
+  <span data-count="28388">E</span>nv_id.Tbl.of_seq
+  @@ Seq.ma<span data-count="28388">p</span>
        (fun (i, t) -&gt;
-         <span data-count="27997">l</span>et s = ITbl.to_seq t in
-         <span data-count="27996">(</span>i, ITbl.of_se<span data-count="27998">q</span> @@ Seq.ma<span data-count="27995">p</span> (fun (i, a) -&gt; <span data-count="28016">(</span>i, global_cop<span data-count="28014">y</span> a)) s) )
+         <span data-count="27492">l</span>et s = ITbl.to_seq t in
+         <span data-count="27491">(</span>i, ITbl.of_se<span data-count="27491">q</span> @@ Seq.ma<span data-count="27492">p</span> (fun (i, a) -&gt; <span data-count="27510">(</span>i, global_cop<span data-count="27510">y</span> a)) s) )
        s
 
 let convert_values (v : Concrete_value.t) : Symbolic_value.t =
@@ -202,29 +202,29 @@ let convert (orig_global : Concrete_global.t) : t =
   <span data-count="689">{</span> value = convert_value<span data-count="689">s</span> orig_global.value; orig = orig_global }
 
 let get_env env_id tables =
-  <span data-count="5275">m</span>atch Env_id.Tbl.find_opt tables env_id with
-  | <span data-count="4588">S</span>ome env -&gt; env
+  <span data-count="5029">m</span>atch Env_id.Tbl.find_opt tables env_id with
+  | <span data-count="4343">S</span>ome env -&gt; env
   | <span data-count="686">N</span>one -&gt;
     let t = ITbl.create 0 in
     <span data-count="686">E</span>nv_id.Tbl.add tables env_id t;
     <span data-count="686">t</span>
 
 let get_global env_id (orig_global : Concrete_global.t) collection g_id =
-  <span data-count="5275">l</span>et env = get_env env_id collection in
-  <span data-count="5274">m</span>atch ITbl.find_opt env g_id with
-  | <span data-count="4585">S</span>ome t -&gt; t
+  <span data-count="5029">l</span>et env = get_env env_id collection in
+  <span data-count="5029">m</span>atch ITbl.find_opt env g_id with
+  | <span data-count="4340">S</span>ome t -&gt; t
   | <span data-count="689">N</span>one -&gt;
     let t = convert orig_global in
     <span data-count="689">I</span>Tbl.add env g_id t;
     <span data-count="689">t</span>
 
-let value v = <span data-count="1532">v</span>.value
+let value v = <span data-count="1533">v</span>.value
 
-let set_value v x = <span data-count="3743">v</span>.value &lt;- x
+let set_value v x = <span data-count="3495">v</span>.value &lt;- x
 
 let mut v = <span data-count="0">v</span>.orig.mut
 
-let typ v = <span data-count="2048">v</span>.orig.typ
+let typ v = <span data-count="1801">v</span>.orig.typ
 </code></pre>
       </div>
     </div>
