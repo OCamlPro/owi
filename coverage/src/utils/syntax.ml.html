@@ -304,12 +304,12 @@ let array_map f a =
   try
     o<span data-count="218">k</span>
     @@ Array.ini<span data-count="218">t</span> (Array.lengt<span data-count="220">h</span> a) (fun i -&gt;
-         <span data-count="16365">l</span>et v = Array.get a i in
-         <span data-count="16365">m</span>atch f v with
-         | <span data-count="2">E</span>rror _e as e -&gt;
-           err := Some e;
-           raise Exit
-         | <span data-count="16363">O</span>k v -&gt; v )
+      <span data-count="16365">l</span>et v = Array.get a i in
+      <span data-count="16365">m</span>atch f v with
+      | <span data-count="2">E</span>rror _e as e -&gt;
+        err := Some e;
+        raise Exit
+      | <span data-count="16363">O</span>k v -&gt; v )
   with <span data-count="2">E</span>xit -&gt; ( match !err with None -&gt; assert false | <span data-count="2">S</span>ome e -&gt; e )
 [@@inline]
 

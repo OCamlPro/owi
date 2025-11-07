@@ -18,17 +18,17 @@
       <h2>21.74%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:24.14%"></span>
-      <span class="unvisited" style="top:41.38%"></span>
-      <span class="unvisited" style="top:44.83%"></span>
-      <span class="unvisited" style="top:48.28%"></span>
-      <span class="unvisited" style="bottom:48.28%"></span>
-      <span class="unvisited" style="bottom:41.38%"></span>
-      <span class="unvisited" style="bottom:31.03%"></span>
-      <span class="unvisited" style="bottom:27.59%"></span>
-      <span class="unvisited" style="bottom:24.14%"></span>
-      <span class="unvisited" style="bottom:17.24%"></span>
-      <span class="unvisited" style="bottom:13.79%"></span>
+      <span class="unvisited" style="top:25.00%"></span>
+      <span class="unvisited" style="top:42.86%"></span>
+      <span class="unvisited" style="top:46.43%"></span>
+      <span class="unvisited" style="top:50.00%"></span>
+      <span class="unvisited" style="bottom:46.43%"></span>
+      <span class="unvisited" style="bottom:42.86%"></span>
+      <span class="unvisited" style="bottom:32.14%"></span>
+      <span class="unvisited" style="bottom:28.57%"></span>
+      <span class="unvisited" style="bottom:25.00%"></span>
+      <span class="unvisited" style="bottom:17.86%"></span>
+      <span class="unvisited" style="bottom:14.29%"></span>
       <span class="unvisited" style="bottom:0.00%"></span>
     </div>
     <div id="report">
@@ -49,20 +49,19 @@
 <a id="L13"></a><span class="unvisited"> </span>
 <a id="L14"></a><span class="unvisited"> </span>
 <a id="L15"></a><span class="unvisited"> </span>
-<a id="L16"></a><span > </span>
-<a id="L17"></a><span class="unvisited"> </span>
+<a id="L16"></a><span class="unvisited"> </span>
+<a id="L17"></a><span > </span>
 <a id="L18"></a><span > </span>
-<a id="L19"></a><span > </span>
+<a id="L19"></a><span class="unvisited"> </span>
 <a id="L20"></a><span class="unvisited"> </span>
 <a id="L21"></a><span class="unvisited"> </span>
-<a id="L22"></a><span class="unvisited"> </span>
-<a id="L23"></a><span > </span>
+<a id="L22"></a><span > </span>
+<a id="L23"></a><span class="unvisited"> </span>
 <a id="L24"></a><span class="unvisited"> </span>
-<a id="L25"></a><span class="unvisited"> </span>
-<a id="L26"></a><span > </span>
-<a id="L27"></a><span class="visited"> </span>
-<a id="L28"></a><span > </span>
-<a id="L29"></a><span class="unvisited"> </span>
+<a id="L25"></a><span > </span>
+<a id="L26"></a><span class="visited"> </span>
+<a id="L27"></a><span > </span>
+<a id="L28"></a><span class="unvisited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -95,7 +94,6 @@
 <a href="#L26">26</a>
 <a href="#L27">27</a>
 <a href="#L28">28</a>
-<a href="#L29">29</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -110,9 +108,8 @@ let version () = <span data-count="852">s</span>tring_of_version @@ Build_info.V
 let statically_linked_libraries () =
   <span data-count="0">B</span>uild_info.V1.Statically_linked_libraries.to_list ()
   |&gt; <span data-count="0">L</span>ist.map (fun l -&gt;
-       <span data-count="0">(</span> Build_info.V1.Statically_linked_library.nam<span data-count="0">e</span> l
-       , Build_info.V1.Statically_linked_library.version l |&gt; <span data-count="0">s</span>tring_of_versio<span data-count="0">n</span>
-       ) )
+    <span data-count="0">(</span> Build_info.V1.Statically_linked_library.nam<span data-count="0">e</span> l
+    , Build_info.V1.Statically_linked_library.version l |&gt; <span data-count="0">s</span>tring_of_versio<span data-count="0">n</span> ) )
   |&gt; <span data-count="0">L</span>ist.sort (fun (n1, _) (n2, _) -&gt; <span data-count="0">S</span>tring.compare n1 n2)
 
 let pp fmt () =

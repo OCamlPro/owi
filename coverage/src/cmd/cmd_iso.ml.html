@@ -1355,14 +1355,14 @@ let cmd ~deterministic_result_order ~fail_mode ~exploration_strategy ~files
   <span data-count="3">l</span>et funcexports1 =
     module1.exports.func
     |&gt; List.map (fun { Binary.name; id } -&gt;
-         <span data-count="6">l</span>et typ = Binary.Module.get_func_type id module1 in
-         <span data-count="6">(</span>name, typ) )
+      <span data-count="6">l</span>et typ = Binary.Module.get_func_type id module1 in
+      <span data-count="6">(</span>name, typ) )
   in
   <span data-count="3">l</span>et funcexports2 =
     module2.exports.func
     |&gt; List.map (fun { Binary.name; id } -&gt;
-         <span data-count="6">l</span>et typ = Binary.Module.get_func_type id module2 in
-         <span data-count="6">(</span>name, typ) )
+      <span data-count="6">l</span>et typ = Binary.Module.get_func_type id module2 in
+      <span data-count="6">(</span>name, typ) )
   in
 
   <span data-count="3">l</span>et exports_name_1 = List.map fst funcexports1 in

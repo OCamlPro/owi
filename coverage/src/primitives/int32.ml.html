@@ -384,7 +384,7 @@ let ctz n = <span data-count="14">o</span>f_int (Ocaml_intrinsics.Int32.count_tr
 (* Taken from Base *)
 let popcnt =
   let mask = 0xffff_ffffL in
-  fun [@inline] x -&gt;
+  fun[@inline] x -&gt;
     <span data-count="8">I</span>nt64.to_int32 (Int64.popcn<span data-count="8">t</span> (Int64.logan<span data-count="8">d</span> (Int64.of_int3<span data-count="8">2</span> x) mask))
 
 let of_int64 n = <span data-count="0">I</span>nt64.to_int32 n [@@inline]
