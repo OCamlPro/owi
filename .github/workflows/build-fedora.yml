@@ -6,7 +6,6 @@ on:
   push:
     branches:
       - main
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -31,20 +30,13 @@ jobs:
           . "$HOME/.cargo/env"
           rustup target add wasm32-unknown-unknown
 
-          # Clone the repository
           git clone https://github.com/${{ github.repository }}.git
           cd $(basename ${{ github.repository }})
 
-          # Print stuff
-          echo "github.event_name is ${{ github.event_name }}"
-
-          # Fetch the PR or the current branch
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            echo "Fetching PR branch"
             git fetch origin pull/${{ github.event.pull_request.number }}/head:pr-${{ github.event.pull_request.number }}
             git checkout pr-${{ github.event.pull_request.number }}
           else
-            echo "Fetching current branch"
             git checkout ${{ github.ref_name }}
           fi
 
@@ -55,10 +47,8 @@ jobs:
           export OPAMCONFIRMLEVEL=unsafe-yes
           opam update
 
-          # Install system dependencies
+          # Install system and opam-repo dependencies
           opam install . --depext-only --with-test
-
-          # Install opam-repo dependencies
           opam install . --deps-only --with-test
 
           # Build and test

@@ -44,7 +44,7 @@ jobs:
           mkdir zig
           tar xf zig-*.tar.xz -C zig --strip-components 1
           sudo mv zig/* /usr/local/bin/
-          opam install . --depext-only --with-test --with-doc
+          opam install . --depext-only --with-test
       - name: setup
         if: steps.cache-opam.outputs.cache-hit != 'true'
         run: |
