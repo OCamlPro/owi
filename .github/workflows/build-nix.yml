@@ -17,28 +17,18 @@ jobs:
         run: |
           set -x
 
-          # GitHub sucks
-          export HOME=/root
-          cd $HOME
-
           git clone https://github.com/${{ github.repository }}.git
           cd $(basename ${{ github.repository }})
 
-          echo "github.event_name is ${{ github.event_name }}"
-
-          # fetch the current PR/branch
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            echo "Fetching PR branch"
             git fetch origin pull/${{ github.event.pull_request.number }}/head:pr-${{ github.event.pull_request.number }}
             git checkout pr-${{ github.event.pull_request.number }}
           else
-            echo "Fetching current branch"
             git checkout ${{ github.ref_name }}
           fi
 
           git submodule update --init --recursive
 
-          set -x
           nix-shell --run "
             ODOC_WARN_ERROR=true
             dune build @fmt &&
