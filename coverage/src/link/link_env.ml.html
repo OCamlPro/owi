@@ -511,17 +511,17 @@ let recover backup into =
   <span data-count="535">l</span>et _ : _ IMap.t = IMap.merge (appl<span data-count="535">y</span> recover_elem) backup.elem into.elem in
   <span data-count="535">(</span>)
 
-let id (env : _ t) = <span data-count="2343702">e</span>nv.id
+let id (env : _ t) = <span data-count="2344016">e</span>nv.id
 
 let get_global (env : _ t) id =
-  <span data-count="5824">m</span>atch IMap.find_opt id env.globals with
+  <span data-count="6048">m</span>atch IMap.find_opt id env.globals with
   | None -&gt; assert false
-  | <span data-count="5823">S</span>ome v -&gt; Concrete_choice.return v
+  | <span data-count="6048">S</span>ome v -&gt; Concrete_choice.return v
 
 let get_memory (env : _ t) id =
-  <span data-count="4180958">m</span>atch IMap.find_opt id env.memories with
+  <span data-count="4181032">m</span>atch IMap.find_opt id env.memories with
   | None -&gt; assert false
-  | <span data-count="4180946">S</span>ome v -&gt; Concrete_choice.return v
+  | <span data-count="4181029">S</span>ome v -&gt; Concrete_choice.return v
 
 let get_table (env : _ t) id =
   <span data-count="812668">m</span>atch IMap.find_opt id env.tables with
@@ -529,7 +529,7 @@ let get_table (env : _ t) id =
   | <span data-count="812668">S</span>ome v -&gt; Concrete_choice.return v
 
 let get_func (env : _ t) id =
-  <span data-count="5533376">m</span>atch IMap.find_opt id env.functions with None -&gt; assert false | <span data-count="5533375">S</span>ome v -&gt; v
+  <span data-count="5509820">m</span>atch IMap.find_opt id env.functions with None -&gt; assert false | <span data-count="5509820">S</span>ome v -&gt; v
 
 let get_data (env : _ t) id =
   <span data-count="1962">m</span>atch IMap.find_opt id env.data with

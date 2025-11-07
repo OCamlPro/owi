@@ -402,25 +402,25 @@ struct
   module Memory = struct
     include Memory
 
-    let load_8_s m a = <span data-count="569">C</span>hoice.lift_mem @@ load_8_<span data-count="569">s</span> m a
+    let load_8_s m a = <span data-count="571">C</span>hoice.lift_mem @@ load_8_<span data-count="571">s</span> m a
 
-    let load_8_u m a = <span data-count="3361">C</span>hoice.lift_mem @@ load_8_<span data-count="3362">u</span> m a
+    let load_8_u m a = <span data-count="3408">C</span>hoice.lift_mem @@ load_8_<span data-count="3407">u</span> m a
 
     let load_16_s m a = <span data-count="2">C</span>hoice.lift_mem @@ load_16_<span data-count="2">s</span> m a
 
     let load_16_u m a = <span data-count="2">C</span>hoice.lift_mem @@ load_16_<span data-count="2">u</span> m a
 
-    let load_32 m a = <span data-count="73898">C</span>hoice.lift_mem @@ load_3<span data-count="73897">2</span> m a
+    let load_32 m a = <span data-count="73885">C</span>hoice.lift_mem @@ load_3<span data-count="73884">2</span> m a
 
     let load_64 m a = <span data-count="79">C</span>hoice.lift_mem @@ load_6<span data-count="79">4</span> m a
 
-    let store_8 m ~addr v = <span data-count="3176">C</span>hoice.lift_mem @@ store_<span data-count="3174">8</span> m ~addr v
+    let store_8 m ~addr v = <span data-count="3187">C</span>hoice.lift_mem @@ store_<span data-count="3186">8</span> m ~addr v
 
     let store_16 m ~addr v = <span data-count="4">C</span>hoice.lift_mem @@ store_1<span data-count="4">6</span> m ~addr v
 
-    let store_32 m ~addr v = <span data-count="641076">C</span>hoice.lift_mem @@ store_3<span data-count="641074">2</span> m ~addr v
+    let store_32 m ~addr v = <span data-count="641072">C</span>hoice.lift_mem @@ store_3<span data-count="641073">2</span> m ~addr v
 
-    let store_64 m ~addr v = <span data-count="349772">C</span>hoice.lift_mem @@ store_6<span data-count="349773">4</span> m ~addr v
+    let store_64 m ~addr v = <span data-count="349770">C</span>hoice.lift_mem @@ store_6<span data-count="349770">4</span> m ~addr v
 
     let fill m ~pos ~len c = <span data-count="0">C</span>hoice.lift_mem @@ fil<span data-count="0">l</span> m ~pos ~len c
 
@@ -441,12 +441,12 @@ struct
     type t' = Env_id.t
 
     let get_memory env id =
-      <span data-count="2156609">m</span>atch Link_env.get_memory env id with
+      <span data-count="2156673">m</span>atch Link_env.get_memory env id with
       | <span data-count="0">E</span>rror e -&gt; Choice.trap e
-      | <span data-count="2156572">O</span>k orig_mem -&gt;
+      | <span data-count="2156664">O</span>k orig_mem -&gt;
         let f (t : thread) =
-          <span data-count="2156585">l</span>et memories = Thread.memories t in
-          <span data-count="2156587">M</span>emory.get_memory (Link_env.i<span data-count="2156577">d</span> env) orig_mem memories id
+          <span data-count="2156670">l</span>et memories = Thread.memories t in
+          <span data-count="2156669">M</span>emory.get_memory (Link_env.i<span data-count="2156669">d</span> env) orig_mem memories id
         in
         Choice.with_thread f
 
@@ -472,12 +472,12 @@ struct
       | <span data-count="404">O</span>k orig_data -&gt; Choice.return orig_data
 
     let get_global (env : t) i : Global.t Choice.t =
-      <span data-count="2151">m</span>atch Link_env.get_global env i with
+      <span data-count="2375">m</span>atch Link_env.get_global env i with
       | <span data-count="0">E</span>rror e -&gt; Choice.trap e
-      | <span data-count="2151">O</span>k orig_global -&gt;
+      | <span data-count="2374">O</span>k orig_global -&gt;
         let f (t : thread) =
-          <span data-count="2152">l</span>et globals = Thread.globals t in
-          <span data-count="2152">S</span>ymbolic_global.get_global (Link_env.i<span data-count="2152">d</span> env) orig_global globals i
+          <span data-count="2374">l</span>et globals = Thread.globals t in
+          <span data-count="2375">S</span>ymbolic_global.get_global (Link_env.i<span data-count="2375">d</span> env) orig_global globals i
         in
         Choice.with_thread f
 
