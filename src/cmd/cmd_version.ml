@@ -11,9 +11,8 @@ let version () = string_of_version @@ Build_info.V1.version ()
 let statically_linked_libraries () =
   Build_info.V1.Statically_linked_libraries.to_list ()
   |> List.map (fun l ->
-       ( Build_info.V1.Statically_linked_library.name l
-       , Build_info.V1.Statically_linked_library.version l |> string_of_version
-       ) )
+    ( Build_info.V1.Statically_linked_library.name l
+    , Build_info.V1.Statically_linked_library.version l |> string_of_version ) )
   |> List.sort (fun (n1, _) (n2, _) -> String.compare n1 n2)
 
 let pp fmt () =

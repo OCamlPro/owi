@@ -1,4 +1,4 @@
-4 (* SPDX-License-Identifier: AGPL-3.0-or-later *)
+(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
@@ -473,21 +473,20 @@ let rec typecheck_instr (env : Env.t) (stack : stack)
     Ok stack
   | Select t ->
     let* stack = Stack.pop [ i32 ] stack in
-    begin
-      match t with
-      | None -> begin
-        match stack with
-        | Ref_type _ :: _tl -> Error (`Type_mismatch "select implicit")
-        | Any :: _ -> Ok [ Something; Any ]
-        | hd :: Any :: _ -> ok @@ (hd :: [ Any ])
-        | hd :: hd' :: tl when Stack.match_types hd hd' -> ok @@ (hd :: tl)
-        | _ -> Error (`Type_mismatch "select")
-      end
-      | Some t ->
-        let t = List.map typ_of_val_type t in
-        let* stack = Stack.pop t stack in
-        let* stack = Stack.pop t stack in
-        Stack.push t stack
+    begin match t with
+    | None -> begin
+      match stack with
+      | Ref_type _ :: _tl -> Error (`Type_mismatch "select implicit")
+      | Any :: _ -> Ok [ Something; Any ]
+      | hd :: Any :: _ -> ok @@ (hd :: [ Any ])
+      | hd :: hd' :: tl when Stack.match_types hd hd' -> ok @@ (hd :: tl)
+      | _ -> Error (`Type_mismatch "select")
+    end
+    | Some t ->
+      let t = List.map typ_of_val_type t in
+      let* stack = Stack.pop t stack in
+      let* stack = Stack.pop t stack in
+      Stack.push t stack
     end
   | Ref_func (Raw i) ->
     if not @@ Hashtbl.mem env.refs i then Error `Undeclared_function_reference

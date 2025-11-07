@@ -388,10 +388,9 @@ let rec read_instr types input =
     let* bt, input = read_block_type types input in
     let* expr1, input = read_expr types input in
     let* expr2, input =
-      begin
-        match read_byte ~msg:"read_instr (0x04)" input with
-        | Ok ('\x05', input) -> read_expr types input
-        | Ok _ | Error _ -> Ok (Annotated.dummy [], input)
+      begin match read_byte ~msg:"read_instr (0x04)" input with
+      | Ok ('\x05', input) -> read_expr types input
+      | Ok _ | Error _ -> Ok (Annotated.dummy [], input)
       end
     in
     let+ input = check_end_opcode input in

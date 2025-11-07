@@ -361,40 +361,36 @@ module Make (P : Interpret_intf.P) :
       let res =
         match sx with S -> I32.trunc_f32_s f | U -> I32.trunc_f32_u f
       in
-      begin
-        match res with
-        | Error t -> Choice.trap t
-        | Ok res -> Choice.return @@ Stack.push_i32 stack res
+      begin match res with
+      | Error t -> Choice.trap t
+      | Ok res -> Choice.return @@ Stack.push_i32 stack res
       end
     | S32, S64 ->
       let f, stack = Stack.pop_f64 stack in
       let res =
         match sx with S -> I32.trunc_f64_s f | U -> I32.trunc_f64_u f
       in
-      begin
-        match res with
-        | Error t -> Choice.trap t
-        | Ok res -> Choice.return @@ Stack.push_i32 stack res
+      begin match res with
+      | Error t -> Choice.trap t
+      | Ok res -> Choice.return @@ Stack.push_i32 stack res
       end
     | S64, S32 ->
       let f, stack = Stack.pop_f32 stack in
       let res =
         match sx with S -> I64.trunc_f32_s f | U -> I64.trunc_f32_u f
       in
-      begin
-        match res with
-        | Error t -> Choice.trap t
-        | Ok res -> Choice.return @@ Stack.push_i64 stack res
+      begin match res with
+      | Error t -> Choice.trap t
+      | Ok res -> Choice.return @@ Stack.push_i64 stack res
       end
     | S64, S64 ->
       let f, stack = Stack.pop_f64 stack in
       let res =
         match sx with S -> I64.trunc_f64_s f | U -> I64.trunc_f64_u f
       in
-      begin
-        match res with
-        | Error t -> Choice.trap t
-        | Ok res -> Choice.return @@ Stack.push_i64 stack res
+      begin match res with
+      | Error t -> Choice.trap t
+      | Ok res -> Choice.return @@ Stack.push_i64 stack res
       end
 
   let exec_itruncsatf stack nn nn' sx =
@@ -789,16 +785,15 @@ module Make (P : Interpret_intf.P) :
         let* fun_i = Choice.select_i32 fun_i in
         let fun_i = Int32.to_int fun_i in
         let f_ref = Table.get t fun_i in
-        begin
-          match Ref.get_func f_ref with
-          | Null -> Choice.trap (`Uninitialized_element fun_i)
-          | Type_mismatch -> Choice.trap `Element_type_error
-          | Ref_value func ->
-            let ft = func_type state func in
-            let ft' = typ_i in
-            if not (Types.func_type_eq ft ft') then
-              Choice.trap `Indirect_call_type_mismatch
-            else exec_vfunc ~return state func
+        begin match Ref.get_func f_ref with
+        | Null -> Choice.trap (`Uninitialized_element fun_i)
+        | Type_mismatch -> Choice.trap `Element_type_error
+        | Ref_value func ->
+          let ft = func_type state func in
+          let ft' = typ_i in
+          if not (Types.func_type_eq ft ft') then
+            Choice.trap `Indirect_call_type_mismatch
+          else exec_vfunc ~return state func
         end
     | _ -> Choice.trap `Indirect_call_type_mismatch
 
@@ -1281,26 +1276,25 @@ module Make (P : Interpret_intf.P) :
         I64.add pos offset
       in
       let size = Memory.size mem |> I64.extend_i32_u in
-      begin
-        match nn with
-        | S32 ->
-          let> out_of_bounds =
-            I64.(lt_u size (add addr (const 4l |> I64.extend_i32_u)))
-          in
-          if out_of_bounds then Choice.trap `Out_of_bounds_memory_access
-          else
-            let* mem = Env.get_memory env mem_0 in
-            let* res = Memory.load_32 mem (I32.wrap_i64 addr) in
-            st @@ Stack.push_i32 stack res
-        | S64 ->
-          let> out_of_bounds =
-            I64.(lt_u size (add addr (const 8l |> I64.extend_i32_u)))
-          in
-          if out_of_bounds then Choice.trap `Out_of_bounds_memory_access
-          else
-            let* mem = Env.get_memory env mem_0 in
-            let* res = Memory.load_64 mem (I32.wrap_i64 addr) in
-            st @@ Stack.push_i64 stack res
+      begin match nn with
+      | S32 ->
+        let> out_of_bounds =
+          I64.(lt_u size (add addr (const 4l |> I64.extend_i32_u)))
+        in
+        if out_of_bounds then Choice.trap `Out_of_bounds_memory_access
+        else
+          let* mem = Env.get_memory env mem_0 in
+          let* res = Memory.load_32 mem (I32.wrap_i64 addr) in
+          st @@ Stack.push_i32 stack res
+      | S64 ->
+        let> out_of_bounds =
+          I64.(lt_u size (add addr (const 8l |> I64.extend_i32_u)))
+        in
+        if out_of_bounds then Choice.trap `Out_of_bounds_memory_access
+        else
+          let* mem = Env.get_memory env mem_0 in
+          let* res = Memory.load_64 mem (I32.wrap_i64 addr) in
+          st @@ Stack.push_i64 stack res
       end
     | F_load (nn, { offset; _ }) ->
       let* mem = Env.get_memory env mem_0 in
@@ -1311,28 +1305,27 @@ module Make (P : Interpret_intf.P) :
         I64.add pos offset
       in
       let size = Memory.size mem |> I64.extend_i32_u in
-      begin
-        match nn with
-        | S32 ->
-          let> out_of_bounds =
-            I64.(lt_u size (add addr (const 4l |> I64.extend_i32_u)))
-          in
-          if out_of_bounds then Choice.trap `Out_of_bounds_memory_access
-          else
-            let* mem = Env.get_memory env mem_0 in
-            let* res = Memory.load_32 mem (I32.wrap_i64 addr) in
-            let res = F32.of_bits res in
-            st @@ Stack.push_f32 stack res
-        | S64 ->
-          let> out_of_bounds =
-            I64.(lt_u size (add addr (const 8l |> I64.extend_i32_u)))
-          in
-          if out_of_bounds then Choice.trap `Out_of_bounds_memory_access
-          else
-            let* mem = Env.get_memory env mem_0 in
-            let* res = Memory.load_64 mem (I32.wrap_i64 addr) in
-            let res = F64.of_bits res in
-            st @@ Stack.push_f64 stack res
+      begin match nn with
+      | S32 ->
+        let> out_of_bounds =
+          I64.(lt_u size (add addr (const 4l |> I64.extend_i32_u)))
+        in
+        if out_of_bounds then Choice.trap `Out_of_bounds_memory_access
+        else
+          let* mem = Env.get_memory env mem_0 in
+          let* res = Memory.load_32 mem (I32.wrap_i64 addr) in
+          let res = F32.of_bits res in
+          st @@ Stack.push_f32 stack res
+      | S64 ->
+        let> out_of_bounds =
+          I64.(lt_u size (add addr (const 8l |> I64.extend_i32_u)))
+        in
+        if out_of_bounds then Choice.trap `Out_of_bounds_memory_access
+        else
+          let* mem = Env.get_memory env mem_0 in
+          let* res = Memory.load_64 mem (I32.wrap_i64 addr) in
+          let res = F64.of_bits res in
+          st @@ Stack.push_f64 stack res
       end
     | I_store (nn, { offset; _ }) -> (
       let* mem = Env.get_memory env mem_0 in

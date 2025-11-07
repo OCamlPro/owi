@@ -234,7 +234,7 @@ let sort_results deterministic_result_order results =
   if deterministic_result_order then
     results
     |> Seq.map (function (_, thread) as x ->
-         (x, List.rev @@ Thread_with_memory.breadcrumbs thread) )
+      (x, List.rev @@ Thread_with_memory.breadcrumbs thread) )
     |> List.of_seq
     |> List.sort (fun (_, bc1) (_, bc2) -> List.compare compare bc1 bc2)
     |> List.to_seq |> Seq.map fst

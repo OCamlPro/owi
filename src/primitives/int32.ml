@@ -19,7 +19,7 @@ let ctz n = of_int (Ocaml_intrinsics.Int32.count_trailing_zeros n)
 (* Taken from Base *)
 let popcnt =
   let mask = 0xffff_ffffL in
-  fun [@inline] x ->
+  fun[@inline] x ->
     Int64.to_int32 (Int64.popcnt (Int64.logand (Int64.of_int32 x) mask))
 
 let of_int64 n = Int64.to_int32 n [@@inline]
