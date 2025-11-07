@@ -56,7 +56,7 @@ jobs:
           opam update
 
           # Install system dependencies
-          opam install . --depext-only --with-test --with-doc --with-dev-setup
+          opam install . --depext-only --with-test
 
           # Install opam-repo dependencies
           opam install . --deps-only --with-test
