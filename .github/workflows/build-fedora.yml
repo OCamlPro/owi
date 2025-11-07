@@ -55,13 +55,6 @@ jobs:
           export OPAMCONFIRMLEVEL=unsafe-yes
           opam update
 
-          # Install zig
-          # TODO: remove the following once the conf-zig package works
-          wget  https://ziglang.org/download/0.14.0/zig-linux-x86_64-0.14.0.tar.xz
-          mkdir zig
-          tar xf zig-*.tar.xz -C zig --strip-components 1
-          mv zig/* /usr/local/bin/
-
           # Install system dependencies
           opam install . --depext-only --with-test --with-doc --with-dev-setup
 
