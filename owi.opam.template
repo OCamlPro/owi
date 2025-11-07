@@ -1,8 +1,7 @@
-available: (arch = "x86_32" | arch = "x86_64" | arch = "arm64") & os != "win32"
+available: (arch = "x86_32" | arch = "x86_64" | arch = "arm64") & os != "win32" & os != "macos" & os != "homebrew"
 depexts: [
   ["mdbook"] { with-dev-setup }
   ["llvm" "lld"]  {os-family = "debian"}
-  ["llvm"]  {os-family = "homebrew"}
   ["rust-llvm" "libstd-rust-dev-wasm32" "rustc"] {os-distribution = "debian"}
   ["zig"] {os-distribution = "fedora"}
 ]
