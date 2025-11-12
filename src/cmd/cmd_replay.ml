@@ -4,7 +4,7 @@
 
 open Syntax
 
-let run_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
+let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
   let next =
     let next = ref ~-1 in
     fun () ->
@@ -218,23 +218,7 @@ let run_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
 
   let* m = Compile.File.until_binary ~rac:false ~srac:false ~unsafe filename in
   let* m = Cmd_utils.set_entry_point entry_point invoke_with_symbols m in
-  let* m, link_state =
-    Compile.Binary.until_link ~unsafe link_state ~name:None m
-  in
-  if Log.is_bench_enabled () then
-    let before_time = (Unix.times ()).tms_utime in
-    let+ () =
-      Interpret.Concrete.modul ~timeout:None ~timeout_instr:None link_state.envs
-        m
-    in
-    let after_time = (Unix.times ()).tms_utime in
-    Some (after_time -. before_time)
-  else
-    let+ () =
-      Interpret.Concrete.modul ~timeout:None ~timeout_instr:None link_state.envs
-        m
-    in
-    None
+  Compile.Binary.until_link ~unsafe link_state ~name:None m
 
 let parse_model replay_file =
   let* parse_fn =
@@ -277,11 +261,16 @@ let parse_model replay_file =
 
 let cmd ~unsafe ~replay_file ~source_file ~entry_point ~invoke_with_symbols =
   let* model = parse_model replay_file in
-  let+ run_time =
-    run_file ~unsafe ~entry_point ~invoke_with_symbols source_file model
+  let* m, link_state =
+    compile_file ~unsafe ~entry_point ~invoke_with_symbols source_file model
   in
-  Log.app (fun m -> m "All OK!");
+  let r, run_time =
+    Benchmark.with_utime @@ fun () ->
+    Interpret.Concrete.modul ~timeout:None ~timeout_instr:None link_state.envs m
+  in
   Log.bench (fun m ->
-    match run_time with
-    | None -> ()
-    | Some t -> m "Benchmarks:@[<v>interpreter time:%f@]" t )
+    (* run_time shouldn't be none in bench mode *)
+    let run_time = match run_time with None -> assert false | Some t -> t in
+    m "Benchmarks:@[<v>interpreter time: %fms@]" (run_time *. 1000.) );
+  Log.app (fun m -> m "All OK!");
+  r

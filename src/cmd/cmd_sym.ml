@@ -58,18 +58,8 @@ let run_file ~parameters ~source_file =
     Compile.Binary.until_link ~unsafe ~name:None link_state m
   in
   let m = Symbolic.convert_module_to_run m in
-  if Log.is_bench_enabled () then
-    let ctime_before = (Unix.times ()).tms_utime in
-    let r =
-      Interpret.Symbolic.modul ~timeout:None ~timeout_instr:None link_state.envs
-        m
-    in
-    let ctime_after = (Unix.times ()).tms_utime -. ctime_before in
-    (r, Some ctime_after)
-  else
-    ( Interpret.Symbolic.modul ~timeout:None ~timeout_instr:None link_state.envs
-        m
-    , None )
+  Benchmark.with_utime @@ fun () ->
+  Interpret.Symbolic.modul ~timeout:None ~timeout_instr:None link_state.envs m
 
 let print_bug ~model_format ~model_out_file ~id ~no_value ~no_stop_at_failure
   ~no_assert_failure_expression_printing ~with_breadcrumbs bug =
@@ -307,11 +297,13 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
 
   Log.bench (fun m ->
     let bench_stats = Thread_with_memory.bench_stats thread in
-    let run_time = Option.value ~default:0. run_time in
-    m "Benchmarks:@\n@[<v>solver time: %a@;interpreter time: %f@;@]"
+    (* run_time shouldn't be none in bench mode *)
+    let run_time = match run_time with None -> assert false | Some t -> t in
+    m "Benchmarks:@\n@[<v>solver time: %a@;interpreter time: %fms@;@]"
       Mtime.Span.pp
       (Atomic.get bench_stats.solver_time)
-      (interpreter_time +. run_time) );
+      ((interpreter_time +. run_time) *. 1000.) );
+
   let+ () = if count > 0 then Error (`Found_bug count) else Ok () in
   Log.app (fun m -> m "All OK!")
 
