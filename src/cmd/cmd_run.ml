@@ -24,14 +24,12 @@ let cmd ~unsafe ~timeout ~timeout_instr ~rac ~source_file =
     Compile.File.until_link ~unsafe ~rac ~srac:false ~name link_state
       source_file
   in
-  if Log.is_bench_enabled () then (
-    let before = Unix.times () in
-    let r =
-      Interpret.Concrete.modul ~timeout ~timeout_instr link_state.envs m
-    in
-    Log.bench (fun m ->
-      let now = Unix.times () in
-      m "Benchmarks:@\n@[<v>interpreter time: %f@;@]"
-        (now.tms_utime -. before.tms_utime) );
-    r )
-  else Interpret.Concrete.modul ~timeout ~timeout_instr link_state.envs m
+  let res, run_time =
+    Benchmark.with_utime @@ fun () ->
+    Interpret.Concrete.modul ~timeout ~timeout_instr link_state.envs m
+  in
+  Log.bench (fun m ->
+    (* run_time shouldn't be none in bench mode *)
+    let run_time = match run_time with None -> assert false | Some t -> t in
+    m "Benchmarks:@\n@[<v>interpreter time: %fms@]" (run_time *. 1000.) );
+  res

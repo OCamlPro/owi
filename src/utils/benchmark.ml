@@ -14,3 +14,11 @@ let handle_time_span atomic_span f =
     in
     atomic_set ()
   else f ()
+
+let with_utime f =
+  if Log.is_bench_enabled () then
+    let before = (Unix.times ()).tms_utime in
+    let r = f () in
+    let after = (Unix.times ()).tms_utime in
+    (r, Some (after -. before))
+  else (f (), None)
