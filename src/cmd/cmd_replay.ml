@@ -272,5 +272,5 @@ let cmd ~unsafe ~replay_file ~source_file ~entry_point ~invoke_with_symbols =
     (* run_time shouldn't be none in bench mode *)
     let run_time = match run_time with None -> assert false | Some t -> t in
     m "Benchmarks:@[<v>interpreter time: %fms@]" (run_time *. 1000.) );
-  Log.app (fun m -> m "All OK!");
-  r
+  let+ () = r in
+  Log.app (fun m -> m "All OK!")
