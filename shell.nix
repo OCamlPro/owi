@@ -37,6 +37,7 @@ pkgs.mkShell {
     pkgs.mdbook-plugins
     mdx
     menhir
+    merlin
     ocaml
     ocamlformat
     ocb
