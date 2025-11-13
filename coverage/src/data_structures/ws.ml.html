@@ -106,7 +106,7 @@ module Stack = Prelude.Stack
 
 type 'a t = ('a, Prio.t * 'a) Synchronizer.t
 
-let pop s ~pledge = <span data-count="588">S</span>ynchronizer.get s ~pledge
+let pop s ~pledge = <span data-count="591">S</span>ynchronizer.get s ~pledge
 
 let make_pledge = Synchronizer.make_pledge
 
@@ -114,25 +114,25 @@ let end_pledge = Synchronizer.end_pledge
 
 let rec read_as_seq (s : 'a t) ~finalizer : 'a Seq.t =
  fun () -&gt;
-  <span data-count="588">m</span>atch pop s ~pledge:false with
-  | <span data-count="353">N</span>one -&gt;
+  <span data-count="591">m</span>atch pop s ~pledge:false with
+  | <span data-count="354">N</span>one -&gt;
     finalizer ();
-    <span data-count="353">N</span>il
-  | <span data-count="235">S</span>ome v -&gt; Cons (v, read_as_se<span data-count="235">q</span> s ~finalizer)
+    <span data-count="354">N</span>il
+  | <span data-count="237">S</span>ome v -&gt; Cons (v, read_as_se<span data-count="237">q</span> s ~finalizer)
 
-let push v prio s = <span data-count="235">S</span>ynchronizer.write (prio, v) s
+let push v prio s = <span data-count="237">S</span>ynchronizer.write (prio, v) s
 
 let work_while f s = <span data-count="0">S</span>ynchronizer.work_while f s
 
 let close = Synchronizer.close
 
 let make () =
-  <span data-count="407">l</span>et s = Stack.create () in
-  <span data-count="407">l</span>et writter prio_v condvar =
-    <span data-count="235">S</span>tack.push (sn<span data-count="235">d</span> prio_v) s;
-    <span data-count="235">C</span>ondition.signal condvar
+  <span data-count="408">l</span>et s = Stack.create () in
+  <span data-count="408">l</span>et writter prio_v condvar =
+    <span data-count="237">S</span>tack.push (sn<span data-count="237">d</span> prio_v) s;
+    <span data-count="237">C</span>ondition.signal condvar
   in
-  Synchronizer.init (fun () -&gt; <span data-count="1137">S</span>tack.pop_opt s) writter
+  Synchronizer.init (fun () -&gt; <span data-count="1135">S</span>tack.pop_opt s) writter
 </code></pre>
       </div>
     </div>

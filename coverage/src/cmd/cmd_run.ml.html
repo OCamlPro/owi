@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>cmd_run.ml &mdash; Coverage report</title>
-    <meta name="description" content="100.00% coverage in src/cmd/cmd_run.ml">
+    <meta name="description" content="87.50% coverage in src/cmd/cmd_run.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,9 +15,10 @@
           <span class="dirname">src/cmd/</span>cmd_run.ml
         </a>
       </h1>
-      <h2>100.00%</h2>
+      <h2>87.50%</h2>
     </div>
     <div id="navbar">
+      <span class="unvisited" style="bottom:5.71%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -49,9 +50,14 @@
 <a id="L25"></a><span > </span>
 <a id="L26"></a><span > </span>
 <a id="L27"></a><span class="visited"> </span>
-<a id="L28"></a><span class="visited"> </span>
-<a id="L29"></a><span > </span>
-<a id="L30"></a><span class="visited"> </span>
+<a id="L28"></a><span > </span>
+<a id="L29"></a><span class="visited"> </span>
+<a id="L30"></a><span > </span>
+<a id="L31"></a><span class="visited"> </span>
+<a id="L32"></a><span > </span>
+<a id="L33"></a><span class="unvisited"> </span>
+<a id="L34"></a><span > </span>
+<a id="L35"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -86,6 +92,11 @@
 <a href="#L28">28</a>
 <a href="#L29">29</a>
 <a href="#L30">30</a>
+<a href="#L31">31</a>
+<a href="#L32">32</a>
+<a href="#L33">33</a>
+<a href="#L34">34</a>
+<a href="#L35">35</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -101,10 +112,10 @@ let extern_module : Concrete_extern_func.extern_func Link.extern_module =
   in
   let open Concrete.Extern_func in
   let open Concrete.Extern_func.Syntax in
-  let functions = [ ("assert", Extern_func (i32 ^-&gt;<span data-count="883">.</span> unit, assert_i32)) ] in
+  let functions = [ ("assert", Extern_func (i32 ^-&gt;<span data-count="884">.</span> unit, assert_i32)) ] in
   { functions }
 
-let link_state = Link.extern_modul<span data-count="883">e</span> Link.empty_state ~name:"owi" extern_module
+let link_state = Link.extern_modul<span data-count="884">e</span> Link.empty_state ~name:"owi" extern_module
 
 let cmd ~unsafe ~timeout ~timeout_instr ~rac ~source_file =
   <span data-count="20">l</span>et name = None in
@@ -113,10 +124,15 @@ let cmd ~unsafe ~timeout ~timeout_instr ~rac ~source_file =
     Compile.File.until_lin<span data-count="20">k</span> ~unsafe ~rac ~srac:false ~name link_state
       source_file
   in
-  <span data-count="20">l</span>et+ () =
-    Interpret.Concrete.modu<span data-count="20">l</span> ~timeout ~timeout_instr link_state.envs m
+  <span data-count="20">l</span>et res, run_time =
+    Benchmark.with_utime @@ fun () -&gt;
+    <span data-count="20">I</span>nterpret.Concrete.modul ~timeout ~timeout_instr link_state.envs m
   in
-  <span data-count="16">(</span>)
+  <span data-count="20">L</span>og.bench (fun m -&gt;
+    (* run_time shouldn't be none in bench mode *)
+    <span data-count="0">l</span>et run_time = match run_time with None -&gt; assert false | <span data-count="0">S</span>ome t -&gt; t in
+    m "Benchmarks:@\n@[&lt;v&gt;interpreter time: %fms@]" (run_time *. 1000.) );
+  <span data-count="20">r</span>es
 </code></pre>
       </div>
     </div>

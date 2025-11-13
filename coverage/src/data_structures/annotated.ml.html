@@ -59,13 +59,13 @@
 </pre>
 <pre><code class="ocaml">type 'a t = { raw : 'a }
 
-let dummy raw = <span data-count="65697413">{</span> raw }
+let dummy raw = <span data-count="65695125">{</span> raw }
 
-let dummies l = <span data-count="20579">L</span>ist.map (fun raw -&gt; <span data-count="51630">{</span> raw }) l
+let dummies l = <span data-count="20585">L</span>ist.map (fun raw -&gt; <span data-count="51643">{</span> raw }) l
 
 let dummy_deep raw =
-  <span data-count="18009">l</span>et raw = dummies raw in
-  <span data-count="18009">{</span> raw }
+  <span data-count="18015">l</span>et raw = dummies raw in
+  <span data-count="18015">{</span> raw }
 
 let map f { raw } =
   <span data-count="1167038">l</span>et raw = f raw in

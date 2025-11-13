@@ -503,78 +503,78 @@ module Make (X : VariableType) : S with type key = X.t = struct
   let empty = { canonical_elements = MX.empty; node_of_canonicals = MX.empty }
 
   let find_canonical variable t =
-    <span data-count="62637">m</span>atch MX.find_opt variable t.canonical_elements with
-    | <span data-count="53528">N</span>one -&gt; variable
-    | <span data-count="9110">S</span>ome canonical -&gt; canonical
+    <span data-count="62664">m</span>atch MX.find_opt variable t.canonical_elements with
+    | <span data-count="53576">N</span>one -&gt; variable
+    | <span data-count="9090">S</span>ome canonical -&gt; canonical
 
   let add ~merge variable datum t =
-    <span data-count="28541">l</span>et variable = find_canonical variable t in
-    <span data-count="28541">l</span>et node_of_canonicals =
+    <span data-count="28556">l</span>et variable = find_canonical variable t in
+    <span data-count="28555">l</span>et node_of_canonicals =
       MX.update variable
         (function
-          | <span data-count="1348">N</span>one -&gt;
+          | <span data-count="1349">N</span>one -&gt;
             Some { aliases = SX.empty; cardinal = 0; datum = Some datum }
-          | <span data-count="27193">S</span>ome node -&gt;
+          | <span data-count="27207">S</span>ome node -&gt;
             let datum =
               match node.datum with
               | <span data-count="0">N</span>one -&gt; Some datum
-              | <span data-count="27193">S</span>ome existing_datum -&gt; Some (merg<span data-count="27193">e</span> datum existing_datum)
+              | <span data-count="27204">S</span>ome existing_datum -&gt; Some (merg<span data-count="27207">e</span> datum existing_datum)
             in
             Some { node with datum } )
         t.node_of_canonicals
     in
-    <span data-count="28541">{</span> t with node_of_canonicals }
+    <span data-count="28556">{</span> t with node_of_canonicals }
 
-  let find_node_opt canonical t = <span data-count="28645">M</span>X.find_opt canonical t.node_of_canonicals
+  let find_node_opt canonical t = <span data-count="28650">M</span>X.find_opt canonical t.node_of_canonicals
 
   let find_node canonical t =
-    <span data-count="1898">m</span>atch find_node_opt canonical t with
+    <span data-count="1904">m</span>atch find_node_opt canonical t with
     | <span data-count="583">N</span>one -&gt; { aliases = SX.empty; cardinal = 0; datum = None }
-    | <span data-count="1315">S</span>ome node -&gt; node
+    | <span data-count="1321">S</span>ome node -&gt; node
 
   let find_opt variable t =
     <span data-count="26746">O</span>ption.bind
-      (find_node_op<span data-count="26747">t</span> (find_canonica<span data-count="26747">l</span> variable t) t)
-      (fun node -&gt; <span data-count="26747">n</span>ode.datum)
+      (find_node_op<span data-count="26746">t</span> (find_canonica<span data-count="26746">l</span> variable t) t)
+      (fun node -&gt; <span data-count="26746">n</span>ode.datum)
 
   let set_canonical_element aliases canonical canonical_elements =
-    <span data-count="949">S</span>X.fold
+    <span data-count="952">S</span>X.fold
       (fun alias canonical_elements -&gt; <span data-count="4">M</span>X.add alias canonical canonical_elements)
       aliases canonical_elements
 
   let union ~merge lhs rhs t =
-    <span data-count="3675">l</span>et lhs = find_canonical lhs t in
-    <span data-count="3675">l</span>et rhs = find_canonical rhs t in
-    <span data-count="3675">i</span>f X.equal lhs rhs then <span data-count="2726">t</span>
+    <span data-count="3682">l</span>et lhs = find_canonical lhs t in
+    <span data-count="3682">l</span>et rhs = find_canonical rhs t in
+    <span data-count="3682">i</span>f X.equal lhs rhs then <span data-count="2730">t</span>
     else
-      <span data-count="949">l</span>et lhs_node = find_node lhs t in
-      <span data-count="949">l</span>et rhs_node = find_node rhs t in
-      <span data-count="949">l</span>et demoted, canonical, canonical_elements =
+      <span data-count="952">l</span>et lhs_node = find_node lhs t in
+      <span data-count="952">l</span>et rhs_node = find_node rhs t in
+      <span data-count="952">l</span>et demoted, canonical, canonical_elements =
         if lhs_node.cardinal &lt; rhs_node.cardinal then
           <span data-count="140">(</span> lhs
           , rhs
           , set_canonical_elemen<span data-count="140">t</span> lhs_node.aliases rhs t.canonical_elements )
         else
-          <span data-count="809">(</span> rhs
+          <span data-count="812">(</span> rhs
           , lhs
-          , set_canonical_elemen<span data-count="809">t</span> rhs_node.aliases lhs t.canonical_elements )
+          , set_canonical_elemen<span data-count="812">t</span> rhs_node.aliases lhs t.canonical_elements )
       in
       let datum =
         match (lhs_node.datum, rhs_node.datum) with
         | <span data-count="0">N</span>one, None -&gt; None
         | <span data-count="0">N</span>one, Some datum | <span data-count="583">S</span>ome datum, None -&gt; Some datum
-        | <span data-count="366">S</span>ome lhs_datum, Some rhs_datum -&gt; Some (merg<span data-count="366">e</span> lhs_datum rhs_datum)
+        | <span data-count="369">S</span>ome lhs_datum, Some rhs_datum -&gt; Some (merg<span data-count="369">e</span> lhs_datum rhs_datum)
       in
       let node =
-        { aliases = SX.ad<span data-count="949">d</span> demoted (SX.unio<span data-count="949">n</span> lhs_node.aliases rhs_node.aliases)
+        { aliases = SX.ad<span data-count="952">d</span> demoted (SX.unio<span data-count="952">n</span> lhs_node.aliases rhs_node.aliases)
         ; cardinal = lhs_node.cardinal + rhs_node.cardinal + 1
         ; datum
         }
       in
       let canonical_elements = MX.add demoted canonical canonical_elements in
-      <span data-count="949">l</span>et node_of_canonicals = MX.add canonical node t.node_of_canonicals in
-      <span data-count="949">l</span>et node_of_canonicals = MX.remove demoted node_of_canonicals in
-      <span data-count="949">{</span> canonical_elements; node_of_canonicals }
+      <span data-count="952">l</span>et node_of_canonicals = MX.add canonical node t.node_of_canonicals in
+      <span data-count="952">l</span>et node_of_canonicals = MX.remove demoted node_of_canonicals in
+      <span data-count="952">{</span> canonical_elements; node_of_canonicals }
 end
 </code></pre>
       </div>
