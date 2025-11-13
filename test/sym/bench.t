@@ -1,6 +1,6 @@
-  $ owi sym div_i32.wat --no-value --deterministic-result-order -w1 --bench 2>&1 | sed 's/\(solver\|interpreter\|Parsing\|execution\|Typechecking\) \(time\).*/\1 \2/'
-  owi: [INFO] Parsing time
-  owi: [INFO] Typechecking time
+  $ owi sym div_i32.wat --no-value --deterministic-result-order -w1 --bench 2>&1 | sed 's/\(solver\|interpreter\|parsing\|execution\|typechecking\) \(time\).*/\1 \2/'
+  owi: [INFO] parsing time
+  owi: [INFO] typechecking time
   owi: [INFO] execution time
   owi: [ERROR] Trap: integer overflow
   model {
