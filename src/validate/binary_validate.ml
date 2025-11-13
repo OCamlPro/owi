@@ -737,7 +737,7 @@ let validate_mem modul =
 
 let modul (modul : Module.t) =
   Log.info (fun m -> m "typechecking ...");
-  Log.bench_fn "Typechecking time" @@ fun () ->
+  Log.bench_fn "typechecking time" @@ fun () ->
   let refs = Hashtbl.create 512 in
   let* () = array_iter (typecheck_global modul refs) modul.global in
   let* () = array_iter (typecheck_elem modul refs) modul.elem in

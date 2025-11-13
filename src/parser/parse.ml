@@ -403,7 +403,7 @@ module Binary = struct
 end
 
 let guess_from_file file =
-  Log.bench_fn "Parsing time" @@ fun () ->
+  Log.bench_fn "parsing time" @@ fun () ->
   match Fpath.get_ext ~multi:false file with
   | ".wat" ->
     let+ m = Text.Module.from_file file in
