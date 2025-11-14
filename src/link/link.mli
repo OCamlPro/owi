@@ -67,7 +67,7 @@ type 'extern_func extern_module = { functions : (string * 'extern_func) list }
 val extern_module' :
      'f state
   -> name:string
-  -> func_typ:('f -> binary func_type)
+  -> func_typ:('f -> func_type)
   -> 'f extern_module
   -> 'f state
 

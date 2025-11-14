@@ -6,7 +6,7 @@ open Types
 open Syntax
 
 module Type = struct
-  type t = binary func_type
+  type t = func_type
 
   let compare (x : t) (y : t) = Types.compare_func_type x y
 end
@@ -39,7 +39,7 @@ let rewrite_block_type (typemap : binary indice TypeMap.t) (modul : Assigned.t)
     Ok (Bt_raw (Some idx, func_type))
 
 let rewrite_expr (typemap : binary indice TypeMap.t) (modul : Assigned.t)
-  (locals : binary param list) (iexpr : text expr Annotated.t) :
+  (locals : param list) (iexpr : text expr Annotated.t) :
   binary expr Annotated.t Result.t =
   (* block_ids handling *)
   let block_id_to_raw (loop_count, block_ids) id =
@@ -72,7 +72,7 @@ let rewrite_expr (typemap : binary indice TypeMap.t) (modul : Assigned.t)
 
   let* locals, _after_last_assigned_local =
     list_fold_left
-      (fun (locals, next_free_int) ((name, _type) : binary param) ->
+      (fun (locals, next_free_int) ((name, _type) : param) ->
         match name with
         | None -> Ok (locals, next_free_int + 1)
         | Some name ->
@@ -312,8 +312,7 @@ let rewrite_named f named =
   in
   Named.create values named.named
 
-let rewrite_types (_modul : Assigned.t) (t : binary func_type) :
-  binary type_def Result.t =
+let rewrite_types (_modul : Assigned.t) (t : func_type) : type_def Result.t =
   Ok (None, t)
 
 let rec rewrite_term ~(binder_list : string option list) ~(modul : Assigned.t)

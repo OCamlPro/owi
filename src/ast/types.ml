@@ -341,7 +341,7 @@ let compare_val_type t1 t2 =
   | Num_type _, _ -> 1
   | Ref_type _, _ -> -1
 
-type nonrec 'a param = string option * val_type
+type nonrec param = string option * val_type
 
 let pp_param fmt (id, vt) = pf fmt "(param%a %a)" pp_id_opt id pp_val_type vt
 
@@ -349,7 +349,7 @@ let param_eq (_, t1) (_, t2) = val_type_eq t1 t2
 
 let compare_param (_, t1) (_, t2) = compare_val_type t1 t2
 
-type nonrec 'a param_type = 'a param list
+type nonrec param_type = param list
 
 let pp_param_type fmt params = list ~sep:sp pp_param fmt params
 
@@ -357,7 +357,7 @@ let param_type_eq t1 t2 = List.equal param_eq t1 t2
 
 let compare_param_type t1 t2 = List.compare compare_param t1 t2
 
-type nonrec 'a result_type = val_type list
+type nonrec result_type = val_type list
 
 let pp_result_ fmt vt = pf fmt "(result %a)" pp_val_type vt
 
@@ -372,7 +372,7 @@ let compare_result_type t1 t2 = List.compare compare_val_type t1 t2
 let with_space_list printer fmt l =
   match l with [] -> () | _l -> pf fmt " %a" printer l
 
-type nonrec 'a func_type = 'a param_type * 'a result_type
+type nonrec func_type = param_type * result_type
 
 let pp_func_type fmt (params, results) =
   pf fmt "(func%a%a)"
@@ -387,7 +387,7 @@ let func_type_eq (pt1, rt1) (pt2, rt2) =
 (* TODO: add a third case that only has (pt * rt) and is the only one used in simplified *)
 type 'a block_type =
   | Bt_ind : 'a indice -> (< with_ind_bt ; .. > as 'a) block_type
-  | Bt_raw : ('a indice option * 'a func_type) -> (< .. > as 'a) block_type
+  | Bt_raw : ('a indice option * func_type) -> (< .. > as 'a) block_type
 
 let pp_block_type (type kind) fmt : kind block_type -> unit = function
   | Bt_ind ind -> pf fmt "(type %a)" pp_indice ind
@@ -411,18 +411,18 @@ type nonrec table_type = limits * ref_type
 let pp_table_type fmt (limits, ref_type) =
   pf fmt "%a %a" pp_limits limits pp_ref_type ref_type
 
-type nonrec 'a global_type = mut * val_type
+type nonrec global_type = mut * val_type
 
 let pp_global_type fmt (mut, val_type) =
   match mut with
   | Var -> pf fmt "(mut %a)" pp_val_type val_type
   | Const -> pf fmt "%a" pp_val_type val_type
 
-type nonrec 'a extern_type =
-  | Func of string option * 'a func_type
+type nonrec extern_type =
+  | Func of string option * func_type
   | Table of string option * table_type
   | Mem of string option * limits
-  | Global of string option * 'a global_type
+  | Global of string option * global_type
 
 (** Instructions *)
 
@@ -697,7 +697,7 @@ and iter_instr f instr =
    using (param_type, result_type) M.block_type before simplify and directly an indice after *)
 type 'a func =
   { type_f : 'a block_type
-  ; locals : 'a param list
+  ; locals : param list
   ; body : 'a expr Annotated.t
   ; id : string option
   }
@@ -717,7 +717,7 @@ let pp_funcs fmt (funcs : 'a func list) = list ~sep:pp_newline pp_func fmt funcs
 
 (* Tables & Memories *)
 
-type 'a table = string option * table_type
+type table = string option * table_type
 
 let pp_table fmt (id, ty) = pf fmt "(table%a %a)" pp_id_opt id pp_table_type ty
 
@@ -727,7 +727,7 @@ type 'a import_desc =
   | Import_func of string option * 'a block_type
   | Import_table of string option * table_type
   | Import_mem of string option * limits
-  | Import_global of string option * 'a global_type
+  | Import_global of string option * global_type
 
 let import_desc fmt : 'a import_desc -> Unit.t = function
   | Import_func (id, t) -> pf fmt "(func%a %a)" pp_id_opt id pp_block_type t
@@ -769,7 +769,7 @@ type 'a export =
 let pp_export fmt (e : text export) =
   pf fmt {|(export "%s" %a)|} e.name pp_export_desc e.desc
 
-type 'a type_def = string option * 'a func_type
+type type_def = string option * func_type
 
 let pp_type_def fmt (id, t) = pf fmt "(type%a %a)" pp_id_opt id pp_func_type t
 

@@ -19,7 +19,7 @@ type exports =
   }
 
 type global =
-  { typ : binary global_type (* TODO: init : binary+const expr*)
+  { typ : global_type (* TODO: init : binary+const expr*)
   ; init : binary expr Annotated.t
   ; id : string option
   }
@@ -55,9 +55,9 @@ type custom =
 module Module = struct
   type t =
     { id : string option
-    ; types : binary type_def array
-    ; global : (global, binary global_type) Runtime.t array
-    ; table : (binary table, table_type) Runtime.t array
+    ; types : type_def array
+    ; global : (global, global_type) Runtime.t array
+    ; table : (table, table_type) Runtime.t array
     ; mem : (mem, limits) Runtime.t array
     ; func : (binary func, binary block_type) Runtime.t array
         (* TODO: switch to func_type *)

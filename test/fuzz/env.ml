@@ -21,10 +21,10 @@ type t =
   ; mutable next_block : int
   ; mutable datas : string list
   ; mutable memory : string option
-  ; mutable types : (string * text func_type) list
+  ; mutable types : (string * func_type) list
   ; mutable elems : (string * ref_type) list
   ; mutable tables : (string * table_type) list
-  ; mutable globals : (string * text global_type) list
+  ; mutable globals : (string * global_type) list
   ; mutable locals : (string * val_type) list
   ; mutable blocks : (block_kind * string * text block_type) list
   ; mutable funcs : (string * text block_type) list

@@ -6,7 +6,7 @@ open Types
 
 let sep fmt () = Fmt.pf fmt " ; "
 
-type type_check = text indice * text func_type
+type type_check = text indice * func_type
 
 let pp_type_check fmt (indice, func_type) =
   Fmt.pf fmt "(%a, %a)" pp_indice indice pp_func_type func_type
@@ -37,15 +37,15 @@ let curr_id (curr : int ref) (i : text indice option) =
 
 type t =
   { id : string option
-  ; typ : text type_def list
-  ; function_type : text func_type list
+  ; typ : type_def list
+  ; function_type : func_type list
       (* Types comming from function declarations.
      It contains potential duplication *)
   ; type_checks : type_check list
       (* Types checks to perform after assignment.
      Come from function declarations with type indicies *)
-  ; global : (Text.global, binary global_type) Runtime.t Indexed.t list
-  ; table : (binary table, table_type) Runtime.t Indexed.t list
+  ; global : (Text.global, global_type) Runtime.t Indexed.t list
+  ; table : (table, table_type) Runtime.t Indexed.t list
   ; mem : (mem, limits) Runtime.t Indexed.t list
   ; func : (text func, text block_type) Runtime.t Indexed.t list
   ; elem : Text.elem Indexed.t list
