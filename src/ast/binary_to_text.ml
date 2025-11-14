@@ -44,8 +44,7 @@ let convert_data (e : Binary.data) : Text.data =
   { id; init; mode }
 
 let from_types types : Text.module_field list =
-  Array.map (fun (t : Types.binary Types.type_def) -> MType t) types
-  |> Array.to_list
+  Array.map (fun (t : Types.type_def) -> MType t) types |> Array.to_list
 
 let from_global global : Text.module_field list =
   Array.map

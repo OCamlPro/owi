@@ -14,7 +14,7 @@ let bt_ind i = Bt_ind i
 let bt_raw i t = Bt_raw (i, t)
 
 type global =
-  { typ : text global_type
+  { typ : global_type
   ; init : text expr Annotated.t
   ; id : string option
   }
@@ -71,9 +71,9 @@ let pp_elem fmt (e : elem) =
     e.init
 
 type module_field =
-  | MType of text type_def
+  | MType of type_def
   | MGlobal of global
-  | MTable of text table
+  | MTable of table
   | MMem of mem
   | MFunc of text func
   | MElem of elem

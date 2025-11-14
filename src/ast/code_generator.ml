@@ -20,14 +20,13 @@ type type_env =
   ; owi_assert : binary indice
   }
 
-let build_type_env (m : Module.t)
-  (func_ty : binary param_type * binary result_type)
+let build_type_env (m : Module.t) (func_ty : param_type * result_type)
   (owi_funcs : (string * int) array) : type_env * Module.t =
   let param_types = Array.of_list (List.map snd (fst func_ty)) in
   let binder_types = [||] in
   let global_types =
     Array.map
-      (fun (x : (global, binary global_type) Runtime.t) ->
+      (fun (x : (global, global_type) Runtime.t) ->
         match x with
         | Runtime.Local { typ = _, gt; _ } -> gt
         | Runtime.Imported { desc = _, gt; _ } -> gt )
@@ -556,7 +555,7 @@ let subst_index ?(subst_custom = false) (subst_task : (int * int) list)
     Annotated.map (List.map subst_instr) expr
   in
 
-  let subst_global (global : (global, binary global_type) Runtime.t) =
+  let subst_global (global : (global, global_type) Runtime.t) =
     match global with
     | Runtime.Local { typ; init; id } ->
       let init = subst_expr init in
@@ -721,14 +720,12 @@ let contracts_generate (owi_funcs : (string * int) array) (m : Module.t)
   let contracts = join (List.sort Contract.compare_funcid contracts) in
   list_fold_left (contract_generate owi_funcs) m contracts
 
-let add_owi_funcs (owi_funcs : (string * binary func_type) array) (m : Module.t)
-  : Module.t * (string * int) array =
+let add_owi_funcs (owi_funcs : (string * func_type) array) (m : Module.t) :
+  Module.t * (string * int) array =
   (* update module field `types` *)
-  let update_types () : Module.t * (string * (binary func_type * int)) array =
-    let func_type2type_def : binary func_type -> binary type_def =
-     fun ty -> (None, ty)
-    in
-    let owi_funcs : (string * (binary func_type * binary type_def)) array =
+  let update_types () : Module.t * (string * (func_type * int)) array =
+    let func_type2type_def : func_type -> type_def = fun ty -> (None, ty) in
+    let owi_funcs : (string * (func_type * type_def)) array =
       Array.map
         (fun (name, ty) -> (name, (ty, func_type2type_def ty)))
         owi_funcs
