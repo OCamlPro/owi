@@ -48,7 +48,6 @@
     - [`owi analyze`](manpages/owi-analyze.md)
     - [`owi c`](manpages/owi-c.md)
     - [`owi c++`](manpages/owi-cpp.md)
-    - [`owi conc`](manpages/owi-conc.md)
     - [`owi fmt`](manpages/owi-fmt.md)
     - [`owi instrument`](manpages/owi-instrument.md)
     - [`owi iso`](manpages/owi-iso.md)

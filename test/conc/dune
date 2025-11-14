@@ -1,2 +1,0 @@
-(cram
- (deps %{bin:owi} global_sharing.wat immediately_fail.wat range.wat))

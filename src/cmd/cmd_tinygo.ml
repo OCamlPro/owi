@@ -44,7 +44,7 @@ let compile ~workspace ~out_file (files : Fpath.t list) : Fpath.t Result.t =
 
   out
 
-let cmd ~symbolic_parameters ~files ~concolic ~out_file : unit Result.t =
+let cmd ~symbolic_parameters ~files ~out_file : unit Result.t =
   let* workspace =
     match symbolic_parameters.Cmd_sym.workspace with
     | Some path -> Ok path
@@ -57,4 +57,4 @@ let cmd ~symbolic_parameters ~files ~concolic ~out_file : unit Result.t =
 
   let parameters = { symbolic_parameters with workspace } in
 
-  (if concolic then Cmd_conc.cmd else Cmd_sym.cmd) ~parameters ~source_file
+  Cmd_sym.cmd ~parameters ~source_file

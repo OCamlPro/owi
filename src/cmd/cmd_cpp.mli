@@ -8,6 +8,5 @@ val cmd :
   -> opt_lvl:string
   -> includes:Fpath.t list
   -> files:Fpath.t list
-  -> concolic:bool
   -> out_file:Fpath.t option
   -> unit Result.t

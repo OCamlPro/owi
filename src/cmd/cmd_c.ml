@@ -185,7 +185,7 @@ let metadata ~workspace arch property files : unit Result.t =
   res
 
 let cmd ~symbolic_parameters ~arch ~property ~testcomp:_ ~opt_lvl ~includes
-  ~files ~concolic ~eacsl ~out_file : unit Result.t =
+  ~files ~eacsl ~out_file : unit Result.t =
   let* workspace =
     match symbolic_parameters.Cmd_sym.workspace with
     | Some path -> Ok path
@@ -204,4 +204,4 @@ let cmd ~symbolic_parameters ~arch ~property ~testcomp:_ ~opt_lvl ~includes
 
   let parameters = { symbolic_parameters with Cmd_sym.workspace } in
 
-  (if concolic then Cmd_conc.cmd else Cmd_sym.cmd) ~parameters ~source_file
+  Cmd_sym.cmd ~parameters ~source_file

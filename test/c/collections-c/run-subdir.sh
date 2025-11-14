@@ -27,9 +27,6 @@ for test in $(ls files/normal/testsuite/$DIR/*.c); do
 
   printf "Using owi sym:\n"
   run_once "" "$test"
-
-  printf "Using owi conc:\n"
-  run_once "--concolic" "$test"
 done
 
 exit 0

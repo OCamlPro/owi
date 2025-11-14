@@ -35,10 +35,6 @@ Owi is written in [OCaml], thus it also provides a library for:
 
 This allows for tightly integrating Wasm-based computation within OCaml-based systems while maintaining strong type guarantees.
 
-### ⚠️ Warning
-
-For now, the optimizer and the formatter are quite experimental. The optimizer is well tested but only performs basic optimizations in an inefficient way. The formatter is mainly used for debugging purpose and is probably incorrect on some cases. Moreover, the *concolic* mode is currently broken, use the symbolic one.
-
 ### 🧑‍🎓Want to join us?
 
 We are looking for interns, have a look at the [internship labeled issues].

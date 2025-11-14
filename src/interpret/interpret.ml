@@ -1666,4 +1666,3 @@ end
 module Concrete = Make [@inlined hint] (Concrete)
 module Symbolic = Make [@inlined hint] (Symbolic)
 module Minimalist_symbolic = Make [@inlined hint] (Minimalist_symbolic)
-module Concolic = Make [@inlined hint] (Concolic)

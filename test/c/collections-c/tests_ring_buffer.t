@@ -3,15 +3,9 @@ Ring-buffer tests:
   Testing "files/normal/testsuite/ring_buffer/ring_buffer_test_capacity.c":
   Using owi sym:
   All OK!
-  Using owi conc:
-  All OK!
   Testing "files/normal/testsuite/ring_buffer/ring_buffer_test_dequeue.c":
   Using owi sym:
   All OK!
-  Using owi conc:
-  All OK!
   Testing "files/normal/testsuite/ring_buffer/ring_buffer_test_enqueue.c":
   Using owi sym:
-  All OK!
-  Using owi conc:
   All OK!
