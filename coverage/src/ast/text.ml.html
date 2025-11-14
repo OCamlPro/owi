@@ -459,13 +459,13 @@
 open Fmt
 open Types
 
-let symbolic v = <span data-count="9150">T</span>ext v
+let symbolic v = <span data-count="9158">T</span>ext v
 
-let raw v = <span data-count="31422">R</span>aw v
+let raw v = <span data-count="31427">R</span>aw v
 
-let bt_ind i = <span data-count="7994">B</span>t_ind i
+let bt_ind i = <span data-count="7995">B</span>t_ind i
 
-let bt_raw i t = <span data-count="9052">B</span>t_raw (i, t)
+let bt_raw i t = <span data-count="9053">B</span>t_raw (i, t)
 
 type global =
   { typ : text global_type
@@ -511,7 +511,7 @@ let pp_elem_mode fmt = function
 
 type elem =
   { id : string option
-  ; typ : text ref_type
+  ; typ : ref_type
   ; init : text expr Annotated.t list
   ; mode : elem_mode
   }
@@ -562,7 +562,7 @@ let pp_modul fmt (m : modul) =
     m.fields
 
 type action =
-  | Invoke of string option * string * text const list
+  | Invoke of string option * string * const list
   | Get of string option * string
 
 let pp_action fmt = function
@@ -571,7 +571,7 @@ let pp_action fmt = function
   | <span data-count="0">G</span>et _ -&gt; pf fmt "&lt;action_get TODO&gt;"
 
 type result_const =
-  | Literal of text const
+  | Literal of const
   | Nan_canon of nn
   | Nan_arith of nn
 

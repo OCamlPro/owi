@@ -573,7 +573,7 @@ type elem_mode =
 
 type elem =
   { id : string option
-  ; typ : binary ref_type (* TODO: init : binary+const expr*)
+  ; typ : ref_type (* TODO: init : binary+const expr*)
   ; init : binary expr Annotated.t list
   ; mode : elem_mode
   }
@@ -587,7 +587,7 @@ module Module = struct
     { id : string option
     ; types : binary type_def array
     ; global : (global, binary global_type) Runtime.t array
-    ; table : (binary table, binary table_type) Runtime.t array
+    ; table : (binary table, table_type) Runtime.t array
     ; mem : (mem, limits) Runtime.t array
     ; func : (binary func, binary block_type) Runtime.t array
         (* TODO: switch to func_type *)
@@ -624,18 +624,18 @@ module Module = struct
     *)
     <span data-count="1569">l</span>et update_idx (Raw idx as raw : Types.binary Types.indice) :
       Types.binary Types.indice =
-      <span data-count="60327">i</span>f idx &gt;= i then <span data-count="47857">R</span>aw (idx + 1) else <span data-count="12470">r</span>aw
+      <span data-count="61455">i</span>f idx &gt;= i then <span data-count="48985">R</span>aw (idx + 1) else <span data-count="12470">r</span>aw
     in
 
     let rec handle_instr instr =
-      <span data-count="1096261">A</span>nnotated.map
+      <span data-count="1093433">A</span>nnotated.map
         (function
-          | <span data-count="54196">T</span>ypes.Call idx -&gt; Types.Call (update_id<span data-count="54196">x</span> idx)
+          | <span data-count="55310">T</span>ypes.Call idx -&gt; Types.Call (update_id<span data-count="55310">x</span> idx)
           | <span data-count="0">T</span>ypes.Return_call idx -&gt; Types.Return_call (update_id<span data-count="0">x</span> idx)
-          | <span data-count="4550">T</span>ypes.Ref_func idx -&gt; Types.Ref_func (update_id<span data-count="4550">x</span> idx)
-          | <span data-count="37293">T</span>ypes.Block (id, typ, body) -&gt;
+          | <span data-count="4564">T</span>ypes.Ref_func idx -&gt; Types.Ref_func (update_id<span data-count="4564">x</span> idx)
+          | <span data-count="37233">T</span>ypes.Block (id, typ, body) -&gt;
             let body = handle_expr body in
-            <span data-count="37293">T</span>ypes.Block (id, typ, body)
+            <span data-count="37233">T</span>ypes.Block (id, typ, body)
           | <span data-count="6124">T</span>ypes.Loop (id, typ, body) -&gt;
             let body = handle_expr body in
             <span data-count="6124">T</span>ypes.Loop (id, typ, body)
@@ -643,26 +643,26 @@ module Module = struct
             let true_branch = handle_expr true_branch in
             <span data-count="17">l</span>et false_branch = handle_expr false_branch in
             <span data-count="17">T</span>ypes.If_else (id, typ, true_branch, false_branch)
-          | <span data-count="994081">i</span>nstr -&gt;
+          | <span data-count="990185">i</span>nstr -&gt;
             (* TODO: make this match non fragile *)
             instr )
         instr
     and handle_expr expr =
-      <span data-count="70524">A</span>nnotated.map (fun expr -&gt; <span data-count="70524">L</span>ist.map handle_instr expr) expr
+      <span data-count="70632">A</span>nnotated.map (fun expr -&gt; <span data-count="70632">L</span>ist.map handle_instr expr) expr
     in
     let update_function = function
       | <span data-count="10354">R</span>untime.Imported _ as f -&gt; f
-      | <span data-count="20958">R</span>untime.Local f -&gt;
+      | <span data-count="21112">R</span>untime.Local f -&gt;
         let body = handle_expr f.Types.body in
-        <span data-count="20958">R</span>untime.Local { f with body }
+        <span data-count="21112">R</span>untime.Local { f with body }
     in
     let func =
       Array.init
         (Array.lengt<span data-count="1569">h</span> m.func + 1)
         (fun j -&gt;
-          <span data-count="31312">i</span>f i = j then <span data-count="1569">i</span>f update_function_itself then <span data-count="1569">u</span>pdate_function f else <span data-count="0">f</span>
-          else <span data-count="29743">b</span>egin
-            update_function @@ if i &lt; j then <span data-count="20958">m</span>.func.(j - 1) else <span data-count="8785">m</span>.func.(j)
+          <span data-count="31466">i</span>f i = j then <span data-count="1569">i</span>f update_function_itself then <span data-count="1569">u</span>pdate_function f else <span data-count="0">f</span>
+          else <span data-count="29897">b</span>egin
+            update_function @@ if i &lt; j then <span data-count="21112">m</span>.func.(j - 1) else <span data-count="8785">m</span>.func.(j)
           end )
     in
     <span data-count="1569">l</span>et elem =
@@ -711,7 +711,7 @@ module Module = struct
     <span data-count="408">l</span>et func =
       Array.init
         (Array.lengt<span data-count="408">h</span> m.func + 1)
-        (fun i -&gt; <span data-count="8815">i</span>f i = len then <span data-count="408">f</span> else <span data-count="8407">m</span>.func.(i))
+        (fun i -&gt; <span data-count="8848">i</span>f i = len then <span data-count="408">f</span> else <span data-count="8440">m</span>.func.(i))
     in
 
     <span data-count="408">(</span>{ m with func }, len)
@@ -743,7 +743,7 @@ module Module = struct
         | <span data-count="21829">R</span>untime.Imported { Imported.modul; name; assigned_name = _; desc = _ }
           -&gt;
           String.equa<span data-count="21829">l</span> modul_name modul &amp;&amp; <span data-count="21829">S</span>tring.equal func_name name
-        | <span data-count="20964">L</span>ocal _ -&gt; false )
+        | <span data-count="21118">L</span>ocal _ -&gt; false )
       m.func
 
   (** Finds the index of the last imported function. Will be `~-1` if there are
@@ -752,7 +752,7 @@ module Module = struct
     <span data-count="1569">l</span>et _i, last =
       Array.fold_left
         (fun (i, last) -&gt; function
-          | <span data-count="8785">R</span>untime.Imported _ -&gt; (suc<span data-count="8785">c</span> i, i) | <span data-count="20958">R</span>untime.Local _ -&gt; (suc<span data-count="20958">c</span> i, last) )
+          | <span data-count="8785">R</span>untime.Imported _ -&gt; (suc<span data-count="8785">c</span> i, i) | <span data-count="21112">R</span>untime.Local _ -&gt; (suc<span data-count="21112">c</span> i, last) )
         (0, ~<span data-count="1569">-</span>1) m.func
     in
     <span data-count="1569">l</span>ast

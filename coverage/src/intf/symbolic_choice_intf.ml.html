@@ -281,7 +281,7 @@ module type S = sig
 
   val trap : Result.err -&gt; 'a t
 
-  val select : V.bool -&gt; Bool.t t
+  val select : V.bool -&gt; prio_true:Prio.t -&gt; prio_false:Prio.t -&gt; Bool.t t
 
   val select_i32 : V.int32 -&gt; Int32.t t
 

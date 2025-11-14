@@ -274,7 +274,7 @@ module Make (Thread : Thread_intf.S) = struct
 
   let ( let+ ) = map
 
-  let select (vb : bool) =
+  let select (vb : bool) ~prio_true:_ ~prio_false:_ =
     <span data-count="0">l</span>et v = Smtml.Expr.simplify vb in
     <span data-count="0">m</span>atch Smtml.Expr.view v with
     | <span data-count="0">V</span>al True -&gt; return true

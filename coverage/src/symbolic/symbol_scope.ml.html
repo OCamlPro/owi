@@ -602,12 +602,12 @@ let close_scope tl = <span data-count="10">C</span>lose_scope :: tl
 let empty = []
 
 let of_expressions exprs =
-  <span data-count="371">L</span>ist.fold_left
-    (fun acc cur -&gt; <span data-count="1554">S</span>ymbol cur :: acc)
+  <span data-count="365">L</span>ist.fold_left
+    (fun acc cur -&gt; <span data-count="1525">S</span>ymbol cur :: acc)
     []
-    (Smtml.Expr.Set.get_symbol<span data-count="371">s</span> exprs)
+    (Smtml.Expr.Set.get_symbol<span data-count="365">s</span> exprs)
 
-let of_symbol sym = <span data-count="820">[</span> Symbol sym ]
+let of_symbol sym = <span data-count="1011">[</span> Symbol sym ]
 
 let pp_token fmt token =
   <span data-count="6">m</span>atch token with
@@ -619,8 +619,8 @@ let pp fmt tokens =
   <span data-count="4">F</span>mt.list ~sep:(fun fmt () -&gt; <span data-count="2">F</span>mt.pf fmt " ; ") pp_token fmt tokens
 
 let only_symbols tokens =
-  <span data-count="1431">L</span>ist.filter_map
-    (<span data-count="2783">f</span>unction <span data-count="2769">S</span>ymbol s -&gt; Some s | <span data-count="7">O</span>pen_scope _ | <span data-count="7">C</span>lose_scope -&gt; None)
+  <span data-count="1616">L</span>ist.filter_map
+    (<span data-count="2945">f</span>unction <span data-count="2931">S</span>ymbol s -&gt; Some s | <span data-count="7">O</span>pen_scope _ | <span data-count="7">C</span>lose_scope -&gt; None)
     tokens
 
 let get_value model sym =

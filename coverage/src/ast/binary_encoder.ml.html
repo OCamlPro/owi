@@ -2006,7 +2006,7 @@ let write_table buf ((_so, (limits, (_nullable, heaptype))) : _ table) =
 
 let write_table_import buf
   ({ Imported.modul; name; desc = limits, (_nullable, heaptype); _ } :
-    _ table_type Imported.t ) =
+    table_type Imported.t ) =
   <span data-count="0">w</span>rite_string buf modul;
   <span data-count="0">w</span>rite_string buf name;
   <span data-count="0">B</span>uffer.add_char buf '\x01';
