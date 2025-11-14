@@ -43,7 +43,6 @@
       <span class="unvisited" style="bottom:11.67%"></span>
       <span class="unvisited" style="bottom:8.33%"></span>
       <span class="unvisited" style="bottom:6.67%"></span>
-      <span class="unvisited" style="bottom:0.00%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -107,7 +106,7 @@
 <a id="L57"></a><span > </span>
 <a id="L58"></a><span > </span>
 <a id="L59"></a><span > </span>
-<a id="L60"></a><span class="unvisited"> </span>
+<a id="L60"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -219,7 +218,7 @@ let compile ~workspace ~out_file (files : Fpath.t list) : Fpath.t Result.t =
 
   <span data-count="0">o</span>ut
 
-let cmd ~symbolic_parameters ~files ~concolic ~out_file : unit Result.t =
+let cmd ~symbolic_parameters ~files ~out_file : unit Result.t =
   <span data-count="0">l</span>et* workspace =
     match symbolic_parameters.Cmd_sym.workspace with
     | <span data-count="0">S</span>ome path -&gt; Ok path
@@ -232,7 +231,7 @@ let cmd ~symbolic_parameters ~files ~concolic ~out_file : unit Result.t =
 
   let parameters = { symbolic_parameters with workspace } in
 
-  (if concolic then <span data-count="0">C</span>md_conc.cmd else <span data-count="0">C</span>md_sym.cmd) ~parameters ~source_file
+  Cmd_sym.cmd ~parameters ~source_file
 </code></pre>
       </div>
     </div>

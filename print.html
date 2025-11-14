@@ -208,8 +208,6 @@ It offers a practical path from fuzzing to formal proofs.</p>
 <li><strong>Importing OCaml functions</strong> into Wasm modules with full type safety.</li>
 </ul>
 <p>This allows for tightly integrating Wasm-based computation within OCaml-based systems while maintaining strong type guarantees.</p>
-<h3 id="-warning"><a class="header" href="#-warning">⚠️ Warning</a></h3>
-<p>For now, the optimizer and the formatter are quite experimental. The optimizer is well tested but only performs basic optimizations in an inefficient way. The formatter is mainly used for debugging purpose and is probably incorrect on some cases. Moreover, the <em>concolic</em> mode is currently broken, use the symbolic one.</p>
 <h3 id="want-to-join-us"><a class="header" href="#want-to-join-us">🧑‍🎓Want to join us?</a></h3>
 <p>We are looking for interns, have a look at the <a href="https://github.com/OCamlPro/owi/labels/internship">internship labeled issues</a>.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="installation"><a class="header" href="#installation">Installation</a></h1>
@@ -1774,9 +1772,6 @@ COMMANDS
        c++ [OPTION]… FILE…
            Compile a C++ file to Wasm and run the symbolic interpreter on it
 
-       conc [OPTION]… FILE
-           Run the concolic interpreter
-
        fmt [--inplace] [OPTION]… FILE…
            Format a .wat or .wast file
 
@@ -1904,9 +1899,6 @@ ARGUMENTS
            source files
 
 OPTIONS
-       --concolic
-           concolic mode
-
        --deterministic-result-order
            Guarantee a fixed deterministic order of found failures. This
            implies --no-stop-at-failure.
@@ -2054,9 +2046,6 @@ ARGUMENTS
            source files
 
 OPTIONS
-       --concolic
-           concolic mode
-
        --deterministic-result-order
            Guarantee a fixed deterministic order of found failures. This
            implies --no-stop-at-failure.
@@ -2168,129 +2157,6 @@ EXIT STATUS
 
 ENVIRONMENT
        These environment variables affect the execution of owi c++:
-
-       OWI_VERBOSITY
-           See option --verbosity.
-
-BUGS
-       Email them to &lt;contact@ndrs.fr&gt;.
-
-SEE ALSO
-       owi(1)
-
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="owi-conc"><a class="header" href="#owi-conc"><code>owi conc</code></a></h1>
-<pre><code class="language-sh">$ owi conc --help=plain
-NAME
-       owi-conc - Run the concolic interpreter
-
-SYNOPSIS
-       owi conc [OPTION]… FILE
-
-ARGUMENTS
-       FILE (required)
-           source file
-
-OPTIONS
-       --deterministic-result-order
-           Guarantee a fixed deterministic order of found failures. This
-           implies --no-stop-at-failure.
-
-       --entry-point=FUNCTION
-           entry point of the executable
-
-       --exploration=VAL (absent=fifo)
-           exploration strategy to use ("fifo", "lifo" or "random")
-
-       --fail-on-assertion-only
-           ignore traps and only report assertion violations
-
-       --fail-on-trap-only
-           ignore assertion violations and only report traps
-
-       --invoke-with-symbols
-           Invoke the entry point of the program with symbolic values instead
-           of dummy constants.
-
-       --model-format=VAL (absent=scfg)
-            The format of the model ("json" or "scfg")
-
-       --model-out-file=FILE
-           Output the generated model to FILE. if --no-stop-at-failure is
-           given this is used as a prefix and the ouputed files would have
-           PREFIX_%d.
-
-       --no-assert-failure-expression-printing
-           do not display the expression in the assert failure
-
-       --no-stop-at-failure
-           do not stop when a program failure is encountered
-
-       --no-value
-           do not display a value for each symbol
-
-       --rac
-           runtime assertion checking mode
-
-       -s VALUE, --solver=VALUE (absent=Z3)
-           SMT solver to use. VALUE must be one of the 5 available solvers:
-           Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo
-
-       --srac
-           symbolic runtime assertion checking mode
-
-       -u, --unsafe
-           skip typechecking pass
-
-       -w VAL, --workers=VAL (absent=n)
-           number of workers for symbolic execution. Defaults to the number
-           of physical cores.
-
-       --with-breadcrumbs
-           add breadcrumbs to the generated model
-
-       --workspace=DIR
-           write results and intermediate compilation artifacts to dir
-
-COMMON OPTIONS
-       --bench
-           enable benchmarks
-
-       --color=WHEN (absent=auto)
-           Colorize the output. WHEN must be one of auto, always or never.
-
-       --help[=FMT] (default=auto)
-           Show this help in format FMT. The value FMT must be one of auto,
-           pager, groff or plain. With auto, the format is pager or plain
-           whenever the TERM env var is dumb or undefined.
-
-       -q, --quiet
-           Be quiet. Takes over -v and --verbosity.
-
-       -v, --verbose
-           Increase verbosity. Repeatable, but more than twice does not bring
-           more.
-
-       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
-           Be more or less verbose. LEVEL must be one of quiet, error,
-           warning, info or debug. Takes over -v.
-
-       --version
-           Show version information.
-
-EXIT STATUS
-       owi conc exits with:
-
-       0   on success.
-
-       123 on indiscriminate errors reported on standard error.
-
-       124 on command line parsing errors.
-
-       125 on unexpected internal errors (bugs).
-
-ENVIRONMENT
-       These environment variables affect the execution of owi conc:
 
        OWI_VERBOSITY
            See option --verbosity.
@@ -2689,9 +2555,6 @@ ARGUMENTS
            source files
 
 OPTIONS
-       --concolic
-           concolic mode
-
        --deterministic-result-order
            Guarantee a fixed deterministic order of found failures. This
            implies --no-stop-at-failure.
@@ -3277,9 +3140,6 @@ ARGUMENTS
            source files
 
 OPTIONS
-       --concolic
-           concolic mode
-
        --deterministic-result-order
            Guarantee a fixed deterministic order of found failures. This
            implies --no-stop-at-failure.

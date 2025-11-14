@@ -85,18 +85,18 @@
 <a href="#L28">28</a>
 <a href="#L29">29</a>
 </pre>
-<pre><code class="ocaml">let main_src = Logs.Src.creat<span data-count="885">e</span> "owi" ~doc:"Owi's main logs"
+<pre><code class="ocaml">let main_src = Logs.Src.creat<span data-count="718">e</span> "owi" ~doc:"Owi's main logs"
 
-let bench_src = Logs.Src.creat<span data-count="885">e</span> "owi-bench" ~doc:"Owi's benchmark logs"
+let bench_src = Logs.Src.creat<span data-count="718">e</span> "owi-bench" ~doc:"Owi's benchmark logs"
 
-include (val Logs.src_lo<span data-count="885">g</span> main_src : Logs.LOG)
+include (val Logs.src_lo<span data-count="718">g</span> main_src : Logs.LOG)
 
 let is_bench_enabled () =
-  <span data-count="30174">m</span>atch Logs.Src.level bench_src with <span data-count="30165">N</span>one -&gt; false | <span data-count="9">S</span>ome _ -&gt; true
+  <span data-count="29281">m</span>atch Logs.Src.level bench_src with <span data-count="29272">N</span>one -&gt; false | <span data-count="9">S</span>ome _ -&gt; true
 
 let bench_fn str fn =
-  <span data-count="5833">m</span>atch Logs.Src.level bench_src with
-  | <span data-count="5827">N</span>one -&gt; fn ()
+  <span data-count="5017">m</span>atch Logs.Src.level bench_src with
+  | <span data-count="5011">N</span>one -&gt; fn ()
   | <span data-count="6">S</span>ome _ -&gt;
     let c = Mtime_clock.counter () in
     <span data-count="6">l</span>et r = fn () in
@@ -105,15 +105,15 @@ let bench_fn str fn =
     <span data-count="6">r</span>
 
 let bench f =
-  <span data-count="847">m</span>atch Logs.Src.level bench_src with
-  | <span data-count="845">N</span>one -&gt; ()
+  <span data-count="842">m</span>atch Logs.Src.level bench_src with
+  | <span data-count="840">N</span>one -&gt; ()
   | <span data-count="2">S</span>ome _ -&gt; Logs.info ~src:bench_src f
 
 let setup style_renderer level ~bench =
-  <span data-count="816">F</span>mt_tty.setup_std_outputs ?style_renderer ();
-  <span data-count="816">L</span>ogs.Src.set_level main_src level;
-  <span data-count="816">L</span>ogs.Src.set_level bench_src (if bench then <span data-count="1">S</span>ome Logs.Info else <span data-count="815">N</span>one);
-  <span data-count="816">L</span>ogs.set_reporter (Logs.format_reporte<span data-count="816">r</span> ())
+  <span data-count="652">F</span>mt_tty.setup_std_outputs ?style_renderer ();
+  <span data-count="652">L</span>ogs.Src.set_level main_src level;
+  <span data-count="652">L</span>ogs.Src.set_level bench_src (if bench then <span data-count="1">S</span>ome Logs.Info else <span data-count="651">N</span>one);
+  <span data-count="652">L</span>ogs.set_reporter (Logs.format_reporte<span data-count="652">r</span> ())
 </code></pre>
       </div>
     </div>
