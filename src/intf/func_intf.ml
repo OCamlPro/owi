@@ -68,7 +68,7 @@ module type T_Extern_func = sig
   type extern_func = Extern_func : 'a func_type * 'a -> extern_func
 
   (* val extern_type : _ func_type -> Simplified.func_type *)
-  val extern_type : extern_func -> binary Types.func_type
+  val extern_type : extern_func -> Types.func_type
 
   module Syntax : sig
     type l
@@ -200,7 +200,7 @@ end = struct
     | V128 -> Num_type V128
     | Externref _ -> Ref_type (Null, Extern_ht)
 
-  let res_type (type t) (r : t rtype) : binary result_type =
+  let res_type (type t) (r : t rtype) : result_type =
     match r with
     | R0 -> []
     | R1 a -> [ elt_type a ]
@@ -208,14 +208,14 @@ end = struct
     | R3 (a, b, c) -> [ elt_type a; elt_type b; elt_type c ]
     | R4 (a, b, c, d) -> [ elt_type a; elt_type b; elt_type c; elt_type d ]
 
-  let rec arg_type : type t r. (t, r) atype -> binary param_type = function
+  let rec arg_type : type t r. (t, r) atype -> param_type = function
     | Mem tl -> arg_type tl
     | UArg tl -> arg_type tl
     | Arg (hd, tl) -> (None, elt_type hd) :: arg_type tl
     | NArg (name, hd, tl) -> (Some name, elt_type hd) :: arg_type tl
     | Res -> []
 
-  let extern_type (Extern_func (Func (arg, res), _)) : binary Types.func_type =
+  let extern_type (Extern_func (Func (arg, res), _)) : Types.func_type =
     (arg_type arg, res_type res)
 
   type nonrec t = t

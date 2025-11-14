@@ -102,10 +102,10 @@ let encode_vector_list buf datas encode_func =
 let encode_vector_array buf datas encode_func =
   encode_vector Array.length Array.iter buf datas encode_func
 
-let write_resulttype buf (rt : _ result_type) =
+let write_resulttype buf (rt : result_type) =
   encode_vector_list buf rt write_valtype
 
-let write_paramtype buf (pt : _ param_type) =
+let write_paramtype buf (pt : param_type) =
   let vt = List.map snd pt in
   write_resulttype buf vt
 
@@ -128,7 +128,7 @@ let write_block_type_idx buf (typ : binary block_type) =
   | Bt_raw (None, _) -> assert false
   | Bt_raw (Some idx, _) -> write_indice buf idx
 
-let write_global_type buf ((mut, vt) : _ global_type) =
+let write_global_type buf ((mut, vt) : global_type) =
   write_valtype buf vt;
   write_mut buf mut
 
@@ -155,7 +155,7 @@ let write_memory_import buf
   Buffer.add_char buf '\x02';
   write_limits buf limits
 
-let write_table buf ((_so, (limits, (_nullable, heaptype))) : _ table) =
+let write_table buf ((_so, (limits, (_nullable, heaptype))) : table) =
   write_reftype buf heaptype;
   write_limits buf limits
 
@@ -524,8 +524,7 @@ let write_global buf ({ typ; init; _ } : global) =
   write_expr buf init ~end_op_code:None
 
 let write_global_import buf
-  ({ Imported.modul; name; desc = mut, valtype; _ } : _ global_type Imported.t)
-    =
+  ({ Imported.modul; name; desc = mut, valtype; _ } : global_type Imported.t) =
   write_string buf modul;
   write_string buf name;
   Buffer.add_char buf '\x03';

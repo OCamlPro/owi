@@ -60,7 +60,7 @@ let load_from_module ls f (import : _ Imported.t) =
       else Error (`Unknown_import (import.modul, import.name))
     | Some v -> Ok v )
 
-let load_global (ls : 'f state) (import : binary global_type Imported.t) :
+let load_global (ls : 'f state) (import : global_type Imported.t) :
   global Result.t =
   let* global = load_from_module ls (fun (e : exports) -> e.globals) import in
   let* () =
@@ -127,8 +127,8 @@ module Eval_const = struct
     | [ result ] -> Ok result
 end
 
-let eval_global ls env (global : (Binary.global, binary global_type) Runtime.t)
-  : global Result.t =
+let eval_global ls env (global : (Binary.global, global_type) Runtime.t) :
+  global Result.t =
   match global with
   | Local global ->
     let* value = Eval_const.expr env global.init in
@@ -397,7 +397,7 @@ let modul (ls : 'f state) ~name (modul : Binary.Module.t) =
       ; envs
       } )
 
-let extern_module' (ls : 'f state) ~name ~(func_typ : 'f -> binary func_type)
+let extern_module' (ls : 'f state) ~name ~(func_typ : 'f -> func_type)
   (module_ : 'f extern_module) =
   let functions, collection =
     List.fold_left

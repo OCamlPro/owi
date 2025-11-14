@@ -621,9 +621,9 @@ module Make (P : Interpret_intf.P) :
 
     type block =
       { branch : binary expr Annotated.t
-      ; branch_rt : binary result_type
+      ; branch_rt : result_type
       ; continue : binary expr Annotated.t
-      ; continue_rt : binary result_type
+      ; continue_rt : result_type
       ; stack : stack
       ; is_loop : Prelude.Bool.t
       }
@@ -637,7 +637,7 @@ module Make (P : Interpret_intf.P) :
           (* TODO: rename this PC, it stands for program counter but is easily confused with path condition... *)
       ; pc : binary expr Annotated.t
       ; block_stack : block_stack
-      ; func_rt : binary result_type
+      ; func_rt : result_type
       ; env : Env.t
       ; envs : Env.t Env_id.collection
       }

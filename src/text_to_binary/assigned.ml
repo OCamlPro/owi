@@ -6,7 +6,7 @@ open Types
 open Syntax
 
 module Type = struct
-  type t = binary func_type
+  type t = func_type
 
   let compare = Types.compare_func_type
 end
@@ -16,8 +16,8 @@ module TypeMap = Map.Make (Type)
 type t =
   { id : string option
   ; typ : Type.t Named.t
-  ; global : (Text.global, binary global_type) Runtime.t Named.t
-  ; table : (binary table, table_type) Runtime.t Named.t
+  ; global : (Text.global, global_type) Runtime.t Named.t
+  ; table : (table, table_type) Runtime.t Named.t
   ; mem : (mem, limits) Runtime.t Named.t
   ; func : (text func, text block_type) Runtime.t Named.t
   ; elem : Text.elem Named.t
@@ -81,8 +81,8 @@ let pp fmt
     pp_annots annots
 
 type type_acc =
-  { declared_types : binary func_type Indexed.t list
-  ; func_types : binary func_type Indexed.t list
+  { declared_types : func_type Indexed.t list
+  ; func_types : func_type Indexed.t list
   ; named_types : int String_map.t
   ; last_assigned_int : int
   ; all_types : int TypeMap.t
@@ -120,7 +120,7 @@ let assign_heap_type (acc : type_acc) typ : type_acc =
     let func_types = Indexed.return id typ :: func_types in
     { acc with func_types; last_assigned_int; all_types }
 
-let assign_types (modul : Grouped.t) : binary func_type Named.t =
+let assign_types (modul : Grouped.t) : func_type Named.t =
   let empty_acc : type_acc =
     { declared_types = []
     ; func_types = []
@@ -156,7 +156,7 @@ let name kind ~get_name values =
   let+ named = list_fold_left assign_one String_map.empty values in
   Named.create values named
 
-let check_type_id (types : binary func_type Named.t)
+let check_type_id (types : func_type Named.t)
   ((id, func_type) : Grouped.type_check) =
   let id =
     match id with
@@ -184,7 +184,7 @@ let of_grouped (modul : Grouped.t) : t Result.t =
   in
   let* table =
     name "table"
-      ~get_name:(get_runtime_name (fun ((id, _) : binary table) -> id))
+      ~get_name:(get_runtime_name (fun ((id, _) : table) -> id))
       modul.table
   in
   let* mem =

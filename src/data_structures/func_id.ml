@@ -9,7 +9,7 @@ type t = int
 module IMap = Map.Make (Int)
 
 type 'a collection =
-  { c : ('a * binary func_type) IMap.t
+  { c : ('a * func_type) IMap.t
   ; last : int
   }
 
