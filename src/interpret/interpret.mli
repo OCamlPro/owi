@@ -62,12 +62,3 @@ module Minimalist_symbolic : sig
     -> Minimalist_symbolic.Module_to_run.t
     -> unit Minimalist_symbolic.Choice.t
 end
-
-module Concolic : sig
-  val modul :
-       timeout:float option
-    -> timeout_instr:int option
-    -> Concolic.Env.t Env_id.collection
-    -> Concolic.Module_to_run.t
-    -> unit Concolic.Choice.t
-end

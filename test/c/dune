@@ -6,7 +6,6 @@
   assume_properly_checked.c
   bool.c
   char.c
-  concolic.c
   double_free.c
   entry_point.c
   exit.c

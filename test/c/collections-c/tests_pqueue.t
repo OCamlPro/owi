@@ -14,8 +14,6 @@ Pqueue tests:
   owi: [ERROR] Reached problem!
   
   [13]
-  Using owi conc:
-  All OK!
   Testing "files/normal/testsuite/pqueue/pqueue_test_pop.c":
   Using owi sym:
   owi: [ERROR] Trap: out of bounds memory access
@@ -33,5 +31,3 @@ Pqueue tests:
   owi: [ERROR] Reached problem!
   
   [13]
-  Using owi conc:
-  All OK!

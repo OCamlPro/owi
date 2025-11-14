@@ -110,10 +110,6 @@ let arch =
   let doc = "data model" in
   Arg.(value & opt int 32 & info [ "arch"; "m" ] ~doc)
 
-let concolic =
-  let doc = "concolic mode" in
-  Arg.(value & flag & info [ "concolic" ] ~doc)
-
 let deterministic_result_order =
   let doc =
     "Guarantee a fixed deterministic order of found failures. This implies \
@@ -365,7 +361,6 @@ let c_cmd =
   and+ testcomp =
     let doc = "test-comp mode" in
     Arg.(value & flag & info [ "testcomp" ] ~doc)
-  and+ concolic
   and+ files
   and+ () = setup_log
   and+ eacsl =
@@ -379,7 +374,7 @@ let c_cmd =
   and+ symbolic_parameters = symbolic_parameters (Some "main") in
 
   Cmd_c.cmd ~symbolic_parameters ~arch ~property ~includes ~opt_lvl ~out_file
-    ~testcomp ~concolic ~files ~eacsl
+    ~testcomp ~files ~eacsl
 
 (* owi cpp *)
 
@@ -394,28 +389,12 @@ let cpp_cmd =
   let+ arch
   and+ includes
   and+ opt_lvl
-  and+ concolic
   and+ files
   and+ out_file
   and+ () = setup_log
   and+ symbolic_parameters = symbolic_parameters (Some "main") in
 
-  Cmd_cpp.cmd ~symbolic_parameters ~out_file ~arch ~includes ~opt_lvl ~concolic
-    ~files
-
-(* owi conc *)
-
-let conc_info =
-  let doc = "Run the concolic interpreter" in
-  let man = [] @ shared_man in
-  Cmd.info "conc" ~version ~doc ~sdocs ~man
-
-let conc_cmd =
-  let+ () = setup_log
-  and+ source_file
-  and+ parameters = symbolic_parameters None in
-
-  Cmd_conc.cmd ~parameters ~source_file
+  Cmd_cpp.cmd ~symbolic_parameters ~out_file ~arch ~includes ~opt_lvl ~files
 
 (* owi fmt *)
 
@@ -561,14 +540,12 @@ let rust_cmd =
   let+ arch
   and+ includes
   and+ opt_lvl
-  and+ concolic
   and+ files
   and+ out_file
   and+ () = setup_log
   and+ symbolic_parameters = symbolic_parameters (Some "main") in
 
-  Cmd_rust.cmd ~symbolic_parameters ~arch ~opt_lvl ~includes ~files ~concolic
-    ~out_file
+  Cmd_rust.cmd ~symbolic_parameters ~arch ~opt_lvl ~includes ~files ~out_file
 
 (* owi script *)
 
@@ -610,12 +587,11 @@ let tinygo_info =
   Cmd.info "tinygo" ~version ~doc ~sdocs ~man
 
 let tinygo_cmd =
-  let+ concolic
-  and+ files
+  let+ files
   and+ out_file
   and+ () = setup_log
   and+ symbolic_parameters = symbolic_parameters (Some "_start") in
-  Cmd_tinygo.cmd ~symbolic_parameters ~files ~concolic ~out_file
+  Cmd_tinygo.cmd ~symbolic_parameters ~files ~out_file
 
 (* owi validate *)
 
@@ -685,13 +661,12 @@ let zig_info =
   Cmd.info "zig" ~version ~doc ~sdocs ~man
 
 let zig_cmd =
-  let+ concolic
-  and+ includes
+  let+ includes
   and+ files
   and+ out_file
   and+ () = setup_log
   and+ symbolic_parameters = symbolic_parameters (Some "_start") in
-  Cmd_zig.cmd ~symbolic_parameters ~includes ~files ~concolic ~out_file
+  Cmd_zig.cmd ~symbolic_parameters ~includes ~files ~out_file
 
 (* owi *)
 
@@ -707,7 +682,6 @@ let cli =
   Cmd.group info ~default
     [ Cmd.group analyze_info [ Cmd.v cg_info cg_cmd; Cmd.v cfg_info cfg_cmd ]
     ; Cmd.v c_info c_cmd
-    ; Cmd.v conc_info conc_cmd
     ; Cmd.v cpp_info cpp_cmd
     ; Cmd.v fmt_info fmt_cmd
     ; Cmd.group instrument_info

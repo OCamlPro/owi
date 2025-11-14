@@ -1,12 +1,4 @@
   $ owi wat2wasm symbolic.wat
-  $ owi conc symbolic.wasm
-  owi: [ERROR] Trap: unreachable
-  Model:
-   model {
-    symbol symbol_1 i32 6
-  }
-  owi: [ERROR] Reached problem!
-  [13]
   $ owi wasm2wat symbolic.wasm
   (module
     (import "owi" "i32_symbol" (func  (result i32)))

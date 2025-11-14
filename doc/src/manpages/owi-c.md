@@ -14,9 +14,6 @@ ARGUMENTS
            source files
 
 OPTIONS
-       --concolic
-           concolic mode
-
        --deterministic-result-order
            Guarantee a fixed deterministic order of found failures. This
            implies --no-stop-at-failure.

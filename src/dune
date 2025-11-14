@@ -18,7 +18,6 @@
   cmd_c
   cmd_call_graph
   cmd_cfg
-  cmd_conc
   cmd_cpp
   cmd_fmt
   cmd_instrument_label
@@ -37,12 +36,6 @@
   cmd_zig
   code_generator
   compile
-  concolic
-  concolic_choice
-  concolic_extern_func
-  concolic_memory
-  concolic_value
-  concolic_wasm_ffi
   concrete
   concrete_choice
   concrete_extern_func
@@ -96,7 +89,6 @@
   symbolic_choice_without_memory
   symbolic_functor
   symbolic_global
-  symbolic_memory
   symbolic_memory_concretizing
   symbolic_memory_intf
   symbolic_memory_make
