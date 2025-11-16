@@ -91,7 +91,7 @@ type t = int
 module IMap = Map.Make (Int)
 
 type 'a collection =
-  { c : ('a * binary func_type) IMap.t
+  { c : ('a * func_type) IMap.t
   ; last : int
   }
 
@@ -102,7 +102,7 @@ let add f t { last; c } =
   <span data-count="12571">(</span>last, { c; last = suc<span data-count="12571">c</span> last })
 
 let get i c =
-  <span data-count="111499">m</span>atch IMap.find_opt i c.c with <span data-count="0">N</span>one -&gt; None | <span data-count="111497">S</span>ome (v, _) -&gt; Some v
+  <span data-count="111488">m</span>atch IMap.find_opt i c.c with <span data-count="0">N</span>one -&gt; None | <span data-count="111488">S</span>ome (v, _) -&gt; Some v
 
 let get_typ i c =
   <span data-count="3523">m</span>atch IMap.find_opt i c.c with None -&gt; assert false | <span data-count="3523">S</span>ome (_, t) -&gt; t

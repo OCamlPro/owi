@@ -1614,7 +1614,7 @@ let check_align memarg_align align =
 module Env = struct
   type t =
     { locals : typ Index.Map.t
-    ; result_type : binary result_type
+    ; result_type : result_type
     ; blocks : typ list list
     ; modul : Binary.Module.t
     ; refs : (int, unit) Hashtbl.t
@@ -2165,7 +2165,7 @@ let typecheck_const_expr (modul : Module.t) refs expr =
   <span data-count="4995">l</span>ist_fold_left (typecheck_const_inst<span data-count="4995">r</span> modul refs) [] expr.Annotated.raw
 
 let typecheck_global (modul : Module.t) refs
-  (global : (global, binary global_type) Runtime.t) =
+  (global : (global, global_type) Runtime.t) =
   <span data-count="1070">m</span>atch global with
   | <span data-count="120">I</span>mported _ -&gt; Ok ()
   | <span data-count="950">L</span>ocal { typ; init; _ } -&gt; (

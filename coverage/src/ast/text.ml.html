@@ -468,7 +468,7 @@ let bt_ind i = <span data-count="7991">B</span>t_ind i
 let bt_raw i t = <span data-count="9044">B</span>t_raw (i, t)
 
 type global =
-  { typ : text global_type
+  { typ : global_type
   ; init : text expr Annotated.t
   ; id : string option
   }
@@ -525,9 +525,9 @@ let pp_elem fmt (e : elem) =
     e.init
 
 type module_field =
-  | MType of text type_def
+  | MType of type_def
   | MGlobal of global
-  | MTable of text table
+  | MTable of table
   | MMem of mem
   | MFunc of text func
   | MElem of elem

@@ -1032,7 +1032,7 @@ let sort_results deterministic_result_order results =
     |&gt; Seq.map (function <span data-count="44">(</span>_, thread) as x -&gt;
       (x, List.re<span data-count="44">v</span> @@ Thread_with_memory.breadcrumb<span data-count="44">s</span> thread) )
     |&gt; <span data-count="35">L</span>ist.of_seq
-    |&gt; <span data-count="35">L</span>ist.sort (fun (_, bc1) (_, bc2) -&gt; <span data-count="14">L</span>ist.compare compare bc1 bc2)
+    |&gt; <span data-count="35">L</span>ist.sort (fun (_, bc1) (_, bc2) -&gt; <span data-count="15">L</span>ist.compare compare bc1 bc2)
     |&gt; <span data-count="35">L</span>ist.to_seq |&gt; <span data-count="35">S</span>eq.map fst
   else <span data-count="373">r</span>esults
 
@@ -1044,10 +1044,10 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
   <span data-count="408">l</span>et res_stack = Ws.make () in
   <span data-count="408">l</span>et path_count = Atomic.make 0 in
   <span data-count="408">l</span>et callback v =
-    <span data-count="1659">l</span>et open Symbolic_choice_intf in
+    <span data-count="1705">l</span>et open Symbolic_choice_intf in
     Atomic.incr path_count;
-    <span data-count="1661">m</span>atch (fail_mode, v) with
-    | <span data-count="1419">_</span>, (EVal (), _) -&gt; ()
+    <span data-count="1706">m</span>atch (fail_mode, v) with
+    | <span data-count="1464">_</span>, (EVal (), _) -&gt; ()
     | <span data-count="174">(</span> (<span data-count="174">B</span>oth | <span data-count="0">T</span>rap_only)
       , (ETrap (t, m, labels, breadcrumbs, symbol_scopes, stats), thread) ) -&gt;
       Ws.push
@@ -1072,7 +1072,7 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
         | <span data-count="0">S</span>mart -&gt; (module Wpq) )
         ~workers solver result thread ~callback
         ~callback_init:(fun () -&gt; <span data-count="790">W</span>s.make_pledge res_stack)
-        ~callback_end:(fun () -&gt; <span data-count="758">W</span>s.end_pledge res_stack)
+        ~callback_end:(fun () -&gt; <span data-count="751">W</span>s.end_pledge res_stack)
     in
     <span data-count="408">l</span>et results =
       Ws.read_as_seq res_stack ~finalizer:(fun () -&gt;

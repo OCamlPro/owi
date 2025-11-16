@@ -1826,8 +1826,8 @@ let pp_num_type fmt = function
   | <span data-count="0">V</span>128 -&gt; pf fmt "v128"
 
 let num_type_eq t1 t2 =
-  <span data-count="1613676">m</span>atch (t1, t2) with
-  | <span data-count="1478752">I</span>32, I32 | <span data-count="44937">I</span>64, I64 | <span data-count="44792">F</span>32, F32 | <span data-count="44935">F</span>64, F64 | <span data-count="234">V</span>128, V128 -&gt; true
+  <span data-count="1613661">m</span>atch (t1, t2) with
+  | <span data-count="1478738">I</span>32, I32 | <span data-count="44937">I</span>64, I64 | <span data-count="44792">F</span>32, F32 | <span data-count="44935">F</span>64, F64 | <span data-count="234">V</span>128, V128 -&gt; true
   | <span data-count="25">(</span><span data-count="10">I</span>32 | <span data-count="6">I</span>64 | <span data-count="5">F</span>32 | <span data-count="4">F</span>64 | <span data-count="0">V</span>128), _ -&gt; false
 
 let compare_num_type t1 t2 =
@@ -2087,8 +2087,8 @@ let pp_val_type fmt = function
   | <span data-count="0">R</span>ef_type t -&gt; pp_ref_type fmt t
 
 let val_type_eq t1 t2 =
-  <span data-count="1612793">m</span>atch (t1, t2) with
-  | <span data-count="1612780">N</span>um_type t1, Num_type t2 -&gt; num_type_eq t1 t2
+  <span data-count="1612779">m</span>atch (t1, t2) with
+  | <span data-count="1612766">N</span>um_type t1, Num_type t2 -&gt; num_type_eq t1 t2
   | <span data-count="13">R</span>ef_type t1, Ref_type t2 -&gt; ref_type_eq t1 t2
   | <span data-count="0">_</span>, _ -&gt; false
 
@@ -2099,29 +2099,29 @@ let compare_val_type t1 t2 =
   | <span data-count="210">N</span>um_type _, _ -&gt; 1
   | <span data-count="64">R</span>ef_type _, _ -&gt; -1
 
-type nonrec 'a param = string option * val_type
+type nonrec param = string option * val_type
 
 let pp_param fmt (id, vt) = <span data-count="303">p</span>f fmt "(param%a %a)" pp_id_opt id pp_val_type vt
 
-let param_eq (_, t1) (_, t2) = <span data-count="808097">v</span>al_type_eq t1 t2
+let param_eq (_, t1) (_, t2) = <span data-count="808086">v</span>al_type_eq t1 t2
 
 let compare_param (_, t1) (_, t2) = <span data-count="18516">c</span>ompare_val_type t1 t2
 
-type nonrec 'a param_type = 'a param list
+type nonrec param_type = param list
 
 let pp_param_type fmt params = <span data-count="161">l</span>ist ~sep:sp pp_param fmt params
 
-let param_type_eq t1 t2 = <span data-count="808826">L</span>ist.equal param_eq t1 t2
+let param_type_eq t1 t2 = <span data-count="808817">L</span>ist.equal param_eq t1 t2
 
 let compare_param_type t1 t2 = <span data-count="41061">L</span>ist.compare compare_param t1 t2
 
-type nonrec 'a result_type = val_type list
+type nonrec result_type = val_type list
 
 let pp_result_ fmt vt = <span data-count="163">p</span>f fmt "(result %a)" pp_val_type vt
 
 let pp_result_type fmt results = <span data-count="163">l</span>ist ~sep:sp pp_result_ fmt results
 
-let result_type_eq t1 t2 = <span data-count="808712">L</span>ist.equal val_type_eq t1 t2
+let result_type_eq t1 t2 = <span data-count="808704">L</span>ist.equal val_type_eq t1 t2
 
 let compare_result_type t1 t2 = <span data-count="22186">L</span>ist.compare compare_val_type t1 t2
 
@@ -2130,7 +2130,7 @@ let compare_result_type t1 t2 = <span data-count="22186">L</span>ist.compare com
 let with_space_list printer fmt l =
   <span data-count="940">m</span>atch l with <span data-count="566">[</span>] -&gt; () | <span data-count="374">_</span>l -&gt; pf fmt " %a" printer l
 
-type nonrec 'a func_type = 'a param_type * 'a result_type
+type nonrec func_type = param_type * result_type
 
 let pp_func_type fmt (params, results) =
   <span data-count="89">p</span>f fmt "(func%a%a)"
@@ -2140,12 +2140,12 @@ let pp_func_type fmt (params, results) =
     results
 
 let func_type_eq (pt1, rt1) (pt2, rt2) =
-  <span data-count="808826">p</span>aram_type_e<span data-count="808825">q</span> pt1 pt2 &amp;&amp; <span data-count="808712">r</span>esult_type_eq rt1 rt2
+  <span data-count="808817">p</span>aram_type_e<span data-count="808817">q</span> pt1 pt2 &amp;&amp; <span data-count="808704">r</span>esult_type_eq rt1 rt2
 
 (* TODO: add a third case that only has (pt * rt) and is the only one used in simplified *)
 type 'a block_type =
   | Bt_ind : 'a indice -&gt; (&lt; with_ind_bt ; .. &gt; as 'a) block_type
-  | Bt_raw : ('a indice option * 'a func_type) -&gt; (&lt; .. &gt; as 'a) block_type
+  | Bt_raw : ('a indice option * func_type) -&gt; (&lt; .. &gt; as 'a) block_type
 
 let pp_block_type (type kind) fmt : kind block_type -&gt; unit = function
   | <span data-count="3">B</span>t_ind ind -&gt; pf fmt "(type %a)" pp_indice ind
@@ -2169,18 +2169,18 @@ type nonrec table_type = limits * ref_type
 let pp_table_type fmt (limits, ref_type) =
   <span data-count="4">p</span>f fmt "%a %a" pp_limits limits pp_ref_type ref_type
 
-type nonrec 'a global_type = mut * val_type
+type nonrec global_type = mut * val_type
 
 let pp_global_type fmt (mut, val_type) =
   <span data-count="6">m</span>atch mut with
   | <span data-count="5">V</span>ar -&gt; pf fmt "(mut %a)" pp_val_type val_type
   | <span data-count="1">C</span>onst -&gt; pf fmt "%a" pp_val_type val_type
 
-type nonrec 'a extern_type =
-  | Func of string option * 'a func_type
+type nonrec extern_type =
+  | Func of string option * func_type
   | Table of string option * table_type
   | Mem of string option * limits
-  | Global of string option * 'a global_type
+  | Global of string option * global_type
 
 (** Instructions *)
 
@@ -2455,7 +2455,7 @@ and iter_instr f instr =
    using (param_type, result_type) M.block_type before simplify and directly an indice after *)
 type 'a func =
   { type_f : 'a block_type
-  ; locals : 'a param list
+  ; locals : param list
   ; body : 'a expr Annotated.t
   ; id : string option
   }
@@ -2475,7 +2475,7 @@ let pp_funcs fmt (funcs : 'a func list) = <span data-count="0">l</span>ist ~sep:
 
 (* Tables &amp; Memories *)
 
-type 'a table = string option * table_type
+type table = string option * table_type
 
 let pp_table fmt (id, ty) = <span data-count="4">p</span>f fmt "(table%a %a)" pp_id_opt id pp_table_type ty
 
@@ -2485,7 +2485,7 @@ type 'a import_desc =
   | Import_func of string option * 'a block_type
   | Import_table of string option * table_type
   | Import_mem of string option * limits
-  | Import_global of string option * 'a global_type
+  | Import_global of string option * global_type
 
 let import_desc fmt : 'a import_desc -&gt; Unit.t = function
   | <span data-count="13">I</span>mport_func (id, t) -&gt; pf fmt "(func%a %a)" pp_id_opt id pp_block_type t
@@ -2527,7 +2527,7 @@ type 'a export =
 let pp_export fmt (e : text export) =
   <span data-count="33">p</span>f fmt {|(export "%s" %a)|} e.name pp_export_desc e.desc
 
-type 'a type_def = string option * 'a func_type
+type type_def = string option * func_type
 
 let pp_type_def fmt (id, t) = <span data-count="85">p</span>f fmt "(type%a %a)" pp_id_opt id pp_func_type t
 

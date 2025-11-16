@@ -982,7 +982,7 @@ let load_from_module ls f (import : _ Imported.t) =
       else <span data-count="11">E</span>rror (`Unknown_import (import.modul, import.name))
     | <span data-count="3882">S</span>ome v -&gt; Ok v )
 
-let load_global (ls : 'f state) (import : binary global_type Imported.t) :
+let load_global (ls : 'f state) (import : global_type Imported.t) :
   global Result.t =
   <span data-count="71">l</span>et* global = load_from_modul<span data-count="71">e</span> ls (fun (e : exports) -&gt; <span data-count="71">e</span>.globals) import in
   <span data-count="63">l</span>et* () =
@@ -1049,8 +1049,8 @@ module Eval_const = struct
     | <span data-count="4563">[</span> result ] -&gt; Ok result
 end
 
-let eval_global ls env (global : (Binary.global, binary global_type) Runtime.t)
-  : global Result.t =
+let eval_global ls env (global : (Binary.global, global_type) Runtime.t) :
+  global Result.t =
   <span data-count="923">m</span>atch global with
   | <span data-count="852">L</span>ocal global -&gt;
     let* value = Eval_const.exp<span data-count="852">r</span> env global.init in
@@ -1319,7 +1319,7 @@ let modul (ls : 'f state) ~name (modul : Binary.Module.t) =
       ; envs
       } )
 
-let extern_module' (ls : 'f state) ~name ~(func_typ : 'f -&gt; binary func_type)
+let extern_module' (ls : 'f state) ~name ~(func_typ : 'f -&gt; func_type)
   (module_ : 'f extern_module) =
   <span data-count="1678">l</span>et functions, collection =
     List.fold_left

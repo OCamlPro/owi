@@ -723,7 +723,7 @@ module type T_Extern_func = sig
   type extern_func = Extern_func : 'a func_type * 'a -&gt; extern_func
 
   (* val extern_type : _ func_type -&gt; Simplified.func_type *)
-  val extern_type : extern_func -&gt; binary Types.func_type
+  val extern_type : extern_func -&gt; Types.func_type
 
   module Syntax : sig
     type l
@@ -855,7 +855,7 @@ end = struct
     | <span data-count="418">V</span>128 -&gt; Num_type V128
     | <span data-count="3">E</span>xternref _ -&gt; Ref_type (Null, Extern_ht)
 
-  let res_type (type t) (r : t rtype) : binary result_type =
+  let res_type (type t) (r : t rtype) : result_type =
     <span data-count="12575">m</span>atch r with
     | <span data-count="5654">R</span>0 -&gt; []
     | <span data-count="6921">R</span>1 a -&gt; [ elt_typ<span data-count="6921">e</span> a ]
@@ -863,14 +863,14 @@ end = struct
     | <span data-count="0">R</span>3 (a, b, c) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b; elt_typ<span data-count="0">e</span> c ]
     | <span data-count="0">R</span>4 (a, b, c, d) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b; elt_typ<span data-count="0">e</span> c; elt_typ<span data-count="0">e</span> d ]
 
-  let rec arg_type : type t r. (t, r) atype -&gt; binary param_type = function
+  let rec arg_type : type t r. (t, r) atype -&gt; param_type = function
     | <span data-count="1673">M</span>em tl -&gt; arg_type tl
     | <span data-count="5396">U</span>Arg tl -&gt; arg_type tl
     | <span data-count="10320">A</span>rg (hd, tl) -&gt; (None, elt_typ<span data-count="10320">e</span> hd) :: arg_typ<span data-count="10320">e</span> tl
     | <span data-count="0">N</span>Arg (name, hd, tl) -&gt; (Some name, elt_typ<span data-count="0">e</span> hd) :: arg_typ<span data-count="0">e</span> tl
     | <span data-count="12575">R</span>es -&gt; []
 
-  let extern_type (Extern_func (Func (arg, res), _)) : binary Types.func_type =
+  let extern_type (Extern_func (Func (arg, res), _)) : Types.func_type =
     <span data-count="12575">(</span>arg_typ<span data-count="12575">e</span> arg, res_typ<span data-count="12575">e</span> res)
 
   type nonrec t = t
