@@ -6,6 +6,5 @@ val cmd :
      unsafe:bool
   -> timeout:float option
   -> timeout_instr:int option
-  -> rac:bool
   -> source_file:Fpath.t
   -> unit Result.t

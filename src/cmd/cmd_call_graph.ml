@@ -3,7 +3,6 @@
 (* Written by the Owi programmers *)
 
 open Syntax
-open Types
 module Stack = Stack.Make (Concrete_value)
 module M = Map.Make (Int)
 module S = Set.Make (Int)
@@ -13,19 +12,18 @@ type mode =
   | Sound
 
 let find_functions_with_func_type func_type (acc, i)
-  (f : (binary func, binary block_type) Runtime.t) =
+  (f : (Binary.func, Binary.block_type) Runtime.t) =
   let (Bt_raw (_, ft)) =
     match f with
     | Runtime.Local x -> x.type_f
     | Runtime.Imported imp -> imp.desc
   in
-  if func_type_eq func_type ft then (S.add i acc, i + 1) else (acc, i + 1)
+  if Binary.func_type_eq func_type ft then (S.add i acc, i + 1) else (acc, i + 1)
 
-let rec find_children mode tables (funcs : 'a array) acc
-  (l : binary instr Annotated.t list) =
+let rec find_children mode tables (funcs : 'a array) acc (l : Binary.expr) =
   match (l, mode) with
   | [], _ -> acc
-  | ({ raw = Call (Raw i) | Return_call (Raw i); _ } as instr) :: l, _ ->
+  | ({ raw = Call i | Return_call i; _ } as instr) :: l, _ ->
     Annotated.update_functions_called instr (S.singleton i);
     find_children mode tables funcs (S.add i acc) l
   | ( ( { raw =
@@ -42,9 +40,8 @@ let rec find_children mode tables (funcs : 'a array) acc
     let acc = S.union children acc in
     find_children mode tables funcs acc l
   | ( { raw = I32_const x; _ }
-      :: ( { raw = Call_indirect (Raw i, _) | Return_call_indirect (Raw i, _)
-           ; _
-           } as instr )
+      :: ( { raw = Call_indirect (i, _) | Return_call_indirect (i, _); _ } as
+           instr )
       :: l
     , Sound ) -> (
     let t_opt = M.find_opt i tables in
@@ -68,7 +65,7 @@ let rec find_children mode tables (funcs : 'a array) acc
     find_children mode tables funcs x l
   | _ :: l, _ -> find_children mode tables funcs acc l
 
-let build_graph mode tables funcs (g, i) (f : (binary func, 'a) Runtime.t) =
+let build_graph mode tables funcs (g, i) (f : (Binary.func, 'a) Runtime.t) =
   match f with
   | Runtime.Local x ->
     let s = find_children mode tables funcs S.empty x.body.raw in
@@ -76,9 +73,9 @@ let build_graph mode tables funcs (g, i) (f : (binary func, 'a) Runtime.t) =
     ((i, Some cfg, s) :: g, i + 1)
   | Runtime.Imported _ -> ((i, None, S.empty) :: g, i + 1)
 
-let eval_ibinop stack nn (op : ibinop) =
+let eval_ibinop stack nn (op : Binary.ibinop) =
   match nn with
-  | S32 ->
+  | Binary.S32 ->
     let (n1, n2), stack = Stack.pop2_i32 stack in
     Stack.push_i32 stack
       (let open Int32 in
@@ -102,17 +99,17 @@ let get_const_global env id =
 
 let eval_const_instr env stack instr =
   match instr.Annotated.raw with
-  | I32_const n -> ok @@ Stack.push_i32 stack n
+  | Binary.I32_const n -> ok @@ Stack.push_i32 stack n
   | I64_const n -> ok @@ Stack.push_i64 stack n
   | F32_const f -> ok @@ Stack.push_f32 stack f
   | F64_const f -> ok @@ Stack.push_f64 stack f
   | V128_const f -> ok @@ Stack.push_v128 stack f
   | I_binop (nn, op) -> ok @@ eval_ibinop stack nn op
   | Ref_null t -> ok @@ Stack.push stack (Concrete_value.ref_null t)
-  | Global_get (Raw id) ->
+  | Global_get id ->
     let* g = get_const_global env id in
     ok @@ Stack.push_i32 stack g
-  | Ref_func (Raw id) -> ok @@ Stack.push_i32_of_int stack id
+  | Ref_func id -> ok @@ Stack.push_i32_of_int stack id
   | _ -> assert false
 
 let eval_const env exp =
@@ -143,9 +140,9 @@ let build_env (env, n) (global : (Binary.global, 'a) Runtime.t) =
     | _ -> (env, n + 1) )
   | _ -> (env, n + 1)
 
-let rec find_tables acc (e : binary instr Annotated.t) =
+let rec find_tables acc (e : Binary.instr Annotated.t) =
   match e.raw with
-  | Table_set (Raw i) | Table_fill (Raw i) | Table_copy (Raw i, _) -> i :: acc
+  | Table_set i | Table_fill i | Table_copy (i, _) -> i :: acc
   | Block (_, _, exp) | Loop (_, _, exp) ->
     List.fold_left find_tables acc exp.raw
   | If_else (_, _, e1, e2) ->
@@ -154,11 +151,11 @@ let rec find_tables acc (e : binary instr Annotated.t) =
   | _ -> acc
 
 let find_tables_to_remove export_tables funcs =
-  let l = List.map (fun (x : Binary.export) -> x.id) export_tables in
+  let l = List.map (fun (x : Binary.named_export) -> x.id) export_tables in
   Array.fold_left
     (fun acc f ->
       match f with
-      | Runtime.Local x -> List.fold_left find_tables acc x.body.raw
+      | Runtime.Local x -> List.fold_left find_tables acc x.Binary.body.raw
       | _ -> acc )
     l funcs
 
@@ -174,16 +171,17 @@ let rec remove_tables (l1 : (int * Binary.elem) list) l2 acc =
 
 let find_entry_points (m : Binary.Module.t) =
   let l = Option.to_list m.start in
-  List.fold_left (fun acc (x : Binary.export) -> x.id :: acc) l m.exports.func
+  List.fold_left
+    (fun acc (x : Binary.named_export) -> x.id :: acc)
+    l m.exports.func
 
 let find_entries entry_point (m : Binary.Module.t) =
   let entries =
     Option.bind
       (Option.bind entry_point (fun x ->
          Array.find_index
-           (fun f ->
-             match f with
-             | Runtime.Local y ->
+           (function
+             | Runtime.Local (y : Binary.func) ->
                Option.compare String.compare (Some x) y.id = 0
              | _ -> false )
            m.func ) )
@@ -224,9 +222,7 @@ let build_call_graph call_graph_mode (m : Binary.Module.t) entry_point =
   Call_graph.init l entries
 
 let build_call_graph_from_text_module call_graph_mode modul entry_point =
-  let m =
-    Compile.Text.until_validate ~unsafe:false ~rac:false ~srac:false modul
-  in
+  let m = Compile.Text.until_validate ~unsafe:false modul in
   match m with
   | Ok m -> build_call_graph call_graph_mode m entry_point
   | _ -> assert false
@@ -236,9 +232,7 @@ let compute_distances m entry_point =
   Exploration_smart.compute_distance_to_unreachable call_graph
 
 let cmd ~call_graph_mode ~source_file ~entry_point =
-  let* m =
-    Compile.File.until_validate ~unsafe:false ~rac:false ~srac:false source_file
-  in
+  let* m = Compile.File.until_validate ~unsafe:false source_file in
   let call_graph = build_call_graph call_graph_mode m entry_point in
 
   Bos.OS.File.writef

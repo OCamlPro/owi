@@ -1,11 +1,10 @@
 type t
 
-val init :
-  (int * Types.binary Types.expr) list -> (int * int * Int32.t option) list -> t
+val init : (int * Binary.expr) list -> (int * int * Int32.t option) list -> t
 
 module Vertex : sig
   type t =
-    { expr : Types.binary Types.expr
+    { expr : Binary.expr
     ; idx : int
     }
 end

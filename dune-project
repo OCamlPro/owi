@@ -19,13 +19,13 @@
 (license AGPL-3.0-or-later)
 
 (authors
- "Léo Andrès <leo@ocamlpro.com>"
+ "redianthus <leo@ocaml.pro>"
  "Pierre Chambart <pierre.chambart@ocamlpro.com>"
  "Filipe Marques <filipe.s.marques@tecnico.ulisboa.pt>"
  "Eric Patrizio <epatrizio@mpns.fr>"
  "Arthur Carcano <arthur.carcano@ocamlpro.com>")
 
-(maintainers "Léo Andrès <leo@ocamlpro.com>")
+(maintainers "redianthus <leo@ocaml.pro>")
 
 (source
  (github ocamlpro/owi))

@@ -5,8 +5,6 @@
 (** Module to define externref values in OCaml. You should look in the `example`
     directory to understand how to use this before reading the code... *)
 
-open Types
-
 type externref = E : 'a Type.Id.t * 'a -> externref
 
 type ref_value =
@@ -25,13 +23,13 @@ type t =
 
 val cast_ref : externref -> 'a Type.Id.t -> 'a option
 
-val of_instr : binary instr -> t
+val of_instr : Binary.instr -> t
 
-val to_instr : t -> binary instr
+val to_instr : t -> Binary.instr
 
-val ref_null' : heap_type -> ref_value
+val ref_null' : Binary.heap_type -> ref_value
 
-val ref_null : heap_type -> t
+val ref_null : Binary.heap_type -> t
 
 val ref_func : Concrete_extern_func.t -> t
 

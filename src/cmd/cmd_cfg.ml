@@ -1,5 +1,4 @@
 open Syntax
-open Types
 
 type to_add =
   | Ind of int
@@ -20,7 +19,7 @@ let increase x =
   let n, m, s = x in
   match m with Ind m -> (n, Ind (m + 1), s) | _ -> x
 
-let rec build_graph (l : binary expr) nodes n node edges
+let rec build_graph (l : Binary.expr) nodes n node edges
   (edges_to_add : (int * to_add * Int32.t option) list) continue =
   match l with
   | [] -> (
@@ -85,21 +84,21 @@ let rec build_graph (l : binary expr) nodes n node edges
           (edges_to_add' @ edges_to_add)
       in
       build_graph l nodes n2 [] edges edges_to_add (continue || continue')
-    | Br (Raw i) ->
+    | Br i ->
       let nodes = (n, instr :: node) :: nodes in
       let edges_to_add = (n, Ind i, None) :: edges_to_add in
       (nodes, edges, n + 1, edges_to_add, false)
-    | Br_if (Raw i) ->
+    | Br_if i ->
       let nodes = (n, instr :: node) :: nodes in
       let edges_to_add = (n, Ind i, Some 1l) :: edges_to_add in
       let edges = (n, n + 1, Some 0l) :: edges in
       build_graph l nodes (n + 1) [] edges edges_to_add continue
-    | Br_table (inds, Raw i) ->
+    | Br_table (inds, i) ->
       let nodes = (n, instr :: node) :: nodes in
       let edges_to_add = (n, Ind i, None) :: edges_to_add in
       let edges_to_add, _ =
         Array.fold_left
-          (fun (acc, x) (Raw i : binary indice) ->
+          (fun (acc, x) (i : Binary.indice) ->
             ((n, Ind i, Some (Int32.of_int x)) :: acc, x + 1) )
           (edges_to_add, 0) inds
       in
@@ -119,7 +118,7 @@ let rec build_graph (l : binary expr) nodes n node edges
 
 let build_cfg instr =
   let nodes, edges, n, edges_to_add, _ = build_graph instr [] 0 [] [] [] true in
-  let nodes = (n, [ Annotated.dummy Return ]) :: nodes in
+  let nodes = (n, [ Annotated.dummy Binary.Return ]) :: nodes in
   let edges, edges_to_add =
     List.fold_left (update_edges n n) (edges, []) edges_to_add
   in
@@ -127,9 +126,7 @@ let build_cfg instr =
   (nodes, edges)
 
 let build_cfg_from_text_module modul entry =
-  let m =
-    Compile.Text.until_validate ~unsafe:false ~rac:false ~srac:false modul
-  in
+  let m = Compile.Text.until_validate ~unsafe:false modul in
   match m with
   | Ok m ->
     let f =
@@ -141,14 +138,12 @@ let build_cfg_from_text_module modul entry =
     Control_flow_graph.init nodes edges
   | _ -> assert false
 
-let build_cfg_from_func f =
+let build_cfg_from_func (f : Binary.func) =
   let nodes, edges = build_cfg f.body.raw in
   Control_flow_graph.init nodes edges
 
 let cmd ~source_file ~entry_point =
-  let* m =
-    Compile.File.until_validate ~unsafe:false ~rac:false ~srac:false source_file
-  in
+  let* m = Compile.File.until_validate ~unsafe:false source_file in
   let entry =
     Option.value
       (Option.bind entry_point (fun x ->
@@ -157,7 +152,7 @@ let cmd ~source_file ~entry_point =
          | None ->
            Array.find_index
              (function
-               | Runtime.Local y ->
+               | Runtime.Local (y : Binary.func) ->
                  Option.compare String.compare (Some x) y.id = 0
                | _ -> false )
              m.func ) )

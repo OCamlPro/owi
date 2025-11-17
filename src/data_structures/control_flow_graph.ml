@@ -2,7 +2,7 @@ module Vertex = struct
   (** A node of the control flow graph is an expression. The invariant is that
       it should not contain any "block". *)
   type t =
-    { expr : Types.binary Types.expr
+    { expr : Binary.expr
     ; idx : int
     }
 
@@ -80,7 +80,8 @@ let pp_edges g fmt vertex =
     g vertex;
   pp_sep fmt ()
 
-let pp_inst fmt i = Fmt.pf fmt "%a" (Types.pp_instr ~short:true) i.Annotated.raw
+let pp_inst fmt i =
+  Fmt.pf fmt "%a" (Binary.pp_instr ~short:true) i.Annotated.raw
 
 let pp_exp fmt l =
   Fmt.list ~sep:(fun fmt () -> Fmt.string fmt " | ") pp_inst fmt l

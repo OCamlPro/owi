@@ -10,13 +10,13 @@ val guess_from_file : Fpath.t -> 'extern_func Kind.t Result.t
 module Text : sig
   module Script : sig
     (** Parse a script from a string. *)
-    val from_string : string -> Text.script Result.t
+    val from_string : string -> Wast.script Result.t
 
     (** Parse a script from a channel. *)
-    val from_channel : in_channel -> Text.script Result.t
+    val from_channel : in_channel -> Wast.script Result.t
 
     (** Parse a script from a file. *)
-    val from_file : Fpath.t -> Text.script Result.t
+    val from_file : Fpath.t -> Wast.script Result.t
   end
 
   module Module : sig

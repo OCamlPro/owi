@@ -3,7 +3,6 @@
 (library
  (public_name owi)
  (modules
-  annot
   annotated
   assigned
   benchmark
@@ -21,7 +20,6 @@
   cmd_cpp
   cmd_fmt
   cmd_instrument_label
-  cmd_instrument_rac
   cmd_iso
   cmd_replay
   cmd_run
@@ -34,7 +32,6 @@
   cmd_wasm2wat
   cmd_wat2wasm
   cmd_zig
-  code_generator
   compile
   concrete
   concrete_choice
@@ -50,8 +47,6 @@
   exploration_smart
   float32
   float64
-  v128
-  contract
   func_id
   func_intf
   grouped
@@ -62,7 +57,6 @@
   interpret
   interpret_intf
   kind
-  spec
   label
   link
   link_env
@@ -108,11 +102,12 @@
   thread_intf
   thread_with_memory
   thread_without_memory
-  types
   union_find
   value_intf
   v
+  v128
   wasm_ffi_intf
+  wast
   work_ds_intf
   wpq
   wq_random

@@ -19,8 +19,6 @@ type exploration_strategy =
 
 type parameters =
   { unsafe : bool
-  ; rac : bool
-  ; srac : bool
   ; workers : int
   ; no_stop_at_failure : bool
   ; no_value : bool
@@ -38,17 +36,10 @@ type parameters =
   }
 
 let run_file ~parameters ~source_file =
-  let { unsafe
-      ; rac
-      ; srac
-      ; entry_point
-      ; invoke_with_symbols
-      ; exploration_strategy
-      ; _
-      } =
+  let { unsafe; entry_point; invoke_with_symbols; exploration_strategy; _ } =
     parameters
   in
-  let* m = Compile.File.until_validate ~unsafe ~rac ~srac source_file in
+  let* m = Compile.File.until_validate ~unsafe source_file in
   ( match exploration_strategy with
   | Smart -> Cmd_call_graph.compute_distances m entry_point
   | _ -> () );

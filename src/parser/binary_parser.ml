@@ -7,7 +7,6 @@
 
 open Binary
 open Syntax
-open Types
 
 let parse_fail format = Fmt.kstr (fun msg -> Error (`Parse_fail msg)) format
 
@@ -213,9 +212,9 @@ let check_zero_opcode input =
 
 let read_bytes ~msg input = vector_no_id (read_byte ~msg) input
 
-let read_indice input : (Types.binary Types.indice * Input.t, _) result =
+let read_indice input : (Binary.indice * Input.t, _) result =
   let+ indice, input = read_U32 input in
-  (Raw indice, input)
+  (indice, input)
 
 let read_numtype input =
   let* b, input = read_S7 input in
@@ -413,14 +412,14 @@ let rec read_instr types input =
     let+ funcidx, input = read_indice input in
     (Call funcidx, input)
   | '\x11' ->
-    let* Raw typeidx, input = read_indice input in
+    let* typeidx, input = read_indice input in
     let+ tableidx, input = read_indice input in
     (Call_indirect (tableidx, block_type_of_type_def types.(typeidx)), input)
   | '\x12' ->
     let+ funcidx, input = read_indice input in
     (Return_call funcidx, input)
   | '\x13' ->
-    let* Raw typeidx, input = read_indice input in
+    let* typeidx, input = read_indice input in
     let+ tableidx, input = read_indice input in
     ( Return_call_indirect (tableidx, block_type_of_type_def types.(typeidx))
     , input )
@@ -428,7 +427,7 @@ let rec read_instr types input =
     let+ funcidx, input = read_indice input in
     (Call_ref funcidx, input)
   | '\x15' ->
-    let+ Raw typeidx, input = read_indice input in
+    let+ typeidx, input = read_indice input in
     (Return_call_ref (block_type_of_type_def types.(typeidx)), input)
   | '\x1A' -> Ok (Drop, input)
   | '\x1B' -> Ok (Select None, input)
@@ -826,7 +825,7 @@ let read_export input =
   ((export_typeidx, { id; name }), input)
 
 let read_elem_active types input =
-  let* Raw index, input = read_indice input in
+  let* index, input = read_indice input in
   let+ offset, input = read_const types input in
   (Elem_active (Some index, offset), input)
 
@@ -936,7 +935,7 @@ let read_code types input =
 
 (* TODO: merge Elem and Data modes ? *)
 let read_data_active types input =
-  let* Raw index, input = read_indice input in
+  let* index, input = read_indice input in
   let+ offset, input = read_const types input in
   (Data_active (index, offset), input)
 

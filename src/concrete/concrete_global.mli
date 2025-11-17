@@ -4,22 +4,20 @@
 
 (** runtime global *)
 
-open Types
-
 type t =
   { mutable value : Concrete_value.t
   ; label : string option
-  ; mut : mut
-  ; typ : val_type
+  ; mut : Binary.mut
+  ; typ : Binary.val_type
   }
 
 val value : t -> Concrete_value.t
 
 val set_value : t -> Concrete_value.t -> unit
 
-val typ : t -> val_type
+val typ : t -> Binary.val_type
 
-val mut : t -> mut
+val mut : t -> Binary.mut
 
 val backup : t -> t
 

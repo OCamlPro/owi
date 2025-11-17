@@ -5,4 +5,4 @@
 (** Module to execute a full Wasm script. *)
 
 (** execute a Wasm script *)
-val exec : no_exhaustion:bool -> Text.script -> unit Result.t
+val exec : no_exhaustion:bool -> Wast.script -> unit Result.t

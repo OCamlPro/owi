@@ -12,9 +12,9 @@ val clone : collection -> collection
 
 val get_global : Env_id.t -> Concrete_global.t -> collection -> int -> t
 
-val typ : t -> Types.val_type
+val typ : t -> Binary.val_type
 
-val mut : t -> Types.mut
+val mut : t -> Binary.mut
 
 val value : t -> Symbolic_value.t
 

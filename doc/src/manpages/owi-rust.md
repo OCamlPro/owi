@@ -63,15 +63,9 @@ OPTIONS
        -O VAL (absent=3)
            specify which optimization level to use
 
-       --rac
-           runtime assertion checking mode
-
        -s VALUE, --solver=VALUE (absent=Z3)
            SMT solver to use. VALUE must be one of the 5 available solvers:
            Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo
-
-       --srac
-           symbolic runtime assertion checking mode
 
        -u, --unsafe
            skip typechecking pass

@@ -2,7 +2,6 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-open Types
 open Syntax
 module StringMap = Map.Make (String)
 module StringSet = Set.Make (String)
@@ -24,7 +23,7 @@ type exports =
 type 'f module_to_run =
   { id : string option
   ; env : 'f Link_env.t
-  ; to_run : binary expr Annotated.t list
+  ; to_run : Binary.expr Annotated.t list
   }
 
 type 'f envs = 'f Link_env.t Env_id.collection
@@ -60,7 +59,7 @@ let load_from_module ls f (import : _ Imported.t) =
       else Error (`Unknown_import (import.modul, import.name))
     | Some v -> Ok v )
 
-let load_global (ls : 'f state) (import : global_type Imported.t) :
+let load_global (ls : 'f state) (import : Binary.global_type Imported.t) :
   global Result.t =
   let* global = load_from_module ls (fun (e : exports) -> e.globals) import in
   let* () =
@@ -68,7 +67,7 @@ let load_global (ls : 'f state) (import : global_type Imported.t) :
     | Var, Const | Const, Var -> Error (`Incompatible_import_type import.name)
     | Const, Const | Var, Var -> Ok ()
   in
-  if not @@ Types.val_type_eq (snd import.desc) global.typ then begin
+  if not @@ Binary.val_type_eq (snd import.desc) global.typ then begin
     Error (`Incompatible_import_type import.name)
   end
   else Ok global
@@ -77,9 +76,9 @@ module Eval_const = struct
   module Stack = Stack.Make [@inlined hint] (Concrete_value)
 
   (* TODO: const ibinop *)
-  let ibinop stack nn (op : ibinop) =
+  let ibinop stack nn (op : Binary.ibinop) =
     match nn with
-    | S32 ->
+    | Binary.S32 ->
       let (n1, n2), stack = Stack.pop2_i32 stack in
       Stack.push_i32 stack
         (let open Int32 in
@@ -101,18 +100,18 @@ module Eval_const = struct
   (* TODO: binary+const instr *)
   let instr env stack instr =
     match instr.Annotated.raw with
-    | I32_const n -> ok @@ Stack.push_i32 stack n
+    | Binary.I32_const n -> ok @@ Stack.push_i32 stack n
     | I64_const n -> ok @@ Stack.push_i64 stack n
     | F32_const f -> ok @@ Stack.push_f32 stack f
     | F64_const f -> ok @@ Stack.push_f64 stack f
     | V128_const f -> ok @@ Stack.push_v128 stack f
     | I_binop (nn, op) -> ok @@ ibinop stack nn op
     | Ref_null t -> ok @@ Stack.push stack (Concrete_value.ref_null t)
-    | Ref_func (Raw f) ->
+    | Ref_func f ->
       let* f = Link_env.Build.get_func env f in
       let value = Concrete_value.Ref (Funcref (Some f)) in
       ok @@ Stack.push stack value
-    | Global_get (Raw id) ->
+    | Global_get id ->
       let* g = Link_env.Build.get_const_global env id in
       ok @@ Stack.push stack g
     | _ -> assert false
@@ -127,8 +126,8 @@ module Eval_const = struct
     | [ result ] -> Ok result
 end
 
-let eval_global ls env (global : (Binary.global, global_type) Runtime.t) :
-  global Result.t =
+let eval_global ls env (global : (Binary.global, Binary.global_type) Runtime.t)
+  : global Result.t =
   match global with
   | Local global ->
     let* value = Eval_const.expr env global.init in
@@ -161,21 +160,21 @@ let eval_in_data (env : Link_env.t) (data : _ data') : (int, value) data' =
 *)
 
 let limit_is_included ~import ~imported =
-  imported.min >= import.min
+  imported.Binary.min >= import.Binary.min
   &&
   match (imported.max, import.max) with
   | _, None -> true
   | None, Some _ -> false
   | Some i, Some j -> i <= j
 
-let load_memory (ls : 'f state) (import : limits Imported.t) :
+let load_memory (ls : 'f state) (import : Binary.limits Imported.t) :
   Concrete_memory.t Result.t =
   let* mem = load_from_module ls (fun (e : exports) -> e.memories) import in
   let imported_limit = Concrete_memory.get_limits mem in
   if limit_is_included ~import:import.desc ~imported:imported_limit then Ok mem
   else Error (`Incompatible_import_type import.name)
 
-let eval_memory ls (memory : (mem, limits) Runtime.t) :
+let eval_memory ls (memory : (Binary.mem, Binary.limits) Runtime.t) :
   Concrete_memory.t Result.t =
   match memory with
   | Local (_label, mem_type) -> ok @@ Concrete_memory.init mem_type
@@ -192,17 +191,17 @@ let eval_memories ls env memories =
   in
   env
 
-let table_types_are_compatible (import, (t1 : ref_type)) (imported, t2) =
-  limit_is_included ~import ~imported && Types.ref_type_eq t1 t2
+let table_types_are_compatible (import, (t1 : Binary.ref_type)) (imported, t2) =
+  limit_is_included ~import ~imported && Binary.ref_type_eq t1 t2
 
-let load_table (ls : 'f state) (import : table_type Imported.t) : table Result.t
-    =
-  let typ : table_type = import.desc in
+let load_table (ls : 'f state) (import : Binary.table_type Imported.t) :
+  table Result.t =
+  let typ : Binary.table_type = import.desc in
   let* t = load_from_module ls (fun (e : exports) -> e.tables) import in
   if table_types_are_compatible typ (t.limits, t.typ) then Ok t
   else Error (`Incompatible_import_type import.name)
 
-let eval_table ls (table : (_, table_type) Runtime.t) : table Result.t =
+let eval_table ls (table : (_, Binary.table_type) Runtime.t) : table Result.t =
   match table with
   | Local (label, table_type) -> ok @@ Concrete_table.init ?label table_type
   | Imported import -> load_table ls import
@@ -218,9 +217,9 @@ let eval_tables ls env tables =
   in
   env
 
-let load_func (ls : 'f state) (import : binary block_type Imported.t) :
+let load_func (ls : 'f state) (import : Binary.block_type Imported.t) :
   func Result.t =
-  let (Bt_raw ((None | Some _), typ)) = import.desc in
+  let (Binary.Bt_raw ((None | Some _), typ)) = import.desc in
   let* func = load_from_module ls (fun (e : exports) -> e.functions) import in
   let type' =
     match func with
@@ -229,7 +228,7 @@ let load_func (ls : 'f state) (import : binary block_type Imported.t) :
       t
     | Extern func_id -> Func_id.get_typ func_id ls.collection
   in
-  if Types.func_type_eq typ type' then Ok func
+  if Binary.func_type_eq typ type' then Ok func
   else Error (`Incompatible_import_type import.name)
 
 let eval_func ls (finished_env : Link_env.t') func : func Result.t =
@@ -249,18 +248,18 @@ let eval_functions ls (finished_env : Link_env.t') env functions =
   env
 
 let active_elem_expr ~offset ~length ~table ~elem =
-  [ I32_const offset
+  [ Binary.I32_const offset
   ; I32_const 0l
   ; I32_const length
-  ; Table_init (Raw table, Raw elem)
-  ; Elem_drop (Raw elem)
+  ; Table_init (table, elem)
+  ; Elem_drop elem
   ]
 
 let active_data_expr ~offset ~length ~mem ~data =
-  if mem <> 0 then Error (`Unknown_memory (Raw mem))
+  if mem <> 0 then Error (`Unknown_memory (Text.Raw mem))
   else
     Ok
-      [ I32_const offset
+      [ Binary.I32_const offset
       ; I32_const 0l
       ; I32_const length
       ; Memory_init data
@@ -274,21 +273,20 @@ let get_i32 = function
 let define_data env data =
   let+ env, init, _i =
     array_fold_left
-      (fun (env, init, i) (data : Binary.data) ->
+      (fun (env, init, id) (data : Binary.data) ->
         let data' : Link_env.data = { value = data.init } in
-        let env = Link_env.Build.add_data i data' env in
+        let env = Link_env.Build.add_data id data' env in
         let+ init =
           match data.mode with
           | Data_active (mem, offset) ->
             let* offset = Eval_const.expr env offset in
             let length = Int32.of_int @@ String.length data.init in
             let* offset = get_i32 offset in
-            let id = Raw i in
             let* v = active_data_expr ~offset ~length ~mem ~data:id in
             ok @@ (v :: init)
           | Data_passive -> Ok init
         in
-        (env, init, succ i) )
+        (env, init, succ id) )
       (env, [], 0) data
   in
   (env, List.rev init)
@@ -331,7 +329,7 @@ let define_elem env elem =
 let populate_exports env (exports : Binary.exports) : exports Result.t =
   let fill_exports get_env exports names =
     list_fold_left
-      (fun (acc, names) ({ name; id; _ } : Binary.export) ->
+      (fun (acc, names) ({ name; id; _ } : Binary.named_export) ->
         let value = get_env env id in
         if StringSet.mem name names then Error `Duplicate_export_name
         else Ok (StringMap.add name value acc, StringSet.add name names) )
@@ -339,7 +337,7 @@ let populate_exports env (exports : Binary.exports) : exports Result.t =
   in
   let fill_exports' get_env exports names =
     list_fold_left
-      (fun (acc, names) ({ name; id; _ } : Binary.export) ->
+      (fun (acc, names) ({ name; id; _ } : Binary.named_export) ->
         let* value = get_env env id in
         if StringSet.mem name names then Error `Duplicate_export_name
         else Ok (StringMap.add name value acc, StringSet.add name names) )
@@ -382,7 +380,7 @@ let modul (ls : 'f state) ~name (modul : Binary.Module.t) =
     | Some name -> StringMap.add name by_id_exports ls.by_name
   in
   let start =
-    Option.map (fun start_id -> [ Call (Raw start_id) ]) modul.start
+    Option.map (fun start_id -> [ Binary.Call start_id ]) modul.start
   in
   let start = Option.fold ~none:[] ~some:(fun s -> [ s ]) start in
   let to_run = (init_active_data @ init_active_elem) @ start in
@@ -397,7 +395,7 @@ let modul (ls : 'f state) ~name (modul : Binary.Module.t) =
       ; envs
       } )
 
-let extern_module' (ls : 'f state) ~name ~(func_typ : 'f -> func_type)
+let extern_module' (ls : 'f state) ~name ~(func_typ : 'f -> Binary.func_type)
   (module_ : 'f extern_module) =
   let functions, collection =
     List.fold_left

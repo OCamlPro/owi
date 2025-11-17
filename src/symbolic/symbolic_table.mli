@@ -17,7 +17,7 @@ val copy : t_src:t -> t_dst:t -> src:int32 -> dst:int32 -> len:int32 -> unit
 
 val size : t -> int
 
-val typ : t -> Types.ref_type
+val typ : t -> Binary.ref_type
 
 val max_size : t -> int option
 

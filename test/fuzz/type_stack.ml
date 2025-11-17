@@ -1,4 +1,4 @@
-open Owi.Types
+open Owi.Text
 
 type elem = val_type
 

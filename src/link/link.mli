@@ -7,13 +7,11 @@
 
 (** runtime env *)
 
-open Types
-
 (** runnable module *)
 type 'f module_to_run =
   { id : string option
   ; env : 'f Link_env.t
-  ; to_run : binary expr Annotated.t list
+  ; to_run : Binary.expr Annotated.t list
   }
 
 module StringMap : Map.S with type key = string
@@ -67,7 +65,7 @@ type 'extern_func extern_module = { functions : (string * 'extern_func) list }
 val extern_module' :
      'f state
   -> name:string
-  -> func_typ:('f -> func_type)
+  -> func_typ:('f -> Binary.func_type)
   -> 'f extern_module
   -> 'f state
 

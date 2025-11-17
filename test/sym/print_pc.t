@@ -32,8 +32,7 @@
                    func: [("f", $f)]
                    }
                  start: 
-                 annots: []
-               }
+                 }
   owi: [DEBUG] assigning    ...
   owi: [DEBUG] {
                  id: 
@@ -78,8 +77,7 @@
                    func: [("f", $f)]
                    }
                  start: 
-                 annots: []
-               }
+                 }
   owi: [DEBUG] rewriting    ...
   owi: [INFO] typechecking ...
   owi: [INFO] linking      ...

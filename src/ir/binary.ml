@@ -4,48 +4,19 @@
 
 open Fmt
 
-exception Parse_fail of string
-
-type yes = Yes
-
-type no = No
-
-(* IR parameters *)
-type with_string_indices = < string_indices : yes >
-
-type without_string_indices = < string_indices : no >
-
-type with_ind_bt = < raw_bt : yes >
-
-type without_ind_bt = < raw_bt : no >
-
-(* various IR *)
-type text = < with_string_indices ; with_ind_bt >
-
-type binary = < without_string_indices ; without_ind_bt >
-
 let sp ppf () = Fmt.char ppf ' '
 
 (* identifiers *)
 
-type _ indice =
-  | Text : string -> < with_string_indices ; .. > indice
-  | Raw : int -> < .. > indice
+type indice = int
 
 let pp_id fmt id = pf fmt "$%s" id
 
 let pp_id_opt fmt = function None -> () | Some i -> pf fmt " %a" pp_id i
 
-let pp_indice (type kind) fmt : kind indice -> unit = function
-  | Raw u -> int fmt u
-  | Text i -> pp_id fmt i
+let pp_indice fmt i = int fmt i
 
-let compare_indice (type a) (id1 : a indice) (id2 : a indice) =
-  match (id1, id2) with
-  | Raw i1, Raw i2 -> compare i1 i2
-  | Text s1, Text s2 -> String.compare s1 s2
-  | Raw _, Text _ -> -1
-  | Text _, Raw _ -> 1
+let compare_indice id1 id2 = compare id1 id2
 
 let indice_eq id1 id2 = compare_indice id1 id2 = 0
 
@@ -384,13 +355,11 @@ let pp_func_type fmt (params, results) =
 let func_type_eq (pt1, rt1) (pt2, rt2) =
   param_type_eq pt1 pt2 && result_type_eq rt1 rt2
 
-(* TODO: add a third case that only has (pt * rt) and is the only one used in simplified *)
-type 'a block_type =
-  | Bt_ind : 'a indice -> (< with_ind_bt ; .. > as 'a) block_type
-  | Bt_raw : ('a indice option * func_type) -> (< .. > as 'a) block_type
+type block_type =
+  (* TODO: inline this *)
+  | Bt_raw of (indice option * func_type)
 
-let pp_block_type (type kind) fmt : kind block_type -> unit = function
-  | Bt_ind ind -> pf fmt "(type %a)" pp_indice ind
+let pp_block_type fmt = function
   | Bt_raw (_ind, (pt, rt)) ->
     pf fmt "%a%a"
       (with_space_list pp_param_type)
@@ -426,7 +395,7 @@ type nonrec extern_type =
 
 (** Instructions *)
 
-type 'a instr =
+type instr =
   (* Numeric Instructions *)
   | I32_const of Int32.t
   | I64_const of Int64.t
@@ -456,25 +425,25 @@ type 'a instr =
   (* Reference instructions *)
   | Ref_null of heap_type
   | Ref_is_null
-  | Ref_func of 'a indice
+  | Ref_func of indice
   (* Parametric instructions *)
   | Drop
   | Select of val_type list option
   (* Variable instructions *)
-  | Local_get of 'a indice
-  | Local_set of 'a indice
-  | Local_tee of 'a indice
-  | Global_get of 'a indice
-  | Global_set of 'a indice
+  | Local_get of indice
+  | Local_set of indice
+  | Local_tee of indice
+  | Global_get of indice
+  | Global_set of indice
   (* Table instructions *)
-  | Table_get of 'a indice
-  | Table_set of 'a indice
-  | Table_size of 'a indice
-  | Table_grow of 'a indice
-  | Table_fill of 'a indice
-  | Table_copy of 'a indice * 'a indice
-  | Table_init of 'a indice * 'a indice
-  | Elem_drop of 'a indice
+  | Table_get of indice
+  | Table_set of indice
+  | Table_size of indice
+  | Table_grow of indice
+  | Table_fill of indice
+  | Table_copy of indice * indice
+  | Table_init of indice * indice
+  | Elem_drop of indice
   (* Memory instructions *)
   | I_load of nn * memarg
   | F_load of nn * memarg
@@ -490,33 +459,30 @@ type 'a instr =
   | Memory_grow
   | Memory_fill
   | Memory_copy
-  | Memory_init of 'a indice
-  | Data_drop of 'a indice
+  | Memory_init of indice
+  | Data_drop of indice
   (* Control instructions *)
   | Nop
   | Unreachable
-  | Block of string option * 'a block_type option * 'a expr Annotated.t
-  | Loop of string option * 'a block_type option * 'a expr Annotated.t
+  | Block of string option * block_type option * expr Annotated.t
+  | Loop of string option * block_type option * expr Annotated.t
   | If_else of
-      string option
-      * 'a block_type option
-      * 'a expr Annotated.t
-      * 'a expr Annotated.t
-  | Br of 'a indice
-  | Br_if of 'a indice
-  | Br_table of 'a indice array * 'a indice
+      string option * block_type option * expr Annotated.t * expr Annotated.t
+  | Br of indice
+  | Br_if of indice
+  | Br_table of indice array * indice
   | Return
-  | Return_call of 'a indice
-  | Return_call_indirect of 'a indice * 'a block_type
-  | Return_call_ref of 'a block_type
-  | Call of 'a indice
-  | Call_indirect of 'a indice * 'a block_type
-  | Call_ref of 'a indice
+  | Return_call of indice
+  | Return_call_indirect of indice * block_type
+  | Return_call_ref of block_type
+  | Call of indice
+  | Call_indirect of indice * block_type
+  | Call_ref of indice
   (* extern *)
   | Extern_externalize
   | Extern_internalize
 
-and 'a expr = 'a instr Annotated.t list
+and expr = instr Annotated.t list
 
 let pp_newline ppf () = pf ppf "@\n"
 
@@ -639,7 +605,7 @@ and pp_expr ~short fmt instrs =
         fmt instrs )
     instrs
 
-let rec iter_expr f (e : _ expr Annotated.t) =
+let rec iter_expr f (e : expr Annotated.t) =
   Annotated.iter (List.iter (iter_instr f)) e
 
 and iter_instr f instr =
@@ -695,10 +661,10 @@ and iter_instr f instr =
 
 (* TODO: func and expr should also be parametrised on block type:
    using (param_type, result_type) M.block_type before simplify and directly an indice after *)
-type 'a func =
-  { type_f : 'a block_type
+type func =
+  { type_f : block_type
   ; locals : param list
-  ; body : 'a expr Annotated.t
+  ; body : expr Annotated.t
   ; id : string option
   }
 
@@ -706,14 +672,13 @@ let pp_local fmt (id, t) = pf fmt "(local%a %a)" pp_id_opt id pp_val_type t
 
 let pp_locals fmt locals = list ~sep:sp pp_local fmt locals
 
-let pp_func : type kind. Format.formatter -> kind func -> unit =
- fun fmt f ->
+let pp_func fmt f =
   (* TODO: typeuse ? *)
   pf fmt "(func%a%a%a@\n  @[<v>%a@]@\n)" pp_id_opt f.id pp_block_type f.type_f
     (with_space_list pp_locals)
     f.locals (pp_expr ~short:false) f.body
 
-let pp_funcs fmt (funcs : 'a func list) = list ~sep:pp_newline pp_func fmt funcs
+let pp_funcs fmt (funcs : func list) = list ~sep:pp_newline pp_func fmt funcs
 
 (* Tables & Memories *)
 
@@ -724,7 +689,7 @@ let pp_table fmt (id, ty) = pf fmt "(table%a %a)" pp_id_opt id pp_table_type ty
 (* Modules *)
 
 type 'a import_desc =
-  | Import_func of string option * 'a block_type
+  | Import_func of string option * block_type
   | Import_table of string option * table_type
   | Import_mem of string option * limits
   | Import_global of string option * global_type
@@ -749,11 +714,11 @@ let pp_import fmt i =
   pf fmt {|(import "%a" "%a" %a)|} string i.modul string i.name import_desc
     i.desc
 
-type 'a export_desc =
-  | Export_func of 'a indice option
-  | Export_table of 'a indice option
-  | Export_mem of 'a indice option
-  | Export_global of 'a indice option
+type export_desc =
+  | Export_func of indice option
+  | Export_table of indice option
+  | Export_mem of indice option
+  | Export_global of indice option
 
 let pp_export_desc fmt = function
   | Export_func id -> pf fmt "(func %a)" pp_indice_opt id
@@ -761,12 +726,12 @@ let pp_export_desc fmt = function
   | Export_mem id -> pf fmt "(memory %a)" pp_indice_opt id
   | Export_global id -> pf fmt "(global %a)" pp_indice_opt id
 
-type 'a export =
+type export =
   { name : string
-  ; desc : 'a export_desc
+  ; desc : export_desc
   }
 
-let pp_export fmt (e : text export) =
+let pp_export fmt (e : export) =
   pf fmt {|(export "%s" %a)|} e.name pp_export_desc e.desc
 
 type type_def = string option * func_type
@@ -778,28 +743,231 @@ let type_def_eq (id1, t1) (id2, t2) =
 
 let pp_start fmt start = pf fmt "(start %a)" pp_indice start
 
-type const =
-  | Const_I32 of Int32.t
-  | Const_I64 of Int64.t
-  | Const_F32 of Float32.t
-  | Const_F64 of Float64.t
-  | Const_V128 of V128.t
-  | Const_null of heap_type
-  | Const_host of int
-  | Const_extern of int
+(** named export *)
+type named_export =
+  { name : string
+  ; id : int
+  }
 
-let pp_const fmt c =
-  pf fmt "(%a)"
-    (fun fmt c ->
-      match c with
-      | Const_I32 i -> pf fmt "i32.const %ld" i
-      | Const_I64 i -> pf fmt "i64.const %Ld" i
-      | Const_F32 f -> pf fmt "f32.const %a" Float32.pp f
-      | Const_F64 f -> pf fmt "f64.const %a" Float64.pp f
-      | Const_V128 v -> pf fmt "v128.const %a" V128.pp v
-      | Const_null rt -> pf fmt "ref.null %a" pp_heap_type rt
-      | Const_host i -> pf fmt "ref.host %d" i
-      | Const_extern i -> pf fmt "ref.extern %d" i )
-    c
+(** named exports of a module *)
+type exports =
+  { global : named_export list
+  ; mem : named_export list
+  ; table : named_export list
+  ; func : named_export list
+  }
 
-let pp_consts fmt c = list ~sep:sp pp_const fmt c
+type global =
+  { typ : global_type (* TODO: init : binary+const expr*)
+  ; init : expr Annotated.t
+  ; id : string option
+  }
+
+type data_mode =
+  | Data_passive
+  (* TODO: Data_active binary+const expr*)
+  | Data_active of int * expr Annotated.t
+
+type data =
+  { id : string option
+  ; init : string
+  ; mode : data_mode
+  }
+
+type elem_mode =
+  | Elem_passive
+  (* TODO: Elem_active binary+const expr*)
+  | Elem_active of int option * expr Annotated.t
+  | Elem_declarative
+
+type elem =
+  { id : string option
+  ; typ : ref_type (* TODO: init : binary+const expr*)
+  ; init : expr Annotated.t list
+  ; mode : elem_mode
+  }
+
+type custom = Uninterpreted of string
+
+module Module = struct
+  type t =
+    { id : string option
+    ; types : type_def array
+    ; global : (global, global_type) Runtime.t array
+    ; table : (table, table_type) Runtime.t array
+    ; mem : (mem, limits) Runtime.t array
+    ; func : (func, block_type) Runtime.t array (* TODO: switch to func_type *)
+    ; elem : elem array
+    ; data : data array
+    ; exports : exports
+    ; start : int option
+    ; custom : custom list
+    }
+
+  let empty =
+    { id = None
+    ; types = [||]
+    ; global = [||]
+    ; table = [||]
+    ; mem = [||]
+    ; func = [||]
+    ; elem = [||]
+    ; data = [||]
+    ; exports = { global = []; mem = []; table = []; func = [] }
+    ; start = None
+    ; custom = []
+    }
+
+  (** Functions *)
+
+  (** Insert a function [f] to a module [m] at index [i] and returns the module.
+      It will update all function indices accordingly. *)
+  let insert_func_at_idx ?(update_function_itself = true) f m i =
+    (* TODO: we should also update elements and everything... *)
+    (*
+    Log.warn (fun m ->
+      m "insert_func_at_idx is still incomplete and you may run into issues" );
+    *)
+    let update_idx idx = if idx >= i then idx + 1 else idx in
+
+    let rec handle_instr instr =
+      Annotated.map
+        (function
+          | Call idx -> Call (update_idx idx)
+          | Return_call idx -> Return_call (update_idx idx)
+          | Ref_func idx -> Ref_func (update_idx idx)
+          | Block (id, typ, body) ->
+            let body = handle_expr body in
+            Block (id, typ, body)
+          | Loop (id, typ, body) ->
+            let body = handle_expr body in
+            Loop (id, typ, body)
+          | If_else (id, typ, true_branch, false_branch) ->
+            let true_branch = handle_expr true_branch in
+            let false_branch = handle_expr false_branch in
+            If_else (id, typ, true_branch, false_branch)
+          | instr ->
+            (* TODO: make this match non fragile *)
+            instr )
+        instr
+    and handle_expr expr =
+      Annotated.map (fun expr -> List.map handle_instr expr) expr
+    in
+    let update_function = function
+      | Runtime.Imported _ as f -> f
+      | Runtime.Local f ->
+        let body = handle_expr f.body in
+        Runtime.Local { f with body }
+    in
+    let func =
+      Array.init
+        (Array.length m.func + 1)
+        (fun j ->
+          if i = j then if update_function_itself then update_function f else f
+          else begin
+            update_function @@ if i < j then m.func.(j - 1) else m.func.(j)
+          end )
+    in
+    let elem =
+      Array.map
+        (fun elem ->
+          let init = List.map handle_expr elem.init in
+          { elem with init } )
+        m.elem
+    in
+    let global =
+      Array.map
+        (function
+          | Runtime.Imported _ as v -> v
+          | Local (global : global) ->
+            let init = handle_expr global.init in
+            Local { global with init } )
+        m.global
+    in
+
+    let start = Option.map update_idx m.start in
+
+    let exports =
+      let func =
+        List.map
+          (fun export ->
+            let id = update_idx (export : named_export).id in
+            { export with id } )
+          m.exports.func
+      in
+      { m.exports with func }
+    in
+
+    { m with func; elem; start; global; exports }
+
+  (** Add a function [f] at the end of a module [m] and returns the module and
+      the index of the added function. *)
+  let add_func f m =
+    let len = Array.length m.func in
+    let func =
+      Array.init
+        (Array.length m.func + 1)
+        (fun i -> if i = len then f else m.func.(i))
+    in
+
+    ({ m with func }, len)
+
+  (** Return the type of the function at index [id]. *)
+  let get_func_type id m =
+    if id >= Array.length m.func then None
+    else
+      match m.func.(id) with
+      | Local f -> Some f.type_f
+      | Imported i -> Some i.desc
+
+  (** Exports *)
+
+  (** Return the first function exported as [name] if it exists. Return [None]
+      otherwise.*)
+  let find_exported_func_from_name name m =
+    List.find_opt
+      (function { name = name'; _ } -> String.equal name name')
+      m.exports.func
+
+  (** Imports *)
+
+  (** Return the index of a function imported from a given [modul_name] and
+      [func_name] if it exists. Return [None] otherwise. *)
+  let find_imported_func_index ~modul_name ~func_name m =
+    Array.find_index
+      (function
+        | Runtime.Imported { Imported.modul; name; assigned_name = _; desc = _ }
+          ->
+          String.equal modul_name modul && String.equal func_name name
+        | Local _ -> false )
+      m.func
+
+  (** Finds the index of the last imported function. Will be `~-1` if there are
+      no imported functions. *)
+  let find_last_import_index m =
+    let _i, last =
+      Array.fold_left
+        (fun (i, last) -> function
+          | Runtime.Imported _ -> (succ i, i) | Runtime.Local _ -> (succ i, last) )
+        (0, ~-1) m.func
+    in
+    last
+
+  (** Look for an imported function index, adding it if not already imported. *)
+  let add_import_if_not_present ~modul_name ~func_name ~desc m =
+    match find_imported_func_index ~modul_name ~func_name m with
+    | Some _i -> m
+    | None ->
+      let f =
+        Runtime.Imported
+          { Imported.modul = modul_name
+          ; name = func_name
+          ; assigned_name = None
+          ; desc
+          }
+      in
+
+      let idx = find_last_import_index m + 1 in
+
+      insert_func_at_idx f m idx
+end

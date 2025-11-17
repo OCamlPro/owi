@@ -4,15 +4,13 @@
 
 (** runtime table *)
 
-open Types
-
 type table = Concrete_value.ref_value array
 
 type t =
   { id : int
   ; label : string option
-  ; limits : limits
-  ; typ : ref_type
+  ; limits : Binary.limits
+  ; typ : Binary.ref_type
   ; mutable data : table
   }
 
@@ -26,11 +24,11 @@ val set : t -> int -> Concrete_value.ref_value -> unit
 
 val size : t -> int
 
-val typ : t -> ref_type
+val typ : t -> Binary.ref_type
 
 val update : t -> table -> unit
 
-val init : ?label:string -> table_type -> t
+val init : ?label:string -> Binary.table_type -> t
 
 val max_size : t -> int option
 

@@ -2,14 +2,12 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-open Types
-
 type t = int
 
 module IMap = Map.Make (Int)
 
 type 'a collection =
-  { c : ('a * func_type) IMap.t
+  { c : ('a * Binary.func_type) IMap.t
   ; last : int
   }
 

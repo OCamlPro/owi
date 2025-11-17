@@ -2,7 +2,6 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-open Types
 open Fmt
 
 type externref = E : 'a Type.Id.t * 'a -> externref
@@ -27,7 +26,7 @@ type t =
   | Ref of ref_value
 
 (* TODO: make a new kind of instr for this *)
-let of_instr (i : binary instr) : t =
+let of_instr (i : Binary.instr) : t =
   match i with
   | I32_const c -> I32 c
   | I64_const c -> I64 c
@@ -38,7 +37,7 @@ let of_instr (i : binary instr) : t =
 
 let to_instr v =
   match v with
-  | I32 c -> I32_const c
+  | I32 c -> Binary.I32_const c
   | I64 c -> I64_const c
   | F32 c -> F32_const c
   | F64 c -> F64_const c
@@ -53,7 +52,9 @@ let pp fmt = function
   | V128 v -> pf fmt "v128.const %a" V128.pp v
   | Ref r -> pp_ref_value fmt r
 
-let ref_null' = function Func_ht -> Funcref None | Extern_ht -> Externref None
+let ref_null' = function
+  | Binary.Func_ht -> Funcref None
+  | Extern_ht -> Externref None
 
 let ref_null typ = Ref (ref_null' typ)
 

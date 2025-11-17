@@ -199,10 +199,6 @@ let model_out_file =
     & opt (some path_conv) None
     & info [ "model-out-file" ] ~docv:"FILE" ~doc )
 
-let rac =
-  let doc = "runtime assertion checking mode" in
-  Arg.(value & flag & info [ "rac" ] ~doc)
-
 let solver =
   let docv = Arg.conv_docv solver_conv in
   let doc =
@@ -230,10 +226,6 @@ let setup_log =
   and+ log_level
   and+ style_renderer = Fmt_cli.style_renderer ~docs:sdocs () in
   Log.setup ~bench style_renderer log_level
-
-let srac =
-  let doc = "symbolic runtime assertion checking mode" in
-  Arg.(value & flag & info [ "srac" ] ~doc)
 
 let timeout =
   let doc = "Stop execution after S seconds." in
@@ -269,8 +261,6 @@ let with_breadcrumbs =
 
 let symbolic_parameters default_entry_point =
   let+ unsafe
-  and+ rac
-  and+ srac
   and+ workers
   and+ no_stop_at_failure
   and+ no_value
@@ -286,8 +276,6 @@ let symbolic_parameters default_entry_point =
   and+ with_breadcrumbs
   and+ invoke_with_symbols in
   { Cmd_sym.unsafe
-  ; rac
-  ; srac
   ; workers
   ; no_stop_at_failure
   ; no_value
@@ -434,26 +422,6 @@ let instrument_label_cmd =
   and+ source_file in
   Cmd_instrument_label.cmd ~unsafe ~source_file ~coverage_criteria
 
-(* owi instrument rac *)
-let instrument_rac_info =
-  let doc =
-    "Generate an instrumented file with runtime assertion checking coming from \
-     Weasel specifications"
-  in
-  let man = [] @ shared_man in
-  Cmd.info "rac" ~version ~doc ~sdocs ~man
-
-let instrument_rac_cmd =
-  let+ unsafe
-  and+ symbolic =
-    let doc =
-      "generate instrumented module that depends on symbolic execution"
-    in
-    Arg.(value & flag & info [ "symbolic" ] ~doc)
-  and+ () = setup_log
-  and+ files in
-  Cmd_instrument_rac.cmd ~unsafe ~symbolic ~files
-
 (* owi iso *)
 
 let iso_info =
@@ -522,10 +490,9 @@ let run_cmd =
   let+ unsafe
   and+ timeout
   and+ timeout_instr
-  and+ rac
   and+ () = setup_log
   and+ source_file in
-  Cmd_run.cmd ~unsafe ~timeout ~timeout_instr ~rac ~source_file
+  Cmd_run.cmd ~unsafe ~timeout ~timeout_instr ~source_file
 
 (* owi rust *)
 
@@ -685,9 +652,7 @@ let cli =
     ; Cmd.v cpp_info cpp_cmd
     ; Cmd.v fmt_info fmt_cmd
     ; Cmd.group instrument_info
-        [ Cmd.v instrument_label_info instrument_label_cmd
-        ; Cmd.v instrument_rac_info instrument_rac_cmd
-        ]
+        [ Cmd.v instrument_label_info instrument_label_cmd ]
     ; Cmd.v iso_info iso_cmd
     ; Cmd.v replay_info replay_cmd
     ; Cmd.v run_info run_cmd

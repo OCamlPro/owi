@@ -1,6 +1,5 @@
 open Crowbar
 open Crowbar.Syntax
-open Owi.Types
 open Owi.Text
 module S = Type_stack
 module B = Basic

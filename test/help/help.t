@@ -30,7 +30,7 @@ no subcommand should print help
              Replay a module containing symbols with concrete values in a
              replay file containing a model
   
-         run [OPTION]… FILE
+         run [--timeout=S] [--timeout-instr=I] [--unsafe] [OPTION]… FILE
              Run the concrete interpreter
   
          rust [OPTION]… FILE…

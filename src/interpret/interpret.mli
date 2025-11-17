@@ -19,30 +19,36 @@ module Concrete : sig
     -> V.t list Concrete_choice.t
 
   val exec_ibinop :
-    V.t list -> Types.nn -> Types.ibinop -> V.t list Concrete_choice.t
+    V.t list -> Binary.nn -> Binary.ibinop -> V.t list Concrete_choice.t
 
-  val exec_iunop : V.t list -> Types.nn -> Types.iunop -> V.t list
+  val exec_iunop : V.t list -> Binary.nn -> Binary.iunop -> V.t list
 
-  val exec_itestop : V.t list -> Types.nn -> Types.itestop -> V.t list
+  val exec_itestop : V.t list -> Binary.nn -> Binary.itestop -> V.t list
 
-  val exec_irelop : V.t list -> Types.nn -> Types.irelop -> V.t list
+  val exec_irelop : V.t list -> Binary.nn -> Binary.irelop -> V.t list
 
   val exec_itruncf :
-    V.t list -> Types.nn -> Types.nn -> Types.sx -> V.t list Concrete_choice.t
+       V.t list
+    -> Binary.nn
+    -> Binary.nn
+    -> Binary.sx
+    -> V.t list Concrete_choice.t
 
-  val exec_itruncsatf : V.t list -> Types.nn -> Types.nn -> Types.sx -> V.t list
+  val exec_itruncsatf :
+    V.t list -> Binary.nn -> Binary.nn -> Binary.sx -> V.t list
 
-  val exec_ireinterpretf : V.t list -> Types.nn -> Types.nn -> V.t list
+  val exec_ireinterpretf : V.t list -> Binary.nn -> Binary.nn -> V.t list
 
-  val exec_fbinop : V.t list -> Types.nn -> Types.fbinop -> V.t list
+  val exec_fbinop : V.t list -> Binary.nn -> Binary.fbinop -> V.t list
 
-  val exec_funop : V.t list -> Types.nn -> Types.funop -> V.t list
+  val exec_funop : V.t list -> Binary.nn -> Binary.funop -> V.t list
 
-  val exec_frelop : V.t list -> Types.nn -> Types.frelop -> V.t list
+  val exec_frelop : V.t list -> Binary.nn -> Binary.frelop -> V.t list
 
-  val exec_fconverti : V.t list -> Types.nn -> Types.nn -> Types.sx -> V.t list
+  val exec_fconverti :
+    V.t list -> Binary.nn -> Binary.nn -> Binary.sx -> V.t list
 
-  val exec_freinterpreti : V.t list -> Types.nn -> Types.nn -> V.t list
+  val exec_freinterpreti : V.t list -> Binary.nn -> Binary.nn -> V.t list
 end
 
 module Symbolic : sig

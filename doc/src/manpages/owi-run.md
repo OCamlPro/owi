@@ -6,16 +6,13 @@ NAME
        owi-run - Run the concrete interpreter
 
 SYNOPSIS
-       owi run [OPTION]… FILE
+       owi run [--timeout=S] [--timeout-instr=I] [--unsafe] [OPTION]… FILE
 
 ARGUMENTS
        FILE (required)
            source file
 
 OPTIONS
-       --rac
-           runtime assertion checking mode
-
        --timeout=S
            Stop execution after S seconds.
 

@@ -16,22 +16,20 @@ module Text = struct
     let* m = until_group ~unsafe m in
     Assigned.of_grouped m
 
-  let until_binary ~unsafe ~rac ~srac m =
+  let until_binary ~unsafe m =
     let* m = until_assign ~unsafe m in
     let* m = Rewrite.modul m in
-    if srac then Code_generator.generate true m
-    else if rac then Code_generator.generate false m
-    else Ok m
+    Ok m
 
-  let until_validate ~unsafe ~rac ~srac m =
-    let* m = until_binary ~unsafe ~rac ~srac m in
+  let until_validate ~unsafe m =
+    let* m = until_binary ~unsafe m in
     if unsafe then Ok m
     else
       let+ () = Binary_validate.modul m in
       m
 
-  let until_link ~unsafe ~rac ~srac ~name link_state m =
-    let* m = until_validate ~unsafe ~rac ~srac m in
+  let until_link ~unsafe ~name link_state m =
+    let* m = until_validate ~unsafe m in
     Link.modul link_state ~name m
 end
 
@@ -48,14 +46,14 @@ module Binary = struct
 end
 
 module Any = struct
-  let until_validate ~unsafe ~rac ~srac = function
-    | Kind.Wat m -> Text.until_validate ~unsafe ~rac ~srac m
+  let until_validate ~unsafe = function
+    | Kind.Wat m -> Text.until_validate ~unsafe m
     | Wasm m -> Binary.until_validate ~unsafe m
     | Wast _ -> Fmt.error_msg "can not validate a .wast file"
     | Ocaml _ -> Fmt.error_msg "can not validate an OCaml module"
 
-  let until_link ~unsafe ~rac ~srac ~name link_state = function
-    | Kind.Wat m -> Text.until_link ~unsafe ~rac ~srac ~name link_state m
+  let until_link ~unsafe ~name link_state = function
+    | Kind.Wat m -> Text.until_link ~unsafe ~name link_state m
     | Wasm m -> Binary.until_link ~unsafe ~name link_state m
     | Ocaml _m ->
       (* TODO: we may be able to handle linking here but return an empty runnable module ? *)
@@ -64,25 +62,25 @@ module Any = struct
 end
 
 module File = struct
-  let until_binary ~unsafe ~rac ~srac filename =
+  let until_binary ~unsafe filename =
     let* m = Parse.guess_from_file filename in
     match m with
-    | Kind.Wat m -> Text.until_binary ~unsafe ~rac ~srac m
+    | Kind.Wat m -> Text.until_binary ~unsafe m
     | Wasm m -> Ok m
     | Wast _ | Ocaml _ -> assert false
 
-  let until_validate ~unsafe ~rac ~srac filename =
+  let until_validate ~unsafe filename =
     let* m = Parse.guess_from_file filename in
     Log.bench_fn "validation time" @@ fun () ->
     match m with
-    | Kind.Wat m -> Text.until_validate ~unsafe ~rac ~srac m
+    | Kind.Wat m -> Text.until_validate ~unsafe m
     | Wasm m -> Binary.until_validate ~unsafe m
     | Wast _ | Ocaml _ -> assert false
 
-  let until_link ~unsafe ~rac ~srac ~name link_state filename =
+  let until_link ~unsafe ~name link_state filename =
     let* m = Parse.guess_from_file filename in
     match m with
-    | Kind.Wat m -> Text.until_link ~unsafe ~rac ~srac ~name link_state m
+    | Kind.Wat m -> Text.until_link ~unsafe ~name link_state m
     | Wasm m -> Binary.until_link ~unsafe ~name link_state m
     | Wast _ | Ocaml _ -> assert false
 end

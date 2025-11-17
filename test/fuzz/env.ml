@@ -1,4 +1,4 @@
-open Owi.Types
+open Owi.Text
 
 type conf =
   | Symbolic
@@ -26,8 +26,8 @@ type t =
   ; mutable tables : (string * table_type) list
   ; mutable globals : (string * global_type) list
   ; mutable locals : (string * val_type) list
-  ; mutable blocks : (block_kind * string * text block_type) list
-  ; mutable funcs : (string * text block_type) list
+  ; mutable blocks : (block_kind * string * block_type) list
+  ; mutable funcs : (string * block_type) list
   ; mutable fuel : int
   ; conf : conf
   }
