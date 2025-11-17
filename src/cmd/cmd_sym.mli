@@ -15,8 +15,6 @@ type exploration_strategy =
 
 type parameters =
   { unsafe : bool
-  ; rac : bool
-  ; srac : bool
   ; workers : int
   ; no_stop_at_failure : bool
   ; no_value : bool

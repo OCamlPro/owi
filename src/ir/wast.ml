@@ -1,111 +1,31 @@
-(* SPDX-License-Identifier: AGPL-3.0-or-later *)
-(* Copyright © 2021-2024 OCamlPro *)
-(* Written by the Owi programmers *)
-
 open Fmt
-open Types
+open Text
 
-let symbolic v = Text v
+type const =
+  | Const_I32 of Int32.t
+  | Const_I64 of Int64.t
+  | Const_F32 of Float32.t
+  | Const_F64 of Float64.t
+  | Const_V128 of V128.t
+  | Const_null of heap_type
+  | Const_host of int
+  | Const_extern of int
 
-let raw v = Raw v
+let pp_const fmt c =
+  pf fmt "(%a)"
+    (fun fmt c ->
+      match c with
+      | Const_I32 i -> pf fmt "i32.const %ld" i
+      | Const_I64 i -> pf fmt "i64.const %Ld" i
+      | Const_F32 f -> pf fmt "f32.const %a" Float32.pp f
+      | Const_F64 f -> pf fmt "f64.const %a" Float64.pp f
+      | Const_V128 v -> pf fmt "v128.const %a" V128.pp v
+      | Const_null rt -> pf fmt "ref.null %a" pp_heap_type rt
+      | Const_host i -> pf fmt "ref.host %d" i
+      | Const_extern i -> pf fmt "ref.extern %d" i )
+    c
 
-let bt_ind i = Bt_ind i
-
-let bt_raw i t = Bt_raw (i, t)
-
-type global =
-  { typ : global_type
-  ; init : text expr Annotated.t
-  ; id : string option
-  }
-
-let pp_global fmt (g : global) =
-  pf fmt "(global%a %a %a)" pp_id_opt g.id pp_global_type g.typ
-    (pp_expr ~short:false) g.init
-
-type data_mode =
-  | Data_passive
-  | Data_active of text indice option * text expr Annotated.t
-
-let pp_data_mode fmt = function
-  | Data_passive -> ()
-  | Data_active (i, e) ->
-    pf fmt "(memory %a) (offset %a)" pp_indice_opt i (pp_expr ~short:false) e
-
-type data =
-  { id : string option
-  ; init : string
-  ; mode : data_mode
-  }
-
-let pp_data fmt (d : data) =
-  pf fmt {|(data%a %a %S)|} pp_id_opt d.id pp_data_mode d.mode d.init
-
-type elem_mode =
-  | Elem_passive
-  | Elem_active of text indice option * text expr Annotated.t
-  | Elem_declarative
-
-let pp_elem_mode fmt = function
-  | Elem_passive -> ()
-  | Elem_declarative -> pf fmt "declare"
-  | Elem_active (i, e) -> (
-    match i with
-    | None -> pf fmt "(offset %a)" (pp_expr ~short:false) e
-    | Some i ->
-      pf fmt "(table %a) (offset %a)" pp_indice i (pp_expr ~short:false) e )
-
-type elem =
-  { id : string option
-  ; typ : ref_type
-  ; init : text expr Annotated.t list
-  ; mode : elem_mode
-  }
-
-let pp_elem_expr fmt e = pf fmt "(item %a)" (pp_expr ~short:false) e
-
-let pp_elem fmt (e : elem) =
-  pf fmt "@[<hov 2>(elem%a %a %a %a)@]" pp_id_opt e.id pp_elem_mode e.mode
-    pp_ref_type e.typ
-    (list ~sep:pp_newline pp_elem_expr)
-    e.init
-
-type module_field =
-  | MType of type_def
-  | MGlobal of global
-  | MTable of table
-  | MMem of mem
-  | MFunc of text func
-  | MElem of elem
-  | MData of data
-  | MStart of text indice
-  | MImport of text import
-  | MExport of text export
-
-let pp_module_field fmt = function
-  | MType t -> pp_type_def fmt t
-  | MGlobal g -> pp_global fmt g
-  | MTable t -> pp_table fmt t
-  | MMem m -> pp_mem fmt m
-  | MFunc f -> pp_func fmt f
-  | MElem e -> pp_elem fmt e
-  | MData d -> pp_data fmt d
-  | MStart s -> pp_start fmt s
-  | MImport i -> pp_import fmt i
-  | MExport e -> pp_export fmt e
-
-type modul =
-  { id : string option
-  ; fields : module_field list
-  ; annots : text Annot.annot list
-  }
-
-let pp_modul fmt (m : modul) =
-  pf fmt "%a(module%a@\n  @[<v>%a@]@\n)"
-    (list ~sep:pp_newline Annot.pp_annot)
-    m.annots pp_id_opt m.id
-    (list ~sep:pp_newline pp_module_field)
-    m.fields
+let pp_consts fmt c = list ~sep:sp pp_const fmt c
 
 type action =
   | Invoke of string option * string * const list
@@ -192,7 +112,7 @@ type cmd =
 
 let pp_cmd fmt = function
   | Quoted_module m -> pf fmt "(module %S)" m
-  | Binary_module (id, m) -> Fmt.pf fmt "(module %a %S)" Types.pp_id_opt id m
+  | Binary_module (id, m) -> Fmt.pf fmt "(module %a %S)" Text.pp_id_opt id m
   | Text_module m -> pp_modul fmt m
   | Assert a -> pp_assertion fmt a
   | Register (s, name) -> pp_register fmt (s, name)

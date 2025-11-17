@@ -2,11 +2,11 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-open Types
+open Text
 
 type opt_export =
   { name : string
-  ; id : text indice
+  ; id : indice
   }
 
 type opt_exports =
@@ -18,7 +18,7 @@ type opt_exports =
 
 val pp_opt_exports : Format.formatter -> opt_exports -> unit
 
-type type_check = text indice * func_type
+type type_check = indice * func_type
 
 type t =
   { id : string option
@@ -29,17 +29,16 @@ type t =
   ; type_checks : type_check list
       (* Types checks to perform after assignment.
          Come from function declarations with type indicies *)
-  ; global : (Text.global, global_type) Runtime.t Indexed.t list
+  ; global : (global, global_type) Runtime.t Indexed.t list
   ; table : (table, table_type) Runtime.t Indexed.t list
-  ; mem : (mem, Types.limits) Runtime.t Indexed.t list
-  ; func : (text func, text block_type) Runtime.t Indexed.t list
-  ; elem : Text.elem Indexed.t list
-  ; data : Text.data Indexed.t list
+  ; mem : (mem, limits) Runtime.t Indexed.t list
+  ; func : (func, block_type) Runtime.t Indexed.t list
+  ; elem : elem Indexed.t list
+  ; data : data Indexed.t list
   ; exports : opt_exports
-  ; start : text indice option
-  ; annots : text Annot.annot list
+  ; start : indice option
   }
 
-val of_text : Text.modul -> t
+val of_text : modul -> t
 
 val pp : Format.formatter -> t -> unit

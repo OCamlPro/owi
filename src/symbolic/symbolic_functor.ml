@@ -140,7 +140,7 @@ struct
     type t =
       { id : string option
       ; env : Env.t
-      ; to_run : Types.binary Types.expr Annotated.t list
+      ; to_run : Binary.expr Annotated.t list
       }
 
     let env (t : t) = t.env

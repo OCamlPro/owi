@@ -12,7 +12,7 @@ let m =
   | Error _ -> assert false
 
 let m =
-  match Compile.Text.until_binary ~unsafe:false ~rac:false ~srac:false m with
+  match Compile.Text.until_binary ~unsafe:false m with
   | Ok m -> Binary_to_text.modul m
   | Error _ -> assert false
 
@@ -24,7 +24,7 @@ let m =
   | Error _ -> assert false
 
 let m =
-  match Compile.Text.until_binary ~unsafe:false ~rac:false ~srac:false m with
+  match Compile.Text.until_binary ~unsafe:false m with
   | Ok m -> Binary_to_text.modul m
   | Error _ -> assert false
 

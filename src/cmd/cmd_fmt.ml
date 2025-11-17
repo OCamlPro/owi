@@ -12,7 +12,7 @@ let get_printer filename =
     fun fmt () -> Text.pp_modul fmt v
   | ".wast" ->
     let+ v = Parse.Text.Script.from_file filename in
-    fun fmt () -> Text.pp_script fmt v
+    fun fmt () -> Wast.pp_script fmt v
   | ext -> Error (`Unsupported_file_extension ext)
 
 let cmd_one inplace file =

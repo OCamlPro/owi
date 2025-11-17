@@ -3,7 +3,6 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-open Types
 open Binary
 open Module
 open Syntax
@@ -17,8 +16,8 @@ type typ =
 
 let typ_equal t1 t2 =
   match (t1, t2) with
-  | Num_type t1, Num_type t2 -> Types.num_type_eq t1 t2
-  | Ref_type t1, Ref_type t2 -> Types.heap_type_eq t1 t2
+  | Num_type t1, Num_type t2 -> Binary.num_type_eq t1 t2
+  | Ref_type t1, Ref_type t2 -> Binary.heap_type_eq t1 t2
   | Any, _ | _, Any -> true
   | Something, _ | _, Something -> true
   | _, _ -> false
@@ -34,7 +33,7 @@ let pp_typ fmt = function
 let pp_typ_list fmt l = list ~sep:sp pp_typ fmt l
 
 let typ_of_val_type = function
-  | Types.Ref_type (_null, t) -> Ref_type t
+  | Binary.Ref_type (_null, t) -> Ref_type t
   | Num_type t -> Num_type t
 
 let typ_of_pt pt = typ_of_val_type @@ snd pt
@@ -46,10 +45,12 @@ module Index = struct
 end
 
 let check_mem modul n =
-  if n >= Array.length modul.mem then Error (`Unknown_memory (Raw n)) else Ok ()
+  if n >= Array.length modul.mem then Error (`Unknown_memory (Text.Raw n))
+  else Ok ()
 
 let check_data modul n =
-  if n >= Array.length modul.data then Error (`Unknown_data (Raw n)) else Ok ()
+  if n >= Array.length modul.data then Error (`Unknown_data (Text.Raw n))
+  else Ok ()
 
 let check_align memarg_align align =
   if Int32.ge memarg_align align then Error `Alignment_too_large else Ok ()
@@ -65,17 +66,17 @@ module Env = struct
 
   let local_get i env =
     match Index.Map.find_opt i env.locals with
-    | None -> Error (`Unknown_local (Raw i))
+    | None -> Error (`Unknown_local (Text.Raw i))
     | Some v -> Ok v
 
   let global_get i modul =
-    if i >= Array.length modul.global then Error (`Unknown_global (Raw i))
+    if i >= Array.length modul.global then Error (`Unknown_global (Text.Raw i))
     else
       match modul.global.(i) with
       | Runtime.Local { typ = desc; _ } | Imported { desc; _ } -> Ok desc
 
   let func_get i modul =
-    if i >= Array.length modul.func then Error (`Unknown_func (Raw i))
+    if i >= Array.length modul.func then Error (`Unknown_func (Text.Raw i))
     else
       match modul.func.(i) with
       | Runtime.Local { type_f = Bt_raw (_, t); _ }
@@ -84,17 +85,17 @@ module Env = struct
 
   let block_type_get i env =
     match List.nth_opt env.blocks i with
-    | None -> Error (`Unknown_label (Raw i))
+    | None -> Error (`Unknown_label (Text.Raw i))
     | Some bt -> Ok bt
 
   let table_type_get i (modul : Binary.Module.t) =
-    if i >= Array.length modul.table then Error (`Unknown_table (Raw i))
+    if i >= Array.length modul.table then Error (`Unknown_table (Text.Raw i))
     else
       match modul.table.(i) with
       | Runtime.Local (_, (_, t)) | Imported { desc = _, t; _ } -> Ok t
 
   let elem_type_get i modul =
-    if i >= Array.length modul.elem then Error (`Unknown_elem (Raw i))
+    if i >= Array.length modul.elem then Error (`Unknown_elem (Text.Raw i))
     else match modul.elem.(i) with value -> Ok value.typ
 
   let make ~params ~locals ~modul ~result_type ~refs =
@@ -136,7 +137,7 @@ module Stack : sig
 
   val push : t -> t -> t Result.t
 
-  val pop_push : binary block_type -> t -> t Result.t
+  val pop_push : block_type -> t -> t Result.t
 
   val pop_ref : t -> t Result.t
 
@@ -217,14 +218,14 @@ end = struct
 
   let push t stack = ok @@ t @ stack
 
-  let pop_push (Bt_raw (_, (pt, rt)) : binary block_type) stack =
+  let pop_push (Bt_raw (_, (pt, rt)) : block_type) stack =
     let pt, rt = (List.rev_map typ_of_pt pt, List.rev_map typ_of_val_type rt) in
     let* stack = pop pt stack in
     push rt stack
 end
 
-let rec typecheck_instr (env : Env.t) (stack : stack)
-  (instr : binary instr Annotated.t) : stack Result.t =
+let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t)
+  : stack Result.t =
   match instr.raw with
   | Nop -> Ok stack
   | Drop -> Stack.drop stack
@@ -269,21 +270,21 @@ let rec typecheck_instr (env : Env.t) (stack : stack)
     let t = ftype nn in
     let* stack = Stack.pop [ t; t ] stack in
     Stack.push [ i32 ] stack
-  | Local_get (Raw i) ->
+  | Local_get i ->
     let* t = Env.local_get i env in
     Stack.push [ t ] stack
-  | Local_set (Raw i) ->
+  | Local_set i ->
     let* t = Env.local_get i env in
     Stack.pop [ t ] stack
-  | Local_tee (Raw i) ->
+  | Local_tee i ->
     let* t = Env.local_get i env in
     let* stack = Stack.pop [ t ] stack in
     Stack.push [ t ] stack
-  | Global_get (Raw i) ->
+  | Global_get i ->
     let* _mut, t = Env.global_get i env.modul in
     let t = typ_of_val_type t in
     Stack.push [ t ] stack
-  | Global_set (Raw i) ->
+  | Global_set i ->
     let* mut, t = Env.global_get i env.modul in
     let* () =
       match mut with Var -> Ok () | Const -> Error `Global_is_immutable
@@ -385,17 +386,17 @@ let rec typecheck_instr (env : Env.t) (stack : stack)
   | Memory_copy | Memory_fill ->
     let* () = check_mem env.modul 0 in
     Stack.pop [ i32; i32; i32 ] stack
-  | Memory_init (Raw id) ->
+  | Memory_init id ->
     let* () = check_mem env.modul 0 in
     let* () = check_data env.modul id in
     Stack.pop [ i32; i32; i32 ] stack
   | Block (_, bt, expr) -> typecheck_expr env expr ~is_loop:false bt ~stack
   | Loop (_, bt, expr) -> typecheck_expr env expr ~is_loop:true bt ~stack
-  | Call_indirect (Raw tbl_id, bt) ->
+  | Call_indirect (tbl_id, bt) ->
     let* _tbl_type = Env.table_type_get tbl_id env.modul in
     let* stack = Stack.pop [ i32 ] stack in
     Stack.pop_push bt stack
-  | Call (Raw i) ->
+  | Call i ->
     let* pt, rt = Env.func_get i env.modul in
     let* stack = Stack.pop (List.rev_map typ_of_pt pt) stack in
     Stack.push (List.rev_map typ_of_val_type rt) stack
@@ -406,7 +407,7 @@ let rec typecheck_instr (env : Env.t) (stack : stack)
          Stack.pop_push (Some bt) stack
     *)
     stack
-  | Return_call (Raw i) ->
+  | Return_call i ->
     let* pt, rt = Env.func_get i env.modul in
     if
       not
@@ -417,7 +418,7 @@ let rec typecheck_instr (env : Env.t) (stack : stack)
     else
       let+ _stack = Stack.pop (List.rev_map typ_of_pt pt) stack in
       [ any ]
-  | Return_call_indirect (Raw tbl_id, Bt_raw (_, (pt, rt))) ->
+  | Return_call_indirect (tbl_id, Bt_raw (_, (pt, rt))) ->
     let* _tbl_type = Env.table_type_get tbl_id env.modul in
     if
       not
@@ -440,35 +441,36 @@ let rec typecheck_instr (env : Env.t) (stack : stack)
       let* stack = Stack.pop_ref stack in
       let+ _stack = Stack.pop (List.rev_map typ_of_pt pt) stack in
       [ any ]
-  | Data_drop (Raw id) ->
+  | Data_drop id ->
     let* () = check_data env.modul id in
     Ok stack
-  | Table_init (Raw ti, Raw ei) ->
+  | Table_init (ti, ei) ->
     let* table_typ = Env.table_type_get ti env.modul in
     let* elem_typ = Env.elem_type_get ei env.modul in
     if not @@ Stack.match_ref_type (snd table_typ) (snd elem_typ) then
       Error (`Type_mismatch "table_init")
     else Stack.pop [ i32; i32; i32 ] stack
-  | Table_copy (Raw i, Raw i') ->
+  | Table_copy (i, i') ->
     let* typ = Env.table_type_get i env.modul in
     let* typ' = Env.table_type_get i' env.modul in
-    if not @@ Types.ref_type_eq typ typ' then Error (`Type_mismatch "table_copy")
+    if not @@ Binary.ref_type_eq typ typ' then
+      Error (`Type_mismatch "table_copy")
     else Stack.pop [ i32; i32; i32 ] stack
-  | Table_fill (Raw i) ->
+  | Table_fill i ->
     let* _null, t = Env.table_type_get i env.modul in
     Stack.pop [ i32; Ref_type t; i32 ] stack
-  | Table_grow (Raw i) ->
+  | Table_grow i ->
     let* _null, t = Env.table_type_get i env.modul in
     let* stack = Stack.pop [ i32; Ref_type t ] stack in
     Stack.push [ i32 ] stack
-  | Table_size (Raw i) ->
+  | Table_size i ->
     let* _null, _t = Env.table_type_get i env.modul in
     Stack.push [ i32 ] stack
   | Ref_is_null ->
     let* stack = Stack.pop_ref stack in
     Stack.push [ i32 ] stack
   | Ref_null rt -> Stack.push [ Ref_type rt ] stack
-  | Elem_drop (Raw id) ->
+  | Elem_drop id ->
     let* _elem_typ = Env.elem_type_get id env.modul in
     Ok stack
   | Select t ->
@@ -488,25 +490,25 @@ let rec typecheck_instr (env : Env.t) (stack : stack)
       let* stack = Stack.pop t stack in
       Stack.push t stack
     end
-  | Ref_func (Raw i) ->
+  | Ref_func i ->
     if not @@ Hashtbl.mem env.refs i then Error `Undeclared_function_reference
     else Stack.push [ Ref_type Func_ht ] stack
-  | Br (Raw i) ->
+  | Br i ->
     let* jt = Env.block_type_get i env in
     let* _stack = Stack.pop jt stack in
     Ok [ any ]
-  | Br_if (Raw i) ->
+  | Br_if i ->
     let* stack = Stack.pop [ i32 ] stack in
     let* jt = Env.block_type_get i env in
     let* stack = Stack.pop jt stack in
     Stack.push jt stack
-  | Br_table (branches, Raw i) ->
+  | Br_table (branches, i) ->
     let* stack = Stack.pop [ i32 ] stack in
     let* default_jt = Env.block_type_get i env in
     let* _stack = Stack.pop default_jt stack in
     let* () =
       array_iter
-        (fun (Raw i : binary indice) ->
+        (fun (i : indice) ->
           let* jt = Env.block_type_get i env in
           if not (List.length jt = List.length default_jt) then
             Error (`Type_mismatch "br_table")
@@ -516,11 +518,11 @@ let rec typecheck_instr (env : Env.t) (stack : stack)
         branches
     in
     Ok [ any ]
-  | Table_get (Raw i) ->
+  | Table_get i ->
     let* _null, t = Env.table_type_get i env.modul in
     let* stack = Stack.pop [ i32 ] stack in
     Stack.push [ Ref_type t ] stack
-  | Table_set (Raw i) ->
+  | Table_set i ->
     let* _null, t = Env.table_type_get i env.modul in
     Stack.pop [ Ref_type t; i32 ] stack
   | (Extern_externalize | Extern_internalize) as i ->
@@ -529,11 +531,11 @@ let rec typecheck_instr (env : Env.t) (stack : stack)
         i );
     assert false
 
-and typecheck_expr env expr ~is_loop (block_type : binary block_type option)
+and typecheck_expr env expr ~is_loop (block_type : block_type option)
   ~stack:previous_stack : stack Result.t =
   let pt, rt =
     Option.fold ~none:([], [])
-      ~some:(fun (Bt_raw (_, (pt, rt)) : binary block_type) ->
+      ~some:(fun (Bt_raw (_, (pt, rt)) : block_type) ->
         (List.rev_map typ_of_pt pt, List.rev_map typ_of_val_type rt) )
       block_type
   in
@@ -580,16 +582,16 @@ let typecheck_const_instr (modul : Module.t) refs stack instr =
   | F64_const _ -> Stack.push [ f64 ] stack
   | V128_const _ -> Stack.push [ v128 ] stack
   | Ref_null t -> Stack.push [ Ref_type t ] stack
-  | Ref_func (Raw i) ->
+  | Ref_func i ->
     let* _t = Env.func_get i modul in
     Hashtbl.add refs i ();
     Stack.push [ Ref_type Func_ht ] stack
-  | Global_get (Raw i) ->
-    if i >= Array.length modul.global then Error (`Unknown_global (Raw i))
+  | Global_get i ->
+    if i >= Array.length modul.global then Error (`Unknown_global (Text.Raw i))
     else
       let* mut, typ =
         match modul.global.(i) with
-        | Runtime.Local _ -> Error (`Unknown_global (Raw i))
+        | Runtime.Local _ -> Error (`Unknown_global (Text.Raw i))
         | Imported { desc; _ } -> Ok desc
       in
       let* () =
@@ -644,13 +646,13 @@ let typecheck_elem modul refs (elem : elem) =
   | Elem_active (None, _e) -> assert false
   | Elem_active (Some tbl_i, e) -> (
     let* _null, tbl_type = Env.table_type_get tbl_i modul in
-    if not @@ Types.heap_type_eq tbl_type expected_type then
+    if not @@ Binary.heap_type_eq tbl_type expected_type then
       Error (`Type_mismatch "typecheck elem 3")
     else
       let* t = typecheck_const_expr modul refs e in
       match t with
       | [ Ref_type t ] ->
-        if not @@ Types.heap_type_eq t tbl_type then
+        if not @@ Binary.heap_type_eq t tbl_type then
           Error (`Type_mismatch "typecheck_elem 4")
         else Ok ()
       | [ _t ] -> Ok ()
@@ -671,7 +673,7 @@ let typecheck_start { start; func; _ } =
   | None -> Ok ()
   | Some idx -> (
     let* f =
-      if idx >= Array.length func then Error (`Unknown_func (Raw idx))
+      if idx >= Array.length func then Error (`Unknown_func (Text.Raw idx))
       else Ok func.(idx)
     in
     match f with
@@ -747,6 +749,6 @@ let modul (modul : Module.t) =
   let* () = validate_tables modul in
   let* () = validate_mem modul in
   List.iter
-    (fun (export : export) -> Hashtbl.add refs export.id ())
+    (fun (export : named_export) -> Hashtbl.add refs export.id ())
     modul.exports.func;
   array_iter (fun func -> typecheck_function modul func refs) modul.func

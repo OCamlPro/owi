@@ -2,8 +2,6 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-open Types
-
 module type P = sig
   type thread
 
@@ -21,9 +19,9 @@ module type P = sig
 
     val set_value : t -> Value.t -> unit
 
-    val mut : t -> Types.mut
+    val mut : t -> Binary.mut
 
-    val typ : t -> val_type
+    val typ : t -> Binary.val_type
   end
 
   module Table : sig
@@ -35,7 +33,7 @@ module type P = sig
 
     val size : t -> int
 
-    val typ : t -> ref_type
+    val typ : t -> Binary.ref_type
 
     val max_size : t -> int option
 
@@ -149,7 +147,7 @@ module type P = sig
 
     val env : t -> Env.t
 
-    val to_run : t -> binary expr Annotated.t list
+    val to_run : t -> Binary.expr Annotated.t list
 
     val id : t -> string option
   end
@@ -187,31 +185,31 @@ module type S = sig
     -> Func_intf.t
     -> value list choice
 
-  val exec_iunop : State.stack -> Types.nn -> Types.iunop -> State.stack
+  val exec_iunop : State.stack -> Binary.nn -> Binary.iunop -> State.stack
 
-  val exec_funop : State.stack -> Types.nn -> Types.funop -> State.stack
+  val exec_funop : State.stack -> Binary.nn -> Binary.funop -> State.stack
 
   val exec_ibinop :
-    State.stack -> Types.nn -> Types.ibinop -> State.stack choice
+    State.stack -> Binary.nn -> Binary.ibinop -> State.stack choice
 
-  val exec_fbinop : State.stack -> Types.nn -> Types.fbinop -> State.stack
+  val exec_fbinop : State.stack -> Binary.nn -> Binary.fbinop -> State.stack
 
-  val exec_itestop : State.stack -> Types.nn -> Types.itestop -> State.stack
+  val exec_itestop : State.stack -> Binary.nn -> Binary.itestop -> State.stack
 
-  val exec_irelop : State.stack -> Types.nn -> Types.irelop -> State.stack
+  val exec_irelop : State.stack -> Binary.nn -> Binary.irelop -> State.stack
 
-  val exec_frelop : State.stack -> Types.nn -> Types.frelop -> State.stack
+  val exec_frelop : State.stack -> Binary.nn -> Binary.frelop -> State.stack
 
   val exec_itruncf :
-    State.stack -> Types.nn -> Types.nn -> Types.sx -> State.stack choice
+    State.stack -> Binary.nn -> Binary.nn -> Binary.sx -> State.stack choice
 
   val exec_itruncsatf :
-    State.stack -> Types.nn -> Types.nn -> Types.sx -> State.stack
+    State.stack -> Binary.nn -> Binary.nn -> Binary.sx -> State.stack
 
   val exec_fconverti :
-    State.stack -> Types.nn -> Types.nn -> Types.sx -> State.stack
+    State.stack -> Binary.nn -> Binary.nn -> Binary.sx -> State.stack
 
-  val exec_ireinterpretf : State.stack -> Types.nn -> Types.nn -> State.stack
+  val exec_ireinterpretf : State.stack -> Binary.nn -> Binary.nn -> State.stack
 
-  val exec_freinterpreti : State.stack -> Types.nn -> Types.nn -> State.stack
+  val exec_freinterpreti : State.stack -> Binary.nn -> Binary.nn -> State.stack
 end

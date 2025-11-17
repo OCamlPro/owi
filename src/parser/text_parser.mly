@@ -27,7 +27,7 @@
 
 %{
 
-open Types
+open Wast
 open Text
 
 let failwith msg = raise @@ Parse_fail msg
@@ -99,7 +99,7 @@ let t16_of_v128_arg_list z = function
 
 %}
 
-%start <Text.script> script
+%start <Wast.script> script
 %start <Text.modul> modul
 %start <Text.modul> inline_module
 
@@ -184,19 +184,19 @@ let type_use ==
 
 (* var *)
 let indice ==
-  | id = ID; { symbolic id }
-  | n = NUM; { raw (u32 n) }
+  | id = ID; { Text id }
+  | n = NUM; { Raw (u32 n) }
 
 (* bind_var *)
 let id ==
   | ~ = ID; <>
 
 let num_type ==
-  | I32; { Types.I32 }
-  | I64; { Types.I64 }
-  | F32; { Types.F32 }
-  | F64; { Types.F64 }
-  | V128; { Types.V128 }
+  | I32; { Text.I32 }
+  | I64; { Text.I64 }
+  | F32; { Text.F32 }
+  | F64; { Text.F64 }
+  | V128; { Text.V128 }
 
 let align ==
   | ALIGN; EQUAL; n = NUM; {
@@ -262,7 +262,7 @@ let plain_instr :=
   }
   | RETURN; { Return }
   | RETURN_CALL; ~ = indice; <Return_call>
-  | RETURN_CALL_REF; ~ = indice; { Return_call_ref (bt_ind indice) }
+  | RETURN_CALL_REF; ~ = indice; { Return_call_ref (Bt_ind indice) }
   | CALL; ~ = indice; <Call>
   | CALL_REF; ~ = indice; { Call_ref (indice) }
   | LOCAL_GET; ~ = indice; <Local_get>
@@ -271,26 +271,26 @@ let plain_instr :=
   | GLOBAL_GET; ~ = indice; <Global_get>
   | GLOBAL_SET; ~ = indice; <Global_set>
   | TABLE_GET; indice = option(indice); {
-    Table_get (Option.value indice ~default:(raw 0))
+    Table_get (Option.value indice ~default:(Raw 0))
   }
   | TABLE_SET; indice = option(indice); {
-    Table_set (Option.value indice ~default:(raw 0))
+    Table_set (Option.value indice ~default:(Raw 0))
   }
   | TABLE_SIZE; indice = option(indice); {
-    Table_size (Option.value indice ~default:(raw 0))
+    Table_size (Option.value indice ~default:(Raw 0))
   }
   | TABLE_GROW; indice = option(indice); {
-    Table_grow (Option.value indice ~default:(raw 0))
+    Table_grow (Option.value indice ~default:(Raw 0))
   }
   | TABLE_FILL; indice = option(indice); {
-    Table_fill (Option.value indice ~default:(raw 0))
+    Table_fill (Option.value indice ~default:(Raw 0))
   }
   | TABLE_COPY; {
-    Table_copy (raw 0, raw 0)
+    Table_copy (Raw 0, Raw 0)
   }
   | TABLE_COPY; src = indice; dst = indice; { Table_copy (src, dst) }
   | TABLE_INIT; t_indice = ioption(indice); ~ = indice; {
-    Table_init (Option.value t_indice ~default:(raw 0), indice)
+    Table_init (Option.value t_indice ~default:(Raw 0), indice)
   }
   (* TODO: check they're actually plain_instr and not instr: *)
   (* TODO: check that nothing is missing *)
@@ -507,16 +507,16 @@ let call_instr_instr_list ==
     call_indirect_prim (indice, x) :: es
   }
   | ~ = call_indirect_prim; (x, es) = call_instr_type_instr_list; {
-    call_indirect_prim (raw 0, x) :: es
+    call_indirect_prim (Raw 0, x) :: es
   }
 
 let call_instr_type_instr_list ==
   | ~ = type_use; ~ = call_instr_params_instr_list; {
     match call_instr_params_instr_list with
-    | ([], []), es -> bt_ind (type_use), es
-    | (pt, rt), es -> bt_raw (Some type_use) ((List.map (fun t -> None, t) pt), rt), es
+    | ([], []), es -> Bt_ind (type_use), es
+    | (pt, rt), es -> Bt_raw ((Some type_use), ((List.map (fun t -> None, t) pt), rt)), es
   }
-  | ((pt, rt), es) = call_instr_params_instr_list; { bt_raw None (List.map (fun t -> None, t) pt, rt), es }
+  | ((pt, rt), es) = call_instr_params_instr_list; { Bt_raw (None, (List.map (fun t -> None, t) pt, rt)), es }
 
 let call_instr_params_instr_list :=
   | LPAR; PARAM; l = list(val_type); RPAR; ((ts1, ts2), es) = call_instr_params_instr_list; {
@@ -561,8 +561,8 @@ let block_instr ==
 let block ==
   | ~ = type_use; (l, r) = block_param_body; {
     let block_type = match l with
-    | ([], []) -> bt_ind type_use
-    | (pt, rt) -> bt_raw (Some type_use) (List.map (fun t -> None, t) pt, rt)
+    | ([], []) -> Bt_ind type_use
+    | (pt, rt) -> Bt_raw ((Some type_use), (List.map (fun t -> None, t) pt, rt))
     in
     let r = Annotated.dummy_deep r in
     Some block_type, r
@@ -570,7 +570,7 @@ let block ==
   | (l, r) = block_param_body; {
     let block_type = match l with
       | [], [] -> None
-      | (pt, rt) -> Some (bt_raw None (List.map (fun t -> None, t) pt, rt))
+      | (pt, rt) -> Some (Bt_raw (None, (List.map (fun t -> None, t) pt, rt)))
     in
     let r = Annotated.dummy_deep r in
     block_type, r
@@ -601,7 +601,7 @@ let expr_aux ==
     es, call_indirect_prim (indice, x)
   }
   | ~ = call_indirect_prim; (x, es) = call_expr_type; {
-    es, call_indirect_prim (raw 0, x)
+    es, call_indirect_prim (Raw 0, x)
   }
   | BLOCK; id = option(id); (bt, es) = block; {
     let l = Annotated.dummy [] in
@@ -618,9 +618,9 @@ let expr_aux ==
       let pt = List.map (fun t -> None, t) pt in
       let raw = pt, rt in
       begin match bt with
-      | Some (Bt_ind type_use) -> Some (bt_raw (Some type_use) raw)
+      | Some (Bt_ind type_use) -> Some (Bt_raw ((Some type_use), raw))
       | Some (Bt_raw _) -> failwith "unexpected Bt_raw"
-      | None -> Some (bt_raw None raw)
+      | None -> Some (Bt_raw (None, raw))
       end
     in
     let es1 = Annotated.dummy_deep es1 in
@@ -643,11 +643,11 @@ let select_expr_result :=
 let call_expr_type ==
   | ~ = type_use; ~ = call_expr_params; {
     match call_expr_params with
-    | ([], []), es -> bt_ind type_use, es
-    | (pt, rt), es -> bt_raw (Some type_use) (List.map (fun t -> None, t) pt, rt), es
+    | ([], []), es -> Bt_ind type_use, es
+    | (pt, rt), es -> Bt_raw ((Some type_use), (List.map (fun t -> None, t) pt, rt)), es
   }
   | ((pt, rt), es) = call_expr_params; {
-    bt_raw None (List.map (fun t -> None, t) pt, rt), es
+    Bt_raw (None, (List.map (fun t -> None, t) pt, rt)), es
   }
 
 let call_expr_params :=
@@ -666,7 +666,7 @@ let call_expr_results :=
   | ~ = expr_list; { [], expr_list }
 
 let if_block ==
-  | ~ = type_use; ~ = if_block_param_body; { Some (bt_ind type_use), if_block_param_body }
+  | ~ = type_use; ~ = if_block_param_body; { Some (Bt_ind type_use), if_block_param_body }
   | ~ = if_block_param_body; {
     None, if_block_param_body
   }
@@ -724,7 +724,7 @@ let const_expr ==
 
 let func ==
   | FUNC; id = option(id); ~ = func_fields; {
-    let func_id = Option.map symbolic id in
+    let func_id = Option.map (fun id -> Text id) id in
     List.rev_map (function
       | MImport i ->
         begin match i.desc with
@@ -743,17 +743,17 @@ let func ==
 let func_fields :=
   | ~ = type_use; (ft, f) = func_fields_body; {
     match ft with
-    | [], [] -> [MFunc { f with type_f = bt_ind type_use }]
-    | (_pt, _rt) as ft -> [MFunc { f with type_f = bt_raw (Some type_use) ft}]
+    | [], [] -> [MFunc { f with type_f = Bt_ind type_use }]
+    | (_pt, _rt) as ft -> [MFunc { f with type_f = Bt_raw ((Some type_use), ft)}]
   }
   | (type_f, f) = func_fields_body; {
-    [MFunc { f with type_f = bt_raw None type_f }]
+    [MFunc { f with type_f = Bt_raw (None, type_f) }]
   }
   | (modul, name) = inline_import; ~ = type_use; _ = func_fields_import; {
-    [MImport { modul; name; desc = Import_func (None, bt_ind type_use) }]
+    [MImport { modul; name; desc = Import_func (None, Bt_ind type_use) }]
   }
   | (modul, name) = inline_import; ~ = func_fields_import; {
-    [MImport { modul; name; desc = Import_func (None, bt_raw None func_fields_import) }]
+    [MImport { modul; name; desc = Import_func (None, Bt_raw (None, func_fields_import)) }]
   }
   | ~ = inline_export; ~ = func_fields; {
     MExport { name = inline_export; desc = Export_func None } :: func_fields
@@ -792,7 +792,7 @@ let func_result_body :=
 let func_body :=
   | body = instr_list; {
     let body = Annotated.dummy_deep body in
-    { type_f = bt_ind (raw Int.max_int); locals = []; body; id = None }
+    { type_f = Bt_ind (Raw Int.max_int); locals = []; body; id = None }
   }
   | LPAR; LOCAL; l = list(val_type); RPAR; ~ = func_body; {
     { func_body with locals = (List.map (fun v -> None, v) l) @ func_body.locals  }
@@ -831,10 +831,10 @@ let elem_var ==
 
 let elem_list ==
   | ~ = elem_kind; l = list(elem_var); {
-    elem_kind, (l : text expr list)
+    elem_kind, (l : expr list)
   }
   | ~ = ref_type; l = list(elem_expr); {
-    let l : text expr list = List.map (List.map Annotated.dummy) l in
+    let l : expr list = List.map (List.map Annotated.dummy) l in
     ref_type, l
   }
 
@@ -855,17 +855,17 @@ let elem ==
   | ELEM; id = option(id); ~ = offset; (typ, init) = elem_list; {
     let init = Annotated.dummies init in
     let offset = Annotated.dummy_deep offset in
-    [ MElem { id; typ; init; mode = Elem_active (Some (raw 0), offset) } ]
+    [ MElem { id; typ; init; mode = Elem_active (Some (Raw 0), offset) } ]
   }
   | ELEM; id = option(id); ~ = offset; init = list(elem_var); {
     let init =  Annotated.dummies init in
     let offset = Annotated.dummy_deep offset in
-    [ MElem { id; typ = (Null, Func_ht); init; mode = Elem_active (Some (raw 0), offset) } ]
+    [ MElem { id; typ = (Null, Func_ht); init; mode = Elem_active (Some (Raw 0), offset) } ]
   }
 
 let table ==
 | TABLE; id = option(id); ~ = table_fields; {
-  let tbl_id = Option.map symbolic id in
+  let tbl_id = Option.map (fun id -> Text id) id in
   List.rev_map (function
     | MTable (_id, tbl) -> MTable (id, tbl)
     | MExport e -> MExport { e with desc = Export_table tbl_id }
@@ -912,14 +912,14 @@ let data ==
     [ MData { id; init; mode = Data_passive } ]
   }
   | DATA; id = option(id); memory_use = ioption(par(memory_use)); ~ = offset; init = string_list; {
-    let memory_use = Option.value memory_use ~default:(raw 0) in
+    let memory_use = Option.value memory_use ~default:(Raw 0) in
     let offset = Annotated.dummy_deep offset in
     [ MData { id; init; mode = Data_active (Some memory_use, offset) } ]
   }
 
 let memory ==
   | MEMORY; id = option(id); ~ = memory_fields; {
-    let mem_id = Option.map symbolic id in
+    let mem_id = Option.map (fun id -> Text id) id in
     List.rev_map (function
       | MMem (_id, m) -> MMem (id, m)
       | MExport e -> MExport { e with desc = Export_mem mem_id }
@@ -956,7 +956,7 @@ let memory_fields :=
 
 let global ==
   | GLOBAL; id = option(id); ~ = global_fields; {
-    let global_id = Option.map symbolic id in
+    let global_id = Option.map (fun id -> Text id) id in
     List.rev_map (function
       | MGlobal g -> MGlobal { g with id }
       | MExport e -> MExport { e with desc = Export_global global_id }
@@ -974,7 +974,7 @@ let global ==
 
 let global_fields :=
   | typ = global_type; init = const_expr; {
-    let init : text expr Annotated.t = Annotated.dummy_deep init in
+    let init : expr Annotated.t = Annotated.dummy_deep init in
     [ MGlobal { typ; init; id = None } ]
   }
   | (modul, name) = inline_import; ~ = global_type; {
@@ -987,8 +987,8 @@ let global_fields :=
 (* Imports & Exports *)
 
 let import_desc ==
-  | FUNC; id = option(id); ~ = type_use; { Import_func (id, bt_ind type_use) }
-  | (id, ft) = preceded(FUNC, pair(option(id), func_type)); { Import_func (id, bt_raw None ft) }
+  | FUNC; id = option(id); ~ = type_use; { Import_func (id, Bt_ind type_use) }
+  | (id, ft) = preceded(FUNC, pair(option(id), func_type)); { Import_func (id, Bt_raw (None, ft)) }
   | TABLE; ~ = option(id); ~ = table_type; <Import_table>
   | MEMORY; ~ = option(id); ~ = mem_type; <Import_mem>
   | GLOBAL; ~ = option(id); ~ = global_type; <Import_global>
@@ -1039,24 +1039,7 @@ let inline_module_inner ==
   | fields = list(par(module_field)); {
     let fields = List.flatten fields in
     let id = None in
-    let open Annot in
-    let open Contract in
-    let open Syntax in
-    let annots =
-      match
-        list_map
-          (fun ({ annotid; items } as t) ->
-            if String.equal "contract" annotid then
-              let+ c = parse_contract items in
-              Log.debug (fun m -> m "%a\n" pp_contract c);
-              Contract c
-            else Ok (Annot t) )
-          (get_annots ())
-      with
-      | Ok annots -> annots
-      | Error err -> failwith (Result.err_to_string err)
-    in
-    { id; fields; annots }
+    { id; fields; }
   }
 
 let inline_module :=

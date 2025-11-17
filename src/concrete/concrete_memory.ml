@@ -2,12 +2,10 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-open Types
-
 let page_size = 65_536
 
 type t =
-  { mutable limits : limits
+  { mutable limits : Binary.limits
   ; mutable data : bytes
   }
 
@@ -18,7 +16,7 @@ let recover ~from_ ~to_ =
   to_.data <- from_.data
 
 let init limits : t =
-  let data = Bytes.make (page_size * limits.min) '\x00' in
+  let data = Bytes.make (page_size * limits.Binary.min) '\x00' in
   { limits; data }
 
 let update_memory mem data =

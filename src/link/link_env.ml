@@ -2,7 +2,6 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-open Types
 open Syntax
 module IMap = Map.Make (Int)
 
@@ -139,7 +138,7 @@ module Build = struct
 
   let get_global (env : t) id =
     match IMap.find_opt id env.globals with
-    | None -> Error (`Unknown_global (Raw id))
+    | None -> Error (`Unknown_global (Text.Raw id))
     | Some v -> Ok v
 
   let get_const_global (env : t) id =
@@ -150,7 +149,7 @@ module Build = struct
 
   let get_func (env : t) id =
     match IMap.find_opt id env.functions with
-    | None -> Error (`Unknown_func (Raw id))
+    | None -> Error (`Unknown_func (Text.Raw id))
     | Some v -> Ok v
 end
 
@@ -183,7 +182,7 @@ module type T = sig
 
   val get_extern_func : t -> Func_id.t -> Concrete_extern_func.extern_func
 
-  val get_func_typ : t -> func -> func_type
+  val get_func_typ : t -> func -> Binary.func_type
 
   val pp : Format.formatter -> t -> unit
 

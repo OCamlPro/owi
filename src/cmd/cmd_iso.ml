@@ -77,7 +77,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
     | Some index -> (
       match Binary.Module.get_func_type index module1 with
       | None -> assert false
-      | Some (Types.Bt_raw (_, (pt, _rt))) -> (
+      | Some (Binary.Bt_raw (_, (pt, _rt))) -> (
         match List.length pt with 1 -> false | _n -> true ) )
   in
 
@@ -105,7 +105,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
       module2
   in
 
-  let typ = Types.Bt_raw (None, export_type) in
+  let typ = Binary.Bt_raw (None, export_type) in
 
   let iso_modul = Binary.Module.empty in
   let func1 =
@@ -133,15 +133,15 @@ let check_iso ~unsafe export_name export_type module1 module2 =
          { modul = "owi"
          ; name = "assert"
          ; assigned_name = Some "assert"
-         ; desc = Types.Bt_raw (None, ([ (None, Types.Num_type I32) ], []))
+         ; desc = Binary.Bt_raw (None, ([ (None, Binary.Num_type I32) ], []))
          } )
       iso_modul
   in
   let iso_func =
     let id = Some "check_iso_func" in
     let locals =
-      [ (None, Types.Num_type F32)
-      ; (None, Types.Num_type F32)
+      [ (None, Binary.Num_type F32)
+      ; (None, Num_type F32)
       ; (None, Num_type F64)
       ; (None, Num_type F64)
       ]
@@ -149,91 +149,88 @@ let check_iso ~unsafe export_name export_type module1 module2 =
     let body =
       let put_on_stack =
         List.mapi
-          (fun i (_name, _symbol) ->
-            let id = Types.Raw i in
-            [ Types.Local_get id ] )
+          (fun id (_name, _symbol) -> [ Binary.Local_get id ])
           (fst export_type)
         |> List.flatten
       in
       let local_offset = List.length (fst export_type) in
 
-      put_on_stack @ [ Types.Call (Raw idf1) ] @ put_on_stack
-      @ [ Types.Call (Raw idf2) ]
+      put_on_stack @ [ Binary.Call idf1 ] @ put_on_stack @ [ Binary.Call idf2 ]
       @ ( match snd export_type with
-        | [] -> [ Types.I32_const 1l ]
-        | [ Types.Num_type I32 ] -> [ Types.I_relop (S32, Eq) ]
-        | [ Types.Num_type I64 ] -> [ I_relop (S64, Eq) ]
-        | [ Types.Num_type F32 ] ->
+        | [] -> [ Binary.I32_const 1l ]
+        | [ Binary.Num_type I32 ] -> [ Binary.I_relop (S32, Eq) ]
+        | [ Binary.Num_type I64 ] -> [ I_relop (S64, Eq) ]
+        | [ Binary.Num_type F32 ] ->
           (* Here we can not simply compare the two numbers, because they may both be nan and then the comparison on float will return false. *)
           [ (* We store the two floats *)
-            Local_set (Raw (local_offset + 0))
-          ; Local_set (Raw (local_offset + 1))
+            Local_set (local_offset + 0)
+          ; Local_set (local_offset + 1)
           ; (* We compare the first one with itself to see if it is nan. *)
-            Local_get (Raw (local_offset + 0))
-          ; Local_get (Raw (local_offset + 0))
+            Local_get (local_offset + 0)
+          ; Local_get (local_offset + 0)
           ; F_relop (S32, Eq)
           ; If_else
               ( None
               , Some (Bt_raw (None, ([], [ Num_type I32 ])))
               , [ (* Not nan case, we can directly compare the two numbers *)
-                  Types.Local_get (Raw (local_offset + 0))
-                ; Local_get (Raw (local_offset + 1))
+                  Binary.Local_get (local_offset + 0)
+                ; Local_get (local_offset + 1)
                 ; F_relop (S32, Eq)
                 ]
                 |> Annotated.dummy_deep
               , [ (* Nan case, we must check if the second one is nan *)
-                  Types.Local_get (Raw (local_offset + 1))
-                ; Local_get (Raw (local_offset + 1))
+                  Binary.Local_get (local_offset + 1)
+                ; Local_get (local_offset + 1)
                 ; F_relop (S32, Eq)
                 ; If_else
                     ( None
                     , Some (Bt_raw (None, ([], [ Num_type I32 ])))
                     , [ (* Not nan case, we can compare the two numbers *)
-                        Types.Local_get (Raw (local_offset + 0))
-                      ; Local_get (Raw (local_offset + 1))
+                        Binary.Local_get (local_offset + 0)
+                      ; Local_get (local_offset + 1)
                       ; F_relop (S32, Eq)
                       ]
                       |> Annotated.dummy_deep
                     , [ (* Nan case, they are both nan, we return true *)
-                        Types.I32_const 1l
+                        Binary.I32_const 1l
                       ]
                       |> Annotated.dummy_deep )
                 ]
                 |> Annotated.dummy_deep )
           ]
-        | [ Types.Num_type F64 ] ->
+        | [ Binary.Num_type F64 ] ->
           (* Here we can not simply compare the two numbers, because they may both be nan and then the comparison on float will return false. *)
           [ (* We store the two floats *)
-            Local_set (Raw (local_offset + 2))
-          ; Local_set (Raw (local_offset + 3))
+            Local_set (local_offset + 2)
+          ; Local_set (local_offset + 3)
           ; (* We compare the first one with itself to see if it is nan. *)
-            Local_get (Raw (local_offset + 2))
-          ; Local_get (Raw (local_offset + 2))
+            Local_get (local_offset + 2)
+          ; Local_get (local_offset + 2)
           ; F_relop (S64, Eq)
           ; If_else
               ( None
               , Some (Bt_raw (None, ([], [ Num_type I32 ])))
               , [ (* Not nan case, we can directly compare the two numbers *)
-                  Types.Local_get (Raw (local_offset + 2))
-                ; Local_get (Raw (local_offset + 3))
+                  Binary.Local_get (local_offset + 2)
+                ; Local_get (local_offset + 3)
                 ; F_relop (S64, Eq)
                 ]
                 |> Annotated.dummy_deep
               , [ (* Nan case, we must check if the second one is nan *)
-                  Types.Local_get (Raw (local_offset + 3))
-                ; Local_get (Raw (local_offset + 3))
+                  Binary.Local_get (local_offset + 3)
+                ; Local_get (local_offset + 3)
                 ; F_relop (S64, Eq)
                 ; If_else
                     ( None
                     , Some (Bt_raw (None, ([], [ Num_type I32 ])))
                     , [ (* Not nan case, we can compare the two numbers *)
-                        Types.Local_get (Raw (local_offset + 2))
-                      ; Local_get (Raw (local_offset + 3))
+                        Binary.Local_get (local_offset + 2)
+                      ; Local_get (local_offset + 3)
                       ; F_relop (S64, Eq)
                       ]
                       |> Annotated.dummy_deep
                     , [ (* Nan case, they are both nan, we return true *)
-                        Types.I32_const 1l
+                        Binary.I32_const 1l
                       ]
                       |> Annotated.dummy_deep )
                 ]
@@ -243,15 +240,15 @@ let check_iso ~unsafe export_name export_type module1 module2 =
           Fmt.failwith
             "Equivalence check has not been implemented for result type %a, \
              please open a bug report."
-            Types.pp_result_type rt )
-      @ [ Call (Raw id_owi_assert) ]
+            Binary.pp_result_type rt )
+      @ [ Call id_owi_assert ]
     in
     let body = Annotated.dummies body |> Annotated.dummy in
     let type_f =
-      let (Bt_raw (_, typ) : Types.binary Types.block_type) = typ in
-      Types.Bt_raw (None, (fst typ, []))
+      let (Bt_raw (_, typ) : Binary.block_type) = typ in
+      Binary.Bt_raw (None, (fst typ, []))
     in
-    Runtime.Local { Types.type_f; locals; body; id }
+    Runtime.Local { Binary.type_f; locals; body; id }
   in
 
   let iso_modul, id_i32_symbol =
@@ -260,7 +257,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
          { modul = "owi"
          ; name = "i32_symbol"
          ; assigned_name = Some "i32_symbol"
-         ; desc = Types.Bt_raw (None, ([], [ Types.Num_type I32 ]))
+         ; desc = Binary.Bt_raw (None, ([], [ Binary.Num_type I32 ]))
          } )
       iso_modul
   in
@@ -271,7 +268,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
          { modul = "owi"
          ; name = "i64_symbol"
          ; assigned_name = Some "i64_symbol"
-         ; desc = Types.Bt_raw (None, ([], [ Types.Num_type I64 ]))
+         ; desc = Binary.Bt_raw (None, ([], [ Binary.Num_type I64 ]))
          } )
       iso_modul
   in
@@ -282,7 +279,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
          { modul = "owi"
          ; name = "f32_symbol"
          ; assigned_name = Some "f32_symbol"
-         ; desc = Types.Bt_raw (None, ([], [ Types.Num_type F32 ]))
+         ; desc = Binary.Bt_raw (None, ([], [ Binary.Num_type F32 ]))
          } )
       iso_modul
   in
@@ -293,7 +290,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
          { modul = "owi"
          ; name = "f64_symbol"
          ; assigned_name = Some "f64_symbol"
-         ; desc = Types.Bt_raw (None, ([], [ Types.Num_type F64 ]))
+         ; desc = Binary.Bt_raw (None, ([], [ Binary.Num_type F64 ]))
          } )
       iso_modul
   in
@@ -307,20 +304,16 @@ let check_iso ~unsafe export_name export_type module1 module2 =
       Annotated.dummy_deep
       @@ List.map
            (function
-             | (None | Some _), Types.Num_type I32 ->
-               Types.Call (Raw id_i32_symbol)
-             | (None | Some _), Types.Num_type I64 ->
-               Types.Call (Raw id_i64_symbol)
-             | (None | Some _), Types.Num_type F32 ->
-               Types.Call (Raw id_f32_symbol)
-             | (None | Some _), Types.Num_type F64 ->
-               Types.Call (Raw id_f64_symbol)
+             | (None | Some _), Binary.Num_type I32 -> Binary.Call id_i32_symbol
+             | (None | Some _), Binary.Num_type I64 -> Binary.Call id_i64_symbol
+             | (None | Some _), Binary.Num_type F32 -> Binary.Call id_f32_symbol
+             | (None | Some _), Binary.Num_type F64 -> Binary.Call id_f64_symbol
              | _ -> Fmt.failwith "TODO" )
            (fst export_type)
-      @ [ Types.Call (Raw iso_check_index) ]
+      @ [ Binary.Call iso_check_index ]
     in
-    let type_f = Types.Bt_raw (None, ([], [])) in
-    Runtime.Local { Types.type_f; locals; body; id }
+    let type_f = Binary.Bt_raw (None, ([], [])) in
+    Runtime.Local { Binary.type_f; locals; body; id }
   in
   let iso_modul, index = Binary.Module.add_func start_function iso_modul in
   let start = Some index in
@@ -358,9 +351,7 @@ let cmd ~deterministic_result_order ~fail_mode ~exploration_strategy ~files
   Log.info (fun m -> m "module %s is %a" module_name1 Fpath.pp file1);
   Log.info (fun m -> m "module %s is %a" module_name2 Fpath.pp file2);
 
-  let compile ~unsafe file =
-    Compile.File.until_validate ~unsafe ~rac:false ~srac:false file
-  in
+  let compile ~unsafe file = Compile.File.until_validate ~unsafe file in
 
   Log.info (fun m -> m "Compiling %a" Fpath.pp file1);
   let* module1 = compile ~unsafe file1 in
@@ -421,7 +412,7 @@ let cmd ~deterministic_result_order ~fail_mode ~exploration_strategy ~files
             (typ1, typ2)
           | _, _ -> assert false
         in
-        if Types.func_type_eq typ1 typ2 then (name, typ1) :: common_exports
+        if Binary.func_type_eq typ1 typ2 then (name, typ1) :: common_exports
         else begin
           Log.warn (fun m ->
             m

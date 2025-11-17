@@ -47,36 +47,23 @@ type err =
   | `Unbound_name of string
   | `Undeclared_function_reference
   | `Unexpected_token of string
-  | `Unknown_data of Types.text Types.indice
-  | `Unknown_elem of Types.text Types.indice
-  | `Unknown_func of Types.text Types.indice
-  | `Unknown_global of Types.text Types.indice
+  | `Unknown_data of Text.indice
+  | `Unknown_elem of Text.indice
+  | `Unknown_func of Text.indice
+  | `Unknown_global of Text.indice
   | `Unknown_import of string * string
-  | `Unknown_label of Types.text Types.indice
-  | `Unknown_local of Types.text Types.indice
-  | `Unknown_memory of Types.text Types.indice
-  | `Unknown_export of Types.text Types.indice
+  | `Unknown_label of Text.indice
+  | `Unknown_local of Text.indice
+  | `Unknown_memory of Text.indice
+  | `Unknown_export of Text.indice
   | `Unknown_module of string
   | `Unknown_operator
-  | `Unknown_table of Types.text Types.indice
-  | `Unknown_type of Types.text Types.indice
+  | `Unknown_table of Text.indice
+  | `Unknown_type of Text.indice
   | `Unsupported_file_extension of string
-  | `Spec_invalid_int32 of string
-  | `Spec_invalid_int64 of string
-  | `Spec_invalid_float32 of string
-  | `Spec_invalid_float64 of string
-  | `Spec_invalid_indice of string
-  | `Spec_invalid_text_indice of string
   | `Unknown_annotation_clause of Sexp.t
   | `Unknown_annotation_object of Sexp.t
-  | `Spec_unknown_binder of Types.text Types.indice
-  | `Spec_unknown_param of Types.text Types.indice
-  | `Spec_unknown_variable of Types.text Types.indice
-  | `Spec_unknown_binder_type of Sexp.t
-  | `Spec_unknown_prop of Sexp.t
-  | `Spec_unknown_term of Sexp.t
-  | `Spec_type_error of string
-  | `Contract_unknown_func of Types.text Types.indice
+  | `Contract_unknown_func of Text.indice
   | `Empty_annotation_id
   | `Empty_identifier
   | `Unclosed_annotation

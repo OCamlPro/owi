@@ -12,4 +12,4 @@ type 'a t =
 
 let pp pp_desc fmt { modul; name; assigned_name; desc } =
   Fmt.pf fmt "{@\n  @[<v>modul: %S@\nname: %S@\nassigned_name: %a@\ndesc: %a@]}"
-    modul name Types.pp_id_opt assigned_name pp_desc desc
+    modul name Text.pp_id_opt assigned_name pp_desc desc

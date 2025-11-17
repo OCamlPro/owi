@@ -9,4 +9,4 @@ type extern_module = Concrete_extern_func.extern_func Link.extern_module
 val extern_m : extern_module
 
 (** the spectest module *)
-val m : Text.cmd
+val m : Wast.cmd

@@ -481,16 +481,12 @@ let rec token buf =
     let annotid = String.sub annotid 3 (String.length annotid - 4) in
     let annotid = mk_string buf annotid in
     if String.equal "" annotid then raise Empty_annotation_id
-    else
-      let items = Sexp.List (annot buf) in
-      Annot.(record_annot annotid items);
+    else begin
+      annot buf;
       token buf
+    end
   | "(@", Plus id_char ->
-    let annotid = Utf8.lexeme buf in
-    let annotid = String.sub annotid 2 (String.length annotid - 2) in
-    let annotid = mk_string buf annotid in
-    let items = Sexp.List (annot buf) in
-    Annot.(record_annot annotid items);
+    annot buf;
     token buf
   | "(@" -> raise Empty_annotation_id
   (* 1 *)
@@ -541,14 +537,12 @@ and annot buf =
     comment buf;
     annot buf
   | "(" ->
-    let items = annot buf in
-    Sexp.List items :: annot buf
-  | ")" -> []
+    annot buf;
+    annot buf
+  | ")" -> ()
   | "\"", Star string_elem -> raise Unclosed_string
   | eof -> raise Unclosed_annotation
-  | annot_atom ->
-    let annot_atom = Utf8.lexeme buf in
-    Sexp.Atom annot_atom :: annot buf
+  | annot_atom -> annot buf
   | _ -> illegal_character buf
 
 let lexer buf = Sedlexing.with_tokenizer token buf

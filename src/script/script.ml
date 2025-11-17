@@ -2,7 +2,6 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-open Types
 open Syntax
 module Stack = Stack.Make [@inlined hint] (Concrete_value)
 
@@ -74,7 +73,7 @@ let load_global_from_module ls mod_id name =
 
 let compare_result_const result (const : V.t) =
   match (result, const) with
-  | Text.Result_const (Literal (Const_I32 n)), I32 n' -> Int32.eq n n'
+  | Wast.Result_const (Literal (Const_I32 n)), I32 n' -> Int32.eq n n'
   | Result_const (Literal (Const_I64 n)), I64 n' -> Int64.eq n n'
   | Result_const (Literal (Const_F32 n)), F32 n' ->
     Float32.eq n n' || String.equal (Float32.to_string n) (Float32.to_string n')
@@ -111,25 +110,32 @@ let compare_result_const result (const : V.t) =
     Log.err (fun m -> m "TODO: unimplemented Script.compare_result_const");
     assert false
 
-let value_of_const : const -> V.t = function
+let convert_heap_type (ht : Text.heap_type) : Binary.heap_type =
+  match ht with
+  | Text.Func_ht -> Binary.Func_ht
+  | Text.Extern_ht -> Binary.Extern_ht
+
+let value_of_const : Wast.const -> V.t = function
   | Const_I32 v -> V.I32 v
   | Const_I64 v -> V.I64 v
   | Const_F32 v -> V.F32 v
   | Const_F64 v -> V.F64 v
   | Const_V128 v -> V.V128 v
-  | Const_null rt -> V.ref_null rt
+  | Const_null rt ->
+    let rt = convert_heap_type rt in
+    V.ref_null rt
   | Const_extern i -> V.Ref (Host_externref.value i)
   | i ->
     Log.err (fun m ->
-      m "TODO: unimplemented Script.value_of_const %a)" Types.pp_const i );
+      m "TODO: unimplemented Script.value_of_const %a)" Wast.pp_const i );
     assert false
 
 let action (link_state : Concrete_extern_func.extern_func Link.state) = function
-  | Text.Invoke (mod_id, f, args) -> begin
+  | Wast.Invoke (mod_id, f, args) -> begin
     Log.info (fun m ->
       m "invoke %a %s %a..."
         (Fmt.option ~none:Fmt.nop Fmt.string)
-        mod_id f Types.pp_consts args );
+        mod_id f Wast.pp_consts args );
     let* f, env_id = load_func_from_module link_state mod_id f in
     let stack = List.rev_map value_of_const args in
     Interpret.Concrete.exec_vfunc_from_outside ~locals:stack ~env:env_id
@@ -152,15 +158,14 @@ let run ~no_exhaustion script =
   let curr_module = ref 0 in
   list_fold_left
     (fun (link_state : Concrete_extern_func.extern_func Link.state) -> function
-      | Text.Text_module m ->
+      | Wast.Text_module m ->
         if !curr_module = 0 then
           (* TODO: disable printing*)
           ();
         Log.info (fun m -> m "*** module");
         incr curr_module;
         let* m, link_state =
-          Compile.Text.until_link link_state ~unsafe ~rac:false ~srac:false
-            ~name:None m
+          Compile.Text.until_link link_state ~unsafe ~name:None m
         in
         let+ () =
           Interpret.Concrete.modul ~timeout:None ~timeout_instr:None
@@ -168,20 +173,19 @@ let run ~no_exhaustion script =
         in
         (* TODO: enable printing again! *)
         link_state
-      | Text.Quoted_module m ->
+      | Wast.Quoted_module m ->
         Log.info (fun m -> m "*** quoted module");
         incr curr_module;
         let* m = Parse.Text.Inline_module.from_string m in
         let* m, link_state =
-          Compile.Text.until_link link_state ~unsafe ~rac:false ~srac:false
-            ~name:None m
+          Compile.Text.until_link link_state ~unsafe ~name:None m
         in
         let+ () =
           Interpret.Concrete.modul ~timeout:None ~timeout_instr:None
             link_state.envs m
         in
         link_state
-      | Text.Binary_module (id, m) ->
+      | Wast.Binary_module (id, m) ->
         Log.info (fun m -> m "*** binary module");
         incr curr_module;
         let* m = Parse.Binary.Module.from_string m in
@@ -198,8 +202,7 @@ let run ~no_exhaustion script =
         Log.info (fun m -> m "*** assert_trap");
         incr curr_module;
         let* m, link_state =
-          Compile.Text.until_link link_state ~unsafe ~rac:false ~srac:false
-            ~name:None m
+          Compile.Text.until_link link_state ~unsafe ~name:None m
         in
         let got =
           Interpret.Concrete.modul ~timeout:None ~timeout_instr:None
@@ -220,9 +223,7 @@ let run ~no_exhaustion script =
           match got with
           | Error got -> check_error ~expected ~got
           | Ok [ Text_module m ] ->
-            let got =
-              Compile.Text.until_binary ~unsafe ~rac:false ~srac:false m
-            in
+            let got = Compile.Text.until_binary ~unsafe m in
             check_error_result expected got
           | _ -> assert false
         in
@@ -244,10 +245,7 @@ let run ~no_exhaustion script =
         link_state
       | Assert (Assert_invalid (m, expected)) ->
         Log.info (fun m -> m "*** assert_invalid");
-        let got =
-          Compile.Text.until_link link_state ~unsafe ~rac:false ~srac:false
-            ~name:None m
-        in
+        let got = Compile.Text.until_link link_state ~unsafe ~name:None m in
         let+ () = check_error_result expected got in
         link_state
       | Assert (Assert_invalid_quote (m, expected)) ->
@@ -257,18 +255,12 @@ let run ~no_exhaustion script =
         link_state
       | Assert (Assert_unlinkable (m, expected)) ->
         Log.info (fun m -> m "*** assert_unlinkable");
-        let got =
-          Compile.Text.until_link link_state ~unsafe ~rac:false ~srac:false
-            ~name:None m
-        in
+        let got = Compile.Text.until_link link_state ~unsafe ~name:None m in
         let+ () = check_error_result expected got in
         link_state
       | Assert (Assert_malformed (m, expected)) ->
         Log.info (fun m -> m "*** assert_malformed");
-        let got =
-          Compile.Text.until_link ~unsafe ~rac:false ~srac:false ~name:None
-            link_state m
-        in
+        let got = Compile.Text.until_link ~unsafe ~name:None link_state m in
         let+ () = check_error_result expected got in
         assert false
       | Assert (Assert_return (a, res)) ->
@@ -280,7 +272,7 @@ let run ~no_exhaustion script =
           || not (List.for_all2 compare_result_const res stack)
         then begin
           Log.err (fun m ->
-            m "got:      %a@.expected: %a" Stack.pp stack Text.pp_results res );
+            m "got:      %a@.expected: %a" Stack.pp stack Wast.pp_results res );
           Error `Bad_result
         end
         else Ok link_state

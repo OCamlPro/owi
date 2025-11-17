@@ -47,36 +47,23 @@ type err =
   | `Unbound_name of string
   | `Undeclared_function_reference
   | `Unexpected_token of string
-  | `Unknown_data of Types.text Types.indice
-  | `Unknown_elem of Types.text Types.indice
-  | `Unknown_func of Types.text Types.indice
-  | `Unknown_global of Types.text Types.indice
+  | `Unknown_data of Text.indice
+  | `Unknown_elem of Text.indice
+  | `Unknown_func of Text.indice
+  | `Unknown_global of Text.indice
   | `Unknown_import of string * string
-  | `Unknown_label of Types.text Types.indice
-  | `Unknown_local of Types.text Types.indice
-  | `Unknown_memory of Types.text Types.indice
-  | `Unknown_export of Types.text Types.indice
+  | `Unknown_label of Text.indice
+  | `Unknown_local of Text.indice
+  | `Unknown_memory of Text.indice
+  | `Unknown_export of Text.indice
   | `Unknown_module of string
   | `Unknown_operator
-  | `Unknown_table of Types.text Types.indice
-  | `Unknown_type of Types.text Types.indice
+  | `Unknown_table of Text.indice
+  | `Unknown_type of Text.indice
   | `Unsupported_file_extension of string
-  | `Spec_invalid_int32 of string
-  | `Spec_invalid_int64 of string
-  | `Spec_invalid_float32 of string
-  | `Spec_invalid_float64 of string
-  | `Spec_invalid_indice of string
-  | `Spec_invalid_text_indice of string
   | `Unknown_annotation_clause of Sexp.t
   | `Unknown_annotation_object of Sexp.t
-  | `Spec_unknown_binder of Types.text Types.indice
-  | `Spec_unknown_param of Types.text Types.indice
-  | `Spec_unknown_variable of Types.text Types.indice
-  | `Spec_unknown_binder_type of Sexp.t
-  | `Spec_unknown_prop of Sexp.t
-  | `Spec_unknown_term of Sexp.t
-  | `Spec_type_error of string
-  | `Contract_unknown_func of Types.text Types.indice
+  | `Contract_unknown_func of Text.indice
   | `Empty_annotation_id
   | `Empty_identifier
   | `Unclosed_annotation
@@ -153,44 +140,27 @@ let rec err_to_string = function
   | `Unbound_name id -> Fmt.str "unbound name %s" id
   | `Undeclared_function_reference -> "undeclared function reference"
   | `Unexpected_token s -> Fmt.str "unexpected token %S" s
-  | `Unknown_data id -> Fmt.str "unknown data segment %a" Types.pp_indice id
-  | `Unknown_elem id -> Fmt.str "unknown elem segment %a" Types.pp_indice id
-  | `Unknown_func id -> Fmt.str "unknown function %a" Types.pp_indice id
-  | `Unknown_global id -> Fmt.str "unknown global %a" Types.pp_indice id
+  | `Unknown_data id -> Fmt.str "unknown data segment %a" Text.pp_indice id
+  | `Unknown_elem id -> Fmt.str "unknown elem segment %a" Text.pp_indice id
+  | `Unknown_func id -> Fmt.str "unknown function %a" Text.pp_indice id
+  | `Unknown_global id -> Fmt.str "unknown global %a" Text.pp_indice id
   | `Unknown_import (modul, value) -> Fmt.str "unknown import %S %S" modul value
-  | `Unknown_label id -> Fmt.str "unknown label %a" Types.pp_indice id
-  | `Unknown_local id -> Fmt.str "unknown local %a" Types.pp_indice id
-  | `Unknown_memory id -> Fmt.str "unknown memory %a" Types.pp_indice id
-  | `Unknown_export id -> Fmt.str "unknown export %a" Types.pp_indice id
+  | `Unknown_label id -> Fmt.str "unknown label %a" Text.pp_indice id
+  | `Unknown_local id -> Fmt.str "unknown local %a" Text.pp_indice id
+  | `Unknown_memory id -> Fmt.str "unknown memory %a" Text.pp_indice id
+  | `Unknown_export id -> Fmt.str "unknown export %a" Text.pp_indice id
   | `Unknown_module name -> Fmt.str "unknown module %s" name
   | `Unknown_operator -> Fmt.str "unknown operator"
-  | `Unknown_table id -> Fmt.str "unknown table %a" Types.pp_indice id
-  | `Unknown_type id -> Fmt.str "unknown type %a" Types.pp_indice id
+  | `Unknown_table id -> Fmt.str "unknown table %a" Text.pp_indice id
+  | `Unknown_type id -> Fmt.str "unknown type %a" Text.pp_indice id
   | `Unsupported_file_extension ext ->
     Fmt.str "unsupported file_extension %S" ext
-  | `Spec_invalid_int32 i32 -> Fmt.str "spec: invalid int32 %S" i32
-  | `Spec_invalid_int64 i64 -> Fmt.str "spec: invalid int64 %S" i64
-  | `Spec_invalid_float32 f32 -> Fmt.str "spec: invalid float32 %S" f32
-  | `Spec_invalid_float64 f64 -> Fmt.str "spec: invalid float64 %S" f64
-  | `Spec_invalid_indice id -> Fmt.str "spec: invalid indice %S" id
-  | `Spec_invalid_text_indice id -> Fmt.str "spec: invalid text indice %S" id
   | `Unknown_annotation_clause s ->
     Fmt.str "unknown annotation clause %a" Sexp.pp_sexp s
   | `Unknown_annotation_object s ->
     Fmt.str "unknown annotation object %a" Sexp.pp_sexp s
-  | `Spec_unknown_binder id ->
-    Fmt.str "spec: unknown binder %a" Types.pp_indice id
-  | `Spec_unknown_param id ->
-    Fmt.str "spec: unknown param %a" Types.pp_indice id
-  | `Spec_unknown_variable id ->
-    Fmt.str "spec: unknown variable %a" Types.pp_indice id
-  | `Spec_unknown_binder_type s ->
-    Fmt.str "spec: unknown binder type %a" Sexp.pp_sexp s
-  | `Spec_unknown_prop pr -> Fmt.str "spec: unknown prop %a" Sexp.pp_sexp pr
-  | `Spec_unknown_term tm -> Fmt.str "spec: unknown term %a" Sexp.pp_sexp tm
-  | `Spec_type_error str -> Fmt.str "spec: %S type error" str
   | `Contract_unknown_func id ->
-    Fmt.str "contract: unknown function %a" Types.pp_indice id
+    Fmt.str "contract: unknown function %a" Text.pp_indice id
   | `Empty_annotation_id -> Fmt.str "empty annotation id"
   | `Empty_identifier -> Fmt.str "empty identifier"
   | `Unclosed_annotation -> Fmt.str "unclosed annotation"

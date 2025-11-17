@@ -2,8 +2,6 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-open Types
-
 module type Value_types = sig
   type int32
 
@@ -68,7 +66,7 @@ module type T_Extern_func = sig
   type extern_func = Extern_func : 'a func_type * 'a -> extern_func
 
   (* val extern_type : _ func_type -> Simplified.func_type *)
-  val extern_type : extern_func -> Types.func_type
+  val extern_type : extern_func -> Binary.func_type
 
   module Syntax : sig
     type l
@@ -128,7 +126,7 @@ module type T_Extern_func = sig
 end
 
 type t =
-  | WASM of int * binary func * Env_id.t
+  | WASM of int * Binary.func * Env_id.t
   | Extern of Func_id.t
 
 module type T = sig
@@ -136,9 +134,9 @@ module type T = sig
 
   type nonrec t = t
 
-  (* val typ : ('env, extern_func) t -> binary func_type *)
+  (* val typ : ('env, extern_func) t -> Binary.func_type *)
 
-  val wasm : binary func -> Env_id.t -> t
+  val wasm : Binary.func -> Env_id.t -> t
 end
 
 module Make_extern_func
@@ -149,7 +147,7 @@ module Make_extern_func
 
   val fresh : unit -> int
 
-  val wasm : Types.binary Types.func -> Env_id.t -> t
+  val wasm : Binary.func -> Env_id.t -> t
 
   include
     T_Extern_func
@@ -191,7 +189,7 @@ end = struct
 
   type extern_func = Extern_func : 'a func_type * 'a -> extern_func
 
-  let elt_type (type t) (e : t telt) : val_type =
+  let elt_type (type t) (e : t telt) : Binary.val_type =
     match e with
     | I32 -> Num_type I32
     | I64 -> Num_type I64
@@ -200,7 +198,7 @@ end = struct
     | V128 -> Num_type V128
     | Externref _ -> Ref_type (Null, Extern_ht)
 
-  let res_type (type t) (r : t rtype) : result_type =
+  let res_type (type t) (r : t rtype) : Binary.result_type =
     match r with
     | R0 -> []
     | R1 a -> [ elt_type a ]
@@ -208,14 +206,14 @@ end = struct
     | R3 (a, b, c) -> [ elt_type a; elt_type b; elt_type c ]
     | R4 (a, b, c, d) -> [ elt_type a; elt_type b; elt_type c; elt_type d ]
 
-  let rec arg_type : type t r. (t, r) atype -> param_type = function
+  let rec arg_type : type t r. (t, r) atype -> Binary.param_type = function
     | Mem tl -> arg_type tl
     | UArg tl -> arg_type tl
     | Arg (hd, tl) -> (None, elt_type hd) :: arg_type tl
     | NArg (name, hd, tl) -> (Some name, elt_type hd) :: arg_type tl
     | Res -> []
 
-  let extern_type (Extern_func (Func (arg, res), _)) : Types.func_type =
+  let extern_type (Extern_func (Func (arg, res), _)) : Binary.func_type =
     (arg_type arg, res_type res)
 
   type nonrec t = t

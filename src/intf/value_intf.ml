@@ -2,8 +2,6 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-open Types
-
 module type Iop = sig
   type num
 
@@ -213,7 +211,7 @@ module type T = sig
   val const_v128 : V128.t -> v128
   (* TODO ref *)
 
-  val ref_null : heap_type -> t
+  val ref_null : Binary.heap_type -> t
 
   val ref_func : Func_intf.t -> t
 

@@ -38,11 +38,11 @@ let annotate_fc m cov_label_set_idx =
               (fun expr ->
                 incr count;
                 Annotated.dummies
-                  [ Types.I32_const (Int32.of_int !count)
+                  [ Binary.I32_const (Int32.of_int !count)
                   ; Call cov_label_set_idx
                   ]
                 @ expr )
-              f.Types.body
+              f.Binary.body
           in
           let f = { f with body } in
           Runtime.Local f )
@@ -64,23 +64,23 @@ let annotate_sc m cov_label_set_idx =
             incr count;
             let prefix =
               Annotated.dummies
-                [ Types.I32_const (Int32.of_int !count)
+                [ Binary.I32_const (Int32.of_int !count)
                 ; Call cov_label_set_idx
                 ]
             in
             let instr =
               Annotated.map
                 (function
-                  | Types.Block (id, typ, body) ->
+                  | Binary.Block (id, typ, body) ->
                     let body = handle_expr body in
-                    Types.Block (id, typ, body)
-                  | Types.Loop (id, typ, body) ->
+                    Binary.Block (id, typ, body)
+                  | Binary.Loop (id, typ, body) ->
                     let body = handle_expr body in
-                    Types.Loop (id, typ, body)
-                  | Types.If_else (id, typ, true_branch, false_branch) ->
+                    Binary.Loop (id, typ, body)
+                  | Binary.If_else (id, typ, true_branch, false_branch) ->
                     let true_branch = handle_expr true_branch in
                     let false_branch = handle_expr false_branch in
-                    Types.If_else (id, typ, true_branch, false_branch)
+                    Binary.If_else (id, typ, true_branch, false_branch)
                   | instr ->
                     (* TODO: make this match non fragile? *)
                     instr )
@@ -92,7 +92,7 @@ let annotate_sc m cov_label_set_idx =
               (fun expr -> List.map handle_instr expr |> List.flatten)
               expr
           in
-          let body = handle_expr f.Types.body in
+          let body = handle_expr f.Binary.body in
           let f = { f with body } in
           Runtime.Local f )
       func
@@ -111,31 +111,31 @@ let annotate_dc m cov_label_set_idx =
             let instr =
               Annotated.map
                 (function
-                  | Types.Br_if (Raw idx) ->
+                  | Binary.Br_if idx ->
                     incr count;
                     let count_true = !count in
                     incr count;
                     let count_false = !count in
-                    Types.If_else
+                    Binary.If_else
                       ( None
                       , None
                       , Annotated.dummy_deep
-                          [ Types.I32_const (Int32.of_int count_true)
+                          [ Binary.I32_const (Int32.of_int count_true)
                           ; Call cov_label_set_idx
-                          ; Br (Raw (idx + 1))
+                          ; Br (idx + 1)
                           ]
                       , Annotated.dummy_deep
-                          [ Types.I32_const (Int32.of_int count_false)
+                          [ Binary.I32_const (Int32.of_int count_false)
                           ; Call cov_label_set_idx
                           ] )
-                  | Types.If_else (id, typ, true_branch, false_branch) ->
+                  | Binary.If_else (id, typ, true_branch, false_branch) ->
                     incr count;
                     let count_true = !count in
                     let true_branch =
                       Annotated.map
                         (fun expr ->
                           Annotated.dummies
-                            [ Types.I32_const (Int32.of_int count_true)
+                            [ Binary.I32_const (Int32.of_int count_true)
                             ; Call cov_label_set_idx
                             ]
                           @ expr )
@@ -148,7 +148,7 @@ let annotate_dc m cov_label_set_idx =
                       Annotated.map
                         (fun expr ->
                           Annotated.dummies
-                            [ Types.I32_const (Int32.of_int count_false)
+                            [ Binary.I32_const (Int32.of_int count_false)
                             ; Call cov_label_set_idx
                             ]
                           @ expr )
@@ -157,13 +157,13 @@ let annotate_dc m cov_label_set_idx =
 
                     let true_branch = handle_expr true_branch in
                     let false_branch = handle_expr false_branch in
-                    Types.If_else (id, typ, true_branch, false_branch)
-                  | Types.Block (id, typ, body) ->
+                    Binary.If_else (id, typ, true_branch, false_branch)
+                  | Binary.Block (id, typ, body) ->
                     let body = handle_expr body in
-                    Types.Block (id, typ, body)
-                  | Types.Loop (id, typ, body) ->
+                    Binary.Block (id, typ, body)
+                  | Binary.Loop (id, typ, body) ->
                     let body = handle_expr body in
-                    Types.Loop (id, typ, body)
+                    Binary.Loop (id, typ, body)
                   | instr ->
                     (* TODO: make this match non fragile? *)
                     instr )
@@ -175,7 +175,7 @@ let annotate_dc m cov_label_set_idx =
               (fun expr -> List.map handle_instr expr |> List.flatten)
               expr
           in
-          let body = handle_expr f.Types.body in
+          let body = handle_expr f.Binary.body in
           let f = { f with body } in
           Runtime.Local f )
       func
@@ -185,8 +185,8 @@ let annotate_dc m cov_label_set_idx =
 let annotate criteria m =
   let m =
     let desc =
-      Types.Bt_raw
-        (None, ([ (None, Types.Num_type I32); (None, Num_type I32) ], []))
+      Binary.Bt_raw
+        (None, ([ (None, Binary.Num_type I32); (None, Num_type I32) ], []))
     in
     Binary.Module.add_import_if_not_present ~modul_name:"owi"
       ~func_name:"cov_label_set" ~desc m
@@ -197,7 +197,7 @@ let annotate criteria m =
         ~func_name:"cov_label_set" m
     with
     | None -> assert false
-    | Some idx -> Types.Raw idx
+    | Some idx -> idx
   in
   let m, label_count =
     match criteria with

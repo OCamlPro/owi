@@ -6,18 +6,12 @@
 
 module Any : sig
   val until_validate :
-       unsafe:bool
-    -> rac:bool
-    -> srac:bool
-    -> 'extern_func Kind.t
-    -> Binary.Module.t Result.t
+    unsafe:bool -> 'extern_func Kind.t -> Binary.Module.t Result.t
 
   (** compile a module with a given link state and produce a new link state and
       a runnable module *)
   val until_link :
        unsafe:bool
-    -> rac:bool
-    -> srac:bool
     -> name:string option
     -> 'extern_func Link.state
     -> 'extern_func Kind.t
@@ -25,18 +19,14 @@ module Any : sig
 end
 
 module File : sig
-  val until_binary :
-    unsafe:bool -> rac:bool -> srac:bool -> Fpath.t -> Binary.Module.t Result.t
+  val until_binary : unsafe:bool -> Fpath.t -> Binary.Module.t Result.t
 
-  val until_validate :
-    unsafe:bool -> rac:bool -> srac:bool -> Fpath.t -> Binary.Module.t Result.t
+  val until_validate : unsafe:bool -> Fpath.t -> Binary.Module.t Result.t
 
   (** compile a file with a given link state and produce a new link state and a
       runnable module *)
   val until_link :
        unsafe:bool
-    -> rac:bool
-    -> srac:bool
     -> name:string option
     -> 'extern_func Link.state
     -> Fpath.t
@@ -44,26 +34,14 @@ module File : sig
 end
 
 module Text : sig
-  val until_binary :
-       unsafe:bool
-    -> rac:bool
-    -> srac:bool
-    -> Text.modul
-    -> Binary.Module.t Result.t
+  val until_binary : unsafe:bool -> Text.modul -> Binary.Module.t Result.t
 
-  val until_validate :
-       unsafe:bool
-    -> rac:bool
-    -> srac:bool
-    -> Text.modul
-    -> Binary.Module.t Result.t
+  val until_validate : unsafe:bool -> Text.modul -> Binary.Module.t Result.t
 
   (** compile a module with a given link state and produce a new link state and
       a runnable module *)
   val until_link :
        unsafe:bool
-    -> rac:bool
-    -> srac:bool
     -> name:string option
     -> 'f Link.state
     -> Text.modul

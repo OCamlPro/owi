@@ -105,7 +105,6 @@ let gen (conf : Env.conf) =
 
 let prepare_for_sym (modul : Owi.Text.modul) =
   let open Owi.Text in
-  let open Owi.Types in
   let process_inst inst inst_list =
     match inst.Owi.Annotated.raw with
     | I32_const i ->

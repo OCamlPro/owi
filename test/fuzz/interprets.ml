@@ -31,9 +31,7 @@ let timeout_call_run (run : unit -> unit Result.t) : 'a Result.t =
 
 module Owi_regular : INTERPRET = struct
   let parse_and_run modul =
-    let* simplified =
-      Compile.Text.until_binary ~unsafe:false ~rac:false ~srac:false modul
-    in
+    let* simplified = Compile.Text.until_binary ~unsafe:false modul in
     let* () = Binary_validate.modul simplified in
     let* regular, link_state =
       Link.modul Link.empty_state ~name:None simplified
@@ -49,9 +47,7 @@ module Owi_minimalist_symbolic : INTERPRET = struct
   let dummy_workers_count = 42
 
   let parse_and_run modul : unit Result.t =
-    let* simplified =
-      Compile.Text.until_binary ~unsafe:false ~rac:false ~srac:false modul
-    in
+    let* simplified = Compile.Text.until_binary ~unsafe:false modul in
     let* () = Binary_validate.modul simplified in
     let* regular, link_state =
       Link.modul Link.empty_state ~name:None simplified
@@ -108,9 +104,7 @@ end) : INTERPRET = struct
 
   let parse_and_run modul : unit Result.t =
     let modul = Symbolizer.symbolize modul in
-    let* simplified =
-      Compile.Text.until_binary ~rac:false ~srac:false ~unsafe:false modul
-    in
+    let* simplified = Compile.Text.until_binary ~unsafe:false modul in
     let* () = Binary_validate.modul simplified in
     let* regular, link_state =
       Link.modul Link.empty_state ~name:None simplified

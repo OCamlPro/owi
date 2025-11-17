@@ -4,7 +4,6 @@
 
 [@@@ocaml.warning "-32-33"]
 
-open Types
 open Binary
 
 (* TODO: make this a CLI parameter *)
@@ -620,9 +619,9 @@ module Make (P : Interpret_intf.P) :
     end
 
     type block =
-      { branch : binary expr Annotated.t
+      { branch : expr Annotated.t
       ; branch_rt : result_type
-      ; continue : binary expr Annotated.t
+      ; continue : expr Annotated.t
       ; continue_rt : result_type
       ; stack : stack
       ; is_loop : Prelude.Bool.t
@@ -635,7 +634,7 @@ module Make (P : Interpret_intf.P) :
       ; stack : stack
       ; locals : Locals.t
           (* TODO: rename this PC, it stands for program counter but is easily confused with path condition... *)
-      ; pc : binary expr Annotated.t
+      ; pc : expr Annotated.t
       ; block_stack : block_stack
       ; func_rt : result_type
       ; env : Env.t
@@ -688,8 +687,8 @@ module Make (P : Interpret_intf.P) :
           (Continue { state with block_stack; pc = block.continue; stack })
   end
 
-  let exec_block (state : State.exec_state) ~is_loop
-    (bt : binary block_type option) expr =
+  let exec_block (state : State.exec_state) ~is_loop (bt : block_type option)
+    expr =
     let pt, rt =
       match bt with
       | None -> ([], [])
@@ -709,8 +708,7 @@ module Make (P : Interpret_intf.P) :
       (State.Continue
          { state with pc = expr; block_stack = block :: state.block_stack } )
 
-  let exec_func ~return (state : State.exec_state) env (func : binary Types.func)
-      =
+  let exec_func ~return (state : State.exec_state) env (func : func) =
     Log.info (fun m ->
       m "calling func  : func %s" (Option.value func.id ~default:"anonymous") );
     let (Bt_raw ((None | Some _), (param_type, result_type))) = func.type_f in
@@ -771,7 +769,7 @@ module Make (P : Interpret_intf.P) :
   (* exec_vfunc ~return state func *)
 
   let call_indirect ~return (state : State.exec_state)
-    (tbl_i, (Bt_raw ((None | Some _), typ_i) : binary block_type)) =
+    (tbl_i, (Bt_raw ((None | Some _), typ_i) : block_type)) =
     let fun_i, stack = Stack.pop_i32 state.stack in
     let state = { state with stack } in
     let* t = Env.get_table state.env tbl_i in
@@ -791,7 +789,7 @@ module Make (P : Interpret_intf.P) :
         | Ref_value func ->
           let ft = func_type state func in
           let ft' = typ_i in
-          if not (Types.func_type_eq ft ft') then
+          if not (func_type_eq ft ft') then
             Choice.trap `Indirect_call_type_mismatch
           else exec_vfunc ~return state func
         end
@@ -807,7 +805,7 @@ module Make (P : Interpret_intf.P) :
     let st stack = Choice.return (State.Continue { state with stack }) in
     Log.info (fun m -> m "stack         : [ %a ]" Stack.pp stack);
     Log.info (fun m ->
-      m "running instr : %a" (Types.pp_instr ~short:true) instr.Annotated.raw );
+      m "running instr : %a" (pp_instr ~short:true) instr.Annotated.raw );
     let* () =
       match Logs.Src.level Log.main_src with
       | Some Logs.Debug ->
@@ -893,12 +891,12 @@ module Make (P : Interpret_intf.P) :
       let r, stack = Stack.pop_as_ref stack in
       let is_null = ref_is_null r in
       st @@ Stack.push_bool stack is_null
-    | Ref_func (Raw i) ->
+    | Ref_func i ->
       let f = Env.get_func env i in
       st @@ Stack.push stack (ref_func f)
     | Drop -> st @@ Stack.drop stack
-    | Local_get (Raw i) -> st @@ Stack.push stack (State.Locals.get locals i)
-    | Local_set (Raw i) ->
+    | Local_get i -> st @@ Stack.push stack (State.Locals.get locals i)
+    | Local_set i ->
       let v, stack = Stack.pop stack in
       let locals = State.Locals.set locals i v in
       Choice.return (State.Continue { state with locals; stack })
@@ -924,16 +922,16 @@ module Make (P : Interpret_intf.P) :
       in
       let state = { state with stack } in
       exec_block state ~is_loop:false bt (if b then e1 else e2)
-    | Call (Raw i) -> begin
+    | Call i -> begin
       let func = Env.get_func env i in
       exec_vfunc ~return:false state func
     end
-    | Return_call (Raw i) -> begin
+    | Return_call i -> begin
       let func = Env.get_func env i in
       exec_vfunc ~return:true state func
     end
-    | Br (Raw i) -> State.branch state i
-    | Br_if (Raw i) ->
+    | Br i -> State.branch state i
+    | Br_if i ->
       let* b, stack =
         let counter_next_false, counter_next_true =
           match state.pc.raw with
@@ -1025,7 +1023,7 @@ module Make (P : Interpret_intf.P) :
         let* () = Memory.blit mem ~src ~dst ~len in
         st stack
       end
-    | Memory_init (Raw i) ->
+    | Memory_init i ->
       let len, stack = Stack.pop_i32 stack in
       let src, stack = Stack.pop_i32 stack in
       let dst, stack = Stack.pop_i32 stack in
@@ -1064,15 +1062,15 @@ module Make (P : Interpret_intf.P) :
         let o1, stack = Stack.pop stack in
         st @@ Stack.push stack (if b then o1 else o2)
       end
-    | Local_tee (Raw i) ->
+    | Local_tee i ->
       let v, stack = Stack.pop stack in
       let locals = State.Locals.set locals i v in
       let stack = Stack.push stack v in
       Choice.return (State.Continue { state with locals; stack })
-    | Global_get (Raw i) ->
+    | Global_get i ->
       let* g = Env.get_global env i in
       st @@ Stack.push stack (Global.value g)
-    | Global_set (Raw i) ->
+    | Global_set i ->
       let* global = Env.get_global env i in
       let v, stack =
         match Global.typ global with
@@ -1097,7 +1095,7 @@ module Make (P : Interpret_intf.P) :
       in
       Global.set_value global v;
       st stack
-    | Table_get (Raw i) ->
+    | Table_get i ->
       let* t = Env.get_table env i in
       let i, stack = Stack.pop_i32 stack in
       let* i = Choice.select_i32 i in
@@ -1107,7 +1105,7 @@ module Make (P : Interpret_intf.P) :
       else
         let v = Table.get t i in
         st @@ Stack.push stack (Ref v)
-    | Table_set (Raw indice) ->
+    | Table_set indice ->
       let* t = Env.get_table env indice in
       let v, stack = Stack.pop_as_ref stack in
       let indice, stack = Stack.pop_i32 stack in
@@ -1119,11 +1117,11 @@ module Make (P : Interpret_intf.P) :
         Table.set t indice v;
         st stack
       end
-    | Table_size (Raw indice) ->
+    | Table_size indice ->
       let* t = Env.get_table env indice in
       let size = consti @@ Table.size t in
       st @@ Stack.push_i32 stack size
-    | Table_grow (Raw indice) ->
+    | Table_grow indice ->
       let* t = Env.get_table env indice in
       let size = consti @@ Table.size t in
       let delta, stack = Stack.pop_i32 stack in
@@ -1144,7 +1142,7 @@ module Make (P : Interpret_intf.P) :
         let* new_size = Choice.select_i32 new_size in
         Table.grow t new_size new_element;
         st @@ Stack.push_i32 stack size
-    | Table_fill (Raw indice) ->
+    | Table_fill indice ->
       let* t = Env.get_table env indice in
       let len, stack = Stack.pop_i32 stack in
       let x, stack = Stack.pop_as_ref stack in
@@ -1162,7 +1160,7 @@ module Make (P : Interpret_intf.P) :
         Table.fill t pos len x;
         st stack
       end
-    | Table_copy (Raw ti_dst, Raw ti_src) -> begin
+    | Table_copy (ti_dst, ti_src) -> begin
       let* t_src = Env.get_table env ti_src in
       let* t_dst = Env.get_table env ti_dst in
       let len, stack = Stack.pop_i32 stack in
@@ -1193,7 +1191,7 @@ module Make (P : Interpret_intf.P) :
         st stack
       end
     end
-    | Table_init (Raw t_i, Raw e_i) -> begin
+    | Table_init (t_i, e_i) -> begin
       let* t = Env.get_table env t_i in
       let elem = Env.get_elem env e_i in
       let len, stack = Stack.pop_i32 stack in
@@ -1224,7 +1222,7 @@ module Make (P : Interpret_intf.P) :
         st stack
       end
     end
-    | Elem_drop (Raw i) ->
+    | Elem_drop i ->
       let elem = Env.get_elem env i in
       Env.drop_elem elem;
       st stack
@@ -1511,11 +1509,11 @@ module Make (P : Interpret_intf.P) :
         in
         st stack
       end
-    | Data_drop (Raw i) ->
+    | Data_drop i ->
       let* data = Env.get_data env i in
       Env.drop_data data;
       st stack
-    | Br_table (inds, Raw i) ->
+    | Br_table (inds, i) ->
       let target, stack = Stack.pop_i32 stack in
       let> out = I32.(ge_u target (const (Int32.of_int (Array.length inds)))) in
       let* target =
@@ -1523,20 +1521,19 @@ module Make (P : Interpret_intf.P) :
         else
           let+ target = Choice.select_i32 target in
           let target = Int32.to_int target in
-          let (Raw i) = inds.(target) in
-          i
+          inds.(target)
       in
       let state = { state with stack } in
       State.branch state target
-    | Call_indirect (Raw tbl_i, typ_i) ->
+    | Call_indirect (tbl_i, typ_i) ->
       call_indirect ~return:false state (tbl_i, typ_i)
-    | Return_call_indirect (Raw tbl_i, typ_i) ->
+    | Return_call_indirect (tbl_i, typ_i) ->
       call_indirect ~return:true state (tbl_i, typ_i)
     | Call_ref typ_i -> call_ref ~return:false state typ_i
     | Return_call_ref typ_i -> call_ref ~return:true state typ_i
     | (Extern_externalize | Extern_internalize) as i ->
       Log.err (fun m ->
-        m "unimplemented instruction: %a" (Types.pp_instr ~short:false) i );
+        m "unimplemented instruction: %a" (pp_instr ~short:false) i );
       assert false
 
   let rec loop ~heartbeat (state : State.exec_state) =

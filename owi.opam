@@ -11,9 +11,9 @@ The framework includes tools for formatting, optimizing, interpreting, validatin
 It also provides a generator for random valid WebAssembly modules.
 
 An OCaml library is available to embed WebAssembly modules and import OCaml functions in a type-safe manner."""
-maintainer: ["Léo Andrès <leo@ocamlpro.com>"]
+maintainer: ["redianthus <leo@ocaml.pro>"]
 authors: [
-  "Léo Andrès <leo@ocamlpro.com>"
+  "redianthus <leo@ocaml.pro>"
   "Pierre Chambart <pierre.chambart@ocamlpro.com>"
   "Filipe Marques <filipe.s.marques@tecnico.ulisboa.pt>"
   "Eric Patrizio <epatrizio@mpns.fr>"

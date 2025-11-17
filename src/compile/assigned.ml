@@ -2,13 +2,12 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-open Types
 open Syntax
 
 module Type = struct
-  type t = func_type
+  type t = Text.func_type
 
-  let compare = Types.compare_func_type
+  let compare = Text.compare_func_type
 end
 
 module TypeMap = Map.Make (Type)
@@ -16,52 +15,43 @@ module TypeMap = Map.Make (Type)
 type t =
   { id : string option
   ; typ : Type.t Named.t
-  ; global : (Text.global, global_type) Runtime.t Named.t
-  ; table : (table, table_type) Runtime.t Named.t
-  ; mem : (mem, limits) Runtime.t Named.t
-  ; func : (text func, text block_type) Runtime.t Named.t
+  ; global : (Text.global, Text.global_type) Runtime.t Named.t
+  ; table : (Text.table, Text.table_type) Runtime.t Named.t
+  ; mem : (Text.mem, Text.limits) Runtime.t Named.t
+  ; func : (Text.func, Text.block_type) Runtime.t Named.t
   ; elem : Text.elem Named.t
   ; data : Text.data Named.t
   ; exports : Grouped.opt_exports
-  ; start : text indice option
-  ; annots : text Annot.annot list
+  ; start : Text.indice option
   }
 
-let sep fmt () = Fmt.pf fmt " ; "
+let pp_id fmt id = Text.pp_id_opt fmt id
 
-let pp_id fmt id = Types.pp_id_opt fmt id
-
-let pp_typ fmt typ = Named.pp Types.pp_func_type fmt typ
+let pp_typ fmt typ = Named.pp Text.pp_func_type fmt typ
 
 let pp_runtime_named ~pp_local ~pp_imported fmt l =
   Named.pp (Runtime.pp ~pp_local ~pp_imported) fmt l
 
 let pp_global fmt g =
-  pp_runtime_named ~pp_local:Text.pp_global ~pp_imported:Types.pp_global_type
-    fmt g
+  pp_runtime_named ~pp_local:Text.pp_global ~pp_imported:Text.pp_global_type fmt
+    g
 
 let pp_table fmt t =
-  pp_runtime_named ~pp_local:Types.pp_table ~pp_imported:Types.pp_table_type fmt
-    t
+  pp_runtime_named ~pp_local:Text.pp_table ~pp_imported:Text.pp_table_type fmt t
 
 let pp_mem fmt m =
-  pp_runtime_named ~pp_local:Types.pp_mem ~pp_imported:Types.pp_limits fmt m
+  pp_runtime_named ~pp_local:Text.pp_mem ~pp_imported:Text.pp_limits fmt m
 
 let pp_func fmt f =
-  pp_runtime_named ~pp_local:Types.pp_func ~pp_imported:Types.pp_block_type fmt
-    f
+  pp_runtime_named ~pp_local:Text.pp_func ~pp_imported:Text.pp_block_type fmt f
 
 let pp_elem fmt e = Named.pp Text.pp_elem fmt e
 
 let pp_data fmt d = Named.pp Text.pp_data fmt d
 
-let pp_start fmt s = Types.pp_indice_opt fmt s
+let pp_start fmt s = Text.pp_indice_opt fmt s
 
-let pp_annots fmt annots =
-  Fmt.pf fmt "[%a]" (Fmt.list ~sep Annot.pp_annot) annots
-
-let pp fmt
-  { id; typ; global; table; mem; func; elem; data; exports; start; annots } =
+let pp fmt { id; typ; global; table; mem; func; elem; data; exports; start } =
   Fmt.pf fmt
     "{@\n\
     \  @[<v>id: %a@\n\
@@ -74,15 +64,13 @@ let pp fmt
      data: %a@\n\
      exports: %a@\n\
      start: %a@\n\
-     annots: %a@]@\n\
      }"
     pp_id id pp_typ typ pp_global global pp_table table pp_mem mem pp_func func
     pp_elem elem pp_data data Grouped.pp_opt_exports exports pp_start start
-    pp_annots annots
 
 type type_acc =
-  { declared_types : func_type Indexed.t list
-  ; func_types : func_type Indexed.t list
+  { declared_types : Text.func_type Indexed.t list
+  ; func_types : Text.func_type Indexed.t list
   ; named_types : int String_map.t
   ; last_assigned_int : int
   ; all_types : int TypeMap.t
@@ -120,7 +108,7 @@ let assign_heap_type (acc : type_acc) typ : type_acc =
     let func_types = Indexed.return id typ :: func_types in
     { acc with func_types; last_assigned_int; all_types }
 
-let assign_types (modul : Grouped.t) : func_type Named.t =
+let assign_types (modul : Grouped.t) : Text.func_type Named.t =
   let empty_acc : type_acc =
     { declared_types = []
     ; func_types = []
@@ -156,7 +144,7 @@ let name kind ~get_name values =
   let+ named = list_fold_left assign_one String_map.empty values in
   Named.create values named
 
-let check_type_id (types : func_type Named.t)
+let check_type_id (types : Text.func_type Named.t)
   ((id, func_type) : Grouped.type_check) =
   let id =
     match id with
@@ -168,9 +156,9 @@ let check_type_id (types : func_type Named.t)
   in
   (* TODO more efficient version of that *)
   match Indexed.get_at id types.values with
-  | None -> Error (`Unknown_type (Raw id))
+  | None -> Error (`Unknown_type (Text.Raw id))
   | Some func_type' ->
-    if not (Types.func_type_eq func_type func_type') then
+    if not (Text.func_type_eq func_type func_type') then
       Error `Inline_function_type
     else Ok ()
 
@@ -184,17 +172,17 @@ let of_grouped (modul : Grouped.t) : t Result.t =
   in
   let* table =
     name "table"
-      ~get_name:(get_runtime_name (fun ((id, _) : table) -> id))
+      ~get_name:(get_runtime_name (fun ((id, _) : Text.table) -> id))
       modul.table
   in
   let* mem =
     name "mem"
-      ~get_name:(get_runtime_name (fun ((id, _) : mem) -> id))
+      ~get_name:(get_runtime_name (fun ((id, _) : Text.mem) -> id))
       modul.mem
   in
   let* func =
     name "func"
-      ~get_name:(get_runtime_name (fun ({ id; _ } : text func) -> id))
+      ~get_name:(get_runtime_name (fun ({ id; _ } : Text.func) -> id))
       modul.func
   in
   let* elem =
@@ -215,18 +203,17 @@ let of_grouped (modul : Grouped.t) : t Result.t =
     ; data
     ; exports = modul.exports
     ; start = modul.start
-    ; annots = modul.annots
     }
   in
   Log.debug (fun m -> m "%a" pp modul);
   modul
 
-let find (named : 'a Named.t) err : _ -> binary indice Result.t = function
-  | Raw _i as indice -> Ok indice
+let find (named : 'a Named.t) err : _ -> Binary.indice Result.t = function
+  | Text.Raw i -> Ok i
   | Text name -> (
     match String_map.find_opt name named.named with
     | None -> Error err
-    | Some i -> Ok (Raw i) )
+    | Some i -> Ok i )
 
 let find_func modul id = find modul.func (`Unknown_func id) id
 

@@ -25,7 +25,6 @@
 # Verification and Proof of Programs
 
 - [E-ACSL](verification/eacsl.md)
-- [Weasel](verification/weasel.md)
 
 # Solver-Aided Programming
 

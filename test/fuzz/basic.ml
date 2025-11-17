@@ -1,6 +1,6 @@
 open Crowbar
 open Crowbar.Syntax
-open Owi.Types
+open Owi.Text
 module S = Type_stack
 
 type num_size =
@@ -13,7 +13,7 @@ let num_type = choose [ const I32; const I64; const F32; const F64 ]
 
 let nullable = choose [ const No_null; const Null ]
 
-let heap_type : text heap_type Crowbar.gen = const Func_ht
+let heap_type : heap_type Crowbar.gen = const Func_ht
 (* TODO: complete this - Extern_ht and others *)
 
 let ref_type = pair nullable heap_type
@@ -106,48 +106,48 @@ let const_v128 =
   let v128 = Owi.V128.of_i64x2 a b in
   V128_const v128
 
-let ibinop_32 : text instr gen =
+let ibinop_32 : instr gen =
   let+ ibinop in
   I_binop (S32, ibinop)
 
-let ibinop_64 : text instr gen =
+let ibinop_64 : instr gen =
   let+ ibinop in
   I_binop (S64, ibinop)
 
-let iunop_32 : text instr gen =
+let iunop_32 : instr gen =
   let+ iunop in
   I_unop (S32, iunop)
 
-let iunop_64 : text instr gen =
+let iunop_64 : instr gen =
   let+ iunop in
   I_unop (S64, iunop)
 
-let itestop_32 : text instr gen =
+let itestop_32 : instr gen =
   let+ itestop in
   I_testop (S32, itestop)
 
-let itestop_64 : text instr gen =
+let itestop_64 : instr gen =
   let+ itestop in
   I_testop (S64, itestop)
 
-let irelop_32 : text instr gen =
+let irelop_32 : instr gen =
   let+ irelop in
   I_relop (S32, irelop)
 
-let irelop_64 : text instr gen =
+let irelop_64 : instr gen =
   let+ irelop in
   I_relop (S64, irelop)
 
-let i32_wrap_i64 : text instr gen = const I32_wrap_i64
+let i32_wrap_i64 : instr gen = const I32_wrap_i64
 
-let i64_extend_i32 : text instr gen =
+let i64_extend_i32 : instr gen =
   let+ sx in
   I64_extend_i32 sx
 
-let extend_32_i32 : text instr gen =
+let extend_32_i32 : instr gen =
   choose [ const (I_extend8_s S32); const (I_extend16_s S32) ]
 
-let extend_64_i64 : text instr gen =
+let extend_64_i64 : instr gen =
   choose
     [ const (I_extend8_s S64); const (I_extend16_s S64); const I64_extend32_s ]
 
@@ -176,97 +176,97 @@ let fbinop =
 let frelop =
   choose [ const Eq; const Ne; const Lt; const Gt; const Le; const Ge ]
 
-let fbinop_32 : text instr gen =
+let fbinop_32 : instr gen =
   let+ fbinop in
   F_binop (S32, fbinop)
 
-let fbinop_64 : text instr gen =
+let fbinop_64 : instr gen =
   let+ fbinop in
   F_binop (S64, fbinop)
 
-let funop_32 : text instr gen =
+let funop_32 : instr gen =
   let+ funop in
   F_unop (S32, funop)
 
-let funop_64 : text instr gen =
+let funop_64 : instr gen =
   let+ funop in
   F_unop (S64, funop)
 
-let frelop_32 : text instr gen =
+let frelop_32 : instr gen =
   let+ frelop in
   F_relop (S32, frelop)
 
-let frelop_64 : text instr gen =
+let frelop_64 : instr gen =
   let+ frelop in
   F_relop (S64, frelop)
 
-let const_f32 : text instr gen =
+let const_f32 : instr gen =
   let+ float in
   F32_const (Owi.Float32.of_float float)
 
-let const_f64 : text instr gen =
+let const_f64 : instr gen =
   let+ float in
   F64_const (Owi.Float64.of_float float)
 
-let f32_convert_i32 : text instr gen =
+let f32_convert_i32 : instr gen =
   let+ sx in
   F_convert_i (S32, S32, sx)
 
-let f32_convert_i64 : text instr gen =
+let f32_convert_i64 : instr gen =
   let+ sx in
   F_convert_i (S32, S64, sx)
 
-let f64_convert_i32 : text instr gen =
+let f64_convert_i32 : instr gen =
   let+ sx in
   F_convert_i (S64, S32, sx)
 
-let f64_convert_i64 : text instr gen =
+let f64_convert_i64 : instr gen =
   let+ sx in
   F_convert_i (S64, S64, sx)
 
-let i32_trunc_f32 : text instr gen =
+let i32_trunc_f32 : instr gen =
   let+ sx in
   I_trunc_f (S32, S32, sx)
 
-let i32_trunc_f64 : text instr gen =
+let i32_trunc_f64 : instr gen =
   let+ sx in
   I_trunc_f (S32, S64, sx)
 
-let i64_trunc_f32 : text instr gen =
+let i64_trunc_f32 : instr gen =
   let+ sx in
   I_trunc_f (S64, S32, sx)
 
-let i64_trunc_f64 : text instr gen =
+let i64_trunc_f64 : instr gen =
   let+ sx in
   I_trunc_f (S64, S64, sx)
 
-let i32_trunc_sat_f32 : text instr gen =
+let i32_trunc_sat_f32 : instr gen =
   let+ sx in
   I_trunc_sat_f (S32, S32, sx)
 
-let i32_trunc_sat_f64 : text instr gen =
+let i32_trunc_sat_f64 : instr gen =
   let+ sx in
   I_trunc_sat_f (S32, S64, sx)
 
-let i64_trunc_sat_f32 : text instr gen =
+let i64_trunc_sat_f32 : instr gen =
   let+ sx in
   I_trunc_sat_f (S64, S32, sx)
 
-let i64_trunc_sat_f64 : text instr gen =
+let i64_trunc_sat_f64 : instr gen =
   let+ sx in
   I_trunc_sat_f (S64, S64, sx)
 
-let f32_demote_f64 : text instr gen = const F32_demote_f64
+let f32_demote_f64 : instr gen = const F32_demote_f64
 
-let f64_promote_f32 : text instr gen = const F64_promote_f32
+let f64_promote_f32 : instr gen = const F64_promote_f32
 
-let i32_reinterpret_f32 : text instr gen = const (I_reinterpret_f (S32, S32))
+let i32_reinterpret_f32 : instr gen = const (I_reinterpret_f (S32, S32))
 
-let i64_reinterpret_f64 : text instr gen = const (I_reinterpret_f (S64, S64))
+let i64_reinterpret_f64 : instr gen = const (I_reinterpret_f (S64, S64))
 
-let f32_reinterpret_i32 : text instr gen = const (F_reinterpret_i (S32, S32))
+let f32_reinterpret_i32 : instr gen = const (F_reinterpret_i (S32, S32))
 
-let f64_reinterpret_i64 : text instr gen = const (F_reinterpret_i (S64, S64))
+let f64_reinterpret_i64 : instr gen = const (F_reinterpret_i (S64, S64))
 
 let global ntyp env =
   let globals = Env.get_globals ntyp env ~only_mut:false in
@@ -359,7 +359,7 @@ let global_type = pair mut val_type
 let elem_active (env : Env.t) =
   List.map
     (fun (name, _) ->
-      let+ ind = const (Some (Owi.Text.symbolic name))
+      let+ ind = const (Some (Owi.Text.Text name))
       and+ instr = const_i32 in
       Owi.Text.Elem_active (ind, [ instr ] |> Owi.Annotated.dummy_deep) )
     env.tables
@@ -411,80 +411,80 @@ let memarg nsize =
   let align = Int32.of_int align in
   { offset; align }
 
-let i32_load : text instr gen =
+let i32_load : instr gen =
   let+ memarg = memarg NS32 in
   I_load (S32, memarg)
 
-let i64_load : text instr gen =
+let i64_load : instr gen =
   let+ memarg = memarg NS64 in
   I_load (S64, memarg)
 
-let f32_load : text instr gen =
+let f32_load : instr gen =
   let+ memarg = memarg NS32 in
   F_load (S32, memarg)
 
-let f64_load : text instr gen =
+let f64_load : instr gen =
   let+ memarg = memarg NS64 in
   F_load (S64, memarg)
 
-let i32_load8 : text instr gen =
+let i32_load8 : instr gen =
   let+ memarg = memarg NS8
   and+ sx in
   I_load8 (S32, sx, memarg)
 
-let i32_load16 : text instr gen =
+let i32_load16 : instr gen =
   let+ memarg = memarg NS16
   and+ sx in
   I_load16 (S32, sx, memarg)
 
-let i64_load8 : text instr gen =
+let i64_load8 : instr gen =
   let+ memarg = memarg NS8
   and+ sx in
   I_load8 (S64, sx, memarg)
 
-let i64_load16 : text instr gen =
+let i64_load16 : instr gen =
   let+ memarg = memarg NS16
   and+ sx in
   I_load16 (S64, sx, memarg)
 
-let i64_load32 : text instr gen =
+let i64_load32 : instr gen =
   let+ memarg = memarg NS32
   and+ sx in
   I64_load32 (sx, memarg)
 
-let i32_store : text instr gen =
+let i32_store : instr gen =
   let+ memarg = memarg NS32 in
   I_store (S32, memarg)
 
-let i64_store : text instr gen =
+let i64_store : instr gen =
   let+ memarg = memarg NS64 in
   I_store (S64, memarg)
 
-let f32_store : text instr gen =
+let f32_store : instr gen =
   let+ memarg = memarg NS32 in
   F_store (S32, memarg)
 
-let f64_store : text instr gen =
+let f64_store : instr gen =
   let+ memarg = memarg NS64 in
   F_store (S64, memarg)
 
-let i32_store8 : text instr gen =
+let i32_store8 : instr gen =
   let+ memarg = memarg NS8 in
   I_store8 (S32, memarg)
 
-let i64_store8 : text instr gen =
+let i64_store8 : instr gen =
   let+ memarg = memarg NS8 in
   I_store8 (S64, memarg)
 
-let i32_store16 : text instr gen =
+let i32_store16 : instr gen =
   let+ memarg = memarg NS16 in
   I_store16 (S32, memarg)
 
-let i64_store16 : text instr gen =
+let i64_store16 : instr gen =
   let+ memarg = memarg NS16 in
   I_store16 (S64, memarg)
 
-let i64_store32 : text instr gen =
+let i64_store32 : instr gen =
   let+ memarg = memarg NS32 in
   I64_store32 memarg
 
@@ -579,7 +579,7 @@ let table_get (env : Env.t) =
 
 let block_kind = choose [ const Env.Block; const Env.Loop; const Env.Func ]
 
-let expr_call (env : Env.t) (stack : text val_type list) =
+let expr_call (env : Env.t) (stack : val_type list) =
   let stack_pt = List.map (fun _ -> S.Pop) in
   let stack_rt = List.map (fun vt -> S.Push vt) in
   List.filter_map
@@ -592,7 +592,7 @@ let expr_call (env : Env.t) (stack : text val_type list) =
       | _ -> None )
     env.funcs
 
-let expr_br_if (env : Env.t) (stack : text val_type list) =
+let expr_br_if (env : Env.t) (stack : val_type list) =
   match stack with
   | [] -> []
   | _hd :: tl ->
@@ -624,7 +624,7 @@ let random_stack =
 let unreachable : (text instr * S.stack_op list) gen =
   pair (const Unreachable) random_stack
 
-let expr_br (env : Env.t) (stack : text val_type list) =
+let expr_br (env : Env.t) (stack : val_type list) =
   let blocs = Env.get_blocks env in
   List.filter_map
     (fun (bk, name, bt) ->
@@ -646,7 +646,7 @@ let expr_br (env : Env.t) (stack : text val_type list) =
       | _ -> None )
     blocs
 
-let stack_prefix (stack : text val_type list) =
+let stack_prefix (stack : val_type list) =
   match List.length stack with
   | 0 -> const []
   | len ->

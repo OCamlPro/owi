@@ -2,14 +2,12 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-open Types
-
 (** Single table *)
 
 type t =
   { mutable data : Symbolic_value.ref_value array
-  ; limits : limits
-  ; typ : ref_type
+  ; limits : Binary.limits
+  ; typ : Binary.ref_type
   }
 
 let clone_t { limits; data; typ } = { typ; limits; data = Array.copy data }

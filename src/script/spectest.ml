@@ -3,7 +3,6 @@
 (* Written by the Owi programmers *)
 
 open Fmt
-open Types
 
 type extern_module = Concrete_extern_func.extern_func Link.extern_module
 
@@ -61,8 +60,8 @@ let extern_m =
   { Link.functions }
 
 let m =
-  let open Text in
-  Text.Text_module
+  let open Wast in
+  Text_module
     { id = Some "spectest"
     ; fields =
         [ MImport
@@ -157,24 +156,26 @@ let m =
         ; MTable (Some "table", ({ min = 10; max = Some 20 }, (Null, Func_ht)))
         ; MGlobal
             { typ = (Const, Num_type I32)
-            ; init = [ I32_const 666l ] |> Annotated.dummy_deep
+            ; init = [ Text.I32_const 666l ] |> Annotated.dummy_deep
             ; id = Some "global_i32"
             }
         ; MGlobal
             { typ = (Const, Num_type I64)
-            ; init = [ I64_const 666L ] |> Annotated.dummy_deep
+            ; init = [ Text.I64_const 666L ] |> Annotated.dummy_deep
             ; id = Some "global_i64"
             }
         ; MGlobal
             { typ = (Const, Num_type F32)
             ; init =
-                [ F32_const (Float32.of_float 666.6) ] |> Annotated.dummy_deep
+                [ Text.F32_const (Float32.of_float 666.6) ]
+                |> Annotated.dummy_deep
             ; id = Some "global_f32"
             }
         ; MGlobal
             { typ = (Const, Num_type F64)
             ; init =
-                [ F64_const (Float64.of_float 666.6) ] |> Annotated.dummy_deep
+                [ Text.F64_const (Float64.of_float 666.6) ]
+                |> Annotated.dummy_deep
             ; id = Some "global_f64"
             }
         ; MExport { name = "func"; desc = Export_func (Some (Text "func")) }
@@ -222,5 +223,4 @@ let m =
             ; desc = Export_global (Some (Text "global_f64"))
             }
         ]
-    ; annots = []
     }

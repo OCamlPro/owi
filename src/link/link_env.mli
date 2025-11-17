@@ -2,8 +2,6 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-open Types
-
 type 'ext t
 
 type 'ext backup
@@ -93,7 +91,7 @@ module type T = sig
 
   val get_extern_func : t -> Func_id.t -> Concrete_extern_func.extern_func
 
-  val get_func_typ : t -> func -> func_type
+  val get_func_typ : t -> func -> Binary.func_type
 
   val pp : Format.formatter -> t -> unit
 

@@ -347,7 +347,7 @@ struct
         (tok, start, stop)
       in
       try Ok (parser provider) with
-      | Types.Parse_fail msg -> Error (`Parse_fail msg)
+      | Text.Parse_fail msg -> Error (`Parse_fail msg)
       | Text_lexer.Empty_annotation_id -> Error `Empty_annotation_id
       | Text_lexer.Empty_identifier -> Error `Empty_identifier
       | Text_lexer.Illegal_escape msg -> Error (`Illegal_escape msg)
@@ -380,7 +380,7 @@ end
 
 module Text = struct
   module Script = Make (struct
-    type t = Text.script
+    type t = Wast.script
 
     let rule = Text_parser.script
   end)

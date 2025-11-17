@@ -4,7 +4,6 @@
 
 open Binary
 open Syntax
-open Types
 
 (* add byte from int (ascii code) *)
 let write_byte buf i =
@@ -64,7 +63,7 @@ let write_f64 buf f =
   let i64 = Float64.to_bits f in
   write_bytes_8 buf i64
 
-let write_indice buf (Raw idx : binary indice) = write_u32_of_int buf idx
+let write_indice buf (idx : Binary.indice) = write_u32_of_int buf idx
 
 let write_char_indice buf c idx =
   Buffer.add_char buf c;
@@ -113,7 +112,7 @@ let write_mut buf (mut : mut) =
   let c = match mut with Const -> '\x00' | Var -> '\x01' in
   Buffer.add_char buf c
 
-let write_block_type buf (typ : binary block_type option) =
+let write_block_type buf (typ : Binary.block_type option) =
   match typ with
   | None | Some (Bt_raw (None, ([], []))) -> Buffer.add_char buf '\x40'
   | Some (Bt_raw (None, ([], [ vt ]))) -> write_valtype buf vt
@@ -123,7 +122,7 @@ let write_block_type buf (typ : binary block_type option) =
   *)
   | _ -> assert false (* TODO: same, new pattern matching cases ? *)
 
-let write_block_type_idx buf (typ : binary block_type) =
+let write_block_type_idx buf (typ : Binary.block_type) =
   match typ with
   | Bt_raw (None, _) -> assert false
   | Bt_raw (Some idx, _) -> write_indice buf idx
@@ -169,7 +168,7 @@ let write_table_import buf
   write_limits buf limits
 
 let write_func_import buf
-  ({ Imported.modul; name; desc; _ } : binary block_type Imported.t) =
+  ({ Imported.modul; name; desc; _ } : Binary.block_type Imported.t) =
   write_string buf modul;
   write_string buf name;
   Buffer.add_char buf '\x00';
@@ -514,7 +513,7 @@ and write_expr buf expr ~end_op_code =
   let end_op_code = Option.value end_op_code ~default:'\x0B' in
   Buffer.add_char buf end_op_code
 
-let write_export buf cid ({ name; id } : Binary.export) =
+let write_export buf cid ({ name; id } : Binary.named_export) =
   write_string buf name;
   Buffer.add_char buf cid;
   write_u32_of_int buf id
@@ -600,14 +599,14 @@ let write_element buf ({ typ = _, ht; init; mode; _ } : elem) =
     let is_ref_func = write_init elem_buf init in
     if is_ref_func then begin
       write_u32_of_int buf 2;
-      write_indice buf (Raw i);
+      write_indice buf i;
       write_expr buf expr ~end_op_code:None;
       Buffer.add_char buf '\x00';
       Buffer.add_buffer buf elem_buf
     end
     else begin
       write_u32_of_int buf 6;
-      write_indice buf (Raw i);
+      write_indice buf i;
       write_expr buf expr ~end_op_code:None;
       write_reftype buf ht;
       Buffer.add_buffer buf elem_buf
@@ -661,7 +660,7 @@ let encode_imports buf (funcs, tables, memories, globals) =
   Buffer.add_buffer buf imp_buf
 
 (* function: section 3 *)
-let encode_functions buf (funcs : binary func list) =
+let encode_functions buf (funcs : Binary.func list) =
   let idx = ref 0 in
   encode_vector_list buf funcs (fun buf func ->
     write_block_type_idx buf func.type_f;
@@ -767,6 +766,6 @@ let write_file outfile filename content =
 
 let convert (outfile : Fpath.t option) (filename : Fpath.t) ~unsafe m =
   Log.info (fun m -> m "binary encoding ...");
-  let* m = Compile.Text.until_validate ~unsafe ~rac:false ~srac:false m in
+  let* m = Compile.Text.until_validate ~unsafe m in
   let content = encode m in
   write_file outfile filename content
