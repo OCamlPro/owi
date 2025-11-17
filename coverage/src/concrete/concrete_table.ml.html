@@ -18,8 +18,8 @@
       <h2>88.89%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:29.51%"></span>
-      <span class="unvisited" style="top:32.79%"></span>
+      <span class="unvisited" style="top:27.12%"></span>
+      <span class="unvisited" style="top:30.51%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -39,22 +39,22 @@
 <a id="L13"></a><span > </span>
 <a id="L14"></a><span > </span>
 <a id="L15"></a><span > </span>
-<a id="L16"></a><span > </span>
+<a id="L16"></a><span class="unvisited"> </span>
 <a id="L17"></a><span > </span>
 <a id="L18"></a><span class="unvisited"> </span>
 <a id="L19"></a><span > </span>
-<a id="L20"></a><span class="unvisited"> </span>
+<a id="L20"></a><span > </span>
 <a id="L21"></a><span > </span>
 <a id="L22"></a><span > </span>
-<a id="L23"></a><span > </span>
-<a id="L24"></a><span > </span>
-<a id="L25"></a><span class="visited"> </span>
-<a id="L26"></a><span class="visited"> </span>
-<a id="L27"></a><span > </span>
+<a id="L23"></a><span class="visited"> </span>
+<a id="L24"></a><span class="visited"> </span>
+<a id="L25"></a><span > </span>
+<a id="L26"></a><span > </span>
+<a id="L27"></a><span class="visited"> </span>
 <a id="L28"></a><span > </span>
 <a id="L29"></a><span class="visited"> </span>
-<a id="L30"></a><span > </span>
-<a id="L31"></a><span class="visited"> </span>
+<a id="L30"></a><span class="visited"> </span>
+<a id="L31"></a><span > </span>
 <a id="L32"></a><span class="visited"> </span>
 <a id="L33"></a><span > </span>
 <a id="L34"></a><span class="visited"> </span>
@@ -67,24 +67,22 @@
 <a id="L41"></a><span > </span>
 <a id="L42"></a><span class="visited"> </span>
 <a id="L43"></a><span > </span>
-<a id="L44"></a><span class="visited"> </span>
-<a id="L45"></a><span > </span>
-<a id="L46"></a><span > </span>
+<a id="L44"></a><span > </span>
+<a id="L45"></a><span class="visited"> </span>
+<a id="L46"></a><span class="visited"> </span>
 <a id="L47"></a><span class="visited"> </span>
 <a id="L48"></a><span class="visited"> </span>
-<a id="L49"></a><span class="visited"> </span>
-<a id="L50"></a><span class="visited"> </span>
-<a id="L51"></a><span > </span>
-<a id="L52"></a><span > </span>
+<a id="L49"></a><span > </span>
+<a id="L50"></a><span > </span>
+<a id="L51"></a><span class="visited"> </span>
+<a id="L52"></a><span class="visited"> </span>
 <a id="L53"></a><span class="visited"> </span>
-<a id="L54"></a><span class="visited"> </span>
-<a id="L55"></a><span class="visited"> </span>
-<a id="L56"></a><span > </span>
-<a id="L57"></a><span > </span>
+<a id="L54"></a><span > </span>
+<a id="L55"></a><span > </span>
+<a id="L56"></a><span class="visited"> </span>
+<a id="L57"></a><span class="visited"> </span>
 <a id="L58"></a><span class="visited"> </span>
 <a id="L59"></a><span class="visited"> </span>
-<a id="L60"></a><span class="visited"> </span>
-<a id="L61"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -148,14 +146,10 @@
 <a href="#L57">57</a>
 <a href="#L58">58</a>
 <a href="#L59">59</a>
-<a href="#L60">60</a>
-<a href="#L61">61</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
-
-open Types
 
 (* TODO: V.ref_value array, gadt to constraint to the right ref_type ? *)
 type table = V.ref_value array
@@ -163,8 +157,8 @@ type table = V.ref_value array
 type t =
   { id : int
   ; label : string option
-  ; limits : limits
-  ; typ : ref_type
+  ; limits : Binary.limits
+  ; typ : Binary.ref_type
   ; mutable data : table
   }
 
@@ -178,7 +172,7 @@ let fresh =
     <span data-count="633">i</span>ncr r;
     <span data-count="633">!</span>r
 
-let init ?label (typ : table_type) : t =
+let init ?label (typ : Binary.table_type) : t =
   <span data-count="633">l</span>et limits, ((_null, heap_type) as ref_type) = typ in
   let null = V.ref_null' heap_type in
   <span data-count="633">l</span>et table = Array.make limits.min null in

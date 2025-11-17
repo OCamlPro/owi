@@ -18,9 +18,9 @@
       <h2>66.67%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="bottom:13.33%"></span>
-      <span class="unvisited" style="bottom:6.67%"></span>
-      <span class="unvisited" style="bottom:3.33%"></span>
+      <span class="unvisited" style="bottom:14.29%"></span>
+      <span class="unvisited" style="bottom:7.14%"></span>
+      <span class="unvisited" style="bottom:3.57%"></span>
       <span class="unvisited" style="bottom:0.00%"></span>
     </div>
     <div id="report">
@@ -37,25 +37,23 @@
 <a id="L9"></a><span class="visited"> </span>
 <a id="L10"></a><span > </span>
 <a id="L11"></a><span class="visited"> </span>
-<a id="L12"></a><span class="visited"> </span>
-<a id="L13"></a><span > </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span class="visited"> </span>
 <a id="L14"></a><span > </span>
-<a id="L15"></a><span class="visited"> </span>
-<a id="L16"></a><span > </span>
+<a id="L15"></a><span > </span>
+<a id="L16"></a><span class="visited"> </span>
 <a id="L17"></a><span > </span>
 <a id="L18"></a><span class="visited"> </span>
 <a id="L19"></a><span > </span>
 <a id="L20"></a><span class="visited"> </span>
-<a id="L21"></a><span > </span>
-<a id="L22"></a><span class="visited"> </span>
+<a id="L21"></a><span class="visited"> </span>
+<a id="L22"></a><span > </span>
 <a id="L23"></a><span class="visited"> </span>
-<a id="L24"></a><span > </span>
-<a id="L25"></a><span class="visited"> </span>
+<a id="L24"></a><span class="unvisited"> </span>
+<a id="L25"></a><span > </span>
 <a id="L26"></a><span class="unvisited"> </span>
-<a id="L27"></a><span > </span>
+<a id="L27"></a><span class="unvisited"> </span>
 <a id="L28"></a><span class="unvisited"> </span>
-<a id="L29"></a><span class="unvisited"> </span>
-<a id="L30"></a><span class="unvisited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -88,8 +86,6 @@
 <a href="#L26">26</a>
 <a href="#L27">27</a>
 <a href="#L28">28</a>
-<a href="#L29">29</a>
-<a href="#L30">30</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -101,9 +97,7 @@ let cmd ~unsafe ~coverage_criteria ~source_file =
   <span data-count="3">l</span>et _dir, filename = Fpath.split_base source_file in
   <span data-count="3">l</span>et filename, ext = Fpath.split_ext filename in
 
-  <span data-count="3">l</span>et* m =
-    Compile.File.until_binar<span data-count="3">y</span> ~unsafe ~rac:false ~srac:false source_file
-  in
+  <span data-count="3">l</span>et* m = Compile.File.until_binar<span data-count="3">y</span> ~unsafe source_file in
 
   <span data-count="3">l</span>et m = Label.annotate coverage_criteria m in
 

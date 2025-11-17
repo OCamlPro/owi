@@ -142,18 +142,18 @@ type 'a t =
   }
 
 let dummy raw =
-  <span data-count="65011799">{</span> raw
-  ; instr_counter = Atomic.mak<span data-count="65011794">e</span> 0
+  <span data-count="64993729">{</span> raw
+  ; instr_counter = Atomic.mak<span data-count="64993732">e</span> 0
   ; functions_called = S.empty
   ; d_true = ref None
   ; d_false = ref None
   }
 
 let dummies l =
-  <span data-count="18754">L</span>ist.map
+  <span data-count="18626">L</span>ist.map
     (fun raw -&gt;
-      <span data-count="48030">{</span> raw
-      ; instr_counter = Atomic.mak<span data-count="48030">e</span> 0
+      <span data-count="47791">{</span> raw
+      ; instr_counter = Atomic.mak<span data-count="47791">e</span> 0
       ; functions_called = S.empty
       ; d_true = ref None
       ; d_false = ref None
@@ -161,19 +161,19 @@ let dummies l =
     l
 
 let dummy_deep raw =
-  <span data-count="16344">l</span>et raw = dummies raw in
-  <span data-count="16344">{</span> raw
-  ; instr_counter = Atomic.mak<span data-count="16344">e</span> 0
+  <span data-count="16239">l</span>et raw = dummies raw in
+  <span data-count="16239">{</span> raw
+  ; instr_counter = Atomic.mak<span data-count="16239">e</span> 0
   ; functions_called = S.empty
   ; d_true = ref None
   ; d_false = ref None
   }
 
 let map f { raw; instr_counter; functions_called; d_true; d_false } =
-  <span data-count="679506">l</span>et raw = f raw in
-  <span data-count="679506">{</span> raw; instr_counter; functions_called; d_true; d_false }
+  <span data-count="679767">l</span>et raw = f raw in
+  <span data-count="679767">{</span> raw; instr_counter; functions_called; d_true; d_false }
 
-let iter f { raw; _ } = <span data-count="312611">f</span> raw
+let iter f { raw; _ } = <span data-count="312432">f</span> raw
 
 let update_functions_called annot l = <span data-count="15">a</span>nnot.functions_called &lt;- l
 

@@ -18,7 +18,7 @@
       <h2>87.50%</h2>
     </div>
     <div id="navbar">
-      <span class="some-visited" style="bottom:11.54%"></span>
+      <span class="some-visited" style="bottom:12.50%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -39,16 +39,14 @@
 <a id="L14"></a><span > </span>
 <a id="L15"></a><span > </span>
 <a id="L16"></a><span > </span>
-<a id="L17"></a><span > </span>
-<a id="L18"></a><span > </span>
-<a id="L19"></a><span class="visited"> </span>
-<a id="L20"></a><span class="visited"> </span>
-<a id="L21"></a><span > </span>
+<a id="L17"></a><span class="visited"> </span>
+<a id="L18"></a><span class="visited"> </span>
+<a id="L19"></a><span > </span>
+<a id="L20"></a><span > </span>
+<a id="L21"></a><span class="some-visited"> </span>
 <a id="L22"></a><span > </span>
-<a id="L23"></a><span class="some-visited"> </span>
-<a id="L24"></a><span > </span>
-<a id="L25"></a><span > </span>
-<a id="L26"></a><span class="visited"> </span>
+<a id="L23"></a><span > </span>
+<a id="L24"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -77,35 +75,31 @@
 <a href="#L22">22</a>
 <a href="#L23">23</a>
 <a href="#L24">24</a>
-<a href="#L25">25</a>
-<a href="#L26">26</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
-
-open Types
 
 type t = int
 
 module IMap = Map.Make (Int)
 
 type 'a collection =
-  { c : ('a * func_type) IMap.t
+  { c : ('a * Binary.func_type) IMap.t
   ; last : int
   }
 
 let empty = { c = IMap.empty; last = 0 }
 
 let add f t { last; c } =
-  <span data-count="12571">l</span>et c = IMap.add last (f, t) c in
-  <span data-count="12571">(</span>last, { c; last = suc<span data-count="12571">c</span> last })
+  <span data-count="11653">l</span>et c = IMap.add last (f, t) c in
+  <span data-count="11653">(</span>last, { c; last = suc<span data-count="11653">c</span> last })
 
 let get i c =
-  <span data-count="111488">m</span>atch IMap.find_opt i c.c with <span data-count="0">N</span>one -&gt; None | <span data-count="111488">S</span>ome (v, _) -&gt; Some v
+  <span data-count="111485">m</span>atch IMap.find_opt i c.c with <span data-count="0">N</span>one -&gt; None | <span data-count="111484">S</span>ome (v, _) -&gt; Some v
 
 let get_typ i c =
-  <span data-count="3523">m</span>atch IMap.find_opt i c.c with None -&gt; assert false | <span data-count="3523">S</span>ome (_, t) -&gt; t
+  <span data-count="3514">m</span>atch IMap.find_opt i c.c with None -&gt; assert false | <span data-count="3514">S</span>ome (_, t) -&gt; t
 </code></pre>
       </div>
     </div>

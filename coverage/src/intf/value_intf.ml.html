@@ -339,8 +339,6 @@
 <a id="L315"></a><span > </span>
 <a id="L316"></a><span > </span>
 <a id="L317"></a><span > </span>
-<a id="L318"></a><span > </span>
-<a id="L319"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -662,14 +660,10 @@
 <a href="#L315">315</a>
 <a href="#L316">316</a>
 <a href="#L317">317</a>
-<a href="#L318">318</a>
-<a href="#L319">319</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
-
-open Types
 
 module type Iop = sig
   type num
@@ -880,7 +874,7 @@ module type T = sig
   val const_v128 : V128.t -&gt; v128
   (* TODO ref *)
 
-  val ref_null : heap_type -&gt; t
+  val ref_null : Binary.heap_type -&gt; t
 
   val ref_func : Func_intf.t -&gt; t
 

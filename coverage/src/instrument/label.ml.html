@@ -505,11 +505,11 @@ let annotate_fc m cov_label_set_idx =
               (fun expr -&gt;
                 <span data-count="1">i</span>ncr count;
                 <span data-count="1">A</span>nnotated.dummie<span data-count="1">s</span>
-                  [ Types.I32_const (Int32.of_in<span data-count="1">t</span> !count)
+                  [ Binary.I32_const (Int32.of_in<span data-count="1">t</span> !count)
                   ; Call cov_label_set_idx
                   ]
                 @ expr )
-              f.Types.body
+              f.Binary.body
           in
           <span data-count="1">l</span>et f = { f with body } in
           Runtime.Local f )
@@ -531,23 +531,23 @@ let annotate_sc m cov_label_set_idx =
             <span data-count="7">i</span>ncr count;
             <span data-count="7">l</span>et prefix =
               Annotated.dummies
-                [ Types.I32_const (Int32.of_in<span data-count="7">t</span> !count)
+                [ Binary.I32_const (Int32.of_in<span data-count="7">t</span> !count)
                 ; Call cov_label_set_idx
                 ]
             in
             <span data-count="7">l</span>et instr =
               Annotated.map
                 (function
-                  | <span data-count="0">T</span>ypes.Block (id, typ, body) -&gt;
+                  | <span data-count="0">B</span>inary.Block (id, typ, body) -&gt;
                     let body = handle_expr body in
-                    <span data-count="0">T</span>ypes.Block (id, typ, body)
-                  | <span data-count="0">T</span>ypes.Loop (id, typ, body) -&gt;
+                    <span data-count="0">B</span>inary.Block (id, typ, body)
+                  | <span data-count="0">B</span>inary.Loop (id, typ, body) -&gt;
                     let body = handle_expr body in
-                    <span data-count="0">T</span>ypes.Loop (id, typ, body)
-                  | <span data-count="1">T</span>ypes.If_else (id, typ, true_branch, false_branch) -&gt;
+                    <span data-count="0">B</span>inary.Loop (id, typ, body)
+                  | <span data-count="1">B</span>inary.If_else (id, typ, true_branch, false_branch) -&gt;
                     let true_branch = handle_expr true_branch in
                     <span data-count="1">l</span>et false_branch = handle_expr false_branch in
-                    <span data-count="1">T</span>ypes.If_else (id, typ, true_branch, false_branch)
+                    <span data-count="1">B</span>inary.If_else (id, typ, true_branch, false_branch)
                   | <span data-count="6">i</span>nstr -&gt;
                     (* TODO: make this match non fragile? *)
                     instr )
@@ -559,7 +559,7 @@ let annotate_sc m cov_label_set_idx =
               (fun expr -&gt; <span data-count="3">L</span>ist.map handle_instr expr |&gt; <span data-count="3">L</span>ist.flatten)
               expr
           in
-          let body = handle_expr f.Types.body in
+          let body = handle_expr f.Binary.body in
           <span data-count="1">l</span>et f = { f with body } in
           Runtime.Local f )
       func
@@ -578,31 +578,31 @@ let annotate_dc m cov_label_set_idx =
             <span data-count="11">l</span>et instr =
               Annotated.map
                 (function
-                  | <span data-count="0">T</span>ypes.Br_if (Raw idx) -&gt;
+                  | <span data-count="0">B</span>inary.Br_if idx -&gt;
                     incr count;
                     <span data-count="0">l</span>et count_true = !count in
                     incr count;
                     <span data-count="0">l</span>et count_false = !count in
-                    Types.If_else
+                    Binary.If_else
                       ( None
                       , None
                       , Annotated.dummy_dee<span data-count="0">p</span>
-                          [ Types.I32_const (Int32.of_in<span data-count="0">t</span> count_true)
+                          [ Binary.I32_const (Int32.of_in<span data-count="0">t</span> count_true)
                           ; Call cov_label_set_idx
-                          ; Br (Raw (idx + 1))
+                          ; Br (idx + 1)
                           ]
                       , Annotated.dummy_dee<span data-count="0">p</span>
-                          [ Types.I32_const (Int32.of_in<span data-count="0">t</span> count_false)
+                          [ Binary.I32_const (Int32.of_in<span data-count="0">t</span> count_false)
                           ; Call cov_label_set_idx
                           ] )
-                  | <span data-count="1">T</span>ypes.If_else (id, typ, true_branch, false_branch) -&gt;
+                  | <span data-count="1">B</span>inary.If_else (id, typ, true_branch, false_branch) -&gt;
                     incr count;
                     <span data-count="1">l</span>et count_true = !count in
                     let true_branch =
                       Annotated.map
                         (fun expr -&gt;
                           <span data-count="1">A</span>nnotated.dummie<span data-count="1">s</span>
-                            [ Types.I32_const (Int32.of_in<span data-count="1">t</span> count_true)
+                            [ Binary.I32_const (Int32.of_in<span data-count="1">t</span> count_true)
                             ; Call cov_label_set_idx
                             ]
                           @ expr )
@@ -615,7 +615,7 @@ let annotate_dc m cov_label_set_idx =
                       Annotated.map
                         (fun expr -&gt;
                           <span data-count="1">A</span>nnotated.dummie<span data-count="1">s</span>
-                            [ Types.I32_const (Int32.of_in<span data-count="1">t</span> count_false)
+                            [ Binary.I32_const (Int32.of_in<span data-count="1">t</span> count_false)
                             ; Call cov_label_set_idx
                             ]
                           @ expr )
@@ -624,13 +624,13 @@ let annotate_dc m cov_label_set_idx =
 
                     <span data-count="1">l</span>et true_branch = handle_expr true_branch in
                     <span data-count="1">l</span>et false_branch = handle_expr false_branch in
-                    <span data-count="1">T</span>ypes.If_else (id, typ, true_branch, false_branch)
-                  | <span data-count="0">T</span>ypes.Block (id, typ, body) -&gt;
+                    <span data-count="1">B</span>inary.If_else (id, typ, true_branch, false_branch)
+                  | <span data-count="0">B</span>inary.Block (id, typ, body) -&gt;
                     let body = handle_expr body in
-                    <span data-count="0">T</span>ypes.Block (id, typ, body)
-                  | <span data-count="0">T</span>ypes.Loop (id, typ, body) -&gt;
+                    <span data-count="0">B</span>inary.Block (id, typ, body)
+                  | <span data-count="0">B</span>inary.Loop (id, typ, body) -&gt;
                     let body = handle_expr body in
-                    <span data-count="0">T</span>ypes.Loop (id, typ, body)
+                    <span data-count="0">B</span>inary.Loop (id, typ, body)
                   | <span data-count="10">i</span>nstr -&gt;
                     (* TODO: make this match non fragile? *)
                     instr )
@@ -642,7 +642,7 @@ let annotate_dc m cov_label_set_idx =
               (fun expr -&gt; <span data-count="3">L</span>ist.map handle_instr expr |&gt; <span data-count="3">L</span>ist.flatten)
               expr
           in
-          let body = handle_expr f.Types.body in
+          let body = handle_expr f.Binary.body in
           <span data-count="1">l</span>et f = { f with body } in
           Runtime.Local f )
       func
@@ -652,8 +652,8 @@ let annotate_dc m cov_label_set_idx =
 let annotate criteria m =
   <span data-count="3">l</span>et m =
     let desc =
-      Types.Bt_raw
-        (None, ([ (None, Types.Num_type I32); (None, Num_type I32) ], []))
+      Binary.Bt_raw
+        (None, ([ (None, Binary.Num_type I32); (None, Num_type I32) ], []))
     in
     Binary.Module.add_import_if_not_presen<span data-count="3">t</span> ~modul_name:"owi"
       ~func_name:"cov_label_set" ~desc m
@@ -664,7 +664,7 @@ let annotate criteria m =
         ~func_name:"cov_label_set" m
     with
     | None -&gt; assert false
-    | <span data-count="3">S</span>ome idx -&gt; Types.Raw idx
+    | <span data-count="3">S</span>ome idx -&gt; idx
   in
   let m, label_count =
     match criteria with

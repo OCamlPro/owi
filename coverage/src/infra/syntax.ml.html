@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>syntax.ml &mdash; Coverage report</title>
-    <meta name="description" content="88.14% coverage in src/utils/syntax.ml">
+    <meta name="description" content="76.27% coverage in src/infra/syntax.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -12,10 +12,10 @@
     <div id="header">
       <h1>
         <a href="../../index.html">
-          <span class="dirname">src/utils/</span>syntax.ml
+          <span class="dirname">src/infra/</span>syntax.ml
         </a>
       </h1>
-      <h2>88.14%</h2>
+      <h2>76.27%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:33.33%"></span>
@@ -23,6 +23,11 @@
       <span class="unvisited" style="top:35.42%"></span>
       <span class="unvisited" style="top:37.50%"></span>
       <span class="unvisited" style="top:38.54%"></span>
+      <span class="unvisited" style="bottom:45.83%"></span>
+      <span class="unvisited" style="bottom:44.79%"></span>
+      <span class="unvisited" style="bottom:42.71%"></span>
+      <span class="unvisited" style="bottom:41.67%"></span>
+      <span class="unvisited" style="bottom:38.54%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -78,14 +83,14 @@
 <a id="L49"></a><span > </span>
 <a id="L50"></a><span > </span>
 <a id="L51"></a><span > </span>
-<a id="L52"></a><span class="visited"> </span>
-<a id="L53"></a><span class="visited"> </span>
+<a id="L52"></a><span class="unvisited"> </span>
+<a id="L53"></a><span class="unvisited"> </span>
 <a id="L54"></a><span > </span>
-<a id="L55"></a><span class="visited"> </span>
-<a id="L56"></a><span class="visited"> </span>
+<a id="L55"></a><span class="unvisited"> </span>
+<a id="L56"></a><span class="unvisited"> </span>
 <a id="L57"></a><span > </span>
 <a id="L58"></a><span > </span>
-<a id="L59"></a><span class="visited"> </span>
+<a id="L59"></a><span class="unvisited"> </span>
 <a id="L60"></a><span > </span>
 <a id="L61"></a><span > </span>
 <a id="L62"></a><span > </span>
@@ -230,26 +235,26 @@
 
 open Prelude.Result
 
-let ( let* ) o f = <span data-count="1865568">m</span>atch o with <span data-count="1856306">O</span>k v -&gt; f v | <span data-count="9262">E</span>rror _ as e -&gt; e [@@inline]
+let ( let* ) o f = <span data-count="1860284">m</span>atch o with <span data-count="1851022">O</span>k v -&gt; f v | <span data-count="9262">E</span>rror _ as e -&gt; e [@@inline]
 
-let ( let+ ) o f = <span data-count="1346810">m</span>atch o with <span data-count="1343385">O</span>k v -&gt; Ok (<span data-count="1343385">f</span> v) | <span data-count="3425">E</span>rror _ as e -&gt; e
+let ( let+ ) o f = <span data-count="1345514">m</span>atch o with <span data-count="1342089">O</span>k v -&gt; Ok (<span data-count="1342089">f</span> v) | <span data-count="3425">E</span>rror _ as e -&gt; e
 [@@inline]
 
-let ok v = <span data-count="188746">O</span>k v [@@inline]
+let ok v = <span data-count="188199">O</span>k v [@@inline]
 
 let list_iter f l =
-  <span data-count="19977">l</span>et rec aux = function
-    | <span data-count="19910">[</span>] -&gt; Ok ()
-    | <span data-count="10222">x</span> :: xs -&gt; ( match f x with <span data-count="10155">O</span>k () -&gt; aux xs | <span data-count="67">E</span>rror _ as e -&gt; e )
+  <span data-count="19883">l</span>et rec aux = function
+    | <span data-count="19816">[</span>] -&gt; Ok ()
+    | <span data-count="10185">x</span> :: xs -&gt; ( match f x with <span data-count="10118">O</span>k () -&gt; aux xs | <span data-count="67">E</span>rror _ as e -&gt; e )
   in
   aux l
 [@@inline]
 
 let list_map f l =
-  <span data-count="57315">l</span>et rec aux acc = function
-    | <span data-count="57242">[</span>] -&gt; Ok (List.re<span data-count="57242">v</span> acc)
-    | <span data-count="68674">x</span> :: xs -&gt; (
-      match f x with <span data-count="68601">O</span>k v -&gt; aux (v :: acc) xs | <span data-count="73">E</span>rror _ as e -&gt; e )
+  <span data-count="49742">l</span>et rec aux acc = function
+    | <span data-count="49669">[</span>] -&gt; Ok (List.re<span data-count="49669">v</span> acc)
+    | <span data-count="68238">x</span> :: xs -&gt; (
+      match f x with <span data-count="68165">O</span>k v -&gt; aux (v :: acc) xs | <span data-count="73">E</span>rror _ as e -&gt; e )
   in
   aux [] l
 [@@inline]
@@ -266,34 +271,34 @@ let list_concat_map f l =
 [@@inline]
 
 let list_fold_left f acc l =
-  <span data-count="74303">l</span>et rec aux acc = function
-    | <span data-count="72558">[</span>] -&gt; Ok acc
-    | <span data-count="271275">v</span> :: tl -&gt; (
-      match f acc v with <span data-count="269530">O</span>k acc -&gt; aux acc tl | <span data-count="1745">E</span>rror _ as e -&gt; e )
+  <span data-count="73948">l</span>et rec aux acc = function
+    | <span data-count="72203">[</span>] -&gt; Ok acc
+    | <span data-count="270666">v</span> :: tl -&gt; (
+      match f acc v with <span data-count="268921">O</span>k acc -&gt; aux acc tl | <span data-count="1745">E</span>rror _ as e -&gt; e )
   in
   aux acc l
 [@@inline]
 
 let list_fold_left_map f acc l =
-  <span data-count="30">l</span>et+ acc, l =
-    list_fold_lef<span data-count="30">t</span>
+  <span data-count="0">l</span>et+ acc, l =
+    list_fold_lef<span data-count="0">t</span>
       (fun (acc, l) v -&gt;
-        <span data-count="15">l</span>et+ acc, x = <span data-count="15">f</span> acc v in
-        <span data-count="15">(</span>acc, x :: l) )
+        <span data-count="0">l</span>et+ acc, x = <span data-count="0">f</span> acc v in
+        <span data-count="0">(</span>acc, x :: l) )
       (acc, []) l
   in
-  <span data-count="30">(</span>acc, List.re<span data-count="30">v</span> l)
+  <span data-count="0">(</span>acc, List.re<span data-count="0">v</span> l)
 [@@inline]
 
 let array_iter f a =
-  <span data-count="23032">l</span>et err = ref None in
+  <span data-count="22936">l</span>et err = ref None in
   try
-    for i = 0 to Array.lengt<span data-count="23032">h</span> a - 1 do
-      <span data-count="34055">m</span>atch f (Array.unsafe_ge<span data-count="34055">t</span> a i) with
+    for i = 0 to Array.lengt<span data-count="22936">h</span> a - 1 do
+      <span data-count="33996">m</span>atch f (Array.unsafe_ge<span data-count="33996">t</span> a i) with
       | <span data-count="1528">E</span>rror _e as e -&gt;
         err := Some e;
         raise Exit
-      | <span data-count="32527">O</span>k () -&gt; ()
+      | <span data-count="32468">O</span>k () -&gt; ()
     done;
     Ok ()
   with <span data-count="1528">E</span>xit -&gt; ( match !err with None -&gt; assert false | <span data-count="1528">S</span>ome e -&gt; e )
@@ -314,10 +319,10 @@ let array_map f a =
 [@@inline]
 
 let array_fold_left f acc l =
-  <span data-count="13638">A</span>rray.fold_left
+  <span data-count="13584">A</span>rray.fold_left
     (fun acc v -&gt;
-      <span data-count="16240">l</span>et* acc in
-      <span data-count="16231">f</span> acc v )
+      <span data-count="16207">l</span>et* acc in
+      <span data-count="16198">f</span> acc v )
     (Ok acc) l
 [@@inline]
 </code></pre>

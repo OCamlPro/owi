@@ -71,7 +71,7 @@ type 'a t =
 
 let pp pp_desc fmt { modul; name; assigned_name; desc } =
   <span data-count="2">F</span>mt.pf fmt "{@\n  @[&lt;v&gt;modul: %S@\nname: %S@\nassigned_name: %a@\ndesc: %a@]}"
-    modul name Types.pp_id_opt assigned_name pp_desc desc
+    modul name Text.pp_id_opt assigned_name pp_desc desc
 </code></pre>
       </div>
     </div>

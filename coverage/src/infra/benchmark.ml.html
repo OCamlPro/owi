@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>benchmark.ml &mdash; Coverage report</title>
-    <meta name="description" content="94.74% coverage in src/utils/benchmark.ml">
+    <meta name="description" content="94.74% coverage in src/infra/benchmark.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -12,7 +12,7 @@
     <div id="header">
       <h1>
         <a href="../../index.html">
-          <span class="dirname">src/utils/</span>benchmark.ml
+          <span class="dirname">src/infra/</span>benchmark.ml
         </a>
       </h1>
       <h2>94.74%</h2>
@@ -79,7 +79,7 @@
 <pre><code class="ocaml">type stats = { solver_time : Mtime.Span.t Atomic.t }
 
 let handle_time_span atomic_span f =
-  <span data-count="28470">i</span>f Log.is_bench_enabled () then
+  <span data-count="28641">i</span>f Log.is_bench_enabled () then
     <span data-count="4">l</span>et counter = Mtime_clock.counter () in
     <span data-count="4">l</span>et res = f () in
     <span data-count="4">l</span>et span = Mtime_clock.count counter in
@@ -91,15 +91,15 @@ let handle_time_span atomic_span f =
       <span data-count="4">i</span>f success then <span data-count="4">r</span>es else <span data-count="0">a</span>tomic_set ()
     in
     atomic_set ()
-  else <span data-count="28464">f</span> ()
+  else <span data-count="28637">f</span> ()
 
 let with_utime f =
-  <span data-count="435">i</span>f Log.is_bench_enabled () then
+  <span data-count="426">i</span>f Log.is_bench_enabled () then
     <span data-count="1">l</span>et before = (Unix.time<span data-count="1">s</span> ()).tms_utime in
     let r = f () in
     <span data-count="1">l</span>et after = (Unix.time<span data-count="1">s</span> ()).tms_utime in
     (r, Some (after -. before))
-  else <span data-count="434">(</span><span data-count="430">f</span> (), None)
+  else <span data-count="425">(</span><span data-count="421">f</span> (), None)
 </code></pre>
       </div>
     </div>

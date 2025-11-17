@@ -237,8 +237,6 @@
 <a id="L213"></a><span > </span>
 <a id="L214"></a><span > </span>
 <a id="L215"></a><span > </span>
-<a id="L216"></a><span > </span>
-<a id="L217"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -458,14 +456,10 @@
 <a href="#L213">213</a>
 <a href="#L214">214</a>
 <a href="#L215">215</a>
-<a href="#L216">216</a>
-<a href="#L217">217</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
-
-open Types
 
 module type P = sig
   type thread
@@ -484,9 +478,9 @@ module type P = sig
 
     val set_value : t -&gt; Value.t -&gt; unit
 
-    val mut : t -&gt; Types.mut
+    val mut : t -&gt; Binary.mut
 
-    val typ : t -&gt; val_type
+    val typ : t -&gt; Binary.val_type
   end
 
   module Table : sig
@@ -498,7 +492,7 @@ module type P = sig
 
     val size : t -&gt; int
 
-    val typ : t -&gt; ref_type
+    val typ : t -&gt; Binary.ref_type
 
     val max_size : t -&gt; int option
 
@@ -612,7 +606,7 @@ module type P = sig
 
     val env : t -&gt; Env.t
 
-    val to_run : t -&gt; binary expr Annotated.t list
+    val to_run : t -&gt; Binary.expr Annotated.t list
 
     val id : t -&gt; string option
   end
@@ -650,33 +644,33 @@ module type S = sig
     -&gt; Func_intf.t
     -&gt; value list choice
 
-  val exec_iunop : State.stack -&gt; Types.nn -&gt; Types.iunop -&gt; State.stack
+  val exec_iunop : State.stack -&gt; Binary.nn -&gt; Binary.iunop -&gt; State.stack
 
-  val exec_funop : State.stack -&gt; Types.nn -&gt; Types.funop -&gt; State.stack
+  val exec_funop : State.stack -&gt; Binary.nn -&gt; Binary.funop -&gt; State.stack
 
   val exec_ibinop :
-    State.stack -&gt; Types.nn -&gt; Types.ibinop -&gt; State.stack choice
+    State.stack -&gt; Binary.nn -&gt; Binary.ibinop -&gt; State.stack choice
 
-  val exec_fbinop : State.stack -&gt; Types.nn -&gt; Types.fbinop -&gt; State.stack
+  val exec_fbinop : State.stack -&gt; Binary.nn -&gt; Binary.fbinop -&gt; State.stack
 
-  val exec_itestop : State.stack -&gt; Types.nn -&gt; Types.itestop -&gt; State.stack
+  val exec_itestop : State.stack -&gt; Binary.nn -&gt; Binary.itestop -&gt; State.stack
 
-  val exec_irelop : State.stack -&gt; Types.nn -&gt; Types.irelop -&gt; State.stack
+  val exec_irelop : State.stack -&gt; Binary.nn -&gt; Binary.irelop -&gt; State.stack
 
-  val exec_frelop : State.stack -&gt; Types.nn -&gt; Types.frelop -&gt; State.stack
+  val exec_frelop : State.stack -&gt; Binary.nn -&gt; Binary.frelop -&gt; State.stack
 
   val exec_itruncf :
-    State.stack -&gt; Types.nn -&gt; Types.nn -&gt; Types.sx -&gt; State.stack choice
+    State.stack -&gt; Binary.nn -&gt; Binary.nn -&gt; Binary.sx -&gt; State.stack choice
 
   val exec_itruncsatf :
-    State.stack -&gt; Types.nn -&gt; Types.nn -&gt; Types.sx -&gt; State.stack
+    State.stack -&gt; Binary.nn -&gt; Binary.nn -&gt; Binary.sx -&gt; State.stack
 
   val exec_fconverti :
-    State.stack -&gt; Types.nn -&gt; Types.nn -&gt; Types.sx -&gt; State.stack
+    State.stack -&gt; Binary.nn -&gt; Binary.nn -&gt; Binary.sx -&gt; State.stack
 
-  val exec_ireinterpretf : State.stack -&gt; Types.nn -&gt; Types.nn -&gt; State.stack
+  val exec_ireinterpretf : State.stack -&gt; Binary.nn -&gt; Binary.nn -&gt; State.stack
 
-  val exec_freinterpreti : State.stack -&gt; Types.nn -&gt; Types.nn -&gt; State.stack
+  val exec_freinterpreti : State.stack -&gt; Binary.nn -&gt; Binary.nn -&gt; State.stack
 end
 </code></pre>
       </div>

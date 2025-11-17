@@ -872,7 +872,7 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
     Link.extern_module Link.empty_state ~name:"owi" replay_extern_module
   in
 
-  <span data-count="10">l</span>et* m = Compile.File.until_binar<span data-count="10">y</span> ~rac:false ~srac:false ~unsafe filename in
+  <span data-count="10">l</span>et* m = Compile.File.until_binar<span data-count="10">y</span> ~unsafe filename in
   <span data-count="10">l</span>et* m = Cmd_utils.set_entry_poin<span data-count="10">t</span> entry_point invoke_with_symbols m in
   <span data-count="10">C</span>ompile.Binary.until_link ~unsafe link_state ~name:None m
 

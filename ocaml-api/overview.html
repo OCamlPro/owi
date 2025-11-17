@@ -194,9 +194,8 @@ val filename : Fpath.t = &lt;abstr&gt;
     | Error e -&gt; assert false;;
 mdx_gen.bc.exe: [INFO] parsing      ...
 ...
-   annots = []}
 # let module_to_run, link_state =
-    match Compile.Text.until_link Link.empty_state ~unsafe:false ~rac:false ~srac:false ~name:None m with
+    match Compile.Text.until_link Link.empty_state ~unsafe:false ~name:None m with
     | Ok v -&gt; v
     | Error _ -&gt; assert false;;
 mdx_gen.bc.exe: [INFO] checking     ...

@@ -1045,81 +1045,6 @@ int main(void) {
 All OK!
 </code></pre>
 <p>All the specified properties have been satisfied during the execution.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="weasel"><a class="header" href="#weasel">Weasel</a></h1>
-<p>Weasel stands for WEbAssembly Specification Language, it can be used to annotate Webassembly text modules in <a href="https://github.com/WebAssembly/annotations">custom annotation</a>. Annotated modules can be instrumented to perform runtime assertion checking thanks to owi's code generator.</p>
-<p>Commands and options related to Weasel:</p>
-<ul>
-<li><code>owi instrument rac</code> to instrument an annotated text module.</li>
-<li><code>--rac</code> for <code>run</code>, <code>sym</code> and <code>conc</code> to instrument an annotated text module and perform runtime assertion checking.</li>
-<li><code>--srac</code> for <code>sym</code> and <code>conc</code> to instrument an annotated text module and perform runtime assertion checking symbolically.</li>
-</ul>
-<p>The formal specification of Weasel can be found in <code>src/annot/spec.ml</code>.</p>
-<h2 id="basic-example"><a class="header" href="#basic-example">Basic example</a></h2>
-<p>Suppose we have a function returning its parameter plus three:</p>
-<pre><code class="language-wast">(module
-  (;...;)
-  (func $plus_three (param $x i32) (result i32)
-    local.get $x
-    i32.const 3
-    i32.add
-  )
-  (;...;)
-)
-</code></pre>
-<p>With Weasel, we can annotate this function by specifying its postconditions:</p>
-<pre><code class="language-wast">(module
-  (;...;)
-  (@contract $plus_three
-    (ensures (= result (+ $x 3)))
-  )
-  (func $plus_three (param $x i32) (result i32)
-    local.get $x
-    i32.const 3
-    i32.add
-  )
-  (;...;)
-)
-</code></pre>
-<p><code>owi instrument rac</code> generates a new wrapper function checking this postcondition:</p>
-<pre><code class="language-sh">$ owi instrument rac plus_three.wat
-$ cat plus_three.instrumented.wat
-(module
-  (import "owi" "assert" (func $assert  (param i32)))
-  (type (func (param $x i32) (result i32)))
-  (type (func))
-  (type (func (param i32)))
-  (type (func (result i32)))
-  (func $plus_three (param $x i32) (result i32)
-    local.get 0
-    i32.const 3
-    i32.add
-  )
-  (func $start
-    i32.const 42
-    call 3
-    drop
-  )
-  (func $__weasel_plus_three (param $x i32) (result i32) (local $__weasel_temp i32) (local $__weasel_res_0 i32)
-    local.get 0
-    call 1
-    local.set 2
-    local.get 2
-    local.get 0
-    i32.const 3
-    i32.add
-    i32.eq
-    call 0
-    local.get 2
-  )
-  (start 2)
-)
-</code></pre>
-<p>We can perform runtime assertion checking either by <code>owi sym plus_three.instrumented.wat</code> or by <code>owi sym --rac plus_three.wat</code>.</p>
-<pre><code class="language-sh">$ owi sym plus_three.instrumented.wat
-All OK!
-$ owi sym --rac plus_three.wat
-All OK!
-</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="examples-of-problem-solving"><a class="header" href="#examples-of-problem-solving">Examples of Problem Solving</a></h1>
 <h2 id="solving-polynomials"><a class="header" href="#solving-polynomials">Solving polynomials</a></h2>
 <details>
@@ -1786,7 +1711,7 @@ COMMANDS
            Replay a module containing symbols with concrete values in a
            replay file containing a model
 
-       run [OPTION]… FILE
+       run [--timeout=S] [--timeout-instr=I] [--unsafe] [OPTION]… FILE
            Run the concrete interpreter
 
        rust [OPTION]… FILE…
@@ -1956,15 +1881,9 @@ OPTIONS
        --property=FILE
            property file
 
-       --rac
-           runtime assertion checking mode
-
        -s VALUE, --solver=VALUE (absent=Z3)
            SMT solver to use. VALUE must be one of the 5 available solvers:
            Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo
-
-       --srac
-           symbolic runtime assertion checking mode
 
        --testcomp
            test-comp mode
@@ -2095,15 +2014,9 @@ OPTIONS
        -O VAL (absent=3)
            specify which optimization level to use
 
-       --rac
-           runtime assertion checking mode
-
        -s VALUE, --solver=VALUE (absent=Z3)
            SMT solver to use. VALUE must be one of the 5 available solvers:
            Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo
-
-       --srac
-           symbolic runtime assertion checking mode
 
        -u, --unsafe
            skip typechecking pass
@@ -2246,10 +2159,6 @@ COMMANDS
        label [--criteria=VAL] [--unsafe] [OPTION]… FILE
            Generate an instrumented file with labels corresponding to test
            objectives for a given coverage criteria.
-
-       rac [--symbolic] [--unsafe] [OPTION]… FILE…
-           Generate an instrumented file with runtime assertion checking
-           coming from Weasel specifications
 
 COMMON OPTIONS
        --help[=FMT] (default=auto)
@@ -2472,16 +2381,13 @@ NAME
        owi-run - Run the concrete interpreter
 
 SYNOPSIS
-       owi run [OPTION]… FILE
+       owi run [--timeout=S] [--timeout-instr=I] [--unsafe] [OPTION]… FILE
 
 ARGUMENTS
        FILE (required)
            source file
 
 OPTIONS
-       --rac
-           runtime assertion checking mode
-
        --timeout=S
            Stop execution after S seconds.
 
@@ -2604,15 +2510,9 @@ OPTIONS
        -O VAL (absent=3)
            specify which optimization level to use
 
-       --rac
-           runtime assertion checking mode
-
        -s VALUE, --solver=VALUE (absent=Z3)
            SMT solver to use. VALUE must be one of the 5 available solvers:
            Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo
-
-       --srac
-           symbolic runtime assertion checking mode
 
        -u, --unsafe
            skip typechecking pass
@@ -2793,15 +2693,9 @@ OPTIONS
        --no-value
            do not display a value for each symbol
 
-       --rac
-           runtime assertion checking mode
-
        -s VALUE, --solver=VALUE (absent=Z3)
            SMT solver to use. VALUE must be one of the 5 available solvers:
            Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo
-
-       --srac
-           symbolic runtime assertion checking mode
 
        -u, --unsafe
            skip typechecking pass
@@ -3183,15 +3077,9 @@ OPTIONS
        -o FILE, --output=FILE
            Output the generated .wasm or .wat to FILE.
 
-       --rac
-           runtime assertion checking mode
-
        -s VALUE, --solver=VALUE (absent=Z3)
            SMT solver to use. VALUE must be one of the 5 available solvers:
            Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo
-
-       --srac
-           symbolic runtime assertion checking mode
 
        -u, --unsafe
            skip typechecking pass
@@ -3274,9 +3162,8 @@ val filename : Fpath.t = &lt;abstr&gt;
     | Error e -&gt; assert false;;
 mdx_gen.bc.exe: [INFO] parsing      ...
 ...
-   annots = []}
 # let module_to_run, link_state =
-    match Compile.Text.until_link Link.empty_state ~unsafe:false ~rac:false ~srac:false ~name:None m with
+    match Compile.Text.until_link Link.empty_state ~unsafe:false ~name:None m with
     | Ok v -&gt; v
     | Error _ -&gt; assert false;;
 mdx_gen.bc.exe: [INFO] checking     ...
@@ -3384,8 +3271,7 @@ let pure_wasm_module =
 (* our pure wasm module, linked with `sausage` *)
 let module_to_run, link_state =
   match
-    Compile.Text.until_link link_state ~unsafe:false ~rac:false ~srac:false
-      ~name:None pure_wasm_module
+    Compile.Text.until_link link_state ~unsafe:false ~name:None pure_wasm_module
   with
   | Error _ -&gt; assert false
   | Ok v -&gt; v
@@ -3491,8 +3377,7 @@ let pure_wasm_module =
 (* our pure wasm module, linked with `chorizo` *)
 let module_to_run, link_state =
   match
-    Compile.Text.until_link link_state ~unsafe:false ~rac:false ~srac:false
-      ~name:None pure_wasm_module
+    Compile.Text.until_link link_state ~unsafe:false ~name:None pure_wasm_module
   with
   | Error _ -&gt; assert false
   | Ok v -&gt; v
