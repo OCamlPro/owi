@@ -378,16 +378,16 @@ let block_type env =
   and+ result_type = list val_type in
   Bt_raw (None, (param_type, result_type))
 
-let memory_size : (text instr * S.stack_op list) gen =
+let memory_size : (instr * S.stack_op list) gen =
   pair (const Memory_size) (const [ S.Push (Num_type I32) ])
 
-let memory_grow : (text instr * S.stack_op list) gen =
+let memory_grow : (instr * S.stack_op list) gen =
   pair (const Memory_grow) (const [ S.Nothing ])
 
-let memory_copy : (text instr * S.stack_op list) gen =
+let memory_copy : (instr * S.stack_op list) gen =
   pair (const Memory_copy) (const [ S.Pop; S.Pop; S.Pop ])
 
-let memory_fill : (text instr * S.stack_op list) gen =
+let memory_fill : (instr * S.stack_op list) gen =
   pair (const Memory_fill) (const [ S.Pop; S.Pop; S.Pop ])
 
 let memory_init (env : Env.t) =
@@ -621,7 +621,7 @@ let random_stack =
   let+ l_vt = list val_type in
   [ S.Whatever l_vt ]
 
-let unreachable : (text instr * S.stack_op list) gen =
+let unreachable : (instr * S.stack_op list) gen =
   pair (const Unreachable) random_stack
 
 let expr_br (env : Env.t) (stack : val_type list) =

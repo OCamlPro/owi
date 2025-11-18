@@ -178,7 +178,7 @@ let block expr ~locals ~stack env =
   and+ rt_descr = const @@ List.rev_map (fun t -> S.Push t) rt in
   (instr, pt_descr @ rt_descr)
 
-let loop expr ~locals ~stack env : (text instr * S.stack_op list) gen =
+let loop expr ~locals ~stack env : (instr * S.stack_op list) gen =
   let* rt = list B.val_type
   and+ pt = B.stack_prefix stack in
   let typ =
@@ -192,7 +192,7 @@ let loop expr ~locals ~stack env : (text instr * S.stack_op list) gen =
   and+ rt_descr = const @@ List.rev_map (fun t -> S.Push t) rt in
   (instr, pt_descr @ rt_descr)
 
-let rec expr ~block_type ~stack ~locals env : text expr Owi.Annotated.t gen =
+let rec expr ~block_type ~stack ~locals env : expr Owi.Annotated.t gen =
   let _pt, rt =
     match block_type with
     | Bt_raw (_indice, (pt, rt)) -> (pt, rt)
@@ -208,7 +208,7 @@ let rec expr ~block_type ~stack ~locals env : text expr Owi.Annotated.t gen =
       let+ drops = const (List.map (fun _typ -> Drop) l)
       and+ adds =
         List.fold_left
-          (fun (acc : text instr list gen) typ ->
+          (fun (acc : instr list gen) typ ->
             let+ acc
             and+ cst = B.const_of_val_type typ in
             cst :: acc )
@@ -259,7 +259,7 @@ let rec expr ~block_type ~stack ~locals env : text expr Owi.Annotated.t gen =
       let stack = S.apply_stack_ops stack ops in
       expr ~block_type ~stack ~locals env
     and+ i = const (Owi.Annotated.dummy i) in
-    let res : text expr = i :: next.raw in
+    let res : expr = i :: next.raw in
     Owi.Annotated.dummy res
 
 let data env : Owi.Text.module_field gen =
@@ -347,5 +347,4 @@ let modul conf =
   let id = Some "m" in
   let* env = const Env.empty in
   let+ fields = fields (env conf) in
-  let annots = [] in
-  { id; fields; annots }
+  { id; fields }
