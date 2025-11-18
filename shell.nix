@@ -3,32 +3,10 @@
   }) {}
 }:
 
-let
-  ocamlPackages = pkgs.ocaml-ng.ocamlPackages_5_3.overrideScope (self: super: {
-    ocb = self.buildDunePackage {
-      pname = "ocb";
-      version = "master";
-      src = pkgs.fetchgit {
-        url = "https://github.com/ocamlpro/ocb.git";
-        hash = "sha256-IuVP1moJpnbctYGv7X1aKq0elUQ/Zmn81MD/zBPqwno=";
-      };
-      propagatedNativeBuildInputs = with ocamlPackages; [
-        dune_3
-        findlib
-        ocaml
-      ];
-      propagatedBuildInputs = with ocamlPackages; [
-        cmdliner
-        fmt
-        prelude
-      ];
-    };
-  });
-in
 pkgs.mkShell {
   name = "owi-dev-shell";
   dontDetectOcamlConflicts = true;
-  nativeBuildInputs = with ocamlPackages; [
+  nativeBuildInputs = with pkgs.ocamlPackages; [
     dune_3
     findlib
     bisect_ppx
@@ -52,7 +30,7 @@ pkgs.mkShell {
     pkgs.zig
     pkgs.makeWrapper
   ];
-  buildInputs = with ocamlPackages; [
+  buildInputs = with pkgs.ocamlPackages; [
     bos
     cmdliner
     crowbar
