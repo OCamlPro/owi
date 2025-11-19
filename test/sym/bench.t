@@ -18,7 +18,8 @@
               execution time
               solver time
               interpreter time
-              Solver stats:
+              path count: 3
+              solver stats : 
               ((added eqs 11)
                (bv bit2core 160)
                (bv dynamic diseqs 4)

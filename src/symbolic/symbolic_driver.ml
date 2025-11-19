@@ -79,7 +79,7 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
   let callback =
     mk_callback no_stop_at_failure fail_mode res_stack path_count
   in
-  let time_counter = Mtime_clock.counter () in
+  let exec_time_counter = Mtime_clock.counter () in
   let time_before = (Unix.times ()).tms_utime in
   let join_handles =
     Symbolic_choice_with_memory.run exploration_strategy ~workers solver result
@@ -100,24 +100,15 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
   in
 
   Log.bench (fun m ->
-    let time_counter = Mtime_clock.count time_counter in
+    let execution_time = Mtime_clock.count exec_time_counter in
     let bench_stats = Thread_with_memory.bench_stats thread in
-    let solver_time = Atomic.get bench_stats.solver_time in
     let interpreter_time =
+      (* run_time shouldn't be none in bench mode *)
       let run_time = match run_time with None -> assert false | Some t -> t in
       (interpreter_time +. run_time) *. 1000.
     in
     let solver_stats = Solver.get_all_stats ~finalizer () in
-    (* run_time shouldn't be none in bench mode *)
-    m
-      "Benchmarks:@\n\
-       execution time: %a@\n\
-       @[<v>solver time: %a@;\
-       interpreter time: %fms@;\
-       Solver stats:@;\
-       %a@]"
-      Mtime.Span.pp time_counter Mtime.Span.pp solver_time interpreter_time
-      Solver.pp_stats solver_stats );
+    Benchmark.pp ~solver_stats ~bench_stats ~interpreter_time ~execution_time m );
 
   Log.info (fun m -> m "Completed paths: %d" (Atomic.get path_count));
 

@@ -1,4 +1,7 @@
-type stats = { solver_time : Mtime.Span.t Atomic.t }
+type stats =
+  { solver_time : Mtime.Span.t Atomic.t
+  ; path_count : int Atomic.t
+  }
 
 let handle_time_span atomic_span f =
   if Log.is_bench_enabled () then
@@ -22,3 +25,20 @@ let with_utime f =
     let after = (Unix.times ()).tms_utime in
     (r, Some (after -. before))
   else (f (), None)
+
+let pp ~solver_stats ~bench_stats ~interpreter_time ~execution_time :
+  ('a, unit) Logs.msgf =
+ fun m ->
+  m
+    "Benchmarks:@\n\
+     execution time: %a@\n\
+     @[<v>solver time: %a@;\
+     interpreter time: %.3fms@;\
+     path count: %i@;\
+     solver stats : @;\
+     %a@]"
+    Mtime.Span.pp execution_time Mtime.Span.pp
+    (Atomic.get bench_stats.solver_time)
+    interpreter_time
+    (Atomic.get bench_stats.path_count)
+    Solver.pp_stats solver_stats
