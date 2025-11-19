@@ -46,7 +46,9 @@ struct
     let breadcrumbs = [] in
     let labels = [] in
     let bench_stats : Benchmark.stats =
-      { solver_time = Atomic.make Mtime.Span.min_span }
+      { solver_time = Atomic.make Mtime.Span.min_span
+      ; path_count = Atomic.make 1
+      }
     in
     create num_symbols symbol_scopes pc memories tables globals breadcrumbs
       labels bench_stats
@@ -95,6 +97,8 @@ struct
     let open Symbol_scope in
     { t with symbol_scopes = close_scope t.symbol_scopes }
 
+  let incr_path_count t = Atomic.incr (bench_stats t).path_count
+
   let clone
     { num_symbols
     ; symbol_scopes
@@ -109,9 +113,6 @@ struct
     let memories = Memory.clone memories in
     let tables = Symbolic_table.clone tables in
     let globals = Symbolic_global.clone globals in
-    let bench_stats : Benchmark.stats =
-      { solver_time = bench_stats.solver_time }
-    in
     { num_symbols
     ; symbol_scopes
     ; pc

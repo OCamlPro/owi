@@ -466,6 +466,8 @@ module Make (Thread : Thread_intf.S) = struct
 
       let true_branch = branch v true prio_true in
       let false_branch = branch (Symbolic_value.Bool.not v) false prio_false in
+      let* thread in
+      Thread.incr_path_count thread;
       if explore_first then choose true_branch false_branch
       else choose false_branch true_branch
   [@@inline]
@@ -525,6 +527,8 @@ module Make (Thread : Thread_intf.S) = struct
           let* () = add_pc not_this_value_cond in
           generator ()
         in
+        let* thread in
+        Thread.incr_path_count thread;
         choose this_val_branch not_this_val_branch
       in
       generator ()
