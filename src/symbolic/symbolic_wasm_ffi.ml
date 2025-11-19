@@ -200,7 +200,7 @@ let symbolic_extern_module =
     ; ("exit", Extern_func (i32 ^->. unit, exit))
     ]
   in
-  { Link.functions }
+  { Link.functions; func_type = Symbolic.Extern_func.extern_type }
 
 let fd_write _ _ _ _ = assert false
 
@@ -219,4 +219,4 @@ let wasi_snapshot_preview1 =
     ; ("random_get", Extern_func (i32 ^-> i32 ^->. i32, random_get))
     ]
   in
-  { Link.functions }
+  { Link.functions; func_type = Symbolic.Extern_func.extern_type }

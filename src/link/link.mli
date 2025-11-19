@@ -58,21 +58,13 @@ val register_module :
   'f state -> name:string -> id:string option -> 'f state Result.t
 
 (** extern modules *)
-type 'extern_func extern_module = { functions : (string * 'extern_func) list }
+type 'extern_func extern_module =
+  { functions : (string * 'extern_func) list
+  ; func_type : 'extern_func -> Binary.func_type
+  }
 
 (** register an extern module with a given link state, producing a new link
     state *)
-val extern_module' :
-     'f state
-  -> name:string
-  -> func_typ:('f -> Binary.func_type)
-  -> 'f extern_module
-  -> 'f state
-
-val extern_module :
-     Concrete_extern_func.extern_func state
-  -> name:string
-  -> Concrete_extern_func.extern_func extern_module
-  -> Concrete_extern_func.extern_func state
+val extern_module : 'f state -> name:string -> 'f extern_module -> 'f state
 
 type extern_func = Concrete_extern_func.extern_func Func_id.collection

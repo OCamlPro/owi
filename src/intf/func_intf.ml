@@ -65,7 +65,6 @@ module type T_Extern_func = sig
 
   type extern_func = Extern_func : 'a func_type * 'a -> extern_func
 
-  (* val extern_type : _ func_type -> Simplified.func_type *)
   val extern_type : extern_func -> Binary.func_type
 
   module Syntax : sig
@@ -213,6 +212,7 @@ end = struct
     | NArg (name, hd, tl) -> (Some name, elt_type hd) :: arg_type tl
     | Res -> []
 
+  (* TODO: we could move this out, as it does not really depend on the functor's parameters *)
   let extern_type (Extern_func (Func (arg, res), _)) : Binary.func_type =
     (arg_type arg, res_type res)
 

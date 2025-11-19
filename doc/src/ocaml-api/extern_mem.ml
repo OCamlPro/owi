@@ -26,7 +26,7 @@ let extern_module : Concrete_extern_func.extern_func Link.extern_module =
     ; ("memset", Extern_func (memory ^-> i32 ^-> i32 ^-> i32 ^->. unit, memset))
     ]
   in
-  { functions }
+  { functions; func_type = Concrete_extern_func.extern_type }
 
 (* a link state that contains our custom module, available under the name `chorizo` *)
 let link_state =
