@@ -8,6 +8,3 @@ include
      and module Choice = Concrete_choice
      and module Memory = Concrete_memory
      and module Extern_func = Concrete_extern_func
-     and type Env.t = Concrete_extern_func.extern_func Link_env.t
-     and type Module_to_run.t =
-      Concrete_extern_func.extern_func Link.module_to_run

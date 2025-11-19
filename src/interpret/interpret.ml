@@ -1600,8 +1600,8 @@ module Make (P : Interpret_intf.P) = struct
            end
            else Choice.return () )
 
-  let modul ~timeout ~timeout_instr link_state (modul : Module_to_run.t) :
-    unit P.Choice.t =
+  let modul ~timeout ~timeout_instr (link_state : 'extern_func Link.state)
+    (modul : 'extern_func Link.module_to_run) : unit P.Choice.t =
     let envs = link_state.Link.envs in
     let heartbeat = make_heartbeat ~timeout ~timeout_instr () in
     Log.info (fun m -> m "interpreting ...");
@@ -1612,13 +1612,12 @@ module Make (P : Interpret_intf.P) = struct
             (fun u to_run ->
               let* () = u in
               let+ _end_stack =
-                let env = Module_to_run.env modul in
+                let env = modul.env in
                 exec_expr ~heartbeat envs env (State.Locals.of_list [])
                   Stack.empty to_run None
               in
               () )
-            (Choice.return ())
-            (Module_to_run.to_run modul)
+            (Choice.return ()) modul.to_run
         in
         Choice.return ()
       end
