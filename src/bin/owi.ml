@@ -433,6 +433,7 @@ let iso_info =
   Cmd.info "iso" ~version ~doc ~sdocs ~man
 
 let iso_cmd =
+  (* TODO: this is actually almost `symbolic_parameters` (with `entry_point` removed), we should use it... it'll simplify the signature a lot! *)
   let+ deterministic_result_order
   and+ fail_mode
   and+ exploration_strategy
