@@ -38,7 +38,10 @@ type 'f state =
   ; envs : 'f envs
   }
 
-type 'extern_func extern_module = { functions : (string * 'extern_func) list }
+type 'extern_func extern_module =
+  { functions : (string * 'extern_func) list
+  ; func_type : 'extern_func -> Binary.func_type
+  }
 
 let empty_state =
   { by_name = StringMap.empty
@@ -395,15 +398,14 @@ let modul (ls : 'f state) ~name (modul : Binary.Module.t) =
       ; envs
       } )
 
-let extern_module' (ls : 'f state) ~name ~(func_typ : 'f -> Binary.func_type)
-  (module_ : 'f extern_module) =
+let extern_module' (ls : 'f state) ~name (modul : 'f extern_module) =
   let functions, collection =
     List.fold_left
       (fun (functions, collection) (name, func) ->
-        let typ = func_typ func in
+        let typ = modul.func_type func in
         let id, collection = Func_id.add func typ collection in
         ((name, Func_intf.Extern id) :: functions, collection) )
-      ([], ls.collection) module_.functions
+      ([], ls.collection) modul.functions
   in
   let functions = StringMap.of_seq (List.to_seq functions) in
   let defined_names =
@@ -421,8 +423,7 @@ let extern_module' (ls : 'f state) ~name ~(func_typ : 'f -> Binary.func_type)
   in
   { ls with by_name = StringMap.add name exports ls.by_name; collection }
 
-let extern_module ls ~name modul =
-  extern_module' ls ~name ~func_typ:Concrete_extern_func.extern_type modul
+let extern_module ls ~name modul = extern_module' ls ~name modul
 
 let register_module (ls : 'f state) ~name ~(id : string option) :
   'f state Result.t =

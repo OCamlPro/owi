@@ -135,7 +135,7 @@ let env_extern_module =
       , Extern_func (i32 ^->. i32, emscripten_resize_heap) )
     ]
   in
-  { Link.functions }
+  { Link.functions; func_type = Concrete.Extern_func.extern_type }
 
 let fd_close (_ : int32) : int32 Choice.t = assert false
 
@@ -171,4 +171,4 @@ let wasi_snapshot_preview1_extern_module =
     ; ("fd_fdstat_get", Extern_func (i32 ^-> i32 ^->. i32, fd_fdstat_get))
     ]
   in
-  { Link.functions }
+  { Link.functions; func_type = Concrete.Extern_func.extern_type }

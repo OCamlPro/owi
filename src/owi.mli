@@ -15,6 +15,8 @@ module Text : sig
 end
 
 module Binary : sig
+  type func_type
+
   module Module : sig
     type t
   end
@@ -65,6 +67,8 @@ module Concrete_extern_func : sig
   type _ func_type = Func : ('f, 'r Result.t) atype * 'r rtype -> 'f func_type
 
   type extern_func = Extern_func : 'a func_type * 'a -> extern_func
+
+  val extern_type : extern_func -> Binary.func_type
 
   module Syntax : sig
     type l
@@ -144,7 +148,10 @@ module Link : sig
 
   val empty_state : 'f state
 
-  type 'extern_func extern_module = { functions : (string * 'extern_func) list }
+  type 'extern_func extern_module =
+    { functions : (string * 'extern_func) list
+    ; func_type : 'extern_func -> Binary.func_type
+    }
 
   type 'a module_to_run
 

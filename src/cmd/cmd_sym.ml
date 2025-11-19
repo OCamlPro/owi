@@ -45,14 +45,13 @@ let run_file ~parameters ~source_file =
   | _ -> () );
   let* m = Cmd_utils.set_entry_point entry_point invoke_with_symbols m in
   let link_state =
-    let func_typ = Symbolic.Extern_func.extern_type in
     let link_state = Link.empty_state in
     let link_state =
-      Link.extern_module' link_state ~name:"wasi_snapshot_preview1" ~func_typ
+      Link.extern_module link_state ~name:"wasi_snapshot_preview1"
         Symbolic_wasm_ffi.wasi_snapshot_preview1
     in
     let link_state =
-      Link.extern_module' link_state ~name:"owi" ~func_typ
+      Link.extern_module link_state ~name:"owi"
         Symbolic_wasm_ffi.symbolic_extern_module
     in
     link_state

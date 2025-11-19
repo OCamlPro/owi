@@ -209,7 +209,7 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
       ; ("exit", Extern_func (i32 ^->. unit, exit))
       ]
     in
-    { Link.functions }
+    { Link.functions; func_type = Concrete.Extern_func.extern_type }
   in
 
   let link_state =

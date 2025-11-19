@@ -57,7 +57,7 @@ let extern_m =
     ]
   in
 
-  { Link.functions }
+  { Link.functions; func_type = Concrete.Extern_func.extern_type }
 
 let m =
   let open Wast in
