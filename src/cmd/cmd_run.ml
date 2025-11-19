@@ -12,7 +12,7 @@ let cmd ~unsafe ~timeout ~timeout_instr ~source_file =
   in
   let res, run_time =
     Benchmark.with_utime @@ fun () ->
-    Interpret.Concrete.modul ~timeout ~timeout_instr link_state.envs m
+    Interpret.Concrete.modul ~timeout ~timeout_instr link_state m
   in
   Log.bench (fun m ->
     (* run_time shouldn't be none in bench mode *)

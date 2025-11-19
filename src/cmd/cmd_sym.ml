@@ -63,7 +63,7 @@ let run_file ~parameters ~source_file =
   in
   let m = Symbolic.convert_module_to_run m in
   Benchmark.with_utime @@ fun () ->
-  Interpret.Symbolic.modul ~timeout:None ~timeout_instr:None link_state.envs m
+  Interpret.Symbolic.modul ~timeout:None ~timeout_instr:None link_state m
 
 let print_bug ~model_format ~model_out_file ~id ~no_value ~no_stop_at_failure
   ~no_assert_failure_expression_printing ~with_breadcrumbs bug =

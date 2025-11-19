@@ -120,7 +120,7 @@ module type P = sig
   end
 
   module Env : sig
-    type t
+    type t = Extern_func.extern_func Link_env.t
 
     val get_memory : t -> int -> Memory.t Choice.t
 
@@ -151,65 +151,4 @@ module type P = sig
 
     val id : t -> string option
   end
-end
-
-module type S = sig
-  (** Module to interpret a linked module. *)
-  type thread
-
-  type env
-
-  type 'a choice
-
-  type module_to_run
-
-  (** interpret a module *)
-  val modul :
-       timeout:float option
-    -> timeout_instr:int option
-    -> env Env_id.collection
-    -> module_to_run
-    -> unit choice
-
-  type value
-
-  module State : sig
-    type stack
-  end
-
-  (** interpret a function with a given input stack and produce a new stack *)
-  val exec_vfunc_from_outside :
-       locals:value list
-    -> env:Env_id.t
-    -> envs:env Env_id.collection
-    -> Func_intf.t
-    -> value list choice
-
-  val exec_iunop : State.stack -> Binary.nn -> Binary.iunop -> State.stack
-
-  val exec_funop : State.stack -> Binary.nn -> Binary.funop -> State.stack
-
-  val exec_ibinop :
-    State.stack -> Binary.nn -> Binary.ibinop -> State.stack choice
-
-  val exec_fbinop : State.stack -> Binary.nn -> Binary.fbinop -> State.stack
-
-  val exec_itestop : State.stack -> Binary.nn -> Binary.itestop -> State.stack
-
-  val exec_irelop : State.stack -> Binary.nn -> Binary.irelop -> State.stack
-
-  val exec_frelop : State.stack -> Binary.nn -> Binary.frelop -> State.stack
-
-  val exec_itruncf :
-    State.stack -> Binary.nn -> Binary.nn -> Binary.sx -> State.stack choice
-
-  val exec_itruncsatf :
-    State.stack -> Binary.nn -> Binary.nn -> Binary.sx -> State.stack
-
-  val exec_fconverti :
-    State.stack -> Binary.nn -> Binary.nn -> Binary.sx -> State.stack
-
-  val exec_ireinterpretf : State.stack -> Binary.nn -> Binary.nn -> State.stack
-
-  val exec_freinterpreti : State.stack -> Binary.nn -> Binary.nn -> State.stack
 end
