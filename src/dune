@@ -64,6 +64,7 @@
   minimalist_symbolic
   minimalist_symbolic_choice
   named
+  owi
   parse
   pq_imperative
   prio

@@ -266,7 +266,7 @@ let cmd ~unsafe ~replay_file ~source_file ~entry_point ~invoke_with_symbols =
   in
   let r, run_time =
     Benchmark.with_utime @@ fun () ->
-    Interpret.Concrete.modul ~timeout:None ~timeout_instr:None link_state.envs m
+    Interpret.Concrete.modul ~timeout:None ~timeout_instr:None link_state m
   in
   Log.bench (fun m ->
     (* run_time shouldn't be none in bench mode *)

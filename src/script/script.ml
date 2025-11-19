@@ -168,8 +168,8 @@ let run ~no_exhaustion script =
           Compile.Text.until_link link_state ~unsafe ~name:None m
         in
         let+ () =
-          Interpret.Concrete.modul ~timeout:None ~timeout_instr:None
-            link_state.envs m
+          Interpret.Concrete.modul ~timeout:None ~timeout_instr:None link_state
+            m
         in
         (* TODO: enable printing again! *)
         link_state
@@ -181,8 +181,8 @@ let run ~no_exhaustion script =
           Compile.Text.until_link link_state ~unsafe ~name:None m
         in
         let+ () =
-          Interpret.Concrete.modul ~timeout:None ~timeout_instr:None
-            link_state.envs m
+          Interpret.Concrete.modul ~timeout:None ~timeout_instr:None link_state
+            m
         in
         link_state
       | Wast.Binary_module (id, m) ->
@@ -194,8 +194,8 @@ let run ~no_exhaustion script =
           Compile.Binary.until_link link_state ~unsafe ~name:None m
         in
         let+ () =
-          Interpret.Concrete.modul ~timeout:None ~timeout_instr:None
-            link_state.envs m
+          Interpret.Concrete.modul ~timeout:None ~timeout_instr:None link_state
+            m
         in
         link_state
       | Assert (Assert_trap_module (m, expected)) ->
@@ -205,8 +205,8 @@ let run ~no_exhaustion script =
           Compile.Text.until_link link_state ~unsafe ~name:None m
         in
         let got =
-          Interpret.Concrete.modul ~timeout:None ~timeout_instr:None
-            link_state.envs m
+          Interpret.Concrete.modul ~timeout:None ~timeout_instr:None link_state
+            m
         in
         let+ () = check_error_result expected got in
         link_state

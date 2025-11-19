@@ -9,14 +9,7 @@ open Binary
 (* TODO: make this a CLI parameter *)
 let use_ite_for_select = true
 
-module Make (P : Interpret_intf.P) :
-  Interpret_intf.S
-    with type 'a choice := 'a P.Choice.t
-     and type module_to_run := P.Module_to_run.t
-     and type thread := P.thread
-     and type env := P.Env.t
-     and type State.stack := P.Value.t list
-     and type value = P.Value.t = struct
+module Make (P : Interpret_intf.P) = struct
   open P
   open Value
   open Choice
@@ -1607,8 +1600,9 @@ module Make (P : Interpret_intf.P) :
            end
            else Choice.return () )
 
-  let modul ~timeout ~timeout_instr envs (modul : Module_to_run.t) :
+  let modul ~timeout ~timeout_instr link_state (modul : Module_to_run.t) :
     unit P.Choice.t =
+    let envs = link_state.Link.envs in
     let heartbeat = make_heartbeat ~timeout ~timeout_instr () in
     Log.info (fun m -> m "interpreting ...");
     try
@@ -1656,8 +1650,6 @@ module Make (P : Interpret_intf.P) :
           res
       end
     with Stack_overflow -> Choice.trap `Call_stack_exhausted
-
-  type value = Value.t
 end
 
 module Concrete = Make [@inlined hint] (Concrete)

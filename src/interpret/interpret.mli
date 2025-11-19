@@ -6,8 +6,7 @@ module Concrete : sig
   val modul :
        timeout:float option
     -> timeout_instr:int option
-         (* TODO: replace this by a Concrete_extern_func.extern_func Link.state ? *)
-    -> Concrete.Env.t Env_id.collection
+    -> Concrete_extern_func.extern_func Link.state
     -> Concrete.Module_to_run.t
     -> unit Concrete_choice.t
 
@@ -55,7 +54,7 @@ module Symbolic : sig
   val modul :
        timeout:float option
     -> timeout_instr:int option
-    -> Symbolic.Env.t Env_id.collection
+    -> Symbolic.Extern_func.extern_func Link.state
     -> Symbolic.Module_to_run.t
     -> unit Symbolic.Choice.t
 end
@@ -64,7 +63,7 @@ module Minimalist_symbolic : sig
   val modul :
        timeout:float option
     -> timeout_instr:int option
-    -> Minimalist_symbolic.Env.t Env_id.collection
+    -> Minimalist_symbolic.Extern_func.extern_func Link.state
     -> Minimalist_symbolic.Module_to_run.t
     -> unit Minimalist_symbolic.Choice.t
 end
