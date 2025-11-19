@@ -2,7 +2,6 @@
   owi: [INFO] parsing time
   owi: [INFO] typechecking time
   owi: [INFO] validation time
-  owi: [INFO] execution time
   owi: [ERROR] Trap: integer overflow
   model {
     symbol symbol_0 i32
@@ -48,5 +47,6 @@
   owi: [INFO] Benchmarks:
               solver time
               interpreter time
-              
+              execution time
+              path count: 3
   owi: [ERROR] Reached 2 problems!

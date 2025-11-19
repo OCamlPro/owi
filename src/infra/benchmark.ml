@@ -1,4 +1,7 @@
-type stats = { solver_time : Mtime.Span.t Atomic.t }
+type stats =
+  { solver_time : Mtime.Span.t Atomic.t
+  ; path_count : int Atomic.t
+  }
 
 let handle_time_span atomic_span f =
   if Log.is_bench_enabled () then

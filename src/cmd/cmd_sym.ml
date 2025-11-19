@@ -291,8 +291,7 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
     (results, time_after -. time_before)
   in
   let results = sort_results deterministic_result_order results in
-  Log.bench (fun m ->
-    m "execution time: %a" Mtime.Span.pp (Mtime_clock.count time_counter) );
+  let execution_time = Mtime_clock.count time_counter in
   let* count =
     print_and_count_failures ~model_format ~model_out_file ~no_value
       ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
@@ -304,10 +303,17 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
     let bench_stats = Thread_with_memory.bench_stats thread in
     (* run_time shouldn't be none in bench mode *)
     let run_time = match run_time with None -> assert false | Some t -> t in
-    m "Benchmarks:@\n@[<v>solver time: %a@;interpreter time: %fms@;@]"
+    m
+      "Benchmarks:@\n\
+       @[<v>solver time: %a@;\
+       interpreter time: %fms@;\
+       execution time: %a@;\
+       path count: %i@]"
       Mtime.Span.pp
       (Atomic.get bench_stats.solver_time)
-      ((interpreter_time +. run_time) *. 1000.) );
+      ((interpreter_time +. run_time) *. 1000.)
+      Mtime.Span.pp execution_time
+      (Atomic.get bench_stats.path_count) );
 
   let+ () = if count > 0 then Error (`Found_bug count) else Ok () in
   Log.app (fun m -> m "All OK!")

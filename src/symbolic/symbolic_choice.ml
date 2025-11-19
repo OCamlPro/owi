@@ -448,6 +448,8 @@ module Make (Thread : Thread_intf.S) = struct
         let+ () = check_reachability neg_v prio_false in
         false
       in
+      let* thread in
+      Atomic.incr (Thread.bench_stats thread).path_count;
       if explore_first then choose true_branch false_branch
       else choose false_branch true_branch
   [@@inline]
@@ -507,6 +509,8 @@ module Make (Thread : Thread_intf.S) = struct
           let* () = add_pc not_this_value_cond in
           generator ()
         in
+        let* thread in
+        Atomic.incr (Thread.bench_stats thread).path_count;
         choose this_val_branch not_this_val_branch
       in
       generator ()
