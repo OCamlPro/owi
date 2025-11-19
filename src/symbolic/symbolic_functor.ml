@@ -134,22 +134,4 @@ struct
 
     let drop_data = Link_env.drop_data
   end
-
-  module Module_to_run = struct
-    (** runnable module *)
-    type t =
-      { id : string option
-      ; env : Env.t
-      ; to_run : Binary.expr Annotated.t list
-      }
-
-    let env (t : t) = t.env
-
-    let id (t : t) = t.id
-
-    let to_run (t : t) = t.to_run
-  end
-
-  let convert_module_to_run (m : 'f Link.module_to_run) =
-    Module_to_run.{ id = m.id; env = m.env; to_run = m.to_run }
 end

@@ -61,7 +61,6 @@ let run_file ~parameters ~source_file =
     (* unsafe is set to true because the module was already validated before *)
     Compile.Binary.until_link ~unsafe:true ~name:None link_state m
   in
-  let m = Symbolic.convert_module_to_run m in
   Benchmark.with_utime @@ fun () ->
   Interpret.Symbolic.modul ~timeout:None ~timeout_instr:None link_state m
 

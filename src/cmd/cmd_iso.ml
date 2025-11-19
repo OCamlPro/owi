@@ -324,8 +324,6 @@ let check_iso ~unsafe export_name export_type module1 module2 =
   let+ m, link_state =
     Compile.Binary.until_link ~unsafe:false ~name:None link_state modul
   in
-  let m = Symbolic.convert_module_to_run m in
-
   Interpret.Symbolic.modul ~timeout:None ~timeout_instr:None link_state m
 
 module String_set = Set.Make (String)

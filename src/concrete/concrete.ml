@@ -40,14 +40,3 @@ module Env = struct
     let data = get_data env n in
     data
 end
-
-module Module_to_run = struct
-  (** runnable module *)
-  type t = Extern_func.extern_func Link.module_to_run
-
-  let env (t : Extern_func.extern_func Link.module_to_run) = t.env
-
-  let id (t : Extern_func.extern_func Link.module_to_run) = t.id
-
-  let to_run (t : Extern_func.extern_func Link.module_to_run) = t.to_run
-end

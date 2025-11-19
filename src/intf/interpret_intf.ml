@@ -140,15 +140,4 @@ module type P = sig
 
     val drop_data : Data.t -> unit
   end
-
-  module Module_to_run : sig
-    (** runnable module *)
-    type t
-
-    val env : t -> Env.t
-
-    val to_run : t -> Binary.expr Annotated.t list
-
-    val id : t -> string option
-  end
 end

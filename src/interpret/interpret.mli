@@ -7,7 +7,7 @@ module Concrete : sig
        timeout:float option
     -> timeout_instr:int option
     -> Concrete_extern_func.extern_func Link.state
-    -> Concrete.Module_to_run.t
+    -> Concrete_extern_func.extern_func Link.module_to_run
     -> unit Concrete_choice.t
 
   val exec_vfunc_from_outside :
@@ -55,7 +55,7 @@ module Symbolic : sig
        timeout:float option
     -> timeout_instr:int option
     -> Symbolic.Extern_func.extern_func Link.state
-    -> Symbolic.Module_to_run.t
+    -> Symbolic.Extern_func.extern_func Link.module_to_run
     -> unit Symbolic.Choice.t
 end
 
@@ -64,6 +64,6 @@ module Minimalist_symbolic : sig
        timeout:float option
     -> timeout_instr:int option
     -> Minimalist_symbolic.Extern_func.extern_func Link.state
-    -> Minimalist_symbolic.Module_to_run.t
+    -> Minimalist_symbolic.Extern_func.extern_func Link.module_to_run
     -> unit Minimalist_symbolic.Choice.t
 end
