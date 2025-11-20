@@ -4,4 +4,4 @@
 
 include Wasm_ffi_intf.S with type extern_func = Symbolic.Extern_func.extern_func
 
-val wasi_snapshot_preview1 : extern_func Link.extern_module
+val wasi_snapshot_preview1 : extern_func Extern.Module.t

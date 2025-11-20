@@ -4,8 +4,6 @@
 
 open Fmt
 
-type extern_module = Concrete_extern_func.extern_func Link.extern_module
-
 let ( let* ) = Result.bind
 
 let extern_m =
@@ -57,7 +55,7 @@ let extern_m =
     ]
   in
 
-  { Link.functions; func_type = Concrete.Extern_func.extern_type }
+  { Extern.Module.functions; func_type = Concrete.Extern_func.extern_type }
 
 let m =
   let open Wast in

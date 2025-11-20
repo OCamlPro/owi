@@ -934,29 +934,39 @@ module Label : sig
   end
 end
 
+module Linked : sig
+  module Module : sig
+    type 'f t
+  end
+end
+
+module Extern : sig
+  module Module : sig
+    type 'f t =
+      { functions : (string * 'f) list
+      ; func_type : 'f -> Binary.func_type
+      }
+  end
+end
+
 module Link : sig
-  type 'f state
+  module State : sig
+    type 'f t
 
-  val empty_state : 'f state
+    val empty : 'f t
+  end
 
-  type 'extern_func extern_module =
-    { functions : (string * 'extern_func) list
-    ; func_type : 'extern_func -> Binary.func_type
-    }
+  module Binary : sig
+    val modul :
+         name:string option
+      -> 'f State.t
+      -> Binary.Module.t
+      -> ('f Linked.Module.t * 'f State.t) Result.t
+  end
 
-  type 'a module_to_run
-
-  val extern_module :
-       Concrete_extern_func.extern_func state
-    -> name:string
-    -> Concrete_extern_func.extern_func extern_module
-    -> Concrete_extern_func.extern_func state
-
-  val modul :
-       'f state
-    -> name:string option
-    -> Binary.Module.t
-    -> ('f module_to_run * 'f state) Result.t
+  module Extern : sig
+    val modul : name:string -> 'f Extern.Module.t -> 'f State.t -> 'f State.t
+  end
 end
 
 module Compile : sig
@@ -966,11 +976,9 @@ module Compile : sig
     val until_link :
          unsafe:bool
       -> name:string option
-      -> Concrete_extern_func.extern_func Link.state
+      -> 'f Link.State.t
       -> Text.Module.t
-      -> ( Concrete_extern_func.extern_func Link.module_to_run
-         * Concrete_extern_func.extern_func Link.state )
-         Result.t
+      -> ('f Linked.Module.t * 'f Link.State.t) Result.t
   end
 end
 
@@ -983,8 +991,8 @@ module Interpret : sig
     val modul :
          timeout:float option
       -> timeout_instr:int option
-      -> Concrete_extern_func.extern_func Link.state
-      -> Concrete_extern_func.extern_func Link.module_to_run
+      -> Concrete_extern_func.extern_func Link.State.t
+      -> Concrete_extern_func.extern_func Linked.Module.t
       -> unit Result.t
   end
 end

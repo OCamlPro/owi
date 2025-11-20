@@ -45,6 +45,7 @@
   convert
   env_id
   exploration_smart
+  extern
   float32
   float64
   func_id
@@ -59,6 +60,7 @@
   kind
   label
   link
+  linked
   link_env
   log
   named

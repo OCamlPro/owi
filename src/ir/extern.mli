@@ -2,8 +2,9 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type 'f t =
-  | Wat of Text.Module.t
-  | Wast of Wast.script
-  | Wasm of Binary.Module.t
-  | Extern of 'f Extern.Module.t
+module Module : sig
+  type 'f t =
+    { functions : (string * 'f) list
+    ; func_type : 'f -> Binary.func_type
+    }
+end

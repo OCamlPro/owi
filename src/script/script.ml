@@ -41,12 +41,12 @@ let load_func_from_module ls mod_id f_name =
   let* exports, env_id =
     match mod_id with
     | None -> begin
-      match ls.Link.last with
+      match ls.Link.State.last with
       | None -> Error `Unbound_last_module
       | Some m -> Ok m
     end
     | Some mod_id -> (
-      match Link.StringMap.find_opt mod_id ls.Link.by_id with
+      match Link.StringMap.find_opt mod_id ls.Link.State.by_id with
       | None -> Error (`Unbound_module mod_id)
       | Some exports -> Ok exports )
   in
@@ -58,12 +58,12 @@ let load_global_from_module ls mod_id name =
   let* exports =
     match mod_id with
     | None -> begin
-      match ls.Link.last with
+      match ls.Link.State.last with
       | None -> Error `Unbound_last_module
       | Some (m, _env_id) -> Ok m
     end
     | Some mod_id -> (
-      match Link.StringMap.find_opt mod_id ls.Link.by_id with
+      match Link.StringMap.find_opt mod_id ls.Link.State.by_id with
       | None -> Error (`Unbound_module mod_id)
       | Some (exports, _env_id) -> Ok exports )
   in
@@ -130,7 +130,8 @@ let value_of_const : Wast.const -> V.t = function
       m "TODO: unimplemented Script.value_of_const %a)" Wast.pp_const i );
     assert false
 
-let action (link_state : Concrete_extern_func.extern_func Link.state) = function
+let action (link_state : Concrete_extern_func.extern_func Link.State.t) =
+  function
   | Wast.Invoke (mod_id, f, args) -> begin
     Log.info (fun m ->
       m "invoke %a %s %a..."
@@ -150,14 +151,14 @@ let unsafe = false
 
 let run ~no_exhaustion script =
   let state =
-    Link.extern_module Link.empty_state ~name:"spectest_extern"
-      Spectest.extern_m
+    Link.Extern.modul ~name:"spectest_extern" Spectest.extern_m Link.State.empty
   in
   let script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
   let registered = ref false in
   let curr_module = ref 0 in
   list_fold_left
-    (fun (link_state : Concrete_extern_func.extern_func Link.state) -> function
+    (fun (link_state : Concrete_extern_func.extern_func Link.State.t) ->
+      function
       | Wast.Text_module m ->
         if !curr_module = 0 then
           (* TODO: disable printing*)
@@ -238,7 +239,7 @@ let run ~no_exhaustion script =
             match Binary_validate.modul m with
             | Error got -> check_error ~expected ~got
             | Ok () ->
-              let got = Link.modul link_state ~name:None m in
+              let got = Link.Binary.modul link_state ~name:None m in
               check_error_result expected got
           end
         in
@@ -293,7 +294,7 @@ let run ~no_exhaustion script =
       | Register (name, mod_name) ->
         if !curr_module = 1 && not !registered then (* TODO: disable debug *) ();
         Log.info (fun m -> m "*** register");
-        let+ state = Link.register_module link_state ~name ~id:mod_name in
+        let+ state = Link.register_last_module link_state ~name ~id:mod_name in
         (* TODO: enable debug again! *)
         state
       | Action a ->

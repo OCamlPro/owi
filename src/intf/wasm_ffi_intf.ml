@@ -67,5 +67,5 @@ end
 module type S = sig
   type extern_func
 
-  val symbolic_extern_module : extern_func Link.extern_module
+  val symbolic_extern_module : extern_func Extern.Module.t
 end

@@ -49,7 +49,7 @@ let binaryen_fuzzing_support_module weird_log_i64 =
     ; ("sleep", Extern_func (i32 ^-> i32 ^->. i32, sleep))
     ]
   in
-  { Link.functions; func_type = Symbolic.Extern_func.extern_type }
+  { Extern.Module.functions; func_type = Symbolic.Extern_func.extern_type }
 
 let emscripten_fuzzing_support_module () =
   let temp_ret_0 = ref (Smtml.Expr.value (Smtml.Value.Int 0)) in
@@ -65,7 +65,7 @@ let emscripten_fuzzing_support_module () =
     ; ("getTempRet0", Extern_func (unit ^->. i32, get_temp_ret_0))
     ]
   in
-  { Link.functions; func_type = Symbolic.Extern_func.extern_type }
+  { Extern.Module.functions; func_type = Symbolic.Extern_func.extern_type }
 
 let check_iso ~unsafe export_name export_type module1 module2 =
   let weird_log_i64 =
@@ -82,16 +82,11 @@ let check_iso ~unsafe export_name export_type module1 module2 =
   in
 
   let link_state =
-    Link.extern_module Link.empty_state ~name:"owi"
-      Symbolic_wasm_ffi.symbolic_extern_module
-  in
-  let link_state =
-    Link.extern_module link_state ~name:"fuzzing-support"
-      (binaryen_fuzzing_support_module weird_log_i64)
-  in
-  let link_state =
-    Link.extern_module link_state ~name:"env"
-      (emscripten_fuzzing_support_module ())
+    Link.State.empty
+    |> Link.Extern.modul ~name:"owi" Symbolic_wasm_ffi.symbolic_extern_module
+    |> Link.Extern.modul ~name:"fuzzing-support"
+         (binaryen_fuzzing_support_module weird_log_i64)
+    |> Link.Extern.modul ~name:"env" (emscripten_fuzzing_support_module ())
   in
   let* _module, link_state =
     Compile.Binary.until_link ~name:(Some module_name1) ~unsafe link_state
