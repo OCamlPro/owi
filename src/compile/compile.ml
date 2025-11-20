@@ -30,7 +30,7 @@ module Text = struct
 
   let until_link ~unsafe ~name link_state m =
     let* m = until_validate ~unsafe m in
-    Link.modul link_state ~name m
+    Link.Binary.modul link_state ~name m
 end
 
 module Binary = struct
@@ -42,7 +42,7 @@ module Binary = struct
 
   let until_link ~unsafe ~name link_state m =
     let* m = until_validate ~unsafe m in
-    Link.modul link_state ~name m
+    Link.Binary.modul link_state ~name m
 end
 
 module Any = struct
@@ -50,13 +50,13 @@ module Any = struct
     | Kind.Wat m -> Text.until_validate ~unsafe m
     | Wasm m -> Binary.until_validate ~unsafe m
     | Wast _ -> Fmt.error_msg "can not validate a .wast file"
-    | Ocaml _ -> Fmt.error_msg "can not validate an OCaml module"
+    | Extern _ -> Fmt.error_msg "can not validate an OCaml module"
 
   let until_link ~unsafe ~name link_state = function
     | Kind.Wat m -> Text.until_link ~unsafe ~name link_state m
     | Wasm m -> Binary.until_link ~unsafe ~name link_state m
-    | Ocaml _m ->
-      (* TODO: we may be able to handle linking here but return an empty runnable module ? *)
+    | Extern _m ->
+      (* TODO: Link.Extern.modul m *)
       Fmt.error_msg "can not link an OCaml module"
     | Wast _ -> Fmt.error_msg "can not link a .wast file"
 end
@@ -67,7 +67,7 @@ module File = struct
     match m with
     | Kind.Wat m -> Text.until_binary ~unsafe m
     | Wasm m -> Ok m
-    | Wast _ | Ocaml _ -> assert false
+    | Wast _ | Extern _ -> assert false
 
   let until_validate ~unsafe filename =
     let* m = Parse.guess_from_file filename in
@@ -75,12 +75,12 @@ module File = struct
     match m with
     | Kind.Wat m -> Text.until_validate ~unsafe m
     | Wasm m -> Binary.until_validate ~unsafe m
-    | Wast _ | Ocaml _ -> assert false
+    | Wast _ | Extern _ -> assert false
 
   let until_link ~unsafe ~name link_state filename =
     let* m = Parse.guess_from_file filename in
     match m with
     | Kind.Wat m -> Text.until_link ~unsafe ~name link_state m
     | Wasm m -> Binary.until_link ~unsafe ~name link_state m
-    | Wast _ | Ocaml _ -> assert false
+    | Wast _ | Extern _ -> assert false
 end

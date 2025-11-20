@@ -209,11 +209,11 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
       ; ("exit", Extern_func (i32 ^->. unit, exit))
       ]
     in
-    { Link.functions; func_type = Concrete.Extern_func.extern_type }
+    { Extern.Module.functions; func_type = Concrete.Extern_func.extern_type }
   in
 
   let link_state =
-    Link.extern_module Link.empty_state ~name:"owi" replay_extern_module
+    Link.Extern.modul ~name:"owi" replay_extern_module Link.State.empty
   in
 
   let* m = Compile.File.until_binary ~unsafe filename in

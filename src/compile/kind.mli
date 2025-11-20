@@ -2,8 +2,8 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type 'extern_func t =
+type 'f t =
   | Wat of Text.Module.t
   | Wast of Wast.script
   | Wasm of Binary.Module.t
-  | Ocaml of 'extern_func Link.extern_module
+  | Extern of 'f Extern.Module.t

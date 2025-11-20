@@ -5,17 +5,16 @@
 (** Utility functions to compile a module until a given step. *)
 
 module Any : sig
-  val until_validate :
-    unsafe:bool -> 'extern_func Kind.t -> Binary.Module.t Result.t
+  val until_validate : unsafe:bool -> 'f Kind.t -> Binary.Module.t Result.t
 
   (** compile a module with a given link state and produce a new link state and
       a runnable module *)
   val until_link :
        unsafe:bool
     -> name:string option
-    -> 'extern_func Link.state
-    -> 'extern_func Kind.t
-    -> ('extern_func Link.module_to_run * 'extern_func Link.state) Result.t
+    -> 'f Link.State.t
+    -> 'f Kind.t
+    -> ('f Linked.Module.t * 'f Link.State.t) Result.t
 end
 
 module File : sig
@@ -28,9 +27,9 @@ module File : sig
   val until_link :
        unsafe:bool
     -> name:string option
-    -> 'extern_func Link.state
+    -> 'f Link.State.t
     -> Fpath.t
-    -> ('extern_func Link.module_to_run * 'extern_func Link.state) Result.t
+    -> ('f Linked.Module.t * 'f Link.State.t) Result.t
 end
 
 module Text : sig
@@ -43,9 +42,9 @@ module Text : sig
   val until_link :
        unsafe:bool
     -> name:string option
-    -> 'f Link.state
+    -> 'f Link.State.t
     -> Text.Module.t
-    -> ('f Link.module_to_run * 'f Link.state) Result.t
+    -> ('f Linked.Module.t * 'f Link.State.t) Result.t
 end
 
 module Binary : sig
@@ -57,7 +56,7 @@ module Binary : sig
   val until_link :
        unsafe:bool
     -> name:string option
-    -> 'f Link.state
+    -> 'f Link.State.t
     -> Binary.Module.t
-    -> ('f Link.module_to_run * 'f Link.state) Result.t
+    -> ('f Linked.Module.t * 'f Link.State.t) Result.t
 end

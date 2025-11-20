@@ -4,9 +4,11 @@
 
 (** The `spectest` module, to run script from the official test suite. *)
 
-type extern_module = Concrete_extern_func.extern_func Link.extern_module
+(* OCaml definition *)
+val extern_m : Concrete_extern_func.extern_func Extern.Module.t
 
-val extern_m : extern_module
+(* TODO: this can probably be removed by directly registering the previous module in script.ml ? *)
 
-(** the spectest module *)
+(** the spectest module, which is simply a Wast Text module importing everything
+    required *)
 val m : Wast.cmd

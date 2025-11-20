@@ -12,69 +12,59 @@ type table = Concrete_table.t
 
 type func = Concrete_extern_func.t
 
-type exports =
-  { globals : global StringMap.t
-  ; memories : Concrete_memory.t StringMap.t
-  ; tables : table StringMap.t
-  ; functions : func StringMap.t
-  ; defined_names : StringSet.t
-  }
+module State = struct
+  type exports =
+    { globals : global StringMap.t
+    ; memories : Concrete_memory.t StringMap.t
+    ; tables : table StringMap.t
+    ; functions : func StringMap.t
+    ; defined_names : StringSet.t
+    }
 
-type 'f module_to_run =
-  { id : string option
-  ; env : 'f Link_env.t
-  ; to_run : Binary.expr Annotated.t list
-  }
+  type 'f envs = 'f Link_env.t Env_id.collection
 
-type 'f envs = 'f Link_env.t Env_id.collection
+  type 'f t =
+    { by_name : exports StringMap.t
+    ; by_id : (exports * Env_id.t) StringMap.t
+    ; last : (exports * Env_id.t) option
+    ; collection : 'f Func_id.collection
+    ; envs : 'f envs
+    }
 
-type fenvs = Concrete_extern_func.extern_func Link_env.t Env_id.collection
+  let empty =
+    { by_name = StringMap.empty
+    ; by_id = StringMap.empty
+    ; last = None
+    ; collection = Func_id.empty
+    ; envs = Env_id.empty
+    }
 
-type 'f state =
-  { by_name : exports StringMap.t
-  ; by_id : (exports * Env_id.t) StringMap.t
-  ; last : (exports * Env_id.t) option
-  ; collection : 'f Func_id.collection
-  ; envs : 'f envs
-  }
+  let load_from_module ls f (import : _ Imported.t) =
+    match StringMap.find_opt import.modul ls.by_name with
+    | None -> Error (`Unknown_module import.modul)
+    | Some exports -> (
+      match StringMap.find_opt import.name (f exports) with
+      | None ->
+        if StringSet.mem import.name exports.defined_names then
+          Error (`Incompatible_import_type import.name)
+        else Error (`Unknown_import (import.modul, import.name))
+      | Some v -> Ok v )
 
-type 'extern_func extern_module =
-  { functions : (string * 'extern_func) list
-  ; func_type : 'extern_func -> Binary.func_type
-  }
+  let load_global (ls : 'f t) (import : Binary.Global.Type.t Imported.t) :
+    global Result.t =
+    let* global = load_from_module ls (fun (e : exports) -> e.globals) import in
+    let* () =
+      match (fst import.typ, global.mut) with
+      | Var, Const | Const, Var -> Error (`Incompatible_import_type import.name)
+      | Const, Const | Var, Var -> Ok ()
+    in
+    if not @@ Binary.val_type_eq (snd import.typ) global.typ then begin
+      Error (`Incompatible_import_type import.name)
+    end
+    else Ok global
+end
 
-let empty_state =
-  { by_name = StringMap.empty
-  ; by_id = StringMap.empty
-  ; last = None
-  ; collection = Func_id.empty
-  ; envs = Env_id.empty
-  }
-
-let load_from_module ls f (import : _ Imported.t) =
-  match StringMap.find_opt import.modul ls.by_name with
-  | None -> Error (`Unknown_module import.modul)
-  | Some exports -> (
-    match StringMap.find_opt import.name (f exports) with
-    | None ->
-      if StringSet.mem import.name exports.defined_names then
-        Error (`Incompatible_import_type import.name)
-      else Error (`Unknown_import (import.modul, import.name))
-    | Some v -> Ok v )
-
-let load_global (ls : 'f state) (import : Binary.Global.Type.t Imported.t) :
-  global Result.t =
-  let* global = load_from_module ls (fun (e : exports) -> e.globals) import in
-  let* () =
-    match (fst import.typ, global.mut) with
-    | Var, Const | Const, Var -> Error (`Incompatible_import_type import.name)
-    | Const, Const | Var, Var -> Ok ()
-  in
-  if not @@ Binary.val_type_eq (snd import.typ) global.typ then begin
-    Error (`Incompatible_import_type import.name)
-  end
-  else Ok global
-
+(* TODO; the const evaluation is duplicated in many places and should be moved somewhere else! *)
 module Eval_const = struct
   module Stack = Stack.Make [@inlined hint] (Concrete_value)
 
@@ -138,7 +128,7 @@ let eval_global ls env
     let mut, typ = global.typ in
     let global : global = { value; label = global.id; mut; typ } in
     Ok global
-  | Imported import -> load_global ls import
+  | Imported import -> State.load_global ls import
 
 let eval_globals ls env globals : Link_env.Build.t Result.t =
   let+ env, _i =
@@ -151,18 +141,7 @@ let eval_globals ls env globals : Link_env.Build.t Result.t =
   in
   env
 
-(*
-let eval_in_data (env : Link_env.t) (data : _ data') : (int, value) data' =
-  let mode =
-    match data.mode with
-    | Data_passive -> Data_passive
-    | Data_active (id, expr) ->
-      let const = Const_interp.exec_expr env expr in
-      Data_active (id, const)
-  in
-  { data with mode }
-*)
-
+(* TODO: IIRC this is duplicated and should be refactored *)
 let limit_is_included ~import ~imported =
   imported.Binary.min >= import.Binary.min
   &&
@@ -171,9 +150,11 @@ let limit_is_included ~import ~imported =
   | None, Some _ -> false
   | Some i, Some j -> i <= j
 
-let load_memory (ls : 'f state) (import : Binary.limits Imported.t) :
+let load_memory (ls : 'f State.t) (import : Binary.limits Imported.t) :
   Concrete_memory.t Result.t =
-  let* mem = load_from_module ls (fun (e : exports) -> e.memories) import in
+  let* mem =
+    State.load_from_module ls (fun (e : State.exports) -> e.memories) import
+  in
   let imported_limit = Concrete_memory.get_limits mem in
   if limit_is_included ~import:import.typ ~imported:imported_limit then Ok mem
   else Error (`Incompatible_import_type import.name)
@@ -198,10 +179,12 @@ let eval_memories ls env memories =
 let table_types_are_compatible (import, (t1 : Binary.ref_type)) (imported, t2) =
   limit_is_included ~import ~imported && Binary.ref_type_eq t1 t2
 
-let load_table (ls : 'f state) (import : Binary.Table.Type.t Imported.t) :
+let load_table (ls : 'f State.t) (import : Binary.Table.Type.t Imported.t) :
   table Result.t =
   let typ : Binary.Table.Type.t = import.typ in
-  let* t = load_from_module ls (fun (e : exports) -> e.tables) import in
+  let* t =
+    State.load_from_module ls (fun (e : State.exports) -> e.tables) import
+  in
   if table_types_are_compatible typ (t.limits, t.typ) then Ok t
   else Error (`Incompatible_import_type import.name)
 
@@ -222,10 +205,12 @@ let eval_tables ls env tables =
   in
   env
 
-let load_func (ls : 'f state) (import : Binary.block_type Imported.t) :
+let load_func (ls : 'f State.t) (import : Binary.block_type Imported.t) :
   func Result.t =
   let (Binary.Bt_raw ((None | Some _), typ)) = import.typ in
-  let* func = load_from_module ls (fun (e : exports) -> e.functions) import in
+  let* func =
+    State.load_from_module ls (fun (e : State.exports) -> e.functions) import
+  in
   let type' =
     match func with
     | Func_intf.WASM (_, func, _) ->
@@ -331,8 +316,8 @@ let define_elem env elem =
   in
   (env, List.rev inits)
 
-let populate_exports env (exports : Binary.Module.Exports.t) : exports Result.t
-    =
+let populate_exports env (exports : Binary.Module.Exports.t) :
+  State.exports Result.t =
   let fill_exports get_env exports names =
     list_fold_left
       (fun (acc, names) ({ name; id; _ } : Binary.Export.t) ->
@@ -355,81 +340,82 @@ let populate_exports env (exports : Binary.Module.Exports.t) : exports Result.t
   in
   let* memories, names = fill_exports' Link_env.get_memory exports.mem names in
   let* tables, names = fill_exports' Link_env.get_table exports.table names in
-  let* functions, names = fill_exports Link_env.get_func exports.func names in
-  Ok { globals; memories; tables; functions; defined_names = names }
+  let+ functions, names = fill_exports Link_env.get_func exports.func names in
+  { State.globals; memories; tables; functions; defined_names = names }
 
-let modul (ls : 'f state) ~name (modul : Binary.Module.t) =
-  Log.info (fun m -> m "linking      ...");
-  let* envs, (env, init_active_data, init_active_elem) =
-    Env_id.with_fresh_id
-      (fun env_id ->
-        let env = Link_env.Build.empty in
-        let* env = eval_functions ls env_id env modul.func in
-        let* env = eval_globals ls env modul.global in
-        let* env = eval_memories ls env modul.mem in
-        let* env = eval_tables ls env modul.table in
-        let* env, init_active_data = define_data env modul.data in
-        let+ env, init_active_elem = define_elem env modul.elem in
-        let finished_env = Link_env.freeze env_id env ls.collection in
-        (finished_env, (finished_env, init_active_data, init_active_elem)) )
-      ls.envs
-  in
-  let* by_id_exports = populate_exports env modul.exports in
-  let by_id =
-    match modul.id with
-    | None -> ls.by_id
-    | Some id -> StringMap.add id (by_id_exports, Link_env.id env) ls.by_id
-  in
-  let by_name =
-    match name with
-    | None -> ls.by_name
-    | Some name -> StringMap.add name by_id_exports ls.by_name
-  in
-  let start =
-    Option.map (fun start_id -> [ Binary.Call start_id ]) modul.start
-  in
-  let start = Option.fold ~none:[] ~some:(fun s -> [ s ]) start in
-  let to_run = (init_active_data @ init_active_elem) @ start in
-  let to_run = List.map Annotated.dummy_deep to_run in
-  let module_to_run = { id = modul.id; env; to_run } in
-  Ok
-    ( module_to_run
-    , { by_id
+module Binary = struct
+  let modul ~name (ls : 'f State.t) (modul : Binary.Module.t) =
+    Log.info (fun m -> m "linking      ...");
+    let* envs, (env, init_active_data, init_active_elem) =
+      Env_id.with_fresh_id
+        (fun env_id ->
+          let env = Link_env.Build.empty in
+          let* env = eval_functions ls env_id env modul.func in
+          let* env = eval_globals ls env modul.global in
+          let* env = eval_memories ls env modul.mem in
+          let* env = eval_tables ls env modul.table in
+          let* env, init_active_data = define_data env modul.data in
+          let+ env, init_active_elem = define_elem env modul.elem in
+          let finished_env = Link_env.freeze env_id env ls.collection in
+          (finished_env, (finished_env, init_active_data, init_active_elem)) )
+        ls.envs
+    in
+    let+ by_id_exports = populate_exports env modul.exports in
+    let by_id =
+      match modul.id with
+      | None -> ls.by_id
+      | Some id -> StringMap.add id (by_id_exports, Link_env.id env) ls.by_id
+    in
+    let by_name =
+      match name with
+      | None -> ls.by_name
+      | Some name -> StringMap.add name by_id_exports ls.by_name
+    in
+    let start =
+      Option.map (fun start_id -> [ Binary.Call start_id ]) modul.start
+    in
+    let start = Option.fold ~none:[] ~some:(fun s -> [ s ]) start in
+    let to_run = (init_active_data @ init_active_elem) @ start in
+    let to_run = List.map Annotated.dummy_deep to_run in
+    let modul = { Linked.Module.id = modul.id; env; to_run } in
+    ( modul
+    , { State.by_id
       ; by_name
       ; last = Some (by_id_exports, Link_env.id env)
       ; collection = ls.collection
       ; envs
       } )
+end
 
-let extern_module' (ls : 'f state) ~name (modul : 'f extern_module) =
-  let functions, collection =
-    List.fold_left
-      (fun (functions, collection) (name, func) ->
-        let typ = modul.func_type func in
-        let id, collection = Func_id.add func typ collection in
-        ((name, Func_intf.Extern id) :: functions, collection) )
-      ([], ls.collection) modul.functions
-  in
-  let functions = StringMap.of_seq (List.to_seq functions) in
-  let defined_names =
-    StringMap.fold
-      (fun name _ set -> StringSet.add name set)
-      functions StringSet.empty
-  in
-  let exports =
-    { functions
-    ; globals = StringMap.empty
-    ; memories = StringMap.empty
-    ; tables = StringMap.empty
-    ; defined_names
-    }
-  in
-  { ls with by_name = StringMap.add name exports ls.by_name; collection }
+module Extern = struct
+  let modul ~name (modul : 'f Extern.Module.t) (ls : 'f State.t) =
+    let functions, collection =
+      List.fold_left
+        (fun (functions, collection) (name, func) ->
+          let typ = modul.func_type func in
+          let id, collection = Func_id.add func typ collection in
+          ((name, Func_intf.Extern id) :: functions, collection) )
+        ([], ls.collection) modul.functions
+    in
+    let functions = StringMap.of_seq (List.to_seq functions) in
+    let defined_names =
+      StringMap.fold
+        (fun name _ set -> StringSet.add name set)
+        functions StringSet.empty
+    in
+    let exports =
+      { State.functions
+      ; globals = StringMap.empty
+      ; memories = StringMap.empty
+      ; tables = StringMap.empty
+      ; defined_names
+      }
+    in
+    { ls with by_name = StringMap.add name exports ls.by_name; collection }
+end
 
-let extern_module ls ~name modul = extern_module' ls ~name modul
-
-let register_module (ls : 'f state) ~name ~(id : string option) :
-  'f state Result.t =
+let register_last_module (ls : 'f State.t) ~name ~(id : string option) :
+  'f State.t Result.t =
   let* exports, _env_id =
     match id with
     | Some id -> begin
@@ -441,5 +427,3 @@ let register_module (ls : 'f state) ~name ~(id : string option) :
       match ls.last with Some e -> Ok e | None -> Error `Unbound_last_module )
   in
   Ok { ls with by_name = StringMap.add name exports ls.by_name }
-
-type extern_func = Concrete_extern_func.extern_func Func_id.collection

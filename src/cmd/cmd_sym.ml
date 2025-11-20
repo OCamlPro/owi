@@ -45,16 +45,10 @@ let run_file ~parameters ~source_file =
   | _ -> () );
   let* m = Cmd_utils.set_entry_point entry_point invoke_with_symbols m in
   let link_state =
-    let link_state = Link.empty_state in
-    let link_state =
-      Link.extern_module link_state ~name:"wasi_snapshot_preview1"
-        Symbolic_wasm_ffi.wasi_snapshot_preview1
-    in
-    let link_state =
-      Link.extern_module link_state ~name:"owi"
-        Symbolic_wasm_ffi.symbolic_extern_module
-    in
-    link_state
+    Link.State.empty
+    |> Link.Extern.modul ~name:"wasi_snapshot_preview1"
+         Symbolic_wasm_ffi.wasi_snapshot_preview1
+    |> Link.Extern.modul ~name:"owi" Symbolic_wasm_ffi.symbolic_extern_module
   in
   let+ m, link_state =
     (* unsafe is set to true because the module was already validated before *)

@@ -1600,9 +1600,9 @@ module Make (P : Interpret_intf.P) = struct
            end
            else Choice.return () )
 
-  let modul ~timeout ~timeout_instr (link_state : 'extern_func Link.state)
-    (modul : 'extern_func Link.module_to_run) : unit P.Choice.t =
-    let envs = link_state.Link.envs in
+  let modul ~timeout ~timeout_instr (link_state : 'f Link.State.t)
+    (modul : 'extern_func Linked.Module.t) : unit P.Choice.t =
+    let envs = link_state.Link.State.envs in
     let heartbeat = make_heartbeat ~timeout ~timeout_instr () in
     Log.info (fun m -> m "interpreting ...");
     try

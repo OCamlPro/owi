@@ -1,7 +1,7 @@
 open Owi
 
 (* an extern module that will be linked with a wasm module *)
-let extern_module : Concrete_extern_func.extern_func Link.extern_module =
+let extern_module : Concrete_extern_func.extern_func Extern.Module.t =
   (* some custom functions *)
   let memset m start byte length =
     let rec loop offset =
@@ -26,11 +26,11 @@ let extern_module : Concrete_extern_func.extern_func Link.extern_module =
     ; ("memset", Extern_func (memory ^-> i32 ^-> i32 ^-> i32 ^->. unit, memset))
     ]
   in
-  { functions; func_type = Concrete_extern_func.extern_type }
+  { Extern.Module.functions; func_type = Concrete_extern_func.extern_type }
 
 (* a link state that contains our custom module, available under the name `chorizo` *)
 let link_state =
-  Link.extern_module Link.empty_state ~name:"chorizo" extern_module
+  Link.Extern.modul ~name:"chorizo" extern_module Link.State.empty
 
 (* a pure wasm module refering to `$extern_mem` *)
 let pure_wasm_module =
