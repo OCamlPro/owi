@@ -449,7 +449,7 @@ module Make (Thread : Thread_intf.S) = struct
         false
       in
       let* thread in
-      Atomic.incr (Thread.bench_stats thread).path_count;
+      Thread.incr_path_count thread;
       if explore_first then choose true_branch false_branch
       else choose false_branch true_branch
   [@@inline]
@@ -510,7 +510,7 @@ module Make (Thread : Thread_intf.S) = struct
           generator ()
         in
         let* thread in
-        Atomic.incr (Thread.bench_stats thread).path_count;
+        Thread.incr_path_count thread;
         choose this_val_branch not_this_val_branch
       in
       generator ()

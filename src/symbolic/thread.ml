@@ -97,6 +97,8 @@ struct
     let open Symbol_scope in
     { t with symbol_scopes = close_scope t.symbol_scopes }
 
+  let incr_path_count t = Atomic.incr (bench_stats t).path_count
+
   let clone
     { num_symbols
     ; symbol_scopes
@@ -111,11 +113,6 @@ struct
     let memories = Memory.clone memories in
     let tables = Symbolic_table.clone tables in
     let globals = Symbolic_global.clone globals in
-    let bench_stats : Benchmark.stats =
-      { solver_time = bench_stats.solver_time
-      ; path_count = bench_stats.path_count
-      }
-    in
     { num_symbols
     ; symbol_scopes
     ; pc
