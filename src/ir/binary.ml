@@ -16,14 +16,6 @@ let pp_id_opt fmt = function None -> () | Some i -> pf fmt " %a" pp_id i
 
 let pp_indice fmt i = int fmt i
 
-let compare_indice id1 id2 = compare id1 id2
-
-let indice_eq id1 id2 = compare_indice id1 id2 = 0
-
-let pp_indice_opt fmt = function None -> () | Some i -> pp_indice fmt i
-
-let pp_indices fmt ids = list ~sep:sp pp_indice fmt ids
-
 type nonrec num_type =
   | I32
   | I64
@@ -57,19 +49,9 @@ type nullable =
   | No_null
   | Null
 
-let pp_nullable fmt = function
-  | No_null ->
-    (* TODO: no notation to enforce nonnull ? *)
-    pf fmt ""
-  | Null -> pf fmt "null"
-
 type nonrec mut =
   | Const
   | Var
-
-let pp_mut fmt = function Const -> () | Var -> pf fmt "mut"
-
-let is_mut = function Const -> false | Var -> true
 
 type nonrec nn =
   | S32
@@ -92,8 +74,6 @@ let pp_ishape fmt = function
 type nonrec fshape =
   | F32x4
   | F64x8
-
-let pp_fshape fmt = function F32x4 -> pf fmt "f32x4" | F64x8 -> pf fmt "f64x8"
 
 type nonrec sx =
   | U
@@ -238,12 +218,7 @@ type nonrec limits =
   ; max : int option
   }
 
-let pp_limits fmt { min; max } =
-  match max with None -> pf fmt "%d" min | Some max -> pf fmt "%d %d" min max
-
 type nonrec mem = string option * limits
-
-let pp_mem fmt (id, ty) = pf fmt "(memory%a %a)" pp_id_opt id pp_limits ty
 
 (** Structure *)
 
@@ -345,13 +320,6 @@ let with_space_list printer fmt l =
 
 type nonrec func_type = param_type * result_type
 
-let pp_func_type fmt (params, results) =
-  pf fmt "(func%a%a)"
-    (with_space_list pp_param_type)
-    params
-    (with_space_list pp_result_type)
-    results
-
 let func_type_eq (pt1, rt1) (pt2, rt2) =
   param_type_eq pt1 pt2 && result_type_eq rt1 rt2
 
@@ -377,21 +345,7 @@ let compare_func_type (pt1, rt1) (pt2, rt2) =
 
 type nonrec table_type = limits * ref_type
 
-let pp_table_type fmt (limits, ref_type) =
-  pf fmt "%a %a" pp_limits limits pp_ref_type ref_type
-
 type nonrec global_type = mut * val_type
-
-let pp_global_type fmt (mut, val_type) =
-  match mut with
-  | Var -> pf fmt "(mut %a)" pp_val_type val_type
-  | Const -> pf fmt "%a" pp_val_type val_type
-
-type nonrec extern_type =
-  | Func of string option * func_type
-  | Table of string option * table_type
-  | Mem of string option * limits
-  | Global of string option * global_type
 
 (** Instructions *)
 
@@ -668,93 +622,26 @@ type func =
   ; id : string option
   }
 
-let pp_local fmt (id, t) = pf fmt "(local%a %a)" pp_id_opt id pp_val_type t
-
-let pp_locals fmt locals = list ~sep:sp pp_local fmt locals
-
-let pp_func fmt f =
-  (* TODO: typeuse ? *)
-  pf fmt "(func%a%a%a@\n  @[<v>%a@]@\n)" pp_id_opt f.id pp_block_type f.type_f
-    (with_space_list pp_locals)
-    f.locals (pp_expr ~short:false) f.body
-
-let pp_funcs fmt (funcs : func list) = list ~sep:pp_newline pp_func fmt funcs
-
 (* Tables & Memories *)
 
 type table = string option * table_type
 
-let pp_table fmt (id, ty) = pf fmt "(table%a %a)" pp_id_opt id pp_table_type ty
-
 (* Modules *)
-
-type 'a import_desc =
-  | Import_func of string option * block_type
-  | Import_table of string option * table_type
-  | Import_mem of string option * limits
-  | Import_global of string option * global_type
-
-let import_desc fmt : 'a import_desc -> Unit.t = function
-  | Import_func (id, t) -> pf fmt "(func%a %a)" pp_id_opt id pp_block_type t
-  | Import_table (id, t) -> pf fmt "(table%a %a)" pp_id_opt id pp_table_type t
-  | Import_mem (id, t) -> pf fmt "(memory%a %a)" pp_id_opt id pp_limits t
-  | Import_global (id, t) ->
-    pf fmt "(global%a %a)" pp_id_opt id pp_global_type t
-
-type 'a import =
-  { modul : string  (** The name of the module from which the import is done *)
-  ; name : string  (** The name of the importee in its module of origin *)
-  ; desc : 'a import_desc
-      (** If this import_desc first field is Some s, the importee is made
-          available under name s, else it can only be used via its numerical
-          index.*)
-  }
-
-let pp_import fmt i =
-  pf fmt {|(import "%a" "%a" %a)|} string i.modul string i.name import_desc
-    i.desc
-
-type export_desc =
-  | Export_func of indice option
-  | Export_table of indice option
-  | Export_mem of indice option
-  | Export_global of indice option
-
-let pp_export_desc fmt = function
-  | Export_func id -> pf fmt "(func %a)" pp_indice_opt id
-  | Export_table id -> pf fmt "(table %a)" pp_indice_opt id
-  | Export_mem id -> pf fmt "(memory %a)" pp_indice_opt id
-  | Export_global id -> pf fmt "(global %a)" pp_indice_opt id
-
-type export =
-  { name : string
-  ; desc : export_desc
-  }
-
-let pp_export fmt (e : export) =
-  pf fmt {|(export "%s" %a)|} e.name pp_export_desc e.desc
 
 type type_def = string option * func_type
 
-let pp_type_def fmt (id, t) = pf fmt "(type%a %a)" pp_id_opt id pp_func_type t
-
-let type_def_eq (id1, t1) (id2, t2) =
-  Option.equal String.equal id1 id2 && func_type_eq t1 t2
-
-let pp_start fmt start = pf fmt "(start %a)" pp_indice start
-
 (** named export *)
-type named_export =
+type export =
   { name : string
   ; id : int
   }
 
 (** named exports of a module *)
 type exports =
-  { global : named_export list
-  ; mem : named_export list
-  ; table : named_export list
-  ; func : named_export list
+  { global : export list
+  ; mem : export list
+  ; table : export list
+  ; func : export list
   }
 
 type global =
@@ -891,7 +778,7 @@ module Module = struct
       let func =
         List.map
           (fun export ->
-            let id = update_idx (export : named_export).id in
+            let id = update_idx (export : export).id in
             { export with id } )
           m.exports.func
       in

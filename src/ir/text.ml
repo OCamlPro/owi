@@ -20,18 +20,7 @@ let pp_id_opt fmt = function None -> () | Some i -> pf fmt " %a" pp_id i
 
 let pp_indice fmt = function Raw u -> int fmt u | Text i -> pp_id fmt i
 
-let compare_indice id1 id2 =
-  match (id1, id2) with
-  | Raw i1, Raw i2 -> compare i1 i2
-  | Text s1, Text s2 -> String.compare s1 s2
-  | Raw _, Text _ -> -1
-  | Text _, Raw _ -> 1
-
-let indice_eq id1 id2 = compare_indice id1 id2 = 0
-
 let pp_indice_opt fmt = function None -> () | Some i -> pp_indice fmt i
-
-let pp_indices fmt ids = list ~sep:sp pp_indice fmt ids
 
 type nonrec num_type =
   | I32
@@ -66,17 +55,9 @@ type nullable =
   | No_null
   | Null
 
-let pp_nullable fmt = function
-  | No_null ->
-    (* TODO: no notation to enforce nonnull ? *)
-    pf fmt ""
-  | Null -> pf fmt "null"
-
 type nonrec mut =
   | Const
   | Var
-
-let pp_mut fmt = function Const -> () | Var -> pf fmt "mut"
 
 let is_mut = function Const -> false | Var -> true
 
@@ -101,8 +82,6 @@ let pp_ishape fmt = function
 type nonrec fshape =
   | F32x4
   | F64x8
-
-let pp_fshape fmt = function F32x4 -> pf fmt "f32x4" | F64x8 -> pf fmt "f64x8"
 
 type nonrec sx =
   | U
@@ -398,12 +377,6 @@ let pp_global_type fmt (mut, val_type) =
   | Var -> pf fmt "(mut %a)" pp_val_type val_type
   | Const -> pf fmt "%a" pp_val_type val_type
 
-type nonrec extern_type =
-  | Func of string option * func_type
-  | Table of string option * table_type
-  | Mem of string option * limits
-  | Global of string option * global_type
-
 (** Instructions *)
 
 type instr =
@@ -616,60 +589,6 @@ and pp_expr ~short fmt instrs =
         fmt instrs )
     instrs
 
-let rec iter_expr f (e : expr Annotated.t) =
-  Annotated.iter (List.iter (iter_instr f)) e
-
-and iter_instr f instr =
-  Annotated.iter f instr;
-  Annotated.iter
-    (function
-      | I32_const _ | I64_const _ | F32_const _ | F64_const _ | V128_const _
-      | I_unop (_, _)
-      | F_unop (_, _)
-      | I_binop (_, _)
-      | F_binop (_, _)
-      | V_ibinop (_, _)
-      | I_testop (_, _)
-      | I_relop (_, _)
-      | F_relop (_, _)
-      | I_extend8_s _ | I_extend16_s _ | I64_extend32_s | I32_wrap_i64
-      | I64_extend_i32 _
-      | I_trunc_f (_, _, _)
-      | I_trunc_sat_f (_, _, _)
-      | F32_demote_f64 | F64_promote_f32
-      | F_convert_i (_, _, _)
-      | I_reinterpret_f (_, _)
-      | F_reinterpret_i (_, _)
-      | Ref_null _ | Ref_is_null | Ref_func _ | Drop | Select _ | Local_get _
-      | Local_set _ | Local_tee _ | Global_get _ | Global_set _ | Table_get _
-      | Table_set _ | Table_size _ | Table_grow _ | Table_fill _
-      | Table_copy (_, _)
-      | Table_init (_, _)
-      | Elem_drop _
-      | I_load (_, _)
-      | F_load (_, _)
-      | I_store (_, _)
-      | F_store (_, _)
-      | I_load8 (_, _, _)
-      | I_load16 (_, _, _)
-      | I64_load32 (_, _)
-      | I_store8 (_, _)
-      | I_store16 (_, _)
-      | I64_store32 _ | Memory_size | Memory_grow | Memory_fill | Memory_copy
-      | Memory_init _ | Data_drop _ | Nop | Unreachable | Br _ | Br_if _
-      | Br_table (_, _)
-      | Return | Return_call _
-      | Return_call_indirect (_, _)
-      | Return_call_ref _ | Call _
-      | Call_indirect (_, _)
-      | Call_ref _ | Extern_externalize | Extern_internalize ->
-        ()
-      | Block (_, _, e) | Loop (_, _, e) -> iter_expr f e
-      | If_else (_, _, e1, e2) ->
-        iter_expr f e1;
-        iter_expr f e2 )
-    instr
-
 (* TODO: func and expr should also be parametrised on block type:
    using (param_type, result_type) M.block_type before simplify and directly an indice after *)
 type func =
@@ -688,8 +607,6 @@ let pp_func fmt f =
   pf fmt "(func%a%a%a@\n  @[<v>%a@]@\n)" pp_id_opt f.id pp_block_type f.type_f
     (with_space_list pp_locals)
     f.locals (pp_expr ~short:false) f.body
-
-let pp_funcs fmt (funcs : func list) = list ~sep:pp_newline pp_func fmt funcs
 
 (* Tables & Memories *)
 
@@ -748,9 +665,6 @@ let pp_export fmt (e : export) =
 type type_def = string option * func_type
 
 let pp_type_def fmt (id, t) = pf fmt "(type%a %a)" pp_id_opt id pp_func_type t
-
-let type_def_eq (id1, t1) (id2, t2) =
-  Option.equal String.equal id1 id2 && func_type_eq t1 t2
 
 let pp_start fmt start = pf fmt "(start %a)" pp_indice start
 

@@ -58,12 +58,3 @@ module Symbolic : sig
     -> Symbolic.Extern_func.extern_func Link.module_to_run
     -> unit Symbolic.Choice.t
 end
-
-module Minimalist_symbolic : sig
-  val modul :
-       timeout:float option
-    -> timeout_instr:int option
-    -> Minimalist_symbolic.Extern_func.extern_func Link.state
-    -> Minimalist_symbolic.Extern_func.extern_func Link.module_to_run
-    -> unit Minimalist_symbolic.Choice.t
-end

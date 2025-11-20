@@ -332,7 +332,7 @@ let define_elem env elem =
 let populate_exports env (exports : Binary.exports) : exports Result.t =
   let fill_exports get_env exports names =
     list_fold_left
-      (fun (acc, names) ({ name; id; _ } : Binary.named_export) ->
+      (fun (acc, names) ({ name; id; _ } : Binary.export) ->
         let value = get_env env id in
         if StringSet.mem name names then Error `Duplicate_export_name
         else Ok (StringMap.add name value acc, StringSet.add name names) )
@@ -340,7 +340,7 @@ let populate_exports env (exports : Binary.exports) : exports Result.t =
   in
   let fill_exports' get_env exports names =
     list_fold_left
-      (fun (acc, names) ({ name; id; _ } : Binary.named_export) ->
+      (fun (acc, names) ({ name; id; _ } : Binary.export) ->
         let* value = get_env env id in
         if StringSet.mem name names then Error `Duplicate_export_name
         else Ok (StringMap.add name value acc, StringSet.add name names) )

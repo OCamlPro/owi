@@ -1,4 +1,6 @@
+module Annotated = Annotated
 module Binary = Binary
+module Binary_validate = Binary_validate
 module Binary_to_text = Binary_to_text
 module Cmd_sym = Cmd_sym
 module Cmd_c = Cmd_c
