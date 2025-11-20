@@ -304,7 +304,7 @@ struct
 
   let create num_symbols symbol_scopes pc memories tables globals breadcrumbs
     labels bench_stats =
-    <span data-count="2169005">{</span> num_symbols
+    <span data-count="2168998">{</span> num_symbols
     ; symbol_scopes
     ; pc
     ; memories
@@ -330,39 +330,39 @@ struct
     create num_symbols symbol_scopes pc memories tables globals breadcrumbs
       labels bench_stats
 
-  let num_symbols t = <span data-count="2170141">t</span>.num_symbols
+  let num_symbols t = <span data-count="2170155">t</span>.num_symbols
 
-  let symbol_scopes t = <span data-count="2168817">t</span>.symbol_scopes
+  let symbol_scopes t = <span data-count="2168829">t</span>.symbol_scopes
 
-  let pc t = <span data-count="2196534">t</span>.pc
+  let pc t = <span data-count="2196449">t</span>.pc
 
-  let memories t = <span data-count="4324980">t</span>.memories
+  let memories t = <span data-count="4324998">t</span>.memories
 
-  let tables t = <span data-count="2172625">t</span>.tables
+  let tables t = <span data-count="2172641">t</span>.tables
 
-  let globals t = <span data-count="2170726">t</span>.globals
+  let globals t = <span data-count="2170641">t</span>.globals
 
-  let breadcrumbs t = <span data-count="2168867">t</span>.breadcrumbs
+  let breadcrumbs t = <span data-count="2168856">t</span>.breadcrumbs
 
-  let labels t = <span data-count="2168831">t</span>.labels
+  let labels t = <span data-count="2168823">t</span>.labels
 
-  let bench_stats t = <span data-count="2196284">t</span>.bench_stats
+  let bench_stats t = <span data-count="2196198">t</span>.bench_stats
 
   let add_symbol t s =
     <span data-count="1392">l</span>et open Symbol_scope in
     { t with symbol_scopes = symbo<span data-count="1392">l</span> s t.symbol_scopes }
 
   let add_pc t c =
-    <span data-count="28557">l</span>et pc = Symbolic_path_condition.add t.pc c in
-    <span data-count="28556">{</span> t with pc }
+    <span data-count="28393">l</span>et pc = Symbolic_path_condition.add t.pc c in
+    <span data-count="28393">{</span> t with pc }
 
   let add_breadcrumb t crumb =
-    <span data-count="25881">l</span>et breadcrumbs = crumb :: t.breadcrumbs in
+    <span data-count="25796">l</span>et breadcrumbs = crumb :: t.breadcrumbs in
     { t with breadcrumbs }
 
   let incr_num_symbols t =
-    <span data-count="1538">l</span>et num_symbols = succ t.num_symbols in
-    <span data-count="1538">{</span> t with num_symbols }
+    <span data-count="1536">l</span>et num_symbols = succ t.num_symbols in
+    <span data-count="1536">{</span> t with num_symbols }
 
   let add_label t label = <span data-count="2">{</span> t with labels = label :: t.labels }
 
@@ -385,10 +385,10 @@ struct
     ; labels
     ; bench_stats
     } =
-    <span data-count="28412">l</span>et memories = Memory.clone memories in
-    <span data-count="28414">l</span>et tables = Symbolic_table.clone tables in
-    <span data-count="28414">l</span>et globals = Symbolic_global.clone globals in
-    <span data-count="28412">l</span>et bench_stats : Benchmark.stats =
+    <span data-count="28249">l</span>et memories = Memory.clone memories in
+    <span data-count="28250">l</span>et tables = Symbolic_table.clone tables in
+    <span data-count="28249">l</span>et globals = Symbolic_global.clone globals in
+    <span data-count="28250">l</span>et bench_stats : Benchmark.stats =
       { solver_time = bench_stats.solver_time }
     in
     { num_symbols
