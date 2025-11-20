@@ -5,7 +5,7 @@ let extern_module : Concrete_extern_func.extern_func Link.extern_module =
   (* some custom functions *)
   let memset m start byte length =
     let rec loop offset =
-      if Int32.le offset length then begin
+      if offset <= length then begin
         match Concrete_memory.store_8 m ~addr:(Int32.add start offset) byte with
         | Error _ as e -> e
         | Ok () -> loop (Int32.add offset 1l)

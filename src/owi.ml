@@ -24,7 +24,6 @@ module Cmd_zig = Cmd_zig
 module Compile = Compile
 module Concrete_extern_func = Concrete_extern_func
 module Concrete_memory = Concrete_memory
-module Int32 = Int32
 module Interpret = Interpret
 module Label = Label
 module Link = Link
