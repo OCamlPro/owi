@@ -81,7 +81,6 @@
   symbolic_choice_intf
   symbolic_choice_with_memory
   symbolic_choice_without_memory
-  symbolic_functor
   symbolic_global
   symbolic_memory_concretizing
   symbolic_memory_intf
