@@ -268,14 +268,6 @@ module Text : sig
 
   val pp_block_type : Format.formatter -> block_type -> unit
 
-  type nonrec table_type = limits * ref_type
-
-  val pp_table_type : Format.formatter -> table_type -> unit
-
-  type nonrec global_type = mut * val_type
-
-  val pp_global_type : Format.formatter -> global_type -> unit
-
   (** Instructions *)
 
   type instr =
@@ -367,110 +359,141 @@ module Text : sig
 
   and expr = instr Annotated.t list
 
-  (* TODO: func and expr should also be parametrised on block type:
-     using (param_type, result_type) M.block_type before simplify and directly an indice after *)
-  type func =
-    { type_f : block_type
-    ; locals : param list
-    ; body : expr Annotated.t
-    ; id : string option
-    }
+  module Func : sig
+    type t =
+      { type_f : block_type
+      ; locals : param list
+      ; body : expr Annotated.t
+      ; id : string option
+      }
 
-  val pp_func : Format.formatter -> func -> unit
+    val pp : Format.formatter -> t -> unit
+  end
 
-  (* Tables & Memories *)
+  module Typedef : sig
+    type t = string option * func_type
 
-  type table = string option * table_type
+    val pp : Format.formatter -> t -> unit
+  end
 
-  val pp_table : Format.formatter -> table -> unit
+  module Table : sig
+    module Type : sig
+      type nonrec t = limits * ref_type
 
-  (* Modules *)
+      val pp : Format.formatter -> t -> unit
+    end
 
-  type import_desc =
-    | Import_func of string option * block_type
-    | Import_table of string option * table_type
-    | Import_mem of string option * limits
-    | Import_global of string option * global_type
+    type t = string option * Type.t
 
-  type import =
-    { modul : string
-        (** The name of the module from which the import is done *)
-    ; name : string  (** The name of the importee in its module of origin *)
-    ; desc : import_desc
-        (** If this import_desc first field is Some s, the importee is made
-            available under name s, else it can only be used via its numerical
-            index.*)
-    }
+    val pp : Format.formatter -> t -> unit
+  end
 
-  type export_desc =
-    | Export_func of indice option
-    | Export_table of indice option
-    | Export_mem of indice option
-    | Export_global of indice option
+  module Global : sig
+    module Type : sig
+      type nonrec t = mut * val_type
 
-  type export =
-    { name : string
-    ; desc : export_desc
-    }
+      val pp : Format.formatter -> t -> unit
+    end
 
-  type type_def = string option * func_type
+    type t =
+      { typ : Type.t
+      ; init : expr Annotated.t
+      ; id : string option
+      }
 
-  val pp_type_def : Format.formatter -> type_def -> unit
+    val pp : Format.formatter -> t -> unit
+  end
 
-  type global =
-    { typ : global_type
-    ; init : expr Annotated.t
-    ; id : string option
-    }
+  module Data : sig
+    module Mode : sig
+      type t =
+        | Passive
+        | Active of indice option * expr Annotated.t
+    end
 
-  val pp_global : Format.formatter -> global -> unit
+    type t =
+      { id : string option
+      ; init : string
+      ; mode : Mode.t
+      }
 
-  type data_mode =
-    | Data_passive
-    | Data_active of indice option * expr Annotated.t
+    val pp : Format.formatter -> t -> unit
+  end
 
-  type data =
-    { id : string option
-    ; init : string
-    ; mode : data_mode
-    }
+  module Elem : sig
+    module Mode : sig
+      type t =
+        | Passive
+        | Declarative
+        | Active of indice option * expr Annotated.t
+    end
 
-  val pp_data : Format.formatter -> data -> unit
+    type t =
+      { id : string option
+      ; typ : ref_type
+      ; init : expr Annotated.t list
+      ; mode : Mode.t
+      }
 
-  type elem_mode =
-    | Elem_passive
-    | Elem_active of indice option * expr Annotated.t
-    | Elem_declarative
+    val pp : Format.formatter -> t -> unit
+  end
 
-  type elem =
-    { id : string option
-    ; typ : ref_type
-    ; init : expr Annotated.t list
-    ; mode : elem_mode
-    }
+  module Import : sig
+    module Type : sig
+      type t =
+        | Func of string option * block_type
+        | Table of string option * Table.Type.t
+        | Mem of string option * limits
+        | Global of string option * Global.Type.t
+    end
 
-  val pp_elem : Format.formatter -> elem -> unit
+    type t =
+      { modul : string
+          (** The name of the module from which the import is done *)
+      ; name : string  (** The name of the importee in its module of origin *)
+      ; typ : Type.t
+      }
+  end
 
-  type module_field =
-    | MType of type_def
-    | MGlobal of global
-    | MTable of table
-    | MMem of mem
-    | MFunc of func
-    | MElem of elem
-    | MData of data
-    | MStart of indice
-    | MImport of import
-    | MExport of export
+  module Export : sig
+    module Type : sig
+      type t =
+        | Func of indice option
+        | Table of indice option
+        | Mem of indice option
+        | Global of indice option
+    end
 
-  val pp_module_field : Format.formatter -> module_field -> unit
+    type t =
+      { name : string
+      ; typ : Type.t
+      }
+  end
 
-  type modul =
-    { id : string option
-    ; fields : module_field list
-    }
+  module Module : sig
+    module Field : sig
+      type t =
+        | Typedef of Typedef.t
+        | Global of Global.t
+        | Table of Table.t
+        | Mem of mem
+        | Func of Func.t
+        | Elem of Elem.t
+        | Data of Data.t
+        | Start of indice
+        | Import of Import.t
+        | Export of Export.t
 
-  val pp_modul : Format.formatter -> modul -> unit
+      val pp : Format.formatter -> t -> unit
+    end
+
+    type t =
+      { id : string option
+      ; fields : Field.t list
+      }
+
+    val pp : Format.formatter -> t -> unit
+  end
 end
 
 module Binary : sig
@@ -800,7 +823,7 @@ end
 
 module Binary_to_text : sig
   (* TODO: move this to Compile.Binary.to_text *)
-  val modul : Binary.Module.t -> Text.modul
+  val modul : Binary.Module.t -> Text.Module.t
 end
 
 module Concrete_memory : sig
@@ -865,9 +888,9 @@ end
 module Parse : sig
   module Text : sig
     module Module : sig
-      val from_file : Fpath.t -> Text.modul Result.t
+      val from_file : Fpath.t -> Text.Module.t Result.t
 
-      val from_string : string -> Text.modul Result.t
+      val from_string : string -> Text.Module.t Result.t
     end
   end
 end
@@ -912,13 +935,13 @@ end
 
 module Compile : sig
   module Text : sig
-    val until_binary : unsafe:bool -> Text.modul -> Binary.Module.t Result.t
+    val until_binary : unsafe:bool -> Text.Module.t -> Binary.Module.t Result.t
 
     val until_link :
          unsafe:bool
       -> name:string option
       -> Concrete_extern_func.extern_func Link.state
-      -> Text.modul
+      -> Text.Module.t
       -> ( Concrete_extern_func.extern_func Link.module_to_run
          * Concrete_extern_func.extern_func Link.state )
          Result.t

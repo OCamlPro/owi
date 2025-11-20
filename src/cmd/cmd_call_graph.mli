@@ -7,7 +7,7 @@ type mode =
   | Sound
 
 val build_call_graph_from_text_module :
-  mode -> Text.modul -> string option -> Call_graph.t
+  mode -> Text.Module.t -> string option -> Call_graph.t
 
 val compute_distances : Binary.Module.t -> string option -> unit
 

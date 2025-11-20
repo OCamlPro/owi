@@ -3,7 +3,7 @@ let ( let* ) = Result.bind
 exception Timeout
 
 module type INTERPRET = sig
-  val parse_and_run : Owi.Text.modul -> (unit, Owi.Result.err) Result.t
+  val parse_and_run : Owi.Text.Module.t -> (unit, Owi.Result.err) Result.t
 
   val name : string
 end
@@ -46,7 +46,7 @@ end
 module Reference : INTERPRET = struct
   let parse_and_run modul =
     let* tmp_file = Bos.OS.Dir.tmp "owi_fuzzer_official%s.wast" in
-    let* () = Bos.OS.File.writef tmp_file "%a" Owi.Text.pp_modul modul in
+    let* () = Bos.OS.File.writef tmp_file "%a" Owi.Text.Module.pp modul in
 
     let* cmd =
       Bos.OS.Cmd.resolve

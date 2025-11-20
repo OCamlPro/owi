@@ -5,7 +5,7 @@ let timeout_count = ref 0
 let global_count = ref 0
 
 let write_module (fpath : Fpath.t) m =
-  match Bos.OS.File.writef fpath "%a@." Owi.Text.pp_modul m with
+  match Bos.OS.File.writef fpath "%a@." Owi.Text.Module.pp m with
   | Ok () -> Ok ()
   | Error (`Msg err) ->
     Fmt.error_msg "Failed to write module to %a: %s" Fpath.pp fpath err
@@ -91,7 +91,7 @@ let add_test name gen (module I1 : Interprets.INTERPRET)
   (module I2 : Interprets.INTERPRET) =
   Crowbar.add_test ~name [ gen ] (fun m ->
     incr global_count;
-    if Param.debug then Fmt.epr "%a@\n" Owi.Text.pp_modul m;
+    if Param.debug then Fmt.epr "%a@\n" Owi.Text.Module.pp m;
     Fmt.epr "test module %d [got %d timeouts...]@\n@[<v>" !global_count
       !timeout_count;
     Fmt.flush Fmt.stderr ();
@@ -102,7 +102,7 @@ let add_test name gen (module I1 : Interprets.INTERPRET)
       Fmt.epr "@]" )
 
 let gen (conf : Env.conf) =
-  Crowbar.with_printer Owi.Text.pp_modul (Gen.modul conf)
+  Crowbar.with_printer Owi.Text.Module.pp (Gen.modul conf)
 
 module S = Set.Make (Set.Make (Int))
 

@@ -1,6 +1,8 @@
 open Fmt
 open Text
 
+let sp ppf () = Fmt.char ppf ' '
+
 type const =
   | Const_I32 of Int32.t
   | Const_I64 of Int64.t
@@ -64,15 +66,15 @@ let pp_results fmt r = list ~sep:sp pp_result_bis fmt r
 type assertion =
   | Assert_return of action * result list
   | Assert_trap of action * string
-  | Assert_trap_module of modul * string
-  | Assert_malformed of modul * string
+  | Assert_trap_module of Module.t * string
+  | Assert_malformed of Module.t * string
   | Assert_malformed_quote of string * string
   | Assert_malformed_binary of string * string
-  | Assert_invalid of modul * string
+  | Assert_invalid of Module.t * string
   | Assert_invalid_quote of string * string
   | Assert_invalid_binary of string * string
   | Assert_exhaustion of action * string
-  | Assert_unlinkable of modul * string
+  | Assert_unlinkable of Module.t * string
 
 let pp_assertion fmt = function
   | Assert_return (a, l) ->
@@ -81,14 +83,14 @@ let pp_assertion fmt = function
     pf fmt "(assert_exhaustion %a %s)" pp_action a msg
   | Assert_trap (a, f) -> pf fmt {|(assert_trap %a "%s")|} pp_action a f
   | Assert_trap_module (m, f) ->
-    pf fmt {|(assert_trap_module %a "%s")|} pp_modul m f
+    pf fmt {|(assert_trap_module %a "%s")|} Module.pp m f
   | Assert_invalid (m, msg) ->
-    pf fmt "(assert_invalid@\n  @[<v>%a@]@\n  @[<v>%S@]@\n)" pp_modul m msg
+    pf fmt "(assert_invalid@\n  @[<v>%a@]@\n  @[<v>%S@]@\n)" Module.pp m msg
   | Assert_unlinkable (m, msg) ->
-    pf fmt "(assert_unlinkable@\n  @[<v>%a@]@\n  @[<v>%S@]@\n)" pp_modul m msg
+    pf fmt "(assert_unlinkable@\n  @[<v>%a@]@\n  @[<v>%S@]@\n)" Module.pp m msg
   | Assert_malformed (m, msg) ->
     pf fmt "(assert_malformed (module binary@\n  @[<v>%a@])@\n  @[<v>%S@]@\n)"
-      pp_modul m msg
+      Module.pp m msg
   | Assert_malformed_quote (ls, msg) ->
     pf fmt "(assert_malformed_quote@\n  @[<v>%S@]@\n  @[<v>%S@]@\n)" ls msg
   | Assert_invalid_quote (ls, msg) ->
@@ -105,7 +107,7 @@ let pp_register fmt (s, _name) = pf fmt "(register %s)" s
 type cmd =
   | Quoted_module of string
   | Binary_module of string option * string
-  | Text_module of modul
+  | Text_module of Module.t
   | Assert of assertion
   | Register of string * string option
   | Action of action
@@ -113,7 +115,7 @@ type cmd =
 let pp_cmd fmt = function
   | Quoted_module m -> pf fmt "(module %S)" m
   | Binary_module (id, m) -> Fmt.pf fmt "(module %a %S)" Text.pp_id_opt id m
-  | Text_module m -> pp_modul fmt m
+  | Text_module m -> Module.pp fmt m
   | Assert a -> pp_assertion fmt a
   | Register (s, name) -> pp_register fmt (s, name)
   | Action _a -> pf fmt "<action>"

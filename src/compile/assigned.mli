@@ -5,12 +5,12 @@
 type t =
   { id : string option
   ; typ : Text.func_type Named.t
-  ; global : (Text.global, Text.global_type) Runtime.t Named.t
-  ; table : (Text.table, Text.table_type) Runtime.t Named.t
+  ; global : (Text.Global.t, Text.Global.Type.t) Runtime.t Named.t
+  ; table : (Text.Table.t, Text.Table.Type.t) Runtime.t Named.t
   ; mem : (Text.mem, Text.limits) Runtime.t Named.t
-  ; func : (Text.func, Text.block_type) Runtime.t Named.t
-  ; elem : Text.elem Named.t
-  ; data : Text.data Named.t
+  ; func : (Text.Func.t, Text.block_type) Runtime.t Named.t
+  ; elem : Text.Elem.t Named.t
+  ; data : Text.Data.t Named.t
   ; exports : Grouped.opt_exports
   ; start : Text.indice option
   }

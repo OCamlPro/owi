@@ -51,44 +51,46 @@ let modul m =
   in
 
   let+ (_env : env) =
+    let open Module in
     list_fold_left
-      (fun env field ->
-        match field with
-        | MExport _e -> Ok env
-        | MFunc _f -> Ok { env with funcs = true }
-        | MStart _start ->
+      (fun env ->
+        let open Field in
+        function
+        | Export _e -> Ok env
+        | Func _f -> Ok { env with funcs = true }
+        | Start _start ->
           if env.start then Error `Multiple_start_sections
           else Ok { env with start = true }
-        | MImport i ->
+        | Import i ->
           if env.funcs then Error `Import_after_function
           else if env.memory then Error `Import_after_memory
           else if env.tables then Error `Import_after_table
           else if env.globals then Error `Import_after_global
           else begin
-            match i.desc with
-            | Import_mem (id, _) ->
+            match i.typ with
+            | Mem (id, _) ->
               let* () = add_memory id in
               if env.imported_memory then Error `Multiple_memories
               else Ok { env with imported_memory = true }
-            | Import_func _ -> Ok env
-            | Import_global (id, _) ->
+            | Func _ -> Ok env
+            | Global (id, _) ->
               let+ () = add_global id in
               env
-            | Import_table (id, _) ->
+            | Table (id, _) ->
               let+ () = add_table id in
               env
           end
-        | MData _d -> Ok env
-        | MElem _e -> Ok env
-        | MMem (id, _) ->
+        | Data _d -> Ok env
+        | Elem _e -> Ok env
+        | Mem (id, _) ->
           let* () = add_memory id in
           if env.memory || env.imported_memory then Error `Multiple_memories
           else Ok { env with memory = true }
-        | MType _t -> Ok env
-        | MGlobal { id; _ } ->
+        | Typedef _t -> Ok env
+        | Global { id; _ } ->
           let+ () = add_global id in
           { env with globals = true }
-        | MTable (id, _) ->
+        | Table (id, _) ->
           let+ () = add_table id in
           { env with tables = true } )
       (empty_env ()) m.fields

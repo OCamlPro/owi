@@ -20,9 +20,8 @@ let cmd ~unsafe ~coverage_criteria ~source_file =
   match ext with
   | ".wat" ->
     let filename = Fpath.add_ext ".wat" filename in
-    Bos.OS.File.writef filename "%a" Text.pp_modul m
+    Bos.OS.File.writef filename "%a" Text.Module.pp m
   | ".wasm" ->
     let filename = Fpath.add_ext ".wasm" filename in
-    let* () = Binary_encoder.convert None filename ~unsafe m in
-    Ok ()
+    Binary_encoder.convert None filename ~unsafe m
   | ext -> Error (`Unsupported_file_extension ext)

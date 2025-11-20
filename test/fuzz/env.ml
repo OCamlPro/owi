@@ -23,8 +23,8 @@ type t =
   ; mutable memory : string option
   ; mutable types : (string * func_type) list
   ; mutable elems : (string * ref_type) list
-  ; mutable tables : (string * table_type) list
-  ; mutable globals : (string * global_type) list
+  ; mutable tables : (string * Table.Type.t) list
+  ; mutable globals : (string * Global.Type.t) list
   ; mutable locals : (string * val_type) list
   ; mutable blocks : (block_kind * string * block_type) list
   ; mutable funcs : (string * block_type) list

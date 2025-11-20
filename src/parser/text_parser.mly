@@ -100,8 +100,8 @@ let t16_of_v128_arg_list z = function
 %}
 
 %start <Wast.script> script
-%start <Text.modul> modul
-%start <Text.modul> inline_module
+%start <Text.Module.t> modul
+%start <Text.Module.t> inline_module
 
 %%
 
@@ -726,15 +726,15 @@ let func ==
   | FUNC; id = option(id); ~ = func_fields; {
     let func_id = Option.map (fun id -> Text id) id in
     List.rev_map (function
-      | MImport i ->
-        begin match i.desc with
-        | Import_func (_id, ft) -> MImport { i with desc = Import_func (id, ft) }
-        | Import_global _ | Import_mem _ | Import_table _ -> assert false
+      | Module.Field.Import i ->
+        begin match i.typ with
+        | Func (_id, ft) -> Module.Field.Import { i with typ = Func (id, ft) }
+        | Global _ | Mem _ | Table _ -> assert false
         end
-      | MExport e -> MExport { e with desc = Export_func func_id }
-      | MFunc f -> MFunc { f with id }
-      | MData _ | MElem _ | MGlobal _ | MStart _ | MType _ | MTable _ | MMem _ as field -> begin
-        Fmt.epr "got invalid field: `%a`@." pp_module_field field;
+      | Export e -> Export { e with typ = Func func_id }
+      | Func f -> Func { f with id }
+      | Data _ | Elem _ | Global _ | Start _ | Typedef _ | Table _ | Mem _ as field -> begin
+        Fmt.epr "got invalid field: `%a`@." Module.Field.pp field;
         assert false
       end
     ) func_fields
@@ -743,20 +743,20 @@ let func ==
 let func_fields :=
   | ~ = type_use; (ft, f) = func_fields_body; {
     match ft with
-    | [], [] -> [MFunc { f with type_f = Bt_ind type_use }]
-    | (_pt, _rt) as ft -> [MFunc { f with type_f = Bt_raw ((Some type_use), ft)}]
+    | [], [] -> [Func { f with type_f = Bt_ind type_use }]
+    | (_pt, _rt) as ft -> [Func { f with type_f = Bt_raw ((Some type_use), ft)}]
   }
   | (type_f, f) = func_fields_body; {
-    [MFunc { f with type_f = Bt_raw (None, type_f) }]
+    [Func { f with type_f = Bt_raw (None, type_f) }]
   }
   | (modul, name) = inline_import; ~ = type_use; _ = func_fields_import; {
-    [MImport { modul; name; desc = Import_func (None, Bt_ind type_use) }]
+    [Import { modul; name; typ = Func (None, Bt_ind type_use) }]
   }
   | (modul, name) = inline_import; ~ = func_fields_import; {
-    [MImport { modul; name; desc = Import_func (None, Bt_raw (None, func_fields_import)) }]
+    [Import { modul; name; typ = Func (None, Bt_raw (None, func_fields_import)) }]
   }
   | ~ = inline_export; ~ = func_fields; {
-    MExport { name = inline_export; desc = Export_func None } :: func_fields
+    Module.Field.Export { name = inline_export; typ = Func None } :: func_fields
   }
 
 let func_fields_import :=
@@ -841,43 +841,43 @@ let elem_list ==
 let elem ==
   | ELEM; id = option(id); (typ, init) = elem_list; {
     let init = Annotated.dummies init in
-    [ MElem { id; typ; init; mode = Elem_passive } ]
+    [ Elem { id; typ; init; mode = Passive } ]
   }
   | ELEM; id = option(id); table_use = par(table_use); ~ = offset; (typ, init) = elem_list; {
     let init = Annotated.dummies init in
     let offset = Annotated.dummy_deep offset in
-    [ MElem { id; typ; init; mode = Elem_active (Some table_use, offset) } ]
+    [ Elem { id; typ; init; mode = Active (Some table_use, offset) } ]
   }
   | ELEM; id = option(id); DECLARE; (typ, init) = elem_list; {
     let init = Annotated.dummies init in
-    [ MElem { id; typ; init; mode = Elem_declarative } ]
+    [ Elem { id; typ; init; mode = Declarative } ]
   }
   | ELEM; id = option(id); ~ = offset; (typ, init) = elem_list; {
     let init = Annotated.dummies init in
     let offset = Annotated.dummy_deep offset in
-    [ MElem { id; typ; init; mode = Elem_active (Some (Raw 0), offset) } ]
+    [ Elem { id; typ; init; mode = Active (Some (Raw 0), offset) } ]
   }
   | ELEM; id = option(id); ~ = offset; init = list(elem_var); {
     let init =  Annotated.dummies init in
     let offset = Annotated.dummy_deep offset in
-    [ MElem { id; typ = (Null, Func_ht); init; mode = Elem_active (Some (Raw 0), offset) } ]
+    [ Elem { id; typ = (Null, Func_ht); init; mode = Active (Some (Raw 0), offset) } ]
   }
 
 let table ==
 | TABLE; id = option(id); ~ = table_fields; {
   let tbl_id = Option.map (fun id -> Text id) id in
   List.rev_map (function
-    | MTable (_id, tbl) -> MTable (id, tbl)
-    | MExport e -> MExport { e with desc = Export_table tbl_id }
-    | MElem e ->
-      let mode = Elem_active (tbl_id, Annotated.dummy_deep [ I32_const 0l ]) in
-      MElem { e with mode }
-    | MImport i -> begin match i.desc with
-      | Import_table (_id, table_type) -> MImport { i with desc = Import_table (id, table_type) }
-      | Import_func _ | Import_global _ | Import_mem _ -> assert false
+    | Module.Field.Table (_id, tbl) -> Module.Field.Table (id, tbl)
+    | Export e -> Export { e with typ = Table tbl_id }
+    | Elem e ->
+      let mode = Elem.Mode.Active (tbl_id, Annotated.dummy_deep [ I32_const 0l ]) in
+      Elem { e with mode }
+    | Import i -> begin match i.typ with
+      | Table (_id, table_type) -> Import { i with typ = Table (id, table_type) }
+      | Func _ | Global _ | Mem _ -> assert false
     end
-    | MMem _ | MData _ | MStart _ | MFunc _ | MGlobal _ | MType _ as field -> begin
-      Fmt.epr "got invalid field: `%a`@." pp_module_field field;
+    | Mem _ | Data _ | Start _ | Func _ | Global _ | Typedef _ as field -> begin
+      Fmt.epr "got invalid field: `%a`@." Module.Field.pp field;
       assert false
     end
   ) table_fields
@@ -889,49 +889,49 @@ let init ==
 
 let table_fields :=
   | ~ = table_type; {
-    [ MTable (None, table_type) ]
+    [ Module.Field.Table (None, table_type) ]
   }
   | (modul, name) = inline_import; ~ = table_type; {
-    [ MImport { modul; name; desc = Import_table (None, table_type) }]
+    [ Import { modul; name; typ = Table (None, table_type) }]
   }
   | ~ = inline_export; ~ = table_fields; {
-    MExport { name = inline_export; desc = Export_table None } :: table_fields
+    Export { name = inline_export; typ = Table None } :: table_fields
   }
   | ~ = ref_type; LPAR; ELEM; ~ = init; RPAR; {
     let min = List.fold_left (fun sum l ->
         sum + List.length l.Annotated.raw
       ) 0 init
     in
-    let mode = Elem_active (None, Annotated.dummy []) in
-    [ MElem { id = None; typ = (Null, Func_ht); init; mode }
-    ; MTable (None, ({ min; max = Some min }, ref_type)) ]
+    let mode = Elem.Mode.Active (None, Annotated.dummy []) in
+    [ Module.Field.Elem { id = None; typ = (Null, Func_ht); init; mode }
+    ; Table (None, ({ min; max = Some min }, ref_type)) ]
   }
 
 let data ==
   | DATA; id = option(id); init = string_list; {
-    [ MData { id; init; mode = Data_passive } ]
+    [ Data { id; init; mode = Passive } ]
   }
   | DATA; id = option(id); memory_use = ioption(par(memory_use)); ~ = offset; init = string_list; {
     let memory_use = Option.value memory_use ~default:(Raw 0) in
     let offset = Annotated.dummy_deep offset in
-    [ MData { id; init; mode = Data_active (Some memory_use, offset) } ]
+    [ Data { id; init; mode = Active (Some memory_use, offset) } ]
   }
 
 let memory ==
   | MEMORY; id = option(id); ~ = memory_fields; {
     let mem_id = Option.map (fun id -> Text id) id in
     List.rev_map (function
-      | MMem (_id, m) -> MMem (id, m)
-      | MExport e -> MExport { e with desc = Export_mem mem_id }
-      | MData d ->
-        let mode = Data_active (mem_id, Annotated.dummy_deep [ I32_const 0l ]) in
-        MData { d with mode }
-      | MImport i -> begin match i.desc with
-        | Import_mem (_id, mem_type ) -> MImport { i with desc = Import_mem (id, mem_type) }
-        | Import_table _ | Import_func _ | Import_global _ -> assert false
+      | Module.Field.Mem (_id, m) -> Module.Field.Mem (id, m)
+      | Export e -> Export { e with typ = Mem mem_id }
+      | Data d ->
+        let mode = Data.Mode.Active (mem_id, Annotated.dummy_deep [ I32_const 0l ]) in
+        Data { d with mode }
+      | Import i -> begin match i.typ with
+        | Mem (_id, mem_type ) -> Import { i with typ = Mem (id, mem_type) }
+        | Table _ | Func _ | Global _ -> assert false
         end
-      | MElem _ | MType _ | MTable _ | MFunc _ | MGlobal _ | MStart _ as field -> begin
-        Fmt.epr "got invalid field: `%a`@." pp_module_field field;
+      | Elem _ | Typedef _ | Table _ | Func _ | Global _ | Start _ as field -> begin
+        Fmt.epr "got invalid field: `%a`@." Module.Field.pp field;
         assert false
       end
     ) memory_fields
@@ -939,34 +939,34 @@ let memory ==
 
 let memory_fields :=
   | ~ = mem_type; {
-    [ MMem (None, mem_type) ]
+    [ Mem (None, mem_type) ]
   }
   | (modul, name) = inline_import; ~ = mem_type; {
-    [ MImport { modul; name; desc = Import_mem (None, mem_type) } ]
+    [ Import { modul; name; typ = Mem (None, mem_type) } ]
   }
   | ~ = inline_export; ~ = memory_fields; {
-    MExport { name = inline_export; desc = Export_mem None } :: memory_fields
+    Export { name = inline_export; typ = Mem None } :: memory_fields
   }
   | LPAR; DATA; init = string_list; RPAR; {
     let min = Int32.(div (add (of_int (String.length init)) 65535l) 65536l) in
     let min = Int32.to_int min in
-    [ MData { id = None; init; mode = Data_active (None, Annotated.dummy []) }
-    ; MMem (None, { min; max = Some min}) ]
+    [ Module.Field.Data { id = None; init; mode = Data.Mode.Active (None, Annotated.dummy []) }
+    ; Mem (None, { min; max = Some min}) ]
   }
 
 let global ==
   | GLOBAL; id = option(id); ~ = global_fields; {
     let global_id = Option.map (fun id -> Text id) id in
     List.rev_map (function
-      | MGlobal g -> MGlobal { g with id }
-      | MExport e -> MExport { e with desc = Export_global global_id }
-      | MImport i ->
-        begin match i.desc with
-        | Import_global (_id, t) -> MImport { i with desc = Import_global (id, t) }
-        | Import_mem _ | Import_table _ | Import_func _ -> assert false
+      | Module.Field.Global g -> Module.Field.Global { g with id }
+      | Export e -> Export { e with typ = Global global_id }
+      | Import i ->
+        begin match i.typ with
+        | Global (_id, t) -> Import { i with typ = Global (id, t) }
+        | Mem _ | Table _ | Func _ -> assert false
         end
-      | MStart _ | MFunc _ | MData _ | MElem _ | MMem _ | MTable _ | MType _ as field -> begin
-        Fmt.epr "got invalid field: `%a`@." pp_module_field field;
+      | Start _ | Func _ | Data _ | Elem _ | Mem _ | Table _ | Typedef _ as field -> begin
+        Fmt.epr "got invalid field: `%a`@." Module.Field.pp field;
         assert false
       end
     ) global_fields
@@ -975,41 +975,41 @@ let global ==
 let global_fields :=
   | typ = global_type; init = const_expr; {
     let init : expr Annotated.t = Annotated.dummy_deep init in
-    [ MGlobal { typ; init; id = None } ]
+    [ Module.Field.Global { typ; init; id = None } ]
   }
   | (modul, name) = inline_import; ~ = global_type; {
-    [ MImport { modul; name; desc = Import_global (None, global_type) } ]
+    [ Import { modul; name; typ = Global (None, global_type) } ]
   }
   | ~ = inline_export; ~ = global_fields; {
-    MExport { name = inline_export; desc = Export_global None } :: global_fields
+    Module.Field.Export { name = inline_export; typ = Global None } :: global_fields
   }
 
 (* Imports & Exports *)
 
-let import_desc ==
-  | FUNC; id = option(id); ~ = type_use; { Import_func (id, Bt_ind type_use) }
-  | (id, ft) = preceded(FUNC, pair(option(id), func_type)); { Import_func (id, Bt_raw (None, ft)) }
-  | TABLE; ~ = option(id); ~ = table_type; <Import_table>
-  | MEMORY; ~ = option(id); ~ = mem_type; <Import_mem>
-  | GLOBAL; ~ = option(id); ~ = global_type; <Import_global>
+let import_type ==
+  | FUNC; id = option(id); ~ = type_use; { Import.Type.Func (id, Bt_ind type_use) }
+  | (id, ft) = preceded(FUNC, pair(option(id), func_type)); { Import.Type.Func (id, Bt_raw (None, ft)) }
+  | TABLE; ~ = option(id); ~ = table_type; <Import.Type.Table>
+  | MEMORY; ~ = option(id); ~ = mem_type; <Import.Type.Mem>
+  | GLOBAL; ~ = option(id); ~ = global_type; <Import.Type.Global>
 
 let import ==
-  | IMPORT; modul = utf8_name; name = utf8_name; desc = par(import_desc); {
-    [ MImport { modul; name; desc } ]
+  | IMPORT; modul = utf8_name; name = utf8_name; typ = par(import_type); {
+    [ Module.Field.Import { modul; name; typ } ]
   }
 
 let inline_import ==
   | LPAR; IMPORT; ln = utf8_name; rn = utf8_name; RPAR; { ln, rn }
 
-let export_desc ==
-  | FUNC; ~ = indice; { Export_func (Some indice) }
-  | TABLE; ~ = indice; { Export_table (Some indice) }
-  | MEMORY; ~ = indice; { Export_mem (Some indice) }
-  | GLOBAL; ~ = indice; { Export_global (Some indice) }
+let export_typ ==
+  | FUNC; ~ = indice; { Export.Type.Func (Some indice) }
+  | TABLE; ~ = indice; { Export.Type.Table (Some indice) }
+  | MEMORY; ~ = indice; { Export.Type.Mem (Some indice) }
+  | GLOBAL; ~ = indice; { Export.Type.Global (Some indice) }
 
 let export ==
-  | EXPORT; name = utf8_name; desc = par(export_desc); {
-    [ MExport { name; desc; } ]
+  | EXPORT; name = utf8_name; typ = par(export_typ); {
+    [ Export { name; typ; } ]
   }
 
 let inline_export ==
@@ -1018,10 +1018,10 @@ let inline_export ==
 (* Modules *)
 
 let type_field ==
-  | ~ = type_def; { [ MType type_def ] }
+  | ~ = type_def; { [ Module.Field.Typedef type_def ] }
 
 let start ==
-  | START; ~ = indice; { [ MStart indice ] }
+  | START; ~ = indice; { [ Start indice ] }
 
 let module_field :=
   | ~ = type_field; <>
@@ -1039,7 +1039,7 @@ let inline_module_inner ==
   | fields = list(par(module_field)); {
     let fields = List.flatten fields in
     let id = None in
-    { id; fields; }
+    { Text.Module.id; fields; }
   }
 
 let inline_module :=

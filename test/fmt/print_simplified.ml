@@ -16,7 +16,7 @@ let m =
   | Ok m -> Binary_to_text.modul m
   | Error _ -> assert false
 
-let s = Format.asprintf "%a@\n" Text.pp_modul m
+let s = Format.asprintf "%a@\n" Text.Module.pp m
 
 let m =
   match Parse.Text.Module.from_string s with
@@ -28,4 +28,4 @@ let m =
   | Ok m -> Binary_to_text.modul m
   | Error _ -> assert false
 
-let () = Fmt.pr "%a@\n" Text.pp_modul m
+let () = Fmt.pr "%a@\n" Text.Module.pp m

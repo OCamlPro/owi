@@ -9,7 +9,7 @@ let get_printer filename =
   match ext with
   | ".wat" ->
     let+ v = Parse.Text.Module.from_file filename in
-    fun fmt () -> Text.pp_modul fmt v
+    fun fmt () -> Text.Module.pp fmt v
   | ".wast" ->
     let+ v = Parse.Text.Script.from_file filename in
     fun fmt () -> Wast.pp_script fmt v

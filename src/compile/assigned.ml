@@ -15,12 +15,12 @@ module TypeMap = Map.Make (Type)
 type t =
   { id : string option
   ; typ : Type.t Named.t
-  ; global : (Text.global, Text.global_type) Runtime.t Named.t
-  ; table : (Text.table, Text.table_type) Runtime.t Named.t
+  ; global : (Text.Global.t, Text.Global.Type.t) Runtime.t Named.t
+  ; table : (Text.Table.t, Text.Table.Type.t) Runtime.t Named.t
   ; mem : (Text.mem, Text.limits) Runtime.t Named.t
-  ; func : (Text.func, Text.block_type) Runtime.t Named.t
-  ; elem : Text.elem Named.t
-  ; data : Text.data Named.t
+  ; func : (Text.Func.t, Text.block_type) Runtime.t Named.t
+  ; elem : Text.Elem.t Named.t
+  ; data : Text.Data.t Named.t
   ; exports : Grouped.opt_exports
   ; start : Text.indice option
   }
@@ -33,21 +33,21 @@ let pp_runtime_named ~pp_local ~pp_imported fmt l =
   Named.pp (Runtime.pp ~pp_local ~pp_imported) fmt l
 
 let pp_global fmt g =
-  pp_runtime_named ~pp_local:Text.pp_global ~pp_imported:Text.pp_global_type fmt
+  pp_runtime_named ~pp_local:Text.Global.pp ~pp_imported:Text.Global.Type.pp fmt
     g
 
 let pp_table fmt t =
-  pp_runtime_named ~pp_local:Text.pp_table ~pp_imported:Text.pp_table_type fmt t
+  pp_runtime_named ~pp_local:Text.Table.pp ~pp_imported:Text.Table.Type.pp fmt t
 
 let pp_mem fmt m =
   pp_runtime_named ~pp_local:Text.pp_mem ~pp_imported:Text.pp_limits fmt m
 
 let pp_func fmt f =
-  pp_runtime_named ~pp_local:Text.pp_func ~pp_imported:Text.pp_block_type fmt f
+  pp_runtime_named ~pp_local:Text.Func.pp ~pp_imported:Text.pp_block_type fmt f
 
-let pp_elem fmt e = Named.pp Text.pp_elem fmt e
+let pp_elem fmt e = Named.pp Text.Elem.pp fmt e
 
-let pp_data fmt d = Named.pp Text.pp_data fmt d
+let pp_data fmt d = Named.pp Text.Data.pp fmt d
 
 let pp_start fmt s = Text.pp_indice_opt fmt s
 
@@ -167,12 +167,12 @@ let of_grouped (modul : Grouped.t) : t Result.t =
   let typ = assign_types modul in
   let* global =
     name "global"
-      ~get_name:(get_runtime_name (fun ({ id; _ } : Text.global) -> id))
+      ~get_name:(get_runtime_name (fun ({ id; _ } : Text.Global.t) -> id))
       modul.global
   in
   let* table =
     name "table"
-      ~get_name:(get_runtime_name (fun ((id, _) : Text.table) -> id))
+      ~get_name:(get_runtime_name (fun ((id, _) : Text.Table.t) -> id))
       modul.table
   in
   let* mem =
@@ -182,14 +182,14 @@ let of_grouped (modul : Grouped.t) : t Result.t =
   in
   let* func =
     name "func"
-      ~get_name:(get_runtime_name (fun ({ id; _ } : Text.func) -> id))
+      ~get_name:(get_runtime_name (fun ({ id; _ } : Text.Func.t) -> id))
       modul.func
   in
   let* elem =
-    name "elem" ~get_name:(fun (elem : Text.elem) -> elem.id) modul.elem
+    name "elem" ~get_name:(fun (elem : Text.Elem.t) -> elem.id) modul.elem
   in
   let* data =
-    name "data" ~get_name:(fun (data : Text.data) -> data.id) modul.data
+    name "data" ~get_name:(fun (data : Text.Data.t) -> data.id) modul.data
   in
   let+ () = list_iter (check_type_id typ) modul.type_checks in
   let modul =
