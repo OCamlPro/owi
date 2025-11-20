@@ -368,7 +368,7 @@ module Text : sig
   and expr = instr Annotated.t list
 
   (* TODO: func and expr should also be parametrised on block type:
-   using (param_type, result_type) M.block_type before simplify and directly an indice after *)
+     using (param_type, result_type) M.block_type before simplify and directly an indice after *)
   type func =
     { type_f : block_type
     ; locals : param list
@@ -698,7 +698,7 @@ module Binary : sig
   and expr = instr Annotated.t list
 
   (* TODO: func and expr should also be parametrised on block type:
-   using (param_type, result_type) M.block_type before simplify and directly an indice after *)
+     using (param_type, result_type) M.block_type before simplify and directly an indice after *)
   type func =
     { type_f : block_type
     ; locals : param list
@@ -803,44 +803,14 @@ module Binary_to_text : sig
   val modul : Binary.Module.t -> Text.modul
 end
 
-module Int32 : sig
-  type t = int32
-
-  val le : t -> t -> bool
-
-  val add : t -> t -> t
-end
-
 module Concrete_memory : sig
   type t
 
-  val store_8 : t -> addr:Int32.t -> Int32.t -> unit Result.t
+  val store_8 : t -> addr:int32 -> int32 -> unit Result.t
 end
 
 module Concrete_extern_func : sig
-  type _ telt =
-    | I32 : Int32.t telt
-    | I64 : Int64.t telt
-    | F32 : Float32.t telt
-    | F64 : Float64.t telt
-    | V128 : V128.t telt
-    | Externref : 'a Type.Id.t -> 'a telt
-
-  type _ rtype =
-    | R0 : unit rtype
-    | R1 : 'a telt -> 'a rtype
-    | R2 : 'a telt * 'b telt -> ('a * 'b) rtype
-    | R3 : 'a telt * 'b telt * 'c telt -> ('a * 'b * 'c) rtype
-    | R4 : 'a telt * 'b telt * 'c telt * 'd telt -> ('a * 'b * 'c * 'd) rtype
-
-  type (_, _) atype =
-    | Mem : ('b, 'r) atype -> (Concrete_memory.t -> 'b, 'r) atype
-    | UArg : ('b, 'r) atype -> (unit -> 'b, 'r) atype
-    | Arg : 'a telt * ('b, 'r) atype -> ('a -> 'b, 'r) atype
-    | NArg : string * 'a telt * ('b, 'r) atype -> ('a -> 'b, 'r) atype
-    | Res : ('r, 'r) atype
-
-  type _ func_type = Func : ('f, 'r Result.t) atype * 'r rtype -> 'f func_type
+  type _ func_type
 
   type extern_func = Extern_func : 'a func_type * 'a -> extern_func
 
@@ -855,11 +825,7 @@ module Concrete_extern_func : sig
 
     type mem
 
-    type (_, _, _) t = private
-      | Unit : (lr, unit, unit) t
-      | Memory : (l, mem, Concrete_memory.t) t
-      | Elt : 'a telt -> (lr, elt, 'a) t
-      | Elt_labeled : string * 'a telt -> (l, string * elt, 'a) t
+    type (_, _, _) t
 
     val ( ^-> ) : ('r, 'k, 'a) t -> 'b func_type -> ('a -> 'b) func_type
 
