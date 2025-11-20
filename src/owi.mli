@@ -226,10 +226,6 @@ module Text : sig
 
   val pp_limits : Format.formatter -> limits -> unit
 
-  type nonrec mem = string option * limits
-
-  val pp_mem : Format.formatter -> mem -> unit
-
   (** Structure *)
 
   (** Types *)
@@ -470,13 +466,19 @@ module Text : sig
       }
   end
 
+  module Mem : sig
+    type nonrec t = string option * limits
+
+    val pp : Format.formatter -> t -> unit
+  end
+
   module Module : sig
     module Field : sig
       type t =
         | Typedef of Typedef.t
         | Global of Global.t
         | Table of Table.t
-        | Mem of mem
+        | Mem of Mem.t
         | Func of Func.t
         | Elem of Elem.t
         | Data of Data.t
@@ -601,8 +603,6 @@ module Binary : sig
     ; max : int option
     }
 
-  type nonrec mem = string option * limits
-
   type heap_type =
     | Func_ht
     | Extern_ht
@@ -624,10 +624,6 @@ module Binary : sig
   type block_type =
     (* TODO: inline this *)
     | Bt_raw of (indice option * func_type)
-
-  type nonrec table_type = limits * ref_type
-
-  type nonrec global_type = mut * val_type
 
   (** Instructions *)
 
@@ -720,65 +716,6 @@ module Binary : sig
 
   and expr = instr Annotated.t list
 
-  (* TODO: func and expr should also be parametrised on block type:
-     using (param_type, result_type) M.block_type before simplify and directly an indice after *)
-  type func =
-    { type_f : block_type
-    ; locals : param list
-    ; body : expr Annotated.t
-    ; id : string option
-    }
-
-  type table = string option * table_type
-
-  type type_def = string option * func_type
-
-  (** export *)
-  type export =
-    { name : string
-    ; id : int
-    }
-
-  (** named exports of a module *)
-  type exports =
-    { global : export list
-    ; mem : export list
-    ; table : export list
-    ; func : export list
-    }
-
-  type global =
-    { typ : global_type (* TODO: init : binary+const expr*)
-    ; init : expr Annotated.t
-    ; id : string option
-    }
-
-  type data_mode =
-    | Data_passive
-    (* TODO: Data_active binary+const expr*)
-    | Data_active of int * expr Annotated.t
-
-  type data =
-    { id : string option
-    ; init : string
-    ; mode : data_mode
-    }
-
-  type elem_mode =
-    | Elem_passive
-    (* TODO: Elem_active binary+const expr*)
-    | Elem_active of int option * expr Annotated.t
-    | Elem_declarative
-
-  type elem =
-    { id : string option
-    ; typ : ref_type (* TODO: init : binary+const expr*)
-    ; init : expr Annotated.t list
-    ; mode : elem_mode
-    }
-
-  type custom = Uninterpreted of string
-
   val pp_instr : short:bool -> Format.formatter -> instr -> unit
 
   val pp_result_type : Format.formatter -> result_type -> unit
@@ -803,20 +740,109 @@ module Binary : sig
 
   val iter_expr : (instr -> unit) -> expr Annotated.t -> unit
 
-  module Module : sig
+  module Func : sig
+    type t =
+      { type_f : block_type
+      ; locals : param list
+      ; body : expr Annotated.t
+      ; id : string option
+      }
+  end
+
+  module Table : sig
+    module Type : sig
+      type nonrec t = limits * ref_type
+    end
+
+    type t = string option * Type.t
+  end
+
+  module Typedef : sig
+    type t = string option * func_type
+  end
+
+  module Export : sig
+    (** export *)
+    type t =
+      { name : string
+      ; id : int
+      }
+  end
+
+  module Global : sig
+    module Type : sig
+      type nonrec t = mut * val_type
+    end
+
+    type t =
+      { typ : Type.t
+      ; init : expr Annotated.t
+      ; id : string option
+      }
+  end
+
+  module Data : sig
+    module Mode : sig
+      type t =
+        | Passive
+        | Active of int * expr Annotated.t
+    end
+
     type t =
       { id : string option
-      ; types : type_def array
-      ; global : (global, global_type) Runtime.t array
-      ; table : (table, table_type) Runtime.t array
-      ; mem : (mem, limits) Runtime.t array
+      ; init : string
+      ; mode : Mode.t
+      }
+  end
+
+  module Elem : sig
+    module Mode : sig
+      type t =
+        | Passive
+        | Declarative
+        (* TODO: Elem_active binary+const expr*)
+        | Active of int option * expr Annotated.t
+    end
+
+    type t =
+      { id : string option
+      ; typ : ref_type (* TODO: init : binary+const expr*)
+      ; init : expr Annotated.t list
+      ; mode : Mode.t
+      }
+  end
+
+  module Mem : sig
+    type nonrec t = string option * limits
+  end
+
+  module Custom : sig
+    type t = Uninterpreted of string
+  end
+
+  module Module : sig
+    module Exports : sig
+      type t =
+        { global : Export.t list
+        ; mem : Export.t list
+        ; table : Export.t list
+        ; func : Export.t list
+        }
+    end
+
+    type t =
+      { id : string option
+      ; types : Typedef.t array
+      ; global : (Global.t, Global.Type.t) Runtime.t array
+      ; table : (Table.t, Table.Type.t) Runtime.t array
+      ; mem : (Mem.t, limits) Runtime.t array
       ; func :
-          (func, block_type) Runtime.t array (* TODO: switch to func_type *)
-      ; elem : elem array
-      ; data : data array
-      ; exports : exports
+          (Func.t, block_type) Runtime.t array (* TODO: switch to func_type *)
+      ; elem : Elem.t array
+      ; data : Data.t array
+      ; exports : Exports.t
       ; start : int option
-      ; custom : custom list
+      ; custom : Custom.t list
       }
   end
 end

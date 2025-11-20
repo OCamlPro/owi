@@ -22,7 +22,7 @@
                    modul: "owi"
                    name: "i32_symbol"
                    assigned_name:  $i32_symbol
-                   desc:  (result i32)}) }]
+                   typ:  (result i32)}) }]
                  elem: []
                  data: []
                  exports: {
@@ -62,7 +62,7 @@
                      modul: "owi"
                      name: "i32_symbol"
                      assigned_name:  $i32_symbol
-                     desc:  (result i32)}) }]
+                     typ:  (result i32)}) }]
                    named: ("f", 1) ; ("i32_symbol", 0)}
                  elem: {
                    values: []

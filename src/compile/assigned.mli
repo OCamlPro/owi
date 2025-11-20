@@ -7,7 +7,7 @@ type t =
   ; typ : Text.func_type Named.t
   ; global : (Text.Global.t, Text.Global.Type.t) Runtime.t Named.t
   ; table : (Text.Table.t, Text.Table.Type.t) Runtime.t Named.t
-  ; mem : (Text.mem, Text.limits) Runtime.t Named.t
+  ; mem : (Text.Mem.t, Text.limits) Runtime.t Named.t
   ; func : (Text.Func.t, Text.block_type) Runtime.t Named.t
   ; elem : Text.Elem.t Named.t
   ; data : Text.Data.t Named.t

@@ -218,8 +218,6 @@ type nonrec limits =
   ; max : int option
   }
 
-type nonrec mem = string option * limits
-
 (** Structure *)
 
 (** Types *)
@@ -342,10 +340,6 @@ let pp_block_type_opt fmt = function
 let compare_func_type (pt1, rt1) (pt2, rt2) =
   let pt = compare_param_type pt1 pt2 in
   if pt = 0 then compare_result_type rt1 rt2 else pt
-
-type nonrec table_type = limits * ref_type
-
-type nonrec global_type = mut * val_type
 
 (** Instructions *)
 
@@ -613,82 +607,114 @@ and iter_instr f instr =
         iter_expr f e2 )
     instr
 
-(* TODO: func and expr should also be parametrised on block type:
-   using (param_type, result_type) M.block_type before simplify and directly an indice after *)
-type func =
-  { type_f : block_type
-  ; locals : param list
-  ; body : expr Annotated.t
-  ; id : string option
-  }
+module Func = struct
+  type t =
+    { type_f : block_type
+    ; locals : param list
+    ; body : expr Annotated.t
+    ; id : string option
+    }
+end
 
 (* Tables & Memories *)
 
-type table = string option * table_type
+module Table = struct
+  module Type = struct
+    type nonrec t = limits * ref_type
+  end
+
+  type t = string option * Type.t
+end
 
 (* Modules *)
 
-type type_def = string option * func_type
+module Typedef = struct
+  type t = string option * func_type
+end
 
 (** named export *)
-type export =
-  { name : string
-  ; id : int
-  }
+module Export = struct
+  type t =
+    { name : string
+    ; id : int
+    }
+end
 
-(** named exports of a module *)
-type exports =
-  { global : export list
-  ; mem : export list
-  ; table : export list
-  ; func : export list
-  }
+module Global = struct
+  module Type = struct
+    type nonrec t = mut * val_type
+  end
 
-type global =
-  { typ : global_type (* TODO: init : binary+const expr*)
-  ; init : expr Annotated.t
-  ; id : string option
-  }
+  type t =
+    { typ : Type.t (* TODO: init : binary+const expr*)
+    ; init : expr Annotated.t
+    ; id : string option
+    }
+end
 
-type data_mode =
-  | Data_passive
-  (* TODO: Data_active binary+const expr*)
-  | Data_active of int * expr Annotated.t
+module Data = struct
+  module Mode = struct
+    type t =
+      | Passive
+      (* TODO: Data_active binary+const expr*)
+      | Active of int * expr Annotated.t
+  end
 
-type data =
-  { id : string option
-  ; init : string
-  ; mode : data_mode
-  }
-
-type elem_mode =
-  | Elem_passive
-  (* TODO: Elem_active binary+const expr*)
-  | Elem_active of int option * expr Annotated.t
-  | Elem_declarative
-
-type elem =
-  { id : string option
-  ; typ : ref_type (* TODO: init : binary+const expr*)
-  ; init : expr Annotated.t list
-  ; mode : elem_mode
-  }
-
-type custom = Uninterpreted of string
-
-module Module = struct
   type t =
     { id : string option
-    ; types : type_def array
-    ; global : (global, global_type) Runtime.t array
-    ; table : (table, table_type) Runtime.t array
-    ; mem : (mem, limits) Runtime.t array
-    ; func : (func, block_type) Runtime.t array (* TODO: switch to func_type *)
-    ; elem : elem array
-    ; data : data array
-    ; exports : exports
+    ; init : string
+    ; mode : Mode.t
+    }
+end
+
+module Elem = struct
+  module Mode = struct
+    type t =
+      | Passive
+      | Declarative
+      (* TODO: Elem_active binary+const expr*)
+      | Active of int option * expr Annotated.t
+  end
+
+  type t =
+    { id : string option
+    ; typ : ref_type (* TODO: init : binary+const expr*)
+    ; init : expr Annotated.t list
+    ; mode : Mode.t
+    }
+end
+
+module Custom = struct
+  type t = Uninterpreted of string
+end
+
+module Mem = struct
+  type t = string option * limits
+end
+
+module Module = struct
+  module Exports = struct
+    type t =
+      { global : Export.t list
+      ; mem : Export.t list
+      ; table : Export.t list
+      ; func : Export.t list
+      }
+  end
+
+  type t =
+    { id : string option
+    ; types : Typedef.t array
+    ; global : (Global.t, Global.Type.t) Runtime.t array
+    ; table : (Table.t, Table.Type.t) Runtime.t array
+    ; mem : (Mem.t, limits) Runtime.t array
+    ; func :
+        (Func.t, block_type) Runtime.t array (* TODO: switch to func_type *)
+    ; elem : Elem.t array
+    ; data : Data.t array
+    ; exports : Exports.t
     ; start : int option
-    ; custom : custom list
+    ; custom : Custom.t list
     }
 
   let empty =
@@ -742,7 +768,7 @@ module Module = struct
     in
     let update_function = function
       | Runtime.Imported _ as f -> f
-      | Runtime.Local f ->
+      | Runtime.Local (f : Func.t) ->
         let body = handle_expr f.body in
         Runtime.Local { f with body }
     in
@@ -757,7 +783,7 @@ module Module = struct
     in
     let elem =
       Array.map
-        (fun elem ->
+        (fun (elem : Elem.t) ->
           let init = List.map handle_expr elem.init in
           { elem with init } )
         m.elem
@@ -766,7 +792,7 @@ module Module = struct
       Array.map
         (function
           | Runtime.Imported _ as v -> v
-          | Local (global : global) ->
+          | Local (global : Global.t) ->
             let init = handle_expr global.init in
             Local { global with init } )
         m.global
@@ -778,7 +804,7 @@ module Module = struct
       let func =
         List.map
           (fun export ->
-            let id = update_idx (export : export).id in
+            let id = update_idx (export : Export.t).id in
             { export with id } )
           m.exports.func
       in
@@ -805,7 +831,7 @@ module Module = struct
     else
       match m.func.(id) with
       | Local f -> Some f.type_f
-      | Imported i -> Some i.desc
+      | Imported i -> Some i.typ
 
   (** Exports *)
 
@@ -813,7 +839,7 @@ module Module = struct
       otherwise.*)
   let find_exported_func_from_name name m =
     List.find_opt
-      (function { name = name'; _ } -> String.equal name name')
+      (function { Export.name = name'; _ } -> String.equal name name')
       m.exports.func
 
   (** Imports *)
@@ -823,7 +849,7 @@ module Module = struct
   let find_imported_func_index ~modul_name ~func_name m =
     Array.find_index
       (function
-        | Runtime.Imported { Imported.modul; name; assigned_name = _; desc = _ }
+        | Runtime.Imported { Imported.modul; name; assigned_name = _; typ = _ }
           ->
           String.equal modul_name modul && String.equal func_name name
         | Local _ -> false )
@@ -841,7 +867,7 @@ module Module = struct
     last
 
   (** Look for an imported function index, adding it if not already imported. *)
-  let add_import_if_not_present ~modul_name ~func_name ~desc m =
+  let add_import_if_not_present ~modul_name ~func_name ~typ m =
     match find_imported_func_index ~modul_name ~func_name m with
     | Some _i -> m
     | None ->
@@ -850,7 +876,7 @@ module Module = struct
           { Imported.modul = modul_name
           ; name = func_name
           ; assigned_name = None
-          ; desc
+          ; typ
           }
       in
 

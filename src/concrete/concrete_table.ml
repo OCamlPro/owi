@@ -23,7 +23,7 @@ let fresh =
     incr r;
     !r
 
-let init ?label (typ : Binary.table_type) : t =
+let init ?label (typ : Binary.Table.Type.t) : t =
   let limits, ((_null, heap_type) as ref_type) = typ in
   let null = V.ref_null' heap_type in
   let table = Array.make limits.min null in

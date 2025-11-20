@@ -46,7 +46,7 @@ type t =
      Come from function declarations with type indicies *)
   ; global : (Text.Global.t, Global.Type.t) Runtime.t Indexed.t list
   ; table : (Table.t, Table.Type.t) Runtime.t Indexed.t list
-  ; mem : (mem, limits) Runtime.t Indexed.t list
+  ; mem : (Mem.t, limits) Runtime.t Indexed.t list
   ; func : (Func.t, block_type) Runtime.t Indexed.t list
   ; elem : Text.Elem.t Indexed.t list
   ; data : Text.Data.t Indexed.t list
@@ -76,7 +76,7 @@ let pp_table fmt t =
     ~pp_imported:Text.Table.Type.pp fmt t
 
 let pp_mem fmt m =
-  pp_runtime_indexed_list ~pp_local:Text.pp_mem ~pp_imported:Text.pp_limits fmt
+  pp_runtime_indexed_list ~pp_local:Text.Mem.pp ~pp_imported:Text.pp_limits fmt
     m
 
 let pp_func fmt f =
@@ -121,8 +121,8 @@ let pp fmt
     type_checks pp_global global pp_table table pp_mem mem pp_func func pp_elem
     elem pp_data data pp_opt_exports exports pp_start start
 
-let imp (import : Import.t) (assigned_name, desc) : 'a Imported.t =
-  { modul = import.modul; name = import.name; assigned_name; desc }
+let imp (import : Import.t) (assigned_name, typ) : 'a Imported.t =
+  { modul = import.modul; name = import.name; assigned_name; typ }
 
 let empty_module id =
   { id
@@ -203,7 +203,7 @@ let add_func value (fields : t) (curr : curr) =
     | Runtime.Local (func : Func.t) ->
       let fields = declare_func_type fields func.type_f in
       List.fold_left declare_func_type fields (extract_block_types func.body)
-    | Imported func -> declare_func_type fields func.desc
+    | Imported func -> declare_func_type fields func.typ
   in
   let index = !(curr.func) in
   incr curr.func;

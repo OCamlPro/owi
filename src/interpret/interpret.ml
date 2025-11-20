@@ -701,7 +701,7 @@ module Make (P : Interpret_intf.P) = struct
       (State.Continue
          { state with pc = expr; block_stack = block :: state.block_stack } )
 
-  let exec_func ~return (state : State.exec_state) env (func : func) =
+  let exec_func ~return (state : State.exec_state) env (func : Func.t) =
     Log.info (fun m ->
       m "calling func  : func %s" (Option.value func.id ~default:"anonymous") );
     let (Bt_raw ((None | Some _), (param_type, result_type))) = func.type_f in

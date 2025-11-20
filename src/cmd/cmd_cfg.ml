@@ -138,7 +138,7 @@ let build_cfg_from_text_module modul entry =
     Control_flow_graph.init nodes edges
   | _ -> assert false
 
-let build_cfg_from_func (f : Binary.func) =
+let build_cfg_from_func (f : Binary.Func.t) =
   let nodes, edges = build_cfg f.body.raw in
   Control_flow_graph.init nodes edges
 
@@ -152,7 +152,7 @@ let cmd ~source_file ~entry_point =
          | None ->
            Array.find_index
              (function
-               | Runtime.Local (y : Binary.func) ->
+               | Runtime.Local (y : Binary.Func.t) ->
                  Option.compare String.compare (Some x) y.id = 0
                | _ -> false )
              m.func ) )

@@ -212,7 +212,7 @@ let check_zero_opcode input =
 
 let read_bytes ~msg input = vector_no_id (read_byte ~msg) input
 
-let read_indice input : (Binary.indice * Input.t, _) result =
+let read_indice input : (indice * Input.t, _) result =
   let+ indice, input = read_U32 input in
   (indice, input)
 
@@ -815,23 +815,23 @@ let read_memory input =
 let read_global types input =
   let* typ, input = read_global_type input in
   let+ init, input = read_const types input in
-  ({ typ; init; id = None }, input)
+  ({ Global.typ; init; id = None }, input)
 
 let read_export input =
   let* name, input = read_bytes ~msg:"read_export 1" input in
   let name = string_of_char_list name in
   let* export_typeidx, input = read_byte ~msg:"read_export 2" input in
   let+ id, input = read_U32 input in
-  ((export_typeidx, { id; name }), input)
+  ((export_typeidx, { Export.id; name }), input)
 
 let read_elem_active types input =
   let* index, input = read_indice input in
   let+ offset, input = read_const types input in
-  (Elem_active (Some index, offset), input)
+  (Elem.Mode.Active (Some index, offset), input)
 
 let read_elem_active_zero types input =
   let+ offset, input = read_const types input in
-  (Elem_active (Some 0, offset), input)
+  (Elem.Mode.Active (Some 0, offset), input)
 
 let read_elem_index input =
   let+ index, input = read_indice input in
@@ -854,45 +854,45 @@ let read_element types input =
     let+ init, input = vector_no_id read_elem_index input in
     let init = List.map Annotated.dummy_deep init in
     let typ = (Null, Func_ht) in
-    ({ id; typ; init; mode }, input)
+    ({ Elem.id; typ; init; mode }, input)
   | 1 ->
-    let mode = Elem_passive in
+    let mode = Elem.Mode.Passive in
     let* typ, input = read_elem_kind input in
     let+ init, input = vector_no_id read_elem_index input in
     let init = List.map Annotated.dummy_deep init in
-    ({ id; typ; init; mode }, input)
+    ({ Elem.id; typ; init; mode }, input)
   | 2 ->
     let* mode, input = read_elem_active types input in
     let* typ, input = read_elem_kind input in
     let+ init, input = vector_no_id read_elem_index input in
     let init = List.map Annotated.dummy_deep init in
-    ({ id; typ; init; mode }, input)
+    ({ Elem.id; typ; init; mode }, input)
   | 3 ->
-    let mode = Elem_declarative in
+    let mode = Elem.Mode.Declarative in
     let* typ, input = read_elem_kind input in
     let+ init, input = vector_no_id read_elem_index input in
     let init = List.map Annotated.dummy_deep init in
-    ({ id; typ; init; mode }, input)
+    ({ Elem.id; typ; init; mode }, input)
   | 4 ->
     let* mode, input = read_elem_active_zero types input in
     let+ init, input = vector_no_id (read_const types) input in
     let typ = (Null, Func_ht) in
-    ({ id; typ; init; mode }, input)
+    ({ Elem.id; typ; init; mode }, input)
   | 5 ->
-    let mode = Elem_passive in
+    let mode = Elem.Mode.Passive in
     let* typ, input = read_reftype input in
     let+ init, input = vector_no_id (read_const types) input in
-    ({ id; typ; init; mode }, input)
+    ({ Elem.id; typ; init; mode }, input)
   | 6 ->
     let* mode, input = read_elem_active types input in
     let* typ, input = read_reftype input in
     let+ init, input = vector_no_id (read_const types) input in
-    ({ id; typ; init; mode }, input)
+    ({ Elem.id; typ; init; mode }, input)
   | 7 ->
-    let mode = Elem_declarative in
+    let mode = Elem.Mode.Declarative in
     let* typ, input = read_reftype input in
     let+ init, input = vector_no_id (read_const types) input in
-    ({ id; typ; init; mode }, input)
+    ({ Elem.id; typ; init; mode }, input)
   | i -> parse_fail "malformed elements segment kind: %d" i
 
 let read_local input =
@@ -937,11 +937,11 @@ let read_code types input =
 let read_data_active types input =
   let* index, input = read_indice input in
   let+ offset, input = read_const types input in
-  (Data_active (index, offset), input)
+  (Data.Mode.Active (index, offset), input)
 
 let read_data_active_zero types input =
   let+ offset, input = read_const types input in
-  (Data_active (0, offset), input)
+  (Data.Mode.Active (0, offset), input)
 
 let read_data types input =
   let* i, input = read_U32 input in
@@ -951,17 +951,17 @@ let read_data types input =
     let* mode, input = read_data_active_zero types input in
     let+ init, input = read_bytes ~msg:"read_data 0" input in
     let init = string_of_char_list init in
-    ({ id; init; mode }, input)
+    ({ Data.id; init; mode }, input)
   | 1 ->
-    let mode = Data_passive in
+    let mode = Data.Mode.Passive in
     let+ init, input = read_bytes ~msg:"read_data 1" input in
     let init = string_of_char_list init in
-    ({ id; init; mode }, input)
+    ({ Data.id; init; mode }, input)
   | 2 ->
     let* mode, input = read_data_active types input in
     let+ init, input = read_bytes ~msg:"read_data 2" input in
     let init = string_of_char_list init in
-    ({ id; init; mode }, input)
+    ({ Data.id; init; mode }, input)
   | i -> parse_fail "malformed data segment kind %d" i
 
 let parse_many_custom_section input =
@@ -1131,9 +1131,9 @@ let sections_iterate (input : Input.t) =
     let imported =
       List.filter_map
         (function
-          | modul, name, Mem desc ->
+          | modul, name, Mem typ ->
             Option.some
-            @@ Runtime.Imported { modul; name; assigned_name = None; desc }
+            @@ Runtime.Imported { modul; name; assigned_name = None; typ }
           | _not_a_memory_import -> None )
         import_section
     in
@@ -1149,7 +1149,7 @@ let sections_iterate (input : Input.t) =
           | modul, name, Global (mut, val_type) ->
             Option.some
             @@ Runtime.Imported
-                 { modul; name; assigned_name = None; desc = (mut, val_type) }
+                 { modul; name; assigned_name = None; typ = (mut, val_type) }
           | _not_a_global_import -> None )
         import_section
     in
@@ -1162,7 +1162,7 @@ let sections_iterate (input : Input.t) =
       List.map2
         (fun typeidx (locals, body) ->
           Runtime.Local
-            { type_f = block_type_of_type_def types.(typeidx)
+            { Func.type_f = block_type_of_type_def types.(typeidx)
             ; locals
             ; body
             ; id = None
@@ -1178,7 +1178,7 @@ let sections_iterate (input : Input.t) =
                  { modul
                  ; name
                  ; assigned_name = None
-                 ; desc = block_type_of_type_def types.(typeidx)
+                 ; typ = block_type_of_type_def types.(typeidx)
                  }
           | _not_a_function_import -> None )
         import_section
@@ -1195,11 +1195,7 @@ let sections_iterate (input : Input.t) =
           | modul, name, Table (limits, ref_type) ->
             Option.some
             @@ Runtime.Imported
-                 { modul
-                 ; name
-                 ; assigned_name = None
-                 ; desc = (limits, ref_type)
-                 }
+                 { modul; name; assigned_name = None; typ = (limits, ref_type) }
           | _not_a_table_import -> None )
         import_section
     in
@@ -1210,10 +1206,12 @@ let sections_iterate (input : Input.t) =
   let elem = Array.of_list element_section in
 
   (* Exports *)
-  let empty_exports = { global = []; mem = []; table = []; func = [] } in
+  let empty_exports =
+    { Module.Exports.global = []; mem = []; table = []; func = [] }
+  in
   let exports =
     List.fold_left
-      (fun (exports : exports) (export_typeidx, export) ->
+      (fun (exports : Module.Exports.t) (export_typeidx, export) ->
         match export_typeidx with
         | '\x00' ->
           let func = export :: exports.func in
@@ -1231,7 +1229,7 @@ let sections_iterate (input : Input.t) =
       empty_exports export_section
   in
   let exports =
-    { func = List.rev exports.func
+    { Module.Exports.func = List.rev exports.func
     ; table = List.rev exports.table
     ; mem = List.rev exports.mem
     ; global = List.rev exports.global
@@ -1240,10 +1238,12 @@ let sections_iterate (input : Input.t) =
 
   (* Custom *)
   let custom =
-    List.filter_map (Option.map (fun x -> Uninterpreted x)) custom_sections
+    List.filter_map
+      (Option.map (fun x -> Custom.Uninterpreted x))
+      custom_sections
   in
 
-  { Binary.Module.id = None
+  { Module.id = None
   ; types
   ; global
   ; mem

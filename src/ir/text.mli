@@ -129,10 +129,6 @@ type nonrec limits =
 
 val pp_limits : Format.formatter -> limits -> unit
 
-type nonrec mem = string option * limits
-
-val pp_mem : Format.formatter -> mem -> unit
-
 (** Structure *)
 
 (** Types *)
@@ -373,13 +369,19 @@ module Export : sig
     }
 end
 
+module Mem : sig
+  type nonrec t = string option * limits
+
+  val pp : Format.formatter -> t -> unit
+end
+
 module Module : sig
   module Field : sig
     type t =
       | Typedef of Typedef.t
       | Global of Global.t
       | Table of Table.t
-      | Mem of mem
+      | Mem of Mem.t
       | Func of Func.t
       | Elem of Elem.t
       | Data of Data.t
