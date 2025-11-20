@@ -63,7 +63,7 @@
   (digestif
    (>= 1.2.0))
   (logs
-   (>= 0.8.0))
+   (>= 0.10.0))
   (ocaml_intrinsics
    (>= "v0.16.1"))
   (prelude
