@@ -11,7 +11,7 @@ let cast_ref (type r) (E (rty, r) : externref) (ty : r Type.Id.t) : r option =
 
 type ref_value =
   | Externref of externref option
-  | Funcref of Func_intf.t option
+  | Funcref of Kind.func option
 
 let pp_ref_value fmt = function
   | Externref _ -> pf fmt "externref"
@@ -58,7 +58,7 @@ let ref_null' = function
 
 let ref_null typ = Ref (ref_null' typ)
 
-let ref_func (f : Concrete_extern_func.t) : t = Ref (Funcref (Some f))
+let ref_func (f : Kind.func) : t = Ref (Funcref (Some f))
 
 let ref_externref (type x) (t : x Type.Id.t) (v : x) : t =
   Ref (Externref (Some (E (t, v))))

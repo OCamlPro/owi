@@ -10,7 +10,7 @@ type global = Concrete_global.t
 
 type table = Concrete_table.t
 
-type func = Concrete_extern_func.t
+type func = Kind.func
 
 module State = struct
   type exports =
@@ -213,7 +213,7 @@ let load_func (ls : 'f State.t) (import : Binary.block_type Imported.t) :
   in
   let type' =
     match func with
-    | Func_intf.WASM (_, func, _) ->
+    | Kind.Wasm (_, func, _) ->
       let (Bt_raw ((None | Some _), t)) = func.type_f in
       t
     | Extern func_id -> Func_id.get_typ func_id ls.collection
@@ -223,7 +223,7 @@ let load_func (ls : 'f State.t) (import : Binary.block_type Imported.t) :
 
 let eval_func ls (finished_env : Env_id.t) func : func Result.t =
   match func with
-  | Runtime.Local func -> ok @@ Concrete_extern_func.wasm func finished_env
+  | Runtime.Local func -> ok @@ Kind.wasm func finished_env
   | Imported import -> load_func ls import
 
 let eval_functions ls (finished_env : Env_id.t) env functions =
@@ -394,7 +394,7 @@ module Extern = struct
         (fun (functions, collection) (name, func) ->
           let typ = modul.func_type func in
           let id, collection = Func_id.add func typ collection in
-          ((name, Func_intf.Extern id) :: functions, collection) )
+          ((name, (Kind.extern id : Kind.func)) :: functions, collection) )
         ([], ls.collection) modul.functions
     in
     let functions = StringMap.of_seq (List.to_seq functions) in

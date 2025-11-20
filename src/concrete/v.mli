@@ -9,7 +9,7 @@ type externref = E : 'a Type.Id.t * 'a -> externref
 
 type ref_value =
   | Externref of externref option
-  | Funcref of Func_intf.t option
+  | Funcref of Kind.func option
 
 val pp_ref_value : Format.formatter -> ref_value -> unit
 
@@ -31,7 +31,7 @@ val ref_null' : Binary.heap_type -> ref_value
 
 val ref_null : Binary.heap_type -> t
 
-val ref_func : Concrete_extern_func.t -> t
+val ref_func : Kind.func -> t
 
 val ref_externref : 'a Type.Id.t -> 'a -> t
 

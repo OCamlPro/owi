@@ -94,7 +94,7 @@ module type P = sig
   end
 
   module Extern_func :
-    Func_intf.T_Extern_func
+    Extern.Func.T
       with type int32 := Value.int32
        and type int64 := Value.int64
        and type float32 := Value.float32
@@ -124,7 +124,7 @@ module type P = sig
 
     val get_memory : t -> int -> Memory.t Choice.t
 
-    val get_func : t -> int -> Func_intf.t
+    val get_func : t -> int -> Kind.func
 
     val get_table : t -> int -> Table.t Choice.t
 
