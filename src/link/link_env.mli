@@ -4,23 +4,13 @@
 
 type 'ext t
 
-type 'ext backup
-
-type t' = Env_id.t
-
 type elem = { mutable value : Concrete_value.ref_value array }
 
 type data = { mutable value : string }
 
-type func := Func_intf.t
-
-val backup : 'ext t -> 'ext backup
-
-val recover : 'ext backup -> 'ext t -> unit
-
 val get_memory : _ t -> int -> Concrete_memory.t Concrete_choice.t
 
-val get_func : _ t -> int -> func
+val get_func : _ t -> int -> Func_intf.t
 
 val get_table : _ t -> int -> Concrete_table.t Concrete_choice.t
 
@@ -49,7 +39,7 @@ module Build : sig
 
   val add_table : int -> Concrete_table.t -> t -> t
 
-  val add_func : int -> func -> t -> t
+  val add_func : int -> Func_intf.t -> t -> t
 
   val add_data : int -> data -> t -> t
 
@@ -57,9 +47,7 @@ module Build : sig
 
   val get_const_global : t -> int -> V.t Result.t
 
-  val get_func : t -> int -> func Result.t
+  val get_func : t -> int -> Func_intf.t Result.t
 end
 
-type extern_funcs = Concrete_extern_func.extern_func Func_id.collection
-
-val freeze : t' -> Build.t -> 'ext Func_id.collection -> 'ext t
+val freeze : Env_id.t -> Build.t -> 'ext Func_id.collection -> 'ext t

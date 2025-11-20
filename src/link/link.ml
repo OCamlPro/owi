@@ -221,12 +221,12 @@ let load_func (ls : 'f State.t) (import : Binary.block_type Imported.t) :
   if Binary.func_type_eq typ type' then Ok func
   else Error (`Incompatible_import_type import.name)
 
-let eval_func ls (finished_env : Link_env.t') func : func Result.t =
+let eval_func ls (finished_env : Env_id.t) func : func Result.t =
   match func with
   | Runtime.Local func -> ok @@ Concrete_extern_func.wasm func finished_env
   | Imported import -> load_func ls import
 
-let eval_functions ls (finished_env : Link_env.t') env functions =
+let eval_functions ls (finished_env : Env_id.t) env functions =
   let+ env, _i =
     array_fold_left
       (fun (env, i) func ->
