@@ -7,50 +7,31 @@
     symbol symbol_0 i32
     symbol symbol_1 i32
   }
-  solver_stats {
-    stat "rlimit count"
-    stat propagations
-    stat "num checks"
-    stat "num allocs"
-    stat "mk clause"
-    stat "mk bool var"
-    stat memory
-    stat "max memory"
-    stat "final checks"
-    stat "del clause"
-    stat decisions
-    stat "cache misses"
-    stat "cache hits"
-    stat "bv dynamic diseqs"
-    stat "bv bit2core"
-    stat "added eqs"
-  }
-  
+
   owi: [ERROR] Trap: integer divide by zero
   model {
     symbol symbol_0 i32
     symbol symbol_1 i32
   }
-  solver_stats {
-    stat "rlimit count"
-    stat propagations
-    stat "num checks"
-    stat "num allocs"
-    stat "mk clause"
-    stat "mk bool var"
-    stat memory
-    stat "max memory"
-    stat "final checks"
-    stat "del clause"
-    stat "cache misses"
-    stat "cache hits"
-    stat "bv bit2core"
-    stat "added eqs"
-  }
-  
+
   owi: [INFO] Benchmarks:
               execution time
               solver time
               interpreter time
-              
+              Solver stats:
+              ((added eqs 13)
+               (bv bit2core 192)
+               (bv dynamic diseqs 4)
+               (bv->core eq 1)
+               (decisions 96)
+               (del clause 10)
+               (final checks 6)
+               (max memory 33.39)
+               (memory 33.39)
+               (mk bool var 309)
+               (mk clause 15)
+               (num allocs 8415)
+               (num checks 6)
+               (propagations 12)
+               (rlimit count 2087))
   owi: [ERROR] Reached 2 problems!
