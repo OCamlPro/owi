@@ -1,10 +1,9 @@
-open Owi
-open Syntax
+let ( let* ) = Result.bind
 
 exception Timeout
 
 module type INTERPRET = sig
-  val parse_and_run : Text.modul -> unit Result.t
+  val parse_and_run : Owi.Text.modul -> (unit, Owi.Result.err) Result.t
 
   val name : string
 end
@@ -22,7 +21,8 @@ let set =
     in
     ()
 
-let timeout_call_run (run : unit -> unit Result.t) : 'a Result.t =
+let timeout_call_run (run : unit -> (unit, Owi.Result.err) Result.t) :
+  (unit, [> `Timeout ]) Result.t =
   try
     Fun.protect ~finally:unset (fun () ->
       set ();
@@ -31,50 +31,22 @@ let timeout_call_run (run : unit -> unit Result.t) : 'a Result.t =
 
 module Owi_regular : INTERPRET = struct
   let parse_and_run modul =
-    let* simplified = Compile.Text.until_binary ~unsafe:false modul in
-    let* () = Binary_validate.modul simplified in
+    let* simplified = Owi.Compile.Text.until_binary ~unsafe:false modul in
+    let* () = Owi.Binary_validate.modul simplified in
     let* regular, link_state =
-      Link.modul Link.empty_state ~name:None simplified
+      Owi.Link.modul Owi.Link.empty_state ~name:None simplified
     in
     timeout_call_run (fun () ->
-      Interpret.Concrete.modul link_state.envs regular ~timeout:None
+      Owi.Interpret.Concrete.modul link_state regular ~timeout:None
         ~timeout_instr:None )
 
   let name = "owi_concrete"
 end
 
-module Owi_minimalist_symbolic : INTERPRET = struct
-  let dummy_workers_count = 42
-
-  let parse_and_run modul : unit Result.t =
-    let* simplified = Compile.Text.until_binary ~unsafe:false modul in
-    let* () = Binary_validate.modul simplified in
-    let* regular, link_state =
-      Link.modul Link.empty_state ~name:None simplified
-    in
-    let regular = Minimalist_symbolic.convert_module_to_run regular in
-    timeout_call_run (fun () ->
-      let c =
-        Interpret.Minimalist_symbolic.modul link_state.envs regular
-          ~timeout:None ~timeout_instr:None
-      in
-      let init_thread = Thread_with_memory.init () in
-      let res, _ =
-        Minimalist_symbolic_choice.run ~workers:dummy_workers_count
-          Smtml.Solver_type.Z3_solver c init_thread
-      in
-      match res with
-      | Ok res -> Ok res
-      | Error (Trap t) -> Error t
-      | Error Assert_fail -> Error `Assert_failure )
-
-  let name = "owi_minimalist_symbolic"
-end
-
 module Reference : INTERPRET = struct
-  let parse_and_run modul : unit Result.t =
+  let parse_and_run modul =
     let* tmp_file = Bos.OS.Dir.tmp "owi_fuzzer_official%s.wast" in
-    let* () = Bos.OS.File.writef tmp_file "%a" Text.pp_modul modul in
+    let* () = Bos.OS.File.writef tmp_file "%a" Owi.Text.pp_modul modul in
 
     let* cmd =
       Bos.OS.Cmd.resolve
@@ -95,49 +67,4 @@ module Reference : INTERPRET = struct
   (* TODO: https://github.com/OCamlPro/owi/pull/28#discussion_r1212866678 *)
 
   let name = "reference"
-end
-
-module Owi_full_symbolic (Symbolizer : sig
-  val symbolize : Text.modul -> Text.modul
-end) : INTERPRET = struct
-  let name = "owi_full_symbolic"
-
-  let parse_and_run modul : unit Result.t =
-    let modul = Symbolizer.symbolize modul in
-    let* simplified = Compile.Text.until_binary ~unsafe:false modul in
-    let* () = Binary_validate.modul simplified in
-    let* regular, link_state =
-      Link.modul Link.empty_state ~name:None simplified
-    in
-    let regular = Symbolic.convert_module_to_run regular in
-    timeout_call_run (fun () ->
-      let c =
-        Interpret.Symbolic.modul link_state.envs regular ~timeout:None
-          ~timeout_instr:None
-      in
-      let init_thread = Thread_with_memory.init () in
-      let res_acc = ref [] in
-      let res_acc_mutex = Mutex.create () in
-      let jhs =
-        Symbolic_choice_with_memory.run ~workers:1
-          (* TODO: we should fuzz different exploration strategies! *)
-          (module Owi.Ws)
-          Smtml.Solver_type.Z3_solver c init_thread
-          ~callback:(fun (res, _) ->
-            Mutex.protect res_acc_mutex (fun () -> res_acc := res :: !res_acc) )
-          ~callback_init:(fun () -> ())
-          ~callback_end:(fun () -> ())
-      in
-      Array.iter (fun jh -> Domain.join jh) jhs;
-      match !res_acc with
-      | [ v ] -> begin
-        match v with
-        | EVal r -> Ok r
-        | ETrap (t, _mdl, _labels, _breadcrumbs, _symbol_scopes, _stats) ->
-          Error t
-        | EAssert (_expr, _mdl, _labels, _breadcrumbs, _symbol_scopes, _stats)
-          ->
-          Error `Assert_failure
-      end
-      | _ -> Fmt.failwith "Unexpected multiple results." )
 end

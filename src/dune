@@ -61,8 +61,6 @@
   link
   link_env
   log
-  minimalist_symbolic
-  minimalist_symbolic_choice
   named
   owi
   parse

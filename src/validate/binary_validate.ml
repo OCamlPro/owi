@@ -749,6 +749,6 @@ let modul (modul : Module.t) =
   let* () = validate_tables modul in
   let* () = validate_mem modul in
   List.iter
-    (fun (export : named_export) -> Hashtbl.add refs export.id ())
+    (fun (export : export) -> Hashtbl.add refs export.id ())
     modul.exports.func;
   array_iter (fun func -> typecheck_function modul func refs) modul.func

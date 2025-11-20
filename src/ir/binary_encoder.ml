@@ -513,7 +513,7 @@ and write_expr buf expr ~end_op_code =
   let end_op_code = Option.value end_op_code ~default:'\x0B' in
   Buffer.add_char buf end_op_code
 
-let write_export buf cid ({ name; id } : Binary.named_export) =
+let write_export buf cid ({ name; id } : Binary.export) =
   write_string buf name;
   Buffer.add_char buf cid;
   write_u32_of_int buf id

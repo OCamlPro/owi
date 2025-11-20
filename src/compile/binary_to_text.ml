@@ -486,7 +486,7 @@ let from_data data : Text.module_field list =
 let from_exports (exports : Binary.exports) : Text.module_field list =
   let global =
     List.map
-      (fun ({ name; id } : Binary.named_export) ->
+      (fun ({ name; id } : Binary.export) ->
         let id = Some (Text.Raw id) in
         Text.MExport { name; desc = Export_global id } )
       exports.global
@@ -494,7 +494,7 @@ let from_exports (exports : Binary.exports) : Text.module_field list =
 
   let mem =
     List.map
-      (fun ({ name; id } : Binary.named_export) ->
+      (fun ({ name; id } : Binary.export) ->
         let id = Some (Text.Raw id) in
         Text.MExport { name; desc = Export_mem id } )
       exports.mem
@@ -502,7 +502,7 @@ let from_exports (exports : Binary.exports) : Text.module_field list =
 
   let table =
     List.map
-      (fun ({ name; id } : Binary.named_export) ->
+      (fun ({ name; id } : Binary.export) ->
         let id = Some (Text.Raw id) in
         Text.MExport { name; desc = Export_table id } )
       exports.table
@@ -510,7 +510,7 @@ let from_exports (exports : Binary.exports) : Text.module_field list =
 
   let func =
     List.map
-      (fun ({ name; id } : Binary.named_export) ->
+      (fun ({ name; id } : Binary.export) ->
         let id = Some (Text.Raw id) in
         Text.MExport { name; desc = Export_func id } )
       exports.func

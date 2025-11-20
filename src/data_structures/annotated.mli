@@ -22,3 +22,5 @@ val update_functions_called : 'a t -> Set.Make(Int).t -> unit
 val set_d_true : 'a t -> int array -> unit
 
 val set_d_false : 'a t -> int array -> unit
+
+val raw : 'a t -> 'a

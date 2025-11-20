@@ -8,6 +8,8 @@ type 'a t =
   ; d_false : int array option ref
   }
 
+let raw { raw; _ } = raw
+
 let dummy raw =
   { raw
   ; instr_counter = Atomic.make 0

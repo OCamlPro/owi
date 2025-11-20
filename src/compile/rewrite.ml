@@ -500,7 +500,7 @@ let rewrite_data (typemap : Binary.indice TypeMap.t) (modul : Assigned.t)
   { Binary.mode; id = data.id; init = data.init }
 
 let rewrite_export named (exports : Grouped.opt_export list) :
-  Binary.named_export list Result.t =
+  Binary.export list Result.t =
   list_map
     (fun { Grouped.name; id } ->
       let+ id =

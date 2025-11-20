@@ -151,7 +151,7 @@ let rec find_tables acc (e : Binary.instr Annotated.t) =
   | _ -> acc
 
 let find_tables_to_remove export_tables funcs =
-  let l = List.map (fun (x : Binary.named_export) -> x.id) export_tables in
+  let l = List.map (fun (x : Binary.export) -> x.id) export_tables in
   Array.fold_left
     (fun acc f ->
       match f with
@@ -171,9 +171,7 @@ let rec remove_tables (l1 : (int * Binary.elem) list) l2 acc =
 
 let find_entry_points (m : Binary.Module.t) =
   let l = Option.to_list m.start in
-  List.fold_left
-    (fun acc (x : Binary.named_export) -> x.id :: acc)
-    l m.exports.func
+  List.fold_left (fun acc (x : Binary.export) -> x.id :: acc) l m.exports.func
 
 let find_entries entry_point (m : Binary.Module.t) =
   let entries =
