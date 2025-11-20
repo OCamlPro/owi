@@ -282,8 +282,6 @@ type collection = t ITbl.t Env_id.Tbl.t
 
 let init () = Env_id.Tbl.create 0
 
-let iter f collection = Env_id.Tbl.iter (fun _ tbl -> f tbl) collection
-
 let clone collection =
   (* TODO: this is ugly and should be rewritten *)
   let s = Env_id.Tbl.to_seq collection in
