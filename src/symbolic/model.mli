@@ -21,13 +21,11 @@ val print :
         * (int * string) list
         * int list
         * Symbol_scope.t
-        * Smtml.Statistics.t
      | `ETrap of
        Result.err
        * Smtml.Model.t
        * (int * string) list
        * int list
        * Symbol_scope.t
-       * Smtml.Statistics.t
      ]
   -> unit Result.t

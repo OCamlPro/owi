@@ -10,7 +10,7 @@ type output_format =
   | Json
 
 let pp format with_breadcrumbs no_value fmt
-  (model, labels, breadcrumbs, scoped_values, stats) =
+  (model, labels, breadcrumbs, scoped_values) =
   match format with
   | Json ->
     let json = Symbol_scope.to_json ~no_value model scoped_values in
@@ -33,21 +33,6 @@ let pp format with_breadcrumbs no_value fmt
         | `Assoc fields -> `Assoc (fields @ [ ("breadcrumbs", `List crumbs) ])
         | _ -> json
       else json
-    in
-    let json =
-      match json with
-      | `Assoc fields when Log.is_bench_enabled () ->
-        let solver_stats_json : Yojson.Basic.t =
-          `Assoc
-            (Solver.fold_stats
-               (fun id v acc ->
-                 match v with
-                 | `Int i -> (id, `Int i) :: acc
-                 | `Float f -> (id, `Float f) :: acc )
-               stats [] )
-        in
-        `Assoc (("solver_stats", solver_stats_json) :: fields)
-      | _ -> json
     in
     Yojson.Basic.pretty_print fmt json
   | Scfg ->
@@ -75,26 +60,6 @@ let pp format with_breadcrumbs no_value fmt
         ]
       else []
     in
-    let bcrumbs =
-      if Log.is_bench_enabled () then
-        let stats =
-          { Scfg.Types.name = "solver_stats"
-          ; params = []
-          ; children =
-              Solver.fold_stats
-                (fun id v acc ->
-                  let params =
-                    match v with
-                    | `Int i -> [ id; string_of_int i ]
-                    | `Float f -> [ id; string_of_float f ]
-                  in
-                  { Scfg.Types.name = "stat"; params; children = [] } :: acc )
-                stats []
-          }
-        in
-        stats :: bcrumbs
-      else bcrumbs
-    in
     let ret =
       model
       :: (if List.length lbls.children > 0 then lbls :: bcrumbs else bcrumbs)
@@ -103,7 +68,7 @@ let pp format with_breadcrumbs no_value fmt
 
 let print ~format ~out_file ~id ~no_value ~no_stop_at_failure
   ~no_assert_failure_expression_printing ~with_breadcrumbs bug =
-  let to_file path model labels breadcrumbs symbol_scopes stats =
+  let to_file path model labels breadcrumbs symbol_scopes =
     let ext = match format with Json -> "json" | Scfg -> "scfg" in
     let contains_ext =
       Fpath.has_ext ".json" path || Fpath.has_ext ".scfg" path
@@ -124,26 +89,26 @@ let print ~format ~out_file ~id ~no_value ~no_stop_at_failure
     in
     Bos.OS.File.writef path "%a"
       (pp format with_breadcrumbs no_value)
-      (model, labels, breadcrumbs, symbol_scopes, stats)
+      (model, labels, breadcrumbs, symbol_scopes)
   in
-  let output model labels breadcrumbs symbol_scopes stats =
+  let output model labels breadcrumbs symbol_scopes =
     match out_file with
-    | Some path -> to_file path model labels breadcrumbs symbol_scopes stats
+    | Some path -> to_file path model labels breadcrumbs symbol_scopes
     | None -> begin
       Log.app (fun m ->
         let fmt = m (if no_stop_at_failure then "%a@." else "%a") in
         fmt
           (pp format with_breadcrumbs no_value)
-          (model, labels, breadcrumbs, symbol_scopes, stats) );
+          (model, labels, breadcrumbs, symbol_scopes) );
       Ok ()
     end
   in
   match bug with
-  | `ETrap (tr, model, labels, breadcrumbs, symbol_scopes, stats) ->
+  | `ETrap (tr, model, labels, breadcrumbs, symbol_scopes) ->
     Log.err (fun m -> m "Trap: %s" (Result.err_to_string tr));
-    output model labels breadcrumbs symbol_scopes stats
-  | `EAssert (assertion, model, labels, breadcrumbs, symbol_scopes, stats) ->
+    output model labels breadcrumbs symbol_scopes
+  | `EAssert (assertion, model, labels, breadcrumbs, symbol_scopes) ->
     if no_assert_failure_expression_printing then
       Log.err (fun m -> m "Assert failure")
     else Log.err (fun m -> m "Assert failure: %a" Smtml.Expr.pp assertion);
-    output model labels breadcrumbs symbol_scopes stats
+    output model labels breadcrumbs symbol_scopes

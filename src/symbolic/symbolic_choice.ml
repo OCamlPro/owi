@@ -221,7 +221,6 @@ module CoreImpl = struct
       -> (int * string) list
       -> int list
       -> Symbol_scope.t
-      -> Smtml.Statistics.t
       -> 'a t
 
     val stop : 'a t
@@ -324,13 +323,12 @@ module CoreImpl = struct
       let pc = Thread.pc thread |> Symbolic_path_condition.to_set in
       let symbol_scopes = Thread.symbol_scopes thread in
       let model = Solver.model solver ~symbol_scopes ~pc in
-      let stats = Solver.get_stats solver in
       let labels = Thread.labels thread in
       let breadcrumbs = Thread.breadcrumbs thread in
-      State.return (ETrap (t, model, labels, breadcrumbs, symbol_scopes, stats))
+      State.return (ETrap (t, model, labels, breadcrumbs, symbol_scopes))
 
-    let assertion_fail c model labels bcrumbs symbol_scopes stats =
-      State.return (EAssert (c, model, labels, bcrumbs, symbol_scopes, stats))
+    let assertion_fail c model labels bcrumbs symbol_scopes =
+      State.return (EAssert (c, model, labels, bcrumbs, symbol_scopes))
   end
 end
 
@@ -527,10 +525,9 @@ module Make (Thread : Thread_intf.S) = struct
       let symbol_scopes = Thread.symbol_scopes thread in
       let pc = Thread.pc thread |> Symbolic_path_condition.to_set in
       let model = Solver.model ~symbol_scopes ~pc solver in
-      let stats = Solver.get_stats solver in
       let breadcrumbs = Thread.breadcrumbs thread in
       let labels = Thread.labels thread in
-      assertion_fail c model labels breadcrumbs symbol_scopes stats
+      assertion_fail c model labels breadcrumbs symbol_scopes
 
   let assume c =
     let* assertion_true =
