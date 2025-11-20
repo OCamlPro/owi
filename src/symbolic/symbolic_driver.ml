@@ -19,8 +19,7 @@ let print_and_count_failures ~format ~out_file ~no_value
     | Seq.Cons ((result, _thread), tl) ->
       let* model =
         match result with
-        | (`EAssert (_, model, _, _, _, _) | `ETrap (_, model, _, _, _, _)) as
-          bug ->
+        | (`EAssert (_, model, _, _, _) | `ETrap (_, model, _, _, _)) as bug ->
           let* () =
             Model.print ~format ~out_file ~id:count_acc ~no_value
               ~no_stop_at_failure ~no_assert_failure_expression_printing
@@ -57,14 +56,14 @@ let mk_callback fail_mode res_stack path_count =
   match (fail_mode, v) with
   | _, (EVal (), _) -> ()
   | ( (Symbolic_parameters.Both | Trap_only)
-    , (ETrap (t, m, labels, breadcrumbs, symbol_scopes, stats), thread) ) ->
+    , (ETrap (t, m, labels, breadcrumbs, symbol_scopes), thread) ) ->
     Ws.push
-      (`ETrap (t, m, labels, breadcrumbs, symbol_scopes, stats), thread)
+      (`ETrap (t, m, labels, breadcrumbs, symbol_scopes), thread)
       Prio.default res_stack
   | ( (Both | Assertion_only)
-    , (EAssert (e, m, labels, breadcrumbs, symbol_scopes, stats), thread) ) ->
+    , (EAssert (e, m, labels, breadcrumbs, symbol_scopes), thread) ) ->
     Ws.push
-      (`EAssert (e, m, labels, breadcrumbs, symbol_scopes, stats), thread)
+      (`EAssert (e, m, labels, breadcrumbs, symbol_scopes), thread)
       Prio.default res_stack
   | (Trap_only | Assertion_only), _ -> ()
 
