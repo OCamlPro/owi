@@ -9,8 +9,6 @@ module Table = Concrete_table
 module Memory = Concrete_memory
 module Choice = Concrete_choice
 
-type thread = unit
-
 let select cond ~if_true ~if_false =
   if cond then Choice.return if_true else Choice.return if_false
 [@@inline]
