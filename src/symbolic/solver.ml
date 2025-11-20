@@ -6,13 +6,20 @@ type 'a solver_module = (module Smtml.Solver_intf.S with type t = 'a)
 
 type t = S : ('a solver_module * 'a) -> t [@@unboxed]
 
-let fresh solver () =
-  let module Mapping = (val Smtml.Solver_dispatcher.mappings_of_solver solver)
+let instances = Atomic.make []
+
+let fresh solver_ty () =
+  let module Mapping = (val Smtml.Solver_dispatcher.mappings_of_solver solver_ty)
   in
   let module Mapping = Mapping.Fresh.Make () in
   let module Batch = Smtml.Solver.Cached (Mapping) in
-  let solver = Batch.create ~logic:QF_BVFP () in
-  S ((module Batch), solver)
+  let solver_inst = Batch.create ~logic:QF_BVFP () in
+  let solver = S ((module Batch), solver_inst) in
+  ( if Log.is_bench_enabled () then
+      let l = Atomic.get instances in
+      let l = solver :: l in
+      Atomic.set instances l );
+  solver
 
 let check (S (solver_module, s)) pc =
   let module Solver = (val solver_module) in
@@ -41,5 +48,15 @@ let empty_stats = Smtml.Statistics.Map.empty
 
 let stats_are_empty = Smtml.Statistics.Map.is_empty
 
+let get_all_stats () =
+  if Log.is_bench_enabled () then
+    let solvers = Atomic.get instances in
+    List.fold_left
+      (fun stats_acc (S (solver_module, s)) ->
+        let module Solver = (val solver_module) in
+        let stats = Solver.get_statistics s in
+        Smtml.Statistics.merge stats stats_acc )
+      empty_stats solvers
+  else empty_stats
 
 let pp_stats = Smtml.Statistics.pp

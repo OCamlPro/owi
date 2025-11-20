@@ -105,14 +105,17 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
       let run_time = match run_time with None -> assert false | Some t -> t in
       (interpreter_time +. run_time) *. 1000.
     in
+    let solver_stats = Solver.get_all_stats () in
     (* run_time shouldn't be none in bench mode *)
     m
       "Benchmarks:@\n\
        execution time: %a@\n\
        @[<v>solver time: %a@;\
        interpreter time: %fms@;\
-       @]"
-      Mtime.Span.pp time_counter Mtime.Span.pp solver_time interpreter_time );
+       Solver stats:@;\
+       %a@]"
+      Mtime.Span.pp time_counter Mtime.Span.pp solver_time interpreter_time
+      Solver.pp_stats solver_stats );
 
   Log.info (fun m -> m "Completed paths: %d" (Atomic.get path_count));
 
