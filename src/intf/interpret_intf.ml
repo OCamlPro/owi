@@ -3,8 +3,6 @@
 (* Written by the Owi programmers *)
 
 module type P = sig
-  type thread
-
   module Value : Value_intf.T
 
   module Choice : Choice_intf.Base with module V := Value
