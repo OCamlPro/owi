@@ -300,20 +300,8 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
   Log.info (fun m -> m "Completed paths: %d" (Atomic.get path_count));
 
   Log.bench (fun m ->
-    let bench_stats = Thread_with_memory.bench_stats thread in
-    (* run_time shouldn't be none in bench mode *)
-    let run_time = match run_time with None -> assert false | Some t -> t in
-    m
-      "Benchmarks:@\n\
-       @[<v>solver time: %a@;\
-       interpreter time: %fms@;\
-       execution time: %a@;\
-       path count: %i@]"
-      Mtime.Span.pp
-      (Atomic.get bench_stats.solver_time)
-      ((interpreter_time +. run_time) *. 1000.)
-      Mtime.Span.pp execution_time
-      (Atomic.get bench_stats.path_count) );
+    let stats = Thread_with_memory.bench_stats thread in
+    Benchmark.pp ~stats ~interpreter_time ~execution_time ~run_time m );
 
   let+ () = if count > 0 then Error (`Found_bug count) else Ok () in
   Log.app (fun m -> m "All OK!")
