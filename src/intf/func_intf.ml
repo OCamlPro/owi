@@ -128,16 +128,6 @@ type t =
   | WASM of int * Binary.Func.t * Env_id.t
   | Extern of Func_id.t
 
-module type T = sig
-  include T_Extern_func
-
-  type nonrec t = t
-
-  (* val typ : ('env, extern_func) t -> Binary.func_type *)
-
-  val wasm : Binary.Func.t -> Env_id.t -> t
-end
-
 module Make_extern_func
     (V : Value_types)
     (M : Monad_type)
