@@ -59,7 +59,7 @@ let run_file ~parameters ~source_file =
 
 let print_bug ~model_format ~model_out_file ~id ~no_value ~no_stop_at_failure
   ~no_assert_failure_expression_printing ~with_breadcrumbs bug =
-  let pp fmt (model, labels, breadcrumbs, scoped_values, stats) =
+  let pp fmt (model, labels, breadcrumbs, scoped_values) =
     match model_format with
     | Cmd_utils.Json ->
       let json = Symbol_scope.to_json ~no_value model scoped_values in
@@ -82,21 +82,6 @@ let print_bug ~model_format ~model_out_file ~id ~no_value ~no_stop_at_failure
           | `Assoc fields -> `Assoc (fields @ [ ("breadcrumbs", `List crumbs) ])
           | _ -> json
         else json
-      in
-      let json =
-        match json with
-        | `Assoc fields when Log.is_bench_enabled () ->
-          let solver_stats_json : Yojson.Basic.t =
-            `Assoc
-              (Solver.fold_stats
-                 (fun id v acc ->
-                   match v with
-                   | `Int i -> (id, `Int i) :: acc
-                   | `Float f -> (id, `Float f) :: acc )
-                 stats [] )
-          in
-          `Assoc (("solver_stats", solver_stats_json) :: fields)
-        | _ -> json
       in
       Yojson.Basic.pretty_print fmt json
     | Scfg ->
@@ -124,33 +109,13 @@ let print_bug ~model_format ~model_out_file ~id ~no_value ~no_stop_at_failure
           ]
         else []
       in
-      let bcrumbs =
-        if Log.is_bench_enabled () then
-          let stats =
-            { Scfg.Types.name = "solver_stats"
-            ; params = []
-            ; children =
-                Solver.fold_stats
-                  (fun id v acc ->
-                    let params =
-                      match v with
-                      | `Int i -> [ id; string_of_int i ]
-                      | `Float f -> [ id; string_of_float f ]
-                    in
-                    { Scfg.Types.name = "stat"; params; children = [] } :: acc )
-                  stats []
-            }
-          in
-          stats :: bcrumbs
-        else bcrumbs
-      in
       let ret =
         model
         :: (if List.length lbls.children > 0 then lbls :: bcrumbs else bcrumbs)
       in
       Scfg.Pp.config fmt ret
   in
-  let to_file path model labels breadcrumbs symbol_scopes stats =
+  let to_file path model labels breadcrumbs symbol_scopes =
     let model_ext = match model_format with Json -> "json" | Scfg -> "scfg" in
     let contains_ext =
       Fpath.has_ext ".json" path || Fpath.has_ext ".scfg" path
@@ -169,28 +134,27 @@ let print_bug ~model_format ~model_out_file ~id ~no_value ~no_stop_at_failure
       in
       Ok (Fpath.add_ext model_ext base)
     in
-    Bos.OS.File.writef path "%a" pp
-      (model, labels, breadcrumbs, symbol_scopes, stats)
+    Bos.OS.File.writef path "%a" pp (model, labels, breadcrumbs, symbol_scopes)
   in
-  let output model labels breadcrumbs symbol_scopes stats =
+  let output model labels breadcrumbs symbol_scopes =
     match model_out_file with
-    | Some path -> to_file path model labels breadcrumbs symbol_scopes stats
+    | Some path -> to_file path model labels breadcrumbs symbol_scopes
     | None -> begin
       Log.app (fun m ->
         let fmt = m (if no_stop_at_failure then "%a@." else "%a") in
-        fmt pp (model, labels, breadcrumbs, symbol_scopes, stats) );
+        fmt pp (model, labels, breadcrumbs, symbol_scopes) );
       Ok ()
     end
   in
   match bug with
-  | `ETrap (tr, model, labels, breadcrumbs, symbol_scopes, stats) ->
+  | `ETrap (tr, model, labels, breadcrumbs, symbol_scopes) ->
     Log.err (fun m -> m "Trap: %s" (Result.err_to_string tr));
-    output model labels breadcrumbs symbol_scopes stats
-  | `EAssert (assertion, model, labels, breadcrumbs, symbol_scopes, stats) ->
+    output model labels breadcrumbs symbol_scopes
+  | `EAssert (assertion, model, labels, breadcrumbs, symbol_scopes) ->
     if no_assert_failure_expression_printing then
       Log.err (fun m -> m "Assert failure")
     else Log.err (fun m -> m "Assert failure: %a" Expr.pp assertion);
-    output model labels breadcrumbs symbol_scopes stats
+    output model labels breadcrumbs symbol_scopes
 
 let print_and_count_failures ~model_format ~model_out_file ~no_value
   ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
@@ -206,8 +170,7 @@ let print_and_count_failures ~model_format ~model_out_file ~no_value
     | Seq.Cons ((result, _thread), tl) ->
       let* model =
         match result with
-        | (`EAssert (_, model, _, _, _, _) | `ETrap (_, model, _, _, _, _)) as
-          bug ->
+        | (`EAssert (_, model, _, _, _) | `ETrap (_, model, _, _, _)) as bug ->
           let* () =
             print_bug ~model_format ~model_out_file ~id:count_acc ~no_value
               ~no_stop_at_failure ~no_assert_failure_expression_printing
@@ -250,14 +213,14 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
     match (fail_mode, v) with
     | _, (EVal (), _) -> ()
     | ( (Both | Trap_only)
-      , (ETrap (t, m, labels, breadcrumbs, symbol_scopes, stats), thread) ) ->
+      , (ETrap (t, m, labels, breadcrumbs, symbol_scopes), thread) ) ->
       Ws.push
-        (`ETrap (t, m, labels, breadcrumbs, symbol_scopes, stats), thread)
+        (`ETrap (t, m, labels, breadcrumbs, symbol_scopes), thread)
         Prio.default res_stack
     | ( (Both | Assertion_only)
-      , (EAssert (e, m, labels, breadcrumbs, symbol_scopes, stats), thread) ) ->
+      , (EAssert (e, m, labels, breadcrumbs, symbol_scopes), thread) ) ->
       Ws.push
-        (`EAssert (e, m, labels, breadcrumbs, symbol_scopes, stats), thread)
+        (`EAssert (e, m, labels, breadcrumbs, symbol_scopes), thread)
         Prio.default res_stack
     | (Trap_only | Assertion_only), _ -> ()
   in
