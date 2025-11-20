@@ -34,9 +34,9 @@ module File : sig
 end
 
 module Text : sig
-  val until_binary : unsafe:bool -> Text.modul -> Binary.Module.t Result.t
+  val until_binary : unsafe:bool -> Text.Module.t -> Binary.Module.t Result.t
 
-  val until_validate : unsafe:bool -> Text.modul -> Binary.Module.t Result.t
+  val until_validate : unsafe:bool -> Text.Module.t -> Binary.Module.t Result.t
 
   (** compile a module with a given link state and produce a new link state and
       a runnable module *)
@@ -44,7 +44,7 @@ module Text : sig
        unsafe:bool
     -> name:string option
     -> 'f Link.state
-    -> Text.modul
+    -> Text.Module.t
     -> ('f Link.module_to_run * 'f Link.state) Result.t
 end
 

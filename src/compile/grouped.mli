@@ -22,23 +22,23 @@ type type_check = indice * func_type
 
 type t =
   { id : string option
-  ; typ : type_def list
+  ; typ : Typedef.t list
   ; function_type : func_type list
       (* Types comming from function declarations.
          It contains potential duplication *)
   ; type_checks : type_check list
       (* Types checks to perform after assignment.
          Come from function declarations with type indicies *)
-  ; global : (global, global_type) Runtime.t Indexed.t list
-  ; table : (table, table_type) Runtime.t Indexed.t list
+  ; global : (Global.t, Global.Type.t) Runtime.t Indexed.t list
+  ; table : (Table.t, Table.Type.t) Runtime.t Indexed.t list
   ; mem : (mem, limits) Runtime.t Indexed.t list
-  ; func : (func, block_type) Runtime.t Indexed.t list
-  ; elem : elem Indexed.t list
-  ; data : data Indexed.t list
+  ; func : (Func.t, block_type) Runtime.t Indexed.t list
+  ; elem : Elem.t Indexed.t list
+  ; data : Data.t Indexed.t list
   ; exports : opt_exports
   ; start : indice option
   }
 
-val of_text : modul -> t
+val of_text : Module.t -> t
 
 val pp : Format.formatter -> t -> unit

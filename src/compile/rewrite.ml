@@ -158,13 +158,13 @@ let rewrite_global_type (mut, t) =
   let t = rewrite_val_type t in
   (mut, t)
 
-let rewrite_table_type ((limits, ref_type) : Text.table_type) :
+let rewrite_table_type ((limits, ref_type) : Text.Table.Type.t) :
   Binary.table_type =
   let limits = rewrite_limits limits in
   let ref_type = rewrite_ref_type ref_type in
   (limits, ref_type)
 
-let rewrite_table ((name, typ) : Text.table) : Binary.table =
+let rewrite_table ((name, typ) : Text.Table.t) : Binary.table =
   let typ = rewrite_table_type typ in
   (name, typ)
 
@@ -465,19 +465,19 @@ let rewrite_expr (typemap : Binary.indice TypeMap.t) (modul : Assigned.t)
   expr iexpr (0, [])
 
 let rewrite_global (typemap : Binary.indice TypeMap.t) (modul : Assigned.t)
-  (global : Text.global) : Binary.global Result.t =
+  (global : Text.Global.t) : Binary.global Result.t =
   let+ init = rewrite_expr typemap modul [] global.init in
   let typ = rewrite_global_type global.typ in
   { Binary.id = global.id; init; typ }
 
 let rewrite_elem (typemap : Binary.indice TypeMap.t) (modul : Assigned.t)
-  (elem : Text.elem) : Binary.elem Result.t =
+  (elem : Text.Elem.t) : Binary.elem Result.t =
   let* (mode : Binary.elem_mode) =
     match elem.mode with
-    | Elem_declarative -> Ok Binary.Elem_declarative
-    | Elem_passive -> Ok Elem_passive
-    | Elem_active (None, _expr) -> assert false
-    | Elem_active (Some id, expr) ->
+    | Declarative -> Ok Binary.Elem_declarative
+    | Passive -> Ok Elem_passive
+    | Active (None, _expr) -> assert false
+    | Active (Some id, expr) ->
       let* indice = Assigned.find_table modul id in
       let+ expr = rewrite_expr typemap modul [] expr in
       Binary.Elem_active (Some indice, expr)
@@ -487,12 +487,12 @@ let rewrite_elem (typemap : Binary.indice TypeMap.t) (modul : Assigned.t)
   { Binary.init; mode; id = elem.id; typ }
 
 let rewrite_data (typemap : Binary.indice TypeMap.t) (modul : Assigned.t)
-  (data : Text.data) : Binary.data Result.t =
+  (data : Text.Data.t) : Binary.data Result.t =
   let+ mode =
     match data.mode with
-    | Data_passive -> Ok Binary.Data_passive
-    | Data_active (None, _expr) -> assert false
-    | Data_active (Some indice, expr) ->
+    | Passive -> Ok Binary.Data_passive
+    | Active (None, _expr) -> assert false
+    | Active (Some indice, expr) ->
       let* indice = Assigned.find_memory modul indice in
       let+ expr = rewrite_expr typemap modul [] expr in
       Binary.Data_active (indice, expr)
@@ -524,7 +524,7 @@ let rewrite_exports (modul : Assigned.t) (exports : Grouped.opt_exports) :
   { Binary.global; mem; table; func }
 
 let rewrite_func (typemap : Binary.indice TypeMap.t) (modul : Assigned.t)
-  ({ id; type_f; locals; body; _ } : Text.func) : Binary.func Result.t =
+  ({ id; type_f; locals; body; _ } : Text.Func.t) : Binary.func Result.t =
   let* (Bt_raw (_, (params, _)) as type_f) =
     rewrite_block_type typemap modul type_f
   in

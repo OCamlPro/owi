@@ -317,7 +317,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
   let modul = { iso_modul with start } in
   let text_modul = Binary_to_text.modul modul in
   Log.debug (fun m ->
-    m "generated module:@\n  @[<v>%a@]" Text.pp_modul text_modul );
+    m "generated module:@\n  @[<v>%a@]" Text.Module.pp text_modul );
   let+ m, link_state =
     Compile.Binary.until_link ~unsafe:false ~name:None link_state modul
   in

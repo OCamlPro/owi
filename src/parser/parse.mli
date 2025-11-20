@@ -21,24 +21,24 @@ module Text : sig
 
   module Module : sig
     (** Parse a module from a string. *)
-    val from_string : string -> Text.modul Result.t
+    val from_string : string -> Text.Module.t Result.t
 
     (** Parse a module from a channel. *)
-    val from_channel : in_channel -> Text.modul Result.t
+    val from_channel : in_channel -> Text.Module.t Result.t
 
     (** Parse a module from a file. *)
-    val from_file : Fpath.t -> Text.modul Result.t
+    val from_file : Fpath.t -> Text.Module.t Result.t
   end
 
   module Inline_module : sig
     (** Parse an inline module from a string. *)
-    val from_string : string -> Text.modul Result.t
+    val from_string : string -> Text.Module.t Result.t
 
     (** Parse an inline module from a channel. *)
-    val from_channel : in_channel -> Text.modul Result.t
+    val from_channel : in_channel -> Text.Module.t Result.t
 
     (** Parse an inline module from a file. *)
-    val from_file : Fpath.t -> Text.modul Result.t
+    val from_file : Fpath.t -> Text.Module.t Result.t
   end
 end
 

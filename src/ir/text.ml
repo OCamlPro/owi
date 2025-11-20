@@ -365,18 +365,6 @@ let compare_func_type (pt1, rt1) (pt2, rt2) =
   let pt = compare_param_type pt1 pt2 in
   if pt = 0 then compare_result_type rt1 rt2 else pt
 
-type nonrec table_type = limits * ref_type
-
-let pp_table_type fmt (limits, ref_type) =
-  pf fmt "%a %a" pp_limits limits pp_ref_type ref_type
-
-type nonrec global_type = mut * val_type
-
-let pp_global_type fmt (mut, val_type) =
-  match mut with
-  | Var -> pf fmt "(mut %a)" pp_val_type val_type
-  | Const -> pf fmt "%a" pp_val_type val_type
-
 (** Instructions *)
 
 type instr =
@@ -589,172 +577,209 @@ and pp_expr ~short fmt instrs =
         fmt instrs )
     instrs
 
-(* TODO: func and expr should also be parametrised on block type:
-   using (param_type, result_type) M.block_type before simplify and directly an indice after *)
-type func =
-  { type_f : block_type
-  ; locals : param list
-  ; body : expr Annotated.t
-  ; id : string option
-  }
+module Func = struct
+  type t =
+    { type_f : block_type
+    ; locals : param list
+    ; body : expr Annotated.t
+    ; id : string option
+    }
 
-let pp_local fmt (id, t) = pf fmt "(local%a %a)" pp_id_opt id pp_val_type t
+  let pp_local fmt (id, t) = pf fmt "(local%a %a)" pp_id_opt id pp_val_type t
 
-let pp_locals fmt locals = list ~sep:sp pp_local fmt locals
+  let pp_locals fmt locals = list ~sep:sp pp_local fmt locals
 
-let pp_func fmt f =
-  (* TODO: typeuse ? *)
-  pf fmt "(func%a%a%a@\n  @[<v>%a@]@\n)" pp_id_opt f.id pp_block_type f.type_f
-    (with_space_list pp_locals)
-    f.locals (pp_expr ~short:false) f.body
+  let pp fmt f =
+    (* TODO: type_use ? *)
+    pf fmt "(func%a%a%a@\n  @[<v>%a@]@\n)" pp_id_opt f.id pp_block_type f.type_f
+      (with_space_list pp_locals)
+      f.locals (pp_expr ~short:false) f.body
+end
 
-(* Tables & Memories *)
+module Typedef = struct
+  type t = string option * func_type
 
-type table = string option * table_type
+  let pp fmt (id, t) = pf fmt "(type%a %a)" pp_id_opt id pp_func_type t
+end
 
-let pp_table fmt (id, ty) = pf fmt "(table%a %a)" pp_id_opt id pp_table_type ty
+module Table = struct
+  module Type = struct
+    type nonrec t = limits * ref_type
 
-(* Modules *)
+    let pp fmt (limits, ref_type) =
+      pf fmt "%a %a" pp_limits limits pp_ref_type ref_type
+  end
 
-type import_desc =
-  | Import_func of string option * block_type
-  | Import_table of string option * table_type
-  | Import_mem of string option * limits
-  | Import_global of string option * global_type
+  type t = string option * Type.t
 
-let import_desc fmt = function
-  | Import_func (id, t) -> pf fmt "(func%a %a)" pp_id_opt id pp_block_type t
-  | Import_table (id, t) -> pf fmt "(table%a %a)" pp_id_opt id pp_table_type t
-  | Import_mem (id, t) -> pf fmt "(memory%a %a)" pp_id_opt id pp_limits t
-  | Import_global (id, t) ->
-    pf fmt "(global%a %a)" pp_id_opt id pp_global_type t
+  let pp fmt (id, ty) = pf fmt "(table%a %a)" pp_id_opt id Type.pp ty
+end
 
-type import =
-  { modul : string  (** The name of the module from which the import is done *)
-  ; name : string  (** The name of the importee in its module of origin *)
-  ; desc : import_desc
-      (** If this import_desc first field is Some s, the importee is made
-          available under name s, else it can only be used via its numerical
-          index.*)
-  }
+module Global = struct
+  module Type = struct
+    type nonrec t = mut * val_type
 
-let pp_import fmt i =
-  pf fmt {|(import "%a" "%a" %a)|} string i.modul string i.name import_desc
-    i.desc
+    let pp fmt (mut, val_type) =
+      match mut with
+      | Var -> pf fmt "(mut %a)" pp_val_type val_type
+      | Const -> pf fmt "%a" pp_val_type val_type
+  end
 
-type export_desc =
-  | Export_func of indice option
-  | Export_table of indice option
-  | Export_mem of indice option
-  | Export_global of indice option
+  type t =
+    { typ : Type.t
+    ; init : expr Annotated.t
+    ; id : string option
+    }
 
-let pp_export_desc fmt = function
-  | Export_func id -> pf fmt "(func %a)" pp_indice_opt id
-  | Export_table id -> pf fmt "(table %a)" pp_indice_opt id
-  | Export_mem id -> pf fmt "(memory %a)" pp_indice_opt id
-  | Export_global id -> pf fmt "(global %a)" pp_indice_opt id
+  let pp fmt (g : t) =
+    pf fmt "(global%a %a %a)" pp_id_opt g.id Type.pp g.typ
+      (pp_expr ~short:false) g.init
+end
 
-type export =
-  { name : string
-  ; desc : export_desc
-  }
+module Data = struct
+  module Mode = struct
+    type t =
+      | Passive
+      | Active of indice option * expr Annotated.t
 
-let pp_export fmt (e : export) =
-  pf fmt {|(export "%s" %a)|} e.name pp_export_desc e.desc
+    let pp fmt = function
+      | Passive -> ()
+      | Active (i, e) ->
+        pf fmt "(memory %a) (offset %a)" pp_indice_opt i (pp_expr ~short:false)
+          e
+  end
 
-type type_def = string option * func_type
+  type t =
+    { id : string option
+    ; init : string
+    ; mode : Mode.t
+    }
 
-let pp_type_def fmt (id, t) = pf fmt "(type%a %a)" pp_id_opt id pp_func_type t
+  let pp fmt (d : t) =
+    pf fmt {|(data%a %a %S)|} pp_id_opt d.id Mode.pp d.mode d.init
+end
 
-let pp_start fmt start = pf fmt "(start %a)" pp_indice start
+module Elem = struct
+  module Mode = struct
+    type t =
+      | Passive
+      | Declarative
+      | Active of indice option * expr Annotated.t
 
-type global =
-  { typ : global_type
-  ; init : expr Annotated.t
-  ; id : string option
-  }
+    let pp fmt = function
+      | Passive -> ()
+      | Declarative -> pf fmt "declare"
+      | Active (i, e) -> (
+        match i with
+        | None -> pf fmt "(offset %a)" (pp_expr ~short:false) e
+        | Some i ->
+          pf fmt "(table %a) (offset %a)" pp_indice i (pp_expr ~short:false) e )
+  end
 
-let pp_global fmt (g : global) =
-  pf fmt "(global%a %a %a)" pp_id_opt g.id pp_global_type g.typ
-    (pp_expr ~short:false) g.init
+  type t =
+    { id : string option
+    ; typ : ref_type
+    ; init : expr Annotated.t list
+    ; mode : Mode.t
+    }
 
-type data_mode =
-  | Data_passive
-  | Data_active of indice option * expr Annotated.t
+  let pp_items fmt e = pf fmt "(item %a)" (pp_expr ~short:false) e
 
-let pp_data_mode fmt = function
-  | Data_passive -> ()
-  | Data_active (i, e) ->
-    pf fmt "(memory %a) (offset %a)" pp_indice_opt i (pp_expr ~short:false) e
+  let pp fmt (e : t) =
+    pf fmt "@[<hov 2>(elem%a %a %a %a)@]" pp_id_opt e.id Mode.pp e.mode
+      pp_ref_type e.typ
+      (list ~sep:pp_newline pp_items)
+      e.init
+end
 
-type data =
-  { id : string option
-  ; init : string
-  ; mode : data_mode
-  }
+module Import = struct
+  module Type = struct
+    type t =
+      | Func of string option * block_type
+      | Table of string option * Table.Type.t
+      | Mem of string option * limits
+      | Global of string option * Global.Type.t
 
-let pp_data fmt (d : data) =
-  pf fmt {|(data%a %a %S)|} pp_id_opt d.id pp_data_mode d.mode d.init
+    let pp fmt = function
+      | Func (id, t) -> pf fmt "(func%a %a)" pp_id_opt id pp_block_type t
+      | Table (id, t) -> pf fmt "(table%a %a)" pp_id_opt id Table.Type.pp t
+      | Mem (id, t) -> pf fmt "(memory%a %a)" pp_id_opt id pp_limits t
+      | Global (id, t) -> pf fmt "(global%a %a)" pp_id_opt id Global.Type.pp t
+  end
 
-type elem_mode =
-  | Elem_passive
-  | Elem_active of indice option * expr Annotated.t
-  | Elem_declarative
+  type t =
+    { modul : string
+        (** The name of the module from which the import is done *)
+    ; name : string  (** The name of the importee in its module of origin *)
+    ; typ : Type.t
+        (** If this import_desc first field is Some s, the importee is made
+            available under name s, else it can only be used via its numerical
+            index.*)
+    }
 
-let pp_elem_mode fmt = function
-  | Elem_passive -> ()
-  | Elem_declarative -> pf fmt "declare"
-  | Elem_active (i, e) -> (
-    match i with
-    | None -> pf fmt "(offset %a)" (pp_expr ~short:false) e
-    | Some i ->
-      pf fmt "(table %a) (offset %a)" pp_indice i (pp_expr ~short:false) e )
+  let pp fmt i =
+    pf fmt {|(import "%a" "%a" %a)|} string i.modul string i.name Type.pp i.typ
+end
 
-type elem =
-  { id : string option
-  ; typ : ref_type
-  ; init : expr Annotated.t list
-  ; mode : elem_mode
-  }
+module Export = struct
+  module Type = struct
+    type t =
+      | Func of indice option
+      | Table of indice option
+      | Mem of indice option
+      | Global of indice option
 
-let pp_elem_expr fmt e = pf fmt "(item %a)" (pp_expr ~short:false) e
+    let pp fmt = function
+      | Func id -> pf fmt "(func %a)" pp_indice_opt id
+      | Table id -> pf fmt "(table %a)" pp_indice_opt id
+      | Mem id -> pf fmt "(memory %a)" pp_indice_opt id
+      | Global id -> pf fmt "(global %a)" pp_indice_opt id
+  end
 
-let pp_elem fmt (e : elem) =
-  pf fmt "@[<hov 2>(elem%a %a %a %a)@]" pp_id_opt e.id pp_elem_mode e.mode
-    pp_ref_type e.typ
-    (list ~sep:pp_newline pp_elem_expr)
-    e.init
+  type t =
+    { name : string
+    ; typ : Type.t
+    }
 
-type module_field =
-  | MType of type_def
-  | MGlobal of global
-  | MTable of table
-  | MMem of mem
-  | MFunc of func
-  | MElem of elem
-  | MData of data
-  | MStart of indice
-  | MImport of import
-  | MExport of export
+  let pp fmt (e : t) = pf fmt {|(export "%s" %a)|} e.name Type.pp e.typ
+end
 
-let pp_module_field fmt = function
-  | MType t -> pp_type_def fmt t
-  | MGlobal g -> pp_global fmt g
-  | MTable t -> pp_table fmt t
-  | MMem m -> pp_mem fmt m
-  | MFunc f -> pp_func fmt f
-  | MElem e -> pp_elem fmt e
-  | MData d -> pp_data fmt d
-  | MStart s -> pp_start fmt s
-  | MImport i -> pp_import fmt i
-  | MExport e -> pp_export fmt e
+module Module = struct
+  module Field = struct
+    type t =
+      | Typedef of Typedef.t
+      | Global of Global.t
+      | Table of Table.t
+      | Mem of mem
+      | Func of Func.t
+      | Elem of Elem.t
+      | Data of Data.t
+      | Start of indice
+      | Import of Import.t
+      | Export of Export.t
 
-type modul =
-  { id : string option
-  ; fields : module_field list
-  }
+    let pp_start fmt start = pf fmt "(start %a)" pp_indice start
 
-let pp_modul fmt (m : modul) =
-  pf fmt "(module%a@\n  @[<v>%a@]@\n)" pp_id_opt m.id
-    (list ~sep:pp_newline pp_module_field)
-    m.fields
+    let pp fmt = function
+      | Typedef t -> Typedef.pp fmt t
+      | Global g -> Global.pp fmt g
+      | Table t -> Table.pp fmt t
+      | Mem m -> pp_mem fmt m
+      | Func f -> Func.pp fmt f
+      | Elem e -> Elem.pp fmt e
+      | Data d -> Data.pp fmt d
+      | Start s -> pp_start fmt s
+      | Import i -> Import.pp fmt i
+      | Export e -> Export.pp fmt e
+  end
+
+  type t =
+    { id : string option
+    ; fields : Field.t list
+    }
+
+  let pp fmt m =
+    pf fmt "(module%a@\n  @[<v>%a@]@\n)" pp_id_opt m.id
+      (list ~sep:pp_newline Field.pp)
+      m.fields
+end

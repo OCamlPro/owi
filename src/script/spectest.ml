@@ -64,163 +64,142 @@ let m =
   Text_module
     { id = Some "spectest"
     ; fields =
-        [ MImport
+        [ Import
             { modul = "spectest_extern"
             ; name = "print"
-            ; desc = Import_func (Some "print", Bt_raw (None, ([], [])))
+            ; typ = Func (Some "print", Bt_raw (None, ([], [])))
             }
-        ; MImport
+        ; Import
             { modul = "spectest_extern"
             ; name = "print_i32"
-            ; desc =
-                Import_func
+            ; typ =
+                Func
                   ( Some "print_i32"
                   , Bt_raw (None, ([ (None, Num_type I32) ], [])) )
             }
-        ; MImport
+        ; Import
             { modul = "spectest_extern"
             ; name = "print_i64"
-            ; desc =
-                Import_func
+            ; typ =
+                Func
                   ( Some "print_i64"
                   , Bt_raw (None, ([ (None, Num_type I64) ], [])) )
             }
-        ; MImport
+        ; Import
             { modul = "spectest_extern"
             ; name = "print_f32"
-            ; desc =
-                Import_func
+            ; typ =
+                Func
                   ( Some "print_f32"
                   , Bt_raw (None, ([ (None, Num_type F32) ], [])) )
             }
-        ; MImport
+        ; Import
             { modul = "spectest_extern"
             ; name = "print_f64"
-            ; desc =
-                Import_func
+            ; typ =
+                Func
                   ( Some "print_f64"
                   , Bt_raw (None, ([ (None, Num_type F64) ], [])) )
             }
-        ; MImport
+        ; Import
             { modul = "spectest_extern"
             ; name = "print_i32_f32"
-            ; desc =
-                Import_func
+            ; typ =
+                Func
                   ( Some "print_i32_f32"
                   , Bt_raw
                       ( None
                       , ([ (None, Num_type I32); (None, Num_type F32) ], []) )
                   )
             }
-        ; MImport
+        ; Import
             { modul = "spectest_extern"
             ; name = "print_f64_f64"
-            ; desc =
-                Import_func
+            ; typ =
+                Func
                   ( Some "print_f64_f64"
                   , Bt_raw
                       ( None
                       , ([ (None, Num_type F64); (None, Num_type F64) ], []) )
                   )
             }
-        ; MImport
+        ; Import
             { modul = "spectest_extern"
             ; name = "func"
-            ; desc = Import_func (Some "func", Bt_raw (None, ([], [])))
+            ; typ = Func (Some "func", Bt_raw (None, ([], [])))
             }
-        ; MImport
+        ; Import
             { modul = "spectest_extern"
             ; name = "func-i32"
-            ; desc =
-                Import_func
+            ; typ =
+                Func
                   ( Some "func-i32"
                   , Bt_raw (None, ([ (None, Num_type I32) ], [])) )
             }
-        ; MImport
+        ; Import
             { modul = "spectest_extern"
             ; name = "func->i32"
-            ; desc =
-                Import_func
-                  (Some "func->i32", Bt_raw (None, ([], [ Num_type I32 ])))
+            ; typ =
+                Func (Some "func->i32", Bt_raw (None, ([], [ Num_type I32 ])))
             }
-        ; MImport
+        ; Import
             { modul = "spectest_extern"
             ; name = "func-i32->i32"
-            ; desc =
-                Import_func
+            ; typ =
+                Func
                   ( Some "func-i32->i32"
                   , Bt_raw (None, ([ (None, Num_type I32) ], [ Num_type I32 ]))
                   )
             }
-        ; MMem (Some "memory", { min = 1; max = Some 2 })
-        ; MTable (Some "table", ({ min = 10; max = Some 20 }, (Null, Func_ht)))
-        ; MGlobal
+        ; Mem (Some "memory", { min = 1; max = Some 2 })
+        ; Table (Some "table", ({ min = 10; max = Some 20 }, (Null, Func_ht)))
+        ; Global
             { typ = (Const, Num_type I32)
             ; init = [ Text.I32_const 666l ] |> Annotated.dummy_deep
             ; id = Some "global_i32"
             }
-        ; MGlobal
+        ; Global
             { typ = (Const, Num_type I64)
             ; init = [ Text.I64_const 666L ] |> Annotated.dummy_deep
             ; id = Some "global_i64"
             }
-        ; MGlobal
+        ; Global
             { typ = (Const, Num_type F32)
             ; init =
                 [ Text.F32_const (Float32.of_float 666.6) ]
                 |> Annotated.dummy_deep
             ; id = Some "global_f32"
             }
-        ; MGlobal
+        ; Global
             { typ = (Const, Num_type F64)
             ; init =
                 [ Text.F64_const (Float64.of_float 666.6) ]
                 |> Annotated.dummy_deep
             ; id = Some "global_f64"
             }
-        ; MExport { name = "func"; desc = Export_func (Some (Text "func")) }
-        ; MExport
-            { name = "func-i32"; desc = Export_func (Some (Text "func-i32")) }
-        ; MExport
-            { name = "func->i32"; desc = Export_func (Some (Text "func->i32")) }
-        ; MExport
-            { name = "func-i32->i32"
-            ; desc = Export_func (Some (Text "func-i32->i32"))
-            }
-        ; MExport { name = "memory"; desc = Export_mem (Some (Text "memory")) }
-        ; MExport { name = "table"; desc = Export_table (Some (Text "table")) }
-        ; MExport { name = "print"; desc = Export_func (Some (Text "print")) }
-        ; MExport
-            { name = "print_i32"; desc = Export_func (Some (Text "print_i32")) }
-        ; MExport
-            { name = "print_f32"; desc = Export_func (Some (Text "print_f32")) }
-        ; MExport
-            { name = "print_i64"; desc = Export_func (Some (Text "print_i64")) }
-        ; MExport
-            { name = "print_f64"; desc = Export_func (Some (Text "print_f64")) }
-        ; MExport
-            { name = "print_i32_f32"
-            ; desc = Export_func (Some (Text "print_i32_f32"))
-            }
-        ; MExport
-            { name = "print_f64_f64"
-            ; desc = Export_func (Some (Text "print_f64_f64"))
-            }
-        ; MExport
-            { name = "global_i32"
-            ; desc = Export_global (Some (Text "global_i32"))
-            }
-        ; MExport
-            { name = "global_i64"
-            ; desc = Export_global (Some (Text "global_i64"))
-            }
-        ; MExport
-            { name = "global_f32"
-            ; desc = Export_global (Some (Text "global_f32"))
-            }
-        ; MExport
-            { name = "global_f64"
-            ; desc = Export_global (Some (Text "global_f64"))
-            }
+        ; Export { name = "func"; typ = Func (Some (Text "func")) }
+        ; Export { name = "func-i32"; typ = Func (Some (Text "func-i32")) }
+        ; Export { name = "func->i32"; typ = Func (Some (Text "func->i32")) }
+        ; Export
+            { name = "func-i32->i32"; typ = Func (Some (Text "func-i32->i32")) }
+        ; Export { name = "memory"; typ = Mem (Some (Text "memory")) }
+        ; Export { name = "table"; typ = Table (Some (Text "table")) }
+        ; Export { name = "print"; typ = Func (Some (Text "print")) }
+        ; Export { name = "print_i32"; typ = Func (Some (Text "print_i32")) }
+        ; Export { name = "print_f32"; typ = Func (Some (Text "print_f32")) }
+        ; Export { name = "print_i64"; typ = Func (Some (Text "print_i64")) }
+        ; Export { name = "print_f64"; typ = Func (Some (Text "print_f64")) }
+        ; Export
+            { name = "print_i32_f32"; typ = Func (Some (Text "print_i32_f32")) }
+        ; Export
+            { name = "print_f64_f64"; typ = Func (Some (Text "print_f64_f64")) }
+        ; Export
+            { name = "global_i32"; typ = Global (Some (Text "global_i32")) }
+        ; Export
+            { name = "global_i64"; typ = Global (Some (Text "global_i64")) }
+        ; Export
+            { name = "global_f32"; typ = Global (Some (Text "global_f32")) }
+        ; Export
+            { name = "global_f64"; typ = Global (Some (Text "global_f64")) }
         ]
     }

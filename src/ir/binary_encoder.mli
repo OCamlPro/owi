@@ -6,5 +6,5 @@ val convert :
      Fpath.t option
   -> Fpath.t
   -> unsafe:bool
-  -> Text.modul
+  -> Text.Module.t
   -> (unit, Result.err) result

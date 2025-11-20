@@ -357,38 +357,38 @@ and convert_expr (e : Binary.expr Annotated.t) : Text.expr Annotated.t =
       List.map (fun i -> Annotated.map convert_instr i) e )
     e
 
-let convert_elem_mode : Binary.elem_mode -> Text.elem_mode = function
-  | Elem_passive -> Elem_passive
-  | Elem_declarative -> Elem_declarative
+let convert_elem_mode : Binary.elem_mode -> Text.Elem.Mode.t = function
+  | Elem_passive -> Passive
+  | Elem_declarative -> Declarative
   | Elem_active (opt, e) ->
     let opt = Option.map (fun i -> Text.Raw i) opt in
     let e = convert_expr e in
-    Elem_active (opt, e)
+    Active (opt, e)
 
-let convert_elem : Binary.elem -> Text.elem = function
+let convert_elem : Binary.elem -> Text.Elem.t = function
   | { id; typ; init; mode } ->
     let init = List.map convert_expr init in
     let mode = convert_elem_mode mode in
     let typ = convert_ref_type typ in
     { id; typ; init; mode }
 
-let convert_data_mode : Binary.data_mode -> Text.data_mode = function
-  | Data_passive -> Data_passive
+let convert_data_mode : Binary.data_mode -> Text.Data.Mode.t = function
+  | Data_passive -> Passive
   | Data_active (i, e) ->
     let e = convert_expr e in
-    Data_active (Some (Raw i), e)
+    Active (Some (Raw i), e)
 
-let convert_data : Binary.data -> Text.data = function
+let convert_data : Binary.data -> Text.Data.t = function
   | { id; init; mode } ->
     let mode = convert_data_mode mode in
     { id; init; mode }
 
-let from_types types : Text.module_field list =
+let from_types types : Text.Module.Field.t list =
   Array.map
     (fun ((s, ft) : Binary.type_def) ->
       let ft = convert_func_type ft in
       let t = (s, ft) in
-      Text.MType t )
+      Text.Module.Field.Typedef t )
     types
   |> Array.to_list
 
@@ -396,7 +396,7 @@ let convert_mut : Binary.mut -> Text.mut = function
   | Const -> Const
   | Var -> Var
 
-let convert_global_type ((mut, t) : Binary.global_type) : Text.global_type =
+let convert_global_type ((mut, t) : Binary.global_type) : Text.Global.Type.t =
   let mut = convert_mut mut in
   let t = convert_val_type t in
   (mut, t)
@@ -404,54 +404,54 @@ let convert_global_type ((mut, t) : Binary.global_type) : Text.global_type =
 let convert_limits : Binary.limits -> Text.limits = function
   | { min; max } -> { min; max }
 
-let convert_table_type ((limits, t) : Binary.table_type) : Text.table_type =
+let convert_table_type ((limits, t) : Binary.table_type) : Text.Table.Type.t =
   let limits = convert_limits limits in
   let t = convert_ref_type t in
   (limits, t)
 
 let from_global (global : (Binary.global, Binary.global_type) Runtime.t array) :
-  Text.module_field list =
+  Text.Module.Field.t list =
   Array.map
     (function
       | Runtime.Local (g : Binary.global) ->
         let typ = convert_global_type g.typ in
         let init = convert_expr g.init in
         let id = g.id in
-        Text.MGlobal { typ; init; id }
+        Text.Module.Field.Global { typ; init; id }
       | Imported { modul; name; assigned_name; desc } ->
-        let desc = convert_global_type desc in
-        let desc = Text.Import_global (assigned_name, desc) in
-        Text.MImport { modul; name; desc } )
+        let typ = convert_global_type desc in
+        let typ = Text.Import.Type.Global (assigned_name, typ) in
+        Text.Module.Field.Import { modul; name; typ } )
     global
   |> Array.to_list
 
-let from_table table : Text.module_field list =
+let from_table table : Text.Module.Field.t list =
   Array.map
     (function
       | Runtime.Local (name, t) ->
         let t = convert_table_type t in
-        Text.MTable (name, t)
+        Text.Module.Field.Table (name, t)
       | Imported { modul; name; assigned_name; desc } ->
-        let desc = convert_table_type desc in
-        let desc = Text.Import_table (assigned_name, desc) in
-        Text.MImport { modul; name; desc } )
+        let typ = convert_table_type desc in
+        let typ = Text.Import.Type.Table (assigned_name, typ) in
+        Import { modul; name; typ } )
     table
   |> Array.to_list
 
-let from_mem mem : Text.module_field list =
+let from_mem mem : Text.Module.Field.t list =
   Array.map
     (function
       | Runtime.Local (name, t) ->
         let t = convert_limits t in
-        Text.MMem (name, t)
+        Text.Module.Field.Mem (name, t)
       | Imported { modul; name; assigned_name; desc } ->
-        let desc = convert_limits desc in
-        let desc = Text.Import_mem (assigned_name, desc) in
-        MImport { modul; name; desc } )
+        let typ = convert_limits desc in
+        let typ = Text.Import.Type.Mem (assigned_name, typ) in
+        Import { modul; name; typ } )
     mem
   |> Array.to_list
 
-let from_func func : Text.module_field list =
+let from_func func : Text.Module.Field.t list =
   Array.map
     (function
       | Runtime.Local (func : Binary.func) ->
@@ -459,36 +459,36 @@ let from_func func : Text.module_field list =
         let locals = List.map convert_param func.locals in
         let body = convert_expr func.body in
         let id = func.id in
-        Text.MFunc { type_f; locals; body; id }
+        Text.Module.Field.Func { type_f; locals; body; id }
       | Imported { modul; name; assigned_name; desc } ->
-        let desc = convert_block_type desc in
-        let desc = Text.Import_func (assigned_name, desc) in
-        Text.MImport { modul; name; desc } )
+        let typ = convert_block_type desc in
+        let typ = Text.Import.Type.Func (assigned_name, typ) in
+        Text.Module.Field.Import { modul; name; typ } )
     func
   |> Array.to_list
 
-let from_elem elem : Text.module_field list =
+let from_elem elem : Text.Module.Field.t list =
   Array.map
     (fun (elem : Binary.elem) ->
       let elem = convert_elem elem in
-      Text.MElem elem )
+      Text.Module.Field.Elem elem )
     elem
   |> Array.to_list
 
-let from_data data : Text.module_field list =
+let from_data data : Text.Module.Field.t list =
   Array.map
     (fun (data : Binary.data) ->
       let data = convert_data data in
-      Text.MData data )
+      Text.Module.Field.Data data )
     data
   |> Array.to_list
 
-let from_exports (exports : Binary.exports) : Text.module_field list =
+let from_exports (exports : Binary.exports) : Text.Module.Field.t list =
   let global =
     List.map
       (fun ({ name; id } : Binary.export) ->
         let id = Some (Text.Raw id) in
-        Text.MExport { name; desc = Export_global id } )
+        Text.Module.Field.Export { name; typ = Global id } )
       exports.global
   in
 
@@ -496,7 +496,7 @@ let from_exports (exports : Binary.exports) : Text.module_field list =
     List.map
       (fun ({ name; id } : Binary.export) ->
         let id = Some (Text.Raw id) in
-        Text.MExport { name; desc = Export_mem id } )
+        Text.Module.Field.Export { name; typ = Mem id } )
       exports.mem
   in
 
@@ -504,7 +504,7 @@ let from_exports (exports : Binary.exports) : Text.module_field list =
     List.map
       (fun ({ name; id } : Binary.export) ->
         let id = Some (Text.Raw id) in
-        Text.MExport { name; desc = Export_table id } )
+        Text.Module.Field.Export { name; typ = Table id } )
       exports.table
   in
 
@@ -512,13 +512,15 @@ let from_exports (exports : Binary.exports) : Text.module_field list =
     List.map
       (fun ({ name; id } : Binary.export) ->
         let id = Some (Text.Raw id) in
-        Text.MExport { name; desc = Export_func id } )
+        Text.Module.Field.Export { name; typ = Func id } )
       exports.func
   in
 
   global @ mem @ table @ func
 
-let from_start = function None -> [] | Some n -> [ Text.MStart (Raw n) ]
+let from_start = function
+  | None -> []
+  | Some n -> [ Text.Module.Field.Start (Raw n) ]
 
 let modul
   { Binary.Module.id
@@ -541,10 +543,10 @@ let modul
   let imported, locals =
     List.partition_map
       (function
-        | Text.MImport _ as import -> Either.Left import
+        | Text.Module.Field.Import _ as import -> Either.Left import
         | local -> Either.Right local )
       fields
   in
   let fields = imported @ locals in
 
-  { Text.id; fields }
+  { Text.Module.id; fields }

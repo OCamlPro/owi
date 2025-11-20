@@ -3,7 +3,7 @@
 (* Written by the Owi programmers *)
 
 type 'extern_func t =
-  | Wat of Text.modul
+  | Wat of Text.Module.t
   | Wast of Wast.script
   | Wasm of Binary.Module.t
   | Ocaml of 'extern_func Link.extern_module
