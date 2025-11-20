@@ -41,14 +41,5 @@ let empty_stats = Smtml.Statistics.Map.empty
 
 let stats_are_empty = Smtml.Statistics.Map.is_empty
 
-let get_stats (S (solver_module, s)) =
-  if Log.is_bench_enabled () then
-    let module Solver = (val solver_module) in
-    Solver.get_statistics s
-  else empty_stats
-
-let merge_stats = Smtml.Statistics.merge
 
 let pp_stats = Smtml.Statistics.pp
-
-let fold_stats f (s : Smtml.Statistics.t) = Smtml.Statistics.Map.fold f s
