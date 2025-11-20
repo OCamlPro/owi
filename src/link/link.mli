@@ -17,7 +17,7 @@ module State : sig
     { globals : Concrete_global.t StringMap.t
     ; memories : Concrete_memory.t StringMap.t
     ; tables : Concrete_table.t StringMap.t
-    ; functions : Func_intf.t StringMap.t
+    ; functions : Kind.func StringMap.t
     ; defined_names : StringSet.t
     }
 

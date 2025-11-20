@@ -723,9 +723,9 @@ module Make (P : Interpret_intf.P) = struct
       ; envs = state.envs
       }
 
-  let exec_vfunc ~return (state : State.exec_state) (func : Func_intf.t) =
+  let exec_vfunc ~return (state : State.exec_state) (func : Kind.func) =
     match func with
-    | WASM (_id, func, env_id) ->
+    | Wasm (_id, func, env_id) ->
       let env = Env_id.get env_id state.envs in
       Choice.return (State.Continue (exec_func ~return state env func))
     | Extern f ->
@@ -734,9 +734,9 @@ module Make (P : Interpret_intf.P) = struct
       let state = { state with stack } in
       if return then State.return state else State.Continue state
 
-  let func_type (state : State.exec_state) (f : Func_intf.t) =
+  let func_type (state : State.exec_state) (f : Kind.func) =
     match f with
-    | WASM (_, func, _) ->
+    | Wasm (_, func, _) ->
       let (Bt_raw ((None | Some _), t)) = func.type_f in
       t
     | Extern f ->
@@ -1623,14 +1623,15 @@ module Make (P : Interpret_intf.P) = struct
       end
     with Stack_overflow -> Choice.trap `Call_stack_exhausted
 
-  let exec_vfunc_from_outside ~locals ~env ~envs func : _ list Choice.t =
+  let exec_vfunc_from_outside ~locals ~env ~envs (func : Kind.func) :
+    _ list Choice.t =
     let env = Env_id.get env envs in
     let exec_state = State.empty_exec_state ~locals ~env ~envs in
     try
       begin
         let* state =
           match func with
-          | Func_intf.WASM (_id, func, env_id) ->
+          | Kind.Wasm (_id, func, env_id) ->
             let env = Env_id.get env_id exec_state.State.envs in
             let stack = locals in
             let state = State.{ exec_state with stack } in

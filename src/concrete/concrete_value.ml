@@ -37,7 +37,7 @@ let const_v128 x = x
 include V
 
 module Ref = struct
-  let get_func (r : ref_value) : Func_intf.t Value_intf.get_ref =
+  let get_func (r : ref_value) : Kind.func Value_intf.get_ref =
     match r with
     | Funcref (Some f) -> Ref_value f
     | Funcref None -> Null

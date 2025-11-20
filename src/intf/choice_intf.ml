@@ -3,7 +3,19 @@
 (* Written by the Owi programmers *)
 
 module type Base = sig
-  module V : Func_intf.Value_types
+  module V : sig
+    type int32
+
+    type int64
+
+    type float32
+
+    type float64
+
+    type v128
+
+    type bool
+  end
 
   type 'a t
 

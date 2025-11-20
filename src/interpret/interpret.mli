@@ -14,7 +14,7 @@ module Concrete : sig
        locals:Concrete_value.t list
     -> env:Env_id.t
     -> envs:Concrete.Env.t Env_id.collection
-    -> Func_intf.t
+    -> Kind.func
     -> V.t list Concrete_choice.t
 
   val exec_ibinop :

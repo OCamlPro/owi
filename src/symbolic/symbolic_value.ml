@@ -31,7 +31,7 @@ let pp_v128 = Expr.pp
 type externref = V.externref
 
 type ref_value =
-  | Funcref of Func_intf.t option
+  | Funcref of Kind.func option
   | Externref of externref option
 
 let pp_ref_value fmt = function
@@ -77,7 +77,7 @@ let pp fmt = function
   | Ref r -> pp_ref_value fmt r
 
 module Ref = struct
-  let get_func (r : ref_value) : Func_intf.t Value_intf.get_ref =
+  let get_func (r : ref_value) : Kind.func Value_intf.get_ref =
     match r with
     | Funcref (Some f) -> Ref_value f
     | Funcref None -> Null

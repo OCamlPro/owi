@@ -20,7 +20,19 @@ type 'a eval =
       * Smtml.Statistics.t
 
 module type S = sig
-  module V : Func_intf.Value_types
+  module V : sig
+    type bool
+
+    type int32
+
+    type int64
+
+    type float32
+
+    type float64
+
+    type v128
+  end
 
   type thread
 

@@ -10,7 +10,7 @@ type data = { mutable value : string }
 
 val get_memory : _ t -> int -> Concrete_memory.t Concrete_choice.t
 
-val get_func : _ t -> int -> Func_intf.t
+val get_func : _ t -> int -> Kind.func
 
 val get_table : _ t -> int -> Concrete_table.t Concrete_choice.t
 
@@ -39,7 +39,7 @@ module Build : sig
 
   val add_table : int -> Concrete_table.t -> t -> t
 
-  val add_func : int -> Func_intf.t -> t -> t
+  val add_func : int -> Kind.func -> t -> t
 
   val add_data : int -> data -> t -> t
 
@@ -47,7 +47,7 @@ module Build : sig
 
   val get_const_global : t -> int -> V.t Result.t
 
-  val get_func : t -> int -> Func_intf.t Result.t
+  val get_func : t -> int -> Kind.func Result.t
 end
 
 val freeze : Env_id.t -> Build.t -> 'ext Func_id.collection -> 'ext t

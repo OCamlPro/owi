@@ -17,7 +17,7 @@ type 'ext t =
   { globals : Concrete_global.t IMap.t
   ; memories : Concrete_memory.t IMap.t
   ; tables : Concrete_table.t IMap.t
-  ; functions : Func_intf.t IMap.t
+  ; functions : Kind.func IMap.t
   ; data : data IMap.t
   ; elem : elem IMap.t
   ; extern_funcs : 'ext Func_id.collection
@@ -62,7 +62,7 @@ module Build = struct
     { globals : Concrete_global.t IMap.t
     ; memories : Concrete_memory.t IMap.t
     ; tables : Concrete_table.t IMap.t
-    ; functions : Func_intf.t IMap.t
+    ; functions : Kind.func IMap.t
     ; data : data IMap.t
     ; elem : elem IMap.t
     }

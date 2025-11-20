@@ -5,7 +5,7 @@
 type externref
 
 type ref_value =
-  | Funcref of Func_intf.t option
+  | Funcref of Kind.func option
   | Externref of externref option
 
 include
