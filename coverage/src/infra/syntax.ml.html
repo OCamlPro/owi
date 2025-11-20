@@ -235,9 +235,9 @@
 
 open Prelude.Result
 
-let ( let* ) o f = <span data-count="1860284">m</span>atch o with <span data-count="1851022">O</span>k v -&gt; f v | <span data-count="9262">E</span>rror _ as e -&gt; e [@@inline]
+let ( let* ) o f = <span data-count="1855845">m</span>atch o with <span data-count="1846610">O</span>k v -&gt; f v | <span data-count="9235">E</span>rror _ as e -&gt; e [@@inline]
 
-let ( let+ ) o f = <span data-count="1345514">m</span>atch o with <span data-count="1342089">O</span>k v -&gt; Ok (<span data-count="1342089">f</span> v) | <span data-count="3425">E</span>rror _ as e -&gt; e
+let ( let+ ) o f = <span data-count="1349953">m</span>atch o with <span data-count="1346501">O</span>k v -&gt; Ok (<span data-count="1346501">f</span> v) | <span data-count="3452">E</span>rror _ as e -&gt; e
 [@@inline]
 
 let ok v = <span data-count="188199">O</span>k v [@@inline]

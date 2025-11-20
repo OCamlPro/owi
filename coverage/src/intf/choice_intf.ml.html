@@ -69,6 +69,18 @@
 <a id="L45"></a><span > </span>
 <a id="L46"></a><span > </span>
 <a id="L47"></a><span > </span>
+<a id="L48"></a><span > </span>
+<a id="L49"></a><span > </span>
+<a id="L50"></a><span > </span>
+<a id="L51"></a><span > </span>
+<a id="L52"></a><span > </span>
+<a id="L53"></a><span > </span>
+<a id="L54"></a><span > </span>
+<a id="L55"></a><span > </span>
+<a id="L56"></a><span > </span>
+<a id="L57"></a><span > </span>
+<a id="L58"></a><span > </span>
+<a id="L59"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -120,13 +132,37 @@
 <a href="#L45">45</a>
 <a href="#L46">46</a>
 <a href="#L47">47</a>
+<a href="#L48">48</a>
+<a href="#L49">49</a>
+<a href="#L50">50</a>
+<a href="#L51">51</a>
+<a href="#L52">52</a>
+<a href="#L53">53</a>
+<a href="#L54">54</a>
+<a href="#L55">55</a>
+<a href="#L56">56</a>
+<a href="#L57">57</a>
+<a href="#L58">58</a>
+<a href="#L59">59</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
 module type Base = sig
-  module V : Func_intf.Value_types
+  module V : sig
+    type int32
+
+    type int64
+
+    type float32
+
+    type float64
+
+    type v128
+
+    type bool
+  end
 
   type 'a t
 

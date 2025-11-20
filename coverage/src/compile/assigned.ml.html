@@ -504,12 +504,12 @@ module TypeMap = Map.Make (Type)
 type t =
   { id : string option
   ; typ : Type.t Named.t
-  ; global : (Text.global, Text.global_type) Runtime.t Named.t
-  ; table : (Text.table, Text.table_type) Runtime.t Named.t
-  ; mem : (Text.mem, Text.limits) Runtime.t Named.t
-  ; func : (Text.func, Text.block_type) Runtime.t Named.t
-  ; elem : Text.elem Named.t
-  ; data : Text.data Named.t
+  ; global : (Text.Global.t, Text.Global.Type.t) Runtime.t Named.t
+  ; table : (Text.Table.t, Text.Table.Type.t) Runtime.t Named.t
+  ; mem : (Text.Mem.t, Text.limits) Runtime.t Named.t
+  ; func : (Text.Func.t, Text.block_type) Runtime.t Named.t
+  ; elem : Text.Elem.t Named.t
+  ; data : Text.Data.t Named.t
   ; exports : Grouped.opt_exports
   ; start : Text.indice option
   }
@@ -522,21 +522,21 @@ let pp_runtime_named ~pp_local ~pp_imported fmt l =
   <span data-count="4">N</span>amed.pp (Runtime.pp ~pp_local ~pp_imported) fmt l
 
 let pp_global fmt g =
-  <span data-count="1">p</span>p_runtime_named ~pp_local:Text.pp_global ~pp_imported:Text.pp_global_type fmt
+  <span data-count="1">p</span>p_runtime_named ~pp_local:Text.Global.pp ~pp_imported:Text.Global.Type.pp fmt
     g
 
 let pp_table fmt t =
-  <span data-count="1">p</span>p_runtime_named ~pp_local:Text.pp_table ~pp_imported:Text.pp_table_type fmt t
+  <span data-count="1">p</span>p_runtime_named ~pp_local:Text.Table.pp ~pp_imported:Text.Table.Type.pp fmt t
 
 let pp_mem fmt m =
-  <span data-count="1">p</span>p_runtime_named ~pp_local:Text.pp_mem ~pp_imported:Text.pp_limits fmt m
+  <span data-count="1">p</span>p_runtime_named ~pp_local:Text.Mem.pp ~pp_imported:Text.pp_limits fmt m
 
 let pp_func fmt f =
-  <span data-count="1">p</span>p_runtime_named ~pp_local:Text.pp_func ~pp_imported:Text.pp_block_type fmt f
+  <span data-count="1">p</span>p_runtime_named ~pp_local:Text.Func.pp ~pp_imported:Text.pp_block_type fmt f
 
-let pp_elem fmt e = <span data-count="1">N</span>amed.pp Text.pp_elem fmt e
+let pp_elem fmt e = <span data-count="1">N</span>amed.pp Text.Elem.pp fmt e
 
-let pp_data fmt d = <span data-count="1">N</span>amed.pp Text.pp_data fmt d
+let pp_data fmt d = <span data-count="1">N</span>amed.pp Text.Data.pp fmt d
 
 let pp_start fmt s = <span data-count="1">T</span>ext.pp_indice_opt fmt s
 
@@ -656,29 +656,29 @@ let of_grouped (modul : Grouped.t) : t Result.t =
   <span data-count="3655">l</span>et typ = assign_types modul in
   <span data-count="3655">l</span>et* global =
     nam<span data-count="3655">e</span> "global"
-      ~get_name:(get_runtime_nam<span data-count="3655">e</span> (fun ({ id; _ } : Text.global) -&gt; <span data-count="721">i</span>d))
+      ~get_name:(get_runtime_nam<span data-count="3655">e</span> (fun ({ id; _ } : Text.Global.t) -&gt; <span data-count="721">i</span>d))
       modul.global
   in
   <span data-count="3655">l</span>et* table =
     nam<span data-count="3655">e</span> "table"
-      ~get_name:(get_runtime_nam<span data-count="3655">e</span> (fun ((id, _) : Text.table) -&gt; <span data-count="671">i</span>d))
+      ~get_name:(get_runtime_nam<span data-count="3655">e</span> (fun ((id, _) : Text.Table.t) -&gt; <span data-count="671">i</span>d))
       modul.table
   in
   <span data-count="3655">l</span>et* mem =
     nam<span data-count="3655">e</span> "mem"
-      ~get_name:(get_runtime_nam<span data-count="3655">e</span> (fun ((id, _) : Text.mem) -&gt; <span data-count="788">i</span>d))
+      ~get_name:(get_runtime_nam<span data-count="3655">e</span> (fun ((id, _) : Text.Mem.t) -&gt; <span data-count="788">i</span>d))
       modul.mem
   in
   <span data-count="3655">l</span>et* func =
     nam<span data-count="3655">e</span> "func"
-      ~get_name:(get_runtime_nam<span data-count="3655">e</span> (fun ({ id; _ } : Text.func) -&gt; <span data-count="7097">i</span>d))
+      ~get_name:(get_runtime_nam<span data-count="3655">e</span> (fun ({ id; _ } : Text.Func.t) -&gt; <span data-count="7097">i</span>d))
       modul.func
   in
   <span data-count="3652">l</span>et* elem =
-    nam<span data-count="3652">e</span> "elem" ~get_name:(fun (elem : Text.elem) -&gt; <span data-count="919">e</span>lem.id) modul.elem
+    nam<span data-count="3652">e</span> "elem" ~get_name:(fun (elem : Text.Elem.t) -&gt; <span data-count="919">e</span>lem.id) modul.elem
   in
   <span data-count="3652">l</span>et* data =
-    nam<span data-count="3652">e</span> "data" ~get_name:(fun (data : Text.data) -&gt; <span data-count="524">d</span>ata.id) modul.data
+    nam<span data-count="3652">e</span> "data" ~get_name:(fun (data : Text.Data.t) -&gt; <span data-count="524">d</span>ata.id) modul.data
   in
   <span data-count="3652">l</span>et+ () = list_ite<span data-count="3652">r</span> (check_type_i<span data-count="3652">d</span> typ) modul.type_checks in
   <span data-count="3627">l</span>et modul =

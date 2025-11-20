@@ -1,7 +1,7 @@
 open Owi
 
 (* an extern module that will be linked with a wasm module *)
-let extern_module : Concrete_extern_func.extern_func Link.extern_module =
+let extern_module : Concrete_extern_func.extern_func Extern.Module.t =
   (* some custom functions *)
   let rint : int32 ref Type.Id.t = Type.Id.make () in
   let fresh i = Ok (ref i) in
@@ -27,11 +27,11 @@ let extern_module : Concrete_extern_func.extern_func Link.extern_module =
       , Concrete_extern_func.Extern_func (externref rint ^->. i32, get) )
     ]
   in
-  { functions }
+  { functions; func_type = Concrete_extern_func.extern_type }
 
 (* a link state that contains our custom module, available under the name `sausage` *)
 let link_state =
-  Link.extern_module Link.empty_state ~name:"sausage" extern_module
+  Link.Extern.modul ~name:"sausage" extern_module Link.State.empty
 
 (* a pure wasm module refering to `sausage` *)
 let pure_wasm_module =
@@ -50,7 +50,7 @@ let module_to_run, link_state =
 (* let's run it ! it will print the values as defined in the print_i32 function *)
 let () =
   match
-    Interpret.Concrete.modul ~timeout:None ~timeout_instr:None link_state.envs
+    Interpret.Concrete.modul ~timeout:None ~timeout_instr:None link_state
       module_to_run
   with
   | Error _o -> assert false

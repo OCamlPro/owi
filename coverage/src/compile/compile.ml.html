@@ -241,7 +241,7 @@ module Text = struct
 
   let until_link ~unsafe ~name link_state m =
     <span data-count="3397">l</span>et* m = until_validat<span data-count="3397">e</span> ~unsafe m in
-    <span data-count="1844">L</span>ink.modul link_state ~name m
+    <span data-count="1844">L</span>ink.Binary.modul link_state ~name m
 end
 
 module Binary = struct
@@ -253,7 +253,7 @@ module Binary = struct
 
   let until_link ~unsafe ~name link_state m =
     <span data-count="473">l</span>et* m = until_validat<span data-count="473">e</span> ~unsafe m in
-    <span data-count="473">L</span>ink.modul link_state ~name m
+    <span data-count="473">L</span>ink.Binary.modul link_state ~name m
 end
 
 module Any = struct
@@ -261,13 +261,13 @@ module Any = struct
     | <span data-count="0">K</span>ind.Wat m -&gt; Text.until_validate ~unsafe m
     | <span data-count="0">W</span>asm m -&gt; Binary.until_validate ~unsafe m
     | <span data-count="0">W</span>ast _ -&gt; Fmt.error_msg "can not validate a .wast file"
-    | <span data-count="0">O</span>caml _ -&gt; Fmt.error_msg "can not validate an OCaml module"
+    | <span data-count="0">E</span>xtern _ -&gt; Fmt.error_msg "can not validate an OCaml module"
 
   let until_link ~unsafe ~name link_state = function
     | <span data-count="0">K</span>ind.Wat m -&gt; Text.until_link ~unsafe ~name link_state m
     | <span data-count="0">W</span>asm m -&gt; Binary.until_link ~unsafe ~name link_state m
-    | <span data-count="0">O</span>caml _m -&gt;
-      (* TODO: we may be able to handle linking here but return an empty runnable module ? *)
+    | <span data-count="0">E</span>xtern _m -&gt;
+      (* TODO: Link.Extern.modul m *)
       Fmt.error_msg "can not link an OCaml module"
     | <span data-count="0">W</span>ast _ -&gt; Fmt.error_msg "can not link a .wast file"
 end
@@ -278,7 +278,7 @@ module File = struct
     <span data-count="13">m</span>atch m with
     | <span data-count="12">K</span>ind.Wat m -&gt; Text.until_binary ~unsafe m
     | <span data-count="1">W</span>asm m -&gt; Ok m
-    | Wast _ | Ocaml _ -&gt; assert false
+    | Wast _ | Extern _ -&gt; assert false
 
   let until_validate ~unsafe filename =
     <span data-count="419">l</span>et* m = Parse.guess_from_fil<span data-count="419">e</span> filename in
@@ -286,14 +286,14 @@ module File = struct
     <span data-count="418">m</span>atch m with
     | <span data-count="201">K</span>ind.Wat m -&gt; Text.until_validate ~unsafe m
     | <span data-count="217">W</span>asm m -&gt; Binary.until_validate ~unsafe m
-    | Wast _ | Ocaml _ -&gt; assert false
+    | Wast _ | Extern _ -&gt; assert false
 
   let until_link ~unsafe ~name link_state filename =
     <span data-count="19">l</span>et* m = Parse.guess_from_fil<span data-count="19">e</span> filename in
     <span data-count="19">m</span>atch m with
     | <span data-count="9">K</span>ind.Wat m -&gt; Text.until_link ~unsafe ~name link_state m
     | <span data-count="10">W</span>asm m -&gt; Binary.until_link ~unsafe ~name link_state m
-    | Wast _ | Ocaml _ -&gt; assert false
+    | Wast _ | Extern _ -&gt; assert false
 end
 </code></pre>
       </div>

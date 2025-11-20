@@ -1634,14 +1634,14 @@ module Env = struct
     <span data-count="1844">i</span>f i &gt;= Array.lengt<span data-count="1844">h</span> modul.global then <span data-count="20">E</span>rror (`Unknown_global (Text.Raw i))
     else
       <span data-count="1824">m</span>atch modul.global.(i) with
-      | <span data-count="1811">R</span>untime.Local { typ = desc; _ } | <span data-count="13">I</span>mported { desc; _ } -&gt; Ok desc
+      | <span data-count="1811">R</span>untime.Local { typ; _ } | <span data-count="13">I</span>mported { typ; _ } -&gt; Ok typ
 
   let func_get i modul =
     <span data-count="17776">i</span>f i &gt;= Array.lengt<span data-count="17776">h</span> modul.func then <span data-count="11">E</span>rror (`Unknown_func (Text.Raw i))
     else
       <span data-count="17765">m</span>atch modul.func.(i) with
-      | <span data-count="13933">R</span>untime.Local { type_f = Bt_raw (_, t); _ }
-      | <span data-count="3832">I</span>mported { desc = Bt_raw (_, t); _ } -&gt;
+      | <span data-count="13933">R</span>untime.Local { Func.type_f = Bt_raw (_, t); _ }
+      | <span data-count="3832">I</span>mported { typ = Bt_raw (_, t); _ } -&gt;
         Ok t
 
   let block_type_get i env =
@@ -1653,7 +1653,7 @@ module Env = struct
     <span data-count="2577">i</span>f i &gt;= Array.lengt<span data-count="2577">h</span> modul.table then <span data-count="13">E</span>rror (`Unknown_table (Text.Raw i))
     else
       <span data-count="2564">m</span>atch modul.table.(i) with
-      | <span data-count="2501">R</span>untime.Local (_, (_, t)) | <span data-count="63">I</span>mported { desc = _, t; _ } -&gt; Ok t
+      | <span data-count="2501">R</span>untime.Local (_, (_, t)) | <span data-count="63">I</span>mported { typ = _, t; _ } -&gt; Ok t
 
   let elem_type_get i modul =
     <span data-count="124">i</span>f i &gt;= Array.lengt<span data-count="124">h</span> modul.elem then <span data-count="2">E</span>rror (`Unknown_elem (Text.Raw i))
@@ -2120,7 +2120,7 @@ and typecheck_expr env expr ~is_loop (block_type : block_type option)
 let typecheck_function (modul : Module.t) func refs =
   <span data-count="12724">m</span>atch func with
   | <span data-count="2786">R</span>untime.Imported _ -&gt; Ok ()
-  | <span data-count="9938">L</span>ocal func -&gt;
+  | <span data-count="9938">L</span>ocal (func : Func.t) -&gt;
     let (Bt_raw (_, (params, result))) = func.type_f in
     let env =
       Env.make ~params ~modul ~locals:func.locals ~result_type:result ~refs
@@ -2153,7 +2153,7 @@ let typecheck_const_instr (modul : Module.t) refs stack instr =
       <span data-count="77">l</span>et* mut, typ =
         match modul.global.(i) with
         | <span data-count="16">R</span>untime.Local _ -&gt; Error (`Unknown_global (Text.Raw i))
-        | <span data-count="61">I</span>mported { desc; _ } -&gt; Ok desc
+        | <span data-count="61">I</span>mported { typ; _ } -&gt; Ok typ
       in
       <span data-count="61">l</span>et* () =
         match mut with
@@ -2171,7 +2171,7 @@ let typecheck_const_expr (modul : Module.t) refs expr =
   <span data-count="4995">l</span>ist_fold_left (typecheck_const_inst<span data-count="4995">r</span> modul refs) [] expr.Annotated.raw
 
 let typecheck_global (modul : Module.t) refs
-  (global : (global, global_type) Runtime.t) =
+  (global : (Global.t, Global.Type.t) Runtime.t) =
   <span data-count="1070">m</span>atch global with
   | <span data-count="120">I</span>mported _ -&gt; Ok ()
   | <span data-count="950">L</span>ocal { typ; init; _ } -&gt; (
@@ -2184,7 +2184,7 @@ let typecheck_global (modul : Module.t) refs
       else <span data-count="913">O</span>k ()
     | <span data-count="8">_</span>whatever -&gt; Error (`Type_mismatch "typecheck_global 2") )
 
-let typecheck_elem modul refs (elem : elem) =
+let typecheck_elem modul refs (elem : Elem.t) =
   <span data-count="1090">l</span>et _null, expected_type = elem.typ in
   let* () =
     list_ite<span data-count="1090">r</span>
@@ -2203,9 +2203,9 @@ let typecheck_elem modul refs (elem : elem) =
       elem.init
   in
   <span data-count="1077">m</span>atch elem.mode with
-  | <span data-count="362">E</span>lem_passive | <span data-count="25">E</span>lem_declarative -&gt; Ok ()
-  | Elem_active (None, _e) -&gt; assert false
-  | <span data-count="690">E</span>lem_active (Some tbl_i, e) -&gt; (
+  | <span data-count="362">P</span>assive | <span data-count="25">D</span>eclarative -&gt; Ok ()
+  | Active (None, _e) -&gt; assert false
+  | <span data-count="690">A</span>ctive (Some tbl_i, e) -&gt; (
     let* _null, tbl_type = Env.table_type_ge<span data-count="690">t</span> tbl_i modul in
     <span data-count="684">i</span>f not @@ Binary.heap_type_e<span data-count="684">q</span> tbl_type expected_type then
       <span data-count="4">E</span>rror (`Type_mismatch "typecheck elem 3")
@@ -2219,10 +2219,10 @@ let typecheck_elem modul refs (elem : elem) =
       | <span data-count="648">[</span> _t ] -&gt; Ok ()
       | <span data-count="8">_</span>whatever -&gt; Error (`Type_mismatch "typecheck_elem 5") )
 
-let typecheck_data modul refs (data : data) =
+let typecheck_data modul refs (data : Data.t) =
   <span data-count="740">m</span>atch data.mode with
-  | <span data-count="257">D</span>ata_passive -&gt; Ok ()
-  | <span data-count="483">D</span>ata_active (n, e) -&gt; (
+  | <span data-count="257">P</span>assive -&gt; Ok ()
+  | <span data-count="483">A</span>ctive (n, e) -&gt; (
     let* () = check_me<span data-count="483">m</span> modul n in
     <span data-count="468">l</span>et* t = typecheck_const_exp<span data-count="468">r</span> modul refs e in
     <span data-count="448">m</span>atch t with
@@ -2239,34 +2239,34 @@ let typecheck_start { start; func; _ } =
     in
     <span data-count="246">m</span>atch f with
     | <span data-count="243">L</span>ocal { type_f = Bt_raw (_, ([], [])); _ }
-    | <span data-count="1">I</span>mported { desc = Bt_raw (_, ([], [])); _ } -&gt;
+    | <span data-count="1">I</span>mported { typ = Bt_raw (_, ([], [])); _ } -&gt;
       Ok ()
     | <span data-count="2">_</span> -&gt; Error `Start_function )
 
 let validate_exports modul =
   <span data-count="3749">l</span>et* () =
     list_ite<span data-count="3749">r</span>
-      (fun { id; name = _ } -&gt;
+      (fun { Export.id; name = _ } -&gt;
         <span data-count="5944">l</span>et* _t = Env.func_ge<span data-count="5944">t</span> id modul in
         <span data-count="5941">O</span>k () )
       modul.exports.func
   in
   <span data-count="3746">l</span>et* () =
     list_ite<span data-count="3746">r</span>
-      (fun { id; name = _ } -&gt;
+      (fun { Export.id; name = _ } -&gt;
         <span data-count="172">l</span>et* _t = Env.table_type_ge<span data-count="172">t</span> id modul in
         <span data-count="169">O</span>k () )
       modul.exports.table
   in
   <span data-count="3743">l</span>et* () =
     list_ite<span data-count="3743">r</span>
-      (fun { id; name = _ } -&gt;
+      (fun { Export.id; name = _ } -&gt;
         <span data-count="569">l</span>et* _t = Env.global_ge<span data-count="569">t</span> id modul in
         <span data-count="566">O</span>k () )
       modul.exports.global
   in
   <span data-count="3740">l</span>ist_iter
-    (fun { id; name = _ } -&gt;
+    (fun { id; Export.name = _ } -&gt;
       <span data-count="399">l</span>et* () = check_me<span data-count="399">m</span> modul id in
       <span data-count="396">O</span>k () )
     modul.exports.mem
@@ -2280,22 +2280,22 @@ let check_limit { min; max } =
 let validate_tables modul =
   <span data-count="3737">a</span>rray_iter
     (<span data-count="869">f</span>unction
-      | <span data-count="786">R</span>untime.Local (_, (limits, _)) | <span data-count="83">I</span>mported { desc = limits, _; _ } -&gt;
+      | <span data-count="786">R</span>untime.Local (_, (limits, _)) | <span data-count="83">I</span>mported { typ = limits, _; _ } -&gt;
         check_limit limits )
     modul.table
 
 let validate_mem modul =
   <span data-count="3735">a</span>rray_iter
     (<span data-count="1056">f</span>unction
-      | <span data-count="986">R</span>untime.Local (_, desc) | <span data-count="70">I</span>mported { desc; _ } -&gt;
+      | <span data-count="986">R</span>untime.Local (_, typ) | <span data-count="70">I</span>mported { typ; _ } -&gt;
         let* () =
-          if desc.min &gt; 65536 then <span data-count="3">E</span>rror `Memory_size_too_large
+          if typ.min &gt; 65536 then <span data-count="3">E</span>rror `Memory_size_too_large
           else
-            <span data-count="1053">m</span>atch desc.max with
+            <span data-count="1053">m</span>atch typ.max with
             | <span data-count="377">S</span>ome max when max &gt; 65536 -&gt; <span data-count="3">E</span>rror `Memory_size_too_large
             | <span data-count="374">S</span>ome _ | <span data-count="676">N</span>one -&gt; Ok ()
         in
-        <span data-count="1050">c</span>heck_limit desc )
+        <span data-count="1050">c</span>heck_limit typ )
     modul.mem
 
 let modul (modul : Module.t) =
@@ -2310,7 +2310,7 @@ let modul (modul : Module.t) =
   <span data-count="3737">l</span>et* () = validate_table<span data-count="3737">s</span> modul in
   <span data-count="3735">l</span>et* () = validate_me<span data-count="3735">m</span> modul in
   <span data-count="3728">L</span>ist.iter
-    (fun (export : named_export) -&gt; <span data-count="5941">H</span>ashtbl.add refs export.id ())
+    (fun (export : Export.t) -&gt; <span data-count="5941">H</span>ashtbl.add refs export.id ())
     modul.exports.func;
   <span data-count="3728">a</span>rray_iter (fun func -&gt; <span data-count="12724">t</span>ypecheck_function modul func refs) modul.func
 </code></pre>

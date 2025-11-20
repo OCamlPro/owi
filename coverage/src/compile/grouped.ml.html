@@ -662,26 +662,26 @@ let curr_id (curr : int ref) (i : indice option) =
 
 type t =
   { id : string option
-  ; typ : type_def list
+  ; typ : Typedef.t list
   ; function_type : func_type list
       (* Types comming from function declarations.
      It contains potential duplication *)
   ; type_checks : type_check list
       (* Types checks to perform after assignment.
      Come from function declarations with type indicies *)
-  ; global : (Text.global, global_type) Runtime.t Indexed.t list
-  ; table : (table, table_type) Runtime.t Indexed.t list
-  ; mem : (mem, limits) Runtime.t Indexed.t list
-  ; func : (func, block_type) Runtime.t Indexed.t list
-  ; elem : Text.elem Indexed.t list
-  ; data : Text.data Indexed.t list
+  ; global : (Text.Global.t, Global.Type.t) Runtime.t Indexed.t list
+  ; table : (Table.t, Table.Type.t) Runtime.t Indexed.t list
+  ; mem : (Mem.t, limits) Runtime.t Indexed.t list
+  ; func : (Func.t, block_type) Runtime.t Indexed.t list
+  ; elem : Text.Elem.t Indexed.t list
+  ; data : Text.Data.t Indexed.t list
   ; exports : opt_exports
   ; start : indice option
   }
 
 let pp_id fmt id = <span data-count="1">T</span>ext.pp_id_opt fmt id
 
-let pp_typ fmt typ = <span data-count="1">F</span>mt.pf fmt "[%a]" (Fmt.lis<span data-count="1">t</span> ~sep Text.pp_type_def) typ
+let pp_typ fmt typ = <span data-count="1">F</span>mt.pf fmt "[%a]" (Fmt.lis<span data-count="1">t</span> ~sep Text.Typedef.pp) typ
 
 let pp_function_type fmt function_type =
   <span data-count="1">F</span>mt.pf fmt "[%a]" (Fmt.lis<span data-count="1">t</span> ~sep Text.pp_func_type) function_type
@@ -693,24 +693,24 @@ let pp_runtime_indexed_list ~pp_local ~pp_imported fmt l =
   <span data-count="4">I</span>ndexed.pp_list (Runtime.pp ~pp_local ~pp_imported) fmt l
 
 let pp_global fmt g =
-  <span data-count="1">p</span>p_runtime_indexed_list ~pp_local:Text.pp_global
-    ~pp_imported:Text.pp_global_type fmt g
+  <span data-count="1">p</span>p_runtime_indexed_list ~pp_local:Text.Global.pp
+    ~pp_imported:Text.Global.Type.pp fmt g
 
 let pp_table fmt t =
-  <span data-count="1">p</span>p_runtime_indexed_list ~pp_local:Text.pp_table
-    ~pp_imported:Text.pp_table_type fmt t
+  <span data-count="1">p</span>p_runtime_indexed_list ~pp_local:Text.Table.pp
+    ~pp_imported:Text.Table.Type.pp fmt t
 
 let pp_mem fmt m =
-  <span data-count="1">p</span>p_runtime_indexed_list ~pp_local:Text.pp_mem ~pp_imported:Text.pp_limits fmt
+  <span data-count="1">p</span>p_runtime_indexed_list ~pp_local:Text.Mem.pp ~pp_imported:Text.pp_limits fmt
     m
 
 let pp_func fmt f =
-  <span data-count="1">p</span>p_runtime_indexed_list ~pp_local:Text.pp_func ~pp_imported:Text.pp_block_type
+  <span data-count="1">p</span>p_runtime_indexed_list ~pp_local:Text.Func.pp ~pp_imported:Text.pp_block_type
     fmt f
 
-let pp_elem fmt e = <span data-count="1">I</span>ndexed.pp_list Text.pp_elem fmt e
+let pp_elem fmt e = <span data-count="1">I</span>ndexed.pp_list Text.Elem.pp fmt e
 
-let pp_data fmt d = <span data-count="1">I</span>ndexed.pp_list Text.pp_data fmt d
+let pp_data fmt d = <span data-count="1">I</span>ndexed.pp_list Text.Data.pp fmt d
 
 let pp_start fmt s = <span data-count="1">T</span>ext.pp_indice_opt fmt s
 
@@ -746,8 +746,8 @@ let pp fmt
     type_checks pp_global global pp_table table pp_mem mem pp_func func pp_elem
     elem pp_data data pp_opt_exports exports pp_start start
 
-let imp (import : import) (assigned_name, desc) : 'a Imported.t =
-  <span data-count="2185">{</span> modul = import.modul; name = import.name; assigned_name; desc }
+let imp (import : Import.t) (assigned_name, typ) : 'a Imported.t =
+  <span data-count="2185">{</span> modul = import.modul; name = import.name; assigned_name; typ }
 
 let empty_module id =
   <span data-count="3655">{</span> id
@@ -825,10 +825,10 @@ let rec extract_block_types expr =
 let add_func value (fields : t) (curr : curr) =
   <span data-count="9007">l</span>et fields =
     match value with
-    | <span data-count="7097">R</span>untime.Local func -&gt;
+    | <span data-count="7097">R</span>untime.Local (func : Func.t) -&gt;
       let fields = declare_func_type fields func.type_f in
       <span data-count="7097">L</span>ist.fold_lef<span data-count="7097">t</span> declare_func_type fields (extract_block_type<span data-count="7097">s</span> func.body)
-    | <span data-count="1910">I</span>mported func -&gt; declare_func_typ<span data-count="1910">e</span> fields func.desc
+    | <span data-count="1910">I</span>mported func -&gt; declare_func_typ<span data-count="1910">e</span> fields func.typ
   in
   let index = !(curr.func) in
   incr curr.func;
@@ -845,75 +845,75 @@ let add_data value (fields : t) (curr : curr) =
   <span data-count="524">{</span> fields with data = Indexed.retur<span data-count="524">n</span> index value :: fields.data }
 
 let add_field curr (fields : t) = function
-  | <span data-count="286">T</span>ext.MType typ -&gt;
+  | <span data-count="286">T</span>ext.Module.Field.Typedef typ -&gt;
     let typ = typ :: fields.typ in
     { fields with typ }
-  | <span data-count="721">M</span>Global global -&gt; add_global (Local global) fields curr
-  | <span data-count="120">M</span>Import ({ desc = Import_global (a, (mut, val_type)); _ } as import) -&gt;
+  | <span data-count="721">G</span>lobal global -&gt; add_global (Local global) fields curr
+  | <span data-count="120">I</span>mport ({ typ = Global (a, (mut, val_type)); _ } as import) -&gt;
     let b = (mut, val_type) in
     let imported = imp import (a, b) in
     <span data-count="120">a</span>dd_global (Imported imported) fields curr
-  | <span data-count="563">M</span>Export { name; desc = Export_global id } -&gt;
+  | <span data-count="563">E</span>xport { name; typ = Global id } -&gt;
     let id = curr_id curr.global id in
     <span data-count="563">l</span>et exports =
       { fields.exports with global = { name; id } :: fields.exports.global }
     in
     { fields with exports }
-  | <span data-count="671">M</span>Table table -&gt;
+  | <span data-count="671">T</span>able table -&gt;
     let id, table_type = table in
     let table = (id, table_type) in
     add_table (Local table) fields curr
-  | <span data-count="84">M</span>Import ({ desc = Import_table (id, table_type); _ } as import) -&gt;
+  | <span data-count="84">I</span>mport ({ typ = Table (id, table_type); _ } as import) -&gt;
     let imported = imp import (id, table_type) in
     <span data-count="84">a</span>dd_table (Imported imported) fields curr
-  | <span data-count="172">M</span>Export { name; desc = Export_table id } -&gt;
+  | <span data-count="172">E</span>xport { name; typ = Table id } -&gt;
     let id = curr_id curr.table id in
     <span data-count="172">l</span>et exports =
       { fields.exports with table = { name; id } :: fields.exports.table }
     in
     { fields with exports }
-  | <span data-count="788">M</span>Mem mem -&gt; add_mem (Local mem) fields curr
-  | <span data-count="71">M</span>Import ({ desc = Import_mem (id, limits); _ } as import) -&gt;
+  | <span data-count="788">M</span>em mem -&gt; add_mem (Local mem) fields curr
+  | <span data-count="71">I</span>mport ({ typ = Mem (id, limits); _ } as import) -&gt;
     let imported = imp import (id, limits) in
     <span data-count="71">a</span>dd_mem (Imported imported) fields curr
-  | <span data-count="184">M</span>Export { name; desc = Export_mem id } -&gt;
+  | <span data-count="184">E</span>xport { name; typ = Mem id } -&gt;
     let id = curr_id curr.mem id in
     <span data-count="184">l</span>et exports =
       { fields.exports with mem = { name; id } :: fields.exports.mem }
     in
     { fields with exports }
-  | <span data-count="7097">M</span>Func func -&gt; add_func (Runtime.Local func) fields curr
-  | <span data-count="1910">M</span>Import ({ desc = Import_func (a, type_f); _ } as import) -&gt;
+  | <span data-count="7097">F</span>unc func -&gt; add_func (Runtime.Local func) fields curr
+  | <span data-count="1910">I</span>mport ({ typ = Func (a, type_f); _ } as import) -&gt;
     let imported : block_type Imported.t = imp import (a, type_f) in
     <span data-count="1910">a</span>dd_func (Imported imported) fields curr
-  | <span data-count="5707">M</span>Export { name; desc = Export_func id } -&gt;
+  | <span data-count="5707">E</span>xport { name; typ = Func id } -&gt;
     let id = curr_id curr.func id in
     <span data-count="5707">l</span>et exports =
       { fields.exports with func = { name; id } :: fields.exports.func }
     in
     { fields with exports }
-  | <span data-count="919">M</span>Elem elem -&gt;
+  | <span data-count="919">E</span>lem elem -&gt;
     let mode =
       match elem.mode with
-      | (<span data-count="362">T</span>ext.Elem_passive | <span data-count="25">E</span>lem_declarative) as mode -&gt; mode
-      | <span data-count="532">E</span>lem_active (id, expr) -&gt;
+      | (<span data-count="362">T</span>ext.Elem.Mode.Passive | <span data-count="25">D</span>eclarative) as mode -&gt; mode
+      | <span data-count="532">A</span>ctive (id, expr) -&gt;
         let id = curr_id curr.table id in
-        <span data-count="532">E</span>lem_active (Some id, expr)
+        <span data-count="532">A</span>ctive (Some id, expr)
     in
     add_elem { elem with mode } fields curr
-  | <span data-count="524">M</span>Data data -&gt;
+  | <span data-count="524">D</span>ata data -&gt;
     let mode =
       match data.mode with
-      | <span data-count="257">D</span>ata_passive -&gt; Text.Data_passive
-      | <span data-count="267">D</span>ata_active (id, expr) -&gt;
+      | <span data-count="257">P</span>assive -&gt; Text.Data.Mode.Passive
+      | <span data-count="267">A</span>ctive (id, expr) -&gt;
         let id = curr_id curr.mem id in
-        <span data-count="267">D</span>ata_active (Some id, expr)
+        <span data-count="267">A</span>ctive (Some id, expr)
     in
-    let data : Text.data = { id = data.id; init = data.init; mode } in
+    let data : Text.Data.t = { id = data.id; init = data.init; mode } in
     add_data data fields curr
-  | <span data-count="233">M</span>Start start -&gt; { fields with start = Some start }
+  | <span data-count="233">S</span>tart start -&gt; { fields with start = Some start }
 
-let of_text { Text.fields; id } =
+let of_text { Text.Module.fields; id } =
   <span data-count="3655">L</span>og.debug (fun m -&gt; <span data-count="1">m</span> "grouping     ...");
   <span data-count="3655">l</span>et modul =
     List.fold_left (add_fiel<span data-count="3655">d</span> (init_cur<span data-count="3655">r</span> ())) (empty_modul<span data-count="3655">e</span> id) fields

@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>concrete.ml &mdash; Coverage report</title>
-    <meta name="description" content="91.67% coverage in src/concrete/concrete.ml">
+    <meta name="description" content="100.00% coverage in src/concrete/concrete.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,10 +15,9 @@
           <span class="dirname">src/concrete/</span>concrete.ml
         </a>
       </h1>
-      <h2>91.67%</h2>
+      <h2>100.00%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="bottom:5.66%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -35,47 +34,34 @@
 <a id="L10"></a><span > </span>
 <a id="L11"></a><span > </span>
 <a id="L12"></a><span > </span>
-<a id="L13"></a><span > </span>
+<a id="L13"></a><span class="visited"> </span>
 <a id="L14"></a><span > </span>
-<a id="L15"></a><span class="visited"> </span>
+<a id="L15"></a><span > </span>
 <a id="L16"></a><span > </span>
 <a id="L17"></a><span > </span>
 <a id="L18"></a><span > </span>
-<a id="L19"></a><span > </span>
+<a id="L19"></a><span class="visited"> </span>
 <a id="L20"></a><span > </span>
 <a id="L21"></a><span class="visited"> </span>
 <a id="L22"></a><span > </span>
-<a id="L23"></a><span class="visited"> </span>
+<a id="L23"></a><span > </span>
 <a id="L24"></a><span > </span>
 <a id="L25"></a><span > </span>
 <a id="L26"></a><span > </span>
-<a id="L27"></a><span > </span>
+<a id="L27"></a><span class="visited"> </span>
 <a id="L28"></a><span > </span>
 <a id="L29"></a><span class="visited"> </span>
 <a id="L30"></a><span > </span>
-<a id="L31"></a><span class="visited"> </span>
+<a id="L31"></a><span > </span>
 <a id="L32"></a><span > </span>
 <a id="L33"></a><span > </span>
 <a id="L34"></a><span > </span>
 <a id="L35"></a><span > </span>
 <a id="L36"></a><span > </span>
 <a id="L37"></a><span > </span>
-<a id="L38"></a><span > </span>
-<a id="L39"></a><span > </span>
-<a id="L40"></a><span class="visited"> </span>
-<a id="L41"></a><span class="visited"> </span>
-<a id="L42"></a><span > </span>
-<a id="L43"></a><span > </span>
-<a id="L44"></a><span > </span>
-<a id="L45"></a><span > </span>
-<a id="L46"></a><span > </span>
-<a id="L47"></a><span > </span>
-<a id="L48"></a><span class="visited"> </span>
-<a id="L49"></a><span > </span>
-<a id="L50"></a><span class="unvisited"> </span>
-<a id="L51"></a><span > </span>
-<a id="L52"></a><span class="visited"> </span>
-<a id="L53"></a><span > </span>
+<a id="L38"></a><span class="visited"> </span>
+<a id="L39"></a><span class="visited"> </span>
+<a id="L40"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -120,19 +106,6 @@
 <a href="#L38">38</a>
 <a href="#L39">39</a>
 <a href="#L40">40</a>
-<a href="#L41">41</a>
-<a href="#L42">42</a>
-<a href="#L43">43</a>
-<a href="#L44">44</a>
-<a href="#L45">45</a>
-<a href="#L46">46</a>
-<a href="#L47">47</a>
-<a href="#L48">48</a>
-<a href="#L49">49</a>
-<a href="#L50">50</a>
-<a href="#L51">51</a>
-<a href="#L52">52</a>
-<a href="#L53">53</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -144,8 +117,6 @@ module Global = Concrete_global
 module Table = Concrete_table
 module Memory = Concrete_memory
 module Choice = Concrete_choice
-
-type thread = unit
 
 let select cond ~if_true ~if_false =
   <span data-count="236">i</span>f cond then <span data-count="121">C</span>hoice.return if_true else <span data-count="115">C</span>hoice.return if_false
@@ -175,17 +146,6 @@ module Env = struct
   let get_data env n =
     <span data-count="486">l</span>et data = get_data env n in
     <span data-count="486">d</span>ata
-end
-
-module Module_to_run = struct
-  (** runnable module *)
-  type t = Extern_func.extern_func Link.module_to_run
-
-  let env (t : Extern_func.extern_func Link.module_to_run) = <span data-count="725">t</span>.env
-
-  let id (t : Extern_func.extern_func Link.module_to_run) = <span data-count="0">t</span>.id
-
-  let to_run (t : Extern_func.extern_func Link.module_to_run) = <span data-count="1800">t</span>.to_run
 end
 </code></pre>
       </div>

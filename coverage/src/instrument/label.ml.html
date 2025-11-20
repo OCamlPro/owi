@@ -509,7 +509,7 @@ let annotate_fc m cov_label_set_idx =
                   ; Call cov_label_set_idx
                   ]
                 @ expr )
-              f.Binary.body
+              f.Binary.Func.body
           in
           <span data-count="1">l</span>et f = { f with body } in
           Runtime.Local f )
@@ -559,7 +559,7 @@ let annotate_sc m cov_label_set_idx =
               (fun expr -&gt; <span data-count="3">L</span>ist.map handle_instr expr |&gt; <span data-count="3">L</span>ist.flatten)
               expr
           in
-          let body = handle_expr f.Binary.body in
+          let body = handle_expr f.Binary.Func.body in
           <span data-count="1">l</span>et f = { f with body } in
           Runtime.Local f )
       func
@@ -642,7 +642,7 @@ let annotate_dc m cov_label_set_idx =
               (fun expr -&gt; <span data-count="3">L</span>ist.map handle_instr expr |&gt; <span data-count="3">L</span>ist.flatten)
               expr
           in
-          let body = handle_expr f.Binary.body in
+          let body = handle_expr f.Binary.Func.body in
           <span data-count="1">l</span>et f = { f with body } in
           Runtime.Local f )
       func
@@ -651,12 +651,12 @@ let annotate_dc m cov_label_set_idx =
 
 let annotate criteria m =
   <span data-count="3">l</span>et m =
-    let desc =
+    let typ =
       Binary.Bt_raw
         (None, ([ (None, Binary.Num_type I32); (None, Num_type I32) ], []))
     in
     Binary.Module.add_import_if_not_presen<span data-count="3">t</span> ~modul_name:"owi"
-      ~func_name:"cov_label_set" ~desc m
+      ~func_name:"cov_label_set" ~typ m
   in
   let cov_label_set_idx =
     match

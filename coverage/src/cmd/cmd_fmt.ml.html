@@ -91,7 +91,7 @@ let get_printer filename =
   <span data-count="7">m</span>atch ext with
   | <span data-count="6">"</span>.wat" -&gt;
     let+ v = Parse.Text.Module.from_fil<span data-count="6">e</span> filename in
-    <span data-count="6">f</span>un fmt () -&gt; <span data-count="6">T</span>ext.pp_modul fmt v
+    <span data-count="6">f</span>un fmt () -&gt; <span data-count="6">T</span>ext.Module.pp fmt v
   | <span data-count="1">"</span>.wast" -&gt;
     let+ v = Parse.Text.Script.from_fil<span data-count="1">e</span> filename in
     <span data-count="1">f</span>un fmt () -&gt; <span data-count="1">W</span>ast.pp_script fmt v

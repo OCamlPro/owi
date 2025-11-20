@@ -41,10 +41,6 @@
 <a id="L17"></a><span > </span>
 <a id="L18"></a><span > </span>
 <a id="L19"></a><span > </span>
-<a id="L20"></a><span > </span>
-<a id="L21"></a><span > </span>
-<a id="L22"></a><span > </span>
-<a id="L23"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -68,17 +64,13 @@
 <a href="#L17">17</a>
 <a href="#L18">18</a>
 <a href="#L19">19</a>
-<a href="#L20">20</a>
-<a href="#L21">21</a>
-<a href="#L22">22</a>
-<a href="#L23">23</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2025 OCamlPro *)
 (* Written by the Owi programmers *)
 
 include
-  Func_intf.Make_extern_func
+  Extern.Func.Make
     (struct
       type int32 = Int32.t
 
@@ -89,12 +81,8 @@ include
       type float64 = Float64.t
 
       type v128 = V128.t
-
-      type bool = Bool.t
     end)
-    (struct
-      type 'a t = 'a Result.t
-    end)
+    (Result)
     (Concrete_memory)
 </code></pre>
       </div>

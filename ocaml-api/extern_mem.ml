@@ -1,11 +1,11 @@
 open Owi
 
 (* an extern module that will be linked with a wasm module *)
-let extern_module : Concrete_extern_func.extern_func Link.extern_module =
+let extern_module : Concrete_extern_func.extern_func Extern.Module.t =
   (* some custom functions *)
   let memset m start byte length =
     let rec loop offset =
-      if Int32.le offset length then begin
+      if offset <= length then begin
         match Concrete_memory.store_8 m ~addr:(Int32.add start offset) byte with
         | Error _ as e -> e
         | Ok () -> loop (Int32.add offset 1l)
@@ -26,11 +26,11 @@ let extern_module : Concrete_extern_func.extern_func Link.extern_module =
     ; ("memset", Extern_func (memory ^-> i32 ^-> i32 ^-> i32 ^->. unit, memset))
     ]
   in
-  { functions }
+  { Extern.Module.functions; func_type = Concrete_extern_func.extern_type }
 
 (* a link state that contains our custom module, available under the name `chorizo` *)
 let link_state =
-  Link.extern_module Link.empty_state ~name:"chorizo" extern_module
+  Link.Extern.modul ~name:"chorizo" extern_module Link.State.empty
 
 (* a pure wasm module refering to `$extern_mem` *)
 let pure_wasm_module =
@@ -49,7 +49,7 @@ let module_to_run, link_state =
 (* let's run it ! it will print the values as defined in the print_i64 function *)
 let () =
   match
-    Interpret.Concrete.modul ~timeout:None ~timeout_instr:None link_state.envs
+    Interpret.Concrete.modul ~timeout:None ~timeout_instr:None link_state
       module_to_run
   with
   | Error _ -> assert false

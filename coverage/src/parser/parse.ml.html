@@ -1576,13 +1576,13 @@ module Text = struct
   end)
 
   module Module = Make (struct
-    type t = Text.modul
+    type t = Text.Module.t
 
     let rule = Text_parser.modul
   end)
 
   module Inline_module = Make (struct
-    type t = Text.modul
+    type t = Text.Module.t
 
     let rule = Text_parser.inline_module
   end)

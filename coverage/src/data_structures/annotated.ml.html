@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>annotated.ml &mdash; Coverage report</title>
-    <meta name="description" content="66.67% coverage in src/data_structures/annotated.ml">
+    <meta name="description" content="63.16% coverage in src/data_structures/annotated.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,10 +15,11 @@
           <span class="dirname">src/data_structures/</span>annotated.ml
         </a>
       </h1>
-      <h2>66.67%</h2>
+      <h2>63.16%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="bottom:5.88%"></span>
+      <span class="unvisited" style="top:20.75%"></span>
+      <span class="unvisited" style="bottom:5.66%"></span>
       <span class="unvisited" style="bottom:0.00%"></span>
     </div>
     <div id="report">
@@ -34,47 +35,49 @@
 <a id="L8"></a><span > </span>
 <a id="L9"></a><span > </span>
 <a id="L10"></a><span > </span>
-<a id="L11"></a><span > </span>
-<a id="L12"></a><span class="visited"> </span>
-<a id="L13"></a><span class="visited"> </span>
-<a id="L14"></a><span > </span>
-<a id="L15"></a><span > </span>
+<a id="L11"></a><span class="unvisited"> </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span > </span>
+<a id="L14"></a><span class="visited"> </span>
+<a id="L15"></a><span class="visited"> </span>
 <a id="L16"></a><span > </span>
 <a id="L17"></a><span > </span>
 <a id="L18"></a><span > </span>
 <a id="L19"></a><span > </span>
-<a id="L20"></a><span class="visited"> </span>
+<a id="L20"></a><span > </span>
 <a id="L21"></a><span > </span>
 <a id="L22"></a><span class="visited"> </span>
-<a id="L23"></a><span class="visited"> </span>
-<a id="L24"></a><span > </span>
-<a id="L25"></a><span > </span>
+<a id="L23"></a><span > </span>
+<a id="L24"></a><span class="visited"> </span>
+<a id="L25"></a><span class="visited"> </span>
 <a id="L26"></a><span > </span>
 <a id="L27"></a><span > </span>
 <a id="L28"></a><span > </span>
 <a id="L29"></a><span > </span>
 <a id="L30"></a><span > </span>
-<a id="L31"></a><span class="visited"> </span>
-<a id="L32"></a><span class="visited"> </span>
+<a id="L31"></a><span > </span>
+<a id="L32"></a><span > </span>
 <a id="L33"></a><span class="visited"> </span>
-<a id="L34"></a><span > </span>
-<a id="L35"></a><span > </span>
+<a id="L34"></a><span class="visited"> </span>
+<a id="L35"></a><span class="visited"> </span>
 <a id="L36"></a><span > </span>
 <a id="L37"></a><span > </span>
 <a id="L38"></a><span > </span>
 <a id="L39"></a><span > </span>
-<a id="L40"></a><span class="visited"> </span>
-<a id="L41"></a><span class="visited"> </span>
-<a id="L42"></a><span > </span>
+<a id="L40"></a><span > </span>
+<a id="L41"></a><span > </span>
+<a id="L42"></a><span class="visited"> </span>
 <a id="L43"></a><span class="visited"> </span>
 <a id="L44"></a><span > </span>
 <a id="L45"></a><span class="visited"> </span>
 <a id="L46"></a><span > </span>
-<a id="L47"></a><span > </span>
-<a id="L48"></a><span class="unvisited"> </span>
+<a id="L47"></a><span class="visited"> </span>
+<a id="L48"></a><span > </span>
 <a id="L49"></a><span > </span>
-<a id="L50"></a><span > </span>
-<a id="L51"></a><span class="unvisited"> </span>
+<a id="L50"></a><span class="unvisited"> </span>
+<a id="L51"></a><span > </span>
+<a id="L52"></a><span > </span>
+<a id="L53"></a><span class="unvisited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -130,6 +133,8 @@
 <a href="#L49">49</a>
 <a href="#L50">50</a>
 <a href="#L51">51</a>
+<a href="#L52">52</a>
+<a href="#L53">53</a>
 </pre>
 <pre><code class="ocaml">module S = Set.Make (Int)
 
@@ -141,9 +146,11 @@ type 'a t =
   ; d_false : int array option ref
   }
 
+let raw { raw; _ } = <span data-count="0">r</span>aw
+
 let dummy raw =
-  <span data-count="65009769">{</span> raw
-  ; instr_counter = Atomic.mak<span data-count="65009763">e</span> 0
+  <span data-count="64991311">{</span> raw
+  ; instr_counter = Atomic.mak<span data-count="64991306">e</span> 0
   ; functions_called = S.empty
   ; d_true = ref None
   ; d_false = ref None

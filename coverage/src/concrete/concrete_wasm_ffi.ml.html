@@ -546,7 +546,7 @@ let env_extern_module =
       , Extern_func (i32 ^-&gt;<span data-count="701">.</span> i32, emscripten_resize_heap) )
     ]
   in
-  { Link.functions }
+  { Extern.Module.functions; func_type = Concrete.Extern_func.extern_type }
 
 let fd_close (_ : int32) : int32 Choice.t = <span data-count="0">a</span>ssert false
 
@@ -582,7 +582,7 @@ let wasi_snapshot_preview1_extern_module =
     ; ("fd_fdstat_get", Extern_func (i32 ^-<span data-count="701">&gt;</span> i32 ^-&gt;<span data-count="701">.</span> i32, fd_fdstat_get))
     ]
   in
-  { Link.functions }
+  { Extern.Module.functions; func_type = Concrete.Extern_func.extern_type }
 </code></pre>
       </div>
     </div>

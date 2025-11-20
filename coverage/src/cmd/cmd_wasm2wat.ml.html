@@ -105,9 +105,9 @@ let cmd ~source_file ~emit_file ~out_file =
       end
     in
     if emit_fil<span data-count="1">e</span> || outpu<span data-count="2">t</span> then
-      <span data-count="3">B</span>os.OS.File.writef outname "%a@\n" Text.pp_modul m
+      <span data-count="3">B</span>os.OS.File.writef outname "%a@\n" Text.Module.pp m
     else <span data-count="15">b</span>egin
-      Log.app (fun log -&gt; <span data-count="15">l</span>og "%a" Text.pp_modul m);
+      Log.app (fun log -&gt; <span data-count="15">l</span>og "%a" Text.Module.pp m);
       <span data-count="15">O</span>k ()
     end
   | <span data-count="1">e</span>xt -&gt; Error (`Unsupported_file_extension ext)

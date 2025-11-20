@@ -265,7 +265,7 @@ let const_v128 x = <span data-count="211">x</span>
 include V
 
 module Ref = struct
-  let get_func (r : ref_value) : Func_intf.t Value_intf.get_ref =
+  let get_func (r : ref_value) : Kind.func Value_intf.get_ref =
     <span data-count="802835">m</span>atch r with
     | <span data-count="801064">F</span>uncref (Some f) -&gt; Ref_value f
     | <span data-count="1771">F</span>uncref None -&gt; Null

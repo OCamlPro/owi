@@ -275,8 +275,8 @@
       <span class="unvisited" style="bottom:9.81%"></span>
       <span class="unvisited" style="bottom:7.14%"></span>
       <span class="unvisited" style="bottom:6.20%"></span>
-      <span class="unvisited" style="bottom:4.16%"></span>
-      <span class="unvisited" style="bottom:3.45%"></span>
+      <span class="unvisited" style="bottom:4.32%"></span>
+      <span class="unvisited" style="bottom:3.61%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -1479,51 +1479,51 @@
 <a id="L1196"></a><span > </span>
 <a id="L1197"></a><span > </span>
 <a id="L1198"></a><span > </span>
-<a id="L1199"></a><span > </span>
+<a id="L1199"></a><span class="visited"> </span>
 <a id="L1200"></a><span > </span>
 <a id="L1201"></a><span > </span>
-<a id="L1202"></a><span > </span>
-<a id="L1203"></a><span class="visited"> </span>
+<a id="L1202"></a><span class="visited"> </span>
+<a id="L1203"></a><span > </span>
 <a id="L1204"></a><span > </span>
 <a id="L1205"></a><span > </span>
-<a id="L1206"></a><span class="visited"> </span>
+<a id="L1206"></a><span > </span>
 <a id="L1207"></a><span > </span>
 <a id="L1208"></a><span > </span>
-<a id="L1209"></a><span > </span>
+<a id="L1209"></a><span class="visited"> </span>
 <a id="L1210"></a><span > </span>
 <a id="L1211"></a><span > </span>
 <a id="L1212"></a><span > </span>
-<a id="L1213"></a><span class="visited"> </span>
+<a id="L1213"></a><span > </span>
 <a id="L1214"></a><span > </span>
-<a id="L1215"></a><span > </span>
-<a id="L1216"></a><span > </span>
-<a id="L1217"></a><span class="visited"> </span>
-<a id="L1218"></a><span class="visited"> </span>
-<a id="L1219"></a><span > </span>
+<a id="L1215"></a><span class="visited"> </span>
+<a id="L1216"></a><span class="visited"> </span>
+<a id="L1217"></a><span > </span>
+<a id="L1218"></a><span > </span>
+<a id="L1219"></a><span class="unvisited"> </span>
 <a id="L1220"></a><span > </span>
-<a id="L1221"></a><span class="unvisited"> </span>
-<a id="L1222"></a><span > </span>
+<a id="L1221"></a><span > </span>
+<a id="L1222"></a><span class="visited"> </span>
 <a id="L1223"></a><span > </span>
-<a id="L1224"></a><span class="visited"> </span>
-<a id="L1225"></a><span > </span>
+<a id="L1224"></a><span > </span>
+<a id="L1225"></a><span class="visited"> </span>
 <a id="L1226"></a><span > </span>
-<a id="L1227"></a><span class="visited"> </span>
-<a id="L1228"></a><span > </span>
+<a id="L1227"></a><span > </span>
+<a id="L1228"></a><span class="unvisited"> </span>
 <a id="L1229"></a><span > </span>
-<a id="L1230"></a><span class="unvisited"> </span>
-<a id="L1231"></a><span > </span>
-<a id="L1232"></a><span > </span>
+<a id="L1230"></a><span > </span>
+<a id="L1231"></a><span class="visited"> </span>
+<a id="L1232"></a><span class="visited"> </span>
 <a id="L1233"></a><span class="visited"> </span>
 <a id="L1234"></a><span class="visited"> </span>
 <a id="L1235"></a><span class="visited"> </span>
-<a id="L1236"></a><span class="visited"> </span>
-<a id="L1237"></a><span class="visited"> </span>
+<a id="L1236"></a><span > </span>
+<a id="L1237"></a><span > </span>
 <a id="L1238"></a><span > </span>
 <a id="L1239"></a><span > </span>
 <a id="L1240"></a><span > </span>
 <a id="L1241"></a><span > </span>
-<a id="L1242"></a><span > </span>
-<a id="L1243"></a><span class="visited"> </span>
+<a id="L1242"></a><span class="visited"> </span>
+<a id="L1243"></a><span > </span>
 <a id="L1244"></a><span > </span>
 <a id="L1245"></a><span > </span>
 <a id="L1246"></a><span class="visited"> </span>
@@ -3048,7 +3048,7 @@ let check_zero_opcode input =
 
 let read_bytes ~msg input = <span data-count="3827">v</span>ector_no_id (read_byte ~msg) input
 
-let read_indice input : (Binary.indice * Input.t, _) result =
+let read_indice input : (indice * Input.t, _) result =
   <span data-count="77216">l</span>et+ indice, input = read_U3<span data-count="77216">2</span> input in
   <span data-count="77216">(</span>indice, input)
 
@@ -3651,23 +3651,23 @@ let read_memory input =
 let read_global types input =
   <span data-count="250">l</span>et* typ, input = read_global_typ<span data-count="250">e</span> input in
   <span data-count="246">l</span>et+ init, input = read_cons<span data-count="246">t</span> types input in
-  <span data-count="234">(</span>{ typ; init; id = None }, input)
+  <span data-count="234">(</span>{ Global.typ; init; id = None }, input)
 
 let read_export input =
   <span data-count="452">l</span>et* name, input = read_byte<span data-count="452">s</span> ~msg:"read_export 1" input in
   <span data-count="450">l</span>et name = string_of_char_list name in
   <span data-count="450">l</span>et* export_typeidx, input = read_byt<span data-count="450">e</span> ~msg:"read_export 2" input in
   <span data-count="450">l</span>et+ id, input = read_U3<span data-count="450">2</span> input in
-  <span data-count="448">(</span>(export_typeidx, { id; name }), input)
+  <span data-count="448">(</span>(export_typeidx, { Export.id; name }), input)
 
 let read_elem_active types input =
   <span data-count="4">l</span>et* index, input = read_indic<span data-count="4">e</span> input in
   <span data-count="4">l</span>et+ offset, input = read_cons<span data-count="4">t</span> types input in
-  <span data-count="4">(</span>Elem_active (Some index, offset), input)
+  <span data-count="4">(</span>Elem.Mode.Active (Some index, offset), input)
 
 let read_elem_active_zero types input =
   <span data-count="168">l</span>et+ offset, input = read_cons<span data-count="168">t</span> types input in
-  <span data-count="168">(</span>Elem_active (Some 0, offset), input)
+  <span data-count="168">(</span>Elem.Mode.Active (Some 0, offset), input)
 
 let read_elem_index input =
   <span data-count="605">l</span>et+ index, input = read_indic<span data-count="605">e</span> input in
@@ -3690,45 +3690,45 @@ let read_element types input =
     <span data-count="168">l</span>et+ init, input = vector_no_i<span data-count="168">d</span> read_elem_index input in
     <span data-count="168">l</span>et init = List.map Annotated.dummy_deep init in
     <span data-count="168">l</span>et typ = (Null, Func_ht) in
-    ({ id; typ; init; mode }, input)
+    ({ Elem.id; typ; init; mode }, input)
   | <span data-count="0">1</span> -&gt;
-    let mode = Elem_passive in
+    let mode = Elem.Mode.Passive in
     let* typ, input = read_elem_kin<span data-count="0">d</span> input in
     <span data-count="0">l</span>et+ init, input = vector_no_i<span data-count="0">d</span> read_elem_index input in
     <span data-count="0">l</span>et init = List.map Annotated.dummy_deep init in
-    <span data-count="0">(</span>{ id; typ; init; mode }, input)
+    <span data-count="0">(</span>{ Elem.id; typ; init; mode }, input)
   | <span data-count="4">2</span> -&gt;
     let* mode, input = read_elem_activ<span data-count="4">e</span> types input in
     <span data-count="4">l</span>et* typ, input = read_elem_kin<span data-count="4">d</span> input in
     <span data-count="4">l</span>et+ init, input = vector_no_i<span data-count="4">d</span> read_elem_index input in
     <span data-count="4">l</span>et init = List.map Annotated.dummy_deep init in
-    <span data-count="4">(</span>{ id; typ; init; mode }, input)
+    <span data-count="4">(</span>{ Elem.id; typ; init; mode }, input)
   | <span data-count="0">3</span> -&gt;
-    let mode = Elem_declarative in
+    let mode = Elem.Mode.Declarative in
     let* typ, input = read_elem_kin<span data-count="0">d</span> input in
     <span data-count="0">l</span>et+ init, input = vector_no_i<span data-count="0">d</span> read_elem_index input in
     <span data-count="0">l</span>et init = List.map Annotated.dummy_deep init in
-    <span data-count="0">(</span>{ id; typ; init; mode }, input)
+    <span data-count="0">(</span>{ Elem.id; typ; init; mode }, input)
   | <span data-count="0">4</span> -&gt;
     let* mode, input = read_elem_active_zer<span data-count="0">o</span> types input in
     <span data-count="0">l</span>et+ init, input = vector_no_i<span data-count="0">d</span> (read_cons<span data-count="0">t</span> types) input in
     <span data-count="0">l</span>et typ = (Null, Func_ht) in
-    ({ id; typ; init; mode }, input)
+    ({ Elem.id; typ; init; mode }, input)
   | <span data-count="0">5</span> -&gt;
-    let mode = Elem_passive in
+    let mode = Elem.Mode.Passive in
     let* typ, input = read_reftyp<span data-count="0">e</span> input in
     <span data-count="0">l</span>et+ init, input = vector_no_i<span data-count="0">d</span> (read_cons<span data-count="0">t</span> types) input in
-    <span data-count="0">(</span>{ id; typ; init; mode }, input)
+    <span data-count="0">(</span>{ Elem.id; typ; init; mode }, input)
   | <span data-count="0">6</span> -&gt;
     let* mode, input = read_elem_activ<span data-count="0">e</span> types input in
     <span data-count="0">l</span>et* typ, input = read_reftyp<span data-count="0">e</span> input in
     <span data-count="0">l</span>et+ init, input = vector_no_i<span data-count="0">d</span> (read_cons<span data-count="0">t</span> types) input in
-    <span data-count="0">(</span>{ id; typ; init; mode }, input)
+    <span data-count="0">(</span>{ Elem.id; typ; init; mode }, input)
   | <span data-count="0">7</span> -&gt;
-    let mode = Elem_declarative in
+    let mode = Elem.Mode.Declarative in
     let* typ, input = read_reftyp<span data-count="0">e</span> input in
     <span data-count="0">l</span>et+ init, input = vector_no_i<span data-count="0">d</span> (read_cons<span data-count="0">t</span> types) input in
-    <span data-count="0">(</span>{ id; typ; init; mode }, input)
+    <span data-count="0">(</span>{ Elem.id; typ; init; mode }, input)
   | <span data-count="0">i</span> -&gt; parse_fail "malformed elements segment kind: %d" i
 
 let read_local input =
@@ -3773,11 +3773,11 @@ let read_code types input =
 let read_data_active types input =
   <span data-count="10">l</span>et* index, input = read_indic<span data-count="10">e</span> input in
   <span data-count="10">l</span>et+ offset, input = read_cons<span data-count="10">t</span> types input in
-  <span data-count="10">(</span>Data_active (index, offset), input)
+  <span data-count="10">(</span>Data.Mode.Active (index, offset), input)
 
 let read_data_active_zero types input =
   <span data-count="208">l</span>et+ offset, input = read_cons<span data-count="208">t</span> types input in
-  <span data-count="208">(</span>Data_active (0, offset), input)
+  <span data-count="208">(</span>Data.Mode.Active (0, offset), input)
 
 let read_data types input =
   <span data-count="220">l</span>et* i, input = read_U3<span data-count="220">2</span> input in
@@ -3787,17 +3787,17 @@ let read_data types input =
     let* mode, input = read_data_active_zer<span data-count="208">o</span> types input in
     <span data-count="208">l</span>et+ init, input = read_byte<span data-count="208">s</span> ~msg:"read_data 0" input in
     <span data-count="208">l</span>et init = string_of_char_list init in
-    <span data-count="208">(</span>{ id; init; mode }, input)
+    <span data-count="208">(</span>{ Data.id; init; mode }, input)
   | <span data-count="0">1</span> -&gt;
-    let mode = Data_passive in
+    let mode = Data.Mode.Passive in
     let+ init, input = read_byte<span data-count="0">s</span> ~msg:"read_data 1" input in
     <span data-count="0">l</span>et init = string_of_char_list init in
-    <span data-count="0">(</span>{ id; init; mode }, input)
+    <span data-count="0">(</span>{ Data.id; init; mode }, input)
   | <span data-count="10">2</span> -&gt;
     let* mode, input = read_data_activ<span data-count="10">e</span> types input in
     <span data-count="10">l</span>et+ init, input = read_byte<span data-count="10">s</span> ~msg:"read_data 2" input in
     <span data-count="10">l</span>et init = string_of_char_list init in
-    <span data-count="10">(</span>{ id; init; mode }, input)
+    <span data-count="10">(</span>{ Data.id; init; mode }, input)
   | <span data-count="0">i</span> -&gt; parse_fail "malformed data segment kind %d" i
 
 let parse_many_custom_section input =
@@ -3967,9 +3967,9 @@ let sections_iterate (input : Input.t) =
     <span data-count="304">l</span>et imported =
       List.filter_map
         (function
-          | <span data-count="0">m</span>odul, name, Mem desc -&gt;
+          | <span data-count="0">m</span>odul, name, Mem typ -&gt;
             Option.some
-            @@ Runtime.Imported { modul; name; assigned_name = None; desc }
+            @@ Runtime.Imported { modul; name; assigned_name = None; typ }
           | <span data-count="862">_</span>not_a_memory_import -&gt; None )
         import_section
     in
@@ -3985,7 +3985,7 @@ let sections_iterate (input : Input.t) =
           | <span data-count="0">m</span>odul, name, Global (mut, val_type) -&gt;
             Option.some
             @@ Runtime.Imported
-                 { modul; name; assigned_name = None; desc = (mut, val_type) }
+                 { modul; name; assigned_name = None; typ = (mut, val_type) }
           | <span data-count="862">_</span>not_a_global_import -&gt; None )
         import_section
     in
@@ -3998,7 +3998,7 @@ let sections_iterate (input : Input.t) =
       List.map2
         (fun typeidx (locals, body) -&gt;
           <span data-count="2996">R</span>untime.Local
-            { type_f = block_type_of_type_de<span data-count="2996">f</span> types.(typeidx)
+            { Func.type_f = block_type_of_type_de<span data-count="2996">f</span> types.(typeidx)
             ; locals
             ; body
             ; id = None
@@ -4014,7 +4014,7 @@ let sections_iterate (input : Input.t) =
                  { modul
                  ; name
                  ; assigned_name = None
-                 ; desc = block_type_of_type_de<span data-count="862">f</span> types.(typeidx)
+                 ; typ = block_type_of_type_de<span data-count="862">f</span> types.(typeidx)
                  }
           | <span data-count="0">_</span>not_a_function_import -&gt; None )
         import_section
@@ -4031,11 +4031,7 @@ let sections_iterate (input : Input.t) =
           | <span data-count="0">m</span>odul, name, Table (limits, ref_type) -&gt;
             Option.some
             @@ Runtime.Imported
-                 { modul
-                 ; name
-                 ; assigned_name = None
-                 ; desc = (limits, ref_type)
-                 }
+                 { modul; name; assigned_name = None; typ = (limits, ref_type) }
           | <span data-count="862">_</span>not_a_table_import -&gt; None )
         import_section
     in
@@ -4046,10 +4042,12 @@ let sections_iterate (input : Input.t) =
   let elem = Array.of_list element_section in
 
   (* Exports *)
-  <span data-count="304">l</span>et empty_exports = { global = []; mem = []; table = []; func = [] } in
+  <span data-count="304">l</span>et empty_exports =
+    { Module.Exports.global = []; mem = []; table = []; func = [] }
+  in
   let exports =
     List.fold_left
-      (fun (exports : exports) (export_typeidx, export) -&gt;
+      (fun (exports : Module.Exports.t) (export_typeidx, export) -&gt;
         <span data-count="448">m</span>atch export_typeidx with
         | <span data-count="226">'</span>\x00' -&gt;
           let func = export :: exports.func in
@@ -4067,7 +4065,7 @@ let sections_iterate (input : Input.t) =
       empty_exports export_section
   in
   <span data-count="304">l</span>et exports =
-    { func = List.re<span data-count="304">v</span> exports.func
+    { Module.Exports.func = List.re<span data-count="304">v</span> exports.func
     ; table = List.re<span data-count="304">v</span> exports.table
     ; mem = List.re<span data-count="304">v</span> exports.mem
     ; global = List.re<span data-count="304">v</span> exports.global
@@ -4076,10 +4074,12 @@ let sections_iterate (input : Input.t) =
 
   (* Custom *)
   let custom =
-    List.filter_map (Option.ma<span data-count="304">p</span> (fun x -&gt; <span data-count="707">U</span>ninterpreted x)) custom_sections
+    List.filter_map
+      (Option.ma<span data-count="304">p</span> (fun x -&gt; <span data-count="707">C</span>ustom.Uninterpreted x))
+      custom_sections
   in
 
-  <span data-count="304">{</span> Binary.Module.id = None
+  <span data-count="304">{</span> Module.id = None
   ; types
   ; global
   ; mem

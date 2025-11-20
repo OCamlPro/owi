@@ -876,14 +876,14 @@ module type T = sig
 
   val ref_null : Binary.heap_type -&gt; t
 
-  val ref_func : Func_intf.t -&gt; t
+  val ref_func : Kind.func -&gt; t
 
   val ref_externref : 'a Type.Id.t -&gt; 'a -&gt; t
 
   val ref_is_null : ref_value -&gt; bool
 
   module Ref : sig
-    val get_func : ref_value -&gt; Func_intf.t get_ref
+    val get_func : ref_value -&gt; Kind.func get_ref
 
     val get_externref : ref_value -&gt; 'a Type.Id.t -&gt; 'a get_ref
   end

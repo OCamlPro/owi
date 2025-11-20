@@ -865,11 +865,11 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
       ; ("exit", Extern_func (i32 ^-&gt;<span data-count="10">.</span> unit, exit))
       ]
     in
-    { Link.functions }
+    { Extern.Module.functions; func_type = Concrete.Extern_func.extern_type }
   in
 
   let link_state =
-    Link.extern_module Link.empty_state ~name:"owi" replay_extern_module
+    Link.Extern.modul ~name:"owi" replay_extern_module Link.State.empty
   in
 
   <span data-count="10">l</span>et* m = Compile.File.until_binar<span data-count="10">y</span> ~unsafe filename in
@@ -922,7 +922,7 @@ let cmd ~unsafe ~replay_file ~source_file ~entry_point ~invoke_with_symbols =
   in
   <span data-count="10">l</span>et r, run_time =
     Benchmark.with_utime @@ fun () -&gt;
-    <span data-count="10">I</span>nterpret.Concrete.modul ~timeout:None ~timeout_instr:None link_state.envs m
+    <span data-count="10">I</span>nterpret.Concrete.modul ~timeout:None ~timeout_instr:None link_state m
   in
   <span data-count="6">L</span>og.bench (fun m -&gt;
     (* run_time shouldn't be none in bench mode *)
