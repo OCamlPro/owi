@@ -12,7 +12,7 @@ module Concrete : sig
 
   val exec_vfunc_from_outside :
        locals:Concrete_value.t list
-    -> env:Link_env.t'
+    -> env:Env_id.t
     -> envs:Concrete.Env.t Env_id.collection
     -> Func_intf.t
     -> V.t list Concrete_choice.t

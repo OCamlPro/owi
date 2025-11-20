@@ -13,10 +13,6 @@ type elem = { mutable value : Concrete_value.ref_value array }
 
 let drop_elem (elem : elem) = elem.value <- [||]
 
-type extern_funcs = Concrete_extern_func.extern_func Func_id.collection
-
-type t' = Env_id.t
-
 type 'ext t =
   { globals : Concrete_global.t IMap.t
   ; memories : Concrete_memory.t IMap.t
@@ -27,46 +23,6 @@ type 'ext t =
   ; extern_funcs : 'ext Func_id.collection
   ; id : Env_id.t
   }
-
-type 'ext backup = 'ext t
-
-let backup_data (data : data) : data = { value = data.value }
-
-let backup_elem (elem : elem) : elem = { value = elem.value }
-
-let recover_data ~(from_ : data) ~(to_ : data) = to_.value <- from_.value
-
-let recover_elem ~(from_ : elem) ~(to_ : elem) = to_.value <- from_.value
-
-let backup t =
-  { t with
-    globals = IMap.map Concrete_global.backup t.globals
-  ; memories = IMap.map Concrete_memory.backup t.memories
-  ; tables = IMap.map Concrete_table.backup t.tables
-  ; data = IMap.map backup_data t.data
-  ; elem = IMap.map backup_elem t.elem
-  }
-
-let recover backup into =
-  let apply f _key v1 v2 =
-    match (v1, v2) with
-    | Some v1, Some v2 ->
-      f ~from_:v1 ~to_:v2;
-      None
-    | _ -> assert false
-  in
-  let _ : _ IMap.t =
-    IMap.merge (apply Concrete_global.recover) backup.globals into.globals
-  in
-  let _ : _ IMap.t =
-    IMap.merge (apply Concrete_memory.recover) backup.memories into.memories
-  in
-  let _ : _ IMap.t =
-    IMap.merge (apply Concrete_table.recover) backup.tables into.tables
-  in
-  let _ : _ IMap.t = IMap.merge (apply recover_data) backup.data into.data in
-  let _ : _ IMap.t = IMap.merge (apply recover_elem) backup.elem into.elem in
-  ()
 
 let id (env : _ t) = env.id
 
