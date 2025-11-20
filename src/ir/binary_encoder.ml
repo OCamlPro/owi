@@ -127,7 +127,7 @@ let write_block_type_idx buf (typ : Binary.block_type) =
   | Bt_raw (None, _) -> assert false
   | Bt_raw (Some idx, _) -> write_indice buf idx
 
-let write_global_type buf ((mut, vt) : global_type) =
+let write_global_type buf ((mut, vt) : Global.Type.t) =
   write_valtype buf vt;
   write_mut buf mut
 
@@ -145,22 +145,22 @@ let write_memarg buf ({ offset; align } : memarg) =
   write_u32 buf align;
   write_u32 buf offset
 
-let write_memory buf ((_so, limits) : mem) = write_limits buf limits
+let write_memory buf ((_so, limits) : Mem.t) = write_limits buf limits
 
 let write_memory_import buf
-  ({ Imported.modul; name; desc = limits; _ } : limits Imported.t) =
+  ({ Imported.modul; name; typ = limits; _ } : limits Imported.t) =
   write_string buf modul;
   write_string buf name;
   Buffer.add_char buf '\x02';
   write_limits buf limits
 
-let write_table buf ((_so, (limits, (_nullable, heaptype))) : table) =
+let write_table buf ((_so, (limits, (_nullable, heaptype))) : Table.t) =
   write_reftype buf heaptype;
   write_limits buf limits
 
 let write_table_import buf
-  ({ Imported.modul; name; desc = limits, (_nullable, heaptype); _ } :
-    table_type Imported.t ) =
+  ({ Imported.modul; name; typ = limits, (_nullable, heaptype); _ } :
+    Table.Type.t Imported.t ) =
   write_string buf modul;
   write_string buf name;
   Buffer.add_char buf '\x01';
@@ -168,11 +168,11 @@ let write_table_import buf
   write_limits buf limits
 
 let write_func_import buf
-  ({ Imported.modul; name; desc; _ } : Binary.block_type Imported.t) =
+  ({ Imported.modul; name; typ; _ } : Binary.block_type Imported.t) =
   write_string buf modul;
   write_string buf name;
   Buffer.add_char buf '\x00';
-  write_block_type_idx buf desc
+  write_block_type_idx buf typ
 
 let write_fc buf i =
   Buffer.add_char buf '\xFC';
@@ -513,17 +513,17 @@ and write_expr buf expr ~end_op_code =
   let end_op_code = Option.value end_op_code ~default:'\x0B' in
   Buffer.add_char buf end_op_code
 
-let write_export buf cid ({ name; id } : Binary.export) =
+let write_export buf cid ({ name; id } : Binary.Export.t) =
   write_string buf name;
   Buffer.add_char buf cid;
   write_u32_of_int buf id
 
-let write_global buf ({ typ; init; _ } : global) =
+let write_global buf ({ typ; init; _ } : Global.t) =
   write_global_type buf typ;
   write_expr buf init ~end_op_code:None
 
 let write_global_import buf
-  ({ Imported.modul; name; desc = mut, valtype; _ } : global_type Imported.t) =
+  ({ Imported.modul; name; typ = mut, valtype; _ } : Global.Type.t Imported.t) =
   write_string buf modul;
   write_string buf name;
   Buffer.add_char buf '\x03';
@@ -550,7 +550,7 @@ let write_locals buf locals =
       Buffer.add_char buf char )
     compressed
 
-let write_element buf ({ typ = _, ht; init; mode; _ } : elem) =
+let write_element buf ({ typ = _, ht; init; mode; _ } : Elem.t) =
   let write_init buf init =
     let is_ref_func = ref true in
     encode_vector_list buf init (fun buf expr ->
@@ -562,7 +562,7 @@ let write_element buf ({ typ = _, ht; init; mode; _ } : elem) =
     !is_ref_func
   in
   match mode with
-  | Elem_passive ->
+  | Passive ->
     let elem_buf = Buffer.create 16 in
     let is_ref_func = write_init elem_buf init in
     if is_ref_func then begin
@@ -575,7 +575,7 @@ let write_element buf ({ typ = _, ht; init; mode; _ } : elem) =
       write_reftype buf ht;
       Buffer.add_buffer buf elem_buf
     end
-  | Elem_declarative ->
+  | Declarative ->
     let elem_buf = Buffer.create 16 in
     let is_ref_func = write_init elem_buf init in
     if is_ref_func then begin
@@ -588,13 +588,13 @@ let write_element buf ({ typ = _, ht; init; mode; _ } : elem) =
       write_reftype buf ht;
       Buffer.add_buffer buf elem_buf
     end
-  | Elem_active (Some 0, expr) ->
+  | Active (Some 0, expr) ->
     let elem_buf = Buffer.create 16 in
     let is_ref_func = write_init elem_buf init in
     if is_ref_func then write_u32_of_int buf 0 else write_u32_of_int buf 4;
     write_expr buf expr ~end_op_code:None;
     Buffer.add_buffer buf elem_buf
-  | Elem_active (Some i, expr) ->
+  | Active (Some i, expr) ->
     let elem_buf = Buffer.create 16 in
     let is_ref_func = write_init elem_buf init in
     if is_ref_func then begin
@@ -613,16 +613,16 @@ let write_element buf ({ typ = _, ht; init; mode; _ } : elem) =
     end
   | _ -> assert false
 
-let write_data buf ({ init; mode; _ } : data) =
+let write_data buf ({ init; mode; _ } : Data.t) =
   match mode with
-  | Data_passive ->
+  | Passive ->
     write_u32_of_int buf 1;
     write_string buf init
-  | Data_active (0, expr) ->
+  | Active (0, expr) ->
     write_u32_of_int buf 0;
     write_expr buf expr ~end_op_code:None;
     write_string buf init
-  | Data_active (i, expr) ->
+  | Active (i, expr) ->
     write_u32_of_int buf 2;
     write_u32_of_int buf i;
     write_expr buf expr ~end_op_code:None;
@@ -660,7 +660,7 @@ let encode_imports buf (funcs, tables, memories, globals) =
   Buffer.add_buffer buf imp_buf
 
 (* function: section 3 *)
-let encode_functions buf (funcs : Binary.func list) =
+let encode_functions buf (funcs : Binary.Func.t list) =
   let idx = ref 0 in
   encode_vector_list buf funcs (fun buf func ->
     write_block_type_idx buf func.type_f;
@@ -676,7 +676,7 @@ let encode_memories buf memories = encode_vector_list buf memories write_memory
 let encode_globals buf globals = encode_vector_list buf globals write_global
 
 (* export: section 7 *)
-let encode_exports buf ({ global; mem; table; func } : exports) =
+let encode_exports buf ({ global; mem; table; func } : Module.Exports.t) =
   let exp_buf = Buffer.create 16 in
   let len =
     List.length global + List.length mem + List.length table + List.length func
@@ -706,7 +706,7 @@ let encode_datacount buf datas =
 
 (* code: section 10 *)
 let encode_codes buf funcs =
-  encode_vector_list buf funcs (fun buf { locals; body; _ } ->
+  encode_vector_list buf funcs (fun buf { Func.locals; body; _ } ->
     let code_buf = Buffer.create 16 in
     write_locals code_buf locals;
     write_expr code_buf body ~end_op_code:None;

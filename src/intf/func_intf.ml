@@ -125,7 +125,7 @@ module type T_Extern_func = sig
 end
 
 type t =
-  | WASM of int * Binary.func * Env_id.t
+  | WASM of int * Binary.Func.t * Env_id.t
   | Extern of Func_id.t
 
 module type T = sig
@@ -135,7 +135,7 @@ module type T = sig
 
   (* val typ : ('env, extern_func) t -> Binary.func_type *)
 
-  val wasm : Binary.func -> Env_id.t -> t
+  val wasm : Binary.Func.t -> Env_id.t -> t
 end
 
 module Make_extern_func
@@ -146,7 +146,7 @@ module Make_extern_func
 
   val fresh : unit -> int
 
-  val wasm : Binary.func -> Env_id.t -> t
+  val wasm : Binary.Func.t -> Env_id.t -> t
 
   include
     T_Extern_func

@@ -17,7 +17,7 @@ type t =
   ; typ : Type.t Named.t
   ; global : (Text.Global.t, Text.Global.Type.t) Runtime.t Named.t
   ; table : (Text.Table.t, Text.Table.Type.t) Runtime.t Named.t
-  ; mem : (Text.mem, Text.limits) Runtime.t Named.t
+  ; mem : (Text.Mem.t, Text.limits) Runtime.t Named.t
   ; func : (Text.Func.t, Text.block_type) Runtime.t Named.t
   ; elem : Text.Elem.t Named.t
   ; data : Text.Data.t Named.t
@@ -40,7 +40,7 @@ let pp_table fmt t =
   pp_runtime_named ~pp_local:Text.Table.pp ~pp_imported:Text.Table.Type.pp fmt t
 
 let pp_mem fmt m =
-  pp_runtime_named ~pp_local:Text.pp_mem ~pp_imported:Text.pp_limits fmt m
+  pp_runtime_named ~pp_local:Text.Mem.pp ~pp_imported:Text.pp_limits fmt m
 
 let pp_func fmt f =
   pp_runtime_named ~pp_local:Text.Func.pp ~pp_imported:Text.pp_block_type fmt f
@@ -177,7 +177,7 @@ let of_grouped (modul : Grouped.t) : t Result.t =
   in
   let* mem =
     name "mem"
-      ~get_name:(get_runtime_name (fun ((id, _) : Text.mem) -> id))
+      ~get_name:(get_runtime_name (fun ((id, _) : Text.Mem.t) -> id))
       modul.mem
   in
   let* func =

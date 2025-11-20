@@ -7,7 +7,7 @@ type 'a t =
   { modul : string
   ; name : string
   ; assigned_name : string option
-  ; desc : 'a
+  ; typ : 'a
   }
 
 val pp : 'a Fmt.t -> Format.formatter -> 'a t -> unit

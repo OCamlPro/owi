@@ -230,10 +230,6 @@ type nonrec limits =
 let pp_limits fmt { min; max } =
   match max with None -> pf fmt "%d" min | Some max -> pf fmt "%d %d" min max
 
-type nonrec mem = string option * limits
-
-let pp_mem fmt (id, ty) = pf fmt "(memory%a %a)" pp_id_opt id pp_limits ty
-
 (** Structure *)
 
 (** Types *)
@@ -712,9 +708,6 @@ module Import = struct
         (** The name of the module from which the import is done *)
     ; name : string  (** The name of the importee in its module of origin *)
     ; typ : Type.t
-        (** If this import_desc first field is Some s, the importee is made
-            available under name s, else it can only be used via its numerical
-            index.*)
     }
 
   let pp fmt i =
@@ -744,13 +737,19 @@ module Export = struct
   let pp fmt (e : t) = pf fmt {|(export "%s" %a)|} e.name Type.pp e.typ
 end
 
+module Mem = struct
+  type nonrec t = string option * limits
+
+  let pp fmt (id, ty) = pf fmt "(memory%a %a)" pp_id_opt id pp_limits ty
+end
+
 module Module = struct
   module Field = struct
     type t =
       | Typedef of Typedef.t
       | Global of Global.t
       | Table of Table.t
-      | Mem of mem
+      | Mem of Mem.t
       | Func of Func.t
       | Elem of Elem.t
       | Data of Data.t
@@ -764,7 +763,7 @@ module Module = struct
       | Typedef t -> Typedef.pp fmt t
       | Global g -> Global.pp fmt g
       | Table t -> Table.pp fmt t
-      | Mem m -> pp_mem fmt m
+      | Mem m -> Mem.pp fmt m
       | Func f -> Func.pp fmt f
       | Elem e -> Elem.pp fmt e
       | Data d -> Data.pp fmt d

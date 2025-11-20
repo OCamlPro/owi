@@ -31,7 +31,7 @@ type t =
          Come from function declarations with type indicies *)
   ; global : (Global.t, Global.Type.t) Runtime.t Indexed.t list
   ; table : (Table.t, Table.Type.t) Runtime.t Indexed.t list
-  ; mem : (mem, limits) Runtime.t Indexed.t list
+  ; mem : (Mem.t, limits) Runtime.t Indexed.t list
   ; func : (Func.t, block_type) Runtime.t Indexed.t list
   ; elem : Elem.t Indexed.t list
   ; data : Data.t Indexed.t list

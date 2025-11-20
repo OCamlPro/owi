@@ -28,7 +28,7 @@ val typ : t -> Binary.ref_type
 
 val update : t -> table -> unit
 
-val init : ?label:string -> Binary.table_type -> t
+val init : ?label:string -> Binary.Table.Type.t -> t
 
 val max_size : t -> int option
 

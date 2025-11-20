@@ -56,28 +56,28 @@ let default_symbol_of_t m =
   let modul_name = "owi" in
   let m =
     let func_name = "i32_symbol" in
-    let desc = Binary.Bt_raw (None, ([], [ Binary.Num_type Binary.I32 ])) in
-    Binary.Module.add_import_if_not_present ~modul_name ~func_name ~desc m
+    let typ = Binary.Bt_raw (None, ([], [ Binary.Num_type Binary.I32 ])) in
+    Binary.Module.add_import_if_not_present ~modul_name ~func_name ~typ m
   in
   let m =
     let func_name = "i64_symbol" in
-    let desc = Binary.Bt_raw (None, ([], [ Binary.Num_type Binary.I64 ])) in
-    Binary.Module.add_import_if_not_present ~modul_name ~func_name ~desc m
+    let typ = Binary.Bt_raw (None, ([], [ Binary.Num_type Binary.I64 ])) in
+    Binary.Module.add_import_if_not_present ~modul_name ~func_name ~typ m
   in
   let m =
     let func_name = "f32_symbol" in
-    let desc = Binary.Bt_raw (None, ([], [ Binary.Num_type Binary.F32 ])) in
-    Binary.Module.add_import_if_not_present ~modul_name ~func_name ~desc m
+    let typ = Binary.Bt_raw (None, ([], [ Binary.Num_type Binary.F32 ])) in
+    Binary.Module.add_import_if_not_present ~modul_name ~func_name ~typ m
   in
   let m =
     let func_name = "f64_symbol" in
-    let desc = Binary.Bt_raw (None, ([], [ Binary.Num_type Binary.F64 ])) in
-    Binary.Module.add_import_if_not_present ~modul_name ~func_name ~desc m
+    let typ = Binary.Bt_raw (None, ([], [ Binary.Num_type Binary.F64 ])) in
+    Binary.Module.add_import_if_not_present ~modul_name ~func_name ~typ m
   in
   let m =
     let func_name = "v128_symbol" in
-    let desc = Binary.Bt_raw (None, ([], [ Binary.Num_type Binary.V128 ])) in
-    Binary.Module.add_import_if_not_present ~modul_name ~func_name ~desc m
+    let typ = Binary.Bt_raw (None, ([], [ Binary.Num_type Binary.V128 ])) in
+    Binary.Module.add_import_if_not_present ~modul_name ~func_name ~typ m
   in
   let i32_symbol =
     match
@@ -177,9 +177,7 @@ let set_entry_point entry_point invoke_with_symbols (m : Binary.Module.t) =
         |> Annotated.dummies |> Annotated.dummy
       in
       let type_f : Binary.block_type = Binary.Bt_raw (None, ([], [])) in
-      let start_code : Binary.func =
-        { Binary.type_f; locals = []; body; id = None }
-      in
+      let start_code = { Binary.Func.type_f; locals = []; body; id = None } in
       let start_func = Runtime.Local start_code in
 
       let m, start_index = Binary.Module.add_func start_func m in

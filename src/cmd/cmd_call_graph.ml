@@ -12,11 +12,9 @@ type mode =
   | Sound
 
 let find_functions_with_func_type func_type (acc, i)
-  (f : (Binary.func, Binary.block_type) Runtime.t) =
+  (f : (Binary.Func.t, Binary.block_type) Runtime.t) =
   let (Bt_raw (_, ft)) =
-    match f with
-    | Runtime.Local x -> x.type_f
-    | Runtime.Imported imp -> imp.desc
+    match f with Runtime.Local x -> x.type_f | Runtime.Imported imp -> imp.typ
   in
   if Binary.func_type_eq func_type ft then (S.add i acc, i + 1) else (acc, i + 1)
 
@@ -65,7 +63,7 @@ let rec find_children mode tables (funcs : 'a array) acc (l : Binary.expr) =
     find_children mode tables funcs x l
   | _ :: l, _ -> find_children mode tables funcs acc l
 
-let build_graph mode tables funcs (g, i) (f : (Binary.func, 'a) Runtime.t) =
+let build_graph mode tables funcs (g, i) (f : (Binary.Func.t, 'a) Runtime.t) =
   match f with
   | Runtime.Local x ->
     let s = find_children mode tables funcs S.empty x.body.raw in
@@ -127,16 +125,16 @@ let eval_tables tables env =
   let t =
     List.map
       (fun (n, elem) ->
-        (n, Array.of_list (List.map (eval_const env) elem.Binary.init)) )
+        (n, Array.of_list (List.map (eval_const env) elem.Binary.Elem.init)) )
       tables
   in
   M.of_list t
 
-let build_env (env, n) (global : (Binary.global, 'a) Runtime.t) =
+let build_env (env, n) (global : (Binary.Global.t, 'a) Runtime.t) =
   match global with
   | Runtime.Local x -> (
-    match fst x.Binary.typ with
-    | Const -> (M.add n (eval_const env x.Binary.init) env, n + 1)
+    match fst x.Binary.Global.typ with
+    | Const -> (M.add n (eval_const env x.Binary.Global.init) env, n + 1)
     | _ -> (env, n + 1) )
   | _ -> (env, n + 1)
 
@@ -151,15 +149,15 @@ let rec find_tables acc (e : Binary.instr Annotated.t) =
   | _ -> acc
 
 let find_tables_to_remove export_tables funcs =
-  let l = List.map (fun (x : Binary.export) -> x.id) export_tables in
+  let l = List.map (fun (x : Binary.Export.t) -> x.id) export_tables in
   Array.fold_left
     (fun acc f ->
       match f with
-      | Runtime.Local x -> List.fold_left find_tables acc x.Binary.body.raw
+      | Runtime.Local x -> List.fold_left find_tables acc x.Binary.Func.body.raw
       | _ -> acc )
     l funcs
 
-let rec remove_tables (l1 : (int * Binary.elem) list) l2 acc =
+let rec remove_tables (l1 : (int * Binary.Elem.t) list) l2 acc =
   match (l1, l2) with
   | [], [] -> acc
   | [], _ -> acc
@@ -171,7 +169,7 @@ let rec remove_tables (l1 : (int * Binary.elem) list) l2 acc =
 
 let find_entry_points (m : Binary.Module.t) =
   let l = Option.to_list m.start in
-  List.fold_left (fun acc (x : Binary.export) -> x.id :: acc) l m.exports.func
+  List.fold_left (fun acc (x : Binary.Export.t) -> x.id :: acc) l m.exports.func
 
 let find_entries entry_point (m : Binary.Module.t) =
   let entries =
@@ -179,7 +177,7 @@ let find_entries entry_point (m : Binary.Module.t) =
       (Option.bind entry_point (fun x ->
          Array.find_index
            (function
-             | Runtime.Local (y : Binary.func) ->
+             | Runtime.Local (y : Binary.Func.t) ->
                Option.compare String.compare (Some x) y.id = 0
              | _ -> false )
            m.func ) )
@@ -198,8 +196,8 @@ let build_call_graph call_graph_mode (m : Binary.Module.t) entry_point =
         let elems =
           List.filter_map
             (fun e ->
-              match e.Binary.mode with
-              | Elem_active (Some n, _) -> Some (n, e)
+              match e.Binary.Elem.mode with
+              | Active (Some n, _) -> Some (n, e)
               | _ -> None )
             (Array.to_list m.elem)
         in

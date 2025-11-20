@@ -73,14 +73,14 @@ module Env = struct
     if i >= Array.length modul.global then Error (`Unknown_global (Text.Raw i))
     else
       match modul.global.(i) with
-      | Runtime.Local { typ = desc; _ } | Imported { desc; _ } -> Ok desc
+      | Runtime.Local { typ; _ } | Imported { typ; _ } -> Ok typ
 
   let func_get i modul =
     if i >= Array.length modul.func then Error (`Unknown_func (Text.Raw i))
     else
       match modul.func.(i) with
-      | Runtime.Local { type_f = Bt_raw (_, t); _ }
-      | Imported { desc = Bt_raw (_, t); _ } ->
+      | Runtime.Local { Func.type_f = Bt_raw (_, t); _ }
+      | Imported { typ = Bt_raw (_, t); _ } ->
         Ok t
 
   let block_type_get i env =
@@ -92,7 +92,7 @@ module Env = struct
     if i >= Array.length modul.table then Error (`Unknown_table (Text.Raw i))
     else
       match modul.table.(i) with
-      | Runtime.Local (_, (_, t)) | Imported { desc = _, t; _ } -> Ok t
+      | Runtime.Local (_, (_, t)) | Imported { typ = _, t; _ } -> Ok t
 
   let elem_type_get i modul =
     if i >= Array.length modul.elem then Error (`Unknown_elem (Text.Raw i))
@@ -559,7 +559,7 @@ and typecheck_expr env expr ~is_loop (block_type : block_type option)
 let typecheck_function (modul : Module.t) func refs =
   match func with
   | Runtime.Imported _ -> Ok ()
-  | Local func ->
+  | Local (func : Func.t) ->
     let (Bt_raw (_, (params, result))) = func.type_f in
     let env =
       Env.make ~params ~modul ~locals:func.locals ~result_type:result ~refs
@@ -592,7 +592,7 @@ let typecheck_const_instr (modul : Module.t) refs stack instr =
       let* mut, typ =
         match modul.global.(i) with
         | Runtime.Local _ -> Error (`Unknown_global (Text.Raw i))
-        | Imported { desc; _ } -> Ok desc
+        | Imported { typ; _ } -> Ok typ
       in
       let* () =
         match mut with
@@ -610,7 +610,7 @@ let typecheck_const_expr (modul : Module.t) refs expr =
   list_fold_left (typecheck_const_instr modul refs) [] expr.Annotated.raw
 
 let typecheck_global (modul : Module.t) refs
-  (global : (global, global_type) Runtime.t) =
+  (global : (Global.t, Global.Type.t) Runtime.t) =
   match global with
   | Imported _ -> Ok ()
   | Local { typ; init; _ } -> (
@@ -623,7 +623,7 @@ let typecheck_global (modul : Module.t) refs
       else Ok ()
     | _whatever -> Error (`Type_mismatch "typecheck_global 2") )
 
-let typecheck_elem modul refs (elem : elem) =
+let typecheck_elem modul refs (elem : Elem.t) =
   let _null, expected_type = elem.typ in
   let* () =
     list_iter
@@ -642,9 +642,9 @@ let typecheck_elem modul refs (elem : elem) =
       elem.init
   in
   match elem.mode with
-  | Elem_passive | Elem_declarative -> Ok ()
-  | Elem_active (None, _e) -> assert false
-  | Elem_active (Some tbl_i, e) -> (
+  | Passive | Declarative -> Ok ()
+  | Active (None, _e) -> assert false
+  | Active (Some tbl_i, e) -> (
     let* _null, tbl_type = Env.table_type_get tbl_i modul in
     if not @@ Binary.heap_type_eq tbl_type expected_type then
       Error (`Type_mismatch "typecheck elem 3")
@@ -658,10 +658,10 @@ let typecheck_elem modul refs (elem : elem) =
       | [ _t ] -> Ok ()
       | _whatever -> Error (`Type_mismatch "typecheck_elem 5") )
 
-let typecheck_data modul refs (data : data) =
+let typecheck_data modul refs (data : Data.t) =
   match data.mode with
-  | Data_passive -> Ok ()
-  | Data_active (n, e) -> (
+  | Passive -> Ok ()
+  | Active (n, e) -> (
     let* () = check_mem modul n in
     let* t = typecheck_const_expr modul refs e in
     match t with
@@ -678,34 +678,34 @@ let typecheck_start { start; func; _ } =
     in
     match f with
     | Local { type_f = Bt_raw (_, ([], [])); _ }
-    | Imported { desc = Bt_raw (_, ([], [])); _ } ->
+    | Imported { typ = Bt_raw (_, ([], [])); _ } ->
       Ok ()
     | _ -> Error `Start_function )
 
 let validate_exports modul =
   let* () =
     list_iter
-      (fun { id; name = _ } ->
+      (fun { Export.id; name = _ } ->
         let* _t = Env.func_get id modul in
         Ok () )
       modul.exports.func
   in
   let* () =
     list_iter
-      (fun { id; name = _ } ->
+      (fun { Export.id; name = _ } ->
         let* _t = Env.table_type_get id modul in
         Ok () )
       modul.exports.table
   in
   let* () =
     list_iter
-      (fun { id; name = _ } ->
+      (fun { Export.id; name = _ } ->
         let* _t = Env.global_get id modul in
         Ok () )
       modul.exports.global
   in
   list_iter
-    (fun { id; name = _ } ->
+    (fun { id; Export.name = _ } ->
       let* () = check_mem modul id in
       Ok () )
     modul.exports.mem
@@ -719,22 +719,22 @@ let check_limit { min; max } =
 let validate_tables modul =
   array_iter
     (function
-      | Runtime.Local (_, (limits, _)) | Imported { desc = limits, _; _ } ->
+      | Runtime.Local (_, (limits, _)) | Imported { typ = limits, _; _ } ->
         check_limit limits )
     modul.table
 
 let validate_mem modul =
   array_iter
     (function
-      | Runtime.Local (_, desc) | Imported { desc; _ } ->
+      | Runtime.Local (_, typ) | Imported { typ; _ } ->
         let* () =
-          if desc.min > 65536 then Error `Memory_size_too_large
+          if typ.min > 65536 then Error `Memory_size_too_large
           else
-            match desc.max with
+            match typ.max with
             | Some max when max > 65536 -> Error `Memory_size_too_large
             | Some _ | None -> Ok ()
         in
-        check_limit desc )
+        check_limit typ )
     modul.mem
 
 let modul (modul : Module.t) =
@@ -749,6 +749,6 @@ let modul (modul : Module.t) =
   let* () = validate_tables modul in
   let* () = validate_mem modul in
   List.iter
-    (fun (export : export) -> Hashtbl.add refs export.id ())
+    (fun (export : Export.t) -> Hashtbl.add refs export.id ())
     modul.exports.func;
   array_iter (fun func -> typecheck_function modul func refs) modul.func
