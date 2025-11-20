@@ -259,10 +259,17 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
     let bench_stats = Thread_with_memory.bench_stats thread in
     (* run_time shouldn't be none in bench mode *)
     let run_time = match run_time with None -> assert false | Some t -> t in
-    m "Benchmarks:@\n@[<v>solver time: %a@;interpreter time: %fms@;@]"
+    let solver_stats = Solver.get_all_stats () in
+    m
+      "Benchmarks:@\n\
+       @[<v>solver time: %a@;\
+       interpreter time: %fms@;\
+       Solver stats:@;\
+       %a@]"
       Mtime.Span.pp
       (Atomic.get bench_stats.solver_time)
-      ((interpreter_time +. run_time) *. 1000.) );
+      ((interpreter_time +. run_time) *. 1000.)
+      Solver.pp_stats solver_stats );
 
   let+ () = if count > 0 then Error (`Found_bug count) else Ok () in
   Log.app (fun m -> m "All OK!")
