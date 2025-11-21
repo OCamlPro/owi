@@ -197,21 +197,27 @@ let rewrite_expr (typemap : Binary.indice TypeMap.t) (modul : Assigned.t)
     | None -> Ok None
   in
 
-  let* locals, _after_last_assigned_local =
+  let seen_locals = Hashtbl.create 64 in
+
+  (* Fill locals *)
+  let* (_ : int) =
     list_fold_left
-      (fun (locals, next_free_int) ((name, _type) : Binary.param) ->
+      (fun next_free_int ((name, _type) : Binary.param) ->
         match name with
-        | None -> Ok (locals, next_free_int + 1)
+        | None -> Ok (next_free_int + 1)
         | Some name ->
-          if String_map.mem name locals then Error (`Duplicate_local name)
-          else Ok (String_map.add name next_free_int locals, next_free_int + 1) )
-      (String_map.empty, 0) locals
+          if Hashtbl.mem seen_locals name then Error (`Duplicate_local name)
+          else begin
+            Hashtbl.add seen_locals name next_free_int;
+            Ok (next_free_int + 1)
+          end )
+      0 locals
   in
 
   let find_local : Text.indice -> Binary.indice = function
     | Raw i -> i
     | Text name -> (
-      match String_map.find_opt name locals with
+      match Hashtbl.find_opt seen_locals name with
       | None -> assert false
       | Some id -> id )
   in
