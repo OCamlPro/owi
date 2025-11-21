@@ -361,18 +361,15 @@ module Binary = struct
   let modul ~name (ls : 'f State.t) (modul : Binary.Module.t) =
     Log.info (fun m -> m "linking      ...");
     let ls = State.clone ls in
-    let* env, init_active_data, init_active_elem =
-      let next_id = Dynarray.length ls.envs in
-      let env = Link_env.Build.empty in
-      let* env = eval_functions ls next_id env modul.func in
-      let* env = eval_globals ls env modul.global in
-      let* env = eval_memories ls env modul.mem in
-      let* env = eval_tables ls env modul.table in
-      let* env, init_active_data = define_data env modul.data in
-      let+ env, init_active_elem = define_elem env modul.elem in
-      let finished_env = Link_env.freeze next_id env ls.collection in
-      (finished_env, init_active_data, init_active_elem)
-    in
+    let next_id = Dynarray.length ls.envs in
+    let env = Link_env.Build.empty in
+    let* env = eval_functions ls next_id env modul.func in
+    let* env = eval_globals ls env modul.global in
+    let* env = eval_memories ls env modul.mem in
+    let* env = eval_tables ls env modul.table in
+    let* env, init_active_data = define_data env modul.data in
+    let* env, init_active_elem = define_elem env modul.elem in
+    let env = Link_env.freeze next_id env ls.collection in
     Dynarray.add_last ls.envs env;
     let+ by_id_exports = populate_exports env modul.exports in
     let by_id =
