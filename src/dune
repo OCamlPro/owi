@@ -43,7 +43,6 @@
   concrete_wasm_ffi
   control_flow_graph
   convert
-  env_id
   exploration_smart
   extern
   float32

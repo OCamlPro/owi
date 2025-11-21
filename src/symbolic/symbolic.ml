@@ -79,8 +79,6 @@ end
 module Env = struct
   type t = Extern_func.extern_func Link_env.t
 
-  type t' = Env_id.t
-
   let get_memory env id =
     match Link_env.get_memory env id with
     | Error e -> Choice.trap e

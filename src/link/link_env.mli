@@ -26,7 +26,7 @@ val drop_data : data -> unit
 
 val get_extern_func : 'ext t -> int -> 'ext
 
-val id : _ t -> Env_id.t
+val id : _ t -> int
 
 module Build : sig
   type t
@@ -50,5 +50,4 @@ module Build : sig
   val get_func : t -> int -> Kind.func Result.t
 end
 
-val freeze :
-  Env_id.t -> Build.t -> ('ext * Binary.func_type) Dynarray.t -> 'ext t
+val freeze : int -> Build.t -> ('ext * Binary.func_type) Dynarray.t -> 'ext t

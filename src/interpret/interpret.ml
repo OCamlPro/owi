@@ -632,7 +632,7 @@ module Make (P : Interpret_intf.P) = struct
       ; block_stack : block_stack
       ; func_rt : result_type
       ; env : Env.t
-      ; envs : Env.t Env_id.collection
+      ; envs : Env.t Dynarray.t
       }
 
     let empty_exec_state ~locals ~env ~envs =
@@ -726,22 +726,22 @@ module Make (P : Interpret_intf.P) = struct
 
   let exec_vfunc ~return (state : State.exec_state) (func : Kind.func) =
     match func with
-    | Wasm (_id, func, env_id) ->
-      let env = Env_id.get env_id state.envs in
+    | Wasm { func; idx; uuid = _ } ->
+      let env = Dynarray.get state.envs idx in
       Choice.return (State.Continue (exec_func ~return state env func))
-    | Extern f ->
-      let f = Env.get_extern_func state.env f in
+    | Extern { idx } ->
+      let f = Env.get_extern_func state.env idx in
       let+ stack = exec_extern_func state.env state.stack f in
       let state = { state with stack } in
       if return then State.return state else State.Continue state
 
   let func_type (state : State.exec_state) (f : Kind.func) =
     match f with
-    | Wasm (_, func, _) ->
+    | Wasm { func; _ } ->
       let (Bt_raw ((None | Some _), t)) = func.type_f in
       t
-    | Extern f ->
-      let f = Env.get_extern_func state.env f in
+    | Extern { idx } ->
+      let f = Env.get_extern_func state.env idx in
       Extern_func.extern_type f
 
   let call_ref ~return:_ (_state : State.exec_state) _typ_i =
@@ -1066,27 +1066,7 @@ module Make (P : Interpret_intf.P) = struct
       st @@ Stack.push stack (Global.value g)
     | Global_set i ->
       let* global = Env.get_global env i in
-      let v, stack =
-        match Global.typ global with
-        | Ref_type _rt -> Stack.pop_ref stack
-        | Num_type nt -> (
-          match nt with
-          | I32 ->
-            let v, stack = Stack.pop_i32 stack in
-            (I32 v, stack)
-          | I64 ->
-            let v, stack = Stack.pop_i64 stack in
-            (I64 v, stack)
-          | F32 ->
-            let v, stack = Stack.pop_f32 stack in
-            (F32 v, stack)
-          | F64 ->
-            let v, stack = Stack.pop_f64 stack in
-            (F64 v, stack)
-          | V128 ->
-            let v, stack = Stack.pop_v128 stack in
-            (V128 v, stack) )
-      in
+      let v, stack = Stack.pop stack in
       Global.set_value global v;
       st stack
     | Table_get i ->
@@ -1626,20 +1606,19 @@ module Make (P : Interpret_intf.P) = struct
 
   let exec_vfunc_from_outside ~locals ~env ~envs (func : Kind.func) :
     _ list Choice.t =
-    let env = Env_id.get env envs in
+    let env = Dynarray.get envs env in
     let exec_state = State.empty_exec_state ~locals ~env ~envs in
     try
       begin
         let* state =
           match func with
-          | Kind.Wasm (_id, func, env_id) ->
-            let env = Env_id.get env_id exec_state.State.envs in
-            let stack = locals in
-            let state = State.{ exec_state with stack } in
+          | Kind.Wasm { func; idx; uuid = _ } ->
+            let env = Dynarray.get exec_state.State.envs idx in
+            let state = State.{ exec_state with stack = locals } in
             Choice.return
               (State.Continue (exec_func ~return:true state env func))
-          | Extern f ->
-            let f = Env.get_extern_func exec_state.env f in
+          | Extern { idx } ->
+            let f = Env.get_extern_func exec_state.env idx in
             let+ stack = exec_extern_func exec_state.env exec_state.stack f in
             let state = State.{ exec_state with stack } in
             State.return state

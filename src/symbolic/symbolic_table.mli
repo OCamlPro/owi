@@ -28,4 +28,4 @@ val init : unit -> collection
 
 val clone : collection -> collection
 
-val get_table : Env_id.t -> Concrete_table.t -> collection -> int -> t
+val get_table : int -> Concrete_table.t -> collection -> int -> t

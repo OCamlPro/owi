@@ -3,8 +3,12 @@
 (* Written by the Owi programmers *)
 
 type func =
-  | Wasm of int * Binary.Func.t * Env_id.t
-  | Extern of int
+  | Wasm of
+      { uuid : int
+      ; func : Binary.Func.t
+      ; idx : int
+      }
+  | Extern of { idx : int }
 
 let fresh =
   let r = ref ~-1 in
@@ -12,9 +16,11 @@ let fresh =
     incr r;
     !r
 
-let wasm func env : func = Wasm (fresh (), func, env)
+let wasm func idx : func =
+  let uuid = fresh () in
+  Wasm { uuid; func; idx }
 
-let extern f : func = Extern f
+let extern idx : func = Extern { idx }
 
 type 'f t =
   | Wat of Text.Module.t

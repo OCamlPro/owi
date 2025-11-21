@@ -21,7 +21,7 @@ module State : sig
     ; defined_names : StringSet.t
     }
 
-  type 'ext envs = 'ext Link_env.t Env_id.collection
+  type 'ext envs = 'ext Link_env.t Dynarray.t
 
   type 'f t
 
@@ -30,9 +30,9 @@ module State : sig
 
   val get_envs : 'f t -> 'f envs
 
-  val get_last : 'f t -> (exports * Env_id.t) option
+  val get_last : 'f t -> (exports * int) option
 
-  val get_by_id : 'f t -> string -> (exports * Env_id.t) option
+  val get_by_id : 'f t -> string -> (exports * int) option
 end
 
 module Extern : sig
