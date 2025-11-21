@@ -726,7 +726,7 @@ module Make (P : Interpret_intf.P) = struct
 
   let exec_vfunc ~return (state : State.exec_state) (func : Kind.func) =
     match func with
-    | Wasm { func; idx; uuid = _ } ->
+    | Wasm { func; idx } ->
       let env = Dynarray.get state.envs idx in
       Choice.return (State.Continue (exec_func ~return state env func))
     | Extern { idx } ->
@@ -1612,7 +1612,7 @@ module Make (P : Interpret_intf.P) = struct
       begin
         let* state =
           match func with
-          | Kind.Wasm { func; idx; uuid = _ } ->
+          | Kind.Wasm { func; idx } ->
             let env = Dynarray.get exec_state.State.envs idx in
             let state = State.{ exec_state with stack = locals } in
             Choice.return
