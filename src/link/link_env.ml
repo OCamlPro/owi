@@ -21,7 +21,7 @@ type 'ext t =
   ; data : data IMap.t
   ; elem : elem IMap.t
   ; extern_funcs : ('ext * Binary.func_type) Dynarray.t
-  ; id : Env_id.t
+  ; id : int
   }
 
 let id (env : _ t) = env.id

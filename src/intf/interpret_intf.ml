@@ -16,10 +16,6 @@ module type P = sig
     val value : t -> Value.t
 
     val set_value : t -> Value.t -> unit
-
-    val mut : t -> Binary.mut
-
-    val typ : t -> Binary.val_type
   end
 
   module Table : sig
