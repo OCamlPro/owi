@@ -15,14 +15,6 @@ val empty_stats : Smtml.Statistics.t
 
 val stats_are_empty : Smtml.Statistics.t -> bool
 
-val get_stats : t -> Smtml.Statistics.t
-
-val merge_stats : Smtml.Statistics.t -> Smtml.Statistics.t -> Smtml.Statistics.t
-
 val pp_stats : Smtml.Statistics.t Fmt.t
 
-val fold_stats :
-     (string -> Smtml.Statistics.entry -> 'a -> 'a)
-  -> Smtml.Statistics.t
-  -> 'a
-  -> 'a
+val get_all_stats : unit -> Smtml.Statistics.t
