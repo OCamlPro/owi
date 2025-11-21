@@ -4,12 +4,16 @@
   owi: [DEBUG] grouping     ...
   owi: [DEBUG] {id: 
                  typ: []
-                 function_type: [(func (param $x i32)) ; (func (result i32))]
+                 function_type: [(func (result i32)) ; (func (param $x i32))]
                  type_checks: []
                  global: []
                  table: []
                  mem: []
-                 func: [{ index = 1 ; value = Local ((func $f (param $x i32)
+                 func: [Imported ({
+                   modul: "owi"
+                   name: "i32_symbol"
+                   assigned_name:  $i32_symbol
+                   typ:  (result i32)}) ; Local ((func $f (param $x i32)
                    local.get $x
                    i32.const 1
                    i32.lt_u
@@ -18,11 +22,7 @@
                        unreachable
                      )
                    )
-                 )) } ; { index = 0 ; value = Imported ({
-                   modul: "owi"
-                   name: "i32_symbol"
-                   assigned_name:  $i32_symbol
-                   typ:  (result i32)}) }]
+                 ))]
                  elem: []
                  data: []
                  exports: {
