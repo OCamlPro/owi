@@ -10,6 +10,10 @@ type 'a t =
 
 let empty = { values = []; named = String_map.empty }
 
+let get_at { values; _ } i = Indexed.get_at i values
+
+let get_by_name { named; _ } name = String_map.find_opt name named
+
 let create values named = { values; named }
 
 let fold f v acc =
@@ -20,6 +24,11 @@ let fold f v acc =
 let map f v =
   let values = List.map f v.values in
   { v with values }
+
+let monadic_map f v =
+  let open Syntax in
+  let+ values = list_map f v.values in
+  create values v.named
 
 let to_array v = Indexed.list_to_array v.values
 

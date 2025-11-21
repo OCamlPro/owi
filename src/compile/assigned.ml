@@ -150,12 +150,12 @@ let check_type_id (types : Text.func_type Named.t)
     match id with
     | Raw i -> i
     | Text name -> (
-      match String_map.find_opt name types.named with
+      match Named.get_by_name types name with
       | None -> (* TODO: unchecked, is this actually reachable? *) assert false
       | Some v -> v )
   in
   (* TODO more efficient version of that *)
-  match Indexed.get_at id types.values with
+  match Named.get_at types id with
   | None -> Error (`Unknown_type (Text.Raw id))
   | Some func_type' ->
     if not (Text.func_type_eq func_type func_type') then
@@ -211,9 +211,7 @@ let of_grouped (modul : Grouped.t) : t Result.t =
 let find (named : 'a Named.t) err : _ -> Binary.indice Result.t = function
   | Text.Raw i -> Ok i
   | Text name -> (
-    match String_map.find_opt name named.named with
-    | None -> Error err
-    | Some i -> Ok i )
+    match Named.get_by_name named name with None -> Error err | Some i -> Ok i )
 
 let find_func modul id = find modul.func (`Unknown_func id) id
 
