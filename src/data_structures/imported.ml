@@ -13,3 +13,12 @@ type 'a t =
 let pp pp_typ fmt { modul; name; assigned_name; typ } =
   Fmt.pf fmt "{@\n  @[<v>modul: %S@\nname: %S@\nassigned_name: %a@\ntyp: %a@]}"
     modul name Text.pp_id_opt assigned_name pp_typ typ
+
+let map f v =
+  let typ = f v.typ in
+  { v with typ }
+
+let monadic_map f v =
+  let open Syntax in
+  let+ typ = f v.typ in
+  { v with typ }

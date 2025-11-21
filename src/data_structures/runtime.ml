@@ -10,3 +10,21 @@ let pp ~pp_local ~pp_imported fmt = function
   | Local local -> Fmt.pf fmt "Local (%a)" pp_local local
   | Imported imported ->
     Fmt.pf fmt "Imported (%a)" (Imported.pp pp_imported) imported
+
+let map ~f_local ~f_imported = function
+  | Local v ->
+    let v = f_local v in
+    Local v
+  | Imported v ->
+    let v = f_imported v in
+    Imported v
+
+let monadic_map ~f_local ~f_imported =
+  let open Syntax in
+  function
+  | Local v ->
+    let+ v = f_local v in
+    Local v
+  | Imported v ->
+    let+ v = f_imported v in
+    Imported v
