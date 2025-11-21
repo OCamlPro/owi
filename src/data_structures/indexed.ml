@@ -27,13 +27,15 @@ let get_at i values =
   | None -> None
   | Some { value; _ } -> Some value
 
-let list_to_array l =
+let sort l =
   List.sort
     (fun { index = i1; value = _ } { index = i2; value = _ } ->
       Int.compare i1 i2 )
     l
-  |> List.map (fun { value; _ } -> value)
-  |> Array.of_list
+
+let list_to_array l = sort l |> List.map get |> Array.of_list
+
+let list_to_dynarray l = sort l |> List.map get |> Dynarray.of_list
 
 let pp pp_v fmt { index; value } =
   Fmt.pf fmt "{ index = %d ; value = %a }" index pp_v value

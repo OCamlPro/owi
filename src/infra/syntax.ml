@@ -87,6 +87,20 @@ let array_map f a =
   with Exit -> ( match !err with None -> assert false | Some e -> e )
 [@@inline]
 
+let dynarray_map f a =
+  let err = ref None in
+  try
+    ok
+    @@ Dynarray.init (Dynarray.length a) (fun i ->
+      let v = Dynarray.get a i in
+      match f v with
+      | Error _e as e ->
+        err := Some e;
+        raise Exit
+      | Ok v -> v )
+  with Exit -> ( match !err with None -> assert false | Some e -> e )
+[@@inline]
+
 let array_fold_left f acc l =
   Array.fold_left
     (fun acc v ->

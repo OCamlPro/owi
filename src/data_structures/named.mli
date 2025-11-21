@@ -4,13 +4,11 @@
 
 type 'a t
 
-val empty : 'a t
-
 val get_at : 'a t -> int -> 'a option
 
 val get_by_name : 'a t -> string -> int option
 
-val create : 'a Indexed.t list -> int String_map.t -> 'a t
+val create : 'a Dynarray.t -> int String_map.t -> 'a t
 
 val fold : (int -> 'a -> 'b -> 'b) -> 'a t -> 'b -> 'b
 

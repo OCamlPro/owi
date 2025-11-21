@@ -4,35 +4,38 @@
 
 (** named values (fields) *)
 type 'a t =
-  { values : 'a Indexed.t list
+  { values : 'a Dynarray.t
   ; named : int String_map.t
   }
 
-let empty = { values = []; named = String_map.empty }
-
-let get_at { values; _ } i = Indexed.get_at i values
+let get_at { values; _ } i =
+  if i >= Dynarray.length values then None else Some (Dynarray.get values i)
 
 let get_by_name { named; _ } name = String_map.find_opt name named
 
 let create values named = { values; named }
 
 let fold f v acc =
-  List.fold_left
-    (fun acc v -> f (Indexed.get_index v) (Indexed.get v) acc)
-    acc v.values
+  snd
+  @@ Dynarray.fold_left
+       (fun (i, acc) v -> (succ i, f i v acc))
+       (0, acc) v.values
 
 let map f v =
-  let values = List.map (Indexed.map f) v.values in
+  let values = Dynarray.map f v.values in
   { v with values }
 
 let monadic_map f v =
   let open Syntax in
-  let+ values = list_map (Indexed.monadic_map f) v.values in
+  let+ values = dynarray_map f v.values in
   { v with values }
 
-let to_array v = Indexed.list_to_array v.values
+let to_array v = Dynarray.to_array v.values
 
-let pp_values pp_v fmt values = Indexed.pp_list pp_v fmt values
+let pp_values pp_v fmt values =
+  Fmt.pf fmt "[%a]"
+    (Fmt.iter ~sep:(fun fmt () -> Fmt.pf fmt " ; ") Dynarray.iter pp_v)
+    values
 
 let pp_named fmt named =
   Fmt.iter_bindings
