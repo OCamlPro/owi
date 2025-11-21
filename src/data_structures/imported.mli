@@ -11,3 +11,7 @@ type 'a t =
   }
 
 val pp : 'a Fmt.t -> Format.formatter -> 'a t -> unit
+
+val map : ('a -> 'b) -> 'a t -> 'b t
+
+val monadic_map : ('a -> 'b Result.t) -> 'a t -> 'b t Result.t

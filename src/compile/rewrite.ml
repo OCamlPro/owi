@@ -531,34 +531,6 @@ let rewrite_func (typemap : Binary.indice TypeMap.t) (modul : Assigned.t)
   let+ body = rewrite_expr typemap modul (params @ locals) body in
   { Binary.Func.body; type_f; id; locals }
 
-let rewrite_import (f : 'a -> 'b Result.t) (import : 'a Imported.t) :
-  'b Imported.t Result.t =
-  let+ typ = f import.typ in
-  { import with typ }
-
-let rewrite_import_no_failure (f : 'a -> 'b) (import : 'a Imported.t) :
-  'b Imported.t =
-  let typ = f import.typ in
-  { import with typ }
-
-let rewrite_runtime f g r =
-  match r with
-  | Runtime.Local v ->
-    let+ v = f v in
-    Runtime.Local v
-  | Imported i ->
-    let+ i = g i in
-    Runtime.Imported i
-
-let rewrite_runtime_no_failure f g r =
-  match r with
-  | Runtime.Local v ->
-    let v = f v in
-    Runtime.Local v
-  | Imported i ->
-    let i = g i in
-    Runtime.Imported i
-
 let rewrite_types (_modul : Assigned.t) (t : Binary.func_type) :
   Binary.Typedef.t Result.t =
   Ok (None, t)
@@ -569,28 +541,29 @@ let modul (modul : Assigned.t) : Binary.Module.t Result.t =
   let typemap = typemap modul_typ in
   let* global =
     Named.monadic_map
-      (rewrite_runtime
-         (rewrite_global typemap modul)
-         (rewrite_import (fun x -> Ok (rewrite_global_type x))) )
+      (Runtime.monadic_map
+         ~f_local:(rewrite_global typemap modul)
+         ~f_imported:(Imported.monadic_map (fun x -> Ok (rewrite_global_type x))) )
       modul.global
   in
   let* elem = Named.monadic_map (rewrite_elem typemap modul) modul.elem in
   let* data = Named.monadic_map (rewrite_data typemap modul) modul.data in
   let* exports = rewrite_exports modul modul.exports in
   let* func =
-    let import = rewrite_import (rewrite_block_type typemap modul) in
-    let runtime = rewrite_runtime (rewrite_func typemap modul) import in
+    let f_imported = Imported.monadic_map (rewrite_block_type typemap modul) in
+    let f_local = rewrite_func typemap modul in
+    let runtime = Runtime.monadic_map ~f_local ~f_imported in
     Named.monadic_map runtime modul.func
   in
   let* types = Named.monadic_map (rewrite_types modul) modul_typ in
   let mem =
-    let import = rewrite_import_no_failure rewrite_limits in
-    let runtime = rewrite_runtime_no_failure rewrite_mem import in
+    let f_imported = Imported.map rewrite_limits in
+    let runtime = Runtime.map ~f_local:rewrite_mem ~f_imported in
     Named.map runtime modul.mem
   in
   let table =
-    let import = rewrite_import_no_failure rewrite_table_type in
-    let runtime = rewrite_runtime_no_failure rewrite_table import in
+    let f_imported = Imported.map rewrite_table_type in
+    let runtime = Runtime.map ~f_local:rewrite_table ~f_imported in
     Named.map runtime modul.table
   in
   let+ start =

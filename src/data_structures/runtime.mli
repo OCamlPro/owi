@@ -12,3 +12,15 @@ val pp :
   -> Format.formatter
   -> ('local, 'imported) t
   -> unit
+
+val map :
+     f_local:('local -> 'local2)
+  -> f_imported:('imported Imported.t -> 'imported2 Imported.t)
+  -> ('local, 'imported) t
+  -> ('local2, 'imported2) t
+
+val monadic_map :
+     f_local:('local -> 'local2 Result.t)
+  -> f_imported:('imported Imported.t -> 'imported2 Imported.t Result.t)
+  -> ('local, 'imported) t
+  -> ('local2, 'imported2) t Result.t
