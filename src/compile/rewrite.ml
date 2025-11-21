@@ -134,12 +134,11 @@ let rewrite_block_type (typemap : Binary.indice TypeMap.t) (modul : Assigned.t)
   (block_type : Text.block_type) : Binary.block_type Result.t =
   match block_type with
   | Bt_ind id -> begin
-    let* v = Assigned.find_type modul id in
-    match List.nth_opt modul.typ.values v with
+    let* idx = Assigned.find_type modul id in
+    match Named.get_at modul.typ idx with
     | None -> Error (`Unknown_type id)
     | Some v ->
-      let t' = Indexed.get v |> rewrite_func_type in
-      let idx = Indexed.get_index v in
+      let t' = rewrite_func_type v in
       Ok (Binary.Bt_raw (Some idx, t'))
   end
   | Bt_raw (_, func_type) ->
@@ -507,7 +506,7 @@ let rewrite_export named (exports : Grouped.opt_export list) :
         match id with
         | Text.Raw i -> Ok i
         | Text name -> (
-          match String_map.find_opt name named.Named.named with
+          match Named.get_by_name named name with
           | None -> Error (`Unknown_export id)
           | Some i -> Ok i )
       in
@@ -561,28 +560,22 @@ let rewrite_runtime_no_failure f g r =
     Runtime.Imported i
 
 let rewrite_named f named =
-  let+ values =
-    list_map
-      (fun ind ->
-        let index = Indexed.get_index ind in
-        let value = Indexed.get ind in
-        let+ value = f value in
-        Indexed.return index value )
-      named.Named.values
-  in
-  Named.create values named.named
+  Named.monadic_map
+    (fun ind ->
+      let index = Indexed.get_index ind in
+      let value = Indexed.get ind in
+      let+ value = f value in
+      Indexed.return index value )
+    named
 
 let rewrite_named_no_failure f named =
-  let values =
-    List.map
-      (fun ind ->
-        let index = Indexed.get_index ind in
-        let value = Indexed.get ind in
-        let value = f value in
-        Indexed.return index value )
-      named.Named.values
-  in
-  Named.create values named.named
+  Named.map
+    (fun ind ->
+      let index = Indexed.get_index ind in
+      let value = Indexed.get ind in
+      let value = f value in
+      Indexed.return index value )
+    named
 
 let rewrite_types (_modul : Assigned.t) (t : Binary.func_type) :
   Binary.Typedef.t Result.t =
@@ -593,15 +586,11 @@ let modul (modul : Assigned.t) : Binary.Module.t Result.t =
   let modul_typ = rewrite_named_no_failure rewrite_func_type modul.typ in
   let typemap = typemap modul_typ in
   let* global =
-    let+ { Named.named; values } =
-      rewrite_named
-        (rewrite_runtime
-           (rewrite_global typemap modul)
-           (rewrite_import (fun x -> Ok (rewrite_global_type x))) )
-        modul.global
-    in
-    let values = List.rev values in
-    Named.create values named
+    rewrite_named
+      (rewrite_runtime
+         (rewrite_global typemap modul)
+         (rewrite_import (fun x -> Ok (rewrite_global_type x))) )
+      modul.global
   in
   let* elem = rewrite_named (rewrite_elem typemap modul) modul.elem in
   let* data = rewrite_named (rewrite_data typemap modul) modul.data in
