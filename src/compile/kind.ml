@@ -4,21 +4,12 @@
 
 type func =
   | Wasm of
-      { uuid : int
-      ; func : Binary.Func.t
+      { func : Binary.Func.t
       ; idx : int
       }
   | Extern of { idx : int }
 
-let fresh =
-  let r = ref ~-1 in
-  fun () ->
-    incr r;
-    !r
-
-let wasm func idx : func =
-  let uuid = fresh () in
-  Wasm { uuid; func; idx }
+let wasm func idx : func = Wasm { func; idx }
 
 let extern idx : func = Extern { idx }
 

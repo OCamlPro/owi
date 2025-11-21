@@ -4,8 +4,7 @@
 
 type func = private
   | Wasm of
-      { uuid : int
-      ; func : Binary.Func.t
+      { func : Binary.Func.t
       ; idx : int
       }
   | Extern of { idx : int }
