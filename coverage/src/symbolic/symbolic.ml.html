@@ -316,9 +316,9 @@ type thread = Thread.t
 
 let select (c : Value.bool) ~(if_true : Value.t) ~(if_false : Value.t) :
   Value.t Choice.t =
-  <span data-count="21395">m</span>atch (if_true, if_false) with
-  | <span data-count="21393">I</span>32 if_true, I32 if_false -&gt;
-    Choice.return (Value.I32 (Value.Bool.select_exp<span data-count="21392">r</span> c ~if_true ~if_false))
+  <span data-count="21393">m</span>atch (if_true, if_false) with
+  | <span data-count="21391">I</span>32 if_true, I32 if_false -&gt;
+    Choice.return (Value.I32 (Value.Bool.select_exp<span data-count="21391">r</span> c ~if_true ~if_false))
   | <span data-count="0">I</span>64 if_true, I64 if_false -&gt;
     Choice.return (Value.I64 (Value.Bool.select_exp<span data-count="0">r</span> c ~if_true ~if_false))
   | <span data-count="2">F</span>32 if_true, F32 if_false -&gt;
@@ -345,25 +345,25 @@ end
 module Memory = struct
   include Symbolic_memory_concretizing
 
-  let load_8_s m a = <span data-count="570">C</span>hoice.lift_mem @@ load_8_<span data-count="569">s</span> m a
+  let load_8_s m a = <span data-count="570">C</span>hoice.lift_mem @@ load_8_<span data-count="570">s</span> m a
 
-  let load_8_u m a = <span data-count="3366">C</span>hoice.lift_mem @@ load_8_<span data-count="3366">u</span> m a
+  let load_8_u m a = <span data-count="3343">C</span>hoice.lift_mem @@ load_8_<span data-count="3343">u</span> m a
 
   let load_16_s m a = <span data-count="2">C</span>hoice.lift_mem @@ load_16_<span data-count="2">s</span> m a
 
   let load_16_u m a = <span data-count="2">C</span>hoice.lift_mem @@ load_16_<span data-count="2">u</span> m a
 
-  let load_32 m a = <span data-count="73864">C</span>hoice.lift_mem @@ load_3<span data-count="73859">2</span> m a
+  let load_32 m a = <span data-count="73859">C</span>hoice.lift_mem @@ load_3<span data-count="73856">2</span> m a
 
   let load_64 m a = <span data-count="79">C</span>hoice.lift_mem @@ load_6<span data-count="79">4</span> m a
 
-  let store_8 m ~addr v = <span data-count="3180">C</span>hoice.lift_mem @@ store_<span data-count="3180">8</span> m ~addr v
+  let store_8 m ~addr v = <span data-count="3162">C</span>hoice.lift_mem @@ store_<span data-count="3162">8</span> m ~addr v
 
   let store_16 m ~addr v = <span data-count="4">C</span>hoice.lift_mem @@ store_1<span data-count="4">6</span> m ~addr v
 
-  let store_32 m ~addr v = <span data-count="641070">C</span>hoice.lift_mem @@ store_3<span data-count="641063">2</span> m ~addr v
+  let store_32 m ~addr v = <span data-count="641065">C</span>hoice.lift_mem @@ store_3<span data-count="641065">2</span> m ~addr v
 
-  let store_64 m ~addr v = <span data-count="349770">C</span>hoice.lift_mem @@ store_6<span data-count="349768">4</span> m ~addr v
+  let store_64 m ~addr v = <span data-count="349770">C</span>hoice.lift_mem @@ store_6<span data-count="349770">4</span> m ~addr v
 
   let fill m ~pos ~len c = <span data-count="0">C</span>hoice.lift_mem @@ fil<span data-count="0">l</span> m ~pos ~len c
 
@@ -384,12 +384,12 @@ module Env = struct
   type t' = Env_id.t
 
   let get_memory env id =
-    <span data-count="2156520">m</span>atch Link_env.get_memory env id with
+    <span data-count="2156423">m</span>atch Link_env.get_memory env id with
     | <span data-count="0">E</span>rror e -&gt; Choice.trap e
-    | <span data-count="2156510">O</span>k orig_mem -&gt;
+    | <span data-count="2156416">O</span>k orig_mem -&gt;
       let f (t : thread) =
-        <span data-count="2156502">l</span>et memories = Thread.memories t in
-        <span data-count="2156501">M</span>emory.get_memory (Link_env.i<span data-count="2156496">d</span> env) orig_mem memories id
+        <span data-count="2156411">l</span>et memories = Thread.memories t in
+        <span data-count="2156416">M</span>emory.get_memory (Link_env.i<span data-count="2156410">d</span> env) orig_mem memories id
       in
       Choice.with_thread f
 
@@ -398,12 +398,12 @@ module Env = struct
   let get_extern_func = Link_env.get_extern_func
 
   let get_table (env : t) i : Table.t Choice.t =
-    <span data-count="4051">m</span>atch Link_env.get_table env i with
+    <span data-count="4048">m</span>atch Link_env.get_table env i with
     | <span data-count="0">E</span>rror e -&gt; Choice.trap e
-    | <span data-count="4051">O</span>k orig_table -&gt;
+    | <span data-count="4048">O</span>k orig_table -&gt;
       let f (t : thread) =
-        <span data-count="4051">l</span>et tables = Thread.tables t in
-        <span data-count="4051">S</span>ymbolic_table.get_table (Link_env.i<span data-count="4051">d</span> env) orig_table tables i
+        <span data-count="4048">l</span>et tables = Thread.tables t in
+        <span data-count="4048">S</span>ymbolic_table.get_table (Link_env.i<span data-count="4048">d</span> env) orig_table tables i
       in
       Choice.with_thread f
 
@@ -415,12 +415,12 @@ module Env = struct
     | <span data-count="404">O</span>k orig_data -&gt; Choice.return orig_data
 
   let get_global (env : t) i : Global.t Choice.t =
-    <span data-count="2226">m</span>atch Link_env.get_global env i with
+    <span data-count="2163">m</span>atch Link_env.get_global env i with
     | <span data-count="0">E</span>rror e -&gt; Choice.trap e
-    | <span data-count="2226">O</span>k orig_global -&gt;
+    | <span data-count="2163">O</span>k orig_global -&gt;
       let f (t : thread) =
-        <span data-count="2226">l</span>et globals = Thread.globals t in
-        <span data-count="2226">S</span>ymbolic_global.get_global (Link_env.i<span data-count="2226">d</span> env) orig_global globals i
+        <span data-count="2163">l</span>et globals = Thread.globals t in
+        <span data-count="2163">S</span>ymbolic_global.get_global (Link_env.i<span data-count="2163">d</span> env) orig_global globals i
       in
       Choice.with_thread f
 

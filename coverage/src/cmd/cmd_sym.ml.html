@@ -993,10 +993,10 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
   <span data-count="400">l</span>et res_stack = Ws.make () in
   <span data-count="400">l</span>et path_count = Atomic.make 0 in
   <span data-count="400">l</span>et callback v =
-    <span data-count="1810">l</span>et open Symbolic_choice_intf in
+    <span data-count="1749">l</span>et open Symbolic_choice_intf in
     Atomic.incr path_count;
-    <span data-count="1810">m</span>atch (fail_mode, v) with
-    | <span data-count="1570">_</span>, (EVal (), _) -&gt; ()
+    <span data-count="1749">m</span>atch (fail_mode, v) with
+    | <span data-count="1509">_</span>, (EVal (), _) -&gt; ()
     | <span data-count="174">(</span> (<span data-count="174">B</span>oth | <span data-count="0">T</span>rap_only)
       , (ETrap (t, m, labels, breadcrumbs, symbol_scopes, stats), thread) ) -&gt;
       Ws.push
@@ -1021,7 +1021,7 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
         | <span data-count="0">S</span>mart -&gt; (module Wpq) )
         ~workers solver result thread ~callback
         ~callback_init:(fun () -&gt; <span data-count="774">W</span>s.make_pledge res_stack)
-        ~callback_end:(fun () -&gt; <span data-count="742">W</span>s.end_pledge res_stack)
+        ~callback_end:(fun () -&gt; <span data-count="747">W</span>s.end_pledge res_stack)
     in
     <span data-count="400">l</span>et results =
       Ws.read_as_seq res_stack ~finalizer:(fun () -&gt;
