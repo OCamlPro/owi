@@ -987,6 +987,8 @@ module Binary_validate : sig
 end
 
 module Interpret : sig
+  val unset_use_ite_for_select : unit -> unit
+
   module Concrete : sig
     val modul :
          timeout:float option
