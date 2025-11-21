@@ -48,7 +48,6 @@
   extern
   float32
   float64
-  func_id
   grouped
   imported
   indexed

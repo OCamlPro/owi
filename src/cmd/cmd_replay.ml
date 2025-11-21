@@ -213,7 +213,7 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
   in
 
   let link_state =
-    Link.Extern.modul ~name:"owi" replay_extern_module Link.State.empty
+    Link.State.empty () |> Link.Extern.modul ~name:"owi" replay_extern_module
   in
 
   let* m = Compile.File.until_binary ~unsafe filename in
