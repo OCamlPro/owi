@@ -44,6 +44,16 @@ val array_iter :
   -> 'a array
   -> (unit, 'err) Prelude.Result.t
 
+val dynarray_iter :
+     ('a -> (unit, 'err) Prelude.Result.t)
+  -> 'a Dynarray.t
+  -> (unit, 'err) Prelude.Result.t
+
+val dynarray_iteri :
+     (int -> 'a -> (unit, 'err) Prelude.Result.t)
+  -> 'a Dynarray.t
+  -> (unit, 'err) Prelude.Result.t
+
 val array_map :
      ('a -> ('b, 'err) Prelude.Result.t)
   -> 'a array
@@ -58,4 +68,16 @@ val array_fold_left :
      ('a -> 'b -> ('a, 'err) Prelude.Result.t)
   -> 'a
   -> 'b array
+  -> ('a, 'err) Prelude.Result.t
+
+val dynarray_fold_left :
+     ('a -> 'b -> ('a, 'err) Prelude.Result.t)
+  -> 'a
+  -> 'b Dynarray.t
+  -> ('a, 'err) Prelude.Result.t
+
+val dynarray_fold_lefti :
+     (int -> 'a -> 'b -> ('a, 'err) Prelude.Result.t)
+  -> 'a
+  -> 'b Dynarray.t
   -> ('a, 'err) Prelude.Result.t

@@ -4,17 +4,17 @@
 
 open Syntax
 
-module Type = struct
+module Typetbl = Hashtbl.Make (struct
   type t = Text.func_type
 
-  let compare = Text.compare_func_type
-end
+  let equal = Text.func_type_eq
 
-module TypeMap = Map.Make (Type)
+  let hash = Hashtbl.hash
+end)
 
 type t =
   { id : string option
-  ; typ : Type.t Named.t
+  ; typ : Text.func_type Named.t
   ; global : (Text.Global.t, Text.Global.Type.t) Runtime.t Named.t
   ; table : (Text.Table.t, Text.Table.Type.t) Runtime.t Named.t
   ; mem : (Text.Mem.t, Text.limits) Runtime.t Named.t
@@ -68,62 +68,30 @@ let pp fmt { id; typ; global; table; mem; func; elem; data; exports; start } =
     pp_id id pp_typ typ pp_global global pp_table table pp_mem mem pp_func func
     pp_elem elem pp_data data Grouped.pp_opt_exports exports pp_start start
 
-type type_acc =
-  { declared_types : Text.func_type Indexed.t list
-  ; func_types : Text.func_type Indexed.t list
-  ; named_types : int String_map.t
-  ; last_assigned_int : int
-  ; all_types : int TypeMap.t
-  }
-
-let assign_type (acc : type_acc) (name, func_type) : type_acc =
-  let { declared_types; func_types; named_types; last_assigned_int; all_types }
-      =
-    acc
-  in
-  let last_assigned_int, declared_types, named_types, all_types =
-    let id = last_assigned_int in
-    let last_assigned_int = succ last_assigned_int in
-    let declared_types = Indexed.return id func_type :: declared_types in
-    let named_types =
-      match name with
-      | None -> named_types
-      | Some name -> String_map.add name id named_types
-    in
-    let all_types = TypeMap.add func_type id all_types in
-    (last_assigned_int, declared_types, named_types, all_types)
-  in
-
-  (* Is there something to do/check when a type is already declared ? *)
-  { declared_types; func_types; named_types; last_assigned_int; all_types }
-
-let assign_heap_type (acc : type_acc) typ : type_acc =
-  let { func_types; last_assigned_int; all_types; _ } = acc in
-  match TypeMap.find_opt typ all_types with
-  | Some _id -> acc
-  | None ->
-    let id = last_assigned_int in
-    let last_assigned_int = succ last_assigned_int in
-    let all_types = TypeMap.add typ id all_types in
-    let func_types = Indexed.return id typ :: func_types in
-    { acc with func_types; last_assigned_int; all_types }
-
 let assign_types (modul : Grouped.t) : Text.func_type Named.t =
-  let empty_acc : type_acc =
-    { declared_types = []
-    ; func_types = []
-    ; named_types = String_map.empty
-    ; last_assigned_int = 0
-    ; all_types = TypeMap.empty
-    }
-  in
-  let acc = List.fold_left assign_type empty_acc (List.rev modul.typ) in
-  let acc =
-    List.fold_left assign_heap_type acc (List.rev modul.function_type)
-  in
-  let values = List.rev acc.declared_types @ List.rev acc.func_types in
-  let values = Indexed.list_to_dynarray values in
-  Named.create values acc.named_types
+  let all_types = Typetbl.create 64 in
+  let named_types = Hashtbl.create 64 in
+  let declared_types = Dynarray.create () in
+  List.iter
+    (fun (name, typ) ->
+      let id = Dynarray.length declared_types in
+      begin match name with
+      | None -> ()
+      | Some name -> Hashtbl.add named_types name id
+      end;
+      Dynarray.add_last declared_types typ;
+      Typetbl.add all_types typ id )
+    modul.typ;
+  List.iter
+    (fun typ ->
+      match Typetbl.find_opt all_types typ with
+      | Some _id -> ()
+      | None ->
+        let id = Dynarray.length declared_types in
+        Dynarray.add_last declared_types typ;
+        Typetbl.add all_types typ id )
+    modul.function_type;
+  Named.create declared_types named_types
 
 let get_runtime_name (get_name : 'a -> string option) (elt : ('a, 'b) Runtime.t)
   : string option =
@@ -132,18 +100,22 @@ let get_runtime_name (get_name : 'a -> string option) (elt : ('a, 'b) Runtime.t)
   | Imported { assigned_name; _ } -> assigned_name
 
 let name kind ~get_name values =
-  let assign_one (named : int String_map.t) (elt : _ Indexed.t) =
-    let elt_v = Indexed.get elt in
-    match get_name elt_v with
-    | None -> Ok named
-    | Some name ->
-      let index = Indexed.get_index elt in
-      if String_map.mem name named then
-        Fmt.error_msg "duplicate %s %s" kind name
-      else ok @@ String_map.add name index named
-  in
-  let+ named = list_fold_left assign_one String_map.empty values in
   let values = Indexed.list_to_dynarray values in
+  let named = Hashtbl.create 64 in
+  let+ () =
+    dynarray_iteri
+      (fun i elt_v ->
+        match get_name elt_v with
+        | None -> Ok ()
+        | Some name ->
+          if Hashtbl.mem named name then
+            Fmt.error_msg "duplicate %s %s" kind name
+          else begin
+            Hashtbl.add named name i;
+            Ok ()
+          end )
+      values
+  in
   Named.create values named
 
 let check_type_id (types : Text.func_type Named.t)
@@ -156,7 +128,6 @@ let check_type_id (types : Text.func_type Named.t)
       | None -> (* TODO: unchecked, is this actually reachable? *) assert false
       | Some v -> v )
   in
-  (* TODO more efficient version of that *)
   match Named.get_at types id with
   | None -> Error (`Unknown_type (Text.Raw id))
   | Some func_type' ->
