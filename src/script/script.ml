@@ -151,7 +151,8 @@ let unsafe = false
 
 let run ~no_exhaustion script =
   let state =
-    Link.Extern.modul ~name:"spectest_extern" Spectest.extern_m Link.State.empty
+    Link.State.empty ()
+    |> Link.Extern.modul ~name:"spectest_extern" Spectest.extern_m
   in
   let script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
   let registered = ref false in

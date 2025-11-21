@@ -953,7 +953,7 @@ module Link : sig
   module State : sig
     type 'f t
 
-    val empty : 'f t
+    val empty : unit -> 'f t
   end
 
   module Binary : sig

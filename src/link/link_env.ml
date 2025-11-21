@@ -20,7 +20,7 @@ type 'ext t =
   ; functions : Kind.func IMap.t
   ; data : data IMap.t
   ; elem : elem IMap.t
-  ; extern_funcs : 'ext Func_id.collection
+  ; extern_funcs : ('ext * Binary.func_type) Dynarray.t
   ; id : Env_id.t
   }
 
@@ -53,9 +53,8 @@ let get_elem (env : _ t) id =
   match IMap.find_opt id env.elem with None -> assert false | Some v -> v
 
 let get_extern_func env id =
-  match Func_id.get id env.extern_funcs with
-  | None -> assert false
-  | Some v -> v
+  let f, _t = Dynarray.get env.extern_funcs id in
+  f
 
 module Build = struct
   type t =

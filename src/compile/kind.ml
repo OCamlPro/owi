@@ -4,7 +4,7 @@
 
 type func =
   | Wasm of int * Binary.Func.t * Env_id.t
-  | Extern of Func_id.t
+  | Extern of int
 
 let fresh =
   let r = ref ~-1 in

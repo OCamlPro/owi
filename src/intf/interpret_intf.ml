@@ -132,7 +132,7 @@ module type P = sig
 
     val get_global : t -> int -> Global.t Choice.t
 
-    val get_extern_func : t -> Func_id.t -> Extern_func.extern_func
+    val get_extern_func : t -> int -> Extern_func.extern_func
 
     val drop_elem : Elem.t -> unit
 

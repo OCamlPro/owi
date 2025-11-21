@@ -27,15 +27,15 @@ module State = struct
     { by_name : exports StringMap.t
     ; by_id : (exports * Env_id.t) StringMap.t
     ; last : (exports * Env_id.t) option
-    ; collection : 'f Func_id.collection
+    ; collection : ('f * Binary.func_type) Dynarray.t
     ; envs : 'f envs
     }
 
-  let empty =
+  let empty () =
     { by_name = StringMap.empty
     ; by_id = StringMap.empty
     ; last = None
-    ; collection = Func_id.empty
+    ; collection = Dynarray.create ()
     ; envs = Env_id.empty
     }
 
@@ -216,7 +216,9 @@ let load_func (ls : 'f State.t) (import : Binary.block_type Imported.t) :
     | Kind.Wasm (_, func, _) ->
       let (Bt_raw ((None | Some _), t)) = func.type_f in
       t
-    | Extern func_id -> Func_id.get_typ func_id ls.collection
+    | Extern func_id ->
+      let _f, t = Dynarray.get ls.collection func_id in
+      t
   in
   if Binary.func_type_eq typ type' then Ok func
   else Error (`Incompatible_import_type import.name)
@@ -393,7 +395,8 @@ module Extern = struct
       List.fold_left
         (fun (functions, collection) (name, func) ->
           let typ = modul.func_type func in
-          let id, collection = Func_id.add func typ collection in
+          Dynarray.add_last collection (func, typ);
+          let id = Dynarray.length collection - 1 in
           ((name, (Kind.extern id : Kind.func)) :: functions, collection) )
         ([], ls.collection) modul.functions
     in

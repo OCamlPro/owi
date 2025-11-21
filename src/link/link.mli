@@ -27,12 +27,12 @@ module State : sig
     { by_name : exports StringMap.t
     ; by_id : (exports * Env_id.t) StringMap.t
     ; last : (exports * Env_id.t) option
-    ; collection : 'f Func_id.collection
+    ; collection : ('f * Binary.func_type) Dynarray.t
     ; envs : 'f envs
     }
 
   (** the empty link state *)
-  val empty : 'f t
+  val empty : unit -> 'f t
 end
 
 module Extern : sig
