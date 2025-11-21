@@ -56,8 +56,6 @@ module Result : sig
     | `Unknown_table of Text.indice
     | `Unknown_type of Text.indice
     | `Unsupported_file_extension of string
-    | `Unknown_annotation_clause of Sexp.t
-    | `Unknown_annotation_object of Sexp.t
     | `Contract_unknown_func of Text.indice
     | `Empty_annotation_id
     | `Empty_identifier
