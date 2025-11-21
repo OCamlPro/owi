@@ -37,36 +37,26 @@ let check_error_result expected = function
   | Ok _whatever -> Error (`Did_not_fail_but_expected expected)
   | Error got -> check_error ~expected ~got
 
+let load_module ls mod_id =
+  match mod_id with
+  | None -> begin
+    match Link.State.get_last ls with
+    | None -> Error `Unbound_last_module
+    | Some m -> Ok m
+  end
+  | Some mod_id -> (
+    match Link.State.get_by_id ls mod_id with
+    | None -> Error (`Unbound_module mod_id)
+    | Some exports -> Ok exports )
+
 let load_func_from_module ls mod_id f_name =
-  let* exports, env_id =
-    match mod_id with
-    | None -> begin
-      match ls.Link.State.last with
-      | None -> Error `Unbound_last_module
-      | Some m -> Ok m
-    end
-    | Some mod_id -> (
-      match Link.StringMap.find_opt mod_id ls.Link.State.by_id with
-      | None -> Error (`Unbound_module mod_id)
-      | Some exports -> Ok exports )
-  in
+  let* exports, env_id = load_module ls mod_id in
   match Link.StringMap.find_opt f_name exports.functions with
   | None -> Error (`Unbound_name f_name)
   | Some v -> Ok (v, env_id)
 
 let load_global_from_module ls mod_id name =
-  let* exports =
-    match mod_id with
-    | None -> begin
-      match ls.Link.State.last with
-      | None -> Error `Unbound_last_module
-      | Some (m, _env_id) -> Ok m
-    end
-    | Some mod_id -> (
-      match Link.StringMap.find_opt mod_id ls.Link.State.by_id with
-      | None -> Error (`Unbound_module mod_id)
-      | Some (exports, _env_id) -> Ok exports )
-  in
+  let* exports, _env_id = load_module ls mod_id in
   match Link.StringMap.find_opt name exports.globals with
   | None -> Error (`Unbound_name name)
   | Some v -> Ok v
@@ -139,8 +129,8 @@ let action (link_state : Concrete_extern_func.extern_func Link.State.t) =
         mod_id f Wast.pp_consts args );
     let* f, env_id = load_func_from_module link_state mod_id f in
     let stack = List.rev_map value_of_const args in
-    Interpret.Concrete.exec_vfunc_from_outside ~locals:stack ~env:env_id
-      ~envs:link_state.envs f
+    let envs = Link.State.get_envs link_state in
+    Interpret.Concrete.exec_vfunc_from_outside ~locals:stack ~env:env_id ~envs f
   end
   | Get (mod_id, name) ->
     Log.info (fun m -> m "get...");
