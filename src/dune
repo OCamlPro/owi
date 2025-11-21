@@ -86,7 +86,6 @@
   symbolic_wasm_ffi
   spectest
   stack
-  string_map
   syntax
   text
   text_lexer
