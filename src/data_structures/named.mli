@@ -14,10 +14,9 @@ val create : 'a Indexed.t list -> int String_map.t -> 'a t
 
 val fold : (int -> 'a -> 'b -> 'b) -> 'a t -> 'b -> 'b
 
-val map : ('a Indexed.t -> 'b Indexed.t) -> 'a t -> 'b t
+val map : ('a -> 'b) -> 'a t -> 'b t
 
-val monadic_map :
-  ('a Indexed.t -> 'b Indexed.t Result.t) -> 'a t -> 'b t Result.t
+val monadic_map : ('a -> 'b Result.t) -> 'a t -> 'b t Result.t
 
 val to_array : 'a t -> 'a array
 

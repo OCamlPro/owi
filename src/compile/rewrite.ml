@@ -559,57 +559,39 @@ let rewrite_runtime_no_failure f g r =
     let i = g i in
     Runtime.Imported i
 
-let rewrite_named f named =
-  Named.monadic_map
-    (fun ind ->
-      let index = Indexed.get_index ind in
-      let value = Indexed.get ind in
-      let+ value = f value in
-      Indexed.return index value )
-    named
-
-let rewrite_named_no_failure f named =
-  Named.map
-    (fun ind ->
-      let index = Indexed.get_index ind in
-      let value = Indexed.get ind in
-      let value = f value in
-      Indexed.return index value )
-    named
-
 let rewrite_types (_modul : Assigned.t) (t : Binary.func_type) :
   Binary.Typedef.t Result.t =
   Ok (None, t)
 
 let modul (modul : Assigned.t) : Binary.Module.t Result.t =
   Log.debug (fun m -> m "rewriting    ...");
-  let modul_typ = rewrite_named_no_failure rewrite_func_type modul.typ in
+  let modul_typ = Named.map rewrite_func_type modul.typ in
   let typemap = typemap modul_typ in
   let* global =
-    rewrite_named
+    Named.monadic_map
       (rewrite_runtime
          (rewrite_global typemap modul)
          (rewrite_import (fun x -> Ok (rewrite_global_type x))) )
       modul.global
   in
-  let* elem = rewrite_named (rewrite_elem typemap modul) modul.elem in
-  let* data = rewrite_named (rewrite_data typemap modul) modul.data in
+  let* elem = Named.monadic_map (rewrite_elem typemap modul) modul.elem in
+  let* data = Named.monadic_map (rewrite_data typemap modul) modul.data in
   let* exports = rewrite_exports modul modul.exports in
   let* func =
     let import = rewrite_import (rewrite_block_type typemap modul) in
     let runtime = rewrite_runtime (rewrite_func typemap modul) import in
-    rewrite_named runtime modul.func
+    Named.monadic_map runtime modul.func
   in
-  let* types = rewrite_named (rewrite_types modul) modul_typ in
+  let* types = Named.monadic_map (rewrite_types modul) modul_typ in
   let mem =
     let import = rewrite_import_no_failure rewrite_limits in
     let runtime = rewrite_runtime_no_failure rewrite_mem import in
-    rewrite_named_no_failure runtime modul.mem
+    Named.map runtime modul.mem
   in
   let table =
     let import = rewrite_import_no_failure rewrite_table_type in
     let runtime = rewrite_runtime_no_failure rewrite_table import in
-    rewrite_named_no_failure runtime modul.table
+    Named.map runtime modul.table
   in
   let+ start =
     match modul.start with

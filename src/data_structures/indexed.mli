@@ -10,6 +10,8 @@ val get_index : 'a t -> int
 
 val map : ('a -> 'b) -> 'a t -> 'b t
 
+val monadic_map : ('a -> 'b Result.t) -> 'a t -> 'b t Result.t
+
 val return : int -> 'a -> 'a t
 
 val get_at : int -> 'a t list -> 'a option
