@@ -22,13 +22,13 @@ let fold f v acc =
     acc v.values
 
 let map f v =
-  let values = List.map f v.values in
+  let values = List.map (Indexed.map f) v.values in
   { v with values }
 
 let monadic_map f v =
   let open Syntax in
-  let+ values = list_map f v.values in
-  create values v.named
+  let+ values = list_map (Indexed.monadic_map f) v.values in
+  { v with values }
 
 let to_array v = Indexed.list_to_array v.values
 

@@ -13,6 +13,11 @@ let get_index v = v.index
 
 let map f v = { index = v.index; value = f v.value }
 
+let monadic_map f v =
+  let open Syntax in
+  let+ value = f v.value in
+  { index = v.index; value }
+
 let return index value = { index; value }
 
 let has_index idx { index; _ } = idx = index
