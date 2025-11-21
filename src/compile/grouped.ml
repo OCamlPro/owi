@@ -293,5 +293,8 @@ let of_text { Text.Module.fields; id } =
   let modul =
     List.fold_left (add_field (init_curr ())) (empty_module id) fields
   in
+  let typ = List.rev modul.typ in
+  let function_type = List.rev modul.function_type in
+  let modul = { modul with typ; function_type } in
   Log.debug (fun m -> m "%a" pp modul);
   modul

@@ -73,6 +73,34 @@ let array_iter f a =
   with Exit -> ( match !err with None -> assert false | Some e -> e )
 [@@inline]
 
+let dynarray_iter f a =
+  let err = ref None in
+  try
+    for i = 0 to Dynarray.length a - 1 do
+      match f (Dynarray.get a i) with
+      | Error _e as e ->
+        err := Some e;
+        raise Exit
+      | Ok () -> ()
+    done;
+    Ok ()
+  with Exit -> ( match !err with None -> assert false | Some e -> e )
+[@@inline]
+
+let dynarray_iteri f a =
+  let err = ref None in
+  try
+    for i = 0 to Dynarray.length a - 1 do
+      match f i (Dynarray.get a i) with
+      | Error _e as e ->
+        err := Some e;
+        raise Exit
+      | Ok () -> ()
+    done;
+    Ok ()
+  with Exit -> ( match !err with None -> assert false | Some e -> e )
+[@@inline]
+
 let array_map f a =
   let err = ref None in
   try
@@ -107,4 +135,22 @@ let array_fold_left f acc l =
       let* acc in
       f acc v )
     (Ok acc) l
+[@@inline]
+
+let dynarray_fold_left f acc l =
+  Dynarray.fold_left
+    (fun acc v ->
+      let* acc in
+      f acc v )
+    (Ok acc) l
+[@@inline]
+
+let dynarray_fold_lefti f acc l =
+  snd
+  @@ Dynarray.fold_left
+       (fun (i, acc) v ->
+         ( succ i
+         , let* acc in
+           f i acc v ) )
+       (0, Ok acc) l
 [@@inline]

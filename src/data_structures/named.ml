@@ -5,13 +5,13 @@
 (** named values (fields) *)
 type 'a t =
   { values : 'a Dynarray.t
-  ; named : int String_map.t
+  ; named : (string, int) Hashtbl.t
   }
 
 let get_at { values; _ } i =
   if i >= Dynarray.length values then None else Some (Dynarray.get values i)
 
-let get_by_name { named; _ } name = String_map.find_opt name named
+let get_by_name { named; _ } name = Hashtbl.find_opt named name
 
 let create values named = { values; named }
 
@@ -40,7 +40,7 @@ let pp_values pp_v fmt values =
 let pp_named fmt named =
   Fmt.iter_bindings
     ~sep:(fun fmt () -> Fmt.pf fmt " ; ")
-    String_map.iter
+    Hashtbl.iter
     (fun fmt (name, n) -> Fmt.pf fmt "(%S, %d)" name n)
     fmt named
 
