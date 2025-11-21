@@ -25,12 +25,6 @@
                  ))]
                  elem: []
                  data: []
-                 exports: {
-                   global: []
-                   mem: []
-                   table: []
-                   func: [("f", $f)]
-                   }
                  start: 
                  }
   owi: [DEBUG] assigning    ...
@@ -70,12 +64,6 @@
                  data: {
                    values: []
                    named: }
-                 exports: {
-                   global: []
-                   mem: []
-                   table: []
-                   func: [("f", $f)]
-                   }
                  start: 
                  }
   owi: [DEBUG] rewriting    ...

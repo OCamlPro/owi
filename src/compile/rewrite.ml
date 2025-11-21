@@ -496,9 +496,9 @@ let rewrite_data (typemap : Binary.indice TypeMap.t) (modul : Assigned.t)
   in
   { Binary.Data.mode; id = data.id; init = data.init }
 
-let rewrite_export named (exports : Grouped.opt_export list) :
-  Binary.Export.t list Result.t =
-  list_map
+let rewrite_export named (exports : Grouped.opt_export Dynarray.t) :
+  Binary.Export.t Dynarray.t Result.t =
+  dynarray_map
     (fun { Grouped.name; id } ->
       let+ id =
         match id with
@@ -512,12 +512,16 @@ let rewrite_export named (exports : Grouped.opt_export list) :
       { Binary.Export.name; id } )
     exports
 
-let rewrite_exports (modul : Assigned.t) (exports : Grouped.opt_exports) :
-  Binary.Module.Exports.t Result.t =
-  let* global = rewrite_export modul.global exports.global in
-  let* mem = rewrite_export modul.mem exports.mem in
-  let* table = rewrite_export modul.table exports.table in
-  let+ func = rewrite_export modul.func exports.func in
+let rewrite_exports (modul : Assigned.t) : Binary.Module.Exports.t Result.t =
+  let* global = rewrite_export modul.global modul.global_exports in
+  let* mem = rewrite_export modul.mem modul.mem_exports in
+  let* table = rewrite_export modul.table modul.table_exports in
+  let+ func = rewrite_export modul.func modul.func_exports in
+  (* TODO: change the type in Binary so that it is an immutable array! *)
+  let global = Dynarray.to_list global in
+  let mem = Dynarray.to_list mem in
+  let table = Dynarray.to_list table in
+  let func = Dynarray.to_list func in
   { Binary.Module.Exports.global; mem; table; func }
 
 let rewrite_func (typemap : Binary.indice TypeMap.t) (modul : Assigned.t)
@@ -529,8 +533,7 @@ let rewrite_func (typemap : Binary.indice TypeMap.t) (modul : Assigned.t)
   let+ body = rewrite_expr typemap modul (params @ locals) body in
   { Binary.Func.body; type_f; id; locals }
 
-let rewrite_types (_modul : Assigned.t) (t : Binary.func_type) :
-  Binary.Typedef.t Result.t =
+let rewrite_types (t : Binary.func_type) : Binary.Typedef.t Result.t =
   Ok (None, t)
 
 let modul (modul : Assigned.t) : Binary.Module.t Result.t =
@@ -546,14 +549,14 @@ let modul (modul : Assigned.t) : Binary.Module.t Result.t =
   in
   let* elem = Named.monadic_map (rewrite_elem typemap modul) modul.elem in
   let* data = Named.monadic_map (rewrite_data typemap modul) modul.data in
-  let* exports = rewrite_exports modul modul.exports in
+  let* exports = rewrite_exports modul in
   let* func =
     let f_imported = Imported.monadic_map (rewrite_block_type typemap modul) in
     let f_local = rewrite_func typemap modul in
     let runtime = Runtime.monadic_map ~f_local ~f_imported in
     Named.monadic_map runtime modul.func
   in
-  let* types = Named.monadic_map (rewrite_types modul) modul_typ in
+  let* types = Named.monadic_map rewrite_types modul_typ in
   let mem =
     let f_imported = Imported.map rewrite_limits in
     let runtime = Runtime.map ~f_local:rewrite_mem ~f_imported in

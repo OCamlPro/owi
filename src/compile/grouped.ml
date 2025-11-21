@@ -4,33 +4,10 @@
 
 open Text
 
-let sep fmt () = Fmt.pf fmt " ; "
-
-type type_check = indice * func_type
-
-let pp_type_check fmt (indice, func_type) =
-  Fmt.pf fmt "(%a, %a)" pp_indice indice pp_func_type func_type
-
 type opt_export =
   { name : string
   ; id : indice
   }
-
-let pp_opt_export fmt { name; id } = Fmt.pf fmt "(%S, %a)" name pp_indice id
-
-let pp_opt_export_list fmt l = Fmt.pf fmt "[%a]" (Fmt.list ~sep pp_opt_export) l
-
-type opt_exports =
-  { global : opt_export list
-  ; mem : opt_export list
-  ; table : opt_export list
-  ; func : opt_export list
-  }
-
-let pp_opt_exports fmt { global; mem; table; func } =
-  Fmt.pf fmt "{@\n  @[<v>global: %a@\nmem: %a@\ntable: %a@\nfunc: %a@\n@]}"
-    pp_opt_export_list global pp_opt_export_list mem pp_opt_export_list table
-    pp_opt_export_list func
 
 let curr_id (curr : int) (i : indice option) =
   match i with None -> Raw (pred curr) | Some id -> id
@@ -41,7 +18,7 @@ type t =
   ; function_type : func_type Dynarray.t
       (** Types comming from function declarations. It contains potential
           duplication. *)
-  ; type_checks : type_check Dynarray.t
+  ; type_checks : (indice * func_type) Dynarray.t
       (** Types checks to perform after assignment. Come from function
           declarations with type indicies. *)
   ; global : (Text.Global.t, Global.Type.t) Runtime.t Dynarray.t
@@ -50,8 +27,11 @@ type t =
   ; func : (Func.t, block_type) Runtime.t Dynarray.t
   ; elem : Text.Elem.t Dynarray.t
   ; data : Text.Data.t Dynarray.t
-  ; exports : opt_exports
-  ; start : indice option
+  ; global_exports : opt_export Dynarray.t
+  ; mem_exports : opt_export Dynarray.t
+  ; table_exports : opt_export Dynarray.t
+  ; func_exports : opt_export Dynarray.t
+  ; mutable start : indice option
   }
 
 let pp_id fmt id = Text.pp_id_opt fmt id
@@ -65,6 +45,9 @@ let pp_typ fmt typ = pp_dynarray Text.Typedef.pp fmt typ
 
 let pp_function_type fmt function_type =
   pp_dynarray Text.pp_func_type fmt function_type
+
+let pp_type_check fmt (indice, func_type) =
+  Fmt.pf fmt "(%a, %a)" pp_indice indice pp_func_type func_type
 
 let pp_type_checks fmt type_checks = pp_dynarray pp_type_check fmt type_checks
 
@@ -103,9 +86,10 @@ let pp fmt
   ; func
   ; elem
   ; data
-  ; exports
   ; start
+  ; _
   } =
+  (* TODO: print exports once again *)
   Fmt.pf fmt
     "{id: %a@\n\
     \  @[<v>typ: %a@\n\
@@ -117,12 +101,11 @@ let pp fmt
      func: %a@\n\
      elem: %a@\n\
      data: %a@\n\
-     exports: %a@\n\
      start: %a@\n\
      }"
     pp_id id pp_typ typ pp_function_type function_type pp_type_checks
     type_checks pp_global global pp_table table pp_mem mem pp_func func pp_elem
-    elem pp_data data pp_opt_exports exports pp_start start
+    elem pp_data data pp_start start
 
 let imp (import : Import.t) (assigned_name, typ) : 'a Imported.t =
   { modul = import.modul; name = import.name; assigned_name; typ }
@@ -138,7 +121,10 @@ let empty_module id =
   ; func = Dynarray.create ()
   ; elem = Dynarray.create ()
   ; data = Dynarray.create ()
-  ; exports = { global = []; table = []; mem = []; func = [] }
+  ; global_exports = Dynarray.create ()
+  ; mem_exports = Dynarray.create ()
+  ; table_exports = Dynarray.create ()
+  ; func_exports = Dynarray.create ()
   ; start = None
   }
 
@@ -183,65 +169,40 @@ let add_data value (modul : t) = Dynarray.add_last modul.data value
 
 let add_typ value (modul : t) = Dynarray.add_last modul.typ value
 
-let add_field (modul : t) : Text.Module.Field.t -> t = function
-  | Typedef typ ->
-    add_typ typ modul;
-    modul
-  | Global global ->
-    add_global (Local global) modul;
-    modul
+let add_field (modul : t) : Text.Module.Field.t -> unit = function
+  | Typedef typ -> add_typ typ modul
+  | Global global -> add_global (Local global) modul
   | Import ({ typ = Global (a, (mut, val_type)); _ } as import) ->
     let b = (mut, val_type) in
     let imported = imp import (a, b) in
-    add_global (Imported imported) modul;
-    modul
+    add_global (Imported imported) modul
   | Export { name; typ = Global id } ->
-    let exports =
-      let id = curr_id (Dynarray.length modul.global) id in
-      { modul.exports with global = { name; id } :: modul.exports.global }
-    in
-    { modul with exports }
+    let id = curr_id (Dynarray.length modul.global) id in
+    Dynarray.add_last modul.global_exports { name; id }
   | Table table ->
     let id, table_type = table in
     let table = (id, table_type) in
-    add_table (Local table) modul;
-    modul
+    add_table (Local table) modul
   | Import ({ typ = Table (id, table_type); _ } as import) ->
     let imported = imp import (id, table_type) in
-    add_table (Imported imported) modul;
-    modul
+    add_table (Imported imported) modul
   | Export { name; typ = Table id } ->
-    let exports =
-      let id = curr_id (Dynarray.length modul.table) id in
-      { modul.exports with table = { name; id } :: modul.exports.table }
-    in
-    { modul with exports }
-  | Mem mem ->
-    add_mem (Local mem) modul;
-    modul
+    let id = curr_id (Dynarray.length modul.table) id in
+    Dynarray.add_last modul.table_exports { name; id }
+  | Mem mem -> add_mem (Local mem) modul
   | Import ({ typ = Mem (id, limits); _ } as import) ->
     let imported = imp import (id, limits) in
-    add_mem (Imported imported) modul;
-    modul
+    add_mem (Imported imported) modul
   | Export { name; typ = Mem id } ->
-    let exports =
-      let id = curr_id (Dynarray.length modul.mem) id in
-      { modul.exports with mem = { name; id } :: modul.exports.mem }
-    in
-    { modul with exports }
-  | Func func ->
-    add_func (Runtime.Local func) modul;
-    modul
+    let id = curr_id (Dynarray.length modul.mem) id in
+    Dynarray.add_last modul.mem_exports { name; id }
+  | Func func -> add_func (Runtime.Local func) modul
   | Import ({ typ = Func (a, type_f); _ } as import) ->
     let imported : block_type Imported.t = imp import (a, type_f) in
-    add_func (Imported imported) modul;
-    modul
+    add_func (Imported imported) modul
   | Export { name; typ = Func id } ->
-    let exports =
-      let id = curr_id (Dynarray.length modul.func) id in
-      { modul.exports with func = { name; id } :: modul.exports.func }
-    in
-    { modul with exports }
+    let id = curr_id (Dynarray.length modul.func) id in
+    Dynarray.add_last modul.func_exports { name; id }
   | Elem elem ->
     let mode =
       match elem.mode with
@@ -250,8 +211,7 @@ let add_field (modul : t) : Text.Module.Field.t -> t = function
         let id = curr_id (Dynarray.length modul.table) id in
         Active (Some id, expr)
     in
-    add_elem { elem with mode } modul;
-    modul
+    add_elem { elem with mode } modul
   | Data data ->
     let mode =
       match data.mode with
@@ -260,14 +220,12 @@ let add_field (modul : t) : Text.Module.Field.t -> t = function
         let id = curr_id (Dynarray.length modul.mem) id in
         Active (Some id, expr)
     in
-    let data : Text.Data.t = { id = data.id; init = data.init; mode } in
-    add_data data modul;
-    modul
-  | Start start -> { modul with start = Some start }
+    add_data { data with mode } modul
+  | Start start -> modul.start <- Some start
 
 let of_text { Text.Module.fields; id } =
   Log.debug (fun m -> m "grouping     ...");
   let modul = empty_module id in
-  let modul = List.fold_left add_field modul fields in
+  List.iter (add_field modul) fields;
   Log.debug (fun m -> m "%a" pp modul);
   modul

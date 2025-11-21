@@ -9,24 +9,13 @@ type opt_export =
   ; id : indice
   }
 
-type opt_exports =
-  { global : opt_export list
-  ; mem : opt_export list
-  ; table : opt_export list
-  ; func : opt_export list
-  }
-
-val pp_opt_exports : Format.formatter -> opt_exports -> unit
-
-type type_check = indice * func_type
-
 type t =
   { id : string option
   ; typ : Typedef.t Dynarray.t
   ; function_type : func_type Dynarray.t
       (* Types comming from function declarations.
          It contains potential duplication *)
-  ; type_checks : type_check Dynarray.t
+  ; type_checks : (indice * func_type) Dynarray.t
       (* Types checks to perform after assignment.
          Come from function declarations with type indicies *)
   ; global : (Global.t, Global.Type.t) Runtime.t Dynarray.t
@@ -35,8 +24,11 @@ type t =
   ; func : (Func.t, block_type) Runtime.t Dynarray.t
   ; elem : Elem.t Dynarray.t
   ; data : Data.t Dynarray.t
-  ; exports : opt_exports
-  ; start : indice option
+  ; global_exports : opt_export Dynarray.t
+  ; mem_exports : opt_export Dynarray.t
+  ; table_exports : opt_export Dynarray.t
+  ; func_exports : opt_export Dynarray.t
+  ; mutable start : indice option
   }
 
 val of_text : Module.t -> t
