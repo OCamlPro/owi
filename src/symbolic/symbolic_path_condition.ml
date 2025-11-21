@@ -14,21 +14,19 @@ let empty : t =
   let set = Smtml.Expr.Set.empty in
   { uf; set }
 
-(* TODO: should we make some normalization here? *)
-(* TODO: it would be better to split the conjunctions in many sub-conditions *)
-let add ({ uf; set } : t) (c : Symbolic_value.bool) : t =
-  match Smtml.Expr.get_symbols [ c ] with
+let add_one ({ uf; set } : t) (condition : Symbolic_value.bool) : t =
+  match Smtml.Expr.get_symbols [ condition ] with
   | [] ->
     (* It means Smt.ml did not properly simplified a expression! *)
     Log.err (fun m ->
       m "an expression was not simplified by smtml: %a" Symbolic_value.pp_int32
-        c );
+        condition );
     assert false
   | hd :: tl ->
-    let set = Smtml.Expr.Set.add c set in
+    let set = Smtml.Expr.Set.add condition set in
     (* We add the first symbol to the UF *)
     let uf =
-      let c = Smtml.Expr.Set.singleton c in
+      let c = Smtml.Expr.Set.singleton condition in
       Union_find.add ~merge:Smtml.Expr.Set.union hd c uf
     in
     (* We union-ize all symbols together, starting with the first one that has already been added *)
@@ -39,6 +37,13 @@ let add ({ uf; set } : t) (c : Symbolic_value.bool) : t =
         (uf, hd) tl
     in
     { uf; set }
+
+let add (pc : t) (condition : Symbolic_value.bool) : t =
+  (* we start by splitting the condition ((P & Q) & R) into a set {P; Q; R} before adding each of P, Q and R into the UF data structure, this way we maximize the independence of the PC *)
+  let splitted_condition = Smtml.Expr.split_conjunctions condition in
+  Smtml.Expr.Set.fold
+    (fun condition pc -> add_one pc condition)
+    splitted_condition pc
 
 (* Turns all constraints into a set *)
 let to_set { uf = _; set } = set
