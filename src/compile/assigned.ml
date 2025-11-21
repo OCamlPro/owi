@@ -21,7 +21,10 @@ type t =
   ; func : (Text.Func.t, Text.block_type) Runtime.t Named.t
   ; elem : Text.Elem.t Named.t
   ; data : Text.Data.t Named.t
-  ; exports : Grouped.opt_exports
+  ; global_exports : Grouped.opt_export Dynarray.t
+  ; mem_exports : Grouped.opt_export Dynarray.t
+  ; table_exports : Grouped.opt_export Dynarray.t
+  ; func_exports : Grouped.opt_export Dynarray.t
   ; start : Text.indice option
   }
 
@@ -51,7 +54,7 @@ let pp_data fmt d = Named.pp Text.Data.pp fmt d
 
 let pp_start fmt s = Text.pp_indice_opt fmt s
 
-let pp fmt { id; typ; global; table; mem; func; elem; data; exports; start } =
+let pp fmt { id; typ; global; table; mem; func; elem; data; start; _ } =
   Fmt.pf fmt
     "{@\n\
     \  @[<v>id: %a@\n\
@@ -62,11 +65,10 @@ let pp fmt { id; typ; global; table; mem; func; elem; data; exports; start } =
      func: %a@\n\
      elem: %a@\n\
      data: %a@\n\
-     exports: %a@\n\
      start: %a@\n\
      }"
     pp_id id pp_typ typ pp_global global pp_table table pp_mem mem pp_func func
-    pp_elem elem pp_data data Grouped.pp_opt_exports exports pp_start start
+    pp_elem elem pp_data data pp_start start
 
 let assign_types (modul : Grouped.t) : Text.func_type Named.t =
   let all_types = Typetbl.create 64 in
@@ -117,11 +119,10 @@ let name kind ~get_name values =
   in
   Named.create values named
 
-let check_type_id (types : Text.func_type Named.t)
-  ((id, func_type) : Grouped.type_check) =
+let check_type_id (types : Text.func_type Named.t) (id, func_type) =
   let id =
     match id with
-    | Raw i -> i
+    | Text.Raw i -> i
     | Text name -> (
       match Named.get_by_name types name with
       | None -> (* TODO: unchecked, is this actually reachable? *) assert false
@@ -173,7 +174,10 @@ let of_grouped (modul : Grouped.t) : t Result.t =
     ; func
     ; elem
     ; data
-    ; exports = modul.exports
+    ; global_exports = modul.global_exports
+    ; mem_exports = modul.mem_exports
+    ; table_exports = modul.table_exports
+    ; func_exports = modul.func_exports
     ; start = modul.start
     }
   in
