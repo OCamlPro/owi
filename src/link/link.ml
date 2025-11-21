@@ -39,6 +39,12 @@ module State = struct
     ; envs = Env_id.empty
     }
 
+  let get_envs state = state.envs
+
+  let get_last state = state.last
+
+  let get_by_id state id = StringMap.find_opt id state.by_id
+
   let load_from_module ls f (import : _ Imported.t) =
     match StringMap.find_opt import.modul ls.by_name with
     | None -> Error (`Unknown_module import.modul)

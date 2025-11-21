@@ -1603,7 +1603,7 @@ module Make (P : Interpret_intf.P) = struct
 
   let modul ~timeout ~timeout_instr (link_state : 'f Link.State.t)
     (modul : 'extern_func Linked.Module.t) : unit P.Choice.t =
-    let envs = link_state.Link.State.envs in
+    let envs = Link.State.get_envs link_state in
     let heartbeat = make_heartbeat ~timeout ~timeout_instr () in
     Log.info (fun m -> m "interpreting ...");
     try
