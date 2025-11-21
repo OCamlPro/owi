@@ -70,7 +70,6 @@
   runtime
   script
   symbol_scope
-  sexp
   share
   solver
   symbolic
