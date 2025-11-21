@@ -49,6 +49,11 @@ val array_map :
   -> 'a array
   -> ('b array, 'err) Prelude.Result.t
 
+val dynarray_map :
+     ('a -> ('b, 'err) Prelude.Result.t)
+  -> 'a Dynarray.t
+  -> ('b Dynarray.t, 'err) Prelude.Result.t
+
 val array_fold_left :
      ('a -> 'b -> ('a, 'err) Prelude.Result.t)
   -> 'a

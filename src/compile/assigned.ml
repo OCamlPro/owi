@@ -122,6 +122,7 @@ let assign_types (modul : Grouped.t) : Text.func_type Named.t =
     List.fold_left assign_heap_type acc (List.rev modul.function_type)
   in
   let values = List.rev acc.declared_types @ List.rev acc.func_types in
+  let values = Indexed.list_to_dynarray values in
   Named.create values acc.named_types
 
 let get_runtime_name (get_name : 'a -> string option) (elt : ('a, 'b) Runtime.t)
@@ -142,6 +143,7 @@ let name kind ~get_name values =
       else ok @@ String_map.add name index named
   in
   let+ named = list_fold_left assign_one String_map.empty values in
+  let values = Indexed.list_to_dynarray values in
   Named.create values named
 
 let check_type_id (types : Text.func_type Named.t)

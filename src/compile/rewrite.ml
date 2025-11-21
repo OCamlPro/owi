@@ -4,15 +4,13 @@
 
 open Syntax
 
-module Type = struct
+module TypeMap = Map.Make (struct
   type t = Binary.func_type
 
   let compare (x : t) (y : t) = Binary.compare_func_type x y
-end
+end)
 
-module TypeMap = Map.Make (Type)
-
-let typemap (types : Type.t Named.t) =
+let typemap (types : Binary.func_type Named.t) =
   Named.fold (fun idx typ acc -> TypeMap.add typ idx acc) types TypeMap.empty
 
 let rewrite_num_type : Text.num_type -> Binary.num_type = function

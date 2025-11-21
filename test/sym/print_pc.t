@@ -37,7 +37,7 @@
   owi: [DEBUG] {
                  id: 
                  typ: {
-                   values: [{ index = 0 ; value = (func (result i32)) } ; { index = 1 ; value = (func (param $x i32)) }]
+                   values: [(func (result i32)) ; (func (param $x i32))]
                    named: }
                  global: {
                    values: []
@@ -49,7 +49,11 @@
                    values: []
                    named: }
                  func: {
-                   values: [{ index = 1 ; value = Local ((func $f (param $x i32)
+                   values: [Imported ({
+                     modul: "owi"
+                     name: "i32_symbol"
+                     assigned_name:  $i32_symbol
+                     typ:  (result i32)}) ; Local ((func $f (param $x i32)
                      local.get $x
                      i32.const 1
                      i32.lt_u
@@ -58,11 +62,7 @@
                          unreachable
                        )
                      )
-                   )) } ; { index = 0 ; value = Imported ({
-                     modul: "owi"
-                     name: "i32_symbol"
-                     assigned_name:  $i32_symbol
-                     typ:  (result i32)}) }]
+                   ))]
                    named: ("f", 1) ; ("i32_symbol", 0)}
                  elem: {
                    values: []
