@@ -6,8 +6,9 @@ open Syntax
 
 let cmd ~unsafe ~timeout ~timeout_instr ~source_file =
   let name = None in
-  let* m, (link_state : _ Link.State.t) =
-    Compile.File.until_link ~unsafe ~name Link.State.empty source_file
+  let link_state = Link.State.empty () in
+  let* m, link_state =
+    Compile.File.until_link ~unsafe ~name link_state source_file
   in
   let res, run_time =
     Benchmark.with_utime @@ fun () ->

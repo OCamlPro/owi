@@ -3,12 +3,15 @@
 (* Written by the Owi programmers *)
 
 type func = private
-  | Wasm of int * Binary.Func.t * Env_id.t
-  | Extern of Func_id.t
+  | Wasm of
+      { func : Binary.Func.t
+      ; idx : int
+      }
+  | Extern of { idx : int }
 
-val wasm : Binary.Func.t -> Env_id.t -> func
+val wasm : Binary.Func.t -> int -> func
 
-val extern : Func_id.t -> func
+val extern : int -> func
 
 type 'f t =
   | Wat of Text.Module.t

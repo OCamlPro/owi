@@ -140,7 +140,7 @@ let size { size; _ } = Symbolic_value.I32.mul size page_size
 
 let size_in_pages { size; _ } = size
 
-let clone m = { data = Backend.clone m.data; size = m.size }
+let clone_memory m = { data = Backend.clone m.data; size = m.size }
 
 let must_be_valid_address m a n =
   let open Symbolic_choice_without_memory in
@@ -275,40 +275,30 @@ let free m base = Backend.free m.data base
 
 let realloc m ~ptr ~size = Backend.realloc m.data ~ptr ~size
 
-(* TODO: Move this into a separate module? *)
-module ITbl = Hashtbl.Make (Int)
-
-type collection = t ITbl.t Env_id.Tbl.t
-
-let init () = Env_id.Tbl.create 0
-
-let clone collection =
-  (* TODO: this is ugly and should be rewritten *)
-  let s = Env_id.Tbl.to_seq collection in
-  Env_id.Tbl.of_seq
-  @@ Seq.map
-       (fun (i, t) ->
-         let s = ITbl.to_seq t in
-         (i, ITbl.of_seq @@ Seq.map (fun (i, a) -> (i, clone a)) s) )
-       s
-
 let convert (orig_mem : Concrete_memory.t) : t =
   let s = Concrete_memory.size_in_pages orig_mem in
   create s
 
-let get_env env_id memories =
-  match Env_id.Tbl.find_opt memories env_id with
-  | Some env -> env
-  | None ->
-    let t = ITbl.create 0 in
-    Env_id.Tbl.add memories env_id t;
-    t
+(** Collections of memories *)
+
+type collection = (int * int, t) Hashtbl.t
+
+let init () = Hashtbl.create 16
+
+let clone collection =
+  let collection' = init () in
+  Hashtbl.iter
+    (fun loc memory ->
+      let memory' = clone_memory memory in
+      Hashtbl.add collection' loc memory' )
+    collection;
+  collection'
 
 let get_memory env_id (orig_memory : Concrete_memory.t) collection g_id =
-  let env = get_env env_id collection in
-  match ITbl.find_opt env g_id with
-  | Some t -> t
+  let loc = (env_id, g_id) in
+  match Hashtbl.find_opt collection loc with
   | None ->
-    let t = convert orig_memory in
-    ITbl.add env g_id t;
-    t
+    let g = convert orig_memory in
+    Hashtbl.add collection loc g;
+    g
+  | Some t -> t

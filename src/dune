@@ -43,15 +43,11 @@
   concrete_wasm_ffi
   control_flow_graph
   convert
-  env_id
   exploration_smart
   extern
   float32
   float64
-  func_id
   grouped
-  imported
-  indexed
   int32
   int64
   interpret
@@ -73,7 +69,6 @@
   runtime
   script
   symbol_scope
-  sexp
   share
   solver
   symbolic
@@ -89,7 +84,6 @@
   symbolic_wasm_ffi
   spectest
   stack
-  string_map
   syntax
   text
   text_lexer

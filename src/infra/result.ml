@@ -61,8 +61,6 @@ type err =
   | `Unknown_table of Text.indice
   | `Unknown_type of Text.indice
   | `Unsupported_file_extension of string
-  | `Unknown_annotation_clause of Sexp.t
-  | `Unknown_annotation_object of Sexp.t
   | `Contract_unknown_func of Text.indice
   | `Empty_annotation_id
   | `Empty_identifier
@@ -155,10 +153,6 @@ let rec err_to_string = function
   | `Unknown_type id -> Fmt.str "unknown type %a" Text.pp_indice id
   | `Unsupported_file_extension ext ->
     Fmt.str "unsupported file_extension %S" ext
-  | `Unknown_annotation_clause s ->
-    Fmt.str "unknown annotation clause %a" Sexp.pp_sexp s
-  | `Unknown_annotation_object s ->
-    Fmt.str "unknown annotation object %a" Sexp.pp_sexp s
   | `Contract_unknown_func id ->
     Fmt.str "contract: unknown function %a" Text.pp_indice id
   | `Empty_annotation_id -> Fmt.str "empty annotation id"

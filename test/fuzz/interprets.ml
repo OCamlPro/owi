@@ -33,8 +33,9 @@ module Owi_regular : INTERPRET = struct
   let parse_and_run modul =
     let* simplified = Owi.Compile.Text.until_binary ~unsafe:false modul in
     let* () = Owi.Binary_validate.modul simplified in
+    let link_state = Owi.Link.State.empty () in
     let* regular, link_state =
-      Owi.Link.Binary.modul ~name:None Owi.Link.State.empty simplified
+      Owi.Link.Binary.modul ~name:None link_state simplified
     in
     timeout_call_run (fun () ->
       Owi.Interpret.Concrete.modul link_state regular ~timeout:None

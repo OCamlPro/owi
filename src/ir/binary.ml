@@ -849,9 +849,13 @@ module Module = struct
   let find_imported_func_index ~modul_name ~func_name m =
     Array.find_index
       (function
-        | Runtime.Imported { Imported.modul; name; assigned_name = _; typ = _ }
-          ->
-          String.equal modul_name modul && String.equal func_name name
+        | Runtime.Imported
+            { Runtime.modul_name = modul_name'
+            ; name
+            ; assigned_name = _
+            ; typ = _
+            } ->
+          String.equal modul_name modul_name' && String.equal func_name name
         | Local _ -> false )
       m.func
 
@@ -872,12 +876,7 @@ module Module = struct
     | Some _i -> m
     | None ->
       let f =
-        Runtime.Imported
-          { Imported.modul = modul_name
-          ; name = func_name
-          ; assigned_name = None
-          ; typ
-          }
+        Runtime.imported ~modul_name ~name:func_name ~assigned_name:None ~typ
       in
 
       let idx = find_last_import_index m + 1 in

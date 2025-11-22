@@ -10,11 +10,7 @@ val init : unit -> collection
 
 val clone : collection -> collection
 
-val get_global : Env_id.t -> Concrete_global.t -> collection -> int -> t
-
-val typ : t -> Binary.val_type
-
-val mut : t -> Binary.mut
+val get_global : int -> Concrete_global.t -> collection -> int -> t
 
 val value : t -> Symbolic_value.t
 

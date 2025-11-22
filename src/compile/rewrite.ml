@@ -4,15 +4,13 @@
 
 open Syntax
 
-module Type = struct
+module TypeMap = Map.Make (struct
   type t = Binary.func_type
 
   let compare (x : t) (y : t) = Binary.compare_func_type x y
-end
+end)
 
-module TypeMap = Map.Make (Type)
-
-let typemap (types : Type.t Named.t) =
+let typemap (types : Binary.func_type Named.t) =
   Named.fold (fun idx typ acc -> TypeMap.add typ idx acc) types TypeMap.empty
 
 let rewrite_num_type : Text.num_type -> Binary.num_type = function
@@ -134,12 +132,11 @@ let rewrite_block_type (typemap : Binary.indice TypeMap.t) (modul : Assigned.t)
   (block_type : Text.block_type) : Binary.block_type Result.t =
   match block_type with
   | Bt_ind id -> begin
-    let* v = Assigned.find_type modul id in
-    match List.nth_opt modul.typ.values v with
+    let* idx = Assigned.find_type modul id in
+    match Named.get_at modul.typ idx with
     | None -> Error (`Unknown_type id)
     | Some v ->
-      let t' = Indexed.get v |> rewrite_func_type in
-      let idx = Indexed.get_index v in
+      let t' = rewrite_func_type v in
       Ok (Binary.Bt_raw (Some idx, t'))
   end
   | Bt_raw (_, func_type) ->
@@ -200,21 +197,27 @@ let rewrite_expr (typemap : Binary.indice TypeMap.t) (modul : Assigned.t)
     | None -> Ok None
   in
 
-  let* locals, _after_last_assigned_local =
+  let seen_locals = Hashtbl.create 64 in
+
+  (* Fill locals *)
+  let* (_ : int) =
     list_fold_left
-      (fun (locals, next_free_int) ((name, _type) : Binary.param) ->
+      (fun next_free_int ((name, _type) : Binary.param) ->
         match name with
-        | None -> Ok (locals, next_free_int + 1)
+        | None -> Ok (next_free_int + 1)
         | Some name ->
-          if String_map.mem name locals then Error (`Duplicate_local name)
-          else Ok (String_map.add name next_free_int locals, next_free_int + 1) )
-      (String_map.empty, 0) locals
+          if Hashtbl.mem seen_locals name then Error (`Duplicate_local name)
+          else begin
+            Hashtbl.add seen_locals name next_free_int;
+            Ok (next_free_int + 1)
+          end )
+      0 locals
   in
 
   let find_local : Text.indice -> Binary.indice = function
     | Raw i -> i
     | Text name -> (
-      match String_map.find_opt name locals with
+      match Hashtbl.find_opt seen_locals name with
       | None -> assert false
       | Some id -> id )
   in
@@ -499,15 +502,15 @@ let rewrite_data (typemap : Binary.indice TypeMap.t) (modul : Assigned.t)
   in
   { Binary.Data.mode; id = data.id; init = data.init }
 
-let rewrite_export named (exports : Grouped.opt_export list) :
-  Binary.Export.t list Result.t =
-  list_map
+let rewrite_export named (exports : Grouped.opt_export Dynarray.t) :
+  Binary.Export.t Dynarray.t Result.t =
+  dynarray_map
     (fun { Grouped.name; id } ->
       let+ id =
         match id with
         | Text.Raw i -> Ok i
         | Text name -> (
-          match String_map.find_opt name named.Named.named with
+          match Named.get_by_name named name with
           | None -> Error (`Unknown_export id)
           | Some i -> Ok i )
       in
@@ -515,12 +518,16 @@ let rewrite_export named (exports : Grouped.opt_export list) :
       { Binary.Export.name; id } )
     exports
 
-let rewrite_exports (modul : Assigned.t) (exports : Grouped.opt_exports) :
-  Binary.Module.Exports.t Result.t =
-  let* global = rewrite_export modul.global exports.global in
-  let* mem = rewrite_export modul.mem exports.mem in
-  let* table = rewrite_export modul.table exports.table in
-  let+ func = rewrite_export modul.func exports.func in
+let rewrite_exports (modul : Assigned.t) : Binary.Module.Exports.t Result.t =
+  let* global = rewrite_export modul.global modul.global_exports in
+  let* mem = rewrite_export modul.mem modul.mem_exports in
+  let* table = rewrite_export modul.table modul.table_exports in
+  let+ func = rewrite_export modul.func modul.func_exports in
+  (* TODO: change the type in Binary so that it is an immutable array! *)
+  let global = Dynarray.to_list global in
+  let mem = Dynarray.to_list mem in
+  let table = Dynarray.to_list table in
+  let func = Dynarray.to_list func in
   { Binary.Module.Exports.global; mem; table; func }
 
 let rewrite_func (typemap : Binary.indice TypeMap.t) (modul : Assigned.t)
@@ -532,95 +539,39 @@ let rewrite_func (typemap : Binary.indice TypeMap.t) (modul : Assigned.t)
   let+ body = rewrite_expr typemap modul (params @ locals) body in
   { Binary.Func.body; type_f; id; locals }
 
-let rewrite_import (f : 'a -> 'b Result.t) (import : 'a Imported.t) :
-  'b Imported.t Result.t =
-  let+ typ = f import.typ in
-  { import with typ }
-
-let rewrite_import_no_failure (f : 'a -> 'b) (import : 'a Imported.t) :
-  'b Imported.t =
-  let typ = f import.typ in
-  { import with typ }
-
-let rewrite_runtime f g r =
-  match r with
-  | Runtime.Local v ->
-    let+ v = f v in
-    Runtime.Local v
-  | Imported i ->
-    let+ i = g i in
-    Runtime.Imported i
-
-let rewrite_runtime_no_failure f g r =
-  match r with
-  | Runtime.Local v ->
-    let v = f v in
-    Runtime.Local v
-  | Imported i ->
-    let i = g i in
-    Runtime.Imported i
-
-let rewrite_named f named =
-  let+ values =
-    list_map
-      (fun ind ->
-        let index = Indexed.get_index ind in
-        let value = Indexed.get ind in
-        let+ value = f value in
-        Indexed.return index value )
-      named.Named.values
-  in
-  Named.create values named.named
-
-let rewrite_named_no_failure f named =
-  let values =
-    List.map
-      (fun ind ->
-        let index = Indexed.get_index ind in
-        let value = Indexed.get ind in
-        let value = f value in
-        Indexed.return index value )
-      named.Named.values
-  in
-  Named.create values named.named
-
-let rewrite_types (_modul : Assigned.t) (t : Binary.func_type) :
-  Binary.Typedef.t Result.t =
+let rewrite_types (t : Binary.func_type) : Binary.Typedef.t Result.t =
   Ok (None, t)
 
 let modul (modul : Assigned.t) : Binary.Module.t Result.t =
   Log.debug (fun m -> m "rewriting    ...");
-  let modul_typ = rewrite_named_no_failure rewrite_func_type modul.typ in
+  let modul_typ = Named.map rewrite_func_type modul.typ in
   let typemap = typemap modul_typ in
   let* global =
-    let+ { Named.named; values } =
-      rewrite_named
-        (rewrite_runtime
-           (rewrite_global typemap modul)
-           (rewrite_import (fun x -> Ok (rewrite_global_type x))) )
-        modul.global
-    in
-    let values = List.rev values in
-    Named.create values named
+    Named.monadic_map
+      (Runtime.monadic_map
+         ~f_local:(rewrite_global typemap modul)
+         ~f_imported:(Imported.monadic_map (fun x -> Ok (rewrite_global_type x))) )
+      modul.global
   in
-  let* elem = rewrite_named (rewrite_elem typemap modul) modul.elem in
-  let* data = rewrite_named (rewrite_data typemap modul) modul.data in
-  let* exports = rewrite_exports modul modul.exports in
+  let* elem = Named.monadic_map (rewrite_elem typemap modul) modul.elem in
+  let* data = Named.monadic_map (rewrite_data typemap modul) modul.data in
+  let* exports = rewrite_exports modul in
   let* func =
-    let import = rewrite_import (rewrite_block_type typemap modul) in
-    let runtime = rewrite_runtime (rewrite_func typemap modul) import in
-    rewrite_named runtime modul.func
+    let f_imported = Imported.monadic_map (rewrite_block_type typemap modul) in
+    let f_local = rewrite_func typemap modul in
+    let runtime = Runtime.monadic_map ~f_local ~f_imported in
+    Named.monadic_map runtime modul.func
   in
-  let* types = rewrite_named (rewrite_types modul) modul_typ in
+  let* types = Named.monadic_map rewrite_types modul_typ in
   let mem =
-    let import = rewrite_import_no_failure rewrite_limits in
-    let runtime = rewrite_runtime_no_failure rewrite_mem import in
-    rewrite_named_no_failure runtime modul.mem
+    let f_imported = Imported.map rewrite_limits in
+    let runtime = Runtime.map ~f_local:rewrite_mem ~f_imported in
+    Named.map runtime modul.mem
   in
   let table =
-    let import = rewrite_import_no_failure rewrite_table_type in
-    let runtime = rewrite_runtime_no_failure rewrite_table import in
-    rewrite_named_no_failure runtime modul.table
+    let f_imported = Imported.map rewrite_table_type in
+    let runtime = Runtime.map ~f_local:rewrite_table ~f_imported in
+    Named.map runtime modul.table
   in
   let+ start =
     match modul.start with

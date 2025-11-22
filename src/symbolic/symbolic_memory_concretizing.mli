@@ -10,7 +10,7 @@ val init : unit -> collection
 
 val clone : collection -> collection
 
-val get_memory : Env_id.t -> Concrete_memory.t -> collection -> int -> t
+val get_memory : int -> Concrete_memory.t -> collection -> int -> t
 
 val realloc :
      t

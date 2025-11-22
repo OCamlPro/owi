@@ -16,10 +16,6 @@ module type P = sig
     val value : t -> Value.t
 
     val set_value : t -> Value.t -> unit
-
-    val mut : t -> Binary.mut
-
-    val typ : t -> Binary.val_type
   end
 
   module Table : sig
@@ -132,7 +128,7 @@ module type P = sig
 
     val get_global : t -> int -> Global.t Choice.t
 
-    val get_extern_func : t -> Func_id.t -> Extern_func.extern_func
+    val get_extern_func : t -> int -> Extern_func.extern_func
 
     val drop_elem : Elem.t -> unit
 

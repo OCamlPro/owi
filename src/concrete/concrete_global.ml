@@ -2,9 +2,9 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
+(* TODO: mut and typ are only used at link time but not at runtime, it could be possible to remove them with some effort! *)
 type t =
   { mutable value : Concrete_value.t
-  ; label : string option
   ; mut : Binary.mut
   ; typ : Binary.val_type
   }
@@ -12,10 +12,6 @@ type t =
 let value g = g.value
 
 let set_value g v = g.value <- v
-
-let mut g = g.mut
-
-let typ g = g.typ
 
 let backup t = { t with value = t.value }
 

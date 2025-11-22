@@ -21,23 +21,35 @@ module State = struct
     ; defined_names : StringSet.t
     }
 
-  type 'f envs = 'f Link_env.t Env_id.collection
+  type 'f envs = 'f Link_env.t Dynarray.t
 
   type 'f t =
     { by_name : exports StringMap.t
-    ; by_id : (exports * Env_id.t) StringMap.t
-    ; last : (exports * Env_id.t) option
-    ; collection : 'f Func_id.collection
+    ; by_id : (exports * int) StringMap.t
+    ; last : (exports * int) option
+    ; collection : ('f * Binary.func_type) Dynarray.t
     ; envs : 'f envs
     }
 
-  let empty =
+  let empty () =
     { by_name = StringMap.empty
     ; by_id = StringMap.empty
     ; last = None
-    ; collection = Func_id.empty
-    ; envs = Env_id.empty
+    ; collection = Dynarray.create ()
+    ; envs = Dynarray.create ()
     }
+
+  (* TODO: I'm not sure it makes sense to try making the Link.State.t persistent, we could change the API to be fully mutable? *)
+  let clone { by_name; by_id; last; collection; envs } =
+    let collection = Dynarray.copy collection in
+    let envs = Dynarray.copy envs in
+    { by_name; by_id; last; collection; envs }
+
+  let get_envs state = state.envs
+
+  let get_last state = state.last
+
+  let get_by_id state id = StringMap.find_opt id state.by_id
 
   let load_from_module ls f (import : _ Imported.t) =
     match StringMap.find_opt import.modul ls.by_name with
@@ -126,7 +138,7 @@ let eval_global ls env
   | Local global ->
     let* value = Eval_const.expr env global.init in
     let mut, typ = global.typ in
-    let global : global = { value; label = global.id; mut; typ } in
+    let global : global = { value; mut; typ } in
     Ok global
   | Imported import -> State.load_global ls import
 
@@ -213,20 +225,22 @@ let load_func (ls : 'f State.t) (import : Binary.block_type Imported.t) :
   in
   let type' =
     match func with
-    | Kind.Wasm (_, func, _) ->
+    | Kind.Wasm { func; _ } ->
       let (Bt_raw ((None | Some _), t)) = func.type_f in
       t
-    | Extern func_id -> Func_id.get_typ func_id ls.collection
+    | Extern { idx } ->
+      let _f, t = Dynarray.get ls.collection idx in
+      t
   in
   if Binary.func_type_eq typ type' then Ok func
   else Error (`Incompatible_import_type import.name)
 
-let eval_func ls (finished_env : Env_id.t) func : func Result.t =
+let eval_func ls (finished_env : int) func : func Result.t =
   match func with
   | Runtime.Local func -> ok @@ Kind.wasm func finished_env
   | Imported import -> load_func ls import
 
-let eval_functions ls (finished_env : Env_id.t) env functions =
+let eval_functions ls (finished_env : int) env functions =
   let+ env, _i =
     array_fold_left
       (fun (env, i) func ->
@@ -346,20 +360,17 @@ let populate_exports env (exports : Binary.Module.Exports.t) :
 module Binary = struct
   let modul ~name (ls : 'f State.t) (modul : Binary.Module.t) =
     Log.info (fun m -> m "linking      ...");
-    let* envs, (env, init_active_data, init_active_elem) =
-      Env_id.with_fresh_id
-        (fun env_id ->
-          let env = Link_env.Build.empty in
-          let* env = eval_functions ls env_id env modul.func in
-          let* env = eval_globals ls env modul.global in
-          let* env = eval_memories ls env modul.mem in
-          let* env = eval_tables ls env modul.table in
-          let* env, init_active_data = define_data env modul.data in
-          let+ env, init_active_elem = define_elem env modul.elem in
-          let finished_env = Link_env.freeze env_id env ls.collection in
-          (finished_env, (finished_env, init_active_data, init_active_elem)) )
-        ls.envs
-    in
+    let ls = State.clone ls in
+    let next_id = Dynarray.length ls.envs in
+    let env = Link_env.Build.empty in
+    let* env = eval_functions ls next_id env modul.func in
+    let* env = eval_globals ls env modul.global in
+    let* env = eval_memories ls env modul.mem in
+    let* env = eval_tables ls env modul.table in
+    let* env, init_active_data = define_data env modul.data in
+    let* env, init_active_elem = define_elem env modul.elem in
+    let env = Link_env.freeze next_id env ls.collection in
+    Dynarray.add_last ls.envs env;
     let+ by_id_exports = populate_exports env modul.exports in
     let by_id =
       match modul.id with
@@ -383,7 +394,7 @@ module Binary = struct
       ; by_name
       ; last = Some (by_id_exports, Link_env.id env)
       ; collection = ls.collection
-      ; envs
+      ; envs = ls.envs
       } )
 end
 
@@ -393,7 +404,8 @@ module Extern = struct
       List.fold_left
         (fun (functions, collection) (name, func) ->
           let typ = modul.func_type func in
-          let id, collection = Func_id.add func typ collection in
+          Dynarray.add_last collection (func, typ);
+          let id = Dynarray.length collection - 1 in
           ((name, (Kind.extern id : Kind.func)) :: functions, collection) )
         ([], ls.collection) modul.functions
     in

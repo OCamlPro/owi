@@ -6,7 +6,6 @@
 
 type t =
   { mutable value : Concrete_value.t
-  ; label : string option
   ; mut : Binary.mut
   ; typ : Binary.val_type
   }
@@ -14,10 +13,6 @@ type t =
 val value : t -> Concrete_value.t
 
 val set_value : t -> Concrete_value.t -> unit
-
-val typ : t -> Binary.val_type
-
-val mut : t -> Binary.mut
 
 val backup : t -> t
 

@@ -45,7 +45,7 @@ let run_file ~parameters ~source_file =
   | _ -> () );
   let* m = Cmd_utils.set_entry_point entry_point invoke_with_symbols m in
   let link_state =
-    Link.State.empty
+    Link.State.empty ()
     |> Link.Extern.modul ~name:"wasi_snapshot_preview1"
          Symbolic_wasm_ffi.wasi_snapshot_preview1
     |> Link.Extern.modul ~name:"owi" Symbolic_wasm_ffi.symbolic_extern_module

@@ -2,18 +2,19 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type 'a t = private
-  { values : 'a Indexed.t list
-  ; named : int String_map.t
-  }
+type 'a t
 
-val empty : 'a t
+val get_at : 'a t -> int -> 'a option
 
-val create : 'a Indexed.t list -> int String_map.t -> 'a t
+val get_by_name : 'a t -> string -> int option
+
+val create : 'a Dynarray.t -> (string, int) Hashtbl.t -> 'a t
 
 val fold : (int -> 'a -> 'b -> 'b) -> 'a t -> 'b -> 'b
 
-val map : ('a Indexed.t -> 'b Indexed.t) -> 'a t -> 'b t
+val map : ('a -> 'b) -> 'a t -> 'b t
+
+val monadic_map : ('a -> 'b Result.t) -> 'a t -> 'b t Result.t
 
 val to_array : 'a t -> 'a array
 

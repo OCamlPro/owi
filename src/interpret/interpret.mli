@@ -14,8 +14,8 @@ module Concrete : sig
 
   val exec_vfunc_from_outside :
        locals:Concrete_value.t list
-    -> env:Env_id.t
-    -> envs:Concrete.Env.t Env_id.collection
+    -> env:int
+    -> envs:Concrete.Env.t Dynarray.t
     -> Kind.func
     -> V.t list Concrete_choice.t
 

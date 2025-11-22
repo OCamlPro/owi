@@ -21,18 +21,18 @@ module State : sig
     ; defined_names : StringSet.t
     }
 
-  type 'ext envs = 'ext Link_env.t Env_id.collection
+  type 'ext envs = 'ext Link_env.t Dynarray.t
 
-  type 'f t =
-    { by_name : exports StringMap.t
-    ; by_id : (exports * Env_id.t) StringMap.t
-    ; last : (exports * Env_id.t) option
-    ; collection : 'f Func_id.collection
-    ; envs : 'f envs
-    }
+  type 'f t
 
   (** the empty link state *)
-  val empty : 'f t
+  val empty : unit -> 'f t
+
+  val get_envs : 'f t -> 'f envs
+
+  val get_last : 'f t -> (exports * int) option
+
+  val get_by_id : 'f t -> string -> (exports * int) option
 end
 
 module Extern : sig
