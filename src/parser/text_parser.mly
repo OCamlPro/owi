@@ -749,11 +749,11 @@ let func_fields :=
   | (type_f, f) = func_fields_body; {
     [Func { f with type_f = Bt_raw (None, type_f) }]
   }
-  | (modul, name) = inline_import; ~ = type_use; _ = func_fields_import; {
-    [Import { modul; name; typ = Func (None, Bt_ind type_use) }]
+  | (modul_name, name) = inline_import; ~ = type_use; _ = func_fields_import; {
+    [Import { modul_name; name; typ = Func (None, Bt_ind type_use) }]
   }
-  | (modul, name) = inline_import; ~ = func_fields_import; {
-    [Import { modul; name; typ = Func (None, Bt_raw (None, func_fields_import)) }]
+  | (modul_name, name) = inline_import; ~ = func_fields_import; {
+    [Import { modul_name; name; typ = Func (None, Bt_raw (None, func_fields_import)) }]
   }
   | ~ = inline_export; ~ = func_fields; {
     Module.Field.Export { name = inline_export; typ = Func None } :: func_fields
@@ -891,8 +891,8 @@ let table_fields :=
   | ~ = table_type; {
     [ Module.Field.Table (None, table_type) ]
   }
-  | (modul, name) = inline_import; ~ = table_type; {
-    [ Import { modul; name; typ = Table (None, table_type) }]
+  | (modul_name, name) = inline_import; ~ = table_type; {
+    [ Import { modul_name; name; typ = Table (None, table_type) }]
   }
   | ~ = inline_export; ~ = table_fields; {
     Export { name = inline_export; typ = Table None } :: table_fields
@@ -941,8 +941,8 @@ let memory_fields :=
   | ~ = mem_type; {
     [ Mem (None, mem_type) ]
   }
-  | (modul, name) = inline_import; ~ = mem_type; {
-    [ Import { modul; name; typ = Mem (None, mem_type) } ]
+  | (modul_name, name) = inline_import; ~ = mem_type; {
+    [ Import { modul_name; name; typ = Mem (None, mem_type) } ]
   }
   | ~ = inline_export; ~ = memory_fields; {
     Export { name = inline_export; typ = Mem None } :: memory_fields
@@ -977,8 +977,8 @@ let global_fields :=
     let init : expr Annotated.t = Annotated.dummy_deep init in
     [ Module.Field.Global { typ; init; id = None } ]
   }
-  | (modul, name) = inline_import; ~ = global_type; {
-    [ Import { modul; name; typ = Global (None, global_type) } ]
+  | (modul_name, name) = inline_import; ~ = global_type; {
+    [ Import { modul_name; name; typ = Global (None, global_type) } ]
   }
   | ~ = inline_export; ~ = global_fields; {
     Module.Field.Export { name = inline_export; typ = Global None } :: global_fields
@@ -994,8 +994,8 @@ let import_type ==
   | GLOBAL; ~ = option(id); ~ = global_type; <Import.Type.Global>
 
 let import ==
-  | IMPORT; modul = utf8_name; name = utf8_name; typ = par(import_type); {
-    [ Module.Field.Import { modul; name; typ } ]
+  | IMPORT; modul_name = utf8_name; name = utf8_name; typ = par(import_type); {
+    [ Module.Field.Import { modul_name; name; typ } ]
   }
 
 let inline_import ==

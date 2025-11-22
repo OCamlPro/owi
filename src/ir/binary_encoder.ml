@@ -148,8 +148,8 @@ let write_memarg buf ({ offset; align } : memarg) =
 let write_memory buf ((_so, limits) : Mem.t) = write_limits buf limits
 
 let write_memory_import buf
-  ({ Imported.modul; name; typ = limits; _ } : limits Imported.t) =
-  write_string buf modul;
+  ({ modul_name; name; typ = limits; _ } : limits Origin.imported) =
+  write_string buf modul_name;
   write_string buf name;
   Buffer.add_char buf '\x02';
   write_limits buf limits
@@ -159,17 +159,17 @@ let write_table buf ((_so, (limits, (_nullable, heaptype))) : Table.t) =
   write_limits buf limits
 
 let write_table_import buf
-  ({ Imported.modul; name; typ = limits, (_nullable, heaptype); _ } :
-    Table.Type.t Imported.t ) =
-  write_string buf modul;
+  ({ modul_name; name; typ = limits, (_nullable, heaptype); _ } :
+    Table.Type.t Origin.imported ) =
+  write_string buf modul_name;
   write_string buf name;
   Buffer.add_char buf '\x01';
   write_reftype buf heaptype;
   write_limits buf limits
 
 let write_func_import buf
-  ({ Imported.modul; name; typ; _ } : Binary.block_type Imported.t) =
-  write_string buf modul;
+  ({ modul_name; name; typ; _ } : Binary.block_type Origin.imported) =
+  write_string buf modul_name;
   write_string buf name;
   Buffer.add_char buf '\x00';
   write_block_type_idx buf typ
@@ -523,8 +523,9 @@ let write_global buf ({ typ; init; _ } : Global.t) =
   write_expr buf init ~end_op_code:None
 
 let write_global_import buf
-  ({ Imported.modul; name; typ = mut, valtype; _ } : Global.Type.t Imported.t) =
-  write_string buf modul;
+  ({ modul_name; name; typ = mut, valtype; _ } : Global.Type.t Origin.imported)
+    =
+  write_string buf modul_name;
   write_string buf name;
   Buffer.add_char buf '\x03';
   write_valtype buf valtype;
@@ -718,12 +719,12 @@ let encode_datas buf datas = encode_vector_array buf datas write_data
 
 let keep_local values =
   List.filter_map
-    (function Runtime.Local data -> Some data | Runtime.Imported _data -> None)
+    (function Origin.Local data -> Some data | Origin.Imported _data -> None)
     (Array.to_list values)
 
 let keep_imported values =
   List.filter_map
-    (function Runtime.Local _data -> None | Runtime.Imported data -> Some data)
+    (function Origin.Local _data -> None | Origin.Imported data -> Some data)
     (Array.to_list values)
 
 let encode

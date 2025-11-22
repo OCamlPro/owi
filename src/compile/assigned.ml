@@ -15,10 +15,10 @@ end)
 type t =
   { id : string option
   ; typ : Text.func_type Named.t
-  ; global : (Text.Global.t, Text.Global.Type.t) Runtime.t Named.t
-  ; table : (Text.Table.t, Text.Table.Type.t) Runtime.t Named.t
-  ; mem : (Text.Mem.t, Text.limits) Runtime.t Named.t
-  ; func : (Text.Func.t, Text.block_type) Runtime.t Named.t
+  ; global : (Text.Global.t, Text.Global.Type.t) Origin.t Named.t
+  ; table : (Text.Table.t, Text.Table.Type.t) Origin.t Named.t
+  ; mem : (Text.Mem.t, Text.limits) Origin.t Named.t
+  ; func : (Text.Func.t, Text.block_type) Origin.t Named.t
   ; elem : Text.Elem.t Named.t
   ; data : Text.Data.t Named.t
   ; global_exports : Grouped.opt_export Dynarray.t
@@ -33,7 +33,7 @@ let pp_id fmt id = Text.pp_id_opt fmt id
 let pp_typ fmt typ = Named.pp Text.pp_func_type fmt typ
 
 let pp_runtime_named ~pp_local ~pp_imported fmt l =
-  Named.pp (Runtime.pp ~pp_local ~pp_imported) fmt l
+  Named.pp (Origin.pp ~pp_local ~pp_imported) fmt l
 
 let pp_global fmt g =
   pp_runtime_named ~pp_local:Text.Global.pp ~pp_imported:Text.Global.Type.pp fmt
@@ -95,7 +95,7 @@ let assign_types (modul : Grouped.t) : Text.func_type Named.t =
     modul.function_type;
   Named.create declared_types named_types
 
-let get_runtime_name (get_name : 'a -> string option) (elt : ('a, 'b) Runtime.t)
+let get_runtime_name (get_name : 'a -> string option) (elt : ('a, 'b) Origin.t)
   : string option =
   match elt with
   | Local v -> get_name v

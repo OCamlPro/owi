@@ -51,18 +51,18 @@ module State = struct
 
   let get_by_id state id = StringMap.find_opt id state.by_id
 
-  let load_from_module ls f (import : _ Imported.t) =
-    match StringMap.find_opt import.modul ls.by_name with
-    | None -> Error (`Unknown_module import.modul)
+  let load_from_module ls f (import : _ Origin.imported) =
+    match StringMap.find_opt import.modul_name ls.by_name with
+    | None -> Error (`Unknown_module import.modul_name)
     | Some exports -> (
       match StringMap.find_opt import.name (f exports) with
       | None ->
         if StringSet.mem import.name exports.defined_names then
           Error (`Incompatible_import_type import.name)
-        else Error (`Unknown_import (import.modul, import.name))
+        else Error (`Unknown_import (import.modul_name, import.name))
       | Some v -> Ok v )
 
-  let load_global (ls : 'f t) (import : Binary.Global.Type.t Imported.t) :
+  let load_global (ls : 'f t) (import : Binary.Global.Type.t Origin.imported) :
     global Result.t =
     let* global = load_from_module ls (fun (e : exports) -> e.globals) import in
     let* () =
@@ -132,7 +132,7 @@ module Eval_const = struct
 end
 
 let eval_global ls env
-  (global : (Binary.Global.t, Binary.Global.Type.t) Runtime.t) : global Result.t
+  (global : (Binary.Global.t, Binary.Global.Type.t) Origin.t) : global Result.t
     =
   match global with
   | Local global ->
@@ -162,7 +162,7 @@ let limit_is_included ~import ~imported =
   | None, Some _ -> false
   | Some i, Some j -> i <= j
 
-let load_memory (ls : 'f State.t) (import : Binary.limits Imported.t) :
+let load_memory (ls : 'f State.t) (import : Binary.limits Origin.imported) :
   Concrete_memory.t Result.t =
   let* mem =
     State.load_from_module ls (fun (e : State.exports) -> e.memories) import
@@ -171,7 +171,7 @@ let load_memory (ls : 'f State.t) (import : Binary.limits Imported.t) :
   if limit_is_included ~import:import.typ ~imported:imported_limit then Ok mem
   else Error (`Incompatible_import_type import.name)
 
-let eval_memory ls (memory : (Binary.Mem.t, Binary.limits) Runtime.t) :
+let eval_memory ls (memory : (Binary.Mem.t, Binary.limits) Origin.t) :
   Concrete_memory.t Result.t =
   match memory with
   | Local (_label, mem_type) -> ok @@ Concrete_memory.init mem_type
@@ -191,8 +191,8 @@ let eval_memories ls env memories =
 let table_types_are_compatible (import, (t1 : Binary.ref_type)) (imported, t2) =
   limit_is_included ~import ~imported && Binary.ref_type_eq t1 t2
 
-let load_table (ls : 'f State.t) (import : Binary.Table.Type.t Imported.t) :
-  table Result.t =
+let load_table (ls : 'f State.t) (import : Binary.Table.Type.t Origin.imported)
+  : table Result.t =
   let typ : Binary.Table.Type.t = import.typ in
   let* t =
     State.load_from_module ls (fun (e : State.exports) -> e.tables) import
@@ -200,8 +200,7 @@ let load_table (ls : 'f State.t) (import : Binary.Table.Type.t Imported.t) :
   if table_types_are_compatible typ (t.limits, t.typ) then Ok t
   else Error (`Incompatible_import_type import.name)
 
-let eval_table ls (table : (_, Binary.Table.Type.t) Runtime.t) : table Result.t
-    =
+let eval_table ls (table : (_, Binary.Table.Type.t) Origin.t) : table Result.t =
   match table with
   | Local (label, table_type) -> ok @@ Concrete_table.init ?label table_type
   | Imported import -> load_table ls import
@@ -217,7 +216,7 @@ let eval_tables ls env tables =
   in
   env
 
-let load_func (ls : 'f State.t) (import : Binary.block_type Imported.t) :
+let load_func (ls : 'f State.t) (import : Binary.block_type Origin.imported) :
   func Result.t =
   let (Binary.Bt_raw ((None | Some _), typ)) = import.typ in
   let* func =
@@ -237,7 +236,7 @@ let load_func (ls : 'f State.t) (import : Binary.block_type Imported.t) :
 
 let eval_func ls (finished_env : int) func : func Result.t =
   match func with
-  | Runtime.Local func -> ok @@ Kind.wasm func finished_env
+  | Origin.Local func -> ok @@ Kind.wasm func finished_env
   | Imported import -> load_func ls import
 
 let eval_functions ls (finished_env : int) env functions =

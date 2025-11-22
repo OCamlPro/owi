@@ -442,7 +442,7 @@ module Text : sig
     end
 
     type t =
-      { modul : string
+      { modul_name : string
           (** The name of the module from which the import is done *)
       ; name : string  (** The name of the importee in its module of origin *)
       ; typ : Type.t
@@ -831,11 +831,11 @@ module Binary : sig
     type t =
       { id : string option
       ; types : Typedef.t array
-      ; global : (Global.t, Global.Type.t) Runtime.t array
-      ; table : (Table.t, Table.Type.t) Runtime.t array
-      ; mem : (Mem.t, limits) Runtime.t array
+      ; global : (Global.t, Global.Type.t) Origin.t array
+      ; table : (Table.t, Table.Type.t) Origin.t array
+      ; mem : (Mem.t, limits) Origin.t array
       ; func :
-          (Func.t, block_type) Runtime.t array (* TODO: switch to func_type *)
+          (Func.t, block_type) Origin.t array (* TODO: switch to func_type *)
       ; elem : Elem.t array
       ; data : Data.t array
       ; exports : Exports.t

@@ -101,32 +101,21 @@ let check_iso ~unsafe export_name export_type module1 module2 =
 
   let iso_modul = Binary.Module.empty in
   let func1 =
-    Runtime.Imported
-      { modul = module_name1
-      ; name = export_name
-      ; assigned_name = Some "iso_func1"
-      ; typ
-      }
+    Origin.imported ~modul_name:module_name1 ~name:export_name
+      ~assigned_name:(Some "iso_func1") ~typ
   in
   let iso_modul, idf1 = Binary.Module.add_func func1 iso_modul in
   let func2 =
-    Runtime.Imported
-      { modul = module_name2
-      ; name = export_name
-      ; assigned_name = Some "iso_func2"
-      ; typ
-      }
+    Origin.imported ~modul_name:module_name2 ~name:export_name
+      ~assigned_name:(Some "iso_func2") ~typ
   in
   let iso_modul, idf2 = Binary.Module.add_func func2 iso_modul in
 
   let iso_modul, id_owi_assert =
     Binary.Module.add_func
-      (Runtime.Imported
-         { modul = "owi"
-         ; name = "assert"
-         ; assigned_name = Some "assert"
-         ; typ = Binary.Bt_raw (None, ([ (None, Binary.Num_type I32) ], []))
-         } )
+      (Origin.imported ~modul_name:"owi" ~name:"assert"
+         ~assigned_name:(Some "assert")
+         ~typ:(Binary.Bt_raw (None, ([ (None, Binary.Num_type I32) ], []))) )
       iso_modul
   in
   let iso_func =
@@ -240,50 +229,38 @@ let check_iso ~unsafe export_name export_type module1 module2 =
       let (Bt_raw (_, typ) : Binary.block_type) = typ in
       Binary.Bt_raw (None, (fst typ, []))
     in
-    Runtime.Local { Binary.Func.type_f; locals; body; id }
+    Origin.Local { Binary.Func.type_f; locals; body; id }
   in
 
   let iso_modul, id_i32_symbol =
     Binary.Module.add_func
-      (Runtime.Imported
-         { modul = "owi"
-         ; name = "i32_symbol"
-         ; assigned_name = Some "i32_symbol"
-         ; typ = Binary.Bt_raw (None, ([], [ Binary.Num_type I32 ]))
-         } )
+      (Origin.imported ~modul_name:"owi" ~name:"i32_symbol"
+         ~assigned_name:(Some "i32_symbol")
+         ~typ:(Binary.Bt_raw (None, ([], [ Binary.Num_type I32 ]))) )
       iso_modul
   in
 
   let iso_modul, id_i64_symbol =
     Binary.Module.add_func
-      (Runtime.Imported
-         { modul = "owi"
-         ; name = "i64_symbol"
-         ; assigned_name = Some "i64_symbol"
-         ; typ = Binary.Bt_raw (None, ([], [ Binary.Num_type I64 ]))
-         } )
+      (Origin.imported ~modul_name:"owi" ~name:"i64_symbol"
+         ~assigned_name:(Some "i64_symbol")
+         ~typ:(Binary.Bt_raw (None, ([], [ Binary.Num_type I64 ]))) )
       iso_modul
   in
 
   let iso_modul, id_f32_symbol =
     Binary.Module.add_func
-      (Runtime.Imported
-         { modul = "owi"
-         ; name = "f32_symbol"
-         ; assigned_name = Some "f32_symbol"
-         ; typ = Binary.Bt_raw (None, ([], [ Binary.Num_type F32 ]))
-         } )
+      (Origin.imported ~modul_name:"owi" ~name:"f32_symbol"
+         ~assigned_name:(Some "f32_symbol")
+         ~typ:(Binary.Bt_raw (None, ([], [ Binary.Num_type F32 ]))) )
       iso_modul
   in
 
   let iso_modul, id_f64_symbol =
     Binary.Module.add_func
-      (Runtime.Imported
-         { modul = "owi"
-         ; name = "f64_symbol"
-         ; assigned_name = Some "f64_symbol"
-         ; typ = Binary.Bt_raw (None, ([], [ Binary.Num_type F64 ]))
-         } )
+      (Origin.imported ~modul_name:"owi" ~name:"f64_symbol"
+         ~assigned_name:(Some "f64_symbol")
+         ~typ:(Binary.Bt_raw (None, ([], [ Binary.Num_type F64 ]))) )
       iso_modul
   in
 
@@ -305,7 +282,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
       @ [ Binary.Call iso_check_index ]
     in
     let type_f = Binary.Bt_raw (None, ([], [])) in
-    Runtime.Local { Binary.Func.type_f; locals; body; id }
+    Origin.Local { Binary.Func.type_f; locals; body; id }
   in
   let iso_modul, index = Binary.Module.add_func start_function iso_modul in
   let start = Some index in

@@ -347,7 +347,7 @@ module Import : sig
   end
 
   type t =
-    { modul : string
+    { modul_name : string
         (** The name of the module from which the import is done *)
     ; name : string  (** The name of the importee in its module of origin *)
     ; typ : Type.t
