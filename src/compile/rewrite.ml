@@ -548,29 +548,28 @@ let modul (modul : Assigned.t) : Binary.Module.t Result.t =
   let typemap = typemap modul_typ in
   let* global =
     Named.monadic_map
-      (Runtime.monadic_map
-         ~f_local:(rewrite_global typemap modul)
-         ~f_imported:(Imported.monadic_map (fun x -> Ok (rewrite_global_type x))) )
+      (Origin.monadic_map ~f_local:(rewrite_global typemap modul)
+         ~f_imported:(fun x -> Ok (rewrite_global_type x) ) )
       modul.global
   in
   let* elem = Named.monadic_map (rewrite_elem typemap modul) modul.elem in
   let* data = Named.monadic_map (rewrite_data typemap modul) modul.data in
   let* exports = rewrite_exports modul in
   let* func =
-    let f_imported = Imported.monadic_map (rewrite_block_type typemap modul) in
+    let f_imported = rewrite_block_type typemap modul in
     let f_local = rewrite_func typemap modul in
-    let runtime = Runtime.monadic_map ~f_local ~f_imported in
+    let runtime = Origin.monadic_map ~f_local ~f_imported in
     Named.monadic_map runtime modul.func
   in
   let* types = Named.monadic_map rewrite_types modul_typ in
   let mem =
-    let f_imported = Imported.map rewrite_limits in
-    let runtime = Runtime.map ~f_local:rewrite_mem ~f_imported in
+    let runtime = Origin.map ~f_local:rewrite_mem ~f_imported:rewrite_limits in
     Named.map runtime modul.mem
   in
   let table =
-    let f_imported = Imported.map rewrite_table_type in
-    let runtime = Runtime.map ~f_local:rewrite_table ~f_imported in
+    let runtime =
+      Origin.map ~f_local:rewrite_table ~f_imported:rewrite_table_type
+    in
     Named.map runtime modul.table
   in
   let+ start =

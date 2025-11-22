@@ -409,62 +409,61 @@ let convert_table_type ((limits, t) : Binary.Table.Type.t) : Text.Table.Type.t =
   let t = convert_ref_type t in
   (limits, t)
 
-let from_global
-  (global : (Binary.Global.t, Binary.Global.Type.t) Runtime.t array) :
-  Text.Module.Field.t list =
+let from_global (global : (Binary.Global.t, Binary.Global.Type.t) Origin.t array)
+  : Text.Module.Field.t list =
   Array.map
     (function
-      | Runtime.Local (g : Binary.Global.t) ->
+      | Origin.Local (g : Binary.Global.t) ->
         let typ = convert_global_type g.typ in
         let init = convert_expr g.init in
         let id = g.id in
         Text.Module.Field.Global { typ; init; id }
-      | Imported { modul; name; assigned_name; typ } ->
+      | Imported { modul_name; name; assigned_name; typ } ->
         let typ = convert_global_type typ in
         let typ = Text.Import.Type.Global (assigned_name, typ) in
-        Text.Module.Field.Import { modul; name; typ } )
+        Text.Module.Field.Import { modul_name; name; typ } )
     global
   |> Array.to_list
 
 let from_table table : Text.Module.Field.t list =
   Array.map
     (function
-      | Runtime.Local (name, t) ->
+      | Origin.Local (name, t) ->
         let t = convert_table_type t in
         Text.Module.Field.Table (name, t)
-      | Imported { modul; name; assigned_name; typ } ->
+      | Imported { modul_name; name; assigned_name; typ } ->
         let typ = convert_table_type typ in
         let typ = Text.Import.Type.Table (assigned_name, typ) in
-        Import { modul; name; typ } )
+        Import { modul_name; name; typ } )
     table
   |> Array.to_list
 
 let from_mem mem : Text.Module.Field.t list =
   Array.map
     (function
-      | Runtime.Local (name, t) ->
+      | Origin.Local (name, t) ->
         let t = convert_limits t in
         Text.Module.Field.Mem (name, t)
-      | Imported { modul; name; assigned_name; typ } ->
+      | Imported { modul_name; name; assigned_name; typ } ->
         let typ = convert_limits typ in
         let typ = Text.Import.Type.Mem (assigned_name, typ) in
-        Import { modul; name; typ } )
+        Import { modul_name; name; typ } )
     mem
   |> Array.to_list
 
 let from_func func : Text.Module.Field.t list =
   Array.map
     (function
-      | Runtime.Local (func : Binary.Func.t) ->
+      | Origin.Local (func : Binary.Func.t) ->
         let type_f = convert_block_type func.type_f in
         let locals = List.map convert_param func.locals in
         let body = convert_expr func.body in
         let id = func.id in
         Text.Module.Field.Func { type_f; locals; body; id }
-      | Imported { modul; name; assigned_name; typ } ->
+      | Imported { modul_name; name; assigned_name; typ } ->
         let typ = convert_block_type typ in
         let typ = Text.Import.Type.Func (assigned_name, typ) in
-        Text.Module.Field.Import { modul; name; typ } )
+        Text.Module.Field.Import { modul_name; name; typ } )
     func
   |> Array.to_list
 

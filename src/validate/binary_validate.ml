@@ -73,13 +73,13 @@ module Env = struct
     if i >= Array.length modul.global then Error (`Unknown_global (Text.Raw i))
     else
       match modul.global.(i) with
-      | Runtime.Local { typ; _ } | Imported { typ; _ } -> Ok typ
+      | Origin.Local { typ; _ } | Imported { typ; _ } -> Ok typ
 
   let func_get i modul =
     if i >= Array.length modul.func then Error (`Unknown_func (Text.Raw i))
     else
       match modul.func.(i) with
-      | Runtime.Local { Func.type_f = Bt_raw (_, t); _ }
+      | Origin.Local { Func.type_f = Bt_raw (_, t); _ }
       | Imported { typ = Bt_raw (_, t); _ } ->
         Ok t
 
@@ -92,7 +92,7 @@ module Env = struct
     if i >= Array.length modul.table then Error (`Unknown_table (Text.Raw i))
     else
       match modul.table.(i) with
-      | Runtime.Local (_, (_, t)) | Imported { typ = _, t; _ } -> Ok t
+      | Origin.Local (_, (_, t)) | Imported { typ = _, t; _ } -> Ok t
 
   let elem_type_get i modul =
     if i >= Array.length modul.elem then Error (`Unknown_elem (Text.Raw i))
@@ -558,7 +558,7 @@ and typecheck_expr env expr ~is_loop (block_type : block_type option)
 
 let typecheck_function (modul : Module.t) func refs =
   match func with
-  | Runtime.Imported _ -> Ok ()
+  | Origin.Imported _ -> Ok ()
   | Local (func : Func.t) ->
     let (Bt_raw (_, (params, result))) = func.type_f in
     let env =
@@ -591,7 +591,7 @@ let typecheck_const_instr (modul : Module.t) refs stack instr =
     else
       let* mut, typ =
         match modul.global.(i) with
-        | Runtime.Local _ -> Error (`Unknown_global (Text.Raw i))
+        | Origin.Local _ -> Error (`Unknown_global (Text.Raw i))
         | Imported { typ; _ } -> Ok typ
       in
       let* () =
@@ -610,7 +610,7 @@ let typecheck_const_expr (modul : Module.t) refs expr =
   list_fold_left (typecheck_const_instr modul refs) [] expr.Annotated.raw
 
 let typecheck_global (modul : Module.t) refs
-  (global : (Global.t, Global.Type.t) Runtime.t) =
+  (global : (Global.t, Global.Type.t) Origin.t) =
   match global with
   | Imported _ -> Ok ()
   | Local { typ; init; _ } -> (
@@ -719,14 +719,14 @@ let check_limit { min; max } =
 let validate_tables modul =
   array_iter
     (function
-      | Runtime.Local (_, (limits, _)) | Imported { typ = limits, _; _ } ->
+      | Origin.Local (_, (limits, _)) | Imported { typ = limits, _; _ } ->
         check_limit limits )
     modul.table
 
 let validate_mem modul =
   array_iter
     (function
-      | Runtime.Local (_, typ) | Imported { typ; _ } ->
+      | Origin.Local (_, typ) | Imported { typ; _ } ->
         let* () =
           if typ.min > 65536 then Error `Memory_size_too_large
           else

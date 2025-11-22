@@ -12,9 +12,9 @@ type mode =
   | Sound
 
 let find_functions_with_func_type func_type (acc, i)
-  (f : (Binary.Func.t, Binary.block_type) Runtime.t) =
+  (f : (Binary.Func.t, Binary.block_type) Origin.t) =
   let (Bt_raw (_, ft)) =
-    match f with Runtime.Local x -> x.type_f | Runtime.Imported imp -> imp.typ
+    match f with Origin.Local x -> x.type_f | Origin.Imported imp -> imp.typ
   in
   if Binary.func_type_eq func_type ft then (S.add i acc, i + 1) else (acc, i + 1)
 
@@ -63,13 +63,13 @@ let rec find_children mode tables (funcs : 'a array) acc (l : Binary.expr) =
     find_children mode tables funcs x l
   | _ :: l, _ -> find_children mode tables funcs acc l
 
-let build_graph mode tables funcs (g, i) (f : (Binary.Func.t, 'a) Runtime.t) =
+let build_graph mode tables funcs (g, i) (f : (Binary.Func.t, 'a) Origin.t) =
   match f with
-  | Runtime.Local x ->
+  | Origin.Local x ->
     let s = find_children mode tables funcs S.empty x.body.raw in
     let cfg = Cmd_cfg.build_cfg_from_func x in
     ((i, Some cfg, s) :: g, i + 1)
-  | Runtime.Imported _ -> ((i, None, S.empty) :: g, i + 1)
+  | Origin.Imported _ -> ((i, None, S.empty) :: g, i + 1)
 
 let eval_ibinop stack nn (op : Binary.ibinop) =
   match nn with
@@ -130,9 +130,9 @@ let eval_tables tables env =
   in
   M.of_list t
 
-let build_env (env, n) (global : (Binary.Global.t, 'a) Runtime.t) =
+let build_env (env, n) (global : (Binary.Global.t, 'a) Origin.t) =
   match global with
-  | Runtime.Local x -> (
+  | Origin.Local x -> (
     match fst x.Binary.Global.typ with
     | Const -> (M.add n (eval_const env x.Binary.Global.init) env, n + 1)
     | _ -> (env, n + 1) )
@@ -153,7 +153,7 @@ let find_tables_to_remove export_tables funcs =
   Array.fold_left
     (fun acc f ->
       match f with
-      | Runtime.Local x -> List.fold_left find_tables acc x.Binary.Func.body.raw
+      | Origin.Local x -> List.fold_left find_tables acc x.Binary.Func.body.raw
       | _ -> acc )
     l funcs
 
@@ -177,7 +177,7 @@ let find_entries entry_point (m : Binary.Module.t) =
       (Option.bind entry_point (fun x ->
          Array.find_index
            (function
-             | Runtime.Local (y : Binary.Func.t) ->
+             | Origin.Local (y : Binary.Func.t) ->
                Option.compare String.compare (Some x) y.id = 0
              | _ -> false )
            m.func ) )

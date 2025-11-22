@@ -29,10 +29,10 @@ let annotate_fc m cov_label_set_idx =
   let func =
     Array.map
       (function
-        | Runtime.Imported _ as v ->
+        | Origin.Imported _ as v ->
           (* TODO: should we write a wrapper for the imported function so that it gets counted in FC? *)
           v
-        | Runtime.Local f ->
+        | Origin.Local f ->
           let body =
             Annotated.map
               (fun expr ->
@@ -45,7 +45,7 @@ let annotate_fc m cov_label_set_idx =
               f.Binary.Func.body
           in
           let f = { f with body } in
-          Runtime.Local f )
+          Origin.Local f )
       func
   in
   ({ m with func }, !count)
@@ -56,10 +56,10 @@ let annotate_sc m cov_label_set_idx =
   let func =
     Array.map
       (function
-        | Runtime.Imported _ as v ->
+        | Origin.Imported _ as v ->
           (* TODO: should we write a wrapper for the imported function so that it gets counted in FC? *)
           v
-        | Runtime.Local f ->
+        | Origin.Local f ->
           let rec handle_instr instr =
             incr count;
             let prefix =
@@ -94,7 +94,7 @@ let annotate_sc m cov_label_set_idx =
           in
           let body = handle_expr f.Binary.Func.body in
           let f = { f with body } in
-          Runtime.Local f )
+          Origin.Local f )
       func
   in
   ({ m with func }, !count)
@@ -105,8 +105,8 @@ let annotate_dc m cov_label_set_idx =
   let func =
     Array.map
       (function
-        | Runtime.Imported _ as v -> v
-        | Runtime.Local f ->
+        | Origin.Imported _ as v -> v
+        | Origin.Local f ->
           let rec handle_instr instr =
             let instr =
               Annotated.map
@@ -177,7 +177,7 @@ let annotate_dc m cov_label_set_idx =
           in
           let body = handle_expr f.Binary.Func.body in
           let f = { f with body } in
-          Runtime.Local f )
+          Origin.Local f )
       func
   in
   ({ m with func }, !count)

@@ -705,11 +705,10 @@ module Module = struct
   type t =
     { id : string option
     ; types : Typedef.t array
-    ; global : (Global.t, Global.Type.t) Runtime.t array
-    ; table : (Table.t, Table.Type.t) Runtime.t array
-    ; mem : (Mem.t, limits) Runtime.t array
-    ; func :
-        (Func.t, block_type) Runtime.t array (* TODO: switch to func_type *)
+    ; global : (Global.t, Global.Type.t) Origin.t array
+    ; table : (Table.t, Table.Type.t) Origin.t array
+    ; mem : (Mem.t, limits) Origin.t array
+    ; func : (Func.t, block_type) Origin.t array (* TODO: switch to func_type *)
     ; elem : Elem.t array
     ; data : Data.t array
     ; exports : Exports.t
@@ -767,10 +766,10 @@ module Module = struct
       Annotated.map (fun expr -> List.map handle_instr expr) expr
     in
     let update_function = function
-      | Runtime.Imported _ as f -> f
-      | Runtime.Local (f : Func.t) ->
+      | Origin.Imported _ as f -> f
+      | Origin.Local (f : Func.t) ->
         let body = handle_expr f.body in
-        Runtime.Local { f with body }
+        Origin.Local { f with body }
     in
     let func =
       Array.init
@@ -791,7 +790,7 @@ module Module = struct
     let global =
       Array.map
         (function
-          | Runtime.Imported _ as v -> v
+          | Origin.Imported _ as v -> v
           | Local (global : Global.t) ->
             let init = handle_expr global.init in
             Local { global with init } )
@@ -849,9 +848,13 @@ module Module = struct
   let find_imported_func_index ~modul_name ~func_name m =
     Array.find_index
       (function
-        | Runtime.Imported { Imported.modul; name; assigned_name = _; typ = _ }
-          ->
-          String.equal modul_name modul && String.equal func_name name
+        | Origin.Imported
+            { Origin.modul_name = modul_name'
+            ; name
+            ; assigned_name = _
+            ; typ = _
+            } ->
+          String.equal modul_name modul_name' && String.equal func_name name
         | Local _ -> false )
       m.func
 
@@ -861,7 +864,7 @@ module Module = struct
     let _i, last =
       Array.fold_left
         (fun (i, last) -> function
-          | Runtime.Imported _ -> (succ i, i) | Runtime.Local _ -> (succ i, last) )
+          | Origin.Imported _ -> (succ i, i) | Origin.Local _ -> (succ i, last) )
         (0, ~-1) m.func
     in
     last
@@ -872,12 +875,7 @@ module Module = struct
     | Some _i -> m
     | None ->
       let f =
-        Runtime.Imported
-          { Imported.modul = modul_name
-          ; name = func_name
-          ; assigned_name = None
-          ; typ
-          }
+        Origin.imported ~modul_name ~name:func_name ~assigned_name:None ~typ
       in
 
       let idx = find_last_import_index m + 1 in

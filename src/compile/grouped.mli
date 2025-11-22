@@ -18,10 +18,10 @@ type t =
   ; type_checks : (indice * func_type) Dynarray.t
       (* Types checks to perform after assignment.
          Come from function declarations with type indicies *)
-  ; global : (Global.t, Global.Type.t) Runtime.t Dynarray.t
-  ; table : (Table.t, Table.Type.t) Runtime.t Dynarray.t
-  ; mem : (Mem.t, limits) Runtime.t Dynarray.t
-  ; func : (Func.t, block_type) Runtime.t Dynarray.t
+  ; global : (Global.t, Global.Type.t) Origin.t Dynarray.t
+  ; table : (Table.t, Table.Type.t) Origin.t Dynarray.t
+  ; mem : (Mem.t, limits) Origin.t Dynarray.t
+  ; func : (Func.t, block_type) Origin.t Dynarray.t
   ; elem : Elem.t Dynarray.t
   ; data : Data.t Dynarray.t
   ; global_exports : opt_export Dynarray.t

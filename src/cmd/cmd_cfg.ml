@@ -131,7 +131,7 @@ let build_cfg_from_text_module modul entry =
   | Ok m ->
     let f =
       match Array.get m.func entry with
-      | Runtime.Local f -> f
+      | Origin.Local f -> f
       | _ -> assert false
     in
     let nodes, edges = build_cfg f.body.raw in
@@ -152,14 +152,14 @@ let cmd ~source_file ~entry_point =
          | None ->
            Array.find_index
              (function
-               | Runtime.Local (y : Binary.Func.t) ->
+               | Origin.Local (y : Binary.Func.t) ->
                  Option.compare String.compare (Some x) y.id = 0
                | _ -> false )
              m.func ) )
       ~default:0
   in
   let f =
-    match Array.get m.func entry with Runtime.Local f -> f | _ -> assert false
+    match Array.get m.func entry with Origin.Local f -> f | _ -> assert false
   in
   let nodes, edges = build_cfg f.body.raw in
   let graph = Control_flow_graph.init nodes edges in

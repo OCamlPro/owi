@@ -704,14 +704,15 @@ module Import = struct
   end
 
   type t =
-    { modul : string
+    { modul_name : string
         (** The name of the module from which the import is done *)
     ; name : string  (** The name of the importee in its module of origin *)
     ; typ : Type.t
     }
 
   let pp fmt i =
-    pf fmt {|(import "%a" "%a" %a)|} string i.modul string i.name Type.pp i.typ
+    pf fmt {|(import "%a" "%a" %a)|} string i.modul_name string i.name Type.pp
+      i.typ
 end
 
 module Export = struct

@@ -21,10 +21,10 @@ type t =
   ; type_checks : (indice * func_type) Dynarray.t
       (** Types checks to perform after assignment. Come from function
           declarations with type indicies. *)
-  ; global : (Text.Global.t, Global.Type.t) Runtime.t Dynarray.t
-  ; table : (Table.t, Table.Type.t) Runtime.t Dynarray.t
-  ; mem : (Mem.t, limits) Runtime.t Dynarray.t
-  ; func : (Func.t, block_type) Runtime.t Dynarray.t
+  ; global : (Text.Global.t, Global.Type.t) Origin.t Dynarray.t
+  ; table : (Table.t, Table.Type.t) Origin.t Dynarray.t
+  ; mem : (Mem.t, limits) Origin.t Dynarray.t
+  ; func : (Func.t, block_type) Origin.t Dynarray.t
   ; elem : Text.Elem.t Dynarray.t
   ; data : Text.Data.t Dynarray.t
   ; global_exports : opt_export Dynarray.t
@@ -52,7 +52,7 @@ let pp_type_check fmt (indice, func_type) =
 let pp_type_checks fmt type_checks = pp_dynarray pp_type_check fmt type_checks
 
 let pp_runtime_dynarray ~pp_local ~pp_imported fmt l =
-  pp_dynarray (Runtime.pp ~pp_local ~pp_imported) fmt l
+  pp_dynarray (Origin.pp ~pp_local ~pp_imported) fmt l
 
 let pp_global fmt g =
   pp_runtime_dynarray ~pp_local:Text.Global.pp ~pp_imported:Text.Global.Type.pp
@@ -107,9 +107,6 @@ let pp fmt
     type_checks pp_global global pp_table table pp_mem mem pp_func func pp_elem
     elem pp_data data pp_start start
 
-let imp (import : Import.t) (assigned_name, typ) : 'a Imported.t =
-  { modul = import.modul; name = import.name; assigned_name; typ }
-
 let empty_module id =
   { id
   ; typ = Dynarray.create ()
@@ -156,7 +153,7 @@ let rec extract_block_types expr =
 
 let add_func value (modul : t) =
   begin match value with
-  | Runtime.Imported func -> add_func_type modul func.typ
+  | Origin.Imported func -> add_func_type modul func.typ
   | Local (func : Func.t) ->
     List.iter (add_func_type modul)
       (func.type_f :: extract_block_types func.body)
@@ -172,10 +169,9 @@ let add_typ value (modul : t) = Dynarray.add_last modul.typ value
 let add_field (modul : t) : Text.Module.Field.t -> unit = function
   | Typedef typ -> add_typ typ modul
   | Global global -> add_global (Local global) modul
-  | Import ({ typ = Global (a, (mut, val_type)); _ } as import) ->
-    let b = (mut, val_type) in
-    let imported = imp import (a, b) in
-    add_global (Imported imported) modul
+  | Import { typ = Global (assigned_name, typ); modul_name; name } ->
+    let imported = Origin.imported ~modul_name ~name ~assigned_name ~typ in
+    add_global imported modul
   | Export { name; typ = Global id } ->
     let id = curr_id (Dynarray.length modul.global) id in
     Dynarray.add_last modul.global_exports { name; id }
@@ -183,23 +179,23 @@ let add_field (modul : t) : Text.Module.Field.t -> unit = function
     let id, table_type = table in
     let table = (id, table_type) in
     add_table (Local table) modul
-  | Import ({ typ = Table (id, table_type); _ } as import) ->
-    let imported = imp import (id, table_type) in
-    add_table (Imported imported) modul
+  | Import { typ = Table (assigned_name, typ); modul_name; name } ->
+    let imported = Origin.imported ~modul_name ~name ~assigned_name ~typ in
+    add_table imported modul
   | Export { name; typ = Table id } ->
     let id = curr_id (Dynarray.length modul.table) id in
     Dynarray.add_last modul.table_exports { name; id }
   | Mem mem -> add_mem (Local mem) modul
-  | Import ({ typ = Mem (id, limits); _ } as import) ->
-    let imported = imp import (id, limits) in
-    add_mem (Imported imported) modul
+  | Import { typ = Mem (assigned_name, typ); modul_name; name } ->
+    let imported = Origin.imported ~modul_name ~name ~assigned_name ~typ in
+    add_mem imported modul
   | Export { name; typ = Mem id } ->
     let id = curr_id (Dynarray.length modul.mem) id in
     Dynarray.add_last modul.mem_exports { name; id }
-  | Func func -> add_func (Runtime.Local func) modul
-  | Import ({ typ = Func (a, type_f); _ } as import) ->
-    let imported : block_type Imported.t = imp import (a, type_f) in
-    add_func (Imported imported) modul
+  | Func func -> add_func (Origin.Local func) modul
+  | Import { typ = Func (assigned_name, typ); modul_name; name } ->
+    let imported = Origin.imported ~modul_name ~name ~assigned_name ~typ in
+    add_func imported modul
   | Export { name; typ = Func id } ->
     let id = curr_id (Dynarray.length modul.func) id in
     Dynarray.add_last modul.func_exports { name; id }
