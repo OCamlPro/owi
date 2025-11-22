@@ -1131,9 +1131,9 @@ let sections_iterate (input : Input.t) =
     let imported =
       List.filter_map
         (function
-          | modul, name, Mem typ ->
+          | modul_name, name, Mem typ ->
             Option.some
-            @@ Runtime.Imported { modul; name; assigned_name = None; typ }
+            @@ Runtime.imported ~modul_name ~name ~assigned_name:None ~typ
           | _not_a_memory_import -> None )
         import_section
     in
@@ -1146,10 +1146,10 @@ let sections_iterate (input : Input.t) =
     let imported =
       List.filter_map
         (function
-          | modul, name, Global (mut, val_type) ->
+          | modul_name, name, Global (mut, typ) ->
             Option.some
-            @@ Runtime.Imported
-                 { modul; name; assigned_name = None; typ = (mut, val_type) }
+            @@ Runtime.imported ~modul_name ~name ~assigned_name:None
+                 ~typ:(mut, typ)
           | _not_a_global_import -> None )
         import_section
     in
@@ -1172,14 +1172,10 @@ let sections_iterate (input : Input.t) =
     let imported =
       List.filter_map
         (function
-          | modul, name, Func typeidx ->
+          | modul_name, name, Func idx ->
+            let typ = block_type_of_type_def types.(idx) in
             Option.some
-            @@ Runtime.Imported
-                 { modul
-                 ; name
-                 ; assigned_name = None
-                 ; typ = block_type_of_type_def types.(typeidx)
-                 }
+            @@ Runtime.imported ~modul_name ~name ~assigned_name:None ~typ
           | _not_a_function_import -> None )
         import_section
     in
@@ -1192,10 +1188,10 @@ let sections_iterate (input : Input.t) =
     let imported =
       List.filter_map
         (function
-          | modul, name, Table (limits, ref_type) ->
+          | modul_name, name, Table (limits, ref_type) ->
+            let typ = (limits, ref_type) in
             Option.some
-            @@ Runtime.Imported
-                 { modul; name; assigned_name = None; typ = (limits, ref_type) }
+            @@ Runtime.imported ~modul_name ~name ~assigned_name:None ~typ
           | _not_a_table_import -> None )
         import_section
     in
