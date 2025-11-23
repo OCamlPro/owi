@@ -4,12 +4,13 @@
 
 (** named values (fields) *)
 type 'a t =
-  { values : 'a Dynarray.t
+  { (* TODO: make this an immutable array! *)
+    values : 'a Array.t
   ; named : (string, int) Hashtbl.t
   }
 
 let get_at { values; _ } i =
-  if i >= Dynarray.length values then None else Some (Dynarray.get values i)
+  if i >= Array.length values then None else Some (Array.get values i)
 
 let get_by_name { named; _ } name = Hashtbl.find_opt named name
 
@@ -17,24 +18,22 @@ let create values named = { values; named }
 
 let fold f v acc =
   snd
-  @@ Dynarray.fold_left
-       (fun (i, acc) v -> (succ i, f i v acc))
-       (0, acc) v.values
+  @@ Array.fold_left (fun (i, acc) v -> (succ i, f i v acc)) (0, acc) v.values
 
 let map f v =
-  let values = Dynarray.map f v.values in
+  let values = Array.map f v.values in
   { v with values }
 
 let monadic_map f v =
   let open Syntax in
-  let+ values = dynarray_map f v.values in
+  let+ values = array_map f v.values in
   { v with values }
 
-let to_array v = Dynarray.to_array v.values
+let to_array v = v.values
 
 let pp_values pp_v fmt values =
   Fmt.pf fmt "[%a]"
-    (Fmt.iter ~sep:(fun fmt () -> Fmt.pf fmt " ; ") Dynarray.iter pp_v)
+    (Fmt.array ~sep:(fun fmt () -> Fmt.pf fmt " ; ") pp_v)
     values
 
 let pp_named fmt named =

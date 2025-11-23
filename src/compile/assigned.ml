@@ -93,6 +93,7 @@ let assign_types (modul : Grouped.t) : Text.func_type Named.t =
         Dynarray.add_last declared_types typ;
         Typetbl.add all_types typ id )
     modul.function_type;
+  let declared_types = Dynarray.to_array declared_types in
   Named.create declared_types named_types
 
 let get_runtime_name (get_name : 'a -> string option) (elt : ('a, 'b) Origin.t)
@@ -103,8 +104,9 @@ let get_runtime_name (get_name : 'a -> string option) (elt : ('a, 'b) Origin.t)
 
 let name kind ~get_name values =
   let named = Hashtbl.create 64 in
+  let values = Dynarray.to_array values in
   let+ () =
-    dynarray_iteri
+    array_iteri
       (fun i elt_v ->
         match get_name elt_v with
         | None -> Ok ()
