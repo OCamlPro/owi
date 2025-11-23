@@ -486,7 +486,7 @@ let from_data data : Text.Module.Field.t list =
 let from_exports (exports : Binary.Module.Exports.t) : Text.Module.Field.t list
     =
   let global =
-    List.map
+    Array.map
       (fun ({ name; id } : Binary.Export.t) ->
         let id = Some (Text.Raw id) in
         Text.Module.Field.Export { name; typ = Global id } )
@@ -494,7 +494,7 @@ let from_exports (exports : Binary.Module.Exports.t) : Text.Module.Field.t list
   in
 
   let mem =
-    List.map
+    Array.map
       (fun ({ name; id } : Binary.Export.t) ->
         let id = Some (Text.Raw id) in
         Text.Module.Field.Export { name; typ = Mem id } )
@@ -502,7 +502,7 @@ let from_exports (exports : Binary.Module.Exports.t) : Text.Module.Field.t list
   in
 
   let table =
-    List.map
+    Array.map
       (fun ({ name; id } : Binary.Export.t) ->
         let id = Some (Text.Raw id) in
         Text.Module.Field.Export { name; typ = Table id } )
@@ -510,14 +510,15 @@ let from_exports (exports : Binary.Module.Exports.t) : Text.Module.Field.t list
   in
 
   let func =
-    List.map
+    Array.map
       (fun ({ name; id } : Binary.Export.t) ->
         let id = Some (Text.Raw id) in
         Text.Module.Field.Export { name; typ = Func id } )
       exports.func
   in
 
-  global @ mem @ table @ func
+  Array.to_list global @ Array.to_list mem @ Array.to_list table
+  @ Array.to_list func
 
 let from_start = function
   | None -> []

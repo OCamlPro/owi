@@ -684,27 +684,27 @@ let typecheck_start { start; func; _ } =
 
 let validate_exports modul =
   let* () =
-    list_iter
+    array_iter
       (fun { Export.id; name = _ } ->
         let* _t = Env.func_get id modul in
         Ok () )
       modul.exports.func
   in
   let* () =
-    list_iter
+    array_iter
       (fun { Export.id; name = _ } ->
         let* _t = Env.table_type_get id modul in
         Ok () )
       modul.exports.table
   in
   let* () =
-    list_iter
+    array_iter
       (fun { Export.id; name = _ } ->
         let* _t = Env.global_get id modul in
         Ok () )
       modul.exports.global
   in
-  list_iter
+  array_iter
     (fun { id; Export.name = _ } ->
       let* () = check_mem modul id in
       Ok () )
@@ -748,7 +748,7 @@ let modul (modul : Module.t) =
   let* () = validate_exports modul in
   let* () = validate_tables modul in
   let* () = validate_mem modul in
-  List.iter
+  Array.iter
     (fun (export : Export.t) -> Hashtbl.add refs export.id ())
     modul.exports.func;
   array_iter (fun func -> typecheck_function modul func refs) modul.func

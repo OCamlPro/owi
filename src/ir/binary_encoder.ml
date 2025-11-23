@@ -680,16 +680,18 @@ let encode_globals buf globals = encode_vector_list buf globals write_global
 let encode_exports buf ({ global; mem; table; func } : Module.Exports.t) =
   let exp_buf = Buffer.create 16 in
   let len =
-    List.length global + List.length mem + List.length table + List.length func
+    Array.length global + Array.length mem + Array.length table
+    + Array.length func
   in
-  let global = List.rev global in
-  let mem = List.rev mem in
-  let table = List.rev table in
-  let func = List.rev func in
-  List.iter (write_export exp_buf '\x03') global;
-  List.iter (write_export exp_buf '\x02') mem;
-  List.iter (write_export exp_buf '\x01') table;
-  List.iter (write_export exp_buf '\x00') func;
+  let array_rev_iter f a =
+    for i = Array.length a - 1 downto 0 do
+      f a.(i)
+    done
+  in
+  array_rev_iter (write_export exp_buf '\x03') global;
+  array_rev_iter (write_export exp_buf '\x02') mem;
+  array_rev_iter (write_export exp_buf '\x01') table;
+  array_rev_iter (write_export exp_buf '\x00') func;
   write_u32_of_int buf len;
   Buffer.add_buffer buf exp_buf
 
