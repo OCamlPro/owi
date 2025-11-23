@@ -502,9 +502,9 @@ let rewrite_data (typemap : Binary.indice TypeMap.t) (modul : Assigned.t)
   in
   { Binary.Data.mode; id = data.id; init = data.init }
 
-let rewrite_export named (exports : Grouped.opt_export Dynarray.t) :
-  Binary.Export.t Dynarray.t Result.t =
-  dynarray_map
+let rewrite_export named (exports : Grouped.opt_export Array.t) :
+  Binary.Export.t Array.t Result.t =
+  array_map
     (fun { Grouped.name; id } ->
       let+ id =
         match id with
@@ -524,10 +524,10 @@ let rewrite_exports (modul : Assigned.t) : Binary.Module.Exports.t Result.t =
   let* table = rewrite_export modul.table modul.table_exports in
   let+ func = rewrite_export modul.func modul.func_exports in
   (* TODO: change the type in Binary so that it is an immutable array! *)
-  let global = Dynarray.to_list global in
-  let mem = Dynarray.to_list mem in
-  let table = Dynarray.to_list table in
-  let func = Dynarray.to_list func in
+  let global = Array.to_list global in
+  let mem = Array.to_list mem in
+  let table = Array.to_list table in
+  let func = Array.to_list func in
   { Binary.Module.Exports.global; mem; table; func }
 
 let rewrite_func (typemap : Binary.indice TypeMap.t) (modul : Assigned.t)
