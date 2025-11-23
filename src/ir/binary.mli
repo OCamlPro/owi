@@ -328,10 +328,10 @@ end
 module Module : sig
   module Exports : sig
     type t =
-      { global : Export.t list
-      ; mem : Export.t list
-      ; table : Export.t list
-      ; func : Export.t list
+      { global : Export.t Array.t
+      ; mem : Export.t Array.t
+      ; table : Export.t Array.t
+      ; func : Export.t Array.t
       }
   end
 

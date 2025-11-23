@@ -523,11 +523,6 @@ let rewrite_exports (modul : Assigned.t) : Binary.Module.Exports.t Result.t =
   let* mem = rewrite_export modul.mem modul.mem_exports in
   let* table = rewrite_export modul.table modul.table_exports in
   let+ func = rewrite_export modul.func modul.func_exports in
-  (* TODO: change the type in Binary so that it is an immutable array! *)
-  let global = Array.to_list global in
-  let mem = Array.to_list mem in
-  let table = Array.to_list table in
-  let func = Array.to_list func in
   { Binary.Module.Exports.global; mem; table; func }
 
 let rewrite_func (typemap : Binary.indice TypeMap.t) (modul : Assigned.t)

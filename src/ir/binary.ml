@@ -695,10 +695,10 @@ end
 module Module = struct
   module Exports = struct
     type t =
-      { global : Export.t list
-      ; mem : Export.t list
-      ; table : Export.t list
-      ; func : Export.t list
+      { global : Export.t Array.t
+      ; mem : Export.t Array.t
+      ; table : Export.t Array.t
+      ; func : Export.t Array.t
       }
   end
 
@@ -725,7 +725,7 @@ module Module = struct
     ; func = [||]
     ; elem = [||]
     ; data = [||]
-    ; exports = { global = []; mem = []; table = []; func = [] }
+    ; exports = { global = [||]; mem = [||]; table = [||]; func = [||] }
     ; start = None
     ; custom = []
     }
@@ -801,7 +801,7 @@ module Module = struct
 
     let exports =
       let func =
-        List.map
+        Array.map
           (fun export ->
             let id = update_idx (export : Export.t).id in
             { export with id } )
@@ -837,7 +837,7 @@ module Module = struct
   (** Return the first function exported as [name] if it exists. Return [None]
       otherwise.*)
   let find_exported_func_from_name name m =
-    List.find_opt
+    Array.find_opt
       (function { Export.name = name'; _ } -> String.equal name name')
       m.exports.func
 

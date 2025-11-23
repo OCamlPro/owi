@@ -1202,33 +1202,30 @@ let sections_iterate (input : Input.t) =
   let elem = Array.of_list element_section in
 
   (* Exports *)
-  let empty_exports =
-    { Module.Exports.global = []; mem = []; table = []; func = [] }
+  (* We use an intermediate stack because the values are in reverse order *)
+  let module Stack = Prelude.Stack in
+  let global_exports = Stack.create () in
+  let mem_exports = Stack.create () in
+  let table_exports = Stack.create () in
+  let func_exports = Stack.create () in
+  List.iter
+    (fun (export_typeidx, export) ->
+      match export_typeidx with
+      | '\x00' -> Stack.push export func_exports
+      | '\x01' -> Stack.push export table_exports
+      | '\x02' -> Stack.push export mem_exports
+      | '\x03' -> Stack.push export global_exports
+      | _ -> Fmt.failwith "read_exportdesc error" )
+    export_section;
+  let stack_to_array s =
+    Array.init (Stack.length s) (fun _i ->
+      match Stack.pop_opt s with Some v -> v | None -> assert false )
   in
   let exports =
-    List.fold_left
-      (fun (exports : Module.Exports.t) (export_typeidx, export) ->
-        match export_typeidx with
-        | '\x00' ->
-          let func = export :: exports.func in
-          { exports with func }
-        | '\x01' ->
-          let table = export :: exports.table in
-          { exports with table }
-        | '\x02' ->
-          let mem = export :: exports.mem in
-          { exports with mem }
-        | '\x03' ->
-          let global = export :: exports.global in
-          { exports with global }
-        | _ -> Fmt.failwith "read_exportdesc error" )
-      empty_exports export_section
-  in
-  let exports =
-    { Module.Exports.func = List.rev exports.func
-    ; table = List.rev exports.table
-    ; mem = List.rev exports.mem
-    ; global = List.rev exports.global
+    { Module.Exports.func = stack_to_array func_exports
+    ; table = stack_to_array table_exports
+    ; mem = stack_to_array mem_exports
+    ; global = stack_to_array global_exports
     }
   in
 

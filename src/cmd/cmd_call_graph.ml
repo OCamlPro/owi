@@ -169,7 +169,9 @@ let rec remove_tables (l1 : (int * Binary.Elem.t) list) l2 acc =
 
 let find_entry_points (m : Binary.Module.t) =
   let l = Option.to_list m.start in
-  List.fold_left (fun acc (x : Binary.Export.t) -> x.id :: acc) l m.exports.func
+  Array.fold_left
+    (fun acc (x : Binary.Export.t) -> x.id :: acc)
+    l m.exports.func
 
 let find_entries entry_point (m : Binary.Module.t) =
   let entries =
@@ -201,7 +203,7 @@ let build_call_graph call_graph_mode (m : Binary.Module.t) entry_point =
               | _ -> None )
             (Array.to_list m.elem)
         in
-        let t = find_tables_to_remove m.exports.table funcs in
+        let t = find_tables_to_remove (Array.to_list m.exports.table) funcs in
         remove_tables
           (List.sort_uniq (fun x y -> compare (fst x) (fst y)) elems)
           (List.sort_uniq compare t) []
