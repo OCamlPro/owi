@@ -11,10 +11,10 @@ type t =
   ; func : (Text.Func.t, Text.block_type) Origin.t Named.t
   ; elem : Text.Elem.t Named.t
   ; data : Text.Data.t Named.t
-  ; global_exports : Grouped.opt_export Dynarray.t
-  ; mem_exports : Grouped.opt_export Dynarray.t
-  ; table_exports : Grouped.opt_export Dynarray.t
-  ; func_exports : Grouped.opt_export Dynarray.t
+  ; global_exports : Grouped.opt_export Array.t
+  ; mem_exports : Grouped.opt_export Array.t
+  ; table_exports : Grouped.opt_export Array.t
+  ; func_exports : Grouped.opt_export Array.t
   ; start : Text.indice option
   }
 

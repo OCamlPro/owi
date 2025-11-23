@@ -21,10 +21,10 @@ type t =
   ; func : (Text.Func.t, Text.block_type) Origin.t Named.t
   ; elem : Text.Elem.t Named.t
   ; data : Text.Data.t Named.t
-  ; global_exports : Grouped.opt_export Dynarray.t
-  ; mem_exports : Grouped.opt_export Dynarray.t
-  ; table_exports : Grouped.opt_export Dynarray.t
-  ; func_exports : Grouped.opt_export Dynarray.t
+  ; global_exports : Grouped.opt_export Array.t
+  ; mem_exports : Grouped.opt_export Array.t
+  ; table_exports : Grouped.opt_export Array.t
+  ; func_exports : Grouped.opt_export Array.t
   ; start : Text.indice option
   }
 
@@ -176,10 +176,10 @@ let of_grouped (modul : Grouped.t) : t Result.t =
     ; func
     ; elem
     ; data
-    ; global_exports = modul.global_exports
-    ; mem_exports = modul.mem_exports
-    ; table_exports = modul.table_exports
-    ; func_exports = modul.func_exports
+    ; global_exports = Dynarray.to_array modul.global_exports
+    ; mem_exports = Dynarray.to_array modul.mem_exports
+    ; table_exports = Dynarray.to_array modul.table_exports
+    ; func_exports = Dynarray.to_array modul.func_exports
     ; start = modul.start
     }
   in
