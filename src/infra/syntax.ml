@@ -73,6 +73,20 @@ let array_iter f a =
   with Exit -> ( match !err with None -> assert false | Some e -> e )
 [@@inline]
 
+let array_iteri f a =
+  let err = ref None in
+  try
+    for i = 0 to Array.length a - 1 do
+      match f i (Array.unsafe_get a i) with
+      | Error _e as e ->
+        err := Some e;
+        raise Exit
+      | Ok () -> ()
+    done;
+    Ok ()
+  with Exit -> ( match !err with None -> assert false | Some e -> e )
+[@@inline]
+
 let dynarray_iter f a =
   let err = ref None in
   try

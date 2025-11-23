@@ -44,6 +44,11 @@ val array_iter :
   -> 'a array
   -> (unit, 'err) Prelude.Result.t
 
+val array_iteri :
+     (int -> 'a -> (unit, 'err) Prelude.Result.t)
+  -> 'a array
+  -> (unit, 'err) Prelude.Result.t
+
 val dynarray_iter :
      ('a -> (unit, 'err) Prelude.Result.t)
   -> 'a Dynarray.t
