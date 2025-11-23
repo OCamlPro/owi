@@ -11,23 +11,23 @@ type opt_export =
 
 type t =
   { id : string option
-  ; typ : Typedef.t Dynarray.t
-  ; function_type : func_type Dynarray.t
+  ; typ : Typedef.t Array.t
+  ; function_type : func_type Array.t
       (* Types comming from function declarations.
          It contains potential duplication *)
-  ; type_checks : (indice * func_type) Dynarray.t
+  ; type_checks : (indice * func_type) Array.t
       (* Types checks to perform after assignment.
          Come from function declarations with type indicies *)
-  ; global : (Global.t, Global.Type.t) Origin.t Dynarray.t
-  ; table : (Table.t, Table.Type.t) Origin.t Dynarray.t
-  ; mem : (Mem.t, limits) Origin.t Dynarray.t
-  ; func : (Func.t, block_type) Origin.t Dynarray.t
-  ; elem : Elem.t Dynarray.t
-  ; data : Data.t Dynarray.t
-  ; global_exports : opt_export Dynarray.t
-  ; mem_exports : opt_export Dynarray.t
-  ; table_exports : opt_export Dynarray.t
-  ; func_exports : opt_export Dynarray.t
+  ; global : (Global.t, Global.Type.t) Origin.t Array.t
+  ; table : (Table.t, Table.Type.t) Origin.t Array.t
+  ; mem : (Mem.t, limits) Origin.t Array.t
+  ; func : (Func.t, block_type) Origin.t Array.t
+  ; elem : Elem.t Array.t
+  ; data : Data.t Array.t
+  ; global_exports : opt_export Array.t
+  ; mem_exports : opt_export Array.t
+  ; table_exports : opt_export Array.t
+  ; func_exports : opt_export Array.t
   ; mutable start : indice option
   }
 

@@ -74,7 +74,7 @@ let assign_types (modul : Grouped.t) : Text.func_type Named.t =
   let all_types = Typetbl.create 64 in
   let named_types = Hashtbl.create 64 in
   let declared_types = Dynarray.create () in
-  Dynarray.iter
+  Array.iter
     (fun (name, typ) ->
       let id = Dynarray.length declared_types in
       begin match name with
@@ -84,7 +84,7 @@ let assign_types (modul : Grouped.t) : Text.func_type Named.t =
       Dynarray.add_last declared_types typ;
       Typetbl.add all_types typ id )
     modul.typ;
-  Dynarray.iter
+  Array.iter
     (fun typ ->
       match Typetbl.find_opt all_types typ with
       | Some _id -> ()
@@ -104,7 +104,6 @@ let get_runtime_name (get_name : 'a -> string option) (elt : ('a, 'b) Origin.t)
 
 let name kind ~get_name values =
   let named = Hashtbl.create 64 in
-  let values = Dynarray.to_array values in
   let+ () =
     array_iteri
       (fun i elt_v ->
@@ -166,7 +165,7 @@ let of_grouped (modul : Grouped.t) : t Result.t =
   let* data =
     name "data" ~get_name:(fun (data : Text.Data.t) -> data.id) modul.data
   in
-  let+ () = dynarray_iter (check_type_id typ) modul.type_checks in
+  let+ () = array_iter (check_type_id typ) modul.type_checks in
   let modul =
     { id = modul.id
     ; typ
@@ -176,10 +175,10 @@ let of_grouped (modul : Grouped.t) : t Result.t =
     ; func
     ; elem
     ; data
-    ; global_exports = Dynarray.to_array modul.global_exports
-    ; mem_exports = Dynarray.to_array modul.mem_exports
-    ; table_exports = Dynarray.to_array modul.table_exports
-    ; func_exports = Dynarray.to_array modul.func_exports
+    ; global_exports = modul.global_exports
+    ; mem_exports = modul.mem_exports
+    ; table_exports = modul.table_exports
+    ; func_exports = modul.func_exports
     ; start = modul.start
     }
   in
