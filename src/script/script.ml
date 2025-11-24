@@ -100,20 +100,13 @@ let compare_result_const result (const : V.t) =
     Log.err (fun m -> m "TODO: unimplemented Script.compare_result_const");
     assert false
 
-let convert_heap_type (ht : Text.heap_type) : Binary.heap_type =
-  match ht with
-  | Text.Func_ht -> Binary.Func_ht
-  | Text.Extern_ht -> Binary.Extern_ht
-
 let value_of_const : Wast.const -> V.t = function
   | Const_I32 v -> V.I32 v
   | Const_I64 v -> V.I64 v
   | Const_F32 v -> V.F32 v
   | Const_F64 v -> V.F64 v
   | Const_V128 v -> V.V128 v
-  | Const_null rt ->
-    let rt = convert_heap_type rt in
-    V.ref_null rt
+  | Const_null rt -> V.ref_null rt
   | Const_extern i -> V.Ref (Host_externref.value i)
   | i ->
     Log.err (fun m ->

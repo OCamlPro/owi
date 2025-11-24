@@ -53,7 +53,7 @@ let pp fmt = function
   | Ref r -> pp_ref_value fmt r
 
 let ref_null' = function
-  | Binary.Func_ht -> Funcref None
+  | Text.Func_ht -> Funcref None
   | Extern_ht -> Externref None
 
 let ref_null typ = Ref (ref_null' typ)

@@ -50,4 +50,4 @@ module Build : sig
   val get_func : t -> int -> Kind.func Result.t
 end
 
-val freeze : int -> Build.t -> ('ext * Binary.func_type) Dynarray.t -> 'ext t
+val freeze : int -> Build.t -> ('ext * Text.func_type) Dynarray.t -> 'ext t

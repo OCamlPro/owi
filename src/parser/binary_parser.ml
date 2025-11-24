@@ -219,7 +219,7 @@ let read_indice input : (indice * Input.t, _) result =
 let read_numtype input =
   let* b, input = read_S7 input in
   match b with
-  | -0x01 -> Ok (I32, input)
+  | -0x01 -> Ok (Text.I32, input)
   | -0x02 -> Ok (I64, input)
   | -0x03 -> Ok (F32, input)
   | -0x04 -> Ok (F64, input)
@@ -237,13 +237,13 @@ let read_vectype input =
 let read_reftype input =
   let* b, input = read_S7 input in
   match b with
-  | -0x10 -> Ok ((Null, Func_ht), input)
+  | -0x10 -> Ok ((Text.Null, Text.Func_ht), input)
   | -0x11 -> Ok ((Null, Extern_ht), input)
   | b -> parse_fail "malformed reference type: %d" b
 
 let read_valtype input =
   match read_numtype input with
-  | Ok (t, input) -> Ok (Num_type t, input)
+  | Ok (t, input) -> Ok (Text.Num_type t, input)
   | Error _ -> (
     match read_vectype input with
     | Ok (_t, _input) -> Error (`Unimplemented "simd binary parsing")
@@ -257,7 +257,7 @@ let read_valtypes input = vector_no_id read_valtype input
 let read_mut input =
   let* b, input = read_byte ~msg:"read_mut" input in
   match b with
-  | '\x00' -> Ok (Const, input)
+  | '\x00' -> Ok (Text.Const, input)
   | '\x01' -> Ok (Var, input)
   | _c -> parse_fail "malformed mutability"
 
@@ -266,11 +266,11 @@ let read_limits input =
   match b with
   | '\x00' ->
     let+ min, input = read_U32 input in
-    ({ min; max = None }, input)
+    ({ Text.min; max = None }, input)
   | '\x01' ->
     let* min, input = read_U32 input in
     let+ max, input = read_U32 input in
-    ({ min; max = Some max }, input)
+    ({ Text.min; max = Some max }, input)
   | _c -> parse_fail "integer too large (read_limits)"
 
 let read_memarg max_align input =
@@ -280,7 +280,7 @@ let read_memarg max_align input =
     let+ offset, input = read_U32 input in
     let align = Int32.of_int align in
     let offset = Int32.of_int offset in
-    ({ align; offset }, input)
+    ({ Text.align; offset }, input)
 
 let read_FC input =
   let* i, input = read_U32 input in
@@ -701,9 +701,9 @@ let read_const types input =
 
 type import =
   | Func of int
-  | Table of limits * ref_type
-  | Mem of limits
-  | Global of mut * val_type
+  | Table of Text.limits * Text.ref_type
+  | Mem of Text.limits
+  | Global of Text.mut * Text.val_type
 
 let magic_check str =
   if String.length str < 4 then parse_fail "unexpected end"
@@ -840,7 +840,7 @@ let read_elem_index input =
 let read_elem_kind input =
   let msg = "malformed element kind" in
   match read_byte ~msg input with
-  | Ok ('\x00', input) -> Ok ((Null, Func_ht), input)
+  | Ok ('\x00', input) -> Ok ((Text.Null, Text.Func_ht), input)
   | Ok (c, _input) ->
     parse_fail "%s (expected 0x00 but got %s)" msg (Char.escaped c)
   | Error _ as e -> e
@@ -853,7 +853,7 @@ let read_element types input =
     let* mode, input = read_elem_active_zero types input in
     let+ init, input = vector_no_id read_elem_index input in
     let init = List.map Annotated.dummy_deep init in
-    let typ = (Null, Func_ht) in
+    let typ = (Text.Null, Text.Func_ht) in
     ({ Elem.id; typ; init; mode }, input)
   | 1 ->
     let mode = Elem.Mode.Passive in
@@ -876,7 +876,7 @@ let read_element types input =
   | 4 ->
     let* mode, input = read_elem_active_zero types input in
     let+ init, input = vector_no_id (read_const types) input in
-    let typ = (Null, Func_ht) in
+    let typ = (Text.Null, Text.Func_ht) in
     ({ Elem.id; typ; init; mode }, input)
   | 5 ->
     let mode = Elem.Mode.Passive in

@@ -9,8 +9,8 @@ type table = Concrete_value.ref_value array
 type t =
   { id : int
   ; label : string option
-  ; limits : Binary.limits
-  ; typ : Binary.ref_type
+  ; limits : Text.limits
+  ; typ : Text.ref_type
   ; mutable data : table
   }
 
@@ -24,11 +24,11 @@ val set : t -> int -> Concrete_value.ref_value -> unit
 
 val size : t -> int
 
-val typ : t -> Binary.ref_type
+val typ : t -> Text.ref_type
 
 val update : t -> table -> unit
 
-val init : ?label:string -> Binary.Table.Type.t -> t
+val init : ?label:string -> Text.Table.Type.t -> t
 
 val max_size : t -> int option
 

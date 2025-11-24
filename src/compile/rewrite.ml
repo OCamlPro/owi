@@ -4,121 +4,6 @@
 
 open Syntax
 
-let rewrite_num_type : Text.num_type -> Binary.num_type = function
-  | I32 -> I32
-  | I64 -> I64
-  | F32 -> F32
-  | F64 -> F64
-  | V128 -> V128
-
-let rewrite_heap_type : Text.heap_type -> Binary.heap_type = function
-  | Func_ht -> Binary.Func_ht
-  | Extern_ht -> Binary.Extern_ht
-
-let rewrite_nullable (nullable : Text.nullable) : Binary.nullable =
-  match nullable with No_null -> No_null | Null -> Null
-
-let rewrite_ref_type ((nullable, heap_type) : Text.ref_type) : Binary.ref_type =
-  let nullable = rewrite_nullable nullable in
-  let heap_type = rewrite_heap_type heap_type in
-  (nullable, heap_type)
-
-let rewrite_val_type : Text.val_type -> Binary.val_type = function
-  | Num_type t -> Num_type (rewrite_num_type t)
-  | Ref_type t -> Ref_type (rewrite_ref_type t)
-
-let rewrite_param ((name, t) : Text.param) : Binary.param =
-  (name, rewrite_val_type t)
-
-let rewrite_param_type (pt : Text.param_type) : Binary.param_type =
-  List.map rewrite_param pt
-
-let rewrite_result_type (rt : Text.result_type) : Binary.result_type =
-  List.map rewrite_val_type rt
-
-let rewrite_func_type ((pt, rt) : Text.func_type) : Binary.func_type =
-  let pt = rewrite_param_type pt in
-  let rt = rewrite_result_type rt in
-  (pt, rt)
-
-let rewrite_nn : Text.nn -> Binary.nn = function S32 -> S32 | S64 -> S64
-
-let rewrite_ishape : Text.ishape -> Binary.ishape = function
-  | I8x16 -> I8x16
-  | I16x8 -> I16x8
-  | I32x4 -> I32x4
-  | I64x2 -> I64x2
-
-let rewrite_sx : Text.sx -> Binary.sx = function U -> U | S -> S
-
-let rewrite_iunop : Text.iunop -> Binary.iunop = function
-  | Clz -> Clz
-  | Ctz -> Ctz
-  | Popcnt -> Popcnt
-
-let rewrite_funop : Text.funop -> Binary.funop = function
-  | Abs -> Abs
-  | Neg -> Neg
-  | Sqrt -> Sqrt
-  | Ceil -> Ceil
-  | Floor -> Floor
-  | Trunc -> Trunc
-  | Nearest -> Nearest
-
-let rewrite_vibinop : Text.vibinop -> Binary.vibinop = function
-  | Add -> Add
-  | Sub -> Sub
-
-let rewrite_ibinop : Text.ibinop -> Binary.ibinop = function
-  | Add -> Add
-  | Sub -> Sub
-  | Mul -> Mul
-  | Div sx -> Div (rewrite_sx sx)
-  | Rem sx -> Rem (rewrite_sx sx)
-  | And -> And
-  | Or -> Or
-  | Xor -> Xor
-  | Shl -> Shl
-  | Shr sx -> Shr (rewrite_sx sx)
-  | Rotl -> Rotl
-  | Rotr -> Rotr
-
-let rewrite_fbinop : Text.fbinop -> Binary.fbinop = function
-  | Add -> Add
-  | Sub -> Sub
-  | Mul -> Mul
-  | Div -> Div
-  | Min -> Min
-  | Max -> Max
-  | Copysign -> Copysign
-
-let rewrite_itestop : Text.itestop -> Binary.itestop = function Eqz -> Eqz
-
-let rewrite_irelop : Text.irelop -> Binary.irelop = function
-  | Eq -> Eq
-  | Ne -> Ne
-  | Lt sx -> Lt (rewrite_sx sx)
-  | Gt sx -> Gt (rewrite_sx sx)
-  | Le sx -> Le (rewrite_sx sx)
-  | Ge sx -> Ge (rewrite_sx sx)
-
-let rewrite_frelop : Text.frelop -> Binary.frelop = function
-  | Eq -> Eq
-  | Ne -> Ne
-  | Lt -> Lt
-  | Gt -> Gt
-  | Le -> Le
-  | Ge -> Ge
-
-let rewrite_memarg : Text.memarg -> Binary.memarg = function
-  | { offset; align } -> { offset; align }
-
-let rewrite_limits : Text.limits -> Binary.limits = function
-  | { min; max } -> { min; max }
-
-let rewrite_mem ((name, limits) : Text.Mem.t) : Binary.Mem.t =
-  (name, rewrite_limits limits)
-
 let rewrite_block_type (assigned : Assigned.t) (block_type : Text.block_type) :
   Binary.block_type Result.t =
   match block_type with
@@ -129,31 +14,12 @@ let rewrite_block_type (assigned : Assigned.t) (block_type : Text.block_type) :
       | None -> Error (`Unknown_type id)
       | Some v -> Ok v
     in
-    let t = rewrite_func_type t in
     Binary.Bt_raw (Some idx, t)
   | Bt_raw (_, func_type) ->
     let idx = Assigned.find_raw_type assigned func_type in
-    let func_type = rewrite_func_type func_type in
     Ok (Binary.Bt_raw (Some idx, func_type))
 
-let rewrite_mut = function Text.Const -> Binary.Const | Var -> Var
-
-let rewrite_global_type (mut, t) =
-  let mut = rewrite_mut mut in
-  let t = rewrite_val_type t in
-  (mut, t)
-
-let rewrite_table_type ((limits, ref_type) : Text.Table.Type.t) :
-  Binary.Table.Type.t =
-  let limits = rewrite_limits limits in
-  let ref_type = rewrite_ref_type ref_type in
-  (limits, ref_type)
-
-let rewrite_table ((name, typ) : Text.Table.t) : Binary.Table.t =
-  let typ = rewrite_table_type typ in
-  (name, typ)
-
-let rewrite_expr (assigned : Assigned.t) (locals : Binary.param list)
+let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
   (iexpr : Text.expr Annotated.t) : Binary.expr Annotated.t Result.t =
   (* block_ids handling *)
   let block_id_to_raw (loop_count, block_ids) id =
@@ -189,7 +55,7 @@ let rewrite_expr (assigned : Assigned.t) (locals : Binary.param list)
   (* Fill locals *)
   let* (_ : int) =
     list_fold_left
-      (fun next_free_int ((name, _type) : Binary.param) ->
+      (fun next_free_int ((name, _type) : Text.param) ->
         match name with
         | None -> Ok (next_free_int + 1)
         | Some name ->
@@ -310,74 +176,29 @@ let rewrite_expr (assigned : Assigned.t) (locals : Binary.param list)
     | Select typ -> begin
       match typ with
       | None -> Ok (Binary.Select None)
-      | Some [ t ] -> Ok (Binary.Select (Some [ rewrite_val_type t ]))
+      | Some [ t ] -> Ok (Binary.Select (Some [ t ]))
       | Some [] | Some (_ :: _ :: _) -> Error `Invalid_result_arity
     end
-    | I_unop (nn, op) ->
-      let nn = rewrite_nn nn in
-      let op = rewrite_iunop op in
-      Ok (Binary.I_unop (nn, op))
-    | I_binop (nn, op) ->
-      let nn = rewrite_nn nn in
-      let op = rewrite_ibinop op in
-      Ok (I_binop (nn, op))
-    | I_testop (nn, op) ->
-      let nn = rewrite_nn nn in
-      let op = rewrite_itestop op in
-      Ok (Binary.I_testop (nn, op))
-    | I_relop (nn, op) ->
-      let nn = rewrite_nn nn in
-      let op = rewrite_irelop op in
-      Ok (I_relop (nn, op))
-    | F_unop (nn, op) ->
-      let nn = rewrite_nn nn in
-      let op = rewrite_funop op in
-      Ok (Binary.F_unop (nn, op))
-    | F_relop (nn, op) ->
-      let nn = rewrite_nn nn in
-      let op = rewrite_frelop op in
-      Ok (F_relop (nn, op))
+    | I_unop (nn, op) -> Ok (Binary.I_unop (nn, op))
+    | I_binop (nn, op) -> Ok (I_binop (nn, op))
+    | I_testop (nn, op) -> Ok (Binary.I_testop (nn, op))
+    | I_relop (nn, op) -> Ok (I_relop (nn, op))
+    | F_unop (nn, op) -> Ok (Binary.F_unop (nn, op))
+    | F_relop (nn, op) -> Ok (F_relop (nn, op))
     | I32_wrap_i64 -> Ok Binary.I32_wrap_i64
-    | F_reinterpret_i (nn1, nn2) ->
-      let nn1 = rewrite_nn nn1 in
-      let nn2 = rewrite_nn nn2 in
-      Ok (F_reinterpret_i (nn1, nn2))
-    | I_reinterpret_f (nn1, nn2) ->
-      let nn1 = rewrite_nn nn1 in
-      let nn2 = rewrite_nn nn2 in
-      Ok (I_reinterpret_f (nn1, nn2))
-    | I64_extend_i32 sx ->
-      let sx = rewrite_sx sx in
-      Ok (Binary.I64_extend_i32 sx)
+    | F_reinterpret_i (nn1, nn2) -> Ok (F_reinterpret_i (nn1, nn2))
+    | I_reinterpret_f (nn1, nn2) -> Ok (I_reinterpret_f (nn1, nn2))
+    | I64_extend_i32 sx -> Ok (Binary.I64_extend_i32 sx)
     | I64_extend32_s -> Ok Binary.I64_extend32_s
     | F32_demote_f64 -> Ok Binary.F32_demote_f64
-    | I_extend8_s nn ->
-      let nn = rewrite_nn nn in
-      Ok (I_extend8_s nn)
-    | I_extend16_s nn ->
-      let nn = rewrite_nn nn in
-      Ok (I_extend16_s nn)
+    | I_extend8_s nn -> Ok (I_extend8_s nn)
+    | I_extend16_s nn -> Ok (I_extend16_s nn)
     | F64_promote_f32 -> Ok Binary.F64_promote_f32
-    | F_convert_i (nn1, nn2, sx) ->
-      let nn1 = rewrite_nn nn1 in
-      let nn2 = rewrite_nn nn2 in
-      let sx = rewrite_sx sx in
-      Ok (Binary.F_convert_i (nn1, nn2, sx))
-    | I_trunc_f (nn1, nn2, sx) ->
-      let nn1 = rewrite_nn nn1 in
-      let nn2 = rewrite_nn nn2 in
-      let sx = rewrite_sx sx in
-      Ok (Binary.I_trunc_f (nn1, nn2, sx))
-    | I_trunc_sat_f (nn1, nn2, sx) ->
-      let nn1 = rewrite_nn nn1 in
-      let nn2 = rewrite_nn nn2 in
-      let sx = rewrite_sx sx in
-      Ok (Binary.I_trunc_sat_f (nn1, nn2, sx))
+    | F_convert_i (nn1, nn2, sx) -> Ok (Binary.F_convert_i (nn1, nn2, sx))
+    | I_trunc_f (nn1, nn2, sx) -> Ok (Binary.I_trunc_f (nn1, nn2, sx))
+    | I_trunc_sat_f (nn1, nn2, sx) -> Ok (Binary.I_trunc_sat_f (nn1, nn2, sx))
     | Ref_is_null -> Ok Binary.Ref_is_null
-    | F_binop (nn, op) ->
-      let nn = rewrite_nn nn in
-      let op = rewrite_fbinop op in
-      Ok (Binary.F_binop (nn, op))
+    | F_binop (nn, op) -> Ok (Binary.F_binop (nn, op))
     | F32_const v -> Ok (Binary.F32_const v)
     | F64_const v -> Ok (Binary.F64_const v)
     | I32_const v -> Ok (Binary.I32_const v)
@@ -389,58 +210,22 @@ let rewrite_expr (assigned : Assigned.t) (locals : Binary.param list)
     | Return -> Ok Binary.Return
     | Extern_externalize -> Ok Binary.Extern_externalize
     | Extern_internalize -> Ok Binary.Extern_internalize
-    | I_load8 (nn, sx, memarg) ->
-      let nn = rewrite_nn nn in
-      let sx = rewrite_sx sx in
-      let memarg = rewrite_memarg memarg in
-      Ok (Binary.I_load8 (nn, sx, memarg))
-    | I_store8 (nn, memarg) ->
-      let nn = rewrite_nn nn in
-      let memarg = rewrite_memarg memarg in
-      Ok (Binary.I_store8 (nn, memarg))
-    | I_load16 (nn, sx, memarg) ->
-      let nn = rewrite_nn nn in
-      let sx = rewrite_sx sx in
-      let memarg = rewrite_memarg memarg in
-      Ok (Binary.I_load16 (nn, sx, memarg))
-    | I_store16 (nn, memarg) ->
-      let nn = rewrite_nn nn in
-      let memarg = rewrite_memarg memarg in
-      Ok (Binary.I_store16 (nn, memarg))
-    | I64_load32 (sx, memarg) ->
-      let sx = rewrite_sx sx in
-      let memarg = rewrite_memarg memarg in
-      Ok (Binary.I64_load32 (sx, memarg))
-    | I64_store32 memarg ->
-      let memarg = rewrite_memarg memarg in
-      Ok (Binary.I64_store32 memarg)
-    | I_load (nn, memarg) ->
-      let nn = rewrite_nn nn in
-      let memarg = rewrite_memarg memarg in
-      Ok (Binary.I_load (nn, memarg))
-    | F_load (nn, memarg) ->
-      let nn = rewrite_nn nn in
-      let memarg = rewrite_memarg memarg in
-      Ok (Binary.F_load (nn, memarg))
-    | F_store (nn, memarg) ->
-      let nn = rewrite_nn nn in
-      let memarg = rewrite_memarg memarg in
-      Ok (Binary.F_store (nn, memarg))
-    | I_store (nn, memarg) ->
-      let nn = rewrite_nn nn in
-      let memarg = rewrite_memarg memarg in
-      Ok (Binary.I_store (nn, memarg))
+    | I_load8 (nn, sx, memarg) -> Ok (Binary.I_load8 (nn, sx, memarg))
+    | I_store8 (nn, memarg) -> Ok (Binary.I_store8 (nn, memarg))
+    | I_load16 (nn, sx, memarg) -> Ok (Binary.I_load16 (nn, sx, memarg))
+    | I_store16 (nn, memarg) -> Ok (Binary.I_store16 (nn, memarg))
+    | I64_load32 (sx, memarg) -> Ok (Binary.I64_load32 (sx, memarg))
+    | I64_store32 memarg -> Ok (Binary.I64_store32 memarg)
+    | I_load (nn, memarg) -> Ok (Binary.I_load (nn, memarg))
+    | F_load (nn, memarg) -> Ok (Binary.F_load (nn, memarg))
+    | F_store (nn, memarg) -> Ok (Binary.F_store (nn, memarg))
+    | I_store (nn, memarg) -> Ok (Binary.I_store (nn, memarg))
     | Memory_copy -> Ok Binary.Memory_copy
     | Memory_size -> Ok Binary.Memory_size
     | Memory_fill -> Ok Binary.Memory_fill
     | Memory_grow -> Ok Binary.Memory_grow
-    | V_ibinop (shape, op) ->
-      let shape = rewrite_ishape shape in
-      let op = rewrite_vibinop op in
-      Ok (Binary.V_ibinop (shape, op))
-    | Ref_null t ->
-      let t = rewrite_heap_type t in
-      Ok (Binary.Ref_null t)
+    | V_ibinop (shape, op) -> Ok (Binary.V_ibinop (shape, op))
+    | Ref_null t -> Ok (Binary.Ref_null t)
   and expr (e : Text.expr Annotated.t) (loop_count, block_ids) :
     Binary.expr Annotated.t Result.t =
     let+ e =
@@ -457,8 +242,7 @@ let rewrite_expr (assigned : Assigned.t) (locals : Binary.param list)
 let rewrite_global (assigned : Assigned.t) (global : Text.Global.t) :
   Binary.Global.t Result.t =
   let+ init = rewrite_expr assigned [] global.init in
-  let typ = rewrite_global_type global.typ in
-  { Binary.Global.id = global.id; init; typ }
+  { Binary.Global.id = global.id; init; typ = global.typ }
 
 let rewrite_elem (assigned : Assigned.t) (elem : Text.Elem.t) :
   Binary.Elem.t Result.t =
@@ -473,8 +257,7 @@ let rewrite_elem (assigned : Assigned.t) (elem : Text.Elem.t) :
       Binary.Elem.Mode.Active (Some indice, expr)
   in
   let+ init = list_map (rewrite_expr assigned []) elem.init in
-  let typ = rewrite_ref_type elem.typ in
-  { Binary.Elem.init; mode; id = elem.id; typ }
+  { Binary.Elem.init; mode; id = elem.id; typ = elem.typ }
 
 let rewrite_data (assigned : Assigned.t) (data : Text.Data.t) :
   Binary.Data.t Result.t =
@@ -515,13 +298,10 @@ let rewrite_func (assigned : Assigned.t)
   let* (Bt_raw (_, (params, _)) as type_f) =
     rewrite_block_type assigned type_f
   in
-  let locals = List.map rewrite_param locals in
   let+ body = rewrite_expr assigned (params @ locals) body in
   { Binary.Func.body; type_f; id; locals }
 
-let rewrite_types (t : Text.func_type) : Binary.Typedef.t Result.t =
-  let t = rewrite_func_type t in
-  Ok (None, t)
+let rewrite_types (t : Text.func_type) : Text.Typedef.t Result.t = Ok (None, t)
 
 let modul (modul : Grouped.t) (assigned : Assigned.t) : Binary.Module.t Result.t
     =
@@ -529,7 +309,7 @@ let modul (modul : Grouped.t) (assigned : Assigned.t) : Binary.Module.t Result.t
   let* global =
     array_map
       (Origin.monadic_map ~f_local:(rewrite_global assigned)
-         ~f_imported:(fun x -> Ok (rewrite_global_type x) ) )
+         ~f_imported:Result.ok )
       modul.global
   in
   let* elem = array_map (rewrite_elem assigned) modul.elem in
@@ -542,16 +322,6 @@ let modul (modul : Grouped.t) (assigned : Assigned.t) : Binary.Module.t Result.t
     array_map runtime modul.func
   in
   let* types = array_map rewrite_types (Assigned.get_types assigned) in
-  let mem =
-    let runtime = Origin.map ~f_local:rewrite_mem ~f_imported:rewrite_limits in
-    Array.map runtime modul.mem
-  in
-  let table =
-    let runtime =
-      Origin.map ~f_local:rewrite_table ~f_imported:rewrite_table_type
-    in
-    Array.map runtime modul.table
-  in
   let+ start =
     match modul.start with
     | None -> Ok None
@@ -559,13 +329,10 @@ let modul (modul : Grouped.t) (assigned : Assigned.t) : Binary.Module.t Result.t
       let+ id = Assigned.find_func assigned id in
       Some id
   in
-  let custom = [] in
 
-  let id = modul.id in
-
-  { Binary.Module.id
-  ; mem
-  ; table
+  { Binary.Module.id = modul.id
+  ; mem = modul.mem
+  ; table = modul.table
   ; types
   ; global
   ; elem
@@ -573,5 +340,5 @@ let modul (modul : Grouped.t) (assigned : Assigned.t) : Binary.Module.t Result.t
   ; exports
   ; func
   ; start
-  ; custom
+  ; custom = []
   }

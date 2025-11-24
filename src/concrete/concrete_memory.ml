@@ -5,7 +5,7 @@
 let page_size = 65_536
 
 type t =
-  { mutable limits : Binary.limits
+  { mutable limits : Text.limits
   ; mutable data : bytes
   }
 
@@ -16,7 +16,7 @@ let recover ~from_ ~to_ =
   to_.data <- from_.data
 
 let init limits : t =
-  let data = Bytes.make (page_size * limits.Binary.min) '\x00' in
+  let data = Bytes.make (page_size * limits.Text.min) '\x00' in
   { limits; data }
 
 let update_memory mem data =

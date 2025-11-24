@@ -8,8 +8,8 @@ type table = V.ref_value array
 type t =
   { id : int
   ; label : string option
-  ; limits : Binary.limits
-  ; typ : Binary.ref_type
+  ; limits : Text.limits
+  ; typ : Text.ref_type
   ; mutable data : table
   }
 
@@ -23,7 +23,7 @@ let fresh =
     incr r;
     !r
 
-let init ?label (typ : Binary.Table.Type.t) : t =
+let init ?label (typ : Text.Table.Type.t) : t =
   let limits, ((_null, heap_type) as ref_type) = typ in
   let null = V.ref_null' heap_type in
   let table = Array.make limits.min null in

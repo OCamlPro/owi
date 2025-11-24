@@ -9,15 +9,15 @@ open Syntax
 open Fmt
 
 type typ =
-  | Num_type of num_type
-  | Ref_type of heap_type
+  | Num_type of Text.num_type
+  | Ref_type of Text.heap_type
   | Any
   | Something
 
 let typ_equal t1 t2 =
   match (t1, t2) with
-  | Num_type t1, Num_type t2 -> Binary.num_type_eq t1 t2
-  | Ref_type t1, Ref_type t2 -> Binary.heap_type_eq t1 t2
+  | Num_type t1, Num_type t2 -> Text.num_type_eq t1 t2
+  | Ref_type t1, Ref_type t2 -> Text.heap_type_eq t1 t2
   | Any, _ | _, Any -> true
   | Something, _ | _, Something -> true
   | _, _ -> false
@@ -25,15 +25,15 @@ let typ_equal t1 t2 =
 let sp fmt () = Fmt.string fmt " "
 
 let pp_typ fmt = function
-  | Num_type t -> pp_num_type fmt t
-  | Ref_type t -> pp_heap_type fmt t
+  | Num_type t -> Text.pp_num_type fmt t
+  | Ref_type t -> Text.pp_heap_type fmt t
   | Any -> string fmt "any"
   | Something -> string fmt "something"
 
 let pp_typ_list fmt l = list ~sep:sp pp_typ fmt l
 
 let typ_of_val_type = function
-  | Binary.Ref_type (_null, t) -> Ref_type t
+  | Text.Ref_type (_null, t) -> Ref_type t
   | Num_type t -> Num_type t
 
 let typ_of_pt pt = typ_of_val_type @@ snd pt
@@ -58,7 +58,7 @@ let check_align memarg_align align =
 module Env = struct
   type t =
     { locals : typ Index.Map.t
-    ; result_type : result_type
+    ; result_type : Text.result_type
     ; blocks : typ list list
     ; modul : Binary.Module.t
     ; refs : (int, unit) Hashtbl.t
@@ -124,9 +124,9 @@ let v128 = Num_type V128
 
 let any = Any
 
-let itype = function S32 -> i32 | S64 -> i64
+let itype = function Text.S32 -> i32 | S64 -> i64
 
-let ftype = function S32 -> f32 | S64 -> f64
+let ftype = function Text.S32 -> f32 | S64 -> f64
 
 module Stack : sig
   type t = typ list
@@ -143,7 +143,7 @@ module Stack : sig
 
   val equal : t -> t -> bool
 
-  val match_ref_type : heap_type -> heap_type -> bool
+  val match_ref_type : Text.heap_type -> Text.heap_type -> bool
 
   val match_types : typ -> typ -> bool
 
@@ -155,7 +155,7 @@ end = struct
 
   let pp fmt (s : stack) = pf fmt "[%a]" pp_typ_list s
 
-  let match_num_type (required : num_type) (got : num_type) =
+  let match_num_type (required : Text.num_type) (got : Text.num_type) =
     match (required, got) with
     | I32, I32 -> true
     | I64, I64 -> true
@@ -166,7 +166,7 @@ end = struct
 
   let match_ref_type required got =
     match (required, got) with
-    | Func_ht, Func_ht -> true
+    | Text.Func_ht, Text.Func_ht -> true
     | Extern_ht, Extern_ht -> true
     | Func_ht, Extern_ht -> false
     | Extern_ht, Func_ht -> false
@@ -453,8 +453,7 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
   | Table_copy (i, i') ->
     let* typ = Env.table_type_get i env.modul in
     let* typ' = Env.table_type_get i' env.modul in
-    if not @@ Binary.ref_type_eq typ typ' then
-      Error (`Type_mismatch "table_copy")
+    if not @@ Text.ref_type_eq typ typ' then Error (`Type_mismatch "table_copy")
     else Stack.pop [ i32; i32; i32 ] stack
   | Table_fill i ->
     let* _null, t = Env.table_type_get i env.modul in
@@ -610,7 +609,7 @@ let typecheck_const_expr (modul : Module.t) refs expr =
   list_fold_left (typecheck_const_instr modul refs) [] expr.Annotated.raw
 
 let typecheck_global (modul : Module.t) refs
-  (global : (Global.t, Global.Type.t) Origin.t) =
+  (global : (Global.t, Text.Global.Type.t) Origin.t) =
   match global with
   | Imported _ -> Ok ()
   | Local { typ; init; _ } -> (
@@ -646,13 +645,13 @@ let typecheck_elem modul refs (elem : Elem.t) =
   | Active (None, _e) -> assert false
   | Active (Some tbl_i, e) -> (
     let* _null, tbl_type = Env.table_type_get tbl_i modul in
-    if not @@ Binary.heap_type_eq tbl_type expected_type then
+    if not @@ Text.heap_type_eq tbl_type expected_type then
       Error (`Type_mismatch "typecheck elem 3")
     else
       let* t = typecheck_const_expr modul refs e in
       match t with
       | [ Ref_type t ] ->
-        if not @@ Binary.heap_type_eq t tbl_type then
+        if not @@ Text.heap_type_eq t tbl_type then
           Error (`Type_mismatch "typecheck_elem 4")
         else Ok ()
       | [ _t ] -> Ok ()
@@ -710,7 +709,7 @@ let validate_exports modul =
       Ok () )
     modul.exports.mem
 
-let check_limit { min; max } =
+let check_limit { Text.min; max } =
   match max with
   | None -> Ok ()
   | Some max ->
@@ -728,7 +727,7 @@ let validate_mem modul =
     (function
       | Origin.Local (_, typ) | Imported { typ; _ } ->
         let* () =
-          if typ.min > 65536 then Error `Memory_size_too_large
+          if typ.Text.min > 65536 then Error `Memory_size_too_large
           else
             match typ.max with
             | Some max when max > 65536 -> Error `Memory_size_too_large

@@ -20,36 +20,30 @@ module Concrete : sig
     -> V.t list Concrete_choice.t
 
   val exec_ibinop :
-    V.t list -> Binary.nn -> Binary.ibinop -> V.t list Concrete_choice.t
+    V.t list -> Text.nn -> Text.ibinop -> V.t list Concrete_choice.t
 
-  val exec_iunop : V.t list -> Binary.nn -> Binary.iunop -> V.t list
+  val exec_iunop : V.t list -> Text.nn -> Text.iunop -> V.t list
 
-  val exec_itestop : V.t list -> Binary.nn -> Binary.itestop -> V.t list
+  val exec_itestop : V.t list -> Text.nn -> Text.itestop -> V.t list
 
-  val exec_irelop : V.t list -> Binary.nn -> Binary.irelop -> V.t list
+  val exec_irelop : V.t list -> Text.nn -> Text.irelop -> V.t list
 
   val exec_itruncf :
-       V.t list
-    -> Binary.nn
-    -> Binary.nn
-    -> Binary.sx
-    -> V.t list Concrete_choice.t
+    V.t list -> Text.nn -> Text.nn -> Text.sx -> V.t list Concrete_choice.t
 
-  val exec_itruncsatf :
-    V.t list -> Binary.nn -> Binary.nn -> Binary.sx -> V.t list
+  val exec_itruncsatf : V.t list -> Text.nn -> Text.nn -> Text.sx -> V.t list
 
-  val exec_ireinterpretf : V.t list -> Binary.nn -> Binary.nn -> V.t list
+  val exec_ireinterpretf : V.t list -> Text.nn -> Text.nn -> V.t list
 
-  val exec_fbinop : V.t list -> Binary.nn -> Binary.fbinop -> V.t list
+  val exec_fbinop : V.t list -> Text.nn -> Text.fbinop -> V.t list
 
-  val exec_funop : V.t list -> Binary.nn -> Binary.funop -> V.t list
+  val exec_funop : V.t list -> Text.nn -> Text.funop -> V.t list
 
-  val exec_frelop : V.t list -> Binary.nn -> Binary.frelop -> V.t list
+  val exec_frelop : V.t list -> Text.nn -> Text.frelop -> V.t list
 
-  val exec_fconverti :
-    V.t list -> Binary.nn -> Binary.nn -> Binary.sx -> V.t list
+  val exec_fconverti : V.t list -> Text.nn -> Text.nn -> Text.sx -> V.t list
 
-  val exec_freinterpreti : V.t list -> Binary.nn -> Binary.nn -> V.t list
+  val exec_freinterpreti : V.t list -> Text.nn -> Text.nn -> V.t list
 end
 
 module Symbolic : sig

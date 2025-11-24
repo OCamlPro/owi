@@ -71,11 +71,11 @@ let write_char_indice buf c idx =
 
 let write_reftype buf ht =
   match ht with
-  | Func_ht -> Buffer.add_char buf '\x70'
+  | Text.Func_ht -> Buffer.add_char buf '\x70'
   | Extern_ht -> Buffer.add_char buf '\x6F'
 
 let get_char_valtype = function
-  | Num_type I32 -> '\x7F'
+  | Text.Num_type I32 -> '\x7F'
   | Num_type I64 -> '\x7E'
   | Num_type F32 -> '\x7D'
   | Num_type F64 -> '\x7C'
@@ -101,14 +101,14 @@ let encode_vector_list buf datas encode_func =
 let encode_vector_array buf datas encode_func =
   encode_vector Array.length Array.iter buf datas encode_func
 
-let write_resulttype buf (rt : result_type) =
+let write_resulttype buf (rt : Text.result_type) =
   encode_vector_list buf rt write_valtype
 
-let write_paramtype buf (pt : param_type) =
+let write_paramtype buf (pt : Text.param_type) =
   let vt = List.map snd pt in
   write_resulttype buf vt
 
-let write_mut buf (mut : mut) =
+let write_mut buf (mut : Text.mut) =
   let c = match mut with Const -> '\x00' | Var -> '\x01' in
   Buffer.add_char buf c
 
@@ -127,11 +127,11 @@ let write_block_type_idx buf (typ : Binary.block_type) =
   | Bt_raw (None, _) -> assert false
   | Bt_raw (Some idx, _) -> write_indice buf idx
 
-let write_global_type buf ((mut, vt) : Global.Type.t) =
+let write_global_type buf ((mut, vt) : Text.Global.Type.t) =
   write_valtype buf vt;
   write_mut buf mut
 
-let write_limits buf (limits : limits) =
+let write_limits buf (limits : Text.limits) =
   match limits with
   | { min; max = None } ->
     Buffer.add_char buf '\x00';
@@ -141,26 +141,26 @@ let write_limits buf (limits : limits) =
     write_u32_of_int buf min;
     write_u32_of_int buf max
 
-let write_memarg buf ({ offset; align } : memarg) =
+let write_memarg buf ({ offset; align } : Text.memarg) =
   write_u32 buf align;
   write_u32 buf offset
 
-let write_memory buf ((_so, limits) : Mem.t) = write_limits buf limits
+let write_memory buf ((_so, limits) : Text.Mem.t) = write_limits buf limits
 
 let write_memory_import buf
-  ({ modul_name; name; typ = limits; _ } : limits Origin.imported) =
+  ({ modul_name; name; typ = limits; _ } : Text.limits Origin.imported) =
   write_string buf modul_name;
   write_string buf name;
   Buffer.add_char buf '\x02';
   write_limits buf limits
 
-let write_table buf ((_so, (limits, (_nullable, heaptype))) : Table.t) =
+let write_table buf ((_so, (limits, (_nullable, heaptype))) : Text.Table.t) =
   write_reftype buf heaptype;
   write_limits buf limits
 
 let write_table_import buf
   ({ modul_name; name; typ = limits, (_nullable, heaptype); _ } :
-    Table.Type.t Origin.imported ) =
+    Text.Table.Type.t Origin.imported ) =
   write_string buf modul_name;
   write_string buf name;
   Buffer.add_char buf '\x01';
@@ -523,8 +523,8 @@ let write_global buf ({ typ; init; _ } : Global.t) =
   write_expr buf init ~end_op_code:None
 
 let write_global_import buf
-  ({ modul_name; name; typ = mut, valtype; _ } : Global.Type.t Origin.imported)
-    =
+  ({ modul_name; name; typ = mut, valtype; _ } :
+    Text.Global.Type.t Origin.imported ) =
   write_string buf modul_name;
   write_string buf name;
   Buffer.add_char buf '\x03';

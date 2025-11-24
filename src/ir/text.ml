@@ -198,7 +198,7 @@ type nonrec frelop =
   | Le
   | Ge
 
-let frelop fmt : frelop -> Unit.t = function
+let pp_frelop fmt : frelop -> Unit.t = function
   | Eq -> pf fmt "eq"
   | Ne -> pf fmt "ne"
   | Lt -> pf fmt "lt"
@@ -467,7 +467,7 @@ let rec pp_instr ~short fmt = function
   | V_ibinop (shape, op) -> pf fmt "%a.%a" pp_ishape shape pp_vibinop op
   | I_testop (n, op) -> pf fmt "i%a.%a" pp_nn n pp_itestop op
   | I_relop (n, op) -> pf fmt "i%a.%a" pp_nn n pp_irelop op
-  | F_relop (n, op) -> pf fmt "f%a.%a" pp_nn n frelop op
+  | F_relop (n, op) -> pf fmt "f%a.%a" pp_nn n pp_frelop op
   | I_extend8_s n -> pf fmt "i%a.extend8_s" pp_nn n
   | I_extend16_s n -> pf fmt "i%a.extend16_s" pp_nn n
   | I64_extend32_s -> pf fmt "i64.extend32_s"

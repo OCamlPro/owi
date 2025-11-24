@@ -20,7 +20,7 @@ type 'ext t =
   ; functions : Kind.func IMap.t
   ; data : data IMap.t
   ; elem : elem IMap.t
-  ; extern_funcs : ('ext * Binary.func_type) Dynarray.t
+  ; extern_funcs : ('ext * Text.func_type) Dynarray.t
   ; id : int
   }
 
