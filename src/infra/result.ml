@@ -76,7 +76,7 @@ type err =
   | `Uninitialized_element of int
   | `Integer_overflow
   | `Integer_divide_by_zero
-  | `Invalid_conversion_to_integer
+  | `Conversion_to_integer
   | `Element_type_error
   | `Unreachable
   | `Indirect_call_type_mismatch
@@ -169,7 +169,7 @@ let rec err_to_string = function
   | `Uninitialized_element fun_i -> Fmt.str "uninitialized element %i" fun_i
   | `Integer_overflow -> "integer overflow"
   | `Integer_divide_by_zero -> "integer divide by zero"
-  | `Invalid_conversion_to_integer -> "invalid conversion to integer"
+  | `Conversion_to_integer -> "invalid conversion to integer"
   | `Element_type_error -> "element_type_error"
   | `Unreachable -> "unreachable"
   | `Indirect_call_type_mismatch -> "indirect call type mismatch"
@@ -266,7 +266,7 @@ let err_to_exit_code = function
   | `Indirect_call_type_mismatch -> 84
   | `Integer_divide_by_zero -> 85
   | `Integer_overflow -> 86
-  | `Invalid_conversion_to_integer -> 87
+  | `Conversion_to_integer -> 87
   | `Memory_heap_buffer_overflow -> 88
   | `Memory_leak_use_after_free -> 89
   | `Out_of_bounds_memory_access -> 90

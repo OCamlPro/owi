@@ -77,7 +77,7 @@ type err =
   | `Uninitialized_element of int
   | `Integer_overflow
   | `Integer_divide_by_zero
-  | `Invalid_conversion_to_integer
+  | `Conversion_to_integer
   | `Element_type_error
   | `Unreachable
   | `Indirect_call_type_mismatch
