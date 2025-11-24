@@ -79,7 +79,7 @@
 <pre><code class="ocaml">type stats = { solver_time : Mtime.Span.t Atomic.t }
 
 let handle_time_span atomic_span f =
-  <span data-count="28612">i</span>f Log.is_bench_enabled () then
+  <span data-count="28258">i</span>f Log.is_bench_enabled () then
     <span data-count="4">l</span>et counter = Mtime_clock.counter () in
     <span data-count="4">l</span>et res = f () in
     <span data-count="4">l</span>et span = Mtime_clock.count counter in
@@ -91,7 +91,7 @@ let handle_time_span atomic_span f =
       <span data-count="4">i</span>f success then <span data-count="4">r</span>es else <span data-count="0">a</span>tomic_set ()
     in
     atomic_set ()
-  else <span data-count="28608">f</span> ()
+  else <span data-count="28254">f</span> ()
 
 let with_utime f =
   <span data-count="426">i</span>f Log.is_bench_enabled () then
