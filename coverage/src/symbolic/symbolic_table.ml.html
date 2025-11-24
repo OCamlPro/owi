@@ -199,15 +199,15 @@ type t =
   ; typ : Binary.ref_type
   }
 
-let clone_table { limits; data; typ } = <span data-count="5062">{</span> typ; limits; data = Array.cop<span data-count="5062">y</span> data }
+let clone_table { limits; data; typ } = <span data-count="5061">{</span> typ; limits; data = Array.cop<span data-count="5062">y</span> data }
 
-let get t i = <span data-count="3887">t</span>.data.(i)
+let get t i = <span data-count="3890">t</span>.data.(i)
 
 let set t i v = <span data-count="610">t</span>.data.(i) &lt;- v
 
-let size t = <span data-count="4050">A</span>rray.length t.data
+let size t = <span data-count="4053">A</span>rray.length t.data
 
-let typ t = <span data-count="3882">t</span>.typ
+let typ t = <span data-count="3884">t</span>.typ
 
 let max_size t = <span data-count="0">t</span>.limits.max
 
@@ -242,25 +242,25 @@ let convert (orig_table : Concrete_table.t) =
 
 type collection = (int * int, t) Hashtbl.t
 
-let init () = <span data-count="28556">H</span>ashtbl.create 16
+let init () = <span data-count="28784">H</span>ashtbl.create 16
 
 let clone collection =
-  <span data-count="28156">l</span>et collection' = init () in
-  <span data-count="28155">H</span>ashtbl.iter
+  <span data-count="28384">l</span>et collection' = init () in
+  <span data-count="28384">H</span>ashtbl.iter
     (fun loc table -&gt;
       <span data-count="5062">l</span>et table' = clone_table table in
       <span data-count="5062">H</span>ashtbl.add collection' loc table' )
     collection;
-  <span data-count="28155">c</span>ollection'
+  <span data-count="28384">c</span>ollection'
 
 let get_table env_id (orig_table : Concrete_table.t) collection g_id =
-  <span data-count="4049">l</span>et loc = (env_id, g_id) in
+  <span data-count="4051">l</span>et loc = (env_id, g_id) in
   match Hashtbl.find_opt collection loc with
   | <span data-count="167">N</span>one -&gt;
     let g = convert orig_table in
     <span data-count="167">H</span>ashtbl.add collection loc g;
     <span data-count="167">g</span>
-  | <span data-count="3883">S</span>ome t -&gt; t
+  | <span data-count="3886">S</span>ome t -&gt; t
 </code></pre>
       </div>
     </div>

@@ -49,9 +49,9 @@
 <a id="L15"></a><span > </span>
 <a id="L16"></a><span class="visited"> </span>
 <a id="L17"></a><span class="visited"> </span>
-<a id="L18"></a><span > </span>
+<a id="L18"></a><span class="visited"> </span>
 <a id="L19"></a><span > </span>
-<a id="L20"></a><span class="visited"> </span>
+<a id="L20"></a><span > </span>
 <a id="L21"></a><span class="visited"> </span>
 <a id="L22"></a><span class="visited"> </span>
 <a id="L23"></a><span > </span>
@@ -225,12 +225,12 @@ module Text = struct
 
   let until_assign ~unsafe m =
     <span data-count="3689">l</span>et* m = until_grou<span data-count="3689">p</span> ~unsafe m in
-    <span data-count="3655">A</span>ssigned.of_grouped m
+    <span data-count="3655">l</span>et+ assigned = Assigned.of_groupe<span data-count="3655">d</span> m in
+    <span data-count="3627">(</span>m, assigned)
 
   let until_binary ~unsafe m =
-    <span data-count="3689">l</span>et* m = until_assig<span data-count="3689">n</span> ~unsafe m in
-    <span data-count="3627">l</span>et* m = Rewrite.modu<span data-count="3627">l</span> m in
-    <span data-count="3595">O</span>k m
+    <span data-count="3689">l</span>et* m, assigned = until_assig<span data-count="3689">n</span> ~unsafe m in
+    <span data-count="3627">R</span>ewrite.modul m assigned
 
   let until_validate ~unsafe m =
     <span data-count="3611">l</span>et* m = until_binar<span data-count="3611">y</span> ~unsafe m in

@@ -150,7 +150,7 @@ let imported ~modul_name ~name ~assigned_name ~typ =
   <span data-count="3994">I</span>mported { modul_name; name; assigned_name; typ }
 
 let pp_imported pp_typ fmt { modul_name; name; assigned_name; typ } =
-  <span data-count="2">F</span>mt.pf fmt "{@\n  @[&lt;v&gt;modul: %S@\nname: %S@\nassigned_name: %a@\ntyp: %a@]}"
+  <span data-count="1">F</span>mt.pf fmt "{@\n  @[&lt;v&gt;modul: %S@\nname: %S@\nassigned_name: %a@\ntyp: %a@]}"
     modul_name name Text.pp_id_opt assigned_name pp_typ typ
 
 let map_imported f v =
@@ -163,8 +163,8 @@ let monadic_map_imported f v =
   <span data-count="2025">{</span> v with typ }
 
 let pp ~pp_local ~pp_imported:pp fmt = function
-  | <span data-count="2">L</span>ocal local -&gt; Fmt.pf fmt "Local (%a)" pp_local local
-  | <span data-count="2">I</span>mported imported -&gt; Fmt.pf fmt "Imported (%a)" (pp_importe<span data-count="2">d</span> pp) imported
+  | <span data-count="1">L</span>ocal local -&gt; Fmt.pf fmt "Local (%a)" pp_local local
+  | <span data-count="1">I</span>mported imported -&gt; Fmt.pf fmt "Imported (%a)" (pp_importe<span data-count="1">d</span> pp) imported
 
 let map ~f_local ~f_imported = function
   | <span data-count="1447">L</span>ocal v -&gt;
