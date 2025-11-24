@@ -4,23 +4,22 @@
 
 open Syntax
 
-module Typetbl = Hashtbl.Make (struct
-  type t = Text.func_type
-
-  let equal = Text.func_type_eq
-
-  let hash = Hashtbl.hash
-end)
-
 type t =
   { id : string option
-  ; typ : Text.func_type Named.t
-  ; global : (Text.Global.t, Text.Global.Type.t) Origin.t Named.t
-  ; table : (Text.Table.t, Text.Table.Type.t) Origin.t Named.t
-  ; mem : (Text.Mem.t, Text.limits) Origin.t Named.t
-  ; func : (Text.Func.t, Text.block_type) Origin.t Named.t
-  ; elem : Text.Elem.t Named.t
-  ; data : Text.Data.t Named.t
+  ; typ : Text.func_type Array.t
+  ; global : (Text.Global.t, Text.Global.Type.t) Origin.t Array.t
+  ; table : (Text.Table.t, Text.Table.Type.t) Origin.t Array.t
+  ; mem : (Text.Mem.t, Text.limits) Origin.t Array.t
+  ; func : (Text.Func.t, Text.block_type) Origin.t Array.t
+  ; elem : Text.Elem.t Array.t
+  ; data : Text.Data.t Array.t
+  ; typ_names : (string, int) Hashtbl.t
+  ; global_names : (string, int) Hashtbl.t
+  ; table_names : (string, int) Hashtbl.t
+  ; mem_names : (string, int) Hashtbl.t
+  ; func_names : (string, int) Hashtbl.t
+  ; elem_names : (string, int) Hashtbl.t
+  ; data_names : (string, int) Hashtbl.t
   ; global_exports : Grouped.opt_export Array.t
   ; mem_exports : Grouped.opt_export Array.t
   ; table_exports : Grouped.opt_export Array.t
@@ -30,27 +29,29 @@ type t =
 
 let pp_id fmt id = Text.pp_id_opt fmt id
 
-let pp_typ fmt typ = Named.pp Text.pp_func_type fmt typ
-
-let pp_runtime_named ~pp_local ~pp_imported fmt l =
-  Named.pp (Origin.pp ~pp_local ~pp_imported) fmt l
+let pp_typ fmt typ = Fmt.array Text.pp_func_type fmt typ
 
 let pp_global fmt g =
-  pp_runtime_named ~pp_local:Text.Global.pp ~pp_imported:Text.Global.Type.pp fmt
-    g
+  Fmt.array
+    (Origin.pp ~pp_local:Text.Global.pp ~pp_imported:Text.Global.Type.pp)
+    fmt g
 
 let pp_table fmt t =
-  pp_runtime_named ~pp_local:Text.Table.pp ~pp_imported:Text.Table.Type.pp fmt t
+  Fmt.array
+    (Origin.pp ~pp_local:Text.Table.pp ~pp_imported:Text.Table.Type.pp)
+    fmt t
 
 let pp_mem fmt m =
-  pp_runtime_named ~pp_local:Text.Mem.pp ~pp_imported:Text.pp_limits fmt m
+  Fmt.array (Origin.pp ~pp_local:Text.Mem.pp ~pp_imported:Text.pp_limits) fmt m
 
 let pp_func fmt f =
-  pp_runtime_named ~pp_local:Text.Func.pp ~pp_imported:Text.pp_block_type fmt f
+  Fmt.array
+    (Origin.pp ~pp_local:Text.Func.pp ~pp_imported:Text.pp_block_type)
+    fmt f
 
-let pp_elem fmt e = Named.pp Text.Elem.pp fmt e
+let pp_elem fmt e = Fmt.array Text.Elem.pp fmt e
 
-let pp_data fmt d = Named.pp Text.Data.pp fmt d
+let pp_data fmt d = Fmt.array Text.Data.pp fmt d
 
 let pp_start fmt s = Text.pp_indice_opt fmt s
 
@@ -70,7 +71,16 @@ let pp fmt { id; typ; global; table; mem; func; elem; data; start; _ } =
     pp_id id pp_typ typ pp_global global pp_table table pp_mem mem pp_func func
     pp_elem elem pp_data data pp_start start
 
-let assign_types (modul : Grouped.t) : Text.func_type Named.t =
+module Typetbl = Hashtbl.Make (struct
+  type t = Text.func_type
+
+  let equal = Text.func_type_eq
+
+  let hash = Hashtbl.hash
+end)
+
+let assign_types typ function_type :
+  Text.func_type Array.t * (string, int) Hashtbl.t =
   let all_types = Typetbl.create 64 in
   let named_types = Hashtbl.create 64 in
   let declared_types = Dynarray.create () in
@@ -83,7 +93,7 @@ let assign_types (modul : Grouped.t) : Text.func_type Named.t =
       end;
       Dynarray.add_last declared_types typ;
       Typetbl.add all_types typ id )
-    modul.typ;
+    typ;
   Array.iter
     (fun typ ->
       match Typetbl.find_opt all_types typ with
@@ -92,12 +102,12 @@ let assign_types (modul : Grouped.t) : Text.func_type Named.t =
         let id = Dynarray.length declared_types in
         Dynarray.add_last declared_types typ;
         Typetbl.add all_types typ id )
-    modul.function_type;
+    function_type;
   let declared_types = Dynarray.to_array declared_types in
-  Named.create declared_types named_types
+  (declared_types, named_types)
 
-let get_runtime_name (get_name : 'a -> string option) (elt : ('a, 'b) Origin.t)
-  : string option =
+let get_origin_name (get_name : 'a -> string option) (elt : ('a, 'b) Origin.t) :
+  string option =
   match elt with
   | Local v -> get_name v
   | Imported { assigned_name; _ } -> assigned_name
@@ -118,56 +128,74 @@ let name kind ~get_name values =
           end )
       values
   in
-  Named.create values named
+  named
 
-let check_type_id (types : Text.func_type Named.t) (id, func_type) =
+let check_type_id (types : Text.func_type Array.t)
+  (typ_names : (string, int) Hashtbl.t) (id, func_type) =
   let id =
     match id with
     | Text.Raw i -> i
     | Text name -> (
-      match Named.get_by_name types name with
-      | None -> (* TODO: unchecked, is this actually reachable? *) assert false
+      match Hashtbl.find_opt typ_names name with
+      | None -> assert false
       | Some v -> v )
   in
-  match Named.get_at types id with
-  | None -> Error (`Unknown_type (Text.Raw id))
-  | Some func_type' ->
+  if id >= Array.length types then Error (`Unknown_type (Text.Raw id))
+  else
+    let func_type' = Array.unsafe_get types id in
     if not (Text.func_type_eq func_type func_type') then
       Error `Inline_function_type
     else Ok ()
 
-let of_grouped (modul : Grouped.t) : t Result.t =
+let of_grouped
+  ({ global
+   ; table
+   ; mem
+   ; func
+   ; elem
+   ; data
+   ; type_checks
+   ; id
+   ; typ
+   ; function_type
+   ; global_exports
+   ; mem_exports
+   ; table_exports
+   ; func_exports
+   ; start
+   } :
+    Grouped.t ) : t Result.t =
   Log.debug (fun m -> m "assigning    ...");
-  let typ = assign_types modul in
-  let* global =
+  let typ, typ_names = assign_types typ function_type in
+  let* global_names =
     name "global"
-      ~get_name:(get_runtime_name (fun ({ id; _ } : Text.Global.t) -> id))
-      modul.global
+      ~get_name:(get_origin_name (fun ({ id; _ } : Text.Global.t) -> id))
+      global
   in
-  let* table =
+  let* table_names =
     name "table"
-      ~get_name:(get_runtime_name (fun ((id, _) : Text.Table.t) -> id))
-      modul.table
+      ~get_name:(get_origin_name (fun ((id, _) : Text.Table.t) -> id))
+      table
   in
-  let* mem =
+  let* mem_names =
     name "mem"
-      ~get_name:(get_runtime_name (fun ((id, _) : Text.Mem.t) -> id))
-      modul.mem
+      ~get_name:(get_origin_name (fun ((id, _) : Text.Mem.t) -> id))
+      mem
   in
-  let* func =
+  let* func_names =
     name "func"
-      ~get_name:(get_runtime_name (fun ({ id; _ } : Text.Func.t) -> id))
-      modul.func
+      ~get_name:(get_origin_name (fun ({ id; _ } : Text.Func.t) -> id))
+      func
   in
-  let* elem =
-    name "elem" ~get_name:(fun (elem : Text.Elem.t) -> elem.id) modul.elem
+  let* elem_names =
+    name "elem" ~get_name:(fun (elem : Text.Elem.t) -> elem.id) elem
   in
-  let* data =
-    name "data" ~get_name:(fun (data : Text.Data.t) -> data.id) modul.data
+  let* data_names =
+    name "data" ~get_name:(fun (data : Text.Data.t) -> data.id) data
   in
-  let+ () = array_iter (check_type_id typ) modul.type_checks in
+  let+ () = array_iter (check_type_id typ typ_names) type_checks in
   let modul =
-    { id = modul.id
+    { id
     ; typ
     ; global
     ; table
@@ -175,31 +203,39 @@ let of_grouped (modul : Grouped.t) : t Result.t =
     ; func
     ; elem
     ; data
-    ; global_exports = modul.global_exports
-    ; mem_exports = modul.mem_exports
-    ; table_exports = modul.table_exports
-    ; func_exports = modul.func_exports
-    ; start = modul.start
+    ; typ_names
+    ; global_names
+    ; table_names
+    ; mem_names
+    ; func_names
+    ; elem_names
+    ; data_names
+    ; global_exports
+    ; mem_exports
+    ; table_exports
+    ; func_exports
+    ; start
     }
   in
   Log.debug (fun m -> m "%a" pp modul);
   modul
 
-let find (named : 'a Named.t) err : _ -> Binary.indice Result.t = function
+let find (names : (string, int) Hashtbl.t) err : _ -> Binary.indice Result.t =
+  function
   | Text.Raw i -> Ok i
   | Text name -> (
-    match Named.get_by_name named name with None -> Error err | Some i -> Ok i )
+    match Hashtbl.find_opt names name with None -> Error err | Some i -> Ok i )
 
-let find_func modul id = find modul.func (`Unknown_func id) id
+let find_func modul id = find modul.func_names (`Unknown_func id) id
 
-let find_global modul id = find modul.global (`Unknown_global id) id
+let find_global modul id = find modul.global_names (`Unknown_global id) id
 
-let find_memory modul id = find modul.mem (`Unknown_memory id) id
+let find_memory modul id = find modul.mem_names (`Unknown_memory id) id
 
-let find_table modul id = find modul.table (`Unknown_table id) id
+let find_table modul id = find modul.table_names (`Unknown_table id) id
 
-let find_data modul id = find modul.data (`Unknown_data id) id
+let find_data modul id = find modul.data_names (`Unknown_data id) id
 
-let find_elem modul id = find modul.elem (`Unknown_elem id) id
+let find_elem modul id = find modul.elem_names (`Unknown_elem id) id
 
-let find_type modul id = find modul.typ (`Unknown_type id) id
+let find_type modul id = find modul.typ_names (`Unknown_type id) id

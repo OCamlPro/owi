@@ -10,8 +10,11 @@ module TypeMap = Map.Make (struct
   let compare (x : t) (y : t) = Binary.compare_func_type x y
 end)
 
-let typemap (types : Binary.func_type Named.t) =
-  Named.fold (fun idx typ acc -> TypeMap.add typ idx acc) types TypeMap.empty
+let typemap (types : Binary.func_type Array.t) =
+  snd
+  @@ Array.fold_left
+       (fun (idx, acc) typ -> (succ idx, TypeMap.add typ idx acc))
+       (0, TypeMap.empty) types
 
 let rewrite_num_type : Text.num_type -> Binary.num_type = function
   | I32 -> I32
@@ -133,9 +136,9 @@ let rewrite_block_type (typemap : Binary.indice TypeMap.t) (modul : Assigned.t)
   match block_type with
   | Bt_ind id -> begin
     let* idx = Assigned.find_type modul id in
-    match Named.get_at modul.typ idx with
-    | None -> Error (`Unknown_type id)
-    | Some v ->
+    if idx >= Array.length modul.typ then Error (`Unknown_type id)
+    else
+      let v = Array.unsafe_get modul.typ idx in
       let t' = rewrite_func_type v in
       Ok (Binary.Bt_raw (Some idx, t'))
   end
@@ -502,7 +505,7 @@ let rewrite_data (typemap : Binary.indice TypeMap.t) (modul : Assigned.t)
   in
   { Binary.Data.mode; id = data.id; init = data.init }
 
-let rewrite_export named (exports : Grouped.opt_export Array.t) :
+let rewrite_export names (exports : Grouped.opt_export Array.t) :
   Binary.Export.t Array.t Result.t =
   array_map
     (fun { Grouped.name; id } ->
@@ -510,7 +513,7 @@ let rewrite_export named (exports : Grouped.opt_export Array.t) :
         match id with
         | Text.Raw i -> Ok i
         | Text name -> (
-          match Named.get_by_name named name with
+          match Hashtbl.find_opt names name with
           | None -> Error (`Unknown_export id)
           | Some i -> Ok i )
       in
@@ -519,10 +522,10 @@ let rewrite_export named (exports : Grouped.opt_export Array.t) :
     exports
 
 let rewrite_exports (modul : Assigned.t) : Binary.Module.Exports.t Result.t =
-  let* global = rewrite_export modul.global modul.global_exports in
-  let* mem = rewrite_export modul.mem modul.mem_exports in
-  let* table = rewrite_export modul.table modul.table_exports in
-  let+ func = rewrite_export modul.func modul.func_exports in
+  let* global = rewrite_export modul.global_names modul.global_exports in
+  let* mem = rewrite_export modul.mem_names modul.mem_exports in
+  let* table = rewrite_export modul.table_names modul.table_exports in
+  let+ func = rewrite_export modul.func_names modul.func_exports in
   { Binary.Module.Exports.global; mem; table; func }
 
 let rewrite_func (typemap : Binary.indice TypeMap.t) (modul : Assigned.t)
@@ -539,33 +542,33 @@ let rewrite_types (t : Binary.func_type) : Binary.Typedef.t Result.t =
 
 let modul (modul : Assigned.t) : Binary.Module.t Result.t =
   Log.debug (fun m -> m "rewriting    ...");
-  let modul_typ = Named.map rewrite_func_type modul.typ in
+  let modul_typ = Array.map rewrite_func_type modul.typ in
   let typemap = typemap modul_typ in
   let* global =
-    Named.monadic_map
+    array_map
       (Origin.monadic_map ~f_local:(rewrite_global typemap modul)
          ~f_imported:(fun x -> Ok (rewrite_global_type x) ) )
       modul.global
   in
-  let* elem = Named.monadic_map (rewrite_elem typemap modul) modul.elem in
-  let* data = Named.monadic_map (rewrite_data typemap modul) modul.data in
+  let* elem = array_map (rewrite_elem typemap modul) modul.elem in
+  let* data = array_map (rewrite_data typemap modul) modul.data in
   let* exports = rewrite_exports modul in
   let* func =
     let f_imported = rewrite_block_type typemap modul in
     let f_local = rewrite_func typemap modul in
     let runtime = Origin.monadic_map ~f_local ~f_imported in
-    Named.monadic_map runtime modul.func
+    array_map runtime modul.func
   in
-  let* types = Named.monadic_map rewrite_types modul_typ in
+  let* types = array_map rewrite_types modul_typ in
   let mem =
     let runtime = Origin.map ~f_local:rewrite_mem ~f_imported:rewrite_limits in
-    Named.map runtime modul.mem
+    Array.map runtime modul.mem
   in
   let table =
     let runtime =
       Origin.map ~f_local:rewrite_table ~f_imported:rewrite_table_type
     in
-    Named.map runtime modul.table
+    Array.map runtime modul.table
   in
   let+ start =
     match modul.start with
@@ -577,13 +580,6 @@ let modul (modul : Assigned.t) : Binary.Module.t Result.t =
   let custom = [] in
 
   let id = modul.id in
-  let mem = Named.to_array mem in
-  let table = Named.to_array table in
-  let types = Named.to_array types in
-  let global = Named.to_array global in
-  let elem = Named.to_array elem in
-  let data = Named.to_array data in
-  let func = Named.to_array func in
 
   { Binary.Module.id
   ; mem
