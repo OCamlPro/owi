@@ -214,23 +214,27 @@ module I32 = struct
 
   let trunc_f32_s x =
     try Ok (cvtop ty TruncSF32 x) with
-    | Smtml.Eval.Integer_overflow -> Error `Integer_overflow
-    | Smtml.Eval.Conversion_to_integer -> Error `Invalid_conversion_to_integer
+    | Smtml.Eval.Eval_error `Integer_overflow -> Error `Integer_overflow
+    | Smtml.Eval.Eval_error `Conversion_to_integer ->
+      Error `Invalid_conversion_to_integer
 
   let trunc_f32_u x =
     try Ok (cvtop ty TruncUF32 x) with
-    | Smtml.Eval.Integer_overflow -> Error `Integer_overflow
-    | Smtml.Eval.Conversion_to_integer -> Error `Invalid_conversion_to_integer
+    | Smtml.Eval.Eval_error `Integer_overflow -> Error `Integer_overflow
+    | Smtml.Eval.Eval_error `Conversion_to_integer ->
+      Error `Invalid_conversion_to_integer
 
   let trunc_f64_s x =
     try Ok (cvtop ty TruncSF64 x) with
-    | Smtml.Eval.Integer_overflow -> Error `Integer_overflow
-    | Smtml.Eval.Conversion_to_integer -> Error `Invalid_conversion_to_integer
+    | Smtml.Eval.Eval_error `Integer_overflow -> Error `Integer_overflow
+    | Smtml.Eval.Eval_error `Conversion_to_integer ->
+      Error `Invalid_conversion_to_integer
 
   let trunc_f64_u x =
     try Ok (cvtop ty TruncUF64 x) with
-    | Smtml.Eval.Integer_overflow -> Error `Integer_overflow
-    | Smtml.Eval.Conversion_to_integer -> Error `Invalid_conversion_to_integer
+    | Smtml.Eval.Eval_error `Integer_overflow -> Error `Integer_overflow
+    | Smtml.Eval.Eval_error `Conversion_to_integer ->
+      Error `Invalid_conversion_to_integer
 
   let trunc_sat_f32_s x = cvtop ty Trunc_sat_f32_s x
 
@@ -318,23 +322,27 @@ module I64 = struct
 
   let trunc_f32_s x =
     try Ok (cvtop ty TruncSF32 x) with
-    | Smtml.Eval.Integer_overflow -> Error `Integer_overflow
-    | Smtml.Eval.Conversion_to_integer -> Error `Invalid_conversion_to_integer
+    | Smtml.Eval.Eval_error `Integer_overflow -> Error `Integer_overflow
+    | Smtml.Eval.Eval_error `Conversion_to_integer ->
+      Error `Invalid_conversion_to_integer
 
   let trunc_f32_u x =
     try Ok (cvtop ty TruncUF32 x) with
-    | Smtml.Eval.Integer_overflow -> Error `Integer_overflow
-    | Smtml.Eval.Conversion_to_integer -> Error `Invalid_conversion_to_integer
+    | Smtml.Eval.Eval_error `Integer_overflow -> Error `Integer_overflow
+    | Smtml.Eval.Eval_error `Conversion_to_integer ->
+      Error `Invalid_conversion_to_integer
 
   let trunc_f64_s x =
     try Ok (cvtop ty TruncSF64 x) with
-    | Smtml.Eval.Integer_overflow -> Error `Integer_overflow
-    | Smtml.Eval.Conversion_to_integer -> Error `Invalid_conversion_to_integer
+    | Smtml.Eval.Eval_error `Integer_overflow -> Error `Integer_overflow
+    | Smtml.Eval.Eval_error `Conversion_to_integer ->
+      Error `Invalid_conversion_to_integer
 
   let trunc_f64_u x =
     try Ok (cvtop ty TruncUF64 x) with
-    | Smtml.Eval.Integer_overflow -> Error `Integer_overflow
-    | Smtml.Eval.Conversion_to_integer -> Error `Invalid_conversion_to_integer
+    | Smtml.Eval.Eval_error `Integer_overflow -> Error `Integer_overflow
+    | Smtml.Eval.Eval_error `Conversion_to_integer ->
+      Error `Invalid_conversion_to_integer
 
   let trunc_sat_f32_s x = cvtop ty Trunc_sat_f32_s x
 
