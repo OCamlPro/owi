@@ -187,3 +187,14 @@ let find_data modul id = find modul.data_names (`Unknown_data id) id
 let find_elem modul id = find modul.elem_names (`Unknown_elem id) id
 
 let find_type modul id = find modul.typ_names (`Unknown_type id) id
+
+let get_type modul idx =
+  if idx >= Array.length modul.typ then None
+  else Some (Array.unsafe_get modul.typ idx)
+
+let get_types modul = modul.typ
+
+let find_raw_type modul func_type =
+  match Array.find_index (Text.func_type_eq func_type) modul.typ with
+  | None -> assert false
+  | Some idx -> idx
