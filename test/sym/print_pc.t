@@ -30,32 +30,16 @@
                  start: 
                  }
   owi: [DEBUG] assigning    ...
-  owi: [DEBUG] {
-                 id: 
-                 typ: (func (result i32))
-                 (func (param $x i32))
-                 global: 
-                 table: 
-                 mem: 
-                 func: Imported ({
-                   modul: "owi"
-                   name: "i32_symbol"
-                   assigned_name:  $i32_symbol
-                   typ:  (result i32)})
-                 Local ((func $f (param $x i32)
-                   local.get $x
-                   i32.const 1
-                   i32.lt_u
-                   (if
-                     (then
-                       unreachable
-                     )
-                   )
-                 ))
-                 elem: 
-                 data: 
-                 start: 
-                 }
+  owi: [DEBUG] Types: (func (result i32))
+               (func (param $x i32))
+               Types names: 
+               Global names: 
+               Table names: 
+               Mem names: 
+               Func names: ("f", 1) ; ("i32_symbol", 0)
+               Elem names: 
+               Data names: 
+               
   owi: [DEBUG] rewriting    ...
   owi: [INFO] typechecking ...
   owi: [INFO] linking      ...

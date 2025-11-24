@@ -14,12 +14,12 @@ module Text = struct
 
   let until_assign ~unsafe m =
     let* m = until_group ~unsafe m in
-    Assigned.of_grouped m
+    let+ assigned = Assigned.of_grouped m in
+    (m, assigned)
 
   let until_binary ~unsafe m =
-    let* m = until_assign ~unsafe m in
-    let* m = Rewrite.modul m in
-    Ok m
+    let* m, assigned = until_assign ~unsafe m in
+    Rewrite.modul m assigned
 
   let until_validate ~unsafe m =
     let* m = until_binary ~unsafe m in

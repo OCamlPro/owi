@@ -3,14 +3,7 @@
 (* Written by the Owi programmers *)
 
 type t = private
-  { id : string option
-  ; typ : Text.func_type Array.t
-  ; global : (Text.Global.t, Text.Global.Type.t) Origin.t Array.t
-  ; table : (Text.Table.t, Text.Table.Type.t) Origin.t Array.t
-  ; mem : (Text.Mem.t, Text.limits) Origin.t Array.t
-  ; func : (Text.Func.t, Text.block_type) Origin.t Array.t
-  ; elem : Text.Elem.t Array.t
-  ; data : Text.Data.t Array.t
+  { typ : Text.func_type Array.t
   ; typ_names : (string, int) Hashtbl.t
   ; global_names : (string, int) Hashtbl.t
   ; table_names : (string, int) Hashtbl.t
@@ -18,11 +11,6 @@ type t = private
   ; func_names : (string, int) Hashtbl.t
   ; elem_names : (string, int) Hashtbl.t
   ; data_names : (string, int) Hashtbl.t
-  ; global_exports : Grouped.opt_export Array.t
-  ; mem_exports : Grouped.opt_export Array.t
-  ; table_exports : Grouped.opt_export Array.t
-  ; func_exports : Grouped.opt_export Array.t
-  ; start : Text.indice option
   }
 
 val of_grouped : Grouped.t -> t Result.t

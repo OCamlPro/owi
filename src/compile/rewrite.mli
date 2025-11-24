@@ -2,4 +2,4 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-val modul : Assigned.t -> Binary.Module.t Result.t
+val modul : Grouped.t -> Assigned.t -> Binary.Module.t Result.t
