@@ -27,9 +27,9 @@ val of_instr : Binary.instr -> t
 
 val to_instr : t -> Binary.instr
 
-val ref_null' : Binary.heap_type -> ref_value
+val ref_null' : Text.heap_type -> ref_value
 
-val ref_null : Binary.heap_type -> t
+val ref_null : Text.heap_type -> t
 
 val ref_func : Kind.func -> t
 

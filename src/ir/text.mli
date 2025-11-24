@@ -25,6 +25,8 @@ type nonrec num_type =
   | F64
   | V128
 
+val pp_num_type : Format.formatter -> num_type -> unit
+
 val num_type_eq : num_type -> num_type -> bool
 
 type nullable =
@@ -49,6 +51,8 @@ type nonrec ishape =
   | I32x4
   | I64x2
 
+val pp_ishape : Format.formatter -> ishape -> unit
+
 type nonrec fshape =
   | F32x4
   | F64x8
@@ -57,10 +61,14 @@ type nonrec sx =
   | U
   | S
 
+val pp_sx : Format.formatter -> sx -> unit
+
 type nonrec iunop =
   | Clz
   | Ctz
   | Popcnt
+
+val pp_iunop : Format.formatter -> iunop -> unit
 
 type nonrec funop =
   | Abs
@@ -71,9 +79,13 @@ type nonrec funop =
   | Trunc
   | Nearest
 
+val pp_funop : Format.formatter -> funop -> unit
+
 type nonrec vibinop =
   | Add
   | Sub
+
+val pp_vibinop : Format.formatter -> vibinop -> unit
 
 type nonrec ibinop =
   | Add
@@ -89,6 +101,8 @@ type nonrec ibinop =
   | Rotl
   | Rotr
 
+val pp_ibinop : Format.formatter -> ibinop -> unit
+
 type nonrec fbinop =
   | Add
   | Sub
@@ -98,8 +112,12 @@ type nonrec fbinop =
   | Max
   | Copysign
 
+val pp_fbinop : Format.formatter -> fbinop -> unit
+
 (* TODO: inline this *)
 type nonrec itestop = Eqz
+
+val pp_itestop : Format.formatter -> itestop -> unit
 
 type nonrec irelop =
   | Eq
@@ -109,6 +127,8 @@ type nonrec irelop =
   | Le of sx
   | Ge of sx
 
+val pp_irelop : Format.formatter -> irelop -> unit
+
 type nonrec frelop =
   | Eq
   | Ne
@@ -117,10 +137,14 @@ type nonrec frelop =
   | Le
   | Ge
 
+val pp_frelop : Format.formatter -> frelop -> unit
+
 type nonrec memarg =
   { offset : Int32.t
   ; align : Int32.t
   }
+
+val pp_memarg : Format.formatter -> memarg -> unit
 
 type nonrec limits =
   { min : int
@@ -139,7 +163,13 @@ type heap_type =
 
 val pp_heap_type : Format.formatter -> heap_type -> unit
 
+val heap_type_eq : heap_type -> heap_type -> bool
+
 type nonrec ref_type = nullable * heap_type
+
+val pp_ref_type : Format.formatter -> ref_type -> unit
+
+val ref_type_eq : ref_type -> ref_type -> bool
 
 type nonrec val_type =
   | Num_type of num_type
@@ -151,7 +181,11 @@ type nonrec param = string option * val_type
 
 type nonrec param_type = param list
 
+val pp_param_type : Format.formatter -> param_type -> unit
+
 type nonrec result_type = val_type list
+
+val pp_result_type : Format.formatter -> result_type -> unit
 
 type nonrec func_type = param_type * result_type
 

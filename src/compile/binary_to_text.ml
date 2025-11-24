@@ -4,119 +4,9 @@
 
 let convert_indice : Binary.indice -> Text.indice = function i -> Raw i
 
-let convert_num_type : Binary.num_type -> Text.num_type = function
-  | I32 -> I32
-  | I64 -> I64
-  | F32 -> F32
-  | F64 -> F64
-  | V128 -> V128
-
-let convert_heap_type : Binary.heap_type -> Text.heap_type = function
-  | Func_ht -> Text.Func_ht
-  | Extern_ht -> Text.Extern_ht
-
-let convert_nullable (nullable : Binary.nullable) : Text.nullable =
-  match nullable with No_null -> No_null | Null -> Null
-
-let convert_ref_type ((nullable, heap_type) : Binary.ref_type) : Text.ref_type =
-  let nullable = convert_nullable nullable in
-  let heap_type = convert_heap_type heap_type in
-  (nullable, heap_type)
-
-let convert_val_type : Binary.val_type -> Text.val_type = function
-  | Num_type t -> Num_type (convert_num_type t)
-  | Ref_type t -> Ref_type (convert_ref_type t)
-
-let convert_param ((name, t) : Binary.param) : Text.param =
-  (name, convert_val_type t)
-
-let convert_param_type (pt : Binary.param_type) : Text.param_type =
-  List.map convert_param pt
-
-let convert_result_type (rt : Binary.result_type) : Text.result_type =
-  List.map convert_val_type rt
-
-let convert_func_type ((pt, rt) : Binary.func_type) : Text.func_type =
-  let pt = convert_param_type pt in
-  let rt = convert_result_type rt in
-  (pt, rt)
-
-let convert_nn : Binary.nn -> Text.nn = function S32 -> S32 | S64 -> S64
-
-let convert_ishape : Binary.ishape -> Text.ishape = function
-  | I8x16 -> I8x16
-  | I16x8 -> I16x8
-  | I32x4 -> I32x4
-  | I64x2 -> I64x2
-
-let convert_sx : Binary.sx -> Text.sx = function U -> U | S -> S
-
-let convert_iunop : Binary.iunop -> Text.iunop = function
-  | Clz -> Clz
-  | Ctz -> Ctz
-  | Popcnt -> Popcnt
-
-let convert_funop : Binary.funop -> Text.funop = function
-  | Abs -> Abs
-  | Neg -> Neg
-  | Sqrt -> Sqrt
-  | Ceil -> Ceil
-  | Floor -> Floor
-  | Trunc -> Trunc
-  | Nearest -> Nearest
-
-let convert_vibinop : Binary.vibinop -> Text.vibinop = function
-  | Add -> Add
-  | Sub -> Sub
-
-let convert_ibinop : Binary.ibinop -> Text.ibinop = function
-  | Add -> Add
-  | Sub -> Sub
-  | Mul -> Mul
-  | Div sx -> Div (convert_sx sx)
-  | Rem sx -> Rem (convert_sx sx)
-  | And -> And
-  | Or -> Or
-  | Xor -> Xor
-  | Shl -> Shl
-  | Shr sx -> Shr (convert_sx sx)
-  | Rotl -> Rotl
-  | Rotr -> Rotr
-
-let convert_fbinop : Binary.fbinop -> Text.fbinop = function
-  | Add -> Add
-  | Sub -> Sub
-  | Mul -> Mul
-  | Div -> Div
-  | Min -> Min
-  | Max -> Max
-  | Copysign -> Copysign
-
-let convert_itestop : Binary.itestop -> Text.itestop = function Eqz -> Eqz
-
-let convert_irelop : Binary.irelop -> Text.irelop = function
-  | Eq -> Eq
-  | Ne -> Ne
-  | Lt sx -> Lt (convert_sx sx)
-  | Gt sx -> Gt (convert_sx sx)
-  | Le sx -> Le (convert_sx sx)
-  | Ge sx -> Ge (convert_sx sx)
-
-let convert_frelop : Binary.frelop -> Text.frelop = function
-  | Eq -> Eq
-  | Ne -> Ne
-  | Lt -> Lt
-  | Gt -> Gt
-  | Le -> Le
-  | Ge -> Ge
-
-let convert_memarg (memarg : Binary.memarg) : Text.memarg =
-  { offset = memarg.offset; align = memarg.align }
-
 let convert_block_type : Binary.block_type -> Text.block_type = function
   | Bt_raw (opt, ft) ->
     let opt = Option.map convert_indice opt in
-    let ft = convert_func_type ft in
     Bt_raw (opt, ft)
 
 let rec convert_instr : Binary.instr -> Text.instr = function
@@ -216,77 +106,32 @@ let rec convert_instr : Binary.instr -> Text.instr = function
   | Select typ -> begin
     match typ with
     | None -> Select None
-    | Some [ t ] -> Select (Some [ convert_val_type t ])
+    | Some [ t ] -> Select (Some [ t ])
     | Some [] | Some (_ :: _ :: _) ->
       (* invalid result arity *)
       (* TODO: maybe we could change the type of Binary.Select to prevent this from happening? *)
       assert false
   end
-  | I_unop (nn, op) ->
-    let nn = convert_nn nn in
-    let op = convert_iunop op in
-    I_unop (nn, op)
-  | I_binop (nn, op) ->
-    let nn = convert_nn nn in
-    let op = convert_ibinop op in
-    I_binop (nn, op)
-  | I_testop (nn, op) ->
-    let nn = convert_nn nn in
-    let op = convert_itestop op in
-    I_testop (nn, op)
-  | I_relop (nn, op) ->
-    let nn = convert_nn nn in
-    let op = convert_irelop op in
-    I_relop (nn, op)
-  | F_unop (nn, op) ->
-    let nn = convert_nn nn in
-    let op = convert_funop op in
-    F_unop (nn, op)
-  | F_relop (nn, op) ->
-    let nn = convert_nn nn in
-    let op = convert_frelop op in
-    F_relop (nn, op)
+  | I_unop (nn, op) -> I_unop (nn, op)
+  | I_binop (nn, op) -> I_binop (nn, op)
+  | I_testop (nn, op) -> I_testop (nn, op)
+  | I_relop (nn, op) -> I_relop (nn, op)
+  | F_unop (nn, op) -> F_unop (nn, op)
+  | F_relop (nn, op) -> F_relop (nn, op)
   | I32_wrap_i64 -> I32_wrap_i64
-  | F_reinterpret_i (nn1, nn2) ->
-    let nn1 = convert_nn nn1 in
-    let nn2 = convert_nn nn2 in
-    F_reinterpret_i (nn1, nn2)
-  | I_reinterpret_f (nn1, nn2) ->
-    let nn1 = convert_nn nn1 in
-    let nn2 = convert_nn nn2 in
-    I_reinterpret_f (nn1, nn2)
-  | I64_extend_i32 sx ->
-    let sx = convert_sx sx in
-    I64_extend_i32 sx
+  | F_reinterpret_i (nn1, nn2) -> F_reinterpret_i (nn1, nn2)
+  | I_reinterpret_f (nn1, nn2) -> I_reinterpret_f (nn1, nn2)
+  | I64_extend_i32 sx -> I64_extend_i32 sx
   | I64_extend32_s -> I64_extend32_s
   | F32_demote_f64 -> F32_demote_f64
-  | I_extend8_s nn ->
-    let nn = convert_nn nn in
-    I_extend8_s nn
-  | I_extend16_s nn ->
-    let nn = convert_nn nn in
-    I_extend16_s nn
+  | I_extend8_s nn -> I_extend8_s nn
+  | I_extend16_s nn -> I_extend16_s nn
   | F64_promote_f32 -> F64_promote_f32
-  | F_convert_i (nn1, nn2, sx) ->
-    let nn1 = convert_nn nn1 in
-    let nn2 = convert_nn nn2 in
-    let sx = convert_sx sx in
-    F_convert_i (nn1, nn2, sx)
-  | I_trunc_f (nn1, nn2, sx) ->
-    let nn1 = convert_nn nn1 in
-    let nn2 = convert_nn nn2 in
-    let sx = convert_sx sx in
-    I_trunc_f (nn1, nn2, sx)
-  | I_trunc_sat_f (nn1, nn2, sx) ->
-    let nn1 = convert_nn nn1 in
-    let nn2 = convert_nn nn2 in
-    let sx = convert_sx sx in
-    I_trunc_sat_f (nn1, nn2, sx)
+  | F_convert_i (nn1, nn2, sx) -> F_convert_i (nn1, nn2, sx)
+  | I_trunc_f (nn1, nn2, sx) -> I_trunc_f (nn1, nn2, sx)
+  | I_trunc_sat_f (nn1, nn2, sx) -> I_trunc_sat_f (nn1, nn2, sx)
   | Ref_is_null -> Ref_is_null
-  | F_binop (nn, op) ->
-    let nn = convert_nn nn in
-    let op = convert_fbinop op in
-    F_binop (nn, op)
+  | F_binop (nn, op) -> F_binop (nn, op)
   | F32_const v -> F32_const v
   | F64_const v -> F64_const v
   | I32_const v -> I32_const v
@@ -298,58 +143,22 @@ let rec convert_instr : Binary.instr -> Text.instr = function
   | Return -> Return
   | Extern_externalize -> Extern_externalize
   | Extern_internalize -> Extern_internalize
-  | I_load8 (nn, sx, memarg) ->
-    let nn = convert_nn nn in
-    let sx = convert_sx sx in
-    let memarg = convert_memarg memarg in
-    I_load8 (nn, sx, memarg)
-  | I_store8 (nn, memarg) ->
-    let nn = convert_nn nn in
-    let memarg = convert_memarg memarg in
-    I_store8 (nn, memarg)
-  | I_load16 (nn, sx, memarg) ->
-    let nn = convert_nn nn in
-    let sx = convert_sx sx in
-    let memarg = convert_memarg memarg in
-    I_load16 (nn, sx, memarg)
-  | I_store16 (nn, memarg) ->
-    let nn = convert_nn nn in
-    let memarg = convert_memarg memarg in
-    I_store16 (nn, memarg)
-  | I64_load32 (sx, memarg) ->
-    let sx = convert_sx sx in
-    let memarg = convert_memarg memarg in
-    I64_load32 (sx, memarg)
-  | I64_store32 memarg ->
-    let memarg = convert_memarg memarg in
-    I64_store32 memarg
-  | I_load (nn, memarg) ->
-    let nn = convert_nn nn in
-    let memarg = convert_memarg memarg in
-    I_load (nn, memarg)
-  | F_load (nn, memarg) ->
-    let nn = convert_nn nn in
-    let memarg = convert_memarg memarg in
-    F_load (nn, memarg)
-  | F_store (nn, memarg) ->
-    let nn = convert_nn nn in
-    let memarg = convert_memarg memarg in
-    F_store (nn, memarg)
-  | I_store (nn, memarg) ->
-    let nn = convert_nn nn in
-    let memarg = convert_memarg memarg in
-    I_store (nn, memarg)
+  | I_load8 (nn, sx, memarg) -> I_load8 (nn, sx, memarg)
+  | I_store8 (nn, memarg) -> I_store8 (nn, memarg)
+  | I_load16 (nn, sx, memarg) -> I_load16 (nn, sx, memarg)
+  | I_store16 (nn, memarg) -> I_store16 (nn, memarg)
+  | I64_load32 (sx, memarg) -> I64_load32 (sx, memarg)
+  | I64_store32 memarg -> I64_store32 memarg
+  | I_load (nn, memarg) -> I_load (nn, memarg)
+  | F_load (nn, memarg) -> F_load (nn, memarg)
+  | F_store (nn, memarg) -> F_store (nn, memarg)
+  | I_store (nn, memarg) -> I_store (nn, memarg)
   | Memory_copy -> Memory_copy
   | Memory_size -> Memory_size
   | Memory_fill -> Memory_fill
   | Memory_grow -> Memory_grow
-  | V_ibinop (shape, op) ->
-    let shape = convert_ishape shape in
-    let op = convert_vibinop op in
-    V_ibinop (shape, op)
-  | Ref_null t ->
-    let t = convert_heap_type t in
-    Ref_null t
+  | V_ibinop (shape, op) -> V_ibinop (shape, op)
+  | Ref_null t -> Ref_null t
 
 and convert_expr (e : Binary.expr Annotated.t) : Text.expr Annotated.t =
   Annotated.map
@@ -369,7 +178,6 @@ let convert_elem : Binary.Elem.t -> Text.Elem.t = function
   | { id; typ; init; mode } ->
     let init = List.map convert_expr init in
     let mode = convert_elem_mode mode in
-    let typ = convert_ref_type typ in
     { id; typ; init; mode }
 
 let convert_data_mode : Binary.Data.Mode.t -> Text.Data.Mode.t = function
@@ -384,42 +192,18 @@ let convert_data : Binary.Data.t -> Text.Data.t = function
     { id; init; mode }
 
 let from_types types : Text.Module.Field.t list =
-  Array.map
-    (fun ((s, ft) : Binary.Typedef.t) ->
-      let ft = convert_func_type ft in
-      let t = (s, ft) in
-      Text.Module.Field.Typedef t )
-    types
+  Array.map (fun (t : Text.Typedef.t) -> Text.Module.Field.Typedef t) types
   |> Array.to_list
 
-let convert_mut : Binary.mut -> Text.mut = function
-  | Const -> Const
-  | Var -> Var
-
-let convert_global_type ((mut, t) : Binary.Global.Type.t) : Text.Global.Type.t =
-  let mut = convert_mut mut in
-  let t = convert_val_type t in
-  (mut, t)
-
-let convert_limits : Binary.limits -> Text.limits = function
-  | { min; max } -> { min; max }
-
-let convert_table_type ((limits, t) : Binary.Table.Type.t) : Text.Table.Type.t =
-  let limits = convert_limits limits in
-  let t = convert_ref_type t in
-  (limits, t)
-
-let from_global (global : (Binary.Global.t, Binary.Global.Type.t) Origin.t array)
+let from_global (global : (Binary.Global.t, Text.Global.Type.t) Origin.t array)
   : Text.Module.Field.t list =
   Array.map
     (function
       | Origin.Local (g : Binary.Global.t) ->
-        let typ = convert_global_type g.typ in
         let init = convert_expr g.init in
         let id = g.id in
-        Text.Module.Field.Global { typ; init; id }
+        Text.Module.Field.Global { typ = g.typ; init; id }
       | Imported { modul_name; name; assigned_name; typ } ->
-        let typ = convert_global_type typ in
         let typ = Text.Import.Type.Global (assigned_name, typ) in
         Text.Module.Field.Import { modul_name; name; typ } )
     global
@@ -428,11 +212,8 @@ let from_global (global : (Binary.Global.t, Binary.Global.Type.t) Origin.t array
 let from_table table : Text.Module.Field.t list =
   Array.map
     (function
-      | Origin.Local (name, t) ->
-        let t = convert_table_type t in
-        Text.Module.Field.Table (name, t)
+      | Origin.Local (name, t) -> Text.Module.Field.Table (name, t)
       | Imported { modul_name; name; assigned_name; typ } ->
-        let typ = convert_table_type typ in
         let typ = Text.Import.Type.Table (assigned_name, typ) in
         Import { modul_name; name; typ } )
     table
@@ -441,11 +222,8 @@ let from_table table : Text.Module.Field.t list =
 let from_mem mem : Text.Module.Field.t list =
   Array.map
     (function
-      | Origin.Local (name, t) ->
-        let t = convert_limits t in
-        Text.Module.Field.Mem (name, t)
+      | Origin.Local (name, t) -> Text.Module.Field.Mem (name, t)
       | Imported { modul_name; name; assigned_name; typ } ->
-        let typ = convert_limits typ in
         let typ = Text.Import.Type.Mem (assigned_name, typ) in
         Import { modul_name; name; typ } )
     mem
@@ -456,10 +234,9 @@ let from_func func : Text.Module.Field.t list =
     (function
       | Origin.Local (func : Binary.Func.t) ->
         let type_f = convert_block_type func.type_f in
-        let locals = List.map convert_param func.locals in
         let body = convert_expr func.body in
         let id = func.id in
-        Text.Module.Field.Func { type_f; locals; body; id }
+        Text.Module.Field.Func { type_f; locals = func.locals; body; id }
       | Imported { modul_name; name; assigned_name; typ } ->
         let typ = convert_block_type typ in
         let typ = Text.Import.Type.Func (assigned_name, typ) in

@@ -11,9 +11,9 @@ val recover : from_:t -> to_:t -> unit
 
 val get_limit_max : t -> int64 option
 
-val get_limits : t -> Binary.limits
+val get_limits : t -> Text.limits
 
-val init : Binary.limits -> t
+val init : Text.limits -> t
 
 val update_memory : t -> bytes -> unit
 

@@ -6,8 +6,8 @@
 
 type t =
   { mutable value : Concrete_value.t
-  ; mut : Binary.mut
-  ; typ : Binary.val_type
+  ; mut : Text.mut
+  ; typ : Text.val_type
   }
 
 val value : t -> Concrete_value.t

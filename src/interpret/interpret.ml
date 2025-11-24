@@ -91,11 +91,11 @@ module Make (P : Interpret_intf.P) = struct
 
   let exec_iunop stack nn op =
     match nn with
-    | S32 ->
+    | Text.S32 ->
       let n, stack = Stack.pop_i32 stack in
       let res =
         let open I32 in
-        match op with Clz -> clz n | Ctz -> ctz n | Popcnt -> popcnt n
+        match op with Text.Clz -> clz n | Ctz -> ctz n | Popcnt -> popcnt n
       in
       Stack.push_i32 stack res
     | S64 ->
@@ -108,12 +108,12 @@ module Make (P : Interpret_intf.P) = struct
 
   let exec_funop stack nn op =
     match nn with
-    | S32 ->
+    | Text.S32 ->
       let open F32 in
       let f, stack = Stack.pop_f32 stack in
       let res =
         match op with
-        | Abs -> abs f
+        | Text.Abs -> abs f
         | Neg -> neg f
         | Sqrt -> sqrt f
         | Ceil -> ceil f
@@ -137,9 +137,9 @@ module Make (P : Interpret_intf.P) = struct
       in
       Stack.push_f64 stack res
 
-  let exec_ibinop (stack : Stack.t) nn (op : ibinop) : Stack.t Choice.t =
+  let exec_ibinop (stack : Stack.t) nn (op : Text.ibinop) : Stack.t Choice.t =
     match nn with
-    | S32 ->
+    | Text.S32 ->
       let (n1, n2), stack = Stack.pop2_i32 stack in
       let+ res =
         let open I32 in
@@ -217,9 +217,9 @@ module Make (P : Interpret_intf.P) = struct
       in
       Stack.push_i64 stack res
 
-  let exec_fbinop stack nn (op : fbinop) =
+  let exec_fbinop stack nn (op : Text.fbinop) =
     match nn with
-    | S32 ->
+    | Text.S32 ->
       let (f1, f2), stack = Stack.pop2_f32 stack in
       Stack.push_f32 stack
         (let open F32 in
@@ -244,7 +244,7 @@ module Make (P : Interpret_intf.P) = struct
          | Max -> max f1 f2
          | Copysign -> copy_sign f1 f2 )
 
-  let exec_vibinop stack (shape : ishape) (op : vibinop) =
+  let exec_vibinop stack (shape : Text.ishape) (op : Text.vibinop) =
     let (f1, f2), stack = Stack.pop2_v128 stack in
     let v =
       match shape with
@@ -272,18 +272,18 @@ module Make (P : Interpret_intf.P) = struct
 
   let exec_itestop stack nn op =
     match nn with
-    | S32 ->
+    | Text.S32 ->
       let n, stack = Stack.pop_i32 stack in
-      let res = match op with Eqz -> I32.eq_const n 0l in
+      let res = match op with Text.Eqz -> I32.eq_const n 0l in
       Stack.push_bool stack res
     | S64 ->
       let n, stack = Stack.pop_i64 stack in
       let res = match op with Eqz -> I64.eq_const n 0L in
       Stack.push_bool stack res
 
-  let exec_irelop stack nn (op : irelop) =
+  let exec_irelop stack nn (op : Text.irelop) =
     match nn with
-    | S32 ->
+    | Text.S32 ->
       let (n1, n2), stack = Stack.pop2_i32 stack in
       let res =
         let open I32 in
@@ -318,9 +318,9 @@ module Make (P : Interpret_intf.P) = struct
       in
       Stack.push_bool stack res
 
-  let exec_frelop stack nn (op : frelop) =
+  let exec_frelop stack nn (op : Text.frelop) =
     match nn with
-    | S32 ->
+    | Text.S32 ->
       let (n1, n2), stack = Stack.pop2_f32 stack in
       let res =
         let open F32 in
@@ -349,10 +349,10 @@ module Make (P : Interpret_intf.P) = struct
 
   let exec_itruncf stack nn nn' sx =
     match (nn, nn') with
-    | S32, S32 ->
+    | Text.S32, Text.S32 ->
       let f, stack = Stack.pop_f32 stack in
       let res =
-        match sx with S -> I32.trunc_f32_s f | U -> I32.trunc_f32_u f
+        match sx with Text.S -> I32.trunc_f32_s f | U -> I32.trunc_f32_u f
       in
       begin match res with
       | Error t -> Choice.trap t
@@ -388,13 +388,13 @@ module Make (P : Interpret_intf.P) = struct
 
   let exec_itruncsatf stack nn nn' sx =
     match nn with
-    | S32 -> begin
+    | Text.S32 -> begin
       match nn' with
-      | S32 ->
+      | Text.S32 ->
         let n, stack = Stack.pop_f32 stack in
         let n =
           match sx with
-          | S -> I32.trunc_sat_f32_s n
+          | Text.S -> I32.trunc_sat_f32_s n
           | U -> I32.trunc_sat_f32_u n
         in
         Stack.push_i32 stack n
@@ -428,12 +428,12 @@ module Make (P : Interpret_intf.P) = struct
     end
 
   let exec_fconverti stack nn nn' sx =
-    let is_signed = match sx with S -> true | U -> false in
+    let is_signed = match sx with Text.S -> true | U -> false in
     match nn with
-    | S32 -> (
+    | Text.S32 -> (
       let open F32 in
       match nn' with
-      | S32 ->
+      | Text.S32 ->
         let n, stack = Stack.pop_i32 stack in
         let n = if is_signed then convert_i32_s n else convert_i32_u n in
         Stack.push_f32 stack n
@@ -455,9 +455,9 @@ module Make (P : Interpret_intf.P) = struct
 
   let exec_ireinterpretf stack nn nn' =
     match nn with
-    | S32 -> begin
+    | Text.S32 -> begin
       match nn' with
-      | S32 ->
+      | Text.S32 ->
         let n, stack = Stack.pop_f32 stack in
         let n = I32.reinterpret_f32 n in
         Stack.push_i32 stack n
@@ -480,9 +480,9 @@ module Make (P : Interpret_intf.P) = struct
 
   let exec_freinterpreti stack nn nn' =
     match nn with
-    | S32 -> begin
+    | Text.S32 -> begin
       match nn' with
-      | S32 ->
+      | Text.S32 ->
         let n, stack = Stack.pop_i32 stack in
         let n = F32.reinterpret_i32 n in
         Stack.push_f32 stack n
@@ -505,7 +505,7 @@ module Make (P : Interpret_intf.P) = struct
 
   let init_local (_id, t) : Value.t =
     match t with
-    | Num_type I32 -> I32 I32.zero
+    | Text.Num_type I32 -> I32 I32.zero
     | Num_type I64 -> I64 I64.zero
     | Num_type F32 -> F32 F32.zero
     | Num_type F64 -> F64 F64.zero
@@ -614,9 +614,9 @@ module Make (P : Interpret_intf.P) = struct
 
     type block =
       { branch : expr Annotated.t
-      ; branch_rt : result_type
+      ; branch_rt : Text.result_type
       ; continue : expr Annotated.t
-      ; continue_rt : result_type
+      ; continue_rt : Text.result_type
       ; stack : stack
       ; is_loop : Prelude.Bool.t
       }
@@ -630,7 +630,7 @@ module Make (P : Interpret_intf.P) = struct
           (* TODO: rename this PC, it stands for program counter but is easily confused with path condition... *)
       ; pc : expr Annotated.t
       ; block_stack : block_stack
-      ; func_rt : result_type
+      ; func_rt : Text.result_type
       ; env : Env.t
       ; envs : Env.t Dynarray.t
       }
@@ -783,7 +783,7 @@ module Make (P : Interpret_intf.P) = struct
         | Ref_value func ->
           let ft = func_type state func in
           let ft' = typ_i in
-          if not (func_type_eq ft ft') then
+          if not (Text.func_type_eq ft ft') then
             Choice.trap `Indirect_call_type_mismatch
           else exec_vfunc ~return state func
         end

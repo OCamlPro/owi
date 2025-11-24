@@ -211,7 +211,7 @@ module type T = sig
   val const_v128 : V128.t -> v128
   (* TODO ref *)
 
-  val ref_null : Binary.heap_type -> t
+  val ref_null : Text.heap_type -> t
 
   val ref_func : Kind.func -> t
 

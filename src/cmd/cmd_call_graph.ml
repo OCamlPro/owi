@@ -16,7 +16,7 @@ let find_functions_with_func_type func_type (acc, i)
   let (Bt_raw (_, ft)) =
     match f with Origin.Local x -> x.type_f | Origin.Imported imp -> imp.typ
   in
-  if Binary.func_type_eq func_type ft then (S.add i acc, i + 1) else (acc, i + 1)
+  if Text.func_type_eq func_type ft then (S.add i acc, i + 1) else (acc, i + 1)
 
 let rec find_children mode tables (funcs : 'a array) acc (l : Binary.expr) =
   match (l, mode) with
@@ -71,9 +71,9 @@ let build_graph mode tables funcs (g, i) (f : (Binary.Func.t, 'a) Origin.t) =
     ((i, Some cfg, s) :: g, i + 1)
   | Origin.Imported _ -> ((i, None, S.empty) :: g, i + 1)
 
-let eval_ibinop stack nn (op : Binary.ibinop) =
+let eval_ibinop stack nn (op : Text.ibinop) =
   match nn with
-  | Binary.S32 ->
+  | Text.S32 ->
     let (n1, n2), stack = Stack.pop2_i32 stack in
     Stack.push_i32 stack
       (let open Int32 in

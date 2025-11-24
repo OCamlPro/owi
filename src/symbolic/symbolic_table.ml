@@ -6,8 +6,8 @@
 
 type t =
   { mutable data : Symbolic_value.ref_value array
-  ; limits : Binary.limits
-  ; typ : Binary.ref_type
+  ; limits : Text.limits
+  ; typ : Text.ref_type
   }
 
 let clone_table { limits; data; typ } = { typ; limits; data = Array.copy data }
