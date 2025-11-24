@@ -5,14 +5,7 @@
 open Syntax
 
 type t =
-  { id : string option
-  ; typ : Text.func_type Array.t
-  ; global : (Text.Global.t, Text.Global.Type.t) Origin.t Array.t
-  ; table : (Text.Table.t, Text.Table.Type.t) Origin.t Array.t
-  ; mem : (Text.Mem.t, Text.limits) Origin.t Array.t
-  ; func : (Text.Func.t, Text.block_type) Origin.t Array.t
-  ; elem : Text.Elem.t Array.t
-  ; data : Text.Data.t Array.t
+  { typ : Text.func_type Array.t
   ; typ_names : (string, int) Hashtbl.t
   ; global_names : (string, int) Hashtbl.t
   ; table_names : (string, int) Hashtbl.t
@@ -20,56 +13,37 @@ type t =
   ; func_names : (string, int) Hashtbl.t
   ; elem_names : (string, int) Hashtbl.t
   ; data_names : (string, int) Hashtbl.t
-  ; global_exports : Grouped.opt_export Array.t
-  ; mem_exports : Grouped.opt_export Array.t
-  ; table_exports : Grouped.opt_export Array.t
-  ; func_exports : Grouped.opt_export Array.t
-  ; start : Text.indice option
   }
 
-let pp_id fmt id = Text.pp_id_opt fmt id
+let pp_table fmt tbl =
+  Fmt.iter_bindings
+    ~sep:(fun fmt () -> Fmt.pf fmt " ; ")
+    Hashtbl.iter
+    (fun fmt (name, n) -> Fmt.pf fmt "(%S, %d)" name n)
+    fmt tbl
 
-let pp_typ fmt typ = Fmt.array Text.pp_func_type fmt typ
-
-let pp_global fmt g =
-  Fmt.array
-    (Origin.pp ~pp_local:Text.Global.pp ~pp_imported:Text.Global.Type.pp)
-    fmt g
-
-let pp_table fmt t =
-  Fmt.array
-    (Origin.pp ~pp_local:Text.Table.pp ~pp_imported:Text.Table.Type.pp)
-    fmt t
-
-let pp_mem fmt m =
-  Fmt.array (Origin.pp ~pp_local:Text.Mem.pp ~pp_imported:Text.pp_limits) fmt m
-
-let pp_func fmt f =
-  Fmt.array
-    (Origin.pp ~pp_local:Text.Func.pp ~pp_imported:Text.pp_block_type)
-    fmt f
-
-let pp_elem fmt e = Fmt.array Text.Elem.pp fmt e
-
-let pp_data fmt d = Fmt.array Text.Data.pp fmt d
-
-let pp_start fmt s = Text.pp_indice_opt fmt s
-
-let pp fmt { id; typ; global; table; mem; func; elem; data; start; _ } =
+let pp fmt
+  { typ
+  ; typ_names
+  ; global_names
+  ; table_names
+  ; mem_names
+  ; func_names
+  ; elem_names
+  ; data_names
+  } =
   Fmt.pf fmt
-    "{@\n\
-    \  @[<v>id: %a@\n\
-     typ: %a@\n\
-     global: %a@\n\
-     table: %a@\n\
-     mem: %a@\n\
-     func: %a@\n\
-     elem: %a@\n\
-     data: %a@\n\
-     start: %a@\n\
-     }"
-    pp_id id pp_typ typ pp_global global pp_table table pp_mem mem pp_func func
-    pp_elem elem pp_data data pp_start start
+    "Types: %a@\n\
+     Types names: %a@\n\
+     Global names: %a@\n\
+     Table names: %a@\n\
+     Mem names: %a@\n\
+     Func names: %a@\n\
+     Elem names: %a@\n\
+     Data names: %a@\n"
+    (Fmt.array Text.pp_func_type)
+    typ pp_table typ_names pp_table global_names pp_table table_names pp_table
+    mem_names pp_table func_names pp_table elem_names pp_table data_names
 
 module Typetbl = Hashtbl.Make (struct
   type t = Text.func_type
@@ -148,22 +122,7 @@ let check_type_id (types : Text.func_type Array.t)
     else Ok ()
 
 let of_grouped
-  ({ global
-   ; table
-   ; mem
-   ; func
-   ; elem
-   ; data
-   ; type_checks
-   ; id
-   ; typ
-   ; function_type
-   ; global_exports
-   ; mem_exports
-   ; table_exports
-   ; func_exports
-   ; start
-   } :
+  ({ global; table; mem; func; elem; data; type_checks; typ; function_type; _ } :
     Grouped.t ) : t Result.t =
   Log.debug (fun m -> m "assigning    ...");
   let typ, typ_names = assign_types typ function_type in
@@ -194,15 +153,9 @@ let of_grouped
     name "data" ~get_name:(fun (data : Text.Data.t) -> data.id) data
   in
   let+ () = array_iter (check_type_id typ typ_names) type_checks in
+
   let modul =
-    { id
-    ; typ
-    ; global
-    ; table
-    ; mem
-    ; func
-    ; elem
-    ; data
+    { typ
     ; typ_names
     ; global_names
     ; table_names
@@ -210,11 +163,6 @@ let of_grouped
     ; func_names
     ; elem_names
     ; data_names
-    ; global_exports
-    ; mem_exports
-    ; table_exports
-    ; func_exports
-    ; start
     }
   in
   Log.debug (fun m -> m "%a" pp modul);

@@ -4,18 +4,6 @@
 
 open Syntax
 
-module TypeMap = Map.Make (struct
-  type t = Binary.func_type
-
-  let compare (x : t) (y : t) = Binary.compare_func_type x y
-end)
-
-let typemap (types : Binary.func_type Array.t) =
-  snd
-  @@ Array.fold_left
-       (fun (idx, acc) typ -> (succ idx, TypeMap.add typ idx acc))
-       (0, TypeMap.empty) types
-
 let rewrite_num_type : Text.num_type -> Binary.num_type = function
   | I32 -> I32
   | I64 -> I64
@@ -131,24 +119,24 @@ let rewrite_limits : Text.limits -> Binary.limits = function
 let rewrite_mem ((name, limits) : Text.Mem.t) : Binary.Mem.t =
   (name, rewrite_limits limits)
 
-let rewrite_block_type (typemap : Binary.indice TypeMap.t) (modul : Assigned.t)
-  (block_type : Text.block_type) : Binary.block_type Result.t =
+let rewrite_block_type (assigned : Assigned.t) (block_type : Text.block_type) :
+  Binary.block_type Result.t =
   match block_type with
   | Bt_ind id -> begin
-    let* idx = Assigned.find_type modul id in
-    if idx >= Array.length modul.typ then Error (`Unknown_type id)
+    let* idx = Assigned.find_type assigned id in
+    if idx >= Array.length assigned.typ then Error (`Unknown_type id)
     else
-      let v = Array.unsafe_get modul.typ idx in
+      let v = Array.unsafe_get assigned.typ idx in
       let t' = rewrite_func_type v in
       Ok (Binary.Bt_raw (Some idx, t'))
   end
   | Bt_raw (_, func_type) ->
-    let func_type = rewrite_func_type func_type in
     let idx =
-      match TypeMap.find_opt func_type typemap with
+      match Array.find_index (Text.func_type_eq func_type) assigned.typ with
       | None -> assert false
       | Some idx -> idx
     in
+    let func_type = rewrite_func_type func_type in
     Ok (Binary.Bt_raw (Some idx, func_type))
 
 let rewrite_mut = function Text.Const -> Binary.Const | Var -> Var
@@ -168,9 +156,8 @@ let rewrite_table ((name, typ) : Text.Table.t) : Binary.Table.t =
   let typ = rewrite_table_type typ in
   (name, typ)
 
-let rewrite_expr (typemap : Binary.indice TypeMap.t) (modul : Assigned.t)
-  (locals : Binary.param list) (iexpr : Text.expr Annotated.t) :
-  Binary.expr Annotated.t Result.t =
+let rewrite_expr (assigned : Assigned.t) (locals : Binary.param list)
+  (iexpr : Text.expr Annotated.t) : Binary.expr Annotated.t Result.t =
   (* block_ids handling *)
   let block_id_to_raw (loop_count, block_ids) id =
     let* id =
@@ -195,7 +182,7 @@ let rewrite_expr (typemap : Binary.indice TypeMap.t) (modul : Assigned.t)
   (* block_types handling *)
   let block_ty_opt_rewrite = function
     | Some bt ->
-      let+ bt = rewrite_block_type typemap modul bt in
+      let+ bt = rewrite_block_type assigned bt in
       Some bt
     | None -> Ok None
   in
@@ -240,10 +227,10 @@ let rewrite_expr (typemap : Binary.indice TypeMap.t) (modul : Assigned.t)
       let+ id = block_id_to_raw (loop_count, block_ids) id in
       Binary.Br id
     | Call id ->
-      let+ id = Assigned.find_func modul id in
+      let+ id = Assigned.find_func assigned id in
       Binary.Call id
     | Return_call id ->
-      let+ id = Assigned.find_func modul id in
+      let+ id = Assigned.find_func assigned id in
       Binary.Return_call id
     | Local_set id ->
       let id = find_local id in
@@ -269,59 +256,59 @@ let rewrite_expr (typemap : Binary.indice TypeMap.t) (modul : Assigned.t)
       let+ e = expr e (loop_count, id :: block_ids) in
       Binary.Block (id, bt, e)
     | Call_indirect (tbl_i, bt) ->
-      let* tbl_i = Assigned.find_table modul tbl_i in
-      let+ bt = rewrite_block_type typemap modul bt in
+      let* tbl_i = Assigned.find_table assigned tbl_i in
+      let+ bt = rewrite_block_type assigned bt in
       Binary.Call_indirect (tbl_i, bt)
     | Return_call_indirect (tbl_i, bt) ->
-      let* tbl_i = Assigned.find_table modul tbl_i in
-      let+ bt = rewrite_block_type typemap modul bt in
+      let* tbl_i = Assigned.find_table assigned tbl_i in
+      let+ bt = rewrite_block_type assigned bt in
       Binary.Return_call_indirect (tbl_i, bt)
     | Call_ref t ->
-      let+ t = Assigned.find_type modul t in
+      let+ t = Assigned.find_type assigned t in
       Binary.Call_ref t
     | Return_call_ref bt ->
-      let+ bt = rewrite_block_type typemap modul bt in
+      let+ bt = rewrite_block_type assigned bt in
       Binary.Return_call_ref bt
     | Global_set id ->
-      let+ idx = Assigned.find_global modul id in
+      let+ idx = Assigned.find_global assigned id in
       Binary.Global_set idx
     | Global_get id ->
-      let+ idx = Assigned.find_global modul id in
+      let+ idx = Assigned.find_global assigned id in
       Binary.Global_get idx
     | Ref_func id ->
-      let+ id = Assigned.find_func modul id in
+      let+ id = Assigned.find_func assigned id in
       Binary.Ref_func id
     | Table_size id ->
-      let+ id = Assigned.find_table modul id in
+      let+ id = Assigned.find_table assigned id in
       Binary.Table_size id
     | Table_get id ->
-      let+ id = Assigned.find_table modul id in
+      let+ id = Assigned.find_table assigned id in
       Binary.Table_get id
     | Table_set id ->
-      let+ id = Assigned.find_table modul id in
+      let+ id = Assigned.find_table assigned id in
       Binary.Table_set id
     | Table_grow id ->
-      let+ id = Assigned.find_table modul id in
+      let+ id = Assigned.find_table assigned id in
       Binary.Table_grow id
     | Table_init (i, i') ->
-      let* table = Assigned.find_table modul i in
-      let+ elem = Assigned.find_elem modul i' in
+      let* table = Assigned.find_table assigned i in
+      let+ elem = Assigned.find_elem assigned i' in
       Binary.Table_init (table, elem)
     | Table_fill id ->
-      let+ id = Assigned.find_table modul id in
+      let+ id = Assigned.find_table assigned id in
       Binary.Table_fill id
     | Table_copy (i, i') ->
-      let* table = Assigned.find_table modul i in
-      let+ table' = Assigned.find_table modul i' in
+      let* table = Assigned.find_table assigned i in
+      let+ table' = Assigned.find_table assigned i' in
       Binary.Table_copy (table, table')
     | Memory_init id ->
-      let+ id = Assigned.find_data modul id in
+      let+ id = Assigned.find_data assigned id in
       Binary.Memory_init id
     | Data_drop id ->
-      let+ id = Assigned.find_data modul id in
+      let+ id = Assigned.find_data assigned id in
       Binary.Data_drop id
     | Elem_drop id ->
-      let+ id = Assigned.find_elem modul id in
+      let+ id = Assigned.find_elem assigned id in
       Binary.Elem_drop id
     | Select typ -> begin
       match typ with
@@ -470,37 +457,37 @@ let rewrite_expr (typemap : Binary.indice TypeMap.t) (modul : Assigned.t)
   in
   expr iexpr (0, [])
 
-let rewrite_global (typemap : Binary.indice TypeMap.t) (modul : Assigned.t)
-  (global : Text.Global.t) : Binary.Global.t Result.t =
-  let+ init = rewrite_expr typemap modul [] global.init in
+let rewrite_global (assigned : Assigned.t) (global : Text.Global.t) :
+  Binary.Global.t Result.t =
+  let+ init = rewrite_expr assigned [] global.init in
   let typ = rewrite_global_type global.typ in
   { Binary.Global.id = global.id; init; typ }
 
-let rewrite_elem (typemap : Binary.indice TypeMap.t) (modul : Assigned.t)
-  (elem : Text.Elem.t) : Binary.Elem.t Result.t =
+let rewrite_elem (assigned : Assigned.t) (elem : Text.Elem.t) :
+  Binary.Elem.t Result.t =
   let* (mode : Binary.Elem.Mode.t) =
     match elem.mode with
     | Declarative -> Ok Binary.Elem.Mode.Declarative
     | Passive -> Ok Passive
     | Active (None, _expr) -> assert false
     | Active (Some id, expr) ->
-      let* indice = Assigned.find_table modul id in
-      let+ expr = rewrite_expr typemap modul [] expr in
+      let* indice = Assigned.find_table assigned id in
+      let+ expr = rewrite_expr assigned [] expr in
       Binary.Elem.Mode.Active (Some indice, expr)
   in
-  let+ init = list_map (rewrite_expr typemap modul []) elem.init in
+  let+ init = list_map (rewrite_expr assigned []) elem.init in
   let typ = rewrite_ref_type elem.typ in
   { Binary.Elem.init; mode; id = elem.id; typ }
 
-let rewrite_data (typemap : Binary.indice TypeMap.t) (modul : Assigned.t)
-  (data : Text.Data.t) : Binary.Data.t Result.t =
+let rewrite_data (assigned : Assigned.t) (data : Text.Data.t) :
+  Binary.Data.t Result.t =
   let+ mode =
     match data.mode with
     | Passive -> Ok Binary.Data.Mode.Passive
     | Active (None, _expr) -> assert false
     | Active (Some indice, expr) ->
-      let* indice = Assigned.find_memory modul indice in
-      let+ expr = rewrite_expr typemap modul [] expr in
+      let* indice = Assigned.find_memory assigned indice in
+      let+ expr = rewrite_expr assigned [] expr in
       Binary.Data.Mode.Active (indice, expr)
   in
   { Binary.Data.mode; id = data.id; init = data.init }
@@ -521,45 +508,46 @@ let rewrite_export names (exports : Grouped.opt_export Array.t) :
       { Binary.Export.name; id } )
     exports
 
-let rewrite_exports (modul : Assigned.t) : Binary.Module.Exports.t Result.t =
-  let* global = rewrite_export modul.global_names modul.global_exports in
-  let* mem = rewrite_export modul.mem_names modul.mem_exports in
-  let* table = rewrite_export modul.table_names modul.table_exports in
-  let+ func = rewrite_export modul.func_names modul.func_exports in
+let rewrite_exports (modul : Grouped.t) (assigned : Assigned.t) :
+  Binary.Module.Exports.t Result.t =
+  let* global = rewrite_export assigned.global_names modul.global_exports in
+  let* mem = rewrite_export assigned.mem_names modul.mem_exports in
+  let* table = rewrite_export assigned.table_names modul.table_exports in
+  let+ func = rewrite_export assigned.func_names modul.func_exports in
   { Binary.Module.Exports.global; mem; table; func }
 
-let rewrite_func (typemap : Binary.indice TypeMap.t) (modul : Assigned.t)
+let rewrite_func (assigned : Assigned.t)
   ({ id; type_f; locals; body; _ } : Text.Func.t) : Binary.Func.t Result.t =
   let* (Bt_raw (_, (params, _)) as type_f) =
-    rewrite_block_type typemap modul type_f
+    rewrite_block_type assigned type_f
   in
   let locals = List.map rewrite_param locals in
-  let+ body = rewrite_expr typemap modul (params @ locals) body in
+  let+ body = rewrite_expr assigned (params @ locals) body in
   { Binary.Func.body; type_f; id; locals }
 
-let rewrite_types (t : Binary.func_type) : Binary.Typedef.t Result.t =
+let rewrite_types (t : Text.func_type) : Binary.Typedef.t Result.t =
+  let t = rewrite_func_type t in
   Ok (None, t)
 
-let modul (modul : Assigned.t) : Binary.Module.t Result.t =
+let modul (modul : Grouped.t) (assigned : Assigned.t) : Binary.Module.t Result.t
+    =
   Log.debug (fun m -> m "rewriting    ...");
-  let modul_typ = Array.map rewrite_func_type modul.typ in
-  let typemap = typemap modul_typ in
   let* global =
     array_map
-      (Origin.monadic_map ~f_local:(rewrite_global typemap modul)
+      (Origin.monadic_map ~f_local:(rewrite_global assigned)
          ~f_imported:(fun x -> Ok (rewrite_global_type x) ) )
       modul.global
   in
-  let* elem = array_map (rewrite_elem typemap modul) modul.elem in
-  let* data = array_map (rewrite_data typemap modul) modul.data in
-  let* exports = rewrite_exports modul in
+  let* elem = array_map (rewrite_elem assigned) modul.elem in
+  let* data = array_map (rewrite_data assigned) modul.data in
+  let* exports = rewrite_exports modul assigned in
   let* func =
-    let f_imported = rewrite_block_type typemap modul in
-    let f_local = rewrite_func typemap modul in
+    let f_imported = rewrite_block_type assigned in
+    let f_local = rewrite_func assigned in
     let runtime = Origin.monadic_map ~f_local ~f_imported in
     array_map runtime modul.func
   in
-  let* types = array_map rewrite_types modul_typ in
+  let* types = array_map rewrite_types assigned.typ in
   let mem =
     let runtime = Origin.map ~f_local:rewrite_mem ~f_imported:rewrite_limits in
     Array.map runtime modul.mem
@@ -574,7 +562,7 @@ let modul (modul : Assigned.t) : Binary.Module.t Result.t =
     match modul.start with
     | None -> Ok None
     | Some id ->
-      let+ id = Assigned.find_func modul id in
+      let+ id = Assigned.find_func assigned id in
       Some id
   in
   let custom = [] in
