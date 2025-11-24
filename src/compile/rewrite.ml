@@ -122,20 +122,17 @@ let rewrite_mem ((name, limits) : Text.Mem.t) : Binary.Mem.t =
 let rewrite_block_type (assigned : Assigned.t) (block_type : Text.block_type) :
   Binary.block_type Result.t =
   match block_type with
-  | Bt_ind id -> begin
+  | Bt_ind id ->
     let* idx = Assigned.find_type assigned id in
-    if idx >= Array.length assigned.typ then Error (`Unknown_type id)
-    else
-      let v = Array.unsafe_get assigned.typ idx in
-      let t' = rewrite_func_type v in
-      Ok (Binary.Bt_raw (Some idx, t'))
-  end
-  | Bt_raw (_, func_type) ->
-    let idx =
-      match Array.find_index (Text.func_type_eq func_type) assigned.typ with
-      | None -> assert false
-      | Some idx -> idx
+    let+ t =
+      match Assigned.get_type assigned idx with
+      | None -> Error (`Unknown_type id)
+      | Some v -> Ok v
     in
+    let t = rewrite_func_type t in
+    Binary.Bt_raw (Some idx, t)
+  | Bt_raw (_, func_type) ->
+    let idx = Assigned.find_raw_type assigned func_type in
     let func_type = rewrite_func_type func_type in
     Ok (Binary.Bt_raw (Some idx, func_type))
 
@@ -492,28 +489,25 @@ let rewrite_data (assigned : Assigned.t) (data : Text.Data.t) :
   in
   { Binary.Data.mode; id = data.id; init = data.init }
 
-let rewrite_export names (exports : Grouped.opt_export Array.t) :
+let rewrite_export find assigned (exports : Grouped.opt_export Array.t) :
   Binary.Export.t Array.t Result.t =
   array_map
     (fun { Grouped.name; id } ->
-      let+ id =
-        match id with
-        | Text.Raw i -> Ok i
-        | Text name -> (
-          match Hashtbl.find_opt names name with
-          | None -> Error (`Unknown_export id)
-          | Some i -> Ok i )
-      in
-
-      { Binary.Export.name; id } )
+      match find assigned id with
+      | Error _ -> Error (`Unknown_export id)
+      | Ok id -> Ok { Binary.Export.name; id } )
     exports
 
 let rewrite_exports (modul : Grouped.t) (assigned : Assigned.t) :
   Binary.Module.Exports.t Result.t =
-  let* global = rewrite_export assigned.global_names modul.global_exports in
-  let* mem = rewrite_export assigned.mem_names modul.mem_exports in
-  let* table = rewrite_export assigned.table_names modul.table_exports in
-  let+ func = rewrite_export assigned.func_names modul.func_exports in
+  let* global =
+    rewrite_export Assigned.find_global assigned modul.global_exports
+  in
+  let* mem = rewrite_export Assigned.find_memory assigned modul.mem_exports in
+  let* table =
+    rewrite_export Assigned.find_table assigned modul.table_exports
+  in
+  let+ func = rewrite_export Assigned.find_func assigned modul.func_exports in
   { Binary.Module.Exports.global; mem; table; func }
 
 let rewrite_func (assigned : Assigned.t)
@@ -547,7 +541,7 @@ let modul (modul : Grouped.t) (assigned : Assigned.t) : Binary.Module.t Result.t
     let runtime = Origin.monadic_map ~f_local ~f_imported in
     array_map runtime modul.func
   in
-  let* types = array_map rewrite_types assigned.typ in
+  let* types = array_map rewrite_types (Assigned.get_types assigned) in
   let mem =
     let runtime = Origin.map ~f_local:rewrite_mem ~f_imported:rewrite_limits in
     Array.map runtime modul.mem
