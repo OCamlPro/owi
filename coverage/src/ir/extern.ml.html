@@ -638,7 +638,7 @@
 
     type extern_func = Extern_func : 'a func_type * 'a -&gt; extern_func
 
-    val extern_type : extern_func -&gt; Binary.func_type
+    val extern_type : extern_func -&gt; Text.func_type
 
     module Syntax : sig
       type l
@@ -752,7 +752,7 @@
 
     type extern_func = Extern_func : 'a func_type * 'a -&gt; extern_func
 
-    let elt_type (type t) (e : t telt) : Binary.val_type =
+    let elt_type (type t) (e : t telt) : Text.val_type =
       <span data-count="16235">m</span>atch e with
       | <span data-count="13806">I</span>32 -&gt; Num_type I32
       | <span data-count="543">I</span>64 -&gt; Num_type I64
@@ -761,7 +761,7 @@
       | <span data-count="410">V</span>128 -&gt; Num_type V128
       | <span data-count="3">E</span>xternref _ -&gt; Ref_type (Null, Extern_ht)
 
-    let res_type (type t) (r : t rtype) : Binary.result_type =
+    let res_type (type t) (r : t rtype) : Text.result_type =
       <span data-count="11657">m</span>atch r with
       | <span data-count="4864">R</span>0 -&gt; []
       | <span data-count="6793">R</span>1 a -&gt; [ elt_typ<span data-count="6793">e</span> a ]
@@ -769,7 +769,7 @@
       | <span data-count="0">R</span>3 (a, b, c) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b; elt_typ<span data-count="0">e</span> c ]
       | <span data-count="0">R</span>4 (a, b, c, d) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b; elt_typ<span data-count="0">e</span> c; elt_typ<span data-count="0">e</span> d ]
 
-    let rec arg_type : type t r. (t, r) atype -&gt; Binary.param_type = function
+    let rec arg_type : type t r. (t, r) atype -&gt; Text.param_type = function
       | <span data-count="1641">M</span>em tl -&gt; arg_type tl
       | <span data-count="5300">U</span>Arg tl -&gt; arg_type tl
       | <span data-count="9442">A</span>rg (hd, tl) -&gt; (None, elt_typ<span data-count="9442">e</span> hd) :: arg_typ<span data-count="9442">e</span> tl
@@ -777,7 +777,7 @@
       | <span data-count="11657">R</span>es -&gt; []
 
     (* TODO: we could move this out, as it does not really depend on the functor's parameters *)
-    let extern_type (Extern_func (Func (arg, res), _)) : Binary.func_type =
+    let extern_type (Extern_func (Func (arg, res), _)) : Text.func_type =
       <span data-count="11657">(</span>arg_typ<span data-count="11657">e</span> arg, res_typ<span data-count="11657">e</span> res)
 
     let fresh =
@@ -869,7 +869,7 @@ module Module = struct
   (** extern modules *)
   type 'extern_func t =
     { functions : (string * 'extern_func) list
-    ; func_type : 'extern_func -&gt; Binary.func_type
+    ; func_type : 'extern_func -&gt; Text.func_type
     }
 end
 </code></pre>

@@ -278,29 +278,29 @@ type 'ext t =
   ; functions : Kind.func IMap.t
   ; data : data IMap.t
   ; elem : elem IMap.t
-  ; extern_funcs : ('ext * Binary.func_type) Dynarray.t
+  ; extern_funcs : ('ext * Text.func_type) Dynarray.t
   ; id : int
   }
 
-let id (env : _ t) = <span data-count="2165421">e</span>nv.id
+let id (env : _ t) = <span data-count="2165033">e</span>nv.id
 
 let get_global (env : _ t) id =
-  <span data-count="3113">m</span>atch IMap.find_opt id env.globals with
+  <span data-count="2909">m</span>atch IMap.find_opt id env.globals with
   | None -&gt; assert false
-  | <span data-count="3113">S</span>ome v -&gt; Concrete_choice.return v
+  | <span data-count="2908">S</span>ome v -&gt; Concrete_choice.return v
 
 let get_memory (env : _ t) id =
-  <span data-count="4010165">m</span>atch IMap.find_opt id env.memories with
+  <span data-count="4009980">m</span>atch IMap.find_opt id env.memories with
   | None -&gt; assert false
-  | <span data-count="4010149">S</span>ome v -&gt; Concrete_choice.return v
+  | <span data-count="4009978">S</span>ome v -&gt; Concrete_choice.return v
 
 let get_table (env : _ t) id =
-  <span data-count="807927">m</span>atch IMap.find_opt id env.tables with
+  <span data-count="807915">m</span>atch IMap.find_opt id env.tables with
   | None -&gt; assert false
-  | <span data-count="807927">S</span>ome v -&gt; Concrete_choice.return v
+  | <span data-count="807915">S</span>ome v -&gt; Concrete_choice.return v
 
 let get_func (env : _ t) id =
-  <span data-count="5476577">m</span>atch IMap.find_opt id env.functions with None -&gt; assert false | <span data-count="5476576">S</span>ome v -&gt; v
+  <span data-count="5476577">m</span>atch IMap.find_opt id env.functions with None -&gt; assert false | <span data-count="5476575">S</span>ome v -&gt; v
 
 let get_data (env : _ t) id =
   <span data-count="890">m</span>atch IMap.find_opt id env.data with
@@ -311,8 +311,8 @@ let get_elem (env : _ t) id =
   <span data-count="1272">m</span>atch IMap.find_opt id env.elem with None -&gt; assert false | <span data-count="1272">S</span>ome v -&gt; v
 
 let get_extern_func env id =
-  <span data-count="111486">l</span>et f, _t = Dynarray.get env.extern_funcs id in
-  <span data-count="111486">f</span>
+  <span data-count="111488">l</span>et f, _t = Dynarray.get env.extern_funcs id in
+  <span data-count="111488">f</span>
 
 module Build = struct
   type t =

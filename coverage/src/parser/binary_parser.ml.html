@@ -3041,7 +3041,7 @@ let read_indice input : (indice * Input.t, _) result =
 let read_numtype input =
   <span data-count="4743">l</span>et* b, input = read_S<span data-count="4743">7</span> input in
   <span data-count="4743">m</span>atch b with
-  | <span data-count="4638">-</span>0x01 -&gt; Ok (I32, input)
+  | <span data-count="4638">-</span>0x01 -&gt; Ok (Text.I32, input)
   | <span data-count="79">-</span>0x02 -&gt; Ok (I64, input)
   | <span data-count="15">-</span>0x03 -&gt; Ok (F32, input)
   | <span data-count="5">-</span>0x04 -&gt; Ok (F64, input)
@@ -3059,13 +3059,13 @@ let read_vectype input =
 let read_reftype input =
   <span data-count="178">l</span>et* b, input = read_S<span data-count="178">7</span> input in
   <span data-count="178">m</span>atch b with
-  | <span data-count="178">-</span>0x10 -&gt; Ok ((Null, Func_ht), input)
+  | <span data-count="178">-</span>0x10 -&gt; Ok ((Text.Null, Text.Func_ht), input)
   | <span data-count="0">-</span>0x11 -&gt; Ok ((Null, Extern_ht), input)
   | <span data-count="0">b</span> -&gt; parse_fail "malformed reference type: %d" b
 
 let read_valtype input =
   <span data-count="4743">m</span>atch read_numtype input with
-  | <span data-count="4743">O</span>k (t, input) -&gt; Ok (Num_type t, input)
+  | <span data-count="4743">O</span>k (t, input) -&gt; Ok (Text.Num_type t, input)
   | <span data-count="0">E</span>rror _ -&gt; (
     match read_vectype input with
     | <span data-count="0">O</span>k (_t, _input) -&gt; Error (`Unimplemented "simd binary parsing")
@@ -3079,7 +3079,7 @@ let read_valtypes input = <span data-count="2662">v</span>ector_no_id read_valty
 let read_mut input =
   <span data-count="254">l</span>et* b, input = read_byt<span data-count="254">e</span> ~msg:"read_mut" input in
   <span data-count="254">m</span>atch b with
-  | <span data-count="28">'</span>\x00' -&gt; Ok (Const, input)
+  | <span data-count="28">'</span>\x00' -&gt; Ok (Text.Const, input)
   | <span data-count="218">'</span>\x01' -&gt; Ok (Var, input)
   | <span data-count="8">_</span>c -&gt; parse_fail "malformed mutability"
 
@@ -3088,11 +3088,11 @@ let read_limits input =
   <span data-count="438">m</span>atch b with
   | <span data-count="262">'</span>\x00' -&gt;
     let+ min, input = read_U3<span data-count="262">2</span> input in
-    <span data-count="259">(</span>{ min; max = None }, input)
+    <span data-count="259">(</span>{ Text.min; max = None }, input)
   | <span data-count="176">'</span>\x01' -&gt;
     let* min, input = read_U3<span data-count="176">2</span> input in
     <span data-count="176">l</span>et+ max, input = read_U3<span data-count="176">2</span> input in
-    <span data-count="173">(</span>{ min; max = Some max }, input)
+    <span data-count="173">(</span>{ Text.min; max = Some max }, input)
   | <span data-count="0">_</span>c -&gt; parse_fail "integer too large (read_limits)"
 
 let read_memarg max_align input =
@@ -3102,7 +3102,7 @@ let read_memarg max_align input =
     <span data-count="23659">l</span>et+ offset, input = read_U3<span data-count="23659">2</span> input in
     <span data-count="23653">l</span>et align = Int32.of_int align in
     <span data-count="23653">l</span>et offset = Int32.of_int offset in
-    <span data-count="23653">(</span>{ align; offset }, input)
+    <span data-count="23653">(</span>{ Text.align; offset }, input)
 
 let read_FC input =
   <span data-count="61">l</span>et* i, input = read_U3<span data-count="61">2</span> input in
@@ -3523,9 +3523,9 @@ let read_const types input =
 
 type import =
   | Func of int
-  | Table of limits * ref_type
-  | Mem of limits
-  | Global of mut * val_type
+  | Table of Text.limits * Text.ref_type
+  | Mem of Text.limits
+  | Global of Text.mut * Text.val_type
 
 let magic_check str =
   <span data-count="945">i</span>f String.lengt<span data-count="945">h</span> str &lt; 4 then <span data-count="3">p</span>arse_fail "unexpected end"
@@ -3662,7 +3662,7 @@ let read_elem_index input =
 let read_elem_kind input =
   <span data-count="4">l</span>et msg = "malformed element kind" in
   match read_byte ~msg input with
-  | <span data-count="4">O</span>k ('\x00', input) -&gt; Ok ((Null, Func_ht), input)
+  | <span data-count="4">O</span>k ('\x00', input) -&gt; Ok ((Text.Null, Text.Func_ht), input)
   | <span data-count="0">O</span>k (c, _input) -&gt;
     parse_fail "%s (expected 0x00 but got %s)" msg (Char.escape<span data-count="0">d</span> c)
   | <span data-count="0">E</span>rror _ as e -&gt; e
@@ -3675,7 +3675,7 @@ let read_element types input =
     let* mode, input = read_elem_active_zer<span data-count="168">o</span> types input in
     <span data-count="168">l</span>et+ init, input = vector_no_i<span data-count="168">d</span> read_elem_index input in
     <span data-count="168">l</span>et init = List.map Annotated.dummy_deep init in
-    <span data-count="168">l</span>et typ = (Null, Func_ht) in
+    <span data-count="168">l</span>et typ = (Text.Null, Text.Func_ht) in
     ({ Elem.id; typ; init; mode }, input)
   | <span data-count="0">1</span> -&gt;
     let mode = Elem.Mode.Passive in
@@ -3698,7 +3698,7 @@ let read_element types input =
   | <span data-count="0">4</span> -&gt;
     let* mode, input = read_elem_active_zer<span data-count="0">o</span> types input in
     <span data-count="0">l</span>et+ init, input = vector_no_i<span data-count="0">d</span> (read_cons<span data-count="0">t</span> types) input in
-    <span data-count="0">l</span>et typ = (Null, Func_ht) in
+    <span data-count="0">l</span>et typ = (Text.Null, Text.Func_ht) in
     ({ Elem.id; typ; init; mode }, input)
   | <span data-count="0">5</span> -&gt;
     let mode = Elem.Mode.Passive in

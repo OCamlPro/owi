@@ -235,7 +235,7 @@ let pp fmt = function
   | <span data-count="0">R</span>ef r -&gt; pp_ref_value fmt r
 
 let ref_null' = function
-  | <span data-count="669">B</span>inary.Func_ht -&gt; Funcref None
+  | <span data-count="669">T</span>ext.Func_ht -&gt; Funcref None
   | <span data-count="63">E</span>xtern_ht -&gt; Externref None
 
 let ref_null typ = <span data-count="99">R</span>ef (ref_null<span data-count="99">'</span> typ)

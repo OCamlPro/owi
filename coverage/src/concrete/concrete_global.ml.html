@@ -72,8 +72,8 @@
 (* TODO: mut and typ are only used at link time but not at runtime, it could be possible to remove them with some effort! *)
 type t =
   { mutable value : Concrete_value.t
-  ; mut : Binary.mut
-  ; typ : Binary.val_type
+  ; mut : Text.mut
+  ; typ : Text.val_type
   }
 
 let value g = <span data-count="159">g</span>.value

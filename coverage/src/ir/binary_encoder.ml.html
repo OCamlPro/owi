@@ -1924,11 +1924,11 @@ let write_char_indice buf c idx =
 
 let write_reftype buf ht =
   <span data-count="1">m</span>atch ht with
-  | <span data-count="1">F</span>unc_ht -&gt; Buffer.add_char buf '\x70'
+  | <span data-count="1">T</span>ext.Func_ht -&gt; Buffer.add_char buf '\x70'
   | <span data-count="0">E</span>xtern_ht -&gt; Buffer.add_char buf '\x6F'
 
 let get_char_valtype = function
-  | <span data-count="20">N</span>um_type I32 -&gt; '\x7F'
+  | <span data-count="20">T</span>ext.Num_type I32 -&gt; '\x7F'
   | <span data-count="6">N</span>um_type I64 -&gt; '\x7E'
   | <span data-count="7">N</span>um_type F32 -&gt; '\x7D'
   | <span data-count="1">N</span>um_type F64 -&gt; '\x7C'
@@ -1954,14 +1954,14 @@ let encode_vector_list buf datas encode_func =
 let encode_vector_array buf datas encode_func =
   <span data-count="39">e</span>ncode_vector Array.length Array.iter buf datas encode_func
 
-let write_resulttype buf (rt : result_type) =
+let write_resulttype buf (rt : Text.result_type) =
   <span data-count="56">e</span>ncode_vector_list buf rt write_valtype
 
-let write_paramtype buf (pt : param_type) =
+let write_paramtype buf (pt : Text.param_type) =
   <span data-count="28">l</span>et vt = List.map snd pt in
   <span data-count="28">w</span>rite_resulttype buf vt
 
-let write_mut buf (mut : mut) =
+let write_mut buf (mut : Text.mut) =
   <span data-count="2">l</span>et c = match mut with <span data-count="1">C</span>onst -&gt; '\x00' | <span data-count="1">V</span>ar -&gt; '\x01' in
   Buffer.add_char buf c
 
@@ -1980,11 +1980,11 @@ let write_block_type_idx buf (typ : Binary.block_type) =
   | Bt_raw (None, _) -&gt; assert false
   | <span data-count="27">B</span>t_raw (Some idx, _) -&gt; write_indice buf idx
 
-let write_global_type buf ((mut, vt) : Global.Type.t) =
+let write_global_type buf ((mut, vt) : Text.Global.Type.t) =
   <span data-count="2">w</span>rite_valtype buf vt;
   <span data-count="2">w</span>rite_mut buf mut
 
-let write_limits buf (limits : limits) =
+let write_limits buf (limits : Text.limits) =
   <span data-count="4">m</span>atch limits with
   | <span data-count="3">{</span> min; max = None } -&gt;
     Buffer.add_char buf '\x00';
@@ -1994,26 +1994,26 @@ let write_limits buf (limits : limits) =
     <span data-count="1">w</span>rite_u32_of_int buf min;
     <span data-count="1">w</span>rite_u32_of_int buf max
 
-let write_memarg buf ({ offset; align } : memarg) =
+let write_memarg buf ({ offset; align } : Text.memarg) =
   <span data-count="14">w</span>rite_u32 buf align;
   <span data-count="14">w</span>rite_u32 buf offset
 
-let write_memory buf ((_so, limits) : Mem.t) = <span data-count="3">w</span>rite_limits buf limits
+let write_memory buf ((_so, limits) : Text.Mem.t) = <span data-count="3">w</span>rite_limits buf limits
 
 let write_memory_import buf
-  ({ modul_name; name; typ = limits; _ } : limits Origin.imported) =
+  ({ modul_name; name; typ = limits; _ } : Text.limits Origin.imported) =
   <span data-count="0">w</span>rite_string buf modul_name;
   <span data-count="0">w</span>rite_string buf name;
   <span data-count="0">B</span>uffer.add_char buf '\x02';
   <span data-count="0">w</span>rite_limits buf limits
 
-let write_table buf ((_so, (limits, (_nullable, heaptype))) : Table.t) =
+let write_table buf ((_so, (limits, (_nullable, heaptype))) : Text.Table.t) =
   <span data-count="1">w</span>rite_reftype buf heaptype;
   <span data-count="1">w</span>rite_limits buf limits
 
 let write_table_import buf
   ({ modul_name; name; typ = limits, (_nullable, heaptype); _ } :
-    Table.Type.t Origin.imported ) =
+    Text.Table.Type.t Origin.imported ) =
   <span data-count="0">w</span>rite_string buf modul_name;
   <span data-count="0">w</span>rite_string buf name;
   <span data-count="0">B</span>uffer.add_char buf '\x01';
@@ -2376,8 +2376,8 @@ let write_global buf ({ typ; init; _ } : Global.t) =
   <span data-count="2">w</span>rite_expr buf init ~end_op_code:None
 
 let write_global_import buf
-  ({ modul_name; name; typ = mut, valtype; _ } : Global.Type.t Origin.imported)
-    =
+  ({ modul_name; name; typ = mut, valtype; _ } :
+    Text.Global.Type.t Origin.imported ) =
   <span data-count="0">w</span>rite_string buf modul_name;
   <span data-count="0">w</span>rite_string buf name;
   <span data-count="0">B</span>uffer.add_char buf '\x03';
