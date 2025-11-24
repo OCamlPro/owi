@@ -31,7 +31,7 @@ type t =
   ; mem_exports : opt_export Array.t
   ; table_exports : opt_export Array.t
   ; func_exports : opt_export Array.t
-  ; mutable start : indice option
+  ; start : indice option
   }
 
 let pp_id fmt id = Text.pp_id_opt fmt id

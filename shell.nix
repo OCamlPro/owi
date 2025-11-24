@@ -18,6 +18,7 @@ pkgs.mkShell {
     merlin
     ocaml
     ocamlformat
+    ocp-browser
     ocp-index
     ocb
     odoc

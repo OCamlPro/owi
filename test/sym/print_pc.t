@@ -32,40 +32,28 @@
   owi: [DEBUG] assigning    ...
   owi: [DEBUG] {
                  id: 
-                 typ: {
-                   values: [(func (result i32)) ; (func (param $x i32))]
-                   named: }
-                 global: {
-                   values: []
-                   named: }
-                 table: {
-                   values: []
-                   named: }
-                 mem: {
-                   values: []
-                   named: }
-                 func: {
-                   values: [Imported ({
-                     modul: "owi"
-                     name: "i32_symbol"
-                     assigned_name:  $i32_symbol
-                     typ:  (result i32)}) ; Local ((func $f (param $x i32)
-                     local.get $x
-                     i32.const 1
-                     i32.lt_u
-                     (if
-                       (then
-                         unreachable
-                       )
+                 typ: (func (result i32))
+                 (func (param $x i32))
+                 global: 
+                 table: 
+                 mem: 
+                 func: Imported ({
+                   modul: "owi"
+                   name: "i32_symbol"
+                   assigned_name:  $i32_symbol
+                   typ:  (result i32)})
+                 Local ((func $f (param $x i32)
+                   local.get $x
+                   i32.const 1
+                   i32.lt_u
+                   (if
+                     (then
+                       unreachable
                      )
-                   ))]
-                   named: ("f", 1) ; ("i32_symbol", 0)}
-                 elem: {
-                   values: []
-                   named: }
-                 data: {
-                   values: []
-                   named: }
+                   )
+                 ))
+                 elem: 
+                 data: 
                  start: 
                  }
   owi: [DEBUG] rewriting    ...

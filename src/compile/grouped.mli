@@ -4,12 +4,12 @@
 
 open Text
 
-type opt_export =
+type opt_export = private
   { name : string
   ; id : indice
   }
 
-type t =
+type t = private
   { id : string option
   ; typ : Typedef.t Array.t
   ; function_type : func_type Array.t
@@ -28,7 +28,7 @@ type t =
   ; mem_exports : opt_export Array.t
   ; table_exports : opt_export Array.t
   ; func_exports : opt_export Array.t
-  ; mutable start : indice option
+  ; start : indice option
   }
 
 val of_text : Module.t -> t
