@@ -507,7 +507,7 @@ let build_cfg_from_text_module modul entry =
   | <span data-count="0">O</span>k m -&gt;
     let f =
       match Array.get m.func entry with
-      | <span data-count="0">R</span>untime.Local f -&gt; f
+      | <span data-count="0">O</span>rigin.Local f -&gt; f
       | _ -&gt; assert false
     in
     let nodes, edges = build_cfg f.body.raw in
@@ -528,14 +528,14 @@ let cmd ~source_file ~entry_point =
          | <span data-count="1">N</span>one -&gt;
            Array.find_index
              (function
-               | <span data-count="5">R</span>untime.Local (y : Binary.Func.t) -&gt;
+               | <span data-count="5">O</span>rigin.Local (y : Binary.Func.t) -&gt;
                  Option.compar<span data-count="5">e</span> String.compare (Some x) y.id = 0
                | <span data-count="0">_</span> -&gt; false )
              m.func ) )
       ~default:0
   in
   <span data-count="5">l</span>et f =
-    match Array.get m.func entry with <span data-count="5">R</span>untime.Local f -&gt; f | _ -&gt; assert false
+    match Array.get m.func entry with <span data-count="5">O</span>rigin.Local f -&gt; f | _ -&gt; assert false
   in
   let nodes, edges = build_cfg f.body.raw in
   <span data-count="5">l</span>et graph = Control_flow_graph.init nodes edges in

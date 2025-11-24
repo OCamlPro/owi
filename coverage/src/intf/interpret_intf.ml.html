@@ -159,10 +159,6 @@
 <a id="L135"></a><span > </span>
 <a id="L136"></a><span > </span>
 <a id="L137"></a><span > </span>
-<a id="L138"></a><span > </span>
-<a id="L139"></a><span > </span>
-<a id="L140"></a><span > </span>
-<a id="L141"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -304,10 +300,6 @@
 <a href="#L135">135</a>
 <a href="#L136">136</a>
 <a href="#L137">137</a>
-<a href="#L138">138</a>
-<a href="#L139">139</a>
-<a href="#L140">140</a>
-<a href="#L141">141</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -327,10 +319,6 @@ module type P = sig
     val value : t -&gt; Value.t
 
     val set_value : t -&gt; Value.t -&gt; unit
-
-    val mut : t -&gt; Binary.mut
-
-    val typ : t -&gt; Binary.val_type
   end
 
   module Table : sig
@@ -443,7 +431,7 @@ module type P = sig
 
     val get_global : t -&gt; int -&gt; Global.t Choice.t
 
-    val get_extern_func : t -&gt; Func_id.t -&gt; Extern_func.extern_func
+    val get_extern_func : t -&gt; int -&gt; Extern_func.extern_func
 
     val drop_elem : Elem.t -&gt; unit
 

@@ -18,8 +18,7 @@
       <h2>50.00%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="bottom:27.27%"></span>
-      <span class="unvisited" style="bottom:9.09%"></span>
+      <span class="unvisited" style="bottom:11.11%"></span>
       <span class="unvisited" style="bottom:0.00%"></span>
     </div>
     <div id="report">
@@ -42,11 +41,7 @@
 <a id="L15"></a><span > </span>
 <a id="L16"></a><span class="unvisited"> </span>
 <a id="L17"></a><span > </span>
-<a id="L18"></a><span class="visited"> </span>
-<a id="L19"></a><span > </span>
-<a id="L20"></a><span class="unvisited"> </span>
-<a id="L21"></a><span > </span>
-<a id="L22"></a><span class="unvisited"> </span>
+<a id="L18"></a><span class="unvisited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -69,18 +64,14 @@
 <a href="#L16">16</a>
 <a href="#L17">17</a>
 <a href="#L18">18</a>
-<a href="#L19">19</a>
-<a href="#L20">20</a>
-<a href="#L21">21</a>
-<a href="#L22">22</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
+(* TODO: mut and typ are only used at link time but not at runtime, it could be possible to remove them with some effort! *)
 type t =
   { mutable value : Concrete_value.t
-  ; label : string option
   ; mut : Binary.mut
   ; typ : Binary.val_type
   }
@@ -88,10 +79,6 @@ type t =
 let value g = <span data-count="159">g</span>.value
 
 let set_value g v = <span data-count="46">g</span>.value &lt;- v
-
-let mut g = <span data-count="0">g</span>.mut
-
-let typ g = <span data-count="46">g</span>.typ
 
 let backup t = <span data-count="0">{</span> t with value = t.value }
 

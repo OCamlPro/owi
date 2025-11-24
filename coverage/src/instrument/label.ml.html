@@ -496,10 +496,10 @@ let annotate_fc m cov_label_set_idx =
   let func =
     Array.map
       (function
-        | <span data-count="1">R</span>untime.Imported _ as v -&gt;
+        | <span data-count="1">O</span>rigin.Imported _ as v -&gt;
           (* TODO: should we write a wrapper for the imported function so that it gets counted in FC? *)
           v
-        | <span data-count="1">R</span>untime.Local f -&gt;
+        | <span data-count="1">O</span>rigin.Local f -&gt;
           let body =
             Annotated.map
               (fun expr -&gt;
@@ -512,7 +512,7 @@ let annotate_fc m cov_label_set_idx =
               f.Binary.Func.body
           in
           <span data-count="1">l</span>et f = { f with body } in
-          Runtime.Local f )
+          Origin.Local f )
       func
   in
   <span data-count="1">(</span>{ m with func }, !count)
@@ -523,10 +523,10 @@ let annotate_sc m cov_label_set_idx =
   let func =
     Array.map
       (function
-        | <span data-count="1">R</span>untime.Imported _ as v -&gt;
+        | <span data-count="1">O</span>rigin.Imported _ as v -&gt;
           (* TODO: should we write a wrapper for the imported function so that it gets counted in FC? *)
           v
-        | <span data-count="1">R</span>untime.Local f -&gt;
+        | <span data-count="1">O</span>rigin.Local f -&gt;
           let rec handle_instr instr =
             <span data-count="7">i</span>ncr count;
             <span data-count="7">l</span>et prefix =
@@ -561,7 +561,7 @@ let annotate_sc m cov_label_set_idx =
           in
           let body = handle_expr f.Binary.Func.body in
           <span data-count="1">l</span>et f = { f with body } in
-          Runtime.Local f )
+          Origin.Local f )
       func
   in
   <span data-count="1">(</span>{ m with func }, !count)
@@ -572,8 +572,8 @@ let annotate_dc m cov_label_set_idx =
   let func =
     Array.map
       (function
-        | <span data-count="1">R</span>untime.Imported _ as v -&gt; v
-        | <span data-count="1">R</span>untime.Local f -&gt;
+        | <span data-count="1">O</span>rigin.Imported _ as v -&gt; v
+        | <span data-count="1">O</span>rigin.Local f -&gt;
           let rec handle_instr instr =
             <span data-count="11">l</span>et instr =
               Annotated.map
@@ -644,7 +644,7 @@ let annotate_dc m cov_label_set_idx =
           in
           let body = handle_expr f.Binary.Func.body in
           <span data-count="1">l</span>et f = { f with body } in
-          Runtime.Local f )
+          Origin.Local f )
       func
   in
   <span data-count="1">(</span>{ m with func }, !count)

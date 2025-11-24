@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>cmd_sym.ml &mdash; Coverage report</title>
-    <meta name="description" content="82.16% coverage in src/cmd/cmd_sym.ml">
+    <meta name="description" content="82.26% coverage in src/cmd/cmd_sym.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">src/cmd/</span>cmd_sym.ml
         </a>
       </h1>
-      <h2>82.16%</h2>
+      <h2>82.26%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:12.75%"></span>
@@ -99,7 +99,7 @@
 <a id="L46"></a><span class="visited"> </span>
 <a id="L47"></a><span class="visited"> </span>
 <a id="L48"></a><span > </span>
-<a id="L49"></a><span > </span>
+<a id="L49"></a><span class="visited"> </span>
 <a id="L50"></a><span > </span>
 <a id="L51"></a><span class="visited"> </span>
 <a id="L52"></a><span > </span>
@@ -793,8 +793,8 @@ let run_file ~parameters ~source_file =
   | <span data-count="398">_</span> -&gt; () );
   let* m = Cmd_utils.set_entry_poin<span data-count="398">t</span> entry_point invoke_with_symbols m in
   <span data-count="397">l</span>et link_state =
-    Link.State.empty
-    |&gt; Link.Extern.modul ~name:"wasi_snapshot_preview1"
+    Link.State.empty ()
+    |&gt; <span data-count="397">L</span>ink.Extern.modul ~name:"wasi_snapshot_preview1"
          Symbolic_wasm_ffi.wasi_snapshot_preview1
     |&gt; <span data-count="397">L</span>ink.Extern.modul ~name:"owi" Symbolic_wasm_ffi.symbolic_extern_module
   in
@@ -993,16 +993,16 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
   <span data-count="400">l</span>et res_stack = Ws.make () in
   <span data-count="400">l</span>et path_count = Atomic.make 0 in
   <span data-count="400">l</span>et callback v =
-    <span data-count="1749">l</span>et open Symbolic_choice_intf in
+    <span data-count="1763">l</span>et open Symbolic_choice_intf in
     Atomic.incr path_count;
-    <span data-count="1749">m</span>atch (fail_mode, v) with
-    | <span data-count="1509">_</span>, (EVal (), _) -&gt; ()
+    <span data-count="1763">m</span>atch (fail_mode, v) with
+    | <span data-count="1522">_</span>, (EVal (), _) -&gt; ()
     | <span data-count="174">(</span> (<span data-count="174">B</span>oth | <span data-count="0">T</span>rap_only)
       , (ETrap (t, m, labels, breadcrumbs, symbol_scopes, stats), thread) ) -&gt;
       Ws.push
         (`ETrap (t, m, labels, breadcrumbs, symbol_scopes, stats), thread)
         Prio.default res_stack
-    | <span data-count="63">(</span> (<span data-count="60">B</span>oth | <span data-count="3">A</span>ssertion_only)
+    | <span data-count="64">(</span> (<span data-count="61">B</span>oth | <span data-count="3">A</span>ssertion_only)
       , (EAssert (e, m, labels, breadcrumbs, symbol_scopes, stats), thread) ) -&gt;
       Ws.push
         (`EAssert (e, m, labels, breadcrumbs, symbol_scopes, stats), thread)
@@ -1021,7 +1021,7 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
         | <span data-count="0">S</span>mart -&gt; (module Wpq) )
         ~workers solver result thread ~callback
         ~callback_init:(fun () -&gt; <span data-count="774">W</span>s.make_pledge res_stack)
-        ~callback_end:(fun () -&gt; <span data-count="747">W</span>s.end_pledge res_stack)
+        ~callback_end:(fun () -&gt; <span data-count="742">W</span>s.end_pledge res_stack)
     in
     <span data-count="400">l</span>et results =
       Ws.read_as_seq res_stack ~finalizer:(fun () -&gt;

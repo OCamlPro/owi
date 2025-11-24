@@ -127,10 +127,10 @@ let close = Synchronizer.close
 let make () =
   <span data-count="400">l</span>et q = Queue.create () in
   <span data-count="400">l</span>et writter prio_v condvar =
-    <span data-count="28161">Q</span>ueue.push (sn<span data-count="28161">d</span> prio_v) q;
-    <span data-count="28161">C</span>ondition.signal condvar
+    <span data-count="28168">Q</span>ueue.push (sn<span data-count="28168">d</span> prio_v) q;
+    <span data-count="28168">C</span>ondition.signal condvar
   in
-  Synchronizer.init (fun () -&gt; <span data-count="29664">Q</span>ueue.take_opt q) writter
+  Synchronizer.init (fun () -&gt; <span data-count="29705">Q</span>ueue.take_opt q) writter
 </code></pre>
       </div>
     </div>

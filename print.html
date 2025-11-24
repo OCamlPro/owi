@@ -3178,7 +3178,7 @@ val filename : Fpath.t = &lt;abstr&gt;
 mdx_gen.bc.exe: [INFO] parsing      ...
 ...
 # let module_to_run, link_state =
-    match Compile.Text.until_link Link.State.empty ~unsafe:false ~name:None m with
+    match Compile.Text.until_link (Link.State.empty ()) ~unsafe:false ~name:None m with
     | Ok v -&gt; v
     | Error _ -&gt; assert false;;
 mdx_gen.bc.exe: [INFO] checking     ...
@@ -3275,7 +3275,7 @@ let extern_module : Concrete_extern_func.extern_func Extern.Module.t =
 
 (* a link state that contains our custom module, available under the name `sausage` *)
 let link_state =
-  Link.Extern.modul ~name:"sausage" extern_module Link.State.empty
+  Link.State.empty () |&gt; Link.Extern.modul ~name:"sausage" extern_module
 
 (* a pure wasm module refering to `sausage` *)
 let pure_wasm_module =
@@ -3381,7 +3381,7 @@ let extern_module : Concrete_extern_func.extern_func Extern.Module.t =
 
 (* a link state that contains our custom module, available under the name `chorizo` *)
 let link_state =
-  Link.Extern.modul ~name:"chorizo" extern_module Link.State.empty
+  Link.State.empty () |&gt; Link.Extern.modul ~name:"chorizo" extern_module
 
 (* a pure wasm module refering to `$extern_mem` *)
 let pure_wasm_module =

@@ -440,21 +440,21 @@ let popcnt =
 (*
  * Unsigned comparison in terms of signed comparison.
  *)
-let cmp_u x op y = <span data-count="1004246">o</span>p (ad<span data-count="1004246">d</span> x min_int) (ad<span data-count="1004246">d</span> y min_int) [@@inline]
+let cmp_u x op y = <span data-count="1004216">o</span>p (ad<span data-count="1004216">d</span> x min_int) (ad<span data-count="1004216">d</span> y min_int) [@@inline]
 
 let eq (x : int64) y = <span data-count="5030934">e</span>qual x y [@@inline]
 
 let ne (x : int64) y = <span data-count="25823">n</span>ot (equa<span data-count="25823">l</span> x y) [@@inline]
 
-let lt (x : int64) y = <span data-count="936775">c</span>ompar<span data-count="936775">e</span> x y &lt; 0 [@@inline]
+let lt (x : int64) y = <span data-count="936745">c</span>ompar<span data-count="936745">e</span> x y &lt; 0 [@@inline]
 
 let gt (x : int64) y = <span data-count="2260">c</span>ompar<span data-count="2260">e</span> x y &gt; 0 [@@inline]
 
 let le (x : int64) y = <span data-count="75917">c</span>ompar<span data-count="75917">e</span> x y &lt;= 0 [@@inline]
 
-let ge (x : int64) y = <span data-count="6586">c</span>ompar<span data-count="6586">e</span> x y &gt;= 0 [@@inline]
+let ge (x : int64) y = <span data-count="6585">c</span>ompar<span data-count="6585">e</span> x y &gt;= 0 [@@inline]
 
-let lt_u x y = <span data-count="934165">c</span>mp_u x lt y [@@inline]
+let lt_u x y = <span data-count="934135">c</span>mp_u x lt y [@@inline]
 
 let le_u x y = <span data-count="67034">c</span>mp_u x le y [@@inline]
 
@@ -486,9 +486,9 @@ let low_int = shift_lef<span data-count="701">t</span> minus_one 63
 let high_int = logxo<span data-count="701">r</span> low_int minus_one
 
 (* WebAssembly's shifts mask the shift count according to the bitwidth. *)
-let shift f x y = <span data-count="92279">f</span> x (to_in<span data-count="92279">t</span> (logan<span data-count="92279">d</span> y (of_in<span data-count="92279">t</span> 63)))
+let shift f x y = <span data-count="91249">f</span> x (to_in<span data-count="91249">t</span> (logan<span data-count="91249">d</span> y (of_in<span data-count="91249">t</span> 63)))
 
-let shl x y = <span data-count="69140">s</span>hift shift_left x y
+let shl x y = <span data-count="68110">s</span>hift shift_left x y
 
 let shr_s x y = <span data-count="20">s</span>hift shift_right x y
 

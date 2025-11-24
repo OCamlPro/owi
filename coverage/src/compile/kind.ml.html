@@ -31,20 +31,17 @@
 <a id="L7"></a><span > </span>
 <a id="L8"></a><span > </span>
 <a id="L9"></a><span > </span>
-<a id="L10"></a><span class="visited"> </span>
+<a id="L10"></a><span > </span>
 <a id="L11"></a><span > </span>
 <a id="L12"></a><span class="visited"> </span>
-<a id="L13"></a><span class="visited"> </span>
-<a id="L14"></a><span > </span>
-<a id="L15"></a><span class="visited"> </span>
+<a id="L13"></a><span > </span>
+<a id="L14"></a><span class="visited"> </span>
+<a id="L15"></a><span > </span>
 <a id="L16"></a><span > </span>
-<a id="L17"></a><span class="visited"> </span>
+<a id="L17"></a><span > </span>
 <a id="L18"></a><span > </span>
 <a id="L19"></a><span > </span>
 <a id="L20"></a><span > </span>
-<a id="L21"></a><span > </span>
-<a id="L22"></a><span > </span>
-<a id="L23"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -69,27 +66,21 @@
 <a href="#L18">18</a>
 <a href="#L19">19</a>
 <a href="#L20">20</a>
-<a href="#L21">21</a>
-<a href="#L22">22</a>
-<a href="#L23">23</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
 type func =
-  | Wasm of int * Binary.Func.t * Env_id.t
-  | Extern of Func_id.t
+  | Wasm of
+      { func : Binary.Func.t
+      ; idx : int
+      }
+  | Extern of { idx : int }
 
-let fresh =
-  let r = ref ~<span data-count="701">-</span>1 in
-  fun () -&gt;
-    <span data-count="8619">i</span>ncr r;
-    <span data-count="8619">!</span>r
+let wasm func idx : func = <span data-count="8589">W</span>asm { func; idx }
 
-let wasm func env : func = <span data-count="8619">W</span>asm (fres<span data-count="8619">h</span> (), func, env)
-
-let extern f : func = <span data-count="11653">E</span>xtern f
+let extern idx : func = <span data-count="11653">E</span>xtern { idx }
 
 type 'f t =
   | Wat of Text.Module.t

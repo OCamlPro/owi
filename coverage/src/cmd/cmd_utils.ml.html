@@ -658,7 +658,7 @@ let set_entry_point entry_point invoke_with_symbols (m : Binary.Module.t) =
       in
       <span data-count="221">l</span>et type_f : Binary.block_type = Binary.Bt_raw (None, ([], [])) in
       let start_code = { Binary.Func.type_f; locals = []; body; id = None } in
-      let start_func = Runtime.Local start_code in
+      let start_func = Origin.Local start_code in
 
       let m, start_index = Binary.Module.add_func start_func m in
       <span data-count="221">l</span>et start = Some start_index in
