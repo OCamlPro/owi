@@ -48,8 +48,11 @@ let empty_stats = Smtml.Statistics.Map.empty
 
 let stats_are_empty = Smtml.Statistics.Map.is_empty
 
-let get_all_stats () =
-  if Log.is_bench_enabled () then
+let get_all_stats ~finalizer () =
+  if not (Log.is_bench_enabled ()) then empty_stats
+  else begin
+    finalizer ();
+    (* ensure that everyone has finished working *)
     let solvers = Atomic.get instances in
     List.fold_left
       (fun stats_acc (S (solver_module, s)) ->
@@ -57,6 +60,6 @@ let get_all_stats () =
         let stats = Solver.get_statistics s in
         Smtml.Statistics.merge stats stats_acc )
       empty_stats solvers
-  else empty_stats
+  end
 
 let pp_stats = Smtml.Statistics.pp

@@ -99,7 +99,10 @@ module CoreImpl = struct
           ~finally:(fun () -> callback_close ())
           (fun () ->
             let wls = wls_init () in
-            try work wls sched callback
+            try
+              work wls sched
+                (callback ~close:(fun () ->
+                   Work_datastructure.close sched.work_queue ) )
             with e ->
               let bt = Printexc.get_raw_backtrace () in
               Work_datastructure.close sched.work_queue;
@@ -253,7 +256,7 @@ module CoreImpl = struct
       -> Smtml.Solver_type.t
       -> 'a t
       -> thread
-      -> callback:('a eval * thread -> unit)
+      -> callback:(close:(unit -> unit) -> 'a eval * thread -> unit)
       -> callback_init:(unit -> unit)
       -> callback_end:(unit -> unit)
       -> unit Domain.t array

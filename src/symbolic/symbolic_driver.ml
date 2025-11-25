@@ -49,8 +49,8 @@ let sort_results deterministic_result_order results =
     |> List.to_seq |> Seq.map fst
   else results
 
-let mk_callback fail_mode res_stack path_count =
- fun v ->
+let mk_callback no_stop_at_failure fail_mode res_stack path_count =
+ fun ~close v ->
   let open Symbolic_choice_intf in
   Atomic.incr path_count;
   match (fail_mode, v) with
@@ -59,12 +59,14 @@ let mk_callback fail_mode res_stack path_count =
     , (ETrap (t, m, labels, breadcrumbs, symbol_scopes), thread) ) ->
     Ws.push
       (`ETrap (t, m, labels, breadcrumbs, symbol_scopes), thread)
-      Prio.default res_stack
+      Prio.default res_stack;
+    if not no_stop_at_failure then close ()
   | ( (Both | Assertion_only)
     , (EAssert (e, m, labels, breadcrumbs, symbol_scopes), thread) ) ->
     Ws.push
       (`EAssert (e, m, labels, breadcrumbs, symbol_scopes), thread)
-      Prio.default res_stack
+      Prio.default res_stack;
+    if not no_stop_at_failure then close ()
   | (Trap_only | Assertion_only), _ -> ()
 
 let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
@@ -74,7 +76,9 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
   let thread = Thread_with_memory.init () in
   let res_stack = Ws.make () in
   let path_count = Atomic.make 0 in
-  let callback = mk_callback fail_mode res_stack path_count in
+  let callback =
+    mk_callback no_stop_at_failure fail_mode res_stack path_count
+  in
   let time_counter = Mtime_clock.counter () in
   let time_before = (Unix.times ()).tms_utime in
   let join_handles =
@@ -83,10 +87,8 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
       ~callback_init:(fun () -> Ws.make_pledge res_stack)
       ~callback_end:(fun () -> Ws.end_pledge res_stack)
   in
-  let results =
-    Ws.read_as_seq res_stack ~finalizer:(fun () ->
-      Array.iter Domain.join join_handles )
-  in
+  let finalizer () = Array.iter Domain.join join_handles in
+  let results = Ws.read_as_seq res_stack ~finalizer in
   let time_after = (Unix.times ()).tms_utime in
   let interpreter_time = time_after -. time_before in
   let results = sort_results deterministic_result_order results in
@@ -105,7 +107,7 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
       let run_time = match run_time with None -> assert false | Some t -> t in
       (interpreter_time +. run_time) *. 1000.
     in
-    let solver_stats = Solver.get_all_stats () in
+    let solver_stats = Solver.get_all_stats ~finalizer () in
     (* run_time shouldn't be none in bench mode *)
     m
       "Benchmarks:@\n\
