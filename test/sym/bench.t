@@ -23,6 +23,8 @@
                (bv bit2core 192)
                (bv dynamic diseqs 4)
                (bv->core eq 1)
+               (cache hits 0)
+               (cache misses 4)
                (decisions 96)
                (del clause 10)
                (final checks 6)
