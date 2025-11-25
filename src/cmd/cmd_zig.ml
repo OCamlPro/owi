@@ -58,9 +58,10 @@ let compile ~workspace ~entry_point ~includes ~out_file (files : Fpath.t list) :
 
   out
 
-let cmd ~symbolic_parameters ~includes ~files ~out_file : unit Result.t =
+let cmd ~(symbolic_parameters : Symbolic_parameters.t) ~includes ~files
+  ~out_file : unit Result.t =
   let* workspace =
-    match symbolic_parameters.Cmd_sym.workspace with
+    match symbolic_parameters.workspace with
     | Some path -> Ok path
     | None -> OS.Dir.tmp "cmd_zig_%s"
   in

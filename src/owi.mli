@@ -837,26 +837,27 @@ module Interpret : sig
   end
 end
 
-(* TODO: move this to a proper `Model` module ? *)
-module Cmd_utils : sig
-  type model_format =
+module Model : sig
+  type output_format =
     | Scfg
     | Json
 end
 
-module Cmd_sym : sig
+module Symbolic_parameters : sig
   type fail_mode =
     | Trap_only
     | Assertion_only
     | Both
 
-  type exploration_strategy =
-    | FIFO
-    | LIFO
-    | Random
-    | Smart
+  module Exploration_strategy : sig
+    type t =
+      | FIFO
+      | LIFO
+      | Random
+      | Smart
+  end
 
-  type parameters =
+  type t =
     { unsafe : bool
     ; workers : int
     ; no_stop_at_failure : bool
@@ -864,22 +865,25 @@ module Cmd_sym : sig
     ; no_assert_failure_expression_printing : bool
     ; deterministic_result_order : bool
     ; fail_mode : fail_mode
-    ; exploration_strategy : exploration_strategy
+    ; exploration_strategy : Exploration_strategy.t
     ; workspace : Fpath.t option
     ; solver : Smtml.Solver_type.t
-    ; model_format : Cmd_utils.model_format
+    ; model_format : Model.output_format
     ; entry_point : string option
     ; invoke_with_symbols : bool
     ; model_out_file : Fpath.t option
     ; with_breadcrumbs : bool
     }
+end
 
-  val cmd : parameters:parameters -> source_file:Fpath.t -> unit Result.t
+module Cmd_sym : sig
+  val cmd :
+    parameters:Symbolic_parameters.t -> source_file:Fpath.t -> unit Result.t
 end
 
 module Cmd_c : sig
   val cmd :
-       symbolic_parameters:Cmd_sym.parameters
+       symbolic_parameters:Symbolic_parameters.t
     -> arch:int
     -> property:Fpath.t option
     -> testcomp:bool
@@ -909,7 +913,7 @@ end
 
 module Cmd_cpp : sig
   val cmd :
-       symbolic_parameters:Cmd_sym.parameters
+       symbolic_parameters:Symbolic_parameters.t
     -> arch:int
     -> opt_lvl:string
     -> includes:Fpath.t list
@@ -933,10 +937,10 @@ end
 module Cmd_iso : sig
   val cmd :
        deterministic_result_order:bool
-    -> fail_mode:Cmd_sym.fail_mode
-    -> exploration_strategy:Cmd_sym.exploration_strategy
+    -> fail_mode:Symbolic_parameters.fail_mode
+    -> exploration_strategy:Symbolic_parameters.Exploration_strategy.t
     -> files:Fpath.t list
-    -> model_format:Cmd_utils.model_format
+    -> model_format:Model.output_format
     -> no_assert_failure_expression_printing:bool
     -> no_stop_at_failure:bool
     -> no_value:bool
@@ -970,7 +974,7 @@ end
 
 module Cmd_rust : sig
   val cmd :
-       symbolic_parameters:Cmd_sym.parameters
+       symbolic_parameters:Symbolic_parameters.t
     -> arch:int
     -> opt_lvl:string
     -> includes:Fpath.t list
@@ -985,7 +989,7 @@ end
 
 module Cmd_tinygo : sig
   val cmd :
-       symbolic_parameters:Cmd_sym.parameters
+       symbolic_parameters:Symbolic_parameters.t
     -> files:Fpath.t list
     -> out_file:Fpath.t option
     -> unit Result.t
@@ -1019,7 +1023,7 @@ end
 
 module Cmd_zig : sig
   val cmd :
-       symbolic_parameters:Cmd_sym.parameters
+       symbolic_parameters:Symbolic_parameters.t
     -> includes:Fpath.t list
     -> files:Fpath.t list
     -> out_file:Fpath.t option

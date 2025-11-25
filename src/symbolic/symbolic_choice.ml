@@ -249,7 +249,7 @@ module CoreImpl = struct
     type 'a run_result = ('a eval * thread) Seq.t
 
     val run :
-         (module Work_ds_intf.S)
+         Symbolic_parameters.Exploration_strategy.t
       -> workers:int
       -> Smtml.Solver_type.t
       -> 'a t
@@ -303,8 +303,12 @@ module CoreImpl = struct
 
     type 'a run_result = ('a eval * Thread.t) Seq.t
 
-    let run (module M : Work_ds_intf.S) ~workers solver t thread ~callback
+    let run exploration_strategy ~workers solver t thread ~callback
       ~callback_init ~callback_end =
+      let module M =
+        ( val Symbolic_parameters.Exploration_strategy.to_work_ds_module
+                exploration_strategy )
+      in
       let module Scheduler = Scheduler (M) in
       let open Scheduler in
       let sched = init_scheduler () in

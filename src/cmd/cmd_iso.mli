@@ -1,9 +1,9 @@
 val cmd :
      deterministic_result_order:bool
-  -> fail_mode:Cmd_sym.fail_mode
-  -> exploration_strategy:Cmd_sym.exploration_strategy
+  -> fail_mode:Symbolic_parameters.fail_mode
+  -> exploration_strategy:Symbolic_parameters.Exploration_strategy.t
   -> files:Fpath.t list
-  -> model_format:Cmd_utils.model_format
+  -> model_format:Model.output_format
   -> no_assert_failure_expression_printing:bool
   -> no_stop_at_failure:bool
   -> no_value:bool

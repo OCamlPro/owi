@@ -81,7 +81,7 @@ module type S = sig
   type 'a run_result = ('a eval * thread) Seq.t
 
   val run :
-       (module Work_ds_intf.S)
+       Symbolic_parameters.Exploration_strategy.t
     -> workers:int
     -> Smtml.Solver_type.t
     -> 'a t

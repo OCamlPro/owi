@@ -2,11 +2,6 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-(* model stuff *)
-type model_format =
-  | Scfg
-  | Json
-
 (* test-case stuff *)
 val write_testcase : dir:Fpath.t -> Smtml.Value.t list -> unit Result.t
 

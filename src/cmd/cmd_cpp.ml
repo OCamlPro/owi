@@ -109,10 +109,10 @@ let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file
 
   out
 
-let cmd ~symbolic_parameters ~arch:_ ~opt_lvl ~includes ~files ~out_file :
-  unit Result.t =
+let cmd ~(symbolic_parameters : Symbolic_parameters.t) ~arch:_ ~opt_lvl
+  ~includes ~files ~out_file : unit Result.t =
   let* workspace =
-    match symbolic_parameters.Cmd_sym.workspace with
+    match symbolic_parameters.workspace with
     | Some path -> Ok path
     | None -> OS.Dir.tmp "owi_cpp_%s"
   in

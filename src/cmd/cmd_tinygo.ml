@@ -44,9 +44,10 @@ let compile ~workspace ~out_file (files : Fpath.t list) : Fpath.t Result.t =
 
   out
 
-let cmd ~symbolic_parameters ~files ~out_file : unit Result.t =
+let cmd ~(symbolic_parameters : Symbolic_parameters.t) ~files ~out_file :
+  unit Result.t =
   let* workspace =
-    match symbolic_parameters.Cmd_sym.workspace with
+    match symbolic_parameters.workspace with
     | Some path -> Ok path
     | None -> OS.Dir.tmp "cmd_tinygo_%s"
   in

@@ -3,7 +3,7 @@
 (* Written by the Owi programmers *)
 
 val cmd :
-     symbolic_parameters:Cmd_sym.parameters
+     symbolic_parameters:Symbolic_parameters.t
   -> arch:int
   -> opt_lvl:string
   -> includes:Fpath.t list

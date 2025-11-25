@@ -4,12 +4,6 @@
 
 open Syntax
 
-(* Models *)
-
-type model_format =
-  | Scfg
-  | Json
-
 (* Test-case generation *)
 
 let out_testcase ~dst testcase =
