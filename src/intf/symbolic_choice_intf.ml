@@ -84,7 +84,7 @@ module type S = sig
     -> Smtml.Solver_type.t
     -> 'a t
     -> thread
-    -> callback:('a eval * thread -> unit)
+    -> callback:(close:(unit -> unit) -> 'a eval * thread -> unit)
     -> callback_init:(unit -> unit)
     -> callback_end:(unit -> unit)
     -> unit Domain.t array

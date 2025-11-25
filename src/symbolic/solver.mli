@@ -17,4 +17,4 @@ val stats_are_empty : Smtml.Statistics.t -> bool
 
 val pp_stats : Smtml.Statistics.t Fmt.t
 
-val get_all_stats : unit -> Smtml.Statistics.t
+val get_all_stats : finalizer:(unit -> unit) -> unit -> Smtml.Statistics.t
