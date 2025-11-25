@@ -92,7 +92,7 @@ let bench_src = Logs.Src.creat<span data-count="701">e</span> "owi-bench" ~doc:"
 include (val Logs.src_lo<span data-count="701">g</span> main_src : Logs.LOG)
 
 let is_bench_enabled () =
-  <span data-count="29432">m</span>atch Logs.Src.level bench_src with <span data-count="29423">N</span>one -&gt; false | <span data-count="9">S</span>ome _ -&gt; true
+  <span data-count="29379">m</span>atch Logs.Src.level bench_src with <span data-count="29370">N</span>one -&gt; false | <span data-count="9">S</span>ome _ -&gt; true
 
 let bench_fn str fn =
   <span data-count="4984">m</span>atch Logs.Src.level bench_src with
@@ -105,9 +105,9 @@ let bench_fn str fn =
     <span data-count="6">r</span>
 
 let bench f =
-  <span data-count="825">m</span>atch Logs.Src.level bench_src with
-  | <span data-count="823">N</span>one -&gt; ()
-  | <span data-count="2">S</span>ome _ -&gt; Logs.info ~src:bench_src f
+  <span data-count="425">m</span>atch Logs.Src.level bench_src with
+  | <span data-count="424">N</span>one -&gt; ()
+  | <span data-count="1">S</span>ome _ -&gt; Logs.info ~src:bench_src f
 
 let setup style_renderer level ~bench =
   <span data-count="636">F</span>mt_tty.setup_std_outputs ?style_renderer ();

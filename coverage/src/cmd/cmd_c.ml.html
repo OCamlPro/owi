@@ -640,10 +640,10 @@ let metadata ~workspace arch property files : unit Result.t =
   let* res = OS.File.with_o<span data-count="203">c</span> fpath out_metadata { arch; property; files } in
   <span data-count="203">r</span>es
 
-let cmd ~symbolic_parameters ~arch ~property ~testcomp:_ ~opt_lvl ~includes
-  ~files ~eacsl ~out_file : unit Result.t =
+let cmd ~(symbolic_parameters : Symbolic_parameters.t) ~arch ~property
+  ~testcomp:_ ~opt_lvl ~includes ~files ~eacsl ~out_file : unit Result.t =
   <span data-count="204">l</span>et* workspace =
-    match symbolic_parameters.Cmd_sym.workspace with
+    match symbolic_parameters.workspace with
     | <span data-count="0">S</span>ome path -&gt; Ok path
     | <span data-count="204">N</span>one -&gt; Bos.OS.Dir.tm<span data-count="204">p</span> "owi_c_%s"
   in
@@ -658,7 +658,7 @@ let cmd ~symbolic_parameters ~arch ~property ~testcomp:_ ~opt_lvl ~includes
   <span data-count="203">l</span>et* () = metadat<span data-count="203">a</span> ~workspace arch property files in
   <span data-count="203">l</span>et workspace = Some workspace in
 
-  let parameters = { symbolic_parameters with Cmd_sym.workspace } in
+  let parameters = { symbolic_parameters with workspace } in
 
   Cmd_sym.cmd ~parameters ~source_file
 </code></pre>

@@ -18,14 +18,14 @@
       <h2>79.07%</h2>
     </div>
     <div id="navbar">
-      <span class="some-visited" style="top:13.25%"></span>
-      <span class="unvisited" style="top:20.48%"></span>
-      <span class="unvisited" style="top:21.69%"></span>
-      <span class="unvisited" style="top:36.14%"></span>
-      <span class="unvisited" style="bottom:46.99%"></span>
-      <span class="some-visited" style="bottom:45.78%"></span>
-      <span class="unvisited" style="bottom:36.14%"></span>
-      <span class="unvisited" style="bottom:22.89%"></span>
+      <span class="some-visited" style="top:13.10%"></span>
+      <span class="unvisited" style="top:20.24%"></span>
+      <span class="unvisited" style="top:21.43%"></span>
+      <span class="unvisited" style="top:35.71%"></span>
+      <span class="unvisited" style="bottom:47.62%"></span>
+      <span class="some-visited" style="bottom:46.43%"></span>
+      <span class="unvisited" style="bottom:36.90%"></span>
+      <span class="unvisited" style="bottom:22.62%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -91,28 +91,29 @@
 <a id="L59"></a><span class="visited"> </span>
 <a id="L60"></a><span > </span>
 <a id="L61"></a><span > </span>
-<a id="L62"></a><span class="visited"> </span>
-<a id="L63"></a><span > </span>
-<a id="L64"></a><span class="unvisited"> </span>
-<a id="L65"></a><span class="visited"> </span>
-<a id="L66"></a><span > </span>
-<a id="L67"></a><span class="visited"> </span>
-<a id="L68"></a><span > </span>
-<a id="L69"></a><span class="visited"> </span>
-<a id="L70"></a><span > </span>
+<a id="L62"></a><span > </span>
+<a id="L63"></a><span class="visited"> </span>
+<a id="L64"></a><span > </span>
+<a id="L65"></a><span class="unvisited"> </span>
+<a id="L66"></a><span class="visited"> </span>
+<a id="L67"></a><span > </span>
+<a id="L68"></a><span class="visited"> </span>
+<a id="L69"></a><span > </span>
+<a id="L70"></a><span class="visited"> </span>
 <a id="L71"></a><span > </span>
 <a id="L72"></a><span > </span>
 <a id="L73"></a><span > </span>
 <a id="L74"></a><span > </span>
 <a id="L75"></a><span > </span>
-<a id="L76"></a><span class="visited"> </span>
-<a id="L77"></a><span > </span>
+<a id="L76"></a><span > </span>
+<a id="L77"></a><span class="visited"> </span>
 <a id="L78"></a><span > </span>
-<a id="L79"></a><span class="visited"> </span>
-<a id="L80"></a><span > </span>
+<a id="L79"></a><span > </span>
+<a id="L80"></a><span class="visited"> </span>
 <a id="L81"></a><span > </span>
 <a id="L82"></a><span > </span>
 <a id="L83"></a><span > </span>
+<a id="L84"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -200,6 +201,7 @@
 <a href="#L81">81</a>
 <a href="#L82">82</a>
 <a href="#L83">83</a>
+<a href="#L84">84</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -261,9 +263,10 @@ let compile ~workspace ~entry_point ~includes ~out_file (files : Fpath.t list) :
 
   <span data-count="3">o</span>ut
 
-let cmd ~symbolic_parameters ~includes ~files ~out_file : unit Result.t =
+let cmd ~(symbolic_parameters : Symbolic_parameters.t) ~includes ~files
+  ~out_file : unit Result.t =
   <span data-count="4">l</span>et* workspace =
-    match symbolic_parameters.Cmd_sym.workspace with
+    match symbolic_parameters.workspace with
     | <span data-count="0">S</span>ome path -&gt; Ok path
     | <span data-count="4">N</span>one -&gt; OS.Dir.tm<span data-count="4">p</span> "cmd_zig_%s"
   in

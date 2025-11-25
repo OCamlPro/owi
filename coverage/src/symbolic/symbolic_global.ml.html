@@ -137,9 +137,9 @@ type t = { mutable value : Symbolic_value.t }
 
 let value v = <span data-count="321">v</span>.value
 
-let set_value v x = <span data-count="1816">v</span>.value &lt;- x
+let set_value v x = <span data-count="1778">v</span>.value &lt;- x
 
-let clone_global r = <span data-count="27527">{</span> value = r.value }
+let clone_global r = <span data-count="27468">{</span> value = r.value }
 
 let convert_values (v : Concrete_value.t) : Symbolic_value.t =
   (* TODO share various versions *)
@@ -160,25 +160,25 @@ let convert (orig_global : Concrete_global.t) : t =
 
 type collection = (int * int, t) Hashtbl.t
 
-let init () = <span data-count="28805">H</span>ashtbl.create 16
+let init () = <span data-count="28746">H</span>ashtbl.create 16
 
 let clone collection =
-  <span data-count="28405">l</span>et collection' = init () in
-  <span data-count="28405">H</span>ashtbl.iter
+  <span data-count="28347">l</span>et collection' = init () in
+  <span data-count="28349">H</span>ashtbl.iter
     (fun loc global -&gt;
-      <span data-count="27528">l</span>et global' = clone_global global in
-      <span data-count="27526">H</span>ashtbl.add collection' loc global' )
+      <span data-count="27468">l</span>et global' = clone_global global in
+      <span data-count="27468">H</span>ashtbl.add collection' loc global' )
     collection;
-  <span data-count="28405">c</span>ollection'
+  <span data-count="28349">c</span>ollection'
 
 let get_global env_id (orig_global : Concrete_global.t) collection g_id =
-  <span data-count="2137">l</span>et loc = (env_id, g_id) in
+  <span data-count="2100">l</span>et loc = (env_id, g_id) in
   match Hashtbl.find_opt collection loc with
   | <span data-count="192">N</span>one -&gt;
     let g = convert orig_global in
     <span data-count="192">H</span>ashtbl.add collection loc g;
     <span data-count="192">g</span>
-  | <span data-count="1945">S</span>ome t -&gt; t
+  | <span data-count="1909">S</span>ome t -&gt; t
 </code></pre>
       </div>
     </div>

@@ -18,31 +18,31 @@
       <h2>0.00%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:15.00%"></span>
-      <span class="unvisited" style="top:18.33%"></span>
-      <span class="unvisited" style="top:20.00%"></span>
-      <span class="unvisited" style="top:21.67%"></span>
-      <span class="unvisited" style="top:26.67%"></span>
-      <span class="unvisited" style="top:31.67%"></span>
-      <span class="unvisited" style="top:33.33%"></span>
-      <span class="unvisited" style="top:36.67%"></span>
-      <span class="unvisited" style="top:38.33%"></span>
-      <span class="unvisited" style="top:40.00%"></span>
-      <span class="unvisited" style="top:50.00%"></span>
-      <span class="unvisited" style="bottom:48.33%"></span>
-      <span class="unvisited" style="bottom:41.67%"></span>
-      <span class="unvisited" style="bottom:40.00%"></span>
-      <span class="unvisited" style="bottom:38.33%"></span>
-      <span class="unvisited" style="bottom:36.67%"></span>
-      <span class="unvisited" style="bottom:35.00%"></span>
-      <span class="unvisited" style="bottom:33.33%"></span>
-      <span class="unvisited" style="bottom:25.00%"></span>
-      <span class="unvisited" style="bottom:20.00%"></span>
-      <span class="unvisited" style="bottom:16.67%"></span>
-      <span class="unvisited" style="bottom:15.00%"></span>
-      <span class="unvisited" style="bottom:11.67%"></span>
-      <span class="unvisited" style="bottom:8.33%"></span>
-      <span class="unvisited" style="bottom:6.67%"></span>
+      <span class="unvisited" style="top:14.75%"></span>
+      <span class="unvisited" style="top:18.03%"></span>
+      <span class="unvisited" style="top:19.67%"></span>
+      <span class="unvisited" style="top:21.31%"></span>
+      <span class="unvisited" style="top:26.23%"></span>
+      <span class="unvisited" style="top:31.15%"></span>
+      <span class="unvisited" style="top:32.79%"></span>
+      <span class="unvisited" style="top:36.07%"></span>
+      <span class="unvisited" style="top:37.70%"></span>
+      <span class="unvisited" style="top:39.34%"></span>
+      <span class="unvisited" style="top:49.18%"></span>
+      <span class="unvisited" style="bottom:49.18%"></span>
+      <span class="unvisited" style="bottom:42.62%"></span>
+      <span class="unvisited" style="bottom:40.98%"></span>
+      <span class="unvisited" style="bottom:39.34%"></span>
+      <span class="unvisited" style="bottom:37.70%"></span>
+      <span class="unvisited" style="bottom:36.07%"></span>
+      <span class="unvisited" style="bottom:34.43%"></span>
+      <span class="unvisited" style="bottom:26.23%"></span>
+      <span class="unvisited" style="bottom:19.67%"></span>
+      <span class="unvisited" style="bottom:16.39%"></span>
+      <span class="unvisited" style="bottom:14.75%"></span>
+      <span class="unvisited" style="bottom:11.48%"></span>
+      <span class="unvisited" style="bottom:8.20%"></span>
+      <span class="unvisited" style="bottom:6.56%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -94,19 +94,20 @@
 <a id="L45"></a><span class="unvisited"> </span>
 <a id="L46"></a><span > </span>
 <a id="L47"></a><span > </span>
-<a id="L48"></a><span class="unvisited"> </span>
-<a id="L49"></a><span > </span>
-<a id="L50"></a><span class="unvisited"> </span>
+<a id="L48"></a><span > </span>
+<a id="L49"></a><span class="unvisited"> </span>
+<a id="L50"></a><span > </span>
 <a id="L51"></a><span class="unvisited"> </span>
-<a id="L52"></a><span > </span>
-<a id="L53"></a><span class="unvisited"> </span>
-<a id="L54"></a><span > </span>
-<a id="L55"></a><span class="unvisited"> </span>
+<a id="L52"></a><span class="unvisited"> </span>
+<a id="L53"></a><span > </span>
+<a id="L54"></a><span class="unvisited"> </span>
+<a id="L55"></a><span > </span>
 <a id="L56"></a><span class="unvisited"> </span>
-<a id="L57"></a><span > </span>
+<a id="L57"></a><span class="unvisited"> </span>
 <a id="L58"></a><span > </span>
 <a id="L59"></a><span > </span>
 <a id="L60"></a><span > </span>
+<a id="L61"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -171,6 +172,7 @@
 <a href="#L58">58</a>
 <a href="#L59">59</a>
 <a href="#L60">60</a>
+<a href="#L61">61</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -218,9 +220,10 @@ let compile ~workspace ~out_file (files : Fpath.t list) : Fpath.t Result.t =
 
   <span data-count="0">o</span>ut
 
-let cmd ~symbolic_parameters ~files ~out_file : unit Result.t =
+let cmd ~(symbolic_parameters : Symbolic_parameters.t) ~files ~out_file :
+  unit Result.t =
   <span data-count="0">l</span>et* workspace =
-    match symbolic_parameters.Cmd_sym.workspace with
+    match symbolic_parameters.workspace with
     | <span data-count="0">S</span>ome path -&gt; Ok path
     | <span data-count="0">N</span>one -&gt; OS.Dir.tm<span data-count="0">p</span> "cmd_tinygo_%s"
   in

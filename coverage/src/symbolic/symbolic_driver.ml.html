@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>symbolic_driver.ml &mdash; Coverage report</title>
+    <meta name="description" content="95.95% coverage in src/symbolic/symbolic_driver.ml">
+    <link rel="stylesheet" href="../../coverage.css"/>
+    <script src="../../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../../index.html">
+          <span class="dirname">src/symbolic/</span>symbolic_driver.ml
+        </a>
+      </h1>
+      <h2>95.95%</h2>
+    </div>
+    <div id="navbar">
+      <span class="unvisited" style="top:24.79%"></span>
+      <span class="some-visited" style="top:48.76%"></span>
+      <span class="some-visited" style="bottom:42.98%"></span>
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span > </span>
+<a id="L7"></a><span > </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span > </span>
+<a id="L10"></a><span > </span>
+<a id="L11"></a><span class="visited"> </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span class="visited"> </span>
+<a id="L14"></a><span > </span>
+<a id="L15"></a><span > </span>
+<a id="L16"></a><span class="visited"> </span>
+<a id="L17"></a><span class="visited"> </span>
+<a id="L18"></a><span class="visited"> </span>
+<a id="L19"></a><span class="visited"> </span>
+<a id="L20"></a><span > </span>
+<a id="L21"></a><span > </span>
+<a id="L22"></a><span class="visited"> </span>
+<a id="L23"></a><span > </span>
+<a id="L24"></a><span > </span>
+<a id="L25"></a><span class="visited"> </span>
+<a id="L26"></a><span > </span>
+<a id="L27"></a><span > </span>
+<a id="L28"></a><span > </span>
+<a id="L29"></a><span class="visited"> </span>
+<a id="L30"></a><span class="unvisited"> </span>
+<a id="L31"></a><span > </span>
+<a id="L32"></a><span class="visited"> </span>
+<a id="L33"></a><span class="visited"> </span>
+<a id="L34"></a><span > </span>
+<a id="L35"></a><span class="visited"> </span>
+<a id="L36"></a><span class="visited"> </span>
+<a id="L37"></a><span class="visited"> </span>
+<a id="L38"></a><span > </span>
+<a id="L39"></a><span class="visited"> </span>
+<a id="L40"></a><span > </span>
+<a id="L41"></a><span > </span>
+<a id="L42"></a><span > </span>
+<a id="L43"></a><span > </span>
+<a id="L44"></a><span class="visited"> </span>
+<a id="L45"></a><span class="visited"> </span>
+<a id="L46"></a><span class="visited"> </span>
+<a id="L47"></a><span class="visited"> </span>
+<a id="L48"></a><span class="visited"> </span>
+<a id="L49"></a><span class="visited"> </span>
+<a id="L50"></a><span class="visited"> </span>
+<a id="L51"></a><span class="visited"> </span>
+<a id="L52"></a><span > </span>
+<a id="L53"></a><span > </span>
+<a id="L54"></a><span > </span>
+<a id="L55"></a><span class="visited"> </span>
+<a id="L56"></a><span > </span>
+<a id="L57"></a><span class="visited"> </span>
+<a id="L58"></a><span class="visited"> </span>
+<a id="L59"></a><span class="some-visited"> </span>
+<a id="L60"></a><span > </span>
+<a id="L61"></a><span > </span>
+<a id="L62"></a><span > </span>
+<a id="L63"></a><span > </span>
+<a id="L64"></a><span class="visited"> </span>
+<a id="L65"></a><span > </span>
+<a id="L66"></a><span > </span>
+<a id="L67"></a><span > </span>
+<a id="L68"></a><span > </span>
+<a id="L69"></a><span class="some-visited"> </span>
+<a id="L70"></a><span > </span>
+<a id="L71"></a><span > </span>
+<a id="L72"></a><span > </span>
+<a id="L73"></a><span > </span>
+<a id="L74"></a><span > </span>
+<a id="L75"></a><span class="visited"> </span>
+<a id="L76"></a><span class="visited"> </span>
+<a id="L77"></a><span class="visited"> </span>
+<a id="L78"></a><span class="visited"> </span>
+<a id="L79"></a><span class="visited"> </span>
+<a id="L80"></a><span class="visited"> </span>
+<a id="L81"></a><span > </span>
+<a id="L82"></a><span > </span>
+<a id="L83"></a><span > </span>
+<a id="L84"></a><span class="visited"> </span>
+<a id="L85"></a><span class="visited"> </span>
+<a id="L86"></a><span > </span>
+<a id="L87"></a><span class="visited"> </span>
+<a id="L88"></a><span > </span>
+<a id="L89"></a><span class="visited"> </span>
+<a id="L90"></a><span > </span>
+<a id="L91"></a><span class="visited"> </span>
+<a id="L92"></a><span > </span>
+<a id="L93"></a><span > </span>
+<a id="L94"></a><span > </span>
+<a id="L95"></a><span class="visited"> </span>
+<a id="L96"></a><span > </span>
+<a id="L97"></a><span > </span>
+<a id="L98"></a><span > </span>
+<a id="L99"></a><span > </span>
+<a id="L100"></a><span > </span>
+<a id="L101"></a><span class="visited"> </span>
+<a id="L102"></a><span class="visited"> </span>
+<a id="L103"></a><span class="visited"> </span>
+<a id="L104"></a><span class="visited"> </span>
+<a id="L105"></a><span class="visited"> </span>
+<a id="L106"></a><span class="visited"> </span>
+<a id="L107"></a><span > </span>
+<a id="L108"></a><span > </span>
+<a id="L109"></a><span > </span>
+<a id="L110"></a><span > </span>
+<a id="L111"></a><span > </span>
+<a id="L112"></a><span > </span>
+<a id="L113"></a><span > </span>
+<a id="L114"></a><span > </span>
+<a id="L115"></a><span > </span>
+<a id="L116"></a><span > </span>
+<a id="L117"></a><span > </span>
+<a id="L118"></a><span class="visited"> </span>
+<a id="L119"></a><span > </span>
+<a id="L120"></a><span class="visited"> </span>
+<a id="L121"></a><span class="visited"> </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1">  1</a>
+<a href="#L2">  2</a>
+<a href="#L3">  3</a>
+<a href="#L4">  4</a>
+<a href="#L5">  5</a>
+<a href="#L6">  6</a>
+<a href="#L7">  7</a>
+<a href="#L8">  8</a>
+<a href="#L9">  9</a>
+<a href="#L10"> 10</a>
+<a href="#L11"> 11</a>
+<a href="#L12"> 12</a>
+<a href="#L13"> 13</a>
+<a href="#L14"> 14</a>
+<a href="#L15"> 15</a>
+<a href="#L16"> 16</a>
+<a href="#L17"> 17</a>
+<a href="#L18"> 18</a>
+<a href="#L19"> 19</a>
+<a href="#L20"> 20</a>
+<a href="#L21"> 21</a>
+<a href="#L22"> 22</a>
+<a href="#L23"> 23</a>
+<a href="#L24"> 24</a>
+<a href="#L25"> 25</a>
+<a href="#L26"> 26</a>
+<a href="#L27"> 27</a>
+<a href="#L28"> 28</a>
+<a href="#L29"> 29</a>
+<a href="#L30"> 30</a>
+<a href="#L31"> 31</a>
+<a href="#L32"> 32</a>
+<a href="#L33"> 33</a>
+<a href="#L34"> 34</a>
+<a href="#L35"> 35</a>
+<a href="#L36"> 36</a>
+<a href="#L37"> 37</a>
+<a href="#L38"> 38</a>
+<a href="#L39"> 39</a>
+<a href="#L40"> 40</a>
+<a href="#L41"> 41</a>
+<a href="#L42"> 42</a>
+<a href="#L43"> 43</a>
+<a href="#L44"> 44</a>
+<a href="#L45"> 45</a>
+<a href="#L46"> 46</a>
+<a href="#L47"> 47</a>
+<a href="#L48"> 48</a>
+<a href="#L49"> 49</a>
+<a href="#L50"> 50</a>
+<a href="#L51"> 51</a>
+<a href="#L52"> 52</a>
+<a href="#L53"> 53</a>
+<a href="#L54"> 54</a>
+<a href="#L55"> 55</a>
+<a href="#L56"> 56</a>
+<a href="#L57"> 57</a>
+<a href="#L58"> 58</a>
+<a href="#L59"> 59</a>
+<a href="#L60"> 60</a>
+<a href="#L61"> 61</a>
+<a href="#L62"> 62</a>
+<a href="#L63"> 63</a>
+<a href="#L64"> 64</a>
+<a href="#L65"> 65</a>
+<a href="#L66"> 66</a>
+<a href="#L67"> 67</a>
+<a href="#L68"> 68</a>
+<a href="#L69"> 69</a>
+<a href="#L70"> 70</a>
+<a href="#L71"> 71</a>
+<a href="#L72"> 72</a>
+<a href="#L73"> 73</a>
+<a href="#L74"> 74</a>
+<a href="#L75"> 75</a>
+<a href="#L76"> 76</a>
+<a href="#L77"> 77</a>
+<a href="#L78"> 78</a>
+<a href="#L79"> 79</a>
+<a href="#L80"> 80</a>
+<a href="#L81"> 81</a>
+<a href="#L82"> 82</a>
+<a href="#L83"> 83</a>
+<a href="#L84"> 84</a>
+<a href="#L85"> 85</a>
+<a href="#L86"> 86</a>
+<a href="#L87"> 87</a>
+<a href="#L88"> 88</a>
+<a href="#L89"> 89</a>
+<a href="#L90"> 90</a>
+<a href="#L91"> 91</a>
+<a href="#L92"> 92</a>
+<a href="#L93"> 93</a>
+<a href="#L94"> 94</a>
+<a href="#L95"> 95</a>
+<a href="#L96"> 96</a>
+<a href="#L97"> 97</a>
+<a href="#L98"> 98</a>
+<a href="#L99"> 99</a>
+<a href="#L100">100</a>
+<a href="#L101">101</a>
+<a href="#L102">102</a>
+<a href="#L103">103</a>
+<a href="#L104">104</a>
+<a href="#L105">105</a>
+<a href="#L106">106</a>
+<a href="#L107">107</a>
+<a href="#L108">108</a>
+<a href="#L109">109</a>
+<a href="#L110">110</a>
+<a href="#L111">111</a>
+<a href="#L112">112</a>
+<a href="#L113">113</a>
+<a href="#L114">114</a>
+<a href="#L115">115</a>
+<a href="#L116">116</a>
+<a href="#L117">117</a>
+<a href="#L118">118</a>
+<a href="#L119">119</a>
+<a href="#L120">120</a>
+<a href="#L121">121</a>
+</pre>
+<pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
+(* Copyright © 2021-2024 OCamlPro *)
+(* Written by the Owi programmers *)
+
+open Bos
+open Syntax
+
+let print_and_count_failures ~format ~out_file ~no_value
+  ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
+  ~count_acc ~results ~with_breadcrumbs =
+  <span data-count="400">l</span>et test_suite_dir = Fpath.(workspace / "test-suite") in
+  let* (_created : bool) =
+    if not no_value then <span data-count="287">O</span>S.Dir.creat<span data-count="287">e</span> test_suite_dir else <span data-count="113">O</span>k false
+  in
+
+  <span data-count="400">l</span>et rec aux count_acc results =
+    <span data-count="583">m</span>atch results () with
+    | <span data-count="346">S</span>eq.Nil -&gt; Ok count_acc
+    | <span data-count="237">S</span>eq.Cons ((result, _thread), tl) -&gt;
+      let* model =
+        match result with
+        | (<span data-count="63">`</span>EAssert (_, model, _, _, _, _) | <span data-count="174">`</span>ETrap (_, model, _, _, _, _)) as
+          bug -&gt;
+          let* () =
+            Model.prin<span data-count="237">t</span> ~format ~out_file ~id:count_acc ~no_value
+              ~no_stop_at_failure ~no_assert_failure_expression_printing
+              ~with_breadcrumbs bug
+          in
+          <span data-count="237">O</span>k model
+        | <span data-count="0">`</span>Error e -&gt; Error e
+      in
+      <span data-count="237">l</span>et count_acc = succ count_acc in
+      <span data-count="237">l</span>et* () =
+        if not no_value then
+          <span data-count="119">l</span>et testcase = Smtml.Model.get_bindings model |&gt; <span data-count="119">L</span>ist.map snd in
+          <span data-count="119">C</span>md_utils.write_testcas<span data-count="119">e</span> ~dir:test_suite_dir testcase
+        else <span data-count="118">O</span>k ()
+      in
+      <span data-count="237">i</span>f no_stop_at_failure then <span data-count="183">a</span>ux count_acc tl else <span data-count="54">O</span>k count_acc
+  in
+  aux count_acc results
+
+let sort_results deterministic_result_order results =
+  <span data-count="400">i</span>f deterministic_result_order then
+    <span data-count="35">r</span>esults
+    |&gt; Seq.map (function <span data-count="44">(</span>_, thread) as x -&gt;
+      (x, List.re<span data-count="44">v</span> @@ Thread_with_memory.breadcrumb<span data-count="44">s</span> thread) )
+    |&gt; <span data-count="35">L</span>ist.of_seq
+    |&gt; <span data-count="35">L</span>ist.sort (fun (_, bc1) (_, bc2) -&gt; <span data-count="14">L</span>ist.compare compare bc1 bc2)
+    |&gt; <span data-count="35">L</span>ist.to_seq |&gt; <span data-count="35">S</span>eq.map fst
+  else <span data-count="365">r</span>esults
+
+let mk_callback fail_mode res_stack path_count =
+ fun v -&gt;
+  <span data-count="1685">l</span>et open Symbolic_choice_intf in
+  Atomic.incr path_count;
+  <span data-count="1687">m</span>atch (fail_mode, v) with
+  | <span data-count="1445">_</span>, (EVal (), _) -&gt; ()
+  | <span data-count="174">(</span> (<span data-count="174">S</span>ymbolic_parameters.Both | <span data-count="0">T</span>rap_only)
+    , (ETrap (t, m, labels, breadcrumbs, symbol_scopes, stats), thread) ) -&gt;
+    Ws.push
+      (`ETrap (t, m, labels, breadcrumbs, symbol_scopes, stats), thread)
+      Prio.default res_stack
+  | <span data-count="64">(</span> (<span data-count="61">B</span>oth | <span data-count="3">A</span>ssertion_only)
+    , (EAssert (e, m, labels, breadcrumbs, symbol_scopes, stats), thread) ) -&gt;
+    Ws.push
+      (`EAssert (e, m, labels, breadcrumbs, symbol_scopes, stats), thread)
+      Prio.default res_stack
+  | <span data-count="3">(</span><span data-count="0">T</span>rap_only | <span data-count="3">A</span>ssertion_only), _ -&gt; ()
+
+let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
+  ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
+  ~workspace ~solver ~model_format ~model_out_file ~with_breadcrumbs ~run_time
+  (result : unit Symbolic.Choice.t) =
+  <span data-count="400">l</span>et thread = Thread_with_memory.init () in
+  <span data-count="400">l</span>et res_stack = Ws.make () in
+  <span data-count="400">l</span>et path_count = Atomic.make 0 in
+  <span data-count="400">l</span>et callback = mk_callback fail_mode res_stack path_count in
+  <span data-count="400">l</span>et time_counter = Mtime_clock.counter () in
+  <span data-count="400">l</span>et time_before = (Unix.time<span data-count="400">s</span> ()).tms_utime in
+  let join_handles =
+    Symbolic_choice_with_memory.run exploration_strategy ~workers solver result
+      thread ~callback
+      ~callback_init:(fun () -&gt; <span data-count="774">W</span>s.make_pledge res_stack)
+      ~callback_end:(fun () -&gt; <span data-count="738">W</span>s.end_pledge res_stack)
+  in
+  <span data-count="400">l</span>et results =
+    Ws.read_as_seq res_stack ~finalizer:(fun () -&gt;
+      <span data-count="346">A</span>rray.iter Domain.join join_handles )
+  in
+  <span data-count="400">l</span>et time_after = (Unix.time<span data-count="400">s</span> ()).tms_utime in
+  let interpreter_time = time_after -. time_before in
+  let results = sort_results deterministic_result_order results in
+
+  <span data-count="400">l</span>et* count =
+    print_and_count_failures ~format:model_format ~out_file:model_out_file
+      ~no_value ~no_assert_failure_expression_printing ~workspace
+      ~no_stop_at_failure ~count_acc:0 ~results ~with_breadcrumbs
+  in
+
+  <span data-count="400">L</span>og.bench (fun m -&gt;
+    <span data-count="1">l</span>et time_counter = Mtime_clock.count time_counter in
+    <span data-count="1">l</span>et bench_stats = Thread_with_memory.bench_stats thread in
+    <span data-count="1">l</span>et solver_time = Atomic.get bench_stats.solver_time in
+    <span data-count="1">l</span>et interpreter_time =
+      let run_time = match run_time with None -&gt; assert false | <span data-count="1">S</span>ome t -&gt; t in
+      (interpreter_time +. run_time) *. 1000.
+    in
+    (* run_time shouldn't be none in bench mode *)
+    m
+      "Benchmarks:@\n\
+       execution time: %a@\n\
+       @[&lt;v&gt;solver time: %a@;\
+       interpreter time: %fms@;\
+       @]"
+      Mtime.Span.pp time_counter Mtime.Span.pp solver_time interpreter_time );
+
+  <span data-count="400">L</span>og.info (fun m -&gt; <span data-count="2">m</span> "Completed paths: %d" (Atomic.ge<span data-count="2">t</span> path_count));
+
+  <span data-count="400">i</span>f count &gt; 0 then <span data-count="222">E</span>rror (`Found_bug count)
+  else <span data-count="178">O</span>k (Log.ap<span data-count="178">p</span> (fun m -&gt; <span data-count="178">m</span> "All OK!"))
+</code></pre>
+      </div>
+    </div>
+    <script src="../../coverage.js"></script>
+  </body>
+</html>

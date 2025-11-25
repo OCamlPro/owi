@@ -567,10 +567,10 @@ module M :
         with <span data-count="0">I</span>nvalid_argument _ -&gt; false )
 
   let assume (i : Value.int32) : unit Choice.t =
-    <span data-count="587">C</span>hoice.assume @@ Value.I32.to_boo<span data-count="587">l</span> i
+    <span data-count="593">C</span>hoice.assume @@ Value.I32.to_boo<span data-count="593">l</span> i
 
   let assert' (i : Value.int32) : unit Choice.t =
-    <span data-count="96949">C</span>hoice.assertion @@ Value.I32.to_boo<span data-count="96950">l</span> i
+    <span data-count="96953">C</span>hoice.assertion @@ Value.I32.to_boo<span data-count="96953">l</span> i
 
   let symbol_bool () =
     <span data-count="4">C</span>hoice.with_new_symbol (Ty_bitv 1) (fun sym -&gt;
@@ -608,10 +608,10 @@ module M :
   let abort () : unit Choice.t = <span data-count="2">C</span>hoice.stop
 
   let alloc m (base : Value.int32) (size : Value.int32) : Value.int32 Choice.t =
-    <span data-count="9918">C</span>hoice.lift_mem @@ Memory.reallo<span data-count="9918">c</span> m ~ptr:base ~size
+    <span data-count="9920">C</span>hoice.lift_mem @@ Memory.reallo<span data-count="9920">c</span> m ~ptr:base ~size
 
   let free m (ptr : Value.int32) : Value.int32 Choice.t =
-    <span data-count="2540">C</span>hoice.lift_mem @@ Memory.fre<span data-count="2540">e</span> m ptr
+    <span data-count="2537">C</span>hoice.lift_mem @@ Memory.fre<span data-count="2534">e</span> m ptr
 
   let exit (_p : Value.int32) : unit Choice.t = <span data-count="1">a</span>bort ()
 

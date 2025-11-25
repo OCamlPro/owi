@@ -233,10 +233,10 @@ let compile ~entry_point ~includes:_ ~opt_lvl:_ ~out_file (files : Fpath.t list)
 
   <span data-count="3">o</span>ut
 
-let cmd ~symbolic_parameters ~arch:_ ~opt_lvl ~includes ~files ~out_file :
-  unit Result.t =
+let cmd ~(symbolic_parameters : Symbolic_parameters.t) ~arch:_ ~opt_lvl
+  ~includes ~files ~out_file : unit Result.t =
   <span data-count="4">l</span>et* workspace =
-    match symbolic_parameters.Cmd_sym.workspace with
+    match symbolic_parameters.workspace with
     | <span data-count="0">S</span>ome path -&gt; Ok path
     | <span data-count="4">N</span>one -&gt; OS.Dir.tm<span data-count="4">p</span> "owi_rust_%s"
   in

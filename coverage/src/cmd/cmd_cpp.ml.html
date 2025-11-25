@@ -409,10 +409,10 @@ let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file
 
   <span data-count="5">o</span>ut
 
-let cmd ~symbolic_parameters ~arch:_ ~opt_lvl ~includes ~files ~out_file :
-  unit Result.t =
+let cmd ~(symbolic_parameters : Symbolic_parameters.t) ~arch:_ ~opt_lvl
+  ~includes ~files ~out_file : unit Result.t =
   <span data-count="6">l</span>et* workspace =
-    match symbolic_parameters.Cmd_sym.workspace with
+    match symbolic_parameters.workspace with
     | <span data-count="0">S</span>ome path -&gt; Ok path
     | <span data-count="6">N</span>one -&gt; OS.Dir.tm<span data-count="6">p</span> "owi_cpp_%s"
   in
