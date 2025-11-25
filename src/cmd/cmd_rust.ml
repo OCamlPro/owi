@@ -53,10 +53,10 @@ let compile ~entry_point ~includes:_ ~opt_lvl:_ ~out_file (files : Fpath.t list)
 
   out
 
-let cmd ~symbolic_parameters ~arch:_ ~opt_lvl ~includes ~files ~out_file :
-  unit Result.t =
+let cmd ~(symbolic_parameters : Symbolic_parameters.t) ~arch:_ ~opt_lvl
+  ~includes ~files ~out_file : unit Result.t =
   let* workspace =
-    match symbolic_parameters.Cmd_sym.workspace with
+    match symbolic_parameters.workspace with
     | Some path -> Ok path
     | None -> OS.Dir.tmp "owi_rust_%s"
   in

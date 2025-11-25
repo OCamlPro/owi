@@ -408,8 +408,8 @@ let cmd ~deterministic_result_order ~fail_mode ~exploration_strategy ~files
       let* result = check_iso ~unsafe export_name export_type module1 module2 in
       let run_time = if Log.is_bench_enabled () then Some 0. else None in
 
-      Cmd_sym.handle_result ~exploration_strategy ~fail_mode ~workers ~solver
-        ~deterministic_result_order ~model_format ~no_value
+      Symbolic_driver.handle_result ~exploration_strategy ~fail_mode ~workers
+        ~solver ~deterministic_result_order ~model_format ~no_value
         ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
         ~model_out_file ~with_breadcrumbs ~run_time result )
     () common_exports

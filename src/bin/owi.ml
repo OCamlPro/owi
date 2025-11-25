@@ -57,29 +57,29 @@ let solver_conv = Arg.conv (Smtml.Solver_type.of_string, Smtml.Solver_type.pp)
 let exploration_conv =
   let of_string s =
     match String.lowercase_ascii s with
-    | "fifo" -> Ok Cmd_sym.FIFO
-    | "lifo" -> Ok Cmd_sym.LIFO
-    | "random" -> Ok Cmd_sym.Random
-    | "smart" -> Ok Cmd_sym.Smart
+    | "fifo" -> Ok Symbolic_parameters.Exploration_strategy.FIFO
+    | "lifo" -> Ok LIFO
+    | "random" -> Ok Random
+    | "smart" -> Ok Smart
     | _ -> Fmt.error_msg {|Expected "fifo", "lifo" or "random" but got "%s"|} s
   in
   let pp fmt = function
-    | Cmd_sym.FIFO -> Fmt.string fmt "fifo"
-    | Cmd_sym.LIFO -> Fmt.string fmt "lifo"
-    | Cmd_sym.Random -> Fmt.string fmt "random"
-    | Cmd_sym.Smart -> Fmt.string fmt "smart"
+    | Symbolic_parameters.Exploration_strategy.FIFO -> Fmt.string fmt "fifo"
+    | LIFO -> Fmt.string fmt "lifo"
+    | Random -> Fmt.string fmt "random"
+    | Smart -> Fmt.string fmt "smart"
   in
   Arg.conv (of_string, pp)
 
 let model_format_conv =
   let of_string s =
     match String.lowercase_ascii s with
-    | "scfg" -> Ok Cmd_utils.Scfg
+    | "scfg" -> Ok Model.Scfg
     | "json" -> Ok Json
     | _ -> Fmt.error_msg {|Expected "json" or "scfg" but got "%s"|} s
   in
   let pp fmt = function
-    | Cmd_utils.Scfg -> Fmt.string fmt "scfg"
+    | Model.Scfg -> Fmt.string fmt "scfg"
     | Json -> Fmt.string fmt "json"
   in
   Arg.conv (of_string, pp)
@@ -140,14 +140,17 @@ let fail_mode =
   let assert_doc = "ignore traps and only report assertion violations" in
   Arg.(
     value
-    & vflag Cmd_sym.Both
+    & vflag Symbolic_parameters.Both
         [ (Trap_only, info [ "fail-on-trap-only" ] ~doc:trap_doc)
         ; (Assertion_only, info [ "fail-on-assertion-only" ] ~doc:assert_doc)
         ] )
 
 let exploration_strategy =
   let doc = {|exploration strategy to use ("fifo", "lifo" or "random")|} in
-  Arg.(value & opt exploration_conv Cmd_sym.FIFO & info [ "exploration" ] ~doc)
+  Arg.(
+    value
+    & opt exploration_conv Symbolic_parameters.Exploration_strategy.FIFO
+    & info [ "exploration" ] ~doc )
 
 let files =
   let doc = "source files" in
@@ -281,7 +284,7 @@ let symbolic_parameters default_entry_point =
   and+ invoke_with_symbols
   and+ no_ite_for_select in
   if no_ite_for_select then Interpret.unset_use_ite_for_select ();
-  { Cmd_sym.unsafe
+  { Symbolic_parameters.unsafe
   ; workers
   ; no_stop_at_failure
   ; no_value

@@ -58,6 +58,7 @@
   linked
   link_env
   log
+  model
   origin
   owi
   parse
@@ -75,9 +76,11 @@
   symbolic_choice_intf
   symbolic_choice_with_memory
   symbolic_choice_without_memory
+  symbolic_driver
   symbolic_global
   symbolic_memory_concretizing
   symbolic_path_condition
+  symbolic_parameters
   symbolic_table
   symbolic_value
   symbolic_wasm_ffi
