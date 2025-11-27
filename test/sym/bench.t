@@ -7,13 +7,13 @@
     symbol symbol_0 i32
     symbol symbol_1 i32
   }
-
+  
   owi: [ERROR] Trap: integer divide by zero
   model {
     symbol symbol_0 i32
     symbol symbol_1 i32
   }
-
+  
   owi: [INFO] Benchmarks:
               execution time
               solver time
