@@ -771,7 +771,7 @@ type err =
   | `Uninitialized_element of int
   | `Integer_overflow
   | `Integer_divide_by_zero
-  | `Invalid_conversion_to_integer
+  | `Conversion_to_integer
   | `Element_type_error
   | `Unreachable
   | `Indirect_call_type_mismatch
@@ -864,7 +864,7 @@ let rec err_to_string = function
   | <span data-count="3541">`</span>Uninitialized_element fun_i -&gt; Fmt.str "uninitialized element %i" fun_i
   | <span data-count="45">`</span>Integer_overflow -&gt; "integer overflow"
   | <span data-count="56">`</span>Integer_divide_by_zero -&gt; "integer divide by zero"
-  | <span data-count="40">`</span>Invalid_conversion_to_integer -&gt; "invalid conversion to integer"
+  | <span data-count="40">`</span>Conversion_to_integer -&gt; "invalid conversion to integer"
   | <span data-count="0">`</span>Element_type_error -&gt; "element_type_error"
   | <span data-count="227">`</span>Unreachable -&gt; "unreachable"
   | <span data-count="17">`</span>Indirect_call_type_mismatch -&gt; "indirect call type mismatch"
@@ -961,7 +961,7 @@ let err_to_exit_code = function
   | <span data-count="0">`</span>Indirect_call_type_mismatch -&gt; 84
   | <span data-count="0">`</span>Integer_divide_by_zero -&gt; 85
   | <span data-count="1">`</span>Integer_overflow -&gt; 86
-  | <span data-count="0">`</span>Invalid_conversion_to_integer -&gt; 87
+  | <span data-count="0">`</span>Conversion_to_integer -&gt; 87
   | <span data-count="0">`</span>Memory_heap_buffer_overflow -&gt; 88
   | <span data-count="0">`</span>Memory_leak_use_after_free -&gt; 89
   | <span data-count="0">`</span>Out_of_bounds_memory_access -&gt; 90

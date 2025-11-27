@@ -432,9 +432,9 @@ let pp format with_breadcrumbs no_value fmt
           ; children =
               Solver.fold_stat<span data-count="2">s</span>
                 (fun id v acc -&gt;
-                  <span data-count="26">l</span>et params =
+                  <span data-count="30">l</span>et params =
                     match v with
-                    | <span data-count="22">`</span>Int i -&gt; [ id; string_of_in<span data-count="22">t</span> i ]
+                    | <span data-count="26">`</span>Int i -&gt; [ id; string_of_in<span data-count="26">t</span> i ]
                     | <span data-count="4">`</span>Float f -&gt; [ id; string_of_floa<span data-count="4">t</span> f ]
                   in
                   { Scfg.Types.name = "stat"; params; children = [] } :: acc )

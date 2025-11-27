@@ -199,15 +199,15 @@ type t =
   ; typ : Text.ref_type
   }
 
-let clone_table { limits; data; typ } = <span data-count="5078">{</span> typ; limits; data = Array.cop<span data-count="5078">y</span> data }
+let clone_table { limits; data; typ } = <span data-count="5073">{</span> typ; limits; data = Array.cop<span data-count="5074">y</span> data }
 
-let get t i = <span data-count="3890">t</span>.data.(i)
+let get t i = <span data-count="3875">t</span>.data.(i)
 
 let set t i v = <span data-count="610">t</span>.data.(i) &lt;- v
 
-let size t = <span data-count="4047">A</span>rray.length t.data
+let size t = <span data-count="4038">A</span>rray.length t.data
 
-let typ t = <span data-count="3883">t</span>.typ
+let typ t = <span data-count="3869">t</span>.typ
 
 let max_size t = <span data-count="0">t</span>.limits.max
 
@@ -242,25 +242,25 @@ let convert (orig_table : Concrete_table.t) =
 
 type collection = (int * int, t) Hashtbl.t
 
-let init () = <span data-count="28752">H</span>ashtbl.create 16
+let init () = <span data-count="28740">H</span>ashtbl.create 16
 
 let clone collection =
-  <span data-count="28352">l</span>et collection' = init () in
-  <span data-count="28354">H</span>ashtbl.iter
+  <span data-count="28341">l</span>et collection' = init () in
+  <span data-count="28341">H</span>ashtbl.iter
     (fun loc table -&gt;
-      <span data-count="5078">l</span>et table' = clone_table table in
-      <span data-count="5078">H</span>ashtbl.add collection' loc table' )
+      <span data-count="5073">l</span>et table' = clone_table table in
+      <span data-count="5074">H</span>ashtbl.add collection' loc table' )
     collection;
-  <span data-count="28353">c</span>ollection'
+  <span data-count="28339">c</span>ollection'
 
 let get_table env_id (orig_table : Concrete_table.t) collection g_id =
-  <span data-count="4050">l</span>et loc = (env_id, g_id) in
+  <span data-count="4038">l</span>et loc = (env_id, g_id) in
   match Hashtbl.find_opt collection loc with
   | <span data-count="167">N</span>one -&gt;
     let g = convert orig_table in
     <span data-count="167">H</span>ashtbl.add collection loc g;
     <span data-count="167">g</span>
-  | <span data-count="3880">S</span>ome t -&gt; t
+  | <span data-count="3871">S</span>ome t -&gt; t
 </code></pre>
       </div>
     </div>

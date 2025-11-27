@@ -608,7 +608,7 @@ module MInt32 = struct
   let wrap_i64 x = <span data-count="925856">I</span>nt64.to_int32 x
 
   let trunc_f32_s x =
-    <span data-count="30">i</span>f Float32.ne x x then <span data-count="5">E</span>rror `Invalid_conversion_to_integer
+    <span data-count="30">i</span>f Float32.ne x x then <span data-count="5">E</span>rror `Conversion_to_integer
     else
       <span data-count="25">l</span>et xf = Float32.to_float x in
       <span data-count="25">i</span>f
@@ -619,7 +619,7 @@ module MInt32 = struct
       else <span data-count="21">O</span>k (Int32.of_floa<span data-count="21">t</span> xf)
 
   let trunc_f32_u x =
-    <span data-count="29">i</span>f Float32.ne x x then <span data-count="5">E</span>rror `Invalid_conversion_to_integer
+    <span data-count="29">i</span>f Float32.ne x x then <span data-count="5">E</span>rror `Conversion_to_integer
     else
       <span data-count="24">l</span>et xf = Float32.to_float x in
       <span data-count="24">i</span>f
@@ -630,7 +630,7 @@ module MInt32 = struct
       else <span data-count="20">O</span>k Int64.(to_int3<span data-count="20">2</span> (of_floa<span data-count="20">t</span> xf))
 
   let trunc_f64_s x =
-    <span data-count="30">i</span>f Float64.ne x x then <span data-count="5">E</span>rror `Invalid_conversion_to_integer
+    <span data-count="30">i</span>f Float64.ne x x then <span data-count="5">E</span>rror `Conversion_to_integer
     else <span data-count="25">i</span>f
       let mif = Int32.(to_floa<span data-count="25">t</span> min_int) in
       Float64.(g<span data-count="25">e</span> x (of_floa<span data-count="25">t</span> @@ -<span data-count="25">.</span>mif)<span data-count="2">)</span>
@@ -639,7 +639,7 @@ module MInt32 = struct
     else <span data-count="20">O</span>k (Int32.of_floa<span data-count="20">t</span> (Float64.to_floa<span data-count="20">t</span> x))
 
   let trunc_f64_u x =
-    <span data-count="32">i</span>f Float64.ne x x then <span data-count="5">E</span>rror `Invalid_conversion_to_integer
+    <span data-count="32">i</span>f Float64.ne x x then <span data-count="5">E</span>rror `Conversion_to_integer
     else <span data-count="27">i</span>f
       let mif = Int32.to_float Int32.min_int in
       <span data-count="27">F</span>loat64.(g<span data-count="27">e</span> x (of_floa<span data-count="27">t</span> @@ (-<span data-count="27">.</span>mif *. 2.0))<span data-count="5">)</span>
@@ -691,7 +691,7 @@ module MInt64 = struct
   let extend_i32_u x = <span data-count="3710462">I</span>nt64.logand (Int64.of_int3<span data-count="3710462">2</span> x) 0x0000_0000_ffff_ffffL
 
   let trunc_f32_s x =
-    <span data-count="29">i</span>f Float32.ne x x then <span data-count="5">E</span>rror `Invalid_conversion_to_integer
+    <span data-count="29">i</span>f Float32.ne x x then <span data-count="5">E</span>rror `Conversion_to_integer
     else <span data-count="24">i</span>f
       let mif = Int64.(to_floa<span data-count="24">t</span> min_int) in
       Float32.(ge <span data-count="24">x</span> @@ of_floa<span data-count="24">t</span> @@ ~-<span data-count="24">.</span>mif<span data-count="2">)</span> || Float32.(lt <span data-count="22">x</span> @@ of_floa<span data-count="22">t</span> mif<span data-count="2">)</span>
@@ -700,7 +700,7 @@ module MInt64 = struct
 
   let trunc_f32_u x =
     <span data-count="24">l</span>et mif = Int64.(to_floa<span data-count="24">t</span> min_int) in
-    if Float32.ne x x then <span data-count="5">E</span>rror `Invalid_conversion_to_integer
+    if Float32.ne x x then <span data-count="5">E</span>rror `Conversion_to_integer
     else <span data-count="19">i</span>f
       Float32.(ge <span data-count="19">x</span> @@ of_floa<span data-count="19">t</span> ~-<span data-count="19">.</span>(mif *. 2.0)<span data-count="2">)</span>
       || Float32.(le <span data-count="17">x</span> @@ of_floa<span data-count="17">t</span> ~-<span data-count="17">.</span>1.0<span data-count="2">)</span>
@@ -710,7 +710,7 @@ module MInt64 = struct
     else <span data-count="14">O</span>k (Int64.of_floa<span data-count="14">t</span> @@ Float32.to_floa<span data-count="14">t</span> x)
 
   let trunc_f64_s x =
-    <span data-count="34">i</span>f Float64.ne x x then <span data-count="5">E</span>rror `Invalid_conversion_to_integer
+    <span data-count="34">i</span>f Float64.ne x x then <span data-count="5">E</span>rror `Conversion_to_integer
     else <span data-count="29">i</span>f
       let mif = Int64.(to_floa<span data-count="29">t</span> min_int) in
       Float64.(ge <span data-count="29">x</span> @@ of_floa<span data-count="29">t</span> ~-<span data-count="29">.</span>mif<span data-count="2">)</span> || Float64.(lt <span data-count="27">x</span> @@ of_floa<span data-count="27">t</span> mif<span data-count="2">)</span>
@@ -719,7 +719,7 @@ module MInt64 = struct
 
   let trunc_f64_u x =
     <span data-count="31">l</span>et mif = Int64.(to_floa<span data-count="31">t</span> min_int) in
-    if Float64.ne x x then <span data-count="5">E</span>rror `Invalid_conversion_to_integer
+    if Float64.ne x x then <span data-count="5">E</span>rror `Conversion_to_integer
     else <span data-count="26">i</span>f
       Float64.(ge <span data-count="26">x</span> @@ of_floa<span data-count="26">t</span> (~-<span data-count="26">.</span>mif *. 2.0)<span data-count="2">)</span>
       || Float64.(le <span data-count="24">x</span> @@ of_floa<span data-count="24">t</span> ~-<span data-count="24">.</span>1.0<span data-count="2">)</span>
