@@ -138,8 +138,6 @@
 <a id="L114"></a><span > </span>
 <a id="L115"></a><span > </span>
 <a id="L116"></a><span > </span>
-<a id="L117"></a><span > </span>
-<a id="L118"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -260,8 +258,6 @@
 <a href="#L114">114</a>
 <a href="#L115">115</a>
 <a href="#L116">116</a>
-<a href="#L117">117</a>
-<a href="#L118">118</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -275,14 +271,12 @@ type 'a eval =
       * (int * string) list
       * int list
       * Symbol_scope.t
-      * Smtml.Statistics.t
   | EAssert of
       Smtml.Expr.t
       * Smtml.Model.t
       * (int * string) list
       * int list
       * Symbol_scope.t
-      * Smtml.Statistics.t
 
 module type S = sig
   module V : sig
@@ -351,7 +345,7 @@ module type S = sig
     -&gt; Smtml.Solver_type.t
     -&gt; 'a t
     -&gt; thread
-    -&gt; callback:('a eval * thread -&gt; unit)
+    -&gt; callback:(close:(unit -&gt; unit) -&gt; 'a eval * thread -&gt; unit)
     -&gt; callback_init:(unit -&gt; unit)
     -&gt; callback_end:(unit -&gt; unit)
     -&gt; unit Domain.t array

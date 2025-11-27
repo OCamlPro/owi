@@ -120,7 +120,7 @@ let rec read_as_seq (s : 'a t) ~finalizer : 'a Seq.t =
     <span data-count="346">N</span>il
   | <span data-count="237">S</span>ome v -&gt; Cons (v, read_as_se<span data-count="237">q</span> s ~finalizer)
 
-let push v prio s = <span data-count="237">S</span>ynchronizer.write (prio, v) s
+let push v prio s = <span data-count="238">S</span>ynchronizer.write (prio, v) s
 
 let work_while f s = <span data-count="0">S</span>ynchronizer.work_while f s
 
@@ -129,10 +129,10 @@ let close = Synchronizer.close
 let make () =
   <span data-count="400">l</span>et s = Stack.create () in
   <span data-count="400">l</span>et writter prio_v condvar =
-    <span data-count="237">S</span>tack.push (sn<span data-count="237">d</span> prio_v) s;
-    <span data-count="237">C</span>ondition.signal condvar
+    <span data-count="238">S</span>tack.push (sn<span data-count="238">d</span> prio_v) s;
+    <span data-count="238">C</span>ondition.signal condvar
   in
-  Synchronizer.init (fun () -&gt; <span data-count="1105">S</span>tack.pop_opt s) writter
+  Synchronizer.init (fun () -&gt; <span data-count="1125">S</span>tack.pop_opt s) writter
 </code></pre>
       </div>
     </div>
