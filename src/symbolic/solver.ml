@@ -8,6 +8,11 @@ type t = S : ('a solver_module * 'a) -> t [@@unboxed]
 
 let instances = Atomic.make []
 
+let rec add_solver solver =
+  let l = Atomic.get instances in
+  let success = Atomic.compare_and_set instances l (solver :: l) in
+  if not success then add_solver solver
+
 let fresh solver_ty () =
   let module Mapping = (val Smtml.Solver_dispatcher.mappings_of_solver solver_ty)
   in
@@ -15,10 +20,7 @@ let fresh solver_ty () =
   let module Batch = Smtml.Solver.Cached (Mapping) in
   let solver_inst = Batch.create ~logic:QF_BVFP () in
   let solver = S ((module Batch), solver_inst) in
-  ( if Log.is_bench_enabled () then
-      let l = Atomic.get instances in
-      let l = solver :: l in
-      Atomic.set instances l );
+  if Log.is_bench_enabled () then add_solver solver;
   solver
 
 let check (S (solver_module, s)) pc =
