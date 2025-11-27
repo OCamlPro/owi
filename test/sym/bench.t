@@ -19,6 +19,8 @@
     stat "final checks"
     stat "del clause"
     stat decisions
+    stat "cache misses"
+    stat "cache hits"
     stat "bv dynamic diseqs"
     stat "bv bit2core"
     stat "added eqs"
@@ -40,6 +42,8 @@
     stat "max memory"
     stat "final checks"
     stat "del clause"
+    stat "cache misses"
+    stat "cache hits"
     stat "bv bit2core"
     stat "added eqs"
   }
