@@ -67,7 +67,6 @@
                 (assert (i32.lt_u symbol_0 (i32 1)))
                 (check-sat)
   owi: [ERROR] Trap: unreachable
-  owi: [DEBUG] scope tokens: [symbol symbol_0]
   model {
     symbol symbol_0 i32 0
   }
