@@ -396,14 +396,11 @@ module Make (Thread : Thread_intf.S) = struct
     let pc = Thread.pc thread in
     let sliced_pc = Symbolic_path_condition.slice pc v in
     let stats = Thread.bench_stats thread in
-    let checked =
+    let reachability =
       Benchmark.handle_time_span stats.solver_time @@ fun () ->
       Solver.check solver sliced_pc
     in
-    match checked with
-    | `Sat -> return ()
-    | `Unsat -> stop
-    | `Unknown -> assert false
+    return reachability
 
   let get_model_or_stop symbol =
     let* () = yield Prio.default in
@@ -440,19 +437,35 @@ module Make (Thread : Thread_intf.S) = struct
     | Val False -> return false
     | Val (Bitv _bv) -> Fmt.failwith "unreachable (type error)"
     | _ ->
-      let true_branch =
-        let* () = add_pc v in
-        let* () = if with_breadcrumbs then add_breadcrumb 1 else return () in
-        let+ () = check_reachability v prio_true in
-        true
+      let is_other_branch_unsat = Atomic.make false in
+      let branch condition final_value prio =
+        let* () = add_pc condition in
+        let* () =
+          if with_breadcrumbs then add_breadcrumb (if final_value then 1 else 0)
+          else return ()
+        in
+        (* this is an optimisation under the assumption that the PC is always SAT (i.e. we are performing eager pruning), in such a case, when a branch is unsat, we don't have to check the reachability of the other's branch negation, because it is always going to be SAT. *)
+        if Atomic.get is_other_branch_unsat then begin
+          Log.debug (fun m ->
+            m "The SMT call for the %b branch was optimized away" final_value );
+          (* the other branch is unsat, we must be SAT and don't need to check reachability! *)
+          return final_value
+        end
+        else begin
+          (* the other branch is SAT (or we haven't computed it yet), so we have to check reachability *)
+          let* satisfiability = check_reachability condition prio in
+          begin match satisfiability with
+          | `Sat -> return final_value
+          | `Unsat ->
+            Atomic.set is_other_branch_unsat true;
+            stop
+          | `Unknown -> assert false
+          end
+        end
       in
-      let false_branch =
-        let neg_v = Symbolic_value.Bool.not v in
-        let* () = add_pc neg_v in
-        let* () = if with_breadcrumbs then add_breadcrumb 0 else return () in
-        let+ () = check_reachability neg_v prio_false in
-        false
-      in
+
+      let true_branch = branch v true prio_true in
+      let false_branch = branch (Symbolic_value.Bool.not v) false prio_false in
       if explore_first then choose true_branch false_branch
       else choose false_branch true_branch
   [@@inline]
