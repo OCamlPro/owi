@@ -125,10 +125,10 @@ let random = Random (Random.in<span data-count="701">t</span> 10000)
 let default = Default
 
 let from_annotated instr_counter distances =
-  <span data-count="16555899">l</span>et distances_to_unreachable =
+  <span data-count="16555836">l</span>et distances_to_unreachable =
     Option.bind distances (fun d -&gt; <span data-count="0">S</span>ome (List.sor<span data-count="0">t</span> compare (Array.to_lis<span data-count="0">t</span> d)))
   in
-  <span data-count="16555899">V</span>al { instr_counter; distances_to_unreachable }
+  <span data-count="16555838">V</span>al { instr_counter; distances_to_unreachable }
 
 let compare p1 p2 =
   <span data-count="0">m</span>atch (p1, p2) with

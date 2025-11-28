@@ -282,25 +282,25 @@ type 'ext t =
   ; id : int
   }
 
-let id (env : _ t) = <span data-count="2165457">e</span>nv.id
+let id (env : _ t) = <span data-count="2165447">e</span>nv.id
 
 let get_global (env : _ t) id =
-  <span data-count="2917">m</span>atch IMap.find_opt id env.globals with
+  <span data-count="3030">m</span>atch IMap.find_opt id env.globals with
   | None -&gt; assert false
-  | <span data-count="2917">S</span>ome v -&gt; Concrete_choice.return v
+  | <span data-count="3030">S</span>ome v -&gt; Concrete_choice.return v
 
 let get_memory (env : _ t) id =
-  <span data-count="4010363">m</span>atch IMap.find_opt id env.memories with
+  <span data-count="4010254">m</span>atch IMap.find_opt id env.memories with
   | None -&gt; assert false
-  | <span data-count="4010357">S</span>ome v -&gt; Concrete_choice.return v
+  | <span data-count="4010244">S</span>ome v -&gt; Concrete_choice.return v
 
 let get_table (env : _ t) id =
-  <span data-count="807927">m</span>atch IMap.find_opt id env.tables with
+  <span data-count="807921">m</span>atch IMap.find_opt id env.tables with
   | None -&gt; assert false
-  | <span data-count="807927">S</span>ome v -&gt; Concrete_choice.return v
+  | <span data-count="807920">S</span>ome v -&gt; Concrete_choice.return v
 
 let get_func (env : _ t) id =
-  <span data-count="5489914">m</span>atch IMap.find_opt id env.functions with None -&gt; assert false | <span data-count="5489912">S</span>ome v -&gt; v
+  <span data-count="5494024">m</span>atch IMap.find_opt id env.functions with None -&gt; assert false | <span data-count="5494022">S</span>ome v -&gt; v
 
 let get_data (env : _ t) id =
   <span data-count="890">m</span>atch IMap.find_opt id env.data with
@@ -311,8 +311,8 @@ let get_elem (env : _ t) id =
   <span data-count="1272">m</span>atch IMap.find_opt id env.elem with None -&gt; assert false | <span data-count="1272">S</span>ome v -&gt; v
 
 let get_extern_func env id =
-  <span data-count="111499">l</span>et f, _t = Dynarray.get env.extern_funcs id in
-  <span data-count="111498">f</span>
+  <span data-count="111503">l</span>et f, _t = Dynarray.get env.extern_funcs id in
+  <span data-count="111503">f</span>
 
 module Build = struct
   type t =
