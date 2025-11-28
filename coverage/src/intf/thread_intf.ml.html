@@ -92,6 +92,8 @@
 <a id="L68"></a><span > </span>
 <a id="L69"></a><span > </span>
 <a id="L70"></a><span > </span>
+<a id="L71"></a><span > </span>
+<a id="L72"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -166,6 +168,8 @@
 <a href="#L68">68</a>
 <a href="#L69">69</a>
 <a href="#L70">70</a>
+<a href="#L71">71</a>
+<a href="#L72">72</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -229,6 +233,8 @@ module type S = sig
   val open_scope : t -&gt; string -&gt; t
 
   val close_scope : t -&gt; t
+
+  val incr_path_count : t -&gt; unit
 
   val incr_num_symbols : t -&gt; t
 end

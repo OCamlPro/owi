@@ -191,18 +191,18 @@ let fresh solver_ty () =
   let module Mapping = Mapping.Fresh.Make () in
   let module Batch = Smtml.Solver.Cached (Mapping) in
   let solver_inst = Batch.create ~logic:QF_BVFP () in
-  <span data-count="767">l</span>et solver = S ((module Batch), solver_inst) in
+  <span data-count="764">l</span>et solver = S ((module Batch), solver_inst) in
   if Log.is_bench_enabled () then <span data-count="1">a</span>dd_solve<span data-count="1">r</span> solver;
-  <span data-count="766">s</span>olver
+  <span data-count="764">s</span>olver
 
 let check (S (solver_module, s)) pc =
-  <span data-count="27829">l</span>et module Solver = (val solver_module) in
+  <span data-count="27799">l</span>et module Solver = (val solver_module) in
   Solver.check_set s pc
 
 let model (S (solver_module, s)) ~symbol_scopes ~pc =
-  <span data-count="1190">l</span>et module Solver = (val solver_module) in
+  <span data-count="1181">l</span>et module Solver = (val solver_module) in
   let symbols = Symbol_scope.only_symbols symbol_scopes in
-  <span data-count="1190">l</span>et model =
+  <span data-count="1181">l</span>et model =
     match Solver.get_sat_model ~symbols s pc with
     | `Unknown -&gt; assert false
     | <span data-count="0">`</span>Unsat -&gt;
@@ -214,7 +214,7 @@ let model (S (solver_module, s)) ~symbol_scopes ~pc =
           symbols );
       <span data-count="0">L</span>og.err (fun m -&gt; <span data-count="0">m</span> "pc:@\n  @[&lt;v&gt;%a@]" Smtml.Expr.Set.pp pc);
       <span data-count="0">a</span>ssert false
-    | <span data-count="1190">`</span>Model model -&gt; model
+    | <span data-count="1180">`</span>Model model -&gt; model
   in
   model
 

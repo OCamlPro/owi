@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>symbolic_driver.ml &mdash; Coverage report</title>
-    <meta name="description" content="96.20% coverage in src/symbolic/symbolic_driver.ml">
+    <meta name="description" content="96.15% coverage in src/symbolic/symbolic_driver.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,12 +15,12 @@
           <span class="dirname">src/symbolic/</span>symbolic_driver.ml
         </a>
       </h1>
-      <h2>96.20%</h2>
+      <h2>96.15%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:23.20%"></span>
-      <span class="some-visited" style="top:46.40%"></span>
-      <span class="some-visited" style="bottom:44.00%"></span>
+      <span class="unvisited" style="top:25.00%"></span>
+      <span class="some-visited" style="top:50.00%"></span>
+      <span class="some-visited" style="bottom:39.66%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -130,26 +130,17 @@
 <a id="L103"></a><span class="visited"> </span>
 <a id="L104"></a><span class="visited"> </span>
 <a id="L105"></a><span class="visited"> </span>
-<a id="L106"></a><span class="visited"> </span>
+<a id="L106"></a><span > </span>
 <a id="L107"></a><span class="visited"> </span>
 <a id="L108"></a><span > </span>
 <a id="L109"></a><span > </span>
 <a id="L110"></a><span > </span>
-<a id="L111"></a><span > </span>
-<a id="L112"></a><span class="visited"> </span>
-<a id="L113"></a><span > </span>
+<a id="L111"></a><span class="visited"> </span>
+<a id="L112"></a><span > </span>
+<a id="L113"></a><span class="visited"> </span>
 <a id="L114"></a><span > </span>
-<a id="L115"></a><span > </span>
-<a id="L116"></a><span > </span>
-<a id="L117"></a><span > </span>
-<a id="L118"></a><span > </span>
-<a id="L119"></a><span > </span>
-<a id="L120"></a><span > </span>
-<a id="L121"></a><span > </span>
-<a id="L122"></a><span class="visited"> </span>
-<a id="L123"></a><span > </span>
-<a id="L124"></a><span class="visited"> </span>
-<a id="L125"></a><span class="visited"> </span>
+<a id="L115"></a><span class="visited"> </span>
+<a id="L116"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -270,15 +261,6 @@
 <a href="#L114">114</a>
 <a href="#L115">115</a>
 <a href="#L116">116</a>
-<a href="#L117">117</a>
-<a href="#L118">118</a>
-<a href="#L119">119</a>
-<a href="#L120">120</a>
-<a href="#L121">121</a>
-<a href="#L122">122</a>
-<a href="#L123">123</a>
-<a href="#L124">124</a>
-<a href="#L125">125</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -333,22 +315,22 @@ let sort_results deterministic_result_order results =
 
 let mk_callback no_stop_at_failure fail_mode res_stack path_count =
  fun ~close v -&gt;
-  <span data-count="1844">l</span>et open Symbolic_choice_intf in
+  <span data-count="1832">l</span>et open Symbolic_choice_intf in
   Atomic.incr path_count;
-  <span data-count="1844">m</span>atch (fail_mode, v) with
-  | <span data-count="1602">_</span>, (EVal (), _) -&gt; ()
+  <span data-count="1832">m</span>atch (fail_mode, v) with
+  | <span data-count="1591">_</span>, (EVal (), _) -&gt; ()
   | <span data-count="174">(</span> (<span data-count="174">S</span>ymbolic_parameters.Both | <span data-count="0">T</span>rap_only)
     , (ETrap (t, m, labels, breadcrumbs, symbol_scopes), thread) ) -&gt;
     Ws.push
       (`ETrap (t, m, labels, breadcrumbs, symbol_scopes), thread)
       Prio.default res_stack;
     <span data-count="173">i</span>f not no_stop_at_failure then <span data-count="13">c</span>lose ()
-  | <span data-count="65">(</span> (<span data-count="62">B</span>oth | <span data-count="3">A</span>ssertion_only)
+  | <span data-count="64">(</span> (<span data-count="61">B</span>oth | <span data-count="3">A</span>ssertion_only)
     , (EAssert (e, m, labels, breadcrumbs, symbol_scopes), thread) ) -&gt;
     Ws.push
       (`EAssert (e, m, labels, breadcrumbs, symbol_scopes), thread)
       Prio.default res_stack;
-    <span data-count="55">i</span>f not no_stop_at_failure then <span data-count="32">c</span>lose ()
+    <span data-count="60">i</span>f not no_stop_at_failure then <span data-count="37">c</span>lose ()
   | <span data-count="3">(</span><span data-count="0">T</span>rap_only | <span data-count="3">A</span>ssertion_only), _ -&gt; ()
 
 let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
@@ -361,13 +343,13 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
   <span data-count="400">l</span>et callback =
     mk_callback no_stop_at_failure fail_mode res_stack path_count
   in
-  <span data-count="400">l</span>et time_counter = Mtime_clock.counter () in
+  <span data-count="400">l</span>et exec_time_counter = Mtime_clock.counter () in
   <span data-count="400">l</span>et time_before = (Unix.time<span data-count="400">s</span> ()).tms_utime in
   let join_handles =
     Symbolic_choice_with_memory.run exploration_strategy ~workers solver result
       thread ~callback
       ~callback_init:(fun () -&gt; <span data-count="774">W</span>s.make_pledge res_stack)
-      ~callback_end:(fun () -&gt; <span data-count="740">W</span>s.end_pledge res_stack)
+      ~callback_end:(fun () -&gt; <span data-count="741">W</span>s.end_pledge res_stack)
   in
   <span data-count="400">l</span>et finalizer () = <span data-count="347">A</span>rray.iter Domain.join join_handles in
   let results = Ws.read_as_seq res_stack ~finalizer in
@@ -382,24 +364,15 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
   in
 
   <span data-count="400">L</span>og.bench (fun m -&gt;
-    <span data-count="1">l</span>et time_counter = Mtime_clock.count time_counter in
+    <span data-count="1">l</span>et execution_time = Mtime_clock.count exec_time_counter in
     <span data-count="1">l</span>et bench_stats = Thread_with_memory.bench_stats thread in
-    <span data-count="1">l</span>et solver_time = Atomic.get bench_stats.solver_time in
     <span data-count="1">l</span>et interpreter_time =
+      (* run_time shouldn't be none in bench mode *)
       let run_time = match run_time with None -&gt; assert false | <span data-count="1">S</span>ome t -&gt; t in
       (interpreter_time +. run_time) *. 1000.
     in
     let solver_stats = Solver.get_all_stats ~finalizer () in
-    (* run_time shouldn't be none in bench mode *)
-    <span data-count="1">m</span>
-      "Benchmarks:@\n\
-       execution time: %a@\n\
-       @[&lt;v&gt;solver time: %a@;\
-       interpreter time: %fms@;\
-       Solver stats:@;\
-       %a@]"
-      Mtime.Span.pp time_counter Mtime.Span.pp solver_time interpreter_time
-      Solver.pp_stats solver_stats );
+    <span data-count="1">B</span>enchmark.pp ~solver_stats ~bench_stats ~interpreter_time ~execution_time m );
 
   <span data-count="400">L</span>og.info (fun m -&gt; <span data-count="2">m</span> "Completed paths: %d" (Atomic.ge<span data-count="2">t</span> path_count));
 

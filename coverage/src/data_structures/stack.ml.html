@@ -588,17 +588,17 @@ module Make (V : Value_intf.T) :
 
   let empty = []
 
-  let push s v = <span data-count="47221841">v</span> :: s
+  let push s v = <span data-count="47222427">v</span> :: s
 
-  let push_bool s b = <span data-count="8286407">p</span>ush s (I32 (V.Bool.int3<span data-count="8286407">2</span> b))
+  let push_bool s b = <span data-count="8286450">p</span>ush s (I32 (V.Bool.int3<span data-count="8286451">2</span> b))
 
-  let push_const_i32 s i = <span data-count="4834530">p</span>ush s (I32 (V.const_i3<span data-count="4834532">2</span> i))
+  let push_const_i32 s i = <span data-count="4834592">p</span>ush s (I32 (V.const_i3<span data-count="4834594">2</span> i))
 
-  let push_i32 s i = <span data-count="3786035">p</span>ush s (I32 i)
+  let push_i32 s i = <span data-count="3786187">p</span>ush s (I32 i)
 
   let push_i32_of_int s i = <span data-count="7">p</span>ush_const_i32 s (Int32.of_in<span data-count="7">t</span> i)
 
-  let push_const_i64 s i = <span data-count="5462656">p</span>ush s (I64 (V.const_i6<span data-count="5462656">4</span> i))
+  let push_const_i64 s i = <span data-count="5462653">p</span>ush s (I64 (V.const_i6<span data-count="5462652">4</span> i))
 
   let push_i64 s i = <span data-count="5069930">p</span>ush s (I64 i)
 
@@ -621,22 +621,22 @@ module Make (V : Value_intf.T) :
   let pp fmt (s : t) =
     <span data-count="287">F</span>mt.list ~sep:(fun fmt () -&gt; <span data-count="118">F</span>mt.string fmt " ; ") V.pp fmt s
 
-  let pop = function <span data-count="0">[</span>] -&gt; raise Empty | <span data-count="40760939">h</span>d :: tl -&gt; (hd, tl)
+  let pop = function <span data-count="0">[</span>] -&gt; raise Empty | <span data-count="40761505">h</span>d :: tl -&gt; (hd, tl)
 
-  let drop = function <span data-count="0">[</span>] -&gt; raise Empty | <span data-count="6527">_</span>hd :: tl -&gt; tl
+  let drop = function <span data-count="0">[</span>] -&gt; raise Empty | <span data-count="6522">_</span>hd :: tl -&gt; tl
 
   let pop_i32 s =
-    <span data-count="4395783">l</span>et hd, tl = pop s in
-    <span data-count="4395779">m</span>atch hd with <span data-count="4395788">I</span>32 n -&gt; (n, tl) | _ -&gt; assert false
+    <span data-count="4395987">l</span>et hd, tl = pop s in
+    <span data-count="4395977">m</span>atch hd with <span data-count="4395965">I</span>32 n -&gt; (n, tl) | _ -&gt; assert false
 
   let pop2_i32 s =
-    <span data-count="5138868">l</span>et n2, s = pop s in
-    <span data-count="5138868">l</span>et n1, tl = pop s in
-    <span data-count="5138865">m</span>atch (n1, n2) with <span data-count="5138864">I</span>32 n1, I32 n2 -&gt; ((n1, n2), tl) | _ -&gt; assert false
+    <span data-count="5138959">l</span>et n2, s = pop s in
+    <span data-count="5138956">l</span>et n1, tl = pop s in
+    <span data-count="5138956">m</span>atch (n1, n2) with <span data-count="5138959">I</span>32 n1, I32 n2 -&gt; ((n1, n2), tl) | _ -&gt; assert false
 
   let pop_i64 s =
-    <span data-count="5352338">l</span>et hd, tl = pop s in
-    <span data-count="5352337">m</span>atch hd with <span data-count="5352336">I</span>64 n -&gt; (n, tl) | _ -&gt; assert false
+    <span data-count="5352334">l</span>et hd, tl = pop s in
+    <span data-count="5352333">m</span>atch hd with <span data-count="5352331">I</span>64 n -&gt; (n, tl) | _ -&gt; assert false
 
   let pop2_i64 s =
     <span data-count="5113538">l</span>et n2, s = pop s in
@@ -679,17 +679,17 @@ module Make (V : Value_intf.T) :
     <span data-count="118">m</span>atch hd with <span data-count="118">R</span>ef hd -&gt; (hd, tl) | _ -&gt; assert false
 
   let pop_bool s =
-    <span data-count="8299543">l</span>et hd, tl = pop s in
-    <span data-count="8299543">m</span>atch hd with <span data-count="8299543">I</span>32 n -&gt; (V.I32.to_boo<span data-count="8299541">l</span> n, tl) | _ -&gt; assert false
+    <span data-count="8299621">l</span>et hd, tl = pop s in
+    <span data-count="8299621">m</span>atch hd with <span data-count="8299621">I</span>32 n -&gt; (V.I32.to_boo<span data-count="8299621">l</span> n, tl) | _ -&gt; assert false
 
   let pop_n s n =
-    <span data-count="6206195">(</span>List.filter<span data-count="6206193">i</span> (fun i _hd -&gt; <span data-count="6640248">i</span> &lt; n) s, List.filter<span data-count="6206193">i</span> (fun i _hd -&gt; <span data-count="6640250">i</span> &gt;= n) s)
+    <span data-count="6179584">(</span>List.filter<span data-count="6179584">i</span> (fun i _hd -&gt; <span data-count="6640273">i</span> &lt; n) s, List.filter<span data-count="6179583">i</span> (fun i _hd -&gt; <span data-count="6640276">i</span> &gt;= n) s)
 
-  let keep s n = <span data-count="2143823">L</span>ist.filteri (fun i _hd -&gt; <span data-count="273704">i</span> &lt; n) s
+  let keep s n = <span data-count="2143853">L</span>ist.filteri (fun i _hd -&gt; <span data-count="273713">i</span> &lt; n) s
 
   let rec drop_n s n =
-    <span data-count="8517785">i</span>f n = 0 then <span data-count="7971709">s</span>
-    else <span data-count="546075">m</span>atch s with [] -&gt; assert false | <span data-count="546075">_</span> :: tl -&gt; drop_n tl (n - 1)
+    <span data-count="8517822">i</span>f n = 0 then <span data-count="7971797">s</span>
+    else <span data-count="546025">m</span>atch s with [] -&gt; assert false | <span data-count="546025">_</span> :: tl -&gt; drop_n tl (n - 1)
 end
 </code></pre>
       </div>

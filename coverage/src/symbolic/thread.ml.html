@@ -71,11 +71,11 @@
 <a id="L47"></a><span > </span>
 <a id="L48"></a><span > </span>
 <a id="L49"></a><span class="visited"> </span>
-<a id="L50"></a><span > </span>
+<a id="L50"></a><span class="visited"> </span>
 <a id="L51"></a><span > </span>
 <a id="L52"></a><span > </span>
 <a id="L53"></a><span > </span>
-<a id="L54"></a><span class="visited"> </span>
+<a id="L54"></a><span > </span>
 <a id="L55"></a><span > </span>
 <a id="L56"></a><span class="visited"> </span>
 <a id="L57"></a><span > </span>
@@ -93,35 +93,35 @@
 <a id="L69"></a><span > </span>
 <a id="L70"></a><span class="visited"> </span>
 <a id="L71"></a><span > </span>
-<a id="L72"></a><span > </span>
-<a id="L73"></a><span class="visited"> </span>
-<a id="L74"></a><span class="visited"> </span>
-<a id="L75"></a><span > </span>
-<a id="L76"></a><span > </span>
-<a id="L77"></a><span class="visited"> </span>
-<a id="L78"></a><span class="visited"> </span>
-<a id="L79"></a><span > </span>
-<a id="L80"></a><span > </span>
-<a id="L81"></a><span class="visited"> </span>
+<a id="L72"></a><span class="visited"> </span>
+<a id="L73"></a><span > </span>
+<a id="L74"></a><span > </span>
+<a id="L75"></a><span class="visited"> </span>
+<a id="L76"></a><span class="visited"> </span>
+<a id="L77"></a><span > </span>
+<a id="L78"></a><span > </span>
+<a id="L79"></a><span class="visited"> </span>
+<a id="L80"></a><span class="visited"> </span>
+<a id="L81"></a><span > </span>
 <a id="L82"></a><span > </span>
-<a id="L83"></a><span > </span>
+<a id="L83"></a><span class="visited"> </span>
 <a id="L84"></a><span > </span>
-<a id="L85"></a><span class="visited"> </span>
-<a id="L86"></a><span class="visited"> </span>
-<a id="L87"></a><span > </span>
+<a id="L85"></a><span > </span>
+<a id="L86"></a><span > </span>
+<a id="L87"></a><span class="visited"> </span>
 <a id="L88"></a><span class="visited"> </span>
 <a id="L89"></a><span > </span>
-<a id="L90"></a><span > </span>
-<a id="L91"></a><span class="visited"> </span>
-<a id="L92"></a><span class="visited"> </span>
-<a id="L93"></a><span > </span>
-<a id="L94"></a><span > </span>
-<a id="L95"></a><span class="visited"> </span>
-<a id="L96"></a><span class="visited"> </span>
-<a id="L97"></a><span > </span>
-<a id="L98"></a><span > </span>
+<a id="L90"></a><span class="visited"> </span>
+<a id="L91"></a><span > </span>
+<a id="L92"></a><span > </span>
+<a id="L93"></a><span class="visited"> </span>
+<a id="L94"></a><span class="visited"> </span>
+<a id="L95"></a><span > </span>
+<a id="L96"></a><span > </span>
+<a id="L97"></a><span class="visited"> </span>
+<a id="L98"></a><span class="visited"> </span>
 <a id="L99"></a><span > </span>
-<a id="L100"></a><span > </span>
+<a id="L100"></a><span class="visited"> </span>
 <a id="L101"></a><span > </span>
 <a id="L102"></a><span > </span>
 <a id="L103"></a><span > </span>
@@ -130,14 +130,14 @@
 <a id="L106"></a><span > </span>
 <a id="L107"></a><span > </span>
 <a id="L108"></a><span > </span>
-<a id="L109"></a><span class="visited"> </span>
-<a id="L110"></a><span class="visited"> </span>
-<a id="L111"></a><span class="visited"> </span>
-<a id="L112"></a><span class="visited"> </span>
-<a id="L113"></a><span > </span>
-<a id="L114"></a><span > </span>
-<a id="L115"></a><span > </span>
-<a id="L116"></a><span > </span>
+<a id="L109"></a><span > </span>
+<a id="L110"></a><span > </span>
+<a id="L111"></a><span > </span>
+<a id="L112"></a><span > </span>
+<a id="L113"></a><span class="visited"> </span>
+<a id="L114"></a><span class="visited"> </span>
+<a id="L115"></a><span class="visited"> </span>
+<a id="L116"></a><span class="visited"> </span>
 <a id="L117"></a><span > </span>
 <a id="L118"></a><span > </span>
 <a id="L119"></a><span > </span>
@@ -147,6 +147,7 @@
 <a id="L123"></a><span > </span>
 <a id="L124"></a><span > </span>
 <a id="L125"></a><span > </span>
+<a id="L126"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -276,6 +277,7 @@
 <a href="#L123">123</a>
 <a href="#L124">124</a>
 <a href="#L125">125</a>
+<a href="#L126">126</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -304,7 +306,7 @@ struct
 
   let create num_symbols symbol_scopes pc memories tables globals breadcrumbs
     labels bench_stats =
-    <span data-count="2169119">{</span> num_symbols
+    <span data-count="2169427">{</span> num_symbols
     ; symbol_scopes
     ; pc
     ; memories
@@ -325,44 +327,46 @@ struct
     <span data-count="400">l</span>et breadcrumbs = [] in
     let labels = [] in
     let bench_stats : Benchmark.stats =
-      { solver_time = Atomic.mak<span data-count="400">e</span> Mtime.Span.min_span }
+      { solver_time = Atomic.mak<span data-count="400">e</span> Mtime.Span.min_span
+      ; path_count = Atomic.mak<span data-count="400">e</span> 1
+      }
     in
     create num_symbols symbol_scopes pc memories tables globals breadcrumbs
       labels bench_stats
 
-  let num_symbols t = <span data-count="2170281">t</span>.num_symbols
+  let num_symbols t = <span data-count="2170580">t</span>.num_symbols
 
-  let symbol_scopes t = <span data-count="2168959">t</span>.symbol_scopes
+  let symbol_scopes t = <span data-count="2169267">t</span>.symbol_scopes
 
-  let pc t = <span data-count="2196806">t</span>.pc
+  let pc t = <span data-count="2197098">t</span>.pc
 
-  let memories t = <span data-count="4325224">t</span>.memories
+  let memories t = <span data-count="4325840">t</span>.memories
 
-  let tables t = <span data-count="2172752">t</span>.tables
+  let tables t = <span data-count="2173095">t</span>.tables
 
-  let globals t = <span data-count="2170962">t</span>.globals
+  let globals t = <span data-count="2171266">t</span>.globals
 
-  let breadcrumbs t = <span data-count="2168986">t</span>.breadcrumbs
+  let breadcrumbs t = <span data-count="2169306">t</span>.breadcrumbs
 
-  let labels t = <span data-count="2168948">t</span>.labels
+  let labels t = <span data-count="2169258">t</span>.labels
 
-  let bench_stats t = <span data-count="2196559">t</span>.bench_stats
+  let bench_stats t = <span data-count="2211164">t</span>.bench_stats
 
   let add_symbol t s =
     <span data-count="1392">l</span>et open Symbol_scope in
     { t with symbol_scopes = symbo<span data-count="1392">l</span> s t.symbol_scopes }
 
   let add_pc t c =
-    <span data-count="28822">l</span>et pc = Symbolic_path_condition.add t.pc c in
-    <span data-count="28822">{</span> t with pc }
+    <span data-count="28795">l</span>et pc = Symbolic_path_condition.add t.pc c in
+    <span data-count="28795">{</span> t with pc }
 
   let add_breadcrumb t crumb =
-    <span data-count="26016">l</span>et breadcrumbs = crumb :: t.breadcrumbs in
+    <span data-count="26004">l</span>et breadcrumbs = crumb :: t.breadcrumbs in
     { t with breadcrumbs }
 
   let incr_num_symbols t =
-    <span data-count="1544">l</span>et num_symbols = succ t.num_symbols in
-    <span data-count="1544">{</span> t with num_symbols }
+    <span data-count="1542">l</span>et num_symbols = succ t.num_symbols in
+    <span data-count="1542">{</span> t with num_symbols }
 
   let add_label t label = <span data-count="2">{</span> t with labels = label :: t.labels }
 
@@ -373,6 +377,8 @@ struct
   let close_scope t =
     <span data-count="10">l</span>et open Symbol_scope in
     { t with symbol_scopes = close_scop<span data-count="10">e</span> t.symbol_scopes }
+
+  let incr_path_count t = <span data-count="14323">A</span>tomic.incr (bench_stat<span data-count="14323">s</span> t).path_count
 
   let clone
     { num_symbols
@@ -385,13 +391,10 @@ struct
     ; labels
     ; bench_stats
     } =
-    <span data-count="28672">l</span>et memories = Memory.clone memories in
-    <span data-count="28672">l</span>et tables = Symbolic_table.clone tables in
-    <span data-count="28672">l</span>et globals = Symbolic_global.clone globals in
-    <span data-count="28672">l</span>et bench_stats : Benchmark.stats =
-      { solver_time = bench_stats.solver_time }
-    in
-    { num_symbols
+    <span data-count="28646">l</span>et memories = Memory.clone memories in
+    <span data-count="28645">l</span>et tables = Symbolic_table.clone tables in
+    <span data-count="28645">l</span>et globals = Symbolic_global.clone globals in
+    <span data-count="28646">{</span> num_symbols
     ; symbol_scopes
     ; pc
     ; memories
