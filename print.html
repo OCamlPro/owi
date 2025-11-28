@@ -211,6 +211,12 @@ It offers a practical path from fuzzing to formal proofs.</p>
 <h3 id="want-to-join-us"><a class="header" href="#want-to-join-us">🧑‍🎓Want to join us?</a></h3>
 <p>We are looking for interns, have a look at the <a href="https://github.com/OCamlPro/owi/labels/internship">internship labeled issues</a>.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="installation"><a class="header" href="#installation">Installation</a></h1>
+<h2 id="install-from-your-package-manager"><a class="header" href="#install-from-your-package-manager">Install from your package manager</a></h2>
+<p>Check on <a href="https://repology.org/project/ocaml%3Aowi/versions">repology</a> if Owi is available in your package manager.</p>
+<h3 id="nixos"><a class="header" href="#nixos">NixOS</a></h3>
+<pre><code class="language-shell-session">$ nix-shell -p owi
+</code></pre>
+<h2 id="install-from-sources"><a class="header" href="#install-from-sources">Install from sources</a></h2>
 <p><code>owi</code> can be installed with <a href="https://opam.ocaml.org">opam</a>:</p>
 <pre><code class="language-shell-session">$ opam install owi
 # if you intend to use symbolic execution you must install one solver
@@ -229,38 +235,8 @@ $ dune build -p owi @install
 $ dune install
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="supported-wasm-proposals"><a class="header" href="#supported-wasm-proposals">Supported Wasm proposals</a></h1>
-<p>The 🐌 status means the proposal is not applicable to Owi.</p>
-<h3 id="adopted-proposals"><a class="header" href="#adopted-proposals">Adopted proposals</a></h3>
-<div class="table-wrapper"><table><thead><tr><th>Proposal</th><th>Status</th></tr></thead><tbody>
-<tr><td><a href="https://github.com/WebAssembly/mutable-global">Import/Export of Mutable Globals</a></td><td>✔️</td></tr>
-<tr><td><a href="https://github.com/WebAssembly/nontrapping-float-to-int-conversions">Non-trapping float-to-int conversions</a></td><td>✔️</td></tr>
-<tr><td><a href="https://github.com/WebAssembly/sign-extension-ops">Sign-extension operators</a></td><td>✔️</td></tr>
-<tr><td><a href="https://github.com/WebAssembly/multi-value">Multi-value</a></td><td>✔️</td></tr>
-<tr><td><a href="https://github.com/WebAssembly/reference-types">Reference Types</a></td><td>✔️</td></tr>
-<tr><td><a href="https://github.com/WebAssembly/bulk-memory-operations">Bulk memory operations</a></td><td>✔️</td></tr>
-<tr><td><a href="https://github.com/webassembly/simd">Fixed-width SIMD</a></td><td>❌</td></tr>
-<tr><td><a href="https://github.com/WebAssembly/JS-BigInt-integration">JavaScript BigInt to WebAssembly i64 integration</a></td><td>🐌</td></tr>
-</tbody></table>
-</div>
-<h3 id="current-proposals"><a class="header" href="#current-proposals">Current proposals</a></h3>
-<p>We only list proposals that reached phase 3 at least.</p>
-<div class="table-wrapper"><table><thead><tr><th>Proposal</th><th>Status</th></tr></thead><tbody>
-<tr><td><a href="https://github.com/WebAssembly/tail-call">Tail call</a></td><td>✔️</td></tr>
-<tr><td><a href="https://github.com/WebAssembly/function-references">Typed Function References</a></td><td>✔️</td></tr>
-<tr><td><a href="https://github.com/WebAssembly/extended-const">Extended Constant Expressions</a></td><td>✔️</td></tr>
-<tr><td><a href="https://github.com/WebAssembly/gc">Garbage collection</a></td><td>Ongoing</td></tr>
-<tr><td><a href="https://github.com/WebAssembly/annotations">Custom Annotation Syntax in the Text Format</a></td><td>Ongoing</td></tr>
-<tr><td><a href="https://github.com/WebAssembly/multi-memory">Multiple memories</a></td><td>❌</td></tr>
-<tr><td><a href="https://github.com/WebAssembly/memory64">Memory64</a></td><td>❌</td></tr>
-<tr><td><a href="https://github.com/WebAssembly/exception-handling">Exception handling</a></td><td>❌</td></tr>
-<tr><td><a href="https://github.com/WebAssembly/branch-hinting">Branch Hinting</a></td><td>❌</td></tr>
-<tr><td><a href="https://github.com/WebAssembly/relaxed-simd">Relaxed SIMD</a></td><td>❌</td></tr>
-<tr><td><a href="https://github.com/webassembly/threads">Threads</a></td><td>❌</td></tr>
-<tr><td><a href="https://github.com/WebAssembly/content-security-policy">Web Content Security Policy</a></td><td>🐌</td></tr>
-<tr><td><a href="https://github.com/WebAssembly/js-promise-integration">JS Promise Integration</a></td><td>🐌</td></tr>
-<tr><td><a href="https://github.com/WebAssembly/js-types">Type Reflection for WebAssembly JavaScript API</a></td><td>🐌</td></tr>
-</tbody></table>
-</div><div style="break-before: page; page-break-before: always;"></div><h1 id="comparison-with-other-tools"><a class="header" href="#comparison-with-other-tools">Comparison with other tools</a></h1>
+<p>See the <a href="https://webassembly.org/features">WebAssembly features</a> page.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="comparison-with-other-tools"><a class="header" href="#comparison-with-other-tools">Comparison with other tools</a></h1>
 <div class="table-wrapper"><table><thead><tr><th>Tool</th><th>Supported languages</th><th>Automatic</th><th>Falses positives</th><th>Falses negatives</th><th>Bug-finding</th><th>Proof of Program</th><th>Code Coverage</th><th>Licence</th><th>Category</th></tr></thead><tbody>
 <tr><td>Owi</td><td>C, C++, Rust, TinyGo, Wasm, Zig</td><td>Yes</td><td>No</td><td>Only when non terminating</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Free</td><td>Symbolic Execution</td></tr>
 <tr><td>KLEE</td><td>C</td><td>Yes</td><td>No</td><td>Yes</td><td>Yes</td><td>No</td><td>Yes</td><td>Free</td><td>Symbolic Execution</td></tr>
