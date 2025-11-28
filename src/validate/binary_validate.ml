@@ -376,14 +376,14 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
   | I64_extend_i32 _ ->
     let* stack = Stack.pop [ i32 ] stack in
     Stack.push [ i64 ] stack
-  | Memory_grow ->
+  | Memory_grow _ ->
     let* () = check_mem env.modul 0 in
     let* stack = Stack.pop [ i32 ] stack in
     Stack.push [ i32 ] stack
-  | Memory_size ->
+  | Memory_size _ ->
     let* () = check_mem env.modul 0 in
     Stack.push [ i32 ] stack
-  | Memory_copy | Memory_fill ->
+  | Memory_copy _ | Memory_fill _ ->
     let* () = check_mem env.modul 0 in
     Stack.pop [ i32; i32; i32 ] stack
   | Memory_init id ->

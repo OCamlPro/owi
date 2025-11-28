@@ -423,10 +423,10 @@ type instr =
   | I_store8 of nn * memarg
   | I_store16 of nn * memarg
   | I64_store32 of memarg
-  | Memory_size
-  | Memory_grow
-  | Memory_fill
-  | Memory_copy
+  | Memory_size of indice
+  | Memory_grow of indice
+  | Memory_fill of indice
+  | Memory_copy of indice * indice
   | Memory_init of indice
   | Data_drop of indice
   (* Control instructions *)
@@ -519,10 +519,11 @@ let rec pp_instr ~short fmt = function
   | I_store8 (n, memarg) -> pf fmt "i%a.store8 %a" pp_nn n pp_memarg memarg
   | I_store16 (n, memarg) -> pf fmt "i%a.store16 %a" pp_nn n pp_memarg memarg
   | I64_store32 memarg -> pf fmt "i64.store32 %a" pp_memarg memarg
-  | Memory_size -> pf fmt "memory.size"
-  | Memory_grow -> pf fmt "memory.grow"
-  | Memory_fill -> pf fmt "memory.fill"
-  | Memory_copy -> pf fmt "memory.copy"
+  | Memory_size id -> pf fmt "memory.size %a" pp_indice id
+  | Memory_grow id -> pf fmt "memory.grow %a" pp_indice id
+  | Memory_fill id -> pf fmt "memory.fill %a" pp_indice id
+  | Memory_copy (id1, id2) ->
+    pf fmt "memory.copy %a %a" pp_indice id1 pp_indice id2
   | Memory_init id -> pf fmt "memory.init %a" pp_indice id
   | Data_drop id -> pf fmt "data.drop %a" pp_indice id
   | Nop -> pf fmt "nop"

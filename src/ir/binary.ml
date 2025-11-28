@@ -99,10 +99,10 @@ type instr =
   | I_store8 of Text.nn * Text.memarg
   | I_store16 of Text.nn * Text.memarg
   | I64_store32 of Text.memarg
-  | Memory_size
-  | Memory_grow
-  | Memory_fill
-  | Memory_copy
+  | Memory_size of indice
+  | Memory_grow of indice
+  | Memory_fill of indice
+  | Memory_copy of indice * indice
   | Memory_init of indice
   | Data_drop of indice
   (* Control instructions *)
@@ -205,10 +205,11 @@ let rec pp_instr ~short fmt = function
   | I_store16 (n, memarg) ->
     pf fmt "i%a.store16 %a" Text.pp_nn n Text.pp_memarg memarg
   | I64_store32 memarg -> pf fmt "i64.store32 %a" Text.pp_memarg memarg
-  | Memory_size -> pf fmt "memory.size"
-  | Memory_grow -> pf fmt "memory.grow"
-  | Memory_fill -> pf fmt "memory.fill"
-  | Memory_copy -> pf fmt "memory.copy"
+  | Memory_size id -> pf fmt "memory.size %a" pp_indice id
+  | Memory_grow id -> pf fmt "memory.grow %a" pp_indice id
+  | Memory_fill id -> pf fmt "memory.fill %a" pp_indice id
+  | Memory_copy (id1, id2) ->
+    pf fmt "memory.copy %a %a" pp_indice id1 pp_indice id2
   | Memory_init id -> pf fmt "memory.init %a" pp_indice id
   | Data_drop id -> pf fmt "data.drop %a" pp_indice id
   | Nop -> pf fmt "nop"
@@ -298,8 +299,9 @@ and iter_instr f instr =
       | I64_load32 (_, _)
       | I_store8 (_, _)
       | I_store16 (_, _)
-      | I64_store32 _ | Memory_size | Memory_grow | Memory_fill | Memory_copy
-      | Memory_init _ | Data_drop _ | Nop | Unreachable | Br _ | Br_if _
+      | I64_store32 _ | Memory_size _ | Memory_grow _ | Memory_fill _
+      | Memory_copy _ | Memory_init _ | Data_drop _ | Nop | Unreachable | Br _
+      | Br_if _
       | Br_table (_, _)
       | Return | Return_call _
       | Return_call_indirect (_, _)

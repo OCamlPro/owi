@@ -54,6 +54,8 @@
   24
   24
   13
+  owi: [ERROR] expected multiple memories but got (unknown module )
+  [54]
   $ owi script --no-exhaustion reference/inline-module.wast
   $ owi script --no-exhaustion reference/int_exprs.wast
   $ owi script --no-exhaustion reference/int_literals.wast
@@ -73,6 +75,8 @@
   $ owi script --no-exhaustion reference/memory_size.wast
   $ owi script --no-exhaustion reference/memory_trap.wast
   $ owi script --no-exhaustion reference/memory.wast
+  owi: [ERROR] expected multiple memories but there was no error
+  [7]
   $ owi script --no-exhaustion reference/names.wast
   42
   123

@@ -748,7 +748,7 @@ print script:
       (memory 0)
       (func $type-unary-operand-empty-in-memory.grow
         i32.eqz
-        memory.grow
+        memory.grow 0
         drop
       )
     )
@@ -1180,7 +1180,7 @@ print script:
       (memory 0)
       (func $type-binary-1st-operand-empty-in-memory.grow
         i32.add
-        memory.grow
+        memory.grow 0
         drop
       )
     )
@@ -1192,7 +1192,7 @@ print script:
       (func $type-binary-2nd-operand-empty-in-memory.grow
         i32.const 0
         i32.add
-        memory.grow
+        memory.grow 0
         drop
       )
     )

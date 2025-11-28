@@ -153,10 +153,11 @@ let rec convert_instr : Binary.instr -> Text.instr = function
   | F_load (nn, memarg) -> F_load (nn, memarg)
   | F_store (nn, memarg) -> F_store (nn, memarg)
   | I_store (nn, memarg) -> I_store (nn, memarg)
-  | Memory_copy -> Memory_copy
-  | Memory_size -> Memory_size
-  | Memory_fill -> Memory_fill
-  | Memory_grow -> Memory_grow
+  | Memory_copy (id1, id2) ->
+    Memory_copy (convert_indice id1, convert_indice id2)
+  | Memory_size id -> Memory_size (convert_indice id)
+  | Memory_fill id -> Memory_fill (convert_indice id)
+  | Memory_grow id -> Memory_grow (convert_indice id)
   | V_ibinop (shape, op) -> V_ibinop (shape, op)
   | Ref_null t -> Ref_null t
 

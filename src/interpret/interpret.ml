@@ -972,11 +972,11 @@ struct
       if b then State.branch state i else Choice.return (State.Continue state)
     | Loop (_id, bt, e) -> exec_block state ~is_loop:true bt e
     | Block (_id, bt, e) -> exec_block state ~is_loop:false bt e
-    | Memory_size ->
+    | Memory_size _ ->
       let* mem = Env.get_memory env mem_0 in
       let len = Memory.size_in_pages mem in
       st @@ Stack.push_i32 stack len
-    | Memory_grow -> begin
+    | Memory_grow _ -> begin
       let* mem = Env.get_memory env mem_0 in
       let old_size = I64.of_int32 @@ Memory.size mem in
       let max_size = Memory.get_limit_max mem in
@@ -998,7 +998,7 @@ struct
         st @@ Stack.push_i32 stack res
       end
     end
-    | Memory_fill ->
+    | Memory_fill _ ->
       let len, stack = Stack.pop_i32 stack in
       let c, stack = Stack.pop_i32 stack in
       let pos, stack = Stack.pop_i32 stack in
@@ -1019,7 +1019,7 @@ struct
       let* mem = Env.get_memory env mem_0 in
       let* () = Memory.fill mem ~pos ~len c in
       st stack
-    | Memory_copy ->
+    | Memory_copy _ ->
       let len, stack = Stack.pop_i32 stack in
       let src, stack = Stack.pop_i32 stack in
       let dst, stack = Stack.pop_i32 stack in
