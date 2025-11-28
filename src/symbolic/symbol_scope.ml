@@ -94,7 +94,6 @@ let to_scfg ~no_value model scope_tokens =
   in
 
   let rev_scope_tokens = List.rev scope_tokens in
-  Log.debug (fun m -> m "scope tokens: [%a]" pp rev_scope_tokens);
   let children = process_tokens rev_scope_tokens [] in
   [ { name = "model"; params = []; children } ]
 
