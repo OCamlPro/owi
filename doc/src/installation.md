@@ -1,5 +1,17 @@
 # Installation
 
+## Install from your package manager
+
+Check on [repology] if Owi is available in your package manager.
+
+### NixOS
+
+```shell-session
+$ nix-shell -p owi
+```
+
+## Install from sources
+
 `owi` can be installed with [opam]:
 
 ```shell-session
@@ -28,3 +40,4 @@ $ dune install
 
 [how to install opam]: https://opam.ocaml.org/doc/Install.html
 [opam]: https://opam.ocaml.org
+[repology]: https://repology.org/project/ocaml%3Aowi/versions
