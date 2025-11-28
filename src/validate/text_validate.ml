@@ -7,8 +7,7 @@ open Syntax
 
 type env =
   { start : bool
-  ; memory : bool
-  ; imported_memory : bool
+  ; declared_memory : bool
   ; funcs : bool
   ; tables : bool
   ; globals : bool
@@ -16,8 +15,7 @@ type env =
 
 let empty_env () =
   { start = false
-  ; memory = false
-  ; imported_memory = false
+  ; declared_memory = false
   ; funcs = false
   ; tables = false
   ; globals = false
@@ -63,15 +61,14 @@ let modul m =
           else Ok { env with start = true }
         | Import i ->
           if env.funcs then Error `Import_after_function
-          else if env.memory then Error `Import_after_memory
+          else if env.declared_memory then Error `Import_after_memory
           else if env.tables then Error `Import_after_table
           else if env.globals then Error `Import_after_global
           else begin
             match i.typ with
             | Mem (id, _) ->
               let* () = add_memory id in
-              if env.imported_memory then Error `Multiple_memories
-              else Ok { env with imported_memory = true }
+              Ok env
             | Func _ -> Ok env
             | Global (id, _) ->
               let+ () = add_global id in
@@ -84,8 +81,7 @@ let modul m =
         | Elem _e -> Ok env
         | Mem (id, _) ->
           let* () = add_memory id in
-          if env.memory || env.imported_memory then Error `Multiple_memories
-          else Ok { env with memory = true }
+          Ok { env with declared_memory = true }
         | Typedef _t -> Ok env
         | Global { id; _ } ->
           let+ () = add_global id in
