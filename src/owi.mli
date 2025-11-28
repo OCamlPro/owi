@@ -323,10 +323,10 @@ module Text : sig
     | I_store8 of nn * memarg
     | I_store16 of nn * memarg
     | I64_store32 of memarg
-    | Memory_size
-    | Memory_grow
-    | Memory_fill
-    | Memory_copy
+    | Memory_size of indice
+    | Memory_grow of indice
+    | Memory_fill of indice
+    | Memory_copy of indice * indice
     | Memory_init of indice
     | Data_drop of indice
     (* Control instructions *)
@@ -564,10 +564,10 @@ module Binary : sig
     | I_store8 of Text.nn * Text.memarg
     | I_store16 of Text.nn * Text.memarg
     | I64_store32 of Text.memarg
-    | Memory_size
-    | Memory_grow
-    | Memory_fill
-    | Memory_copy
+    | Memory_size of indice
+    | Memory_grow of indice
+    | Memory_fill of indice
+    | Memory_copy of indice * indice
     | Memory_init of indice
     | Data_drop of indice
     (* Control instructions *)

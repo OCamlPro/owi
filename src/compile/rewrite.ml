@@ -220,10 +220,19 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
     | F_load (nn, memarg) -> Ok (Binary.F_load (nn, memarg))
     | F_store (nn, memarg) -> Ok (Binary.F_store (nn, memarg))
     | I_store (nn, memarg) -> Ok (Binary.I_store (nn, memarg))
-    | Memory_copy -> Ok Binary.Memory_copy
-    | Memory_size -> Ok Binary.Memory_size
-    | Memory_fill -> Ok Binary.Memory_fill
-    | Memory_grow -> Ok Binary.Memory_grow
+    | Memory_copy (id1, id2) ->
+      let* id1 = Assigned.find_memory assigned id1 in
+      let* id2 = Assigned.find_memory assigned id2 in
+      Ok (Binary.Memory_copy (id1, id2))
+    | Memory_size id ->
+      let* id = Assigned.find_memory assigned id in
+      Ok (Binary.Memory_size id)
+    | Memory_fill id ->
+      let* id = Assigned.find_memory assigned id in
+      Ok (Binary.Memory_fill id)
+    | Memory_grow id ->
+      let* id = Assigned.find_memory assigned id in
+      Ok (Binary.Memory_grow id)
     | V_ibinop (shape, op) -> Ok (Binary.V_ibinop (shape, op))
     | Ref_null t -> Ok (Binary.Ref_null t)
   and expr (e : Text.expr Annotated.t) (loop_count, block_ids) :

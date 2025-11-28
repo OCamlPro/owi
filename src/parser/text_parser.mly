@@ -97,6 +97,10 @@ let t16_of_v128_arg_list z = function
      z i, z j, z k, z l, z m, z n, z o, z p
   | _ -> wrong_number_of_lane_literals ()
 
+let get_id_def0 = function
+  | None -> Raw 0
+  | Some v -> v
+
 %}
 
 %start <Wast.script> script
@@ -473,10 +477,12 @@ let plain_instr :=
   | I32_STORE16; memarg = memarg; { I_store16 (S32, memarg) }
   | I64_STORE16; memarg = memarg; { I_store16 (S64, memarg) }
   | I64_STORE32; ~ = memarg; <I64_store32>
-  | MEMORY_SIZE; { Memory_size }
-  | MEMORY_GROW; { Memory_grow }
-  | MEMORY_FILL; { Memory_fill }
-  | MEMORY_COPY; { Memory_copy }
+  | MEMORY_SIZE; id_opt = option(indice); { Memory_size (get_id_def0 id_opt) }
+  | MEMORY_GROW; id_opt = option(indice); { Memory_grow (get_id_def0 id_opt) }
+  | MEMORY_FILL; id_opt = option(indice); { Memory_fill (get_id_def0 id_opt) }
+  | MEMORY_COPY; id1 = option(indice); id2 = option(indice); {
+    Memory_copy (get_id_def0 id1, get_id_def0 id2)
+  }
   | MEMORY_INIT; ~ = indice; <Memory_init>
   | DATA_DROP; ~ = indice; <Data_drop>
   (* extern *)

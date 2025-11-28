@@ -301,12 +301,12 @@ let read_FC input =
     let+ dataidx, input = read_indice input in
     (Data_drop dataidx, input)
   | 10 ->
-    let* input = check_zero_opcode input in
-    let+ input = check_zero_opcode input in
-    (Memory_copy, input)
+    let* id1, input = read_indice input in
+    let+ id2, input = read_indice input in
+    (Memory_copy (id1, id2), input)
   | 11 ->
-    let+ input = check_zero_opcode input in
-    (Memory_fill, input)
+    let+ id, input = read_indice input in
+    (Memory_fill id, input)
   | 12 ->
     let* elemidx, input = read_indice input in
     let+ tableidx, input = read_indice input in
@@ -525,11 +525,11 @@ let rec read_instr types input =
     let+ memarg, input = read_memarg 32 input in
     (I64_store32 memarg, input)
   | '\x3F' ->
-    let+ input = check_zero_opcode input in
-    (Memory_size, input)
+    let+ id, input = read_indice input in
+    (Memory_size id, input)
   | '\x40' ->
-    let+ input = check_zero_opcode input in
-    (Memory_grow, input)
+    let+ id, input = read_indice input in
+    (Memory_grow id, input)
   | '\x41' ->
     let+ i32, input = read_S32 input in
     (I32_const i32, input)

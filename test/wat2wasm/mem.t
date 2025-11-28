@@ -10,7 +10,7 @@
     (memory 1)
     (func
       i32.const 32
-      memory.grow
+      memory.grow 0
       drop
     )
     (func (param i32) (param i32)
@@ -35,7 +35,7 @@
     )
     (func
       call 0
-      memory.size
+      memory.size 0
       drop
       i32.const 4
       i32.const 21
