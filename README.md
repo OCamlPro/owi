@@ -1,43 +1,28 @@
-# [🐌] Owi [![build-badge]][build status] [![coverage-badge]][coverage percentage]
+<div align="center">
+  <a href="https://ocamlpro.github.io/owi">
+    <img src="doc/src/logo.png" width=300 alt="Owi logo"/>
+  </a>
+  <br />
+  <strong>Owi: Seamless bug-finding for Wasm, C, C++, Rust and Zig</strong>
+</div>
 
-**Owi** is an open-source framework for advanced WebAssembly analysis and manipulation, with a focus on practical symbolic execution and robust tooling.
-It is designed for researchers, engineers, programming language enthusiasts and practitioners requiring precise, flexible, and extensible support program reasoning.
+<div align="center">
+<br />
 
-Owi provides three primary components:
+[![build-badge]][build status] [![coverage-badge]][code coverage] [📘 documentation] [💬 zulip]
 
-###  🔬 Symbolic Execution Engine for Wasm, C, C++, Rust, and Zig
+</div>
 
-Owi includes a cross-language symbolic execution engine supporting:
-- **Automated testing, bug finding and pentesting** through symbolic testing and constraint solving;
-- **Solver-aided programming** for problem solving and synthesis tasks;
-- **Test case generation** aligned with advanced coverage criteria;
-- **Formal verification**: prove properties or find counterexamples in real-world programs.
+<hr />
 
-The engine is designed for precision, scalability, interoperability across languages, and extensibility toward both experimental and applied verification use-cases.
-It offers a practical path from fuzzing to formal proofs.
+**Owi** is an automatic bug-finding tool for C, C++, Go, Rust and Zig. It can also be used for test-case generation, proof of programs and solver-aided programming. It works at the WebAssembly level, and thus incidentally provides a Wasm Swiss Army Knife: a formatter, an interpreter, a validator, a converter between `.wasm` and `.wat`, but also a fuzzer! Owi being written in OCaml, you can also use it as an OCaml library for many purposes.
 
-### 🔧 The Wasm Swiss Army Knife
+### Key resources
 
-Owi offers a set of practical tools for Wasm development and analysis:
-- **Formatter** for Wasm modules;
-- **Interpreter** for `.wasm`, `.wat`, and `.wast` files;
-- **Specification-compliant validator**;
-- **Bidirectional translation** between binary (`.wasm`) and text (`.wat`) formats;
-- **Randomized fuzzer** generating valid (well-typed) Wasm modules.
-
-These tools aim to support everyday development tasks as well as research on program analysis, fuzzing, and program transformation.
-
-### 🐪  Native OCaml Library for Wasm Integration
-
-Owi also provides a library for:
-- **Embedding Wasm modules** into OCaml applications;
-- **Importing OCaml functions** into Wasm modules with full type safety.
-
-This allows for tightly integrating Wasm-based computation within OCaml-based systems while maintaining strong type guarantees.
-
-### Documentation
-
-A [detailed documentation is available], including tutorials, how-to guides, explanation and design notes, many references and instructions for contributing.
+<div>
+  📘 <kbd><a href="https://ocamlpro.github.io/owi">Documentation</a></kbd> → Read the documentation<br />
+  💬 <kbd><a href="https://owi.zulipchat.com">Zulip community</a></kbd> → Ask questions and collaborate<br />
+</div>
 
 ### License
 
@@ -65,13 +50,11 @@ Some code has been taken from the `base` library from Jane Street. It is license
 
 Some code has been taken from the E-ACSL plugin of Frama-C. It is licensed under the GNU Lesser General Public License 2.1 and have a different copyright which is stated in the header of the files.
 
-
 [LICENSE]: ./LICENSE.md
 
-[build-badge]: https://github.com/OCamlPro/owi/actions/workflows/build-ubuntu.yml/badge.svg
+[build-badge]: https://github.com/OCamlPro/owi/actions/workflows/build-nix.yml/badge.svg
 [build status]: https://github.com/ocamlpro/owi/actions
 [coverage-badge]: https://raw.githubusercontent.com/ocamlpro/owi/gh-pages/coverage/badge.svg
-[coverage percentage]: https://ocamlpro.github.io/owi/coverage
-[detailed documentation is available]: https://ocamlpro.github.io/owi/
-
-[🐌]: https://youtu.be/XgK9Fd8ikxk
+[code coverage]: https://ocamlpro.github.io/owi/coverage
+[📘 documentation]: https://ocamlpro.github.io/owi
+[💬 zulip]: https://owi.zulipchat.com
