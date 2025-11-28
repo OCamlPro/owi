@@ -29,7 +29,6 @@ module Result : sig
     | `Malformed_utf8_encoding of string
     | `Memory_size_too_large
     | `Msg of string
-    | `Multiple_memories
     | `Multiple_start_sections
     | `No_error
     | `Parse_fail of string
