@@ -429,9 +429,8 @@ module Make (Thread : Thread_intf.S) = struct
     end
     | `Unknown -> assert false
 
-  let select_inner ~explore_first ?(with_breadcrumbs = true)
-    ~check_only_true_branch (cond : Symbolic_value.bool) ~prio_true ~prio_false
-      =
+  let select_inner ~with_breadcrumbs ~check_only_true_branch
+    (cond : Symbolic_value.bool) ~prio_true ~prio_false =
     let v = Smtml.Expr.simplify cond in
     match Smtml.Expr.view v with
     | Val True -> return true
@@ -474,12 +473,11 @@ module Make (Thread : Thread_intf.S) = struct
         in
         let* thread in
         Thread.incr_path_count thread;
-        if explore_first then choose true_branch false_branch
-        else choose false_branch true_branch
+        choose true_branch false_branch
   [@@inline]
 
   let select (cond : Symbolic_value.bool) ~prio_true ~prio_false =
-    select_inner cond ~explore_first:true ~prio_true ~prio_false
+    select_inner cond ~with_breadcrumbs:true ~prio_true ~prio_false
       ~check_only_true_branch:false
   [@@inline]
 
@@ -542,9 +540,8 @@ module Make (Thread : Thread_intf.S) = struct
 
   let assertion c =
     let* assertion_true =
-      select_inner c ~with_breadcrumbs:false ~explore_first:false
-        ~prio_true:Prio.Default ~prio_false:Prio.Default
-        ~check_only_true_branch:false
+      select_inner c ~with_breadcrumbs:false ~prio_true:Prio.Default
+        ~prio_false:Prio.Default ~check_only_true_branch:false
     in
     if assertion_true then return ()
     else
@@ -559,9 +556,8 @@ module Make (Thread : Thread_intf.S) = struct
 
   let assume c =
     let* assertion_true =
-      select_inner c ~with_breadcrumbs:false ~explore_first:true
-        ~prio_true:Prio.Default ~prio_false:Prio.Default
-        ~check_only_true_branch:true
+      select_inner c ~with_breadcrumbs:false ~prio_true:Prio.Default
+        ~prio_false:Prio.Default ~check_only_true_branch:true
     in
     if assertion_true then return () else stop
 end
