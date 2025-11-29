@@ -1,0 +1,7 @@
+(* SPDX-License-Identifier: AGPL-3.0-or-later *)
+(* Copyright © 2021-2024 OCamlPro *)
+(* Written by the Owi programmers *)
+
+include
+  Extern.Func.Make (Symbolic_value) (Symbolic_choice_with_memory)
+    (Symbolic_memory_concretizing)

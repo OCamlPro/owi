@@ -10,24 +10,24 @@ let module_name2 = "owi_iso_module2"
 
 let binaryen_fuzzing_support_module weird_log_i64 =
   let log_i32 x =
-    Log.app (fun m -> m "%a@?" Symbolic.Value.pp_int32 x);
+    Log.app (fun m -> m "%a@?" Symbolic_value.pp_int32 x);
     Symbolic_choice_with_memory.return ()
   in
   let log_i64 x =
-    Log.app (fun m -> m "%a@?" Symbolic.Value.pp_int64 x);
+    Log.app (fun m -> m "%a@?" Symbolic_value.pp_int64 x);
     Symbolic_choice_with_memory.return ()
   in
   let log_i64_weird x y =
     Log.app (fun m ->
-      m "%a%a@?" Symbolic.Value.pp_int32 x Symbolic.Value.pp_int32 y );
+      m "%a%a@?" Symbolic_value.pp_int32 x Symbolic_value.pp_int32 y );
     Symbolic_choice_with_memory.return ()
   in
   let log_f32 x =
-    Log.app (fun m -> m "%a@?" Symbolic.Value.pp_float32 x);
+    Log.app (fun m -> m "%a@?" Symbolic_value.pp_float32 x);
     Symbolic_choice_with_memory.return ()
   in
   let log_f64 x =
-    Log.app (fun m -> m "%a@?" Symbolic.Value.pp_float64 x);
+    Log.app (fun m -> m "%a@?" Symbolic_value.pp_float64 x);
     Symbolic_choice_with_memory.return ()
   in
   let call_export _n1 _n2 = Symbolic_choice_with_memory.return () in
@@ -35,8 +35,8 @@ let binaryen_fuzzing_support_module weird_log_i64 =
     Symbolic_choice_with_memory.return @@ Symbolic_value.const_i32 0l
   in
   let sleep _ms id = Symbolic_choice_with_memory.return id in
-  let open Symbolic.Extern_func in
-  let open Symbolic.Extern_func.Syntax in
+  let open Symbolic_extern_func in
+  let open Symbolic_extern_func.Syntax in
   let functions =
     [ ("log-i32", Extern_func (i32 ^->. unit, log_i32))
     ; ( "log-i64"
@@ -49,7 +49,7 @@ let binaryen_fuzzing_support_module weird_log_i64 =
     ; ("sleep", Extern_func (i32 ^-> i32 ^->. i32, sleep))
     ]
   in
-  { Extern.Module.functions; func_type = Symbolic.Extern_func.extern_type }
+  { Extern.Module.functions; func_type = Symbolic_extern_func.extern_type }
 
 let emscripten_fuzzing_support_module () =
   let temp_ret_0 = ref (Smtml.Expr.value (Smtml.Value.Int 0)) in
@@ -58,14 +58,14 @@ let emscripten_fuzzing_support_module () =
     Symbolic_choice_with_memory.return ()
   in
   let get_temp_ret_0 () = Symbolic_choice_with_memory.return !temp_ret_0 in
-  let open Symbolic.Extern_func in
-  let open Symbolic.Extern_func.Syntax in
+  let open Symbolic_extern_func in
+  let open Symbolic_extern_func.Syntax in
   let functions =
     [ ("setTempRet0", Extern_func (i32 ^->. unit, set_temp_ret_0))
     ; ("getTempRet0", Extern_func (unit ^->. i32, get_temp_ret_0))
     ]
   in
-  { Extern.Module.functions; func_type = Symbolic.Extern_func.extern_type }
+  { Extern.Module.functions; func_type = Symbolic_extern_func.extern_type }
 
 let check_iso ~unsafe export_name export_type module1 module2 =
   let weird_log_i64 =

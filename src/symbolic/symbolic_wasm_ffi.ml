@@ -4,14 +4,14 @@
 
 module Expr = Smtml.Expr
 module Choice = Symbolic_choice_with_memory
-module Memory = Symbolic.Memory
+module Memory = Symbolic_memory
 
 (* The constraint is used here to make sure we don't forget to define one of the expected FFI functions, this whole file is further constrained such that if one function of M is unused in the FFI module below, an error will be displayed *)
 module M :
   Wasm_ffi_intf.S0
     with type 'a t = 'a Choice.t
      and type memory = Memory.t
-     and module Value = Symbolic_value = struct
+     and module Value := Symbolic_value = struct
   type 'a t = 'a Choice.t
 
   type memory = Memory.t
@@ -166,11 +166,11 @@ module M :
   let close_scope = Choice.close_scope
 end
 
-type extern_func = Symbolic.Extern_func.extern_func
+type extern_func = Symbolic_extern_func.extern_func
 
 open M
-open Symbolic.Extern_func
-open Symbolic.Extern_func.Syntax
+open Symbolic_extern_func
+open Symbolic_extern_func.Syntax
 
 let symbolic_extern_module =
   let functions =
@@ -200,7 +200,7 @@ let symbolic_extern_module =
     ; ("exit", Extern_func (i32 ^->. unit, exit))
     ]
   in
-  { Extern.Module.functions; func_type = Symbolic.Extern_func.extern_type }
+  { Extern.Module.functions; func_type = Symbolic_extern_func.extern_type }
 
 let fd_write _ _ _ _ = assert false
 
@@ -219,4 +219,4 @@ let wasi_snapshot_preview1 =
     ; ("random_get", Extern_func (i32 ^-> i32 ^->. i32, random_get))
     ]
   in
-  { Extern.Module.functions; func_type = Symbolic.Extern_func.extern_type }
+  { Extern.Module.functions; func_type = Symbolic_extern_func.extern_type }

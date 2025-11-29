@@ -4,6 +4,8 @@
 
 module type Base = sig
   module V : sig
+    type t
+
     type int32
 
     type int64
@@ -36,6 +38,8 @@ module type Base = sig
   val ( let+ ) : 'a t -> ('a -> 'b) -> 'b t
 
   val get_pc : unit -> Smtml.Expr.Set.t t
+
+  val ite : V.bool -> if_true:V.t -> if_false:V.t -> V.t t
 end
 
 module type Complete = sig
