@@ -55,7 +55,7 @@ let extern_m =
     ]
   in
 
-  { Extern.Module.functions; func_type = Concrete.Extern_func.extern_type }
+  { Extern.Module.functions; func_type = Concrete_extern_func.extern_type }
 
 let m =
   let open Wast in

@@ -2,16 +2,42 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-[@@@ocaml.warning "-32-33"]
-
 open Binary
 
 let use_ite_for_select = ref true
 
 let unset_use_ite_for_select () = use_ite_for_select := false
 
-module Make (P : Interpret_intf.P) = struct
-  open P
+module Make
+    (Value : Value_intf.T)
+    (Data : Interpret_intf.Data)
+    (Global : Interpret_intf.Global with module Value := Value)
+    (Elem : Interpret_intf.Elem with module Value := Value)
+    (Table : Interpret_intf.Table with module Value := Value)
+    (Choice : Choice_intf.Base with module V := Value)
+    (Memory :
+      Interpret_intf.Memory
+        with module Value := Value
+         and module Choice := Choice)
+    (Extern_func :
+      Extern.Func.T
+        with type int32 := Value.int32
+         and type int64 := Value.int64
+         and type float32 := Value.float32
+         and type float64 := Value.float64
+         and type v128 := Value.v128
+         and type memory := Memory.t
+         and type 'a m := 'a Choice.t)
+    (Env :
+      Interpret_intf.Env
+        with type data := Data.t
+         and type memory := Memory.t
+         and type global := Global.t
+         and type table := Table.t
+         and type elem := Elem.t
+         and type extern_func := Extern_func.extern_func
+         and type 'a choice := 'a Choice.t) =
+struct
   open Value
   open Choice
   module Stack = Stack.Make [@inlined hint] (Value)
@@ -19,25 +45,11 @@ module Make (P : Interpret_intf.P) = struct
   module I32 = struct
     include I32
 
-    let ( < ) = lt
-
-    let ( <= ) = le
-
-    let ( > ) = gt
-
-    let ( >= ) = ge
-
     let ( + ) = add
 
     let ( - ) = sub
 
-    let ( * ) = mul
-
-    let ( / ) = div
-
     let ( ~- ) x = const_i32 0l - x
-
-    let ( <> ) = ne
 
     let ( = ) = eq
 
@@ -48,14 +60,6 @@ module Make (P : Interpret_intf.P) = struct
 
   module I64 = struct
     include I64
-
-    let ( < ) = lt
-
-    let ( <= ) = le
-
-    let ( > ) = gt
-
-    let ( >= ) = ge
 
     let ( + ) = add
 
@@ -1045,7 +1049,7 @@ module Make (P : Interpret_intf.P) = struct
         let b, stack = Stack.pop_bool stack in
         let o2, stack = Stack.pop stack in
         let o1, stack = Stack.pop stack in
-        let* res = P.select b ~if_true:o1 ~if_false:o2 in
+        let* res = Choice.ite b ~if_true:o1 ~if_false:o2 in
         st @@ Stack.push stack res
       end
       else begin
@@ -1582,7 +1586,7 @@ module Make (P : Interpret_intf.P) = struct
            else Choice.return () )
 
   let modul ~timeout ~timeout_instr (link_state : 'f Link.State.t)
-    (modul : 'extern_func Linked.Module.t) : unit P.Choice.t =
+    (modul : 'extern_func Linked.Module.t) : unit Choice.t =
     let envs = Link.State.get_envs link_state in
     let heartbeat = make_heartbeat ~timeout ~timeout_instr () in
     Log.info (fun m -> m "interpreting ...");
@@ -1632,5 +1636,19 @@ module Make (P : Interpret_intf.P) = struct
     with Stack_overflow -> Choice.trap `Call_stack_exhausted
 end
 
-module Concrete = Make [@inlined hint] (Concrete)
-module Symbolic = Make [@inlined hint] (Symbolic)
+module Concrete =
+  Make [@inlined hint] (Concrete_value) (Concrete_data) (Concrete_global)
+    (Concrete_elem)
+    (Concrete_table)
+    (Concrete_choice)
+    (Concrete_memory)
+    (Concrete_extern_func)
+    (Concrete_env)
+module Symbolic =
+  Make [@inlined hint] (Symbolic_value) (Symbolic_data) (Symbolic_global)
+    (Symbolic_elem)
+    (Symbolic_table)
+    (Symbolic_choice_with_memory)
+    (Symbolic_memory)
+    (Symbolic_extern_func)
+    (Symbolic_env)

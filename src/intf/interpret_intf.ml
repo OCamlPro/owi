@@ -2,136 +2,132 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-module type P = sig
+module type Data = sig
+  type t
+
+  val value : t -> string
+
+  val size : t -> int
+end
+
+module type Memory = sig
+  type t
+
   module Value : Value_intf.T
 
   module Choice : Choice_intf.Base with module V := Value
 
-  val select :
-    Value.bool -> if_true:Value.t -> if_false:Value.t -> Value.t Choice.t
+  val load_8_s : t -> Value.int32 -> Value.int32 Choice.t
 
-  module Global : sig
-    type t
+  val load_8_u : t -> Value.int32 -> Value.int32 Choice.t
 
-    val value : t -> Value.t
+  val load_16_s : t -> Value.int32 -> Value.int32 Choice.t
 
-    val set_value : t -> Value.t -> unit
-  end
+  val load_16_u : t -> Value.int32 -> Value.int32 Choice.t
 
-  module Table : sig
-    type t
+  val load_32 : t -> Value.int32 -> Value.int32 Choice.t
 
-    val get : t -> int -> Value.ref_value
+  val load_64 : t -> Value.int32 -> Value.int64 Choice.t
 
-    val set : t -> int -> Value.ref_value -> unit
+  val store_8 : t -> addr:Value.int32 -> Value.int32 -> unit Choice.t
 
-    val size : t -> int
+  val store_16 : t -> addr:Value.int32 -> Value.int32 -> unit Choice.t
 
-    val typ : t -> Text.ref_type
+  val store_32 : t -> addr:Value.int32 -> Value.int32 -> unit Choice.t
 
-    val max_size : t -> int option
+  val store_64 : t -> addr:Value.int32 -> Value.int64 -> unit Choice.t
 
-    val grow : t -> int32 -> Value.ref_value -> unit
+  val grow : t -> Value.int32 -> unit
 
-    val fill : t -> int32 -> int32 -> Value.ref_value -> unit
+  val fill : t -> pos:Value.int32 -> len:Value.int32 -> char -> unit Choice.t
 
-    val copy : t_src:t -> t_dst:t -> src:int32 -> dst:int32 -> len:int32 -> unit
-  end
+  val blit :
+    t -> src:Value.int32 -> dst:Value.int32 -> len:Value.int32 -> unit Choice.t
 
-  module Memory : sig
-    type t
+  val blit_string :
+    t -> string -> src:Value.int32 -> dst:Value.int32 -> len:Value.int32 -> unit
 
-    val load_8_s : t -> Value.int32 -> Value.int32 Choice.t
+  val size : t -> Value.int32
 
-    val load_8_u : t -> Value.int32 -> Value.int32 Choice.t
+  val size_in_pages : t -> Value.int32
 
-    val load_16_s : t -> Value.int32 -> Value.int32 Choice.t
+  val get_limit_max : t -> Value.int64 option
+end
 
-    val load_16_u : t -> Value.int32 -> Value.int32 Choice.t
+module type Global = sig
+  module Value : Value_intf.T
 
-    val load_32 : t -> Value.int32 -> Value.int32 Choice.t
+  type t
 
-    val load_64 : t -> Value.int32 -> Value.int64 Choice.t
+  val value : t -> Value.t
 
-    val store_8 : t -> addr:Value.int32 -> Value.int32 -> unit Choice.t
+  val set_value : t -> Value.t -> unit
+end
 
-    val store_16 : t -> addr:Value.int32 -> Value.int32 -> unit Choice.t
+module type Elem = sig
+  module Value : Value_intf.T
 
-    val store_32 : t -> addr:Value.int32 -> Value.int32 -> unit Choice.t
+  type t
 
-    val store_64 : t -> addr:Value.int32 -> Value.int64 -> unit Choice.t
+  val get : t -> int -> Value.ref_value
 
-    val grow : t -> Value.int32 -> unit
+  val size : t -> int
+end
 
-    val fill : t -> pos:Value.int32 -> len:Value.int32 -> char -> unit Choice.t
+module type Table = sig
+  module Value : Value_intf.T
 
-    val blit :
-         t
-      -> src:Value.int32
-      -> dst:Value.int32
-      -> len:Value.int32
-      -> unit Choice.t
+  type t
 
-    val blit_string :
-         t
-      -> string
-      -> src:Value.int32
-      -> dst:Value.int32
-      -> len:Value.int32
-      -> unit
+  val get : t -> int -> Value.ref_value
 
-    val size : t -> Value.int32
+  val set : t -> int -> Value.ref_value -> unit
 
-    val size_in_pages : t -> Value.int32
+  val size : t -> int
 
-    val get_limit_max : t -> Value.int64 option
-  end
+  val typ : t -> Text.ref_type
 
-  module Extern_func :
-    Extern.Func.T
-      with type int32 := Value.int32
-       and type int64 := Value.int64
-       and type float32 := Value.float32
-       and type float64 := Value.float64
-       and type v128 := Value.v128
-       and type 'a m := 'a Choice.t
-       and type memory := Memory.t
+  val max_size : t -> int option
 
-  module Data : sig
-    type t
+  val grow : t -> int32 -> Value.ref_value -> unit
 
-    val value : t -> string
+  val fill : t -> int32 -> int32 -> Value.ref_value -> unit
 
-    val size : t -> int
-  end
+  val copy : t_src:t -> t_dst:t -> src:int32 -> dst:int32 -> len:int32 -> unit
+end
 
-  module Elem : sig
-    type t
+module type Env = sig
+  type memory
 
-    val get : t -> int -> Value.ref_value
+  type data
 
-    val size : t -> int
-  end
+  type global
 
-  module Env : sig
-    type t = Extern_func.extern_func Link_env.t
+  type elem
 
-    val get_memory : t -> int -> Memory.t Choice.t
+  type table
 
-    val get_func : t -> int -> Kind.func
+  type extern_func
 
-    val get_table : t -> int -> Table.t Choice.t
+  type 'a choice
 
-    val get_elem : t -> int -> Elem.t
+  type t = extern_func Link_env.t
 
-    val get_data : t -> int -> Data.t Choice.t
+  val get_memory : t -> int -> memory choice
 
-    val get_global : t -> int -> Global.t Choice.t
+  val get_func : t -> int -> Kind.func
 
-    val get_extern_func : t -> int -> Extern_func.extern_func
+  val get_table : t -> int -> table choice
 
-    val drop_elem : Elem.t -> unit
+  val get_elem : t -> int -> elem
 
-    val drop_data : Data.t -> unit
-  end
+  val get_data : t -> int -> data choice
+
+  val get_global : t -> int -> global choice
+
+  val get_extern_func : t -> int -> extern_func
+
+  val drop_elem : elem -> unit
+
+  val drop_data : data -> unit
 end

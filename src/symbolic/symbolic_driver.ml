@@ -72,7 +72,7 @@ let mk_callback no_stop_at_failure fail_mode res_stack path_count =
 let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
   ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
   ~workspace ~solver ~model_format ~model_out_file ~with_breadcrumbs ~run_time
-  (result : unit Symbolic.Choice.t) =
+  (result : unit Symbolic_choice_with_memory.t) =
   let thread = Thread_with_memory.init () in
   let res_stack = Ws.make () in
   let path_count = Atomic.make 0 in

@@ -564,4 +564,28 @@ module Make (Thread : Thread_intf.S) = struct
         ~check_only_true_branch:true
     in
     if assertion_true then return () else stop
+
+  let ite (c : Symbolic_value.bool) ~(if_true : Symbolic_value.t)
+    ~(if_false : Symbolic_value.t) : Symbolic_value.t t =
+    match (if_true, if_false) with
+    | I32 if_true, I32 if_false ->
+      return
+        (Symbolic_value.I32
+           (Symbolic_value.Bool.select_expr c ~if_true ~if_false) )
+    | I64 if_true, I64 if_false ->
+      return
+        (Symbolic_value.I64
+           (Symbolic_value.Bool.select_expr c ~if_true ~if_false) )
+    | F32 if_true, F32 if_false ->
+      return
+        (Symbolic_value.F32
+           (Symbolic_value.Bool.select_expr c ~if_true ~if_false) )
+    | F64 if_true, F64 if_false ->
+      return
+        (Symbolic_value.F64
+           (Symbolic_value.Bool.select_expr c ~if_true ~if_false) )
+    | Ref _, Ref _ ->
+      let+ b = select c ~prio_true:Prio.Default ~prio_false:Prio.Default in
+      if b then if_true else if_false
+    | _, _ -> assert false
 end

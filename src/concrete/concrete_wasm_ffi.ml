@@ -6,7 +6,7 @@ module Choice = Concrete_choice
 module Memory = Concrete_memory
 module Value = Concrete_value
 
-type extern_func = Concrete.Extern_func.extern_func
+type extern_func = Concrete_extern_func.extern_func
 
 open Concrete_value
 
@@ -83,8 +83,8 @@ let syscall_utimensat (_ : int32) (_ : int32) (_ : int32) (_ : int32) :
 let emscripten_resize_heap (_ : int32) : int32 Choice.t = assert false
 
 let env_extern_module =
-  let open Concrete.Extern_func in
-  let open Concrete.Extern_func.Syntax in
+  let open Concrete_extern_func in
+  let open Concrete_extern_func.Syntax in
   let functions =
     [ ( "__syscall_faccessat"
       , Extern_func (i32 ^-> i32 ^-> i32 ^-> i32 ^->. i32, syscall_faccessat) )
@@ -135,7 +135,7 @@ let env_extern_module =
       , Extern_func (i32 ^->. i32, emscripten_resize_heap) )
     ]
   in
-  { Extern.Module.functions; func_type = Concrete.Extern_func.extern_type }
+  { Extern.Module.functions; func_type = Concrete_extern_func.extern_type }
 
 let fd_close (_ : int32) : int32 Choice.t = assert false
 
@@ -157,8 +157,8 @@ let fd_seek (_ : int32) (_ : int64) (_ : int32) (_ : int32) : int32 Choice.t =
 let fd_fdstat_get (_ : int32) (_ : int32) : int32 Choice.t = assert false
 
 let wasi_snapshot_preview1_extern_module =
-  let open Concrete.Extern_func in
-  let open Concrete.Extern_func.Syntax in
+  let open Concrete_extern_func in
+  let open Concrete_extern_func.Syntax in
   let functions =
     [ ("fd_close", Extern_func (i32 ^->. i32, fd_close))
     ; ("fd_write", Extern_func (i32 ^-> i32 ^-> i32 ^-> i32 ^->. i32, fd_write))
@@ -171,4 +171,4 @@ let wasi_snapshot_preview1_extern_module =
     ; ("fd_fdstat_get", Extern_func (i32 ^-> i32 ^->. i32, fd_fdstat_get))
     ]
   in
-  { Extern.Module.functions; func_type = Concrete.Extern_func.extern_type }
+  { Extern.Module.functions; func_type = Concrete_extern_func.extern_type }

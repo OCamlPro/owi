@@ -33,8 +33,10 @@
   cmd_wat2wasm
   cmd_zig
   compile
-  concrete
   concrete_choice
+  concrete_data
+  concrete_elem
+  concrete_env
   concrete_extern_func
   concrete_global
   concrete_memory
@@ -71,13 +73,17 @@
   symbol_scope
   share
   solver
-  symbolic
   symbolic_choice
   symbolic_choice_intf
   symbolic_choice_with_memory
   symbolic_choice_without_memory
+  symbolic_data
   symbolic_driver
+  symbolic_elem
+  symbolic_env
+  symbolic_extern_func
   symbolic_global
+  symbolic_memory
   symbolic_memory_concretizing
   symbolic_path_condition
   symbolic_parameters

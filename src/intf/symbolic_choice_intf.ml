@@ -88,6 +88,12 @@ module type S = sig
     -> callback_init:(unit -> unit)
     -> callback_end:(unit -> unit)
     -> unit Domain.t array
+
+  val ite :
+       Symbolic_value.bool
+    -> if_true:Symbolic_value.t
+    -> if_false:Symbolic_value.t
+    -> Symbolic_value.t t
 end
 
 module type Intf = sig
