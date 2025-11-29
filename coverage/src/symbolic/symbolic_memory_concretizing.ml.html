@@ -684,105 +684,105 @@
   let clone { data; chunks } =
     (* Caution, it is tempting not to rebuild the record here, but...
        it must be! otherwise the mutable data points to the same location *)
-    <span data-count="27667">{</span> data; chunks }
+    <span data-count="26618">{</span> data; chunks }
 
   let address a =
-    <span data-count="1081865">l</span>et open Symbolic_choice_without_memory in
+    <span data-count="1082035">l</span>et open Symbolic_choice_without_memory in
     match Smtml.Expr.view a with
-    | <span data-count="1033215">V</span>al (Bitv bv) when Smtml.Bitvector.numbit<span data-count="1033214">s</span> bv &lt;= 32 -&gt;
-      <span data-count="1033218">r</span>eturn (Smtml.Bitvector.to_int3<span data-count="1033226">2</span> bv)
-    | <span data-count="48639">P</span>tr { base; offset } -&gt;
-      let base = Smtml.Bitvector.to_int32 base |&gt; <span data-count="48638">S</span>ymbolic_value.const_i32 in
-      <span data-count="48639">l</span>et addr = Symbolic_value.I32.add base offset in
-      <span data-count="48638">s</span>elect_i32 addr
+    | <span data-count="1033307">V</span>al (Bitv bv) when Smtml.Bitvector.numbit<span data-count="1033307">s</span> bv &lt;= 32 -&gt;
+      <span data-count="1033307">r</span>eturn (Smtml.Bitvector.to_int3<span data-count="1033309">2</span> bv)
+    | <span data-count="48720">P</span>tr { base; offset } -&gt;
+      let base = Smtml.Bitvector.to_int32 base |&gt; <span data-count="48719">S</span>ymbolic_value.const_i32 in
+      <span data-count="48721">l</span>et addr = Symbolic_value.I32.add base offset in
+      <span data-count="48721">s</span>elect_i32 addr
     | <span data-count="8">_</span> -&gt; select_i32 a
 
   let address_i32 a = <span data-count="9550">a</span>
 
   let load_byte a { data; _ } =
-    <span data-count="300150">m</span>atch Map.find_opt a data with
-    | <span data-count="4252">N</span>one -&gt; Smtml.Expr.value (Bitv (Smtml.Bitvector.of_int<span data-count="4252">8</span> 0))
-    | <span data-count="295895">S</span>ome v -&gt; v
+    <span data-count="300666">m</span>atch Map.find_opt a data with
+    | <span data-count="4244">N</span>one -&gt; Smtml.Expr.value (Bitv (Smtml.Bitvector.of_int<span data-count="4244">8</span> 0))
+    | <span data-count="296435">S</span>ome v -&gt; v
 
   let loadn m a n =
-    <span data-count="77923">l</span>et rec loop addr size i acc =
-      <span data-count="300151">i</span>f i = size then <span data-count="77923">a</span>cc
+    <span data-count="78041">l</span>et rec loop addr size i acc =
+      <span data-count="300682">i</span>f i = size then <span data-count="78044">a</span>cc
       else
-        <span data-count="222228">l</span>et addr' = Int32.(ad<span data-count="222230">d</span> addr (of_in<span data-count="222230">t</span> i)) in
+        <span data-count="222636">l</span>et addr' = Int32.(ad<span data-count="222631">d</span> addr (of_in<span data-count="222631">t</span> i)) in
         let byte = load_byte addr' m in
-        <span data-count="222228">l</span>oop addr size (i + 1) (Smtml.Expr.conca<span data-count="222232">t</span> byte acc)
+        <span data-count="222636">l</span>oop addr size (i + 1) (Smtml.Expr.conca<span data-count="222638">t</span> byte acc)
     in
     let v0 = load_byte a m in
-    <span data-count="77921">l</span>oop a n 1 v0
+    <span data-count="78043">l</span>oop a n 1 v0
 
-  let replace m k v = <span data-count="5375305">m</span>.data &lt;- Map.ad<span data-count="5375287">d</span> k v m.data
+  let replace m k v = <span data-count="5375445">m</span>.data &lt;- Map.ad<span data-count="5375443">d</span> k v m.data
 
   let storen m a v n =
-    <span data-count="1003598">f</span>or i = 0 to n - 1 do
-      <span data-count="5375269">l</span>et a' = Int32.add a (Int32.of_in<span data-count="5375258">t</span> i) in
-      <span data-count="5375228">l</span>et v' = Smtml.Expr.extract v ~low:i ~high:(i + 1) in
-      <span data-count="5375315">r</span>eplac<span data-count="5375296">e</span> m a' v'
+    <span data-count="1003650">f</span>or i = 0 to n - 1 do
+      <span data-count="5375436">l</span>et a' = Int32.add a (Int32.of_in<span data-count="5375431">t</span> i) in
+      <span data-count="5375428">l</span>et v' = Smtml.Expr.extract v ~low:i ~high:(i + 1) in
+      <span data-count="5375449">r</span>eplac<span data-count="5375442">e</span> m a' v'
     done
 
   let validate_address m a range =
-    <span data-count="1071935">l</span>et open Symbolic_choice_without_memory in
+    <span data-count="1072107">l</span>et open Symbolic_choice_without_memory in
     match Smtml.Expr.view a with
-    | <span data-count="1023280">V</span>al (Bitv _) -&gt;
+    | <span data-count="1023383">V</span>al (Bitv _) -&gt;
       (* An i32 is not a pointer to a heap chunk, so its valid *)
       return (Ok a)
-    | <span data-count="48638">P</span>tr { base; offset = start_offset } -&gt; (
+    | <span data-count="48715">P</span>tr { base; offset = start_offset } -&gt; (
       let open Symbolic_value in
       let base = Smtml.Bitvector.to_int32 base in
-      <span data-count="48640">m</span>atch Map.find_opt base m.chunks with
+      <span data-count="48719">m</span>atch Map.find_opt base m.chunks with
       | <span data-count="0">N</span>one -&gt; return (Error `Memory_leak_use_after_free)
-      | <span data-count="48639">S</span>ome chunk_size -&gt;
+      | <span data-count="48719">S</span>ome chunk_size -&gt;
         let+ is_out_of_bounds =
-          let range = const_i32 (Int32.of_in<span data-count="48639">t</span> (range - 1)) in
+          let range = const_i32 (Int32.of_in<span data-count="48721">t</span> (range - 1)) in
           (* end_offset: last byte we will read/write *)
-          <span data-count="48639">l</span>et end_offset = I32.add start_offset range in
-          <span data-count="48640">s</span>elec<span data-count="48640">t</span>
-            (Bool.or<span data-count="48638">_</span>
-               (I32.ge_<span data-count="48640">u</span> start_offset chunk_size)
-               (I32.ge_<span data-count="48640">u</span> end_offset chunk_size) )
+          <span data-count="48722">l</span>et end_offset = I32.add start_offset range in
+          <span data-count="48722">s</span>elec<span data-count="48720">t</span>
+            (Bool.or<span data-count="48718">_</span>
+               (I32.ge_<span data-count="48722">u</span> start_offset chunk_size)
+               (I32.ge_<span data-count="48721">u</span> end_offset chunk_size) )
             ~prio_true:Prio.Default ~prio_false:Prio.Default
         in
-        <span data-count="48639">i</span>f is_out_of_bounds then <span data-count="1">E</span>rror `Memory_heap_buffer_overflow else <span data-count="48638">O</span>k a )
+        <span data-count="48719">i</span>f is_out_of_bounds then <span data-count="1">E</span>rror `Memory_heap_buffer_overflow else <span data-count="48718">O</span>k a )
     | <span data-count="7">_</span> -&gt;
       (* A symbolic expression is valid, but we print to check if Ptr's are passing through here  *)
       Log.warn (fun m -&gt; <span data-count="2">m</span> "Saw a symbolic address: %a" Smtml.Expr.pp a);
       <span data-count="7">r</span>eturn (Ok a)
 
   let ptr v =
-    <span data-count="2538">l</span>et open Symbolic_choice_without_memory in
+    <span data-count="2544">l</span>et open Symbolic_choice_without_memory in
     match Smtml.Expr.view v with
-    | <span data-count="2538">P</span>tr { base; _ } -&gt;
+    | <span data-count="2544">P</span>tr { base; _ } -&gt;
       let base = Smtml.Bitvector.to_int32 base in
-      <span data-count="2538">r</span>eturn base
+      <span data-count="2544">r</span>eturn base
     | <span data-count="0">_</span> -&gt;
       Log.err (fun m -&gt;
         <span data-count="0">m</span> {|free: cannot fetch pointer base of "%a"|} Smtml.Expr.pp v );
       <span data-count="0">a</span>ssert false
 
   let free m p =
-    <span data-count="2540">l</span>et open Symbolic_choice_without_memory in
+    <span data-count="2546">l</span>et open Symbolic_choice_without_memory in
     match Smtml.Expr.view p with
     | <span data-count="2">V</span>al (Bitv bv) when Smtml.Bitvector.eq<span data-count="2">z</span> bv -&gt;
       <span data-count="2">r</span>eturn (Symbolic_value.const_i3<span data-count="2">2</span> 0l)
-    | <span data-count="2538">_</span> -&gt;
-      let* base = pt<span data-count="2538">r</span> p in
-      <span data-count="2538">i</span>f not @@ Map.me<span data-count="2538">m</span> base m.chunks then <span data-count="1">t</span>rap `Double_free
-      else <span data-count="2537">b</span>egin
+    | <span data-count="2544">_</span> -&gt;
+      let* base = pt<span data-count="2544">r</span> p in
+      <span data-count="2544">i</span>f not @@ Map.me<span data-count="2544">m</span> base m.chunks then <span data-count="1">t</span>rap `Double_free
+      else <span data-count="2543">b</span>egin
         let chunks = Map.remove base m.chunks in
-        <span data-count="2537">m</span>.chunks &lt;- chunks;
-        return (Symbolic_value.const_i3<span data-count="2537">2</span> base)
+        <span data-count="2543">m</span>.chunks &lt;- chunks;
+        return (Symbolic_value.const_i3<span data-count="2543">2</span> base)
       end
 
   let realloc m ~ptr ~size =
-    <span data-count="9920">l</span>et open Symbolic_choice_without_memory in
-    let+ base = addres<span data-count="9920">s</span> ptr in
-    <span data-count="9920">l</span>et chunks = Map.add base size m.chunks in
-    <span data-count="9920">m</span>.chunks &lt;- chunks;
-    Smtml.Expr.ptr base (Symbolic_value.const_i3<span data-count="9920">2</span> 0l)
+    <span data-count="9922">l</span>et open Symbolic_choice_without_memory in
+    let+ base = addres<span data-count="9922">s</span> ptr in
+    <span data-count="9922">l</span>et chunks = Map.add base size m.chunks in
+    <span data-count="9922">m</span>.chunks &lt;- chunks;
+    Smtml.Expr.ptr base (Symbolic_value.const_i3<span data-count="9922">2</span> 0l)
 end
 
 let page_size = Symbolic_value.const_i3<span data-count="701">2</span> 65_536l
@@ -809,36 +809,36 @@ let grow m delta =
       (Symbolic_value.I32.g<span data-count="1">t</span> new_size m.size)
       ~if_true:new_size ~if_false:m.size
 
-let size { size; _ } = <span data-count="1072070">S</span>ymbolic_value.I32.mul size page_size
+let size { size; _ } = <span data-count="1072237">S</span>ymbolic_value.I32.mul size page_size
 
 let size_in_pages { size; _ } = <span data-count="0">s</span>ize
 
-let clone_memory m = <span data-count="27667">{</span> data = Backend.clon<span data-count="27666">e</span> m.data; size = m.size }
+let clone_memory m = <span data-count="26619">{</span> data = Backend.clon<span data-count="26618">e</span> m.data; size = m.size }
 
 let must_be_valid_address m a n =
-  <span data-count="1071935">l</span>et open Symbolic_choice_without_memory in
-  let* addr = Backend.validate_addres<span data-count="1071920">s</span> m a n in
-  <span data-count="1071946">m</span>atch addr with <span data-count="1">E</span>rror t -&gt; trap t | <span data-count="1071943">O</span>k ptr -&gt; Backend.address ptr
+  <span data-count="1072109">l</span>et open Symbolic_choice_without_memory in
+  let* addr = Backend.validate_addres<span data-count="1072110">s</span> m a n in
+  <span data-count="1072114">m</span>atch addr with <span data-count="1">E</span>rror t -&gt; trap t | <span data-count="1072115">O</span>k ptr -&gt; Backend.address ptr
 
 let load_8_s m a =
   <span data-count="570">l</span>et open Symbolic_choice_without_memory in
   let+ a = must_be_valid_addres<span data-count="570">s</span> m.data a 1 in
   <span data-count="570">l</span>et v = Backend.loadn m.data a 1 in
-  <span data-count="569">m</span>atch Smtml.Expr.view v with
+  <span data-count="570">m</span>atch Smtml.Expr.view v with
   | <span data-count="231">V</span>al (Bitv i8) when Smtml.Bitvector.numbit<span data-count="231">s</span> i8 = 8 -&gt;
     <span data-count="231">l</span>et i8 = Smtml.Bitvector.to_int32 i8 in
-    <span data-count="231">S</span>ymbolic_value.const_i32 (Int32.extend_<span data-count="230">s</span> 8 i8)
+    <span data-count="231">S</span>ymbolic_value.const_i32 (Int32.extend_<span data-count="231">s</span> 8 i8)
   | <span data-count="339">_</span> -&gt; Smtml.Expr.cvtop (Ty_bitv 32) (Sign_extend 24) v
 
 let load_8_u m a =
-  <span data-count="3377">l</span>et open Symbolic_choice_without_memory in
-  let+ a = must_be_valid_addres<span data-count="3377">s</span> m.data a 1 in
-  <span data-count="3379">l</span>et v = Backend.loadn m.data a 1 in
-  <span data-count="3379">m</span>atch Smtml.Expr.view v with
-  | <span data-count="2491">V</span>al (Bitv i) when Smtml.Bitvector.numbit<span data-count="2491">s</span> i = 8 -&gt;
-    <span data-count="2491">l</span>et i = Smtml.Bitvector.to_int32 i in
-    <span data-count="2491">S</span>ymbolic_value.const_i32 i
-  | <span data-count="888">_</span> -&gt; Smtml.Expr.cvtop (Ty_bitv 32) (Zero_extend 24) v
+  <span data-count="3359">l</span>et open Symbolic_choice_without_memory in
+  let+ a = must_be_valid_addres<span data-count="3362">s</span> m.data a 1 in
+  <span data-count="3364">l</span>et v = Backend.loadn m.data a 1 in
+  <span data-count="3364">m</span>atch Smtml.Expr.view v with
+  | <span data-count="2474">V</span>al (Bitv i) when Smtml.Bitvector.numbit<span data-count="2474">s</span> i = 8 -&gt;
+    <span data-count="2474">l</span>et i = Smtml.Bitvector.to_int32 i in
+    <span data-count="2474">S</span>ymbolic_value.const_i32 i
+  | <span data-count="890">_</span> -&gt; Smtml.Expr.cvtop (Ty_bitv 32) (Zero_extend 24) v
 
 let load_16_s m a =
   <span data-count="2">l</span>et open Symbolic_choice_without_memory in
@@ -861,10 +861,10 @@ let load_16_u m a =
   | <span data-count="2">_</span> -&gt; Smtml.Expr.cvtop (Ty_bitv 32) (Zero_extend 16) v
 
 let load_32 m a =
-  <span data-count="73883">l</span>et open Symbolic_choice_without_memory in
-  let+ a = must_be_valid_addres<span data-count="73879">s</span> m.data a 4 in
-  <span data-count="73891">l</span>et res = Backend.loadn m.data a 4 in
-  <span data-count="73892">S</span>mtml.Expr.simplify res
+  <span data-count="74018">l</span>et open Symbolic_choice_without_memory in
+  let+ a = must_be_valid_addres<span data-count="74015">s</span> m.data a 4 in
+  <span data-count="74024">l</span>et res = Backend.loadn m.data a 4 in
+  <span data-count="74029">S</span>mtml.Expr.simplify res
 
 let load_64 m a =
   <span data-count="79">l</span>et open Symbolic_choice_without_memory in
@@ -872,9 +872,9 @@ let load_64 m a =
   <span data-count="79">B</span>ackend.loadn m.data a 8
 
 let store_8 m ~addr v =
-  <span data-count="3181">l</span>et open Symbolic_choice_without_memory in
-  let+ a = must_be_valid_addres<span data-count="3181">s</span> m.data addr 1 in
-  <span data-count="3181">B</span>ackend.storen m.data a v 1
+  <span data-count="3192">l</span>et open Symbolic_choice_without_memory in
+  let+ a = must_be_valid_addres<span data-count="3192">s</span> m.data addr 1 in
+  <span data-count="3192">B</span>ackend.storen m.data a v 1
 
 let store_16 m ~addr v =
   <span data-count="4">l</span>et open Symbolic_choice_without_memory in
@@ -882,14 +882,14 @@ let store_16 m ~addr v =
   <span data-count="4">B</span>ackend.storen m.data a v 2
 
 let store_32 m ~addr v =
-  <span data-count="641076">l</span>et open Symbolic_choice_without_memory in
-  let+ a = must_be_valid_addres<span data-count="641068">s</span> m.data addr 4 in
-  <span data-count="641095">B</span>ackend.storen m.data a v 4
+  <span data-count="641117">l</span>et open Symbolic_choice_without_memory in
+  let+ a = must_be_valid_addres<span data-count="641114">s</span> m.data addr 4 in
+  <span data-count="641134">B</span>ackend.storen m.data a v 4
 
 let store_64 m ~(addr : Smtml.Expr.t) v =
-  <span data-count="349772">l</span>et open Symbolic_choice_without_memory in
-  let+ a = must_be_valid_addres<span data-count="349768">s</span> m.data addr 8 in
-  <span data-count="349771">B</span>ackend.storen m.data a v 8
+  <span data-count="349770">l</span>et open Symbolic_choice_without_memory in
+  let+ a = must_be_valid_addres<span data-count="349770">s</span> m.data addr 8 in
+  <span data-count="349770">B</span>ackend.storen m.data a v 8
 
 let fill m ~(pos : Smtml.Expr.t) ~(len : Smtml.Expr.t) (c : char) =
   <span data-count="0">l</span>et open Symbolic_choice_without_memory in
@@ -944,9 +944,9 @@ let blit_string m str ~src ~dst ~len =
 
 let get_limit_max _m = <span data-count="1">N</span>one (* TODO *)
 
-let free m base = <span data-count="2540">B</span>ackend.free m.data base
+let free m base = <span data-count="2546">B</span>ackend.free m.data base
 
-let realloc m ~ptr ~size = <span data-count="9920">B</span>ackend.realloc m.data ~ptr ~size
+let realloc m ~ptr ~size = <span data-count="9922">B</span>ackend.realloc m.data ~ptr ~size
 
 let convert (orig_mem : Concrete_memory.t) : t =
   <span data-count="201">l</span>et s = Concrete_memory.size_in_pages orig_mem in
@@ -956,25 +956,25 @@ let convert (orig_mem : Concrete_memory.t) : t =
 
 type collection = (int * int, t) Hashtbl.t
 
-let init () = <span data-count="28687">H</span>ashtbl.create 16
+let init () = <span data-count="27504">H</span>ashtbl.create 16
 
 let clone collection =
-  <span data-count="28287">l</span>et collection' = init () in
-  <span data-count="28287">H</span>ashtbl.iter
+  <span data-count="27104">l</span>et collection' = init () in
+  <span data-count="27103">H</span>ashtbl.iter
     (fun loc memory -&gt;
-      <span data-count="27666">l</span>et memory' = clone_memory memory in
-      <span data-count="27666">H</span>ashtbl.add collection' loc memory' )
+      <span data-count="26619">l</span>et memory' = clone_memory memory in
+      <span data-count="26618">H</span>ashtbl.add collection' loc memory' )
     collection;
-  <span data-count="28286">c</span>ollection'
+  <span data-count="27104">c</span>ollection'
 
 let get_memory env_id (orig_memory : Concrete_memory.t) collection g_id =
-  <span data-count="2156613">l</span>et loc = (env_id, g_id) in
+  <span data-count="2156951">l</span>et loc = (env_id, g_id) in
   match Hashtbl.find_opt collection loc with
   | <span data-count="201">N</span>one -&gt;
     let g = convert orig_memory in
     <span data-count="201">H</span>ashtbl.add collection loc g;
     <span data-count="201">g</span>
-  | <span data-count="2156418">S</span>ome t -&gt; t
+  | <span data-count="2156757">S</span>ome t -&gt; t
 </code></pre>
       </div>
     </div>
