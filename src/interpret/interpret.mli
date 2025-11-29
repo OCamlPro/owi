@@ -15,7 +15,7 @@ module Concrete : sig
   val exec_vfunc_from_outside :
        locals:Concrete_value.t list
     -> env:int
-    -> envs:Concrete.Env.t Dynarray.t
+    -> envs:Concrete_env.t Dynarray.t
     -> Kind.func
     -> V.t list Concrete_choice.t
 
@@ -50,7 +50,7 @@ module Symbolic : sig
   val modul :
        timeout:float option
     -> timeout_instr:int option
-    -> Symbolic.Extern_func.extern_func Link.State.t
-    -> Symbolic.Extern_func.extern_func Linked.Module.t
-    -> unit Symbolic.Choice.t
+    -> Symbolic_extern_func.extern_func Link.State.t
+    -> Symbolic_extern_func.extern_func Linked.Module.t
+    -> unit Symbolic_choice_with_memory.t
 end
