@@ -9,48 +9,44 @@ on:
 
 jobs:
   build:
-    strategy:
-      fail-fast: false
-      matrix:
-        ocaml-compiler:
-          - "5.3"
     runs-on: ubuntu-latest
     steps:
-      - name: checkout
-        uses: actions/checkout@v6
-      - name: cache
-        id: cache-opam
-        uses: actions/cache@v4
-        env:
-          cache-name: cache-opam-build
-        with:
-          path: |
-            ~/work/owi/owi/_opam/
-          key: ${{ runner.os }}-build-${{ matrix.ocaml-compiler }}-${{ env.cache-name }}-${{ hashFiles('**/*.opam') }}
-      - name: setup-ocaml
-        uses: ocaml/setup-ocaml@v3
-        with:
-          ocaml-compiler: ${{ matrix.ocaml-compiler }}
-          dune-cache: true
-          opam-pin: true
-          allow-prerelease-opam: false
-      - name: depext
+      - name: test
         run: |
-          # Installs rust-wasm
-          rustup update
+          set -x
+
+          git clone https://github.com/${{ github.repository }}.git
+          cd $(basename ${{ github.repository }})
+
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch origin pull/${{ github.event.pull_request.number }}/head:pr-${{ github.event.pull_request.number }}
+            git checkout pr-${{ github.event.pull_request.number }}
+          else
+            git checkout ${{ github.ref_name }}
+          fi
+
+          sudo apt install opam -yqq
+
+          # Prepare OCaml stuff
+          opam init --disable-sandboxing --bare -ya
+          opam switch create ocaml ocaml-base-compiler --criteria="-notuptodate"
+          eval "$(opam env)"
+          export OPAMCONFIRMLEVEL=unsafe-yes
+          opam update
+
           rustup target add wasm32-unknown-unknown
-          sudo apt update
-          wget https://ziglang.org/download/0.14.0/zig-linux-x86_64-0.14.0.tar.xz # TODO: remove this and the following once the conf-zig package works
+
+          # Install zig
+          # TODO: remove the following once the conf-zig package works
+          wget  https://ziglang.org/download/0.14.0/zig-linux-x86_64-0.14.0.tar.xz
           mkdir zig
           tar xf zig-*.tar.xz -C zig --strip-components 1
           sudo mv zig/* /usr/local/bin/
+
+          # Install system and opam-repo dependencies
           opam install . --depext-only --with-test
-      - name: setup
-        if: steps.cache-opam.outputs.cache-hit != 'true'
-        run: |
           opam install . --deps-only --with-test
-          opam clean --switch-cleanup
-      - name: build
-        run: |
-          opam exec -- dune build @install
-          opam exec -- dune build @quicktest
+
+          # Build and test
+          dune build @install
+          dune build @quicktest
