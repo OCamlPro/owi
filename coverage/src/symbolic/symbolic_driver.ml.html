@@ -309,34 +309,34 @@ let sort_results deterministic_result_order results =
     |&gt; Seq.map (function <span data-count="44">(</span>_, thread) as x -&gt;
       (x, List.re<span data-count="44">v</span> @@ Thread_with_memory.breadcrumb<span data-count="44">s</span> thread) )
     |&gt; <span data-count="35">L</span>ist.of_seq
-    |&gt; <span data-count="35">L</span>ist.sort (fun (_, bc1) (_, bc2) -&gt; <span data-count="15">L</span>ist.compare compare bc1 bc2)
+    |&gt; <span data-count="35">L</span>ist.sort (fun (_, bc1) (_, bc2) -&gt; <span data-count="14">L</span>ist.compare compare bc1 bc2)
     |&gt; <span data-count="35">L</span>ist.to_seq |&gt; <span data-count="35">S</span>eq.map fst
   else <span data-count="365">r</span>esults
 
 let mk_callback no_stop_at_failure fail_mode res_stack path_count =
  fun ~close v -&gt;
-  <span data-count="1666">l</span>et open Symbolic_choice_intf in
+  <span data-count="1774">l</span>et open Symbolic_choice_intf in
   Atomic.incr path_count;
-  <span data-count="1666">m</span>atch (fail_mode, v) with
-  | <span data-count="1427">_</span>, (EVal (), _) -&gt; ()
+  <span data-count="1775">m</span>atch (fail_mode, v) with
+  | <span data-count="1535">_</span>, (EVal (), _) -&gt; ()
   | <span data-count="174">(</span> (<span data-count="174">S</span>ymbolic_parameters.Both | <span data-count="0">T</span>rap_only)
     , (ETrap (t, m, labels, breadcrumbs, symbol_scopes), thread) ) -&gt;
     Ws.push
       (`ETrap (t, m, labels, breadcrumbs, symbol_scopes), thread)
       Prio.default res_stack;
-    <span data-count="169">i</span>f not no_stop_at_failure then <span data-count="9">c</span>lose ()
+    <span data-count="172">i</span>f not no_stop_at_failure then <span data-count="12">c</span>lose ()
   | <span data-count="63">(</span> (<span data-count="60">B</span>oth | <span data-count="3">A</span>ssertion_only)
     , (EAssert (e, m, labels, breadcrumbs, symbol_scopes), thread) ) -&gt;
     Ws.push
       (`EAssert (e, m, labels, breadcrumbs, symbol_scopes), thread)
       Prio.default res_stack;
-    <span data-count="60">i</span>f not no_stop_at_failure then <span data-count="37">c</span>lose ()
+    <span data-count="58">i</span>f not no_stop_at_failure then <span data-count="35">c</span>lose ()
   | <span data-count="3">(</span><span data-count="0">T</span>rap_only | <span data-count="3">A</span>ssertion_only), _ -&gt; ()
 
 let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
   ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
   ~workspace ~solver ~model_format ~model_out_file ~with_breadcrumbs ~run_time
-  (result : unit Symbolic.Choice.t) =
+  (result : unit Symbolic_choice_with_memory.t) =
   <span data-count="400">l</span>et thread = Thread_with_memory.init () in
   <span data-count="400">l</span>et res_stack = Ws.make () in
   <span data-count="400">l</span>et path_count = Atomic.make 0 in
@@ -349,7 +349,7 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
     Symbolic_choice_with_memory.run exploration_strategy ~workers solver result
       thread ~callback
       ~callback_init:(fun () -&gt; <span data-count="774">W</span>s.make_pledge res_stack)
-      ~callback_end:(fun () -&gt; <span data-count="740">W</span>s.end_pledge res_stack)
+      ~callback_end:(fun () -&gt; <span data-count="742">W</span>s.end_pledge res_stack)
   in
   <span data-count="400">l</span>et finalizer () = <span data-count="347">A</span>rray.iter Domain.join join_handles in
   let results = Ws.read_as_seq res_stack ~finalizer in

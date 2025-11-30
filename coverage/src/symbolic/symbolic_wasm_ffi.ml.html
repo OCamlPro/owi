@@ -513,14 +513,14 @@
 
 module Expr = Smtml.Expr
 module Choice = Symbolic_choice_with_memory
-module Memory = Symbolic.Memory
+module Memory = Symbolic_memory
 
 (* The constraint is used here to make sure we don't forget to define one of the expected FFI functions, this whole file is further constrained such that if one function of M is unused in the FFI module below, an error will be displayed *)
 module M :
   Wasm_ffi_intf.S0
     with type 'a t = 'a Choice.t
      and type memory = Memory.t
-     and module Value = Symbolic_value = struct
+     and module Value := Symbolic_value = struct
   type 'a t = 'a Choice.t
 
   type memory = Memory.t
@@ -567,10 +567,10 @@ module M :
         with <span data-count="0">I</span>nvalid_argument _ -&gt; false )
 
   let assume (i : Value.int32) : unit Choice.t =
-    <span data-count="595">C</span>hoice.assume @@ Value.I32.to_boo<span data-count="595">l</span> i
+    <span data-count="591">C</span>hoice.assume @@ Value.I32.to_boo<span data-count="591">l</span> i
 
   let assert' (i : Value.int32) : unit Choice.t =
-    <span data-count="96958">C</span>hoice.assertion @@ Value.I32.to_boo<span data-count="96958">l</span> i
+    <span data-count="96951">C</span>hoice.assertion @@ Value.I32.to_boo<span data-count="96952">l</span> i
 
   let symbol_bool () =
     <span data-count="4">C</span>hoice.with_new_symbol (Ty_bitv 1) (fun sym -&gt;
@@ -608,10 +608,10 @@ module M :
   let abort () : unit Choice.t = <span data-count="2">C</span>hoice.stop
 
   let alloc m (base : Value.int32) (size : Value.int32) : Value.int32 Choice.t =
-    <span data-count="9924">C</span>hoice.lift_mem @@ Memory.reallo<span data-count="9924">c</span> m ~ptr:base ~size
+    <span data-count="9917">C</span>hoice.lift_mem @@ Memory.reallo<span data-count="9917">c</span> m ~ptr:base ~size
 
   let free m (ptr : Value.int32) : Value.int32 Choice.t =
-    <span data-count="2546">C</span>hoice.lift_mem @@ Memory.fre<span data-count="2546">e</span> m ptr
+    <span data-count="2540">C</span>hoice.lift_mem @@ Memory.fre<span data-count="2540">e</span> m ptr
 
   let exit (_p : Value.int32) : unit Choice.t = <span data-count="1">a</span>bort ()
 
@@ -675,11 +675,11 @@ module M :
   let close_scope = Choice.close_scope
 end
 
-type extern_func = Symbolic.Extern_func.extern_func
+type extern_func = Symbolic_extern_func.extern_func
 
 open M
-open Symbolic.Extern_func
-open Symbolic.Extern_func.Syntax
+open Symbolic_extern_func
+open Symbolic_extern_func.Syntax
 
 let symbolic_extern_module =
   let functions =
@@ -709,7 +709,7 @@ let symbolic_extern_module =
     ; ("exit", Extern_func (i32 ^-&gt;<span data-count="701">.</span> unit, exit))
     ]
   in
-  { Extern.Module.functions; func_type = Symbolic.Extern_func.extern_type }
+  { Extern.Module.functions; func_type = Symbolic_extern_func.extern_type }
 
 let fd_write _ _ _ _ = <span data-count="0">a</span>ssert false
 
@@ -728,7 +728,7 @@ let wasi_snapshot_preview1 =
     ; ("random_get", Extern_func (i32 ^-<span data-count="701">&gt;</span> i32 ^-&gt;<span data-count="701">.</span> i32, random_get))
     ]
   in
-  { Extern.Module.functions; func_type = Symbolic.Extern_func.extern_type }
+  { Extern.Module.functions; func_type = Symbolic_extern_func.extern_type }
 </code></pre>
       </div>
     </div>

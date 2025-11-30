@@ -135,11 +135,11 @@
 
 type t = { mutable value : Symbolic_value.t }
 
-let value v = <span data-count="327">v</span>.value
+let value v = <span data-count="321">v</span>.value
 
-let set_value v x = <span data-count="1765">v</span>.value &lt;- x
+let set_value v x = <span data-count="1872">v</span>.value &lt;- x
 
-let clone_global r = <span data-count="26723">{</span> value = r.value }
+let clone_global r = <span data-count="26936">{</span> value = r.value }
 
 let convert_values (v : Concrete_value.t) : Symbolic_value.t =
   (* TODO share various versions *)
@@ -160,25 +160,25 @@ let convert (orig_global : Concrete_global.t) : t =
 
 type collection = (int * int, t) Hashtbl.t
 
-let init () = <span data-count="27866">H</span>ashtbl.create 16
+let init () = <span data-count="28076">H</span>ashtbl.create 16
 
 let clone collection =
-  <span data-count="27466">l</span>et collection' = init () in
-  <span data-count="27466">H</span>ashtbl.iter
+  <span data-count="27676">l</span>et collection' = init () in
+  <span data-count="27675">H</span>ashtbl.iter
     (fun loc global -&gt;
-      <span data-count="26724">l</span>et global' = clone_global global in
-      <span data-count="26724">H</span>ashtbl.add collection' loc global' )
+      <span data-count="26939">l</span>et global' = clone_global global in
+      <span data-count="26940">H</span>ashtbl.add collection' loc global' )
     collection;
-  <span data-count="27466">c</span>ollection'
+  <span data-count="27675">c</span>ollection'
 
 let get_global env_id (orig_global : Concrete_global.t) collection g_id =
-  <span data-count="2094">l</span>et loc = (env_id, g_id) in
+  <span data-count="2195">l</span>et loc = (env_id, g_id) in
   match Hashtbl.find_opt collection loc with
   | <span data-count="192">N</span>one -&gt;
     let g = convert orig_global in
     <span data-count="192">H</span>ashtbl.add collection loc g;
     <span data-count="192">g</span>
-  | <span data-count="1902">S</span>ome t -&gt; t
+  | <span data-count="2003">S</span>ome t -&gt; t
 </code></pre>
       </div>
     </div>
