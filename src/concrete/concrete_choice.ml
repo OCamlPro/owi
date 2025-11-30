@@ -24,6 +24,12 @@ let run m = m
 
 let get_pc () = return Smtml.Expr.Set.empty
 
+let assume v =
+  if v then Ok ()
+  else
+    (* TODO: there could be a dedicated error here? *)
+    assert false
+
 let ite cond ~if_true ~if_false =
   if cond then return if_true else return if_false
 [@@inline]

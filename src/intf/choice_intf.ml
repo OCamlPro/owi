@@ -40,6 +40,8 @@ module type Base = sig
   val get_pc : unit -> Smtml.Expr.Set.t t
 
   val ite : V.bool -> if_true:V.t -> if_false:V.t -> V.t t
+
+  val assume : V.bool -> unit t
 end
 
 module type Complete = sig

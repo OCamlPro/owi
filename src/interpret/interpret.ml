@@ -8,6 +8,8 @@ let use_ite_for_select = ref true
 
 let unset_use_ite_for_select () = use_ite_for_select := false
 
+let throw_away_trap = ref false
+
 module Make
     (Value : Value_intf.T)
     (Data : Interpret_intf.Data)
@@ -85,9 +87,26 @@ struct
     let* b = select b ~prio_true ~prio_false in
     return (b, stack)
 
+  (*
+     `let> cond = e1 in e2` is:
+       - `let cond = e1 in e2` in concrete mode
+       - possibly two branches in symbolic mode, one where cond is true if e1 is SAT, and another one where cond is false if e2 is SAT
+   *)
   let ( let> ) v f =
     let* v = select v ~prio_true:Prio.Default ~prio_false:Prio.Default in
     f v
+
+  (* In case of throw_away_trap, this is only going in the non-trapping branch, to avoid a useless solver call.
+     Otherwise, this will properly try both branches (one trapping, one non-trapping).
+     I.e. this can be read as `if v then trap else f` (or assume (not v) and f) in the non-trapping mode).
+  *)
+  let ( let>! ) (v, trap) f =
+    if !throw_away_trap then
+      let* () = Choice.assume (Bool.not v) in
+      f ()
+    else
+      let* v = select v ~prio_true:Prio.Default ~prio_false:Prio.Default in
+      if v then Choice.trap trap else f ()
 
   let const = const_i32
 
@@ -152,23 +171,21 @@ struct
         | Sub -> Choice.return @@ sub n1 n2
         | Mul -> Choice.return @@ mul n1 n2
         | Div s -> begin
-          let> cond = eqz n2 in
-          if cond then Choice.trap `Integer_divide_by_zero
-          else
-            match s with
-            | S ->
-              let> overflow = Bool.and_ (eq n1 min_int) @@ eq n2 ~-(const 1l) in
-              if overflow then Choice.trap `Integer_overflow
-              else Choice.return @@ div n1 n2
-            | U -> Choice.return @@ unsigned_div n1 n2
+          let>! () = (eqz n2, `Integer_divide_by_zero) in
+          match s with
+          | S ->
+            let>! () =
+              ( Bool.and_ (eq n1 min_int) @@ eq n2 ~-(const 1l)
+              , `Integer_overflow )
+            in
+            Choice.return @@ div n1 n2
+          | U -> Choice.return @@ unsigned_div n1 n2
         end
         | Rem s -> begin
-          let> cond = eqz n2 in
-          if cond then Choice.trap `Integer_divide_by_zero
-          else
-            match s with
-            | S -> Choice.return @@ rem n1 n2
-            | U -> Choice.return @@ unsigned_rem n1 n2
+          let>! () = (eqz n2, `Integer_divide_by_zero) in
+          match s with
+          | S -> Choice.return @@ rem n1 n2
+          | U -> Choice.return @@ unsigned_rem n1 n2
         end
         | And -> Choice.return @@ logand n1 n2
         | Or -> Choice.return @@ logor n1 n2
@@ -189,26 +206,22 @@ struct
         | Sub -> Choice.return @@ sub n1 n2
         | Mul -> Choice.return @@ mul n1 n2
         | Div s -> begin
-          let> cond = eqz n2 in
-          if cond then Choice.trap `Integer_divide_by_zero
-          else
-            match s with
-            | S ->
-              let> overflow =
-                Bool.and_ (eq n1 min_int)
+          let>! () = (eqz n2, `Integer_divide_by_zero) in
+          match s with
+          | S ->
+            let>! () =
+              ( Bool.and_ (eq n1 min_int)
                 @@ eq n2 (sub (const_i64 0L) (const_i64 1L))
-              in
-              if overflow then Choice.trap `Integer_overflow
-              else Choice.return @@ div n1 n2
-            | U -> Choice.return @@ unsigned_div n1 n2
+              , `Integer_overflow )
+            in
+            Choice.return @@ div n1 n2
+          | U -> Choice.return @@ unsigned_div n1 n2
         end
         | Rem s -> begin
-          let> cond = eqz n2 in
-          if cond then Choice.trap `Integer_divide_by_zero
-          else
-            match s with
-            | S -> Choice.return @@ rem n1 n2
-            | U -> Choice.return @@ unsigned_rem n1 n2
+          let>! () = (eqz n2, `Integer_divide_by_zero) in
+          match s with
+          | S -> Choice.return @@ rem n1 n2
+          | U -> Choice.return @@ unsigned_rem n1 n2
         end
         | And -> Choice.return @@ logand n1 n2
         | Or -> Choice.return @@ logor n1 n2
@@ -775,22 +788,20 @@ struct
     match ref_kind with
     | Func_ht ->
       let size = Table.size t in
-      let> out_of_bounds = I32.(le_u (consti size) fun_i) in
-      if out_of_bounds then Choice.trap `Undefined_element
-      else
-        let* fun_i = Choice.select_i32 fun_i in
-        let fun_i = Int32.to_int fun_i in
-        let f_ref = Table.get t fun_i in
-        begin match Ref.get_func f_ref with
-        | Null -> Choice.trap (`Uninitialized_element fun_i)
-        | Type_mismatch -> Choice.trap `Element_type_error
-        | Ref_value func ->
-          let ft = func_type state func in
-          let ft' = typ_i in
-          if not (Text.func_type_eq ft ft') then
-            Choice.trap `Indirect_call_type_mismatch
-          else exec_vfunc ~return state func
-        end
+      let>! () = (I32.(le_u (consti size) fun_i), `Undefined_element) in
+      let* fun_i = Choice.select_i32 fun_i in
+      let fun_i = Int32.to_int fun_i in
+      let f_ref = Table.get t fun_i in
+      begin match Ref.get_func f_ref with
+      | Null -> Choice.trap (`Uninitialized_element fun_i)
+      | Type_mismatch -> Choice.trap `Element_type_error
+      | Ref_value func ->
+        let ft = func_type state func in
+        let ft' = typ_i in
+        if not (Text.func_type_eq ft ft') then
+          Choice.trap `Indirect_call_type_mismatch
+        else exec_vfunc ~return state func
+      end
     | _ -> Choice.trap `Indirect_call_type_mismatch
 
   let exec_instr instr (state : State.exec_state) : State.instr_result Choice.t
@@ -983,67 +994,61 @@ struct
       let c, stack = Stack.pop_i32 stack in
       let pos, stack = Stack.pop_i32 stack in
       let* mem = Env.get_memory env mem_0 in
-      let> out_of_bounds =
+      let>! () =
         let size = I64.extend_i32_u (Memory.size mem) in
         let len = I64.extend_i32_u len in
         let pos = I64.extend_i32_u pos in
-        I64.gt_u I64.(add pos len) size
+        (I64.gt_u I64.(add pos len) size, `Out_of_bounds_memory_access)
       in
-      if out_of_bounds then Choice.trap `Out_of_bounds_memory_access
-      else
-        (* TODO: should we have something like select_i8 here? or rather, mask it correctly before calling select_i32? *)
-        let* c = Choice.select_i32 c in
-        let c =
-          let c = Int32.to_int c in
-          let c = Int.abs c mod 256 in
-          Char.chr c
-        in
-        let* mem = Env.get_memory env mem_0 in
-        let* () = Memory.fill mem ~pos ~len c in
-        st stack
+      (* TODO: should we have something like select_i8 here? or rather, mask it correctly before calling select_i32? *)
+      let* c = Choice.select_i32 c in
+      let c =
+        let c = Int32.to_int c in
+        let c = Int.abs c mod 256 in
+        Char.chr c
+      in
+      let* mem = Env.get_memory env mem_0 in
+      let* () = Memory.fill mem ~pos ~len c in
+      st stack
     | Memory_copy ->
       let len, stack = Stack.pop_i32 stack in
       let src, stack = Stack.pop_i32 stack in
       let dst, stack = Stack.pop_i32 stack in
       let* mem = Env.get_memory env mem_0 in
-      let> out_of_bounds =
+      let>! () =
         let size = I64.extend_i32_u (Memory.size mem) in
         let len = I64.extend_i32_u len in
         let src = I64.extend_i32_u src in
         let dst = I64.extend_i32_u dst in
-        Bool.or_
-          (I64.gt_u I64.(add src len) size)
-          (I64.gt_u I64.(add dst len) size)
+        ( Bool.or_
+            (I64.gt_u I64.(add src len) size)
+            (I64.gt_u I64.(add dst len) size)
+        , `Out_of_bounds_memory_access )
       in
-      if out_of_bounds then Choice.trap `Out_of_bounds_memory_access
-      else begin
-        let* mem = Env.get_memory env mem_0 in
-        let* () = Memory.blit mem ~src ~dst ~len in
-        st stack
-      end
+      let* mem = Env.get_memory env mem_0 in
+      let* () = Memory.blit mem ~src ~dst ~len in
+      st stack
     | Memory_init i ->
       let len, stack = Stack.pop_i32 stack in
       let src, stack = Stack.pop_i32 stack in
       let dst, stack = Stack.pop_i32 stack in
       let* data = Env.get_data env i in
       let* mem = Env.get_memory env mem_0 in
-      let> out_of_bounds =
+      let>! () =
         let memsize = I64.extend_i32_u (Memory.size mem) in
         let datasize = const_i64 @@ Int64.of_int (Data.size data) in
         let len = I64.extend_i32_u len in
         let src = I64.extend_i32_u src in
         let dst = I64.extend_i32_u dst in
-        Bool.or_
-          (I64.gt_u I64.(add dst len) memsize)
-          (I64.gt_u I64.(add src len) datasize)
+        ( Bool.or_
+            (I64.gt_u I64.(add dst len) memsize)
+            (I64.gt_u I64.(add src len) datasize)
+        , `Out_of_bounds_memory_access )
       in
-      if out_of_bounds then Choice.trap `Out_of_bounds_memory_access
-      else begin
-        let data = Data.value data in
-        let* mem = Env.get_memory env mem_0 in
-        Memory.blit_string mem data ~src ~dst ~len;
-        st stack
-      end
+      let data = Data.value data in
+      let* mem = Env.get_memory env mem_0 in
+      Memory.blit_string mem data ~src ~dst ~len;
+      st stack
     | Select _t ->
       if !use_ite_for_select then begin
         let b, stack = Stack.pop_bool stack in
@@ -1074,6 +1079,7 @@ struct
       Global.set_value global v;
       st stack
     | Table_get i ->
+      (* TODO: this should be rewritten without `select_i32` ! but it requires to change the type of `Table.get` *)
       let* t = Env.get_table env i in
       let i, stack = Stack.pop_i32 stack in
       let* i = Choice.select_i32 i in
@@ -1087,6 +1093,7 @@ struct
       let* t = Env.get_table env indice in
       let v, stack = Stack.pop_as_ref stack in
       let indice, stack = Stack.pop_i32 stack in
+      (* TODO: avoid the select_i32, it requires to change the type of `Table.set` *)
       let* indice = Choice.select_i32 indice in
       let indice = Int32.to_int indice in
       if indice < 0 || indice >= Table.size t then
@@ -1104,14 +1111,13 @@ struct
       let size = consti @@ Table.size t in
       let delta, stack = Stack.pop_i32 stack in
       let new_size = I32.(size + delta) in
-      let allowed =
+      let> allowed =
         Bool.and_
           ( match Table.max_size t with
           | None -> Bool.const true
           | Some max -> I32.ge_u (consti max) new_size )
           (I32.ge_u new_size size)
       in
-      let> allowed in
       if not allowed then
         let stack = Stack.drop stack in
         st @@ Stack.push_i32_of_int stack (-1)
@@ -1125,49 +1131,44 @@ struct
       let len, stack = Stack.pop_i32 stack in
       let x, stack = Stack.pop_as_ref stack in
       let pos, stack = Stack.pop_i32 stack in
-      let> out_of_bounds =
+      let>! () =
         let pos = I64.extend_i32_u pos in
         let len = I64.extend_i32_u len in
         let size = I64.extend_i32_u (consti @@ Table.size t) in
-        I64.gt_u I64.(add pos len) size
+        (I64.gt_u I64.(add pos len) size, `Out_of_bounds_table_access)
       in
-      if out_of_bounds then Choice.trap `Out_of_bounds_table_access
-      else begin
-        let* pos = Choice.select_i32 pos in
-        let* len = Choice.select_i32 len in
-        Table.fill t pos len x;
-        st stack
-      end
+      let* pos = Choice.select_i32 pos in
+      let* len = Choice.select_i32 len in
+      Table.fill t pos len x;
+      st stack
     | Table_copy (ti_dst, ti_src) -> begin
       let* t_src = Env.get_table env ti_src in
       let* t_dst = Env.get_table env ti_dst in
       let len, stack = Stack.pop_i32 stack in
       let src, stack = Stack.pop_i32 stack in
       let dst, stack = Stack.pop_i32 stack in
-      let> out_of_bounds =
+      let>! () =
         let src_size = Table.size t_src |> consti |> I64.extend_i32_u in
         let dst_size = Table.size t_dst |> consti |> I64.extend_i32_u in
         let src = I64.extend_i32_u src in
         let dst = I64.extend_i32_u dst in
         let len = I64.extend_i32_u len in
-        Bool.or_
-          (I64.gt_u I64.(add src len) src_size)
-          (I64.gt_u I64.(add dst len) dst_size)
+        ( Bool.or_
+            (I64.gt_u I64.(add src len) src_size)
+            (I64.gt_u I64.(add dst len) dst_size)
+        , `Out_of_bounds_table_access )
       in
-      if out_of_bounds then Choice.trap `Out_of_bounds_table_access
-      else begin
-        let* () =
-          let> len_eqz = I32.eqz len in
-          if len_eqz then return ()
-          else begin
-            let* src = Choice.select_i32 src in
-            let* dst = Choice.select_i32 dst in
-            let+ len = Choice.select_i32 len in
-            Table.copy ~t_src ~t_dst ~src ~dst ~len
-          end
-        in
-        st stack
-      end
+      let* () =
+        let> len_eqz = I32.eqz len in
+        if len_eqz then return ()
+        else begin
+          let* src = Choice.select_i32 src in
+          let* dst = Choice.select_i32 dst in
+          let+ len = Choice.select_i32 len in
+          Table.copy ~t_src ~t_dst ~src ~dst ~len
+        end
+      in
+      st stack
     end
     | Table_init (t_i, e_i) -> begin
       let* t = Env.get_table env t_i in
@@ -1175,30 +1176,28 @@ struct
       let len, stack = Stack.pop_i32 stack in
       let pos_x, stack = Stack.pop_i32 stack in
       let pos, stack = Stack.pop_i32 stack in
-      let> out_of_bounds =
+      let>! () =
         let pos = I64.extend_i32_u pos in
         let pos_x = I64.extend_i32_u pos_x in
         let len = I64.extend_i32_u len in
         let tbl_size = Table.size t |> consti |> I64.extend_i32_u in
         let elem_size = Elem.size elem |> consti |> I64.extend_i32_u in
-        Bool.or_
-          I64.(gt_u (add len pos_x) elem_size)
-          I64.(gt_u (add len pos) tbl_size)
+        ( Bool.or_
+            I64.(gt_u (add len pos_x) elem_size)
+            I64.(gt_u (add len pos) tbl_size)
+        , `Out_of_bounds_table_access )
       in
-      if out_of_bounds then Choice.trap `Out_of_bounds_table_access
-      else begin
-        let* len = Choice.select_i32 len in
-        let* pos_x = Choice.select_i32 pos_x in
-        let* pos = Choice.select_i32 pos in
-        let len = Int32.to_int len in
-        let pos_x = Int32.to_int pos_x in
-        let pos = Int32.to_int pos in
-        for i = 0 to len - 1 do
-          let elt = Elem.get elem (pos_x + i) in
-          Table.set t (pos + i) elt
-        done;
-        st stack
-      end
+      let* len = Choice.select_i32 len in
+      let* pos_x = Choice.select_i32 pos_x in
+      let* pos = Choice.select_i32 pos in
+      let len = Int32.to_int len in
+      let pos_x = Int32.to_int pos_x in
+      let pos = Int32.to_int pos in
+      for i = 0 to len - 1 do
+        let elt = Elem.get elem (pos_x + i) in
+        Table.set t (pos + i) elt
+      done;
+      st stack
     end
     | Elem_drop i ->
       let elem = Env.get_elem env i in
@@ -1212,22 +1211,21 @@ struct
         let offset = const offset |> I64.extend_i32_u in
         I64.add pos offset
       in
-      let> out_of_bounds =
+      let>! () =
         let size = Memory.size mem |> I64.extend_i32_u in
-        I64.(lt_u size (add addr (const 2l |> I64.extend_i32_u)))
+        ( I64.(lt_u size (add addr (const 2l |> I64.extend_i32_u)))
+        , `Out_of_bounds_memory_access )
       in
-      if out_of_bounds then Choice.trap `Out_of_bounds_memory_access
-      else
-        let* mem = Env.get_memory env mem_0 in
-        let* res =
-          (match sx with S -> Memory.load_16_s | U -> Memory.load_16_u)
-            mem (I32.wrap_i64 addr)
-        in
-        st
-        @@
-        match nn with
-        | S32 -> Stack.push_i32 stack res
-        | S64 -> Stack.push_i64 stack (I64.of_int32 res) )
+      let* mem = Env.get_memory env mem_0 in
+      let* res =
+        (match sx with S -> Memory.load_16_s | U -> Memory.load_16_u)
+          mem (I32.wrap_i64 addr)
+      in
+      st
+      @@
+      match nn with
+      | S32 -> Stack.push_i32 stack res
+      | S64 -> Stack.push_i64 stack (I64.of_int32 res) )
     | I_load8 (nn, sx, { offset; _ }) -> (
       let* mem = Env.get_memory env mem_0 in
       let pos, stack = Stack.pop_i32 stack in
@@ -1236,22 +1234,21 @@ struct
         let offset = const offset |> I64.extend_i32_u in
         I64.add pos offset
       in
-      let> out_of_bounds =
+      let>! () =
         let size = Memory.size mem |> I64.extend_i32_u in
-        I64.(lt_u size (add addr (const 1l |> I64.extend_i32_u)))
+        ( I64.(lt_u size (add addr (const 1l |> I64.extend_i32_u)))
+        , `Out_of_bounds_memory_access )
       in
-      if out_of_bounds then Choice.trap `Out_of_bounds_memory_access
-      else
-        let* mem = Env.get_memory env mem_0 in
-        let* res =
-          (match sx with S -> Memory.load_8_s | U -> Memory.load_8_u)
-            mem (I32.wrap_i64 addr)
-        in
-        st
-        @@
-        match nn with
-        | S32 -> Stack.push_i32 stack res
-        | S64 -> Stack.push_i64 stack (I64.of_int32 res) )
+      let* mem = Env.get_memory env mem_0 in
+      let* res =
+        (match sx with S -> Memory.load_8_s | U -> Memory.load_8_u)
+          mem (I32.wrap_i64 addr)
+      in
+      st
+      @@
+      match nn with
+      | S32 -> Stack.push_i32 stack res
+      | S64 -> Stack.push_i64 stack (I64.of_int32 res) )
     | I_store8 (nn, { offset; _ }) ->
       let* mem = Env.get_memory env mem_0 in
       let n, stack =
@@ -1269,17 +1266,15 @@ struct
         let offset = const offset |> I64.extend_i32_u in
         I64.add pos offset
       in
-      let> out_of_bounds =
+      let>! () =
         let size = Memory.size mem |> I64.extend_i32_u in
-        I64.(lt_u size (add addr (const 1l |> I64.extend_i32_u)))
+        ( I64.(lt_u size (add addr (const 1l |> I64.extend_i32_u)))
+        , `Out_of_bounds_memory_access )
       in
-      if out_of_bounds then Choice.trap `Out_of_bounds_memory_access
-      else begin
-        let* mem = Env.get_memory env mem_0 in
-        let* () = Memory.store_8 mem ~addr:(I32.wrap_i64 addr) n in
-        (* Thread memory ? *)
-        st stack
-      end
+      let* mem = Env.get_memory env mem_0 in
+      let* () = Memory.store_8 mem ~addr:(I32.wrap_i64 addr) n in
+      (* Thread memory ? *)
+      st stack
     | I_load (nn, { offset; _ }) ->
       let* mem = Env.get_memory env mem_0 in
       let pos, stack = Stack.pop_i32 stack in
@@ -1291,23 +1286,21 @@ struct
       let size = Memory.size mem |> I64.extend_i32_u in
       begin match nn with
       | S32 ->
-        let> out_of_bounds =
-          I64.(lt_u size (add addr (const 4l |> I64.extend_i32_u)))
+        let>! () =
+          ( I64.(lt_u size (add addr (const 4l |> I64.extend_i32_u)))
+          , `Out_of_bounds_memory_access )
         in
-        if out_of_bounds then Choice.trap `Out_of_bounds_memory_access
-        else
-          let* mem = Env.get_memory env mem_0 in
-          let* res = Memory.load_32 mem (I32.wrap_i64 addr) in
-          st @@ Stack.push_i32 stack res
+        let* mem = Env.get_memory env mem_0 in
+        let* res = Memory.load_32 mem (I32.wrap_i64 addr) in
+        st @@ Stack.push_i32 stack res
       | S64 ->
-        let> out_of_bounds =
-          I64.(lt_u size (add addr (const 8l |> I64.extend_i32_u)))
+        let>! () =
+          ( I64.(lt_u size (add addr (const 8l |> I64.extend_i32_u)))
+          , `Out_of_bounds_memory_access )
         in
-        if out_of_bounds then Choice.trap `Out_of_bounds_memory_access
-        else
-          let* mem = Env.get_memory env mem_0 in
-          let* res = Memory.load_64 mem (I32.wrap_i64 addr) in
-          st @@ Stack.push_i64 stack res
+        let* mem = Env.get_memory env mem_0 in
+        let* res = Memory.load_64 mem (I32.wrap_i64 addr) in
+        st @@ Stack.push_i64 stack res
       end
     | F_load (nn, { offset; _ }) ->
       let* mem = Env.get_memory env mem_0 in
@@ -1320,25 +1313,23 @@ struct
       let size = Memory.size mem |> I64.extend_i32_u in
       begin match nn with
       | S32 ->
-        let> out_of_bounds =
-          I64.(lt_u size (add addr (const 4l |> I64.extend_i32_u)))
+        let>! () =
+          ( I64.(lt_u size (add addr (const 4l |> I64.extend_i32_u)))
+          , `Out_of_bounds_memory_access )
         in
-        if out_of_bounds then Choice.trap `Out_of_bounds_memory_access
-        else
-          let* mem = Env.get_memory env mem_0 in
-          let* res = Memory.load_32 mem (I32.wrap_i64 addr) in
-          let res = F32.of_bits res in
-          st @@ Stack.push_f32 stack res
+        let* mem = Env.get_memory env mem_0 in
+        let* res = Memory.load_32 mem (I32.wrap_i64 addr) in
+        let res = F32.of_bits res in
+        st @@ Stack.push_f32 stack res
       | S64 ->
-        let> out_of_bounds =
-          I64.(lt_u size (add addr (const 8l |> I64.extend_i32_u)))
+        let>! () =
+          ( I64.(lt_u size (add addr (const 8l |> I64.extend_i32_u)))
+          , `Out_of_bounds_memory_access )
         in
-        if out_of_bounds then Choice.trap `Out_of_bounds_memory_access
-        else
-          let* mem = Env.get_memory env mem_0 in
-          let* res = Memory.load_64 mem (I32.wrap_i64 addr) in
-          let res = F64.of_bits res in
-          st @@ Stack.push_f64 stack res
+        let* mem = Env.get_memory env mem_0 in
+        let* res = Memory.load_64 mem (I32.wrap_i64 addr) in
+        let res = F64.of_bits res in
+        st @@ Stack.push_f64 stack res
       end
     | I_store (nn, { offset; _ }) -> (
       let* mem = Env.get_memory env mem_0 in
@@ -1352,13 +1343,13 @@ struct
           let pos = I64.extend_i32_u pos in
           I64.add pos offset
         in
-        let> out_of_bounds = I64.(lt_u size (add addr (const_i64 4L))) in
-        if out_of_bounds then Choice.trap `Out_of_bounds_memory_access
-        else begin
-          let* mem = Env.get_memory env mem_0 in
-          let* () = Memory.store_32 mem ~addr:(I32.wrap_i64 addr) n in
-          st stack
-        end
+        let>! () =
+          ( I64.(lt_u size (add addr (const_i64 4L)))
+          , `Out_of_bounds_memory_access )
+        in
+        let* mem = Env.get_memory env mem_0 in
+        let* () = Memory.store_32 mem ~addr:(I32.wrap_i64 addr) n in
+        st stack
       | S64 ->
         let n, stack = Stack.pop_i64 stack in
         let pos, stack = Stack.pop_i32 stack in
@@ -1366,13 +1357,13 @@ struct
           let pos = I64.extend_i32_u pos in
           I64.add pos offset
         in
-        let> out_of_bounds = I64.(lt_u size (add addr (const_i64 8L))) in
-        if out_of_bounds then Choice.trap `Out_of_bounds_memory_access
-        else begin
-          let* mem = Env.get_memory env mem_0 in
-          let* () = Memory.store_64 mem ~addr:(I32.wrap_i64 addr) n in
-          st stack
-        end )
+        let>! () =
+          ( I64.(lt_u size (add addr (const_i64 8L)))
+          , `Out_of_bounds_memory_access )
+        in
+        let* mem = Env.get_memory env mem_0 in
+        let* () = Memory.store_64 mem ~addr:(I32.wrap_i64 addr) n in
+        st stack )
     | F_store (nn, { offset; _ }) -> (
       let* mem = Env.get_memory env mem_0 in
       let size = Memory.size mem |> I64.extend_i32_u in
@@ -1385,15 +1376,15 @@ struct
           let pos = I64.extend_i32_u pos in
           I64.add pos offset
         in
-        let> out_of_bounds = I64.(lt_u size (add addr (const_i64 4L))) in
-        if out_of_bounds then Choice.trap `Out_of_bounds_memory_access
-        else begin
-          let* mem = Env.get_memory env mem_0 in
-          let* () =
-            Memory.store_32 mem ~addr:(I32.wrap_i64 addr) (F32.to_bits n)
-          in
-          st stack
-        end
+        let>! () =
+          ( I64.(lt_u size (add addr (const_i64 4L)))
+          , `Out_of_bounds_memory_access )
+        in
+        let* mem = Env.get_memory env mem_0 in
+        let* () =
+          Memory.store_32 mem ~addr:(I32.wrap_i64 addr) (F32.to_bits n)
+        in
+        st stack
       | S64 ->
         let n, stack = Stack.pop_f64 stack in
         let pos, stack = Stack.pop_i32 stack in
@@ -1401,15 +1392,15 @@ struct
           let pos = I64.extend_i32_u pos in
           I64.add pos offset
         in
-        let> out_of_bounds = I64.(lt_u size (add addr (const_i64 8L))) in
-        if out_of_bounds then Choice.trap `Out_of_bounds_memory_access
-        else begin
-          let* mem = Env.get_memory env mem_0 in
-          let* () =
-            Memory.store_64 mem ~addr:(I32.wrap_i64 addr) (F64.to_bits n)
-          in
-          st stack
-        end )
+        let>! () =
+          ( I64.(lt_u size (add addr (const_i64 8L)))
+          , `Out_of_bounds_memory_access )
+        in
+        let* mem = Env.get_memory env mem_0 in
+        let* () =
+          Memory.store_64 mem ~addr:(I32.wrap_i64 addr) (F64.to_bits n)
+        in
+        st stack )
     | I64_load32 (sx, { offset; _ }) ->
       let* mem = Env.get_memory env mem_0 in
       let pos, stack = Stack.pop_i32 stack in
@@ -1418,26 +1409,23 @@ struct
         let offset = const offset |> I64.extend_i32_u in
         I64.add pos offset
       in
-      let> out_of_bounds =
+      let>! () =
         let size = Memory.size mem |> I64.extend_i32_u in
-        I64.(lt_u size (add addr (const_i64 4L)))
+        (I64.(lt_u size (add addr (const_i64 4L))), `Out_of_bounds_memory_access)
       in
-      if out_of_bounds then Choice.trap `Out_of_bounds_memory_access
-      else begin
-        let* mem = Env.get_memory env mem_0 in
-        let* res = Memory.load_32 mem (I32.wrap_i64 addr) in
-        let res = I64.of_int32 res in
-        let res =
-          match sx with
-          | S -> res
-          | U ->
-            let open I64 in
-            let a = shl (const_i64 1L) (const_i64 32L) in
-            let b = a - const_i64 1L in
-            logand res b
-        in
-        st @@ Stack.push_i64 stack res
-      end
+      let* mem = Env.get_memory env mem_0 in
+      let* res = Memory.load_32 mem (I32.wrap_i64 addr) in
+      let res = I64.of_int32 res in
+      let res =
+        match sx with
+        | S -> res
+        | U ->
+          let open I64 in
+          let a = shl (const_i64 1L) (const_i64 32L) in
+          let b = a - const_i64 1L in
+          logand res b
+      in
+      st @@ Stack.push_i64 stack res
     | I_store16 (nn, { offset; _ }) ->
       let n, stack =
         match nn with
@@ -1455,16 +1443,13 @@ struct
         I64.add pos offset
       in
       let* mem = Env.get_memory env mem_0 in
-      let> out_of_bounds =
+      let>! () =
         let size = Memory.size mem |> I64.extend_i32_u in
-        I64.(lt_u size (add addr (const_i64 2L)))
+        (I64.(lt_u size (add addr (const_i64 2L))), `Out_of_bounds_memory_access)
       in
-      if out_of_bounds then Choice.trap `Out_of_bounds_memory_access
-      else begin
-        let* mem = Env.get_memory env mem_0 in
-        let* () = Memory.store_16 mem ~addr:(I32.wrap_i64 addr) n in
-        st stack
-      end
+      let* mem = Env.get_memory env mem_0 in
+      let* () = Memory.store_16 mem ~addr:(I32.wrap_i64 addr) n in
+      st stack
     | I64_store32 { offset; _ } ->
       let* mem = Env.get_memory env mem_0 in
       let n, stack = Stack.pop_i64 stack in
@@ -1474,19 +1459,16 @@ struct
         let offset = const offset |> I64.extend_i32_u in
         I64.add pos offset
       in
-      let> out_of_bounds =
+      let>! () =
         let size = Memory.size mem |> I64.extend_i32_u in
-        I64.(lt_u size (add addr (const_i64 4L)))
+        (I64.(lt_u size (add addr (const_i64 4L))), `Out_of_bounds_memory_access)
       in
-      if out_of_bounds then Choice.trap `Out_of_bounds_memory_access
-      else begin
-        let* mem = Env.get_memory env mem_0 in
-        let* () =
-          let n = I64.to_int32 n in
-          Memory.store_32 mem ~addr:(I32.wrap_i64 addr) n
-        in
-        st stack
-      end
+      let* mem = Env.get_memory env mem_0 in
+      let* () =
+        let n = I64.to_int32 n in
+        Memory.store_32 mem ~addr:(I32.wrap_i64 addr) n
+      in
+      st stack
     | Data_drop i ->
       let* data = Env.get_data env i in
       Env.drop_data data;
@@ -1565,11 +1547,11 @@ struct
          fun () ->
            let fuel_left = Atomic.fetch_and_add fuel (-1) in
            (* If we only use [timeout_instr], we want to stop all as
-                soon as [fuel_left <= 0]. But if we only use [timeout],
-                we don't want to run into the slow path below on each
-                instruction after [fuel_left] becomes negative. We avoid
-                this repeated slow path by bumping [fuel] to [max_int]
-                again in this case. *)
+              soon as [fuel_left <= 0]. But if we only use [timeout],
+              we don't want to run into the slow path below on each
+              instruction after [fuel_left] becomes negative. We avoid
+              this repeated slow path by bumping [fuel] to [max_int]
+              again in this case. *)
            if fuel_left mod 1024 = 0 || fuel_left < 0 then begin
              let stop =
                match (timeout, timeout_instr) with
