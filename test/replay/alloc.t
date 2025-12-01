@@ -17,7 +17,7 @@
   owi: [INFO] stack         : [ i32.const 0 ; i32.const 1024 ]
   owi: [INFO] running instr : i32.const 4
   owi: [INFO] stack         : [ i32.const 4 ; i32.const 0 ; i32.const 1024 ]
-  owi: [INFO] running instr : memory.init 0 0
+  owi: [INFO] running instr : memory.init 0
   owi: [INFO] stack         : [  ]
   owi: [INFO] running instr : data.drop 0
   owi: [INFO] stack         : [  ]
@@ -51,11 +51,11 @@
   owi: [INFO] stack         : [  ]
   owi: [INFO] running instr : call 3
   owi: [INFO] stack         : [ i32.const 9 ; i32.const 8389632 ]
-  owi: [INFO] running instr : i32.store 0 offset=12 align=4
+  owi: [INFO] running instr : i32.store offset=12 align=4
   owi: [INFO] stack         : [  ]
   owi: [INFO] running instr : local.get 0
   owi: [INFO] stack         : [ i32.const 8389632 ]
-  owi: [INFO] running instr : i32.load 0 offset=12 align=4
+  owi: [INFO] running instr : i32.load offset=12 align=4
   owi: [INFO] stack         : [ i32.const 9 ]
   owi: [INFO] running instr : i32.const 10
   owi: [INFO] stack         : [ i32.const 10 ; i32.const 9 ]
@@ -69,7 +69,7 @@
   owi: [INFO] stack         : [  ]
   owi: [INFO] running instr : local.get 0
   owi: [INFO] stack         : [ i32.const 8389632 ]
-  owi: [INFO] running instr : i32.load 0 offset=12 align=4
+  owi: [INFO] running instr : i32.load offset=12 align=4
   owi: [INFO] stack         : [ i32.const 9 ]
   owi: [INFO] running instr : i32.const 0
   owi: [INFO] stack         : [ i32.const 0 ; i32.const 9 ]
@@ -85,7 +85,7 @@
   owi: [INFO] stack         : [ i32.const 8389632 ]
   owi: [INFO] running instr : local.get 0
   owi: [INFO] stack         : [ i32.const 8389632 ; i32.const 8389632 ]
-  owi: [INFO] running instr : i32.load 0 offset=12 align=4
+  owi: [INFO] running instr : i32.load offset=12 align=4
   owi: [INFO] stack         : [ i32.const 9 ; i32.const 8389632 ]
   owi: [INFO] running instr : call 9
   owi: [INFO] calling func  : func anonymous
@@ -126,7 +126,7 @@
   owi: [INFO] stack         : [ i32.const 8 ; i32.const 0 ]
   owi: [INFO] running instr : i32.const 0
   owi: [INFO] stack         : [ i32.const 0 ; i32.const 8 ; i32.const 0 ]
-  owi: [INFO] running instr : i32.load 0 offset=1024 align=4
+  owi: [INFO] running instr : i32.load offset=1024 align=4
   owi: [INFO] stack         : [ i32.const 8389648 ; i32.const 8 ; i32.const 0 ]
   owi: [INFO] running instr : local.tee 2
   owi: [INFO] stack         : [ i32.const 8389648 ; i32.const 8 ; i32.const 0 ]
@@ -158,7 +158,7 @@
   owi: [INFO] stack         : [ i32.const 9 ; i32.const 8389648 ; i32.const 0 ]
   owi: [INFO] running instr : i32.add
   owi: [INFO] stack         : [ i32.const 8389657 ; i32.const 0 ]
-  owi: [INFO] running instr : i32.store 0 offset=1024 align=4
+  owi: [INFO] running instr : i32.store offset=1024 align=4
   owi: [INFO] stack         : [  ]
   owi: [INFO] running instr : local.get 1
   owi: [INFO] stack         : [ i32.const 8389648 ]
@@ -166,11 +166,11 @@
   owi: [INFO] stack         : [ i32.const 9 ; i32.const 8389648 ]
   owi: [INFO] running instr : call 0
   owi: [INFO] stack         : [ i32.const 0 ; i32.const 8389632 ]
-  owi: [INFO] running instr : i32.store 0 offset=8 align=4
+  owi: [INFO] running instr : i32.store offset=8 align=4
   owi: [INFO] stack         : [  ]
   owi: [INFO] running instr : local.get 0
   owi: [INFO] stack         : [ i32.const 8389632 ]
-  owi: [INFO] running instr : i32.load 0 offset=8 align=4
+  owi: [INFO] running instr : i32.load offset=8 align=4
   owi: [INFO] stack         : [ i32.const 0 ]
   owi: [INFO] running instr : call 10
   owi: [INFO] calling func  : func anonymous

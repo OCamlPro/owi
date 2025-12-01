@@ -77,7 +77,7 @@
     2 -> 3[label="default"]
     
     
-    3 [label="local.get 0 | i32.const 1 | i32.sub | i32.const 4 | i32.mul | i32.load 0 align=1 | local.tee 1 | if"]
+    3 [label="local.get 0 | i32.const 1 | i32.sub | i32.const 4 | i32.mul | i32.load align=1 | local.tee 1 | if"]
     3 -> 4[label="1"]
     3 -> 5[label="0"]
     
@@ -90,11 +90,11 @@
     5 -> 6[label="default"]
     
     
-    6 [label="local.tee 1 | i32.store 0 align=1"]
+    6 [label="local.tee 1 | i32.store align=1"]
     6 -> 7[label="default"]
     
     
-    7 [label="local.get 1 | local.get 0 | i32.const 2 | i32.sub | i32.const 4 | i32.mul | i32.load 0 align=1 | local.tee 2 | if"]
+    7 [label="local.get 1 | local.get 0 | i32.const 2 | i32.sub | i32.const 4 | i32.mul | i32.load align=1 | local.tee 2 | if"]
     7 -> 8[label="1"]
     7 -> 9[label="0"]
     
@@ -107,7 +107,7 @@
     9 -> 10[label="default"]
     
     
-    10 [label="local.tee 2 | i32.store 0 align=1"]
+    10 [label="local.tee 2 | i32.store align=1"]
     10 -> 11[label="default"]
     
     
