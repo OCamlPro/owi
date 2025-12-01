@@ -69,7 +69,7 @@ $ owi fmt horrible.wat
     i32.const 4
     local.get $n
     i32.mul
-    i32.load align=1
+    i32.load 0 align=1
     i32.eqz
     (if
       (then
@@ -85,13 +85,13 @@ $ owi fmt horrible.wat
         i32.sub
         call $f
         i32.add
-        i32.store align=1
+        i32.store 0 align=1
       )
     )
     local.get $n
     i32.const 4
     i32.mul
-    i32.load align=1
+    i32.load 0 align=1
     return
   )
 )

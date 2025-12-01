@@ -164,9 +164,10 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
       let* table = Assigned.find_table assigned i in
       let+ table' = Assigned.find_table assigned i' in
       Binary.Table_copy (table, table')
-    | Memory_init id ->
-      let+ id = Assigned.find_data assigned id in
-      Binary.Memory_init id
+    | Memory_init (memidx, dataidx) ->
+      let* memidx = Assigned.find_memory assigned memidx in
+      let+ dataidx = Assigned.find_data assigned dataidx in
+      Binary.Memory_init (memidx, dataidx)
     | Data_drop id ->
       let+ id = Assigned.find_data assigned id in
       Binary.Data_drop id
@@ -210,16 +211,36 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
     | Return -> Ok Binary.Return
     | Extern_externalize -> Ok Binary.Extern_externalize
     | Extern_internalize -> Ok Binary.Extern_internalize
-    | I_load8 (nn, sx, memarg) -> Ok (Binary.I_load8 (nn, sx, memarg))
-    | I_store8 (nn, memarg) -> Ok (Binary.I_store8 (nn, memarg))
-    | I_load16 (nn, sx, memarg) -> Ok (Binary.I_load16 (nn, sx, memarg))
-    | I_store16 (nn, memarg) -> Ok (Binary.I_store16 (nn, memarg))
-    | I64_load32 (sx, memarg) -> Ok (Binary.I64_load32 (sx, memarg))
-    | I64_store32 memarg -> Ok (Binary.I64_store32 memarg)
-    | I_load (nn, memarg) -> Ok (Binary.I_load (nn, memarg))
-    | F_load (nn, memarg) -> Ok (Binary.F_load (nn, memarg))
-    | F_store (nn, memarg) -> Ok (Binary.F_store (nn, memarg))
-    | I_store (nn, memarg) -> Ok (Binary.I_store (nn, memarg))
+    | I_load8 (id, nn, sx, memarg) ->
+      let* id = Assigned.find_memory assigned id in
+      Ok (Binary.I_load8 (id, nn, sx, memarg))
+    | I_store8 (id, nn, memarg) ->
+      let* id = Assigned.find_memory assigned id in
+      Ok (Binary.I_store8 (id, nn, memarg))
+    | I_load16 (id, nn, sx, memarg) ->
+      let* id = Assigned.find_memory assigned id in
+      Ok (Binary.I_load16 (id, nn, sx, memarg))
+    | I_store16 (id, nn, memarg) ->
+      let* id = Assigned.find_memory assigned id in
+      Ok (Binary.I_store16 (id, nn, memarg))
+    | I64_load32 (id, sx, memarg) ->
+      let* id = Assigned.find_memory assigned id in
+      Ok (Binary.I64_load32 (id, sx, memarg))
+    | I64_store32 (id, memarg) ->
+      let* id = Assigned.find_memory assigned id in
+      Ok (Binary.I64_store32 (id, memarg))
+    | I_load (id, nn, memarg) ->
+      let* id = Assigned.find_memory assigned id in
+      Ok (Binary.I_load (id, nn, memarg))
+    | F_load (id, nn, memarg) ->
+      let* id = Assigned.find_memory assigned id in
+      Ok (Binary.F_load (id, nn, memarg))
+    | F_store (id, nn, memarg) ->
+      let* id = Assigned.find_memory assigned id in
+      Ok (Binary.F_store (id, nn, memarg))
+    | I_store (id, nn, memarg) ->
+      let* id = Assigned.find_memory assigned id in
+      Ok (Binary.I_store (id, nn, memarg))
     | Memory_copy (id1, id2) ->
       let* id1 = Assigned.find_memory assigned id1 in
       let* id2 = Assigned.find_memory assigned id2 in

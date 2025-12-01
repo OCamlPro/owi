@@ -141,8 +141,11 @@ let write_limits buf (limits : Text.limits) =
     write_u32_of_int buf min;
     write_u32_of_int buf max
 
-let write_memarg buf ({ offset; align } : Text.memarg) =
-  write_u32 buf align;
+let write_memarg buf idx ({ offset; align } : Text.memarg) =
+  (* Set the 6th bit *)
+  write_u32 buf (Int32.logor align 0x40l);
+  (* Should this set the max_align bit instead of always setting the 6th? *)
+  write_indice buf idx;
   write_u32 buf offset
 
 let write_memory buf ((_so, limits) : Text.Mem.t) = write_limits buf limits
@@ -228,81 +231,77 @@ let rec write_instr buf instr =
   | Global_set idx -> write_char_indice buf '\x24' idx
   | Table_get idx -> write_char_indice buf '\x25' idx
   | Table_set idx -> write_char_indice buf '\x26' idx
-  | I_load (S32, memarg) ->
+  | I_load (idx, S32, memarg) ->
     add_char '\x28';
-    write_memarg buf memarg
-  | I_load (S64, memarg) ->
+    write_memarg buf idx memarg
+  | I_load (idx, S64, memarg) ->
     add_char '\x29';
-    write_memarg buf memarg
-  | F_load (S32, memarg) ->
+    write_memarg buf idx memarg
+  | F_load (idx, S32, memarg) ->
     add_char '\x2A';
-    write_memarg buf memarg
-  | F_load (S64, memarg) ->
+    write_memarg buf idx memarg
+  | F_load (idx, S64, memarg) ->
     add_char '\x2B';
-    write_memarg buf memarg
-  | I_load8 (S32, S, memarg) ->
+    write_memarg buf idx memarg
+  | I_load8 (idx, S32, S, memarg) ->
     add_char '\x2C';
-    write_memarg buf memarg
-  | I_load8 (S32, U, memarg) ->
+    write_memarg buf idx memarg
+  | I_load8 (idx, S32, U, memarg) ->
     add_char '\x2D';
-    write_memarg buf memarg
-  | I_load16 (S32, S, memarg) ->
+    write_memarg buf idx memarg
+  | I_load16 (idx, S32, S, memarg) ->
     add_char '\x2E';
-    write_memarg buf memarg
-  | I_load16 (S32, U, memarg) ->
+    write_memarg buf idx memarg
+  | I_load16 (idx, S32, U, memarg) ->
     add_char '\x2F';
-    write_memarg buf memarg
-  | I_load8 (S64, S, memarg) ->
+    write_memarg buf idx memarg
+  | I_load8 (idx, S64, S, memarg) ->
     add_char '\x30';
-    write_memarg buf memarg
-  | I_load8 (S64, U, memarg) ->
+    write_memarg buf idx memarg
+  | I_load8 (idx, S64, U, memarg) ->
     add_char '\x31';
-    write_memarg buf memarg
-  | I_load16 (S64, S, memarg) ->
+    write_memarg buf idx memarg
+  | I_load16 (idx, S64, S, memarg) ->
     add_char '\x32';
-    write_memarg buf memarg
-  | I_load16 (S64, U, memarg) ->
+    write_memarg buf idx memarg
+  | I_load16 (idx, S64, U, memarg) ->
     add_char '\x33';
-    write_memarg buf memarg
-  | I64_load32 (S, memarg) ->
+    write_memarg buf idx memarg
+  | I64_load32 (idx, S, memarg) ->
     add_char '\x34';
-    write_memarg buf memarg
-  | I64_load32 (U, memarg) ->
+    write_memarg buf idx memarg
+  | I64_load32 (idx, U, memarg) ->
     add_char '\x35';
-    write_memarg buf memarg
-  | I_store (S32, memarg) ->
+    write_memarg buf idx memarg
+  | I_store (idx, S32, memarg) ->
     add_char '\x36';
-    write_memarg buf memarg
-  | I_store (S64, memarg) ->
+    write_memarg buf idx memarg
+  | I_store (idx, S64, memarg) ->
     add_char '\x37';
-    write_memarg buf memarg
-  | F_store (S32, memarg) ->
+    write_memarg buf idx memarg
+  | F_store (idx, S32, memarg) ->
     add_char '\x38';
-    write_memarg buf memarg
-  | F_store (S64, memarg) ->
+    write_memarg buf idx memarg
+  | F_store (idx, S64, memarg) ->
     add_char '\x39';
-    write_memarg buf memarg
-  | I_store8 (S32, memarg) ->
+    write_memarg buf idx memarg
+  | I_store8 (idx, S32, memarg) ->
     add_char '\x3A';
-    write_memarg buf memarg
-  | I_store16 (S32, memarg) ->
+    write_memarg buf idx memarg
+  | I_store16 (idx, S32, memarg) ->
     add_char '\x3B';
-    write_memarg buf memarg
-  | I_store8 (S64, memarg) ->
+    write_memarg buf idx memarg
+  | I_store8 (idx, S64, memarg) ->
     add_char '\x3C';
-    write_memarg buf memarg
-  | I_store16 (S64, memarg) ->
+    write_memarg buf idx memarg
+  | I_store16 (idx, S64, memarg) ->
     add_char '\x3D';
-    write_memarg buf memarg
-  | I64_store32 memarg ->
+    write_memarg buf idx memarg
+  | I64_store32 (idx, memarg) ->
     add_char '\x3E';
-    write_memarg buf memarg
-  | Memory_size idx ->
-    add_char '\x3F';
-    write_indice buf idx
-  | Memory_grow idx ->
-    add_char '\x40';
-    write_indice buf idx
+    write_memarg buf idx memarg
+  | Memory_size idx -> write_char_indice buf '\x3F' idx
+  | Memory_grow idx -> write_char_indice buf '\x40' idx
   | I32_const i ->
     add_char '\x41';
     write_s32 buf i
@@ -456,10 +455,10 @@ let rec write_instr buf instr =
   | I_trunc_sat_f (S64, S32, U) -> write_fc buf 5
   | I_trunc_sat_f (S64, S64, S) -> write_fc buf 6
   | I_trunc_sat_f (S64, S64, U) -> write_fc buf 7
-  | Memory_init idx ->
+  | Memory_init (memidx, dataidx) ->
     write_fc buf 8;
-    write_indice buf idx;
-    add_char '\x00'
+    write_indice buf dataidx;
+    write_indice buf memidx
   | Data_drop idx ->
     write_fc buf 9;
     write_indice buf idx

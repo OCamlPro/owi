@@ -759,7 +759,7 @@ print script:
       (memory 0)
       (func $type-unary-operand-empty-in-load
         i32.eqz
-        i32.load align=1
+        i32.load 0 align=1
         drop
       )
     )
@@ -771,7 +771,7 @@ print script:
       (func $type-unary-operand-empty-in-store
         i32.eqz
         i32.const 1
-        i32.store align=1
+        i32.store 0 align=1
       )
     )
     "type mismatch"
@@ -1203,7 +1203,7 @@ print script:
       (memory 0)
       (func $type-binary-1st-operand-empty-in-load
         i32.add
-        i32.load align=1
+        i32.load 0 align=1
         drop
       )
     )
@@ -1215,7 +1215,7 @@ print script:
       (func $type-binary-2nd-operand-empty-in-load
         i32.const 0
         i32.add
-        i32.load align=1
+        i32.load 0 align=1
         drop
       )
     )
@@ -1227,7 +1227,7 @@ print script:
       (func $type-binary-1st-operand-empty-in-store
         i32.add
         i32.const 1
-        i32.store align=1
+        i32.store 0 align=1
       )
     )
     "type mismatch"
@@ -1239,7 +1239,7 @@ print script:
         i32.const 1
         i32.add
         i32.const 0
-        i32.store align=1
+        i32.store 0 align=1
       )
     )
     "type mismatch"

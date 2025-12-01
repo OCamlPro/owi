@@ -264,7 +264,7 @@ let active_data_expr ~offset ~length ~mem ~data =
       [ Binary.I32_const offset
       ; I32_const 0l
       ; I32_const length
-      ; Memory_init data
+      ; Memory_init (mem, data)
       ; Data_drop data
       ]
 

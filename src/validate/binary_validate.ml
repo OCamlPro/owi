@@ -296,51 +296,51 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
     let* stack_e1 = typecheck_expr env e1 ~is_loop:false block_type ~stack in
     let+ _stack_e2 = typecheck_expr env e2 ~is_loop:false block_type ~stack in
     stack_e1
-  | I_load8 (nn, _, memarg) ->
+  | I_load8 (_id, nn, _, memarg) ->
     let* () = check_mem env.modul 0 in
     let* () = check_align memarg.align 1l in
     let* stack = Stack.pop [ i32 ] stack in
     Stack.push [ itype nn ] stack
-  | I_load16 (nn, _, memarg) ->
+  | I_load16 (_id, nn, _, memarg) ->
     let* () = check_mem env.modul 0 in
     let* () = check_align memarg.align 2l in
     let* stack = Stack.pop [ i32 ] stack in
     Stack.push [ itype nn ] stack
-  | I_load (nn, memarg) ->
+  | I_load (_id, nn, memarg) ->
     let* () = check_mem env.modul 0 in
     let max_allowed = match nn with S32 -> 4l | S64 -> 8l in
     let* () = check_align memarg.align max_allowed in
     let* stack = Stack.pop [ i32 ] stack in
     Stack.push [ itype nn ] stack
-  | I64_load32 (_, memarg) ->
+  | I64_load32 (_id, _, memarg) ->
     let* () = check_mem env.modul 0 in
     let* () = check_align memarg.align 4l in
     let* stack = Stack.pop [ i32 ] stack in
     Stack.push [ i64 ] stack
-  | I_store8 (nn, memarg) ->
+  | I_store8 (_id, nn, memarg) ->
     let* () = check_mem env.modul 0 in
     let* () = check_align memarg.align 1l in
     Stack.pop [ itype nn; i32 ] stack
-  | I_store16 (nn, memarg) ->
+  | I_store16 (_id, nn, memarg) ->
     let* () = check_mem env.modul 0 in
     let* () = check_align memarg.align 2l in
     Stack.pop [ itype nn; i32 ] stack
-  | I_store (nn, memarg) ->
+  | I_store (_id, nn, memarg) ->
     let* () = check_mem env.modul 0 in
     let max_allowed = match nn with S32 -> 4l | S64 -> 8l in
     let* () = check_align memarg.align max_allowed in
     Stack.pop [ itype nn; i32 ] stack
-  | I64_store32 memarg ->
+  | I64_store32 (_id, memarg) ->
     let* () = check_mem env.modul 0 in
     let* () = check_align memarg.align 4l in
     Stack.pop [ i64; i32 ] stack
-  | F_load (nn, memarg) ->
+  | F_load (_id, nn, memarg) ->
     let* () = check_mem env.modul 0 in
     let max_allowed = match nn with S32 -> 4l | S64 -> 8l in
     let* () = check_align memarg.align max_allowed in
     let* stack = Stack.pop [ i32 ] stack in
     Stack.push [ ftype nn ] stack
-  | F_store (nn, memarg) ->
+  | F_store (_id, nn, memarg) ->
     let* () = check_mem env.modul 0 in
     let max_allowed = match nn with S32 -> 4l | S64 -> 8l in
     let* () = check_align memarg.align max_allowed in
@@ -386,9 +386,9 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
   | Memory_copy _ | Memory_fill _ ->
     let* () = check_mem env.modul 0 in
     Stack.pop [ i32; i32; i32 ] stack
-  | Memory_init id ->
+  | Memory_init (_memidx, dataidx) ->
     let* () = check_mem env.modul 0 in
-    let* () = check_data env.modul id in
+    let* () = check_data env.modul dataidx in
     Stack.pop [ i32; i32; i32 ] stack
   | Block (_, bt, expr) -> typecheck_expr env expr ~is_loop:false bt ~stack
   | Loop (_, bt, expr) -> typecheck_expr env expr ~is_loop:true bt ~stack

@@ -94,9 +94,10 @@ let rec convert_instr : Binary.instr -> Text.instr = function
     let table = convert_indice i in
     let table' = convert_indice i' in
     Table_copy (table, table')
-  | Memory_init id ->
-    let id = convert_indice id in
-    Memory_init id
+  | Memory_init (memidx, dataidx) ->
+    let memidx = convert_indice memidx in
+    let dataidx = convert_indice dataidx in
+    Memory_init (memidx, dataidx)
   | Data_drop id ->
     let id = convert_indice id in
     Data_drop id
@@ -143,16 +144,16 @@ let rec convert_instr : Binary.instr -> Text.instr = function
   | Return -> Return
   | Extern_externalize -> Extern_externalize
   | Extern_internalize -> Extern_internalize
-  | I_load8 (nn, sx, memarg) -> I_load8 (nn, sx, memarg)
-  | I_store8 (nn, memarg) -> I_store8 (nn, memarg)
-  | I_load16 (nn, sx, memarg) -> I_load16 (nn, sx, memarg)
-  | I_store16 (nn, memarg) -> I_store16 (nn, memarg)
-  | I64_load32 (sx, memarg) -> I64_load32 (sx, memarg)
-  | I64_store32 memarg -> I64_store32 memarg
-  | I_load (nn, memarg) -> I_load (nn, memarg)
-  | F_load (nn, memarg) -> F_load (nn, memarg)
-  | F_store (nn, memarg) -> F_store (nn, memarg)
-  | I_store (nn, memarg) -> I_store (nn, memarg)
+  | I_load8 (id, nn, sx, memarg) -> I_load8 (convert_indice id, nn, sx, memarg)
+  | I_store8 (id, nn, memarg) -> I_store8 (convert_indice id, nn, memarg)
+  | I_load16 (id, nn, sx, memarg) -> I_load16 (convert_indice id, nn, sx, memarg)
+  | I_store16 (id, nn, memarg) -> I_store16 (convert_indice id, nn, memarg)
+  | I64_load32 (id, sx, memarg) -> I64_load32 (convert_indice id, sx, memarg)
+  | I64_store32 (id, memarg) -> I64_store32 (convert_indice id, memarg)
+  | I_load (id, nn, memarg) -> I_load (convert_indice id, nn, memarg)
+  | F_load (id, nn, memarg) -> F_load (convert_indice id, nn, memarg)
+  | F_store (id, nn, memarg) -> F_store (convert_indice id, nn, memarg)
+  | I_store (id, nn, memarg) -> I_store (convert_indice id, nn, memarg)
   | Memory_copy (id1, id2) ->
     Memory_copy (convert_indice id1, convert_indice id2)
   | Memory_size id -> Memory_size (convert_indice id)

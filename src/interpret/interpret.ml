@@ -1037,11 +1037,11 @@ struct
       let* mem = Env.get_memory env mem_0 in
       let* () = Memory.blit mem ~src ~dst ~len in
       st stack
-    | Memory_init i ->
+    | Memory_init (_memid, dataid) ->
       let len, stack = Stack.pop_i32 stack in
       let src, stack = Stack.pop_i32 stack in
       let dst, stack = Stack.pop_i32 stack in
-      let* data = Env.get_data env i in
+      let* data = Env.get_data env dataid in
       let* mem = Env.get_memory env mem_0 in
       let>! () =
         let memsize = I64.extend_i32_u (Memory.size mem) in
@@ -1212,7 +1212,7 @@ struct
       let elem = Env.get_elem env i in
       Env.drop_elem elem;
       st stack
-    | I_load16 (nn, sx, { offset; _ }) -> (
+    | I_load16 (_id, nn, sx, { offset; _ }) -> (
       let* mem = Env.get_memory env mem_0 in
       let pos, stack = Stack.pop_i32 stack in
       let addr =
@@ -1235,7 +1235,7 @@ struct
       match nn with
       | S32 -> Stack.push_i32 stack res
       | S64 -> Stack.push_i64 stack (I64.of_int32 res) )
-    | I_load8 (nn, sx, { offset; _ }) -> (
+    | I_load8 (_id, nn, sx, { offset; _ }) -> (
       let* mem = Env.get_memory env mem_0 in
       let pos, stack = Stack.pop_i32 stack in
       let addr =
@@ -1258,7 +1258,7 @@ struct
       match nn with
       | S32 -> Stack.push_i32 stack res
       | S64 -> Stack.push_i64 stack (I64.of_int32 res) )
-    | I_store8 (nn, { offset; _ }) ->
+    | I_store8 (_id, nn, { offset; _ }) ->
       let* mem = Env.get_memory env mem_0 in
       let n, stack =
         match nn with
@@ -1284,7 +1284,7 @@ struct
       let* () = Memory.store_8 mem ~addr:(I32.wrap_i64 addr) n in
       (* Thread memory ? *)
       st stack
-    | I_load (nn, { offset; _ }) ->
+    | I_load (_id, nn, { offset; _ }) ->
       let* mem = Env.get_memory env mem_0 in
       let pos, stack = Stack.pop_i32 stack in
       let addr =
@@ -1311,7 +1311,7 @@ struct
         let* res = Memory.load_64 mem (I32.wrap_i64 addr) in
         st @@ Stack.push_i64 stack res
       end
-    | F_load (nn, { offset; _ }) ->
+    | F_load (_id, nn, { offset; _ }) ->
       let* mem = Env.get_memory env mem_0 in
       let pos, stack = Stack.pop_i32 stack in
       let addr =
@@ -1340,7 +1340,7 @@ struct
         let res = F64.of_bits res in
         st @@ Stack.push_f64 stack res
       end
-    | I_store (nn, { offset; _ }) -> (
+    | I_store (_id, nn, { offset; _ }) -> (
       let* mem = Env.get_memory env mem_0 in
       let size = Memory.size mem |> I64.extend_i32_u in
       let offset = I32.of_concrete offset |> I64.extend_i32_u in
@@ -1373,7 +1373,7 @@ struct
         let* mem = Env.get_memory env mem_0 in
         let* () = Memory.store_64 mem ~addr:(I32.wrap_i64 addr) n in
         st stack )
-    | F_store (nn, { offset; _ }) -> (
+    | F_store (_id, nn, { offset; _ }) -> (
       let* mem = Env.get_memory env mem_0 in
       let size = Memory.size mem |> I64.extend_i32_u in
       let offset = I32.of_concrete offset |> I64.extend_i32_u in
@@ -1410,7 +1410,7 @@ struct
           Memory.store_64 mem ~addr:(I32.wrap_i64 addr) (F64.to_bits n)
         in
         st stack )
-    | I64_load32 (sx, { offset; _ }) ->
+    | I64_load32 (_id, sx, { offset; _ }) ->
       let* mem = Env.get_memory env mem_0 in
       let pos, stack = Stack.pop_i32 stack in
       let addr =
@@ -1436,7 +1436,7 @@ struct
           logand res b
       in
       st @@ Stack.push_i64 stack res
-    | I_store16 (nn, { offset; _ }) ->
+    | I_store16 (_id, nn, { offset; _ }) ->
       let n, stack =
         match nn with
         | S32 ->
@@ -1461,7 +1461,7 @@ struct
       let* mem = Env.get_memory env mem_0 in
       let* () = Memory.store_16 mem ~addr:(I32.wrap_i64 addr) n in
       st stack
-    | I64_store32 { offset; _ } ->
+    | I64_store32 (_id, { offset; _ }) ->
       let* mem = Env.get_memory env mem_0 in
       let n, stack = Stack.pop_i64 stack in
       let pos, stack = Stack.pop_i32 stack in
