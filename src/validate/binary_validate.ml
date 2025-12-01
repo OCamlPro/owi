@@ -296,52 +296,52 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
     let* stack_e1 = typecheck_expr env e1 ~is_loop:false block_type ~stack in
     let+ _stack_e2 = typecheck_expr env e2 ~is_loop:false block_type ~stack in
     stack_e1
-  | I_load8 (_id, nn, _, memarg) ->
-    let* () = check_mem env.modul 0 in
+  | I_load8 (id, nn, _, memarg) ->
+    let* () = check_mem env.modul id in
     let* () = check_align memarg.align 1l in
     let* stack = Stack.pop [ i32 ] stack in
     Stack.push [ itype nn ] stack
-  | I_load16 (_id, nn, _, memarg) ->
-    let* () = check_mem env.modul 0 in
+  | I_load16 (id, nn, _, memarg) ->
+    let* () = check_mem env.modul id in
     let* () = check_align memarg.align 2l in
     let* stack = Stack.pop [ i32 ] stack in
     Stack.push [ itype nn ] stack
-  | I_load (_id, nn, memarg) ->
-    let* () = check_mem env.modul 0 in
+  | I_load (id, nn, memarg) ->
+    let* () = check_mem env.modul id in
     let max_allowed = match nn with S32 -> 4l | S64 -> 8l in
     let* () = check_align memarg.align max_allowed in
     let* stack = Stack.pop [ i32 ] stack in
     Stack.push [ itype nn ] stack
-  | I64_load32 (_id, _, memarg) ->
-    let* () = check_mem env.modul 0 in
+  | I64_load32 (id, _, memarg) ->
+    let* () = check_mem env.modul id in
     let* () = check_align memarg.align 4l in
     let* stack = Stack.pop [ i32 ] stack in
     Stack.push [ i64 ] stack
-  | I_store8 (_id, nn, memarg) ->
-    let* () = check_mem env.modul 0 in
+  | I_store8 (id, nn, memarg) ->
+    let* () = check_mem env.modul id in
     let* () = check_align memarg.align 1l in
     Stack.pop [ itype nn; i32 ] stack
-  | I_store16 (_id, nn, memarg) ->
-    let* () = check_mem env.modul 0 in
+  | I_store16 (id, nn, memarg) ->
+    let* () = check_mem env.modul id in
     let* () = check_align memarg.align 2l in
     Stack.pop [ itype nn; i32 ] stack
-  | I_store (_id, nn, memarg) ->
-    let* () = check_mem env.modul 0 in
+  | I_store (id, nn, memarg) ->
+    let* () = check_mem env.modul id in
     let max_allowed = match nn with S32 -> 4l | S64 -> 8l in
     let* () = check_align memarg.align max_allowed in
     Stack.pop [ itype nn; i32 ] stack
-  | I64_store32 (_id, memarg) ->
-    let* () = check_mem env.modul 0 in
+  | I64_store32 (id, memarg) ->
+    let* () = check_mem env.modul id in
     let* () = check_align memarg.align 4l in
     Stack.pop [ i64; i32 ] stack
-  | F_load (_id, nn, memarg) ->
-    let* () = check_mem env.modul 0 in
+  | F_load (id, nn, memarg) ->
+    let* () = check_mem env.modul id in
     let max_allowed = match nn with S32 -> 4l | S64 -> 8l in
     let* () = check_align memarg.align max_allowed in
     let* stack = Stack.pop [ i32 ] stack in
     Stack.push [ ftype nn ] stack
-  | F_store (_id, nn, memarg) ->
-    let* () = check_mem env.modul 0 in
+  | F_store (id, nn, memarg) ->
+    let* () = check_mem env.modul id in
     let max_allowed = match nn with S32 -> 4l | S64 -> 8l in
     let* () = check_align memarg.align max_allowed in
     Stack.pop [ ftype nn; i32 ] stack
@@ -376,18 +376,22 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
   | I64_extend_i32 _ ->
     let* stack = Stack.pop [ i32 ] stack in
     Stack.push [ i64 ] stack
-  | Memory_grow _ ->
-    let* () = check_mem env.modul 0 in
+  | Memory_grow id ->
+    let* () = check_mem env.modul id in
     let* stack = Stack.pop [ i32 ] stack in
     Stack.push [ i32 ] stack
-  | Memory_size _ ->
-    let* () = check_mem env.modul 0 in
+  | Memory_size id ->
+    let* () = check_mem env.modul id in
     Stack.push [ i32 ] stack
-  | Memory_copy _ | Memory_fill _ ->
-    let* () = check_mem env.modul 0 in
+  | Memory_copy (id1, id2) ->
+    let* () = check_mem env.modul id1 in
+    let* () = check_mem env.modul id2 in
     Stack.pop [ i32; i32; i32 ] stack
-  | Memory_init (_memidx, dataidx) ->
-    let* () = check_mem env.modul 0 in
+  | Memory_fill id ->
+    let* () = check_mem env.modul id in
+    Stack.pop [ i32; i32; i32 ] stack
+  | Memory_init (memidx, dataidx) ->
+    let* () = check_mem env.modul memidx in
     let* () = check_data env.modul dataidx in
     Stack.pop [ i32; i32; i32 ] stack
   | Block (_, bt, expr) -> typecheck_expr env expr ~is_loop:false bt ~stack
