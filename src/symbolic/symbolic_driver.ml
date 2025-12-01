@@ -20,13 +20,12 @@ let print_and_count_failures ~format ~out_file ~no_value
       let* model =
         match result with
         | (`EAssert (_, model, _, _, _) | `ETrap (_, model, _, _, _)) as bug ->
-          let* () =
+          let+ () =
             Model.print ~format ~out_file ~id:count_acc ~no_value
               ~no_stop_at_failure ~no_assert_failure_expression_printing
               ~with_breadcrumbs bug
           in
-          Ok model
-        | `Error e -> Error e
+          model
       in
       let count_acc = succ count_acc in
       let* () =
