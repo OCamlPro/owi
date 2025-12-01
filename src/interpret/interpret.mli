@@ -2,13 +2,21 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-val unset_use_ite_for_select : unit -> unit
+module type Parameters = sig
+  val use_ite_for_select : bool
 
-module Concrete : sig
+  val throw_away_trap : bool
+
+  val timeout : float option
+
+  val timeout_instr : int option
+end
+
+module Default_parameters : Parameters
+
+module Concrete (_ : Parameters) : sig
   val modul :
-       timeout:float option
-    -> timeout_instr:int option
-    -> Concrete_extern_func.extern_func Link.State.t
+       Concrete_extern_func.extern_func Link.State.t
     -> Concrete_extern_func.extern_func Linked.Module.t
     -> unit Concrete_choice.t
 
@@ -46,11 +54,9 @@ module Concrete : sig
   val exec_freinterpreti : V.t list -> Text.nn -> Text.nn -> V.t list
 end
 
-module Symbolic : sig
+module Symbolic (_ : Parameters) : sig
   val modul :
-       timeout:float option
-    -> timeout_instr:int option
-    -> Symbolic_extern_func.extern_func Link.State.t
+       Symbolic_extern_func.extern_func Link.State.t
     -> Symbolic_extern_func.extern_func Linked.Module.t
     -> unit Symbolic_choice_with_memory.t
 end

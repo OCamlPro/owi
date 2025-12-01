@@ -28,8 +28,15 @@ mdx_gen.bc.exe: [INFO] typechecking ...
 ...
 mdx_gen.bc.exe: [INFO] linking      ...
 ...
+# module I = Interpret.Concrete (Interpret.Default_parameters);;
+module I :
+  sig
+    val modul :
+      Concrete_extern_func.extern_func Link.State.t ->
+      Concrete_extern_func.extern_func Linked.Module.t -> unit Owi.Result.t
+  end
 # let () =
-    match Interpret.Concrete.modul ~timeout:None ~timeout_instr:None link_state module_to_run with
+    match I.modul link_state module_to_run with
     | Ok () -> ()
     | Error _ -> assert false;;
 mdx_gen.bc.exe: [INFO] interpreting ...

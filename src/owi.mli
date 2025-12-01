@@ -825,13 +825,21 @@ module Binary_validate : sig
 end
 
 module Interpret : sig
-  val unset_use_ite_for_select : unit -> unit
+  module type Parameters = sig
+    val use_ite_for_select : bool
 
-  module Concrete : sig
+    val throw_away_trap : bool
+
+    val timeout : float option
+
+    val timeout_instr : int option
+  end
+
+  module Default_parameters : Parameters
+
+  module Concrete (_ : Parameters) : sig
     val modul :
-         timeout:float option
-      -> timeout_instr:int option
-      -> Concrete_extern_func.extern_func Link.State.t
+         Concrete_extern_func.extern_func Link.State.t
       -> Concrete_extern_func.extern_func Linked.Module.t
       -> unit Result.t
   end
@@ -873,6 +881,7 @@ module Symbolic_parameters : sig
     ; invoke_with_symbols : bool
     ; model_out_file : Fpath.t option
     ; with_breadcrumbs : bool
+    ; use_ite_for_select : bool
     }
 end
 

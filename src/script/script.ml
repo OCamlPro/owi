@@ -123,7 +123,8 @@ let action (link_state : Concrete_extern_func.extern_func Link.State.t) =
     let* f, env_id = load_func_from_module link_state mod_id f in
     let stack = List.rev_map value_of_const args in
     let envs = Link.State.get_envs link_state in
-    Interpret.Concrete.exec_vfunc_from_outside ~locals:stack ~env:env_id ~envs f
+    let module I = Interpret.Concrete (Interpret.Default_parameters) in
+    I.exec_vfunc_from_outside ~locals:stack ~env:env_id ~envs f
   end
   | Get (mod_id, name) ->
     Log.info (fun m -> m "get...");
@@ -140,6 +141,7 @@ let run ~no_exhaustion script =
   let script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
   let registered = ref false in
   let curr_module = ref 0 in
+  let module I = Interpret.Concrete (Interpret.Default_parameters) in
   list_fold_left
     (fun (link_state : Concrete_extern_func.extern_func Link.State.t) ->
       function
@@ -152,10 +154,7 @@ let run ~no_exhaustion script =
         let* m, link_state =
           Compile.Text.until_link link_state ~unsafe ~name:None m
         in
-        let+ () =
-          Interpret.Concrete.modul ~timeout:None ~timeout_instr:None link_state
-            m
-        in
+        let+ () = I.modul link_state m in
         (* TODO: enable printing again! *)
         link_state
       | Wast.Quoted_module m ->
@@ -165,10 +164,7 @@ let run ~no_exhaustion script =
         let* m, link_state =
           Compile.Text.until_link link_state ~unsafe ~name:None m
         in
-        let+ () =
-          Interpret.Concrete.modul ~timeout:None ~timeout_instr:None link_state
-            m
-        in
+        let+ () = I.modul link_state m in
         link_state
       | Wast.Binary_module (id, m) ->
         Log.info (fun m -> m "*** binary module");
@@ -178,10 +174,7 @@ let run ~no_exhaustion script =
         let* m, link_state =
           Compile.Binary.until_link link_state ~unsafe ~name:None m
         in
-        let+ () =
-          Interpret.Concrete.modul ~timeout:None ~timeout_instr:None link_state
-            m
-        in
+        let+ () = I.modul link_state m in
         link_state
       | Assert (Assert_trap_module (m, expected)) ->
         Log.info (fun m -> m "*** assert_trap");
@@ -189,10 +182,7 @@ let run ~no_exhaustion script =
         let* m, link_state =
           Compile.Text.until_link link_state ~unsafe ~name:None m
         in
-        let got =
-          Interpret.Concrete.modul ~timeout:None ~timeout_instr:None link_state
-            m
-        in
+        let got = I.modul link_state m in
         let+ () = check_error_result expected got in
         link_state
       | Assert (Assert_malformed_binary (m, expected)) ->

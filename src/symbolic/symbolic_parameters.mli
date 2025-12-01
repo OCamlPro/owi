@@ -29,4 +29,5 @@ type t =
   ; invoke_with_symbols : bool
   ; model_out_file : Fpath.t option
   ; with_breadcrumbs : bool
+  ; use_ite_for_select : bool
   }

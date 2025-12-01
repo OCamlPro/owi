@@ -4,11 +4,25 @@
 
 open Binary
 
-let use_ite_for_select = ref true
+module type Parameters = sig
+  val use_ite_for_select : bool
 
-let unset_use_ite_for_select () = use_ite_for_select := false
+  val throw_away_trap : bool
 
-let throw_away_trap = ref false
+  val timeout : float option
+
+  val timeout_instr : int option
+end
+
+module Default_parameters = struct
+  let use_ite_for_select = true
+
+  let throw_away_trap = false
+
+  let timeout = None
+
+  let timeout_instr = None
+end
 
 module Make
     (Value : Value_intf.T)
@@ -38,7 +52,8 @@ module Make
          and type table := Table.t
          and type elem := Elem.t
          and type extern_func := Extern_func.extern_func
-         and type 'a choice := 'a Choice.t) =
+         and type 'a choice := 'a Choice.t)
+    (Parameters : Parameters) =
 struct
   open Value
   open Choice
@@ -101,7 +116,7 @@ struct
      I.e. this can be read as `if v then trap else f` (or assume (not v) and f) in the non-trapping mode).
   *)
   let ( let>! ) (v, trap) f =
-    if !throw_away_trap then
+    if Parameters.throw_away_trap then
       let* () = Choice.assume (Bool.not v) in
       f ()
     else
@@ -1050,7 +1065,7 @@ struct
       Memory.blit_string mem data ~src ~dst ~len;
       st stack
     | Select _t ->
-      if !use_ite_for_select then begin
+      if Parameters.use_ite_for_select then begin
         let b, stack = Stack.pop_bool stack in
         let o2, stack = Stack.pop stack in
         let o1, stack = Stack.pop stack in
@@ -1527,66 +1542,63 @@ struct
       ; return_state = None
       }
     in
+    loop ~heartbeat state
 
-    let+ state = loop ~heartbeat state in
-    state
-
-  let make_heartbeat ~timeout ~timeout_instr () =
-    match (timeout, timeout_instr) with
+  let make_heartbeat () =
+    match (Parameters.timeout, Parameters.timeout_instr) with
     | None, None -> None
     | Some _, _ | _, Some _ ->
+      let fuel =
+        Atomic.make
+          (match Parameters.timeout_instr with Some i -> i | None -> max_int)
+      in
+      let after_time =
+        let start_time = Unix.gettimeofday () in
+        fun timeout_s ->
+          Float.compare (Unix.gettimeofday () -. start_time) timeout_s > 0
+      in
       Some
-        (let fuel =
-           Atomic.make (match timeout_instr with Some i -> i | None -> max_int)
-         in
-         let after_time =
-           let start_time = Unix.gettimeofday () in
-           fun timeout_s ->
-             Float.compare (Unix.gettimeofday () -. start_time) timeout_s > 0
-         in
-         fun () ->
-           let fuel_left = Atomic.fetch_and_add fuel (-1) in
-           (* If we only use [timeout_instr], we want to stop all as
-              soon as [fuel_left <= 0]. But if we only use [timeout],
-              we don't want to run into the slow path below on each
-              instruction after [fuel_left] becomes negative. We avoid
-              this repeated slow path by bumping [fuel] to [max_int]
-              again in this case. *)
-           if fuel_left mod 1024 = 0 || fuel_left < 0 then begin
-             let stop =
-               match (timeout, timeout_instr) with
-               | None, None -> assert false
-               | None, Some _instr -> fuel_left <= 0
-               | Some s, Some _instr -> after_time s || fuel_left <= 0
-               | Some s, None ->
-                 let stop = after_time s in
-                 if (not stop) && fuel_left < 0 then Atomic.set fuel max_int;
-                 stop
-             in
-             if stop then Choice.trap (`Msg "timeout") else Choice.return ()
-           end
-           else Choice.return () )
+        (fun () ->
+          let fuel_left = Atomic.fetch_and_add fuel (-1) in
+          (* If we only use [timeout_instr], we want to stop all as
+               soon as [fuel_left <= 0]. But if we only use [timeout],
+               we don't want to run into the slow path below on each
+               instruction after [fuel_left] becomes negative. We avoid
+               this repeated slow path by bumping [fuel] to [max_int]
+               again in this case. *)
+          if fuel_left mod 1024 = 0 || fuel_left < 0 then begin
+            let stop =
+              match (Parameters.timeout, Parameters.timeout_instr) with
+              | None, None -> assert false
+              | None, Some _instr -> fuel_left <= 0
+              | Some s, Some _instr -> after_time s || fuel_left <= 0
+              | Some s, None ->
+                let stop = after_time s in
+                if (not stop) && fuel_left < 0 then Atomic.set fuel max_int;
+                stop
+            in
+            if stop then Choice.trap (`Msg "timeout") else Choice.return ()
+          end
+          else Choice.return () )
 
-  let modul ~timeout ~timeout_instr (link_state : 'f Link.State.t)
-    (modul : 'extern_func Linked.Module.t) : unit Choice.t =
+  let modul (link_state : 'f Link.State.t) (modul : 'extern_func Linked.Module.t)
+    : unit Choice.t =
     let envs = Link.State.get_envs link_state in
-    let heartbeat = make_heartbeat ~timeout ~timeout_instr () in
+    let heartbeat = make_heartbeat () in
     Log.info (fun m -> m "interpreting ...");
     try
       begin
-        let* () =
-          List.fold_left
-            (fun u to_run ->
-              let* () = u in
-              let+ _end_stack =
-                let env = modul.env in
-                exec_expr ~heartbeat envs env (State.Locals.of_list [])
-                  Stack.empty to_run None
-              in
-              () )
-            (Choice.return ()) modul.to_run
-        in
-        Choice.return ()
+        List.fold_left
+          (fun (acc : unit Choice.t) to_run ->
+            (* WARN: it can be tempting to remove the next line, but you shouldn't! (trust me, I've tried before... )*)
+            let* () = acc in
+            let+ _end_stack =
+              let env = modul.env in
+              exec_expr ~heartbeat envs env (State.Locals.of_list [])
+                Stack.empty to_run None
+            in
+            () )
+          (Choice.return ()) modul.to_run
       end
     with Stack_overflow -> Choice.trap `Call_stack_exhausted
 
@@ -1611,14 +1623,12 @@ struct
         in
         match state with
         | State.Return res -> Choice.return res
-        | State.Continue state ->
-          let+ res = loop ~heartbeat:None state in
-          res
+        | State.Continue state -> loop ~heartbeat:None state
       end
     with Stack_overflow -> Choice.trap `Call_stack_exhausted
 end
 
-module Concrete =
+module Concrete (Parameters : Parameters) =
   Make [@inlined hint] (Concrete_value) (Concrete_data) (Concrete_global)
     (Concrete_elem)
     (Concrete_table)
@@ -1626,7 +1636,8 @@ module Concrete =
     (Concrete_memory)
     (Concrete_extern_func)
     (Concrete_env)
-module Symbolic =
+    (Parameters)
+module Symbolic (Parameters : Parameters) =
   Make [@inlined hint] (Symbolic_value) (Symbolic_data) (Symbolic_global)
     (Symbolic_elem)
     (Symbolic_table)
@@ -1634,3 +1645,4 @@ module Symbolic =
     (Symbolic_memory)
     (Symbolic_extern_func)
     (Symbolic_env)
+    (Parameters)

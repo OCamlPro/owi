@@ -283,7 +283,7 @@ let symbolic_parameters default_entry_point =
   and+ with_breadcrumbs
   and+ invoke_with_symbols
   and+ no_ite_for_select in
-  if no_ite_for_select then Interpret.unset_use_ite_for_select ();
+  let use_ite_for_select = not no_ite_for_select in
   { Symbolic_parameters.unsafe
   ; workers
   ; no_stop_at_failure
@@ -299,6 +299,7 @@ let symbolic_parameters default_entry_point =
   ; model_out_file
   ; with_breadcrumbs
   ; invoke_with_symbols
+  ; use_ite_for_select
   }
 
 (* owi analyze *)
