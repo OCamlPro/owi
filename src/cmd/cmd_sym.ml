@@ -29,8 +29,20 @@ let run_file ~parameters ~source_file =
     (* unsafe is set to true because the module was already validated before *)
     Compile.Binary.until_link ~unsafe:true ~name:None link_state m
   in
-  Benchmark.with_utime @@ fun () ->
-  Interpret.Symbolic.modul ~timeout:None ~timeout_instr:None link_state m
+  let module Parameters = struct
+    let throw_away_trap =
+      match parameters.fail_mode with
+      | Assertion_only -> true
+      | Both | Trap_only -> false
+
+    let timeout = None
+
+    let timeout_instr = None
+
+    let use_ite_for_select = parameters.use_ite_for_select
+  end in
+  let module I = Interpret.Symbolic (Parameters) in
+  Benchmark.with_utime @@ fun () -> I.modul link_state m
 
 (* NB: This function propagates potential errors (Result.err) occurring
              during evaluation (OS, syntax error, etc.), except for Trap and Assert,

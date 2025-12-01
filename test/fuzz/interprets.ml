@@ -37,9 +37,8 @@ module Owi_regular : INTERPRET = struct
     let* regular, link_state =
       Owi.Link.Binary.modul ~name:None link_state simplified
     in
-    timeout_call_run (fun () ->
-      Owi.Interpret.Concrete.modul link_state regular ~timeout:None
-        ~timeout_instr:None )
+    let module I = Owi.Interpret.Concrete (Owi.Interpret.Default_parameters) in
+    timeout_call_run (fun () -> I.modul link_state regular)
 
   let name = "owi_concrete"
 end
