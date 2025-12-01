@@ -18,9 +18,9 @@
       <h2>25.00%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:38.89%"></span>
-      <span class="unvisited" style="top:44.44%"></span>
-      <span class="unvisited" style="top:47.22%"></span>
+      <span class="unvisited" style="top:37.84%"></span>
+      <span class="unvisited" style="top:43.24%"></span>
+      <span class="unvisited" style="top:45.95%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -61,6 +61,7 @@
 <a id="L34"></a><span > </span>
 <a id="L35"></a><span > </span>
 <a id="L36"></a><span > </span>
+<a id="L37"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -101,6 +102,7 @@
 <a href="#L34">34</a>
 <a href="#L35">35</a>
 <a href="#L36">36</a>
+<a href="#L37">37</a>
 </pre>
 <pre><code class="ocaml">type fail_mode =
   | Trap_only
@@ -137,6 +139,7 @@ type t =
   ; invoke_with_symbols : bool
   ; model_out_file : Fpath.t option
   ; with_breadcrumbs : bool
+  ; use_ite_for_select : bool
   }
 </code></pre>
       </div>

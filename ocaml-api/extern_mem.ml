@@ -46,11 +46,10 @@ let module_to_run, link_state =
   | Error _ -> assert false
   | Ok v -> v
 
+module I = Interpret.Concrete (Interpret.Default_parameters)
+
 (* let's run it ! it will print the values as defined in the print_i64 function *)
 let () =
-  match
-    Interpret.Concrete.modul ~timeout:None ~timeout_instr:None link_state
-      module_to_run
-  with
+  match I.modul link_state module_to_run with
   | Error _ -> assert false
   | Ok () -> ()

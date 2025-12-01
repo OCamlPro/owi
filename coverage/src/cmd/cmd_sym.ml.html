@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>cmd_sym.ml &mdash; Coverage report</title>
-    <meta name="description" content="90.91% coverage in src/cmd/cmd_sym.ml">
+    <meta name="description" content="88.00% coverage in src/cmd/cmd_sym.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,10 +15,11 @@
           <span class="dirname">src/cmd/</span>cmd_sym.ml
         </a>
       </h1>
-      <h2>90.91%</h2>
+      <h2>88.00%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:26.03%"></span>
+      <span class="unvisited" style="top:22.35%"></span>
+      <span class="some-visited" style="top:42.35%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -55,47 +56,59 @@
 <a id="L30"></a><span class="visited"> </span>
 <a id="L31"></a><span > </span>
 <a id="L32"></a><span class="visited"> </span>
-<a id="L33"></a><span class="visited"> </span>
+<a id="L33"></a><span > </span>
 <a id="L34"></a><span > </span>
-<a id="L35"></a><span > </span>
-<a id="L36"></a><span > </span>
+<a id="L35"></a><span class="visited"> </span>
+<a id="L36"></a><span class="some-visited"> </span>
 <a id="L37"></a><span > </span>
 <a id="L38"></a><span > </span>
 <a id="L39"></a><span > </span>
-<a id="L40"></a><span class="visited"> </span>
+<a id="L40"></a><span > </span>
 <a id="L41"></a><span > </span>
 <a id="L42"></a><span > </span>
 <a id="L43"></a><span > </span>
 <a id="L44"></a><span > </span>
-<a id="L45"></a><span > </span>
+<a id="L45"></a><span class="visited"> </span>
 <a id="L46"></a><span > </span>
 <a id="L47"></a><span > </span>
 <a id="L48"></a><span > </span>
 <a id="L49"></a><span > </span>
 <a id="L50"></a><span > </span>
 <a id="L51"></a><span > </span>
-<a id="L52"></a><span > </span>
+<a id="L52"></a><span class="visited"> </span>
 <a id="L53"></a><span > </span>
 <a id="L54"></a><span > </span>
 <a id="L55"></a><span > </span>
 <a id="L56"></a><span > </span>
 <a id="L57"></a><span > </span>
-<a id="L58"></a><span class="visited"> </span>
+<a id="L58"></a><span > </span>
 <a id="L59"></a><span > </span>
 <a id="L60"></a><span > </span>
 <a id="L61"></a><span > </span>
 <a id="L62"></a><span > </span>
 <a id="L63"></a><span > </span>
-<a id="L64"></a><span class="visited"> </span>
-<a id="L65"></a><span class="visited"> </span>
+<a id="L64"></a><span > </span>
+<a id="L65"></a><span > </span>
 <a id="L66"></a><span > </span>
 <a id="L67"></a><span > </span>
-<a id="L68"></a><span class="visited"> </span>
+<a id="L68"></a><span > </span>
 <a id="L69"></a><span > </span>
 <a id="L70"></a><span class="visited"> </span>
 <a id="L71"></a><span > </span>
 <a id="L72"></a><span > </span>
 <a id="L73"></a><span > </span>
+<a id="L74"></a><span > </span>
+<a id="L75"></a><span > </span>
+<a id="L76"></a><span class="visited"> </span>
+<a id="L77"></a><span class="visited"> </span>
+<a id="L78"></a><span > </span>
+<a id="L79"></a><span > </span>
+<a id="L80"></a><span class="visited"> </span>
+<a id="L81"></a><span > </span>
+<a id="L82"></a><span class="visited"> </span>
+<a id="L83"></a><span > </span>
+<a id="L84"></a><span > </span>
+<a id="L85"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -173,6 +186,18 @@
 <a href="#L71">71</a>
 <a href="#L72">72</a>
 <a href="#L73">73</a>
+<a href="#L74">74</a>
+<a href="#L75">75</a>
+<a href="#L76">76</a>
+<a href="#L77">77</a>
+<a href="#L78">78</a>
+<a href="#L79">79</a>
+<a href="#L80">80</a>
+<a href="#L81">81</a>
+<a href="#L82">82</a>
+<a href="#L83">83</a>
+<a href="#L84">84</a>
+<a href="#L85">85</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -205,8 +230,20 @@ let run_file ~parameters ~source_file =
     (* unsafe is set to true because the module was already validated before *)
     Compile.Binary.until_lin<span data-count="397">k</span> ~unsafe:true ~name:None link_state m
   in
-  <span data-count="397">B</span>enchmark.with_utime @@ fun () -&gt;
-  <span data-count="397">I</span>nterpret.Symbolic.modul ~timeout:None ~timeout_instr:None link_state m
+  <span data-count="397">l</span>et module Parameters = struct
+    let throw_away_trap =
+      match parameters.fail_mode with
+      | <span data-count="3">A</span>ssertion_only -&gt; true
+      | <span data-count="394">B</span>oth | <span data-count="0">T</span>rap_only -&gt; false
+
+    let timeout = None
+
+    let timeout_instr = None
+
+    let use_ite_for_select = parameters.use_ite_for_select
+  end in
+  let module I = Interpret.Symbolic (Parameters) in
+  Benchmark.with_utime @@ fun () -&gt; <span data-count="397">I</span>.modul link_state m
 
 (* NB: This function propagates potential errors (Result.err) occurring
              during evaluation (OS, syntax error, etc.), except for Trap and Assert,

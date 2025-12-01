@@ -85,6 +85,8 @@
 <a id="L61"></a><span > </span>
 <a id="L62"></a><span > </span>
 <a id="L63"></a><span > </span>
+<a id="L64"></a><span > </span>
+<a id="L65"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -152,6 +154,8 @@
 <a href="#L61">61</a>
 <a href="#L62">62</a>
 <a href="#L63">63</a>
+<a href="#L64">64</a>
+<a href="#L65">65</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -195,6 +199,8 @@ module type Base = sig
   val get_pc : unit -&gt; Smtml.Expr.Set.t t
 
   val ite : V.bool -&gt; if_true:V.t -&gt; if_false:V.t -&gt; V.t t
+
+  val assume : V.bool -&gt; unit t
 end
 
 module type Complete = sig
