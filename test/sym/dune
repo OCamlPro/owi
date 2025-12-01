@@ -32,4 +32,6 @@
   sub_f32.wat
   sub_f64.wat
   syntax_error.wat
-  table.wat))
+  table.wat
+  trap_only_trap.wat
+  trap_only_no_failure.wat))
