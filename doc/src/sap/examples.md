@@ -126,21 +126,21 @@ int main() {
 }
 ```
 
-We are defining one symbolic variable `x` using the function `owi_i32(void)`. Then we build a polynomial `poly` equal to $x^3 - 7x^2 + 14x - 8$.
+We are defining one symbolic variable `x` using the function `owi_int(void)`. Then we build a polynomial `poly` equal to $x^3 - 7x^2 + 14x - 8$.
 
-Then we use `owi_assert(p.getPoly() != 0)`. Which should fail as this polynomial has multiple roots. Let's see what owi says about it:
+Then we use `owi_assert(p.getPoly() != 0)`. Which should fail as this polynomial has multiple roots. Let's see what Owi says about it:
 
 ```sh
 $ owi c++ ./poly.cpp -w1 --no-assert-failure-expression-printing
 owi: [ERROR] Assert failure
 model {
-  symbol symbol_0 i32 4
+  symbol symbol_0 i32 2
 }
 owi: [ERROR] Reached problem!
 [13]
 ```
 
-Indeed, `4` is a root of the polynomial and thus it is expected to be equal to `0` in this case. We know the three roots are `1`, `2` and `4`, so let's inform owi that we are not interested in this cases.
+Indeed, `2` is a root of the polynomial and thus it is expected to be equal to `0` in this case. We know the three roots are `1`, `2` and `4`, so let's inform Owi that we are not interested in this cases.
 
 We can do so by assuming that `x` is not equal to any of these with the function `owi_assume(bool)`:
 
