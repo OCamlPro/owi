@@ -44,6 +44,7 @@
 - add `--exploration` option
 - add `--bench` option
 - add `--no-ite-for-select` option
+- support the multi-memory proposal
 
 ## 0.2 - 2024-04-24
 
