@@ -23,15 +23,9 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
 
   let module M :
     Wasm_ffi_intf.S0
-      with type 'a t = 'a Result.t
-       and type memory = Concrete_memory.t
+      with type 'a t := 'a Result.t
+       and type memory := Concrete_memory.t
        and module Value := Concrete_value = struct
-    type 'a t = 'a Result.t
-
-    type memory = Concrete_memory.t
-
-    module Value = Concrete_value
-
     let assume _ = Ok ()
 
     let assert' n =
@@ -45,12 +39,12 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
     let symbol_i8 () =
       let i = next () in
       match model.(i) with
-      | V.I32 n ->
+      | Concrete_value.I32 n ->
         add_sym i;
         Ok n
       | v ->
         Log.err (fun m ->
-          m "Got value %a but expected a i8 (i32) value." V.pp v );
+          m "Got value %a but expected a i8 (i32) value." Concrete_value.pp v );
         assert false
 
     let symbol_bool = symbol_i8
@@ -60,62 +54,67 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
     let symbol_i16 () =
       let i = next () in
       match model.(i) with
-      | V.I32 n ->
+      | Concrete_value.I32 n ->
         add_sym i;
         Ok n
       | v ->
         Log.err (fun m ->
-          m "Got value %a but expected a i16 (i32) value." V.pp v );
+          m "Got value %a but expected a i16 (i32) value." Concrete_value.pp v );
         assert false
 
     let symbol_i32 () =
       let i = next () in
       match model.(i) with
-      | V.I32 n ->
+      | Concrete_value.I32 n ->
         add_sym i;
         Ok n
       | v ->
-        Log.err (fun m -> m "Got value %a but expected a i32 value." V.pp v);
+        Log.err (fun m ->
+          m "Got value %a but expected a i32 value." Concrete_value.pp v );
         assert false
 
     let symbol_i64 () =
       let i = next () in
       match model.(i) with
-      | V.I64 n ->
+      | Concrete_value.I64 n ->
         add_sym i;
         Ok n
       | v ->
-        Log.err (fun m -> m "Got value %a but expected a i64 value." V.pp v);
+        Log.err (fun m ->
+          m "Got value %a but expected a i64 value." Concrete_value.pp v );
         assert false
 
     let symbol_f32 () =
       let i = next () in
       match model.(i) with
-      | V.F32 n ->
+      | Concrete_value.F32 n ->
         add_sym i;
         Ok n
       | v ->
-        Log.err (fun m -> m "Got value %a but expected a f32 value." V.pp v);
+        Log.err (fun m ->
+          m "Got value %a but expected a f32 value." Concrete_value.pp v );
         assert false
 
     let symbol_f64 () =
       let i = next () in
       match model.(i) with
-      | V.F64 n ->
+      | Concrete_value.F64 n ->
         add_sym i;
         Ok n
       | v ->
-        Log.err (fun m -> m "Got value %a but expected a f64 value." V.pp v);
+        Log.err (fun m ->
+          m "Got value %a but expected a f64 value." Concrete_value.pp v );
         assert false
 
     let symbol_v128 () =
       let i = next () in
       match model.(i) with
-      | V.V128 n ->
+      | Concrete_value.V128 n ->
         add_sym i;
         Ok n
       | v ->
-        Log.err (fun m -> m "Got value %a but expected a v128 value." V.pp v);
+        Log.err (fun m ->
+          m "Got value %a but expected a v128 value." Concrete_value.pp v );
         assert false
 
     let abort () =
@@ -127,18 +126,19 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
       brk := Int32.add !brk size;
       Ok r
 
-    let free (_ : memory) adr = Ok adr
+    let free (_ : Concrete_memory.t) adr = Ok adr
 
-    let exit (n : Value.int32) = exit (Int32.to_int n)
+    let exit (n : Concrete_value.int32) = exit (Int32.to_int n)
 
     let symbol_range _ _ =
       let i = next () in
       match model.(i) with
-      | V.I32 n ->
+      | Concrete_value.I32 n ->
         add_sym i;
         Ok n
       | v ->
-        Log.err (fun m -> m "Got value %a but expected a i32 value." V.pp v);
+        Log.err (fun m ->
+          m "Got value %a but expected a i32 value." Concrete_value.pp v );
         assert false
 
     let print_char c =
@@ -159,7 +159,7 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
     let cov_label_is_covered id =
       let open Concrete_choice in
       let* id = select_i32 id in
-      return @@ Value.const_i32
+      return @@ Concrete_value.const_i32
       @@ if Hashtbl.mem covered_labels id then 1l else 0l
 
     let cov_label_set m id str_ptr =
@@ -238,14 +238,14 @@ let parse_model replay_file =
       list_map
         (fun (_sym, v) ->
           match v with
-          | Smtml.Value.False -> Ok (V.I32 0l)
-          | True -> Ok (V.I32 1l)
+          | Smtml.Value.False -> Ok (Concrete_value.I32 0l)
+          | True -> Ok (Concrete_value.I32 1l)
           | Bitv bv when Smtml.Bitvector.numbits bv <= 32 ->
-            Ok (V.I32 (Smtml.Bitvector.to_int32 bv))
+            Ok (Concrete_value.I32 (Smtml.Bitvector.to_int32 bv))
           | Bitv bv when Smtml.Bitvector.numbits bv <= 64 ->
-            Ok (V.I64 (Smtml.Bitvector.to_int64 bv))
-          | Num (F32 n) -> Ok (V.F32 (Float32.of_bits n))
-          | Num (F64 n) -> Ok (V.F64 (Float64.of_bits n))
+            Ok (Concrete_value.I64 (Smtml.Bitvector.to_int64 bv))
+          | Num (F32 n) -> Ok (Concrete_value.F32 (Float32.of_bits n))
+          | Num (F64 n) -> Ok (Concrete_value.F64 (Float64.of_bits n))
           | Bitv bv ->
             Error
               (`Invalid_model

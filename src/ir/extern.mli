@@ -100,7 +100,7 @@ module Func : sig
     end
   end
 
-  module Make (V : sig
+  module Make (Value : sig
     type int32
 
     type int64
@@ -121,11 +121,11 @@ module Func : sig
 
     include
       T
-        with type int32 := V.int32
-         and type int64 := V.int64
-         and type float32 := V.float32
-         and type float64 := V.float64
-         and type v128 := V.v128
+        with type int32 := Value.int32
+         and type int64 := Value.int64
+         and type float32 := Value.float32
+         and type float64 := Value.float64
+         and type v128 := Value.v128
          and type 'a m := 'a M.t
          and type memory := Memory.t
   end

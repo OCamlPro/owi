@@ -12,14 +12,13 @@ let set_value v x = v.value <- x
 let clone_global r = { value = r.value }
 
 let convert_values (v : Concrete_value.t) : Symbolic_value.t =
-  (* TODO share various versions *)
   match v with
   | I32 v -> I32 (Symbolic_value.const_i32 v)
   | I64 v -> I64 (Symbolic_value.const_i64 v)
   | F32 v -> F32 (Symbolic_value.const_f32 v)
   | F64 v -> F64 (Symbolic_value.const_f64 v)
   | V128 v -> V128 (Symbolic_value.const_v128 v)
-  | Ref (Funcref f) -> Ref (Funcref f)
+  | Ref (Func f) -> Ref (Func f)
   | Ref _ -> assert false
 
 let convert (orig_global : Concrete_global.t) : t =

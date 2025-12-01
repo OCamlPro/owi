@@ -4,7 +4,7 @@
 
 type t = Link_env.elem
 
-let get (elem : t) i : Symbolic_value.ref_value =
-  match elem.value.(i) with Funcref f -> Funcref f | _ -> assert false
+let get (elem : t) i : Symbolic_value.Ref.t =
+  match elem.value.(i) with Func f -> Func f | _ -> assert false
 
 let size (elem : t) = Array.length elem.value

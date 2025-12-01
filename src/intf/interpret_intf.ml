@@ -15,7 +15,7 @@ module type Memory = sig
 
   module Value : Value_intf.T
 
-  module Choice : Choice_intf.Base with module V := Value
+  module Choice : Choice_intf.Base with module Value := Value
 
   val load_8_s : t -> Value.int32 -> Value.int32 Choice.t
 
@@ -69,7 +69,7 @@ module type Elem = sig
 
   type t
 
-  val get : t -> int -> Value.ref_value
+  val get : t -> int -> Value.Ref.t
 
   val size : t -> int
 end
@@ -79,9 +79,9 @@ module type Table = sig
 
   type t
 
-  val get : t -> int -> Value.ref_value
+  val get : t -> int -> Value.Ref.t
 
-  val set : t -> int -> Value.ref_value -> unit
+  val set : t -> int -> Value.Ref.t -> unit
 
   val size : t -> int
 
@@ -89,9 +89,9 @@ module type Table = sig
 
   val max_size : t -> int option
 
-  val grow : t -> int32 -> Value.ref_value -> unit
+  val grow : t -> int32 -> Value.Ref.t -> unit
 
-  val fill : t -> int32 -> int32 -> Value.ref_value -> unit
+  val fill : t -> int32 -> int32 -> Value.Ref.t -> unit
 
   val copy : t_src:t -> t_dst:t -> src:int32 -> dst:int32 -> len:int32 -> unit
 end

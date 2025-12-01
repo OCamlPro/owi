@@ -3,21 +3,13 @@
 (* Written by the Owi programmers *)
 
 module Expr = Smtml.Expr
-module Choice = Symbolic_choice_with_memory
-module Memory = Symbolic_memory
 
 (* The constraint is used here to make sure we don't forget to define one of the expected FFI functions, this whole file is further constrained such that if one function of M is unused in the FFI module below, an error will be displayed *)
 module M :
   Wasm_ffi_intf.S0
-    with type 'a t = 'a Choice.t
-     and type memory = Memory.t
+    with type 'a t := 'a Symbolic_choice_with_memory.t
+     and type memory := Symbolic_memory.t
      and module Value := Symbolic_value = struct
-  type 'a t = 'a Choice.t
-
-  type memory = Memory.t
-
-  module Value = Symbolic_value
-
   let covered_labels = Hashtbl.create 16
 
   let cov_lock = Mutex.create ()
@@ -57,66 +49,77 @@ module M :
           lbl_status <> 0
         with Invalid_argument _ -> false )
 
-  let assume (i : Value.int32) : unit Choice.t =
-    Choice.assume @@ Value.I32.to_bool i
+  let assume (i : Symbolic_value.int32) : unit Symbolic_choice_with_memory.t =
+    Symbolic_choice_with_memory.assume @@ Symbolic_value.I32.to_bool i
 
-  let assert' (i : Value.int32) : unit Choice.t =
-    Choice.assertion @@ Value.I32.to_bool i
+  let assert' (i : Symbolic_value.int32) : unit Symbolic_choice_with_memory.t =
+    Symbolic_choice_with_memory.assertion @@ Symbolic_value.I32.to_bool i
 
   let symbol_bool () =
-    Choice.with_new_symbol (Ty_bitv 1) (fun sym ->
+    Symbolic_choice_with_memory.with_new_symbol (Ty_bitv 1) (fun sym ->
       Expr.cvtop (Ty_bitv 32) (Zero_extend 31) (Expr.symbol sym) )
 
   let symbol_invisible_bool () =
-    Choice.with_new_invisible_symbol (Ty_bitv 1) (fun sym ->
-      Expr.cvtop (Ty_bitv 32) (Zero_extend 31) (Expr.symbol sym) )
+    Symbolic_choice_with_memory.with_new_invisible_symbol (Ty_bitv 1)
+      (fun sym -> Expr.cvtop (Ty_bitv 32) (Zero_extend 31) (Expr.symbol sym) )
 
   let symbol_i8 () =
-    Choice.with_new_symbol (Ty_bitv 8) (fun sym ->
+    Symbolic_choice_with_memory.with_new_symbol (Ty_bitv 8) (fun sym ->
       Expr.cvtop (Ty_bitv 32) (Zero_extend 24) (Expr.symbol sym) )
 
   let symbol_i16 () =
-    Choice.with_new_symbol (Ty_bitv 16) (fun sym ->
+    Symbolic_choice_with_memory.with_new_symbol (Ty_bitv 16) (fun sym ->
       Expr.cvtop (Ty_bitv 32) (Zero_extend 16) (Expr.symbol sym) )
 
-  let symbol_i32 () = Choice.with_new_symbol (Ty_bitv 32) Expr.symbol
+  let symbol_i32 () =
+    Symbolic_choice_with_memory.with_new_symbol (Ty_bitv 32) Expr.symbol
 
-  let symbol_i64 () = Choice.with_new_symbol (Ty_bitv 64) Expr.symbol
+  let symbol_i64 () =
+    Symbolic_choice_with_memory.with_new_symbol (Ty_bitv 64) Expr.symbol
 
-  let symbol_f32 () = Choice.with_new_symbol (Ty_fp 32) Expr.symbol
+  let symbol_f32 () =
+    Symbolic_choice_with_memory.with_new_symbol (Ty_fp 32) Expr.symbol
 
-  let symbol_f64 () = Choice.with_new_symbol (Ty_fp 64) Expr.symbol
+  let symbol_f64 () =
+    Symbolic_choice_with_memory.with_new_symbol (Ty_fp 64) Expr.symbol
 
-  let symbol_v128 () = Choice.with_new_symbol (Ty_bitv 128) Expr.symbol
+  let symbol_v128 () =
+    Symbolic_choice_with_memory.with_new_symbol (Ty_bitv 128) Expr.symbol
 
-  let symbol_range (lo : Value.int32) (hi : Value.int32) =
-    let open Choice in
+  let symbol_range (lo : Symbolic_value.int32) (hi : Symbolic_value.int32) =
+    let open Symbolic_choice_with_memory in
     let* x = symbol_i32 () in
-    let* () = assume (Value.I32.le lo x) in
-    let+ () = assume (Value.I32.gt hi x) in
+    let* () = assume (Symbolic_value.I32.le lo x) in
+    let+ () = assume (Symbolic_value.I32.gt hi x) in
     x
 
-  let abort () : unit Choice.t = Choice.stop
+  let abort () : unit Symbolic_choice_with_memory.t =
+    Symbolic_choice_with_memory.stop
 
-  let alloc m (base : Value.int32) (size : Value.int32) : Value.int32 Choice.t =
-    Choice.lift_mem @@ Memory.realloc m ~ptr:base ~size
+  let alloc m (base : Symbolic_value.int32) (size : Symbolic_value.int32) :
+    Symbolic_value.int32 Symbolic_choice_with_memory.t =
+    Symbolic_choice_with_memory.lift_mem
+    @@ Symbolic_memory.realloc m ~ptr:base ~size
 
-  let free m (ptr : Value.int32) : Value.int32 Choice.t =
-    Choice.lift_mem @@ Memory.free m ptr
+  let free m (ptr : Symbolic_value.int32) :
+    Symbolic_value.int32 Symbolic_choice_with_memory.t =
+    Symbolic_choice_with_memory.lift_mem @@ Symbolic_memory.free m ptr
 
-  let exit (_p : Value.int32) : unit Choice.t = abort ()
+  let exit (_p : Symbolic_value.int32) : unit Symbolic_choice_with_memory.t =
+    abort ()
 
-  let in_replay_mode () = Choice.return @@ Smtml.Expr.value (Smtml.Value.Int 0)
+  let in_replay_mode () =
+    Symbolic_choice_with_memory.return @@ Smtml.Expr.value (Smtml.Value.Int 0)
 
-  let print_char (c : Value.int32) =
-    let open Choice in
+  let print_char (c : Symbolic_value.int32) =
+    let open Symbolic_choice_with_memory in
     let* c = select_i32 c in
     Log.app (fun m -> m "%c@?" (char_of_int (Int32.to_int c)));
     return ()
 
   let rec make_str m accu i =
-    let open Choice in
-    let* p = Memory.load_8_u m (Value.const_i32 i) in
+    let open Symbolic_choice_with_memory in
+    let* p = Symbolic_memory.load_8_u m (Symbolic_value.const_i32 i) in
     match Smtml.Expr.view p with
     | Val (Bitv bv) when Smtml.Bitvector.numbits bv = 32 ->
       let c = Smtml.Bitvector.to_int32 bv in
@@ -128,14 +131,14 @@ module M :
     | _ -> assert false
 
   let cov_label_is_covered id =
-    let open Choice in
+    let open Symbolic_choice_with_memory in
     let* id = select_i32 id in
-    return @@ Value.const_i32 @@ Mutex.protect cov_lock
+    return @@ Symbolic_value.const_i32 @@ Mutex.protect cov_lock
     @@ fun () ->
     if Hashtbl.mem covered_labels id || in_seacoral_store id then 1l else 0l
 
   let cov_label_set m id ptr =
-    let open Choice in
+    let open Symbolic_choice_with_memory in
     let open Smtml in
     let id = Expr.simplify id in
     let ptr = Expr.simplify ptr in
@@ -157,13 +160,13 @@ module M :
       assert false
 
   let open_scope m ptr =
-    let open Choice in
+    let open Symbolic_choice_with_memory in
     let* ptr = select_i32 ptr in
     let* chars = make_str m [] ptr in
     let str = String.init (Array.length chars) (Array.get chars) in
     open_scope str
 
-  let close_scope = Choice.close_scope
+  let close_scope = Symbolic_choice_with_memory.close_scope
 end
 
 type extern_func = Symbolic_extern_func.extern_func
@@ -206,11 +209,11 @@ let fd_write _ _ _ _ = assert false
 
 let proc_exit _ =
   Log.warn (fun m -> m "used dummy proc_exit implementation");
-  Choice.return ()
+  Symbolic_choice_with_memory.return ()
 
 let random_get _ _ =
   Log.warn (fun m -> m "used dummy random_get implementation");
-  Choice.return @@ Symbolic_value.const_i32 0l
+  Symbolic_choice_with_memory.return @@ Symbolic_value.const_i32 0l
 
 let wasi_snapshot_preview1 =
   let functions =

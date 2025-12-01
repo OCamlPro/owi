@@ -103,7 +103,6 @@
   thread_without_memory
   union_find
   value_intf
-  v
   v128
   wasm_ffi_intf
   wast

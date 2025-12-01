@@ -5,13 +5,13 @@
 (** Single table *)
 type t
 
-val get : t -> int -> Symbolic_value.ref_value
+val get : t -> int -> Symbolic_value.Ref.t
 
-val set : t -> int -> Symbolic_value.ref_value -> unit
+val set : t -> int -> Symbolic_value.Ref.t -> unit
 
-val grow : t -> int32 -> Symbolic_value.ref_value -> unit
+val grow : t -> int32 -> Symbolic_value.Ref.t -> unit
 
-val fill : t -> int32 -> int32 -> Symbolic_value.ref_value -> unit
+val fill : t -> int32 -> int32 -> Symbolic_value.Ref.t -> unit
 
 val copy : t_src:t -> t_dst:t -> src:int32 -> dst:int32 -> len:int32 -> unit
 
