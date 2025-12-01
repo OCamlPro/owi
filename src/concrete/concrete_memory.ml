@@ -33,11 +33,11 @@ let fill mem ~pos ~len c =
   Bytes.unsafe_fill mem.data pos len c;
   Ok ()
 
-let blit mem1 ~src mem2 ~dst ~len =
-  let src = Int32.to_int src in
-  let dst = Int32.to_int dst in
+let blit ~src ~src_idx ~dst ~dst_idx ~len =
+  let src_idx = Int32.to_int src_idx in
+  let dst_idx = Int32.to_int dst_idx in
   let len = Int32.to_int len in
-  Bytes.unsafe_blit mem1.data src mem2.data dst len;
+  Bytes.unsafe_blit src.data src_idx dst.data dst_idx len;
   Ok ()
 
 let blit_string mem str ~src ~dst ~len =
