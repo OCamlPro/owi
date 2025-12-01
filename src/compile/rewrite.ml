@@ -212,48 +212,48 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
     | Extern_externalize -> Ok Binary.Extern_externalize
     | Extern_internalize -> Ok Binary.Extern_internalize
     | I_load8 (id, nn, sx, memarg) ->
-      let* id = Assigned.find_memory assigned id in
-      Ok (Binary.I_load8 (id, nn, sx, memarg))
+      let+ id = Assigned.find_memory assigned id in
+      Binary.I_load8 (id, nn, sx, memarg)
     | I_store8 (id, nn, memarg) ->
-      let* id = Assigned.find_memory assigned id in
-      Ok (Binary.I_store8 (id, nn, memarg))
+      let+ id = Assigned.find_memory assigned id in
+      Binary.I_store8 (id, nn, memarg)
     | I_load16 (id, nn, sx, memarg) ->
-      let* id = Assigned.find_memory assigned id in
-      Ok (Binary.I_load16 (id, nn, sx, memarg))
+      let+ id = Assigned.find_memory assigned id in
+      Binary.I_load16 (id, nn, sx, memarg)
     | I_store16 (id, nn, memarg) ->
-      let* id = Assigned.find_memory assigned id in
-      Ok (Binary.I_store16 (id, nn, memarg))
+      let+ id = Assigned.find_memory assigned id in
+      Binary.I_store16 (id, nn, memarg)
     | I64_load32 (id, sx, memarg) ->
-      let* id = Assigned.find_memory assigned id in
-      Ok (Binary.I64_load32 (id, sx, memarg))
+      let+ id = Assigned.find_memory assigned id in
+      Binary.I64_load32 (id, sx, memarg)
     | I64_store32 (id, memarg) ->
-      let* id = Assigned.find_memory assigned id in
-      Ok (Binary.I64_store32 (id, memarg))
+      let+ id = Assigned.find_memory assigned id in
+      Binary.I64_store32 (id, memarg)
     | I_load (id, nn, memarg) ->
-      let* id = Assigned.find_memory assigned id in
-      Ok (Binary.I_load (id, nn, memarg))
+      let+ id = Assigned.find_memory assigned id in
+      Binary.I_load (id, nn, memarg)
     | F_load (id, nn, memarg) ->
-      let* id = Assigned.find_memory assigned id in
-      Ok (Binary.F_load (id, nn, memarg))
+      let+ id = Assigned.find_memory assigned id in
+      Binary.F_load (id, nn, memarg)
     | F_store (id, nn, memarg) ->
-      let* id = Assigned.find_memory assigned id in
-      Ok (Binary.F_store (id, nn, memarg))
+      let+ id = Assigned.find_memory assigned id in
+      Binary.F_store (id, nn, memarg)
     | I_store (id, nn, memarg) ->
-      let* id = Assigned.find_memory assigned id in
-      Ok (Binary.I_store (id, nn, memarg))
+      let+ id = Assigned.find_memory assigned id in
+      Binary.I_store (id, nn, memarg)
     | Memory_copy (id1, id2) ->
       let* id1 = Assigned.find_memory assigned id1 in
-      let* id2 = Assigned.find_memory assigned id2 in
-      Ok (Binary.Memory_copy (id1, id2))
+      let+ id2 = Assigned.find_memory assigned id2 in
+      Binary.Memory_copy (id1, id2)
     | Memory_size id ->
-      let* id = Assigned.find_memory assigned id in
-      Ok (Binary.Memory_size id)
+      let+ id = Assigned.find_memory assigned id in
+      Binary.Memory_size id
     | Memory_fill id ->
-      let* id = Assigned.find_memory assigned id in
-      Ok (Binary.Memory_fill id)
+      let+ id = Assigned.find_memory assigned id in
+      Binary.Memory_fill id
     | Memory_grow id ->
-      let* id = Assigned.find_memory assigned id in
-      Ok (Binary.Memory_grow id)
+      let+ id = Assigned.find_memory assigned id in
+      Binary.Memory_grow id
     | V_ibinop (shape, op) -> Ok (Binary.V_ibinop (shape, op))
     | Ref_null t -> Ok (Binary.Ref_null t)
   and expr (e : Text.expr Annotated.t) (loop_count, block_ids) :
