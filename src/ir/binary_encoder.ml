@@ -297,12 +297,12 @@ let rec write_instr buf instr =
   | I64_store32 memarg ->
     add_char '\x3E';
     write_memarg buf memarg
-  | Memory_size _ ->
+  | Memory_size idx ->
     add_char '\x3F';
-    add_char '\x00'
-  | Memory_grow _ ->
+    write_indice buf idx
+  | Memory_grow idx ->
     add_char '\x40';
-    add_char '\x00'
+    write_indice buf idx
   | I32_const i ->
     add_char '\x41';
     write_s32 buf i
@@ -463,13 +463,13 @@ let rec write_instr buf instr =
   | Data_drop idx ->
     write_fc buf 9;
     write_indice buf idx
-  | Memory_copy _ ->
+  | Memory_copy (id1, id2) ->
     write_fc buf 10;
-    add_char '\x00';
-    add_char '\x00'
-  | Memory_fill _ ->
+    write_indice buf id1;
+    write_indice buf id2
+  | Memory_fill idx ->
     write_fc buf 11;
-    add_char '\x00'
+    write_indice buf idx
   | Table_init (tableidx, elemidx) ->
     write_fc buf 12;
     write_indice buf elemidx;
