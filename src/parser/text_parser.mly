@@ -191,6 +191,10 @@ let indice ==
   | id = ID; { Text id }
   | n = NUM; { Raw (u32 n) }
 
+(* memory index *)
+let memidx ==
+ | idx = option(indice); { get_id_def0 idx }
+
 (* bind_var *)
 let id ==
   | ~ = ID; <>
@@ -477,12 +481,10 @@ let plain_instr :=
   | I32_STORE16; memarg = memarg; { I_store16 (S32, memarg) }
   | I64_STORE16; memarg = memarg; { I_store16 (S64, memarg) }
   | I64_STORE32; ~ = memarg; <I64_store32>
-  | MEMORY_SIZE; id_opt = option(indice); { Memory_size (get_id_def0 id_opt) }
-  | MEMORY_GROW; id_opt = option(indice); { Memory_grow (get_id_def0 id_opt) }
-  | MEMORY_FILL; id_opt = option(indice); { Memory_fill (get_id_def0 id_opt) }
-  | MEMORY_COPY; id1 = option(indice); id2 = option(indice); {
-    Memory_copy (get_id_def0 id1, get_id_def0 id2)
-  }
+  | MEMORY_SIZE; id = memidx; { Memory_size id }
+  | MEMORY_GROW; id = memidx; { Memory_grow id }
+  | MEMORY_FILL; id = memidx; { Memory_fill id }
+  | MEMORY_COPY; id1 = memidx; id2 = memidx; { Memory_copy (id1, id2) }
   | MEMORY_INIT; ~ = indice; <Memory_init>
   | DATA_DROP; ~ = indice; <Data_drop>
   (* extern *)
