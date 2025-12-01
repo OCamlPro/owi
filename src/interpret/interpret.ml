@@ -1022,24 +1022,24 @@ struct
       st stack
     | Memory_copy (memid1, memid2) ->
       let len, stack = Stack.pop_i32 stack in
-      let src, stack = Stack.pop_i32 stack in
-      let dst, stack = Stack.pop_i32 stack in
+      let src_idx, stack = Stack.pop_i32 stack in
+      let dst_idx, stack = Stack.pop_i32 stack in
       let* mem1 = Env.get_memory env memid1 in
       let* mem2 = Env.get_memory env memid2 in
       let>! () =
         let size1 = I64.extend_i32_u (Memory.size mem1) in
         let size2 = I64.extend_i32_u (Memory.size mem2) in
         let len = I64.extend_i32_u len in
-        let src = I64.extend_i32_u src in
-        let dst = I64.extend_i32_u dst in
+        let src_idx = I64.extend_i32_u src_idx in
+        let dst_idx = I64.extend_i32_u dst_idx in
         ( Boolean.or_
-            (I64.gt_u I64.(add src len) size1)
-            (I64.gt_u I64.(add dst len) size2)
+            (I64.gt_u I64.(add src_idx len) size1)
+            (I64.gt_u I64.(add dst_idx len) size2)
         , `Out_of_bounds_memory_access )
       in
       let* mem1 = Env.get_memory env memid1 in
       let* mem2 = Env.get_memory env memid2 in
-      let* () = Memory.blit mem1 ~src mem2 ~dst ~len in
+      let* () = Memory.blit ~src:mem1 ~src_idx ~dst:mem2 ~dst_idx ~len in
       st stack
     | Memory_init (memid, dataid) ->
       let len, stack = Stack.pop_i32 stack in
