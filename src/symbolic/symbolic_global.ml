@@ -8,6 +8,7 @@ let value v = v.value
 
 let set_value v x = v.value <- x
 
+(* WARNING: because we are doing an optimization in `Symbolic_choice`, the cloned state should not refer to a mutable value of the previous state. Assuming that the original state is not mutated is wrong. *)
 let clone_global r = { value = r.value }
 
 let convert_values (v : Concrete_value.t) : Symbolic_value.t =

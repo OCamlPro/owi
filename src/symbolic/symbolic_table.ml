@@ -10,6 +10,7 @@ type t =
   ; typ : Text.ref_type
   }
 
+(* WARNING: because we are doing an optimization in `Symbolic_choice`, the cloned state should not refer to a mutable value of the previous state. Assuming that the original state is not mutated is wrong. *)
 let clone_table { limits; data; typ } = { typ; limits; data = Array.copy data }
 
 let get t i = t.data.(i)
