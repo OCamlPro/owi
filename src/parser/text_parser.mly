@@ -458,34 +458,39 @@ let plain_instr :=
   | REF_IS_NULL; { Ref_is_null }
   | REF_FUNC; ~ = indice; <Ref_func>
   (* i32 *)
-  | I32_LOAD; memarg = memarg; { I_load (S32, memarg) }
-  | I64_LOAD; memarg = memarg; { I_load (S64, memarg) }
-  | F32_LOAD; memarg = memarg; { F_load (S32, memarg) }
-  | F64_LOAD; memarg = memarg; { F_load (S64, memarg) }
-  | I32_STORE; memarg = memarg; { I_store (S32, memarg) }
-  | I64_STORE; memarg = memarg; { I_store (S64, memarg) }
-  | F32_STORE; memarg = memarg; { F_store (S32, memarg) }
-  | F64_STORE; memarg = memarg; { F_store (S64, memarg) }
-  | I32_LOAD8_S; memarg = memarg; { I_load8 (S32, S, memarg ) }
-  | I32_LOAD8_U; memarg = memarg; { I_load8 (S32, U, memarg ) }
-  | I64_LOAD8_S; memarg = memarg; { I_load8 (S64, S, memarg ) }
-  | I64_LOAD8_U; memarg = memarg; { I_load8 (S64, U, memarg ) }
-  | I32_LOAD16_S; memarg = memarg; { I_load16 (S32, S, memarg )  }
-  | I32_LOAD16_U; memarg = memarg; { I_load16 (S32, U, memarg ) }
-  | I64_LOAD16_S; memarg = memarg; { I_load16 (S64, S, memarg ) }
-  | I64_LOAD16_U; memarg = memarg; { I_load16 (S64, U, memarg ) }
-  | I64_LOAD32_S; memarg = memarg; { I64_load32 (S, memarg) }
-  | I64_LOAD32_U; memarg = memarg; { I64_load32 (U, memarg) }
-  | I32_STORE8; memarg = memarg; { I_store8 (S32, memarg) }
-  | I64_STORE8; memarg = memarg; { I_store8 (S64, memarg) }
-  | I32_STORE16; memarg = memarg; { I_store16 (S32, memarg) }
-  | I64_STORE16; memarg = memarg; { I_store16 (S64, memarg) }
-  | I64_STORE32; ~ = memarg; <I64_store32>
+  | I32_LOAD; id = memidx; memarg = memarg; { I_load (id, S32, memarg) }
+  | I64_LOAD; id = memidx; memarg = memarg; { I_load (id, S64, memarg) }
+  | F32_LOAD; id = memidx; memarg = memarg; { F_load (id, S32, memarg) }
+  | F64_LOAD; id = memidx; memarg = memarg; { F_load (id, S64, memarg) }
+  | I32_STORE; id = memidx; memarg = memarg; { I_store (id, S32, memarg) }
+  | I64_STORE; id = memidx; memarg = memarg; { I_store (id, S64, memarg) }
+  | F32_STORE; id = memidx; memarg = memarg; { F_store (id, S32, memarg) }
+  | F64_STORE; id = memidx; memarg = memarg; { F_store (id, S64, memarg) }
+  | I32_LOAD8_S; id = memidx; memarg = memarg; { I_load8 (id, S32, S, memarg ) }
+  | I32_LOAD8_U; id = memidx; memarg = memarg; { I_load8 (id, S32, U, memarg ) }
+  | I64_LOAD8_S; id = memidx; memarg = memarg; { I_load8 (id, S64, S, memarg ) }
+  | I64_LOAD8_U; id = memidx; memarg = memarg; { I_load8 (id, S64, U, memarg ) }
+  | I32_LOAD16_S; id = memidx; memarg = memarg; { I_load16 (id, S32, S, memarg )  }
+  | I32_LOAD16_U; id = memidx; memarg = memarg; { I_load16 (id, S32, U, memarg ) }
+  | I64_LOAD16_S; id = memidx; memarg = memarg; { I_load16 (id, S64, S, memarg ) }
+  | I64_LOAD16_U; id = memidx; memarg = memarg; { I_load16 (id, S64, U, memarg ) }
+  | I64_LOAD32_S; id = memidx; memarg = memarg; { I64_load32 (id, S, memarg) }
+  | I64_LOAD32_U; id = memidx; memarg = memarg; { I64_load32 (id, U, memarg) }
+  | I32_STORE8; id = memidx; memarg = memarg; { I_store8 (id, S32, memarg) }
+  | I64_STORE8; id = memidx; memarg = memarg; { I_store8 (id, S64, memarg) }
+  | I32_STORE16; id = memidx; memarg = memarg; { I_store16 (id, S32, memarg) }
+  | I64_STORE16; id = memidx; memarg = memarg; { I_store16 (id, S64, memarg) }
+  | I64_STORE32; id = memidx; memarg = memarg; { I64_store32 (id, memarg) }
   | MEMORY_SIZE; id = memidx; { Memory_size id }
   | MEMORY_GROW; id = memidx; { Memory_grow id }
   | MEMORY_FILL; id = memidx; { Memory_fill id }
   | MEMORY_COPY; id1 = memidx; id2 = memidx; { Memory_copy (id1, id2) }
-  | MEMORY_INIT; ~ = indice; <Memory_init>
+  | MEMORY_INIT; args = list(indice); {
+    match args with
+    | [] -> failwith "memory.init: expected at least one argument"
+    | [dataidx] -> Memory_init (Raw 0, dataidx)
+    | memidx :: dataidx :: _ -> Memory_init (memidx, dataidx)
+  }
   | DATA_DROP; ~ = indice; <Data_drop>
   (* extern *)
   | EXTERN_EXTERNALIZE; { Extern_externalize }

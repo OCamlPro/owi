@@ -313,21 +313,21 @@ module Text : sig
     | Table_init of indice * indice
     | Elem_drop of indice
     (* Memory instructions *)
-    | I_load of nn * memarg
-    | F_load of nn * memarg
-    | I_store of nn * memarg
-    | F_store of nn * memarg
-    | I_load8 of nn * sx * memarg
-    | I_load16 of nn * sx * memarg
-    | I64_load32 of sx * memarg
-    | I_store8 of nn * memarg
-    | I_store16 of nn * memarg
-    | I64_store32 of memarg
+    | I_load of indice * nn * memarg
+    | F_load of indice * nn * memarg
+    | I_store of indice * nn * memarg
+    | F_store of indice * nn * memarg
+    | I_load8 of indice * nn * sx * memarg
+    | I_load16 of indice * nn * sx * memarg
+    | I64_load32 of indice * sx * memarg
+    | I_store8 of indice * nn * memarg
+    | I_store16 of indice * nn * memarg
+    | I64_store32 of indice * memarg
     | Memory_size of indice
     | Memory_grow of indice
     | Memory_fill of indice
     | Memory_copy of indice * indice
-    | Memory_init of indice
+    | Memory_init of indice * indice
     | Data_drop of indice
     (* Control instructions *)
     | Nop
@@ -554,21 +554,21 @@ module Binary : sig
     | Table_init of indice * indice
     | Elem_drop of indice
     (* Memory instructions *)
-    | I_load of Text.nn * Text.memarg
-    | F_load of Text.nn * Text.memarg
-    | I_store of Text.nn * Text.memarg
-    | F_store of Text.nn * Text.memarg
-    | I_load8 of Text.nn * Text.sx * Text.memarg
-    | I_load16 of Text.nn * Text.sx * Text.memarg
-    | I64_load32 of Text.sx * Text.memarg
-    | I_store8 of Text.nn * Text.memarg
-    | I_store16 of Text.nn * Text.memarg
-    | I64_store32 of Text.memarg
+    | I_load of indice * Text.nn * Text.memarg
+    | F_load of indice * Text.nn * Text.memarg
+    | I_store of indice * Text.nn * Text.memarg
+    | F_store of indice * Text.nn * Text.memarg
+    | I_load8 of indice * Text.nn * Text.sx * Text.memarg
+    | I_load16 of indice * Text.nn * Text.sx * Text.memarg
+    | I64_load32 of indice * Text.sx * Text.memarg
+    | I_store8 of indice * Text.nn * Text.memarg
+    | I_store16 of indice * Text.nn * Text.memarg
+    | I64_store32 of indice * Text.memarg
     | Memory_size of indice
     | Memory_grow of indice
     | Memory_fill of indice
     | Memory_copy of indice * indice
-    | Memory_init of indice
+    | Memory_init of indice * indice
     | Data_drop of indice
     (* Control instructions *)
     | Nop
