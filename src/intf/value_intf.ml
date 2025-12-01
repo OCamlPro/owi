@@ -186,20 +186,6 @@ module type T = sig
 
   val pp_v128 : Format.formatter -> v128 -> unit
 
-  type ref_value
-
-  val pp_ref_value : Format.formatter -> ref_value -> unit
-
-  type t =
-    | I32 of int32
-    | I64 of int64
-    | F32 of float32
-    | F64 of float64
-    | V128 of v128
-    | Ref of ref_value
-
-  val pp : Format.formatter -> t -> unit
-
   val const_i32 : Int32.t -> int32
 
   val const_i64 : Int64.t -> int64
@@ -209,21 +195,49 @@ module type T = sig
   val const_f64 : Float64.t -> float64
 
   val const_v128 : V128.t -> v128
-  (* TODO ref *)
+
+  module Ref : sig
+    module Extern : sig
+      type t
+
+      val cast : t -> 'x Type.Id.t -> 'x option
+    end
+
+    (* TODO; make this private and even opaque at some point *)
+    type t =
+      | Extern of Extern.t option
+      | Func of Kind.func option
+
+    val pp : Format.formatter -> t -> unit
+
+    val null : Text.heap_type -> t
+
+    val func : Kind.func -> t
+
+    val extern : 'x Type.Id.t -> 'x -> t
+
+    val is_null : t -> Bool.t
+
+    val get_func : t -> Kind.func get_ref
+
+    val get_extern : t -> 'x Type.Id.t -> 'x get_ref
+  end
+
+  type t =
+    | I32 of int32
+    | I64 of int64
+    | F32 of float32
+    | F64 of float64
+    | V128 of v128
+    | Ref of Ref.t
 
   val ref_null : Text.heap_type -> t
 
   val ref_func : Kind.func -> t
 
-  val ref_externref : 'a Type.Id.t -> 'a -> t
+  val ref_extern : 'x Type.Id.t -> 'x -> t
 
-  val ref_is_null : ref_value -> bool
-
-  module Ref : sig
-    val get_func : ref_value -> Kind.func get_ref
-
-    val get_externref : ref_value -> 'a Type.Id.t -> 'a get_ref
-  end
+  val pp : Format.formatter -> t -> unit
 
   module Bool : sig
     val const : Bool.t -> bool

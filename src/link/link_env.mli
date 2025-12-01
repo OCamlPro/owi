@@ -4,7 +4,7 @@
 
 type 'ext t
 
-type elem = { mutable value : Concrete_value.ref_value array }
+type elem = { mutable value : Concrete_value.Ref.t array }
 
 type data = { mutable value : string }
 
@@ -45,7 +45,7 @@ module Build : sig
 
   val add_elem : int -> elem -> t -> t
 
-  val get_const_global : t -> int -> V.t Result.t
+  val get_const_global : t -> int -> Concrete_value.t Result.t
 
   val get_func : t -> int -> Kind.func Result.t
 end

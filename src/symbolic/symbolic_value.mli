@@ -2,15 +2,8 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type externref
-
-type ref_value =
-  | Funcref of Kind.func option
-  | Externref of externref option
-
 include
   Value_intf.T
-    with type ref_value := ref_value
     with type bool = Smtml.Expr.t
      and type int32 = Smtml.Expr.t
      and type int64 = Smtml.Expr.t

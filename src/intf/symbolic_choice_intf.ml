@@ -18,19 +18,7 @@ type 'a eval =
       * Symbol_scope.t
 
 module type S = sig
-  module V : sig
-    type bool
-
-    type int32
-
-    type int64
-
-    type float32
-
-    type float64
-
-    type v128
-  end
+  module Value : Value_intf.T
 
   type thread
 
@@ -50,13 +38,13 @@ module type S = sig
 
   val trap : Result.err -> 'a t
 
-  val select : V.bool -> prio_true:Prio.t -> prio_false:Prio.t -> Bool.t t
+  val select : Value.bool -> prio_true:Prio.t -> prio_false:Prio.t -> Bool.t t
 
-  val select_i32 : V.int32 -> Int32.t t
+  val select_i32 : Value.int32 -> Int32.t t
 
-  val assertion : V.bool -> unit t
+  val assertion : Value.bool -> unit t
 
-  val assume : V.bool -> unit t
+  val assume : Value.bool -> unit t
 
   val with_thread : (thread -> 'a) -> 'a t
 
@@ -118,5 +106,5 @@ module type Intf = sig
     S
       with type 'a t = ('a eval, Thread.t) CoreImpl.State.t
        and type thread := Thread.t
-       and module V := Symbolic_value
+       and module Value := Symbolic_value
 end

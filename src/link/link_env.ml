@@ -9,7 +9,7 @@ type data = { mutable value : string }
 
 let drop_data data = data.value <- ""
 
-type elem = { mutable value : Concrete_value.ref_value array }
+type elem = { mutable value : Concrete_value.Ref.t array }
 
 let drop_elem (elem : elem) = elem.value <- [||]
 

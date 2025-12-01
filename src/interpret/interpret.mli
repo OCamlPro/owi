@@ -25,33 +25,58 @@ module Concrete (_ : Parameters) : sig
     -> env:int
     -> envs:Concrete_env.t Dynarray.t
     -> Kind.func
-    -> V.t list Concrete_choice.t
+    -> Concrete_value.t list Concrete_choice.t
 
   val exec_ibinop :
-    V.t list -> Text.nn -> Text.ibinop -> V.t list Concrete_choice.t
+       Concrete_value.t list
+    -> Text.nn
+    -> Text.ibinop
+    -> Concrete_value.t list Concrete_choice.t
 
-  val exec_iunop : V.t list -> Text.nn -> Text.iunop -> V.t list
+  val exec_iunop :
+    Concrete_value.t list -> Text.nn -> Text.iunop -> Concrete_value.t list
 
-  val exec_itestop : V.t list -> Text.nn -> Text.itestop -> V.t list
+  val exec_itestop :
+    Concrete_value.t list -> Text.nn -> Text.itestop -> Concrete_value.t list
 
-  val exec_irelop : V.t list -> Text.nn -> Text.irelop -> V.t list
+  val exec_irelop :
+    Concrete_value.t list -> Text.nn -> Text.irelop -> Concrete_value.t list
 
   val exec_itruncf :
-    V.t list -> Text.nn -> Text.nn -> Text.sx -> V.t list Concrete_choice.t
+       Concrete_value.t list
+    -> Text.nn
+    -> Text.nn
+    -> Text.sx
+    -> Concrete_value.t list Concrete_choice.t
 
-  val exec_itruncsatf : V.t list -> Text.nn -> Text.nn -> Text.sx -> V.t list
+  val exec_itruncsatf :
+       Concrete_value.t list
+    -> Text.nn
+    -> Text.nn
+    -> Text.sx
+    -> Concrete_value.t list
 
-  val exec_ireinterpretf : V.t list -> Text.nn -> Text.nn -> V.t list
+  val exec_ireinterpretf :
+    Concrete_value.t list -> Text.nn -> Text.nn -> Concrete_value.t list
 
-  val exec_fbinop : V.t list -> Text.nn -> Text.fbinop -> V.t list
+  val exec_fbinop :
+    Concrete_value.t list -> Text.nn -> Text.fbinop -> Concrete_value.t list
 
-  val exec_funop : V.t list -> Text.nn -> Text.funop -> V.t list
+  val exec_funop :
+    Concrete_value.t list -> Text.nn -> Text.funop -> Concrete_value.t list
 
-  val exec_frelop : V.t list -> Text.nn -> Text.frelop -> V.t list
+  val exec_frelop :
+    Concrete_value.t list -> Text.nn -> Text.frelop -> Concrete_value.t list
 
-  val exec_fconverti : V.t list -> Text.nn -> Text.nn -> Text.sx -> V.t list
+  val exec_fconverti :
+       Concrete_value.t list
+    -> Text.nn
+    -> Text.nn
+    -> Text.sx
+    -> Concrete_value.t list
 
-  val exec_freinterpreti : V.t list -> Text.nn -> Text.nn -> V.t list
+  val exec_freinterpreti :
+    Concrete_value.t list -> Text.nn -> Text.nn -> Concrete_value.t list
 end
 
 module Symbolic (_ : Parameters) : sig

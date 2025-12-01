@@ -4,6 +4,8 @@
 
 (* TODO: type 'a t should be abstract, run will be needed for this *)
 include
-  Choice_intf.Base with type 'a t = 'a Result.t and module V := Concrete_value
+  Choice_intf.Base
+    with type 'a t = 'a Result.t
+     and module Value := Concrete_value
 
 val run : 'a t -> 'a t

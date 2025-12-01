@@ -114,7 +114,7 @@ module Eval_const = struct
     | Ref_null t -> ok @@ Stack.push stack (Concrete_value.ref_null t)
     | Ref_func f ->
       let* f = Link_env.Build.get_func env f in
-      let value = Concrete_value.Ref (Funcref (Some f)) in
+      let value = Concrete_value.Ref (Func (Some f)) in
       ok @@ Stack.push stack value
     | Global_get id ->
       let* g = Link_env.Build.get_const_global env id in

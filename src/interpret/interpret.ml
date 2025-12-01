@@ -30,7 +30,7 @@ module Make
     (Global : Interpret_intf.Global with module Value := Value)
     (Elem : Interpret_intf.Elem with module Value := Value)
     (Table : Interpret_intf.Table with module Value := Value)
-    (Choice : Choice_intf.Base with module V := Value)
+    (Choice : Choice_intf.Base with module Value := Value)
     (Memory :
       Interpret_intf.Memory
         with module Value := Value
@@ -560,7 +560,7 @@ struct
       | V128 -> Choice.return @@ Stack.pop_v128 stack
       | Externref ety -> (
         let v, stack = Stack.pop_as_ref stack in
-        match Ref.get_externref v ety with
+        match Ref.get_extern v ety with
         | Ref_value v -> Choice.return @@ (v, stack)
         | Type_mismatch -> Choice.trap `Extern_call_arg_type_mismatch
         | Null -> Choice.trap `Extern_call_null_arg )
@@ -913,7 +913,7 @@ struct
     | Ref_null t -> st @@ Stack.push stack (ref_null t)
     | Ref_is_null ->
       let r, stack = Stack.pop_as_ref stack in
-      let is_null = ref_is_null r in
+      let is_null = Ref.is_null r |> Bool.const in
       st @@ Stack.push_bool stack is_null
     | Ref_func i ->
       let f = Env.get_func env i in

@@ -2,8 +2,8 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-(* TODO: V.ref_value array, gadt to constraint to the right ref_type ? *)
-type table = V.ref_value array
+(* TODO: Concrete_value.Ref.t array, gadt to constraint to the right ref_type ? *)
+type table = Concrete_value.Ref.t array
 
 type t =
   { id : int
@@ -25,7 +25,7 @@ let fresh =
 
 let init ?label (typ : Text.Table.Type.t) : t =
   let limits, ((_null, heap_type) as ref_type) = typ in
-  let null = V.ref_null' heap_type in
+  let null = Concrete_value.Ref.null heap_type in
   let table = Array.make limits.min null in
   { id = fresh (); label; limits; typ = ref_type; data = table }
 

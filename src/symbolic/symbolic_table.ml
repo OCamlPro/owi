@@ -5,7 +5,7 @@
 (** Single table *)
 
 type t =
-  { mutable data : Symbolic_value.ref_value array
+  { mutable data : Symbolic_value.Ref.t array
   ; limits : Text.limits
   ; typ : Text.ref_type
   }
@@ -40,9 +40,8 @@ let copy ~t_src ~t_dst ~src ~dst ~len =
   let len = Int32.to_int len in
   Array.blit t_src.data src t_dst.data dst len
 
-let convert_ref_values (v : Concrete_value.ref_value) : Symbolic_value.ref_value
-    =
-  match v with Funcref f -> Funcref f | _ -> assert false
+let convert_ref_values (v : Concrete_value.Ref.t) : Symbolic_value.Ref.t =
+  match v with Func f -> Func f | _ -> assert false
 
 let convert (orig_table : Concrete_table.t) =
   { data = Array.map convert_ref_values orig_table.data

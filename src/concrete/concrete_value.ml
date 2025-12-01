@@ -2,25 +2,27 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
+open Fmt
+
 type nonrec bool = bool
 
 type int32 = Int32.t
 
-let pp_int32 fmt i = Fmt.pf fmt "%ld" i
-
 type int64 = Int64.t
-
-let pp_int64 fmt i = Fmt.pf fmt "%Ld" i
 
 type float32 = Float32.t
 
-let pp_float32 = Float32.pp
-
 type float64 = Float64.t
 
-let pp_float64 = Float64.pp
-
 type v128 = V128.t
+
+let pp_int32 fmt i = pf fmt "%ld" i
+
+let pp_int64 fmt i = pf fmt "%Ld" i
+
+let pp_float32 = Float32.pp
+
+let pp_float64 = Float64.pp
 
 let pp_v128 = V128.pp
 
@@ -34,24 +36,70 @@ let const_f64 x = x
 
 let const_v128 x = x
 
-include V
-
 module Ref = struct
-  let get_func (r : ref_value) : Kind.func Value_intf.get_ref =
+  module Extern = struct
+    type t = E : 'a Type.Id.t * 'a -> t
+
+    let cast (type r) (E (rty, r) : t) (ty : r Type.Id.t) : r option =
+      match Type.Id.provably_equal rty ty with
+      | None -> None
+      | Some Equal -> Some r
+  end
+
+  type t =
+    | Extern of Extern.t option
+    | Func of Kind.func option
+
+  let pp fmt = function
+    | Extern _ -> pf fmt "externref"
+    | Func _ -> pf fmt "funcref"
+
+  let null = function Text.Func_ht -> Func None | Extern_ht -> Extern None
+
+  let func (f : Kind.func) = Func (Some f)
+
+  let extern (type x) (t : x Type.Id.t) (v : x) : t = Extern (Some (E (t, v)))
+
+  let is_null = function
+    | Func None | Extern None -> true
+    | Func (Some _) | Extern (Some _) -> false
+
+  let get_func (r : t) : Kind.func Value_intf.get_ref =
     match r with
-    | Funcref (Some f) -> Ref_value f
-    | Funcref None -> Null
+    | Func (Some f) -> Ref_value f
+    | Func None -> Null
     | _ -> Type_mismatch
 
-  let get_externref (type t) (r : ref_value) (t : t Type.Id.t) :
-    t Value_intf.get_ref =
+  let get_extern (type x) (r : t) (typ : x Type.Id.t) : x Value_intf.get_ref =
     match r with
-    | Externref (Some (E (ety, v))) -> (
-      match Type.Id.provably_equal t ety with
+    | Extern (Some (E (ety, v))) -> (
+      match Type.Id.provably_equal typ ety with
       | None -> assert false
       | Some Equal -> Ref_value v )
     | _ -> assert false
 end
+
+type t =
+  | I32 of int32
+  | I64 of int64
+  | F32 of float32
+  | F64 of float64
+  | V128 of v128
+  | Ref of Ref.t
+
+let pp fmt = function
+  | I32 i -> pf fmt "i32.const %ld" i
+  | I64 i -> pf fmt "i64.const %Ld" i
+  | F32 f -> pf fmt "f32.const %a" Float32.pp f
+  | F64 f -> pf fmt "f64.const %a" Float64.pp f
+  | V128 v -> pf fmt "v128.const %a" V128.pp v
+  | Ref r -> Ref.pp fmt r
+
+let ref_null typ = Ref (Ref.null typ)
+
+let ref_func (f : Kind.func) : t = Ref (Ref.func f)
+
+let ref_extern (type x) (t : x Type.Id.t) (v : x) : t = Ref (Ref.extern t v)
 
 module Bool = struct
   let const c = c
@@ -64,7 +112,7 @@ module Bool = struct
 
   let int32 = function true -> 1l | false -> 0l
 
-  let pp = Fmt.bool
+  let pp = bool
 end
 
 module I32 = struct

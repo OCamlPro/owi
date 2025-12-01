@@ -96,19 +96,19 @@ module type S = sig
   val push_array : t -> unit Array.t -> t
 end
 
-module Make (V : Value_intf.T) :
+module Make (Value : Value_intf.T) :
   S
-    with type value := V.t
-     and type bool := V.bool
-     and type int32 := V.int32
-     and type int64 := V.int64
-     and type float32 := V.float32
-     and type float64 := V.float64
-     and type v128 := V.v128
-     and type ref_value := V.ref_value = struct
-  open V
+    with type value := Value.t
+     and type bool := Value.bool
+     and type int32 := Value.int32
+     and type int64 := Value.int64
+     and type float32 := Value.float32
+     and type float64 := Value.float64
+     and type v128 := Value.v128
+     and type ref_value := Value.Ref.t = struct
+  open Value
 
-  type t = V.t list
+  type t = Value.t list
 
   exception Empty
 
@@ -116,36 +116,36 @@ module Make (V : Value_intf.T) :
 
   let push s v = v :: s
 
-  let push_bool s b = push s (I32 (V.Bool.int32 b))
+  let push_bool s b = push s (I32 (Value.Bool.int32 b))
 
-  let push_const_i32 s i = push s (I32 (V.const_i32 i))
+  let push_const_i32 s i = push s (I32 (Value.const_i32 i))
 
   let push_i32 s i = push s (I32 i)
 
   let push_i32_of_int s i = push_const_i32 s (Int32.of_int i)
 
-  let push_const_i64 s i = push s (I64 (V.const_i64 i))
+  let push_const_i64 s i = push s (I64 (Value.const_i64 i))
 
   let push_i64 s i = push s (I64 i)
 
-  let push_const_f32 s f = push s (F32 (V.const_f32 f))
+  let push_const_f32 s f = push s (F32 (Value.const_f32 f))
 
   let push_f32 s f = push s (F32 f)
 
-  let push_const_f64 s f = push s (F64 (V.const_f64 f))
+  let push_const_f64 s f = push s (F64 (Value.const_f64 f))
 
   let push_f64 s f = push s (F64 f)
 
-  let push_const_v128 s f = push s (V128 (V.const_v128 f))
+  let push_const_v128 s f = push s (V128 (Value.const_v128 f))
 
   let push_v128 s f = push s (V128 f)
 
-  let push_as_externref s ty v = push s (V.ref_externref ty v)
+  let push_as_externref s ty v = push s (Value.ref_extern ty v)
 
   let push_array _ _ = assert false
 
   let pp fmt (s : t) =
-    Fmt.list ~sep:(fun fmt () -> Fmt.string fmt " ; ") V.pp fmt s
+    Fmt.list ~sep:(fun fmt () -> Fmt.string fmt " ; ") Value.pp fmt s
 
   let pop = function [] -> raise Empty | hd :: tl -> (hd, tl)
 
@@ -206,7 +206,7 @@ module Make (V : Value_intf.T) :
 
   let pop_bool s =
     let hd, tl = pop s in
-    match hd with I32 n -> (V.I32.to_bool n, tl) | _ -> assert false
+    match hd with I32 n -> (Value.I32.to_bool n, tl) | _ -> assert false
 
   let pop_n s n =
     (List.filteri (fun i _hd -> i < n) s, List.filteri (fun i _hd -> i >= n) s)

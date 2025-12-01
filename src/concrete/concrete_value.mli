@@ -10,5 +10,3 @@ include
      and type float32 = Float32.t
      and type float64 = Float64.t
      and type v128 = V128.t
-     and type ref_value = V.ref_value
-     and type t = V.t

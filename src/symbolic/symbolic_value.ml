@@ -5,6 +5,7 @@
 open Smtml
 open Ty
 open Expr
+open Fmt
 
 type bool = Expr.t
 
@@ -28,24 +29,6 @@ type v128 = Expr.t
 
 let pp_v128 = Expr.pp
 
-type externref = V.externref
-
-type ref_value =
-  | Funcref of Kind.func option
-  | Externref of externref option
-
-let pp_ref_value fmt = function
-  | Funcref _ -> Fmt.string fmt "funcref"
-  | Externref _ -> Fmt.string fmt "externref"
-
-type t =
-  | I32 of int32
-  | I64 of int64
-  | F32 of float32
-  | F64 of float64
-  | V128 of v128
-  | Ref of ref_value
-
 let const_i32 (i : Int32.t) : int32 = value (Bitv (Smtml.Bitvector.of_int32 i))
 
 let const_i64 (i : Int64.t) : int64 = value (Bitv (Smtml.Bitvector.of_int64 i))
@@ -58,15 +41,62 @@ let const_v128 (v : V128.t) : v128 =
   let a, b = V128.to_i64x2 v in
   Smtml.Expr.concat (const_i64 a) (const_i64 b)
 
-let ref_null _ty = Ref (Funcref None)
+module Ref = struct
+  module Extern = struct
+    type t = E : 'a Type.Id.t * 'a -> t
 
-let ref_func f : t = Ref (Funcref (Some f))
+    let cast (type r) (E (rty, r) : t) (ty : r Type.Id.t) : r option =
+      match Type.Id.provably_equal rty ty with
+      | None -> None
+      | Some Equal -> Some r
+  end
 
-let ref_externref t v : t = Ref (Externref (Some (E (t, v))))
+  type t =
+    | Extern of Extern.t option
+    | Func of Kind.func option
 
-let ref_is_null = function
-  | Funcref (Some _) | Externref (Some _) -> value False
-  | Funcref None | Externref None -> value True
+  let pp fmt = function
+    | Extern _ -> pf fmt "externref"
+    | Func _ -> pf fmt "funcref"
+
+  let null = function Text.Func_ht -> Func None | Extern_ht -> Extern None
+
+  let func (f : Kind.func) = Func (Some f)
+
+  let extern (type x) (t : x Type.Id.t) (v : x) : t = Extern (Some (E (t, v)))
+
+  let is_null = function
+    | Func None | Extern None -> true
+    | Func (Some _) | Extern (Some _) -> false
+
+  let get_func (r : t) : Kind.func Value_intf.get_ref =
+    match r with
+    | Func (Some f) -> Ref_value f
+    | Func None -> Null
+    | _ -> Type_mismatch
+
+  let get_extern (type x) (r : t) (typ : x Type.Id.t) : x Value_intf.get_ref =
+    match r with
+    | Extern (Some (E (ety, v))) -> (
+      match Type.Id.provably_equal typ ety with
+      | None -> assert false
+      | Some Equal -> Ref_value v )
+    | _ -> assert false
+end
+
+type t =
+  | I32 of int32
+  | I64 of int64
+  | F32 of float32
+  | F64 of float64
+  | V128 of v128
+  | Ref of Ref.t
+
+let ref_null typ = Ref (Ref.null typ)
+
+let ref_func (f : Kind.func) : t = Ref (Ref.func f)
+
+let ref_extern (type x) (t : x Type.Id.t) (v : x) : t = Ref (Ref.extern t v)
 
 let pp fmt = function
   | I32 i -> pp_int32 fmt i
@@ -74,24 +104,7 @@ let pp fmt = function
   | F32 f -> pp_float32 fmt f
   | F64 f -> pp_float64 fmt f
   | V128 e -> pp_v128 fmt e
-  | Ref r -> pp_ref_value fmt r
-
-module Ref = struct
-  let get_func (r : ref_value) : Kind.func Value_intf.get_ref =
-    match r with
-    | Funcref (Some f) -> Ref_value f
-    | Funcref None -> Null
-    | Externref _ -> Type_mismatch
-
-  let get_externref (type t) (r : ref_value) (t : t Type.Id.t) :
-    t Value_intf.get_ref =
-    match r with
-    | Externref (Some (E (ety, v))) -> (
-      match Type.Id.provably_equal t ety with
-      | None -> assert false
-      | Some Equal -> Ref_value v )
-    | _ -> assert false
-end
+  | Ref r -> Ref.pp fmt r
 
 module Bool = struct
   let const b = Bool.v b

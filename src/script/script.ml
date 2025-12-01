@@ -10,7 +10,7 @@ module Host_externref = struct
 
   let ty : t Type.Id.t = Type.Id.make ()
 
-  let value i = V.Externref (Some (V.E (ty, i)))
+  let value i = Concrete_value.Ref.extern ty i
 end
 
 let check_error ~expected ~got : unit Result.t =
@@ -61,7 +61,7 @@ let load_global_from_module ls mod_id name =
   | None -> Error (`Unbound_name name)
   | Some v -> Ok v
 
-let compare_result_const result (const : V.t) =
+let compare_result_const result (const : Concrete_value.t) =
   match (result, const) with
   | Wast.Result_const (Literal (Const_I32 n)), I32 n' -> Int32.eq n n'
   | Result_const (Literal (Const_I64 n)), I64 n' -> Int64.eq n n'
@@ -70,10 +70,10 @@ let compare_result_const result (const : V.t) =
   | Result_const (Literal (Const_F64 n)), F64 n' ->
     Float64.eq n n' || String.equal (Float64.to_string n) (Float64.to_string n')
   | Result_const (Literal (Const_V128 n)), V128 n' -> V128.eq n n'
-  | Result_const (Literal (Const_null Func_ht)), Ref (Funcref None) -> true
-  | Result_const (Literal (Const_null Extern_ht)), Ref (Externref None) -> true
-  | Result_const (Literal (Const_extern n)), Ref (Externref (Some ref)) -> begin
-    match V.cast_ref ref Host_externref.ty with
+  | Result_const (Literal (Const_null Func_ht)), Ref (Func None) -> true
+  | Result_const (Literal (Const_null Extern_ht)), Ref (Extern None) -> true
+  | Result_const (Literal (Const_extern n)), Ref (Extern (Some ref)) -> begin
+    match Concrete_value.Ref.Extern.cast ref Host_externref.ty with
     | None -> false
     | Some n' -> n = n'
   end
@@ -100,14 +100,14 @@ let compare_result_const result (const : V.t) =
     Log.err (fun m -> m "TODO: unimplemented Script.compare_result_const");
     assert false
 
-let value_of_const : Wast.const -> V.t = function
-  | Const_I32 v -> V.I32 v
-  | Const_I64 v -> V.I64 v
-  | Const_F32 v -> V.F32 v
-  | Const_F64 v -> V.F64 v
-  | Const_V128 v -> V.V128 v
-  | Const_null rt -> V.ref_null rt
-  | Const_extern i -> V.Ref (Host_externref.value i)
+let value_of_const : Wast.const -> Concrete_value.t = function
+  | Const_I32 v -> Concrete_value.I32 v
+  | Const_I64 v -> Concrete_value.I64 v
+  | Const_F32 v -> Concrete_value.F32 v
+  | Const_F64 v -> Concrete_value.F64 v
+  | Const_V128 v -> Concrete_value.V128 v
+  | Const_null rt -> Concrete_value.ref_null rt
+  | Const_extern i -> Concrete_value.Ref (Host_externref.value i)
   | i ->
     Log.err (fun m ->
       m "TODO: unimplemented Script.value_of_const %a)" Wast.pp_const i );

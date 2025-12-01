@@ -9,4 +9,4 @@ include
       , Thread_without_memory.t )
       Symbolic_choice.CoreImpl.State.t
      and type thread := Thread_without_memory.t
-     and module V := Symbolic_value
+     and module Value := Symbolic_value
