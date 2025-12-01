@@ -18,8 +18,8 @@
       <h2>89.29%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:40.00%"></span>
-      <span class="unvisited" style="top:42.00%"></span>
+      <span class="unvisited" style="top:41.18%"></span>
+      <span class="unvisited" style="top:43.14%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -34,46 +34,47 @@
 <a id="L8"></a><span > </span>
 <a id="L9"></a><span class="visited"> </span>
 <a id="L10"></a><span > </span>
-<a id="L11"></a><span class="visited"> </span>
-<a id="L12"></a><span > </span>
+<a id="L11"></a><span > </span>
+<a id="L12"></a><span class="visited"> </span>
 <a id="L13"></a><span > </span>
 <a id="L14"></a><span > </span>
-<a id="L15"></a><span class="visited"> </span>
+<a id="L15"></a><span > </span>
 <a id="L16"></a><span class="visited"> </span>
 <a id="L17"></a><span class="visited"> </span>
 <a id="L18"></a><span class="visited"> </span>
 <a id="L19"></a><span class="visited"> </span>
-<a id="L20"></a><span class="unvisited"> </span>
+<a id="L20"></a><span class="visited"> </span>
 <a id="L21"></a><span class="unvisited"> </span>
-<a id="L22"></a><span > </span>
+<a id="L22"></a><span class="unvisited"> </span>
 <a id="L23"></a><span > </span>
 <a id="L24"></a><span > </span>
-<a id="L25"></a><span class="visited"> </span>
+<a id="L25"></a><span > </span>
 <a id="L26"></a><span class="visited"> </span>
-<a id="L27"></a><span > </span>
+<a id="L27"></a><span class="visited"> </span>
 <a id="L28"></a><span > </span>
 <a id="L29"></a><span > </span>
 <a id="L30"></a><span > </span>
 <a id="L31"></a><span > </span>
-<a id="L32"></a><span class="visited"> </span>
-<a id="L33"></a><span > </span>
+<a id="L32"></a><span > </span>
+<a id="L33"></a><span class="visited"> </span>
 <a id="L34"></a><span > </span>
-<a id="L35"></a><span class="visited"> </span>
+<a id="L35"></a><span > </span>
 <a id="L36"></a><span class="visited"> </span>
-<a id="L37"></a><span > </span>
-<a id="L38"></a><span class="visited"> </span>
+<a id="L37"></a><span class="visited"> </span>
+<a id="L38"></a><span > </span>
 <a id="L39"></a><span class="visited"> </span>
-<a id="L40"></a><span > </span>
-<a id="L41"></a><span class="visited"> </span>
-<a id="L42"></a><span > </span>
+<a id="L40"></a><span class="visited"> </span>
+<a id="L41"></a><span > </span>
+<a id="L42"></a><span class="visited"> </span>
 <a id="L43"></a><span > </span>
-<a id="L44"></a><span class="visited"> </span>
-<a id="L45"></a><span > </span>
-<a id="L46"></a><span class="visited"> </span>
-<a id="L47"></a><span > </span>
-<a id="L48"></a><span class="visited"> </span>
+<a id="L44"></a><span > </span>
+<a id="L45"></a><span class="visited"> </span>
+<a id="L46"></a><span > </span>
+<a id="L47"></a><span class="visited"> </span>
+<a id="L48"></a><span > </span>
 <a id="L49"></a><span class="visited"> </span>
 <a id="L50"></a><span class="visited"> </span>
+<a id="L51"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -128,6 +129,7 @@
 <a href="#L48">48</a>
 <a href="#L49">49</a>
 <a href="#L50">50</a>
+<a href="#L51">51</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -137,9 +139,10 @@ type t = { mutable value : Symbolic_value.t }
 
 let value v = <span data-count="321">v</span>.value
 
-let set_value v x = <span data-count="1729">v</span>.value &lt;- x
+let set_value v x = <span data-count="1679">v</span>.value &lt;- x
 
-let clone_global r = <span data-count="26632">{</span> value = r.value }
+(* WARNING: because we are doing an optimization in `Symbolic_choice`, the cloned state should not refer to a mutable value of the previous state. Assuming that the original state is not mutated is wrong. *)
+let clone_global r = <span data-count="13266">{</span> value = r.value }
 
 let convert_values (v : Concrete_value.t) : Symbolic_value.t =
   (* TODO share various versions *)
@@ -160,25 +163,25 @@ let convert (orig_global : Concrete_global.t) : t =
 
 type collection = (int * int, t) Hashtbl.t
 
-let init () = <span data-count="27766">H</span>ashtbl.create 16
+let init () = <span data-count="14033">H</span>ashtbl.create 16
 
 let clone collection =
-  <span data-count="27366">l</span>et collection' = init () in
-  <span data-count="27366">H</span>ashtbl.iter
+  <span data-count="13633">l</span>et collection' = init () in
+  <span data-count="13633">H</span>ashtbl.iter
     (fun loc global -&gt;
-      <span data-count="26632">l</span>et global' = clone_global global in
-      <span data-count="26632">H</span>ashtbl.add collection' loc global' )
+      <span data-count="13266">l</span>et global' = clone_global global in
+      <span data-count="13266">H</span>ashtbl.add collection' loc global' )
     collection;
-  <span data-count="27366">c</span>ollection'
+  <span data-count="13633">c</span>ollection'
 
 let get_global env_id (orig_global : Concrete_global.t) collection g_id =
-  <span data-count="2050">l</span>et loc = (env_id, g_id) in
+  <span data-count="2000">l</span>et loc = (env_id, g_id) in
   match Hashtbl.find_opt collection loc with
   | <span data-count="192">N</span>one -&gt;
     let g = convert orig_global in
     <span data-count="192">H</span>ashtbl.add collection loc g;
     <span data-count="192">g</span>
-  | <span data-count="1858">S</span>ome t -&gt; t
+  | <span data-count="1808">S</span>ome t -&gt; t
 </code></pre>
       </div>
     </div>

@@ -315,22 +315,22 @@ let sort_results deterministic_result_order results =
 
 let mk_callback no_stop_at_failure fail_mode res_stack path_count =
  fun ~close v -&gt;
-  <span data-count="1637">l</span>et open Symbolic_choice_intf in
+  <span data-count="1580">l</span>et open Symbolic_choice_intf in
   Atomic.incr path_count;
-  <span data-count="1637">m</span>atch (fail_mode, v) with
-  | <span data-count="1395">_</span>, (EVal (), _) -&gt; ()
+  <span data-count="1581">m</span>atch (fail_mode, v) with
+  | <span data-count="1339">_</span>, (EVal (), _) -&gt; ()
   | <span data-count="174">(</span> (<span data-count="174">S</span>ymbolic_parameters.Both | <span data-count="0">T</span>rap_only)
     , (ETrap (t, m, labels, breadcrumbs, symbol_scopes), thread) ) -&gt;
     Ws.push
       (`ETrap (t, m, labels, breadcrumbs, symbol_scopes), thread)
       Prio.default res_stack;
-    <span data-count="173">i</span>f not no_stop_at_failure then <span data-count="13">c</span>lose ()
+    <span data-count="172">i</span>f not no_stop_at_failure then <span data-count="12">c</span>lose ()
   | <span data-count="65">(</span> (<span data-count="62">B</span>oth | <span data-count="3">A</span>ssertion_only)
     , (EAssert (e, m, labels, breadcrumbs, symbol_scopes), thread) ) -&gt;
     Ws.push
       (`EAssert (e, m, labels, breadcrumbs, symbol_scopes), thread)
       Prio.default res_stack;
-    <span data-count="60">i</span>f not no_stop_at_failure then <span data-count="37">c</span>lose ()
+    <span data-count="57">i</span>f not no_stop_at_failure then <span data-count="34">c</span>lose ()
   | <span data-count="3">(</span><span data-count="0">T</span>rap_only | <span data-count="3">A</span>ssertion_only), _ -&gt; ()
 
 let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
@@ -349,7 +349,7 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
     Symbolic_choice_with_memory.run exploration_strategy ~workers solver result
       thread ~callback
       ~callback_init:(fun () -&gt; <span data-count="774">W</span>s.make_pledge res_stack)
-      ~callback_end:(fun () -&gt; <span data-count="745">W</span>s.end_pledge res_stack)
+      ~callback_end:(fun () -&gt; <span data-count="731">W</span>s.end_pledge res_stack)
   in
   <span data-count="400">l</span>et finalizer () = <span data-count="347">A</span>rray.iter Domain.join join_handles in
   let results = Ws.read_as_seq res_stack ~finalizer in
