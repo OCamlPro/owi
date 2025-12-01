@@ -284,17 +284,14 @@ module CoreImpl = struct
 
     let set_thread st = modify_thread (Fun.const st)
 
-    let clone_thread = modify_thread Thread.clone
-
     let solver = lift_schedulable Schedulable.worker_local
 
     let choose a b =
-      let a =
-        let* () = clone_thread in
-        a
-      in
+      (* Here we are doing an optimization: we can clone only one of the two thread because the clone should not have a dependency on the previous state, it is thus safe to re-use it for the other thread. We choose to clone `b` rather than `a` because `a` is likely to be the first one executed. *)
+      let* thread in
+      let new_thread = Thread.clone thread in
       let b =
-        let* () = clone_thread in
+        let* () = modify_thread (fun (_ : Thread.t) -> new_thread) in
         b
       in
       State.liftF2 Schedulable.choose a b

@@ -8,8 +8,9 @@ module Backend = struct
 
   let make () = { data = Map.empty; chunks = Map.empty }
 
+  (* WARNING: because we are doing an optimization in `Symbolic_choice`, the cloned state should not refer to a mutable value of the previous state. Assuming that the original state is not mutated is wrong. *)
   let clone { data; chunks } =
-    (* Caution, it is tempting not to rebuild the record here, but...
+    (* WARNING: it is tempting not to rebuild the record here, but...
        it must be! otherwise the mutable data points to the same location *)
     { data; chunks }
 
@@ -140,6 +141,7 @@ let size { size; _ } = Symbolic_value.I32.mul size page_size
 
 let size_in_pages { size; _ } = size
 
+(* WARNING: because we are doing an optimization in `Symbolic_choice`, the cloned state should not refer to a mutable value of the previous state. Assuming that the original state is not mutated is wrong. *)
 let clone_memory m = { data = Backend.clone m.data; size = m.size }
 
 let must_be_valid_address m a n =
