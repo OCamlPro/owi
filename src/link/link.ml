@@ -258,15 +258,13 @@ let active_elem_expr ~offset ~length ~table ~elem =
   ]
 
 let active_data_expr ~offset ~length ~mem ~data =
-  if mem <> 0 then Error (`Unknown_memory (Text.Raw mem))
-  else
-    Ok
-      [ Binary.I32_const offset
-      ; I32_const 0l
-      ; I32_const length
-      ; Memory_init (mem, data)
-      ; Data_drop data
-      ]
+  Ok
+    [ Binary.I32_const offset
+    ; I32_const 0l
+    ; I32_const length
+    ; Memory_init (mem, data)
+    ; Data_drop data
+    ]
 
 let get_i32 = function
   | Concrete_value.I32 i -> Ok i
