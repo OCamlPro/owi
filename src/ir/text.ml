@@ -20,6 +20,11 @@ let pp_id_opt fmt = function None -> () | Some i -> pf fmt " %a" pp_id i
 
 let pp_indice fmt = function Raw u -> int fmt u | Text i -> pp_id fmt i
 
+let pp_indice_not0 fmt = function
+  | Text i -> pp_id fmt i
+  | Raw u when u = 0 -> ()
+  | Raw u -> Fmt.pf fmt " %d" u
+
 let pp_indice_opt fmt = function None -> () | Some i -> pp_indice fmt i
 
 type nonrec num_type =
@@ -507,32 +512,34 @@ let rec pp_instr ~short fmt = function
     pf fmt "table.init %a %a" pp_indice tid pp_indice eid
   | Elem_drop id -> pf fmt "elem.drop %a" pp_indice id
   | I_load (id, n, memarg) ->
-    pf fmt "i%a.load %a %a" pp_nn n pp_indice id pp_memarg memarg
+    pf fmt "i%a.load%a %a" pp_nn n pp_indice_not0 id pp_memarg memarg
   | F_load (id, n, memarg) ->
-    pf fmt "f%a.load %a %a" pp_nn n pp_indice id pp_memarg memarg
+    pf fmt "f%a.load%a %a" pp_nn n pp_indice_not0 id pp_memarg memarg
   | I_store (id, n, memarg) ->
-    pf fmt "i%a.store %a %a" pp_nn n pp_indice id pp_memarg memarg
+    pf fmt "i%a.store%a %a" pp_nn n pp_indice_not0 id pp_memarg memarg
   | F_store (id, n, memarg) ->
-    pf fmt "f%a.store %a %a" pp_nn n pp_indice id pp_memarg memarg
+    pf fmt "f%a.store%a %a" pp_nn n pp_indice_not0 id pp_memarg memarg
   | I_load8 (id, n, sx, memarg) ->
-    pf fmt "i%a.load8_%a %a %a" pp_nn n pp_sx sx pp_indice id pp_memarg memarg
+    pf fmt "i%a.load8_%a%a %a" pp_nn n pp_sx sx pp_indice_not0 id pp_memarg
+      memarg
   | I_load16 (id, n, sx, memarg) ->
-    pf fmt "i%a.load16_%a %a %a" pp_nn n pp_sx sx pp_indice id pp_memarg memarg
+    pf fmt "i%a.load16_%a%a %a" pp_nn n pp_sx sx pp_indice_not0 id pp_memarg
+      memarg
   | I64_load32 (id, sx, memarg) ->
-    pf fmt "i64.load32_%a %a %a" pp_sx sx pp_indice id pp_memarg memarg
+    pf fmt "i64.load32_%a%a %a" pp_sx sx pp_indice_not0 id pp_memarg memarg
   | I_store8 (id, n, memarg) ->
-    pf fmt "i%a.store8 %a %a" pp_nn n pp_indice id pp_memarg memarg
+    pf fmt "i%a.store8%a %a" pp_nn n pp_indice_not0 id pp_memarg memarg
   | I_store16 (id, n, memarg) ->
-    pf fmt "i%a.store16 %a %a" pp_nn n pp_indice id pp_memarg memarg
+    pf fmt "i%a.store16%a %a" pp_nn n pp_indice_not0 id pp_memarg memarg
   | I64_store32 (id, memarg) ->
-    pf fmt "i64.store32 %a %a" pp_indice id pp_memarg memarg
-  | Memory_size id -> pf fmt "memory.size %a" pp_indice id
-  | Memory_grow id -> pf fmt "memory.grow %a" pp_indice id
-  | Memory_fill id -> pf fmt "memory.fill %a" pp_indice id
+    pf fmt "i64.store32%a %a" pp_indice_not0 id pp_memarg memarg
+  | Memory_size id -> pf fmt "memory.size%a" pp_indice_not0 id
+  | Memory_grow id -> pf fmt "memory.grow%a" pp_indice_not0 id
+  | Memory_fill id -> pf fmt "memory.fill%a" pp_indice_not0 id
   | Memory_copy (id1, id2) ->
-    pf fmt "memory.copy %a %a" pp_indice id1 pp_indice id2
+    pf fmt "memory.copy%a%a" pp_indice_not0 id1 pp_indice_not0 id2
   | Memory_init (memidx, dataidx) ->
-    pf fmt "memory.init %a %a" pp_indice memidx pp_indice dataidx
+    pf fmt "memory.init%a %a" pp_indice_not0 memidx pp_indice dataidx
   | Data_drop id -> pf fmt "data.drop %a" pp_indice id
   | Nop -> pf fmt "nop"
   | Unreachable -> pf fmt "unreachable"

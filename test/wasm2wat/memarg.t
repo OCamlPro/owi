@@ -12,11 +12,11 @@
   owi: [INFO] stack         : [ i32.const 4 ]
   owi: [INFO] running instr : i32.const 99999999
   owi: [INFO] stack         : [ i32.const 99999999 ; i32.const 4 ]
-  owi: [INFO] running instr : i32.store 0 align=1
+  owi: [INFO] running instr : i32.store align=1
   owi: [INFO] stack         : [  ]
   owi: [INFO] running instr : i32.const 1
   owi: [INFO] stack         : [ i32.const 1 ]
-  owi: [INFO] running instr : i32.load 0 align=2
+  owi: [INFO] running instr : i32.load align=2
   owi: [INFO] stack         : [ i32.const -16777216 ]
   owi: [INFO] running instr : drop
   $ owi wat2wasm memarg.wat
@@ -32,10 +32,10 @@
   owi: [INFO] stack         : [ i32.const 4 ]
   owi: [INFO] running instr : i32.const 99999999
   owi: [INFO] stack         : [ i32.const 99999999 ; i32.const 4 ]
-  owi: [INFO] running instr : i32.store 0 align=1
+  owi: [INFO] running instr : i32.store align=1
   owi: [INFO] stack         : [  ]
   owi: [INFO] running instr : i32.const 1
   owi: [INFO] stack         : [ i32.const 1 ]
-  owi: [INFO] running instr : i32.load 0 align=2
+  owi: [INFO] running instr : i32.load align=2
   owi: [INFO] stack         : [ i32.const -16777216 ]
   owi: [INFO] running instr : drop
