@@ -538,7 +538,7 @@ struct
     | Num_type V128 -> V128 V128.zero
     | Ref_type (_null, rt) -> Ref (Ref.null rt)
 
-  (* TODO move to module Env *)
+  (* TODO: remove *)
   let mem_0 = 0
 
   type extern_func = Extern_func.extern_func
@@ -579,6 +579,7 @@ struct
      fun stack ty f ->
       match ty with
       | Mem args ->
+        (* TODO: add memid to Mem *)
         let* mem = Env.get_memory env mem_0 in
         apply stack args (f mem)
       | Arg (arg, args) ->
@@ -972,12 +973,12 @@ struct
       if b then State.branch state i else Choice.return (State.Continue state)
     | Loop (_id, bt, e) -> exec_block state ~is_loop:true bt e
     | Block (_id, bt, e) -> exec_block state ~is_loop:false bt e
-    | Memory_size _ ->
-      let* mem = Env.get_memory env mem_0 in
+    | Memory_size memid ->
+      let* mem = Env.get_memory env memid in
       let len = Memory.size_in_pages mem in
       st @@ Stack.push_i32 stack len
-    | Memory_grow _ -> begin
-      let* mem = Env.get_memory env mem_0 in
+    | Memory_grow memid -> begin
+      let* mem = Env.get_memory env memid in
       let old_size = I64.of_int32 @@ Memory.size mem in
       let max_size = Memory.get_limit_max mem in
       let delta, stack = Stack.pop_i32 stack in
@@ -992,17 +993,17 @@ struct
       in
       if too_big then st @@ Stack.push_i32 stack (I32.of_int ~-1)
       else begin
-        let* mem = Env.get_memory env mem_0 in
+        let* mem = Env.get_memory env memid in
         Memory.grow mem I64.(to_int32 delta);
         let res = I64.(to_int32 @@ (old_size / page_size)) in
         st @@ Stack.push_i32 stack res
       end
     end
-    | Memory_fill _ ->
+    | Memory_fill memid ->
       let len, stack = Stack.pop_i32 stack in
       let c, stack = Stack.pop_i32 stack in
       let pos, stack = Stack.pop_i32 stack in
-      let* mem = Env.get_memory env mem_0 in
+      let* mem = Env.get_memory env memid in
       let>! () =
         let size = I64.extend_i32_u (Memory.size mem) in
         let len = I64.extend_i32_u len in
@@ -1016,33 +1017,36 @@ struct
         let c = Int.abs c mod 256 in
         Char.chr c
       in
-      let* mem = Env.get_memory env mem_0 in
+      let* mem = Env.get_memory env memid in
       let* () = Memory.fill mem ~pos ~len c in
       st stack
-    | Memory_copy _ ->
+    | Memory_copy (memid1, memid2) ->
       let len, stack = Stack.pop_i32 stack in
       let src, stack = Stack.pop_i32 stack in
       let dst, stack = Stack.pop_i32 stack in
-      let* mem = Env.get_memory env mem_0 in
+      let* mem1 = Env.get_memory env memid1 in
+      let* mem2 = Env.get_memory env memid2 in
       let>! () =
-        let size = I64.extend_i32_u (Memory.size mem) in
+        let size1 = I64.extend_i32_u (Memory.size mem1) in
+        let size2 = I64.extend_i32_u (Memory.size mem2) in
         let len = I64.extend_i32_u len in
         let src = I64.extend_i32_u src in
         let dst = I64.extend_i32_u dst in
         ( Boolean.or_
-            (I64.gt_u I64.(add src len) size)
-            (I64.gt_u I64.(add dst len) size)
+            (I64.gt_u I64.(add src len) size1)
+            (I64.gt_u I64.(add dst len) size2)
         , `Out_of_bounds_memory_access )
       in
-      let* mem = Env.get_memory env mem_0 in
-      let* () = Memory.blit mem ~src ~dst ~len in
+      let* mem1 = Env.get_memory env memid1 in
+      let* mem2 = Env.get_memory env memid2 in
+      let* () = Memory.blit mem1 ~src mem2 ~dst ~len in
       st stack
-    | Memory_init (_memid, dataid) ->
+    | Memory_init (memid, dataid) ->
       let len, stack = Stack.pop_i32 stack in
       let src, stack = Stack.pop_i32 stack in
       let dst, stack = Stack.pop_i32 stack in
       let* data = Env.get_data env dataid in
-      let* mem = Env.get_memory env mem_0 in
+      let* mem = Env.get_memory env memid in
       let>! () =
         let memsize = I64.extend_i32_u (Memory.size mem) in
         let datasize = I64.of_int (Data.size data) in
@@ -1055,7 +1059,7 @@ struct
         , `Out_of_bounds_memory_access )
       in
       let data = Data.value data in
-      let* mem = Env.get_memory env mem_0 in
+      let* mem = Env.get_memory env memid in
       Memory.blit_string mem data ~src ~dst ~len;
       st stack
     | Select _t ->
@@ -1212,8 +1216,8 @@ struct
       let elem = Env.get_elem env i in
       Env.drop_elem elem;
       st stack
-    | I_load16 (_id, nn, sx, { offset; _ }) -> (
-      let* mem = Env.get_memory env mem_0 in
+    | I_load16 (memid, nn, sx, { offset; _ }) -> (
+      let* mem = Env.get_memory env memid in
       let pos, stack = Stack.pop_i32 stack in
       let addr =
         let pos = I64.extend_i32_u pos in
@@ -1225,7 +1229,7 @@ struct
         ( I64.(lt_u size (add addr (I32.of_concrete 2l |> I64.extend_i32_u)))
         , `Out_of_bounds_memory_access )
       in
-      let* mem = Env.get_memory env mem_0 in
+      let* mem = Env.get_memory env memid in
       let* res =
         (match sx with S -> Memory.load_16_s | U -> Memory.load_16_u)
           mem (I32.wrap_i64 addr)
@@ -1235,8 +1239,8 @@ struct
       match nn with
       | S32 -> Stack.push_i32 stack res
       | S64 -> Stack.push_i64 stack (I64.of_int32 res) )
-    | I_load8 (_id, nn, sx, { offset; _ }) -> (
-      let* mem = Env.get_memory env mem_0 in
+    | I_load8 (memid, nn, sx, { offset; _ }) -> (
+      let* mem = Env.get_memory env memid in
       let pos, stack = Stack.pop_i32 stack in
       let addr =
         let pos = I64.extend_i32_u pos in
@@ -1248,7 +1252,7 @@ struct
         ( I64.(lt_u size (add addr (I32.of_concrete 1l |> I64.extend_i32_u)))
         , `Out_of_bounds_memory_access )
       in
-      let* mem = Env.get_memory env mem_0 in
+      let* mem = Env.get_memory env memid in
       let* res =
         (match sx with S -> Memory.load_8_s | U -> Memory.load_8_u)
           mem (I32.wrap_i64 addr)
@@ -1258,8 +1262,8 @@ struct
       match nn with
       | S32 -> Stack.push_i32 stack res
       | S64 -> Stack.push_i64 stack (I64.of_int32 res) )
-    | I_store8 (_id, nn, { offset; _ }) ->
-      let* mem = Env.get_memory env mem_0 in
+    | I_store8 (memid, nn, { offset; _ }) ->
+      let* mem = Env.get_memory env memid in
       let n, stack =
         match nn with
         | S32 ->
@@ -1280,12 +1284,12 @@ struct
         ( I64.(lt_u size (add addr (I32.of_concrete 1l |> I64.extend_i32_u)))
         , `Out_of_bounds_memory_access )
       in
-      let* mem = Env.get_memory env mem_0 in
+      let* mem = Env.get_memory env memid in
       let* () = Memory.store_8 mem ~addr:(I32.wrap_i64 addr) n in
       (* Thread memory ? *)
       st stack
-    | I_load (_id, nn, { offset; _ }) ->
-      let* mem = Env.get_memory env mem_0 in
+    | I_load (memid, nn, { offset; _ }) ->
+      let* mem = Env.get_memory env memid in
       let pos, stack = Stack.pop_i32 stack in
       let addr =
         let pos = I64.extend_i32_u pos in
@@ -1299,7 +1303,7 @@ struct
           ( I64.(lt_u size (add addr (I32.of_concrete 4l |> I64.extend_i32_u)))
           , `Out_of_bounds_memory_access )
         in
-        let* mem = Env.get_memory env mem_0 in
+        let* mem = Env.get_memory env memid in
         let* res = Memory.load_32 mem (I32.wrap_i64 addr) in
         st @@ Stack.push_i32 stack res
       | S64 ->
@@ -1307,12 +1311,12 @@ struct
           ( I64.(lt_u size (add addr (I32.of_concrete 8l |> I64.extend_i32_u)))
           , `Out_of_bounds_memory_access )
         in
-        let* mem = Env.get_memory env mem_0 in
+        let* mem = Env.get_memory env memid in
         let* res = Memory.load_64 mem (I32.wrap_i64 addr) in
         st @@ Stack.push_i64 stack res
       end
-    | F_load (_id, nn, { offset; _ }) ->
-      let* mem = Env.get_memory env mem_0 in
+    | F_load (memid, nn, { offset; _ }) ->
+      let* mem = Env.get_memory env memid in
       let pos, stack = Stack.pop_i32 stack in
       let addr =
         let pos = I64.extend_i32_u pos in
@@ -1326,7 +1330,7 @@ struct
           ( I64.(lt_u size (add addr (I32.of_concrete 4l |> I64.extend_i32_u)))
           , `Out_of_bounds_memory_access )
         in
-        let* mem = Env.get_memory env mem_0 in
+        let* mem = Env.get_memory env memid in
         let* res = Memory.load_32 mem (I32.wrap_i64 addr) in
         let res = F32.of_bits res in
         st @@ Stack.push_f32 stack res
@@ -1335,13 +1339,13 @@ struct
           ( I64.(lt_u size (add addr (I32.of_concrete 8l |> I64.extend_i32_u)))
           , `Out_of_bounds_memory_access )
         in
-        let* mem = Env.get_memory env mem_0 in
+        let* mem = Env.get_memory env memid in
         let* res = Memory.load_64 mem (I32.wrap_i64 addr) in
         let res = F64.of_bits res in
         st @@ Stack.push_f64 stack res
       end
-    | I_store (_id, nn, { offset; _ }) -> (
-      let* mem = Env.get_memory env mem_0 in
+    | I_store (memid, nn, { offset; _ }) -> (
+      let* mem = Env.get_memory env memid in
       let size = Memory.size mem |> I64.extend_i32_u in
       let offset = I32.of_concrete offset |> I64.extend_i32_u in
       match nn with
@@ -1356,7 +1360,7 @@ struct
           ( I64.(lt_u size (add addr (I64.of_concrete 4L)))
           , `Out_of_bounds_memory_access )
         in
-        let* mem = Env.get_memory env mem_0 in
+        let* mem = Env.get_memory env memid in
         let* () = Memory.store_32 mem ~addr:(I32.wrap_i64 addr) n in
         st stack
       | S64 ->
@@ -1370,11 +1374,11 @@ struct
           ( I64.(lt_u size (add addr (I64.of_concrete 8L)))
           , `Out_of_bounds_memory_access )
         in
-        let* mem = Env.get_memory env mem_0 in
+        let* mem = Env.get_memory env memid in
         let* () = Memory.store_64 mem ~addr:(I32.wrap_i64 addr) n in
         st stack )
-    | F_store (_id, nn, { offset; _ }) -> (
-      let* mem = Env.get_memory env mem_0 in
+    | F_store (memid, nn, { offset; _ }) -> (
+      let* mem = Env.get_memory env memid in
       let size = Memory.size mem |> I64.extend_i32_u in
       let offset = I32.of_concrete offset |> I64.extend_i32_u in
       match nn with
@@ -1389,7 +1393,7 @@ struct
           ( I64.(lt_u size (add addr (I64.of_concrete 4L)))
           , `Out_of_bounds_memory_access )
         in
-        let* mem = Env.get_memory env mem_0 in
+        let* mem = Env.get_memory env memid in
         let* () =
           Memory.store_32 mem ~addr:(I32.wrap_i64 addr) (F32.to_bits n)
         in
@@ -1405,13 +1409,13 @@ struct
           ( I64.(lt_u size (add addr (I64.of_concrete 8L)))
           , `Out_of_bounds_memory_access )
         in
-        let* mem = Env.get_memory env mem_0 in
+        let* mem = Env.get_memory env memid in
         let* () =
           Memory.store_64 mem ~addr:(I32.wrap_i64 addr) (F64.to_bits n)
         in
         st stack )
-    | I64_load32 (_id, sx, { offset; _ }) ->
-      let* mem = Env.get_memory env mem_0 in
+    | I64_load32 (memid, sx, { offset; _ }) ->
+      let* mem = Env.get_memory env memid in
       let pos, stack = Stack.pop_i32 stack in
       let addr =
         let pos = I64.extend_i32_u pos in
@@ -1423,7 +1427,7 @@ struct
         ( I64.(lt_u size (add addr (I64.of_concrete 4L)))
         , `Out_of_bounds_memory_access )
       in
-      let* mem = Env.get_memory env mem_0 in
+      let* mem = Env.get_memory env memid in
       let* res = Memory.load_32 mem (I32.wrap_i64 addr) in
       let res = I64.of_int32 res in
       let res =
@@ -1436,7 +1440,7 @@ struct
           logand res b
       in
       st @@ Stack.push_i64 stack res
-    | I_store16 (_id, nn, { offset; _ }) ->
+    | I_store16 (memid, nn, { offset; _ }) ->
       let n, stack =
         match nn with
         | S32 ->
@@ -1452,17 +1456,17 @@ struct
         let offset = I32.of_concrete offset |> I64.extend_i32_u in
         I64.add pos offset
       in
-      let* mem = Env.get_memory env mem_0 in
+      let* mem = Env.get_memory env memid in
       let>! () =
         let size = Memory.size mem |> I64.extend_i32_u in
         ( I64.(lt_u size (add addr (I64.of_concrete 2L)))
         , `Out_of_bounds_memory_access )
       in
-      let* mem = Env.get_memory env mem_0 in
+      let* mem = Env.get_memory env memid in
       let* () = Memory.store_16 mem ~addr:(I32.wrap_i64 addr) n in
       st stack
-    | I64_store32 (_id, { offset; _ }) ->
-      let* mem = Env.get_memory env mem_0 in
+    | I64_store32 (memid, { offset; _ }) ->
+      let* mem = Env.get_memory env memid in
       let n, stack = Stack.pop_i64 stack in
       let pos, stack = Stack.pop_i32 stack in
       let addr =
@@ -1475,7 +1479,7 @@ struct
         ( I64.(lt_u size (add addr (I64.of_concrete 4L)))
         , `Out_of_bounds_memory_access )
       in
-      let* mem = Env.get_memory env mem_0 in
+      let* mem = Env.get_memory env memid in
       let* () =
         let n = I64.to_int32 n in
         Memory.store_32 mem ~addr:(I32.wrap_i64 addr) n

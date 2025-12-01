@@ -240,7 +240,7 @@ let fill m ~(pos : Smtml.Expr.t) ~(len : Smtml.Expr.t) (c : char) =
   in
   aux 0
 
-let blit m ~src ~dst ~len =
+let blit m1 ~src m2 ~dst ~len =
   let open Symbolic_choice_without_memory in
   let* len = select_i32 len in
   let len = Int32.to_int len in
@@ -253,9 +253,9 @@ let blit m ~src ~dst ~len =
     if i = len then return ()
     else
       let addr = Symbolic_value.I32.of_int (src + i) in
-      let* v = load_8_s m addr in
+      let* v = load_8_s m1 addr in
       let addr = Symbolic_value.I32.of_int (dst + i) in
-      let* () = store_8 m ~addr v in
+      let* () = store_8 m2 ~addr v in
       aux (i + 1)
   in
   aux 0

@@ -30,7 +30,7 @@ module type T = sig
   val fill : t -> pos:Value.i32 -> len:Value.i32 -> char -> unit Choice.t
 
   val blit :
-    t -> src:Value.i32 -> dst:Value.i32 -> len:Value.i32 -> unit Choice.t
+    t -> src:Value.i32 -> t -> dst:Value.i32 -> len:Value.i32 -> unit Choice.t
 
   val blit_string :
     t -> string -> src:Value.i32 -> dst:Value.i32 -> len:Value.i32 -> unit
