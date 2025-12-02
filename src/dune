@@ -54,10 +54,14 @@
   float32
   float64
   fop_intf
+  f32_intf
+  f64_intf
   global_intf
   grouped
   int32
   int64
+  i32_intf
+  i64_intf
   interpret
   iop_intf
   kind
@@ -112,6 +116,7 @@
   union_find
   value_intf
   v128
+  v128_intf
   wasm_ffi_intf
   wast
   work_ds_intf

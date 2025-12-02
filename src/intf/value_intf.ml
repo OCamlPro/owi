@@ -69,6 +69,41 @@ module type T = sig
     val get_extern : t -> 'x Type.Id.t -> 'x get_ref
   end
 
+  module F32 :
+    F32_intf.T
+      with type t := f32
+       and type boolean := boolean
+       and type i32 := i32
+       and type i64 := i64
+       and type f64 := f64
+
+  module F64 :
+    F64_intf.T
+      with type t := f64
+       and type boolean := boolean
+       and type f32 := f32
+       and type i32 := i32
+       and type i64 := i64
+
+  module I32 :
+    I32_intf.T
+      with type t := i32
+       and type boolean := boolean
+       and type f32 := f32
+       and type f64 := f64
+       and type i64 := i64
+
+  module I64 :
+    I64_intf.T
+      with type t := i64
+       and type boolean := boolean
+       and type i32 := i32
+       and type f32 := f32
+       and type f64 := f64
+
+  module V128 :
+    V128_intf.T with type t := v128 and type i32 := i32 and type i64 := i64
+
   type t =
     | I32 of i32
     | I64 of i64
@@ -84,80 +119,4 @@ module type T = sig
   val ref_extern : 'x Type.Id.t -> 'x -> t
 
   val pp : Format.formatter -> t -> unit
-
-  module F32 : sig
-    include
-      Fop_intf.T
-        with type t := f32
-         and type boolean := boolean
-         and type i32 := i32
-         and type i64 := i64
-         and type same_size_int := i32
-
-    val demote_f64 : f64 -> f32
-
-    val reinterpret_i32 : i32 -> f32
-  end
-
-  module F64 : sig
-    include
-      Fop_intf.T
-        with type t := f64
-         and type boolean := boolean
-         and type i32 := i32
-         and type i64 := i64
-         and type same_size_int := i64
-
-    val promote_f32 : f32 -> f64
-
-    val reinterpret_i64 : i64 -> f64
-  end
-
-  module I32 : sig
-    include
-      Iop_intf.T
-        with type t := i32
-         and type boolean := boolean
-         and type const := Int32.t
-         and type f32 := f32
-         and type f64 := f64
-
-    val to_bool : i32 -> boolean
-
-    val reinterpret_f32 : f32 -> i32
-
-    val wrap_i64 : i64 -> i32
-  end
-
-  module I64 : sig
-    include
-      Iop_intf.T
-        with type t := i64
-         and type boolean := boolean
-         and type const := Int64.t
-         and type f32 := f32
-         and type f64 := f64
-
-    val of_int32 : i32 -> i64
-
-    val to_int32 : i64 -> i32
-
-    val reinterpret_f64 : f64 -> i64
-
-    val extend_i32_s : i32 -> i64
-
-    val extend_i32_u : i32 -> i64
-  end
-
-  module V128 : sig
-    val zero : v128
-
-    val of_i32x4 : i32 -> i32 -> i32 -> i32 -> v128
-
-    val to_i32x4 : v128 -> i32 * i32 * i32 * i32
-
-    val of_i64x2 : i64 -> i64 -> v128
-
-    val to_i64x2 : v128 -> i64 * i64
-  end
 end
