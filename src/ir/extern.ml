@@ -1,12 +1,12 @@
 module Func = struct
   module type T = sig
-    type int32
+    type i32
 
-    type int64
+    type i64
 
-    type float32
+    type f32
 
-    type float64
+    type f64
 
     type v128
 
@@ -15,10 +15,10 @@ module Func = struct
     type memory
 
     type _ telt = private
-      | I32 : int32 telt
-      | I64 : int64 telt
-      | F32 : float32 telt
-      | F64 : float64 telt
+      | I32 : i32 telt
+      | I64 : i64 telt
+      | F32 : f32 telt
+      | F64 : f64 telt
       | V128 : v128 telt
       | Externref : 'a Type.Id.t -> 'a telt
 
@@ -54,13 +54,13 @@ module Func = struct
 
       type (_, _, _) t
 
-      val i32 : (lr, elt, int32) t
+      val i32 : (lr, elt, i32) t
 
-      val i64 : (lr, elt, int64) t
+      val i64 : (lr, elt, i64) t
 
-      val f32 : (lr, elt, float32) t
+      val f32 : (lr, elt, f32) t
 
-      val f64 : (lr, elt, float64) t
+      val f64 : (lr, elt, f64) t
 
       val v128 : (lr, elt, v128) t
 
@@ -96,14 +96,14 @@ module Func = struct
     end
   end
 
-  module Make (V : sig
-    type int32
+  module Make (Value : sig
+    type i32
 
-    type int64
+    type i64
 
-    type float32
+    type f32
 
-    type float64
+    type f64
 
     type v128
   end) (M : sig
@@ -117,11 +117,11 @@ module Func = struct
 
     include
       T
-        with type int32 := V.int32
-         and type int64 := V.int64
-         and type float32 := V.float32
-         and type float64 := V.float64
-         and type v128 := V.v128
+        with type i32 := Value.i32
+         and type i64 := Value.i64
+         and type f32 := Value.f32
+         and type f64 := Value.f64
+         and type v128 := Value.v128
          and type 'a m := 'a M.t
          and type memory := Memory.t
   end = struct
@@ -130,11 +130,11 @@ module Func = struct
     type memory = Memory.t
 
     type _ telt =
-      | I32 : V.int32 telt
-      | I64 : V.int64 telt
-      | F32 : V.float32 telt
-      | F64 : V.float64 telt
-      | V128 : V.v128 telt
+      | I32 : Value.i32 telt
+      | I64 : Value.i64 telt
+      | F32 : Value.f32 telt
+      | F64 : Value.f64 telt
+      | V128 : Value.v128 telt
       | Externref : 'a Type.Id.t -> 'a telt
 
     type _ rtype =

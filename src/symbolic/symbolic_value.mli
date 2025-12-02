@@ -4,11 +4,11 @@
 
 include
   Value_intf.T
-    with type bool = Smtml.Expr.t
-     and type int32 = Smtml.Expr.t
-     and type int64 = Smtml.Expr.t
-     and type float32 = Smtml.Expr.t
-     and type float64 = Smtml.Expr.t
+    with type boolean = Smtml.Expr.t
+     and type i32 = Smtml.Expr.t
+     and type i64 = Smtml.Expr.t
+     and type f32 = Smtml.Expr.t
+     and type f64 = Smtml.Expr.t
      and type v128 = Smtml.Expr.t
 
 module Bool : sig

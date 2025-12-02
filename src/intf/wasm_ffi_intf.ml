@@ -8,58 +8,58 @@ module type S0 = sig
   type memory
 
   module Value : sig
-    type int32
+    type i32
 
-    type int64
+    type i64
 
-    type float32
+    type f32
 
-    type float64
+    type f64
 
     type v128
   end
 
-  val symbol_bool : unit -> Value.int32 t
+  val symbol_bool : unit -> Value.i32 t
 
-  val symbol_invisible_bool : unit -> Value.int32 t
+  val symbol_invisible_bool : unit -> Value.i32 t
 
-  val symbol_i8 : unit -> Value.int32 t
+  val symbol_i8 : unit -> Value.i32 t
 
-  val symbol_i16 : unit -> Value.int32 t
+  val symbol_i16 : unit -> Value.i32 t
 
-  val symbol_i32 : unit -> Value.int32 t
+  val symbol_i32 : unit -> Value.i32 t
 
-  val symbol_i64 : unit -> Value.int64 t
+  val symbol_i64 : unit -> Value.i64 t
 
-  val symbol_f32 : unit -> Value.float32 t
+  val symbol_f32 : unit -> Value.f32 t
 
-  val symbol_f64 : unit -> Value.float64 t
+  val symbol_f64 : unit -> Value.f64 t
 
   val symbol_v128 : unit -> Value.v128 t
 
-  val symbol_range : Value.int32 -> Value.int32 -> Value.int32 t
+  val symbol_range : Value.i32 -> Value.i32 -> Value.i32 t
 
-  val assume : Value.int32 -> unit t
+  val assume : Value.i32 -> unit t
 
-  val assert' : Value.int32 -> unit t
+  val assert' : Value.i32 -> unit t
 
   val abort : unit -> unit t
 
-  val alloc : memory -> Value.int32 -> Value.int32 -> Value.int32 t
+  val alloc : memory -> Value.i32 -> Value.i32 -> Value.i32 t
 
-  val free : memory -> Value.int32 -> Value.int32 t
+  val free : memory -> Value.i32 -> Value.i32 t
 
-  val exit : Value.int32 -> unit t
+  val exit : Value.i32 -> unit t
 
-  val in_replay_mode : unit -> Value.int32 t
+  val in_replay_mode : unit -> Value.i32 t
 
-  val print_char : Value.int32 -> unit t
+  val print_char : Value.i32 -> unit t
 
-  val cov_label_is_covered : Value.int32 -> Value.int32 t
+  val cov_label_is_covered : Value.i32 -> Value.i32 t
 
-  val cov_label_set : memory -> Value.int32 -> Value.int32 -> unit t
+  val cov_label_set : memory -> Value.i32 -> Value.i32 -> unit t
 
-  val open_scope : memory -> Value.int32 -> unit t
+  val open_scope : memory -> Value.i32 -> unit t
 
   val close_scope : unit -> unit t
 end

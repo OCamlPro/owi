@@ -7,11 +7,11 @@ module type Iop = sig
 
   type const
 
-  type bool
+  type boolean
 
-  type float32
+  type f32
 
-  type float64
+  type f64
 
   val zero : t
 
@@ -51,43 +51,43 @@ module type Iop = sig
 
   val rotr : t -> t -> t
 
-  val eq_const : t -> const -> bool
+  val eq_const : t -> const -> boolean
 
-  val eq : t -> t -> bool
+  val eq : t -> t -> boolean
 
-  val ne : t -> t -> bool
+  val ne : t -> t -> boolean
 
-  val lt : t -> t -> bool
+  val lt : t -> t -> boolean
 
-  val gt : t -> t -> bool
+  val gt : t -> t -> boolean
 
-  val lt_u : t -> t -> bool
+  val lt_u : t -> t -> boolean
 
-  val gt_u : t -> t -> bool
+  val gt_u : t -> t -> boolean
 
-  val le : t -> t -> bool
+  val le : t -> t -> boolean
 
-  val ge : t -> t -> bool
+  val ge : t -> t -> boolean
 
-  val le_u : t -> t -> bool
+  val le_u : t -> t -> boolean
 
-  val ge_u : t -> t -> bool
+  val ge_u : t -> t -> boolean
 
-  val trunc_f32_s : float32 -> t Result.t
+  val trunc_f32_s : f32 -> t Result.t
 
-  val trunc_f32_u : float32 -> t Result.t
+  val trunc_f32_u : f32 -> t Result.t
 
-  val trunc_f64_s : float64 -> t Result.t
+  val trunc_f64_s : f64 -> t Result.t
 
-  val trunc_f64_u : float64 -> t Result.t
+  val trunc_f64_u : f64 -> t Result.t
 
-  val trunc_sat_f32_s : float32 -> t
+  val trunc_sat_f32_s : f32 -> t
 
-  val trunc_sat_f32_u : float32 -> t
+  val trunc_sat_f32_u : f32 -> t
 
-  val trunc_sat_f64_s : float64 -> t
+  val trunc_sat_f64_s : f64 -> t
 
-  val trunc_sat_f64_u : float64 -> t
+  val trunc_sat_f64_u : f64 -> t
 
   val extend_s : int -> t -> t
 end
@@ -95,11 +95,11 @@ end
 module type Fop = sig
   type t
 
-  type bool
+  type boolean
 
-  type int32
+  type i32
 
-  type int64
+  type i64
 
   type same_size_int
 
@@ -133,25 +133,25 @@ module type Fop = sig
 
   val copy_sign : t -> t -> t
 
-  val eq : t -> t -> bool
+  val eq : t -> t -> boolean
 
-  val ne : t -> t -> bool
+  val ne : t -> t -> boolean
 
-  val lt : t -> t -> bool
+  val lt : t -> t -> boolean
 
-  val gt : t -> t -> bool
+  val gt : t -> t -> boolean
 
-  val le : t -> t -> bool
+  val le : t -> t -> boolean
 
-  val ge : t -> t -> bool
+  val ge : t -> t -> boolean
 
-  val convert_i32_s : int32 -> t
+  val convert_i32_s : i32 -> t
 
-  val convert_i32_u : int32 -> t
+  val convert_i32_u : i32 -> t
 
-  val convert_i64_s : int64 -> t
+  val convert_i64_s : i64 -> t
 
-  val convert_i64_u : int64 -> t
+  val convert_i64_u : i64 -> t
 
   val of_bits : same_size_int -> t
 
@@ -164,35 +164,35 @@ type 'a get_ref =
   | Type_mismatch
 
 module type T = sig
-  type bool
+  type boolean
 
-  type int32
+  type i32
 
-  val pp_int32 : Format.formatter -> int32 -> unit
+  val pp_int32 : Format.formatter -> i32 -> unit
 
-  type int64
+  type i64
 
-  val pp_int64 : Format.formatter -> int64 -> unit
+  val pp_int64 : Format.formatter -> i64 -> unit
 
-  type float32
+  type f32
 
-  val pp_float32 : Format.formatter -> float32 -> unit
+  val pp_float32 : Format.formatter -> f32 -> unit
 
-  type float64
+  type f64
 
-  val pp_float64 : Format.formatter -> float64 -> unit
+  val pp_float64 : Format.formatter -> f64 -> unit
 
   type v128
 
   val pp_v128 : Format.formatter -> v128 -> unit
 
-  val const_i32 : Int32.t -> int32
+  val const_i32 : Int32.t -> i32
 
-  val const_i64 : Int64.t -> int64
+  val const_i64 : Int64.t -> i64
 
-  val const_f32 : Float32.t -> float32
+  val const_f32 : Float32.t -> f32
 
-  val const_f64 : Float64.t -> float64
+  val const_f64 : Float64.t -> f64
 
   val const_v128 : V128.t -> v128
 
@@ -224,10 +224,10 @@ module type T = sig
   end
 
   type t =
-    | I32 of int32
-    | I64 of int64
-    | F32 of float32
-    | F64 of float64
+    | I32 of i32
+    | I64 of i64
+    | F32 of f32
+    | F64 of f64
     | V128 of v128
     | Ref of Ref.t
 
@@ -240,92 +240,92 @@ module type T = sig
   val pp : Format.formatter -> t -> unit
 
   module Bool : sig
-    val const : Bool.t -> bool
+    val const : Bool.t -> boolean
 
-    val not : bool -> bool
+    val not : boolean -> boolean
 
-    val or_ : bool -> bool -> bool
+    val or_ : boolean -> boolean -> boolean
 
-    val and_ : bool -> bool -> bool
+    val and_ : boolean -> boolean -> boolean
 
-    val int32 : bool -> int32
+    val int32 : boolean -> i32
 
-    val pp : Format.formatter -> bool -> unit
+    val pp : Format.formatter -> boolean -> unit
   end
 
   module F32 : sig
     include
       Fop
-        with type t := float32
-         and type bool := bool
-         and type int32 := int32
-         and type int64 := int64
-         and type same_size_int := int32
+        with type t := f32
+         and type boolean := boolean
+         and type i32 := i32
+         and type i64 := i64
+         and type same_size_int := i32
 
-    val demote_f64 : float64 -> float32
+    val demote_f64 : f64 -> f32
 
-    val reinterpret_i32 : int32 -> float32
+    val reinterpret_i32 : i32 -> f32
   end
 
   module F64 : sig
     include
       Fop
-        with type t := float64
-         and type bool := bool
-         and type int32 := int32
-         and type int64 := int64
-         and type same_size_int := int64
+        with type t := f64
+         and type boolean := boolean
+         and type i32 := i32
+         and type i64 := i64
+         and type same_size_int := i64
 
-    val promote_f32 : float32 -> float64
+    val promote_f32 : f32 -> f64
 
-    val reinterpret_i64 : int64 -> float64
+    val reinterpret_i64 : i64 -> f64
   end
 
   module I32 : sig
     include
       Iop
-        with type t := int32
-         and type bool := bool
+        with type t := i32
+         and type boolean := boolean
          and type const := Int32.t
-         and type float32 := float32
-         and type float64 := float64
+         and type f32 := f32
+         and type f64 := f64
 
-    val to_bool : int32 -> bool
+    val to_bool : i32 -> boolean
 
-    val reinterpret_f32 : float32 -> int32
+    val reinterpret_f32 : f32 -> i32
 
-    val wrap_i64 : int64 -> int32
+    val wrap_i64 : i64 -> i32
   end
 
   module I64 : sig
     include
       Iop
-        with type t := int64
-         and type bool := bool
+        with type t := i64
+         and type boolean := boolean
          and type const := Int64.t
-         and type float32 := float32
-         and type float64 := float64
+         and type f32 := f32
+         and type f64 := f64
 
-    val of_int32 : int32 -> int64
+    val of_int32 : i32 -> i64
 
-    val to_int32 : int64 -> int32
+    val to_int32 : i64 -> i32
 
-    val reinterpret_f64 : float64 -> int64
+    val reinterpret_f64 : f64 -> i64
 
-    val extend_i32_s : int32 -> int64
+    val extend_i32_s : i32 -> i64
 
-    val extend_i32_u : int32 -> int64
+    val extend_i32_u : i32 -> i64
   end
 
   module V128 : sig
     val zero : v128
 
-    val of_i32x4 : int32 -> int32 -> int32 -> int32 -> v128
+    val of_i32x4 : i32 -> i32 -> i32 -> i32 -> v128
 
-    val to_i32x4 : v128 -> int32 * int32 * int32 * int32
+    val to_i32x4 : v128 -> i32 * i32 * i32 * i32
 
-    val of_i64x2 : int64 -> int64 -> v128
+    val of_i64x2 : i64 -> i64 -> v128
 
-    val to_i64x2 : v128 -> int64 * int64
+    val to_i64x2 : v128 -> i64 * i64
   end
 end

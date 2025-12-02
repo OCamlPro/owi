@@ -4,9 +4,9 @@
 
 include
   Value_intf.T
-    with type bool = Bool.t
-     and type int32 = Int32.t
-     and type int64 = Int64.t
-     and type float32 = Float32.t
-     and type float64 = Float64.t
+    with type boolean = Bool.t
+     and type i32 = Int32.t
+     and type i64 = Int64.t
+     and type f32 = Float32.t
+     and type f64 = Float64.t
      and type v128 = V128.t

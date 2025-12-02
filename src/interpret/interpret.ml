@@ -32,15 +32,13 @@ module Make
     (Table : Interpret_intf.Table with module Value := Value)
     (Choice : Choice_intf.Base with module Value := Value)
     (Memory :
-      Interpret_intf.Memory
-        with module Value := Value
-         and module Choice := Choice)
+      Memory_intf.T with module Value := Value and module Choice := Choice)
     (Extern_func :
       Extern.Func.T
-        with type int32 := Value.int32
-         and type int64 := Value.int64
-         and type float32 := Value.float32
-         and type float64 := Value.float64
+        with type i32 := Value.i32
+         and type i64 := Value.i64
+         and type f32 := Value.f32
+         and type f64 := Value.f64
          and type v128 := Value.v128
          and type memory := Memory.t
          and type 'a m := 'a Choice.t)

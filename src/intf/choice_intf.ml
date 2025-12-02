@@ -13,9 +13,10 @@ module type Base = sig
 
   val map : 'a t -> ('a -> 'b) -> 'b t
 
-  val select : Value.bool -> prio_true:Prio.t -> prio_false:Prio.t -> Bool.t t
+  val select :
+    Value.boolean -> prio_true:Prio.t -> prio_false:Prio.t -> Bool.t t
 
-  val select_i32 : Value.int32 -> Int32.t t
+  val select_i32 : Value.i32 -> Int32.t t
 
   val trap : Result.err -> 'a t
 
@@ -25,9 +26,9 @@ module type Base = sig
 
   val get_pc : unit -> Smtml.Expr.Set.t t
 
-  val ite : Value.bool -> if_true:Value.t -> if_false:Value.t -> Value.t t
+  val ite : Value.boolean -> if_true:Value.t -> if_false:Value.t -> Value.t t
 
-  val assume : Value.bool -> unit t
+  val assume : Value.boolean -> unit t
 end
 
 module type Complete = sig
@@ -37,9 +38,9 @@ module type Complete = sig
 
   type 'a run_result
 
-  val assertion : Value.bool -> unit t
+  val assertion : Value.boolean -> unit t
 
-  val assume : Value.bool -> unit t
+  val assume : Value.boolean -> unit t
 
   val with_thread : (thread -> 'b) -> 'b t
 

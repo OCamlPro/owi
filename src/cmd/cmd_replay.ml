@@ -128,7 +128,7 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
 
     let free (_ : Concrete_memory.t) adr = Ok adr
 
-    let exit (n : Concrete_value.int32) = exit (Int32.to_int n)
+    let exit (n : Concrete_value.i32) = exit (Int32.to_int n)
 
     let symbol_range _ _ =
       let i = next () in
