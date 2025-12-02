@@ -484,7 +484,10 @@ let plain_instr :=
   | MEMORY_SIZE; id = memidx; { Memory_size id }
   | MEMORY_GROW; id = memidx; { Memory_grow id }
   | MEMORY_FILL; id = memidx; { Memory_fill id }
-  | MEMORY_COPY; id1 = memidx; id2 = memidx; { Memory_copy (id1, id2) }
+  | MEMORY_COPY; {
+    Memory_copy (Raw 0, Raw 0)
+  }
+  | MEMORY_COPY; src = indice; dst = indice; { Memory_copy (src, dst) }
   | MEMORY_INIT; args = list(indice); {
     match args with
     | [] -> failwith "memory.init: expected at least one argument"
