@@ -23,7 +23,7 @@ module Func = struct
       | Externref : 'a Type.Id.t -> 'a telt
 
     type (_, _) atype = private
-      | Mem : i32 telt * ('b, 'r) atype -> (memory -> 'b, 'r) atype
+      | Mem : int32 * ('b, 'r) atype -> (memory -> 'b, 'r) atype
       | UArg : ('b, 'r) atype -> (unit -> 'b, 'r) atype
       | Arg : 'a telt * ('b, 'r) atype -> ('a -> 'b, 'r) atype
       | NArg : string * 'a telt * ('b, 'r) atype -> ('a -> 'b, 'r) atype
@@ -145,7 +145,7 @@ module Func = struct
       | R4 : 'a telt * 'b telt * 'c telt * 'd telt -> ('a * 'b * 'c * 'd) rtype
 
     type (_, _) atype =
-      | Mem : Value.i32 telt * ('b, 'r) atype -> (memory -> 'b, 'r) atype
+      | Mem : int32 * ('b, 'r) atype -> (memory -> 'b, 'r) atype
       | UArg : ('b, 'r) atype -> (unit -> 'b, 'r) atype
       | Arg : 'a telt * ('b, 'r) atype -> ('a -> 'b, 'r) atype
       | NArg : string * 'a telt * ('b, 'r) atype -> ('a -> 'b, 'r) atype
@@ -200,7 +200,7 @@ module Func = struct
 
       type (_, _, _) t =
         | Unit : (lr, unit, unit) t
-        | Memory : Value.i32 telt -> (l, mem, memory) t
+        | Memory : int32 -> (l, mem, memory) t
         | Elt : 'a telt -> (lr, elt, 'a) t
         | Elt_labeled : string * 'a telt -> (l, string * elt, 'a) t
 
@@ -230,7 +230,7 @@ module Func = struct
 
       let unit = Unit
 
-      let memory = Memory I32
+      let memory = Memory (assert false)
 
       let label s (Elt v) = Elt_labeled (s, v)
 

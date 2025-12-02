@@ -576,7 +576,6 @@ struct
      fun stack ty f ->
       match ty with
       | Mem (memid, args) ->
-        let* memid, stack = pop_arg stack memid in
         let* mem = Env.get_memory env (Int32.to_int memid) in
         apply stack args (f mem)
       | Arg (arg, args) ->
