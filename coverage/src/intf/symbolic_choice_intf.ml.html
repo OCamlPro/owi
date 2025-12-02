@@ -133,17 +133,6 @@
 <a id="L109"></a><span > </span>
 <a id="L110"></a><span > </span>
 <a id="L111"></a><span > </span>
-<a id="L112"></a><span > </span>
-<a id="L113"></a><span > </span>
-<a id="L114"></a><span > </span>
-<a id="L115"></a><span > </span>
-<a id="L116"></a><span > </span>
-<a id="L117"></a><span > </span>
-<a id="L118"></a><span > </span>
-<a id="L119"></a><span > </span>
-<a id="L120"></a><span > </span>
-<a id="L121"></a><span > </span>
-<a id="L122"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -259,17 +248,6 @@
 <a href="#L109">109</a>
 <a href="#L110">110</a>
 <a href="#L111">111</a>
-<a href="#L112">112</a>
-<a href="#L113">113</a>
-<a href="#L114">114</a>
-<a href="#L115">115</a>
-<a href="#L116">116</a>
-<a href="#L117">117</a>
-<a href="#L118">118</a>
-<a href="#L119">119</a>
-<a href="#L120">120</a>
-<a href="#L121">121</a>
-<a href="#L122">122</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -291,19 +269,7 @@ type 'a eval =
       * Symbol_scope.t
 
 module type S = sig
-  module V : sig
-    type bool
-
-    type int32
-
-    type int64
-
-    type float32
-
-    type float64
-
-    type v128
-  end
+  module Value : Value_intf.T
 
   type thread
 
@@ -323,13 +289,14 @@ module type S = sig
 
   val trap : Result.err -&gt; 'a t
 
-  val select : V.bool -&gt; prio_true:Prio.t -&gt; prio_false:Prio.t -&gt; Bool.t t
+  val select :
+    Value.boolean -&gt; prio_true:Prio.t -&gt; prio_false:Prio.t -&gt; Bool.t t
 
-  val select_i32 : V.int32 -&gt; Int32.t t
+  val select_i32 : Value.i32 -&gt; Int32.t t
 
-  val assertion : V.bool -&gt; unit t
+  val assertion : Value.boolean -&gt; unit t
 
-  val assume : V.bool -&gt; unit t
+  val assume : Value.boolean -&gt; unit t
 
   val with_thread : (thread -&gt; 'a) -&gt; 'a t
 
@@ -363,7 +330,7 @@ module type S = sig
     -&gt; unit Domain.t array
 
   val ite :
-       Symbolic_value.bool
+       Symbolic_value.boolean
     -&gt; if_true:Symbolic_value.t
     -&gt; if_false:Symbolic_value.t
     -&gt; Symbolic_value.t t
@@ -391,7 +358,7 @@ module type Intf = sig
     S
       with type 'a t = ('a eval, Thread.t) CoreImpl.State.t
        and type thread := Thread.t
-       and module V := Symbolic_value
+       and module Value := Symbolic_value
 end
 </code></pre>
       </div>

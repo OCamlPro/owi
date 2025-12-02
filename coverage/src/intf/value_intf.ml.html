@@ -339,6 +339,20 @@
 <a id="L315"></a><span > </span>
 <a id="L316"></a><span > </span>
 <a id="L317"></a><span > </span>
+<a id="L318"></a><span > </span>
+<a id="L319"></a><span > </span>
+<a id="L320"></a><span > </span>
+<a id="L321"></a><span > </span>
+<a id="L322"></a><span > </span>
+<a id="L323"></a><span > </span>
+<a id="L324"></a><span > </span>
+<a id="L325"></a><span > </span>
+<a id="L326"></a><span > </span>
+<a id="L327"></a><span > </span>
+<a id="L328"></a><span > </span>
+<a id="L329"></a><span > </span>
+<a id="L330"></a><span > </span>
+<a id="L331"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -660,165 +674,179 @@
 <a href="#L315">315</a>
 <a href="#L316">316</a>
 <a href="#L317">317</a>
+<a href="#L318">318</a>
+<a href="#L319">319</a>
+<a href="#L320">320</a>
+<a href="#L321">321</a>
+<a href="#L322">322</a>
+<a href="#L323">323</a>
+<a href="#L324">324</a>
+<a href="#L325">325</a>
+<a href="#L326">326</a>
+<a href="#L327">327</a>
+<a href="#L328">328</a>
+<a href="#L329">329</a>
+<a href="#L330">330</a>
+<a href="#L331">331</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
 module type Iop = sig
-  type num
+  type t
 
   type const
 
-  type bool
+  type boolean
 
-  type float32
+  type f32
 
-  type float64
+  type f64
 
-  val zero : num
+  val zero : t
 
-  val clz : num -&gt; num
+  val clz : t -&gt; t
 
-  val ctz : num -&gt; num
+  val ctz : t -&gt; t
 
-  val popcnt : num -&gt; num
+  val popcnt : t -&gt; t
 
-  val add : num -&gt; num -&gt; num
+  val add : t -&gt; t -&gt; t
 
-  val sub : num -&gt; num -&gt; num
+  val sub : t -&gt; t -&gt; t
 
-  val mul : num -&gt; num -&gt; num
+  val mul : t -&gt; t -&gt; t
 
-  val div : num -&gt; num -&gt; num
+  val div : t -&gt; t -&gt; t
 
-  val unsigned_div : num -&gt; num -&gt; num
+  val unsigned_div : t -&gt; t -&gt; t
 
-  val rem : num -&gt; num -&gt; num
+  val rem : t -&gt; t -&gt; t
 
-  val unsigned_rem : num -&gt; num -&gt; num
+  val unsigned_rem : t -&gt; t -&gt; t
 
-  val logand : num -&gt; num -&gt; num
+  val logand : t -&gt; t -&gt; t
 
-  val logor : num -&gt; num -&gt; num
+  val logor : t -&gt; t -&gt; t
 
-  val logxor : num -&gt; num -&gt; num
+  val logxor : t -&gt; t -&gt; t
 
-  val shl : num -&gt; num -&gt; num
+  val shl : t -&gt; t -&gt; t
 
-  val shr_s : num -&gt; num -&gt; num
+  val shr_s : t -&gt; t -&gt; t
 
-  val shr_u : num -&gt; num -&gt; num
+  val shr_u : t -&gt; t -&gt; t
 
-  val rotl : num -&gt; num -&gt; num
+  val rotl : t -&gt; t -&gt; t
 
-  val rotr : num -&gt; num -&gt; num
+  val rotr : t -&gt; t -&gt; t
 
-  val eq_const : num -&gt; const -&gt; bool
+  val eq_const : t -&gt; const -&gt; boolean
 
-  val eq : num -&gt; num -&gt; bool
+  val eq : t -&gt; t -&gt; boolean
 
-  val ne : num -&gt; num -&gt; bool
+  val ne : t -&gt; t -&gt; boolean
 
-  val lt : num -&gt; num -&gt; bool
+  val lt : t -&gt; t -&gt; boolean
 
-  val gt : num -&gt; num -&gt; bool
+  val gt : t -&gt; t -&gt; boolean
 
-  val lt_u : num -&gt; num -&gt; bool
+  val lt_u : t -&gt; t -&gt; boolean
 
-  val gt_u : num -&gt; num -&gt; bool
+  val gt_u : t -&gt; t -&gt; boolean
 
-  val le : num -&gt; num -&gt; bool
+  val le : t -&gt; t -&gt; boolean
 
-  val ge : num -&gt; num -&gt; bool
+  val ge : t -&gt; t -&gt; boolean
 
-  val le_u : num -&gt; num -&gt; bool
+  val le_u : t -&gt; t -&gt; boolean
 
-  val ge_u : num -&gt; num -&gt; bool
+  val ge_u : t -&gt; t -&gt; boolean
 
-  val trunc_f32_s : float32 -&gt; num Result.t
+  val trunc_f32_s : f32 -&gt; t Result.t
 
-  val trunc_f32_u : float32 -&gt; num Result.t
+  val trunc_f32_u : f32 -&gt; t Result.t
 
-  val trunc_f64_s : float64 -&gt; num Result.t
+  val trunc_f64_s : f64 -&gt; t Result.t
 
-  val trunc_f64_u : float64 -&gt; num Result.t
+  val trunc_f64_u : f64 -&gt; t Result.t
 
-  val trunc_sat_f32_s : float32 -&gt; num
+  val trunc_sat_f32_s : f32 -&gt; t
 
-  val trunc_sat_f32_u : float32 -&gt; num
+  val trunc_sat_f32_u : f32 -&gt; t
 
-  val trunc_sat_f64_s : float64 -&gt; num
+  val trunc_sat_f64_s : f64 -&gt; t
 
-  val trunc_sat_f64_u : float64 -&gt; num
+  val trunc_sat_f64_u : f64 -&gt; t
 
-  val extend_s : int -&gt; num -&gt; num
+  val extend_s : int -&gt; t -&gt; t
 end
 
 module type Fop = sig
-  type num
+  type t
 
-  type bool
+  type boolean
 
-  type int32
+  type i32
 
-  type int64
+  type i64
 
   type same_size_int
 
-  val zero : num
+  val zero : t
 
-  val abs : num -&gt; num
+  val abs : t -&gt; t
 
-  val neg : num -&gt; num
+  val neg : t -&gt; t
 
-  val sqrt : num -&gt; num
+  val sqrt : t -&gt; t
 
-  val ceil : num -&gt; num
+  val ceil : t -&gt; t
 
-  val floor : num -&gt; num
+  val floor : t -&gt; t
 
-  val trunc : num -&gt; num
+  val trunc : t -&gt; t
 
-  val nearest : num -&gt; num
+  val nearest : t -&gt; t
 
-  val add : num -&gt; num -&gt; num
+  val add : t -&gt; t -&gt; t
 
-  val sub : num -&gt; num -&gt; num
+  val sub : t -&gt; t -&gt; t
 
-  val mul : num -&gt; num -&gt; num
+  val mul : t -&gt; t -&gt; t
 
-  val div : num -&gt; num -&gt; num
+  val div : t -&gt; t -&gt; t
 
-  val min : num -&gt; num -&gt; num
+  val min : t -&gt; t -&gt; t
 
-  val max : num -&gt; num -&gt; num
+  val max : t -&gt; t -&gt; t
 
-  val copy_sign : num -&gt; num -&gt; num
+  val copy_sign : t -&gt; t -&gt; t
 
-  val eq : num -&gt; num -&gt; bool
+  val eq : t -&gt; t -&gt; boolean
 
-  val ne : num -&gt; num -&gt; bool
+  val ne : t -&gt; t -&gt; boolean
 
-  val lt : num -&gt; num -&gt; bool
+  val lt : t -&gt; t -&gt; boolean
 
-  val gt : num -&gt; num -&gt; bool
+  val gt : t -&gt; t -&gt; boolean
 
-  val le : num -&gt; num -&gt; bool
+  val le : t -&gt; t -&gt; boolean
 
-  val ge : num -&gt; num -&gt; bool
+  val ge : t -&gt; t -&gt; boolean
 
-  val convert_i32_s : int32 -&gt; num
+  val convert_i32_s : i32 -&gt; t
 
-  val convert_i32_u : int32 -&gt; num
+  val convert_i32_u : i32 -&gt; t
 
-  val convert_i64_s : int64 -&gt; num
+  val convert_i64_s : i64 -&gt; t
 
-  val convert_i64_u : int64 -&gt; num
+  val convert_i64_u : i64 -&gt; t
 
-  val of_bits : same_size_int -&gt; num
+  val of_bits : same_size_int -&gt; t
 
-  val to_bits : num -&gt; same_size_int
+  val to_bits : t -&gt; same_size_int
 end
 
 type 'a get_ref =
@@ -827,155 +855,169 @@ type 'a get_ref =
   | Type_mismatch
 
 module type T = sig
-  type bool
+  type boolean
 
-  type int32
+  type i32
 
-  val pp_int32 : Format.formatter -&gt; int32 -&gt; unit
+  val pp_int32 : Format.formatter -&gt; i32 -&gt; unit
 
-  type int64
+  type i64
 
-  val pp_int64 : Format.formatter -&gt; int64 -&gt; unit
+  val pp_int64 : Format.formatter -&gt; i64 -&gt; unit
 
-  type float32
+  type f32
 
-  val pp_float32 : Format.formatter -&gt; float32 -&gt; unit
+  val pp_float32 : Format.formatter -&gt; f32 -&gt; unit
 
-  type float64
+  type f64
 
-  val pp_float64 : Format.formatter -&gt; float64 -&gt; unit
+  val pp_float64 : Format.formatter -&gt; f64 -&gt; unit
 
   type v128
 
   val pp_v128 : Format.formatter -&gt; v128 -&gt; unit
 
-  type ref_value
+  val const_i32 : Int32.t -&gt; i32
 
-  val pp_ref_value : Format.formatter -&gt; ref_value -&gt; unit
+  val const_i64 : Int64.t -&gt; i64
 
-  type t =
-    | I32 of int32
-    | I64 of int64
-    | F32 of float32
-    | F64 of float64
-    | V128 of v128
-    | Ref of ref_value
+  val const_f32 : Float32.t -&gt; f32
 
-  val pp : Format.formatter -&gt; t -&gt; unit
-
-  val const_i32 : Int32.t -&gt; int32
-
-  val const_i64 : Int64.t -&gt; int64
-
-  val const_f32 : Float32.t -&gt; float32
-
-  val const_f64 : Float64.t -&gt; float64
+  val const_f64 : Float64.t -&gt; f64
 
   val const_v128 : V128.t -&gt; v128
-  (* TODO ref *)
+
+  module Ref : sig
+    module Extern : sig
+      type t
+
+      val cast : t -&gt; 'x Type.Id.t -&gt; 'x option
+    end
+
+    (* TODO; make this private and even opaque at some point *)
+    type t =
+      | Extern of Extern.t option
+      | Func of Kind.func option
+
+    val pp : Format.formatter -&gt; t -&gt; unit
+
+    val null : Text.heap_type -&gt; t
+
+    val func : Kind.func -&gt; t
+
+    val extern : 'x Type.Id.t -&gt; 'x -&gt; t
+
+    val is_null : t -&gt; Bool.t
+
+    val get_func : t -&gt; Kind.func get_ref
+
+    val get_extern : t -&gt; 'x Type.Id.t -&gt; 'x get_ref
+  end
+
+  type t =
+    | I32 of i32
+    | I64 of i64
+    | F32 of f32
+    | F64 of f64
+    | V128 of v128
+    | Ref of Ref.t
 
   val ref_null : Text.heap_type -&gt; t
 
   val ref_func : Kind.func -&gt; t
 
-  val ref_externref : 'a Type.Id.t -&gt; 'a -&gt; t
+  val ref_extern : 'x Type.Id.t -&gt; 'x -&gt; t
 
-  val ref_is_null : ref_value -&gt; bool
-
-  module Ref : sig
-    val get_func : ref_value -&gt; Kind.func get_ref
-
-    val get_externref : ref_value -&gt; 'a Type.Id.t -&gt; 'a get_ref
-  end
+  val pp : Format.formatter -&gt; t -&gt; unit
 
   module Bool : sig
-    val const : Bool.t -&gt; bool
+    val const : Bool.t -&gt; boolean
 
-    val not : bool -&gt; bool
+    val not : boolean -&gt; boolean
 
-    val or_ : bool -&gt; bool -&gt; bool
+    val or_ : boolean -&gt; boolean -&gt; boolean
 
-    val and_ : bool -&gt; bool -&gt; bool
+    val and_ : boolean -&gt; boolean -&gt; boolean
 
-    val int32 : bool -&gt; int32
+    val int32 : boolean -&gt; i32
 
-    val pp : Format.formatter -&gt; bool -&gt; unit
+    val pp : Format.formatter -&gt; boolean -&gt; unit
   end
 
   module F32 : sig
     include
       Fop
-        with type num := float32
-         and type bool := bool
-         and type int32 := int32
-         and type int64 := int64
-         and type same_size_int := int32
+        with type t := f32
+         and type boolean := boolean
+         and type i32 := i32
+         and type i64 := i64
+         and type same_size_int := i32
 
-    val demote_f64 : float64 -&gt; float32
+    val demote_f64 : f64 -&gt; f32
 
-    val reinterpret_i32 : int32 -&gt; float32
+    val reinterpret_i32 : i32 -&gt; f32
   end
 
   module F64 : sig
     include
       Fop
-        with type num := float64
-         and type bool := bool
-         and type int32 := int32
-         and type int64 := int64
-         and type same_size_int := int64
+        with type t := f64
+         and type boolean := boolean
+         and type i32 := i32
+         and type i64 := i64
+         and type same_size_int := i64
 
-    val promote_f32 : float32 -&gt; float64
+    val promote_f32 : f32 -&gt; f64
 
-    val reinterpret_i64 : int64 -&gt; float64
+    val reinterpret_i64 : i64 -&gt; f64
   end
 
   module I32 : sig
     include
       Iop
-        with type num := int32
-         and type bool := bool
+        with type t := i32
+         and type boolean := boolean
          and type const := Int32.t
-         and type float32 := float32
-         and type float64 := float64
+         and type f32 := f32
+         and type f64 := f64
 
-    val to_bool : int32 -&gt; bool
+    val to_bool : i32 -&gt; boolean
 
-    val reinterpret_f32 : float32 -&gt; int32
+    val reinterpret_f32 : f32 -&gt; i32
 
-    val wrap_i64 : int64 -&gt; int32
+    val wrap_i64 : i64 -&gt; i32
   end
 
   module I64 : sig
     include
       Iop
-        with type num := int64
-         and type bool := bool
+        with type t := i64
+         and type boolean := boolean
          and type const := Int64.t
-         and type float32 := float32
-         and type float64 := float64
+         and type f32 := f32
+         and type f64 := f64
 
-    val of_int32 : int32 -&gt; int64
+    val of_int32 : i32 -&gt; i64
 
-    val to_int32 : int64 -&gt; int32
+    val to_int32 : i64 -&gt; i32
 
-    val reinterpret_f64 : float64 -&gt; int64
+    val reinterpret_f64 : f64 -&gt; i64
 
-    val extend_i32_s : int32 -&gt; int64
+    val extend_i32_s : i32 -&gt; i64
 
-    val extend_i32_u : int32 -&gt; int64
+    val extend_i32_u : i32 -&gt; i64
   end
 
   module V128 : sig
     val zero : v128
 
-    val of_i32x4 : int32 -&gt; int32 -&gt; int32 -&gt; int32 -&gt; v128
+    val of_i32x4 : i32 -&gt; i32 -&gt; i32 -&gt; i32 -&gt; v128
 
-    val to_i32x4 : v128 -&gt; int32 * int32 * int32 * int32
+    val to_i32x4 : v128 -&gt; i32 * i32 * i32 * i32
 
-    val of_i64x2 : int64 -&gt; int64 -&gt; v128
+    val of_i64x2 : i64 -&gt; i64 -&gt; v128
 
-    val to_i64x2 : v128 -&gt; int64 * int64
+    val to_i64x2 : v128 -&gt; i64 * i64
   end
 end
 </code></pre>

@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>concrete_table.ml &mdash; Coverage report</title>
-    <meta name="description" content="88.89% coverage in src/concrete/concrete_table.ml">
+    <meta name="description" content="100.00% coverage in src/concrete/concrete_table.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,11 +15,9 @@
           <span class="dirname">src/concrete/</span>concrete_table.ml
         </a>
       </h1>
-      <h2>88.89%</h2>
+      <h2>100.00%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:27.12%"></span>
-      <span class="unvisited" style="top:30.51%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -39,20 +37,20 @@
 <a id="L13"></a><span > </span>
 <a id="L14"></a><span > </span>
 <a id="L15"></a><span > </span>
-<a id="L16"></a><span class="unvisited"> </span>
+<a id="L16"></a><span > </span>
 <a id="L17"></a><span > </span>
-<a id="L18"></a><span class="unvisited"> </span>
-<a id="L19"></a><span > </span>
-<a id="L20"></a><span > </span>
+<a id="L18"></a><span > </span>
+<a id="L19"></a><span class="visited"> </span>
+<a id="L20"></a><span class="visited"> </span>
 <a id="L21"></a><span > </span>
 <a id="L22"></a><span > </span>
 <a id="L23"></a><span class="visited"> </span>
-<a id="L24"></a><span class="visited"> </span>
-<a id="L25"></a><span > </span>
-<a id="L26"></a><span > </span>
-<a id="L27"></a><span class="visited"> </span>
-<a id="L28"></a><span > </span>
-<a id="L29"></a><span class="visited"> </span>
+<a id="L24"></a><span > </span>
+<a id="L25"></a><span class="visited"> </span>
+<a id="L26"></a><span class="visited"> </span>
+<a id="L27"></a><span > </span>
+<a id="L28"></a><span class="visited"> </span>
+<a id="L29"></a><span > </span>
 <a id="L30"></a><span class="visited"> </span>
 <a id="L31"></a><span > </span>
 <a id="L32"></a><span class="visited"> </span>
@@ -63,26 +61,22 @@
 <a id="L37"></a><span > </span>
 <a id="L38"></a><span class="visited"> </span>
 <a id="L39"></a><span > </span>
-<a id="L40"></a><span class="visited"> </span>
-<a id="L41"></a><span > </span>
+<a id="L40"></a><span > </span>
+<a id="L41"></a><span class="visited"> </span>
 <a id="L42"></a><span class="visited"> </span>
-<a id="L43"></a><span > </span>
-<a id="L44"></a><span > </span>
-<a id="L45"></a><span class="visited"> </span>
-<a id="L46"></a><span class="visited"> </span>
+<a id="L43"></a><span class="visited"> </span>
+<a id="L44"></a><span class="visited"> </span>
+<a id="L45"></a><span > </span>
+<a id="L46"></a><span > </span>
 <a id="L47"></a><span class="visited"> </span>
 <a id="L48"></a><span class="visited"> </span>
-<a id="L49"></a><span > </span>
+<a id="L49"></a><span class="visited"> </span>
 <a id="L50"></a><span > </span>
-<a id="L51"></a><span class="visited"> </span>
+<a id="L51"></a><span > </span>
 <a id="L52"></a><span class="visited"> </span>
 <a id="L53"></a><span class="visited"> </span>
-<a id="L54"></a><span > </span>
-<a id="L55"></a><span > </span>
-<a id="L56"></a><span class="visited"> </span>
-<a id="L57"></a><span class="visited"> </span>
-<a id="L58"></a><span class="visited"> </span>
-<a id="L59"></a><span class="visited"> </span>
+<a id="L54"></a><span class="visited"> </span>
+<a id="L55"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -142,17 +136,13 @@
 <a href="#L53">53</a>
 <a href="#L54">54</a>
 <a href="#L55">55</a>
-<a href="#L56">56</a>
-<a href="#L57">57</a>
-<a href="#L58">58</a>
-<a href="#L59">59</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-(* TODO: V.ref_value array, gadt to constraint to the right ref_type ? *)
-type table = V.ref_value array
+(* TODO: Concrete_value.Ref.t array, gadt to constraint to the right ref_type ? *)
+type table = Concrete_value.Ref.t array
 
 type t =
   { id : int
@@ -162,10 +152,6 @@ type t =
   ; mutable data : table
   }
 
-let backup t = <span data-count="0">{</span> t with data = Array.cop<span data-count="0">y</span> t.data }
-
-let recover ~from_ ~to_ = <span data-count="0">t</span>o_.data &lt;- from_.data
-
 let fresh =
   let r = ref (-1) in
   fun () -&gt;
@@ -174,7 +160,7 @@ let fresh =
 
 let init ?label (typ : Text.Table.Type.t) : t =
   <span data-count="633">l</span>et limits, ((_null, heap_type) as ref_type) = typ in
-  let null = V.ref_null' heap_type in
+  let null = Concrete_value.Ref.null heap_type in
   <span data-count="633">l</span>et table = Array.make limits.min null in
   <span data-count="633">{</span> id = fres<span data-count="633">h</span> (); label; limits; typ = ref_type; data = table }
 

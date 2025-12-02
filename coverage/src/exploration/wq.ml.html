@@ -118,19 +118,19 @@ let rec read_as_seq (q : 'a t) ~finalizer : 'a Seq.t =
     <span data-count="0">N</span>il
   | <span data-count="0">S</span>ome v -&gt; Cons (v, read_as_se<span data-count="0">q</span> q ~finalizer)
 
-let push v prio q = <span data-count="400">S</span>ynchronizer.write (prio, v) q
+let push v prio q = <span data-count="402">S</span>ynchronizer.write (prio, v) q
 
-let work_while f q = <span data-count="763">S</span>ynchronizer.work_while f q
+let work_while f q = <span data-count="769">S</span>ynchronizer.work_while f q
 
 let close = Synchronizer.close
 
 let make () =
-  <span data-count="400">l</span>et q = Queue.create () in
-  <span data-count="400">l</span>et writter prio_v condvar =
-    <span data-count="27539">Q</span>ueue.push (sn<span data-count="27539">d</span> prio_v) q;
-    <span data-count="27539">C</span>ondition.signal condvar
+  <span data-count="402">l</span>et q = Queue.create () in
+  <span data-count="402">l</span>et writter prio_v condvar =
+    <span data-count="27846">Q</span>ueue.push (sn<span data-count="27846">d</span> prio_v) q;
+    <span data-count="27846">C</span>ondition.signal condvar
   in
-  Synchronizer.init (fun () -&gt; <span data-count="28917">Q</span>ueue.take_opt q) writter
+  Synchronizer.init (fun () -&gt; <span data-count="29263">Q</span>ueue.take_opt q) writter
 </code></pre>
       </div>
     </div>

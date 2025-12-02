@@ -2,8 +2,8 @@
 <html lang="en">
   <head>
     <meta charset="utf-8"/>
-    <title>concrete_choice.ml &mdash; Coverage report</title>
-    <meta name="description" content="68.75% coverage in src/concrete/concrete_choice.ml">
+    <title>env_intf.ml &mdash; Coverage report</title>
+    <meta name="description" content="100.00% coverage in src/intf/env_intf.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -12,16 +12,12 @@
     <div id="header">
       <h1>
         <a href="../../index.html">
-          <span class="dirname">src/concrete/</span>concrete_choice.ml
+          <span class="dirname">src/intf/</span>env_intf.ml
         </a>
       </h1>
-      <h2>68.75%</h2>
+      <h2>100.00%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="bottom:34.29%"></span>
-      <span class="unvisited" style="bottom:28.57%"></span>
-      <span class="unvisited" style="bottom:20.00%"></span>
-      <span class="unvisited" style="bottom:11.43%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -32,35 +28,39 @@
 <a id="L4"></a><span > </span>
 <a id="L5"></a><span > </span>
 <a id="L6"></a><span > </span>
-<a id="L7"></a><span class="visited"> </span>
+<a id="L7"></a><span > </span>
 <a id="L8"></a><span > </span>
-<a id="L9"></a><span class="visited"> </span>
+<a id="L9"></a><span > </span>
 <a id="L10"></a><span > </span>
-<a id="L11"></a><span class="visited"> </span>
+<a id="L11"></a><span > </span>
 <a id="L12"></a><span > </span>
-<a id="L13"></a><span class="visited"> </span>
+<a id="L13"></a><span > </span>
 <a id="L14"></a><span > </span>
-<a id="L15"></a><span class="visited"> </span>
+<a id="L15"></a><span > </span>
 <a id="L16"></a><span > </span>
-<a id="L17"></a><span class="visited"> </span>
+<a id="L17"></a><span > </span>
 <a id="L18"></a><span > </span>
-<a id="L19"></a><span class="visited"> </span>
+<a id="L19"></a><span > </span>
 <a id="L20"></a><span > </span>
-<a id="L21"></a><span class="visited"> </span>
+<a id="L21"></a><span > </span>
 <a id="L22"></a><span > </span>
-<a id="L23"></a><span class="unvisited"> </span>
+<a id="L23"></a><span > </span>
 <a id="L24"></a><span > </span>
-<a id="L25"></a><span class="unvisited"> </span>
+<a id="L25"></a><span > </span>
 <a id="L26"></a><span > </span>
 <a id="L27"></a><span > </span>
-<a id="L28"></a><span class="unvisited"> </span>
+<a id="L28"></a><span > </span>
 <a id="L29"></a><span > </span>
 <a id="L30"></a><span > </span>
-<a id="L31"></a><span class="unvisited"> </span>
+<a id="L31"></a><span > </span>
 <a id="L32"></a><span > </span>
 <a id="L33"></a><span > </span>
-<a id="L34"></a><span class="visited"> </span>
+<a id="L34"></a><span > </span>
 <a id="L35"></a><span > </span>
+<a id="L36"></a><span > </span>
+<a id="L37"></a><span > </span>
+<a id="L38"></a><span > </span>
+<a id="L39"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -100,42 +100,50 @@
 <a href="#L33">33</a>
 <a href="#L34">34</a>
 <a href="#L35">35</a>
+<a href="#L36">36</a>
+<a href="#L37">37</a>
+<a href="#L38">38</a>
+<a href="#L39">39</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type 'a t = 'a Result.t
+module type T = sig
+  type memory
 
-let return x = <span data-count="191551067">O</span>k x [@@inline]
+  type data
 
-let bind x f = <span data-count="200884361">R</span>esult.bind x f [@@inline]
+  type global
 
-let ( let* ) x f = <span data-count="200884361">b</span>ind x f [@@inline]
+  type elem
 
-let map v f = <span data-count="6737263">R</span>esult.map f v [@@inline]
+  type table
 
-let ( let+ ) v f = <span data-count="6737263">m</span>ap v f [@@inline]
+  type extern_func
 
-let select b ~prio_true:_ ~prio_false:_ = <span data-count="9787929">O</span>k b [@@inline]
+  type 'a choice
 
-let select_i32 i = <span data-count="804712">O</span>k i [@@inline]
+  type t = extern_func Link_env.t
 
-let trap t = <span data-count="2451">E</span>rror t
+  val get_memory : t -&gt; int -&gt; memory choice
 
-let run m = <span data-count="0">m</span>
+  val get_func : t -&gt; int -&gt; Kind.func
 
-let get_pc () = <span data-count="0">r</span>eturn Smtml.Expr.Set.empty
+  val get_table : t -&gt; int -&gt; table choice
 
-let assume v =
-  <span data-count="0">i</span>f v then <span data-count="0">O</span>k ()
-  else
-    (* TODO: there could be a dedicated error here? *)
-    <span data-count="0">a</span>ssert false
+  val get_elem : t -&gt; int -&gt; elem
 
-let ite cond ~if_true ~if_false =
-  <span data-count="236">i</span>f cond then <span data-count="121">r</span>eturn if_true else <span data-count="115">r</span>eturn if_false
-[@@inline]
+  val get_data : t -&gt; int -&gt; data choice
+
+  val get_global : t -&gt; int -&gt; global choice
+
+  val get_extern_func : t -&gt; int -&gt; extern_func
+
+  val drop_elem : elem -&gt; unit
+
+  val drop_data : data -&gt; unit
+end
 </code></pre>
       </div>
     </div>

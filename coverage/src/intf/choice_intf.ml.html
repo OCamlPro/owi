@@ -74,19 +74,6 @@
 <a id="L50"></a><span > </span>
 <a id="L51"></a><span > </span>
 <a id="L52"></a><span > </span>
-<a id="L53"></a><span > </span>
-<a id="L54"></a><span > </span>
-<a id="L55"></a><span > </span>
-<a id="L56"></a><span > </span>
-<a id="L57"></a><span > </span>
-<a id="L58"></a><span > </span>
-<a id="L59"></a><span > </span>
-<a id="L60"></a><span > </span>
-<a id="L61"></a><span > </span>
-<a id="L62"></a><span > </span>
-<a id="L63"></a><span > </span>
-<a id="L64"></a><span > </span>
-<a id="L65"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -143,40 +130,13 @@
 <a href="#L50">50</a>
 <a href="#L51">51</a>
 <a href="#L52">52</a>
-<a href="#L53">53</a>
-<a href="#L54">54</a>
-<a href="#L55">55</a>
-<a href="#L56">56</a>
-<a href="#L57">57</a>
-<a href="#L58">58</a>
-<a href="#L59">59</a>
-<a href="#L60">60</a>
-<a href="#L61">61</a>
-<a href="#L62">62</a>
-<a href="#L63">63</a>
-<a href="#L64">64</a>
-<a href="#L65">65</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
 module type Base = sig
-  module V : sig
-    type t
-
-    type int32
-
-    type int64
-
-    type float32
-
-    type float64
-
-    type v128
-
-    type bool
-  end
+  module Value : Value_intf.T
 
   type 'a t
 
@@ -186,9 +146,10 @@ module type Base = sig
 
   val map : 'a t -&gt; ('a -&gt; 'b) -&gt; 'b t
 
-  val select : V.bool -&gt; prio_true:Prio.t -&gt; prio_false:Prio.t -&gt; Bool.t t
+  val select :
+    Value.boolean -&gt; prio_true:Prio.t -&gt; prio_false:Prio.t -&gt; Bool.t t
 
-  val select_i32 : V.int32 -&gt; Int32.t t
+  val select_i32 : Value.i32 -&gt; Int32.t t
 
   val trap : Result.err -&gt; 'a t
 
@@ -198,9 +159,9 @@ module type Base = sig
 
   val get_pc : unit -&gt; Smtml.Expr.Set.t t
 
-  val ite : V.bool -&gt; if_true:V.t -&gt; if_false:V.t -&gt; V.t t
+  val ite : Value.boolean -&gt; if_true:Value.t -&gt; if_false:Value.t -&gt; Value.t t
 
-  val assume : V.bool -&gt; unit t
+  val assume : Value.boolean -&gt; unit t
 end
 
 module type Complete = sig
@@ -210,9 +171,9 @@ module type Complete = sig
 
   type 'a run_result
 
-  val assertion : V.bool -&gt; unit t
+  val assertion : Value.boolean -&gt; unit t
 
-  val assume : V.bool -&gt; unit t
+  val assume : Value.boolean -&gt; unit t
 
   val with_thread : (thread -&gt; 'b) -&gt; 'b t
 

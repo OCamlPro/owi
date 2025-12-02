@@ -477,15 +477,15 @@
 (* Written by the Owi programmers *)
 
 module type S = sig
-  type bool
+  type boolean
 
-  type int32
+  type i32
 
-  type int64
+  type i64
 
-  type float32
+  type f32
 
-  type float64
+  type f64
 
   type v128
 
@@ -511,23 +511,23 @@ module type S = sig
 
   val keep : t -&gt; int -&gt; t
 
-  val pop_bool : t -&gt; bool * t
+  val pop_bool : t -&gt; boolean * t
 
-  val pop_i32 : t -&gt; int32 * t
+  val pop_i32 : t -&gt; i32 * t
 
-  val pop2_i32 : t -&gt; (int32 * int32) * t
+  val pop2_i32 : t -&gt; (i32 * i32) * t
 
-  val pop_i64 : t -&gt; int64 * t
+  val pop_i64 : t -&gt; i64 * t
 
-  val pop2_i64 : t -&gt; (int64 * int64) * t
+  val pop2_i64 : t -&gt; (i64 * i64) * t
 
-  val pop_f32 : t -&gt; float32 * t
+  val pop_f32 : t -&gt; f32 * t
 
-  val pop2_f32 : t -&gt; (float32 * float32) * t
+  val pop2_f32 : t -&gt; (f32 * f32) * t
 
-  val pop_f64 : t -&gt; float64 * t
+  val pop_f64 : t -&gt; f64 * t
 
-  val pop2_f64 : t -&gt; (float64 * float64) * t
+  val pop2_f64 : t -&gt; (f64 * f64) * t
 
   val pop_v128 : t -&gt; v128 * t
 
@@ -541,23 +541,23 @@ module type S = sig
 
   val push : t -&gt; value -&gt; t
 
-  val push_bool : t -&gt; bool -&gt; t
+  val push_bool : t -&gt; boolean -&gt; t
 
-  val push_i32 : t -&gt; int32 -&gt; t
+  val push_i32 : t -&gt; i32 -&gt; t
 
   val push_const_i32 : t -&gt; Int32.t -&gt; t
 
   val push_i32_of_int : t -&gt; int -&gt; t
 
-  val push_i64 : t -&gt; int64 -&gt; t
+  val push_i64 : t -&gt; i64 -&gt; t
 
   val push_const_i64 : t -&gt; Int64.t -&gt; t
 
-  val push_f32 : t -&gt; float32 -&gt; t
+  val push_f32 : t -&gt; f32 -&gt; t
 
   val push_const_f32 : t -&gt; Float32.t -&gt; t
 
-  val push_f64 : t -&gt; float64 -&gt; t
+  val push_f64 : t -&gt; f64 -&gt; t
 
   val push_const_f64 : t -&gt; Float64.t -&gt; t
 
@@ -570,72 +570,72 @@ module type S = sig
   val push_array : t -&gt; unit Array.t -&gt; t
 end
 
-module Make (V : Value_intf.T) :
+module Make (Value : Value_intf.T) :
   S
-    with type value := V.t
-     and type bool := V.bool
-     and type int32 := V.int32
-     and type int64 := V.int64
-     and type float32 := V.float32
-     and type float64 := V.float64
-     and type v128 := V.v128
-     and type ref_value := V.ref_value = struct
-  open V
+    with type value := Value.t
+     and type boolean := Value.boolean
+     and type i32 := Value.i32
+     and type i64 := Value.i64
+     and type f32 := Value.f32
+     and type f64 := Value.f64
+     and type v128 := Value.v128
+     and type ref_value := Value.Ref.t = struct
+  open Value
 
-  type t = V.t list
+  type t = Value.t list
 
   exception Empty
 
   let empty = []
 
-  let push s v = <span data-count="47219591">v</span> :: s
+  let push s v = <span data-count="47221504">v</span> :: s
 
-  let push_bool s b = <span data-count="8286347">p</span>ush s (I32 (V.Bool.int3<span data-count="8286351">2</span> b))
+  let push_bool s b = <span data-count="8286395">p</span>ush s (I32 (Value.Bool.int3<span data-count="8286396">2</span> b))
 
-  let push_const_i32 s i = <span data-count="4833874">p</span>ush s (I32 (V.const_i3<span data-count="4833878">2</span> i))
+  let push_const_i32 s i = <span data-count="4834444">p</span>ush s (I32 (Value.const_i3<span data-count="4834448">2</span> i))
 
-  let push_i32 s i = <span data-count="3785421">p</span>ush s (I32 i)
+  let push_i32 s i = <span data-count="3785925">p</span>ush s (I32 i)
 
   let push_i32_of_int s i = <span data-count="7">p</span>ush_const_i32 s (Int32.of_in<span data-count="7">t</span> i)
 
-  let push_const_i64 s i = <span data-count="5462649">p</span>ush s (I64 (V.const_i6<span data-count="5462649">4</span> i))
+  let push_const_i64 s i = <span data-count="5462648">p</span>ush s (I64 (Value.const_i6<span data-count="5462649">4</span> i))
 
   let push_i64 s i = <span data-count="5069930">p</span>ush s (I64 i)
 
-  let push_const_f32 s f = <span data-count="57537">p</span>ush s (F32 (V.const_f3<span data-count="57537">2</span> f))
+  let push_const_f32 s f = <span data-count="57537">p</span>ush s (F32 (Value.const_f3<span data-count="57537">2</span> f))
 
   let push_f32 s f = <span data-count="40311">p</span>ush s (F32 f)
 
-  let push_const_f64 s f = <span data-count="56275">p</span>ush s (F64 (V.const_f6<span data-count="56275">4</span> f))
+  let push_const_f64 s f = <span data-count="56275">p</span>ush s (F64 (Value.const_f6<span data-count="56275">4</span> f))
 
   let push_f64 s f = <span data-count="39758">p</span>ush s (F64 f)
 
-  let push_const_v128 s f = <span data-count="211">p</span>ush s (V128 (V.const_v12<span data-count="211">8</span> f))
+  let push_const_v128 s f = <span data-count="211">p</span>ush s (V128 (Value.const_v12<span data-count="211">8</span> f))
 
   let push_v128 s f = <span data-count="7">p</span>ush s (V128 f)
 
-  let push_as_externref s ty v = <span data-count="1">p</span>ush s (V.ref_externre<span data-count="1">f</span> ty v)
+  let push_as_externref s ty v = <span data-count="1">p</span>ush s (Value.ref_exter<span data-count="1">n</span> ty v)
 
   let push_array _ _ = <span data-count="0">a</span>ssert false
 
   let pp fmt (s : t) =
-    <span data-count="287">F</span>mt.list ~sep:(fun fmt () -&gt; <span data-count="118">F</span>mt.string fmt " ; ") V.pp fmt s
+    <span data-count="287">F</span>mt.list ~sep:(fun fmt () -&gt; <span data-count="118">F</span>mt.string fmt " ; ") Value.pp fmt s
 
-  let pop = function <span data-count="0">[</span>] -&gt; raise Empty | <span data-count="40758966">h</span>d :: tl -&gt; (hd, tl)
+  let pop = function <span data-count="0">[</span>] -&gt; raise Empty | <span data-count="40760599">h</span>d :: tl -&gt; (hd, tl)
 
-  let drop = function <span data-count="0">[</span>] -&gt; raise Empty | <span data-count="6263">_</span>hd :: tl -&gt; tl
+  let drop = function <span data-count="0">[</span>] -&gt; raise Empty | <span data-count="6530">_</span>hd :: tl -&gt; tl
 
   let pop_i32 s =
-    <span data-count="4395663">l</span>et hd, tl = pop s in
-    <span data-count="4395666">m</span>atch hd with <span data-count="4395661">I</span>32 n -&gt; (n, tl) | _ -&gt; assert false
+    <span data-count="4395636">l</span>et hd, tl = pop s in
+    <span data-count="4395635">m</span>atch hd with <span data-count="4395625">I</span>32 n -&gt; (n, tl) | _ -&gt; assert false
 
   let pop2_i32 s =
-    <span data-count="5138229">l</span>et n2, s = pop s in
-    <span data-count="5138227">l</span>et n1, tl = pop s in
-    <span data-count="5138226">m</span>atch (n1, n2) with <span data-count="5138225">I</span>32 n1, I32 n2 -&gt; ((n1, n2), tl) | _ -&gt; assert false
+    <span data-count="5138812">l</span>et n2, s = pop s in
+    <span data-count="5138812">l</span>et n1, tl = pop s in
+    <span data-count="5138812">m</span>atch (n1, n2) with <span data-count="5138810">I</span>32 n1, I32 n2 -&gt; ((n1, n2), tl) | _ -&gt; assert false
 
   let pop_i64 s =
-    <span data-count="5352330">l</span>et hd, tl = pop s in
+    <span data-count="5352329">l</span>et hd, tl = pop s in
     <span data-count="5352329">m</span>atch hd with <span data-count="5352329">I</span>64 n -&gt; (n, tl) | _ -&gt; assert false
 
   let pop2_i64 s =
@@ -679,17 +679,17 @@ module Make (V : Value_intf.T) :
     <span data-count="118">m</span>atch hd with <span data-count="118">R</span>ef hd -&gt; (hd, tl) | _ -&gt; assert false
 
   let pop_bool s =
-    <span data-count="8299485">l</span>et hd, tl = pop s in
-    <span data-count="8299481">m</span>atch hd with <span data-count="8299481">I</span>32 n -&gt; (V.I32.to_boo<span data-count="8299481">l</span> n, tl) | _ -&gt; assert false
+    <span data-count="8299514">l</span>et hd, tl = pop s in
+    <span data-count="8299514">m</span>atch hd with <span data-count="8299515">I</span>32 n -&gt; (Value.I32.to_boo<span data-count="8299514">l</span> n, tl) | _ -&gt; assert false
 
   let pop_n s n =
-    <span data-count="6219501">(</span>List.filter<span data-count="6219500">i</span> (fun i _hd -&gt; <span data-count="6640256">i</span> &lt; n) s, List.filter<span data-count="6219501">i</span> (fun i _hd -&gt; <span data-count="6640246">i</span> &gt;= n) s)
+    <span data-count="6210278">(</span>List.filter<span data-count="6210277">i</span> (fun i _hd -&gt; <span data-count="6640220">i</span> &lt; n) s, List.filter<span data-count="6210278">i</span> (fun i _hd -&gt; <span data-count="6640220">i</span> &gt;= n) s)
 
-  let keep s n = <span data-count="2142361">L</span>ist.filteri (fun i _hd -&gt; <span data-count="273201">i</span> &lt; n) s
+  let keep s n = <span data-count="2143888">L</span>ist.filteri (fun i _hd -&gt; <span data-count="273731">i</span> &lt; n) s
 
   let rec drop_n s n =
-    <span data-count="8515328">i</span>f n = 0 then <span data-count="7971112">s</span>
-    else <span data-count="544217">m</span>atch s with [] -&gt; assert false | <span data-count="544216">_</span> :: tl -&gt; drop_n tl (n - 1)
+    <span data-count="8517956">i</span>f n = 0 then <span data-count="7971762">s</span>
+    else <span data-count="546194">m</span>atch s with [] -&gt; assert false | <span data-count="546194">_</span> :: tl -&gt; drop_n tl (n - 1)
 end
 </code></pre>
       </div>

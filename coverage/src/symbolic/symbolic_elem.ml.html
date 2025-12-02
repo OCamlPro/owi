@@ -53,8 +53,8 @@
 
 type t = Link_env.elem
 
-let get (elem : t) i : Symbolic_value.ref_value =
-  <span data-count="610">m</span>atch elem.value.(i) with <span data-count="610">F</span>uncref f -&gt; Funcref f | _ -&gt; assert false
+let get (elem : t) i : Symbolic_value.Ref.t =
+  <span data-count="610">m</span>atch elem.value.(i) with <span data-count="610">F</span>unc f -&gt; Func f | _ -&gt; assert false
 
 let size (elem : t) = <span data-count="167">A</span>rray.length elem.value
 </code></pre>

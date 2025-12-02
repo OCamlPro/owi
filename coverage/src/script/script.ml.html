@@ -663,9 +663,9 @@ module Stack = Stack.Make [@inlined hint] (Concrete_value)
 module Host_externref = struct
   type t = int
 
-  let ty : t Type.Id.t = Type.Id.mak<span data-count="701">e</span> ()
+  let ty : t Type.Id.t = Type.Id.mak<span data-count="703">e</span> ()
 
-  let value i = <span data-count="34">V</span>.Externref (Some (V.E (ty, i)))
+  let value i = <span data-count="34">C</span>oncrete_value.Ref.extern ty i
 end
 
 let check_error ~expected ~got : unit Result.t =
@@ -716,7 +716,7 @@ let load_global_from_module ls mod_id name =
   | <span data-count="0">N</span>one -&gt; Error (`Unbound_name name)
   | <span data-count="11">S</span>ome v -&gt; Ok v
 
-let compare_result_const result (const : V.t) =
+let compare_result_const result (const : Concrete_value.t) =
   <span data-count="21701">m</span>atch (result, const) with
   | <span data-count="12863">W</span>ast.Result_const (Literal (Const_I32 n)), I32 n' -&gt; Int32.eq n n'
   | <span data-count="892">R</span>esult_const (Literal (Const_I64 n)), I64 n' -&gt; Int64.eq n n'
@@ -725,10 +725,10 @@ let compare_result_const result (const : V.t) =
   | <span data-count="2915">R</span>esult_const (Literal (Const_F64 n)), F64 n' -&gt;
     Float64.e<span data-count="2915">q</span> n n<span data-count="2820">'</span> || String.equal (Float64.to_strin<span data-count="95">g</span> n) (Float64.to_strin<span data-count="95">g</span> n')
   | <span data-count="202">R</span>esult_const (Literal (Const_V128 n)), V128 n' -&gt; V128.eq n n'
-  | <span data-count="7">R</span>esult_const (Literal (Const_null Func_ht)), Ref (Funcref None) -&gt; true
-  | <span data-count="28">R</span>esult_const (Literal (Const_null Extern_ht)), Ref (Externref None) -&gt; true
-  | <span data-count="35">R</span>esult_const (Literal (Const_extern n)), Ref (Externref (Some ref)) -&gt; begin
-    match V.cast_ref ref Host_externref.ty with
+  | <span data-count="7">R</span>esult_const (Literal (Const_null Func_ht)), Ref (Func None) -&gt; true
+  | <span data-count="28">R</span>esult_const (Literal (Const_null Extern_ht)), Ref (Extern None) -&gt; true
+  | <span data-count="35">R</span>esult_const (Literal (Const_extern n)), Ref (Extern (Some ref)) -&gt; begin
+    match Concrete_value.Ref.Extern.cast ref Host_externref.ty with
     | <span data-count="0">N</span>one -&gt; false
     | <span data-count="35">S</span>ome n' -&gt; n = n'
   end
@@ -755,14 +755,14 @@ let compare_result_const result (const : V.t) =
     Log.err (fun m -&gt; <span data-count="0">m</span> "TODO: unimplemented Script.compare_result_const");
     <span data-count="0">a</span>ssert false
 
-let value_of_const : Wast.const -&gt; V.t = function
-  | <span data-count="10293">C</span>onst_I32 v -&gt; V.I32 v
-  | <span data-count="1133">C</span>onst_I64 v -&gt; V.I64 v
-  | <span data-count="11680">C</span>onst_F32 v -&gt; V.F32 v
-  | <span data-count="11846">C</span>onst_F64 v -&gt; V.F64 v
-  | <span data-count="7">C</span>onst_V128 v -&gt; V.V128 v
-  | <span data-count="14">C</span>onst_null rt -&gt; V.ref_null rt
-  | <span data-count="34">C</span>onst_extern i -&gt; V.Ref (Host_externref.valu<span data-count="34">e</span> i)
+let value_of_const : Wast.const -&gt; Concrete_value.t = function
+  | <span data-count="10293">C</span>onst_I32 v -&gt; Concrete_value.I32 v
+  | <span data-count="1133">C</span>onst_I64 v -&gt; Concrete_value.I64 v
+  | <span data-count="11680">C</span>onst_F32 v -&gt; Concrete_value.F32 v
+  | <span data-count="11846">C</span>onst_F64 v -&gt; Concrete_value.F64 v
+  | <span data-count="7">C</span>onst_V128 v -&gt; Concrete_value.V128 v
+  | <span data-count="14">C</span>onst_null rt -&gt; Concrete_value.ref_null rt
+  | <span data-count="34">C</span>onst_extern i -&gt; Concrete_value.Ref (Host_externref.valu<span data-count="34">e</span> i)
   | <span data-count="0">i</span> -&gt;
     Log.err (fun m -&gt;
       <span data-count="0">m</span> "TODO: unimplemented Script.value_of_const %a)" Wast.pp_const i );
