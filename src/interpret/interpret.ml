@@ -538,9 +538,6 @@ struct
     | Num_type V128 -> V128 V128.zero
     | Ref_type (_null, rt) -> Ref (Ref.null rt)
 
-  (* TODO: remove *)
-  let mem_0 = 0
-
   type extern_func = Extern_func.extern_func
 
   let exec_extern_func env stack (f : extern_func) =
@@ -568,7 +565,7 @@ struct
         (elt :: elts, stack)
       in
       match ty with
-      | Mem args -> split_args stack args
+      | Mem (_, args) -> split_args stack args
       | Arg (_, args) -> split_one_arg args
       | UArg args -> split_args stack args
       | NArg (_, _, args) -> split_one_arg args
@@ -578,9 +575,9 @@ struct
       Stack.t -> (f, r) Extern_func.atype -> f -> r Choice.t =
      fun stack ty f ->
       match ty with
-      | Mem args ->
-        (* TODO: add memid to Mem *)
-        let* mem = Env.get_memory env mem_0 in
+      | Mem (memid, args) ->
+        let* memid, stack = pop_arg stack memid in
+        let* mem = Env.get_memory env (Int32.to_int memid) in
         apply stack args (f mem)
       | Arg (arg, args) ->
         let* v, stack = pop_arg stack arg in
