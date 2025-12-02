@@ -11,23 +11,13 @@ type boolean = Expr.t
 
 type i32 = Expr.t
 
-let pp_int32 = Expr.pp
-
 type i64 = Expr.t
-
-let pp_int64 = Expr.pp
 
 type f32 = Expr.t
 
-let pp_float32 = Expr.pp
-
 type f64 = Expr.t
 
-let pp_float64 = Expr.pp
-
 type v128 = Expr.t
-
-let pp_v128 = Expr.pp
 
 module Ref = struct
   module Extern = struct
@@ -79,14 +69,6 @@ type t =
   | F64 of f64
   | V128 of v128
   | Ref of Ref.t
-
-let pp fmt = function
-  | I32 i -> pp_int32 fmt i
-  | I64 i -> pp_int64 fmt i
-  | F32 f -> pp_float32 fmt f
-  | F64 f -> pp_float64 fmt f
-  | V128 e -> pp_v128 fmt e
-  | Ref r -> Ref.pp fmt r
 
 module Boolean = struct
   let of_concrete (i : bool) : i32 =
@@ -263,6 +245,8 @@ module I32 = struct
   (* FIXME: This is probably wrong? *)
   let extend_s n x =
     cvtop ty (Sign_extend (32 - n)) (Smtml.Expr.extract x ~high:(n / 8) ~low:0)
+
+  let pp = Expr.pp
 end
 
 module I64 = struct
@@ -381,6 +365,8 @@ module I64 = struct
   let extend_i32_s x = cvtop ty (Sign_extend 32) x
 
   let extend_i32_u x = cvtop ty (Zero_extend 32) x
+
+  let pp = Expr.pp
 end
 
 module F32 = struct
@@ -445,6 +431,8 @@ module F32 = struct
   let of_bits x = cvtop ty Reinterpret_int x
 
   let to_bits x = cvtop (Ty_bitv 32) Reinterpret_float x
+
+  let pp = Expr.pp
 end
 
 module F64 = struct
@@ -509,6 +497,8 @@ module F64 = struct
   let of_bits x = cvtop ty Reinterpret_int x
 
   let to_bits x = cvtop (Ty_bitv 64) Reinterpret_float x
+
+  let pp = Expr.pp
 end
 
 module V128 = struct
@@ -534,4 +524,14 @@ module V128 = struct
     let a = Smtml.Expr.extract v ~low:8 ~high:16 in
     let b = Smtml.Expr.extract v ~low:0 ~high:8 in
     (a, b)
+
+  let pp ppf v = Expr.pp ppf v
 end
+
+let pp fmt = function
+  | I32 i -> I32.pp fmt i
+  | I64 i -> I64.pp fmt i
+  | F32 f -> F32.pp fmt f
+  | F64 f -> F64.pp fmt f
+  | V128 e -> V128.pp fmt e
+  | Ref r -> Ref.pp fmt r

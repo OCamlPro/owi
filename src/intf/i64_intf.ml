@@ -34,4 +34,6 @@ module type T = sig
   val of_concrete : Int64.t -> t
 
   val of_int : int -> t
+
+  val pp : Format.formatter -> t -> unit
 end
