@@ -5,21 +5,7 @@
 (** Single table *)
 type t
 
-val get : t -> int -> Symbolic_value.Ref.t
-
-val set : t -> int -> Symbolic_value.Ref.t -> unit
-
-val grow : t -> int32 -> Symbolic_value.Ref.t -> unit
-
-val fill : t -> int32 -> int32 -> Symbolic_value.Ref.t -> unit
-
-val copy : t_src:t -> t_dst:t -> src:int32 -> dst:int32 -> len:int32 -> unit
-
-val size : t -> int
-
-val typ : t -> Text.ref_type
-
-val max_size : t -> int option
+include Table_intf.T with module Value := Symbolic_value and type t := t
 
 (** Collection of tables *)
 type collection

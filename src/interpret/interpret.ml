@@ -26,10 +26,10 @@ end
 
 module Make
     (Value : Value_intf.T)
-    (Data : Interpret_intf.Data)
-    (Global : Interpret_intf.Global with module Value := Value)
-    (Elem : Interpret_intf.Elem with module Value := Value)
-    (Table : Interpret_intf.Table with module Value := Value)
+    (Data : Data_intf.T)
+    (Global : Global_intf.T with module Value := Value)
+    (Elem : Elem_intf.T with module Value := Value)
+    (Table : Table_intf.T with module Value := Value)
     (Choice : Choice_intf.Base with module Value := Value)
     (Memory :
       Memory_intf.T with module Value := Value and module Choice := Choice)
@@ -43,7 +43,7 @@ module Make
          and type memory := Memory.t
          and type 'a m := 'a Choice.t)
     (Env :
-      Interpret_intf.Env
+      Env_intf.T
         with type data := Data.t
          and type memory := Memory.t
          and type global := Global.t

@@ -2,4 +2,5 @@
 (* Copyright © 2021-2025 OCamlPro *)
 (* Written by the Owi programmers *)
 
-include Data_intf.T with type t = Link_env.data
+include
+  Elem_intf.T with module Value := Concrete_value and type t = Link_env.elem

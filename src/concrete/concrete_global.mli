@@ -4,16 +4,11 @@
 
 (** runtime global *)
 
+(* TODO: make it private and even opaque later! *)
 type t =
   { mutable value : Concrete_value.t
   ; mut : Text.mut
   ; typ : Text.val_type
   }
 
-val value : t -> Concrete_value.t
-
-val set_value : t -> Concrete_value.t -> unit
-
-val backup : t -> t
-
-val recover : from_:t -> to_:t -> unit
+include Global_intf.T with module Value := Concrete_value and type t := t
