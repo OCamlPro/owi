@@ -11,6 +11,7 @@
   binary_parser
   binary_to_text
   binary_validate
+  boolean_intf
   choice_intf
   call_graph
   cmd_utils

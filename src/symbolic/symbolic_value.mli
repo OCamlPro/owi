@@ -11,8 +11,8 @@ include
      and type f64 = Smtml.Expr.t
      and type v128 = Smtml.Expr.t
 
-module Bool : sig
-  include module type of Bool
+module Boolean : sig
+  include module type of Boolean
 
   val select_expr :
        Smtml.Expr.t
