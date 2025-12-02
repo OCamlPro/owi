@@ -22,7 +22,7 @@ let pp_indice fmt = function Raw u -> int fmt u | Text i -> pp_id fmt i
 
 let pp_indice_not0 fmt = function
   | Text i -> pp_id fmt i
-  | Raw u when u = 0 -> ()
+  | Raw 0 -> ()
   | Raw u -> Fmt.pf fmt " %d" u
 
 let pp_indice_opt fmt = function None -> () | Some i -> pp_indice fmt i
