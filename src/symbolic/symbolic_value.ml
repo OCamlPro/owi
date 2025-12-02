@@ -83,8 +83,6 @@ module Boolean = struct
 
   let true_ = Bool.true_
 
-  let const b = Bool.v b
-
   let not e = Bool.not e
 
   let or_ e1 e2 = Bool.or_ e1 e2
@@ -134,8 +132,8 @@ module I32 = struct
 
   let boolify e =
     match view e with
-    | Val (Bitv bv) when Smtml.Bitvector.eqz bv -> Some (Boolean.const false)
-    | Val (Bitv bv) when Smtml.Bitvector.eq_one bv -> Some (Boolean.const true)
+    | Val (Bitv bv) when Smtml.Bitvector.eqz bv -> Some Boolean.false_
+    | Val (Bitv bv) when Smtml.Bitvector.eq_one bv -> Some Boolean.true_
     | Cvtop (_, OfBool, cond) -> Some cond
     | _ -> None
 
@@ -164,45 +162,41 @@ module I32 = struct
   let eq_concrete e c =
     match view e with
     | Cvtop (_, OfBool, cond) -> begin
-      match c with 0l -> Bool.not cond | 1l -> cond | _ -> Boolean.const false
+      match c with 0l -> Bool.not cond | 1l -> cond | _ -> Boolean.false_
     end
     | _ -> relop Ty_bool Eq e (of_concrete c)
 
   let eq e1 e2 =
-    if phys_equal e1 e2 then Boolean.const true else relop Ty_bool Eq e1 e2
+    if phys_equal e1 e2 then Boolean.true_ else relop Ty_bool Eq e1 e2
 
   let ne e1 e2 =
-    if phys_equal e1 e2 then Boolean.const false else relop Ty_bool Ne e1 e2
+    if phys_equal e1 e2 then Boolean.false_ else relop Ty_bool Ne e1 e2
 
-  let lt e1 e2 =
-    if phys_equal e1 e2 then Boolean.const false else relop ty Lt e1 e2
+  let lt e1 e2 = if phys_equal e1 e2 then Boolean.false_ else relop ty Lt e1 e2
 
-  let gt e1 e2 =
-    if phys_equal e1 e2 then Boolean.const false else relop ty Gt e1 e2
+  let gt e1 e2 = if phys_equal e1 e2 then Boolean.false_ else relop ty Gt e1 e2
 
   let lt_u e1 e2 =
-    if phys_equal e1 e2 then Boolean.const false else relop ty LtU e1 e2
+    if phys_equal e1 e2 then Boolean.false_ else relop ty LtU e1 e2
 
   let gt_u e1 e2 =
-    if phys_equal e1 e2 then Boolean.const false else relop ty GtU e1 e2
+    if phys_equal e1 e2 then Boolean.false_ else relop ty GtU e1 e2
 
-  let le e1 e2 =
-    if phys_equal e1 e2 then Boolean.const true else relop ty Le e1 e2
+  let le e1 e2 = if phys_equal e1 e2 then Boolean.true_ else relop ty Le e1 e2
 
-  let ge e1 e2 =
-    if phys_equal e1 e2 then Boolean.const true else relop ty Ge e1 e2
+  let ge e1 e2 = if phys_equal e1 e2 then Boolean.true_ else relop ty Ge e1 e2
 
   let le_u e1 e2 =
-    if phys_equal e1 e2 then Boolean.const true else relop ty LeU e1 e2
+    if phys_equal e1 e2 then Boolean.true_ else relop ty LeU e1 e2
 
   let ge_u e1 e2 =
-    if phys_equal e1 e2 then Boolean.const true else relop ty GeU e1 e2
+    if phys_equal e1 e2 then Boolean.true_ else relop ty GeU e1 e2
 
   let to_bool (e : boolean) =
     match view e with
     | Val (Bitv i) when Smtml.Bitvector.numbits i = 32 ->
-      Boolean.const (not @@ Bitvector.eqz i)
-    | Ptr _ -> Boolean.const true
+      Boolean.of_concrete (not @@ Bitvector.eqz i)
+    | Ptr _ -> Boolean.true_
     | Symbol { ty = Ty_bool; _ } -> e
     | Cvtop (_, OfBool, cond) -> cond
     | _ -> Smtml.Expr.cvtop ty ToBool e
