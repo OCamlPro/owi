@@ -30,16 +30,6 @@ module type T = sig
 
   val pp_v128 : Format.formatter -> v128 -> unit
 
-  val const_i32 : Int32.t -> i32
-
-  val const_i64 : Int64.t -> i64
-
-  val const_f32 : Float32.t -> f32
-
-  val const_f64 : Float64.t -> f64
-
-  val const_v128 : V128.t -> v128
-
   module Boolean : Boolean_intf.T with type t := boolean and type i32 := i32
 
   module Ref : sig

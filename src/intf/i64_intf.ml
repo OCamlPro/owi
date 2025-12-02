@@ -17,7 +17,7 @@ module type T = sig
     Iop_intf.T
       with type t := t
        and type boolean := boolean
-       and type const := Int64.t
+       and type concrete := Int64.t
        and type f32 := f32
        and type f64 := f64
 
@@ -30,4 +30,8 @@ module type T = sig
   val extend_i32_s : i32 -> t
 
   val extend_i32_u : i32 -> t
+
+  val of_concrete : Int64.t -> t
+
+  val of_int : int -> t
 end

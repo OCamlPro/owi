@@ -7,7 +7,11 @@ module type T = sig
 
   type i32
 
-  val const : Bool.t -> t
+  val false_ : t
+
+  val true_ : t
+
+  val of_concrete : Bool.t -> t
 
   val not : t -> t
 

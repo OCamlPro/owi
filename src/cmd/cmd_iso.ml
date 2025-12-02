@@ -32,7 +32,7 @@ let binaryen_fuzzing_support_module weird_log_i64 =
   in
   let call_export _n1 _n2 = Symbolic_choice_with_memory.return () in
   let call_export_catch _n =
-    Symbolic_choice_with_memory.return @@ Symbolic_value.const_i32 0l
+    Symbolic_choice_with_memory.return @@ Symbolic_value.I32.of_concrete 0l
   in
   let sleep _ms id = Symbolic_choice_with_memory.return id in
   let open Symbolic_extern_func in

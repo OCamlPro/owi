@@ -24,4 +24,6 @@ module type T = sig
   val promote_f32 : f32 -> t
 
   val reinterpret_i64 : i64 -> t
+
+  val of_concrete : Float64.t -> t
 end

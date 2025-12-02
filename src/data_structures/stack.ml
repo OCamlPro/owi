@@ -71,25 +71,25 @@ module type S = sig
 
   val push_i32 : t -> i32 -> t
 
-  val push_const_i32 : t -> Int32.t -> t
+  val push_concrete_i32 : t -> Int32.t -> t
 
   val push_i32_of_int : t -> int -> t
 
   val push_i64 : t -> i64 -> t
 
-  val push_const_i64 : t -> Int64.t -> t
+  val push_concrete_i64 : t -> Int64.t -> t
 
   val push_f32 : t -> f32 -> t
 
-  val push_const_f32 : t -> Float32.t -> t
+  val push_concrete_f32 : t -> Float32.t -> t
 
   val push_f64 : t -> f64 -> t
 
-  val push_const_f64 : t -> Float64.t -> t
+  val push_concrete_f64 : t -> Float64.t -> t
 
   val push_v128 : t -> v128 -> t
 
-  val push_const_v128 : t -> V128.t -> t
+  val push_concrete_v128 : t -> V128.t -> t
 
   val push_ref : t -> ref_value -> t
 
@@ -118,25 +118,25 @@ module Make (Value : Value_intf.T) :
 
   let push_bool s b = push s (I32 (Value.Boolean.to_i32 b))
 
-  let push_const_i32 s i = push s (I32 (Value.const_i32 i))
+  let push_concrete_i32 s i = push s (I32 (Value.I32.of_concrete i))
 
   let push_i32 s i = push s (I32 i)
 
-  let push_i32_of_int s i = push_const_i32 s (Int32.of_int i)
+  let push_i32_of_int s i = push_concrete_i32 s (Int32.of_int i)
 
-  let push_const_i64 s i = push s (I64 (Value.const_i64 i))
+  let push_concrete_i64 s i = push s (I64 (Value.I64.of_concrete i))
 
   let push_i64 s i = push s (I64 i)
 
-  let push_const_f32 s f = push s (F32 (Value.const_f32 f))
+  let push_concrete_f32 s f = push s (F32 (Value.F32.of_concrete f))
 
   let push_f32 s f = push s (F32 f)
 
-  let push_const_f64 s f = push s (F64 (Value.const_f64 f))
+  let push_concrete_f64 s f = push s (F64 (Value.F64.of_concrete f))
 
   let push_f64 s f = push s (F64 f)
 
-  let push_const_v128 s f = push s (V128 (Value.const_v128 f))
+  let push_concrete_v128 s f = push s (V128 (Value.V128.of_concrete f))
 
   let push_v128 s f = push s (V128 f)
 

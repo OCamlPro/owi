@@ -5,7 +5,7 @@
 module type T = sig
   type t
 
-  type const
+  type concrete
 
   type boolean
 
@@ -51,7 +51,7 @@ module type T = sig
 
   val rotr : t -> t -> t
 
-  val eq_const : t -> const -> boolean
+  val eq_concrete : t -> concrete -> boolean
 
   val eq : t -> t -> boolean
 

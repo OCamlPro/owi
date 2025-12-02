@@ -26,16 +26,6 @@ let pp_float64 = Float64.pp
 
 let pp_v128 = V128.pp
 
-let const_i32 x = x
-
-let const_i64 x = x
-
-let const_f32 x = x
-
-let const_f64 x = x
-
-let const_v128 x = x
-
 module Ref = struct
   module Extern = struct
     type t = E : 'a Type.Id.t * 'a -> t
@@ -96,7 +86,11 @@ let pp fmt = function
   | Ref r -> Ref.pp fmt r
 
 module Boolean = struct
-  let const c = c
+  let false_ = false
+
+  let true_ = true
+
+  let of_concrete c = c
 
   let not = not
 
@@ -104,7 +98,7 @@ module Boolean = struct
 
   let or_ = ( || )
 
-  let to_i32 = function true -> 1l | false -> 0l
+  let to_i32 = function false -> 0l | true -> 1l
 
   let pp = Fmt.bool
 end
@@ -113,28 +107,38 @@ module I32 = struct
   include Int32
   include Convert.Int32
 
-  let to_bool i = Int32.ne i 0l
+  let to_bool = function 0l -> false | _i -> true
 
-  let eq_const = eq
+  let of_concrete v = v
+
+  let eq_concrete = eq
 end
 
 module I64 = struct
   include Int64
   include Convert.Int64
 
-  let eq_const = eq
+  let of_concrete v = v
+
+  let eq_concrete = eq
 end
 
 module F32 = struct
   include Float32
   include Convert.Float32
+
+  let of_concrete v = v
 end
 
 module F64 = struct
   include Float64
   include Convert.Float64
+
+  let of_concrete v = v
 end
 
 module V128 = struct
   include V128
+
+  let of_concrete v = v
 end
