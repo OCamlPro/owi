@@ -18,4 +18,6 @@ module type T = sig
   val of_i64x2 : i64 -> i64 -> t
 
   val to_i64x2 : t -> i64 * i64
+
+  val of_concrete : V128.t -> t
 end

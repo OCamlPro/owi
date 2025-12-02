@@ -13,11 +13,11 @@ let clone_global r = { value = r.value }
 
 let convert_values (v : Concrete_value.t) : Symbolic_value.t =
   match v with
-  | I32 v -> I32 (Symbolic_value.const_i32 v)
-  | I64 v -> I64 (Symbolic_value.const_i64 v)
-  | F32 v -> F32 (Symbolic_value.const_f32 v)
-  | F64 v -> F64 (Symbolic_value.const_f64 v)
-  | V128 v -> V128 (Symbolic_value.const_v128 v)
+  | I32 v -> I32 (Symbolic_value.I32.of_concrete v)
+  | I64 v -> I64 (Symbolic_value.I64.of_concrete v)
+  | F32 v -> F32 (Symbolic_value.F32.of_concrete v)
+  | F64 v -> F64 (Symbolic_value.F64.of_concrete v)
+  | V128 v -> V128 (Symbolic_value.V128.of_concrete v)
   | Ref (Func f) -> Ref (Func f)
   | Ref _ -> assert false
 

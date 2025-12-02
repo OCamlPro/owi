@@ -158,22 +158,20 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
 
     let cov_label_is_covered id =
       let open Concrete_choice in
-      let* id = select_i32 id in
-      return @@ Concrete_value.const_i32
+      let+ id = select_i32 id in
+      Concrete_value.I32.of_concrete
       @@ if Hashtbl.mem covered_labels id then 1l else 0l
 
     let cov_label_set m id str_ptr =
-      let* chars = make_str m [] str_ptr in
+      let+ chars = make_str m [] str_ptr in
       let str = String.init (Array.length chars) (Array.get chars) in
       Hashtbl.add covered_labels id str;
-      Log.debug (fun m -> m "reached %ld@." id);
-      Ok ()
+      Log.debug (fun m -> m "reached %ld@." id)
 
     let open_scope m strptr =
-      let* chars = make_str m [] strptr in
+      let+ chars = make_str m [] strptr in
       let str = String.init (Array.length chars) (Array.get chars) in
-      scopes := Symbol_scope.open_scope str !scopes;
-      Concrete_choice.return ()
+      scopes := Symbol_scope.open_scope str !scopes
 
     let close_scope () =
       scopes := Symbol_scope.close_scope !scopes;

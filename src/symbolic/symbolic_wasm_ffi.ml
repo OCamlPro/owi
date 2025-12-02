@@ -119,7 +119,7 @@ module M :
 
   let rec make_str m accu i =
     let open Symbolic_choice_with_memory in
-    let* p = Symbolic_memory.load_8_u m (Symbolic_value.const_i32 i) in
+    let* p = Symbolic_memory.load_8_u m (Symbolic_value.I32.of_concrete i) in
     match Smtml.Expr.view p with
     | Val (Bitv bv) when Smtml.Bitvector.numbits bv = 32 ->
       let c = Smtml.Bitvector.to_int32 bv in
@@ -133,7 +133,7 @@ module M :
   let cov_label_is_covered id =
     let open Symbolic_choice_with_memory in
     let* id = select_i32 id in
-    return @@ Symbolic_value.const_i32 @@ Mutex.protect cov_lock
+    return @@ Symbolic_value.I32.of_concrete @@ Mutex.protect cov_lock
     @@ fun () ->
     if Hashtbl.mem covered_labels id || in_seacoral_store id then 1l else 0l
 
@@ -213,7 +213,7 @@ let proc_exit _ =
 
 let random_get _ _ =
   Log.warn (fun m -> m "used dummy random_get implementation");
-  Symbolic_choice_with_memory.return @@ Symbolic_value.const_i32 0l
+  Symbolic_choice_with_memory.return @@ Symbolic_value.I32.of_concrete 0l
 
 let wasi_snapshot_preview1 =
   let functions =

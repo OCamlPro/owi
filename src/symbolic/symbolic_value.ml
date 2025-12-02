@@ -29,18 +29,6 @@ type v128 = Expr.t
 
 let pp_v128 = Expr.pp
 
-let const_i32 (i : Int32.t) : i32 = value (Bitv (Smtml.Bitvector.of_int32 i))
-
-let const_i64 (i : Int64.t) : i64 = value (Bitv (Smtml.Bitvector.of_int64 i))
-
-let const_f32 (f : Float32.t) : f32 = value (Num (F32 (Float32.to_bits f)))
-
-let const_f64 (f : Float64.t) : f64 = value (Num (F64 (Float64.to_bits f)))
-
-let const_v128 (v : V128.t) : v128 =
-  let a, b = V128.to_i64x2 v in
-  Smtml.Expr.concat (const_i64 a) (const_i64 b)
-
 module Ref = struct
   module Extern = struct
     type t = E : 'a Type.Id.t * 'a -> t
@@ -101,6 +89,13 @@ let pp fmt = function
   | Ref r -> Ref.pp fmt r
 
 module Boolean = struct
+  let of_concrete (i : bool) : i32 =
+    value (Bitv (Smtml.Bitvector.of_int32 (if i then 1l else 0l)))
+
+  let false_ = Bool.false_
+
+  let true_ = Bool.true_
+
   let const b = Bool.v b
 
   let not e = Bool.not e
@@ -111,8 +106,8 @@ module Boolean = struct
 
   let to_i32 e =
     match view e with
-    | Val True -> const_i32 1l
-    | Val False -> const_i32 0l
+    | Val True -> of_concrete true
+    | Val False -> of_concrete false
     | Cvtop (Ty_bitv 32, ToBool, e') -> e'
     | _ -> Expr.cvtop (Ty_bitv 32) OfBool e
 
@@ -124,7 +119,11 @@ end
 module I32 = struct
   let ty = Ty_bitv 32
 
-  let zero = const_i32 0l
+  let of_concrete (i : Int32.t) : i32 = value (Bitv (Smtml.Bitvector.of_int32 i))
+
+  let of_int (i : int) : i32 = of_concrete (Int32.of_int i)
+
+  let zero = of_concrete 0l
 
   let clz e = unop ty Clz e
 
@@ -175,12 +174,12 @@ module I32 = struct
 
   let rotr e1 e2 = binop ty Rotr e1 e2
 
-  let eq_const e c =
+  let eq_concrete e c =
     match view e with
     | Cvtop (_, OfBool, cond) -> begin
       match c with 0l -> Bool.not cond | 1l -> cond | _ -> Boolean.const false
     end
-    | _ -> relop Ty_bool Eq e (const_i32 c)
+    | _ -> relop Ty_bool Eq e (of_concrete c)
 
   let eq e1 e2 =
     if phys_equal e1 e2 then Boolean.const true else relop Ty_bool Eq e1 e2
@@ -269,7 +268,11 @@ end
 module I64 = struct
   let ty = Ty_bitv 64
 
-  let zero = const_i64 0L
+  let of_concrete (i : Int64.t) : i64 = value (Bitv (Smtml.Bitvector.of_int64 i))
+
+  let of_int (i : int) : i64 = of_concrete (Int64.of_int i)
+
+  let zero = of_concrete 0L
 
   let clz e = unop ty Clz e
 
@@ -307,7 +310,7 @@ module I64 = struct
 
   let rotr e1 e2 = binop ty Rotr e1 e2
 
-  let eq_const e c = relop Ty_bool Eq e (const_i64 c)
+  let eq_concrete e c = relop Ty_bool Eq e (of_concrete c)
 
   let eq e1 e2 = relop Ty_bool Eq e1 e2
 
@@ -383,7 +386,9 @@ end
 module F32 = struct
   let ty = Ty_fp 32
 
-  let zero = const_f32 Float32.zero
+  let of_concrete (f : Float32.t) : f32 = value (Num (F32 (Float32.to_bits f)))
+
+  let zero = of_concrete Float32.zero
 
   let abs x = unop ty Abs x
 
@@ -445,7 +450,9 @@ end
 module F64 = struct
   let ty = Ty_fp 64
 
-  let zero = const_f64 Float64.zero
+  let of_concrete (f : Float64.t) : f64 = value (Num (F64 (Float64.to_bits f)))
+
+  let zero = of_concrete Float64.zero
 
   let abs x = unop ty Abs x
 
@@ -505,7 +512,11 @@ module F64 = struct
 end
 
 module V128 = struct
-  let zero : v128 = const_v128 V128.zero
+  let of_concrete (v : V128.t) : v128 =
+    let a, b = V128.to_i64x2 v in
+    Smtml.Expr.concat (I64.of_concrete a) (I64.of_concrete b)
+
+  let zero : v128 = of_concrete V128.zero
 
   let of_i32x4 a b c d =
     Smtml.Expr.concat (Smtml.Expr.concat a b) (Smtml.Expr.concat c d)

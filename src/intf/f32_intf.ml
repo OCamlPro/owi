@@ -24,4 +24,6 @@ module type T = sig
   val demote_f64 : f64 -> t
 
   val reinterpret_i32 : i32 -> t
+
+  val of_concrete : Float32.t -> t
 end
