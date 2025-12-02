@@ -3,7 +3,7 @@
 (* Written by the Owi programmers *)
 
 module type Iop = sig
-  type num
+  type t
 
   type const
 
@@ -13,87 +13,87 @@ module type Iop = sig
 
   type float64
 
-  val zero : num
+  val zero : t
 
-  val clz : num -> num
+  val clz : t -> t
 
-  val ctz : num -> num
+  val ctz : t -> t
 
-  val popcnt : num -> num
+  val popcnt : t -> t
 
-  val add : num -> num -> num
+  val add : t -> t -> t
 
-  val sub : num -> num -> num
+  val sub : t -> t -> t
 
-  val mul : num -> num -> num
+  val mul : t -> t -> t
 
-  val div : num -> num -> num
+  val div : t -> t -> t
 
-  val unsigned_div : num -> num -> num
+  val unsigned_div : t -> t -> t
 
-  val rem : num -> num -> num
+  val rem : t -> t -> t
 
-  val unsigned_rem : num -> num -> num
+  val unsigned_rem : t -> t -> t
 
-  val logand : num -> num -> num
+  val logand : t -> t -> t
 
-  val logor : num -> num -> num
+  val logor : t -> t -> t
 
-  val logxor : num -> num -> num
+  val logxor : t -> t -> t
 
-  val shl : num -> num -> num
+  val shl : t -> t -> t
 
-  val shr_s : num -> num -> num
+  val shr_s : t -> t -> t
 
-  val shr_u : num -> num -> num
+  val shr_u : t -> t -> t
 
-  val rotl : num -> num -> num
+  val rotl : t -> t -> t
 
-  val rotr : num -> num -> num
+  val rotr : t -> t -> t
 
-  val eq_const : num -> const -> bool
+  val eq_const : t -> const -> bool
 
-  val eq : num -> num -> bool
+  val eq : t -> t -> bool
 
-  val ne : num -> num -> bool
+  val ne : t -> t -> bool
 
-  val lt : num -> num -> bool
+  val lt : t -> t -> bool
 
-  val gt : num -> num -> bool
+  val gt : t -> t -> bool
 
-  val lt_u : num -> num -> bool
+  val lt_u : t -> t -> bool
 
-  val gt_u : num -> num -> bool
+  val gt_u : t -> t -> bool
 
-  val le : num -> num -> bool
+  val le : t -> t -> bool
 
-  val ge : num -> num -> bool
+  val ge : t -> t -> bool
 
-  val le_u : num -> num -> bool
+  val le_u : t -> t -> bool
 
-  val ge_u : num -> num -> bool
+  val ge_u : t -> t -> bool
 
-  val trunc_f32_s : float32 -> num Result.t
+  val trunc_f32_s : float32 -> t Result.t
 
-  val trunc_f32_u : float32 -> num Result.t
+  val trunc_f32_u : float32 -> t Result.t
 
-  val trunc_f64_s : float64 -> num Result.t
+  val trunc_f64_s : float64 -> t Result.t
 
-  val trunc_f64_u : float64 -> num Result.t
+  val trunc_f64_u : float64 -> t Result.t
 
-  val trunc_sat_f32_s : float32 -> num
+  val trunc_sat_f32_s : float32 -> t
 
-  val trunc_sat_f32_u : float32 -> num
+  val trunc_sat_f32_u : float32 -> t
 
-  val trunc_sat_f64_s : float64 -> num
+  val trunc_sat_f64_s : float64 -> t
 
-  val trunc_sat_f64_u : float64 -> num
+  val trunc_sat_f64_u : float64 -> t
 
-  val extend_s : int -> num -> num
+  val extend_s : int -> t -> t
 end
 
 module type Fop = sig
-  type num
+  type t
 
   type bool
 
@@ -103,59 +103,59 @@ module type Fop = sig
 
   type same_size_int
 
-  val zero : num
+  val zero : t
 
-  val abs : num -> num
+  val abs : t -> t
 
-  val neg : num -> num
+  val neg : t -> t
 
-  val sqrt : num -> num
+  val sqrt : t -> t
 
-  val ceil : num -> num
+  val ceil : t -> t
 
-  val floor : num -> num
+  val floor : t -> t
 
-  val trunc : num -> num
+  val trunc : t -> t
 
-  val nearest : num -> num
+  val nearest : t -> t
 
-  val add : num -> num -> num
+  val add : t -> t -> t
 
-  val sub : num -> num -> num
+  val sub : t -> t -> t
 
-  val mul : num -> num -> num
+  val mul : t -> t -> t
 
-  val div : num -> num -> num
+  val div : t -> t -> t
 
-  val min : num -> num -> num
+  val min : t -> t -> t
 
-  val max : num -> num -> num
+  val max : t -> t -> t
 
-  val copy_sign : num -> num -> num
+  val copy_sign : t -> t -> t
 
-  val eq : num -> num -> bool
+  val eq : t -> t -> bool
 
-  val ne : num -> num -> bool
+  val ne : t -> t -> bool
 
-  val lt : num -> num -> bool
+  val lt : t -> t -> bool
 
-  val gt : num -> num -> bool
+  val gt : t -> t -> bool
 
-  val le : num -> num -> bool
+  val le : t -> t -> bool
 
-  val ge : num -> num -> bool
+  val ge : t -> t -> bool
 
-  val convert_i32_s : int32 -> num
+  val convert_i32_s : int32 -> t
 
-  val convert_i32_u : int32 -> num
+  val convert_i32_u : int32 -> t
 
-  val convert_i64_s : int64 -> num
+  val convert_i64_s : int64 -> t
 
-  val convert_i64_u : int64 -> num
+  val convert_i64_u : int64 -> t
 
-  val of_bits : same_size_int -> num
+  val of_bits : same_size_int -> t
 
-  val to_bits : num -> same_size_int
+  val to_bits : t -> same_size_int
 end
 
 type 'a get_ref =
@@ -256,7 +256,7 @@ module type T = sig
   module F32 : sig
     include
       Fop
-        with type num := float32
+        with type t := float32
          and type bool := bool
          and type int32 := int32
          and type int64 := int64
@@ -270,7 +270,7 @@ module type T = sig
   module F64 : sig
     include
       Fop
-        with type num := float64
+        with type t := float64
          and type bool := bool
          and type int32 := int32
          and type int64 := int64
@@ -284,7 +284,7 @@ module type T = sig
   module I32 : sig
     include
       Iop
-        with type num := int32
+        with type t := int32
          and type bool := bool
          and type const := Int32.t
          and type float32 := float32
@@ -300,7 +300,7 @@ module type T = sig
   module I64 : sig
     include
       Iop
-        with type num := int64
+        with type t := int64
          and type bool := bool
          and type const := Int64.t
          and type float32 := float32
