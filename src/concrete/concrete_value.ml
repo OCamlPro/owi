@@ -101,7 +101,7 @@ let ref_func (f : Kind.func) : t = Ref (Ref.func f)
 
 let ref_extern (type x) (t : x Type.Id.t) (v : x) : t = Ref (Ref.extern t v)
 
-module Bool = struct
+module Boolean = struct
   let const c = c
 
   let not = not
@@ -110,9 +110,9 @@ module Bool = struct
 
   let or_ = ( || )
 
-  let int32 = function true -> 1l | false -> 0l
+  let to_i32 = function true -> 1l | false -> 0l
 
-  let pp = bool
+  let pp = Fmt.bool
 end
 
 module I32 = struct

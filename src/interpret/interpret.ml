@@ -115,7 +115,7 @@ struct
   *)
   let ( let>! ) (v, trap) f =
     if Parameters.throw_away_trap then
-      let* () = Choice.assume (Bool.not v) in
+      let* () = Choice.assume (Boolean.not v) in
       f ()
     else
       let* v = select v ~prio_true:Prio.Default ~prio_false:Prio.Default in
@@ -188,7 +188,7 @@ struct
           match s with
           | S ->
             let>! () =
-              ( Bool.and_ (eq n1 min_int) @@ eq n2 ~-(const 1l)
+              ( Boolean.and_ (eq n1 min_int) @@ eq n2 ~-(const 1l)
               , `Integer_overflow )
             in
             Choice.return @@ div n1 n2
@@ -223,7 +223,7 @@ struct
           match s with
           | S ->
             let>! () =
-              ( Bool.and_ (eq n1 min_int)
+              ( Boolean.and_ (eq n1 min_int)
                 @@ eq n2 (sub (const_i64 0L) (const_i64 1L))
               , `Integer_overflow )
             in
@@ -911,7 +911,7 @@ struct
     | Ref_null t -> st @@ Stack.push stack (ref_null t)
     | Ref_is_null ->
       let r, stack = Stack.pop_as_ref stack in
-      let is_null = Ref.is_null r |> Bool.const in
+      let is_null = Ref.is_null r |> Boolean.const in
       st @@ Stack.push_bool stack is_null
     | Ref_func i ->
       let f = Env.get_func env i in
@@ -986,7 +986,7 @@ struct
       let delta = I64.(of_int32 delta * page_size) in
       let new_size = I64.(old_size + delta) in
       let> too_big =
-        Bool.or_ I64.(ge_u new_size (page_size * page_size))
+        Boolean.or_ I64.(ge_u new_size (page_size * page_size))
         @@
         match max_size with
         | Some max -> I64.(gt_u new_size (max * page_size))
@@ -1033,7 +1033,7 @@ struct
         let len = I64.extend_i32_u len in
         let src = I64.extend_i32_u src in
         let dst = I64.extend_i32_u dst in
-        ( Bool.or_
+        ( Boolean.or_
             (I64.gt_u I64.(add src len) size)
             (I64.gt_u I64.(add dst len) size)
         , `Out_of_bounds_memory_access )
@@ -1053,7 +1053,7 @@ struct
         let len = I64.extend_i32_u len in
         let src = I64.extend_i32_u src in
         let dst = I64.extend_i32_u dst in
-        ( Bool.or_
+        ( Boolean.or_
             (I64.gt_u I64.(add dst len) memsize)
             (I64.gt_u I64.(add src len) datasize)
         , `Out_of_bounds_memory_access )
@@ -1125,9 +1125,9 @@ struct
       let delta, stack = Stack.pop_i32 stack in
       let new_size = I32.(size + delta) in
       let> allowed =
-        Bool.and_
+        Boolean.and_
           ( match Table.max_size t with
-          | None -> Bool.const true
+          | None -> Boolean.const true
           | Some max -> I32.ge_u (consti max) new_size )
           (I32.ge_u new_size size)
       in
@@ -1166,7 +1166,7 @@ struct
         let src = I64.extend_i32_u src in
         let dst = I64.extend_i32_u dst in
         let len = I64.extend_i32_u len in
-        ( Bool.or_
+        ( Boolean.or_
             (I64.gt_u I64.(add src len) src_size)
             (I64.gt_u I64.(add dst len) dst_size)
         , `Out_of_bounds_table_access )
@@ -1195,7 +1195,7 @@ struct
         let len = I64.extend_i32_u len in
         let tbl_size = Table.size t |> consti |> I64.extend_i32_u in
         let elem_size = Elem.size elem |> consti |> I64.extend_i32_u in
-        ( Bool.or_
+        ( Boolean.or_
             I64.(gt_u (add len pos_x) elem_size)
             I64.(gt_u (add len pos) tbl_size)
         , `Out_of_bounds_table_access )

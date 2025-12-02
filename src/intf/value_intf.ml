@@ -40,6 +40,8 @@ module type T = sig
 
   val const_v128 : V128.t -> v128
 
+  module Boolean : Boolean_intf.T with type t := boolean and type i32 := i32
+
   module Ref : sig
     module Extern : sig
       type t
@@ -82,20 +84,6 @@ module type T = sig
   val ref_extern : 'x Type.Id.t -> 'x -> t
 
   val pp : Format.formatter -> t -> unit
-
-  module Bool : sig
-    val const : Bool.t -> boolean
-
-    val not : boolean -> boolean
-
-    val or_ : boolean -> boolean -> boolean
-
-    val and_ : boolean -> boolean -> boolean
-
-    val int32 : boolean -> i32
-
-    val pp : Format.formatter -> boolean -> unit
-  end
 
   module F32 : sig
     include

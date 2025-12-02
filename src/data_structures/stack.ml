@@ -116,7 +116,7 @@ module Make (Value : Value_intf.T) :
 
   let push s v = v :: s
 
-  let push_bool s b = push s (I32 (Value.Bool.int32 b))
+  let push_bool s b = push s (I32 (Value.Boolean.to_i32 b))
 
   let push_const_i32 s i = push s (I32 (Value.const_i32 i))
 
