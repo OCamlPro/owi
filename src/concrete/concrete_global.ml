@@ -12,7 +12,3 @@ type t =
 let value g = g.value
 
 let set_value g v = g.value <- v
-
-let backup t = { t with value = t.value }
-
-let recover ~from_ ~to_ = to_.value <- from_.value

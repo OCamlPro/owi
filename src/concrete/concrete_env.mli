@@ -3,7 +3,7 @@
 (* Written by the Owi programmers *)
 
 include
-  Interpret_intf.Env
+  Env_intf.T
     with type memory := Concrete_memory.t
      and type data := Concrete_data.t
      and type global := Concrete_global.t

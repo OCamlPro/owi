@@ -45,15 +45,18 @@
   concrete_wasm_ffi
   control_flow_graph
   convert
+  data_intf
+  elem_intf
+  env_intf
   exploration_smart
   extern
   float32
   float64
+  global_intf
   grouped
   int32
   int64
   interpret
-  interpret_intf
   kind
   label
   link
@@ -94,6 +97,7 @@
   spectest
   stack
   syntax
+  table_intf
   text
   text_lexer
   text_parser

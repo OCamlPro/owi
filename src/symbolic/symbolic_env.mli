@@ -3,7 +3,7 @@
 (* Written by the Owi programmers *)
 
 include
-  Interpret_intf.Env
+  Env_intf.T
     with type memory := Symbolic_memory.t
      and type data := Symbolic_data.t
      and type global := Symbolic_global.t

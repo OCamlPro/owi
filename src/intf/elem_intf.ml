@@ -1,0 +1,13 @@
+(* SPDX-License-Identifier: AGPL-3.0-or-later *)
+(* Copyright © 2021-2024 OCamlPro *)
+(* Written by the Owi programmers *)
+
+module type T = sig
+  module Value : Value_intf.T
+
+  type t
+
+  val get : t -> int -> Value.Ref.t
+
+  val size : t -> int
+end
