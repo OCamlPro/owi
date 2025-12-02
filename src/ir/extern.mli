@@ -27,7 +27,7 @@ module Func : sig
       | Externref : 'a Type.Id.t -> 'a telt
 
     type (_, _) atype = private
-      | Mem : ('b, 'r) atype -> (memory -> 'b, 'r) atype
+      | Mem : int32 telt * ('b, 'r) atype -> (memory -> 'b, 'r) atype
       | UArg : ('b, 'r) atype -> (unit -> 'b, 'r) atype
       | Arg : 'a telt * ('b, 'r) atype -> ('a -> 'b, 'r) atype
       | NArg : string * 'a telt * ('b, 'r) atype -> ('a -> 'b, 'r) atype

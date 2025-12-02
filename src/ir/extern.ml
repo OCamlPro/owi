@@ -23,7 +23,7 @@ module Func = struct
       | Externref : 'a Type.Id.t -> 'a telt
 
     type (_, _) atype = private
-      | Mem : ('b, 'r) atype -> (memory -> 'b, 'r) atype
+      | Mem : i32 telt * ('b, 'r) atype -> (memory -> 'b, 'r) atype
       | UArg : ('b, 'r) atype -> (unit -> 'b, 'r) atype
       | Arg : 'a telt * ('b, 'r) atype -> ('a -> 'b, 'r) atype
       | NArg : string * 'a telt * ('b, 'r) atype -> ('a -> 'b, 'r) atype
@@ -145,7 +145,7 @@ module Func = struct
       | R4 : 'a telt * 'b telt * 'c telt * 'd telt -> ('a * 'b * 'c * 'd) rtype
 
     type (_, _) atype =
-      | Mem : ('b, 'r) atype -> (memory -> 'b, 'r) atype
+      | Mem : Value.i32 telt * ('b, 'r) atype -> (memory -> 'b, 'r) atype
       | UArg : ('b, 'r) atype -> (unit -> 'b, 'r) atype
       | Arg : 'a telt * ('b, 'r) atype -> ('a -> 'b, 'r) atype
       | NArg : string * 'a telt * ('b, 'r) atype -> ('a -> 'b, 'r) atype
@@ -173,7 +173,7 @@ module Func = struct
       | R4 (a, b, c, d) -> [ elt_type a; elt_type b; elt_type c; elt_type d ]
 
     let rec arg_type : type t r. (t, r) atype -> Text.param_type = function
-      | Mem tl -> arg_type tl
+      | Mem (_, tl) -> arg_type tl
       | UArg tl -> arg_type tl
       | Arg (hd, tl) -> (None, elt_type hd) :: arg_type tl
       | NArg (name, hd, tl) -> (Some name, elt_type hd) :: arg_type tl
@@ -200,7 +200,7 @@ module Func = struct
 
       type (_, _, _) t =
         | Unit : (lr, unit, unit) t
-        | Memory : (l, mem, memory) t
+        | Memory : Value.i32 telt -> (l, mem, memory) t
         | Elt : 'a telt -> (lr, elt, 'a) t
         | Elt_labeled : string * 'a telt -> (l, string * elt, 'a) t
 
@@ -230,7 +230,7 @@ module Func = struct
 
       let unit = Unit
 
-      let memory = Memory
+      let memory = Memory I32
 
       let label s (Elt v) = Elt_labeled (s, v)
 
@@ -241,7 +241,7 @@ module Func = struct
         | Elt a -> Func (Arg (a, b), r)
         | Elt_labeled (label, a) -> Func (NArg (label, a, b), r)
         | Unit -> Func (UArg b, r)
-        | Memory -> Func (Mem b, r)
+        | Memory id -> Func (Mem (id, b), r)
 
       let ( ^->. ) : type ll k kk a b.
         (ll, k, a) t -> (lr, kk, b) t -> (a -> b m) func_type =
