@@ -17,6 +17,11 @@ type f64 = Float64.t
 type v128 = V128.t
 
 module Ref = struct
+  type 'a get_ref =
+    | Null
+    | Ref_value of 'a
+    | Type_mismatch
+
   module Extern = struct
     type t = E : 'a Type.Id.t * 'a -> t
 
@@ -44,13 +49,13 @@ module Ref = struct
     | Func None | Extern None -> true
     | Func (Some _) | Extern (Some _) -> false
 
-  let get_func (r : t) : Kind.func Value_intf.get_ref =
+  let get_func (r : t) : Kind.func get_ref =
     match r with
     | Func (Some f) -> Ref_value f
     | Func None -> Null
     | _ -> Type_mismatch
 
-  let get_extern (type x) (r : t) (typ : x Type.Id.t) : x Value_intf.get_ref =
+  let get_extern (type x) (r : t) (typ : x Type.Id.t) : x get_ref =
     match r with
     | Extern (Some (E (ety, v))) -> (
       match Type.Id.provably_equal typ ety with
