@@ -52,11 +52,13 @@
   extern
   float32
   float64
+  fop_intf
   global_intf
   grouped
   int32
   int64
   interpret
+  iop_intf
   kind
   label
   link
