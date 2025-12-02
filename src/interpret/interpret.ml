@@ -540,7 +540,7 @@ struct
     | Num_type F32 -> F32 F32.zero
     | Num_type F64 -> F64 F64.zero
     | Num_type V128 -> V128 V128.zero
-    | Ref_type (_null, rt) -> ref_null rt
+    | Ref_type (_null, rt) -> Ref (Ref.null rt)
 
   (* TODO move to module Env *)
   let mem_0 = 0
@@ -604,7 +604,9 @@ struct
       | F32 -> Stack.push_f32 stack v
       | F64 -> Stack.push_f64 stack v
       | V128 -> Stack.push_v128 stack v
-      | Externref ty -> Stack.push_as_externref stack ty v
+      | Externref ty ->
+        let r = Ref.extern ty v in
+        Stack.push_ref stack r
     in
     let+ r in
     match (rtype, r) with
@@ -908,14 +910,14 @@ struct
     | F_convert_i (nn, nn', s) -> st @@ exec_fconverti stack nn nn' s
     | I_reinterpret_f (nn, nn') -> st @@ exec_ireinterpretf stack nn nn'
     | F_reinterpret_i (nn, nn') -> st @@ exec_freinterpreti stack nn nn'
-    | Ref_null t -> st @@ Stack.push stack (ref_null t)
+    | Ref_null t -> st @@ Stack.push_ref stack (Ref.null t)
     | Ref_is_null ->
       let r, stack = Stack.pop_as_ref stack in
       let is_null = Ref.is_null r |> Boolean.const in
       st @@ Stack.push_bool stack is_null
     | Ref_func i ->
       let f = Env.get_func env i in
-      st @@ Stack.push stack (ref_func f)
+      st @@ Stack.push_ref stack (Ref.func f)
     | Drop -> st @@ Stack.drop stack
     | Local_get i -> st @@ Stack.push stack (State.Locals.get locals i)
     | Local_set i ->

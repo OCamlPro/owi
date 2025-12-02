@@ -95,12 +95,6 @@ let pp fmt = function
   | V128 v -> pf fmt "v128.const %a" V128.pp v
   | Ref r -> Ref.pp fmt r
 
-let ref_null typ = Ref (Ref.null typ)
-
-let ref_func (f : Kind.func) : t = Ref (Ref.func f)
-
-let ref_extern (type x) (t : x Type.Id.t) (v : x) : t = Ref (Ref.extern t v)
-
 module Boolean = struct
   let const c = c
 

@@ -106,7 +106,7 @@ let value_of_const : Wast.const -> Concrete_value.t = function
   | Const_F32 v -> Concrete_value.F32 v
   | Const_F64 v -> Concrete_value.F64 v
   | Const_V128 v -> Concrete_value.V128 v
-  | Const_null rt -> Concrete_value.ref_null rt
+  | Const_null rt -> Concrete_value.Ref (Concrete_value.Ref.null rt)
   | Const_extern i -> Concrete_value.Ref (Host_externref.value i)
   | i ->
     Log.err (fun m ->

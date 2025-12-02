@@ -91,7 +91,7 @@ module type S = sig
 
   val push_const_v128 : t -> V128.t -> t
 
-  val push_as_externref : t -> 'b Type.Id.t -> 'b -> t
+  val push_ref : t -> ref_value -> t
 
   val push_array : t -> unit Array.t -> t
 end
@@ -140,7 +140,7 @@ module Make (Value : Value_intf.T) :
 
   let push_v128 s f = push s (V128 f)
 
-  let push_as_externref s ty v = push s (Value.ref_extern ty v)
+  let push_ref s r = push s (Ref r)
 
   let push_array _ _ = assert false
 

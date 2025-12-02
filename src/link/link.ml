@@ -111,7 +111,7 @@ module Eval_const = struct
     | F64_const f -> ok @@ Stack.push_f64 stack f
     | V128_const f -> ok @@ Stack.push_v128 stack f
     | I_binop (nn, op) -> ok @@ ibinop stack nn op
-    | Ref_null t -> ok @@ Stack.push stack (Concrete_value.ref_null t)
+    | Ref_null t -> ok @@ Stack.push_ref stack (Concrete_value.Ref.null t)
     | Ref_func f ->
       let* f = Link_env.Build.get_func env f in
       let value = Concrete_value.Ref (Func (Some f)) in

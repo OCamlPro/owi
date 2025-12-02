@@ -112,11 +112,5 @@ module type T = sig
     | V128 of v128
     | Ref of Ref.t
 
-  val ref_null : Text.heap_type -> t
-
-  val ref_func : Kind.func -> t
-
-  val ref_extern : 'x Type.Id.t -> 'x -> t
-
   val pp : Format.formatter -> t -> unit
 end

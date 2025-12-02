@@ -103,7 +103,7 @@ let eval_const_instr env stack instr =
   | F64_const f -> ok @@ Stack.push_f64 stack f
   | V128_const f -> ok @@ Stack.push_v128 stack f
   | I_binop (nn, op) -> ok @@ eval_ibinop stack nn op
-  | Ref_null t -> ok @@ Stack.push stack (Concrete_value.ref_null t)
+  | Ref_null t -> ok @@ Stack.push_ref stack (Concrete_value.Ref.null t)
   | Global_get id ->
     let* g = get_const_global env id in
     ok @@ Stack.push_i32 stack g
