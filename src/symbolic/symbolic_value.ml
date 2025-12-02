@@ -92,12 +92,6 @@ type t =
   | V128 of v128
   | Ref of Ref.t
 
-let ref_null typ = Ref (Ref.null typ)
-
-let ref_func (f : Kind.func) : t = Ref (Ref.func f)
-
-let ref_extern (type x) (t : x Type.Id.t) (v : x) : t = Ref (Ref.extern t v)
-
 let pp fmt = function
   | I32 i -> pp_int32 fmt i
   | I64 i -> pp_int64 fmt i
