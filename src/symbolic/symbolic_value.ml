@@ -76,12 +76,11 @@ type t =
   | Ref of Ref.t
 
 module Boolean = struct
-  let of_concrete (i : bool) : i32 =
-    value (Bitv (Smtml.Bitvector.of_int32 (if i then 1l else 0l)))
-
   let false_ = Bool.false_
 
   let true_ = Bool.true_
+
+  let of_concrete (i : bool) : i32 = if i then true_ else false_
 
   let not e = Bool.not e
 
