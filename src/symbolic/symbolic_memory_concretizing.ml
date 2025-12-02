@@ -2,8 +2,8 @@ module Backend = struct
   module Map = Map.Make (Int32)
 
   type t =
-    { mutable data : Symbolic_value.int32 Map.t
-    ; mutable chunks : Symbolic_value.int32 Map.t
+    { mutable data : Symbolic_value.i32 Map.t
+    ; mutable chunks : Symbolic_value.i32 Map.t
     }
 
   let make () = { data = Map.empty; chunks = Map.empty }
@@ -117,7 +117,7 @@ let page_size = Symbolic_value.const_i32 65_536l
 
 type t =
   { data : Backend.t
-  ; mutable size : Symbolic_value.int32
+  ; mutable size : Symbolic_value.i32
   }
 
 let create size =

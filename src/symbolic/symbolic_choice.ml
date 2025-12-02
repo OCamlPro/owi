@@ -339,7 +339,7 @@ end
 module Make (Thread : Thread_intf.S) = struct
   include CoreImpl.Make (Thread)
 
-  let add_pc (c : Symbolic_value.bool) =
+  let add_pc (c : Symbolic_value.boolean) =
     let c = Smtml.Expr.simplify c in
     match Smtml.Expr.view c with
     | Val True -> return ()
@@ -427,8 +427,8 @@ module Make (Thread : Thread_intf.S) = struct
     | `Unknown -> assert false
 
   let select_inner ~explore_first ?(with_breadcrumbs = true)
-    ~check_only_true_branch (cond : Symbolic_value.bool) ~prio_true ~prio_false
-      =
+    ~check_only_true_branch (cond : Symbolic_value.boolean) ~prio_true
+    ~prio_false =
     let v = Smtml.Expr.simplify cond in
     match Smtml.Expr.view v with
     | Val True -> return true
@@ -475,7 +475,7 @@ module Make (Thread : Thread_intf.S) = struct
         else choose false_branch true_branch
   [@@inline]
 
-  let select (cond : Symbolic_value.bool) ~prio_true ~prio_false =
+  let select (cond : Symbolic_value.boolean) ~prio_true ~prio_false =
     select_inner cond ~explore_first:true ~prio_true ~prio_false
       ~check_only_true_branch:false
   [@@inline]
@@ -493,7 +493,7 @@ module Make (Thread : Thread_intf.S) = struct
       let assign = Smtml.Expr.(relop Ty_bool Eq (symbol sym) e) in
       (Some assign, sym)
 
-  let select_i32 (i : Symbolic_value.int32) =
+  let select_i32 (i : Symbolic_value.i32) =
     let sym_int = Smtml.Expr.simplify i in
     match Smtml.Expr.view sym_int with
     | Val (Bitv bv) when Smtml.Bitvector.numbits bv <= 32 ->
@@ -562,7 +562,7 @@ module Make (Thread : Thread_intf.S) = struct
     in
     if assertion_true then return () else stop
 
-  let ite (c : Symbolic_value.bool) ~(if_true : Symbolic_value.t)
+  let ite (c : Symbolic_value.boolean) ~(if_true : Symbolic_value.t)
     ~(if_false : Symbolic_value.t) : Symbolic_value.t t =
     match (if_true, if_false) with
     | I32 if_true, I32 if_false ->

@@ -49,10 +49,10 @@ module M :
           lbl_status <> 0
         with Invalid_argument _ -> false )
 
-  let assume (i : Symbolic_value.int32) : unit Symbolic_choice_with_memory.t =
+  let assume (i : Symbolic_value.i32) : unit Symbolic_choice_with_memory.t =
     Symbolic_choice_with_memory.assume @@ Symbolic_value.I32.to_bool i
 
-  let assert' (i : Symbolic_value.int32) : unit Symbolic_choice_with_memory.t =
+  let assert' (i : Symbolic_value.i32) : unit Symbolic_choice_with_memory.t =
     Symbolic_choice_with_memory.assertion @@ Symbolic_value.I32.to_bool i
 
   let symbol_bool () =
@@ -86,7 +86,7 @@ module M :
   let symbol_v128 () =
     Symbolic_choice_with_memory.with_new_symbol (Ty_bitv 128) Expr.symbol
 
-  let symbol_range (lo : Symbolic_value.int32) (hi : Symbolic_value.int32) =
+  let symbol_range (lo : Symbolic_value.i32) (hi : Symbolic_value.i32) =
     let open Symbolic_choice_with_memory in
     let* x = symbol_i32 () in
     let* () = assume (Symbolic_value.I32.le lo x) in
@@ -96,22 +96,22 @@ module M :
   let abort () : unit Symbolic_choice_with_memory.t =
     Symbolic_choice_with_memory.stop
 
-  let alloc m (base : Symbolic_value.int32) (size : Symbolic_value.int32) :
-    Symbolic_value.int32 Symbolic_choice_with_memory.t =
+  let alloc m (base : Symbolic_value.i32) (size : Symbolic_value.i32) :
+    Symbolic_value.i32 Symbolic_choice_with_memory.t =
     Symbolic_choice_with_memory.lift_mem
     @@ Symbolic_memory.realloc m ~ptr:base ~size
 
-  let free m (ptr : Symbolic_value.int32) :
-    Symbolic_value.int32 Symbolic_choice_with_memory.t =
+  let free m (ptr : Symbolic_value.i32) :
+    Symbolic_value.i32 Symbolic_choice_with_memory.t =
     Symbolic_choice_with_memory.lift_mem @@ Symbolic_memory.free m ptr
 
-  let exit (_p : Symbolic_value.int32) : unit Symbolic_choice_with_memory.t =
+  let exit (_p : Symbolic_value.i32) : unit Symbolic_choice_with_memory.t =
     abort ()
 
   let in_replay_mode () =
     Symbolic_choice_with_memory.return @@ Smtml.Expr.value (Smtml.Value.Int 0)
 
-  let print_char (c : Symbolic_value.int32) =
+  let print_char (c : Symbolic_value.i32) =
     let open Symbolic_choice_with_memory in
     let* c = select_i32 c in
     Log.app (fun m -> m "%c@?" (char_of_int (Int32.to_int c)));

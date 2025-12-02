@@ -9,12 +9,6 @@ type t =
   ; mutable data : bytes
   }
 
-let backup t = { t with data = Bytes.copy t.data }
-
-let recover ~from_ ~to_ =
-  to_.limits <- from_.limits;
-  to_.data <- from_.data
-
 let init limits : t =
   let data = Bytes.make (page_size * limits.Text.min) '\x00' in
   { limits; data }

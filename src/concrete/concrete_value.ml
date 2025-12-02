@@ -4,15 +4,15 @@
 
 open Fmt
 
-type nonrec bool = bool
+type boolean = bool
 
-type int32 = Int32.t
+type i32 = Int32.t
 
-type int64 = Int64.t
+type i64 = Int64.t
 
-type float32 = Float32.t
+type f32 = Float32.t
 
-type float64 = Float64.t
+type f64 = Float64.t
 
 type v128 = V128.t
 
@@ -80,10 +80,10 @@ module Ref = struct
 end
 
 type t =
-  | I32 of int32
-  | I64 of int64
-  | F32 of float32
-  | F64 of float64
+  | I32 of i32
+  | I64 of i64
+  | F32 of f32
+  | F64 of f64
   | V128 of v128
   | Ref of Ref.t
 

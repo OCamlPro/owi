@@ -10,77 +10,67 @@ type extern_func = Concrete_extern_func.extern_func
 
 open Concrete_value
 
-let syscall_faccessat (_ : int32) (_ : int32) (_ : int32) (_ : int32) :
-  int32 Choice.t =
+let syscall_faccessat (_ : i32) (_ : i32) (_ : i32) (_ : i32) : i32 Choice.t =
   assert false
 
-let emscripten_date_now () : float64 Choice.t = assert false
+let emscripten_date_now () : f64 Choice.t = assert false
 
-let emscripten_get_now_is_monotonic () : int32 Choice.t = assert false
+let emscripten_get_now_is_monotonic () : i32 Choice.t = assert false
 
-let emscripten_get_now () : float64 Choice.t = assert false
+let emscripten_get_now () : f64 Choice.t = assert false
 
-let syscall_fchmod (_ : int32) (_ : int32) : int32 Choice.t = assert false
+let syscall_fchmod (_ : i32) (_ : i32) : i32 Choice.t = assert false
 
-let syscall_chmod (_ : int32) (_ : int32) : int32 Choice.t = assert false
+let syscall_chmod (_ : i32) (_ : i32) : i32 Choice.t = assert false
 
-let syscall_fchown32 (_ : int32) (_ : int32) (_ : int32) : int32 Choice.t =
+let syscall_fchown32 (_ : i32) (_ : i32) (_ : i32) : i32 Choice.t = assert false
+
+let syscall_fcntl64 (_ : i32) (_ : i32) (_ : i32) : i32 Choice.t = assert false
+
+let syscall_openat (_ : i32) (_ : i32) (_ : i32) (_ : i32) : i32 Choice.t =
   assert false
 
-let syscall_fcntl64 (_ : int32) (_ : int32) (_ : int32) : int32 Choice.t =
+let syscall_ioctl (_ : i32) (_ : i32) (_ : i32) : i32 Choice.t = assert false
+
+let syscall_fstat64 (_ : i32) (_ : i32) : i32 Choice.t = assert false
+
+let syscall_stat64 (_ : i32) (_ : i32) : i32 Choice.t = assert false
+
+let syscall_newfstatat (_ : i32) (_ : i32) (_ : i32) (_ : i32) : i32 Choice.t =
   assert false
 
-let syscall_openat (_ : int32) (_ : int32) (_ : int32) (_ : int32) :
-  int32 Choice.t =
+let syscall_lstat64 (_ : i32) (_ : i32) : i32 Choice.t = assert false
+
+let syscall_ftruncate64 (_ : i32) (_ : i64) : i32 Choice.t = assert false
+
+let syscall_getcwd (_ : i32) (_ : i32) : i32 Choice.t = assert false
+
+let syscall_mkdirat (_ : i32) (_ : i32) (_ : i32) : i32 Choice.t = assert false
+
+let tzset_js (_ : i32) (_ : i32) (_ : i32) (_ : i32) : unit Choice.t =
   assert false
 
-let syscall_ioctl (_ : int32) (_ : int32) (_ : int32) : int32 Choice.t =
+let localtime_js (_ : i64) (_ : i32) : unit Choice.t = assert false
+
+let munmap_js (_ : i32) (_ : i32) (_ : i32) (_ : i32) (_ : i32) (_ : i64) :
+  i32 Choice.t =
   assert false
 
-let syscall_fstat64 (_ : int32) (_ : int32) : int32 Choice.t = assert false
-
-let syscall_stat64 (_ : int32) (_ : int32) : int32 Choice.t = assert false
-
-let syscall_newfstatat (_ : int32) (_ : int32) (_ : int32) (_ : int32) :
-  int32 Choice.t =
+let mmap_js (_ : i32) (_ : i32) (_ : i32) (_ : i32) (_ : i64) (_ : i32) (_ : i32)
+  : i32 Choice.t =
   assert false
 
-let syscall_lstat64 (_ : int32) (_ : int32) : int32 Choice.t = assert false
-
-let syscall_ftruncate64 (_ : int32) (_ : int64) : int32 Choice.t = assert false
-
-let syscall_getcwd (_ : int32) (_ : int32) : int32 Choice.t = assert false
-
-let syscall_mkdirat (_ : int32) (_ : int32) (_ : int32) : int32 Choice.t =
+let syscall_readlinkat (_ : i32) (_ : i32) (_ : i32) (_ : i32) : i32 Choice.t =
   assert false
 
-let tzset_js (_ : int32) (_ : int32) (_ : int32) (_ : int32) : unit Choice.t =
+let syscall_rmdir (_ : i32) : i32 Choice.t = assert false
+
+let syscall_unlinkat (_ : i32) (_ : i32) (_ : i32) : i32 Choice.t = assert false
+
+let syscall_utimensat (_ : i32) (_ : i32) (_ : i32) (_ : i32) : i32 Choice.t =
   assert false
 
-let localtime_js (_ : int64) (_ : int32) : unit Choice.t = assert false
-
-let munmap_js (_ : int32) (_ : int32) (_ : int32) (_ : int32) (_ : int32)
-  (_ : int64) : int32 Choice.t =
-  assert false
-
-let mmap_js (_ : int32) (_ : int32) (_ : int32) (_ : int32) (_ : int64)
-  (_ : int32) (_ : int32) : int32 Choice.t =
-  assert false
-
-let syscall_readlinkat (_ : int32) (_ : int32) (_ : int32) (_ : int32) :
-  int32 Choice.t =
-  assert false
-
-let syscall_rmdir (_ : int32) : int32 Choice.t = assert false
-
-let syscall_unlinkat (_ : int32) (_ : int32) (_ : int32) : int32 Choice.t =
-  assert false
-
-let syscall_utimensat (_ : int32) (_ : int32) (_ : int32) (_ : int32) :
-  int32 Choice.t =
-  assert false
-
-let emscripten_resize_heap (_ : int32) : int32 Choice.t = assert false
+let emscripten_resize_heap (_ : i32) : i32 Choice.t = assert false
 
 let env_extern_module =
   let open Concrete_extern_func in
@@ -137,24 +127,24 @@ let env_extern_module =
   in
   { Extern.Module.functions; func_type = Concrete_extern_func.extern_type }
 
-let fd_close (_ : int32) : int32 Choice.t = assert false
+let fd_close (_ : i32) : i32 Choice.t = assert false
 
-let fd_write (_ : int32) (_ : int32) (_ : int32) (_ : int32) : int32 Choice.t =
+let fd_write (_ : i32) (_ : i32) (_ : i32) (_ : i32) : i32 Choice.t =
   assert false
 
-let fd_read (_ : int32) (_ : int32) (_ : int32) (_ : int32) : int32 Choice.t =
+let fd_read (_ : i32) (_ : i32) (_ : i32) (_ : i32) : i32 Choice.t =
   assert false
 
-let fd_sync (_ : int32) : int32 Choice.t = assert false
+let fd_sync (_ : i32) : i32 Choice.t = assert false
 
-let environ_sizes_get (_ : int32) (_ : int32) : int32 Choice.t = assert false
+let environ_sizes_get (_ : i32) (_ : i32) : i32 Choice.t = assert false
 
-let environ_get (_ : int32) (_ : int32) : int32 Choice.t = assert false
+let environ_get (_ : i32) (_ : i32) : i32 Choice.t = assert false
 
-let fd_seek (_ : int32) (_ : int64) (_ : int32) (_ : int32) : int32 Choice.t =
+let fd_seek (_ : i32) (_ : i64) (_ : i32) (_ : i32) : i32 Choice.t =
   assert false
 
-let fd_fdstat_get (_ : int32) (_ : int32) : int32 Choice.t = assert false
+let fd_fdstat_get (_ : i32) (_ : i32) : i32 Choice.t = assert false
 
 let wasi_snapshot_preview1_extern_module =
   let open Concrete_extern_func in

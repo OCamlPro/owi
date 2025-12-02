@@ -4,4 +4,4 @@
 
 include
   Extern.Func.Make (Symbolic_value) (Symbolic_choice_with_memory)
-    (Symbolic_memory_concretizing)
+    (Symbolic_memory)

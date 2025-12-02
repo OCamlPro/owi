@@ -2,15 +2,15 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type t
+type t = Symbolic_memory_concretizing.t
 
 include
   Memory_intf.T
     with module Value := Symbolic_value
-     and module Choice := Symbolic_choice_without_memory
+     and module Choice := Symbolic_choice_with_memory
      and type t := t
 
-type collection
+type collection = Symbolic_memory_concretizing.collection
 
 val init : unit -> collection
 

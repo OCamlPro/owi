@@ -38,13 +38,14 @@ module type S = sig
 
   val trap : Result.err -> 'a t
 
-  val select : Value.bool -> prio_true:Prio.t -> prio_false:Prio.t -> Bool.t t
+  val select :
+    Value.boolean -> prio_true:Prio.t -> prio_false:Prio.t -> Bool.t t
 
-  val select_i32 : Value.int32 -> Int32.t t
+  val select_i32 : Value.i32 -> Int32.t t
 
-  val assertion : Value.bool -> unit t
+  val assertion : Value.boolean -> unit t
 
-  val assume : Value.bool -> unit t
+  val assume : Value.boolean -> unit t
 
   val with_thread : (thread -> 'a) -> 'a t
 
@@ -78,7 +79,7 @@ module type S = sig
     -> unit Domain.t array
 
   val ite :
-       Symbolic_value.bool
+       Symbolic_value.boolean
     -> if_true:Symbolic_value.t
     -> if_false:Symbolic_value.t
     -> Symbolic_value.t t

@@ -7,21 +7,21 @@ open Ty
 open Expr
 open Fmt
 
-type bool = Expr.t
+type boolean = Expr.t
 
-type int32 = Expr.t
+type i32 = Expr.t
 
 let pp_int32 = Expr.pp
 
-type int64 = Expr.t
+type i64 = Expr.t
 
 let pp_int64 = Expr.pp
 
-type float32 = Expr.t
+type f32 = Expr.t
 
 let pp_float32 = Expr.pp
 
-type float64 = Expr.t
+type f64 = Expr.t
 
 let pp_float64 = Expr.pp
 
@@ -29,13 +29,13 @@ type v128 = Expr.t
 
 let pp_v128 = Expr.pp
 
-let const_i32 (i : Int32.t) : int32 = value (Bitv (Smtml.Bitvector.of_int32 i))
+let const_i32 (i : Int32.t) : i32 = value (Bitv (Smtml.Bitvector.of_int32 i))
 
-let const_i64 (i : Int64.t) : int64 = value (Bitv (Smtml.Bitvector.of_int64 i))
+let const_i64 (i : Int64.t) : i64 = value (Bitv (Smtml.Bitvector.of_int64 i))
 
-let const_f32 (f : Float32.t) : float32 = value (Num (F32 (Float32.to_bits f)))
+let const_f32 (f : Float32.t) : f32 = value (Num (F32 (Float32.to_bits f)))
 
-let const_f64 (f : Float64.t) : float64 = value (Num (F64 (Float64.to_bits f)))
+let const_f64 (f : Float64.t) : f64 = value (Num (F64 (Float64.to_bits f)))
 
 let const_v128 (v : V128.t) : v128 =
   let a, b = V128.to_i64x2 v in
@@ -85,10 +85,10 @@ module Ref = struct
 end
 
 type t =
-  | I32 of int32
-  | I64 of int64
-  | F32 of float32
-  | F64 of float64
+  | I32 of i32
+  | I64 of i64
+  | F32 of f32
+  | F64 of f64
   | V128 of v128
   | Ref of Ref.t
 
@@ -124,7 +124,7 @@ module Bool = struct
 
   let select_expr c ~if_true ~if_false = Bool.ite c if_true if_false
 
-  let pp ppf (e : bool) = Expr.pp ppf e
+  let pp ppf (e : boolean) = Expr.pp ppf e
 end
 
 module I32 = struct
@@ -216,7 +216,7 @@ module I32 = struct
   let ge_u e1 e2 =
     if phys_equal e1 e2 then Bool.const true else relop ty GeU e1 e2
 
-  let to_bool (e : bool) =
+  let to_bool (e : boolean) =
     match view e with
     | Val (Bitv i) when Smtml.Bitvector.numbits i = 32 ->
       Bool.const (not @@ Bitvector.eqz i)

@@ -14,7 +14,7 @@ let empty : t =
   let set = Smtml.Expr.Set.empty in
   { uf; set }
 
-let add_one ({ uf; set } : t) (condition : Symbolic_value.bool) : t =
+let add_one ({ uf; set } : t) (condition : Symbolic_value.boolean) : t =
   match Smtml.Expr.get_symbols [ condition ] with
   | [] ->
     (* It means Smt.ml did not properly simplified a expression! *)
@@ -38,7 +38,7 @@ let add_one ({ uf; set } : t) (condition : Symbolic_value.bool) : t =
     in
     { uf; set }
 
-let add (pc : t) (condition : Symbolic_value.bool) : t =
+let add (pc : t) (condition : Symbolic_value.boolean) : t =
   (* we start by splitting the condition ((P & Q) & R) into a set {P; Q; R} before adding each of P, Q and R into the UF data structure, this way we maximize the independence of the PC *)
   let splitted_condition = Smtml.Expr.split_conjunctions condition in
   Smtml.Expr.Set.fold
@@ -49,7 +49,8 @@ let add (pc : t) (condition : Symbolic_value.bool) : t =
 let to_set { uf = _; set } = set
 
 (* Return the set of constraints from [pc] that are relevant for [c]. *)
-let slice ({ uf; set = _ } : t) (c : Symbolic_value.bool) : Smtml.Expr.Set.t =
+let slice ({ uf; set = _ } : t) (c : Symbolic_value.boolean) : Smtml.Expr.Set.t
+    =
   match Smtml.Expr.get_symbols [ c ] with
   | [] ->
     (* It means Smt.ml did not properly simplified a expression... *)

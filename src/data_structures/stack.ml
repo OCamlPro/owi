@@ -3,15 +3,15 @@
 (* Written by the Owi programmers *)
 
 module type S = sig
-  type bool
+  type boolean
 
-  type int32
+  type i32
 
-  type int64
+  type i64
 
-  type float32
+  type f32
 
-  type float64
+  type f64
 
   type v128
 
@@ -37,23 +37,23 @@ module type S = sig
 
   val keep : t -> int -> t
 
-  val pop_bool : t -> bool * t
+  val pop_bool : t -> boolean * t
 
-  val pop_i32 : t -> int32 * t
+  val pop_i32 : t -> i32 * t
 
-  val pop2_i32 : t -> (int32 * int32) * t
+  val pop2_i32 : t -> (i32 * i32) * t
 
-  val pop_i64 : t -> int64 * t
+  val pop_i64 : t -> i64 * t
 
-  val pop2_i64 : t -> (int64 * int64) * t
+  val pop2_i64 : t -> (i64 * i64) * t
 
-  val pop_f32 : t -> float32 * t
+  val pop_f32 : t -> f32 * t
 
-  val pop2_f32 : t -> (float32 * float32) * t
+  val pop2_f32 : t -> (f32 * f32) * t
 
-  val pop_f64 : t -> float64 * t
+  val pop_f64 : t -> f64 * t
 
-  val pop2_f64 : t -> (float64 * float64) * t
+  val pop2_f64 : t -> (f64 * f64) * t
 
   val pop_v128 : t -> v128 * t
 
@@ -67,23 +67,23 @@ module type S = sig
 
   val push : t -> value -> t
 
-  val push_bool : t -> bool -> t
+  val push_bool : t -> boolean -> t
 
-  val push_i32 : t -> int32 -> t
+  val push_i32 : t -> i32 -> t
 
   val push_const_i32 : t -> Int32.t -> t
 
   val push_i32_of_int : t -> int -> t
 
-  val push_i64 : t -> int64 -> t
+  val push_i64 : t -> i64 -> t
 
   val push_const_i64 : t -> Int64.t -> t
 
-  val push_f32 : t -> float32 -> t
+  val push_f32 : t -> f32 -> t
 
   val push_const_f32 : t -> Float32.t -> t
 
-  val push_f64 : t -> float64 -> t
+  val push_f64 : t -> f64 -> t
 
   val push_const_f64 : t -> Float64.t -> t
 
@@ -99,11 +99,11 @@ end
 module Make (Value : Value_intf.T) :
   S
     with type value := Value.t
-     and type bool := Value.bool
-     and type int32 := Value.int32
-     and type int64 := Value.int64
-     and type float32 := Value.float32
-     and type float64 := Value.float64
+     and type boolean := Value.boolean
+     and type i32 := Value.i32
+     and type i64 := Value.i64
+     and type f32 := Value.f32
+     and type f64 := Value.f64
      and type v128 := Value.v128
      and type ref_value := Value.Ref.t = struct
   open Value
