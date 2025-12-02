@@ -19,7 +19,7 @@ let add_one ({ uf; set } : t) (condition : Symbolic_value.boolean) : t =
   | [] ->
     (* It means Smt.ml did not properly simplified a expression! *)
     Log.err (fun m ->
-      m "an expression was not simplified by smtml: %a" Symbolic_value.pp_int32
+      m "an expression was not simplified by smtml: %a" Symbolic_value.I32.pp
         condition );
     assert false
   | hd :: tl ->
@@ -55,8 +55,7 @@ let slice ({ uf; set = _ } : t) (c : Symbolic_value.boolean) : Smtml.Expr.Set.t
   | [] ->
     (* It means Smt.ml did not properly simplified a expression... *)
     Log.err (fun m ->
-      m "an expression was not simplified by smtml: %a" Symbolic_value.pp_int32
-        c );
+      m "an expression was not simplified by smtml: %a" Symbolic_value.I32.pp c );
     assert false
   | sym0 :: _tl -> (
     (* we need only the first symbol as all the others should have been merged with it *)

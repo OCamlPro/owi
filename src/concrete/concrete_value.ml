@@ -16,16 +16,6 @@ type f64 = Float64.t
 
 type v128 = V128.t
 
-let pp_int32 fmt i = pf fmt "%ld" i
-
-let pp_int64 fmt i = pf fmt "%Ld" i
-
-let pp_float32 = Float32.pp
-
-let pp_float64 = Float64.pp
-
-let pp_v128 = V128.pp
-
 module Ref = struct
   module Extern = struct
     type t = E : 'a Type.Id.t * 'a -> t
@@ -112,6 +102,8 @@ module I32 = struct
   let of_concrete v = v
 
   let eq_concrete = eq
+
+  let pp = Fmt.int32
 end
 
 module I64 = struct
@@ -121,6 +113,8 @@ module I64 = struct
   let of_concrete v = v
 
   let eq_concrete = eq
+
+  let pp = Fmt.int64
 end
 
 module F32 = struct

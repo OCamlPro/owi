@@ -12,23 +12,13 @@ module type T = sig
 
   type i32
 
-  val pp_int32 : Format.formatter -> i32 -> unit
-
   type i64
-
-  val pp_int64 : Format.formatter -> i64 -> unit
 
   type f32
 
-  val pp_float32 : Format.formatter -> f32 -> unit
-
   type f64
 
-  val pp_float64 : Format.formatter -> f64 -> unit
-
   type v128
-
-  val pp_v128 : Format.formatter -> v128 -> unit
 
   module Boolean : Boolean_intf.T with type t := boolean and type i32 := i32
 

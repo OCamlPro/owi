@@ -20,4 +20,6 @@ module type T = sig
   val to_i64x2 : t -> i64 * i64
 
   val of_concrete : V128.t -> t
+
+  val pp : Format.formatter -> t -> unit
 end
