@@ -68,7 +68,7 @@ module Func = struct
 
       val unit : (lr, unit, unit) t
 
-      val memory : (l, mem, memory) t
+      val memory : Int32.t -> (l, mem, memory) t
 
       val label : string -> (lr, elt, 'a) t -> (l, string * elt, 'a) t
 
@@ -230,7 +230,7 @@ module Func = struct
 
       let unit = Unit
 
-      let memory = Memory (assert false)
+      let memory id = Memory id
 
       let label s (Elt v) = Elt_labeled (s, v)
 

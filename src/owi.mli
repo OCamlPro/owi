@@ -742,7 +742,7 @@ module Concrete_extern_func : sig
 
     val unit : (lr, unit, unit) t
 
-    val memory : (l, mem, Concrete_memory.t) t
+    val memory : Int32.t -> (l, mem, Concrete_memory.t) t
 
     val externref : 'a Type.Id.t -> (lr, elt, 'a) t
   end

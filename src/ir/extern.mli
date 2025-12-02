@@ -72,7 +72,7 @@ module Func : sig
 
       val unit : (lr, unit, unit) t
 
-      val memory : (l, mem, memory) t
+      val memory : Int32.t -> (l, mem, memory) t
 
       val label : string -> (lr, elt, 'a) t -> (l, string * elt, 'a) t
 

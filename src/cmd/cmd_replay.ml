@@ -198,11 +198,11 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
       ; ( "cov_label_is_covered"
         , Extern_func (i32 ^->. i32, cov_label_is_covered) )
       ; ( "cov_label_set"
-        , Extern_func (memory ^-> i32 ^-> i32 ^->. unit, cov_label_set) )
-      ; ("open_scope", Extern_func (memory ^-> i32 ^->. unit, open_scope))
+        , Extern_func (memory 0l ^-> i32 ^-> i32 ^->. unit, cov_label_set) )
+      ; ("open_scope", Extern_func (memory 0l ^-> i32 ^->. unit, open_scope))
       ; ("close_scope", Extern_func (unit ^->. unit, close_scope))
-      ; ("alloc", Extern_func (memory ^-> i32 ^-> i32 ^->. i32, alloc))
-      ; ("dealloc", Extern_func (memory ^-> i32 ^->. i32, free))
+      ; ("alloc", Extern_func (memory 0l ^-> i32 ^-> i32 ^->. i32, alloc))
+      ; ("dealloc", Extern_func (memory 0l ^-> i32 ^->. i32, free))
       ; ("abort", Extern_func (unit ^->. unit, abort))
       ; ("exit", Extern_func (i32 ^->. unit, exit))
       ]
