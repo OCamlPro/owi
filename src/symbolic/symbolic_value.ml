@@ -78,9 +78,13 @@ type t =
 module Boolean = struct
   let false_ = Bool.false_
 
+  let false_i32 = value (Bitv (Smtml.Bitvector.of_int32 0l))
+
   let true_ = Bool.true_
 
-  let of_concrete (i : bool) : i32 = if i then true_ else false_
+  let true_i32 = value (Bitv (Smtml.Bitvector.of_int32 1l))
+
+  let of_concrete (i : bool) : boolean = if i then true_ else false_
 
   let not e = Bool.not e
 
@@ -90,8 +94,8 @@ module Boolean = struct
 
   let to_i32 e =
     match view e with
-    | Val True -> of_concrete true
-    | Val False -> of_concrete false
+    | Val True -> true_i32
+    | Val False -> false_i32
     | Cvtop (Ty_bitv 32, ToBool, e') -> e'
     | _ -> Expr.cvtop (Ty_bitv 32) OfBool e
 
@@ -106,6 +110,15 @@ module I32 = struct
   let of_concrete (i : Int32.t) : i32 = value (Bitv (Smtml.Bitvector.of_int32 i))
 
   let of_int (i : int) : i32 = of_concrete (Int32.of_int i)
+
+  let to_bool (e : i32) : boolean =
+    match view e with
+    | Val (Bitv bv) ->
+      if Smtml.Bitvector.eqz bv then Boolean.false_ else Boolean.true_
+    | Ptr _ -> Boolean.true_
+    | Symbol { ty = Ty_bool; _ } -> e
+    | Cvtop (_, OfBool, cond) -> cond
+    | _ -> Smtml.Expr.cvtop ty ToBool e
 
   let zero = of_concrete 0l
 
@@ -190,15 +203,6 @@ module I32 = struct
 
   let ge_u e1 e2 =
     if phys_equal e1 e2 then Boolean.true_ else relop ty GeU e1 e2
-
-  let to_bool (e : boolean) =
-    match view e with
-    | Val (Bitv i) when Smtml.Bitvector.numbits i = 32 ->
-      Boolean.of_concrete (not @@ Bitvector.eqz i)
-    | Ptr _ -> Boolean.true_
-    | Symbol { ty = Ty_bool; _ } -> e
-    | Cvtop (_, OfBool, cond) -> cond
-    | _ -> Smtml.Expr.cvtop ty ToBool e
 
   let trunc_f32_s x =
     try Ok (cvtop ty TruncSF32 x)
