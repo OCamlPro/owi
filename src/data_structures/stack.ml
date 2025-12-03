@@ -99,7 +99,7 @@ end
 module Make (Value : Value_intf.T) :
   S
     with type value := Value.t
-     and type boolean := Value.boolean
+     and type boolean := Value.Boolean.t
      and type i32 := Value.i32
      and type i64 := Value.i64
      and type f32 := Value.f32

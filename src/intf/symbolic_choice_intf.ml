@@ -18,8 +18,6 @@ type 'a eval =
       * Symbol_scope.t
 
 module type S = sig
-  module Value : Value_intf.T
-
   type thread
 
   type 'a t
@@ -39,13 +37,13 @@ module type S = sig
   val trap : Result.err -> 'a t
 
   val select :
-    Value.boolean -> prio_true:Prio.t -> prio_false:Prio.t -> Bool.t t
+    Symbolic_boolean.t -> prio_true:Prio.t -> prio_false:Prio.t -> Bool.t t
 
-  val select_i32 : Value.i32 -> Int32.t t
+  val select_i32 : Symbolic_i32.t -> Int32.t t
 
-  val assertion : Value.boolean -> unit t
+  val assertion : Symbolic_boolean.t -> unit t
 
-  val assume : Value.boolean -> unit t
+  val assume : Symbolic_boolean.t -> unit t
 
   val with_thread : (thread -> 'a) -> 'a t
 
@@ -79,7 +77,7 @@ module type S = sig
     -> unit Domain.t array
 
   val ite :
-       Symbolic_value.boolean
+       Symbolic_boolean.t
     -> if_true:Symbolic_value.t
     -> if_false:Symbolic_value.t
     -> Symbolic_value.t t
@@ -107,5 +105,4 @@ module type Intf = sig
     S
       with type 'a t = ('a eval, Thread.t) CoreImpl.State.t
        and type thread := Thread.t
-       and module Value := Symbolic_value
 end

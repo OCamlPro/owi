@@ -490,7 +490,7 @@ module Make (Thread : Thread_intf.S) = struct
       let assign = Smtml.Expr.(relop Ty_bool Eq (symbol sym) e) in
       (Some assign, sym)
 
-  let select_i32 (i : Symbolic_value.i32) =
+  let select_i32 (i : Symbolic_i32.t) =
     let sym_int = Smtml.Expr.simplify i in
     match Smtml.Expr.view sym_int with
     | Val (Bitv bv) when Smtml.Bitvector.numbits bv <= 32 ->

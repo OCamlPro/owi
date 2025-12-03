@@ -4,7 +4,7 @@
 
 include
   Value_intf.T
-    with type boolean = Bool.t
+    with type Boolean.t = bool
      and type i32 = Int32.t
      and type i64 = Int64.t
      and type f32 = Float32.t

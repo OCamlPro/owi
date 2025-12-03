@@ -14,12 +14,12 @@ let empty : t =
   let set = Smtml.Expr.Set.empty in
   { uf; set }
 
-let add_one ({ uf; set } : t) (condition : Symbolic_value.boolean) : t =
+let add_one ({ uf; set } : t) (condition : Symbolic_boolean.t) : t =
   match Smtml.Expr.get_symbols [ condition ] with
   | [] ->
     (* It means Smt.ml did not properly simplified a expression! *)
     Log.err (fun m ->
-      m "an expression was not simplified by smtml: %a" Symbolic_value.I32.pp
+      m "an expression was not simplified by smtml: %a" Symbolic_boolean.pp
         condition );
     assert false
   | hd :: tl ->
@@ -38,7 +38,7 @@ let add_one ({ uf; set } : t) (condition : Symbolic_value.boolean) : t =
     in
     { uf; set }
 
-let add (pc : t) (condition : Symbolic_value.boolean) : t =
+let add (pc : t) (condition : Symbolic_boolean.t) : t =
   (* we start by splitting the condition ((P & Q) & R) into a set {P; Q; R} before adding each of P, Q and R into the UF data structure, this way we maximize the independence of the PC *)
   let splitted_condition = Smtml.Expr.split_conjunctions condition in
   Smtml.Expr.Set.fold
@@ -49,13 +49,12 @@ let add (pc : t) (condition : Symbolic_value.boolean) : t =
 let to_set { uf = _; set } = set
 
 (* Return the set of constraints from [pc] that are relevant for [c]. *)
-let slice ({ uf; set = _ } : t) (c : Symbolic_value.boolean) : Smtml.Expr.Set.t
-    =
+let slice ({ uf; set = _ } : t) (c : Symbolic_boolean.t) : Smtml.Expr.Set.t =
   match Smtml.Expr.get_symbols [ c ] with
   | [] ->
     (* It means Smt.ml did not properly simplified a expression... *)
     Log.err (fun m ->
-      m "an expression was not simplified by smtml: %a" Symbolic_value.I32.pp c );
+      m "an expression was not simplified by smtml: %a" Symbolic_boolean.pp c );
     assert false
   | sym0 :: _tl -> (
     (* we need only the first symbol as all the others should have been merged with it *)

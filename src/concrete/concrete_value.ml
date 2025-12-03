@@ -4,8 +4,6 @@
 
 open Fmt
 
-type boolean = bool
-
 type i32 = Int32.t
 
 type i64 = Int64.t
@@ -81,6 +79,8 @@ let pp fmt = function
   | Ref r -> Ref.pp fmt r
 
 module Boolean = struct
+  type t = bool
+
   let false_ = false
 
   let true_ = true

@@ -6,9 +6,9 @@ type t
 
 val empty : t
 
-val add : t -> Symbolic_value.boolean -> t
+val add : t -> Symbolic_boolean.t -> t
 
 (* CAUTION: this must only be called after `add` has been called! *)
-val slice : t -> Symbolic_value.boolean -> Smtml.Expr.Set.t
+val slice : t -> Symbolic_boolean.t -> Smtml.Expr.Set.t
 
 val to_set : t -> Smtml.Expr.Set.t
