@@ -3,7 +3,6 @@
 (* Written by the Owi programmers *)
 
 open Smtml
-open Ty
 open Expr
 open Fmt
 
@@ -78,11 +77,11 @@ type t =
 module Boolean = struct
   let false_ = Bool.false_
 
-  let false_i32 = value (Bitv (Smtml.Bitvector.of_int32 0l))
+  let false_i32 = value (Bitv (Bitvector.of_int32 0l))
 
   let true_ = Bool.true_
 
-  let true_i32 = value (Bitv (Smtml.Bitvector.of_int32 1l))
+  let true_i32 = value (Bitv (Bitvector.of_int32 1l))
 
   let of_concrete (i : bool) : boolean = if i then true_ else false_
 
@@ -105,20 +104,20 @@ module Boolean = struct
 end
 
 module I32 = struct
-  let ty = Ty_bitv 32
+  let ty = Ty.Ty_bitv 32
 
-  let of_concrete (i : Int32.t) : i32 = value (Bitv (Smtml.Bitvector.of_int32 i))
+  let of_concrete (i : Int32.t) : i32 = value (Bitv (Bitvector.of_int32 i))
 
   let of_int (i : int) : i32 = of_concrete (Int32.of_int i)
 
   let to_bool (e : i32) : boolean =
     match view e with
     | Val (Bitv bv) ->
-      if Smtml.Bitvector.eqz bv then Boolean.false_ else Boolean.true_
+      if Bitvector.eqz bv then Boolean.false_ else Boolean.true_
     | Ptr _ -> Boolean.true_
     | Symbol { ty = Ty_bool; _ } -> e
     | Cvtop (_, OfBool, cond) -> cond
-    | _ -> Smtml.Expr.cvtop ty ToBool e
+    | _ -> Expr.cvtop ty ToBool e
 
   let zero = of_concrete 0l
 
@@ -144,8 +143,8 @@ module I32 = struct
 
   let boolify e =
     match view e with
-    | Val (Bitv bv) when Smtml.Bitvector.eqz bv -> Some Boolean.false_
-    | Val (Bitv bv) when Smtml.Bitvector.eq_one bv -> Some Boolean.true_
+    | Val (Bitv bv) when Bitvector.eqz bv -> Some Boolean.false_
+    | Val (Bitv bv) when Bitvector.eq_one bv -> Some Boolean.true_
     | Cvtop (_, OfBool, cond) -> Some cond
     | _ -> None
 
@@ -207,29 +206,25 @@ module I32 = struct
   let trunc_f32_s x =
     try Ok (cvtop ty TruncSF32 x)
     with
-    | Smtml.Eval.Eval_error ((`Integer_overflow | `Conversion_to_integer) as e)
-    ->
+    | Eval.Eval_error ((`Integer_overflow | `Conversion_to_integer) as e) ->
       Error e
 
   let trunc_f32_u x =
     try Ok (cvtop ty TruncUF32 x)
     with
-    | Smtml.Eval.Eval_error ((`Integer_overflow | `Conversion_to_integer) as e)
-    ->
+    | Eval.Eval_error ((`Integer_overflow | `Conversion_to_integer) as e) ->
       Error e
 
   let trunc_f64_s x =
     try Ok (cvtop ty TruncSF64 x)
     with
-    | Smtml.Eval.Eval_error ((`Integer_overflow | `Conversion_to_integer) as e)
-    ->
+    | Eval.Eval_error ((`Integer_overflow | `Conversion_to_integer) as e) ->
       Error e
 
   let trunc_f64_u x =
     try Ok (cvtop ty TruncUF64 x)
     with
-    | Smtml.Eval.Eval_error ((`Integer_overflow | `Conversion_to_integer) as e)
-    ->
+    | Eval.Eval_error ((`Integer_overflow | `Conversion_to_integer) as e) ->
       Error e
 
   let trunc_sat_f32_s x = cvtop ty Trunc_sat_f32_s x
@@ -246,15 +241,15 @@ module I32 = struct
 
   (* FIXME: This is probably wrong? *)
   let extend_s n x =
-    cvtop ty (Sign_extend (32 - n)) (Smtml.Expr.extract x ~high:(n / 8) ~low:0)
+    cvtop ty (Sign_extend (32 - n)) (Expr.extract x ~high:(n / 8) ~low:0)
 
   let pp = Expr.pp
 end
 
 module I64 = struct
-  let ty = Ty_bitv 64
+  let ty = Ty.Ty_bitv 64
 
-  let of_concrete (i : Int64.t) : i64 = value (Bitv (Smtml.Bitvector.of_int64 i))
+  let of_concrete (i : Int64.t) : i64 = value (Bitv (Bitvector.of_int64 i))
 
   let of_int (i : int) : i64 = of_concrete (Int64.of_int i)
 
@@ -325,29 +320,25 @@ module I64 = struct
   let trunc_f32_s x =
     try Ok (cvtop ty TruncSF32 x)
     with
-    | Smtml.Eval.Eval_error ((`Integer_overflow | `Conversion_to_integer) as e)
-    ->
+    | Eval.Eval_error ((`Integer_overflow | `Conversion_to_integer) as e) ->
       Error e
 
   let trunc_f32_u x =
     try Ok (cvtop ty TruncUF32 x)
     with
-    | Smtml.Eval.Eval_error ((`Integer_overflow | `Conversion_to_integer) as e)
-    ->
+    | Eval.Eval_error ((`Integer_overflow | `Conversion_to_integer) as e) ->
       Error e
 
   let trunc_f64_s x =
     try Ok (cvtop ty TruncSF64 x)
     with
-    | Smtml.Eval.Eval_error ((`Integer_overflow | `Conversion_to_integer) as e)
-    ->
+    | Eval.Eval_error ((`Integer_overflow | `Conversion_to_integer) as e) ->
       Error e
 
   let trunc_f64_u x =
     try Ok (cvtop ty TruncUF64 x)
     with
-    | Smtml.Eval.Eval_error ((`Integer_overflow | `Conversion_to_integer) as e)
-    ->
+    | Eval.Eval_error ((`Integer_overflow | `Conversion_to_integer) as e) ->
       Error e
 
   let trunc_sat_f32_s x = cvtop ty Trunc_sat_f32_s x
@@ -362,7 +353,7 @@ module I64 = struct
 
   (* FIXME: This is probably wrong? *)
   let extend_s n x =
-    cvtop ty (Sign_extend (64 - n)) (Smtml.Expr.extract x ~high:(n / 8) ~low:0)
+    cvtop ty (Sign_extend (64 - n)) (Expr.extract x ~high:(n / 8) ~low:0)
 
   let extend_i32_s x = cvtop ty (Sign_extend 32) x
 
@@ -372,7 +363,7 @@ module I64 = struct
 end
 
 module F32 = struct
-  let ty = Ty_fp 32
+  let ty = Ty.Ty_fp 32
 
   let of_concrete (f : Float32.t) : f32 = value (Num (F32 (Float32.to_bits f)))
 
@@ -438,7 +429,7 @@ module F32 = struct
 end
 
 module F64 = struct
-  let ty = Ty_fp 64
+  let ty = Ty.Ty_fp 64
 
   let of_concrete (f : Float64.t) : f64 = value (Num (F64 (Float64.to_bits f)))
 
@@ -506,25 +497,24 @@ end
 module V128 = struct
   let of_concrete (v : V128.t) : v128 =
     let a, b = V128.to_i64x2 v in
-    Smtml.Expr.concat (I64.of_concrete a) (I64.of_concrete b)
+    Expr.concat (I64.of_concrete a) (I64.of_concrete b)
 
   let zero : v128 = of_concrete V128.zero
 
-  let of_i32x4 a b c d =
-    Smtml.Expr.concat (Smtml.Expr.concat a b) (Smtml.Expr.concat c d)
+  let of_i32x4 a b c d = Expr.concat (Expr.concat a b) (Expr.concat c d)
 
   let to_i32x4 v =
-    let a = Smtml.Expr.extract v ~low:12 ~high:16 in
-    let b = Smtml.Expr.extract v ~low:8 ~high:12 in
-    let c = Smtml.Expr.extract v ~low:4 ~high:8 in
-    let d = Smtml.Expr.extract v ~low:0 ~high:4 in
+    let a = Expr.extract v ~low:12 ~high:16 in
+    let b = Expr.extract v ~low:8 ~high:12 in
+    let c = Expr.extract v ~low:4 ~high:8 in
+    let d = Expr.extract v ~low:0 ~high:4 in
     (a, b, c, d)
 
-  let of_i64x2 a b = Smtml.Expr.concat a b
+  let of_i64x2 a b = Expr.concat a b
 
   let to_i64x2 v =
-    let a = Smtml.Expr.extract v ~low:8 ~high:16 in
-    let b = Smtml.Expr.extract v ~low:0 ~high:8 in
+    let a = Expr.extract v ~low:8 ~high:16 in
+    let b = Expr.extract v ~low:0 ~high:8 in
     (a, b)
 
   let pp ppf v = Expr.pp ppf v
