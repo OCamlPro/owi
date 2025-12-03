@@ -72,7 +72,7 @@ module Backend = struct
           (* end_offset: last byte we will read/write *)
           let end_offset = I32.add start_offset range in
           select
-            (Boolean.or_
+            (Symbolic_boolean.or_
                (I32.ge_u start_offset chunk_size)
                (I32.ge_u end_offset chunk_size) )
             ~prio_true:Prio.Default ~prio_false:Prio.Default
@@ -136,7 +136,7 @@ let grow m delta =
   let old_size = Symbolic_value.I32.mul m.size page_size in
   let new_size = Symbolic_value.I32.(div (add old_size delta) page_size) in
   m.size <-
-    Symbolic_value.Boolean.select_expr
+    Symbolic_boolean.select_expr
       (Symbolic_value.I32.gt new_size m.size)
       ~if_true:new_size ~if_false:m.size
 

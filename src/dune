@@ -85,6 +85,7 @@
   symbol_scope
   share
   solver
+  symbolic_boolean
   symbolic_choice
   symbolic_choice_intf
   symbolic_choice_with_memory
@@ -94,13 +95,19 @@
   symbolic_elem
   symbolic_env
   symbolic_extern_func
+  symbolic_f32
+  symbolic_f64
   symbolic_global
+  symbolic_i32
+  symbolic_i64
   symbolic_memory
   symbolic_memory_concretizing
   symbolic_path_condition
   symbolic_parameters
+  symbolic_ref
   symbolic_table
   symbolic_value
+  symbolic_v128
   symbolic_wasm_ffi
   spectest
   stack
