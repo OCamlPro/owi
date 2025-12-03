@@ -339,7 +339,7 @@ end
 module Make (Thread : Thread_intf.S) = struct
   include CoreImpl.Make (Thread)
 
-  let add_pc (c : Symbolic_value.boolean) =
+  let add_pc (c : Symbolic_boolean.t) =
     let c = Smtml.Expr.simplify c in
     match Smtml.Expr.view c with
     | Val True -> return ()
@@ -427,8 +427,7 @@ module Make (Thread : Thread_intf.S) = struct
     | `Unknown -> assert false
 
   let select_inner ~explore_first ?(with_breadcrumbs = true)
-    ~check_only_true_branch (cond : Symbolic_value.boolean) ~prio_true
-    ~prio_false =
+    ~check_only_true_branch (cond : Symbolic_boolean.t) ~prio_true ~prio_false =
     let v = Smtml.Expr.simplify cond in
     match Smtml.Expr.view v with
     | Val True -> return true
@@ -466,16 +465,14 @@ module Make (Thread : Thread_intf.S) = struct
 
       if check_only_true_branch then true_branch
       else
-        let false_branch =
-          branch (Symbolic_value.Boolean.not v) false prio_false
-        in
+        let false_branch = branch (Symbolic_boolean.not v) false prio_false in
         let* thread in
         Thread.incr_path_count thread;
         if explore_first then choose true_branch false_branch
         else choose false_branch true_branch
   [@@inline]
 
-  let select (cond : Symbolic_value.boolean) ~prio_true ~prio_false =
+  let select (cond : Symbolic_boolean.t) ~prio_true ~prio_false =
     select_inner cond ~explore_first:true ~prio_true ~prio_false
       ~check_only_true_branch:false
   [@@inline]
@@ -562,25 +559,21 @@ module Make (Thread : Thread_intf.S) = struct
     in
     if assertion_true then return () else stop
 
-  let ite (c : Symbolic_value.boolean) ~(if_true : Symbolic_value.t)
+  let ite (c : Symbolic_boolean.t) ~(if_true : Symbolic_value.t)
     ~(if_false : Symbolic_value.t) : Symbolic_value.t t =
     match (if_true, if_false) with
     | I32 if_true, I32 if_false ->
       return
-        (Symbolic_value.I32
-           (Symbolic_value.Boolean.select_expr c ~if_true ~if_false) )
+        (Symbolic_value.I32 (Symbolic_boolean.select_expr c ~if_true ~if_false))
     | I64 if_true, I64 if_false ->
       return
-        (Symbolic_value.I64
-           (Symbolic_value.Boolean.select_expr c ~if_true ~if_false) )
+        (Symbolic_value.I64 (Symbolic_boolean.select_expr c ~if_true ~if_false))
     | F32 if_true, F32 if_false ->
       return
-        (Symbolic_value.F32
-           (Symbolic_value.Boolean.select_expr c ~if_true ~if_false) )
+        (Symbolic_value.F32 (Symbolic_boolean.select_expr c ~if_true ~if_false))
     | F64 if_true, F64 if_false ->
       return
-        (Symbolic_value.F64
-           (Symbolic_value.Boolean.select_expr c ~if_true ~if_false) )
+        (Symbolic_value.F64 (Symbolic_boolean.select_expr c ~if_true ~if_false))
     | Ref _, Ref _ ->
       let+ b = select c ~prio_true:Prio.Default ~prio_false:Prio.Default in
       if b then if_true else if_false
