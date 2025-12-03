@@ -34,6 +34,7 @@
   cmd_wat2wasm
   cmd_zig
   compile
+  concrete_boolean
   concrete_choice
   concrete_data
   concrete_elem
@@ -41,6 +42,7 @@
   concrete_extern_func
   concrete_global
   concrete_memory
+  concrete_ref
   concrete_table
   concrete_value
   concrete_wasm_ffi
