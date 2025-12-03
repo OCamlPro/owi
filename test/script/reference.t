@@ -120,3 +120,65 @@
   $ owi script --no-exhaustion reference/proposals/annotations/annotations.wast
   owi: [ERROR] unknown operator "\"(@x \\\"\") \"unclosed"
   [23]
+  $ owi script --no-exhaustion reference/proposals/multi-memory/address0.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/address1.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/align0.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/binary.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/binary0.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/data_drop0.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/data.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/data0.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/data1.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/exports0.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/float_exprs0.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/float_exprs1.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/float_memory0.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/imports.wast
+  13
+  14
+  42
+  13
+  13
+  13
+  13
+  24
+  25
+  53
+  24
+  24
+  24
+  24
+  13
+  $ owi script --no-exhaustion reference/proposals/multi-memory/imports0.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/imports1.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/imports2.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/imports3.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/imports4.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/linking0.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/linking1.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/linking2.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/linking3.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/load.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/load0.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/load1.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/load2.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/memory_copy0.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/memory_copy1.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/memory_fill0.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/memory_grow.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/memory_init0.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/memory_size.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/memory_size0.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/memory_size1.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/memory_size2.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/memory_size3.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/memory_trap0.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/memory_trap1.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/memory-multi.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/memory.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/simd_memory-multi.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/start0.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/store.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/store0.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/store1.wast
+  $ owi script --no-exhaustion reference/proposals/multi-memory/traps0.wast
