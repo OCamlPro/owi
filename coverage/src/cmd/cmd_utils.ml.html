@@ -501,7 +501,7 @@ let dummy_value_of_t = function
   | <span data-count="0">N</span>um_type I64 -&gt; Ok (Binary.I64_const 0L)
   | <span data-count="0">N</span>um_type F32 -&gt; Ok (Binary.F32_const (Float32.of_floa<span data-count="0">t</span> 0.))
   | <span data-count="0">N</span>um_type F64 -&gt; Ok (Binary.F64_const (Float64.of_floa<span data-count="0">t</span> 0.))
-  | <span data-count="0">N</span>um_type V128 -&gt; Ok (Binary.V128_const (V128.of_i64x<span data-count="0">2</span> 0L 0L))
+  | <span data-count="0">N</span>um_type V128 -&gt; Ok (Binary.V128_const (Concrete_v128.of_i64x<span data-count="0">2</span> 0L 0L))
   | <span data-count="0">R</span>ef_type (Text.Null, t) -&gt; Ok (Binary.Ref_null t)
   | <span data-count="0">R</span>ef_type (Text.No_null, t) -&gt;
     Fmt.error_msg "can not create default value of type %a" Text.pp_heap_type t

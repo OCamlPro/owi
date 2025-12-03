@@ -130,9 +130,6 @@
 <a id="L106"></a><span > </span>
 <a id="L107"></a><span > </span>
 <a id="L108"></a><span > </span>
-<a id="L109"></a><span > </span>
-<a id="L110"></a><span > </span>
-<a id="L111"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -245,9 +242,6 @@
 <a href="#L106">106</a>
 <a href="#L107">107</a>
 <a href="#L108">108</a>
-<a href="#L109">109</a>
-<a href="#L110">110</a>
-<a href="#L111">111</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -269,8 +263,6 @@ type 'a eval =
       * Symbol_scope.t
 
 module type S = sig
-  module Value : Value_intf.T
-
   type thread
 
   type 'a t
@@ -290,13 +282,13 @@ module type S = sig
   val trap : Result.err -&gt; 'a t
 
   val select :
-    Value.boolean -&gt; prio_true:Prio.t -&gt; prio_false:Prio.t -&gt; Bool.t t
+    Symbolic_boolean.t -&gt; prio_true:Prio.t -&gt; prio_false:Prio.t -&gt; Bool.t t
 
-  val select_i32 : Value.i32 -&gt; Int32.t t
+  val select_i32 : Symbolic_i32.t -&gt; Int32.t t
 
-  val assertion : Value.boolean -&gt; unit t
+  val assertion : Symbolic_boolean.t -&gt; unit t
 
-  val assume : Value.boolean -&gt; unit t
+  val assume : Symbolic_boolean.t -&gt; unit t
 
   val with_thread : (thread -&gt; 'a) -&gt; 'a t
 
@@ -330,7 +322,7 @@ module type S = sig
     -&gt; unit Domain.t array
 
   val ite :
-       Symbolic_value.boolean
+       Symbolic_boolean.t
     -&gt; if_true:Symbolic_value.t
     -&gt; if_false:Symbolic_value.t
     -&gt; Symbolic_value.t t
@@ -358,7 +350,6 @@ module type Intf = sig
     S
       with type 'a t = ('a eval, Thread.t) CoreImpl.State.t
        and type thread := Thread.t
-       and module Value := Symbolic_value
 end
 </code></pre>
       </div>

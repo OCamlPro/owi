@@ -923,29 +923,29 @@ let module_name2 = "owi_iso_module2"
 
 let binaryen_fuzzing_support_module weird_log_i64 =
   <span data-count="3">l</span>et log_i32 x =
-    <span data-count="0">L</span>og.app (fun m -&gt; <span data-count="0">m</span> "%a@?" Symbolic_value.pp_int32 x);
+    <span data-count="0">L</span>og.app (fun m -&gt; <span data-count="0">m</span> "%a@?" Symbolic_value.I32.pp x);
     <span data-count="0">S</span>ymbolic_choice_with_memory.return ()
   in
   let log_i64 x =
-    <span data-count="0">L</span>og.app (fun m -&gt; <span data-count="0">m</span> "%a@?" Symbolic_value.pp_int64 x);
+    <span data-count="0">L</span>og.app (fun m -&gt; <span data-count="0">m</span> "%a@?" Symbolic_value.I64.pp x);
     <span data-count="0">S</span>ymbolic_choice_with_memory.return ()
   in
   let log_i64_weird x y =
     <span data-count="0">L</span>og.app (fun m -&gt;
-      <span data-count="0">m</span> "%a%a@?" Symbolic_value.pp_int32 x Symbolic_value.pp_int32 y );
+      <span data-count="0">m</span> "%a%a@?" Symbolic_value.I32.pp x Symbolic_value.I32.pp y );
     <span data-count="0">S</span>ymbolic_choice_with_memory.return ()
   in
   let log_f32 x =
-    <span data-count="0">L</span>og.app (fun m -&gt; <span data-count="0">m</span> "%a@?" Symbolic_value.pp_float32 x);
+    <span data-count="0">L</span>og.app (fun m -&gt; <span data-count="0">m</span> "%a@?" Symbolic_value.F32.pp x);
     <span data-count="0">S</span>ymbolic_choice_with_memory.return ()
   in
   let log_f64 x =
-    <span data-count="0">L</span>og.app (fun m -&gt; <span data-count="0">m</span> "%a@?" Symbolic_value.pp_float64 x);
+    <span data-count="0">L</span>og.app (fun m -&gt; <span data-count="0">m</span> "%a@?" Symbolic_value.F64.pp x);
     <span data-count="0">S</span>ymbolic_choice_with_memory.return ()
   in
   let call_export _n1 _n2 = <span data-count="0">S</span>ymbolic_choice_with_memory.return () in
   let call_export_catch _n =
-    <span data-count="0">S</span>ymbolic_choice_with_memory.return @@ Symbolic_value.const_i3<span data-count="0">2</span> 0l
+    <span data-count="0">S</span>ymbolic_choice_with_memory.return @@ Symbolic_value.I32.of_concret<span data-count="0">e</span> 0l
   in
   let sleep _ms id = <span data-count="0">S</span>ymbolic_choice_with_memory.return id in
   let open Symbolic_extern_func in

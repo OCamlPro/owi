@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>concrete_ref.ml &mdash; Coverage report</title>
+    <meta name="description" content="80.95% coverage in src/concrete/concrete_ref.ml">
+    <link rel="stylesheet" href="../../coverage.css"/>
+    <script src="../../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../../index.html">
+          <span class="dirname">src/concrete/</span>concrete_ref.ml
+        </a>
+      </h1>
+      <h2>80.95%</h2>
+    </div>
+    <div id="navbar">
+      <span class="unvisited" style="top:27.66%"></span>
+      <span class="unvisited" style="top:46.81%"></span>
+      <span class="unvisited" style="top:48.94%"></span>
+      <span class="unvisited" style="bottom:17.02%"></span>
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span > </span>
+<a id="L7"></a><span > </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span > </span>
+<a id="L10"></a><span > </span>
+<a id="L11"></a><span > </span>
+<a id="L12"></a><span class="visited"> </span>
+<a id="L13"></a><span class="unvisited"> </span>
+<a id="L14"></a><span class="visited"> </span>
+<a id="L15"></a><span > </span>
+<a id="L16"></a><span > </span>
+<a id="L17"></a><span > </span>
+<a id="L18"></a><span > </span>
+<a id="L19"></a><span > </span>
+<a id="L20"></a><span > </span>
+<a id="L21"></a><span > </span>
+<a id="L22"></a><span class="unvisited"> </span>
+<a id="L23"></a><span class="unvisited"> </span>
+<a id="L24"></a><span > </span>
+<a id="L25"></a><span class="visited"> </span>
+<a id="L26"></a><span > </span>
+<a id="L27"></a><span class="visited"> </span>
+<a id="L28"></a><span > </span>
+<a id="L29"></a><span class="visited"> </span>
+<a id="L30"></a><span > </span>
+<a id="L31"></a><span class="visited"> </span>
+<a id="L32"></a><span class="visited"> </span>
+<a id="L33"></a><span class="visited"> </span>
+<a id="L34"></a><span > </span>
+<a id="L35"></a><span > </span>
+<a id="L36"></a><span class="visited"> </span>
+<a id="L37"></a><span class="visited"> </span>
+<a id="L38"></a><span class="visited"> </span>
+<a id="L39"></a><span class="unvisited"> </span>
+<a id="L40"></a><span > </span>
+<a id="L41"></a><span > </span>
+<a id="L42"></a><span class="visited"> </span>
+<a id="L43"></a><span class="visited"> </span>
+<a id="L44"></a><span > </span>
+<a id="L45"></a><span > </span>
+<a id="L46"></a><span class="visited"> </span>
+<a id="L47"></a><span > </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1"> 1</a>
+<a href="#L2"> 2</a>
+<a href="#L3"> 3</a>
+<a href="#L4"> 4</a>
+<a href="#L5"> 5</a>
+<a href="#L6"> 6</a>
+<a href="#L7"> 7</a>
+<a href="#L8"> 8</a>
+<a href="#L9"> 9</a>
+<a href="#L10">10</a>
+<a href="#L11">11</a>
+<a href="#L12">12</a>
+<a href="#L13">13</a>
+<a href="#L14">14</a>
+<a href="#L15">15</a>
+<a href="#L16">16</a>
+<a href="#L17">17</a>
+<a href="#L18">18</a>
+<a href="#L19">19</a>
+<a href="#L20">20</a>
+<a href="#L21">21</a>
+<a href="#L22">22</a>
+<a href="#L23">23</a>
+<a href="#L24">24</a>
+<a href="#L25">25</a>
+<a href="#L26">26</a>
+<a href="#L27">27</a>
+<a href="#L28">28</a>
+<a href="#L29">29</a>
+<a href="#L30">30</a>
+<a href="#L31">31</a>
+<a href="#L32">32</a>
+<a href="#L33">33</a>
+<a href="#L34">34</a>
+<a href="#L35">35</a>
+<a href="#L36">36</a>
+<a href="#L37">37</a>
+<a href="#L38">38</a>
+<a href="#L39">39</a>
+<a href="#L40">40</a>
+<a href="#L41">41</a>
+<a href="#L42">42</a>
+<a href="#L43">43</a>
+<a href="#L44">44</a>
+<a href="#L45">45</a>
+<a href="#L46">46</a>
+<a href="#L47">47</a>
+</pre>
+<pre><code class="ocaml">open Fmt
+
+type 'a get_ref =
+  | Null
+  | Ref_value of 'a
+  | Type_mismatch
+
+module Extern = struct
+  type t = E : 'a Type.Id.t * 'a -&gt; t
+
+  let cast (type r) (E (rty, r) : t) (ty : r Type.Id.t) : r option =
+    <span data-count="35">m</span>atch Type.Id.provably_equal rty ty with
+    | <span data-count="0">N</span>one -&gt; None
+    | <span data-count="35">S</span>ome Equal -&gt; Some r
+end
+
+type t =
+  | Extern of Extern.t option
+  | Func of Kind.func option
+
+let pp fmt = function
+  | <span data-count="0">E</span>xtern _ -&gt; pf fmt "externref"
+  | <span data-count="0">F</span>unc _ -&gt; pf fmt "funcref"
+
+let null = function <span data-count="669">T</span>ext.Func_ht -&gt; Func None | <span data-count="63">E</span>xtern_ht -&gt; Extern None
+
+let func (f : Kind.func) = <span data-count="9">F</span>unc (Some f)
+
+let extern (type x) (t : x Type.Id.t) (v : x) : t = <span data-count="35">E</span>xtern (Some (E (t, v)))
+
+let is_null = <span data-count="47">f</span>unction
+  | <span data-count="34">F</span>unc None | <span data-count="4">E</span>xtern None -&gt; true
+  | <span data-count="7">F</span>unc (Some _) | <span data-count="2">E</span>xtern (Some _) -&gt; false
+
+let get_func (r : t) : Kind.func get_ref =
+  <span data-count="802835">m</span>atch r with
+  | <span data-count="801064">F</span>unc (Some f) -&gt; Ref_value f
+  | <span data-count="1771">F</span>unc None -&gt; Null
+  | <span data-count="0">_</span> -&gt; Type_mismatch
+
+let get_extern (type x) (r : t) (typ : x Type.Id.t) : x get_ref =
+  <span data-count="3">m</span>atch r with
+  | <span data-count="3">E</span>xtern (Some (E (ety, v))) -&gt; (
+    match Type.Id.provably_equal typ ety with
+    | None -&gt; assert false
+    | <span data-count="3">S</span>ome Equal -&gt; Ref_value v )
+  | _ -&gt; assert false
+</code></pre>
+      </div>
+    </div>
+    <script src="../../coverage.js"></script>
+  </body>
+</html>

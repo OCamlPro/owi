@@ -2,8 +2,8 @@
 <html lang="en">
   <head>
     <meta charset="utf-8"/>
-    <title>v128.ml &mdash; Coverage report</title>
-    <meta name="description" content="78.79% coverage in src/primitives/v128.ml">
+    <title>concrete_v128.ml &mdash; Coverage report</title>
+    <meta name="description" content="79.10% coverage in src/concrete/concrete_v128.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -12,23 +12,23 @@
     <div id="header">
       <h1>
         <a href="../../index.html">
-          <span class="dirname">src/primitives/</span>v128.ml
+          <span class="dirname">src/concrete/</span>concrete_v128.ml
         </a>
       </h1>
-      <h2>78.79%</h2>
+      <h2>79.10%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="bottom:33.33%"></span>
-      <span class="unvisited" style="bottom:30.86%"></span>
-      <span class="unvisited" style="bottom:27.16%"></span>
-      <span class="unvisited" style="bottom:25.93%"></span>
-      <span class="unvisited" style="bottom:24.69%"></span>
-      <span class="unvisited" style="bottom:19.75%"></span>
-      <span class="unvisited" style="bottom:7.41%"></span>
-      <span class="unvisited" style="bottom:6.17%"></span>
-      <span class="unvisited" style="bottom:4.94%"></span>
-      <span class="unvisited" style="bottom:3.70%"></span>
-      <span class="unvisited" style="bottom:2.47%"></span>
+      <span class="unvisited" style="bottom:34.94%"></span>
+      <span class="unvisited" style="bottom:32.53%"></span>
+      <span class="unvisited" style="bottom:28.92%"></span>
+      <span class="unvisited" style="bottom:27.71%"></span>
+      <span class="unvisited" style="bottom:26.51%"></span>
+      <span class="unvisited" style="bottom:21.69%"></span>
+      <span class="unvisited" style="bottom:9.64%"></span>
+      <span class="unvisited" style="bottom:8.43%"></span>
+      <span class="unvisited" style="bottom:7.23%"></span>
+      <span class="unvisited" style="bottom:6.02%"></span>
+      <span class="unvisited" style="bottom:4.82%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -114,6 +114,8 @@
 <a id="L79"></a><span class="unvisited"> </span>
 <a id="L80"></a><span > </span>
 <a id="L81"></a><span > </span>
+<a id="L82"></a><span > </span>
+<a id="L83"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -199,6 +201,8 @@
 <a href="#L79">79</a>
 <a href="#L80">80</a>
 <a href="#L81">81</a>
+<a href="#L82">82</a>
+<a href="#L83">83</a>
 </pre>
 <pre><code class="ocaml">type t =
   | F32x4 of Float32.t * Float32.t * Float32.t * Float32.t
@@ -281,6 +285,8 @@ let pp ppf v =
   | <span data-count="0">F</span>32x4 (a, b, c, d) -&gt;
     Fmt.pf ppf "f32x4 %a %a %a %a" Float32.pp a Float32.pp b Float32.pp c
       Float32.pp d
+
+let of_concrete v = <span data-count="211">v</span>
 </code></pre>
       </div>
     </div>

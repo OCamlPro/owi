@@ -83,16 +83,6 @@
 <a id="L59"></a><span > </span>
 <a id="L60"></a><span > </span>
 <a id="L61"></a><span > </span>
-<a id="L62"></a><span > </span>
-<a id="L63"></a><span > </span>
-<a id="L64"></a><span > </span>
-<a id="L65"></a><span > </span>
-<a id="L66"></a><span > </span>
-<a id="L67"></a><span > </span>
-<a id="L68"></a><span > </span>
-<a id="L69"></a><span > </span>
-<a id="L70"></a><span > </span>
-<a id="L71"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -158,16 +148,6 @@
 <a href="#L59">59</a>
 <a href="#L60">60</a>
 <a href="#L61">61</a>
-<a href="#L62">62</a>
-<a href="#L63">63</a>
-<a href="#L64">64</a>
-<a href="#L65">65</a>
-<a href="#L66">66</a>
-<a href="#L67">67</a>
-<a href="#L68">68</a>
-<a href="#L69">69</a>
-<a href="#L70">70</a>
-<a href="#L71">71</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -178,17 +158,7 @@ module type S0 = sig
 
   type memory
 
-  module Value : sig
-    type i32
-
-    type i64
-
-    type f32
-
-    type f64
-
-    type v128
-  end
+  module Value : Value_intf.T
 
   val symbol_bool : unit -&gt; Value.i32 t
 

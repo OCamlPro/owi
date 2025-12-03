@@ -1291,7 +1291,7 @@ type instr =
   | I64_const of Int64.t
   | F32_const of Float32.t
   | F64_const of Float64.t
-  | V128_const of V128.t
+  | V128_const of Concrete_v128.t
   | I_unop of Text.nn * Text.iunop
   | F_unop of Text.nn * Text.funop
   | I_binop of Text.nn * Text.ibinop
@@ -1381,7 +1381,7 @@ let rec pp_instr ~short fmt = function
   | <span data-count="7">I</span>64_const i -&gt; pf fmt "i64.const %Ld" i
   | <span data-count="5">F</span>32_const f -&gt; pf fmt "f32.const %a" Float32.pp f
   | <span data-count="1">F</span>64_const f -&gt; pf fmt "f64.const %a" Float64.pp f
-  | <span data-count="0">V</span>128_const f -&gt; pf fmt "v128.const %a" V128.pp f
+  | <span data-count="0">V</span>128_const f -&gt; pf fmt "v128.const %a" Concrete_v128.pp f
   | <span data-count="1">I</span>_unop (n, op) -&gt; pf fmt "i%a.%a" Text.pp_nn n Text.pp_iunop op
   | <span data-count="0">F</span>_unop (n, op) -&gt; pf fmt "f%a.%a" Text.pp_nn n Text.pp_funop op
   | <span data-count="49">I</span>_binop (n, op) -&gt; pf fmt "i%a.%a" Text.pp_nn n Text.pp_ibinop op

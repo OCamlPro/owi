@@ -3160,7 +3160,7 @@ let read_FD input =
     <span data-count="6">l</span>et data = Input.as_string data in
     <span data-count="6">l</span>et high = String.get_int64_le data 0 in
     <span data-count="6">l</span>et low = String.get_int64_le data 8 in
-    <span data-count="6">l</span>et v128 = V128.of_i64x2 high low in
+    <span data-count="6">l</span>et v128 = Concrete_v128.of_i64x2 high low in
     <span data-count="6">(</span>V128_const v128, input)
   | <span data-count="0">1</span>10 -&gt; Ok (V_ibinop (I8x16, Add), input)
   | <span data-count="0">1</span>13 -&gt; Ok (V_ibinop (I8x16, Sub), input)
@@ -3725,7 +3725,7 @@ let read_local input =
 let read_locals input =
   <span data-count="2986">l</span>et* nts, input = vector_no_i<span data-count="2986">d</span> read_local input in
   <span data-count="2986">l</span>et ns =
-    List.map (fun (n, _t) -&gt; <span data-count="1834">C</span>onvert.Int64.extend_i32_u @@ Int32.of_in<span data-count="1834">t</span> n) nts
+    List.map (fun (n, _t) -&gt; <span data-count="1834">C</span>oncrete_i64.extend_i32_u @@ Int32.of_in<span data-count="1834">t</span> n) nts
   in
   <span data-count="2986">l</span>et+ () =
     if not @@ Int64.lt_<span data-count="2986">u</span> (List.fold_lef<span data-count="2986">t</span> Int64.add 0L ns) 0x1_0000_0000L then

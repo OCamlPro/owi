@@ -2345,7 +2345,7 @@ let rec write_instr buf instr =
     <span data-count="0">w</span>rite_indice buf idx
   | <span data-count="0">V</span>128_const v -&gt;
     write_fd buf 12;
-    <span data-count="0">l</span>et a, b = V128.to_i64x2 v in
+    <span data-count="0">l</span>et a, b = Concrete_v128.to_i64x2 v in
     <span data-count="0">w</span>rite_bytes_8 buf a;
     <span data-count="0">w</span>rite_bytes_8 buf b
   | <span data-count="0">V</span>_ibinop (I8x16, Add) -&gt; write_fd buf 110

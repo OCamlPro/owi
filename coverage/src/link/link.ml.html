@@ -1025,7 +1025,7 @@ module Eval_const = struct
     | <span data-count="135">F</span>64_const f -&gt; ok @@ Stack.push_f6<span data-count="135">4</span> stack f
     | <span data-count="5">V</span>128_const f -&gt; ok @@ Stack.push_v12<span data-count="5">8</span> stack f
     | <span data-count="20">I</span>_binop (nn, op) -&gt; ok @@ ibino<span data-count="20">p</span> stack nn op
-    | <span data-count="48">R</span>ef_null t -&gt; ok @@ Stack.pus<span data-count="48">h</span> stack (Concrete_value.ref_nul<span data-count="48">l</span> t)
+    | <span data-count="48">R</span>ef_null t -&gt; ok @@ Stack.push_re<span data-count="48">f</span> stack (Concrete_value.Ref.nul<span data-count="48">l</span> t)
     | <span data-count="2623">R</span>ef_func f -&gt;
       let* f = Link_env.Build.get_fun<span data-count="2623">c</span> env f in
       <span data-count="2623">l</span>et value = Concrete_value.Ref (Func (Some f)) in
