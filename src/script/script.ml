@@ -69,7 +69,7 @@ let compare_result_const result (const : Concrete_value.t) =
     Float32.eq n n' || String.equal (Float32.to_string n) (Float32.to_string n')
   | Result_const (Literal (Const_F64 n)), F64 n' ->
     Float64.eq n n' || String.equal (Float64.to_string n) (Float64.to_string n')
-  | Result_const (Literal (Const_V128 n)), V128 n' -> V128.eq n n'
+  | Result_const (Literal (Const_V128 n)), V128 n' -> Concrete_v128.eq n n'
   | Result_const (Literal (Const_null Func_ht)), Ref (Func None) -> true
   | Result_const (Literal (Const_null Extern_ht)), Ref (Extern None) -> true
   | Result_const (Literal (Const_extern n)), Ref (Extern (Some ref)) -> begin

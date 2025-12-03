@@ -492,7 +492,7 @@ let rec write_instr buf instr =
     write_indice buf idx
   | V128_const v ->
     write_fd buf 12;
-    let a, b = V128.to_i64x2 v in
+    let a, b = Concrete_v128.to_i64x2 v in
     write_bytes_8 buf a;
     write_bytes_8 buf b
   | V_ibinop (I8x16, Add) -> write_fd buf 110

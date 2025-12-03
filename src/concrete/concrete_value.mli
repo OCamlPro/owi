@@ -9,4 +9,4 @@ include
      and type i64 = Int64.t
      and type f32 = Float32.t
      and type f64 = Float64.t
-     and type v128 = V128.t
+     and type v128 = Concrete_v128.t

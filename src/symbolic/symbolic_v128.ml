@@ -6,11 +6,11 @@ type t = Smtml.Expr.t
 
 open Smtml.Expr
 
-let of_concrete (v : V128.t) : t =
-  let a, b = V128.to_i64x2 v in
+let of_concrete (v : Concrete_v128.t) : t =
+  let a, b = Concrete_v128.to_i64x2 v in
   concat (Symbolic_i64.of_concrete a) (Symbolic_i64.of_concrete b)
 
-let zero : t = of_concrete V128.zero
+let zero : t = of_concrete Concrete_v128.zero
 
 let of_i32x4 a b c d = concat (concat a b) (concat c d)
 

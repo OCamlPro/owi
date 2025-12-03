@@ -8,7 +8,7 @@ type const =
   | Const_I64 of Int64.t
   | Const_F32 of Float32.t
   | Const_F64 of Float64.t
-  | Const_V128 of V128.t
+  | Const_V128 of Concrete_v128.t
   | Const_null of heap_type
   | Const_host of int
   | Const_extern of int
@@ -21,7 +21,7 @@ let pp_const fmt c =
       | Const_I64 i -> pf fmt "i64.const %Ld" i
       | Const_F32 f -> pf fmt "f32.const %a" Float32.pp f
       | Const_F64 f -> pf fmt "f64.const %a" Float64.pp f
-      | Const_V128 v -> pf fmt "v128.const %a" V128.pp v
+      | Const_V128 v -> pf fmt "v128.const %a" Concrete_v128.pp v
       | Const_null rt -> pf fmt "ref.null %a" pp_heap_type rt
       | Const_host i -> pf fmt "ref.host %d" i
       | Const_extern i -> pf fmt "ref.extern %d" i )

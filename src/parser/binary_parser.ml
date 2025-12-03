@@ -338,7 +338,7 @@ let read_FD input =
     let data = Input.as_string data in
     let high = String.get_int64_le data 0 in
     let low = String.get_int64_le data 8 in
-    let v128 = V128.of_i64x2 high low in
+    let v128 = Concrete_v128.of_i64x2 high low in
     (V128_const v128, input)
   | 110 -> Ok (V_ibinop (I8x16, Add), input)
   | 113 -> Ok (V_ibinop (I8x16, Sub), input)
@@ -903,7 +903,7 @@ let read_local input =
 let read_locals input =
   let* nts, input = vector_no_id read_local input in
   let ns =
-    List.map (fun (n, _t) -> Convert.Int64.extend_i32_u @@ Int32.of_int n) nts
+    List.map (fun (n, _t) -> Concrete_i64.extend_i32_u @@ Int32.of_int n) nts
   in
   let+ () =
     if not @@ Int64.lt_u (List.fold_left Int64.add 0L ns) 0x1_0000_0000L then

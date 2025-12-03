@@ -79,3 +79,5 @@ let pp ppf v =
   | F32x4 (a, b, c, d) ->
     Fmt.pf ppf "f32x4 %a %a %a %a" Float32.pp a Float32.pp b Float32.pp c
       Float32.pp d
+
+let of_concrete v = v

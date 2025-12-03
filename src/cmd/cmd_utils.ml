@@ -39,7 +39,7 @@ let dummy_value_of_t = function
   | Num_type I64 -> Ok (Binary.I64_const 0L)
   | Num_type F32 -> Ok (Binary.F32_const (Float32.of_float 0.))
   | Num_type F64 -> Ok (Binary.F64_const (Float64.of_float 0.))
-  | Num_type V128 -> Ok (Binary.V128_const (V128.of_i64x2 0L 0L))
+  | Num_type V128 -> Ok (Binary.V128_const (Concrete_v128.of_i64x2 0L 0L))
   | Ref_type (Text.Null, t) -> Ok (Binary.Ref_null t)
   | Ref_type (Text.No_null, t) ->
     Fmt.error_msg "can not create default value of type %a" Text.pp_heap_type t

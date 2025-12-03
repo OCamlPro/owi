@@ -18,7 +18,7 @@ type instr =
   | I64_const of Int64.t
   | F32_const of Float32.t
   | F64_const of Float64.t
-  | V128_const of V128.t
+  | V128_const of Concrete_v128.t
   | I_unop of Text.nn * Text.iunop
   | F_unop of Text.nn * Text.funop
   | I_binop of Text.nn * Text.ibinop

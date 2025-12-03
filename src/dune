@@ -40,14 +40,18 @@
   concrete_elem
   concrete_env
   concrete_extern_func
+  concrete_f32
+  concrete_f64
   concrete_global
+  concrete_i32
+  concrete_i64
   concrete_memory
   concrete_ref
   concrete_table
   concrete_value
+  concrete_v128
   concrete_wasm_ffi
   control_flow_graph
-  convert
   data_intf
   elem_intf
   env_intf
@@ -125,7 +129,6 @@
   thread_without_memory
   union_find
   value_intf
-  v128
   v128_intf
   wasm_ffi_intf
   wast
@@ -135,13 +138,7 @@
   wq
   ws
   wutf8)
- (private_modules
-  binary_parser
-  convert
-  spectest
-  text_lexer
-  text_parser
-  wutf8)
+ (private_modules binary_parser spectest text_lexer text_parser wutf8)
  (libraries
   bos
   digestif

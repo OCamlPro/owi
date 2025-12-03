@@ -226,27 +226,27 @@ let v128_const :=
              n9, n10, n11, n12, n13, n14, n15, n16) =
           t16_of_v128_arg_list i8 n
         in
-        V128.of_i8x16 n1 n2 n3 n4 n5 n6 n7 n8 n9 n10 n11 n12 n13 n14 n15 n16
+        Concrete_v128.of_i8x16 n1 n2 n3 n4 n5 n6 n7 n8 n9 n10 n11 n12 n13 n14 n15 n16
   }
   | V128_CONST; I16X8; n = list(NUM); {
         let (n1, n2, n3, n4, n5, n6, n7, n8) = t8_of_v128_arg_list i16 n in
-        V128.of_i16x8 n1 n2 n3 n4 n5 n6 n7 n8
+        Concrete_v128.of_i16x8 n1 n2 n3 n4 n5 n6 n7 n8
   }
   | V128_CONST; F32X4; n = list(NUM); {
         let (n1, n2, n3, n4) = t4_of_v128_arg_list f32 n in
-        V128.of_f32x4 n1 n2 n3 n4
+        Concrete_v128.of_f32x4 n1 n2 n3 n4
   }
   | V128_CONST; F64X2; n = list(NUM); {
         let (n1, n2) = t2_of_v128_arg_list f64 n in
-        V128.of_f64x2 n1 n2
+        Concrete_v128.of_f64x2 n1 n2
       }
   | V128_CONST; I32X4; n = list(NUM); {
         let (n1, n2, n3, n4) = t4_of_v128_arg_list i32 n in
-        V128.of_i32x4 n1 n2 n3 n4
+        Concrete_v128.of_i32x4 n1 n2 n3 n4
       }
   | V128_CONST; I64X2; n = list(NUM); {
         let (n1, n2) = t2_of_v128_arg_list i64 n in
-        V128.of_i64x2 n1 n2
+        Concrete_v128.of_i64x2 n1 n2
       }
 
 let plain_instr :=

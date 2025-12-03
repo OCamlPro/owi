@@ -369,7 +369,7 @@ type instr =
   | I64_const of Int64.t
   | F32_const of Float32.t
   | F64_const of Float64.t
-  | V128_const of V128.t
+  | V128_const of Concrete_v128.t
   | I_unop of nn * iunop
   | F_unop of nn * funop
   | I_binop of nn * ibinop
@@ -459,7 +459,7 @@ let rec pp_instr ~short fmt = function
   | I64_const i -> pf fmt "i64.const %Ld" i
   | F32_const f -> pf fmt "f32.const %a" Float32.pp f
   | F64_const f -> pf fmt "f64.const %a" Float64.pp f
-  | V128_const f -> pf fmt "v128.const %a" V128.pp f
+  | V128_const f -> pf fmt "v128.const %a" Concrete_v128.pp f
   | I_unop (n, op) -> pf fmt "i%a.%a" pp_nn n pp_iunop op
   | F_unop (n, op) -> pf fmt "f%a.%a" pp_nn n pp_funop op
   | I_binop (n, op) -> pf fmt "i%a.%a" pp_nn n pp_ibinop op

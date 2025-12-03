@@ -89,7 +89,7 @@ module type S = sig
 
   val push_v128 : t -> v128 -> t
 
-  val push_concrete_v128 : t -> V128.t -> t
+  val push_concrete_v128 : t -> Concrete_v128.t -> t
 
   val push_ref : t -> ref_value -> t
 
