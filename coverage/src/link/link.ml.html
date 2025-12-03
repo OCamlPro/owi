@@ -946,35 +946,35 @@ module State = struct
     }
 
   let empty () =
-    <span data-count="563">{</span> by_name = StringMap.empty
+    <span data-count="566">{</span> by_name = StringMap.empty
     ; by_id = StringMap.empty
     ; last = None
-    ; collection = Dynarray.creat<span data-count="563">e</span> ()
-    ; envs = Dynarray.creat<span data-count="563">e</span> ()
+    ; collection = Dynarray.creat<span data-count="566">e</span> ()
+    ; envs = Dynarray.creat<span data-count="566">e</span> ()
     }
 
   (* TODO: I'm not sure it makes sense to try making the Link.State.t persistent, we could change the API to be fully mutable? *)
   let clone { by_name; by_id; last; collection; envs } =
-    <span data-count="2319">l</span>et collection = Dynarray.copy collection in
-    <span data-count="2319">l</span>et envs = Dynarray.copy envs in
-    <span data-count="2319">{</span> by_name; by_id; last; collection; envs }
+    <span data-count="2322">l</span>et collection = Dynarray.copy collection in
+    <span data-count="2322">l</span>et envs = Dynarray.copy envs in
+    <span data-count="2322">{</span> by_name; by_id; last; collection; envs }
 
-  let get_envs state = <span data-count="26634">s</span>tate.envs
+  let get_envs state = <span data-count="26637">s</span>tate.envs
 
   let get_last state = <span data-count="24313">s</span>tate.last
 
   let get_by_id state id = <span data-count="130">S</span>tringMap.find_opt id state.by_id
 
   let load_from_module ls f (import : _ Origin.imported) =
-    <span data-count="3909">m</span>atch StringMap.find_opt import.modul_name ls.by_name with
+    <span data-count="3927">m</span>atch StringMap.find_opt import.modul_name ls.by_name with
     | <span data-count="0">N</span>one -&gt; Error (`Unknown_module import.modul_name)
-    | <span data-count="3909">S</span>ome exports -&gt; (
-      match StringMap.find_opt import.name (<span data-count="3909">f</span> exports) with
+    | <span data-count="3927">S</span>ome exports -&gt; (
+      match StringMap.find_opt import.name (<span data-count="3927">f</span> exports) with
       | <span data-count="33">N</span>one -&gt;
         if StringSet.mem import.name exports.defined_names then
           <span data-count="22">E</span>rror (`Incompatible_import_type import.name)
         else <span data-count="11">E</span>rror (`Unknown_import (import.modul_name, import.name))
-      | <span data-count="3876">S</span>ome v -&gt; Ok v )
+      | <span data-count="3894">S</span>ome v -&gt; Ok v )
 
   let load_global (ls : 'f t) (import : Text.Global.Type.t Origin.imported) :
     global Result.t =
@@ -1018,11 +1018,11 @@ module Eval_const = struct
 
   (* TODO: binary+const instr *)
   let instr env stack instr =
-    <span data-count="4603">m</span>atch instr.Annotated.raw with
-    | <span data-count="1452">B</span>inary.I32_const n -&gt; ok @@ Stack.push_i3<span data-count="1452">2</span> stack n
-    | <span data-count="151">I</span>64_const n -&gt; ok @@ Stack.push_i6<span data-count="151">4</span> stack n
-    | <span data-count="140">F</span>32_const f -&gt; ok @@ Stack.push_f3<span data-count="140">2</span> stack f
-    | <span data-count="135">F</span>64_const f -&gt; ok @@ Stack.push_f6<span data-count="135">4</span> stack f
+    <span data-count="4615">m</span>atch instr.Annotated.raw with
+    | <span data-count="1455">B</span>inary.I32_const n -&gt; ok @@ Stack.push_i3<span data-count="1455">2</span> stack n
+    | <span data-count="154">I</span>64_const n -&gt; ok @@ Stack.push_i6<span data-count="154">4</span> stack n
+    | <span data-count="143">F</span>32_const f -&gt; ok @@ Stack.push_f3<span data-count="143">2</span> stack f
+    | <span data-count="138">F</span>64_const f -&gt; ok @@ Stack.push_f6<span data-count="138">4</span> stack f
     | <span data-count="5">V</span>128_const f -&gt; ok @@ Stack.push_v12<span data-count="5">8</span> stack f
     | <span data-count="20">I</span>_binop (nn, op) -&gt; ok @@ ibino<span data-count="20">p</span> stack nn op
     | <span data-count="48">R</span>ef_null t -&gt; ok @@ Stack.push_re<span data-count="48">f</span> stack (Concrete_value.Ref.nul<span data-count="48">l</span> t)
@@ -1037,34 +1037,34 @@ module Eval_const = struct
 
   (* TODO: binary+const expr *)
   let expr env e : Concrete_value.t Result.t =
-    <span data-count="4563">l</span>et* stack = list_fold_lef<span data-count="4563">t</span> (inst<span data-count="4563">r</span> env) Stack.empty e.Annotated.raw in
-    <span data-count="4563">m</span>atch stack with
+    <span data-count="4575">l</span>et* stack = list_fold_lef<span data-count="4575">t</span> (inst<span data-count="4575">r</span> env) Stack.empty e.Annotated.raw in
+    <span data-count="4575">m</span>atch stack with
     | <span data-count="0">[</span>] -&gt; Error (`Type_mismatch "const expr returning zero values")
     | <span data-count="0">_</span> :: _ :: _ -&gt;
       Error (`Type_mismatch "const expr returning more than one value")
-    | <span data-count="4563">[</span> result ] -&gt; Ok result
+    | <span data-count="4575">[</span> result ] -&gt; Ok result
 end
 
 let eval_global ls env (global : (Binary.Global.t, Text.Global.Type.t) Origin.t)
   : global Result.t =
-  <span data-count="923">m</span>atch global with
-  | <span data-count="852">L</span>ocal global -&gt;
-    let* value = Eval_const.exp<span data-count="852">r</span> env global.init in
-    <span data-count="852">l</span>et mut, typ = global.typ in
+  <span data-count="935">m</span>atch global with
+  | <span data-count="864">L</span>ocal global -&gt;
+    let* value = Eval_const.exp<span data-count="864">r</span> env global.init in
+    <span data-count="864">l</span>et mut, typ = global.typ in
     let global : global = { value; mut; typ } in
     Ok global
   | <span data-count="71">I</span>mported import -&gt; State.load_global ls import
 
 let eval_globals ls env globals : Link_env.Build.t Result.t =
-  <span data-count="2292">l</span>et+ env, _i =
-    array_fold_lef<span data-count="2292">t</span>
+  <span data-count="2295">l</span>et+ env, _i =
+    array_fold_lef<span data-count="2295">t</span>
       (fun (env, i) global -&gt;
-        <span data-count="923">l</span>et+ global = eval_globa<span data-count="923">l</span> ls env global in
-        <span data-count="897">l</span>et env = Link_env.Build.add_global i global env in
-        <span data-count="897">(</span>env, suc<span data-count="897">c</span> i) )
+        <span data-count="935">l</span>et+ global = eval_globa<span data-count="935">l</span> ls env global in
+        <span data-count="909">l</span>et env = Link_env.Build.add_global i global env in
+        <span data-count="909">(</span>env, suc<span data-count="909">c</span> i) )
       (env, 0) globals
   in
-  <span data-count="2266">e</span>nv
+  <span data-count="2269">e</span>nv
 
 (* TODO: IIRC this is duplicated and should be refactored *)
 let limit_is_included ~import ~imported =
@@ -1091,15 +1091,15 @@ let eval_memory ls (memory : (Text.Mem.t, Text.limits) Origin.t) :
   | <span data-count="69">I</span>mported import -&gt; load_memory ls import
 
 let eval_memories ls env memories =
-  <span data-count="2266">l</span>et+ env, _i =
-    array_fold_lef<span data-count="2266">t</span>
+  <span data-count="2269">l</span>et+ env, _i =
+    array_fold_lef<span data-count="2269">t</span>
       (fun (env, id) mem -&gt;
         <span data-count="688">l</span>et+ memory = eval_memor<span data-count="688">y</span> ls mem in
         <span data-count="673">l</span>et env = Link_env.Build.add_memory id memory env in
         <span data-count="673">(</span>env, suc<span data-count="673">c</span> id) )
       (env, 0) memories
   in
-  <span data-count="2251">e</span>nv
+  <span data-count="2254">e</span>nv
 
 let table_types_are_compatible (import, (t1 : Text.ref_type)) (imported, t2) =
   <span data-count="74">l</span>imit_is_included ~import ~imported &amp;&amp; <span data-count="68">T</span>ext.ref_type_eq t1 t2
@@ -1119,49 +1119,49 @@ let eval_table ls (table : (_, Text.Table.Type.t) Origin.t) : table Result.t =
   | <span data-count="81">I</span>mported import -&gt; load_table ls import
 
 let eval_tables ls env tables =
-  <span data-count="2251">l</span>et+ env, _i =
-    array_fold_lef<span data-count="2251">t</span>
+  <span data-count="2254">l</span>et+ env, _i =
+    array_fold_lef<span data-count="2254">t</span>
       (fun (env, i) table -&gt;
         <span data-count="714">l</span>et+ table = eval_tabl<span data-count="714">e</span> ls table in
         <span data-count="699">l</span>et env = Link_env.Build.add_table i table env in
         <span data-count="699">(</span>env, suc<span data-count="699">c</span> i) )
       (env, 0) tables
   in
-  <span data-count="2236">e</span>nv
+  <span data-count="2239">e</span>nv
 
 let load_func (ls : 'f State.t) (import : Binary.block_type Origin.imported) :
   func Result.t =
-  <span data-count="3688">l</span>et (Binary.Bt_raw ((None | Some _), typ)) = import.typ in
+  <span data-count="3706">l</span>et (Binary.Bt_raw ((None | Some _), typ)) = import.typ in
   let* func =
-    State.load_from_modul<span data-count="3688">e</span> ls (fun (e : State.exports) -&gt; <span data-count="3688">e</span>.functions) import
+    State.load_from_modul<span data-count="3706">e</span> ls (fun (e : State.exports) -&gt; <span data-count="3706">e</span>.functions) import
   in
-  <span data-count="3679">l</span>et type' =
+  <span data-count="3697">l</span>et type' =
     match func with
     | <span data-count="162">K</span>ind.Wasm { func; _ } -&gt;
       let (Bt_raw ((None | Some _), t)) = func.type_f in
       t
-    | <span data-count="3517">E</span>xtern { idx } -&gt;
+    | <span data-count="3535">E</span>xtern { idx } -&gt;
       let _f, t = Dynarray.get ls.collection idx in
-      <span data-count="3517">t</span>
+      <span data-count="3535">t</span>
   in
-  if Text.func_type_eq typ type' then <span data-count="3661">O</span>k func
+  if Text.func_type_eq typ type' then <span data-count="3679">O</span>k func
   else <span data-count="18">E</span>rror (`Incompatible_import_type import.name)
 
 let eval_func ls (finished_env : int) func : func Result.t =
-  <span data-count="12279">m</span>atch func with
-  | <span data-count="8591">O</span>rigin.Local func -&gt; ok @@ Kind.was<span data-count="8591">m</span> func finished_env
-  | <span data-count="3688">I</span>mported import -&gt; load_func ls import
+  <span data-count="12300">m</span>atch func with
+  | <span data-count="8594">O</span>rigin.Local func -&gt; ok @@ Kind.was<span data-count="8594">m</span> func finished_env
+  | <span data-count="3706">I</span>mported import -&gt; load_func ls import
 
 let eval_functions ls (finished_env : int) env functions =
-  <span data-count="2319">l</span>et+ env, _i =
-    array_fold_lef<span data-count="2319">t</span>
+  <span data-count="2322">l</span>et+ env, _i =
+    array_fold_lef<span data-count="2322">t</span>
       (fun (env, i) func -&gt;
-        <span data-count="12279">l</span>et+ func = eval_fun<span data-count="12279">c</span> ls finished_env func in
-        <span data-count="12252">l</span>et env = Link_env.Build.add_func i func env in
-        <span data-count="12252">(</span>env, suc<span data-count="12252">c</span> i) )
+        <span data-count="12300">l</span>et+ func = eval_fun<span data-count="12300">c</span> ls finished_env func in
+        <span data-count="12273">l</span>et env = Link_env.Build.add_func i func env in
+        <span data-count="12273">(</span>env, suc<span data-count="12273">c</span> i) )
       (env, 0) functions
   in
-  <span data-count="2292">e</span>nv
+  <span data-count="2295">e</span>nv
 
 let active_elem_expr ~offset ~length ~table ~elem =
   <span data-count="619">[</span> Binary.I32_const offset
@@ -1187,8 +1187,8 @@ let get_i32 = function
   | <span data-count="9">_</span> -&gt; Error (`Type_mismatch "get_i32")
 
 let define_data env data =
-  <span data-count="2236">l</span>et+ env, init, _i =
-    array_fold_lef<span data-count="2236">t</span>
+  <span data-count="2239">l</span>et+ env, init, _i =
+    array_fold_lef<span data-count="2239">t</span>
       (fun (env, init, id) (data : Binary.Data.t) -&gt;
         <span data-count="630">l</span>et data' : Link_env.data = { value = data.init } in
         let env = Link_env.Build.add_data id data' env in
@@ -1205,11 +1205,11 @@ let define_data env data =
         <span data-count="626">(</span>env, init, suc<span data-count="626">c</span> id) )
       (env, [], 0) data
   in
-  <span data-count="2232">(</span>env, List.re<span data-count="2232">v</span> init)
+  <span data-count="2235">(</span>env, List.re<span data-count="2235">v</span> init)
 
 let define_elem env elem =
-  <span data-count="2232">l</span>et+ env, inits, _i =
-    array_fold_lef<span data-count="2232">t</span>
+  <span data-count="2235">l</span>et+ env, inits, _i =
+    array_fold_lef<span data-count="2235">t</span>
       (fun (env, inits, i) (elem : Binary.Elem.t) -&gt;
         <span data-count="939">l</span>et* init = list_ma<span data-count="939">p</span> (Eval_const.exp<span data-count="939">r</span> env) elem.init in
         <span data-count="939">l</span>et* init_as_ref =
@@ -1240,12 +1240,12 @@ let define_elem env elem =
         <span data-count="934">(</span>env, inits, suc<span data-count="934">c</span> i) )
       (env, [], 0) elem
   in
-  <span data-count="2227">(</span>env, List.re<span data-count="2227">v</span> inits)
+  <span data-count="2230">(</span>env, List.re<span data-count="2230">v</span> inits)
 
 let populate_exports env (exports : Binary.Module.Exports.t) :
   State.exports Result.t =
-  <span data-count="2227">l</span>et fill_exports get_env exports names =
-    <span data-count="2216">a</span>rray_fold_left
+  <span data-count="2230">l</span>et fill_exports get_env exports names =
+    <span data-count="2219">a</span>rray_fold_left
       (fun (acc, names) ({ name; id; _ } : Binary.Export.t) -&gt;
         <span data-count="5660">l</span>et value = get_env env id in
         <span data-count="5660">i</span>f StringSet.mem name names then <span data-count="8">E</span>rror `Duplicate_export_name
@@ -1253,7 +1253,7 @@ let populate_exports env (exports : Binary.Module.Exports.t) :
       (StringMap.empty, names) exports
   in
   let fill_exports' get_env exports names =
-    <span data-count="6674">a</span>rray_fold_left
+    <span data-count="6683">a</span>rray_fold_left
       (fun (acc, names) ({ name; id; _ } : Binary.Export.t) -&gt;
         <span data-count="1127">l</span>et* value = get_en<span data-count="1127">v</span> env id in
         <span data-count="1127">i</span>f StringSet.mem name names then <span data-count="11">E</span>rror `Duplicate_export_name
@@ -1262,49 +1262,49 @@ let populate_exports env (exports : Binary.Module.Exports.t) :
   in
   let names = StringSet.empty in
   let* globals, names =
-    fill_exports<span data-count="2227">'</span> Link_env.get_global exports.global names
+    fill_exports<span data-count="2230">'</span> Link_env.get_global exports.global names
   in
-  <span data-count="2225">l</span>et* memories, names = fill_exports<span data-count="2225">'</span> Link_env.get_memory exports.mem names in
-  <span data-count="2222">l</span>et* tables, names = fill_exports<span data-count="2222">'</span> Link_env.get_table exports.table names in
-  <span data-count="2216">l</span>et+ functions, names = fill_export<span data-count="2216">s</span> Link_env.get_func exports.func names in
-  <span data-count="2208">{</span> State.globals; memories; tables; functions; defined_names = names }
+  <span data-count="2228">l</span>et* memories, names = fill_exports<span data-count="2228">'</span> Link_env.get_memory exports.mem names in
+  <span data-count="2225">l</span>et* tables, names = fill_exports<span data-count="2225">'</span> Link_env.get_table exports.table names in
+  <span data-count="2219">l</span>et+ functions, names = fill_export<span data-count="2219">s</span> Link_env.get_func exports.func names in
+  <span data-count="2211">{</span> State.globals; memories; tables; functions; defined_names = names }
 
 module Binary = struct
   let modul ~name (ls : 'f State.t) (modul : Binary.Module.t) =
-    <span data-count="2319">L</span>og.info (fun m -&gt; <span data-count="22">m</span> "linking      ...");
-    <span data-count="2319">l</span>et ls = State.clone ls in
-    <span data-count="2319">l</span>et next_id = Dynarray.length ls.envs in
-    <span data-count="2319">l</span>et env = Link_env.Build.empty in
-    let* env = eval_function<span data-count="2319">s</span> ls next_id env modul.func in
-    <span data-count="2292">l</span>et* env = eval_global<span data-count="2292">s</span> ls env modul.global in
-    <span data-count="2266">l</span>et* env = eval_memorie<span data-count="2266">s</span> ls env modul.mem in
-    <span data-count="2251">l</span>et* env = eval_table<span data-count="2251">s</span> ls env modul.table in
-    <span data-count="2236">l</span>et* env, init_active_data = define_dat<span data-count="2236">a</span> env modul.data in
-    <span data-count="2232">l</span>et* env, init_active_elem = define_ele<span data-count="2232">m</span> env modul.elem in
-    <span data-count="2227">l</span>et env = Link_env.freeze next_id env ls.collection in
-    <span data-count="2227">D</span>ynarray.add_last ls.envs env;
-    <span data-count="2227">l</span>et+ by_id_exports = populate_export<span data-count="2227">s</span> env modul.exports in
-    <span data-count="2208">l</span>et by_id =
+    <span data-count="2322">L</span>og.info (fun m -&gt; <span data-count="22">m</span> "linking      ...");
+    <span data-count="2322">l</span>et ls = State.clone ls in
+    <span data-count="2322">l</span>et next_id = Dynarray.length ls.envs in
+    <span data-count="2322">l</span>et env = Link_env.Build.empty in
+    let* env = eval_function<span data-count="2322">s</span> ls next_id env modul.func in
+    <span data-count="2295">l</span>et* env = eval_global<span data-count="2295">s</span> ls env modul.global in
+    <span data-count="2269">l</span>et* env = eval_memorie<span data-count="2269">s</span> ls env modul.mem in
+    <span data-count="2254">l</span>et* env = eval_table<span data-count="2254">s</span> ls env modul.table in
+    <span data-count="2239">l</span>et* env, init_active_data = define_dat<span data-count="2239">a</span> env modul.data in
+    <span data-count="2235">l</span>et* env, init_active_elem = define_ele<span data-count="2235">m</span> env modul.elem in
+    <span data-count="2230">l</span>et env = Link_env.freeze next_id env ls.collection in
+    <span data-count="2230">D</span>ynarray.add_last ls.envs env;
+    <span data-count="2230">l</span>et+ by_id_exports = populate_export<span data-count="2230">s</span> env modul.exports in
+    <span data-count="2211">l</span>et by_id =
       match modul.id with
-      | <span data-count="2026">N</span>one -&gt; ls.by_id
+      | <span data-count="2029">N</span>one -&gt; ls.by_id
       | <span data-count="182">S</span>ome id -&gt; StringMap.ad<span data-count="182">d</span> id (by_id_exports, Link_env.i<span data-count="182">d</span> env) ls.by_id
     in
     let by_name =
       match name with
-      | <span data-count="2202">N</span>one -&gt; ls.by_name
+      | <span data-count="2205">N</span>one -&gt; ls.by_name
       | <span data-count="6">S</span>ome name -&gt; StringMap.ad<span data-count="6">d</span> name by_id_exports ls.by_name
     in
     let start =
-      Option.map (fun start_id -&gt; <span data-count="444">[</span> Binary.Call start_id ]) modul.start
+      Option.map (fun start_id -&gt; <span data-count="447">[</span> Binary.Call start_id ]) modul.start
     in
-    <span data-count="2208">l</span>et start = Option.fold ~none:[] ~some:(fun s -&gt; <span data-count="444">[</span> s ]) start in
-    <span data-count="2208">l</span>et to_run = (init_active_data @ init_active_elem) @ start in
+    <span data-count="2211">l</span>et start = Option.fold ~none:[] ~some:(fun s -&gt; <span data-count="447">[</span> s ]) start in
+    <span data-count="2211">l</span>et to_run = (init_active_data @ init_active_elem) @ start in
     let to_run = List.map Annotated.dummy_deep to_run in
-    <span data-count="2208">l</span>et modul = { Linked.Module.id = modul.id; env; to_run } in
+    <span data-count="2211">l</span>et modul = { Linked.Module.id = modul.id; env; to_run } in
     ( modul
     , { State.by_id
       ; by_name
-      ; last = Some (by_id_exports, Link_env.i<span data-count="2208">d</span> env)
+      ; last = Some (by_id_exports, Link_env.i<span data-count="2211">d</span> env)
       ; collection = ls.collection
       ; envs = ls.envs
       } )
@@ -1312,22 +1312,22 @@ end
 
 module Extern = struct
   let modul ~name (modul : 'f Extern.Module.t) (ls : 'f State.t) =
-    <span data-count="948">l</span>et functions, collection =
+    <span data-count="954">l</span>et functions, collection =
       List.fold_left
         (fun (functions, collection) (name, func) -&gt;
-          <span data-count="11703">l</span>et typ = modul.func_type func in
-          <span data-count="11703">D</span>ynarray.add_last collection (func, typ);
-          <span data-count="11703">l</span>et id = Dynarray.lengt<span data-count="11703">h</span> collection - 1 in
-          ((name, (Kind.exter<span data-count="11703">n</span> id : Kind.func)) :: functions, collection) )
+          <span data-count="11778">l</span>et typ = modul.func_type func in
+          <span data-count="11778">D</span>ynarray.add_last collection (func, typ);
+          <span data-count="11778">l</span>et id = Dynarray.lengt<span data-count="11778">h</span> collection - 1 in
+          ((name, (Kind.exter<span data-count="11778">n</span> id : Kind.func)) :: functions, collection) )
         ([], ls.collection) modul.functions
     in
-    <span data-count="948">l</span>et functions = StringMap.of_seq (List.to_se<span data-count="948">q</span> functions) in
-    <span data-count="948">l</span>et defined_names =
+    <span data-count="954">l</span>et functions = StringMap.of_seq (List.to_se<span data-count="954">q</span> functions) in
+    <span data-count="954">l</span>et defined_names =
       StringMap.fold
-        (fun name _ set -&gt; <span data-count="11703">S</span>tringSet.add name set)
+        (fun name _ set -&gt; <span data-count="11778">S</span>tringSet.add name set)
         functions StringSet.empty
     in
-    <span data-count="948">l</span>et exports =
+    <span data-count="954">l</span>et exports =
       { State.functions
       ; globals = StringMap.empty
       ; memories = StringMap.empty
@@ -1335,7 +1335,7 @@ module Extern = struct
       ; defined_names
       }
     in
-    { ls with by_name = StringMap.ad<span data-count="948">d</span> name exports ls.by_name; collection }
+    { ls with by_name = StringMap.ad<span data-count="954">d</span> name exports ls.by_name; collection }
 end
 
 let register_last_module (ls : 'f State.t) ~name ~(id : string option) :

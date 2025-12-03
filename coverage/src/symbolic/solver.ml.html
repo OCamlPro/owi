@@ -178,7 +178,7 @@ type 'a solver_module = (module Smtml.Solver_intf.S with type t = 'a)
 
 type t = S : ('a solver_module * 'a) -&gt; t [@@unboxed]
 
-let instances = Atomic.mak<span data-count="703">e</span> []
+let instances = Atomic.mak<span data-count="707">e</span> []
 
 let rec add_solver solver =
   <span data-count="1">l</span>et l = Atomic.get instances in
@@ -186,23 +186,23 @@ let rec add_solver solver =
   <span data-count="1">i</span>f not success then <span data-count="0">a</span>dd_solver solver
 
 let fresh solver_ty () =
-  <span data-count="776">l</span>et module Mapping = (val Smtml.Solver_dispatcher.mappings_of_solve<span data-count="776">r</span> solver_ty)
+  <span data-count="782">l</span>et module Mapping = (val Smtml.Solver_dispatcher.mappings_of_solve<span data-count="782">r</span> solver_ty)
   in
   let module Mapping = Mapping.Fresh.Make () in
   let module Batch = Smtml.Solver.Cached (Mapping) in
   let solver_inst = Batch.create ~logic:QF_BVFP () in
-  <span data-count="767">l</span>et solver = S ((module Batch), solver_inst) in
+  <span data-count="773">l</span>et solver = S ((module Batch), solver_inst) in
   if Log.is_bench_enabled () then <span data-count="1">a</span>dd_solve<span data-count="1">r</span> solver;
-  <span data-count="768">s</span>olver
+  <span data-count="773">s</span>olver
 
 let check (S (solver_module, s)) pc =
-  <span data-count="27275">l</span>et module Solver = (val solver_module) in
+  <span data-count="27283">l</span>et module Solver = (val solver_module) in
   Solver.check_set s pc
 
 let model (S (solver_module, s)) ~symbol_scopes ~pc =
-  <span data-count="1092">l</span>et module Solver = (val solver_module) in
+  <span data-count="1070">l</span>et module Solver = (val solver_module) in
   let symbols = Symbol_scope.only_symbols symbol_scopes in
-  <span data-count="1092">l</span>et model =
+  <span data-count="1070">l</span>et model =
     match Solver.get_sat_model ~symbols s pc with
     | `Unknown -&gt; assert false
     | <span data-count="0">`</span>Unsat -&gt;
@@ -214,7 +214,7 @@ let model (S (solver_module, s)) ~symbol_scopes ~pc =
           symbols );
       <span data-count="0">L</span>og.err (fun m -&gt; <span data-count="0">m</span> "pc:@\n  @[&lt;v&gt;%a@]" Smtml.Expr.Set.pp pc);
       <span data-count="0">a</span>ssert false
-    | <span data-count="1091">`</span>Model model -&gt; model
+    | <span data-count="1066">`</span>Model model -&gt; model
   in
   model
 

@@ -503,29 +503,29 @@ module Make (X : VariableType) : S with type key = X.t = struct
   let empty = { canonical_elements = MX.empty; node_of_canonicals = MX.empty }
 
   let find_canonical variable t =
-    <span data-count="61404">m</span>atch MX.find_opt variable t.canonical_elements with
-    | <span data-count="52334">N</span>one -&gt; variable
-    | <span data-count="9070">S</span>ome canonical -&gt; canonical
+    <span data-count="61441">m</span>atch MX.find_opt variable t.canonical_elements with
+    | <span data-count="52386">N</span>one -&gt; variable
+    | <span data-count="9056">S</span>ome canonical -&gt; canonical
 
   let add ~merge variable datum t =
     <span data-count="28390">l</span>et variable = find_canonical variable t in
     <span data-count="28390">l</span>et node_of_canonicals =
       MX.update variable
         (function
-          | <span data-count="1233">N</span>one -&gt;
+          | <span data-count="1244">N</span>one -&gt;
             Some { aliases = SX.empty; cardinal = 0; datum = Some datum }
-          | <span data-count="27157">S</span>ome node -&gt;
+          | <span data-count="27147">S</span>ome node -&gt;
             let datum =
               match node.datum with
               | <span data-count="0">N</span>one -&gt; Some datum
-              | <span data-count="27157">S</span>ome existing_datum -&gt; Some (merg<span data-count="27157">e</span> datum existing_datum)
+              | <span data-count="27146">S</span>ome existing_datum -&gt; Some (merg<span data-count="27147">e</span> datum existing_datum)
             in
             Some { node with datum } )
         t.node_of_canonicals
     in
-    <span data-count="28390">{</span> t with node_of_canonicals }
+    <span data-count="28392">{</span> t with node_of_canonicals }
 
-  let find_node_opt canonical t = <span data-count="27631">M</span>X.find_opt canonical t.node_of_canonicals
+  let find_node_opt canonical t = <span data-count="27660">M</span>X.find_opt canonical t.node_of_canonicals
 
   let find_node canonical t =
     <span data-count="1342">m</span>atch find_node_opt canonical t with
@@ -533,9 +533,9 @@ module Make (X : VariableType) : S with type key = X.t = struct
     | <span data-count="1013">S</span>ome node -&gt; node
 
   let find_opt variable t =
-    <span data-count="26289">O</span>ption.bind
-      (find_node_op<span data-count="26288">t</span> (find_canonica<span data-count="26288">l</span> variable t) t)
-      (fun node -&gt; <span data-count="26289">n</span>ode.datum)
+    <span data-count="26318">O</span>ption.bind
+      (find_node_op<span data-count="26318">t</span> (find_canonica<span data-count="26318">l</span> variable t) t)
+      (fun node -&gt; <span data-count="26318">n</span>ode.datum)
 
   let set_canonical_element aliases canonical canonical_elements =
     <span data-count="671">S</span>X.fold
@@ -543,9 +543,9 @@ module Make (X : VariableType) : S with type key = X.t = struct
       aliases canonical_elements
 
   let union ~merge lhs rhs t =
-    <span data-count="3363">l</span>et lhs = find_canonical lhs t in
-    <span data-count="3363">l</span>et rhs = find_canonical rhs t in
-    <span data-count="3363">i</span>f X.equal lhs rhs then <span data-count="2692">t</span>
+    <span data-count="3367">l</span>et lhs = find_canonical lhs t in
+    <span data-count="3366">l</span>et rhs = find_canonical rhs t in
+    <span data-count="3367">i</span>f X.equal lhs rhs then <span data-count="2695">t</span>
     else
       <span data-count="671">l</span>et lhs_node = find_node lhs t in
       <span data-count="671">l</span>et rhs_node = find_node rhs t in

@@ -168,9 +168,9 @@ open Smtml.Expr
 
 let ty = Smtml.Ty.Ty_fp 64
 
-let of_concrete (f : Float64.t) : t = <span data-count="738">v</span>alue (Num (F64 (Float64.to_bit<span data-count="738">s</span> f)))
+let of_concrete (f : Float64.t) : t = <span data-count="751">v</span>alue (Num (F64 (Float64.to_bit<span data-count="751">s</span> f)))
 
-let zero = of_concret<span data-count="703">e</span> Float64.zero
+let zero = of_concret<span data-count="707">e</span> Float64.zero
 
 let abs x = <span data-count="3">u</span>nop ty Abs x
 
@@ -200,13 +200,13 @@ let max x y = <span data-count="1">b</span>inop ty Max x y
 
 let copy_sign x y = <span data-count="3">b</span>inop ty Copysign x y
 
-let eq x y = <span data-count="30">r</span>elop ty Eq x y
+let eq x y = <span data-count="33">r</span>elop ty Eq x y
 
 let ne x y = <span data-count="1">r</span>elop ty Ne x y
 
-let lt x y = <span data-count="5">r</span>elop ty Lt x y
+let lt x y = <span data-count="8">r</span>elop ty Lt x y
 
-let gt x y = <span data-count="4">r</span>elop ty Gt x y
+let gt x y = <span data-count="7">r</span>elop ty Gt x y
 
 let le x y = <span data-count="2">r</span>elop ty Le x y
 

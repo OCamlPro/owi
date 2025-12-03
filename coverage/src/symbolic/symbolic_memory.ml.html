@@ -93,29 +93,29 @@
 </pre>
 <pre><code class="ocaml">include Symbolic_memory_concretizing
 
-let load_8_s m a = <span data-count="567">S</span>ymbolic_choice_with_memory.lift_mem @@ load_8_<span data-count="567">s</span> m a
+let load_8_s m a = <span data-count="571">S</span>ymbolic_choice_with_memory.lift_mem @@ load_8_<span data-count="571">s</span> m a
 
-let load_8_u m a = <span data-count="3331">S</span>ymbolic_choice_with_memory.lift_mem @@ load_8_<span data-count="3331">u</span> m a
+let load_8_u m a = <span data-count="3339">S</span>ymbolic_choice_with_memory.lift_mem @@ load_8_<span data-count="3338">u</span> m a
 
 let load_16_s m a = <span data-count="2">S</span>ymbolic_choice_with_memory.lift_mem @@ load_16_<span data-count="2">s</span> m a
 
 let load_16_u m a = <span data-count="2">S</span>ymbolic_choice_with_memory.lift_mem @@ load_16_<span data-count="2">u</span> m a
 
-let load_32 m a = <span data-count="73802">S</span>ymbolic_choice_with_memory.lift_mem @@ load_3<span data-count="73801">2</span> m a
+let load_32 m a = <span data-count="73857">S</span>ymbolic_choice_with_memory.lift_mem @@ load_3<span data-count="73851">2</span> m a
 
 let load_64 m a = <span data-count="79">S</span>ymbolic_choice_with_memory.lift_mem @@ load_6<span data-count="79">4</span> m a
 
 let store_8 m ~addr v =
-  <span data-count="3151">S</span>ymbolic_choice_with_memory.lift_mem @@ store_<span data-count="3151">8</span> m ~addr v
+  <span data-count="3157">S</span>ymbolic_choice_with_memory.lift_mem @@ store_<span data-count="3157">8</span> m ~addr v
 
 let store_16 m ~addr v =
   <span data-count="4">S</span>ymbolic_choice_with_memory.lift_mem @@ store_1<span data-count="4">6</span> m ~addr v
 
 let store_32 m ~addr v =
-  <span data-count="641038">S</span>ymbolic_choice_with_memory.lift_mem @@ store_3<span data-count="641020">2</span> m ~addr v
+  <span data-count="641057">S</span>ymbolic_choice_with_memory.lift_mem @@ store_3<span data-count="641053">2</span> m ~addr v
 
 let store_64 m ~addr v =
-  <span data-count="349770">S</span>ymbolic_choice_with_memory.lift_mem @@ store_6<span data-count="349768">4</span> m ~addr v
+  <span data-count="349766">S</span>ymbolic_choice_with_memory.lift_mem @@ store_6<span data-count="349764">4</span> m ~addr v
 
 let fill m ~pos ~len c =
   <span data-count="0">S</span>ymbolic_choice_with_memory.lift_mem @@ fil<span data-count="0">l</span> m ~pos ~len c

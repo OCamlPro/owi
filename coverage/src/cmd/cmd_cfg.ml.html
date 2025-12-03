@@ -382,8 +382,8 @@ type to_add =
   | End
 
 let update_edges x next (edges, acc) (n, m, s) =
-  <span data-count="68">m</span>atch m with
-  | <span data-count="39">N</span>ext -&gt; ((n, next, s) :: edges, acc)
+  <span data-count="69">m</span>atch m with
+  | <span data-count="40">N</span>ext -&gt; ((n, next, s) :: edges, acc)
   | <span data-count="10">I</span>nd 0 -&gt; ((n, x, s) :: edges, acc)
   | <span data-count="8">I</span>nd m -&gt; (edges, (n, Ind (m - 1), s) :: acc)
   | <span data-count="11">_</span> -&gt; (edges, (n, m, s) :: acc)
@@ -397,12 +397,12 @@ let increase x =
 
 let rec build_graph (l : Binary.expr) nodes n node edges
   (edges_to_add : (int * to_add * Int32.t option) list) continue =
-  <span data-count="555">m</span>atch l with
-  | <span data-count="42">[</span>] -&gt; (
+  <span data-count="604">m</span>atch l with
+  | <span data-count="43">[</span>] -&gt; (
     match node with
-    | <span data-count="23">[</span>] -&gt;
+    | <span data-count="24">[</span>] -&gt;
       if continue then
-        <span data-count="20">l</span>et nodes = (n, node) :: nodes in
+        <span data-count="21">l</span>et nodes = (n, node) :: nodes in
         let edges_to_add = (n, Next, None) :: edges_to_add in
         (nodes, edges, n + 1, edges_to_add, true)
       else <span data-count="3">(</span>nodes, edges, n, edges_to_add, true)
@@ -410,7 +410,7 @@ let rec build_graph (l : Binary.expr) nodes n node edges
       let nodes = (n, node) :: nodes in
       let edges_to_add = (n, Next, None) :: edges_to_add in
       (nodes, edges, n + 1, edges_to_add, true) )
-  | <span data-count="513">i</span>nstr :: l -&gt; (
+  | <span data-count="561">i</span>nstr :: l -&gt; (
     match instr.raw with
     | <span data-count="8">B</span>lock (_, _, exp) -&gt;
       let nodes, edges, n, edges_to_add, continue =
@@ -486,20 +486,20 @@ let rec build_graph (l : Binary.expr) nodes n node edges
     | <span data-count="1">U</span>nreachable -&gt;
       let nodes = (n, instr :: node) :: nodes in
       (nodes, edges, n + 1, edges_to_add, false)
-    | <span data-count="12">C</span>all _ | <span data-count="4">C</span>all_indirect _ -&gt;
+    | <span data-count="22">C</span>all _ | <span data-count="4">C</span>all_indirect _ -&gt;
       let nodes = (n, instr :: node) :: nodes in
       let edges = (n, n + 1, None) :: edges in
       build_graph l nodes (n + 1) [] edges edges_to_add continue
-    | <span data-count="467">_</span> -&gt; build_graph l nodes n (instr :: node) edges edges_to_add continue )
+    | <span data-count="505">_</span> -&gt; build_graph l nodes n (instr :: node) edges edges_to_add continue )
 
 let build_cfg instr =
-  <span data-count="30">l</span>et nodes, edges, n, edges_to_add, _ = build_graph instr [] 0 [] [] [] true in
-  <span data-count="30">l</span>et nodes = (n, [ Annotated.dumm<span data-count="30">y</span> Binary.Return ]) :: nodes in
+  <span data-count="31">l</span>et nodes, edges, n, edges_to_add, _ = build_graph instr [] 0 [] [] [] true in
+  <span data-count="31">l</span>et nodes = (n, [ Annotated.dumm<span data-count="31">y</span> Binary.Return ]) :: nodes in
   let edges, edges_to_add =
-    List.fold_left (update_edge<span data-count="30">s</span> n n) (edges, []) edges_to_add
+    List.fold_left (update_edge<span data-count="31">s</span> n n) (edges, []) edges_to_add
   in
-  <span data-count="30">l</span>et edges = List.fold_left (update_edges_en<span data-count="30">d</span> n) edges edges_to_add in
-  <span data-count="30">(</span>nodes, edges)
+  <span data-count="31">l</span>et edges = List.fold_left (update_edges_en<span data-count="31">d</span> n) edges edges_to_add in
+  <span data-count="31">(</span>nodes, edges)
 
 let build_cfg_from_text_module modul entry =
   <span data-count="0">l</span>et m = Compile.Text.until_validate ~unsafe:false modul in
@@ -515,8 +515,8 @@ let build_cfg_from_text_module modul entry =
   | _ -&gt; assert false
 
 let build_cfg_from_func (f : Binary.Func.t) =
-  <span data-count="25">l</span>et nodes, edges = build_cfg f.body.raw in
-  <span data-count="25">C</span>ontrol_flow_graph.init nodes edges
+  <span data-count="26">l</span>et nodes, edges = build_cfg f.body.raw in
+  <span data-count="26">C</span>ontrol_flow_graph.init nodes edges
 
 let cmd ~source_file ~entry_point =
   <span data-count="5">l</span>et* m = Compile.File.until_validat<span data-count="5">e</span> ~unsafe:false source_file in
