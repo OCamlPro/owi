@@ -216,8 +216,9 @@ let rec pp_instr ~short fmt = function
   | Memory_size id -> pf fmt "memory.size%a" pp_indice_not0 id
   | Memory_grow id -> pf fmt "memory.grow%a" pp_indice_not0 id
   | Memory_fill id -> pf fmt "memory.fill%a" pp_indice_not0 id
+  | Memory_copy (0, 0) -> pf fmt "memory.copy"
   | Memory_copy (id1, id2) ->
-    pf fmt "memory.copy%a%a" pp_indice_not0 id1 pp_indice_not0 id2
+    pf fmt "memory.copy %a %a" pp_indice id1 pp_indice id2
   | Memory_init (memidx, dataidx) ->
     pf fmt "memory.init%a %a" pp_indice_not0 memidx pp_indice dataidx
   | Data_drop id -> pf fmt "data.drop %a" pp_indice id

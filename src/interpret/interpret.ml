@@ -1016,15 +1016,15 @@ struct
       let* mem = Env.get_memory env memid in
       let* () = Memory.fill mem ~pos ~len c in
       st stack
-    | Memory_copy (memid1, memid2) ->
+    | Memory_copy (dstmemid, srcmemid) ->
       let len, stack = Stack.pop_i32 stack in
       let src_idx, stack = Stack.pop_i32 stack in
       let dst_idx, stack = Stack.pop_i32 stack in
-      let* mem1 = Env.get_memory env memid1 in
-      let* mem2 = Env.get_memory env memid2 in
+      let* srcmem = Env.get_memory env srcmemid in
+      let* dstmem = Env.get_memory env dstmemid in
       let>! () =
-        let size1 = I64.extend_i32_u (Memory.size mem1) in
-        let size2 = I64.extend_i32_u (Memory.size mem2) in
+        let size1 = I64.extend_i32_u (Memory.size srcmem) in
+        let size2 = I64.extend_i32_u (Memory.size dstmem) in
         let len = I64.extend_i32_u len in
         let src_idx = I64.extend_i32_u src_idx in
         let dst_idx = I64.extend_i32_u dst_idx in
@@ -1033,9 +1033,9 @@ struct
             (I64.gt_u I64.(add dst_idx len) size2)
         , `Out_of_bounds_memory_access )
       in
-      let* mem1 = Env.get_memory env memid1 in
-      let* mem2 = Env.get_memory env memid2 in
-      let* () = Memory.blit ~src:mem1 ~src_idx ~dst:mem2 ~dst_idx ~len in
+      let* srcmem = Env.get_memory env srcmemid in
+      let* dstmem = Env.get_memory env dstmemid in
+      let* () = Memory.blit ~src:srcmem ~src_idx ~dst:dstmem ~dst_idx ~len in
       st stack
     | Memory_init (memid, dataid) ->
       let len, stack = Stack.pop_i32 stack in
