@@ -10,8 +10,6 @@ module F64 = Symbolic_f64
 module V128 = Symbolic_v128
 module Ref = Symbolic_ref
 
-type boolean = Boolean.t
-
 type i32 = I32.t
 
 type i64 = I64.t

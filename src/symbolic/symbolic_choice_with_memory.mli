@@ -9,6 +9,5 @@ include
       , Thread_with_memory.t )
       Symbolic_choice.CoreImpl.State.t
      and type thread := Thread_with_memory.t
-     and module Value := Symbolic_value
 
 val lift_mem : 'a Symbolic_choice_without_memory.t -> 'a t

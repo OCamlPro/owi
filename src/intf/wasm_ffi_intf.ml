@@ -7,17 +7,7 @@ module type S0 = sig
 
   type memory
 
-  module Value : sig
-    type i32
-
-    type i64
-
-    type f32
-
-    type f64
-
-    type v128
-  end
+  module Value : Value_intf.T
 
   val symbol_bool : unit -> Value.i32 t
 

@@ -49,7 +49,7 @@ module type S = sig
 
   val clone : t -> t
 
-  val add_pc : t -> Symbolic_value.boolean -> t
+  val add_pc : t -> Symbolic_boolean.t -> t
 
   val add_breadcrumb : t -> int -> t
 
