@@ -142,10 +142,11 @@ let write_limits buf (limits : Text.limits) =
     write_u32_of_int buf max
 
 let write_memarg buf idx ({ offset; align } : Text.memarg) =
-  (* Set the 6th bit *)
-  write_u32 buf (Int32.logor align 0x40l);
-  (* Should this set the max_align bit instead of always setting the 6th? *)
-  write_indice buf idx;
+  if idx = 0 then write_u32 buf align
+  else (
+    (* Set the 6th bit if the id not 0 *)
+    write_u32 buf (Int32.logor align 0x40l);
+    write_indice buf idx );
   write_u32 buf offset
 
 let write_memory buf ((_so, limits) : Text.Mem.t) = write_limits buf limits

@@ -28,11 +28,16 @@ module Input : sig
   val of_string : string -> t
 
   val sub : pos:int -> len:int -> t -> t Result.t
+
+  val nbmems : t -> int
+
+  val incr_nbmems : t -> t
 end = struct
   type t =
     { bytes : string
     ; pt : int
     ; size : int
+    ; nbmems : int
     }
 
   let size s = s.size
@@ -41,7 +46,7 @@ end = struct
 
   let of_string str =
     let size = String.length str in
-    { bytes = str; pt = 0; size }
+    { bytes = str; pt = 0; size; nbmems = 0 }
 
   let sub ~pos ~len input =
     if pos <= input.size && len <= input.size - pos then
@@ -57,6 +62,10 @@ end = struct
     else None
 
   let as_string input = String.sub input.bytes input.pt input.size
+
+  let nbmems { nbmems; _ } = nbmems
+
+  let incr_nbmems ({ nbmems; _ } as t) = { t with nbmems = nbmems + 1 }
 end
 
 let string_of_char_list char_list =
@@ -289,7 +298,9 @@ let read_limits input =
 let read_memarg max_align input =
   let* align_64, input = read_UN 32 input in
   let align = Int64.to_int32 align_64 in
-  let has_memidx = Int32.ne (Int32.logand align 0x40l) 0l in
+  let has_memidx =
+    Input.nbmems input > 1 && Int32.ne (Int32.logand align 0x40l) 0l
+  in
   (* Is the 6th bit set? *)
   let* memidx, align, input =
     if has_memidx then
@@ -822,7 +833,7 @@ let read_import input =
     ((modul, name, Table (limits, ref_type)), input)
   | '\x02' ->
     let+ limits, input = read_limits input in
-    ((modul, name, Mem limits), input)
+    ((modul, name, Mem limits), Input.incr_nbmems input)
   | '\x03' ->
     let+ (mut, val_type), input = read_global_type input in
     ((modul, name, Global (mut, val_type)), input)
@@ -1047,7 +1058,8 @@ let sections_iterate (input : Input.t) =
 
   (* Memory *)
   let* memory_section, input =
-    section_parse input ~expected_id:'\x05' [] (vector_no_id read_memory)
+    section_parse input ~expected_id:'\x05' []
+      (vector_no_id (fun input -> read_memory (Input.incr_nbmems input)))
   in
 
   (* Custom *)
