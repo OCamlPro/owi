@@ -204,7 +204,7 @@ let check_end_opcode ?unexpected_eoi_msg input =
   | Error _ as e -> e
 
 let check_zero_opcode input =
-  let msg = "zero byte expected" in
+  let msg = "data count section required" in
   match read_byte ~msg input with
   | Ok ('\x00', input) -> Ok input
   | Ok (c, _input) -> parse_fail "%s (got %s instead)" msg (Char.escaped c)
@@ -262,7 +262,9 @@ let read_mut input =
   | _c -> parse_fail "malformed mutability"
 
 let read_limits input =
-  let* b, input = read_byte ~msg:"read_limits" input in
+  let* b, input =
+    read_byte ~msg:"unexpected end of section or function (read_limits)" input
+  in
   match b with
   | '\x00' ->
     let+ min, input = read_U32 input in
@@ -770,7 +772,9 @@ let section_parse input ~expected_id default section_content_parse =
 
 let parse_utf8_name input =
   let* () =
-    if Input.size input = 0 then parse_fail "unexpected end" else Ok ()
+    if Input.size input = 0 then
+      parse_fail "unexpected end of section or function"
+    else Ok ()
   in
   let* name, input = read_bytes ~msg:"parse_utf8_name" input in
   let name = string_of_char_list name in
@@ -946,10 +950,7 @@ let read_code types input =
       parse_fail "unexpected end of section or function"
     else Ok ()
   in
-  let* code_input =
-    check_end_opcode ~unexpected_eoi_msg:"unexpected end of section or function"
-      code_input
-  in
+  let* code_input = check_end_opcode code_input in
   if Input.size code_input > 0 then
     parse_fail "unexpected end of section or function"
   else Ok ((locals, code), next_input)
@@ -970,17 +971,26 @@ let read_data types input =
   match i with
   | 0 ->
     let* mode, input = read_data_active_zero types input in
-    let+ init, input = read_bytes ~msg:"read_data 0" input in
+    let+ init, input =
+      read_bytes ~msg:"unexpected end of section or function (read_data 0)"
+        input
+    in
     let init = string_of_char_list init in
     ({ Data.id; init; mode }, input)
   | 1 ->
     let mode = Data.Mode.Passive in
-    let+ init, input = read_bytes ~msg:"read_data 1" input in
+    let+ init, input =
+      read_bytes ~msg:"unexpected end of section or function (read_data 1)"
+        input
+    in
     let init = string_of_char_list init in
     ({ Data.id; init; mode }, input)
   | 2 ->
     let* mode, input = read_data_active types input in
-    let+ init, input = read_bytes ~msg:"read_data 2" input in
+    let+ init, input =
+      read_bytes ~msg:"unexpected end of section or function (read_data 2)"
+        input
+    in
     let init = string_of_char_list init in
     ({ Data.id; init; mode }, input)
   | i -> parse_fail "malformed data segment kind %d" i
