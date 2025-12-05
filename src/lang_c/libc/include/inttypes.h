@@ -221,10 +221,14 @@ typedef long long          int64_t;
 typedef unsigned long long uint64_t;
 typedef long long          intmax_t;
 typedef unsigned long long uintmax_t;
+#ifndef __FRAMAC__
 typedef __int128           int128_t;
 typedef unsigned __int128  uint128_t;
-
 typedef int        intptr_t;
 typedef unsigned int uintptr_t;
+#else
+typedef long int        intptr_t;
+typedef unsigned long int uintptr_t;
+#endif
 
 #endif
