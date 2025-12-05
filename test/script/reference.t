@@ -177,7 +177,7 @@
   $ owi script --no-exhaustion reference/proposals/multi-memory/memory-multi.wast
   $ owi script --no-exhaustion reference/proposals/multi-memory/memory.wast
 ;  $ owi script --no-exhaustion reference/proposals/multi-memory/simd_memory-multi.wast
-; simd instructions are not yet fully supported
+; TODO: simd instructions are not yet fully supported
   $ owi script --no-exhaustion reference/proposals/multi-memory/start0.wast
   $ owi script --no-exhaustion reference/proposals/multi-memory/store.wast
   $ owi script --no-exhaustion reference/proposals/multi-memory/store0.wast
