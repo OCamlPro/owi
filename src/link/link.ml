@@ -257,14 +257,17 @@ let active_elem_expr ~offset ~length ~table ~elem =
   ; Elem_drop elem
   ]
 
-let active_data_expr ~offset ~length ~mem ~data =
-  Ok
-    [ Binary.I32_const offset
-    ; I32_const 0l
-    ; I32_const length
-    ; Memory_init (mem, data)
-    ; Data_drop data
-    ]
+let active_data_expr env ~offset ~length ~mem ~data =
+  if not (Link_env.IMap.mem mem (Link_env.Build.get_memories env)) then
+    Error (`Unknown_memory (Text.Raw mem))
+  else
+    Ok
+      [ Binary.I32_const offset
+      ; I32_const 0l
+      ; I32_const length
+      ; Memory_init (mem, data)
+      ; Data_drop data
+      ]
 
 let get_i32 = function
   | Concrete_value.I32 i -> Ok i
@@ -282,7 +285,7 @@ let define_data env data =
             let* offset = Eval_const.expr env offset in
             let length = Int32.of_int @@ String.length data.init in
             let* offset = get_i32 offset in
-            let* v = active_data_expr ~offset ~length ~mem ~data:id in
+            let* v = active_data_expr env ~offset ~length ~mem ~data:id in
             ok @@ (v :: init)
           | Passive -> Ok init
         in

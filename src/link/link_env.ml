@@ -106,6 +106,8 @@ module Build = struct
     match IMap.find_opt id env.functions with
     | None -> Error (`Unknown_func (Text.Raw id))
     | Some v -> Ok v
+
+  let get_memories { memories; _ } = memories
 end
 
 let freeze id ({ globals; memories; tables; functions; data; elem } : Build.t)
