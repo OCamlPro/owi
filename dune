@@ -1,3 +1,8 @@
+(env
+ (release
+  (ocamlopt_flags
+   (:standard -O3))))
+
 (mdx
  (libraries owi)
  (deps %{bin:owi})

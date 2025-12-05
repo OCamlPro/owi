@@ -231,7 +231,12 @@ let load_func (ls : 'f State.t) (import : Binary.block_type Origin.imported) :
       t
   in
   if Text.func_type_eq typ type' then Ok func
-  else Error (`Incompatible_import_type import.name)
+  else
+    let msg =
+      Fmt.str "%s: expected: %a got: %a" import.name Text.pp_func_type typ
+        Text.pp_func_type type'
+    in
+    Error (`Incompatible_import_type msg)
 
 let eval_func ls (finished_env : int) func : func Result.t =
   match func with

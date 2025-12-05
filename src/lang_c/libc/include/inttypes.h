@@ -211,20 +211,20 @@
 #define SCNuPTR __PRIPTR_PREFIX "u"
 #define SCNxPTR __PRIPTR_PREFIX "x"
 
-typedef signed char int8_t;
-typedef signed short int16_t;
-typedef signed int int32_t;
+typedef signed char        int8_t;
+typedef unsigned char      uint8_t;
+typedef short              int16_t;
+typedef unsigned short     uint16_t;
+typedef int                int32_t;
+typedef unsigned int       uint32_t;
+typedef long long          int64_t;
+typedef unsigned long long uint64_t;
+typedef long long          intmax_t;
+typedef unsigned long long uintmax_t;
+typedef __int128           int128_t;
+typedef unsigned __int128  uint128_t;
 
-typedef unsigned char uint8_t;
-typedef unsigned short uint16_t;
-typedef unsigned int uint32_t;
-
-typedef signed long int64_t;
-typedef unsigned long uint64_t;
-typedef signed long intmax_t;
-typedef unsigned long uintmax_t;
-
-typedef long int intptr_t;
-typedef unsigned long int uintptr_t;
+typedef int        intptr_t;
+typedef unsigned int uintptr_t;
 
 #endif
