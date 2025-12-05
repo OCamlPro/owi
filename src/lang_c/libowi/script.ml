@@ -14,8 +14,9 @@ let () =
       let out = Format.sprintf "%s.o" filename in
       let n =
         Format.ksprintf Sys.command
-          "clang -O3 -ffreestanding --no-standard-libraries --target=wasm32 -c \
-           -m32 -Iinclude -I../libc/include/ -Wall -Werror -Wno-int-conversion \
+          "clang -O3 -ffreestanding --no-standard-libraries \
+           --target=wasm32-unknown-unknown -c -m32 -Iinclude \
+           -I../libc/include/ -Wall -Werror -Wno-int-conversion \
            -Wno-return-type -fbracket-depth=512 \
            -DWANT_STRTOD_WITHOUT_LONG_DOUBLE -o %s %s"
           out c_filename
