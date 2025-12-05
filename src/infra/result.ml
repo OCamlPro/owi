@@ -34,7 +34,6 @@ type err =
   | `Malformed_utf8_encoding of string
   | `Memory_size_too_large
   | `Msg of string
-  | `Multiple_memories
   | `Multiple_start_sections
   | `No_error
   | `Parse_fail of string
@@ -124,7 +123,6 @@ let rec err_to_string = function
   | `Malformed_utf8_encoding txt -> Fmt.str "malformed UTF-8 encoding %S" txt
   | `Memory_size_too_large -> "memory size must be at most 65536 pages (4GiB)"
   | `Msg msg -> msg
-  | `Multiple_memories -> "multiple memories"
   | `Multiple_start_sections -> "multiple start sections"
   | `No_error -> "no error"
   | `Parse_fail msg -> msg
@@ -208,7 +206,6 @@ let err_to_exit_code = function
   | `Malformed_utf8_encoding _txt -> 24
   | `Memory_size_too_large -> 25
   | `Msg _msg -> 26
-  | `Multiple_memories -> 27
   | `Multiple_start_sections -> 28
   | `Parse_fail _txt -> 30
   | `Size_minimum_greater_than_maximum -> 31

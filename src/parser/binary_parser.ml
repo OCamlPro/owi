@@ -28,11 +28,16 @@ module Input : sig
   val of_string : string -> t
 
   val sub : pos:int -> len:int -> t -> t Result.t
+
+  val nbmems : t -> int
+
+  val incr_nbmems : t -> t
 end = struct
   type t =
     { bytes : string
     ; pt : int
     ; size : int
+    ; nbmems : int
     }
 
   let size s = s.size
@@ -41,7 +46,7 @@ end = struct
 
   let of_string str =
     let size = String.length str in
-    { bytes = str; pt = 0; size }
+    { bytes = str; pt = 0; size; nbmems = 0 }
 
   let sub ~pos ~len input =
     if pos <= input.size && len <= input.size - pos then
@@ -57,6 +62,10 @@ end = struct
     else None
 
   let as_string input = String.sub input.bytes input.pt input.size
+
+  let nbmems { nbmems; _ } = nbmems
+
+  let incr_nbmems ({ nbmems; _ } as t) = { t with nbmems = nbmems + 1 }
 end
 
 let string_of_char_list char_list =
@@ -204,7 +213,7 @@ let check_end_opcode ?unexpected_eoi_msg input =
   | Error _ as e -> e
 
 let check_zero_opcode input =
-  let msg = "zero byte expected" in
+  let msg = "data count section required" in
   match read_byte ~msg input with
   | Ok ('\x00', input) -> Ok input
   | Ok (c, _input) -> parse_fail "%s (got %s instead)" msg (Char.escaped c)
@@ -262,7 +271,9 @@ let read_mut input =
   | _c -> parse_fail "malformed mutability"
 
 let read_limits input =
-  let* b, input = read_byte ~msg:"read_limits" input in
+  let* b, input =
+    read_byte ~msg:"unexpected end of section or function (read_limits)" input
+  in
   match b with
   | '\x00' ->
     let+ min, input = read_U32 input in
@@ -273,14 +284,36 @@ let read_limits input =
     ({ Text.min; max = Some max }, input)
   | _c -> parse_fail "integer too large (read_limits)"
 
+(* There are some differences between what is done here and the docs:
+    https://webassembly.github.io/spec/core/binary/instructions.html#memory-instructions
+    https://webassembly.github.io/spec/core/syntax/instructions.html#memory-instructions
+   - `offset` is a u64 in the docs but a u32 here
+   - the "Unsigned 64-bit overflow" test in test\script\reference\align.wast
+   does not pass because with `i32.load offset=0 align=2**64` align (= 64) is
+   greater than max_align (= 32) so it should fail, but the doc says that if
+   the 6th bit (= 64) is set then the memidx is set so now it does not detect
+   the error, sine the new align is 0 (after unsetting the flag for memdix)
+
+*)
 let read_memarg max_align input =
-  let* align, input = read_U32 input in
-  if align >= max_align then parse_fail "malformed memop flags"
+  let* align_64, input = read_UN 32 input in
+  let align = Int64.to_int32 align_64 in
+  let has_memidx =
+    Input.nbmems input > 1 && Int32.ne (Int32.logand align 0x40l) 0l
+  in
+  (* Is the 6th bit set? *)
+  let* memidx, align, input =
+    if has_memidx then
+      let+ memidx, input = read_indice input in
+      (* Unset the 6th bit *)
+      (memidx, Int32.logand align (Int32.lognot 0x40l), input)
+    else Ok (0, align, input)
+  in
+  if Int32.to_int align >= max_align then parse_fail "malformed memop flags"
   else
     let+ offset, input = read_U32 input in
-    let align = Int32.of_int align in
     let offset = Int32.of_int offset in
-    ({ Text.align; offset }, input)
+    (memidx, { Text.align; offset }, input)
 
 let read_FC input =
   let* i, input = read_U32 input in
@@ -295,18 +328,19 @@ let read_FC input =
   | 7 -> Ok (I_trunc_sat_f (S64, S64, U), input)
   | 8 ->
     let* dataidx, input = read_indice input in
+    let* memidx, input = read_indice input in
     let+ input = check_zero_opcode input in
-    (Memory_init dataidx, input)
+    (Memory_init (memidx, dataidx), input)
   | 9 ->
     let+ dataidx, input = read_indice input in
     (Data_drop dataidx, input)
   | 10 ->
-    let* input = check_zero_opcode input in
-    let+ input = check_zero_opcode input in
-    (Memory_copy, input)
+    let* id1, input = read_indice input in
+    let+ id2, input = read_indice input in
+    (Memory_copy (id1, id2), input)
   | 11 ->
-    let+ input = check_zero_opcode input in
-    (Memory_fill, input)
+    let+ id, input = read_indice input in
+    (Memory_fill id, input)
   | 12 ->
     let* elemidx, input = read_indice input in
     let+ tableidx, input = read_indice input in
@@ -456,80 +490,80 @@ let rec read_instr types input =
     let+ tableidx, input = read_indice input in
     (Table_set tableidx, input)
   | '\x28' ->
-    let+ memarg, input = read_memarg 32 input in
-    (I_load (S32, memarg), input)
+    let+ idx, memarg, input = read_memarg 32 input in
+    (I_load (idx, S32, memarg), input)
   | '\x29' ->
-    let+ memarg, input = read_memarg 64 input in
-    (I_load (S64, memarg), input)
+    let+ idx, memarg, input = read_memarg 64 input in
+    (I_load (idx, S64, memarg), input)
   | '\x2A' ->
-    let+ memarg, input = read_memarg 32 input in
-    (F_load (S32, memarg), input)
+    let+ idx, memarg, input = read_memarg 32 input in
+    (F_load (idx, S32, memarg), input)
   | '\x2B' ->
-    let+ memarg, input = read_memarg 64 input in
-    (F_load (S64, memarg), input)
+    let+ idx, memarg, input = read_memarg 64 input in
+    (F_load (idx, S64, memarg), input)
   | '\x2C' ->
-    let+ memarg, input = read_memarg 32 input in
-    (I_load8 (S32, S, memarg), input)
+    let+ idx, memarg, input = read_memarg 32 input in
+    (I_load8 (idx, S32, S, memarg), input)
   | '\x2D' ->
-    let+ memarg, input = read_memarg 32 input in
-    (I_load8 (S32, U, memarg), input)
+    let+ idx, memarg, input = read_memarg 32 input in
+    (I_load8 (idx, S32, U, memarg), input)
   | '\x2E' ->
-    let+ memarg, input = read_memarg 32 input in
-    (I_load16 (S32, S, memarg), input)
+    let+ idx, memarg, input = read_memarg 32 input in
+    (I_load16 (idx, S32, S, memarg), input)
   | '\x2F' ->
-    let+ memarg, input = read_memarg 32 input in
-    (I_load16 (S32, U, memarg), input)
+    let+ idx, memarg, input = read_memarg 32 input in
+    (I_load16 (idx, S32, U, memarg), input)
   | '\x30' ->
-    let+ memarg, input = read_memarg 64 input in
-    (I_load8 (S64, S, memarg), input)
+    let+ idx, memarg, input = read_memarg 64 input in
+    (I_load8 (idx, S64, S, memarg), input)
   | '\x31' ->
-    let+ memarg, input = read_memarg 64 input in
-    (I_load8 (S64, U, memarg), input)
+    let+ idx, memarg, input = read_memarg 64 input in
+    (I_load8 (idx, S64, U, memarg), input)
   | '\x32' ->
-    let+ memarg, input = read_memarg 64 input in
-    (I_load16 (S64, S, memarg), input)
+    let+ idx, memarg, input = read_memarg 64 input in
+    (I_load16 (idx, S64, S, memarg), input)
   | '\x33' ->
-    let+ memarg, input = read_memarg 64 input in
-    (I_load16 (S64, U, memarg), input)
+    let+ idx, memarg, input = read_memarg 64 input in
+    (I_load16 (idx, S64, U, memarg), input)
   | '\x34' ->
-    let+ memarg, input = read_memarg 32 input in
-    (I64_load32 (S, memarg), input)
+    let+ idx, memarg, input = read_memarg 32 input in
+    (I64_load32 (idx, S, memarg), input)
   | '\x35' ->
-    let+ memarg, input = read_memarg 32 input in
-    (I64_load32 (U, memarg), input)
+    let+ idx, memarg, input = read_memarg 32 input in
+    (I64_load32 (idx, U, memarg), input)
   | '\x36' ->
-    let+ memarg, input = read_memarg 32 input in
-    (I_store (S32, memarg), input)
+    let+ idx, memarg, input = read_memarg 32 input in
+    (I_store (idx, S32, memarg), input)
   | '\x37' ->
-    let+ memarg, input = read_memarg 64 input in
-    (I_store (S64, memarg), input)
+    let+ idx, memarg, input = read_memarg 64 input in
+    (I_store (idx, S64, memarg), input)
   | '\x38' ->
-    let+ memarg, input = read_memarg 32 input in
-    (F_store (S32, memarg), input)
+    let+ idx, memarg, input = read_memarg 32 input in
+    (F_store (idx, S32, memarg), input)
   | '\x39' ->
-    let+ memarg, input = read_memarg 64 input in
-    (F_store (S64, memarg), input)
+    let+ idx, memarg, input = read_memarg 64 input in
+    (F_store (idx, S64, memarg), input)
   | '\x3A' ->
-    let+ memarg, input = read_memarg 32 input in
-    (I_store8 (S32, memarg), input)
+    let+ idx, memarg, input = read_memarg 32 input in
+    (I_store8 (idx, S32, memarg), input)
   | '\x3B' ->
-    let+ memarg, input = read_memarg 32 input in
-    (I_store16 (S32, memarg), input)
+    let+ idx, memarg, input = read_memarg 32 input in
+    (I_store16 (idx, S32, memarg), input)
   | '\x3C' ->
-    let+ memarg, input = read_memarg 64 input in
-    (I_store8 (S64, memarg), input)
+    let+ idx, memarg, input = read_memarg 64 input in
+    (I_store8 (idx, S64, memarg), input)
   | '\x3D' ->
-    let+ memarg, input = read_memarg 64 input in
-    (I_store16 (S64, memarg), input)
+    let+ idx, memarg, input = read_memarg 64 input in
+    (I_store16 (idx, S64, memarg), input)
   | '\x3E' ->
-    let+ memarg, input = read_memarg 32 input in
-    (I64_store32 memarg, input)
+    let+ idx, memarg, input = read_memarg 32 input in
+    (I64_store32 (idx, memarg), input)
   | '\x3F' ->
-    let+ input = check_zero_opcode input in
-    (Memory_size, input)
+    let+ id, input = read_indice input in
+    (Memory_size id, input)
   | '\x40' ->
-    let+ input = check_zero_opcode input in
-    (Memory_grow, input)
+    let+ id, input = read_indice input in
+    (Memory_grow id, input)
   | '\x41' ->
     let+ i32, input = read_S32 input in
     (I32_const i32, input)
@@ -749,7 +783,9 @@ let section_parse input ~expected_id default section_content_parse =
 
 let parse_utf8_name input =
   let* () =
-    if Input.size input = 0 then parse_fail "unexpected end" else Ok ()
+    if Input.size input = 0 then
+      parse_fail "unexpected end of section or function"
+    else Ok ()
   in
   let* name, input = read_bytes ~msg:"parse_utf8_name" input in
   let name = string_of_char_list name in
@@ -797,7 +833,7 @@ let read_import input =
     ((modul, name, Table (limits, ref_type)), input)
   | '\x02' ->
     let+ limits, input = read_limits input in
-    ((modul, name, Mem limits), input)
+    ((modul, name, Mem limits), Input.incr_nbmems input)
   | '\x03' ->
     let+ (mut, val_type), input = read_global_type input in
     ((modul, name, Global (mut, val_type)), input)
@@ -925,10 +961,7 @@ let read_code types input =
       parse_fail "unexpected end of section or function"
     else Ok ()
   in
-  let* code_input =
-    check_end_opcode ~unexpected_eoi_msg:"unexpected end of section or function"
-      code_input
-  in
+  let* code_input = check_end_opcode code_input in
   if Input.size code_input > 0 then
     parse_fail "unexpected end of section or function"
   else Ok ((locals, code), next_input)
@@ -949,17 +982,26 @@ let read_data types input =
   match i with
   | 0 ->
     let* mode, input = read_data_active_zero types input in
-    let+ init, input = read_bytes ~msg:"read_data 0" input in
+    let+ init, input =
+      read_bytes ~msg:"unexpected end of section or function (read_data 0)"
+        input
+    in
     let init = string_of_char_list init in
     ({ Data.id; init; mode }, input)
   | 1 ->
     let mode = Data.Mode.Passive in
-    let+ init, input = read_bytes ~msg:"read_data 1" input in
+    let+ init, input =
+      read_bytes ~msg:"unexpected end of section or function (read_data 1)"
+        input
+    in
     let init = string_of_char_list init in
     ({ Data.id; init; mode }, input)
   | 2 ->
     let* mode, input = read_data_active types input in
-    let+ init, input = read_bytes ~msg:"read_data 2" input in
+    let+ init, input =
+      read_bytes ~msg:"unexpected end of section or function (read_data 2)"
+        input
+    in
     let init = string_of_char_list init in
     ({ Data.id; init; mode }, input)
   | i -> parse_fail "malformed data segment kind %d" i
@@ -1016,7 +1058,8 @@ let sections_iterate (input : Input.t) =
 
   (* Memory *)
   let* memory_section, input =
-    section_parse input ~expected_id:'\x05' [] (vector_no_id read_memory)
+    section_parse input ~expected_id:'\x05' []
+      (vector_no_id (fun input -> read_memory (Input.incr_nbmems input)))
   in
 
   (* Custom *)

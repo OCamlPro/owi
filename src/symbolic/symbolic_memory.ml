@@ -27,5 +27,5 @@ let store_64 m ~addr v =
 let fill m ~pos ~len c =
   Symbolic_choice_with_memory.lift_mem @@ fill m ~pos ~len c
 
-let blit m ~src ~dst ~len =
-  Symbolic_choice_with_memory.lift_mem @@ blit m ~src ~dst ~len
+let blit ~src ~src_idx ~dst ~dst_idx ~len =
+  Symbolic_choice_with_memory.lift_mem @@ blit ~src ~src_idx ~dst ~dst_idx ~len
