@@ -61,6 +61,7 @@ int fflush(FILE *stream);
 int ferror(FILE *stream);
 size_t fread(void *ptr, size_t size, size_t nmemb, FILE *restrict stream);
 
+int vasprintf(char **s, const char *fmt, va_list ap);
 /*
 int vprintf(const char *format, va_list ap);
 int vfprintf(FILE *stream, const char *format, va_list ap);
