@@ -24,7 +24,7 @@ let extern_module : Concrete_extern_func.extern_func Extern.Module.t =
   let functions =
     [ ("print_x64", Extern_func (i64 ^->. unit, print_x64))
     ; ( "memset"
-      , Extern_func (memory 0l ^-> i32 ^-> i32 ^-> i32 ^->. unit, memset) )
+      , Extern_func (memory 0 ^-> i32 ^-> i32 ^-> i32 ^->. unit, memset) )
     ]
   in
   { Extern.Module.functions; func_type = Concrete_extern_func.extern_type }
