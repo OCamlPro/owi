@@ -2,6 +2,8 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
+module IMap : Map.S with type key = int
+
 type 'ext t
 
 type elem = { mutable value : Concrete_value.Ref.t array }
@@ -48,6 +50,8 @@ module Build : sig
   val get_const_global : t -> int -> Concrete_value.t Result.t
 
   val get_func : t -> int -> Kind.func Result.t
+
+  val get_memories : t -> Concrete_memory.t IMap.t
 end
 
 val freeze : int -> Build.t -> ('ext * Text.func_type) Dynarray.t -> 'ext t
