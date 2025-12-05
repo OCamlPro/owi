@@ -86,7 +86,7 @@ let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file
     Cmd.(
       of_list
         ( [ Fmt.str "-O%s" opt_lvl
-          ; "--target=wasm32"
+          ; "--target=wasm32-unknown-unknown"
           ; "-m32"
           ; "-ffreestanding"
           ; "--no-standard-libraries"
