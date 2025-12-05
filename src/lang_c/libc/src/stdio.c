@@ -51,7 +51,7 @@ int vsnprintf(char *str, size_t size, const char *format, va_list ap) {
   return 0;
 }
 
+int vasprintf(char **s, const char *fmt, va_list ap) { return 0; }
+
 FILE memstream = {0};
-FILE *open_memstream(char **ptr, size_t *sizeloc) {
-  return &memstream;
-}
+FILE *open_memstream(char **ptr, size_t *sizeloc) { return &memstream; }
