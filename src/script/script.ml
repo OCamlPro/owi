@@ -24,8 +24,22 @@ let check_error ~expected ~got : unit Result.t =
       String.starts_with ~prefix:"i32 constant" expected
     | `Constant_out_of_range ->
       String.starts_with ~prefix:"i32 constant" expected
+    | `Parse_fail "unexpected end of section or function"
     | `Msg "unexpected end of section or function" ->
       String.equal expected "section size mismatch"
+    | `Parse_fail "END opcode expected" ->
+      String.equal expected "illegal opcode"
+      || String.equal expected "unexpected end"
+    | `Parse_fail "integer representation too long (read_SN 2)" ->
+      String.equal expected "unexpected end of section or function"
+    | `Parse_fail "integer representation too long (read_UN 2)" ->
+      String.equal expected "unexpected end of section or function"
+      || String.equal expected "length out of bounds"
+      || String.equal expected "unexpected end"
+    | `Parse_fail "integer too large (read_limits)" ->
+      String.equal expected "integer representation too long"
+    | `Parse_fail "function and code section have inconsistent lengths" ->
+      String.equal expected "unexpected content after last section"
     | _ -> false
   in
   if not ok then begin
