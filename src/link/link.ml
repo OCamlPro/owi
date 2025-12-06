@@ -390,7 +390,7 @@ module Binary = struct
       Option.map (fun start_id -> [ Binary.Call start_id ]) modul.start
     in
     let start = Option.fold ~none:[] ~some:(fun s -> [ s ]) start in
-    let to_run = (init_active_data @ init_active_elem) @ start in
+    let to_run = (init_active_elem @ init_active_data) @ start in
     let to_run = List.map Annotated.dummy_deep to_run in
     let modul = { Linked.Module.id = modul.id; env; to_run } in
     ( modul
