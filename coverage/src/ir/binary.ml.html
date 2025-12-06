@@ -1506,36 +1506,36 @@ and pp_expr ~short fmt instrs =
     instrs
 
 let rec iter_expr f (e : expr Annotated.t) =
-  <span data-count="6247">A</span>nnotated.iter (List.ite<span data-count="6247">r</span> (iter_inst<span data-count="6247">r</span> f)) e
+  <span data-count="6250">A</span>nnotated.iter (List.ite<span data-count="6250">r</span> (iter_inst<span data-count="6250">r</span> f)) e
 
 and iter_instr f instr =
-  <span data-count="153016">A</span>nnotated.iter f instr;
-  <span data-count="153016">A</span>nnotated.iter
-    (<span data-count="153016">f</span>unction
-      | <span data-count="23325">I</span>32_const _ | <span data-count="474">I</span>64_const _ | <span data-count="10">F</span>32_const _ | <span data-count="0">F</span>64_const _ | <span data-count="0">V</span>128_const _
+  <span data-count="153093">A</span>nnotated.iter f instr;
+  <span data-count="153093">A</span>nnotated.iter
+    (<span data-count="153093">f</span>unction
+      | <span data-count="23324">I</span>32_const _ | <span data-count="474">I</span>64_const _ | <span data-count="10">F</span>32_const _ | <span data-count="0">F</span>64_const _ | <span data-count="0">V</span>128_const _
       | <span data-count="364">I</span>_unop (_, _)
       | <span data-count="0">F</span>_unop (_, _)
-      | <span data-count="14172">I</span>_binop (_, _)
+      | <span data-count="14171">I</span>_binop (_, _)
       | <span data-count="33">F</span>_binop (_, _)
       | <span data-count="0">V</span>_ibinop (_, _)
       | <span data-count="1666">I</span>_testop (_, _)
       | <span data-count="3909">I</span>_relop (_, _)
       | <span data-count="8">F</span>_relop (_, _)
-      | <span data-count="19">I</span>_extend8_s _ | <span data-count="0">I</span>_extend16_s _ | <span data-count="0">I</span>64_extend32_s | <span data-count="21">I</span>32_wrap_i64
-      | <span data-count="31">I</span>64_extend_i32 _
+      | <span data-count="19">I</span>_extend8_s _ | <span data-count="0">I</span>_extend16_s _ | <span data-count="0">I</span>64_extend32_s | <span data-count="23">I</span>32_wrap_i64
+      | <span data-count="63">I</span>64_extend_i32 _
       | <span data-count="0">I</span>_trunc_f (_, _, _)
       | <span data-count="33">I</span>_trunc_sat_f (_, _, _)
       | <span data-count="0">F</span>32_demote_f64 | <span data-count="0">F</span>64_promote_f32
       | <span data-count="37">F</span>_convert_i (_, _, _)
       | <span data-count="0">I</span>_reinterpret_f (_, _)
       | <span data-count="0">F</span>_reinterpret_i (_, _)
-      | <span data-count="0">R</span>ef_null _ | <span data-count="0">R</span>ef_is_null | <span data-count="0">R</span>ef_func _ | <span data-count="1902">D</span>rop | <span data-count="1121">S</span>elect _ | <span data-count="43637">L</span>ocal_get _
-      | <span data-count="7859">L</span>ocal_set _ | <span data-count="7067">L</span>ocal_tee _ | <span data-count="360">G</span>lobal_get _ | <span data-count="688">G</span>lobal_set _ | <span data-count="0">T</span>able_get _
+      | <span data-count="0">R</span>ef_null _ | <span data-count="0">R</span>ef_is_null | <span data-count="0">R</span>ef_func _ | <span data-count="1902">D</span>rop | <span data-count="1121">S</span>elect _ | <span data-count="43640">L</span>ocal_get _
+      | <span data-count="7862">L</span>ocal_set _ | <span data-count="7107">L</span>ocal_tee _ | <span data-count="360">G</span>lobal_get _ | <span data-count="688">G</span>lobal_set _ | <span data-count="0">T</span>able_get _
       | <span data-count="0">T</span>able_set _ | <span data-count="0">T</span>able_size _ | <span data-count="0">T</span>able_grow _ | <span data-count="0">T</span>able_fill _
       | <span data-count="0">T</span>able_copy (_, _)
       | <span data-count="0">T</span>able_init (_, _)
       | <span data-count="0">E</span>lem_drop _
-      | <span data-count="11446">I</span>_load (_, _)
+      | <span data-count="11439">I</span>_load (_, _)
       | <span data-count="45">F</span>_load (_, _)
       | <span data-count="8864">I</span>_store (_, _)
       | <span data-count="12">F</span>_store (_, _)
@@ -1545,7 +1545,7 @@ and iter_instr f instr =
       | <span data-count="1905">I</span>_store8 (_, _)
       | <span data-count="29">I</span>_store16 (_, _)
       | <span data-count="0">I</span>64_store32 _ | <span data-count="0">M</span>emory_size | <span data-count="3">M</span>emory_grow | <span data-count="6">M</span>emory_fill | <span data-count="17">M</span>emory_copy
-      | <span data-count="0">M</span>emory_init _ | <span data-count="0">D</span>ata_drop _ | <span data-count="0">N</span>op | <span data-count="252">U</span>nreachable | <span data-count="1601">B</span>r _ | <span data-count="5486">B</span>r_if _
+      | <span data-count="0">M</span>emory_init _ | <span data-count="0">D</span>ata_drop _ | <span data-count="0">N</span>op | <span data-count="252">U</span>nreachable | <span data-count="1604">B</span>r _ | <span data-count="5486">B</span>r_if _
       | <span data-count="26">B</span>r_table (_, _)
       | <span data-count="1004">R</span>eturn | <span data-count="0">R</span>eturn_call _
       | <span data-count="0">R</span>eturn_call_indirect (_, _)
@@ -1553,7 +1553,7 @@ and iter_instr f instr =
       | <span data-count="1008">C</span>all_indirect (_, _)
       | <span data-count="0">C</span>all_ref _ | <span data-count="0">E</span>xtern_externalize | <span data-count="0">E</span>xtern_internalize -&gt;
         ()
-      | <span data-count="5212">B</span>lock (_, _, e) | <span data-count="829">L</span>oop (_, _, e) -&gt; iter_expr f e
+      | <span data-count="5215">B</span>lock (_, _, e) | <span data-count="829">L</span>oop (_, _, e) -&gt; iter_expr f e
       | <span data-count="0">I</span>f_else (_, _, e1, e2) -&gt;
         iter_expr f e1;
         <span data-count="0">i</span>ter_expr f e2 )
@@ -1673,14 +1673,14 @@ module Module = struct
     <span data-count="926">l</span>et update_idx idx = <span data-count="33331">i</span>f idx &gt;= i then <span data-count="26597">i</span>dx + 1 else <span data-count="6734">i</span>dx in
 
     let rec handle_instr instr =
-      <span data-count="641337">A</span>nnotated.map
+      <span data-count="641645">A</span>nnotated.map
         (function
           | <span data-count="29935">C</span>all idx -&gt; Call (update_id<span data-count="29935">x</span> idx)
           | <span data-count="0">R</span>eturn_call idx -&gt; Return_call (update_id<span data-count="0">x</span> idx)
           | <span data-count="2458">R</span>ef_func idx -&gt; Ref_func (update_id<span data-count="2458">x</span> idx)
-          | <span data-count="21750">B</span>lock (id, typ, body) -&gt;
+          | <span data-count="21762">B</span>lock (id, typ, body) -&gt;
             let body = handle_expr body in
-            <span data-count="21750">B</span>lock (id, typ, body)
+            <span data-count="21762">B</span>lock (id, typ, body)
           | <span data-count="3402">L</span>oop (id, typ, body) -&gt;
             let body = handle_expr body in
             <span data-count="3402">L</span>oop (id, typ, body)
@@ -1688,12 +1688,12 @@ module Module = struct
             let true_branch = handle_expr true_branch in
             <span data-count="17">l</span>et false_branch = handle_expr false_branch in
             <span data-count="17">I</span>f_else (id, typ, true_branch, false_branch)
-          | <span data-count="583775">i</span>nstr -&gt;
+          | <span data-count="584071">i</span>nstr -&gt;
             (* TODO: make this match non fragile *)
             instr )
         instr
     and handle_expr expr =
-      <span data-count="40376">A</span>nnotated.map (fun expr -&gt; <span data-count="40376">L</span>ist.map handle_instr expr) expr
+      <span data-count="40388">A</span>nnotated.map (fun expr -&gt; <span data-count="40388">L</span>ist.map handle_instr expr) expr
     in
     let update_function = function
       | <span data-count="5911">O</span>rigin.Imported _ as f -&gt; f

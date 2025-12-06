@@ -410,12 +410,12 @@
 
 open Prelude.Result
 
-let ( let* ) o f = <span data-count="1858738">m</span>atch o with <span data-count="1849622">O</span>k v -&gt; f v | <span data-count="9116">E</span>rror _ as e -&gt; e [@@inline]
+let ( let* ) o f = <span data-count="1859223">m</span>atch o with <span data-count="1850107">O</span>k v -&gt; f v | <span data-count="9116">E</span>rror _ as e -&gt; e [@@inline]
 
-let ( let+ ) o f = <span data-count="1305100">m</span>atch o with <span data-count="1301995">O</span>k v -&gt; Ok (<span data-count="1301995">f</span> v) | <span data-count="3105">E</span>rror _ as e -&gt; e
+let ( let+ ) o f = <span data-count="1305482">m</span>atch o with <span data-count="1302377">O</span>k v -&gt; Ok (<span data-count="1302377">f</span> v) | <span data-count="3105">E</span>rror _ as e -&gt; e
 [@@inline]
 
-let ok v = <span data-count="216416">O</span>k v [@@inline]
+let ok v = <span data-count="216487">O</span>k v [@@inline]
 
 let list_iter f l =
   <span data-count="1253">l</span>et rec aux = function
@@ -446,10 +446,10 @@ let list_concat_map f l =
 [@@inline]
 
 let list_fold_left f acc l =
-  <span data-count="43176">l</span>et rec aux acc = function
-    | <span data-count="41453">[</span>] -&gt; Ok acc
-    | <span data-count="251829">v</span> :: tl -&gt; (
-      match f acc v with <span data-count="250106">O</span>k acc -&gt; aux acc tl | <span data-count="1723">E</span>rror _ as e -&gt; e )
+  <span data-count="43179">l</span>et rec aux acc = function
+    | <span data-count="41456">[</span>] -&gt; Ok acc
+    | <span data-count="251906">v</span> :: tl -&gt; (
+      match f acc v with <span data-count="250183">O</span>k acc -&gt; aux acc tl | <span data-count="1723">E</span>rror _ as e -&gt; e )
   in
   aux acc l
 [@@inline]

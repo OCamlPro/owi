@@ -149,8 +149,8 @@ type 'a t =
 let raw { raw; _ } = <span data-count="0">r</span>aw
 
 let dummy raw =
-  <span data-count="65008011">{</span> raw
-  ; instr_counter = Atomic.mak<span data-count="65007997">e</span> 0
+  <span data-count="65006780">{</span> raw
+  ; instr_counter = Atomic.mak<span data-count="65006775">e</span> 0
   ; functions_called = S.empty
   ; d_true = ref None
   ; d_false = ref None
@@ -177,10 +177,10 @@ let dummy_deep raw =
   }
 
 let map f { raw; instr_counter; functions_called; d_true; d_false } =
-  <span data-count="682227">l</span>et raw = f raw in
-  <span data-count="682227">{</span> raw; instr_counter; functions_called; d_true; d_false }
+  <span data-count="682547">l</span>et raw = f raw in
+  <span data-count="682547">{</span> raw; instr_counter; functions_called; d_true; d_false }
 
-let iter f { raw; _ } = <span data-count="313537">f</span> raw
+let iter f { raw; _ } = <span data-count="313694">f</span> raw
 
 let update_functions_called annot l = <span data-count="25">a</span>nnot.functions_called &lt;- l
 

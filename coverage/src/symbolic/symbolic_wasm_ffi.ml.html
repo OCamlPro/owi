@@ -565,7 +565,7 @@ module M :
         with <span data-count="0">I</span>nvalid_argument _ -&gt; false )
 
   let assume (i : Symbolic_value.i32) : unit Symbolic_choice_with_memory.t =
-    <span data-count="598">S</span>ymbolic_choice_with_memory.assume @@ Symbolic_value.I32.to_boo<span data-count="598">l</span> i
+    <span data-count="601">S</span>ymbolic_choice_with_memory.assume @@ Symbolic_value.I32.to_boo<span data-count="601">l</span> i
 
   let assert' (i : Symbolic_value.i32) : unit Symbolic_choice_with_memory.t =
     <span data-count="96968">S</span>ymbolic_choice_with_memory.assertion @@ Symbolic_value.I32.to_boo<span data-count="96969">l</span> i
@@ -609,16 +609,16 @@ module M :
     <span data-count="12">x</span>
 
   let abort () : unit Symbolic_choice_with_memory.t =
-    <span data-count="1">S</span>ymbolic_choice_with_memory.stop
+    <span data-count="2">S</span>ymbolic_choice_with_memory.stop
 
   let alloc m (base : Symbolic_value.i32) (size : Symbolic_value.i32) :
     Symbolic_value.i32 Symbolic_choice_with_memory.t =
-    <span data-count="9919">S</span>ymbolic_choice_with_memory.lift_mem
-    @@ Symbolic_memory.reallo<span data-count="9919">c</span> m ~ptr:base ~size
+    <span data-count="9913">S</span>ymbolic_choice_with_memory.lift_mem
+    @@ Symbolic_memory.reallo<span data-count="9913">c</span> m ~ptr:base ~size
 
   let free m (ptr : Symbolic_value.i32) :
     Symbolic_value.i32 Symbolic_choice_with_memory.t =
-    <span data-count="2539">S</span>ymbolic_choice_with_memory.lift_mem @@ Symbolic_memory.fre<span data-count="2539">e</span> m ptr
+    <span data-count="2541">S</span>ymbolic_choice_with_memory.lift_mem @@ Symbolic_memory.fre<span data-count="2541">e</span> m ptr
 
   let exit (_p : Symbolic_value.i32) : unit Symbolic_choice_with_memory.t =
     <span data-count="1">a</span>bort ()
