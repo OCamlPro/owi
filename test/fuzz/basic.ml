@@ -378,29 +378,46 @@ let block_type env =
   and+ result_type = list val_type in
   Bt_raw (None, (param_type, result_type))
 
-let memory_size : (instr * S.stack_op list) gen =
-  pair (const (Memory_size (assert false))) (const [ S.Push (Num_type I32) ])
+let memid (env : Env.t) =
+  let memories = List.map const env.memories in
+  let+ memory = choose memories in
+  Text memory
 
-let memory_grow : (instr * S.stack_op list) gen =
-  pair (const (Memory_grow (assert false))) (const [ S.Nothing ])
-
-let memory_copy : (instr * S.stack_op list) gen =
+let memory_size env : (instr * S.stack_op list) gen =
   pair
-    (const (Memory_copy (assert false, assert false)))
+    (let+ id = memid env in
+     Memory_size id )
+    (const [ S.Push (Num_type I32) ])
+
+let memory_grow env : (instr * S.stack_op list) gen =
+  pair
+    (let+ id = memid env in
+     Memory_grow id )
+    (const [ S.Nothing ])
+
+let memory_copy env : (instr * S.stack_op list) gen =
+  pair
+    (let+ id1 = memid env
+     and+ id2 = memid env in
+     Memory_copy (id1, id2) )
     (const [ S.Pop; S.Pop; S.Pop ])
 
-let memory_fill : (instr * S.stack_op list) gen =
-  pair (const (Memory_fill (assert false))) (const [ S.Pop; S.Pop; S.Pop ])
+let memory_fill env : (instr * S.stack_op list) gen =
+  pair
+    (let+ id = memid env in
+     Memory_fill id )
+    (const [ S.Pop; S.Pop; S.Pop ])
 
 let memory_init (env : Env.t) =
   List.map
     (fun name ->
       pair
-        (const (Memory_init (Text name, assert false)))
+        (let+ id = memid env in
+         Memory_init (id, Text name) )
         (const [ S.Pop; S.Pop; S.Pop ]) )
     env.datas
 
-let memory_exists (env : Env.t) = Option.is_some env.memory
+let memory_exists (env : Env.t) = List.compare_length_with env.memories 0 > 0
 
 let memarg nsize =
   let+ offset = int32
@@ -415,82 +432,100 @@ let memarg nsize =
   let align = Int32.of_int align in
   { offset; align }
 
-let i32_load : instr gen =
-  let+ memarg = memarg NS32 in
-  I_load (assert false, S32, memarg)
-
-let i64_load : instr gen =
-  let+ memarg = memarg NS64 in
-  I_load (assert false, S64, memarg)
-
-let f32_load : instr gen =
-  let+ memarg = memarg NS32 in
-  F_load (assert false, S32, memarg)
-
-let f64_load : instr gen =
-  let+ memarg = memarg NS64 in
-  F_load (assert false, S64, memarg)
-
-let i32_load8 : instr gen =
-  let+ memarg = memarg NS8
-  and+ sx in
-  I_load8 (assert false, S32, sx, memarg)
-
-let i32_load16 : instr gen =
-  let+ memarg = memarg NS16
-  and+ sx in
-  I_load16 (assert false, S32, sx, memarg)
-
-let i64_load8 : instr gen =
-  let+ memarg = memarg NS8
-  and+ sx in
-  I_load8 (assert false, S64, sx, memarg)
-
-let i64_load16 : instr gen =
-  let+ memarg = memarg NS16
-  and+ sx in
-  I_load16 (assert false, S64, sx, memarg)
-
-let i64_load32 : instr gen =
+let i32_load env : instr gen =
   let+ memarg = memarg NS32
+  and+ id = memid env in
+  I_load (id, S32, memarg)
+
+let i64_load env : instr gen =
+  let+ memarg = memarg NS64
+  and+ id = memid env in
+  I_load (id, S64, memarg)
+
+let f32_load env : instr gen =
+  let+ memarg = memarg NS32
+  and+ id = memid env in
+  F_load (id, S32, memarg)
+
+let f64_load env : instr gen =
+  let+ memarg = memarg NS64
+  and+ id = memid env in
+  F_load (id, S64, memarg)
+
+let i32_load8 env : instr gen =
+  let+ memarg = memarg NS8
+  and+ id = memid env
   and+ sx in
-  I64_load32 (assert false, sx, memarg)
+  I_load8 (id, S32, sx, memarg)
 
-let i32_store : instr gen =
-  let+ memarg = memarg NS32 in
-  I_store (assert false, S32, memarg)
+let i32_load16 env : instr gen =
+  let+ memarg = memarg NS16
+  and+ id = memid env
+  and+ sx in
+  I_load16 (id, S32, sx, memarg)
 
-let i64_store : instr gen =
-  let+ memarg = memarg NS64 in
-  I_store (assert false, S64, memarg)
+let i64_load8 env : instr gen =
+  let+ memarg = memarg NS8
+  and+ id = memid env
+  and+ sx in
+  I_load8 (id, S64, sx, memarg)
 
-let f32_store : instr gen =
-  let+ memarg = memarg NS32 in
-  F_store (assert false, S32, memarg)
+let i64_load16 env : instr gen =
+  let+ memarg = memarg NS16
+  and+ id = memid env
+  and+ sx in
+  I_load16 (id, S64, sx, memarg)
 
-let f64_store : instr gen =
-  let+ memarg = memarg NS64 in
-  F_store (assert false, S64, memarg)
+let i64_load32 env : instr gen =
+  let+ memarg = memarg NS32
+  and+ id = memid env
+  and+ sx in
+  I64_load32 (id, sx, memarg)
 
-let i32_store8 : instr gen =
-  let+ memarg = memarg NS8 in
-  I_store8 (assert false, S32, memarg)
+let i32_store env : instr gen =
+  let+ memarg = memarg NS32
+  and+ id = memid env in
+  I_store (id, S32, memarg)
 
-let i64_store8 : instr gen =
-  let+ memarg = memarg NS8 in
-  I_store8 (assert false, S64, memarg)
+let i64_store env : instr gen =
+  let+ memarg = memarg NS64
+  and+ id = memid env in
+  I_store (id, S64, memarg)
 
-let i32_store16 : instr gen =
-  let+ memarg = memarg NS16 in
-  I_store16 (assert false, S32, memarg)
+let f32_store env : instr gen =
+  let+ memarg = memarg NS32
+  and+ id = memid env in
+  F_store (id, S32, memarg)
 
-let i64_store16 : instr gen =
-  let+ memarg = memarg NS16 in
-  I_store16 (assert false, S64, memarg)
+let f64_store env : instr gen =
+  let+ memarg = memarg NS64
+  and+ id = memid env in
+  F_store (id, S64, memarg)
 
-let i64_store32 : instr gen =
-  let+ memarg = memarg NS32 in
-  I64_store32 (assert false, memarg)
+let i32_store8 env : instr gen =
+  let+ memarg = memarg NS8
+  and+ id = memid env in
+  I_store8 (id, S32, memarg)
+
+let i64_store8 env : instr gen =
+  let+ memarg = memarg NS8
+  and+ id = memid env in
+  I_store8 (id, S64, memarg)
+
+let i32_store16 env : instr gen =
+  let+ memarg = memarg NS16
+  and+ id = memid env in
+  I_store16 (id, S32, memarg)
+
+let i64_store16 env : instr gen =
+  let+ memarg = memarg NS16
+  and+ id = memid env in
+  I_store16 (id, S64, memarg)
+
+let i64_store32 env : instr gen =
+  let+ memarg = memarg NS32
+  and+ id = memid env in
+  I64_store32 (id, memarg)
 
 let data_active name =
   let+ inst = const_i32 in
@@ -498,9 +533,12 @@ let data_active name =
   Owi.Text.Data.Mode.Active (Some (Text name), exp)
 
 let data_mode (env : Env.t) =
-  match env.memory with
-  | Some name -> choose [ const Owi.Text.Data.Mode.Passive; data_active name ]
-  | None -> const Owi.Text.Data.Mode.Passive
+  match env.memories with
+  | [] -> const Owi.Text.Data.Mode.Passive
+  | memories ->
+    choose
+      ( const Owi.Text.Data.Mode.Passive
+      :: List.map (fun id -> data_active id) memories )
 
 let data_drop (env : Env.t) =
   List.map
