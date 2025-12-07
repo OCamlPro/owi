@@ -259,50 +259,50 @@ let rec expr ~block_type ~stack ~locals env : expr Owi.Annotated.t gen =
       let stack = S.apply_stack_ops stack ops in
       expr ~block_type ~stack ~locals env
     and+ i = const (Owi.Annotated.dummy i) in
-    let res : expr = i :: next.raw in
+    let res : expr = i :: Owi.Annotated.raw next in
     Owi.Annotated.dummy res
 
-let data env : Owi.Text.module_field gen =
+let data env : Module.Field.t gen =
   let+ mode = B.data_mode env
   (* TODO: add some real data ! *)
   and+ init = (*bytes*) const "tmp" in
   (* TODO: Issue #37 *)
   let id = Some (Env.add_data env) in
-  MData { id; init; mode }
+  Module.Field.Data { id; init; mode }
 
-let memory env : Owi.Text.module_field gen =
+let memory env : Module.Field.t gen =
   (* TODO: fix time explosion https://github.com/OCamlPro/owi/pull/28#discussion_r1212835761 *)
   let sup = if true then 10 else 65537 in
   let* min = range sup in
   let+ max = option (range ~min (sup - min)) in
   let id = Some (Env.add_memory env) in
-  MMem (id, { min; max })
+  Module.Field.Mem (id, { min; max })
 
-let typ env : Owi.Text.module_field gen =
+let typ env : Module.Field.t gen =
   let+ typ = B.func_type in
   let id = Some (Env.add_type env typ) in
-  MType (id, typ)
+  Module.Field.Typedef (id, typ)
 
-let elem env : Owi.Text.module_field gen =
+let elem env : Module.Field.t gen =
   let+ typ = B.ref_type
   and+ mode = B.elem_mode env in
   let id = Some (Env.add_elem env typ) in
-  MElem { id; typ; init = []; mode }
+  Module.Field.Elem { id; typ; init = []; mode }
 
-let table env : Owi.Text.module_field gen =
+let table env : Module.Field.t gen =
   let+ typ = B.table_type in
   let id = Some (Env.add_table env typ) in
-  MTable (id, typ)
+  Module.Field.Table (id, typ)
 
-let global env : Owi.Text.module_field gen =
+let global env : Module.Field.t gen =
   let* ((_mut, t) as typ) = B.global_type in
   let+ init = B.const_of_val_type t in
   let id = Some (Env.add_global env typ) in
   let init = [ init ] in
   let init = Owi.Annotated.dummy_deep init in
-  MGlobal { typ; init; id }
+  Module.Field.Global { typ; init; id }
 
-let func env : Owi.Text.module_field gen =
+let func env : Module.Field.t gen =
   let* () = const () in
   Env.reset_locals env;
   Env.refill_fuel env;
@@ -312,9 +312,9 @@ let func env : Owi.Text.module_field gen =
   let+ body = expr ~block_type:type_f ~stack:[] ~locals env in
   Env.remove_block env;
   let id = Some (Env.add_func env type_f) in
-  MFunc { type_f; locals; body; id }
+  Module.Field.Func { type_f; locals; body; id }
 
-let fields env : Owi.Text.module_field list gen =
+let fields env : Module.Field.t list gen =
   let+ memory =
     (* No memory management in symbolic context.
        TODO: When implementation will be more advanced,
@@ -335,9 +335,9 @@ let fields env : Owi.Text.module_field list gen =
     let type_f = Bt_raw (None, ([], [])) in
     let id = Some "start" in
     let+ body = expr ~block_type:type_f ~stack:[] ~locals:[] env in
-    MFunc { type_f; locals = []; body; id }
+    Module.Field.Func { type_f; locals = []; body; id }
   in
-  let start = MStart (Raw 0) in
+  let start = Module.Field.Start (Raw 0) in
   let funcs = start :: start_code :: funcs in
   match memory with
   | None -> datas @ types @ elems @ tables @ globals @ funcs
@@ -347,4 +347,4 @@ let modul conf =
   let id = Some "m" in
   let* env = const Env.empty in
   let+ fields = fields (env conf) in
-  { id; fields }
+  Module.{ id; fields }

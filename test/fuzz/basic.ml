@@ -103,7 +103,7 @@ let const_i64 =
 let const_v128 =
   let* a = int64 in
   let+ b = int64 in
-  let v128 = Owi.V128.of_i64x2 a b in
+  let v128 = Owi.Concrete_v128.of_i64x2 a b in
   V128_const v128
 
 let ibinop_32 : instr gen =
@@ -361,11 +361,11 @@ let elem_active (env : Env.t) =
     (fun (name, _) ->
       let+ ind = const (Some (Owi.Text.Text name))
       and+ instr = const_i32 in
-      Owi.Text.Elem_active (ind, [ instr ] |> Owi.Annotated.dummy_deep) )
+      Owi.Text.Elem.Mode.Active (ind, [ instr ] |> Owi.Annotated.dummy_deep) )
     env.tables
 
 let elem_mode (env : Env.t) =
-  choose (const Owi.Text.Elem_passive :: elem_active env)
+  choose (const Owi.Text.Elem.Mode.Passive :: elem_active env)
 (* TODO: complete Elem_declarative - elem_active *)
 
 let param env =
@@ -379,21 +379,25 @@ let block_type env =
   Bt_raw (None, (param_type, result_type))
 
 let memory_size : (instr * S.stack_op list) gen =
-  pair (const Memory_size) (const [ S.Push (Num_type I32) ])
+  pair (const (Memory_size (assert false))) (const [ S.Push (Num_type I32) ])
 
 let memory_grow : (instr * S.stack_op list) gen =
-  pair (const Memory_grow) (const [ S.Nothing ])
+  pair (const (Memory_grow (assert false))) (const [ S.Nothing ])
 
 let memory_copy : (instr * S.stack_op list) gen =
-  pair (const Memory_copy) (const [ S.Pop; S.Pop; S.Pop ])
+  pair
+    (const (Memory_copy (assert false, assert false)))
+    (const [ S.Pop; S.Pop; S.Pop ])
 
 let memory_fill : (instr * S.stack_op list) gen =
-  pair (const Memory_fill) (const [ S.Pop; S.Pop; S.Pop ])
+  pair (const (Memory_fill (assert false))) (const [ S.Pop; S.Pop; S.Pop ])
 
 let memory_init (env : Env.t) =
   List.map
     (fun name ->
-      pair (const (Memory_init (Text name))) (const [ S.Pop; S.Pop; S.Pop ]) )
+      pair
+        (const (Memory_init (Text name, assert false)))
+        (const [ S.Pop; S.Pop; S.Pop ]) )
     env.datas
 
 let memory_exists (env : Env.t) = Option.is_some env.memory
@@ -413,90 +417,90 @@ let memarg nsize =
 
 let i32_load : instr gen =
   let+ memarg = memarg NS32 in
-  I_load (S32, memarg)
+  I_load (assert false, S32, memarg)
 
 let i64_load : instr gen =
   let+ memarg = memarg NS64 in
-  I_load (S64, memarg)
+  I_load (assert false, S64, memarg)
 
 let f32_load : instr gen =
   let+ memarg = memarg NS32 in
-  F_load (S32, memarg)
+  F_load (assert false, S32, memarg)
 
 let f64_load : instr gen =
   let+ memarg = memarg NS64 in
-  F_load (S64, memarg)
+  F_load (assert false, S64, memarg)
 
 let i32_load8 : instr gen =
   let+ memarg = memarg NS8
   and+ sx in
-  I_load8 (S32, sx, memarg)
+  I_load8 (assert false, S32, sx, memarg)
 
 let i32_load16 : instr gen =
   let+ memarg = memarg NS16
   and+ sx in
-  I_load16 (S32, sx, memarg)
+  I_load16 (assert false, S32, sx, memarg)
 
 let i64_load8 : instr gen =
   let+ memarg = memarg NS8
   and+ sx in
-  I_load8 (S64, sx, memarg)
+  I_load8 (assert false, S64, sx, memarg)
 
 let i64_load16 : instr gen =
   let+ memarg = memarg NS16
   and+ sx in
-  I_load16 (S64, sx, memarg)
+  I_load16 (assert false, S64, sx, memarg)
 
 let i64_load32 : instr gen =
   let+ memarg = memarg NS32
   and+ sx in
-  I64_load32 (sx, memarg)
+  I64_load32 (assert false, sx, memarg)
 
 let i32_store : instr gen =
   let+ memarg = memarg NS32 in
-  I_store (S32, memarg)
+  I_store (assert false, S32, memarg)
 
 let i64_store : instr gen =
   let+ memarg = memarg NS64 in
-  I_store (S64, memarg)
+  I_store (assert false, S64, memarg)
 
 let f32_store : instr gen =
   let+ memarg = memarg NS32 in
-  F_store (S32, memarg)
+  F_store (assert false, S32, memarg)
 
 let f64_store : instr gen =
   let+ memarg = memarg NS64 in
-  F_store (S64, memarg)
+  F_store (assert false, S64, memarg)
 
 let i32_store8 : instr gen =
   let+ memarg = memarg NS8 in
-  I_store8 (S32, memarg)
+  I_store8 (assert false, S32, memarg)
 
 let i64_store8 : instr gen =
   let+ memarg = memarg NS8 in
-  I_store8 (S64, memarg)
+  I_store8 (assert false, S64, memarg)
 
 let i32_store16 : instr gen =
   let+ memarg = memarg NS16 in
-  I_store16 (S32, memarg)
+  I_store16 (assert false, S32, memarg)
 
 let i64_store16 : instr gen =
   let+ memarg = memarg NS16 in
-  I_store16 (S64, memarg)
+  I_store16 (assert false, S64, memarg)
 
 let i64_store32 : instr gen =
   let+ memarg = memarg NS32 in
-  I64_store32 memarg
+  I64_store32 (assert false, memarg)
 
 let data_active name =
   let+ inst = const_i32 in
   let exp = [ inst ] |> Owi.Annotated.dummy_deep in
-  Owi.Text.Data_active (Some (Text name), exp)
+  Owi.Text.Data.Mode.Active (Some (Text name), exp)
 
 let data_mode (env : Env.t) =
   match env.memory with
-  | Some name -> choose [ const Owi.Text.Data_passive; data_active name ]
-  | None -> const Owi.Text.Data_passive
+  | Some name -> choose [ const Owi.Text.Data.Mode.Passive; data_active name ]
+  | None -> const Owi.Text.Data.Mode.Passive
 
 let data_drop (env : Env.t) =
   List.map
