@@ -20,7 +20,7 @@ type t =
   ; mutable next_local : int
   ; mutable next_block : int
   ; mutable datas : string list
-  ; mutable memory : string option
+  ; mutable memories : string list
   ; mutable types : (string * func_type) list
   ; mutable elems : (string * ref_type) list
   ; mutable tables : (string * Table.Type.t) list
@@ -43,7 +43,7 @@ let empty conf =
   ; next_local = 0
   ; next_block = 0
   ; datas = []
-  ; memory = None
+  ; memories = []
   ; types = []
   ; elems = []
   ; tables = []
@@ -70,14 +70,11 @@ let add_data env =
   name
 
 let add_memory env =
-  match env.memory with
-  | None ->
-    let n = env.next_memory in
-    let name = Fmt.str "m%d" n in
-    env.memory <- Some name;
-    env.next_memory <- succ n;
-    name
-  | Some _ -> assert false
+  let n = env.next_memory in
+  let name = Fmt.str "m%d" n in
+  env.memories <- name :: env.memories;
+  env.next_memory <- succ n;
+  name
 
 let add_type env typ =
   let n = env.next_type in

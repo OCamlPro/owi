@@ -17,22 +17,22 @@ let expr_always_available block loop expr ~locals ~stack env =
   @ B.global_i32 env @ B.global_i64 env @ B.global_f32 env @ B.global_f64 env
   @ B.local_i32 env @ B.local_i64 env @ B.local_f32 env @ B.local_f64 env
   @ B.data_drop env @ B.elem_drop env
-  @ (if B.memory_exists env then [ B.memory_size ] else [])
+  @ (if B.memory_exists env then [ B.memory_size env ] else [])
   @ B.table_size env
 
 let expr_available_1_any = [ pair (const Drop) (const [ S.Pop ]) ]
 
 let expr_available_1_i32 if_else expr ~locals ~stack env =
   let load_instr =
-    [ pair B.i32_load (const [ S.Pop; S.Push (Num_type I32) ])
-    ; pair B.i64_load (const [ S.Pop; S.Push (Num_type I64) ])
-    ; pair B.f32_load (const [ S.Pop; S.Push (Num_type F32) ])
-    ; pair B.f64_load (const [ S.Pop; S.Push (Num_type F64) ])
-    ; pair B.i32_load8 (const [ S.Nothing ])
-    ; pair B.i32_load16 (const [ S.Nothing ])
-    ; pair B.i64_load8 (const [ S.Pop; S.Push (Num_type I64) ])
-    ; pair B.i64_load16 (const [ S.Pop; S.Push (Num_type I64) ])
-    ; pair B.i64_load32 (const [ S.Pop; S.Push (Num_type I64) ])
+    [ pair (B.i32_load env) (const [ S.Pop; S.Push (Num_type I32) ])
+    ; pair (B.i64_load env) (const [ S.Pop; S.Push (Num_type I64) ])
+    ; pair (B.f32_load env) (const [ S.Pop; S.Push (Num_type F32) ])
+    ; pair (B.f64_load env) (const [ S.Pop; S.Push (Num_type F64) ])
+    ; pair (B.i32_load8 env) (const [ S.Nothing ])
+    ; pair (B.i32_load16 env) (const [ S.Nothing ])
+    ; pair (B.i64_load8 env) (const [ S.Pop; S.Push (Num_type I64) ])
+    ; pair (B.i64_load16 env) (const [ S.Pop; S.Push (Num_type I64) ])
+    ; pair (B.i64_load32 env) (const [ S.Pop; S.Push (Num_type I64) ])
     ]
   in
   [ pair B.iunop_32 (const [ S.Nothing ])
@@ -45,14 +45,14 @@ let expr_available_1_i32 if_else expr ~locals ~stack env =
   ; if_else expr ~locals ~stack env
   ]
   @ B.local_set_i32 env @ B.local_tee_i32 env @ B.global_set_i32 env
-  @ (if B.memory_exists env then B.memory_grow :: load_instr else [])
+  @ (if B.memory_exists env then B.memory_grow env :: load_instr else [])
   @ B.expr_br_if env stack @ B.table_get env
 
 let expr_available_2_i32 (env : Env.t) =
   let store_instr =
-    [ pair B.i32_store (const [ S.Pop; S.Pop ])
-    ; pair B.i32_store8 (const [ S.Pop; S.Pop ])
-    ; pair B.i32_store16 (const [ S.Pop; S.Pop ])
+    [ pair (B.i32_store env) (const [ S.Pop; S.Pop ])
+    ; pair (B.i32_store8 env) (const [ S.Pop; S.Pop ])
+    ; pair (B.i32_store16 env) (const [ S.Pop; S.Pop ])
     ]
   in
   [ pair B.ibinop_32 (const [ S.Pop ]); pair B.irelop_32 (const [ S.Pop ]) ]
@@ -60,25 +60,27 @@ let expr_available_2_i32 (env : Env.t) =
 
 let expr_available_2_i64_i32 (env : Env.t) =
   if B.memory_exists env then
-    [ pair B.i64_store (const [ S.Pop; S.Pop ])
-    ; pair B.i64_store8 (const [ S.Pop; S.Pop ])
-    ; pair B.i64_store16 (const [ S.Pop; S.Pop ])
-    ; pair B.i64_store32 (const [ S.Pop; S.Pop ])
+    [ pair (B.i64_store env) (const [ S.Pop; S.Pop ])
+    ; pair (B.i64_store8 env) (const [ S.Pop; S.Pop ])
+    ; pair (B.i64_store16 env) (const [ S.Pop; S.Pop ])
+    ; pair (B.i64_store32 env) (const [ S.Pop; S.Pop ])
     ]
   else []
 
 let expr_available_2_f32_i32 (env : Env.t) =
-  if B.memory_exists env then [ pair B.f32_store (const [ S.Pop; S.Pop ]) ]
+  if B.memory_exists env then
+    [ pair (B.f32_store env) (const [ S.Pop; S.Pop ]) ]
   else []
 
 let expr_available_2_f64_i32 (env : Env.t) =
-  if B.memory_exists env then [ pair B.f64_store (const [ S.Pop; S.Pop ]) ]
+  if B.memory_exists env then
+    [ pair (B.f64_store env) (const [ S.Pop; S.Pop ]) ]
   else []
 
 let expr_available_3_i32 env =
   let mem_expr =
     if B.memory_exists env then
-      [ B.memory_copy; B.memory_fill ] @ B.memory_init env
+      [ B.memory_copy env; B.memory_fill env ] @ B.memory_init env
     else []
   in
   let table_expr = B.table_init env @ B.table_copy env in
@@ -315,13 +317,7 @@ let func env : Module.Field.t gen =
   Module.Field.Func { type_f; locals; body; id }
 
 let fields env : Module.Field.t list gen =
-  let+ memory =
-    (* No memory management in symbolic context.
-       TODO: When implementation will be more advanced,
-       reactivate and refine instruction by instruction (not_symbolic operator). *)
-    match env.Env.conf with
-    | Concrete -> option (memory env)
-    | Symbolic -> const None
+  let+ memories = list (memory env)
   and+ datas = list (data env)
   and+ types = list (typ env)
   and+ tables = list (table env)
@@ -339,9 +335,7 @@ let fields env : Module.Field.t list gen =
   in
   let start = Module.Field.Start (Raw 0) in
   let funcs = start :: start_code :: funcs in
-  match memory with
-  | None -> datas @ types @ elems @ tables @ globals @ funcs
-  | Some mem -> datas @ [ mem ] @ types @ elems @ tables @ globals @ funcs
+  memories @ datas @ types @ elems @ tables @ globals @ funcs
 
 let modul conf =
   let id = Some "m" in
