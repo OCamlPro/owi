@@ -96,6 +96,8 @@ module Annotated : sig
 
   val dummies : 'a list -> 'a t list
 
+  val dummy_deep : 'a list -> 'a t list t
+
   val map : ('a -> 'b) -> 'a t -> 'b t
 
   val iter : ('a -> Unit.t) -> 'a t -> Unit.t
@@ -232,6 +234,8 @@ module Text : sig
     | Extern_ht
 
   val pp_heap_type : Format.formatter -> heap_type -> unit
+
+  val heap_type_eq : heap_type -> heap_type -> bool
 
   type nonrec ref_type = nullable * heap_type
 
@@ -746,6 +750,24 @@ module Concrete_extern_func : sig
 
     val externref : 'a Type.Id.t -> (lr, elt, 'a) t
   end
+end
+
+module Concrete_v128 : sig
+  val of_i64x2 : int64 -> int64 -> Concrete_v128.t
+end
+
+module Int32 : sig
+  val add : Int32.t -> Int32.t -> Int32.t
+
+  val lt : Int32.t -> Int32.t -> bool
+end
+
+module Float32 : sig
+  val of_float : float -> Float32.t
+end
+
+module Float64 : sig
+  val of_float : float -> Float64.t
 end
 
 module Parse : sig
