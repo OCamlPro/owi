@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>link_env.ml &mdash; Coverage report</title>
-    <meta name="description" content="92.68% coverage in src/link/link_env.ml">
+    <meta name="description" content="92.86% coverage in src/link/link_env.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,12 +15,12 @@
           <span class="dirname">src/link/</span>link_env.ml
         </a>
       </h1>
-      <h2>92.68%</h2>
+      <h2>92.86%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="bottom:15.04%"></span>
-      <span class="unvisited" style="bottom:8.85%"></span>
-      <span class="unvisited" style="bottom:5.31%"></span>
+      <span class="unvisited" style="bottom:16.52%"></span>
+      <span class="unvisited" style="bottom:10.43%"></span>
+      <span class="unvisited" style="bottom:6.96%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -134,10 +134,12 @@
 <a id="L107"></a><span class="unvisited"> </span>
 <a id="L108"></a><span class="visited"> </span>
 <a id="L109"></a><span > </span>
-<a id="L110"></a><span > </span>
+<a id="L110"></a><span class="visited"> </span>
 <a id="L111"></a><span > </span>
 <a id="L112"></a><span > </span>
-<a id="L113"></a><span class="visited"> </span>
+<a id="L113"></a><span > </span>
+<a id="L114"></a><span > </span>
+<a id="L115"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -255,6 +257,8 @@
 <a href="#L111">111</a>
 <a href="#L112">112</a>
 <a href="#L113">113</a>
+<a href="#L114">114</a>
+<a href="#L115">115</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -265,11 +269,11 @@ module IMap = Map.Make (Int)
 
 type data = { mutable value : string }
 
-let drop_data data = <span data-count="412">d</span>ata.value &lt;- ""
+let drop_data data = <span data-count="487">d</span>ata.value &lt;- ""
 
 type elem = { mutable value : Concrete_value.Ref.t array }
 
-let drop_elem (elem : elem) = <span data-count="602">e</span>lem.value &lt;- [||]
+let drop_elem (elem : elem) = <span data-count="607">e</span>lem.value &lt;- [||]
 
 type 'ext t =
   { globals : Concrete_global.t IMap.t
@@ -282,37 +286,37 @@ type 'ext t =
   ; id : int
   }
 
-let id (env : _ t) = <span data-count="2164862">e</span>nv.id
+let id (env : _ t) = <span data-count="2165824">e</span>nv.id
 
 let get_global (env : _ t) id =
-  <span data-count="2825">m</span>atch IMap.find_opt id env.globals with
+  <span data-count="3120">m</span>atch IMap.find_opt id env.globals with
   | None -&gt; assert false
-  | <span data-count="2827">S</span>ome v -&gt; Concrete_choice.return v
+  | <span data-count="3121">S</span>ome v -&gt; Concrete_choice.return v
 
 let get_memory (env : _ t) id =
-  <span data-count="4009854">m</span>atch IMap.find_opt id env.memories with
+  <span data-count="4013428">m</span>atch IMap.find_opt id env.memories with
   | None -&gt; assert false
-  | <span data-count="4009853">S</span>ome v -&gt; Concrete_choice.return v
+  | <span data-count="4013432">S</span>ome v -&gt; Concrete_choice.return v
 
 let get_table (env : _ t) id =
-  <span data-count="807925">m</span>atch IMap.find_opt id env.tables with
+  <span data-count="807971">m</span>atch IMap.find_opt id env.tables with
   | None -&gt; assert false
-  | <span data-count="807925">S</span>ome v -&gt; Concrete_choice.return v
+  | <span data-count="807971">S</span>ome v -&gt; Concrete_choice.return v
 
 let get_func (env : _ t) id =
-  <span data-count="5500173">m</span>atch IMap.find_opt id env.functions with None -&gt; assert false | <span data-count="5500171">S</span>ome v -&gt; v
+  <span data-count="5497839">m</span>atch IMap.find_opt id env.functions with None -&gt; assert false | <span data-count="5497836">S</span>ome v -&gt; v
 
 let get_data (env : _ t) id =
-  <span data-count="890">m</span>atch IMap.find_opt id env.data with
+  <span data-count="1071">m</span>atch IMap.find_opt id env.data with
   | None -&gt; assert false
-  | <span data-count="890">S</span>ome v -&gt; Concrete_choice.return v
+  | <span data-count="1071">S</span>ome v -&gt; Concrete_choice.return v
 
 let get_elem (env : _ t) id =
-  <span data-count="1272">m</span>atch IMap.find_opt id env.elem with None -&gt; assert false | <span data-count="1272">S</span>ome v -&gt; v
+  <span data-count="1283">m</span>atch IMap.find_opt id env.elem with None -&gt; assert false | <span data-count="1283">S</span>ome v -&gt; v
 
 let get_extern_func env id =
-  <span data-count="111527">l</span>et f, _t = Dynarray.get env.extern_funcs id in
-  <span data-count="111527">f</span>
+  <span data-count="111530">l</span>et f, _t = Dynarray.get env.extern_funcs id in
+  <span data-count="111530">f</span>
 
 module Build = struct
   type t =
@@ -334,41 +338,43 @@ module Build = struct
     }
 
   let add_global id const (env : t) =
-    <span data-count="909">{</span> env with globals = IMap.ad<span data-count="909">d</span> id const env.globals }
+    <span data-count="1073">{</span> env with globals = IMap.ad<span data-count="1073">d</span> id const env.globals }
 
   let add_memory id mem (env : t) =
-    <span data-count="673">{</span> env with memories = IMap.ad<span data-count="673">d</span> id mem env.memories }
+    <span data-count="988">{</span> env with memories = IMap.ad<span data-count="988">d</span> id mem env.memories }
 
   let add_table id table (env : t) =
-    <span data-count="699">{</span> env with tables = IMap.ad<span data-count="699">d</span> id table env.tables }
+    <span data-count="750">{</span> env with tables = IMap.ad<span data-count="750">d</span> id table env.tables }
 
   let add_func id func (env : t) =
-    <span data-count="12273">{</span> env with functions = IMap.ad<span data-count="12273">d</span> id func env.functions }
+    <span data-count="12989">{</span> env with functions = IMap.ad<span data-count="12989">d</span> id func env.functions }
 
-  let add_data id data (env : t) = <span data-count="630">{</span> env with data = IMap.ad<span data-count="630">d</span> id data env.data }
+  let add_data id data (env : t) = <span data-count="725">{</span> env with data = IMap.ad<span data-count="725">d</span> id data env.data }
 
-  let add_elem id elem (env : t) = <span data-count="939">{</span> env with elem = IMap.ad<span data-count="939">d</span> id elem env.elem }
+  let add_elem id elem (env : t) = <span data-count="946">{</span> env with elem = IMap.ad<span data-count="946">d</span> id elem env.elem }
 
   let get_global (env : t) id =
-    <span data-count="29">m</span>atch IMap.find_opt id env.globals with
+    <span data-count="34">m</span>atch IMap.find_opt id env.globals with
     | <span data-count="0">N</span>one -&gt; Error (`Unknown_global (Text.Raw id))
-    | <span data-count="29">S</span>ome v -&gt; Ok v
+    | <span data-count="34">S</span>ome v -&gt; Ok v
 
   let get_const_global (env : t) id =
-    <span data-count="29">l</span>et* g = get_globa<span data-count="29">l</span> env id in
-    <span data-count="29">m</span>atch g.mut with
-    | <span data-count="29">C</span>onst -&gt; ok g.value
+    <span data-count="34">l</span>et* g = get_globa<span data-count="34">l</span> env id in
+    <span data-count="34">m</span>atch g.mut with
+    | <span data-count="34">C</span>onst -&gt; ok g.value
     | <span data-count="0">V</span>ar -&gt; Error `Constant_expression_required
 
   let get_func (env : t) id =
-    <span data-count="2623">m</span>atch IMap.find_opt id env.functions with
+    <span data-count="2632">m</span>atch IMap.find_opt id env.functions with
     | <span data-count="0">N</span>one -&gt; Error (`Unknown_func (Text.Raw id))
-    | <span data-count="2623">S</span>ome v -&gt; Ok v
+    | <span data-count="2632">S</span>ome v -&gt; Ok v
+
+  let get_memories { memories; _ } = <span data-count="526">m</span>emories
 end
 
 let freeze id ({ globals; memories; tables; functions; data; elem } : Build.t)
   extern_funcs =
-  <span data-count="2230">{</span> id; globals; memories; tables; functions; data; elem; extern_funcs }
+  <span data-count="2388">{</span> id; globals; memories; tables; functions; data; elem; extern_funcs }
 </code></pre>
       </div>
     </div>

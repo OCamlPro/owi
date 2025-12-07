@@ -149,7 +149,7 @@ let pp fmt = function
   | <span data-count="0">E</span>xtern _ -&gt; pf fmt "externref"
   | <span data-count="0">F</span>unc _ -&gt; pf fmt "funcref"
 
-let null = function <span data-count="669">T</span>ext.Func_ht -&gt; Func None | <span data-count="63">E</span>xtern_ht -&gt; Extern None
+let null = function <span data-count="719">T</span>ext.Func_ht -&gt; Func None | <span data-count="63">E</span>xtern_ht -&gt; Extern None
 
 let func (f : Kind.func) = <span data-count="9">F</span>unc (Some f)
 
@@ -160,9 +160,9 @@ let is_null = <span data-count="47">f</span>unction
   | <span data-count="7">F</span>unc (Some _) | <span data-count="2">E</span>xtern (Some _) -&gt; false
 
 let get_func (r : t) : Kind.func get_ref =
-  <span data-count="802835">m</span>atch r with
-  | <span data-count="801064">F</span>unc (Some f) -&gt; Ref_value f
-  | <span data-count="1771">F</span>unc None -&gt; Null
+  <span data-count="802842">m</span>atch r with
+  | <span data-count="801070">F</span>unc (Some f) -&gt; Ref_value f
+  | <span data-count="1772">F</span>unc None -&gt; Null
   | <span data-count="0">_</span> -&gt; Type_mismatch
 
 let get_extern (type x) (r : t) (typ : x Type.Id.t) : x get_ref =

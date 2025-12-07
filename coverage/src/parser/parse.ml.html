@@ -1529,14 +1529,14 @@ end) =
 struct
   let from_lexbuf =
     let parser = MenhirLib.Convert.Simplified.traditional2revised M.rule in
-    <span data-count="2121">f</span>un buf -&gt;
-      <span data-count="1186">L</span>og.info (fun m -&gt; <span data-count="14">m</span> "parsing      ...");
-      <span data-count="1186">l</span>et provider () =
-        <span data-count="729008">l</span>et tok = Text_lexer.token buf in
-        <span data-count="728657">l</span>et start, stop = Sedlexing.lexing_positions buf in
-        <span data-count="728657">(</span>tok, start, stop)
+    <span data-count="2235">f</span>un buf -&gt;
+      <span data-count="1224">L</span>og.info (fun m -&gt; <span data-count="14">m</span> "parsing      ...");
+      <span data-count="1224">l</span>et provider () =
+        <span data-count="751471">l</span>et tok = Text_lexer.token buf in
+        <span data-count="751120">l</span>et start, stop = Sedlexing.lexing_positions buf in
+        <span data-count="751120">(</span>tok, start, stop)
       in
-      try Ok (parse<span data-count="448">r</span> provider) with
+      try Ok (parse<span data-count="486">r</span> provider) with
       | <span data-count="305">T</span>ext.Parse_fail msg -&gt; Error (`Parse_fail msg)
       | <span data-count="0">T</span>ext_lexer.Empty_annotation_id -&gt; Error `Empty_annotation_id
       | <span data-count="0">T</span>ext_lexer.Empty_identifier -&gt; Error `Empty_identifier
@@ -1552,16 +1552,16 @@ struct
       | <span data-count="0">S</span>edlexing.MalFormed -&gt; Error (`Malformed_utf8_encoding "")
 
   let from_file filename =
-    <span data-count="394">l</span>et open Syntax in
+    <span data-count="432">l</span>et open Syntax in
     let* res =
-      Bos.OS.File.with_i<span data-count="394">c</span> filename
+      Bos.OS.File.with_i<span data-count="432">c</span> filename
         (fun chan () -&gt;
-          <span data-count="394">l</span>et lb = Sedlexing.Utf8.from_channel chan in
-          <span data-count="394">S</span>edlexing.set_filename lb (Fpath.to_strin<span data-count="394">g</span> filename);
-          <span data-count="394">f</span>rom_lexbuf lb )
+          <span data-count="432">l</span>et lb = Sedlexing.Utf8.from_channel chan in
+          <span data-count="432">S</span>edlexing.set_filename lb (Fpath.to_strin<span data-count="432">g</span> filename);
+          <span data-count="432">f</span>rom_lexbuf lb )
         ()
     in
-    <span data-count="394">r</span>es
+    <span data-count="432">r</span>es
 
   let from_string s = <span data-count="792">f</span>rom_lexbuf (Sedlexing.Utf8.from_strin<span data-count="792">g</span> s)
 

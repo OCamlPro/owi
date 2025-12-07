@@ -107,21 +107,21 @@
 
 type 'a t = 'a Result.t
 
-let return x = <span data-count="191556999">O</span>k x [@@inline]
+let return x = <span data-count="191593920">O</span>k x [@@inline]
 
-let bind x f = <span data-count="200890505">R</span>esult.bind x f [@@inline]
+let bind x f = <span data-count="200928888">R</span>esult.bind x f [@@inline]
 
-let ( let* ) x f = <span data-count="200890505">b</span>ind x f [@@inline]
+let ( let* ) x f = <span data-count="200928888">b</span>ind x f [@@inline]
 
-let map v f = <span data-count="6737263">R</span>esult.map f v [@@inline]
+let map v f = <span data-count="6738435">R</span>esult.map f v [@@inline]
 
-let ( let+ ) v f = <span data-count="6737263">m</span>ap v f [@@inline]
+let ( let+ ) v f = <span data-count="6738435">m</span>ap v f [@@inline]
 
-let select b ~prio_true:_ ~prio_false:_ = <span data-count="9787929">O</span>k b [@@inline]
+let select b ~prio_true:_ ~prio_false:_ = <span data-count="9789849">O</span>k b [@@inline]
 
-let select_i32 i = <span data-count="804712">O</span>k i [@@inline]
+let select_i32 i = <span data-count="804747">O</span>k i [@@inline]
 
-let trap t = <span data-count="2451">E</span>rror t
+let trap t = <span data-count="2709">E</span>rror t
 
 let run m = <span data-count="0">m</span>
 
@@ -134,7 +134,7 @@ let assume v =
     <span data-count="0">a</span>ssert false
 
 let ite cond ~if_true ~if_false =
-  <span data-count="236">i</span>f cond then <span data-count="121">r</span>eturn if_true else <span data-count="115">r</span>eturn if_false
+  <span data-count="239">i</span>f cond then <span data-count="122">r</span>eturn if_true else <span data-count="117">r</span>eturn if_false
 [@@inline]
 </code></pre>
       </div>

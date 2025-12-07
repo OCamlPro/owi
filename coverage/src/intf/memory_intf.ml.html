@@ -65,6 +65,11 @@
 <a id="L41"></a><span > </span>
 <a id="L42"></a><span > </span>
 <a id="L43"></a><span > </span>
+<a id="L44"></a><span > </span>
+<a id="L45"></a><span > </span>
+<a id="L46"></a><span > </span>
+<a id="L47"></a><span > </span>
+<a id="L48"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -112,6 +117,11 @@
 <a href="#L41">41</a>
 <a href="#L42">42</a>
 <a href="#L43">43</a>
+<a href="#L44">44</a>
+<a href="#L45">45</a>
+<a href="#L46">46</a>
+<a href="#L47">47</a>
+<a href="#L48">48</a>
 </pre>
 <pre><code class="ocaml">module type T = sig
   type t
@@ -145,7 +155,12 @@
   val fill : t -&gt; pos:Value.i32 -&gt; len:Value.i32 -&gt; char -&gt; unit Choice.t
 
   val blit :
-    t -&gt; src:Value.i32 -&gt; dst:Value.i32 -&gt; len:Value.i32 -&gt; unit Choice.t
+       src:t
+    -&gt; src_idx:Value.i32
+    -&gt; dst:t
+    -&gt; dst_idx:Value.i32
+    -&gt; len:Value.i32
+    -&gt; unit Choice.t
 
   val blit_string :
     t -&gt; string -&gt; src:Value.i32 -&gt; dst:Value.i32 -&gt; len:Value.i32 -&gt; unit

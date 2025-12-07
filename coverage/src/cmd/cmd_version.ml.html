@@ -100,10 +100,10 @@
 (* Written by the Owi programmers *)
 
 let string_of_version = function
-  | <span data-count="678">N</span>one -&gt; "unknown"
+  | <span data-count="716">N</span>one -&gt; "unknown"
   | <span data-count="0">S</span>ome v -&gt; Build_info.V1.Version.to_string v
 
-let version () = <span data-count="678">s</span>tring_of_version @@ Build_info.V1.versio<span data-count="678">n</span> ()
+let version () = <span data-count="716">s</span>tring_of_version @@ Build_info.V1.versio<span data-count="716">n</span> ()
 
 let statically_linked_libraries () =
   <span data-count="0">B</span>uild_info.V1.Statically_linked_libraries.to_list ()
@@ -120,7 +120,7 @@ let pp fmt () =
     (("owi", versio<span data-count="0">n</span> ()) :: statically_linked_librarie<span data-count="0">s</span> ());
   <span data-count="0">F</span>mt.string fmt "@\n"
 
-let owi_version () = <span data-count="678">F</span>mt.str "owi version %s" (versio<span data-count="678">n</span> ())
+let owi_version () = <span data-count="716">F</span>mt.str "owi version %s" (versio<span data-count="716">n</span> ())
 
 let cmd () = <span data-count="0">O</span>k (Log.ap<span data-count="0">p</span> (fun m -&gt; <span data-count="0">m</span> "%a" pp ()))
 </code></pre>

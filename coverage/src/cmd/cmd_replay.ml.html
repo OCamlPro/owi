@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>cmd_replay.ml &mdash; Coverage report</title>
-    <meta name="description" content="50.46% coverage in src/cmd/cmd_replay.ml">
+    <meta name="description" content="51.36% coverage in src/cmd/cmd_replay.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">src/cmd/</span>cmd_replay.ml
         </a>
       </h1>
-      <h2>50.46%</h2>
+      <h2>51.36%</h2>
     </div>
     <div id="navbar">
       <span class="some-visited" style="top:12.87%"></span>
@@ -845,11 +845,11 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
       ; ( "cov_label_is_covered"
         , Extern_func (i32 ^-&gt;<span data-count="10">.</span> i32, cov_label_is_covered) )
       ; ( "cov_label_set"
-        , Extern_func (memory ^-<span data-count="10">&gt;</span> i32 ^-<span data-count="10">&gt;</span> i32 ^-&gt;<span data-count="10">.</span> unit, cov_label_set) )
-      ; ("open_scope", Extern_func (memory ^-<span data-count="10">&gt;</span> i32 ^-&gt;<span data-count="10">.</span> unit, open_scope))
+        , Extern_func (memor<span data-count="10">y</span> 0 ^-<span data-count="10">&gt;</span> i32 ^-<span data-count="10">&gt;</span> i32 ^-&gt;<span data-count="10">.</span> unit, cov_label_set) )
+      ; ("open_scope", Extern_func (memor<span data-count="10">y</span> 0 ^-<span data-count="10">&gt;</span> i32 ^-&gt;<span data-count="10">.</span> unit, open_scope))
       ; ("close_scope", Extern_func (unit ^-&gt;<span data-count="10">.</span> unit, close_scope))
-      ; ("alloc", Extern_func (memory ^-<span data-count="10">&gt;</span> i32 ^-<span data-count="10">&gt;</span> i32 ^-&gt;<span data-count="10">.</span> i32, alloc))
-      ; ("dealloc", Extern_func (memory ^-<span data-count="10">&gt;</span> i32 ^-&gt;<span data-count="10">.</span> i32, free))
+      ; ("alloc", Extern_func (memor<span data-count="10">y</span> 0 ^-<span data-count="10">&gt;</span> i32 ^-<span data-count="10">&gt;</span> i32 ^-&gt;<span data-count="10">.</span> i32, alloc))
+      ; ("dealloc", Extern_func (memor<span data-count="10">y</span> 0 ^-<span data-count="10">&gt;</span> i32 ^-&gt;<span data-count="10">.</span> i32, free))
       ; ("abort", Extern_func (unit ^-&gt;<span data-count="10">.</span> unit, abort))
       ; ("exit", Extern_func (i32 ^-&gt;<span data-count="10">.</span> unit, exit))
       ]
