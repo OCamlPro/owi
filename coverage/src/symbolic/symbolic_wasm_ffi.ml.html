@@ -565,10 +565,10 @@ module M :
         with <span data-count="0">I</span>nvalid_argument _ -&gt; false )
 
   let assume (i : Symbolic_value.i32) : unit Symbolic_choice_with_memory.t =
-    <span data-count="601">S</span>ymbolic_choice_with_memory.assume @@ Symbolic_value.I32.to_boo<span data-count="601">l</span> i
+    <span data-count="600">S</span>ymbolic_choice_with_memory.assume @@ Symbolic_value.I32.to_boo<span data-count="600">l</span> i
 
   let assert' (i : Symbolic_value.i32) : unit Symbolic_choice_with_memory.t =
-    <span data-count="96967">S</span>ymbolic_choice_with_memory.assertion @@ Symbolic_value.I32.to_boo<span data-count="96967">l</span> i
+    <span data-count="96966">S</span>ymbolic_choice_with_memory.assertion @@ Symbolic_value.I32.to_boo<span data-count="96969">l</span> i
 
   let symbol_bool () =
     <span data-count="4">S</span>ymbolic_choice_with_memory.with_new_symbol (Ty_bitv 1) (fun sym -&gt;
@@ -613,8 +613,8 @@ module M :
 
   let alloc m (base : Symbolic_value.i32) (size : Symbolic_value.i32) :
     Symbolic_value.i32 Symbolic_choice_with_memory.t =
-    <span data-count="9920">S</span>ymbolic_choice_with_memory.lift_mem
-    @@ Symbolic_memory.reallo<span data-count="9920">c</span> m ~ptr:base ~size
+    <span data-count="9922">S</span>ymbolic_choice_with_memory.lift_mem
+    @@ Symbolic_memory.reallo<span data-count="9922">c</span> m ~ptr:base ~size
 
   let free m (ptr : Symbolic_value.i32) :
     Symbolic_value.i32 Symbolic_choice_with_memory.t =
