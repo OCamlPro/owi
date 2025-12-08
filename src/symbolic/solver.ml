@@ -27,39 +27,49 @@ let check (S (solver_module, s)) pc =
   let module Solver = (val solver_module) in
   Solver.check_set s pc
 
-let model (S (solver_module, s)) ~symbol_scopes ~pc =
+let get_sat_model (S (solver_module, s)) ~symbol_scopes ~pc =
   let module Solver = (val solver_module) in
   let symbols = Symbol_scope.only_symbols symbol_scopes in
-  let model =
-    match Solver.get_sat_model ~symbols s pc with
-    | `Unknown -> assert false
-    | `Unsat ->
-      (* Should not happen because we checked just before that is must be true. *)
-      Log.err (fun m -> m "something is wrong... I can not get a model");
-      Log.err (fun m ->
-        m "symbols: %a"
-          (Fmt.list ~sep:(fun fmt () -> Fmt.pf fmt ", ") Smtml.Symbol.pp)
-          symbols );
-      Log.err (fun m -> m "pc:@\n  @[<v>%a@]" Smtml.Expr.Set.pp pc);
-      assert false
-    | `Model model -> model
-  in
-  model
+  Solver.get_sat_model ~symbols s pc
+
+let model solver ~symbol_scopes ~pc =
+  match get_sat_model solver ~symbol_scopes ~pc with
+  | `Model model -> model
+  | `Unknown ->
+    (* Should not happen because we never have unknown results from solvers *)
+    assert false
+  | `Unsat ->
+    (* Should not happen because we checked just before that is must be true. *)
+    assert false
 
 let empty_stats = Smtml.Statistics.Map.empty
 
 let stats_are_empty = Smtml.Statistics.Map.is_empty
 
-let get_all_stats ~finalizer () =
+let interrupt_all () =
+  let solvers = Atomic.get instances in
+  List.iter
+    (fun (S (solver_module, s)) ->
+      let module Solver = (val solver_module) in
+      Solver.interrupt s )
+    solvers
+
+let get_all_stats () =
   if not (Log.is_bench_enabled ()) then empty_stats
   else begin
-    finalizer ();
-    (* ensure that everyone has finished working *)
     let solvers = Atomic.get instances in
     List.fold_left
       (fun stats_acc (S (solver_module, s)) ->
         let module Solver = (val solver_module) in
-        let stats = Solver.get_statistics s in
+        let stats =
+          try Solver.get_statistics s
+          with Z3.Error "canceled" ->
+            Logs.warn (fun m ->
+              m
+                "could not fetch the statistics of one solver because it was \
+                 canceled" );
+            empty_stats
+        in
         Smtml.Statistics.merge stats stats_acc )
       empty_stats solvers
   end
