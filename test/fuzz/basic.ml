@@ -202,11 +202,11 @@ let frelop_64 : instr gen =
 
 let const_f32 : instr gen =
   let+ float in
-  F32_const (Owi.Float32.of_float float)
+  F32_const (Owi.Concrete_f32.of_float float)
 
 let const_f64 : instr gen =
   let+ float in
-  F64_const (Owi.Float64.of_float float)
+  F64_const (Owi.Concrete_f64.of_float float)
 
 let f32_convert_i32 : instr gen =
   let+ sx in
@@ -428,7 +428,9 @@ let memarg nsize =
     | NS32 -> range 2
     | NS64 -> range 3
   in
-  let offset = if Owi.Int32.lt offset 0l then Int32.sub 0l offset else offset in
+  let offset =
+    if Owi.Concrete_i32.lt offset 0l then Int32.sub 0l offset else offset
+  in
   let align = Int32.of_int align in
   { offset; align }
 

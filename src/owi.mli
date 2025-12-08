@@ -756,17 +756,17 @@ module Concrete_v128 : sig
   val of_i64x2 : int64 -> int64 -> Concrete_v128.t
 end
 
-module Int32 : sig
+module Concrete_i32 : sig
   val add : Int32.t -> Int32.t -> Int32.t
 
   val lt : Int32.t -> Int32.t -> bool
 end
 
-module Float32 : sig
+module Concrete_f32 : sig
   val of_float : float -> Float32.t
 end
 
-module Float64 : sig
+module Concrete_f64 : sig
   val of_float : float -> Float64.t
 end
 
