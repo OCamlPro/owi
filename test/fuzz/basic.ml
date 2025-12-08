@@ -535,12 +535,9 @@ let data_active name =
   Owi.Text.Data.Mode.Active (Some (Text name), exp)
 
 let data_mode (env : Env.t) =
-  match env.memories with
-  | [] -> const Owi.Text.Data.Mode.Passive
-  | memories ->
-    choose
-      ( const Owi.Text.Data.Mode.Passive
-      :: List.map (fun id -> data_active id) memories )
+  choose
+    ( const Owi.Text.Data.Mode.Passive
+    :: List.map (fun id -> data_active id) env.memories )
 
 let data_drop (env : Env.t) =
   List.map
