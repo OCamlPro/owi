@@ -322,7 +322,11 @@ module CoreImpl = struct
       let* solver in
       let pc = Thread.pc thread |> Symbolic_path_condition.to_set in
       let symbol_scopes = Thread.symbol_scopes thread in
-      let model = Solver.model solver ~symbol_scopes ~pc in
+      let stats = Thread.bench_stats thread in
+      let model =
+        Benchmark.handle_time_span stats.solver_final_model_time @@ fun () ->
+        Solver.model solver ~symbol_scopes ~pc
+      in
       let labels = Thread.labels thread in
       let breadcrumbs = Thread.breadcrumbs thread in
       State.return (ETrap (t, model, labels, breadcrumbs, symbol_scopes))
@@ -394,7 +398,7 @@ module Make (Thread : Thread_intf.S) = struct
     let sliced_pc = Symbolic_path_condition.slice pc v in
     let stats = Thread.bench_stats thread in
     let reachability =
-      Benchmark.handle_time_span stats.solver_time @@ fun () ->
+      Benchmark.handle_time_span stats.solver_sat_time @@ fun () ->
       Solver.check solver sliced_pc
     in
     return reachability
@@ -405,24 +409,19 @@ module Make (Thread : Thread_intf.S) = struct
     let+ thread in
     let pc = Thread.pc thread |> Symbolic_path_condition.to_set in
     let stats = Thread.bench_stats thread in
-    let checked =
-      Benchmark.handle_time_span stats.solver_time (fun () ->
-        Solver.check solver pc )
+    let symbol_scopes = Symbol_scope.of_symbol symbol in
+    let sat_model =
+      Benchmark.handle_time_span stats.solver_intermediate_model_time (fun () ->
+        Solver.get_sat_model solver ~symbol_scopes ~pc )
     in
-    match checked with
+    match sat_model with
     | `Unsat -> stop
-    | `Sat -> begin
-      let symbol_scopes = Symbol_scope.of_symbol symbol in
-      (* TODO: we are doing the check two times here, because Solver.model is also doing it, we should remove it! *)
-      let model =
-        Benchmark.handle_time_span stats.solver_time @@ fun () ->
-        Solver.model solver ~symbol_scopes ~pc
-      in
+    | `Model model -> begin
       match Smtml.Model.evaluate model symbol with
-      | None ->
-        Fmt.failwith
-          "Unreachable: The model exists so this symbol should evaluate"
       | Some v -> return v
+      | None ->
+        (* the model exists so the symbol should evaluate *)
+        assert false
     end
     | `Unknown -> assert false
 
@@ -456,7 +455,9 @@ module Make (Thread : Thread_intf.S) = struct
           | `Unsat ->
             Atomic.set is_other_branch_unsat true;
             stop
-          | `Unknown -> assert false
+          | `Unknown ->
+            (* It can happen when the solver is interrupted *)
+            stop
           end
         end
       in
@@ -546,7 +547,11 @@ module Make (Thread : Thread_intf.S) = struct
       let* solver in
       let symbol_scopes = Thread.symbol_scopes thread in
       let pc = Thread.pc thread |> Symbolic_path_condition.to_set in
-      let model = Solver.model ~symbol_scopes ~pc solver in
+      let stats = Thread.bench_stats thread in
+      let model =
+        Benchmark.handle_time_span stats.solver_final_model_time @@ fun () ->
+        Solver.model solver ~symbol_scopes ~pc
+      in
       let breadcrumbs = Thread.breadcrumbs thread in
       let labels = Thread.labels thread in
       assertion_fail c model labels breadcrumbs symbol_scopes

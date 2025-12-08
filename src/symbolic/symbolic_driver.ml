@@ -59,13 +59,17 @@ let mk_callback no_stop_at_failure fail_mode res_stack path_count =
     Ws.push
       (`ETrap (t, m, labels, breadcrumbs, symbol_scopes), thread)
       Prio.default res_stack;
-    if not no_stop_at_failure then close ()
+    if not no_stop_at_failure then begin
+      close ()
+    end
   | ( (Both | Assertion_only)
     , (EAssert (e, m, labels, breadcrumbs, symbol_scopes), thread) ) ->
     Ws.push
       (`EAssert (e, m, labels, breadcrumbs, symbol_scopes), thread)
       Prio.default res_stack;
-    if not no_stop_at_failure then close ()
+    if not no_stop_at_failure then begin
+      close ()
+    end
   | (Trap_only | Assertion_only), _ -> ()
 
 let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
@@ -78,36 +82,43 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
   let callback =
     mk_callback no_stop_at_failure fail_mode res_stack path_count
   in
-  let exec_time_counter = Mtime_clock.counter () in
   let time_before = (Unix.times ()).tms_utime in
-  let join_handles =
+  let _domains : unit Domain.t Array.t =
     Symbolic_choice_with_memory.run exploration_strategy ~workers solver result
       thread ~callback
       ~callback_init:(fun () -> Ws.make_pledge res_stack)
       ~callback_end:(fun () -> Ws.end_pledge res_stack)
   in
-  let finalizer () = Array.iter Domain.join join_handles in
-  let results = Ws.read_as_seq res_stack ~finalizer in
-  let time_after = (Unix.times ()).tms_utime in
-  let interpreter_time = time_after -. time_before in
+  let results = Ws.read_as_seq res_stack ~finalizer:Fun.id in
   let results = sort_results deterministic_result_order results in
-
   let* count =
     print_and_count_failures ~format:model_format ~out_file:model_out_file
       ~no_value ~no_assert_failure_expression_printing ~workspace
       ~no_stop_at_failure ~count_acc:0 ~results ~with_breadcrumbs
   in
 
-  Log.bench (fun m ->
-    let execution_time = Mtime_clock.count exec_time_counter in
+  (* do we really want to do this ?
+  Solver.interrupt_all ();
+  Array.iter
+    (fun domain ->
+      (* TODO: remove this try catch *)
+      try Domain.join domain with
+      | Z3.Error "canceled" ->
+        (* I know this is bad but hey... they don't provide anything better... *)
+        ()
+      | Invalid_argument _ -> () )
+    join_handles;
+    *)
+  if Log.is_bench_enabled () then begin
+    Solver.interrupt_all ();
     let bench_stats = Thread_with_memory.bench_stats thread in
-    let interpreter_time =
-      (* run_time shouldn't be none in bench mode *)
-      let run_time = match run_time with None -> assert false | Some t -> t in
-      (interpreter_time +. run_time) *. 1000.
+    let execution_time_b =
+      let time_after = (Unix.times ()).tms_utime in
+      time_after -. time_before
     in
-    let solver_stats = Solver.get_all_stats ~finalizer () in
-    Benchmark.pp ~solver_stats ~bench_stats ~interpreter_time ~execution_time m );
+    Benchmark.print_final ~bench_stats ~execution_time_a:run_time
+      ~execution_time_b
+  end;
 
   Log.info (fun m -> m "Completed paths: %d" (Atomic.get path_count));
 

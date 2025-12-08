@@ -45,11 +45,7 @@ struct
     let globals = Symbolic_global.init () in
     let breadcrumbs = [] in
     let labels = [] in
-    let bench_stats : Benchmark.stats =
-      { solver_time = Atomic.make Mtime.Span.min_span
-      ; path_count = Atomic.make 1
-      }
-    in
+    let bench_stats = Benchmark.empty_stats () in
     create num_symbols symbol_scopes pc memories tables globals breadcrumbs
       labels bench_stats
 

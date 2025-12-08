@@ -1,7 +1,7 @@
-  $ owi sym div_i32.wat --no-value --deterministic-result-order -w1 --bench 2>&1 | sed 's/\(solver\|interpreter\|parsing\|execution\|typechecking\|validation\) \(time\).*/\1 \2/' | grep -v "(memory" | grep -v "(max memory" | grep -v "(num allocs"
-  owi: [INFO] parsing time
-  owi: [INFO] typechecking time
-  owi: [INFO] validation time
+  $ owi sym div_i32.wat --no-value --deterministic-result-order -w1 --bench 2>&1 | sed 's/: [0-9].*/: X/' | sed 's/[0-9].*)/ X)/'
+  owi: [INFO] parsing time : X
+  owi: [INFO] typechecking time : X
+  owi: [INFO] validation time : X
   owi: [ERROR] Trap: integer overflow
   model {
     symbol symbol_0 i32
@@ -14,24 +14,58 @@
     symbol symbol_1 i32
   }
   
-  owi: [INFO] Benchmarks:
-              execution time
-              solver time
-              interpreter time
-              path count: 3
-              solver stats : 
-              ((added eqs 11)
-               (bv bit2core 160)
-               (bv dynamic diseqs 4)
-               (bv->core eq 1)
-               (cache hits 0)
-               (cache misses 4)
-               (decisions 96)
-               (del clause 9)
-               (final checks 6)
-               (mk bool var 277)
-               (mk clause 14)
-               (num checks 6)
-               (propagations 11)
-               (rlimit count 2003))
+  owi: [INFO] whole execution time          : X
+  owi: [INFO] solver time                   : X
+  owi: [INFO] solver SAT time               : X
+  owi: [INFO] solver model time             : X
+  owi: [INFO] solver final model time       : X
+  owi: [INFO] solver intermediate model time: X
+  owi: [INFO] interpreter loop time         : X
+  owi: [INFO] path count: X
+  owi: [INFO] solver stats: ((added eqs  X)
+                             (bv bit X)
+                             (bv dynamic diseqs  X)
+                             (bv->core eq  X)
+                             (cache hits  X)
+                             (cache misses  X)
+                             (decisions  X)
+                             (del clause  X)
+                             (final checks  X)
+                             (max memory  X)
+                             (memory  X)
+                             (mk bool var  X)
+                             (mk clause  X)
+                             (num allocs  X)
+                             (num checks  X)
+                             (propagations  X)
+                             (rlimit count  X)
   owi: [ERROR] Reached 2 problems!
+Testing with the -q flag:
+  $ owi sym div_i32.wat --unsafe --fail-on-assertion-only --no-value -w1 --bench --workspace . -q 2>&1 | sed 's/: [0-9].*/: X/' | sed 's/[0-9].*)/ X)/'
+  owi: [INFO] parsing time : X
+  owi: [INFO] validation time : X
+  owi: [INFO] whole execution time          : X
+  owi: [INFO] solver time                   : X
+  owi: [INFO] solver SAT time               : X
+  owi: [INFO] solver model time             : X
+  owi: [INFO] solver final model time       : X
+  owi: [INFO] solver intermediate model time: X
+  owi: [INFO] interpreter loop time         : X
+  owi: [INFO] path count: X
+  owi: [INFO] solver stats: ((added eqs  X)
+                             (bv dynamic diseqs  X)
+                             (bv->core eq  X)
+                             (cache hits  X)
+                             (cache misses  X)
+                             (decisions  X)
+                             (del clause  X)
+                             (final checks  X)
+                             (max memory  X)
+                             (memory  X)
+                             (mk bool var  X)
+                             (mk clause  X)
+                             (num allocs  X)
+                             (num checks  X)
+                             (propagations  X)
+                             (rlimit count  X)
+
