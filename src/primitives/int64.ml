@@ -41,11 +41,6 @@ let popcnt =
     (* sum the bit counts in the top byte and shift it down *)
     (x * h01) lsr 56
 
-(*
- * Unsigned comparison in terms of signed comparison.
- *)
-let cmp_u x op y = op (add x min_int) (add y min_int) [@@inline]
-
 let eq (x : int64) y = equal x y [@@inline]
 
 let ne (x : int64) y = not (equal x y) [@@inline]
@@ -58,45 +53,20 @@ let le (x : int64) y = compare x y <= 0 [@@inline]
 
 let ge (x : int64) y = compare x y >= 0 [@@inline]
 
-let lt_u x y = cmp_u x lt y [@@inline]
+let lt_u (x : int64) y = unsigned_compare x y < 0 [@@inline]
 
-let le_u x y = cmp_u x le y [@@inline]
+let le_u (x : int64) y = unsigned_compare x y <= 0 [@@inline]
 
-let gt_u x y = cmp_u x gt y [@@inline]
+let gt_u (x : int64) y = unsigned_compare x y > 0 [@@inline]
 
-let ge_u x y = cmp_u x ge y [@@inline]
+let ge_u (x : int64) y = unsigned_compare x y >= 0 [@@inline]
 
-(*
- * Unsigned division and remainder in terms of signed division; algorithm from
- * Hacker's Delight, Second Edition, by Henry S. Warren, Jr., section 9-3
- * "Unsigned Short Division from Signed Division".
- *)
-let divrem_u n d =
-  if equal d zero then raise Division_by_zero
-  else
-    let t = shift_right d 63 in
-    let n' = logand n (lognot t) in
-    let q = shift_left (div (shift_right_logical n' 1) d) 1 in
-    let r = sub n (mul q d) in
-    if cmp_u r lt d then (q, r) else (add q one, sub r d)
+(* In OCaml, `shift_{left,right,right_logical} are unspecified if y < 0 or y >= 64, but they're not in Wasm and thus we need to mask `y`` to only keep the low 7 bits. *)
+let shl x y = shift_left x (to_int (logand y 63L)) [@@inline]
 
-(* We don't override min_int and max_int since those are used
- * by other functions (like parsing), and rely on it being
- * min/max for int32 *)
-(* The smallest signed |bitwidth|-bits int. *)
-let low_int = shift_left minus_one 63
+let shr_s x y = shift_right x (to_int (logand y 63L)) [@@inline]
 
-(* The largest signed |bitwidth|-bits int. *)
-let high_int = logxor low_int minus_one
-
-(* WebAssembly's shifts mask the shift count according to the bitwidth. *)
-let shift f x y = f x (to_int (logand y (of_int 63)))
-
-let shl x y = shift shift_left x y
-
-let shr_s x y = shift shift_right x y
-
-let shr_u x y = shift shift_right_logical x y
+let shr_u x y = shift_right_logical x (to_int (logand y 63L)) [@@inline]
 
 let rotl x y =
   let n = logand y 63L in
@@ -112,21 +82,23 @@ let extend_s n x =
 
 (* String conversion that allows leading signs and unsigned values *)
 
-let require b = if not b then Fmt.failwith "of_string (int64)" [@@inline]
-
+(* TODO: replace by Char.Ascii.digit_to_int once on 5.4 *)
 let dec_digit = function
   | '0' .. '9' as c -> Char.code c - Char.code '0'
-  | _ -> Fmt.failwith "of_string"
+  | _ -> assert false
 [@@inline]
 
+(* TODO: replace by Char.Ascii.hex_digit_to_int once on 5.4 *)
 let hex_digit = function
   | '0' .. '9' as c -> Char.code c - Char.code '0'
   | 'a' .. 'f' as c -> 0xa + Char.code c - Char.code 'a'
   | 'A' .. 'F' as c -> 0xa + Char.code c - Char.code 'A'
-  | _ -> Fmt.failwith "of_string"
+  | _ -> assert false
 [@@inline]
 
-let max_upper, max_lower = divrem_u minus_one 10L
+let max_upper = unsigned_div minus_one 10L
+
+let max_lower = unsigned_rem minus_one 10L
 
 let of_string_exn s =
   let len = String.length s in
@@ -138,8 +110,9 @@ let of_string_exn s =
       if Char.equal c '_' then parse_hex (i + 1) num
       else begin
         let digit = of_int (hex_digit c) in
-        require (le_u num (shr_u minus_one (of_int 4)));
-        parse_hex (i + 1) (logor (shift_left num 4) digit)
+        if not (le_u num (shr_u minus_one (of_int 4))) then
+          Fmt.failwith "of_string (int64)"
+        else parse_hex (i + 1) (logor (shift_left num 4) digit)
       end
   in
 
@@ -150,32 +123,27 @@ let of_string_exn s =
       if Char.equal c '_' then parse_dec (i + 1) num
       else begin
         let digit = of_int (dec_digit c) in
-        require
-          (lt_u num max_upper || (eq num max_upper && le_u digit max_lower));
-        parse_dec (i + 1) (add (mul num 10L) digit)
+        if not (lt_u num max_upper || (eq num max_upper && le_u digit max_lower))
+        then Fmt.failwith "of_string (int64)"
+        else parse_dec (i + 1) (add (mul num 10L) digit)
       end
   in
 
   let parse_int i =
-    require (len - i > 0);
-    if i + 2 <= len && Char.equal s.[i] '0' && Char.equal s.[i + 1] 'x' then
-      parse_hex (i + 2) zero
+    if not (len - i > 0) then Fmt.failwith "of_string (int64)"
+    else if i + 2 <= len && Char.equal s.[i] '0' && Char.equal s.[i + 1] 'x'
+    then parse_hex (i + 2) zero
     else parse_dec i zero
   in
-
-  require (len > 0);
 
   let parsed =
     match s.[0] with
     | '+' -> parse_int 1
     | '-' ->
       let n = parse_int 1 in
-      require (ge (sub n one) minus_one);
-      neg n
+      if not (ge (sub n one) minus_one) then Fmt.failwith "of_string (int64)"
+      else neg n
     | _ -> parse_int 0
   in
 
-  require (le low_int parsed && le parsed high_int);
   parsed
-
-let of_string s = try Some (of_string_exn s) with _ -> None
