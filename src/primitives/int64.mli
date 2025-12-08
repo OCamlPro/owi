@@ -24,8 +24,6 @@ val to_float : t -> float
 
 val of_string_exn : string -> t
 
-val of_string : string -> t option
-
 val of_int : int -> t
 
 val to_int : t -> int
