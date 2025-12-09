@@ -70,7 +70,7 @@ let get_all_stats () =
         let module Solver = (val solver_module) in
         let stats =
           try Solver.get_statistics s
-          with Z3.Error "canceled" ->
+          with Z3.Error _ ->
             Logs.warn (fun m ->
               m
                 "could not fetch the statistics of one solver because it was \

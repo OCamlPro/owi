@@ -103,7 +103,7 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
     (fun domain ->
       (* TODO: remove this try catch *)
       try Domain.join domain with
-      | Z3.Error "canceled" ->
+      | Z3.Error _ ->
         (* I know this is bad but hey... they don't provide anything better... *)
         ()
       | Invalid_argument _ -> () )
