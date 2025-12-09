@@ -35,23 +35,42 @@ let only_symbols tokens =
     (function Symbol s -> Some s | Open_scope _ | Close_scope -> None)
     tokens
 
-let get_value model sym = Smtml.Model.evaluate model sym
+let get_value model sym ty =
+  match Smtml.Model.evaluate model sym with
+  | Some v -> v
+  | None -> (
+    (* The symbol was created but is not part of the generated model. Thus we can use a dummy value. TODO: allows to hide these symbols or their value through a flag (and make it the default, the flag should actually display them). *)
+    let res =
+      match ty with
+      | Smtml.Ty.Ty_bool -> Smtml.Value.of_string ty "false"
+      | Ty_bitv 8 ->
+        Ok (Smtml.Value.Bitv (Smtml.Bitvector.make (Z.of_string "0") 8))
+      | Ty_bitv 32 ->
+        Ok (Smtml.Value.Bitv (Smtml.Bitvector.make (Z.of_string "0") 32))
+      | Ty_bitv 64 ->
+        Ok (Smtml.Value.Bitv (Smtml.Bitvector.make (Z.of_string "0") 64))
+      | Ty_fp 32 -> Smtml.Value.of_string ty "0.0"
+      | Ty_fp 64 -> Smtml.Value.of_string ty "0.0"
+      | ty ->
+        Log.err (fun m ->
+          m "unhandled type %a in symbol_scope.ml" Smtml.Ty.pp ty );
+        assert false
+    in
+    match res with Ok v -> v | Error _ -> assert false )
 
 let to_scfg ~no_value model scope_tokens =
   let open Scfg.Types in
   let symbol_to_scfg symbol =
     let open Smtml in
-    let p0 = Symbol.to_string symbol in
-    let p1 = Symbol.type_of symbol |> Ty.string_of_type in
+    let name = Symbol.to_string symbol in
+    let ty = Symbol.type_of symbol in
+    let ty_s = Ty.string_of_type ty in
     let params =
-      if no_value then [ p0; p1 ]
+      if no_value then [ name; ty_s ]
       else
-        let value = get_value model symbol in
-        match value with
-        | None -> [ p0; p1 ]
-        | Some p2 ->
-          let p2 = Value.to_string p2 in
-          [ p0; p1; p2 ]
+        let value = get_value model symbol ty in
+        let value = Value.to_string value in
+        [ name; ty_s; value ]
     in
     { name = "symbol"; params; children = [] }
   in
@@ -105,11 +124,9 @@ let to_json ~no_value model scope_tokens =
     let ty = ("type", `String (Fmt.str "%a" Ty.pp sym.ty)) in
     if no_value then `Assoc [ name; ty ]
     else
-      match get_value model sym with
-      | None -> `Assoc [ name; ty ]
-      | Some value ->
-        let value = ("value", Value.to_json value) in
-        `Assoc [ name; ty; value ]
+      let value = get_value model sym sym.ty in
+      let value = ("value", Value.to_json value) in
+      `Assoc [ name; ty; value ]
   in
 
   let rec process_scope scope_name tokens =
