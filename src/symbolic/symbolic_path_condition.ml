@@ -4,17 +4,11 @@
 
 module Union_find = Union_find.Make (Smtml.Symbol)
 
-type t =
-  { uf : Smtml.Expr.Set.t Union_find.t
-  ; set : Smtml.Expr.Set.t
-  }
+type t = Smtml.Expr.Set.t Union_find.t
 
-let empty : t =
-  let uf = Union_find.empty in
-  let set = Smtml.Expr.Set.empty in
-  { uf; set }
+let empty : t = Union_find.empty
 
-let add_one ({ uf; set } : t) (condition : Symbolic_boolean.t) : t =
+let add_one uf (condition : Symbolic_boolean.t) : t =
   match Smtml.Expr.get_symbols [ condition ] with
   | [] ->
     (* It means Smt.ml did not properly simplified a expression! *)
@@ -23,7 +17,6 @@ let add_one ({ uf; set } : t) (condition : Symbolic_boolean.t) : t =
         condition );
     assert false
   | hd :: tl ->
-    let set = Smtml.Expr.Set.add condition set in
     (* We add the first symbol to the UF *)
     let uf =
       let c = Smtml.Expr.Set.singleton condition in
@@ -36,7 +29,7 @@ let add_one ({ uf; set } : t) (condition : Symbolic_boolean.t) : t =
           (Union_find.union ~merge:Smtml.Expr.Set.union last_sym sym uf, sym) )
         (uf, hd) tl
     in
-    { uf; set }
+    uf
 
 let add (pc : t) (condition : Symbolic_boolean.t) : t =
   (* we start by splitting the condition ((P & Q) & R) into a set {P; Q; R} before adding each of P, Q and R into the UF data structure, this way we maximize the independence of the PC *)
@@ -45,24 +38,25 @@ let add (pc : t) (condition : Symbolic_boolean.t) : t =
     (fun condition pc -> add_one pc condition)
     splitted_condition pc
 
-(* Turns all constraints into a set *)
-let to_set { uf = _; set } = set
-
 (* Get all partitions of the union find as a list. *)
-let explode { uf; set = _ } = Union_find.explode uf
+let explode uf = Union_find.explode uf
+
+(* Return the set of constraints from [pc] that are relevant for [sym]. *)
+let slice_on_symbol uf (sym : Smtml.Symbol.t) : Smtml.Expr.Set.t =
+  match Union_find.find_opt sym uf with
+  | None ->
+    (* if there is a symbol, it should have been added to the union-find structure before, otherwise it means `add` has not been called properly before *)
+    assert false
+  | Some s -> s
 
 (* Return the set of constraints from [pc] that are relevant for [c]. *)
-let slice ({ uf; set = _ } : t) (c : Symbolic_boolean.t) : Smtml.Expr.Set.t =
+let slice pc (c : Symbolic_boolean.t) : Smtml.Expr.Set.t =
   match Smtml.Expr.get_symbols [ c ] with
   | [] ->
     (* It means Smt.ml did not properly simplified a expression... *)
     Log.err (fun m ->
       m "an expression was not simplified by smtml: %a" Symbolic_boolean.pp c );
     assert false
-  | sym0 :: _tl -> (
+  | sym0 :: _tl ->
     (* we need only the first symbol as all the others should have been merged with it *)
-    match Union_find.find_opt sym0 uf with
-    | None ->
-      (* if there is a symbol, it should have been added to the union-find structure before, otherwise it means `add` has not been called properly before *)
-      assert false
-    | Some s -> s )
+    slice_on_symbol pc sym0
