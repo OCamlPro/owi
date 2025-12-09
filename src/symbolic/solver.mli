@@ -14,8 +14,7 @@ val get_sat_model :
   -> pc:Smtml.Expr.Set.t
   -> [ `Unsat | `Unknown | `Model of Smtml.Model.t ]
 
-val model :
-  t -> symbol_scopes:Symbol_scope.t -> pc:Smtml.Expr.Set.t -> Smtml.Model.t
+val model_of_partition : t -> partition:Smtml.Expr.Set.t list -> Smtml.Model.t
 
 val empty_stats : Smtml.Statistics.t
 

@@ -42,6 +42,8 @@ module type S = sig
   (** [union ~merge key1 key2 uf] merges the equivalence classes associated with
       [key1] and [key2], calling [merge] on the corresponding values. *)
   val union : merge:('a -> 'a -> 'a) -> key -> key -> 'a t -> 'a t
+
+  val explode : 'a t -> 'a list
 end
 
 module Make (X : VariableType) : S with type key = X.t = struct
@@ -174,4 +176,9 @@ module Make (X : VariableType) : S with type key = X.t = struct
       let node_of_canonicals = MX.add canonical node t.node_of_canonicals in
       let node_of_canonicals = MX.remove demoted node_of_canonicals in
       { canonical_elements; node_of_canonicals }
+
+  let explode { canonical_elements = _; node_of_canonicals } =
+    MX.to_list node_of_canonicals
+    |> List.map (fun (_k, v) ->
+      match v.datum with None -> assert false | Some v -> v )
 end

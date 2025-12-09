@@ -12,3 +12,5 @@ val add : t -> Symbolic_boolean.t -> t
 val slice : t -> Symbolic_boolean.t -> Smtml.Expr.Set.t
 
 val to_set : t -> Smtml.Expr.Set.t
+
+val explode : t -> Smtml.Expr.Set.t list
