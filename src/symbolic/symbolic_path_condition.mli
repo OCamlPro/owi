@@ -9,8 +9,9 @@ val empty : t
 val add : t -> Symbolic_boolean.t -> t
 
 (* CAUTION: this must only be called after `add` has been called! *)
-val slice : t -> Symbolic_boolean.t -> Smtml.Expr.Set.t
+val slice_on_symbol : t -> Smtml.Symbol.t -> Smtml.Expr.Set.t
 
-val to_set : t -> Smtml.Expr.Set.t
+(* CAUTION: this must only be called after `add` has been called! *)
+val slice : t -> Symbolic_boolean.t -> Smtml.Expr.Set.t
 
 val explode : t -> Smtml.Expr.Set.t list

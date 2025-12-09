@@ -358,7 +358,8 @@ module Make (Thread : Thread_intf.S) = struct
   let get_pc () =
     let+ thread in
     let pc = Thread.pc thread in
-    Symbolic_path_condition.to_set pc
+    let pc = Symbolic_path_condition.explode pc in
+    List.fold_left Smtml.Expr.Set.union Smtml.Expr.Set.empty pc
 
   let add_breadcrumb crumb =
     modify_thread (fun t -> Thread.add_breadcrumb t crumb)
@@ -408,9 +409,9 @@ module Make (Thread : Thread_intf.S) = struct
     let* () = yield Prio.default in
     let* solver in
     let+ thread in
-    let pc = Thread.pc thread |> Symbolic_path_condition.to_set in
+    let pc = Thread.pc thread in
+    let pc = Symbolic_path_condition.slice_on_symbol pc symbol in
     let stats = Thread.bench_stats thread in
-    (* TODO: this can be improved a lot, by 1. slicing the PC before sending it to the solver 2. using an equivalent of Solver.model_of_partition *)
     let symbol_scopes = Symbol_scope.of_symbol symbol in
     let sat_model =
       Benchmark.handle_time_span stats.solver_intermediate_model_time (fun () ->
