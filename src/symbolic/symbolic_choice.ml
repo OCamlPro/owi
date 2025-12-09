@@ -320,12 +320,13 @@ module CoreImpl = struct
     let trap t =
       let* thread in
       let* solver in
-      let pc = Thread.pc thread |> Symbolic_path_condition.to_set in
+      let pc = Thread.pc thread in
       let symbol_scopes = Thread.symbol_scopes thread in
       let stats = Thread.bench_stats thread in
       let model =
         Benchmark.handle_time_span stats.solver_final_model_time @@ fun () ->
-        Solver.model solver ~symbol_scopes ~pc
+        let partition = Symbolic_path_condition.explode pc in
+        Solver.model_of_partition solver ~partition
       in
       let labels = Thread.labels thread in
       let breadcrumbs = Thread.breadcrumbs thread in
@@ -409,6 +410,7 @@ module Make (Thread : Thread_intf.S) = struct
     let+ thread in
     let pc = Thread.pc thread |> Symbolic_path_condition.to_set in
     let stats = Thread.bench_stats thread in
+    (* TODO: this can be improved a lot, by 1. slicing the PC before sending it to the solver 2. using an equivalent of Solver.model_of_partition *)
     let symbol_scopes = Symbol_scope.of_symbol symbol in
     let sat_model =
       Benchmark.handle_time_span stats.solver_intermediate_model_time (fun () ->
@@ -545,12 +547,13 @@ module Make (Thread : Thread_intf.S) = struct
     else
       let* thread in
       let* solver in
+      let pc = Thread.pc thread in
       let symbol_scopes = Thread.symbol_scopes thread in
-      let pc = Thread.pc thread |> Symbolic_path_condition.to_set in
       let stats = Thread.bench_stats thread in
       let model =
         Benchmark.handle_time_span stats.solver_final_model_time @@ fun () ->
-        Solver.model solver ~symbol_scopes ~pc
+        let partition = Symbolic_path_condition.explode pc in
+        Solver.model_of_partition solver ~partition
       in
       let breadcrumbs = Thread.breadcrumbs thread in
       let labels = Thread.labels thread in

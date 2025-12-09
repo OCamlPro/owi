@@ -27,20 +27,27 @@ let check (S (solver_module, s)) pc =
   let module Solver = (val solver_module) in
   Solver.check_set s pc
 
+let model_of_partition (S (solver_module, s)) ~partition : Smtml.Model.t =
+  let module Solver = (val solver_module) in
+  let partition =
+    List.map
+      (fun pc ->
+        match Solver.get_sat_model s pc with
+        | `Model model -> model
+        | `Unknown -> assert false
+        | `Unsat -> assert false )
+      partition
+  in
+  let model = Hashtbl.create 64 in
+  List.iter
+    (fun tbl -> Hashtbl.iter (fun sym v -> Hashtbl.add model sym v) tbl)
+    partition;
+  model
+
 let get_sat_model (S (solver_module, s)) ~symbol_scopes ~pc =
   let module Solver = (val solver_module) in
   let symbols = Symbol_scope.only_symbols symbol_scopes in
   Solver.get_sat_model ~symbols s pc
-
-let model solver ~symbol_scopes ~pc =
-  match get_sat_model solver ~symbol_scopes ~pc with
-  | `Model model -> model
-  | `Unknown ->
-    (* Should not happen because we never have unknown results from solvers *)
-    assert false
-  | `Unsat ->
-    (* Should not happen because we checked just before that is must be true. *)
-    assert false
 
 let empty_stats = Smtml.Statistics.Map.empty
 

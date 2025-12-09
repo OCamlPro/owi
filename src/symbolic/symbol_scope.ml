@@ -35,10 +35,7 @@ let only_symbols tokens =
     (function Symbol s -> Some s | Open_scope _ | Close_scope -> None)
     tokens
 
-let get_value model sym =
-  match Smtml.Model.evaluate model sym with
-  | Some value -> value
-  | None -> assert false
+let get_value model sym = Smtml.Model.evaluate model sym
 
 let to_scfg ~no_value model scope_tokens =
   let open Scfg.Types in
@@ -50,8 +47,11 @@ let to_scfg ~no_value model scope_tokens =
       if no_value then [ p0; p1 ]
       else
         let value = get_value model symbol in
-        let p2 = Value.to_string value in
-        [ p0; p1; p2 ]
+        match value with
+        | None -> [ p0; p1 ]
+        | Some p2 ->
+          let p2 = Value.to_string p2 in
+          [ p0; p1; p2 ]
     in
     { name = "symbol"; params; children = [] }
   in
@@ -105,8 +105,11 @@ let to_json ~no_value model scope_tokens =
     let ty = ("type", `String (Fmt.str "%a" Ty.pp sym.ty)) in
     if no_value then `Assoc [ name; ty ]
     else
-      let value = ("value", Value.to_json @@ get_value model sym) in
-      `Assoc [ name; ty; value ]
+      match get_value model sym with
+      | None -> `Assoc [ name; ty ]
+      | Some value ->
+        let value = ("value", Value.to_json value) in
+        `Assoc [ name; ty; value ]
   in
 
   let rec process_scope scope_name tokens =

@@ -48,6 +48,9 @@ let add (pc : t) (condition : Symbolic_boolean.t) : t =
 (* Turns all constraints into a set *)
 let to_set { uf = _; set } = set
 
+(* Get all partitions of the union find as a list. *)
+let explode { uf; set = _ } = Union_find.explode uf
+
 (* Return the set of constraints from [pc] that are relevant for [c]. *)
 let slice ({ uf; set = _ } : t) (c : Symbolic_boolean.t) : Smtml.Expr.Set.t =
   match Smtml.Expr.get_symbols [ c ] with
