@@ -8,13 +8,14 @@ val fresh : Smtml.Solver_type.t -> unit -> t
 
 val check : t -> Smtml.Expr.Set.t -> [ `Sat | `Unknown | `Unsat ]
 
-val get_sat_model :
+val model_of_set :
      t
   -> symbol_scopes:Symbol_scope.t
-  -> pc:Smtml.Expr.Set.t
+  -> set:Smtml.Expr.Set.t
   -> [ `Unsat | `Unknown | `Model of Smtml.Model.t ]
 
-val model_of_partition : t -> partition:Smtml.Expr.Set.t list -> Smtml.Model.t
+val model_of_path_condition :
+  t -> path_condition:Symbolic_path_condition.t -> Smtml.Model.t option
 
 val empty_stats : Smtml.Statistics.t
 
@@ -22,6 +23,5 @@ val stats_are_empty : Smtml.Statistics.t -> bool
 
 val pp_stats : Smtml.Statistics.t Fmt.t
 
-val get_all_stats : unit -> Smtml.Statistics.t
-
-val interrupt_all : unit -> unit
+val get_all_stats :
+  wait_for_all_domains:(Unit.t -> Unit.t) -> Smtml.Statistics.t

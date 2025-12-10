@@ -18,7 +18,7 @@ let empty_stats () =
 let handle_time_span atomic_span f =
   if Log.is_bench_enabled () then
     let counter = Mtime_clock.counter () in
-    (* f is supposed to take a long time as it is calling the solver *)
+    (* f is supposed to take a long time! *)
     let res = f () in
     let span = Mtime_clock.count counter in
     let rec atomic_set () =
@@ -44,7 +44,8 @@ let percentage ~whole ~self =
   let self = Mtime.Span.to_float_ns self in
   self /. whole *. 100.
 
-let print_final ~bench_stats ~execution_time_a ~execution_time_b =
+let print_final ~bench_stats ~execution_time_a ~execution_time_b
+  ~wait_for_all_domains =
   let execution_time =
     (* execution time shouldn't be none in bench mode *)
     let execution_time_a =
@@ -100,14 +101,10 @@ let print_final ~bench_stats ~execution_time_a ~execution_time_b =
       solver_intermediate_model_time percentage );
 
   Log.bench (fun m ->
-    let percentage =
-      let whole = Mtime.Span.to_float_ns execution_time in
-      let interp = Mtime.Span.to_float_ns interpreter_time in
-      interp /. whole *. 100.
-    in
+    let percentage = percentage ~whole:execution_time ~self:interpreter_time in
     m "interpreter loop time         : %a (%.2G%%)" Mtime.Span.pp
       interpreter_time percentage );
   Log.bench (fun m -> m "path count: %d" (Atomic.get bench_stats.path_count));
 
-  let solver_stats = Solver.get_all_stats () in
+  let solver_stats = Solver.get_all_stats ~wait_for_all_domains in
   Log.bench (fun m -> m "solver stats: %a" Solver.pp_stats solver_stats)

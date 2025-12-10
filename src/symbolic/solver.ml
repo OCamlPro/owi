@@ -27,27 +27,35 @@ let check (S (solver_module, s)) pc =
   let module Solver = (val solver_module) in
   Solver.check_set s pc
 
-let model_of_partition (S (solver_module, s)) ~partition : Smtml.Model.t =
+let model_of_path_condition (S (solver_module, s)) ~path_condition :
+  Smtml.Model.t Option.t =
+  let exception Unknown in
   let module Solver = (val solver_module) in
-  let partition =
-    List.map
-      (fun pc ->
-        match Solver.get_sat_model s pc with
-        | `Model model -> model
-        | `Unknown -> assert false
-        | `Unsat -> assert false )
-      partition
-  in
-  let model = Hashtbl.create 64 in
-  List.iter
-    (fun tbl -> Hashtbl.iter (fun sym v -> Hashtbl.add model sym v) tbl)
-    partition;
-  model
+  try
+    let sub_conditions = Symbolic_path_condition.slice path_condition in
+    let models =
+      List.map
+        (fun pc ->
+          match Solver.get_sat_model s pc with
+          | `Model model -> model
+          | `Unknown ->
+            (* it can happen if the solver is interrupted, otherwise it is an error, we raise, so the function can return an option that will be handled by the called *)
+            raise Unknown
+          | `Unsat ->
+            (* it can not happen otherwise it means we reached an unreachable branch (or added garbage to the PC and did something wrong, who knows... :-) *)
+            assert false )
+        sub_conditions
+    in
+    (* We build the new complete model by merging all "sub models" *)
+    let model = Hashtbl.create 64 in
+    List.iter (Hashtbl.iter (Hashtbl.add model)) models;
+    Some model
+  with Unknown -> None
 
-let get_sat_model (S (solver_module, s)) ~symbol_scopes ~pc =
+let model_of_set (S (solver_module, s)) ~symbol_scopes ~set =
   let module Solver = (val solver_module) in
   let symbols = Symbol_scope.only_symbols symbol_scopes in
-  Solver.get_sat_model ~symbols s pc
+  Solver.get_sat_model ~symbols s set
 
 let empty_stats = Smtml.Statistics.Map.empty
 
@@ -61,9 +69,17 @@ let interrupt_all () =
       Solver.interrupt s )
     solvers
 
-let get_all_stats () =
+let get_all_stats ~wait_for_all_domains =
   if not (Log.is_bench_enabled ()) then empty_stats
   else begin
+    (* interrupt_all is unreliable but is a best effort to try to make sure we don't wait too long on really long requests.
+     The reliable alternative would be to backup the statistics before each SMT request when in benchmark mode, but this would be too costly and lead to less accurate requests than random failures... *)
+    interrupt_all ();
+    (* we wait for all domains to terminate because:
+    - some solvers can not be interrupted and usually don't like being asked for statistics while running
+    - we already got all the previous metrics, so we don't care about waiting more... *)
+    wait_for_all_domains ();
+
     let solvers = Atomic.get instances in
     List.fold_left
       (fun stats_acc (S (solver_module, s)) ->
@@ -74,7 +90,7 @@ let get_all_stats () =
             Logs.warn (fun m ->
               m
                 "could not fetch the statistics of one solver because it was \
-                 canceled" );
+                 canceled, used empty stats instead" );
             empty_stats
         in
         Smtml.Statistics.merge stats stats_acc )
