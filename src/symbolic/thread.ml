@@ -72,7 +72,7 @@ struct
     { t with symbol_scopes = symbol s t.symbol_scopes }
 
   let add_pc t c =
-    let pc = Symbolic_path_condition.add t.pc c in
+    let pc = Symbolic_path_condition.add c t.pc in
     { t with pc }
 
   let add_breadcrumb t crumb =

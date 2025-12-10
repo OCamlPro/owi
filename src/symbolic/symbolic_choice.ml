@@ -92,21 +92,21 @@ module CoreImpl = struct
         (fun f write_back -> handle_status (Schedulable.run f wls) write_back)
         sched.work_queue
 
-    let spawn_worker sched wls_init callback callback_init callback_close =
+    let spawn_worker sched wls_init ~callback ~callback_init ~callback_end =
       callback_init ();
       Domain.spawn (fun () ->
-        Fun.protect
-          ~finally:(fun () -> callback_close ())
-          (fun () ->
-            let wls = wls_init () in
-            try
-              work wls sched
-                (callback ~close:(fun () ->
-                   Work_datastructure.close sched.work_queue ) )
-            with e ->
-              let bt = Printexc.get_raw_backtrace () in
-              Work_datastructure.close sched.work_queue;
-              Printexc.raise_with_backtrace e bt ) )
+        let wls = wls_init () in
+        Fun.protect ~finally:callback_end (fun () ->
+          try
+            work wls sched
+              (callback ~close_work_queue:(fun () ->
+                 Work_datastructure.close sched.work_queue ) )
+          with e ->
+            let bt = Printexc.get_raw_backtrace () in
+            (* TODO: I don't understand why we are closing the work queue if one worker dies...
+                    If I remove this line, nothing seens to go wrong with the tests... *)
+            Work_datastructure.close sched.work_queue;
+            Printexc.raise_with_backtrace e bt ) )
   end
 
   module State = struct
@@ -256,7 +256,7 @@ module CoreImpl = struct
       -> Smtml.Solver_type.t
       -> 'a t
       -> thread
-      -> callback:(close:(unit -> unit) -> 'a eval * thread -> unit)
+      -> callback:(close_work_queue:(unit -> unit) -> 'a eval * thread -> unit)
       -> callback_init:(unit -> unit)
       -> callback_end:(unit -> unit)
       -> unit Domain.t array
@@ -314,19 +314,24 @@ module CoreImpl = struct
       add_init_task sched (State.run t thread);
       if workers > 1 then Logs_threaded.enable ();
       Array.init workers (fun _i ->
-        spawn_worker sched (Solver.fresh solver) callback callback_init
-          callback_end )
+        spawn_worker sched (Solver.fresh solver) ~callback ~callback_init
+          ~callback_end )
 
     let trap t =
       let* thread in
       let* solver in
-      let pc = Thread.pc thread in
+      let path_condition = Thread.pc thread in
       let symbol_scopes = Thread.symbol_scopes thread in
       let stats = Thread.bench_stats thread in
-      let model =
+      let* model =
         Benchmark.handle_time_span stats.solver_final_model_time @@ fun () ->
-        let partition = Symbolic_path_condition.explode pc in
-        Solver.model_of_partition solver ~partition
+        match Solver.model_of_path_condition solver ~path_condition with
+        | Some model -> return model
+        | None ->
+          (* It can happen when the solver is interrupted *)
+          (* TODO: once https://github.com/formalsec/smtml/pull/479 is merged
+             if solver was interrupted then stop else assert false *)
+          stop
       in
       let labels = Thread.labels thread in
       let breadcrumbs = Thread.breadcrumbs thread in
@@ -358,7 +363,7 @@ module Make (Thread : Thread_intf.S) = struct
   let get_pc () =
     let+ thread in
     let pc = Thread.pc thread in
-    let pc = Symbolic_path_condition.explode pc in
+    let pc = Symbolic_path_condition.slice pc in
     List.fold_left Smtml.Expr.Set.union Smtml.Expr.Set.empty pc
 
   let add_breadcrumb crumb =
@@ -396,26 +401,26 @@ module Make (Thread : Thread_intf.S) = struct
     let* () = yield prio in
     let* thread in
     let* solver in
-    let pc = Thread.pc thread in
-    let sliced_pc = Symbolic_path_condition.slice pc v in
+    let pc = Thread.pc thread |> Symbolic_path_condition.slice_on_condition v in
     let stats = Thread.bench_stats thread in
     let reachability =
       Benchmark.handle_time_span stats.solver_sat_time @@ fun () ->
-      Solver.check solver sliced_pc
+      Solver.check solver pc
     in
     return reachability
 
   let get_model_or_stop symbol =
     let* () = yield Prio.default in
     let* solver in
-    let+ thread in
-    let pc = Thread.pc thread in
-    let pc = Symbolic_path_condition.slice_on_symbol pc symbol in
+    let* thread in
+    let set =
+      Thread.pc thread |> Symbolic_path_condition.slice_on_symbol symbol
+    in
     let stats = Thread.bench_stats thread in
     let symbol_scopes = Symbol_scope.of_symbol symbol in
     let sat_model =
       Benchmark.handle_time_span stats.solver_intermediate_model_time (fun () ->
-        Solver.get_sat_model solver ~symbol_scopes ~pc )
+        Solver.model_of_set solver ~symbol_scopes ~set )
     in
     match sat_model with
     | `Unsat -> stop
@@ -426,7 +431,11 @@ module Make (Thread : Thread_intf.S) = struct
         (* the model exists so the symbol should evaluate *)
         assert false
     end
-    | `Unknown -> assert false
+    | `Unknown ->
+      (* It can happen when the solver is interrupted *)
+      (* TODO: once https://github.com/formalsec/smtml/pull/479 is merged
+               if solver was interrupted then stop else assert false *)
+      stop
 
   let select_inner ~explore_first ?(with_breadcrumbs = true)
     ~check_only_true_branch (cond : Symbolic_boolean.t) ~prio_true ~prio_false =
@@ -460,6 +469,8 @@ module Make (Thread : Thread_intf.S) = struct
             stop
           | `Unknown ->
             (* It can happen when the solver is interrupted *)
+            (* TODO: once https://github.com/formalsec/smtml/pull/479 is merged
+                 if solver was interrupted then stop else assert false *)
             stop
           end
         end
@@ -495,25 +506,27 @@ module Make (Thread : Thread_intf.S) = struct
       (Some assign, sym)
 
   let select_i32 (i : Symbolic_i32.t) =
-    let sym_int = Smtml.Expr.simplify i in
-    match Smtml.Expr.view sym_int with
+    let i = Smtml.Expr.simplify i in
+    match Smtml.Expr.view i with
     | Val (Bitv bv) when Smtml.Bitvector.numbits bv <= 32 ->
       return (Smtml.Bitvector.to_int32 bv)
     | _ ->
-      let* assign, symbol = summary_symbol sym_int in
+      let* assign, symbol = summary_symbol i in
       let* () =
         match assign with Some assign -> add_pc assign | None -> return ()
       in
       let rec generator () =
         let* possible_value = get_model_or_stop symbol in
-        let* possible_value in
         let i =
           match possible_value with
           | Smtml.Value.Bitv bv when Smtml.Bitvector.numbits bv <= 32 ->
             Smtml.Bitvector.to_int32 bv
-          | _ -> Fmt.failwith "Unreachable: found symbol must be a value"
+          | _ ->
+            (* it should be a value! *)
+            assert false
         in
         let s = Smtml.Expr.symbol symbol in
+        (* TODO: everything which follows look like select_inner and could probably be simplified by calling it directly! *)
         let this_value_cond =
           let open Smtml.Expr in
           Bitv.I32.(s = v i)
@@ -548,13 +561,18 @@ module Make (Thread : Thread_intf.S) = struct
     else
       let* thread in
       let* solver in
-      let pc = Thread.pc thread in
+      let path_condition = Thread.pc thread in
       let symbol_scopes = Thread.symbol_scopes thread in
       let stats = Thread.bench_stats thread in
-      let model =
+      let* model =
         Benchmark.handle_time_span stats.solver_final_model_time @@ fun () ->
-        let partition = Symbolic_path_condition.explode pc in
-        Solver.model_of_partition solver ~partition
+        match Solver.model_of_path_condition solver ~path_condition with
+        | Some model -> return model
+        | None ->
+          (* It can happen when the solver is interrupted *)
+          (* TODO: once https://github.com/formalsec/smtml/pull/479 is merged
+               if solver was interrupted then stop else assert false *)
+          stop
       in
       let breadcrumbs = Thread.breadcrumbs thread in
       let labels = Thread.labels thread in

@@ -43,8 +43,8 @@ Array tests:
   Using owi sym:
   owi: [ERROR] Assert failure: (bool.ne symbol_3 symbol_2)
   model {
-    symbol symbol_0 i32
-    symbol symbol_1 i32
+    symbol symbol_0 i32 0
+    symbol symbol_1 i32 0
     symbol symbol_2 i32 0
     symbol symbol_3 i32 0
   }

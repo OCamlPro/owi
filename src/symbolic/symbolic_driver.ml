@@ -49,7 +49,7 @@ let sort_results deterministic_result_order results =
   else results
 
 let mk_callback no_stop_at_failure fail_mode res_stack path_count =
- fun ~close v ->
+ fun ~close_work_queue v ->
   let open Symbolic_choice_intf in
   Atomic.incr path_count;
   match (fail_mode, v) with
@@ -60,7 +60,7 @@ let mk_callback no_stop_at_failure fail_mode res_stack path_count =
       (`ETrap (t, m, labels, breadcrumbs, symbol_scopes), thread)
       Prio.default res_stack;
     if not no_stop_at_failure then begin
-      close ()
+      close_work_queue ()
     end
   | ( (Both | Assertion_only)
     , (EAssert (e, m, labels, breadcrumbs, symbol_scopes), thread) ) ->
@@ -68,7 +68,7 @@ let mk_callback no_stop_at_failure fail_mode res_stack path_count =
       (`EAssert (e, m, labels, breadcrumbs, symbol_scopes), thread)
       Prio.default res_stack;
     if not no_stop_at_failure then begin
-      close ()
+      close_work_queue ()
     end
   | (Trap_only | Assertion_only), _ -> ()
 
@@ -83,7 +83,7 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
     mk_callback no_stop_at_failure fail_mode res_stack path_count
   in
   let time_before = (Unix.times ()).tms_utime in
-  let _domains : unit Domain.t Array.t =
+  let domains : unit Domain.t Array.t =
     Symbolic_choice_with_memory.run exploration_strategy ~workers solver result
       thread ~callback
       ~callback_init:(fun () -> Ws.make_pledge res_stack)
@@ -97,27 +97,38 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
       ~no_stop_at_failure ~count_acc:0 ~results ~with_breadcrumbs
   in
 
-  (* do we really want to do this ?
-  Solver.interrupt_all ();
-  Array.iter
-    (fun domain ->
-      (* TODO: remove this try catch *)
-      try Domain.join domain with
-      | Z3.Error _ ->
-        (* I know this is bad but hey... they don't provide anything better... *)
-        ()
-      | Invalid_argument _ -> () )
-    join_handles;
-    *)
+  (* We don't want to wait for domain to complete in normal/quiet mode because it may take quite some time (if a solver is running a long query, the interpreter is in a long concrete loop, or if the work queue was not correctly closed for instance) *)
+  let wait_for_all_domains () =
+    Array.iter
+      (fun domain ->
+        try Domain.join domain with
+        | Z3.Error msg ->
+          Log.info (fun m ->
+            m "one domain exited with the following Z3 exception: %s" msg )
+        | exn ->
+          let backtrace = Printexc.get_raw_backtrace () in
+          Log.info (fun m ->
+            m
+              "one domaine exited with the %s exception which was only noticed \
+               while waiting for all domain to join:@\n\
+              \  @[<v>%s@]"
+              (Printexc.to_string exn)
+              (Printexc.raw_backtrace_to_string backtrace) ) )
+      domains
+  in
+
   if Log.is_bench_enabled () then begin
-    Solver.interrupt_all ();
     let bench_stats = Thread_with_memory.bench_stats thread in
     let execution_time_b =
       let time_after = (Unix.times ()).tms_utime in
       time_after -. time_before
     in
     Benchmark.print_final ~bench_stats ~execution_time_a:run_time
-      ~execution_time_b
+      ~execution_time_b ~wait_for_all_domains
+  end
+  else if Log.is_info_enabled () then begin
+    (* we don't run this in normal/quiet because it may be slow *)
+    wait_for_all_domains ()
   end;
 
   Log.info (fun m -> m "Completed paths: %d" (Atomic.get path_count));

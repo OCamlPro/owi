@@ -6,12 +6,12 @@ type t
 
 val empty : t
 
-val add : t -> Symbolic_boolean.t -> t
+val add : Symbolic_boolean.t -> t -> t
 
-(* CAUTION: this must only be called after `add` has been called! *)
-val slice_on_symbol : t -> Smtml.Symbol.t -> Smtml.Expr.Set.t
+(* CAUTION: this must only be called after the symbol has been added to the path condition *)
+val slice_on_symbol : Smtml.Symbol.t -> t -> Smtml.Expr.Set.t
 
-(* CAUTION: this must only be called after `add` has been called! *)
-val slice : t -> Symbolic_boolean.t -> Smtml.Expr.Set.t
+(* CAUTION: this must only be called after the condition added to the path condition with `add` *)
+val slice_on_condition : Symbolic_boolean.t -> t -> Smtml.Expr.Set.t
 
-val explode : t -> Smtml.Expr.Set.t list
+val slice : t -> Smtml.Expr.Set.t list

@@ -8,55 +8,48 @@ type t = Smtml.Expr.Set.t Union_find.t
 
 let empty : t = Union_find.empty
 
-let add_one uf (condition : Symbolic_boolean.t) : t =
+let add_one (condition : Symbolic_boolean.t) pc : t =
   match Smtml.Expr.get_symbols [ condition ] with
-  | [] ->
-    (* It means Smt.ml did not properly simplified a expression! *)
-    Log.err (fun m ->
-      m "an expression was not simplified by smtml: %a" Symbolic_boolean.pp
-        condition );
-    assert false
   | hd :: tl ->
     (* We add the first symbol to the UF *)
-    let uf =
+    let pc =
       let c = Smtml.Expr.Set.singleton condition in
-      Union_find.add ~merge:Smtml.Expr.Set.union hd c uf
+      Union_find.add ~merge:Smtml.Expr.Set.union hd c pc
     in
     (* We union-ize all symbols together, starting with the first one that has already been added *)
-    let uf, _last_sym =
+    let pc, _last_sym =
       List.fold_left
-        (fun (uf, last_sym) sym ->
-          (Union_find.union ~merge:Smtml.Expr.Set.union last_sym sym uf, sym) )
-        (uf, hd) tl
+        (fun (pc, last_sym) sym ->
+          (Union_find.union ~merge:Smtml.Expr.Set.union last_sym sym pc, sym) )
+        (pc, hd) tl
     in
-    uf
+    pc
+  | [] ->
+    (* It means smtml did not properly simplified an expression! *)
+    assert false
 
-let add (pc : t) (condition : Symbolic_boolean.t) : t =
+let add (condition : Symbolic_boolean.t) (pc : t) : t =
   (* we start by splitting the condition ((P & Q) & R) into a set {P; Q; R} before adding each of P, Q and R into the UF data structure, this way we maximize the independence of the PC *)
   let splitted_condition = Smtml.Expr.split_conjunctions condition in
-  Smtml.Expr.Set.fold
-    (fun condition pc -> add_one pc condition)
-    splitted_condition pc
+  Smtml.Expr.Set.fold add_one splitted_condition pc
 
-(* Get all partitions of the union find as a list. *)
-let explode uf = Union_find.explode uf
+(* Get all sub conditions of the path condition as a list of independent sets of constraints. *)
+let slice pc = Union_find.explode pc
 
 (* Return the set of constraints from [pc] that are relevant for [sym]. *)
-let slice_on_symbol uf (sym : Smtml.Symbol.t) : Smtml.Expr.Set.t =
-  match Union_find.find_opt sym uf with
+let slice_on_symbol (sym : Smtml.Symbol.t) pc : Smtml.Expr.Set.t =
+  match Union_find.find_opt sym pc with
+  | Some s -> s
   | None ->
     (* if there is a symbol, it should have been added to the union-find structure before, otherwise it means `add` has not been called properly before *)
     assert false
-  | Some s -> s
 
 (* Return the set of constraints from [pc] that are relevant for [c]. *)
-let slice pc (c : Symbolic_boolean.t) : Smtml.Expr.Set.t =
+let slice_on_condition (c : Symbolic_boolean.t) pc : Smtml.Expr.Set.t =
   match Smtml.Expr.get_symbols [ c ] with
-  | [] ->
-    (* It means Smt.ml did not properly simplified a expression... *)
-    Log.err (fun m ->
-      m "an expression was not simplified by smtml: %a" Symbolic_boolean.pp c );
-    assert false
   | sym0 :: _tl ->
     (* we need only the first symbol as all the others should have been merged with it *)
-    slice_on_symbol pc sym0
+    slice_on_symbol sym0 pc
+  | [] ->
+    (* It means smtml did not properly simplified a expression! *)
+    assert false

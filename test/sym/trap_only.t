@@ -1,7 +1,7 @@
   $ owi sym trap_only_trap.wat --fail-on-trap-only --deterministic-result-order -w1
   owi: [ERROR] Trap: integer divide by zero
   model {
-    symbol symbol_0 i32
+    symbol symbol_0 i32 0
   }
   
   owi: [ERROR] Reached problem!
