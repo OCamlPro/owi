@@ -25,6 +25,6 @@ let to_i32 e =
   | Cvtop (Ty_bitv 32, ToBool, e') -> e'
   | _ -> cvtop (Ty_bitv 32) OfBool e
 
-let select_expr c ~if_true ~if_false = Bool.ite c if_true if_false
+let ite c ~if_true ~if_false = Bool.ite c if_true if_false
 
 let pp = pp
