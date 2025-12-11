@@ -317,7 +317,13 @@ let func env : Module.Field.t gen =
   Module.Field.Func { type_f; locals; body; id }
 
 let fields env : Module.Field.t list gen =
-  let+ memories = list (memory env)
+  let+ memories =
+    (* No memory management in symbolic context.
+       TODO: When implementation will be more advanced,
+       reactivate and refine instruction by instruction (not_symbolic operator). *)
+    match env.Env.conf with
+    | Concrete -> list (memory env)
+    | Symbolic -> const []
   and+ datas = list (data env)
   and+ types = list (typ env)
   and+ tables = list (table env)
