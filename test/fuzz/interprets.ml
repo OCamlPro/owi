@@ -45,7 +45,7 @@ end
 
 module Reference : INTERPRET = struct
   let parse_and_run modul =
-    let* tmp_file = Bos.OS.Dir.tmp "owi_fuzzer_official%s.wast" in
+    let* tmp_file = Bos.OS.File.tmp "owi_fuzzer_official%s.wast" in
     let* () = Bos.OS.File.writef tmp_file "%a" Owi.Text.Module.pp modul in
 
     let* cmd =
