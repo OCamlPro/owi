@@ -47,7 +47,7 @@ depends: [
   "frama-c" {>= "29.0" & with-test}
   "z3" {with-test}
   "bisect_ppx" {>= "2.5" & with-dev-setup}
-  "crowbar" {with-dev-setup}
+  "crowbar" {>= "0.2.2" & with-dev-setup}
   "landmarks-ppx" {with-dev-setup}
   "ocamlformat" {>= "0.28" & with-dev-setup}
   "ocb" {>= "0.1" & with-dev-setup}
@@ -75,9 +75,6 @@ depexts: [
   ["llvm" "lld"]  {os-family = "debian"}
   ["rust-llvm" "libstd-rust-dev-wasm32" "rustc"] {os-distribution = "debian"}
   ["zig"] {os-distribution = "fedora"}
-]
-pin-depends: [
-  [ "crowbar.dev" "git+https://github.com/stedolan/crowbar#1ab53fb088d56578b48301bc4cfb859331a10d78"]
 ]
 post-messages: [
   "Thank you for installing Owi!"

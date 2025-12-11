@@ -5,9 +5,6 @@ depexts: [
   ["rust-llvm" "libstd-rust-dev-wasm32" "rustc"] {os-distribution = "debian"}
   ["zig"] {os-distribution = "fedora"}
 ]
-pin-depends: [
-  [ "crowbar.dev" "git+https://github.com/stedolan/crowbar#1ab53fb088d56578b48301bc4cfb859331a10d78"]
-]
 post-messages: [
   "Thank you for installing Owi!"
   "To fully utilize Owi, consider installing a solver such as Z3"

@@ -99,7 +99,10 @@
    (and
     (>= 2.5)
     :with-dev-setup))
-  (crowbar :with-dev-setup)
+  (crowbar
+   (and
+    (>= 0.2.2)
+    :with-dev-setup))
   (landmarks-ppx :with-dev-setup)
   (ocamlformat
    (and
