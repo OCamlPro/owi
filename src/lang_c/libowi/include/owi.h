@@ -8,10 +8,6 @@ extern "C"
 {
 #endif
 
-__attribute__((import_module("owi"), import_name("i8_symbol")))   int8_t   owi_int8(void);
-__attribute__((import_module("owi"), import_name("i8_symbol")))  uint8_t  owi_uint8(void);
-__attribute__((import_module("owi"), import_name("i16_symbol")))  int16_t  owi_int16(void);
-__attribute__((import_module("owi"), import_name("i16_symbol"))) uint16_t owi_uint16(void);
 __attribute__((import_module("owi"), import_name("i32_symbol")))  int32_t  owi_int32(void);
 __attribute__((import_module("owi"), import_name("i32_symbol"))) uint32_t owi_uint32(void);
 __attribute__((import_module("owi"), import_name("i64_symbol")))  int64_t  owi_int64(void);
@@ -31,14 +27,13 @@ __attribute__((import_module("owi"), import_name("f64_symbol"))) double owi_doub
 // TODO
 // long double owi_long_double(void);
 
-__attribute__((import_module("owi"), import_name("bool_symbol")))
+
 #ifdef __cplusplus
   bool
 #else
   _Bool
 #endif
-owi_bool(void);
-
+     owi_bool(void);
 char owi_char(void);
 unsigned char owi_unsigned_char(void);
 short owi_short(void);

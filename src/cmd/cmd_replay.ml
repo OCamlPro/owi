@@ -36,31 +36,7 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
       end;
       Ok ()
 
-    let symbol_i8 () =
-      let i = next () in
-      match model.(i) with
-      | Concrete_value.I32 n ->
-        add_sym i;
-        Ok n
-      | v ->
-        Log.err (fun m ->
-          m "Got value %a but expected a i8 (i32) value." Concrete_value.pp v );
-        assert false
-
-    let symbol_bool = symbol_i8
-
     let symbol_invisible_bool () = Ok 0l
-
-    let symbol_i16 () =
-      let i = next () in
-      match model.(i) with
-      | Concrete_value.I32 n ->
-        add_sym i;
-        Ok n
-      | v ->
-        Log.err (fun m ->
-          m "Got value %a but expected a i16 (i32) value." Concrete_value.pp v );
-        assert false
 
     let symbol_i32 () =
       let i = next () in
@@ -181,14 +157,11 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
     let open Concrete_extern_func in
     let open Concrete_extern_func.Syntax in
     let functions =
-      [ ("i8_symbol", Extern_func (unit ^->. i32, symbol_i8))
-      ; ("i16_symbol", Extern_func (unit ^->. i32, symbol_i16))
-      ; ("i32_symbol", Extern_func (unit ^->. i32, symbol_i32))
+      [ ("i32_symbol", Extern_func (unit ^->. i32, symbol_i32))
       ; ("i64_symbol", Extern_func (unit ^->. i64, symbol_i64))
       ; ("f32_symbol", Extern_func (unit ^->. f32, symbol_f32))
       ; ("f64_symbol", Extern_func (unit ^->. f64, symbol_f64))
       ; ("v128_symbol", Extern_func (unit ^->. v128, symbol_v128))
-      ; ("bool_symbol", Extern_func (unit ^->. i32, symbol_bool))
       ; ("range_symbol", Extern_func (i32 ^-> i32 ^->. i32, symbol_range))
       ; ("assume", Extern_func (i32 ^->. unit, assume))
       ; ("assert", Extern_func (i32 ^->. unit, assert'))
