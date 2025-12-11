@@ -9,13 +9,8 @@ module type S0 = sig
 
   module Value : Value_intf.T
 
-  val symbol_bool : unit -> Value.i32 t
-
+  (* TODO: change for invisible_i32? *)
   val symbol_invisible_bool : unit -> Value.i32 t
-
-  val symbol_i8 : unit -> Value.i32 t
-
-  val symbol_i16 : unit -> Value.i32 t
 
   val symbol_i32 : unit -> Value.i32 t
 

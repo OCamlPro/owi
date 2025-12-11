@@ -55,21 +55,10 @@ module M :
   let assert' (b : Symbolic_i32.t) : unit Symbolic_choice_with_memory.t =
     Symbolic_choice_with_memory.assertion @@ Symbolic_i32.to_boolean b
 
-  let symbol_bool () =
-    Symbolic_choice_with_memory.with_new_symbol (Ty_bitv 1) (fun sym ->
-      Expr.cvtop (Ty_bitv 32) (Zero_extend 31) (Expr.symbol sym) )
-
   let symbol_invisible_bool () =
+    (* TODO: should we change this to an i32 too? *)
     Symbolic_choice_with_memory.with_new_invisible_symbol (Ty_bitv 1)
       (fun sym -> Expr.cvtop (Ty_bitv 32) (Zero_extend 31) (Expr.symbol sym) )
-
-  let symbol_i8 () =
-    Symbolic_choice_with_memory.with_new_symbol (Ty_bitv 8) (fun sym ->
-      Expr.cvtop (Ty_bitv 32) (Zero_extend 24) (Expr.symbol sym) )
-
-  let symbol_i16 () =
-    Symbolic_choice_with_memory.with_new_symbol (Ty_bitv 16) (fun sym ->
-      Expr.cvtop (Ty_bitv 32) (Zero_extend 16) (Expr.symbol sym) )
 
   let symbol_i32 () =
     Symbolic_choice_with_memory.with_new_symbol (Ty_bitv 32) Expr.symbol
@@ -177,14 +166,11 @@ open Symbolic_extern_func.Syntax
 
 let symbolic_extern_module =
   let functions =
-    [ ("i8_symbol", Extern_func (unit ^->. i32, symbol_i8))
-    ; ("i16_symbol", Extern_func (unit ^->. i32, symbol_i16))
-    ; ("i32_symbol", Extern_func (unit ^->. i32, symbol_i32))
+    [ ("i32_symbol", Extern_func (unit ^->. i32, symbol_i32))
     ; ("i64_symbol", Extern_func (unit ^->. i64, symbol_i64))
     ; ("f32_symbol", Extern_func (unit ^->. f32, symbol_f32))
     ; ("f64_symbol", Extern_func (unit ^->. f64, symbol_f64))
     ; ("v128_symbol", Extern_func (unit ^->. v128, symbol_v128))
-    ; ("bool_symbol", Extern_func (unit ^->. i32, symbol_bool))
     ; ( "invisible_bool_symbol"
       , Extern_func (unit ^->. i32, symbol_invisible_bool) )
     ; ("range_symbol", Extern_func (i32 ^-> i32 ^->. i32, symbol_range))

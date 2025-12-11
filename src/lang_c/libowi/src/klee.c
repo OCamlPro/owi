@@ -12,7 +12,7 @@ extern void *malloc(size_t size);
 unsigned char *make_in(size_t size) {
   unsigned char *t = malloc(size);
   for (int i = 0; i < (size / sizeof(char)); i++) {
-    t[i] = owi_int8();
+    t[i] = owi_unsigned_char();
   }
   return t;
 }
@@ -71,7 +71,9 @@ void klee_prefer_cex(void *object, uintptr_t condition) { owi_assert(0); }
 void klee_posix_prefer_cex(void *object, uintptr_t condition) { owi_assert(0); }
 void klee_mark_global(void *object) { owi_assert(0); }
 
-void klee_check_memory_access(const void *address, size_t size) { owi_assert(0); }
+void klee_check_memory_access(const void *address, size_t size) {
+  owi_assert(0);
+}
 void klee_set_forking(unsigned enable) { owi_assert(0); }
 void klee_stack_trace() { owi_assert(0); }
 void klee_print_range(const char *name, int arg) { owi_assert(0); }

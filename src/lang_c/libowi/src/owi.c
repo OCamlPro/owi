@@ -5,8 +5,8 @@
     _Static_assert(sizeof(T) == 1 || sizeof(T) == 2 || sizeof(T) == 4 ||       \
                        sizeof(T) == 8,                                         \
                    "Unsupported type size!");                                  \
-    (sizeof(T) == 1)   ? (T)(owi_int8())                                       \
-    : (sizeof(T) == 2) ? (T)(owi_int16())                                      \
+    (sizeof(T) == 1)   ? (T)(owi_int32())                                      \
+    : (sizeof(T) == 2) ? (T)(owi_int32())                                      \
     : (sizeof(T) == 4) ? (T)(owi_int32())                                      \
                        : (T)(owi_int64());                                     \
   })
@@ -16,11 +16,26 @@
     _Static_assert(sizeof(T) == 1 || sizeof(T) == 2 || sizeof(T) == 4 ||       \
                        sizeof(T) == 8,                                         \
                    "Unsupported type size!");                                  \
-    (sizeof(T) == 1)   ? (T)(owi_uint8())                                      \
-    : (sizeof(T) == 2) ? (T)(owi_uint16())                                     \
+    (sizeof(T) == 1)   ? (T)(owi_uint32())                                     \
+    : (sizeof(T) == 2) ? (T)(owi_uint32())                                     \
     : (sizeof(T) == 4) ? (T)(owi_uint32())                                     \
                        : (T)(owi_uint64());                                    \
   })
+
+#ifdef __cplusplus
+bool
+#else
+_Bool
+#endif
+  owi_bool(void) {
+  return magic_size_unsigned(
+#ifdef __cplusplus
+      bool
+#else
+      _Bool
+#endif
+  );
+}
 
 char owi_char(void) { return magic_size_signed(char); }
 
@@ -31,6 +46,7 @@ unsigned char owi_unsigned_char(void) {
 short owi_short(void) { return magic_size_signed(short); }
 
 unsigned short owi_unsigned_short(void) {
+
   return magic_size_unsigned(unsigned short);
 }
 
