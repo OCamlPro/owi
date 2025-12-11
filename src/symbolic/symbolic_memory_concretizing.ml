@@ -136,7 +136,7 @@ let grow m delta =
   let old_size = Symbolic_value.I32.mul m.size page_size in
   let new_size = Symbolic_value.I32.(div (add old_size delta) page_size) in
   m.size <-
-    Symbolic_boolean.select_expr
+    Symbolic_boolean.ite
       (Symbolic_value.I32.gt new_size m.size)
       ~if_true:new_size ~if_false:m.size
 
