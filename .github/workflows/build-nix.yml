@@ -33,6 +33,7 @@ jobs:
             dune build @fmt &&
             dune build @doc &&
             dune build @install &&
+            dune build @all &&
             dune runtest
           "
 
