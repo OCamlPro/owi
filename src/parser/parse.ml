@@ -337,6 +337,17 @@ module Make (M : sig
   val rule : (Lexing.lexbuf -> Text_parser.token) -> Lexing.lexbuf -> t
 end) =
 struct
+  let pp_pos fmt ((p1, p2) : Lexing.position * Lexing.position) =
+    if p1.pos_lnum = p2.pos_lnum then
+      if p1.pos_cnum = p2.pos_cnum then
+        Fmt.pf fmt "line %d, character %d" p1.pos_lnum (p1.pos_cnum - p1.pos_bol)
+      else
+        Fmt.pf fmt "line %d, character %d-%d" p1.pos_lnum
+          (p1.pos_cnum - p1.pos_bol) (p2.pos_cnum - p2.pos_bol)
+    else
+      Fmt.pf fmt "line %d, character %d to line %d, character %d" p1.pos_lnum
+        (p1.pos_cnum - p1.pos_bol) p2.pos_lnum (p2.pos_cnum - p2.pos_bol)
+
   let from_lexbuf =
     let parser = MenhirLib.Convert.Simplified.traditional2revised M.rule in
     fun buf ->
@@ -357,8 +368,11 @@ struct
       | Text_lexer.Unclosed_string -> Error `Unclosed_string
       | Text_lexer.Unknown_operator msg -> Error (`Lexer_unknown_operator msg)
       | Text_parser.Error ->
-        let tok = Text_lexer.token buf |> token_to_string in
-        Error (`Unexpected_token tok)
+        let tok, pos1, pos2 = Text_lexer.lexer buf () in
+        let msg =
+          Fmt.str "%s in %a" (token_to_string tok) pp_pos (pos1, pos2)
+        in
+        Error (`Unexpected_token msg)
       | Sedlexing.MalFormed -> Error (`Malformed_utf8_encoding "")
 
   let from_file filename =
