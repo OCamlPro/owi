@@ -13,7 +13,7 @@ module type T = sig
 
   type v128
 
-  module Boolean : Boolean_intf.T with type i32 := i32
+  module Boolean : Boolean_intf.T
 
   module I32 :
     I32_intf.T

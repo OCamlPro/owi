@@ -86,6 +86,6 @@ let reinterpret_f64 = Float64.to_bits
 
 let of_concrete v = v
 
-let eq_concrete = eq
+let eq_concrete (v1 : t) (v2 : Int64.t) = eq v1 v2
 
 let pp = Fmt.int64

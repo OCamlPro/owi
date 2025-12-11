@@ -36,17 +36,17 @@ let max x y = binop ty Max x y
 
 let copy_sign x y = binop ty Copysign x y
 
-let eq x y = relop ty Eq x y
+let eq x y = relop ty Eq x y |> Symbolic_boolean.of_expr
 
-let ne x y = relop ty Ne x y
+let ne x y = relop ty Ne x y |> Symbolic_boolean.of_expr
 
-let lt x y = relop ty Lt x y
+let lt x y = relop ty Lt x y |> Symbolic_boolean.of_expr
 
-let gt x y = relop ty Gt x y
+let gt x y = relop ty Gt x y |> Symbolic_boolean.of_expr
 
-let le x y = relop ty Le x y
+let le x y = relop ty Le x y |> Symbolic_boolean.of_expr
 
-let ge x y = relop ty Ge x y
+let ge x y = relop ty Ge x y |> Symbolic_boolean.of_expr
 
 let convert_i32_s x = cvtop ty ConvertSI32 x
 

@@ -110,5 +110,5 @@ let print ~format ~out_file ~id ~no_value ~no_stop_at_failure
   | `EAssert (assertion, model, labels, breadcrumbs, symbol_scopes) ->
     if no_assert_failure_expression_printing then
       Log.err (fun m -> m "Assert failure")
-    else Log.err (fun m -> m "Assert failure: %a" Smtml.Expr.pp assertion);
+    else Log.err (fun m -> m "Assert failure: %a" Symbolic_boolean.pp assertion);
     output model labels breadcrumbs symbol_scopes

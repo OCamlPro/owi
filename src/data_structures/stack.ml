@@ -116,7 +116,7 @@ module Make (Value : Value_intf.T) :
 
   let push s v = v :: s
 
-  let push_bool s b = push s (I32 (Value.Boolean.to_i32 b))
+  let push_bool s b = push s (I32 (Value.I32.of_boolean b))
 
   let push_concrete_i32 s i = push s (I32 (Value.I32.of_concrete i))
 
@@ -206,7 +206,7 @@ module Make (Value : Value_intf.T) :
 
   let pop_bool s =
     let hd, tl = pop s in
-    match hd with I32 n -> (Value.I32.to_bool n, tl) | _ -> assert false
+    match hd with I32 n -> (Value.I32.to_boolean n, tl) | _ -> assert false
 
   let pop_n s n =
     (List.filteri (fun i _hd -> i < n) s, List.filteri (fun i _hd -> i >= n) s)

@@ -227,7 +227,7 @@ module CoreImpl = struct
     val ( let+ ) : 'a t -> ('a -> 'b) -> 'b t
 
     val assertion_fail :
-         Smtml.Expr.t
+         Symbolic_boolean.t
       -> Smtml.Model.t
       -> (int * string) list
       -> int list
@@ -359,12 +359,14 @@ module Make (Thread : Thread_intf.S) = struct
   include CoreImpl.Make (Thread)
 
   let add_pc (c : Symbolic_boolean.t) =
+    let c = Symbolic_boolean.to_expr c in
     let c = Smtml.Expr.simplify c in
     match Smtml.Expr.view c with
     | Val True -> return ()
     | Val False -> stop
     | _ ->
       let* thread in
+      let c = Symbolic_boolean.of_expr c in
       let new_thread = Thread.add_pc thread c in
       set_thread new_thread
   [@@inline]
@@ -448,8 +450,9 @@ module Make (Thread : Thread_intf.S) = struct
 
   let select_inner ~explore_first ?(with_breadcrumbs = true)
     ~check_only_true_branch (cond : Symbolic_boolean.t) ~prio_true ~prio_false =
-    let v = Smtml.Expr.simplify cond in
-    match Smtml.Expr.view v with
+    let cond = Symbolic_boolean.to_expr cond in
+    let cond = Smtml.Expr.simplify cond in
+    match Smtml.Expr.view cond with
     | Val True -> return true
     | Val False -> return false
     | Val (Bitv _bv) -> Fmt.failwith "unreachable (type error)"
@@ -485,11 +488,15 @@ module Make (Thread : Thread_intf.S) = struct
         end
       in
 
-      let true_branch = branch v true prio_true in
+      let cond = Symbolic_boolean.of_expr cond in
+
+      let true_branch = branch cond true prio_true in
 
       if check_only_true_branch then true_branch
       else
-        let false_branch = branch (Symbolic_boolean.not v) false prio_false in
+        let false_branch =
+          branch (Symbolic_boolean.not cond) false prio_false
+        in
         let* thread in
         Thread.incr_path_count thread;
         if explore_first then choose true_branch false_branch
@@ -522,7 +529,11 @@ module Make (Thread : Thread_intf.S) = struct
     | _ ->
       let* assign, symbol = summary_symbol i in
       let* () =
-        match assign with Some assign -> add_pc assign | None -> return ()
+        match assign with
+        | Some assign ->
+          let assign = Symbolic_boolean.of_expr assign in
+          add_pc assign
+        | None -> return ()
       in
       let rec generator () =
         let* possible_value = get_model_or_stop symbol in
@@ -538,13 +549,9 @@ module Make (Thread : Thread_intf.S) = struct
         (* TODO: everything which follows look like select_inner and could probably be simplified by calling it directly! *)
         let this_value_cond =
           let open Smtml.Expr in
-          Bitv.I32.(s = v i)
+          Bitv.I32.(s = v i) |> Symbolic_boolean.of_expr
         in
-        let not_this_value_cond =
-          let open Smtml.Expr in
-          (* != is **not** the physical inequality here *)
-          Bitv.I32.(s != v i)
-        in
+        let not_this_value_cond = Symbolic_boolean.not this_value_cond in
         let this_val_branch =
           let* () = add_breadcrumb (Int32.to_int i) in
           let+ () = add_pc this_value_cond in
@@ -560,7 +567,7 @@ module Make (Thread : Thread_intf.S) = struct
       in
       generator ()
 
-  let assertion c =
+  let assertion (c : Symbolic_boolean.t) =
     let* assertion_true =
       select_inner c ~with_breadcrumbs:false ~explore_first:false
         ~prio_true:Prio.Default ~prio_false:Prio.Default
