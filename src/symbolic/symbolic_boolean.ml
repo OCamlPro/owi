@@ -1,30 +1,21 @@
 type t = Smtml.Expr.t
 
-open Smtml.Expr
+let false_ = Smtml.Expr.Bool.false_
 
-let false_ = Bool.false_
+let true_ = Smtml.Expr.Bool.true_
 
-let false_i32 = value (Bitv (Smtml.Bitvector.of_int32 0l))
+let of_concrete (i : bool) : t = if i then true_ else false_ [@@inline]
 
-let true_ = Bool.true_
+let not e = Smtml.Expr.Bool.not e [@@inline]
 
-let true_i32 = value (Bitv (Smtml.Bitvector.of_int32 1l))
+let or_ e1 e2 = Smtml.Expr.Bool.or_ e1 e2 [@@inline]
 
-let of_concrete (i : bool) : t = if i then true_ else false_
+let and_ e1 e2 = Smtml.Expr.Bool.and_ e1 e2 [@@inline]
 
-let not e = Bool.not e
+let pp = Smtml.Expr.pp
 
-let or_ e1 e2 = Bool.or_ e1 e2
+let ite c ~if_true ~if_false = Smtml.Expr.Bool.ite c if_true if_false [@@inline]
 
-let and_ e1 e2 = Bool.and_ e1 e2
+let of_expr v = v [@@inline]
 
-let to_i32 e =
-  match view e with
-  | Val True -> true_i32
-  | Val False -> false_i32
-  | Cvtop (Ty_bitv 32, ToBool, e') -> e'
-  | _ -> cvtop (Ty_bitv 32) OfBool e
-
-let ite c ~if_true ~if_false = Bool.ite c if_true if_false
-
-let pp = pp
+let to_expr v = v [@@inline]

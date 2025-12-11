@@ -46,27 +46,29 @@ let rotl e1 e2 = binop ty Rotl e1 e2
 
 let rotr e1 e2 = binop ty Rotr e1 e2
 
-let eq_concrete e c = relop Ty_bool Eq e (of_concrete c)
+(* TODO: same as i32, why do we use `Ty_bool` sometimes and `ty` in other places? *)
+let eq_concrete (e : t) (c : Int64.t) =
+  relop Ty_bool Eq e (of_concrete c) |> Symbolic_boolean.of_expr
 
-let eq e1 e2 = relop Ty_bool Eq e1 e2
+let eq e1 e2 = relop Ty_bool Eq e1 e2 |> Symbolic_boolean.of_expr
 
-let ne e1 e2 = relop Ty_bool Ne e1 e2
+let ne e1 e2 = relop Ty_bool Ne e1 e2 |> Symbolic_boolean.of_expr
 
-let lt e1 e2 = relop ty Lt e1 e2
+let lt e1 e2 = relop ty Lt e1 e2 |> Symbolic_boolean.of_expr
 
-let gt e1 e2 = relop ty Gt e1 e2
+let gt e1 e2 = relop ty Gt e1 e2 |> Symbolic_boolean.of_expr
 
-let lt_u e1 e2 = relop ty LtU e1 e2
+let lt_u e1 e2 = relop ty LtU e1 e2 |> Symbolic_boolean.of_expr
 
-let gt_u e1 e2 = relop ty GtU e1 e2
+let gt_u e1 e2 = relop ty GtU e1 e2 |> Symbolic_boolean.of_expr
 
-let le e1 e2 = relop ty Le e1 e2
+let le e1 e2 = relop ty Le e1 e2 |> Symbolic_boolean.of_expr
 
-let ge e1 e2 = relop ty Ge e1 e2
+let ge e1 e2 = relop ty Ge e1 e2 |> Symbolic_boolean.of_expr
 
-let le_u e1 e2 = relop ty LeU e1 e2
+let le_u e1 e2 = relop ty LeU e1 e2 |> Symbolic_boolean.of_expr
 
-let ge_u e1 e2 = relop ty GeU e1 e2
+let ge_u e1 e2 = relop ty GeU e1 e2 |> Symbolic_boolean.of_expr
 
 let of_int32 e = cvtop ty (Sign_extend 32) e
 

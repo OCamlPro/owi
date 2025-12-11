@@ -79,10 +79,12 @@ let trunc_sat_f64_u x =
 
 let reinterpret_f32 = Float32.to_bits
 
-let to_bool = function 0l -> false | _i -> true
+let to_boolean = function 0l -> false | _i -> true
 
-let of_concrete v = v
+let of_boolean = function false -> 0l | true -> 1l
 
-let eq_concrete = eq
+let of_concrete (v : t) : t = v
+
+let eq_concrete (v1 : t) (v2 : Int32.t) = eq v1 v2
 
 let pp = Fmt.int32

@@ -11,7 +11,7 @@ type 'a eval =
       * int list
       * Symbol_scope.t
   | EAssert of
-      Smtml.Expr.t
+      Symbolic_boolean.t
       * Smtml.Model.t
       * (int * string) list
       * int list

@@ -5,8 +5,6 @@
 module type T = sig
   type t
 
-  type i32
-
   val false_ : t
 
   val true_ : t
@@ -18,8 +16,6 @@ module type T = sig
   val or_ : t -> t -> t
 
   val and_ : t -> t -> t
-
-  val to_i32 : t -> i32
 
   val pp : Format.formatter -> t -> unit
 end

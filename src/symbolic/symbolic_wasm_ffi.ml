@@ -50,10 +50,10 @@ module M :
         with Invalid_argument _ -> false )
 
   let assume (i : Symbolic_value.i32) : unit Symbolic_choice_with_memory.t =
-    Symbolic_choice_with_memory.assume @@ Symbolic_value.I32.to_bool i
+    Symbolic_choice_with_memory.assume @@ Symbolic_value.I32.to_boolean i
 
   let assert' (i : Symbolic_value.i32) : unit Symbolic_choice_with_memory.t =
-    Symbolic_choice_with_memory.assertion @@ Symbolic_value.I32.to_bool i
+    Symbolic_choice_with_memory.assertion @@ Symbolic_value.I32.to_boolean i
 
   let symbol_bool () =
     Symbolic_choice_with_memory.with_new_symbol (Ty_bitv 1) (fun sym ->

@@ -16,7 +16,7 @@ val print :
   -> no_assert_failure_expression_printing:bool
   -> with_breadcrumbs:bool
   -> [< `EAssert of
-        Smtml.Expr.t
+        Symbolic_boolean.t
         * Smtml.Model.t
         * (int * string) list
         * int list

@@ -21,7 +21,9 @@ module type T = sig
        and type f32 := f32
        and type f64 := f64
 
-  val to_bool : t -> boolean
+  val to_boolean : t -> boolean
+
+  val of_boolean : boolean -> t
 
   val reinterpret_f32 : f32 -> t
 

@@ -10,29 +10,28 @@ let module_name2 = "owi_iso_module2"
 
 let binaryen_fuzzing_support_module weird_log_i64 =
   let log_i32 x =
-    Log.app (fun m -> m "%a@?" Symbolic_value.I32.pp x);
+    Log.app (fun m -> m "%a@?" Symbolic_i32.pp x);
     Symbolic_choice_with_memory.return ()
   in
   let log_i64 x =
-    Log.app (fun m -> m "%a@?" Symbolic_value.I64.pp x);
+    Log.app (fun m -> m "%a@?" Symbolic_i64.pp x);
     Symbolic_choice_with_memory.return ()
   in
   let log_i64_weird x y =
-    Log.app (fun m ->
-      m "%a%a@?" Symbolic_value.I32.pp x Symbolic_value.I32.pp y );
+    Log.app (fun m -> m "%a%a@?" Symbolic_i32.pp x Symbolic_i32.pp y);
     Symbolic_choice_with_memory.return ()
   in
   let log_f32 x =
-    Log.app (fun m -> m "%a@?" Symbolic_value.F32.pp x);
+    Log.app (fun m -> m "%a@?" Symbolic_f32.pp x);
     Symbolic_choice_with_memory.return ()
   in
   let log_f64 x =
-    Log.app (fun m -> m "%a@?" Symbolic_value.F64.pp x);
+    Log.app (fun m -> m "%a@?" Symbolic_f64.pp x);
     Symbolic_choice_with_memory.return ()
   in
   let call_export _n1 _n2 = Symbolic_choice_with_memory.return () in
   let call_export_catch _n =
-    Symbolic_choice_with_memory.return @@ Symbolic_value.I32.of_concrete 0l
+    Symbolic_choice_with_memory.return @@ Symbolic_i32.of_concrete 0l
   in
   let sleep _ms id = Symbolic_choice_with_memory.return id in
   let open Symbolic_extern_func in
