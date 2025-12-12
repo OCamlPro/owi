@@ -126,8 +126,8 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
     Benchmark.print_final ~bench_stats ~execution_time_a:run_time
       ~execution_time_b ~wait_for_all_domains
   end
-  else if Log.is_info_enabled () then begin
-    (* we don't run this in normal/quiet because it may be slow *)
+  else if Log.is_debug_enabled () then begin
+    (* we only do this in debug mode because otherwise it makes performances very bad *)
     wait_for_all_domains ()
   end;
 

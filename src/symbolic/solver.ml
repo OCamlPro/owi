@@ -75,10 +75,9 @@ let get_all_stats ~wait_for_all_domains =
     (* interrupt_all is unreliable but is a best effort to try to make sure we don't wait too long on really long requests.
      The reliable alternative would be to backup the statistics before each SMT request when in benchmark mode, but this would be too costly and lead to less accurate requests than random failures... *)
     interrupt_all ();
-    (* we wait for all domains to terminate because:
-    - some solvers can not be interrupted and usually don't like being asked for statistics while running
-    - we already got all the previous metrics, so we don't care about waiting more... *)
-    wait_for_all_domains ();
+    if Log.is_debug_enabled () then
+      (* we only do this in debug mode because otherwise it makes performances very bad *)
+      wait_for_all_domains ();
 
     let solvers = Atomic.get instances in
     List.fold_left
