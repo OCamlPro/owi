@@ -32,8 +32,4 @@ module type T = sig
   val get_global : t -> int -> global choice
 
   val get_extern_func : t -> int -> extern_func
-
-  val drop_elem : elem -> unit
-
-  val drop_data : data -> unit
 end

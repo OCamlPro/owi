@@ -3,4 +3,4 @@
 (* Written by the Owi programmers *)
 
 include
-  Elem_intf.T with module Value := Symbolic_value and type t = Link_env.elem
+  Elem_intf.T with type reference := Symbolic_ref.t and type t = Concrete_elem.t

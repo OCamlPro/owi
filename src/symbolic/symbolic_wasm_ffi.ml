@@ -49,11 +49,11 @@ module M :
           lbl_status <> 0
         with Invalid_argument _ -> false )
 
-  let assume (i : Symbolic_value.i32) : unit Symbolic_choice_with_memory.t =
-    Symbolic_choice_with_memory.assume @@ Symbolic_value.I32.to_boolean i
+  let assume (b : Symbolic_i32.t) : unit Symbolic_choice_with_memory.t =
+    Symbolic_choice_with_memory.assume @@ Symbolic_i32.to_boolean b
 
-  let assert' (i : Symbolic_value.i32) : unit Symbolic_choice_with_memory.t =
-    Symbolic_choice_with_memory.assertion @@ Symbolic_value.I32.to_boolean i
+  let assert' (b : Symbolic_i32.t) : unit Symbolic_choice_with_memory.t =
+    Symbolic_choice_with_memory.assertion @@ Symbolic_i32.to_boolean b
 
   let symbol_bool () =
     Symbolic_choice_with_memory.with_new_symbol (Ty_bitv 1) (fun sym ->
@@ -86,32 +86,32 @@ module M :
   let symbol_v128 () =
     Symbolic_choice_with_memory.with_new_symbol (Ty_bitv 128) Expr.symbol
 
-  let symbol_range (lo : Symbolic_value.i32) (hi : Symbolic_value.i32) =
+  let symbol_range (lo : Symbolic_i32.t) (hi : Symbolic_i32.t) =
     let open Symbolic_choice_with_memory in
     let* x = symbol_i32 () in
-    let* () = assume (Symbolic_value.I32.le lo x) in
-    let+ () = assume (Symbolic_value.I32.gt hi x) in
+    let* () = assume (Symbolic_i32.le lo x) in
+    let+ () = assume (Symbolic_i32.gt hi x) in
     x
 
   let abort () : unit Symbolic_choice_with_memory.t =
     Symbolic_choice_with_memory.stop
 
-  let alloc m (base : Symbolic_value.i32) (size : Symbolic_value.i32) :
-    Symbolic_value.i32 Symbolic_choice_with_memory.t =
+  let alloc m (base : Symbolic_i32.t) (size : Symbolic_i32.t) :
+    Symbolic_i32.t Symbolic_choice_with_memory.t =
     Symbolic_choice_with_memory.lift_mem
     @@ Symbolic_memory.realloc m ~ptr:base ~size
 
-  let free m (ptr : Symbolic_value.i32) :
-    Symbolic_value.i32 Symbolic_choice_with_memory.t =
+  let free m (ptr : Symbolic_i32.t) :
+    Symbolic_i32.t Symbolic_choice_with_memory.t =
     Symbolic_choice_with_memory.lift_mem @@ Symbolic_memory.free m ptr
 
-  let exit (_p : Symbolic_value.i32) : unit Symbolic_choice_with_memory.t =
-    abort ()
+  let exit (_p : Symbolic_i32.t) : unit Symbolic_choice_with_memory.t = abort ()
 
   let in_replay_mode () =
-    Symbolic_choice_with_memory.return @@ Smtml.Expr.value (Smtml.Value.Int 0)
+    Symbolic_choice_with_memory.return
+    @@ Symbolic_i32.of_boolean Symbolic_boolean.false_
 
-  let print_char (c : Symbolic_value.i32) =
+  let print_char (c : Symbolic_i32.t) =
     let open Symbolic_choice_with_memory in
     let* c = select_i32 c in
     Log.app (fun m -> m "%c@?" (char_of_int (Int32.to_int c)));
@@ -119,7 +119,7 @@ module M :
 
   let rec make_str m accu i =
     let open Symbolic_choice_with_memory in
-    let* p = Symbolic_memory.load_8_u m (Symbolic_value.I32.of_concrete i) in
+    let* p = Symbolic_memory.load_8_u m (Symbolic_i32.of_concrete i) in
     match Smtml.Expr.view p with
     | Val (Bitv bv) when Smtml.Bitvector.numbits bv = 32 ->
       let c = Smtml.Bitvector.to_int32 bv in
@@ -133,7 +133,7 @@ module M :
   let cov_label_is_covered id =
     let open Symbolic_choice_with_memory in
     let* id = select_i32 id in
-    return @@ Symbolic_value.I32.of_concrete @@ Mutex.protect cov_lock
+    return @@ Symbolic_i32.of_concrete @@ Mutex.protect cov_lock
     @@ fun () ->
     if Hashtbl.mem covered_labels id || in_seacoral_store id then 1l else 0l
 
@@ -213,7 +213,7 @@ let proc_exit _ =
 
 let random_get _ _ =
   Log.warn (fun m -> m "used dummy random_get implementation");
-  Symbolic_choice_with_memory.return @@ Symbolic_value.I32.of_concrete 0l
+  Symbolic_choice_with_memory.return @@ Symbolic_i32.of_concrete 0l
 
 let wasi_snapshot_preview1 =
   let functions =

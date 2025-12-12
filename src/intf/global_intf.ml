@@ -1,9 +1,9 @@
 module type T = sig
-  module Value : Value_intf.T
-
   type t
 
-  val value : t -> Value.t
+  type value
 
-  val set_value : t -> Value.t -> unit
+  val value : t -> value
+
+  val set_value : t -> value -> unit
 end

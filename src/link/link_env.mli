@@ -6,25 +6,17 @@ module IMap : Map.S with type key = int
 
 type 'ext t
 
-type elem = { mutable value : Concrete_value.Ref.t array }
-
-type data = { mutable value : string }
-
 val get_memory : _ t -> int -> Concrete_memory.t Concrete_choice.t
 
 val get_func : _ t -> int -> Kind.func
 
 val get_table : _ t -> int -> Concrete_table.t Concrete_choice.t
 
-val get_elem : _ t -> int -> elem
+val get_elem : _ t -> int -> Concrete_elem.t
 
-val get_data : _ t -> int -> data Concrete_choice.t
+val get_data : _ t -> int -> Concrete_data.t Concrete_choice.t
 
 val get_global : _ t -> int -> Concrete_global.t Concrete_choice.t
-
-val drop_elem : elem -> unit
-
-val drop_data : data -> unit
 
 val get_extern_func : 'ext t -> int -> 'ext
 
@@ -43,9 +35,9 @@ module Build : sig
 
   val add_func : int -> Kind.func -> t -> t
 
-  val add_data : int -> data -> t -> t
+  val add_data : int -> Concrete_data.t -> t -> t
 
-  val add_elem : int -> elem -> t -> t
+  val add_elem : int -> Concrete_elem.t -> t -> t
 
   val get_const_global : t -> int -> Concrete_value.t Result.t
 

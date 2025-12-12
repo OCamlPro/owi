@@ -8,4 +8,6 @@ module type T = sig
   val value : t -> string
 
   val size : t -> int
+
+  val drop : t -> unit
 end

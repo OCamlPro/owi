@@ -2,8 +2,10 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type t = Link_env.elem
+type t = { mutable value : Concrete_ref.t array }
 
 let get (e : t) i = e.value.(i)
 
 let size (e : t) = Array.length e.value
+
+let drop (e : t) = e.value <- [||]

@@ -3,7 +3,11 @@
 (* Written by the Owi programmers *)
 
 module type Base = sig
-  module Value : Value_intf.T
+  type boolean
+
+  type i32
+
+  type value
 
   type 'a t
 
@@ -13,10 +17,9 @@ module type Base = sig
 
   val map : 'a t -> ('a -> 'b) -> 'b t
 
-  val select :
-    Value.Boolean.t -> prio_true:Prio.t -> prio_false:Prio.t -> Bool.t t
+  val select : boolean -> prio_true:Prio.t -> prio_false:Prio.t -> Bool.t t
 
-  val select_i32 : Value.i32 -> Int32.t t
+  val select_i32 : i32 -> Concrete_i32.t t
 
   val trap : Result.err -> 'a t
 
@@ -26,9 +29,9 @@ module type Base = sig
 
   val get_pc : unit -> Smtml.Expr.Set.t t
 
-  val ite : Value.Boolean.t -> if_true:Value.t -> if_false:Value.t -> Value.t t
+  val ite : boolean -> if_true:value -> if_false:value -> value t
 
-  val assume : Value.Boolean.t -> unit t
+  val assume : boolean -> unit t
 end
 
 module type Complete = sig
@@ -38,9 +41,9 @@ module type Complete = sig
 
   type 'a run_result
 
-  val assertion : Value.Boolean.t -> unit t
+  val assertion : boolean -> unit t
 
-  val assume : Value.Boolean.t -> unit t
+  val assume : boolean -> unit t
 
   val with_thread : (thread -> 'b) -> 'b t
 

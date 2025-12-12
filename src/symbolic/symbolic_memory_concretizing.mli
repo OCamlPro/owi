@@ -6,9 +6,10 @@ type t
 
 include
   Memory_intf.T
-    with module Value := Symbolic_value
-     and module Choice := Symbolic_choice_without_memory
-     and type t := t
+    with type t := t
+     and type i32 := Symbolic_i32.t
+     and type i64 := Symbolic_i64.t
+     and type 'a choice := 'a Symbolic_choice_without_memory.t
 
 type collection
 

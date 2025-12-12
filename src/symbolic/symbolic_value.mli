@@ -4,9 +4,10 @@
 
 include
   Value_intf.T
-    with type Boolean.t = Symbolic_boolean.t
+    with type boolean = Symbolic_boolean.t
      and type i32 = Smtml.Expr.t
      and type i64 = Smtml.Expr.t
      and type f32 = Smtml.Expr.t
      and type f64 = Smtml.Expr.t
      and type v128 = Smtml.Expr.t
+     and module Ref = Symbolic_ref

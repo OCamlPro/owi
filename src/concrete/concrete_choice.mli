@@ -6,6 +6,8 @@
 include
   Choice_intf.Base
     with type 'a t = 'a Result.t
-     and module Value := Concrete_value
+     and type boolean := Concrete_boolean.t
+     and type i32 := Concrete_i32.t
+     and type value := Concrete_value.t
 
 val run : 'a t -> 'a t

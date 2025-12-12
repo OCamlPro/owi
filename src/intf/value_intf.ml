@@ -13,12 +13,14 @@ module type T = sig
 
   type v128
 
-  module Boolean : Boolean_intf.T
+  type boolean
+
+  module Boolean : Boolean_intf.T with type t := boolean
 
   module I32 :
     I32_intf.T
       with type t := i32
-       and type boolean := Boolean.t
+       and type boolean := boolean
        and type f32 := f32
        and type f64 := f64
        and type i64 := i64
@@ -26,7 +28,7 @@ module type T = sig
   module I64 :
     I64_intf.T
       with type t := i64
-       and type boolean := Boolean.t
+       and type boolean := boolean
        and type i32 := i32
        and type f32 := f32
        and type f64 := f64
@@ -34,7 +36,7 @@ module type T = sig
   module F32 :
     F32_intf.T
       with type t := f32
-       and type boolean := Boolean.t
+       and type boolean := boolean
        and type i32 := i32
        and type i64 := i64
        and type f64 := f64
@@ -42,7 +44,7 @@ module type T = sig
   module F64 :
     F64_intf.T
       with type t := f64
-       and type boolean := Boolean.t
+       and type boolean := boolean
        and type f32 := f32
        and type i32 := i32
        and type i64 := i64

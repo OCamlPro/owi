@@ -2,9 +2,11 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type t = Link_env.elem
+type t = Concrete_elem.t
 
-let get (elem : t) i : Symbolic_value.Ref.t =
+let get (elem : t) i : Symbolic_ref.t =
   match elem.value.(i) with Func f -> Func f | _ -> assert false
 
 let size (elem : t) = Array.length elem.value
+
+let drop (e : t) = e.value <- [||]

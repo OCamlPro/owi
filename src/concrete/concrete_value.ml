@@ -2,15 +2,19 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type i32 = Int32.t
+type boolean = Concrete_boolean.t
 
-type i64 = Int64.t
+type i32 = Concrete_i32.t
 
-type f32 = Float32.t
+type i64 = Concrete_i64.t
 
-type f64 = Float64.t
+type f32 = Concrete_f32.t
+
+type f64 = Concrete_f64.t
 
 type v128 = Concrete_v128.t
+
+type reference = Concrete_ref.t
 
 module Boolean = Concrete_boolean
 module Ref = Concrete_ref
@@ -26,7 +30,7 @@ type t =
   | F32 of f32
   | F64 of f64
   | V128 of v128
-  | Ref of Ref.t
+  | Ref of reference
 
 let pp ppf =
   let open Fmt in
