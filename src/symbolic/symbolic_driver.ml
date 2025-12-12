@@ -79,15 +79,15 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
   let thread = Thread_with_memory.init () in
   let res_stack = Ws.make () in
   let path_count = Atomic.make 0 in
-  let callback =
+  let at_worker_value =
     mk_callback no_stop_at_failure fail_mode res_stack path_count
   in
   let time_before = (Unix.times ()).tms_utime in
   let domains : unit Domain.t Array.t =
     Symbolic_choice_with_memory.run exploration_strategy ~workers solver result
-      thread ~callback
-      ~callback_init:(fun () -> Ws.make_pledge res_stack)
-      ~callback_end:(fun () -> Ws.end_pledge res_stack)
+      thread ~at_worker_value
+      ~at_worker_init:(fun () -> Ws.make_pledge res_stack)
+      ~at_worker_end:(fun () -> Ws.end_pledge res_stack)
   in
   let results = Ws.read_as_seq res_stack ~finalizer:Fun.id in
   let results = sort_results deterministic_result_order results in

@@ -78,11 +78,11 @@ module CoreImpl = struct
     let add_init_task sched task =
       Work_datastructure.push task Prio.default sched.work_queue
 
-    let work wls sched callback =
+    let work wls sched at_worker_value =
       let rec handle_status (t : _ Schedulable.status) write_back =
         match t with
         | Stop -> ()
-        | Now x -> callback x
+        | Now x -> at_worker_value x
         | Yield (prio, f) -> write_back (prio, f)
         | Choice (m1, m2) ->
           handle_status m1 write_back;
@@ -92,20 +92,28 @@ module CoreImpl = struct
         (fun f write_back -> handle_status (Schedulable.run f wls) write_back)
         sched.work_queue
 
-    let spawn_worker sched wls_init ~callback ~callback_init ~callback_end =
-      callback_init ();
+    let spawn_worker sched wls_init ~at_worker_value ~at_worker_init
+      ~at_worker_end =
+      at_worker_init ();
       Domain.spawn (fun () ->
-        let wls = wls_init () in
-        Fun.protect ~finally:callback_end (fun () ->
+        Fun.protect ~finally:at_worker_end (fun () ->
           try
+            let wls = wls_init () in
             work wls sched
-              (callback ~close_work_queue:(fun () ->
+              (at_worker_value ~close_work_queue:(fun () ->
                  Work_datastructure.close sched.work_queue ) )
           with e ->
+            let e_s = Printexc.to_string e in
             let bt = Printexc.get_raw_backtrace () in
-            (* TODO: I don't understand why we are closing the work queue if one worker dies...
-                    If I remove this line, nothing seens to go wrong with the tests... *)
-            Work_datastructure.close sched.work_queue;
+            let bt_s = Printexc.raw_backtrace_to_string bt in
+            let bt_s =
+              if String.equal "" bt_s then
+                "use OCAMLRUNPARAM=b to get the backtrace"
+              else bt_s
+            in
+            Log.err (fun m ->
+              m "a worker ended with exception %s, backtrace is: @\n@[<v>%s@]"
+                e_s bt_s );
             Printexc.raise_with_backtrace e bt ) )
   end
 
@@ -256,9 +264,10 @@ module CoreImpl = struct
       -> Smtml.Solver_type.t
       -> 'a t
       -> thread
-      -> callback:(close_work_queue:(unit -> unit) -> 'a eval * thread -> unit)
-      -> callback_init:(unit -> unit)
-      -> callback_end:(unit -> unit)
+      -> at_worker_value:
+           (close_work_queue:(unit -> unit) -> 'a eval * thread -> unit)
+      -> at_worker_init:(unit -> unit)
+      -> at_worker_end:(unit -> unit)
       -> unit Domain.t array
   end = struct
     include Eval
@@ -302,8 +311,8 @@ module CoreImpl = struct
 
     type 'a run_result = ('a eval * Thread.t) Seq.t
 
-    let run exploration_strategy ~workers solver t thread ~callback
-      ~callback_init ~callback_end =
+    let run exploration_strategy ~workers solver t thread ~at_worker_value
+      ~at_worker_init ~at_worker_end =
       let module M =
         ( val Symbolic_parameters.Exploration_strategy.to_work_ds_module
                 exploration_strategy )
@@ -314,8 +323,8 @@ module CoreImpl = struct
       add_init_task sched (State.run t thread);
       if workers > 1 then Logs_threaded.enable ();
       Array.init workers (fun _i ->
-        spawn_worker sched (Solver.fresh solver) ~callback ~callback_init
-          ~callback_end )
+        spawn_worker sched (Solver.fresh solver) ~at_worker_value
+          ~at_worker_init ~at_worker_end )
 
     let trap t =
       let* thread in
@@ -470,7 +479,7 @@ module Make (Thread : Thread_intf.S) = struct
           | `Unknown ->
             (* It can happen when the solver is interrupted *)
             (* TODO: once https://github.com/formalsec/smtml/pull/479 is merged
-                 if solver was interrupted then stop else assert false *)
+                   if solver was interrupted then stop else assert false *)
             stop
           end
         end

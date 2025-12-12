@@ -71,9 +71,10 @@ module type S = sig
     -> Smtml.Solver_type.t
     -> 'a t
     -> thread
-    -> callback:(close_work_queue:(unit -> unit) -> 'a eval * thread -> unit)
-    -> callback_init:(unit -> unit)
-    -> callback_end:(unit -> unit)
+    -> at_worker_value:
+         (close_work_queue:(unit -> unit) -> 'a eval * thread -> unit)
+    -> at_worker_init:(unit -> unit)
+    -> at_worker_end:(unit -> unit)
     -> unit Domain.t array
 
   val ite :
