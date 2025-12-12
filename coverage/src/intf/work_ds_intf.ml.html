@@ -99,7 +99,7 @@ module type S = sig
   val push : 'a -&gt; Prio.t -&gt; 'a t -&gt; unit
 
   (** Make a new pledge, ie indicate that new elements may be pushed to the
-      queue and that calls to pop should block waitting for them. *)
+      queue and that calls to pop should block waiting for them. *)
   val make_pledge : 'a t -&gt; unit
 
   (** End one pledge. *)

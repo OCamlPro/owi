@@ -316,7 +316,7 @@ module type S = sig
     -&gt; Smtml.Solver_type.t
     -&gt; 'a t
     -&gt; thread
-    -&gt; callback:(close:(unit -&gt; unit) -&gt; 'a eval * thread -&gt; unit)
+    -&gt; callback:(close_work_queue:(unit -&gt; unit) -&gt; 'a eval * thread -&gt; unit)
     -&gt; callback_init:(unit -&gt; unit)
     -&gt; callback_end:(unit -&gt; unit)
     -&gt; unit Domain.t array
