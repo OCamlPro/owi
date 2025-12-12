@@ -2,7 +2,7 @@ include Logs.LOG
 
 val main_src : Logs.src
 
-val is_info_enabled : unit -> bool
+val is_debug_enabled : unit -> bool
 
 val is_bench_enabled : unit -> bool
 
