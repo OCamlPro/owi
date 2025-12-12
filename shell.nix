@@ -8,8 +8,8 @@ let
     src = pkgs.fetchFromGitHub {
       owner = "redianthus";
       repo = "smtml";
-      rev = "b8853d3a589722652904dfc1d6f85958f954dd4c";
-      hash = "sha256-9ogUDfsUbHsEfMhxdfA/bvUVLy4oxBT7pXnGQkPiLkY=";
+      rev = "25a307e685b79ef772266a76070922dfdb25bd80";
+      hash = "sha256-BgsX69fTCPc3ScTmiDpeScem+k6CJ+61RIdoSVp2At4=";
     };
   });
   synchronizer = pkgs.ocamlPackages.synchronizer.overrideAttrs (old: {
