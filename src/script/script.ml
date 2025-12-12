@@ -10,7 +10,7 @@ module Host_externref = struct
 
   let ty : t Type.Id.t = Type.Id.make ()
 
-  let value i = Concrete_value.Ref.extern ty i
+  let value i = Concrete_ref.extern ty i
 end
 
 let check_error ~expected ~got : unit Result.t =
@@ -87,7 +87,7 @@ let compare_result_const result (const : Concrete_value.t) =
   | Result_const (Literal (Const_null Func_ht)), Ref (Func None) -> true
   | Result_const (Literal (Const_null Extern_ht)), Ref (Extern None) -> true
   | Result_const (Literal (Const_extern n)), Ref (Extern (Some ref)) -> begin
-    match Concrete_value.Ref.Extern.cast ref Host_externref.ty with
+    match Concrete_ref.Extern.cast ref Host_externref.ty with
     | None -> false
     | Some n' -> n = n'
   end
@@ -120,7 +120,7 @@ let value_of_const : Wast.const -> Concrete_value.t = function
   | Const_F32 v -> Concrete_value.F32 v
   | Const_F64 v -> Concrete_value.F64 v
   | Const_V128 v -> Concrete_value.V128 v
-  | Const_null rt -> Concrete_value.Ref (Concrete_value.Ref.null rt)
+  | Const_null rt -> Concrete_value.Ref (Concrete_ref.null rt)
   | Const_extern i -> Concrete_value.Ref (Host_externref.value i)
   | i ->
     Log.err (fun m ->

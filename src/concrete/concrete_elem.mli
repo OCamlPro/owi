@@ -2,5 +2,7 @@
 (* Copyright © 2021-2025 OCamlPro *)
 (* Written by the Owi programmers *)
 
-include
-  Elem_intf.T with module Value := Concrete_value and type t = Link_env.elem
+(* TODO: make it opaque *)
+type t = { mutable value : Concrete_ref.t array }
+
+include Elem_intf.T with type reference := Concrete_ref.t and type t := t

@@ -4,7 +4,7 @@
 
 type t
 
-include Global_intf.T with module Value := Symbolic_value and type t := t
+include Global_intf.T with type value := Symbolic_value.t and type t := t
 
 type collection
 

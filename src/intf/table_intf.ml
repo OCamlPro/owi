@@ -1,11 +1,11 @@
 module type T = sig
-  module Value : Value_intf.T
+  type reference
 
   type t
 
-  val get : t -> int -> Value.Ref.t
+  val get : t -> int -> reference
 
-  val set : t -> int -> Value.Ref.t -> unit
+  val set : t -> int -> reference -> unit
 
   val size : t -> int
 
@@ -13,9 +13,9 @@ module type T = sig
 
   val max_size : t -> int option
 
-  val grow : t -> Int32.t -> Value.Ref.t -> unit
+  val grow : t -> Int32.t -> reference -> unit
 
-  val fill : t -> Int32.t -> Int32.t -> Value.Ref.t -> unit
+  val fill : t -> Int32.t -> Int32.t -> reference -> unit
 
   val copy :
     t_src:t -> t_dst:t -> src:Int32.t -> dst:Int32.t -> len:Int32.t -> unit

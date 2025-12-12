@@ -2,8 +2,10 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type t = Link_env.data
+type t = { mutable value : string }
 
-let value data = data.Link_env.value
+let value data = data.value
 
-let size data = String.length data.Link_env.value
+let size data = String.length data.value
+
+let drop data = data.value <- ""

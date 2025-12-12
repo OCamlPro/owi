@@ -27,12 +27,19 @@ end
 module Make
     (Value : Value_intf.T)
     (Data : Data_intf.T)
-    (Global : Global_intf.T with module Value := Value)
-    (Elem : Elem_intf.T with module Value := Value)
-    (Table : Table_intf.T with module Value := Value)
-    (Choice : Choice_intf.Base with module Value := Value)
+    (Global : Global_intf.T with type value := Value.t)
+    (Elem : Elem_intf.T with type reference := Value.Ref.t)
+    (Table : Table_intf.T with type reference := Value.Ref.t)
+    (Choice :
+      Choice_intf.Base
+        with type boolean := Value.boolean
+         and type i32 := Value.i32
+         and type value := Value.t)
     (Memory :
-      Memory_intf.T with module Value := Value and module Choice := Choice)
+      Memory_intf.T
+        with type i32 := Value.i32
+         and type i64 := Value.i64
+         and type 'a choice := 'a Choice.t)
     (Extern_func :
       Extern.Func.T
         with type i32 := Value.i32
@@ -1210,7 +1217,7 @@ struct
     end
     | Elem_drop i ->
       let elem = Env.get_elem env i in
-      Env.drop_elem elem;
+      Elem.drop elem;
       st stack
     | I_load16 (memid, nn, sx, { offset; _ }) -> (
       let* mem = Env.get_memory env memid in
@@ -1483,7 +1490,7 @@ struct
       st stack
     | Data_drop i ->
       let* data = Env.get_data env i in
-      Env.drop_data data;
+      Data.drop data;
       st stack
     | Br_table (inds, i) ->
       let target, stack = Stack.pop_i32 stack in

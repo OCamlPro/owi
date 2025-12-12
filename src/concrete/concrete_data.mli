@@ -2,4 +2,6 @@
 (* Copyright © 2021-2025 OCamlPro *)
 (* Written by the Owi programmers *)
 
-include Data_intf.T with type t = Link_env.data
+type t = { mutable value : string }
+
+include Data_intf.T with type t := t

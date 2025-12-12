@@ -2,14 +2,14 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-(** runtime memory *)
 type t
 
 include
   Memory_intf.T
-    with module Value := Concrete_value
-     and module Choice := Concrete_choice
-     and type t := t
+    with type t := t
+     and type i32 := Concrete_i32.t
+     and type i64 := Concrete_i64.t
+     and type 'a choice := 'a Concrete_choice.t
 
 val get_limits : t -> Text.limits
 

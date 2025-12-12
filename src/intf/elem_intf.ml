@@ -3,11 +3,13 @@
 (* Written by the Owi programmers *)
 
 module type T = sig
-  module Value : Value_intf.T
+  type reference
 
   type t
 
-  val get : t -> int -> Value.Ref.t
+  val get : t -> int -> reference
 
   val size : t -> int
+
+  val drop : t -> unit
 end

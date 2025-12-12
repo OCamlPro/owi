@@ -5,21 +5,13 @@
 open Syntax
 module IMap = Map.Make (Int)
 
-type data = { mutable value : string }
-
-let drop_data data = data.value <- ""
-
-type elem = { mutable value : Concrete_value.Ref.t array }
-
-let drop_elem (elem : elem) = elem.value <- [||]
-
 type 'ext t =
   { globals : Concrete_global.t IMap.t
   ; memories : Concrete_memory.t IMap.t
   ; tables : Concrete_table.t IMap.t
   ; functions : Kind.func IMap.t
-  ; data : data IMap.t
-  ; elem : elem IMap.t
+  ; data : Concrete_data.t IMap.t
+  ; elem : Concrete_elem.t IMap.t
   ; extern_funcs : ('ext * Text.func_type) Dynarray.t
   ; id : int
   }
@@ -62,8 +54,8 @@ module Build = struct
     ; memories : Concrete_memory.t IMap.t
     ; tables : Concrete_table.t IMap.t
     ; functions : Kind.func IMap.t
-    ; data : data IMap.t
-    ; elem : elem IMap.t
+    ; data : Concrete_data.t IMap.t
+    ; elem : Concrete_elem.t IMap.t
     }
 
   let empty =

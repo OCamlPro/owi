@@ -5,7 +5,7 @@
 (** runtime table *)
 
 (* TODO: make private and even opaque! *)
-type table = Concrete_value.Ref.t array
+type table = Concrete_ref.t array
 
 (* TODO: make private and even opaque! *)
 type t =
@@ -16,6 +16,6 @@ type t =
   ; mutable data : table
   }
 
-include Table_intf.T with module Value := Concrete_value and type t := t
+include Table_intf.T with type reference := Concrete_ref.t and type t := t
 
 val init : ?label:string -> Text.Table.Type.t -> t

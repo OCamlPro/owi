@@ -5,7 +5,7 @@
 (** Single table *)
 type t
 
-include Table_intf.T with module Value := Symbolic_value and type t := t
+include Table_intf.T with type reference := Symbolic_ref.t and type t := t
 
 (** Collection of tables *)
 type collection

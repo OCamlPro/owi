@@ -3,7 +3,7 @@
 (* Written by the Owi programmers *)
 
 (* TODO: Concrete_value.Ref.t array, gadt to constraint to the right ref_type ? *)
-type table = Concrete_value.Ref.t array
+type table = Concrete_ref.t array
 
 type t =
   { id : int
@@ -21,7 +21,7 @@ let fresh =
 
 let init ?label (typ : Text.Table.Type.t) : t =
   let limits, ((_null, heap_type) as ref_type) = typ in
-  let null = Concrete_value.Ref.null heap_type in
+  let null = Concrete_ref.null heap_type in
   let table = Array.make limits.min null in
   { id = fresh (); label; limits; typ = ref_type; data = table }
 

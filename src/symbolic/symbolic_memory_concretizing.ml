@@ -2,8 +2,8 @@ module Backend = struct
   module Map = Map.Make (Int32)
 
   type t =
-    { mutable data : Symbolic_value.i32 Map.t
-    ; mutable chunks : Symbolic_value.i32 Map.t
+    { mutable data : Symbolic_i32.t Map.t
+    ; mutable chunks : Symbolic_i32.t Map.t
     }
 
   let make () = { data = Map.empty; chunks = Map.empty }
@@ -22,9 +22,9 @@ module Backend = struct
     | Ptr { base; offset } ->
       let base =
         (* TODO: it seems possible to avoid this conversion *)
-        Smtml.Bitvector.to_int32 base |> Symbolic_value.I32.of_concrete
+        Smtml.Bitvector.to_int32 base |> Symbolic_i32.of_concrete
       in
-      let addr = Symbolic_value.I32.add base offset in
+      let addr = Symbolic_i32.add base offset in
       select_i32 addr
     | _ -> select_i32 a
 
@@ -62,19 +62,18 @@ module Backend = struct
       (* An i32 is not a pointer to a heap chunk, so its valid *)
       return (Ok a)
     | Ptr { base; offset = start_offset } -> (
-      let open Symbolic_value in
       let base = Smtml.Bitvector.to_int32 base in
       match Map.find_opt base m.chunks with
       | None -> return (Error `Memory_leak_use_after_free)
       | Some chunk_size ->
         let+ is_out_of_bounds =
-          let range = I32.of_int (range - 1) in
+          let range = Symbolic_i32.of_int (range - 1) in
           (* end_offset: last byte we will read/write *)
-          let end_offset = I32.add start_offset range in
+          let end_offset = Symbolic_i32.add start_offset range in
           select
             (Symbolic_boolean.or_
-               (I32.ge_u start_offset chunk_size)
-               (I32.ge_u end_offset chunk_size) )
+               (Symbolic_i32.ge_u start_offset chunk_size)
+               (Symbolic_i32.ge_u end_offset chunk_size) )
             ~prio_true:Prio.Default ~prio_false:Prio.Default
         in
         if is_out_of_bounds then Error `Memory_heap_buffer_overflow else Ok a )
@@ -98,14 +97,14 @@ module Backend = struct
     let open Symbolic_choice_without_memory in
     match Smtml.Expr.view p with
     | Val (Bitv bv) when Smtml.Bitvector.eqz bv ->
-      return (Symbolic_value.I32.of_concrete 0l)
+      return (Symbolic_i32.of_concrete 0l)
     | _ ->
       let* base = ptr p in
       if not @@ Map.mem base m.chunks then trap `Double_free
       else begin
         let chunks = Map.remove base m.chunks in
         m.chunks <- chunks;
-        return (Symbolic_value.I32.of_concrete base)
+        return (Symbolic_i32.of_concrete base)
       end
 
   let realloc m ~ptr ~size =
@@ -113,18 +112,18 @@ module Backend = struct
     let+ base = address ptr in
     let chunks = Map.add base size m.chunks in
     m.chunks <- chunks;
-    Smtml.Expr.ptr base (Symbolic_value.I32.of_concrete 0l)
+    Smtml.Expr.ptr base (Symbolic_i32.of_concrete 0l)
 end
 
-let page_size = Symbolic_value.I32.of_concrete 65_536l
+let page_size = Symbolic_i32.of_concrete 65_536l
 
 type t =
   { data : Backend.t
-  ; mutable size : Symbolic_value.i32
+  ; mutable size : Symbolic_i32.t
   }
 
 let create size =
-  { data = Backend.make (); size = Symbolic_value.I32.of_concrete size }
+  { data = Backend.make (); size = Symbolic_i32.of_concrete size }
 
 let i32 v =
   match Smtml.Expr.view v with
@@ -133,14 +132,14 @@ let i32 v =
   | _ -> assert false
 
 let grow m delta =
-  let old_size = Symbolic_value.I32.mul m.size page_size in
-  let new_size = Symbolic_value.I32.(div (add old_size delta) page_size) in
+  let old_size = Symbolic_i32.mul m.size page_size in
+  let new_size = Symbolic_i32.(div (add old_size delta) page_size) in
   m.size <-
     Symbolic_boolean.ite
-      (Symbolic_value.I32.gt new_size m.size)
+      (Symbolic_i32.gt new_size m.size)
       ~if_true:new_size ~if_false:m.size
 
-let size { size; _ } = Symbolic_value.I32.mul size page_size
+let size { size; _ } = Symbolic_i32.mul size page_size
 
 let size_in_pages { size; _ } = size
 
@@ -159,7 +158,7 @@ let load_8_s m a =
   match Smtml.Expr.view v with
   | Val (Bitv i8) when Smtml.Bitvector.numbits i8 = 8 ->
     let i8 = Smtml.Bitvector.to_int32 i8 in
-    Symbolic_value.I32.of_concrete (Int32.extend_s 8 i8)
+    Symbolic_i32.of_concrete (Concrete_i32.extend_s 8 i8)
   | _ -> Smtml.Expr.cvtop (Ty_bitv 32) (Sign_extend 24) v
 
 let load_8_u m a =
@@ -169,7 +168,7 @@ let load_8_u m a =
   match Smtml.Expr.view v with
   | Val (Bitv i) when Smtml.Bitvector.numbits i = 8 ->
     let i = Smtml.Bitvector.to_int32 i in
-    Symbolic_value.I32.of_concrete i
+    Symbolic_i32.of_concrete i
   | _ -> Smtml.Expr.cvtop (Ty_bitv 32) (Zero_extend 24) v
 
 let load_16_s m a =
@@ -179,7 +178,7 @@ let load_16_s m a =
   match Smtml.Expr.view v with
   | Val (Bitv i16) when Smtml.Bitvector.numbits i16 = 16 ->
     let i16 = Smtml.Bitvector.to_int32 i16 in
-    Symbolic_value.I32.of_concrete (Int32.extend_s 16 i16)
+    Symbolic_i32.of_concrete (Int32.extend_s 16 i16)
   | _ -> Smtml.Expr.cvtop (Ty_bitv 32) (Sign_extend 16) v
 
 let load_16_u m a =
@@ -189,7 +188,7 @@ let load_16_u m a =
   match Smtml.Expr.view v with
   | Val (Bitv i16) when Smtml.Bitvector.numbits i16 = 16 ->
     let i16 = Smtml.Bitvector.to_int32 i16 in
-    Symbolic_value.I32.of_concrete i16
+    Symbolic_i32.of_concrete i16
   | _ -> Smtml.Expr.cvtop (Ty_bitv 32) (Zero_extend 16) v
 
 let load_32 m a =
@@ -229,12 +228,12 @@ let fill m ~(pos : Smtml.Expr.t) ~(len : Smtml.Expr.t) (c : char) =
   let len = Int32.to_int len in
   let* pos = select_i32 pos in
   let pos = Int32.to_int pos in
-  let c = Symbolic_value.I32.of_int (int_of_char c) in
+  let c = Symbolic_i32.of_int (int_of_char c) in
 
   let rec aux i =
     if i = len then return ()
     else
-      let addr = Symbolic_value.I32.of_int (pos + i) in
+      let addr = Symbolic_i32.of_int (pos + i) in
       let* () = store_8 m ~addr c in
       aux (i + 1)
   in
@@ -252,9 +251,9 @@ let blit ~src ~src_idx ~dst ~dst_idx ~len =
   let rec aux i =
     if i = len then return ()
     else
-      let addr = Symbolic_value.I32.of_int (src_idx + i) in
+      let addr = Symbolic_i32.of_int (src_idx + i) in
       let* v = load_8_s src addr in
-      let addr = Symbolic_value.I32.of_int (dst_idx + i) in
+      let addr = Symbolic_i32.of_int (dst_idx + i) in
       let* () = store_8 dst ~addr v in
       aux (i + 1)
   in

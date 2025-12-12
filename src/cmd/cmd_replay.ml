@@ -159,8 +159,7 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
     let cov_label_is_covered id =
       let open Concrete_choice in
       let+ id = select_i32 id in
-      Concrete_value.I32.of_concrete
-      @@ if Hashtbl.mem covered_labels id then 1l else 0l
+      if Hashtbl.mem covered_labels id then 1l else 0l
 
     let cov_label_set m id str_ptr =
       let+ chars = make_str m [] str_ptr in
