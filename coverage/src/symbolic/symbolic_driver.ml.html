@@ -360,10 +360,10 @@ let sort_results deterministic_result_order results =
 
 let mk_callback no_stop_at_failure fail_mode res_stack path_count =
  fun ~close_work_queue v -&gt;
-  <span data-count="1695">l</span>et open Symbolic_choice_intf in
+  <span data-count="1750">l</span>et open Symbolic_choice_intf in
   Atomic.incr path_count;
-  <span data-count="1695">m</span>atch (fail_mode, v) with
-  | <span data-count="1452">_</span>, (EVal (), _) -&gt; ()
+  <span data-count="1750">m</span>atch (fail_mode, v) with
+  | <span data-count="1509">_</span>, (EVal (), _) -&gt; ()
   | <span data-count="175">(</span> (<span data-count="174">S</span>ymbolic_parameters.Both | <span data-count="1">T</span>rap_only)
     , (ETrap (t, m, labels, breadcrumbs, symbol_scopes), thread) ) -&gt;
     Ws.push
@@ -372,15 +372,15 @@ let mk_callback no_stop_at_failure fail_mode res_stack path_count =
     <span data-count="175">i</span>f not no_stop_at_failure then <span data-count="14">b</span>egin
       close_work_queue ()
     end
-  | <span data-count="64">(</span> (<span data-count="61">B</span>oth | <span data-count="3">A</span>ssertion_only)
+  | <span data-count="63">(</span> (<span data-count="60">B</span>oth | <span data-count="3">A</span>ssertion_only)
     , (EAssert (e, m, labels, breadcrumbs, symbol_scopes), thread) ) -&gt;
     Ws.push
       (`EAssert (e, m, labels, breadcrumbs, symbol_scopes), thread)
       Prio.default res_stack;
-    <span data-count="59">i</span>f not no_stop_at_failure then <span data-count="36">b</span>egin
+    <span data-count="60">i</span>f not no_stop_at_failure then <span data-count="37">b</span>egin
       close_work_queue ()
     end
-  | <span data-count="4">(</span><span data-count="1">T</span>rap_only | <span data-count="3">A</span>ssertion_only), _ -&gt; ()
+  | <span data-count="3">(</span><span data-count="1">T</span>rap_only | <span data-count="2">A</span>ssertion_only), _ -&gt; ()
 
 let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
   ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
@@ -389,15 +389,15 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
   <span data-count="406">l</span>et thread = Thread_with_memory.init () in
   <span data-count="406">l</span>et res_stack = Ws.make () in
   <span data-count="406">l</span>et path_count = Atomic.make 0 in
-  <span data-count="406">l</span>et callback =
+  <span data-count="406">l</span>et at_worker_value =
     mk_callback no_stop_at_failure fail_mode res_stack path_count
   in
   <span data-count="406">l</span>et time_before = (Unix.time<span data-count="406">s</span> ()).tms_utime in
   let domains : unit Domain.t Array.t =
     Symbolic_choice_with_memory.run exploration_strategy ~workers solver result
-      thread ~callback
-      ~callback_init:(fun () -&gt; <span data-count="783">W</span>s.make_pledge res_stack)
-      ~callback_end:(fun () -&gt; <span data-count="759">W</span>s.end_pledge res_stack)
+      thread ~at_worker_value
+      ~at_worker_init:(fun () -&gt; <span data-count="783">W</span>s.make_pledge res_stack)
+      ~at_worker_end:(fun () -&gt; <span data-count="767">W</span>s.end_pledge res_stack)
   in
   <span data-count="406">l</span>et results = Ws.read_as_seq res_stack ~finalizer:Fun.id in
   <span data-count="406">l</span>et results = sort_results deterministic_result_order results in
@@ -409,9 +409,9 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
 
   (* We don't want to wait for domain to complete in normal/quiet mode because it may take quite some time (if a solver is running a long query, the interpreter is in a long concrete loop, or if the work queue was not correctly closed for instance) *)
   <span data-count="406">l</span>et wait_for_all_domains () =
-    <span data-count="4">A</span>rray.iter
+    <span data-count="1">A</span>rray.iter
       (fun domain -&gt;
-        <span data-count="4">t</span>ry Domain.joi<span data-count="4">n</span> domain with
+        <span data-count="1">t</span>ry Domain.joi<span data-count="1">n</span> domain with
         | <span data-count="0">Z</span>3.Error msg -&gt;
           Log.info (fun m -&gt;
             <span data-count="0">m</span> "one domain exited with the following Z3 exception: %s" msg )
@@ -436,9 +436,9 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
     Benchmark.print_final ~bench_stats ~execution_time_a:run_time
       ~execution_time_b ~wait_for_all_domains
   end
-  else <span data-count="404">i</span>f Log.is_info_enabled () then begin
-    (* we don't run this in normal/quiet because it may be slow *)
-    <span data-count="2">w</span>ait_for_all_domain<span data-count="2">s</span> ()
+  else <span data-count="404">i</span>f Log.is_debug_enabled () then begin
+    (* we only do this in debug mode because otherwise it makes performances very bad *)
+    <span data-count="1">w</span>ait_for_all_domain<span data-count="1">s</span> ()
   end;
 
   Log.info (fun m -&gt; <span data-count="2">m</span> "Completed paths: %d" (Atomic.ge<span data-count="2">t</span> path_count));

@@ -103,20 +103,20 @@ let true_i32 = valu<span data-count="746">e</span> (Bitv (Smtml.Bitvector.of_int
 
 let of_concrete (i : bool) : t = <span data-count="0">i</span>f i then <span data-count="0">t</span>rue_ else <span data-count="0">f</span>alse_
 
-let not e = <span data-count="13104">B</span>ool.not e
+let not e = <span data-count="13098">B</span>ool.not e
 
-let or_ e1 e2 = <span data-count="48842">B</span>ool.or_ e1 e2
+let or_ e1 e2 = <span data-count="48791">B</span>ool.or_ e1 e2
 
-let and_ e1 e2 = <span data-count="28">B</span>ool.and_ e1 e2
+let and_ e1 e2 = <span data-count="25">B</span>ool.and_ e1 e2
 
 let to_i32 e =
-  <span data-count="225609">m</span>atch view e with
-  | <span data-count="95615">V</span>al True -&gt; true_i32
-  | <span data-count="107693">V</span>al False -&gt; false_i32
+  <span data-count="225604">m</span>atch view e with
+  | <span data-count="95608">V</span>al True -&gt; true_i32
+  | <span data-count="107703">V</span>al False -&gt; false_i32
   | <span data-count="0">C</span>vtop (Ty_bitv 32, ToBool, e') -&gt; e'
-  | <span data-count="22302">_</span> -&gt; cvtop (Ty_bitv 32) OfBool e
+  | <span data-count="22293">_</span> -&gt; cvtop (Ty_bitv 32) OfBool e
 
-let select_expr c ~if_true ~if_false = <span data-count="21394">B</span>ool.ite c if_true if_false
+let select_expr c ~if_true ~if_false = <span data-count="21390">B</span>ool.ite c if_true if_false
 
 let pp = pp
 </code></pre>

@@ -120,17 +120,17 @@ let rec read_as_seq (q : 'a t) ~finalizer : 'a Seq.t =
 
 let push v prio q = <span data-count="404">S</span>ynchronizer.write (prio, v) q
 
-let work_while f q = <span data-count="773">S</span>ynchronizer.work_while f q
+let work_while f q = <span data-count="772">S</span>ynchronizer.work_while f q
 
 let close = Synchronizer.close
 
 let make () =
   <span data-count="404">l</span>et q = Queue.create () in
   <span data-count="404">l</span>et writter prio_v condvar =
-    <span data-count="27710">Q</span>ueue.push (sn<span data-count="27710">d</span> prio_v) q;
-    <span data-count="27710">C</span>ondition.signal condvar
+    <span data-count="27773">Q</span>ueue.push (sn<span data-count="27773">d</span> prio_v) q;
+    <span data-count="27773">C</span>ondition.signal condvar
   in
-  Synchronizer.init (fun () -&gt; <span data-count="29087">Q</span>ueue.take_opt q) writter
+  Synchronizer.init (fun () -&gt; <span data-count="29168">Q</span>ueue.take_opt q) writter
 </code></pre>
       </div>
     </div>

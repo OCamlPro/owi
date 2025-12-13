@@ -130,6 +130,7 @@
 <a id="L106"></a><span > </span>
 <a id="L107"></a><span > </span>
 <a id="L108"></a><span > </span>
+<a id="L109"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -242,6 +243,7 @@
 <a href="#L106">106</a>
 <a href="#L107">107</a>
 <a href="#L108">108</a>
+<a href="#L109">109</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -316,9 +318,10 @@ module type S = sig
     -&gt; Smtml.Solver_type.t
     -&gt; 'a t
     -&gt; thread
-    -&gt; callback:(close_work_queue:(unit -&gt; unit) -&gt; 'a eval * thread -&gt; unit)
-    -&gt; callback_init:(unit -&gt; unit)
-    -&gt; callback_end:(unit -&gt; unit)
+    -&gt; at_worker_value:
+         (close_work_queue:(unit -&gt; unit) -&gt; 'a eval * thread -&gt; unit)
+    -&gt; at_worker_init:(unit -&gt; unit)
+    -&gt; at_worker_end:(unit -&gt; unit)
     -&gt; unit Domain.t array
 
   val ite :
