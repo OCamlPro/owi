@@ -18,10 +18,10 @@
       <h2>16.67%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="bottom:10.81%"></span>
-      <span class="unvisited" style="bottom:8.11%"></span>
-      <span class="unvisited" style="bottom:5.41%"></span>
-      <span class="unvisited" style="bottom:2.70%"></span>
+      <span class="unvisited" style="bottom:10.26%"></span>
+      <span class="unvisited" style="bottom:7.69%"></span>
+      <span class="unvisited" style="bottom:5.13%"></span>
+      <span class="unvisited" style="bottom:2.56%"></span>
       <span class="unvisited" style="bottom:0.00%"></span>
     </div>
     <div id="report">
@@ -58,12 +58,14 @@
 <a id="L29"></a><span > </span>
 <a id="L30"></a><span > </span>
 <a id="L31"></a><span > </span>
-<a id="L32"></a><span class="visited"> </span>
-<a id="L33"></a><span class="unvisited"> </span>
-<a id="L34"></a><span class="unvisited"> </span>
+<a id="L32"></a><span > </span>
+<a id="L33"></a><span > </span>
+<a id="L34"></a><span class="visited"> </span>
 <a id="L35"></a><span class="unvisited"> </span>
 <a id="L36"></a><span class="unvisited"> </span>
 <a id="L37"></a><span class="unvisited"> </span>
+<a id="L38"></a><span class="unvisited"> </span>
+<a id="L39"></a><span class="unvisited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -105,6 +107,8 @@
 <a href="#L35">35</a>
 <a href="#L36">36</a>
 <a href="#L37">37</a>
+<a href="#L38">38</a>
+<a href="#L39">39</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -117,6 +121,8 @@ module I64 = Symbolic_i64
 module F64 = Symbolic_f64
 module V128 = Symbolic_v128
 module Ref = Symbolic_ref
+
+type boolean = Symbolic_boolean.t
 
 type i32 = I32.t
 

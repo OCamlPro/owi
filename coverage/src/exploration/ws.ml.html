@@ -128,10 +128,10 @@ let close = Synchronizer.close
 let make () =
   <span data-count="407">l</span>et s = Stack.create () in
   <span data-count="407">l</span>et writter prio_v condvar =
-    <span data-count="247">S</span>tack.push (sn<span data-count="247">d</span> prio_v) s;
-    <span data-count="247">C</span>ondition.signal condvar
+    <span data-count="249">S</span>tack.push (sn<span data-count="249">d</span> prio_v) s;
+    <span data-count="249">C</span>ondition.signal condvar
   in
-  Synchronizer.init (fun () -&gt; <span data-count="1142">S</span>tack.pop_opt s) writter
+  Synchronizer.init (fun () -&gt; <span data-count="1159">S</span>tack.pop_opt s) writter
 </code></pre>
       </div>
     </div>

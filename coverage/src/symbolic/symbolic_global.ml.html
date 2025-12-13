@@ -137,18 +137,18 @@ type t = { mutable value : Symbolic_value.t }
 
 let value v = <span data-count="333">v</span>.value
 
-let set_value v x = <span data-count="1855">v</span>.value &lt;- x
+let set_value v x = <span data-count="1866">v</span>.value &lt;- x
 
 (* WARNING: because we are doing an optimization in `Symbolic_choice`, the cloned state should not refer to a mutable value of the previous state. Assuming that the original state is not mutated is wrong. *)
-let clone_global r = <span data-count="13482">{</span> value = r.value }
+let clone_global r = <span data-count="13779">{</span> value = r.value }
 
 let convert_values (v : Concrete_value.t) : Symbolic_value.t =
   <span data-count="204">m</span>atch v with
-  | <span data-count="192">I</span>32 v -&gt; I32 (Symbolic_value.I32.of_concret<span data-count="192">e</span> v)
-  | <span data-count="4">I</span>64 v -&gt; I64 (Symbolic_value.I64.of_concret<span data-count="4">e</span> v)
-  | <span data-count="4">F</span>32 v -&gt; F32 (Symbolic_value.F32.of_concret<span data-count="4">e</span> v)
-  | <span data-count="4">F</span>64 v -&gt; F64 (Symbolic_value.F64.of_concret<span data-count="4">e</span> v)
-  | <span data-count="0">V</span>128 v -&gt; V128 (Symbolic_value.V128.of_concret<span data-count="0">e</span> v)
+  | <span data-count="192">I</span>32 v -&gt; I32 (Symbolic_i32.of_concret<span data-count="192">e</span> v)
+  | <span data-count="4">I</span>64 v -&gt; I64 (Symbolic_i64.of_concret<span data-count="4">e</span> v)
+  | <span data-count="4">F</span>32 v -&gt; F32 (Symbolic_f32.of_concret<span data-count="4">e</span> v)
+  | <span data-count="4">F</span>64 v -&gt; F64 (Symbolic_f64.of_concret<span data-count="4">e</span> v)
+  | <span data-count="0">V</span>128 v -&gt; V128 (Symbolic_v128.of_concret<span data-count="0">e</span> v)
   | <span data-count="0">R</span>ef (Func f) -&gt; Ref (Func f)
   | Ref _ -&gt; assert false
 
@@ -160,25 +160,25 @@ let convert (orig_global : Concrete_global.t) : t =
 
 type collection = (int * int, t) Hashtbl.t
 
-let init () = <span data-count="14235">H</span>ashtbl.create 16
+let init () = <span data-count="14533">H</span>ashtbl.create 16
 
 let clone collection =
-  <span data-count="13829">l</span>et collection' = init () in
-  <span data-count="13831">H</span>ashtbl.iter
+  <span data-count="14128">l</span>et collection' = init () in
+  <span data-count="14130">H</span>ashtbl.iter
     (fun loc global -&gt;
-      <span data-count="13481">l</span>et global' = clone_global global in
-      <span data-count="13482">H</span>ashtbl.add collection' loc global' )
+      <span data-count="13779">l</span>et global' = clone_global global in
+      <span data-count="13779">H</span>ashtbl.add collection' loc global' )
     collection;
-  <span data-count="13831">c</span>ollection'
+  <span data-count="14129">c</span>ollection'
 
 let get_global env_id (orig_global : Concrete_global.t) collection g_id =
-  <span data-count="2191">l</span>et loc = (env_id, g_id) in
+  <span data-count="2200">l</span>et loc = (env_id, g_id) in
   match Hashtbl.find_opt collection loc with
   | <span data-count="204">N</span>one -&gt;
     let g = convert orig_global in
     <span data-count="204">H</span>ashtbl.add collection loc g;
     <span data-count="204">g</span>
-  | <span data-count="1986">S</span>ome t -&gt; t
+  | <span data-count="1996">S</span>ome t -&gt; t
 </code></pre>
       </div>
     </div>

@@ -31,29 +31,35 @@
 <a id="L7"></a><span class="visited"> </span>
 <a id="L8"></a><span > </span>
 <a id="L9"></a><span class="visited"> </span>
+<a id="L10"></a><span > </span>
+<a id="L11"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
         <pre id="line-numbers">
-<a href="#L1">1</a>
-<a href="#L2">2</a>
-<a href="#L3">3</a>
-<a href="#L4">4</a>
-<a href="#L5">5</a>
-<a href="#L6">6</a>
-<a href="#L7">7</a>
-<a href="#L8">8</a>
-<a href="#L9">9</a>
+<a href="#L1"> 1</a>
+<a href="#L2"> 2</a>
+<a href="#L3"> 3</a>
+<a href="#L4"> 4</a>
+<a href="#L5"> 5</a>
+<a href="#L6"> 6</a>
+<a href="#L7"> 7</a>
+<a href="#L8"> 8</a>
+<a href="#L9"> 9</a>
+<a href="#L10">10</a>
+<a href="#L11">11</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type t = Link_env.data
+type t = { mutable value : string }
 
-let value data = <span data-count="306">d</span>ata.Link_env.value
+let value data = <span data-count="306">d</span>ata.value
 
-let size data = <span data-count="382">S</span>tring.length data.Link_env.value
+let size data = <span data-count="382">S</span>tring.length data.value
+
+let drop data = <span data-count="285">d</span>ata.value &lt;- ""
 </code></pre>
       </div>
     </div>

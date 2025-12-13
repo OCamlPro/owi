@@ -32,6 +32,8 @@
 <a id="L8"></a><span class="visited"> </span>
 <a id="L9"></a><span > </span>
 <a id="L10"></a><span class="visited"> </span>
+<a id="L11"></a><span > </span>
+<a id="L12"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -46,17 +48,21 @@
 <a href="#L8"> 8</a>
 <a href="#L9"> 9</a>
 <a href="#L10">10</a>
+<a href="#L11">11</a>
+<a href="#L12">12</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type t = Link_env.elem
+type t = Concrete_elem.t
 
-let get (elem : t) i : Symbolic_value.Ref.t =
+let get (elem : t) i : Symbolic_ref.t =
   <span data-count="610">m</span>atch elem.value.(i) with <span data-count="610">F</span>unc f -&gt; Func f | _ -&gt; assert false
 
 let size (elem : t) = <span data-count="167">A</span>rray.length elem.value
+
+let drop (e : t) = <span data-count="167">e</span>.value &lt;- [||]
 </code></pre>
       </div>
     </div>

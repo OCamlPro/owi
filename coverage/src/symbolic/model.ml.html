@@ -382,7 +382,7 @@ let print ~format ~out_file ~id ~no_value ~no_stop_at_failure
   | <span data-count="63">`</span>EAssert (assertion, model, labels, breadcrumbs, symbol_scopes) -&gt;
     if no_assert_failure_expression_printing then
       <span data-count="12">L</span>og.er<span data-count="12">r</span> (fun m -&gt; <span data-count="12">m</span> "Assert failure")
-    else <span data-count="51">L</span>og.er<span data-count="51">r</span> (fun m -&gt; <span data-count="51">m</span> "Assert failure: %a" Smtml.Expr.pp assertion);
+    else <span data-count="51">L</span>og.er<span data-count="51">r</span> (fun m -&gt; <span data-count="51">m</span> "Assert failure: %a" Symbolic_boolean.pp assertion);
     output model labels breadcrumbs symbol_scopes
 </code></pre>
       </div>

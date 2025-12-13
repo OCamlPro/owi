@@ -35,6 +35,8 @@
 <a id="L11"></a><span > </span>
 <a id="L12"></a><span > </span>
 <a id="L13"></a><span > </span>
+<a id="L14"></a><span > </span>
+<a id="L15"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -52,19 +54,23 @@
 <a href="#L11">11</a>
 <a href="#L12">12</a>
 <a href="#L13">13</a>
+<a href="#L14">14</a>
+<a href="#L15">15</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
 module type T = sig
-  module Value : Value_intf.T
+  type reference
 
   type t
 
-  val get : t -&gt; int -&gt; Value.Ref.t
+  val get : t -&gt; int -&gt; reference
 
   val size : t -&gt; int
+
+  val drop : t -&gt; unit
 end
 </code></pre>
       </div>

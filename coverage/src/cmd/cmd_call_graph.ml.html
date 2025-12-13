@@ -638,7 +638,7 @@ let eval_const_instr env stack instr =
   | <span data-count="0">F</span>64_const f -&gt; ok @@ Stack.push_f6<span data-count="0">4</span> stack f
   | <span data-count="0">V</span>128_const f -&gt; ok @@ Stack.push_v12<span data-count="0">8</span> stack f
   | <span data-count="2">I</span>_binop (nn, op) -&gt; ok @@ eval_ibino<span data-count="2">p</span> stack nn op
-  | <span data-count="0">R</span>ef_null t -&gt; ok @@ Stack.push_re<span data-count="0">f</span> stack (Concrete_value.Ref.nul<span data-count="0">l</span> t)
+  | <span data-count="0">R</span>ef_null t -&gt; ok @@ Stack.push_re<span data-count="0">f</span> stack (Concrete_ref.nul<span data-count="0">l</span> t)
   | <span data-count="0">G</span>lobal_get id -&gt;
     let* g = get_const_globa<span data-count="0">l</span> env id in
     <span data-count="0">o</span>k @@ Stack.push_i3<span data-count="0">2</span> stack g

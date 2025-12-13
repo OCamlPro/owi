@@ -72,13 +72,13 @@
 <a href="#L22">22</a>
 </pre>
 <pre><code class="ocaml">module type T = sig
-  module Value : Value_intf.T
+  type reference
 
   type t
 
-  val get : t -&gt; int -&gt; Value.Ref.t
+  val get : t -&gt; int -&gt; reference
 
-  val set : t -&gt; int -&gt; Value.Ref.t -&gt; unit
+  val set : t -&gt; int -&gt; reference -&gt; unit
 
   val size : t -&gt; int
 
@@ -86,9 +86,9 @@
 
   val max_size : t -&gt; int option
 
-  val grow : t -&gt; Int32.t -&gt; Value.Ref.t -&gt; unit
+  val grow : t -&gt; Int32.t -&gt; reference -&gt; unit
 
-  val fill : t -&gt; Int32.t -&gt; Int32.t -&gt; Value.Ref.t -&gt; unit
+  val fill : t -&gt; Int32.t -&gt; Int32.t -&gt; reference -&gt; unit
 
   val copy :
     t_src:t -&gt; t_dst:t -&gt; src:Int32.t -&gt; dst:Int32.t -&gt; len:Int32.t -&gt; unit

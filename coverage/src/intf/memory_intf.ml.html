@@ -66,10 +66,6 @@
 <a id="L42"></a><span > </span>
 <a id="L43"></a><span > </span>
 <a id="L44"></a><span > </span>
-<a id="L45"></a><span > </span>
-<a id="L46"></a><span > </span>
-<a id="L47"></a><span > </span>
-<a id="L48"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -118,58 +114,50 @@
 <a href="#L42">42</a>
 <a href="#L43">43</a>
 <a href="#L44">44</a>
-<a href="#L45">45</a>
-<a href="#L46">46</a>
-<a href="#L47">47</a>
-<a href="#L48">48</a>
 </pre>
 <pre><code class="ocaml">module type T = sig
   type t
 
-  module Value : Value_intf.T
+  type i32
 
-  module Choice : Choice_intf.Base with module Value := Value
+  type i64
 
-  val load_8_s : t -&gt; Value.i32 -&gt; Value.i32 Choice.t
+  type 'a choice
 
-  val load_8_u : t -&gt; Value.i32 -&gt; Value.i32 Choice.t
+  val load_8_s : t -&gt; i32 -&gt; i32 choice
 
-  val load_16_s : t -&gt; Value.i32 -&gt; Value.i32 Choice.t
+  val load_8_u : t -&gt; i32 -&gt; i32 choice
 
-  val load_16_u : t -&gt; Value.i32 -&gt; Value.i32 Choice.t
+  val load_16_s : t -&gt; i32 -&gt; i32 choice
 
-  val load_32 : t -&gt; Value.i32 -&gt; Value.i32 Choice.t
+  val load_16_u : t -&gt; i32 -&gt; i32 choice
 
-  val load_64 : t -&gt; Value.i32 -&gt; Value.i64 Choice.t
+  val load_32 : t -&gt; i32 -&gt; i32 choice
 
-  val store_8 : t -&gt; addr:Value.i32 -&gt; Value.i32 -&gt; unit Choice.t
+  val load_64 : t -&gt; i32 -&gt; i64 choice
 
-  val store_16 : t -&gt; addr:Value.i32 -&gt; Value.i32 -&gt; unit Choice.t
+  val store_8 : t -&gt; addr:i32 -&gt; i32 -&gt; unit choice
 
-  val store_32 : t -&gt; addr:Value.i32 -&gt; Value.i32 -&gt; unit Choice.t
+  val store_16 : t -&gt; addr:i32 -&gt; i32 -&gt; unit choice
 
-  val store_64 : t -&gt; addr:Value.i32 -&gt; Value.i64 -&gt; unit Choice.t
+  val store_32 : t -&gt; addr:i32 -&gt; i32 -&gt; unit choice
 
-  val grow : t -&gt; Value.i32 -&gt; unit
+  val store_64 : t -&gt; addr:i32 -&gt; i64 -&gt; unit choice
 
-  val fill : t -&gt; pos:Value.i32 -&gt; len:Value.i32 -&gt; char -&gt; unit Choice.t
+  val grow : t -&gt; i32 -&gt; unit
+
+  val fill : t -&gt; pos:i32 -&gt; len:i32 -&gt; char -&gt; unit choice
 
   val blit :
-       src:t
-    -&gt; src_idx:Value.i32
-    -&gt; dst:t
-    -&gt; dst_idx:Value.i32
-    -&gt; len:Value.i32
-    -&gt; unit Choice.t
+    src:t -&gt; src_idx:i32 -&gt; dst:t -&gt; dst_idx:i32 -&gt; len:i32 -&gt; unit choice
 
-  val blit_string :
-    t -&gt; string -&gt; src:Value.i32 -&gt; dst:Value.i32 -&gt; len:Value.i32 -&gt; unit
+  val blit_string : t -&gt; string -&gt; src:i32 -&gt; dst:i32 -&gt; len:i32 -&gt; unit
 
-  val size : t -&gt; Value.i32
+  val size : t -&gt; i32
 
-  val size_in_pages : t -&gt; Value.i32
+  val size_in_pages : t -&gt; i32
 
-  val get_limit_max : t -&gt; Value.i64 option
+  val get_limit_max : t -&gt; i64 option
 end
 </code></pre>
       </div>

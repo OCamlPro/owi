@@ -36,9 +36,7 @@
 <a id="L12"></a><span > </span>
 <a id="L13"></a><span > </span>
 <a id="L14"></a><span > </span>
-<a id="L15"></a><span class="visited"> </span>
-<a id="L16"></a><span > </span>
-<a id="L17"></a><span > </span>
+<a id="L15"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -58,8 +56,6 @@
 <a href="#L13">13</a>
 <a href="#L14">14</a>
 <a href="#L15">15</a>
-<a href="#L16">16</a>
-<a href="#L17">17</a>
 </pre>
 <pre><code class="ocaml">type t = bool
 
@@ -67,15 +63,13 @@ let false_ = false
 
 let true_ = true
 
-let of_concrete c = <span data-count="47">c</span>
+let of_concrete c = <span data-count="47">c</span> [@@inline]
 
 let not = not
 
 let and_ = ( &amp;&amp; )
 
 let or_ = ( || )
-
-let to_i32 = function <span data-count="7085287">f</span>alse -&gt; 0l | <span data-count="975843">t</span>rue -&gt; 1l
 
 let pp = Fmt.bool
 </code></pre>

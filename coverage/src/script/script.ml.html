@@ -694,7 +694,7 @@ module Host_externref = struct
 
   let ty : t Type.Id.t = Type.Id.mak<span data-count="746">e</span> ()
 
-  let value i = <span data-count="34">C</span>oncrete_value.Ref.extern ty i
+  let value i = <span data-count="34">C</span>oncrete_ref.extern ty i
 end
 
 let check_error ~expected ~got : unit Result.t =
@@ -771,7 +771,7 @@ let compare_result_const result (const : Concrete_value.t) =
   | <span data-count="7">R</span>esult_const (Literal (Const_null Func_ht)), Ref (Func None) -&gt; true
   | <span data-count="28">R</span>esult_const (Literal (Const_null Extern_ht)), Ref (Extern None) -&gt; true
   | <span data-count="35">R</span>esult_const (Literal (Const_extern n)), Ref (Extern (Some ref)) -&gt; begin
-    match Concrete_value.Ref.Extern.cast ref Host_externref.ty with
+    match Concrete_ref.Extern.cast ref Host_externref.ty with
     | <span data-count="0">N</span>one -&gt; false
     | <span data-count="35">S</span>ome n' -&gt; n = n'
   end
@@ -804,7 +804,7 @@ let value_of_const : Wast.const -&gt; Concrete_value.t = function
   | <span data-count="11689">C</span>onst_F32 v -&gt; Concrete_value.F32 v
   | <span data-count="11868">C</span>onst_F64 v -&gt; Concrete_value.F64 v
   | <span data-count="7">C</span>onst_V128 v -&gt; Concrete_value.V128 v
-  | <span data-count="14">C</span>onst_null rt -&gt; Concrete_value.Ref (Concrete_value.Ref.nul<span data-count="14">l</span> rt)
+  | <span data-count="14">C</span>onst_null rt -&gt; Concrete_value.Ref (Concrete_ref.nul<span data-count="14">l</span> rt)
   | <span data-count="34">C</span>onst_extern i -&gt; Concrete_value.Ref (Host_externref.valu<span data-count="34">e</span> i)
   | <span data-count="0">i</span> -&gt;
     Log.err (fun m -&gt;

@@ -74,6 +74,9 @@
 <a id="L50"></a><span > </span>
 <a id="L51"></a><span > </span>
 <a id="L52"></a><span > </span>
+<a id="L53"></a><span > </span>
+<a id="L54"></a><span > </span>
+<a id="L55"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -130,13 +133,20 @@
 <a href="#L50">50</a>
 <a href="#L51">51</a>
 <a href="#L52">52</a>
+<a href="#L53">53</a>
+<a href="#L54">54</a>
+<a href="#L55">55</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
 module type Base = sig
-  module Value : Value_intf.T
+  type boolean
+
+  type i32
+
+  type value
 
   type 'a t
 
@@ -146,10 +156,9 @@ module type Base = sig
 
   val map : 'a t -&gt; ('a -&gt; 'b) -&gt; 'b t
 
-  val select :
-    Value.Boolean.t -&gt; prio_true:Prio.t -&gt; prio_false:Prio.t -&gt; Bool.t t
+  val select : boolean -&gt; prio_true:Prio.t -&gt; prio_false:Prio.t -&gt; Bool.t t
 
-  val select_i32 : Value.i32 -&gt; Int32.t t
+  val select_i32 : i32 -&gt; Concrete_i32.t t
 
   val trap : Result.err -&gt; 'a t
 
@@ -159,9 +168,9 @@ module type Base = sig
 
   val get_pc : unit -&gt; Smtml.Expr.Set.t t
 
-  val ite : Value.Boolean.t -&gt; if_true:Value.t -&gt; if_false:Value.t -&gt; Value.t t
+  val ite : boolean -&gt; if_true:value -&gt; if_false:value -&gt; value t
 
-  val assume : Value.Boolean.t -&gt; unit t
+  val assume : boolean -&gt; unit t
 end
 
 module type Complete = sig
@@ -171,9 +180,9 @@ module type Complete = sig
 
   type 'a run_result
 
-  val assertion : Value.Boolean.t -&gt; unit t
+  val assertion : boolean -&gt; unit t
 
-  val assume : Value.Boolean.t -&gt; unit t
+  val assume : boolean -&gt; unit t
 
   val with_thread : (thread -&gt; 'b) -&gt; 'b t
 

@@ -107,9 +107,11 @@
 <a id="L83"></a><span > </span>
 <a id="L84"></a><span class="visited"> </span>
 <a id="L85"></a><span > </span>
-<a id="L86"></a><span > </span>
+<a id="L86"></a><span class="visited"> </span>
 <a id="L87"></a><span > </span>
-<a id="L88"></a><span > </span>
+<a id="L88"></a><span class="visited"> </span>
+<a id="L89"></a><span > </span>
+<a id="L90"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -202,6 +204,8 @@
 <a href="#L86">86</a>
 <a href="#L87">87</a>
 <a href="#L88">88</a>
+<a href="#L89">89</a>
+<a href="#L90">90</a>
 </pre>
 <pre><code class="ocaml">include Int32
 
@@ -284,11 +288,13 @@ let trunc_sat_f64_u x =
 
 let reinterpret_f32 = Float32.to_bits
 
-let to_bool = function <span data-count="7082252">0</span>l -&gt; false | <span data-count="975624">_</span>i -&gt; true
+let to_boolean = function <span data-count="7082252">0</span>l -&gt; false | <span data-count="975624">_</span>i -&gt; true
 
-let of_concrete v = <span data-count="4773581">v</span>
+let of_boolean = function <span data-count="7085287">f</span>alse -&gt; 0l | <span data-count="975843">t</span>rue -&gt; 1l
 
-let eq_concrete = eq
+let of_concrete (v : t) : t = <span data-count="4773581">v</span>
+
+let eq_concrete (v1 : t) (v2 : Int32.t) = <span data-count="712226">e</span>q v1 v2
 
 let pp = Fmt.int32
 </code></pre>

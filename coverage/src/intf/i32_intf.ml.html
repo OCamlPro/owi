@@ -57,6 +57,8 @@
 <a id="L33"></a><span > </span>
 <a id="L34"></a><span > </span>
 <a id="L35"></a><span > </span>
+<a id="L36"></a><span > </span>
+<a id="L37"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -96,6 +98,8 @@
 <a href="#L33">33</a>
 <a href="#L34">34</a>
 <a href="#L35">35</a>
+<a href="#L36">36</a>
+<a href="#L37">37</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -120,7 +124,9 @@ module type T = sig
        and type f32 := f32
        and type f64 := f64
 
-  val to_bool : t -&gt; boolean
+  val to_boolean : t -&gt; boolean
+
+  val of_boolean : boolean -&gt; t
 
   val reinterpret_f32 : f32 -&gt; t
 

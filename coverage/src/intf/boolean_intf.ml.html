@@ -43,10 +43,6 @@
 <a id="L19"></a><span > </span>
 <a id="L20"></a><span > </span>
 <a id="L21"></a><span > </span>
-<a id="L22"></a><span > </span>
-<a id="L23"></a><span > </span>
-<a id="L24"></a><span > </span>
-<a id="L25"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -72,10 +68,6 @@
 <a href="#L19">19</a>
 <a href="#L20">20</a>
 <a href="#L21">21</a>
-<a href="#L22">22</a>
-<a href="#L23">23</a>
-<a href="#L24">24</a>
-<a href="#L25">25</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -83,8 +75,6 @@
 
 module type T = sig
   type t
-
-  type i32
 
   val false_ : t
 
@@ -97,8 +87,6 @@ module type T = sig
   val or_ : t -&gt; t -&gt; t
 
   val and_ : t -&gt; t -&gt; t
-
-  val to_i32 : t -&gt; i32
 
   val pp : Format.formatter -&gt; t -&gt; unit
 end

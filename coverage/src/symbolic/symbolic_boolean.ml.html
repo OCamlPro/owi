@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>symbolic_boolean.ml &mdash; Coverage report</title>
-    <meta name="description" content="75.00% coverage in src/symbolic/symbolic_boolean.ml">
+    <meta name="description" content="66.67% coverage in src/symbolic/symbolic_boolean.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,11 +15,10 @@
           <span class="dirname">src/symbolic/</span>symbolic_boolean.ml
         </a>
       </h1>
-      <h2>75.00%</h2>
+      <h2>66.67%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:43.33%"></span>
-      <span class="unvisited" style="bottom:16.67%"></span>
+      <span class="unvisited" style="top:33.33%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -30,30 +29,21 @@
 <a id="L4"></a><span > </span>
 <a id="L5"></a><span > </span>
 <a id="L6"></a><span > </span>
-<a id="L7"></a><span class="visited"> </span>
+<a id="L7"></a><span class="unvisited"> </span>
 <a id="L8"></a><span > </span>
-<a id="L9"></a><span > </span>
+<a id="L9"></a><span class="visited"> </span>
 <a id="L10"></a><span > </span>
 <a id="L11"></a><span class="visited"> </span>
 <a id="L12"></a><span > </span>
-<a id="L13"></a><span class="unvisited"> </span>
+<a id="L13"></a><span class="visited"> </span>
 <a id="L14"></a><span > </span>
-<a id="L15"></a><span class="visited"> </span>
+<a id="L15"></a><span > </span>
 <a id="L16"></a><span > </span>
 <a id="L17"></a><span class="visited"> </span>
 <a id="L18"></a><span > </span>
 <a id="L19"></a><span class="visited"> </span>
 <a id="L20"></a><span > </span>
-<a id="L21"></a><span > </span>
-<a id="L22"></a><span class="visited"> </span>
-<a id="L23"></a><span class="visited"> </span>
-<a id="L24"></a><span class="visited"> </span>
-<a id="L25"></a><span class="unvisited"> </span>
-<a id="L26"></a><span class="visited"> </span>
-<a id="L27"></a><span > </span>
-<a id="L28"></a><span class="visited"> </span>
-<a id="L29"></a><span > </span>
-<a id="L30"></a><span > </span>
+<a id="L21"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -79,46 +69,28 @@
 <a href="#L19">19</a>
 <a href="#L20">20</a>
 <a href="#L21">21</a>
-<a href="#L22">22</a>
-<a href="#L23">23</a>
-<a href="#L24">24</a>
-<a href="#L25">25</a>
-<a href="#L26">26</a>
-<a href="#L27">27</a>
-<a href="#L28">28</a>
-<a href="#L29">29</a>
-<a href="#L30">30</a>
 </pre>
 <pre><code class="ocaml">type t = Smtml.Expr.t
 
-open Smtml.Expr
+let false_ = Smtml.Expr.Bool.false_
 
-let false_ = Bool.false_
+let true_ = Smtml.Expr.Bool.true_
 
-let false_i32 = valu<span data-count="746">e</span> (Bitv (Smtml.Bitvector.of_int3<span data-count="746">2</span> 0l))
+let of_concrete (i : bool) : t = <span data-count="0">i</span>f i then <span data-count="0">t</span>rue_ else <span data-count="0">f</span>alse_ [@@inline]
 
-let true_ = Bool.true_
+let not e = <span data-count="14260">S</span>mtml.Expr.Bool.not e [@@inline]
 
-let true_i32 = valu<span data-count="746">e</span> (Bitv (Smtml.Bitvector.of_int3<span data-count="746">2</span> 1l))
+let or_ e1 e2 = <span data-count="48923">S</span>mtml.Expr.Bool.or_ e1 e2 [@@inline]
 
-let of_concrete (i : bool) : t = <span data-count="0">i</span>f i then <span data-count="0">t</span>rue_ else <span data-count="0">f</span>alse_
+let and_ e1 e2 = <span data-count="372">S</span>mtml.Expr.Bool.and_ e1 e2 [@@inline]
 
-let not e = <span data-count="13098">B</span>ool.not e
+let pp = Smtml.Expr.pp
 
-let or_ e1 e2 = <span data-count="48791">B</span>ool.or_ e1 e2
+let ite c ~if_true ~if_false = <span data-count="21398">S</span>mtml.Expr.Bool.ite c if_true if_false [@@inline]
 
-let and_ e1 e2 = <span data-count="25">B</span>ool.and_ e1 e2
+let of_expr v = <span data-count="1545091">v</span> [@@inline]
 
-let to_i32 e =
-  <span data-count="225604">m</span>atch view e with
-  | <span data-count="95608">V</span>al True -&gt; true_i32
-  | <span data-count="107703">V</span>al False -&gt; false_i32
-  | <span data-count="0">C</span>vtop (Ty_bitv 32, ToBool, e') -&gt; e'
-  | <span data-count="22293">_</span> -&gt; cvtop (Ty_bitv 32) OfBool e
-
-let select_expr c ~if_true ~if_false = <span data-count="21390">B</span>ool.ite c if_true if_false
-
-let pp = pp
+let to_expr v = <span data-count="1833556">v</span> [@@inline]
 </code></pre>
       </div>
     </div>

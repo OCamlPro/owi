@@ -155,7 +155,7 @@ let empty = Dynarray.create
 let is_empty h = <span data-count="0">D</span>ynarray.lengt<span data-count="0">h</span> h = 0
 
 let rec move_up (h : 'a t) x i =
-  <span data-count="9">i</span>f i = 0 then <span data-count="6">D</span>ynarray.set h i x
+  <span data-count="11">i</span>f i = 0 then <span data-count="8">D</span>ynarray.set h i x
   else
     <span data-count="3">l</span>et fi = (i - 1) / 2 in
     let y = Dynarray.get h fi in
@@ -166,9 +166,9 @@ let rec move_up (h : 'a t) x i =
     else <span data-count="3">D</span>ynarray.set h i x
 
 let push x h =
-  <span data-count="9">l</span>et n = Dynarray.length h in
-  <span data-count="9">D</span>ynarray.add_last h x;
-  <span data-count="9">m</span>ove_up h x n
+  <span data-count="11">l</span>et n = Dynarray.length h in
+  <span data-count="11">D</span>ynarray.add_last h x;
+  <span data-count="11">m</span>ove_up h x n
 
 let min (h : 'a t) l r =
   <span data-count="0">l</span>et xr = Dynarray.get h r in
@@ -193,15 +193,15 @@ let rec move_down h x i =
   end
 
 let pop h =
-  <span data-count="11">l</span>et n = Dynarray.length h in
-  <span data-count="11">i</span>f n = 0 then <span data-count="2">N</span>one
+  <span data-count="15">l</span>et n = Dynarray.length h in
+  <span data-count="15">i</span>f n = 0 then <span data-count="4">N</span>one
   else
-    <span data-count="9">l</span>et y = Dynarray.get h 0 in
-    <span data-count="9">m</span>atch Dynarray.pop_last_opt h with
+    <span data-count="11">l</span>et y = Dynarray.get h 0 in
+    <span data-count="11">m</span>atch Dynarray.pop_last_opt h with
     | <span data-count="0">N</span>one -&gt; None
-    | <span data-count="9">S</span>ome x -&gt;
+    | <span data-count="11">S</span>ome x -&gt;
       if n &gt; 1 then <span data-count="3">m</span>ove_dow<span data-count="3">n</span> h x 0;
-      <span data-count="9">S</span>ome (sn<span data-count="9">d</span> y)
+      <span data-count="11">S</span>ome (sn<span data-count="11">d</span> y)
 </code></pre>
       </div>
     </div>

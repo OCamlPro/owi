@@ -165,10 +165,10 @@
 <a id="L105"></a><span > </span>
 <a id="L106"></a><span class="visited"> </span>
 <a id="L107"></a><span > </span>
-<a id="L108"></a><span > </span>
-<a id="L109"></a><span class="visited"> </span>
+<a id="L108"></a><span class="visited"> </span>
+<a id="L109"></a><span > </span>
 <a id="L110"></a><span > </span>
-<a id="L111"></a><span > </span>
+<a id="L111"></a><span class="visited"> </span>
 <a id="L112"></a><span class="visited"> </span>
 <a id="L113"></a><span > </span>
 <a id="L114"></a><span > </span>
@@ -564,11 +564,11 @@ module M :
           <span data-count="0">l</span>bl_status &lt;&gt; 0
         with <span data-count="0">I</span>nvalid_argument _ -&gt; false )
 
-  let assume (i : Symbolic_value.i32) : unit Symbolic_choice_with_memory.t =
-    <span data-count="593">S</span>ymbolic_choice_with_memory.assume @@ Symbolic_value.I32.to_boo<span data-count="593">l</span> i
+  let assume (b : Symbolic_i32.t) : unit Symbolic_choice_with_memory.t =
+    <span data-count="593">S</span>ymbolic_choice_with_memory.assume @@ Symbolic_i32.to_boolea<span data-count="593">n</span> b
 
-  let assert' (i : Symbolic_value.i32) : unit Symbolic_choice_with_memory.t =
-    <span data-count="96964">S</span>ymbolic_choice_with_memory.assertion @@ Symbolic_value.I32.to_boo<span data-count="96963">l</span> i
+  let assert' (b : Symbolic_i32.t) : unit Symbolic_choice_with_memory.t =
+    <span data-count="96963">S</span>ymbolic_choice_with_memory.assertion @@ Symbolic_i32.to_boolea<span data-count="96964">n</span> b
 
   let symbol_bool () =
     <span data-count="4">S</span>ymbolic_choice_with_memory.with_new_symbol (Ty_bitv 1) (fun sym -&gt;
@@ -601,32 +601,32 @@ module M :
   let symbol_v128 () =
     <span data-count="0">S</span>ymbolic_choice_with_memory.with_new_symbol (Ty_bitv 128) Expr.symbol
 
-  let symbol_range (lo : Symbolic_value.i32) (hi : Symbolic_value.i32) =
+  let symbol_range (lo : Symbolic_i32.t) (hi : Symbolic_i32.t) =
     <span data-count="12">l</span>et open Symbolic_choice_with_memory in
     let* x = symbol_i3<span data-count="12">2</span> () in
-    <span data-count="12">l</span>et* () = assum<span data-count="12">e</span> (Symbolic_value.I32.l<span data-count="12">e</span> lo x) in
-    <span data-count="12">l</span>et+ () = assum<span data-count="12">e</span> (Symbolic_value.I32.g<span data-count="12">t</span> hi x) in
+    <span data-count="12">l</span>et* () = assum<span data-count="12">e</span> (Symbolic_i32.l<span data-count="12">e</span> lo x) in
+    <span data-count="12">l</span>et+ () = assum<span data-count="12">e</span> (Symbolic_i32.g<span data-count="12">t</span> hi x) in
     <span data-count="12">x</span>
 
   let abort () : unit Symbolic_choice_with_memory.t =
     <span data-count="2">S</span>ymbolic_choice_with_memory.stop
 
-  let alloc m (base : Symbolic_value.i32) (size : Symbolic_value.i32) :
-    Symbolic_value.i32 Symbolic_choice_with_memory.t =
-    <span data-count="9918">S</span>ymbolic_choice_with_memory.lift_mem
-    @@ Symbolic_memory.reallo<span data-count="9918">c</span> m ~ptr:base ~size
+  let alloc m (base : Symbolic_i32.t) (size : Symbolic_i32.t) :
+    Symbolic_i32.t Symbolic_choice_with_memory.t =
+    <span data-count="9920">S</span>ymbolic_choice_with_memory.lift_mem
+    @@ Symbolic_memory.reallo<span data-count="9920">c</span> m ~ptr:base ~size
 
-  let free m (ptr : Symbolic_value.i32) :
-    Symbolic_value.i32 Symbolic_choice_with_memory.t =
-    <span data-count="2540">S</span>ymbolic_choice_with_memory.lift_mem @@ Symbolic_memory.fre<span data-count="2540">e</span> m ptr
+  let free m (ptr : Symbolic_i32.t) :
+    Symbolic_i32.t Symbolic_choice_with_memory.t =
+    <span data-count="2542">S</span>ymbolic_choice_with_memory.lift_mem @@ Symbolic_memory.fre<span data-count="2542">e</span> m ptr
 
-  let exit (_p : Symbolic_value.i32) : unit Symbolic_choice_with_memory.t =
-    <span data-count="1">a</span>bort ()
+  let exit (_p : Symbolic_i32.t) : unit Symbolic_choice_with_memory.t = <span data-count="1">a</span>bort ()
 
   let in_replay_mode () =
-    <span data-count="1">S</span>ymbolic_choice_with_memory.return @@ Smtml.Expr.valu<span data-count="1">e</span> (Smtml.Value.Int 0)
+    <span data-count="1">S</span>ymbolic_choice_with_memory.return
+    @@ Symbolic_i32.of_boolea<span data-count="1">n</span> Symbolic_boolean.false_
 
-  let print_char (c : Symbolic_value.i32) =
+  let print_char (c : Symbolic_i32.t) =
     <span data-count="0">l</span>et open Symbolic_choice_with_memory in
     let* c = select_i3<span data-count="0">2</span> c in
     <span data-count="0">L</span>og.app (fun m -&gt; <span data-count="0">m</span> "%c@?" (char_of_in<span data-count="0">t</span> (Int32.to_in<span data-count="0">t</span> c)));
@@ -634,7 +634,7 @@ module M :
 
   let rec make_str m accu i =
     <span data-count="83">l</span>et open Symbolic_choice_with_memory in
-    let* p = Symbolic_memory.load_8_<span data-count="83">u</span> m (Symbolic_value.I32.of_concret<span data-count="83">e</span> i) in
+    let* p = Symbolic_memory.load_8_<span data-count="83">u</span> m (Symbolic_i32.of_concret<span data-count="83">e</span> i) in
     <span data-count="83">m</span>atch Smtml.Expr.view p with
     | <span data-count="83">V</span>al (Bitv bv) when Smtml.Bitvector.numbit<span data-count="83">s</span> bv = 32 -&gt;
       <span data-count="83">l</span>et c = Smtml.Bitvector.to_int32 bv in
@@ -648,7 +648,7 @@ module M :
   let cov_label_is_covered id =
     <span data-count="0">l</span>et open Symbolic_choice_with_memory in
     let* id = select_i3<span data-count="0">2</span> id in
-    <span data-count="0">r</span>eturn @@ Symbolic_value.I32.of_concret<span data-count="0">e</span> @@ Mutex.protect cov_loc<span data-count="0">k</span>
+    <span data-count="0">r</span>eturn @@ Symbolic_i32.of_concret<span data-count="0">e</span> @@ Mutex.protect cov_loc<span data-count="0">k</span>
     @@ fun () -&gt;
     <span data-count="0">i</span>f Hashtbl.me<span data-count="0">m</span> covered_labels i<span data-count="0">d</span> || in_seacoral_stor<span data-count="0">e</span> i<span data-count="0">d</span> then <span data-count="0">1</span>l else <span data-count="0">0</span>l
 
@@ -728,7 +728,7 @@ let proc_exit _ =
 
 let random_get _ _ =
   <span data-count="0">L</span>og.warn (fun m -&gt; <span data-count="0">m</span> "used dummy random_get implementation");
-  <span data-count="0">S</span>ymbolic_choice_with_memory.return @@ Symbolic_value.I32.of_concret<span data-count="0">e</span> 0l
+  <span data-count="0">S</span>ymbolic_choice_with_memory.return @@ Symbolic_i32.of_concret<span data-count="0">e</span> 0l
 
 let wasi_snapshot_preview1 =
   let functions =
