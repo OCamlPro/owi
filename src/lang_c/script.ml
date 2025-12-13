@@ -14,9 +14,12 @@ let () =
       let out = Format.sprintf "%s.o" filename in
       let n =
         Format.ksprintf Sys.command
-          "clang -O3 -ffreestanding --no-standard-libraries --target=wasm32 -c \
-           -m32 -Iinclude -Wall -Werror -Wno-int-conversion -Wno-return-type \
-           -fbracket-depth=512 -DWANT_STRTOD_WITHOUT_LONG_DOUBLE -o %s %s"
+          {sh|clang -O3 \
+          --sysroot=$HOME/dev/c/wasi-libc/sysroot \
+          --target=wasm32-wasi -c -m32 -Iinclude \
+           -I../libc/include/ -Wall -Werror -Wno-int-conversion \
+           -Wno-return-type -fbracket-depth=512 \
+           -DWANT_STRTOD_WITHOUT_LONG_DOUBLE -o %s %s|sh}
           out c_filename
       in
       if n <> 0 then exit n

@@ -86,10 +86,9 @@ let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file
     Cmd.(
       of_list
         ( [ Fmt.str "-O%s" opt_lvl
-          ; "--target=wasm32-unknown-unknown"
+          ; "--sysroot=/home/drjoker/dev/c/wasi-libc/sysroot"
+          ; "--target=wasm32-wasi"
           ; "-m32"
-          ; "-ffreestanding"
-          ; "--no-standard-libraries"
           ; "-Wno-everything"
           ; "-flto=thin"
           ]
@@ -103,6 +102,8 @@ let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file
         @ [ (* TODO: allow this behind a flag, this is slooooow *)
             "-Wl,--lto-O0"
           ; Fmt.str "-Wl,-z,stack-size=%s" stack_size
+          ; "-L$HOME/dev/c/wasi-libc/sysroot/lib/wasm32-wasi"
+          ; "-lc"
           ] )
       %% includes )
   in
@@ -110,12 +111,9 @@ let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file
   let* clang_bin = OS.Cmd.resolve @@ Cmd.v "clang" in
 
   let out = Option.value ~default:Fpath.(workspace / "a.out.wasm") out_file in
-  let* libc = Cmd_utils.find_installed_c_file (Fpath.v "libc.wasm") in
   let* libowi = Cmd_utils.find_installed_c_file (Fpath.v "libowi.wasm") in
 
-  let files =
-    Cmd.of_list (List.map Fpath.to_string (libc :: libowi :: files))
-  in
+  let files = Cmd.of_list (List.map Fpath.to_string (libowi :: files)) in
   let clang : Cmd.t = Cmd.(clang_bin %% flags % "-o" % p out %% files) in
 
   let err =
