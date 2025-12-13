@@ -1,4 +1,8 @@
 #include <owi.h>
+#include <stdlib.h>
+
+#define OWI_IMPORT(name)                                                       \
+  __attribute__((import_module("owi"), import_name(name)))
 
 #define magic_size_signed(T)                                                   \
   ({                                                                           \
@@ -89,3 +93,35 @@ unsigned __int128 owi_uint128(void) {
   high128 = high128 << 64;
   return high128 | low128;
 }
+
+/* stdlib redifinitions */
+
+OWI_IMPORT("abort") __attribute__((noreturn)) void abort(void);
+
+OWI_IMPORT("exit") __attribute__((noreturn)) void exit(int);
+
+extern unsigned char __heap_base;
+unsigned int bump_pointer = &__heap_base;
+
+void *malloc(size_t size) {
+  if (size == 0) {
+    // TODO: this could also be a proper *unique* pointer
+    // that is, calling malloc(0) two times, and freeing the two pointers should
+    // not lead to a double free see issue# 602 and the test added in #604 whose
+    // result should change once this is added
+    return NULL;
+  }
+  unsigned int start = bump_pointer;
+  unsigned int closest_pow2 =
+      1 << (sizeof(size_t) * 8 - (__builtin_clz(size) + 1));
+  unsigned int align = (closest_pow2 <= 16) ? closest_pow2 : 16;
+  unsigned int off_align = bump_pointer % align;
+
+  if (off_align != 0) {
+    start += (align - off_align);
+  }
+  bump_pointer = size + start;
+  return (void *)owi_malloc(start, size);
+}
+
+OWI_IMPORT("free") void free(void *ptr);
