@@ -123,13 +123,13 @@ let random = Random (Random.in<span data-count="746">t</span> 10000)
 let default = Default
 
 let from_annotated instr_counter distances =
-  <span data-count="16556825">l</span>et distances_to_unreachable =
+  <span data-count="16556889">l</span>et distances_to_unreachable =
     Option.bind distances (fun d -&gt; <span data-count="0">S</span>ome (List.sor<span data-count="0">t</span> compare (Array.to_lis<span data-count="0">t</span> d)))
   in
-  <span data-count="16556825">V</span>al { instr_counter; distances_to_unreachable }
+  <span data-count="16556888">V</span>al { instr_counter; distances_to_unreachable }
 
 let compare p1 p2 =
-  <span data-count="3">m</span>atch (p1, p2) with
+  <span data-count="4">m</span>atch (p1, p2) with
   | <span data-count="0">V</span>al v1, Val v2 -&gt; (
     match (v1.distances_to_unreachable, v2.distances_to_unreachable) with
     | <span data-count="0">N</span>one, None -&gt; 0
@@ -143,7 +143,7 @@ let compare p1 p2 =
   | <span data-count="0">D</span>efault, Default -&gt; 0
   | <span data-count="0">D</span>efault, _ -&gt; -1
   | <span data-count="0">_</span>, Default -&gt; 1
-  | <span data-count="3">R</span>andom x, Random y -&gt; compare x y
+  | <span data-count="4">R</span>andom x, Random y -&gt; compare x y
   | _ -&gt; assert false
 </code></pre>
       </div>

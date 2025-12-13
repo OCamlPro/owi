@@ -978,15 +978,15 @@ module State = struct
   let get_by_id state id = <span data-count="174">S</span>tringMap.find_opt id state.by_id
 
   let load_from_module ls f (import : _ Origin.imported) =
-    <span data-count="4442">m</span>atch StringMap.find_opt import.modul_name ls.by_name with
+    <span data-count="4435">m</span>atch StringMap.find_opt import.modul_name ls.by_name with
     | <span data-count="0">N</span>one -&gt; Error (`Unknown_module import.modul_name)
-    | <span data-count="4442">S</span>ome exports -&gt; (
-      match StringMap.find_opt import.name (<span data-count="4442">f</span> exports) with
+    | <span data-count="4435">S</span>ome exports -&gt; (
+      match StringMap.find_opt import.name (<span data-count="4435">f</span> exports) with
       | <span data-count="49">N</span>one -&gt;
         if StringSet.mem import.name exports.defined_names then
           <span data-count="34">E</span>rror (`Incompatible_import_type import.name)
         else <span data-count="15">E</span>rror (`Unknown_import (import.modul_name, import.name))
-      | <span data-count="4393">S</span>ome v -&gt; Ok v )
+      | <span data-count="4386">S</span>ome v -&gt; Ok v )
 
   let load_global (ls : 'f t) (import : Text.Global.Type.t Origin.imported) :
     global Result.t =
@@ -1143,20 +1143,20 @@ let eval_tables ls env tables =
 
 let load_func (ls : 'f State.t) (import : Binary.block_type Origin.imported) :
   func Result.t =
-  <span data-count="4129">l</span>et (Binary.Bt_raw ((None | Some _), typ)) = import.typ in
+  <span data-count="4122">l</span>et (Binary.Bt_raw ((None | Some _), typ)) = import.typ in
   let* func =
-    State.load_from_modul<span data-count="4129">e</span> ls (fun (e : State.exports) -&gt; <span data-count="4129">e</span>.functions) import
+    State.load_from_modul<span data-count="4122">e</span> ls (fun (e : State.exports) -&gt; <span data-count="4122">e</span>.functions) import
   in
-  <span data-count="4118">l</span>et type' =
+  <span data-count="4111">l</span>et type' =
     match func with
     | <span data-count="163">K</span>ind.Wasm { func; _ } -&gt;
       let (Bt_raw ((None | Some _), t)) = func.type_f in
       t
-    | <span data-count="3955">E</span>xtern { idx } -&gt;
+    | <span data-count="3948">E</span>xtern { idx } -&gt;
       let _f, t = Dynarray.get ls.collection idx in
-      <span data-count="3955">t</span>
+      <span data-count="3948">t</span>
   in
-  if Text.func_type_eq typ type' then <span data-count="4100">O</span>k func
+  if Text.func_type_eq typ type' then <span data-count="4093">O</span>k func
   else
     <span data-count="18">l</span>et msg =
       Fmt.str "%s: expected: %a got: %a" import.name Text.pp_func_type typ
@@ -1165,17 +1165,17 @@ let load_func (ls : 'f State.t) (import : Binary.block_type Origin.imported) :
     <span data-count="18">E</span>rror (`Incompatible_import_type msg)
 
 let eval_func ls (finished_env : int) func : func Result.t =
-  <span data-count="13020">m</span>atch func with
-  | <span data-count="8891">O</span>rigin.Local func -&gt; ok @@ Kind.was<span data-count="8891">m</span> func finished_env
-  | <span data-count="4129">I</span>mported import -&gt; load_func ls import
+  <span data-count="13017">m</span>atch func with
+  | <span data-count="8895">O</span>rigin.Local func -&gt; ok @@ Kind.was<span data-count="8895">m</span> func finished_env
+  | <span data-count="4122">I</span>mported import -&gt; load_func ls import
 
 let eval_functions ls (finished_env : int) env functions =
   <span data-count="2503">l</span>et+ env, _i =
     array_fold_lef<span data-count="2503">t</span>
       (fun (env, i) func -&gt;
-        <span data-count="13020">l</span>et+ func = eval_fun<span data-count="13020">c</span> ls finished_env func in
-        <span data-count="12991">l</span>et env = Link_env.Build.add_func i func env in
-        <span data-count="12991">(</span>env, suc<span data-count="12991">c</span> i) )
+        <span data-count="13017">l</span>et+ func = eval_fun<span data-count="13017">c</span> ls finished_env func in
+        <span data-count="12988">l</span>et env = Link_env.Build.add_func i func env in
+        <span data-count="12988">(</span>env, suc<span data-count="12988">c</span> i) )
       (env, 0) functions
   in
   <span data-count="2474">e</span>nv
@@ -1333,16 +1333,16 @@ module Extern = struct
     <span data-count="994">l</span>et functions, collection =
       List.fold_left
         (fun (functions, collection) (name, func) -&gt;
-          <span data-count="12221">l</span>et typ = modul.func_type func in
-          <span data-count="12221">D</span>ynarray.add_last collection (func, typ);
-          <span data-count="12221">l</span>et id = Dynarray.lengt<span data-count="12221">h</span> collection - 1 in
-          ((name, (Kind.exter<span data-count="12221">n</span> id : Kind.func)) :: functions, collection) )
+          <span data-count="10973">l</span>et typ = modul.func_type func in
+          <span data-count="10973">D</span>ynarray.add_last collection (func, typ);
+          <span data-count="10973">l</span>et id = Dynarray.lengt<span data-count="10973">h</span> collection - 1 in
+          ((name, (Kind.exter<span data-count="10973">n</span> id : Kind.func)) :: functions, collection) )
         ([], ls.collection) modul.functions
     in
     <span data-count="994">l</span>et functions = StringMap.of_seq (List.to_se<span data-count="994">q</span> functions) in
     <span data-count="994">l</span>et defined_names =
       StringMap.fold
-        (fun name _ set -&gt; <span data-count="12221">S</span>tringSet.add name set)
+        (fun name _ set -&gt; <span data-count="10973">S</span>tringSet.add name set)
         functions StringSet.empty
     in
     <span data-count="994">l</span>et exports =
