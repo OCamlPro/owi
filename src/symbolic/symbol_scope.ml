@@ -38,21 +38,10 @@ let only_symbols tokens =
 let get_value model sym ty =
   match Smtml.Model.evaluate model sym with
   | Some v -> v
-  | None -> (
-    (* The symbol was created but is not part of the generated model. Thus we can use a dummy value. TODO: allows to hide these symbols or their value through a flag (and make it the default, the flag should actually display them). *)
-    (* TODO: do this in Smt.ml, see https://github.com/formalsec/smtml/issues/483 *)
-    let res =
-      match ty with
-      | Smtml.Ty.Ty_bool -> Smtml.Value.of_string ty "false"
-      | Ty_bitv n ->
-        Ok (Smtml.Value.Bitv (Smtml.Bitvector.make (Z.of_string "0") n))
-      | Ty_fp 32 -> Smtml.Value.of_string ty "0.0"
-      | Ty_fp 64 -> Smtml.Value.of_string ty "0.0"
-      | _ty ->
-        (* if this fails, it may be that we changed something and a new type should be added here *)
-        assert false
-    in
-    match res with Ok v -> v | Error _ -> assert false )
+  | None ->
+    (* The symbol was created but is not part of the generated model. Thus we can use a dummy value. *)
+    (* TODO: allows to hide these symbols or their value through a flag (and make it the default, the flag should actually display them). *)
+    Smtml.Value.default_of_type ty
 
 let to_scfg ~no_value model scope_tokens =
   let open Scfg.Types in
