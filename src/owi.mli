@@ -1103,7 +1103,17 @@ module Symbolic_parameters : sig
       | FIFO
       | LIFO
       | Random
-      | Smart
+      | Random_unseen_then_random
+      | Rarity
+      | Hot_path_penalty
+      | Rarity_aging
+      | Rarity_depth_aging
+      | Rarity_depth_loop_aging
+      | Rarity_depth_loop_aging_random
+
+    val of_string : String.t -> (t, [ `Msg of string ]) Prelude.Result.t
+
+    val pp : t Fmt.t
   end
 
   type t =

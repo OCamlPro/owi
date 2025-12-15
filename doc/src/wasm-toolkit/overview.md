@@ -132,16 +132,16 @@ owi: [INFO] typechecking ...
 owi: [INFO] linking      ...
 owi: [INFO] interpreting ...
 owi: [INFO] stack         : [  ]
-owi: [INFO] running instr : call 0
+owi: [INFO] running instr : call 0 (executed 0 times)
 owi: [INFO] calling func  : func f
 owi: [INFO] stack         : [  ]
-owi: [INFO] running instr : i32.const 20
+owi: [INFO] running instr : i32.const 20 (executed 0 times)
 owi: [INFO] stack         : [ i32.const 20 ]
-owi: [INFO] running instr : i32.const 22
+owi: [INFO] running instr : i32.const 22 (executed 0 times)
 owi: [INFO] stack         : [ i32.const 22 ; i32.const 20 ]
-owi: [INFO] running instr : i32.add
+owi: [INFO] running instr : i32.add (executed 0 times)
 owi: [INFO] stack         : [ i32.const 42 ]
-owi: [INFO] running instr : drop
+owi: [INFO] running instr : drop (executed 0 times)
 ```
 
 ## Script using the `spectest` module
@@ -231,16 +231,16 @@ owi: [INFO] typechecking ...
 owi: [INFO] linking      ...
 owi: [INFO] interpreting ...
 owi: [INFO] stack         : [  ]
-owi: [INFO] running instr : call 0
+owi: [INFO] running instr : call 0 (executed 0 times)
 owi: [INFO] calling func  : func anonymous
 owi: [INFO] stack         : [  ]
-owi: [INFO] running instr : i32.const 20
+owi: [INFO] running instr : i32.const 20 (executed 0 times)
 owi: [INFO] stack         : [ i32.const 20 ]
-owi: [INFO] running instr : i32.const 22
+owi: [INFO] running instr : i32.const 22 (executed 0 times)
 owi: [INFO] stack         : [ i32.const 22 ; i32.const 20 ]
-owi: [INFO] running instr : i32.add
+owi: [INFO] running instr : i32.add (executed 0 times)
 owi: [INFO] stack         : [ i32.const 42 ]
-owi: [INFO] running instr : drop
+owi: [INFO] running instr : drop (executed 0 times)
 ```
 
 ## Wat2wasm
@@ -254,16 +254,16 @@ owi: [INFO] typechecking ...
 owi: [INFO] linking      ...
 owi: [INFO] interpreting ...
 owi: [INFO] stack         : [  ]
-owi: [INFO] running instr : call 0
+owi: [INFO] running instr : call 0 (executed 0 times)
 owi: [INFO] calling func  : func anonymous
 owi: [INFO] stack         : [  ]
-owi: [INFO] running instr : i32.const 20
+owi: [INFO] running instr : i32.const 20 (executed 0 times)
 owi: [INFO] stack         : [ i32.const 20 ]
-owi: [INFO] running instr : i32.const 22
+owi: [INFO] running instr : i32.const 22 (executed 0 times)
 owi: [INFO] stack         : [ i32.const 22 ; i32.const 20 ]
-owi: [INFO] running instr : i32.add
+owi: [INFO] running instr : i32.add (executed 0 times)
 owi: [INFO] stack         : [ i32.const 42 ]
-owi: [INFO] running instr : drop
+owi: [INFO] running instr : drop (executed 0 times)
 ```
 
 ## Call Graph

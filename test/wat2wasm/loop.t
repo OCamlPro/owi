@@ -4,71 +4,71 @@
   owi: [INFO] linking      ...
   owi: [INFO] interpreting ...
   owi: [INFO] stack         : [  ]
-  owi: [INFO] running instr : call 1
+  owi: [INFO] running instr : call 1 (executed 0 times)
   owi: [INFO] calling func  : func anonymous
   owi: [INFO] stack         : [  ]
-  owi: [INFO] running instr : i32.const 3
+  owi: [INFO] running instr : i32.const 3 (executed 0 times)
   owi: [INFO] stack         : [ i32.const 3 ]
-  owi: [INFO] running instr : call 0
+  owi: [INFO] running instr : call 0 (executed 0 times)
   owi: [INFO] calling func  : func anonymous
   owi: [INFO] stack         : [  ]
-  owi: [INFO] running instr : i32.const 0
+  owi: [INFO] running instr : i32.const 0 (executed 0 times)
   owi: [INFO] stack         : [ i32.const 0 ]
-  owi: [INFO] running instr : local.set 1
+  owi: [INFO] running instr : local.set 1 (executed 0 times)
   owi: [INFO] stack         : [  ]
-  owi: [INFO] running instr : loop (result i64)
+  owi: [INFO] running instr : loop (result i64) (executed 0 times)
   owi: [INFO] stack         : [  ]
-  owi: [INFO] running instr : local.get 1
+  owi: [INFO] running instr : local.get 1 (executed 0 times)
   owi: [INFO] stack         : [ i32.const 0 ]
-  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] running instr : i32.const 1 (executed 0 times)
   owi: [INFO] stack         : [ i32.const 1 ; i32.const 0 ]
-  owi: [INFO] running instr : i32.add
+  owi: [INFO] running instr : i32.add (executed 0 times)
   owi: [INFO] stack         : [ i32.const 1 ]
-  owi: [INFO] running instr : local.tee 1
+  owi: [INFO] running instr : local.tee 1 (executed 0 times)
   owi: [INFO] stack         : [ i32.const 1 ]
-  owi: [INFO] running instr : local.get 0
+  owi: [INFO] running instr : local.get 0 (executed 0 times)
   owi: [INFO] stack         : [ i32.const 3 ; i32.const 1 ]
-  owi: [INFO] running instr : i32.ne
+  owi: [INFO] running instr : i32.ne (executed 0 times)
   owi: [INFO] stack         : [ i32.const 1 ]
-  owi: [INFO] running instr : if
+  owi: [INFO] running instr : if (executed 0 times)
   owi: [INFO] stack         : [  ]
-  owi: [INFO] running instr : br 1
+  owi: [INFO] running instr : br 1 (executed 0 times)
   owi: [INFO] stack         : [  ]
-  owi: [INFO] running instr : local.get 1
+  owi: [INFO] running instr : local.get 1 (executed 1 times)
   owi: [INFO] stack         : [ i32.const 1 ]
-  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] running instr : i32.const 1 (executed 1 times)
   owi: [INFO] stack         : [ i32.const 1 ; i32.const 1 ]
-  owi: [INFO] running instr : i32.add
+  owi: [INFO] running instr : i32.add (executed 1 times)
   owi: [INFO] stack         : [ i32.const 2 ]
-  owi: [INFO] running instr : local.tee 1
+  owi: [INFO] running instr : local.tee 1 (executed 1 times)
   owi: [INFO] stack         : [ i32.const 2 ]
-  owi: [INFO] running instr : local.get 0
+  owi: [INFO] running instr : local.get 0 (executed 1 times)
   owi: [INFO] stack         : [ i32.const 3 ; i32.const 2 ]
-  owi: [INFO] running instr : i32.ne
+  owi: [INFO] running instr : i32.ne (executed 1 times)
   owi: [INFO] stack         : [ i32.const 1 ]
-  owi: [INFO] running instr : if
+  owi: [INFO] running instr : if (executed 1 times)
   owi: [INFO] stack         : [  ]
-  owi: [INFO] running instr : br 1
+  owi: [INFO] running instr : br 1 (executed 1 times)
   owi: [INFO] stack         : [  ]
-  owi: [INFO] running instr : local.get 1
+  owi: [INFO] running instr : local.get 1 (executed 2 times)
   owi: [INFO] stack         : [ i32.const 2 ]
-  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] running instr : i32.const 1 (executed 2 times)
   owi: [INFO] stack         : [ i32.const 1 ; i32.const 2 ]
-  owi: [INFO] running instr : i32.add
+  owi: [INFO] running instr : i32.add (executed 2 times)
   owi: [INFO] stack         : [ i32.const 3 ]
-  owi: [INFO] running instr : local.tee 1
+  owi: [INFO] running instr : local.tee 1 (executed 2 times)
   owi: [INFO] stack         : [ i32.const 3 ]
-  owi: [INFO] running instr : local.get 0
+  owi: [INFO] running instr : local.get 0 (executed 2 times)
   owi: [INFO] stack         : [ i32.const 3 ; i32.const 3 ]
-  owi: [INFO] running instr : i32.ne
+  owi: [INFO] running instr : i32.ne (executed 2 times)
   owi: [INFO] stack         : [ i32.const 0 ]
-  owi: [INFO] running instr : if
+  owi: [INFO] running instr : if (executed 2 times)
   owi: [INFO] stack         : [  ]
-  owi: [INFO] running instr : nop
+  owi: [INFO] running instr : nop (executed 0 times)
   owi: [INFO] stack         : [  ]
-  owi: [INFO] running instr : i64.const 42
+  owi: [INFO] running instr : i64.const 42 (executed 0 times)
   owi: [INFO] stack         : [ i64.const 42 ]
-  owi: [INFO] running instr : drop
+  owi: [INFO] running instr : drop (executed 0 times)
   $ owi wasm2wat loop.wasm
   (module
     (type (func (param i32) (result i64)))

@@ -50,7 +50,7 @@ module M :
         with Invalid_argument _ -> false )
 
   let assume (b : Symbolic_i32.t) : unit Symbolic_choice_with_memory.t =
-    Symbolic_choice_with_memory.assume @@ Symbolic_i32.to_boolean b
+    Symbolic_choice_with_memory.assume (Symbolic_i32.to_boolean b) None
 
   let assert' (b : Symbolic_i32.t) : unit Symbolic_choice_with_memory.t =
     Symbolic_choice_with_memory.assertion @@ Symbolic_i32.to_boolean b
@@ -78,8 +78,8 @@ module M :
   let symbol_range (lo : Symbolic_i32.t) (hi : Symbolic_i32.t) =
     let open Symbolic_choice_with_memory in
     let* x = symbol_i32 () in
-    let* () = assume (Symbolic_i32.le lo x) in
-    let+ () = assume (Symbolic_i32.gt hi x) in
+    let* () = assume (Symbolic_i32.le lo x) None in
+    let+ () = assume (Symbolic_i32.gt hi x) None in
     x
 
   let abort () : unit Symbolic_choice_with_memory.t =

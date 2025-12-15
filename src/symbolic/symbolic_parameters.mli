@@ -8,9 +8,19 @@ module Exploration_strategy : sig
     | FIFO
     | LIFO
     | Random
-    | Smart
+    | Random_unseen_then_random
+    | Rarity
+    | Hot_path_penalty
+    | Rarity_aging
+    | Rarity_depth_aging
+    | Rarity_depth_loop_aging
+    | Rarity_depth_loop_aging_random
 
-  val to_work_ds_module : t -> (module Work_ds_intf.S)
+  val of_string : String.t -> (t, [ `Msg of string ]) Prelude.Result.t
+
+  val pp : t Fmt.t
+
+  val to_work_ds_module : t -> (module Prio.S)
 end
 
 type t =

@@ -4,5 +4,15 @@
   All OK!
   $ owi sym global.wat --deterministic-result-order --exploration=random
   All OK!
-  $ owi sym global.wat --deterministic-result-order --exploration=smart 2>&1 | grep -v "line"
-  owi: internal error, uncaught exception:
+  $ owi sym global.wat --deterministic-result-order --exploration=random-unseen-then-random
+  All OK!
+  $ owi sym global.wat --deterministic-result-order --exploration=rarity
+  All OK!
+  $ owi sym global.wat --deterministic-result-order --exploration=hot-path-penalty
+  All OK!
+  $ owi sym global.wat --deterministic-result-order --exploration=rarity-aging
+  All OK!
+  $ owi sym global.wat --deterministic-result-order --exploration=rarity-depth-aging
+  All OK!
+  $ owi sym global.wat --deterministic-result-order --exploration=rarity-depth-loop-aging
+  All OK!

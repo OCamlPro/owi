@@ -17,7 +17,8 @@ module type Base = sig
 
   val map : 'a t -> ('a -> 'b) -> 'b t
 
-  val select : boolean -> prio_true:Prio.t -> prio_false:Prio.t -> Bool.t t
+  val select :
+    boolean -> prio_true:Prio.source -> prio_false:Prio.source -> Bool.t t
 
   val select_i32 : i32 -> Concrete_i32.t t
 
@@ -29,9 +30,11 @@ module type Base = sig
 
   val get_pc : unit -> Smtml.Expr.Set.t t
 
+  val depth : unit -> int t
+
   val ite : boolean -> if_true:value -> if_false:value -> value t
 
-  val assume : boolean -> unit t
+  val assume : boolean -> Int.t Option.t -> unit t
 end
 
 module type Complete = sig

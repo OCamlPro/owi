@@ -4,33 +4,33 @@
   owi: [INFO] linking      ...
   owi: [INFO] interpreting ...
   owi: [INFO] stack         : [  ]
-  owi: [INFO] running instr : i32.const 0
+  owi: [INFO] running instr : i32.const 0 (executed 0 times)
   owi: [INFO] stack         : [ i32.const 0 ]
-  owi: [INFO] running instr : i32.const 0
+  owi: [INFO] running instr : i32.const 0 (executed 0 times)
   owi: [INFO] stack         : [ i32.const 0 ; i32.const 0 ]
-  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] running instr : i32.const 1 (executed 0 times)
   owi: [INFO] stack         : [ i32.const 1 ; i32.const 0 ; i32.const 0 ]
-  owi: [INFO] running instr : table.init 0 0
+  owi: [INFO] running instr : table.init 0 0 (executed 0 times)
   owi: [INFO] stack         : [  ]
-  owi: [INFO] running instr : elem.drop 0
+  owi: [INFO] running instr : elem.drop 0 (executed 0 times)
   owi: [INFO] stack         : [  ]
-  owi: [INFO] running instr : call 1
+  owi: [INFO] running instr : call 1 (executed 0 times)
   owi: [INFO] calling func  : func anonymous
   owi: [INFO] stack         : [  ]
-  owi: [INFO] running instr : i64.const 1
+  owi: [INFO] running instr : i64.const 1 (executed 0 times)
   owi: [INFO] stack         : [ i64.const 1 ]
-  owi: [INFO] running instr : i32.const 0
+  owi: [INFO] running instr : i32.const 0 (executed 0 times)
   owi: [INFO] stack         : [ i32.const 0 ; i64.const 1 ]
-  owi: [INFO] running instr : call_indirect 0  (param i64) (result i64)
+  owi: [INFO] running instr : call_indirect 0  (param i64) (result i64) (executed 0 times)
   owi: [INFO] calling func  : func anonymous
   owi: [INFO] stack         : [  ]
-  owi: [INFO] running instr : local.get 0
+  owi: [INFO] running instr : local.get 0 (executed 0 times)
   owi: [INFO] stack         : [ i64.const 1 ]
-  owi: [INFO] running instr : i64.const -1
+  owi: [INFO] running instr : i64.const -1 (executed 0 times)
   owi: [INFO] stack         : [ i64.const -1 ; i64.const 1 ]
-  owi: [INFO] running instr : i64.add
+  owi: [INFO] running instr : i64.add (executed 0 times)
   owi: [INFO] stack         : [ i64.const 0 ]
-  owi: [INFO] running instr : drop
+  owi: [INFO] running instr : drop (executed 0 times)
   $ owi wasm2wat call_indirect.wasm
   (module
     (type (func (param i64) (result i64)))

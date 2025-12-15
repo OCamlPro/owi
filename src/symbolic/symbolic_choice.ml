@@ -20,7 +20,7 @@ module CoreImpl = struct
 
     and ('a, 'wls) status =
       | Now of 'a
-      | Yield of Prio.t * ('a, 'wls) t
+      | Yield of Prio.source * ('a, 'wls) t
       | Choice of (('a, 'wls) status * ('a, 'wls) status)
       | Stop
 
@@ -63,7 +63,7 @@ module CoreImpl = struct
     let worker_local : ('a, 'a) t = Sched (fun wls -> Now wls)
   end
 
-  module Scheduler (Work_datastructure : Work_ds_intf.S) = struct
+  module Scheduler (Work_datastructure : Prio.S) = struct
     (*
         A scheduler for Schedulable values.
       *)
@@ -76,7 +76,7 @@ module CoreImpl = struct
       { work_queue }
 
     let add_init_task sched task =
-      Work_datastructure.push task Prio.default sched.work_queue
+      Work_datastructure.push task Prio.dummy sched.work_queue
 
     let work wls sched at_worker_value =
       let rec handle_status (t : _ Schedulable.status) write_back =
@@ -240,7 +240,7 @@ module CoreImpl = struct
 
     val thread : thread t
 
-    val yield : Prio.t -> unit t
+    val yield : Prio.source -> unit t
 
     val solver : Solver.t t
 
@@ -421,7 +421,8 @@ module Make (Thread : Thread_intf.S) = struct
     return reachability
 
   let get_model_or_stop symbol =
-    let* () = yield Prio.default in
+    (* TODO: better prio here! *)
+    let* () = yield Prio.dummy in
     let* solver in
     let* thread in
     let set =
@@ -568,10 +569,12 @@ module Make (Thread : Thread_intf.S) = struct
       generator ()
 
   let assertion (c : Symbolic_boolean.t) =
+    (* TODO: better prio here *)
+    let prio_false = Prio.dummy in
+    let prio_true = Prio.dummy in
     let* assertion_true =
-      select_inner c ~with_breadcrumbs:false ~explore_first:false
-        ~prio_true:Prio.Default ~prio_false:Prio.Default
-        ~check_only_true_branch:false
+      select_inner c ~with_breadcrumbs:false ~explore_first:false ~prio_true
+        ~prio_false ~check_only_true_branch:false
     in
     if assertion_true then return ()
     else
@@ -594,14 +597,6 @@ module Make (Thread : Thread_intf.S) = struct
       let labels = Thread.labels thread in
       assertion_fail c model labels breadcrumbs symbol_scopes
 
-  let assume c =
-    let* assertion_true =
-      select_inner c ~with_breadcrumbs:false ~explore_first:true
-        ~prio_true:Prio.Default ~prio_false:Prio.Default
-        ~check_only_true_branch:true
-    in
-    if assertion_true then return () else stop
-
   let ite (c : Symbolic_boolean.t) ~(if_true : Symbolic_value.t)
     ~(if_false : Symbolic_value.t) : Symbolic_value.t t =
     match (if_true, if_false) with
@@ -614,7 +609,28 @@ module Make (Thread : Thread_intf.S) = struct
     | F64 if_true, F64 if_false ->
       return (Symbolic_value.F64 (Symbolic_boolean.ite c ~if_true ~if_false))
     | Ref _, Ref _ ->
-      let+ b = select c ~prio_true:Prio.Default ~prio_false:Prio.Default in
+      (* TODO: better prio here *)
+      let prio_false = Prio.dummy in
+      let prio_true = Prio.dummy in
+      let+ b = select c ~prio_true ~prio_false in
       if b then if_true else if_false
     | _, _ -> assert false
+
+  let depth () =
+    let+ thread in
+    Thread.depth thread
+
+  let assume c instr_counter =
+    (* TODO: better prio here *)
+    let* thread in
+    let depth = Thread.depth thread in
+    let prio_true =
+      Prio.v ~depth ~instr_counter ~distance_to_unreachable:None
+    in
+    let prio_false = Prio.low in
+    let* assertion_true =
+      select_inner c ~with_breadcrumbs:false ~explore_first:true ~prio_true
+        ~prio_false ~check_only_true_branch:true
+    in
+    if assertion_true then return () else stop
 end

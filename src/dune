@@ -81,7 +81,6 @@
   origin
   owi
   parse
-  pq_imperative
   prio
   priority_queue
   ref_intf
@@ -132,11 +131,6 @@
   v128_intf
   wasm_ffi_intf
   wast
-  work_ds_intf
-  wpq
-  wq_random
-  wq
-  ws
   wutf8)
  (private_modules binary_parser spectest text_lexer text_parser wutf8)
  (libraries

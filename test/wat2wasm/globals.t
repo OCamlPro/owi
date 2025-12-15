@@ -4,20 +4,20 @@
   owi: [INFO] linking      ...
   owi: [INFO] interpreting ...
   owi: [INFO] stack         : [  ]
-  owi: [INFO] running instr : call 0
+  owi: [INFO] running instr : call 0 (executed 0 times)
   owi: [INFO] calling func  : func anonymous
   owi: [INFO] stack         : [  ]
-  owi: [INFO] running instr : global.get 0
+  owi: [INFO] running instr : global.get 0 (executed 0 times)
   owi: [INFO] stack         : [ i32.const 42 ]
-  owi: [INFO] running instr : drop
+  owi: [INFO] running instr : drop (executed 0 times)
   owi: [INFO] stack         : [  ]
-  owi: [INFO] running instr : i64.const 42
+  owi: [INFO] running instr : i64.const 42 (executed 0 times)
   owi: [INFO] stack         : [ i64.const 42 ]
-  owi: [INFO] running instr : global.set 1
+  owi: [INFO] running instr : global.set 1 (executed 0 times)
   owi: [INFO] stack         : [  ]
-  owi: [INFO] running instr : global.get 1
+  owi: [INFO] running instr : global.get 1 (executed 0 times)
   owi: [INFO] stack         : [ i64.const 42 ]
-  owi: [INFO] running instr : drop
+  owi: [INFO] running instr : drop (executed 0 times)
   $ owi wasm2wat globals.wasm
   (module
     (type (func))
