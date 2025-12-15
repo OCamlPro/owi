@@ -13,7 +13,7 @@ module type S = sig
 
   (** Make a new pledge, ie indicate that new elements may be pushed to the
       queue and that calls to pop should block waiting for them. *)
-  val make_pledge : 'a t -> unit
+  val new_pledge : 'a t -> unit
 
   (** End one pledge. *)
   val end_pledge : 'a t -> unit
