@@ -9,15 +9,17 @@ let run_file ~parameters ~source_file =
   let { Symbolic_parameters.unsafe
       ; entry_point
       ; invoke_with_symbols
-      ; exploration_strategy
+      ; exploration_strategy = _
       ; _
       } =
     parameters
   in
   let* m = Compile.File.until_validate ~unsafe source_file in
+  (* TODO: enable this once the smart strategy is fully implemented
   ( match exploration_strategy with
   | Smart -> Cmd_call_graph.compute_distances m entry_point
   | _ -> () );
+  *)
   let* m = Cmd_utils.set_entry_point entry_point invoke_with_symbols m in
   let link_state =
     Link.State.empty ()

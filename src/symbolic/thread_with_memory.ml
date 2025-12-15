@@ -15,8 +15,9 @@ let project (th : t) : Thread_without_memory.t * _ =
     let breadcrumbs = breadcrumbs th in
     let labels = labels th in
     let bench_stats = bench_stats th in
+    let depth = depth th in
     Thread_without_memory.create num_symbols symbol_scopes pc memories tables
-      globals breadcrumbs labels bench_stats
+      globals breadcrumbs labels bench_stats ~depth
   in
   let backup = memories th in
   (projected, backup)
@@ -35,5 +36,6 @@ let restore backup th =
   let breadcrumbs = Thread_without_memory.breadcrumbs th in
   let labels = Thread_without_memory.labels th in
   let bench_stats = Thread_without_memory.bench_stats th in
+  let depth = Thread_without_memory.depth th in
   create num_symbols symbol_scopes pc memories tables globals breadcrumbs labels
-    bench_stats
+    bench_stats ~depth

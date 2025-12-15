@@ -19,12 +19,13 @@ struct
         (** Breadcrumbs represent the list of choices that were made so far.
             They identify one given symbolic execution trace. *)
     ; breadcrumbs : int list
+    ; depth : int
     ; labels : (int * string) list
     ; bench_stats : Benchmark.stats
     }
 
   let create num_symbols symbol_scopes pc memories tables globals breadcrumbs
-    labels bench_stats =
+    labels bench_stats ~depth =
     { num_symbols
     ; symbol_scopes
     ; pc
@@ -34,6 +35,7 @@ struct
     ; breadcrumbs
     ; labels
     ; bench_stats
+    ; depth
     }
 
   let init () =
@@ -46,8 +48,9 @@ struct
     let breadcrumbs = [] in
     let labels = [] in
     let bench_stats = Benchmark.empty_stats () in
+    let depth = 0 in
     create num_symbols symbol_scopes pc memories tables globals breadcrumbs
-      labels bench_stats
+      labels bench_stats ~depth
 
   let num_symbols t = t.num_symbols
 
@@ -63,6 +66,8 @@ struct
 
   let breadcrumbs t = t.breadcrumbs
 
+  let depth t = t.depth
+
   let labels t = t.labels
 
   let bench_stats t = t.bench_stats
@@ -77,7 +82,8 @@ struct
 
   let add_breadcrumb t crumb =
     let breadcrumbs = crumb :: t.breadcrumbs in
-    { t with breadcrumbs }
+    let depth = t.depth + 1 in
+    { t with breadcrumbs; depth }
 
   let incr_num_symbols t =
     let num_symbols = succ t.num_symbols in
@@ -105,6 +111,7 @@ struct
     ; breadcrumbs
     ; labels
     ; bench_stats
+    ; depth
     } =
     (* WARNING: because we are doing an optimization in `Symbolic_choice`, the cloned state should not refer to a mutable value of the previous state. Assuming that the original state is not mutated is wrong. *)
     let memories = Memory.clone memories in
@@ -119,5 +126,6 @@ struct
     ; breadcrumbs
     ; labels
     ; bench_stats
+    ; depth
     }
 end

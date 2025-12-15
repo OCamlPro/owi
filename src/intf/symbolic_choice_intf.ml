@@ -37,13 +37,16 @@ module type S = sig
   val trap : Result.err -> 'a t
 
   val select :
-    Symbolic_boolean.t -> prio_true:Prio.t -> prio_false:Prio.t -> Bool.t t
+       Symbolic_boolean.t
+    -> prio_true:Prio.source
+    -> prio_false:Prio.source
+    -> Bool.t t
 
   val select_i32 : Symbolic_i32.t -> Int32.t t
 
   val assertion : Symbolic_boolean.t -> unit t
 
-  val assume : Symbolic_boolean.t -> unit t
+  val assume : Symbolic_boolean.t -> Int.t Option.t -> unit t
 
   val with_thread : (thread -> 'a) -> 'a t
 
@@ -82,6 +85,8 @@ module type S = sig
     -> if_true:Symbolic_value.t
     -> if_false:Symbolic_value.t
     -> Symbolic_value.t t
+
+  val depth : unit -> int t
 end
 
 module type Intf = sig

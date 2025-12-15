@@ -27,6 +27,7 @@ module type S = sig
     -> int list
     -> (int * string) list
     -> Benchmark.stats
+    -> depth:int
     -> t
 
   val pc : t -> Symbolic_path_condition.t
@@ -38,6 +39,8 @@ module type S = sig
   val globals : t -> Symbolic_global.collection
 
   val breadcrumbs : t -> int list
+
+  val depth : t -> int
 
   val symbol_scopes : t -> Symbol_scope.t
 

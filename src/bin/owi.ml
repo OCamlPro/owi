@@ -55,21 +55,9 @@ let path_conv = Arg.conv (Fpath.of_string, Fpath.pp)
 let solver_conv = Arg.conv (Smtml.Solver_type.of_string, Smtml.Solver_type.pp)
 
 let exploration_conv =
-  let of_string s =
-    match String.lowercase_ascii s with
-    | "fifo" -> Ok Symbolic_parameters.Exploration_strategy.FIFO
-    | "lifo" -> Ok LIFO
-    | "random" -> Ok Random
-    | "smart" -> Ok Smart
-    | _ -> Fmt.error_msg {|Expected "fifo", "lifo" or "random" but got "%s"|} s
-  in
-  let pp fmt = function
-    | Symbolic_parameters.Exploration_strategy.FIFO -> Fmt.string fmt "fifo"
-    | LIFO -> Fmt.string fmt "lifo"
-    | Random -> Fmt.string fmt "random"
-    | Smart -> Fmt.string fmt "smart"
-  in
-  Arg.conv (of_string, pp)
+  Arg.conv
+    ( Symbolic_parameters.Exploration_strategy.of_string
+    , Symbolic_parameters.Exploration_strategy.pp )
 
 let model_format_conv =
   let of_string s =
@@ -146,7 +134,9 @@ let fail_mode =
         ] )
 
 let exploration_strategy =
-  let doc = {|exploration strategy to use ("fifo", "lifo" or "random")|} in
+  let doc =
+    {|exploration strategy to use ("fifo", "lifo", "random", "random-unseen-then-random", "rarity", "hot-path-penalty", "rarity-aging", "rarity-depth-aging", "rarity-depth-loop-aging", "rarity-depth-loop-aging-random")|}
+  in
   Arg.(
     value
     & opt exploration_conv Symbolic_parameters.Exploration_strategy.FIFO
@@ -690,7 +680,7 @@ let exit_code =
       Result.err_to_exit_code e
     end
   end
-  | Error e -> (
-    match e with `Term -> 122 | `Parse -> cli_error | `Exn -> internal_error )
+  | Error (`Parse | `Term) -> cli_error
+  | Error `Exn -> internal_error
 
 let () = exit exit_code

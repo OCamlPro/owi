@@ -42,22 +42,22 @@ owi: [INFO] typechecking ...
 owi: [INFO] linking      ...
 owi: [INFO] interpreting ...
 owi: [INFO] stack         : [  ]
-owi: [INFO] running instr : call 1
+owi: [INFO] running instr : call 1 (executed 0 times)
 owi: [INFO] calling func  : func start
 owi: [INFO] stack         : [  ]
-owi: [INFO] running instr : call 0
+owi: [INFO] running instr : call 0 (executed 0 times)
 owi: [INFO] stack         : [ i32.const 6 ]
-owi: [INFO] running instr : local.set 0
+owi: [INFO] running instr : local.set 0 (executed 0 times)
 owi: [INFO] stack         : [  ]
-owi: [INFO] running instr : i32.const 5
+owi: [INFO] running instr : i32.const 5 (executed 0 times)
 owi: [INFO] stack         : [ i32.const 5 ]
-owi: [INFO] running instr : local.get 0
+owi: [INFO] running instr : local.get 0 (executed 0 times)
 owi: [INFO] stack         : [ i32.const 6 ; i32.const 5 ]
-owi: [INFO] running instr : i32.lt_s
+owi: [INFO] running instr : i32.lt_s (executed 0 times)
 owi: [INFO] stack         : [ i32.const 1 ]
-owi: [INFO] running instr : if
+owi: [INFO] running instr : if (executed 0 times)
 owi: [INFO] stack         : [  ]
-owi: [INFO] running instr : unreachable
+owi: [INFO] running instr : unreachable (executed 0 times)
 owi: [ERROR] unreachable
 [94]
 ```

@@ -70,11 +70,14 @@ module Backend = struct
           let range = Symbolic_i32.of_int (range - 1) in
           (* end_offset: last byte we will read/write *)
           let end_offset = Symbolic_i32.add start_offset range in
+          (* TODO: better prio here *)
+          let prio_true = Prio.dummy in
+          let prio_false = Prio.dummy in
           select
             (Symbolic_boolean.or_
                (Symbolic_i32.ge_u start_offset chunk_size)
                (Symbolic_i32.ge_u end_offset chunk_size) )
-            ~prio_true:Prio.Default ~prio_false:Prio.Default
+            ~prio_true ~prio_false
         in
         if is_out_of_bounds then Error `Memory_heap_buffer_overflow else Ok a )
     | _ ->

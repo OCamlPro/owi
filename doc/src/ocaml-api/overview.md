@@ -41,14 +41,14 @@ module I :
     | Error _ -> assert false;;
 mdx_gen.bc.exe: [INFO] interpreting ...
 mdx_gen.bc.exe: [INFO] stack         : [  ]
-mdx_gen.bc.exe: [INFO] running instr : call 0
+mdx_gen.bc.exe: [INFO] running instr : call 0 (executed 0 times)
 mdx_gen.bc.exe: [INFO] calling func  : func f
 mdx_gen.bc.exe: [INFO] stack         : [  ]
-mdx_gen.bc.exe: [INFO] running instr : i32.const 24
+mdx_gen.bc.exe: [INFO] running instr : i32.const 24 (executed 0 times)
 mdx_gen.bc.exe: [INFO] stack         : [ i32.const 24 ]
-mdx_gen.bc.exe: [INFO] running instr : i32.const 24
+mdx_gen.bc.exe: [INFO] running instr : i32.const 24 (executed 0 times)
 mdx_gen.bc.exe: [INFO] stack         : [ i32.const 24 ; i32.const 24 ]
-mdx_gen.bc.exe: [INFO] running instr : i32.add
+mdx_gen.bc.exe: [INFO] running instr : i32.add (executed 0 times)
 mdx_gen.bc.exe: [INFO] stack         : [ i32.const 48 ]
-mdx_gen.bc.exe: [INFO] running instr : drop
+mdx_gen.bc.exe: [INFO] running instr : drop (executed 0 times)
 ```

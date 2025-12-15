@@ -19,7 +19,10 @@ OPTIONS
            implies --no-stop-at-failure.
 
        --exploration=VAL (absent=fifo)
-           exploration strategy to use ("fifo", "lifo" or "random")
+           exploration strategy to use ("fifo", "lifo", "random",
+           "random-unseen-then-random", "rarity", "hot-path-penalty",
+           "rarity-aging", "rarity-depth-aging", "rarity-depth-loop-aging",
+           "rarity-depth-loop-aging-random")
 
        --fail-on-assertion-only
            ignore traps and only report assertion violations

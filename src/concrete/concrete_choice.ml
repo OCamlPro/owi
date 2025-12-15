@@ -24,7 +24,11 @@ let run m = m
 
 let get_pc () = return Smtml.Expr.Set.empty
 
-let assume v =
+let depth () =
+  (* TODO: maybe implement it at some point, it is only used in symbolic mode for exploration priority so we use 0 here for now *)
+  Ok 0
+
+let assume v _instr_counter =
   if v then Ok ()
   else
     (* TODO: there could be a dedicated error here? *)

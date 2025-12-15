@@ -45,23 +45,23 @@
   owi: [INFO] linking      ...
   owi: [INFO] interpreting ...
   owi: [INFO] stack         : [  ]
-  owi: [INFO] running instr : call 6
+  owi: [INFO] running instr : call 6 (executed 0 times)
   owi: [INFO] calling func  : func anonymous
   owi: [INFO] stack         : [  ]
-  owi: [INFO] running instr : call 0
+  owi: [INFO] running instr : call 0 (executed 0 times)
   owi: [INFO] stack         : [ symbol_0 ]
-  owi: [INFO] running instr : call 5
+  owi: [INFO] running instr : call 5 (executed 0 times)
   owi: [INFO] calling func  : func f
   owi: [INFO] stack         : [  ]
-  owi: [INFO] running instr : local.get 0
+  owi: [INFO] running instr : local.get 0 (executed 0 times)
   owi: [INFO] stack         : [ symbol_0 ]
-  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] running instr : i32.const 1 (executed 0 times)
   owi: [INFO] stack         : [ 1 ; symbol_0 ]
-  owi: [INFO] running instr : i32.lt_u
+  owi: [INFO] running instr : i32.lt_u (executed 0 times)
   owi: [INFO] stack         : [ (i32.of_bool (i32.lt_u symbol_0 1)) ]
-  owi: [INFO] running instr : if
+  owi: [INFO] running instr : if (executed 0 times)
   owi: [INFO] stack         : [  ]
-  owi: [INFO] running instr : unreachable
+  owi: [INFO] running instr : unreachable (executed 0 times)
   owi: [DEBUG] path condition smt query:
                 (let-const symbol_0 i32)
                 (assert (i32.lt_u symbol_0 (i32 1)))

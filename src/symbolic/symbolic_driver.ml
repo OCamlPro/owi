@@ -4,6 +4,7 @@
 
 open Bos
 open Syntax
+module Outcome = Prio.Make (Prio.FIFO)
 
 let print_and_count_failures ~format ~out_file ~no_value
   ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
@@ -56,17 +57,17 @@ let mk_callback no_stop_at_failure fail_mode res_stack path_count =
   | _, (EVal (), _) -> ()
   | ( (Symbolic_parameters.Both | Trap_only)
     , (ETrap (t, m, labels, breadcrumbs, symbol_scopes), thread) ) ->
-    Ws.push
+    Outcome.push
       (`ETrap (t, m, labels, breadcrumbs, symbol_scopes), thread)
-      Prio.default res_stack;
+      Prio.dummy res_stack;
     if not no_stop_at_failure then begin
       close_work_queue ()
     end
   | ( (Both | Assertion_only)
     , (EAssert (e, m, labels, breadcrumbs, symbol_scopes), thread) ) ->
-    Ws.push
+    Outcome.push
       (`EAssert (e, m, labels, breadcrumbs, symbol_scopes), thread)
-      Prio.default res_stack;
+      Prio.dummy res_stack;
     if not no_stop_at_failure then begin
       close_work_queue ()
     end
@@ -77,7 +78,7 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
   ~workspace ~solver ~model_format ~model_out_file ~with_breadcrumbs ~run_time
   (result : unit Symbolic_choice_with_memory.t) =
   let thread = Thread_with_memory.init () in
-  let res_stack = Ws.make () in
+  let res_stack = Outcome.make () in
   let path_count = Atomic.make 0 in
   let at_worker_value =
     mk_callback no_stop_at_failure fail_mode res_stack path_count
@@ -86,10 +87,10 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
   let domains : unit Domain.t Array.t =
     Symbolic_choice_with_memory.run exploration_strategy ~workers solver result
       thread ~at_worker_value
-      ~at_worker_init:(fun () -> Ws.new_pledge res_stack)
-      ~at_worker_end:(fun () -> Ws.end_pledge res_stack)
+      ~at_worker_init:(fun () -> Outcome.new_pledge res_stack)
+      ~at_worker_end:(fun () -> Outcome.end_pledge res_stack)
   in
-  let results = Ws.read_as_seq res_stack ~finalizer:Fun.id in
+  let results = Outcome.read_as_seq res_stack ~finalizer:Fun.id in
   let results = sort_results deterministic_result_order results in
   let* count =
     print_and_count_failures ~format:model_format ~out_file:model_out_file
