@@ -8,7 +8,7 @@ type 'a t = ('a, Prio.t * 'a) Synchronizer.t
 
 let pop s ~pledge = Synchronizer.get s ~pledge
 
-let make_pledge = Synchronizer.make_pledge
+let new_pledge = Synchronizer.new_pledge
 
 let end_pledge = Synchronizer.end_pledge
 
@@ -20,7 +20,7 @@ let rec read_as_seq (s : 'a t) ~finalizer : 'a Seq.t =
     Nil
   | Some v -> Cons (v, read_as_seq s ~finalizer)
 
-let push v prio s = Synchronizer.write (prio, v) s
+let push v prio s = Synchronizer.write s (prio, v)
 
 let work_while f s = Synchronizer.work_while f s
 
@@ -28,8 +28,5 @@ let close = Synchronizer.close
 
 let make () =
   let s = Stack.create () in
-  let writter prio_v condvar =
-    Stack.push (snd prio_v) s;
-    Condition.signal condvar
-  in
+  let writter prio_v = Stack.push (snd prio_v) s in
   Synchronizer.init (fun () -> Stack.pop_opt s) writter

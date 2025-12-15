@@ -6,18 +6,18 @@
 let
   smtml = pkgs.ocamlPackages.smtml.overrideAttrs (old: {
     src = pkgs.fetchFromGitHub {
-      owner = "redianthus";
+      owner = "formalsec";
       repo = "smtml";
-      rev = "25a307e685b79ef772266a76070922dfdb25bd80";
-      hash = "sha256-BgsX69fTCPc3ScTmiDpeScem+k6CJ+61RIdoSVp2At4=";
+      rev = "ee041eead0c45d1a124a57c43df9ff6814f512eb";
+      hash = "sha256-IFjaZcwBiM/xA39W+FuJ87OSEvAhvhEsZ1cF2KrxrhY=";
     };
   });
   synchronizer = pkgs.ocamlPackages.synchronizer.overrideAttrs (old: {
     src = pkgs.fetchFromGitHub {
       owner = "ocamlpro";
       repo = "synchronizer";
-      rev = "e70f51f7518ac2bfa02243ec3820fb16dc7f9ad9";
-      hash = "sha256-g1JtiWSeco2ULjE0wtJGM8ZvyJFSnyj+3gjTakYF8Uc=";
+      rev = "cb5fd995e8a42e5244acf68f238221594fd19a8d";
+      hash = "sha256-0XtPHpDlyH1h8W2ZlRvJbZjCN9WP5mzk2N01WFd8eLQ=";
     };
   });
 in

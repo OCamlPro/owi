@@ -86,7 +86,7 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
   let domains : unit Domain.t Array.t =
     Symbolic_choice_with_memory.run exploration_strategy ~workers solver result
       thread ~at_worker_value
-      ~at_worker_init:(fun () -> Ws.make_pledge res_stack)
+      ~at_worker_init:(fun () -> Ws.new_pledge res_stack)
       ~at_worker_end:(fun () -> Ws.end_pledge res_stack)
   in
   let results = Ws.read_as_seq res_stack ~finalizer:Fun.id in
