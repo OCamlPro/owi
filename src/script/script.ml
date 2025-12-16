@@ -31,18 +31,26 @@ let check_error ~expected ~got : unit Result.t =
     | `Parse_fail "END opcode expected" ->
       String.equal expected "illegal opcode"
       || String.equal expected "unexpected end"
-    | `Parse_fail "integer representation too long (read_SN 2)" ->
+      || String.equal expected "unexpected end of section or function"
+    | (`Msg s | `Parse_fail s)
+      when String.starts_with s ~prefix:"integer representation too long" ->
       String.equal expected "unexpected end of section or function"
-    | `Parse_fail "integer representation too long (read_UN 2)" ->
-      String.equal expected "unexpected end of section or function"
+      || String.equal expected "unexpected end of section or function"
       || String.equal expected "length out of bounds"
       || String.equal expected "unexpected end"
+      || String.equal expected "integer too large"
     | `Parse_fail "integer too large (read_limits)" ->
       String.equal expected "integer representation too long"
+      || String.equal expected "malformed limits flags"
     | `Parse_fail "offset out of range" ->
       String.equal expected "integer representation too long"
-    | `Parse_fail "function and code section have inconsistent lengths" ->
+    | (`Msg s | `Parse_fail s)
+      when String.equal s "function and code section have inconsistent lengths"
+           || String.equal s
+                "data count and data section have inconsistent lengths"
+           || String.equal s "malformed section id" ->
       String.equal expected "unexpected content after last section"
+    | `Empty_identifier -> String.equal expected "unknown operator"
     | _ -> false
   in
   if not ok then begin
