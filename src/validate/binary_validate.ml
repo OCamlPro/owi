@@ -594,8 +594,7 @@ let typecheck_const_instr (modul : Module.t) refs stack instr =
     else
       let* mut, typ =
         match modul.global.(i) with
-        | Origin.Local _ -> Error (`Unknown_global (Text.Raw i))
-        | Imported { typ; _ } -> Ok typ
+        | Origin.Local { typ; _ } | Imported { typ; _ } -> Ok typ
       in
       let* () =
         match mut with
