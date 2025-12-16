@@ -707,7 +707,7 @@ let rec read_instr types input =
     (Ref_func funcidx, input)
   | '\xFC' -> read_FC input
   | '\xFD' -> read_FD input
-  | c -> parse_fail "illegal opcode (2) %s" (Char.escaped c)
+  | c -> parse_fail "illegal opcode %2x" (Char.code c)
 
 and read_expr types input =
   let rec aux acc input =
