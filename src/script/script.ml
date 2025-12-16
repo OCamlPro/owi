@@ -22,6 +22,7 @@ let check_error ~expected ~got : unit Result.t =
     | (`Msg s | `Parse_fail s)
       when String.starts_with ~prefix:"constant out of range" s ->
       String.starts_with ~prefix:"i32 constant" expected
+      || String.equal expected "offset out of range"
     | `Constant_out_of_range ->
       String.starts_with ~prefix:"i32 constant" expected
     | `Parse_fail "unexpected end of section or function"
@@ -37,6 +38,8 @@ let check_error ~expected ~got : unit Result.t =
       || String.equal expected "length out of bounds"
       || String.equal expected "unexpected end"
     | `Parse_fail "integer too large (read_limits)" ->
+      String.equal expected "integer representation too long"
+    | `Parse_fail "offset out of range" ->
       String.equal expected "integer representation too long"
     | `Parse_fail "function and code section have inconsistent lengths" ->
       String.equal expected "unexpected content after last section"
@@ -239,8 +242,15 @@ let run ~no_exhaustion script =
         link_state
       | Assert (Assert_invalid_quote (m, expected)) ->
         Log.info (fun m -> m "*** assert_invalid_quote");
-        let got = Parse.Text.Module.from_string m in
-        let+ () = check_error_result expected got in
+        let got = Parse.Text.Script.from_string m in
+        let+ () =
+          match got with
+          | Error got -> check_error ~expected ~got
+          | Ok [ Text_module m ] ->
+            let got = Compile.Text.until_binary ~unsafe m in
+            check_error_result expected got
+          | _ -> assert false
+        in
         link_state
       | Assert (Assert_unlinkable (m, expected)) ->
         Log.info (fun m -> m "*** assert_unlinkable");
