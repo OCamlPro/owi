@@ -244,11 +244,17 @@ let read_vectype input =
   | b -> parse_fail "malformed vector type: %d" b
 
 let read_reftype input =
-  let* b, input = read_S7 input in
-  match b with
+  let* b1, input = read_S7 input in
+  match b1 with
   | -0x10 -> Ok ((Text.Null, Text.Func_ht), input)
   | -0x11 -> Ok ((Null, Extern_ht), input)
-  | b -> parse_fail "malformed reference type: %d" b
+  | -0x1c -> begin
+    let* b2, input = read_S7 input in
+    match b2 with
+    | -0x10 -> Ok ((Text.No_null, Text.Func_ht), input)
+    | _ -> parse_fail "malformed reference type: %d then %d" b1 b2
+  end
+  | _ -> parse_fail "malformed reference type: %d" b1
 
 let read_valtype input =
   match read_numtype input with
@@ -715,6 +721,11 @@ and read_expr types input =
     | Ok (('\x05' | '\x0B'), _) | Error _ ->
       let acc = List.rev acc |> Annotated.dummy in
       Ok (acc, input)
+    | Ok ('\xd2', input) -> begin
+      let* id, input = read_indice input in
+      let instr = Annotated.dummy (Ref_func id) in
+      aux (instr :: acc) input
+    end
     | Ok _ ->
       let* instr, input = read_instr types input in
       let instr = Annotated.dummy instr in
@@ -834,9 +845,24 @@ let read_import input =
   | _c -> parse_fail "malformed import kind"
 
 let read_table input =
-  let* ref_type, input = read_reftype input in
-  let+ limits, input = read_limits input in
-  ((limits, ref_type), input)
+  let* b1, input = read_S7 input in
+  match b1 with
+  | -0x10 ->
+    let+ limits, input = read_limits input in
+    ((limits, (Text.Null, Text.Func_ht), None), input)
+  | -0x11 ->
+    let+ limits, input = read_limits input in
+    ((limits, (Text.Null, Text.Extern_ht), None), input)
+  | -0x40 -> begin
+    let* input = check_zero_opcode input in
+    let* ref_type, input = read_reftype input in
+    let* limits, input = read_limits input in
+    let+ value, input =
+      read_const [| (None, ([], [ Ref_type ref_type ])) |] input
+    in
+    ((limits, ref_type, Some value), input)
+  end
+  | _ -> parse_fail "malformed reference type: %d  %d" b1 (-0x40)
 
 let read_memory input =
   let+ limits, input = read_limits input in
@@ -1221,7 +1247,13 @@ let sections_iterate (input : Input.t) =
 
   (* Tables *)
   let table =
-    let local = List.map (fun tbl -> Origin.Local (None, tbl)) table_section in
+    let local =
+      List.map
+        (fun (v1, v2, _v3) ->
+          (* TODO: find a way to init tables with _v3 here *)
+          Origin.Local (None, (v1, v2)) )
+        table_section
+    in
     let imported =
       List.filter_map
         (function
