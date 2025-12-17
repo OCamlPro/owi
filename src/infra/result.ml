@@ -135,7 +135,7 @@ let rec err_to_string = function
   | `Unbound_module id -> Fmt.str "unbound module %s" id
   | `Unbound_name id -> Fmt.str "unbound name %s" id
   | `Undeclared_function_reference -> "undeclared function reference"
-  | `Unexpected_token s -> Fmt.str "unexpected token %S" s
+  | `Unexpected_token s -> Fmt.str "unexpected token %s" s
   | `Unknown_data id -> Fmt.str "unknown data segment %a" Text.pp_indice id
   | `Unknown_elem id -> Fmt.str "unknown elem segment %a" Text.pp_indice id
   | `Unknown_func id -> Fmt.str "unknown function %a" Text.pp_indice id
