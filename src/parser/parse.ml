@@ -370,7 +370,7 @@ struct
       | Text_parser.Error ->
         let tok, pos1, pos2 = Text_lexer.lexer buf () in
         let msg =
-          Fmt.str "%s in %a" (token_to_string tok) pp_pos (pos1, pos2)
+          Fmt.str "%S in %a" (token_to_string tok) pp_pos (pos1, pos2)
         in
         Error (`Unexpected_token msg)
       | Sedlexing.MalFormed -> Error (`Malformed_utf8_encoding "")
