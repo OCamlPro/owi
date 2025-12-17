@@ -907,6 +907,11 @@ let table_fields :=
   | ~ = table_type; {
     [ Module.Field.Table (None, table_type) ]
   }
+  | ~ = table_type; LPAR; REF_FUNC; id = elem_var; RPAR; {
+    let mode = Elem.Mode.Active (None, Annotated.dummy []) in
+    [ Module.Field.Elem { id = None; typ = (Null, Func_ht); init = [Annotated.dummy id]; mode }
+    ; Table (None, table_type) ]
+  }
   | (modul_name, name) = inline_import; ~ = table_type; {
     [ Import { modul_name; name; typ = Table (None, table_type) }]
   }
