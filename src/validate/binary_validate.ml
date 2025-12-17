@@ -224,6 +224,9 @@ end = struct
     push rt stack
 end
 
+let is_func_type (ref_type : Text.ref_type) =
+  match ref_type with _, Func_ht -> true | _ -> false
+
 let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t)
   : stack Result.t =
   match instr.raw with
@@ -398,6 +401,10 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
   | Loop (_, bt, expr) -> typecheck_expr env expr ~is_loop:true bt ~stack
   | Call_indirect (tbl_id, bt) ->
     let* _tbl_type = Env.table_type_get tbl_id env.modul in
+    let* () =
+      if is_func_type _tbl_type then Ok ()
+      else Error (`Type_mismatch "call_indirect")
+    in
     let* stack = Stack.pop [ i32 ] stack in
     Stack.pop_push bt stack
   | Call i ->
@@ -424,6 +431,10 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
       [ any ]
   | Return_call_indirect (tbl_id, Bt_raw (_, (pt, rt))) ->
     let* _tbl_type = Env.table_type_get tbl_id env.modul in
+    let* () =
+      if is_func_type _tbl_type then Ok ()
+      else Error (`Type_mismatch "call_indirect")
+    in
     if
       not
         (Stack.equal
