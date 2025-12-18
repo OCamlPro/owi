@@ -909,46 +909,46 @@ let read_element types input =
     let* mode, input = read_elem_active_zero types input in
     let+ init, input = vector_no_id read_elem_index input in
     let init = List.map Annotated.dummy_deep init in
-    let typ = (Text.Null, Text.Func_ht) in
-    ({ Elem.id; typ; init; mode }, input)
+    let typ = (Text.No_null, Text.Func_ht) in
+    ({ Elem.id; typ; init; mode; explicit_typ = true }, input)
   | 1 ->
     let mode = Elem.Mode.Passive in
     let* typ, input = read_elem_kind input in
     let+ init, input = vector_no_id read_elem_index input in
     let init = List.map Annotated.dummy_deep init in
-    ({ Elem.id; typ; init; mode }, input)
+    ({ Elem.id; typ; init; mode; explicit_typ = false }, input)
   | 2 ->
     let* mode, input = read_elem_active types input in
     let* typ, input = read_elem_kind input in
     let+ init, input = vector_no_id read_elem_index input in
     let init = List.map Annotated.dummy_deep init in
-    ({ Elem.id; typ; init; mode }, input)
+    ({ Elem.id; typ; init; mode; explicit_typ = false }, input)
   | 3 ->
     let mode = Elem.Mode.Declarative in
     let* typ, input = read_elem_kind input in
     let+ init, input = vector_no_id read_elem_index input in
     let init = List.map Annotated.dummy_deep init in
-    ({ Elem.id; typ; init; mode }, input)
+    ({ Elem.id; typ; init; mode; explicit_typ = false }, input)
   | 4 ->
     let* mode, input = read_elem_active_zero types input in
     let+ init, input = vector_no_id (read_const types) input in
     let typ = (Text.Null, Text.Func_ht) in
-    ({ Elem.id; typ; init; mode }, input)
+    ({ Elem.id; typ; init; mode; explicit_typ = true }, input)
   | 5 ->
     let mode = Elem.Mode.Passive in
     let* typ, input = read_reftype input in
     let+ init, input = vector_no_id (read_const types) input in
-    ({ Elem.id; typ; init; mode }, input)
+    ({ Elem.id; typ; init; mode; explicit_typ = true }, input)
   | 6 ->
     let* mode, input = read_elem_active types input in
     let* typ, input = read_reftype input in
     let+ init, input = vector_no_id (read_const types) input in
-    ({ Elem.id; typ; init; mode }, input)
+    ({ Elem.id; typ; init; mode; explicit_typ = true }, input)
   | 7 ->
     let mode = Elem.Mode.Declarative in
     let* typ, input = read_reftype input in
     let+ init, input = vector_no_id (read_const types) input in
-    ({ Elem.id; typ; init; mode }, input)
+    ({ Elem.id; typ; init; mode; explicit_typ = true }, input)
   | i -> parse_fail "malformed elements segment kind: %d" i
 
 let read_local input =

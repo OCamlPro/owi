@@ -289,7 +289,7 @@ let elem env : Module.Field.t gen =
   let+ typ = B.ref_type
   and+ mode = B.elem_mode env in
   let id = Some (Env.add_elem env typ) in
-  Module.Field.Elem { id; typ; init = []; mode }
+  Module.Field.Elem { id; typ; init = []; mode; explicit_typ = false }
 
 let table env : Module.Field.t gen =
   let+ typ = B.table_type in

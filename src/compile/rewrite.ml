@@ -287,7 +287,12 @@ let rewrite_elem (assigned : Assigned.t) (elem : Text.Elem.t) :
       Binary.Elem.Mode.Active (Some indice, expr)
   in
   let+ init = list_map (rewrite_expr assigned []) elem.init in
-  { Binary.Elem.init; mode; id = elem.id; typ = elem.typ }
+  { Binary.Elem.init
+  ; mode
+  ; id = elem.id
+  ; typ = elem.typ
+  ; explicit_typ = elem.explicit_typ
+  }
 
 let rewrite_data (assigned : Assigned.t) (data : Text.Data.t) :
   Binary.Data.t Result.t =

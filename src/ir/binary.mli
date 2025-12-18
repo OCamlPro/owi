@@ -158,6 +158,7 @@ module Elem : sig
     ; typ : Text.ref_type (* TODO: init : binary+const expr*)
     ; init : expr Annotated.t list
     ; mode : Mode.t
+    ; explicit_typ : bool
     }
 end
 

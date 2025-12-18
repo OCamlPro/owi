@@ -31,13 +31,47 @@ let modul m =
       if Hashtbl.mem seen id then Error (`Duplicate_global id)
       else Ok (Hashtbl.replace seen id ())
   in
-  let add_table =
+  let add_table, get_table =
+    let cnt = ref 0 in
+    let names2ids = Hashtbl.create 512 in
     let seen = Hashtbl.create 512 in
-    function
-    | None -> Ok ()
-    | Some id ->
-      if Hashtbl.mem seen id then Error (`Duplicate_table id)
-      else Ok (Hashtbl.replace seen id ())
+    let add_table name ty =
+      match name with
+      | None ->
+        Hashtbl.replace seen !cnt ty;
+        incr cnt;
+        Ok ()
+      | Some name ->
+        if Hashtbl.mem names2ids name then Error (`Duplicate_table name)
+        else (
+          Hashtbl.replace names2ids name !cnt;
+          Hashtbl.replace seen !cnt ty;
+          incr cnt;
+          Ok () )
+    in
+    let get_table name =
+      match name with
+      | None -> begin
+        match Hashtbl.find_opt seen 0 with
+        | None -> assert false
+        | Some ty -> Ok ty
+      end
+      | Some (Text name) -> begin
+        match Hashtbl.find_opt names2ids name with
+        | None -> Error (`Unknown_table (Text name))
+        | Some id -> begin
+          match Hashtbl.find_opt seen id with
+          | None -> assert false
+          | Some ty -> Ok ty
+        end
+      end
+      | Some (Raw id) -> begin
+        match Hashtbl.find_opt seen id with
+        | None -> Error (`Unknown_table (Raw id))
+        | Some ty -> Ok ty
+      end
+    in
+    (add_table, get_table)
   in
   let add_memory =
     let seen = Hashtbl.create 512 in
@@ -47,7 +81,6 @@ let modul m =
       if Hashtbl.mem seen id then Error (`Duplicate_memory id)
       else Ok (Hashtbl.add seen id ())
   in
-
   let+ (_env : env) =
     let open Module in
     list_fold_left
@@ -73,12 +106,29 @@ let modul m =
             | Global (id, _) ->
               let+ () = add_global id in
               env
-            | Table (id, _) ->
-              let+ () = add_table id in
+            | Table (id, ty) ->
+              let+ () = add_table id ty in
               env
           end
         | Data _d -> Ok env
-        | Elem _e -> Ok env
+        | Elem { typ = elemnull, elemty; mode; explicit_typ; _ } -> begin
+          match mode with
+          | Text.Elem.Mode.(Passive | Declarative) -> Ok env
+          | Text.Elem.Mode.Active (id, _) ->
+            let* _, (tabnull, tabty) = get_table id in
+            (* Only of elem_ty is explicit, otherwise it can be inferred *)
+            if
+              (not explicit_typ)
+              || Text.heap_type_eq elemty tabty
+                 && Text.compare_nullable elemnull tabnull >= 0
+            then Ok env
+            else
+              Error
+                (`Type_mismatch
+                   (Fmt.str "Declared elem of type %a for table of type %a"
+                      Text.pp_ref_type (elemnull, elemty) Text.pp_ref_type
+                      (tabnull, tabty) ) )
+        end
         | Mem (id, _) ->
           let* () = add_memory id in
           Ok { env with declared_memory = true }
@@ -86,8 +136,8 @@ let modul m =
         | Global { id; _ } ->
           let+ () = add_global id in
           { env with globals = true }
-        | Table (id, _) ->
-          let+ () = add_table id in
+        | Table (id, ty) ->
+          let+ () = add_table id ty in
           { env with tables = true } )
       (empty_env ()) m.fields
   in

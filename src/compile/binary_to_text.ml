@@ -177,10 +177,10 @@ let convert_elem_mode : Binary.Elem.Mode.t -> Text.Elem.Mode.t = function
     Active (opt, e)
 
 let convert_elem : Binary.Elem.t -> Text.Elem.t = function
-  | { id; typ; init; mode } ->
+  | { id; typ; init; mode; explicit_typ } ->
     let init = List.map convert_expr init in
     let mode = convert_elem_mode mode in
-    { id; typ; init; mode }
+    { id; typ; init; mode; explicit_typ }
 
 let convert_data_mode : Binary.Data.Mode.t -> Text.Data.Mode.t = function
   | Passive -> Passive

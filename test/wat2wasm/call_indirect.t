@@ -47,6 +47,6 @@
       call_indirect 0  (param i64) (result i64)
       drop
     )
-    (elem (table 0) (offset i32.const 0) (ref null func) (item ref.func 0))
+    (elem (table 0) (offset i32.const 0) (ref func) (item ref.func 0))
     (start 1)
   )

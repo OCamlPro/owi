@@ -33,6 +33,8 @@ type nullable =
   | No_null
   | Null
 
+val compare_nullable : nullable -> nullable -> int
+
 type nonrec mut =
   | Const
   | Var
@@ -366,6 +368,7 @@ module Elem : sig
     ; typ : ref_type
     ; init : expr Annotated.t list
     ; mode : Mode.t
+    ; explicit_typ : bool
     }
 
   val pp : t Fmt.t

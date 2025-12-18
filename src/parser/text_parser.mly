@@ -847,36 +847,36 @@ let elem_var ==
 
 let elem_list ==
   | ~ = elem_kind; l = list(elem_var); {
-    elem_kind, (l : expr list)
+    elem_kind, (l : expr list), false
   }
   | ~ = ref_type; l = list(elem_expr); {
     let l : expr list = List.map (List.map Annotated.dummy) l in
-    ref_type, l
+    ref_type, l, true
   }
 
 let elem ==
-  | ELEM; id = option(id); (typ, init) = elem_list; {
+  | ELEM; id = option(id); (typ, init, explicit_typ) = elem_list; {
     let init = Annotated.dummies init in
-    [ Elem { id; typ; init; mode = Passive } ]
+    [ Elem { id; typ; init; mode = Passive; explicit_typ } ]
   }
-  | ELEM; id = option(id); table_use = par(table_use); ~ = offset; (typ, init) = elem_list; {
+  | ELEM; id = option(id); table_use = par(table_use); ~ = offset; (typ, init, explicit_typ) = elem_list; {
     let init = Annotated.dummies init in
     let offset = Annotated.dummy_deep offset in
-    [ Elem { id; typ; init; mode = Active (Some table_use, offset) } ]
+    [ Elem { id; typ; init; mode = Active (Some table_use, offset); explicit_typ } ]
   }
-  | ELEM; id = option(id); DECLARE; (typ, init) = elem_list; {
+  | ELEM; id = option(id); DECLARE; (typ, init, explicit_typ) = elem_list; {
     let init = Annotated.dummies init in
-    [ Elem { id; typ; init; mode = Declarative } ]
+    [ Elem { id; typ; init; mode = Declarative; explicit_typ } ]
   }
-  | ELEM; id = option(id); ~ = offset; (typ, init) = elem_list; {
+  | ELEM; id = option(id); ~ = offset; (typ, init, explicit_typ) = elem_list; {
     let init = Annotated.dummies init in
     let offset = Annotated.dummy_deep offset in
-    [ Elem { id; typ; init; mode = Active (Some (Raw 0), offset) } ]
+    [ Elem { id; typ; init; mode = Active (Some (Raw 0), offset); explicit_typ } ]
   }
   | ELEM; id = option(id); ~ = offset; init = list(elem_var); {
     let init =  Annotated.dummies init in
     let offset = Annotated.dummy_deep offset in
-    [ Elem { id; typ = (Null, Func_ht); init; mode = Active (Some (Raw 0), offset) } ]
+    [ Elem { id; typ = (Null, Func_ht); init; mode = Active (Some (Raw 0), offset); explicit_typ = false } ]
   }
 
 let table ==
@@ -909,7 +909,7 @@ let table_fields :=
   }
   | ~ = table_type; LPAR; REF_FUNC; id = elem_var; RPAR; {
     let mode = Elem.Mode.Active (None, Annotated.dummy []) in
-    [ Module.Field.Elem { id = None; typ = (Null, Func_ht); init = [Annotated.dummy id]; mode }
+    [ Module.Field.Elem { id = None; typ = (No_null, Func_ht); init = [Annotated.dummy id]; mode; explicit_typ = true }
     ; Table (None, table_type) ]
   }
   | (modul_name, name) = inline_import; ~ = table_type; {
@@ -924,7 +924,7 @@ let table_fields :=
       ) 0 init
     in
     let mode = Elem.Mode.Active (None, Annotated.dummy []) in
-    [ Module.Field.Elem { id = None; typ = (Null, Func_ht); init; mode }
+    [ Module.Field.Elem { id = None; typ = ref_type; init; mode; explicit_typ = true }
     ; Table (None, ({ min; max = Some min }, ref_type)) ]
   }
 
