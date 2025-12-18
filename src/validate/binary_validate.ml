@@ -637,14 +637,14 @@ let typecheck_global (modul : Module.t) refs
     | _whatever -> Error (`Type_mismatch "typecheck_global 2") )
 
 let typecheck_elem modul refs (elem : Elem.t) =
-  let _null, expected_type = elem.typ in
+  let elem_null, elem_ty = elem.typ in
   let* () =
     list_iter
       (fun init ->
         let* real_type = typecheck_const_expr modul refs init in
         match real_type with
         | [ real_type ] ->
-          let expected_type = Ref_type expected_type in
+          let expected_type = Ref_type elem_ty in
           if not @@ typ_equal expected_type real_type then
             Error
               (`Type_mismatch
@@ -658,14 +658,16 @@ let typecheck_elem modul refs (elem : Elem.t) =
   | Passive | Declarative -> Ok ()
   | Active (None, _e) -> assert false
   | Active (Some tbl_i, e) -> (
-    let* _null, tbl_type = Env.table_type_get tbl_i modul in
-    if not @@ Text.heap_type_eq tbl_type expected_type then
-      Error (`Type_mismatch "typecheck elem 3")
+    let* tbl_null, tbl_ty = Env.table_type_get tbl_i modul in
+    if
+      (elem.explicit_typ && Text.compare_nullable tbl_null elem_null > 0)
+      || not (Text.heap_type_eq tbl_ty elem_ty)
+    then Error (`Type_mismatch "typecheck elem 3")
     else
       let* t = typecheck_const_expr modul refs e in
       match t with
       | [ Ref_type t ] ->
-        if not @@ Text.heap_type_eq t tbl_type then
+        if not @@ Text.heap_type_eq t tbl_ty then
           Error (`Type_mismatch "typecheck_elem 4")
         else Ok ()
       | [ _t ] -> Ok ()

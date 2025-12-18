@@ -247,10 +247,6 @@ let pp_heap_type fmt = function
   | Func_ht -> pf fmt "func"
   | Extern_ht -> pf fmt "extern"
 
-let pp_heap_type_short fmt = function
-  | Func_ht -> pf fmt "funcref"
-  | Extern_ht -> pf fmt "externref"
-
 let heap_type_eq t1 t2 =
   (* TODO: this is wrong *)
   match (t1, t2) with
@@ -266,13 +262,19 @@ type nonrec ref_type = nullable * heap_type
 
 let pp_ref_type fmt (n, ht) =
   match n with
-  | No_null -> pf fmt "%a" pp_heap_type_short ht
+  | No_null -> pf fmt "(ref %a)" pp_heap_type ht
   | Null -> pf fmt "(ref null %a)" pp_heap_type ht
 
 let ref_type_eq t1 t2 =
   match (t1, t2) with
   | (Null, t1), (Null, t2) | (No_null, t1), (No_null, t2) -> heap_type_eq t1 t2
   | _ -> false
+
+let compare_nullable n1 n2 =
+  match (n1, n2) with
+  | Null, Null | No_null, No_null -> 0
+  | Null, No_null -> -1
+  | No_null, Null -> 1
 
 let compare_ref_type t1 t2 =
   match (t1, t2) with
@@ -694,6 +696,7 @@ module Elem = struct
     ; typ : ref_type
     ; init : expr Annotated.t list
     ; mode : Mode.t
+    ; explicit_typ : bool
     }
 
   let pp_items fmt e = pf fmt "(item %a)" (pp_expr ~short:false) e
