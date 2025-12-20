@@ -133,7 +133,7 @@ let of_grouped
   in
   let* table_names =
     name "table"
-      ~get_name:(get_origin_name (fun ((id, _) : Text.Table.t) -> id))
+      ~get_name:(get_origin_name (fun ({ id; _ } : Text.Table.t) -> id))
       table
   in
   let* mem_names =

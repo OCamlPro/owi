@@ -150,7 +150,11 @@ let m =
                    )
              }
          ; Mem (Some "memory", { min = 1; max = Some 2 })
-         ; Table (Some "table", ({ min = 10; max = Some 20 }, (Null, Func_ht)))
+         ; Table
+             { id = Some "table"
+             ; typ = ({ min = 10; max = Some 20 }, (Null, Func_ht))
+             ; init = None
+             }
          ; Global
              { typ = (Const, Num_type I32)
              ; init = [ Text.I32_const 666l ] |> Annotated.dummy_deep

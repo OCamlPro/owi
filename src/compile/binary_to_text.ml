@@ -214,7 +214,9 @@ let from_global (global : (Binary.Global.t, Text.Global.Type.t) Origin.t array)
 let from_table table : Text.Module.Field.t list =
   Array.map
     (function
-      | Origin.Local (name, t) -> Text.Module.Field.Table (name, t)
+      | Origin.Local Binary.Table.{ id; typ; init } ->
+        let init = Option.map convert_expr init in
+        Text.Module.Field.Table { id; typ; init }
       | Imported { modul_name; name; assigned_name; typ } ->
         let typ = Text.Import.Type.Table (assigned_name, typ) in
         Import { modul_name; name; typ } )

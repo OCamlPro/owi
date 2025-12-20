@@ -269,6 +269,14 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
   in
   expr iexpr (0, [])
 
+let rewrite_table (assigned : Assigned.t) ({ id; typ; init } : Text.Table.t) :
+  Binary.Table.t Result.t =
+  match init with
+  | None -> Ok { Binary.Table.id; typ; init = None }
+  | Some e ->
+    let+ e = rewrite_expr assigned [] e in
+    { Binary.Table.id; typ; init = Some e }
+
 let rewrite_global (assigned : Assigned.t) (global : Text.Global.t) :
   Binary.Global.t Result.t =
   let+ init = rewrite_expr assigned [] global.init in
@@ -347,6 +355,12 @@ let modul (modul : Grouped.t) (assigned : Assigned.t) : Binary.Module.t Result.t
          ~f_imported:Result.ok )
       modul.global
   in
+  let* table =
+    array_map
+      (Origin.monadic_map ~f_local:(rewrite_table assigned)
+         ~f_imported:Result.ok )
+      modul.table
+  in
   let* elem = array_map (rewrite_elem assigned) modul.elem in
   let* data = array_map (rewrite_data assigned) modul.data in
   let* exports = rewrite_exports modul assigned in
@@ -367,7 +381,7 @@ let modul (modul : Grouped.t) (assigned : Assigned.t) : Binary.Module.t Result.t
 
   { Binary.Module.id = modul.id
   ; mem = modul.mem
-  ; table = modul.table
+  ; table
   ; types
   ; global
   ; elem

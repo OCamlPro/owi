@@ -883,7 +883,7 @@ let table ==
 | TABLE; id = option(id); ~ = table_fields; {
   let tbl_id = Option.map (fun id -> Text id) id in
   List.rev_map (function
-    | Module.Field.Table (_id, tbl) -> Module.Field.Table (id, tbl)
+    | Module.Field.Table { id = _; typ; init } -> Module.Field.Table { id; typ; init }
     | Export e -> Export { e with typ = Table tbl_id }
     | Elem e ->
       let mode = Elem.Mode.Active (tbl_id, Annotated.dummy_deep [ I32_const 0l ]) in
@@ -905,12 +905,11 @@ let init ==
 
 let table_fields :=
   | ~ = table_type; {
-    [ Module.Field.Table (None, table_type) ]
+    [ Module.Field.Table { id = None; typ = table_type; init = None } ]
   }
-  | ~ = table_type; LPAR; REF_FUNC; id = elem_var; RPAR; {
-    let mode = Elem.Mode.Active (None, Annotated.dummy []) in
-    [ Module.Field.Elem { id = None; typ = (No_null, Func_ht); init = [Annotated.dummy id]; mode; explicit_typ = true }
-    ; Table (None, table_type) ]
+  | ~ = table_type; init = expr; {
+    [ Table { id = None; typ = table_type;
+      init = Some (Annotated.dummy (List.map Annotated.dummy init)) } ]
   }
   | (modul_name, name) = inline_import; ~ = table_type; {
     [ Import { modul_name; name; typ = Table (None, table_type) }]
@@ -925,7 +924,7 @@ let table_fields :=
     in
     let mode = Elem.Mode.Active (None, Annotated.dummy []) in
     [ Module.Field.Elem { id = None; typ = ref_type; init; mode; explicit_typ = true }
-    ; Table (None, ({ min; max = Some min }, ref_type)) ]
+    ; Table  { id = None; typ = ({ min; max = Some min }, ref_type); init = None } ]
   }
 
 let data ==
@@ -1111,6 +1110,8 @@ let const ==
 let result ==
   | ~ = const; <Result_const>
   | REF_EXTERN; { Result_extern_ref }
+  | REF_FUNC; { Result_func_ref }
+  | REF_NULL; { Result_const (Literal (Const_null Func_ht)) }
 
 let assert_ ==
   | ASSERT_RETURN; ~ = par(action); ~ = list(par(result)); <Assert_return>

@@ -23,13 +23,16 @@ let empty_env () =
 
 let modul m =
   Log.info (fun m -> m "checking     ...");
-  let add_global =
+  let add_global, global_exists =
     let seen = Hashtbl.create 512 in
-    function
-    | None -> Ok ()
-    | Some id ->
-      if Hashtbl.mem seen id then Error (`Duplicate_global id)
-      else Ok (Hashtbl.replace seen id ())
+    let add_global = function
+      | None -> Ok ()
+      | Some id ->
+        if Hashtbl.mem seen id then Error (`Duplicate_global id)
+        else Ok (Hashtbl.replace seen id ())
+    in
+    let global_exists id = Hashtbl.mem seen id in
+    (add_global, global_exists)
   in
   let add_table, get_table =
     let cnt = ref 0 in
@@ -73,6 +76,39 @@ let modul m =
     in
     (add_table, get_table)
   in
+  let elem_check_type env (elemnull, elemty) mode explicit_typ =
+    match mode with
+    | Text.Elem.Mode.(Passive | Declarative) -> Ok env
+    | Text.Elem.Mode.Active (id, _) ->
+      let* _, (tabnull, tabty) = get_table id in
+      (* Only if elem_ty is explicit, otherwise it can be inferred *)
+      if
+        (not explicit_typ)
+        || Text.heap_type_eq elemty tabty
+           && Text.compare_nullable elemnull tabnull >= 0
+      then Ok env
+      else
+        Error
+          (`Type_mismatch
+             (Fmt.str "Declared elem of type %a for table of type %a"
+                Text.pp_ref_type (elemnull, elemty) Text.pp_ref_type
+                (tabnull, tabty) ) )
+  in
+  let rec check_expr = function
+    | [] -> Ok ()
+    | { Annotated.raw = Global_get (Text id); _ } :: _
+      when not (global_exists id) ->
+      Error (`Unknown_global (Text id))
+    | { Annotated.raw = Global_get (Text _id); _ } :: _ -> Ok ()
+    | { raw = _; _ } :: t -> check_expr t
+    (* TODO: complete for other operations *)
+  in
+  let rec elem_check_init = function
+    | [] -> Ok ()
+    | { Annotated.raw = l; _ } :: t ->
+      let* () = check_expr l in
+      elem_check_init t
+  in
   let add_memory =
     let seen = Hashtbl.create 512 in
     function
@@ -81,6 +117,10 @@ let modul m =
       if Hashtbl.mem seen id then Error (`Duplicate_memory id)
       else Ok (Hashtbl.add seen id ())
   in
+  (* let m = Text.Module.{ m with fields = List.sort Field.compare m.fields } in *)
+  (* in some tests, modules are exptected to be evaluated in an order different
+    from the one in which they were written. e.g. the last "unknown global" in
+    "test/references/global.wast". *)
   let+ (_env : env) =
     let open Module in
     list_fold_left
@@ -111,24 +151,10 @@ let modul m =
               env
           end
         | Data _d -> Ok env
-        | Elem { typ = elemnull, elemty; mode; explicit_typ; _ } -> begin
-          match mode with
-          | Text.Elem.Mode.(Passive | Declarative) -> Ok env
-          | Text.Elem.Mode.Active (id, _) ->
-            let* _, (tabnull, tabty) = get_table id in
-            (* Only of elem_ty is explicit, otherwise it can be inferred *)
-            if
-              (not explicit_typ)
-              || Text.heap_type_eq elemty tabty
-                 && Text.compare_nullable elemnull tabnull >= 0
-            then Ok env
-            else
-              Error
-                (`Type_mismatch
-                   (Fmt.str "Declared elem of type %a for table of type %a"
-                      Text.pp_ref_type (elemnull, elemty) Text.pp_ref_type
-                      (tabnull, tabty) ) )
-        end
+        | Elem { typ; mode; explicit_typ; init; _ } ->
+          let* env = elem_check_type env typ mode explicit_typ in
+          let* () = elem_check_init init in
+          Ok env
         | Mem (id, _) ->
           let* () = add_memory id in
           Ok { env with declared_memory = true }
@@ -136,9 +162,12 @@ let modul m =
         | Global { id; _ } ->
           let+ () = add_global id in
           { env with globals = true }
-        | Table (id, ty) ->
-          let+ () = add_table id ty in
-          { env with tables = true } )
+        | Table { id; typ; init } ->
+          let* () = add_table id typ in
+          let* () =
+            match init with None -> Ok () | Some e -> check_expr e.raw
+          in
+          Ok { env with tables = true } )
       (empty_env ()) m.fields
   in
 

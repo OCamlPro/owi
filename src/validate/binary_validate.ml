@@ -92,7 +92,7 @@ module Env = struct
     if i >= Array.length modul.table then Error (`Unknown_table (Text.Raw i))
     else
       match modul.table.(i) with
-      | Origin.Local (_, (_, t)) | Imported { typ = _, t; _ } -> Ok t
+      | Origin.Local { typ = _, t; _ } | Imported { typ = _, t; _ } -> Ok t
 
   let elem_type_get i modul =
     if i >= Array.length modul.elem then Error (`Unknown_elem (Text.Raw i))
@@ -734,7 +734,8 @@ let check_limit { Text.min; max } =
 let validate_tables modul =
   array_iter
     (function
-      | Origin.Local (_, (limits, _)) | Imported { typ = limits, _; _ } ->
+      | Origin.Local Table.{ typ = limits, _; _ }
+      | Imported { typ = limits, _; _ } ->
         check_limit limits )
     modul.table
 
