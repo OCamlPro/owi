@@ -156,3 +156,5 @@ let extend_s n x =
   cvtop ty (Sign_extend (32 - n)) (extract x ~high:(n / 8) ~low:0)
 
 let pp = pp
+
+let symbol s = Smtml.Expr.symbol s

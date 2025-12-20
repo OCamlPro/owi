@@ -3,15 +3,15 @@ open Owi
 (* an extern module that will be linked with a wasm module *)
 let extern_module : Concrete_extern_func.extern_func Extern.Module.t =
   (* some custom functions *)
-  let rint : int32 ref Type.Id.t = Type.Id.make () in
+  let rint : Concrete_i32.t ref Type.Id.t = Type.Id.make () in
   let fresh i = Ok (ref i) in
-  let set r (i : int32) =
+  let set r (i : Concrete_i32.t) =
     r := i;
     Ok ()
   in
   let get r = Ok !r in
-  let print_i32 (i : int32) =
-    Printf.printf "%li\n%!" i;
+  let print_i32 (i : Concrete_i32.t) =
+    Format.printf "%a\n%!" Concrete_i32.pp i;
     Ok ()
   in
   (* we need to describe their types *)

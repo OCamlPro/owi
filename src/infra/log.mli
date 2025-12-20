@@ -1,6 +1,8 @@
 include Logs.LOG
 
-val main_src : Logs.src
+val bench_src : Logs.Src.t
+
+val main_src : Logs.Src.t
 
 val is_debug_enabled : unit -> bool
 

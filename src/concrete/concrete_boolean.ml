@@ -1,5 +1,7 @@
 type t = bool
 
+let to_bool b = b
+
 let false_ = false
 
 let true_ = true

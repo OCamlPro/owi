@@ -89,3 +89,7 @@ let of_concrete v = v
 let eq_concrete (v1 : t) (v2 : Int64.t) = eq v1 v2
 
 let pp = Fmt.int64
+
+let of_int64 (v : int64) : t = v
+
+let to_int64 (v : t) : int64 = v

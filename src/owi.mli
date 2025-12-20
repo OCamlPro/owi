@@ -105,14 +105,84 @@ module Annotated : sig
   val raw : 'a t -> 'a
 end
 
+module Concrete_boolean : sig
+  type t
+
+  val to_bool : t -> bool
+
+  val pp : t Fmt.t
+end
+
+module Concrete_i32 : sig
+  type t
+
+  val zero : t
+
+  val of_int : Int.t -> t
+
+  val of_int32 : Int32.t -> t
+
+  val add : t -> t -> t
+
+  val sub : t -> t -> t
+
+  val lt : t -> t -> Concrete_boolean.t
+
+  val gt : t -> t -> Concrete_boolean.t
+
+  val le : t -> t -> Concrete_boolean.t
+
+  val ge : t -> t -> Concrete_boolean.t
+
+  val pp : t Fmt.t
+end
+
+module Concrete_i64 : sig
+  type t
+
+  val of_int64 : Int64.t -> t
+
+  val to_int64 : t -> Int64.t
+
+  val add : t -> t -> t
+
+  val lt : t -> t -> Concrete_boolean.t
+
+  val pp : t Fmt.t
+end
+
+module Concrete_f32 : sig
+  type t
+
+  val of_float : float -> t
+
+  val pp : t Fmt.t
+end
+
+module Concrete_f64 : sig
+  type t
+
+  val of_float : float -> t
+
+  val pp : t Fmt.t
+end
+
+module Concrete_v128 : sig
+  type t
+
+  val of_i64x2 : int64 -> int64 -> t
+
+  val pp : t Fmt.t
+end
+
 module Text : sig
   type indice =
     | Text of string
     | Raw of int
 
-  val pp_indice : Format.formatter -> indice -> unit
+  val pp_indice : indice Fmt.t
 
-  val pp_indice_opt : Format.formatter -> indice option -> unit
+  val pp_indice_opt : indice option Fmt.t
 
   type nonrec num_type =
     | I32
@@ -137,7 +207,7 @@ module Text : sig
     | S32
     | S64
 
-  val pp_nn : Format.formatter -> nn -> unit
+  val pp_nn : nn Fmt.t
 
   type nonrec ishape =
     | I8x16
@@ -214,8 +284,8 @@ module Text : sig
     | Ge
 
   type nonrec memarg =
-    { offset : Int32.t
-    ; align : Int32.t
+    { offset : Concrete_i32.t
+    ; align : Concrete_i32.t
     }
 
   type nonrec limits =
@@ -223,7 +293,7 @@ module Text : sig
     ; max : int option
     }
 
-  val pp_limits : Format.formatter -> limits -> unit
+  val pp_limits : limits Fmt.t
 
   (** Structure *)
 
@@ -233,7 +303,7 @@ module Text : sig
     | Func_ht
     | Extern_ht
 
-  val pp_heap_type : Format.formatter -> heap_type -> unit
+  val pp_heap_type : heap_type Fmt.t
 
   val heap_type_eq : heap_type -> heap_type -> bool
 
@@ -253,7 +323,7 @@ module Text : sig
 
   type nonrec func_type = param_type * result_type
 
-  val pp_func_type : Format.formatter -> func_type -> unit
+  val pp_func_type : func_type Fmt.t
 
   val compare_func_type : func_type -> func_type -> int
 
@@ -263,16 +333,16 @@ module Text : sig
     | Bt_ind of indice
     | Bt_raw of (indice option * func_type)
 
-  val pp_block_type : Format.formatter -> block_type -> unit
+  val pp_block_type : block_type Fmt.t
 
   (** Instructions *)
 
   type instr =
     (* Numeric Instructions *)
-    | I32_const of Int32.t
-    | I64_const of Int64.t
-    | F32_const of Float32.t
-    | F64_const of Float64.t
+    | I32_const of Concrete_i32.t
+    | I64_const of Concrete_i64.t
+    | F32_const of Concrete_f32.t
+    | F64_const of Concrete_f64.t
     | V128_const of Concrete_v128.t
     | I_unop of nn * iunop
     | F_unop of nn * funop
@@ -364,32 +434,32 @@ module Text : sig
       ; id : string option
       }
 
-    val pp : Format.formatter -> t -> unit
+    val pp : t Fmt.t
   end
 
   module Typedef : sig
     type t = string option * func_type
 
-    val pp : Format.formatter -> t -> unit
+    val pp : t Fmt.t
   end
 
   module Table : sig
     module Type : sig
       type nonrec t = limits * ref_type
 
-      val pp : Format.formatter -> t -> unit
+      val pp : t Fmt.t
     end
 
     type t = string option * Type.t
 
-    val pp : Format.formatter -> t -> unit
+    val pp : t Fmt.t
   end
 
   module Global : sig
     module Type : sig
       type nonrec t = mut * val_type
 
-      val pp : Format.formatter -> t -> unit
+      val pp : t Fmt.t
     end
 
     type t =
@@ -398,7 +468,7 @@ module Text : sig
       ; id : string option
       }
 
-    val pp : Format.formatter -> t -> unit
+    val pp : t Fmt.t
   end
 
   module Data : sig
@@ -414,7 +484,7 @@ module Text : sig
       ; mode : Mode.t
       }
 
-    val pp : Format.formatter -> t -> unit
+    val pp : t Fmt.t
   end
 
   module Elem : sig
@@ -432,7 +502,7 @@ module Text : sig
       ; mode : Mode.t
       }
 
-    val pp : Format.formatter -> t -> unit
+    val pp : t Fmt.t
   end
 
   module Import : sig
@@ -470,7 +540,7 @@ module Text : sig
   module Mem : sig
     type nonrec t = string option * limits
 
-    val pp : Format.formatter -> t -> unit
+    val pp : t Fmt.t
   end
 
   module Module : sig
@@ -487,7 +557,7 @@ module Text : sig
         | Import of Import.t
         | Export of Export.t
 
-      val pp : Format.formatter -> t -> unit
+      val pp : t Fmt.t
     end
 
     type t =
@@ -495,7 +565,7 @@ module Text : sig
       ; fields : Field.t list
       }
 
-    val pp : Format.formatter -> t -> unit
+    val pp : t Fmt.t
   end
 end
 
@@ -510,10 +580,10 @@ module Binary : sig
 
   type instr =
     (* Numeric Instructions *)
-    | I32_const of Int32.t
-    | I64_const of Int64.t
-    | F32_const of Float32.t
-    | F64_const of Float64.t
+    | I32_const of Concrete_i32.t
+    | I64_const of Concrete_i64.t
+    | F32_const of Concrete_f32.t
+    | F64_const of Concrete_f64.t
     | V128_const of Concrete_v128.t
     | I_unop of Text.nn * Text.iunop
     | F_unop of Text.nn * Text.funop
@@ -597,7 +667,7 @@ module Binary : sig
 
   and expr = instr Annotated.t list
 
-  val pp_instr : short:bool -> Format.formatter -> instr -> unit
+  val pp_instr : short:bool -> instr Fmt.t
 
   val iter_expr : (instr -> unit) -> expr Annotated.t -> unit
 
@@ -688,6 +758,25 @@ module Binary : sig
   end
 end
 
+module Kind : sig
+  type func = private
+    | Wasm of
+        { func : Binary.Func.t
+        ; idx : int
+        }
+    | Extern of { idx : int }
+
+  val wasm : Binary.Func.t -> int -> func
+
+  val extern : int -> func
+
+  type 'f t =
+    | Wat of Text.Module.t
+    | Wast of Wast.script
+    | Wasm of Binary.Module.t
+    | Extern of 'f Extern.Module.t
+end
+
 module Binary_to_text : sig
   (* TODO: move this to Compile.Binary.to_text *)
   val modul : Binary.Module.t -> Text.Module.t
@@ -696,7 +785,7 @@ end
 module Concrete_memory : sig
   type t
 
-  val store_8 : t -> addr:int32 -> int32 -> unit Result.t
+  val store_8 : t -> addr:Concrete_i32.t -> Concrete_i32.t -> unit Result.t
 end
 
 module Concrete_extern_func : sig
@@ -740,9 +829,9 @@ module Concrete_extern_func : sig
          * (lr, elt, 'b4) t
       -> ('a -> ('b1 * 'b2 * 'b3 * 'b4) Result.t) func_type
 
-    val i32 : (lr, elt, Int32.t) t
+    val i32 : (lr, elt, Concrete_i32.t) t
 
-    val i64 : (lr, elt, Int64.t) t
+    val i64 : (lr, elt, Concrete_i64.t) t
 
     val unit : (lr, unit, unit) t
 
@@ -752,30 +841,20 @@ module Concrete_extern_func : sig
   end
 end
 
-module Concrete_v128 : sig
-  val of_i64x2 : int64 -> int64 -> Concrete_v128.t
-end
-
-module Concrete_i32 : sig
-  val add : Int32.t -> Int32.t -> Int32.t
-
-  val lt : Int32.t -> Int32.t -> bool
-end
-
-module Concrete_f32 : sig
-  val of_float : float -> Float32.t
-end
-
-module Concrete_f64 : sig
-  val of_float : float -> Float64.t
-end
-
 module Parse : sig
   module Text : sig
     module Module : sig
       val from_file : Fpath.t -> Text.Module.t Result.t
 
       val from_string : string -> Text.Module.t Result.t
+    end
+  end
+
+  module Binary : sig
+    module Module : sig
+      val from_file : Fpath.t -> Binary.Module.t Result.t
+
+      val from_string : string -> Binary.Module.t Result.t
     end
   end
 end
@@ -789,7 +868,7 @@ module Label : sig
 
     val of_string : string -> (t, [ `Msg of string ]) Prelude.Result.t
 
-    val pp : Format.formatter -> t -> unit
+    val pp : t Fmt.t
   end
 end
 
@@ -839,10 +918,144 @@ module Compile : sig
       -> Text.Module.t
       -> ('f Linked.Module.t * 'f Link.State.t) Result.t
   end
+
+  module Binary : sig
+    val until_link :
+         unsafe:bool
+      -> name:string option
+      -> 'f Link.State.t
+      -> Binary.Module.t
+      -> ('f Linked.Module.t * 'f Link.State.t) Result.t
+  end
 end
 
 module Binary_validate : sig
   val modul : Binary.Module.t -> unit Result.t
+end
+
+module Text_validate : sig
+  val modul : Text.Module.t -> Text.Module.t Result.t
+end
+
+module Symbolic_boolean : sig
+  type t
+
+  val pp : t Fmt.t
+end
+
+module Symbolic_i32 : sig
+  type t
+
+  val add : t -> t -> t
+
+  val lt : t -> t -> Symbolic_boolean.t
+
+  val pp : t Fmt.t
+
+  val symbol : Smtml.Symbol.t -> t
+end
+
+module Symbolic_i64 : sig
+  type t
+
+  val add : t -> t -> t
+
+  val lt : t -> t -> Symbolic_boolean.t
+
+  val pp : t Fmt.t
+end
+
+module Symbolic_v128 : sig
+  type t
+
+  val of_i64x2 : Symbolic_i64.t -> Symbolic_i64.t -> t
+
+  val pp : t Fmt.t
+end
+
+module Symbolic_f32 : sig
+  type t
+
+  val pp : t Fmt.t
+end
+
+module Symbolic_f64 : sig
+  type t
+
+  val of_float : float -> t
+
+  val pp : t Fmt.t
+end
+
+module Symbolic_choice : sig
+  type 'a t
+
+  val with_new_symbol : Smtml.Ty.t -> (Smtml.Symbol.t -> 'a) -> 'a t
+
+  val return : 'a -> 'a t
+
+  val stop : 'a t
+
+  val bind : 'a t -> ('a -> 'b t) -> 'b t
+
+  val map : 'a t -> ('a -> 'b) -> 'b t
+
+  val trap : Result.err -> 'a t
+end
+
+module Symbolic_extern_func : sig
+  type _ func_type
+
+  type extern_func = Extern_func : 'a func_type * 'a -> extern_func
+
+  val extern_type : extern_func -> Text.func_type
+
+  module Syntax : sig
+    type l
+
+    type lr
+
+    type elt
+
+    type mem
+
+    type (_, _, _) t
+
+    val ( ^-> ) : ('r, 'k, 'a) t -> 'b func_type -> ('a -> 'b) func_type
+
+    val ( ^->. ) :
+         ('r, 'k, 'a) t
+      -> (lr, 'kk, 'b) t
+      -> ('a -> 'b Symbolic_choice.t) func_type
+
+    val ( ^->.. ) :
+         ('ll, 'k, 'a) t
+      -> (lr, elt, 'b1) t * (lr, elt, 'b2) t
+      -> ('a -> ('b1 * 'b2) Symbolic_choice.t) func_type
+
+    val ( ^->... ) :
+         ('ll, 'k, 'a) t
+      -> (lr, elt, 'b1) t * (lr, elt, 'b2) t * (lr, elt, 'b3) t
+      -> ('a -> ('b1 * 'b2 * 'b3) Symbolic_choice.t) func_type
+
+    val ( ^->.... ) :
+         ('ll, 'k, 'a) t
+      -> (lr, elt, 'b1) t
+         * (lr, elt, 'b2) t
+         * (lr, elt, 'b3) t
+         * (lr, elt, 'b4) t
+      -> ('a -> ('b1 * 'b2 * 'b3 * 'b4) Symbolic_choice.t) func_type
+
+    val i32 : (lr, elt, Symbolic_i32.t) t
+
+    val i64 : (lr, elt, Symbolic_i64.t) t
+
+    val unit : (lr, unit, unit) t
+
+    val memory : int -> (l, mem, Symbolic_memory.t) t
+
+    val externref : 'a Type.Id.t -> (lr, elt, 'a) t
+  end
 end
 
 module Interpret : sig
@@ -863,6 +1076,13 @@ module Interpret : sig
          Concrete_extern_func.extern_func Link.State.t
       -> Concrete_extern_func.extern_func Linked.Module.t
       -> unit Result.t
+  end
+
+  module Symbolic (_ : Parameters) : sig
+    val modul :
+         Symbolic_extern_func.extern_func Link.State.t
+      -> Symbolic_extern_func.extern_func Linked.Module.t
+      -> unit Symbolic_choice.t
   end
 end
 
@@ -904,6 +1124,25 @@ module Symbolic_parameters : sig
     ; with_breadcrumbs : bool
     ; use_ite_for_select : bool
     }
+end
+
+module Symbolic_driver : sig
+  val handle_result :
+       exploration_strategy:Symbolic_parameters.Exploration_strategy.t
+    -> workers:int
+    -> no_stop_at_failure:bool
+    -> no_value:bool
+    -> no_assert_failure_expression_printing:bool
+    -> deterministic_result_order:bool
+    -> fail_mode:Symbolic_parameters.fail_mode
+    -> workspace:Fpath.t
+    -> solver:Smtml.Solver_type.t
+    -> model_format:Model.output_format
+    -> model_out_file:Fpath.t option
+    -> with_breadcrumbs:bool
+    -> run_time:float option
+    -> unit Symbolic_choice.t
+    -> unit Result.t
 end
 
 module Cmd_sym : sig
@@ -1061,6 +1300,10 @@ module Cmd_zig : sig
 end
 
 module Log : sig
+  val main_src : Logs.Src.t
+
+  val bench_src : Logs.Src.t
+
   val err : 'a Logs.log
 
   val setup :
