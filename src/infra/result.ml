@@ -107,7 +107,7 @@ let rec err_to_string = function
   | `Found_bug n ->
     if n > 1 then Fmt.str "Reached %d problems!" n
     else Fmt.str "Reached problem!"
-  | `Global_is_immutable -> "global is immutable"
+  | `Global_is_immutable -> "immutable global"
   | `Illegal_escape txt -> Fmt.str "illegal escape %S" txt
   | `Import_after_function -> "import after function"
   | `Import_after_global -> "import after global"
