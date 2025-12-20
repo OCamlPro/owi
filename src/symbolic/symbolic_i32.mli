@@ -5,3 +5,5 @@ include
      and type i64 := Smtml.Expr.t
      and type f32 := Smtml.Expr.t
      and type f64 := Smtml.Expr.t
+
+val symbol : Smtml.Symbol.t -> t

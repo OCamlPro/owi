@@ -65,3 +65,5 @@ let of_bits x = cvtop ty Reinterpret_int x
 let to_bits x = cvtop (Ty_bitv 64) Reinterpret_float x
 
 let pp = pp
+
+let of_float (f : Float.t) : t = Concrete_f64.of_float f |> of_concrete

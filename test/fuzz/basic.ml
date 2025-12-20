@@ -94,10 +94,12 @@ let irelop =
 
 let const_i32 =
   let+ int32 in
+  let int32 = Owi.Concrete_i32.of_int32 int32 in
   I32_const int32
 
 let const_i64 =
   let+ int64 in
+  let int64 = Owi.Concrete_i64.of_int64 int64 in
   I64_const int64
 
 let const_v128 =
@@ -428,10 +430,15 @@ let memarg nsize =
     | NS32 -> range 2
     | NS64 -> range 3
   in
+  let offset = Owi.Concrete_i32.of_int32 offset in
   let offset =
-    if Owi.Concrete_i32.lt offset 0l then Int32.sub 0l offset else offset
+    if
+      Owi.Concrete_i32.lt offset Owi.Concrete_i32.zero
+      |> Owi.Concrete_boolean.to_bool
+    then Owi.Concrete_i32.sub Owi.Concrete_i32.zero offset
+    else offset
   in
-  let align = Int32.of_int align in
+  let align = Owi.Concrete_i32.of_int align in
   { offset; align }
 
 let i32_load env : instr gen =
