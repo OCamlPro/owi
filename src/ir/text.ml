@@ -625,9 +625,19 @@ module Table = struct
       pf fmt "%a %a" pp_limits limits pp_ref_type ref_type
   end
 
-  type t = string option * Type.t
+  type t =
+    { id : string option
+    ; typ : Type.t
+    ; init : expr Annotated.t option
+    }
 
-  let pp fmt (id, ty) = pf fmt "(table%a %a)" pp_id_opt id Type.pp ty
+  let pp fmt { id; typ; init } =
+    pf fmt "(table%a %a%a)" pp_id_opt id Type.pp typ
+      (fun fmt e ->
+        match e with
+        | None -> ()
+        | Some e -> Fmt.pf fmt " %a" (pp_expr ~short:true) e )
+      init
 end
 
 module Global = struct
@@ -791,6 +801,21 @@ module Module = struct
       | Start s -> pp_start fmt s
       | Import i -> Import.pp fmt i
       | Export e -> Export.pp fmt e
+
+    let compare m1 m2 =
+      let rank = function
+        | Typedef _ -> 1
+        | Import _ -> 2
+        | Func _ -> 3
+        | Table _ -> 4
+        | Mem _ -> 5
+        | Global _ -> 6
+        | Export _ -> 7
+        | Start _ -> 8
+        | Elem _ -> 9
+        | Data _ -> 10
+      in
+      Int.compare (rank m1) (rank m2)
   end
 
   type t =

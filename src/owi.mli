@@ -450,7 +450,11 @@ module Text : sig
       val pp : t Fmt.t
     end
 
-    type t = string option * Type.t
+    type t =
+      { id : string option
+      ; typ : Type.t
+      ; init : expr Annotated.t option
+      }
 
     val pp : t Fmt.t
   end
@@ -689,6 +693,14 @@ module Binary : sig
       }
   end
 
+  module Table : sig
+    type t =
+      { id : string option
+      ; typ : Text.Table.Type.t
+      ; init : expr Annotated.t option
+      }
+  end
+
   module Global : sig
     type t =
       { typ : Text.Global.Type.t
@@ -747,7 +759,7 @@ module Binary : sig
       { id : string option
       ; types : Text.Typedef.t array
       ; global : (Global.t, Text.Global.Type.t) Origin.t array
-      ; table : (Text.Table.t, Text.Table.Type.t) Origin.t array
+      ; table : (Table.t, Text.Table.Type.t) Origin.t array
       ; mem : (Text.Mem.t, Text.limits) Origin.t array
       ; func :
           (Func.t, block_type) Origin.t array (* TODO: switch to func_type *)

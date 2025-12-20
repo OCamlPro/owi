@@ -740,7 +740,7 @@ let read_const types input =
 
 type import =
   | Func of int
-  | Table of Text.limits * Text.ref_type
+  | Table of Text.limits * Text.ref_type * Text.expr option
   | Mem of Text.limits
   | Global of Text.mut * Text.val_type
 
@@ -835,7 +835,7 @@ let read_import input =
   | '\x01' ->
     let* ref_type, input = read_reftype input in
     let+ limits, input = read_limits input in
-    ((modul, name, Table (limits, ref_type)), input)
+    ((modul, name, Table (limits, ref_type, None)), input)
   | '\x02' ->
     let+ limits, input = read_limits input in
     ((modul, name, Mem limits), Input.incr_nbmems input)
@@ -1249,15 +1249,14 @@ let sections_iterate (input : Input.t) =
   let table =
     let local =
       List.map
-        (fun (v1, v2, _v3) ->
-          (* TODO: find a way to init tables with _v3 here *)
-          Origin.Local (None, (v1, v2)) )
+        (fun (limits, ref_type, init) ->
+          Origin.Local Table.{ id = None; typ = (limits, ref_type); init } )
         table_section
     in
     let imported =
       List.filter_map
         (function
-          | modul_name, name, Table (limits, ref_type) ->
+          | modul_name, name, Table (limits, ref_type, _) ->
             let typ = (limits, ref_type) in
             Option.some
             @@ Origin.imported ~modul_name ~name ~assigned_name:None ~typ

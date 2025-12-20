@@ -141,10 +141,7 @@ let add_field typ function_type type_checks global table mem func elem data
   | Export { name; typ = Global id } ->
     let id = curr_id (Dynarray.length global) id in
     Dynarray.add_last global_exports { name; id }
-  | Table tbl ->
-    let id, table_type = tbl in
-    let tbl = (id, table_type) in
-    Dynarray.add_last table (Origin.Local tbl)
+  | Table tbl -> Dynarray.add_last table (Origin.Local tbl)
   | Import { typ = Table (assigned_name, typ); modul_name; name } ->
     let imported = Origin.imported ~modul_name ~name ~assigned_name ~typ in
     Dynarray.add_last table imported

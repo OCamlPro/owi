@@ -199,9 +199,10 @@ let load_table (ls : 'f State.t) (import : Text.Table.Type.t Origin.imported) :
   if table_types_are_compatible typ (t.limits, t.typ) then Ok t
   else Error (`Incompatible_import_type import.name)
 
-let eval_table ls (table : (_, Text.Table.Type.t) Origin.t) : table Result.t =
+let eval_table ls (table : (Binary.Table.t, Text.Table.Type.t) Origin.t) :
+  table Result.t =
   match table with
-  | Local (label, table_type) -> ok @@ Concrete_table.init ?label table_type
+  | Local { id = label; typ; _ } -> ok @@ Concrete_table.init ?label typ
   | Imported import -> load_table ls import
 
 let eval_tables ls env tables =

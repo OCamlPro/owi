@@ -344,6 +344,14 @@ module Export = struct
     }
 end
 
+module Table = struct
+  type t =
+    { id : string option
+    ; typ : Text.Table.Type.t
+    ; init : expr Annotated.t option
+    }
+end
+
 module Global = struct
   type t =
     { typ : Text.Global.Type.t (* TODO: init : binary+const expr*)
@@ -403,7 +411,7 @@ module Module = struct
     { id : string option
     ; types : Text.Typedef.t array
     ; global : (Global.t, Text.Global.Type.t) Origin.t array
-    ; table : (Text.Table.t, Text.Table.Type.t) Origin.t array
+    ; table : (Table.t, Text.Table.Type.t) Origin.t array
     ; mem : (Text.Mem.t, Text.limits) Origin.t array
     ; func : (Func.t, block_type) Origin.t array (* TODO: switch to func_type *)
     ; elem : Elem.t array

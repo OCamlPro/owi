@@ -294,7 +294,7 @@ let elem env : Module.Field.t gen =
 let table env : Module.Field.t gen =
   let+ typ = B.table_type in
   let id = Some (Env.add_table env typ) in
-  Module.Field.Table (id, typ)
+  Module.Field.Table { id; typ; init = None }
 
 let global env : Module.Field.t gen =
   let* ((_mut, t) as typ) = B.global_type in

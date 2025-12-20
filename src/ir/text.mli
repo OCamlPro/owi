@@ -318,7 +318,11 @@ module Table : sig
     val pp : t Fmt.t
   end
 
-  type t = string option * Type.t
+  type t =
+    { id : string option
+    ; typ : Type.t
+    ; init : expr Annotated.t option
+    }
 
   val pp : t Fmt.t
 end

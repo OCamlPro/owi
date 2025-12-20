@@ -158,10 +158,6 @@ let write_memory_import buf
   Buffer.add_char buf '\x02';
   write_limits buf limits
 
-let write_table buf ((_so, (limits, (_nullable, heaptype))) : Text.Table.t) =
-  write_reftype buf heaptype;
-  write_limits buf limits
-
 let write_table_import buf
   ({ modul_name; name; typ = limits, (_nullable, heaptype); _ } :
     Text.Table.Type.t Origin.imported ) =
@@ -512,6 +508,18 @@ and write_expr buf expr ~end_op_code =
   List.iter (write_instr buf) expr.Annotated.raw;
   let end_op_code = Option.value end_op_code ~default:'\x0B' in
   Buffer.add_char buf end_op_code
+
+let write_table buf { Table.typ = limits, (_nullable, heaptype); init; _ } =
+  match init with
+  | Some e ->
+    Buffer.add_char buf '\x40';
+    Buffer.add_char buf '\x00';
+    write_reftype buf heaptype;
+    write_limits buf limits;
+    write_expr buf e ~end_op_code:None
+  | None ->
+    write_reftype buf heaptype;
+    write_limits buf limits
 
 let write_export buf cid ({ name; id } : Binary.Export.t) =
   write_string buf name;
