@@ -5,17 +5,21 @@ let extern_module : Concrete_extern_func.extern_func Extern.Module.t =
   (* some custom functions *)
   let memset m start byte length =
     let rec loop offset =
-      if offset <= length then begin
-        match Concrete_memory.store_8 m ~addr:(Int32.add start offset) byte with
+      let b = Concrete_i32.le offset length |> Concrete_boolean.to_bool in
+      if b then begin
+        match
+          Concrete_memory.store_8 m ~addr:(Concrete_i32.add start offset) byte
+        with
         | Error _ as e -> e
-        | Ok () -> loop (Int32.add offset 1l)
+        | Ok () -> loop (Concrete_i32.add offset (Concrete_i32.of_int 1))
       end
       else Ok ()
     in
-    loop 0l
+    loop Concrete_i32.zero
   in
-  let print_x64 (i : int64) =
-    Printf.printf "0x%LX\n%!" i;
+  let print_x64 (n : Concrete_i64.t) =
+    let n = Concrete_i64.to_int64 n in
+    Format.printf "0x%LX@\n" n;
     Ok ()
   in
   (* we need to describe their types *)

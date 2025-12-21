@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>concrete_i32.ml &mdash; Coverage report</title>
-    <meta name="description" content="100.00% coverage in src/concrete/concrete_i32.ml">
+    <meta name="description" content="99.28% coverage in src/concrete/concrete_i32.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,9 +15,10 @@
           <span class="dirname">src/concrete/</span>concrete_i32.ml
         </a>
       </h1>
-      <h2>100.00%</h2>
+      <h2>99.28%</h2>
     </div>
     <div id="navbar">
+      <span class="unvisited" style="bottom:0.00%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -112,6 +113,8 @@
 <a id="L88"></a><span class="visited"> </span>
 <a id="L89"></a><span > </span>
 <a id="L90"></a><span > </span>
+<a id="L91"></a><span > </span>
+<a id="L92"></a><span class="unvisited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -206,6 +209,8 @@
 <a href="#L88">88</a>
 <a href="#L89">89</a>
 <a href="#L90">90</a>
+<a href="#L91">91</a>
+<a href="#L92">92</a>
 </pre>
 <pre><code class="ocaml">include Int32
 
@@ -297,6 +302,8 @@ let of_concrete (v : t) : t = <span data-count="4773581">v</span>
 let eq_concrete (v1 : t) (v2 : Int32.t) = <span data-count="712226">e</span>q v1 v2
 
 let pp = Fmt.int32
+
+let of_int32 (v : int32) : t = <span data-count="0">v</span>
 </code></pre>
       </div>
     </div>

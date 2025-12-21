@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>concrete_i64.ml &mdash; Coverage report</title>
-    <meta name="description" content="100.00% coverage in src/concrete/concrete_i64.ml">
+    <meta name="description" content="99.36% coverage in src/concrete/concrete_i64.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,9 +15,10 @@
           <span class="dirname">src/concrete/</span>concrete_i64.ml
         </a>
       </h1>
-      <h2>100.00%</h2>
+      <h2>99.36%</h2>
     </div>
     <div id="navbar">
+      <span class="unvisited" style="bottom:2.11%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -113,6 +114,10 @@
 <a id="L89"></a><span class="visited"> </span>
 <a id="L90"></a><span > </span>
 <a id="L91"></a><span > </span>
+<a id="L92"></a><span > </span>
+<a id="L93"></a><span class="unvisited"> </span>
+<a id="L94"></a><span > </span>
+<a id="L95"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -208,6 +213,10 @@
 <a href="#L89">89</a>
 <a href="#L90">90</a>
 <a href="#L91">91</a>
+<a href="#L92">92</a>
+<a href="#L93">93</a>
+<a href="#L94">94</a>
+<a href="#L95">95</a>
 </pre>
 <pre><code class="ocaml">include Int64
 
@@ -300,6 +309,10 @@ let of_concrete v = <span data-count="5164624">v</span>
 let eq_concrete (v1 : t) (v2 : Int64.t) = <span data-count="5002194">e</span>q v1 v2
 
 let pp = Fmt.int64
+
+let of_int64 (v : int64) : t = <span data-count="0">v</span>
+
+let to_int64 (v : t) : int64 = <span data-count="1">v</span>
 </code></pre>
       </div>
     </div>

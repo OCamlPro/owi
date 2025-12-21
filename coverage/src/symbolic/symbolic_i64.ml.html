@@ -281,7 +281,7 @@ open Smtml.Expr
 
 let ty = Smtml.Ty.Ty_bitv 64
 
-let of_concrete (i : Int64.t) : t = <span data-count="1343865">v</span>alue (Bitv (Smtml.Bitvector.of_int6<span data-count="1343846">4</span> i))
+let of_concrete (i : Int64.t) : t = <span data-count="1343829">v</span>alue (Bitv (Smtml.Bitvector.of_int6<span data-count="1343809">4</span> i))
 
 let of_int (i : int) : t = <span data-count="202">o</span>f_concrete (Int64.of_in<span data-count="202">t</span> i)
 
@@ -293,7 +293,7 @@ let ctz e = <span data-count="0">u</span>nop ty Ctz e
 
 let popcnt e = <span data-count="0">u</span>nop ty Popcnt e
 
-let add e1 e2 = <span data-count="2144630">b</span>inop ty Add e1 e2
+let add e1 e2 = <span data-count="2144444">b</span>inop ty Add e1 e2
 
 let sub e1 e2 = <span data-count="6">b</span>inop ty Sub e1 e2
 
@@ -335,7 +335,7 @@ let lt e1 e2 = <span data-count="4">r</span>elop ty Lt e1 e2 |&gt; <span data-co
 
 let gt e1 e2 = <span data-count="3">r</span>elop ty Gt e1 e2 |&gt; <span data-count="3">S</span>ymbolic_boolean.of_expr
 
-let lt_u e1 e2 = <span data-count="1071935">r</span>elop ty LtU e1 e2 |&gt; <span data-count="1071948">S</span>ymbolic_boolean.of_expr
+let lt_u e1 e2 = <span data-count="1071854">r</span>elop ty LtU e1 e2 |&gt; <span data-count="1071847">S</span>ymbolic_boolean.of_expr
 
 let gt_u e1 e2 = <span data-count="741">r</span>elop ty GtU e1 e2 |&gt; <span data-count="741">S</span>ymbolic_boolean.of_expr
 
@@ -391,7 +391,7 @@ let extend_s n x =
 
 let extend_i32_s x = <span data-count="32">c</span>vtop ty (Sign_extend 32) x
 
-let extend_i32_u x = <span data-count="3298604">c</span>vtop ty (Zero_extend 32) x
+let extend_i32_u x = <span data-count="3298228">c</span>vtop ty (Zero_extend 32) x
 
 let pp = pp
 </code></pre>

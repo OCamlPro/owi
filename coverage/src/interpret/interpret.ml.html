@@ -3488,9 +3488,9 @@ struct
   let page_size = I64.of_concret<span data-count="25837">e</span> 65_536L
 
   let pop_choice stack ~prio_true ~prio_false =
-    <span data-count="8278445">l</span>et b, stack = Stack.pop_bool stack in
-    <span data-count="8278448">l</span>et* b = selec<span data-count="8278449">t</span> b ~prio_true ~prio_false in
-    <span data-count="8279182">r</span>eturn (b, stack)
+    <span data-count="8278385">l</span>et b, stack = Stack.pop_bool stack in
+    <span data-count="8278389">l</span>et* b = selec<span data-count="8278389">t</span> b ~prio_true ~prio_false in
+    <span data-count="8279127">r</span>eturn (b, stack)
 
   (*
      `let&gt; cond = e1 in e2` is:
@@ -3498,28 +3498,28 @@ struct
        - possibly two branches in symbolic mode, one where cond is true if e1 is SAT, and another one where cond is false if e2 is SAT
    *)
   let ( let&gt; ) v f =
-    <span data-count="741">l</span>et* v = selec<span data-count="741">t</span> v ~prio_true:Prio.Default ~prio_false:Prio.Default in
-    <span data-count="774">f</span> v
+    <span data-count="761">l</span>et* v = selec<span data-count="761">t</span> v ~prio_true:Prio.Default ~prio_false:Prio.Default in
+    <span data-count="799">f</span> v
 
   (* In case of throw_away_trap, this is only going in the non-trapping branch, to avoid a useless solver call.
      Otherwise, this will properly try both branches (one trapping, one non-trapping).
      I.e. this can be read as `if v then trap else f` (or assume (not v) and f) in the non-trapping mode).
   *)
   let ( let&gt;! ) (v, trap) f =
-    <span data-count="2887891">i</span>f Parameters.throw_away_trap then
-      <span data-count="130">l</span>et* () = Choice.assum<span data-count="130">e</span> (Boolean.no<span data-count="130">t</span> v) in
-      <span data-count="130">f</span> ()
+    <span data-count="2887760">i</span>f Parameters.throw_away_trap then
+      <span data-count="133">l</span>et* () = Choice.assum<span data-count="133">e</span> (Boolean.no<span data-count="133">t</span> v) in
+      <span data-count="133">f</span> ()
     else
-      <span data-count="2887757">l</span>et* v = selec<span data-count="2887781">t</span> v ~prio_true:Prio.Default ~prio_false:Prio.Default in
-      <span data-count="2887774">i</span>f v then <span data-count="768">C</span>hoice.trap trap else <span data-count="2887006">f</span> ()
+      <span data-count="2887626">l</span>et* v = selec<span data-count="2887676">t</span> v ~prio_true:Prio.Default ~prio_false:Prio.Default in
+      <span data-count="2887669">i</span>f v then <span data-count="768">C</span>hoice.trap trap else <span data-count="2886898">f</span> ()
 
   let exec_iunop stack nn op =
-    <span data-count="9979">m</span>atch nn with
-    | <span data-count="9956">T</span>ext.S32 -&gt;
+    <span data-count="9978">m</span>atch nn with
+    | <span data-count="9955">T</span>ext.S32 -&gt;
       let n, stack = Stack.pop_i32 stack in
-      <span data-count="9956">l</span>et res =
+      <span data-count="9955">l</span>et res =
         let open I32 in
-        match op with <span data-count="9934">T</span>ext.Clz -&gt; cl<span data-count="9934">z</span> n | <span data-count="14">C</span>tz -&gt; ct<span data-count="14">z</span> n | <span data-count="8">P</span>opcnt -&gt; popcn<span data-count="8">t</span> n
+        match op with <span data-count="9933">T</span>ext.Clz -&gt; cl<span data-count="9933">z</span> n | <span data-count="14">C</span>tz -&gt; ct<span data-count="14">z</span> n | <span data-count="8">P</span>opcnt -&gt; popcn<span data-count="8">t</span> n
       in
       Stack.push_i32 stack res
     | <span data-count="23">S</span>64 -&gt;
@@ -3562,15 +3562,15 @@ struct
       Stack.push_f64 stack res
 
   let exec_ibinop (stack : Stack.t) nn (op : Text.ibinop) : Stack.t Choice.t =
-    <span data-count="7829401">m</span>atch nn with
-    | <span data-count="2760298">T</span>ext.S32 -&gt;
+    <span data-count="7829435">m</span>atch nn with
+    | <span data-count="2760332">T</span>ext.S32 -&gt;
       let (n1, n2), stack = Stack.pop2_i32 stack in
-      <span data-count="2760295">l</span>et+ res =
+      <span data-count="2760324">l</span>et+ res =
         let open I32 in
         match op with
-        | <span data-count="1883693">A</span>dd -&gt; Choice.retur<span data-count="1883683">n</span> @@ ad<span data-count="1883693">d</span> n1 n2
-        | <span data-count="746388">S</span>ub -&gt; Choice.retur<span data-count="746388">n</span> @@ su<span data-count="746389">b</span> n1 n2
-        | <span data-count="2242">M</span>ul -&gt; Choice.retur<span data-count="2243">n</span> @@ mu<span data-count="2243">l</span> n1 n2
+        | <span data-count="1883724">A</span>dd -&gt; Choice.retur<span data-count="1883717">n</span> @@ ad<span data-count="1883729">d</span> n1 n2
+        | <span data-count="746386">S</span>ub -&gt; Choice.retur<span data-count="746386">n</span> @@ su<span data-count="746386">b</span> n1 n2
+        | <span data-count="2258">M</span>ul -&gt; Choice.retur<span data-count="2258">n</span> @@ mu<span data-count="2258">l</span> n1 n2
         | <span data-count="102">D</span>iv s -&gt; begin
           let&gt;! () = (eq<span data-count="102">z</span> n2, `Integer_divide_by_zero) in
           <span data-count="85">m</span>atch s with
@@ -3588,16 +3588,16 @@ struct
           | <span data-count="29">S</span> -&gt; Choice.return @@ re<span data-count="29">m</span> n1 n2
           | <span data-count="79997">U</span> -&gt; Choice.return @@ unsigned_re<span data-count="79997">m</span> n1 n2
         end
-        | <span data-count="19728">A</span>nd -&gt; Choice.retur<span data-count="19728">n</span> @@ logan<span data-count="19728">d</span> n1 n2
+        | <span data-count="19724">A</span>nd -&gt; Choice.retur<span data-count="19724">n</span> @@ logan<span data-count="19724">d</span> n1 n2
         | <span data-count="177">O</span>r -&gt; Choice.retur<span data-count="177">n</span> @@ logo<span data-count="177">r</span> n1 n2
-        | <span data-count="10339">X</span>or -&gt; Choice.retur<span data-count="10339">n</span> @@ logxo<span data-count="10339">r</span> n1 n2
-        | <span data-count="17011">S</span>hl -&gt; Choice.retur<span data-count="17011">n</span> @@ sh<span data-count="17011">l</span> n1 n2
+        | <span data-count="10338">X</span>or -&gt; Choice.retur<span data-count="10338">n</span> @@ logxo<span data-count="10338">r</span> n1 n2
+        | <span data-count="17006">S</span>hl -&gt; Choice.retur<span data-count="17003">n</span> @@ sh<span data-count="17005">l</span> n1 n2
         | <span data-count="26">S</span>hr S -&gt; Choice.retur<span data-count="26">n</span> @@ shr_<span data-count="26">s</span> n1 n2
-        | <span data-count="529">S</span>hr U -&gt; Choice.retur<span data-count="529">n</span> @@ shr_<span data-count="529">u</span> n1 n2
+        | <span data-count="531">S</span>hr U -&gt; Choice.retur<span data-count="531">n</span> @@ shr_<span data-count="531">u</span> n1 n2
         | <span data-count="14">R</span>otl -&gt; Choice.retur<span data-count="14">n</span> @@ rot<span data-count="14">l</span> n1 n2
         | <span data-count="14">R</span>otr -&gt; Choice.retur<span data-count="14">n</span> @@ rot<span data-count="14">r</span> n1 n2
       in
-      <span data-count="2760267">S</span>tack.push_i32 stack res
+      <span data-count="2760298">S</span>tack.push_i32 stack res
     | <span data-count="5069098">S</span>64 -&gt;
       let (n1, n2), stack = Stack.pop2_i64 stack in
       <span data-count="5069098">l</span>et+ res =
@@ -3689,10 +3689,10 @@ struct
     Stack.push_v128 stack v
 
   let exec_itestop stack nn op =
-    <span data-count="5811935">m</span>atch nn with
-    | <span data-count="809724">T</span>ext.S32 -&gt;
+    <span data-count="5811926">m</span>atch nn with
+    | <span data-count="809714">T</span>ext.S32 -&gt;
       let n, stack = Stack.pop_i32 stack in
-      <span data-count="809724">l</span>et res = match op with <span data-count="809724">T</span>ext.Eqz -&gt; I32.eq_concret<span data-count="809724">e</span> n 0l in
+      <span data-count="809715">l</span>et res = match op with <span data-count="809715">T</span>ext.Eqz -&gt; I32.eq_concret<span data-count="809715">e</span> n 0l in
       Stack.push_bool stack res
     | <span data-count="5002211">S</span>64 -&gt;
       let n, stack = Stack.pop_i64 stack in
@@ -3700,22 +3700,22 @@ struct
       Stack.push_bool stack res
 
   let exec_irelop stack nn (op : Text.irelop) =
-    <span data-count="2423898">m</span>atch nn with
-    | <span data-count="2379435">T</span>ext.S32 -&gt;
+    <span data-count="2423881">m</span>atch nn with
+    | <span data-count="2379418">T</span>ext.S32 -&gt;
       let (n1, n2), stack = Stack.pop2_i32 stack in
-      <span data-count="2379435">l</span>et res =
+      <span data-count="2379419">l</span>et res =
         let open I32 in
         match op with
-        | <span data-count="1058273">E</span>q -&gt; e<span data-count="1058273">q</span> n1 n2
-        | <span data-count="477274">N</span>e -&gt; n<span data-count="477275">e</span> n1 n2
+        | <span data-count="1058269">E</span>q -&gt; e<span data-count="1058268">q</span> n1 n2
+        | <span data-count="477269">N</span>e -&gt; n<span data-count="477269">e</span> n1 n2
         | <span data-count="6924">L</span>t S -&gt; l<span data-count="6924">t</span> n1 n2
-        | <span data-count="25071">L</span>t U -&gt; lt_<span data-count="25071">u</span> n1 n2
-        | <span data-count="975">G</span>t S -&gt; g<span data-count="975">t</span> n1 n2
+        | <span data-count="25066">L</span>t U -&gt; lt_<span data-count="25066">u</span> n1 n2
+        | <span data-count="976">G</span>t S -&gt; g<span data-count="976">t</span> n1 n2
         | <span data-count="165">G</span>t U -&gt; gt_<span data-count="165">u</span> n1 n2
-        | <span data-count="487">L</span>e S -&gt; l<span data-count="487">e</span> n1 n2
-        | <span data-count="415393">L</span>e U -&gt; le_<span data-count="415393">u</span> n1 n2
-        | <span data-count="488">G</span>e S -&gt; g<span data-count="488">e</span> n1 n2
-        | <span data-count="394383">G</span>e U -&gt; ge_<span data-count="394383">u</span> n1 n2
+        | <span data-count="487">L</span>e S -&gt; l<span data-count="486">e</span> n1 n2
+        | <span data-count="415396">L</span>e U -&gt; le_<span data-count="415396">u</span> n1 n2
+        | <span data-count="487">G</span>e S -&gt; g<span data-count="488">e</span> n1 n2
+        | <span data-count="394380">G</span>e U -&gt; ge_<span data-count="394381">u</span> n1 n2
       in
       Stack.push_bool stack res
     | <span data-count="44462">S</span>64 -&gt;
@@ -3922,8 +3922,8 @@ struct
     end
 
   let init_local (_id, t) : Value.t =
-    <span data-count="32403">m</span>atch t with
-    | <span data-count="31893">T</span>ext.Num_type I32 -&gt; I32 I32.zero
+    <span data-count="32366">m</span>atch t with
+    | <span data-count="31855">T</span>ext.Num_type I32 -&gt; I32 I32.zero
     | <span data-count="203">N</span>um_type I64 -&gt; I64 I64.zero
     | <span data-count="167">N</span>um_type F32 -&gt; F32 F32.zero
     | <span data-count="122">N</span>um_type F64 -&gt; F64 F64.zero
@@ -3933,10 +3933,10 @@ struct
   type extern_func = Extern_func.extern_func
 
   let exec_extern_func env stack (f : extern_func) =
-    <span data-count="111519">l</span>et pop_arg (type ty) stack (arg : ty Extern_func.telt) :
+    <span data-count="111513">l</span>et pop_arg (type ty) stack (arg : ty Extern_func.telt) :
       (ty * Stack.t) Choice.t =
-      <span data-count="120045">m</span>atch arg with
-      | <span data-count="120025">I</span>32 -&gt; Choice.return @@ Stack.pop_i3<span data-count="120023">2</span> stack
+      <span data-count="120036">m</span>atch arg with
+      | <span data-count="120014">I</span>32 -&gt; Choice.return @@ Stack.pop_i3<span data-count="120012">2</span> stack
       | <span data-count="3">I</span>64 -&gt; Choice.return @@ Stack.pop_i6<span data-count="3">4</span> stack
       | <span data-count="4">F</span>32 -&gt; Choice.return @@ Stack.pop_f3<span data-count="4">2</span> stack
       | <span data-count="10">F</span>64 -&gt; Choice.return @@ Stack.pop_f6<span data-count="10">4</span> stack
@@ -3951,40 +3951,40 @@ struct
     let rec split_args : type f r.
       Stack.t -&gt; (f, r) Extern_func.atype -&gt; Stack.t * Stack.t =
      fun stack ty -&gt;
-      <span data-count="245457">l</span>et[@local] split_one_arg args =
-        <span data-count="120046">l</span>et elt, stack = Stack.pop stack in
-        <span data-count="120045">l</span>et elts, stack = split_args stack args in
-        <span data-count="120043">(</span>elt :: elts, stack)
+      <span data-count="245438">l</span>et[@local] split_one_arg args =
+        <span data-count="120035">l</span>et elt, stack = Stack.pop stack in
+        <span data-count="120035">l</span>et elts, stack = split_args stack args in
+        <span data-count="120037">(</span>elt :: elts, stack)
       in
       match ty with
-      | <span data-count="12478">M</span>em (_, args) -&gt; split_args stack args
-      | <span data-count="120047">A</span>rg (_, args) -&gt; split_one_arg args
+      | <span data-count="12475">M</span>em (_, args) -&gt; split_args stack args
+      | <span data-count="120037">A</span>rg (_, args) -&gt; split_one_arg args
       | <span data-count="1420">U</span>Arg args -&gt; split_args stack args
       | <span data-count="0">N</span>Arg (_, _, args) -&gt; split_one_arg args
-      | <span data-count="111518">R</span>es -&gt; ([], stack)
+      | <span data-count="111512">R</span>es -&gt; ([], stack)
     in
     let rec apply : type f r.
       Stack.t -&gt; (f, r) Extern_func.atype -&gt; f -&gt; r Choice.t =
      fun stack ty f -&gt;
-      <span data-count="245453">m</span>atch ty with
-      | <span data-count="12477">M</span>em (memid, args) -&gt;
-        let* mem = Env.get_memor<span data-count="12479">y</span> env memid in
-        <span data-count="12478">a</span>pply stack args (<span data-count="12478">f</span> mem)
-      | <span data-count="120042">A</span>rg (arg, args) -&gt;
-        let* v, stack = pop_ar<span data-count="120040">g</span> stack arg in
-        <span data-count="120043">a</span>pply stack args (<span data-count="120040">f</span> v)
+      <span data-count="245443">m</span>atch ty with
+      | <span data-count="12475">M</span>em (memid, args) -&gt;
+        let* mem = Env.get_memor<span data-count="12475">y</span> env memid in
+        <span data-count="12475">a</span>pply stack args (<span data-count="12475">f</span> mem)
+      | <span data-count="120038">A</span>rg (arg, args) -&gt;
+        let* v, stack = pop_ar<span data-count="120034">g</span> stack arg in
+        <span data-count="120037">a</span>pply stack args (<span data-count="120032">f</span> v)
       | <span data-count="1420">U</span>Arg args -&gt; apply stack args (<span data-count="1420">f</span> ())
       | <span data-count="0">N</span>Arg (_, arg, args) -&gt;
         let* v, stack = pop_ar<span data-count="0">g</span> stack arg in
         <span data-count="0">a</span>pply stack args (<span data-count="0">f</span> v)
-      | <span data-count="111513">R</span>es -&gt; Choice.return f
+      | <span data-count="111511">R</span>es -&gt; Choice.return f
     in
     let (Extern_func.Extern_func (Func (atype, rtype), func)) = f in
     let args, stack = split_args stack atype in
-    <span data-count="111521">l</span>et* r = appl<span data-count="111515">y</span> (List.re<span data-count="111517">v</span> args) atype func in
-    <span data-count="111516">l</span>et push_val (type ty) (arg : ty Extern_func.telt) (v : ty) stack =
+    <span data-count="111514">l</span>et* r = appl<span data-count="111506">y</span> (List.re<span data-count="111512">v</span> args) atype func in
+    <span data-count="111509">l</span>et push_val (type ty) (arg : ty Extern_func.telt) (v : ty) stack =
       <span data-count="13887">m</span>atch arg with
-      | <span data-count="13700">I</span>32 -&gt; Stack.push_i32 stack v
+      | <span data-count="13699">I</span>32 -&gt; Stack.push_i32 stack v
       | <span data-count="57">I</span>64 -&gt; Stack.push_i64 stack v
       | <span data-count="66">F</span>32 -&gt; Stack.push_f32 stack v
       | <span data-count="63">F</span>64 -&gt; Stack.push_f64 stack v
@@ -3994,9 +3994,9 @@ struct
         <span data-count="1">S</span>tack.push_ref stack r
     in
     let+ r in
-    <span data-count="111297">m</span>atch (rtype, r) with
-    | <span data-count="97406">R</span>0, () -&gt; stack
-    | <span data-count="13890">R</span>1 t1, v1 -&gt; push_val t1 v1 stack
+    <span data-count="111293">m</span>atch (rtype, r) with
+    | <span data-count="97405">R</span>0, () -&gt; stack
+    | <span data-count="13887">R</span>1 t1, v1 -&gt; push_val t1 v1 stack
     | <span data-count="0">R</span>2 (t1, t2), (v1, v2) -&gt; push_val t1 v1 stack |&gt; <span data-count="0">p</span>ush_val t2 v2
     | <span data-count="0">R</span>3 (t1, t2, t3), (v1, v2, v3) -&gt;
       push_val t1 v1 stack |&gt; <span data-count="0">p</span>ush_val t2 v2 |&gt; <span data-count="0">p</span>ush_val t3 v3
@@ -4021,12 +4021,12 @@ struct
 
       let of_list = Array.of_list
 
-      let get t i = <span data-count="19142438">A</span>rray.unsafe_get t i
+      let get t i = <span data-count="19142386">A</span>rray.unsafe_get t i
 
       let set t i v =
-        <span data-count="1787900">l</span>et locals = Array.copy t in
-        <span data-count="1787905">A</span>rray.unsafe_set locals i v;
-        <span data-count="1787903">l</span>ocals
+        <span data-count="1787873">l</span>et locals = Array.copy t in
+        <span data-count="1787881">A</span>rray.unsafe_set locals i v;
+        <span data-count="1787879">l</span>ocals
     end
 
     type block =
@@ -4068,50 +4068,50 @@ struct
       | Continue of exec_state
 
     let return (state : exec_state) =
-      <span data-count="451483">l</span>et args = Stack.keep state.stack (List.lengt<span data-count="451480">h</span> state.func_rt) in
-      <span data-count="451484">m</span>atch state.return_state with
-      | <span data-count="25153">N</span>one -&gt; Return args
-      | <span data-count="426329">S</span>ome state -&gt;
+      <span data-count="451735">l</span>et args = Stack.keep state.stack (List.lengt<span data-count="451733">h</span> state.func_rt) in
+      <span data-count="451730">m</span>atch state.return_state with
+      | <span data-count="25223">N</span>one -&gt; Return args
+      | <span data-count="426506">S</span>ome state -&gt;
         let stack = args @ state.stack in
         Continue { state with stack }
 
     let branch (state : exec_state) n =
-      <span data-count="1042340">l</span>et block_stack = Stack.drop_n state.block_stack n in
-      <span data-count="1042336">m</span>atch block_stack with
+      <span data-count="1042412">l</span>et block_stack = Stack.drop_n state.block_stack n in
+      <span data-count="1042408">m</span>atch block_stack with
       | <span data-count="48">[</span>] -&gt; Choice.return (retur<span data-count="48">n</span> state)
-      | <span data-count="1042287">b</span>lock :: block_stack_tl -&gt;
+      | <span data-count="1042359">b</span>lock :: block_stack_tl -&gt;
         let block_stack =
-          if block.is_loop then <span data-count="1015061">b</span>lock_stack else <span data-count="27227">b</span>lock_stack_tl
+          if block.is_loop then <span data-count="1015040">b</span>lock_stack else <span data-count="27321">b</span>lock_stack_tl
         in
-        let args = Stack.keep state.stack (List.lengt<span data-count="1042288">h</span> block.branch_rt) in
-        <span data-count="1042291">l</span>et stack = args @ block.stack in
+        let args = Stack.keep state.stack (List.lengt<span data-count="1042363">h</span> block.branch_rt) in
+        <span data-count="1042361">l</span>et stack = args @ block.stack in
         Choice.return
           (Continue { state with block_stack; pc = block.branch; stack })
 
     let end_block (state : exec_state) =
-      <span data-count="1100256">m</span>atch state.block_stack with
-      | <span data-count="449809">[</span>] -&gt; Choice.return (retur<span data-count="449806">n</span> state)
-      | <span data-count="650447">b</span>lock :: block_stack -&gt;
-        let args = Stack.keep state.stack (List.lengt<span data-count="650447">h</span> block.continue_rt) in
-        <span data-count="650445">l</span>et stack = args @ block.stack in
+      <span data-count="1100518">m</span>atch state.block_stack with
+      | <span data-count="450060">[</span>] -&gt; Choice.return (retur<span data-count="450052">n</span> state)
+      | <span data-count="650461">b</span>lock :: block_stack -&gt;
+        let args = Stack.keep state.stack (List.lengt<span data-count="650460">h</span> block.continue_rt) in
+        <span data-count="650462">l</span>et stack = args @ block.stack in
         Choice.return
           (Continue { state with block_stack; pc = block.continue; stack })
   end
 
   let exec_block (state : State.exec_state) ~is_loop (bt : block_type option)
     expr =
-    <span data-count="6929693">l</span>et pt, rt =
+    <span data-count="6929743">l</span>et pt, rt =
       match bt with
-      | <span data-count="1051486">N</span>one -&gt; ([], [])
-      | <span data-count="5878207">S</span>ome (Bt_raw ((<span data-count="52623">N</span>one | <span data-count="5825583">S</span>ome _), (pt, rt))) -&gt; (List.ma<span data-count="5878207">p</span> snd pt, rt)
+      | <span data-count="1051485">N</span>one -&gt; ([], [])
+      | <span data-count="5878253">S</span>ome (Bt_raw ((<span data-count="52671">N</span>one | <span data-count="5825583">S</span>ome _), (pt, rt))) -&gt; (List.ma<span data-count="5878256">p</span> snd pt, rt)
     in
     let block : State.block =
-      let branch_rt, branch = if is_loop then <span data-count="9136">(</span>pt, expr) else <span data-count="6920554">(</span>rt, state.pc) in
+      let branch_rt, branch = if is_loop then <span data-count="9129">(</span>pt, expr) else <span data-count="6920612">(</span>rt, state.pc) in
       { branch
       ; branch_rt
       ; continue = state.pc
       ; continue_rt = rt
-      ; stack = Stack.drop_<span data-count="6929691">n</span> state.stack (List.lengt<span data-count="6929688">h</span> pt)
+      ; stack = Stack.drop_<span data-count="6929740">n</span> state.stack (List.lengt<span data-count="6929740">h</span> pt)
       ; is_loop
       }
     in
@@ -4120,17 +4120,17 @@ struct
          { state with pc = expr; block_stack = block :: state.block_stack } )
 
   let exec_func ~return (state : State.exec_state) env (func : Func.t) =
-    <span data-count="6209078">L</span>og.info (fun m -&gt;
+    <span data-count="6212125">L</span>og.info (fun m -&gt;
       <span data-count="33">m</span> "calling func  : func %s" (Option.valu<span data-count="33">e</span> func.id ~default:"anonymous") );
-    <span data-count="6209084">l</span>et (Bt_raw ((None | Some _), (param_type, result_type))) = func.type_f in
-    let args, stack = Stack.pop_n state.stack (List.lengt<span data-count="6209081">h</span> param_type) in
-    <span data-count="6209082">l</span>et return_state =
-      if return then <span data-count="5738378">s</span>tate.return_state else <span data-count="470705">S</span>ome { state with stack }
+    <span data-count="6212127">l</span>et (Bt_raw ((None | Some _), (param_type, result_type))) = func.type_f in
+    let args, stack = Stack.pop_n state.stack (List.lengt<span data-count="6212119">h</span> param_type) in
+    <span data-count="6212128">l</span>et return_state =
+      if return then <span data-count="5738378">s</span>tate.return_state else <span data-count="473746">S</span>ome { state with stack }
     in
     let locals =
-      State.Locals.of_list @@ List.re<span data-count="6209084">v</span> args @ List.ma<span data-count="6209084">p</span> init_local func.locals
+      State.Locals.of_list @@ List.re<span data-count="6212127">v</span> args @ List.ma<span data-count="6212123">p</span> init_local func.locals
     in
-    <span data-count="6209087">S</span>tate.
+    <span data-count="6212125">S</span>tate.
       { stack = []
       ; locals
       ; pc = func.body
@@ -4142,19 +4142,19 @@ struct
       }
 
   let exec_vfunc ~return (state : State.exec_state) (func : Kind.func) =
-    <span data-count="6295368">m</span>atch func with
-    | <span data-count="6183847">W</span>asm { func; idx } -&gt;
+    <span data-count="6298404">m</span>atch func with
+    | <span data-count="6186892">W</span>asm { func; idx } -&gt;
       let env = Dynarray.get state.envs idx in
-      <span data-count="6183845">C</span>hoice.return (State.Continue (exec_fun<span data-count="6183846">c</span> ~return state env func))
-    | <span data-count="111519">E</span>xtern { idx } -&gt;
+      <span data-count="6186896">C</span>hoice.return (State.Continue (exec_fun<span data-count="6186885">c</span> ~return state env func))
+    | <span data-count="111514">E</span>xtern { idx } -&gt;
       let f = Env.get_extern_func state.env idx in
-      <span data-count="111519">l</span>et+ stack = exec_extern_fun<span data-count="111514">c</span> state.env state.stack f in
-      <span data-count="111290">l</span>et state = { state with stack } in
-      if return then <span data-count="0">S</span>tate.return state else <span data-count="111290">S</span>tate.Continue state
+      <span data-count="111512">l</span>et+ stack = exec_extern_fun<span data-count="111506">c</span> state.env state.stack f in
+      <span data-count="111292">l</span>et state = { state with stack } in
+      if return then <span data-count="0">S</span>tate.return state else <span data-count="111289">S</span>tate.Continue state
 
   let func_type (state : State.exec_state) (f : Kind.func) =
-    <span data-count="804960">m</span>atch f with
-    | <span data-count="804957">W</span>asm { func; _ } -&gt;
+    <span data-count="804947">m</span>atch f with
+    | <span data-count="804943">W</span>asm { func; _ } -&gt;
       let (Bt_raw ((None | Some _), t)) = func.type_f in
       t
     | <span data-count="4">E</span>xtern { idx } -&gt;
@@ -4181,41 +4181,41 @@ struct
 
   let call_indirect ~return (state : State.exec_state)
     (tbl_i, (Bt_raw ((None | Some _), typ_i) : block_type)) =
-    <span data-count="806760">l</span>et fun_i, stack = Stack.pop_i32 state.stack in
-    <span data-count="806760">l</span>et state = { state with stack } in
-    let* t = Env.get_tabl<span data-count="806758">e</span> state.env tbl_i in
-    <span data-count="806761">l</span>et _null, ref_kind = Table.typ t in
-    <span data-count="806759">m</span>atch ref_kind with
-    | <span data-count="806759">F</span>unc_ht -&gt;
+    <span data-count="806745">l</span>et fun_i, stack = Stack.pop_i32 state.stack in
+    <span data-count="806746">l</span>et state = { state with stack } in
+    let* t = Env.get_tabl<span data-count="806746">e</span> state.env tbl_i in
+    <span data-count="806746">l</span>et _null, ref_kind = Table.typ t in
+    <span data-count="806746">m</span>atch ref_kind with
+    | <span data-count="806746">F</span>unc_ht -&gt;
       let size = Table.size t in
-      <span data-count="806755">l</span>et&gt;! () = (I32.(le_<span data-count="806760">u</span> (I32.of_in<span data-count="806760">t</span> size) fun_i), `Undefined_element) in
-      <span data-count="806728">l</span>et* fun_i = Choice.select_i3<span data-count="806724">2</span> fun_i in
-      <span data-count="806732">l</span>et fun_i = Int32.to_int fun_i in
-      <span data-count="806732">l</span>et f_ref = Table.get t fun_i in
-      <span data-count="806731">b</span>egin match Ref.get_func f_ref with
+      <span data-count="806746">l</span>et&gt;! () = (I32.(le_<span data-count="806746">u</span> (I32.of_in<span data-count="806746">t</span> size) fun_i), `Undefined_element) in
+      <span data-count="806714">l</span>et* fun_i = Choice.select_i3<span data-count="806714">2</span> fun_i in
+      <span data-count="806719">l</span>et fun_i = Int32.to_int fun_i in
+      <span data-count="806719">l</span>et f_ref = Table.get t fun_i in
+      <span data-count="806719">b</span>egin match Ref.get_func f_ref with
       | <span data-count="1772">N</span>ull -&gt; Choice.trap (`Uninitialized_element fun_i)
       | <span data-count="0">T</span>ype_mismatch -&gt; Choice.trap `Element_type_error
-      | <span data-count="804959">R</span>ef_value func -&gt;
+      | <span data-count="804946">R</span>ef_value func -&gt;
         let ft = func_type state func in
-        <span data-count="804960">l</span>et ft' = typ_i in
-        if not (Text.func_type_e<span data-count="804959">q</span> ft ft') then
+        <span data-count="804947">l</span>et ft' = typ_i in
+        if not (Text.func_type_e<span data-count="804947">q</span> ft ft') then
           <span data-count="17">C</span>hoice.trap `Indirect_call_type_mismatch
-        else <span data-count="804940">e</span>xec_vfunc ~return state func
+        else <span data-count="804930">e</span>xec_vfunc ~return state func
       end
     | <span data-count="0">_</span> -&gt; Choice.trap `Indirect_call_type_mismatch
 
   let exec_instr instr (state : State.exec_state) : State.instr_result Choice.t
       =
-    <span data-count="64742702">l</span>et stack = state.stack in
+    <span data-count="64745742">l</span>et stack = state.stack in
     let env = state.env in
     let locals = state.locals in
 
     Atomic.incr instr.Annotated.instr_counter;
-    <span data-count="64742722">l</span>et st stack = <span data-count="47793749">C</span>hoice.return (State.Continue { state with stack }) in
+    <span data-count="64745741">l</span>et st stack = <span data-count="47793745">C</span>hoice.return (State.Continue { state with stack }) in
     Log.info (fun m -&gt; <span data-count="287">m</span> "stack         : [ %a ]" Stack.pp stack);
-    <span data-count="64742628">L</span>og.info (fun m -&gt;
+    <span data-count="64745588">L</span>og.info (fun m -&gt;
       <span data-count="287">m</span> "running instr : %a" (pp_instr ~short:true) instr.Annotated.raw );
-    <span data-count="64742651">l</span>et* () =
+    <span data-count="64745636">l</span>et* () =
       match Logs.Src.level Log.main_src with
       | <span data-count="8">S</span>ome Logs.Debug -&gt;
         let+ pc = Choice.get_p<span data-count="8">c</span> () in
@@ -4223,26 +4223,26 @@ struct
           <span data-count="1">L</span>og.debug (fun m -&gt;
             <span data-count="1">m</span> "path condition smt query:@\n @[&lt;v&gt;%a@]" Smtml.Expr.pp_smtml
               (Smtml.Expr.Set.to_lis<span data-count="1">t</span> pc) )
-      | <span data-count="9">N</span>one | <span data-count="64742779">S</span>ome _ -&gt; retur<span data-count="64742719">n</span> ()
+      | <span data-count="9">N</span>one | <span data-count="64745860">S</span>ome _ -&gt; retur<span data-count="64745763">n</span> ()
     in
-    <span data-count="64742703">m</span>atch instr.raw with
-    | <span data-count="1627">R</span>eturn -&gt; Choice.return (State.retur<span data-count="1627">n</span> state)
+    <span data-count="64745710">m</span>atch instr.raw with
+    | <span data-count="1628">R</span>eturn -&gt; Choice.return (State.retur<span data-count="1628">n</span> state)
     | <span data-count="207">N</span>op -&gt; Choice.return (State.Continue state)
-    | <span data-count="230">U</span>nreachable -&gt; Choice.trap `Unreachable
-    | <span data-count="4835860">I</span>32_const n -&gt; st @@ Stack.push_concrete_i3<span data-count="4835856">2</span> stack n
-    | <span data-count="5462652">I</span>64_const n -&gt; st @@ Stack.push_concrete_i6<span data-count="5462649">4</span> stack n
+    | <span data-count="231">U</span>nreachable -&gt; Choice.trap `Unreachable
+    | <span data-count="4835895">I</span>32_const n -&gt; st @@ Stack.push_concrete_i3<span data-count="4835888">2</span> stack n
+    | <span data-count="5462651">I</span>64_const n -&gt; st @@ Stack.push_concrete_i6<span data-count="5462649">4</span> stack n
     | <span data-count="57548">F</span>32_const f -&gt; st @@ Stack.push_concrete_f3<span data-count="57548">2</span> stack f
     | <span data-count="56282">F</span>64_const f -&gt; st @@ Stack.push_concrete_f6<span data-count="56282">4</span> stack f
     | <span data-count="211">V</span>128_const f -&gt; st @@ Stack.push_concrete_v12<span data-count="211">8</span> stack f
-    | <span data-count="9979">I</span>_unop (nn, op) -&gt; st @@ exec_iuno<span data-count="9979">p</span> stack nn op
+    | <span data-count="9978">I</span>_unop (nn, op) -&gt; st @@ exec_iuno<span data-count="9978">p</span> stack nn op
     | <span data-count="623">F</span>_unop (nn, op) -&gt; st @@ exec_funo<span data-count="623">p</span> stack nn op
-    | <span data-count="7829401">I</span>_binop (nn, op) -&gt;
-      let* stack = exec_ibino<span data-count="7829393">p</span> stack nn op in
-      <span data-count="7829341">s</span>t stack
+    | <span data-count="7829436">I</span>_binop (nn, op) -&gt;
+      let* stack = exec_ibino<span data-count="7829419">p</span> stack nn op in
+      <span data-count="7829380">s</span>t stack
     | <span data-count="78750">F</span>_binop (nn, op) -&gt; st @@ exec_fbino<span data-count="78750">p</span> stack nn op
     | <span data-count="2">V</span>_ibinop (shape, op) -&gt; st @@ exec_vibino<span data-count="2">p</span> stack shape op
-    | <span data-count="5811935">I</span>_testop (nn, op) -&gt; st @@ exec_itesto<span data-count="5811936">p</span> stack nn op
-    | <span data-count="2423898">I</span>_relop (nn, op) -&gt; st @@ exec_irelo<span data-count="2423898">p</span> stack nn op
+    | <span data-count="5811926">I</span>_testop (nn, op) -&gt; st @@ exec_itesto<span data-count="5811926">p</span> stack nn op
+    | <span data-count="2423882">I</span>_relop (nn, op) -&gt; st @@ exec_irelo<span data-count="2423881">p</span> stack nn op
     | <span data-count="50563">F</span>_relop (nn, op) -&gt; st @@ exec_frelo<span data-count="50563">p</span> stack nn op
     | <span data-count="447">I</span>_extend8_s nn -&gt; begin
       match nn with
@@ -4303,12 +4303,12 @@ struct
     | <span data-count="9">R</span>ef_func i -&gt;
       let f = Env.get_func env i in
       <span data-count="9">s</span>t @@ Stack.push_re<span data-count="9">f</span> stack (Ref.fun<span data-count="9">c</span> f)
-    | <span data-count="6386">D</span>rop -&gt; st @@ Stack.dro<span data-count="6385">p</span> stack
-    | <span data-count="19142439">L</span>ocal_get i -&gt; st @@ Stack.pus<span data-count="19142435">h</span> stack (State.Locals.ge<span data-count="19142437">t</span> locals i)
-    | <span data-count="1362039">L</span>ocal_set i -&gt;
+    | <span data-count="6447">D</span>rop -&gt; st @@ Stack.dro<span data-count="6447">p</span> stack
+    | <span data-count="19142379">L</span>ocal_get i -&gt; st @@ Stack.pus<span data-count="19142368">h</span> stack (State.Locals.ge<span data-count="19142373">t</span> locals i)
+    | <span data-count="1362023">L</span>ocal_set i -&gt;
       let v, stack = Stack.pop stack in
-      <span data-count="1362036">l</span>et locals = State.Locals.set locals i v in
-      <span data-count="1362037">C</span>hoice.return (State.Continue { state with locals; stack })
+      <span data-count="1362021">l</span>et locals = State.Locals.set locals i v in
+      <span data-count="1362023">C</span>hoice.return (State.Continue { state with locals; stack })
     | <span data-count="6874800">I</span>f_else (_id, bt, e1, e2) -&gt;
       let* b, stack =
         let counter_next_true =
@@ -4331,36 +4331,36 @@ struct
       in
       <span data-count="6874953">l</span>et state = { state with stack } in
       exec_block state ~is_loop:false bt (if b then <span data-count="580413">e</span>1 else <span data-count="6294540">e</span>2)
-    | <span data-count="488933">C</span>all i -&gt; begin
+    | <span data-count="491986">C</span>all i -&gt; begin
       let func = Env.get_func env i in
-      <span data-count="488931">e</span>xec_vfunc ~return:false state func
+      <span data-count="491977">e</span>xec_vfunc ~return:false state func
     end
     | <span data-count="5001499">R</span>eturn_call i -&gt; begin
       let func = Env.get_func env i in
       <span data-count="5001499">e</span>xec_vfunc ~return:true state func
     end
-    | <span data-count="527323">B</span>r i -&gt; State.branch state i
-    | <span data-count="1403649">B</span>r_if i -&gt;
+    | <span data-count="527332">B</span>r i -&gt; State.branch state i
+    | <span data-count="1403593">B</span>r_if i -&gt;
       let* b, stack =
         let counter_next_false, counter_next_true =
           match state.pc.raw with
-          | <span data-count="495181">[</span>] -&gt; (Int.max_int, Atomic.ge<span data-count="495180">t</span> instr.Annotated.instr_counter - 1)
-          | <span data-count="908468">h</span> :: _ -&gt;
+          | <span data-count="495170">[</span>] -&gt; (Int.max_int, Atomic.ge<span data-count="495168">t</span> instr.Annotated.instr_counter - 1)
+          | <span data-count="908423">h</span> :: _ -&gt;
             let v = Atomic.get h.Annotated.instr_counter in
-            <span data-count="908468">(</span>v, Atomic.ge<span data-count="908468">t</span> instr.Annotated.instr_counter - 1 - v)
+            <span data-count="908421">(</span>v, Atomic.ge<span data-count="908422">t</span> instr.Annotated.instr_counter - 1 - v)
         in
         let prio_true =
           Prio.from_annotated counter_next_true !(instr.Annotated.d_true)
         in
-        <span data-count="1403643">l</span>et prio_false =
+        <span data-count="1403587">l</span>et prio_false =
           Prio.from_annotated counter_next_false !(instr.Annotated.d_false)
         in
-        <span data-count="1403645">p</span>op_choic<span data-count="1403647">e</span> stack ~prio_true ~prio_false
+        <span data-count="1403585">p</span>op_choic<span data-count="1403591">e</span> stack ~prio_true ~prio_false
       in
-      <span data-count="1404231">l</span>et state = { state with stack } in
-      if b then <span data-count="513858">S</span>tate.branch state i else <span data-count="890370">C</span>hoice.return (State.Continue state)
-    | <span data-count="9137">L</span>oop (_id, bt, e) -&gt; exec_block state ~is_loop:true bt e
-    | <span data-count="45602">B</span>lock (_id, bt, e) -&gt; exec_block state ~is_loop:false bt e
+      <span data-count="1404171">l</span>et state = { state with stack } in
+      if b then <span data-count="513829">S</span>tate.branch state i else <span data-count="890342">C</span>hoice.return (State.Continue state)
+    | <span data-count="9129">L</span>oop (_id, bt, e) -&gt; exec_block state ~is_loop:true bt e
+    | <span data-count="45662">B</span>lock (_id, bt, e) -&gt; exec_block state ~is_loop:false bt e
     | <span data-count="120">M</span>emory_size memid -&gt;
       let* mem = Env.get_memor<span data-count="120">y</span> env memid in
       <span data-count="120">l</span>et len = Memory.size_in_pages mem in
@@ -4450,13 +4450,13 @@ struct
       <span data-count="508">l</span>et* mem = Env.get_memor<span data-count="508">y</span> env memid in
       <span data-count="508">M</span>emory.blit_string mem data ~src ~dst ~len;
       <span data-count="508">s</span>t stack
-    | <span data-count="21636">S</span>elect _t -&gt;
-      if Parameters.use_ite_for_select then <span data-count="21636">b</span>egin
+    | <span data-count="21633">S</span>elect _t -&gt;
+      if Parameters.use_ite_for_select then <span data-count="21633">b</span>egin
         let b, stack = Stack.pop_bool stack in
-        <span data-count="21635">l</span>et o2, stack = Stack.pop stack in
-        <span data-count="21635">l</span>et o1, stack = Stack.pop stack in
-        <span data-count="21635">l</span>et* res = Choice.it<span data-count="21633">e</span> b ~if_true:o1 ~if_false:o2 in
-        <span data-count="21635">s</span>t @@ Stack.pus<span data-count="21633">h</span> stack res
+        <span data-count="21633">l</span>et o2, stack = Stack.pop stack in
+        <span data-count="21633">l</span>et o1, stack = Stack.pop stack in
+        <span data-count="21633">l</span>et* res = Choice.it<span data-count="21633">e</span> b ~if_true:o1 ~if_false:o2 in
+        <span data-count="21633">s</span>t @@ Stack.pus<span data-count="21633">h</span> stack res
       end
       else <span data-count="0">b</span>egin
         let* b, stack =
@@ -4466,19 +4466,19 @@ struct
         <span data-count="0">l</span>et o1, stack = Stack.pop stack in
         <span data-count="0">s</span>t @@ Stack.pus<span data-count="0">h</span> stack (if b then <span data-count="0">o</span>1 else <span data-count="0">o</span>2)
       end
-    | <span data-count="425869">L</span>ocal_tee i -&gt;
+    | <span data-count="425856">L</span>ocal_tee i -&gt;
       let v, stack = Stack.pop stack in
-      <span data-count="425866">l</span>et locals = State.Locals.set locals i v in
-      <span data-count="425865">l</span>et stack = Stack.push stack v in
-      <span data-count="425862">C</span>hoice.return (State.Continue { state with locals; stack })
+      <span data-count="425854">l</span>et locals = State.Locals.set locals i v in
+      <span data-count="425855">l</span>et stack = Stack.push stack v in
+      <span data-count="425846">C</span>hoice.return (State.Continue { state with locals; stack })
     | <span data-count="492">G</span>lobal_get i -&gt;
       let* g = Env.get_globa<span data-count="492">l</span> env i in
       <span data-count="492">s</span>t @@ Stack.pus<span data-count="492">h</span> stack (Global.valu<span data-count="492">e</span> g)
-    | <span data-count="1839">G</span>lobal_set i -&gt;
-      let* global = Env.get_globa<span data-count="1838">l</span> env i in
-      <span data-count="1839">l</span>et v, stack = Stack.pop stack in
-      <span data-count="1839">G</span>lobal.set_value global v;
-      <span data-count="1838">s</span>t stack
+    | <span data-count="1909">G</span>lobal_set i -&gt;
+      let* global = Env.get_globa<span data-count="1909">l</span> env i in
+      <span data-count="1910">l</span>et v, stack = Stack.pop stack in
+      <span data-count="1910">G</span>lobal.set_value global v;
+      <span data-count="1909">s</span>t stack
     | <span data-count="105">T</span>able_get i -&gt;
       (* TODO: this should be rewritten without `select_i32` ! but it requires to change the type of `Table.get` *)
       let* t = Env.get_tabl<span data-count="105">e</span> env i in
@@ -4629,71 +4629,71 @@ struct
       | <span data-count="84">S</span>64 -&gt; Stack.push_i6<span data-count="84">4</span> stack (I64.of_int3<span data-count="84">2</span> res) )
     | <span data-count="926672">I</span>_load8 (memid, nn, sx, { offset; _ }) -&gt; (
       let* mem = Env.get_memor<span data-count="926675">y</span> env memid in
-      <span data-count="926675">l</span>et pos, stack = Stack.pop_i32 stack in
-      <span data-count="926675">l</span>et addr =
+      <span data-count="926676">l</span>et pos, stack = Stack.pop_i32 stack in
+      <span data-count="926676">l</span>et addr =
         let pos = I64.extend_i32_u pos in
-        <span data-count="926675">l</span>et offset = I32.of_concrete offset |&gt; <span data-count="926674">I</span>64.extend_i32_u in
-        <span data-count="926675">I</span>64.ad<span data-count="926673">d</span> pos offset
+        <span data-count="926675">l</span>et offset = I32.of_concrete offset |&gt; <span data-count="926676">I</span>64.extend_i32_u in
+        <span data-count="926676">I</span>64.ad<span data-count="926676">d</span> pos offset
       in
       let&gt;! () =
-        let size = Memory.size mem |&gt; <span data-count="926675">I</span>64.extend_i32_u in
-        <span data-count="926674">(</span> I64.(lt_<span data-count="926673">u</span> size (ad<span data-count="926675">d</span> addr (I32.of_concrete 1l |&gt; <span data-count="926675">I</span>64.extend_i32_<span data-count="926675">u</span>)))
+        let size = Memory.size mem |&gt; <span data-count="926676">I</span>64.extend_i32_u in
+        <span data-count="926676">(</span> I64.(lt_<span data-count="926671">u</span> size (ad<span data-count="926675">d</span> addr (I32.of_concrete 1l |&gt; <span data-count="926676">I</span>64.extend_i32_<span data-count="926676">u</span>)))
         , `Out_of_bounds_memory_access )
       in
-      <span data-count="926626">l</span>et* mem = Env.get_memor<span data-count="926627">y</span> env memid in
-      <span data-count="926627">l</span>et* res =
-        (match sx with <span data-count="648">S</span> -&gt; Memory.load_8_s | <span data-count="925979">U</span> -&gt; Memory.load_8_u<span data-count="926625">)</span>
-          mem (I32.wrap_i6<span data-count="926627">4</span> addr)
+      <span data-count="926628">l</span>et* mem = Env.get_memor<span data-count="926628">y</span> env memid in
+      <span data-count="926628">l</span>et* res =
+        (match sx with <span data-count="647">S</span> -&gt; Memory.load_8_s | <span data-count="925981">U</span> -&gt; Memory.load_8_u<span data-count="926627">)</span>
+          mem (I32.wrap_i6<span data-count="926628">4</span> addr)
       in
-      <span data-count="926628">s</span>t
+      <span data-count="926630">s</span>t
       @@
       match nn with
-      | <span data-count="926554">S</span>32 -&gt; Stack.push_i3<span data-count="926554">2</span> stack res
+      | <span data-count="926555">S</span>32 -&gt; Stack.push_i3<span data-count="926555">2</span> stack res
       | <span data-count="74">S</span>64 -&gt; Stack.push_i6<span data-count="74">4</span> stack (I64.of_int3<span data-count="74">2</span> res) )
-    | <span data-count="4560">I</span>_store8 (memid, nn, { offset; _ }) -&gt;
-      let* mem = Env.get_memor<span data-count="4561">y</span> env memid in
-      <span data-count="4562">l</span>et n, stack =
+    | <span data-count="4550">I</span>_store8 (memid, nn, { offset; _ }) -&gt;
+      let* mem = Env.get_memor<span data-count="4550">y</span> env memid in
+      <span data-count="4550">l</span>et n, stack =
         match nn with
-        | <span data-count="4544">S</span>32 -&gt;
+        | <span data-count="4532">S</span>32 -&gt;
           let n, stack = Stack.pop_i32 stack in
-          <span data-count="4543">(</span>n, stack)
+          <span data-count="4533">(</span>n, stack)
         | <span data-count="18">S</span>64 -&gt;
           let n, stack = Stack.pop_i64 stack in
           <span data-count="18">(</span>I64.to_int3<span data-count="18">2</span> n, stack)
       in
       let pos, stack = Stack.pop_i32 stack in
-      <span data-count="4561">l</span>et addr =
+      <span data-count="4551">l</span>et addr =
         let pos = I64.extend_i32_u pos in
-        <span data-count="4561">l</span>et offset = I32.of_concrete offset |&gt; <span data-count="4562">I</span>64.extend_i32_u in
-        <span data-count="4561">I</span>64.ad<span data-count="4562">d</span> pos offset
+        <span data-count="4551">l</span>et offset = I32.of_concrete offset |&gt; <span data-count="4550">I</span>64.extend_i32_u in
+        <span data-count="4551">I</span>64.ad<span data-count="4551">d</span> pos offset
       in
       let&gt;! () =
-        let size = Memory.size mem |&gt; <span data-count="4562">I</span>64.extend_i32_u in
-        <span data-count="4562">(</span> I64.(lt_<span data-count="4562">u</span> size (ad<span data-count="4562">d</span> addr (I32.of_concrete 1l |&gt; <span data-count="4562">I</span>64.extend_i32_<span data-count="4562">u</span>)))
+        let size = Memory.size mem |&gt; <span data-count="4551">I</span>64.extend_i32_u in
+        <span data-count="4550">(</span> I64.(lt_<span data-count="4549">u</span> size (ad<span data-count="4551">d</span> addr (I32.of_concrete 1l |&gt; <span data-count="4551">I</span>64.extend_i32_<span data-count="4550">u</span>)))
         , `Out_of_bounds_memory_access )
       in
-      <span data-count="4553">l</span>et* mem = Env.get_memor<span data-count="4553">y</span> env memid in
-      <span data-count="4554">l</span>et* () = Memory.store_<span data-count="4552">8</span> mem ~addr:(I32.wrap_i6<span data-count="4554">4</span> addr) n in
+      <span data-count="4543">l</span>et* mem = Env.get_memor<span data-count="4542">y</span> env memid in
+      <span data-count="4543">l</span>et* () = Memory.store_<span data-count="4542">8</span> mem ~addr:(I32.wrap_i6<span data-count="4543">4</span> addr) n in
       (* Thread memory ? *)
-      <span data-count="4554">s</span>t stack
-    | <span data-count="74416">I</span>_load (memid, nn, { offset; _ }) -&gt;
-      let* mem = Env.get_memor<span data-count="74416">y</span> env memid in
-      <span data-count="74419">l</span>et pos, stack = Stack.pop_i32 stack in
-      <span data-count="74418">l</span>et addr =
+      <span data-count="4543">s</span>t stack
+    | <span data-count="74346">I</span>_load (memid, nn, { offset; _ }) -&gt;
+      let* mem = Env.get_memor<span data-count="74349">y</span> env memid in
+      <span data-count="74347">l</span>et pos, stack = Stack.pop_i32 stack in
+      <span data-count="74347">l</span>et addr =
         let pos = I64.extend_i32_u pos in
-        <span data-count="74423">l</span>et offset = I32.of_concrete offset |&gt; <span data-count="74416">I</span>64.extend_i32_u in
-        <span data-count="74422">I</span>64.ad<span data-count="74420">d</span> pos offset
+        <span data-count="74351">l</span>et offset = I32.of_concrete offset |&gt; <span data-count="74349">I</span>64.extend_i32_u in
+        <span data-count="74348">I</span>64.ad<span data-count="74351">d</span> pos offset
       in
-      let size = Memory.size mem |&gt; <span data-count="74422">I</span>64.extend_i32_u in
-      <span data-count="74422">b</span>egin match nn with
-      | <span data-count="74158">S</span>32 -&gt;
+      let size = Memory.size mem |&gt; <span data-count="74349">I</span>64.extend_i32_u in
+      <span data-count="74351">b</span>egin match nn with
+      | <span data-count="74089">S</span>32 -&gt;
         let&gt;! () =
-          ( I64.(lt_<span data-count="74140">u</span> size (ad<span data-count="74161">d</span> addr (I32.of_concrete 4l |&gt; <span data-count="74164">I</span>64.extend_i32_<span data-count="74158">u</span>)))
+          ( I64.(lt_<span data-count="74074">u</span> size (ad<span data-count="74090">d</span> addr (I32.of_concrete 4l |&gt; <span data-count="74093">I</span>64.extend_i32_<span data-count="74088">u</span>)))
           , `Out_of_bounds_memory_access )
         in
-        <span data-count="74109">l</span>et* mem = Env.get_memor<span data-count="74109">y</span> env memid in
-        <span data-count="74110">l</span>et* res = Memory.load_3<span data-count="74108">2</span> mem (I32.wrap_i6<span data-count="74113">4</span> addr) in
-        <span data-count="74126">s</span>t @@ Stack.push_i3<span data-count="74115">2</span> stack res
+        <span data-count="74040">l</span>et* mem = Env.get_memor<span data-count="74038">y</span> env memid in
+        <span data-count="74039">l</span>et* res = Memory.load_3<span data-count="74036">2</span> mem (I32.wrap_i6<span data-count="74042">4</span> addr) in
+        <span data-count="74057">s</span>t @@ Stack.push_i3<span data-count="74047">2</span> stack res
       | <span data-count="259">S</span>64 -&gt;
         let&gt;! () =
           ( I64.(lt_<span data-count="259">u</span> size (ad<span data-count="259">d</span> addr (I32.of_concrete 8l |&gt; <span data-count="259">I</span>64.extend_i32_<span data-count="259">u</span>)))
@@ -4732,38 +4732,38 @@ struct
         <span data-count="597">l</span>et res = F64.of_bits res in
         <span data-count="597">s</span>t @@ Stack.push_f6<span data-count="597">4</span> stack res
       end
-    | <span data-count="991131">I</span>_store (memid, nn, { offset; _ }) -&gt; (
-      let* mem = Env.get_memor<span data-count="991141">y</span> env memid in
-      <span data-count="991141">l</span>et size = Memory.size mem |&gt; <span data-count="991140">I</span>64.extend_i32_u in
-      <span data-count="991143">l</span>et offset = I32.of_concrete offset |&gt; <span data-count="991144">I</span>64.extend_i32_u in
-      <span data-count="991143">m</span>atch nn with
-      | <span data-count="641225">S</span>32 -&gt;
+    | <span data-count="991121">I</span>_store (memid, nn, { offset; _ }) -&gt; (
+      let* mem = Env.get_memor<span data-count="991127">y</span> env memid in
+      <span data-count="991130">l</span>et size = Memory.size mem |&gt; <span data-count="991133">I</span>64.extend_i32_u in
+      <span data-count="991132">l</span>et offset = I32.of_concrete offset |&gt; <span data-count="991127">I</span>64.extend_i32_u in
+      <span data-count="991130">m</span>atch nn with
+      | <span data-count="641212">S</span>32 -&gt;
         let n, stack = Stack.pop_i32 stack in
-        <span data-count="641207">l</span>et pos, stack = Stack.pop_i32 stack in
-        <span data-count="641197">l</span>et addr =
+        <span data-count="641197">l</span>et pos, stack = Stack.pop_i32 stack in
+        <span data-count="641186">l</span>et addr =
           let pos = I64.extend_i32_u pos in
-          <span data-count="641226">I</span>64.ad<span data-count="641228">d</span> pos offset
+          <span data-count="641213">I</span>64.ad<span data-count="641210">d</span> pos offset
         in
         let&gt;! () =
-          ( I64.(lt_<span data-count="641220">u</span> size (ad<span data-count="641222">d</span> addr (I64.of_concret<span data-count="641227">e</span> 4L)))
+          ( I64.(lt_<span data-count="641188">u</span> size (ad<span data-count="641216">d</span> addr (I64.of_concret<span data-count="641220">e</span> 4L)))
           , `Out_of_bounds_memory_access )
         in
-        <span data-count="641190">l</span>et* mem = Env.get_memor<span data-count="641187">y</span> env memid in
-        <span data-count="641190">l</span>et* () = Memory.store_3<span data-count="641183">2</span> mem ~addr:(I32.wrap_i6<span data-count="641190">4</span> addr) n in
-        <span data-count="641208">s</span>t stack
-      | <span data-count="349916">S</span>64 -&gt;
+        <span data-count="641177">l</span>et* mem = Env.get_memor<span data-count="641178">y</span> env memid in
+        <span data-count="641181">l</span>et* () = Memory.store_3<span data-count="641163">2</span> mem ~addr:(I32.wrap_i6<span data-count="641182">4</span> addr) n in
+        <span data-count="641200">s</span>t stack
+      | <span data-count="349914">S</span>64 -&gt;
         let n, stack = Stack.pop_i64 stack in
         <span data-count="349912">l</span>et pos, stack = Stack.pop_i32 stack in
-        <span data-count="349910">l</span>et addr =
+        <span data-count="349905">l</span>et addr =
           let pos = I64.extend_i32_u pos in
-          <span data-count="349916">I</span>64.ad<span data-count="349916">d</span> pos offset
+          <span data-count="349916">I</span>64.ad<span data-count="349914">d</span> pos offset
         in
         let&gt;! () =
-          ( I64.(lt_<span data-count="349914">u</span> size (ad<span data-count="349915">d</span> addr (I64.of_concret<span data-count="349916">e</span> 8L)))
+          ( I64.(lt_<span data-count="349910">u</span> size (ad<span data-count="349911">d</span> addr (I64.of_concret<span data-count="349916">e</span> 8L)))
           , `Out_of_bounds_memory_access )
         in
-        <span data-count="349879">l</span>et* mem = Env.get_memor<span data-count="349880">y</span> env memid in
-        <span data-count="349880">l</span>et* () = Memory.store_6<span data-count="349877">4</span> mem ~addr:(I32.wrap_i6<span data-count="349880">4</span> addr) n in
+        <span data-count="349877">l</span>et* mem = Env.get_memor<span data-count="349877">y</span> env memid in
+        <span data-count="349880">l</span>et* () = Memory.store_6<span data-count="349868">4</span> mem ~addr:(I32.wrap_i6<span data-count="349881">4</span> addr) n in
         <span data-count="349881">s</span>t stack )
     | <span data-count="137">F</span>_store (memid, nn, { offset; _ }) -&gt; (
       let* mem = Env.get_memor<span data-count="137">y</span> env memid in
@@ -4877,21 +4877,21 @@ struct
       let* data = Env.get_dat<span data-count="487">a</span> env i in
       <span data-count="487">D</span>ata.drop data;
       <span data-count="487">s</span>t stack
-    | <span data-count="513">B</span>r_table (inds, i) -&gt;
+    | <span data-count="533">B</span>r_table (inds, i) -&gt;
       let target, stack = Stack.pop_i32 stack in
-      <span data-count="513">l</span>et&gt; out =
-        I32.(ge_<span data-count="513">u</span> target (I32.of_concret<span data-count="513">e</span> (Int32.of_in<span data-count="513">t</span> (Array.lengt<span data-count="513">h</span> inds))))
+      <span data-count="533">l</span>et&gt; out =
+        I32.(ge_<span data-count="533">u</span> target (I32.of_concret<span data-count="533">e</span> (Int32.of_in<span data-count="533">t</span> (Array.lengt<span data-count="533">h</span> inds))))
       in
-      <span data-count="546">l</span>et* target =
-        if out then <span data-count="282">r</span>etur<span data-count="282">n</span> i
+      <span data-count="571">l</span>et* target =
+        if out then <span data-count="298">r</span>etur<span data-count="298">n</span> i
         else
-          <span data-count="264">l</span>et+ target = Choice.select_i3<span data-count="264">2</span> target in
-          <span data-count="875">l</span>et target = Int32.to_int target in
-          <span data-count="876">i</span>nds.(target)
+          <span data-count="273">l</span>et+ target = Choice.select_i3<span data-count="273">2</span> target in
+          <span data-count="951">l</span>et target = Int32.to_int target in
+          <span data-count="952">i</span>nds.(target)
       in
-      <span data-count="1158">l</span>et state = { state with stack } in
+      <span data-count="1250">l</span>et state = { state with stack } in
       State.branch state target
-    | <span data-count="95106">C</span>all_indirect (tbl_i, typ_i) -&gt;
+    | <span data-count="95091">C</span>all_indirect (tbl_i, typ_i) -&gt;
       call_indirect ~return:false state (tbl_i, typ_i)
     | <span data-count="711654">R</span>eturn_call_indirect (tbl_i, typ_i) -&gt;
       call_indirect ~return:true state (tbl_i, typ_i)
@@ -4903,22 +4903,22 @@ struct
       <span data-count="0">a</span>ssert false
 
   let rec loop ~heartbeat (state : State.exec_state) =
-    <span data-count="65842947">l</span>et* () =
-      match heartbeat with <span data-count="65794707">N</span>one -&gt; Choice.retur<span data-count="65794631">n</span> () | <span data-count="48236">S</span>ome f -&gt; <span data-count="48236">f</span> ()
+    <span data-count="65846191">l</span>et* () =
+      match heartbeat with <span data-count="65794905">N</span>one -&gt; Choice.retur<span data-count="65794807">n</span> () | <span data-count="51308">S</span>ome f -&gt; <span data-count="51308">f</span> ()
     in
-    <span data-count="65842921">m</span>atch state.pc.raw with
-    | <span data-count="64742680">i</span>nstr :: pc -&gt; begin
+    <span data-count="65846205">m</span>atch state.pc.raw with
+    | <span data-count="64745693">i</span>nstr :: pc -&gt; begin
       let pc = Annotated.dummy pc in
-      <span data-count="64742645">l</span>et* state = exec_inst<span data-count="64742748">r</span> instr { state with pc } in
-      <span data-count="64741015">m</span>atch state with
-      | <span data-count="64740450">S</span>tate.Continue state -&gt; loop ~heartbeat state
+      <span data-count="64745666">l</span>et* state = exec_inst<span data-count="64745821">r</span> instr { state with pc } in
+      <span data-count="64744078">m</span>atch state with
+      | <span data-count="64743510">S</span>tate.Continue state -&gt; loop ~heartbeat state
       | <span data-count="570">S</span>tate.Return res -&gt; Choice.return res
     end
-    | <span data-count="1100254">[</span>] -&gt; (
-      let* next_state = State.end_bloc<span data-count="1100253">k</span> state in
-      <span data-count="1100254">m</span>atch next_state with
-      | <span data-count="1075672">S</span>tate.Continue state -&gt; loop ~heartbeat state
-      | <span data-count="24583">S</span>tate.Return res -&gt; Choice.return res )
+    | <span data-count="1100520">[</span>] -&gt; (
+      let* next_state = State.end_bloc<span data-count="1100509">k</span> state in
+      <span data-count="1100518">m</span>atch next_state with
+      | <span data-count="1075862">S</span>tate.Continue state -&gt; loop ~heartbeat state
+      | <span data-count="24653">S</span>tate.Return res -&gt; Choice.return res )
 
   let exec_expr ~heartbeat envs env locals stack expr bt =
     <span data-count="1599">l</span>et state : State.exec_state =
@@ -4946,31 +4946,31 @@ struct
       <span data-count="4">l</span>et after_time =
         let start_time = Unix.gettimeofday () in
         <span data-count="4">f</span>un timeout_s -&gt;
-          <span data-count="45">F</span>loat.compar<span data-count="45">e</span> (Unix.gettimeofda<span data-count="45">y</span> () -. start_time) timeout_s &gt; 0
+          <span data-count="48">F</span>loat.compar<span data-count="48">e</span> (Unix.gettimeofda<span data-count="48">y</span> () -. start_time) timeout_s &gt; 0
       in
       Some
         (fun () -&gt;
-          <span data-count="48236">l</span>et fuel_left = Atomic.fetch_and_add fuel (-1) in
+          <span data-count="51308">l</span>et fuel_left = Atomic.fetch_and_add fuel (-1) in
           (* If we only use [timeout_instr], we want to stop all as
                 soon as [fuel_left &lt;= 0]. But if we only use [timeout],
                 we don't want to run into the slow path below on each
                 instruction after [fuel_left] becomes negative. We avoid
                 this repeated slow path by bumping [fuel] to [max_int]
                 again in this case. *)
-          <span data-count="48236">i</span>f fuel_left mod 1024 = <span data-count="49">0</span> || fuel_left &lt; <span data-count="0">0</span> then <span data-count="49">b</span>egin
+          <span data-count="51308">i</span>f fuel_left mod 1024 = <span data-count="52">0</span> || fuel_left &lt; <span data-count="0">0</span> then <span data-count="52">b</span>egin
             let stop =
               match (Parameters.timeout, Parameters.timeout_instr) with
               | None, None -&gt; assert false
               | <span data-count="4">N</span>one, Some _instr -&gt; fuel_left &lt;= 0
               | <span data-count="0">S</span>ome s, Some _instr -&gt; after_tim<span data-count="0">e</span> <span data-count="0">s</span> || fuel_left &lt;= <span data-count="0">0</span>
-              | <span data-count="45">S</span>ome s, None -&gt;
+              | <span data-count="48">S</span>ome s, None -&gt;
                 let stop = after_time s in
-                <span data-count="45">i</span>f (not stop) &amp;&amp; <span data-count="44">f</span>uel_left &lt; 0 then <span data-count="0">A</span>tomic.se<span data-count="0">t</span> fuel max_int;
-                <span data-count="45">s</span>top
+                <span data-count="48">i</span>f (not stop) &amp;&amp; <span data-count="47">f</span>uel_left &lt; 0 then <span data-count="0">A</span>tomic.se<span data-count="0">t</span> fuel max_int;
+                <span data-count="48">s</span>top
             in
-            if stop then <span data-count="3">C</span>hoice.trap (`Msg "timeout") else <span data-count="46">C</span>hoice.return ()
+            if stop then <span data-count="3">C</span>hoice.trap (`Msg "timeout") else <span data-count="49">C</span>hoice.return ()
           end
-          else <span data-count="48187">C</span>hoice.return () )
+          else <span data-count="51256">C</span>hoice.return () )
 
   let modul (link_state : 'f Link.State.t) (modul : 'extern_func Linked.Module.t)
     : unit Choice.t =
@@ -4988,7 +4988,7 @@ struct
               exec_exp<span data-count="1595">r</span> ~heartbeat envs env (State.Locals.of_lis<span data-count="1599">t</span> [])
                 Stack.empty to_run None
             in
-            <span data-count="2542">(</span>) )
+            <span data-count="2613">(</span>) )
           (Choice.retur<span data-count="2364">n</span> ()) modul.to_run
       end
     with <span data-count="0">S</span>tack_overflow -&gt; Choice.trap `Call_stack_exhausted
