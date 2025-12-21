@@ -22,7 +22,11 @@ let pp fmt = function
   | Extern _ -> pf fmt "externref"
   | Func _ -> pf fmt "funcref"
 
-let null = function Text.Func_ht -> Func None | Extern_ht -> Extern None
+(* TODO: Is this the same as Symbolic_ref.null? *)
+let null = function
+  | Text.Func_ht -> Func None
+  | Extern_ht -> Extern None
+  | TypeOf _ -> (* TODO: Func None? *) assert false
 
 let func (f : Kind.func) = Func (Some f)
 

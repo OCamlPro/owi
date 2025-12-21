@@ -27,6 +27,13 @@ let pp_indice_not0 fmt = function
 
 let pp_indice_opt fmt = function None -> () | Some i -> pp_indice fmt i
 
+let compare_indice id1 id2 =
+  match (id1, id2) with
+  | Text s1, Text s2 -> String.compare s1 s2
+  | Raw i1, Raw i2 -> Int.compare i1 i2
+  | Text _, Raw _ -> 1
+  | Raw _, Text _ -> -1
+
 type nonrec num_type =
   | I32
   | I64
@@ -240,10 +247,13 @@ let pp_limits fmt { min; max } =
 (** Types *)
 
 type heap_type =
+  | TypeOf of indice
+  (* abs_heap_type *)
   | Func_ht
   | Extern_ht
 
 let pp_heap_type fmt = function
+  | TypeOf id -> pf fmt "%a" pp_indice id
   | Func_ht -> pf fmt "func"
   | Extern_ht -> pf fmt "extern"
 
@@ -251,12 +261,18 @@ let heap_type_eq t1 t2 =
   (* TODO: this is wrong *)
   match (t1, t2) with
   | Func_ht, Func_ht | Extern_ht, Extern_ht -> true
+  | TypeOf id1, TypeOf id2 -> compare_indice id1 id2 = 0
   | _, _ -> false
 
 let compare_heap_type t1 t2 =
   (* TODO: this is wrong *)
-  let to_int = function Func_ht -> 0 | Extern_ht -> 1 in
-  Int.compare (to_int t1) (to_int t2)
+  match (t1, t2) with
+  | Func_ht, Func_ht | Extern_ht, Extern_ht -> 0
+  | TypeOf id1, TypeOf id2 -> compare_indice id1 id2
+  | TypeOf _, _ -> 1
+  | _, TypeOf _ -> -1
+  | Extern_ht, _ -> 1
+  | _, Extern_ht -> -1
 
 type nonrec ref_type = nullable * heap_type
 

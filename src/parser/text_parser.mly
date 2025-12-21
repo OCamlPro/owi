@@ -133,6 +133,7 @@ let null_opt ==
 let heap_type ==
   | FUNC; { Func_ht }
   | EXTERN; { Extern_ht }
+  | ~ = indice; <TypeOf>
 
 let ref_type ==
   | LPAR; REF; ~ = null_opt; ~ = heap_type; RPAR; <>

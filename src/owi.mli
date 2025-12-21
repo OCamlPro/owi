@@ -300,6 +300,8 @@ module Text : sig
   (** Types *)
 
   type heap_type =
+    | TypeOf of indice
+    (* abs_heap_type *)
     | Func_ht
     | Extern_ht
 

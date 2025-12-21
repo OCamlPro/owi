@@ -69,10 +69,26 @@ let write_char_indice buf c idx =
   Buffer.add_char buf c;
   write_indice buf idx
 
-let write_reftype buf ht =
-  match ht with
-  | Text.Func_ht -> Buffer.add_char buf '\x70'
-  | Extern_ht -> Buffer.add_char buf '\x6F'
+let write_reftype buf nullable ht =
+  match nullable with
+  | Text.Null -> begin
+    match ht with
+    | Text.Extern_ht -> Buffer.add_char buf '\x6F'
+    | Func_ht -> Buffer.add_char buf '\x70'
+    | TypeOf (Raw id) -> write_char_indice buf '\x63' id
+    | TypeOf _ -> assert false
+  end
+  | No_null -> begin
+    Buffer.add_char buf '\x64';
+    match ht with
+    | Text.Func_ht -> Buffer.add_char buf '\x70'
+    | Extern_ht -> Buffer.add_char buf '\x6F'
+    | TypeOf (Raw id) -> write_indice buf id
+    | TypeOf _ -> assert false
+  end
+(* TODO: TypeOf (Text id) Unreachable because there are no text ids in binary
+  format, the proper way to do it is by redefining ref_type and heap_type for
+  the binary format but it requires lots of changes. *)
 
 let get_char_valtype = function
   | Text.Num_type I32 -> '\x7F'
@@ -159,12 +175,12 @@ let write_memory_import buf
   write_limits buf limits
 
 let write_table_import buf
-  ({ modul_name; name; typ = limits, (_nullable, heaptype); _ } :
+  ({ modul_name; name; typ = limits, (nullable, heaptype); _ } :
     Text.Table.Type.t Origin.imported ) =
   write_string buf modul_name;
   write_string buf name;
   Buffer.add_char buf '\x01';
-  write_reftype buf heaptype;
+  write_reftype buf nullable heaptype;
   write_limits buf limits
 
 let write_func_import buf
@@ -441,7 +457,7 @@ let rec write_instr buf instr =
   | I64_extend32_s -> add_char '\xC4'
   | Ref_null rt ->
     add_char '\xD0';
-    write_reftype buf rt
+    write_reftype buf Text.Null rt
   | Ref_is_null -> add_char '\xD1'
   | Ref_func idx -> write_char_indice buf '\xD2' idx
   | I_trunc_sat_f (S32, S32, S) -> write_fc buf 0
@@ -509,16 +525,16 @@ and write_expr buf expr ~end_op_code =
   let end_op_code = Option.value end_op_code ~default:'\x0B' in
   Buffer.add_char buf end_op_code
 
-let write_table buf { Table.typ = limits, (_nullable, heaptype); init; _ } =
+let write_table buf { Table.typ = limits, (nullable, heaptype); init; _ } =
   match init with
   | Some e ->
     Buffer.add_char buf '\x40';
     Buffer.add_char buf '\x00';
-    write_reftype buf heaptype;
+    write_reftype buf nullable heaptype;
     write_limits buf limits;
     write_expr buf e ~end_op_code:None
   | None ->
-    write_reftype buf heaptype;
+    write_reftype buf nullable heaptype;
     write_limits buf limits
 
 let write_export buf cid ({ name; id } : Binary.Export.t) =
@@ -559,7 +575,7 @@ let write_locals buf locals =
       Buffer.add_char buf char )
     compressed
 
-let write_element buf ({ typ = _, ht; init; mode; _ } : Elem.t) =
+let write_element buf ({ typ = nullable, ht; init; mode; _ } : Elem.t) =
   let write_init buf init =
     let is_ref_func = ref true in
     encode_vector_list buf init (fun buf expr ->
@@ -581,7 +597,7 @@ let write_element buf ({ typ = _, ht; init; mode; _ } : Elem.t) =
     end
     else begin
       write_u32_of_int buf 5;
-      write_reftype buf ht;
+      write_reftype buf nullable ht;
       Buffer.add_buffer buf elem_buf
     end
   | Declarative ->
@@ -594,7 +610,7 @@ let write_element buf ({ typ = _, ht; init; mode; _ } : Elem.t) =
     end
     else begin
       write_u32_of_int buf 7;
-      write_reftype buf ht;
+      write_reftype buf nullable ht;
       Buffer.add_buffer buf elem_buf
     end
   | Active (Some 0, expr) ->
@@ -617,7 +633,7 @@ let write_element buf ({ typ = _, ht; init; mode; _ } : Elem.t) =
       write_u32_of_int buf 6;
       write_indice buf i;
       write_expr buf expr ~end_op_code:None;
-      write_reftype buf ht;
+      write_reftype buf nullable ht;
       Buffer.add_buffer buf elem_buf
     end
   | _ -> assert false
