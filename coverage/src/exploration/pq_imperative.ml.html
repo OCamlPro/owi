@@ -155,20 +155,20 @@ let empty = Dynarray.create
 let is_empty h = <span data-count="0">D</span>ynarray.lengt<span data-count="0">h</span> h = 0
 
 let rec move_up (h : 'a t) x i =
-  <span data-count="11">i</span>f i = 0 then <span data-count="7">D</span>ynarray.set h i x
+  <span data-count="7">i</span>f i = 0 then <span data-count="5">D</span>ynarray.set h i x
   else
-    <span data-count="4">l</span>et fi = (i - 1) / 2 in
+    <span data-count="2">l</span>et fi = (i - 1) / 2 in
     let y = Dynarray.get h fi in
-    <span data-count="4">i</span>f Prio.compar<span data-count="4">e</span> (fs<span data-count="4">t</span> y) (fs<span data-count="4">t</span> x) &gt; 0 then <span data-count="0">b</span>egin
+    <span data-count="2">i</span>f Prio.compar<span data-count="2">e</span> (fs<span data-count="2">t</span> y) (fs<span data-count="2">t</span> x) &gt; 0 then <span data-count="0">b</span>egin
       Dynarray.set h i y;
       <span data-count="0">m</span>ove_up h x fi
     end
-    else <span data-count="4">D</span>ynarray.set h i x
+    else <span data-count="2">D</span>ynarray.set h i x
 
 let push x h =
-  <span data-count="11">l</span>et n = Dynarray.length h in
-  <span data-count="11">D</span>ynarray.add_last h x;
-  <span data-count="11">m</span>ove_up h x n
+  <span data-count="7">l</span>et n = Dynarray.length h in
+  <span data-count="7">D</span>ynarray.add_last h x;
+  <span data-count="7">m</span>ove_up h x n
 
 let min (h : 'a t) l r =
   <span data-count="0">l</span>et xr = Dynarray.get h r in
@@ -176,32 +176,32 @@ let min (h : 'a t) l r =
   <span data-count="0">i</span>f Prio.compar<span data-count="0">e</span> (fs<span data-count="0">t</span> xr) (fs<span data-count="0">t</span> xl) &lt; 0 then <span data-count="0">r</span> else <span data-count="0">l</span>
 
 let smallest_node h x i =
-  <span data-count="4">l</span>et l = (2 * i) + 1 in
+  <span data-count="2">l</span>et l = (2 * i) + 1 in
   let n = Dynarray.length h in
-  <span data-count="4">i</span>f l &gt;= n then <span data-count="4">i</span>
+  <span data-count="2">i</span>f l &gt;= n then <span data-count="2">i</span>
   else
     <span data-count="0">l</span>et r = l + 1 in
     let j = if r &lt; n then <span data-count="0">m</span>i<span data-count="0">n</span> h l r else <span data-count="0">l</span> in
     if Prio.compar<span data-count="0">e</span> (fs<span data-count="0">t</span> (Dynarray.ge<span data-count="0">t</span> h j)) (fs<span data-count="0">t</span> x) &lt; 0 then <span data-count="0">j</span> else <span data-count="0">i</span>
 
 let rec move_down h x i =
-  <span data-count="4">l</span>et j = smallest_node h x i in
-  <span data-count="4">i</span>f j = i then <span data-count="4">D</span>ynarray.set h i x
+  <span data-count="2">l</span>et j = smallest_node h x i in
+  <span data-count="2">i</span>f j = i then <span data-count="2">D</span>ynarray.set h i x
   else <span data-count="0">b</span>egin
     Dynarray.set h i (Dynarray.ge<span data-count="0">t</span> h j);
     <span data-count="0">m</span>ove_down h x j
   end
 
 let pop h =
-  <span data-count="16">l</span>et n = Dynarray.length h in
-  <span data-count="16">i</span>f n = 0 then <span data-count="5">N</span>one
+  <span data-count="10">l</span>et n = Dynarray.length h in
+  <span data-count="10">i</span>f n = 0 then <span data-count="3">N</span>one
   else
-    <span data-count="11">l</span>et y = Dynarray.get h 0 in
-    <span data-count="11">m</span>atch Dynarray.pop_last_opt h with
+    <span data-count="7">l</span>et y = Dynarray.get h 0 in
+    <span data-count="7">m</span>atch Dynarray.pop_last_opt h with
     | <span data-count="0">N</span>one -&gt; None
-    | <span data-count="11">S</span>ome x -&gt;
-      if n &gt; 1 then <span data-count="4">m</span>ove_dow<span data-count="4">n</span> h x 0;
-      <span data-count="11">S</span>ome (sn<span data-count="11">d</span> y)
+    | <span data-count="7">S</span>ome x -&gt;
+      if n &gt; 1 then <span data-count="2">m</span>ove_dow<span data-count="2">n</span> h x 0;
+      <span data-count="7">S</span>ome (sn<span data-count="7">d</span> y)
 </code></pre>
       </div>
     </div>

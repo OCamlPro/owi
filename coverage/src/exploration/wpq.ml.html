@@ -18,17 +18,15 @@
       <h2>0.00%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:20.59%"></span>
-      <span class="unvisited" style="top:44.12%"></span>
-      <span class="unvisited" style="top:47.06%"></span>
-      <span class="unvisited" style="bottom:47.06%"></span>
-      <span class="unvisited" style="bottom:44.12%"></span>
-      <span class="unvisited" style="bottom:38.24%"></span>
-      <span class="unvisited" style="bottom:32.35%"></span>
-      <span class="unvisited" style="bottom:17.65%"></span>
-      <span class="unvisited" style="bottom:14.71%"></span>
-      <span class="unvisited" style="bottom:11.76%"></span>
-      <span class="unvisited" style="bottom:5.88%"></span>
+      <span class="unvisited" style="top:23.33%"></span>
+      <span class="unvisited" style="top:50.00%"></span>
+      <span class="unvisited" style="bottom:46.67%"></span>
+      <span class="unvisited" style="bottom:40.00%"></span>
+      <span class="unvisited" style="bottom:36.67%"></span>
+      <span class="unvisited" style="bottom:30.00%"></span>
+      <span class="unvisited" style="bottom:23.33%"></span>
+      <span class="unvisited" style="bottom:6.67%"></span>
+      <span class="unvisited" style="bottom:3.33%"></span>
       <span class="unvisited" style="bottom:0.00%"></span>
     </div>
     <div id="report">
@@ -64,10 +62,6 @@
 <a id="L28"></a><span class="unvisited"> </span>
 <a id="L29"></a><span class="unvisited"> </span>
 <a id="L30"></a><span class="unvisited"> </span>
-<a id="L31"></a><span > </span>
-<a id="L32"></a><span class="unvisited"> </span>
-<a id="L33"></a><span > </span>
-<a id="L34"></a><span class="unvisited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -102,10 +96,6 @@
 <a href="#L28">28</a>
 <a href="#L29">29</a>
 <a href="#L30">30</a>
-<a href="#L31">31</a>
-<a href="#L32">32</a>
-<a href="#L33">33</a>
-<a href="#L34">34</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -115,7 +105,7 @@ type 'a t = ('a, Prio.t * 'a) Synchronizer.t
 
 let pop q ~pledge = <span data-count="0">S</span>ynchronizer.get q ~pledge
 
-let make_pledge = Synchronizer.make_pledge
+let new_pledge = Synchronizer.new_pledge
 
 let end_pledge = Synchronizer.end_pledge
 
@@ -127,7 +117,7 @@ let rec read_as_seq (q : 'a t) ~finalizer : 'a Seq.t =
     <span data-count="0">N</span>il
   | <span data-count="0">S</span>ome v -&gt; Cons (v, read_as_se<span data-count="0">q</span> q ~finalizer)
 
-let push v prio q = <span data-count="0">S</span>ynchronizer.write (prio, v) q
+let push v prio q = <span data-count="0">S</span>ynchronizer.write q (prio, v)
 
 let work_while f q = <span data-count="0">S</span>ynchronizer.work_while f q
 
@@ -135,11 +125,7 @@ let close = Synchronizer.close
 
 let make () =
   <span data-count="0">l</span>et q = Pq_imperative.empty () in
-  <span data-count="0">l</span>et writter prio_v condvar =
-    <span data-count="0">l</span>et prio, v = prio_v in
-    Pq_imperative.push (prio, v) q;
-    <span data-count="0">C</span>ondition.signal condvar
-  in
+  <span data-count="0">l</span>et writter prio_v = <span data-count="0">P</span>q_imperative.push prio_v q in
   Synchronizer.init (fun () -&gt; <span data-count="0">P</span>q_imperative.pop q) writter
 </code></pre>
       </div>

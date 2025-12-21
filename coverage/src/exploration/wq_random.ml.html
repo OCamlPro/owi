@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>wq_random.ml &mdash; Coverage report</title>
-    <meta name="description" content="60.00% coverage in src/exploration/wq_random.ml">
+    <meta name="description" content="57.14% coverage in src/exploration/wq_random.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,14 +15,14 @@
           <span class="dirname">src/exploration/</span>wq_random.ml
         </a>
       </h1>
-      <h2>60.00%</h2>
+      <h2>57.14%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:10.00%"></span>
-      <span class="unvisited" style="top:36.67%"></span>
-      <span class="unvisited" style="top:40.00%"></span>
-      <span class="unvisited" style="top:46.67%"></span>
-      <span class="unvisited" style="top:50.00%"></span>
+      <span class="unvisited" style="top:11.11%"></span>
+      <span class="unvisited" style="top:40.74%"></span>
+      <span class="unvisited" style="top:44.44%"></span>
+      <span class="unvisited" style="bottom:48.15%"></span>
+      <span class="unvisited" style="bottom:44.44%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -54,9 +54,6 @@
 <a id="L25"></a><span class="visited"> </span>
 <a id="L26"></a><span class="visited"> </span>
 <a id="L27"></a><span class="visited"> </span>
-<a id="L28"></a><span class="visited"> </span>
-<a id="L29"></a><span > </span>
-<a id="L30"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -88,15 +85,12 @@
 <a href="#L25">25</a>
 <a href="#L26">26</a>
 <a href="#L27">27</a>
-<a href="#L28">28</a>
-<a href="#L29">29</a>
-<a href="#L30">30</a>
 </pre>
 <pre><code class="ocaml">type 'a t = ('a, Prio.t * 'a) Synchronizer.t
 
 let pop q pledge = <span data-count="0">S</span>ynchronizer.get q ~pledge
 
-let make_pledge = Synchronizer.make_pledge
+let new_pledge = Synchronizer.new_pledge
 
 let end_pledge = Synchronizer.end_pledge
 
@@ -108,7 +102,7 @@ let rec read_as_seq (q : 'a t) ~finalizer : 'a Seq.t =
     <span data-count="0">N</span>il
   | <span data-count="0">S</span>ome v -&gt; Cons (v, read_as_se<span data-count="0">q</span> q ~finalizer)
 
-let push v prio q = <span data-count="1">S</span>ynchronizer.write (prio, v) q
+let push v prio q = <span data-count="1">S</span>ynchronizer.write q (prio, v)
 
 let work_while f q = <span data-count="2">S</span>ynchronizer.work_while f q
 
@@ -117,11 +111,8 @@ let close = Synchronizer.close
 let make () =
   <span data-count="1">l</span>et q = Pq_imperative.empty () in
   <span data-count="1">R</span>andom.init 0;
-  <span data-count="1">l</span>et writter prio_v condvar =
-    <span data-count="11">P</span>q_imperative.push (Prio.random, sn<span data-count="11">d</span> prio_v) q;
-    <span data-count="11">C</span>ondition.signal condvar
-  in
-  Synchronizer.init (fun () -&gt; <span data-count="16">P</span>q_imperative.pop q) writter
+  <span data-count="1">l</span>et writter prio_v = <span data-count="7">P</span>q_imperative.push (Prio.random, sn<span data-count="7">d</span> prio_v) q in
+  Synchronizer.init (fun () -&gt; <span data-count="10">P</span>q_imperative.pop q) writter
 </code></pre>
       </div>
     </div>

@@ -102,7 +102,7 @@ let bench_src = Logs.Src.creat<span data-count="746">e</span> "owi-bench" ~doc:"
 include (val Logs.src_lo<span data-count="746">g</span> main_src : Logs.LOG)
 
 let is_bench_enabled () =
-  <span data-count="29788">m</span>atch Logs.Src.level bench_src with <span data-count="29772">N</span>one -&gt; false | <span data-count="16">S</span>ome _ -&gt; true
+  <span data-count="28884">m</span>atch Logs.Src.level bench_src with <span data-count="28868">N</span>one -&gt; false | <span data-count="16">S</span>ome _ -&gt; true
 
 let is_debug_enabled () =
   <span data-count="406">m</span>atch Logs.Src.level main_src with

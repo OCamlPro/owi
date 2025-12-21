@@ -269,7 +269,7 @@ let empty_stats () =
   }
 
 let handle_time_span atomic_span f =
-  <span data-count="28166">i</span>f Log.is_bench_enabled () then
+  <span data-count="27259">i</span>f Log.is_bench_enabled () then
     <span data-count="8">l</span>et counter = Mtime_clock.counter () in
     (* f is supposed to take a long time! *)
     <span data-count="8">l</span>et res = f () in
@@ -282,7 +282,7 @@ let handle_time_span atomic_span f =
       <span data-count="8">i</span>f success then <span data-count="8">r</span>es else <span data-count="0">a</span>tomic_set ()
     in
     atomic_set ()
-  else <span data-count="28158">f</span> ()
+  else <span data-count="27252">f</span> ()
 
 let with_utime f =
   <span data-count="432">i</span>f Log.is_bench_enabled () then

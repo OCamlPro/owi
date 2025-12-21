@@ -137,10 +137,10 @@ type t = { mutable value : Symbolic_value.t }
 
 let value v = <span data-count="333">v</span>.value
 
-let set_value v x = <span data-count="1861">v</span>.value &lt;- x
+let set_value v x = <span data-count="1618">v</span>.value &lt;- x
 
 (* WARNING: because we are doing an optimization in `Symbolic_choice`, the cloned state should not refer to a mutable value of the previous state. Assuming that the original state is not mutated is wrong. *)
-let clone_global r = <span data-count="13783">{</span> value = r.value }
+let clone_global r = <span data-count="13203">{</span> value = r.value }
 
 let convert_values (v : Concrete_value.t) : Symbolic_value.t =
   <span data-count="204">m</span>atch v with
@@ -160,25 +160,25 @@ let convert (orig_global : Concrete_global.t) : t =
 
 type collection = (int * int, t) Hashtbl.t
 
-let init () = <span data-count="14536">H</span>ashtbl.create 16
+let init () = <span data-count="13962">H</span>ashtbl.create 16
 
 let clone collection =
-  <span data-count="14130">l</span>et collection' = init () in
-  <span data-count="14130">H</span>ashtbl.iter
+  <span data-count="13556">l</span>et collection' = init () in
+  <span data-count="13555">H</span>ashtbl.iter
     (fun loc global -&gt;
-      <span data-count="13783">l</span>et global' = clone_global global in
-      <span data-count="13783">H</span>ashtbl.add collection' loc global' )
+      <span data-count="13203">l</span>et global' = clone_global global in
+      <span data-count="13202">H</span>ashtbl.add collection' loc global' )
     collection;
-  <span data-count="14130">c</span>ollection'
+  <span data-count="13556">c</span>ollection'
 
 let get_global env_id (orig_global : Concrete_global.t) collection g_id =
-  <span data-count="2194">l</span>et loc = (env_id, g_id) in
+  <span data-count="1951">l</span>et loc = (env_id, g_id) in
   match Hashtbl.find_opt collection loc with
   | <span data-count="204">N</span>one -&gt;
     let g = convert orig_global in
     <span data-count="204">H</span>ashtbl.add collection loc g;
     <span data-count="204">g</span>
-  | <span data-count="1989">S</span>ome t -&gt; t
+  | <span data-count="1747">S</span>ome t -&gt; t
 </code></pre>
       </div>
     </div>

@@ -54,9 +54,6 @@
 <a id="L30"></a><span class="visited"> </span>
 <a id="L31"></a><span class="visited"> </span>
 <a id="L32"></a><span class="visited"> </span>
-<a id="L33"></a><span class="visited"> </span>
-<a id="L34"></a><span > </span>
-<a id="L35"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -93,9 +90,6 @@
 <a href="#L30">30</a>
 <a href="#L31">31</a>
 <a href="#L32">32</a>
-<a href="#L33">33</a>
-<a href="#L34">34</a>
-<a href="#L35">35</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -107,7 +101,7 @@ type 'a t = ('a, Prio.t * 'a) Synchronizer.t
 
 let pop s ~pledge = <span data-count="590">S</span>ynchronizer.get s ~pledge
 
-let make_pledge = Synchronizer.make_pledge
+let new_pledge = Synchronizer.new_pledge
 
 let end_pledge = Synchronizer.end_pledge
 
@@ -119,7 +113,7 @@ let rec read_as_seq (s : 'a t) ~finalizer : 'a Seq.t =
     <span data-count="352">N</span>il
   | <span data-count="238">S</span>ome v -&gt; Cons (v, read_as_se<span data-count="238">q</span> s ~finalizer)
 
-let push v prio s = <span data-count="239">S</span>ynchronizer.write (prio, v) s
+let push v prio s = <span data-count="239">S</span>ynchronizer.write s (prio, v)
 
 let work_while f s = <span data-count="2">S</span>ynchronizer.work_while f s
 
@@ -127,11 +121,8 @@ let close = Synchronizer.close
 
 let make () =
   <span data-count="407">l</span>et s = Stack.create () in
-  <span data-count="407">l</span>et writter prio_v condvar =
-    <span data-count="249">S</span>tack.push (sn<span data-count="249">d</span> prio_v) s;
-    <span data-count="249">C</span>ondition.signal condvar
-  in
-  Synchronizer.init (fun () -&gt; <span data-count="1156">S</span>tack.pop_opt s) writter
+  <span data-count="407">l</span>et writter prio_v = <span data-count="245">S</span>tack.push (sn<span data-count="245">d</span> prio_v) s in
+  Synchronizer.init (fun () -&gt; <span data-count="1146">S</span>tack.pop_opt s) writter
 </code></pre>
       </div>
     </div>
