@@ -53,13 +53,12 @@ type result =
   | Result_extern_ref
   | Result_func_ref
 
-let pp_result fmt = function
-  | Result_const c -> pf fmt "(%a)" pp_result_const c
-  | Result_func_ref | Result_extern_ref -> assert false
-
 let pp_result_bis fmt = function
   | Result_const c -> pf fmt "%a" pp_result_const c
-  | Result_extern_ref | Result_func_ref -> assert false
+  | Result_extern_ref -> pf fmt "ref.extern"
+  | Result_func_ref -> pf fmt "ref.func"
+
+let pp_result fmt r = Fmt.pf fmt "(%a)" pp_result_bis r
 
 let pp_results fmt r = list ~sep:sp pp_result_bis fmt r
 

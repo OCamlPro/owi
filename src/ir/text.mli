@@ -18,6 +18,8 @@ val pp_indice : indice Fmt.t
 
 val pp_indice_opt : indice option Fmt.t
 
+val compare_indice : indice -> indice -> int
+
 type nonrec num_type =
   | I32
   | I64
@@ -160,6 +162,8 @@ val pp_limits : limits Fmt.t
 (** Types *)
 
 type heap_type =
+  | TypeOf of indice
+  (* abs_heap_type *)
   | Func_ht
   | Extern_ht
 

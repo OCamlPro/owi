@@ -168,8 +168,11 @@ end = struct
     match (required, got) with
     | Text.Func_ht, Text.Func_ht -> true
     | Extern_ht, Extern_ht -> true
-    | Func_ht, Extern_ht -> false
-    | Extern_ht, Func_ht -> false
+    | TypeOf id1, TypeOf id2 ->
+      (* TODO: This should probably check the types of id1 and id2,
+        not the ids themselves *)
+      Text.compare_indice id1 id2 = 0
+    | _ -> false
 
   let match_types required got =
     match (required, got) with
