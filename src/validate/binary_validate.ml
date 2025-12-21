@@ -52,8 +52,14 @@ let check_memarg (memarg : Text.memarg) align =
   else Ok ()
 
 module Env = struct
+  type local =
+    { typ : typ
+    ; param : bool
+    ; init : bool
+    }
+
   type t =
-    { locals : typ Index.Map.t
+    { locals : local Index.Map.t
     ; result_type : Text.result_type
     ; blocks : typ list list
     ; modul : Binary.Module.t
@@ -69,6 +75,13 @@ module Env = struct
     match Index.Map.find_opt i env.locals with
     | None -> Error (`Unknown_local (Text.Raw i))
     | Some v -> Ok v
+
+  let local_set_init i env =
+    match Index.Map.find_opt i env.locals with
+    | None -> Error (`Unknown_local (Text.Raw i))
+    | Some ({ param = false; init = false; _ } as t) ->
+      Ok { env with locals = Index.Map.add i { t with init = true } env.locals }
+    | _ -> Ok env
 
   let global_get i modul =
     if i >= Array.length modul.global then Error (`Unknown_global (Text.Raw i))
@@ -107,15 +120,21 @@ module Env = struct
       | Imported { typ; _ } -> Ok typ
 
   let make ~params ~locals ~modul ~result_type ~refs =
-    let l = List.mapi (fun i v -> (i, v)) (params @ locals) in
-    let locals =
+    let cnt, l =
       List.fold_left
-        (fun locals (i, (_, typ)) ->
+        (fun (cnt, l) (_, typ) ->
           let typ = typ_of_val_type typ in
-          Index.Map.add i typ locals )
-        Index.Map.empty l
+          (cnt + 1, Index.Map.add cnt { typ; param = true; init = false } l) )
+        (0, Index.Map.empty) params
     in
-    { locals; modul; result_type; blocks = []; refs }
+    let _, l =
+      List.fold_left
+        (fun (cnt, l) (_, typ) ->
+          let typ = typ_of_val_type typ in
+          (cnt + 1, Index.Map.add cnt { typ; param = false; init = false } l) )
+        (cnt, l) locals
+    in
+    { locals = l; modul; result_type; blocks = []; refs }
 end
 
 type stack = typ list
@@ -323,177 +342,240 @@ let is_func_type (ref_type : Text.ref_type) =
   match ref_type with _, Func_ht -> true | _ -> false
 
 let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t)
-  : stack Result.t =
+  : (Env.t * stack) Result.t =
   match instr.raw with
-  | Nop -> Ok stack
-  | Drop -> Stack.drop stack
+  | Nop -> Ok (env, stack)
+  | Drop ->
+    let+ stack = Stack.drop stack in
+    (env, stack)
   | Return ->
     let+ _stack =
       Stack.pop env.modul (List.rev_map typ_of_val_type env.result_type) stack
     in
-    [ any ]
-  | Unreachable -> Ok [ any ]
-  | I32_const _ -> Stack.push [ i32 ] stack
-  | I64_const _ -> Stack.push [ i64 ] stack
-  | F32_const _ -> Stack.push [ f32 ] stack
-  | F64_const _ -> Stack.push [ f64 ] stack
-  | V128_const _ -> Stack.push [ v128 ] stack
+    (env, [ any ])
+  | Unreachable -> Ok (env, [ any ])
+  | I32_const _ ->
+    let+ stack = Stack.push [ i32 ] stack in
+    (env, stack)
+  | I64_const _ ->
+    let+ stack = Stack.push [ i64 ] stack in
+    (env, stack)
+  | F32_const _ ->
+    let+ stack = Stack.push [ f32 ] stack in
+    (env, stack)
+  | F64_const _ ->
+    let+ stack = Stack.push [ f64 ] stack in
+    (env, stack)
+  | V128_const _ ->
+    let+ stack = Stack.push [ v128 ] stack in
+    (env, stack)
   | I_unop (s, _op) ->
     let t = itype s in
     let* stack = Stack.pop env.modul [ t ] stack in
-    Stack.push [ t ] stack
+    let+ stack = Stack.push [ t ] stack in
+    (env, stack)
   | I_binop (s, _op) ->
     let t = itype s in
     let* stack = Stack.pop env.modul [ t; t ] stack in
-    Stack.push [ t ] stack
+    let+ stack = Stack.push [ t ] stack in
+    (env, stack)
   | F_unop (s, _op) ->
     let t = ftype s in
     let* stack = Stack.pop env.modul [ t ] stack in
-    Stack.push [ t ] stack
+    let+ stack = Stack.push [ t ] stack in
+    (env, stack)
   | F_binop (s, _op) ->
     let t = ftype s in
     let* stack = Stack.pop env.modul [ t; t ] stack in
-    Stack.push [ t ] stack
+    let+ stack = Stack.push [ t ] stack in
+    (env, stack)
   | V_ibinop (_shape, _op) ->
     let* stack = Stack.pop env.modul [ v128; v128 ] stack in
-    Stack.push [ v128 ] stack
+    let+ stack = Stack.push [ v128 ] stack in
+    (env, stack)
   | I_testop (nn, _) ->
     let* stack = Stack.pop env.modul [ itype nn ] stack in
-    Stack.push [ i32 ] stack
+    let+ stack = Stack.push [ i32 ] stack in
+    (env, stack)
   | I_relop (nn, _) ->
     let t = itype nn in
     let* stack = Stack.pop env.modul [ t; t ] stack in
-    Stack.push [ i32 ] stack
+    let+ stack = Stack.push [ i32 ] stack in
+    (env, stack)
   | F_relop (nn, _) ->
     let t = ftype nn in
     let* stack = Stack.pop env.modul [ t; t ] stack in
-    Stack.push [ i32 ] stack
+    let+ stack = Stack.push [ i32 ] stack in
+    (env, stack)
   | Local_get i ->
-    let* t = Env.local_get i env in
-    Stack.push [ t ] stack
+    let* { typ = t; param; init } = Env.local_get i env in
+    let* () =
+      if (not param) && not init then
+        let no_def_value =
+          match t with Ref_type (No_null, _) -> true | _ -> false
+        in
+        if no_def_value then Error (`Uninitialized_local i) else Ok ()
+      else Ok ()
+    in
+    let+ stack = Stack.push [ t ] stack in
+    (env, stack)
   | Local_set i ->
-    let* t = Env.local_get i env in
-    Stack.pop env.modul [ t ] stack
+    let* { typ = t; _ } = Env.local_get i env in
+    let* env = Env.local_set_init i env in
+    let+ stack = Stack.pop env.modul [ t ] stack in
+    (env, stack)
   | Local_tee i ->
-    let* t = Env.local_get i env in
+    let* { typ = t; _ } = Env.local_get i env in
     let* stack = Stack.pop env.modul [ t ] stack in
-    Stack.push [ t ] stack
+    let+ stack = Stack.push [ t ] stack in
+    (env, stack)
   | Global_get i ->
     let* _mut, t = Env.global_get i env.modul in
     let t = typ_of_val_type t in
-    Stack.push [ t ] stack
+    let+ stack = Stack.push [ t ] stack in
+    (env, stack)
   | Global_set i ->
     let* mut, t = Env.global_get i env.modul in
     let* () =
       match mut with Var -> Ok () | Const -> Error `Global_is_immutable
     in
     let t = typ_of_val_type t in
-    Stack.pop env.modul [ t ] stack
+    let+ stack = Stack.pop env.modul [ t ] stack in
+    (env, stack)
   | If_else (_id, block_type, e1, e2) ->
     let* stack = Stack.pop env.modul [ i32 ] stack in
     let* stack_e1 = typecheck_expr env e1 ~is_loop:false block_type ~stack in
     let+ _stack_e2 = typecheck_expr env e2 ~is_loop:false block_type ~stack in
-    stack_e1
+    (env, stack_e1)
   | I_load8 (id, nn, _, memarg) ->
     let* () = check_mem env.modul id in
     let* () = check_memarg memarg 1L in
     let* stack = Stack.pop env.modul [ i32 ] stack in
-    Stack.push [ itype nn ] stack
+    let+ stack = Stack.push [ itype nn ] stack in
+    (env, stack)
   | I_load16 (id, nn, _, memarg) ->
     let* () = check_mem env.modul id in
     let* () = check_memarg memarg 2L in
     let* stack = Stack.pop env.modul [ i32 ] stack in
-    Stack.push [ itype nn ] stack
+    let+ stack = Stack.push [ itype nn ] stack in
+    (env, stack)
   | I_load (id, nn, memarg) ->
     let* () = check_mem env.modul id in
     let max_allowed = match nn with S32 -> 4L | S64 -> 8L in
     let* () = check_memarg memarg max_allowed in
     let* stack = Stack.pop env.modul [ i32 ] stack in
-    Stack.push [ itype nn ] stack
+    let+ stack = Stack.push [ itype nn ] stack in
+    (env, stack)
   | I64_load32 (id, _, memarg) ->
     let* () = check_mem env.modul id in
     let* () = check_memarg memarg 4L in
     let* stack = Stack.pop env.modul [ i32 ] stack in
-    Stack.push [ i64 ] stack
+    let+ stack = Stack.push [ i64 ] stack in
+    (env, stack)
   | I_store8 (id, nn, memarg) ->
     let* () = check_mem env.modul id in
     let* () = check_memarg memarg 1L in
-    Stack.pop env.modul [ itype nn; i32 ] stack
+    let+ stack = Stack.pop env.modul [ itype nn; i32 ] stack in
+    (env, stack)
   | I_store16 (id, nn, memarg) ->
     let* () = check_mem env.modul id in
     let* () = check_memarg memarg 2L in
-    Stack.pop env.modul [ itype nn; i32 ] stack
+    let+ stack = Stack.pop env.modul [ itype nn; i32 ] stack in
+    (env, stack)
   | I_store (id, nn, memarg) ->
     let* () = check_mem env.modul id in
     let max_allowed = match nn with S32 -> 4L | S64 -> 8L in
     let* () = check_memarg memarg max_allowed in
-    Stack.pop env.modul [ itype nn; i32 ] stack
+    let+ stack = Stack.pop env.modul [ itype nn; i32 ] stack in
+    (env, stack)
   | I64_store32 (id, memarg) ->
     let* () = check_mem env.modul id in
     let* () = check_memarg memarg 4L in
-    Stack.pop env.modul [ i64; i32 ] stack
+    let+ stack = Stack.pop env.modul [ i64; i32 ] stack in
+    (env, stack)
   | F_load (id, nn, memarg) ->
     let* () = check_mem env.modul id in
     let max_allowed = match nn with S32 -> 4L | S64 -> 8L in
     let* () = check_memarg memarg max_allowed in
     let* stack = Stack.pop env.modul [ i32 ] stack in
-    Stack.push [ ftype nn ] stack
+    let+ stack = Stack.push [ ftype nn ] stack in
+    (env, stack)
   | F_store (id, nn, memarg) ->
     let* () = check_mem env.modul id in
     let max_allowed = match nn with S32 -> 4L | S64 -> 8L in
     let* () = check_memarg memarg max_allowed in
-    Stack.pop env.modul [ ftype nn; i32 ] stack
+    let+ stack = Stack.pop env.modul [ ftype nn; i32 ] stack in
+    (env, stack)
   | I_reinterpret_f (inn, fnn) ->
     let* stack = Stack.pop env.modul [ ftype fnn ] stack in
-    Stack.push [ itype inn ] stack
+    let+ stack = Stack.push [ itype inn ] stack in
+    (env, stack)
   | F_reinterpret_i (fnn, inn) ->
     let* stack = Stack.pop env.modul [ itype inn ] stack in
-    Stack.push [ ftype fnn ] stack
+    let+ stack = Stack.push [ ftype fnn ] stack in
+    (env, stack)
   | F32_demote_f64 ->
     let* stack = Stack.pop env.modul [ f64 ] stack in
-    Stack.push [ f32 ] stack
+    let+ stack = Stack.push [ f32 ] stack in
+    (env, stack)
   | F64_promote_f32 ->
     let* stack = Stack.pop env.modul [ f32 ] stack in
-    Stack.push [ f64 ] stack
+    let+ stack = Stack.push [ f64 ] stack in
+    (env, stack)
   | F_convert_i (fnn, inn, _) ->
     let* stack = Stack.pop env.modul [ itype inn ] stack in
-    Stack.push [ ftype fnn ] stack
+    let+ stack = Stack.push [ ftype fnn ] stack in
+    (env, stack)
   | I_trunc_f (inn, fnn, _) | I_trunc_sat_f (inn, fnn, _) ->
     let* stack = Stack.pop env.modul [ ftype fnn ] stack in
-    Stack.push [ itype inn ] stack
+    let+ stack = Stack.push [ itype inn ] stack in
+    (env, stack)
   | I32_wrap_i64 ->
     let* stack = Stack.pop env.modul [ i64 ] stack in
-    Stack.push [ i32 ] stack
+    let+ stack = Stack.push [ i32 ] stack in
+    (env, stack)
   | I_extend8_s nn | I_extend16_s nn ->
     let t = itype nn in
     let* stack = Stack.pop env.modul [ t ] stack in
-    Stack.push [ t ] stack
+    let+ stack = Stack.push [ t ] stack in
+    (env, stack)
   | I64_extend32_s ->
     let* stack = Stack.pop env.modul [ i64 ] stack in
-    Stack.push [ i64 ] stack
+    let+ stack = Stack.push [ i64 ] stack in
+    (env, stack)
   | I64_extend_i32 _ ->
     let* stack = Stack.pop env.modul [ i32 ] stack in
-    Stack.push [ i64 ] stack
+    let+ stack = Stack.push [ i64 ] stack in
+    (env, stack)
   | Memory_grow id ->
     let* () = check_mem env.modul id in
     let* stack = Stack.pop env.modul [ i32 ] stack in
-    Stack.push [ i32 ] stack
+    let+ stack = Stack.push [ i32 ] stack in
+    (env, stack)
   | Memory_size id ->
     let* () = check_mem env.modul id in
-    Stack.push [ i32 ] stack
+    let+ stack = Stack.push [ i32 ] stack in
+    (env, stack)
   | Memory_copy (id1, id2) ->
     let* () = check_mem env.modul id1 in
     let* () = check_mem env.modul id2 in
-    Stack.pop env.modul [ i32; i32; i32 ] stack
+    let+ stack = Stack.pop env.modul [ i32; i32; i32 ] stack in
+    (env, stack)
   | Memory_fill id ->
     let* () = check_mem env.modul id in
-    Stack.pop env.modul [ i32; i32; i32 ] stack
+    let+ stack = Stack.pop env.modul [ i32; i32; i32 ] stack in
+    (env, stack)
   | Memory_init (memidx, dataidx) ->
     let* () = check_mem env.modul memidx in
     let* () = check_data env.modul dataidx in
-    Stack.pop env.modul [ i32; i32; i32 ] stack
-  | Block (_, bt, expr) -> typecheck_expr env expr ~is_loop:false bt ~stack
-  | Loop (_, bt, expr) -> typecheck_expr env expr ~is_loop:true bt ~stack
+    let+ stack = Stack.pop env.modul [ i32; i32; i32 ] stack in
+    (env, stack)
+  | Block (_, bt, expr) ->
+    let+ stack = typecheck_expr env expr ~is_loop:false bt ~stack in
+    (env, stack)
+  | Loop (_, bt, expr) ->
+    let+ stack = typecheck_expr env expr ~is_loop:true bt ~stack in
+    (env, stack)
   | Call_indirect (tbl_id, bt) ->
     let* _tbl_type = Env.table_type_get tbl_id env.modul in
     let* () =
@@ -501,17 +583,19 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
       else Error (`Type_mismatch "call_indirect")
     in
     let* stack = Stack.pop env.modul [ i32 ] stack in
-    Stack.pop_push env.modul bt stack
+    let+ stack = Stack.pop_push env.modul bt stack in
+    (env, stack)
   | Call i ->
     let* pt, rt = Env.func_get i env.modul in
     let* stack = Stack.pop env.modul (List.rev_map typ_of_pt pt) stack in
-    Stack.push (List.rev_map typ_of_val_type rt) stack
+    let+ stack = Stack.push (List.rev_map typ_of_val_type rt) stack in
+    (env, stack)
   | Call_ref t ->
     let* stack = Stack.pop_ref stack in
     let* pt, rt = Env.type_get t env.modul in
     let* stack = Stack.pop env.modul (List.rev_map typ_of_pt pt) stack in
-    let* stack = Stack.push (List.rev_map typ_of_val_type rt) stack in
-    Ok stack
+    let+ stack = Stack.push (List.rev_map typ_of_val_type rt) stack in
+    (env, stack)
   | Return_call i ->
     let* pt, rt = Env.func_get i env.modul in
     let* b =
@@ -522,7 +606,7 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
     if not b then Error (`Type_mismatch "return_call")
     else
       let+ _stack = Stack.pop env.modul (List.rev_map typ_of_pt pt) stack in
-      [ any ]
+      (env, [ any ])
   | Return_call_indirect (tbl_id, Bt_raw (_, (pt, rt))) ->
     let* _tbl_type = Env.table_type_get tbl_id env.modul in
     let* () =
@@ -538,7 +622,7 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
     else
       let* stack = Stack.pop env.modul [ i32 ] stack in
       let+ _stack = Stack.pop env.modul (List.rev_map typ_of_pt pt) stack in
-      [ any ]
+      (env, [ any ])
   | Return_call_ref (Bt_raw (_, (pt, rt))) ->
     let* b =
       Stack.equal env.modul
@@ -549,10 +633,10 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
     else
       let* stack = Stack.pop_ref stack in
       let+ _stack = Stack.pop env.modul (List.rev_map typ_of_pt pt) stack in
-      [ any ]
+      (env, [ any ])
   | Data_drop id ->
-    let* () = check_data env.modul id in
-    Ok stack
+    let+ () = check_data env.modul id in
+    (env, stack)
   | Table_init (ti, ei) ->
     let* _, table_typ = Env.table_type_get ti env.modul in
     let* _, elem_typ = Env.elem_type_get ei env.modul in
@@ -560,7 +644,9 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
       Stack.match_heap_type env.modul ~expected:table_typ ~got:elem_typ
     in
     if not b then Error (`Type_mismatch "table_init")
-    else Stack.pop env.modul [ i32; i32; i32 ] stack
+    else
+      let+ stack = Stack.pop env.modul [ i32; i32; i32 ] stack in
+      (env, stack)
   | Table_copy (id1, id2) ->
     let* _null1, typ1 = Env.table_type_get id1 env.modul in
     let* _null2, typ2 = Env.table_type_get id2 env.modul in
@@ -568,48 +654,58 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
       Stack.match_heap_type ~subtype:true env.modul ~expected:typ1 ~got:typ2
     in
     if not b then Error (`Type_mismatch "table_copy")
-    else Stack.pop env.modul [ i32; i32; i32 ] stack
+    else
+      let+ stack = Stack.pop env.modul [ i32; i32; i32 ] stack in
+      (env, stack)
   | Table_fill i ->
     let* t = Env.table_type_get i env.modul in
-    Stack.pop env.modul [ i32; Ref_type t; i32 ] stack
+    let+ stack = Stack.pop env.modul [ i32; Ref_type t; i32 ] stack in
+    (env, stack)
   | Table_grow i ->
     let* t = Env.table_type_get i env.modul in
     let* stack = Stack.pop env.modul [ i32; Ref_type t ] stack in
-    Stack.push [ i32 ] stack
+    let+ stack = Stack.push [ i32 ] stack in
+    (env, stack)
   | Table_size i ->
     let* _null, _t = Env.table_type_get i env.modul in
-    Stack.push [ i32 ] stack
+    let+ stack = Stack.push [ i32 ] stack in
+    (env, stack)
   | Ref_is_null ->
     let* stack = Stack.pop_ref stack in
-    Stack.push [ i32 ] stack
+    let+ stack = Stack.push [ i32 ] stack in
+    (env, stack)
   | Ref_as_non_null ->
     let* stack = Stack.pop_ref stack in
-    Stack.push [ Any ] stack
+    let+ stack = Stack.push [ Any ] stack in
+    (env, stack)
     (* TODO: The type can be Something/Any, and if its a Ref_type the heap_type
       can be a TypeUse or Extern_ht. The pushed type should account for that
       and restrict whatever the type is to non_null. *)
-  | Ref_null rt -> Stack.push [ Ref_type (Null, rt) ] stack
+  | Ref_null rt ->
+    let+ stack = Stack.push [ Ref_type (Null, rt) ] stack in
+    (env, stack)
   | Elem_drop id ->
-    let* _elem_typ = Env.elem_type_get id env.modul in
-    Ok stack
+    let+ _elem_typ = Env.elem_type_get id env.modul in
+    (env, stack)
   | Select t ->
     let* stack = Stack.pop env.modul [ i32 ] stack in
     begin match t with
     | None -> begin
       match stack with
       | Ref_type _ :: _tl -> Error (`Type_mismatch "select implicit")
-      | Any :: _ -> Ok [ Something; Any ]
-      | hd :: Any :: _ -> Ok (hd :: [ Any ])
+      | Any :: _ -> Ok (env, [ Something; Any ])
+      | hd :: Any :: _ -> Ok (env, hd :: [ Any ])
       | hd :: hd' :: tl ->
         let* b = Stack.match_types env.modul ~expected:hd ~got:hd' in
-        if b then Ok (hd :: tl) else Error (`Type_mismatch "select")
+        if b then Ok (env, hd :: tl) else Error (`Type_mismatch "select")
       | _ -> Error (`Type_mismatch "select")
     end
     | Some t ->
       let t = List.map typ_of_val_type t in
       let* stack = Stack.pop env.modul t stack in
       let* stack = Stack.pop env.modul t stack in
-      Stack.push t stack
+      let+ stack = Stack.push t stack in
+      (env, stack)
     end
   | Ref_func i ->
     if not @@ Hashtbl.mem env.refs i then Error `Undeclared_function_reference
@@ -617,22 +713,26 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
       match get_func_type_id env i with
       | None -> assert false
       | Some id ->
-        Stack.push [ Ref_type (Text.No_null, TypeUse (Raw id)) ] stack
+        let+ stack =
+          Stack.push [ Ref_type (Text.No_null, TypeUse (Raw id)) ] stack
+        in
+        (env, stack)
     end
   | Br i ->
     let* jt = Env.block_type_get i env in
-    let* _stack = Stack.pop env.modul jt stack in
-    Ok [ any ]
+    let+ _stack = Stack.pop env.modul jt stack in
+    (env, [ any ])
   | Br_if i ->
     let* stack = Stack.pop env.modul [ i32 ] stack in
     let* jt = Env.block_type_get i env in
     let* stack = Stack.pop env.modul jt stack in
-    Stack.push jt stack
+    let+ stack = Stack.push jt stack in
+    (env, stack)
   | Br_table (branches, i) ->
     let* stack = Stack.pop env.modul [ i32 ] stack in
     let* default_jt = Env.block_type_get i env in
     let* _stack = Stack.pop env.modul default_jt stack in
-    let* () =
+    let+ () =
       array_iter
         (fun (i : indice) ->
           let* jt = Env.block_type_get i env in
@@ -643,25 +743,28 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
             Ok () )
         branches
     in
-    Ok [ any ]
+    (env, [ any ])
   | Br_on_null i ->
     let* stack = Stack.pop_ref stack in
     let* jt = Env.block_type_get i env in
     let* _stack = Stack.pop env.modul jt stack in
     (* TODO: must restrict the popped ref as a non-nullable ref *)
-    Stack.push [ Any ] stack
+    let+ stack = Stack.push [ Any ] stack in
+    (env, stack)
   | Br_on_non_null i ->
     let* stack = Stack.pop_ref stack in
     let* jt = Env.block_type_get i env in
-    let* _stack = Stack.pop env.modul jt stack in
-    Ok stack
+    let+ _stack = Stack.pop env.modul jt stack in
+    (env, stack)
   | Table_get i ->
     let* t = Env.table_type_get i env.modul in
     let* stack = Stack.pop env.modul [ i32 ] stack in
-    Stack.push [ Ref_type t ] stack
+    let+ stack = Stack.push [ Ref_type t ] stack in
+    (env, stack)
   | Table_set i ->
     let* t = Env.table_type_get i env.modul in
-    Stack.pop env.modul [ Ref_type t; i32 ] stack
+    let+ stack = Stack.pop env.modul [ Ref_type t; i32 ] stack in
+    (env, stack)
   | (Extern_externalize | Extern_internalize) as i ->
     Log.err (fun m ->
       m "TODO: unimplemented instruction typecheking %a" (pp_instr ~short:false)
@@ -678,7 +781,11 @@ and typecheck_expr env expr ~is_loop (block_type : block_type option)
   in
   let jump_type = if is_loop then pt else rt in
   let env = { env with blocks = jump_type :: env.blocks } in
-  let* stack = list_fold_left (typecheck_instr env) pt expr.raw in
+  let* env, stack =
+    list_fold_left
+      (fun (env, stack) -> typecheck_instr env stack)
+      (env, pt) expr.raw
+  in
   let* b = Stack.equal env.modul rt stack in
   if not b then
     Error
