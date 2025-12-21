@@ -200,15 +200,15 @@ type t =
   }
 
 (* WARNING: because we are doing an optimization in `Symbolic_choice`, the cloned state should not refer to a mutable value of the previous state. Assuming that the original state is not mutated is wrong. *)
-let clone_table { limits; data; typ } = <span data-count="2228">{</span> typ; limits; data = Array.cop<span data-count="2229">y</span> data }
+let clone_table { limits; data; typ } = <span data-count="2233">{</span> typ; limits; data = Array.cop<span data-count="2233">y</span> data }
 
-let get t i = <span data-count="3869">t</span>.data.(i)
+let get t i = <span data-count="3871">t</span>.data.(i)
 
 let set t i v = <span data-count="610">t</span>.data.(i) &lt;- v
 
-let size t = <span data-count="4032">A</span>rray.length t.data
+let size t = <span data-count="4033">A</span>rray.length t.data
 
-let typ t = <span data-count="3864">t</span>.typ
+let typ t = <span data-count="3867">t</span>.typ
 
 let max_size t = <span data-count="0">t</span>.limits.max
 
@@ -242,25 +242,25 @@ let convert (orig_table : Concrete_table.t) =
 
 type collection = (int * int, t) Hashtbl.t
 
-let init () = <span data-count="13962">H</span>ashtbl.create 16
+let init () = <span data-count="14101">H</span>ashtbl.create 16
 
 let clone collection =
-  <span data-count="13556">l</span>et collection' = init () in
-  <span data-count="13557">H</span>ashtbl.iter
+  <span data-count="13696">l</span>et collection' = init () in
+  <span data-count="13694">H</span>ashtbl.iter
     (fun loc table -&gt;
-      <span data-count="2228">l</span>et table' = clone_table table in
-      <span data-count="2229">H</span>ashtbl.add collection' loc table' )
+      <span data-count="2233">l</span>et table' = clone_table table in
+      <span data-count="2233">H</span>ashtbl.add collection' loc table' )
     collection;
-  <span data-count="13557">c</span>ollection'
+  <span data-count="13696">c</span>ollection'
 
 let get_table env_id (orig_table : Concrete_table.t) collection g_id =
-  <span data-count="4032">l</span>et loc = (env_id, g_id) in
+  <span data-count="4036">l</span>et loc = (env_id, g_id) in
   match Hashtbl.find_opt collection loc with
   | <span data-count="167">N</span>one -&gt;
     let g = convert orig_table in
     <span data-count="167">H</span>ashtbl.add collection loc g;
     <span data-count="167">g</span>
-  | <span data-count="3865">S</span>ome t -&gt; t
+  | <span data-count="3869">S</span>ome t -&gt; t
 </code></pre>
       </div>
     </div>

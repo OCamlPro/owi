@@ -254,12 +254,12 @@ let fresh solver_ty () =
   let module Mapping = Mapping.Fresh.Make () in
   let module Batch = Smtml.Solver.Cached (Mapping) in
   let solver_inst = Batch.create ~logic:QF_BVFP () in
-  <span data-count="775">l</span>et solver = S ((module Batch), solver_inst) in
+  <span data-count="777">l</span>et solver = S ((module Batch), solver_inst) in
   if Log.is_bench_enabled () then <span data-count="2">a</span>dd_solve<span data-count="2">r</span> solver;
-  <span data-count="774">s</span>olver
+  <span data-count="776">s</span>olver
 
 let check (S (solver_module, s)) pc =
-  <span data-count="26270">l</span>et module Solver = (val solver_module) in
+  <span data-count="26276">l</span>et module Solver = (val solver_module) in
   Solver.check_set s pc
 
 let model_of_path_condition (S (solver_module, s)) ~path_condition :
@@ -288,9 +288,9 @@ let model_of_path_condition (S (solver_module, s)) ~path_condition :
   with <span data-count="0">U</span>nknown -&gt; None
 
 let model_of_set (S (solver_module, s)) ~symbol_scopes ~set =
-  <span data-count="749">l</span>et module Solver = (val solver_module) in
+  <span data-count="881">l</span>et module Solver = (val solver_module) in
   let symbols = Symbol_scope.only_symbols symbol_scopes in
-  <span data-count="749">S</span>olver.get_sat_model ~symbols s set
+  <span data-count="881">S</span>olver.get_sat_model ~symbols s set
 
 let empty_stats = Smtml.Statistics.Map.empty
 

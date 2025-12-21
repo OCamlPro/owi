@@ -360,16 +360,16 @@ let sort_results deterministic_result_order results =
 
 let mk_callback no_stop_at_failure fail_mode res_stack path_count =
  fun ~close_work_queue v -&gt;
-  <span data-count="1506">l</span>et open Symbolic_choice_intf in
+  <span data-count="1635">l</span>et open Symbolic_choice_intf in
   Atomic.incr path_count;
-  <span data-count="1506">m</span>atch (fail_mode, v) with
-  | <span data-count="1265">_</span>, (EVal (), _) -&gt; ()
+  <span data-count="1635">m</span>atch (fail_mode, v) with
+  | <span data-count="1394">_</span>, (EVal (), _) -&gt; ()
   | <span data-count="175">(</span> (<span data-count="174">S</span>ymbolic_parameters.Both | <span data-count="1">T</span>rap_only)
     , (ETrap (t, m, labels, breadcrumbs, symbol_scopes), thread) ) -&gt;
     Ws.push
       (`ETrap (t, m, labels, breadcrumbs, symbol_scopes), thread)
       Prio.default res_stack;
-    <span data-count="174">i</span>f not no_stop_at_failure then <span data-count="13">b</span>egin
+    <span data-count="175">i</span>f not no_stop_at_failure then <span data-count="14">b</span>egin
       close_work_queue ()
     end
   | <span data-count="63">(</span> (<span data-count="60">B</span>oth | <span data-count="3">A</span>ssertion_only)
@@ -377,7 +377,7 @@ let mk_callback no_stop_at_failure fail_mode res_stack path_count =
     Ws.push
       (`EAssert (e, m, labels, breadcrumbs, symbol_scopes), thread)
       Prio.default res_stack;
-    <span data-count="58">i</span>f not no_stop_at_failure then <span data-count="35">b</span>egin
+    <span data-count="59">i</span>f not no_stop_at_failure then <span data-count="36">b</span>egin
       close_work_queue ()
     end
   | <span data-count="3">(</span><span data-count="1">T</span>rap_only | <span data-count="2">A</span>ssertion_only), _ -&gt; ()
@@ -397,7 +397,7 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
     Symbolic_choice_with_memory.run exploration_strategy ~workers solver result
       thread ~at_worker_value
       ~at_worker_init:(fun () -&gt; <span data-count="783">W</span>s.new_pledge res_stack)
-      ~at_worker_end:(fun () -&gt; <span data-count="760">W</span>s.end_pledge res_stack)
+      ~at_worker_end:(fun () -&gt; <span data-count="767">W</span>s.end_pledge res_stack)
   in
   <span data-count="406">l</span>et results = Ws.read_as_seq res_stack ~finalizer:Fun.id in
   <span data-count="406">l</span>et results = sort_results deterministic_result_order results in

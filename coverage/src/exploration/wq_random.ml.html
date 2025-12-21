@@ -112,7 +112,7 @@ let make () =
   <span data-count="1">l</span>et q = Pq_imperative.empty () in
   <span data-count="1">R</span>andom.init 0;
   <span data-count="1">l</span>et writter prio_v = <span data-count="7">P</span>q_imperative.push (Prio.random, sn<span data-count="7">d</span> prio_v) q in
-  Synchronizer.init (fun () -&gt; <span data-count="10">P</span>q_imperative.pop q) writter
+  Synchronizer.init (fun () -&gt; <span data-count="9">P</span>q_imperative.pop q) writter
 </code></pre>
       </div>
     </div>
