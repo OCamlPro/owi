@@ -50,8 +50,8 @@ let rewrite_block_type (assigned : Assigned.t) (block_type : Text.block_type) :
     Ok (Binary.Bt_raw (Some idx, func_type))
 
 let rewrite_expr (assigned : Assigned.t) ?known_globals
-  (params : Text.param list) (locals : Text.param list)
-  (iexpr : Text.expr Annotated.t) : Binary.expr Annotated.t Result.t =
+  (locals : Text.param list) (iexpr : Text.expr Annotated.t) :
+  Binary.expr Annotated.t Result.t =
   (* block_ids handling *)
   let block_id_to_raw (loop_count, block_ids) id =
     let* id =
@@ -82,12 +82,11 @@ let rewrite_expr (assigned : Assigned.t) ?known_globals
   in
 
   let seen_locals = Hashtbl.create 64 in
-  let locals_info = Hashtbl.create 64 in
 
-  let init_locals cnt not_params locals =
+  (* Fill locals *)
+  let* (_ : int) =
     list_fold_left
-      (fun next_free_int ((name, typ) : Text.param) ->
-        if not_params then Hashtbl.add locals_info next_free_int (typ, false);
+      (fun next_free_int ((name, _type) : Text.param) ->
         match name with
         | None -> Ok (next_free_int + 1)
         | Some name ->
@@ -96,23 +95,15 @@ let rewrite_expr (assigned : Assigned.t) ?known_globals
             Hashtbl.add seen_locals name next_free_int;
             Ok (next_free_int + 1)
           end )
-      cnt locals
+      0 locals
   in
 
-  (* Fill locals *)
-  let* cnt = init_locals 0 false params in
-  let* _ = init_locals cnt true locals in
-
-  let get_local_id : Text.indice -> Binary.indice = function
+  let find_local : Text.indice -> Binary.indice = function
     | Raw i -> i
     | Text name -> (
       match Hashtbl.find_opt seen_locals name with
       | None -> assert false
       | Some id -> id )
-  in
-
-  let find_local (i : Binary.indice) : (Text.val_type * bool) option Result.t =
-    Ok (Hashtbl.find_opt locals_info i)
   in
 
   let rec body (loop_count, block_ids) (instr : Text.instr Annotated.t) :
@@ -142,27 +133,18 @@ let rewrite_expr (assigned : Assigned.t) ?known_globals
       let+ id = Assigned.find_func assigned id in
       Binary.Return_call id
     | Local_set id ->
-      let id = get_local_id id in
-      let* opt = find_local id in
+      let id = find_local id in
+      (* let* opt = find_local id in
       Option.iter
         (fun (ty, init) ->
           if not init then Hashtbl.add locals_info id (ty, true) )
-        opt;
+        opt; *)
       Ok (Binary.Local_set id)
     | Local_get id ->
-      let id = get_local_id id in
-      let* opt = find_local id in
-      begin match opt with
-      | Some (ty, init) ->
-        let has_def_value =
-          match ty with Text.Ref_type (No_null, _) -> false | _ -> true
-        in
-        if (not init) && not has_def_value then Error (`Uninitialized_local id)
-        else Ok (Binary.Local_get id)
-      | None -> Ok (Binary.Local_get id)
-      end
+      let id = find_local id in
+      Ok (Binary.Local_get id)
     | Local_tee id ->
-      let id = get_local_id id in
+      let id = find_local id in
       Ok (Binary.Local_tee id)
     | If_else (id, bt, e1, e2) ->
       let* bt = block_ty_opt_rewrite bt in
@@ -344,14 +326,14 @@ let rewrite_table (assigned : Assigned.t)
     Ok { Binary.Table.id; typ = (limits, (null, ht)); init = None }
   | Some e ->
     let* ht = rewrite_heap_type assigned ht in
-    let+ e = rewrite_expr assigned [] [] e in
+    let+ e = rewrite_expr assigned [] e in
     { Binary.Table.id; typ = (limits, (null, ht)); init = Some e }
 
 let rewrite_global (assigned : Assigned.t) (known_globals : int)
   (global : Text.Global.t) : Binary.Global.t Result.t =
   let mut, vt = global.typ in
   let* vt = rewrite_val_type assigned vt in
-  let+ init = rewrite_expr assigned ~known_globals [] [] global.init in
+  let+ init = rewrite_expr assigned ~known_globals [] global.init in
   { Binary.Global.id = global.id; init; typ = (mut, vt) }
 
 let rewrite_elem (assigned : Assigned.t) (elem : Text.Elem.t) :
@@ -363,10 +345,10 @@ let rewrite_elem (assigned : Assigned.t) (elem : Text.Elem.t) :
     | Active (None, _expr) -> assert false
     | Active (Some id, expr) ->
       let* indice = Assigned.find_table assigned id in
-      let+ expr = rewrite_expr assigned [] [] expr in
+      let+ expr = rewrite_expr assigned [] expr in
       Binary.Elem.Mode.Active (Some indice, expr)
   in
-  let* init = list_map (rewrite_expr assigned [] []) elem.init in
+  let* init = list_map (rewrite_expr assigned []) elem.init in
   let nullable, ht = elem.typ in
   let+ ht = rewrite_heap_type assigned ht in
   { Binary.Elem.init
@@ -384,7 +366,7 @@ let rewrite_data (assigned : Assigned.t) (data : Text.Data.t) :
     | Active (None, _expr) -> assert false
     | Active (Some indice, expr) ->
       let* indice = Assigned.find_memory assigned indice in
-      let+ expr = rewrite_expr assigned [] [] expr in
+      let+ expr = rewrite_expr assigned [] expr in
       Binary.Data.Mode.Active (indice, expr)
   in
   { Binary.Data.mode; id = data.id; init = data.init }
@@ -423,7 +405,7 @@ let rewrite_func (assigned : Assigned.t)
         Ok (n, vt) )
       locals
   in
-  let+ body = rewrite_expr assigned params locals body in
+  let+ body = rewrite_expr assigned (params @ locals) body in
   { Binary.Func.body; type_f; id; locals }
 
 let rewrite_tag (assigned : Assigned.t) ({ id; typ } : Text.Tag.t) :
