@@ -6,6 +6,7 @@ type stats =
   ; solver_intermediate_model_time : Mtime.Span.t Atomic.t
       (* time taken by the solver to answer model queries during the execution, for instance when concretizing through `select_i32` *)
   ; path_count : int Atomic.t
+  ; max_depth : int Atomic.t
   }
 
 let empty_stats () =
@@ -13,6 +14,7 @@ let empty_stats () =
   ; solver_final_model_time = Atomic.make Mtime.Span.min_span
   ; solver_intermediate_model_time = Atomic.make Mtime.Span.min_span
   ; path_count = Atomic.make 1
+  ; max_depth = Atomic.make 1
   }
 
 let handle_time_span atomic_span f =
@@ -32,6 +34,11 @@ let with_utime f =
     let after = (Unix.times ()).tms_utime in
     (r, Some (after -. before))
   else (f (), None)
+
+let set_max_depth stats path_depth =
+  Multicore.atomic_modify
+    (fun max_depth -> if path_depth > max_depth then path_depth else max_depth)
+    stats.max_depth
 
 let percentage ~whole ~self =
   let whole = Mtime.Span.to_float_ns whole in
@@ -99,6 +106,7 @@ let print_final ~bench_stats ~execution_time_a ~execution_time_b
     m "interpreter loop time         : %a (%.2G%%)" Mtime.Span.pp
       interpreter_time percentage );
   Log.bench (fun m -> m "path count: %d" (Atomic.get bench_stats.path_count));
+  Log.bench (fun m -> m "max depth: %d" (Atomic.get bench_stats.max_depth));
 
   let solver_stats = Solver.get_all_stats ~wait_for_all_domains in
   Log.bench (fun m -> m "solver stats: %a" Solver.pp_stats solver_stats)
