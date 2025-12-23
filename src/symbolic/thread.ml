@@ -78,6 +78,7 @@ let add_pc t c =
 let add_breadcrumb t crumb =
   let breadcrumbs = crumb :: t.breadcrumbs in
   let depth = t.depth + 1 in
+  Benchmark.set_max_depth t.bench_stats depth;
   { t with breadcrumbs; depth }
 
 let incr_num_symbols t =
