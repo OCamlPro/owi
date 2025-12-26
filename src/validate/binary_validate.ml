@@ -8,19 +8,15 @@ open Module
 open Syntax
 open Fmt
 
+(* TODO:
+   - Why isn't any part of heap_type?
+   - Why is Ref_type holding a heap_type and not a ref_type?
+     What about nullability? *)
 type typ =
   | Num_type of Text.num_type
   | Ref_type of Text.heap_type
   | Any
   | Something
-
-let typ_equal t1 t2 =
-  match (t1, t2) with
-  | Num_type t1, Num_type t2 -> Text.num_type_eq t1 t2
-  | Ref_type t1, Ref_type t2 -> Text.heap_type_eq t1 t2
-  | Any, _ | _, Any -> true
-  | Something, _ | _, Something -> true
-  | _, _ -> false
 
 let sp fmt () = Fmt.string fmt " "
 
@@ -63,10 +59,6 @@ module Env = struct
     ; modul : Binary.Module.t
     ; refs : (int, unit) Hashtbl.t
     }
-
-  let type_get i modul =
-    if i >= Array.length modul.types then Error (`Unknown_type (Text.Raw i))
-    else Ok (Array.get modul.types i)
 
   let local_get i env =
     match Index.Map.find_opt i env.locals with
@@ -132,6 +124,16 @@ let itype = function Text.S32 -> i32 | S64 -> i64
 
 let ftype = function Text.S32 -> f32 | S64 -> f64
 
+(* TODO: Maybe add the type id to Bt_raw to avoid having to look it this way? *)
+let get_func_type_id (env : Env.t) i =
+  let typ =
+    match env.modul.func.(i) with
+    | Origin.Local { type_f = Bt_raw (_, typ); _ } -> typ
+    | Imported { typ = Bt_raw (_, typ); _ } -> typ
+  in
+  Array.find_index (fun (_, typ') -> Text.func_type_eq typ typ') env.modul.types
+
+(* TODO: move type matching functions outside of the stack module? *)
 module Stack : sig
   type t = typ list
 
@@ -154,7 +156,7 @@ module Stack : sig
     -> Text.heap_type
     -> bool Result.t
 
-  val match_types : Module.t -> typ -> typ -> bool Result.t
+  val match_types : ?subtype:bool -> Module.t -> typ -> typ -> bool Result.t
 
   val pp : t Fmt.t
 
@@ -176,7 +178,7 @@ end = struct
   (* TODO: replace this by a comparison function, that returns 0 if the types
      are equal, and -1 if typ1 is a subtype of typ2, 1 otherwise *)
   let match_heap_type ?(subtype = false) modul required got =
-    match (required, got) with
+    match (got, required) with
     | Text.Func_ht, Text.Func_ht -> Ok true
     | Extern_ht, Extern_ht -> Ok true
     | TypeUse (Text _id), _ | _, TypeUse (Text _id) -> assert false
@@ -191,17 +193,17 @@ end = struct
         && List.for_all2 Text.val_type_eq rt1 rt2
       in
       Ok res
-    | TypeUse (Raw id), Func_ht when subtype ->
-      let* _, (pt, rt) = Env.type_get id modul in
-      Ok (List.is_empty pt && List.is_empty rt)
+    | TypeUse (Raw _), Func_ht when subtype -> Ok true
     | _ -> Ok false
 
-  let match_types env required got =
+  let match_types ?subtype env required got =
     match (required, got) with
     | Something, _ | _, Something -> Ok true
     | Any, _ | _, Any -> Ok true
     | Num_type required, Num_type got -> match_num_type required got
-    | Ref_type required, Ref_type got -> match_heap_type env required got
+    | Ref_type required, Ref_type got ->
+      (* TODO: reorder *)
+      match_heap_type ?subtype env required got
     | Num_type _, Ref_type _ | Ref_type _, Num_type _ -> Ok false
 
   let rec equal env s s' =
@@ -214,7 +216,7 @@ end = struct
       let* b = equal env tl (hd :: tl') in
       if b then Ok true else equal env (Any :: tl) tl'
     | hd :: tl, hd' :: tl' ->
-      let* b = match_types env hd hd' in
+      let* b = match_types ~subtype:true env hd hd' in
       if not b then Ok false else equal env tl tl'
 
   let rec match_prefix modul ~prefix ~stack : t option Result.t =
@@ -228,7 +230,7 @@ end = struct
       | _ -> Ok m2
       end
     | hd :: tl, hd' :: tl' ->
-      let* b = match_types modul hd hd' in
+      let* b = match_types ~subtype:true modul hd hd' in
       if b then match_prefix modul ~prefix:tl ~stack:tl' else Ok None
 
   let pop env required stack =
@@ -257,6 +259,16 @@ end = struct
     let* stack = pop modul pt stack in
     push rt stack
 end
+
+let typ_equal modul t1 t2 =
+  match (t1, t2) with
+  | Num_type t1, Num_type t2 -> Ok (Text.num_type_eq t1 t2)
+  | Ref_type t1, Ref_type t2 ->
+    let+ b = Stack.match_heap_type ~subtype:true modul t2 t1 in
+    b
+  | Any, _ | _, Any -> Ok true
+  | Something, _ | _, Something -> Ok true
+  | _, _ -> Ok false
 
 let is_func_type (ref_type : Text.ref_type) =
   match ref_type with _, Func_ht -> true | _ -> false
@@ -502,7 +514,7 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
   | Table_copy (id1, id2) ->
     let* _null1, typ1 = Env.table_type_get id1 env.modul in
     let* _null2, typ2 = Env.table_type_get id2 env.modul in
-    let* b = Stack.match_heap_type ~subtype:true env.modul typ2 typ1 in
+    let* b = Stack.match_heap_type ~subtype:true env.modul typ1 typ2 in
     if not b then Error (`Type_mismatch "table_copy")
     else Stack.pop env.modul [ i32; i32; i32 ] stack
   | Table_fill i ->
@@ -543,7 +555,11 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
     end
   | Ref_func i ->
     if not @@ Hashtbl.mem env.refs i then Error `Undeclared_function_reference
-    else Stack.push [ Ref_type Func_ht ] stack
+    else begin
+      match get_func_type_id env i with
+      | None -> assert false
+      | Some id -> Stack.push [ Ref_type (TypeUse (Raw id)) ] stack
+    end
   | Br i ->
     let* jt = Env.block_type_get i env in
     let* _stack = Stack.pop env.modul jt stack in
@@ -669,9 +685,8 @@ let typecheck_global (modul : Module.t) refs
     match real_type with
     | [ real_type ] ->
       let expected = typ_of_val_type @@ snd typ in
-      if not @@ typ_equal expected real_type then
-        Error (`Type_mismatch "typecheck global 1")
-      else Ok ()
+      let* b = typ_equal modul expected real_type in
+      if not b then Error (`Type_mismatch "typecheck global 1") else Ok ()
     | _whatever -> Error (`Type_mismatch "typecheck_global 2") )
 
 let typecheck_elem modul refs (elem : Elem.t) =
@@ -683,7 +698,8 @@ let typecheck_elem modul refs (elem : Elem.t) =
         match real_type with
         | [ real_type ] ->
           let expected_type = Ref_type elem_ty in
-          if not @@ typ_equal expected_type real_type then
+          let* b = typ_equal modul expected_type real_type in
+          if not b then
             Error
               (`Type_mismatch
                  (Fmt.str "expected %a got %a" pp_typ expected_type pp_typ

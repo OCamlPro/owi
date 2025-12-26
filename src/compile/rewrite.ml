@@ -315,8 +315,10 @@ let rewrite_table (assigned : Assigned.t)
 
 let rewrite_global (assigned : Assigned.t) (global : Text.Global.t) :
   Binary.Global.t Result.t =
+  let mut, vt = global.typ in
+  let* vt = rewrite_val_type assigned vt in
   let+ init = rewrite_expr assigned [] global.init in
-  { Binary.Global.id = global.id; init; typ = global.typ }
+  { Binary.Global.id = global.id; init; typ = (mut, vt) }
 
 let rewrite_elem (assigned : Assigned.t) (elem : Text.Elem.t) :
   Binary.Elem.t Result.t =
@@ -330,11 +332,13 @@ let rewrite_elem (assigned : Assigned.t) (elem : Text.Elem.t) :
       let+ expr = rewrite_expr assigned [] expr in
       Binary.Elem.Mode.Active (Some indice, expr)
   in
-  let+ init = list_map (rewrite_expr assigned []) elem.init in
+  let* init = list_map (rewrite_expr assigned []) elem.init in
+  let nullable, ht = elem.typ in
+  let+ ht = rewrite_heap_type assigned ht in
   { Binary.Elem.init
   ; mode
   ; id = elem.id
-  ; typ = elem.typ
+  ; typ = (nullable, ht)
   ; explicit_typ = elem.explicit_typ
   }
 
@@ -377,6 +381,13 @@ let rewrite_func (assigned : Assigned.t)
   let* (Bt_raw (_, (params, _)) as type_f) =
     rewrite_block_type assigned type_f
   in
+  let* locals =
+    list_map
+      (fun (n, vt) ->
+        let* vt = rewrite_val_type assigned vt in
+        Ok (n, vt) )
+      locals
+  in
   let+ body = rewrite_expr assigned (params @ locals) body in
   { Binary.Func.body; type_f; id; locals }
 
@@ -391,13 +402,17 @@ let modul (modul : Grouped.t) (assigned : Assigned.t) : Binary.Module.t Result.t
   let* global =
     array_map
       (Origin.monadic_map ~f_local:(rewrite_global assigned)
-         ~f_imported:Result.ok )
+         ~f_imported:(fun (m, val_type) ->
+         let+ val_type = rewrite_val_type assigned val_type in
+         (m, val_type) ) )
       modul.global
   in
   let* table =
     array_map
       (Origin.monadic_map ~f_local:(rewrite_table assigned)
-         ~f_imported:Result.ok )
+         ~f_imported:(fun ((l, (n, ht)) : Text.Table.Type.t) ->
+         let+ ht = rewrite_heap_type assigned ht in
+         (l, (n, ht)) ) )
       modul.table
   in
   let* elem = array_map (rewrite_elem assigned) modul.elem in

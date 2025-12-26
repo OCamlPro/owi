@@ -65,12 +65,17 @@ module State = struct
   let load_global (ls : 'f t) (import : Text.Global.Type.t Origin.imported) :
     global Result.t =
     let* global = load_from_module ls (fun (e : exports) -> e.globals) import in
-    let* () =
+    let* strict =
       match (fst import.typ, global.mut) with
       | Var, Const | Const, Var -> Error (`Incompatible_import_type import.name)
-      | Const, Const | Var, Var -> Ok ()
+      | Const, Const -> Ok false
+      | Var, Var -> Ok true
     in
-    if not @@ Text.val_type_eq (snd import.typ) global.typ then begin
+    if
+      not
+        ( if strict then Text.val_type_eq global.typ (snd import.typ)
+          else Text.is_subtype_val_type global.typ (snd import.typ) )
+    then begin
       Error (`Incompatible_import_type import.name)
     end
     else Ok global

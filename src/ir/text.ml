@@ -286,6 +286,16 @@ let ref_type_eq t1 t2 =
   | (Null, t1), (Null, t2) | (No_null, t1), (No_null, t2) -> heap_type_eq t1 t2
   | _ -> false
 
+let is_subtype_ref_type t1 t2 =
+  match (t1, t2) with
+  | (No_null, ht1), (Null, ht2) when heap_type_eq ht1 ht2 -> true
+  | (No_null, TypeUse _), (Null, Func_ht)
+  | (No_null, TypeUse _), (No_null, Func_ht)
+  | (Null, TypeUse _), (Null, Func_ht) ->
+    true
+  | (Null, t1), (Null, t2) | (No_null, t1), (No_null, t2) -> heap_type_eq t1 t2
+  | _ -> false
+
 let compare_nullable n1 n2 =
   match (n1, n2) with
   | Null, Null | No_null, No_null -> 0
@@ -311,6 +321,12 @@ let val_type_eq t1 t2 =
   match (t1, t2) with
   | Num_type t1, Num_type t2 -> num_type_eq t1 t2
   | Ref_type t1, Ref_type t2 -> ref_type_eq t1 t2
+  | _, _ -> false
+
+let is_subtype_val_type t1 t2 =
+  match (t1, t2) with
+  | Num_type t1, Num_type t2 -> num_type_eq t1 t2
+  | Ref_type t1, Ref_type t2 -> is_subtype_ref_type t1 t2
   | _, _ -> false
 
 let compare_val_type t1 t2 =
