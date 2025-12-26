@@ -24,9 +24,9 @@ let pp fmt = function
 
 (* TODO: Is this the same as Symbolic_ref.null? *)
 let null = function
-  | Text.Func_ht -> Func None
+  | Text.Func_ht | TypeUse _ -> Func None
+  (* TODO: is this correct? Are all nulls equal? *)
   | Extern_ht -> Extern None
-  | TypeOf _ -> (* TODO: Func None? *) assert false
 
 let func (f : Kind.func) = Func (Some f)
 

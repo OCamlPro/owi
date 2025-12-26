@@ -247,13 +247,13 @@ let pp_limits fmt { min; max } =
 (** Types *)
 
 type heap_type =
-  | TypeOf of indice
+  | TypeUse of indice
   (* abs_heap_type *)
   | Func_ht
   | Extern_ht
 
 let pp_heap_type fmt = function
-  | TypeOf id -> pf fmt "%a" pp_indice id
+  | TypeUse id -> pf fmt "%a" pp_indice id
   | Func_ht -> pf fmt "func"
   | Extern_ht -> pf fmt "extern"
 
@@ -261,16 +261,16 @@ let heap_type_eq t1 t2 =
   (* TODO: this is wrong *)
   match (t1, t2) with
   | Func_ht, Func_ht | Extern_ht, Extern_ht -> true
-  | TypeOf id1, TypeOf id2 -> compare_indice id1 id2 = 0
+  | TypeUse id1, TypeUse id2 -> compare_indice id1 id2 = 0
   | _, _ -> false
 
 let compare_heap_type t1 t2 =
   (* TODO: this is wrong *)
   match (t1, t2) with
   | Func_ht, Func_ht | Extern_ht, Extern_ht -> 0
-  | TypeOf id1, TypeOf id2 -> compare_indice id1 id2
-  | TypeOf _, _ -> 1
-  | _, TypeOf _ -> -1
+  | TypeUse id1, TypeUse id2 -> compare_indice id1 id2
+  | TypeUse _, _ -> 1
+  | _, TypeUse _ -> -1
   | Extern_ht, _ -> 1
   | _, Extern_ht -> -1
 
