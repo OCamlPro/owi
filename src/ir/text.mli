@@ -177,11 +177,15 @@ val pp_ref_type : ref_type Fmt.t
 
 val ref_type_eq : ref_type -> ref_type -> bool
 
+val is_subtype_ref_type : ref_type -> ref_type -> bool
+
 type nonrec val_type =
   | Num_type of num_type
   | Ref_type of ref_type
 
 val val_type_eq : val_type -> val_type -> bool
+
+val is_subtype_val_type : val_type -> val_type -> bool
 
 type nonrec param = string option * val_type
 
