@@ -75,20 +75,20 @@ let write_reftype buf nullable ht =
     match ht with
     | Text.Extern_ht -> Buffer.add_char buf '\x6F'
     | Func_ht -> Buffer.add_char buf '\x70'
-    | TypeOf (Raw id) -> write_char_indice buf '\x63' id
-    | TypeOf _ -> assert false
+    | TypeUse (Raw id) -> write_char_indice buf '\x63' id
+    | TypeUse _ -> assert false
   end
   | No_null -> begin
     Buffer.add_char buf '\x64';
     match ht with
     | Text.Func_ht -> Buffer.add_char buf '\x70'
     | Extern_ht -> Buffer.add_char buf '\x6F'
-    | TypeOf (Raw id) -> write_indice buf id
-    | TypeOf _ -> assert false
+    | TypeUse (Raw id) -> write_indice buf id
+    | TypeUse _ -> assert false
   end
-(* TODO: TypeOf (Text id) Unreachable because there are no text ids in binary
-  format, the proper way to do it is by redefining ref_type and heap_type for
-  the binary format but it requires lots of changes. *)
+(* TODO: TypeUse (Text id) Unreachable because there (should be) no text ids in
+  binary format, the proper way to do it is by redefining ref_type and heap_type
+  for the binary format but it requires lots of changes. *)
 
 let get_char_valtype = function
   | Text.Num_type I32 -> '\x7F'

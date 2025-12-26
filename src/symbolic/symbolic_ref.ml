@@ -23,10 +23,8 @@ let pp fmt = function
   | Func _ -> pf fmt "funcref"
 
 let null = function
-  | Text.Func_ht -> Func None
+  | Text.Func_ht | TypeUse _ -> Func None
   | Extern_ht -> Extern None
-  | TypeOf _ -> assert false
-(* TODO: Should this be Func None? *)
 
 let func (f : Kind.func) = Func (Some f)
 

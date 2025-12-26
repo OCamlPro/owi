@@ -4,19 +4,49 @@
 
 open Syntax
 
+let rewrite_heap_type (assigned : Assigned.t) (ht : Text.heap_type) :
+  Text.heap_type Result.t =
+  match ht with
+  | Text.TypeUse id ->
+    let* id = Assigned.find_type assigned id in
+    Ok (Text.TypeUse (Raw id))
+  | _ -> Ok ht
+
+let rewrite_val_type (assigned : Assigned.t) (vt : Text.val_type) :
+  Text.val_type Result.t =
+  match vt with
+  | Text.Ref_type (n, ht) ->
+    let* ht = rewrite_heap_type assigned ht in
+    Ok (Text.Ref_type (n, ht))
+  | _ -> Ok vt
+
+let rewrite_func_type (assigned : Assigned.t) ((param, res) : Text.func_type) :
+  Text.func_type Result.t =
+  let* param' =
+    list_map
+      (fun (n, vt) ->
+        let* vt = rewrite_val_type assigned vt in
+        Ok (n, vt) )
+      param
+  in
+  let* res' = list_map (rewrite_val_type assigned) res in
+  Ok (param', res')
+
 let rewrite_block_type (assigned : Assigned.t) (block_type : Text.block_type) :
   Binary.block_type Result.t =
   match block_type with
   | Bt_ind id ->
     let* idx = Assigned.find_type assigned id in
-    let+ t =
+    let* t =
       match Assigned.get_type assigned idx with
       | None -> Error (`Unknown_type id)
       | Some v -> Ok v
     in
-    Binary.Bt_raw (Some idx, t)
+    let* t = rewrite_func_type assigned t in
+    Ok (Binary.Bt_raw (Some idx, t))
   | Bt_raw (_, func_type) ->
     let idx = Assigned.find_raw_type assigned func_type in
+    let* func_type = rewrite_func_type assigned func_type in
     Ok (Binary.Bt_raw (Some idx, func_type))
 
 let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
@@ -255,7 +285,9 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
       let+ id = Assigned.find_memory assigned id in
       Binary.Memory_grow id
     | V_ibinop (shape, op) -> Ok (Binary.V_ibinop (shape, op))
-    | Ref_null t -> Ok (Binary.Ref_null t)
+    | Ref_null t ->
+      let* t = rewrite_heap_type assigned t in
+      Ok (Binary.Ref_null t)
   and expr (e : Text.expr Annotated.t) (loop_count, block_ids) :
     Binary.expr Annotated.t Result.t =
     let+ e =
@@ -269,13 +301,17 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
   in
   expr iexpr (0, [])
 
-let rewrite_table (assigned : Assigned.t) ({ id; typ; init } : Text.Table.t) :
+let rewrite_table (assigned : Assigned.t)
+  ({ id; typ = limits, (null, ht); init } : Text.Table.t) :
   Binary.Table.t Result.t =
   match init with
-  | None -> Ok { Binary.Table.id; typ; init = None }
+  | None ->
+    let* ht = rewrite_heap_type assigned ht in
+    Ok { Binary.Table.id; typ = (limits, (null, ht)); init = None }
   | Some e ->
+    let* ht = rewrite_heap_type assigned ht in
     let+ e = rewrite_expr assigned [] e in
-    { Binary.Table.id; typ; init = Some e }
+    { Binary.Table.id; typ = (limits, (null, ht)); init = Some e }
 
 let rewrite_global (assigned : Assigned.t) (global : Text.Global.t) :
   Binary.Global.t Result.t =
@@ -344,7 +380,10 @@ let rewrite_func (assigned : Assigned.t)
   let+ body = rewrite_expr assigned (params @ locals) body in
   { Binary.Func.body; type_f; id; locals }
 
-let rewrite_types (t : Text.func_type) : Text.Typedef.t Result.t = Ok (None, t)
+let rewrite_types (assigned : Assigned.t) (ft : Text.func_type) :
+  Text.Typedef.t Result.t =
+  let* ft = rewrite_func_type assigned ft in
+  Ok (None, ft)
 
 let modul (modul : Grouped.t) (assigned : Assigned.t) : Binary.Module.t Result.t
     =
@@ -370,7 +409,9 @@ let modul (modul : Grouped.t) (assigned : Assigned.t) : Binary.Module.t Result.t
     let runtime = Origin.monadic_map ~f_local ~f_imported in
     array_map runtime modul.func
   in
-  let* types = array_map rewrite_types (Assigned.get_types assigned) in
+  let* types =
+    array_map (rewrite_types assigned) (Assigned.get_types assigned)
+  in
   let+ start =
     match modul.start with
     | None -> Ok None
