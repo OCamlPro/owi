@@ -74,6 +74,7 @@ type err =
   | `Out_of_bounds_memory_access
   | `Undefined_element
   | `Uninitialized_element of int
+  | `Uninitialized_local of int
   | `Integer_overflow
   | `Integer_divide_by_zero
   | `Conversion_to_integer

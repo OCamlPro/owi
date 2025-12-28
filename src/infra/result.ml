@@ -73,6 +73,7 @@ type err =
   | `Out_of_bounds_memory_access
   | `Undefined_element
   | `Uninitialized_element of int
+  | `Uninitialized_local of int
   | `Integer_overflow
   | `Integer_divide_by_zero
   | `Conversion_to_integer
@@ -165,6 +166,7 @@ let rec err_to_string = function
   | `Out_of_bounds_memory_access -> "out of bounds memory access"
   | `Undefined_element -> "undefined element"
   | `Uninitialized_element fun_i -> Fmt.str "uninitialized element %i" fun_i
+  | `Uninitialized_local i -> Fmt.str "uninitialized local %i" i
   | `Integer_overflow -> "integer overflow"
   | `Integer_divide_by_zero -> "integer divide by zero"
   | `Conversion_to_integer -> "invalid conversion to integer"
@@ -270,5 +272,6 @@ let err_to_exit_code = function
   | `Out_of_bounds_table_access -> 91
   | `Undefined_element -> 92
   | `Uninitialized_element _ -> 93
-  | `Unreachable -> 94
-  | `Invalid_character_in_memory -> 95
+  | `Uninitialized_local _ -> 94
+  | `Unreachable -> 95
+  | `Invalid_character_in_memory -> 96
