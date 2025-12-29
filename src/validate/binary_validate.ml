@@ -642,7 +642,7 @@ let typecheck_function (modul : Module.t) func refs =
     let* b = Stack.equal modul required stack in
     if not b then Error (`Type_mismatch "typecheck_function") else Ok ()
 
-let typecheck_const_instr (modul : Module.t) refs stack instr =
+let typecheck_const_instr ~is_init (modul : Module.t) refs stack instr =
   match instr.Annotated.raw with
   | I32_const _ -> Stack.push [ i32 ] stack
   | I64_const _ -> Stack.push [ i64 ] stack
@@ -659,7 +659,8 @@ let typecheck_const_instr (modul : Module.t) refs stack instr =
     else
       let* mut, typ =
         match modul.global.(i) with
-        | Origin.Local { typ; _ } | Imported { typ; _ } -> Ok typ
+        | Origin.Local _ when is_init -> Error (`Unknown_global (Text.Raw i))
+        | Local { typ; _ } | Imported { typ; _ } -> Ok typ
       in
       let* () =
         match mut with
@@ -673,8 +674,10 @@ let typecheck_const_instr (modul : Module.t) refs stack instr =
     Stack.push [ t ] stack
   | _ -> Error `Constant_expression_required
 
-let typecheck_const_expr (modul : Module.t) refs expr =
-  list_fold_left (typecheck_const_instr modul refs) [] expr.Annotated.raw
+let typecheck_const_expr ?(is_init = false) (modul : Module.t) refs expr =
+  list_fold_left
+    (typecheck_const_instr ~is_init modul refs)
+    [] expr.Annotated.raw
 
 let typecheck_global (modul : Module.t) refs
   (global : (Global.t, Text.Global.Type.t) Origin.t) =
@@ -785,12 +788,19 @@ let check_limit { Text.min; max } =
   | Some max ->
     if min > max then Error `Size_minimum_greater_than_maximum else Ok ()
 
-let validate_tables modul =
+let validate_tables modul refs =
   array_iter
     (function
-      | Origin.Local Table.{ typ = limits, _; _ }
-      | Imported { typ = limits, _; _ } ->
-        check_limit limits )
+      | Origin.Local Table.{ typ = limits, _; init; _ } ->
+        let* () =
+          match init with
+          | None -> Ok ()
+          | Some init ->
+            let* _ = typecheck_const_expr ~is_init:true modul refs init in
+            Ok ()
+        in
+        check_limit limits
+      | Imported { typ = limits, _; _ } -> check_limit limits )
     modul.table
 
 let validate_mem modul =
@@ -816,7 +826,7 @@ let modul (modul : Module.t) =
   let* () = array_iter (typecheck_data modul refs) modul.data in
   let* () = typecheck_start modul in
   let* () = validate_exports modul in
-  let* () = validate_tables modul in
+  let* () = validate_tables modul refs in
   let* () = validate_mem modul in
   Array.iter
     (fun (export : Export.t) -> Hashtbl.add refs export.id ())
