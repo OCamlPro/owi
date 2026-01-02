@@ -712,6 +712,12 @@ let rec read_instr types input =
     let+ funcidx, input = read_indice input in
     (Ref_func funcidx, input)
   | '\xD4' -> Ok (Ref_as_non_null, input)
+  | '\xD5' ->
+    let+ idx, input = read_indice input in
+    (Br_on_null idx, input)
+  | '\xD6' -> 
+    let+ idx, input = read_indice input in
+    (Br_on_non_null idx, input)
   | '\xFC' -> read_FC input
   | '\xFD' -> read_FD input
   | c -> parse_fail "illegal opcode %2x" (Char.code c)

@@ -118,6 +118,8 @@ type instr =
   | Br of indice
   | Br_if of indice
   | Br_table of indice array * indice
+  | Br_on_null of indice
+  | Br_on_non_null of indice
   | Return
   | Return_call of indice
   | Return_call_indirect of indice * block_type
@@ -252,6 +254,8 @@ let rec pp_instr ~short fmt = function
   | Br_if id -> pf fmt "br_if %a" pp_indice id
   | Br_table (ids, id) ->
     pf fmt "br_table %a %a" (array ~sep:sp pp_indice) ids pp_indice id
+  | Br_on_null id -> pf fmt "br_on_null %a" pp_indice id
+  | Br_on_non_null id -> pf fmt "br_on_non_null %a" pp_indice id
   | Return -> pf fmt "return"
   | Return_call id -> pf fmt "return_call %a" pp_indice id
   | Return_call_indirect (tbl_id, ty_id) ->
@@ -316,7 +320,7 @@ and iter_instr f instr =
       | Memory_copy _ | Memory_init _ | Data_drop _ | Nop | Unreachable | Br _
       | Br_if _
       | Br_table (_, _)
-      | Return | Return_call _
+      | Br_on_null _ | Br_on_non_null _ | Return | Return_call _
       | Return_call_indirect (_, _)
       | Return_call_ref _ | Call _
       | Call_indirect (_, _)

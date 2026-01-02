@@ -536,7 +536,7 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
     Stack.push [ i32 ] stack
   | Ref_as_non_null ->
     let* stack = Stack.pop_ref stack in
-    Stack.push [ Ref_type Func_ht ] stack
+    Stack.push [ Any ] stack
     (* TODO: The type can be Something/Any, and if its a Ref_type the heap_type
       can be a TypeUse or Extern_ht. The pushed type should account for that
       and restrict whatever the type is to non_null. *)
@@ -595,6 +595,17 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
         branches
     in
     Ok [ any ]
+  | Br_on_null i ->
+    let* stack = Stack.pop_ref stack in
+    let* jt = Env.block_type_get i env in
+    let* _stack = Stack.pop env.modul jt stack in
+    (* TODO: must restrict the popped ref as a non-nullable ref *)
+    Stack.push [ Any ] stack
+  | Br_on_non_null i ->
+    let* stack = Stack.pop_ref stack in
+    let* jt = Env.block_type_get i env in
+    let* _stack = Stack.pop env.modul jt stack in
+    Ok stack
   | Table_get i ->
     let* _null, t = Env.table_type_get i env.modul in
     let* stack = Stack.pop env.modul [ i32 ] stack in
