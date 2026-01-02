@@ -990,6 +990,15 @@ struct
       let r, stack = Stack.pop_as_ref stack in
       let is_null = Ref.is_null r |> Boolean.of_bool in
       st @@ Stack.push_bool stack is_null
+    | Ref_as_non_null ->
+      let r, stack = Stack.pop_as_ref stack in
+      let is_null = Ref.is_null r in
+      if is_null then
+        Choice.trap
+          (`Type_mismatch
+             "ref.as_non_null expected a non-null reference but got null" )
+      else st @@ Stack.push_ref stack r
+      (* TODO: restrict to non_null refs *)
     | Ref_func i ->
       let f = Env.get_func env i in
       st @@ Stack.push_ref stack (Ref.func f)

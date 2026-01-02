@@ -255,6 +255,7 @@ let rewrite_expr (assigned : Assigned.t) ?known_globals
     | F_convert_i (nn1, nn2, sx) -> Ok (Binary.F_convert_i (nn1, nn2, sx))
     | I_trunc_f (nn1, nn2, sx) -> Ok (Binary.I_trunc_f (nn1, nn2, sx))
     | I_trunc_sat_f (nn1, nn2, sx) -> Ok (Binary.I_trunc_sat_f (nn1, nn2, sx))
+    | Ref_as_non_null -> Ok Binary.Ref_as_non_null
     | Ref_is_null -> Ok Binary.Ref_is_null
     | F_binop (nn, op) -> Ok (Binary.F_binop (nn, op))
     | F32_const v -> Ok (Binary.F32_const v)

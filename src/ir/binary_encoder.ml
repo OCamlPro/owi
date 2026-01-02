@@ -459,6 +459,7 @@ let rec write_instr buf instr =
     add_char '\xD0';
     write_reftype buf Text.Null rt
   | Ref_is_null -> add_char '\xD1'
+  | Ref_as_non_null -> add_char '\xD4'
   | Ref_func idx -> write_char_indice buf '\xD2' idx
   | I_trunc_sat_f (S32, S32, S) -> write_fc buf 0
   | I_trunc_sat_f (S32, S32, U) -> write_fc buf 1

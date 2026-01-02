@@ -432,6 +432,7 @@ type instr =
   (* Reference instructions *)
   | Ref_null of heap_type
   | Ref_is_null
+  | Ref_as_non_null
   | Ref_func of indice
   (* Parametric instructions *)
   | Drop
@@ -523,6 +524,7 @@ let rec pp_instr ~short fmt = function
   | F_reinterpret_i (n, n') -> pf fmt "f%a.reinterpret_i%a" pp_nn n pp_nn n'
   | Ref_null t -> pf fmt "ref.null %a" pp_heap_type t
   | Ref_is_null -> pf fmt "ref.is_null"
+  | Ref_as_non_null -> pf fmt "ref.as_non_null"
   | Ref_func fid -> pf fmt "ref.func %a" pp_indice fid
   | Drop -> pf fmt "drop"
   | Select vt -> begin
