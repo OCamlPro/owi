@@ -71,6 +71,7 @@ type instr =
   (* Reference instructions *)
   | Ref_null of Text.heap_type
   | Ref_is_null
+  | Ref_as_non_null
   | Ref_func of indice
   (* Parametric instructions *)
   | Drop
@@ -166,6 +167,7 @@ let rec pp_instr ~short fmt = function
     pf fmt "f%a.reinterpret_i%a" Text.pp_nn n Text.pp_nn n'
   | Ref_null t -> pf fmt "ref.null %a" Text.pp_heap_type t
   | Ref_is_null -> pf fmt "ref.is_null"
+  | Ref_as_non_null -> pf fmt "ref.as_non_null"
   | Ref_func fid -> pf fmt "ref.func %a" pp_indice fid
   | Drop -> pf fmt "drop"
   | Select vt -> begin
@@ -294,9 +296,10 @@ and iter_instr f instr =
       | F_convert_i (_, _, _)
       | I_reinterpret_f (_, _)
       | F_reinterpret_i (_, _)
-      | Ref_null _ | Ref_is_null | Ref_func _ | Drop | Select _ | Local_get _
-      | Local_set _ | Local_tee _ | Global_get _ | Global_set _ | Table_get _
-      | Table_set _ | Table_size _ | Table_grow _ | Table_fill _
+      | Ref_null _ | Ref_is_null | Ref_as_non_null | Ref_func _ | Drop
+      | Select _ | Local_get _ | Local_set _ | Local_tee _ | Global_get _
+      | Global_set _ | Table_get _ | Table_set _ | Table_size _ | Table_grow _
+      | Table_fill _
       | Table_copy (_, _)
       | Table_init (_, _)
       | Elem_drop _
@@ -536,6 +539,9 @@ module Module = struct
       match m.func.(id) with
       | Local f -> Some f.type_f
       | Imported i -> Some i.typ
+
+  let get_type id m =
+    if id >= Array.length m.types then None else Some m.types.(id)
 
   (** Exports *)
 

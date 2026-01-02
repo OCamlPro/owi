@@ -370,6 +370,7 @@ module Text : sig
     (* Reference instructions *)
     | Ref_null of heap_type
     | Ref_is_null
+    | Ref_as_non_null
     | Ref_func of indice
     (* Parametric instructions *)
     | Drop
@@ -616,6 +617,7 @@ module Binary : sig
     (* Reference instructions *)
     | Ref_null of Text.heap_type
     | Ref_is_null
+    | Ref_as_non_null
     | Ref_func of indice
     (* Parametric instructions *)
     | Drop

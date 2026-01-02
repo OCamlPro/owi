@@ -60,6 +60,8 @@ module Env = struct
     ; refs : (int, unit) Hashtbl.t
     }
 
+  let type_get = Binary.Module.get_type
+
   let local_get i env =
     match Index.Map.find_opt i env.locals with
     | None -> Error (`Unknown_local (Text.Raw i))
@@ -457,13 +459,15 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
     let* pt, rt = Env.func_get i env.modul in
     let* stack = Stack.pop env.modul (List.rev_map typ_of_pt pt) stack in
     Stack.push (List.rev_map typ_of_val_type rt) stack
-  | Call_ref _t ->
-    let+ stack = Stack.pop_ref stack in
-    (* TODO:
-       let bt = Env.type_get t env in
-         Stack.pop_push (Some bt) stack
-    *)
-    stack
+  | Call_ref t ->
+    let* stack = Stack.pop_ref stack in
+    begin match Env.type_get t env.modul with
+    | None -> Error (`Unknown_type (Raw t))
+    | Some (_, (pt, rt)) ->
+      let* stack = Stack.pop env.modul (List.rev_map typ_of_pt pt) stack in
+      let* stack = Stack.push (List.rev_map typ_of_val_type rt) stack in
+      Ok stack
+    end
   | Return_call i ->
     let* pt, rt = Env.func_get i env.modul in
     let* b =
@@ -530,6 +534,12 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
   | Ref_is_null ->
     let* stack = Stack.pop_ref stack in
     Stack.push [ i32 ] stack
+  | Ref_as_non_null ->
+    let* stack = Stack.pop_ref stack in
+    Stack.push [ Ref_type Func_ht ] stack
+    (* TODO: The type can be Something/Any, and if its a Ref_type the heap_type
+      can be a TypeUse or Extern_ht. The pushed type should account for that
+      and restrict whatever the type is to non_null. *)
   | Ref_null rt -> Stack.push [ Ref_type rt ] stack
   | Elem_drop id ->
     let* _elem_typ = Env.elem_type_get id env.modul in

@@ -42,6 +42,7 @@ type instr =
   (* Reference instructions *)
   | Ref_null of Text.heap_type
   | Ref_is_null
+  | Ref_as_non_null
   | Ref_func of indice
   (* Parametric instructions *)
   | Drop
@@ -206,6 +207,8 @@ module Module : sig
     modul_name:string -> func_name:string -> typ:block_type -> t -> t
 
   val get_func_type : indice -> t -> block_type option
+
+  val get_type : indice -> t -> Text.Typedef.t option
 
   val find_imported_func_index :
     modul_name:string -> func_name:string -> t -> indice option

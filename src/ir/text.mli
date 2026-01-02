@@ -243,6 +243,7 @@ type instr =
   (* Reference instructions *)
   | Ref_null of heap_type
   | Ref_is_null
+  | Ref_as_non_null
   | Ref_func of indice
   (* Parametric instructions *)
   | Drop

@@ -131,6 +131,7 @@ let rec convert_instr : Binary.instr -> Text.instr = function
   | F_convert_i (nn1, nn2, sx) -> F_convert_i (nn1, nn2, sx)
   | I_trunc_f (nn1, nn2, sx) -> I_trunc_f (nn1, nn2, sx)
   | I_trunc_sat_f (nn1, nn2, sx) -> I_trunc_sat_f (nn1, nn2, sx)
+  | Ref_as_non_null -> Ref_as_non_null
   | Ref_is_null -> Ref_is_null
   | F_binop (nn, op) -> F_binop (nn, op)
   | F32_const v -> F32_const v
