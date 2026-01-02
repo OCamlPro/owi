@@ -1043,6 +1043,58 @@ struct
       in
       let state = { state with stack } in
       if b then State.branch state i else Choice.return (State.Continue state)
+      (* TODO: unsure about `prio_true` and `prio_false` *)
+    | Br_on_null i ->
+      let counter_next_false, counter_next_true =
+        match state.pc.raw with
+        | [] -> (Int.max_int, Atomic.get instr.Annotated.instr_counter - 1)
+        | h :: _ ->
+          let v = Atomic.get h.Annotated.instr_counter in
+          (v, Atomic.get instr.Annotated.instr_counter - 1 - v)
+      in
+      let prio_true =
+        Prio.from_annotated counter_next_true !(instr.Annotated.d_true)
+      in
+      let prio_false =
+        Prio.from_annotated counter_next_false !(instr.Annotated.d_false)
+      in
+      let r, stack = Stack.pop_as_ref stack in
+      let is_null = Ref.is_null r |> Boolean.of_concrete in
+      let* is_null, stack =
+        let* is_null = select is_null ~prio_true ~prio_false in
+        return (is_null, stack)
+      in
+      let state = { state with stack } in
+      if is_null then State.branch state i
+      else
+        (* TODO: restrict the type of r to non-nullable refs *)
+        let stack = Stack.push_ref stack r in
+        Choice.return (State.Continue { state with stack })
+    | Br_on_non_null i ->
+      let counter_next_false, counter_next_true =
+        match state.pc.raw with
+        | [] -> (Int.max_int, Atomic.get instr.Annotated.instr_counter - 1)
+        | h :: _ ->
+          let v = Atomic.get h.Annotated.instr_counter in
+          (v, Atomic.get instr.Annotated.instr_counter - 1 - v)
+      in
+      let prio_true =
+        Prio.from_annotated counter_next_true !(instr.Annotated.d_true)
+      in
+      let prio_false =
+        Prio.from_annotated counter_next_false !(instr.Annotated.d_false)
+      in
+      let r, stack = Stack.pop_as_ref stack in
+      let* is_non_null, stack =
+        let is_non_null = (not (Ref.is_null r)) |> Boolean.of_concrete in
+        let* is_non_null = select is_non_null ~prio_true ~prio_false in
+        return (is_non_null, stack)
+      in
+      let state = { state with stack } in
+      if is_non_null then
+        let stack = Stack.push_ref stack r in
+        State.branch { state with stack } i
+      else Choice.return (State.Continue state)
     | Loop (_id, bt, e) -> exec_block state ~is_loop:true bt e
     | Block (_id, bt, e) -> exec_block state ~is_loop:false bt e
     | Memory_size memid ->

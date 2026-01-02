@@ -417,6 +417,8 @@ module Text : sig
     | Br of indice
     | Br_if of indice
     | Br_table of indice array * indice
+    | Br_on_null of indice
+    | Br_on_non_null of indice
     | Return
     | Return_call of indice
     | Return_call_indirect of indice * block_type
@@ -664,6 +666,8 @@ module Binary : sig
     | Br of indice
     | Br_if of indice
     | Br_table of indice array * indice
+    | Br_on_null of indice
+    | Br_on_non_null of indice
     | Return
     | Return_call of indice
     | Return_call_indirect of indice * block_type

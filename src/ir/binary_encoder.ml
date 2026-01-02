@@ -226,6 +226,8 @@ let rec write_instr buf instr =
     add_char '\x0E';
     encode_vector_array buf idxs write_indice;
     write_indice buf idx
+  | Br_on_null idx -> write_char_indice buf '\xD5' idx
+  | Br_on_non_null idx -> write_char_indice buf '\xD6' idx
   | Return -> add_char '\x0F'
   | Call idx -> write_char_indice buf '\x10' idx
   | Call_indirect (idx, bt) ->

@@ -129,6 +129,12 @@ let rewrite_expr (assigned : Assigned.t) ?known_globals
     | Br id ->
       let+ id = block_id_to_raw (loop_count, block_ids) id in
       Binary.Br id
+    | Br_on_null id ->
+      let+ id = block_id_to_raw (loop_count, block_ids) id in
+      Binary.Br_on_null id
+    | Br_on_non_null id ->
+      let+ id = block_id_to_raw (loop_count, block_ids) id in
+      Binary.Br_on_non_null id
     | Call id ->
       let+ id = Assigned.find_func assigned id in
       Binary.Call id

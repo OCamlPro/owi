@@ -269,6 +269,8 @@ let plain_instr :=
     let n = Array.length xs in
     Br_table (Array.sub xs 0 (n - 1), xs.(n - 1))
   }
+  | BR_ON_NULL; ~ = indice; <Br_on_null>
+  | BR_ON_NON_NULL; ~ = indice; <Br_on_non_null>
   | RETURN; { Return }
   | RETURN_CALL; ~ = indice; <Return_call>
   | RETURN_CALL_REF; ~ = indice; { Return_call_ref (Bt_ind indice) }

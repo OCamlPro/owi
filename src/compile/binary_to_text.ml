@@ -20,6 +20,12 @@ let rec convert_instr : Binary.instr -> Text.instr = function
   | Br id ->
     let id = convert_indice id in
     Br id
+  | Br_on_null id ->
+    let id = convert_indice id in
+    Br_on_null id
+  | Br_on_non_null id ->
+    let id = convert_indice id in
+    Br_on_non_null id
   | Call id ->
     let id = convert_indice id in
     Call id
