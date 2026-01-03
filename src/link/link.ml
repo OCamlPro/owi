@@ -201,7 +201,9 @@ let load_table (ls : 'f State.t) (import : Text.Table.Type.t Origin.imported) :
   let* t =
     State.load_from_module ls (fun (e : State.exports) -> e.tables) import
   in
-  if table_types_are_compatible typ (t.limits, t.typ) then Ok t
+  let data_size = Concrete_table.size t in
+  if table_types_are_compatible typ ({ t.limits with min = data_size }, t.typ)
+  then Ok t
   else Error (`Incompatible_import_type import.name)
 
 let eval_table ls (table : (Binary.Table.t, Text.Table.Type.t) Origin.t) :
