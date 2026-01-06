@@ -117,8 +117,6 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
               (Printexc.raw_backtrace_to_string backtrace) ) )
       domains
   in
-  (* For testing only *)
-  wait_for_all_domains ();
 
   if Log.is_bench_enabled () then begin
     let bench_stats = Thread_with_memory.bench_stats thread in
@@ -129,8 +127,9 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
     Benchmark.print_final ~bench_stats ~execution_time_a:run_time
       ~execution_time_b ~wait_for_all_domains
   end
-  else if Log.is_debug_enabled () then begin
-    (* we only do this in debug mode because otherwise it makes performances very bad *)
+  else if Log.is_debug_enabled () || Landmark.profiling () then begin
+    (* we only do this in debug mode or when landmarks profiling is on because
+       otherwise it makes performances very bad *)
     wait_for_all_domains ()
   end;
 
