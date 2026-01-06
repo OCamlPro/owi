@@ -166,11 +166,13 @@
   mtime
   mtime.clock
   xmlm
-  domainPC)
+  domainPC
+  landmarks
+  landmarks-ppx)
  (flags
   (:standard -open Prelude))
  (preprocess
-  (pps sedlex.ppx))
+  (pps sedlex.ppx landmarks-ppx))
  (instrumentation
   (backend bisect_ppx --exclusions src/bisect.exclude)
   (deps bisect.exclude))
