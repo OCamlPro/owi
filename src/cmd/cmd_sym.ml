@@ -50,7 +50,7 @@ let run_file ~parameters ~source_file =
              during evaluation (OS, syntax error, etc.), except for Trap and Assert,
              which are handled here. Most of the computations are done in the Result
              monad, hence the let*. *)
-let cmd ~parameters ~source_file =
+let[@landmark "cmd"] cmd ~parameters ~source_file =
   let { Symbolic_parameters.exploration_strategy
       ; fail_mode
       ; workers

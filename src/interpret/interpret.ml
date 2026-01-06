@@ -1640,7 +1640,8 @@ struct
       | State.Continue state -> loop ~heartbeat state
       | State.Return res -> Choice.return res )
 
-  let exec_expr ~heartbeat envs env locals stack expr bt =
+  let[@landmark "exec_expr"] exec_expr ~heartbeat envs env locals stack expr bt
+      =
     let state : State.exec_state =
       let func_rt = match bt with None -> [] | Some rt -> rt in
       { stack

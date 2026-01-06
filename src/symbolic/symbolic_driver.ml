@@ -117,6 +117,8 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
               (Printexc.raw_backtrace_to_string backtrace) ) )
       domains
   in
+  (* For testing only *)
+  wait_for_all_domains ();
 
   if Log.is_bench_enabled () then begin
     let bench_stats = Thread_with_memory.bench_stats thread in

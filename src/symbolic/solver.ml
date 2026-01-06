@@ -23,12 +23,12 @@ let fresh solver_ty () =
   if Log.is_bench_enabled () then add_solver solver;
   solver
 
-let check (S (solver_module, s)) pc =
+let[@landmark "check"] check (S (solver_module, s)) pc =
   let module Solver = (val solver_module) in
   Solver.check_set s pc
 
-let model_of_path_condition (S (solver_module, s)) ~path_condition :
-  Smtml.Model.t Option.t =
+let[@landmark "model_of_path_condition"] model_of_path_condition
+  (S (solver_module, s)) ~path_condition : Smtml.Model.t Option.t =
   let exception Unknown in
   let module Solver = (val solver_module) in
   try
@@ -52,7 +52,8 @@ let model_of_path_condition (S (solver_module, s)) ~path_condition :
     Some model
   with Unknown -> None
 
-let model_of_set (S (solver_module, s)) ~symbol_scopes ~set =
+let[@landmark "model_of_set"] model_of_set (S (solver_module, s)) ~symbol_scopes
+  ~set =
   let module Solver = (val solver_module) in
   let symbols = Symbol_scope.only_symbols symbol_scopes in
   Solver.get_sat_model ~symbols s set
