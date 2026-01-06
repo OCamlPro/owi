@@ -42,6 +42,7 @@ depends: [
   "synchronizer" {>= "0.2"}
   "uutf" {>= "1.0.3"}
   "xmlm" {>= "1.4.0"}
+  "domainPC" {= "dev"}
   "odoc" {>= "3.0.0" & with-doc}
   "mdx" {with-test & >= "2.1"}
   "frama-c" {>= "29.0" & with-test}
@@ -81,4 +82,7 @@ post-messages: [
   "To fully utilize Owi, consider installing a solver such as Z3"
   "Join our community on Zulip: https://owi.zulipchat.com/"
   "Explore tutorials and documentation here: https://ocamlpro.github.io/owi/"
+]
+pin-depends: [
+  ["domainPC.dev" "git+https://github.com/hra687261/domainPC.git"]
 ]

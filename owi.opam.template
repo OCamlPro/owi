@@ -11,3 +11,6 @@ post-messages: [
   "Join our community on Zulip: https://owi.zulipchat.com/"
   "Explore tutorials and documentation here: https://ocamlpro.github.io/owi/"
 ]
+pin-depends: [
+  ["domainPC.dev" "git+https://github.com/hra687261/domainPC.git"]
+]
