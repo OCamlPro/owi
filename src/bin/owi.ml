@@ -173,6 +173,10 @@ let no_value =
   let doc = "do not display a value for each symbol" in
   Arg.(value & flag & info [ "no-value" ] ~doc)
 
+let no_worker_isolation =
+  let doc = "Do not force each worker to run on an isolated physical core." in
+  Arg.(value & flag & info [ "no-worker-isolation" ] ~doc)
+
 let opt_lvl =
   let doc = "specify which optimization level to use" in
   Arg.(value & opt string "3" & info [ "O" ] ~doc)
@@ -234,13 +238,10 @@ let unsafe =
 
 let workers =
   let doc =
-    "number of workers for symbolic execution. Defaults to the number of \
+    "Number of workers for symbolic execution. Defaults to the number of \
      physical cores."
   in
-  Arg.(
-    value
-    & opt int Processor.Query.core_count
-    & info [ "workers"; "w" ] ~doc ~absent:"n" )
+  Arg.(value & opt (some int) None & info [ "workers"; "w" ] ~doc ~absent:"n")
 
 let workspace =
   let doc = "write results and intermediate compilation artifacts to dir" in
@@ -259,6 +260,7 @@ let no_ite_for_select =
 let symbolic_parameters default_entry_point =
   let+ unsafe
   and+ workers
+  and+ no_worker_isolation
   and+ no_stop_at_failure
   and+ no_value
   and+ no_assert_failure_expression_printing
@@ -276,6 +278,7 @@ let symbolic_parameters default_entry_point =
   let use_ite_for_select = not no_ite_for_select in
   { Symbolic_parameters.unsafe
   ; workers
+  ; no_worker_isolation
   ; no_stop_at_failure
   ; no_value
   ; no_assert_failure_expression_printing
@@ -446,14 +449,15 @@ let iso_cmd =
   and+ solver
   and+ unsafe
   and+ workers
+  and+ no_worker_isolation
   and+ model_out_file
   and+ with_breadcrumbs
   and+ workspace in
 
   Cmd_iso.cmd ~deterministic_result_order ~fail_mode ~exploration_strategy
     ~files ~model_format ~no_assert_failure_expression_printing
-    ~no_stop_at_failure ~no_value ~solver ~unsafe ~workers ~workspace
-    ~model_out_file ~with_breadcrumbs
+    ~no_stop_at_failure ~no_value ~solver ~unsafe ~workers ~no_worker_isolation
+    ~workspace ~model_out_file ~with_breadcrumbs
 
 (* owi replay *)
 

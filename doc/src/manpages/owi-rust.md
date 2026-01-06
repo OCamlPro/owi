@@ -63,6 +63,9 @@ OPTIONS
        --no-value
            do not display a value for each symbol
 
+       --no-worker-isolation
+           Do not force each worker to run on an isolated physical core.
+
        -o FILE, --output=FILE
            Output the generated .wasm or .wat to FILE.
 
@@ -77,7 +80,7 @@ OPTIONS
            skip typechecking pass
 
        -w VAL, --workers=VAL (absent=n)
-           number of workers for symbolic execution. Defaults to the number
+           Number of workers for symbolic execution. Defaults to the number
            of physical cores.
 
        --with-breadcrumbs

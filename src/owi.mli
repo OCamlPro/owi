@@ -1216,7 +1216,8 @@ module Symbolic_parameters : sig
 
   type t =
     { unsafe : bool
-    ; workers : int
+    ; workers : Int.t Option.t
+    ; no_worker_isolation : Bool.t
     ; no_stop_at_failure : bool
     ; no_value : bool
     ; no_assert_failure_expression_printing : bool
@@ -1237,7 +1238,8 @@ end
 module Symbolic_driver : sig
   val handle_result :
        exploration_strategy:Symbolic_parameters.Exploration_strategy.t
-    -> workers:int
+    -> workers:Int.t Option.t
+    -> no_worker_isolation:Bool.t
     -> no_stop_at_failure:bool
     -> no_value:bool
     -> no_assert_failure_expression_printing:bool
@@ -1323,7 +1325,8 @@ module Cmd_iso : sig
     -> no_value:bool
     -> solver:Smtml.Solver_type.t
     -> unsafe:bool
-    -> workers:int
+    -> workers:Int.t Option.t
+    -> no_worker_isolation:Bool.t
     -> workspace:Fpath.t option
     -> model_out_file:Fpath.t option
     -> with_breadcrumbs:bool

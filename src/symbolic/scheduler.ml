@@ -59,27 +59,25 @@ module Make (Work_datastructure : Prio.S) = struct
       (fun f write_back -> inner (f ()) write_back)
       sched.work_queue
 
-  let spawn_worker sched
-    ~(at_worker_value : close_work_queue:(unit -> unit) -> 'a -> unit)
-    ~at_worker_init ~finally =
-    at_worker_init ();
-    Domain.spawn (fun () ->
-      Fun.protect ~finally (fun () ->
-        try
-          work sched
-            (at_worker_value ~close_work_queue:(fun () ->
-               Work_datastructure.close sched.work_queue ) )
-        with e ->
-          let e_s = Printexc.to_string e in
-          let bt = Printexc.get_raw_backtrace () in
-          let bt_s = Printexc.raw_backtrace_to_string bt in
-          let bt_s =
-            if String.equal "" bt_s then
-              "use OCAMLRUNPARAM=b to get the backtrace"
-            else bt_s
-          in
-          Log.err (fun m ->
-            m "a worker ended with exception %s, backtrace is: @\n@[<v>%s@]" e_s
-              bt_s );
-          Printexc.raise_with_backtrace e bt ) )
+  let run_worker sched
+    ~(at_worker_value : close_work_queue:(unit -> unit) -> 'a -> unit) ~finally
+      =
+    Fun.protect ~finally (fun () ->
+      try
+        work sched
+          (at_worker_value ~close_work_queue:(fun () ->
+             Work_datastructure.close sched.work_queue ) )
+      with e ->
+        let e_s = Printexc.to_string e in
+        let bt = Printexc.get_raw_backtrace () in
+        let bt_s = Printexc.raw_backtrace_to_string bt in
+        let bt_s =
+          if String.equal "" bt_s then
+            "use OCAMLRUNPARAM=b to get the backtrace"
+          else bt_s
+        in
+        Log.err (fun m ->
+          m "a worker ended with exception %s, backtrace is: @\n@[<v>%s@]" e_s
+            bt_s );
+        Printexc.raise_with_backtrace e bt )
 end
