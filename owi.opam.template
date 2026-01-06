@@ -13,4 +13,6 @@ post-messages: [
 ]
 pin-depends: [
   ["domainPC.dev" "git+https://github.com/hra687261/domainPC.git"]
+  ["landmarks.1.5" "git+https://github.com/hra687261/landmarks.git#cfc017b604f2c41ac0d8841f30a0b55b0d89cbaf"]
+  ["landmarks-ppx.1.5" "git+https://github.com/hra687261/landmarks.git#cfc017b604f2c41ac0d8841f30a0b55b0d89cbaf"]
 ]
