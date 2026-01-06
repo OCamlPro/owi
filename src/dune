@@ -165,7 +165,8 @@
   runtime_events
   mtime
   mtime.clock
-  xmlm)
+  xmlm
+  domainPC)
  (flags
   (:standard -open Prelude))
  (preprocess
