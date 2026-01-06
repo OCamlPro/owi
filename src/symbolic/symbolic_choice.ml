@@ -92,29 +92,32 @@ module CoreImpl = struct
         (fun f write_back -> handle_status (Schedulable.run f wls) write_back)
         sched.work_queue
 
+    let[@landmark "run_worker"] run_worker sched wls_init ~at_worker_value
+      ~at_worker_end () =
+      Fun.protect ~finally:at_worker_end (fun () ->
+        try
+          let wls = wls_init () in
+          work wls sched
+            (at_worker_value ~close_work_queue:(fun () ->
+               Work_datastructure.close sched.work_queue ) )
+        with e ->
+          let e_s = Printexc.to_string e in
+          let bt = Printexc.get_raw_backtrace () in
+          let bt_s = Printexc.raw_backtrace_to_string bt in
+          let bt_s =
+            if String.equal "" bt_s then
+              "use OCAMLRUNPARAM=b to get the backtrace"
+            else bt_s
+          in
+          Log.err (fun m ->
+            m "a worker ended with exception %s, backtrace is: @\n@[<v>%s@]" e_s
+              bt_s );
+          Printexc.raise_with_backtrace e bt )
+
     let spawn_worker sched wls_init ~at_worker_value ~at_worker_init
       ~at_worker_end =
       at_worker_init ();
-      DomainPC.spawn (fun () ->
-        Fun.protect ~finally:at_worker_end (fun () ->
-          try
-            let wls = wls_init () in
-            work wls sched
-              (at_worker_value ~close_work_queue:(fun () ->
-                 Work_datastructure.close sched.work_queue ) )
-          with e ->
-            let e_s = Printexc.to_string e in
-            let bt = Printexc.get_raw_backtrace () in
-            let bt_s = Printexc.raw_backtrace_to_string bt in
-            let bt_s =
-              if String.equal "" bt_s then
-                "use OCAMLRUNPARAM=b to get the backtrace"
-              else bt_s
-            in
-            Log.err (fun m ->
-              m "a worker ended with exception %s, backtrace is: @\n@[<v>%s@]"
-                e_s bt_s );
-            Printexc.raise_with_backtrace e bt ) )
+      DomainPC.spawn (run_worker sched wls_init ~at_worker_value ~at_worker_end)
   end
 
   module State = struct
