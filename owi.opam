@@ -42,6 +42,7 @@ depends: [
   "synchronizer" {>= "0.2"}
   "uutf" {>= "1.0.3"}
   "xmlm" {>= "1.4.0"}
+  "domainpc"
   "odoc" {>= "3.0.0" & with-doc}
   "mdx" {with-test & >= "2.1"}
   "frama-c" {>= "29.0" & with-test}
@@ -81,4 +82,9 @@ post-messages: [
   "To fully utilize Owi, consider installing a solver such as Z3"
   "Join our community on Zulip: https://owi.zulipchat.com/"
   "Explore tutorials and documentation here: https://ocamlpro.github.io/owi/"
+]
+pin-depends: [
+  ["domainpc.dev" "git+https://github.com/ocamlpro/domainpc.git"]
+  ["landmarks.1.5" "git+https://github.com/hra687261/landmarks.git#cfc017b604f2c41ac0d8841f30a0b55b0d89cbaf"]
+  ["landmarks-ppx.1.5" "git+https://github.com/hra687261/landmarks.git#cfc017b604f2c41ac0d8841f30a0b55b0d89cbaf"]
 ]

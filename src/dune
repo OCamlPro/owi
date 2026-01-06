@@ -136,6 +136,7 @@
  (libraries
   bos
   digestif
+  domainpc
   dune-build-info
   dune-site
   fmt

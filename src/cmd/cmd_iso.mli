@@ -9,7 +9,8 @@ val cmd :
   -> no_value:bool
   -> solver:Smtml.Solver_type.t
   -> unsafe:bool
-  -> workers:int
+  -> workers:Int.t Option.t
+  -> no_worker_isolation:Bool.t
   -> workspace:Fpath.t option
   -> model_out_file:Fpath.t option
   -> with_breadcrumbs:bool

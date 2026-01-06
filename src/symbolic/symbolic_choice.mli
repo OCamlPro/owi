@@ -52,10 +52,11 @@ val close_scope : unit -> unit t
 
 val run :
      Symbolic_parameters.Exploration_strategy.t
-  -> workers:int
+  -> workers:int option
   -> Smtml.Solver_type.t
   -> 'a t
   -> Thread.t
+  -> no_worker_isolation:bool
   -> at_worker_value:
        (close_work_queue:(unit -> unit) -> ('a, Bug.t) result * Thread.t -> unit)
   -> at_worker_init:(unit -> unit)

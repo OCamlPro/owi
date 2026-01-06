@@ -172,12 +172,15 @@ module Func = struct
       | R3 (a, b, c) -> [ elt_type a; elt_type b; elt_type c ]
       | R4 (a, b, c, d) -> [ elt_type a; elt_type b; elt_type c; elt_type d ]
 
-    let rec arg_type : type t r. (t, r) atype -> Binary.param_type = function
-      | Mem (_, tl) -> arg_type tl
-      | UArg tl -> arg_type tl
-      | Arg (hd, tl) -> (None, elt_type hd) :: arg_type tl
-      | NArg (name, hd, tl) -> (Some name, elt_type hd) :: arg_type tl
-      | Res -> []
+    let arg_type =
+      let rec aux : type t r. (t, r) atype -> Binary.param_type = function
+        | Mem (_, tl) -> aux tl
+        | UArg tl -> aux tl
+        | Arg (hd, tl) -> (None, elt_type hd) :: aux tl
+        | NArg (name, hd, tl) -> (Some name, elt_type hd) :: aux tl
+        | Res -> []
+      in
+      aux
 
     (* TODO: we could move this out, as it does not really depend on the functor's parameters *)
     let extern_type (Extern_func (Func (arg, res), _)) : Binary.func_type =
@@ -234,18 +237,24 @@ module Func = struct
 
       let label s (Elt v) = Elt_labeled (s, v)
 
-      let ( ^-> ) : type lr k a b.
-        (lr, k, a) t -> b func_type -> (a -> b) func_type =
-       fun a (Func (b, r)) ->
-        match a with
-        | Elt a -> Func (Arg (a, b), r)
-        | Elt_labeled (label, a) -> Func (NArg (label, a, b), r)
-        | Unit -> Func (UArg b, r)
-        | Memory id -> Func (Mem (id, b), r)
+      let ( ^-> ) =
+        let aux : type lr k a b.
+          (lr, k, a) t -> b func_type -> (a -> b) func_type =
+         fun a (Func (b, r)) ->
+          match a with
+          | Elt a -> Func (Arg (a, b), r)
+          | Elt_labeled (label, a) -> Func (NArg (label, a, b), r)
+          | Unit -> Func (UArg b, r)
+          | Memory id -> Func (Mem (id, b), r)
+        in
+        aux
 
-      let ( ^->. ) : type ll k kk a b.
-        (ll, k, a) t -> (lr, kk, b) t -> (a -> b m) func_type =
-       fun a b -> match b with Elt _ -> a ^-> r1 b | Unit -> a ^-> r0
+      let ( ^->. ) =
+        let aux : type ll k kk a b.
+          (ll, k, a) t -> (lr, kk, b) t -> (a -> b m) func_type =
+         fun a b -> match b with Elt _ -> a ^-> r1 b | Unit -> a ^-> r0
+        in
+        aux
 
       let ( ^->.. ) : type ll k a b1 b2.
            (ll, k, a) t
