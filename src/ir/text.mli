@@ -450,4 +450,6 @@ module Module : sig
     }
 
   val pp : t Fmt.t
+
+  val pp_fields : Format.formatter -> Field.t list -> unit
 end
