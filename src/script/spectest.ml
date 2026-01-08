@@ -59,155 +59,156 @@ let extern_m =
 let m =
   let open Wast in
   Text_module
-    { id = Some "spectest"
-    ; fields =
-        (let modul_name = "spectest_extern" in
-         [ Import
-             { modul_name
-             ; name = "print"
-             ; typ = Func (Some "print", Bt_raw (None, ([], [])))
-             }
-         ; Import
-             { modul_name
-             ; name = "print_i32"
-             ; typ =
-                 Func
-                   ( Some "print_i32"
-                   , Bt_raw (None, ([ (None, Num_type I32) ], [])) )
-             }
-         ; Import
-             { modul_name
-             ; name = "print_i64"
-             ; typ =
-                 Func
-                   ( Some "print_i64"
-                   , Bt_raw (None, ([ (None, Num_type I64) ], [])) )
-             }
-         ; Import
-             { modul_name
-             ; name = "print_f32"
-             ; typ =
-                 Func
-                   ( Some "print_f32"
-                   , Bt_raw (None, ([ (None, Num_type F32) ], [])) )
-             }
-         ; Import
-             { modul_name
-             ; name = "print_f64"
-             ; typ =
-                 Func
-                   ( Some "print_f64"
-                   , Bt_raw (None, ([ (None, Num_type F64) ], [])) )
-             }
-         ; Import
-             { modul_name
-             ; name = "print_i32_f32"
-             ; typ =
-                 Func
-                   ( Some "print_i32_f32"
-                   , Bt_raw
-                       ( None
-                       , ([ (None, Num_type I32); (None, Num_type F32) ], []) )
-                   )
-             }
-         ; Import
-             { modul_name
-             ; name = "print_f64_f64"
-             ; typ =
-                 Func
-                   ( Some "print_f64_f64"
-                   , Bt_raw
-                       ( None
-                       , ([ (None, Num_type F64); (None, Num_type F64) ], []) )
-                   )
-             }
-         ; Import
-             { modul_name
-             ; name = "func"
-             ; typ = Func (Some "func", Bt_raw (None, ([], [])))
-             }
-         ; Import
-             { modul_name
-             ; name = "func-i32"
-             ; typ =
-                 Func
-                   ( Some "func-i32"
-                   , Bt_raw (None, ([ (None, Num_type I32) ], [])) )
-             }
-         ; Import
-             { modul_name
-             ; name = "func->i32"
-             ; typ =
-                 Func (Some "func->i32", Bt_raw (None, ([], [ Num_type I32 ])))
-             }
-         ; Import
-             { modul_name
-             ; name = "func-i32->i32"
-             ; typ =
-                 Func
-                   ( Some "func-i32->i32"
-                   , Bt_raw (None, ([ (None, Num_type I32) ], [ Num_type I32 ]))
-                   )
-             }
-         ; Mem (Some "memory", { min = 1; max = Some 2 })
-         ; Table
-             { id = Some "table"
-             ; typ = ({ min = 10; max = Some 20 }, (Null, Func_ht))
-             ; init = None
-             }
-         ; Global
-             { typ = (Const, Num_type I32)
-             ; init = [ Text.I32_const 666l ] |> Annotated.dummy_deep
-             ; id = Some "global_i32"
-             }
-         ; Global
-             { typ = (Const, Num_type I64)
-             ; init = [ Text.I64_const 666L ] |> Annotated.dummy_deep
-             ; id = Some "global_i64"
-             }
-         ; Global
-             { typ = (Const, Num_type F32)
-             ; init =
-                 [ Text.F32_const (Float32.of_float 666.6) ]
-                 |> Annotated.dummy_deep
-             ; id = Some "global_f32"
-             }
-         ; Global
-             { typ = (Const, Num_type F64)
-             ; init =
-                 [ Text.F64_const (Float64.of_float 666.6) ]
-                 |> Annotated.dummy_deep
-             ; id = Some "global_f64"
-             }
-         ; Export { name = "func"; typ = Func (Some (Text "func")) }
-         ; Export { name = "func-i32"; typ = Func (Some (Text "func-i32")) }
-         ; Export { name = "func->i32"; typ = Func (Some (Text "func->i32")) }
-         ; Export
-             { name = "func-i32->i32"
-             ; typ = Func (Some (Text "func-i32->i32"))
-             }
-         ; Export { name = "memory"; typ = Mem (Some (Text "memory")) }
-         ; Export { name = "table"; typ = Table (Some (Text "table")) }
-         ; Export { name = "print"; typ = Func (Some (Text "print")) }
-         ; Export { name = "print_i32"; typ = Func (Some (Text "print_i32")) }
-         ; Export { name = "print_f32"; typ = Func (Some (Text "print_f32")) }
-         ; Export { name = "print_i64"; typ = Func (Some (Text "print_i64")) }
-         ; Export { name = "print_f64"; typ = Func (Some (Text "print_f64")) }
-         ; Export
-             { name = "print_i32_f32"
-             ; typ = Func (Some (Text "print_i32_f32"))
-             }
-         ; Export
-             { name = "print_f64_f64"
-             ; typ = Func (Some (Text "print_f64_f64"))
-             }
-         ; Export
-             { name = "global_i32"; typ = Global (Some (Text "global_i32")) }
-         ; Export
-             { name = "global_i64"; typ = Global (Some (Text "global_i64")) }
-         ; Export
-             { name = "global_f32"; typ = Global (Some (Text "global_f32")) }
-         ; Export
-             { name = "global_f64"; typ = Global (Some (Text "global_f64")) }
-         ] )
-    }
+    ( false
+    , { id = Some "spectest"
+      ; fields =
+          (let modul_name = "spectest_extern" in
+           [ Import
+               { modul_name
+               ; name = "print"
+               ; typ = Func (Some "print", Bt_raw (None, ([], [])))
+               }
+           ; Import
+               { modul_name
+               ; name = "print_i32"
+               ; typ =
+                   Func
+                     ( Some "print_i32"
+                     , Bt_raw (None, ([ (None, Num_type I32) ], [])) )
+               }
+           ; Import
+               { modul_name
+               ; name = "print_i64"
+               ; typ =
+                   Func
+                     ( Some "print_i64"
+                     , Bt_raw (None, ([ (None, Num_type I64) ], [])) )
+               }
+           ; Import
+               { modul_name
+               ; name = "print_f32"
+               ; typ =
+                   Func
+                     ( Some "print_f32"
+                     , Bt_raw (None, ([ (None, Num_type F32) ], [])) )
+               }
+           ; Import
+               { modul_name
+               ; name = "print_f64"
+               ; typ =
+                   Func
+                     ( Some "print_f64"
+                     , Bt_raw (None, ([ (None, Num_type F64) ], [])) )
+               }
+           ; Import
+               { modul_name
+               ; name = "print_i32_f32"
+               ; typ =
+                   Func
+                     ( Some "print_i32_f32"
+                     , Bt_raw
+                         ( None
+                         , ([ (None, Num_type I32); (None, Num_type F32) ], [])
+                         ) )
+               }
+           ; Import
+               { modul_name
+               ; name = "print_f64_f64"
+               ; typ =
+                   Func
+                     ( Some "print_f64_f64"
+                     , Bt_raw
+                         ( None
+                         , ([ (None, Num_type F64); (None, Num_type F64) ], [])
+                         ) )
+               }
+           ; Import
+               { modul_name
+               ; name = "func"
+               ; typ = Func (Some "func", Bt_raw (None, ([], [])))
+               }
+           ; Import
+               { modul_name
+               ; name = "func-i32"
+               ; typ =
+                   Func
+                     ( Some "func-i32"
+                     , Bt_raw (None, ([ (None, Num_type I32) ], [])) )
+               }
+           ; Import
+               { modul_name
+               ; name = "func->i32"
+               ; typ =
+                   Func (Some "func->i32", Bt_raw (None, ([], [ Num_type I32 ])))
+               }
+           ; Import
+               { modul_name
+               ; name = "func-i32->i32"
+               ; typ =
+                   Func
+                     ( Some "func-i32->i32"
+                     , Bt_raw
+                         (None, ([ (None, Num_type I32) ], [ Num_type I32 ])) )
+               }
+           ; Mem (Some "memory", { min = 1; max = Some 2 })
+           ; Table
+               { id = Some "table"
+               ; typ = ({ min = 10; max = Some 20 }, (Null, Func_ht))
+               ; init = None
+               }
+           ; Global
+               { typ = (Const, Num_type I32)
+               ; init = [ Text.I32_const 666l ] |> Annotated.dummy_deep
+               ; id = Some "global_i32"
+               }
+           ; Global
+               { typ = (Const, Num_type I64)
+               ; init = [ Text.I64_const 666L ] |> Annotated.dummy_deep
+               ; id = Some "global_i64"
+               }
+           ; Global
+               { typ = (Const, Num_type F32)
+               ; init =
+                   [ Text.F32_const (Float32.of_float 666.6) ]
+                   |> Annotated.dummy_deep
+               ; id = Some "global_f32"
+               }
+           ; Global
+               { typ = (Const, Num_type F64)
+               ; init =
+                   [ Text.F64_const (Float64.of_float 666.6) ]
+                   |> Annotated.dummy_deep
+               ; id = Some "global_f64"
+               }
+           ; Export { name = "func"; typ = Func (Some (Text "func")) }
+           ; Export { name = "func-i32"; typ = Func (Some (Text "func-i32")) }
+           ; Export { name = "func->i32"; typ = Func (Some (Text "func->i32")) }
+           ; Export
+               { name = "func-i32->i32"
+               ; typ = Func (Some (Text "func-i32->i32"))
+               }
+           ; Export { name = "memory"; typ = Mem (Some (Text "memory")) }
+           ; Export { name = "table"; typ = Table (Some (Text "table")) }
+           ; Export { name = "print"; typ = Func (Some (Text "print")) }
+           ; Export { name = "print_i32"; typ = Func (Some (Text "print_i32")) }
+           ; Export { name = "print_f32"; typ = Func (Some (Text "print_f32")) }
+           ; Export { name = "print_i64"; typ = Func (Some (Text "print_i64")) }
+           ; Export { name = "print_f64"; typ = Func (Some (Text "print_f64")) }
+           ; Export
+               { name = "print_i32_f32"
+               ; typ = Func (Some (Text "print_i32_f32"))
+               }
+           ; Export
+               { name = "print_f64_f64"
+               ; typ = Func (Some (Text "print_f64_f64"))
+               }
+           ; Export
+               { name = "global_i32"; typ = Global (Some (Text "global_i32")) }
+           ; Export
+               { name = "global_i64"; typ = Global (Some (Text "global_i64")) }
+           ; Export
+               { name = "global_f32"; typ = Global (Some (Text "global_f32")) }
+           ; Export
+               { name = "global_f64"; typ = Global (Some (Text "global_f64")) }
+           ] )
+      } )

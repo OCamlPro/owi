@@ -71,6 +71,8 @@ let token_to_string = function
   | NAN_ARITH -> "nan_arith"
   | MUTABLE -> "mutable"
   | MODULE -> "module"
+  | DEFINITION -> "definition"
+  | INSTANCE -> "instance"
   | MEMORY_SIZE -> "memory.size"
   | MEMORY_INIT -> "memory.init"
   | MEMORY_GROW -> "memory.grow"

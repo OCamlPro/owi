@@ -175,7 +175,7 @@ let run ~no_exhaustion script =
   list_fold_left
     (fun (link_state : Concrete_extern_func.extern_func Link.State.t) ->
       function
-      | Wast.Text_module m ->
+      | Wast.Text_module (false, m) ->
         if !curr_module = 0 then
           (* TODO: disable printing*)
           ();
@@ -187,7 +187,7 @@ let run ~no_exhaustion script =
         let+ () = I.modul link_state m in
         (* TODO: enable printing again! *)
         link_state
-      | Wast.Quoted_module m ->
+      | Wast.Quoted_module (false, m) ->
         Log.info (fun m -> m "*** quoted module");
         incr curr_module;
         let* m = Parse.Text.Inline_module.from_string m in
@@ -196,7 +196,7 @@ let run ~no_exhaustion script =
         in
         let+ () = I.modul link_state m in
         link_state
-      | Wast.Binary_module (id, m) ->
+      | Wast.Binary_module (false, id, m) ->
         Log.info (fun m -> m "*** binary module");
         incr curr_module;
         let* m = Parse.Binary.Module.from_string m in
@@ -227,7 +227,7 @@ let run ~no_exhaustion script =
         let+ () =
           match got with
           | Error got -> check_error ~expected ~got
-          | Ok [ Text_module m ] ->
+          | Ok [ Text_module (false, m) ] ->
             let got = Compile.Text.until_binary ~unsafe m in
             check_error_result expected got
           | _ -> assert false
@@ -259,7 +259,7 @@ let run ~no_exhaustion script =
         let+ () =
           match got with
           | Error got -> check_error ~expected ~got
-          | Ok [ Text_module m ] ->
+          | Ok [ Text_module (false, m) ] ->
             let got = Compile.Text.until_binary ~unsafe m in
             check_error_result expected got
           | _ -> assert false
@@ -311,7 +311,16 @@ let run ~no_exhaustion script =
       | Action a ->
         Log.info (fun m -> m "*** action");
         let+ _stack = action link_state a in
-        link_state )
+        link_state
+      | Text_module (true, _)
+      | Binary_module (true, _, _)
+      | Quoted_module (true, _) ->
+        (* TODO: differentiate between modules and module definitions in the
+           link state, ensure that we can instantiate a module from its module
+           definition, and that module definitions are not treated as "normal",
+           or instantiated module. *)
+        Ok link_state
+      | Instance _ -> Error (`Unimplemented "(module instance _)") )
     state script
 
 let exec ~no_exhaustion script =

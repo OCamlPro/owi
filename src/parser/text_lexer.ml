@@ -396,6 +396,8 @@ let keywords =
      ; ("memory.init", MEMORY_INIT)
      ; ("memory.size", MEMORY_SIZE)
      ; ("module", MODULE)
+     ; ("definition", DEFINITION)
+     ; ("instance", INSTANCE)
      ; ("mut", MUTABLE)
      ; ("nan:arithmetic", NAN_ARITH)
      ; ("nan:canonical", NAN_CANON)

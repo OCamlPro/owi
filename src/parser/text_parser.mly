@@ -15,7 +15,7 @@
 %token V128 V128_CONST I8X16 I16X8 I32X4 I64X2 F32X4 F64X2 I32X4_ADD I64X2_ADD I32X4_SUB I64X2_SUB
 %token I8 IF IMPORT INVOKE ITEM
 %token LOCAL LOCAL_GET LOCAL_SET LOCAL_TEE LOOP LPAR
-%token MEMORY MEMORY_COPY MEMORY_FILL MEMORY_GROW MEMORY_INIT MEMORY_SIZE MODULE MUTABLE
+%token MEMORY MEMORY_COPY MEMORY_FILL MEMORY_GROW MEMORY_INIT MEMORY_SIZE MODULE MUTABLE DEFINITION INSTANCE
 %token NAN_ARITH NAN_CANON NOEXTERN NOFUNC NONE NOP NULL NULL_EXTERN_REF NULL_FUNC_REF NULL_REF
 %token OFFSET
 %token PARAM
@@ -1071,18 +1071,21 @@ let inline_module :=
     inline_module
   }
 
-let modul :=
-  | LPAR; MODULE; id = ioption(id); ~ = inline_module_inner; RPAR; {
+let modul_nopar :=
+  | id = ioption(id); ~ = inline_module_inner; {
     { inline_module_inner with id }
   }
 
+let modul :=
+  | LPAR; MODULE; m=modul_nopar; RPAR; { m }
+
 let module_binary :=
-  | MODULE; id = ioption(id); BINARY; lines = list(NAME); {
+  | id = ioption(id); BINARY; lines = list(NAME); {
     id, String.concat "" lines
   }
 
 let module_quoted :=
-  | MODULE; QUOTE; lines = list(NAME); {
+  | QUOTE; lines = list(NAME); {
     String.concat "" lines
   }
 
@@ -1149,13 +1152,22 @@ let action ==
   | INVOKE; ~ = ioption(id); ~ = utf8_name; ~ = list(par(literal_const)); <Invoke>
   | GET; ~ = ioption(id); ~ = utf8_name; <Get>
 
+module_kind :
+  | DEFINITION { true }
+  | /* empty */ { false }
+
 let cmd ==
-  | ~ = modul; <Text_module>
-  | ~ = par(module_quoted); <Quoted_module>
-  | bm = par(module_binary); {
-    let id, m = bm in
-    Binary_module (id, m)
+  | LPAR; MODULE; kind = module_kind; m = modul_nopar; RPAR; {
+    Text_module (kind, m)
   }
+  | LPAR; MODULE; kind = module_kind; m = module_quoted; RPAR; {
+    Quoted_module (kind, m)
+  }
+  | LPAR; MODULE; kind = module_kind; bm = module_binary; RPAR; {
+    let id, m = bm in
+    Binary_module (kind, id, m)
+  }
+  | LPAR; MODULE; INSTANCE; ~ = option(indice); RPAR; <Instance>
   | ~ = par(assert_); <Assert>
   | ~ = par(register); <>
   | ~ = par(action); <Action>
@@ -1163,5 +1175,5 @@ let cmd ==
 let script :=
   | ~ = nonempty_list(cmd); EOF; <>
   | ~ = inline_module_inner; EOF; {
-    [ Text_module inline_module_inner ]
+    [ Text_module (false, inline_module_inner) ]
   }
