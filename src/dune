@@ -160,7 +160,7 @@
   mtime
   mtime.clock
   xmlm
-  domainPC
+  domainpc
   landmarks
   landmarks-ppx)
  (flags

@@ -80,7 +80,7 @@
    (>= 1.0.3))
   (xmlm
    (>= 1.4.0))
-  (domainPC (= dev))
+  domainpc
   ;; doc
   (odoc
    (and
