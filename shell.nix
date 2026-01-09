@@ -3,25 +3,6 @@
   }) {}
 }:
 
-let
-  smtml = pkgs.ocamlPackages.smtml.overrideAttrs (old: {
-    src = pkgs.fetchFromGitHub {
-      owner = "formalsec";
-      repo = "smtml";
-      rev = "ee041eead0c45d1a124a57c43df9ff6814f512eb";
-      hash = "sha256-IFjaZcwBiM/xA39W+FuJ87OSEvAhvhEsZ1cF2KrxrhY=";
-    };
-  });
-  synchronizer = pkgs.ocamlPackages.synchronizer.overrideAttrs (old: {
-    src = pkgs.fetchFromGitHub {
-      owner = "ocamlpro";
-      repo = "synchronizer";
-      rev = "cb5fd995e8a42e5244acf68f238221594fd19a8d";
-      hash = "sha256-0XtPHpDlyH1h8W2ZlRvJbZjCN9WP5mzk2N01WFd8eLQ=";
-    };
-  });
-in
-
 pkgs.mkShell {
   name = "owi-dev-shell";
   dontDetectOcamlConflicts = true;
