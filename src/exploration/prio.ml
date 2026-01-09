@@ -1,4 +1,4 @@
-type source =
+type metrics =
   { instr_counter : int Option.t
   ; distance_to_unreachable : int Option.t
   ; depth : int
@@ -30,14 +30,14 @@ let max_loop_penalty = 10_000
 
 let unknown_loop_penalty = max_loop_penalty / 10
 
-let rarity_of_source { instr_counter; _ } =
+let rarity_of_metrics { instr_counter; _ } =
   let c =
     match instr_counter with Some c -> c | None -> unknown_instruction_counter
   in
   let c = min c max_rarity in
   max_int - c
 
-let depth_of_source { depth; _ } =
+let depth_of_metrics { depth; _ } =
   let depth =
     if use_logarithmic_depth then
       let depth = Float.of_int depth in
@@ -47,7 +47,7 @@ let depth_of_source { depth; _ } =
   in
   min depth max_depth
 
-let loop_penalty_of_source { instr_counter; _ } =
+let loop_penalty_of_metrics { instr_counter; _ } =
   match instr_counter with
   | Some c -> ~-(min (c * c) max_loop_penalty)
   | None -> ~-unknown_loop_penalty
@@ -55,7 +55,7 @@ let loop_penalty_of_source { instr_counter; _ } =
 module type T = sig
   type t
 
-  val of_source : source -> t
+  val of_metrics : metrics -> t
 
   val compare : t -> t -> int
 
@@ -65,7 +65,7 @@ end
 module FIFO : T = struct
   type t = int
 
-  let of_source =
+  let of_metrics =
     let counter = Atomic.make max_int in
     fun { instr_counter = _; distance_to_unreachable = _; depth = _ } ->
       Atomic.fetch_and_add counter ~-1
@@ -78,7 +78,7 @@ end
 module LIFO : T = struct
   type t = int
 
-  let of_source =
+  let of_metrics =
     let counter = Atomic.make 0 in
     fun { instr_counter = _; distance_to_unreachable = _; depth = _ } ->
       Atomic.fetch_and_add counter 1
@@ -91,7 +91,7 @@ end
 module Random_prio : T = struct
   type t = int
 
-  let of_source { instr_counter = _; distance_to_unreachable = _; depth = _ } =
+  let of_metrics { instr_counter = _; distance_to_unreachable = _; depth = _ } =
     Random.int 10_000
 
   let compare = compare_with_highest_first
@@ -102,7 +102,7 @@ end
 module Random_unseen_then_random : T = struct
   type t = int
 
-  let of_source { instr_counter; distance_to_unreachable = _; depth = _ } =
+  let of_metrics { instr_counter; distance_to_unreachable = _; depth = _ } =
     match instr_counter with
     | Some 0 -> max_int - Random.int 10_000
     | None | Some _ -> Random.int 10_000
@@ -115,7 +115,7 @@ end
 module Rarity : T = struct
   type t = int
 
-  let of_source s = rarity_of_source s
+  let of_metrics s = rarity_of_metrics s
 
   let compare = compare_with_highest_first
 
@@ -125,7 +125,7 @@ end
 module Hot_path_penalty : T = struct
   type t = int
 
-  let of_source s = loop_penalty_of_source s
+  let of_metrics s = loop_penalty_of_metrics s
 
   let compare = compare_with_highest_first
 
@@ -140,8 +140,8 @@ module Rarity_aging : T = struct
 
   let age_counter = Atomic.make 0
 
-  let of_source s =
-    let rarity = rarity_of_source s in
+  let of_metrics s =
+    let rarity = rarity_of_metrics s in
     let age = Atomic.fetch_and_add age_counter ~-1 in
     { rarity; age }
 
@@ -161,9 +161,9 @@ module Rarity_depth_aging : T = struct
 
   let age_counter = Atomic.make 0
 
-  let of_source s =
-    let rarity = rarity_of_source s in
-    let depth = depth_of_source s in
+  let of_metrics s =
+    let rarity = rarity_of_metrics s in
+    let depth = depth_of_metrics s in
     let age = Atomic.fetch_and_add age_counter ~-1 in
 
     { rarity; depth; age }
@@ -188,10 +188,10 @@ module Rarity_depth_loop_aging : T = struct
 
   let age_counter = Atomic.make 0
 
-  let of_source s =
-    let rarity = rarity_of_source s in
-    let depth = depth_of_source s in
-    let loop_penalty = loop_penalty_of_source s in
+  let of_metrics s =
+    let rarity = rarity_of_metrics s in
+    let depth = depth_of_metrics s in
+    let loop_penalty = loop_penalty_of_metrics s in
     let age = Atomic.fetch_and_add age_counter ~-1 in
 
     { rarity; depth; loop_penalty; age }
@@ -223,10 +223,10 @@ module Rarity_depth_loop_aging_random : T = struct
 
   let age_counter = Atomic.make 0
 
-  let of_source s =
-    let rarity = rarity_of_source s in
-    let depth = depth_of_source s in
-    let loop_penalty = loop_penalty_of_source s in
+  let of_metrics s =
+    let rarity = rarity_of_metrics s in
+    let depth = depth_of_metrics s in
+    let loop_penalty = loop_penalty_of_metrics s in
     let age = Atomic.fetch_and_add age_counter ~-1 in
     let random = Random.int 7 in
 
@@ -258,7 +258,7 @@ module type S = sig
   val make : unit -> 'a t
 
   (** Add a new element to the queue *)
-  val push : 'a -> source -> 'a t -> unit
+  val push : 'a -> metrics -> 'a t -> unit
 
   (** Make a new pledge, ie indicate that new elements may be pushed to the
       queue and that calls to pop should block waiting for them. *)
@@ -274,13 +274,13 @@ module type S = sig
   (** Pop all elements from the queue in a lazy Seq.t, *)
   val read_as_seq : 'a t -> finalizer:(unit -> unit) -> 'a Seq.t
 
-  val work_while : ('a -> (source * 'a -> unit) -> unit) -> 'a t -> unit
+  val work_while : ('a -> (metrics * 'a -> unit) -> unit) -> 'a t -> unit
 end
 
 module Make (P : T) : S = struct
   module Priority_queue = Priority_queue.Make (P)
 
-  type 'a t = ('a, source * 'a) Synchronizer.t
+  type 'a t = ('a, metrics * 'a) Synchronizer.t
 
   let pop q ~pledge = Synchronizer.get q ~pledge
 
@@ -303,7 +303,7 @@ module Make (P : T) : S = struct
   let close = Synchronizer.close
 
   let writter (prio, v) q =
-    let prio = P.of_source prio in
+    let prio = P.of_metrics prio in
     let prio_and_value = (prio, v) in
     Priority_queue.push prio_and_value q
 

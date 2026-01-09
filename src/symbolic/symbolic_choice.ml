@@ -20,7 +20,7 @@ module CoreImpl = struct
 
     and ('a, 'wls) status =
       | Now of 'a
-      | Yield of Prio.source * ('a, 'wls) t
+      | Yield of Prio.metrics * ('a, 'wls) t
       | Choice of (('a, 'wls) status * ('a, 'wls) status)
       | Stop
 
@@ -240,7 +240,7 @@ module CoreImpl = struct
 
     val thread : thread t
 
-    val yield : Prio.source -> unit t
+    val yield : Prio.metrics -> unit t
 
     val solver : Solver.t t
 

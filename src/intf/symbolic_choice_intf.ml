@@ -38,8 +38,8 @@ module type S = sig
 
   val select :
        Symbolic_boolean.t
-    -> prio_true:Prio.source
-    -> prio_false:Prio.source
+    -> prio_true:Prio.metrics
+    -> prio_false:Prio.metrics
     -> Bool.t t
 
   val select_i32 : Symbolic_i32.t -> Int32.t t

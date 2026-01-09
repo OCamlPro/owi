@@ -1,19 +1,19 @@
-type source
+type metrics
 
 val v :
      instr_counter:int option
   -> distance_to_unreachable:int option
   -> depth:int
-  -> source
+  -> metrics
 
-val dummy : source
+val dummy : metrics
 
-val low : source
+val low : metrics
 
 module type T = sig
   type t
 
-  val of_source : source -> t
+  val of_metrics : metrics -> t
 
   val compare : t -> t -> int
 
@@ -47,7 +47,7 @@ module type S = sig
   val make : unit -> 'a t
 
   (** Add a new element to the queue *)
-  val push : 'a -> source -> 'a t -> unit
+  val push : 'a -> metrics -> 'a t -> unit
 
   (** Make a new pledge, ie indicate that new elements may be pushed to the
       queue and that calls to pop should block waiting for them. *)
@@ -63,7 +63,7 @@ module type S = sig
   (** Pop all elements from the queue in a lazy Seq.t, *)
   val read_as_seq : 'a t -> finalizer:(unit -> unit) -> 'a Seq.t
 
-  val work_while : ('a -> (source * 'a -> unit) -> unit) -> 'a t -> unit
+  val work_while : ('a -> (metrics * 'a -> unit) -> unit) -> 'a t -> unit
 end
 
 module Make (_ : T) : S
