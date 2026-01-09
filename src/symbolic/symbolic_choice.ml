@@ -117,7 +117,7 @@ module CoreImpl = struct
     let spawn_worker sched wls_init ~at_worker_value ~at_worker_init
       ~at_worker_end =
       at_worker_init ();
-      DomainPC.spawn (run_worker sched wls_init ~at_worker_value ~at_worker_end)
+      Domainpc.spawn (run_worker sched wls_init ~at_worker_value ~at_worker_end)
   end
 
   module State = struct
@@ -271,7 +271,7 @@ module CoreImpl = struct
            (close_work_queue:(unit -> unit) -> 'a eval * thread -> unit)
       -> at_worker_init:(unit -> unit)
       -> at_worker_end:(unit -> unit)
-      -> unit DomainPC.t array
+      -> unit Domainpc.t array
   end = struct
     include Eval
 

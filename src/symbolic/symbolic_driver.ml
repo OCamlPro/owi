@@ -83,7 +83,7 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
     mk_callback no_stop_at_failure fail_mode res_stack path_count
   in
   let time_before = (Unix.times ()).tms_utime in
-  let domains : unit DomainPC.t Array.t =
+  let domains : unit Domainpc.t Array.t =
     Symbolic_choice_with_memory.run exploration_strategy ~workers solver result
       thread ~at_worker_value
       ~at_worker_init:(fun () -> Ws.new_pledge res_stack)
@@ -101,7 +101,7 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
   let wait_for_all_domains () =
     Array.iter
       (fun domain ->
-        try DomainPC.join domain with
+        try Domainpc.join domain with
         | Z3.Error msg ->
           Log.info (fun m ->
             m "one domain exited with the following Z3 exception: %s" msg )
