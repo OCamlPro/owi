@@ -18,7 +18,7 @@ module type Base = sig
   val map : 'a t -> ('a -> 'b) -> 'b t
 
   val select :
-    boolean -> prio_true:Prio.source -> prio_false:Prio.source -> Bool.t t
+    boolean -> prio_true:Prio.metrics -> prio_false:Prio.metrics -> Bool.t t
 
   val select_i32 : i32 -> Concrete_i32.t t
 
