@@ -839,21 +839,6 @@ module Module = struct
       | Start s -> pp_start fmt s
       | Import i -> Import.pp fmt i
       | Export e -> Export.pp fmt e
-
-    let compare m1 m2 =
-      let rank = function
-        | Typedef _ -> 1
-        | Import _ -> 2
-        | Func _ -> 3
-        | Table _ -> 4
-        | Mem _ -> 5
-        | Global _ -> 6
-        | Export _ -> 7
-        | Start _ -> 8
-        | Elem _ -> 9
-        | Data _ -> 10
-      in
-      Int.compare (rank m1) (rank m2)
   end
 
   type t =
