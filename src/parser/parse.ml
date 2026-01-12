@@ -57,6 +57,7 @@ let token_to_string = function
   | REF_ARRAY -> "ref.array"
   | REF -> "ref"
   | REC -> "rec"
+  | TAG -> "tag"
   | QUOTE -> "quote"
   | PARAM -> "param"
   | NULL_REF -> "null.ref"

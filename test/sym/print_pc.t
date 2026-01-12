@@ -39,6 +39,7 @@
                Func names: ("f", 1) ; ("i32_symbol", 0)
                Elem names: 
                Data names: 
+               Tag names: 
                
   owi: [DEBUG] rewriting    ...
   owi: [INFO] typechecking ...

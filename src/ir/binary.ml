@@ -343,6 +343,14 @@ end
 
 (* Modules *)
 
+(* Tags *)
+module Tag = struct
+  type t =
+    { id : string option
+    ; typ : block_type
+    }
+end
+
 (** named export *)
 module Export = struct
   type t =
@@ -411,6 +419,7 @@ module Module = struct
       ; mem : Export.t Array.t
       ; table : Export.t Array.t
       ; func : Export.t Array.t
+      ; tag : Export.t Array.t
       }
   end
 
@@ -421,6 +430,7 @@ module Module = struct
     ; table : (Table.t, Text.Table.Type.t) Origin.t array
     ; mem : (Text.Mem.t, Text.limits) Origin.t array
     ; func : (Func.t, block_type) Origin.t array (* TODO: switch to func_type *)
+    ; tag : (Tag.t, block_type) Origin.t array
     ; elem : Elem.t array
     ; data : Data.t array
     ; exports : Exports.t
@@ -437,7 +447,9 @@ module Module = struct
     ; func = [||]
     ; elem = [||]
     ; data = [||]
-    ; exports = { global = [||]; mem = [||]; table = [||]; func = [||] }
+    ; tag = [||]
+    ; exports =
+        { global = [||]; mem = [||]; table = [||]; func = [||]; tag = [||] }
     ; start = None
     ; custom = []
     }

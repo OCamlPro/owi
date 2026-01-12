@@ -117,6 +117,13 @@ module Func : sig
     }
 end
 
+module Tag : sig
+  type t =
+    { id : string option
+    ; typ : block_type
+    }
+end
+
 module Export : sig
   (** export *)
   type t =
@@ -184,6 +191,7 @@ module Module : sig
       ; mem : Export.t Array.t
       ; table : Export.t Array.t
       ; func : Export.t Array.t
+      ; tag : Export.t Array.t
       }
   end
 
@@ -194,6 +202,7 @@ module Module : sig
     ; table : (Table.t, Text.Table.Type.t) Origin.t array
     ; mem : (Text.Mem.t, Text.limits) Origin.t array
     ; func : (Func.t, block_type) Origin.t array (* TODO: switch to func_type *)
+    ; tag : (Tag.t, block_type) Origin.t array
     ; elem : Elem.t array
     ; data : Data.t array
     ; exports : Exports.t

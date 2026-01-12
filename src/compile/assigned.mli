@@ -20,6 +20,8 @@ val find_elem : t -> Text.indice -> Binary.indice Result.t
 
 val find_type : t -> Text.indice -> Binary.indice Result.t
 
+val find_tag : t -> Text.indice -> Binary.indice Result.t
+
 val get_type : t -> int -> Text.func_type Option.t
 
 val get_types : t -> Text.func_type Array.t

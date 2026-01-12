@@ -18,6 +18,7 @@ module State : sig
     ; memories : Concrete_memory.t StringMap.t
     ; tables : Concrete_table.t StringMap.t
     ; functions : Kind.func StringMap.t
+    ; tags : Binary.Tag.t StringMap.t
     ; defined_names : StringSet.t
     }
 

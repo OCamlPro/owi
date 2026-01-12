@@ -407,8 +407,9 @@ let rewrite_exports (modul : Grouped.t) (assigned : Assigned.t) :
   let* table =
     rewrite_export Assigned.find_table assigned modul.table_exports
   in
-  let+ func = rewrite_export Assigned.find_func assigned modul.func_exports in
-  { Binary.Module.Exports.global; mem; table; func }
+  let* func = rewrite_export Assigned.find_func assigned modul.func_exports in
+  let+ tag = rewrite_export Assigned.find_tag assigned modul.tag_exports in
+  { Binary.Module.Exports.global; mem; table; func; tag }
 
 let rewrite_func (assigned : Assigned.t)
   ({ id; type_f; locals; body; _ } : Text.Func.t) : Binary.Func.t Result.t =
@@ -424,6 +425,11 @@ let rewrite_func (assigned : Assigned.t)
   in
   let+ body = rewrite_expr assigned params locals body in
   { Binary.Func.body; type_f; id; locals }
+
+let rewrite_tag (assigned : Assigned.t) ({ id; typ } : Text.Tag.t) :
+  Binary.Tag.t Result.t =
+  let+ typ = rewrite_block_type assigned typ in
+  Binary.Tag.{ id; typ }
 
 let rewrite_types (assigned : Assigned.t) (ft : Text.func_type) :
   Text.Typedef.t Result.t =
@@ -459,6 +465,12 @@ let modul (modul : Grouped.t) (assigned : Assigned.t) : Binary.Module.t Result.t
     let runtime = Origin.monadic_map ~f_local ~f_imported in
     array_map runtime modul.func
   in
+  let* tag =
+    let f_imported = rewrite_block_type assigned in
+    let f_local = rewrite_tag assigned in
+    let runtime = Origin.monadic_map ~f_local ~f_imported in
+    array_map runtime modul.tag
+  in
   let* types =
     array_map (rewrite_types assigned) (Assigned.get_types assigned)
   in
@@ -479,6 +491,7 @@ let modul (modul : Grouped.t) (assigned : Assigned.t) : Binary.Module.t Result.t
   ; data
   ; exports
   ; func
+  ; tag
   ; start
   ; custom = []
   }

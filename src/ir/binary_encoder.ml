@@ -704,7 +704,7 @@ let encode_memories buf memories = encode_vector_list buf memories write_memory
 let encode_globals buf globals = encode_vector_list buf globals write_global
 
 (* export: section 7 *)
-let encode_exports buf ({ global; mem; table; func } : Module.Exports.t) =
+let encode_exports buf ({ global; mem; table; func; tag } : Module.Exports.t) =
   let exp_buf = Buffer.create 16 in
   let len =
     Array.length global + Array.length mem + Array.length table
@@ -715,6 +715,7 @@ let encode_exports buf ({ global; mem; table; func } : Module.Exports.t) =
       f a.(i)
     done
   in
+  array_rev_iter (write_export exp_buf '\x04') tag;
   array_rev_iter (write_export exp_buf '\x03') global;
   array_rev_iter (write_export exp_buf '\x02') mem;
   array_rev_iter (write_export exp_buf '\x01') table;

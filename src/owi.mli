@@ -54,6 +54,7 @@ module Result : sig
     | `Unknown_operator
     | `Unknown_table of Text.indice
     | `Unknown_type of Text.indice
+    | `Unknown_tag of Text.indice
     | `Unsupported_file_extension of string
     | `Contract_unknown_func of Text.indice
     | `Empty_annotation_id
@@ -516,6 +517,15 @@ module Text : sig
     val pp : t Fmt.t
   end
 
+  module Tag : sig
+    type t =
+      { id : string option
+      ; typ : block_type
+      }
+
+    val pp : Format.formatter -> t -> unit
+  end
+
   module Import : sig
     module Type : sig
       type t =
@@ -523,6 +533,7 @@ module Text : sig
         | Table of string option * Table.Type.t
         | Mem of string option * limits
         | Global of string option * Global.Type.t
+        | Tag of string option * block_type
     end
 
     type t =
@@ -540,6 +551,7 @@ module Text : sig
         | Table of indice option
         | Mem of indice option
         | Global of indice option
+        | Tag of indice option
     end
 
     type t =
@@ -564,6 +576,7 @@ module Text : sig
         | Func of Func.t
         | Elem of Elem.t
         | Data of Data.t
+        | Tag of Tag.t
         | Start of indice
         | Import of Import.t
         | Export of Export.t
@@ -694,6 +707,13 @@ module Binary : sig
       }
   end
 
+  module Tag : sig
+    type t =
+      { id : string option
+      ; typ : block_type
+      }
+  end
+
   module Export : sig
     (** export *)
     type t =
@@ -761,6 +781,7 @@ module Binary : sig
         ; mem : Export.t Array.t
         ; table : Export.t Array.t
         ; func : Export.t Array.t
+        ; tag : Export.t Array.t
         }
     end
 
@@ -772,6 +793,7 @@ module Binary : sig
       ; mem : (Text.Mem.t, Text.limits) Origin.t array
       ; func :
           (Func.t, block_type) Origin.t array (* TODO: switch to func_type *)
+      ; tag : (Tag.t, block_type) Origin.t array
       ; elem : Elem.t array
       ; data : Data.t array
       ; exports : Exports.t
