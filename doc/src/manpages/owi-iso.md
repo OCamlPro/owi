@@ -47,6 +47,9 @@ OPTIONS
        --no-value
            do not display a value for each symbol
 
+       --no-worker-isolation
+           Do not force each worker to run on an isolated physical core.
+
        -s VALUE, --solver=VALUE (absent=Z3)
            SMT solver to use. VALUE must be one of the 5 available solvers:
            Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo
@@ -55,7 +58,7 @@ OPTIONS
            skip typechecking pass
 
        -w VAL, --workers=VAL (absent=n)
-           number of workers for symbolic execution. Defaults to the number
+           Number of workers for symbolic execution. Defaults to the number
            of physical cores.
 
        --with-breadcrumbs

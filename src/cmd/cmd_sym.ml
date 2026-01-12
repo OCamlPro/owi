@@ -50,10 +50,11 @@ let run_file ~parameters ~source_file =
              during evaluation (OS, syntax error, etc.), except for Trap and Assert,
              which are handled here. Most of the computations are done in the Result
              monad, hence the let*. *)
-let[@landmark "cmd"] cmd ~parameters ~source_file =
+let cmd ~parameters ~source_file =
   let { Symbolic_parameters.exploration_strategy
       ; fail_mode
       ; workers
+      ; no_worker_isolation
       ; solver
       ; deterministic_result_order
       ; model_format
@@ -82,6 +83,6 @@ let[@landmark "cmd"] cmd ~parameters ~source_file =
   let* result, run_time = run_file ~parameters ~source_file in
 
   Symbolic_driver.handle_result ~exploration_strategy ~fail_mode ~workers
-    ~solver ~deterministic_result_order ~model_format ~no_value
-    ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
-    ~model_out_file ~with_breadcrumbs ~run_time result
+    ~no_worker_isolation ~solver ~deterministic_result_order ~model_format
+    ~no_value ~no_assert_failure_expression_printing ~workspace
+    ~no_stop_at_failure ~model_out_file ~with_breadcrumbs ~run_time result

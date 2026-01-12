@@ -70,7 +70,8 @@ module type S = sig
 
   val run :
        Symbolic_parameters.Exploration_strategy.t
-    -> workers:int
+    -> workers:Int.t Option.t
+    -> no_worker_isolation:Bool.t
     -> Smtml.Solver_type.t
     -> 'a t
     -> thread

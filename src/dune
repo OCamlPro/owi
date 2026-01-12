@@ -136,6 +136,7 @@
  (libraries
   bos
   digestif
+  domainpc
   dune-build-info
   dune-site
   fmt
@@ -159,14 +160,11 @@
   runtime_events
   mtime
   mtime.clock
-  xmlm
-  domainpc
-  landmarks
-  landmarks-ppx)
+  xmlm)
  (flags
   (:standard -open Prelude))
  (preprocess
-  (pps sedlex.ppx landmarks-ppx))
+  (pps sedlex.ppx))
  (instrumentation
   (backend bisect_ppx --exclusions src/bisect.exclude)
   (deps bisect.exclude))

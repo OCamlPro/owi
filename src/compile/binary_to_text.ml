@@ -2,18 +2,18 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-let convert_indice : Binary.indice -> Text.indice = function i -> Raw i
+let convert_indice : Binary.indice -> Text.indice = function i -> Text.Raw i
 
 let convert_block_type : Binary.block_type -> Text.block_type = function
-  | Bt_raw (opt, ft) ->
+  | Binary.Bt_raw (opt, ft) ->
     let opt = Option.map convert_indice opt in
-    Bt_raw (opt, ft)
+    Text.Bt_raw (opt, ft)
 
 let rec convert_instr : Binary.instr -> Text.instr = function
-  | Br_table (ids, id) ->
+  | Binary.Br_table (ids, id) ->
     let ids = Array.map convert_indice ids in
     let id = convert_indice id in
-    Br_table (ids, id)
+    Text.Br_table (ids, id)
   | Br_if id ->
     let id = convert_indice id in
     Br_if id
@@ -169,7 +169,7 @@ and convert_expr (e : Binary.expr Annotated.t) : Text.expr Annotated.t =
     e
 
 let convert_elem_mode : Binary.Elem.Mode.t -> Text.Elem.Mode.t = function
-  | Passive -> Passive
+  | Binary.Elem.Mode.Passive -> Text.Elem.Mode.Passive
   | Declarative -> Declarative
   | Active (opt, e) ->
     let opt = Option.map (fun i -> Text.Raw i) opt in
@@ -177,21 +177,21 @@ let convert_elem_mode : Binary.Elem.Mode.t -> Text.Elem.Mode.t = function
     Active (opt, e)
 
 let convert_elem : Binary.Elem.t -> Text.Elem.t = function
-  | { id; typ; init; mode } ->
+  | { Binary.Elem.id; typ; init; mode } ->
     let init = List.map convert_expr init in
     let mode = convert_elem_mode mode in
-    { id; typ; init; mode }
+    { Text.Elem.id; typ; init; mode }
 
 let convert_data_mode : Binary.Data.Mode.t -> Text.Data.Mode.t = function
-  | Passive -> Passive
+  | Binary.Data.Mode.Passive -> Text.Data.Mode.Passive
   | Active (i, e) ->
     let e = convert_expr e in
     Active (Some (Raw i), e)
 
 let convert_data : Binary.Data.t -> Text.Data.t = function
-  | { id; init; mode } ->
+  | { Binary.Data.id; init; mode } ->
     let mode = convert_data_mode mode in
-    { id; init; mode }
+    { Text.Data.id; init; mode }
 
 let from_types types : Text.Module.Field.t list =
   Array.map (fun (t : Text.Typedef.t) -> Text.Module.Field.Typedef t) types

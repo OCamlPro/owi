@@ -92,8 +92,7 @@ module CoreImpl = struct
         (fun f write_back -> handle_status (Schedulable.run f wls) write_back)
         sched.work_queue
 
-    let[@landmark "run_worker"] run_worker sched wls_init ~at_worker_value
-      ~at_worker_end () =
+    let run_worker sched wls_init ~at_worker_value ~at_worker_end () =
       Fun.protect ~finally:at_worker_end (fun () ->
         try
           let wls = wls_init () in
@@ -113,11 +112,6 @@ module CoreImpl = struct
             m "a worker ended with exception %s, backtrace is: @\n@[<v>%s@]" e_s
               bt_s );
           Printexc.raise_with_backtrace e bt )
-
-    let spawn_worker sched wls_init ~at_worker_value ~at_worker_init
-      ~at_worker_end =
-      at_worker_init ();
-      Domainpc.spawn (run_worker sched wls_init ~at_worker_value ~at_worker_end)
   end
 
   module State = struct
@@ -263,7 +257,8 @@ module CoreImpl = struct
 
     val run :
          Symbolic_parameters.Exploration_strategy.t
-      -> workers:int
+      -> workers:Int.t Option.t
+      -> no_worker_isolation:Bool.t
       -> Smtml.Solver_type.t
       -> 'a t
       -> thread
@@ -314,8 +309,8 @@ module CoreImpl = struct
 
     type 'a run_result = ('a eval * Thread.t) Seq.t
 
-    let run exploration_strategy ~workers solver t thread ~at_worker_value
-      ~at_worker_init ~at_worker_end =
+    let run exploration_strategy ~workers ~no_worker_isolation solver t thread
+      ~at_worker_value ~at_worker_init ~at_worker_end =
       let module M =
         ( val Symbolic_parameters.Exploration_strategy.to_work_ds_module
                 exploration_strategy )
@@ -324,10 +319,28 @@ module CoreImpl = struct
       let open Scheduler in
       let sched = init_scheduler () in
       add_init_task sched (State.run t thread);
-      if workers > 1 then Logs_threaded.enable ();
-      Array.init workers (fun _i ->
-        spawn_worker sched (Solver.fresh solver) ~at_worker_value
-          ~at_worker_init ~at_worker_end )
+      begin match workers with
+      | Some (0 | 1) -> ()
+      | None | Some _ -> Logs_threaded.enable ()
+      end;
+
+      let spawn_one_worker () =
+        run_worker sched (Solver.fresh solver) ~at_worker_value ~at_worker_end
+          ()
+      in
+
+      if no_worker_isolation then begin
+        let workers =
+          match workers with None -> Processor.Query.core_count | Some v -> v
+        in
+        Array.init workers (fun _i ->
+          at_worker_init ();
+          Domain.spawn spawn_one_worker )
+      end
+      else begin
+        Domainpc.spawn_n ?n:workers ~before_spawn:at_worker_init
+          spawn_one_worker
+      end
 
     let trap t =
       let* thread in
@@ -342,7 +355,7 @@ module CoreImpl = struct
         | None ->
           (* It can happen when the solver is interrupted *)
           (* TODO: once https://github.com/formalsec/smtml/pull/479 is merged
-             if solver was interrupted then stop else assert false *)
+                  if solver was interrupted then stop else assert false *)
           stop
       in
       let labels = Thread.labels thread in
@@ -486,7 +499,7 @@ module Make (Thread : Thread_intf.S) = struct
           | `Unknown ->
             (* It can happen when the solver is interrupted *)
             (* TODO: once https://github.com/formalsec/smtml/pull/479 is merged
-                   if solver was interrupted then stop else assert false *)
+                       if solver was interrupted then stop else assert false *)
             stop
           end
         end

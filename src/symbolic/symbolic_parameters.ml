@@ -17,7 +17,7 @@ module Exploration_strategy = struct
     | Rarity_depth_loop_aging_random
 
   let to_priority_module : t -> (module Prio.T) = function
-    | LIFO -> (module Prio.LIFO)
+    | LIFO -> (module Prio.LIFO : Prio.T)
     | FIFO -> (module Prio.FIFO)
     | Random -> (module Prio.Random_prio)
     | Random_unseen_then_random -> (module Prio.Random_unseen_then_random)
@@ -65,7 +65,8 @@ end
 
 type t =
   { unsafe : bool
-  ; workers : int
+  ; workers : Int.t Option.t
+  ; no_worker_isolation : Bool.t
   ; no_stop_at_failure : bool
   ; no_value : bool
   ; no_assert_failure_expression_printing : bool

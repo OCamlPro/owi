@@ -73,9 +73,10 @@ let mk_callback no_stop_at_failure fail_mode res_stack path_count =
     end
   | (Trap_only | Assertion_only), _ -> ()
 
-let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
-  ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
-  ~workspace ~solver ~model_format ~model_out_file ~with_breadcrumbs ~run_time
+let handle_result ~exploration_strategy ~workers ~no_worker_isolation
+  ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
+  ~deterministic_result_order ~fail_mode ~workspace ~solver ~model_format
+  ~model_out_file ~with_breadcrumbs ~run_time
   (result : unit Symbolic_choice_with_memory.t) =
   let thread = Thread_with_memory.init () in
   let res_stack = Outcome.make () in
@@ -85,8 +86,8 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
   in
   let time_before = (Unix.times ()).tms_utime in
   let domains : unit Domainpc.t Array.t =
-    Symbolic_choice_with_memory.run exploration_strategy ~workers solver result
-      thread ~at_worker_value
+    Symbolic_choice_with_memory.run exploration_strategy ~workers
+      ~no_worker_isolation solver result thread ~at_worker_value
       ~at_worker_init:(fun () -> Outcome.new_pledge res_stack)
       ~at_worker_end:(fun () -> Outcome.end_pledge res_stack)
   in
@@ -127,7 +128,12 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
     Benchmark.print_final ~bench_stats ~execution_time_a:run_time
       ~execution_time_b ~wait_for_all_domains
   end
-  else if Log.is_debug_enabled () || Landmark.profiling () then begin
+  else if
+    let landmark_profiling_enabled =
+      Option.is_some @@ Bos.OS.Env.var "OCAML_LANDMARKS"
+    in
+    Log.is_debug_enabled () || landmark_profiling_enabled
+  then begin
     (* we only do this in debug mode or when landmarks profiling is on because
        otherwise it makes performances very bad *)
     wait_for_all_domains ()
