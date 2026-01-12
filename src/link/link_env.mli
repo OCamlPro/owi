@@ -18,6 +18,8 @@ val get_data : _ t -> int -> Concrete_data.t Concrete_choice.t
 
 val get_global : _ t -> int -> Concrete_global.t Concrete_choice.t
 
+val get_tag : _ t -> int -> Binary.Tag.t
+
 val get_extern_func : 'ext t -> int -> 'ext
 
 val id : _ t -> int
@@ -35,6 +37,8 @@ module Build : sig
 
   val add_func : int -> Kind.func -> t -> t
 
+  val add_tag : int -> Binary.Tag.t -> t -> t
+
   val add_data : int -> Concrete_data.t -> t -> t
 
   val add_elem : int -> Concrete_elem.t -> t -> t
@@ -42,6 +46,8 @@ module Build : sig
   val get_const_global : t -> int -> Concrete_value.t Result.t
 
   val get_func : t -> int -> Kind.func Result.t
+
+  val get_tag : t -> int -> Binary.Tag.t Result.t
 
   val get_memories : t -> Concrete_memory.t IMap.t
 end

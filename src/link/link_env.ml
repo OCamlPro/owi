@@ -12,6 +12,7 @@ type 'ext t =
   ; functions : Kind.func IMap.t
   ; data : Concrete_data.t IMap.t
   ; elem : Concrete_elem.t IMap.t
+  ; tags : Binary.Tag.t IMap.t
   ; extern_funcs : ('ext * Text.func_type) Dynarray.t
   ; id : int
   }
@@ -44,6 +45,9 @@ let get_data (env : _ t) id =
 let get_elem (env : _ t) id =
   match IMap.find_opt id env.elem with None -> assert false | Some v -> v
 
+let get_tag (env : _ t) id =
+  match IMap.find_opt id env.tags with None -> assert false | Some v -> v
+
 let get_extern_func env id =
   let f, _t = Dynarray.get env.extern_funcs id in
   f
@@ -56,6 +60,7 @@ module Build = struct
     ; functions : Kind.func IMap.t
     ; data : Concrete_data.t IMap.t
     ; elem : Concrete_elem.t IMap.t
+    ; tags : Binary.Tag.t IMap.t
     }
 
   let empty =
@@ -65,6 +70,7 @@ module Build = struct
     ; functions = IMap.empty
     ; data = IMap.empty
     ; elem = IMap.empty
+    ; tags = IMap.empty
     }
 
   let add_global id const (env : t) =
@@ -83,6 +89,8 @@ module Build = struct
 
   let add_elem id elem (env : t) = { env with elem = IMap.add id elem env.elem }
 
+  let add_tag id tag (env : t) = { env with tags = IMap.add id tag env.tags }
+
   let get_global (env : t) id =
     match IMap.find_opt id env.globals with
     | None -> Error (`Unknown_global (Text.Raw id))
@@ -99,9 +107,15 @@ module Build = struct
     | None -> Error (`Unknown_func (Text.Raw id))
     | Some v -> Ok v
 
+  let get_tag (env : t) id =
+    match IMap.find_opt id env.tags with
+    | None -> Error (`Unknown_tag (Text.Raw id))
+    | Some v -> Ok v
+
   let get_memories { memories; _ } = memories
 end
 
-let freeze id ({ globals; memories; tables; functions; data; elem } : Build.t)
+let freeze id
+  ({ globals; memories; tables; functions; data; elem; tags } : Build.t)
   extern_funcs =
-  { id; globals; memories; tables; functions; data; elem; extern_funcs }
+  { id; globals; memories; tables; functions; data; elem; tags; extern_funcs }

@@ -18,6 +18,7 @@ module State = struct
     ; memories : Concrete_memory.t StringMap.t
     ; tables : table StringMap.t
     ; functions : func StringMap.t
+    ; tags : Binary.Tag.t StringMap.t
     ; defined_names : StringSet.t
     }
 
@@ -262,6 +263,36 @@ let eval_functions ls (finished_env : int) env functions =
   in
   env
 
+let eval_tag ls (_finished_env : int)
+  (tag : (Binary.Tag.t, Binary.block_type) Origin.t) : Binary.Tag.t Result.t =
+  match tag with
+  | Origin.Local tag -> ok tag
+  | Imported import ->
+    let (Binary.Bt_raw ((None | Some _), import_typ)) = import.typ in
+    let* tag =
+      State.load_from_module ls (fun (e : State.exports) -> e.tags) import
+    in
+    let (Bt_raw ((None | Some _), typ)) = tag.typ in
+    if Text.func_type_eq typ import_typ then Ok tag
+    else
+      let msg =
+        Fmt.str "%s: expected: %a got: %a" import.name Text.pp_func_type
+          import_typ Text.pp_func_type typ
+      in
+      Error (`Incompatible_import_type msg)
+
+let eval_tags ls (finished_env : int) env
+  (tags : (Binary.Tag.t, Binary.block_type) Origin.t array) =
+  let+ env, _i =
+    array_fold_left
+      (fun (env, i) tag ->
+        let+ tag = eval_tag ls finished_env tag in
+        let env = Link_env.Build.add_tag i tag env in
+        (env, succ i) )
+      (env, 0) tags
+  in
+  env
+
 let active_elem_expr ~offset ~length ~table ~elem =
   [ Binary.I32_const offset
   ; I32_const 0l
@@ -366,8 +397,9 @@ let populate_exports env (exports : Binary.Module.Exports.t) :
   in
   let* memories, names = fill_exports' Link_env.get_memory exports.mem names in
   let* tables, names = fill_exports' Link_env.get_table exports.table names in
-  let+ functions, names = fill_exports Link_env.get_func exports.func names in
-  { State.globals; memories; tables; functions; defined_names = names }
+  let* functions, names = fill_exports Link_env.get_func exports.func names in
+  let+ tags, names = fill_exports Link_env.get_tag exports.tag names in
+  { State.globals; memories; tables; functions; tags; defined_names = names }
 
 module Binary = struct
   let modul ~name (ls : 'f State.t) (modul : Binary.Module.t) =
@@ -376,6 +408,7 @@ module Binary = struct
     let next_id = Dynarray.length ls.envs in
     let env = Link_env.Build.empty in
     let* env = eval_functions ls next_id env modul.func in
+    let* env = eval_tags ls next_id env modul.tag in
     let* env = eval_globals ls env modul.global in
     let* env = eval_memories ls env modul.mem in
     let* env = eval_tables ls env modul.table in
@@ -432,6 +465,7 @@ module Extern = struct
       ; globals = StringMap.empty
       ; memories = StringMap.empty
       ; tables = StringMap.empty
+      ; tags = StringMap.empty
       ; defined_names
       }
     in

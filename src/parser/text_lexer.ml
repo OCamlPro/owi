@@ -411,6 +411,7 @@ let keywords =
      ; ("quote", QUOTE)
      ; ("rec", REC)
      ; ("ref", REF)
+     ; ("tag", TAG)
      ; ("ref.array", REF_ARRAY)
      ; ("ref.as_non_null", REF_AS_NON_NULL)
      ; ("ref.cast", REF_CAST)

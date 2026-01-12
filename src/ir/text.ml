@@ -722,6 +722,15 @@ module Data = struct
     pf fmt {|(data%a %a %S)|} pp_id_opt d.id Mode.pp d.mode d.init
 end
 
+module Tag = struct
+  type t =
+    { id : string option
+    ; typ : block_type
+    }
+
+  let pp fmt { id; typ } = pf fmt {|(tag%a %a)|} pp_id_opt id pp_block_type typ
+end
+
 module Elem = struct
   module Mode = struct
     type t =
@@ -763,12 +772,14 @@ module Import = struct
       | Table of string option * Table.Type.t
       | Mem of string option * limits
       | Global of string option * Global.Type.t
+      | Tag of string option * block_type
 
     let pp fmt = function
       | Func (id, t) -> pf fmt "(func%a %a)" pp_id_opt id pp_block_type t
       | Table (id, t) -> pf fmt "(table%a %a)" pp_id_opt id Table.Type.pp t
       | Mem (id, t) -> pf fmt "(memory%a %a)" pp_id_opt id pp_limits t
       | Global (id, t) -> pf fmt "(global%a %a)" pp_id_opt id Global.Type.pp t
+      | Tag (id, t) -> pf fmt "(tag%a %a)" pp_id_opt id pp_block_type t
   end
 
   type t =
@@ -790,12 +801,14 @@ module Export = struct
       | Table of indice option
       | Mem of indice option
       | Global of indice option
+      | Tag of indice option
 
     let pp fmt = function
       | Func id -> pf fmt "(func %a)" pp_indice_opt id
       | Table id -> pf fmt "(table %a)" pp_indice_opt id
       | Mem id -> pf fmt "(memory %a)" pp_indice_opt id
       | Global id -> pf fmt "(global %a)" pp_indice_opt id
+      | Tag id -> pf fmt "(tag %a)" pp_indice_opt id
   end
 
   type t =
@@ -822,6 +835,7 @@ module Module = struct
       | Func of Func.t
       | Elem of Elem.t
       | Data of Data.t
+      | Tag of Tag.t
       | Start of indice
       | Import of Import.t
       | Export of Export.t
@@ -836,6 +850,7 @@ module Module = struct
       | Func f -> Func.pp fmt f
       | Elem e -> Elem.pp fmt e
       | Data d -> Data.pp fmt d
+      | Tag t -> Tag.pp fmt t
       | Start s -> pp_start fmt s
       | Import i -> Import.pp fmt i
       | Export e -> Export.pp fmt e

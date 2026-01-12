@@ -212,8 +212,7 @@ let check_end_opcode ?unexpected_eoi_msg input =
     parse_fail "END opcode expected (got %s instead)" (Char.escaped c)
   | Error _ as e -> e
 
-let check_zero_opcode input =
-  let msg = "data count section required" in
+let check_zero_opcode ?(msg = "data count section required") input =
   match read_byte ~msg input with
   | Ok ('\x00', input) -> Ok input
   | Ok (c, _input) -> parse_fail "%s (got %s instead)" msg (Char.escaped c)
@@ -715,7 +714,7 @@ let rec read_instr types input =
   | '\xD5' ->
     let+ idx, input = read_indice input in
     (Br_on_null idx, input)
-  | '\xD6' -> 
+  | '\xD6' ->
     let+ idx, input = read_indice input in
     (Br_on_non_null idx, input)
   | '\xFC' -> read_FC input
@@ -750,6 +749,7 @@ type import =
   | Table of Text.limits * Text.ref_type * Text.expr option
   | Mem of Text.limits
   | Global of Text.mut * Text.val_type
+  | Tag of int
 
 let magic_check str =
   if String.length str < 4 then parse_fail "unexpected end"
@@ -849,6 +849,9 @@ let read_import input =
   | '\x03' ->
     let+ (mut, val_type), input = read_global_type input in
     ((modul, name, Global (mut, val_type)), input)
+  | '\x04' ->
+    let+ typeidx, input = read_U32 input in
+    ((modul, name, Tag typeidx), input)
   | _c -> parse_fail "malformed import kind"
 
 let read_table input =
@@ -1033,6 +1036,11 @@ let read_data types input =
     ({ Data.id; init; mode }, input)
   | i -> parse_fail "malformed data segment kind %d" i
 
+let read_tag input =
+  let* input = check_zero_opcode ~msg:"read_tag" input in
+  let+ typeidx, input = read_U32 input in
+  (typeidx, input)
+
 let parse_many_custom_section input =
   let rec aux acc input =
     let* custom_section, input = section_custom input in
@@ -1160,10 +1168,16 @@ let sections_iterate (input : Input.t) =
   let custom_sections = custom_sections @ custom_sections' in
 
   (* Data *)
-  let+ data, input =
+  let* data, input =
     section_parse input ~expected_id:'\x0B' [] (vector_no_id (read_data types))
   in
 
+  (* Tag *)
+  let+ tag_section, input =
+    section_parse input ~expected_id:'\x0D' [] (vector_no_id read_tag)
+  in
+
+  (* Data *)
   let data = Array.of_list data in
 
   let* () =
@@ -1276,6 +1290,28 @@ let sections_iterate (input : Input.t) =
   (* Elems *)
   let elem = Array.of_list element_section in
 
+  (* Tags *)
+  let tag =
+    let local =
+      List.map
+        (fun typeidx ->
+          Origin.Local
+            { Tag.typ = block_type_of_type_def types.(typeidx); id = None } )
+        tag_section
+    in
+    let imported =
+      List.filter_map
+        (function
+          | modul_name, name, Tag idx ->
+            let typ = block_type_of_type_def types.(idx) in
+            Option.some
+            @@ Origin.imported ~modul_name ~name ~assigned_name:None ~typ
+          | _ -> None )
+        import_section
+    in
+    Array.of_list (imported @ local)
+  in
+
   (* Exports *)
   (* We use an intermediate stack because the values are in reverse order *)
   let module Stack = Prelude.Stack in
@@ -1283,6 +1319,7 @@ let sections_iterate (input : Input.t) =
   let mem_exports = Stack.create () in
   let table_exports = Stack.create () in
   let func_exports = Stack.create () in
+  let tag_exports = Stack.create () in
   List.iter
     (fun (export_typeidx, export) ->
       match export_typeidx with
@@ -1290,6 +1327,7 @@ let sections_iterate (input : Input.t) =
       | '\x01' -> Stack.push export table_exports
       | '\x02' -> Stack.push export mem_exports
       | '\x03' -> Stack.push export global_exports
+      | '\x04' -> Stack.push export global_exports
       | _ -> Fmt.failwith "read_exportdesc error" )
     export_section;
   let stack_to_array s =
@@ -1301,6 +1339,7 @@ let sections_iterate (input : Input.t) =
     ; table = stack_to_array table_exports
     ; mem = stack_to_array mem_exports
     ; global = stack_to_array global_exports
+    ; tag = stack_to_array tag_exports
     }
   in
 
@@ -1320,6 +1359,7 @@ let sections_iterate (input : Input.t) =
   ; table
   ; start = start_section
   ; data
+  ; tag
   ; exports
   ; custom
   }

@@ -59,6 +59,7 @@ type err =
   | `Unknown_operator
   | `Unknown_table of Text.indice
   | `Unknown_type of Text.indice
+  | `Unknown_tag of Text.indice
   | `Unsupported_file_extension of string
   | `Contract_unknown_func of Text.indice
   | `Empty_annotation_id
@@ -150,6 +151,7 @@ let rec err_to_string = function
   | `Unknown_operator -> Fmt.str "unknown operator"
   | `Unknown_table id -> Fmt.str "unknown table %a" Text.pp_indice id
   | `Unknown_type id -> Fmt.str "unknown type %a" Text.pp_indice id
+  | `Unknown_tag id -> Fmt.str "unknown tag %a" Text.pp_indice id
   | `Unsupported_file_extension ext ->
     Fmt.str "unsupported file_extension %S" ext
   | `Contract_unknown_func id ->
@@ -232,46 +234,47 @@ let err_to_exit_code = function
   | `Unknown_operator -> 50
   | `Unknown_table _id -> 51
   | `Unknown_type _id -> 52
-  | `Unsupported_file_extension _ext -> 53
-  | `Failed_with_but_expected (_got, _expected) -> 54
-  | `Spec_invalid_int32 _i32 -> 56
-  | `Spec_invalid_int64 _i64 -> 57
-  | `Spec_invalid_float32 _f32 -> 58
-  | `Spec_invalid_float64 _f64 -> 59
-  | `Spec_invalid_indice _id -> 60
-  | `Spec_invalid_text_indice _id -> 61
-  | `Unknown_annotation_clause _s -> 62
-  | `Unknown_annotation_object _s -> 63
-  | `Spec_unknown_binder _id -> 64
-  | `Spec_unknown_param _id -> 65
-  | `Spec_unknown_variable _id -> 66
-  | `Spec_unknown_binder_type _s -> 67
-  | `Spec_unknown_prop _pr -> 68
-  | `Spec_unknown_term _tm -> 69
-  | `Spec_type_error _str -> 70
-  | `Contract_unknown_func _id -> 71
-  | `Empty_annotation_id -> 72
-  | `Empty_identifier -> 73
-  | `Unclosed_annotation -> 74
-  | `Unclosed_comment -> 75
-  | `Unclosed_string -> 76
-  | `Unbounded_quantification -> 77
-  | `Invalid_model _msg -> 78
-  | `Unknown_export _id -> 79
-  | `Unimplemented _msg -> 80
-  | `Element_type_error -> 81
-  | `Extern_call_arg_type_mismatch -> 82
-  | `Extern_call_null_arg -> 83
-  | `Indirect_call_type_mismatch -> 84
-  | `Integer_divide_by_zero -> 85
-  | `Integer_overflow -> 86
-  | `Conversion_to_integer -> 87
-  | `Memory_heap_buffer_overflow -> 88
-  | `Memory_leak_use_after_free -> 89
-  | `Out_of_bounds_memory_access -> 90
-  | `Out_of_bounds_table_access -> 91
-  | `Undefined_element -> 92
-  | `Uninitialized_element _ -> 93
-  | `Uninitialized_local _ -> 94
-  | `Unreachable -> 95
-  | `Invalid_character_in_memory -> 96
+  | `Unknown_tag _id -> 53
+  | `Unsupported_file_extension _ext -> 54
+  | `Failed_with_but_expected (_got, _expected) -> 55
+  | `Spec_invalid_int32 _i32 -> 57
+  | `Spec_invalid_int64 _i64 -> 58
+  | `Spec_invalid_float32 _f32 -> 59
+  | `Spec_invalid_float64 _f64 -> 60
+  | `Spec_invalid_indice _id -> 61
+  | `Spec_invalid_text_indice _id -> 62
+  | `Unknown_annotation_clause _s -> 63
+  | `Unknown_annotation_object _s -> 64
+  | `Spec_unknown_binder _id -> 65
+  | `Spec_unknown_param _id -> 66
+  | `Spec_unknown_variable _id -> 67
+  | `Spec_unknown_binder_type _s -> 68
+  | `Spec_unknown_prop _pr -> 69
+  | `Spec_unknown_term _tm -> 70
+  | `Spec_type_error _str -> 71
+  | `Contract_unknown_func _id -> 72
+  | `Empty_annotation_id -> 73
+  | `Empty_identifier -> 74
+  | `Unclosed_annotation -> 75
+  | `Unclosed_comment -> 76
+  | `Unclosed_string -> 77
+  | `Unbounded_quantification -> 78
+  | `Invalid_model _msg -> 79
+  | `Unknown_export _id -> 80
+  | `Unimplemented _msg -> 81
+  | `Element_type_error -> 82
+  | `Extern_call_arg_type_mismatch -> 83
+  | `Extern_call_null_arg -> 84
+  | `Indirect_call_type_mismatch -> 85
+  | `Integer_divide_by_zero -> 86
+  | `Integer_overflow -> 87
+  | `Conversion_to_integer -> 88
+  | `Memory_heap_buffer_overflow -> 89
+  | `Memory_leak_use_after_free -> 90
+  | `Out_of_bounds_memory_access -> 91
+  | `Out_of_bounds_table_access -> 92
+  | `Undefined_element -> 93
+  | `Uninitialized_element _ -> 94
+  | `Uninitialized_local _ -> 95
+  | `Unreachable -> 96
+  | `Invalid_character_in_memory -> 97

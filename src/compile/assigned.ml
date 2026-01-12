@@ -13,6 +13,7 @@ type t =
   ; func_names : (string, int) Hashtbl.t
   ; elem_names : (string, int) Hashtbl.t
   ; data_names : (string, int) Hashtbl.t
+  ; tag_names : (string, int) Hashtbl.t
   }
 
 let pp_table fmt tbl =
@@ -31,6 +32,7 @@ let pp fmt
   ; func_names
   ; elem_names
   ; data_names
+  ; tag_names
   } =
   Fmt.pf fmt
     "Types: %a@\n\
@@ -40,10 +42,12 @@ let pp fmt
      Mem names: %a@\n\
      Func names: %a@\n\
      Elem names: %a@\n\
-     Data names: %a@\n"
+     Data names: %a@\n\
+     Tag names: %a@\n"
     (Fmt.array Text.pp_func_type)
     typ pp_table typ_names pp_table global_names pp_table table_names pp_table
     mem_names pp_table func_names pp_table elem_names pp_table data_names
+    pp_table tag_names
 
 module Typetbl = Hashtbl.Make (struct
   type t = Text.func_type
@@ -122,7 +126,18 @@ let check_type_id (types : Text.func_type Array.t)
     else Ok ()
 
 let of_grouped
-  ({ global; table; mem; func; elem; data; type_checks; typ; function_type; _ } :
+  ({ global
+   ; table
+   ; mem
+   ; func
+   ; elem
+   ; data
+   ; type_checks
+   ; typ
+   ; function_type
+   ; tag
+   ; _
+   } :
     Grouped.t ) : t Result.t =
   Log.debug (fun m -> m "assigning    ...");
   let typ, typ_names = assign_types typ function_type in
@@ -152,6 +167,11 @@ let of_grouped
   let* data_names =
     name "data" ~get_name:(fun (data : Text.Data.t) -> data.id) data
   in
+  let* tag_names =
+    name "tag"
+      ~get_name:(get_origin_name (fun ({ id; _ } : Text.Tag.t) -> id))
+      tag
+  in
   let+ () = array_iter (check_type_id typ typ_names) type_checks in
 
   let modul =
@@ -163,6 +183,7 @@ let of_grouped
     ; func_names
     ; elem_names
     ; data_names
+    ; tag_names
     }
   in
   Log.debug (fun m -> m "%a" pp modul);
@@ -187,6 +208,8 @@ let find_data modul id = find modul.data_names (`Unknown_data id) id
 let find_elem modul id = find modul.elem_names (`Unknown_elem id) id
 
 let find_type modul id = find modul.typ_names (`Unknown_type id) id
+
+let find_tag modul id = find modul.tag_names (`Unknown_tag id) id
 
 let get_type modul idx =
   if idx >= Array.length modul.typ then None

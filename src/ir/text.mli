@@ -389,6 +389,15 @@ module Elem : sig
   val pp : t Fmt.t
 end
 
+module Tag : sig
+  type t =
+    { id : string option
+    ; typ : block_type
+    }
+
+  val pp : Format.formatter -> t -> unit
+end
+
 module Import : sig
   module Type : sig
     type t =
@@ -396,6 +405,7 @@ module Import : sig
       | Table of string option * Table.Type.t
       | Mem of string option * limits
       | Global of string option * Global.Type.t
+      | Tag of string option * block_type
   end
 
   type t =
@@ -413,6 +423,7 @@ module Export : sig
       | Table of indice option
       | Mem of indice option
       | Global of indice option
+      | Tag of indice option
   end
 
   type t =
@@ -437,6 +448,7 @@ module Module : sig
       | Func of Func.t
       | Elem of Elem.t
       | Data of Data.t
+      | Tag of Tag.t
       | Start of indice
       | Import of Import.t
       | Export of Export.t

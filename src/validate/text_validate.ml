@@ -149,8 +149,10 @@ let modul m =
             | Table (id, ty) ->
               let+ () = add_table id ty in
               env
+            | Tag _ -> Ok env
           end
         | Data _d -> Ok env
+        | Tag _t -> Ok env
         | Elem { typ; mode; explicit_typ; init; _ } ->
           let* env = elem_check_type env typ mode explicit_typ in
           let* () = elem_check_init init in

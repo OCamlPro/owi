@@ -16,7 +16,9 @@ type t =
   { id : string option
   ; typ : Typedef.t Array.t
   ; function_type : func_type Array.t
-      (** Types comming from function declarations. It contains potential
+      (* TODO: "function_type" should be renamed to something like
+          "implicit_types"?  *)
+      (** Types comming from function or tag declarations. It contains potential
           duplication. *)
   ; type_checks : (indice * func_type) Array.t
       (** Types checks to perform after assignment. Come from function
@@ -27,10 +29,12 @@ type t =
   ; func : (Func.t, block_type) Origin.t Array.t
   ; elem : Text.Elem.t Array.t
   ; data : Text.Data.t Array.t
+  ; tag : (Tag.t, block_type) Origin.t Array.t
   ; global_exports : opt_export Array.t
   ; mem_exports : opt_export Array.t
   ; table_exports : opt_export Array.t
   ; func_exports : opt_export Array.t
+  ; tag_exports : opt_export Array.t
   ; start : indice option
   }
 
@@ -130,8 +134,17 @@ let add_func value function_type type_checks func =
   end;
   Dynarray.add_last func value
 
-let add_field typ function_type type_checks global table mem func elem data
-  global_exports mem_exports table_exports func_exports start :
+let add_tag value tag_type type_checks
+  (tag : (Tag.t, block_type) Origin.t Dynarray.t) =
+  begin match value with
+  | Origin.Imported (t : block_type Origin.imported) ->
+    add_func_type tag_type type_checks t.typ
+  | Local (t : Tag.t) -> add_func_type tag_type type_checks t.typ
+  end;
+  Dynarray.add_last tag value
+
+let add_field typ function_type type_checks global table mem func elem data tag
+  global_exports mem_exports table_exports func_exports tag_exports start :
   Text.Module.Field.t -> unit = function
   | Typedef t -> Dynarray.add_last typ t
   | Global g -> Dynarray.add_last global (Origin.Local g)
@@ -159,9 +172,15 @@ let add_field typ function_type type_checks global table mem func elem data
   | Import { typ = Func (assigned_name, typ); modul_name; name } ->
     let imported = Origin.imported ~modul_name ~name ~assigned_name ~typ in
     add_func imported function_type type_checks func
+  | Import { typ = Tag (assigned_name, typ); modul_name; name } ->
+    let imported = Origin.imported ~modul_name ~name ~assigned_name ~typ in
+    add_tag imported function_type type_checks tag
   | Export { name; typ = Func id } ->
     let id = curr_id (Dynarray.length func) id in
     Dynarray.add_last func_exports { name; id }
+  | Export { name; typ = Tag id } ->
+    let id = curr_id (Dynarray.length tag) id in
+    Dynarray.add_last tag_exports { name; id }
   | Elem e ->
     let mode =
       match e.mode with
@@ -180,6 +199,7 @@ let add_field typ function_type type_checks global table mem func elem data
         Active (Some id, expr)
     in
     Dynarray.add_last data { d with mode }
+  | Tag t -> add_tag (Origin.Local t) function_type type_checks tag
   | Start id -> start := Some id
 
 let of_text { Text.Module.fields; id } =
@@ -193,14 +213,16 @@ let of_text { Text.Module.fields; id } =
   let func = Dynarray.create () in
   let elem = Dynarray.create () in
   let data = Dynarray.create () in
+  let tag = Dynarray.create () in
   let global_exports = Dynarray.create () in
   let mem_exports = Dynarray.create () in
   let table_exports = Dynarray.create () in
   let func_exports = Dynarray.create () in
+  let tag_exports = Dynarray.create () in
   let start = ref None in
   List.iter
-    (add_field typ function_type type_checks global table mem func elem data
-       global_exports mem_exports table_exports func_exports start )
+    (add_field typ function_type type_checks global table mem func elem data tag
+       global_exports mem_exports table_exports func_exports tag_exports start )
     fields;
   let modul =
     { id
@@ -213,10 +235,12 @@ let of_text { Text.Module.fields; id } =
     ; func = Dynarray.to_array func
     ; elem = Dynarray.to_array elem
     ; data = Dynarray.to_array data
+    ; tag = Dynarray.to_array tag
     ; global_exports = Dynarray.to_array global_exports
     ; mem_exports = Dynarray.to_array mem_exports
     ; table_exports = Dynarray.to_array table_exports
     ; func_exports = Dynarray.to_array func_exports
+    ; tag_exports = Dynarray.to_array tag_exports
     ; start = !start
     }
   in

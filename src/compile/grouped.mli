@@ -24,10 +24,12 @@ type t = private
   ; func : (Func.t, block_type) Origin.t Array.t
   ; elem : Elem.t Array.t
   ; data : Data.t Array.t
+  ; tag : (Tag.t, block_type) Origin.t Array.t
   ; global_exports : opt_export Array.t
   ; mem_exports : opt_export Array.t
   ; table_exports : opt_export Array.t
   ; func_exports : opt_export Array.t
+  ; tag_exports : opt_export Array.t
   ; start : indice option
   }
 

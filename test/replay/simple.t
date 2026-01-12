@@ -1,6 +1,6 @@
   $ owi replay --replay-file simple.scfg simple.wat
   owi: [ERROR] unreachable
-  [95]
+  [96]
   $ owi replay --replay-file simple.scfg simple.wat -v
   owi: [INFO] parsing      ...
   owi: [INFO] checking     ...
@@ -21,4 +21,4 @@
   owi: [INFO] stack         : [  ]
   owi: [INFO] running instr : unreachable (executed 0 times)
   owi: [ERROR] unreachable
-  [95]
+  [96]

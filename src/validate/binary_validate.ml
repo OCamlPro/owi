@@ -96,6 +96,13 @@ module Env = struct
     if i >= Array.length modul.elem then Error (`Unknown_elem (Text.Raw i))
     else match modul.elem.(i) with value -> Ok value.typ
 
+  let tag_get i modul =
+    if i >= Array.length modul.tag then Error (`Unknown_tag (Text.Raw i))
+    else
+      match modul.tag.(i) with
+      | Origin.Local { typ; _ } -> Ok typ
+      | Imported { typ; _ } -> Ok typ
+
   let make ~params ~locals ~modul ~result_type ~refs =
     let l = List.mapi (fun i v -> (i, v)) (params @ locals) in
     let locals =
@@ -796,6 +803,13 @@ let validate_exports modul =
         let* _t = Env.global_get id modul in
         Ok () )
       modul.exports.global
+  in
+  let* () =
+    array_iter
+      (fun { Export.id; name = _ } ->
+        let* _t = Env.tag_get id modul in
+        Ok () )
+      modul.exports.tag
   in
   array_iter
     (fun { id; Export.name = _ } ->

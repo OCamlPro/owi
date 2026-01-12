@@ -17,6 +17,7 @@
 %token LOCAL LOCAL_GET LOCAL_SET LOCAL_TEE LOOP LPAR
 %token MEMORY MEMORY_COPY MEMORY_FILL MEMORY_GROW MEMORY_INIT MEMORY_SIZE MODULE MUTABLE DEFINITION INSTANCE
 %token NAN_ARITH NAN_CANON NOEXTERN NOFUNC NONE NOP NULL NULL_EXTERN_REF NULL_FUNC_REF NULL_REF
+%token TAG
 %token OFFSET
 %token PARAM
 %token QUOTE
@@ -749,11 +750,11 @@ let func ==
       | Module.Field.Import i ->
         begin match i.typ with
         | Func (_id, ft) -> Module.Field.Import { i with typ = Func (id, ft) }
-        | Global _ | Mem _ | Table _ -> assert false
+        | Global _ | Mem _ | Table _ | Tag _ -> assert false
         end
       | Export e -> Export { e with typ = Func func_id }
       | Func f -> Func { f with id }
-      | Data _ | Elem _ | Global _ | Start _ | Typedef _ | Table _ | Mem _ as field -> begin
+      | Data _ | Tag _ | Elem _ | Global _ | Start _ | Typedef _ | Table _ | Mem _ as field -> begin
         Fmt.epr "got invalid field: `%a`@." Module.Field.pp field;
         assert false
       end
@@ -894,9 +895,9 @@ let table ==
       Elem { e with mode }
     | Import i -> begin match i.typ with
       | Table (_id, table_type) -> Import { i with typ = Table (id, table_type) }
-      | Func _ | Global _ | Mem _ -> assert false
+      | Func _ | Global _ | Mem _ | Tag _ -> assert false
     end
-    | Mem _ | Data _ | Start _ | Func _ | Global _ | Typedef _ as field -> begin
+    | Mem _ | Data _ | Tag _ | Start _ | Func _ | Global _ | Typedef _ as field -> begin
       Fmt.epr "got invalid field: `%a`@." Module.Field.pp field;
       assert false
     end
@@ -952,9 +953,9 @@ let memory ==
         Data { d with mode }
       | Import i -> begin match i.typ with
         | Mem (_id, mem_type ) -> Import { i with typ = Mem (id, mem_type) }
-        | Table _ | Func _ | Global _ -> assert false
+        | Table _ | Func _ | Global _ | Tag _ -> assert false
         end
-      | Elem _ | Typedef _ | Table _ | Func _ | Global _ | Start _ as field -> begin
+      | Tag _ | Elem _ | Typedef _ | Table _ | Func _ | Global _ | Start _ as field -> begin
         Fmt.epr "got invalid field: `%a`@." Module.Field.pp field;
         assert false
       end
@@ -987,9 +988,9 @@ let global ==
       | Import i ->
         begin match i.typ with
         | Global (_id, t) -> Import { i with typ = Global (id, t) }
-        | Mem _ | Table _ | Func _ -> assert false
+        | Mem _ | Table _ | Func _ | Tag _ -> assert false
         end
-      | Start _ | Func _ | Data _ | Elem _ | Mem _ | Table _ | Typedef _ as field -> begin
+      | Start _ | Func _ | Data _ | Tag _ | Elem _ | Mem _ | Table _ | Typedef _ as field -> begin
         Fmt.epr "got invalid field: `%a`@." Module.Field.pp field;
         assert false
       end
@@ -1016,6 +1017,8 @@ let import_type ==
   | TABLE; ~ = option(id); ~ = table_type; <Import.Type.Table>
   | MEMORY; ~ = option(id); ~ = mem_type; <Import.Type.Mem>
   | GLOBAL; ~ = option(id); ~ = global_type; <Import.Type.Global>
+  | TAG; id = option(id); ~ = type_use; { Import.Type.Tag (id, Bt_ind type_use) }
+  | (id, ft) = preceded(TAG, pair(option(id), func_type)); { Import.Type.Tag (id, Bt_raw (None, ft)) }
 
 let import ==
   | IMPORT; modul_name = utf8_name; name = utf8_name; typ = par(import_type); {
@@ -1030,6 +1033,7 @@ let export_typ ==
   | TABLE; ~ = indice; { Export.Type.Table (Some indice) }
   | MEMORY; ~ = indice; { Export.Type.Mem (Some indice) }
   | GLOBAL; ~ = indice; { Export.Type.Global (Some indice) }
+  | TAG; ~ = indice; { Export.Type.Tag (Some indice) }
 
 let export ==
   | EXPORT; name = utf8_name; typ = par(export_typ); {
@@ -1038,6 +1042,45 @@ let export ==
 
 let inline_export ==
   | LPAR; EXPORT; ~ = utf8_name; RPAR;  <>
+
+let tag ==
+  | TAG; id = option(id); fields = tag_fields; {
+    let tag_id = Option.map (fun id -> Text id) id in
+    List.rev_map (function
+      | Module.Field.Tag t -> Module.Field.Tag { t with id }
+      | Export e -> Export { e with typ = Tag tag_id }
+      | Import i ->
+        begin match i.typ with
+        | Tag (_id, typ) -> Import { i with typ = Tag (id, typ) }
+        | Mem _ | Table _ | Func _ | Global _ -> assert false
+        end
+      | Typedef _ | Global _ | Table _ | Mem _ | Func _ | Elem _  -> assert false
+      | Data _ | Start _ -> assert false
+    ) fields
+  }
+
+let tag_fields :=
+  | ~ = type_use; {
+    [ Module.Field.Tag { id = None; typ = Bt_ind type_use } ]
+  }
+  | ~ = tag_type; {
+    [ Module.Field.Tag { id = None; typ = Bt_raw (None, tag_type) } ]
+  }
+  | (modul_name, name) = inline_import; ~ = tag_type; {
+     [ Import { modul_name; name; typ = Tag (None, Bt_raw (None, tag_type)) }]
+  }
+  | ~ = inline_export; fields = tag_fields; {
+    Module.Field.Export { name = inline_export; typ = Tag None } :: fields
+  }
+
+let tag_type :=
+  | LPAR; PARAM; l = list(val_type); RPAR; (ins, out) = tag_type; {
+    ((List.map (fun i -> None, i) l) @ ins, out)
+  }
+  | LPAR; PARAM; ~ = id; ~ = val_type; RPAR; (ins, out) = tag_type; {
+    ((Some id, val_type) :: ins, out)
+  }
+  | { [], [] }
 
 (* Modules *)
 
@@ -1058,6 +1101,7 @@ let module_field :=
   | ~ = global; <>
   | ~ = table; <>
   | ~ = memory; <>
+  | ~ = tag; <>
 
 let inline_module_inner ==
   | fields = list(par(module_field)); {
