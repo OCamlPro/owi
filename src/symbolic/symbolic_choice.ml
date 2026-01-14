@@ -266,7 +266,7 @@ module CoreImpl = struct
            (close_work_queue:(unit -> unit) -> 'a eval * thread -> unit)
       -> at_worker_init:(unit -> unit)
       -> at_worker_end:(unit -> unit)
-      -> unit Domainpc.t array
+      -> unit Domain.t array
   end = struct
     include Eval
 
@@ -309,6 +309,11 @@ module CoreImpl = struct
 
     type 'a run_result = ('a eval * Thread.t) Seq.t
 
+    let rec repeat n f =
+      if n > 0 then (
+        f ();
+        repeat (n - 1) f )
+
     let run exploration_strategy ~workers ~no_worker_isolation solver t thread
       ~at_worker_value ~at_worker_init ~at_worker_end =
       let module M =
@@ -338,8 +343,9 @@ module CoreImpl = struct
           Domain.spawn spawn_one_worker )
       end
       else begin
-        Domainpc.spawn_n ?n:workers ~before_spawn:at_worker_init
-          spawn_one_worker
+        let n = Domainpc.get_available_cores () in
+        repeat n at_worker_init;
+        Domainpc.spawn_n ?n:workers spawn_one_worker
       end
 
     let trap t =

@@ -79,7 +79,7 @@ module type S = sig
          (close_work_queue:(unit -> unit) -> 'a eval * thread -> unit)
     -> at_worker_init:(unit -> unit)
     -> at_worker_end:(unit -> unit)
-    -> unit Domainpc.t array
+    -> unit Domain.t array
 
   val ite :
        Symbolic_boolean.t
