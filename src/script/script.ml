@@ -115,7 +115,7 @@ let compare_result_const result (const : Concrete_value.t) =
     assert false
 
 let value_of_const : Wast.const -> Concrete_value.t = function
-  | Const_I32 v -> Concrete_value.I32 v
+  | Wast.Const_I32 v -> Concrete_value.I32 v
   | Const_I64 v -> Concrete_value.I64 v
   | Const_F32 v -> Concrete_value.F32 v
   | Const_F64 v -> Concrete_value.F64 v

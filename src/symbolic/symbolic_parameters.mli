@@ -25,7 +25,8 @@ end
 
 type t =
   { unsafe : bool
-  ; workers : int
+  ; workers : Int.t Option.t
+  ; no_worker_isolation : Bool.t
   ; no_stop_at_failure : bool
   ; no_value : bool
   ; no_assert_failure_expression_printing : bool
