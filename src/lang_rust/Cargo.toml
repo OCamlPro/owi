@@ -1,11 +1,3 @@
-[package]
-name = "owi"
-version = "0.2.0"
-edition = "2021"
-
-exclude = ["dune"]
-
-[dependencies]
-
-[lib]
-path = "src/owi_sym.rs"
+[workspace]
+members = ["owi", "cargo-owi"]
+resolver = "2"
