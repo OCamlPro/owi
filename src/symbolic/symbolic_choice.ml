@@ -16,27 +16,26 @@ module CoreImpl = struct
         A monad representing computation that can be cooperatively scheduled and may need
         Worker Local Storage (WLS). Computations can yield, and fork (Choice).
       *)
-    type ('a, 'wls) t = Sched of ('wls -> ('a, 'wls) status) [@@unboxed]
+    type 'a t = Sched of (unit -> 'a status) [@@unboxed]
 
-    and ('a, 'wls) status =
+    and 'a status =
       | Now of 'a
-      | Yield of Prio.metrics * ('a, 'wls) t
-      | Choice of (('a, 'wls) status * ('a, 'wls) status)
+      | Yield of Prio.metrics * 'a t
+      | Choice of 'a status * 'a status
       | Stop
 
-    let run (Sched mxf : ('a, 'wls) t) (wls : 'wls) : ('a, 'wls) status =
-      mxf wls
+    let[@inline] run (Sched mxf : 'a t) : 'a status = mxf ()
 
-    let return x : _ t = Sched (Fun.const (Now x))
+    let[@inline] return x : _ t = Sched (Fun.const (Now x))
 
-    let return_status status = Sched (Fun.const status)
+    let[@inline] return_status status = Sched (Fun.const status)
 
-    let rec bind (mx : ('a, 'wls) t) (f : 'a -> ('b, 'wls) t) : ('b, 'wls) t =
+    let rec bind (mx : 'a t) (f : 'a -> 'b t) : 'b t =
       Sched
-        (fun wls ->
-          let rec unfold_status (x : ('a, 'wls) status) : ('b, 'wls) status =
+        (fun () ->
+          let rec unfold_status (x : 'a status) : 'b status =
             match x with
-            | Now x -> run (f x) wls
+            | Now x -> run (f x)
             | Yield (prio, lx) -> Yield (prio, bind lx f)
             | Choice (mx1, mx2) ->
               let mx1' = unfold_status mx1 in
@@ -44,32 +43,31 @@ module CoreImpl = struct
               Choice (mx1', mx2')
             | Stop -> Stop
           in
-          unfold_status (run mx wls) )
+          unfold_status (run mx) )
 
     let ( let* ) = bind
 
-    let map x f =
+    let[@inline] map x f =
       let* x in
       return (f x)
 
     let ( let+ ) = map
 
-    let yield prio = return_status (Yield (prio, Sched (Fun.const (Now ()))))
+    let[@inline] yield prio =
+      return_status (Yield (prio, Sched (Fun.const (Now ()))))
 
-    let choose a b = Sched (fun wls -> Choice (run a wls, run b wls))
+    let[@inline] choose a b = Sched (fun () -> Choice (run a, run b))
 
-    let stop : ('a, 'b) t = return_status Stop
-
-    let worker_local : ('a, 'a) t = Sched (fun wls -> Now wls)
+    let stop : 'a t = return_status Stop
   end
 
   module Scheduler (Work_datastructure : Prio.S) = struct
     (*
         A scheduler for Schedulable values.
       *)
-    type ('a, 'wls) work_queue = ('a, 'wls) Schedulable.t Work_datastructure.t
+    type 'a work_queue = 'a Schedulable.t Work_datastructure.t
 
-    type ('a, 'wls) t = { work_queue : ('a, 'wls) work_queue } [@@unboxed]
+    type 'a t = { work_queue : 'a work_queue } [@@unboxed]
 
     let init_scheduler () =
       let work_queue = Work_datastructure.make () in
@@ -78,7 +76,7 @@ module CoreImpl = struct
     let add_init_task sched task =
       Work_datastructure.push task Prio.dummy sched.work_queue
 
-    let work wls sched at_worker_value =
+    let work sched at_worker_value =
       let rec handle_status (t : _ Schedulable.status) write_back =
         match t with
         | Stop -> ()
@@ -89,17 +87,15 @@ module CoreImpl = struct
           handle_status m2 write_back
       in
       Work_datastructure.work_while
-        (fun f write_back -> handle_status (Schedulable.run f wls) write_back)
+        (fun f write_back -> handle_status (Schedulable.run f) write_back)
         sched.work_queue
 
-    let spawn_worker sched wls_init ~at_worker_value ~at_worker_init
-      ~at_worker_end =
+    let spawn_worker sched ~at_worker_value ~at_worker_init ~finally =
       at_worker_init ();
       Domain.spawn (fun () ->
-        Fun.protect ~finally:at_worker_end (fun () ->
+        Fun.protect ~finally (fun () ->
           try
-            let wls = wls_init () in
-            work wls sched
+            work sched
               (at_worker_value ~close_work_queue:(fun () ->
                  Work_datastructure.close sched.work_queue ) )
           with e ->
@@ -124,13 +120,13 @@ module CoreImpl = struct
       *)
     module M = Schedulable
 
-    type ('a, 's) t = St of ('s -> ('a * 's, Solver.t) M.t) [@@unboxed]
+    type ('a, 's) t = St of ('s -> ('a * 's) M.t) [@@unboxed]
 
     let run (St mxf) st = mxf st
 
     let return x = St (fun st -> M.return (x, st))
 
-    let lift (x : ('a, _) M.t) : ('a, 's) t =
+    let lift (x : 'a M.t) : ('a, 's) t =
       let ( let+ ) = M.( let+ ) in
       St
         (fun (st : 's) ->
@@ -187,23 +183,27 @@ module CoreImpl = struct
     let bind (mx : _ t) f : _ t =
       let ( let* ) = M.( let* ) in
       let* mx in
-      match mx with
-      | EVal x -> f x
-      | ETrap _ as mx -> M.return mx
-      | EAssert _ as mx -> M.return mx
+      match mx with EVal x -> f x | (ETrap _ | EAssert _) as mx -> M.return mx
 
     let ( let* ) = bind
 
     let map mx f =
       let ( let+ ) = M.( let+ ) in
       let+ mx in
-      match mx with
-      | EVal x -> EVal (f x)
-      | ETrap _ as mx -> mx
-      | EAssert _ as mx -> mx
+      match mx with EVal x -> EVal (f x) | (ETrap _ | EAssert _) as mx -> mx
 
     let ( let+ ) = map
   end
+
+  (* the two following functions can not be in the Make function because it breaks with the two instanciation of `Symbolic_choice.Make (Thread_{with,withou}_memory) *)
+  let solver_to_use = ref None
+
+  let solver_dls_key =
+    Domain.DLS.new_key (fun () ->
+      let solver_to_use = !solver_to_use in
+      match solver_to_use with
+      | None -> assert false
+      | Some solver_to_use -> Solver.fresh solver_to_use () )
 
   module Make (Thread : Thread_intf.S) : sig
     (*
@@ -242,7 +242,7 @@ module CoreImpl = struct
 
     val yield : Prio.metrics -> unit t
 
-    val solver : Solver.t t
+    val solver : unit -> Solver.t
 
     val with_thread : (thread -> 'a) -> 'a t
 
@@ -279,7 +279,7 @@ module CoreImpl = struct
        operate on the three monads layers
     *)
 
-    let lift_schedulable (v : ('a, _) Schedulable.t) : 'a t =
+    let lift_schedulable (v : 'a Schedulable.t) : 'a t =
       let v = State.lift v in
       lift v
 
@@ -293,7 +293,7 @@ module CoreImpl = struct
 
     let set_thread st = modify_thread (Fun.const st)
 
-    let solver = lift_schedulable Schedulable.worker_local
+    let solver () = Domain.DLS.get solver_dls_key
 
     let choose a b =
       (* Here we are doing an optimization: we can clone only one of the two thread because the clone should not have a dependency on the previous state, it is thus safe to re-use it for the other thread. We choose to clone `b` rather than `a` because `a` is likely to be the first one executed. *)
@@ -313,6 +313,7 @@ module CoreImpl = struct
 
     let run exploration_strategy ~workers solver t thread ~at_worker_value
       ~at_worker_init ~at_worker_end =
+      solver_to_use := Some solver;
       let module M =
         ( val Symbolic_parameters.Exploration_strategy.to_work_ds_module
                 exploration_strategy )
@@ -323,12 +324,12 @@ module CoreImpl = struct
       add_init_task sched (State.run t thread);
       if workers > 1 then Logs_threaded.enable ();
       Array.init workers (fun _i ->
-        spawn_worker sched (Solver.fresh solver) ~at_worker_value
-          ~at_worker_init ~at_worker_end )
+        spawn_worker sched ~at_worker_value ~at_worker_init
+          ~finally:at_worker_end )
 
     let trap t =
       let* thread in
-      let* solver in
+      let solver = solver () in
       let path_condition = Thread.pc thread in
       let symbol_scopes = Thread.symbol_scopes thread in
       let stats = Thread.bench_stats thread in
@@ -411,7 +412,7 @@ module Make (Thread : Thread_intf.S) = struct
   let check_reachability v prio =
     let* () = yield prio in
     let* thread in
-    let* solver in
+    let solver = solver () in
     let pc = Thread.pc thread |> Symbolic_path_condition.slice_on_condition v in
     let stats = Thread.bench_stats thread in
     let reachability =
@@ -423,7 +424,7 @@ module Make (Thread : Thread_intf.S) = struct
   let get_model_or_stop symbol =
     (* TODO: better prio here! *)
     let* () = yield Prio.dummy in
-    let* solver in
+    let solver = solver () in
     let* thread in
     let set =
       Thread.pc thread |> Symbolic_path_condition.slice_on_symbol symbol
@@ -579,7 +580,7 @@ module Make (Thread : Thread_intf.S) = struct
     if assertion_true then return ()
     else
       let* thread in
-      let* solver in
+      let solver = solver () in
       let path_condition = Thread.pc thread in
       let symbol_scopes = Thread.symbol_scopes thread in
       let stats = Thread.bench_stats thread in

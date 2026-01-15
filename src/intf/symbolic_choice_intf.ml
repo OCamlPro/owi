@@ -54,7 +54,7 @@ module type S = sig
 
   val with_new_symbol : Smtml.Ty.t -> (Smtml.Symbol.t -> 'b) -> 'b t
 
-  val solver : Solver.t t
+  val solver : unit -> Solver.t
 
   val thread : thread t
 
