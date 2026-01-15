@@ -1,0 +1,16 @@
+[package]
+name = "owi"
+version = "0.2.0"
+edition = "2021"
+license = "AGPL-3.0-only"
+description = "Bindings to the C symbolic API of the owi bug finding tool"
+homepage = "https://ocamlpro.github.io/owi/"
+repository = "https://github.com/OCamlPro/owi"
+readme = "README.md"
+
+exclude = ["dune"]
+
+[dependencies]
+
+[lib]
+path = "src/owi_sym.rs"

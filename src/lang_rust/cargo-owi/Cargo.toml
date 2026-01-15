@@ -1,0 +1,16 @@
+[package]
+name = "cargo-owi"
+version = "0.1.0"
+edition = "2024"
+license = "AGPL-3.0-only"
+description = "Cargo wrapper for the owi bug finding tool"
+homepage = "https://ocamlpro.github.io/owi/"
+repository = "https://github.com/OCamlPro/owi"
+readme = "README.md"
+
+[dependencies]
+anyhow = "1.0.100"
+cargo_metadata = "0.23.1"
+clap = { version = "4.5.54", features = ["derive"] }
+clap-cargo = { version = "0.18.3", features = ["cargo_metadata"] }
+escargot = "0.5.15"
