@@ -95,8 +95,21 @@ let compare_result_const result (const : Concrete_value.t) =
   | Result_const (Literal (Const_F64 n)), F64 n' ->
     Float64.eq n n' || String.equal (Float64.to_string n) (Float64.to_string n')
   | Result_const (Literal (Const_V128 n)), V128 n' -> Concrete_v128.eq n n'
-  | Result_const (Literal (Const_null Func_ht)), Ref (Func None) -> true
-  | Result_const (Literal (Const_null Extern_ht)), Ref (Extern None) -> true
+  | ( Result_const (Literal (Const_null None))
+    , Ref (NullRef | NullExn | Func None | Extern None) ) ->
+    true
+  | ( Result_const (Literal (Const_null (Some (NoFunc_ht | Func_ht))))
+    , Ref (Func None) ) ->
+    true
+  | ( Result_const (Literal (Const_null (Some (Extern_ht | NoExtern_ht))))
+    , Ref (Extern None) ) ->
+    true
+  | Result_const (Literal (Const_null (Some (Exn_ht | NoExn_ht)))), Ref NullExn
+    ->
+    true
+  | Result_const (Literal (Const_null (Some (Any_ht | None_ht)))), Ref NullRef
+    ->
+    true
   | Result_const (Literal (Const_extern n)), Ref (Extern (Some ref)) -> begin
     match Concrete_ref.Extern.cast ref Host_externref.ty with
     | None -> false
@@ -136,7 +149,8 @@ let value_of_const : Wast.const -> Concrete_value.t = function
   | Const_F32 v -> Concrete_value.F32 v
   | Const_F64 v -> Concrete_value.F64 v
   | Const_V128 v -> Concrete_value.V128 v
-  | Const_null rt -> Concrete_value.Ref (Concrete_ref.null rt)
+  | Const_null None -> assert false (* ? *)
+  | Const_null (Some rt) -> Concrete_value.Ref (Concrete_ref.null rt)
   | Const_extern i -> Concrete_value.Ref (Host_externref.value i)
   | i ->
     Log.err (fun m ->

@@ -70,22 +70,27 @@ let write_char_indice buf c idx =
   write_indice buf idx
 
 let write_reftype buf nullable ht =
-  match nullable with
-  | Text.Null -> begin
-    match ht with
-    | Text.Extern_ht -> Buffer.add_char buf '\x6F'
-    | Func_ht -> Buffer.add_char buf '\x70'
-    | TypeUse (Raw id) -> write_char_indice buf '\x63' id
-    | TypeUse _ -> assert false
-  end
-  | No_null -> begin
-    Buffer.add_char buf '\x64';
-    match ht with
-    | Text.Func_ht -> Buffer.add_char buf '\x70'
-    | Extern_ht -> Buffer.add_char buf '\x6F'
-    | TypeUse (Raw id) -> write_indice buf id
-    | TypeUse _ -> assert false
-  end
+  let is_null =
+    match nullable with
+    | Text.Null -> true
+    | No_null ->
+      Buffer.add_char buf '\x64';
+      false
+  in
+  match ht with
+  | Text.TypeUse (Raw id) when is_null ->
+    write_char_indice buf '\x63' id;
+    write_indice buf id
+  | Text.TypeUse (Raw id) -> write_indice buf id
+  | Exn_ht -> Buffer.add_char buf '\x69'
+  | Any_ht -> Buffer.add_char buf '\x6E'
+  | Extern_ht -> Buffer.add_char buf '\x6F'
+  | Func_ht -> Buffer.add_char buf '\x70'
+  | None_ht -> Buffer.add_char buf '\x71'
+  | NoExtern_ht -> Buffer.add_char buf '\x72'
+  | NoFunc_ht -> Buffer.add_char buf '\x73'
+  | NoExn_ht -> Buffer.add_char buf '\x74'
+  | TypeUse (Text _) -> assert false
 (* TODO: TypeUse (Text id) Unreachable because there (should be) no text ids in
   binary format, the proper way to do it is by redefining ref_type and heap_type
   for the binary format but it requires lots of changes. *)

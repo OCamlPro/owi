@@ -18,6 +18,9 @@ module type T = sig
   type t =
     | Extern of Extern.t option
     | Func of Kind.func option
+    (* TODO: Not sure about these two. *)
+    | NullExn
+    | NullRef
 
   val pp : t Fmt.t
 

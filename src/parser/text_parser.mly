@@ -17,7 +17,7 @@
 %token LOCAL LOCAL_GET LOCAL_SET LOCAL_TEE LOOP LPAR
 %token MEMORY MEMORY_COPY MEMORY_FILL MEMORY_GROW MEMORY_INIT MEMORY_SIZE MODULE MUTABLE DEFINITION INSTANCE
 %token NAN_ARITH NAN_CANON NOEXTERN NOFUNC NONE NOP NULL NULL_EXTERN_REF NULL_FUNC_REF NULL_REF
-%token TAG
+%token TAG EXN NO_EXN EXN_REF NULL_EXN_REF
 %token OFFSET
 %token PARAM
 %token QUOTE
@@ -134,12 +134,24 @@ let null_opt ==
 let heap_type ==
   | FUNC; { Func_ht }
   | EXTERN; { Extern_ht }
+  | ANY; { Any_ht }
+  | NONE; { None_ht }
+  | EXN; { Exn_ht }
+  | NOFUNC; { NoFunc_ht }
+  | NO_EXN; { NoExn_ht }
+  | NOEXTERN; { NoExtern_ht }
   | ~ = indice; <TypeUse>
 
 let ref_type ==
   | LPAR; REF; ~ = null_opt; ~ = heap_type; RPAR; <>
   | FUNC_REF; { Null, Func_ht }
   | EXTERN_REF; { Null, Extern_ht }
+  | ANY_REF; { Null, Any_ht }
+  | EXN_REF; { Null, Exn_ht }
+  | NULL_FUNC_REF; { Null, NoFunc_ht }
+  | NULL_REF; { Null, None_ht }
+  | NULL_EXN_REF; { Null, NoExn_ht }
+  | NULL_EXTERN_REF; { Null, NoExtern_ht }
 
 let packed_type :=
   | I8; { I8 }
@@ -1139,7 +1151,7 @@ let literal_const ==
   | F32_CONST; num = NUM; { Const_F32 (f32 num) }
   | F64_CONST; num = NUM; { Const_F64 (f64 num) }
   | n = v128_const; { Const_V128 n }
-  | REF_NULL; ~ = heap_type; <Const_null>
+  | REF_NULL; ht = heap_type; { Const_null (Some ht)}
   | REF_EXTERN; num = NUM; {
     match int_of_string_opt num with
     | None -> assert false
@@ -1162,7 +1174,7 @@ let result ==
   | ~ = const; <Result_const>
   | REF_EXTERN; { Result_extern_ref }
   | REF_FUNC; { Result_func_ref }
-  | REF_NULL; { Result_const (Literal (Const_null Func_ht)) }
+  | REF_NULL; { Result_const (Literal (Const_null None)) }
 
 let assert_ ==
   | ASSERT_RETURN; ~ = par(action); ~ = list(par(result)); <Assert_return>
