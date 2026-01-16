@@ -4,18 +4,14 @@
 
 type 'a eval =
   | EVal of 'a
-  | ETrap of
-      Result.err
-      * Smtml.Model.t
-      * (int * string) list
-      * int list
-      * Symbol_scope.t
-  | EAssert of
-      Symbolic_boolean.t
-      * Smtml.Model.t
-      * (int * string) list
-      * int list
-      * Symbol_scope.t
+  | EError of
+      { kind : [ `Trap of Result.err | `Assertion of Symbolic_boolean.t ]
+      ; model : Smtml.Model.t
+          (* TODO: all that follows could be replaced by the Thread directly! *)
+      ; labels : (int * string) list
+      ; breadcrumbs : int list
+      ; symbol_scopes : Symbol_scope.t
+      }
 
 module type S = sig
   type thread
@@ -90,25 +86,8 @@ module type S = sig
 end
 
 module type Intf = sig
-  module type S = S
-
-  module CoreImpl : sig
-    (* The core implementation of the monad. It is isolated in a module to *)
-    (* restict its exposed interface and maintain its invariant. *)
-
-    module State : sig
-      type ('a, 's) t
-
-      val project_state :
-           ('st1 -> 'st2 * 'backup)
-        -> ('backup -> 'st2 -> 'st1)
-        -> ('a, 'st2) t
-        -> ('a, 'st1) t
-    end
-  end
-
   module Make (Thread : Thread_intf.S) :
     S
-      with type 'a t = ('a eval, Thread.t) CoreImpl.State.t
+      with type 'a t = ('a eval, Thread.t) State_monad.t
        and type thread := Thread.t
 end

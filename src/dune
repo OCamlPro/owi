@@ -86,7 +86,9 @@
   ref_intf
   result
   rewrite
+  scheduler
   script
+  state_monad
   symbol_scope
   share
   solver
