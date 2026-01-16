@@ -17,7 +17,7 @@ let print_and_count_failures ~format ~out_file ~no_value
   let rec aux count_acc results =
     match results () with
     | Seq.Nil -> Ok count_acc
-    | Seq.Cons ((result, _thread), tl) ->
+    | Seq.Cons (result, tl) ->
       let* model =
         match result with
         | (`EAssert (_, model, _, _, _) | `ETrap (_, model, _, _, _)) as bug ->
@@ -42,8 +42,10 @@ let print_and_count_failures ~format ~out_file ~no_value
 let sort_results deterministic_result_order results =
   if deterministic_result_order then
     results
-    |> Seq.map (function (_, thread) as x ->
-      (x, List.rev @@ Thread_with_memory.breadcrumbs thread) )
+    |> Seq.map (function
+      | (`ETrap (_, _, _, breadcrumbs, _) | `EAssert (_, _, _, breadcrumbs, _))
+        as x
+      -> (x, List.rev @@ breadcrumbs) )
     |> List.of_seq
     |> List.sort (fun (_, bc1) (_, bc2) -> List.compare compare bc1 bc2)
     |> List.to_seq |> Seq.map fst
@@ -54,19 +56,21 @@ let mk_callback no_stop_at_failure fail_mode res_stack path_count =
   let open Symbolic_choice_intf in
   Atomic.incr path_count;
   match (fail_mode, v) with
-  | _, (EVal (), _) -> ()
+  | _, (EVal (), _thread) -> ()
   | ( (Symbolic_parameters.Both | Trap_only)
-    , (ETrap (t, m, labels, breadcrumbs, symbol_scopes), thread) ) ->
+    , ( EError { kind = `Trap e; model; labels; breadcrumbs; symbol_scopes }
+      , _thread ) ) ->
     Outcome.push
-      (`ETrap (t, m, labels, breadcrumbs, symbol_scopes), thread)
+      (`ETrap (e, model, labels, breadcrumbs, symbol_scopes))
       Prio.dummy res_stack;
     if not no_stop_at_failure then begin
       close_work_queue ()
     end
   | ( (Both | Assertion_only)
-    , (EAssert (e, m, labels, breadcrumbs, symbol_scopes), thread) ) ->
+    , ( EError { kind = `Assertion e; model; labels; breadcrumbs; symbol_scopes }
+      , _thread ) ) ->
     Outcome.push
-      (`EAssert (e, m, labels, breadcrumbs, symbol_scopes), thread)
+      (`EAssert (e, model, labels, breadcrumbs, symbol_scopes))
       Prio.dummy res_stack;
     if not no_stop_at_failure then begin
       close_work_queue ()

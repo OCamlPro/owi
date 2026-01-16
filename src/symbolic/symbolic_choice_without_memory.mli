@@ -5,7 +5,5 @@
 include
   Symbolic_choice_intf.S
     with type 'a t =
-      ( 'a Symbolic_choice_intf.eval
-      , Thread_without_memory.t )
-      Symbolic_choice.CoreImpl.State.t
+      ('a Symbolic_choice_intf.eval, Thread_without_memory.t) State_monad.t
      and type thread := Thread_without_memory.t
