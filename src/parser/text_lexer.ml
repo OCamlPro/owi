@@ -188,6 +188,7 @@ let keywords =
      ; ("export", EXPORT)
      ; ("extern", EXTERN)
      ; ("externref", EXTERN_REF)
+     ; ("nullexternref", NULL_EXTERN_REF)
      ; ("extern.externalize", EXTERN_EXTERNALIZE)
      ; ("extern.internalize", EXTERN_INTERNALIZE)
      ; ("f32", F32)
@@ -408,6 +409,8 @@ let keywords =
      ; ("nop", NOP)
      ; ("offset", OFFSET)
      ; ("param", PARAM)
+     ; ("nullref", NULL_REF)
+     ; ("nullfuncref", NULL_FUNC_REF)
      ; ("quote", QUOTE)
      ; ("rec", REC)
      ; ("ref", REF)
@@ -457,6 +460,10 @@ let keywords =
      ; ("i32x4.sub", I32X4_SUB)
      ; ("i64x2.add", I64X2_ADD)
      ; ("i64x2.sub", I64X2_SUB)
+     ; ("exn", EXN)
+     ; ("noexn", NO_EXN)
+     ; ("exnref", EXN_REF)
+     ; ("nullexnref", NULL_EXN_REF)
     |];
   tbl
 

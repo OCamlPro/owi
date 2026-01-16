@@ -161,8 +161,8 @@ module Stack : sig
   val match_heap_type :
        ?subtype:bool
     -> Module.t
-    -> Text.heap_type
-    -> Text.heap_type
+    -> expected:Text.heap_type
+    -> got:Text.heap_type
     -> bool Result.t
 
   val match_types : ?subtype:bool -> Module.t -> typ -> typ -> bool Result.t
@@ -186,10 +186,17 @@ end = struct
 
   (* TODO: replace this by a comparison function, that returns 0 if the types
      are equal, and -1 if typ1 is a subtype of typ2, 1 otherwise *)
-  let match_heap_type ?(subtype = false) modul required got =
-    match (got, required) with
-    | Text.Func_ht, Text.Func_ht -> Ok true
-    | Extern_ht, Extern_ht -> Ok true
+  let match_heap_type ?(subtype = false) modul ~expected ~got =
+    match (got, expected) with
+    | Text.Func_ht, Text.Func_ht
+    | Extern_ht, Extern_ht
+    | Any_ht, Any_ht
+    | None_ht, None_ht
+    | NoFunc_ht, NoFunc_ht
+    | Exn_ht, Exn_ht
+    | NoExn_ht, NoExn_ht
+    | NoExtern_ht, NoExtern_ht ->
+      Ok true
     | TypeUse (Text _id), _ | _, TypeUse (Text _id) -> assert false
     | TypeUse (Raw id1), TypeUse (Raw id2) ->
       (* TODO: add subtyping check *)
@@ -202,17 +209,27 @@ end = struct
         && List.for_all2 Text.val_type_eq rt1 rt2
       in
       Ok res
-    | TypeUse (Raw _), Func_ht when subtype -> Ok true
+    (* TODO: proper subtype checking *)
+    | TypeUse (Raw _), Func_ht
+    | NoFunc_ht, (TypeUse (Raw _) | Func_ht)
+    | NoExn_ht, Exn_ht
+    | NoExtern_ht, Extern_ht
+    | None_ht, Any_ht
+      when subtype ->
+      Ok true
+    | TypeUse (Raw id), Func_ht | Func_ht, TypeUse (Raw id) ->
+      (* TODO: not ideal *)
+      let* pt1, rt1 = Env.func_get id modul in
+      if List.is_empty pt1 && List.is_empty rt1 then Ok true else Ok false
     | _ -> Ok false
 
-  let match_types ?subtype env required got =
-    match (required, got) with
+  let match_types ?subtype env expected got =
+    match (expected, got) with
     | Something, _ | _, Something -> Ok true
     | Any, _ | _, Any -> Ok true
-    | Num_type required, Num_type got -> match_num_type required got
-    | Ref_type required, Ref_type got ->
-      (* TODO: reorder *)
-      match_heap_type ?subtype env required got
+    | Num_type expected, Num_type got -> match_num_type expected got
+    | Ref_type expected, Ref_type got ->
+      match_heap_type ?subtype env ~expected ~got
     | Num_type _, Ref_type _ | Ref_type _, Num_type _ -> Ok false
 
   let rec equal env s s' =
@@ -269,11 +286,11 @@ end = struct
     push rt stack
 end
 
-let typ_equal modul t1 t2 =
-  match (t1, t2) with
+let typ_equal modul ~expected ~got =
+  match (expected, got) with
   | Num_type t1, Num_type t2 -> Ok (Text.num_type_eq t1 t2)
-  | Ref_type t1, Ref_type t2 ->
-    let+ b = Stack.match_heap_type ~subtype:true modul t2 t1 in
+  | Ref_type expected, Ref_type got ->
+    let+ b = Stack.match_heap_type ~subtype:true modul ~expected ~got in
     b
   | Any, _ | _, Any -> Ok true
   | Something, _ | _, Something -> Ok true
@@ -519,13 +536,17 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
   | Table_init (ti, ei) ->
     let* _, table_typ = Env.table_type_get ti env.modul in
     let* _, elem_typ = Env.elem_type_get ei env.modul in
-    let* b = Stack.match_heap_type env.modul table_typ elem_typ in
+    let* b =
+      Stack.match_heap_type env.modul ~expected:table_typ ~got:elem_typ
+    in
     if not b then Error (`Type_mismatch "table_init")
     else Stack.pop env.modul [ i32; i32; i32 ] stack
   | Table_copy (id1, id2) ->
     let* _null1, typ1 = Env.table_type_get id1 env.modul in
     let* _null2, typ2 = Env.table_type_get id2 env.modul in
-    let* b = Stack.match_heap_type ~subtype:true env.modul typ1 typ2 in
+    let* b =
+      Stack.match_heap_type ~subtype:true env.modul ~expected:typ1 ~got:typ2
+    in
     if not b then Error (`Type_mismatch "table_copy")
     else Stack.pop env.modul [ i32; i32; i32 ] stack
   | Table_fill i ->
@@ -679,9 +700,16 @@ let typecheck_const_instr ~is_init (modul : Module.t) refs stack instr =
   | V128_const _ -> Stack.push [ v128 ] stack
   | Ref_null t -> Stack.push [ Ref_type t ] stack
   | Ref_func i ->
-    let* _t = Env.func_get i modul in
+    let* ity = Env.func_get i modul in
+    let resty =
+      match
+        Array.find_index (fun (_, ty) -> Text.func_type_eq ty ity) modul.types
+      with
+      | Some tyid -> Text.TypeUse (Raw tyid)
+      | None -> Func_ht
+    in
     Hashtbl.add refs i ();
-    Stack.push [ Ref_type Func_ht ] stack
+    Stack.push [ Ref_type resty ] stack
   | Global_get i ->
     if i >= Array.length modul.global then Error (`Unknown_global (Text.Raw i))
     else
@@ -716,8 +744,8 @@ let typecheck_global (modul : Module.t) refs
     match real_type with
     | [ real_type ] ->
       let expected = typ_of_val_type @@ snd typ in
-      let* b = typ_equal modul expected real_type in
-      if not b then Error (`Type_mismatch "typecheck global 1") else Ok ()
+      let* b = typ_equal modul ~expected ~got:real_type in
+      if b then Ok () else Error (`Type_mismatch "typecheck global 1")
     | _whatever -> Error (`Type_mismatch "typecheck_global 2") )
 
 let typecheck_elem modul refs (elem : Elem.t) =
@@ -729,7 +757,7 @@ let typecheck_elem modul refs (elem : Elem.t) =
         match real_type with
         | [ real_type ] ->
           let expected_type = Ref_type elem_ty in
-          let* b = typ_equal modul expected_type real_type in
+          let* b = typ_equal modul ~expected:expected_type ~got:real_type in
           if not b then
             Error
               (`Type_mismatch

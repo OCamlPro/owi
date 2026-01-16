@@ -242,18 +242,38 @@ let read_vectype input =
     Error (`Unimplemented "simd binary parsing")
   | b -> parse_fail "malformed vector type: %d" b
 
+let read_heap_type ?(abs = false) input b =
+  match b with
+  | -0x17 -> Ok (Text.Exn_ht, input)
+  | -0x12 -> Ok (Any_ht, input)
+  | -0x11 -> Ok (Extern_ht, input)
+  | -0x10 -> Ok (Func_ht, input)
+  | -0x0F -> Ok (None_ht, input)
+  | -0x0E -> Ok (NoExtern_ht, input)
+  | -0x0D -> Ok (NoFunc_ht, input)
+  | -0x0C -> Ok (NoExn_ht, input)
+  | _ when not abs ->
+    let* id, input = read_indice input in
+    if id >= 0 then Ok (Text.TypeUse (Raw id), input)
+    else parse_fail "malformed reference type: %d" b
+  | _ -> parse_fail "malformed reference type: %d" b
+
 let read_reftype input =
   let* b1, input = read_S7 input in
   match b1 with
-  | -0x10 -> Ok ((Text.Null, Text.Func_ht), input)
-  | -0x11 -> Ok ((Null, Extern_ht), input)
-  | -0x1c -> begin
+  | -0x1d ->
+    (* 0x63 *)
     let* b2, input = read_S7 input in
-    match b2 with
-    | -0x10 -> Ok ((Text.No_null, Text.Func_ht), input)
-    | _ -> parse_fail "malformed reference type: %d then %d" b1 b2
-  end
-  | _ -> parse_fail "malformed reference type: %d" b1
+    let* ht, input = read_heap_type input b2 in
+    Ok ((Text.Null, ht), input)
+  | -0x1c ->
+    (* 0x64 *)
+    let* b2, input = read_S7 input in
+    let* ht, input = read_heap_type input b2 in
+    Ok ((Text.No_null, ht), input)
+  | _ ->
+    let* ht, input = read_heap_type ~abs:true input b1 in
+    Ok ((Text.Null, ht), input)
 
 let read_valtype input =
   match read_numtype input with

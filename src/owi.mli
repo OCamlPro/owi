@@ -304,8 +304,14 @@ module Text : sig
   type heap_type =
     | TypeUse of indice
     (* abs_heap_type *)
+    | Any_ht
+    | None_ht
     | Func_ht
+    | NoFunc_ht
+    | Exn_ht
+    | NoExn_ht
     | Extern_ht
+    | NoExtern_ht
 
   val pp_heap_type : heap_type Fmt.t
 
