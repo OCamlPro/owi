@@ -16,34 +16,24 @@ module CoreImpl = struct
         A monad representing computation that can be cooperatively scheduled and may need
         Worker Local Storage (WLS). Computations can yield, and fork (Choice).
       *)
-    type 'a t = Sched of (unit -> 'a status) [@@unboxed]
-
-    and 'a status =
-      | Now of 'a
-      | Yield of Prio.metrics * 'a t
-      | Choice of 'a status * 'a status
+    type 'a t =
       | Stop
+      | Now of 'a
+      | Yield of Prio.metrics * (unit -> 'a t)
+      | Choice of 'a t * 'a t
 
-    let[@inline] run (Sched mxf : 'a t) : 'a status = mxf ()
+    (* let[@inline] run (Sched mxf : 'a t) : 'a status = mxf () *)
 
-    let[@inline] return x : _ t = Sched (Fun.const (Now x))
+    let[@inline] return x : _ t = Now x
 
-    let[@inline] return_status status = Sched (Fun.const status)
+    (* let[@inline] return_status status = Sched (Fun.const status) *)
 
     let rec bind (mx : 'a t) (f : 'a -> 'b t) : 'b t =
-      Sched
-        (fun () ->
-          let rec unfold_status (x : 'a status) : 'b status =
-            match x with
-            | Now x -> run (f x)
-            | Yield (prio, lx) -> Yield (prio, bind lx f)
-            | Choice (mx1, mx2) ->
-              let mx1' = unfold_status mx1 in
-              let mx2' = unfold_status mx2 in
-              Choice (mx1', mx2')
-            | Stop -> Stop
-          in
-          unfold_status (run mx) )
+      match mx with
+      | Stop -> Stop
+      | Now v -> f v
+      | Yield (prio, step) -> Yield (prio, fun () -> bind (step ()) f)
+      | Choice (a, b) -> Choice (bind a f, bind b f)
 
     let ( let* ) = bind
 
@@ -53,19 +43,18 @@ module CoreImpl = struct
 
     let ( let+ ) = map
 
-    let[@inline] yield prio =
-      return_status (Yield (prio, Sched (Fun.const (Now ()))))
+    let[@inline] yield prio = Yield (prio, Fun.const (Now ()))
 
-    let[@inline] choose a b = Sched (fun () -> Choice (run a, run b))
+    let[@inline] choose a b = Choice (a, b)
 
-    let stop : 'a t = return_status Stop
+    let stop : 'a t = Stop
   end
 
   module Scheduler (Work_datastructure : Prio.S) = struct
     (*
         A scheduler for Schedulable values.
       *)
-    type 'a work_queue = 'a Schedulable.t Work_datastructure.t
+    type 'a work_queue = (unit -> 'a Schedulable.t) Work_datastructure.t
 
     type 'a t = { work_queue : 'a work_queue } [@@unboxed]
 
@@ -77,17 +66,17 @@ module CoreImpl = struct
       Work_datastructure.push task Prio.dummy sched.work_queue
 
     let work sched at_worker_value =
-      let rec handle_status (t : _ Schedulable.status) write_back =
+      let rec inner (t : _ Schedulable.t) write_back =
         match t with
         | Stop -> ()
         | Now x -> at_worker_value x
         | Yield (prio, f) -> write_back (prio, f)
         | Choice (m1, m2) ->
-          handle_status m1 write_back;
-          handle_status m2 write_back
+          inner m1 write_back;
+          inner m2 write_back
       in
       Work_datastructure.work_while
-        (fun f write_back -> handle_status (Schedulable.run f) write_back)
+        (fun f write_back -> inner (f ()) write_back)
         sched.work_queue
 
     let spawn_worker sched ~at_worker_value ~at_worker_init ~finally =
@@ -321,7 +310,7 @@ module CoreImpl = struct
       let module Scheduler = Scheduler (M) in
       let open Scheduler in
       let sched = init_scheduler () in
-      add_init_task sched (State.run t thread);
+      add_init_task sched (Fun.const @@ State.run t thread);
       if workers > 1 then Logs_threaded.enable ();
       Array.init workers (fun _i ->
         spawn_worker sched ~at_worker_value ~at_worker_init
