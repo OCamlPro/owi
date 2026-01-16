@@ -1,11 +1,17 @@
 (* Add a notion of State to the Schedulable monad. "Transformer without module functor" style. *)
 module M = Scheduler.Schedulable
 
-type ('a, 's) t = St of ('s -> ('a * 's) M.t) [@@unboxed]
+type ('a, 's) t =
+  | St of ('s -> ('a * 's) M.t)
+  | Immediate of 'a M.t
 
-let[@inline] run (St mxf) st = mxf st
+let[@inline] run mxf st =
+  match mxf with St mxf -> mxf st | Immediate v -> M.map v (fun v -> (v, st))
 
-let[@inline] return x = St (fun st -> M.return (x, st))
+let[@inline] run_immediate mxf =
+  match mxf with St _ -> None | Immediate v -> Some v
+
+let[@inline] return x = Immediate (M.return x)
 
 let[@inline] lift (x : 'a M.t) : ('a, 's) t =
   let ( let+ ) = M.( let+ ) in
@@ -14,18 +20,40 @@ let[@inline] lift (x : 'a M.t) : ('a, 's) t =
       let+ x in
       (x, st) )
 
-let[@inline] bind mx f =
-  St
-    (fun st ->
-      let ( let* ) = M.( let* ) in
-      let* x, new_st = run mx st in
-      run (f x) new_st )
-
-let ( let* ) = bind
+let[@inline] join (mmx : (('a, 's) t, 's) t) : ('a, 's) t =
+  match mmx with
+  | Immediate v ->
+    let x = M.map v run_immediate in
+    begin match M.try_commute_opt x with
+    | Some v -> Immediate (M.join v)
+    | None ->
+      St
+        (fun st ->
+          let ( let* ) = M.( let* ) in
+          let* mx = v in
+          run mx st )
+    end
+  | St f ->
+    St
+      (fun st ->
+        let ( let* ) = M.( let* ) in
+        let* x, new_st = f st in
+        run x new_st )
 
 let[@inline] map x f =
-  let* x in
-  return (f x)
+  match x with
+  | Immediate v -> Immediate (M.map v f)
+  | St step ->
+    St
+      (fun st ->
+        let ( let* ) = M.( let* ) in
+        let* x, new_st = step st in
+        M.return (f x, new_st) )
+
+let[@inline] bind (mx : ('a, 's) t) (f : 'a -> ('b, 's) t) : ('b, 's) t =
+  join (map mx f)
+
+let ( let* ) = bind
 
 let[@inline] liftF2 f x y = St (fun st -> f (run x st) (run y st))
 

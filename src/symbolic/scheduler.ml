@@ -8,6 +8,17 @@ module Schedulable = struct
 
   let[@inline] return x : _ t = Now x
 
+  let rec try_commute_opt (mx : 'a option t) : 'a t option =
+    match mx with
+    | Stop -> Some Stop
+    | Now v -> Option.map return v
+    | Yield (_, _) -> None
+    | Choice (a, b) ->
+      let ( let* ) = Option.bind in
+      let* l = try_commute_opt a in
+      let* r = try_commute_opt b in
+      Some (Choice (l, r))
+
   let rec bind (mx : 'a t) (f : 'a -> 'b t) : 'b t =
     match mx with
     | Stop -> Stop
@@ -16,6 +27,8 @@ module Schedulable = struct
     | Choice (a, b) ->
       (* cps to make it tail rec *)
       Choice (bind a f, bind b f)
+
+  let join mmx = bind mmx Fun.id
 
   let ( let* ) = bind
 
