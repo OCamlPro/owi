@@ -22,6 +22,7 @@
   owi: [INFO] solver intermediate model time: X
   owi: [INFO] interpreter loop time         : X
   owi: [INFO] path count: X
+  owi: [INFO] max depth: X
   owi: [INFO] solver stats: ((added eqs  X)
                              (bv bit X)
                              (bv dynamic diseqs  X)
@@ -52,6 +53,7 @@ Testing with the -q flag:
   owi: [INFO] solver intermediate model time: X
   owi: [INFO] interpreter loop time         : X
   owi: [INFO] path count: X
+  owi: [INFO] max depth: X
   owi: [INFO] solver stats: ((added eqs  X)
                              (bv dynamic diseqs  X)
                              (bv->core eq  X)
