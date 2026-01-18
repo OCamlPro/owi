@@ -121,3 +121,37 @@ let clone
   ; bench_stats
   ; depth
   }
+
+let project (th : t) : t * _ =
+  let projected =
+    let num_symbols = num_symbols th in
+    let symbol_scopes = symbol_scopes th in
+    let pc = pc th in
+    let memories = Symbolic_memory_collection.init () in
+    let tables = tables th in
+    let globals = globals th in
+    let breadcrumbs = breadcrumbs th in
+    let labels = labels th in
+    let bench_stats = bench_stats th in
+    let depth = depth th in
+    create num_symbols symbol_scopes pc memories tables globals breadcrumbs
+      labels bench_stats ~depth
+  in
+  let backup = memories th in
+  (projected, backup)
+
+let restore backup th =
+  let num_symbols = num_symbols th in
+  let symbol_scopes = symbol_scopes th in
+  let pc = pc th in
+  let memories =
+    if true then Symbolic_memory_collection.clone backup else backup
+  in
+  let tables = tables th in
+  let globals = globals th in
+  let breadcrumbs = breadcrumbs th in
+  let labels = labels th in
+  let bench_stats = bench_stats th in
+  let depth = depth th in
+  create num_symbols symbol_scopes pc memories tables globals breadcrumbs labels
+    bench_stats ~depth

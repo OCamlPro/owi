@@ -378,3 +378,6 @@ let assume c instr_counter =
       ~prio_false ~check_only_true_branch:true
   in
   if assertion_true then Eval_monad.return () else stop
+
+let lift_mem (mem_op : 'a t) : 'a t =
+  State_monad.project_state Thread.project Thread.restore mem_op

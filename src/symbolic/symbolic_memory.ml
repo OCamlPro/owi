@@ -138,6 +138,8 @@ let must_be_valid_address m a n =
 
 let load_8_s m a =
   let open Symbolic_choice in
+  lift_mem
+  @@
   let+ a = must_be_valid_address m a 1 in
   let v = loadn m a 1 in
   match Smtml.Expr.view v with
@@ -148,6 +150,8 @@ let load_8_s m a =
 
 let load_8_u m a =
   let open Symbolic_choice in
+  lift_mem
+  @@
   let+ a = must_be_valid_address m a 1 in
   let v = loadn m a 1 in
   match Smtml.Expr.view v with
@@ -158,6 +162,8 @@ let load_8_u m a =
 
 let load_16_s m a =
   let open Symbolic_choice in
+  lift_mem
+  @@
   let+ a = must_be_valid_address m a 2 in
   let v = loadn m a 2 in
   match Smtml.Expr.view v with
@@ -168,6 +174,8 @@ let load_16_s m a =
 
 let load_16_u m a =
   let open Symbolic_choice in
+  lift_mem
+  @@
   let+ a = must_be_valid_address m a 2 in
   let v = loadn m a 2 in
   match Smtml.Expr.view v with
@@ -178,37 +186,51 @@ let load_16_u m a =
 
 let load_32 m a =
   let open Symbolic_choice in
+  lift_mem
+  @@
   let+ a = must_be_valid_address m a 4 in
   let res = loadn m a 4 in
   Smtml.Expr.simplify res
 
 let load_64 m a =
   let open Symbolic_choice in
+  lift_mem
+  @@
   let+ a = must_be_valid_address m a 8 in
   loadn m a 8
 
 let store_8 m ~addr v =
   let open Symbolic_choice in
+  lift_mem
+  @@
   let+ a = must_be_valid_address m addr 1 in
   storen m a v 1
 
 let store_16 m ~addr v =
   let open Symbolic_choice in
+  lift_mem
+  @@
   let+ a = must_be_valid_address m addr 2 in
   storen m a v 2
 
 let store_32 m ~addr v =
   let open Symbolic_choice in
+  lift_mem
+  @@
   let+ a = must_be_valid_address m addr 4 in
   storen m a v 4
 
 let store_64 m ~(addr : Smtml.Expr.t) v =
   let open Symbolic_choice in
+  lift_mem
+  @@
   let+ a = must_be_valid_address m addr 8 in
   storen m a v 8
 
 let fill m ~(pos : Smtml.Expr.t) ~(len : Smtml.Expr.t) (c : char) =
   let open Symbolic_choice in
+  lift_mem
+  @@
   let* len = select_i32 len in
   let len = Int32.to_int len in
   let* pos = select_i32 pos in
@@ -226,6 +248,8 @@ let fill m ~(pos : Smtml.Expr.t) ~(len : Smtml.Expr.t) (c : char) =
 
 let blit ~src ~src_idx ~dst ~dst_idx ~len =
   let open Symbolic_choice in
+  lift_mem
+  @@
   let* len = select_i32 len in
   let len = Int32.to_int len in
   let* src_idx = select_i32 src_idx in
@@ -246,7 +270,7 @@ let blit ~src ~src_idx ~dst ~dst_idx ~len =
 
 let blit_string m str ~src ~dst ~len =
   (* This function is only used in memory init so everything will be concrete *)
-  (* TODO: I am not sure this is true, this should be investigated and fixed at some point *)
+  (* TODO: I am not sure this is true, this should be investigated and fixed at some point, if anything changes, lift_mem should probably be added! *)
   let src = Int32.to_int @@ i32 src in
   let dst = Int32.to_int @@ i32 dst in
   let len = Int32.to_int @@ i32 len in
