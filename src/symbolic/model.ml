@@ -9,8 +9,10 @@ type output_format =
   | Scfg
   | Json
 
-let pp format with_breadcrumbs no_value fmt
-  (model, labels, breadcrumbs, scoped_values) =
+let pp format with_breadcrumbs no_value fmt (model, thread) =
+  let scoped_values = Thread.symbol_scopes thread in
+  let labels = Thread.labels thread in
+  let breadcrumbs = Thread.breadcrumbs thread in
   match format with
   | Json ->
     let json = Symbol_scope.to_json ~no_value model scoped_values in
@@ -68,7 +70,7 @@ let pp format with_breadcrumbs no_value fmt
 
 let print ~format ~out_file ~id ~no_value ~no_stop_at_failure
   ~no_assert_failure_expression_printing ~with_breadcrumbs
-  ({ Bug.labels; model; breadcrumbs; symbol_scopes; _ } as bug) =
+  ({ Bug.model; thread; _ } as bug) =
   begin match bug.Bug.kind with
   | `Trap trap -> Log.err (fun m -> m "Trap: %s" (Result.err_to_string trap))
   | `Assertion assertion ->
@@ -81,9 +83,7 @@ let print ~format ~out_file ~id ~no_value ~no_stop_at_failure
   | None -> begin
     Log.app (fun m ->
       let fmt = m (if no_stop_at_failure then "%a@." else "%a") in
-      fmt
-        (pp format with_breadcrumbs no_value)
-        (model, labels, breadcrumbs, symbol_scopes) );
+      fmt (pp format with_breadcrumbs no_value) (model, thread) );
     Ok ()
   end
   | Some path ->
@@ -107,4 +107,4 @@ let print ~format ~out_file ~id ~no_value ~no_stop_at_failure
     in
     Bos.OS.File.writef path "%a"
       (pp format with_breadcrumbs no_value)
-      (model, labels, breadcrumbs, symbol_scopes)
+      (model, thread)

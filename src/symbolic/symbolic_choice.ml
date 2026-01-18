@@ -289,7 +289,6 @@ let trap t =
   let* thread in
   let solver = solver () in
   let path_condition = Thread.pc thread in
-  let symbol_scopes = Thread.symbol_scopes thread in
   let stats = Thread.bench_stats thread in
   let* model =
     Benchmark.handle_time_span stats.solver_final_model_time @@ fun () ->
@@ -301,15 +300,11 @@ let trap t =
              if solver was interrupted then stop else assert false *)
       stop
   in
-  let labels = Thread.labels thread in
-  let breadcrumbs = Thread.breadcrumbs thread in
-  State_monad.return
-    (Error { Bug.kind = `Trap t; model; labels; breadcrumbs; symbol_scopes })
+  State_monad.return (Error { Bug.kind = `Trap t; model; thread })
 
-let assertion_fail c model labels breadcrumbs symbol_scopes =
-  State_monad.return
-    (Error
-       { Bug.kind = `Assertion c; model; labels; breadcrumbs; symbol_scopes } )
+let assertion_fail c model =
+  let* thread in
+  State_monad.return (Error { Bug.kind = `Assertion c; model; thread })
 
 let assertion (c : Symbolic_boolean.t) =
   (* TODO: better prio here *)
@@ -324,7 +319,6 @@ let assertion (c : Symbolic_boolean.t) =
     let* thread in
     let solver = solver () in
     let path_condition = Thread.pc thread in
-    let symbol_scopes = Thread.symbol_scopes thread in
     let stats = Thread.bench_stats thread in
     let* model =
       Benchmark.handle_time_span stats.solver_final_model_time @@ fun () ->
@@ -336,9 +330,7 @@ let assertion (c : Symbolic_boolean.t) =
                if solver was interrupted then stop else assert false *)
         stop
     in
-    let breadcrumbs = Thread.breadcrumbs thread in
-    let labels = Thread.labels thread in
-    assertion_fail c model labels breadcrumbs symbol_scopes
+    assertion_fail c model
 
 let ite (c : Symbolic_boolean.t) ~(if_true : Symbolic_value.t)
   ~(if_false : Symbolic_value.t) : Symbolic_value.t t =
