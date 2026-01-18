@@ -4,35 +4,7 @@
 
 (* Multicore is based on several layers of monad transformers defined in submodules. The module as a whole is made to provide a monad to explore in parallel different possibilites, with a notion of priority. *)
 
-module Eval = struct
-  (* Add a notion of faillibility to the evaluation. "Transformer without module functor" style. *)
-  module M = State_monad
-
-  type ('a, 's) t = (('a, Bug.t) result, 's) M.t
-
-  let[@inline] return x : _ t = M.return (Ok x)
-
-  let[@inline] lift x =
-    let ( let+ ) = M.( let+ ) in
-    let+ x in
-    Ok x
-
-  let[@inline] bind (mx : _ t) f : _ t =
-    let ( let* ) = M.( let* ) in
-    let* mx in
-    match mx with Ok x -> f x | Error _ as mx -> M.return mx
-
-  let[@inline] ( let* ) mx f = bind mx f
-
-  let[@inline] map mx f =
-    let ( let+ ) = M.( let+ ) in
-    let+ mx in
-    match mx with Ok x -> Ok (f x) | Error _ as mx -> mx
-
-  let[@inline] ( let+ ) mx f = map mx f
-end
-
-(* the two following functions can not be in the Make function because it breaks with the two instanciation of `Symbolic_choice.Make (Thread_{with,withou}_memory) *)
+(* the two following functions can not be in the Make functor because it breaks with the two instanciation of `Symbolic_choice.Make (Thread_{with,withou}_memory) *)
 let solver_to_use = ref None
 
 let solver_dls_key =
@@ -44,34 +16,34 @@ let solver_dls_key =
 
 (* The core implementation of the monad. It is isolated in a module to restict its exposed interface and maintain its invariant. In particular, choose must guarantee that the Thread.t is cloned in each branch. Using functions defined here should be foolproof. *)
 module Make (Thread : Thread_intf.S) = struct
-  type 'a t = ('a, Thread.t) Eval.t
+  type 'a t = ('a, Thread.t) Eval_monad.t
 
   (*
        Here we define functions to seamlessly
        operate on the three monads layers
     *)
 
-  let ( let* ) = Eval.( let* )
+  let ( let* ) = Eval_monad.( let* )
 
-  let ( let+ ) = Eval.( let+ )
+  let ( let+ ) = Eval_monad.( let+ )
 
-  let return = Eval.return
+  let return = Eval_monad.return
 
-  let bind = Eval.bind
+  let bind = Eval_monad.bind
 
-  let map = Eval.map
+  let map = Eval_monad.map
 
   let lift_schedulable (v : 'a Scheduler.Schedulable.t) : 'a t =
     let v = State_monad.lift v in
-    Eval.lift v
+    Eval_monad.lift v
 
   let with_thread (f : Thread.t -> 'a) : 'a t =
     let x = State_monad.with_state (fun st -> (f st, st)) in
-    Eval.lift x
+    Eval_monad.lift x
 
   let thread = with_thread Fun.id
 
-  let modify_thread f = Eval.lift (State_monad.modify_state f)
+  let modify_thread f = Eval_monad.lift (State_monad.modify_state f)
 
   let set_thread st = modify_thread (Fun.const st)
 
@@ -110,7 +82,7 @@ module Make (Thread : Thread_intf.S) = struct
     let c = Symbolic_boolean.to_expr c in
     let c = Smtml.Expr.simplify c in
     match Smtml.Expr.view c with
-    | Val True -> Eval.return ()
+    | Val True -> Eval_monad.return ()
     | Val False -> stop
     | _ ->
       let* thread in
@@ -166,7 +138,7 @@ module Make (Thread : Thread_intf.S) = struct
       Benchmark.handle_time_span stats.solver_sat_time @@ fun () ->
       Solver.check solver pc
     in
-    Eval.return reachability
+    Eval_monad.return reachability
 
   let get_model_or_stop symbol =
     (* TODO: better prio here! *)
@@ -186,7 +158,7 @@ module Make (Thread : Thread_intf.S) = struct
     | `Unsat -> stop
     | `Model model -> begin
       match Smtml.Model.evaluate model symbol with
-      | Some v -> Eval.return v
+      | Some v -> Eval_monad.return v
       | None ->
         (* the model exists so the symbol should evaluate *)
         assert false
@@ -202,8 +174,8 @@ module Make (Thread : Thread_intf.S) = struct
     let cond = Symbolic_boolean.to_expr cond in
     let cond = Smtml.Expr.simplify cond in
     match Smtml.Expr.view cond with
-    | Val True -> Eval.return true
-    | Val False -> Eval.return false
+    | Val True -> Eval_monad.return true
+    | Val False -> Eval_monad.return false
     | Val (Bitv _bv) -> Fmt.failwith "unreachable (type error)"
     | _ ->
       let is_other_branch_unsat = Atomic.make false in
@@ -211,20 +183,20 @@ module Make (Thread : Thread_intf.S) = struct
         let* () = add_pc condition in
         let* () =
           if with_breadcrumbs then add_breadcrumb (if final_value then 1 else 0)
-          else Eval.return ()
+          else Eval_monad.return ()
         in
         (* this is an optimisation under the assumption that the PC is always SAT (i.e. we are performing eager pruning), in such a case, when a branch is unsat, we don't have to check the reachability of the other's branch negation, because it is always going to be SAT. *)
         if Atomic.get is_other_branch_unsat then begin
           Log.debug (fun m ->
             m "The SMT call for the %b branch was optimized away" final_value );
           (* the other branch is unsat, we must be SAT and don't need to check reachability! *)
-          Eval.return final_value
+          Eval_monad.return final_value
         end
         else begin
           (* the other branch is SAT (or we haven't computed it yet), so we have to check reachability *)
           let* satisfiability = check_reachability condition prio in
           begin match satisfiability with
-          | `Sat -> Eval.return final_value
+          | `Sat -> Eval_monad.return final_value
           | `Unsat ->
             Atomic.set is_other_branch_unsat true;
             stop
@@ -260,7 +232,7 @@ module Make (Thread : Thread_intf.S) = struct
   let summary_symbol (e : Smtml.Expr.t) =
     let* thread in
     match Smtml.Expr.view e with
-    | Symbol sym -> Eval.return (None, sym)
+    | Symbol sym -> Eval_monad.return (None, sym)
     | _ ->
       let num_symbols = Thread.num_symbols thread in
       let+ () = modify_thread Thread.incr_num_symbols in
@@ -274,7 +246,7 @@ module Make (Thread : Thread_intf.S) = struct
     let i = Smtml.Expr.simplify i in
     match Smtml.Expr.view i with
     | Val (Bitv bv) when Smtml.Bitvector.numbits bv <= 32 ->
-      Eval.return (Smtml.Bitvector.to_int32 bv)
+      Eval_monad.return (Smtml.Bitvector.to_int32 bv)
     | _ ->
       let* assign, symbol = summary_symbol i in
       let* () =
@@ -282,7 +254,7 @@ module Make (Thread : Thread_intf.S) = struct
         | Some assign ->
           let assign = Symbolic_boolean.of_expr assign in
           add_pc assign
-        | None -> Eval.return ()
+        | None -> Eval_monad.return ()
       in
       let rec generator () =
         let* possible_value = get_model_or_stop symbol in
@@ -325,7 +297,7 @@ module Make (Thread : Thread_intf.S) = struct
     let* model =
       Benchmark.handle_time_span stats.solver_final_model_time @@ fun () ->
       match Solver.model_of_path_condition solver ~path_condition with
-      | Some model -> Eval.return model
+      | Some model -> Eval_monad.return model
       | None ->
         (* It can happen when the solver is interrupted *)
         (* TODO: once https://github.com/formalsec/smtml/pull/479 is merged
@@ -351,7 +323,7 @@ module Make (Thread : Thread_intf.S) = struct
       select_inner c ~with_breadcrumbs:false ~explore_first:false ~prio_true
         ~prio_false ~check_only_true_branch:false
     in
-    if assertion_true then Eval.return ()
+    if assertion_true then Eval_monad.return ()
     else
       let* thread in
       let solver = solver () in
@@ -361,7 +333,7 @@ module Make (Thread : Thread_intf.S) = struct
       let* model =
         Benchmark.handle_time_span stats.solver_final_model_time @@ fun () ->
         match Solver.model_of_path_condition solver ~path_condition with
-        | Some model -> Eval.return model
+        | Some model -> Eval_monad.return model
         | None ->
           (* It can happen when the solver is interrupted *)
           (* TODO: once https://github.com/formalsec/smtml/pull/479 is merged
@@ -376,16 +348,16 @@ module Make (Thread : Thread_intf.S) = struct
     ~(if_false : Symbolic_value.t) : Symbolic_value.t t =
     match (if_true, if_false) with
     | I32 if_true, I32 if_false ->
-      Eval.return
+      Eval_monad.return
         (Symbolic_value.I32 (Symbolic_boolean.ite c ~if_true ~if_false))
     | I64 if_true, I64 if_false ->
-      Eval.return
+      Eval_monad.return
         (Symbolic_value.I64 (Symbolic_boolean.ite c ~if_true ~if_false))
     | F32 if_true, F32 if_false ->
-      Eval.return
+      Eval_monad.return
         (Symbolic_value.F32 (Symbolic_boolean.ite c ~if_true ~if_false))
     | F64 if_true, F64 if_false ->
-      Eval.return
+      Eval_monad.return
         (Symbolic_value.F64 (Symbolic_boolean.ite c ~if_true ~if_false))
     | Ref _, Ref _ ->
       (* TODO: better prio here *)
@@ -411,5 +383,5 @@ module Make (Thread : Thread_intf.S) = struct
       select_inner c ~with_breadcrumbs:false ~explore_first:true ~prio_true
         ~prio_false ~check_only_true_branch:true
     in
-    if assertion_true then Eval.return () else stop
+    if assertion_true then Eval_monad.return () else stop
 end
