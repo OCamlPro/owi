@@ -4,8 +4,7 @@
 
 include
   Symbolic_choice_intf.S
-    with type 'a t =
-      ('a Symbolic_choice_intf.eval, Thread_with_memory.t) State_monad.t
+    with type 'a t = ('a Sym_eval.t, Thread_with_memory.t) State_monad.t
      and type thread := Thread_with_memory.t
 
 val lift_mem : 'a Symbolic_choice_without_memory.t -> 'a t

@@ -92,6 +92,7 @@
   symbol_scope
   share
   solver
+  sym_eval
   symbolic_boolean
   symbolic_choice
   symbolic_choice_intf

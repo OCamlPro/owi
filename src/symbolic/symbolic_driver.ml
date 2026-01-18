@@ -53,10 +53,9 @@ let sort_results deterministic_result_order results =
 
 let mk_callback no_stop_at_failure fail_mode res_stack path_count =
  fun ~close_work_queue v ->
-  let open Symbolic_choice_intf in
   Atomic.incr path_count;
   match (fail_mode, v) with
-  | _, (EVal (), _thread) -> ()
+  | _, (Sym_eval.EVal (), _thread) -> ()
   | ( (Symbolic_parameters.Both | Trap_only)
     , ( EError { kind = `Trap e; model; labels; breadcrumbs; symbol_scopes }
       , _thread ) ) ->
