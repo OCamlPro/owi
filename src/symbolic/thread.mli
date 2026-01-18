@@ -3,4 +3,5 @@
 (* Written by the Owi programmers *)
 
 (** @inline *)
-include Thread_intf.Intf
+module Make (Symbolic_memory : Thread_intf.M) :
+  Thread_intf.S with type Memory.collection = Symbolic_memory.collection

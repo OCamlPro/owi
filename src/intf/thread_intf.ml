@@ -68,8 +68,3 @@ module type S = sig
 
   val incr_num_symbols : t -> t
 end
-
-module type Intf = sig
-  module Make (Symbolic_memory : M) :
-    S with type Memory.collection = Symbolic_memory.collection
-end
