@@ -272,7 +272,7 @@ module type S = sig
   val close : 'a t -> unit
 
   (** Pop all elements from the queue in a lazy Seq.t, *)
-  val read_as_seq : 'a t -> finalizer:(unit -> unit) -> 'a Seq.t
+  val read_as_seq : 'a t -> 'a Seq.t
 
   val work_while : ('a -> (metrics * 'a -> unit) -> unit) -> 'a t -> unit
 end
@@ -288,13 +288,11 @@ module Make (P : T) : S = struct
 
   let end_pledge = Synchronizer.end_pledge
 
-  let rec read_as_seq (q : 'a t) ~finalizer : 'a Seq.t =
+  let rec read_as_seq (q : 'a t) : 'a Seq.t =
    fun () ->
     match pop q ~pledge:false with
-    | None ->
-      finalizer ();
-      Nil
-    | Some v -> Cons (v, read_as_seq q ~finalizer)
+    | None -> Nil
+    | Some v -> Cons (v, read_as_seq q)
 
   let push v prio q = Synchronizer.write q (prio, v)
 

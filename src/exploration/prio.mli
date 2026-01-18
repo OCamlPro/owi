@@ -61,7 +61,7 @@ module type S = sig
   val close : 'a t -> unit
 
   (** Pop all elements from the queue in a lazy Seq.t, *)
-  val read_as_seq : 'a t -> finalizer:(unit -> unit) -> 'a Seq.t
+  val read_as_seq : 'a t -> 'a Seq.t
 
   val work_while : ('a -> (metrics * 'a -> unit) -> unit) -> 'a t -> unit
 end
