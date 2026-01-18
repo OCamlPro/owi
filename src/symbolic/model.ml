@@ -67,8 +67,26 @@ let pp format with_breadcrumbs no_value fmt
     Scfg.Pp.config fmt ret
 
 let print ~format ~out_file ~id ~no_value ~no_stop_at_failure
-  ~no_assert_failure_expression_printing ~with_breadcrumbs bug =
-  let to_file path model labels breadcrumbs symbol_scopes =
+  ~no_assert_failure_expression_printing ~with_breadcrumbs
+  ({ Bug.labels; model; breadcrumbs; symbol_scopes; _ } as bug) =
+  begin match bug.Bug.kind with
+  | `Trap trap -> Log.err (fun m -> m "Trap: %s" (Result.err_to_string trap))
+  | `Assertion assertion ->
+    if no_assert_failure_expression_printing then
+      Log.err (fun m -> m "Assert failure")
+    else Log.err (fun m -> m "Assert failure: %a" Symbolic_boolean.pp assertion)
+  end;
+
+  match out_file with
+  | None -> begin
+    Log.app (fun m ->
+      let fmt = m (if no_stop_at_failure then "%a@." else "%a") in
+      fmt
+        (pp format with_breadcrumbs no_value)
+        (model, labels, breadcrumbs, symbol_scopes) );
+    Ok ()
+  end
+  | Some path ->
     let ext = match format with Json -> "json" | Scfg -> "scfg" in
     let contains_ext =
       Fpath.has_ext ".json" path || Fpath.has_ext ".scfg" path
@@ -90,25 +108,3 @@ let print ~format ~out_file ~id ~no_value ~no_stop_at_failure
     Bos.OS.File.writef path "%a"
       (pp format with_breadcrumbs no_value)
       (model, labels, breadcrumbs, symbol_scopes)
-  in
-  let output model labels breadcrumbs symbol_scopes =
-    match out_file with
-    | Some path -> to_file path model labels breadcrumbs symbol_scopes
-    | None -> begin
-      Log.app (fun m ->
-        let fmt = m (if no_stop_at_failure then "%a@." else "%a") in
-        fmt
-          (pp format with_breadcrumbs no_value)
-          (model, labels, breadcrumbs, symbol_scopes) );
-      Ok ()
-    end
-  in
-  match bug with
-  | `ETrap (tr, model, labels, breadcrumbs, symbol_scopes) ->
-    Log.err (fun m -> m "Trap: %s" (Result.err_to_string tr));
-    output model labels breadcrumbs symbol_scopes
-  | `EAssert (assertion, model, labels, breadcrumbs, symbol_scopes) ->
-    if no_assert_failure_expression_printing then
-      Log.err (fun m -> m "Assert failure")
-    else Log.err (fun m -> m "Assert failure: %a" Symbolic_boolean.pp assertion);
-    output model labels breadcrumbs symbol_scopes

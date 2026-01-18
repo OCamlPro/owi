@@ -8,28 +8,26 @@ module Eval = struct
   (* Add a notion of faillibility to the evaluation. "Transformer without module functor" style. *)
   module M = State_monad
 
-  type ('a, 's) t = ('a Sym_eval.t, 's) M.t
+  type ('a, 's) t = (('a, Bug.t) result, 's) M.t
 
-  let[@inline] return x : _ t = M.return (Sym_eval.EVal x)
+  let[@inline] return x : _ t = M.return (Ok x)
 
   let[@inline] lift x =
     let ( let+ ) = M.( let+ ) in
     let+ x in
-    Sym_eval.EVal x
+    Ok x
 
   let[@inline] bind (mx : _ t) f : _ t =
     let ( let* ) = M.( let* ) in
     let* mx in
-    match mx with EVal x -> f x | EError _ as mx -> M.return mx
+    match mx with Ok x -> f x | Error _ as mx -> M.return mx
 
   let ( let* ) = bind
 
   let[@inline] map mx f =
     let ( let+ ) = M.( let+ ) in
     let+ mx in
-    match mx with
-    | Sym_eval.EVal x -> Sym_eval.EVal (f x)
-    | EError _ as mx -> mx
+    match mx with Ok x -> Ok (f x) | Error _ as mx -> mx
 
   let ( let+ ) = map
 end
@@ -93,7 +91,7 @@ module Make (Thread : Thread_intf.S) = struct
 
   let stop = lift_schedulable Scheduler.Schedulable.stop
 
-  type 'a run_result = ('a Sym_eval.t * Thread.t) Seq.t
+  type 'a run_result = (('a, Bug.t) result * Thread.t) Seq.t
 
   let run exploration_strategy ~workers solver t thread ~at_worker_value
     ~at_worker_init ~at_worker_end =
@@ -339,13 +337,13 @@ module Make (Thread : Thread_intf.S) = struct
     let labels = Thread.labels thread in
     let breadcrumbs = Thread.breadcrumbs thread in
     State_monad.return
-      (Sym_eval.EError
-         { kind = `Trap t; model; labels; breadcrumbs; symbol_scopes } )
+      (Error { Bug.kind = `Trap t; model; labels; breadcrumbs; symbol_scopes })
 
   let assertion_fail c model labels breadcrumbs symbol_scopes =
     State_monad.return
-      (Sym_eval.EError
-         { kind = `Assertion c; model; labels; breadcrumbs; symbol_scopes } )
+      (Error
+         { Bug.kind = `Assertion c; model; labels; breadcrumbs; symbol_scopes }
+      )
 
   let assertion (c : Symbolic_boolean.t) =
     (* TODO: better prio here *)

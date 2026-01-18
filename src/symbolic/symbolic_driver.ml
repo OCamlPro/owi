@@ -7,45 +7,36 @@ open Syntax
 module Outcome = Prio.Make (Prio.FIFO)
 
 let print_and_count_failures ~format ~out_file ~no_value
-  ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
-  ~count_acc ~results ~with_breadcrumbs =
+  ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure ~results
+  ~with_breadcrumbs =
   let test_suite_dir = Fpath.(workspace / "test-suite") in
   let* (_created : bool) =
     if not no_value then OS.Dir.create test_suite_dir else Ok false
   in
 
-  let rec aux count_acc results =
+  let rec aux count results =
     match results () with
-    | Seq.Nil -> Ok count_acc
-    | Seq.Cons (result, tl) ->
-      let* model =
-        match result with
-        | (`EAssert (_, model, _, _, _) | `ETrap (_, model, _, _, _)) as bug ->
-          let+ () =
-            Model.print ~format ~out_file ~id:count_acc ~no_value
-              ~no_stop_at_failure ~no_assert_failure_expression_printing
-              ~with_breadcrumbs bug
-          in
-          model
+    | Seq.Nil -> Ok count
+    | Seq.Cons (bug, tl) ->
+      let* () =
+        Model.print ~format ~out_file ~id:count ~no_value ~no_stop_at_failure
+          ~no_assert_failure_expression_printing ~with_breadcrumbs bug
       in
-      let count_acc = succ count_acc in
       let* () =
         if not no_value then
-          let testcase = Smtml.Model.get_bindings model |> List.map snd in
+          let testcase = Smtml.Model.get_bindings bug.model |> List.map snd in
           Cmd_utils.write_testcase ~dir:test_suite_dir testcase
         else Ok ()
       in
-      if no_stop_at_failure then aux count_acc tl else Ok count_acc
+      let count = succ count in
+      if no_stop_at_failure then aux count tl else Ok count
   in
-  aux count_acc results
+  aux 0 results
 
 let sort_results deterministic_result_order results =
   if deterministic_result_order then
     results
-    |> Seq.map (function
-      | (`ETrap (_, _, _, breadcrumbs, _) | `EAssert (_, _, _, breadcrumbs, _))
-        as x
-      -> (x, List.rev @@ breadcrumbs) )
+    |> Seq.map (fun bug -> (bug, List.rev @@ bug.Bug.breadcrumbs))
     |> List.of_seq
     |> List.sort (fun (_, bc1) (_, bc2) -> List.compare compare bc1 bc2)
     |> List.to_seq |> Seq.map fst
@@ -54,27 +45,21 @@ let sort_results deterministic_result_order results =
 let mk_callback no_stop_at_failure fail_mode res_stack path_count =
  fun ~close_work_queue v ->
   Atomic.incr path_count;
-  match (fail_mode, v) with
-  | _, (Sym_eval.EVal (), _thread) -> ()
-  | ( (Symbolic_parameters.Both | Trap_only)
-    , ( EError { kind = `Trap e; model; labels; breadcrumbs; symbol_scopes }
-      , _thread ) ) ->
-    Outcome.push
-      (`ETrap (e, model, labels, breadcrumbs, symbol_scopes))
-      Prio.dummy res_stack;
-    if not no_stop_at_failure then begin
-      close_work_queue ()
+  match v with
+  | Ok (), _thread -> ()
+  | Error bug, _thread ->
+    let should_be_added =
+      match fail_mode with
+      | Symbolic_parameters.Both -> true
+      | Assertion_only -> Bug.is_assertion bug
+      | Trap_only -> Bug.is_trap bug
+    in
+    if should_be_added then begin
+      Outcome.push bug Prio.dummy res_stack;
+      if not no_stop_at_failure then begin
+        close_work_queue ()
+      end
     end
-  | ( (Both | Assertion_only)
-    , ( EError { kind = `Assertion e; model; labels; breadcrumbs; symbol_scopes }
-      , _thread ) ) ->
-    Outcome.push
-      (`EAssert (e, model, labels, breadcrumbs, symbol_scopes))
-      Prio.dummy res_stack;
-    if not no_stop_at_failure then begin
-      close_work_queue ()
-    end
-  | (Trap_only | Assertion_only), _ -> ()
 
 let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
   ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
@@ -98,7 +83,7 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
   let* count =
     print_and_count_failures ~format:model_format ~out_file:model_out_file
       ~no_value ~no_assert_failure_expression_printing ~workspace
-      ~no_stop_at_failure ~count_acc:0 ~results ~with_breadcrumbs
+      ~no_stop_at_failure ~results ~with_breadcrumbs
   in
 
   (* We don't want to wait for domain to complete in normal/quiet mode because it may take quite some time (if a solver is running a long query, the interpreter is in a long concrete loop, or if the work queue was not correctly closed for instance) *)

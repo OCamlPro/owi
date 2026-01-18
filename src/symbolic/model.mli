@@ -15,17 +15,5 @@ val print :
   -> no_stop_at_failure:bool
   -> no_assert_failure_expression_printing:bool
   -> with_breadcrumbs:bool
-  -> [< `EAssert of
-        Symbolic_boolean.t
-        * Smtml.Model.t
-        * (int * string) list
-        * int list
-        * Symbol_scope.t
-     | `ETrap of
-       Result.err
-       * Smtml.Model.t
-       * (int * string) list
-       * int list
-       * Symbol_scope.t
-     ]
+  -> Bug.t
   -> unit Result.t

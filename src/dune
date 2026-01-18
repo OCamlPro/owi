@@ -12,6 +12,7 @@
   binary_to_text
   binary_validate
   boolean_intf
+  bug
   choice_intf
   call_graph
   cmd_utils
@@ -92,7 +93,6 @@
   symbol_scope
   share
   solver
-  sym_eval
   symbolic_boolean
   symbolic_choice
   symbolic_choice_intf

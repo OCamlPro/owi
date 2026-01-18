@@ -4,5 +4,5 @@
 
 include
   Symbolic_choice_intf.S
-    with type 'a t = ('a Sym_eval.t, Thread_without_memory.t) State_monad.t
+    with type 'a t = (('a, Bug.t) result, Thread_without_memory.t) State_monad.t
      and type thread := Thread_without_memory.t
