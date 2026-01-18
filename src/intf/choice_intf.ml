@@ -2,7 +2,7 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-module type Base = sig
+module type S = sig
   type boolean
 
   type i32
@@ -35,22 +35,4 @@ module type Base = sig
   val ite : boolean -> if_true:value -> if_false:value -> value t
 
   val assume : boolean -> Int.t Option.t -> unit t
-end
-
-module type Complete = sig
-  include Base
-
-  type thread
-
-  val assertion : boolean -> unit t
-
-  val assume : boolean -> unit t
-
-  val with_thread : (thread -> 'b) -> 'b t
-
-  val solver : Solver.t t
-
-  val thread : thread t
-
-  val lift_mem : 'a Symbolic_choice_without_memory.t -> 'a t
 end
