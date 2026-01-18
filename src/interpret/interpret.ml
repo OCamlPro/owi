@@ -1262,7 +1262,7 @@ struct
         Boolean.and_
           ( match Table.max_size t with
           | None -> Boolean.true_
-          | Some max -> I32.ge_u (I32.of_int max) new_size )
+          | Some max -> I32.ge_u (I32.of_int (Int64.to_int max)) new_size )
           (I32.ge_u new_size size)
       in
       if not allowed then

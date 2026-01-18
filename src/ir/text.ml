@@ -235,12 +235,14 @@ let pp_memarg =
     pf fmt "%aalign=%ld" pp_offset offset (pow_2 align)
 
 type nonrec limits =
-  { min : int
-  ; max : int option
+  { min : Concrete_i64.t
+  ; max : Concrete_i64.t option
   }
 
 let pp_limits fmt { min; max } =
-  match max with None -> pf fmt "%d" min | Some max -> pf fmt "%d %d" min max
+  match max with
+  | None -> pf fmt "%Ld" min
+  | Some max -> pf fmt "%Ld %Ld" min max
 
 (** Structure *)
 

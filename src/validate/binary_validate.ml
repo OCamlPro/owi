@@ -849,7 +849,7 @@ let check_limit { Text.min; max } =
   match max with
   | None -> Ok ()
   | Some max ->
-    if min > max then Error `Size_minimum_greater_than_maximum else Ok ()
+    if Int64.gt min max then Error `Size_minimum_greater_than_maximum else Ok ()
 
 let validate_tables modul refs =
   array_iter
@@ -871,10 +871,10 @@ let validate_mem modul =
     (function
       | Origin.Local (_, typ) | Imported { typ; _ } ->
         let* () =
-          if typ.Text.min > 65536 then Error `Memory_size_too_large
+          if Int64.gt typ.Text.min 65536L then Error `Memory_size_too_large
           else
             match typ.max with
-            | Some max when max > 65536 -> Error `Memory_size_too_large
+            | Some max when Int64.gt max 65536L -> Error `Memory_size_too_large
             | Some _ | None -> Ok ()
         in
         check_limit typ )
