@@ -144,7 +144,7 @@ type nonrec frelop =
 val pp_frelop : frelop Fmt.t
 
 type nonrec memarg =
-  { offset : Int32.t
+  { offset : Int64.t
   ; align : Int32.t
   }
 

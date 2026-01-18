@@ -168,7 +168,7 @@ let write_memarg buf idx ({ offset; align } : Text.memarg) =
     (* Set the 6th bit if the id not 0 *)
     write_u32 buf (Int32.logor align 0x40l);
     write_indice buf idx );
-  write_u32 buf offset
+  write_u64 buf offset
 
 let write_memory buf ((_so, limits) : Text.Mem.t) = write_limits buf limits
 

@@ -147,3 +147,5 @@ let of_string_exn s =
   in
 
   parsed
+
+let of_string s = try Some (of_string_exn s) with _ -> None

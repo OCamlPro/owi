@@ -24,6 +24,8 @@ val to_float : t -> float
 
 val of_string_exn : string -> t
 
+val of_string : string -> t option
+
 val of_int : int -> t
 
 val to_int : t -> int
@@ -33,6 +35,8 @@ val of_int32 : int32 -> t
 val to_int32 : t -> int32
 
 val extend_s : int -> t -> t
+
+val unsigned_to_int : t -> int option
 
 (** unary operators *)
 
