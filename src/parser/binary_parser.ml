@@ -301,11 +301,11 @@ let read_limits input =
   in
   match b with
   | '\x00' ->
-    let+ min, input = read_U32 input in
+    let+ min, input = read_UN 64 input in
     ({ Text.min; max = None }, input)
   | '\x01' ->
-    let* min, input = read_U32 input in
-    let+ max, input = read_U32 input in
+    let* min, input = read_UN 64 input in
+    let+ max, input = read_UN 64 input in
     ({ Text.min; max = Some max }, input)
   | _c -> parse_fail "integer too large (read_limits)"
 

@@ -10,12 +10,15 @@ type t =
   }
 
 let init limits : t =
-  let data = Bytes.make (page_size * limits.Text.min) '\x00' in
+  let data = Bytes.make (page_size * Int64.to_int limits.Text.min) '\x00' in
   { limits; data }
 
 let update_memory mem data =
   let limits =
-    { mem.limits with min = max mem.limits.min (Bytes.length data / page_size) }
+    { mem.limits with
+      min =
+        Int64.max mem.limits.min (Int64.of_int (Bytes.length data / page_size))
+    }
   in
   mem.limits <- limits;
   mem.data <- data
@@ -48,7 +51,7 @@ let blit_string mem str ~src ~dst ~len =
   Bytes.unsafe_blit_string str src mem.data dst len;
   Ok ()
 
-let get_limit_max { limits; _ } = Option.map Int64.of_int limits.max
+let get_limit_max { limits; _ } = limits.max
 
 let get_limits { limits; _ } = limits
 
