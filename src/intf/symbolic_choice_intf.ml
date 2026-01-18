@@ -51,8 +51,6 @@ module type S = sig
 
   val close_scope : unit -> unit t
 
-  type 'a run_result = (('a, Bug.t) result * thread) Seq.t
-
   val run :
        Symbolic_parameters.Exploration_strategy.t
     -> workers:int
@@ -72,11 +70,4 @@ module type S = sig
     -> Symbolic_value.t t
 
   val depth : unit -> int t
-end
-
-module type Intf = sig
-  module Make (Thread : Thread_intf.S) :
-    S
-      with type 'a t = (('a, Bug.t) result, Thread.t) State_monad.t
-       and type thread := Thread.t
 end
