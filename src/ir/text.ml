@@ -219,7 +219,7 @@ let pp_frelop fmt : frelop -> Unit.t = function
   | Ge -> pf fmt "ge"
 
 type nonrec memarg =
-  { offset : Int32.t
+  { offset : Int64.t
   ; align : Int32.t
   }
 
@@ -230,7 +230,7 @@ let pp_memarg =
   in
   fun fmt { offset; align } ->
     let pp_offset fmt offset =
-      if Int32.gt offset 0l then pf fmt "offset=%ld " offset
+      if Int64.gt offset 0L then pf fmt "offset=%Ld " offset
     in
     pf fmt "%aalign=%ld" pp_offset offset (pow_2 align)
 

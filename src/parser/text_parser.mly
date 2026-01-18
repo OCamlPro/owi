@@ -42,6 +42,12 @@ let u32 s =
       | None -> Fmt.kstr failwith "constant out of range %s" s
       | Some v -> v
 
+let u64 s =
+  match Int64.of_string s with
+  | None ->
+    Fmt.kstr failwith "constant out of range %s" s
+  | Some v -> v
+
 let i8 s =
   let i =
     try Int32.of_string_exn s
@@ -232,7 +238,7 @@ let memarg_offset ==
 
 let memarg ==
   | offset = option(memarg_offset); align = option(align); {
-    let offset = i32 @@ Option.value offset ~default:"0" in
+    let offset = u64 @@ Option.value offset ~default:"0" in
     let align = Option.value align ~default:0l in
     {offset; align}
   }

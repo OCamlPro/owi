@@ -309,11 +309,6 @@ let read_limits input =
     ({ Text.min; max = Some max }, input)
   | _c -> parse_fail "integer too large (read_limits)"
 
-(* There are some differences between what is done here and the docs:
-    https://webassembly.github.io/spec/core/binary/instructions.html#memory-instructions
-    https://webassembly.github.io/spec/core/syntax/instructions.html#memory-instructions
-    - `offset` is a u64 in the docs but a u32 here
-*)
 let read_memarg max_align input =
   let* align_64, input = read_UN 32 input in
   let align = Int64.to_int32 align_64 in
@@ -331,7 +326,7 @@ let read_memarg max_align input =
   if Int32.to_int align >= max_align then parse_fail "malformed memop flags"
   else
     let+ offset, input = read_U32 input in
-    let offset = Int32.of_int offset in
+    let offset = Int64.of_int offset in
     (memidx, { Text.align; offset }, input)
 
 let read_FC input =
