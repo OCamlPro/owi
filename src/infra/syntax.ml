@@ -4,31 +4,28 @@
 
 open Prelude.Result
 
-let ( let* ) o f = match o with Ok v -> f v | Error _ as e -> e [@@inline]
+let[@inline] ( let* ) o f = match o with Ok v -> f v | Error _ as e -> e
 
-let ( let+ ) o f = match o with Ok v -> Ok (f v) | Error _ as e -> e
-[@@inline]
+let[@inline] ( let+ ) o f = match o with Ok v -> Ok (f v) | Error _ as e -> e
 
-let ok v = Ok v [@@inline]
+let[@inline] ok v = Ok v
 
-let list_iter f l =
+let[@inline] list_iter f l =
   let rec aux = function
     | [] -> Ok ()
     | x :: xs -> ( match f x with Ok () -> aux xs | Error _ as e -> e )
   in
   aux l
-[@@inline]
 
-let list_map f l =
+let[@inline] list_map f l =
   let rec aux acc = function
     | [] -> Ok (List.rev acc)
     | x :: xs -> (
       match f x with Ok v -> aux (v :: acc) xs | Error _ as e -> e )
   in
   aux [] l
-[@@inline]
 
-let list_concat_map f l =
+let[@inline] list_concat_map f l =
   let rec aux acc = function
     | [] -> Ok (List.rev acc)
     | v :: tl -> (
@@ -37,18 +34,16 @@ let list_concat_map f l =
       | Error _ as e -> e )
   in
   aux [] l
-[@@inline]
 
-let list_fold_left f acc l =
+let[@inline] list_fold_left f acc l =
   let rec aux acc = function
     | [] -> Ok acc
     | v :: tl -> (
       match f acc v with Ok acc -> aux acc tl | Error _ as e -> e )
   in
   aux acc l
-[@@inline]
 
-let list_fold_left_map f acc l =
+let[@inline] list_fold_left_map f acc l =
   let+ acc, l =
     list_fold_left
       (fun (acc, l) v ->
@@ -57,9 +52,8 @@ let list_fold_left_map f acc l =
       (acc, []) l
   in
   (acc, List.rev l)
-[@@inline]
 
-let array_iter f a =
+let[@inline] array_iter f a =
   let err = ref None in
   try
     for i = 0 to Array.length a - 1 do
@@ -71,9 +65,8 @@ let array_iter f a =
     done;
     Ok ()
   with Exit -> ( match !err with None -> assert false | Some e -> e )
-[@@inline]
 
-let array_iteri f a =
+let[@inline] array_iteri f a =
   let err = ref None in
   try
     for i = 0 to Array.length a - 1 do
@@ -85,9 +78,8 @@ let array_iteri f a =
     done;
     Ok ()
   with Exit -> ( match !err with None -> assert false | Some e -> e )
-[@@inline]
 
-let dynarray_iter f a =
+let[@inline] dynarray_iter f a =
   let err = ref None in
   try
     for i = 0 to Dynarray.length a - 1 do
@@ -99,9 +91,8 @@ let dynarray_iter f a =
     done;
     Ok ()
   with Exit -> ( match !err with None -> assert false | Some e -> e )
-[@@inline]
 
-let dynarray_iteri f a =
+let[@inline] dynarray_iteri f a =
   let err = ref None in
   try
     for i = 0 to Dynarray.length a - 1 do
@@ -113,9 +104,8 @@ let dynarray_iteri f a =
     done;
     Ok ()
   with Exit -> ( match !err with None -> assert false | Some e -> e )
-[@@inline]
 
-let array_map f a =
+let[@inline] array_map f a =
   let err = ref None in
   try
     ok
@@ -127,9 +117,8 @@ let array_map f a =
         raise Exit
       | Ok v -> v )
   with Exit -> ( match !err with None -> assert false | Some e -> e )
-[@@inline]
 
-let dynarray_map f a =
+let[@inline] dynarray_map f a =
   let err = ref None in
   try
     ok
@@ -141,25 +130,22 @@ let dynarray_map f a =
         raise Exit
       | Ok v -> v )
   with Exit -> ( match !err with None -> assert false | Some e -> e )
-[@@inline]
 
-let array_fold_left f acc l =
+let[@inline] array_fold_left f acc l =
   Array.fold_left
     (fun acc v ->
       let* acc in
       f acc v )
     (Ok acc) l
-[@@inline]
 
-let dynarray_fold_left f acc l =
+let[@inline] dynarray_fold_left f acc l =
   Dynarray.fold_left
     (fun acc v ->
       let* acc in
       f acc v )
     (Ok acc) l
-[@@inline]
 
-let dynarray_fold_lefti f acc l =
+let[@inline] dynarray_fold_lefti f acc l =
   snd
   @@ Dynarray.fold_left
        (fun (i, acc) v ->
@@ -167,4 +153,3 @@ let dynarray_fold_lefti f acc l =
          , let* acc in
            f i acc v ) )
        (0, Ok acc) l
-[@@inline]
