@@ -17,19 +17,19 @@ module Schedulable = struct
       (* cps to make it tail rec *)
       Choice (bind a f, bind b f)
 
-  let ( let* ) = bind
+  let[@inline] ( let* ) mx f = bind mx f
 
-  let[@inline] map x f =
+  let[@inline] map f x =
     let* x in
     return (f x)
 
-  let ( let+ ) = map
+  let[@inline] ( let+ ) x f = map f x
 
   let[@inline] yield prio = Yield (prio, Fun.const (Now ()))
 
   let[@inline] choose a b = Choice (a, b)
 
-  let stop : 'a t = Stop
+  let stop = Stop
 end
 
 module Make (Work_datastructure : Prio.S) = struct

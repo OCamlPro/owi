@@ -3,8 +3,7 @@
 (* Written by the Owi programmers *)
 
 open Fmt
-
-let ( let* ) = Result.bind
+open Syntax
 
 let extern_m =
   let print () = Ok () in

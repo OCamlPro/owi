@@ -22,14 +22,14 @@ module Eval = struct
     let* mx in
     match mx with Ok x -> f x | Error _ as mx -> M.return mx
 
-  let ( let* ) = bind
+  let[@inline] ( let* ) mx f = bind mx f
 
   let[@inline] map mx f =
     let ( let+ ) = M.( let+ ) in
     let+ mx in
     match mx with Ok x -> Ok (f x) | Error _ as mx -> mx
 
-  let ( let+ ) = map
+  let[@inline] ( let+ ) mx f = map mx f
 end
 
 (* the two following functions can not be in the Make function because it breaks with the two instanciation of `Symbolic_choice.Make (Thread_{with,withou}_memory) *)
