@@ -51,7 +51,7 @@ module type S = sig
 
   val close_scope : unit -> unit t
 
-  type 'a run_result = ('a Sym_eval.t * thread) Seq.t
+  type 'a run_result = (('a, Bug.t) result * thread) Seq.t
 
   val run :
        Symbolic_parameters.Exploration_strategy.t
@@ -60,7 +60,7 @@ module type S = sig
     -> 'a t
     -> thread
     -> at_worker_value:
-         (close_work_queue:(unit -> unit) -> 'a Sym_eval.t * thread -> unit)
+         (close_work_queue:(unit -> unit) -> ('a, Bug.t) result * thread -> unit)
     -> at_worker_init:(unit -> unit)
     -> at_worker_end:(unit -> unit)
     -> unit Domain.t array
@@ -77,6 +77,6 @@ end
 module type Intf = sig
   module Make (Thread : Thread_intf.S) :
     S
-      with type 'a t = ('a Sym_eval.t, Thread.t) State_monad.t
+      with type 'a t = (('a, Bug.t) result, Thread.t) State_monad.t
        and type thread := Thread.t
 end
