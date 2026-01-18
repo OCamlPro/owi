@@ -56,3 +56,7 @@ val close_scope : t -> t
 val incr_path_count : t -> unit
 
 val incr_num_symbols : t -> t
+
+val project : t -> t * Symbolic_memory_collection.collection
+
+val restore : Symbolic_memory_collection.collection -> t -> t
