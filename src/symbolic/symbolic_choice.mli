@@ -3,4 +3,7 @@
 (* Written by the Owi programmers *)
 
 (** @inline *)
-include Symbolic_choice_intf.Intf
+module Make (Thread : Thread_intf.S) :
+  Symbolic_choice_intf.S
+    with type 'a t = (('a, Bug.t) result, Thread.t) State_monad.t
+     and type thread := Thread.t

@@ -91,8 +91,6 @@ module Make (Thread : Thread_intf.S) = struct
 
   let stop = lift_schedulable Scheduler.Schedulable.stop
 
-  type 'a run_result = (('a, Bug.t) result * Thread.t) Seq.t
-
   let run exploration_strategy ~workers solver t thread ~at_worker_value
     ~at_worker_init ~at_worker_end =
     solver_to_use := Some solver;

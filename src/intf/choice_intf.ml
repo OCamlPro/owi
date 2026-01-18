@@ -42,8 +42,6 @@ module type Complete = sig
 
   type thread
 
-  type 'a run_result
-
   val assertion : boolean -> unit t
 
   val assume : boolean -> unit t
