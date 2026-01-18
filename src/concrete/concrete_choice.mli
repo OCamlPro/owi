@@ -4,7 +4,7 @@
 
 (* TODO: type 'a t should be abstract, run will be needed for this *)
 include
-  Choice_intf.Base
+  Choice_intf.S
     with type 'a t = 'a Result.t
      and type boolean := Concrete_boolean.t
      and type i32 := Concrete_i32.t

@@ -31,7 +31,7 @@ module Make
     (Elem : Elem_intf.T with type reference := Value.Ref.t)
     (Table : Table_intf.T with type reference := Value.Ref.t)
     (Choice :
-      Choice_intf.Base
+      Choice_intf.S
         with type boolean := Value.boolean
          and type i32 := Value.i32
          and type value := Value.t)
