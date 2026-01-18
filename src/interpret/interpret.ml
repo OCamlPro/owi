@@ -1752,7 +1752,7 @@ module Symbolic (Parameters : Parameters) =
   Make [@inlined hint] (Symbolic_value) (Symbolic_data) (Symbolic_global)
     (Symbolic_elem)
     (Symbolic_table)
-    (Symbolic_choice_with_memory)
+    (Symbolic_choice)
     (Symbolic_memory)
     (Symbolic_extern_func)
     (Symbolic_env)

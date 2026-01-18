@@ -1,6 +1,20 @@
 (* Add a notion of State to the Schedulable monad. "Transformer without module functor" style. *)
 module M = Scheduler.Schedulable
 
+(* TODO:
+  we could use a CPS version of the state monad which could be much more efficient in hot paths, something like:
+
+  type ('a, s') state =
+    's -> ('a -> 's -> 'r) -> 'r
+
+  let return x =
+    fun s k ->
+      k x s
+
+  let bind m f =
+    fun s k ->
+      m s (fun x s -> f x s k)
+  *)
 type ('a, 's) t = 's -> ('a * 's) M.t
 
 let[@inline] run mxf st = mxf st

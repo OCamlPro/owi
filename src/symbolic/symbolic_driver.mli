@@ -16,5 +16,5 @@ val handle_result :
   -> model_out_file:Fpath.t option
   -> with_breadcrumbs:bool
   -> run_time:float option
-  -> unit Symbolic_choice_with_memory.t
+  -> unit Symbolic_choice.t
   -> unit Result.t

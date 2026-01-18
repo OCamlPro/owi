@@ -55,8 +55,8 @@ let mk_callback no_stop_at_failure fail_mode res_stack path_count =
 let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
   ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
   ~workspace ~solver ~model_format ~model_out_file ~with_breadcrumbs ~run_time
-  (result : unit Symbolic_choice_with_memory.t) =
-  let thread = Thread_with_memory.init () in
+  (result : unit Symbolic_choice.t) =
+  let thread = Thread.init () in
   let bug_stack = Bugs.make () in
   let path_count = Atomic.make 0 in
   let at_worker_value =
@@ -64,8 +64,8 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
   in
   let time_before = (Unix.times ()).tms_utime in
   let domains : unit Domain.t Array.t =
-    Symbolic_choice_with_memory.run exploration_strategy ~workers solver result
-      thread ~at_worker_value
+    Symbolic_choice.run exploration_strategy ~workers solver result thread
+      ~at_worker_value
       ~at_worker_init:(fun () -> Bugs.new_pledge bug_stack)
       ~at_worker_end:(fun () -> Bugs.end_pledge bug_stack)
   in
@@ -99,7 +99,7 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
   in
 
   if Log.is_bench_enabled () then begin
-    let bench_stats = Thread_with_memory.bench_stats thread in
+    let bench_stats = Thread.bench_stats thread in
     let execution_time_b =
       let time_after = (Unix.times ()).tms_utime in
       time_after -. time_before
