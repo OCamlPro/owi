@@ -10,4 +10,4 @@ include
      and type elem := Symbolic_elem.t
      and type table := Symbolic_table.t
      and type extern_func := Symbolic_extern_func.extern_func
-     and type 'a choice := 'a Symbolic_choice_with_memory.t
+     and type 'a choice := 'a Symbolic_choice.t

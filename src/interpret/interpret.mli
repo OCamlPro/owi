@@ -83,5 +83,5 @@ module Symbolic (_ : Parameters) : sig
   val modul :
        Symbolic_extern_func.extern_func Link.State.t
     -> Symbolic_extern_func.extern_func Linked.Module.t
-    -> unit Symbolic_choice_with_memory.t
+    -> unit Symbolic_choice.t
 end

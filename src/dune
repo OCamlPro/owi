@@ -96,9 +96,6 @@
   solver
   symbolic_boolean
   symbolic_choice
-  symbolic_choice_intf
-  symbolic_choice_with_memory
-  symbolic_choice_without_memory
   symbolic_data
   symbolic_driver
   symbolic_elem
@@ -110,7 +107,7 @@
   symbolic_i32
   symbolic_i64
   symbolic_memory
-  symbolic_memory_concretizing
+  symbolic_memory_collection
   symbolic_path_condition
   symbolic_parameters
   symbolic_ref
@@ -127,9 +124,6 @@
   text_parser
   text_validate
   thread
-  thread_intf
-  thread_with_memory
-  thread_without_memory
   union_find
   value_intf
   v128_intf

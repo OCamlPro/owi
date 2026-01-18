@@ -8,35 +8,36 @@ type t = Symbolic_extern_func.extern_func Link_env.t
 
 let get_memory env id =
   match get_memory env id with
-  | Error e -> Symbolic_choice_with_memory.trap e
+  | Error e -> Symbolic_choice.trap e
   | Ok orig_mem ->
-    let f (t : Thread_with_memory.t) =
-      let memories = Thread_with_memory.memories t in
-      Symbolic_memory.get_memory (Link_env.id env) orig_mem memories id
+    let f (t : Thread.t) =
+      let memories = Thread.memories t in
+      Symbolic_memory_collection.get_memory (Link_env.id env) orig_mem memories
+        id
     in
-    Symbolic_choice_with_memory.with_thread f
+    Symbolic_choice.with_thread f
 
-let get_table (env : t) i : Symbolic_table.t Symbolic_choice_with_memory.t =
+let get_table (env : t) i : Symbolic_table.t Symbolic_choice.t =
   match get_table env i with
-  | Error e -> Symbolic_choice_with_memory.trap e
+  | Error e -> Symbolic_choice.trap e
   | Ok orig_table ->
-    let f (t : Thread_with_memory.t) =
-      let tables = Thread_with_memory.tables t in
+    let f (t : Thread.t) =
+      let tables = Thread.tables t in
       Symbolic_table.get_table (Link_env.id env) orig_table tables i
     in
-    Symbolic_choice_with_memory.with_thread f
+    Symbolic_choice.with_thread f
 
 let get_data env n =
   match get_data env n with
-  | Error e -> Symbolic_choice_with_memory.trap e
-  | Ok orig_data -> Symbolic_choice_with_memory.return orig_data
+  | Error e -> Symbolic_choice.trap e
+  | Ok orig_data -> Symbolic_choice.return orig_data
 
-let get_global (env : t) i : Symbolic_global.t Symbolic_choice_with_memory.t =
+let get_global (env : t) i : Symbolic_global.t Symbolic_choice.t =
   match get_global env i with
-  | Error e -> Symbolic_choice_with_memory.trap e
+  | Error e -> Symbolic_choice.trap e
   | Ok orig_global ->
-    let f (t : Thread_with_memory.t) =
-      let globals = Thread_with_memory.globals t in
+    let f (t : Thread.t) =
+      let globals = Thread.globals t in
       Symbolic_global.get_global (Link_env.id env) orig_global globals i
     in
-    Symbolic_choice_with_memory.with_thread f
+    Symbolic_choice.with_thread f
