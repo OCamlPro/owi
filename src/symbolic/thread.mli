@@ -8,7 +8,7 @@ type t = private
   ; pc : Symbolic_path_condition.t
   ; memories : Symbolic_memory_collection.t
   ; tables : Symbolic_table.Collection.t
-  ; globals : Symbolic_global.Collection.t
+  ; globals : Symbolic_global_collection.t
       (** Breadcrumbs represent the list of choices that were made so far. They
           identify one given symbolic execution trace. *)
   ; breadcrumbs : int list
@@ -25,7 +25,7 @@ val create :
   -> Symbolic_path_condition.t
   -> Symbolic_memory_collection.t
   -> Symbolic_table.Collection.t
-  -> Symbolic_global.Collection.t
+  -> Symbolic_global_collection.t
   -> int list
   -> (int * string) list
   -> Benchmark.stats
@@ -47,7 +47,8 @@ val replace_memory :
 
 val replace_table : t -> env_id:int -> id:int -> Symbolic_table.t -> t
 
-val replace_global : t -> env_id:int -> id:int -> Symbolic_global.t -> t
+val replace_global :
+  t -> env_id:int -> id:int -> Symbolic_global_collection.global -> t
 
 val open_scope : t -> string -> t
 

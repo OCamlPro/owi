@@ -3,7 +3,9 @@ module type T = sig
 
   type value
 
+  type 'a choice
+
   val value : t -> value
 
-  val set_value : t -> value -> unit
+  val set_value : t -> value -> unit choice
 end

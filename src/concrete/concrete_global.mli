@@ -11,4 +11,8 @@ type t =
   ; typ : Text.val_type
   }
 
-include Global_intf.T with type value := Concrete_value.t and type t := t
+include
+  Global_intf.T
+    with type value := Concrete_value.t
+     and type t := t
+     and type 'a choice := 'a Concrete_choice.t

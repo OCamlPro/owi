@@ -105,6 +105,7 @@
   symbolic_f32
   symbolic_f64
   symbolic_global
+  symbolic_global_collection
   symbolic_i32
   symbolic_i64
   symbolic_memory

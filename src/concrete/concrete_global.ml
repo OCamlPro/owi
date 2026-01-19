@@ -11,4 +11,6 @@ type t =
 
 let value g = g.value
 
-let set_value g v = g.value <- v
+let set_value g v =
+  g.value <- v;
+  Ok ()
