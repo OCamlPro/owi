@@ -27,7 +27,6 @@ end
 module Make
     (Value : Value_intf.T)
     (Data : Data_intf.T)
-    (Global : Global_intf.T with type value := Value.t)
     (Elem : Elem_intf.T with type reference := Value.Ref.t)
     (Table : Table_intf.T with type reference := Value.Ref.t)
     (Choice :
@@ -35,6 +34,8 @@ module Make
         with type boolean := Value.boolean
          and type i32 := Value.i32
          and type value := Value.t)
+    (Global :
+      Global_intf.T with type value := Value.t and type 'a choice := 'a Choice.t)
     (Memory :
       Memory_intf.T
         with type i32 := Value.i32
@@ -1179,7 +1180,7 @@ struct
     | Global_set i ->
       let* global = Env.get_global env i in
       let v, stack = Stack.pop stack in
-      Global.set_value global v;
+      let* () = Global.set_value global v in
       st stack
     | Table_get i ->
       (* TODO: this should be rewritten without `select_i32` ! but it requires to change the type of `Table.get` *)
@@ -1740,19 +1741,19 @@ struct
 end
 
 module Concrete (Parameters : Parameters) =
-  Make [@inlined hint] (Concrete_value) (Concrete_data) (Concrete_global)
-    (Concrete_elem)
+  Make [@inlined hint] (Concrete_value) (Concrete_data) (Concrete_elem)
     (Concrete_table)
     (Concrete_choice)
+    (Concrete_global)
     (Concrete_memory)
     (Concrete_extern_func)
     (Concrete_env)
     (Parameters)
 module Symbolic (Parameters : Parameters) =
-  Make [@inlined hint] (Symbolic_value) (Symbolic_data) (Symbolic_global)
-    (Symbolic_elem)
+  Make [@inlined hint] (Symbolic_value) (Symbolic_data) (Symbolic_elem)
     (Symbolic_table)
     (Symbolic_choice)
+    (Symbolic_global)
     (Symbolic_memory)
     (Symbolic_extern_func)
     (Symbolic_env)

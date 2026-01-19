@@ -2,10 +2,12 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type t
+type t = Symbolic_global_collection.global
 
-include Global_intf.T with type value := Symbolic_value.t and type t := t
+include
+  Global_intf.T
+    with type value := Symbolic_value.t
+     and type t := t
+     and type 'a choice := 'a Symbolic_choice.t
 
-val of_concrete : Concrete_global.t -> t
-
-module Collection : Collection.S with type symbolic := t
+val replace : env_id:int -> id:int -> t -> unit Symbolic_choice.t

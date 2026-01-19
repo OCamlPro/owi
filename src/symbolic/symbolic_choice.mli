@@ -32,6 +32,8 @@ val assume : Symbolic_boolean.t -> Int.t Option.t -> unit t
 
 val with_thread : (Thread.t -> 'a) -> 'a t
 
+val modify_thread : (Thread.t -> Thread.t) -> unit t
+
 val with_new_invisible_symbol : Smtml.Ty.t -> (Smtml.Symbol.t -> 'b) -> 'b t
 
 val with_new_symbol : Smtml.Ty.t -> (Smtml.Symbol.t -> 'b) -> 'b t
@@ -52,8 +54,6 @@ val replace_memory :
   env_id:int -> id:int -> Symbolic_memory_collection.memory -> unit t
 
 val replace_table : env_id:int -> id:int -> Symbolic_table.t -> unit t
-
-val replace_global : env_id:int -> id:int -> Symbolic_global.t -> unit t
 
 val run :
      Symbolic_parameters.Exploration_strategy.t

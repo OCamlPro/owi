@@ -45,13 +45,15 @@ let get_global (env : t) id : Symbolic_global.t Symbolic_choice.t =
   let ( let* ) = Symbolic_choice.( let* ) in
   let env_id = Link_env.id env in
   let* thread = Symbolic_choice.thread in
-  match Symbolic_global.Collection.find thread.globals ~env_id ~id with
+  match Symbolic_global_collection.find thread.globals ~env_id ~id with
   | Some g -> Symbolic_choice.return g
   | None -> begin
     match get_global env id with
     | Error _e -> assert false
     | Ok original ->
-      let symbolic = Symbolic_global.of_concrete original in
-      let* () = Symbolic_choice.replace_global ~env_id ~id symbolic in
+      let symbolic =
+        Symbolic_global_collection.global_of_concrete ~env_id ~id original
+      in
+      let* () = Symbolic_global.replace ~env_id ~id symbolic in
       Symbolic_choice.return symbolic
   end
