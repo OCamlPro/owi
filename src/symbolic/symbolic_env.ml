@@ -12,8 +12,7 @@ let get_memory env id =
   | Ok orig_mem ->
     let f (t : Thread.t) =
       let memories = Thread.memories t in
-      Symbolic_memory_collection.get_memory (Link_env.id env) orig_mem memories
-        id
+      Symbolic_memory_collection.get (Link_env.id env) orig_mem memories id
     in
     Symbolic_choice.with_thread f
 
@@ -23,7 +22,7 @@ let get_table (env : t) i : Symbolic_table.t Symbolic_choice.t =
   | Ok orig_table ->
     let f (t : Thread.t) =
       let tables = Thread.tables t in
-      Symbolic_table.get_table (Link_env.id env) orig_table tables i
+      Symbolic_table.Collection.get (Link_env.id env) orig_table tables i
     in
     Symbolic_choice.with_thread f
 
@@ -38,6 +37,6 @@ let get_global (env : t) i : Symbolic_global.t Symbolic_choice.t =
   | Ok orig_global ->
     let f (t : Thread.t) =
       let globals = Thread.globals t in
-      Symbolic_global.get_global (Link_env.id env) orig_global globals i
+      Symbolic_global.Collection.get (Link_env.id env) orig_global globals i
     in
     Symbolic_choice.with_thread f

@@ -10,9 +10,9 @@ val create :
      int
   -> Symbol_scope.t
   -> Symbolic_path_condition.t
-  -> Symbolic_memory_collection.collection
-  -> Symbolic_table.collection
-  -> Symbolic_global.collection
+  -> Symbolic_memory_collection.t
+  -> Symbolic_table.Collection.t
+  -> Symbolic_global.Collection.t
   -> int list
   -> (int * string) list
   -> Benchmark.stats
@@ -21,11 +21,11 @@ val create :
 
 val pc : t -> Symbolic_path_condition.t
 
-val memories : t -> Symbolic_memory_collection.collection
+val memories : t -> Symbolic_memory_collection.t
 
-val tables : t -> Symbolic_table.collection
+val tables : t -> Symbolic_table.Collection.t
 
-val globals : t -> Symbolic_global.collection
+val globals : t -> Symbolic_global.Collection.t
 
 val breadcrumbs : t -> int list
 
@@ -57,6 +57,6 @@ val incr_path_count : t -> unit
 
 val incr_num_symbols : t -> t
 
-val project : t -> t * Symbolic_memory_collection.collection
+val project : t -> t * Symbolic_memory_collection.t
 
-val restore : Symbolic_memory_collection.collection -> t -> t
+val restore : Symbolic_memory_collection.t -> t -> t

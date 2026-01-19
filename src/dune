@@ -34,6 +34,7 @@
   cmd_wasm2wat
   cmd_wat2wasm
   cmd_zig
+  collection
   compile
   concrete_boolean
   concrete_choice

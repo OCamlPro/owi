@@ -6,9 +6,9 @@ type t =
   { num_symbols : int
   ; symbol_scopes : Symbol_scope.t
   ; pc : Symbolic_path_condition.t
-  ; memories : Symbolic_memory_collection.collection
-  ; tables : Symbolic_table.collection
-  ; globals : Symbolic_global.collection
+  ; memories : Symbolic_memory_collection.t
+  ; tables : Symbolic_table.Collection.t
+  ; globals : Symbolic_global.Collection.t
       (** Breadcrumbs represent the list of choices that were made so far. They
           identify one given symbolic execution trace. *)
   ; breadcrumbs : int list
@@ -36,8 +36,8 @@ let init () =
   let symbol_scopes = Symbol_scope.empty in
   let pc = Symbolic_path_condition.empty in
   let memories = Symbolic_memory_collection.init () in
-  let tables = Symbolic_table.init () in
-  let globals = Symbolic_global.init () in
+  let tables = Symbolic_table.Collection.init () in
+  let globals = Symbolic_global.Collection.init () in
   let breadcrumbs = [] in
   let labels = [] in
   let bench_stats = Benchmark.empty_stats () in
@@ -108,8 +108,8 @@ let clone
   } =
   (* WARNING: because we are doing an optimization in `Symbolic_choice`, the cloned state should not refer to a mutable value of the previous state. Assuming that the original state is not mutated is wrong. *)
   let memories = Symbolic_memory_collection.clone memories in
-  let tables = Symbolic_table.clone tables in
-  let globals = Symbolic_global.clone globals in
+  let tables = Symbolic_table.Collection.clone tables in
+  let globals = Symbolic_global.Collection.clone globals in
   { num_symbols
   ; symbol_scopes
   ; pc

@@ -10,9 +10,6 @@ type t =
   ; typ : Text.ref_type
   }
 
-(* WARNING: because we are doing an optimization in `Symbolic_choice`, the cloned state should not refer to a mutable value of the previous state. Assuming that the original state is not mutated is wrong. *)
-let clone_table { limits; data; typ } = { typ; limits; data = Array.copy data }
-
 let get t i = t.data.(i)
 
 let set t i v = t.data.(i) <- v
@@ -40,35 +37,24 @@ let copy ~t_src ~t_dst ~src ~dst ~len =
   let len = Int32.to_int len in
   Array.blit t_src.data src t_dst.data dst len
 
+(** Collection of tables *)
+
 let convert_ref_values (v : Concrete_ref.t) : Symbolic_ref.t =
   match v with Func f -> Func f | _ -> assert false
 
-let convert (orig_table : Concrete_table.t) =
-  { data = Array.map convert_ref_values orig_table.data
-  ; limits = orig_table.limits
-  ; typ = orig_table.typ
-  }
+module M = struct
+  type concrete = Concrete_table.t
 
-(** Collection of tables *)
+  type symbolic = t
 
-type collection = (int * int, t) Hashtbl.t
+  let convert_one (orig_table : Concrete_table.t) =
+    { data = Array.map convert_ref_values orig_table.data
+    ; limits = orig_table.limits
+    ; typ = orig_table.typ
+    }
 
-let init () = Hashtbl.create 16
+  (* WARNING: because we are doing an optimization in `Symbolic_choice`, the cloned state should not refer to a mutable value of the previous state. Assuming that the original state is not mutated is wrong. *)
+  let clone_one { limits; data; typ } = { typ; limits; data = Array.copy data }
+end
 
-let clone collection =
-  let collection' = init () in
-  Hashtbl.iter
-    (fun loc table ->
-      let table' = clone_table table in
-      Hashtbl.add collection' loc table' )
-    collection;
-  collection'
-
-let get_table env_id (orig_table : Concrete_table.t) collection g_id =
-  let loc = (env_id, g_id) in
-  match Hashtbl.find_opt collection loc with
-  | None ->
-    let g = convert orig_table in
-    Hashtbl.add collection loc g;
-    g
-  | Some t -> t
+module Collection = Collection.Make (M)
