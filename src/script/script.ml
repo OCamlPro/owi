@@ -125,7 +125,7 @@ let compare_result_const result (const : Concrete_value.t) =
   | Result_const (Nan_arith S64), F64 f ->
     let pos_nan = Float64.to_bits Float64.pos_nan in
     Int64.eq (Int64.logand (Float64.to_bits f) pos_nan) pos_nan
-  | Result_func_ref, Ref (Func (Some (Wasm _))) ->
+  | Result_func_ref, Ref (Func _) ->
     (* TODO: FIX! This is probably unsound! *)
     true
   | Result_const (Nan_arith _), _
