@@ -38,6 +38,8 @@ val extend_s : int -> t -> t
 
 val unsigned_to_int : t -> int option
 
+val fits_in_u32 : t -> bool
+
 (** unary operators *)
 
 val abs : t -> t
