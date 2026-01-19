@@ -86,6 +86,8 @@ type err =
   | `Memory_leak_use_after_free
   | `Memory_heap_buffer_overflow
   | `Double_free
+  | `Offset_out_of_range
+  | `Table_size
   ]
 
 type 'a t = ('a, err) Prelude.Result.t
@@ -180,6 +182,8 @@ let rec err_to_string = function
   | `Memory_leak_use_after_free -> "memory leak use after free"
   | `Memory_heap_buffer_overflow -> "memory heap buffer overflow"
   | `Double_free -> "double free"
+  | `Offset_out_of_range -> "offset out of range"
+  | `Table_size -> "table size"
 
 let err_to_exit_code = function
   | `No_error -> Cmdliner.Cmd.Exit.ok
@@ -278,3 +282,5 @@ let err_to_exit_code = function
   | `Uninitialized_local _ -> 95
   | `Unreachable -> 96
   | `Invalid_character_in_memory -> 97
+  | `Offset_out_of_range -> 98
+  | `Table_size -> 99

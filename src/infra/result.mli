@@ -87,6 +87,8 @@ type err =
   | `Memory_leak_use_after_free
   | `Memory_heap_buffer_overflow
   | `Double_free
+  | `Offset_out_of_range
+  | `Table_size
   ]
 
 type 'a t = ('a, err) Prelude.Result.t

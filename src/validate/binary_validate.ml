@@ -48,8 +48,12 @@ let check_data modul n =
   if n >= Array.length modul.data then Error (`Unknown_data (Text.Raw n))
   else Ok ()
 
-let check_align memarg_align align =
-  if Int32.ge memarg_align align then Error `Alignment_too_large else Ok ()
+let check_memarg (memarg : Text.memarg) align =
+  (* TODO: whether an offset is out of range or not should be determined by
+  the memory, but memory64 is not yet supported. *)
+  if not (Int64.fits_in_u32 memarg.offset) then Error `Offset_out_of_range
+  else if Int32.ge memarg.align align then Error `Alignment_too_large
+  else Ok ()
 
 module Env = struct
   type t =
@@ -373,52 +377,52 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
     stack_e1
   | I_load8 (id, nn, _, memarg) ->
     let* () = check_mem env.modul id in
-    let* () = check_align memarg.align 1l in
+    let* () = check_memarg memarg 1l in
     let* stack = Stack.pop env.modul [ i32 ] stack in
     Stack.push [ itype nn ] stack
   | I_load16 (id, nn, _, memarg) ->
     let* () = check_mem env.modul id in
-    let* () = check_align memarg.align 2l in
+    let* () = check_memarg memarg 2l in
     let* stack = Stack.pop env.modul [ i32 ] stack in
     Stack.push [ itype nn ] stack
   | I_load (id, nn, memarg) ->
     let* () = check_mem env.modul id in
     let max_allowed = match nn with S32 -> 4l | S64 -> 8l in
-    let* () = check_align memarg.align max_allowed in
+    let* () = check_memarg memarg max_allowed in
     let* stack = Stack.pop env.modul [ i32 ] stack in
     Stack.push [ itype nn ] stack
   | I64_load32 (id, _, memarg) ->
     let* () = check_mem env.modul id in
-    let* () = check_align memarg.align 4l in
+    let* () = check_memarg memarg 4l in
     let* stack = Stack.pop env.modul [ i32 ] stack in
     Stack.push [ i64 ] stack
   | I_store8 (id, nn, memarg) ->
     let* () = check_mem env.modul id in
-    let* () = check_align memarg.align 1l in
+    let* () = check_memarg memarg 1l in
     Stack.pop env.modul [ itype nn; i32 ] stack
   | I_store16 (id, nn, memarg) ->
     let* () = check_mem env.modul id in
-    let* () = check_align memarg.align 2l in
+    let* () = check_memarg memarg 2l in
     Stack.pop env.modul [ itype nn; i32 ] stack
   | I_store (id, nn, memarg) ->
     let* () = check_mem env.modul id in
     let max_allowed = match nn with S32 -> 4l | S64 -> 8l in
-    let* () = check_align memarg.align max_allowed in
+    let* () = check_memarg memarg max_allowed in
     Stack.pop env.modul [ itype nn; i32 ] stack
   | I64_store32 (id, memarg) ->
     let* () = check_mem env.modul id in
-    let* () = check_align memarg.align 4l in
+    let* () = check_memarg memarg 4l in
     Stack.pop env.modul [ i64; i32 ] stack
   | F_load (id, nn, memarg) ->
     let* () = check_mem env.modul id in
     let max_allowed = match nn with S32 -> 4l | S64 -> 8l in
-    let* () = check_align memarg.align max_allowed in
+    let* () = check_memarg memarg max_allowed in
     let* stack = Stack.pop env.modul [ i32 ] stack in
     Stack.push [ ftype nn ] stack
   | F_store (id, nn, memarg) ->
     let* () = check_mem env.modul id in
     let max_allowed = match nn with S32 -> 4l | S64 -> 8l in
-    let* () = check_align memarg.align max_allowed in
+    let* () = check_memarg memarg max_allowed in
     Stack.pop env.modul [ ftype nn; i32 ] stack
   | I_reinterpret_f (inn, fnn) ->
     let* stack = Stack.pop env.modul [ ftype fnn ] stack in
@@ -845,11 +849,16 @@ let validate_exports modul =
       Ok () )
     modul.exports.mem
 
-let check_limit { Text.min; max } =
+let check_limit ?(table = false) { Text.min; max } =
   match max with
-  | None -> Ok ()
+  | None ->
+    if table && not (Int64.fits_in_u32 min) then Error `Table_size else Ok ()
   | Some max ->
-    if Int64.gt min max then Error `Size_minimum_greater_than_maximum else Ok ()
+    if Int64.gt min max then Error `Size_minimum_greater_than_maximum
+    else if
+      table && ((not (Int64.fits_in_u32 min)) || not (Int64.fits_in_u32 max))
+    then Error `Table_size
+    else Ok ()
 
 let validate_tables modul refs =
   array_iter
@@ -862,8 +871,8 @@ let validate_tables modul refs =
             let* _ = typecheck_const_expr ~is_init:true modul refs init in
             Ok ()
         in
-        check_limit limits
-      | Imported { typ = limits, _; _ } -> check_limit limits )
+        check_limit ~table:true limits
+      | Imported { typ = limits, _; _ } -> check_limit ~table:true limits )
     modul.table
 
 let validate_mem modul =
