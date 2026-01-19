@@ -45,26 +45,6 @@ let init () =
   create num_symbols symbol_scopes pc memories tables globals breadcrumbs labels
     bench_stats ~depth
 
-let num_symbols t = t.num_symbols
-
-let symbol_scopes t = t.symbol_scopes
-
-let pc t = t.pc
-
-let memories t = t.memories
-
-let tables t = t.tables
-
-let globals t = t.globals
-
-let breadcrumbs t = t.breadcrumbs
-
-let depth t = t.depth
-
-let labels t = t.labels
-
-let bench_stats t = t.bench_stats
-
 let add_symbol t s =
   let open Symbol_scope in
   { t with symbol_scopes = symbol s t.symbol_scopes }
@@ -92,12 +72,13 @@ let close_scope t =
   let open Symbol_scope in
   { t with symbol_scopes = close_scope t.symbol_scopes }
 
-let incr_path_count t = Atomic.incr (bench_stats t).path_count
+let incr_path_count t = Atomic.incr t.bench_stats.path_count
 
-let replace_memory thread ~env_id ~id memory =
+let replace_memory (memory : Symbolic_memory_collection.memory) thread =
   let memories = thread.memories in
   let memories =
-    Symbolic_memory_collection.replace memories ~env_id ~id memory
+    Symbolic_memory_collection.replace memories ~env_id:memory.env_id
+      ~id:memory.id memory
   in
   { thread with memories }
 
@@ -129,10 +110,6 @@ let clone
   ; bench_stats
   ; depth
   } =
-  (* WARNING: because we are doing an optimization in `Symbolic_choice`, the cloned state should not refer to a mutable value of the previous state. Assuming that the original state is not mutated is wrong. *)
-  let memories = Symbolic_memory_collection.clone memories in
-  let tables = Symbolic_table_collection.clone tables in
-  let globals = Symbolic_global_collection.clone globals in
   { num_symbols
   ; symbol_scopes
   ; pc
@@ -144,35 +121,3 @@ let clone
   ; bench_stats
   ; depth
   }
-
-let project (th : t) : t * _ =
-  let projected =
-    let num_symbols = num_symbols th in
-    let symbol_scopes = symbol_scopes th in
-    let pc = pc th in
-    let memories = Symbolic_memory_collection.empty in
-    let tables = tables th in
-    let globals = globals th in
-    let breadcrumbs = breadcrumbs th in
-    let labels = labels th in
-    let bench_stats = bench_stats th in
-    let depth = depth th in
-    create num_symbols symbol_scopes pc memories tables globals breadcrumbs
-      labels bench_stats ~depth
-  in
-  let backup = memories th in
-  (projected, backup)
-
-let restore backup th =
-  let num_symbols = num_symbols th in
-  let symbol_scopes = symbol_scopes th in
-  let pc = pc th in
-  let memories = Symbolic_memory_collection.clone backup in
-  let tables = tables th in
-  let globals = globals th in
-  let breadcrumbs = breadcrumbs th in
-  let labels = labels th in
-  let bench_stats = bench_stats th in
-  let depth = depth th in
-  create num_symbols symbol_scopes pc memories tables globals breadcrumbs labels
-    bench_stats ~depth

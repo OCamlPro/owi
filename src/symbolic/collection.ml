@@ -7,8 +7,6 @@ module type S = sig
 
   val empty : t
 
-  val clone : t -> t
-
   val find : t -> env_id:int -> id:int -> symbolic option
 
   val replace : t -> env_id:int -> id:int -> symbolic -> t
@@ -16,8 +14,6 @@ end
 
 module Make (M : sig
   type symbolic
-
-  val clone_one : symbolic -> symbolic
 end) =
 struct
   module Int_pair = struct
@@ -33,8 +29,6 @@ struct
   type t = M.symbolic IPMap.t
 
   let empty = IPMap.empty
-
-  let clone collection = IPMap.map M.clone_one collection
 
   let find collection ~env_id ~id =
     let loc = (env_id, id) in

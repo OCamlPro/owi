@@ -22,8 +22,6 @@ let global_of_concrete ~env_id ~id (v : Concrete_global.t) : global =
 
 module M = struct
   type symbolic = global
-
-  let clone_one = Fun.id
 end
 
 include Collection.Make (M)
