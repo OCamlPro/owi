@@ -2,57 +2,64 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-(** Single table *)
+module IMap = Map.Make (Int)
 
-type t =
-  { mutable data : Symbolic_ref.t array
+type t = Symbolic_table_collection.table =
+  { data : Symbolic_ref.t IMap.t
   ; limits : Text.limits
   ; typ : Text.ref_type
+  ; env_id : int
+  ; id : int
   }
 
-let get t i = t.data.(i)
+let get t i =
+  match IMap.find_opt i t.data with Some v -> v | None -> assert false
 
-let set t i v = t.data.(i) <- v
+let replace tbl = Symbolic_choice.modify_thread (Thread.replace_table tbl)
 
-let size t = Array.length t.data
+let set tbl i v =
+  let data = IMap.add i v tbl.data in
+  let tbl = { tbl with data } in
+  replace tbl
+
+let size t = IMap.cardinal t.data
 
 let typ t = t.typ
 
 let max_size t = t.limits.max
 
-let grow t new_size x =
-  let new_size = Int32.to_int new_size in
-  let new_table = Array.make new_size x in
-  Array.blit t.data 0 new_table 0 (Array.length t.data);
-  t.data <- new_table
+let grow _t _new_size _x =
+  (* TODO
+     let new_size = Int32.to_int new_size in
+     let new_table = Array.make new_size x in
+     Array.blit t.data 0 new_table 0 (Array.length t.data);
+     t.data <- new_table
+  *)
+  Symbolic_choice.return ()
 
 let fill t pos len x =
   let pos = Int32.to_int pos in
   let len = Int32.to_int len in
-  Array.fill t.data pos len x
+  let rec loop i data =
+    if i < pos + len then
+      let data = IMap.add i x t.data in
+      loop (i + 1) data
+    else { t with data }
+  in
+  loop pos t.data |> replace
 
 let copy ~t_src ~t_dst ~src ~dst ~len =
   let src = Int32.to_int src in
   let dst = Int32.to_int dst in
   let len = Int32.to_int len in
-  Array.blit t_src.data src t_dst.data dst len
-
-(** Collection of tables *)
-
-let convert_ref_values (v : Concrete_ref.t) : Symbolic_ref.t =
-  match v with Func f -> Func f | _ -> assert false
-
-let of_concrete (original : Concrete_table.t) =
-  { data = Array.map convert_ref_values original.data
-  ; limits = original.limits
-  ; typ = original.typ
-  }
-
-module M = struct
-  type symbolic = t
-
-  (* WARNING: because we are doing an optimization in `Symbolic_choice`, the cloned state should not refer to a mutable value of the previous state. Assuming that the original state is not mutated is wrong. *)
-  let clone_one { limits; data; typ } = { typ; limits; data = Array.copy data }
-end
-
-module Collection = Collection.Make (M)
+  let rec loop i j l src_map dst_map =
+    if l > 0 then
+      let dst_map =
+        match IMap.find_opt i src_map with
+        | Some v -> IMap.add j v dst_map
+        | None -> dst_map
+      in
+      loop (i + 1) (j + 1) (l - 1) src_map dst_map
+    else { t_dst with data = dst_map }
+  in
+  loop src dst len t_src.data t_dst.data |> replace

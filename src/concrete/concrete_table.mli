@@ -16,6 +16,10 @@ type t =
   ; mutable data : table
   }
 
-include Table_intf.T with type reference := Concrete_ref.t and type t := t
+include
+  Table_intf.T
+    with type reference := Concrete_ref.t
+     and type t := t
+     and type 'a choice := 'a Concrete_choice.t
 
 val init : ?label:string -> Text.Table.Type.t -> t

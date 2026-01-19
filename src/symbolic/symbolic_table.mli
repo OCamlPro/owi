@@ -3,10 +3,12 @@
 (* Written by the Owi programmers *)
 
 (** Single table *)
-type t
+type t = Symbolic_table_collection.table
 
-include Table_intf.T with type reference := Symbolic_ref.t and type t := t
+include
+  Table_intf.T
+    with type reference := Symbolic_ref.t
+     and type t := t
+     and type 'a choice := 'a Symbolic_choice.t
 
-val of_concrete : Concrete_table.t -> t
-
-module Collection : Collection.S with type symbolic := t
+val replace : t -> unit Symbolic_choice.t

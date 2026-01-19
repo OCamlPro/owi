@@ -29,7 +29,9 @@ let update table data = table.data <- data
 
 let get t i = t.data.(i)
 
-let set t i v = t.data.(i) <- v
+let set t i v =
+  t.data.(i) <- v;
+  Ok ()
 
 let size t = Array.length t.data
 
@@ -41,15 +43,18 @@ let grow t new_size x =
   let new_size = Int32.to_int new_size in
   let new_table = Array.make new_size x in
   Array.blit t.data 0 new_table 0 (Array.length t.data);
-  update t new_table
+  update t new_table;
+  Ok ()
 
 let fill t pos len x =
   let pos = Int32.to_int pos in
   let len = Int32.to_int len in
-  Array.fill t.data pos len x
+  Array.fill t.data pos len x;
+  Ok ()
 
 let copy ~t_src ~t_dst ~src ~dst ~len =
   let src = Int32.to_int src in
   let dst = Int32.to_int dst in
   let len = Int32.to_int len in
-  Array.blit t_src.data src t_dst.data dst len
+  Array.blit t_src.data src t_dst.data dst len;
+  Ok ()

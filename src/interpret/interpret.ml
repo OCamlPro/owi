@@ -28,12 +28,15 @@ module Make
     (Value : Value_intf.T)
     (Data : Data_intf.T)
     (Elem : Elem_intf.T with type reference := Value.Ref.t)
-    (Table : Table_intf.T with type reference := Value.Ref.t)
     (Choice :
       Choice_intf.S
         with type boolean := Value.boolean
          and type i32 := Value.i32
          and type value := Value.t)
+    (Table :
+      Table_intf.T
+        with type reference := Value.Ref.t
+         and type 'a choice := 'a Choice.t)
     (Global :
       Global_intf.T with type value := Value.t and type 'a choice := 'a Choice.t)
     (Memory :
@@ -878,6 +881,7 @@ struct
         , (* TODO: get instr counter *) None )
       in
       let* fun_i = Choice.select_i32 fun_i in
+      let* t = Env.get_table state.env tbl_i in
       let fun_i = Int32.to_int fun_i in
       let f_ref = Table.get t fun_i in
       begin match Ref.get_func f_ref with
@@ -1182,28 +1186,30 @@ struct
       let v, stack = Stack.pop stack in
       let* () = Global.set_value global v in
       st stack
-    | Table_get i ->
+    | Table_get tbl_i ->
       (* TODO: this should be rewritten without `select_i32` ! but it requires to change the type of `Table.get` *)
-      let* t = Env.get_table env i in
       let i, stack = Stack.pop_i32 stack in
       let* i = Choice.select_i32 i in
       let i = Int32.to_int i in
+      let* t = Env.get_table env tbl_i in
       let size = Table.size t in
       if i < 0 || i >= size then Choice.trap `Out_of_bounds_table_access
       else
+        let* t = Env.get_table env tbl_i in
         let v = Table.get t i in
         st @@ Stack.push stack (Ref v)
-    | Table_set indice ->
-      let* t = Env.get_table env indice in
+    | Table_set tbl_indice ->
       let v, stack = Stack.pop_as_ref stack in
       let indice, stack = Stack.pop_i32 stack in
       (* TODO: avoid the select_i32, it requires to change the type of `Table.set` *)
       let* indice = Choice.select_i32 indice in
       let indice = Int32.to_int indice in
+      let* t = Env.get_table env tbl_indice in
       if indice < 0 || indice >= Table.size t then
         Choice.trap `Out_of_bounds_table_access
       else begin
-        Table.set t indice v;
+        let* t = Env.get_table env tbl_indice in
+        let* () = Table.set t indice v in
         st stack
       end
     | Table_size indice ->
@@ -1228,7 +1234,8 @@ struct
       else
         let new_element, stack = Stack.pop_as_ref stack in
         let* new_size = Choice.select_i32 new_size in
-        Table.grow t new_size new_element;
+        let* t = Env.get_table env indice in
+        let* () = Table.grow t new_size new_element in
         st @@ Stack.push_i32 stack size
     | Table_fill indice ->
       let* t = Env.get_table env indice in
@@ -1245,7 +1252,8 @@ struct
       in
       let* pos = Choice.select_i32 pos in
       let* len = Choice.select_i32 len in
-      Table.fill t pos len x;
+      let* t = Env.get_table env indice in
+      let* () = Table.fill t pos len x in
       st stack
     | Table_copy (ti_dst, ti_src) -> begin
       let* t_src = Env.get_table env ti_src in
@@ -1271,7 +1279,9 @@ struct
         else begin
           let* src = Choice.select_i32 src in
           let* dst = Choice.select_i32 dst in
-          let+ len = Choice.select_i32 len in
+          let* len = Choice.select_i32 len in
+          let* t_src = Env.get_table env ti_src in
+          let* t_dst = Env.get_table env ti_dst in
           Table.copy ~t_src ~t_dst ~src ~dst ~len
         end
       in
@@ -1301,10 +1311,15 @@ struct
       let len = Int32.to_int len in
       let pos_x = Int32.to_int pos_x in
       let pos = Int32.to_int pos in
-      for i = 0 to len - 1 do
-        let elt = Elem.get elem (pos_x + i) in
-        Table.set t (pos + i) elt
-      done;
+      let rec loop i () =
+        if i = len then return ()
+        else
+          let elt = Elem.get elem (pos_x + i) in
+          let* t = Env.get_table env t_i in
+          let* () = Table.set t (pos + i) elt in
+          loop (i + 1) ()
+      in
+      let* () = loop 0 () in
       st stack
     end
     | Elem_drop i ->
@@ -1742,8 +1757,8 @@ end
 
 module Concrete (Parameters : Parameters) =
   Make [@inlined hint] (Concrete_value) (Concrete_data) (Concrete_elem)
-    (Concrete_table)
     (Concrete_choice)
+    (Concrete_table)
     (Concrete_global)
     (Concrete_memory)
     (Concrete_extern_func)
@@ -1751,8 +1766,8 @@ module Concrete (Parameters : Parameters) =
     (Parameters)
 module Symbolic (Parameters : Parameters) =
   Make [@inlined hint] (Symbolic_value) (Symbolic_data) (Symbolic_elem)
-    (Symbolic_table)
     (Symbolic_choice)
+    (Symbolic_table)
     (Symbolic_global)
     (Symbolic_memory)
     (Symbolic_extern_func)

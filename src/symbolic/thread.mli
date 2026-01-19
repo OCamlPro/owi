@@ -7,7 +7,7 @@ type t = private
   ; symbol_scopes : Symbol_scope.t
   ; pc : Symbolic_path_condition.t
   ; memories : Symbolic_memory_collection.t
-  ; tables : Symbolic_table.Collection.t
+  ; tables : Symbolic_table_collection.t
   ; globals : Symbolic_global_collection.t
       (** Breadcrumbs represent the list of choices that were made so far. They
           identify one given symbolic execution trace. *)
@@ -24,7 +24,7 @@ val create :
   -> Symbol_scope.t
   -> Symbolic_path_condition.t
   -> Symbolic_memory_collection.t
-  -> Symbolic_table.Collection.t
+  -> Symbolic_table_collection.t
   -> Symbolic_global_collection.t
   -> int list
   -> (int * string) list
@@ -45,10 +45,9 @@ val add_label : t -> int * string -> t
 val replace_memory :
   t -> env_id:int -> id:int -> Symbolic_memory_collection.memory -> t
 
-val replace_table : t -> env_id:int -> id:int -> Symbolic_table.t -> t
+val replace_table : Symbolic_table_collection.table -> t -> t
 
-val replace_global :
-  t -> env_id:int -> id:int -> Symbolic_global_collection.global -> t
+val replace_global : Symbolic_global_collection.global -> t -> t
 
 val open_scope : t -> string -> t
 
