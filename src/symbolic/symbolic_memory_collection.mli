@@ -8,10 +8,7 @@ type memory =
   ; mutable size : Symbolic_i32.t
   }
 
-type collection
-
-val init : unit -> collection
-
-val clone : collection -> collection
-
-val get_memory : int -> Concrete_memory.t -> collection -> int -> memory
+include
+  Collection.S
+    with type concrete := Concrete_memory.t
+     and type symbolic := memory

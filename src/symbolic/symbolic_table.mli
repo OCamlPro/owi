@@ -7,11 +7,5 @@ type t
 
 include Table_intf.T with type reference := Symbolic_ref.t and type t := t
 
-(** Collection of tables *)
-type collection
-
-val init : unit -> collection
-
-val clone : collection -> collection
-
-val get_table : int -> Concrete_table.t -> collection -> int -> t
+module Collection :
+  Collection.S with type concrete := Concrete_table.t and type symbolic := t

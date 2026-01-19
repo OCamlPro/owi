@@ -8,8 +8,7 @@ let value v = v.value
 
 let set_value v x = v.value <- x
 
-(* WARNING: because we are doing an optimization in `Symbolic_choice`, the cloned state should not refer to a mutable value of the previous state. Assuming that the original state is not mutated is wrong. *)
-let clone_global r = { value = r.value }
+(** Collections of globals *)
 
 let convert_values (v : Concrete_value.t) : Symbolic_value.t =
   match v with
@@ -21,30 +20,17 @@ let convert_values (v : Concrete_value.t) : Symbolic_value.t =
   | Ref (Func f) -> Ref (Func f)
   | Ref _ -> assert false
 
-let convert (orig_global : Concrete_global.t) : t =
-  let value = convert_values orig_global.value in
-  { value }
+module M = struct
+  type concrete = Concrete_global.t
 
-(** Collections of globals *)
+  type symbolic = t
 
-type collection = (int * int, t) Hashtbl.t
+  let convert_one original =
+    let value = convert_values original.Concrete_global.value in
+    { value }
 
-let init () = Hashtbl.create 16
+  (* WARNING: because we are doing an optimization in `Symbolic_choice`, the cloned state should not refer to a mutable value of the previous state. Assuming that the original state is not mutated is wrong. *)
+  let clone_one r = { value = r.value }
+end
 
-let clone collection =
-  let collection' = init () in
-  Hashtbl.iter
-    (fun loc global ->
-      let global' = clone_global global in
-      Hashtbl.add collection' loc global' )
-    collection;
-  collection'
-
-let get_global env_id (orig_global : Concrete_global.t) collection g_id =
-  let loc = (env_id, g_id) in
-  match Hashtbl.find_opt collection loc with
-  | None ->
-    let g = convert orig_global in
-    Hashtbl.add collection loc g;
-    g
-  | Some t -> t
+module Collection = Collection.Make (M)
