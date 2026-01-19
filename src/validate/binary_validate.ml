@@ -8,13 +8,9 @@ open Module
 open Syntax
 open Fmt
 
-(* TODO:
-   - Why isn't any part of heap_type?
-   - Why is Ref_type holding a heap_type and not a ref_type?
-     What about nullability? *)
 type typ =
   | Num_type of Text.num_type
-  | Ref_type of Text.heap_type
+  | Ref_type of Text.ref_type
   | Any
   | Something
 
@@ -22,14 +18,14 @@ let sp fmt () = Fmt.string fmt " "
 
 let pp_typ fmt = function
   | Num_type t -> Text.pp_num_type fmt t
-  | Ref_type t -> Text.pp_heap_type fmt t
+  | Ref_type t -> Text.pp_ref_type fmt t
   | Any -> string fmt "any"
   | Something -> string fmt "something"
 
 let pp_typ_list fmt l = list ~sep:sp pp_typ fmt l
 
 let typ_of_val_type = function
-  | Text.Ref_type (_null, t) -> Ref_type t
+  | Text.Ref_type rt -> Ref_type rt
   | Num_type t -> Num_type t
 
 let typ_of_pt pt = typ_of_val_type @@ snd pt
@@ -172,7 +168,15 @@ module Stack : sig
     -> got:Text.heap_type
     -> bool Result.t
 
-  val match_types : ?subtype:bool -> Module.t -> typ -> typ -> bool Result.t
+  val match_ref_type :
+       ?subtype:bool
+    -> Module.t
+    -> expected:Text.ref_type
+    -> got:Text.ref_type
+    -> bool Result.t
+
+  val match_types :
+    ?subtype:bool -> Module.t -> expected:typ -> got:typ -> bool Result.t
 
   val pp : t Fmt.t
 
@@ -230,13 +234,25 @@ end = struct
       if List.is_empty pt1 && List.is_empty rt1 then Ok true else Ok false
     | _ -> Ok false
 
-  let match_types ?subtype env expected got =
+  let match_ref_type ?(subtype = false) modul ~expected ~got =
+    match (expected, got) with
+    | (Text.Null, expected), (Text.No_null, got)
+    | (Text.No_null, expected), (Text.No_null, got)
+    | (Text.Null, expected), (Text.Null, got) ->
+      match_heap_type ~subtype modul ~expected ~got
+    | (Text.No_null, _), (Text.Null, _) ->
+      Error
+        (`Type_mismatch
+           (Fmt.str "match_ref_type Expected %a got %a" Text.pp_ref_type
+              expected Text.pp_ref_type got ) )
+
+  let match_types ?subtype env ~expected ~got =
     match (expected, got) with
     | Something, _ | _, Something -> Ok true
     | Any, _ | _, Any -> Ok true
     | Num_type expected, Num_type got -> match_num_type expected got
     | Ref_type expected, Ref_type got ->
-      match_heap_type ?subtype env ~expected ~got
+      match_ref_type ?subtype env ~expected ~got
     | Num_type _, Ref_type _ | Ref_type _, Num_type _ -> Ok false
 
   let rec equal env s s' =
@@ -249,7 +265,7 @@ end = struct
       let* b = equal env tl (hd :: tl') in
       if b then Ok true else equal env (Any :: tl) tl'
     | hd :: tl, hd' :: tl' ->
-      let* b = match_types ~subtype:true env hd hd' in
+      let* b = match_types ~subtype:true env ~expected:hd ~got:hd' in
       if not b then Ok false else equal env tl tl'
 
   let rec match_prefix modul ~prefix ~stack : t option Result.t =
@@ -263,7 +279,7 @@ end = struct
       | _ -> Ok m2
       end
     | hd :: tl, hd' :: tl' ->
-      let* b = match_types ~subtype:true modul hd hd' in
+      let* b = match_types ~subtype:true modul ~expected:hd ~got:hd' in
       if b then match_prefix modul ~prefix:tl ~stack:tl' else Ok None
 
   let pop env required stack =
@@ -297,7 +313,7 @@ let typ_equal modul ~expected ~got =
   match (expected, got) with
   | Num_type t1, Num_type t2 -> Ok (Text.num_type_eq t1 t2)
   | Ref_type expected, Ref_type got ->
-    let+ b = Stack.match_heap_type ~subtype:true modul ~expected ~got in
+    let+ b = Stack.match_ref_type ~subtype:true modul ~expected ~got in
     b
   | Any, _ | _, Any -> Ok true
   | Something, _ | _, Something -> Ok true
@@ -554,10 +570,10 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
     if not b then Error (`Type_mismatch "table_copy")
     else Stack.pop env.modul [ i32; i32; i32 ] stack
   | Table_fill i ->
-    let* _null, t = Env.table_type_get i env.modul in
+    let* t = Env.table_type_get i env.modul in
     Stack.pop env.modul [ i32; Ref_type t; i32 ] stack
   | Table_grow i ->
-    let* _null, t = Env.table_type_get i env.modul in
+    let* t = Env.table_type_get i env.modul in
     let* stack = Stack.pop env.modul [ i32; Ref_type t ] stack in
     Stack.push [ i32 ] stack
   | Table_size i ->
@@ -572,7 +588,7 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
     (* TODO: The type can be Something/Any, and if its a Ref_type the heap_type
       can be a TypeUse or Extern_ht. The pushed type should account for that
       and restrict whatever the type is to non_null. *)
-  | Ref_null rt -> Stack.push [ Ref_type rt ] stack
+  | Ref_null rt -> Stack.push [ Ref_type (Null, rt) ] stack
   | Elem_drop id ->
     let* _elem_typ = Env.elem_type_get id env.modul in
     Ok stack
@@ -585,7 +601,7 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
       | Any :: _ -> Ok [ Something; Any ]
       | hd :: Any :: _ -> Ok (hd :: [ Any ])
       | hd :: hd' :: tl ->
-        let* b = Stack.match_types env.modul hd hd' in
+        let* b = Stack.match_types env.modul ~expected:hd ~got:hd' in
         if b then Ok (hd :: tl) else Error (`Type_mismatch "select")
       | _ -> Error (`Type_mismatch "select")
     end
@@ -600,7 +616,8 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
     else begin
       match get_func_type_id env i with
       | None -> assert false
-      | Some id -> Stack.push [ Ref_type (TypeUse (Raw id)) ] stack
+      | Some id ->
+        Stack.push [ Ref_type (Text.No_null, TypeUse (Raw id)) ] stack
     end
   | Br i ->
     let* jt = Env.block_type_get i env in
@@ -639,11 +656,11 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
     let* _stack = Stack.pop env.modul jt stack in
     Ok stack
   | Table_get i ->
-    let* _null, t = Env.table_type_get i env.modul in
+    let* t = Env.table_type_get i env.modul in
     let* stack = Stack.pop env.modul [ i32 ] stack in
     Stack.push [ Ref_type t ] stack
   | Table_set i ->
-    let* _null, t = Env.table_type_get i env.modul in
+    let* t = Env.table_type_get i env.modul in
     Stack.pop env.modul [ Ref_type t; i32 ] stack
   | (Extern_externalize | Extern_internalize) as i ->
     Log.err (fun m ->
@@ -702,7 +719,7 @@ let typecheck_const_instr ~is_init (modul : Module.t) refs stack instr =
   | F32_const _ -> Stack.push [ f32 ] stack
   | F64_const _ -> Stack.push [ f64 ] stack
   | V128_const _ -> Stack.push [ v128 ] stack
-  | Ref_null t -> Stack.push [ Ref_type t ] stack
+  | Ref_null t -> Stack.push [ Ref_type (Null, t) ] stack
   | Ref_func i ->
     let* ity = Env.func_get i modul in
     let resty =
@@ -713,7 +730,7 @@ let typecheck_const_instr ~is_init (modul : Module.t) refs stack instr =
       | None -> Func_ht
     in
     Hashtbl.add refs i ();
-    Stack.push [ Ref_type resty ] stack
+    Stack.push [ Ref_type (No_null, resty) ] stack
   | Global_get i ->
     if i >= Array.length modul.global then Error (`Unknown_global (Text.Raw i))
     else
@@ -760,7 +777,7 @@ let typecheck_elem modul refs (elem : Elem.t) =
         let* real_type = typecheck_const_expr modul refs init in
         match real_type with
         | [ real_type ] ->
-          let expected_type = Ref_type elem_ty in
+          let expected_type = Ref_type (elem_null, elem_ty) in
           let* b = typ_equal modul ~expected:expected_type ~got:real_type in
           if not b then
             Error
@@ -783,7 +800,7 @@ let typecheck_elem modul refs (elem : Elem.t) =
     else
       let* t = typecheck_const_expr modul refs e in
       match t with
-      | [ Ref_type t ] ->
+      | [ Ref_type (_, t) ] ->
         if not @@ Text.heap_type_eq t tbl_ty then
           Error (`Type_mismatch "typecheck_elem 4")
         else Ok ()
@@ -861,18 +878,41 @@ let check_limit ?(table = false) { Text.min; max } =
     else Ok ()
 
 let validate_tables modul refs =
-  array_iter
-    (function
-      | Origin.Local Table.{ typ = limits, ((_, expected) as rt); init; _ } ->
+  array_iteri
+    (fun id t ->
+      match t with
+      | Origin.Local Table.{ typ = limits, ((nullable, _) as rt); init; _ } ->
         let* () =
           match init with
-          | None -> Ok ()
+          | None -> begin
+            match nullable with
+            | Null -> Ok ()
+            | No_null ->
+              let has_init_elem =
+                Array.exists
+                  (fun e ->
+                    match e with
+                    | Binary.Elem.{ mode = Active (Some id', _); _ }
+                      when id = id' ->
+                      true
+                    | _ -> false )
+                  modul.elem
+              in
+              if has_init_elem then Ok ()
+              else
+                Error
+                  (`Type_mismatch
+                     (Fmt.str
+                        "Table type is %a but init was not provided and is not \
+                         nullable"
+                        Text.pp_ref_type rt ) )
+          end
           | Some init ->
             let* res_tys = typecheck_const_expr ~is_init:true modul refs init in
             begin match res_tys with
             | [ Ref_type got ] ->
               let* res =
-                Stack.match_heap_type ~subtype:true ~expected ~got modul
+                Stack.match_ref_type ~subtype:true ~expected:rt ~got modul
               in
               if res then Ok ()
               else
