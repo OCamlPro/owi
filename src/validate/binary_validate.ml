@@ -863,13 +863,29 @@ let check_limit ?(table = false) { Text.min; max } =
 let validate_tables modul refs =
   array_iter
     (function
-      | Origin.Local Table.{ typ = limits, _; init; _ } ->
+      | Origin.Local Table.{ typ = limits, ((_, expected) as rt); init; _ } ->
         let* () =
           match init with
           | None -> Ok ()
           | Some init ->
-            let* _ = typecheck_const_expr ~is_init:true modul refs init in
-            Ok ()
+            let* res_tys = typecheck_const_expr ~is_init:true modul refs init in
+            begin match res_tys with
+            | [ Ref_type got ] ->
+              let* res =
+                Stack.match_heap_type ~subtype:true ~expected ~got modul
+              in
+              if res then Ok ()
+              else
+                Error
+                  (`Type_mismatch
+                     (Fmt.str "Table type is %a but init expr is of type %a"
+                        Text.pp_ref_type rt pp_typ_list res_tys ) )
+            | _ ->
+              Error
+                (`Type_mismatch
+                   (Fmt.str "Table type is %a but init expr is of type %a"
+                      Text.pp_ref_type rt pp_typ_list res_tys ) )
+            end
         in
         check_limit ~table:true limits
       | Imported { typ = limits, _; _ } -> check_limit ~table:true limits )
