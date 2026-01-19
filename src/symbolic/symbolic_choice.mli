@@ -67,5 +67,3 @@ val ite :
   -> Symbolic_value.t t
 
 val depth : unit -> int t
-
-val lift_mem : 'a t -> 'a t

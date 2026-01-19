@@ -27,14 +27,14 @@ module type T = sig
 
   val store_64 : t -> addr:i32 -> i64 -> unit choice
 
-  val grow : t -> i32 -> unit
+  val grow : t -> i32 -> unit choice
 
   val fill : t -> pos:i32 -> len:i32 -> char -> unit choice
 
   val blit :
     src:t -> src_idx:i32 -> dst:t -> dst_idx:i32 -> len:i32 -> unit choice
 
-  val blit_string : t -> string -> src:i32 -> dst:i32 -> len:i32 -> unit
+  val blit_string : t -> string -> src:i32 -> dst:i32 -> len:i32 -> unit choice
 
   val size : t -> i32
 

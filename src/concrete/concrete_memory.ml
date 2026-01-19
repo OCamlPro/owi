@@ -25,7 +25,8 @@ let grow mem delta =
   let old_size = Bytes.length mem.data in
   let new_mem = Bytes.extend mem.data 0 delta in
   Bytes.unsafe_fill new_mem old_size delta (Char.chr 0);
-  update_memory mem new_mem
+  update_memory mem new_mem;
+  Ok ()
 
 let fill mem ~pos ~len c =
   let pos = Int32.to_int pos in
@@ -44,7 +45,8 @@ let blit_string mem str ~src ~dst ~len =
   let src = Int32.to_int src in
   let dst = Int32.to_int dst in
   let len = Int32.to_int len in
-  Bytes.unsafe_blit_string str src mem.data dst len
+  Bytes.unsafe_blit_string str src mem.data dst len;
+  Ok ()
 
 let get_limit_max { limits; _ } = Option.map Int64.of_int limits.max
 

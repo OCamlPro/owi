@@ -3,9 +3,10 @@
 (* Written by the Owi programmers *)
 
 type memory =
-  { mutable data : Symbolic_i32.t Map.Make(Int32).t
-  ; mutable chunks : Symbolic_i32.t Map.Make(Int32).t
-  ; mutable size : Symbolic_i32.t
+  { data : Symbolic_i32.t Map.Make(Int32).t
+  ; chunks : Symbolic_i32.t Map.Make(Int32).t
+  ; size : Symbolic_i32.t
+  ; id : int * int
   }
 
 type collection
@@ -15,3 +16,5 @@ val init : unit -> collection
 val clone : collection -> collection
 
 val get_memory : int -> Concrete_memory.t -> collection -> int -> memory
+
+val set_memory : collection -> memory -> unit

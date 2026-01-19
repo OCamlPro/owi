@@ -46,11 +46,3 @@ let[@inline] liftF2 f x y = fun st -> f (run x st) (run y st)
 let[@inline] with_state f = fun st -> M.return (f st)
 
 let[@inline] modify_state f = fun st -> M.return ((), f st)
-
-let[@inline] project_state (project_and_backup : 'st1 -> 'st2 * 'backup) restore
-  other =
- fun st ->
-  let ( let+ ) = M.( let+ ) in
-  let proj, backup = project_and_backup st in
-  let+ res, new_state = run other proj in
-  (res, restore backup new_state)

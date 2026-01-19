@@ -876,6 +876,7 @@ struct
         , `Undefined_element
         , (* TODO: get instr counter *) None )
       in
+      let* t = Env.get_table state.env tbl_i in
       let* fun_i = Choice.select_i32 fun_i in
       let fun_i = Int32.to_int fun_i in
       let f_ref = Table.get t fun_i in
@@ -1072,7 +1073,7 @@ struct
       if too_big then st @@ Stack.push_i32 stack (I32.of_int ~-1)
       else begin
         let* mem = Env.get_memory env memid in
-        Memory.grow mem I64.(to_int32 delta);
+        let* () = Memory.grow mem I64.(to_int32 delta) in
         let res = I64.(to_int32 @@ (old_size / page_size)) in
         st @@ Stack.push_i32 stack res
       end
@@ -1140,9 +1141,10 @@ struct
         , `Out_of_bounds_memory_access
         , Some current_instr_counter )
       in
-      let data = Data.value data in
+      let* data = Env.get_data env dataid in
       let* mem = Env.get_memory env memid in
-      Memory.blit_string mem data ~src ~dst ~len;
+      let data = Data.value data in
+      let* () = Memory.blit_string mem data ~src ~dst ~len in
       st stack
     | Select _t ->
       if Parameters.use_ite_for_select then begin
@@ -1190,19 +1192,21 @@ struct
       let size = Table.size t in
       if i < 0 || i >= size then Choice.trap `Out_of_bounds_table_access
       else
+        let* t = Env.get_table env i in
         let v = Table.get t i in
         st @@ Stack.push stack (Ref v)
     | Table_set indice ->
-      let* t = Env.get_table env indice in
       let v, stack = Stack.pop_as_ref stack in
-      let indice, stack = Stack.pop_i32 stack in
+      let indice', stack = Stack.pop_i32 stack in
       (* TODO: avoid the select_i32, it requires to change the type of `Table.set` *)
-      let* indice = Choice.select_i32 indice in
-      let indice = Int32.to_int indice in
-      if indice < 0 || indice >= Table.size t then
+      let* indice' = Choice.select_i32 indice' in
+      let indice' = Int32.to_int indice' in
+      let* t = Env.get_table env indice in
+      if indice' < 0 || indice' >= Table.size t then
         Choice.trap `Out_of_bounds_table_access
       else begin
-        Table.set t indice v;
+        let* t = Env.get_table env indice in
+        Table.set t indice' v;
         st stack
       end
     | Table_size indice ->
@@ -1225,6 +1229,7 @@ struct
         let stack = Stack.drop stack in
         st @@ Stack.push_i32_of_int stack (-1)
       else
+        let* t = Env.get_table env indice in
         let new_element, stack = Stack.pop_as_ref stack in
         let* new_size = Choice.select_i32 new_size in
         Table.grow t new_size new_element;
@@ -1242,6 +1247,7 @@ struct
         , `Out_of_bounds_table_access
         , Some current_instr_counter )
       in
+      let* t = Env.get_table env indice in
       let* pos = Choice.select_i32 pos in
       let* len = Choice.select_i32 len in
       Table.fill t pos len x;
@@ -1268,6 +1274,8 @@ struct
         let> len_eqz = I32.eqz len in
         if len_eqz then return ()
         else begin
+          let* t_src = Env.get_table env ti_src in
+          let* t_dst = Env.get_table env ti_dst in
           let* src = Choice.select_i32 src in
           let* dst = Choice.select_i32 dst in
           let+ len = Choice.select_i32 len in
@@ -1294,6 +1302,8 @@ struct
         , `Out_of_bounds_table_access
         , Some current_instr_counter )
       in
+      let* t = Env.get_table env t_i in
+      let elem = Env.get_elem env e_i in
       let* len = Choice.select_i32 len in
       let* pos_x = Choice.select_i32 pos_x in
       let* pos = Choice.select_i32 pos in
