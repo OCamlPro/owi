@@ -274,7 +274,7 @@ let run ~no_exhaustion script =
           match got with
           | Error got -> check_error ~expected ~got
           | Ok [ Text_module (false, m) ] ->
-            let got = Compile.Text.until_binary ~unsafe m in
+            let got = Compile.Text.until_validate ~unsafe m in
             check_error_result expected got
           | _ -> assert false
         in
