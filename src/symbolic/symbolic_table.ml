@@ -4,7 +4,7 @@
 
 module IMap = Map.Make (Int)
 
-type t = Symbolic_table_collection.table =
+type t = Symbolic_table0.t =
   { data : Symbolic_ref.t IMap.t
   ; limits : Text.limits
   ; typ : Text.ref_type
@@ -63,3 +63,17 @@ let copy ~t_src ~t_dst ~src ~dst ~len =
     else { t_dst with data = dst_map }
   in
   loop src dst len t_src.data t_dst.data |> replace
+
+let convert_ref_values (v : Concrete_ref.t) : Symbolic_ref.t =
+  match v with Func f -> Func f | _ -> assert false
+
+let of_concrete ~env_id ~id (original : Concrete_table.t) =
+  let _i, data =
+    Array.fold_left
+      (fun (i, map) v ->
+        let v = convert_ref_values v in
+        let map = IMap.add i v map in
+        (succ i, map) )
+      (0, IMap.empty) original.data
+  in
+  { data; limits = original.limits; typ = original.typ; env_id; id }

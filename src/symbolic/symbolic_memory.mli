@@ -2,7 +2,7 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type t = Symbolic_memory_collection.memory
+type t = Symbolic_memory0.t
 
 include
   Memory_intf.T
@@ -17,3 +17,5 @@ val realloc :
   t -> ptr:Smtml.Expr.t -> size:Smtml.Expr.t -> Smtml.Expr.t Symbolic_choice.t
 
 val free : t -> Smtml.Expr.t -> Smtml.Expr.t Symbolic_choice.t
+
+val of_concrete : env_id:int -> id:int -> Concrete_memory.t -> t

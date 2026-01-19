@@ -3,7 +3,7 @@
 (* Written by the Owi programmers *)
 
 (** Single table *)
-type t = Symbolic_table_collection.table
+type t = Symbolic_table0.t
 
 include
   Table_intf.T
@@ -12,3 +12,5 @@ include
      and type 'a choice := 'a Symbolic_choice.t
 
 val replace : t -> unit Symbolic_choice.t
+
+val of_concrete : env_id:int -> id:int -> Concrete_table.t -> t
