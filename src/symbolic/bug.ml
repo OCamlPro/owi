@@ -11,8 +11,8 @@ let is_assertion { kind; _ } =
   match kind with `Assertion _ -> true | `Trap _ -> false
 
 let compare_breadcrumbs bug1 bug2 =
-  let breadcrumbs1 = List.rev @@ Thread.breadcrumbs bug1.thread in
-  let breadcrumbs2 = List.rev @@ Thread.breadcrumbs bug2.thread in
+  let breadcrumbs1 = List.rev @@ bug1.thread.breadcrumbs in
+  let breadcrumbs2 = List.rev @@ bug2.thread.breadcrumbs in
   List.compare compare breadcrumbs1 breadcrumbs2
 
 let sort_seq_if b seq =

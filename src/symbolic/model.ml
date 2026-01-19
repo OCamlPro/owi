@@ -9,13 +9,11 @@ type output_format =
   | Scfg
   | Json
 
-let pp format with_breadcrumbs no_value fmt (model, thread) =
-  let scoped_values = Thread.symbol_scopes thread in
-  let labels = Thread.labels thread in
-  let breadcrumbs = Thread.breadcrumbs thread in
+let pp format with_breadcrumbs no_value fmt
+  (model, { Thread.symbol_scopes; labels; breadcrumbs; _ }) =
   match format with
   | Json ->
-    let json = Symbol_scope.to_json ~no_value model scoped_values in
+    let json = Symbol_scope.to_json ~no_value model symbol_scopes in
     let labels_json =
       List.map
         (fun (id, name) -> `Assoc [ ("id", `Int id); ("name", `String name) ])
@@ -38,7 +36,7 @@ let pp format with_breadcrumbs no_value fmt (model, thread) =
     in
     Yojson.Basic.pretty_print fmt json
   | Scfg ->
-    let scfg = Symbol_scope.to_scfg ~no_value model scoped_values in
+    let scfg = Symbol_scope.to_scfg ~no_value model symbol_scopes in
     let model = Scfg.Query.get_dir_exn "model" scfg in
     let lbls =
       { Scfg.Types.name = "labels"

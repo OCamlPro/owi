@@ -92,7 +92,7 @@ let add_pc (c : Symbolic_boolean.t) =
 
 let get_pc () =
   let+ thread in
-  let pc = Thread.pc thread in
+  let pc = thread.pc in
   let pc = Symbolic_path_condition.slice pc in
   List.fold_left Smtml.Expr.Set.union Smtml.Expr.Set.empty pc
 
@@ -107,14 +107,14 @@ let close_scope () = modify_thread (fun t -> Thread.close_scope t)
 
 let with_new_invisible_symbol ty f =
   let* thread in
-  let n = Thread.num_symbols thread in
+  let n = thread.num_symbols in
   let+ () = modify_thread Thread.incr_num_symbols in
   let sym = Fmt.kstr (Smtml.Symbol.make ty) "symbol_invisible_%i" n in
   f sym
 
 let with_new_symbol ty f =
   let* thread in
-  let n = Thread.num_symbols thread in
+  let n = thread.num_symbols in
   let sym = Fmt.kstr (Smtml.Symbol.make ty) "symbol_%d" n in
   let+ () =
     modify_thread (fun thread ->
@@ -131,8 +131,8 @@ let check_reachability v prio =
   let* () = yield prio in
   let* thread in
   let solver = solver () in
-  let pc = Thread.pc thread |> Symbolic_path_condition.slice_on_condition v in
-  let stats = Thread.bench_stats thread in
+  let pc = thread.pc |> Symbolic_path_condition.slice_on_condition v in
+  let stats = thread.bench_stats in
   let reachability =
     Benchmark.handle_time_span stats.solver_sat_time @@ fun () ->
     Solver.check solver pc
@@ -144,10 +144,8 @@ let get_model_or_stop symbol =
   let* () = yield Prio.dummy in
   let solver = solver () in
   let* thread in
-  let set =
-    Thread.pc thread |> Symbolic_path_condition.slice_on_symbol symbol
-  in
-  let stats = Thread.bench_stats thread in
+  let set = thread.pc |> Symbolic_path_condition.slice_on_symbol symbol in
+  let stats = thread.bench_stats in
   let symbol_scopes = Symbol_scope.of_symbol symbol in
   let sat_model =
     Benchmark.handle_time_span stats.solver_intermediate_model_time (fun () ->
@@ -231,7 +229,7 @@ let summary_symbol (e : Smtml.Expr.t) =
   match Smtml.Expr.view e with
   | Symbol sym -> Eval_monad.return (None, sym)
   | _ ->
-    let num_symbols = Thread.num_symbols thread in
+    let num_symbols = thread.num_symbols in
     let+ () = modify_thread Thread.incr_num_symbols in
     let sym_name = Fmt.str "choice_i32_%i" num_symbols in
     let sym_type = Smtml.Ty.Ty_bitv 32 in
@@ -288,8 +286,8 @@ let select_i32 (i : Symbolic_i32.t) =
 let trap t =
   let* thread in
   let solver = solver () in
-  let path_condition = Thread.pc thread in
-  let stats = Thread.bench_stats thread in
+  let path_condition = thread.pc in
+  let stats = thread.bench_stats in
   let* model =
     Benchmark.handle_time_span stats.solver_final_model_time @@ fun () ->
     match Solver.model_of_path_condition solver ~path_condition with
@@ -318,8 +316,8 @@ let assertion (c : Symbolic_boolean.t) =
   else
     let* thread in
     let solver = solver () in
-    let path_condition = Thread.pc thread in
-    let stats = Thread.bench_stats thread in
+    let path_condition = thread.pc in
+    let stats = thread.bench_stats in
     let* model =
       Benchmark.handle_time_span stats.solver_final_model_time @@ fun () ->
       match Solver.model_of_path_condition solver ~path_condition with
@@ -357,12 +355,12 @@ let ite (c : Symbolic_boolean.t) ~(if_true : Symbolic_value.t)
 
 let depth () =
   let+ thread in
-  Thread.depth thread
+  thread.depth
 
 let assume c instr_counter =
   (* TODO: better prio here *)
   let* thread in
-  let depth = Thread.depth thread in
+  let depth = thread.depth in
   let prio_true = Prio.v ~depth ~instr_counter ~distance_to_unreachable:None in
   let prio_false = Prio.low in
   let* assertion_true =

@@ -99,7 +99,7 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
   in
 
   if Log.is_bench_enabled () then begin
-    let bench_stats = Thread.bench_stats thread in
+    let bench_stats = thread.bench_stats in
     let execution_time_b =
       let time_after = (Unix.times ()).tms_utime in
       time_after -. time_before
