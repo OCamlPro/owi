@@ -1077,7 +1077,7 @@ struct
       if too_big then st @@ Stack.push_i32 stack (I32.of_int ~-1)
       else begin
         let* mem = Env.get_memory env memid in
-        Memory.grow mem I64.(to_int32 delta);
+        let* () = Memory.grow mem I64.(to_int32 delta) in
         let res = I64.(to_int32 @@ (old_size / page_size)) in
         st @@ Stack.push_i32 stack res
       end
@@ -1147,7 +1147,7 @@ struct
       in
       let data = Data.value data in
       let* mem = Env.get_memory env memid in
-      Memory.blit_string mem data ~src ~dst ~len;
+      let* () = Memory.blit_string mem data ~src ~dst ~len in
       st stack
     | Select _t ->
       if Parameters.use_ite_for_select then begin
@@ -1399,7 +1399,6 @@ struct
       in
       let* mem = Env.get_memory env memid in
       let* () = Memory.store_8 mem ~addr:(I32.wrap_i64 addr) n in
-      (* Thread memory ? *)
       st stack
     | I_load (memid, nn, { offset; _ }) ->
       let* mem = Env.get_memory env memid in

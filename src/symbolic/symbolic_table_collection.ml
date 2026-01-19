@@ -32,8 +32,6 @@ let table_of_concrete ~env_id ~id (original : Concrete_table.t) =
 
 module M = struct
   type symbolic = table
-
-  let clone_one = Fun.id
 end
 
 include Collection.Make (M)

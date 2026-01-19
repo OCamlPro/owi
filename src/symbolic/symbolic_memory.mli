@@ -11,6 +11,8 @@ include
      and type i64 := Symbolic_i64.t
      and type 'a choice := 'a Symbolic_choice.t
 
+val replace : t -> unit Symbolic_choice.t
+
 val realloc :
   t -> ptr:Smtml.Expr.t -> size:Smtml.Expr.t -> Smtml.Expr.t Symbolic_choice.t
 

@@ -50,9 +50,6 @@ val open_scope : string -> unit t
 
 val close_scope : unit -> unit t
 
-val replace_memory :
-  env_id:int -> id:int -> Symbolic_memory_collection.memory -> unit t
-
 val run :
      Symbolic_parameters.Exploration_strategy.t
   -> workers:int
@@ -72,5 +69,3 @@ val ite :
   -> Symbolic_value.t t
 
 val depth : unit -> int t
-
-val lift_mem : 'a t -> 'a t

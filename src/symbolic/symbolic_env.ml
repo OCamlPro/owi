@@ -16,8 +16,10 @@ let get_memory (env : t) id : Symbolic_memory.t Symbolic_choice.t =
     match get_memory env id with
     | Error _e -> assert false
     | Ok original ->
-      let symbolic = Symbolic_memory_collection.memory_of_concrete original in
-      let* () = Symbolic_choice.replace_memory ~env_id ~id symbolic in
+      let symbolic =
+        Symbolic_memory_collection.memory_of_concrete ~env_id ~id original
+      in
+      let* () = Symbolic_memory.replace symbolic in
       Symbolic_choice.return symbolic
   end
 

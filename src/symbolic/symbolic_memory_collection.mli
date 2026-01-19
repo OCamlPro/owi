@@ -3,11 +3,13 @@
 (* Written by the Owi programmers *)
 
 type memory =
-  { mutable data : Symbolic_i32.t Map.Make(Int32).t
-  ; mutable chunks : Symbolic_i32.t Map.Make(Int32).t
-  ; mutable size : Symbolic_i32.t
+  { data : Symbolic_i32.t Map.Make(Int32).t
+  ; chunks : Symbolic_i32.t Map.Make(Int32).t
+  ; size : Symbolic_i32.t
+  ; env_id : int
+  ; id : int
   }
 
-val memory_of_concrete : Concrete_memory.t -> memory
+val memory_of_concrete : env_id:int -> id:int -> Concrete_memory.t -> memory
 
 include Collection.S with type symbolic := memory
