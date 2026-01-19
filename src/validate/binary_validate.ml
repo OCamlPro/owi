@@ -64,7 +64,10 @@ module Env = struct
     ; refs : (int, unit) Hashtbl.t
     }
 
-  let type_get = Binary.Module.get_type
+  let type_get i m =
+    match Binary.Module.get_type i m with
+    | None -> Error (`Unknown_type (Text.Raw i))
+    | Some (_, ty) -> Ok ty
 
   let local_get i env =
     match Index.Map.find_opt i env.locals with
@@ -204,8 +207,8 @@ end = struct
     | TypeUse (Text _id), _ | _, TypeUse (Text _id) -> assert false
     | TypeUse (Raw id1), TypeUse (Raw id2) ->
       (* TODO: add subtyping check *)
-      let* pt1, rt1 = Env.func_get id1 modul in
-      let* pt2, rt2 = Env.func_get id2 modul in
+      let* pt1, rt1 = Env.type_get id1 modul in
+      let* pt2, rt2 = Env.type_get id2 modul in
       let res =
         List.compare_lengths pt1 pt2 = 0
         && List.compare_lengths rt1 rt2 = 0
@@ -221,9 +224,9 @@ end = struct
     | None_ht, Any_ht
       when subtype ->
       Ok true
-    | TypeUse (Raw id), Func_ht | Func_ht, TypeUse (Raw id) ->
+    | TypeUse (Raw id), Func_ht ->
       (* TODO: not ideal *)
-      let* pt1, rt1 = Env.func_get id modul in
+      let* pt1, rt1 = Env.type_get id modul in
       if List.is_empty pt1 && List.is_empty rt1 then Ok true else Ok false
     | _ -> Ok false
 
@@ -489,13 +492,10 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
     Stack.push (List.rev_map typ_of_val_type rt) stack
   | Call_ref t ->
     let* stack = Stack.pop_ref stack in
-    begin match Env.type_get t env.modul with
-    | None -> Error (`Unknown_type (Raw t))
-    | Some (_, (pt, rt)) ->
-      let* stack = Stack.pop env.modul (List.rev_map typ_of_pt pt) stack in
-      let* stack = Stack.push (List.rev_map typ_of_val_type rt) stack in
-      Ok stack
-    end
+    let* pt, rt = Env.type_get t env.modul in
+    let* stack = Stack.pop env.modul (List.rev_map typ_of_pt pt) stack in
+    let* stack = Stack.push (List.rev_map typ_of_val_type rt) stack in
+    Ok stack
   | Return_call i ->
     let* pt, rt = Env.func_get i env.modul in
     let* b =
