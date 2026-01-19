@@ -42,6 +42,13 @@ val add_symbol : t -> Smtml.Symbol.t -> t
 
 val add_label : t -> int * string -> t
 
+val replace_memory :
+  t -> env_id:int -> id:int -> Symbolic_memory_collection.memory -> t
+
+val replace_table : t -> env_id:int -> id:int -> Symbolic_table.t -> t
+
+val replace_global : t -> env_id:int -> id:int -> Symbolic_global.t -> t
+
 val open_scope : t -> string -> t
 
 val close_scope : t -> t

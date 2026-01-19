@@ -42,16 +42,18 @@ let copy ~t_src ~t_dst ~src ~dst ~len =
 let convert_ref_values (v : Concrete_ref.t) : Symbolic_ref.t =
   match v with Func f -> Func f | _ -> assert false
 
+let of_concrete (original : Concrete_table.t) =
+  { data = Array.map convert_ref_values original.data
+  ; limits = original.limits
+  ; typ = original.typ
+  }
+
 module M = struct
   type concrete = Concrete_table.t
 
   type symbolic = t
 
-  let convert_one (orig_table : Concrete_table.t) =
-    { data = Array.map convert_ref_values orig_table.data
-    ; limits = orig_table.limits
-    ; typ = orig_table.typ
-    }
+  let convert_one (original : Concrete_table.t) = of_concrete original
 
   (* WARNING: because we are doing an optimization in `Symbolic_choice`, the cloned state should not refer to a mutable value of the previous state. Assuming that the original state is not mutated is wrong. *)
   let clone_one { limits; data; typ } = { typ; limits; data = Array.copy data }

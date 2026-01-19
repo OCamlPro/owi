@@ -48,6 +48,13 @@ val open_scope : string -> unit t
 
 val close_scope : unit -> unit t
 
+val replace_memory :
+  env_id:int -> id:int -> Symbolic_memory_collection.memory -> unit t
+
+val replace_table : env_id:int -> id:int -> Symbolic_table.t -> unit t
+
+val replace_global : env_id:int -> id:int -> Symbolic_global.t -> unit t
+
 val run :
      Symbolic_parameters.Exploration_strategy.t
   -> workers:int

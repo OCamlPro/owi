@@ -11,6 +11,10 @@ module type S = sig
 
   val clone : t -> t
 
+  val get_opt : t -> env_id:int -> id:int -> symbolic option
+
+  val replace : t -> env_id:int -> id:int -> symbolic -> t
+
   val get : int -> concrete -> t -> int -> symbolic
 end
 
@@ -36,6 +40,15 @@ struct
         Hashtbl.add collection' loc memory )
       collection;
     collection'
+
+  let get_opt collection ~env_id ~id =
+    let loc = (env_id, id) in
+    Hashtbl.find_opt collection loc
+
+  let replace collection ~env_id ~id v =
+    let loc = (env_id, id) in
+    Hashtbl.replace collection loc v;
+    collection
 
   let get env_id (original : M.concrete) collection id =
     let loc = (env_id, id) in

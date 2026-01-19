@@ -94,6 +94,23 @@ let close_scope t =
 
 let incr_path_count t = Atomic.incr (bench_stats t).path_count
 
+let replace_memory thread ~env_id ~id memory =
+  let memories = thread.memories in
+  let memories =
+    Symbolic_memory_collection.replace memories ~env_id ~id memory
+  in
+  { thread with memories }
+
+let replace_table thread ~env_id ~id table =
+  let tables = thread.tables in
+  let tables = Symbolic_table.Collection.replace tables ~env_id ~id table in
+  { thread with tables }
+
+let replace_global thread ~env_id ~id global =
+  let globals = thread.globals in
+  let globals = Symbolic_global.Collection.replace globals ~env_id ~id global in
+  { thread with globals }
+
 let clone
   { num_symbols
   ; symbol_scopes
