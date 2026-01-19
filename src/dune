@@ -34,7 +34,6 @@
   cmd_wasm2wat
   cmd_wat2wasm
   cmd_zig
-  collection
   compile
   concrete_boolean
   concrete_choice
@@ -105,16 +104,16 @@
   symbolic_f32
   symbolic_f64
   symbolic_global
-  symbolic_global_collection
+  symbolic_global0
   symbolic_i32
   symbolic_i64
   symbolic_memory
-  symbolic_memory_collection
+  symbolic_memory0
   symbolic_path_condition
   symbolic_parameters
   symbolic_ref
   symbolic_table
-  symbolic_table_collection
+  symbolic_table0
   symbolic_value
   symbolic_v128
   symbolic_wasm_ffi

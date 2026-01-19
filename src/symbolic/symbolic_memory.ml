@@ -1,6 +1,6 @@
 module Map = Map.Make (Int32)
 
-type t = Symbolic_memory_collection.memory =
+type t = Symbolic_memory0.t =
   { data : Symbolic_i32.t Map.t
   ; chunks : Symbolic_i32.t Map.t
   ; size : Symbolic_i32.t
@@ -290,3 +290,13 @@ let blit_string m str ~src ~dst ~len =
   replace { m with data }
 
 let get_limit_max _m = None (* TODO *)
+
+let of_concrete ~env_id ~id (original : Concrete_memory.t) : t =
+  let size = Concrete_memory.size_in_pages original in
+  (* TODO: how come we don't put anything in here? is it always an uninitialized memory ? *)
+  { data = Map.empty
+  ; chunks = Map.empty
+  ; size = Symbolic_i32.of_concrete size
+  ; env_id
+  ; id
+  }
