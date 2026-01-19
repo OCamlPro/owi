@@ -114,6 +114,7 @@
   symbolic_parameters
   symbolic_ref
   symbolic_table
+  symbolic_table_collection
   symbolic_value
   symbolic_v128
   symbolic_wasm_ffi

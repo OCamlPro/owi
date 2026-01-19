@@ -108,9 +108,6 @@ let close_scope () = modify_thread (fun t -> Thread.close_scope t)
 let replace_memory ~env_id ~id v =
   modify_thread (fun thread -> Thread.replace_memory thread ~env_id ~id v)
 
-let replace_table ~env_id ~id v =
-  modify_thread (fun thread -> Thread.replace_table thread ~env_id ~id v)
-
 let with_new_invisible_symbol ty f =
   let* thread in
   let n = thread.num_symbols in

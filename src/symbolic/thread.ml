@@ -7,7 +7,7 @@ type t =
   ; symbol_scopes : Symbol_scope.t
   ; pc : Symbolic_path_condition.t
   ; memories : Symbolic_memory_collection.t
-  ; tables : Symbolic_table.Collection.t
+  ; tables : Symbolic_table_collection.t
   ; globals : Symbolic_global_collection.t
       (** Breadcrumbs represent the list of choices that were made so far. They
           identify one given symbolic execution trace. *)
@@ -36,7 +36,7 @@ let init () =
   let symbol_scopes = Symbol_scope.empty in
   let pc = Symbolic_path_condition.empty in
   let memories = Symbolic_memory_collection.empty in
-  let tables = Symbolic_table.Collection.empty in
+  let tables = Symbolic_table_collection.empty in
   let globals = Symbolic_global_collection.empty in
   let breadcrumbs = [] in
   let labels = [] in
@@ -101,14 +101,20 @@ let replace_memory thread ~env_id ~id memory =
   in
   { thread with memories }
 
-let replace_table thread ~env_id ~id table =
+let replace_table (table : Symbolic_table_collection.table) thread =
   let tables = thread.tables in
-  let tables = Symbolic_table.Collection.replace tables ~env_id ~id table in
+  let tables =
+    Symbolic_table_collection.replace tables ~env_id:table.env_id ~id:table.id
+      table
+  in
   { thread with tables }
 
-let replace_global thread ~env_id ~id global =
+let replace_global (global : Symbolic_global_collection.global) thread =
   let globals = thread.globals in
-  let globals = Symbolic_global_collection.replace globals ~env_id ~id global in
+  let globals =
+    Symbolic_global_collection.replace globals ~env_id:global.env_id
+      ~id:global.id global
+  in
   { thread with globals }
 
 let clone
@@ -125,7 +131,7 @@ let clone
   } =
   (* WARNING: because we are doing an optimization in `Symbolic_choice`, the cloned state should not refer to a mutable value of the previous state. Assuming that the original state is not mutated is wrong. *)
   let memories = Symbolic_memory_collection.clone memories in
-  let tables = Symbolic_table.Collection.clone tables in
+  let tables = Symbolic_table_collection.clone tables in
   let globals = Symbolic_global_collection.clone globals in
   { num_symbols
   ; symbol_scopes

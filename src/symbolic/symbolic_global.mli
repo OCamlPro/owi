@@ -10,4 +10,4 @@ include
      and type t := t
      and type 'a choice := 'a Symbolic_choice.t
 
-val replace : env_id:int -> id:int -> t -> unit Symbolic_choice.t
+val replace : t -> unit Symbolic_choice.t
