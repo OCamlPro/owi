@@ -10,7 +10,7 @@ let get_memory (env : t) id : Symbolic_memory.t Symbolic_choice.t =
   let ( let* ) = Symbolic_choice.( let* ) in
   let env_id = Link_env.id env in
   let* thread = Symbolic_choice.thread in
-  match Symbolic_memory_collection.get_opt thread.memories ~env_id ~id with
+  match Symbolic_memory_collection.find thread.memories ~env_id ~id with
   | Some g -> Symbolic_choice.return g
   | None -> begin
     match get_memory env id with
@@ -25,7 +25,7 @@ let get_table (env : t) id : Symbolic_table.t Symbolic_choice.t =
   let ( let* ) = Symbolic_choice.( let* ) in
   let env_id = Link_env.id env in
   let* thread = Symbolic_choice.thread in
-  match Symbolic_table.Collection.get_opt thread.tables ~env_id ~id with
+  match Symbolic_table.Collection.find thread.tables ~env_id ~id with
   | Some g -> Symbolic_choice.return g
   | None -> begin
     match get_table env id with
@@ -45,7 +45,7 @@ let get_global (env : t) id : Symbolic_global.t Symbolic_choice.t =
   let ( let* ) = Symbolic_choice.( let* ) in
   let env_id = Link_env.id env in
   let* thread = Symbolic_choice.thread in
-  match Symbolic_global.Collection.get_opt thread.globals ~env_id ~id with
+  match Symbolic_global.Collection.find thread.globals ~env_id ~id with
   | Some g -> Symbolic_choice.return g
   | None -> begin
     match get_global env id with

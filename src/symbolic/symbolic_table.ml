@@ -49,11 +49,7 @@ let of_concrete (original : Concrete_table.t) =
   }
 
 module M = struct
-  type concrete = Concrete_table.t
-
   type symbolic = t
-
-  let convert_one (original : Concrete_table.t) = of_concrete original
 
   (* WARNING: because we are doing an optimization in `Symbolic_choice`, the cloned state should not refer to a mutable value of the previous state. Assuming that the original state is not mutated is wrong. *)
   let clone_one { limits; data; typ } = { typ; limits; data = Array.copy data }

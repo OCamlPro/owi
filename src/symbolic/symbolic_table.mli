@@ -9,5 +9,4 @@ include Table_intf.T with type reference := Symbolic_ref.t and type t := t
 
 val of_concrete : Concrete_table.t -> t
 
-module Collection :
-  Collection.S with type concrete := Concrete_table.t and type symbolic := t
+module Collection : Collection.S with type symbolic := t

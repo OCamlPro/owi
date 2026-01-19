@@ -10,7 +10,4 @@ type memory =
 
 val memory_of_concrete : Concrete_memory.t -> memory
 
-include
-  Collection.S
-    with type concrete := Concrete_memory.t
-     and type symbolic := memory
+include Collection.S with type symbolic := memory
