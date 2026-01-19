@@ -2,7 +2,20 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type t
+type t = private
+  { num_symbols : int
+  ; symbol_scopes : Symbol_scope.t
+  ; pc : Symbolic_path_condition.t
+  ; memories : Symbolic_memory_collection.t
+  ; tables : Symbolic_table.Collection.t
+  ; globals : Symbolic_global.Collection.t
+      (** Breadcrumbs represent the list of choices that were made so far. They
+          identify one given symbolic execution trace. *)
+  ; breadcrumbs : int list
+  ; depth : int
+  ; labels : (int * string) list
+  ; bench_stats : Benchmark.stats
+  }
 
 val init : unit -> t
 
@@ -18,26 +31,6 @@ val create :
   -> Benchmark.stats
   -> depth:int
   -> t
-
-val pc : t -> Symbolic_path_condition.t
-
-val memories : t -> Symbolic_memory_collection.t
-
-val tables : t -> Symbolic_table.Collection.t
-
-val globals : t -> Symbolic_global.Collection.t
-
-val breadcrumbs : t -> int list
-
-val depth : t -> int
-
-val symbol_scopes : t -> Symbol_scope.t
-
-val num_symbols : t -> int
-
-val labels : t -> (int * string) list
-
-val bench_stats : t -> Benchmark.stats
 
 val clone : t -> t
 
