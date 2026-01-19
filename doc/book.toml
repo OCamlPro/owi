@@ -1,7 +1,6 @@
 [book]
 authors = ["zapashcanon"]
 language = "en"
-multilingual = false
 src = "src"
 title = "Owi"
 
