@@ -6,5 +6,7 @@ type t
 
 include Global_intf.T with type value := Symbolic_value.t and type t := t
 
+val of_concrete : Concrete_global.t -> t
+
 module Collection :
   Collection.S with type concrete := Concrete_global.t and type symbolic := t

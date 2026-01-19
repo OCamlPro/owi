@@ -8,6 +8,8 @@ type memory =
   ; mutable size : Symbolic_i32.t
   }
 
+val memory_of_concrete : Concrete_memory.t -> memory
+
 include
   Collection.S
     with type concrete := Concrete_memory.t

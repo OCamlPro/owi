@@ -20,14 +20,16 @@ let convert_values (v : Concrete_value.t) : Symbolic_value.t =
   | Ref (Func f) -> Ref (Func f)
   | Ref _ -> assert false
 
+let of_concrete (v : Concrete_global.t) : t =
+  let value = convert_values v.Concrete_global.value in
+  { value }
+
 module M = struct
   type concrete = Concrete_global.t
 
   type symbolic = t
 
-  let convert_one original =
-    let value = convert_values original.Concrete_global.value in
-    { value }
+  let convert_one original = of_concrete original
 
   (* WARNING: because we are doing an optimization in `Symbolic_choice`, the cloned state should not refer to a mutable value of the previous state. Assuming that the original state is not mutated is wrong. *)
   let clone_one r = { value = r.value }
