@@ -32,4 +32,9 @@ unsigned long long int strtoull(const char *nptr, char **endptr, int base);
 
 void qsort(void *base, size_t nmemb, size_t size, int (*compar)(const void *, const void *));
 
+#ifndef __FRAMAC__
+// TODO: shout be provided by compiler-rt
+__int128 __multi3(__int128, __int128);
+#endif
+
 #endif
