@@ -96,5 +96,6 @@ FILE *open_memstream(char **ptr, size_t *sizeloc);
 void setbuf(FILE *stream, char *buf);
 int fseek(FILE *stream, long offset, int whence);
 int fgetc(FILE *stream);
+int fputs_unlocked(const char *s, FILE *stream);
 
 #endif
