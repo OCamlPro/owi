@@ -1,5 +1,9 @@
 #include <owi.h>
 
+/* =============
+ * basic symbols
+ * ============= */
+
 _Bool __VERIFIER_nondet_bool(void) { return owi_bool(); }
 
 char __VERIFIER_nondet_char(void) { return owi_char(); }
@@ -18,11 +22,6 @@ __int128 __VERIFIER_nondet_int128(void) { return owi_int128(); }
 
 unsigned __int128 __VERIFIER_nondet_uint128(void) { return owi_uint128(); }
 
-unsigned int __VERIFIER_nondet_charp(void) {
-  // TODO: that could probably be improved
-  return owi_unsigned_long();
-}
-
 long __VERIFIER_nondet_long(void) { return owi_long(); }
 
 unsigned long __VERIFIER_nondet_ulong(void) { return owi_unsigned_long(); }
@@ -36,3 +35,19 @@ unsigned long long __VERIFIER_nondet_ulonglong(void) {
 float __VERIFIER_nondet_float(void) { return owi_float(); }
 
 double __VERIFIER_nondet_double(void) { return owi_double(); }
+
+/* ====================
+ * memory related stuff
+ * ==================== */
+
+unsigned int __VERIFIER_nondet_charp(void) {
+  // this should return a pointer that can alias to anything
+  return __VERIFIER_nondet_uint();
+}
+
+void __VERIFIER_nondet_memory(void *mem, size_t size) {
+  unsigned char *p = mem;
+  for (size_t i = 0; i < size; i++) {
+    p[i] = __VERIFIER_nondet_uchar();
+  }
+}
