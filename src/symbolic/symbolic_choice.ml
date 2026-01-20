@@ -14,7 +14,7 @@ let solver_dls_key =
     | None -> assert false
     | Some solver_to_use -> Solver.fresh solver_to_use () )
 
-(* The core implementation of the monad. It is isolated in a module to restict its exposed interface and maintain its invariant. In particular, choose must guarantee that the Thread.t is cloned in each branch. Using functions defined here should be foolproof. *)
+(* The core implementation of the monad. It is isolated in a module to restict its exposed interface and maintain its invariant. Using functions defined here should be foolproof. *)
 type 'a t = ('a, Thread.t) Eval_monad.t
 
 (*
@@ -48,15 +48,7 @@ let set_thread st = modify_thread (Fun.const st)
 
 let solver () = Domain.DLS.get solver_dls_key
 
-let choose a b =
-  (* Here we are doing an optimization: we can clone only one of the two thread because the clone should not have a dependency on the previous state, it is thus safe to re-use it for the other thread. We choose to clone `b` rather than `a` because `a` is likely to be the first one executed. *)
-  let* thread in
-  let new_thread = Thread.clone thread in
-  let b =
-    let* () = modify_thread (fun (_ : Thread.t) -> new_thread) in
-    b
-  in
-  State_monad.liftF2 Scheduler.Schedulable.choose a b
+let choose a b = State_monad.liftF2 Scheduler.Schedulable.choose a b
 
 let yield prio = lift_schedulable @@ Scheduler.Schedulable.yield prio
 
