@@ -92,4 +92,9 @@ FILE *popen(const char *command, const char *type);
 int pclose(FILE *stream);
 
 FILE *open_memstream(char **ptr, size_t *sizeloc);
+
+void setbuf(FILE *stream, char *buf);
+int fseek(FILE *stream, long offset, int whence);
+int fgetc(FILE *stream);
+
 #endif

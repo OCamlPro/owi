@@ -11,17 +11,14 @@
 #define ldbltype double
 #endif
 
-__attribute__((import_module("owi"), import_name("abort"))) void owi_abort(void);
+__attribute__((import_module("owi"), import_name("abort"))) void
+owi_abort(void);
 
-void abort(void) {
-  owi_abort();
-}
+void abort(void) { owi_abort(); }
 
 __attribute__((import_module("owi"), import_name("exit"))) void owi_exit(int);
 
-void exit(int n) {
-  owi_exit(n);
-}
+void exit(int n) { owi_exit(n); }
 
 extern unsigned char __heap_base;
 unsigned int bump_pointer = &__heap_base;
@@ -29,32 +26,31 @@ unsigned int bump_pointer = &__heap_base;
 void *malloc(size_t size) {
   if (size == 0) {
     // TODO: this could also be a proper *unique* pointer
-    // that is, calling malloc(0) two times, and freeing the two pointers should not lead to a double free
-    // see issue# 602 and the test added in #604 whose result should change once this is added
+    // that is, calling malloc(0) two times, and freeing the two pointers should
+    // not lead to a double free see issue# 602 and the test added in #604 whose
+    // result should change once this is added
     return NULL;
   }
   unsigned int start = bump_pointer;
-  unsigned int closest_pow2 = 1 << (sizeof(size_t)*8 - (__builtin_clz(size) + 1));
+  unsigned int closest_pow2 =
+      1 << (sizeof(size_t) * 8 - (__builtin_clz(size) + 1));
   unsigned int align = (closest_pow2 <= 16) ? closest_pow2 : 16;
   unsigned int off_align = bump_pointer % align;
 
-  if ( off_align != 0 ) {
+  if (off_align != 0) {
     start += (align - off_align);
   }
   bump_pointer = size + start;
   return (void *)owi_malloc(start, size);
 }
 
-void free(void *ptr) {
-  (void) owi_free(ptr);
-}
+void free(void *ptr) { (void)owi_free(ptr); }
 
 void *realloc(void *ptr, size_t size) {
   // TODO: fix
-  (void) free(ptr);
+  (void)free(ptr);
   return (void *)owi_malloc(ptr, size);
 }
-
 
 void *alloca(size_t size) { return malloc(size); }
 
@@ -421,3 +417,5 @@ int posix_memalign(void **memptr, size_t alignment, size_t size) { return 0; }
 
 // TODO: OWI external
 char getchar(void) { return ' '; }
+
+__int128 __multi3(__int128 a, __int128 b) { return a * b; }
