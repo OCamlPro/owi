@@ -262,14 +262,14 @@
   }
 
 let empty_stats () =
-  <span data-count="406">{</span> solver_sat_time = Atomic.mak<span data-count="406">e</span> Mtime.Span.min_span
-  ; solver_final_model_time = Atomic.mak<span data-count="406">e</span> Mtime.Span.min_span
-  ; solver_intermediate_model_time = Atomic.mak<span data-count="406">e</span> Mtime.Span.min_span
-  ; path_count = Atomic.mak<span data-count="406">e</span> 1
+  <span data-count="412">{</span> solver_sat_time = Atomic.mak<span data-count="412">e</span> Mtime.Span.min_span
+  ; solver_final_model_time = Atomic.mak<span data-count="412">e</span> Mtime.Span.min_span
+  ; solver_intermediate_model_time = Atomic.mak<span data-count="412">e</span> Mtime.Span.min_span
+  ; path_count = Atomic.mak<span data-count="412">e</span> 1
   }
 
 let handle_time_span atomic_span f =
-  <span data-count="27399">i</span>f Log.is_bench_enabled () then
+  <span data-count="27775">i</span>f Log.is_bench_enabled () then
     <span data-count="8">l</span>et counter = Mtime_clock.counter () in
     (* f is supposed to take a long time! *)
     <span data-count="8">l</span>et res = f () in
@@ -282,15 +282,15 @@ let handle_time_span atomic_span f =
       <span data-count="8">i</span>f success then <span data-count="8">r</span>es else <span data-count="0">a</span>tomic_set ()
     in
     atomic_set ()
-  else <span data-count="27391">f</span> ()
+  else <span data-count="27767">f</span> ()
 
 let with_utime f =
-  <span data-count="432">i</span>f Log.is_bench_enabled () then
+  <span data-count="438">i</span>f Log.is_bench_enabled () then
     <span data-count="2">l</span>et before = (Unix.time<span data-count="2">s</span> ()).tms_utime in
     let r = f () in
     <span data-count="2">l</span>et after = (Unix.time<span data-count="2">s</span> ()).tms_utime in
     (r, Some (after -. before))
-  else <span data-count="430">(</span><span data-count="426">f</span> (), None)
+  else <span data-count="436">(</span><span data-count="432">f</span> (), None)
 
 let percentage ~whole ~self =
   <span data-count="12">l</span>et whole = Mtime.Span.to_float_ns whole in

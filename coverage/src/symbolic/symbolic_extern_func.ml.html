@@ -27,8 +27,6 @@
 <a id="L3"></a><span > </span>
 <a id="L4"></a><span > </span>
 <a id="L5"></a><span > </span>
-<a id="L6"></a><span > </span>
-<a id="L7"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -38,16 +36,12 @@
 <a href="#L3">3</a>
 <a href="#L4">4</a>
 <a href="#L5">5</a>
-<a href="#L6">6</a>
-<a href="#L7">7</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-include
-  Extern.Func.Make (Symbolic_value) (Symbolic_choice_with_memory)
-    (Symbolic_memory)
+include Extern.Func.Make (Symbolic_value) (Symbolic_choice) (Symbolic_memory)
 </code></pre>
       </div>
     </div>

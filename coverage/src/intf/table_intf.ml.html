@@ -44,6 +44,13 @@
 <a id="L20"></a><span > </span>
 <a id="L21"></a><span > </span>
 <a id="L22"></a><span > </span>
+<a id="L23"></a><span > </span>
+<a id="L24"></a><span > </span>
+<a id="L25"></a><span > </span>
+<a id="L26"></a><span > </span>
+<a id="L27"></a><span > </span>
+<a id="L28"></a><span > </span>
+<a id="L29"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -70,15 +77,24 @@
 <a href="#L20">20</a>
 <a href="#L21">21</a>
 <a href="#L22">22</a>
+<a href="#L23">23</a>
+<a href="#L24">24</a>
+<a href="#L25">25</a>
+<a href="#L26">26</a>
+<a href="#L27">27</a>
+<a href="#L28">28</a>
+<a href="#L29">29</a>
 </pre>
 <pre><code class="ocaml">module type T = sig
   type reference
+
+  type 'a choice
 
   type t
 
   val get : t -&gt; int -&gt; reference
 
-  val set : t -&gt; int -&gt; reference -&gt; unit
+  val set : t -&gt; int -&gt; reference -&gt; unit choice
 
   val size : t -&gt; int
 
@@ -86,12 +102,17 @@
 
   val max_size : t -&gt; int option
 
-  val grow : t -&gt; Int32.t -&gt; reference -&gt; unit
+  val grow : t -&gt; Int32.t -&gt; reference -&gt; unit choice
 
-  val fill : t -&gt; Int32.t -&gt; Int32.t -&gt; reference -&gt; unit
+  val fill : t -&gt; Int32.t -&gt; Int32.t -&gt; reference -&gt; unit choice
 
   val copy :
-    t_src:t -&gt; t_dst:t -&gt; src:Int32.t -&gt; dst:Int32.t -&gt; len:Int32.t -&gt; unit
+       t_src:t
+    -&gt; t_dst:t
+    -&gt; src:Int32.t
+    -&gt; dst:Int32.t
+    -&gt; len:Int32.t
+    -&gt; unit choice
 end
 </code></pre>
       </div>

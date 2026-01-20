@@ -587,12 +587,12 @@ let default_symbol_of_t m =
 
 let set_entry_point entry_point invoke_with_symbols (m : Binary.Module.t) =
   (* We are checking if there's a start function *)
-  <span data-count="414">i</span>f Option.is_some m.start then
-    <span data-count="192">i</span>f Option.is_some entry_point then
+  <span data-count="420">i</span>f Option.is_some m.start then
+    <span data-count="198">i</span>f Option.is_some entry_point then
       <span data-count="0">F</span>mt.error_msg
         "We don't know how to handle a custom entry point when there is a \
          start function for now. Please open a bug report."
-    else <span data-count="192">O</span>k m
+    else <span data-count="198">O</span>k m
   else
     <span data-count="222">l</span>et m, default_symbol_of_t = default_symbol_of_t m in
     (* If there is none and we have an entry point passed in argument we search for it *)
@@ -639,11 +639,11 @@ let set_entry_point entry_point invoke_with_symbols (m : Binary.Module.t) =
 
 (* Installed files  *)
 
-let c_files_location = List.ma<span data-count="746">p</span> Fpath.v Share.Sites.c_files
+let c_files_location = List.ma<span data-count="751">p</span> Fpath.v Share.Sites.c_files
 
-let rust_files_location = List.ma<span data-count="746">p</span> Fpath.v Share.Sites.rust_files
+let rust_files_location = List.ma<span data-count="751">p</span> Fpath.v Share.Sites.rust_files
 
-let zig_files_location = List.ma<span data-count="746">p</span> Fpath.v Share.Sites.zig_files
+let zig_files_location = List.ma<span data-count="751">p</span> Fpath.v Share.Sites.zig_files
 
 let find location file : Fpath.t Result.t =
   <span data-count="424">l</span>et* l =

@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>concrete_choice.ml &mdash; Coverage report</title>
-    <meta name="description" content="68.75% coverage in src/concrete/concrete_choice.ml">
+    <meta name="description" content="70.59% coverage in src/concrete/concrete_choice.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,13 +15,13 @@
           <span class="dirname">src/concrete/</span>concrete_choice.ml
         </a>
       </h1>
-      <h2>68.75%</h2>
+      <h2>70.59%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="bottom:34.29%"></span>
-      <span class="unvisited" style="bottom:28.57%"></span>
-      <span class="unvisited" style="bottom:20.00%"></span>
-      <span class="unvisited" style="bottom:11.43%"></span>
+      <span class="unvisited" style="bottom:39.47%"></span>
+      <span class="unvisited" style="bottom:34.21%"></span>
+      <span class="unvisited" style="bottom:15.79%"></span>
+      <span class="unvisited" style="bottom:7.89%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -53,14 +53,17 @@
 <a id="L25"></a><span class="unvisited"> </span>
 <a id="L26"></a><span > </span>
 <a id="L27"></a><span > </span>
-<a id="L28"></a><span class="unvisited"> </span>
-<a id="L29"></a><span > </span>
+<a id="L28"></a><span > </span>
+<a id="L29"></a><span class="visited"> </span>
 <a id="L30"></a><span > </span>
-<a id="L31"></a><span class="unvisited"> </span>
-<a id="L32"></a><span > </span>
+<a id="L31"></a><span > </span>
+<a id="L32"></a><span class="unvisited"> </span>
 <a id="L33"></a><span > </span>
-<a id="L34"></a><span class="visited"> </span>
-<a id="L35"></a><span > </span>
+<a id="L34"></a><span > </span>
+<a id="L35"></a><span class="unvisited"> </span>
+<a id="L36"></a><span > </span>
+<a id="L37"></a><span > </span>
+<a id="L38"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -100,6 +103,9 @@
 <a href="#L33">33</a>
 <a href="#L34">34</a>
 <a href="#L35">35</a>
+<a href="#L36">36</a>
+<a href="#L37">37</a>
+<a href="#L38">38</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -107,35 +113,38 @@
 
 type 'a t = 'a Result.t
 
-let return x = <span data-count="191617809">O</span>k x [@@inline]
+let[@inline] return x = <span data-count="190257559">O</span>k x
 
-let bind x f = <span data-count="200953464">R</span>esult.bind x f [@@inline]
+let[@inline] bind x f = <span data-count="209814646">R</span>esult.bind x f
 
-let ( let* ) x f = <span data-count="200953464">b</span>ind x f [@@inline]
+let[@inline] ( let* ) x f = <span data-count="209814646">b</span>ind x f
 
-let map v f = <span data-count="6738435">R</span>esult.map f v [@@inline]
+let[@inline] map v f = <span data-count="6738404">R</span>esult.map f v
 
-let ( let+ ) v f = <span data-count="6738435">m</span>ap v f [@@inline]
+let[@inline] ( let+ ) v f = <span data-count="6738404">m</span>ap v f
 
-let select b ~prio_true:_ ~prio_false:_ = <span data-count="9789849">O</span>k b [@@inline]
+let[@inline] select b ~prio_true:_ ~prio_false:_ = <span data-count="9789849">O</span>k b
 
-let select_i32 i = <span data-count="804747">O</span>k i [@@inline]
+let[@inline] select_i32 i = <span data-count="804747">O</span>k i
 
-let trap t = <span data-count="2709">E</span>rror t
+let[@inline] trap t = <span data-count="2709">E</span>rror t
 
-let run m = <span data-count="0">m</span>
+let[@inline] run m = <span data-count="0">m</span>
 
-let get_pc () = <span data-count="0">r</span>eturn Smtml.Expr.Set.empty
+let[@inline] get_pc () = <span data-count="0">r</span>eturn Smtml.Expr.Set.empty
 
-let assume v =
+let[@inline] depth () =
+  (* TODO: maybe implement it at some point, it is only used in symbolic mode for exploration priority so we use 0 here for now *)
+  <span data-count="8057637">O</span>k 0
+
+let[@inline] assume v _instr_counter =
   <span data-count="0">i</span>f v then <span data-count="0">O</span>k ()
   else
     (* TODO: there could be a dedicated error here? *)
     <span data-count="0">a</span>ssert false
 
-let ite cond ~if_true ~if_false =
+let[@inline] ite cond ~if_true ~if_false =
   <span data-count="239">i</span>f cond then <span data-count="122">r</span>eturn if_true else <span data-count="117">r</span>eturn if_false
-[@@inline]
 </code></pre>
       </div>
     </div>

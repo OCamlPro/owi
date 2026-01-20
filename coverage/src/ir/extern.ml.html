@@ -753,35 +753,35 @@
     type extern_func = Extern_func : 'a func_type * 'a -&gt; extern_func
 
     let elt_type (type t) (e : t telt) : Text.val_type =
-      <span data-count="15659">m</span>atch e with
-      | <span data-count="12978">I</span>32 -&gt; Num_type I32
-      | <span data-count="587">I</span>64 -&gt; Num_type I64
-      | <span data-count="753">F</span>32 -&gt; Num_type F32
-      | <span data-count="922">F</span>64 -&gt; Num_type F64
-      | <span data-count="416">V</span>128 -&gt; Num_type V128
+      <span data-count="15857">m</span>atch e with
+      | <span data-count="13152">I</span>32 -&gt; Num_type I32
+      | <span data-count="593">I</span>64 -&gt; Num_type I64
+      | <span data-count="759">F</span>32 -&gt; Num_type F32
+      | <span data-count="928">F</span>64 -&gt; Num_type F64
+      | <span data-count="422">V</span>128 -&gt; Num_type V128
       | <span data-count="3">E</span>xternref _ -&gt; Ref_type (Null, Extern_ht)
 
     let res_type (type t) (r : t rtype) : Text.result_type =
-      <span data-count="10977">m</span>atch r with
-      | <span data-count="5260">R</span>0 -&gt; []
-      | <span data-count="5717">R</span>1 a -&gt; [ elt_typ<span data-count="5717">e</span> a ]
+      <span data-count="11109">m</span>atch r with
+      | <span data-count="5314">R</span>0 -&gt; []
+      | <span data-count="5795">R</span>1 a -&gt; [ elt_typ<span data-count="5795">e</span> a ]
       | <span data-count="0">R</span>2 (a, b) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b ]
       | <span data-count="0">R</span>3 (a, b, c) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b; elt_typ<span data-count="0">e</span> c ]
       | <span data-count="0">R</span>4 (a, b, c, d) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b; elt_typ<span data-count="0">e</span> c; elt_typ<span data-count="0">e</span> d ]
 
     let rec arg_type : type t r. (t, r) atype -&gt; Text.param_type = function
-      | <span data-count="1665">M</span>em (_, tl) -&gt; arg_type tl
-      | <span data-count="4238">U</span>Arg tl -&gt; arg_type tl
-      | <span data-count="9942">A</span>rg (hd, tl) -&gt; (None, elt_typ<span data-count="9942">e</span> hd) :: arg_typ<span data-count="9942">e</span> tl
+      | <span data-count="1689">M</span>em (_, tl) -&gt; arg_type tl
+      | <span data-count="4292">U</span>Arg tl -&gt; arg_type tl
+      | <span data-count="10062">A</span>rg (hd, tl) -&gt; (None, elt_typ<span data-count="10062">e</span> hd) :: arg_typ<span data-count="10062">e</span> tl
       | <span data-count="0">N</span>Arg (name, hd, tl) -&gt; (Some name, elt_typ<span data-count="0">e</span> hd) :: arg_typ<span data-count="0">e</span> tl
-      | <span data-count="10977">R</span>es -&gt; []
+      | <span data-count="11109">R</span>es -&gt; []
 
     (* TODO: we could move this out, as it does not really depend on the functor's parameters *)
     let extern_type (Extern_func (Func (arg, res), _)) : Text.func_type =
-      <span data-count="10977">(</span>arg_typ<span data-count="10977">e</span> arg, res_typ<span data-count="10977">e</span> res)
+      <span data-count="11109">(</span>arg_typ<span data-count="11109">e</span> arg, res_typ<span data-count="11109">e</span> res)
 
     let fresh =
-      let r = ref ~<span data-count="1492">-</span>1 in
+      let r = ref ~<span data-count="1502">-</span>1 in
       fun () -&gt;
         <span data-count="0">i</span>ncr r;
         <span data-count="0">!</span>r
@@ -801,11 +801,11 @@
         | Elt : 'a telt -&gt; (lr, elt, 'a) t
         | Elt_labeled : string * 'a telt -&gt; (l, string * elt, 'a) t
 
-      let return r = <span data-count="36665">F</span>unc (Res, r)
+      let return r = <span data-count="36910">F</span>unc (Res, r)
 
-      let r0 = R0 |&gt; retur<span data-count="1492">n</span>
+      let r0 = R0 |&gt; retur<span data-count="1502">n</span>
 
-      let r1 (Elt a) = <span data-count="35173">R</span>1 a |&gt; return
+      let r1 (Elt a) = <span data-count="35408">R</span>1 a |&gt; return
 
       let r2 (Elt a) (Elt b) = <span data-count="0">R</span>2 (a, b) |&gt; return
 
@@ -827,22 +827,22 @@
 
       let unit = Unit
 
-      let memory id = <span data-count="3025">M</span>emory id
+      let memory id = <span data-count="3045">M</span>emory id
 
       let label s (Elt v) = <span data-count="0">E</span>lt_labeled (s, v)
 
       let ( ^-&gt; ) : type lr k a b.
         (lr, k, a) t -&gt; b func_type -&gt; (a -&gt; b) func_type =
        fun a (Func (b, r)) -&gt;
-        <span data-count="103987">m</span>atch a with
-        | <span data-count="89689">E</span>lt a -&gt; Func (Arg (a, b), r)
+        <span data-count="104682">m</span>atch a with
+        | <span data-count="90289">E</span>lt a -&gt; Func (Arg (a, b), r)
         | <span data-count="0">E</span>lt_labeled (label, a) -&gt; Func (NArg (label, a, b), r)
-        | <span data-count="11273">U</span>nit -&gt; Func (UArg b, r)
-        | <span data-count="3025">M</span>emory id -&gt; Func (Mem (id, b), r)
+        | <span data-count="11348">U</span>nit -&gt; Func (UArg b, r)
+        | <span data-count="3045">M</span>emory id -&gt; Func (Mem (id, b), r)
 
       let ( ^-&gt;. ) : type ll k kk a b.
         (ll, k, a) t -&gt; (lr, kk, b) t -&gt; (a -&gt; b m) func_type =
-       fun a b -&gt; <span data-count="50195">m</span>atch b with <span data-count="35173">E</span>lt _ -&gt; a ^-&gt; r<span data-count="35173">1</span> b | <span data-count="15022">U</span>nit -&gt; a ^-&gt; r0
+       fun a b -&gt; <span data-count="50530">m</span>atch b with <span data-count="35408">E</span>lt _ -&gt; a ^-&gt; r<span data-count="35408">1</span> b | <span data-count="15122">U</span>nit -&gt; a ^-&gt; r0
 
       let ( ^-&gt;.. ) : type ll k a b1 b2.
            (ll, k, a) t

@@ -281,11 +281,11 @@ open Smtml.Expr
 
 let ty = Smtml.Ty.Ty_bitv 64
 
-let of_concrete (i : Int64.t) : t = <span data-count="1343842">v</span>alue (Bitv (Smtml.Bitvector.of_int6<span data-count="1343830">4</span> i))
+let of_concrete (i : Int64.t) : t = <span data-count="1343893">v</span>alue (Bitv (Smtml.Bitvector.of_int6<span data-count="1343892">4</span> i))
 
 let of_int (i : int) : t = <span data-count="202">o</span>f_concrete (Int64.of_in<span data-count="202">t</span> i)
 
-let zero = of_concret<span data-count="746">e</span> 0L
+let zero = of_concret<span data-count="751">e</span> 0L
 
 let clz e = <span data-count="1">u</span>nop ty Clz e
 
@@ -293,7 +293,7 @@ let ctz e = <span data-count="0">u</span>nop ty Ctz e
 
 let popcnt e = <span data-count="0">u</span>nop ty Popcnt e
 
-let add e1 e2 = <span data-count="2144299">b</span>inop ty Add e1 e2
+let add e1 e2 = <span data-count="2144621">b</span>inop ty Add e1 e2
 
 let sub e1 e2 = <span data-count="6">b</span>inop ty Sub e1 e2
 
@@ -327,7 +327,7 @@ let rotr e1 e2 = <span data-count="1">b</span>inop ty Rotr e1 e2
 let eq_concrete (e : t) (c : Int64.t) =
   <span data-count="17">r</span>elop Ty_bool Eq e (of_concret<span data-count="17">e</span> c) |&gt; <span data-count="17">S</span>ymbolic_boolean.of_expr
 
-let eq e1 e2 = <span data-count="55">r</span>elop Ty_bool Eq e1 e2 |&gt; <span data-count="55">S</span>ymbolic_boolean.of_expr
+let eq e1 e2 = <span data-count="61">r</span>elop Ty_bool Eq e1 e2 |&gt; <span data-count="61">S</span>ymbolic_boolean.of_expr
 
 let ne e1 e2 = <span data-count="1">r</span>elop Ty_bool Ne e1 e2 |&gt; <span data-count="1">S</span>ymbolic_boolean.of_expr
 
@@ -335,7 +335,7 @@ let lt e1 e2 = <span data-count="4">r</span>elop ty Lt e1 e2 |&gt; <span data-co
 
 let gt e1 e2 = <span data-count="3">r</span>elop ty Gt e1 e2 |&gt; <span data-count="3">S</span>ymbolic_boolean.of_expr
 
-let lt_u e1 e2 = <span data-count="1071787">r</span>elop ty LtU e1 e2 |&gt; <span data-count="1071783">S</span>ymbolic_boolean.of_expr
+let lt_u e1 e2 = <span data-count="1071944">r</span>elop ty LtU e1 e2 |&gt; <span data-count="1071943">S</span>ymbolic_boolean.of_expr
 
 let gt_u e1 e2 = <span data-count="741">r</span>elop ty GtU e1 e2 |&gt; <span data-count="741">S</span>ymbolic_boolean.of_expr
 
@@ -391,7 +391,7 @@ let extend_s n x =
 
 let extend_i32_s x = <span data-count="32">c</span>vtop ty (Sign_extend 32) x
 
-let extend_i32_u x = <span data-count="3297963">c</span>vtop ty (Zero_extend 32) x
+let extend_i32_u x = <span data-count="3298502">c</span>vtop ty (Zero_extend 32) x
 
 let pp = pp
 </code></pre>

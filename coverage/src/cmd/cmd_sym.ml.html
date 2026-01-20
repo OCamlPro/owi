@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>cmd_sym.ml &mdash; Coverage report</title>
-    <meta name="description" content="96.00% coverage in src/cmd/cmd_sym.ml">
+    <meta name="description" content="100.00% coverage in src/cmd/cmd_sym.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,10 +15,9 @@
           <span class="dirname">src/cmd/</span>cmd_sym.ml
         </a>
       </h1>
-      <h2>96.00%</h2>
+      <h2>100.00%</h2>
     </div>
     <div id="navbar">
-      <span class="some-visited" style="top:22.35%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -40,12 +39,12 @@
 <a id="L15"></a><span > </span>
 <a id="L16"></a><span > </span>
 <a id="L17"></a><span class="visited"> </span>
-<a id="L18"></a><span class="visited"> </span>
-<a id="L19"></a><span class="some-visited"> </span>
-<a id="L20"></a><span class="visited"> </span>
-<a id="L21"></a><span class="visited"> </span>
-<a id="L22"></a><span class="visited"> </span>
-<a id="L23"></a><span > </span>
+<a id="L18"></a><span > </span>
+<a id="L19"></a><span > </span>
+<a id="L20"></a><span > </span>
+<a id="L21"></a><span > </span>
+<a id="L22"></a><span > </span>
+<a id="L23"></a><span class="visited"> </span>
 <a id="L24"></a><span class="visited"> </span>
 <a id="L25"></a><span > </span>
 <a id="L26"></a><span class="visited"> </span>
@@ -56,27 +55,27 @@
 <a id="L31"></a><span > </span>
 <a id="L32"></a><span class="visited"> </span>
 <a id="L33"></a><span > </span>
-<a id="L34"></a><span > </span>
-<a id="L35"></a><span class="visited"> </span>
-<a id="L36"></a><span class="visited"> </span>
-<a id="L37"></a><span > </span>
-<a id="L38"></a><span > </span>
+<a id="L34"></a><span class="visited"> </span>
+<a id="L35"></a><span > </span>
+<a id="L36"></a><span > </span>
+<a id="L37"></a><span class="visited"> </span>
+<a id="L38"></a><span class="visited"> </span>
 <a id="L39"></a><span > </span>
 <a id="L40"></a><span > </span>
 <a id="L41"></a><span > </span>
 <a id="L42"></a><span > </span>
 <a id="L43"></a><span > </span>
 <a id="L44"></a><span > </span>
-<a id="L45"></a><span class="visited"> </span>
+<a id="L45"></a><span > </span>
 <a id="L46"></a><span > </span>
-<a id="L47"></a><span > </span>
+<a id="L47"></a><span class="visited"> </span>
 <a id="L48"></a><span > </span>
 <a id="L49"></a><span > </span>
 <a id="L50"></a><span > </span>
 <a id="L51"></a><span > </span>
-<a id="L52"></a><span class="visited"> </span>
+<a id="L52"></a><span > </span>
 <a id="L53"></a><span > </span>
-<a id="L54"></a><span > </span>
+<a id="L54"></a><span class="visited"> </span>
 <a id="L55"></a><span > </span>
 <a id="L56"></a><span > </span>
 <a id="L57"></a><span > </span>
@@ -92,22 +91,24 @@
 <a id="L67"></a><span > </span>
 <a id="L68"></a><span > </span>
 <a id="L69"></a><span > </span>
-<a id="L70"></a><span class="visited"> </span>
+<a id="L70"></a><span > </span>
 <a id="L71"></a><span > </span>
-<a id="L72"></a><span > </span>
+<a id="L72"></a><span class="visited"> </span>
 <a id="L73"></a><span > </span>
 <a id="L74"></a><span > </span>
 <a id="L75"></a><span > </span>
-<a id="L76"></a><span class="visited"> </span>
-<a id="L77"></a><span class="visited"> </span>
-<a id="L78"></a><span > </span>
-<a id="L79"></a><span > </span>
-<a id="L80"></a><span class="visited"> </span>
+<a id="L76"></a><span > </span>
+<a id="L77"></a><span > </span>
+<a id="L78"></a><span class="visited"> </span>
+<a id="L79"></a><span class="visited"> </span>
+<a id="L80"></a><span > </span>
 <a id="L81"></a><span > </span>
 <a id="L82"></a><span class="visited"> </span>
 <a id="L83"></a><span > </span>
-<a id="L84"></a><span > </span>
+<a id="L84"></a><span class="visited"> </span>
 <a id="L85"></a><span > </span>
+<a id="L86"></a><span > </span>
+<a id="L87"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -197,6 +198,8 @@
 <a href="#L83">83</a>
 <a href="#L84">84</a>
 <a href="#L85">85</a>
+<a href="#L86">86</a>
+<a href="#L87">87</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -206,34 +209,36 @@ open Bos
 open Syntax
 
 let run_file ~parameters ~source_file =
-  <span data-count="406">l</span>et { Symbolic_parameters.unsafe
+  <span data-count="411">l</span>et { Symbolic_parameters.unsafe
       ; entry_point
       ; invoke_with_symbols
-      ; exploration_strategy
+      ; exploration_strategy = _
       ; _
       } =
     parameters
   in
-  let* m = Compile.File.until_validat<span data-count="406">e</span> ~unsafe source_file in
-  <span data-count="405">(</span> match exploration_strategy with
-  | <span data-count="1">S</span>mart -&gt; Cmd_call_graph.compute_distance<span data-count="0">s</span> m entry_point
-  | <span data-count="404">_</span> -&gt; () );
-  let* m = Cmd_utils.set_entry_poin<span data-count="404">t</span> entry_point invoke_with_symbols m in
-  <span data-count="403">l</span>et link_state =
+  let* m = Compile.File.until_validat<span data-count="411">e</span> ~unsafe source_file in
+  (* TODO: enable this once the smart strategy is fully implemented
+  ( match exploration_strategy with
+  | Smart -&gt; Cmd_call_graph.compute_distances m entry_point
+  | _ -&gt; () );
+  *)
+  <span data-count="410">l</span>et* m = Cmd_utils.set_entry_poin<span data-count="410">t</span> entry_point invoke_with_symbols m in
+  <span data-count="409">l</span>et link_state =
     Link.State.empty ()
-    |&gt; <span data-count="403">L</span>ink.Extern.modul ~name:"wasi_snapshot_preview1"
+    |&gt; <span data-count="409">L</span>ink.Extern.modul ~name:"wasi_snapshot_preview1"
          Symbolic_wasm_ffi.wasi_snapshot_preview1
-    |&gt; <span data-count="403">L</span>ink.Extern.modul ~name:"owi" Symbolic_wasm_ffi.symbolic_extern_module
+    |&gt; <span data-count="409">L</span>ink.Extern.modul ~name:"owi" Symbolic_wasm_ffi.symbolic_extern_module
   in
-  <span data-count="403">l</span>et+ m, link_state =
+  <span data-count="409">l</span>et+ m, link_state =
     (* unsafe is set to true because the module was already validated before *)
-    Compile.Binary.until_lin<span data-count="403">k</span> ~unsafe:true ~name:None link_state m
+    Compile.Binary.until_lin<span data-count="409">k</span> ~unsafe:true ~name:None link_state m
   in
-  <span data-count="403">l</span>et module Parameters = struct
+  <span data-count="409">l</span>et module Parameters = struct
     let throw_away_trap =
       match parameters.fail_mode with
       | <span data-count="4">A</span>ssertion_only -&gt; true
-      | <span data-count="397">B</span>oth | <span data-count="2">T</span>rap_only -&gt; false
+      | <span data-count="403">B</span>oth | <span data-count="2">T</span>rap_only -&gt; false
 
     let timeout = None
 
@@ -242,14 +247,14 @@ let run_file ~parameters ~source_file =
     let use_ite_for_select = parameters.use_ite_for_select
   end in
   let module I = Interpret.Symbolic (Parameters) in
-  Benchmark.with_utime @@ fun () -&gt; <span data-count="403">I</span>.modul link_state m
+  Benchmark.with_utime @@ fun () -&gt; <span data-count="409">I</span>.modul link_state m
 
 (* NB: This function propagates potential errors (Result.err) occurring
              during evaluation (OS, syntax error, etc.), except for Trap and Assert,
              which are handled here. Most of the computations are done in the Result
              monad, hence the let*. *)
 let cmd ~parameters ~source_file =
-  <span data-count="406">l</span>et { Symbolic_parameters.exploration_strategy
+  <span data-count="411">l</span>et { Symbolic_parameters.exploration_strategy
       ; fail_mode
       ; workers
       ; solver
@@ -267,19 +272,19 @@ let cmd ~parameters ~source_file =
 
   (* deterministic_result_order implies no_stop_at_failure *)
   let no_stop_at_failure =
-    parameters.deterministic_result_orde<span data-count="41">r</span> || parameters.no_stop_at_failur<span data-count="137">e</span>
+    parameters.deterministic_result_orde<span data-count="46">r</span> || parameters.no_stop_at_failur<span data-count="137">e</span>
   in
 
   (* TODO: can we handle this at the cmdliner level? *)
   let* workspace =
     match workspace with
     | <span data-count="215">S</span>ome path -&gt; Ok path
-    | <span data-count="191">N</span>one -&gt; OS.Dir.tm<span data-count="191">p</span> "owi_sym_%s"
+    | <span data-count="196">N</span>one -&gt; OS.Dir.tm<span data-count="196">p</span> "owi_sym_%s"
   in
 
-  <span data-count="406">l</span>et* result, run_time = run_file ~parameters ~source_file in
+  <span data-count="411">l</span>et* result, run_time = run_file ~parameters ~source_file in
 
-  <span data-count="403">S</span>ymbolic_driver.handle_result ~exploration_strategy ~fail_mode ~workers
+  <span data-count="409">S</span>ymbolic_driver.handle_result ~exploration_strategy ~fail_mode ~workers
     ~solver ~deterministic_result_order ~model_format ~no_value
     ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
     ~model_out_file ~with_breadcrumbs ~run_time result

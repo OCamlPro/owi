@@ -35,7 +35,9 @@
 <a id="L11"></a><span > </span>
 <a id="L12"></a><span class="visited"> </span>
 <a id="L13"></a><span > </span>
-<a id="L14"></a><span class="visited"> </span>
+<a id="L14"></a><span > </span>
+<a id="L15"></a><span class="visited"> </span>
+<a id="L16"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -54,6 +56,8 @@
 <a href="#L12">12</a>
 <a href="#L13">13</a>
 <a href="#L14">14</a>
+<a href="#L15">15</a>
+<a href="#L16">16</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -68,7 +72,9 @@ type t =
 
 let value g = <span data-count="159">g</span>.value
 
-let set_value g v = <span data-count="47">g</span>.value &lt;- v
+let set_value g v =
+  <span data-count="47">g</span>.value &lt;- v;
+  Ok ()
 </code></pre>
       </div>
     </div>

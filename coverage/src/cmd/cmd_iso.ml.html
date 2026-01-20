@@ -921,29 +921,29 @@ let module_name2 = "owi_iso_module2"
 let binaryen_fuzzing_support_module weird_log_i64 =
   <span data-count="3">l</span>et log_i32 x =
     <span data-count="0">L</span>og.app (fun m -&gt; <span data-count="0">m</span> "%a@?" Symbolic_i32.pp x);
-    <span data-count="0">S</span>ymbolic_choice_with_memory.return ()
+    <span data-count="0">S</span>ymbolic_choice.return ()
   in
   let log_i64 x =
     <span data-count="0">L</span>og.app (fun m -&gt; <span data-count="0">m</span> "%a@?" Symbolic_i64.pp x);
-    <span data-count="0">S</span>ymbolic_choice_with_memory.return ()
+    <span data-count="0">S</span>ymbolic_choice.return ()
   in
   let log_i64_weird x y =
     <span data-count="0">L</span>og.app (fun m -&gt; <span data-count="0">m</span> "%a%a@?" Symbolic_i32.pp x Symbolic_i32.pp y);
-    <span data-count="0">S</span>ymbolic_choice_with_memory.return ()
+    <span data-count="0">S</span>ymbolic_choice.return ()
   in
   let log_f32 x =
     <span data-count="0">L</span>og.app (fun m -&gt; <span data-count="0">m</span> "%a@?" Symbolic_f32.pp x);
-    <span data-count="0">S</span>ymbolic_choice_with_memory.return ()
+    <span data-count="0">S</span>ymbolic_choice.return ()
   in
   let log_f64 x =
     <span data-count="0">L</span>og.app (fun m -&gt; <span data-count="0">m</span> "%a@?" Symbolic_f64.pp x);
-    <span data-count="0">S</span>ymbolic_choice_with_memory.return ()
+    <span data-count="0">S</span>ymbolic_choice.return ()
   in
-  let call_export _n1 _n2 = <span data-count="0">S</span>ymbolic_choice_with_memory.return () in
+  let call_export _n1 _n2 = <span data-count="0">S</span>ymbolic_choice.return () in
   let call_export_catch _n =
-    <span data-count="0">S</span>ymbolic_choice_with_memory.return @@ Symbolic_i32.of_concret<span data-count="0">e</span> 0l
+    <span data-count="0">S</span>ymbolic_choice.return @@ Symbolic_i32.of_concret<span data-count="0">e</span> 0l
   in
-  let sleep _ms id = <span data-count="0">S</span>ymbolic_choice_with_memory.return id in
+  let sleep _ms id = <span data-count="0">S</span>ymbolic_choice.return id in
   let open Symbolic_extern_func in
   let open Symbolic_extern_func.Syntax in
   let functions =
@@ -964,9 +964,9 @@ let emscripten_fuzzing_support_module () =
   <span data-count="3">l</span>et temp_ret_0 = ref (Smtml.Expr.valu<span data-count="3">e</span> (Smtml.Value.Int 0)) in
   let set_temp_ret_0 x =
     <span data-count="0">t</span>emp_ret_0 := x;
-    Symbolic_choice_with_memory.return ()
+    Symbolic_choice.return ()
   in
-  let get_temp_ret_0 () = <span data-count="0">S</span>ymbolic_choice_with_memory.return !temp_ret_0 in
+  let get_temp_ret_0 () = <span data-count="0">S</span>ymbolic_choice.return !temp_ret_0 in
   let open Symbolic_extern_func in
   let open Symbolic_extern_func.Syntax in
   let functions =

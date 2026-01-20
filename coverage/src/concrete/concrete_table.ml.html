@@ -53,30 +53,35 @@
 <a id="L29"></a><span > </span>
 <a id="L30"></a><span class="visited"> </span>
 <a id="L31"></a><span > </span>
-<a id="L32"></a><span class="visited"> </span>
-<a id="L33"></a><span > </span>
+<a id="L32"></a><span > </span>
+<a id="L33"></a><span class="visited"> </span>
 <a id="L34"></a><span class="visited"> </span>
 <a id="L35"></a><span > </span>
 <a id="L36"></a><span class="visited"> </span>
 <a id="L37"></a><span > </span>
 <a id="L38"></a><span class="visited"> </span>
 <a id="L39"></a><span > </span>
-<a id="L40"></a><span > </span>
-<a id="L41"></a><span class="visited"> </span>
-<a id="L42"></a><span class="visited"> </span>
+<a id="L40"></a><span class="visited"> </span>
+<a id="L41"></a><span > </span>
+<a id="L42"></a><span > </span>
 <a id="L43"></a><span class="visited"> </span>
 <a id="L44"></a><span class="visited"> </span>
-<a id="L45"></a><span > </span>
-<a id="L46"></a><span > </span>
+<a id="L45"></a><span class="visited"> </span>
+<a id="L46"></a><span class="visited"> </span>
 <a id="L47"></a><span class="visited"> </span>
-<a id="L48"></a><span class="visited"> </span>
-<a id="L49"></a><span class="visited"> </span>
-<a id="L50"></a><span > </span>
-<a id="L51"></a><span > </span>
+<a id="L48"></a><span > </span>
+<a id="L49"></a><span > </span>
+<a id="L50"></a><span class="visited"> </span>
+<a id="L51"></a><span class="visited"> </span>
 <a id="L52"></a><span class="visited"> </span>
 <a id="L53"></a><span class="visited"> </span>
-<a id="L54"></a><span class="visited"> </span>
-<a id="L55"></a><span class="visited"> </span>
+<a id="L54"></a><span > </span>
+<a id="L55"></a><span > </span>
+<a id="L56"></a><span class="visited"> </span>
+<a id="L57"></a><span class="visited"> </span>
+<a id="L58"></a><span class="visited"> </span>
+<a id="L59"></a><span class="visited"> </span>
+<a id="L60"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -136,6 +141,11 @@
 <a href="#L53">53</a>
 <a href="#L54">54</a>
 <a href="#L55">55</a>
+<a href="#L56">56</a>
+<a href="#L57">57</a>
+<a href="#L58">58</a>
+<a href="#L59">59</a>
+<a href="#L60">60</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -168,7 +178,9 @@ let update table data = <span data-count="27">t</span>able.data &lt;- data
 
 let get t i = <span data-count="802940">t</span>.data.(i)
 
-let set t i v = <span data-count="1289">t</span>.data.(i) &lt;- v
+let set t i v =
+  <span data-count="1289">t</span>.data.(i) &lt;- v;
+  <span data-count="1289">O</span>k ()
 
 let size t = <span data-count="803717">A</span>rray.length t.data
 
@@ -180,18 +192,21 @@ let grow t new_size x =
   <span data-count="27">l</span>et new_size = Int32.to_int new_size in
   <span data-count="27">l</span>et new_table = Array.make new_size x in
   <span data-count="27">A</span>rray.blit t.data 0 new_table 0 (Array.lengt<span data-count="27">h</span> t.data);
-  <span data-count="27">u</span>pdate t new_table
+  <span data-count="27">u</span>pdate t new_table;
+  <span data-count="27">O</span>k ()
 
 let fill t pos len x =
   <span data-count="6">l</span>et pos = Int32.to_int pos in
   <span data-count="6">l</span>et len = Int32.to_int len in
-  <span data-count="6">A</span>rray.fill t.data pos len x
+  <span data-count="6">A</span>rray.fill t.data pos len x;
+  <span data-count="6">O</span>k ()
 
 let copy ~t_src ~t_dst ~src ~dst ~len =
   <span data-count="31">l</span>et src = Int32.to_int src in
   <span data-count="31">l</span>et dst = Int32.to_int dst in
   <span data-count="31">l</span>et len = Int32.to_int len in
-  <span data-count="31">A</span>rray.blit t_src.data src t_dst.data dst len
+  <span data-count="31">A</span>rray.blit t_src.data src t_dst.data dst len;
+  <span data-count="31">O</span>k ()
 </code></pre>
       </div>
     </div>

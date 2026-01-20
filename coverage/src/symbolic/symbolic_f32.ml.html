@@ -168,9 +168,9 @@ open Smtml.Expr
 
 let ty = Smtml.Ty.Ty_fp 32
 
-let of_concrete (f : Float32.t) : t = <span data-count="802">v</span>alue (Num (F32 (Float32.to_bit<span data-count="802">s</span> f)))
+let of_concrete (f : Float32.t) : t = <span data-count="825">v</span>alue (Num (F32 (Float32.to_bit<span data-count="825">s</span> f)))
 
-let zero = of_concret<span data-count="746">e</span> Float32.zero
+let zero = of_concret<span data-count="751">e</span> Float32.zero
 
 let abs x = <span data-count="4">u</span>nop ty Abs x
 
@@ -200,13 +200,13 @@ let max x y = <span data-count="1">b</span>inop ty Max x y
 
 let copy_sign x y = <span data-count="3">b</span>inop ty Copysign x y
 
-let eq x y = <span data-count="32">r</span>elop ty Eq x y |&gt; <span data-count="32">S</span>ymbolic_boolean.of_expr
+let eq x y = <span data-count="38">r</span>elop ty Eq x y |&gt; <span data-count="38">S</span>ymbolic_boolean.of_expr
 
 let ne x y = <span data-count="2">r</span>elop ty Ne x y |&gt; <span data-count="2">S</span>ymbolic_boolean.of_expr
 
-let lt x y = <span data-count="7">r</span>elop ty Lt x y |&gt; <span data-count="7">S</span>ymbolic_boolean.of_expr
+let lt x y = <span data-count="13">r</span>elop ty Lt x y |&gt; <span data-count="13">S</span>ymbolic_boolean.of_expr
 
-let gt x y = <span data-count="6">r</span>elop ty Gt x y |&gt; <span data-count="6">S</span>ymbolic_boolean.of_expr
+let gt x y = <span data-count="12">r</span>elop ty Gt x y |&gt; <span data-count="12">S</span>ymbolic_boolean.of_expr
 
 let le x y = <span data-count="8">r</span>elop ty Le x y |&gt; <span data-count="8">S</span>ymbolic_boolean.of_expr
 

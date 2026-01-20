@@ -2,8 +2,8 @@
 <html lang="en">
   <head>
     <meta charset="utf-8"/>
-    <title>symbolic_choice_with_memory.ml &mdash; Coverage report</title>
-    <meta name="description" content="100.00% coverage in src/symbolic/symbolic_choice_with_memory.ml">
+    <title>symbolic_table0.ml &mdash; Coverage report</title>
+    <meta name="description" content="100.00% coverage in src/symbolic/symbolic_table0.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -12,7 +12,7 @@
     <div id="header">
       <h1>
         <a href="../../index.html">
-          <span class="dirname">src/symbolic/</span>symbolic_choice_with_memory.ml
+          <span class="dirname">src/symbolic/</span>symbolic_table0.ml
         </a>
       </h1>
       <h2>100.00%</h2>
@@ -29,31 +29,43 @@
 <a id="L5"></a><span > </span>
 <a id="L6"></a><span > </span>
 <a id="L7"></a><span > </span>
-<a id="L8"></a><span class="visited"> </span>
+<a id="L8"></a><span > </span>
 <a id="L9"></a><span > </span>
+<a id="L10"></a><span > </span>
+<a id="L11"></a><span > </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
         <pre id="line-numbers">
-<a href="#L1">1</a>
-<a href="#L2">2</a>
-<a href="#L3">3</a>
-<a href="#L4">4</a>
-<a href="#L5">5</a>
-<a href="#L6">6</a>
-<a href="#L7">7</a>
-<a href="#L8">8</a>
-<a href="#L9">9</a>
+<a href="#L1"> 1</a>
+<a href="#L2"> 2</a>
+<a href="#L3"> 3</a>
+<a href="#L4"> 4</a>
+<a href="#L5"> 5</a>
+<a href="#L6"> 6</a>
+<a href="#L7"> 7</a>
+<a href="#L8"> 8</a>
+<a href="#L9"> 9</a>
+<a href="#L10">10</a>
+<a href="#L11">11</a>
+<a href="#L12">12</a>
+<a href="#L13">13</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-include Symbolic_choice.Make (Thread_with_memory)
+module IMap = Map.Make (Int)
 
-let lift_mem (mem_op : 'a Symbolic_choice_without_memory.t) : 'a t =
-  <span data-count="1084316">S</span>ymbolic_choice.CoreImpl.State.project_state Thread_with_memory.project
-    Thread_with_memory.restore mem_op
+type t =
+  { data : Symbolic_ref.t IMap.t
+  ; limits : Text.limits
+  ; typ : Text.ref_type
+  ; env_id : int
+  ; id : int
+  }
 </code></pre>
       </div>
     </div>

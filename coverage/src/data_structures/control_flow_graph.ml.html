@@ -239,7 +239,7 @@
     ; idx : int
     }
 
-  let compare n1 n2 = <span data-count="1756">I</span>nt.compare n1.idx n2.idx
+  let compare n1 n2 = <span data-count="1503">I</span>nt.compare n1.idx n2.idx
 
   let hash n = <span data-count="0">I</span>nt.hash n.idx
 
@@ -260,35 +260,35 @@ module G = Graph.Persistent.Digraph.ConcreteLabeled (Vertex) (Edge)
 include G
 
 let init nodes edges =
-  <span data-count="31">l</span>et graph = empty in
+  <span data-count="30">l</span>et graph = empty in
 
   let tbl = Hashtbl.create 512 in
 
   (* adding all vertices *)
-  <span data-count="31">l</span>et graph =
+  <span data-count="30">l</span>et graph =
     List.fold_left
       (fun graph (idx, expr) -&gt;
-        <span data-count="116">l</span>et vertex = { Vertex.expr; idx } in
+        <span data-count="104">l</span>et vertex = { Vertex.expr; idx } in
         Hashtbl.add tbl idx vertex;
-        <span data-count="116">a</span>dd_vertex graph vertex )
+        <span data-count="104">a</span>dd_vertex graph vertex )
       graph nodes
   in
 
   (* adding all edges *)
-  <span data-count="31">L</span>ist.fold_left
+  <span data-count="30">L</span>ist.fold_left
     (fun graph (parent, child, branch) -&gt;
-      <span data-count="96">l</span>et parent =
+      <span data-count="85">l</span>et parent =
         match Hashtbl.find_opt tbl parent with
         | None -&gt; assert false
-        | <span data-count="96">S</span>ome parent -&gt; parent
+        | <span data-count="85">S</span>ome parent -&gt; parent
       in
       let child =
         match Hashtbl.find_opt tbl child with
         | None -&gt; assert false
-        | <span data-count="96">S</span>ome child -&gt; child
+        | <span data-count="85">S</span>ome child -&gt; child
       in
       let edge = E.create parent branch child in
-      <span data-count="96">a</span>dd_edge_e graph edge )
+      <span data-count="85">a</span>dd_edge_e graph edge )
     graph edges
 
 let length g = <span data-count="0">G</span>.nb_vertex g

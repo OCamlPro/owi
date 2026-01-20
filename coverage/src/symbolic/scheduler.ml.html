@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>scheduler.ml &mdash; Coverage report</title>
+    <meta name="description" content="81.82% coverage in src/symbolic/scheduler.ml">
+    <link rel="stylesheet" href="../../coverage.css"/>
+    <script src="../../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../../index.html">
+          <span class="dirname">src/symbolic/</span>scheduler.ml
+        </a>
+      </h1>
+      <h2>81.82%</h2>
+    </div>
+    <div id="navbar">
+      <span class="unvisited" style="bottom:15.29%"></span>
+      <span class="unvisited" style="bottom:12.94%"></span>
+      <span class="unvisited" style="bottom:11.76%"></span>
+      <span class="unvisited" style="bottom:10.59%"></span>
+      <span class="unvisited" style="bottom:8.24%"></span>
+      <span class="unvisited" style="bottom:7.06%"></span>
+      <span class="unvisited" style="bottom:3.53%"></span>
+      <span class="unvisited" style="bottom:1.18%"></span>
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span > </span>
+<a id="L7"></a><span > </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span class="visited"> </span>
+<a id="L10"></a><span > </span>
+<a id="L11"></a><span > </span>
+<a id="L12"></a><span class="visited"> </span>
+<a id="L13"></a><span class="visited"> </span>
+<a id="L14"></a><span class="visited"> </span>
+<a id="L15"></a><span class="visited"> </span>
+<a id="L16"></a><span class="visited"> </span>
+<a id="L17"></a><span > </span>
+<a id="L18"></a><span class="visited"> </span>
+<a id="L19"></a><span > </span>
+<a id="L20"></a><span class="visited"> </span>
+<a id="L21"></a><span > </span>
+<a id="L22"></a><span > </span>
+<a id="L23"></a><span class="visited"> </span>
+<a id="L24"></a><span class="visited"> </span>
+<a id="L25"></a><span > </span>
+<a id="L26"></a><span class="visited"> </span>
+<a id="L27"></a><span > </span>
+<a id="L28"></a><span class="visited"> </span>
+<a id="L29"></a><span > </span>
+<a id="L30"></a><span class="visited"> </span>
+<a id="L31"></a><span > </span>
+<a id="L32"></a><span > </span>
+<a id="L33"></a><span > </span>
+<a id="L34"></a><span > </span>
+<a id="L35"></a><span > </span>
+<a id="L36"></a><span > </span>
+<a id="L37"></a><span > </span>
+<a id="L38"></a><span > </span>
+<a id="L39"></a><span > </span>
+<a id="L40"></a><span > </span>
+<a id="L41"></a><span > </span>
+<a id="L42"></a><span class="visited"> </span>
+<a id="L43"></a><span class="visited"> </span>
+<a id="L44"></a><span > </span>
+<a id="L45"></a><span > </span>
+<a id="L46"></a><span class="visited"> </span>
+<a id="L47"></a><span > </span>
+<a id="L48"></a><span > </span>
+<a id="L49"></a><span class="visited"> </span>
+<a id="L50"></a><span class="visited"> </span>
+<a id="L51"></a><span class="visited"> </span>
+<a id="L52"></a><span class="visited"> </span>
+<a id="L53"></a><span class="visited"> </span>
+<a id="L54"></a><span class="visited"> </span>
+<a id="L55"></a><span > </span>
+<a id="L56"></a><span class="visited"> </span>
+<a id="L57"></a><span > </span>
+<a id="L58"></a><span > </span>
+<a id="L59"></a><span class="visited"> </span>
+<a id="L60"></a><span > </span>
+<a id="L61"></a><span > </span>
+<a id="L62"></a><span > </span>
+<a id="L63"></a><span > </span>
+<a id="L64"></a><span > </span>
+<a id="L65"></a><span class="visited"> </span>
+<a id="L66"></a><span class="visited"> </span>
+<a id="L67"></a><span class="visited"> </span>
+<a id="L68"></a><span class="visited"> </span>
+<a id="L69"></a><span class="visited"> </span>
+<a id="L70"></a><span > </span>
+<a id="L71"></a><span class="visited"> </span>
+<a id="L72"></a><span class="unvisited"> </span>
+<a id="L73"></a><span > </span>
+<a id="L74"></a><span class="unvisited"> </span>
+<a id="L75"></a><span class="unvisited"> </span>
+<a id="L76"></a><span class="unvisited"> </span>
+<a id="L77"></a><span > </span>
+<a id="L78"></a><span class="unvisited"> </span>
+<a id="L79"></a><span class="unvisited"> </span>
+<a id="L80"></a><span > </span>
+<a id="L81"></a><span > </span>
+<a id="L82"></a><span class="unvisited"> </span>
+<a id="L83"></a><span > </span>
+<a id="L84"></a><span class="unvisited"> </span>
+<a id="L85"></a><span > </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1"> 1</a>
+<a href="#L2"> 2</a>
+<a href="#L3"> 3</a>
+<a href="#L4"> 4</a>
+<a href="#L5"> 5</a>
+<a href="#L6"> 6</a>
+<a href="#L7"> 7</a>
+<a href="#L8"> 8</a>
+<a href="#L9"> 9</a>
+<a href="#L10">10</a>
+<a href="#L11">11</a>
+<a href="#L12">12</a>
+<a href="#L13">13</a>
+<a href="#L14">14</a>
+<a href="#L15">15</a>
+<a href="#L16">16</a>
+<a href="#L17">17</a>
+<a href="#L18">18</a>
+<a href="#L19">19</a>
+<a href="#L20">20</a>
+<a href="#L21">21</a>
+<a href="#L22">22</a>
+<a href="#L23">23</a>
+<a href="#L24">24</a>
+<a href="#L25">25</a>
+<a href="#L26">26</a>
+<a href="#L27">27</a>
+<a href="#L28">28</a>
+<a href="#L29">29</a>
+<a href="#L30">30</a>
+<a href="#L31">31</a>
+<a href="#L32">32</a>
+<a href="#L33">33</a>
+<a href="#L34">34</a>
+<a href="#L35">35</a>
+<a href="#L36">36</a>
+<a href="#L37">37</a>
+<a href="#L38">38</a>
+<a href="#L39">39</a>
+<a href="#L40">40</a>
+<a href="#L41">41</a>
+<a href="#L42">42</a>
+<a href="#L43">43</a>
+<a href="#L44">44</a>
+<a href="#L45">45</a>
+<a href="#L46">46</a>
+<a href="#L47">47</a>
+<a href="#L48">48</a>
+<a href="#L49">49</a>
+<a href="#L50">50</a>
+<a href="#L51">51</a>
+<a href="#L52">52</a>
+<a href="#L53">53</a>
+<a href="#L54">54</a>
+<a href="#L55">55</a>
+<a href="#L56">56</a>
+<a href="#L57">57</a>
+<a href="#L58">58</a>
+<a href="#L59">59</a>
+<a href="#L60">60</a>
+<a href="#L61">61</a>
+<a href="#L62">62</a>
+<a href="#L63">63</a>
+<a href="#L64">64</a>
+<a href="#L65">65</a>
+<a href="#L66">66</a>
+<a href="#L67">67</a>
+<a href="#L68">68</a>
+<a href="#L69">69</a>
+<a href="#L70">70</a>
+<a href="#L71">71</a>
+<a href="#L72">72</a>
+<a href="#L73">73</a>
+<a href="#L74">74</a>
+<a href="#L75">75</a>
+<a href="#L76">76</a>
+<a href="#L77">77</a>
+<a href="#L78">78</a>
+<a href="#L79">79</a>
+<a href="#L80">80</a>
+<a href="#L81">81</a>
+<a href="#L82">82</a>
+<a href="#L83">83</a>
+<a href="#L84">84</a>
+<a href="#L85">85</a>
+</pre>
+<pre><code class="ocaml">module Schedulable = struct
+  (* A monad representing computation that can be cooperatively scheduled. Computations can yield, and fork (Choice). *)
+  type 'a t =
+    | Stop
+    | Now of 'a
+    | Yield of Prio.metrics * (unit -&gt; 'a t)
+    | Choice of 'a t * 'a t
+
+  let[@inline] return x : _ t = <span data-count="40727208">N</span>ow x
+
+  let rec bind (mx : 'a t) (f : 'a -&gt; 'b t) : 'b t =
+    <span data-count="41106988">m</span>atch mx with
+    | <span data-count="75134">S</span>top -&gt; Stop
+    | <span data-count="40753383">N</span>ow v -&gt; f v
+    | <span data-count="222258">Y</span>ield (prio, step) -&gt; Yield (prio, fun () -&gt; <span data-count="221742">b</span>ind (ste<span data-count="221682">p</span> ()) f)
+    | <span data-count="56552">C</span>hoice (a, b) -&gt;
+      (* cps to make it tail rec *)
+      Choice (bin<span data-count="56552">d</span> a f, bin<span data-count="56552">d</span> b f)
+
+  let[@inline] ( let* ) mx f = <span data-count="40771965">b</span>ind mx f
+
+  let[@inline] map f x =
+    <span data-count="40016">l</span>et* x in
+    <span data-count="27536">r</span>eturn (<span data-count="27536">f</span> x)
+
+  let[@inline] ( let+ ) x f = <span data-count="40017">m</span>ap f x
+
+  let[@inline] yield prio = <span data-count="27598">Y</span>ield (prio, Fun.cons<span data-count="27598">t</span> (Now ()))
+
+  let[@inline] choose a b = <span data-count="14015">C</span>hoice (a, b)
+
+  let stop = Stop
+end
+
+module Make (Work_datastructure : Prio.S) = struct
+  (* A scheduler for Schedulable values. *)
+  type 'a work_queue = (unit -&gt; 'a Schedulable.t) Work_datastructure.t
+
+  type 'a t = { work_queue : 'a work_queue } [@@unboxed]
+
+  let[@inline] init () =
+    <span data-count="412">l</span>et work_queue = Work_datastructure.make () in
+    <span data-count="412">{</span> work_queue }
+
+  let[@inline] add_init_task sched task =
+    <span data-count="412">W</span>ork_datastructure.push task Prio.dummy sched.work_queue
+
+  let work sched at_worker_value =
+    <span data-count="795">l</span>et rec inner (t : _ Schedulable.t) write_back =
+      <span data-count="55964">m</span>atch t with
+      | <span data-count="12418">S</span>top -&gt; ()
+      | <span data-count="1934">N</span>ow x -&gt; at_worker_value x
+      | <span data-count="27599">Y</span>ield (prio, f) -&gt; write_back (prio, f)
+      | <span data-count="14014">C</span>hoice (m1, m2) -&gt;
+        inner m1 write_back;
+        <span data-count="14014">i</span>nner m2 write_back
+    in
+    Work_datastructure.work_while
+      (fun f write_back -&gt; <span data-count="27948">i</span>nner (<span data-count="27936">f</span> ()) write_back)
+      sched.work_queue
+
+  let spawn_worker sched
+    ~(at_worker_value : close_work_queue:(unit -&gt; unit) -&gt; 'a -&gt; unit)
+    ~at_worker_init ~finally =
+    <span data-count="795">a</span>t_worker_init ();
+    <span data-count="795">D</span>omain.spawn (fun () -&gt;
+      <span data-count="795">F</span>un.protect ~finally (fun () -&gt;
+        <span data-count="795">t</span>ry
+          wor<span data-count="778">k</span> sched
+            (at_worker_value ~close_work_queue:(fun () -&gt;
+               <span data-count="50">W</span>ork_datastructure.close sched.work_queue ) )
+        with <span data-count="0">e</span> -&gt;
+          let e_s = Printexc.to_string e in
+          <span data-count="0">l</span>et bt = Printexc.get_raw_backtrace () in
+          <span data-count="0">l</span>et bt_s = Printexc.raw_backtrace_to_string bt in
+          <span data-count="0">l</span>et bt_s =
+            if String.equal "" bt_s then
+              <span data-count="0">"</span>use OCAMLRUNPARAM=b to get the backtrace"
+            else <span data-count="0">b</span>t_s
+          in
+          Log.err (fun m -&gt;
+            <span data-count="0">m</span> "a worker ended with exception %s, backtrace is: @\n@[&lt;v&gt;%s@]" e_s
+              bt_s );
+          <span data-count="0">P</span>rintexc.raise_with_backtrace e bt ) )
+end
+</code></pre>
+      </div>
+    </div>
+    <script src="../../coverage.js"></script>
+  </body>
+</html>

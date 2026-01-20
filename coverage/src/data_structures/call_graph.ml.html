@@ -316,11 +316,11 @@
         }
 
   let compare n1 n2 =
-    <span data-count="711">m</span>atch (n1, n2) with
-    | <span data-count="513">F</span>unction n1, Function n2 -&gt; Int.compare n1.idx n2.idx
-    | <span data-count="33">O</span>utside_world, Outside_world -&gt; 0
-    | <span data-count="52">O</span>utside_world, Function _n -&gt; -1
-    | <span data-count="113">F</span>unction _, Outside_world -&gt; 1
+    <span data-count="541">m</span>atch (n1, n2) with
+    | <span data-count="370">F</span>unction n1, Function n2 -&gt; Int.compare n1.idx n2.idx
+    | <span data-count="29">O</span>utside_world, Outside_world -&gt; 0
+    | <span data-count="44">O</span>utside_world, Function _n -&gt; -1
+    | <span data-count="98">F</span>unction _, Outside_world -&gt; 1
 
   let hash = Hashtbl.hash
 
@@ -337,37 +337,37 @@ module IntSet = Set.Make (Int)
 
 let init (l : (int * Control_flow_graph.t option * Set.Make(Int).t) list)
   entry_points =
-  <span data-count="6">l</span>et graph = empty in
+  <span data-count="5">l</span>et graph = empty in
 
   let graph = add_vertex graph Vertex.Outside_world in
 
-  <span data-count="6">l</span>et tbl = Hashtbl.create 512 in
+  <span data-count="5">l</span>et tbl = Hashtbl.create 512 in
 
   (* adding all vertices *)
-  <span data-count="6">l</span>et graph =
+  <span data-count="5">l</span>et graph =
     List.fold_left
       (fun graph (idx, cfg, _children) -&gt;
-        <span data-count="34">l</span>et f = Vertex.Function { idx; cfg } in
+        <span data-count="27">l</span>et f = Vertex.Function { idx; cfg } in
         Hashtbl.add tbl idx f;
-        <span data-count="34">a</span>dd_vertex graph f )
+        <span data-count="27">a</span>dd_vertex graph f )
       graph l
   in
 
   (* add all edges from functions to functions *)
-  <span data-count="6">l</span>et graph =
+  <span data-count="5">l</span>et graph =
     List.fold_left
       (fun graph (idx, _cfg, children) -&gt;
-        <span data-count="34">l</span>et parent =
+        <span data-count="27">l</span>et parent =
           match Hashtbl.find_opt tbl idx with
           | None -&gt; assert false
-          | <span data-count="34">S</span>ome parent -&gt; parent
+          | <span data-count="27">S</span>ome parent -&gt; parent
         in
         IntSet.fold
           (fun child_idx graph -&gt;
-            <span data-count="22">l</span>et child =
+            <span data-count="16">l</span>et child =
               match Hashtbl.find_opt tbl child_idx with
               | None -&gt; assert false
-              | <span data-count="22">S</span>ome child -&gt; child
+              | <span data-count="16">S</span>ome child -&gt; child
             in
             add_edge graph parent child )
           children graph )
@@ -375,19 +375,19 @@ let init (l : (int * Control_flow_graph.t option * Set.Make(Int).t) list)
   in
 
   (* add all edges from the outside world to entry points functions *)
-  <span data-count="6">l</span>et graph =
+  <span data-count="5">l</span>et graph =
     List.fold_left
       (fun graph entry_point_idx -&gt;
-        <span data-count="7">l</span>et entry_point =
+        <span data-count="6">l</span>et entry_point =
           match Hashtbl.find_opt tbl entry_point_idx with
           | None -&gt; assert false
-          | <span data-count="7">S</span>ome entry_point -&gt; entry_point
+          | <span data-count="6">S</span>ome entry_point -&gt; entry_point
         in
         add_edge graph Vertex.Outside_world entry_point )
       graph entry_points
   in
 
-  <span data-count="6">g</span>raph
+  <span data-count="5">g</span>raph
 
 let pp_sep fmt () = <span data-count="81">F</span>mt.pf fmt "@,"
 
@@ -434,7 +434,7 @@ end
 module type Empty = sig end
 
 let () =
-  let ignore _ = <span data-count="746">(</span>) in
+  let ignore _ = <span data-count="751">(</span>) in
   ignore (module Condensate : Empty);
   ()
 </code></pre>

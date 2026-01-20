@@ -241,7 +241,7 @@ type 'a solver_module = (module Smtml.Solver_intf.S with type t = 'a)
 
 type t = S : ('a solver_module * 'a) -&gt; t [@@unboxed]
 
-let instances = Atomic.mak<span data-count="746">e</span> []
+let instances = Atomic.mak<span data-count="751">e</span> []
 
 let rec add_solver solver =
   <span data-count="2">l</span>et l = Atomic.get instances in
@@ -249,30 +249,30 @@ let rec add_solver solver =
   <span data-count="2">i</span>f not success then <span data-count="0">a</span>dd_solver solver
 
 let fresh solver_ty () =
-  <span data-count="783">l</span>et module Mapping = (val Smtml.Solver_dispatcher.mappings_of_solve<span data-count="783">r</span> solver_ty)
+  <span data-count="601">l</span>et module Mapping = (val Smtml.Solver_dispatcher.mappings_of_solve<span data-count="601">r</span> solver_ty)
   in
   let module Mapping = Mapping.Fresh.Make () in
   let module Batch = Smtml.Solver.Cached (Mapping) in
   let solver_inst = Batch.create ~logic:QF_BVFP () in
-  <span data-count="777">l</span>et solver = S ((module Batch), solver_inst) in
+  <span data-count="596">l</span>et solver = S ((module Batch), solver_inst) in
   if Log.is_bench_enabled () then <span data-count="2">a</span>dd_solve<span data-count="2">r</span> solver;
-  <span data-count="776">s</span>olver
+  <span data-count="596">s</span>olver
 
 let check (S (solver_module, s)) pc =
-  <span data-count="26276">l</span>et module Solver = (val solver_module) in
+  <span data-count="26342">l</span>et module Solver = (val solver_module) in
   Solver.check_set s pc
 
 let model_of_path_condition (S (solver_module, s)) ~path_condition :
   Smtml.Model.t Option.t =
-  <span data-count="241">l</span>et exception Unknown in
+  <span data-count="242">l</span>et exception Unknown in
   let module Solver = (val solver_module) in
   try
     let sub_conditions = Symbolic_path_condition.slice path_condition in
-    <span data-count="241">l</span>et models =
+    <span data-count="242">l</span>et models =
       List.map
         (fun pc -&gt;
-          <span data-count="263">m</span>atch Solver.get_sat_model s pc with
-          | <span data-count="263">`</span>Model model -&gt; model
+          <span data-count="264">m</span>atch Solver.get_sat_model s pc with
+          | <span data-count="264">`</span>Model model -&gt; model
           | <span data-count="0">`</span>Unknown -&gt;
             (* it can happen if the solver is interrupted, otherwise it is an error, we raise, so the function can return an option that will be handled by the called *)
             raise Unknown
@@ -282,15 +282,15 @@ let model_of_path_condition (S (solver_module, s)) ~path_condition :
         sub_conditions
     in
     (* We build the new complete model by merging all "sub models" *)
-    <span data-count="241">l</span>et model = Hashtbl.create 64 in
-    <span data-count="241">L</span>ist.iter (Hashtbl.ite<span data-count="241">r</span> (Hashtbl.ad<span data-count="241">d</span> model)) models;
-    <span data-count="241">S</span>ome model
+    <span data-count="242">l</span>et model = Hashtbl.create 64 in
+    <span data-count="242">L</span>ist.iter (Hashtbl.ite<span data-count="242">r</span> (Hashtbl.ad<span data-count="242">d</span> model)) models;
+    <span data-count="242">S</span>ome model
   with <span data-count="0">U</span>nknown -&gt; None
 
 let model_of_set (S (solver_module, s)) ~symbol_scopes ~set =
-  <span data-count="881">l</span>et module Solver = (val solver_module) in
+  <span data-count="1188">l</span>et module Solver = (val solver_module) in
   let symbols = Symbol_scope.only_symbols symbol_scopes in
-  <span data-count="881">S</span>olver.get_sat_model ~symbols s set
+  <span data-count="1188">S</span>olver.get_sat_model ~symbols s set
 
 let empty_stats = Smtml.Statistics.Map.empty
 

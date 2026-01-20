@@ -144,14 +144,14 @@
 
   val store_64 : t -&gt; addr:i32 -&gt; i64 -&gt; unit choice
 
-  val grow : t -&gt; i32 -&gt; unit
+  val grow : t -&gt; i32 -&gt; unit choice
 
   val fill : t -&gt; pos:i32 -&gt; len:i32 -&gt; char -&gt; unit choice
 
   val blit :
     src:t -&gt; src_idx:i32 -&gt; dst:t -&gt; dst_idx:i32 -&gt; len:i32 -&gt; unit choice
 
-  val blit_string : t -&gt; string -&gt; src:i32 -&gt; dst:i32 -&gt; len:i32 -&gt; unit
+  val blit_string : t -&gt; string -&gt; src:i32 -&gt; dst:i32 -&gt; len:i32 -&gt; unit choice
 
   val size : t -&gt; i32
 

@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>cmd_call_graph.ml &mdash; Coverage report</title>
-    <meta name="description" content="75.28% coverage in src/cmd/cmd_call_graph.ml">
+    <meta name="description" content="73.60% coverage in src/cmd/cmd_call_graph.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">src/cmd/</span>cmd_call_graph.ml
         </a>
       </h1>
-      <h2>75.28%</h2>
+      <h2>73.60%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:12.18%"></span>
@@ -40,6 +40,7 @@
       <span class="unvisited" style="top:49.58%"></span>
       <span class="unvisited" style="top:50.00%"></span>
       <span class="unvisited" style="bottom:48.74%"></span>
+      <span class="unvisited" style="bottom:42.02%"></span>
       <span class="some-visited" style="bottom:39.92%"></span>
       <span class="unvisited" style="bottom:31.09%"></span>
       <span class="unvisited" style="bottom:30.25%"></span>
@@ -48,6 +49,8 @@
       <span class="unvisited" style="bottom:6.30%"></span>
       <span class="unvisited" style="bottom:5.88%"></span>
       <span class="unvisited" style="bottom:5.46%"></span>
+      <span class="unvisited" style="bottom:3.78%"></span>
+      <span class="unvisited" style="bottom:3.36%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -189,7 +192,7 @@
 <a id="L135"></a><span class="visited"> </span>
 <a id="L136"></a><span > </span>
 <a id="L137"></a><span class="visited"> </span>
-<a id="L138"></a><span class="visited"> </span>
+<a id="L138"></a><span class="unvisited"> </span>
 <a id="L139"></a><span class="visited"> </span>
 <a id="L140"></a><span > </span>
 <a id="L141"></a><span > </span>
@@ -280,8 +283,8 @@
 <a id="L226"></a><span > </span>
 <a id="L227"></a><span > </span>
 <a id="L228"></a><span > </span>
-<a id="L229"></a><span class="visited"> </span>
-<a id="L230"></a><span class="visited"> </span>
+<a id="L229"></a><span class="unvisited"> </span>
+<a id="L230"></a><span class="unvisited"> </span>
 <a id="L231"></a><span > </span>
 <a id="L232"></a><span > </span>
 <a id="L233"></a><span class="visited"> </span>
@@ -554,11 +557,11 @@ let find_functions_with_func_type func_type (acc, i)
   if Text.func_type_eq func_type ft then <span data-count="3">(</span>S.ad<span data-count="3">d</span> i acc, i + 1) else <span data-count="7">(</span>acc, i + 1)
 
 let rec find_children mode tables (funcs : 'a array) acc (l : Binary.expr) =
-  <span data-count="404">m</span>atch (l, mode) with
-  | <span data-count="34">[</span>], _ -&gt; acc
-  | <span data-count="22">(</span>{ raw = <span data-count="20">C</span>all i | <span data-count="2">R</span>eturn_call i; _ } as instr) :: l, _ -&gt;
-    Annotated.update_functions_called instr (S.singleto<span data-count="22">n</span> i);
-    <span data-count="22">f</span>ind_children mode tables funcs (S.ad<span data-count="22">d</span> i acc) l
+  <span data-count="355">m</span>atch (l, mode) with
+  | <span data-count="33">[</span>], _ -&gt; acc
+  | <span data-count="12">(</span>{ raw = <span data-count="10">C</span>all i | <span data-count="2">R</span>eturn_call i; _ } as instr) :: l, _ -&gt;
+    Annotated.update_functions_called instr (S.singleto<span data-count="12">n</span> i);
+    <span data-count="12">f</span>ind_children mode tables funcs (S.ad<span data-count="12">d</span> i acc) l
   | <span data-count="2">(</span> ( { raw =
             ( <span data-count="2">C</span>all_indirect (_, Bt_raw (_, ft))
             | <span data-count="0">R</span>eturn_call_indirect (_, Bt_raw (_, ft)) )
@@ -596,15 +599,15 @@ let rec find_children mode tables (funcs : 'a array) acc (l : Binary.expr) =
     let x = find_children mode tables funcs acc e1.raw in
     <span data-count="2">l</span>et x = find_children mode tables funcs x e2.raw in
     <span data-count="2">f</span>ind_children mode tables funcs x l
-  | <span data-count="338">_</span> :: l, _ -&gt; find_children mode tables funcs acc l
+  | <span data-count="300">_</span> :: l, _ -&gt; find_children mode tables funcs acc l
 
 let build_graph mode tables funcs (g, i) (f : (Binary.Func.t, 'a) Origin.t) =
-  <span data-count="34">m</span>atch f with
-  | <span data-count="26">O</span>rigin.Local x -&gt;
+  <span data-count="27">m</span>atch f with
+  | <span data-count="25">O</span>rigin.Local x -&gt;
     let s = find_children mode tables funcs S.empty x.body.raw in
-    <span data-count="26">l</span>et cfg = Cmd_cfg.build_cfg_from_func x in
-    <span data-count="26">(</span>(i, Some cfg, s) :: g, i + 1)
-  | <span data-count="8">O</span>rigin.Imported _ -&gt; ((i, None, S.empty) :: g, i + 1)
+    <span data-count="25">l</span>et cfg = Cmd_cfg.build_cfg_from_func x in
+    <span data-count="25">(</span>(i, Some cfg, s) :: g, i + 1)
+  | <span data-count="2">O</span>rigin.Imported _ -&gt; ((i, None, S.empty) :: g, i + 1)
 
 let eval_ibinop stack nn (op : Text.ibinop) =
   <span data-count="2">m</span>atch nn with
@@ -657,44 +660,44 @@ let eval_const env exp =
   | <span data-count="0">[</span> _ ] -&gt; Error (`Type_mismatch "expected int32")
 
 let eval_tables tables env =
-  <span data-count="5">l</span>et t =
+  <span data-count="4">l</span>et t =
     List.map
       (fun (n, elem) -&gt;
         <span data-count="1">(</span>n, Array.of_lis<span data-count="1">t</span> (List.ma<span data-count="1">p</span> (eval_cons<span data-count="1">t</span> env) elem.Binary.Elem.init)) )
       tables
   in
-  <span data-count="5">M</span>.of_list t
+  <span data-count="4">M</span>.of_list t
 
 let build_env (env, n) (global : (Binary.Global.t, 'a) Origin.t) =
-  <span data-count="9">m</span>atch global with
-  | <span data-count="6">O</span>rigin.Local x -&gt; (
+  <span data-count="5">m</span>atch global with
+  | <span data-count="2">O</span>rigin.Local x -&gt; (
     match fst x.Binary.Global.typ with
     | <span data-count="2">C</span>onst -&gt; (M.ad<span data-count="2">d</span> n (eval_cons<span data-count="2">t</span> env x.Binary.Global.init) env, n + 1)
-    | <span data-count="4">_</span> -&gt; (env, n + 1) )
+    | <span data-count="0">_</span> -&gt; (env, n + 1) )
   | <span data-count="3">_</span> -&gt; (env, n + 1)
 
 let rec find_tables acc (e : Binary.instr Annotated.t) =
-  <span data-count="352">m</span>atch e.raw with
+  <span data-count="304">m</span>atch e.raw with
   | <span data-count="1">T</span>able_set i | <span data-count="0">T</span>able_fill i | <span data-count="0">T</span>able_copy (i, _) -&gt; i :: acc
   | <span data-count="2">B</span>lock (_, _, exp) | <span data-count="2">L</span>oop (_, _, exp) -&gt;
     List.fold_left find_tables acc exp.raw
   | <span data-count="2">I</span>f_else (_, _, e1, e2) -&gt;
     let acc = List.fold_left find_tables acc e1.raw in
     <span data-count="2">L</span>ist.fold_left find_tables acc e2.raw
-  | <span data-count="345">_</span> -&gt; acc
+  | <span data-count="297">_</span> -&gt; acc
 
 let find_tables_to_remove export_tables funcs =
-  <span data-count="5">l</span>et l = List.map (fun (x : Binary.Export.t) -&gt; <span data-count="1">x</span>.id) export_tables in
-  <span data-count="5">A</span>rray.fold_left
+  <span data-count="4">l</span>et l = List.map (fun (x : Binary.Export.t) -&gt; <span data-count="1">x</span>.id) export_tables in
+  <span data-count="4">A</span>rray.fold_left
     (fun acc f -&gt;
-      <span data-count="29">m</span>atch f with
-      | <span data-count="22">O</span>rigin.Local x -&gt; List.fold_left find_tables acc x.Binary.Func.body.raw
-      | <span data-count="7">_</span> -&gt; acc )
+      <span data-count="22">m</span>atch f with
+      | <span data-count="21">O</span>rigin.Local x -&gt; List.fold_left find_tables acc x.Binary.Func.body.raw
+      | <span data-count="1">_</span> -&gt; acc )
     l funcs
 
 let rec remove_tables (l1 : (int * Binary.Elem.t) list) l2 acc =
-  <span data-count="6">m</span>atch (l1, l2) with
-  | <span data-count="4">[</span>], [] -&gt; acc
+  <span data-count="5">m</span>atch (l1, l2) with
+  | <span data-count="3">[</span>], [] -&gt; acc
   | <span data-count="1">[</span>], _ -&gt; acc
   | <span data-count="0">h</span> :: t, [] -&gt; remove_tables t [] (h :: acc)
   | <span data-count="1">(</span>n, e) :: t1, h2 :: t2 -&gt;
@@ -703,15 +706,15 @@ let rec remove_tables (l1 : (int * Binary.Elem.t) list) l2 acc =
     else <span data-count="0">r</span>emove_tables l1 t2 acc
 
 let find_entry_points (m : Binary.Module.t) =
-  <span data-count="6">l</span>et l = Option.to_list m.start in
-  <span data-count="6">A</span>rray.fold_left
+  <span data-count="5">l</span>et l = Option.to_list m.start in
+  <span data-count="5">A</span>rray.fold_left
     (fun acc (x : Binary.Export.t) -&gt; <span data-count="4">x</span>.id :: acc)
     l m.exports.func
 
 let find_entries entry_point (m : Binary.Module.t) =
-  <span data-count="6">l</span>et entries =
+  <span data-count="5">l</span>et entries =
     Option.bind
-      (Option.bin<span data-count="6">d</span> entry_point (fun x -&gt;
+      (Option.bin<span data-count="5">d</span> entry_point (fun x -&gt;
          <span data-count="1">A</span>rray.find_index
            (function
              | <span data-count="2">O</span>rigin.Local (y : Binary.Func.t) -&gt;
@@ -720,15 +723,15 @@ let find_entries entry_point (m : Binary.Module.t) =
            m.func ) )
       (fun x -&gt; <span data-count="1">S</span>ome [ x ])
   in
-  <span data-count="6">O</span>ption.value entries ~default:(find_entry_point<span data-count="6">s</span> m)
+  <span data-count="5">O</span>ption.value entries ~default:(find_entry_point<span data-count="5">s</span> m)
 
 let build_call_graph call_graph_mode (m : Binary.Module.t) entry_point =
-  <span data-count="6">l</span>et funcs = m.func in
+  <span data-count="5">l</span>et funcs = m.func in
 
   let tables =
     match call_graph_mode with
     | <span data-count="1">C</span>omplete -&gt; M.empty
-    | <span data-count="5">S</span>ound -&gt;
+    | <span data-count="4">S</span>ound -&gt;
       let tables =
         let elems =
           List.filter_map
@@ -736,23 +739,23 @@ let build_call_graph call_graph_mode (m : Binary.Module.t) entry_point =
               <span data-count="3">m</span>atch e.Binary.Elem.mode with
               | <span data-count="2">A</span>ctive (Some n, _) -&gt; Some (n, e)
               | <span data-count="1">_</span> -&gt; None )
-            (Array.to_lis<span data-count="5">t</span> m.elem)
+            (Array.to_lis<span data-count="4">t</span> m.elem)
         in
-        <span data-count="5">l</span>et t = find_tables_to_remove (Array.to_lis<span data-count="5">t</span> m.exports.table) funcs in
-        <span data-count="5">r</span>emove_table<span data-count="5">s</span>
-          (List.sort_uni<span data-count="5">q</span> (fun x y -&gt; <span data-count="1">c</span>ompare (fs<span data-count="1">t</span> x) (fs<span data-count="1">t</span> y)) elems)
-          (List.sort_uni<span data-count="5">q</span> compare t) []
+        <span data-count="4">l</span>et t = find_tables_to_remove (Array.to_lis<span data-count="4">t</span> m.exports.table) funcs in
+        <span data-count="4">r</span>emove_table<span data-count="4">s</span>
+          (List.sort_uni<span data-count="4">q</span> (fun x y -&gt; <span data-count="1">c</span>ompare (fs<span data-count="1">t</span> x) (fs<span data-count="1">t</span> y)) elems)
+          (List.sort_uni<span data-count="4">q</span> compare t) []
       in
       let env, _ = Array.fold_left build_env (M.empty, 0) m.global in
 
-      <span data-count="5">e</span>val_table<span data-count="5">s</span> tables env
+      <span data-count="4">e</span>val_table<span data-count="4">s</span> tables env
   in
 
   let l, _ =
-    Array.fold_left (build_grap<span data-count="6">h</span> call_graph_mode tables funcs) ([], 0) funcs
+    Array.fold_left (build_grap<span data-count="5">h</span> call_graph_mode tables funcs) ([], 0) funcs
   in
-  <span data-count="6">l</span>et entries = find_entries entry_point m in
-  <span data-count="6">C</span>all_graph.init l entries
+  <span data-count="5">l</span>et entries = find_entries entry_point m in
+  <span data-count="5">C</span>all_graph.init l entries
 
 let build_call_graph_from_text_module call_graph_mode modul entry_point =
   <span data-count="0">l</span>et m = Compile.Text.until_validate ~unsafe:false modul in
@@ -761,8 +764,8 @@ let build_call_graph_from_text_module call_graph_mode modul entry_point =
   | _ -&gt; assert false
 
 let compute_distances m entry_point =
-  <span data-count="1">l</span>et call_graph = build_call_graph Sound m entry_point in
-  <span data-count="1">E</span>xploration_smart.compute_distance_to_unreachable call_graph
+  <span data-count="0">l</span>et call_graph = build_call_graph Sound m entry_point in
+  <span data-count="0">E</span>xploration_smart.compute_distance_to_unreachable call_graph
 
 let cmd ~call_graph_mode ~source_file ~entry_point =
   <span data-count="5">l</span>et* m = Compile.File.until_validat<span data-count="5">e</span> ~unsafe:false source_file in
