@@ -36,6 +36,8 @@ float __VERIFIER_nondet_float(void) { return owi_float(); }
 
 double __VERIFIER_nondet_double(void) { return owi_double(); }
 
+size_t __VERIFIER_nondet_size_t(void) { return (size_t)owi_unsigned_int(); }
+
 /* ====================
  * memory related stuff
  * ==================== */
