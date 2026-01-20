@@ -220,19 +220,19 @@ let pp_frelop fmt : frelop -> Unit.t = function
 
 type nonrec memarg =
   { offset : Int64.t
-  ; align : Int32.t
+  ; align : Int64.t
   }
 
 let pp_memarg =
   let pow_2 n =
-    assert (Int32.ge n 0l);
-    Int32.shl 1l n
+    assert (Int64.ge n 0L);
+    Int64.shl 1L n
   in
   fun fmt { offset; align } ->
     let pp_offset fmt offset =
       if Int64.gt offset 0L then pf fmt "offset=%Ld " offset
     in
-    pf fmt "%aalign=%ld" pp_offset offset (pow_2 align)
+    pf fmt "%aalign=%Ld" pp_offset offset (pow_2 align)
 
 type nonrec limits =
   { min : Concrete_i64.t

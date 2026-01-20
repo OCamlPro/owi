@@ -228,9 +228,9 @@ let num_type ==
 
 let align ==
   | ALIGN; EQUAL; n = NUM; {
-    let n = i32 n in
-    if Int32.eq n 0l || Int32.ne Int32.(logand n (sub n 1l)) 0l then failwith "alignment"
-    else Int32.div n 2l
+    let n = u64 n in
+    if Int64.eq n 0L || Int64.ne Int64.(logand n (sub n 1L)) 0L then failwith "alignment"
+    else Int64.div n 2L
   }
 
 let memarg_offset ==
@@ -239,7 +239,7 @@ let memarg_offset ==
 let memarg ==
   | offset = option(memarg_offset); align = option(align); {
     let offset = u64 @@ Option.value offset ~default:"0" in
-    let align = Option.value align ~default:0l in
+    let align = Option.value align ~default:0L in
     {offset; align}
   }
 

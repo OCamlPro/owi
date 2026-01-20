@@ -28,16 +28,11 @@ module Input : sig
   val of_string : string -> t
 
   val sub : pos:int -> len:int -> t -> t Result.t
-
-  val nbmems : t -> int
-
-  val incr_nbmems : t -> t
 end = struct
   type t =
     { bytes : string
     ; pt : int
     ; size : int
-    ; nbmems : int
     }
 
   let size s = s.size
@@ -46,7 +41,7 @@ end = struct
 
   let of_string str =
     let size = String.length str in
-    { bytes = str; pt = 0; size; nbmems = 0 }
+    { bytes = str; pt = 0; size }
 
   let sub ~pos ~len input =
     if pos <= input.size && len <= input.size - pos then
@@ -62,10 +57,6 @@ end = struct
     else None
 
   let as_string input = String.sub input.bytes input.pt input.size
-
-  let nbmems { nbmems; _ } = nbmems
-
-  let incr_nbmems ({ nbmems; _ } as t) = { t with nbmems = nbmems + 1 }
 end
 
 let string_of_char_list char_list =
@@ -309,25 +300,28 @@ let read_limits input =
     ({ Text.min; max = Some max }, input)
   | _c -> parse_fail "integer too large (read_limits)"
 
+let is_malformed align_raw =
+  let reserved_mask = Int64.lognot 0x7FL in
+  Int64.gt (Int64.logand align_raw reserved_mask) 0L
+
 let read_memarg max_align input =
-  let* align_64, input = read_UN 32 input in
-  let align = Int64.to_int32 align_64 in
-  let has_memidx =
-    (* If there are multiple memories, check if the 6th bit set. *)
-    Input.nbmems input > 1 && Int32.ne (Int32.logand align 0x40l) 0l
-  in
+  let* align, input = read_UN 32 input in
+  let has_memidx = Int64.ne (Int64.logand align 0x40L) 0L in
   let* memidx, align, input =
     if has_memidx then
       let+ memidx, input = read_indice input in
       (* Unset the 6th bit *)
-      (memidx, Int32.logand align (Int32.lognot 0x40l), input)
+      (memidx, Int64.logand align (Int64.lognot 0x40L), input)
     else Ok (0, align, input)
   in
-  if Int32.to_int align >= max_align then parse_fail "malformed memop flags"
+  if is_malformed align then parse_fail "malformed memop flags"
+  else if Int64.to_int align > max_align then
+    parse_fail "alignment must not be larger than natural"
   else
     let+ offset, input = read_U32 input in
     let offset = Int64.of_int offset in
     (memidx, { Text.align; offset }, input)
+(* TODO: should the checks be moved to validate? *)
 
 let read_FC input =
   let* i, input = read_U32 input in
@@ -860,7 +854,7 @@ let read_import input =
     ((modul, name, Table (limits, ref_type, None)), input)
   | '\x02' ->
     let+ limits, input = read_limits input in
-    ((modul, name, Mem limits), Input.incr_nbmems input)
+    ((modul, name, Mem limits), input)
   | '\x03' ->
     let+ (mut, val_type), input = read_global_type input in
     ((modul, name, Global (mut, val_type)), input)
@@ -1109,7 +1103,7 @@ let sections_iterate (input : Input.t) =
   (* Memory *)
   let* memory_section, input =
     section_parse input ~expected_id:'\x05' []
-      (vector_no_id (fun input -> read_memory (Input.incr_nbmems input)))
+      (vector_no_id (fun input -> read_memory input))
   in
 
   (* Custom *)
