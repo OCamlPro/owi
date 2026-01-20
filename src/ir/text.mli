@@ -143,18 +143,20 @@ type nonrec frelop =
 
 val pp_frelop : frelop Fmt.t
 
-(* TODO: offset should be in a sum type separating it into
-   i64 and i32 *)
+(* TODO: should probably be in a sum type separating the offset into
+   i64 and i32.
+   align only needs to be parsed as i64, it should be conveted later to i32
+   since it will always be a i32. *)
 type nonrec memarg =
   { offset : Int64.t
-  ; align : Int32.t
+  ; align : Int64.t
   }
 
 val pp_memarg : memarg Fmt.t
 
-(* TODO: limites should be in an sum type representing the
+(* TODO: limits should probably be in an sum type representing the
    cases where they are i64 and i32 (maybe even when max is
-   present or not) *)
+   present or not). *)
 type nonrec limits =
   { min : Concrete_i64.t
   ; max : Concrete_i64.t option
