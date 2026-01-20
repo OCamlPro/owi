@@ -10,6 +10,7 @@
   stdlib.o
   ctype.o
   stdout.o
+  error.o
   errno.o
   strchr.o
   math.o
@@ -45,6 +46,7 @@
   stdlib.o
   ctype.o
   stdout.o
+  error.o
   errno.o
   strchr.o
   math.o
@@ -76,6 +78,7 @@
   src/stdlib.c
   src/ctype.c
   src/stdout.c
+  src/error.c
   src/errno.c
   src/strchr.c
   src/math.c
