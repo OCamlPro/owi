@@ -42,8 +42,6 @@ val create :
   -> depth:int
   -> t
 
-val clone : t -> t
-
 val add_pc : t -> Symbolic_boolean.t -> t
 
 val add_breadcrumb : t -> int -> t

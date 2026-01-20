@@ -118,27 +118,3 @@ let replace_global (global : Symbolic_global0.t) thread =
     Collection.replace globals ~env_id:global.env_id ~id:global.id global
   in
   { thread with globals }
-
-let clone
-  { num_symbols
-  ; symbol_scopes
-  ; pc
-  ; memories
-  ; tables
-  ; globals
-  ; breadcrumbs
-  ; labels
-  ; bench_stats
-  ; depth
-  } =
-  { num_symbols
-  ; symbol_scopes
-  ; pc
-  ; memories
-  ; tables
-  ; globals
-  ; breadcrumbs
-  ; labels
-  ; bench_stats
-  ; depth
-  }
