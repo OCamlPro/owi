@@ -56,7 +56,6 @@
   data_intf
   elem_intf
   env_intf
-  eval_monad
   exploration_smart
   extern
   float32

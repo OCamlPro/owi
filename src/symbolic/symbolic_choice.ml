@@ -2,9 +2,50 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-(* Multicore is based on several layers of monad transformers defined in submodules. The module as a whole is made to provide a monad to explore in parallel different possibilites, with a notion of priority. *)
+(* Multicore is based on several layers of monad transformers. The module as a whole is made to provide a monad to explore in parallel different possibilites, with a notion of priority. *)
 
-(* the two following functions can not be in the Make functor because it breaks with the two instanciation of `Symbolic_choice.Make (Thread_{with,withou}_memory) *)
+(* Add a notion of faillibility to the evaluation. "Transformer without module functor" style. *)
+type 'a t = (('a, Bug.t) result, Thread.t) State_monad.t
+
+(* ================================================
+   Functions to operate on the three monads layers.
+   ================================================ *)
+
+let[@inline] return x : _ t = State_monad.return (Ok x)
+
+let[@inline] lift x =
+  let ( let+ ) = State_monad.( let+ ) in
+  let+ x in
+  Ok x
+
+let[@inline] bind (mx : _ t) f : _ t =
+  let ( let* ) = State_monad.( let* ) in
+  let* mx in
+  match mx with Ok x -> f x | Error _ as mx -> State_monad.return mx
+
+let[@inline] ( let* ) mx f = bind mx f
+
+let[@inline] map mx f =
+  let ( let+ ) = State_monad.( let+ ) in
+  let+ mx in
+  match mx with Ok x -> Ok (f x) | Error _ as mx -> mx
+
+let[@inline] ( let+ ) mx f = map mx f
+
+let[@inline] lift_schedulable (v : 'a Scheduler.Schedulable.t) : 'a t =
+  let v = State_monad.lift v in
+  lift v
+
+let[@inline] with_thread (f : Thread.t -> 'a) : 'a t =
+  let x = State_monad.with_state (fun st -> (f st, st)) in
+  lift x
+
+let thread = with_thread Fun.id
+
+let[@inline] modify_thread f = lift (State_monad.modify_state f)
+
+let[@inline] set_thread st = modify_thread (Fun.const st)
+
 let solver_to_use = ref None
 
 let solver_dls_key =
@@ -14,45 +55,17 @@ let solver_dls_key =
     | None -> assert false
     | Some solver_to_use -> Solver.fresh solver_to_use () )
 
-(* The core implementation of the monad. It is isolated in a module to restict its exposed interface and maintain its invariant. Using functions defined here should be foolproof. *)
-type 'a t = ('a, Thread.t) Eval_monad.t
+let[@inline] solver () = Domain.DLS.get solver_dls_key
 
-(*
-       Here we define functions to seamlessly
-       operate on the three monads layers
-    *)
+let[@inline] choose a b = State_monad.liftF2 Scheduler.Schedulable.choose a b
 
-let ( let* ) = Eval_monad.( let* )
-
-let ( let+ ) = Eval_monad.( let+ )
-
-let return = Eval_monad.return
-
-let bind = Eval_monad.bind
-
-let map = Eval_monad.map
-
-let lift_schedulable (v : 'a Scheduler.Schedulable.t) : 'a t =
-  let v = State_monad.lift v in
-  Eval_monad.lift v
-
-let with_thread (f : Thread.t -> 'a) : 'a t =
-  let x = State_monad.with_state (fun st -> (f st, st)) in
-  Eval_monad.lift x
-
-let thread = with_thread Fun.id
-
-let modify_thread f = Eval_monad.lift (State_monad.modify_state f)
-
-let set_thread st = modify_thread (Fun.const st)
-
-let solver () = Domain.DLS.get solver_dls_key
-
-let choose a b = State_monad.liftF2 Scheduler.Schedulable.choose a b
-
-let yield prio = lift_schedulable @@ Scheduler.Schedulable.yield prio
+let[@inline] yield prio = lift_schedulable @@ Scheduler.Schedulable.yield prio
 
 let stop = lift_schedulable Scheduler.Schedulable.stop
+
+(* ============================================
+   Now this is actual symbolic execution stuff!
+   ============================================ *)
 
 let run exploration_strategy ~workers solver t thread ~at_worker_value
   ~at_worker_init ~at_worker_end =
@@ -73,7 +86,7 @@ let add_pc (c : Symbolic_boolean.t) =
   let c = Symbolic_boolean.to_expr c in
   let c = Smtml.Expr.simplify c in
   match Smtml.Expr.view c with
-  | Val True -> Eval_monad.return ()
+  | Val True -> return ()
   | Val False -> stop
   | _ ->
     let* thread in
@@ -115,9 +128,7 @@ let with_new_symbol ty f =
   in
   f sym
 
-(*
-    Yielding is currently done each time the solver is about to be called,
-    in check_reachability and get_model.
+(* Yielding is currently done each time the solver is about to be called, in check_reachability and get_model.
   *)
 let check_reachability v prio =
   let* () = yield prio in
@@ -129,7 +140,7 @@ let check_reachability v prio =
     Benchmark.handle_time_span stats.solver_sat_time @@ fun () ->
     Solver.check solver pc
   in
-  Eval_monad.return reachability
+  return reachability
 
 let get_model_or_stop symbol =
   (* TODO: better prio here! *)
@@ -147,7 +158,7 @@ let get_model_or_stop symbol =
   | `Unsat -> stop
   | `Model model -> begin
     match Smtml.Model.evaluate model symbol with
-    | Some v -> Eval_monad.return v
+    | Some v -> return v
     | None ->
       (* the model exists so the symbol should evaluate *)
       assert false
@@ -163,36 +174,35 @@ let select_inner ~explore_first ?(with_breadcrumbs = true)
   let cond = Symbolic_boolean.to_expr cond in
   let cond = Smtml.Expr.simplify cond in
   match Smtml.Expr.view cond with
-  | Val True -> Eval_monad.return true
-  | Val False -> Eval_monad.return false
-  | Val (Bitv _bv) -> Fmt.failwith "unreachable (type error)"
+  | Val True -> return true
+  | Val False -> return false
   | _ ->
     let is_other_branch_unsat = Atomic.make false in
     let branch condition final_value prio =
       let* () = add_pc condition in
       let* () =
         if with_breadcrumbs then add_breadcrumb (if final_value then 1 else 0)
-        else Eval_monad.return ()
+        else return ()
       in
       (* this is an optimisation under the assumption that the PC is always SAT (i.e. we are performing eager pruning), in such a case, when a branch is unsat, we don't have to check the reachability of the other's branch negation, because it is always going to be SAT. *)
       if Atomic.get is_other_branch_unsat then begin
         Log.debug (fun m ->
           m "The SMT call for the %b branch was optimized away" final_value );
         (* the other branch is unsat, we must be SAT and don't need to check reachability! *)
-        Eval_monad.return final_value
+        return final_value
       end
       else begin
         (* the other branch is SAT (or we haven't computed it yet), so we have to check reachability *)
         let* satisfiability = check_reachability condition prio in
         begin match satisfiability with
-        | `Sat -> Eval_monad.return final_value
+        | `Sat -> return final_value
         | `Unsat ->
           Atomic.set is_other_branch_unsat true;
           stop
         | `Unknown ->
           (* It can happen when the solver is interrupted *)
           (* TODO: once https://github.com/formalsec/smtml/pull/479 is merged
-                   if solver was interrupted then stop else assert false *)
+                     if solver was interrupted then stop else assert false *)
           stop
         end
       end
@@ -219,7 +229,7 @@ let select (cond : Symbolic_boolean.t) ~prio_true ~prio_false =
 let summary_symbol (e : Smtml.Expr.t) =
   let* thread in
   match Smtml.Expr.view e with
-  | Symbol sym -> Eval_monad.return (None, sym)
+  | Symbol sym -> return (None, sym)
   | _ ->
     let num_symbols = thread.num_symbols in
     let+ () = modify_thread Thread.incr_num_symbols in
@@ -233,7 +243,7 @@ let select_i32 (i : Symbolic_i32.t) =
   let i = Smtml.Expr.simplify i in
   match Smtml.Expr.view i with
   | Val (Bitv bv) when Smtml.Bitvector.numbits bv <= 32 ->
-    Eval_monad.return (Smtml.Bitvector.to_int32 bv)
+    return (Smtml.Bitvector.to_int32 bv)
   | _ ->
     let* assign, symbol = summary_symbol i in
     let* () =
@@ -241,7 +251,7 @@ let select_i32 (i : Symbolic_i32.t) =
       | Some assign ->
         let assign = Symbolic_boolean.of_expr assign in
         add_pc assign
-      | None -> Eval_monad.return ()
+      | None -> return ()
     in
     let rec generator () =
       let* possible_value = get_model_or_stop symbol in
@@ -283,7 +293,7 @@ let trap t =
   let* model =
     Benchmark.handle_time_span stats.solver_final_model_time @@ fun () ->
     match Solver.model_of_path_condition solver ~path_condition with
-    | Some model -> Eval_monad.return model
+    | Some model -> return model
     | None ->
       (* It can happen when the solver is interrupted *)
       (* TODO: once https://github.com/formalsec/smtml/pull/479 is merged
@@ -304,7 +314,7 @@ let assertion (c : Symbolic_boolean.t) =
     select_inner c ~with_breadcrumbs:false ~explore_first:false ~prio_true
       ~prio_false ~check_only_true_branch:false
   in
-  if assertion_true then Eval_monad.return ()
+  if assertion_true then return ()
   else
     let* thread in
     let solver = solver () in
@@ -313,7 +323,7 @@ let assertion (c : Symbolic_boolean.t) =
     let* model =
       Benchmark.handle_time_span stats.solver_final_model_time @@ fun () ->
       match Solver.model_of_path_condition solver ~path_condition with
-      | Some model -> Eval_monad.return model
+      | Some model -> return model
       | None ->
         (* It can happen when the solver is interrupted *)
         (* TODO: once https://github.com/formalsec/smtml/pull/479 is merged
@@ -326,17 +336,13 @@ let ite (c : Symbolic_boolean.t) ~(if_true : Symbolic_value.t)
   ~(if_false : Symbolic_value.t) : Symbolic_value.t t =
   match (if_true, if_false) with
   | I32 if_true, I32 if_false ->
-    Eval_monad.return
-      (Symbolic_value.I32 (Symbolic_boolean.ite c ~if_true ~if_false))
+    return (Symbolic_value.I32 (Symbolic_boolean.ite c ~if_true ~if_false))
   | I64 if_true, I64 if_false ->
-    Eval_monad.return
-      (Symbolic_value.I64 (Symbolic_boolean.ite c ~if_true ~if_false))
+    return (Symbolic_value.I64 (Symbolic_boolean.ite c ~if_true ~if_false))
   | F32 if_true, F32 if_false ->
-    Eval_monad.return
-      (Symbolic_value.F32 (Symbolic_boolean.ite c ~if_true ~if_false))
+    return (Symbolic_value.F32 (Symbolic_boolean.ite c ~if_true ~if_false))
   | F64 if_true, F64 if_false ->
-    Eval_monad.return
-      (Symbolic_value.F64 (Symbolic_boolean.ite c ~if_true ~if_false))
+    return (Symbolic_value.F64 (Symbolic_boolean.ite c ~if_true ~if_false))
   | Ref _, Ref _ ->
     (* TODO: better prio here *)
     let prio_false = Prio.dummy in
@@ -359,4 +365,4 @@ let assume c instr_counter =
     select_inner c ~with_breadcrumbs:false ~explore_first:true ~prio_true
       ~prio_false ~check_only_true_branch:true
   in
-  if assertion_true then Eval_monad.return () else stop
+  if assertion_true then return () else stop
