@@ -57,7 +57,11 @@
   $ owi script --no-exhaustion reference/ref_is_null.wast
   $ owi script --no-exhaustion reference/ref_null.wast
   $ owi script --no-exhaustion reference/return_call_indirect.wast
+  5
+  91
   $ owi script --no-exhaustion reference/return_call.wast
+  5
+  91
   $ owi script --no-exhaustion reference/return.wast
   $ owi script --no-exhaustion reference/select.wast
   $ owi script --no-exhaustion reference/skip-stack-guard-page.wast
