@@ -37,4 +37,6 @@ void qsort(void *base, size_t nmemb, size_t size, int (*compar)(const void *, co
 __int128 __multi3(__int128, __int128);
 #endif
 
+char *gettext(const char *msgid);
+
 #endif

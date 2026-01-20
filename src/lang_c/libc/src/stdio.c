@@ -76,3 +76,9 @@ int fgetc(FILE *stream) {
   int c = owi_int();
   return c & 0xFF;
 }
+
+int fputs_unlocked(const char *s, FILE *stream) {
+  (void)s;
+  (void)stream;
+  return 0;
+}

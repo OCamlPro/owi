@@ -419,3 +419,5 @@ int posix_memalign(void **memptr, size_t alignment, size_t size) { return 0; }
 char getchar(void) { return ' '; }
 
 __int128 __multi3(__int128 a, __int128 b) { return a * b; }
+
+char *gettext(const char *msgid) { return (char *)msgid; }
