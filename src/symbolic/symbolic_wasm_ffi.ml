@@ -100,8 +100,8 @@ module M :
   let rec make_str m accu i =
     let open Symbolic_choice in
     let* p = Symbolic_memory.load_8_u m (Symbolic_i32.of_concrete i) in
-    match Smtml.Expr.view p with
-    | Val (Bitv bv) when Smtml.Bitvector.numbits bv = 32 ->
+    match p with
+    | Imm (Bitv bv) when Smtml.Bitvector.numbits bv = 32 ->
       let c = Smtml.Bitvector.to_int32 bv in
       if Int32.gt c 255l || Int32.lt c 0l then trap `Invalid_character_in_memory
       else
@@ -122,8 +122,8 @@ module M :
     let open Smtml in
     let id = Expr.simplify id in
     let ptr = Expr.simplify ptr in
-    match (Expr.view id, Expr.view ptr) with
-    | Val (Bitv id), Val (Bitv ptr)
+    match (id, ptr) with
+    | Imm (Bitv id), Imm (Bitv ptr)
       when Bitvector.numbits id = 32 && Bitvector.numbits ptr = 32 ->
       let id = Bitvector.to_int32 id in
       let ptr = Bitvector.to_int32 ptr in

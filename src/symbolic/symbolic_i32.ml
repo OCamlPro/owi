@@ -13,23 +13,23 @@ let zero = of_concrete 0l
 let one = of_concrete 1l
 
 let to_boolean (e : t) : Symbolic_boolean.t =
-  match view e with
-  | Val (Bitv bv) ->
+  match e with
+  | Imm (Bitv bv) ->
     if Smtml.Bitvector.eqz bv then Symbolic_boolean.false_
     else Symbolic_boolean.true_
-  | Ptr _ -> Symbolic_boolean.true_
-  | Symbol { ty = Ty_bool; _ } -> Symbolic_boolean.of_expr e
-  | Cvtop (_, OfBool, cond) -> Symbolic_boolean.of_expr cond
+  | Sym { node = Ptr _; _ } -> Symbolic_boolean.true_
+  | Sym { node = Symbol { ty = Ty_bool; _ }; _ } -> Symbolic_boolean.of_expr e
+  | Sym { node = Cvtop (_, OfBool, cond); _ } -> Symbolic_boolean.of_expr cond
   | _ ->
     let e = cvtop ty ToBool e in
     Symbolic_boolean.of_expr e
 
 let of_boolean (e : Symbolic_boolean.t) : t =
   let e = Symbolic_boolean.to_expr e in
-  match view e with
-  | Val True -> one
-  | Val False -> zero
-  | Cvtop (Ty_bitv 32, ToBool, e') -> e'
+  match e with
+  | Imm True -> one
+  | Imm False -> zero
+  | Sym { node = Cvtop (Ty_bitv 32, ToBool, e'); _ } -> e'
   | _ -> cvtop (Ty_bitv 32) OfBool e
 
 let clz e = unop ty Clz e
@@ -53,10 +53,11 @@ let rem e1 e2 = binop ty Rem e1 e2
 let unsigned_rem e1 e2 = binop ty RemU e1 e2
 
 let boolify e =
-  match view e with
-  | Val (Bitv bv) when Smtml.Bitvector.eqz bv -> Some Symbolic_boolean.false_
-  | Val (Bitv bv) when Smtml.Bitvector.eq_one bv -> Some Symbolic_boolean.true_
-  | Cvtop (_, OfBool, cond) -> Some (Symbolic_boolean.of_expr cond)
+  match e with
+  | Imm (Bitv bv) when Smtml.Bitvector.eqz bv -> Some Symbolic_boolean.false_
+  | Imm (Bitv bv) when Smtml.Bitvector.eq_one bv -> Some Symbolic_boolean.true_
+  | Sym { node = Cvtop (_, OfBool, cond); _ } ->
+    Some (Symbolic_boolean.of_expr cond)
   | _ -> None
 
 let logand e1 e2 =

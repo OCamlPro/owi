@@ -80,9 +80,9 @@ let run exploration_strategy ~workers solver t thread ~at_worker_value
 let add_pc (c : Symbolic_boolean.t) =
   let c = Symbolic_boolean.to_expr c in
   let c = Smtml.Expr.simplify c in
-  match Smtml.Expr.view c with
-  | Val True -> Eval_monad.return ()
-  | Val False -> stop
+  match c with
+  | Smtml.Expr.Imm True -> Eval_monad.return ()
+  | Imm False -> stop
   | _ ->
     let* thread in
     let c = Symbolic_boolean.of_expr c in
@@ -179,10 +179,10 @@ let select_inner ~explore_first ?(with_breadcrumbs = true)
   ~check_only_true_branch (cond : Symbolic_boolean.t) ~prio_true ~prio_false =
   let cond = Symbolic_boolean.to_expr cond in
   let cond = Smtml.Expr.simplify cond in
-  match Smtml.Expr.view cond with
-  | Val True -> Eval_monad.return true
-  | Val False -> Eval_monad.return false
-  | Val (Bitv _bv) -> Fmt.failwith "unreachable (type error)"
+  match cond with
+  | Smtml.Expr.Imm True -> Eval_monad.return true
+  | Imm False -> Eval_monad.return false
+  | Imm (Bitv _bv) -> Fmt.failwith "unreachable (type error)"
   | _ ->
     let is_other_branch_unsat = Atomic.make false in
     let branch condition final_value prio =
@@ -235,8 +235,8 @@ let select (cond : Symbolic_boolean.t) ~prio_true ~prio_false =
 
 let summary_symbol (e : Smtml.Expr.t) =
   let* thread in
-  match Smtml.Expr.view e with
-  | Symbol sym -> Eval_monad.return (None, sym)
+  match e with
+  | Sym { node = Symbol sym; _ } -> Eval_monad.return (None, sym)
   | _ ->
     let num_symbols = thread.num_symbols in
     let+ () = modify_thread Thread.incr_num_symbols in
@@ -248,8 +248,8 @@ let summary_symbol (e : Smtml.Expr.t) =
 
 let select_i32 (i : Symbolic_i32.t) =
   let i = Smtml.Expr.simplify i in
-  match Smtml.Expr.view i with
-  | Val (Bitv bv) when Smtml.Bitvector.numbits bv <= 32 ->
+  match i with
+  | Imm (Bitv bv) when Smtml.Bitvector.numbits bv <= 32 ->
     Eval_monad.return (Smtml.Bitvector.to_int32 bv)
   | _ ->
     let* assign, symbol = summary_symbol i in

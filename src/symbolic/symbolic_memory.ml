@@ -8,10 +8,10 @@ type t = Symbolic_memory_collection.memory =
 
 let address a =
   let open Symbolic_choice in
-  match Smtml.Expr.view a with
-  | Val (Bitv bv) when Smtml.Bitvector.numbits bv <= 32 ->
+  match a with
+  | Smtml.Expr.Imm (Bitv bv) when Smtml.Bitvector.numbits bv <= 32 ->
     return (Smtml.Bitvector.to_int32 bv)
-  | Ptr { base; offset } ->
+  | Sym { node = Ptr { base; offset }; _ } ->
     let base =
       (* TODO: it seems possible to avoid this conversion *)
       Smtml.Bitvector.to_int32 base |> Symbolic_i32.of_concrete
@@ -49,11 +49,11 @@ let storen m a v n =
 
 let validate_address m a range =
   let open Symbolic_choice in
-  match Smtml.Expr.view a with
-  | Val (Bitv _) ->
+  match a with
+  | Smtml.Expr.Imm (Bitv _) ->
     (* An i32 is not a pointer to a heap chunk, so its valid *)
     return (Ok a)
-  | Ptr { base; offset = start_offset } -> (
+  | Sym { node = Ptr { base; offset = start_offset }; _ } -> (
     let base = Smtml.Bitvector.to_int32 base in
     match Map.find_opt base m.chunks with
     | None -> return (Error `Memory_leak_use_after_free)
@@ -79,9 +79,9 @@ let validate_address m a range =
 
 let ptr v =
   let open Symbolic_choice in
-  match Smtml.Expr.view v with
-  | Ptr { base; _ } ->
-    let base = Smtml.Bitvector.to_int32 base in
+  match v with
+  | Smtml.Expr.Sym { node = Ptr ptr; _ } ->
+    let base = Smtml.Bitvector.to_int32 ptr.base in
     return base
   | _ ->
     Log.err (fun m ->
@@ -90,8 +90,8 @@ let ptr v =
 
 let free m p =
   let open Symbolic_choice in
-  match Smtml.Expr.view p with
-  | Val (Bitv bv) when Smtml.Bitvector.eqz bv ->
+  match p with
+  | Smtml.Expr.Imm (Bitv bv) when Smtml.Bitvector.eqz bv ->
     return (Symbolic_i32.of_concrete 0l)
   | _ ->
     let* base = ptr p in
@@ -114,8 +114,8 @@ let page_size = Symbolic_i32.of_concrete 65_536l
 (******************************************)
 
 let i32 v =
-  match Smtml.Expr.view v with
-  | Val (Bitv i) when Smtml.Bitvector.numbits i = 32 ->
+  match v with
+  | Smtml.Expr.Imm (Bitv i) when Smtml.Bitvector.numbits i = 32 ->
     Smtml.Bitvector.to_int32 i
   | _ -> assert false
 
@@ -142,8 +142,8 @@ let load_8_s m a =
   @@
   let+ a = must_be_valid_address m a 1 in
   let v = loadn m a 1 in
-  match Smtml.Expr.view v with
-  | Val (Bitv i8) when Smtml.Bitvector.numbits i8 = 8 ->
+  match v with
+  | Imm (Bitv i8) when Smtml.Bitvector.numbits i8 = 8 ->
     let i8 = Smtml.Bitvector.to_int32 i8 in
     Symbolic_i32.of_concrete (Concrete_i32.extend_s 8 i8)
   | _ -> Smtml.Expr.cvtop (Ty_bitv 32) (Sign_extend 24) v
@@ -154,8 +154,8 @@ let load_8_u m a =
   @@
   let+ a = must_be_valid_address m a 1 in
   let v = loadn m a 1 in
-  match Smtml.Expr.view v with
-  | Val (Bitv i) when Smtml.Bitvector.numbits i = 8 ->
+  match v with
+  | Imm (Bitv i) when Smtml.Bitvector.numbits i = 8 ->
     let i = Smtml.Bitvector.to_int32 i in
     Symbolic_i32.of_concrete i
   | _ -> Smtml.Expr.cvtop (Ty_bitv 32) (Zero_extend 24) v
@@ -166,8 +166,8 @@ let load_16_s m a =
   @@
   let+ a = must_be_valid_address m a 2 in
   let v = loadn m a 2 in
-  match Smtml.Expr.view v with
-  | Val (Bitv i16) when Smtml.Bitvector.numbits i16 = 16 ->
+  match v with
+  | Imm (Bitv i16) when Smtml.Bitvector.numbits i16 = 16 ->
     let i16 = Smtml.Bitvector.to_int32 i16 in
     Symbolic_i32.of_concrete (Int32.extend_s 16 i16)
   | _ -> Smtml.Expr.cvtop (Ty_bitv 32) (Sign_extend 16) v
@@ -178,8 +178,8 @@ let load_16_u m a =
   @@
   let+ a = must_be_valid_address m a 2 in
   let v = loadn m a 2 in
-  match Smtml.Expr.view v with
-  | Val (Bitv i16) when Smtml.Bitvector.numbits i16 = 16 ->
+  match v with
+  | Imm (Bitv i16) when Smtml.Bitvector.numbits i16 = 16 ->
     let i16 = Smtml.Bitvector.to_int32 i16 in
     Symbolic_i32.of_concrete i16
   | _ -> Smtml.Expr.cvtop (Ty_bitv 32) (Zero_extend 16) v
