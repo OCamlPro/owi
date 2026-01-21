@@ -14,7 +14,7 @@ val of_expressions : Smtml.Expr.Set.t -> t
 
 val of_symbol : Smtml.Symbol.t -> t
 
-val pp : Format.formatter -> t -> unit
+val pp : t Fmt.t
 
 val to_scfg : no_value:bool -> Smtml.Model.t -> t -> Scfg.Types.config
 

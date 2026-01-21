@@ -21,5 +21,5 @@ module type T = sig
 
   val of_concrete : Concrete_v128.t -> t
 
-  val pp : Format.formatter -> t -> unit
+  val pp : t Fmt.t
 end

@@ -19,7 +19,7 @@ module type T = sig
     | Extern of Extern.t option
     | Func of Kind.func option
 
-  val pp : Format.formatter -> t -> unit
+  val pp : t Fmt.t
 
   val null : Text.heap_type -> t
 

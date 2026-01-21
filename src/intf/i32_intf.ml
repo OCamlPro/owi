@@ -33,5 +33,5 @@ module type T = sig
 
   val of_int : int -> t
 
-  val pp : Format.formatter -> t -> unit
+  val pp : t Fmt.t
 end

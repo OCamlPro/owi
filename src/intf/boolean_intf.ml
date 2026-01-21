@@ -17,5 +17,5 @@ module type T = sig
 
   val and_ : t -> t -> t
 
-  val pp : Format.formatter -> t -> unit
+  val pp : t Fmt.t
 end

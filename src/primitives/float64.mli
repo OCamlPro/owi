@@ -72,4 +72,4 @@ val to_float : t -> Float.t
 
 val of_float : Float.t -> t
 
-val pp : Format.formatter -> t -> unit
+val pp : t Fmt.t

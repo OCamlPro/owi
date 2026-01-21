@@ -62,5 +62,5 @@ module type T = sig
     | V128 of v128
     | Ref of Ref.t
 
-  val pp : Format.formatter -> t -> unit
+  val pp : t Fmt.t
 end

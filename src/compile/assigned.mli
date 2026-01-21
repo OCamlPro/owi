@@ -26,4 +26,4 @@ val get_types : t -> Text.func_type Array.t
 
 val find_raw_type : t -> Text.func_type -> Binary.indice
 
-val pp : Format.formatter -> t -> unit
+val pp : t Fmt.t

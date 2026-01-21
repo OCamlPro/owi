@@ -5,7 +5,7 @@
 module type VariableType = sig
   type t
 
-  val pp : Format.formatter -> t -> unit
+  val pp : t Fmt.t
 
   val equal : t -> t -> bool
 
@@ -17,8 +17,7 @@ module type S = sig
 
   type key
 
-  val print :
-    (Format.formatter -> 'a -> unit) -> Format.formatter -> 'a t -> unit
+  val print : 'a Fmt.t -> 'a t Fmt.t
 
   val empty : 'a t
 
