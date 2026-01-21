@@ -16,19 +16,13 @@ let empty_stats () =
   }
 
 let handle_time_span atomic_span f =
-  if Log.is_bench_enabled () then
+  if Log.is_bench_enabled () then (
     let counter = Mtime_clock.counter () in
     (* f is supposed to take a long time! *)
     let res = f () in
     let span = Mtime_clock.count counter in
-    let rec atomic_set () =
-      let curr = Atomic.get atomic_span in
-      let success =
-        Atomic.compare_and_set atomic_span curr (Mtime.Span.add curr span)
-      in
-      if success then res else atomic_set ()
-    in
-    atomic_set ()
+    Multicore.atomic_modify (Mtime.Span.add span) atomic_span;
+    res )
   else f ()
 
 let with_utime f =
