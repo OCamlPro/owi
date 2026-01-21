@@ -79,6 +79,7 @@
   log
   memory_intf
   model
+  multicore
   origin
   owi
   parse

@@ -8,24 +8,35 @@ type t = S : ('a solver_module * 'a) -> t [@@unboxed]
 
 let instances = Atomic.make []
 
-let rec add_solver solver =
-  let l = Atomic.get instances in
-  let success = Atomic.compare_and_set instances l (solver :: l) in
-  if not success then add_solver solver
+let add_solver solver =
+  Multicore.atomic_modify (fun instances -> solver :: instances) instances
 
 let fresh solver_ty () =
   let module Mapping = (val Smtml.Solver_dispatcher.mappings_of_solver solver_ty)
   in
   let module Mapping = Mapping.Fresh.Make () in
-  let module Batch = Smtml.Solver.Cached (Mapping) in
+  let module Batch = Smtml.Solver.Batch (Mapping) in
   let solver_inst = Batch.create ~logic:QF_BVFP () in
   let solver = S ((module Batch), solver_inst) in
   if Log.is_bench_enabled () then add_solver solver;
   solver
 
+let cache = Smtml.Cache.Strong.create 64
+
+let cache_mutex = Mutex.create ()
+
 let check (S (solver_module, s)) pc =
-  let module Solver = (val solver_module) in
-  Solver.check_set s pc
+  let cached =
+    Mutex.protect cache_mutex (fun () -> Smtml.Cache.Strong.find_opt cache pc)
+  in
+  match cached with
+  | Some sat -> sat
+  | None ->
+    let module Solver = (val solver_module) in
+    let sat = Solver.check_set s pc in
+    Mutex.protect cache_mutex (fun () ->
+      Smtml.Cache.Strong.replace cache pc sat );
+    sat
 
 let model_of_path_condition (S (solver_module, s)) ~path_condition :
   Smtml.Model.t Option.t =
@@ -80,20 +91,27 @@ let get_all_stats ~wait_for_all_domains =
       wait_for_all_domains ();
 
     let solvers = Atomic.get instances in
-    List.fold_left
-      (fun stats_acc (S (solver_module, s)) ->
-        let module Solver = (val solver_module) in
-        let stats =
-          try Solver.get_statistics s
-          with Z3.Error _ ->
-            Logs.warn (fun m ->
-              m
-                "could not fetch the statistics of one solver because it was \
-                 canceled, used empty stats instead" );
-            empty_stats
-        in
-        Smtml.Statistics.merge stats stats_acc )
-      empty_stats solvers
+    let stats =
+      List.fold_left
+        (fun stats_acc (S (solver_module, s)) ->
+          let module Solver = (val solver_module) in
+          let stats =
+            try Solver.get_statistics s
+            with Z3.Error _ ->
+              Logs.warn (fun m ->
+                m
+                  "could not fetch the statistics of one solver because it was \
+                   canceled, used empty stats instead" );
+              empty_stats
+          in
+          Smtml.Statistics.merge stats stats_acc )
+        empty_stats solvers
+    in
+    Mutex.protect cache_mutex (fun () ->
+      let hits = Smtml.Cache.Strong.hits cache in
+      let misses = Smtml.Cache.Strong.misses cache in
+      Smtml.Statistics.Map.add "cache hits" (`Int hits) stats
+      |> Smtml.Statistics.Map.add "cache misses" (`Int misses) )
   end
 
 let pp_stats = Smtml.Statistics.pp
