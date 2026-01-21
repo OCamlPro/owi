@@ -134,7 +134,9 @@ let grow m delta =
   let size =
     Symbolic_boolean.ite
       (Symbolic_i32.gt new_size m.size)
-      ~if_true:new_size ~if_false:m.size
+      ~if_true:(Smtml.Typed.unsafe new_size)
+      ~if_false:(Smtml.Typed.unsafe m.size)
+    |> Smtml.Typed.raw
   in
   let m = { m with size } in
   replace m

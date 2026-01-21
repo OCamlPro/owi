@@ -64,9 +64,13 @@ module M :
 
   let symbol_i64 () = Symbolic_choice.with_new_symbol (Ty_bitv 64) Expr.symbol
 
-  let symbol_f32 () = Symbolic_choice.with_new_symbol (Ty_fp 32) Expr.symbol
+  let symbol_f32 () =
+    Symbolic_choice.with_new_symbol (Ty_fp 32) (fun s ->
+      Expr.symbol s |> Smtml.Typed.unsafe )
 
-  let symbol_f64 () = Symbolic_choice.with_new_symbol (Ty_fp 64) Expr.symbol
+  let symbol_f64 () =
+    Symbolic_choice.with_new_symbol (Ty_fp 64) (fun s ->
+      Expr.symbol s |> Smtml.Typed.unsafe )
 
   let symbol_v128 () = Symbolic_choice.with_new_symbol (Ty_bitv 128) Expr.symbol
 

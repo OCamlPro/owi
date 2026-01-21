@@ -1,67 +1,73 @@
-type t = Smtml.Expr.t
-
-open Smtml.Expr
+type t = Smtml.Typed.float32 Smtml.Typed.t
 
 let ty = Smtml.Ty.Ty_fp 32
 
-let of_concrete (f : Float32.t) : t = value (Num (F32 (Float32.to_bits f)))
+let of_concrete (f : Float32.t) : t = Smtml.Typed.Float32.v (Float32.to_bits f)
 
 let zero = of_concrete Float32.zero
 
-let abs x = unop ty Abs x
+let abs x = Smtml.Typed.Float32.abs x
 
-let neg x = unop ty Neg x
+let neg x = Smtml.Typed.Float32.neg x
 
-let sqrt x = unop ty Sqrt x
+let sqrt x = Smtml.Typed.Float32.sqrt x
 
-let ceil x = unop ty Ceil x
+let ceil x = Smtml.Expr.unop ty Ceil (Smtml.Typed.raw x) |> Smtml.Typed.unsafe
 
-let floor x = unop ty Floor x
+let floor x = Smtml.Expr.unop ty Floor (Smtml.Typed.raw x) |> Smtml.Typed.unsafe
 
-let trunc x = unop ty Trunc x
+let trunc x = Smtml.Expr.unop ty Trunc (Smtml.Typed.raw x) |> Smtml.Typed.unsafe
 
-let nearest x = unop ty Nearest x
+let nearest x =
+  Smtml.Expr.unop ty Nearest (Smtml.Typed.raw x) |> Smtml.Typed.unsafe
 
-let add x y = binop ty Add x y
+let add x y = Smtml.Typed.Float32.add x y
 
-let sub x y = binop ty Sub x y
+let sub x y = Smtml.Typed.Float32.sub x y
 
-let mul x y = binop ty Mul x y
+let mul x y = Smtml.Typed.Float32.mul x y
 
-let div x y = binop ty Div x y
+let div x y = Smtml.Typed.Float32.div x y
 
-let min x y = binop ty Min x y
+let min x y = Smtml.Typed.Float32.min x y
 
-let max x y = binop ty Max x y
+let max x y = Smtml.Typed.Float32.max x y
 
-let copy_sign x y = binop ty Copysign x y
+let copy_sign x y =
+  Smtml.Expr.binop ty Copysign (Smtml.Typed.raw x) (Smtml.Typed.raw y)
+  |> Smtml.Typed.unsafe
 
-let eq x y = relop ty Eq x y |> Symbolic_boolean.of_expr
+let eq x y = Smtml.Typed.Float32.eq x y
 
-let ne x y = relop ty Ne x y |> Symbolic_boolean.of_expr
+let ne x y =
+  Smtml.Expr.relop ty Ne (Smtml.Typed.raw x) (Smtml.Typed.raw y)
+  |> Smtml.Typed.unsafe
 
-let lt x y = relop ty Lt x y |> Symbolic_boolean.of_expr
+let lt x y = Smtml.Typed.Float32.lt x y
 
-let gt x y = relop ty Gt x y |> Symbolic_boolean.of_expr
+let gt x y = Smtml.Typed.Float32.gt x y
 
-let le x y = relop ty Le x y |> Symbolic_boolean.of_expr
+let le x y = Smtml.Typed.Float32.le x y
 
-let ge x y = relop ty Ge x y |> Symbolic_boolean.of_expr
+let ge x y = Smtml.Typed.Float32.ge x y
 
-let convert_i32_s x = cvtop ty ConvertSI32 x
+let convert_i32_s x = Smtml.Expr.cvtop ty ConvertSI32 x |> Smtml.Typed.unsafe
 
-let convert_i32_u x = cvtop ty ConvertUI32 x
+let convert_i32_u x = Smtml.Expr.cvtop ty ConvertUI32 x |> Smtml.Typed.unsafe
 
-let convert_i64_s x = cvtop ty ConvertSI64 x
+let convert_i64_s x = Smtml.Expr.cvtop ty ConvertSI64 x |> Smtml.Typed.unsafe
 
-let convert_i64_u x = cvtop ty ConvertUI64 x
+let convert_i64_u x = Smtml.Expr.cvtop ty ConvertUI64 x |> Smtml.Typed.unsafe
 
-let demote_f64 x = cvtop ty DemoteF64 x
+let demote_f64 x =
+  Smtml.Expr.cvtop ty DemoteF64 (Smtml.Typed.raw x) |> Smtml.Typed.unsafe
 
-let reinterpret_i32 x = cvtop ty Reinterpret_int x
+let reinterpret_i32 x =
+  Smtml.Expr.cvtop ty Reinterpret_int x |> Smtml.Typed.unsafe
 
-let of_bits x = cvtop ty Reinterpret_int x
+let of_bits x = Smtml.Expr.cvtop ty Reinterpret_int x |> Smtml.Typed.unsafe
 
-let to_bits x = cvtop (Ty_bitv 32) Reinterpret_float x
+let to_bits x =
+  Smtml.Expr.cvtop (Ty_bitv 32) Reinterpret_float (Smtml.Typed.raw x)
 
-let pp = pp
+let pp fmt x = Smtml.Expr.pp fmt (Smtml.Typed.raw x)
