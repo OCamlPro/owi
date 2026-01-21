@@ -142,7 +142,7 @@ module type T = sig
 
   val of_int : int -&gt; t
 
-  val pp : Format.formatter -&gt; t -&gt; unit
+  val pp : t Fmt.t
 end
 </code></pre>
       </div>

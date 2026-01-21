@@ -223,7 +223,7 @@ module type T = sig
     | V128 of v128
     | Ref of Ref.t
 
-  val pp : Format.formatter -&gt; t -&gt; unit
+  val pp : t Fmt.t
 end
 </code></pre>
       </div>

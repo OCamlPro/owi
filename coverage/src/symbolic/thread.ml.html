@@ -277,8 +277,8 @@ module Collection = struct
     type t = int * int
 
     let compare (l1, r1) (l2, r2) =
-      <span data-count="3176674">l</span>et res = compare l1 l2 in
-      <span data-count="3176675">i</span>f l1 = l2 then <span data-count="3176673">c</span>ompare r1 r2 else <span data-count="0">r</span>es
+      <span data-count="3176020">l</span>et res = compare l1 l2 in
+      <span data-count="3176022">i</span>f l1 = l2 then <span data-count="3176021">c</span>ompare r1 r2 else <span data-count="0">r</span>es
   end
 
   module Int_pair_map = Map.Make (Int_pair)
@@ -288,11 +288,11 @@ module Collection = struct
   let empty = Int_pair_map.empty
 
   let find collection ~env_id ~id =
-    <span data-count="2167627">l</span>et loc = (env_id, id) in
+    <span data-count="2167119">l</span>et loc = (env_id, id) in
     Int_pair_map.find_opt loc collection
 
   let replace collection ~env_id ~id v =
-    <span data-count="1010018">l</span>et loc = (env_id, id) in
+    <span data-count="1009884">l</span>et loc = (env_id, id) in
     Int_pair_map.add loc v collection
 end
 
@@ -344,17 +344,17 @@ let add_symbol t s =
   { t with symbol_scopes = symbo<span data-count="1432">l</span> s t.symbol_scopes }
 
 let add_pc t c =
-  <span data-count="28339">l</span>et pc = Symbolic_path_condition.add c t.pc in
-  <span data-count="28342">{</span> t with pc }
+  <span data-count="28249">l</span>et pc = Symbolic_path_condition.add c t.pc in
+  <span data-count="28250">{</span> t with pc }
 
 let add_breadcrumb t crumb =
-  <span data-count="25959">l</span>et breadcrumbs = crumb :: t.breadcrumbs in
+  <span data-count="25913">l</span>et breadcrumbs = crumb :: t.breadcrumbs in
   let depth = t.depth + 1 in
   { t with breadcrumbs; depth }
 
 let incr_num_symbols t =
-  <span data-count="1580">l</span>et num_symbols = succ t.num_symbols in
-  <span data-count="1580">{</span> t with num_symbols }
+  <span data-count="1582">l</span>et num_symbols = succ t.num_symbols in
+  <span data-count="1582">{</span> t with num_symbols }
 
 let add_label t label = <span data-count="2">{</span> t with labels = label :: t.labels }
 
@@ -366,14 +366,14 @@ let close_scope t =
   <span data-count="10">l</span>et open Symbol_scope in
   { t with symbol_scopes = close_scop<span data-count="10">e</span> t.symbol_scopes }
 
-let incr_path_count t = <span data-count="13869">A</span>tomic.incr t.bench_stats.path_count
+let incr_path_count t = <span data-count="13824">A</span>tomic.incr t.bench_stats.path_count
 
 let replace_memory (memory : Symbolic_memory0.t) thread =
-  <span data-count="1007094">l</span>et memories = thread.memories in
+  <span data-count="1007003">l</span>et memories = thread.memories in
   let memories =
     Collection.replace memories ~env_id:memory.env_id ~id:memory.id memory
   in
-  <span data-count="1007094">{</span> thread with memories }
+  <span data-count="1006998">{</span> thread with memories }
 
 let replace_table (table : Symbolic_table0.t) thread =
   <span data-count="777">l</span>et tables = thread.tables in
@@ -383,11 +383,11 @@ let replace_table (table : Symbolic_table0.t) thread =
   <span data-count="777">{</span> thread with tables }
 
 let replace_global (global : Symbolic_global0.t) thread =
-  <span data-count="2150">l</span>et globals = thread.globals in
+  <span data-count="2107">l</span>et globals = thread.globals in
   let globals =
     Collection.replace globals ~env_id:global.env_id ~id:global.id global
   in
-  <span data-count="2149">{</span> thread with globals }
+  <span data-count="2107">{</span> thread with globals }
 </code></pre>
       </div>
     </div>

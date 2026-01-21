@@ -118,7 +118,7 @@ module type T = sig
 
   val of_concrete : Float32.t -&gt; t
 
-  val pp : Format.formatter -&gt; t -&gt; unit
+  val pp : t Fmt.t
 end
 </code></pre>
       </div>
