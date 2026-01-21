@@ -110,8 +110,16 @@ let get_all_stats ~wait_for_all_domains =
     Mutex.protect cache_mutex (fun () ->
       let hits = Smtml.Cache.Strong.hits cache in
       let misses = Smtml.Cache.Strong.misses cache in
-      Smtml.Statistics.Map.add "cache hits" (`Int hits) stats
-      |> Smtml.Statistics.Map.add "cache misses" (`Int misses) )
+      let total = hits + misses in
+      if total = 0 then stats
+      else
+        let hits_ratio =
+          if hits = 0 then 0.
+          else Float.of_int hits /. Float.of_int total *. 100.
+        in
+        Smtml.Statistics.Map.add "cache hits" (`Int hits) stats
+        |> Smtml.Statistics.Map.add "cache misses" (`Int misses)
+        |> Smtml.Statistics.Map.add "cache hits ratio" (`Float hits_ratio) )
   end
 
 let pp_stats = Smtml.Statistics.pp
