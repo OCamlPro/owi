@@ -23,9 +23,7 @@ val imported :
 val pp :
      pp_local:'local Fmt.t
   -> pp_imported:'imported Fmt.t
-  -> Format.formatter
-  -> ('local, 'imported) t
-  -> unit
+  -> ('local, 'imported) t Fmt.t
 
 val map :
      f_local:('local -> 'local2)

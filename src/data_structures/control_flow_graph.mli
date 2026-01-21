@@ -18,7 +18,7 @@ val length : t -> int
 
 val succ : t -> Vertex.t -> Vertex.t list
 
-val pp : Format.formatter -> t -> unit
+val pp : t Fmt.t
 
 val iter_vertex : (Vertex.t -> unit) -> t -> unit
 

@@ -10,7 +10,7 @@ module Coverage_criteria : sig
 
   val of_string : string -> (t, [ `Msg of string ]) Prelude.Result.t
 
-  val pp : Format.formatter -> t -> unit
+  val pp : t Fmt.t
 end
 
 val annotate : Coverage_criteria.t -> Binary.Module.t -> Binary.Module.t

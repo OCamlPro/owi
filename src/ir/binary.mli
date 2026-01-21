@@ -101,7 +101,7 @@ type instr =
 
 and expr = instr Annotated.t list
 
-val pp_instr : short:bool -> Format.formatter -> instr -> unit
+val pp_instr : short:bool -> instr Fmt.t
 
 val iter_expr : (instr -> unit) -> expr Annotated.t -> unit
 

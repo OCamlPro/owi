@@ -14,7 +14,7 @@ val init :
 
 val nb_vertex : t -> int
 
-val pp : Format.formatter -> t -> unit
+val pp : t Fmt.t
 
 val iter_vertex : (Vertex.t -> unit) -> t -> unit
 

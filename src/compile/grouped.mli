@@ -33,4 +33,4 @@ type t = private
 
 val of_text : Module.t -> t
 
-val pp : Format.formatter -> t -> unit
+val pp : t Fmt.t

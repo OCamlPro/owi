@@ -4,9 +4,9 @@
 
 exception Parse_fail of string
 
-val pp_id_opt : Format.formatter -> string option -> unit
+val pp_id_opt : string option Fmt.t
 
-val pp_newline : Format.formatter -> unit -> unit
+val pp_newline : unit Fmt.t
 
 (* identifiers *)
 
@@ -14,9 +14,9 @@ type indice =
   | Text of string
   | Raw of int
 
-val pp_indice : Format.formatter -> indice -> unit
+val pp_indice : indice Fmt.t
 
-val pp_indice_opt : Format.formatter -> indice option -> unit
+val pp_indice_opt : indice option Fmt.t
 
 type nonrec num_type =
   | I32
@@ -25,7 +25,7 @@ type nonrec num_type =
   | F64
   | V128
 
-val pp_num_type : Format.formatter -> num_type -> unit
+val pp_num_type : num_type Fmt.t
 
 val num_type_eq : num_type -> num_type -> bool
 
@@ -43,7 +43,7 @@ type nonrec nn =
   | S32
   | S64
 
-val pp_nn : Format.formatter -> nn -> unit
+val pp_nn : nn Fmt.t
 
 type nonrec ishape =
   | I8x16
@@ -51,7 +51,7 @@ type nonrec ishape =
   | I32x4
   | I64x2
 
-val pp_ishape : Format.formatter -> ishape -> unit
+val pp_ishape : ishape Fmt.t
 
 type nonrec fshape =
   | F32x4
@@ -61,14 +61,14 @@ type nonrec sx =
   | U
   | S
 
-val pp_sx : Format.formatter -> sx -> unit
+val pp_sx : sx Fmt.t
 
 type nonrec iunop =
   | Clz
   | Ctz
   | Popcnt
 
-val pp_iunop : Format.formatter -> iunop -> unit
+val pp_iunop : iunop Fmt.t
 
 type nonrec funop =
   | Abs
@@ -79,13 +79,13 @@ type nonrec funop =
   | Trunc
   | Nearest
 
-val pp_funop : Format.formatter -> funop -> unit
+val pp_funop : funop Fmt.t
 
 type nonrec vibinop =
   | Add
   | Sub
 
-val pp_vibinop : Format.formatter -> vibinop -> unit
+val pp_vibinop : vibinop Fmt.t
 
 type nonrec ibinop =
   | Add
@@ -101,7 +101,7 @@ type nonrec ibinop =
   | Rotl
   | Rotr
 
-val pp_ibinop : Format.formatter -> ibinop -> unit
+val pp_ibinop : ibinop Fmt.t
 
 type nonrec fbinop =
   | Add
@@ -112,12 +112,12 @@ type nonrec fbinop =
   | Max
   | Copysign
 
-val pp_fbinop : Format.formatter -> fbinop -> unit
+val pp_fbinop : fbinop Fmt.t
 
 (* TODO: inline this *)
 type nonrec itestop = Eqz
 
-val pp_itestop : Format.formatter -> itestop -> unit
+val pp_itestop : itestop Fmt.t
 
 type nonrec irelop =
   | Eq
@@ -127,7 +127,7 @@ type nonrec irelop =
   | Le of sx
   | Ge of sx
 
-val pp_irelop : Format.formatter -> irelop -> unit
+val pp_irelop : irelop Fmt.t
 
 type nonrec frelop =
   | Eq
@@ -137,21 +137,21 @@ type nonrec frelop =
   | Le
   | Ge
 
-val pp_frelop : Format.formatter -> frelop -> unit
+val pp_frelop : frelop Fmt.t
 
 type nonrec memarg =
   { offset : Int32.t
   ; align : Int32.t
   }
 
-val pp_memarg : Format.formatter -> memarg -> unit
+val pp_memarg : memarg Fmt.t
 
 type nonrec limits =
   { min : int
   ; max : int option
   }
 
-val pp_limits : Format.formatter -> limits -> unit
+val pp_limits : limits Fmt.t
 
 (** Structure *)
 
@@ -161,13 +161,13 @@ type heap_type =
   | Func_ht
   | Extern_ht
 
-val pp_heap_type : Format.formatter -> heap_type -> unit
+val pp_heap_type : heap_type Fmt.t
 
 val heap_type_eq : heap_type -> heap_type -> bool
 
 type nonrec ref_type = nullable * heap_type
 
-val pp_ref_type : Format.formatter -> ref_type -> unit
+val pp_ref_type : ref_type Fmt.t
 
 val ref_type_eq : ref_type -> ref_type -> bool
 
@@ -181,15 +181,15 @@ type nonrec param = string option * val_type
 
 type nonrec param_type = param list
 
-val pp_param_type : Format.formatter -> param_type -> unit
+val pp_param_type : param_type Fmt.t
 
 type nonrec result_type = val_type list
 
-val pp_result_type : Format.formatter -> result_type -> unit
+val pp_result_type : result_type Fmt.t
 
 type nonrec func_type = param_type * result_type
 
-val pp_func_type : Format.formatter -> func_type -> unit
+val pp_func_type : func_type Fmt.t
 
 val compare_func_type : func_type -> func_type -> int
 
@@ -199,7 +199,7 @@ type block_type =
   | Bt_ind of indice
   | Bt_raw of (indice option * func_type)
 
-val pp_block_type : Format.formatter -> block_type -> unit
+val pp_block_type : block_type Fmt.t
 
 (** Instructions *)
 
@@ -300,32 +300,32 @@ module Func : sig
     ; id : string option
     }
 
-  val pp : Format.formatter -> t -> unit
+  val pp : t Fmt.t
 end
 
 module Typedef : sig
   type t = string option * func_type
 
-  val pp : Format.formatter -> t -> unit
+  val pp : t Fmt.t
 end
 
 module Table : sig
   module Type : sig
     type nonrec t = limits * ref_type
 
-    val pp : Format.formatter -> t -> unit
+    val pp : t Fmt.t
   end
 
   type t = string option * Type.t
 
-  val pp : Format.formatter -> t -> unit
+  val pp : t Fmt.t
 end
 
 module Global : sig
   module Type : sig
     type nonrec t = mut * val_type
 
-    val pp : Format.formatter -> t -> unit
+    val pp : t Fmt.t
   end
 
   type t =
@@ -334,7 +334,7 @@ module Global : sig
     ; id : string option
     }
 
-  val pp : Format.formatter -> t -> unit
+  val pp : t Fmt.t
 end
 
 module Data : sig
@@ -350,7 +350,7 @@ module Data : sig
     ; mode : Mode.t
     }
 
-  val pp : Format.formatter -> t -> unit
+  val pp : t Fmt.t
 end
 
 module Elem : sig
@@ -368,7 +368,7 @@ module Elem : sig
     ; mode : Mode.t
     }
 
-  val pp : Format.formatter -> t -> unit
+  val pp : t Fmt.t
 end
 
 module Import : sig
@@ -406,7 +406,7 @@ end
 module Mem : sig
   type nonrec t = string option * limits
 
-  val pp : Format.formatter -> t -> unit
+  val pp : t Fmt.t
 end
 
 module Module : sig
@@ -423,7 +423,7 @@ module Module : sig
       | Import of Import.t
       | Export of Export.t
 
-    val pp : Format.formatter -> t -> unit
+    val pp : t Fmt.t
   end
 
   type t =
@@ -431,5 +431,5 @@ module Module : sig
     ; fields : Field.t list
     }
 
-  val pp : Format.formatter -> t -> unit
+  val pp : t Fmt.t
 end
