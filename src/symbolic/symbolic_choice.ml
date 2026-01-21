@@ -266,8 +266,7 @@ let select_i32 (i : Symbolic_i32.t) =
       let s = Smtml.Expr.symbol symbol in
       (* TODO: everything which follows look like select_inner and could probably be simplified by calling it directly! *)
       let this_value_cond =
-        let open Smtml.Expr in
-        Bitv.I32.(s = v i) |> Symbolic_boolean.of_expr
+        Smtml.Expr.Bitv.I32.(s = v i) |> Symbolic_boolean.of_expr
       in
       let not_this_value_cond = Symbolic_boolean.not this_value_cond in
       let this_val_branch =
@@ -336,9 +335,15 @@ let ite (c : Symbolic_boolean.t) ~(if_true : Symbolic_value.t)
   ~(if_false : Symbolic_value.t) : Symbolic_value.t t =
   match (if_true, if_false) with
   | I32 if_true, I32 if_false ->
-    return (Symbolic_value.I32 (Symbolic_boolean.ite c ~if_true ~if_false))
+    let if_true = Smtml.Typed.unsafe if_true in
+    let if_false = Smtml.Typed.unsafe if_false in
+    let res = Symbolic_boolean.ite c ~if_true ~if_false |> Smtml.Typed.raw in
+    return (Symbolic_value.I32 res)
   | I64 if_true, I64 if_false ->
-    return (Symbolic_value.I64 (Symbolic_boolean.ite c ~if_true ~if_false))
+    let if_true = Smtml.Typed.unsafe if_true in
+    let if_false = Smtml.Typed.unsafe if_false in
+    let res = Symbolic_boolean.ite c ~if_true ~if_false |> Smtml.Typed.raw in
+    return (Symbolic_value.I64 res)
   | F32 if_true, F32 if_false ->
     return (Symbolic_value.F32 (Symbolic_boolean.ite c ~if_true ~if_false))
   | F64 if_true, F64 if_false ->
