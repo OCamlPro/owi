@@ -1,3 +1,5 @@
+include Smtml.Typed.Bitv32
+
 type t = Smtml.Typed.bitv32 Smtml.Typed.t
 
 let ty = Smtml.Ty.Ty_bitv 32
@@ -40,19 +42,9 @@ let ctz e = Smtml.Expr.unop ty Ctz (Smtml.Typed.raw e) |> Smtml.Typed.unsafe
 let popcnt e =
   Smtml.Expr.unop ty Popcnt (Smtml.Typed.raw e) |> Smtml.Typed.unsafe
 
-let add e1 e2 = Smtml.Typed.Bitv32.add e1 e2
-
-let sub e1 e2 = Smtml.Typed.Bitv32.sub e1 e2
-
-let mul e1 e2 = Smtml.Typed.Bitv32.mul e1 e2
-
-let div e1 e2 = Smtml.Typed.Bitv32.div e1 e2
-
 let unsigned_div e1 e2 =
   Smtml.Expr.binop ty DivU (Smtml.Typed.raw e1) (Smtml.Typed.raw e2)
   |> Smtml.Typed.unsafe
-
-let rem e1 e2 = Smtml.Typed.Bitv32.rem e1 e2
 
 let unsigned_rem e1 e2 =
   Smtml.Expr.binop ty RemU (Smtml.Typed.raw e1) (Smtml.Typed.raw e2)
@@ -75,10 +67,6 @@ let logor e1 e2 =
   | Some b1, Some b2 -> of_boolean (Symbolic_boolean.or_ b1 b2)
   | _ -> Smtml.Typed.Bitv32.logor e1 e2
 
-let logxor e1 e2 = Smtml.Typed.Bitv32.logxor e1 e2
-
-let shl e1 e2 = Smtml.Typed.Bitv32.shl e1 e2
-
 let shr_s e1 e2 = Smtml.Typed.Bitv32.ashr e1 e2
 
 let shr_u e1 e2 = Smtml.Typed.Bitv32.lshr e1 e2
@@ -91,27 +79,9 @@ let eq_concrete (e : t) (c : Int32.t) : Symbolic_boolean.t =
   let c = of_concrete c in
   Smtml.Typed.Bitv32.eq c e
 
-let eq e1 e2 : Symbolic_boolean.t = Smtml.Typed.Bitv32.eq e1 e2
-
 let ne e1 e2 : Symbolic_boolean.t =
   Smtml.Expr.relop Ty_bool Ne (Smtml.Typed.raw e1) (Smtml.Typed.raw e2)
   |> Symbolic_boolean.of_expr
-
-let lt e1 e2 : Symbolic_boolean.t = Smtml.Typed.Bitv32.lt e1 e2
-
-let gt e1 e2 : Symbolic_boolean.t = Smtml.Typed.Bitv32.gt e1 e2
-
-let lt_u e1 e2 : Symbolic_boolean.t = Smtml.Typed.Bitv32.lt_u e1 e2
-
-let gt_u e1 e2 : Symbolic_boolean.t = Smtml.Typed.Bitv32.gt_u e1 e2
-
-let le e1 e2 : Symbolic_boolean.t = Smtml.Typed.Bitv32.le e1 e2
-
-let ge e1 e2 : Symbolic_boolean.t = Smtml.Typed.Bitv32.ge e1 e2
-
-let le_u e1 e2 : Symbolic_boolean.t = Smtml.Typed.Bitv32.le_u e1 e2
-
-let ge_u e1 e2 : Symbolic_boolean.t = Smtml.Typed.Bitv32.ge_u e1 e2
 
 let trunc_f32_s x =
   try
@@ -166,7 +136,5 @@ let extend_s n x =
     (Sign_extend (32 - n))
     (Smtml.Expr.extract (Smtml.Typed.raw x) ~high:(n / 8) ~low:0)
   |> Smtml.Typed.unsafe
-
-let pp fmt x = Smtml.Typed.Bitv32.pp fmt x
 
 let symbol s = Smtml.Expr.symbol s |> Smtml.Typed.unsafe
