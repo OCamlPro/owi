@@ -2,6 +2,8 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
+include Smtml.Typed.Bitv128
+
 type t = Smtml.Typed.bitv128 Smtml.Typed.t
 
 let of_concrete (v : Concrete_v128.t) : t =
@@ -30,5 +32,3 @@ let to_i64x2 v =
   let a = Smtml.Typed.Bitv128.extract v ~low:8 ~high:16 in
   let b = Smtml.Typed.Bitv128.extract v ~low:0 ~high:8 in
   (a, b)
-
-let pp ppf v = Smtml.Typed.Bitv128.pp ppf v
