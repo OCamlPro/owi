@@ -2,8 +2,6 @@ include Smtml.Typed.Bitv32
 
 type t = Smtml.Typed.bitv32 Smtml.Typed.t
 
-let ty = Smtml.Ty.Ty_bitv 32
-
 let of_concrete (i : Int32.t) : t =
   Smtml.Typed.Bitv32.v (Smtml.Bitvector.of_int32 i)
 
@@ -59,57 +57,25 @@ let eq_concrete (e : t) (c : Int32.t) : Symbolic_boolean.t =
   Smtml.Typed.Bitv32.eq c e
 
 let trunc_f32_s x =
-  try
-    Ok (Smtml.Expr.cvtop ty TruncSF32 (Smtml.Typed.raw x) |> Smtml.Typed.unsafe)
+  try Ok (Smtml.Typed.Bitv32.trunc_f32_s x)
   with
   | Smtml.Eval.Eval_error ((`Integer_overflow | `Conversion_to_integer) as e) ->
     Error e
 
 let trunc_f32_u x =
-  try
-    Ok (Smtml.Expr.cvtop ty TruncUF32 (Smtml.Typed.raw x) |> Smtml.Typed.unsafe)
+  try Ok (Smtml.Typed.Bitv32.trunc_f32_u x)
   with
   | Smtml.Eval.Eval_error ((`Integer_overflow | `Conversion_to_integer) as e) ->
     Error e
 
 let trunc_f64_s x =
-  try
-    Ok (Smtml.Expr.cvtop ty TruncSF64 (Smtml.Typed.raw x) |> Smtml.Typed.unsafe)
+  try Ok (Smtml.Typed.Bitv32.trunc_f64_s x)
   with
   | Smtml.Eval.Eval_error ((`Integer_overflow | `Conversion_to_integer) as e) ->
     Error e
 
 let trunc_f64_u x =
-  try
-    Ok (Smtml.Expr.cvtop ty TruncUF64 (Smtml.Typed.raw x) |> Smtml.Typed.unsafe)
+  try Ok (Smtml.Typed.Bitv32.trunc_f64_u x)
   with
   | Smtml.Eval.Eval_error ((`Integer_overflow | `Conversion_to_integer) as e) ->
     Error e
-
-let trunc_sat_f32_s x =
-  Smtml.Expr.cvtop ty Trunc_sat_f32_s (Smtml.Typed.raw x) |> Smtml.Typed.unsafe
-
-let trunc_sat_f32_u x =
-  Smtml.Expr.cvtop ty Trunc_sat_f32_u (Smtml.Typed.raw x) |> Smtml.Typed.unsafe
-
-let trunc_sat_f64_s x =
-  Smtml.Expr.cvtop ty Trunc_sat_f64_s (Smtml.Typed.raw x) |> Smtml.Typed.unsafe
-
-let trunc_sat_f64_u x =
-  Smtml.Expr.cvtop ty Trunc_sat_f64_u (Smtml.Typed.raw x) |> Smtml.Typed.unsafe
-
-let reinterpret_f32 x =
-  Smtml.Expr.cvtop ty Reinterpret_float (Smtml.Typed.raw x)
-  |> Smtml.Typed.unsafe
-
-let wrap_i64 x =
-  Smtml.Expr.cvtop ty WrapI64 (Smtml.Typed.raw x) |> Smtml.Typed.unsafe
-
-(* FIXME: This is probably wrong? *)
-let extend_s n x =
-  Smtml.Expr.cvtop ty
-    (Sign_extend (32 - n))
-    (Smtml.Expr.extract (Smtml.Typed.raw x) ~high:(n / 8) ~low:0)
-  |> Smtml.Typed.unsafe
-
-let symbol s = Smtml.Expr.symbol s |> Smtml.Typed.unsafe

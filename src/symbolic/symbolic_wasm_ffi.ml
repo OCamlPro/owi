@@ -62,22 +62,19 @@ module M :
       |> Smtml.Typed.unsafe )
 
   let symbol_i32 () =
-    Symbolic_choice.with_new_symbol (Ty_bitv 32) (fun s ->
-      Expr.symbol s |> Smtml.Typed.unsafe )
+    Symbolic_choice.with_new_symbol (Ty_bitv 32) Smtml.Typed.Bitv32.symbol
 
   let symbol_i64 () =
-    Symbolic_choice.with_new_symbol (Ty_bitv 64) (fun s ->
-      Expr.symbol s |> Smtml.Typed.unsafe )
+    Symbolic_choice.with_new_symbol (Ty_bitv 64) Smtml.Typed.Bitv64.symbol
 
   let symbol_f32 () =
-    Symbolic_choice.with_new_symbol (Ty_fp 32) (fun s ->
-      Expr.symbol s |> Smtml.Typed.unsafe )
+    Symbolic_choice.with_new_symbol (Ty_fp 32) Smtml.Typed.Float32.symbol
 
   let symbol_f64 () =
-    Symbolic_choice.with_new_symbol (Ty_fp 64) (fun s ->
-      Expr.symbol s |> Smtml.Typed.unsafe )
+    Symbolic_choice.with_new_symbol (Ty_fp 64) Smtml.Typed.Float64.symbol
 
-  let symbol_v128 () = Symbolic_choice.with_new_symbol (Ty_bitv 128) Expr.symbol
+  let symbol_v128 () =
+    Symbolic_choice.with_new_symbol (Ty_bitv 128) Smtml.Typed.Bitv128.symbol
 
   let symbol_range (lo : Symbolic_i32.t) (hi : Symbolic_i32.t) =
     let open Symbolic_choice in
