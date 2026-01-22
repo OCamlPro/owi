@@ -8,8 +8,8 @@ let
     src = pkgs.fetchFromGitHub {
       owner = "formalsec";
       repo = "smtml";
-      rev = "d0db3aadc3710a293327b6517bdd16047ac7e277";
-      hash = "sha256-NGMR+hOYF8v6W+0niBT36ATdsgE8X73IZL8oxTpN4Sc=";
+      rev = "4573c997c93938748e40b7f6e3c6aaf452f3c07f";
+      hash = "sha256-nYVKVGQvCDzJIoWF9l2+n0Zxoy3kj2UpyTdmh4GOw5M=";
     };
   });
   synchronizer = pkgs.ocamlPackages.synchronizer.overrideAttrs (old: {

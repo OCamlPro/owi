@@ -21,34 +21,13 @@ let to_boolean (e : t) : Symbolic_boolean.t =
   | Ptr _ -> Symbolic_boolean.true_
   | Symbol { ty = Ty_bool; _ } -> Symbolic_boolean.of_expr (Smtml.Typed.raw e)
   | Cvtop (_, OfBool, cond) -> Symbolic_boolean.of_expr cond
-  | _ ->
-    (* TODO: Smtml.Typed.Bitv32.to_bool e *)
-    let e = Smtml.Expr.cvtop ty ToBool (Smtml.Typed.raw e) in
-    Symbolic_boolean.of_expr e
+  | _ -> Smtml.Typed.Bitv32.to_bool e
 
 let of_boolean (e : Symbolic_boolean.t) : t =
   match Smtml.Typed.view e with
   | Val True -> one
   | Val False -> zero
-  | _ ->
-    (* TODO: Smtml.Typed.Bitv32.of_bool e *)
-    Smtml.Expr.cvtop (Ty_bitv 32) OfBool (Smtml.Typed.raw e)
-    |> Smtml.Typed.unsafe
-
-let clz e = Smtml.Expr.unop ty Clz (Smtml.Typed.raw e) |> Smtml.Typed.unsafe
-
-let ctz e = Smtml.Expr.unop ty Ctz (Smtml.Typed.raw e) |> Smtml.Typed.unsafe
-
-let popcnt e =
-  Smtml.Expr.unop ty Popcnt (Smtml.Typed.raw e) |> Smtml.Typed.unsafe
-
-let unsigned_div e1 e2 =
-  Smtml.Expr.binop ty DivU (Smtml.Typed.raw e1) (Smtml.Typed.raw e2)
-  |> Smtml.Typed.unsafe
-
-let unsigned_rem e1 e2 =
-  Smtml.Expr.binop ty RemU (Smtml.Typed.raw e1) (Smtml.Typed.raw e2)
-  |> Smtml.Typed.unsafe
+  | _ -> Smtml.Typed.Bitv32.of_bool e
 
 let boolify e =
   match Smtml.Typed.view e with
@@ -78,10 +57,6 @@ let rotr e1 e2 = Smtml.Typed.Bitv32.rotate_right e1 e2
 let eq_concrete (e : t) (c : Int32.t) : Symbolic_boolean.t =
   let c = of_concrete c in
   Smtml.Typed.Bitv32.eq c e
-
-let ne e1 e2 : Symbolic_boolean.t =
-  Smtml.Expr.relop Ty_bool Ne (Smtml.Typed.raw e1) (Smtml.Typed.raw e2)
-  |> Symbolic_boolean.of_expr
 
 let trunc_f32_s x =
   try
