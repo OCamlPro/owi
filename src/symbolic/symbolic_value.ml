@@ -12,9 +12,9 @@ module Ref = Symbolic_ref
 
 type boolean = bool Smtml.Typed.t
 
-type i32 = I32.t
+type i32 = Smtml.Typed.bitv32 Smtml.Typed.t
 
-type i64 = I64.t
+type i64 = Smtml.Typed.bitv64 Smtml.Typed.t
 
 type f32 = Smtml.Typed.float32 Smtml.Typed.t
 
@@ -23,8 +23,8 @@ type f64 = Smtml.Typed.float64 Smtml.Typed.t
 type v128 = V128.t
 
 type t =
-  | I32 of I32.t
-  | I64 of I64.t
+  | I32 of Smtml.Typed.bitv32 Smtml.Typed.t
+  | I64 of Smtml.Typed.bitv64 Smtml.Typed.t
   | F32 of Smtml.Typed.float32 Smtml.Typed.t
   | F64 of Smtml.Typed.float64 Smtml.Typed.t
   | V128 of V128.t

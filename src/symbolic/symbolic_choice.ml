@@ -83,14 +83,12 @@ let run exploration_strategy ~workers solver t thread ~at_worker_value
       ~finally:at_worker_end )
 
 let add_pc (c : Symbolic_boolean.t) =
-  let c = Symbolic_boolean.to_expr c in
-  let c = Smtml.Expr.simplify c in
-  match Smtml.Expr.view c with
+  let c = Smtml.Typed.simplify c in
+  match Smtml.Typed.view c with
   | Val True -> return ()
   | Val False -> stop
   | _ ->
     let* thread in
-    let c = Symbolic_boolean.of_expr c in
     let new_thread = Thread.add_pc thread c in
     set_thread new_thread
 [@@inline]
@@ -142,7 +140,7 @@ let check_reachability v prio =
   in
   return reachability
 
-let get_model_or_stop symbol =
+let get_model_or_stop (symbol : Smtml.Symbol.t) =
   (* TODO: better prio here! *)
   let* () = yield Prio.dummy in
   let solver = solver () in
@@ -171,9 +169,8 @@ let get_model_or_stop symbol =
 
 let select_inner ~explore_first ?(with_breadcrumbs = true)
   ~check_only_true_branch (cond : Symbolic_boolean.t) ~prio_true ~prio_false =
-  let cond = Symbolic_boolean.to_expr cond in
-  let cond = Smtml.Expr.simplify cond in
-  match Smtml.Expr.view cond with
+  let cond = Smtml.Typed.simplify cond in
+  match Smtml.Typed.view cond with
   | Val True -> return true
   | Val False -> return false
   | _ ->
@@ -208,8 +205,6 @@ let select_inner ~explore_first ?(with_breadcrumbs = true)
       end
     in
 
-    let cond = Symbolic_boolean.of_expr cond in
-
     let true_branch = branch cond true prio_true in
 
     if check_only_true_branch then true_branch
@@ -226,32 +221,32 @@ let select (cond : Symbolic_boolean.t) ~prio_true ~prio_false =
     ~check_only_true_branch:false
 [@@inline]
 
-let summary_symbol (e : Smtml.Expr.t) =
+let summary_symbol (e : Smtml.Typed.bitv32 Smtml.Typed.t) :
+  (bool Smtml.Typed.t option * Smtml.Symbol.t) t =
   let* thread in
-  match Smtml.Expr.view e with
+  match Smtml.Typed.view e with
   | Symbol sym -> return (None, sym)
   | _ ->
     let num_symbols = thread.num_symbols in
     let+ () = modify_thread Thread.incr_num_symbols in
+
+    (* TODO: all of this should be cleaned-up at some point, but this requires adding some functions into smtml *)
     let sym_name = Fmt.str "choice_i32_%i" num_symbols in
     let sym_type = Smtml.Ty.Ty_bitv 32 in
     let sym = Smtml.Symbol.make sym_type sym_name in
-    let assign = Smtml.Expr.(relop Ty_bool Eq (symbol sym) e) in
+    let assign =
+      Smtml.Typed.Bitv32.eq (Smtml.Typed.unsafe (Smtml.Expr.symbol sym)) e
+    in
     (Some assign, sym)
 
 let select_i32 (i : Symbolic_i32.t) =
-  let i = Smtml.Expr.simplify i in
-  match Smtml.Expr.view i with
+  match Smtml.Typed.view i with
   | Val (Bitv bv) when Smtml.Bitvector.numbits bv <= 32 ->
     return (Smtml.Bitvector.to_int32 bv)
   | _ ->
     let* assign, symbol = summary_symbol i in
     let* () =
-      match assign with
-      | Some assign ->
-        let assign = Symbolic_boolean.of_expr assign in
-        add_pc assign
-      | None -> return ()
+      match assign with Some assign -> add_pc assign | None -> return ()
     in
     let rec generator () =
       let* possible_value = get_model_or_stop symbol in
@@ -335,14 +330,10 @@ let ite (c : Symbolic_boolean.t) ~(if_true : Symbolic_value.t)
   ~(if_false : Symbolic_value.t) : Symbolic_value.t t =
   match (if_true, if_false) with
   | I32 if_true, I32 if_false ->
-    let if_true = Smtml.Typed.unsafe if_true in
-    let if_false = Smtml.Typed.unsafe if_false in
-    let res = Symbolic_boolean.ite c ~if_true ~if_false |> Smtml.Typed.raw in
+    let res = Symbolic_boolean.ite c ~if_true ~if_false in
     return (Symbolic_value.I32 res)
   | I64 if_true, I64 if_false ->
-    let if_true = Smtml.Typed.unsafe if_true in
-    let if_false = Smtml.Typed.unsafe if_false in
-    let res = Symbolic_boolean.ite c ~if_true ~if_false |> Smtml.Typed.raw in
+    let res = Symbolic_boolean.ite c ~if_true ~if_false in
     return (Symbolic_value.I64 res)
   | F32 if_true, F32 if_false ->
     return (Symbolic_value.F32 (Symbolic_boolean.ite c ~if_true ~if_false))

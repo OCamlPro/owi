@@ -60,6 +60,6 @@ let of_bits x = Smtml.Typed.Float64.reinterpret_i64 x
 
 let to_bits x = Smtml.Typed.Float64.to_bv x
 
-let pp fmt x = Smtml.Typed.Float64.pp fmt x
+let pp fmt x = Smtml.Typed.Float64.pp fmt (Obj.magic x)
 
 let of_float (f : Float.t) : t = Concrete_f64.of_float f |> of_concrete
