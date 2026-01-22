@@ -14,8 +14,11 @@ include
 val replace : t -> unit Symbolic_choice.t
 
 val realloc :
-  t -> ptr:Smtml.Expr.t -> size:Smtml.Expr.t -> Smtml.Expr.t Symbolic_choice.t
+     t
+  -> ptr:Symbolic_i32.t
+  -> size:Symbolic_i32.t
+  -> Symbolic_i32.t Symbolic_choice.t
 
-val free : t -> Smtml.Expr.t -> Smtml.Expr.t Symbolic_choice.t
+val free : t -> Symbolic_i32.t -> Symbolic_i32.t Symbolic_choice.t
 
 val of_concrete : env_id:int -> id:int -> Concrete_memory.t -> t
