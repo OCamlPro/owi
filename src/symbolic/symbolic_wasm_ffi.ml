@@ -58,11 +58,16 @@ module M :
   let symbol_invisible_bool () =
     (* TODO: should we change this to an i32 too? *)
     Symbolic_choice.with_new_invisible_symbol (Ty_bitv 1) (fun sym ->
-      Expr.cvtop (Ty_bitv 32) (Zero_extend 31) (Expr.symbol sym) )
+      Expr.cvtop (Ty_bitv 32) (Zero_extend 31) (Expr.symbol sym)
+      |> Smtml.Typed.unsafe )
 
-  let symbol_i32 () = Symbolic_choice.with_new_symbol (Ty_bitv 32) Expr.symbol
+  let symbol_i32 () =
+    Symbolic_choice.with_new_symbol (Ty_bitv 32) (fun s ->
+      Expr.symbol s |> Smtml.Typed.unsafe )
 
-  let symbol_i64 () = Symbolic_choice.with_new_symbol (Ty_bitv 64) Expr.symbol
+  let symbol_i64 () =
+    Symbolic_choice.with_new_symbol (Ty_bitv 64) (fun s ->
+      Expr.symbol s |> Smtml.Typed.unsafe )
 
   let symbol_f32 () =
     Symbolic_choice.with_new_symbol (Ty_fp 32) (fun s ->
@@ -104,7 +109,7 @@ module M :
   let rec make_str m accu i =
     let open Symbolic_choice in
     let* p = Symbolic_memory.load_8_u m (Symbolic_i32.of_concrete i) in
-    match Smtml.Expr.view p with
+    match Smtml.Typed.view p with
     | Val (Bitv bv) when Smtml.Bitvector.numbits bv = 32 ->
       let c = Smtml.Bitvector.to_int32 bv in
       if Int32.gt c 255l || Int32.lt c 0l then trap `Invalid_character_in_memory
@@ -124,9 +129,9 @@ module M :
   let cov_label_set m id ptr =
     let open Symbolic_choice in
     let open Smtml in
-    let id = Expr.simplify id in
-    let ptr = Expr.simplify ptr in
-    match (Expr.view id, Expr.view ptr) with
+    let id = Typed.simplify id in
+    let ptr = Typed.simplify ptr in
+    match (Typed.view id, Typed.view ptr) with
     | Val (Bitv id), Val (Bitv ptr)
       when Bitvector.numbits id = 32 && Bitvector.numbits ptr = 32 ->
       let id = Bitvector.to_int32 id in
@@ -140,7 +145,8 @@ module M :
         add_label (Int32.to_int id, str)
     | _ ->
       Log.err (fun m ->
-        m "cov_label_set: invalid type id:%a ptr:%a" Expr.pp id Expr.pp ptr );
+        m "cov_label_set: invalid type id:%a ptr:%a" Expr.pp
+          (Smtml.Typed.raw id) Expr.pp (Smtml.Typed.raw ptr) );
       assert false
 
   let open_scope m ptr =
