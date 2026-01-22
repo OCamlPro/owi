@@ -11,21 +11,6 @@ let of_int (i : int) : t = of_concrete (Int64.of_int i)
 
 let zero = of_concrete 0L
 
-let clz e = Smtml.Expr.unop ty Clz (Smtml.Typed.raw e) |> Smtml.Typed.unsafe
-
-let ctz e = Smtml.Expr.unop ty Ctz (Smtml.Typed.raw e) |> Smtml.Typed.unsafe
-
-let popcnt e =
-  Smtml.Expr.unop ty Popcnt (Smtml.Typed.raw e) |> Smtml.Typed.unsafe
-
-let unsigned_div e1 e2 =
-  Smtml.Expr.binop ty DivU (Smtml.Typed.raw e1) (Smtml.Typed.raw e2)
-  |> Smtml.Typed.unsafe
-
-let unsigned_rem e1 e2 =
-  Smtml.Expr.binop ty RemU (Smtml.Typed.raw e1) (Smtml.Typed.raw e2)
-  |> Smtml.Typed.unsafe
-
 let shr_s e1 e2 = Smtml.Typed.Bitv64.ashr e1 e2
 
 let shr_u e1 e2 = Smtml.Typed.Bitv64.lshr e1 e2
@@ -37,10 +22,6 @@ let rotr e1 e2 = Smtml.Typed.Bitv64.rotate_right e1 e2
 let eq_concrete (e : t) (c : Int64.t) : Symbolic_boolean.t =
   let c = of_concrete c in
   Smtml.Typed.Bitv64.eq c e
-
-let ne e1 e2 : Symbolic_boolean.t =
-  Smtml.Expr.relop Ty_bool Ne (Smtml.Typed.raw e1) (Smtml.Typed.raw e2)
-  |> Symbolic_boolean.of_expr
 
 let of_int32 e =
   Smtml.Expr.cvtop ty (Sign_extend 32) (Smtml.Typed.raw e) |> Smtml.Typed.unsafe
