@@ -231,10 +231,9 @@ let summary_symbol (e : Smtml.Typed.bitv32 Smtml.Typed.t) :
     let+ () = modify_thread Thread.incr_num_symbols in
     let name = Fmt.str "choice_i32_%i" num_symbols in
     (* TODO: having to build two times the symbol this way is not really elegant... *)
-    let symbol = Smtml.Typed.symbol Smtml.Typed.Bitv32.ty name in
-    let assign = Smtml.Typed.Bitv32.eq symbol e in
-    let symbol' = Smtml.Symbol.make (Smtml.Ty.Ty_bitv 32) name in
-    (Some assign, symbol')
+    let sym = Smtml.Symbol.make Smtml.Typed.Types.(to_ty bitv32) name in
+    let assign = Smtml.Typed.Bitv32.(eq (symbol sym) e) in
+    (Some assign, sym)
 
 let select_i32 (i : Symbolic_i32.t) =
   match Smtml.Typed.view i with
@@ -258,9 +257,7 @@ let select_i32 (i : Symbolic_i32.t) =
       in
       (* TODO: everything which follows look like select_inner and could probably be simplified by calling it directly! *)
       let this_value_cond =
-        Symbolic_i32.eq_concrete
-          (Smtml.Expr.symbol symbol |> Smtml.Typed.unsafe)
-          i
+        Symbolic_i32.eq_concrete (Smtml.Typed.Bitv32.symbol symbol) i
       in
       let not_this_value_cond = Symbolic_boolean.not this_value_cond in
       let this_val_branch =
