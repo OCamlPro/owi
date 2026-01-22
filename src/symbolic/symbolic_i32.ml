@@ -19,8 +19,8 @@ let to_boolean (e : t) : Symbolic_boolean.t =
     if Smtml.Bitvector.eqz bv then Symbolic_boolean.false_
     else Symbolic_boolean.true_
   | Ptr _ -> Symbolic_boolean.true_
-  | Symbol { ty = Ty_bool; _ } -> Symbolic_boolean.of_expr (Smtml.Typed.raw e)
-  | Cvtop (_, OfBool, cond) -> Symbolic_boolean.of_expr cond
+  | Symbol { ty = Ty_bool; _ } -> Smtml.Typed.Bitv32.to_bool e
+  | Cvtop (_, OfBool, cond) -> Smtml.Typed.unsafe cond
   | _ -> Smtml.Typed.Bitv32.to_bool e
 
 let of_boolean (e : Symbolic_boolean.t) : t =
@@ -33,7 +33,7 @@ let boolify e =
   match Smtml.Typed.view e with
   | Val (Bitv bv) when Smtml.Bitvector.eqz bv -> Some Symbolic_boolean.false_
   | Val (Bitv bv) when Smtml.Bitvector.eq_one bv -> Some Symbolic_boolean.true_
-  | Cvtop (_, OfBool, cond) -> Some (Symbolic_boolean.of_expr cond)
+  | Cvtop (_, OfBool, cond) -> Some (Smtml.Typed.unsafe cond)
   | _ -> None
 
 let logand e1 e2 =

@@ -30,7 +30,7 @@ let add_one (condition : Smtml.Expr.t) pc : t =
 
 let add (condition : Symbolic_boolean.t) (pc : t) : t =
   (* we start by splitting the condition ((P & Q) & R) into a set {P; Q; R} before adding each of P, Q and R into the UF data structure, this way we maximize the independence of the PC *)
-  let condition = Symbolic_boolean.to_expr condition in
+  let condition = Smtml.Typed.raw condition in
   let splitted_condition = Smtml.Expr.split_conjunctions condition in
   Smtml.Expr.Set.fold add_one splitted_condition pc
 
@@ -47,7 +47,7 @@ let slice_on_symbol (sym : Smtml.Symbol.t) pc : Smtml.Expr.Set.t =
 
 (* Return the set of constraints from [pc] that are relevant for [c]. *)
 let slice_on_condition (c : Symbolic_boolean.t) pc : Smtml.Expr.Set.t =
-  let c = Symbolic_boolean.to_expr c in
+  let c = Smtml.Typed.raw c in
   match Smtml.Expr.get_symbols [ c ] with
   | sym0 :: _tl ->
     (* we need only the first symbol as all the others should have been merged with it *)
