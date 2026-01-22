@@ -4,12 +4,20 @@
 }:
 
 let
+  smtml = pkgs.ocamlPackages.smtml.overrideAttrs (old: {
+    src = pkgs.fetchFromGitHub {
+      owner = "formalsec";
+      repo = "smtml";
+      rev = "c33fa749c00bc32bd12d5e04772f687594d059d2";
+      hash = "sha256-+7jHv/DjlKDsMP00j8NsgbxhDnv9VXpbVZ/ewXqShCA=";
+    };
+  });
   synchronizer = pkgs.ocamlPackages.synchronizer.overrideAttrs (old: {
     src = pkgs.fetchFromGitHub {
       owner = "ocamlpro";
       repo = "synchronizer";
-      rev = "cb5fd995e8a42e5244acf68f238221594fd19a8d";
-      hash = "sha256-0XtPHpDlyH1h8W2ZlRvJbZjCN9WP5mzk2N01WFd8eLQ=";
+      rev = "4a12eb003620e249176e2046cc0dd76dbd8ff733";
+      hash = "sha256-CKpWGSXV7oXFVWEKrM4nlmSHFRt9et/QYOq97az1vt4=";
     };
   });
 in

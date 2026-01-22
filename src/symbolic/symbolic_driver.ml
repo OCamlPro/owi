@@ -82,20 +82,23 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
   let wait_for_all_domains () =
     Array.iter
       (fun domain ->
+        let id = (Domain.get_id domain :> int) in
+        Log.debug (fun m -> m "waiting for domain %d to run to completion" id);
         try Domain.join domain with
         | Z3.Error msg ->
-          Log.info (fun m ->
-            m "one domain exited with the following Z3 exception: %s" msg )
+          Log.err (fun m ->
+            m "domain %d exited with the following Z3 exception: %s" id msg )
         | exn ->
           let backtrace = Printexc.get_raw_backtrace () in
-          Log.info (fun m ->
+          Log.err (fun m ->
             m
-              "one domaine exited with the %s exception which was only noticed \
+              "domain %d exited with the %s exception which was only noticed \
                while waiting for all domain to join:@\n\
               \  @[<v>%s@]"
-              (Printexc.to_string exn)
+              id (Printexc.to_string exn)
               (Printexc.raw_backtrace_to_string backtrace) ) )
-      domains
+      domains;
+    Log.debug (fun m -> m "all domains ran to completion")
   in
 
   if Log.is_bench_enabled () then begin

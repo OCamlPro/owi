@@ -6,7 +6,7 @@
 
 (using dune_site 0.1)
 
-(using mdx 0.2)
+(using mdx 0.3)
 
 (using directory-targets 0.1)
 
