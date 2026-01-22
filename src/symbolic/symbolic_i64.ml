@@ -1,3 +1,5 @@
+include Smtml.Typed.Bitv64
+
 type t = Smtml.Typed.bitv64 Smtml.Typed.t
 
 let ty = Smtml.Ty.Ty_bitv 64
@@ -16,31 +18,13 @@ let ctz e = Smtml.Expr.unop ty Ctz (Smtml.Typed.raw e) |> Smtml.Typed.unsafe
 let popcnt e =
   Smtml.Expr.unop ty Popcnt (Smtml.Typed.raw e) |> Smtml.Typed.unsafe
 
-let add e1 e2 = Smtml.Typed.Bitv64.add e1 e2
-
-let sub e1 e2 = Smtml.Typed.Bitv64.sub e1 e2
-
-let mul e1 e2 = Smtml.Typed.Bitv64.mul e1 e2
-
-let div e1 e2 = Smtml.Typed.Bitv64.div e1 e2
-
 let unsigned_div e1 e2 =
   Smtml.Expr.binop ty DivU (Smtml.Typed.raw e1) (Smtml.Typed.raw e2)
   |> Smtml.Typed.unsafe
 
-let rem e1 e2 = Smtml.Typed.Bitv64.rem e1 e2
-
 let unsigned_rem e1 e2 =
   Smtml.Expr.binop ty RemU (Smtml.Typed.raw e1) (Smtml.Typed.raw e2)
   |> Smtml.Typed.unsafe
-
-let logand e1 e2 = Smtml.Typed.Bitv64.logand e1 e2
-
-let logor e1 e2 = Smtml.Typed.Bitv64.logor e1 e2
-
-let logxor e1 e2 = Smtml.Typed.Bitv64.logxor e1 e2
-
-let shl e1 e2 = Smtml.Typed.Bitv64.shl e1 e2
 
 let shr_s e1 e2 = Smtml.Typed.Bitv64.ashr e1 e2
 
@@ -54,27 +38,9 @@ let eq_concrete (e : t) (c : Int64.t) : Symbolic_boolean.t =
   let c = of_concrete c in
   Smtml.Typed.Bitv64.eq c e
 
-let eq e1 e2 : Symbolic_boolean.t = Smtml.Typed.Bitv64.eq e1 e2
-
 let ne e1 e2 : Symbolic_boolean.t =
   Smtml.Expr.relop Ty_bool Ne (Smtml.Typed.raw e1) (Smtml.Typed.raw e2)
   |> Symbolic_boolean.of_expr
-
-let lt e1 e2 : Symbolic_boolean.t = Smtml.Typed.Bitv64.lt e1 e2
-
-let gt e1 e2 : Symbolic_boolean.t = Smtml.Typed.Bitv64.gt e1 e2
-
-let lt_u e1 e2 : Symbolic_boolean.t = Smtml.Typed.Bitv64.lt_u e1 e2
-
-let gt_u e1 e2 : Symbolic_boolean.t = Smtml.Typed.Bitv64.gt_u e1 e2
-
-let le e1 e2 : Symbolic_boolean.t = Smtml.Typed.Bitv64.le e1 e2
-
-let ge e1 e2 : Symbolic_boolean.t = Smtml.Typed.Bitv64.ge e1 e2
-
-let le_u e1 e2 : Symbolic_boolean.t = Smtml.Typed.Bitv64.le_u e1 e2
-
-let ge_u e1 e2 : Symbolic_boolean.t = Smtml.Typed.Bitv64.ge_u e1 e2
 
 let of_int32 e =
   Smtml.Expr.cvtop ty (Sign_extend 32) (Smtml.Typed.raw e) |> Smtml.Typed.unsafe
@@ -139,5 +105,3 @@ let extend_i32_s x =
 
 let extend_i32_u x =
   Smtml.Expr.cvtop ty (Zero_extend 32) (Smtml.Typed.raw x) |> Smtml.Typed.unsafe
-
-let pp fmt x = Smtml.Typed.Bitv64.pp fmt x
