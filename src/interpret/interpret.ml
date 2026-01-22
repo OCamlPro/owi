@@ -1131,8 +1131,8 @@ struct
       let len, stack = Stack.pop_i32 stack in
       let src, stack = Stack.pop_i32 stack in
       let dst, stack = Stack.pop_i32 stack in
-      let* data = Env.get_data env dataid in
       let* mem = Env.get_memory env memid in
+      let* data = Env.get_data env dataid in
       let>! () =
         let memsize = I64.extend_i32_u (Memory.size mem) in
         let datasize = I64.of_int (Data.size data) in
@@ -1145,8 +1145,9 @@ struct
         , `Out_of_bounds_memory_access
         , Some current_instr_counter )
       in
-      let data = Data.value data in
       let* mem = Env.get_memory env memid in
+      let* data = Env.get_data env dataid in
+      let data = Data.value data in
       let* () = Memory.blit_string mem data ~src ~dst ~len in
       st stack
     | Select _t ->

@@ -48,15 +48,28 @@ module Make (Work_datastructure : Prio.S) = struct
   let work sched at_worker_value =
     let rec inner (t : _ Schedulable.t) write_back =
       match t with
-      | Stop -> ()
-      | Now x -> at_worker_value x
-      | Yield (prio, f) -> write_back (prio, f)
+      | Stop ->
+        Log.err (fun m ->
+          m "worked %d called inner STOP" (Domain.self () :> int) );
+        ()
+      | Now x ->
+        Log.err (fun m ->
+          m "worked %d called inner NOW" (Domain.self () :> int) );
+        at_worker_value x
+      | Yield (prio, f) ->
+        Log.err (fun m ->
+          m "worked %d called inner YIELD" (Domain.self () :> int) );
+        write_back (prio, f)
       | Choice (m1, m2) ->
+        Log.err (fun m ->
+          m "worked %d called inner CHOICE" (Domain.self () :> int) );
         inner m1 write_back;
         inner m2 write_back
     in
     Work_datastructure.work_while
-      (fun f write_back -> inner (f ()) write_back)
+      (fun f write_back ->
+        inner (f ()) write_back;
+        Log.err (fun m -> m "worker %d done with inner" (Domain.self () :> int)) )
       sched.work_queue
 
   let spawn_worker sched
@@ -64,12 +77,16 @@ module Make (Work_datastructure : Prio.S) = struct
     ~at_worker_init ~finally =
     at_worker_init ();
     Domain.spawn (fun () ->
+      let id = (Domain.self () :> int) in
+      Log.err (fun m -> m "STARTED WORKER %d" id);
       Fun.protect ~finally (fun () ->
         try
           work sched
             (at_worker_value ~close_work_queue:(fun () ->
-               Work_datastructure.close sched.work_queue ) )
+               Work_datastructure.close sched.work_queue ) );
+          Log.err (fun m -> m "WORKER %d OKISH" id)
         with e ->
+          Log.err (fun m -> m "WORKER %d DEAD" id);
           let e_s = Printexc.to_string e in
           let bt = Printexc.get_raw_backtrace () in
           let bt_s = Printexc.raw_backtrace_to_string bt in
@@ -79,7 +96,7 @@ module Make (Work_datastructure : Prio.S) = struct
             else bt_s
           in
           Log.err (fun m ->
-            m "a worker ended with exception %s, backtrace is: @\n@[<v>%s@]" e_s
-              bt_s );
+            m "worker %d ended with exception %s, backtrace is: @\n@[<v>%s@]" id
+              e_s bt_s );
           Printexc.raise_with_backtrace e bt ) )
 end

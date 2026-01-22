@@ -4,4 +4,4 @@ let value data = data.Concrete_data.value
 
 let size data = String.length data.Concrete_data.value
 
-let drop data = data.Concrete_data.value <- ""
+let drop _data = ()
