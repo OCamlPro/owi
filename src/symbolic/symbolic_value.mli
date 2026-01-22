@@ -5,8 +5,8 @@
 include
   Value_intf.T
     with type boolean = bool Smtml.Typed.t
-     and type i32 = Smtml.Expr.t
-     and type i64 = Smtml.Expr.t
+     and type i32 = Smtml.Typed.bitv32 Smtml.Typed.t
+     and type i64 = Smtml.Typed.bitv64 Smtml.Typed.t
      and type f32 = Smtml.Typed.float32 Smtml.Typed.t
      and type f64 = Smtml.Typed.float64 Smtml.Typed.t
      and type v128 = Smtml.Expr.t

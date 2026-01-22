@@ -1,9 +1,9 @@
-type t = Smtml.Expr.t
+type t = Smtml.Typed.bitv32 Smtml.Typed.t
 
 let ty = Smtml.Ty.Ty_bitv 32
 
 let of_concrete (i : Int32.t) : t =
-  Smtml.Expr.value (Bitv (Smtml.Bitvector.of_int32 i))
+  Smtml.Typed.Bitv32.v (Smtml.Bitvector.of_int32 i)
 
 let of_int (i : int) : t = of_concrete (Int32.of_int i)
 
@@ -12,24 +12,20 @@ let zero = of_concrete 0l
 let one = of_concrete 1l
 
 let to_boolean (e : t) : Symbolic_boolean.t =
-  match Smtml.Expr.view e with
+  match Smtml.Typed.view e with
   | Val (Bitv bv) ->
     if Smtml.Bitvector.eqz bv then Symbolic_boolean.false_
     else Symbolic_boolean.true_
   | Ptr _ -> Symbolic_boolean.true_
-  | Symbol { ty = Ty_bool; _ } -> Symbolic_boolean.of_expr e
+  | Symbol { ty = Ty_bool; _ } -> Symbolic_boolean.of_expr (Smtml.Typed.raw e)
   | Cvtop (_, OfBool, cond) -> Symbolic_boolean.of_expr cond
-  | _ ->
-    let e = Smtml.Expr.cvtop ty ToBool e in
-    Symbolic_boolean.of_expr e
+  | _ -> Smtml.Typed.Bitv32.to_bool e
 
 let of_boolean (e : Symbolic_boolean.t) : t =
-  let e = Symbolic_boolean.to_expr e in
-  match Smtml.Expr.view e with
+  match Smtml.Typed.view e with
   | Val True -> one
   | Val False -> zero
-  | Cvtop (Ty_bitv 32, ToBool, e') -> e'
-  | _ -> Smtml.Expr.cvtop (Ty_bitv 32) OfBool e
+  | _ -> Smtml.Typed.Bitv32.of_bool e
 
 let clz e = Smtml.Expr.unop ty Clz e
 
