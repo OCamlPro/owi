@@ -140,7 +140,7 @@ let check_reachability v prio =
   in
   return reachability
 
-let get_model_or_stop (symbol : Smtml.Symbol.t) =
+let get_model_or_stop symbol =
   (* TODO: better prio here! *)
   let* () = yield Prio.dummy in
   let solver = solver () in
@@ -229,15 +229,12 @@ let summary_symbol (e : Smtml.Typed.bitv32 Smtml.Typed.t) :
   | _ ->
     let num_symbols = thread.num_symbols in
     let+ () = modify_thread Thread.incr_num_symbols in
-
-    (* TODO: all of this should be cleaned-up at some point, but this requires adding some functions into smtml *)
-    let sym_name = Fmt.str "choice_i32_%i" num_symbols in
-    let sym_type = Smtml.Ty.Ty_bitv 32 in
-    let sym = Smtml.Symbol.make sym_type sym_name in
-    let assign =
-      Smtml.Typed.Bitv32.eq (Smtml.Typed.unsafe (Smtml.Expr.symbol sym)) e
-    in
-    (Some assign, sym)
+    let name = Fmt.str "choice_i32_%i" num_symbols in
+    (* TODO: having to build two times the symbol this way is not really elegant... *)
+    let symbol = Smtml.Typed.symbol Smtml.Typed.Bitv32.ty name in
+    let assign = Smtml.Typed.Bitv32.eq symbol e in
+    let symbol' = Smtml.Symbol.make (Smtml.Ty.Ty_bitv 32) name in
+    (Some assign, symbol')
 
 let select_i32 (i : Symbolic_i32.t) =
   match Smtml.Typed.view i with
@@ -252,16 +249,18 @@ let select_i32 (i : Symbolic_i32.t) =
       let* possible_value = get_model_or_stop symbol in
       let i =
         match possible_value with
-        | Smtml.Value.Bitv bv when Smtml.Bitvector.numbits bv <= 32 ->
+        | Smtml.Value.Bitv bv ->
+          assert (Smtml.Bitvector.numbits bv <= 32);
           Smtml.Bitvector.to_int32 bv
         | _ ->
           (* it should be a value! *)
           assert false
       in
-      let s = Smtml.Expr.symbol symbol in
       (* TODO: everything which follows look like select_inner and could probably be simplified by calling it directly! *)
       let this_value_cond =
-        Smtml.Expr.Bitv.I32.(s = v i) |> Symbolic_boolean.of_expr
+        Symbolic_i32.eq_concrete
+          (Smtml.Expr.symbol symbol |> Smtml.Typed.unsafe)
+          i
       in
       let not_this_value_cond = Symbolic_boolean.not this_value_cond in
       let this_val_branch =
