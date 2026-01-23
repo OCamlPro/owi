@@ -49,9 +49,8 @@ let rewrite_block_type (assigned : Assigned.t) (block_type : Text.block_type) :
     let* func_type = rewrite_func_type assigned func_type in
     Ok (Binary.Bt_raw (Some idx, func_type))
 
-let rewrite_expr (assigned : Assigned.t) ?known_globals
-  (locals : Text.param list) (iexpr : Text.expr Annotated.t) :
-  Binary.expr Annotated.t Result.t =
+let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
+  (iexpr : Text.expr Annotated.t) : Binary.expr Annotated.t Result.t =
   (* block_ids handling *)
   let block_id_to_raw (loop_count, block_ids) id =
     let* id =
@@ -179,10 +178,7 @@ let rewrite_expr (assigned : Assigned.t) ?known_globals
       Binary.Global_set idx
     | Global_get id ->
       let* idx = Assigned.find_global assigned id in
-      begin match known_globals with
-      | Some n when idx >= n -> Error (`Unknown_global (Text.Raw idx))
-      | _ -> Ok (Binary.Global_get idx)
-      end
+      Ok (Binary.Global_get idx)
     | Ref_func id ->
       let+ id = Assigned.find_func assigned id in
       Binary.Ref_func id
@@ -329,11 +325,11 @@ let rewrite_table (assigned : Assigned.t)
     let+ e = rewrite_expr assigned [] e in
     { Binary.Table.id; typ = (limits, (null, ht)); init = Some e }
 
-let rewrite_global (assigned : Assigned.t) (known_globals : int)
-  (global : Text.Global.t) : Binary.Global.t Result.t =
+let rewrite_global (assigned : Assigned.t) (global : Text.Global.t) :
+  Binary.Global.t Result.t =
   let mut, vt = global.typ in
   let* vt = rewrite_val_type assigned vt in
-  let+ init = rewrite_expr assigned ~known_globals [] global.init in
+  let+ init = rewrite_expr assigned [] global.init in
   { Binary.Global.id = global.id; init; typ = (mut, vt) }
 
 let rewrite_elem (assigned : Assigned.t) (elem : Text.Elem.t) :
@@ -422,12 +418,11 @@ let modul (modul : Grouped.t) (assigned : Assigned.t) : Binary.Module.t Result.t
     =
   Log.debug (fun m -> m "rewriting    ...");
   let* global =
-    array_mapi
-      (fun i ->
-        Origin.monadic_map ~f_local:(rewrite_global assigned i)
-          ~f_imported:(fun (m, val_type) ->
-          let+ val_type = rewrite_val_type assigned val_type in
-          (m, val_type) ) )
+    array_map
+      (Origin.monadic_map ~f_local:(rewrite_global assigned)
+         ~f_imported:(fun (m, val_type) ->
+         let+ val_type = rewrite_val_type assigned val_type in
+         (m, val_type) ) )
       modul.global
   in
   let* table =
