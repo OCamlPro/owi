@@ -829,7 +829,8 @@ let typecheck_function (modul : Module.t) func refs =
     let* b = Stack.equal modul required stack in
     if not b then Error (`Type_mismatch "typecheck_function") else Ok ()
 
-let typecheck_const_instr ~is_init (modul : Module.t) refs stack instr =
+let typecheck_const_instr ?known_globals ~is_init (modul : Module.t) refs stack
+  instr =
   match instr.Annotated.raw with
   | I32_const _ -> Stack.push [ i32 ] stack
   | I64_const _ -> Stack.push [ i64 ] stack
@@ -849,7 +850,10 @@ let typecheck_const_instr ~is_init (modul : Module.t) refs stack instr =
     Hashtbl.add refs i ();
     Stack.push [ Ref_type (No_null, resty) ] stack
   | Global_get i ->
-    if i >= Array.length modul.global then Error (`Unknown_global (Text.Raw i))
+    if
+      Option.fold ~none:false ~some:(fun n -> i >= n) known_globals
+      || i >= Array.length modul.global
+    then Error (`Unknown_global (Text.Raw i))
     else
       let* mut, typ =
         match modul.global.(i) with
@@ -868,17 +872,18 @@ let typecheck_const_instr ~is_init (modul : Module.t) refs stack instr =
     Stack.push [ t ] stack
   | _ -> Error `Constant_expression_required
 
-let typecheck_const_expr ?(is_init = false) (modul : Module.t) refs expr =
+let typecheck_const_expr ?known_globals ?(is_init = false) (modul : Module.t)
+  refs expr =
   list_fold_left
-    (typecheck_const_instr ~is_init modul refs)
+    (typecheck_const_instr ?known_globals ~is_init modul refs)
     [] expr.Annotated.raw
 
-let typecheck_global (modul : Module.t) refs
+let typecheck_global (modul : Module.t) refs known_globals
   (global : (Global.t, Text.Global.Type.t) Origin.t) =
   match global with
   | Imported _ -> Ok ()
   | Local { typ; init; _ } -> (
-    let* real_type = typecheck_const_expr modul refs init in
+    let* real_type = typecheck_const_expr ~known_globals modul refs init in
     match real_type with
     | [ real_type ] ->
       let expected = typ_of_val_type @@ snd typ in
@@ -1066,7 +1071,7 @@ let modul (modul : Module.t) =
   Log.info (fun m -> m "typechecking ...");
   Log.bench_fn "typechecking time" @@ fun () ->
   let refs = Hashtbl.create 512 in
-  let* () = array_iter (typecheck_global modul refs) modul.global in
+  let* () = array_iteri (typecheck_global modul refs) modul.global in
   let* () = array_iter (typecheck_elem modul refs) modul.elem in
   let* () = array_iter (typecheck_data modul refs) modul.data in
   let* () = typecheck_start modul in
