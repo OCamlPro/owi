@@ -176,7 +176,7 @@ module Stack : sig
 
   val pop_push : Module.t -> block_type -> t -> t Result.t
 
-  val pop_ref : t -> t Result.t
+  val pop_ref : t -> (typ * t) Result.t
 
   val equal : Module.t -> t -> t -> bool Result.t
 
@@ -310,8 +310,9 @@ end = struct
     | Error e -> Error e
 
   let pop_ref = function
-    | (Something | Ref_type _) :: tl -> Ok tl
-    | Any :: _ as stack -> Ok stack
+    | (Ref_type _ as typ) :: tl -> Ok (typ, tl)
+    | (Something as typ) :: tl -> Ok (typ, tl)
+    | (Any as typ) :: _ as stack -> Ok (typ, stack)
     | _ -> Error (`Type_mismatch "pop_ref")
 
   let drop stack =
@@ -340,6 +341,14 @@ let typ_equal modul ~expected ~got =
 
 let is_func_type (ref_type : Text.ref_type) =
   match ref_type with _, Func_ht -> true | _ -> false
+
+let ref_type_as_non_null t =
+  match t with
+  | Ref_type (_, rt) -> Ok (Ref_type (No_null, rt))
+  | (Any | Something) as t ->
+    (* TODO: what should be done in this case? *)
+    Ok t
+  | _ -> assert false
 
 let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t)
   : (Env.t * stack) Result.t =
@@ -591,7 +600,7 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
     let+ stack = Stack.push (List.rev_map typ_of_val_type rt) stack in
     (env, stack)
   | Call_ref t ->
-    let* stack = Stack.pop_ref stack in
+    let* _, stack = Stack.pop_ref stack in
     let* pt, rt = Env.type_get t env.modul in
     let* stack = Stack.pop env.modul (List.rev_map typ_of_pt pt) stack in
     let+ stack = Stack.push (List.rev_map typ_of_val_type rt) stack in
@@ -631,7 +640,7 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
     in
     if not b then Error (`Type_mismatch "return_call_ref")
     else
-      let* stack = Stack.pop_ref stack in
+      let* _, stack = Stack.pop_ref stack in
       let+ _stack = Stack.pop env.modul (List.rev_map typ_of_pt pt) stack in
       (env, [ any ])
   | Data_drop id ->
@@ -671,12 +680,13 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
     let+ stack = Stack.push [ i32 ] stack in
     (env, stack)
   | Ref_is_null ->
-    let* stack = Stack.pop_ref stack in
+    let* _, stack = Stack.pop_ref stack in
     let+ stack = Stack.push [ i32 ] stack in
     (env, stack)
   | Ref_as_non_null ->
-    let* stack = Stack.pop_ref stack in
-    let+ stack = Stack.push [ Any ] stack in
+    let* t, stack = Stack.pop_ref stack in
+    let* t = ref_type_as_non_null t in
+    let+ stack = Stack.push [ t ] stack in
     (env, stack)
     (* TODO: The type can be Something/Any, and if its a Ref_type the heap_type
       can be a TypeUse or Extern_ht. The pushed type should account for that
@@ -745,14 +755,14 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
     in
     (env, [ any ])
   | Br_on_null i ->
-    let* stack = Stack.pop_ref stack in
+    let* t, stack = Stack.pop_ref stack in
     let* jt = Env.block_type_get i env in
     let* _stack = Stack.pop env.modul jt stack in
-    (* TODO: must restrict the popped ref as a non-nullable ref *)
-    let+ stack = Stack.push [ Any ] stack in
+    let* t = ref_type_as_non_null t in
+    let+ stack = Stack.push [ t ] stack in
     (env, stack)
   | Br_on_non_null i ->
-    let* stack = Stack.pop_ref stack in
+    let* _, stack = Stack.pop_ref stack in
     let* jt = Env.block_type_get i env in
     let+ _stack = Stack.pop env.modul jt stack in
     (env, stack)
