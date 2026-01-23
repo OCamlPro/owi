@@ -1043,20 +1043,19 @@ struct
       in
       let state = { state with stack } in
       if b then State.branch state i else Choice.return (State.Continue state)
-      (* TODO: unsure about `prio_true` and `prio_false` *)
     | Br_on_null i ->
-      let counter_next_false, counter_next_true =
-        match state.pc.raw with
-        | [] -> (Int.max_int, Atomic.get instr.Annotated.instr_counter - 1)
-        | h :: _ ->
-          let v = Atomic.get h.Annotated.instr_counter in
-          (v, Atomic.get instr.Annotated.instr_counter - 1 - v)
-      in
+      let* depth = Choice.depth () in
       let prio_true =
-        Prio.from_annotated counter_next_true !(instr.Annotated.d_true)
+        let instr_counter =
+          Next_instruction.branch state i |> Next_instruction.with_instr_counter
+        in
+        Prio.v ~instr_counter ~distance_to_unreachable:None ~depth
       in
       let prio_false =
-        Prio.from_annotated counter_next_false !(instr.Annotated.d_false)
+        let instr_counter =
+          Next_instruction.continue state |> Next_instruction.with_instr_counter
+        in
+        Prio.v ~instr_counter ~distance_to_unreachable:None ~depth
       in
       let r, stack = Stack.pop_as_ref stack in
       let is_null = Ref.is_null r |> Boolean.of_concrete in
@@ -1071,18 +1070,18 @@ struct
         let stack = Stack.push_ref stack r in
         Choice.return (State.Continue { state with stack })
     | Br_on_non_null i ->
-      let counter_next_false, counter_next_true =
-        match state.pc.raw with
-        | [] -> (Int.max_int, Atomic.get instr.Annotated.instr_counter - 1)
-        | h :: _ ->
-          let v = Atomic.get h.Annotated.instr_counter in
-          (v, Atomic.get instr.Annotated.instr_counter - 1 - v)
-      in
+      let* depth = Choice.depth () in
       let prio_true =
-        Prio.from_annotated counter_next_true !(instr.Annotated.d_true)
+        let instr_counter =
+          Next_instruction.branch state i |> Next_instruction.with_instr_counter
+        in
+        Prio.v ~instr_counter ~distance_to_unreachable:None ~depth
       in
       let prio_false =
-        Prio.from_annotated counter_next_false !(instr.Annotated.d_false)
+        let instr_counter =
+          Next_instruction.continue state |> Next_instruction.with_instr_counter
+        in
+        Prio.v ~instr_counter ~distance_to_unreachable:None ~depth
       in
       let r, stack = Stack.pop_as_ref stack in
       let* is_non_null, stack =
