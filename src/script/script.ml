@@ -152,9 +152,16 @@ let value_of_const : Wast.const -> Concrete_value.t = function
   | Const_F32 v -> Concrete_value.F32 v
   | Const_F64 v -> Concrete_value.F64 v
   | Const_V128 v -> Concrete_value.V128 v
-  | Const_null None -> assert false (* ? *)
-  | Const_null (Some rt) -> Concrete_value.Ref (Concrete_ref.null rt)
   | Const_extern i -> Concrete_value.Ref (Host_externref.value i)
+  | Const_null None -> assert false (* ? *)
+  (* TODO: not ideal, the following are a duplication of Concrete_ref.null
+  applying on Text.heap_type instead of Binary.heap_type. *)
+  | Const_null (Some (Func_ht | NoFunc_ht | TypeUse _)) ->
+    Concrete_value.Ref (Func None)
+  | Const_null (Some (Extern_ht | NoExtern_ht)) ->
+    Concrete_value.Ref (Extern None)
+  | Const_null (Some (Any_ht | None_ht)) -> Concrete_value.Ref NullRef
+  | Const_null (Some (Exn_ht | NoExn_ht)) -> Concrete_value.Ref NullExn
   | i ->
     Log.err (fun m ->
       m "TODO: unimplemented Script.value_of_const %a)" Wast.pp_const i );

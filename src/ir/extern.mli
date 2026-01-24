@@ -45,7 +45,7 @@ module Func : sig
 
     type extern_func = Extern_func : 'a func_type * 'a -> extern_func
 
-    val extern_type : extern_func -> Text.func_type
+    val extern_type : extern_func -> Binary.func_type
 
     module Syntax : sig
       type l
@@ -134,6 +134,6 @@ end
 module Module : sig
   type 'f t =
     { functions : (string * 'f) list
-    ; func_type : 'f -> Text.func_type
+    ; func_type : 'f -> Binary.func_type
     }
 end

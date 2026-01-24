@@ -6,9 +6,53 @@
 
 type indice = int
 
+type heap_type =
+  | TypeUse of indice
+  (* abs_heap_type *)
+  | Any_ht
+  | None_ht
+  | Func_ht
+  | NoFunc_ht
+  | Exn_ht
+  | NoExn_ht
+  | Extern_ht
+  | NoExtern_ht
+
+val pp_heap_type : heap_type Fmt.t
+
+val heap_type_eq : heap_type -> heap_type -> bool
+
+type ref_type = Text.nullable * heap_type
+
+val pp_ref_type : ref_type Fmt.t
+
+val ref_type_eq : ref_type -> ref_type -> bool
+
+type val_type =
+  | Num_type of Text.num_type
+  | Ref_type of ref_type
+
+val val_type_eq : val_type -> val_type -> bool
+
+val is_subtype_val_type : val_type -> val_type -> bool
+
+type param = string option * val_type
+
+type param_type = param list
+
+type result_type = val_type list
+
+val pp_result_type : Format.formatter -> result_type -> unit
+
+type func_type = param_type * result_type
+
+val pp_func_type : Format.formatter -> func_type -> unit
+
+val func_type_eq : func_type -> func_type -> bool
+
 type block_type =
   (* TODO: inline this *)
-  | Bt_raw of (indice option * Text.func_type)
+  | Bt_raw of (indice option * func_type)
 
 (** Instructions *)
 
@@ -40,13 +84,13 @@ type instr =
   | I_reinterpret_f of Text.nn * Text.nn
   | F_reinterpret_i of Text.nn * Text.nn
   (* Reference instructions *)
-  | Ref_null of Text.heap_type
+  | Ref_null of heap_type
   | Ref_is_null
   | Ref_as_non_null
   | Ref_func of indice
   (* Parametric instructions *)
   | Drop
-  | Select of Text.val_type list option
+  | Select of val_type list option
   (* Variable instructions *)
   | Local_get of indice
   | Local_set of indice
@@ -113,7 +157,7 @@ val iter_expr : (instr -> unit) -> expr Annotated.t -> unit
 module Func : sig
   type t =
     { type_f : block_type
-    ; locals : Text.param list
+    ; locals : param list
     ; body : expr Annotated.t
     ; id : string option
     }
@@ -134,17 +178,33 @@ module Export : sig
     }
 end
 
+module Typedef : sig
+  type t = string option * func_type
+
+  val pp : t Fmt.t
+end
+
 module Table : sig
+  module Type : sig
+    type nonrec t = Text.limits * ref_type
+
+    val pp : t Fmt.t
+  end
+
   type t =
     { id : string option
-    ; typ : Text.Table.Type.t
+    ; typ : Type.t
     ; init : expr Annotated.t option
     }
 end
 
 module Global : sig
+  module Type : sig
+    type nonrec t = Text.mut * val_type
+  end
+
   type t =
-    { typ : Text.Global.Type.t
+    { typ : Type.t
     ; init : expr Annotated.t
     ; id : string option
     }
@@ -175,7 +235,7 @@ module Elem : sig
 
   type t =
     { id : string option
-    ; typ : Text.ref_type (* TODO: init : binary+const expr*)
+    ; typ : ref_type (* TODO: init : binary+const expr*)
     ; init : expr Annotated.t list
     ; mode : Mode.t
     ; explicit_typ : bool
@@ -199,9 +259,9 @@ module Module : sig
 
   type t =
     { id : string option
-    ; types : Text.Typedef.t array
-    ; global : (Global.t, Text.Global.Type.t) Origin.t array
-    ; table : (Table.t, Text.Table.Type.t) Origin.t array
+    ; types : Typedef.t array
+    ; global : (Global.t, Global.Type.t) Origin.t array
+    ; table : (Table.t, Table.Type.t) Origin.t array
     ; mem : (Text.Mem.t, Text.limits) Origin.t array
     ; func : (Func.t, block_type) Origin.t array (* TODO: switch to func_type *)
     ; tag : (Tag.t, block_type) Origin.t array
@@ -221,7 +281,7 @@ module Module : sig
 
   val get_func_type : indice -> t -> block_type option
 
-  val get_type : indice -> t -> Text.Typedef.t option
+  val get_type : indice -> t -> Typedef.t option
 
   val find_imported_func_index :
     modul_name:string -> func_name:string -> t -> indice option

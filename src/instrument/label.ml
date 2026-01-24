@@ -186,7 +186,7 @@ let annotate criteria m =
   let m =
     let typ =
       Binary.Bt_raw
-        (None, ([ (None, Text.Num_type I32); (None, Num_type I32) ], []))
+        (None, ([ (None, Binary.Num_type I32); (None, Num_type I32) ], []))
     in
     Binary.Module.add_import_if_not_present ~modul_name:"owi"
       ~func_name:"cov_label_set" ~typ m

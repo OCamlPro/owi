@@ -28,7 +28,7 @@ module State = struct
     { by_name : exports StringMap.t
     ; by_id : (exports * int) StringMap.t
     ; last : (exports * int) option
-    ; collection : ('f * Text.func_type) Dynarray.t
+    ; collection : ('f * Binary.func_type) Dynarray.t
     ; envs : 'f envs
     }
 
@@ -63,7 +63,7 @@ module State = struct
         else Error (`Unknown_import (import.modul_name, import.name))
       | Some v -> Ok v )
 
-  let load_global (ls : 'f t) (import : Text.Global.Type.t Origin.imported) :
+  let load_global (ls : 'f t) (import : Binary.Global.Type.t Origin.imported) :
     global Result.t =
     let* global = load_from_module ls (fun (e : exports) -> e.globals) import in
     let* strict =
@@ -74,8 +74,8 @@ module State = struct
     in
     if
       not
-        ( if strict then Text.val_type_eq global.typ (snd import.typ)
-          else Text.is_subtype_val_type global.typ (snd import.typ) )
+        ( if strict then Binary.val_type_eq global.typ (snd import.typ)
+          else Binary.is_subtype_val_type global.typ (snd import.typ) )
     then begin
       Error (`Incompatible_import_type import.name)
     end
@@ -137,8 +137,9 @@ module Eval_const = struct
     | [ result ] -> Ok result
 end
 
-let eval_global ls env (global : (Binary.Global.t, Text.Global.Type.t) Origin.t)
-  : global Result.t =
+let eval_global ls env
+  (global : (Binary.Global.t, Binary.Global.Type.t) Origin.t) : global Result.t
+    =
   match global with
   | Local global ->
     let* value = Eval_const.expr env global.init in
@@ -193,12 +194,12 @@ let eval_memories ls env memories =
   in
   env
 
-let table_types_are_compatible (import, (t1 : Text.ref_type)) (imported, t2) =
-  limit_is_included ~import ~imported && Text.ref_type_eq t1 t2
+let table_types_are_compatible (import, (t1 : Binary.ref_type)) (imported, t2) =
+  limit_is_included ~import ~imported && Binary.ref_type_eq t1 t2
 
-let load_table (ls : 'f State.t) (import : Text.Table.Type.t Origin.imported) :
-  table Result.t =
-  let typ : Text.Table.Type.t = import.typ in
+let load_table (ls : 'f State.t) (import : Binary.Table.Type.t Origin.imported)
+  : table Result.t =
+  let typ : Binary.Table.Type.t = import.typ in
   let* t =
     State.load_from_module ls (fun (e : State.exports) -> e.tables) import
   in
@@ -209,7 +210,7 @@ let load_table (ls : 'f State.t) (import : Text.Table.Type.t Origin.imported) :
   then Ok t
   else Error (`Incompatible_import_type import.name)
 
-let eval_table ls (table : (Binary.Table.t, Text.Table.Type.t) Origin.t) :
+let eval_table ls (table : (Binary.Table.t, Binary.Table.Type.t) Origin.t) :
   table Result.t =
   match table with
   | Local { id = label; typ; _ } -> ok @@ Concrete_table.init ?label typ
@@ -241,11 +242,11 @@ let load_func (ls : 'f State.t) (import : Binary.block_type Origin.imported) :
       let _f, t = Dynarray.get ls.collection idx in
       t
   in
-  if Text.func_type_eq typ type' then Ok func
+  if Binary.func_type_eq typ type' then Ok func
   else
     let msg =
-      Fmt.str "%s: expected: %a got: %a" import.name Text.pp_func_type typ
-        Text.pp_func_type type'
+      Fmt.str "%s: expected: %a got: %a" import.name Binary.pp_func_type typ
+        Binary.pp_func_type type'
     in
     Error (`Incompatible_import_type msg)
 
@@ -275,11 +276,11 @@ let eval_tag ls (_finished_env : int)
       State.load_from_module ls (fun (e : State.exports) -> e.tags) import
     in
     let (Bt_raw ((None | Some _), typ)) = tag.typ in
-    if Text.func_type_eq typ import_typ then Ok tag
+    if Binary.func_type_eq typ import_typ then Ok tag
     else
       let msg =
-        Fmt.str "%s: expected: %a got: %a" import.name Text.pp_func_type
-          import_typ Text.pp_func_type typ
+        Fmt.str "%s: expected: %a got: %a" import.name Binary.pp_func_type
+          import_typ Binary.pp_func_type typ
       in
       Error (`Incompatible_import_type msg)
 

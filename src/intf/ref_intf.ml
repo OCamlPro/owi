@@ -24,7 +24,7 @@ module type T = sig
 
   val pp : t Fmt.t
 
-  val null : Text.heap_type -> t
+  val null : Binary.heap_type -> t
 
   val func : Kind.func -> t
 

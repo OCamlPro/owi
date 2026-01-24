@@ -4,10 +4,32 @@
 
 let convert_indice : Binary.indice -> Text.indice = function i -> Raw i
 
+let convert_heap_type : Binary.heap_type -> Text.heap_type = function
+  | TypeUse id -> TypeUse (Raw id)
+  | Any_ht -> Any_ht
+  | None_ht -> None_ht
+  | Func_ht -> Func_ht
+  | NoFunc_ht -> NoFunc_ht
+  | Exn_ht -> Exn_ht
+  | NoExn_ht -> NoExn_ht
+  | Extern_ht -> Extern_ht
+  | NoExtern_ht -> NoExtern_ht
+
+let convert_ref_type ((n, ht) : Binary.ref_type) : Text.ref_type =
+  (n, convert_heap_type ht)
+
+let convert_val_type : Binary.val_type -> Text.val_type = function
+  | Num_type nt -> Num_type nt
+  | Ref_type rt -> Ref_type (convert_ref_type rt)
+
+let convert_func_type ((pt, rt) : Binary.func_type) : Text.func_type =
+  ( List.map (fun (id, vt) -> (id, convert_val_type vt)) pt
+  , List.map convert_val_type rt )
+
 let convert_block_type : Binary.block_type -> Text.block_type = function
   | Bt_raw (opt, ft) ->
     let opt = Option.map convert_indice opt in
-    Bt_raw (opt, ft)
+    Bt_raw (opt, convert_func_type ft)
 
 let rec convert_instr : Binary.instr -> Text.instr = function
   | Br_table (ids, id) ->
@@ -113,7 +135,7 @@ let rec convert_instr : Binary.instr -> Text.instr = function
   | Select typ -> begin
     match typ with
     | None -> Select None
-    | Some [ t ] -> Select (Some [ t ])
+    | Some [ t ] -> Select (Some [ convert_val_type t ])
     | Some [] | Some (_ :: _ :: _) ->
       (* invalid result arity *)
       (* TODO: maybe we could change the type of Binary.Select to prevent this from happening? *)
@@ -167,7 +189,7 @@ let rec convert_instr : Binary.instr -> Text.instr = function
   | Memory_fill id -> Memory_fill (convert_indice id)
   | Memory_grow id -> Memory_grow (convert_indice id)
   | V_ibinop (shape, op) -> V_ibinop (shape, op)
-  | Ref_null t -> Ref_null t
+  | Ref_null t -> Ref_null (convert_heap_type t)
 
 and convert_expr (e : Binary.expr Annotated.t) : Text.expr Annotated.t =
   Annotated.map
@@ -187,7 +209,7 @@ let convert_elem : Binary.Elem.t -> Text.Elem.t = function
   | { id; typ; init; mode; explicit_typ } ->
     let init = List.map convert_expr init in
     let mode = convert_elem_mode mode in
-    { id; typ; init; mode; explicit_typ }
+    { id; typ = convert_ref_type typ; init; mode; explicit_typ }
 
 let convert_data_mode : Binary.Data.Mode.t -> Text.Data.Mode.t = function
   | Passive -> Passive
@@ -201,19 +223,25 @@ let convert_data : Binary.Data.t -> Text.Data.t = function
     { id; init; mode }
 
 let from_types types : Text.Module.Field.t list =
-  Array.map (fun (t : Text.Typedef.t) -> Text.Module.Field.Typedef t) types
+  Array.map
+    (fun ((id, ft) : Binary.Typedef.t) ->
+      Text.Module.Field.Typedef (id, convert_func_type ft) )
+    types
   |> Array.to_list
 
-let from_global (global : (Binary.Global.t, Text.Global.Type.t) Origin.t array)
+let from_global (global : (Binary.Global.t, Binary.Global.Type.t) Origin.t array)
   : Text.Module.Field.t list =
   Array.map
     (function
-      | Origin.Local (g : Binary.Global.t) ->
+      | Origin.Local ({ typ = mut, vt; _ } as g : Binary.Global.t) ->
         let init = convert_expr g.init in
+        let typ = (mut, convert_val_type vt) in
         let id = g.id in
-        Text.Module.Field.Global { typ = g.typ; init; id }
-      | Imported { modul_name; name; assigned_name; typ } ->
-        let typ = Text.Import.Type.Global (assigned_name, typ) in
+        Text.Module.Field.Global { typ; init; id }
+      | Imported { modul_name; name; assigned_name; typ = mut, vt } ->
+        let typ =
+          Text.Import.Type.Global (assigned_name, (mut, convert_val_type vt))
+        in
         Text.Module.Field.Import { modul_name; name; typ } )
     global
   |> Array.to_list
@@ -221,11 +249,14 @@ let from_global (global : (Binary.Global.t, Text.Global.Type.t) Origin.t array)
 let from_table table : Text.Module.Field.t list =
   Array.map
     (function
-      | Origin.Local Binary.Table.{ id; typ; init } ->
+      | Origin.Local Binary.Table.{ id; typ = limits, rt; init } ->
         let init = Option.map convert_expr init in
-        Text.Module.Field.Table { id; typ; init }
-      | Imported { modul_name; name; assigned_name; typ } ->
-        let typ = Text.Import.Type.Table (assigned_name, typ) in
+        Text.Module.Field.Table
+          { id; typ = (limits, convert_ref_type rt); init }
+      | Imported { modul_name; name; assigned_name; typ = limits, rt } ->
+        let typ =
+          Text.Import.Type.Table (assigned_name, (limits, convert_ref_type rt))
+        in
         Import { modul_name; name; typ } )
     table
   |> Array.to_list
@@ -247,7 +278,10 @@ let from_func func : Text.Module.Field.t list =
         let type_f = convert_block_type func.type_f in
         let body = convert_expr func.body in
         let id = func.id in
-        Text.Module.Field.Func { type_f; locals = func.locals; body; id }
+        let locals =
+          List.map (fun (id, vt) -> (id, convert_val_type vt)) func.locals
+        in
+        Text.Module.Field.Func { type_f; locals; body; id }
       | Imported { modul_name; name; assigned_name; typ } ->
         let typ = convert_block_type typ in
         let typ = Text.Import.Type.Func (assigned_name, typ) in

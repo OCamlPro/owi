@@ -13,7 +13,7 @@ type 'ext t =
   ; data : Concrete_data.t IMap.t
   ; elem : Concrete_elem.t IMap.t
   ; tags : Binary.Tag.t IMap.t
-  ; extern_funcs : ('ext * Text.func_type) Dynarray.t
+  ; extern_funcs : ('ext * Binary.func_type) Dynarray.t
   ; id : int
   }
 

@@ -41,7 +41,7 @@ module Func = struct
 
     type extern_func = Extern_func : 'a func_type * 'a -> extern_func
 
-    val extern_type : extern_func -> Text.func_type
+    val extern_type : extern_func -> Binary.func_type
 
     module Syntax : sig
       type l
@@ -155,7 +155,7 @@ module Func = struct
 
     type extern_func = Extern_func : 'a func_type * 'a -> extern_func
 
-    let elt_type (type t) (e : t telt) : Text.val_type =
+    let elt_type (type t) (e : t telt) : Binary.val_type =
       match e with
       | I32 -> Num_type I32
       | I64 -> Num_type I64
@@ -164,7 +164,7 @@ module Func = struct
       | V128 -> Num_type V128
       | Externref _ -> Ref_type (Null, Extern_ht)
 
-    let res_type (type t) (r : t rtype) : Text.result_type =
+    let res_type (type t) (r : t rtype) : Binary.result_type =
       match r with
       | R0 -> []
       | R1 a -> [ elt_type a ]
@@ -172,7 +172,7 @@ module Func = struct
       | R3 (a, b, c) -> [ elt_type a; elt_type b; elt_type c ]
       | R4 (a, b, c, d) -> [ elt_type a; elt_type b; elt_type c; elt_type d ]
 
-    let rec arg_type : type t r. (t, r) atype -> Text.param_type = function
+    let rec arg_type : type t r. (t, r) atype -> Binary.param_type = function
       | Mem (_, tl) -> arg_type tl
       | UArg tl -> arg_type tl
       | Arg (hd, tl) -> (None, elt_type hd) :: arg_type tl
@@ -180,7 +180,7 @@ module Func = struct
       | Res -> []
 
     (* TODO: we could move this out, as it does not really depend on the functor's parameters *)
-    let extern_type (Extern_func (Func (arg, res), _)) : Text.func_type =
+    let extern_type (Extern_func (Func (arg, res), _)) : Binary.func_type =
       (arg_type arg, res_type res)
 
     let fresh =
@@ -272,6 +272,6 @@ module Module = struct
   (** extern modules *)
   type 'extern_func t =
     { functions : (string * 'extern_func) list
-    ; func_type : 'extern_func -> Text.func_type
+    ; func_type : 'extern_func -> Binary.func_type
     }
 end

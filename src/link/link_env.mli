@@ -52,4 +52,4 @@ module Build : sig
   val get_memories : t -> Concrete_memory.t IMap.t
 end
 
-val freeze : int -> Build.t -> ('ext * Text.func_type) Dynarray.t -> 'ext t
+val freeze : int -> Build.t -> ('ext * Binary.func_type) Dynarray.t -> 'ext t
