@@ -78,10 +78,10 @@ let write_reftype buf nullable ht =
       false
   in
   match ht with
-  | Text.TypeUse (Raw id) when is_null ->
+  | Binary.TypeUse id when is_null ->
     write_char_indice buf '\x63' id;
     write_indice buf id
-  | Text.TypeUse (Raw id) -> write_indice buf id
+  | Binary.TypeUse id -> write_indice buf id
   | Exn_ht -> Buffer.add_char buf '\x69'
   | Any_ht -> Buffer.add_char buf '\x6E'
   | Extern_ht -> Buffer.add_char buf '\x6F'
@@ -90,13 +90,9 @@ let write_reftype buf nullable ht =
   | NoExtern_ht -> Buffer.add_char buf '\x72'
   | NoFunc_ht -> Buffer.add_char buf '\x73'
   | NoExn_ht -> Buffer.add_char buf '\x74'
-  | TypeUse (Text _) -> assert false
-(* TODO: TypeUse (Text id) Unreachable because there (should be) no text ids in
-  binary format, the proper way to do it is by redefining ref_type and heap_type
-  for the binary format but it requires lots of changes. *)
 
 let get_char_valtype = function
-  | Text.Num_type I32 -> '\x7F'
+  | Binary.Num_type I32 -> '\x7F'
   | Num_type I64 -> '\x7E'
   | Num_type F32 -> '\x7D'
   | Num_type F64 -> '\x7C'
@@ -122,10 +118,10 @@ let encode_vector_list buf datas encode_func =
 let encode_vector_array buf datas encode_func =
   encode_vector Array.length Array.iter buf datas encode_func
 
-let write_resulttype buf (rt : Text.result_type) =
+let write_resulttype buf (rt : Binary.result_type) =
   encode_vector_list buf rt write_valtype
 
-let write_paramtype buf (pt : Text.param_type) =
+let write_paramtype buf (pt : Binary.param_type) =
   let vt = List.map snd pt in
   write_resulttype buf vt
 
@@ -148,7 +144,7 @@ let write_block_type_idx buf (typ : Binary.block_type) =
   | Bt_raw (None, _) -> assert false
   | Bt_raw (Some idx, _) -> write_indice buf idx
 
-let write_global_type buf ((mut, vt) : Text.Global.Type.t) =
+let write_global_type buf ((mut, vt) : Binary.Global.Type.t) =
   write_valtype buf vt;
   write_mut buf mut
 
@@ -181,7 +177,7 @@ let write_memory_import buf
 
 let write_table_import buf
   ({ modul_name; name; typ = limits, (nullable, heaptype); _ } :
-    Text.Table.Type.t Origin.imported ) =
+    Binary.Table.Type.t Origin.imported ) =
   write_string buf modul_name;
   write_string buf name;
   Buffer.add_char buf '\x01';
@@ -555,8 +551,8 @@ let write_global buf ({ typ; init; _ } : Global.t) =
   write_expr buf init ~end_op_code:None
 
 let write_global_import buf
-  ({ modul_name; name; typ = mut, valtype; _ } :
-    Text.Global.Type.t Origin.imported ) =
+  ({ modul_name; name; typ = mut, valtype; _ } : Global.Type.t Origin.imported)
+    =
   write_string buf modul_name;
   write_string buf name;
   Buffer.add_char buf '\x03';

@@ -6,7 +6,7 @@
 type t =
   { mutable value : Concrete_value.t
   ; mut : Text.mut
-  ; typ : Text.val_type
+  ; typ : Binary.val_type
   }
 
 let value g = g.value

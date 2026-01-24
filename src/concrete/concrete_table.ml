@@ -9,7 +9,7 @@ type t =
   { id : int
   ; label : string option
   ; limits : Text.limits
-  ; typ : Text.ref_type
+  ; typ : Binary.ref_type
   ; mutable data : table
   }
 
@@ -19,7 +19,7 @@ let fresh =
     incr r;
     !r
 
-let init ?label (typ : Text.Table.Type.t) : t =
+let init ?label (typ : Binary.Table.Type.t) : t =
   let limits, ((_null, heap_type) as ref_type) = typ in
   let null = Concrete_ref.null heap_type in
   let table = Array.make (Int64.to_int limits.min) null in

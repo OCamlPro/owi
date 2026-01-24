@@ -11,7 +11,7 @@ module type T = sig
 
   val size : t -> int
 
-  val typ : t -> Text.ref_type
+  val typ : t -> Binary.ref_type
 
   val max_size : t -> Int64.t option
 

@@ -16,7 +16,7 @@ let find_functions_with_func_type func_type (acc, i)
   let (Bt_raw (_, ft)) =
     match f with Origin.Local x -> x.type_f | Origin.Imported imp -> imp.typ
   in
-  if Text.func_type_eq func_type ft then (S.add i acc, i + 1) else (acc, i + 1)
+  if Binary.func_type_eq func_type ft then (S.add i acc, i + 1) else (acc, i + 1)
 
 let rec find_children mode tables (funcs : 'a array) acc (l : Binary.expr) =
   match (l, mode) with

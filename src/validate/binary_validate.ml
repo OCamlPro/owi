@@ -10,7 +10,7 @@ open Fmt
 
 type typ =
   | Num_type of Text.num_type
-  | Ref_type of Text.ref_type
+  | Ref_type of ref_type
   | Any
   | Something
 
@@ -18,14 +18,14 @@ let sp fmt () = Fmt.string fmt " "
 
 let pp_typ fmt = function
   | Num_type t -> Text.pp_num_type fmt t
-  | Ref_type t -> Text.pp_ref_type fmt t
+  | Ref_type t -> pp_ref_type fmt t
   | Any -> string fmt "any"
   | Something -> string fmt "something"
 
 let pp_typ_list fmt l = list ~sep:sp pp_typ fmt l
 
 let typ_of_val_type = function
-  | Text.Ref_type rt -> Ref_type rt
+  | Binary.Ref_type rt -> Ref_type rt
   | Num_type t -> Num_type t
 
 let typ_of_pt pt = typ_of_val_type @@ snd pt
@@ -60,14 +60,14 @@ module Env = struct
 
   type t =
     { locals : local Index.Map.t
-    ; result_type : Text.result_type
+    ; result_type : result_type
     ; blocks : typ list list
-    ; modul : Binary.Module.t
+    ; modul : Module.t
     ; refs : (int, unit) Hashtbl.t
     }
 
   let type_get i m =
-    match Binary.Module.get_type i m with
+    match Module.get_type i m with
     | None -> Error (`Unknown_type (Text.Raw i))
     | Some (_, ty) -> Ok ty
 
@@ -102,7 +102,7 @@ module Env = struct
     | None -> Error (`Unknown_label (Text.Raw i))
     | Some bt -> Ok bt
 
-  let table_type_get i (modul : Binary.Module.t) =
+  let table_type_get i (modul : Module.t) =
     if i >= Array.length modul.table then Error (`Unknown_table (Text.Raw i))
     else
       match modul.table.(i) with
@@ -162,7 +162,7 @@ let get_func_type_id (env : Env.t) i =
     | Origin.Local { type_f = Bt_raw (_, typ); _ } -> typ
     | Imported { typ = Bt_raw (_, typ); _ } -> typ
   in
-  Array.find_index (fun (_, typ') -> Text.func_type_eq typ typ') env.modul.types
+  Array.find_index (fun (_, typ') -> func_type_eq typ typ') env.modul.types
 
 (* TODO: move type matching functions outside of the stack module? *)
 module Stack : sig
@@ -183,15 +183,15 @@ module Stack : sig
   val match_heap_type :
        ?subtype:bool
     -> Module.t
-    -> expected:Text.heap_type
-    -> got:Text.heap_type
+    -> expected:heap_type
+    -> got:heap_type
     -> bool Result.t
 
   val match_ref_type :
        ?subtype:bool
     -> Module.t
-    -> expected:Text.ref_type
-    -> got:Text.ref_type
+    -> expected:ref_type
+    -> got:ref_type
     -> bool Result.t
 
   val match_types :
@@ -218,7 +218,7 @@ end = struct
      are equal, and -1 if typ1 is a subtype of typ2, 1 otherwise *)
   let match_heap_type ?(subtype = false) modul ~expected ~got =
     match (got, expected) with
-    | Text.Func_ht, Text.Func_ht
+    | Func_ht, Func_ht
     | Extern_ht, Extern_ht
     | Any_ht, Any_ht
     | None_ht, None_ht
@@ -227,27 +227,26 @@ end = struct
     | NoExn_ht, NoExn_ht
     | NoExtern_ht, NoExtern_ht ->
       Ok true
-    | TypeUse (Text _id), _ | _, TypeUse (Text _id) -> assert false
-    | TypeUse (Raw id1), TypeUse (Raw id2) ->
+    | TypeUse id1, TypeUse id2 ->
       (* TODO: add subtyping check *)
       let* pt1, rt1 = Env.type_get id1 modul in
       let* pt2, rt2 = Env.type_get id2 modul in
       let res =
         List.compare_lengths pt1 pt2 = 0
         && List.compare_lengths rt1 rt2 = 0
-        && List.for_all2 (fun (_, t1) (_, t2) -> Text.val_type_eq t1 t2) pt1 pt2
-        && List.for_all2 Text.val_type_eq rt1 rt2
+        && List.for_all2 (fun (_, t1) (_, t2) -> val_type_eq t1 t2) pt1 pt2
+        && List.for_all2 val_type_eq rt1 rt2
       in
       Ok res
     (* TODO: proper subtype checking *)
-    | TypeUse (Raw _), Func_ht
-    | NoFunc_ht, (TypeUse (Raw _) | Func_ht)
+    | TypeUse _, Func_ht
+    | NoFunc_ht, (TypeUse _ | Func_ht)
     | NoExn_ht, Exn_ht
     | NoExtern_ht, Extern_ht
     | None_ht, Any_ht
       when subtype ->
       Ok true
-    | TypeUse (Raw id), Func_ht ->
+    | TypeUse id, Func_ht ->
       (* TODO: not ideal *)
       let* pt1, rt1 = Env.type_get id modul in
       if List.is_empty pt1 && List.is_empty rt1 then Ok true else Ok false
@@ -262,8 +261,8 @@ end = struct
     | (Text.No_null, _), (Text.Null, _) ->
       Error
         (`Type_mismatch
-           (Fmt.str "match_ref_type Expected %a got %a" Text.pp_ref_type
-              expected Text.pp_ref_type got ) )
+           (Fmt.str "match_ref_type Expected %a got %a" pp_ref_type expected
+              pp_ref_type got ) )
 
   let match_types ?subtype env ~expected ~got =
     match (expected, got) with
@@ -339,7 +338,7 @@ let typ_equal modul ~expected ~got =
   | Something, _ | _, Something -> Ok true
   | _, _ -> Ok false
 
-let is_func_type (ref_type : Text.ref_type) =
+let is_func_type (ref_type : ref_type) =
   match ref_type with _, Func_ht -> true | _ -> false
 
 let ref_type_as_non_null t =
@@ -723,9 +722,7 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
       match get_func_type_id env i with
       | None -> assert false
       | Some id ->
-        let+ stack =
-          Stack.push [ Ref_type (Text.No_null, TypeUse (Raw id)) ] stack
-        in
+        let+ stack = Stack.push [ Ref_type (Text.No_null, TypeUse id) ] stack in
         (env, stack)
     end
   | Br i ->
@@ -842,9 +839,9 @@ let typecheck_const_instr ?known_globals ~is_init (modul : Module.t) refs stack
     let* ity = Env.func_get i modul in
     let resty =
       match
-        Array.find_index (fun (_, ty) -> Text.func_type_eq ty ity) modul.types
+        Array.find_index (fun (_, ty) -> func_type_eq ty ity) modul.types
       with
-      | Some tyid -> Text.TypeUse (Raw tyid)
+      | Some tyid -> TypeUse tyid
       | None -> Func_ht
     in
     Hashtbl.add refs i ();
@@ -879,7 +876,7 @@ let typecheck_const_expr ?known_globals ?(is_init = false) (modul : Module.t)
     [] expr.Annotated.raw
 
 let typecheck_global (modul : Module.t) refs known_globals
-  (global : (Global.t, Text.Global.Type.t) Origin.t) =
+  (global : (Global.t, Global.Type.t) Origin.t) =
   match global with
   | Imported _ -> Ok ()
   | Local { typ; init; _ } -> (
@@ -917,13 +914,13 @@ let typecheck_elem modul refs (elem : Elem.t) =
     let* tbl_null, tbl_ty = Env.table_type_get tbl_i modul in
     if
       (elem.explicit_typ && Text.compare_nullable tbl_null elem_null > 0)
-      || not (Text.heap_type_eq tbl_ty elem_ty)
+      || not (heap_type_eq tbl_ty elem_ty)
     then Error (`Type_mismatch "typecheck elem 3")
     else
       let* t = typecheck_const_expr modul refs e in
       match t with
       | [ Ref_type (_, t) ] ->
-        if not @@ Text.heap_type_eq t tbl_ty then
+        if not @@ heap_type_eq t tbl_ty then
           Error (`Type_mismatch "typecheck_elem 4")
         else Ok ()
       | [ _t ] -> Ok ()
@@ -1014,8 +1011,7 @@ let validate_tables modul refs =
                 Array.exists
                   (fun e ->
                     match e with
-                    | Binary.Elem.{ mode = Active (Some id', _); _ }
-                      when id = id' ->
+                    | Elem.{ mode = Active (Some id', _); _ } when id = id' ->
                       true
                     | _ -> false )
                   modul.elem
@@ -1027,7 +1023,7 @@ let validate_tables modul refs =
                      (Fmt.str
                         "Table type is %a but init was not provided and is not \
                          nullable"
-                        Text.pp_ref_type rt ) )
+                        pp_ref_type rt ) )
           end
           | Some init ->
             let* res_tys = typecheck_const_expr ~is_init:true modul refs init in
@@ -1041,12 +1037,12 @@ let validate_tables modul refs =
                 Error
                   (`Type_mismatch
                      (Fmt.str "Table type is %a but init expr is of type %a"
-                        Text.pp_ref_type rt pp_typ_list res_tys ) )
+                        pp_ref_type rt pp_typ_list res_tys ) )
             | _ ->
               Error
                 (`Type_mismatch
                    (Fmt.str "Table type is %a but init expr is of type %a"
-                      Text.pp_ref_type rt pp_typ_list res_tys ) )
+                      pp_ref_type rt pp_typ_list res_tys ) )
             end
         in
         check_limit ~table:true limits

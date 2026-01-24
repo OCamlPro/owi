@@ -5,23 +5,30 @@
 open Syntax
 
 let rewrite_heap_type (assigned : Assigned.t) (ht : Text.heap_type) :
-  Text.heap_type Result.t =
+  Binary.heap_type Result.t =
   match ht with
   | Text.TypeUse id ->
     let* id = Assigned.find_type assigned id in
-    Ok (Text.TypeUse (Raw id))
-  | _ -> Ok ht
+    Ok (Binary.TypeUse id)
+  | Any_ht -> Ok Any_ht
+  | None_ht -> Ok None_ht
+  | Func_ht -> Ok Func_ht
+  | NoFunc_ht -> Ok NoFunc_ht
+  | Exn_ht -> Ok Exn_ht
+  | NoExn_ht -> Ok NoExn_ht
+  | Extern_ht -> Ok Extern_ht
+  | NoExtern_ht -> Ok NoExtern_ht
 
 let rewrite_val_type (assigned : Assigned.t) (vt : Text.val_type) :
-  Text.val_type Result.t =
+  Binary.val_type Result.t =
   match vt with
   | Text.Ref_type (n, ht) ->
     let* ht = rewrite_heap_type assigned ht in
-    Ok (Text.Ref_type (n, ht))
-  | _ -> Ok vt
+    Ok (Binary.Ref_type (n, ht))
+  | Num_type nt -> Ok (Num_type nt)
 
 let rewrite_func_type (assigned : Assigned.t) ((param, res) : Text.func_type) :
-  Text.func_type Result.t =
+  Binary.func_type Result.t =
   let* param' =
     list_map
       (fun (n, vt) ->
@@ -33,21 +40,21 @@ let rewrite_func_type (assigned : Assigned.t) ((param, res) : Text.func_type) :
   Ok (param', res')
 
 let rewrite_block_type (assigned : Assigned.t) (block_type : Text.block_type) :
-  Binary.block_type Result.t =
+  (Text.param list * Binary.block_type) Result.t =
   match block_type with
   | Bt_ind id ->
     let* idx = Assigned.find_type assigned id in
-    let* t =
+    let* ((params, _) as t) =
       match Assigned.get_type assigned idx with
       | None -> Error (`Unknown_type id)
       | Some v -> Ok v
     in
     let* t = rewrite_func_type assigned t in
-    Ok (Binary.Bt_raw (Some idx, t))
-  | Bt_raw (_, func_type) ->
+    Ok (params, Binary.Bt_raw (Some idx, t))
+  | Bt_raw (_, ((params, _) as func_type)) ->
     let idx = Assigned.find_raw_type assigned func_type in
     let* func_type = rewrite_func_type assigned func_type in
-    Ok (Binary.Bt_raw (Some idx, func_type))
+    Ok (params, Binary.Bt_raw (Some idx, func_type))
 
 let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
   (iexpr : Text.expr Annotated.t) : Binary.expr Annotated.t Result.t =
@@ -75,7 +82,7 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
   (* block_types handling *)
   let block_ty_opt_rewrite = function
     | Some bt ->
-      let+ bt = rewrite_block_type assigned bt in
+      let+ _, bt = rewrite_block_type assigned bt in
       Some bt
     | None -> Ok None
   in
@@ -133,11 +140,6 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
       Binary.Return_call id
     | Local_set id ->
       let id = find_local id in
-      (* let* opt = find_local id in
-      Option.iter
-        (fun (ty, init) ->
-          if not init then Hashtbl.add locals_info id (ty, true) )
-        opt; *)
       Ok (Binary.Local_set id)
     | Local_get id ->
       let id = find_local id in
@@ -161,17 +163,17 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
       Binary.Block (id, bt, e)
     | Call_indirect (tbl_i, bt) ->
       let* tbl_i = Assigned.find_table assigned tbl_i in
-      let+ bt = rewrite_block_type assigned bt in
+      let+ _, bt = rewrite_block_type assigned bt in
       Binary.Call_indirect (tbl_i, bt)
     | Return_call_indirect (tbl_i, bt) ->
       let* tbl_i = Assigned.find_table assigned tbl_i in
-      let+ bt = rewrite_block_type assigned bt in
+      let+ _, bt = rewrite_block_type assigned bt in
       Binary.Return_call_indirect (tbl_i, bt)
     | Call_ref t ->
       let+ t = Assigned.find_type assigned t in
       Binary.Call_ref t
     | Return_call_ref bt ->
-      let+ bt = rewrite_block_type assigned bt in
+      let+ _, bt = rewrite_block_type assigned bt in
       Binary.Return_call_ref bt
     | Global_set id ->
       let+ idx = Assigned.find_global assigned id in
@@ -218,7 +220,9 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
     | Select typ -> begin
       match typ with
       | None -> Ok (Binary.Select None)
-      | Some [ t ] -> Ok (Binary.Select (Some [ t ]))
+      | Some [ t ] ->
+        let+ t = rewrite_val_type assigned t in
+        Binary.Select (Some [ t ])
       | Some [] | Some (_ :: _ :: _) -> Error `Invalid_result_arity
     end
     | I_unop (nn, op) -> Ok (Binary.I_unop (nn, op))
@@ -391,26 +395,24 @@ let rewrite_exports (modul : Grouped.t) (assigned : Assigned.t) :
 
 let rewrite_func (assigned : Assigned.t)
   ({ id; type_f; locals; body; _ } : Text.Func.t) : Binary.Func.t Result.t =
-  let* (Bt_raw (_, (params, _)) as type_f) =
-    rewrite_block_type assigned type_f
-  in
-  let* locals =
+  let* params, type_f = rewrite_block_type assigned type_f in
+  let* body = rewrite_expr assigned (params @ locals) body in
+  let+ locals : Binary.param_type =
     list_map
-      (fun (n, vt) ->
+      (fun (_n, vt) ->
         let* vt = rewrite_val_type assigned vt in
-        Ok (n, vt) )
+        Ok (None, vt) )
       locals
   in
-  let+ body = rewrite_expr assigned (params @ locals) body in
   { Binary.Func.body; type_f; id; locals }
 
 let rewrite_tag (assigned : Assigned.t) ({ id; typ } : Text.Tag.t) :
   Binary.Tag.t Result.t =
-  let+ typ = rewrite_block_type assigned typ in
+  let+ _, typ = rewrite_block_type assigned typ in
   Binary.Tag.{ id; typ }
 
 let rewrite_types (assigned : Assigned.t) (ft : Text.func_type) :
-  Text.Typedef.t Result.t =
+  Binary.Typedef.t Result.t =
   let* ft = rewrite_func_type assigned ft in
   Ok (None, ft)
 
@@ -437,13 +439,19 @@ let modul (modul : Grouped.t) (assigned : Assigned.t) : Binary.Module.t Result.t
   let* data = array_map (rewrite_data assigned) modul.data in
   let* exports = rewrite_exports modul assigned in
   let* func =
-    let f_imported = rewrite_block_type assigned in
+    let f_imported bt =
+      let+ _, rt = rewrite_block_type assigned bt in
+      rt
+    in
     let f_local = rewrite_func assigned in
     let runtime = Origin.monadic_map ~f_local ~f_imported in
     array_map runtime modul.func
   in
   let* tag =
-    let f_imported = rewrite_block_type assigned in
+    let f_imported bt =
+      let+ _, rt = rewrite_block_type assigned bt in
+      rt
+    in
     let f_local = rewrite_tag assigned in
     let runtime = Origin.monadic_map ~f_local ~f_imported in
     array_map runtime modul.tag

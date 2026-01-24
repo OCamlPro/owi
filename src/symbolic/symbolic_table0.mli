@@ -5,7 +5,7 @@
 type t =
   { data : Symbolic_ref.t Map.Make(Int).t
   ; limits : Text.limits
-  ; typ : Text.ref_type
+  ; typ : Binary.ref_type
   ; env_id : int
   ; id : int
   }

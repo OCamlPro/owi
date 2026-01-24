@@ -12,7 +12,7 @@ type t =
   { id : int
   ; label : string option
   ; limits : Text.limits
-  ; typ : Text.ref_type
+  ; typ : Binary.ref_type
   ; mutable data : table
   }
 
@@ -22,4 +22,4 @@ include
      and type t := t
      and type 'a choice := 'a Concrete_choice.t
 
-val init : ?label:string -> Text.Table.Type.t -> t
+val init : ?label:string -> Binary.Table.Type.t -> t

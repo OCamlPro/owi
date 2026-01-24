@@ -21,6 +21,7 @@ type t =
   | NullRef
 
 let pp fmt = function
+  | Extern None -> pf fmt "externref none"
   | Extern _ -> pf fmt "externref"
   | Func _ -> pf fmt "funcref"
   | NullExn -> pf fmt "nullexnref"
@@ -28,7 +29,7 @@ let pp fmt = function
 
 (* TODO: Is this the same as Symbolic_ref.null? *)
 let null = function
-  | Text.Func_ht | NoFunc_ht | TypeUse _ -> Func None
+  | Binary.Func_ht | NoFunc_ht | TypeUse _ -> Func None
   (* TODO: is this correct? Are all nulls equal? *)
   | Extern_ht | NoExtern_ht -> Extern None
   | Any_ht | None_ht -> NullRef

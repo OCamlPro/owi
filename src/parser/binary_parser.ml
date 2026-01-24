@@ -235,7 +235,7 @@ let read_vectype input =
 
 let read_heap_type ?(abs = false) input b =
   match b with
-  | -0x17 -> Ok (Text.Exn_ht, input)
+  | -0x17 -> Ok (Exn_ht, input)
   | -0x12 -> Ok (Any_ht, input)
   | -0x11 -> Ok (Extern_ht, input)
   | -0x10 -> Ok (Func_ht, input)
@@ -245,7 +245,7 @@ let read_heap_type ?(abs = false) input b =
   | -0x0C -> Ok (NoExn_ht, input)
   | _ when not abs ->
     let* id, input = read_indice input in
-    if id >= 0 then Ok (Text.TypeUse (Raw id), input)
+    if id >= 0 then Ok (TypeUse id, input)
     else parse_fail "malformed reference type: %d" b
   | _ -> parse_fail "malformed reference type: %d" b
 
@@ -268,7 +268,7 @@ let read_reftype input =
 
 let read_valtype input =
   match read_numtype input with
-  | Ok (t, input) -> Ok (Text.Num_type t, input)
+  | Ok (t, input) -> Ok (Binary.Num_type t, input)
   | Error _ -> (
     match read_vectype input with
     | Ok (_t, _input) -> Error (`Unimplemented "simd binary parsing")
@@ -755,9 +755,9 @@ let read_const types input =
 
 type import =
   | Func of int
-  | Table of Text.limits * Text.ref_type * Text.expr option
+  | Table of Text.limits * Binary.ref_type * Text.expr option
   | Mem of Text.limits
-  | Global of Text.mut * Text.val_type
+  | Global of Text.mut * val_type
   | Tag of int
 
 let magic_check str =
@@ -868,10 +868,10 @@ let read_table input =
   match b1 with
   | -0x10 ->
     let+ limits, input = read_limits input in
-    ((limits, (Text.Null, Text.Func_ht), None), input)
+    ((limits, (Text.Null, Binary.Func_ht), None), input)
   | -0x11 ->
     let+ limits, input = read_limits input in
-    ((limits, (Text.Null, Text.Extern_ht), None), input)
+    ((limits, (Text.Null, Binary.Extern_ht), None), input)
   | -0x40 -> begin
     let* input = check_zero_opcode input in
     let* ref_type, input = read_reftype input in
@@ -915,7 +915,7 @@ let read_elem_index input =
 let read_elem_kind input =
   let msg = "malformed element kind" in
   match read_byte ~msg input with
-  | Ok ('\x00', input) -> Ok ((Text.Null, Text.Func_ht), input)
+  | Ok ('\x00', input) -> Ok ((Text.Null, Binary.Func_ht), input)
   | Ok (c, _input) ->
     parse_fail "%s (expected 0x00 but got %s)" msg (Char.escaped c)
   | Error _ as e -> e
@@ -928,7 +928,7 @@ let read_element types input =
     let* mode, input = read_elem_active_zero types input in
     let+ init, input = vector_no_id read_elem_index input in
     let init = List.map Annotated.dummy_deep init in
-    let typ = (Text.No_null, Text.Func_ht) in
+    let typ = (Text.No_null, Binary.Func_ht) in
     ({ Elem.id; typ; init; mode; explicit_typ = true }, input)
   | 1 ->
     let mode = Elem.Mode.Passive in
@@ -951,7 +951,7 @@ let read_element types input =
   | 4 ->
     let* mode, input = read_elem_active_zero types input in
     let+ init, input = vector_no_id (read_const types) input in
-    let typ = (Text.Null, Text.Func_ht) in
+    let typ = (Text.Null, Binary.Func_ht) in
     ({ Elem.id; typ; init; mode; explicit_typ = true }, input)
   | 5 ->
     let mode = Elem.Mode.Passive in

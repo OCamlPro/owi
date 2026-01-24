@@ -554,7 +554,7 @@ struct
 
   let init_local (_id, t) : Value.t =
     match t with
-    | Text.Num_type I32 -> I32 I32.zero
+    | Binary.Num_type I32 -> I32 I32.zero
     | Num_type I64 -> I64 I64.zero
     | Num_type F32 -> F32 F32.zero
     | Num_type F64 -> F64 F64.zero
@@ -662,9 +662,9 @@ struct
 
     type block =
       { branch : expr Annotated.t
-      ; branch_rt : Text.result_type
+      ; branch_rt : Binary.result_type
       ; continue : expr Annotated.t
-      ; continue_rt : Text.result_type
+      ; continue_rt : Binary.result_type
       ; stack : stack
       ; is_loop : Prelude.Bool.t
       }
@@ -678,7 +678,7 @@ struct
           (* TODO: rename this PC, it stands for program counter but is easily confused with path condition... *)
       ; pc : expr Annotated.t
       ; block_stack : block_stack
-      ; func_rt : Text.result_type
+      ; func_rt : result_type
       ; env : Env.t
       ; envs : Env.t Dynarray.t
       }
@@ -886,7 +886,7 @@ struct
       | Ref_value func ->
         let ft = func_type state func in
         let ft' = typ_i in
-        if not (Text.func_type_eq ft ft') then
+        if not (Binary.func_type_eq ft ft') then
           Choice.trap `Indirect_call_type_mismatch
         else exec_vfunc ~return state func
       end

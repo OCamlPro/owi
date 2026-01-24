@@ -14,13 +14,124 @@ let pp_indice fmt i = int fmt i
 
 let pp_indice_not0 fmt i = if i <> 0 then Fmt.pf fmt " %d" i
 
+let pp_str_opt fmt = function None -> () | Some i -> pf fmt " %s" i
+
 (** Structure *)
 
 (** Types *)
 
+type heap_type =
+  | TypeUse of indice
+  (* abs_heap_type *)
+  | Any_ht
+  | None_ht
+  | Func_ht
+  | NoFunc_ht
+  | Exn_ht
+  | NoExn_ht
+  | Extern_ht
+  | NoExtern_ht
+
+let pp_heap_type fmt = function
+  | TypeUse id -> pf fmt "%a" pp_indice id
+  | Any_ht -> pf fmt "any"
+  | None_ht -> pf fmt "none"
+  | Func_ht -> pf fmt "func"
+  | NoFunc_ht -> pf fmt "nofunc"
+  | Exn_ht -> pf fmt "exn"
+  | NoExn_ht -> pf fmt "noexn"
+  | Extern_ht -> pf fmt "extern"
+  | NoExtern_ht -> pf fmt "noextern"
+
+let heap_type_eq t1 t2 =
+  (* TODO: this is wrong *)
+  match (t1, t2) with
+  | Func_ht, Func_ht | Extern_ht, Extern_ht -> true
+  | TypeUse id1, TypeUse id2 -> Int.equal id1 id2
+  | _, _ -> false
+
+type ref_type = Text.nullable * heap_type
+
+let pp_ref_type fmt (n, ht) =
+  match n with
+  | Text.No_null -> pf fmt "(ref %a)" pp_heap_type ht
+  | Null -> pf fmt "(ref null %a)" pp_heap_type ht
+
+type val_type =
+  | Num_type of Text.num_type
+  | Ref_type of ref_type
+
+let ref_type_eq t1 t2 =
+  match (t1, t2) with
+  | (Text.Null, t1), (Text.Null, t2) | (No_null, t1), (No_null, t2) ->
+    heap_type_eq t1 t2
+  | _ -> false
+
+let pp_val_type fmt = function
+  | Num_type t -> Text.pp_num_type fmt t
+  | Ref_type t -> pp_ref_type fmt t
+
+let val_type_eq t1 t2 =
+  match (t1, t2) with
+  | Num_type t1, Num_type t2 -> Text.num_type_eq t1 t2
+  | Ref_type t1, Ref_type t2 -> ref_type_eq t1 t2
+  | _, _ -> false
+
+let is_subtype_ref_type t1 t2 =
+  match (t1, t2) with
+  | (Text.No_null, ht1), (Text.Null, ht2) when heap_type_eq ht1 ht2 -> true
+  | (No_null, TypeUse _), (Null, Func_ht)
+  | (No_null, TypeUse _), (No_null, Func_ht)
+  | (Null, TypeUse _), (Null, Func_ht) ->
+    true
+  | (Null, t1), (Null, t2) | (No_null, t1), (No_null, t2) -> heap_type_eq t1 t2
+  | _ -> false
+
+let is_subtype_val_type t1 t2 =
+  match (t1, t2) with
+  | Num_type t1, Num_type t2 -> Text.num_type_eq t1 t2
+  | Ref_type t1, Ref_type t2 -> is_subtype_ref_type t1 t2
+  | _, _ -> false
+
+type param = string option * val_type
+
+let pp_param fmt ((id, vt) : param) =
+  pf fmt "(param%a %a)" pp_str_opt id pp_val_type vt
+
+let param_eq (_, t1) (_, t2) = val_type_eq t1 t2
+
+type param_type = param list
+
+let pp_param_type fmt (params : param_type) = list ~sep:sp pp_param fmt params
+
+let param_type_eq t1 t2 = List.equal param_eq t1 t2
+
+type result_type = val_type list
+
+let result_type_eq t1 t2 = List.equal val_type_eq t1 t2
+
+let pp_result_ fmt vt = pf fmt "(result %a)" pp_val_type vt
+
+let pp_result_type fmt results = list ~sep:sp pp_result_ fmt results
+
+let with_space_list printer fmt l =
+  match l with [] -> () | _l -> pf fmt " %a" printer l
+
+type func_type = param_type * result_type
+
+let pp_func_type fmt (params, results) =
+  pf fmt "(func%a%a)"
+    (with_space_list pp_param_type)
+    params
+    (with_space_list pp_result_type)
+    results
+
+let func_type_eq (pt1, rt1) (pt2, rt2) =
+  param_type_eq pt1 pt2 && result_type_eq rt1 rt2
+
 type block_type =
   (* TODO: inline this *)
-  | Bt_raw of (indice option * Text.func_type)
+  | Bt_raw of (indice option * func_type)
 
 (* wrap printer to print a space before a non empty list *)
 (* TODO or make it an optional arg of pp_list? *)
@@ -30,9 +141,9 @@ let with_space_list printer fmt l =
 let pp_block_type fmt = function
   | Bt_raw (_ind, (pt, rt)) ->
     pf fmt "%a%a"
-      (with_space_list Text.pp_param_type)
+      (with_space_list pp_param_type)
       pt
-      (with_space_list Text.pp_result_type)
+      (with_space_list pp_result_type)
       rt
 
 let pp_block_type_opt fmt = function
@@ -69,13 +180,13 @@ type instr =
   | I_reinterpret_f of Text.nn * Text.nn
   | F_reinterpret_i of Text.nn * Text.nn
   (* Reference instructions *)
-  | Ref_null of Text.heap_type
+  | Ref_null of heap_type
   | Ref_is_null
   | Ref_as_non_null
   | Ref_func of indice
   (* Parametric instructions *)
   | Drop
-  | Select of Text.val_type list option
+  | Select of val_type list option
   (* Variable instructions *)
   | Local_get of indice
   | Local_set of indice
@@ -167,7 +278,7 @@ let rec pp_instr ~short fmt = function
     pf fmt "i%a.reinterpret_f%a" Text.pp_nn n Text.pp_nn n'
   | F_reinterpret_i (n, n') ->
     pf fmt "f%a.reinterpret_i%a" Text.pp_nn n Text.pp_nn n'
-  | Ref_null t -> pf fmt "ref.null %a" Text.pp_heap_type t
+  | Ref_null t -> pf fmt "ref.null %a" pp_heap_type t
   | Ref_is_null -> pf fmt "ref.is_null"
   | Ref_as_non_null -> pf fmt "ref.as_non_null"
   | Ref_func fid -> pf fmt "ref.func %a" pp_indice fid
@@ -175,7 +286,7 @@ let rec pp_instr ~short fmt = function
   | Select vt -> begin
     match vt with
     | None -> pf fmt "select"
-    | Some vt -> pf fmt "select (%a)" Text.pp_result_type vt
+    | Some vt -> pf fmt "select (%a)" pp_result_type vt
     (* TODO: are the parens needed ? *)
   end
   | Local_get id -> pf fmt "local.get %a" pp_indice id
@@ -335,7 +446,7 @@ and iter_instr f instr =
 module Func = struct
   type t =
     { type_f : block_type
-    ; locals : Text.param list
+    ; locals : param list
     ; body : expr Annotated.t
     ; id : string option
     }
@@ -359,17 +470,35 @@ module Export = struct
     }
 end
 
+module Typedef = struct
+  type t = string option * func_type
+
+  let pp fmt (id, t) =
+    pf fmt "(type%a %a)" (Fmt.option Fmt.string) id pp_func_type t
+end
+
 module Table = struct
+  module Type = struct
+    type nonrec t = Text.limits * ref_type
+
+    let pp fmt (limits, ref_type) =
+      pf fmt "%a %a" Text.pp_limits limits pp_ref_type ref_type
+  end
+
   type t =
     { id : string option
-    ; typ : Text.Table.Type.t
+    ; typ : Type.t
     ; init : expr Annotated.t option
     }
 end
 
 module Global = struct
+  module Type = struct
+    type nonrec t = Text.mut * val_type
+  end
+
   type t =
-    { typ : Text.Global.Type.t (* TODO: init : binary+const expr*)
+    { typ : Type.t (* TODO: init : binary+const expr*)
     ; init : expr Annotated.t
     ; id : string option
     }
@@ -401,7 +530,7 @@ module Elem = struct
 
   type t =
     { id : string option
-    ; typ : Text.ref_type (* TODO: init : binary+const expr*)
+    ; typ : ref_type (* TODO: init : binary+const expr*)
     ; init : expr Annotated.t list
     ; mode : Mode.t
     ; explicit_typ : bool
@@ -425,9 +554,9 @@ module Module = struct
 
   type t =
     { id : string option
-    ; types : Text.Typedef.t array
-    ; global : (Global.t, Text.Global.Type.t) Origin.t array
-    ; table : (Table.t, Text.Table.Type.t) Origin.t array
+    ; types : Typedef.t array
+    ; global : (Global.t, Global.Type.t) Origin.t array
+    ; table : (Table.t, Table.Type.t) Origin.t array
     ; mem : (Text.Mem.t, Text.limits) Origin.t array
     ; func : (Func.t, block_type) Origin.t array (* TODO: switch to func_type *)
     ; tag : (Tag.t, block_type) Origin.t array
