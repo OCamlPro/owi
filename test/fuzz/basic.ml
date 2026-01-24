@@ -25,7 +25,9 @@ let limits =
   in
   let* min = range sup in
   let+ max = option (range ~min (sup - min)) in
-  { min; max }
+  { min = Owi.Concrete_i64.of_int min
+  ; max = Option.map (fun v -> Owi.Concrete_i64.of_int v) max
+  }
 
 let table_type = pair limits ref_type
 
@@ -422,7 +424,7 @@ let memory_init (env : Env.t) =
 let memory_exists (env : Env.t) = List.compare_length_with env.memories 0 > 0
 
 let memarg nsize =
-  let+ offset = int32
+  let+ offset = int64
   and+ align =
     match nsize with
     | NS8 -> const 0
@@ -430,15 +432,15 @@ let memarg nsize =
     | NS32 -> range 2
     | NS64 -> range 3
   in
-  let offset = Owi.Concrete_i32.of_int32 offset in
+  let offset = Owi.Concrete_i64.of_int64 offset in
   let offset =
     if
-      Owi.Concrete_i32.lt offset Owi.Concrete_i32.zero
+      Owi.Concrete_i64.lt offset Owi.Concrete_i64.zero
       |> Owi.Concrete_boolean.to_bool
-    then Owi.Concrete_i32.sub Owi.Concrete_i32.zero offset
+    then Owi.Concrete_i64.sub Owi.Concrete_i64.zero offset
     else offset
   in
-  let align = Owi.Concrete_i32.of_int align in
+  let align = Owi.Concrete_i64.of_int align in
   { offset; align }
 
 let i32_load env : instr gen =
