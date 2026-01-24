@@ -144,11 +144,17 @@ end
 module Concrete_i64 : sig
   type t
 
+  val zero : t
+
+  val of_int : Int.t -> t
+
   val of_int64 : Int64.t -> t
 
   val to_int64 : t -> Int64.t
 
   val add : t -> t -> t
+
+  val sub : t -> t -> t
 
   val lt : t -> t -> Concrete_boolean.t
 
