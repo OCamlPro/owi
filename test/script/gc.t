@@ -9,15 +9,15 @@
   [40]
   $ owi script --no-exhaustion reference/call_ref.wast
   owi: internal error, uncaught exception:
-       File "src/interpret/interpret.ml", line 781, characters 4-10: Assertion failed
-       Raised at Owi__Interpret.Make.call_ref in file "src/interpret/interpret.ml" (inlined), line 781, characters 4-16
-       Called from Owi__Interpret.Make.exec_instr in file "src/interpret/interpret.ml", line 1574, characters 24-58
-       Called from Owi__Interpret.Make.loop in file "src/interpret/interpret.ml", line 1588, characters 19-53
-       Called from Owi__Interpret.Make.exec_vfunc_from_outside in file "src/interpret/interpret.ml", lines 1677-1694, characters 6-9
-       Called from Owi__Script.run.(fun) in file "src/script/script.ml", line 297, characters 21-40
-       Called from Owi__Syntax.list_fold_left.aux in file "src/infra/syntax.ml", line 46, characters 12-19
-       Called from Owi__Script.exec in file "src/script/script.ml", line 344, characters 21-46
-       Called from Owi__Syntax.list_iter.aux in file "src/infra/syntax.ml", line 17, characters 25-28
+       File "src/interpret/interpret.ml", line 853, characters 4-10: Assertion failed
+       Raised at Owi__Interpret.Make.call_ref in file "src/interpret/interpret.ml" (inlined), line 853, characters 4-16
+       Called from Owi__Interpret.Make.exec_instr in file "src/interpret/interpret.ml", line 1693, characters 24-58
+       Called from Owi__Interpret.Make.loop in file "src/interpret/interpret.ml", line 1707, characters 19-53
+       Called from Owi__Interpret.Make.exec_vfunc_from_outside in file "src/interpret/interpret.ml", lines 1796-1813, characters 6-9
+       Called from Owi__Script.run.(fun) in file "src/script/script.ml", line 304, characters 21-40
+       Called from Owi__Syntax.list_fold_left.aux in file "src/infra/syntax.ml", line 42, characters 12-19
+       Called from Owi__Script.exec in file "src/script/script.ml", line 351, characters 21-46
+       Called from Owi__Syntax.list_iter.aux in file "src/infra/syntax.ml", line 16, characters 25-28
        Called from Cmdliner_term.app.(fun) in file "cmdliner_term.ml", line 24, characters 19-24
        Called from Cmdliner_eval.run_parser in file "cmdliner_eval.ml", line 35, characters 37-44
   [125]
@@ -36,15 +36,15 @@
   [40]
   $ owi script --no-exhaustion reference/return_call_ref.wast
   owi: internal error, uncaught exception:
-       File "src/interpret/interpret.ml", line 781, characters 4-10: Assertion failed
-       Raised at Owi__Interpret.Make.call_ref in file "src/interpret/interpret.ml" (inlined), line 781, characters 4-16
-       Called from Owi__Interpret.Make.exec_instr in file "src/interpret/interpret.ml", line 1575, characters 31-64
-       Called from Owi__Interpret.Make.loop in file "src/interpret/interpret.ml", line 1588, characters 19-53
-       Called from Owi__Interpret.Make.exec_vfunc_from_outside in file "src/interpret/interpret.ml", lines 1677-1694, characters 6-9
-       Called from Owi__Script.run.(fun) in file "src/script/script.ml", line 297, characters 21-40
-       Called from Owi__Syntax.list_fold_left.aux in file "src/infra/syntax.ml", line 46, characters 12-19
-       Called from Owi__Script.exec in file "src/script/script.ml", line 344, characters 21-46
-       Called from Owi__Syntax.list_iter.aux in file "src/infra/syntax.ml", line 17, characters 25-28
+       File "src/interpret/interpret.ml", line 853, characters 4-10: Assertion failed
+       Raised at Owi__Interpret.Make.call_ref in file "src/interpret/interpret.ml" (inlined), line 853, characters 4-16
+       Called from Owi__Interpret.Make.exec_instr in file "src/interpret/interpret.ml", line 1694, characters 31-64
+       Called from Owi__Interpret.Make.loop in file "src/interpret/interpret.ml", line 1707, characters 19-53
+       Called from Owi__Interpret.Make.exec_vfunc_from_outside in file "src/interpret/interpret.ml", lines 1796-1813, characters 6-9
+       Called from Owi__Script.run.(fun) in file "src/script/script.ml", line 304, characters 21-40
+       Called from Owi__Syntax.list_fold_left.aux in file "src/infra/syntax.ml", line 42, characters 12-19
+       Called from Owi__Script.exec in file "src/script/script.ml", line 351, characters 21-46
+       Called from Owi__Syntax.list_iter.aux in file "src/infra/syntax.ml", line 16, characters 25-28
        Called from Cmdliner_term.app.(fun) in file "cmdliner_term.ml", line 24, characters 19-24
        Called from Cmdliner_eval.run_parser in file "cmdliner_eval.ml", line 35, characters 37-44
   [125]
