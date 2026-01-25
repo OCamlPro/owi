@@ -59,7 +59,7 @@ module M :
     (* TODO: should we change this to an i32 too? *)
     Symbolic_choice.with_new_invisible_symbol (Ty_bitv 1) (fun sym ->
       Expr.cvtop (Ty_bitv 32) (Zero_extend 31) (Expr.symbol sym)
-      |> Smtml.Typed.unsafe )
+      |> Smtml.Typed.Unsafe.wrap )
 
   let symbol_i32 () =
     Symbolic_choice.with_new_symbol (Ty_bitv 32) Smtml.Typed.Bitv32.symbol
@@ -143,7 +143,9 @@ module M :
     | _ ->
       Log.err (fun m ->
         m "cov_label_set: invalid type id:%a ptr:%a" Expr.pp
-          (Smtml.Typed.raw id) Expr.pp (Smtml.Typed.raw ptr) );
+          (Smtml.Typed.Unsafe.unwrap id)
+          Expr.pp
+          (Smtml.Typed.Unsafe.unwrap ptr) );
       assert false
 
   let open_scope m ptr =

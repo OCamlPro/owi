@@ -2,8 +2,10 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
+type int8 = Smtml.Typed.bitv8 Smtml.Typed.t
+
 type t =
-  { data : Symbolic_i32.t Map.Make(Int32).t
+  { data : int8 Map.Make(Int32).t
   ; chunks : Symbolic_i32.t Map.Make(Int32).t
   ; size : Symbolic_i32.t
   ; env_id : int

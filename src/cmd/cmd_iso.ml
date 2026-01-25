@@ -51,9 +51,7 @@ let binaryen_fuzzing_support_module weird_log_i64 =
   { Extern.Module.functions; func_type = Symbolic_extern_func.extern_type }
 
 let emscripten_fuzzing_support_module () =
-  let temp_ret_0 =
-    ref (Smtml.Expr.value (Smtml.Value.Int 0) |> Smtml.Typed.unsafe)
-  in
+  let temp_ret_0 = ref (Smtml.Typed.Bitv32.v (Smtml.Bitvector.of_int32 0l)) in
   let set_temp_ret_0 x =
     temp_ret_0 := x;
     Symbolic_choice.return ()
