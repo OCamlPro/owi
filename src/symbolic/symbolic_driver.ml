@@ -86,11 +86,15 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
         | Z3.Error msg ->
           Log.info (fun m ->
             m "one domain exited with the following Z3 exception: %s" msg )
+        | Smtml.Eval.Eval_error err ->
+          Log.info (fun m ->
+            m "one domain exited with the following Smtml exception: %a"
+              Smtml.Eval.pp_error_kind err )
         | exn ->
           let backtrace = Printexc.get_raw_backtrace () in
           Log.info (fun m ->
             m
-              "one domaine exited with the %s exception which was only noticed \
+              "one domain exited with the %s exception which was only noticed \
                while waiting for all domain to join:@\n\
               \  @[<v>%s@]"
               (Printexc.to_string exn)
