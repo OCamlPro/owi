@@ -996,58 +996,55 @@ let check_limit ?(table = false) { Text.min; max } =
     then Error `Table_size
     else Ok ()
 
+let validate_table_init modul refs id init ((nullable, _) as rt) =
+  match init with
+  | None -> begin
+    match nullable with
+    | Text.Null -> Ok ()
+    | No_null ->
+      let has_init_elem =
+        Array.exists
+          (fun e ->
+            match e with
+            | Elem.{ mode = Active (Some id', _); _ } when id = id' -> true
+            | _ -> false )
+          modul.elem
+      in
+      if has_init_elem then Ok ()
+      else
+        Error
+          (`Type_mismatch
+             (Fmt.str
+                "Table type is %a but init was not provided and is not nullable"
+                pp_ref_type rt ) )
+  end
+  | Some init ->
+    let* res_tys = typecheck_const_expr ~is_init:true modul refs init in
+    begin match res_tys with
+    | [ Ref_type got ] ->
+      let* res = Stack.match_ref_type ~subtype:true ~expected:rt ~got modul in
+      if res then Ok ()
+      else
+        Error
+          (`Type_mismatch
+             (Fmt.str "Table type is %a but init expr is of type %a" pp_ref_type
+                rt pp_typ_list res_tys ) )
+    | _ ->
+      Error
+        (`Type_mismatch
+           (Fmt.str "Table type is %a but init expr is of type %a" pp_ref_type
+              rt pp_typ_list res_tys ) )
+    end
+
+let validate_table modul refs id t =
+  match t with
+  | Origin.Local Table.{ typ = limits, rt; init; _ } ->
+    let* () = validate_table_init modul refs id init rt in
+    check_limit ~table:true limits
+  | Imported { typ = limits, _; _ } -> check_limit ~table:true limits
+
 let validate_tables modul refs =
-  array_iteri
-    (fun id t ->
-      match t with
-      | Origin.Local Table.{ typ = limits, ((nullable, _) as rt); init; _ } ->
-        let* () =
-          match init with
-          | None -> begin
-            match nullable with
-            | Null -> Ok ()
-            | No_null ->
-              let has_init_elem =
-                Array.exists
-                  (fun e ->
-                    match e with
-                    | Elem.{ mode = Active (Some id', _); _ } when id = id' ->
-                      true
-                    | _ -> false )
-                  modul.elem
-              in
-              if has_init_elem then Ok ()
-              else
-                Error
-                  (`Type_mismatch
-                     (Fmt.str
-                        "Table type is %a but init was not provided and is not \
-                         nullable"
-                        pp_ref_type rt ) )
-          end
-          | Some init ->
-            let* res_tys = typecheck_const_expr ~is_init:true modul refs init in
-            begin match res_tys with
-            | [ Ref_type got ] ->
-              let* res =
-                Stack.match_ref_type ~subtype:true ~expected:rt ~got modul
-              in
-              if res then Ok ()
-              else
-                Error
-                  (`Type_mismatch
-                     (Fmt.str "Table type is %a but init expr is of type %a"
-                        pp_ref_type rt pp_typ_list res_tys ) )
-            | _ ->
-              Error
-                (`Type_mismatch
-                   (Fmt.str "Table type is %a but init expr is of type %a"
-                      pp_ref_type rt pp_typ_list res_tys ) )
-            end
-        in
-        check_limit ~table:true limits
-      | Imported { typ = limits, _; _ } -> check_limit ~table:true limits )
-    modul.table
+  array_iteri (validate_table modul refs) modul.table
 
 let validate_mem modul =
   array_iter
