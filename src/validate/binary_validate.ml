@@ -216,7 +216,7 @@ end = struct
     | Any :: _ -> Ok [ Any ]
     | _ :: tl -> Ok tl
 
-  let push t stack = ok @@ t @ stack
+  let push t stack = Result.ok @@ t @ stack
 
   let pop_push (Bt_raw (_, (pt, rt)) : block_type) stack =
     let pt, rt = (List.rev_map typ_of_pt pt, List.rev_map typ_of_val_type rt) in
@@ -483,8 +483,8 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
       match stack with
       | Ref_type _ :: _tl -> Error (`Type_mismatch "select implicit")
       | Any :: _ -> Ok [ Something; Any ]
-      | hd :: Any :: _ -> ok @@ (hd :: [ Any ])
-      | hd :: hd' :: tl when Stack.match_types hd hd' -> ok @@ (hd :: tl)
+      | hd :: Any :: _ -> Result.ok @@ (hd :: [ Any ])
+      | hd :: hd' :: tl when Stack.match_types hd hd' -> Result.ok @@ (hd :: tl)
       | _ -> Error (`Type_mismatch "select")
     end
     | Some t ->

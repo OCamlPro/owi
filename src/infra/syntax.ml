@@ -3,12 +3,7 @@
 (* Written by the Owi programmers *)
 
 open Prelude.Result
-
-let[@inline] ( let* ) o f = match o with Ok v -> f v | Error _ as e -> e
-
-let[@inline] ( let+ ) o f = match o with Ok v -> Ok (f v) | Error _ as e -> e
-
-let[@inline] ok v = Ok v
+include Syntax
 
 let[@inline] list_iter f l =
   let rec aux = function

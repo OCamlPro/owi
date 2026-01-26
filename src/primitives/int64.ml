@@ -82,20 +82,6 @@ let extend_s n x =
 
 (* String conversion that allows leading signs and unsigned values *)
 
-(* TODO: replace by Char.Ascii.digit_to_int once on 5.4 *)
-let dec_digit = function
-  | '0' .. '9' as c -> Char.code c - Char.code '0'
-  | _ -> assert false
-[@@inline]
-
-(* TODO: replace by Char.Ascii.hex_digit_to_int once on 5.4 *)
-let hex_digit = function
-  | '0' .. '9' as c -> Char.code c - Char.code '0'
-  | 'a' .. 'f' as c -> 0xa + Char.code c - Char.code 'a'
-  | 'A' .. 'F' as c -> 0xa + Char.code c - Char.code 'A'
-  | _ -> assert false
-[@@inline]
-
 let max_upper = unsigned_div minus_one 10L
 
 let max_lower = unsigned_rem minus_one 10L
@@ -109,7 +95,7 @@ let of_string_exn s =
       let c = s.[i] in
       if Char.equal c '_' then parse_hex (i + 1) num
       else begin
-        let digit = of_int (hex_digit c) in
+        let digit = of_int (Char.Ascii.hex_digit_to_int c) in
         if not (le_u num (lshr minus_one (of_int 4))) then
           Fmt.failwith "of_string (int64)"
         else parse_hex (i + 1) (logor (shift_left num 4) digit)
@@ -122,7 +108,7 @@ let of_string_exn s =
       let c = s.[i] in
       if Char.equal c '_' then parse_dec (i + 1) num
       else begin
-        let digit = of_int (dec_digit c) in
+        let digit = of_int (Char.Ascii.digit_to_int c) in
         if not (lt_u num max_upper || (eq num max_upper && le_u digit max_lower))
         then Fmt.failwith "of_string (int64)"
         else parse_dec (i + 1) (add (mul num 10L) digit)
@@ -136,14 +122,10 @@ let of_string_exn s =
     else parse_dec i zero
   in
 
-  let parsed =
-    match s.[0] with
-    | '+' -> parse_int 1
-    | '-' ->
-      let n = parse_int 1 in
-      if not (ge (sub n one) minus_one) then Fmt.failwith "of_string (int64)"
-      else neg n
-    | _ -> parse_int 0
-  in
-
-  parsed
+  match s.[0] with
+  | '+' -> parse_int 1
+  | '-' ->
+    let n = parse_int 1 in
+    if not (ge (sub n one) minus_one) then Fmt.failwith "of_string (int64)"
+    else neg n
+  | _ -> parse_int 0

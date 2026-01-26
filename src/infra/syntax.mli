@@ -10,8 +10,6 @@ val ( let* ) :
 val ( let+ ) :
   ('a, 'err) Prelude.Result.t -> ('a -> 'b) -> ('b, 'err) Prelude.Result.t
 
-val ok : 'a -> ('a, 'err) Prelude.Result.t
-
 val list_iter :
      ('a -> (unit, 'err) Prelude.Result.t)
   -> 'a list
