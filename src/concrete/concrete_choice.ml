@@ -14,7 +14,7 @@ let[@inline] map v f = Result.map f v
 
 let[@inline] ( let+ ) v f = map v f
 
-let[@inline] select b ~prio_true:_ ~prio_false:_ = Ok b
+let[@inline] select b ~instr_counter_true:_ ~instr_counter_false:_ = Ok b
 
 let[@inline] select_i32 i = Ok i
 
@@ -23,10 +23,6 @@ let[@inline] trap t = Error t
 let[@inline] run m = m
 
 let[@inline] get_pc () = return Smtml.Expr.Set.empty
-
-let[@inline] depth () =
-  (* TODO: maybe implement it at some point, it is only used in symbolic mode for exploration priority so we use 0 here for now *)
-  Ok 0
 
 let[@inline] assume v _instr_counter =
   if v then Ok ()

@@ -127,9 +127,10 @@ let with_new_symbol ty f =
   f sym
 
 (* Yielding is currently done each time the solver is about to be called, in check_reachability and get_model.
-  *)
-let check_reachability v prio =
-  let* () = yield prio in
+*)
+let check_reachability v priority =
+  let* () = yield priority in
+  let* () = modify_thread (Thread.set_priority priority) in
   let* thread in
   let solver = solver () in
   let pc = thread.pc |> Symbolic_path_condition.slice_on_condition v in
@@ -141,10 +142,10 @@ let check_reachability v prio =
   return reachability
 
 let get_model_or_stop symbol =
-  (* TODO: better prio here! *)
-  let* () = yield Prio.dummy in
-  let solver = solver () in
   let* thread in
+  (* TODO: better prio here? *)
+  let* () = yield thread.priority in
+  let solver = solver () in
   let set = thread.pc |> Symbolic_path_condition.slice_on_symbol symbol in
   let stats = thread.bench_stats in
   let symbol_scopes = Symbol_scope.of_symbol symbol in
@@ -167,8 +168,8 @@ let get_model_or_stop symbol =
                if solver was interrupted then stop else assert false *)
     stop
 
-let select_inner ~explore_first ?(with_breadcrumbs = true)
-  ~check_only_true_branch (cond : Symbolic_boolean.t) ~prio_true ~prio_false =
+let select_inner ~with_breadcrumbs ~check_only_true_branch
+  (cond : Symbolic_boolean.t) ~instr_counter_true ~instr_counter_false =
   let cond = Smtml.Typed.simplify cond in
   match Smtml.Typed.view cond with
   | Val True -> return true
@@ -199,26 +200,43 @@ let select_inner ~explore_first ?(with_breadcrumbs = true)
         | `Unknown ->
           (* It can happen when the solver is interrupted *)
           (* TODO: once https://github.com/formalsec/smtml/pull/479 is merged
-                     if solver was interrupted then stop else assert false *)
+                             if solver was interrupted then stop else assert false *)
           stop
         end
       end
     in
 
+    let* thread in
+
+    let prio_true =
+      let instr_counter =
+        match instr_counter_true with
+        | None -> thread.priority.instr_counter
+        | Some instr_counter -> instr_counter
+      in
+      Prio.v ~instr_counter ~distance_to_unreachable:None ~depth:thread.depth
+    in
     let true_branch = branch cond true prio_true in
 
     if check_only_true_branch then true_branch
     else
+      let prio_false =
+        let instr_counter =
+          match instr_counter_false with
+          | None -> thread.priority.instr_counter
+          | Some instr_counter -> instr_counter
+        in
+        Prio.v ~instr_counter ~distance_to_unreachable:None ~depth:thread.depth
+      in
       let false_branch = branch (Symbolic_boolean.not cond) false prio_false in
-      let* thread in
       Thread.incr_path_count thread;
-      if explore_first then choose true_branch false_branch
-      else choose false_branch true_branch
+      choose true_branch false_branch
 [@@inline]
 
-let select (cond : Symbolic_boolean.t) ~prio_true ~prio_false =
-  select_inner cond ~explore_first:true ~prio_true ~prio_false
-    ~check_only_true_branch:false
+let select (cond : Symbolic_boolean.t) ~instr_counter_true ~instr_counter_false
+    =
+  select_inner cond ~instr_counter_true ~instr_counter_false
+    ~check_only_true_branch:false ~with_breadcrumbs:true
 [@@inline]
 
 let summary_symbol (e : Smtml.Typed.Bitv32.t) :
@@ -292,22 +310,16 @@ let trap t =
   in
   State_monad.return (Error { Bug.kind = `Trap t; model; thread })
 
-let assertion_fail c model =
-  let* thread in
-  State_monad.return (Error { Bug.kind = `Assertion c; model; thread })
-
 let assertion (c : Symbolic_boolean.t) =
-  (* TODO: better prio here *)
-  let prio_false = Prio.dummy in
-  let prio_true = Prio.dummy in
   let* assertion_true =
-    select_inner c ~with_breadcrumbs:false ~explore_first:false ~prio_true
-      ~prio_false ~check_only_true_branch:false
+    select_inner c ~with_breadcrumbs:false (* TODO: better prio here ? *)
+      ~instr_counter_true:None ~instr_counter_false:None
+      ~check_only_true_branch:false
   in
   if assertion_true then return ()
   else
-    let* thread in
     let solver = solver () in
+    let* thread in
     let path_condition = thread.pc in
     let stats = thread.bench_stats in
     let* model =
@@ -317,10 +329,10 @@ let assertion (c : Symbolic_boolean.t) =
       | None ->
         (* It can happen when the solver is interrupted *)
         (* TODO: once https://github.com/formalsec/smtml/pull/479 is merged
-               if solver was interrupted then stop else assert false *)
+                 if solver was interrupted then stop else assert false *)
         stop
     in
-    assertion_fail c model
+    State_monad.return (Error { Bug.kind = `Assertion c; model; thread })
 
 let ite (c : Symbolic_boolean.t) ~(if_true : Symbolic_value.t)
   ~(if_false : Symbolic_value.t) : Symbolic_value.t t =
@@ -337,24 +349,35 @@ let ite (c : Symbolic_boolean.t) ~(if_true : Symbolic_value.t)
     return (Symbolic_value.F64 (Symbolic_boolean.ite c if_true if_false))
   | Ref _, Ref _ ->
     (* TODO: better prio here *)
-    let prio_false = Prio.dummy in
-    let prio_true = Prio.dummy in
-    let+ b = select c ~prio_true ~prio_false in
+    let+ b = select c ~instr_counter_true:None ~instr_counter_false:None in
     if b then if_true else if_false
   | _, _ -> assert false
 
-let depth () =
-  let+ thread in
-  thread.depth
-
-let assume c instr_counter =
-  (* TODO: better prio here *)
-  let* thread in
-  let depth = thread.depth in
-  let prio_true = Prio.v ~depth ~instr_counter ~distance_to_unreachable:None in
-  let prio_false = Prio.low in
-  let* assertion_true =
-    select_inner c ~with_breadcrumbs:false ~explore_first:true ~prio_true
-      ~prio_false ~check_only_true_branch:true
-  in
-  if assertion_true then return () else stop
+let assume condition instr_counter =
+  (* TODO: do we really need instr_counter here? Couldn't we simply reuse the old one? *)
+  let condition = Smtml.Typed.simplify condition in
+  match Smtml.Typed.view condition with
+  | Val True -> return ()
+  | Val False -> stop
+  | _ -> (
+    let* () = add_pc condition in
+    let* thread in
+    (* TODO: better prio here? *)
+    let instr_counter =
+      match instr_counter with
+      | None -> thread.priority.instr_counter
+      | Some instr_counter -> instr_counter
+    in
+    let prio =
+      Prio.v ~instr_counter ~distance_to_unreachable:None
+        ~depth:thread.priority.depth
+    in
+    let* satisfiability = check_reachability condition prio in
+    match satisfiability with
+    | `Sat -> return ()
+    | `Unsat -> stop
+    | `Unknown ->
+      (* It can happen when the solver is interrupted *)
+      (* TODO: once https://github.com/formalsec/smtml/pull/479 is merged
+                   if solver was interrupted then stop else assert false *)
+      stop )

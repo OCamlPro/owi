@@ -39,20 +39,7 @@ type t =
   ; depth : int
   ; labels : (int * string) list
   ; bench_stats : Benchmark.stats
-  }
-
-let create num_symbols symbol_scopes pc memories tables globals breadcrumbs
-  labels bench_stats ~depth =
-  { num_symbols
-  ; symbol_scopes
-  ; pc
-  ; memories
-  ; tables
-  ; globals
-  ; breadcrumbs
-  ; labels
-  ; bench_stats
-  ; depth
+  ; priority : Prio.metrics
   }
 
 let init () =
@@ -66,8 +53,19 @@ let init () =
   let labels = [] in
   let bench_stats = Benchmark.empty_stats () in
   let depth = 0 in
-  create num_symbols symbol_scopes pc memories tables globals breadcrumbs labels
-    bench_stats ~depth
+  let priority = Prio.dummy in
+  { num_symbols
+  ; symbol_scopes
+  ; pc
+  ; memories
+  ; tables
+  ; globals
+  ; breadcrumbs
+  ; labels
+  ; bench_stats
+  ; depth
+  ; priority
+  }
 
 let add_symbol t s =
   let open Symbol_scope in
@@ -118,3 +116,5 @@ let replace_global (global : Symbolic_global0.t) thread =
     Collection.replace globals ~env_id:global.env_id ~id:global.id global
   in
   { thread with globals }
+
+let set_priority priority thread = { thread with priority }

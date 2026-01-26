@@ -1,5 +1,5 @@
 type metrics =
-  { instr_counter : int Option.t
+  { instr_counter : int
   ; distance_to_unreachable : int Option.t
   ; depth : int
   }
@@ -7,16 +7,13 @@ type metrics =
 let v ~instr_counter ~distance_to_unreachable ~depth =
   { instr_counter; distance_to_unreachable; depth }
 
-let dummy = { instr_counter = None; distance_to_unreachable = None; depth = 0 }
+let dummy = { instr_counter = 0; distance_to_unreachable = None; depth = 0 }
 
-let low =
-  { instr_counter = Some 100_000; distance_to_unreachable = None; depth = 0 }
+let low = { instr_counter = 100_000; distance_to_unreachable = None; depth = 0 }
 
 (* In the following, we use the convention that a path with a *high priority* (i.e. that should be explored first) corresponds to a path with a high "integer". *)
 
 let compare_with_highest_first l r = Int.compare r l [@@inline]
-
-let unknown_instruction_counter = 100
 
 let max_rarity = 1_000_000
 
@@ -28,14 +25,9 @@ let max_depth = if use_logarithmic_depth then 20 else 1_000
 
 let max_loop_penalty = 10_000
 
-let unknown_loop_penalty = max_loop_penalty / 10
-
 let rarity_of_metrics { instr_counter; _ } =
-  let c =
-    match instr_counter with Some c -> c | None -> unknown_instruction_counter
-  in
-  let c = min c max_rarity in
-  max_int - c
+  let instr_counter = min instr_counter max_rarity in
+  max_int - instr_counter
 
 let depth_of_metrics { depth; _ } =
   let depth =
@@ -48,9 +40,7 @@ let depth_of_metrics { depth; _ } =
   min depth max_depth
 
 let loop_penalty_of_metrics { instr_counter; _ } =
-  match instr_counter with
-  | Some c -> ~-(min (c * c) max_loop_penalty)
-  | None -> ~-unknown_loop_penalty
+  ~-(min (instr_counter * instr_counter) max_loop_penalty)
 
 module type T = sig
   type t
@@ -104,8 +94,8 @@ module Random_unseen_then_random : T = struct
 
   let of_metrics { instr_counter; distance_to_unreachable = _; depth = _ } =
     match instr_counter with
-    | Some 0 -> max_int - Random.int 10_000
-    | None | Some _ -> Random.int 10_000
+    | 0 -> max_int - Random.int 10_000
+    | _ -> Random.int 10_000
 
   let compare = compare_with_highest_first
 

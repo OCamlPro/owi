@@ -102,9 +102,9 @@ struct
 
   let page_size = I64.of_int64 65_536L
 
-  let pop_choice stack ~prio_true ~prio_false =
+  let pop_choice stack ~instr_counter_true ~instr_counter_false =
     let b, stack = Stack.pop_bool stack in
-    let* b = select b ~prio_true ~prio_false in
+    let* b = select b ~instr_counter_false ~instr_counter_true in
     return (b, stack)
 
   (*
@@ -113,10 +113,10 @@ struct
        - possibly two branches in symbolic mode, one where cond is true if e1 is SAT, and another one where cond is false if e2 is SAT
    *)
   let ( let> ) v f =
-    (* TODO: do not use dummy here *)
-    let prio_true = Prio.dummy in
-    let prio_false = Prio.dummy in
-    let* v = select v ~prio_true ~prio_false in
+    (* TODO: can we use something better here? *)
+    let instr_counter_true = None in
+    let instr_counter_false = None in
+    let* v = select v ~instr_counter_false ~instr_counter_true in
     f v
 
   (* In case of throw_away_trap, this is only going in the non-trapping branch, to avoid a useless solver call.
@@ -128,10 +128,10 @@ struct
       let* () = Choice.assume (Boolean.not v) instr_counter in
       f ()
     else
-      (* TODO: do not use dummy here *)
-      let prio_true = Prio.dummy in
-      let prio_false = Prio.dummy in
-      let* v = select v ~prio_true ~prio_false in
+      (* TODO: can we do something better here? *)
+      let instr_counter_true = instr_counter in
+      let instr_counter_false = instr_counter in
+      let* v = select v ~instr_counter_false ~instr_counter_true in
       if v then Choice.trap trap else f ()
 
   let exec_iunop stack nn op =
@@ -1001,22 +1001,15 @@ struct
       Choice.return (State.Continue { state with locals; stack })
     | If_else (_id, bt, e1, e2) ->
       let* b, stack =
-        let* depth = Choice.depth () in
-        let prio_true =
-          let instr_counter =
-            Next_instruction.exec_block state ~is_loop:false e1
-            |> Next_instruction.with_instr_counter
-          in
-          Prio.v ~instr_counter ~distance_to_unreachable:None ~depth
+        let instr_counter_true =
+          Next_instruction.exec_block state ~is_loop:false e1
+          |> Next_instruction.with_instr_counter
         in
-        let prio_false =
-          let instr_counter =
-            Next_instruction.exec_block state ~is_loop:false e2
-            |> Next_instruction.with_instr_counter
-          in
-          Prio.v ~instr_counter ~distance_to_unreachable:None ~depth
+        let instr_counter_false =
+          Next_instruction.exec_block state ~is_loop:false e2
+          |> Next_instruction.with_instr_counter
         in
-        pop_choice stack ~prio_true ~prio_false
+        pop_choice stack ~instr_counter_true ~instr_counter_false
       in
       let state = { state with stack } in
       exec_block state ~is_loop:false bt (if b then e1 else e2)
@@ -1031,22 +1024,13 @@ struct
     | Br i -> State.branch state i
     | Br_if i ->
       let* b, stack =
-        let* depth = Choice.depth () in
-        let prio_true =
-          let instr_counter =
-            Next_instruction.branch state i
-            |> Next_instruction.with_instr_counter
-          in
-          Prio.v ~instr_counter ~distance_to_unreachable:None ~depth
+        let instr_counter_true =
+          Next_instruction.branch state i |> Next_instruction.with_instr_counter
         in
-        let prio_false =
-          let instr_counter =
-            Next_instruction.continue state
-            |> Next_instruction.with_instr_counter
-          in
-          Prio.v ~instr_counter ~distance_to_unreachable:None ~depth
+        let instr_counter_false =
+          Next_instruction.continue state |> Next_instruction.with_instr_counter
         in
-        pop_choice stack ~prio_true ~prio_false
+        pop_choice stack ~instr_counter_true ~instr_counter_false
       in
       let state = { state with stack } in
       if b then State.branch state i else Choice.return (State.Continue state)
@@ -1154,17 +1138,13 @@ struct
         st @@ Stack.push stack res
       end
       else begin
-        let instr_counter =
+        let instr_counter_true =
           Next_instruction.continue state |> Next_instruction.with_instr_counter
         in
-        let* depth = Choice.depth () in
-        let prio_true =
-          Prio.v ~instr_counter ~distance_to_unreachable:None ~depth
+        let instr_counter_false = instr_counter_true in
+        let* b, stack =
+          pop_choice stack ~instr_counter_true ~instr_counter_false
         in
-        let prio_false =
-          Prio.v ~instr_counter ~distance_to_unreachable:None ~depth
-        in
-        let* b, stack = pop_choice stack ~prio_true ~prio_false in
         let o2, stack = Stack.pop stack in
         let o1, stack = Stack.pop stack in
         st @@ Stack.push stack (if b then o1 else o2)
