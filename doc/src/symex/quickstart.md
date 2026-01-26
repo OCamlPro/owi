@@ -367,8 +367,8 @@ owi: [ERROR] Reached problem!
 $ owi rust ./mean.rs --entry-point=check --invoke-with-symbols -w1 --fail-on-assertion-only --no-assert-failure-expression-printing --deterministic-result-order
 owi: [ERROR] Assert failure
 model {
-  symbol symbol_0 i32 915013628
-  symbol symbol_1 i32 -1225654275
+  symbol symbol_0 i32 1069400062
+  symbol symbol_1 i32 -1881784317
 }
 
 owi: [ERROR] Reached problem!
@@ -380,8 +380,8 @@ owi: [ERROR] Reached problem!
 $ owi zig ./mean.zig --entry-point=check --invoke-with-symbols -w1 --fail-on-assertion-only --no-assert-failure-expression-printing --deterministic-result-order
 owi: [ERROR] Assert failure
 model {
-  symbol symbol_0 i32 -722535840
-  symbol symbol_1 i32 -418314849
+  symbol symbol_0 i32 1610570242
+  symbol symbol_1 i32 -1610637823
 }
 
 owi: [ERROR] Reached problem!
