@@ -420,20 +420,20 @@ let modul (modul : Grouped.t) (assigned : Assigned.t) : Binary.Module.t Result.t
     =
   Log.debug (fun m -> m "rewriting    ...");
   let* global =
-    array_map
-      (Origin.monadic_map ~f_local:(rewrite_global assigned)
-         ~f_imported:(fun (m, val_type) ->
-         let+ val_type = rewrite_val_type assigned val_type in
-         (m, val_type) ) )
-      modul.global
+    let f_local g = rewrite_global assigned g in
+    let f_imported (m, val_type) =
+      let+ val_type = rewrite_val_type assigned val_type in
+      (m, val_type)
+    in
+    array_map (Origin.monadic_map ~f_local ~f_imported) modul.global
   in
   let* table =
-    array_map
-      (Origin.monadic_map ~f_local:(rewrite_table assigned)
-         ~f_imported:(fun ((l, (n, ht)) : Text.Table.Type.t) ->
-         let+ ht = rewrite_heap_type assigned ht in
-         (l, (n, ht)) ) )
-      modul.table
+    let f_local g = rewrite_table assigned g in
+    let f_imported (l, (n, ht)) =
+      let+ ht = rewrite_heap_type assigned ht in
+      (l, (n, ht))
+    in
+    array_map (Origin.monadic_map ~f_local ~f_imported) modul.table
   in
   let* elem = array_map (rewrite_elem assigned) modul.elem in
   let* data = array_map (rewrite_data assigned) modul.data in

@@ -233,10 +233,9 @@ let from_global (global : (Binary.Global.t, Binary.Global.Type.t) Origin.t array
   : Text.Module.Field.t list =
   Array.map
     (function
-      | Origin.Local ({ typ = mut, vt; _ } as g : Binary.Global.t) ->
-        let init = convert_expr g.init in
+      | Origin.Local ({ typ = mut, vt; init; id } : Binary.Global.t) ->
+        let init = convert_expr init in
         let typ = (mut, convert_val_type vt) in
-        let id = g.id in
         Text.Module.Field.Global { typ; init; id }
       | Imported { modul_name; name; assigned_name; typ = mut, vt } ->
         let typ =
