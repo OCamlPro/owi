@@ -892,6 +892,30 @@ struct
       end
     | _ -> Choice.trap `Indirect_call_type_mismatch
 
+  let mk_addr_check_bounds const env memid pos offset current_instr_counter =
+    let* mem = Env.get_memory env memid in
+    let pos = I64.extend_i32_u pos in
+    let offset = I64.of_concrete offset in
+    let addr = I64.add pos offset in
+
+    let>! () =
+      let res = I64.(add addr (of_concrete const)) in
+      let size = Memory.size mem |> I64.extend_i32_u in
+      let overflow = Boolean.or_ I64.(lt_u addr pos) I64.(lt_u res addr) in
+      ( Boolean.or_ overflow I64.(lt_u size res)
+      , `Out_of_bounds_memory_access
+      , Some current_instr_counter )
+    in
+    Choice.return addr
+
+  let mk_addr_check_bounds_1L = mk_addr_check_bounds 1L
+
+  let mk_addr_check_bounds_2L = mk_addr_check_bounds 2L
+
+  let mk_addr_check_bounds_4L = mk_addr_check_bounds 4L
+
+  let mk_addr_check_bounds_8L = mk_addr_check_bounds 8L
+
   let exec_instr instr (state : State.exec_state) : State.instr_result Choice.t
       =
     let stack = state.stack in
@@ -1363,18 +1387,9 @@ struct
       Elem.drop elem;
       st stack
     | I_load16 (memid, nn, sx, { offset; _ }) -> (
-      let* mem = Env.get_memory env memid in
       let pos, stack = Stack.pop_i32 stack in
-      let addr =
-        let pos = I64.extend_i32_u pos in
-        let offset = I64.of_concrete offset in
-        I64.add pos offset
-      in
-      let>! () =
-        let size = Memory.size mem |> I64.extend_i32_u in
-        ( I64.(lt_u size (add addr (I32.of_int 2 |> I64.extend_i32_u)))
-        , `Out_of_bounds_memory_access
-        , Some current_instr_counter )
+      let* addr =
+        mk_addr_check_bounds_2L env memid pos offset current_instr_counter
       in
       let* mem = Env.get_memory env memid in
       let* res =
@@ -1387,18 +1402,9 @@ struct
       | S32 -> Stack.push_i32 stack res
       | S64 -> Stack.push_i64 stack (I64.of_int32 res) )
     | I_load8 (memid, nn, sx, { offset; _ }) -> (
-      let* mem = Env.get_memory env memid in
       let pos, stack = Stack.pop_i32 stack in
-      let addr =
-        let pos = I64.extend_i32_u pos in
-        let offset = I64.of_concrete offset in
-        I64.add pos offset
-      in
-      let>! () =
-        let size = Memory.size mem |> I64.extend_i32_u in
-        ( I64.(lt_u size (add addr (I32.of_int 1 |> I64.extend_i32_u)))
-        , `Out_of_bounds_memory_access
-        , Some current_instr_counter )
+      let* addr =
+        mk_addr_check_bounds_1L env memid pos offset current_instr_counter
       in
       let* mem = Env.get_memory env memid in
       let* res =
@@ -1411,7 +1417,6 @@ struct
       | S32 -> Stack.push_i32 stack res
       | S64 -> Stack.push_i64 stack (I64.of_int32 res) )
     | I_store8 (memid, nn, { offset; _ }) ->
-      let* mem = Env.get_memory env memid in
       let n, stack =
         match nn with
         | S32 ->
@@ -1422,74 +1427,45 @@ struct
           (I64.to_int32 n, stack)
       in
       let pos, stack = Stack.pop_i32 stack in
-      let addr =
-        let pos = I64.extend_i32_u pos in
-        let offset = I64.of_concrete offset in
-        I64.add pos offset
-      in
-      let>! () =
-        let size = Memory.size mem |> I64.extend_i32_u in
-        ( I64.(lt_u size (add addr (I32.of_int 1 |> I64.extend_i32_u)))
-        , `Out_of_bounds_memory_access
-        , Some current_instr_counter )
+      let* addr =
+        mk_addr_check_bounds_1L env memid pos offset current_instr_counter
       in
       let* mem = Env.get_memory env memid in
       let* () = Memory.store_8 mem ~addr:(I32.wrap_i64 addr) n in
       st stack
     | I_load (memid, nn, { offset; _ }) ->
-      let* mem = Env.get_memory env memid in
       let pos, stack = Stack.pop_i32 stack in
-      let addr =
-        let pos = I64.extend_i32_u pos in
-        let offset = I64.of_concrete offset in
-        I64.add pos offset
-      in
-      let size = Memory.size mem |> I64.extend_i32_u in
       begin match nn with
       | S32 ->
-        let>! () =
-          ( I64.(lt_u size (add addr (I32.of_int 4 |> I64.extend_i32_u)))
-          , `Out_of_bounds_memory_access
-          , Some current_instr_counter )
+        let* addr =
+          mk_addr_check_bounds_4L env memid pos offset current_instr_counter
         in
         let* mem = Env.get_memory env memid in
         let* res = Memory.load_32 mem (I32.wrap_i64 addr) in
         st @@ Stack.push_i32 stack res
       | S64 ->
-        let>! () =
-          ( I64.(lt_u size (add addr (I32.of_int 8 |> I64.extend_i32_u)))
-          , `Out_of_bounds_memory_access
-          , Some current_instr_counter )
+        let* addr =
+          mk_addr_check_bounds_8L env memid pos offset current_instr_counter
         in
         let* mem = Env.get_memory env memid in
         let* res = Memory.load_64 mem (I32.wrap_i64 addr) in
         st @@ Stack.push_i64 stack res
       end
     | F_load (memid, nn, { offset; _ }) ->
-      let* mem = Env.get_memory env memid in
       let pos, stack = Stack.pop_i32 stack in
-      let addr =
-        let pos = I64.extend_i32_u pos in
-        let offset = I64.of_concrete offset in
-        I64.add pos offset
-      in
-      let size = Memory.size mem |> I64.extend_i32_u in
       begin match nn with
       | S32 ->
-        let>! () =
-          ( I64.(lt_u size (add addr (I32.of_int 4 |> I64.extend_i32_u)))
-          , `Out_of_bounds_memory_access
-          , Some current_instr_counter )
+        let* addr =
+          mk_addr_check_bounds_4L env memid pos offset current_instr_counter
         in
         let* mem = Env.get_memory env memid in
         let* res = Memory.load_32 mem (I32.wrap_i64 addr) in
         let res = F32.of_bits res in
         st @@ Stack.push_f32 stack res
       | S64 ->
-        let>! () =
-          ( I64.(lt_u size (add addr (I32.of_int 8 |> I64.extend_i32_u)))
-          , `Out_of_bounds_memory_access
-          , Some current_instr_counter )
+        (* I32.of_concrete 8l |> I64.extend_i32_u = I64.of_concrete 8L, right?  *)
+        let* addr =
+          mk_addr_check_bounds_8L env memid pos offset current_instr_counter
         in
         let* mem = Env.get_memory env memid in
         let* res = Memory.load_64 mem (I32.wrap_i64 addr) in
@@ -1497,21 +1473,12 @@ struct
         st @@ Stack.push_f64 stack res
       end
     | I_store (memid, nn, { offset; _ }) -> (
-      let* mem = Env.get_memory env memid in
-      let size = Memory.size mem |> I64.extend_i32_u in
-      let offset = I64.of_concrete offset in
       match nn with
       | S32 ->
         let n, stack = Stack.pop_i32 stack in
         let pos, stack = Stack.pop_i32 stack in
-        let addr =
-          let pos = I64.extend_i32_u pos in
-          I64.add pos offset
-        in
-        let>! () =
-          ( I64.(lt_u size (add addr (I64.of_int 4)))
-          , `Out_of_bounds_memory_access
-          , Some current_instr_counter )
+        let* addr =
+          mk_addr_check_bounds_4L env memid pos offset current_instr_counter
         in
         let* mem = Env.get_memory env memid in
         let* () = Memory.store_32 mem ~addr:(I32.wrap_i64 addr) n in
@@ -1519,34 +1486,19 @@ struct
       | S64 ->
         let n, stack = Stack.pop_i64 stack in
         let pos, stack = Stack.pop_i32 stack in
-        let addr =
-          let pos = I64.extend_i32_u pos in
-          I64.add pos offset
-        in
-        let>! () =
-          ( I64.(lt_u size (add addr (I64.of_int 8)))
-          , `Out_of_bounds_memory_access
-          , Some current_instr_counter )
+        let* addr =
+          mk_addr_check_bounds_8L env memid pos offset current_instr_counter
         in
         let* mem = Env.get_memory env memid in
         let* () = Memory.store_64 mem ~addr:(I32.wrap_i64 addr) n in
         st stack )
     | F_store (memid, nn, { offset; _ }) -> (
-      let* mem = Env.get_memory env memid in
-      let size = Memory.size mem |> I64.extend_i32_u in
-      let offset = I64.of_concrete offset in
       match nn with
       | S32 ->
         let n, stack = Stack.pop_f32 stack in
         let pos, stack = Stack.pop_i32 stack in
-        let addr =
-          let pos = I64.extend_i32_u pos in
-          I64.add pos offset
-        in
-        let>! () =
-          ( I64.(lt_u size (add addr (I64.of_int 4)))
-          , `Out_of_bounds_memory_access
-          , Some current_instr_counter )
+        let* addr =
+          mk_addr_check_bounds_4L env memid pos offset current_instr_counter
         in
         let* mem = Env.get_memory env memid in
         let* () =
@@ -1556,14 +1508,8 @@ struct
       | S64 ->
         let n, stack = Stack.pop_f64 stack in
         let pos, stack = Stack.pop_i32 stack in
-        let addr =
-          let pos = I64.extend_i32_u pos in
-          I64.add pos offset
-        in
-        let>! () =
-          ( I64.(lt_u size (add addr (I64.of_int 8)))
-          , `Out_of_bounds_memory_access
-          , Some current_instr_counter )
+        let* addr =
+          mk_addr_check_bounds_8L env memid pos offset current_instr_counter
         in
         let* mem = Env.get_memory env memid in
         let* () =
@@ -1571,18 +1517,9 @@ struct
         in
         st stack )
     | I64_load32 (memid, sx, { offset; _ }) ->
-      let* mem = Env.get_memory env memid in
       let pos, stack = Stack.pop_i32 stack in
-      let addr =
-        let pos = I64.extend_i32_u pos in
-        let offset = I64.of_concrete offset in
-        I64.add pos offset
-      in
-      let>! () =
-        let size = Memory.size mem |> I64.extend_i32_u in
-        ( I64.(lt_u size (add addr (I64.of_int 4)))
-        , `Out_of_bounds_memory_access
-        , Some current_instr_counter )
+      let* addr =
+        mk_addr_check_bounds_4L env memid pos offset current_instr_counter
       in
       let* mem = Env.get_memory env memid in
       let* res = Memory.load_32 mem (I32.wrap_i64 addr) in
@@ -1608,35 +1545,17 @@ struct
           (I64.to_int32 n, stack)
       in
       let pos, stack = Stack.pop_i32 stack in
-      let addr =
-        let pos = I64.extend_i32_u pos in
-        let offset = I64.of_concrete offset in
-        I64.add pos offset
-      in
-      let* mem = Env.get_memory env memid in
-      let>! () =
-        let size = Memory.size mem |> I64.extend_i32_u in
-        ( I64.(lt_u size (add addr (I64.of_int 2)))
-        , `Out_of_bounds_memory_access
-        , Some current_instr_counter )
+      let* addr =
+        mk_addr_check_bounds_2L env memid pos offset current_instr_counter
       in
       let* mem = Env.get_memory env memid in
       let* () = Memory.store_16 mem ~addr:(I32.wrap_i64 addr) n in
       st stack
     | I64_store32 (memid, { offset; _ }) ->
-      let* mem = Env.get_memory env memid in
       let n, stack = Stack.pop_i64 stack in
       let pos, stack = Stack.pop_i32 stack in
-      let addr =
-        let pos = I64.extend_i32_u pos in
-        let offset = I64.of_concrete offset in
-        I64.add pos offset
-      in
-      let>! () =
-        let size = Memory.size mem |> I64.extend_i32_u in
-        ( I64.(lt_u size (add addr (I64.of_int 4)))
-        , `Out_of_bounds_memory_access
-        , Some current_instr_counter )
+      let* addr =
+        mk_addr_check_bounds_4L env memid pos offset current_instr_counter
       in
       let* mem = Env.get_memory env memid in
       let* () =
