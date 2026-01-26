@@ -117,10 +117,6 @@ let modul m =
       if Hashtbl.mem seen id then Error (`Duplicate_memory id)
       else Ok (Hashtbl.add seen id ())
   in
-  (* let m = Text.Module.{ m with fields = List.sort Field.compare m.fields } in *)
-  (* in some tests, modules are exptected to be evaluated in an order different
-    from the one in which they were written. e.g. the last "unknown global" in
-    "test/references/global.wast". *)
   let+ (_env : env) =
     let open Module in
     list_fold_left
