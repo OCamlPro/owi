@@ -41,7 +41,7 @@
  (depends
   ;; build
   (ocaml
-   (>= 5.2))
+   (>= 5.4))
   (menhir
    (and
     :build
