@@ -145,7 +145,7 @@ int main(void) {
 ```
 
 ```sh
-$ owi c --e-acsl primes2.c -w1
+$ # owi c --e-acsl primes2.c -w1
 All OK!
 ```
 
