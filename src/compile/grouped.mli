@@ -12,9 +12,9 @@ type opt_export = private
 type t = private
   { id : string option
   ; typ : Typedef.t Array.t
-  ; function_type : func_type Array.t
-      (* Types comming from function declarations.
-         It contains potential duplication *)
+  ; decl_types : func_type Array.t
+      (** Types comming from function or tag declarations. It contains potential
+          duplication. *)
   ; type_checks : (indice * func_type) Array.t
       (* Types checks to perform after assignment.
          Come from function declarations with type indicies *)

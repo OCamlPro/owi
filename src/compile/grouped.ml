@@ -15,9 +15,7 @@ let curr_id (curr : int) (i : indice option) =
 type t =
   { id : string option
   ; typ : Typedef.t Array.t
-  ; function_type : func_type Array.t
-      (* TODO: "function_type" should be renamed to something like
-          "implicit_types"?  *)
+  ; decl_types : func_type Array.t
       (** Types comming from function or tag declarations. It contains potential
           duplication. *)
   ; type_checks : (indice * func_type) Array.t
@@ -42,8 +40,7 @@ let pp_id fmt id = Text.pp_id_opt fmt id
 
 let pp_typ fmt typ = Fmt.array Text.Typedef.pp fmt typ
 
-let pp_function_type fmt function_type =
-  Fmt.array Text.pp_func_type fmt function_type
+let pp_function_type fmt decl_types = Fmt.array Text.pp_func_type fmt decl_types
 
 let pp_type_check fmt (indice, func_type) =
   Fmt.pf fmt "(%a, %a)" pp_indice indice pp_func_type func_type
@@ -75,7 +72,7 @@ let pp_start fmt s = Text.pp_indice_opt fmt s
 let pp fmt
   { id
   ; typ
-  ; function_type
+  ; decl_types
   ; type_checks
   ; global
   ; table
@@ -90,7 +87,7 @@ let pp fmt
   Fmt.pf fmt
     "{id: %a@\n\
     \  @[<v>typ: %a@\n\
-     function_type: %a@\n\
+     decl_types: %a@\n\
      type_checks: %a@\n\
      global: %a@\n\
      table: %a@\n\
@@ -100,14 +97,14 @@ let pp fmt
      data: %a@\n\
      start: %a@\n\
      }"
-    pp_id id pp_typ typ pp_function_type function_type pp_type_checks
-    type_checks pp_global global pp_table table pp_mem mem pp_func func pp_elem
-    elem pp_data data pp_start start
+    pp_id id pp_typ typ pp_function_type decl_types pp_type_checks type_checks
+    pp_global global pp_table table pp_mem mem pp_func func pp_elem elem pp_data
+    data pp_start start
 
-let add_func_type function_type type_checks = function
+let add_func_type decl_types type_checks = function
   | Bt_ind _ -> ()
   | Bt_raw (id, typ) ->
-    Dynarray.add_last function_type typ;
+    Dynarray.add_last decl_types typ;
     Option.iter (fun id -> Dynarray.add_last type_checks (id, typ)) id
 
 let rec extract_block_types expr =
@@ -124,12 +121,12 @@ let rec extract_block_types expr =
   in
   List.concat_map aux expr.raw
 
-let add_func value function_type type_checks func =
+let add_func value decl_types type_checks func =
   begin match value with
-  | Origin.Imported f -> add_func_type function_type type_checks f.typ
+  | Origin.Imported f -> add_func_type decl_types type_checks f.typ
   | Local (f : Func.t) ->
     List.iter
-      (add_func_type function_type type_checks)
+      (add_func_type decl_types type_checks)
       (f.type_f :: extract_block_types f.body)
   end;
   Dynarray.add_last func value
@@ -143,7 +140,7 @@ let add_tag value tag_type type_checks
   end;
   Dynarray.add_last tag value
 
-let add_field typ function_type type_checks global table mem func elem data tag
+let add_field typ decl_types type_checks global table mem func elem data tag
   global_exports mem_exports table_exports func_exports tag_exports start :
   Text.Module.Field.t -> unit = function
   | Typedef t -> Dynarray.add_last typ t
@@ -168,13 +165,13 @@ let add_field typ function_type type_checks global table mem func elem data tag
   | Export { name; typ = Mem id } ->
     let id = curr_id (Dynarray.length mem) id in
     Dynarray.add_last mem_exports { name; id }
-  | Func f -> add_func (Origin.Local f) function_type type_checks func
+  | Func f -> add_func (Origin.Local f) decl_types type_checks func
   | Import { typ = Func (assigned_name, typ); modul_name; name } ->
     let imported = Origin.imported ~modul_name ~name ~assigned_name ~typ in
-    add_func imported function_type type_checks func
+    add_func imported decl_types type_checks func
   | Import { typ = Tag (assigned_name, typ); modul_name; name } ->
     let imported = Origin.imported ~modul_name ~name ~assigned_name ~typ in
-    add_tag imported function_type type_checks tag
+    add_tag imported decl_types type_checks tag
   | Export { name; typ = Func id } ->
     let id = curr_id (Dynarray.length func) id in
     Dynarray.add_last func_exports { name; id }
@@ -199,13 +196,13 @@ let add_field typ function_type type_checks global table mem func elem data tag
         Active (Some id, expr)
     in
     Dynarray.add_last data { d with mode }
-  | Tag t -> add_tag (Origin.Local t) function_type type_checks tag
+  | Tag t -> add_tag (Origin.Local t) decl_types type_checks tag
   | Start id -> start := Some id
 
 let of_text { Text.Module.fields; id } =
   Log.debug (fun m -> m "grouping     ...");
   let typ = Dynarray.create () in
-  let function_type = Dynarray.create () in
+  let decl_types = Dynarray.create () in
   let type_checks = Dynarray.create () in
   let global = Dynarray.create () in
   let table = Dynarray.create () in
@@ -221,13 +218,13 @@ let of_text { Text.Module.fields; id } =
   let tag_exports = Dynarray.create () in
   let start = ref None in
   List.iter
-    (add_field typ function_type type_checks global table mem func elem data tag
+    (add_field typ decl_types type_checks global table mem func elem data tag
        global_exports mem_exports table_exports func_exports tag_exports start )
     fields;
   let modul =
     { id
     ; typ = Dynarray.to_array typ
-    ; function_type = Dynarray.to_array function_type
+    ; decl_types = Dynarray.to_array decl_types
     ; type_checks = Dynarray.to_array type_checks
     ; global = Dynarray.to_array global
     ; table = Dynarray.to_array table

@@ -57,7 +57,7 @@ module Typetbl = Hashtbl.Make (struct
   let hash = Hashtbl.hash
 end)
 
-let assign_types typ function_type :
+let assign_types typ decl_types :
   Text.func_type Array.t * (string, int) Hashtbl.t =
   let all_types = Typetbl.create 64 in
   let named_types = Hashtbl.create 64 in
@@ -80,7 +80,7 @@ let assign_types typ function_type :
         let id = Dynarray.length declared_types in
         Dynarray.add_last declared_types typ;
         Typetbl.add all_types typ id )
-    function_type;
+    decl_types;
   let declared_types = Dynarray.to_array declared_types in
   (declared_types, named_types)
 
@@ -134,13 +134,13 @@ let of_grouped
    ; data
    ; type_checks
    ; typ
-   ; function_type
+   ; decl_types
    ; tag
    ; _
    } :
     Grouped.t ) : t Result.t =
   Log.debug (fun m -> m "assigning    ...");
-  let typ, typ_names = assign_types typ function_type in
+  let typ, typ_names = assign_types typ decl_types in
   let* global_names =
     name "global"
       ~get_name:(get_origin_name (fun ({ id; _ } : Text.Global.t) -> id))
