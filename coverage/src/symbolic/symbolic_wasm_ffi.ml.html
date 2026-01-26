@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>symbolic_wasm_ffi.ml &mdash; Coverage report</title>
-    <meta name="description" content="67.80% coverage in src/symbolic/symbolic_wasm_ffi.ml">
+    <meta name="description" content="66.67% coverage in src/symbolic/symbolic_wasm_ffi.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">src/symbolic/</span>symbolic_wasm_ffi.ml
         </a>
       </h1>
-      <h2>67.80%</h2>
+      <h2>66.67%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:9.48%"></span>
@@ -34,6 +34,8 @@
       <span class="unvisited" style="top:23.22%"></span>
       <span class="unvisited" style="top:23.70%"></span>
       <span class="unvisited" style="top:36.49%"></span>
+      <span class="unvisited" style="top:40.76%"></span>
+      <span class="unvisited" style="top:45.02%"></span>
       <span class="unvisited" style="top:47.87%"></span>
       <span class="unvisited" style="top:48.34%"></span>
       <span class="unvisited" style="top:48.82%"></span>
@@ -143,7 +145,7 @@
 <a id="L83"></a><span class="visited"> </span>
 <a id="L84"></a><span class="visited"> </span>
 <a id="L85"></a><span > </span>
-<a id="L86"></a><span class="visited"> </span>
+<a id="L86"></a><span class="unvisited"> </span>
 <a id="L87"></a><span > </span>
 <a id="L88"></a><span > </span>
 <a id="L89"></a><span > </span>
@@ -152,7 +154,7 @@
 <a id="L92"></a><span > </span>
 <a id="L93"></a><span class="visited"> </span>
 <a id="L94"></a><span > </span>
-<a id="L95"></a><span class="visited"> </span>
+<a id="L95"></a><span class="unvisited"> </span>
 <a id="L96"></a><span > </span>
 <a id="L97"></a><span > </span>
 <a id="L98"></a><span class="visited"> </span>
@@ -540,7 +542,7 @@ module M :
     <span data-count="603">S</span>ymbolic_choice.assume (Symbolic_i32.to_boolea<span data-count="603">n</span> b) None
 
   let assert' (b : Symbolic_i32.t) : unit Symbolic_choice.t =
-    <span data-count="10471">S</span>ymbolic_choice.assertion @@ Symbolic_i32.to_boolea<span data-count="10469">n</span> b
+    <span data-count="10467">S</span>ymbolic_choice.assertion @@ Symbolic_i32.to_boolea<span data-count="10467">n</span> b
 
   let symbol_invisible_bool () =
     (* TODO: should we change this to an i32 too? *)
@@ -570,16 +572,16 @@ module M :
     <span data-count="12">l</span>et+ () = assum<span data-count="12">e</span> (Symbolic_i32.g<span data-count="12">t</span> hi x) None in
     <span data-count="12">x</span>
 
-  let abort () : unit Symbolic_choice.t = <span data-count="2">S</span>ymbolic_choice.stop
+  let abort () : unit Symbolic_choice.t = <span data-count="0">S</span>ymbolic_choice.stop
 
   let alloc m (base : Symbolic_i32.t) (size : Symbolic_i32.t) :
     Symbolic_i32.t Symbolic_choice.t =
-    <span data-count="9917">S</span>ymbolic_memory.realloc m ~ptr:base ~size
+    <span data-count="9914">S</span>ymbolic_memory.realloc m ~ptr:base ~size
 
   let free m (ptr : Symbolic_i32.t) : Symbolic_i32.t Symbolic_choice.t =
-    <span data-count="2436">S</span>ymbolic_memory.free m ptr
+    <span data-count="2442">S</span>ymbolic_memory.free m ptr
 
-  let exit (_p : Symbolic_i32.t) : unit Symbolic_choice.t = <span data-count="1">a</span>bort ()
+  let exit (_p : Symbolic_i32.t) : unit Symbolic_choice.t = <span data-count="0">a</span>bort ()
 
   let in_replay_mode () =
     <span data-count="1">S</span>ymbolic_choice.return @@ Symbolic_i32.of_boolea<span data-count="1">n</span> Symbolic_boolean.false_

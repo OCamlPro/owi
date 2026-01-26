@@ -213,28 +213,28 @@
     | Yield of Prio.metrics * (unit -&gt; 'a t)
     | Choice of 'a t * 'a t
 
-  let[@inline] return x : _ t = <span data-count="4421347">N</span>ow x
+  let[@inline] return x : _ t = <span data-count="4309285">N</span>ow x
 
   let rec bind (mx : 'a t) (f : 'a -&gt; 'b t) : 'b t =
-    <span data-count="4507797">m</span>atch mx with
-    | <span data-count="12954">S</span>top -&gt; Stop
-    | <span data-count="4426090">N</span>ow v -&gt; f v
-    | <span data-count="54638">Y</span>ield (prio, step) -&gt; Yield (prio, fun () -&gt; <span data-count="54021">b</span>ind (ste<span data-count="53985">p</span> ()) f)
-    | <span data-count="14588">C</span>hoice (a, b) -&gt;
+    <span data-count="4391927">m</span>atch mx with
+    | <span data-count="12933">S</span>top -&gt; Stop
+    | <span data-count="4314317">N</span>ow v -&gt; f v
+    | <span data-count="52424">Y</span>ield (prio, step) -&gt; Yield (prio, fun () -&gt; <span data-count="52073">b</span>ind (ste<span data-count="52020">p</span> ()) f)
+    | <span data-count="13811">C</span>hoice (a, b) -&gt;
       (* cps to make it tail rec *)
-      Choice (bin<span data-count="14589">d</span> a f, bin<span data-count="14588">d</span> b f)
+      Choice (bin<span data-count="13810">d</span> a f, bin<span data-count="13810">d</span> b f)
 
-  let[@inline] ( let* ) mx f = <span data-count="4424768">b</span>ind mx f
+  let[@inline] ( let* ) mx f = <span data-count="4313590">b</span>ind mx f
 
   let[@inline] map f x =
-    <span data-count="8702">l</span>et* x in
-    <span data-count="6572">r</span>eturn (<span data-count="6572">f</span> x)
+    <span data-count="8475">l</span>et* x in
+    <span data-count="6380">r</span>eturn (<span data-count="6380">f</span> x)
 
-  let[@inline] ( let+ ) x f = <span data-count="8703">m</span>ap f x
+  let[@inline] ( let+ ) x f = <span data-count="8475">m</span>ap f x
 
-  let[@inline] yield prio = <span data-count="6647">Y</span>ield (prio, Fun.cons<span data-count="6647">t</span> (Now ()))
+  let[@inline] yield prio = <span data-count="6421">Y</span>ield (prio, Fun.cons<span data-count="6421">t</span> (Now ()))
 
-  let[@inline] choose a b = <span data-count="3524">C</span>hoice (a, b)
+  let[@inline] choose a b = <span data-count="3327">C</span>hoice (a, b)
 
   let stop = Stop
 end
@@ -254,16 +254,16 @@ module Make (Work_datastructure : Prio.S) = struct
 
   let work sched at_worker_value =
     <span data-count="794">l</span>et rec inner (t : _ Schedulable.t) write_back =
-      <span data-count="14023">m</span>atch t with
-      | <span data-count="2056">S</span>top -&gt; ()
-      | <span data-count="1796">N</span>ow x -&gt; at_worker_value x
-      | <span data-count="6645">Y</span>ield (prio, f) -&gt; write_back (prio, f)
-      | <span data-count="3524">C</span>hoice (m1, m2) -&gt;
+      <span data-count="13435">m</span>atch t with
+      | <span data-count="2052">S</span>top -&gt; ()
+      | <span data-count="1634">N</span>ow x -&gt; at_worker_value x
+      | <span data-count="6422">Y</span>ield (prio, f) -&gt; write_back (prio, f)
+      | <span data-count="3327">C</span>hoice (m1, m2) -&gt;
         inner m1 write_back;
-        <span data-count="3522">i</span>nner m2 write_back
+        <span data-count="3325">i</span>nner m2 write_back
     in
     Work_datastructure.work_while
-      (fun f write_back -&gt; <span data-count="6983">i</span>nner (<span data-count="6977">f</span> ()) write_back)
+      (fun f write_back -&gt; <span data-count="6791">i</span>nner (<span data-count="6783">f</span> ()) write_back)
       sched.work_queue
 
   let spawn_worker sched
@@ -273,9 +273,9 @@ module Make (Work_datastructure : Prio.S) = struct
     <span data-count="794">D</span>omain.spawn (fun () -&gt;
       <span data-count="794">F</span>un.protect ~finally (fun () -&gt;
         <span data-count="794">t</span>ry
-          wor<span data-count="785">k</span> sched
+          wor<span data-count="769">k</span> sched
             (at_worker_value ~close_work_queue:(fun () -&gt;
-               <span data-count="54">W</span>ork_datastructure.close sched.work_queue ) )
+               <span data-count="43">W</span>ork_datastructure.close sched.work_queue ) )
         with <span data-count="0">e</span> -&gt;
           let e_s = Printexc.to_string e in
           <span data-count="0">l</span>et bt = Printexc.get_raw_backtrace () in

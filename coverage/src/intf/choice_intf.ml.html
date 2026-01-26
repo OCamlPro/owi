@@ -60,6 +60,7 @@
 <a id="L36"></a><span > </span>
 <a id="L37"></a><span > </span>
 <a id="L38"></a><span > </span>
+<a id="L39"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -102,6 +103,7 @@
 <a href="#L36">36</a>
 <a href="#L37">37</a>
 <a href="#L38">38</a>
+<a href="#L39">39</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -123,7 +125,10 @@ module type S = sig
   val map : 'a t -&gt; ('a -&gt; 'b) -&gt; 'b t
 
   val select :
-    boolean -&gt; prio_true:Prio.metrics -&gt; prio_false:Prio.metrics -&gt; Bool.t t
+       boolean
+    -&gt; instr_counter_true:int option
+    -&gt; instr_counter_false:int option
+    -&gt; Bool.t t
 
   val select_i32 : i32 -&gt; Concrete_i32.t t
 
@@ -134,8 +139,6 @@ module type S = sig
   val ( let+ ) : 'a t -&gt; ('a -&gt; 'b) -&gt; 'b t
 
   val get_pc : unit -&gt; Smtml.Expr.Set.t t
-
-  val depth : unit -&gt; int t
 
   val ite : boolean -&gt; if_true:value -&gt; if_false:value -&gt; value t
 
