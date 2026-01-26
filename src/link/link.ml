@@ -143,7 +143,7 @@ let eval_global ls env (global : (Binary.Global.t, Text.Global.Type.t) Origin.t)
 
 let eval_globals ls env globals : Link_env.Build.t Result.t =
   let+ env, _i =
-    array_fold_left
+    iarray_fold_left
       (fun (env, i) global ->
         let+ global = eval_global ls env global in
         let env = Link_env.Build.add_global i global env in
@@ -178,7 +178,7 @@ let eval_memory ls (memory : (Text.Mem.t, Text.limits) Origin.t) :
 
 let eval_memories ls env memories =
   let+ env, _i =
-    array_fold_left
+    iarray_fold_left
       (fun (env, id) mem ->
         let+ memory = eval_memory ls mem in
         let env = Link_env.Build.add_memory id memory env in
@@ -207,7 +207,7 @@ let eval_table ls (table : (_, Text.Table.Type.t) Origin.t) : table Result.t =
 
 let eval_tables ls env tables =
   let+ env, _i =
-    array_fold_left
+    iarray_fold_left
       (fun (env, i) table ->
         let+ table = eval_table ls table in
         let env = Link_env.Build.add_table i table env in
@@ -246,7 +246,7 @@ let eval_func ls (finished_env : int) func : func Result.t =
 
 let eval_functions ls (finished_env : int) env functions =
   let+ env, _i =
-    array_fold_left
+    iarray_fold_left
       (fun (env, i) func ->
         let+ func = eval_func ls finished_env func in
         let env = Link_env.Build.add_func i func env in
@@ -281,7 +281,7 @@ let get_i32 = function
 
 let define_data env data =
   let+ env, init, _i =
-    array_fold_left
+    iarray_fold_left
       (fun (env, init, id) (data : Binary.Data.t) ->
         let data' : Concrete_data.t = { value = data.init } in
         let env = Link_env.Build.add_data id data' env in
@@ -302,7 +302,7 @@ let define_data env data =
 
 let define_elem env elem =
   let+ env, inits, _i =
-    array_fold_left
+    iarray_fold_left
       (fun (env, inits, i) (elem : Binary.Elem.t) ->
         let* init = list_map (Eval_const.expr env) elem.init in
         let* init_as_ref =
@@ -314,7 +314,7 @@ let define_elem env elem =
         in
         let value =
           match elem.mode with
-          | Active _ | Passive -> Array.of_list init_as_ref
+          | Active _ | Passive -> Iarray.of_list init_as_ref
           | Declarative ->
             (* Declarative element have no runtime value *)
             [||]
@@ -339,7 +339,7 @@ let define_elem env elem =
 let populate_exports env (exports : Binary.Module.Exports.t) :
   State.exports Result.t =
   let fill_exports get_env exports names =
-    array_fold_left
+    iarray_fold_left
       (fun (acc, names) ({ name; id; _ } : Binary.Export.t) ->
         let value = get_env env id in
         if StringSet.mem name names then Error `Duplicate_export_name
@@ -347,7 +347,7 @@ let populate_exports env (exports : Binary.Module.Exports.t) :
       (StringMap.empty, names) exports
   in
   let fill_exports' get_env exports names =
-    array_fold_left
+    iarray_fold_left
       (fun (acc, names) ({ name; id; _ } : Binary.Export.t) ->
         let* value = get_env env id in
         if StringSet.mem name names then Error `Duplicate_export_name

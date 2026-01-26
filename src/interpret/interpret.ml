@@ -648,6 +648,7 @@ struct
 
       val set : t -> int -> value -> t
     end = struct
+      (* TODO: is this really the good datastructure for this...? *)
       type t = value array
 
       let of_list = Array.of_list
@@ -1590,13 +1591,13 @@ struct
       st stack
     | Br_table (inds, i) ->
       let target, stack = Stack.pop_i32 stack in
-      let> out = I32.(ge_u target (I32.of_int (Array.length inds))) in
+      let> out = I32.(ge_u target (I32.of_int (Iarray.length inds))) in
       let* target =
         if out then return i
         else
           let+ target = Choice.select_i32 target in
           let target = Int32.to_int target in
-          inds.(target)
+          Iarray.get inds target
       in
       let state = { state with stack } in
       State.branch state target

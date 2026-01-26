@@ -116,7 +116,7 @@ type instr =
       string option * block_type option * expr Annotated.t * expr Annotated.t
   | Br of indice
   | Br_if of indice
-  | Br_table of indice array * indice
+  | Br_table of indice Iarray.t * indice
   | Return
   | Return_call of indice
   | Return_call_indirect of indice * block_type
@@ -249,7 +249,9 @@ let rec pp_instr ~short fmt = function
   | Br id -> pf fmt "br %a" pp_indice id
   | Br_if id -> pf fmt "br_if %a" pp_indice id
   | Br_table (ids, id) ->
-    pf fmt "br_table %a %a" (array ~sep:sp pp_indice) ids pp_indice id
+    pf fmt "br_table %a %a"
+      (iter Iarray.iter ~sep:sp pp_indice)
+      ids pp_indice id
   | Return -> pf fmt "return"
   | Return_call id -> pf fmt "return_call %a" pp_indice id
   | Return_call_indirect (tbl_id, ty_id) ->
@@ -391,22 +393,23 @@ end
 module Module = struct
   module Exports = struct
     type t =
-      { global : Export.t Array.t
-      ; mem : Export.t Array.t
-      ; table : Export.t Array.t
-      ; func : Export.t Array.t
+      { global : Export.t Iarray.t
+      ; mem : Export.t Iarray.t
+      ; table : Export.t Iarray.t
+      ; func : Export.t Iarray.t
       }
   end
 
   type t =
     { id : string option
-    ; types : Text.Typedef.t array
-    ; global : (Global.t, Text.Global.Type.t) Origin.t array
-    ; table : (Text.Table.t, Text.Table.Type.t) Origin.t array
-    ; mem : (Text.Mem.t, Text.limits) Origin.t array
-    ; func : (Func.t, block_type) Origin.t array (* TODO: switch to func_type *)
-    ; elem : Elem.t array
-    ; data : Data.t array
+    ; types : Text.Typedef.t Iarray.t
+    ; global : (Global.t, Text.Global.Type.t) Origin.t Iarray.t
+    ; table : (Text.Table.t, Text.Table.Type.t) Origin.t Iarray.t
+    ; mem : (Text.Mem.t, Text.limits) Origin.t Iarray.t
+    ; func :
+        (Func.t, block_type) Origin.t Iarray.t (* TODO: switch to func_type *)
+    ; elem : Elem.t Iarray.t
+    ; data : Data.t Iarray.t
     ; exports : Exports.t
     ; start : int option
     ; custom : Custom.t list
@@ -468,23 +471,23 @@ module Module = struct
         Origin.Local { f with body }
     in
     let func =
-      Array.init
-        (Array.length m.func + 1)
+      Iarray.init
+        (Iarray.length m.func + 1)
         (fun j ->
           if i = j then if update_function_itself then update_function f else f
           else begin
-            update_function @@ if i < j then m.func.(j - 1) else m.func.(j)
+            update_function @@ Iarray.get m.func (if i < j then j - 1 else j)
           end )
     in
     let elem =
-      Array.map
+      Iarray.map
         (fun (elem : Elem.t) ->
           let init = List.map handle_expr elem.init in
           { elem with init } )
         m.elem
     in
     let global =
-      Array.map
+      Iarray.map
         (function
           | Origin.Imported _ as v -> v
           | Local (global : Global.t) ->
@@ -497,7 +500,7 @@ module Module = struct
 
     let exports =
       let func =
-        Array.map
+        Iarray.map
           (fun export ->
             let id = update_idx (export : Export.t).id in
             { export with id } )
@@ -511,20 +514,20 @@ module Module = struct
   (** Add a function [f] at the end of a module [m] and returns the module and
       the index of the added function. *)
   let add_func f m =
-    let len = Array.length m.func in
+    let len = Iarray.length m.func in
     let func =
-      Array.init
-        (Array.length m.func + 1)
-        (fun i -> if i = len then f else m.func.(i))
+      Iarray.init
+        (Iarray.length m.func + 1)
+        (fun i -> if i = len then f else Iarray.get m.func i)
     in
 
     ({ m with func }, len)
 
   (** Return the type of the function at index [id]. *)
   let get_func_type id m =
-    if id >= Array.length m.func then None
+    if id >= Iarray.length m.func then None
     else
-      match m.func.(id) with
+      match Iarray.get m.func id with
       | Local f -> Some f.type_f
       | Imported i -> Some i.typ
 
@@ -533,7 +536,7 @@ module Module = struct
   (** Return the first function exported as [name] if it exists. Return [None]
       otherwise.*)
   let find_exported_func_from_name name m =
-    Array.find_opt
+    Iarray.find_opt
       (function { Export.name = name'; _ } -> String.equal name name')
       m.exports.func
 
@@ -542,7 +545,7 @@ module Module = struct
   (** Return the index of a function imported from a given [modul_name] and
       [func_name] if it exists. Return [None] otherwise. *)
   let find_imported_func_index ~modul_name ~func_name m =
-    Array.find_index
+    Iarray.find_index
       (function
         | Origin.Imported
             { Origin.modul_name = modul_name'
@@ -558,7 +561,7 @@ module Module = struct
       no imported functions. *)
   let find_last_import_index m =
     let _i, last =
-      Array.fold_left
+      Iarray.fold_left
         (fun (i, last) -> function
           | Origin.Imported _ -> (succ i, i) | Origin.Local _ -> (succ i, last) )
         (0, ~-1) m.func

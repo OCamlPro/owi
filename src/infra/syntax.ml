@@ -48,11 +48,11 @@ let[@inline] list_fold_left_map f acc l =
   in
   (acc, List.rev l)
 
-let[@inline] array_iter f a =
+let[@inline] iarray_iter f a =
   let err = ref None in
   try
-    for i = 0 to Array.length a - 1 do
-      match f (Array.unsafe_get a i) with
+    for i = 0 to Iarray.length a - 1 do
+      match f (Iarray.unsafe_get a i) with
       | Error _e as e ->
         err := Some e;
         raise Exit
@@ -61,11 +61,11 @@ let[@inline] array_iter f a =
     Ok ()
   with Exit -> ( match !err with None -> assert false | Some e -> e )
 
-let[@inline] array_iteri f a =
+let[@inline] iarray_iteri f a =
   let err = ref None in
   try
-    for i = 0 to Array.length a - 1 do
-      match f i (Array.unsafe_get a i) with
+    for i = 0 to Iarray.length a - 1 do
+      match f i (Iarray.unsafe_get a i) with
       | Error _e as e ->
         err := Some e;
         raise Exit
@@ -74,38 +74,12 @@ let[@inline] array_iteri f a =
     Ok ()
   with Exit -> ( match !err with None -> assert false | Some e -> e )
 
-let[@inline] dynarray_iter f a =
-  let err = ref None in
-  try
-    for i = 0 to Dynarray.length a - 1 do
-      match f (Dynarray.get a i) with
-      | Error _e as e ->
-        err := Some e;
-        raise Exit
-      | Ok () -> ()
-    done;
-    Ok ()
-  with Exit -> ( match !err with None -> assert false | Some e -> e )
-
-let[@inline] dynarray_iteri f a =
-  let err = ref None in
-  try
-    for i = 0 to Dynarray.length a - 1 do
-      match f i (Dynarray.get a i) with
-      | Error _e as e ->
-        err := Some e;
-        raise Exit
-      | Ok () -> ()
-    done;
-    Ok ()
-  with Exit -> ( match !err with None -> assert false | Some e -> e )
-
-let[@inline] array_map f a =
+let[@inline] iarray_map f a =
   let err = ref None in
   try
     ok
-    @@ Array.init (Array.length a) (fun i ->
-      let v = Array.get a i in
+    @@ Iarray.init (Iarray.length a) (fun i ->
+      let v = Iarray.get a i in
       match f v with
       | Error _e as e ->
         err := Some e;
@@ -113,38 +87,9 @@ let[@inline] array_map f a =
       | Ok v -> v )
   with Exit -> ( match !err with None -> assert false | Some e -> e )
 
-let[@inline] dynarray_map f a =
-  let err = ref None in
-  try
-    ok
-    @@ Dynarray.init (Dynarray.length a) (fun i ->
-      let v = Dynarray.get a i in
-      match f v with
-      | Error _e as e ->
-        err := Some e;
-        raise Exit
-      | Ok v -> v )
-  with Exit -> ( match !err with None -> assert false | Some e -> e )
-
-let[@inline] array_fold_left f acc l =
-  Array.fold_left
+let[@inline] iarray_fold_left f acc l =
+  Iarray.fold_left
     (fun acc v ->
       let* acc in
       f acc v )
     (Ok acc) l
-
-let[@inline] dynarray_fold_left f acc l =
-  Dynarray.fold_left
-    (fun acc v ->
-      let* acc in
-      f acc v )
-    (Ok acc) l
-
-let[@inline] dynarray_fold_lefti f acc l =
-  snd
-  @@ Dynarray.fold_left
-       (fun (i, acc) v ->
-         ( succ i
-         , let* acc in
-           f i acc v ) )
-       (0, Ok acc) l

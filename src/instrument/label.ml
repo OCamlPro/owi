@@ -27,7 +27,7 @@ let annotate_fc m cov_label_set_idx =
   let count = ref ~-1 in
   let func = m.Binary.Module.func in
   let func =
-    Array.map
+    Iarray.map
       (function
         | Origin.Imported _ as v ->
           (* TODO: should we write a wrapper for the imported function so that it gets counted in FC? *)
@@ -54,7 +54,7 @@ let annotate_sc m cov_label_set_idx =
   let count = ref ~-1 in
   let func = m.Binary.Module.func in
   let func =
-    Array.map
+    Iarray.map
       (function
         | Origin.Imported _ as v ->
           (* TODO: should we write a wrapper for the imported function so that it gets counted in FC? *)
@@ -103,7 +103,7 @@ let annotate_dc m cov_label_set_idx =
   let count = ref ~-1 in
   let func = m.Binary.Module.func in
   let func =
-    Array.map
+    Iarray.map
       (function
         | Origin.Imported _ as v -> v
         | Origin.Local f ->

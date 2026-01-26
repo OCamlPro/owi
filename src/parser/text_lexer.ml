@@ -143,7 +143,7 @@ let annot_atom =
 
 let keywords =
   let tbl = Hashtbl.create 512 in
-  Array.iter
+  Iarray.iter
     (fun (k, v) -> Hashtbl.add tbl k v)
     [| ("align", ALIGN)
      ; ("any", ANY)

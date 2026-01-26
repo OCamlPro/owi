@@ -99,7 +99,7 @@ let encode_vector_list buf datas encode_func =
   encode_vector List.length List.iter buf datas encode_func
 
 let encode_vector_array buf datas encode_func =
-  encode_vector Array.length Array.iter buf datas encode_func
+  encode_vector Iarray.length Iarray.iter buf datas encode_func
 
 let write_resulttype buf (rt : Text.result_type) =
   encode_vector_list buf rt write_valtype
@@ -680,18 +680,18 @@ let encode_globals buf globals = encode_vector_list buf globals write_global
 let encode_exports buf ({ global; mem; table; func } : Module.Exports.t) =
   let exp_buf = Buffer.create 16 in
   let len =
-    Array.length global + Array.length mem + Array.length table
-    + Array.length func
+    Iarray.length global + Iarray.length mem + Iarray.length table
+    + Iarray.length func
   in
-  let array_rev_iter f a =
-    for i = Array.length a - 1 downto 0 do
-      f a.(i)
+  let iarray_rev_iter f a =
+    for i = Iarray.length a - 1 downto 0 do
+      f @@ Iarray.get a i
     done
   in
-  array_rev_iter (write_export exp_buf '\x03') global;
-  array_rev_iter (write_export exp_buf '\x02') mem;
-  array_rev_iter (write_export exp_buf '\x01') table;
-  array_rev_iter (write_export exp_buf '\x00') func;
+  iarray_rev_iter (write_export exp_buf '\x03') global;
+  iarray_rev_iter (write_export exp_buf '\x02') mem;
+  iarray_rev_iter (write_export exp_buf '\x01') table;
+  iarray_rev_iter (write_export exp_buf '\x00') func;
   write_u32_of_int buf len;
   Buffer.add_buffer buf exp_buf
 
@@ -704,7 +704,7 @@ let encode_elements buf elems = encode_vector_array buf elems write_element
 
 (* datacount: section 12 *)
 let encode_datacount buf datas =
-  let len = Array.length datas in
+  let len = Iarray.length datas in
   write_u32_of_int buf len
 
 (* code: section 10 *)
@@ -722,12 +722,12 @@ let encode_datas buf datas = encode_vector_array buf datas write_data
 let keep_local values =
   List.filter_map
     (function Origin.Local data -> Some data | Origin.Imported _data -> None)
-    (Array.to_list values)
+    (Iarray.to_list values)
 
 let keep_imported values =
   List.filter_map
     (function Origin.Local _data -> None | Origin.Imported data -> Some data)
-    (Array.to_list values)
+    (Iarray.to_list values)
 
 let encode
   ({ func; table; global; exports; start; data; mem; types; elem; _ } :

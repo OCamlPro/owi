@@ -326,36 +326,36 @@ let cmd ~deterministic_result_order ~fail_mode ~exploration_strategy ~files
 
   let funcexports1 =
     module1.exports.func
-    |> Array.map (fun { Binary.Export.name; id } ->
+    |> Iarray.map (fun { Binary.Export.name; id } ->
       let typ = Binary.Module.get_func_type id module1 in
       (name, typ) )
   in
   let funcexports2 =
     module2.exports.func
-    |> Array.map (fun { Binary.Export.name; id } ->
+    |> Iarray.map (fun { Binary.Export.name; id } ->
       let typ = Binary.Module.get_func_type id module2 in
       (name, typ) )
   in
 
-  let exports_name_1 = Array.map fst funcexports1 in
-  let exports_name_2 = Array.map fst funcexports2 in
+  let exports_name_1 = Iarray.map fst funcexports1 in
+  let exports_name_2 = Iarray.map fst funcexports2 in
 
   Log.debug (fun m ->
     m "%a exports: %a" Fpath.pp file1
-      (Fmt.array ~sep:(fun fmt () -> Fmt.pf fmt " ") Fmt.string)
+      (Fmt.iter Iarray.iter ~sep:(fun fmt () -> Fmt.pf fmt " ") Fmt.string)
       exports_name_1 );
 
   Log.debug (fun m ->
     m "%a exports: %a" Fpath.pp file2
-      (Fmt.array ~sep:(fun fmt () -> Fmt.pf fmt " ") Fmt.string)
+      (Fmt.iter Iarray.iter ~sep:(fun fmt () -> Fmt.pf fmt " ") Fmt.string)
       exports_name_2 );
 
-  let array_to_string_set a =
-    Array.fold_left (fun s v -> String_set.add v s) String_set.empty a
+  let iarray_to_string_set a =
+    Iarray.fold_left (fun s v -> String_set.add v s) String_set.empty a
   in
 
-  let exports_name_1 = array_to_string_set exports_name_1 in
-  let exports_name_2 = array_to_string_set exports_name_2 in
+  let exports_name_1 = iarray_to_string_set exports_name_1 in
+  let exports_name_2 = iarray_to_string_set exports_name_2 in
 
   let common_exports =
     String_set.inter exports_name_1 exports_name_2 |> String_set.to_list
@@ -365,12 +365,12 @@ let cmd ~deterministic_result_order ~fail_mode ~exploration_strategy ~files
     List.fold_left
       (fun common_exports name ->
         let typ1 =
-          Array.find_opt
+          Iarray.find_opt
             (fun (name', _typ) -> String.equal name name')
             funcexports1
         in
         let typ2 =
-          Array.find_opt
+          Iarray.find_opt
             (fun (name', _typ) -> String.equal name name')
             funcexports2
         in

@@ -264,9 +264,9 @@ let plain_instr :=
   | BR; ~ = indice; <Br>
   | BR_IF; ~ = indice; <Br_if>
   | BR_TABLE; l = nonempty_list(indice); {
-    let xs = Array.of_list l in
-    let n = Array.length xs in
-    Br_table (Array.sub xs 0 (n - 1), xs.(n - 1))
+    let xs = Iarray.of_list l in
+    let n = Iarray.length xs in
+    Br_table (Iarray.sub xs ~pos:0 ~len:(n - 1), Iarray.get xs (n - 1))
   }
   | RETURN; { Return }
   | RETURN_CALL; ~ = indice; <Return_call>

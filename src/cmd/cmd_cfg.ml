@@ -97,7 +97,7 @@ let rec build_graph (l : Binary.expr) nodes n node edges
       let nodes = (n, instr :: node) :: nodes in
       let edges_to_add = (n, Ind i, None) :: edges_to_add in
       let edges_to_add, _ =
-        Array.fold_left
+        Iarray.fold_left
           (fun (acc, x) (i : Binary.indice) ->
             ((n, Ind i, Some (Int32.of_int x)) :: acc, x + 1) )
           (edges_to_add, 0) inds
@@ -130,7 +130,7 @@ let build_cfg_from_text_module modul entry =
   match m with
   | Ok m ->
     let f =
-      match Array.get m.func entry with
+      match Iarray.get m.func entry with
       | Origin.Local f -> f
       | _ -> assert false
     in
@@ -150,7 +150,7 @@ let cmd ~source_file ~entry_point =
          match int_of_string_opt x with
          | Some _ as x -> x
          | None ->
-           Array.find_index
+           Iarray.find_index
              (function
                | Origin.Local (y : Binary.Func.t) ->
                  Option.compare String.compare (Some x) y.id = 0
@@ -159,7 +159,7 @@ let cmd ~source_file ~entry_point =
       ~default:0
   in
   let f =
-    match Array.get m.func entry with Origin.Local f -> f | _ -> assert false
+    match Iarray.get m.func entry with Origin.Local f -> f | _ -> assert false
   in
   let nodes, edges = build_cfg f.body.raw in
   let graph = Control_flow_graph.init nodes edges in

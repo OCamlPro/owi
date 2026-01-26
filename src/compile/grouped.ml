@@ -14,57 +14,59 @@ let curr_id (curr : int) (i : indice option) =
 
 type t =
   { id : string option
-  ; typ : Typedef.t Array.t
-  ; function_type : func_type Array.t
+  ; typ : Typedef.t Iarray.t
+  ; function_type : func_type Iarray.t
       (** Types comming from function declarations. It contains potential
           duplication. *)
-  ; type_checks : (indice * func_type) Array.t
+  ; type_checks : (indice * func_type) Iarray.t
       (** Types checks to perform after assignment. Come from function
           declarations with type indicies. *)
-  ; global : (Text.Global.t, Global.Type.t) Origin.t Array.t
-  ; table : (Table.t, Table.Type.t) Origin.t Array.t
-  ; mem : (Mem.t, limits) Origin.t Array.t
-  ; func : (Func.t, block_type) Origin.t Array.t
-  ; elem : Text.Elem.t Array.t
-  ; data : Text.Data.t Array.t
-  ; global_exports : opt_export Array.t
-  ; mem_exports : opt_export Array.t
-  ; table_exports : opt_export Array.t
-  ; func_exports : opt_export Array.t
+  ; global : (Text.Global.t, Global.Type.t) Origin.t Iarray.t
+  ; table : (Table.t, Table.Type.t) Origin.t Iarray.t
+  ; mem : (Mem.t, limits) Origin.t Iarray.t
+  ; func : (Func.t, block_type) Origin.t Iarray.t
+  ; elem : Text.Elem.t Iarray.t
+  ; data : Text.Data.t Iarray.t
+  ; global_exports : opt_export Iarray.t
+  ; mem_exports : opt_export Iarray.t
+  ; table_exports : opt_export Iarray.t
+  ; func_exports : opt_export Iarray.t
   ; start : indice option
   }
 
 let pp_id fmt id = Text.pp_id_opt fmt id
 
-let pp_typ fmt typ = Fmt.array Text.Typedef.pp fmt typ
+let pp_typ fmt typ = Fmt.iter Iarray.iter Text.Typedef.pp fmt typ
 
 let pp_function_type fmt function_type =
-  Fmt.array Text.pp_func_type fmt function_type
+  Fmt.iter Iarray.iter Text.pp_func_type fmt function_type
 
 let pp_type_check fmt (indice, func_type) =
   Fmt.pf fmt "(%a, %a)" pp_indice indice pp_func_type func_type
 
-let pp_type_checks fmt type_checks = Fmt.array pp_type_check fmt type_checks
+let pp_type_checks fmt type_checks =
+  Fmt.iter Iarray.iter pp_type_check fmt type_checks
 
-let pp_runtime_array ~pp_local ~pp_imported fmt l =
-  Fmt.array (Origin.pp ~pp_local ~pp_imported) fmt l
+let pp_runtime_iarray ~pp_local ~pp_imported fmt l =
+  Fmt.iter Iarray.iter (Origin.pp ~pp_local ~pp_imported) fmt l
 
 let pp_global fmt g =
-  pp_runtime_array ~pp_local:Text.Global.pp ~pp_imported:Text.Global.Type.pp fmt
-    g
+  pp_runtime_iarray ~pp_local:Text.Global.pp ~pp_imported:Text.Global.Type.pp
+    fmt g
 
 let pp_table fmt t =
-  pp_runtime_array ~pp_local:Text.Table.pp ~pp_imported:Text.Table.Type.pp fmt t
+  pp_runtime_iarray ~pp_local:Text.Table.pp ~pp_imported:Text.Table.Type.pp fmt
+    t
 
 let pp_mem fmt m =
-  pp_runtime_array ~pp_local:Text.Mem.pp ~pp_imported:Text.pp_limits fmt m
+  pp_runtime_iarray ~pp_local:Text.Mem.pp ~pp_imported:Text.pp_limits fmt m
 
 let pp_func fmt f =
-  pp_runtime_array ~pp_local:Text.Func.pp ~pp_imported:Text.pp_block_type fmt f
+  pp_runtime_iarray ~pp_local:Text.Func.pp ~pp_imported:Text.pp_block_type fmt f
 
-let pp_elem fmt e = Fmt.array Text.Elem.pp fmt e
+let pp_elem fmt e = Fmt.iter Iarray.iter Text.Elem.pp fmt e
 
-let pp_data fmt d = Fmt.array Text.Data.pp fmt d
+let pp_data fmt d = Fmt.iter Iarray.iter Text.Data.pp fmt d
 
 let pp_start fmt s = Text.pp_indice_opt fmt s
 
@@ -205,21 +207,22 @@ let of_text { Text.Module.fields; id } =
     (add_field typ function_type type_checks global table mem func elem data
        global_exports mem_exports table_exports func_exports start )
     fields;
+  let freeze_dynarray a = Dynarray.to_array a |> Iarray.of_array in
   let modul =
     { id
-    ; typ = Dynarray.to_array typ
-    ; function_type = Dynarray.to_array function_type
-    ; type_checks = Dynarray.to_array type_checks
-    ; global = Dynarray.to_array global
-    ; table = Dynarray.to_array table
-    ; mem = Dynarray.to_array mem
-    ; func = Dynarray.to_array func
-    ; elem = Dynarray.to_array elem
-    ; data = Dynarray.to_array data
-    ; global_exports = Dynarray.to_array global_exports
-    ; mem_exports = Dynarray.to_array mem_exports
-    ; table_exports = Dynarray.to_array table_exports
-    ; func_exports = Dynarray.to_array func_exports
+    ; typ = freeze_dynarray typ
+    ; function_type = freeze_dynarray function_type
+    ; type_checks = freeze_dynarray type_checks
+    ; global = freeze_dynarray global
+    ; table = freeze_dynarray table
+    ; mem = freeze_dynarray mem
+    ; func = freeze_dynarray func
+    ; elem = freeze_dynarray elem
+    ; data = freeze_dynarray data
+    ; global_exports = freeze_dynarray global_exports
+    ; mem_exports = freeze_dynarray mem_exports
+    ; table_exports = freeze_dynarray table_exports
+    ; func_exports = freeze_dynarray func_exports
     ; start = !start
     }
   in
