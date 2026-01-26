@@ -29,7 +29,7 @@ module type T = sig
 
   val wrap_i64 : i64 -> t
 
-  val of_concrete : Int32.t -> t
+  val of_int32 : Int32.t -> t
 
   val of_int : int -> t
 

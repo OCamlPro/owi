@@ -51,4 +51,4 @@ let convert_i64_u x =
 
 let reinterpret_i32 = Float32.of_bits
 
-let of_concrete v = v
+let of_float32 v = v

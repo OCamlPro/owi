@@ -1,17 +1,17 @@
 type t = bool
 
-let to_bool b = b
-
 let false_ = false
 
 let true_ = true
 
-let of_concrete c = c [@@inline]
+let[@inline] to_bool b = b
 
-let not = not
+let[@inline] of_bool c = c
 
-let and_ = ( && )
+let[@inline] not b = not b
 
-let or_ = ( || )
+let[@inline] and_ x y = x && y
 
-let pp = Fmt.bool
+let[@inline] or_ x y = x || y
+
+let[@inline] pp fmt b = Fmt.bool fmt b

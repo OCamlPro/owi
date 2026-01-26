@@ -19,10 +19,10 @@ let set_value global value =
 
 let convert_values (v : Concrete_value.t) : Symbolic_value.t =
   match v with
-  | I32 v -> I32 (Symbolic_i32.of_concrete v)
-  | I64 v -> I64 (Symbolic_i64.of_concrete v)
-  | F32 v -> F32 (Symbolic_f32.of_concrete v)
-  | F64 v -> F64 (Symbolic_f64.of_concrete v)
+  | I32 v -> I32 (Symbolic_i32.of_int32 v)
+  | I64 v -> I64 (Symbolic_i64.of_int64 v)
+  | F32 v -> F32 (Symbolic_f32.of_float32 v)
+  | F64 v -> F64 (Symbolic_f64.of_float (Float64.to_float v))
   | V128 v -> V128 (Symbolic_v128.of_concrete v)
   | Ref (Func f) -> Ref (Func f)
   | Ref _ -> assert false

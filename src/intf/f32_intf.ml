@@ -25,7 +25,7 @@ module type T = sig
 
   val reinterpret_i32 : i32 -> t
 
-  val of_concrete : Float32.t -> t
+  val of_float32 : Float32.t -> t
 
   val pp : t Fmt.t
 end
