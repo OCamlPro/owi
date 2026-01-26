@@ -988,11 +988,15 @@ let validate_exports modul =
 let check_limit ?(table = false) { Text.min; max } =
   match max with
   | None ->
-    if table && not (Int64.fits_in_u32 min) then Error `Table_size else Ok ()
+    if table && not (Int64.fits_in_u32 (Int64.of_int min)) then
+      Error `Table_size
+    else Ok ()
   | Some max ->
-    if Int64.gt min max then Error `Size_minimum_greater_than_maximum
+    if min > max then Error `Size_minimum_greater_than_maximum
     else if
-      table && ((not (Int64.fits_in_u32 min)) || not (Int64.fits_in_u32 max))
+      table
+      && ( (not (Int64.fits_in_u32 (Int64.of_int min)))
+         || not (Int64.fits_in_u32 (Int64.of_int max)) )
     then Error `Table_size
     else Ok ()
 
@@ -1051,10 +1055,10 @@ let validate_mem modul =
     (function
       | Origin.Local (_, typ) | Imported { typ; _ } ->
         let* () =
-          if Int64.gt typ.Text.min 65536L then Error `Memory_size_too_large
+          if typ.Text.min > 65536 then Error `Memory_size_too_large
           else
             match typ.max with
-            | Some max when Int64.gt max 65536L -> Error `Memory_size_too_large
+            | Some max when max > 65536 -> Error `Memory_size_too_large
             | Some _ | None -> Ok ()
         in
         check_limit typ )

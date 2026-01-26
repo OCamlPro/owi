@@ -152,11 +152,11 @@ let write_limits buf (limits : Text.limits) =
   match limits with
   | { min; max = None } ->
     Buffer.add_char buf '\x00';
-    write_u64 buf min
+    write_indice buf min
   | { min; max = Some max } ->
     Buffer.add_char buf '\x01';
-    write_u64 buf min;
-    write_u64 buf max
+    write_indice buf min;
+    write_indice buf max
 
 let write_memarg buf idx ({ offset; align } : Text.memarg) =
   if idx = 0 then write_u64 buf align

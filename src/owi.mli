@@ -299,8 +299,8 @@ module Text : sig
     }
 
   type nonrec limits =
-    { min : Concrete_i64.t
-    ; max : Concrete_i64.t option
+    { min : int
+    ; max : int option
     }
 
   val pp_limits : limits Fmt.t

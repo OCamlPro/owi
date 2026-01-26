@@ -191,13 +191,13 @@ let mem_type ==
 
 let limits ==
   | min = NUM; {
-    let min = u64 min in
+    let min = Int64.to_int (u64 min) in
     let max = None in
     { min; max}
   }
   | min = NUM; max = NUM; {
-    let min = u64 min in
-    let max = Some (u64 max) in
+    let min = Int64.to_int (u64 min) in
+    let max = Some (Int64.to_int (u64 max)) in
     { min; max }
   }
 
@@ -942,8 +942,8 @@ let table_fields :=
   }
   | ~ = ref_type; LPAR; ELEM; ~ = init; RPAR; {
     let min = List.fold_left (fun sum l ->
-        Int64.add sum (Int64.of_int (List.length l.Annotated.raw))
-      ) 0L init
+        sum + ((List.length l.Annotated.raw))
+      ) 0 init
     in
     let mode = Elem.Mode.Active (None, Annotated.dummy []) in
     [ Module.Field.Elem { id = None; typ = ref_type; init; mode; explicit_typ = true }
@@ -991,7 +991,7 @@ let memory_fields :=
     Export { name = inline_export; typ = Mem None } :: memory_fields
   }
   | LPAR; DATA; init = string_list; RPAR; {
-    let min = Int64.(div (add (of_int (String.length init)) 65535L) 65536L) in
+    let min = ((((String.length init)) + 65535) / 65536) in
     [ Module.Field.Data { id = None; init; mode = Data.Mode.Active (None, Annotated.dummy []) }
     ; Mem (None, { min; max = Some min}) ]
   }

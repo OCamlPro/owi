@@ -22,7 +22,7 @@ let fresh =
 let init ?label (typ : Binary.Table.Type.t) : t =
   let limits, ((_null, heap_type) as ref_type) = typ in
   let null = Concrete_ref.null heap_type in
-  let table = Array.make (Int64.to_int limits.min) null in
+  let table = Array.make limits.min null in
   { id = fresh (); label; limits; typ = ref_type; data = table }
 
 let update table data = table.data <- data

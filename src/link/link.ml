@@ -161,12 +161,12 @@ let eval_globals ls env globals : Link_env.Build.t Result.t =
 
 (* TODO: IIRC this is duplicated and should be refactored *)
 let limit_is_included ~import ~imported =
-  Int64.ge imported.Text.min import.Text.min
+  imported.Text.min >= import.Text.min
   &&
   match (imported.max, import.max) with
   | _, None -> true
   | None, Some _ -> false
-  | Some i, Some j -> Int64.le i j
+  | Some i, Some j -> i <= j
 
 let load_memory (ls : 'f State.t) (import : Text.limits Origin.imported) :
   Concrete_memory.t Result.t =
@@ -204,9 +204,7 @@ let load_table (ls : 'f State.t) (import : Binary.Table.Type.t Origin.imported)
     State.load_from_module ls (fun (e : State.exports) -> e.tables) import
   in
   let data_size = Concrete_table.size t in
-  if
-    table_types_are_compatible typ
-      ({ t.limits with min = Int64.of_int data_size }, t.typ)
+  if table_types_are_compatible typ ({ t.limits with min = data_size }, t.typ)
   then Ok t
   else Error (`Incompatible_import_type import.name)
 
