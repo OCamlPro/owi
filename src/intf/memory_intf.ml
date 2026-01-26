@@ -40,5 +40,5 @@ module type T = sig
 
   val size_in_pages : t -> i32
 
-  val get_limit_max : t -> i64 option
+  val get_limit_max : t -> int option
 end

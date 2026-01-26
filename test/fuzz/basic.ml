@@ -25,9 +25,7 @@ let limits =
   in
   let* min = range sup in
   let+ max = option (range ~min (sup - min)) in
-  { min = Owi.Concrete_i64.of_int min
-  ; max = Option.map (fun v -> Owi.Concrete_i64.of_int v) max
-  }
+  { min; max }
 
 let table_type = pair limits ref_type
 

@@ -1111,7 +1111,7 @@ struct
         Boolean.or_ I64.(ge_u new_size (page_size * page_size))
         @@
         match max_size with
-        | Some max -> I64.(gt_u new_size (max * page_size))
+        | Some max -> I64.(gt_u new_size (of_int max * page_size))
         | None -> Boolean.false_
       in
       if too_big then st @@ Stack.push_i32 stack (I32.of_int ~-1)
@@ -1261,7 +1261,7 @@ struct
         Boolean.and_
           ( match Table.max_size t with
           | None -> Boolean.true_
-          | Some max -> I32.ge_u (I32.of_int (Int64.to_int max)) new_size )
+          | Some max -> I32.ge_u (I32.of_int max) new_size )
           (I32.ge_u new_size size)
       in
       if not allowed then

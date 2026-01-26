@@ -278,11 +278,7 @@ let memory env : Module.Field.t gen =
   let* min = range sup in
   let+ max = option (range ~min (sup - min)) in
   let id = Some (Env.add_memory env) in
-  Module.Field.Mem
-    ( id
-    , { min = Owi.Concrete_i64.of_int min
-      ; max = Option.map (fun v -> Owi.Concrete_i64.of_int v) max
-      } )
+  Module.Field.Mem (id, { min; max })
 
 let typ env : Module.Field.t gen =
   let+ typ = B.func_type in

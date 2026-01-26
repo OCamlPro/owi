@@ -13,7 +13,7 @@ module type T = sig
 
   val typ : t -> Binary.ref_type
 
-  val max_size : t -> Int64.t option
+  val max_size : t -> int option
 
   val grow : t -> Int32.t -> reference -> unit choice
 

@@ -158,8 +158,8 @@ val pp_memarg : memarg Fmt.t
    cases where they are i64 and i32 (maybe even when max is
    present or not). *)
 type nonrec limits =
-  { min : Concrete_i64.t
-  ; max : Concrete_i64.t option
+  { min : int
+  ; max : int option
   }
 
 val pp_limits : limits Fmt.t
