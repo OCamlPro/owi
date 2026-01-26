@@ -10,24 +10,24 @@ module F64 = Symbolic_f64
 module V128 = Symbolic_v128
 module Ref = Symbolic_ref
 
-type boolean = bool Smtml.Typed.t
+type boolean = Smtml.Typed.Bool.t
 
-type i32 = Smtml.Typed.bitv32 Smtml.Typed.t
+type i32 = Smtml.Typed.Bitv32.t
 
-type i64 = Smtml.Typed.bitv64 Smtml.Typed.t
+type i64 = Smtml.Typed.Bitv64.t
 
-type f32 = Smtml.Typed.float32 Smtml.Typed.t
+type f32 = Smtml.Typed.Float32.t
 
-type f64 = Smtml.Typed.float64 Smtml.Typed.t
+type f64 = Smtml.Typed.Float64.t
 
-type v128 = Smtml.Typed.bitv128 Smtml.Typed.t
+type v128 = Smtml.Typed.Bitv128.t
 
 type t =
-  | I32 of Smtml.Typed.bitv32 Smtml.Typed.t
-  | I64 of Smtml.Typed.bitv64 Smtml.Typed.t
-  | F32 of Smtml.Typed.float32 Smtml.Typed.t
-  | F64 of Smtml.Typed.float64 Smtml.Typed.t
-  | V128 of Smtml.Typed.bitv128 Smtml.Typed.t
+  | I32 of Smtml.Typed.Bitv32.t
+  | I64 of Smtml.Typed.Bitv64.t
+  | F32 of Smtml.Typed.Float32.t
+  | F64 of Smtml.Typed.Float64.t
+  | V128 of Smtml.Typed.Bitv128.t
   | Ref of Ref.t
 
 let pp fmt = function

@@ -1,7 +1,7 @@
 include
   F64_intf.T
-    with type t = Smtml.Typed.float64 Smtml.Typed.t
-     and type boolean := bool Smtml.Typed.t
-     and type i32 := Smtml.Typed.bitv32 Smtml.Typed.t
-     and type i64 := Smtml.Typed.bitv64 Smtml.Typed.t
-     and type f32 := Smtml.Typed.float32 Smtml.Typed.t
+    with type t = Smtml.Typed.Float64.t
+     and type boolean := Smtml.Typed.Bool.t
+     and type i32 := Smtml.Typed.Bitv32.t
+     and type i64 := Smtml.Typed.Bitv64.t
+     and type f32 := Smtml.Typed.Float32.t

@@ -222,10 +222,10 @@ struct
         | Or -> Choice.return @@ logor n1 n2
         | Xor -> Choice.return @@ logxor n1 n2
         | Shl -> Choice.return @@ shl n1 n2
-        | Shr S -> Choice.return @@ shr_s n1 n2
-        | Shr U -> Choice.return @@ shr_u n1 n2
-        | Rotl -> Choice.return @@ rotl n1 n2
-        | Rotr -> Choice.return @@ rotr n1 n2
+        | Shr S -> Choice.return @@ ashr n1 n2
+        | Shr U -> Choice.return @@ lshr n1 n2
+        | Rotl -> Choice.return @@ rotate_left n1 n2
+        | Rotr -> Choice.return @@ rotate_right n1 n2
       in
       Stack.push_i32 stack res
     | S64 ->
@@ -263,10 +263,10 @@ struct
         | Or -> Choice.return @@ logor n1 n2
         | Xor -> Choice.return @@ logxor n1 n2
         | Shl -> Choice.return @@ shl n1 n2
-        | Shr S -> Choice.return @@ shr_s n1 n2
-        | Shr U -> Choice.return @@ shr_u n1 n2
-        | Rotl -> Choice.return @@ rotl n1 n2
-        | Rotr -> Choice.return @@ rotr n1 n2
+        | Shr S -> Choice.return @@ ashr n1 n2
+        | Shr U -> Choice.return @@ lshr n1 n2
+        | Rotl -> Choice.return @@ rotate_left n1 n2
+        | Rotr -> Choice.return @@ rotate_right n1 n2
       in
       Stack.push_i64 stack res
 
