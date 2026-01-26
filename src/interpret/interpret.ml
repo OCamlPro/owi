@@ -895,11 +895,11 @@ struct
   let mk_addr_check_bounds const env memid pos offset current_instr_counter =
     let* mem = Env.get_memory env memid in
     let pos = I64.extend_i32_u pos in
-    let offset = I64.of_concrete offset in
+    let offset = I64.of_int64 offset in
     let addr = I64.add pos offset in
 
     let>! () =
-      let res = I64.(add addr (of_concrete const)) in
+      let res = I64.(add addr (of_int64 const)) in
       let size = Memory.size mem |> I64.extend_i32_u in
       let overflow = Boolean.or_ I64.(lt_u addr pos) I64.(lt_u res addr) in
       ( Boolean.or_ overflow I64.(lt_u size res)
@@ -1068,23 +1068,18 @@ struct
       let state = { state with stack } in
       if b then State.branch state i else Choice.return (State.Continue state)
     | Br_on_null i ->
-      let* depth = Choice.depth () in
-      let prio_true =
-        let instr_counter =
-          Next_instruction.branch state i |> Next_instruction.with_instr_counter
-        in
-        Prio.v ~instr_counter ~distance_to_unreachable:None ~depth
+      let instr_counter_true =
+        Next_instruction.branch state i |> Next_instruction.with_instr_counter
       in
-      let prio_false =
-        let instr_counter =
-          Next_instruction.continue state |> Next_instruction.with_instr_counter
-        in
-        Prio.v ~instr_counter ~distance_to_unreachable:None ~depth
+      let instr_counter_false =
+        Next_instruction.continue state |> Next_instruction.with_instr_counter
       in
       let r, stack = Stack.pop_as_ref stack in
-      let is_null = Ref.is_null r |> Boolean.of_concrete in
+      let is_null = Ref.is_null r |> Boolean.of_bool in
       let* is_null, stack =
-        let* is_null = select is_null ~prio_true ~prio_false in
+        let* is_null =
+          select is_null ~instr_counter_false ~instr_counter_true
+        in
         return (is_null, stack)
       in
       let state = { state with stack } in
@@ -1094,23 +1089,18 @@ struct
         let stack = Stack.push_ref stack r in
         Choice.return (State.Continue { state with stack })
     | Br_on_non_null i ->
-      let* depth = Choice.depth () in
-      let prio_true =
-        let instr_counter =
-          Next_instruction.branch state i |> Next_instruction.with_instr_counter
-        in
-        Prio.v ~instr_counter ~distance_to_unreachable:None ~depth
+      let instr_counter_true =
+        Next_instruction.branch state i |> Next_instruction.with_instr_counter
       in
-      let prio_false =
-        let instr_counter =
-          Next_instruction.continue state |> Next_instruction.with_instr_counter
-        in
-        Prio.v ~instr_counter ~distance_to_unreachable:None ~depth
+      let instr_counter_false =
+        Next_instruction.continue state |> Next_instruction.with_instr_counter
       in
       let r, stack = Stack.pop_as_ref stack in
       let* is_non_null, stack =
-        let is_non_null = (not (Ref.is_null r)) |> Boolean.of_concrete in
-        let* is_non_null = select is_non_null ~prio_true ~prio_false in
+        let is_non_null = (not (Ref.is_null r)) |> Boolean.of_bool in
+        let* is_non_null =
+          select is_non_null ~instr_counter_false ~instr_counter_true
+        in
         return (is_non_null, stack)
       in
       let state = { state with stack } in
