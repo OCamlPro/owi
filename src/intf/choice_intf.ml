@@ -18,7 +18,10 @@ module type S = sig
   val map : 'a t -> ('a -> 'b) -> 'b t
 
   val select :
-    boolean -> prio_true:Prio.metrics -> prio_false:Prio.metrics -> Bool.t t
+       boolean
+    -> instr_counter_true:int option
+    -> instr_counter_false:int option
+    -> Bool.t t
 
   val select_i32 : i32 -> Concrete_i32.t t
 
@@ -29,8 +32,6 @@ module type S = sig
   val ( let+ ) : 'a t -> ('a -> 'b) -> 'b t
 
   val get_pc : unit -> Smtml.Expr.Set.t t
-
-  val depth : unit -> int t
 
   val ite : boolean -> if_true:value -> if_false:value -> value t
 

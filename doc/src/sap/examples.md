@@ -134,7 +134,7 @@ Then we use `owi_assert(p.getPoly() != 0)`. Which should fail as this polynomial
 $ owi c++ ./poly.cpp -w1 --no-assert-failure-expression-printing
 owi: [ERROR] Assert failure
 model {
-  symbol symbol_0 i32 4
+  symbol symbol_0 i32 2
 }
 owi: [ERROR] Reached problem!
 [13]

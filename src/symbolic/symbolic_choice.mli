@@ -20,8 +20,8 @@ val trap : Result.err -> 'a t
 
 val select :
      Symbolic_boolean.t
-  -> prio_true:Prio.metrics
-  -> prio_false:Prio.metrics
+  -> instr_counter_true:int option
+  -> instr_counter_false:int option
   -> Bool.t t
 
 val select_i32 : Symbolic_i32.t -> Int32.t t
@@ -67,5 +67,3 @@ val ite :
   -> if_true:Symbolic_value.t
   -> if_false:Symbolic_value.t
   -> Symbolic_value.t t
-
-val depth : unit -> int t

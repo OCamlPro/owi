@@ -25,22 +25,10 @@ type t = private
   ; depth : int
   ; labels : (int * string) list
   ; bench_stats : Benchmark.stats
+  ; priority : Prio.metrics
   }
 
 val init : unit -> t
-
-val create :
-     int
-  -> Symbol_scope.t
-  -> Symbolic_path_condition.t
-  -> Symbolic_memory0.t Collection.t
-  -> Symbolic_table0.t Collection.t
-  -> Symbolic_global0.t Collection.t
-  -> int list
-  -> (int * string) list
-  -> Benchmark.stats
-  -> depth:int
-  -> t
 
 val add_pc : t -> Symbolic_boolean.t -> t
 
@@ -63,3 +51,5 @@ val close_scope : t -> t
 val incr_path_count : t -> unit
 
 val incr_num_symbols : t -> t
+
+val set_priority : Prio.metrics -> t -> t

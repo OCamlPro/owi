@@ -1,7 +1,11 @@
-type metrics
+type metrics = private
+  { instr_counter : int
+  ; distance_to_unreachable : int Option.t
+  ; depth : int
+  }
 
 val v :
-     instr_counter:int option
+     instr_counter:int
   -> distance_to_unreachable:int option
   -> depth:int
   -> metrics
