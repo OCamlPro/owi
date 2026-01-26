@@ -4,7 +4,7 @@
   owi: [DEBUG] grouping     ...
   owi: [DEBUG] {id: 
                  typ: 
-                 function_type: (func (result i32))
+                 decl_types: (func (result i32))
                  (func (param $x i32))
                  type_checks: 
                  global: 
