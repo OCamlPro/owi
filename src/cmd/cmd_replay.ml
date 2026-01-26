@@ -40,7 +40,7 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
 
     let symbol_i32 () =
       let i = next () in
-      match model.(i) with
+      match Iarray.get model i with
       | Concrete_value.I32 n ->
         add_sym i;
         Ok n
@@ -51,7 +51,7 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
 
     let symbol_i64 () =
       let i = next () in
-      match model.(i) with
+      match Iarray.get model i with
       | Concrete_value.I64 n ->
         add_sym i;
         Ok n
@@ -62,7 +62,7 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
 
     let symbol_f32 () =
       let i = next () in
-      match model.(i) with
+      match Iarray.get model i with
       | Concrete_value.F32 n ->
         add_sym i;
         Ok n
@@ -73,7 +73,7 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
 
     let symbol_f64 () =
       let i = next () in
-      match model.(i) with
+      match Iarray.get model i with
       | Concrete_value.F64 n ->
         add_sym i;
         Ok n
@@ -84,7 +84,7 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
 
     let symbol_v128 () =
       let i = next () in
-      match model.(i) with
+      match Iarray.get model i with
       | Concrete_value.V128 n ->
         add_sym i;
         Ok n
@@ -108,7 +108,7 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
 
     let symbol_range _ _ =
       let i = next () in
-      match model.(i) with
+      match Iarray.get model i with
       | Concrete_value.I32 n ->
         add_sym i;
         Ok n
@@ -129,7 +129,7 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
       if Int32.gt p 255l || Int32.lt p 0l then trap `Invalid_character_in_memory
       else
         let ch = char_of_int (Int32.to_int p) in
-        if Char.equal ch '\x00' then return (List.rev accu |> Array.of_list)
+        if Char.equal ch '\x00' then return (List.rev accu |> Iarray.of_list)
         else make_str m (ch :: accu) (Int32.add i (Int32.of_int 1))
 
     let cov_label_is_covered id =
@@ -139,13 +139,13 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
 
     let cov_label_set m id str_ptr =
       let+ chars = make_str m [] str_ptr in
-      let str = String.init (Array.length chars) (Array.get chars) in
+      let str = String.init (Iarray.length chars) (Iarray.get chars) in
       Hashtbl.add covered_labels id str;
       Log.debug (fun m -> m "reached %ld@." id)
 
     let open_scope m strptr =
       let+ chars = make_str m [] strptr in
-      let str = String.init (Array.length chars) (Array.get chars) in
+      let str = String.init (Iarray.length chars) (Iarray.get chars) in
       scopes := Symbol_scope.open_scope str !scopes
 
     let close_scope () =
@@ -227,7 +227,7 @@ let parse_model replay_file =
                  (Fmt.str "unexpected value type: %a" Smtml.Value.pp v) ) )
         bindings
     in
-    Array.of_list model
+    Iarray.of_list model
 
 let cmd ~unsafe ~replay_file ~source_file ~entry_point ~invoke_with_symbols =
   let* model = parse_model replay_file in

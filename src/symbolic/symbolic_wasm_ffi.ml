@@ -112,7 +112,7 @@ module M :
       if Int32.gt c 255l || Int32.lt c 0l then trap `Invalid_character_in_memory
       else
         let ch = char_of_int (Int32.to_int c) in
-        if Char.equal ch '\x00' then return (List.rev accu |> Array.of_list)
+        if Char.equal ch '\x00' then return (List.rev accu |> Iarray.of_list)
         else make_str m (ch :: accu) (Int32.add i (Int32.of_int 1))
     | _ -> assert false
 
@@ -137,7 +137,7 @@ module M :
       if Hashtbl.mem covered_labels id || in_seacoral_store id then abort ()
       else
         let* chars = make_str m [] ptr in
-        let str = String.init (Array.length chars) (Array.get chars) in
+        let str = String.init (Iarray.length chars) (Iarray.get chars) in
         Hashtbl.add covered_labels id str;
         add_label (Int32.to_int id, str)
     | _ ->
@@ -152,7 +152,7 @@ module M :
     let open Symbolic_choice in
     let* ptr = select_i32 ptr in
     let* chars = make_str m [] ptr in
-    let str = String.init (Array.length chars) (Array.get chars) in
+    let str = String.init (Iarray.length chars) (Iarray.get chars) in
     open_scope str
 
   let close_scope = Symbolic_choice.close_scope

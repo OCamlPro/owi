@@ -84,7 +84,6 @@
   owi
   parse
   prio
-  priority_queue
   ref_intf
   result
   rewrite

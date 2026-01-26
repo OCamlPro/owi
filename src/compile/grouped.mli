@@ -11,23 +11,23 @@ type opt_export = private
 
 type t = private
   { id : string option
-  ; typ : Typedef.t Array.t
-  ; function_type : func_type Array.t
+  ; typ : Typedef.t Iarray.t
+  ; function_type : func_type Iarray.t
       (* Types comming from function declarations.
          It contains potential duplication *)
-  ; type_checks : (indice * func_type) Array.t
+  ; type_checks : (indice * func_type) Iarray.t
       (* Types checks to perform after assignment.
          Come from function declarations with type indicies *)
-  ; global : (Global.t, Global.Type.t) Origin.t Array.t
-  ; table : (Table.t, Table.Type.t) Origin.t Array.t
-  ; mem : (Mem.t, limits) Origin.t Array.t
-  ; func : (Func.t, block_type) Origin.t Array.t
-  ; elem : Elem.t Array.t
-  ; data : Data.t Array.t
-  ; global_exports : opt_export Array.t
-  ; mem_exports : opt_export Array.t
-  ; table_exports : opt_export Array.t
-  ; func_exports : opt_export Array.t
+  ; global : (Global.t, Global.Type.t) Origin.t Iarray.t
+  ; table : (Table.t, Table.Type.t) Origin.t Iarray.t
+  ; mem : (Mem.t, limits) Origin.t Iarray.t
+  ; func : (Func.t, block_type) Origin.t Iarray.t
+  ; elem : Elem.t Iarray.t
+  ; data : Data.t Iarray.t
+  ; global_exports : opt_export Iarray.t
+  ; mem_exports : opt_export Iarray.t
+  ; table_exports : opt_export Iarray.t
+  ; func_exports : opt_export Iarray.t
   ; start : indice option
   }
 

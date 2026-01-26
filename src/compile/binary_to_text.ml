@@ -11,7 +11,7 @@ let convert_block_type : Binary.block_type -> Text.block_type = function
 
 let rec convert_instr : Binary.instr -> Text.instr = function
   | Br_table (ids, id) ->
-    let ids = Array.map convert_indice ids in
+    let ids = Iarray.map convert_indice ids in
     let id = convert_indice id in
     Br_table (ids, id)
   | Br_if id ->
@@ -194,12 +194,13 @@ let convert_data : Binary.Data.t -> Text.Data.t = function
     { id; init; mode }
 
 let from_types types : Text.Module.Field.t list =
-  Array.map (fun (t : Text.Typedef.t) -> Text.Module.Field.Typedef t) types
-  |> Array.to_list
+  Iarray.map (fun (t : Text.Typedef.t) -> Text.Module.Field.Typedef t) types
+  |> Iarray.to_list
 
-let from_global (global : (Binary.Global.t, Text.Global.Type.t) Origin.t array)
-  : Text.Module.Field.t list =
-  Array.map
+let from_global
+  (global : (Binary.Global.t, Text.Global.Type.t) Origin.t Iarray.t) :
+  Text.Module.Field.t list =
+  Iarray.map
     (function
       | Origin.Local (g : Binary.Global.t) ->
         let init = convert_expr g.init in
@@ -209,30 +210,30 @@ let from_global (global : (Binary.Global.t, Text.Global.Type.t) Origin.t array)
         let typ = Text.Import.Type.Global (assigned_name, typ) in
         Text.Module.Field.Import { modul_name; name; typ } )
     global
-  |> Array.to_list
+  |> Iarray.to_list
 
 let from_table table : Text.Module.Field.t list =
-  Array.map
+  Iarray.map
     (function
       | Origin.Local (name, t) -> Text.Module.Field.Table (name, t)
       | Imported { modul_name; name; assigned_name; typ } ->
         let typ = Text.Import.Type.Table (assigned_name, typ) in
         Import { modul_name; name; typ } )
     table
-  |> Array.to_list
+  |> Iarray.to_list
 
 let from_mem mem : Text.Module.Field.t list =
-  Array.map
+  Iarray.map
     (function
       | Origin.Local (name, t) -> Text.Module.Field.Mem (name, t)
       | Imported { modul_name; name; assigned_name; typ } ->
         let typ = Text.Import.Type.Mem (assigned_name, typ) in
         Import { modul_name; name; typ } )
     mem
-  |> Array.to_list
+  |> Iarray.to_list
 
 let from_func func : Text.Module.Field.t list =
-  Array.map
+  Iarray.map
     (function
       | Origin.Local (func : Binary.Func.t) ->
         let type_f = convert_block_type func.type_f in
@@ -244,28 +245,28 @@ let from_func func : Text.Module.Field.t list =
         let typ = Text.Import.Type.Func (assigned_name, typ) in
         Text.Module.Field.Import { modul_name; name; typ } )
     func
-  |> Array.to_list
+  |> Iarray.to_list
 
 let from_elem elem : Text.Module.Field.t list =
-  Array.map
+  Iarray.map
     (fun (elem : Binary.Elem.t) ->
       let elem = convert_elem elem in
       Text.Module.Field.Elem elem )
     elem
-  |> Array.to_list
+  |> Iarray.to_list
 
 let from_data data : Text.Module.Field.t list =
-  Array.map
+  Iarray.map
     (fun (data : Binary.Data.t) ->
       let data = convert_data data in
       Text.Module.Field.Data data )
     data
-  |> Array.to_list
+  |> Iarray.to_list
 
 let from_exports (exports : Binary.Module.Exports.t) : Text.Module.Field.t list
     =
   let global =
-    Array.map
+    Iarray.map
       (fun ({ name; id } : Binary.Export.t) ->
         let id = Some (Text.Raw id) in
         Text.Module.Field.Export { name; typ = Global id } )
@@ -273,7 +274,7 @@ let from_exports (exports : Binary.Module.Exports.t) : Text.Module.Field.t list
   in
 
   let mem =
-    Array.map
+    Iarray.map
       (fun ({ name; id } : Binary.Export.t) ->
         let id = Some (Text.Raw id) in
         Text.Module.Field.Export { name; typ = Mem id } )
@@ -281,7 +282,7 @@ let from_exports (exports : Binary.Module.Exports.t) : Text.Module.Field.t list
   in
 
   let table =
-    Array.map
+    Iarray.map
       (fun ({ name; id } : Binary.Export.t) ->
         let id = Some (Text.Raw id) in
         Text.Module.Field.Export { name; typ = Table id } )
@@ -289,15 +290,15 @@ let from_exports (exports : Binary.Module.Exports.t) : Text.Module.Field.t list
   in
 
   let func =
-    Array.map
+    Iarray.map
       (fun ({ name; id } : Binary.Export.t) ->
         let id = Some (Text.Raw id) in
         Text.Module.Field.Export { name; typ = Func id } )
       exports.func
   in
 
-  Array.to_list global @ Array.to_list mem @ Array.to_list table
-  @ Array.to_list func
+  Iarray.to_list global @ Iarray.to_list mem @ Iarray.to_list table
+  @ Iarray.to_list func
 
 let from_start = function
   | None -> []

@@ -87,7 +87,7 @@ type instr =
       string option * block_type option * expr Annotated.t * expr Annotated.t
   | Br of indice
   | Br_if of indice
-  | Br_table of indice array * indice
+  | Br_table of indice Iarray.t * indice
   | Return
   | Return_call of indice
   | Return_call_indirect of indice * block_type
@@ -168,22 +168,23 @@ end
 module Module : sig
   module Exports : sig
     type t =
-      { global : Export.t Array.t
-      ; mem : Export.t Array.t
-      ; table : Export.t Array.t
-      ; func : Export.t Array.t
+      { global : Export.t Iarray.t
+      ; mem : Export.t Iarray.t
+      ; table : Export.t Iarray.t
+      ; func : Export.t Iarray.t
       }
   end
 
   type t =
     { id : string option
-    ; types : Text.Typedef.t array
-    ; global : (Global.t, Text.Global.Type.t) Origin.t array
-    ; table : (Text.Table.t, Text.Table.Type.t) Origin.t array
-    ; mem : (Text.Mem.t, Text.limits) Origin.t array
-    ; func : (Func.t, block_type) Origin.t array (* TODO: switch to func_type *)
-    ; elem : Elem.t array
-    ; data : Data.t array
+    ; types : Text.Typedef.t Iarray.t
+    ; global : (Global.t, Text.Global.Type.t) Origin.t Iarray.t
+    ; table : (Text.Table.t, Text.Table.Type.t) Origin.t Iarray.t
+    ; mem : (Text.Mem.t, Text.limits) Origin.t Iarray.t
+    ; func :
+        (Func.t, block_type) Origin.t Iarray.t (* TODO: switch to func_type *)
+    ; elem : Elem.t Iarray.t
+    ; data : Data.t Iarray.t
     ; exports : Exports.t
     ; start : int option
     ; custom : Custom.t list

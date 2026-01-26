@@ -78,7 +78,7 @@ let run exploration_strategy ~workers solver t thread ~at_worker_value
   let sched = Scheduler.init () in
   Scheduler.add_init_task sched (Fun.const @@ State_monad.run t thread);
   if workers > 1 then Logs_threaded.enable ();
-  Array.init workers (fun _i ->
+  Iarray.init workers (fun _i ->
     Scheduler.spawn_worker sched ~at_worker_value ~at_worker_init
       ~finally:at_worker_end )
 

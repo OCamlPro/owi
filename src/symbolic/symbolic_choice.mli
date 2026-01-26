@@ -60,7 +60,7 @@ val run :
        (close_work_queue:(unit -> unit) -> ('a, Bug.t) result * Thread.t -> unit)
   -> at_worker_init:(unit -> unit)
   -> at_worker_end:(unit -> unit)
-  -> unit Domain.t array
+  -> unit Domain.t Iarray.t
 
 val ite :
      Symbolic_boolean.t

@@ -22,7 +22,7 @@ val find_type : t -> Text.indice -> Binary.indice Result.t
 
 val get_type : t -> int -> Text.func_type Option.t
 
-val get_types : t -> Text.func_type Array.t
+val get_types : t -> Text.func_type Iarray.t
 
 val find_raw_type : t -> Text.func_type -> Binary.indice
 

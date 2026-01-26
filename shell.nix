@@ -1,32 +1,30 @@
-{ pkgs ? import (builtins.fetchTarball {
-    url = "https://github.com/NixOS/nixpkgs/archive/master.tar.gz";
-  }) {}
-}:
-
 let
-  smtml = pkgs.ocamlPackages.smtml.overrideAttrs (old: {
+  pkgs = import (fetchTarball "https://github.com/NixOS/nixpkgs/archive/nixos-unstable.tar.gz") {};
+  ocamlPackages = pkgs.ocaml-ng.ocamlPackages_5_4;
+  smtml = ocamlPackages.smtml.overrideAttrs (old: {
     src = pkgs.fetchFromGitHub {
       owner = "formalsec";
       repo = "smtml";
-      rev = "3b08a5368718068fa46547e60df4e44caa51db78";
-      hash = "sha256-iD2UGddGYvE/jn+KM5jj05DHcNPjSq9IiH1BlnfO+Sg=";
+      rev = "27aa552f228cdaf36283396ade722cdcae5d1712";
+      hash = "sha256-VnkF+bZXeqaj9LSpyzqH5AM9EQsrW4Rlj5kvyTfYTKE=";
     };
     doCheck = false;
   });
-  synchronizer = pkgs.ocamlPackages.synchronizer.overrideAttrs (old: {
+  synchronizer = ocamlPackages.synchronizer.overrideAttrs (old: {
     src = pkgs.fetchFromGitHub {
       owner = "ocamlpro";
       repo = "synchronizer";
       rev = "cb5fd995e8a42e5244acf68f238221594fd19a8d";
       hash = "sha256-0XtPHpDlyH1h8W2ZlRvJbZjCN9WP5mzk2N01WFd8eLQ=";
     };
+    doCheck = false;
   });
 in
 
 pkgs.mkShell {
   name = "owi-dev-shell";
   dontDetectOcamlConflicts = true;
-  nativeBuildInputs = with pkgs.ocamlPackages; [
+  nativeBuildInputs = with ocamlPackages; [
     dune_3
     findlib
     bisect_ppx
@@ -51,7 +49,7 @@ pkgs.mkShell {
     pkgs.zig
     pkgs.makeWrapper
   ];
-  buildInputs = with pkgs.ocamlPackages; [
+  buildInputs = with ocamlPackages; [
     bos
     cmdliner
     crowbar

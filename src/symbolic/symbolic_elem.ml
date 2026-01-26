@@ -5,8 +5,8 @@
 type t = Concrete_elem.t
 
 let get (elem : t) i : Symbolic_ref.t =
-  match elem.value.(i) with Func f -> Func f | _ -> assert false
+  match Concrete_elem.get elem i with Func f -> Func f | _ -> assert false
 
-let size (elem : t) = Array.length elem.value
+let size (elem : t) = Iarray.length elem.value
 
 let drop (e : t) = e.value <- [||]

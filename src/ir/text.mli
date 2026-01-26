@@ -278,7 +278,7 @@ type instr =
       string option * block_type option * expr Annotated.t * expr Annotated.t
   | Br of indice
   | Br_if of indice
-  | Br_table of indice array * indice
+  | Br_table of indice Iarray.t * indice
   | Return
   | Return_call of indice
   | Return_call_indirect of indice * block_type

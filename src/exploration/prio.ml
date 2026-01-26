@@ -267,8 +267,12 @@ module type S = sig
   val work_while : ('a -> (metrics * 'a -> unit) -> unit) -> 'a t -> unit
 end
 
-module Make (P : T) : S = struct
-  module Priority_queue = Priority_queue.Make (P)
+module Make (Prio : T) : S = struct
+  module Pqueue = Pqueue.MakeMaxPoly (struct
+    type 'a t = Prio.t * 'a
+
+    let compare (p1, _) (p2, _) = Prio.compare p1 p2
+  end)
 
   type 'a t = ('a, metrics * 'a) Synchronizer.t
 
@@ -291,12 +295,12 @@ module Make (P : T) : S = struct
   let close = Synchronizer.close
 
   let writter (prio, v) q =
-    let prio = P.of_metrics prio in
+    let prio = Prio.of_metrics prio in
     let prio_and_value = (prio, v) in
-    Priority_queue.push prio_and_value q
+    Pqueue.add q prio_and_value
 
   let make () =
-    let q = Priority_queue.empty () in
+    let q = Pqueue.create () in
     let writter prio_and_value = writter prio_and_value q in
-    Synchronizer.init (fun () -> Priority_queue.pop q) writter
+    Synchronizer.init (fun () -> Pqueue.pop_max q |> Option.map snd) writter
 end

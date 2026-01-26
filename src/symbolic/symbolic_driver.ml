@@ -63,7 +63,7 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
     mk_callback no_stop_at_failure fail_mode bug_stack path_count
   in
   let time_before = (Unix.times ()).tms_utime in
-  let domains : unit Domain.t Array.t =
+  let domains : unit Domain.t Iarray.t =
     Symbolic_choice.run exploration_strategy ~workers solver result thread
       ~at_worker_value
       ~at_worker_init:(fun () -> Bugs.new_pledge bug_stack)
@@ -80,7 +80,7 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
 
   (* We don't want to wait for domain to complete in normal/quiet mode because it may take quite some time (if a solver is running a long query, the interpreter is in a long concrete loop, or if the work queue was not correctly closed for instance) *)
   let wait_for_all_domains () =
-    Array.iter
+    Iarray.iter
       (fun domain ->
         try Domain.join domain with
         | Z3.Error msg ->

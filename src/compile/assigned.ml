@@ -5,7 +5,7 @@
 open Syntax
 
 type t =
-  { typ : Text.func_type Array.t
+  { typ : Text.func_type Iarray.t
   ; typ_names : (string, int) Hashtbl.t
   ; global_names : (string, int) Hashtbl.t
   ; table_names : (string, int) Hashtbl.t
@@ -41,7 +41,7 @@ let pp fmt
      Func names: %a@\n\
      Elem names: %a@\n\
      Data names: %a@\n"
-    (Fmt.array Text.pp_func_type)
+    (Fmt.iter Iarray.iter Text.pp_func_type)
     typ pp_table typ_names pp_table global_names pp_table table_names pp_table
     mem_names pp_table func_names pp_table elem_names pp_table data_names
 
@@ -54,11 +54,11 @@ module Typetbl = Hashtbl.Make (struct
 end)
 
 let assign_types typ function_type :
-  Text.func_type Array.t * (string, int) Hashtbl.t =
+  Text.func_type Iarray.t * (string, int) Hashtbl.t =
   let all_types = Typetbl.create 64 in
   let named_types = Hashtbl.create 64 in
   let declared_types = Dynarray.create () in
-  Array.iter
+  Iarray.iter
     (fun (name, typ) ->
       let id = Dynarray.length declared_types in
       begin match name with
@@ -68,7 +68,7 @@ let assign_types typ function_type :
       Dynarray.add_last declared_types typ;
       Typetbl.add all_types typ id )
     typ;
-  Array.iter
+  Iarray.iter
     (fun typ ->
       match Typetbl.find_opt all_types typ with
       | Some _id -> ()
@@ -77,7 +77,7 @@ let assign_types typ function_type :
         Dynarray.add_last declared_types typ;
         Typetbl.add all_types typ id )
     function_type;
-  let declared_types = Dynarray.to_array declared_types in
+  let declared_types = Dynarray.to_array declared_types |> Iarray.of_array in
   (declared_types, named_types)
 
 let get_origin_name (get_name : 'a -> string option) (elt : ('a, 'b) Origin.t) :
@@ -89,7 +89,7 @@ let get_origin_name (get_name : 'a -> string option) (elt : ('a, 'b) Origin.t) :
 let name kind ~get_name values =
   let named = Hashtbl.create 64 in
   let+ () =
-    array_iteri
+    iarray_iteri
       (fun i elt_v ->
         match get_name elt_v with
         | None -> Ok ()
@@ -104,7 +104,7 @@ let name kind ~get_name values =
   in
   named
 
-let check_type_id (types : Text.func_type Array.t)
+let check_type_id (types : Text.func_type Iarray.t)
   (typ_names : (string, int) Hashtbl.t) (id, func_type) =
   let id =
     match id with
@@ -114,9 +114,9 @@ let check_type_id (types : Text.func_type Array.t)
       | None -> assert false
       | Some v -> v )
   in
-  if id >= Array.length types then Error (`Unknown_type (Text.Raw id))
+  if id >= Iarray.length types then Error (`Unknown_type (Text.Raw id))
   else
-    let func_type' = Array.unsafe_get types id in
+    let func_type' = Iarray.unsafe_get types id in
     if not (Text.func_type_eq func_type func_type') then
       Error `Inline_function_type
     else Ok ()
@@ -152,7 +152,7 @@ let of_grouped
   let* data_names =
     name "data" ~get_name:(fun (data : Text.Data.t) -> data.id) data
   in
-  let+ () = array_iter (check_type_id typ typ_names) type_checks in
+  let+ () = iarray_iter (check_type_id typ typ_names) type_checks in
 
   let modul =
     { typ
@@ -189,12 +189,12 @@ let find_elem modul id = find modul.elem_names (`Unknown_elem id) id
 let find_type modul id = find modul.typ_names (`Unknown_type id) id
 
 let get_type modul idx =
-  if idx >= Array.length modul.typ then None
-  else Some (Array.unsafe_get modul.typ idx)
+  if idx >= Iarray.length modul.typ then None
+  else Some (Iarray.unsafe_get modul.typ idx)
 
 let get_types modul = modul.typ
 
 let find_raw_type modul func_type =
-  match Array.find_index (Text.func_type_eq func_type) modul.typ with
+  match Iarray.find_index (Text.func_type_eq func_type) modul.typ with
   | None -> assert false
   | Some idx -> idx

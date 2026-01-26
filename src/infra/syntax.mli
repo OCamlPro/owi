@@ -10,8 +10,6 @@ val ( let* ) :
 val ( let+ ) :
   ('a, 'err) Prelude.Result.t -> ('a -> 'b) -> ('b, 'err) Prelude.Result.t
 
-val ok : 'a -> ('a, 'err) Prelude.Result.t
-
 val list_iter :
      ('a -> (unit, 'err) Prelude.Result.t)
   -> 'a list
@@ -39,50 +37,23 @@ val list_fold_left_map :
   -> 'b list
   -> ('a * 'c list, 'err) Prelude.Result.t
 
-val array_iter :
+val iarray_iter :
      ('a -> (unit, 'err) Prelude.Result.t)
-  -> 'a array
+  -> 'a Iarray.t
   -> (unit, 'err) Prelude.Result.t
 
-val array_iteri :
+val iarray_iteri :
      (int -> 'a -> (unit, 'err) Prelude.Result.t)
-  -> 'a array
+  -> 'a Iarray.t
   -> (unit, 'err) Prelude.Result.t
 
-val dynarray_iter :
-     ('a -> (unit, 'err) Prelude.Result.t)
-  -> 'a Dynarray.t
-  -> (unit, 'err) Prelude.Result.t
-
-val dynarray_iteri :
-     (int -> 'a -> (unit, 'err) Prelude.Result.t)
-  -> 'a Dynarray.t
-  -> (unit, 'err) Prelude.Result.t
-
-val array_map :
+val iarray_map :
      ('a -> ('b, 'err) Prelude.Result.t)
-  -> 'a array
-  -> ('b array, 'err) Prelude.Result.t
+  -> 'a Iarray.t
+  -> ('b Iarray.t, 'err) Prelude.Result.t
 
-val dynarray_map :
-     ('a -> ('b, 'err) Prelude.Result.t)
-  -> 'a Dynarray.t
-  -> ('b Dynarray.t, 'err) Prelude.Result.t
-
-val array_fold_left :
+val iarray_fold_left :
      ('a -> 'b -> ('a, 'err) Prelude.Result.t)
   -> 'a
-  -> 'b array
-  -> ('a, 'err) Prelude.Result.t
-
-val dynarray_fold_left :
-     ('a -> 'b -> ('a, 'err) Prelude.Result.t)
-  -> 'a
-  -> 'b Dynarray.t
-  -> ('a, 'err) Prelude.Result.t
-
-val dynarray_fold_lefti :
-     (int -> 'a -> 'b -> ('a, 'err) Prelude.Result.t)
-  -> 'a
-  -> 'b Dynarray.t
+  -> 'b Iarray.t
   -> ('a, 'err) Prelude.Result.t

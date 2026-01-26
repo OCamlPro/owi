@@ -45,11 +45,11 @@ module Index = struct
 end
 
 let check_mem modul n =
-  if n >= Array.length modul.mem then Error (`Unknown_memory (Text.Raw n))
+  if n >= Iarray.length modul.mem then Error (`Unknown_memory (Text.Raw n))
   else Ok ()
 
 let check_data modul n =
-  if n >= Array.length modul.data then Error (`Unknown_data (Text.Raw n))
+  if n >= Iarray.length modul.data then Error (`Unknown_data (Text.Raw n))
   else Ok ()
 
 let check_align memarg_align align =
@@ -70,15 +70,15 @@ module Env = struct
     | Some v -> Ok v
 
   let global_get i modul =
-    if i >= Array.length modul.global then Error (`Unknown_global (Text.Raw i))
+    if i >= Iarray.length modul.global then Error (`Unknown_global (Text.Raw i))
     else
-      match modul.global.(i) with
+      match Iarray.get modul.global i with
       | Origin.Local { typ; _ } | Imported { typ; _ } -> Ok typ
 
   let func_get i modul =
-    if i >= Array.length modul.func then Error (`Unknown_func (Text.Raw i))
+    if i >= Iarray.length modul.func then Error (`Unknown_func (Text.Raw i))
     else
-      match modul.func.(i) with
+      match Iarray.get modul.func i with
       | Origin.Local { Func.type_f = Bt_raw (_, t); _ }
       | Imported { typ = Bt_raw (_, t); _ } ->
         Ok t
@@ -89,14 +89,14 @@ module Env = struct
     | Some bt -> Ok bt
 
   let table_type_get i (modul : Binary.Module.t) =
-    if i >= Array.length modul.table then Error (`Unknown_table (Text.Raw i))
+    if i >= Iarray.length modul.table then Error (`Unknown_table (Text.Raw i))
     else
-      match modul.table.(i) with
+      match Iarray.get modul.table i with
       | Origin.Local (_, (_, t)) | Imported { typ = _, t; _ } -> Ok t
 
   let elem_type_get i modul =
-    if i >= Array.length modul.elem then Error (`Unknown_elem (Text.Raw i))
-    else match modul.elem.(i) with value -> Ok value.typ
+    if i >= Iarray.length modul.elem then Error (`Unknown_elem (Text.Raw i))
+    else match Iarray.get modul.elem i with value -> Ok value.typ
 
   let make ~params ~locals ~modul ~result_type ~refs =
     let l = List.mapi (fun i v -> (i, v)) (params @ locals) in
@@ -216,7 +216,7 @@ end = struct
     | Any :: _ -> Ok [ Any ]
     | _ :: tl -> Ok tl
 
-  let push t stack = ok @@ t @ stack
+  let push t stack = Result.ok @@ t @ stack
 
   let pop_push (Bt_raw (_, (pt, rt)) : block_type) stack =
     let pt, rt = (List.rev_map typ_of_pt pt, List.rev_map typ_of_val_type rt) in
@@ -483,8 +483,8 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
       match stack with
       | Ref_type _ :: _tl -> Error (`Type_mismatch "select implicit")
       | Any :: _ -> Ok [ Something; Any ]
-      | hd :: Any :: _ -> ok @@ (hd :: [ Any ])
-      | hd :: hd' :: tl when Stack.match_types hd hd' -> ok @@ (hd :: tl)
+      | hd :: Any :: _ -> Result.ok @@ (hd :: [ Any ])
+      | hd :: hd' :: tl when Stack.match_types hd hd' -> Result.ok @@ (hd :: tl)
       | _ -> Error (`Type_mismatch "select")
     end
     | Some t ->
@@ -510,7 +510,7 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
     let* default_jt = Env.block_type_get i env in
     let* _stack = Stack.pop default_jt stack in
     let* () =
-      array_iter
+      iarray_iter
         (fun (i : indice) ->
           let* jt = Env.block_type_get i env in
           if not (List.length jt = List.length default_jt) then
@@ -590,10 +590,10 @@ let typecheck_const_instr (modul : Module.t) refs stack instr =
     Hashtbl.add refs i ();
     Stack.push [ Ref_type Func_ht ] stack
   | Global_get i ->
-    if i >= Array.length modul.global then Error (`Unknown_global (Text.Raw i))
+    if i >= Iarray.length modul.global then Error (`Unknown_global (Text.Raw i))
     else
       let* mut, typ =
-        match modul.global.(i) with
+        match Iarray.get modul.global i with
         | Origin.Local _ -> Error (`Unknown_global (Text.Raw i))
         | Imported { typ; _ } -> Ok typ
       in
@@ -676,8 +676,8 @@ let typecheck_start { start; func; _ } =
   | None -> Ok ()
   | Some idx -> (
     let* f =
-      if idx >= Array.length func then Error (`Unknown_func (Text.Raw idx))
-      else Ok func.(idx)
+      if idx >= Iarray.length func then Error (`Unknown_func (Text.Raw idx))
+      else Ok (Iarray.get func idx)
     in
     match f with
     | Local { type_f = Bt_raw (_, ([], [])); _ }
@@ -687,27 +687,27 @@ let typecheck_start { start; func; _ } =
 
 let validate_exports modul =
   let* () =
-    array_iter
+    iarray_iter
       (fun { Export.id; name = _ } ->
         let* _t = Env.func_get id modul in
         Ok () )
       modul.exports.func
   in
   let* () =
-    array_iter
+    iarray_iter
       (fun { Export.id; name = _ } ->
         let* _t = Env.table_type_get id modul in
         Ok () )
       modul.exports.table
   in
   let* () =
-    array_iter
+    iarray_iter
       (fun { Export.id; name = _ } ->
         let* _t = Env.global_get id modul in
         Ok () )
       modul.exports.global
   in
-  array_iter
+  iarray_iter
     (fun { id; Export.name = _ } ->
       let* () = check_mem modul id in
       Ok () )
@@ -720,14 +720,14 @@ let check_limit { Text.min; max } =
     if min > max then Error `Size_minimum_greater_than_maximum else Ok ()
 
 let validate_tables modul =
-  array_iter
+  iarray_iter
     (function
       | Origin.Local (_, (limits, _)) | Imported { typ = limits, _; _ } ->
         check_limit limits )
     modul.table
 
 let validate_mem modul =
-  array_iter
+  iarray_iter
     (function
       | Origin.Local (_, typ) | Imported { typ; _ } ->
         let* () =
@@ -744,14 +744,14 @@ let modul (modul : Module.t) =
   Log.info (fun m -> m "typechecking ...");
   Log.bench_fn "typechecking time" @@ fun () ->
   let refs = Hashtbl.create 512 in
-  let* () = array_iter (typecheck_global modul refs) modul.global in
-  let* () = array_iter (typecheck_elem modul refs) modul.elem in
-  let* () = array_iter (typecheck_data modul refs) modul.data in
+  let* () = iarray_iter (typecheck_global modul refs) modul.global in
+  let* () = iarray_iter (typecheck_elem modul refs) modul.elem in
+  let* () = iarray_iter (typecheck_data modul refs) modul.data in
   let* () = typecheck_start modul in
   let* () = validate_exports modul in
   let* () = validate_tables modul in
   let* () = validate_mem modul in
-  Array.iter
+  Iarray.iter
     (fun (export : Export.t) -> Hashtbl.add refs export.id ())
     modul.exports.func;
-  array_iter (fun func -> typecheck_function modul func refs) modul.func
+  iarray_iter (fun func -> typecheck_function modul func refs) modul.func

@@ -385,7 +385,9 @@ let block_type_of_type_def (_id, (pt, rt)) =
 let read_block_type types input =
   match read_S33 input with
   | Ok (i, input) when Int64.ge i 0L ->
-    let block_type = block_type_of_type_def types.(Int64.to_int i) in
+    let block_type =
+      block_type_of_type_def @@ Iarray.get types (Int64.to_int i)
+    in
     Ok (block_type, input)
   | Error _ | Ok _ -> begin
     match read_byte ~msg:"read_block_type" input with
@@ -432,7 +434,7 @@ let rec read_instr types input =
     (Br_if labelidx, input)
   | '\x0E' ->
     let* xs, input = vector_no_id read_indice input in
-    let xs = Array.of_list xs in
+    let xs = Iarray.of_list xs in
     let+ x, input = read_indice input in
     (Br_table (xs, x), input)
   | '\x0F' -> Ok (Return, input)
@@ -442,21 +444,23 @@ let rec read_instr types input =
   | '\x11' ->
     let* typeidx, input = read_indice input in
     let+ tableidx, input = read_indice input in
-    (Call_indirect (tableidx, block_type_of_type_def types.(typeidx)), input)
+    ( Call_indirect (tableidx, block_type_of_type_def (Iarray.get types typeidx))
+    , input )
   | '\x12' ->
     let+ funcidx, input = read_indice input in
     (Return_call funcidx, input)
   | '\x13' ->
     let* typeidx, input = read_indice input in
     let+ tableidx, input = read_indice input in
-    ( Return_call_indirect (tableidx, block_type_of_type_def types.(typeidx))
+    ( Return_call_indirect
+        (tableidx, block_type_of_type_def (Iarray.get types typeidx))
     , input )
   | '\x14' ->
     let+ funcidx, input = read_indice input in
     (Call_ref funcidx, input)
   | '\x15' ->
     let+ typeidx, input = read_indice input in
-    (Return_call_ref (block_type_of_type_def types.(typeidx)), input)
+    (Return_call_ref (block_type_of_type_def (Iarray.get types typeidx)), input)
   | '\x1A' -> Ok (Drop, input)
   | '\x1B' -> Ok (Select None, input)
   | '\x1C' ->
@@ -1017,7 +1021,7 @@ let sections_iterate (input : Input.t) =
   let* types, input =
     section_parse input ~expected_id:'\x01' [] (vector read_type)
   in
-  let types = Array.of_list types in
+  let types = Iarray.of_list types in
 
   (* Custom *)
   let* custom_sections', input = parse_many_custom_section input in
@@ -1131,10 +1135,10 @@ let sections_iterate (input : Input.t) =
     section_parse input ~expected_id:'\x0B' [] (vector_no_id (read_data types))
   in
 
-  let data = Array.of_list data in
+  let data = Iarray.of_list data in
 
   let* () =
-    match (Array.length data, data_count_section) with
+    match (Iarray.length data, data_count_section) with
     | 0, None -> Ok ()
     | _data_len, None ->
       let code_use_dataidx = ref false in
@@ -1174,7 +1178,7 @@ let sections_iterate (input : Input.t) =
           | _not_a_memory_import -> None )
         import_section
     in
-    Array.of_list (imported @ local)
+    Iarray.of_list (imported @ local)
   in
 
   (* Globals *)
@@ -1190,7 +1194,7 @@ let sections_iterate (input : Input.t) =
           | _not_a_global_import -> None )
         import_section
     in
-    Array.of_list (imported @ local)
+    Iarray.of_list (imported @ local)
   in
 
   (* Functions *)
@@ -1199,7 +1203,7 @@ let sections_iterate (input : Input.t) =
       List.map2
         (fun typeidx (locals, body) ->
           Origin.Local
-            { Func.type_f = block_type_of_type_def types.(typeidx)
+            { Func.type_f = block_type_of_type_def (Iarray.get types typeidx)
             ; locals
             ; body
             ; id = None
@@ -1210,13 +1214,13 @@ let sections_iterate (input : Input.t) =
       List.filter_map
         (function
           | modul_name, name, Func idx ->
-            let typ = block_type_of_type_def types.(idx) in
+            let typ = block_type_of_type_def (Iarray.get types idx) in
             Option.some
             @@ Origin.imported ~modul_name ~name ~assigned_name:None ~typ
           | _not_a_function_import -> None )
         import_section
     in
-    Array.of_list (imported @ local)
+    Iarray.of_list (imported @ local)
   in
 
   (* Tables *)
@@ -1232,11 +1236,11 @@ let sections_iterate (input : Input.t) =
           | _not_a_table_import -> None )
         import_section
     in
-    Array.of_list (imported @ local)
+    Iarray.of_list (imported @ local)
   in
 
   (* Elems *)
-  let elem = Array.of_list element_section in
+  let elem = Iarray.of_list element_section in
 
   (* Exports *)
   (* We use an intermediate stack because the values are in reverse order *)
@@ -1255,7 +1259,7 @@ let sections_iterate (input : Input.t) =
       | _ -> Fmt.failwith "read_exportdesc error" )
     export_section;
   let stack_to_array s =
-    Array.init (Stack.length s) (fun _i ->
+    Iarray.init (Stack.length s) (fun _i ->
       match Stack.pop_opt s with Some v -> v | None -> assert false )
   in
   let exports =

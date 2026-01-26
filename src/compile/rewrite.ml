@@ -80,7 +80,7 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
     match instr.Annotated.raw with
     | Br_table (ids, id) ->
       let block_id_to_raw = block_id_to_raw (loop_count, block_ids) in
-      let* ids = array_map block_id_to_raw ids in
+      let* ids = iarray_map block_id_to_raw ids in
       let+ id = block_id_to_raw id in
       Binary.Br_table (ids, id)
     | Br_if id ->
@@ -302,9 +302,9 @@ let rewrite_data (assigned : Assigned.t) (data : Text.Data.t) :
   in
   { Binary.Data.mode; id = data.id; init = data.init }
 
-let rewrite_export find assigned (exports : Grouped.opt_export Array.t) :
-  Binary.Export.t Array.t Result.t =
-  array_map
+let rewrite_export find assigned (exports : Grouped.opt_export Iarray.t) :
+  Binary.Export.t Iarray.t Result.t =
+  iarray_map
     (fun { Grouped.name; id } ->
       match find assigned id with
       | Error _ -> Error (`Unknown_export id)
@@ -337,21 +337,21 @@ let modul (modul : Grouped.t) (assigned : Assigned.t) : Binary.Module.t Result.t
     =
   Log.debug (fun m -> m "rewriting    ...");
   let* global =
-    array_map
+    iarray_map
       (Origin.monadic_map ~f_local:(rewrite_global assigned)
          ~f_imported:Result.ok )
       modul.global
   in
-  let* elem = array_map (rewrite_elem assigned) modul.elem in
-  let* data = array_map (rewrite_data assigned) modul.data in
+  let* elem = iarray_map (rewrite_elem assigned) modul.elem in
+  let* data = iarray_map (rewrite_data assigned) modul.data in
   let* exports = rewrite_exports modul assigned in
   let* func =
     let f_imported = rewrite_block_type assigned in
     let f_local = rewrite_func assigned in
     let runtime = Origin.monadic_map ~f_local ~f_imported in
-    array_map runtime modul.func
+    iarray_map runtime modul.func
   in
-  let* types = array_map rewrite_types (Assigned.get_types assigned) in
+  let* types = iarray_map rewrite_types (Assigned.get_types assigned) in
   let+ start =
     match modul.start with
     | None -> Ok None

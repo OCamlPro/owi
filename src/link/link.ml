@@ -105,20 +105,20 @@ module Eval_const = struct
   (* TODO: binary+const instr *)
   let instr env stack instr =
     match instr.Annotated.raw with
-    | Binary.I32_const n -> ok @@ Stack.push_i32 stack n
-    | I64_const n -> ok @@ Stack.push_i64 stack n
-    | F32_const f -> ok @@ Stack.push_f32 stack f
-    | F64_const f -> ok @@ Stack.push_f64 stack f
-    | V128_const f -> ok @@ Stack.push_v128 stack f
-    | I_binop (nn, op) -> ok @@ ibinop stack nn op
-    | Ref_null t -> ok @@ Stack.push_ref stack (Concrete_ref.null t)
+    | Binary.I32_const n -> Result.ok @@ Stack.push_i32 stack n
+    | I64_const n -> Result.ok @@ Stack.push_i64 stack n
+    | F32_const f -> Result.ok @@ Stack.push_f32 stack f
+    | F64_const f -> Result.ok @@ Stack.push_f64 stack f
+    | V128_const f -> Result.ok @@ Stack.push_v128 stack f
+    | I_binop (nn, op) -> Result.ok @@ ibinop stack nn op
+    | Ref_null t -> Result.ok @@ Stack.push_ref stack (Concrete_ref.null t)
     | Ref_func f ->
       let* f = Link_env.Build.get_func env f in
       let value = Concrete_value.Ref (Func (Some f)) in
-      ok @@ Stack.push stack value
+      Result.ok @@ Stack.push stack value
     | Global_get id ->
       let* g = Link_env.Build.get_const_global env id in
-      ok @@ Stack.push stack g
+      Result.ok @@ Stack.push stack g
     | _ -> assert false
 
   (* TODO: binary+const expr *)
@@ -143,7 +143,7 @@ let eval_global ls env (global : (Binary.Global.t, Text.Global.Type.t) Origin.t)
 
 let eval_globals ls env globals : Link_env.Build.t Result.t =
   let+ env, _i =
-    array_fold_left
+    iarray_fold_left
       (fun (env, i) global ->
         let+ global = eval_global ls env global in
         let env = Link_env.Build.add_global i global env in
@@ -173,12 +173,12 @@ let load_memory (ls : 'f State.t) (import : Text.limits Origin.imported) :
 let eval_memory ls (memory : (Text.Mem.t, Text.limits) Origin.t) :
   Concrete_memory.t Result.t =
   match memory with
-  | Local (_label, mem_type) -> ok @@ Concrete_memory.init mem_type
+  | Local (_label, mem_type) -> Result.ok @@ Concrete_memory.init mem_type
   | Imported import -> load_memory ls import
 
 let eval_memories ls env memories =
   let+ env, _i =
-    array_fold_left
+    iarray_fold_left
       (fun (env, id) mem ->
         let+ memory = eval_memory ls mem in
         let env = Link_env.Build.add_memory id memory env in
@@ -201,12 +201,13 @@ let load_table (ls : 'f State.t) (import : Text.Table.Type.t Origin.imported) :
 
 let eval_table ls (table : (_, Text.Table.Type.t) Origin.t) : table Result.t =
   match table with
-  | Local (label, table_type) -> ok @@ Concrete_table.init ?label table_type
+  | Local (label, table_type) ->
+    Result.ok @@ Concrete_table.init ?label table_type
   | Imported import -> load_table ls import
 
 let eval_tables ls env tables =
   let+ env, _i =
-    array_fold_left
+    iarray_fold_left
       (fun (env, i) table ->
         let+ table = eval_table ls table in
         let env = Link_env.Build.add_table i table env in
@@ -240,12 +241,12 @@ let load_func (ls : 'f State.t) (import : Binary.block_type Origin.imported) :
 
 let eval_func ls (finished_env : int) func : func Result.t =
   match func with
-  | Origin.Local func -> ok @@ Kind.wasm func finished_env
+  | Origin.Local func -> Result.ok @@ Kind.wasm func finished_env
   | Imported import -> load_func ls import
 
 let eval_functions ls (finished_env : int) env functions =
   let+ env, _i =
-    array_fold_left
+    iarray_fold_left
       (fun (env, i) func ->
         let+ func = eval_func ls finished_env func in
         let env = Link_env.Build.add_func i func env in
@@ -280,7 +281,7 @@ let get_i32 = function
 
 let define_data env data =
   let+ env, init, _i =
-    array_fold_left
+    iarray_fold_left
       (fun (env, init, id) (data : Binary.Data.t) ->
         let data' : Concrete_data.t = { value = data.init } in
         let env = Link_env.Build.add_data id data' env in
@@ -291,7 +292,7 @@ let define_data env data =
             let length = Int32.of_int @@ String.length data.init in
             let* offset = get_i32 offset in
             let* v = active_data_expr env ~offset ~length ~mem ~data:id in
-            ok @@ (v :: init)
+            Result.ok @@ (v :: init)
           | Passive -> Ok init
         in
         (env, init, succ id) )
@@ -301,7 +302,7 @@ let define_data env data =
 
 let define_elem env elem =
   let+ env, inits, _i =
-    array_fold_left
+    iarray_fold_left
       (fun (env, inits, i) (elem : Binary.Elem.t) ->
         let* init = list_map (Eval_const.expr env) elem.init in
         let* init_as_ref =
@@ -313,7 +314,7 @@ let define_elem env elem =
         in
         let value =
           match elem.mode with
-          | Active _ | Passive -> Array.of_list init_as_ref
+          | Active _ | Passive -> Iarray.of_list init_as_ref
           | Declarative ->
             (* Declarative element have no runtime value *)
             [||]
@@ -326,7 +327,8 @@ let define_elem env elem =
             let length = Int32.of_int @@ List.length init in
             let* offset = Eval_const.expr env offset in
             let* offset = get_i32 offset in
-            ok @@ (active_elem_expr ~offset ~length ~table ~elem:i :: inits)
+            Result.ok
+            @@ (active_elem_expr ~offset ~length ~table ~elem:i :: inits)
           | Passive | Declarative -> Ok inits
         in
         (env, inits, succ i) )
@@ -337,7 +339,7 @@ let define_elem env elem =
 let populate_exports env (exports : Binary.Module.Exports.t) :
   State.exports Result.t =
   let fill_exports get_env exports names =
-    array_fold_left
+    iarray_fold_left
       (fun (acc, names) ({ name; id; _ } : Binary.Export.t) ->
         let value = get_env env id in
         if StringSet.mem name names then Error `Duplicate_export_name
@@ -345,7 +347,7 @@ let populate_exports env (exports : Binary.Module.Exports.t) :
       (StringMap.empty, names) exports
   in
   let fill_exports' get_env exports names =
-    array_fold_left
+    iarray_fold_left
       (fun (acc, names) ({ name; id; _ } : Binary.Export.t) ->
         let* value = get_env env id in
         if StringSet.mem name names then Error `Duplicate_export_name
