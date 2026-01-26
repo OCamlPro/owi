@@ -43,13 +43,13 @@ module type T = sig
 
   val shl : t -> t -> t
 
-  val shr_s : t -> t -> t
+  val ashr : t -> t -> t
 
-  val shr_u : t -> t -> t
+  val lshr : t -> t -> t
 
-  val rotl : t -> t -> t
+  val rotate_left : t -> t -> t
 
-  val rotr : t -> t -> t
+  val rotate_right : t -> t -> t
 
   val eq_concrete : t -> concrete -> boolean
 

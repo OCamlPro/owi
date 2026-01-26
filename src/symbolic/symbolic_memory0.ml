@@ -4,10 +4,8 @@
 
 module Map = Map.Make (Int32)
 
-type int8 = Smtml.Typed.bitv8 Smtml.Typed.t
-
 type t =
-  { data : int8 Map.t
+  { data : Smtml.Typed.Bitv8.t Map.t
   ; chunks : Symbolic_i32.t Map.t
   ; size : Symbolic_i32.t
   ; env_id : int

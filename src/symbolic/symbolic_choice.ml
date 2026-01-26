@@ -221,8 +221,8 @@ let select (cond : Symbolic_boolean.t) ~prio_true ~prio_false =
     ~check_only_true_branch:false
 [@@inline]
 
-let summary_symbol (e : Smtml.Typed.bitv32 Smtml.Typed.t) :
-  (bool Smtml.Typed.t option * Smtml.Symbol.t) t =
+let summary_symbol (e : Smtml.Typed.Bitv32.t) :
+  (Smtml.Typed.Bool.t option * Smtml.Symbol.t) t =
   let* thread in
   match Smtml.Typed.view e with
   | Symbol sym -> return (None, sym)
@@ -326,15 +326,15 @@ let ite (c : Symbolic_boolean.t) ~(if_true : Symbolic_value.t)
   ~(if_false : Symbolic_value.t) : Symbolic_value.t t =
   match (if_true, if_false) with
   | I32 if_true, I32 if_false ->
-    let res = Symbolic_boolean.ite c ~if_true ~if_false in
+    let res = Symbolic_boolean.ite c if_true if_false in
     return (Symbolic_value.I32 res)
   | I64 if_true, I64 if_false ->
-    let res = Symbolic_boolean.ite c ~if_true ~if_false in
+    let res = Symbolic_boolean.ite c if_true if_false in
     return (Symbolic_value.I64 res)
   | F32 if_true, F32 if_false ->
-    return (Symbolic_value.F32 (Symbolic_boolean.ite c ~if_true ~if_false))
+    return (Symbolic_value.F32 (Symbolic_boolean.ite c if_true if_false))
   | F64 if_true, F64 if_false ->
-    return (Symbolic_value.F64 (Symbolic_boolean.ite c ~if_true ~if_false))
+    return (Symbolic_value.F64 (Symbolic_boolean.ite c if_true if_false))
   | Ref _, Ref _ ->
     (* TODO: better prio here *)
     let prio_false = Prio.dummy in

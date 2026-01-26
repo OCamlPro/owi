@@ -1,4 +1,3 @@
-include Boolean_intf.T with type t = bool Smtml.Typed.t
+include Boolean_intf.T with type t = Smtml.Typed.Bool.t
 
-val ite :
-  t -> if_true:'a Smtml.Typed.t -> if_false:'a Smtml.Typed.t -> 'a Smtml.Typed.t
+val ite : t -> 'a Smtml.Typed.expr -> 'a Smtml.Typed.expr -> 'a Smtml.Typed.expr

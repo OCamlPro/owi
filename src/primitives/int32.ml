@@ -47,18 +47,18 @@ let ge_u (x : int32) y = unsigned_compare x y >= 0 [@@inline]
 (* In OCaml, `shift_{left,right,right_logical} are unspecified if y < 0 or y >= 32, but they're not in Wasm and thus we need to mask `y`` to only keep the low 5 bits. *)
 let shl x y = shift_left x (to_int (logand y 31l)) [@@inline]
 
-let shr_s x y = shift_right x (to_int (logand y 31l)) [@@inline]
+let ashr x y = shift_right x (to_int (logand y 31l)) [@@inline]
 
-let shr_u x y = shift_right_logical x (to_int (logand y 31l)) [@@inline]
+let lshr x y = shift_right_logical x (to_int (logand y 31l)) [@@inline]
 
-let rotl x y =
+let rotate_left x y =
   let n = logand y 31l in
-  logor (shl x n) (shr_u x (sub 32l n))
+  logor (shl x n) (lshr x (sub 32l n))
 [@@inline]
 
-let rotr x y =
+let rotate_right x y =
   let n = logand y 31l in
-  logor (shr_u x n) (shl x (sub 32l n))
+  logor (lshr x n) (shl x (sub 32l n))
 [@@inline]
 
 let extend_s n x =
@@ -104,7 +104,7 @@ let of_string_exn s =
       if Char.equal c '_' then parse_hex (i + 1) num
       else begin
         let digit = of_int (hex_digit c) in
-        if not (le_u num (shr_u minus_one (of_int 4))) then
+        if not (le_u num (lshr minus_one (of_int 4))) then
           Fmt.failwith "of_string (int32)"
         else parse_hex (i + 1) (logor (shift_left num 4) digit)
       end

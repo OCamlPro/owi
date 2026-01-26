@@ -1,7 +1,5 @@
 include Smtml.Typed.Float32
 
-type t = Smtml.Typed.float32 Smtml.Typed.t
-
 let of_concrete (f : Float32.t) : t = Smtml.Typed.Float32.v (Float32.to_bits f)
 
 let zero = of_concrete Float32.zero

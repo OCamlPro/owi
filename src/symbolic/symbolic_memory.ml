@@ -1,9 +1,7 @@
 module Map = Map.Make (Int32)
 
-type int8 = Smtml.Typed.bitv8 Smtml.Typed.t
-
 type t = Symbolic_memory0.t =
-  { data : int8 Map.t
+  { data : Smtml.Typed.Bitv8.t Map.t
   ; chunks : Symbolic_i32.t Map.t
   ; size : Symbolic_i32.t
   ; env_id : int
@@ -33,7 +31,7 @@ let load_byte a { data; _ } =
   | None -> Smtml.Typed.Bitv8.v (Smtml.Bitvector.of_int8 0)
   | Some v -> v
 
-let replace_byte a (v : int8) data = Map.add a v data
+let replace_byte a (v : Smtml.Typed.Bitv8.t) data = Map.add a v data
 
 let validate_address m a range =
   let open Symbolic_choice in
@@ -114,9 +112,7 @@ let grow m delta =
   let old_size = Symbolic_i32.mul m.size page_size in
   let new_size = Symbolic_i32.(div (add old_size delta) page_size) in
   let size =
-    Symbolic_boolean.ite
-      (Symbolic_i32.gt new_size m.size)
-      ~if_true:new_size ~if_false:m.size
+    Symbolic_boolean.ite (Symbolic_i32.gt new_size m.size) new_size m.size
   in
   let m = { m with size } in
   replace m
@@ -142,7 +138,7 @@ let load_8_u m a =
   let v = load_byte a m in
   Smtml.Typed.Bitv32.of_int8_u v
 
-let load_16_unchecked m a : Smtml.Typed.bitv16 Smtml.Typed.t =
+let load_16_unchecked m a : Smtml.Typed.Bitv16.t =
   let lsb = load_byte a m in
   let msb = load_byte (Int32.add a 1l) m in
   Smtml.Typed.Bitv8.concat msb lsb
@@ -159,7 +155,7 @@ let load_16_u m a =
   let v = load_16_unchecked m a in
   Smtml.Typed.Bitv32.of_int16_u v
 
-let load_32_unchecked m a : Smtml.Typed.bitv32 Smtml.Typed.t =
+let load_32_unchecked m a : Smtml.Typed.Bitv32.t =
   let low = load_16_unchecked m a in
   let high = load_16_unchecked m (Int32.add a 2l) in
   Smtml.Typed.Bitv16.concat high low

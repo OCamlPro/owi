@@ -76,9 +76,9 @@ val logand : t -> t -> t
 
 val logxor : t -> t -> t
 
-val rotl : t -> t -> t
+val rotate_left : t -> t -> t
 
-val rotr : t -> t -> t
+val rotate_right : t -> t -> t
 
 val shift_left : t -> int -> t
 
@@ -86,9 +86,9 @@ val shl : t -> t -> t
 
 val shift_right : t -> int -> t
 
-val shr_s : t -> t -> t
+val ashr : t -> t -> t
 
-val shr_u : t -> t -> t
+val lshr : t -> t -> t
 
 val shift_right_logical : t -> int -> t
 
