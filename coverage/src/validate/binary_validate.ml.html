@@ -1582,9 +1582,9 @@ type typ =
   | Something
 
 let typ_equal t1 t2 =
-  <span data-count="4014">m</span>atch (t1, t2) with
-  | <span data-count="1090">N</span>um_type t1, Num_type t2 -&gt; Text.num_type_eq t1 t2
-  | <span data-count="2920">R</span>ef_type t1, Ref_type t2 -&gt; Text.heap_type_eq t1 t2
+  <span data-count="4022">m</span>atch (t1, t2) with
+  | <span data-count="1089">N</span>um_type t1, Num_type t2 -&gt; Text.num_type_eq t1 t2
+  | <span data-count="2929">R</span>ef_type t1, Ref_type t2 -&gt; Text.heap_type_eq t1 t2
   | <span data-count="0">A</span>ny, _ | <span data-count="0">_</span>, Any -&gt; true
   | <span data-count="0">S</span>omething, _ | <span data-count="0">_</span>, Something -&gt; true
   | <span data-count="4">_</span>, _ -&gt; false
@@ -1601,9 +1601,9 @@ let pp_typ_list fmt l = <span data-count="2488">l</span>ist ~sep:sp pp_typ fmt l
 
 let typ_of_val_type = function
   | <span data-count="118">T</span>ext.Ref_type (_null, t) -&gt; Ref_type t
-  | <span data-count="53399">N</span>um_type t -&gt; Num_type t
+  | <span data-count="53190">N</span>um_type t -&gt; Num_type t
 
-let typ_of_pt pt = <span data-count="12623">t</span>yp_of_val_type @@ sn<span data-count="12623">d</span> pt
+let typ_of_pt pt = <span data-count="12535">t</span>yp_of_val_type @@ sn<span data-count="12535">d</span> pt
 
 module Index = struct
   module M = Int
@@ -1612,15 +1612,15 @@ module Index = struct
 end
 
 let check_mem modul n =
-  <span data-count="28739">i</span>f n &gt;= Array.lengt<span data-count="28739">h</span> modul.mem then <span data-count="27">E</span>rror (`Unknown_memory (Text.Raw n))
-  else <span data-count="28712">O</span>k ()
+  <span data-count="28601">i</span>f n &gt;= Array.lengt<span data-count="28601">h</span> modul.mem then <span data-count="27">E</span>rror (`Unknown_memory (Text.Raw n))
+  else <span data-count="28574">O</span>k ()
 
 let check_data modul n =
   <span data-count="116">i</span>f n &gt;= Array.lengt<span data-count="116">h</span> modul.data then <span data-count="3">E</span>rror (`Unknown_data (Text.Raw n))
   else <span data-count="113">O</span>k ()
 
 let check_align memarg_align align =
-  <span data-count="26794">i</span>f Int32.ge memarg_align align then <span data-count="38">E</span>rror `Alignment_too_large else <span data-count="26756">O</span>k ()
+  <span data-count="26653">i</span>f Int32.ge memarg_align align then <span data-count="38">E</span>rror `Alignment_too_large else <span data-count="26615">O</span>k ()
 
 module Env = struct
   type t =
@@ -1632,28 +1632,28 @@ module Env = struct
     }
 
   let local_get i env =
-    <span data-count="65508">m</span>atch Index.Map.find_opt i env.locals with
+    <span data-count="65142">m</span>atch Index.Map.find_opt i env.locals with
     | <span data-count="19">N</span>one -&gt; Error (`Unknown_local (Text.Raw i))
-    | <span data-count="65489">S</span>ome v -&gt; Ok v
+    | <span data-count="65123">S</span>ome v -&gt; Ok v
 
   let global_get i modul =
-    <span data-count="2087">i</span>f i &gt;= Array.lengt<span data-count="2087">h</span> modul.global then <span data-count="20">E</span>rror (`Unknown_global (Text.Raw i))
+    <span data-count="2063">i</span>f i &gt;= Array.lengt<span data-count="2063">h</span> modul.global then <span data-count="20">E</span>rror (`Unknown_global (Text.Raw i))
     else
-      <span data-count="2067">m</span>atch modul.global.(i) with
-      | <span data-count="2054">O</span>rigin.Local { typ; _ } | <span data-count="13">I</span>mported { typ; _ } -&gt; Ok typ
+      <span data-count="2043">m</span>atch modul.global.(i) with
+      | <span data-count="2030">O</span>rigin.Local { typ; _ } | <span data-count="13">I</span>mported { typ; _ } -&gt; Ok typ
 
   let func_get i modul =
-    <span data-count="18334">i</span>f i &gt;= Array.lengt<span data-count="18334">h</span> modul.func then <span data-count="11">E</span>rror (`Unknown_func (Text.Raw i))
+    <span data-count="18296">i</span>f i &gt;= Array.lengt<span data-count="18296">h</span> modul.func then <span data-count="11">E</span>rror (`Unknown_func (Text.Raw i))
     else
-      <span data-count="18323">m</span>atch modul.func.(i) with
-      | <span data-count="13980">O</span>rigin.Local { Func.type_f = Bt_raw (_, t); _ }
-      | <span data-count="4343">I</span>mported { typ = Bt_raw (_, t); _ } -&gt;
+      <span data-count="18285">m</span>atch modul.func.(i) with
+      | <span data-count="13948">O</span>rigin.Local { Func.type_f = Bt_raw (_, t); _ }
+      | <span data-count="4337">I</span>mported { typ = Bt_raw (_, t); _ } -&gt;
         Ok t
 
   let block_type_get i env =
-    <span data-count="24507">m</span>atch List.nth_opt env.blocks i with
+    <span data-count="24513">m</span>atch List.nth_opt env.blocks i with
     | <span data-count="1">N</span>one -&gt; Error (`Unknown_label (Text.Raw i))
-    | <span data-count="24506">S</span>ome bt -&gt; Ok bt
+    | <span data-count="24512">S</span>ome bt -&gt; Ok bt
 
   let table_type_get i (modul : Binary.Module.t) =
     <span data-count="2634">i</span>f i &gt;= Array.lengt<span data-count="2634">h</span> modul.table then <span data-count="13">E</span>rror (`Unknown_table (Text.Raw i))
@@ -1666,15 +1666,15 @@ module Env = struct
     else <span data-count="122">m</span>atch modul.elem.(i) with <span data-count="122">v</span>alue -&gt; Ok value.typ
 
   let make ~params ~locals ~modul ~result_type ~refs =
-    <span data-count="10223">l</span>et l = List.mapi (fun i v -&gt; <span data-count="15257">(</span>i, v)) (params @ locals) in
-    <span data-count="10223">l</span>et locals =
+    <span data-count="10208">l</span>et l = List.mapi (fun i v -&gt; <span data-count="15176">(</span>i, v)) (params @ locals) in
+    <span data-count="10208">l</span>et locals =
       List.fold_left
         (fun locals (i, (_, typ)) -&gt;
-          <span data-count="15257">l</span>et typ = typ_of_val_type typ in
-          <span data-count="15257">I</span>ndex.Map.add i typ locals )
+          <span data-count="15176">l</span>et typ = typ_of_val_type typ in
+          <span data-count="15176">I</span>ndex.Map.add i typ locals )
         Index.Map.empty l
     in
-    <span data-count="10223">{</span> locals; modul; result_type; blocks = []; refs }
+    <span data-count="10208">{</span> locals; modul; result_type; blocks = []; refs }
 end
 
 type stack = typ list
@@ -1691,7 +1691,7 @@ let v128 = Num_type V128
 
 let any = Any
 
-let itype = function <span data-count="44773">T</span>ext.S32 -&gt; i32 | <span data-count="3871">S</span>64 -&gt; i64
+let itype = function <span data-count="44630">T</span>ext.S32 -&gt; i32 | <span data-count="3815">S</span>64 -&gt; i64
 
 let ftype = function <span data-count="896">T</span>ext.S32 -&gt; f32 | <span data-count="775">S</span>64 -&gt; f64
 
@@ -1723,9 +1723,9 @@ end = struct
   let pp fmt (s : stack) = <span data-count="2488">p</span>f fmt "[%a]" pp_typ_list s
 
   let match_num_type (required : Text.num_type) (got : Text.num_type) =
-    <span data-count="140606">m</span>atch (required, got) with
-    | <span data-count="129909">I</span>32, I32 -&gt; true
-    | <span data-count="5082">I</span>64, I64 -&gt; true
+    <span data-count="140040">m</span>atch (required, got) with
+    | <span data-count="129405">I</span>32, I32 -&gt; true
+    | <span data-count="5020">I</span>64, I64 -&gt; true
     | <span data-count="2216">F</span>32, F32 -&gt; true
     | <span data-count="2292">F</span>64, F64 -&gt; true
     | <span data-count="459">V</span>128, V128 -&gt; true
@@ -1739,38 +1739,38 @@ end = struct
     | <span data-count="2">E</span>xtern_ht, Func_ht -&gt; false
 
   let match_types required got =
-    <span data-count="140758">m</span>atch (required, got) with
+    <span data-count="140192">m</span>atch (required, got) with
     | <span data-count="0">S</span>omething, _ | <span data-count="48">_</span>, Something -&gt; true
     | <span data-count="0">A</span>ny, _ | <span data-count="0">_</span>, Any -&gt; true
-    | <span data-count="140606">N</span>um_type required, Num_type got -&gt; match_num_type required got
+    | <span data-count="140040">N</span>um_type required, Num_type got -&gt; match_num_type required got
     | <span data-count="99">R</span>ef_type required, Ref_type got -&gt; match_ref_type required got
     | <span data-count="3">N</span>um_type _, Ref_type _ | <span data-count="2">R</span>ef_type _, Num_type _ -&gt; false
 
   let rec equal s s' =
-    <span data-count="41136">m</span>atch (s, s') with
-    | <span data-count="26146">[</span>], s | <span data-count="475">s</span>, [] -&gt; List.for_all (function <span data-count="4002">A</span>ny -&gt; true | <span data-count="605">_</span> -&gt; false) s
+    <span data-count="41118">m</span>atch (s, s') with
+    | <span data-count="26130">[</span>], s | <span data-count="475">s</span>, [] -&gt; List.for_all (function <span data-count="4013">A</span>ny -&gt; true | <span data-count="605">_</span> -&gt; false) s
     | <span data-count="0">A</span>ny :: tl, Any :: tl' -&gt; equa<span data-count="0">l</span> tl s<span data-count="0">'</span> || equal s tl'
     | <span data-count="23">A</span>ny :: tl, hd :: tl' | <span data-count="379">h</span>d :: tl', Any :: tl -&gt;
       equa<span data-count="402">l</span> tl (hd :: tl'<span data-count="0">)</span> || equal (Any :: tl) tl'
-    | <span data-count="14113">h</span>d :: tl, hd' :: tl' -&gt; match_type<span data-count="14113">s</span> hd hd' &amp;&amp; <span data-count="14038">e</span>qual tl tl'
+    | <span data-count="14111">h</span>d :: tl, hd' :: tl' -&gt; match_type<span data-count="14111">s</span> hd hd' &amp;&amp; <span data-count="14036">e</span>qual tl tl'
 
   let ( ||| ) l r = <span data-count="386">m</span>atch (l, r) with <span data-count="386">N</span>one, v | <span data-count="0">v</span>, None -&gt; v | <span data-count="0">_</span>l, r -&gt; r
 
   let rec match_prefix ~prefix ~stack =
-    <span data-count="256963">m</span>atch (prefix, stack) with
-    | <span data-count="130393">[</span>], stack -&gt; Some stack
+    <span data-count="256032">m</span>atch (prefix, stack) with
+    | <span data-count="130022">[</span>], stack -&gt; Some stack
     | <span data-count="781">_</span>hd :: _tl, [] -&gt; None
     | <span data-count="386">_</span>hd :: tl, Any :: tl' -&gt;
       match_prefix ~prefix ~stack:tl' ||| match_prefix ~prefix:tl ~stack
-    | <span data-count="125403">h</span>d :: tl, hd' :: tl' -&gt;
-      if match_types hd hd' then <span data-count="124829">m</span>atch_prefix ~prefix:tl ~stack:tl' else <span data-count="574">N</span>one
+    | <span data-count="124843">h</span>d :: tl, hd' :: tl' -&gt;
+      if match_types hd hd' then <span data-count="124269">m</span>atch_prefix ~prefix:tl ~stack:tl' else <span data-count="574">N</span>one
 
   let pop required stack =
-    <span data-count="114252">m</span>atch match_prefix ~prefix:required ~stack with
+    <span data-count="113882">m</span>atch match_prefix ~prefix:required ~stack with
     | <span data-count="943">N</span>one -&gt;
       let msg = Fmt.str "expected %a but stack is %a" pp required pp stack in
       <span data-count="943">E</span>rror (`Type_mismatch msg)
-    | <span data-count="113309">S</span>ome stack -&gt; Ok stack
+    | <span data-count="112939">S</span>ome stack -&gt; Ok stack
 
   let pop_ref = <span data-count="11">f</span>unction
     | <span data-count="9">(</span><span data-count="1">S</span>omething | <span data-count="8">R</span>ef_type _) :: tl -&gt; Ok tl
@@ -1778,12 +1778,12 @@ end = struct
     | <span data-count="2">_</span> -&gt; Error (`Type_mismatch "pop_ref")
 
   let drop stack =
-    <span data-count="2831">m</span>atch stack with
+    <span data-count="2827">m</span>atch stack with
     | <span data-count="1">[</span>] -&gt; Error (`Type_mismatch "drop")
     | <span data-count="1">A</span>ny :: _ -&gt; Ok [ Any ]
-    | <span data-count="2829">_</span> :: tl -&gt; Ok tl
+    | <span data-count="2825">_</span> :: tl -&gt; Ok tl
 
-  let push t stack = <span data-count="168387">o</span>k @@ t @ stack
+  let push t stack = <span data-count="167788">o</span>k @@ t @ stack
 
   let pop_push (Bt_raw (_, (pt, rt)) : block_type) stack =
     <span data-count="1364">l</span>et pt, rt = (List.rev_ma<span data-count="1364">p</span> typ_of_pt pt, List.rev_ma<span data-count="1364">p</span> typ_of_val_type rt) in
@@ -1793,28 +1793,28 @@ end
 
 let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t)
   : stack Result.t =
-  <span data-count="187021">m</span>atch instr.raw with
+  <span data-count="186255">m</span>atch instr.raw with
   | <span data-count="319">N</span>op -&gt; Ok stack
-  | <span data-count="2831">D</span>rop -&gt; Stack.drop stack
-  | <span data-count="1334">R</span>eturn -&gt;
+  | <span data-count="2827">D</span>rop -&gt; Stack.drop stack
+  | <span data-count="1330">R</span>eturn -&gt;
     let+ _stack =
-      Stack.po<span data-count="1334">p</span> (List.rev_ma<span data-count="1334">p</span> typ_of_val_type env.result_type) stack
+      Stack.po<span data-count="1330">p</span> (List.rev_ma<span data-count="1330">p</span> typ_of_val_type env.result_type) stack
     in
-    <span data-count="1298">[</span> any ]
-  | <span data-count="678">U</span>nreachable -&gt; Ok [ any ]
-  | <span data-count="32384">I</span>32_const _ -&gt; Stack.push [ i32 ] stack
-  | <span data-count="1318">I</span>64_const _ -&gt; Stack.push [ i64 ] stack
+    <span data-count="1294">[</span> any ]
+  | <span data-count="686">U</span>nreachable -&gt; Ok [ any ]
+  | <span data-count="32262">I</span>32_const _ -&gt; Stack.push [ i32 ] stack
+  | <span data-count="1290">I</span>64_const _ -&gt; Stack.push [ i64 ] stack
   | <span data-count="963">F</span>32_const _ -&gt; Stack.push [ f32 ] stack
   | <span data-count="899">F</span>64_const _ -&gt; Stack.push [ f64 ] stack
   | <span data-count="325">V</span>128_const _ -&gt; Stack.push [ v128 ] stack
-  | <span data-count="424">I</span>_unop (s, _op) -&gt;
+  | <span data-count="423">I</span>_unop (s, _op) -&gt;
     let t = itype s in
-    <span data-count="424">l</span>et* stack = Stack.po<span data-count="424">p</span> [ t ] stack in
-    <span data-count="405">S</span>tack.push [ t ] stack
-  | <span data-count="15106">I</span>_binop (s, _op) -&gt;
+    <span data-count="423">l</span>et* stack = Stack.po<span data-count="423">p</span> [ t ] stack in
+    <span data-count="404">S</span>tack.push [ t ] stack
+  | <span data-count="15051">I</span>_binop (s, _op) -&gt;
     let t = itype s in
-    <span data-count="15106">l</span>et* stack = Stack.po<span data-count="15106">p</span> [ t; t ] stack in
-    <span data-count="15036">S</span>tack.push [ t ] stack
+    <span data-count="15051">l</span>et* stack = Stack.po<span data-count="15051">p</span> [ t; t ] stack in
+    <span data-count="14981">S</span>tack.push [ t ] stack
   | <span data-count="173">F</span>_unop (s, _op) -&gt;
     let t = ftype s in
     <span data-count="173">l</span>et* stack = Stack.po<span data-count="173">p</span> [ t ] stack in
@@ -1826,38 +1826,38 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
   | <span data-count="2">V</span>_ibinop (_shape, _op) -&gt;
     let* stack = Stack.po<span data-count="2">p</span> [ v128; v128 ] stack in
     <span data-count="2">S</span>tack.push [ v128 ] stack
-  | <span data-count="1853">I</span>_testop (nn, _) -&gt;
-    let* stack = Stack.po<span data-count="1853">p</span> [ ityp<span data-count="1853">e</span> nn ] stack in
-    <span data-count="1805">S</span>tack.push [ i32 ] stack
-  | <span data-count="4391">I</span>_relop (nn, _) -&gt;
+  | <span data-count="1848">I</span>_testop (nn, _) -&gt;
+    let* stack = Stack.po<span data-count="1848">p</span> [ ityp<span data-count="1848">e</span> nn ] stack in
+    <span data-count="1800">S</span>tack.push [ i32 ] stack
+  | <span data-count="4394">I</span>_relop (nn, _) -&gt;
     let t = itype nn in
-    <span data-count="4391">l</span>et* stack = Stack.po<span data-count="4391">p</span> [ t; t ] stack in
-    <span data-count="4371">S</span>tack.push [ i32 ] stack
+    <span data-count="4394">l</span>et* stack = Stack.po<span data-count="4394">p</span> [ t; t ] stack in
+    <span data-count="4374">S</span>tack.push [ i32 ] stack
   | <span data-count="323">F</span>_relop (nn, _) -&gt;
     let t = ftype nn in
     <span data-count="323">l</span>et* stack = Stack.po<span data-count="323">p</span> [ t; t ] stack in
     <span data-count="299">S</span>tack.push [ i32 ] stack
-  | <span data-count="48552">L</span>ocal_get i -&gt;
-    let* t = Env.local_ge<span data-count="48552">t</span> i env in
-    <span data-count="48545">S</span>tack.push [ t ] stack
-  | <span data-count="9651">L</span>ocal_set i -&gt;
-    let* t = Env.local_ge<span data-count="9651">t</span> i env in
-    <span data-count="9645">S</span>tack.pop [ t ] stack
-  | <span data-count="7305">L</span>ocal_tee i -&gt;
-    let* t = Env.local_ge<span data-count="7305">t</span> i env in
-    <span data-count="7299">l</span>et* stack = Stack.po<span data-count="7299">p</span> [ t ] stack in
-    <span data-count="7270">S</span>tack.push [ t ] stack
-  | <span data-count="544">G</span>lobal_get i -&gt;
-    let* _mut, t = Env.global_ge<span data-count="544">t</span> i env.modul in
-    <span data-count="535">l</span>et t = typ_of_val_type t in
-    <span data-count="535">S</span>tack.push [ t ] stack
-  | <span data-count="816">G</span>lobal_set i -&gt;
-    let* mut, t = Env.global_ge<span data-count="816">t</span> i env.modul in
-    <span data-count="808">l</span>et* () =
-      match mut with <span data-count="804">V</span>ar -&gt; Ok () | <span data-count="4">C</span>onst -&gt; Error `Global_is_immutable
+  | <span data-count="48295">L</span>ocal_get i -&gt;
+    let* t = Env.local_ge<span data-count="48295">t</span> i env in
+    <span data-count="48288">S</span>tack.push [ t ] stack
+  | <span data-count="9584">L</span>ocal_set i -&gt;
+    let* t = Env.local_ge<span data-count="9584">t</span> i env in
+    <span data-count="9578">S</span>tack.pop [ t ] stack
+  | <span data-count="7263">L</span>ocal_tee i -&gt;
+    let* t = Env.local_ge<span data-count="7263">t</span> i env in
+    <span data-count="7257">l</span>et* stack = Stack.po<span data-count="7257">p</span> [ t ] stack in
+    <span data-count="7228">S</span>tack.push [ t ] stack
+  | <span data-count="536">G</span>lobal_get i -&gt;
+    let* _mut, t = Env.global_ge<span data-count="536">t</span> i env.modul in
+    <span data-count="527">l</span>et t = typ_of_val_type t in
+    <span data-count="527">S</span>tack.push [ t ] stack
+  | <span data-count="800">G</span>lobal_set i -&gt;
+    let* mut, t = Env.global_ge<span data-count="800">t</span> i env.modul in
+    <span data-count="792">l</span>et* () =
+      match mut with <span data-count="788">V</span>ar -&gt; Ok () | <span data-count="4">C</span>onst -&gt; Error `Global_is_immutable
     in
-    <span data-count="804">l</span>et t = typ_of_val_type t in
-    <span data-count="804">S</span>tack.pop [ t ] stack
+    <span data-count="788">l</span>et t = typ_of_val_type t in
+    <span data-count="788">S</span>tack.pop [ t ] stack
   | <span data-count="650">I</span>f_else (_id, block_type, e1, e2) -&gt;
     let* stack = Stack.po<span data-count="650">p</span> [ i32 ] stack in
     <span data-count="632">l</span>et* stack_e1 = typecheck_exp<span data-count="632">r</span> env e1 ~is_loop:false block_type ~stack in
@@ -1873,30 +1873,30 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
     <span data-count="154">l</span>et* () = check_alig<span data-count="154">n</span> memarg.align 2l in
     <span data-count="146">l</span>et* stack = Stack.po<span data-count="146">p</span> [ i32 ] stack in
     <span data-count="142">S</span>tack.push [ ityp<span data-count="142">e</span> nn ] stack
-  | <span data-count="12733">I</span>_load (id, nn, memarg) -&gt;
-    let* () = check_me<span data-count="12733">m</span> env.modul id in
-    <span data-count="12733">l</span>et max_allowed = match nn with <span data-count="11407">S</span>32 -&gt; 4l | <span data-count="1326">S</span>64 -&gt; 8l in
-    let* () = check_alig<span data-count="12733">n</span> memarg.align max_allowed in
-    <span data-count="12728">l</span>et* stack = Stack.po<span data-count="12728">p</span> [ i32 ] stack in
-    <span data-count="12708">S</span>tack.push [ ityp<span data-count="12708">e</span> nn ] stack
+  | <span data-count="12691">I</span>_load (id, nn, memarg) -&gt;
+    let* () = check_me<span data-count="12691">m</span> env.modul id in
+    <span data-count="12691">l</span>et max_allowed = match nn with <span data-count="11379">S</span>32 -&gt; 4l | <span data-count="1312">S</span>64 -&gt; 8l in
+    let* () = check_alig<span data-count="12691">n</span> memarg.align max_allowed in
+    <span data-count="12686">l</span>et* stack = Stack.po<span data-count="12686">p</span> [ i32 ] stack in
+    <span data-count="12666">S</span>tack.push [ ityp<span data-count="12666">e</span> nn ] stack
   | <span data-count="56">I</span>64_load32 (id, _, memarg) -&gt;
     let* () = check_me<span data-count="56">m</span> env.modul id in
     <span data-count="56">l</span>et* () = check_alig<span data-count="56">n</span> memarg.align 4l in
     <span data-count="52">l</span>et* stack = Stack.po<span data-count="52">p</span> [ i32 ] stack in
     <span data-count="50">S</span>tack.push [ i64 ] stack
-  | <span data-count="1979">I</span>_store8 (id, nn, memarg) -&gt;
-    let* () = check_me<span data-count="1979">m</span> env.modul id in
-    <span data-count="1978">l</span>et* () = check_alig<span data-count="1978">n</span> memarg.align 1l in
-    <span data-count="1976">S</span>tack.pop [ ityp<span data-count="1976">e</span> nn; i32 ] stack
+  | <span data-count="2009">I</span>_store8 (id, nn, memarg) -&gt;
+    let* () = check_me<span data-count="2009">m</span> env.modul id in
+    <span data-count="2008">l</span>et* () = check_alig<span data-count="2008">n</span> memarg.align 1l in
+    <span data-count="2006">S</span>tack.pop [ ityp<span data-count="2006">e</span> nn; i32 ] stack
   | <span data-count="76">I</span>_store16 (id, nn, memarg) -&gt;
     let* () = check_me<span data-count="76">m</span> env.modul id in
     <span data-count="76">l</span>et* () = check_alig<span data-count="76">n</span> memarg.align 2l in
     <span data-count="74">S</span>tack.pop [ ityp<span data-count="74">e</span> nn; i32 ] stack
-  | <span data-count="10088">I</span>_store (id, nn, memarg) -&gt;
-    let* () = check_me<span data-count="10088">m</span> env.modul id in
-    <span data-count="10088">l</span>et max_allowed = match nn with <span data-count="8296">S</span>32 -&gt; 4l | <span data-count="1792">S</span>64 -&gt; 8l in
-    let* () = check_alig<span data-count="10088">n</span> memarg.align max_allowed in
-    <span data-count="10086">S</span>tack.pop [ ityp<span data-count="10086">e</span> nn; i32 ] stack
+  | <span data-count="9959">I</span>_store (id, nn, memarg) -&gt;
+    let* () = check_me<span data-count="9959">m</span> env.modul id in
+    <span data-count="9959">l</span>et max_allowed = match nn with <span data-count="8209">S</span>32 -&gt; 4l | <span data-count="1750">S</span>64 -&gt; 8l in
+    let* () = check_alig<span data-count="9959">n</span> memarg.align max_allowed in
+    <span data-count="9957">S</span>tack.pop [ ityp<span data-count="9957">e</span> nn; i32 ] stack
   | <span data-count="21">I</span>64_store32 (id, memarg) -&gt;
     let* () = check_me<span data-count="21">m</span> env.modul id in
     <span data-count="21">l</span>et* () = check_alig<span data-count="21">n</span> memarg.align 4l in
@@ -1950,10 +1950,10 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
   | <span data-count="38">M</span>emory_size id -&gt;
     let* () = check_me<span data-count="38">m</span> env.modul id in
     <span data-count="37">S</span>tack.push [ i32 ] stack
-  | <span data-count="220">M</span>emory_copy (id1, id2) -&gt;
-    let* () = check_me<span data-count="220">m</span> env.modul id1 in
-    <span data-count="219">l</span>et* () = check_me<span data-count="219">m</span> env.modul id2 in
-    <span data-count="219">S</span>tack.pop [ i32; i32; i32 ] stack
+  | <span data-count="223">M</span>emory_copy (id1, id2) -&gt;
+    let* () = check_me<span data-count="223">m</span> env.modul id1 in
+    <span data-count="222">l</span>et* () = check_me<span data-count="222">m</span> env.modul id2 in
+    <span data-count="222">S</span>tack.pop [ i32; i32; i32 ] stack
   | <span data-count="191">M</span>emory_fill id -&gt;
     let* () = check_me<span data-count="191">m</span> env.modul id in
     <span data-count="190">S</span>tack.pop [ i32; i32; i32 ] stack
@@ -1961,16 +1961,16 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
     let* () = check_me<span data-count="99">m</span> env.modul memidx in
     <span data-count="98">l</span>et* () = check_dat<span data-count="98">a</span> env.modul dataidx in
     <span data-count="97">S</span>tack.pop [ i32; i32; i32 ] stack
-  | <span data-count="6445">B</span>lock (_, bt, expr) -&gt; typecheck_expr env expr ~is_loop:false bt ~stack
-  | <span data-count="1146">L</span>oop (_, bt, expr) -&gt; typecheck_expr env expr ~is_loop:true bt ~stack
+  | <span data-count="6465">B</span>lock (_, bt, expr) -&gt; typecheck_expr env expr ~is_loop:false bt ~stack
+  | <span data-count="1140">L</span>oop (_, bt, expr) -&gt; typecheck_expr env expr ~is_loop:true bt ~stack
   | <span data-count="1366">C</span>all_indirect (tbl_id, bt) -&gt;
     let* _tbl_type = Env.table_type_ge<span data-count="1366">t</span> tbl_id env.modul in
     <span data-count="1365">l</span>et* stack = Stack.po<span data-count="1365">p</span> [ i32 ] stack in
     <span data-count="1364">S</span>tack.pop_push bt stack
-  | <span data-count="8794">C</span>all i -&gt;
-    let* pt, rt = Env.func_ge<span data-count="8794">t</span> i env.modul in
-    <span data-count="8791">l</span>et* stack = Stack.po<span data-count="8791">p</span> (List.rev_ma<span data-count="8791">p</span> typ_of_pt pt) stack in
-    <span data-count="8779">S</span>tack.push (List.rev_ma<span data-count="8779">p</span> typ_of_val_type rt) stack
+  | <span data-count="8748">C</span>all i -&gt;
+    let* pt, rt = Env.func_ge<span data-count="8748">t</span> i env.modul in
+    <span data-count="8745">l</span>et* stack = Stack.po<span data-count="8745">p</span> (List.rev_ma<span data-count="8745">p</span> typ_of_pt pt) stack in
+    <span data-count="8733">S</span>tack.push (List.rev_ma<span data-count="8733">p</span> typ_of_val_type rt) stack
   | <span data-count="0">C</span>all_ref _t -&gt;
     let+ stack = Stack.pop_re<span data-count="0">f</span> stack in
     (* TODO:
@@ -2043,15 +2043,15 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
   | <span data-count="14">E</span>lem_drop id -&gt;
     let* _elem_typ = Env.elem_type_ge<span data-count="14">t</span> id env.modul in
     <span data-count="12">O</span>k stack
-  | <span data-count="1339">S</span>elect t -&gt;
-    let* stack = Stack.po<span data-count="1339">p</span> [ i32 ] stack in
-    <span data-count="1329">b</span>egin match t with
-    | <span data-count="1318">N</span>one -&gt; begin
+  | <span data-count="1335">S</span>elect t -&gt;
+    let* stack = Stack.po<span data-count="1335">p</span> [ i32 ] stack in
+    <span data-count="1325">b</span>egin match t with
+    | <span data-count="1314">N</span>one -&gt; begin
       match stack with
       | <span data-count="1">R</span>ef_type _ :: _tl -&gt; Error (`Type_mismatch "select implicit")
       | <span data-count="54">A</span>ny :: _ -&gt; Ok [ Something; Any ]
       | <span data-count="12">h</span>d :: Any :: _ -&gt; ok @@ (hd :: [ Any ])
-      | <span data-count="1242">h</span>d :: hd' :: tl when Stack.match_type<span data-count="1242">s</span> hd hd' -&gt; <span data-count="1231">o</span>k @@ (hd :: tl)
+      | <span data-count="1238">h</span>d :: hd' :: tl when Stack.match_type<span data-count="1238">s</span> hd hd' -&gt; <span data-count="1227">o</span>k @@ (hd :: tl)
       | <span data-count="20">_</span> -&gt; Error (`Type_mismatch "select")
     end
     | <span data-count="11">S</span>ome t -&gt;
@@ -2063,15 +2063,15 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
   | <span data-count="20">R</span>ef_func i -&gt;
     if not @@ Hashtbl.me<span data-count="20">m</span> env.refs i then <span data-count="2">E</span>rror `Undeclared_function_reference
     else <span data-count="18">S</span>tack.push [ Ref_type Func_ht ] stack
-  | <span data-count="2094">B</span>r i -&gt;
-    let* jt = Env.block_type_ge<span data-count="2094">t</span> i env in
-    <span data-count="2093">l</span>et* _stack = Stack.po<span data-count="2093">p</span> jt stack in
-    <span data-count="1974">O</span>k [ any ]
-  | <span data-count="5746">B</span>r_if i -&gt;
-    let* stack = Stack.po<span data-count="5746">p</span> [ i32 ] stack in
-    <span data-count="5736">l</span>et* jt = Env.block_type_ge<span data-count="5736">t</span> i env in
-    <span data-count="5736">l</span>et* stack = Stack.po<span data-count="5736">p</span> jt stack in
-    <span data-count="5726">S</span>tack.push jt stack
+  | <span data-count="2101">B</span>r i -&gt;
+    let* jt = Env.block_type_ge<span data-count="2101">t</span> i env in
+    <span data-count="2100">l</span>et* _stack = Stack.po<span data-count="2100">p</span> jt stack in
+    <span data-count="1981">O</span>k [ any ]
+  | <span data-count="5745">B</span>r_if i -&gt;
+    let* stack = Stack.po<span data-count="5745">p</span> [ i32 ] stack in
+    <span data-count="5735">l</span>et* jt = Env.block_type_ge<span data-count="5735">t</span> i env in
+    <span data-count="5735">l</span>et* stack = Stack.po<span data-count="5735">p</span> jt stack in
+    <span data-count="5725">S</span>tack.push jt stack
   | <span data-count="228">B</span>r_table (branches, i) -&gt;
     let* stack = Stack.po<span data-count="228">p</span> [ i32 ] stack in
     <span data-count="221">l</span>et* default_jt = Env.block_type_ge<span data-count="221">t</span> i env in
@@ -2103,59 +2103,59 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
 
 and typecheck_expr env expr ~is_loop (block_type : block_type option)
   ~stack:previous_stack : stack Result.t =
-  <span data-count="18997">l</span>et pt, rt =
+  <span data-count="18996">l</span>et pt, rt =
     Option.fold ~none:([], [])
       ~some:(fun (Bt_raw (_, (pt, rt)) : block_type) -&gt;
-        <span data-count="17647">(</span>List.rev_ma<span data-count="17647">p</span> typ_of_pt pt, List.rev_ma<span data-count="17647">p</span> typ_of_val_type rt) )
+        <span data-count="17646">(</span>List.rev_ma<span data-count="17646">p</span> typ_of_pt pt, List.rev_ma<span data-count="17646">p</span> typ_of_val_type rt) )
       block_type
   in
-  <span data-count="18997">l</span>et jump_type = if is_loop then <span data-count="1146">p</span>t else <span data-count="17851">r</span>t in
+  <span data-count="18996">l</span>et jump_type = if is_loop then <span data-count="1140">p</span>t else <span data-count="17856">r</span>t in
   let env = { env with blocks = jump_type :: env.blocks } in
-  let* stack = list_fold_lef<span data-count="18997">t</span> (typecheck_inst<span data-count="18997">r</span> env) pt expr.raw in
-  <span data-count="17385">i</span>f not (Stack.equa<span data-count="17385">l</span> rt stack) then
+  let* stack = list_fold_lef<span data-count="18996">t</span> (typecheck_inst<span data-count="18996">r</span> env) pt expr.raw in
+  <span data-count="17384">i</span>f not (Stack.equa<span data-count="17384">l</span> rt stack) then
     <span data-count="275">E</span>rror
       (`Type_mismatch
          (Fmt.st<span data-count="275">r</span> "expected a prefix of %a but stack has type %a" Stack.pp rt
             Stack.pp stack ) )
   else
-    <span data-count="17110">m</span>atch Stack.match_prefix ~prefix:pt ~stack:previous_stack with
+    <span data-count="17109">m</span>atch Stack.match_prefix ~prefix:pt ~stack:previous_stack with
     | <span data-count="26">N</span>one -&gt;
       Error
         (`Type_mismatch
            (Fmt.st<span data-count="26">r</span> "expected a prefix of %a but stack has type %a" Stack.pp pt
               Stack.pp previous_stack ) )
-    | <span data-count="17084">S</span>ome stack_to_push -&gt; Stack.push rt stack_to_push
+    | <span data-count="17083">S</span>ome stack_to_push -&gt; Stack.push rt stack_to_push
 
 let typecheck_function (modul : Module.t) func refs =
-  <span data-count="13487">m</span>atch func with
-  | <span data-count="3264">O</span>rigin.Imported _ -&gt; Ok ()
-  | <span data-count="10223">L</span>ocal (func : Func.t) -&gt;
+  <span data-count="13467">m</span>atch func with
+  | <span data-count="3259">O</span>rigin.Imported _ -&gt; Ok ()
+  | <span data-count="10208">L</span>ocal (func : Func.t) -&gt;
     let (Bt_raw (_, (params, result))) = func.type_f in
     let env =
       Env.make ~params ~modul ~locals:func.locals ~result_type:result ~refs
     in
     let* stack =
-      typecheck_exp<span data-count="10223">r</span> env func.body ~is_loop:false
+      typecheck_exp<span data-count="10208">r</span> env func.body ~is_loop:false
         (Some (Bt_raw (None, ([], result))))
         ~stack:[]
     in
-    <span data-count="8838">l</span>et required = List.rev_map typ_of_val_type result in
-    <span data-count="8838">i</span>f not @@ Stack.equa<span data-count="8838">l</span> required stack then
+    <span data-count="8823">l</span>et required = List.rev_map typ_of_val_type result in
+    <span data-count="8823">i</span>f not @@ Stack.equa<span data-count="8823">l</span> required stack then
       <span data-count="0">E</span>rror (`Type_mismatch "typecheck_function")
-    else <span data-count="8838">O</span>k ()
+    else <span data-count="8823">O</span>k ()
 
 let typecheck_const_instr (modul : Module.t) refs stack instr =
-  <span data-count="5377">m</span>atch instr.Annotated.raw with
-  | <span data-count="1718">I</span>32_const _ -&gt; Stack.push [ i32 ] stack
+  <span data-count="5383">m</span>atch instr.Annotated.raw with
+  | <span data-count="1715">I</span>32_const _ -&gt; Stack.push [ i32 ] stack
   | <span data-count="201">I</span>64_const _ -&gt; Stack.push [ i64 ] stack
   | <span data-count="197">F</span>32_const _ -&gt; Stack.push [ f32 ] stack
   | <span data-count="182">F</span>64_const _ -&gt; Stack.push [ f64 ] stack
   | <span data-count="5">V</span>128_const _ -&gt; Stack.push [ v128 ] stack
   | <span data-count="59">R</span>ef_null t -&gt; Stack.push [ Ref_type t ] stack
-  | <span data-count="2868">R</span>ef_func i -&gt;
-    let* _t = Env.func_ge<span data-count="2868">t</span> i modul in
-    <span data-count="2865">H</span>ashtbl.add refs i ();
-    <span data-count="2865">S</span>tack.push [ Ref_type Func_ht ] stack
+  | <span data-count="2877">R</span>ef_func i -&gt;
+    let* _t = Env.func_ge<span data-count="2877">t</span> i modul in
+    <span data-count="2874">H</span>ashtbl.add refs i ();
+    <span data-count="2874">S</span>tack.push [ Ref_type Func_ht ] stack
   | <span data-count="92">G</span>lobal_get i -&gt;
     if i &gt;= Array.lengt<span data-count="92">h</span> modul.global then <span data-count="10">E</span>rror (`Unknown_global (Text.Raw i))
     else
@@ -2177,20 +2177,20 @@ let typecheck_const_instr (modul : Module.t) refs stack instr =
   | <span data-count="33">_</span> -&gt; Error `Constant_expression_required
 
 let typecheck_const_expr (modul : Module.t) refs expr =
-  <span data-count="5302">l</span>ist_fold_left (typecheck_const_inst<span data-count="5302">r</span> modul refs) [] expr.Annotated.raw
+  <span data-count="5308">l</span>ist_fold_left (typecheck_const_inst<span data-count="5308">r</span> modul refs) [] expr.Annotated.raw
 
 let typecheck_global (modul : Module.t) refs
   (global : (Global.t, Text.Global.Type.t) Origin.t) =
-  <span data-count="1272">m</span>atch global with
+  <span data-count="1271">m</span>atch global with
   | <span data-count="127">I</span>mported _ -&gt; Ok ()
-  | <span data-count="1145">L</span>ocal { typ; init; _ } -&gt; (
-    let* real_type = typecheck_const_exp<span data-count="1145">r</span> modul refs init in
-    <span data-count="1120">m</span>atch real_type with
-    | <span data-count="1112">[</span> real_type ] -&gt;
-      let expected = typ_of_val_type @@ sn<span data-count="1112">d</span> typ in
-      <span data-count="1112">i</span>f not @@ typ_equa<span data-count="1112">l</span> expected real_type then
+  | <span data-count="1144">L</span>ocal { typ; init; _ } -&gt; (
+    let* real_type = typecheck_const_exp<span data-count="1144">r</span> modul refs init in
+    <span data-count="1119">m</span>atch real_type with
+    | <span data-count="1111">[</span> real_type ] -&gt;
+      let expected = typ_of_val_type @@ sn<span data-count="1111">d</span> typ in
+      <span data-count="1111">i</span>f not @@ typ_equa<span data-count="1111">l</span> expected real_type then
         <span data-count="4">E</span>rror (`Type_mismatch "typecheck global 1")
-      else <span data-count="1108">O</span>k ()
+      else <span data-count="1107">O</span>k ()
     | <span data-count="8">_</span>whatever -&gt; Error (`Type_mismatch "typecheck_global 2") )
 
 let typecheck_elem modul refs (elem : Elem.t) =
@@ -2198,16 +2198,16 @@ let typecheck_elem modul refs (elem : Elem.t) =
   let* () =
     list_ite<span data-count="1099">r</span>
       (fun init -&gt;
-        <span data-count="2909">l</span>et* real_type = typecheck_const_exp<span data-count="2909">r</span> modul refs init in
-        <span data-count="2904">m</span>atch real_type with
-        | <span data-count="2902">[</span> real_type ] -&gt;
+        <span data-count="2918">l</span>et* real_type = typecheck_const_exp<span data-count="2918">r</span> modul refs init in
+        <span data-count="2913">m</span>atch real_type with
+        | <span data-count="2911">[</span> real_type ] -&gt;
           let expected_type = Ref_type expected_type in
-          if not @@ typ_equa<span data-count="2902">l</span> expected_type real_type then
+          if not @@ typ_equa<span data-count="2911">l</span> expected_type real_type then
             <span data-count="6">E</span>rror
               (`Type_mismatch
                  (Fmt.st<span data-count="6">r</span> "expected %a got %a" pp_typ expected_type pp_typ
                     real_type ) )
-          else <span data-count="2896">O</span>k ()
+          else <span data-count="2905">O</span>k ()
         | <span data-count="2">_</span>whatever -&gt; Error (`Type_mismatch "typecheck elem 2") )
       elem.init
   in
@@ -2229,18 +2229,18 @@ let typecheck_elem modul refs (elem : Elem.t) =
       | <span data-count="8">_</span>whatever -&gt; Error (`Type_mismatch "typecheck_elem 5") )
 
 let typecheck_data modul refs (data : Data.t) =
-  <span data-count="836">m</span>atch data.mode with
+  <span data-count="834">m</span>atch data.mode with
   | <span data-count="260">P</span>assive -&gt; Ok ()
-  | <span data-count="576">A</span>ctive (n, e) -&gt; (
-    let* () = check_me<span data-count="576">m</span> modul n in
-    <span data-count="561">l</span>et* t = typecheck_const_exp<span data-count="561">r</span> modul refs e in
-    <span data-count="541">m</span>atch t with
-    | <span data-count="533">[</span> _t ] -&gt; Ok ()
+  | <span data-count="574">A</span>ctive (n, e) -&gt; (
+    let* () = check_me<span data-count="574">m</span> modul n in
+    <span data-count="559">l</span>et* t = typecheck_const_exp<span data-count="559">r</span> modul refs e in
+    <span data-count="539">m</span>atch t with
+    | <span data-count="531">[</span> _t ] -&gt; Ok ()
     | <span data-count="8">_</span>whatever -&gt; Error (`Type_mismatch "typecheck_data") )
 
 let typecheck_start { start; func; _ } =
-  <span data-count="3947">m</span>atch start with
-  | <span data-count="3686">N</span>one -&gt; Ok ()
+  <span data-count="3946">m</span>atch start with
+  | <span data-count="3685">N</span>one -&gt; Ok ()
   | <span data-count="261">S</span>ome idx -&gt; (
     let* f =
       if idx &gt;= Array.lengt<span data-count="261">h</span> func then <span data-count="1">E</span>rror (`Unknown_func (Text.Raw idx))
@@ -2253,75 +2253,75 @@ let typecheck_start { start; func; _ } =
     | <span data-count="2">_</span> -&gt; Error `Start_function )
 
 let validate_exports modul =
-  <span data-count="3944">l</span>et* () =
-    array_ite<span data-count="3944">r</span>
+  <span data-count="3943">l</span>et* () =
+    array_ite<span data-count="3943">r</span>
       (fun { Export.id; name = _ } -&gt;
-        <span data-count="6642">l</span>et* _t = Env.func_ge<span data-count="6642">t</span> id modul in
-        <span data-count="6639">O</span>k () )
+        <span data-count="6641">l</span>et* _t = Env.func_ge<span data-count="6641">t</span> id modul in
+        <span data-count="6638">O</span>k () )
       modul.exports.func
   in
-  <span data-count="3941">l</span>et* () =
-    array_ite<span data-count="3941">r</span>
+  <span data-count="3940">l</span>et* () =
+    array_ite<span data-count="3940">r</span>
       (fun { Export.id; name = _ } -&gt;
         <span data-count="216">l</span>et* _t = Env.table_type_ge<span data-count="216">t</span> id modul in
         <span data-count="213">O</span>k () )
       modul.exports.table
   in
-  <span data-count="3938">l</span>et* () =
-    array_ite<span data-count="3938">r</span>
+  <span data-count="3937">l</span>et* () =
+    array_ite<span data-count="3937">r</span>
       (fun { Export.id; name = _ } -&gt;
         <span data-count="727">l</span>et* _t = Env.global_ge<span data-count="727">t</span> id modul in
         <span data-count="724">O</span>k () )
       modul.exports.global
   in
-  <span data-count="3935">a</span>rray_iter
+  <span data-count="3934">a</span>rray_iter
     (fun { id; Export.name = _ } -&gt;
-      <span data-count="494">l</span>et* () = check_me<span data-count="494">m</span> modul id in
-      <span data-count="491">O</span>k () )
+      <span data-count="493">l</span>et* () = check_me<span data-count="493">m</span> modul id in
+      <span data-count="490">O</span>k () )
     modul.exports.mem
 
 let check_limit { Text.min; max } =
-  <span data-count="2313">m</span>atch max with
-  | <span data-count="1218">N</span>one -&gt; Ok ()
+  <span data-count="2312">m</span>atch max with
+  | <span data-count="1217">N</span>one -&gt; Ok ()
   | <span data-count="1095">S</span>ome max -&gt;
     if min &gt; max then <span data-count="3">E</span>rror `Size_minimum_greater_than_maximum else <span data-count="1092">O</span>k ()
 
 let validate_tables modul =
-  <span data-count="3932">a</span>rray_iter
+  <span data-count="3931">a</span>rray_iter
     (<span data-count="924">f</span>unction
       | <span data-count="835">O</span>rigin.Local (_, (limits, _)) | <span data-count="89">I</span>mported { typ = limits, _; _ } -&gt;
         check_limit limits )
     modul.table
 
 let validate_mem modul =
-  <span data-count="3930">a</span>rray_iter
-    (<span data-count="1395">f</span>unction
-      | <span data-count="1245">O</span>rigin.Local (_, typ) | <span data-count="150">I</span>mported { typ; _ } -&gt;
+  <span data-count="3929">a</span>rray_iter
+    (<span data-count="1394">f</span>unction
+      | <span data-count="1244">O</span>rigin.Local (_, typ) | <span data-count="150">I</span>mported { typ; _ } -&gt;
         let* () =
           if typ.Text.min &gt; 65536 then <span data-count="3">E</span>rror `Memory_size_too_large
           else
-            <span data-count="1392">m</span>atch typ.max with
+            <span data-count="1391">m</span>atch typ.max with
             | <span data-count="503">S</span>ome max when max &gt; 65536 -&gt; <span data-count="3">E</span>rror `Memory_size_too_large
-            | <span data-count="500">S</span>ome _ | <span data-count="889">N</span>one -&gt; Ok ()
+            | <span data-count="500">S</span>ome _ | <span data-count="888">N</span>one -&gt; Ok ()
         in
-        <span data-count="1389">c</span>heck_limit typ )
+        <span data-count="1388">c</span>heck_limit typ )
     modul.mem
 
 let modul (modul : Module.t) =
-  <span data-count="4080">L</span>og.info (fun m -&gt; <span data-count="25">m</span> "typechecking ...");
-  <span data-count="4080">L</span>og.bench_fn "typechecking time" @@ fun () -&gt;
-  <span data-count="4080">l</span>et refs = Hashtbl.create 512 in
-  <span data-count="4080">l</span>et* () = array_ite<span data-count="4080">r</span> (typecheck_globa<span data-count="4080">l</span> modul refs) modul.global in
-  <span data-count="4043">l</span>et* () = array_ite<span data-count="4043">r</span> (typecheck_ele<span data-count="4043">m</span> modul refs) modul.elem in
-  <span data-count="3990">l</span>et* () = array_ite<span data-count="3990">r</span> (typecheck_dat<span data-count="3990">a</span> modul refs) modul.data in
-  <span data-count="3947">l</span>et* () = typecheck_star<span data-count="3947">t</span> modul in
-  <span data-count="3944">l</span>et* () = validate_export<span data-count="3944">s</span> modul in
-  <span data-count="3932">l</span>et* () = validate_table<span data-count="3932">s</span> modul in
-  <span data-count="3930">l</span>et* () = validate_me<span data-count="3930">m</span> modul in
-  <span data-count="3923">A</span>rray.iter
-    (fun (export : Export.t) -&gt; <span data-count="6639">H</span>ashtbl.add refs export.id ())
+  <span data-count="4079">L</span>og.info (fun m -&gt; <span data-count="25">m</span> "typechecking ...");
+  <span data-count="4079">L</span>og.bench_fn "typechecking time" @@ fun () -&gt;
+  <span data-count="4079">l</span>et refs = Hashtbl.create 512 in
+  <span data-count="4079">l</span>et* () = array_ite<span data-count="4079">r</span> (typecheck_globa<span data-count="4079">l</span> modul refs) modul.global in
+  <span data-count="4042">l</span>et* () = array_ite<span data-count="4042">r</span> (typecheck_ele<span data-count="4042">m</span> modul refs) modul.elem in
+  <span data-count="3989">l</span>et* () = array_ite<span data-count="3989">r</span> (typecheck_dat<span data-count="3989">a</span> modul refs) modul.data in
+  <span data-count="3946">l</span>et* () = typecheck_star<span data-count="3946">t</span> modul in
+  <span data-count="3943">l</span>et* () = validate_export<span data-count="3943">s</span> modul in
+  <span data-count="3931">l</span>et* () = validate_table<span data-count="3931">s</span> modul in
+  <span data-count="3929">l</span>et* () = validate_me<span data-count="3929">m</span> modul in
+  <span data-count="3922">A</span>rray.iter
+    (fun (export : Export.t) -&gt; <span data-count="6638">H</span>ashtbl.add refs export.id ())
     modul.exports.func;
-  <span data-count="3923">a</span>rray_iter (fun func -&gt; <span data-count="13487">t</span>ypecheck_function modul func refs) modul.func
+  <span data-count="3922">a</span>rray_iter (fun func -&gt; <span data-count="13467">t</span>ypecheck_function modul func refs) modul.func
 </code></pre>
       </div>
     </div>

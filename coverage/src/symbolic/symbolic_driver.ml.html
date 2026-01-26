@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>symbolic_driver.ml &mdash; Coverage report</title>
-    <meta name="description" content="89.23% coverage in src/symbolic/symbolic_driver.ml">
+    <meta name="description" content="86.57% coverage in src/symbolic/symbolic_driver.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,16 +15,18 @@
           <span class="dirname">src/symbolic/</span>symbolic_driver.ml
         </a>
       </h1>
-      <h2>89.23%</h2>
+      <h2>86.57%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="bottom:27.12%"></span>
-      <span class="unvisited" style="bottom:25.42%"></span>
-      <span class="unvisited" style="bottom:24.58%"></span>
-      <span class="unvisited" style="bottom:22.88%"></span>
-      <span class="unvisited" style="bottom:22.03%"></span>
-      <span class="unvisited" style="bottom:18.64%"></span>
-      <span class="unvisited" style="bottom:17.80%"></span>
+      <span class="unvisited" style="bottom:29.51%"></span>
+      <span class="unvisited" style="bottom:27.87%"></span>
+      <span class="unvisited" style="bottom:27.05%"></span>
+      <span class="unvisited" style="bottom:25.41%"></span>
+      <span class="unvisited" style="bottom:23.77%"></span>
+      <span class="unvisited" style="bottom:22.13%"></span>
+      <span class="unvisited" style="bottom:21.31%"></span>
+      <span class="unvisited" style="bottom:18.03%"></span>
+      <span class="unvisited" style="bottom:17.21%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -120,33 +122,37 @@
 <a id="L89"></a><span class="unvisited"> </span>
 <a id="L90"></a><span > </span>
 <a id="L91"></a><span class="unvisited"> </span>
-<a id="L92"></a><span class="unvisited"> </span>
-<a id="L93"></a><span > </span>
+<a id="L92"></a><span > </span>
+<a id="L93"></a><span class="unvisited"> </span>
 <a id="L94"></a><span > </span>
-<a id="L95"></a><span > </span>
+<a id="L95"></a><span class="unvisited"> </span>
 <a id="L96"></a><span class="unvisited"> </span>
-<a id="L97"></a><span class="unvisited"> </span>
+<a id="L97"></a><span > </span>
 <a id="L98"></a><span > </span>
 <a id="L99"></a><span > </span>
-<a id="L100"></a><span > </span>
-<a id="L101"></a><span class="visited"> </span>
+<a id="L100"></a><span class="unvisited"> </span>
+<a id="L101"></a><span class="unvisited"> </span>
 <a id="L102"></a><span > </span>
 <a id="L103"></a><span > </span>
-<a id="L104"></a><span class="visited"> </span>
-<a id="L105"></a><span > </span>
+<a id="L104"></a><span > </span>
+<a id="L105"></a><span class="visited"> </span>
 <a id="L106"></a><span > </span>
 <a id="L107"></a><span > </span>
-<a id="L108"></a><span > </span>
+<a id="L108"></a><span class="visited"> </span>
 <a id="L109"></a><span > </span>
-<a id="L110"></a><span class="visited"> </span>
+<a id="L110"></a><span > </span>
 <a id="L111"></a><span > </span>
-<a id="L112"></a><span class="visited"> </span>
+<a id="L112"></a><span > </span>
 <a id="L113"></a><span > </span>
-<a id="L114"></a><span > </span>
-<a id="L115"></a><span class="visited"> </span>
-<a id="L116"></a><span > </span>
-<a id="L117"></a><span class="visited"> </span>
-<a id="L118"></a><span class="visited"> </span>
+<a id="L114"></a><span class="visited"> </span>
+<a id="L115"></a><span > </span>
+<a id="L116"></a><span class="visited"> </span>
+<a id="L117"></a><span > </span>
+<a id="L118"></a><span > </span>
+<a id="L119"></a><span class="visited"> </span>
+<a id="L120"></a><span > </span>
+<a id="L121"></a><span class="visited"> </span>
+<a id="L122"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -269,6 +275,10 @@
 <a href="#L116">116</a>
 <a href="#L117">117</a>
 <a href="#L118">118</a>
+<a href="#L119">119</a>
+<a href="#L120">120</a>
+<a href="#L121">121</a>
+<a href="#L122">122</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -281,14 +291,14 @@ module Bugs = Prio.Make (Prio.FIFO)
 let print_and_count_bugs ~format ~out_file ~no_value
   ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure ~results
   ~with_breadcrumbs =
-  <span data-count="412">l</span>et test_suite_dir = Fpath.(workspace / "test-suite") in
+  <span data-count="411">l</span>et test_suite_dir = Fpath.(workspace / "test-suite") in
   let* (_created : bool) =
-    if not no_value then <span data-count="298">O</span>S.Dir.creat<span data-count="298">e</span> test_suite_dir else <span data-count="114">O</span>k false
+    if not no_value then <span data-count="297">O</span>S.Dir.creat<span data-count="297">e</span> test_suite_dir else <span data-count="114">O</span>k false
   in
 
-  <span data-count="412">l</span>et rec aux count results =
-    <span data-count="596">m</span>atch results () with
-    | <span data-count="358">S</span>eq.Nil -&gt; Ok count
+  <span data-count="411">l</span>et rec aux count results =
+    <span data-count="595">m</span>atch results () with
+    | <span data-count="357">S</span>eq.Nil -&gt; Ok count
     | <span data-count="238">S</span>eq.Cons (bug, tl) -&gt;
       let* () =
         Model.prin<span data-count="238">t</span> ~format ~out_file ~id:count ~no_value ~no_stop_at_failure
@@ -307,19 +317,19 @@ let print_and_count_bugs ~format ~out_file ~no_value
 
 let mk_callback no_stop_at_failure fail_mode res_stack path_count =
  fun ~close_work_queue v -&gt;
-  <span data-count="1757">A</span>tomic.incr path_count;
-  <span data-count="1757">m</span>atch v with
-  | <span data-count="1515">O</span>k (), _thread -&gt; ()
+  <span data-count="1795">A</span>tomic.incr path_count;
+  <span data-count="1796">m</span>atch v with
+  | <span data-count="1554">O</span>k (), _thread -&gt; ()
   | <span data-count="242">E</span>rror bug, _thread -&gt;
     let should_be_added =
       match fail_mode with
-      | <span data-count="234">S</span>ymbolic_parameters.Both -&gt; true
-      | <span data-count="6">A</span>ssertion_only -&gt; Bug.is_assertio<span data-count="6">n</span> bug
+      | <span data-count="235">S</span>ymbolic_parameters.Both -&gt; true
+      | <span data-count="5">A</span>ssertion_only -&gt; Bug.is_assertio<span data-count="5">n</span> bug
       | <span data-count="2">T</span>rap_only -&gt; Bug.is_tra<span data-count="2">p</span> bug
     in
-    if should_be_added then <span data-count="238">b</span>egin
+    if should_be_added then <span data-count="239">b</span>egin
       Bugs.push bug Prio.dummy res_stack;
-      <span data-count="232">i</span>f not no_stop_at_failure then <span data-count="48">b</span>egin
+      <span data-count="234">i</span>f not no_stop_at_failure then <span data-count="50">b</span>egin
         close_work_queue ()
       end
     end
@@ -328,41 +338,45 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
   ~no_assert_failure_expression_printing ~deterministic_result_order ~fail_mode
   ~workspace ~solver ~model_format ~model_out_file ~with_breadcrumbs ~run_time
   (result : unit Symbolic_choice.t) =
-  <span data-count="412">l</span>et thread = Thread.init () in
-  <span data-count="412">l</span>et bug_stack = Bugs.make () in
-  <span data-count="412">l</span>et path_count = Atomic.make 0 in
-  <span data-count="412">l</span>et at_worker_value =
+  <span data-count="411">l</span>et thread = Thread.init () in
+  <span data-count="411">l</span>et bug_stack = Bugs.make () in
+  <span data-count="411">l</span>et path_count = Atomic.make 0 in
+  <span data-count="411">l</span>et at_worker_value =
     mk_callback no_stop_at_failure fail_mode bug_stack path_count
   in
-  <span data-count="412">l</span>et time_before = (Unix.time<span data-count="412">s</span> ()).tms_utime in
+  <span data-count="411">l</span>et time_before = (Unix.time<span data-count="411">s</span> ()).tms_utime in
   let domains : unit Domain.t Array.t =
     Symbolic_choice.run exploration_strategy ~workers solver result thread
       ~at_worker_value
-      ~at_worker_init:(fun () -&gt; <span data-count="795">B</span>ugs.new_pledge bug_stack)
-      ~at_worker_end:(fun () -&gt; <span data-count="776">B</span>ugs.end_pledge bug_stack)
+      ~at_worker_init:(fun () -&gt; <span data-count="794">B</span>ugs.new_pledge bug_stack)
+      ~at_worker_end:(fun () -&gt; <span data-count="777">B</span>ugs.end_pledge bug_stack)
   in
-  <span data-count="412">l</span>et results =
-    Bugs.read_as_seq bug_stack |&gt; <span data-count="412">B</span>ug.sort_seq_if deterministic_result_order
+  <span data-count="411">l</span>et results =
+    Bugs.read_as_seq bug_stack |&gt; <span data-count="411">B</span>ug.sort_seq_if deterministic_result_order
   in
-  <span data-count="412">l</span>et* count =
+  <span data-count="411">l</span>et* count =
     print_and_count_bugs ~format:model_format ~out_file:model_out_file ~no_value
       ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
       ~results ~with_breadcrumbs
   in
 
   (* We don't want to wait for domain to complete in normal/quiet mode because it may take quite some time (if a solver is running a long query, the interpreter is in a long concrete loop, or if the work queue was not correctly closed for instance) *)
-  <span data-count="412">l</span>et wait_for_all_domains () =
+  <span data-count="411">l</span>et wait_for_all_domains () =
     <span data-count="1">A</span>rray.iter
       (fun domain -&gt;
         <span data-count="1">t</span>ry Domain.joi<span data-count="1">n</span> domain with
         | <span data-count="0">Z</span>3.Error msg -&gt;
           Log.info (fun m -&gt;
             <span data-count="0">m</span> "one domain exited with the following Z3 exception: %s" msg )
+        | <span data-count="0">S</span>mtml.Eval.Eval_error err -&gt;
+          Log.info (fun m -&gt;
+            <span data-count="0">m</span> "one domain exited with the following Smtml exception: %a"
+              Smtml.Eval.pp_error_kind err )
         | <span data-count="0">e</span>xn -&gt;
           let backtrace = Printexc.get_raw_backtrace () in
           <span data-count="0">L</span>og.info (fun m -&gt;
             <span data-count="0">m</span>
-              "one domaine exited with the %s exception which was only noticed \
+              "one domain exited with the %s exception which was only noticed \
                while waiting for all domain to join:@\n\
               \  @[&lt;v&gt;%s@]"
               (Printexc.to_strin<span data-count="0">g</span> exn)
@@ -379,15 +393,15 @@ let handle_result ~exploration_strategy ~workers ~no_stop_at_failure ~no_value
     Benchmark.print_final ~bench_stats ~execution_time_a:run_time
       ~execution_time_b ~wait_for_all_domains
   end
-  else <span data-count="410">i</span>f Log.is_debug_enabled () then begin
+  else <span data-count="409">i</span>f Log.is_debug_enabled () then begin
     (* we only do this in debug mode because otherwise it makes performances very bad *)
     <span data-count="1">w</span>ait_for_all_domain<span data-count="1">s</span> ()
   end;
 
   Log.info (fun m -&gt; <span data-count="2">m</span> "Completed paths: %d" (Atomic.ge<span data-count="2">t</span> path_count));
 
-  <span data-count="412">i</span>f count &gt; 0 then <span data-count="223">E</span>rror (`Found_bug count)
-  else <span data-count="189">O</span>k (Log.ap<span data-count="189">p</span> (fun m -&gt; <span data-count="188">m</span> "All OK!"))
+  <span data-count="411">i</span>f count &gt; 0 then <span data-count="223">E</span>rror (`Found_bug count)
+  else <span data-count="188">O</span>k (Log.ap<span data-count="188">p</span> (fun m -&gt; <span data-count="187">m</span> "All OK!"))
 </code></pre>
       </div>
     </div>

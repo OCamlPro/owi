@@ -355,7 +355,7 @@ let gt (x : int32) y = <span data-count="379">c</span>ompar<span data-count="379
 
 let le (x : int32) y = <span data-count="33">c</span>ompar<span data-count="33">e</span> x y &lt;= 0 [@@inline]
 
-let ge (x : int32) y = <span data-count="28154">c</span>ompar<span data-count="28154">e</span> x y &gt;= 0 [@@inline]
+let ge (x : int32) y = <span data-count="28013">c</span>ompar<span data-count="28013">e</span> x y &gt;= 0 [@@inline]
 
 let lt_u (x : int32) y = <span data-count="90114">u</span>nsigned_compar<span data-count="90114">e</span> x y &lt; 0 [@@inline]
 
@@ -368,23 +368,23 @@ let ge_u (x : int32) y = <span data-count="393633">u</span>nsigned_compar<span d
 (* In OCaml, `shift_{left,right,right_logical} are unspecified if y &lt; 0 or y &gt;= 32, but they're not in Wasm and thus we need to mask `y`` to only keep the low 5 bits. *)
 let shl x y = <span data-count="306">s</span>hift_left x (to_in<span data-count="306">t</span> (logan<span data-count="306">d</span> y 31l)) [@@inline]
 
-let shr_s x y = <span data-count="20">s</span>hift_right x (to_in<span data-count="20">t</span> (logan<span data-count="20">d</span> y 31l)) [@@inline]
+let ashr x y = <span data-count="20">s</span>hift_right x (to_in<span data-count="20">t</span> (logan<span data-count="20">d</span> y 31l)) [@@inline]
 
-let shr_u x y = <span data-count="29250">s</span>hift_right_logical x (to_in<span data-count="29250">t</span> (logan<span data-count="29250">d</span> y 31l)) [@@inline]
+let lshr x y = <span data-count="29250">s</span>hift_right_logical x (to_in<span data-count="29250">t</span> (logan<span data-count="29250">d</span> y 31l)) [@@inline]
 
-let rotl x y =
+let rotate_left x y =
   <span data-count="13">l</span>et n = logand y 31l in
-  <span data-count="13">l</span>ogor (sh<span data-count="13">l</span> x n) (shr_<span data-count="13">u</span> x (su<span data-count="13">b</span> 32l n))
+  <span data-count="13">l</span>ogor (sh<span data-count="13">l</span> x n) (lsh<span data-count="13">r</span> x (su<span data-count="13">b</span> 32l n))
 [@@inline]
 
-let rotr x y =
+let rotate_right x y =
   <span data-count="13">l</span>et n = logand y 31l in
-  <span data-count="13">l</span>ogor (shr_<span data-count="13">u</span> x n) (sh<span data-count="13">l</span> x (su<span data-count="13">b</span> 32l n))
+  <span data-count="13">l</span>ogor (lsh<span data-count="13">r</span> x n) (sh<span data-count="13">l</span> x (su<span data-count="13">b</span> 32l n))
 [@@inline]
 
 let extend_s n x =
-  <span data-count="243">l</span>et shift = 32 - n in
-  shift_right (shift_lef<span data-count="243">t</span> x shift) shift
+  <span data-count="14">l</span>et shift = 32 - n in
+  shift_right (shift_lef<span data-count="14">t</span> x shift) shift
 [@@inline]
 
 (* String conversion that allows leading signs and unsigned values *)
@@ -403,9 +403,9 @@ let hex_digit = function
   | _ -&gt; assert false
 [@@inline]
 
-let max_upper = unsigned_di<span data-count="751">v</span> minus_one 10l
+let max_upper = unsigned_di<span data-count="750">v</span> minus_one 10l
 
-let max_lower = unsigned_re<span data-count="751">m</span> minus_one 10l
+let max_lower = unsigned_re<span data-count="750">m</span> minus_one 10l
 
 let sign_extend i =
   <span data-count="68028">l</span>et sign_bit = logand (of_in<span data-count="68028">t</span> (1 lsl (32 - 1))) i in
@@ -425,7 +425,7 @@ let of_string_exn s =
       <span data-count="29206">i</span>f Char.equal c '_' then <span data-count="114">p</span>arse_hex (i + 1) num
       else <span data-count="29092">b</span>egin
         let digit = of_int (hex_digi<span data-count="29092">t</span> c) in
-        <span data-count="29092">i</span>f not (le_<span data-count="29092">u</span> num (shr_<span data-count="29092">u</span> minus_one (of_in<span data-count="29092">t</span> 4))) then
+        <span data-count="29092">i</span>f not (le_<span data-count="29092">u</span> num (lsh<span data-count="29092">r</span> minus_one (of_in<span data-count="29092">t</span> 4))) then
           <span data-count="8">F</span>mt.failwith "of_string (int32)"
         else <span data-count="29084">p</span>arse_hex (i + 1) (logo<span data-count="29084">r</span> (shift_lef<span data-count="29084">t</span> num 4) digit)
       end

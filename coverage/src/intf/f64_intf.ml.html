@@ -53,8 +53,6 @@
 <a id="L29"></a><span > </span>
 <a id="L30"></a><span > </span>
 <a id="L31"></a><span > </span>
-<a id="L32"></a><span > </span>
-<a id="L33"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -90,8 +88,6 @@
 <a href="#L29">29</a>
 <a href="#L30">30</a>
 <a href="#L31">31</a>
-<a href="#L32">32</a>
-<a href="#L33">33</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -119,8 +115,6 @@ module type T = sig
   val promote_f32 : f32 -&gt; t
 
   val reinterpret_i64 : i64 -&gt; t
-
-  val of_concrete : Float64.t -&gt; t
 
   val pp : t Fmt.t
 

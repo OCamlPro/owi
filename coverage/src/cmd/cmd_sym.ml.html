@@ -209,7 +209,7 @@ open Bos
 open Syntax
 
 let run_file ~parameters ~source_file =
-  <span data-count="411">l</span>et { Symbolic_parameters.unsafe
+  <span data-count="410">l</span>et { Symbolic_parameters.unsafe
       ; entry_point
       ; invoke_with_symbols
       ; exploration_strategy = _
@@ -217,28 +217,28 @@ let run_file ~parameters ~source_file =
       } =
     parameters
   in
-  let* m = Compile.File.until_validat<span data-count="411">e</span> ~unsafe source_file in
+  let* m = Compile.File.until_validat<span data-count="410">e</span> ~unsafe source_file in
   (* TODO: enable this once the smart strategy is fully implemented
   ( match exploration_strategy with
   | Smart -&gt; Cmd_call_graph.compute_distances m entry_point
   | _ -&gt; () );
   *)
-  <span data-count="410">l</span>et* m = Cmd_utils.set_entry_poin<span data-count="410">t</span> entry_point invoke_with_symbols m in
-  <span data-count="409">l</span>et link_state =
+  <span data-count="409">l</span>et* m = Cmd_utils.set_entry_poin<span data-count="409">t</span> entry_point invoke_with_symbols m in
+  <span data-count="408">l</span>et link_state =
     Link.State.empty ()
-    |&gt; <span data-count="409">L</span>ink.Extern.modul ~name:"wasi_snapshot_preview1"
+    |&gt; <span data-count="408">L</span>ink.Extern.modul ~name:"wasi_snapshot_preview1"
          Symbolic_wasm_ffi.wasi_snapshot_preview1
-    |&gt; <span data-count="409">L</span>ink.Extern.modul ~name:"owi" Symbolic_wasm_ffi.symbolic_extern_module
+    |&gt; <span data-count="408">L</span>ink.Extern.modul ~name:"owi" Symbolic_wasm_ffi.symbolic_extern_module
   in
-  <span data-count="409">l</span>et+ m, link_state =
+  <span data-count="408">l</span>et+ m, link_state =
     (* unsafe is set to true because the module was already validated before *)
-    Compile.Binary.until_lin<span data-count="409">k</span> ~unsafe:true ~name:None link_state m
+    Compile.Binary.until_lin<span data-count="408">k</span> ~unsafe:true ~name:None link_state m
   in
-  <span data-count="409">l</span>et module Parameters = struct
+  <span data-count="408">l</span>et module Parameters = struct
     let throw_away_trap =
       match parameters.fail_mode with
       | <span data-count="4">A</span>ssertion_only -&gt; true
-      | <span data-count="403">B</span>oth | <span data-count="2">T</span>rap_only -&gt; false
+      | <span data-count="402">B</span>oth | <span data-count="2">T</span>rap_only -&gt; false
 
     let timeout = None
 
@@ -247,14 +247,14 @@ let run_file ~parameters ~source_file =
     let use_ite_for_select = parameters.use_ite_for_select
   end in
   let module I = Interpret.Symbolic (Parameters) in
-  Benchmark.with_utime @@ fun () -&gt; <span data-count="409">I</span>.modul link_state m
+  Benchmark.with_utime @@ fun () -&gt; <span data-count="408">I</span>.modul link_state m
 
 (* NB: This function propagates potential errors (Result.err) occurring
              during evaluation (OS, syntax error, etc.), except for Trap and Assert,
              which are handled here. Most of the computations are done in the Result
              monad, hence the let*. *)
 let cmd ~parameters ~source_file =
-  <span data-count="411">l</span>et { Symbolic_parameters.exploration_strategy
+  <span data-count="410">l</span>et { Symbolic_parameters.exploration_strategy
       ; fail_mode
       ; workers
       ; solver
@@ -278,13 +278,13 @@ let cmd ~parameters ~source_file =
   (* TODO: can we handle this at the cmdliner level? *)
   let* workspace =
     match workspace with
-    | <span data-count="215">S</span>ome path -&gt; Ok path
+    | <span data-count="214">S</span>ome path -&gt; Ok path
     | <span data-count="196">N</span>one -&gt; OS.Dir.tm<span data-count="196">p</span> "owi_sym_%s"
   in
 
-  <span data-count="411">l</span>et* result, run_time = run_file ~parameters ~source_file in
+  <span data-count="410">l</span>et* result, run_time = run_file ~parameters ~source_file in
 
-  <span data-count="409">S</span>ymbolic_driver.handle_result ~exploration_strategy ~fail_mode ~workers
+  <span data-count="408">S</span>ymbolic_driver.handle_result ~exploration_strategy ~fail_mode ~workers
     ~solver ~deterministic_result_order ~model_format ~no_value
     ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
     ~model_out_file ~with_breadcrumbs ~run_time result

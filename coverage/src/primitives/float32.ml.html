@@ -790,13 +790,13 @@ let neg_nan = 0xffc0_0000l
 
 let bare_nan = 0x7f80_0000l
 
-let to_hex_string = Fmt.st<span data-count="751">r</span> "%lx"
+let to_hex_string = Fmt.st<span data-count="750">r</span> "%lx"
 
 type t = Int32.t
 
-let pos_inf = Int32.bits_of_floa<span data-count="751">t</span> (1.0 /. 0.0)
+let pos_inf = Int32.bits_of_floa<span data-count="750">t</span> (1.0 /. 0.0)
 
-let neg_inf = Int32.bits_of_floa<span data-count="751">t</span> (-<span data-count="751">.</span>(1.0 /. 0.0))
+let neg_inf = Int32.bits_of_floa<span data-count="750">t</span> (-<span data-count="750">.</span>(1.0 /. 0.0))
 
 let of_float = Int32.bits_of_float
 
@@ -804,7 +804,7 @@ let to_float = Int32.float_of_bits
 
 let of_bits x = <span data-count="1162">x</span>
 
-let to_bits x = <span data-count="2244">x</span>
+let to_bits x = <span data-count="1493">x</span>
 
 let is_inf x = <span data-count="12301">I</span>nt32.e<span data-count="12301">q</span> x pos_in<span data-count="14">f</span> || Int32.eq x neg_inf
 
@@ -861,7 +861,7 @@ let unary op x =
   <span data-count="154">l</span>et t = op (to_floa<span data-count="154">t</span> x) in
   <span data-count="154">i</span>f not @@ Float.is_na<span data-count="154">n</span> t then <span data-count="132">o</span>f_float t else <span data-count="22">d</span>etermine_unary_nan x
 
-let zero = of_floa<span data-count="751">t</span> 0.0
+let zero = of_floa<span data-count="750">t</span> 0.0
 
 let add x y = <span data-count="13221">b</span>inary x ( +. ) y
 
@@ -1143,7 +1143,7 @@ let to_string' convert is_digit n x =
           (if Char.equal s.[String.lengt<span data-count="52">h</span> s - 1] '.' then <span data-count="0">F</span>mt.st<span data-count="0">r</span> "%s0" s else <span data-count="52">s</span>)
     )
 
-let to_string = to_string<span data-count="751">'</span> (Fmt.st<span data-count="751">r</span> "%.17g") is_digit 3
+let to_string = to_string<span data-count="750">'</span> (Fmt.st<span data-count="750">r</span> "%.17g") is_digit 3
 
 let pp fmt v = <span data-count="52">F</span>mt.string fmt (to_strin<span data-count="52">g</span> v)
 </code></pre>

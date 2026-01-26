@@ -225,7 +225,7 @@ module Exploration_strategy = struct
 
   let to_priority_module : t -&gt; (module Prio.T) = function
     | <span data-count="1">L</span>IFO -&gt; (module Prio.LIFO)
-    | <span data-count="404">F</span>IFO -&gt; (module Prio.FIFO)
+    | <span data-count="403">F</span>IFO -&gt; (module Prio.FIFO)
     | <span data-count="1">R</span>andom -&gt; (module Prio.Random_prio)
     | <span data-count="1">R</span>andom_unseen_then_random -&gt; (module Prio.Random_unseen_then_random)
     | <span data-count="1">R</span>arity -&gt; (module Prio.Rarity)
@@ -236,9 +236,9 @@ module Exploration_strategy = struct
     | <span data-count="0">R</span>arity_depth_loop_aging_random -&gt; (module Prio.Rarity_depth_loop_aging)
 
   let to_work_ds_module strategy : (module Prio.S) =
-    <span data-count="412">l</span>et module M = (val to_priority_modul<span data-count="412">e</span> strategy) in
+    <span data-count="411">l</span>et module M = (val to_priority_modul<span data-count="411">e</span> strategy) in
     if M.requires_random then <span data-count="2">R</span>andom.ini<span data-count="2">t</span> 42;
-    <span data-count="412">(</span>module Prio.Make (M))
+    <span data-count="411">(</span>module Prio.Make (M))
 
   let pp fmt v =
     <span data-count="6">F</span>mt.string fmt

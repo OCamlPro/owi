@@ -380,9 +380,9 @@ let gt (x : int64) y = <span data-count="40">c</span>ompar<span data-count="40">
 
 let le (x : int64) y = <span data-count="611">c</span>ompar<span data-count="611">e</span> x y &lt;= 0 [@@inline]
 
-let ge (x : int64) y = <span data-count="6467">c</span>ompar<span data-count="6467">e</span> x y &gt;= 0 [@@inline]
+let ge (x : int64) y = <span data-count="6481">c</span>ompar<span data-count="6481">e</span> x y &gt;= 0 [@@inline]
 
-let lt_u (x : int64) y = <span data-count="935654">u</span>nsigned_compar<span data-count="935654">e</span> x y &lt; 0 [@@inline]
+let lt_u (x : int64) y = <span data-count="935639">u</span>nsigned_compar<span data-count="935639">e</span> x y &lt; 0 [@@inline]
 
 let le_u (x : int64) y = <span data-count="67264">u</span>nsigned_compar<span data-count="67264">e</span> x y &lt;= 0 [@@inline]
 
@@ -391,19 +391,19 @@ let gt_u (x : int64) y = <span data-count="2508">u</span>nsigned_compar<span dat
 let ge_u (x : int64) y = <span data-count="169">u</span>nsigned_compar<span data-count="169">e</span> x y &gt;= 0 [@@inline]
 
 (* In OCaml, `shift_{left,right,right_logical} are unspecified if y &lt; 0 or y &gt;= 64, but they're not in Wasm and thus we need to mask `y`` to only keep the low 7 bits. *)
-let shl x y = <span data-count="68184">s</span>hift_left x (to_in<span data-count="68184">t</span> (logan<span data-count="68184">d</span> y 63L)) [@@inline]
+let shl x y = <span data-count="67704">s</span>hift_left x (to_in<span data-count="67704">t</span> (logan<span data-count="67704">d</span> y 63L)) [@@inline]
 
-let shr_s x y = <span data-count="20">s</span>hift_right x (to_in<span data-count="20">t</span> (logan<span data-count="20">d</span> y 63L)) [@@inline]
+let ashr x y = <span data-count="20">s</span>hift_right x (to_in<span data-count="20">t</span> (logan<span data-count="20">d</span> y 63L)) [@@inline]
 
-let shr_u x y = <span data-count="23349">s</span>hift_right_logical x (to_in<span data-count="23349">t</span> (logan<span data-count="23349">d</span> y 63L)) [@@inline]
+let lshr x y = <span data-count="23349">s</span>hift_right_logical x (to_in<span data-count="23349">t</span> (logan<span data-count="23349">d</span> y 63L)) [@@inline]
 
-let rotl x y =
+let rotate_left x y =
   <span data-count="13">l</span>et n = logand y 63L in
-  <span data-count="13">l</span>ogor (sh<span data-count="13">l</span> x n) (shr_<span data-count="13">u</span> x (su<span data-count="13">b</span> 64L n))
+  <span data-count="13">l</span>ogor (sh<span data-count="13">l</span> x n) (lsh<span data-count="13">r</span> x (su<span data-count="13">b</span> 64L n))
 
-let rotr x y =
+let rotate_right x y =
   <span data-count="13">l</span>et n = logand y 63L in
-  <span data-count="13">l</span>ogor (shr_<span data-count="13">u</span> x n) (sh<span data-count="13">l</span> x (su<span data-count="13">b</span> 64L n))
+  <span data-count="13">l</span>ogor (lsh<span data-count="13">r</span> x n) (sh<span data-count="13">l</span> x (su<span data-count="13">b</span> 64L n))
 
 let extend_s n x =
   <span data-count="24">l</span>et shift = 64 - n in
@@ -425,9 +425,9 @@ let hex_digit = function
   | _ -&gt; assert false
 [@@inline]
 
-let max_upper = unsigned_di<span data-count="751">v</span> minus_one 10L
+let max_upper = unsigned_di<span data-count="750">v</span> minus_one 10L
 
-let max_lower = unsigned_re<span data-count="751">m</span> minus_one 10L
+let max_lower = unsigned_re<span data-count="750">m</span> minus_one 10L
 
 let of_string_exn s =
   <span data-count="4330">l</span>et len = String.length s in
@@ -439,7 +439,7 @@ let of_string_exn s =
       <span data-count="23383">i</span>f Char.equal c '_' then <span data-count="88">p</span>arse_hex (i + 1) num
       else <span data-count="23295">b</span>egin
         let digit = of_int (hex_digi<span data-count="23295">t</span> c) in
-        <span data-count="23295">i</span>f not (le_<span data-count="23295">u</span> num (shr_<span data-count="23295">u</span> minus_one (of_in<span data-count="23295">t</span> 4))) then
+        <span data-count="23295">i</span>f not (le_<span data-count="23295">u</span> num (lsh<span data-count="23295">r</span> minus_one (of_in<span data-count="23295">t</span> 4))) then
           <span data-count="1">F</span>mt.failwith "of_string (int64)"
         else <span data-count="23294">p</span>arse_hex (i + 1) (logo<span data-count="23294">r</span> (shift_lef<span data-count="23294">t</span> num 4) digit)
       end

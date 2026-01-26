@@ -60,7 +60,7 @@
 module Map = Map.Make (Int32)
 
 type t =
-  { data : Symbolic_i32.t Map.t
+  { data : Smtml.Typed.Bitv8.t Map.t
   ; chunks : Symbolic_i32.t Map.t
   ; size : Symbolic_i32.t
   ; env_id : int

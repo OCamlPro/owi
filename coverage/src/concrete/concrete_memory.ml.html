@@ -237,8 +237,8 @@ type t =
   }
 
 let init limits : t =
-  <span data-count="869">l</span>et data = Bytes.make (page_size * limits.Text.min) '\x00' in
-  <span data-count="869">{</span> limits; data }
+  <span data-count="868">l</span>et data = Bytes.make (page_size * limits.Text.min) '\x00' in
+  <span data-count="868">{</span> limits; data }
 
 let update_memory mem data =
   <span data-count="133">l</span>et limits =
@@ -321,7 +321,7 @@ let load_64 mem addr =
   <span data-count="677">l</span>et addr = Int32.to_int addr in
   <span data-count="677">O</span>k (Bytes.get_int64_l<span data-count="677">e</span> mem.data addr)
 
-let size_in_pages mem = <span data-count="321">I</span>nt32.of_int @@ (Bytes.lengt<span data-count="321">h</span> mem.data / page_size)
+let size_in_pages mem = <span data-count="320">I</span>nt32.of_int @@ (Bytes.lengt<span data-count="320">h</span> mem.data / page_size)
 
 let size mem = <span data-count="928220">I</span>nt32.of_int @@ Bytes.lengt<span data-count="928220">h</span> mem.data
 </code></pre>

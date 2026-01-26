@@ -249,29 +249,29 @@
   }
 
 let empty_stats () =
-  <span data-count="412">{</span> solver_sat_time = Atomic.mak<span data-count="412">e</span> Mtime.Span.min_span
-  ; solver_final_model_time = Atomic.mak<span data-count="412">e</span> Mtime.Span.min_span
-  ; solver_intermediate_model_time = Atomic.mak<span data-count="412">e</span> Mtime.Span.min_span
-  ; path_count = Atomic.mak<span data-count="412">e</span> 1
+  <span data-count="411">{</span> solver_sat_time = Atomic.mak<span data-count="411">e</span> Mtime.Span.min_span
+  ; solver_final_model_time = Atomic.mak<span data-count="411">e</span> Mtime.Span.min_span
+  ; solver_intermediate_model_time = Atomic.mak<span data-count="411">e</span> Mtime.Span.min_span
+  ; path_count = Atomic.mak<span data-count="411">e</span> 1
   }
 
 let handle_time_span atomic_span f =
-  <span data-count="27566">i</span>f Log.is_bench_enabled () then <span data-count="8">(</span>
+  <span data-count="6807">i</span>f Log.is_bench_enabled () then <span data-count="8">(</span>
     let counter = Mtime_clock.counter () in
     (* f is supposed to take a long time! *)
     <span data-count="8">l</span>et res = f () in
     <span data-count="8">l</span>et span = Mtime_clock.count counter in
     <span data-count="8">M</span>ulticore.atomic_modify (Mtime.Span.ad<span data-count="8">d</span> span) atomic_span;
     <span data-count="8">r</span>es )
-  else <span data-count="27558">f</span> ()
+  else <span data-count="6798">f</span> ()
 
 let with_utime f =
-  <span data-count="438">i</span>f Log.is_bench_enabled () then
+  <span data-count="437">i</span>f Log.is_bench_enabled () then
     <span data-count="2">l</span>et before = (Unix.time<span data-count="2">s</span> ()).tms_utime in
     let r = f () in
     <span data-count="2">l</span>et after = (Unix.time<span data-count="2">s</span> ()).tms_utime in
     (r, Some (after -. before))
-  else <span data-count="436">(</span><span data-count="432">f</span> (), None)
+  else <span data-count="435">(</span><span data-count="431">f</span> (), None)
 
 let percentage ~whole ~self =
   <span data-count="12">l</span>et whole = Mtime.Span.to_float_ns whole in

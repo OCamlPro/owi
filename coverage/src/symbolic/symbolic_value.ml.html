@@ -122,32 +122,32 @@ module F64 = Symbolic_f64
 module V128 = Symbolic_v128
 module Ref = Symbolic_ref
 
-type boolean = Symbolic_boolean.t
+type boolean = Smtml.Typed.Bool.t
 
-type i32 = I32.t
+type i32 = Smtml.Typed.Bitv32.t
 
-type i64 = I64.t
+type i64 = Smtml.Typed.Bitv64.t
 
-type f32 = F32.t
+type f32 = Smtml.Typed.Float32.t
 
-type f64 = F64.t
+type f64 = Smtml.Typed.Float64.t
 
-type v128 = V128.t
+type v128 = Smtml.Typed.Bitv128.t
 
 type t =
-  | I32 of I32.t
-  | I64 of I64.t
-  | F32 of F32.t
-  | F64 of F64.t
-  | V128 of V128.t
+  | I32 of Smtml.Typed.Bitv32.t
+  | I64 of Smtml.Typed.Bitv64.t
+  | F32 of Smtml.Typed.Float32.t
+  | F64 of Smtml.Typed.Float64.t
+  | V128 of Smtml.Typed.Bitv128.t
   | Ref of Ref.t
 
 let pp fmt = function
-  | <span data-count="29">I</span>32 i -&gt; I32.pp fmt i
-  | <span data-count="0">I</span>64 i -&gt; I64.pp fmt i
-  | <span data-count="0">F</span>32 f -&gt; F32.pp fmt f
-  | <span data-count="0">F</span>64 f -&gt; F64.pp fmt f
-  | <span data-count="0">V</span>128 e -&gt; V128.pp fmt e
+  | <span data-count="29">I</span>32 i -&gt; Smtml.Typed.Bitv32.pp fmt i
+  | <span data-count="0">I</span>64 i -&gt; Smtml.Typed.Bitv64.pp fmt i
+  | <span data-count="0">F</span>32 f -&gt; Smtml.Typed.Float32.pp fmt f
+  | <span data-count="0">F</span>64 f -&gt; Smtml.Typed.Float64.pp fmt f
+  | <span data-count="0">V</span>128 e -&gt; Smtml.Typed.Bitv128.pp fmt e
   | <span data-count="0">R</span>ef r -&gt; Ref.pp fmt r
 </code></pre>
       </div>

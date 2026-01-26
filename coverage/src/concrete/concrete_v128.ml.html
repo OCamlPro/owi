@@ -238,15 +238,15 @@ let of_i16x8 a b c d e f g h = <span data-count="12">I</span>64x2 (i64_of_i16x<s
 
 let of_i32x4 a b c d = <span data-count="85">I</span>32x4 (a, b, c, d)
 
-let of_i64x2 a b = <span data-count="820">I</span>64x2 (a, b)
+let of_i64x2 a b = <span data-count="819">I</span>64x2 (a, b)
 
 let of_f32x4 a b c d = <span data-count="120">F</span>32x4 (a, b, c, d)
 
 let of_f64x2 a b = <span data-count="247">F</span>64x2 (a, b)
 
 let to_i64x2 t =
-  <span data-count="1157">m</span>atch t with
-  | <span data-count="802">I</span>64x2 (a, b) -&gt; (a, b)
+  <span data-count="406">m</span>atch t with
+  | <span data-count="51">I</span>64x2 (a, b) -&gt; (a, b)
   | <span data-count="57">I</span>32x4 (a, b, c, d) -&gt; (i64_of_i32x<span data-count="57">2</span> a b, i64_of_i32x<span data-count="57">2</span> c d)
   | <span data-count="213">F</span>64x2 (a, b) -&gt; (Float64.to_bit<span data-count="213">s</span> a, Float64.to_bit<span data-count="213">s</span> b)
   | <span data-count="85">F</span>32x4 (a, b, c, d) -&gt;
@@ -270,7 +270,7 @@ let to_i32x4 = function
   | <span data-count="2">I</span>32x4 (a, b, c, d) -&gt; (a, b, c, d)
   | <span data-count="0">v</span> -&gt; i64x2_to_i32x4 (to_i64x<span data-count="0">2</span> v)
 
-let zero = of_i64x<span data-count="751">2</span> 0L 0L
+let zero = of_i64x<span data-count="750">2</span> 0L 0L
 
 let eq a b =
   <span data-count="202">l</span>et a1, a2 = to_i64x2 a in

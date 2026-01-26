@@ -258,13 +258,13 @@ module type T = sig
 
   val shl : t -&gt; t -&gt; t
 
-  val shr_s : t -&gt; t -&gt; t
+  val ashr : t -&gt; t -&gt; t
 
-  val shr_u : t -&gt; t -&gt; t
+  val lshr : t -&gt; t -&gt; t
 
-  val rotl : t -&gt; t -&gt; t
+  val rotate_left : t -&gt; t -&gt; t
 
-  val rotr : t -&gt; t -&gt; t
+  val rotate_right : t -&gt; t -&gt; t
 
   val eq_concrete : t -&gt; concrete -&gt; boolean
 

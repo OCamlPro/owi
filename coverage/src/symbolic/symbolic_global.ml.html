@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>symbolic_global.ml &mdash; Coverage report</title>
-    <meta name="description" content="83.33% coverage in src/symbolic/symbolic_global.ml">
+    <meta name="description" content="84.21% coverage in src/symbolic/symbolic_global.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">src/symbolic/</span>symbolic_global.ml
         </a>
       </h1>
-      <h2>83.33%</h2>
+      <h2>84.21%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="bottom:18.75%"></span>
@@ -103,28 +103,28 @@ type t = Symbolic_global0.t =
   ; id : int
   }
 
-let value global = <span data-count="357">g</span>lobal.value
+let value global = <span data-count="354">g</span>lobal.value
 
 let replace global =
-  <span data-count="2107">S</span>ymbolic_choice.modify_thread (Thread.replace_globa<span data-count="2107">l</span> global)
+  <span data-count="1950">S</span>ymbolic_choice.modify_thread (Thread.replace_globa<span data-count="1954">l</span> global)
 
 let set_value global value =
-  <span data-count="1879">l</span>et global = { global with value } in
+  <span data-count="1723">l</span>et global = { global with value } in
   replace global
 
 let convert_values (v : Concrete_value.t) : Symbolic_value.t =
-  <span data-count="228">m</span>atch v with
-  | <span data-count="198">I</span>32 v -&gt; I32 (Symbolic_i32.of_concret<span data-count="198">e</span> v)
-  | <span data-count="10">I</span>64 v -&gt; I64 (Symbolic_i64.of_concret<span data-count="10">e</span> v)
-  | <span data-count="10">F</span>32 v -&gt; F32 (Symbolic_f32.of_concret<span data-count="10">e</span> v)
-  | <span data-count="10">F</span>64 v -&gt; F64 (Symbolic_f64.of_concret<span data-count="10">e</span> v)
+  <span data-count="227">m</span>atch v with
+  | <span data-count="197">I</span>32 v -&gt; I32 (Symbolic_i32.of_int3<span data-count="197">2</span> v)
+  | <span data-count="10">I</span>64 v -&gt; I64 (Symbolic_i64.of_int6<span data-count="10">4</span> v)
+  | <span data-count="10">F</span>32 v -&gt; F32 (Symbolic_f32.of_float3<span data-count="10">2</span> v)
+  | <span data-count="10">F</span>64 v -&gt; F64 (Symbolic_f64.of_floa<span data-count="10">t</span> (Float64.to_floa<span data-count="10">t</span> v))
   | <span data-count="0">V</span>128 v -&gt; V128 (Symbolic_v128.of_concret<span data-count="0">e</span> v)
   | <span data-count="0">R</span>ef (Func f) -&gt; Ref (Func f)
   | Ref _ -&gt; assert false
 
 let of_concrete ~env_id ~id (v : Concrete_global.t) : t =
-  <span data-count="228">l</span>et value = convert_values v.Concrete_global.value in
-  <span data-count="228">{</span> value; env_id; id }
+  <span data-count="227">l</span>et value = convert_values v.Concrete_global.value in
+  <span data-count="227">{</span> value; env_id; id }
 </code></pre>
       </div>
     </div>

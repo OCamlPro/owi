@@ -153,7 +153,7 @@ type ('a, 'b) t =
   | Imported of 'b imported
 
 let imported ~modul_name ~name ~assigned_name ~typ =
-  <span data-count="4560">I</span>mported { modul_name; name; assigned_name; typ }
+  <span data-count="4551">I</span>mported { modul_name; name; assigned_name; typ }
 
 let pp_imported pp_typ fmt { modul_name; name; assigned_name; typ } =
   <span data-count="1">F</span>mt.pf fmt "{@\n  @[&lt;v&gt;modul: %S@\nname: %S@\nassigned_name: %a@\ntyp: %a@]}"

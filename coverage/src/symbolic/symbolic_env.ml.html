@@ -151,26 +151,26 @@ include Link_env
 type t = Symbolic_extern_func.extern_func Link_env.t
 
 let get_memory (env : t) id : Symbolic_memory.t Symbolic_choice.t =
-  <span data-count="2156362">l</span>et ( let* ) = Symbolic_choice.( let* ) in
+  <span data-count="180500">l</span>et ( let* ) = Symbolic_choice.( let* ) in
   let env_id = Link_env.id env in
-  <span data-count="2156349">l</span>et* thread = Symbolic_choice.thread in
-  <span data-count="2156347">m</span>atch Thread.Collection.find thread.memories ~env_id ~id with
-  | <span data-count="2156149">S</span>ome g -&gt; Symbolic_choice.return g
-  | <span data-count="201">N</span>one -&gt; begin
+  <span data-count="180472">l</span>et* thread = Symbolic_choice.thread in
+  <span data-count="180479">m</span>atch Thread.Collection.find thread.memories ~env_id ~id with
+  | <span data-count="180295">S</span>ome g -&gt; Symbolic_choice.return g
+  | <span data-count="200">N</span>one -&gt; begin
     match get_memory env id with
     | Error _e -&gt; assert false
-    | <span data-count="201">O</span>k original -&gt;
+    | <span data-count="200">O</span>k original -&gt;
       let symbolic = Symbolic_memory.of_concrete ~env_id ~id original in
-      <span data-count="201">l</span>et* () = Symbolic_memory.replac<span data-count="201">e</span> symbolic in
-      <span data-count="201">S</span>ymbolic_choice.return symbolic
+      <span data-count="200">l</span>et* () = Symbolic_memory.replac<span data-count="200">e</span> symbolic in
+      <span data-count="200">S</span>ymbolic_choice.return symbolic
   end
 
 let get_table (env : t) id : Symbolic_table.t Symbolic_choice.t =
-  <span data-count="8507">l</span>et ( let* ) = Symbolic_choice.( let* ) in
+  <span data-count="8549">l</span>et ( let* ) = Symbolic_choice.( let* ) in
   let env_id = Link_env.id env in
-  <span data-count="8506">l</span>et* thread = Symbolic_choice.thread in
-  <span data-count="8504">m</span>atch Thread.Collection.find thread.tables ~env_id ~id with
-  | <span data-count="8340">S</span>ome g -&gt; Symbolic_choice.return g
+  <span data-count="8549">l</span>et* thread = Symbolic_choice.thread in
+  <span data-count="8551">m</span>atch Thread.Collection.find thread.tables ~env_id ~id with
+  | <span data-count="8385">S</span>ome g -&gt; Symbolic_choice.return g
   | <span data-count="167">N</span>one -&gt; begin
     match get_table env id with
     | Error _e -&gt; assert false
@@ -181,23 +181,23 @@ let get_table (env : t) id : Symbolic_table.t Symbolic_choice.t =
   end
 
 let get_data env n =
-  <span data-count="404">m</span>atch get_data env n with
+  <span data-count="400">m</span>atch get_data env n with
   | <span data-count="0">E</span>rror e -&gt; Symbolic_choice.trap e
-  | <span data-count="404">O</span>k orig_data -&gt; Symbolic_choice.return orig_data
+  | <span data-count="400">O</span>k orig_data -&gt; Symbolic_choice.return orig_data
 
 let get_global (env : t) id : Symbolic_global.t Symbolic_choice.t =
-  <span data-count="2236">l</span>et ( let* ) = Symbolic_choice.( let* ) in
+  <span data-count="2080">l</span>et ( let* ) = Symbolic_choice.( let* ) in
   let env_id = Link_env.id env in
-  <span data-count="2236">l</span>et* thread = Symbolic_choice.thread in
-  <span data-count="2236">m</span>atch Thread.Collection.find thread.globals ~env_id ~id with
-  | <span data-count="2008">S</span>ome g -&gt; Symbolic_choice.return g
-  | <span data-count="228">N</span>one -&gt; begin
+  <span data-count="2078">l</span>et* thread = Symbolic_choice.thread in
+  <span data-count="2081">m</span>atch Thread.Collection.find thread.globals ~env_id ~id with
+  | <span data-count="1853">S</span>ome g -&gt; Symbolic_choice.return g
+  | <span data-count="227">N</span>one -&gt; begin
     match get_global env id with
     | Error _e -&gt; assert false
-    | <span data-count="228">O</span>k original -&gt;
+    | <span data-count="227">O</span>k original -&gt;
       let symbolic = Symbolic_global.of_concrete ~env_id ~id original in
-      <span data-count="228">l</span>et* () = Symbolic_global.replac<span data-count="228">e</span> symbolic in
-      <span data-count="228">S</span>ymbolic_choice.return symbolic
+      <span data-count="227">l</span>et* () = Symbolic_global.replac<span data-count="227">e</span> symbolic in
+      <span data-count="227">S</span>ymbolic_choice.return symbolic
   end
 </code></pre>
       </div>

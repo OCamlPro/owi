@@ -497,7 +497,7 @@ let write_testcase =
 (* Entry-point *)
 
 let dummy_value_of_t = function
-  | <span data-count="392">T</span>ext.Num_type I32 -&gt; Ok (Binary.I32_const 0l)
+  | <span data-count="390">T</span>ext.Num_type I32 -&gt; Ok (Binary.I32_const 0l)
   | <span data-count="0">N</span>um_type I64 -&gt; Ok (Binary.I64_const 0L)
   | <span data-count="0">N</span>um_type F32 -&gt; Ok (Binary.F32_const (Float32.of_floa<span data-count="0">t</span> 0.))
   | <span data-count="0">N</span>um_type F64 -&gt; Ok (Binary.F64_const (Float64.of_floa<span data-count="0">t</span> 0.))
@@ -508,31 +508,31 @@ let dummy_value_of_t = function
 
 let default_symbol_of_t m =
   (* TODO: make this lazy to avoid adding unused imports to the module *)
-  <span data-count="222">l</span>et modul_name = "owi" in
+  <span data-count="221">l</span>et modul_name = "owi" in
   let m =
     let func_name = "i32_symbol" in
     let typ = Binary.Bt_raw (None, ([], [ Text.Num_type Text.I32 ])) in
-    Binary.Module.add_import_if_not_presen<span data-count="222">t</span> ~modul_name ~func_name ~typ m
+    Binary.Module.add_import_if_not_presen<span data-count="221">t</span> ~modul_name ~func_name ~typ m
   in
   let m =
     let func_name = "i64_symbol" in
     let typ = Binary.Bt_raw (None, ([], [ Text.Num_type Text.I64 ])) in
-    Binary.Module.add_import_if_not_presen<span data-count="222">t</span> ~modul_name ~func_name ~typ m
+    Binary.Module.add_import_if_not_presen<span data-count="221">t</span> ~modul_name ~func_name ~typ m
   in
   let m =
     let func_name = "f32_symbol" in
     let typ = Binary.Bt_raw (None, ([], [ Text.Num_type Text.F32 ])) in
-    Binary.Module.add_import_if_not_presen<span data-count="222">t</span> ~modul_name ~func_name ~typ m
+    Binary.Module.add_import_if_not_presen<span data-count="221">t</span> ~modul_name ~func_name ~typ m
   in
   let m =
     let func_name = "f64_symbol" in
     let typ = Binary.Bt_raw (None, ([], [ Text.Num_type Text.F64 ])) in
-    Binary.Module.add_import_if_not_presen<span data-count="222">t</span> ~modul_name ~func_name ~typ m
+    Binary.Module.add_import_if_not_presen<span data-count="221">t</span> ~modul_name ~func_name ~typ m
   in
   let m =
     let func_name = "v128_symbol" in
     let typ = Binary.Bt_raw (None, ([], [ Text.Num_type Text.V128 ])) in
-    Binary.Module.add_import_if_not_presen<span data-count="222">t</span> ~modul_name ~func_name ~typ m
+    Binary.Module.add_import_if_not_presen<span data-count="221">t</span> ~modul_name ~func_name ~typ m
   in
   let i32_symbol =
     match
@@ -540,7 +540,7 @@ let default_symbol_of_t m =
         m
     with
     | None -&gt; assert false
-    | <span data-count="222">S</span>ome idx -&gt; idx
+    | <span data-count="221">S</span>ome idx -&gt; idx
   in
   let i64_symbol =
     match
@@ -548,7 +548,7 @@ let default_symbol_of_t m =
         m
     with
     | None -&gt; assert false
-    | <span data-count="222">S</span>ome idx -&gt; idx
+    | <span data-count="221">S</span>ome idx -&gt; idx
   in
   let f32_symbol =
     match
@@ -556,7 +556,7 @@ let default_symbol_of_t m =
         m
     with
     | None -&gt; assert false
-    | <span data-count="222">S</span>ome idx -&gt; idx
+    | <span data-count="221">S</span>ome idx -&gt; idx
   in
   let f64_symbol =
     match
@@ -564,7 +564,7 @@ let default_symbol_of_t m =
         m
     with
     | None -&gt; assert false
-    | <span data-count="222">S</span>ome idx -&gt; idx
+    | <span data-count="221">S</span>ome idx -&gt; idx
   in
   let v128_symbol =
     match
@@ -572,7 +572,7 @@ let default_symbol_of_t m =
         ~func_name:"v128_symbol" m
     with
     | None -&gt; assert false
-    | <span data-count="222">S</span>ome idx -&gt; idx
+    | <span data-count="221">S</span>ome idx -&gt; idx
   in
   ( m
   , function
@@ -587,21 +587,21 @@ let default_symbol_of_t m =
 
 let set_entry_point entry_point invoke_with_symbols (m : Binary.Module.t) =
   (* We are checking if there's a start function *)
-  <span data-count="420">i</span>f Option.is_some m.start then
+  <span data-count="419">i</span>f Option.is_some m.start then
     <span data-count="198">i</span>f Option.is_some entry_point then
       <span data-count="0">F</span>mt.error_msg
         "We don't know how to handle a custom entry point when there is a \
          start function for now. Please open a bug report."
     else <span data-count="198">O</span>k m
   else
-    <span data-count="222">l</span>et m, default_symbol_of_t = default_symbol_of_t m in
+    <span data-count="221">l</span>et m, default_symbol_of_t = default_symbol_of_t m in
     (* If there is none and we have an entry point passed in argument we search for it *)
-    <span data-count="222">l</span>et* export =
+    <span data-count="221">l</span>et* export =
       match entry_point with
-      | <span data-count="222">S</span>ome entry_point -&gt; begin
+      | <span data-count="221">S</span>ome entry_point -&gt; begin
         match Binary.Module.find_exported_func_from_name entry_point m with
         | <span data-count="1">N</span>one -&gt; Fmt.error_ms<span data-count="1">g</span> "Entry point %s not found" entry_point
-        | <span data-count="221">S</span>ome ep -&gt; Ok ep
+        | <span data-count="220">S</span>ome ep -&gt; Ok ep
       end
       (* If we have no entry point argument then we search for common entry function names *)
       | <span data-count="0">N</span>one -&gt;
@@ -610,60 +610,60 @@ let set_entry_point entry_point invoke_with_symbols (m : Binary.Module.t) =
            entry point was provided"
     in
     (* We found an entry point, so we check its type and build a start function that put the right values on the stack (be it symbols or dummy values), call the entry function and drop the result. *)
-    <span data-count="221">m</span>atch Binary.Module.get_func_type export.id m with
+    <span data-count="220">m</span>atch Binary.Module.get_func_type export.id m with
     | <span data-count="0">N</span>one -&gt; Fmt.error_msg "can't find a main function"
-    | <span data-count="221">S</span>ome (Bt_raw main_type) -&gt;
+    | <span data-count="220">S</span>ome (Bt_raw main_type) -&gt;
       let+ body =
         let pt, rt = snd main_type in
-        <span data-count="221">l</span>et+ args =
-          list_ma<span data-count="221">p</span>
+        <span data-count="220">l</span>et+ args =
+          list_ma<span data-count="220">p</span>
             (fun (_, t) -&gt;
-              <span data-count="416">l</span>et default =
+              <span data-count="414">l</span>et default =
                 if invoke_with_symbols then <span data-count="24">d</span>efault_symbol_of_t
-                else <span data-count="392">d</span>ummy_value_of_t
+                else <span data-count="390">d</span>ummy_value_of_t
               in
               default t )
             pt
         in
-        <span data-count="221">l</span>et after_call = List.map (fun (_ : Text.val_type) -&gt; <span data-count="205">B</span>inary.Drop) rt in
-        <span data-count="221">a</span>rgs @ [ Binary.Call export.id ] @ after_call
-        |&gt; Annotated.dummies |&gt; <span data-count="221">A</span>nnotated.dummy
+        <span data-count="220">l</span>et after_call = List.map (fun (_ : Text.val_type) -&gt; <span data-count="204">B</span>inary.Drop) rt in
+        <span data-count="220">a</span>rgs @ [ Binary.Call export.id ] @ after_call
+        |&gt; Annotated.dummies |&gt; <span data-count="220">A</span>nnotated.dummy
       in
-      <span data-count="221">l</span>et type_f : Binary.block_type = Binary.Bt_raw (None, ([], [])) in
+      <span data-count="220">l</span>et type_f : Binary.block_type = Binary.Bt_raw (None, ([], [])) in
       let start_code = { Binary.Func.type_f; locals = []; body; id = None } in
       let start_func = Origin.Local start_code in
 
       let m, start_index = Binary.Module.add_func start_func m in
-      <span data-count="221">l</span>et start = Some start_index in
+      <span data-count="220">l</span>et start = Some start_index in
       { m with start }
 
 (* Installed files  *)
 
-let c_files_location = List.ma<span data-count="751">p</span> Fpath.v Share.Sites.c_files
+let c_files_location = List.ma<span data-count="750">p</span> Fpath.v Share.Sites.c_files
 
-let rust_files_location = List.ma<span data-count="751">p</span> Fpath.v Share.Sites.rust_files
+let rust_files_location = List.ma<span data-count="750">p</span> Fpath.v Share.Sites.rust_files
 
-let zig_files_location = List.ma<span data-count="751">p</span> Fpath.v Share.Sites.zig_files
+let zig_files_location = List.ma<span data-count="750">p</span> Fpath.v Share.Sites.zig_files
 
 let find location file : Fpath.t Result.t =
-  <span data-count="424">l</span>et* l =
-    list_ma<span data-count="424">p</span>
+  <span data-count="422">l</span>et* l =
+    list_ma<span data-count="422">p</span>
       (fun dir -&gt;
-        <span data-count="424">l</span>et filename = Fpath.append dir file in
-        <span data-count="424">m</span>atch Bos.OS.File.exists filename with
-        | <span data-count="424">O</span>k true -&gt; Ok (Some filename)
+        <span data-count="422">l</span>et filename = Fpath.append dir file in
+        <span data-count="422">m</span>atch Bos.OS.File.exists filename with
+        | <span data-count="422">O</span>k true -&gt; Ok (Some filename)
         | <span data-count="0">O</span>k false -&gt; Ok None
         | <span data-count="0">E</span>rror _ as e -&gt; e )
       location
   in
-  <span data-count="424">l</span>et rec loop = function
+  <span data-count="422">l</span>et rec loop = function
     | <span data-count="0">[</span>] -&gt; Fmt.error_msg "can't find file %a" Fpath.pp file
     | <span data-count="0">N</span>one :: tl -&gt; loop tl
-    | <span data-count="424">S</span>ome file :: _tl -&gt; Ok file
+    | <span data-count="422">S</span>ome file :: _tl -&gt; Ok file
   in
   loop l
 
-let find_installed_c_file filename = <span data-count="420">f</span>ind c_files_location filename
+let find_installed_c_file filename = <span data-count="418">f</span>ind c_files_location filename
 
 let find_installed_rust_file filename = <span data-count="4">f</span>ind rust_files_location filename
 

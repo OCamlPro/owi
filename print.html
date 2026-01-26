@@ -37,10 +37,10 @@
             const path_to_root = "";
             const default_light_theme = "frappe";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-1ceb3324.js";
+            window.path_to_searchindex_js = "searchindex-f9535317.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-6cb043fd.js"></script>
+        <script src="toc-66d4629a.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -638,8 +638,8 @@ export fn check(x: i32, y: i32) void {
 <pre><code class="language-sh">$ owi c ./mean.c --entry-point=check --invoke-with-symbols --no-assert-failure-expression-printing
 owi: [ERROR] Assert failure
 model {
-  symbol symbol_0 i32 -1744830464
-  symbol symbol_1 i32 -1744830464
+  symbol symbol_0 i32 -1570748002
+  symbol symbol_1 i32 -1425538774
 }
 owi: [ERROR] Reached problem!
 [13]
@@ -650,8 +650,8 @@ owi: [ERROR] Reached problem!
 <pre><code class="language-sh">$ owi c++ ./mean.cpp --entry-point=check --invoke-with-symbols --no-assert-failure-expression-printing
 owi: [ERROR] Assert failure
 model {
-  symbol symbol_0 i32 -1744830464
-  symbol symbol_1 i32 -1744830464
+  symbol symbol_0 i32 -1570748002
+  symbol symbol_1 i32 -1425538774
 }
 owi: [ERROR] Reached problem!
 [13]
@@ -662,8 +662,8 @@ owi: [ERROR] Reached problem!
 <pre><code class="language-sh">$ owi rust ./mean.rs --entry-point=check --invoke-with-symbols -w1 --fail-on-assertion-only --no-assert-failure-expression-printing --deterministic-result-order
 owi: [ERROR] Assert failure
 model {
-  symbol symbol_0 i32 -1470102455
-  symbol symbol_1 i32 908070184
+  symbol symbol_0 i32 1610570242
+  symbol symbol_1 i32 -1610637823
 }
 
 owi: [ERROR] Reached problem!
@@ -675,8 +675,8 @@ owi: [ERROR] Reached problem!
 <pre><code class="language-sh">$ owi zig ./mean.zig --entry-point=check --invoke-with-symbols -w1 --fail-on-assertion-only --no-assert-failure-expression-printing --deterministic-result-order
 owi: [ERROR] Assert failure
 model {
-  symbol symbol_0 i32 -1004015877
-  symbol symbol_1 i32 -405288734
+  symbol symbol_0 i32 -467144965
+  symbol symbol_1 i32 -942159646
 }
 
 owi: [ERROR] Reached problem!
@@ -1071,8 +1071,7 @@ int main(void) {
     return 0;
 }
 </code></pre>
-<pre><code class="language-sh">$ owi c --e-acsl primes2.c -w1
-All OK!
+<pre><code class="language-sh">$ # owi c --e-acsl primes2.c -w1
 </code></pre>
 <p>All the specified properties have been satisfied during the execution.</p>
 <div style="break-before: page; page-break-before: always;"></div>
