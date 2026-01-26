@@ -344,7 +344,8 @@ let run ~no_exhaustion script =
            definition, and that module definitions are not treated as "normal",
            or instantiated module. *)
         Ok link_state
-      | Instance _ -> Error (`Unimplemented "(module instance _)") )
+      | Instance (_name, _mod_name) ->
+        Error (`Unimplemented "(module instance _)") )
     state script
 
 let exec ~no_exhaustion script =

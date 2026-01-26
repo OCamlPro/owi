@@ -102,8 +102,6 @@ let pp_assertion fmt = function
 
 type register = string * string option
 
-let pp_register fmt (s, _name) = pf fmt "(register %s)" s
-
 let pp_module_kind fmt = function
   | true -> Fmt.pf fmt " definition"
   | false -> ()
@@ -112,10 +110,12 @@ type cmd =
   | Quoted_module of bool * string
   | Binary_module of bool * string option * string
   | Text_module of bool * Module.t
-  | Instance of indice option
+  | Instance of string option * string
   | Assert of assertion
   | Register of string * string option
   | Action of action
+
+let pp_str_opt fmt = function None -> () | Some s -> Fmt.pf fmt " %s" s
 
 let pp_cmd fmt = function
   | Quoted_module (kind, m) -> pf fmt "(module%a %S)" pp_module_kind kind m
@@ -124,9 +124,10 @@ let pp_cmd fmt = function
   | Text_module (kind, m) ->
     pf fmt "(module%a%a@\n  @[<v>%a@]@\n)" pp_module_kind kind pp_id_opt m.id
       Text.Module.pp_fields m.fields
-  | Instance id -> pf fmt "(module instance%a)" pp_indice_opt id
+  | Instance (id, module_id) ->
+    pf fmt "(module instance%a %s)" pp_str_opt id module_id
   | Assert a -> pp_assertion fmt a
-  | Register (s, name) -> pp_register fmt (s, name)
+  | Register (name, id) -> pf fmt "(register %s%a)" name pp_str_opt id
   | Action _a -> pf fmt "<action>"
 
 type script = cmd list

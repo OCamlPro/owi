@@ -1206,6 +1206,9 @@ let assert_ ==
   }
   | ASSERT_UNLINKABLE; ~ = modul; ~ = NAME; <Assert_unlinkable>
 
+let instance ==
+  | MODULE; INSTANCE; ~ = option(id); ~ = id; <Instance>
+
 let register ==
   | REGISTER; ~ = utf8_name; ~ = option(id); <Register>
 
@@ -1228,8 +1231,8 @@ let cmd ==
     let id, m = bm in
     Binary_module (kind, id, m)
   }
-  | LPAR; MODULE; INSTANCE; ~ = option(indice); RPAR; <Instance>
   | ~ = par(assert_); <Assert>
+  | ~ = par(instance); <>
   | ~ = par(register); <>
   | ~ = par(action); <Action>
 
