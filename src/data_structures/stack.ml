@@ -118,21 +118,22 @@ module Make (Value : Value_intf.T) :
 
   let push_bool s b = push s (I32 (Value.I32.of_boolean b))
 
-  let push_concrete_i32 s i = push s (I32 (Value.I32.of_concrete i))
+  let push_concrete_i32 s i = push s (I32 (Value.I32.of_int32 i))
 
   let push_i32 s i = push s (I32 i)
 
   let push_i32_of_int s i = push_concrete_i32 s (Int32.of_int i)
 
-  let push_concrete_i64 s i = push s (I64 (Value.I64.of_concrete i))
+  let push_concrete_i64 s i = push s (I64 (Value.I64.of_int64 i))
 
   let push_i64 s i = push s (I64 i)
 
-  let push_concrete_f32 s f = push s (F32 (Value.F32.of_concrete f))
+  let push_concrete_f32 s f = push s (F32 (Value.F32.of_float32 f))
 
   let push_f32 s f = push s (F32 f)
 
-  let push_concrete_f64 s f = push s (F64 (Value.F64.of_concrete f))
+  let push_concrete_f64 s f =
+    push s (F64 (Value.F64.of_float (Float64.to_float f)))
 
   let push_f64 s f = push s (F64 f)
 

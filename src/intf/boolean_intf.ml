@@ -9,7 +9,7 @@ module type T = sig
 
   val true_ : t
 
-  val of_concrete : Bool.t -> t
+  val of_bool : Bool.t -> t
 
   val not : t -> t
 

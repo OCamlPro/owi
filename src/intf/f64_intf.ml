@@ -25,8 +25,6 @@ module type T = sig
 
   val reinterpret_i64 : i64 -> t
 
-  val of_concrete : Float64.t -> t
-
   val pp : t Fmt.t
 
   val of_float : Float.t -> t

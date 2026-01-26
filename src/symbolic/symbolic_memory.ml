@@ -19,7 +19,7 @@ let address a =
   | Ptr { base; offset } ->
     let base =
       (* TODO: it seems possible to avoid this conversion *)
-      Smtml.Bitvector.to_int32 base |> Symbolic_i32.of_concrete
+      Smtml.Bitvector.to_int32 base |> Symbolic_i32.of_int32
     in
     let offset = Smtml.Typed.Unsafe.wrap offset in
     let addr = Symbolic_i32.add base offset in
@@ -78,8 +78,7 @@ let ptr v =
 let free m p : Symbolic_i32.t Symbolic_choice.t =
   let open Symbolic_choice in
   match Smtml.Typed.view p with
-  | Val (Bitv bv) when Smtml.Bitvector.eqz bv ->
-    return (Symbolic_i32.of_concrete 0l)
+  | Val (Bitv bv) when Smtml.Bitvector.eqz bv -> return Symbolic_i32.zero
   | _ ->
     let* base = ptr p in
     if not @@ Map.mem base m.chunks then trap `Double_free
@@ -87,7 +86,7 @@ let free m p : Symbolic_i32.t Symbolic_choice.t =
       let chunks = Map.remove base m.chunks in
       let m = { m with chunks } in
       let* () = replace m in
-      return (Symbolic_i32.of_concrete base)
+      return (Symbolic_i32.of_int32 base)
     end
 
 let realloc m ~(ptr : Symbolic_i32.t) ~(size : Symbolic_i32.t) =
@@ -96,9 +95,9 @@ let realloc m ~(ptr : Symbolic_i32.t) ~(size : Symbolic_i32.t) =
   let chunks = Map.add base size m.chunks in
   let m = { m with chunks } in
   let+ () = replace m in
-  Smtml.Typed.ptr base (Symbolic_i32.of_concrete 0l)
+  Smtml.Typed.ptr base Symbolic_i32.zero
 
-let page_size = Symbolic_i32.of_concrete 65_536l
+let page_size = Symbolic_i32.of_int 65_536
 
 (******************************************)
 
@@ -289,7 +288,7 @@ let of_concrete ~env_id ~id (original : Concrete_memory.t) : t =
   (* TODO: how come we don't put anything in here? is it always an uninitialized memory ? *)
   { data = Map.empty
   ; chunks = Map.empty
-  ; size = Symbolic_i32.of_concrete size
+  ; size = Symbolic_i32.of_int32 size
   ; env_id
   ; id
   }

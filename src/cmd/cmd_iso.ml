@@ -30,9 +30,7 @@ let binaryen_fuzzing_support_module weird_log_i64 =
     Symbolic_choice.return ()
   in
   let call_export _n1 _n2 = Symbolic_choice.return () in
-  let call_export_catch _n =
-    Symbolic_choice.return @@ Symbolic_i32.of_concrete 0l
-  in
+  let call_export_catch _n = Symbolic_choice.return @@ Symbolic_i32.zero in
   let sleep _ms id = Symbolic_choice.return id in
   let open Symbolic_extern_func in
   let open Symbolic_extern_func.Syntax in
@@ -51,7 +49,7 @@ let binaryen_fuzzing_support_module weird_log_i64 =
   { Extern.Module.functions; func_type = Symbolic_extern_func.extern_type }
 
 let emscripten_fuzzing_support_module () =
-  let temp_ret_0 = ref (Smtml.Typed.Bitv32.v (Smtml.Bitvector.of_int32 0l)) in
+  let temp_ret_0 = ref Smtml.Typed.Bitv32.zero in
   let set_temp_ret_0 x =
     temp_ret_0 := x;
     Symbolic_choice.return ()

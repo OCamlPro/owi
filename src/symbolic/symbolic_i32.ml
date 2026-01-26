@@ -1,12 +1,5 @@
 include Smtml.Typed.Bitv32
 
-let of_concrete (i : Int32.t) : t =
-  Smtml.Typed.Bitv32.v (Smtml.Bitvector.of_int32 i)
-
-let of_int (i : int) : t = of_concrete (Int32.of_int i)
-
-let one = of_concrete 1l
-
 let to_boolean (e : t) : Symbolic_boolean.t =
   match Smtml.Typed.view e with
   | Val (Bitv bv) ->
@@ -41,5 +34,5 @@ let logor e1 e2 =
   | _ -> Smtml.Typed.Bitv32.logor e1 e2
 
 let eq_concrete (e : t) (c : Int32.t) : Symbolic_boolean.t =
-  let c = of_concrete c in
+  let c = of_int32 c in
   Smtml.Typed.Bitv32.eq c e

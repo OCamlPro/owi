@@ -31,7 +31,7 @@ module type T = sig
 
   val extend_i32_u : i32 -> t
 
-  val of_concrete : Int64.t -> t
+  val of_int64 : Int64.t -> t
 
   val of_int : int -> t
 
