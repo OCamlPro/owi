@@ -895,18 +895,19 @@ struct
   let mk_addr_check_bounds const env memid pos offset current_instr_counter =
     let* mem = Env.get_memory env memid in
     let pos = I64.extend_i32_u pos in
-    let offset = I64.of_int64 offset in
-    let addr = I64.add pos offset in
-
-    let>! () =
-      let res = I64.(add addr (of_int64 const)) in
-      let size = Memory.size mem |> I64.extend_i32_u in
-      let overflow = Boolean.or_ I64.(lt_u addr pos) I64.(lt_u res addr) in
-      ( Boolean.or_ overflow I64.(lt_u size res)
-      , `Out_of_bounds_memory_access
-      , Some current_instr_counter )
-    in
-    Choice.return addr
+    if Int64.(lt_u (sub 0xFFFF_FFFF_FFFF_FFFFL const) offset) then
+      Choice.trap `Out_of_bounds_memory_access
+    else
+      let>! () =
+        let len = I64.of_int64 (Int64.add const offset) in
+        let mem_size = Memory.size mem |> I64.extend_i32_u in
+        (* mem_size <=u len || mem_size - len <u pos *)
+        ( Boolean.or_ I64.(le_u mem_size len) I64.(lt_u (sub mem_size len) pos)
+        , `Out_of_bounds_memory_access
+        , Some current_instr_counter )
+      in
+      let addr = I64.(add pos (of_int64 offset)) in
+      Choice.return addr
 
   let mk_addr_check_bounds_1L = mk_addr_check_bounds 1L
 
