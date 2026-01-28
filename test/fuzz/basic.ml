@@ -25,7 +25,7 @@ let limits =
   in
   let* min = range sup in
   let+ max = option (range ~min (sup - min)) in
-  { min; max }
+  { is_i64 = false; min; max }
 
 let table_type = pair limits ref_type
 
