@@ -57,9 +57,9 @@ let solver_dls_key =
 
 let[@inline] solver () = Domain.DLS.get solver_dls_key
 
-let[@inline] choose a b = State_monad.liftF2 Scheduler.Schedulable.choose a b
-
-let[@inline] yield prio = lift_schedulable @@ Scheduler.Schedulable.yield prio
+let[@inline] choose a b : 'a t =
+  let* choice = lift_schedulable @@ Scheduler.Schedulable.choose a b in
+  choice
 
 let stop = lift_schedulable Scheduler.Schedulable.stop
 
@@ -128,10 +128,7 @@ let with_new_symbol ty f =
   in
   f sym
 
-(* Yielding is currently done each time the solver is about to be called, in check_reachability and get_model.
-  *)
-let check_reachability v prio =
-  let* () = yield prio in
+let check_reachability v =
   let* thread in
   let solver = solver () in
   let pc = thread.pc |> Symbolic_path_condition.slice_on_condition v in
@@ -144,9 +141,8 @@ let check_reachability v prio =
 
 let get_model_or_stop symbol =
   (* TODO: better prio here! *)
-  let* () = yield Prio.dummy in
-  let solver = solver () in
   let* thread in
+  let solver = solver () in
   let set = thread.pc |> Symbolic_path_condition.slice_on_symbol symbol in
   let stats = thread.bench_stats in
   let symbol_scopes = Symbol_scope.of_symbol symbol in
@@ -178,7 +174,7 @@ let select_inner ~explore_first ?(with_breadcrumbs = true)
   | Val False -> return false
   | _ ->
     let is_other_branch_unsat = Atomic.make false in
-    let branch condition final_value prio =
+    let branch condition final_value =
       let* () = add_pc condition in
       let* () =
         if with_breadcrumbs then add_breadcrumb (if final_value then 1 else 0)
@@ -193,7 +189,7 @@ let select_inner ~explore_first ?(with_breadcrumbs = true)
       end
       else begin
         (* the other branch is SAT (or we haven't computed it yet), so we have to check reachability *)
-        let* satisfiability = check_reachability condition prio in
+        let* satisfiability = check_reachability condition in
         begin match satisfiability with
         | `Sat -> return final_value
         | `Unsat ->
@@ -209,14 +205,17 @@ let select_inner ~explore_first ?(with_breadcrumbs = true)
     in
 
     let cond = Symbolic_boolean.of_expr cond in
-
-    let true_branch = branch cond true prio_true in
+    let true_branch = branch cond true in
 
     if check_only_true_branch then true_branch
     else
-      let false_branch = branch (Symbolic_boolean.not cond) false prio_false in
+      let false_branch = branch (Symbolic_boolean.not cond) false in
       let* thread in
       Thread.incr_path_count thread;
+
+      let true_branch = (prio_true, true_branch) in
+      let false_branch = (prio_false, false_branch) in
+
       if explore_first then choose true_branch false_branch
       else choose false_branch true_branch
 [@@inline]
@@ -281,6 +280,10 @@ let select_i32 (i : Symbolic_i32.t) =
       in
       let* thread in
       Thread.incr_path_count thread;
+
+      let this_val_branch = (Prio.dummy, this_val_branch) in
+      let not_this_val_branch = (Prio.dummy, not_this_val_branch) in
+
       choose this_val_branch not_this_val_branch
     in
     generator ()

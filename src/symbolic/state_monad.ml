@@ -41,8 +41,6 @@ let[@inline] map x f =
 
 let[@inline] ( let+ ) x f = map x f
 
-let[@inline] liftF2 f x y = fun st -> f (run x st) (run y st)
-
 let[@inline] with_state f = fun st -> M.return (f st)
 
 let[@inline] modify_state f = fun st -> M.return ((), f st)
