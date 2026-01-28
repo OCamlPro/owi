@@ -985,14 +985,15 @@ let validate_exports modul =
       Ok () )
     modul.exports.mem
 
-let validate_table_limits { Text.i64; min; max } =
+let validate_table_limits { Text.is_i64; min; max } =
   match max with
   | Some max ->
     if min > max then Error `Size_minimum_greater_than_maximum
-    else if (not i64) && (min > 0xFFFF_FFFF || max > 0xFFFF_FFFF) then
+    else if (not is_i64) && (min > 0xFFFF_FFFF || max > 0xFFFF_FFFF) then
       Error `Table_size
     else Ok ()
-  | None -> if (not i64) && min > 0xFFFF_FFFF then Error `Table_size else Ok ()
+  | None ->
+    if (not is_i64) && min > 0xFFFF_FFFF then Error `Table_size else Ok ()
 
 let validate_table_init modul refs id init ((nullable, _) as rt) =
   match init with
@@ -1044,8 +1045,8 @@ let validate_table modul refs id t =
 let validate_tables modul refs =
   array_iteri (validate_table modul refs) modul.table
 
-let validate_memory_limit { Text.i64; min; max } =
-  let max_pages = if i64 then 0x1_0000_0000_0000 else 0x1_0000 in
+let validate_memory_limit { Text.is_i64; min; max } =
+  let max_pages = if is_i64 then 0x1_0000_0000_0000 else 0x1_0000 in
   match max with
   | Some max ->
     if min > max then Error `Size_minimum_greater_than_maximum

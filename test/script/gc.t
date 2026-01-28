@@ -11,9 +11,9 @@
   owi: internal error, uncaught exception:
        File "src/interpret/interpret.ml", line 849, characters 4-10: Assertion failed
        Raised at Owi__Interpret.Make.call_ref in file "src/interpret/interpret.ml" (inlined), line 849, characters 4-16
-       Called from Owi__Interpret.Make.exec_instr in file "src/interpret/interpret.ml", line 1577, characters 24-58
-       Called from Owi__Interpret.Make.loop in file "src/interpret/interpret.ml", line 1591, characters 19-53
-       Called from Owi__Interpret.Make.exec_vfunc_from_outside in file "src/interpret/interpret.ml", lines 1680-1697, characters 6-9
+       Called from Owi__Interpret.Make.exec_instr in file "src/interpret/interpret.ml", line 1579, characters 24-58
+       Called from Owi__Interpret.Make.loop in file "src/interpret/interpret.ml", line 1593, characters 19-53
+       Called from Owi__Interpret.Make.exec_vfunc_from_outside in file "src/interpret/interpret.ml", lines 1682-1699, characters 6-9
        Called from Owi__Script.run.(fun) in file "src/script/script.ml", line 304, characters 21-40
        Called from Owi__Syntax.list_fold_left.aux in file "src/infra/syntax.ml", line 42, characters 12-19
        Called from Owi__Script.exec in file "src/script/script.ml", line 352, characters 21-46
@@ -38,9 +38,9 @@
   owi: internal error, uncaught exception:
        File "src/interpret/interpret.ml", line 849, characters 4-10: Assertion failed
        Raised at Owi__Interpret.Make.call_ref in file "src/interpret/interpret.ml" (inlined), line 849, characters 4-16
-       Called from Owi__Interpret.Make.exec_instr in file "src/interpret/interpret.ml", line 1578, characters 31-64
-       Called from Owi__Interpret.Make.loop in file "src/interpret/interpret.ml", line 1591, characters 19-53
-       Called from Owi__Interpret.Make.exec_vfunc_from_outside in file "src/interpret/interpret.ml", lines 1680-1697, characters 6-9
+       Called from Owi__Interpret.Make.exec_instr in file "src/interpret/interpret.ml", line 1580, characters 31-64
+       Called from Owi__Interpret.Make.loop in file "src/interpret/interpret.ml", line 1593, characters 19-53
+       Called from Owi__Interpret.Make.exec_vfunc_from_outside in file "src/interpret/interpret.ml", lines 1682-1699, characters 6-9
        Called from Owi__Script.run.(fun) in file "src/script/script.ml", line 304, characters 21-40
        Called from Owi__Syntax.list_fold_left.aux in file "src/infra/syntax.ml", line 42, characters 12-19
        Called from Owi__Script.exec in file "src/script/script.ml", line 352, characters 21-46
