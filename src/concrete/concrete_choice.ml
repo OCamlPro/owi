@@ -24,7 +24,7 @@ let[@inline] run m = m
 
 let[@inline] get_pc () = return Smtml.Expr.Set.empty
 
-let[@inline] assume v _instr_counter =
+let[@inline] assume v =
   if v then Ok ()
   else
     (* TODO: there could be a dedicated error here? *)

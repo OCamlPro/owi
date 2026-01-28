@@ -28,7 +28,7 @@ val select_i32 : Symbolic_i32.t -> Int32.t t
 
 val assertion : Symbolic_boolean.t -> unit t
 
-val assume : Symbolic_boolean.t -> Int.t Option.t -> unit t
+val assume : Symbolic_boolean.t -> unit t
 
 val with_thread : (Thread.t -> 'a) -> 'a t
 
