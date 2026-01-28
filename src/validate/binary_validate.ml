@@ -985,20 +985,14 @@ let validate_exports modul =
       Ok () )
     modul.exports.mem
 
-let check_limit ?(table = false) { Text.min; max } =
+let validate_table_limits { Text.i64; min; max } =
   match max with
-  | None ->
-    if table && not (Int64.fits_in_u32 (Int64.of_int min)) then
-      Error `Table_size
-    else Ok ()
   | Some max ->
     if min > max then Error `Size_minimum_greater_than_maximum
-    else if
-      table
-      && ( (not (Int64.fits_in_u32 (Int64.of_int min)))
-         || not (Int64.fits_in_u32 (Int64.of_int max)) )
-    then Error `Table_size
+    else if (not i64) && (min > 0xFFFF_FFFF || max > 0xFFFF_FFFF) then
+      Error `Table_size
     else Ok ()
+  | None -> if (not i64) && min > 0xFFFF_FFFF then Error `Table_size else Ok ()
 
 let validate_table_init modul refs id init ((nullable, _) as rt) =
   match init with
@@ -1044,24 +1038,25 @@ let validate_table modul refs id t =
   match t with
   | Origin.Local Table.{ typ = limits, rt; init; _ } ->
     let* () = validate_table_init modul refs id init rt in
-    check_limit ~table:true limits
-  | Imported { typ = limits, _; _ } -> check_limit ~table:true limits
+    validate_table_limits limits
+  | Imported { typ = limits, _; _ } -> validate_table_limits limits
 
 let validate_tables modul refs =
   array_iteri (validate_table modul refs) modul.table
 
+let validate_memory_limit { Text.i64; min; max } =
+  let max_pages = if i64 then 0x1_0000_0000_0000 else 0x1_0000 in
+  match max with
+  | Some max ->
+    if min > max then Error `Size_minimum_greater_than_maximum
+    else if min > max_pages || max > max_pages then Error `Memory_size_too_large
+    else Ok ()
+  | None -> if min > max_pages then Error `Memory_size_too_large else Ok ()
+
 let validate_mem modul =
   array_iter
     (function
-      | Origin.Local (_, typ) | Imported { typ; _ } ->
-        let* () =
-          if typ.Text.min > 65536 then Error `Memory_size_too_large
-          else
-            match typ.max with
-            | Some max when max > 65536 -> Error `Memory_size_too_large
-            | Some _ | None -> Ok ()
-        in
-        check_limit typ )
+      | Origin.Local (_, typ) | Imported { typ; _ } -> validate_memory_limit typ )
     modul.mem
 
 let modul (modul : Module.t) =
