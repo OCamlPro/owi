@@ -1212,7 +1212,7 @@ let assert_ ==
   | ASSERT_UNLINKABLE; ~ = modul; ~ = NAME; <Assert_unlinkable>
 
 let instance ==
-  | MODULE; INSTANCE; ~ = option(id); ~ = id; <Instance>
+  | MODULE; INSTANCE; ~ = ioption(id); ~ = id; <Instance>
 
 let register ==
   | REGISTER; ~ = utf8_name; ~ = option(id); <Register>
