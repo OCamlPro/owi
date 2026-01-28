@@ -299,7 +299,7 @@ module Text : sig
     }
 
   type nonrec limits =
-    { i64 : bool
+    { is_i64 : bool
     ; min : int
     ; max : int option
     }

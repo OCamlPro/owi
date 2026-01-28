@@ -195,15 +195,15 @@ let addrtype ==
   | { false }
 
 let limits ==
-  | i64 = addrtype; min = NUM; {
+  | is_i64 = addrtype; min = NUM; {
     let min = Int64.to_int (u64 min) in
     let max = None in
-    { i64; min; max}
+    { is_i64; min; max}
   }
-  | i64 = addrtype; min = NUM; max = NUM; {
+  | is_i64 = addrtype; min = NUM; max = NUM; {
     let min = Int64.to_int (u64 min) in
     let max = Some (Int64.to_int (u64 max)) in
-    { i64; min; max }
+    { is_i64; min; max }
   }
 
 let type_use ==
@@ -952,7 +952,7 @@ let table_fields :=
     in
     let mode = Elem.Mode.Active (None, Annotated.dummy []) in
     [ Module.Field.Elem { id = None; typ = ref_type; init; mode; explicit_typ = true }
-    ; Table  { id = None; typ = ({ i64 = false; min; max = Some min }, ref_type); init = None } ]
+    ; Table  { id = None; typ = ({ is_i64 = false; min; max = Some min }, ref_type); init = None } ]
   }
 
 let data ==
@@ -998,7 +998,7 @@ let memory_fields :=
   | LPAR; DATA; init = string_list; RPAR; {
     let min = ((((String.length init)) + 65535) / 65536) in
     [ Module.Field.Data { id = None; init; mode = Data.Mode.Active (None, Annotated.dummy []) }
-    ; Mem (None, { i64 = false; min; max = Some min}) ]
+    ; Mem (None, { is_i64 = false; min; max = Some min}) ]
   }
 
 let global ==

@@ -293,11 +293,11 @@ let read_limits input =
   match b with
   | '\x00' | '\x04' ->
     let+ min, input = read_indice input in
-    ({ Text.i64 = Char.equal b '\x04'; min; max = None }, input)
+    ({ Text.is_i64 = Char.equal b '\x04'; min; max = None }, input)
   | '\x01' | '\x05' ->
     let* min, input = read_indice input in
     let+ max, input = read_indice input in
-    ({ Text.i64 = Char.equal b '\x05'; min; max = Some max }, input)
+    ({ Text.is_i64 = Char.equal b '\x05'; min; max = Some max }, input)
   | _c -> parse_fail "integer too large (read_limits)"
 
 let is_malformed align_raw =
