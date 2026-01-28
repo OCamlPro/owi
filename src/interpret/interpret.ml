@@ -902,6 +902,8 @@ struct
         let len = I64.of_int64 (Int64.add const offset) in
         let mem_size = Memory.size mem |> I64.extend_i32_u in
         (* mem_size <=u len || mem_size - len <u pos *)
+        (* TODO: experiment with splitting the disjunction and doing the
+           checks one at a time. *)
         ( Boolean.or_ I64.(le_u mem_size len) I64.(lt_u (sub mem_size len) pos)
         , `Out_of_bounds_memory_access
         , Some current_instr_counter )
