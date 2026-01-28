@@ -161,7 +161,8 @@ let eval_globals ls env globals : Link_env.Build.t Result.t =
 
 (* TODO: IIRC this is duplicated and should be refactored *)
 let limit_is_included ~import ~imported =
-  imported.Text.min >= import.Text.min
+  Bool.equal import.Text.is_i64 imported.Text.is_i64
+  && imported.min >= import.min
   &&
   match (imported.max, import.max) with
   | _, None -> true

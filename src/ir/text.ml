@@ -235,12 +235,17 @@ let pp_memarg =
     pf fmt "%aalign=%Ld" pp_offset offset (pow_2 align)
 
 type nonrec limits =
-  { min : int
+  { is_i64 : bool
+  ; min : int
   ; max : int option
   }
 
-let pp_limits fmt { min; max } =
-  match max with None -> pf fmt "%d" min | Some max -> pf fmt "%d %d" min max
+let pp_addr_type fmt is_i64 = if is_i64 then Fmt.pf fmt "i64 "
+
+let pp_limits fmt { is_i64; min; max } =
+  match max with
+  | None -> pf fmt "%a%d" pp_addr_type is_i64 min
+  | Some max -> pf fmt "%a%d %d" pp_addr_type is_i64 min max
 
 (** Structure *)
 

@@ -150,10 +150,11 @@ let m =
                      , Bt_raw
                          (None, ([ (None, Num_type I32) ], [ Num_type I32 ])) )
                }
-           ; Mem (Some "memory", { min = 1; max = Some 2 })
+           ; Mem (Some "memory", { is_i64 = false; min = 1; max = Some 2 })
            ; Table
                { id = Some "table"
-               ; typ = ({ min = 10; max = Some 20 }, (Null, Func_ht))
+               ; typ =
+                   ({ is_i64 = false; min = 10; max = Some 20 }, (Null, Func_ht))
                ; init = None
                }
            ; Global

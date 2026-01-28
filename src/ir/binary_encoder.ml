@@ -150,11 +150,11 @@ let write_global_type buf ((mut, vt) : Binary.Global.Type.t) =
 
 let write_limits buf (limits : Text.limits) =
   match limits with
-  | { min; max = None } ->
-    Buffer.add_char buf '\x00';
+  | { is_i64; min; max = None } ->
+    if is_i64 then Buffer.add_char buf '\x04' else Buffer.add_char buf '\x00';
     write_indice buf min
-  | { min; max = Some max } ->
-    Buffer.add_char buf '\x01';
+  | { is_i64; min; max = Some max } ->
+    if is_i64 then Buffer.add_char buf '\x05' else Buffer.add_char buf '\x01';
     write_indice buf min;
     write_indice buf max
 
