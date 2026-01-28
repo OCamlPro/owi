@@ -1,10 +1,9 @@
 module Schedulable = struct
-  (* A monad representing computation that can be cooperatively scheduled. Computations can yield, and fork (Choice). *)
+  (* A monad representing computation that can be cooperatively scheduled. Computations can stop, continue with a value and fork. *)
   type 'a t =
     | Stop
     | Now of 'a
-    | Yield of Prio.metrics * (unit -> 'a t)
-    | Choice of 'a t * 'a t
+    | Fork of ('a t * (Prio.metrics * (unit -> 'a t)))
 
   let[@inline] return x : _ t = Now x
 
@@ -12,10 +11,8 @@ module Schedulable = struct
     match mx with
     | Stop -> Stop
     | Now v -> f v
-    | Yield (prio, step) -> Yield (prio, fun () -> bind (step ()) f)
-    | Choice (a, b) ->
-      (* cps to make it tail rec *)
-      Choice (bind a f, bind b f)
+    | Fork (v, (prio, next)) ->
+      Fork (bind v f, (prio, fun () -> bind (next ()) f))
 
   let[@inline] ( let* ) mx f = bind mx f
 
@@ -25,9 +22,8 @@ module Schedulable = struct
 
   let[@inline] ( let+ ) x f = map f x
 
-  let[@inline] yield prio = Yield (prio, Fun.const (Now ()))
-
-  let[@inline] choose a b = Choice (a, b)
+  let[@inline] fork v (prio, next) =
+    Fork (return v, (prio, fun () -> return next))
 
   let stop = Stop
 end
@@ -46,14 +42,14 @@ module Make (Work_datastructure : Prio.S) = struct
     Work_datastructure.push task Prio.dummy sched.work_queue
 
   let work sched at_worker_value =
-    let rec inner (t : _ Schedulable.t) write_back =
+    let rec inner (t : _ Schedulable.t) write_back : unit =
       match t with
       | Stop -> ()
       | Now x -> at_worker_value x
-      | Yield (prio, f) -> write_back (prio, f)
-      | Choice (m1, m2) ->
-        inner m1 write_back;
-        inner m2 write_back
+      | Fork (v, (prio, next)) ->
+        (* TODO: should we change the order here? *)
+        write_back (prio, next);
+        inner v write_back
     in
     Work_datastructure.work_while
       (fun f write_back -> inner (f ()) write_back)

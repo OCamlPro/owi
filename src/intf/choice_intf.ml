@@ -35,5 +35,5 @@ module type S = sig
 
   val ite : boolean -> if_true:value -> if_false:value -> value t
 
-  val assume : boolean -> Int.t Option.t -> unit t
+  val assume : boolean -> unit t
 end
