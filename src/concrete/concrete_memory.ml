@@ -10,6 +10,7 @@ type t =
   }
 
 let init limits : t =
+  (* TODO: overflow check? (page_size * limits.min) / page_size = limits.min? *)
   let data = Bytes.make (page_size * limits.Text.min) '\x00' in
   { limits; data }
 
