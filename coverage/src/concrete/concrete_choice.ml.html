@@ -105,21 +105,21 @@
 
 type 'a t = 'a Result.t
 
-let[@inline] return x = <span data-count="190251408">O</span>k x
+let[@inline] return x = <span data-count="165918733">O</span>k x
 
-let[@inline] bind x f = <span data-count="201750865">R</span>esult.bind x f
+let[@inline] bind x f = <span data-count="175451868">R</span>esult.bind x f
 
-let[@inline] ( let* ) x f = <span data-count="201750865">b</span>ind x f
+let[@inline] ( let* ) x f = <span data-count="175451868">b</span>ind x f
 
-let[@inline] map v f = <span data-count="6738404">R</span>esult.map f v
+let[@inline] map v f = <span data-count="6345046">R</span>esult.map f v
 
-let[@inline] ( let+ ) v f = <span data-count="6738404">m</span>ap v f
+let[@inline] ( let+ ) v f = <span data-count="6345046">m</span>ap v f
 
-let[@inline] select b ~instr_counter_true:_ ~instr_counter_false:_ = <span data-count="9789849">O</span>k b
+let[@inline] select b ~instr_counter_true:_ ~instr_counter_false:_ = <span data-count="8216668">O</span>k b
 
-let[@inline] select_i32 i = <span data-count="804747">O</span>k i
+let[@inline] select_i32 i = <span data-count="804570">O</span>k i
 
-let[@inline] trap t = <span data-count="2709">E</span>rror t
+let[@inline] trap t = <span data-count="2681">E</span>rror t
 
 let[@inline] run m = <span data-count="0">m</span>
 
@@ -132,7 +132,7 @@ let[@inline] assume v _instr_counter =
     <span data-count="0">a</span>ssert false
 
 let[@inline] ite cond ~if_true ~if_false =
-  <span data-count="239">i</span>f cond then <span data-count="122">r</span>eturn if_true else <span data-count="117">r</span>eturn if_false
+  <span data-count="235">i</span>f cond then <span data-count="118">r</span>eturn if_true else <span data-count="117">r</span>eturn if_false
 </code></pre>
       </div>
     </div>

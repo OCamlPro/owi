@@ -1018,13 +1018,13 @@ let check_iso ~unsafe export_name export_type module1 module2 =
     Binary.Module.add_func
       (Origin.imported ~modul_name:"owi" ~name:"assert"
          ~assigned_name:(Some "assert")
-         ~typ:(Binary.Bt_raw (None, ([ (None, Text.Num_type I32) ], []))) )
+         ~typ:(Binary.Bt_raw (None, ([ (None, Binary.Num_type I32) ], []))) )
       iso_modul
   in
   <span data-count="3">l</span>et iso_func =
     let id = Some "check_iso_func" in
     let locals =
-      [ (None, Text.Num_type F32)
+      [ (None, Binary.Num_type F32)
       ; (None, Num_type F32)
       ; (None, Num_type F64)
       ; (None, Num_type F64)
@@ -1042,9 +1042,9 @@ let check_iso ~unsafe export_name export_type module1 module2 =
       <span data-count="3">p</span>ut_on_stack @ [ Binary.Call idf1 ] @ put_on_stack @ [ Binary.Call idf2 ]
       @ ( match snd export_type with
         | <span data-count="0">[</span>] -&gt; [ Binary.I32_const 1l ]
-        | <span data-count="3">[</span> Text.Num_type I32 ] -&gt; [ I_relop (S32, Eq) ]
-        | <span data-count="0">[</span> Text.Num_type I64 ] -&gt; [ I_relop (S64, Eq) ]
-        | <span data-count="0">[</span> Text.Num_type F32 ] -&gt;
+        | <span data-count="3">[</span> Num_type I32 ] -&gt; [ I_relop (S32, Eq) ]
+        | <span data-count="0">[</span> Num_type I64 ] -&gt; [ I_relop (S64, Eq) ]
+        | <span data-count="0">[</span> Num_type F32 ] -&gt;
           (* Here we can not simply compare the two numbers, because they may both be nan and then the comparison on float will return false. *)
           [ (* We store the two floats *)
             Local_set (local_offset + 0)
@@ -1082,7 +1082,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
                 ]
                 |&gt; Annotated.dummy_dee<span data-count="0">p</span> )
           ]
-        | <span data-count="0">[</span> Text.Num_type F64 ] -&gt;
+        | <span data-count="0">[</span> Num_type F64 ] -&gt;
           (* Here we can not simply compare the two numbers, because they may both be nan and then the comparison on float will return false. *)
           [ (* We store the two floats *)
             Local_set (local_offset + 2)
@@ -1124,7 +1124,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
           Fmt.failwit<span data-count="0">h</span>
             "Equivalence check has not been implemented for result type %a, \
              please open a bug report."
-            Text.pp_result_type rt )
+            Binary.pp_result_type rt )
       @ [ Call id_owi_assert ]
     in
     let body = Annotated.dummies body |&gt; <span data-count="3">A</span>nnotated.dummy in
@@ -1139,7 +1139,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
     Binary.Module.add_func
       (Origin.imported ~modul_name:"owi" ~name:"i32_symbol"
          ~assigned_name:(Some "i32_symbol")
-         ~typ:(Binary.Bt_raw (None, ([], [ Text.Num_type I32 ]))) )
+         ~typ:(Binary.Bt_raw (None, ([], [ Num_type I32 ]))) )
       iso_modul
   in
 
@@ -1147,7 +1147,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
     Binary.Module.add_func
       (Origin.imported ~modul_name:"owi" ~name:"i64_symbol"
          ~assigned_name:(Some "i64_symbol")
-         ~typ:(Binary.Bt_raw (None, ([], [ Text.Num_type I64 ]))) )
+         ~typ:(Binary.Bt_raw (None, ([], [ Num_type I64 ]))) )
       iso_modul
   in
 
@@ -1155,7 +1155,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
     Binary.Module.add_func
       (Origin.imported ~modul_name:"owi" ~name:"f32_symbol"
          ~assigned_name:(Some "f32_symbol")
-         ~typ:(Binary.Bt_raw (None, ([], [ Text.Num_type F32 ]))) )
+         ~typ:(Binary.Bt_raw (None, ([], [ Num_type F32 ]))) )
       iso_modul
   in
 
@@ -1163,7 +1163,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
     Binary.Module.add_func
       (Origin.imported ~modul_name:"owi" ~name:"f64_symbol"
          ~assigned_name:(Some "f64_symbol")
-         ~typ:(Binary.Bt_raw (None, ([], [ Text.Num_type F64 ]))) )
+         ~typ:(Binary.Bt_raw (None, ([], [ Num_type F64 ]))) )
       iso_modul
   in
 
@@ -1176,7 +1176,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
       Annotated.dummy_deep
       @@ List.ma<span data-count="3">p</span>
            (<span data-count="6">f</span>unction
-             | <span data-count="6">(</span><span data-count="0">N</span>one | <span data-count="6">S</span>ome _), Text.Num_type I32 -&gt; Binary.Call id_i32_symbol
+             | <span data-count="6">(</span><span data-count="0">N</span>one | <span data-count="6">S</span>ome _), Binary.Num_type I32 -&gt; Binary.Call id_i32_symbol
              | <span data-count="0">(</span><span data-count="0">N</span>one | <span data-count="0">S</span>ome _), Num_type I64 -&gt; Call id_i64_symbol
              | <span data-count="0">(</span><span data-count="0">N</span>one | <span data-count="0">S</span>ome _), Num_type F32 -&gt; Call id_f32_symbol
              | <span data-count="0">(</span><span data-count="0">N</span>one | <span data-count="0">S</span>ome _), Num_type F64 -&gt; Call id_f64_symbol
@@ -1287,7 +1287,7 @@ let cmd ~deterministic_result_order ~fail_mode ~exploration_strategy ~files
             (typ1, typ2)
           | _, _ -&gt; assert false
         in
-        if Text.func_type_eq typ1 typ2 then <span data-count="3">(</span>name, typ1) :: common_exports
+        if Binary.func_type_eq typ1 typ2 then <span data-count="3">(</span>name, typ1) :: common_exports
         else <span data-count="0">b</span>egin
           Log.warn (fun m -&gt;
             <span data-count="0">m</span>

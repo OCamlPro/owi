@@ -119,7 +119,7 @@
 type t = Float64.t
 
 let promote_f32 x =
-  <span data-count="58">i</span>f Float32.eq x x then <span data-count="52">F</span>loat64.of_float @@ Float32.to_floa<span data-count="52">t</span> x
+  <span data-count="83">i</span>f Float32.eq x x then <span data-count="77">F</span>loat64.of_float @@ Float32.to_floa<span data-count="77">t</span> x
   else
     <span data-count="6">l</span>et nan32bits = Concrete_i64.extend_i32_u (Float32.to_bit<span data-count="6">s</span> x) in
     <span data-count="6">l</span>et sign_field = Int64.(shift_lef<span data-count="6">t</span> (shift_right_logica<span data-count="6">l</span> nan32bits 31) 63) in

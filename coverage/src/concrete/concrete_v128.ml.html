@@ -238,7 +238,7 @@ let of_i16x8 a b c d e f g h = <span data-count="12">I</span>64x2 (i64_of_i16x<s
 
 let of_i32x4 a b c d = <span data-count="85">I</span>32x4 (a, b, c, d)
 
-let of_i64x2 a b = <span data-count="819">I</span>64x2 (a, b)
+let of_i64x2 a b = <span data-count="816">I</span>64x2 (a, b)
 
 let of_f32x4 a b c d = <span data-count="120">F</span>32x4 (a, b, c, d)
 
@@ -270,7 +270,7 @@ let to_i32x4 = function
   | <span data-count="2">I</span>32x4 (a, b, c, d) -&gt; (a, b, c, d)
   | <span data-count="0">v</span> -&gt; i64x2_to_i32x4 (to_i64x<span data-count="0">2</span> v)
 
-let zero = of_i64x<span data-count="750">2</span> 0L 0L
+let zero = of_i64x<span data-count="747">2</span> 0L 0L
 
 let eq a b =
   <span data-count="202">l</span>et a1, a2 = to_i64x2 a in

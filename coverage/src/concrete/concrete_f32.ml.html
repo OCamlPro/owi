@@ -141,7 +141,7 @@
 type t = Float32.t
 
 let demote_f64 x =
-  <span data-count="87">i</span>f Float64.eq x x then <span data-count="81">F</span>loat32.of_float @@ Float64.to_floa<span data-count="81">t</span> x
+  <span data-count="114">i</span>f Float64.eq x x then <span data-count="108">F</span>loat32.of_float @@ Float64.to_floa<span data-count="108">t</span> x
   else
     <span data-count="6">l</span>et nan64bits = Float64.to_bits x in
     <span data-count="6">l</span>et sign_field = Int64.(shift_lef<span data-count="6">t</span> (shift_right_logica<span data-count="6">l</span> nan64bits 63) 31) in
@@ -189,7 +189,7 @@ let convert_i64_u x =
 
 let reinterpret_i32 = Float32.of_bits
 
-let of_float32 v = <span data-count="57496">v</span>
+let of_float32 v = <span data-count="57500">v</span>
 </code></pre>
       </div>
     </div>

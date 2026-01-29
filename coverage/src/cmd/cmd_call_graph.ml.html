@@ -554,7 +554,7 @@ let find_functions_with_func_type func_type (acc, i)
   <span data-count="10">l</span>et (Bt_raw (_, ft)) =
     match f with <span data-count="8">O</span>rigin.Local x -&gt; x.type_f | <span data-count="2">O</span>rigin.Imported imp -&gt; imp.typ
   in
-  if Text.func_type_eq func_type ft then <span data-count="3">(</span>S.ad<span data-count="3">d</span> i acc, i + 1) else <span data-count="7">(</span>acc, i + 1)
+  if Binary.func_type_eq func_type ft then <span data-count="3">(</span>S.ad<span data-count="3">d</span> i acc, i + 1) else <span data-count="7">(</span>acc, i + 1)
 
 let rec find_children mode tables (funcs : 'a array) acc (l : Binary.expr) =
   <span data-count="355">m</span>atch (l, mode) with

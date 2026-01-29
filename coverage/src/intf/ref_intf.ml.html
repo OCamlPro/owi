@@ -57,6 +57,9 @@
 <a id="L33"></a><span > </span>
 <a id="L34"></a><span > </span>
 <a id="L35"></a><span > </span>
+<a id="L36"></a><span > </span>
+<a id="L37"></a><span > </span>
+<a id="L38"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -96,6 +99,9 @@
 <a href="#L33">33</a>
 <a href="#L34">34</a>
 <a href="#L35">35</a>
+<a href="#L36">36</a>
+<a href="#L37">37</a>
+<a href="#L38">38</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -117,10 +123,13 @@ module type T = sig
   type t =
     | Extern of Extern.t option
     | Func of Kind.func option
+    (* TODO: Not sure about these two. *)
+    | NullExn
+    | NullRef
 
   val pp : t Fmt.t
 
-  val null : Text.heap_type -&gt; t
+  val null : Binary.heap_type -&gt; t
 
   val func : Kind.func -&gt; t
 

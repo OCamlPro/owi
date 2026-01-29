@@ -225,7 +225,7 @@ type t = int64
 
 let extend_i32_s x = <span data-count="10">I</span>nt64.of_int32 x
 
-let extend_i32_u x = <span data-count="3715787">I</span>nt64.logand (Int64.of_int3<span data-count="3715787">2</span> x) 0x0000_0000_ffff_ffffL
+let extend_i32_u x = <span data-count="1074728">I</span>nt64.logand (Int64.of_int3<span data-count="1074728">2</span> x) 0x0000_0000_ffff_ffffL
 
 let trunc_f32_s x =
   <span data-count="29">i</span>f Float32.ne x x then <span data-count="5">E</span>rror `Conversion_to_integer
@@ -311,7 +311,7 @@ let eq_concrete (v1 : t) (v2 : Int64.t) = <span data-count="0">e</span>q v1 v2
 
 let pp = Fmt.int64
 
-let of_int64 (v : int64) : t = <span data-count="5163774">v</span>
+let of_int64 (v : int64) : t = <span data-count="6231015">v</span>
 
 let to_int64 (v : t) : int64 = <span data-count="1">v</span>
 </code></pre>

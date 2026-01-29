@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>wutf8.ml &mdash; Coverage report</title>
-    <meta name="description" content="16.67% coverage in src/infra/wutf8.ml">
+    <meta name="description" content="50.00% coverage in src/infra/wutf8.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,17 +15,11 @@
           <span class="dirname">src/infra/</span>wutf8.ml
         </a>
       </h1>
-      <h2>16.67%</h2>
+      <h2>50.00%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:27.27%"></span>
-      <span class="unvisited" style="top:29.55%"></span>
-      <span class="unvisited" style="top:31.82%"></span>
       <span class="unvisited" style="top:36.36%"></span>
-      <span class="unvisited" style="top:40.91%"></span>
-      <span class="unvisited" style="top:47.73%"></span>
-      <span class="unvisited" style="top:50.00%"></span>
-      <span class="unvisited" style="bottom:47.73%"></span>
+      <span class="some-visited" style="top:50.00%"></span>
       <span class="unvisited" style="bottom:45.45%"></span>
       <span class="unvisited" style="bottom:43.18%"></span>
       <span class="unvisited" style="bottom:40.91%"></span>
@@ -50,18 +44,18 @@
 <a id="L9"></a><span > </span>
 <a id="L10"></a><span > </span>
 <a id="L11"></a><span > </span>
-<a id="L12"></a><span class="unvisited"> </span>
-<a id="L13"></a><span class="unvisited"> </span>
-<a id="L14"></a><span class="unvisited"> </span>
+<a id="L12"></a><span class="visited"> </span>
+<a id="L13"></a><span class="visited"> </span>
+<a id="L14"></a><span class="visited"> </span>
 <a id="L15"></a><span > </span>
 <a id="L16"></a><span class="unvisited"> </span>
 <a id="L17"></a><span > </span>
-<a id="L18"></a><span class="unvisited"> </span>
+<a id="L18"></a><span class="visited"> </span>
 <a id="L19"></a><span > </span>
 <a id="L20"></a><span > </span>
-<a id="L21"></a><span class="unvisited"> </span>
-<a id="L22"></a><span class="unvisited"> </span>
-<a id="L23"></a><span class="unvisited"> </span>
+<a id="L21"></a><span class="visited"> </span>
+<a id="L22"></a><span class="some-visited"> </span>
+<a id="L23"></a><span class="visited"> </span>
 <a id="L24"></a><span class="unvisited"> </span>
 <a id="L25"></a><span class="unvisited"> </span>
 <a id="L26"></a><span class="unvisited"> </span>
@@ -143,18 +137,18 @@
 exception Utf8
 
 let string_implode cs =
-  <span data-count="0">l</span>et buf = Buffer.create 80 in
-  <span data-count="0">L</span>ist.iter (Buffer.add_cha<span data-count="0">r</span> buf) cs;
-  <span data-count="0">B</span>uffer.contents buf
+  <span data-count="1">l</span>et buf = Buffer.create 80 in
+  <span data-count="1">L</span>ist.iter (Buffer.add_cha<span data-count="1">r</span> buf) cs;
+  <span data-count="1">B</span>uffer.contents buf
 
 let con n = <span data-count="0">0</span>x80 lor (n land 0x3f)
 
-let rec encode ns = <span data-count="0">s</span>tring_implode (List.ma<span data-count="0">p</span> Char.chr (encode<span data-count="0">'</span> ns))
+let rec encode ns = <span data-count="1">s</span>tring_implode (List.ma<span data-count="1">p</span> Char.chr (encode<span data-count="1">'</span> ns))
 
 and encode' = function
-  | <span data-count="0">[</span>] -&gt; []
-  | <span data-count="0">n</span> :: _ns when n &lt; 0 -&gt; <span data-count="0">r</span>aise Utf8
-  | <span data-count="0">n</span> :: ns when n &lt; 0x80 -&gt; <span data-count="0">n</span> :: encode<span data-count="0">'</span> ns
+  | <span data-count="1">[</span>] -&gt; []
+  | <span data-count="1">n</span> :: _ns when n &lt; 0 -&gt; <span data-count="0">r</span>aise Utf8
+  | <span data-count="1">n</span> :: ns when n &lt; 0x80 -&gt; <span data-count="1">n</span> :: encode<span data-count="1">'</span> ns
   | <span data-count="0">n</span> :: ns when n &lt; 0x800 -&gt; <span data-count="0">(</span>0xc0 lor (n lsr 6)) :: co<span data-count="0">n</span> n :: encode<span data-count="0">'</span> ns
   | <span data-count="0">n</span> :: ns when n &lt; 0x10000 -&gt;
     <span data-count="0">(</span>0xe0 lor (n lsr 12)) :: co<span data-count="0">n</span> (n lsr 6) :: co<span data-count="0">n</span> n :: encode<span data-count="0">'</span> ns
@@ -166,14 +160,14 @@ and encode' = function
   | <span data-count="0">_</span> -&gt; raise Utf8
 
 let check_utf8 s =
-  <span data-count="35719">l</span>et open Uutf in
+  <span data-count="35665">l</span>et open Uutf in
   let decoder = decoder ~encoding:`UTF_8 (`String s) in
-  <span data-count="35719">l</span>et rec loop () =
-    <span data-count="260632">m</span>atch decode decoder with
+  <span data-count="35665">l</span>et rec loop () =
+    <span data-count="261114">m</span>atch decode decoder with
     | <span data-count="704">`</span>Malformed s -&gt; Error (`Malformed_utf8_encoding s)
     | `Await -&gt; assert false
-    | <span data-count="35015">`</span>End -&gt; Ok ()
-    | <span data-count="224913">`</span>Uchar _ -&gt; loop ()
+    | <span data-count="34961">`</span>End -&gt; Ok ()
+    | <span data-count="225449">`</span>Uchar _ -&gt; loop ()
   in
   loop ()
 </code></pre>

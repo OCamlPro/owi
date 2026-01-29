@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>concrete_ref.ml &mdash; Coverage report</title>
-    <meta name="description" content="80.95% coverage in src/concrete/concrete_ref.ml">
+    <meta name="description" content="73.53% coverage in src/concrete/concrete_ref.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,13 +15,17 @@
           <span class="dirname">src/concrete/</span>concrete_ref.ml
         </a>
       </h1>
-      <h2>80.95%</h2>
+      <h2>73.53%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:27.66%"></span>
-      <span class="unvisited" style="top:46.81%"></span>
-      <span class="unvisited" style="top:48.94%"></span>
-      <span class="unvisited" style="bottom:17.02%"></span>
+      <span class="unvisited" style="top:22.41%"></span>
+      <span class="unvisited" style="top:41.38%"></span>
+      <span class="unvisited" style="top:43.10%"></span>
+      <span class="unvisited" style="top:44.83%"></span>
+      <span class="unvisited" style="top:46.55%"></span>
+      <span class="unvisited" style="top:48.28%"></span>
+      <span class="some-visited" style="bottom:25.86%"></span>
+      <span class="unvisited" style="bottom:13.79%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -47,32 +51,43 @@
 <a id="L19"></a><span > </span>
 <a id="L20"></a><span > </span>
 <a id="L21"></a><span > </span>
-<a id="L22"></a><span class="unvisited"> </span>
-<a id="L23"></a><span class="unvisited"> </span>
-<a id="L24"></a><span > </span>
-<a id="L25"></a><span class="visited"> </span>
-<a id="L26"></a><span > </span>
-<a id="L27"></a><span class="visited"> </span>
-<a id="L28"></a><span > </span>
-<a id="L29"></a><span class="visited"> </span>
+<a id="L22"></a><span > </span>
+<a id="L23"></a><span > </span>
+<a id="L24"></a><span class="unvisited"> </span>
+<a id="L25"></a><span class="unvisited"> </span>
+<a id="L26"></a><span class="unvisited"> </span>
+<a id="L27"></a><span class="unvisited"> </span>
+<a id="L28"></a><span class="unvisited"> </span>
+<a id="L29"></a><span > </span>
 <a id="L30"></a><span > </span>
 <a id="L31"></a><span class="visited"> </span>
 <a id="L32"></a><span class="visited"> </span>
-<a id="L33"></a><span class="visited"> </span>
-<a id="L34"></a><span > </span>
-<a id="L35"></a><span > </span>
+<a id="L33"></a><span > </span>
+<a id="L34"></a><span class="visited"> </span>
+<a id="L35"></a><span class="visited"> </span>
 <a id="L36"></a><span class="visited"> </span>
-<a id="L37"></a><span class="visited"> </span>
+<a id="L37"></a><span > </span>
 <a id="L38"></a><span class="visited"> </span>
-<a id="L39"></a><span class="unvisited"> </span>
-<a id="L40"></a><span > </span>
+<a id="L39"></a><span > </span>
+<a id="L40"></a><span class="visited"> </span>
 <a id="L41"></a><span > </span>
 <a id="L42"></a><span class="visited"> </span>
-<a id="L43"></a><span class="visited"> </span>
-<a id="L44"></a><span > </span>
+<a id="L43"></a><span class="some-visited"> </span>
+<a id="L44"></a><span class="visited"> </span>
 <a id="L45"></a><span > </span>
-<a id="L46"></a><span class="visited"> </span>
-<a id="L47"></a><span > </span>
+<a id="L46"></a><span > </span>
+<a id="L47"></a><span class="visited"> </span>
+<a id="L48"></a><span class="visited"> </span>
+<a id="L49"></a><span class="visited"> </span>
+<a id="L50"></a><span class="unvisited"> </span>
+<a id="L51"></a><span > </span>
+<a id="L52"></a><span > </span>
+<a id="L53"></a><span class="visited"> </span>
+<a id="L54"></a><span class="visited"> </span>
+<a id="L55"></a><span > </span>
+<a id="L56"></a><span > </span>
+<a id="L57"></a><span class="visited"> </span>
+<a id="L58"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -124,6 +139,17 @@
 <a href="#L45">45</a>
 <a href="#L46">46</a>
 <a href="#L47">47</a>
+<a href="#L48">48</a>
+<a href="#L49">49</a>
+<a href="#L50">50</a>
+<a href="#L51">51</a>
+<a href="#L52">52</a>
+<a href="#L53">53</a>
+<a href="#L54">54</a>
+<a href="#L55">55</a>
+<a href="#L56">56</a>
+<a href="#L57">57</a>
+<a href="#L58">58</a>
 </pre>
 <pre><code class="ocaml">open Fmt
 
@@ -136,33 +162,44 @@ module Extern = struct
   type t = E : 'a Type.Id.t * 'a -&gt; t
 
   let cast (type r) (E (rty, r) : t) (ty : r Type.Id.t) : r option =
-    <span data-count="35">m</span>atch Type.Id.provably_equal rty ty with
+    <span data-count="31">m</span>atch Type.Id.provably_equal rty ty with
     | <span data-count="0">N</span>one -&gt; None
-    | <span data-count="35">S</span>ome Equal -&gt; Some r
+    | <span data-count="31">S</span>ome Equal -&gt; Some r
 end
 
 type t =
   | Extern of Extern.t option
   | Func of Kind.func option
+  | NullExn
+  | NullRef
 
 let pp fmt = function
+  | <span data-count="0">E</span>xtern None -&gt; pf fmt "externref none"
   | <span data-count="0">E</span>xtern _ -&gt; pf fmt "externref"
   | <span data-count="0">F</span>unc _ -&gt; pf fmt "funcref"
+  | <span data-count="0">N</span>ullExn -&gt; pf fmt "nullexnref"
+  | <span data-count="0">N</span>ullRef -&gt; pf fmt "nullref"
 
-let null = function <span data-count="719">T</span>ext.Func_ht -&gt; Func None | <span data-count="63">E</span>xtern_ht -&gt; Extern None
+(* TODO: Is this the same as Symbolic_ref.null? *)
+let null = <span data-count="819">f</span>unction
+  | <span data-count="731">B</span>inary.Func_ht | <span data-count="4">N</span>oFunc_ht | <span data-count="16">T</span>ypeUse _ -&gt; Func None
+  (* TODO: is this correct? Are all nulls equal? *)
+  | <span data-count="53">E</span>xtern_ht | <span data-count="3">N</span>oExtern_ht -&gt; Extern None
+  | <span data-count="3">A</span>ny_ht | <span data-count="3">N</span>one_ht -&gt; NullRef
+  | <span data-count="3">E</span>xn_ht | <span data-count="3">N</span>oExn_ht -&gt; NullExn
 
-let func (f : Kind.func) = <span data-count="9">F</span>unc (Some f)
+let func (f : Kind.func) = <span data-count="13">F</span>unc (Some f)
 
-let extern (type x) (t : x Type.Id.t) (v : x) : t = <span data-count="35">E</span>xtern (Some (E (t, v)))
+let extern (type x) (t : x Type.Id.t) (v : x) : t = <span data-count="32">E</span>xtern (Some (E (t, v)))
 
-let is_null = <span data-count="47">f</span>unction
-  | <span data-count="34">F</span>unc None | <span data-count="4">E</span>xtern None -&gt; true
-  | <span data-count="7">F</span>unc (Some _) | <span data-count="2">E</span>xtern (Some _) -&gt; false
+let is_null = <span data-count="52">f</span>unction
+  | <span data-count="38">F</span>unc None | <span data-count="4">E</span>xtern None | <span data-count="0">N</span>ullExn | <span data-count="0">N</span>ullRef -&gt; true
+  | <span data-count="8">F</span>unc (Some _) | <span data-count="2">E</span>xtern (Some _) -&gt; false
 
 let get_func (r : t) : Kind.func get_ref =
-  <span data-count="802842">m</span>atch r with
-  | <span data-count="801070">F</span>unc (Some f) -&gt; Ref_value f
-  | <span data-count="1772">F</span>unc None -&gt; Null
+  <span data-count="802823">m</span>atch r with
+  | <span data-count="801052">F</span>unc (Some f) -&gt; Ref_value f
+  | <span data-count="1771">F</span>unc None -&gt; Null
   | <span data-count="0">_</span> -&gt; Type_mismatch
 
 let get_extern (type x) (r : t) (typ : x Type.Id.t) : x get_ref =
