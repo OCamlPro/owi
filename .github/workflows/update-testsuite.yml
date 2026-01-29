@@ -1,0 +1,56 @@
+name: Update WebAssembly testsuite submodule
+
+on:
+  schedule:
+    - cron: '0 10 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    if: "github.repository == 'OCamlPro/owi' || !github.event.schedule"
+    name: Maybe create a PR with an update.
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Check for changes and update submodule
+        id: update
+        run: |
+          git submodule update --remote test/script/reference
+
+          if git diff --quiet test/script/reference; then
+            echo "changed=false" | tee -a "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" | tee -a "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create pull request
+        if: steps.update.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+
+          time=$(date '+%Y-%m-%d')
+          branch="update-wasm-testsuite"
+
+          git checkout -b "$branch"
+          git commit -am "Update WebAssembly testsuite submodule ($time)"
+          git push origin "$branch"
+
+          gh pr create \
+            --title "Update testsuite subrepo ($time)" \
+            --body "Automated update check for \`test/script/reference/\`." \
+            --base main \
+            --head "$branch"
