@@ -3,8 +3,7 @@ module Schedulable = struct
   type 'a t =
     | Stop
     | Now of 'a
-    | Yield of Prio.metrics * (unit -> 'a t)
-    | Choice of 'a t * 'a t
+    | Choice of (Prio.metrics * (unit -> 'a t)) * (Prio.metrics * (unit -> 'a t))
 
   let[@inline] return x : _ t = Now x
 
@@ -12,10 +11,10 @@ module Schedulable = struct
     match mx with
     | Stop -> Stop
     | Now v -> f v
-    | Yield (prio, step) -> Yield (prio, fun () -> bind (step ()) f)
-    | Choice (a, b) ->
-      (* cps to make it tail rec *)
-      Choice (bind a f, bind b f)
+    | Choice ((prio_a, a), (prio_b, b)) ->
+      let a = (prio_a, fun () -> bind (a ()) f) in
+      let b = (prio_b, fun () -> bind (b ()) f) in
+      Choice (a, b)
 
   let[@inline] ( let* ) mx f = bind mx f
 
@@ -25,9 +24,10 @@ module Schedulable = struct
 
   let[@inline] ( let+ ) x f = map f x
 
-  let[@inline] yield prio = Yield (prio, Fun.const (Now ()))
-
-  let[@inline] choose a b = Choice (a, b)
+  let[@inline] choose (prio_a, a) (prio_b, b) =
+    let a = (prio_a, fun () -> return a) in
+    let b = (prio_b, fun () -> return b) in
+    Choice (a, b)
 
   let stop = Stop
 end
@@ -46,14 +46,13 @@ module Make (Work_datastructure : Prio.S) = struct
     Work_datastructure.push task Prio.dummy sched.work_queue
 
   let work sched at_worker_value =
-    let rec inner (t : _ Schedulable.t) write_back =
+    let inner (t : _ Schedulable.t) write_back =
       match t with
       | Stop -> ()
       | Now x -> at_worker_value x
-      | Yield (prio, f) -> write_back (prio, f)
-      | Choice (m1, m2) ->
-        inner m1 write_back;
-        inner m2 write_back
+      | Choice ((prio_a, a), (prio_b, b)) ->
+        write_back (prio_a, a);
+        write_back (prio_b, b)
     in
     Work_datastructure.work_while
       (fun f write_back -> inner (f ()) write_back)

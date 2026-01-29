@@ -57,9 +57,9 @@ let solver_dls_key =
 
 let[@inline] solver () = Domain.DLS.get solver_dls_key
 
-let[@inline] choose a b = State_monad.liftF2 Scheduler.Schedulable.choose a b
-
-let[@inline] yield prio = lift_schedulable @@ Scheduler.Schedulable.yield prio
+let[@inline] choose a b : 'a t =
+  let* choice = lift_schedulable @@ Scheduler.Schedulable.choose a b in
+  choice
 
 let stop = lift_schedulable Scheduler.Schedulable.stop
 
@@ -126,11 +126,7 @@ let with_new_symbol ty f =
   in
   f sym
 
-(* Yielding is currently done each time the solver is about to be called, in check_reachability and get_model.
-*)
-let check_reachability v priority =
-  let* () = yield priority in
-  let* () = modify_thread (Thread.set_priority priority) in
+let check_reachability v =
   let* thread in
   let solver = solver () in
   let pc = thread.pc |> Symbolic_path_condition.slice_on_condition v in
@@ -143,8 +139,6 @@ let check_reachability v priority =
 
 let get_model_or_stop symbol =
   let* thread in
-  (* TODO: better prio here? *)
-  let* () = yield thread.priority in
   let solver = solver () in
   let set = thread.pc |> Symbolic_path_condition.slice_on_symbol symbol in
   let stats = thread.bench_stats in
@@ -168,15 +162,15 @@ let get_model_or_stop symbol =
                if solver was interrupted then stop else assert false *)
     stop
 
-let select_inner ~with_breadcrumbs ~check_only_true_branch
-  (cond : Symbolic_boolean.t) ~instr_counter_true ~instr_counter_false =
+let select_inner ~with_breadcrumbs (cond : Symbolic_boolean.t)
+  ~instr_counter_true ~instr_counter_false =
   let cond = Smtml.Typed.simplify cond in
   match Smtml.Typed.view cond with
   | Val True -> return true
   | Val False -> return false
   | _ ->
     let is_other_branch_unsat = Atomic.make false in
-    let branch condition final_value prio =
+    let branch condition final_value priority =
       let* () = add_pc condition in
       let* () =
         if with_breadcrumbs then add_breadcrumb (if final_value then 1 else 0)
@@ -191,16 +185,18 @@ let select_inner ~with_breadcrumbs ~check_only_true_branch
       end
       else begin
         (* the other branch is SAT (or we haven't computed it yet), so we have to check reachability *)
-        let* satisfiability = check_reachability condition prio in
+        let* satisfiability = check_reachability condition in
         begin match satisfiability with
-        | `Sat -> return final_value
+        | `Sat ->
+          let* () = modify_thread (Thread.set_priority priority) in
+          return final_value
         | `Unsat ->
           Atomic.set is_other_branch_unsat true;
           stop
         | `Unknown ->
           (* It can happen when the solver is interrupted *)
           (* TODO: once https://github.com/formalsec/smtml/pull/479 is merged
-                             if solver was interrupted then stop else assert false *)
+                               if solver was interrupted then stop else assert false *)
           stop
         end
       end
@@ -218,25 +214,23 @@ let select_inner ~with_breadcrumbs ~check_only_true_branch
     in
     let true_branch = branch cond true prio_true in
 
-    if check_only_true_branch then true_branch
-    else
-      let prio_false =
-        let instr_counter =
-          match instr_counter_false with
-          | None -> thread.priority.instr_counter
-          | Some instr_counter -> instr_counter
-        in
-        Prio.v ~instr_counter ~distance_to_unreachable:None ~depth:thread.depth
+    let prio_false =
+      let instr_counter =
+        match instr_counter_false with
+        | None -> thread.priority.instr_counter
+        | Some instr_counter -> instr_counter
       in
-      let false_branch = branch (Symbolic_boolean.not cond) false prio_false in
-      Thread.incr_path_count thread;
-      choose true_branch false_branch
+      Prio.v ~instr_counter ~distance_to_unreachable:None ~depth:thread.depth
+    in
+    let false_branch = branch (Symbolic_boolean.not cond) false prio_false in
+    Thread.incr_path_count thread;
+    choose (prio_true, true_branch) (prio_false, false_branch)
 [@@inline]
 
 let select (cond : Symbolic_boolean.t) ~instr_counter_true ~instr_counter_false
     =
   select_inner cond ~instr_counter_true ~instr_counter_false
-    ~check_only_true_branch:false ~with_breadcrumbs:true
+    ~with_breadcrumbs:true
 [@@inline]
 
 let summary_symbol (e : Smtml.Typed.Bitv32.t) :
@@ -289,6 +283,16 @@ let select_i32 (i : Symbolic_i32.t) =
       in
       let* thread in
       Thread.incr_path_count thread;
+
+      (* TODO: better prio here? *)
+      let prio =
+        Prio.v ~instr_counter:thread.priority.instr_counter
+          ~distance_to_unreachable:None ~depth:thread.depth
+      in
+
+      let this_val_branch = (prio, this_val_branch) in
+      let not_this_val_branch = (prio, not_this_val_branch) in
+
       choose this_val_branch not_this_val_branch
     in
     generator ()
@@ -314,7 +318,6 @@ let assertion (c : Symbolic_boolean.t) =
   let* assertion_true =
     select_inner c ~with_breadcrumbs:false (* TODO: better prio here ? *)
       ~instr_counter_true:None ~instr_counter_false:None
-      ~check_only_true_branch:false
   in
   if assertion_true then return ()
   else
@@ -353,31 +356,19 @@ let ite (c : Symbolic_boolean.t) ~(if_true : Symbolic_value.t)
     if b then if_true else if_false
   | _, _ -> assert false
 
-let assume condition instr_counter =
-  (* TODO: do we really need instr_counter here? Couldn't we simply reuse the old one? *)
+let assume condition =
   let condition = Smtml.Typed.simplify condition in
   match Smtml.Typed.view condition with
   | Val True -> return ()
   | Val False -> stop
   | _ -> (
     let* () = add_pc condition in
-    let* thread in
-    (* TODO: better prio here? *)
-    let instr_counter =
-      match instr_counter with
-      | None -> thread.priority.instr_counter
-      | Some instr_counter -> instr_counter
-    in
-    let prio =
-      Prio.v ~instr_counter ~distance_to_unreachable:None
-        ~depth:thread.priority.depth
-    in
-    let* satisfiability = check_reachability condition prio in
+    let* satisfiability = check_reachability condition in
     match satisfiability with
     | `Sat -> return ()
     | `Unsat -> stop
     | `Unknown ->
       (* It can happen when the solver is interrupted *)
       (* TODO: once https://github.com/formalsec/smtml/pull/479 is merged
-                   if solver was interrupted then stop else assert false *)
+                     if solver was interrupted then stop else assert false *)
       stop )
