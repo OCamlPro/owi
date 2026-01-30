@@ -6,7 +6,7 @@ module IMap = Map.Make (Int)
 
 type t = Symbolic_table0.t =
   { data : Symbolic_ref.t IMap.t
-  ; limits : Text.limits
+  ; limits : Text.Table.Type.limits
   ; typ : Binary.ref_type
   ; env_id : int
   ; id : int
@@ -26,7 +26,16 @@ let size t = IMap.cardinal t.data
 
 let typ t = t.typ
 
-let max_size t = t.limits.max
+let max_size t =
+  match t.limits with
+  | I32 { max; _ } -> Option.map (fun maxv -> Int32.to_int maxv) max
+  | I64 { max; _ } ->
+    Option.map
+      (fun maxv ->
+        let max2int = Int64.to_int maxv in
+        assert (Int64.(eq maxv (Int64.of_int max2int)));
+        max2int )
+      max
 
 let grow _t _new_size _x =
   (* TODO

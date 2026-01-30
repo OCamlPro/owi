@@ -234,19 +234,6 @@ let pp_memarg =
     in
     pf fmt "%aalign=%Ld" pp_offset offset (pow_2 align)
 
-type nonrec limits =
-  { is_i64 : bool
-  ; min : int
-  ; max : int option
-  }
-
-let pp_addr_type fmt is_i64 = if is_i64 then Fmt.pf fmt "i64 "
-
-let pp_limits fmt { is_i64; min; max } =
-  match max with
-  | None -> pf fmt "%a%d" pp_addr_type is_i64 min
-  | Some max -> pf fmt "%a%d %d" pp_addr_type is_i64 min max
-
 (** Structure *)
 
 (** Types *)
@@ -703,6 +690,22 @@ end
 
 module Table = struct
   module Type = struct
+    type limits =
+      | I32 of
+          { min : Int32.t
+          ; max : Int32.t option
+          }
+      | I64 of
+          { min : Int64.t
+          ; max : Int64.t option
+          }
+
+    let pp_limits fmt = function
+      | I32 { min; max = None } -> pf fmt "%ld" min
+      | I32 { min; max = Some max } -> pf fmt "%ld %ld" min max
+      | I64 { min; max = None } -> pf fmt "i64 %Ld" min
+      | I64 { min; max = Some max } -> pf fmt "i64 %Ld %Ld" min max
+
     type nonrec t = limits * ref_type
 
     let pp fmt (limits, ref_type) =
@@ -811,19 +814,43 @@ module Elem = struct
       e.init
 end
 
+module Mem = struct
+  module Type = struct
+    type limits =
+      | I32 of
+          { min : Int32.t
+          ; max : Int32.t option
+          }
+      | I64 of
+          { min : int
+          ; max : int option
+          }
+
+    let pp_limits fmt = function
+      | I32 { min; max = None } -> pf fmt "%ld" min
+      | I32 { min; max = Some max } -> pf fmt "%ld %ld" min max
+      | I64 { min; max = None } -> pf fmt "i64 %d" min
+      | I64 { min; max = Some max } -> pf fmt "i64 %d %d" min max
+  end
+
+  type nonrec t = string option * Type.limits
+
+  let pp fmt (id, ty) = pf fmt "(memory%a %a)" pp_id_opt id Type.pp_limits ty
+end
+
 module Import = struct
   module Type = struct
     type t =
       | Func of string option * block_type
       | Table of string option * Table.Type.t
-      | Mem of string option * limits
+      | Mem of string option * Mem.Type.limits
       | Global of string option * Global.Type.t
       | Tag of string option * block_type
 
     let pp fmt = function
       | Func (id, t) -> pf fmt "(func%a %a)" pp_id_opt id pp_block_type t
       | Table (id, t) -> pf fmt "(table%a %a)" pp_id_opt id Table.Type.pp t
-      | Mem (id, t) -> pf fmt "(memory%a %a)" pp_id_opt id pp_limits t
+      | Mem (id, t) -> pf fmt "(memory%a %a)" pp_id_opt id Mem.Type.pp_limits t
       | Global (id, t) -> pf fmt "(global%a %a)" pp_id_opt id Global.Type.pp t
       | Tag (id, t) -> pf fmt "(tag%a %a)" pp_id_opt id pp_block_type t
   end
@@ -863,12 +890,6 @@ module Export = struct
     }
 
   let pp fmt (e : t) = pf fmt {|(export "%s" %a)|} e.name Type.pp e.typ
-end
-
-module Mem = struct
-  type nonrec t = string option * limits
-
-  let pp fmt (id, ty) = pf fmt "(memory%a %a)" pp_id_opt id pp_limits ty
 end
 
 module Module = struct

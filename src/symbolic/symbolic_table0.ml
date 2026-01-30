@@ -6,7 +6,7 @@ module IMap = Map.Make (Int)
 
 type t =
   { data : Symbolic_ref.t IMap.t
-  ; limits : Text.limits
+  ; limits : Text.Table.Type.limits
   ; typ : Binary.ref_type
   ; env_id : int
   ; id : int

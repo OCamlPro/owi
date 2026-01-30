@@ -8,7 +8,7 @@ type table = Concrete_ref.t array
 type t =
   { id : int
   ; label : string option
-  ; limits : Text.limits
+  ; limits : Text.Table.Type.limits
   ; typ : Binary.ref_type
   ; mutable data : table
   }
@@ -19,10 +19,25 @@ let fresh =
     incr r;
     !r
 
+let get_min : Text.Table.Type.limits -> int = function
+  | I32 { min; _ } -> Int32.to_int min
+  | I64 { min; _ } -> Int64.to_int min
+
+let max_size t =
+  match t.limits with
+  | I32 { max; _ } -> Option.map (fun maxv -> Int32.to_int maxv) max
+  | I64 { max; _ } ->
+    Option.map
+      (fun maxv ->
+        let max2int = Int64.to_int maxv in
+        assert (Int64.(eq maxv (Int64.of_int max2int)));
+        max2int )
+      max
+
 let init ?label (typ : Binary.Table.Type.t) : t =
   let limits, ((_null, heap_type) as ref_type) = typ in
   let null = Concrete_ref.null heap_type in
-  let table = Array.make limits.min null in
+  let table = Array.make (get_min limits) null in
   { id = fresh (); label; limits; typ = ref_type; data = table }
 
 let update table data = table.data <- data
@@ -36,8 +51,6 @@ let set t i v =
 let size t = Array.length t.data
 
 let typ t = t.typ
-
-let max_size t = t.limits.max
 
 let grow t new_size x =
   let new_size = Int32.to_int new_size in

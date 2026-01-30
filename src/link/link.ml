@@ -159,26 +159,66 @@ let eval_globals ls env globals : Link_env.Build.t Result.t =
   in
   env
 
-(* TODO: IIRC this is duplicated and should be refactored *)
-let limit_is_included ~import ~imported =
-  Bool.equal import.Text.is_i64 imported.Text.is_i64
-  && imported.min >= import.min
-  &&
-  match (imported.max, import.max) with
-  | _, None -> true
-  | None, Some _ -> false
-  | Some i, Some j -> i <= j
+let memory_limit_is_included ~import ?imported_data_size ~imported () =
+  match (import, imported) with
+  | Text.Mem.Type.I32 import, Text.Mem.Type.I32 imported ->
+    Int32.(
+      le_u import.min
+        (Option.fold ~none:imported.min
+           ~some:(fun v -> of_int v)
+           imported_data_size ) )
+    && begin match (imported.max, import.max) with
+    | _, None -> true
+    | None, Some _ -> false
+    | Some i, Some j -> Int32.le_u i j
+    end
+  | I64 import, I64 imported ->
+    import.min
+    <= Option.fold ~none:imported.min ~some:(fun v -> v) imported_data_size
+    && begin match (imported.max, import.max) with
+    | _, None -> true
+    | None, Some _ -> false
+    | Some i, Some j -> i <= j
+    end
+  | _ -> false
 
-let load_memory (ls : 'f State.t) (import : Text.limits Origin.imported) :
-  Concrete_memory.t Result.t =
+let table_limit_is_included ~import ?imported_data_size ~imported () =
+  match (import, imported) with
+  | Text.Table.Type.I32 import, Text.Table.Type.I32 imported ->
+    Int32.(
+      le_u import.min
+        (Option.fold ~none:imported.min
+           ~some:(fun v -> of_int v)
+           imported_data_size ) )
+    && begin match (imported.max, import.max) with
+    | _, None -> true
+    | None, Some _ -> false
+    | Some i, Some j -> Int32.le_u i j
+    end
+  | I64 import, I64 imported ->
+    Int64.(
+      le_u import.min
+        (Option.fold ~none:imported.min
+           ~some:(fun v -> of_int v)
+           imported_data_size ) )
+    && begin match (imported.max, import.max) with
+    | _, None -> true
+    | None, Some _ -> false
+    | Some i, Some j -> Int64.le_u i j
+    end
+  | _ -> false
+
+let load_memory (ls : 'f State.t) (import : Text.Mem.Type.limits Origin.imported)
+  : Concrete_memory.t Result.t =
   let* mem =
     State.load_from_module ls (fun (e : State.exports) -> e.memories) import
   in
   let imported_limit = Concrete_memory.get_limits mem in
-  if limit_is_included ~import:import.typ ~imported:imported_limit then Ok mem
+  if memory_limit_is_included ~import:import.typ ~imported:imported_limit ()
+  then Ok mem
   else Error (`Incompatible_import_type import.name)
 
-let eval_memory ls (memory : (Text.Mem.t, Text.limits) Origin.t) :
+let eval_memory ls (memory : (Text.Mem.t, Text.Mem.Type.limits) Origin.t) :
   Concrete_memory.t Result.t =
   match memory with
   | Local (_label, mem_type) -> ok @@ Concrete_memory.init mem_type
@@ -195,8 +235,10 @@ let eval_memories ls env memories =
   in
   env
 
-let table_types_are_compatible (import, (t1 : Binary.ref_type)) (imported, t2) =
-  limit_is_included ~import ~imported && Binary.ref_type_eq t1 t2
+let table_types_are_compatible ~imported_data_size
+  (import, (t1 : Binary.ref_type)) (imported, t2) =
+  table_limit_is_included ~imported_data_size ~import ~imported ()
+  && Binary.ref_type_eq t1 t2
 
 let load_table (ls : 'f State.t) (import : Binary.Table.Type.t Origin.imported)
   : table Result.t =
@@ -204,9 +246,9 @@ let load_table (ls : 'f State.t) (import : Binary.Table.Type.t Origin.imported)
   let* t =
     State.load_from_module ls (fun (e : State.exports) -> e.tables) import
   in
-  let data_size = Concrete_table.size t in
-  if table_types_are_compatible typ ({ t.limits with min = data_size }, t.typ)
-  then Ok t
+  let imported_data_size = Concrete_table.size t in
+  if table_types_are_compatible typ ~imported_data_size (t.limits, t.typ) then
+    Ok t
   else Error (`Incompatible_import_type import.name)
 
 let eval_table ls (table : (Binary.Table.t, Binary.Table.Type.t) Origin.t) :
