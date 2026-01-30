@@ -18,16 +18,16 @@ let heap_type : heap_type Crowbar.gen = const Func_ht
 
 let ref_type = pair nullable heap_type
 
-let limits =
+let table_limits =
   let sup =
     if true then 10 else 100000
     (* TODO: fix max size ? *)
   in
   let* min = range sup in
   let+ max = option (range ~min (sup - min)) in
-  { is_i64 = false; min; max }
+  Table.Type.I32 { min = Int32.of_int min; max = Option.map Int32.of_int max }
 
-let table_type = pair limits ref_type
+let table_type = pair table_limits ref_type
 
 let sx = choose [ const U; const S ]
 
