@@ -286,18 +286,50 @@ let read_mut input =
   | '\x01' -> Ok (Var, input)
   | _c -> parse_fail "malformed mutability"
 
-let read_limits input =
+let read_table_limits input =
   let* b, input =
     read_byte ~msg:"unexpected end of section or function (read_limits)" input
   in
   match b with
-  | '\x00' | '\x04' ->
+  | '\x00' ->
+    let+ min, input = read_UN 32 input in
+    (Text.Table.Type.I32 { min = Int64.to_int32 min; max = None }, input)
+  | '\x01' ->
+    let* min, input = read_UN 32 input in
+    let+ max, input = read_UN 32 input in
+    ( Text.Table.Type.I32
+        { min = Int64.to_int32 min; max = Some (Int64.to_int32 max) }
+    , input )
+  | '\x04' ->
+    let+ min, input = read_UN 64 input in
+    (Text.Table.Type.I64 { min; max = None }, input)
+  | '\x05' ->
+    let* min, input = read_UN 64 input in
+    let+ max, input = read_UN 64 input in
+    (Text.Table.Type.I64 { min; max = Some max }, input)
+  | _c -> parse_fail "integer too large (read_limits)"
+
+let read_memory_limits input =
+  let* b, input =
+    read_byte ~msg:"unexpected end of section or function (read_limits)" input
+  in
+  match b with
+  | '\x00' ->
+    let+ min, input = read_UN 32 input in
+    (Text.Mem.Type.I32 { min = Int64.to_int32 min; max = None }, input)
+  | '\x01' ->
+    let* min, input = read_UN 32 input in
+    let+ max, input = read_UN 32 input in
+    ( Text.Mem.Type.I32
+        { min = Int64.to_int32 min; max = Some (Int64.to_int32 max) }
+    , input )
+  | '\x04' ->
     let+ min, input = read_indice input in
-    ({ Text.is_i64 = Char.equal b '\x04'; min; max = None }, input)
-  | '\x01' | '\x05' ->
+    (Text.Mem.Type.I64 { min; max = None }, input)
+  | '\x05' ->
     let* min, input = read_indice input in
     let+ max, input = read_indice input in
-    ({ Text.is_i64 = Char.equal b '\x05'; min; max = Some max }, input)
+    (Text.Mem.Type.I64 { min; max = Some max }, input)
   | _c -> parse_fail "integer too large (read_limits)"
 
 let is_malformed align_raw =
@@ -755,8 +787,8 @@ let read_const types input =
 
 type import =
   | Func of int
-  | Table of Text.limits * Binary.ref_type * Text.expr option
-  | Mem of Text.limits
+  | Table of Text.Table.Type.limits * Binary.ref_type * Text.expr option
+  | Mem of Text.Mem.Type.limits
   | Global of Text.mut * val_type
   | Tag of int
 
@@ -850,10 +882,10 @@ let read_import input =
     ((modul, name, Func typeidx), input)
   | '\x01' ->
     let* ref_type, input = read_reftype input in
-    let+ limits, input = read_limits input in
+    let+ limits, input = read_table_limits input in
     ((modul, name, Table (limits, ref_type, None)), input)
   | '\x02' ->
-    let+ limits, input = read_limits input in
+    let+ limits, input = read_memory_limits input in
     ((modul, name, Mem limits), input)
   | '\x03' ->
     let+ (mut, val_type), input = read_global_type input in
@@ -867,15 +899,15 @@ let read_table input =
   let* b1, input = read_S7 input in
   match b1 with
   | -0x10 ->
-    let+ limits, input = read_limits input in
+    let+ limits, input = read_table_limits input in
     ((limits, (Text.Null, Binary.Func_ht), None), input)
   | -0x11 ->
-    let+ limits, input = read_limits input in
+    let+ limits, input = read_table_limits input in
     ((limits, (Text.Null, Binary.Extern_ht), None), input)
   | -0x40 -> begin
     let* input = check_zero_opcode input in
     let* ref_type, input = read_reftype input in
-    let* limits, input = read_limits input in
+    let* limits, input = read_table_limits input in
     let+ value, input =
       read_const [| (None, ([], [ Ref_type ref_type ])) |] input
     in
@@ -884,7 +916,7 @@ let read_table input =
   | _ -> parse_fail "malformed reference type: %d  %d" b1 (-0x40)
 
 let read_memory input =
-  let+ limits, input = read_limits input in
+  let+ limits, input = read_memory_limits input in
   ((None, limits), input)
 
 let read_global types input =

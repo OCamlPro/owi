@@ -985,15 +985,12 @@ let validate_exports modul =
       Ok () )
     modul.exports.mem
 
-let validate_table_limits { Text.is_i64; min; max } =
-  match max with
-  | Some max ->
-    if min > max then Error `Size_minimum_greater_than_maximum
-    else if (not is_i64) && (min > 0xFFFF_FFFF || max > 0xFFFF_FFFF) then
-      Error `Table_size
-    else Ok ()
-  | None ->
-    if (not is_i64) && min > 0xFFFF_FFFF then Error `Table_size else Ok ()
+let validate_table_limits : Text.Table.Type.limits -> unit Result.t = function
+  | I32 { min; max = Some max } when Int32.gt_u min max ->
+    Error `Size_minimum_greater_than_maximum
+  | I64 { min; max = Some max } when Int64.gt_u min max ->
+    Error `Size_minimum_greater_than_maximum
+  | _ -> Ok ()
 
 let validate_table_init modul refs id init ((nullable, _) as rt) =
   match init with
@@ -1045,14 +1042,15 @@ let validate_table modul refs id t =
 let validate_tables modul refs =
   array_iteri (validate_table modul refs) modul.table
 
-let validate_memory_limit { Text.is_i64; min; max } =
-  let max_pages = if is_i64 then 0x1_0000_0000_0000 else 0x1_0000 in
-  match max with
-  | Some max ->
+let validate_memory_limit : Text.Mem.Type.limits -> unit Result.t = function
+  | I32 { min; max = Some max } when Int32.gt_u min max ->
+    Error `Size_minimum_greater_than_maximum
+  | I64 { min; max = Some max } ->
     if min > max then Error `Size_minimum_greater_than_maximum
-    else if min > max_pages || max > max_pages then Error `Memory_size_too_large
+    else if min > 0x1_0000_0000_0000 || max > 0x1_0000_0000_0000 then
+      Error `Memory_size_too_large
     else Ok ()
-  | None -> if min > max_pages then Error `Memory_size_too_large else Ok ()
+  | _ -> Ok ()
 
 let validate_mem modul =
   array_iter

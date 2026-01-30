@@ -479,10 +479,10 @@ end
 
 module Table = struct
   module Type = struct
-    type nonrec t = Text.limits * ref_type
+    type nonrec t = Text.Table.Type.limits * ref_type
 
     let pp fmt (limits, ref_type) =
-      pf fmt "%a %a" Text.pp_limits limits pp_ref_type ref_type
+      pf fmt "%a %a" Text.Table.Type.pp_limits limits pp_ref_type ref_type
   end
 
   type t =
@@ -557,7 +557,7 @@ module Module = struct
     ; types : Typedef.t array
     ; global : (Global.t, Global.Type.t) Origin.t array
     ; table : (Table.t, Table.Type.t) Origin.t array
-    ; mem : (Text.Mem.t, Text.limits) Origin.t array
+    ; mem : (Text.Mem.t, Text.Mem.Type.limits) Origin.t array
     ; func : (Func.t, block_type) Origin.t array (* TODO: switch to func_type *)
     ; tag : (Tag.t, block_type) Origin.t array
     ; elem : Elem.t array

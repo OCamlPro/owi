@@ -148,15 +148,39 @@ let write_global_type buf ((mut, vt) : Binary.Global.Type.t) =
   write_valtype buf vt;
   write_mut buf mut
 
-let write_limits buf (limits : Text.limits) =
+let write_memory_limits buf (limits : Text.Mem.Type.limits) : unit =
   match limits with
-  | { is_i64; min; max = None } ->
-    if is_i64 then Buffer.add_char buf '\x04' else Buffer.add_char buf '\x00';
+  | I32 { min; max = None } ->
+    Buffer.add_char buf '\x00';
+    write_u32 buf min
+  | I32 { min; max = Some max } ->
+    Buffer.add_char buf '\x01';
+    write_u32 buf min;
+    write_u32 buf max
+  | I64 { min; max = None } ->
+    Buffer.add_char buf '\x04';
     write_indice buf min
-  | { is_i64; min; max = Some max } ->
-    if is_i64 then Buffer.add_char buf '\x05' else Buffer.add_char buf '\x01';
+  | I64 { min; max = Some max } ->
+    Buffer.add_char buf '\x05';
     write_indice buf min;
     write_indice buf max
+
+let write_table_limits buf (limits : Text.Table.Type.limits) : unit =
+  match limits with
+  | I32 { min; max = None } ->
+    Buffer.add_char buf '\x00';
+    write_u32 buf min
+  | I32 { min; max = Some max } ->
+    Buffer.add_char buf '\x01';
+    write_u32 buf min;
+    write_u32 buf max
+  | I64 { min; max = None } ->
+    Buffer.add_char buf '\x04';
+    write_u64 buf min
+  | I64 { min; max = Some max } ->
+    Buffer.add_char buf '\x05';
+    write_u64 buf min;
+    write_u64 buf max
 
 let write_memarg buf idx ({ offset; align } : Text.memarg) =
   if idx = 0 then write_u64 buf align
@@ -166,14 +190,16 @@ let write_memarg buf idx ({ offset; align } : Text.memarg) =
     write_indice buf idx );
   write_u64 buf offset
 
-let write_memory buf ((_so, limits) : Text.Mem.t) = write_limits buf limits
+let write_memory buf ((_so, limits) : Text.Mem.t) =
+  write_memory_limits buf limits
 
 let write_memory_import buf
-  ({ modul_name; name; typ = limits; _ } : Text.limits Origin.imported) =
+  ({ modul_name; name; typ = limits; _ } : Text.Mem.Type.limits Origin.imported)
+    =
   write_string buf modul_name;
   write_string buf name;
   Buffer.add_char buf '\x02';
-  write_limits buf limits
+  write_memory_limits buf limits
 
 let write_table_import buf
   ({ modul_name; name; typ = limits, (nullable, heaptype); _ } :
@@ -182,7 +208,7 @@ let write_table_import buf
   write_string buf name;
   Buffer.add_char buf '\x01';
   write_reftype buf nullable heaptype;
-  write_limits buf limits
+  write_table_limits buf limits
 
 let write_func_import buf
   ({ modul_name; name; typ; _ } : Binary.block_type Origin.imported) =
@@ -535,11 +561,11 @@ let write_table buf { Table.typ = limits, (nullable, heaptype); init; _ } =
     Buffer.add_char buf '\x40';
     Buffer.add_char buf '\x00';
     write_reftype buf nullable heaptype;
-    write_limits buf limits;
+    write_table_limits buf limits;
     write_expr buf e ~end_op_code:None
   | None ->
     write_reftype buf nullable heaptype;
-    write_limits buf limits
+    write_table_limits buf limits
 
 let write_export buf cid ({ name; id } : Binary.Export.t) =
   write_string buf name;

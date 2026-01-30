@@ -184,26 +184,58 @@ let func_type :=
   }
 
 let table_type ==
-  | ~ = limits; ~ = ref_type; { limits, ref_type }
+  | ~ = table_limits; ~ = ref_type; { table_limits, ref_type }
 
 let mem_type ==
-  | ~ = limits; <>
+  | ~ = mem_limits; <>
 
 let addrtype ==
   | I64; { true }
   | I32; { false }
   | { false }
 
-let limits ==
+let mem_limits ==
   | is_i64 = addrtype; min = NUM; {
-    let min = Int64.to_int (u64 min) in
-    let max = None in
-    { is_i64; min; max}
+    if is_i64
+    then
+      let min = Int64.to_int (u64 min) in
+      Text.Mem.Type.I64 { min; max = None }
+    else
+      let min = i32 min in
+      Text.Mem.Type.I32 { min; max = None }
   }
   | is_i64 = addrtype; min = NUM; max = NUM; {
-    let min = Int64.to_int (u64 min) in
-    let max = Some (Int64.to_int (u64 max)) in
-    { is_i64; min; max }
+    if is_i64
+    then
+      let min = Int64.to_int (u64 min) in
+      let max = Some (Int64.to_int (u64 max)) in
+      Text.Mem.Type.I64 { min; max }
+    else
+      let min = (i32 min) in
+      let max = Some ((i32 max)) in
+      Text.Mem.Type.I32 { min; max }
+  }
+
+let table_limits ==
+  | is_i64 = addrtype; min = NUM; {
+    if is_i64
+    then
+      let min = u64 min in
+      Text.Table.Type.I64 { min; max = None }
+    else
+      let min = i32 min in
+      Text.Table.Type.I32 { min; max = None }
+  }
+  | is_i64 = addrtype; min = NUM; max = NUM; {
+    if is_i64
+    then
+      let min = u64 min in
+      let max = Some (u64 max) in
+      Text.Table.Type.I64 { min; max }
+    else
+      let min = i32 min in
+      let max = Some (i32 max) in
+      Text.Table.Type.I32 { min; max }
   }
 
 let type_use ==
@@ -952,7 +984,12 @@ let table_fields :=
     in
     let mode = Elem.Mode.Active (None, Annotated.dummy []) in
     [ Module.Field.Elem { id = None; typ = ref_type; init; mode; explicit_typ = true }
-    ; Table  { id = None; typ = ({ is_i64 = false; min; max = Some min }, ref_type); init = None } ]
+    ; Table  {
+      id = None;
+      typ = (
+        Table.Type.I32 { min = Int32.of_int min ; max = Some (Int32.of_int min) },
+        ref_type);
+      init = None } ]
   }
 
 let data ==
@@ -998,7 +1035,10 @@ let memory_fields :=
   | LPAR; DATA; init = string_list; RPAR; {
     let min = ((((String.length init)) + 65535) / 65536) in
     [ Module.Field.Data { id = None; init; mode = Data.Mode.Active (None, Annotated.dummy []) }
-    ; Mem (None, { is_i64 = false; min; max = Some min}) ]
+    ; Mem (
+        None,
+        Mem.Type.I32 { min = Int32.of_int min; max = Some (Int32.of_int min) }
+      ) ]
   }
 
 let global ==
