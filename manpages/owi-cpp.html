@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "frappe";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-b4f5fbab.js";
+            window.path_to_searchindex_js = "../searchindex-26ab7e47.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-66d4629a.js"></script>
@@ -238,6 +238,9 @@ OPTIONS
        --no-value
            do not display a value for each symbol
 
+       --no-worker-isolation
+           Do not force each worker to run on an isolated physical core.
+
        -o FILE, --output=FILE
            Output the generated .wasm or .wat to FILE.
 
@@ -252,7 +255,7 @@ OPTIONS
            skip typechecking pass
 
        -w VAL, --workers=VAL (absent=n)
-           number of workers for symbolic execution. Defaults to the number
+           Number of workers for symbolic execution. Defaults to the number
            of physical cores.
 
        --with-breadcrumbs

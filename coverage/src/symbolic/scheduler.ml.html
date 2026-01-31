@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>scheduler.ml &mdash; Coverage report</title>
-    <meta name="description" content="81.82% coverage in src/symbolic/scheduler.ml">
+    <meta name="description" content="80.95% coverage in src/symbolic/scheduler.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,17 +15,17 @@
           <span class="dirname">src/symbolic/</span>scheduler.ml
         </a>
       </h1>
-      <h2>81.82%</h2>
+      <h2>80.95%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="bottom:15.29%"></span>
-      <span class="unvisited" style="bottom:12.94%"></span>
-      <span class="unvisited" style="bottom:11.76%"></span>
-      <span class="unvisited" style="bottom:10.59%"></span>
-      <span class="unvisited" style="bottom:8.24%"></span>
-      <span class="unvisited" style="bottom:7.06%"></span>
-      <span class="unvisited" style="bottom:3.53%"></span>
-      <span class="unvisited" style="bottom:1.18%"></span>
+      <span class="unvisited" style="bottom:15.66%"></span>
+      <span class="unvisited" style="bottom:13.25%"></span>
+      <span class="unvisited" style="bottom:12.05%"></span>
+      <span class="unvisited" style="bottom:10.84%"></span>
+      <span class="unvisited" style="bottom:8.43%"></span>
+      <span class="unvisited" style="bottom:7.23%"></span>
+      <span class="unvisited" style="bottom:3.61%"></span>
+      <span class="unvisited" style="bottom:1.20%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -97,24 +97,22 @@
 <a id="L65"></a><span class="visited"> </span>
 <a id="L66"></a><span class="visited"> </span>
 <a id="L67"></a><span class="visited"> </span>
-<a id="L68"></a><span class="visited"> </span>
+<a id="L68"></a><span > </span>
 <a id="L69"></a><span class="visited"> </span>
-<a id="L70"></a><span > </span>
-<a id="L71"></a><span class="visited"> </span>
+<a id="L70"></a><span class="unvisited"> </span>
+<a id="L71"></a><span > </span>
 <a id="L72"></a><span class="unvisited"> </span>
-<a id="L73"></a><span > </span>
+<a id="L73"></a><span class="unvisited"> </span>
 <a id="L74"></a><span class="unvisited"> </span>
-<a id="L75"></a><span class="unvisited"> </span>
+<a id="L75"></a><span > </span>
 <a id="L76"></a><span class="unvisited"> </span>
-<a id="L77"></a><span > </span>
-<a id="L78"></a><span class="unvisited"> </span>
-<a id="L79"></a><span class="unvisited"> </span>
-<a id="L80"></a><span > </span>
+<a id="L77"></a><span class="unvisited"> </span>
+<a id="L78"></a><span > </span>
+<a id="L79"></a><span > </span>
+<a id="L80"></a><span class="unvisited"> </span>
 <a id="L81"></a><span > </span>
 <a id="L82"></a><span class="unvisited"> </span>
 <a id="L83"></a><span > </span>
-<a id="L84"></a><span class="unvisited"> </span>
-<a id="L85"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -202,8 +200,6 @@
 <a href="#L81">81</a>
 <a href="#L82">82</a>
 <a href="#L83">83</a>
-<a href="#L84">84</a>
-<a href="#L85">85</a>
 </pre>
 <pre><code class="ocaml">module Schedulable = struct
   (* A monad representing computation that can be cooperatively scheduled. Computations can yield, and fork (Choice). *)
@@ -213,28 +209,28 @@
     | Yield of Prio.metrics * (unit -&gt; 'a t)
     | Choice of 'a t * 'a t
 
-  let[@inline] return x : _ t = <span data-count="4389046">N</span>ow x
+  let[@inline] return x : _ t = <span data-count="4395471">N</span>ow x
 
   let rec bind (mx : 'a t) (f : 'a -&gt; 'b t) : 'b t =
-    <span data-count="4472429">m</span>atch mx with
-    | <span data-count="13027">S</span>top -&gt; Stop
-    | <span data-count="4393987">N</span>ow v -&gt; f v
-    | <span data-count="52100">Y</span>ield (prio, step) -&gt; Yield (prio, fun () -&gt; <span data-count="51696">b</span>ind (ste<span data-count="51671">p</span> ()) f)
-    | <span data-count="13652">C</span>hoice (a, b) -&gt;
+    <span data-count="4481466">m</span>atch mx with
+    | <span data-count="13059">S</span>top -&gt; Stop
+    | <span data-count="4397477">N</span>ow v -&gt; f v
+    | <span data-count="53612">Y</span>ield (prio, step) -&gt; Yield (prio, fun () -&gt; <span data-count="53211">b</span>ind (ste<span data-count="53181">p</span> ()) f)
+    | <span data-count="14367">C</span>hoice (a, b) -&gt;
       (* cps to make it tail rec *)
-      Choice (bin<span data-count="13647">d</span> a f, bin<span data-count="13651">d</span> b f)
+      Choice (bin<span data-count="14368">d</span> a f, bin<span data-count="14368">d</span> b f)
 
-  let[@inline] ( let* ) mx f = <span data-count="4393486">b</span>ind mx f
+  let[@inline] ( let* ) mx f = <span data-count="4395731">b</span>ind mx f
 
   let[@inline] map f x =
-    <span data-count="8403">l</span>et* x in
-    <span data-count="6305">r</span>eturn (<span data-count="6305">f</span> x)
+    <span data-count="8599">l</span>et* x in
+    <span data-count="6495">r</span>eturn (<span data-count="6495">f</span> x)
 
-  let[@inline] ( let+ ) x f = <span data-count="8405">m</span>ap f x
+  let[@inline] ( let+ ) x f = <span data-count="8599">m</span>ap f x
 
-  let[@inline] yield prio = <span data-count="6356">Y</span>ield (prio, Fun.cons<span data-count="6350">t</span> (Now ()))
+  let[@inline] yield prio = <span data-count="6544">Y</span>ield (prio, Fun.cons<span data-count="6544">t</span> (Now ()))
 
-  let[@inline] choose a b = <span data-count="3259">C</span>hoice (a, b)
+  let[@inline] choose a b = <span data-count="3439">C</span>hoice (a, b)
 
   let stop = Stop
 end
@@ -254,41 +250,39 @@ module Make (Work_datastructure : Prio.S) = struct
 
   let work sched at_worker_value =
     <span data-count="794">l</span>et rec inner (t : _ Schedulable.t) write_back =
-      <span data-count="13222">m</span>atch t with
-      | <span data-count="2050">S</span>top -&gt; ()
-      | <span data-count="1565">N</span>ow x -&gt; at_worker_value x
-      | <span data-count="6352">Y</span>ield (prio, f) -&gt; write_back (prio, f)
-      | <span data-count="3256">C</span>hoice (m1, m2) -&gt;
+      <span data-count="13778">m</span>atch t with
+      | <span data-count="2054">S</span>top -&gt; ()
+      | <span data-count="1740">N</span>ow x -&gt; at_worker_value x
+      | <span data-count="6545">Y</span>ield (prio, f) -&gt; write_back (prio, f)
+      | <span data-count="3439">C</span>hoice (m1, m2) -&gt;
         inner m1 write_back;
-        <span data-count="3254">i</span>nner m2 write_back
+        <span data-count="3439">i</span>nner m2 write_back
     in
     Work_datastructure.work_while
-      (fun f write_back -&gt; <span data-count="6716">i</span>nner (<span data-count="6710">f</span> ()) write_back)
+      (fun f write_back -&gt; <span data-count="6906">i</span>nner (<span data-count="6900">f</span> ()) write_back)
       sched.work_queue
 
-  let spawn_worker sched
-    ~(at_worker_value : close_work_queue:(unit -&gt; unit) -&gt; 'a -&gt; unit)
-    ~at_worker_init ~finally =
-    <span data-count="794">a</span>t_worker_init ();
-    <span data-count="794">D</span>omain.spawn (fun () -&gt;
-      <span data-count="794">F</span>un.protect ~finally (fun () -&gt;
-        <span data-count="794">t</span>ry
-          wor<span data-count="780">k</span> sched
-            (at_worker_value ~close_work_queue:(fun () -&gt;
-               <span data-count="49">W</span>ork_datastructure.close sched.work_queue ) )
-        with <span data-count="0">e</span> -&gt;
-          let e_s = Printexc.to_string e in
-          <span data-count="0">l</span>et bt = Printexc.get_raw_backtrace () in
-          <span data-count="0">l</span>et bt_s = Printexc.raw_backtrace_to_string bt in
-          <span data-count="0">l</span>et bt_s =
-            if String.equal "" bt_s then
-              <span data-count="0">"</span>use OCAMLRUNPARAM=b to get the backtrace"
-            else <span data-count="0">b</span>t_s
-          in
-          Log.err (fun m -&gt;
-            <span data-count="0">m</span> "a worker ended with exception %s, backtrace is: @\n@[&lt;v&gt;%s@]" e_s
-              bt_s );
-          <span data-count="0">P</span>rintexc.raise_with_backtrace e bt ) )
+  let run_worker sched
+    ~(at_worker_value : close_work_queue:(unit -&gt; unit) -&gt; 'a -&gt; unit) ~finally
+      =
+    <span data-count="794">F</span>un.protect ~finally (fun () -&gt;
+      <span data-count="794">t</span>ry
+        wor<span data-count="780">k</span> sched
+          (at_worker_value ~close_work_queue:(fun () -&gt;
+             <span data-count="52">W</span>ork_datastructure.close sched.work_queue ) )
+      with <span data-count="0">e</span> -&gt;
+        let e_s = Printexc.to_string e in
+        <span data-count="0">l</span>et bt = Printexc.get_raw_backtrace () in
+        <span data-count="0">l</span>et bt_s = Printexc.raw_backtrace_to_string bt in
+        <span data-count="0">l</span>et bt_s =
+          if String.equal "" bt_s then
+            <span data-count="0">"</span>use OCAMLRUNPARAM=b to get the backtrace"
+          else <span data-count="0">b</span>t_s
+        in
+        Log.err (fun m -&gt;
+          <span data-count="0">m</span> "a worker ended with exception %s, backtrace is: @\n@[&lt;v&gt;%s@]" e_s
+            bt_s );
+        <span data-count="0">P</span>rintexc.raise_with_backtrace e bt )
 end
 </code></pre>
       </div>

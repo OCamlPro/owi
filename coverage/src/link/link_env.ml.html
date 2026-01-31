@@ -294,7 +294,7 @@ type 'ext t =
   ; id : int
   }
 
-let id (env : _ t) = <span data-count="193312">e</span>nv.id
+let id (env : _ t) = <span data-count="193465">e</span>nv.id
 
 let get_global (env : _ t) id =
   <span data-count="1125">m</span>atch IMap.find_opt id env.globals with
@@ -312,7 +312,7 @@ let get_table (env : _ t) id =
   | <span data-count="1608278">S</span>ome v -&gt; Concrete_choice.return v
 
 let get_func (env : _ t) id =
-  <span data-count="5126746">m</span>atch IMap.find_opt id env.functions with None -&gt; assert false | <span data-count="5126746">S</span>ome v -&gt; v
+  <span data-count="5135940">m</span>atch IMap.find_opt id env.functions with None -&gt; assert false | <span data-count="5135940">S</span>ome v -&gt; v
 
 let get_data (env : _ t) id =
   <span data-count="931">m</span>atch IMap.find_opt id env.data with

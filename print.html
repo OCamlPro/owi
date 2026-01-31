@@ -37,7 +37,7 @@
             const path_to_root = "";
             const default_light_theme = "frappe";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-b4f5fbab.js";
+            window.path_to_searchindex_js = "searchindex-26ab7e47.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-66d4629a.js"></script>
@@ -1918,6 +1918,9 @@ OPTIONS
        --no-value
            do not display a value for each symbol
 
+       --no-worker-isolation
+           Do not force each worker to run on an isolated physical core.
+
        -o FILE, --output=FILE
            Output the generated .wasm or .wat to FILE.
 
@@ -1938,7 +1941,7 @@ OPTIONS
            skip typechecking pass
 
        -w VAL, --workers=VAL (absent=n)
-           number of workers for symbolic execution. Defaults to the number
+           Number of workers for symbolic execution. Defaults to the number
            of physical cores.
 
        --with-breadcrumbs
@@ -2061,6 +2064,9 @@ OPTIONS
        --no-value
            do not display a value for each symbol
 
+       --no-worker-isolation
+           Do not force each worker to run on an isolated physical core.
+
        -o FILE, --output=FILE
            Output the generated .wasm or .wat to FILE.
 
@@ -2075,7 +2081,7 @@ OPTIONS
            skip typechecking pass
 
        -w VAL, --workers=VAL (absent=n)
-           number of workers for symbolic execution. Defaults to the number
+           Number of workers for symbolic execution. Defaults to the number
            of physical cores.
 
        --with-breadcrumbs
@@ -2290,6 +2296,9 @@ OPTIONS
        --no-value
            do not display a value for each symbol
 
+       --no-worker-isolation
+           Do not force each worker to run on an isolated physical core.
+
        -s VALUE, --solver=VALUE (absent=Z3)
            SMT solver to use. VALUE must be one of the 5 available solvers:
            Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo
@@ -2298,7 +2307,7 @@ OPTIONS
            skip typechecking pass
 
        -w VAL, --workers=VAL (absent=n)
-           number of workers for symbolic execution. Defaults to the number
+           Number of workers for symbolic execution. Defaults to the number
            of physical cores.
 
        --with-breadcrumbs
@@ -2572,6 +2581,9 @@ OPTIONS
        --no-value
            do not display a value for each symbol
 
+       --no-worker-isolation
+           Do not force each worker to run on an isolated physical core.
+
        -o FILE, --output=FILE
            Output the generated .wasm or .wat to FILE.
 
@@ -2586,7 +2598,7 @@ OPTIONS
            skip typechecking pass
 
        -w VAL, --workers=VAL (absent=n)
-           number of workers for symbolic execution. Defaults to the number
+           Number of workers for symbolic execution. Defaults to the number
            of physical cores.
 
        --with-breadcrumbs
@@ -2769,6 +2781,9 @@ OPTIONS
        --no-value
            do not display a value for each symbol
 
+       --no-worker-isolation
+           Do not force each worker to run on an isolated physical core.
+
        -s VALUE, --solver=VALUE (absent=Z3)
            SMT solver to use. VALUE must be one of the 5 available solvers:
            Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo
@@ -2777,7 +2792,7 @@ OPTIONS
            skip typechecking pass
 
        -w VAL, --workers=VAL (absent=n)
-           number of workers for symbolic execution. Defaults to the number
+           Number of workers for symbolic execution. Defaults to the number
            of physical cores.
 
        --with-breadcrumbs
@@ -3161,6 +3176,9 @@ OPTIONS
        --no-value
            do not display a value for each symbol
 
+       --no-worker-isolation
+           Do not force each worker to run on an isolated physical core.
+
        -o FILE, --output=FILE
            Output the generated .wasm or .wat to FILE.
 
@@ -3172,7 +3190,7 @@ OPTIONS
            skip typechecking pass
 
        -w VAL, --workers=VAL (absent=n)
-           number of workers for symbolic execution. Defaults to the number
+           Number of workers for symbolic execution. Defaults to the number
            of physical cores.
 
        --with-breadcrumbs
@@ -3553,7 +3571,7 @@ xdg-open _coverage/index.html
 <h2 id="landmarks"><a class="header" href="#landmarks">Landmarks</a></h2>
 <pre><code class="language-shell-session">OCAML_LANDMARKS=on dune exec --instrument-with landmarks --profile release -- owi run test/run/binary_loop.wasm
 </code></pre>
-<p>Note: it seems landmarks is not compatible with domains and thus won’t work with most sub-commands.</p>
+<p>See the discussion in <a href="https://github.com/OCamlPro/owi/pull/871">#871</a> to understand landmarks limitations in Owi.</p>
 <h2 id="test-comp"><a class="header" href="#test-comp">Test-comp</a></h2>
 <p>See <a href="https://github.com/OCamlPro/symbocalypse">Symbocalypse</a>.</p>
 <div style="break-before: page; page-break-before: always;"></div>

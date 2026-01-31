@@ -142,35 +142,35 @@ module M = Scheduler.Schedulable
   *)
 type ('a, 's) t = 's -&gt; ('a * 's) M.t
 
-let[@inline] run mxf st = <span data-count="8770925">m</span>xf st
+let[@inline] run mxf st = <span data-count="8778485">m</span>xf st
 
-let[@inline] return x = fun st -&gt; <span data-count="4098657">M</span>.return (x, st)
+let[@inline] return x = fun st -&gt; <span data-count="4105791">M</span>.return (x, st)
 
 let[@inline] lift (x : 'a M.t) : ('a, 's) t =
  fun (st : 's) -&gt;
-  <span data-count="8398">l</span>et ( let+ ) = M.( let+ ) in
+  <span data-count="8594">l</span>et ( let+ ) = M.( let+ ) in
   let+ x in
-  <span data-count="6303">(</span>x, st)
+  <span data-count="6494">(</span>x, st)
 
 let[@inline] bind mx f =
  fun st -&gt;
-  <span data-count="4382471">l</span>et ( let* ) = M.( let* ) in
-  let* x, new_st = ru<span data-count="4381973">n</span> mx st in
-  <span data-count="4384606">r</span>un (<span data-count="4385102">f</span> x) new_st
+  <span data-count="4390177">l</span>et ( let* ) = M.( let* ) in
+  let* x, new_st = ru<span data-count="4388019">n</span> mx st in
+  <span data-count="4389803">r</span>un (<span data-count="4393298">f</span> x) new_st
 
-let[@inline] ( let* ) mx f = <span data-count="4173036">b</span>ind mx f
+let[@inline] ( let* ) mx f = <span data-count="4180115">b</span>ind mx f
 
 let[@inline] map x f =
-  <span data-count="354563">l</span>et* x in
-  <span data-count="563937">r</span>eturn (<span data-count="563941">f</span> x)
+  <span data-count="356167">l</span>et* x in
+  <span data-count="566786">r</span>eturn (<span data-count="566805">f</span> x)
 
-let[@inline] ( let+ ) x f = <span data-count="354559">m</span>ap x f
+let[@inline] ( let+ ) x f = <span data-count="356163">m</span>ap x f
 
-let[@inline] liftF2 f x y = fun st -&gt; <span data-count="3256">f</span> (ru<span data-count="3255">n</span> x st) (ru<span data-count="3256">n</span> y st)
+let[@inline] liftF2 f x y = fun st -&gt; <span data-count="3437">f</span> (ru<span data-count="3437">n</span> x st) (ru<span data-count="3437">n</span> y st)
 
-let[@inline] with_state f = fun st -&gt; <span data-count="209500">M</span>.return (<span data-count="209490">f</span> st)
+let[@inline] with_state f = fun st -&gt; <span data-count="210502">M</span>.return (<span data-count="210519">f</span> st)
 
-let[@inline] modify_state f = fun st -&gt; <span data-count="71835">M</span>.return ((), <span data-count="71841">f</span> st)
+let[@inline] modify_state f = fun st -&gt; <span data-count="72599">M</span>.return ((), <span data-count="72602">f</span> st)
 </code></pre>
       </div>
     </div>

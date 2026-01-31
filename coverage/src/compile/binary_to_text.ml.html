@@ -873,7 +873,7 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-let convert_indice : Binary.indice -&gt; Text.indice = function <span data-count="172">i</span> -&gt; Raw i
+let convert_indice : Binary.indice -&gt; Text.indice = function <span data-count="172">i</span> -&gt; Text.Raw i
 
 let convert_heap_type : Binary.heap_type -&gt; Text.heap_type = function
   | <span data-count="0">T</span>ypeUse id -&gt; TypeUse (Raw id)
@@ -898,15 +898,15 @@ let convert_func_type ((pt, rt) : Binary.func_type) : Text.func_type =
   , List.ma<span data-count="152">p</span> convert_val_type rt )
 
 let convert_block_type : Binary.block_type -&gt; Text.block_type = function
-  | <span data-count="102">B</span>t_raw (opt, ft) -&gt;
+  | <span data-count="102">B</span>inary.Bt_raw (opt, ft) -&gt;
     let opt = Option.map convert_indice opt in
-    <span data-count="102">B</span>t_raw (opt, convert_func_typ<span data-count="102">e</span> ft)
+    <span data-count="102">T</span>ext.Bt_raw (opt, convert_func_typ<span data-count="102">e</span> ft)
 
 let rec convert_instr : Binary.instr -&gt; Text.instr = function
-  | <span data-count="0">B</span>r_table (ids, id) -&gt;
+  | <span data-count="0">B</span>inary.Br_table (ids, id) -&gt;
     let ids = Array.map convert_indice ids in
     <span data-count="0">l</span>et id = convert_indice id in
-    <span data-count="0">B</span>r_table (ids, id)
+    <span data-count="0">T</span>ext.Br_table (ids, id)
   | <span data-count="1">B</span>r_if id -&gt;
     let id = convert_indice id in
     <span data-count="1">B</span>r_if id
@@ -1069,7 +1069,7 @@ and convert_expr (e : Binary.expr Annotated.t) : Text.expr Annotated.t =
     e
 
 let convert_elem_mode : Binary.Elem.Mode.t -&gt; Text.Elem.Mode.t = function
-  | <span data-count="0">P</span>assive -&gt; Passive
+  | <span data-count="0">B</span>inary.Elem.Mode.Passive -&gt; Text.Elem.Mode.Passive
   | <span data-count="0">D</span>eclarative -&gt; Declarative
   | <span data-count="1">A</span>ctive (opt, e) -&gt;
     let opt = Option.map (fun i -&gt; <span data-count="1">T</span>ext.Raw i) opt in
@@ -1077,21 +1077,21 @@ let convert_elem_mode : Binary.Elem.Mode.t -&gt; Text.Elem.Mode.t = function
     <span data-count="1">A</span>ctive (opt, e)
 
 let convert_elem : Binary.Elem.t -&gt; Text.Elem.t = function
-  | <span data-count="1">{</span> id; typ; init; mode; explicit_typ } -&gt;
+  | <span data-count="1">{</span> Binary.Elem.id; typ; init; mode; explicit_typ } -&gt;
     let init = List.map convert_expr init in
     <span data-count="1">l</span>et mode = convert_elem_mode mode in
-    <span data-count="1">{</span> id; typ = convert_ref_typ<span data-count="1">e</span> typ; init; mode; explicit_typ }
+    <span data-count="1">{</span> Text.Elem.id; typ = convert_ref_typ<span data-count="1">e</span> typ; init; mode; explicit_typ }
 
 let convert_data_mode : Binary.Data.Mode.t -&gt; Text.Data.Mode.t = function
-  | <span data-count="0">P</span>assive -&gt; Passive
+  | <span data-count="0">B</span>inary.Data.Mode.Passive -&gt; Text.Data.Mode.Passive
   | <span data-count="1">A</span>ctive (i, e) -&gt;
     let e = convert_expr e in
     <span data-count="1">A</span>ctive (Some (Raw i), e)
 
 let convert_data : Binary.Data.t -&gt; Text.Data.t = function
-  | <span data-count="1">{</span> id; init; mode } -&gt;
+  | <span data-count="1">{</span> Binary.Data.id; init; mode } -&gt;
     let mode = convert_data_mode mode in
-    <span data-count="1">{</span> id; init; mode }
+    <span data-count="1">{</span> Text.Data.id; init; mode }
 
 let from_types types : Text.Module.Field.t list =
   <span data-count="26">A</span>rray.map

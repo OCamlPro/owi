@@ -957,7 +957,7 @@ let compare_result_const result (const : Concrete_value.t) =
     <span data-count="0">a</span>ssert false
 
 let value_of_const : Wast.const -&gt; Concrete_value.t = <span data-count="35825">f</span>unction
-  | <span data-count="10964">C</span>onst_I32 v -&gt; Concrete_value.I32 v
+  | <span data-count="10964">W</span>ast.Const_I32 v -&gt; Concrete_value.I32 v
   | <span data-count="1172">C</span>onst_I64 v -&gt; Concrete_value.I64 v
   | <span data-count="11729">C</span>onst_F32 v -&gt; Concrete_value.F32 v
   | <span data-count="11908">C</span>onst_F64 v -&gt; Concrete_value.F64 v

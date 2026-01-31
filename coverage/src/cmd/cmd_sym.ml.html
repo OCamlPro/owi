@@ -93,22 +93,23 @@
 <a id="L69"></a><span > </span>
 <a id="L70"></a><span > </span>
 <a id="L71"></a><span > </span>
-<a id="L72"></a><span class="visited"> </span>
-<a id="L73"></a><span > </span>
+<a id="L72"></a><span > </span>
+<a id="L73"></a><span class="visited"> </span>
 <a id="L74"></a><span > </span>
 <a id="L75"></a><span > </span>
 <a id="L76"></a><span > </span>
 <a id="L77"></a><span > </span>
-<a id="L78"></a><span class="visited"> </span>
+<a id="L78"></a><span > </span>
 <a id="L79"></a><span class="visited"> </span>
-<a id="L80"></a><span > </span>
+<a id="L80"></a><span class="visited"> </span>
 <a id="L81"></a><span > </span>
-<a id="L82"></a><span class="visited"> </span>
-<a id="L83"></a><span > </span>
-<a id="L84"></a><span class="visited"> </span>
-<a id="L85"></a><span > </span>
+<a id="L82"></a><span > </span>
+<a id="L83"></a><span class="visited"> </span>
+<a id="L84"></a><span > </span>
+<a id="L85"></a><span class="visited"> </span>
 <a id="L86"></a><span > </span>
 <a id="L87"></a><span > </span>
+<a id="L88"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -200,6 +201,7 @@
 <a href="#L85">85</a>
 <a href="#L86">86</a>
 <a href="#L87">87</a>
+<a href="#L88">88</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -257,6 +259,7 @@ let cmd ~parameters ~source_file =
   <span data-count="410">l</span>et { Symbolic_parameters.exploration_strategy
       ; fail_mode
       ; workers
+      ; no_worker_isolation
       ; solver
       ; deterministic_result_order
       ; model_format
@@ -285,9 +288,9 @@ let cmd ~parameters ~source_file =
   <span data-count="410">l</span>et* result, run_time = run_file ~parameters ~source_file in
 
   <span data-count="408">S</span>ymbolic_driver.handle_result ~exploration_strategy ~fail_mode ~workers
-    ~solver ~deterministic_result_order ~model_format ~no_value
-    ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
-    ~model_out_file ~with_breadcrumbs ~run_time result
+    ~no_worker_isolation ~solver ~deterministic_result_order ~model_format
+    ~no_value ~no_assert_failure_expression_printing ~workspace
+    ~no_stop_at_failure ~model_out_file ~with_breadcrumbs ~run_time result
 </code></pre>
       </div>
     </div>
