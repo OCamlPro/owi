@@ -8,8 +8,8 @@ let
     src = pkgs.fetchFromGitHub {
       owner = "formalsec";
       repo = "smtml";
-      rev = "3b08a5368718068fa46547e60df4e44caa51db78";
-      hash = "sha256-iD2UGddGYvE/jn+KM5jj05DHcNPjSq9IiH1BlnfO+Sg=";
+      rev = "e259d5b7d108cb2d1102c188132a6c86bbf7705e";
+      hash = "sha256-8OzNJIyJhfqgDw3ioINN0D0WVTSliG9TP4cUNlrm4s8=";
     };
     doCheck = false;
   });
