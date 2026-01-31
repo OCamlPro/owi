@@ -143,3 +143,5 @@ let of_string_exn s =
   sign_extend parsed
 
 let of_string s = try Some (of_string_exn s) with _ -> None
+
+let to_string_u = Fmt.str "%lu"

@@ -156,8 +156,8 @@ val pp_memarg : memarg Fmt.t
 
 type nonrec limits =
   { is_i64 : bool
-  ; min : int
-  ; max : int option
+  ; min : string
+  ; max : string option
   }
 
 val pp_limits : limits Fmt.t

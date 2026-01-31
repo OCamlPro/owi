@@ -320,9 +320,17 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
 let rewrite_table_limits ({ is_i64; min; max } : Text.limits) :
   Binary.Table.Type.limits Result.t =
   if is_i64 then
-    Ok (I64 { min = Int64.of_int min; max = Option.map Int64.of_int max })
-  else Ok (I32 { min = Int32.of_int min; max = Option.map Int32.of_int max })
-(* TODO: check size *)
+    let* min = try Ok (Int64.of_string_exn min) with _ -> Error `Table_size in
+    let* max =
+      try Ok (Option.map Int64.of_string_exn max) with _ -> Error `Table_size
+    in
+    Ok (Binary.Table.Type.I64 { min; max })
+  else
+    let* min = try Ok (Int32.of_string_exn min) with _ -> Error `Table_size in
+    let* max =
+      try Ok (Option.map Int32.of_string_exn max) with _ -> Error `Table_size
+    in
+    Ok (Binary.Table.Type.I32 { min; max })
 
 let rewrite_table (assigned : Assigned.t)
   ({ id; typ = limits, (null, ht); init } : Text.Table.t) :
@@ -340,9 +348,30 @@ let rewrite_table (assigned : Assigned.t)
 
 let rewrite_memory_limits ({ is_i64; min; max } : Text.limits) :
   Binary.Mem.Type.limits Result.t =
-  if is_i64 then Ok (I64 { min; max })
-  else Ok (I32 { min = Int32.of_int min; max = Option.map Int32.of_int max })
-(* TODO: check size *)
+  if is_i64 then
+    let* min =
+      match int_of_string_opt min with
+      | Some min -> Ok min
+      | None -> Error `Constant_out_of_range
+    in
+    let* max =
+      match max with
+      | None -> Ok None
+      | Some max -> (
+        match int_of_string_opt max with
+        | Some max -> Ok (Some max)
+        | None -> Error `Constant_out_of_range )
+    in
+    Ok (Binary.Mem.Type.I64 { min; max })
+  else
+    let* min =
+      try Ok (Int32.of_string_exn min) with _ -> Error `Constant_out_of_range
+    in
+    let* max =
+      try Ok (Option.map Int32.of_string_exn max)
+      with _ -> Error `Constant_out_of_range
+    in
+    Ok (Binary.Mem.Type.I32 { min; max })
 
 let rewrite_memory ((id, limits) : Text.Mem.t) : Binary.Mem.t Result.t =
   let+ limits = rewrite_memory_limits limits in

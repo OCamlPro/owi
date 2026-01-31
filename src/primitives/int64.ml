@@ -151,3 +151,5 @@ let of_string_exn s =
 let of_string s = try Some (of_string_exn s) with _ -> None
 
 let fits_in_u32 n = unsigned_compare n 0xFFFF_FFFFL <= 0
+
+let to_string_u = Fmt.str "%Lu"
