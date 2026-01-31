@@ -73,7 +73,7 @@
   (sedlex
    (>= 3.3))
   (smtml
-   (>= 0.17.0))
+   (>= 0.20.0))
   (synchronizer
    (>= 0.2))
   (uutf
