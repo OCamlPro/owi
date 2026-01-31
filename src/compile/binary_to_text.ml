@@ -247,11 +247,14 @@ let from_global (global : (Binary.Global.t, Binary.Global.Type.t) Origin.t array
 
 let convert_table_limits : Binary.Table.Type.limits -> Text.limits = function
   | I64 { min; max } ->
-    { is_i64 = true; min = Int64.to_int min; max = Option.map Int64.to_int max }
+    { is_i64 = true
+    ; min = Int64.to_string_u min
+    ; max = Option.map Int64.to_string_u max
+    }
   | I32 { min; max } ->
     { is_i64 = false
-    ; min = Int32.to_int min
-    ; max = Option.map Int32.to_int max
+    ; min = Int32.to_string_u min
+    ; max = Option.map Int32.to_string_u max
     }
 
 let from_table table : Text.Module.Field.t list =
@@ -271,11 +274,15 @@ let from_table table : Text.Module.Field.t list =
   |> Array.to_list
 
 let convert_mem_limits : Binary.Mem.Type.limits -> Text.limits = function
-  | I64 { min; max } -> { is_i64 = true; min; max }
+  | I64 { min; max } ->
+    { is_i64 = true
+    ; min = Int.to_string min
+    ; max = Option.map Int.to_string max
+    }
   | I32 { min; max } ->
     { is_i64 = false
-    ; min = Int32.to_int min
-    ; max = Option.map Int32.to_int max
+    ; min = Int32.to_string_u min
+    ; max = Option.map Int32.to_string_u max
     }
 
 let from_mem mem : Text.Module.Field.t list =

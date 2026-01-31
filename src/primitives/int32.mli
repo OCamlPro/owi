@@ -97,3 +97,5 @@ val unsigned_rem : t -> t -> t
 (* Other stuff not related to Wasm but added here for convenience *)
 
 val compare : t -> t -> int
+
+val to_string_u : t -> string

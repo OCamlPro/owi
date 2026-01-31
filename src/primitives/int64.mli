@@ -105,3 +105,5 @@ val rem : t -> t -> t
 val unsigned_rem : t -> t -> t
 
 val max : t -> t -> t
+
+val to_string_u : t -> string
