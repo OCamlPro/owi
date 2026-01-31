@@ -25,7 +25,10 @@ let table_limits =
   in
   let* min = range sup in
   let+ max = option (range ~min (sup - min)) in
-  Table.Type.I32 { min = Int32.of_int min; max = Option.map Int32.of_int max }
+  { is_i64 = false
+  ; min = string_of_int min
+  ; max = Option.map string_of_int max
+  }
 
 let table_type = pair table_limits ref_type
 
