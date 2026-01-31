@@ -23,9 +23,10 @@ let check_error ~expected ~got : unit Result.t =
       when String.starts_with ~prefix:"constant out of range" s ->
       String.starts_with ~prefix:"i32 constant" expected
       || String.equal expected "offset out of range"
-      || String.equal expected "table size"
     | `Constant_out_of_range ->
       String.starts_with ~prefix:"i32 constant" expected
+      || String.equal expected "table size"
+      || String.equal expected "memory size"
     | `Parse_fail "unexpected end of section or function"
     | `Msg "unexpected end of section or function" ->
       String.equal expected "section size mismatch"

@@ -21,6 +21,42 @@ let empty_env () =
   ; globals = false
   }
 
+let check_mem_limits { is_i64; min; max } =
+  if is_i64 then
+    let* min =
+      match int_of_string_opt min with
+      | Some min -> Ok min
+      | None -> Error `Constant_out_of_range
+    in
+    match max with
+    | None ->
+      if min > 0x1_0000_0000_0000 then Error `Memory_size_too_large else Ok ()
+    | Some max -> (
+      match int_of_string_opt max with
+      | Some max ->
+        if min > max then Error `Size_minimum_greater_than_maximum
+        else if min > 0x1_0000_0000_0000 || max > 0x1_0000_0000_0000 then
+          Error `Memory_size_too_large
+        else Ok ()
+      | None -> Error `Constant_out_of_range )
+  else
+    let* min =
+      try Ok (Int32.of_string_exn min)
+      with Failure _ -> Error `Constant_out_of_range
+    in
+    match max with
+    | None ->
+      if Int32.gt_u min 0x1_0000l then Error `Memory_size_too_large else Ok ()
+    | Some max ->
+      let* max =
+        try Ok (Int32.of_string_exn max)
+        with Failure _ -> Error `Constant_out_of_range
+      in
+      if Int32.gt_u min max then Error `Size_minimum_greater_than_maximum
+      else if Int32.gt_u min 0x1_0000l || Int32.gt_u max 0x1_0000l then
+        Error `Memory_size_too_large
+      else Ok ()
+
 let modul m =
   Log.info (fun m -> m "checking     ...");
   let add_global, global_exists =
@@ -153,7 +189,8 @@ let modul m =
           let* env = elem_check_type env typ mode explicit_typ in
           let* () = elem_check_init init in
           Ok env
-        | Mem (id, _) ->
+        | Mem (id, limits) ->
+          let* () = check_mem_limits limits in
           let* () = add_memory id in
           Ok { env with declared_memory = true }
         | Typedef _t -> Ok env
