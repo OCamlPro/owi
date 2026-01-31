@@ -1043,14 +1043,26 @@ let validate_tables modul refs =
   array_iteri (validate_table modul refs) modul.table
 
 let validate_memory_limit : Binary.Mem.Type.limits -> unit Result.t = function
-  | I32 { min; max = Some max } when Int32.gt_u min max ->
-    Error `Size_minimum_greater_than_maximum
-  | I64 { min; max = Some max } ->
-    if min > max then Error `Size_minimum_greater_than_maximum
-    else if min > 0x1_0000_0000_0000 || max > 0x1_0000_0000_0000 then
-      Error `Memory_size_too_large
-    else Ok ()
-  | _ -> Ok ()
+  | I32 { min; max } -> begin
+    match max with
+    | None ->
+      if Int32.gt_u min 0x1_0000l then Error `Memory_size_too_large else Ok ()
+    | Some max ->
+      if Int32.gt_u min max then Error `Size_minimum_greater_than_maximum
+      else if Int32.gt_u min 0x1_0000l || Int32.gt_u max 0x1_0000l then
+        Error `Memory_size_too_large
+      else Ok ()
+  end
+  | I64 { min; max } -> begin
+    match max with
+    | None ->
+      if min > 0x1_0000_0000_0000 then Error `Memory_size_too_large else Ok ()
+    | Some max ->
+      if min > max then Error `Size_minimum_greater_than_maximum
+      else if min > 0x1_0000_0000_0000 || max > 0x1_0000_0000_0000 then
+        Error `Memory_size_too_large
+      else Ok ()
+  end
 
 let validate_mem modul =
   array_iter
