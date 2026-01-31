@@ -148,7 +148,7 @@ let write_global_type buf ((mut, vt) : Binary.Global.Type.t) =
   write_valtype buf vt;
   write_mut buf mut
 
-let write_memory_limits buf (limits : Text.Mem.Type.limits) : unit =
+let write_memory_limits buf (limits : Binary.Mem.Type.limits) : unit =
   match limits with
   | I32 { min; max = None } ->
     Buffer.add_char buf '\x00';
@@ -165,7 +165,7 @@ let write_memory_limits buf (limits : Text.Mem.Type.limits) : unit =
     write_indice buf min;
     write_indice buf max
 
-let write_table_limits buf (limits : Text.Table.Type.limits) : unit =
+let write_table_limits buf (limits : Binary.Table.Type.limits) : unit =
   match limits with
   | I32 { min; max = None } ->
     Buffer.add_char buf '\x00';
@@ -190,12 +190,12 @@ let write_memarg buf idx ({ offset; align } : Text.memarg) =
     write_indice buf idx );
   write_u64 buf offset
 
-let write_memory buf ((_so, limits) : Text.Mem.t) =
+let write_memory buf ((_so, limits) : Binary.Mem.t) =
   write_memory_limits buf limits
 
 let write_memory_import buf
-  ({ modul_name; name; typ = limits; _ } : Text.Mem.Type.limits Origin.imported)
-    =
+  ({ modul_name; name; typ = limits; _ } :
+    Binary.Mem.Type.limits Origin.imported ) =
   write_string buf modul_name;
   write_string buf name;
   Buffer.add_char buf '\x02';

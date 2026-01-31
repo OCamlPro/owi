@@ -23,7 +23,7 @@ type t =
           declarations with type indicies. *)
   ; global : (Text.Global.t, Global.Type.t) Origin.t Array.t
   ; table : (Table.t, Table.Type.t) Origin.t Array.t
-  ; mem : (Mem.t, Mem.Type.limits) Origin.t Array.t
+  ; mem : (Mem.t, limits) Origin.t Array.t
   ; func : (Func.t, block_type) Origin.t Array.t
   ; elem : Text.Elem.t Array.t
   ; data : Text.Data.t Array.t
@@ -58,8 +58,7 @@ let pp_table fmt t =
   pp_runtime_array ~pp_local:Text.Table.pp ~pp_imported:Text.Table.Type.pp fmt t
 
 let pp_mem fmt m =
-  pp_runtime_array ~pp_local:Text.Mem.pp ~pp_imported:Text.Mem.Type.pp_limits
-    fmt m
+  pp_runtime_array ~pp_local:Text.Mem.pp ~pp_imported:Text.pp_limits fmt m
 
 let pp_func fmt f =
   pp_runtime_array ~pp_local:Text.Func.pp ~pp_imported:Text.pp_block_type fmt f

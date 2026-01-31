@@ -161,7 +161,7 @@ let eval_globals ls env globals : Link_env.Build.t Result.t =
 
 let memory_limit_is_included ~import ?imported_data_size ~imported () =
   match (import, imported) with
-  | Text.Mem.Type.I32 import, Text.Mem.Type.I32 imported ->
+  | Binary.Mem.Type.I32 import, Binary.Mem.Type.I32 imported ->
     Int32.(
       le_u import.min
         (Option.fold ~none:imported.min
@@ -184,7 +184,7 @@ let memory_limit_is_included ~import ?imported_data_size ~imported () =
 
 let table_limit_is_included ~import ?imported_data_size ~imported () =
   match (import, imported) with
-  | Text.Table.Type.I32 import, Text.Table.Type.I32 imported ->
+  | Binary.Table.Type.I32 import, Binary.Table.Type.I32 imported ->
     Int32.(
       le_u import.min
         (Option.fold ~none:imported.min
@@ -208,8 +208,9 @@ let table_limit_is_included ~import ?imported_data_size ~imported () =
     end
   | _ -> false
 
-let load_memory (ls : 'f State.t) (import : Text.Mem.Type.limits Origin.imported)
-  : Concrete_memory.t Result.t =
+let load_memory (ls : 'f State.t)
+  (import : Binary.Mem.Type.limits Origin.imported) : Concrete_memory.t Result.t
+    =
   let* mem =
     State.load_from_module ls (fun (e : State.exports) -> e.memories) import
   in
@@ -218,7 +219,7 @@ let load_memory (ls : 'f State.t) (import : Text.Mem.Type.limits Origin.imported
   then Ok mem
   else Error (`Incompatible_import_type import.name)
 
-let eval_memory ls (memory : (Text.Mem.t, Text.Mem.Type.limits) Origin.t) :
+let eval_memory ls (memory : (Binary.Mem.t, Binary.Mem.Type.limits) Origin.t) :
   Concrete_memory.t Result.t =
   match memory with
   | Local (_label, mem_type) -> ok @@ Concrete_memory.init mem_type

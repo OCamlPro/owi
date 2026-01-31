@@ -317,17 +317,36 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
   in
   expr iexpr (0, [])
 
+let rewrite_table_limits ({ is_i64; min; max } : Text.limits) :
+  Binary.Table.Type.limits Result.t =
+  if is_i64 then
+    Ok (I64 { min = Int64.of_int min; max = Option.map Int64.of_int max })
+  else Ok (I32 { min = Int32.of_int min; max = Option.map Int32.of_int max })
+(* TODO: check size *)
+
 let rewrite_table (assigned : Assigned.t)
   ({ id; typ = limits, (null, ht); init } : Text.Table.t) :
   Binary.Table.t Result.t =
   match init with
   | None ->
     let* ht = rewrite_heap_type assigned ht in
-    Ok { Binary.Table.id; typ = (limits, (null, ht)); init = None }
+    let+ limits = rewrite_table_limits limits in
+    { Binary.Table.id; typ = (limits, (null, ht)); init = None }
   | Some e ->
     let* ht = rewrite_heap_type assigned ht in
-    let+ e = rewrite_expr assigned [] e in
+    let* e = rewrite_expr assigned [] e in
+    let+ limits = rewrite_table_limits limits in
     { Binary.Table.id; typ = (limits, (null, ht)); init = Some e }
+
+let rewrite_memory_limits ({ is_i64; min; max } : Text.limits) :
+  Binary.Mem.Type.limits Result.t =
+  if is_i64 then Ok (I64 { min; max })
+  else Ok (I32 { min = Int32.of_int min; max = Option.map Int32.of_int max })
+(* TODO: check size *)
+
+let rewrite_memory ((id, limits) : Text.Mem.t) : Binary.Mem.t Result.t =
+  let+ limits = rewrite_memory_limits limits in
+  (id, limits)
 
 let rewrite_global (assigned : Assigned.t) (global : Text.Global.t) :
   Binary.Global.t Result.t =
@@ -430,10 +449,16 @@ let modul (modul : Grouped.t) (assigned : Assigned.t) : Binary.Module.t Result.t
   let* table =
     let f_local g = rewrite_table assigned g in
     let f_imported (l, (n, ht)) =
+      let* l = rewrite_table_limits l in
       let+ ht = rewrite_heap_type assigned ht in
       (l, (n, ht))
     in
     array_map (Origin.monadic_map ~f_local ~f_imported) modul.table
+  in
+  let* mem =
+    let f_local g = rewrite_memory g in
+    let f_imported = rewrite_memory_limits in
+    array_map (Origin.monadic_map ~f_local ~f_imported) modul.mem
   in
   let* elem = array_map (rewrite_elem assigned) modul.elem in
   let* data = array_map (rewrite_data assigned) modul.data in
@@ -468,7 +493,7 @@ let modul (modul : Grouped.t) (assigned : Assigned.t) : Binary.Module.t Result.t
   in
 
   { Binary.Module.id = modul.id
-  ; mem = modul.mem
+  ; mem
   ; table
   ; types
   ; global

@@ -985,7 +985,7 @@ let validate_exports modul =
       Ok () )
     modul.exports.mem
 
-let validate_table_limits : Text.Table.Type.limits -> unit Result.t = function
+let validate_table_limits : Binary.Table.Type.limits -> unit Result.t = function
   | I32 { min; max = Some max } when Int32.gt_u min max ->
     Error `Size_minimum_greater_than_maximum
   | I64 { min; max = Some max } when Int64.gt_u min max ->
@@ -1042,7 +1042,7 @@ let validate_table modul refs id t =
 let validate_tables modul refs =
   array_iteri (validate_table modul refs) modul.table
 
-let validate_memory_limit : Text.Mem.Type.limits -> unit Result.t = function
+let validate_memory_limit : Binary.Mem.Type.limits -> unit Result.t = function
   | I32 { min; max = Some max } when Int32.gt_u min max ->
     Error `Size_minimum_greater_than_maximum
   | I64 { min; max = Some max } ->

@@ -5,15 +5,15 @@
 let page_size = 65_536
 
 type t =
-  { mutable limits : Text.Mem.Type.limits
+  { mutable limits : Binary.Mem.Type.limits
   ; mutable data : bytes
   }
 
-let get_min : Text.Mem.Type.limits -> int = function
+let get_min : Binary.Mem.Type.limits -> int = function
   | I32 { min; _ } -> Int32.to_int min
   | I64 { min; _ } -> min
 
-let set_min (limits : Text.Mem.Type.limits) new_min : Text.Mem.Type.limits =
+let set_min (limits : Binary.Mem.Type.limits) new_min : Binary.Mem.Type.limits =
   match limits with
   | I32 l -> I32 { l with min = Int32.of_int new_min }
   | I64 l -> I64 { l with min = new_min }
