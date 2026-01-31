@@ -179,20 +179,10 @@ let lt x y =
   let y = to_float y in
   if Float.is_nan x || Float.is_nan y then false else Float.compare x y < 0
 
-let gt x y =
-  let x = to_float x in
-  let y = to_float y in
-  if Float.is_nan x || Float.is_nan y then false else Float.compare x y > 0
-
 let le x y =
   let x = to_float x in
   let y = to_float y in
   if Float.is_nan x || Float.is_nan y then false else Float.compare x y <= 0
-
-let ge x y =
-  let x = to_float x in
-  let y = to_float y in
-  if Float.is_nan x || Float.is_nan y then false else Float.compare x y >= 0
 
 (*
  * Compare mantissa of two floats in string representation (hex or dec).

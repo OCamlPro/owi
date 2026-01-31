@@ -24,7 +24,7 @@ let convert_i32_s x = Float32.of_float (Int32.to_float x)
 let convert_i32_u x =
   Float32.of_float
     Int32.(
-      if Int32.ge x zero then to_float x
+      if Int32.le zero x then to_float x
       else to_float (logor (shift_right_logical x 1) (logand x 1l)) *. 2.0 )
 
 (*

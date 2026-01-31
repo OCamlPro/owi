@@ -126,7 +126,7 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
     let rec make_str m accu i =
       let open Concrete_choice in
       let* p = Concrete_memory.load_8_u m i in
-      if Int32.gt p 255l || Int32.lt p 0l then trap `Invalid_character_in_memory
+      if Int32.lt 255l p || Int32.lt p 0l then trap `Invalid_character_in_memory
       else
         let ch = char_of_int (Int32.to_int p) in
         if Char.equal ch '\x00' then return (List.rev accu |> Array.of_list)

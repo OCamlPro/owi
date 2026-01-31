@@ -35,7 +35,7 @@ let convert_i64_s x = Float64.of_float (Int64.to_float x)
 let convert_i64_u x =
   Float64.of_float
     Int64.(
-      if Int64.ge x zero then to_float x
+      if Int64.le zero x then to_float x
       else to_float (logor (shift_right_logical x 1) (logand x 1L)) *. 2.0 )
 
 let reinterpret_i64 = Float64.of_bits

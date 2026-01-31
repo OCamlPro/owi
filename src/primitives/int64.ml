@@ -47,19 +47,11 @@ let ne (x : int64) y = not (equal x y) [@@inline]
 
 let lt (x : int64) y = compare x y < 0 [@@inline]
 
-let gt (x : int64) y = compare x y > 0 [@@inline]
-
 let le (x : int64) y = compare x y <= 0 [@@inline]
-
-let ge (x : int64) y = compare x y >= 0 [@@inline]
 
 let lt_u (x : int64) y = unsigned_compare x y < 0 [@@inline]
 
 let le_u (x : int64) y = unsigned_compare x y <= 0 [@@inline]
-
-let gt_u (x : int64) y = unsigned_compare x y > 0 [@@inline]
-
-let ge_u (x : int64) y = unsigned_compare x y >= 0 [@@inline]
 
 (* In OCaml, `shift_{left,right,right_logical} are unspecified if y < 0 or y >= 64, but they're not in Wasm and thus we need to mask `y`` to only keep the low 7 bits. *)
 let shl x y = shift_left x (to_int (logand y 63L)) [@@inline]
@@ -141,7 +133,7 @@ let of_string_exn s =
     | '+' -> parse_int 1
     | '-' ->
       let n = parse_int 1 in
-      if not (ge (sub n one) minus_one) then Fmt.failwith "of_string (int64)"
+      if not (le minus_one (sub n one)) then Fmt.failwith "of_string (int64)"
       else neg n
     | _ -> parse_int 0
   in

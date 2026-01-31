@@ -49,11 +49,7 @@ module type T = sig
 
   val lt : t -> t -> boolean
 
-  val gt : t -> t -> boolean
-
   val le : t -> t -> boolean
-
-  val ge : t -> t -> boolean
 
   val convert_i32_s : i32 -> t
 

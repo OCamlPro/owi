@@ -54,11 +54,7 @@ val ne : t -> t -> bool
 
 val lt : t -> t -> bool
 
-val gt : t -> t -> bool
-
 val le : t -> t -> bool
-
-val ge : t -> t -> bool
 
 val of_string_exn : string -> t
 
