@@ -148,7 +148,7 @@ let of_string_exn s =
 
   parsed
 
-let of_string s = try Some (of_string_exn s) with _ -> None
+let of_string s = try Some (of_string_exn s) with Failure _ -> None
 
 let fits_in_u32 n = unsigned_compare n 0xFFFF_FFFFL <= 0
 

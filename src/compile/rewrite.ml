@@ -320,15 +320,21 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
 let rewrite_table_limits ({ is_i64; min; max } : Text.limits) :
   Binary.Table.Type.limits Result.t =
   if is_i64 then
-    let* min = try Ok (Int64.of_string_exn min) with Failure _ -> Error `Table_size in
+    let* min =
+      try Ok (Int64.of_string_exn min) with Failure _ -> Error `Table_size
+    in
     let* max =
-      try Ok (Option.map Int64.of_string_exn max) with Failure _ -> Error `Table_size
+      try Ok (Option.map Int64.of_string_exn max)
+      with Failure _ -> Error `Table_size
     in
     Ok (Binary.Table.Type.I64 { min; max })
   else
-    let* min = try Ok (Int32.of_string_exn min) with Failure _ -> Error `Table_size in
+    let* min =
+      try Ok (Int32.of_string_exn min) with Failure _ -> Error `Table_size
+    in
     let* max =
-      try Ok (Option.map Int32.of_string_exn max) with Failure _ -> Error `Table_size
+      try Ok (Option.map Int32.of_string_exn max)
+      with Failure _ -> Error `Table_size
     in
     Ok (Binary.Table.Type.I32 { min; max })
 
@@ -365,11 +371,12 @@ let rewrite_memory_limits ({ is_i64; min; max } : Text.limits) :
     Ok (Binary.Mem.Type.I64 { min; max })
   else
     let* min =
-      try Ok (Int32.of_string_exn min) with _ -> Error `Constant_out_of_range
+      try Ok (Int32.of_string_exn min)
+      with Failure _ -> Error `Constant_out_of_range
     in
     let* max =
       try Ok (Option.map Int32.of_string_exn max)
-      with _ -> Error `Constant_out_of_range
+      with Failure _ -> Error `Constant_out_of_range
     in
     Ok (Binary.Mem.Type.I32 { min; max })
 

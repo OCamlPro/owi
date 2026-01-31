@@ -314,7 +314,7 @@ let of_string_exn s =
     if Char.equal s.[0] '+' then x else neg x
   else of_signless_string s
 
-let of_string s = try Some (of_string_exn s) with _ -> None
+let of_string s = try Some (of_string_exn s) with Failure _ -> None
 
 (* String conversion that groups digits for readability *)
 

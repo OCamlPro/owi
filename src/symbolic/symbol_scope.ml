@@ -174,7 +174,7 @@ let model_of_json json_str =
 
   let* json =
     try Ok (from_string json_str)
-    with _ -> Fmt.error_msg "Invalid json string: %s" json_str
+    with Failure _ -> Fmt.error_msg "Invalid json string: %s" json_str
   in
 
   let rec process_json json =
