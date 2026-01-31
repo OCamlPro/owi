@@ -479,10 +479,26 @@ end
 
 module Table = struct
   module Type = struct
-    type nonrec t = Text.Table.Type.limits * ref_type
+    type limits =
+      | I32 of
+          { min : Int32.t
+          ; max : Int32.t option
+          }
+      | I64 of
+          { min : Int64.t
+          ; max : Int64.t option
+          }
+
+    let pp_limits fmt = function
+      | I32 { min; max = None } -> pf fmt "%ld" min
+      | I32 { min; max = Some max } -> pf fmt "%ld %ld" min max
+      | I64 { min; max = None } -> pf fmt "i64 %Ld" min
+      | I64 { min; max = Some max } -> pf fmt "i64 %Ld %Ld" min max
+
+    type nonrec t = limits * ref_type
 
     let pp fmt (limits, ref_type) =
-      pf fmt "%a %a" Text.Table.Type.pp_limits limits pp_ref_type ref_type
+      pf fmt "%a %a" pp_limits limits pp_ref_type ref_type
   end
 
   type t =
@@ -490,6 +506,33 @@ module Table = struct
     ; typ : Type.t
     ; init : expr Annotated.t option
     }
+end
+
+module Mem = struct
+  module Type = struct
+    type limits =
+      | I32 of
+          { min : Int32.t
+          ; max : Int32.t option
+          }
+      | I64 of
+          { min : int
+          ; max : int option
+          }
+
+    let pp_limits fmt = function
+      | I32 { min; max = None } -> pf fmt "%ld" min
+      | I32 { min; max = Some max } -> pf fmt "%ld %ld" min max
+      | I64 { min; max = None } -> pf fmt "i64 %d" min
+      | I64 { min; max = Some max } -> pf fmt "i64 %d %d" min max
+  end
+
+  type nonrec t = string option * Type.limits
+
+  let pp fmt (id, ty) =
+    pf fmt "(memory%a %a)"
+      (Fmt.option ~none:Fmt.nop (fun fmt s -> Fmt.pf fmt " %s" s))
+      id Type.pp_limits ty
 end
 
 module Global = struct
@@ -557,7 +600,7 @@ module Module = struct
     ; types : Typedef.t array
     ; global : (Global.t, Global.Type.t) Origin.t array
     ; table : (Table.t, Table.Type.t) Origin.t array
-    ; mem : (Text.Mem.t, Text.Mem.Type.limits) Origin.t array
+    ; mem : (Mem.t, Mem.Type.limits) Origin.t array
     ; func : (Func.t, block_type) Origin.t array (* TODO: switch to func_type *)
     ; tag : (Tag.t, block_type) Origin.t array
     ; elem : Elem.t array

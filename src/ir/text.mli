@@ -154,6 +154,14 @@ type nonrec memarg =
 
 val pp_memarg : memarg Fmt.t
 
+type nonrec limits =
+  { is_i64 : bool
+  ; min : int
+  ; max : int option
+  }
+
+val pp_limits : limits Fmt.t
+
 (** Structure *)
 
 (** Types *)
@@ -327,18 +335,6 @@ end
 
 module Table : sig
   module Type : sig
-    type limits =
-      | I32 of
-          { min : Int32.t
-          ; max : Int32.t option
-          }
-      | I64 of
-          { min : Int64.t
-          ; max : Int64.t option
-          }
-
-    val pp_limits : limits Fmt.t
-
     type nonrec t = limits * ref_type
 
     val pp : t Fmt.t
@@ -413,32 +409,12 @@ module Tag : sig
   val pp : Format.formatter -> t -> unit
 end
 
-module Mem : sig
-  module Type : sig
-    type limits =
-      | I32 of
-          { min : Int32.t
-          ; max : Int32.t option
-          }
-      | I64 of
-          { min : int
-          ; max : int option
-          }
-
-    val pp_limits : limits Fmt.t
-  end
-
-  type nonrec t = string option * Type.limits
-
-  val pp : t Fmt.t
-end
-
 module Import : sig
   module Type : sig
     type t =
       | Func of string option * block_type
       | Table of string option * Table.Type.t
-      | Mem of string option * Mem.Type.limits
+      | Mem of string option * limits
       | Global of string option * Global.Type.t
       | Tag of string option * block_type
   end
@@ -465,6 +441,12 @@ module Export : sig
     { name : string
     ; typ : Type.t
     }
+end
+
+module Mem : sig
+  type nonrec t = string option * limits
+
+  val pp : t Fmt.t
 end
 
 module Module : sig

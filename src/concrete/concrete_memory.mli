@@ -11,6 +11,6 @@ include
      and type i64 := Concrete_i64.t
      and type 'a choice := 'a Concrete_choice.t
 
-val get_limits : t -> Text.Mem.Type.limits
+val get_limits : t -> Binary.Mem.Type.limits
 
-val init : Text.Mem.Type.limits -> t
+val init : Binary.Mem.Type.limits -> t

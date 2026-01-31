@@ -186,7 +186,19 @@ end
 
 module Table : sig
   module Type : sig
-    type nonrec t = Text.Table.Type.limits * ref_type
+    type limits =
+      | I32 of
+          { min : Int32.t
+          ; max : Int32.t option
+          }
+      | I64 of
+          { min : Int64.t
+          ; max : Int64.t option
+          }
+
+    val pp_limits : limits Fmt.t
+
+    type nonrec t = limits * ref_type
 
     val pp : t Fmt.t
   end
@@ -196,6 +208,26 @@ module Table : sig
     ; typ : Type.t
     ; init : expr Annotated.t option
     }
+end
+
+module Mem : sig
+  module Type : sig
+    type limits =
+      | I32 of
+          { min : Int32.t
+          ; max : Int32.t option
+          }
+      | I64 of
+          { min : int
+          ; max : int option
+          }
+
+    val pp_limits : limits Fmt.t
+  end
+
+  type nonrec t = string option * Type.limits
+
+  val pp : t Fmt.t
 end
 
 module Global : sig
@@ -262,7 +294,7 @@ module Module : sig
     ; types : Typedef.t array
     ; global : (Global.t, Global.Type.t) Origin.t array
     ; table : (Table.t, Table.Type.t) Origin.t array
-    ; mem : (Text.Mem.t, Text.Mem.Type.limits) Origin.t array
+    ; mem : (Mem.t, Mem.Type.limits) Origin.t array
     ; func : (Func.t, block_type) Origin.t array (* TODO: switch to func_type *)
     ; tag : (Tag.t, block_type) Origin.t array
     ; elem : Elem.t array

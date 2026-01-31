@@ -20,7 +20,7 @@ type t = private
          Come from function declarations with type indicies *)
   ; global : (Global.t, Global.Type.t) Origin.t Array.t
   ; table : (Table.t, Table.Type.t) Origin.t Array.t
-  ; mem : (Mem.t, Mem.Type.limits) Origin.t Array.t
+  ; mem : (Mem.t, limits) Origin.t Array.t
   ; func : (Func.t, block_type) Origin.t Array.t
   ; elem : Elem.t Array.t
   ; data : Data.t Array.t

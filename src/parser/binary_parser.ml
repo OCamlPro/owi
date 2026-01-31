@@ -293,20 +293,20 @@ let read_table_limits input =
   match b with
   | '\x00' ->
     let+ min, input = read_UN 32 input in
-    (Text.Table.Type.I32 { min = Int64.to_int32 min; max = None }, input)
+    (Binary.Table.Type.I32 { min = Int64.to_int32 min; max = None }, input)
   | '\x01' ->
     let* min, input = read_UN 32 input in
     let+ max, input = read_UN 32 input in
-    ( Text.Table.Type.I32
+    ( Binary.Table.Type.I32
         { min = Int64.to_int32 min; max = Some (Int64.to_int32 max) }
     , input )
   | '\x04' ->
     let+ min, input = read_UN 64 input in
-    (Text.Table.Type.I64 { min; max = None }, input)
+    (Binary.Table.Type.I64 { min; max = None }, input)
   | '\x05' ->
     let* min, input = read_UN 64 input in
     let+ max, input = read_UN 64 input in
-    (Text.Table.Type.I64 { min; max = Some max }, input)
+    (Binary.Table.Type.I64 { min; max = Some max }, input)
   | _c -> parse_fail "integer too large (read_limits)"
 
 let read_memory_limits input =
@@ -316,20 +316,20 @@ let read_memory_limits input =
   match b with
   | '\x00' ->
     let+ min, input = read_UN 32 input in
-    (Text.Mem.Type.I32 { min = Int64.to_int32 min; max = None }, input)
+    (Binary.Mem.Type.I32 { min = Int64.to_int32 min; max = None }, input)
   | '\x01' ->
     let* min, input = read_UN 32 input in
     let+ max, input = read_UN 32 input in
-    ( Text.Mem.Type.I32
+    ( Binary.Mem.Type.I32
         { min = Int64.to_int32 min; max = Some (Int64.to_int32 max) }
     , input )
   | '\x04' ->
     let+ min, input = read_indice input in
-    (Text.Mem.Type.I64 { min; max = None }, input)
+    (Binary.Mem.Type.I64 { min; max = None }, input)
   | '\x05' ->
     let* min, input = read_indice input in
     let+ max, input = read_indice input in
-    (Text.Mem.Type.I64 { min; max = Some max }, input)
+    (Binary.Mem.Type.I64 { min; max = Some max }, input)
   | _c -> parse_fail "integer too large (read_limits)"
 
 let is_malformed align_raw =
@@ -787,8 +787,8 @@ let read_const types input =
 
 type import =
   | Func of int
-  | Table of Text.Table.Type.limits * Binary.ref_type * Text.expr option
-  | Mem of Text.Mem.Type.limits
+  | Table of Binary.Table.Type.limits * Binary.ref_type * Text.expr option
+  | Mem of Binary.Mem.Type.limits
   | Global of Text.mut * val_type
   | Tag of int
 

@@ -11,7 +11,7 @@ type table = Concrete_ref.t array
 type t =
   { id : int
   ; label : string option
-  ; limits : Text.Table.Type.limits
+  ; limits : Binary.Table.Type.limits
   ; typ : Binary.ref_type
   ; mutable data : table
   }

@@ -245,27 +245,48 @@ let from_global (global : (Binary.Global.t, Binary.Global.Type.t) Origin.t array
     global
   |> Array.to_list
 
+let convert_table_limits : Binary.Table.Type.limits -> Text.limits = function
+  | I64 { min; max } ->
+    { is_i64 = true; min = Int64.to_int min; max = Option.map Int64.to_int max }
+  | I32 { min; max } ->
+    { is_i64 = false
+    ; min = Int32.to_int min
+    ; max = Option.map Int32.to_int max
+    }
+
 let from_table table : Text.Module.Field.t list =
   Array.map
     (function
       | Origin.Local Binary.Table.{ id; typ = limits, rt; init } ->
         let init = Option.map convert_expr init in
         Text.Module.Field.Table
-          { id; typ = (limits, convert_ref_type rt); init }
+          { id; typ = (convert_table_limits limits, convert_ref_type rt); init }
       | Imported { modul_name; name; assigned_name; typ = limits, rt } ->
         let typ =
-          Text.Import.Type.Table (assigned_name, (limits, convert_ref_type rt))
+          Text.Import.Type.Table
+            (assigned_name, (convert_table_limits limits, convert_ref_type rt))
         in
         Import { modul_name; name; typ } )
     table
   |> Array.to_list
 
+let convert_mem_limits : Binary.Mem.Type.limits -> Text.limits = function
+  | I64 { min; max } -> { is_i64 = true; min; max }
+  | I32 { min; max } ->
+    { is_i64 = false
+    ; min = Int32.to_int min
+    ; max = Option.map Int32.to_int max
+    }
+
 let from_mem mem : Text.Module.Field.t list =
   Array.map
     (function
-      | Origin.Local (name, t) -> Text.Module.Field.Mem (name, t)
+      | Origin.Local (name, t) ->
+        Text.Module.Field.Mem (name, convert_mem_limits t)
       | Imported { modul_name; name; assigned_name; typ } ->
-        let typ = Text.Import.Type.Mem (assigned_name, typ) in
+        let typ =
+          Text.Import.Type.Mem (assigned_name, convert_mem_limits typ)
+        in
         Import { modul_name; name; typ } )
     mem
   |> Array.to_list

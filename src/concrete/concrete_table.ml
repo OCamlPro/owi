@@ -8,7 +8,7 @@ type table = Concrete_ref.t array
 type t =
   { id : int
   ; label : string option
-  ; limits : Text.Table.Type.limits
+  ; limits : Binary.Table.Type.limits
   ; typ : Binary.ref_type
   ; mutable data : table
   }
@@ -19,7 +19,7 @@ let fresh =
     incr r;
     !r
 
-let get_min : Text.Table.Type.limits -> int = function
+let get_min : Binary.Table.Type.limits -> int = function
   | I32 { min; _ } -> Int32.to_int min
   | I64 { min; _ } -> Int64.to_int min
 
