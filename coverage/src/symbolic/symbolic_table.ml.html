@@ -220,7 +220,7 @@ type t = Symbolic_table0.t =
   }
 
 let get t i =
-  <span data-count="3873">m</span>atch IMap.find_opt i t.data with <span data-count="3872">S</span>ome v -&gt; v | None -&gt; assert false
+  <span data-count="3873">m</span>atch IMap.find_opt i t.data with <span data-count="3871">S</span>ome v -&gt; v | None -&gt; assert false
 
 let replace tbl = <span data-count="786">S</span>ymbolic_choice.modify_thread (Thread.replace_tabl<span data-count="786">e</span> tbl)
 
