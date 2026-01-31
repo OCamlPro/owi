@@ -328,7 +328,7 @@ let rewrite_table_limits ({ is_i64; min; max } : Text.limits) :
   else
     let* min = try Ok (Int32.of_string_exn min) with Failure _ -> Error `Table_size in
     let* max =
-      try Ok (Option.map Int32.of_string_exn max) with _ -> Error `Table_size
+      try Ok (Option.map Int32.of_string_exn max) with Failure _ -> Error `Table_size
     in
     Ok (Binary.Table.Type.I32 { min; max })
 
