@@ -80,7 +80,7 @@ module M :
     let open Symbolic_choice in
     let* x = symbol_i32 () in
     let* () = assume (Symbolic_i32.le lo x) None in
-    let+ () = assume (Symbolic_i32.gt hi x) None in
+    let+ () = assume (Symbolic_i32.lt x hi) None in
     x
 
   let abort () : unit Symbolic_choice.t = Symbolic_choice.stop
@@ -109,7 +109,7 @@ module M :
     match Smtml.Typed.view p with
     | Val (Bitv bv) when Smtml.Bitvector.numbits bv = 32 ->
       let c = Smtml.Bitvector.to_int32 bv in
-      if Int32.gt c 255l || Int32.lt c 0l then trap `Invalid_character_in_memory
+      if Int32.lt 255l c || Int32.lt c 0l then trap `Invalid_character_in_memory
       else
         let ch = char_of_int (Int32.to_int c) in
         if Char.equal ch '\x00' then return (List.rev accu |> Array.of_list)

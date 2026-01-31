@@ -11,7 +11,7 @@ let trunc_f32_s x =
     if
       let xf = Float64.of_float xf in
       let mif = Int32.(to_float min_int) in
-      Float64.(ge xf (of_float ~-.mif)) || Float64.(lt xf (of_float mif))
+      Float64.(le (of_float ~-.mif) xf) || Float64.(lt xf (of_float mif))
     then Error `Integer_overflow
     else Ok (Int32.of_float xf)
 
@@ -21,7 +21,7 @@ let trunc_f32_u x =
     let xf = Float32.to_float x in
     if
       let xf = Float64.of_float xf in
-      Float64.(ge xf (of_float @@ (-.Int32.(to_float min_int) *. 2.0)))
+      Float64.(le (of_float @@ (-.Int32.(to_float min_int) *. 2.0)) xf)
       || Float64.(le xf (Float64.of_float ~-.1.0))
     then Error `Integer_overflow
     else Ok Int64.(to_int32 (of_float xf))
@@ -30,7 +30,7 @@ let trunc_f64_s x =
   if Float64.ne x x then Error `Conversion_to_integer
   else if
     let mif = Int32.(to_float min_int) in
-    Float64.(ge x (of_float @@ -.mif))
+    Float64.(le (of_float @@ -.mif) x)
     || Float64.(le x (of_float @@ (mif -. 1.0)))
   then Error `Integer_overflow
   else Ok (Int32.of_float (Float64.to_float x))
@@ -39,7 +39,7 @@ let trunc_f64_u x =
   if Float64.ne x x then Error `Conversion_to_integer
   else if
     let mif = Int32.to_float Int32.min_int in
-    Float64.(ge x (of_float @@ (-.mif *. 2.0)))
+    Float64.(le (of_float @@ (-.mif *. 2.0)) x)
     || Float64.(le x (of_float ~-.1.0))
   then Error `Integer_overflow
   else Ok Int64.(to_int32 (of_float (Float64.to_float x)))
@@ -50,7 +50,7 @@ let trunc_sat_f32_s x =
     let xf = Float32.to_float x |> Float64.of_float in
     let mif = Int32.(to_float min_int) in
     if Float64.(lt xf (of_float mif)) then Int32.min_int
-    else if Float64.(ge xf (of_float ~-.mif)) then Int32.max_int
+    else if Float64.(le (of_float ~-.mif) xf) then Int32.max_int
     else Int32.of_float (Float64.to_float xf)
 
 let trunc_sat_f32_u x =
@@ -58,23 +58,23 @@ let trunc_sat_f32_u x =
   else
     let xf = Float32.to_float x |> Float64.of_float in
     if Float64.(le xf (of_float ~-.1.0)) then 0l
-    else if Float64.(ge xf @@ of_float @@ (~-.Int32.(to_float min_int) *. 2.0))
-    then -1l
+    else if Float64.(le (of_float (~-.Int32.(to_float min_int) *. 2.0)) xf) then
+      -1l
     else Int64.(to_int32 @@ of_float (Float64.to_float xf))
 
 let trunc_sat_f64_s x =
   if Float64.ne x x then 0l
   else if Float64.(le x @@ of_float @@ Int32.(to_float min_int)) then
     Int32.min_int
-  else if Float64.(ge x @@ of_float @@ ~-.Int32.(to_float min_int)) then
+  else if Float64.(le (of_float ~-.Int32.(to_float min_int)) x) then
     Int32.max_int
   else Int32.of_float @@ Float64.to_float x
 
 let trunc_sat_f64_u x =
   if Float64.ne x x then 0l
   else if Float64.(le x @@ of_float ~-.1.0) then 0l
-  else if Float64.(ge x @@ of_float @@ ~-.(Int32.(to_float min_int) *. 2.0))
-  then -1l
+  else if Float64.(le (of_float ~-.(Int32.(to_float min_int) *. 2.0)) x) then
+    -1l
   else Int64.(to_int32 (of_float @@ Float64.to_float x))
 
 let reinterpret_f32 = Float32.to_bits

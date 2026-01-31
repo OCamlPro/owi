@@ -132,11 +132,7 @@ module Concrete_i32 : sig
 
   val lt : t -> t -> Concrete_boolean.t
 
-  val gt : t -> t -> Concrete_boolean.t
-
   val le : t -> t -> Concrete_boolean.t
-
-  val ge : t -> t -> Concrete_boolean.t
 
   val pp : t Fmt.t
 end

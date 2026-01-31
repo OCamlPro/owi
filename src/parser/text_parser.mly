@@ -53,7 +53,7 @@ let i8 s =
     try Int32.of_string_exn s
     with Failure msg -> Fmt.kstr failwith "constant out of range %s (%s)" s msg
   in
-  if Int32.gt i 0xFFl || Int32.lt i (-0x80l) then
+  if Int32.lt 0xFFl i || Int32.lt i (-0x80l) then
     Fmt.kstr failwith "constant out of range %s" s
   else Int32.to_int i
 
@@ -62,7 +62,7 @@ let i16 s =
     try Int32.of_string_exn s
     with Failure msg -> Fmt.kstr failwith "constant out of range %s (%s)" s msg
   in
-  if Int32.gt i 0xFFFFl || Int32.lt i (-0x8000l) then
+  if Int32.lt 0xFFFFl i || Int32.lt i (-0x8000l) then
     Fmt.kstr failwith "constant out of range %s" s
   else Int32.to_int i
 

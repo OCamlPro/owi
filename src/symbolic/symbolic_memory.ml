@@ -51,8 +51,8 @@ let validate_address m a range =
         let end_offset = Symbolic_i32.add start_offset range in
         select
           (Symbolic_boolean.or_
-             (Symbolic_i32.ge_u start_offset chunk_size)
-             (Symbolic_i32.ge_u end_offset chunk_size) )
+             (Symbolic_i32.le_u chunk_size start_offset)
+             (Symbolic_i32.le_u chunk_size end_offset) )
           (* TODO: better prio here *)
           ~instr_counter_true:None ~instr_counter_false:None
       in
@@ -109,7 +109,7 @@ let grow m delta =
   let old_size = Symbolic_i32.mul m.size page_size in
   let new_size = Symbolic_i32.(div (add old_size delta) page_size) in
   let size =
-    Symbolic_boolean.ite (Symbolic_i32.gt new_size m.size) new_size m.size
+    Symbolic_boolean.ite (Symbolic_i32.lt m.size new_size) new_size m.size
   in
   let m = { m with size } in
   replace m

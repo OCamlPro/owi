@@ -59,19 +59,11 @@ module type T = sig
 
   val lt : t -> t -> boolean
 
-  val gt : t -> t -> boolean
-
   val lt_u : t -> t -> boolean
-
-  val gt_u : t -> t -> boolean
 
   val le : t -> t -> boolean
 
-  val ge : t -> t -> boolean
-
   val le_u : t -> t -> boolean
-
-  val ge_u : t -> t -> boolean
 
   val trunc_f32_s : f32 -> t Result.t
 

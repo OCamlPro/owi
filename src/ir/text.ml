@@ -225,12 +225,12 @@ type nonrec memarg =
 
 let pp_memarg =
   let pow_2 n =
-    assert (Int64.ge n 0L);
+    assert (Int64.le 0L n);
     Int64.shl 1L n
   in
   fun fmt { offset; align } ->
     let pp_offset fmt offset =
-      if Int64.gt offset 0L then pf fmt "offset=%Ld " offset
+      if Int64.lt 0L offset then pf fmt "offset=%Ld " offset
     in
     pf fmt "%aalign=%Ld" pp_offset offset (pow_2 align)
 

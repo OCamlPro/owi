@@ -302,7 +302,7 @@ let read_limits input =
 
 let is_malformed align_raw =
   let reserved_mask = Int64.lognot 0x7FL in
-  Int64.gt (Int64.logand align_raw reserved_mask) 0L
+  Int64.lt 0L (Int64.logand align_raw reserved_mask)
 
 let read_memarg max_align input =
   let* align, input = read_UN 32 input in
@@ -398,7 +398,7 @@ let block_type_of_type_def (_id, (pt, rt)) =
 
 let read_block_type types input =
   match read_S33 input with
-  | Ok (i, input) when Int64.ge i 0L ->
+  | Ok (i, input) when Int64.le 0L i ->
     let block_type = block_type_of_type_def types.(Int64.to_int i) in
     Ok (block_type, input)
   | Error _ | Ok _ -> begin

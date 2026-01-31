@@ -48,7 +48,7 @@ let check_memarg (memarg : Text.memarg) align =
   (* TODO: whether an offset is out of range or not should be determined by
   the memory, but memory64 is not yet supported. *)
   if not (Int64.fits_in_u32 memarg.offset) then Error `Offset_out_of_range
-  else if Int64.ge memarg.align align then Error `Alignment_too_large
+  else if Int64.le align memarg.align then Error `Alignment_too_large
   else Ok ()
 
 module Env = struct
