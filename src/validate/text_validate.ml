@@ -46,14 +46,14 @@ let check_mem_limits { is_i64; min; max } =
     in
     match max with
     | None ->
-      if Int32.gt_u min 0x1_0000l then Error `Memory_size_too_large else Ok ()
+      if Int32.lt_u 0x1_0000l min then Error `Memory_size_too_large else Ok ()
     | Some max ->
       let* max =
         try Ok (Int32.of_string_exn max)
         with Failure _ -> Error `Constant_out_of_range
       in
-      if Int32.gt_u min max then Error `Size_minimum_greater_than_maximum
-      else if Int32.gt_u min 0x1_0000l || Int32.gt_u max 0x1_0000l then
+      if Int32.lt_u max min then Error `Size_minimum_greater_than_maximum
+      else if Int32.lt_u 0x1_0000l min || Int32.lt_u 0x1_0000l max then
         Error `Memory_size_too_large
       else Ok ()
 
