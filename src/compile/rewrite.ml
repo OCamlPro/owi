@@ -56,6 +56,28 @@ let rewrite_block_type (assigned : Assigned.t) (block_type : Text.block_type) :
     let* func_type = rewrite_func_type assigned func_type in
     Ok (params, Binary.Bt_raw (Some idx, func_type))
 
+let rewrite_memarg ({ offset; align } : Text.memarg) : Binary.memarg Result.t =
+  let* offset =
+    match offset with
+    | None -> Ok Int64.zero
+    | Some offset -> (
+      match Int64.of_string offset with
+      | None -> Error (`Msg "offset")
+      | Some n -> Ok n )
+  in
+  let+ align =
+    match align with
+    | None -> Ok Int32.zero
+    | Some align -> (
+      match Int32.of_string align with
+      | None -> Error `Alignment_too_large
+      | Some n ->
+        if Int32.eq n 0l || Int32.(ne (logand n (sub n 1l)) 0l) then
+          Error `Alignment_too_large
+        else Ok (Int32.div n 2l) )
+  in
+  Binary.{ offset; align }
+
 let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
   (iexpr : Text.expr Annotated.t) : Binary.expr Annotated.t Result.t =
   (* block_ids handling *)
@@ -258,33 +280,43 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
     | Extern_externalize -> Ok Binary.Extern_externalize
     | Extern_internalize -> Ok Binary.Extern_internalize
     | I_load8 (id, nn, sx, memarg) ->
+      let* memarg = rewrite_memarg memarg in
       let+ id = Assigned.find_memory assigned id in
       Binary.I_load8 (id, nn, sx, memarg)
     | I_store8 (id, nn, memarg) ->
+      let* memarg = rewrite_memarg memarg in
       let+ id = Assigned.find_memory assigned id in
       Binary.I_store8 (id, nn, memarg)
     | I_load16 (id, nn, sx, memarg) ->
+      let* memarg = rewrite_memarg memarg in
       let+ id = Assigned.find_memory assigned id in
       Binary.I_load16 (id, nn, sx, memarg)
     | I_store16 (id, nn, memarg) ->
+      let* memarg = rewrite_memarg memarg in
       let+ id = Assigned.find_memory assigned id in
       Binary.I_store16 (id, nn, memarg)
     | I64_load32 (id, sx, memarg) ->
+      let* memarg = rewrite_memarg memarg in
       let+ id = Assigned.find_memory assigned id in
       Binary.I64_load32 (id, sx, memarg)
     | I64_store32 (id, memarg) ->
+      let* memarg = rewrite_memarg memarg in
       let+ id = Assigned.find_memory assigned id in
       Binary.I64_store32 (id, memarg)
     | I_load (id, nn, memarg) ->
+      let* memarg = rewrite_memarg memarg in
       let+ id = Assigned.find_memory assigned id in
       Binary.I_load (id, nn, memarg)
     | F_load (id, nn, memarg) ->
+      let* memarg = rewrite_memarg memarg in
       let+ id = Assigned.find_memory assigned id in
       Binary.F_load (id, nn, memarg)
     | F_store (id, nn, memarg) ->
+      let* memarg = rewrite_memarg memarg in
       let+ id = Assigned.find_memory assigned id in
       Binary.F_store (id, nn, memarg)
     | I_store (id, nn, memarg) ->
+      let* memarg = rewrite_memarg memarg in
       let+ id = Assigned.find_memory assigned id in
       Binary.I_store (id, nn, memarg)
     | Memory_copy (id1, id2) ->

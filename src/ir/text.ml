@@ -219,20 +219,16 @@ let pp_frelop fmt : frelop -> Unit.t = function
   | Ge -> pf fmt "ge"
 
 type nonrec memarg =
-  { offset : Int64.t
-  ; align : Int64.t
+  { offset : string option
+  ; align : string option
   }
 
-let pp_memarg =
-  let pow_2 n =
-    assert (Int64.le 0L n);
-    Int64.shl 1L n
-  in
-  fun fmt { offset; align } ->
-    let pp_offset fmt offset =
-      if Int64.lt 0L offset then pf fmt "offset=%Ld " offset
-    in
-    pf fmt "%aalign=%Ld" pp_offset offset (pow_2 align)
+let pp_memarg fmt { offset; align } =
+  match (offset, align) with
+  | None, None -> ()
+  | Some offset, Some align -> Fmt.pf fmt "offset=%s align=%s" offset align
+  | Some offset, None -> Fmt.pf fmt "offset=%s" offset
+  | None, Some align -> Fmt.pf fmt "align=%s" align
 
 type nonrec limits =
   { is_i64 : bool

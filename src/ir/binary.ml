@@ -133,6 +133,22 @@ type block_type =
   (* TODO: inline this *)
   | Bt_raw of (indice option * func_type)
 
+type nonrec memarg =
+  { offset : Int64.t
+  ; align : Int32.t
+  }
+
+let pp_memarg =
+  let pow_2 n =
+    assert (Int32.le 0l n);
+    Int32.shl 1l n
+  in
+  fun fmt { offset; align } ->
+    let pp_offset fmt offset =
+      if Int64.lt_u 0L offset then pf fmt "offset=%Ld " offset
+    in
+    pf fmt "%aalign=%ld" pp_offset offset (pow_2 align)
+
 (* wrap printer to print a space before a non empty list *)
 (* TODO or make it an optional arg of pp_list? *)
 let with_space_list printer fmt l =
@@ -203,16 +219,16 @@ type instr =
   | Table_init of indice * indice
   | Elem_drop of indice
   (* Memory instructions *)
-  | I_load of indice * Text.nn * Text.memarg
-  | F_load of indice * Text.nn * Text.memarg
-  | I_store of indice * Text.nn * Text.memarg
-  | F_store of indice * Text.nn * Text.memarg
-  | I_load8 of indice * Text.nn * Text.sx * Text.memarg
-  | I_load16 of indice * Text.nn * Text.sx * Text.memarg
-  | I64_load32 of indice * Text.sx * Text.memarg
-  | I_store8 of indice * Text.nn * Text.memarg
-  | I_store16 of indice * Text.nn * Text.memarg
-  | I64_store32 of indice * Text.memarg
+  | I_load of indice * Text.nn * memarg
+  | F_load of indice * Text.nn * memarg
+  | I_store of indice * Text.nn * memarg
+  | F_store of indice * Text.nn * memarg
+  | I_load8 of indice * Text.nn * Text.sx * memarg
+  | I_load16 of indice * Text.nn * Text.sx * memarg
+  | I64_load32 of indice * Text.sx * memarg
+  | I_store8 of indice * Text.nn * memarg
+  | I_store16 of indice * Text.nn * memarg
+  | I64_store32 of indice * memarg
   | Memory_size of indice
   | Memory_grow of indice
   | Memory_fill of indice
@@ -304,30 +320,27 @@ let rec pp_instr ~short fmt = function
     pf fmt "table.init %a %a" pp_indice tid pp_indice eid
   | Elem_drop id -> pf fmt "elem.drop %a" pp_indice id
   | I_load (id, n, memarg) ->
-    pf fmt "i%a.load%a %a" Text.pp_nn n pp_indice_not0 id Text.pp_memarg memarg
+    pf fmt "i%a.load%a %a" Text.pp_nn n pp_indice_not0 id pp_memarg memarg
   | F_load (id, n, memarg) ->
-    pf fmt "f%a.load%a %a" Text.pp_nn n pp_indice_not0 id Text.pp_memarg memarg
+    pf fmt "f%a.load%a %a" Text.pp_nn n pp_indice_not0 id pp_memarg memarg
   | I_store (id, n, memarg) ->
-    pf fmt "i%a.store%a %a" Text.pp_nn n pp_indice_not0 id Text.pp_memarg memarg
+    pf fmt "i%a.store%a %a" Text.pp_nn n pp_indice_not0 id pp_memarg memarg
   | F_store (id, n, memarg) ->
-    pf fmt "f%a.store%a %a" Text.pp_nn n pp_indice_not0 id Text.pp_memarg memarg
+    pf fmt "f%a.store%a %a" Text.pp_nn n pp_indice_not0 id pp_memarg memarg
   | I_load8 (id, n, sx, memarg) ->
     pf fmt "i%a.load8_%a%a %a" Text.pp_nn n Text.pp_sx sx pp_indice_not0 id
-      Text.pp_memarg memarg
+      pp_memarg memarg
   | I_load16 (id, n, sx, memarg) ->
     pf fmt "i%a.load16_%a%a %a" Text.pp_nn n Text.pp_sx sx pp_indice_not0 id
-      Text.pp_memarg memarg
+      pp_memarg memarg
   | I64_load32 (id, sx, memarg) ->
-    pf fmt "i64.load32_%a%a %a" Text.pp_sx sx pp_indice_not0 id Text.pp_memarg
-      memarg
+    pf fmt "i64.load32_%a%a %a" Text.pp_sx sx pp_indice_not0 id pp_memarg memarg
   | I_store8 (id, n, memarg) ->
-    pf fmt "i%a.store8%a %a" Text.pp_nn n pp_indice_not0 id Text.pp_memarg
-      memarg
+    pf fmt "i%a.store8%a %a" Text.pp_nn n pp_indice_not0 id pp_memarg memarg
   | I_store16 (id, n, memarg) ->
-    pf fmt "i%a.store16%a %a" Text.pp_nn n pp_indice_not0 id Text.pp_memarg
-      memarg
+    pf fmt "i%a.store16%a %a" Text.pp_nn n pp_indice_not0 id pp_memarg memarg
   | I64_store32 (id, memarg) ->
-    pf fmt "i64.store32%a %a" pp_indice_not0 id Text.pp_memarg memarg
+    pf fmt "i64.store32%a %a" pp_indice_not0 id pp_memarg memarg
   | Memory_size id -> pf fmt "memory.size%a" pp_indice_not0 id
   | Memory_grow id -> pf fmt "memory.grow%a" pp_indice_not0 id
   | Memory_fill id -> pf fmt "memory.fill%a" pp_indice_not0 id

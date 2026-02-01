@@ -31,6 +31,16 @@ let convert_block_type : Binary.block_type -> Text.block_type = function
     let opt = Option.map convert_indice opt in
     Text.Bt_raw (opt, convert_func_type ft)
 
+let convert_memarg ({ offset; align } : Binary.memarg) : Text.memarg =
+  let offset =
+    if Int64.lt 0L offset then Some (Int64.to_string_u offset) else None
+  in
+  let align =
+    assert (Int32.le 0l align);
+    Some (Int32.to_string_u (Int32.shl 1l align))
+  in
+  { offset; align }
+
 let rec convert_instr : Binary.instr -> Text.instr = function
   | Binary.Br_table (ids, id) ->
     let ids = Array.map convert_indice ids in
@@ -173,16 +183,26 @@ let rec convert_instr : Binary.instr -> Text.instr = function
   | Return -> Return
   | Extern_externalize -> Extern_externalize
   | Extern_internalize -> Extern_internalize
-  | I_load8 (id, nn, sx, memarg) -> I_load8 (convert_indice id, nn, sx, memarg)
-  | I_store8 (id, nn, memarg) -> I_store8 (convert_indice id, nn, memarg)
-  | I_load16 (id, nn, sx, memarg) -> I_load16 (convert_indice id, nn, sx, memarg)
-  | I_store16 (id, nn, memarg) -> I_store16 (convert_indice id, nn, memarg)
-  | I64_load32 (id, sx, memarg) -> I64_load32 (convert_indice id, sx, memarg)
-  | I64_store32 (id, memarg) -> I64_store32 (convert_indice id, memarg)
-  | I_load (id, nn, memarg) -> I_load (convert_indice id, nn, memarg)
-  | F_load (id, nn, memarg) -> F_load (convert_indice id, nn, memarg)
-  | F_store (id, nn, memarg) -> F_store (convert_indice id, nn, memarg)
-  | I_store (id, nn, memarg) -> I_store (convert_indice id, nn, memarg)
+  | I_load8 (id, nn, sx, memarg) ->
+    I_load8 (convert_indice id, nn, sx, convert_memarg memarg)
+  | I_store8 (id, nn, memarg) ->
+    I_store8 (convert_indice id, nn, convert_memarg memarg)
+  | I_load16 (id, nn, sx, memarg) ->
+    I_load16 (convert_indice id, nn, sx, convert_memarg memarg)
+  | I_store16 (id, nn, memarg) ->
+    I_store16 (convert_indice id, nn, convert_memarg memarg)
+  | I64_load32 (id, sx, memarg) ->
+    I64_load32 (convert_indice id, sx, convert_memarg memarg)
+  | I64_store32 (id, memarg) ->
+    I64_store32 (convert_indice id, convert_memarg memarg)
+  | I_load (id, nn, memarg) ->
+    I_load (convert_indice id, nn, convert_memarg memarg)
+  | F_load (id, nn, memarg) ->
+    F_load (convert_indice id, nn, convert_memarg memarg)
+  | F_store (id, nn, memarg) ->
+    F_store (convert_indice id, nn, convert_memarg memarg)
+  | I_store (id, nn, memarg) ->
+    I_store (convert_indice id, nn, convert_memarg memarg)
   | Memory_copy (id1, id2) ->
     Memory_copy (convert_indice id1, convert_indice id2)
   | Memory_size id -> Memory_size (convert_indice id)
