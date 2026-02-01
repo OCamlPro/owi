@@ -678,7 +678,7 @@ let add_field typ decl_types type_checks global table mem func elem data tag
   | <span data-count="216">E</span>xport { name; typ = Table id } -&gt;
     let id = curr_id (Dynarray.lengt<span data-count="216">h</span> table) id in
     <span data-count="216">D</span>ynarray.add_last table_exports { name; id }
-  | <span data-count="972">M</span>em m -&gt; Dynarray.add_last mem (Origin.Local m)
+  | <span data-count="962">M</span>em m -&gt; Dynarray.add_last mem (Origin.Local m)
   | <span data-count="156">I</span>mport { typ = Mem (assigned_name, typ); modul_name; name } -&gt;
     let imported = Origin.imported ~modul_name ~name ~assigned_name ~typ in
     Dynarray.add_last mem imported
@@ -720,49 +720,49 @@ let add_field typ decl_types type_checks global table mem func elem data tag
   | <span data-count="247">S</span>tart id -&gt; start := Some id
 
 let of_text { Text.Module.fields; id } =
-  <span data-count="3778">L</span>og.debug (fun m -&gt; <span data-count="1">m</span> "grouping     ...");
-  <span data-count="3778">l</span>et typ = Dynarray.create () in
-  <span data-count="3778">l</span>et decl_types = Dynarray.create () in
-  <span data-count="3778">l</span>et type_checks = Dynarray.create () in
-  <span data-count="3778">l</span>et global = Dynarray.create () in
-  <span data-count="3778">l</span>et table = Dynarray.create () in
-  <span data-count="3778">l</span>et mem = Dynarray.create () in
-  <span data-count="3778">l</span>et func = Dynarray.create () in
-  <span data-count="3778">l</span>et elem = Dynarray.create () in
-  <span data-count="3778">l</span>et data = Dynarray.create () in
-  <span data-count="3778">l</span>et tag = Dynarray.create () in
-  <span data-count="3778">l</span>et global_exports = Dynarray.create () in
-  <span data-count="3778">l</span>et mem_exports = Dynarray.create () in
-  <span data-count="3778">l</span>et table_exports = Dynarray.create () in
-  <span data-count="3778">l</span>et func_exports = Dynarray.create () in
-  <span data-count="3778">l</span>et tag_exports = Dynarray.create () in
-  <span data-count="3778">l</span>et start = ref None in
+  <span data-count="3768">L</span>og.debug (fun m -&gt; <span data-count="1">m</span> "grouping     ...");
+  <span data-count="3768">l</span>et typ = Dynarray.create () in
+  <span data-count="3768">l</span>et decl_types = Dynarray.create () in
+  <span data-count="3768">l</span>et type_checks = Dynarray.create () in
+  <span data-count="3768">l</span>et global = Dynarray.create () in
+  <span data-count="3768">l</span>et table = Dynarray.create () in
+  <span data-count="3768">l</span>et mem = Dynarray.create () in
+  <span data-count="3768">l</span>et func = Dynarray.create () in
+  <span data-count="3768">l</span>et elem = Dynarray.create () in
+  <span data-count="3768">l</span>et data = Dynarray.create () in
+  <span data-count="3768">l</span>et tag = Dynarray.create () in
+  <span data-count="3768">l</span>et global_exports = Dynarray.create () in
+  <span data-count="3768">l</span>et mem_exports = Dynarray.create () in
+  <span data-count="3768">l</span>et table_exports = Dynarray.create () in
+  <span data-count="3768">l</span>et func_exports = Dynarray.create () in
+  <span data-count="3768">l</span>et tag_exports = Dynarray.create () in
+  <span data-count="3768">l</span>et start = ref None in
   List.iter
-    (add_fiel<span data-count="3778">d</span> typ decl_types type_checks global table mem func elem data tag
+    (add_fiel<span data-count="3768">d</span> typ decl_types type_checks global table mem func elem data tag
        global_exports mem_exports table_exports func_exports tag_exports start )
     fields;
-  <span data-count="3778">l</span>et modul =
+  <span data-count="3768">l</span>et modul =
     { id
-    ; typ = Dynarray.to_arra<span data-count="3778">y</span> typ
-    ; decl_types = Dynarray.to_arra<span data-count="3778">y</span> decl_types
-    ; type_checks = Dynarray.to_arra<span data-count="3778">y</span> type_checks
-    ; global = Dynarray.to_arra<span data-count="3778">y</span> global
-    ; table = Dynarray.to_arra<span data-count="3778">y</span> table
-    ; mem = Dynarray.to_arra<span data-count="3778">y</span> mem
-    ; func = Dynarray.to_arra<span data-count="3778">y</span> func
-    ; elem = Dynarray.to_arra<span data-count="3778">y</span> elem
-    ; data = Dynarray.to_arra<span data-count="3778">y</span> data
-    ; tag = Dynarray.to_arra<span data-count="3778">y</span> tag
-    ; global_exports = Dynarray.to_arra<span data-count="3778">y</span> global_exports
-    ; mem_exports = Dynarray.to_arra<span data-count="3778">y</span> mem_exports
-    ; table_exports = Dynarray.to_arra<span data-count="3778">y</span> table_exports
-    ; func_exports = Dynarray.to_arra<span data-count="3778">y</span> func_exports
-    ; tag_exports = Dynarray.to_arra<span data-count="3778">y</span> tag_exports
+    ; typ = Dynarray.to_arra<span data-count="3768">y</span> typ
+    ; decl_types = Dynarray.to_arra<span data-count="3768">y</span> decl_types
+    ; type_checks = Dynarray.to_arra<span data-count="3768">y</span> type_checks
+    ; global = Dynarray.to_arra<span data-count="3768">y</span> global
+    ; table = Dynarray.to_arra<span data-count="3768">y</span> table
+    ; mem = Dynarray.to_arra<span data-count="3768">y</span> mem
+    ; func = Dynarray.to_arra<span data-count="3768">y</span> func
+    ; elem = Dynarray.to_arra<span data-count="3768">y</span> elem
+    ; data = Dynarray.to_arra<span data-count="3768">y</span> data
+    ; tag = Dynarray.to_arra<span data-count="3768">y</span> tag
+    ; global_exports = Dynarray.to_arra<span data-count="3768">y</span> global_exports
+    ; mem_exports = Dynarray.to_arra<span data-count="3768">y</span> mem_exports
+    ; table_exports = Dynarray.to_arra<span data-count="3768">y</span> table_exports
+    ; func_exports = Dynarray.to_arra<span data-count="3768">y</span> func_exports
+    ; tag_exports = Dynarray.to_arra<span data-count="3768">y</span> tag_exports
     ; start = !start
     }
   in
   Log.debug (fun m -&gt; <span data-count="1">m</span> "%a" pp modul);
-  <span data-count="3778">m</span>odul
+  <span data-count="3768">m</span>odul
 </code></pre>
       </div>
     </div>

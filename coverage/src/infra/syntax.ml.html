@@ -414,11 +414,11 @@
 
 open Prelude.Result
 
-let[@inline] ( let* ) o f = <span data-count="2251206">m</span>atch o with <span data-count="2242065">O</span>k v -&gt; f v | <span data-count="9141">E</span>rror _ as e -&gt; e
+let[@inline] ( let* ) o f = <span data-count="2260839">m</span>atch o with <span data-count="2251653">O</span>k v -&gt; f v | <span data-count="9186">E</span>rror _ as e -&gt; e
 
-let[@inline] ( let+ ) o f = <span data-count="1483135">m</span>atch o with <span data-count="1479041">O</span>k v -&gt; Ok (<span data-count="1479041">f</span> v) | <span data-count="4094">E</span>rror _ as e -&gt; e
+let[@inline] ( let+ ) o f = <span data-count="1484588">m</span>atch o with <span data-count="1480492">O</span>k v -&gt; Ok (<span data-count="1480492">f</span> v) | <span data-count="4096">E</span>rror _ as e -&gt; e
 
-let[@inline] ok v = <span data-count="228699">O</span>k v
+let[@inline] ok v = <span data-count="232250">O</span>k v
 
 let[@inline] list_iter f l =
   <span data-count="1202">l</span>et rec aux = function
@@ -447,9 +447,9 @@ let[@inline] list_concat_map f l =
 
 let[@inline] list_fold_left f acc l =
   <span data-count="43974">l</span>et rec aux acc = function
-    | <span data-count="42314">[</span>] -&gt; Ok acc
+    | <span data-count="42304">[</span>] -&gt; Ok acc
     | <span data-count="255610">v</span> :: tl -&gt; (
-      match f acc v with <span data-count="253950">O</span>k acc -&gt; aux acc tl | <span data-count="1658">E</span>rror _ as e -&gt; e )
+      match f acc v with <span data-count="253940">O</span>k acc -&gt; aux acc tl | <span data-count="1668">E</span>rror _ as e -&gt; e )
   in
   aux acc l
 
@@ -464,30 +464,30 @@ let[@inline] list_fold_left_map f acc l =
   <span data-count="0">(</span>acc, List.re<span data-count="0">v</span> l)
 
 let[@inline] array_iter f a =
-  <span data-count="39749">l</span>et err = ref None in
+  <span data-count="39614">l</span>et err = ref None in
   try
-    for i = 0 to Array.lengt<span data-count="39749">h</span> a - 1 do
-      <span data-count="41019">m</span>atch f (Array.unsafe_ge<span data-count="41019">t</span> a i) with
-      | <span data-count="1468">E</span>rror _e as e -&gt;
+    for i = 0 to Array.lengt<span data-count="39614">h</span> a - 1 do
+      <span data-count="41006">m</span>atch f (Array.unsafe_ge<span data-count="41006">t</span> a i) with
+      | <span data-count="1455">E</span>rror _e as e -&gt;
         err := Some e;
         raise Exit
       | <span data-count="39551">O</span>k () -&gt; ()
     done;
     Ok ()
-  with <span data-count="1468">E</span>xit -&gt; ( match !err with None -&gt; assert false | <span data-count="1468">S</span>ome e -&gt; e )
+  with <span data-count="1455">E</span>xit -&gt; ( match !err with None -&gt; assert false | <span data-count="1455">S</span>ome e -&gt; e )
 
 let[@inline] array_iteri f a =
-  <span data-count="34442">l</span>et err = ref None in
+  <span data-count="34340">l</span>et err = ref None in
   try
-    for i = 0 to Array.lengt<span data-count="34442">h</span> a - 1 do
-      <span data-count="16260">m</span>atch f i (Array.unsafe_ge<span data-count="16260">t</span> a i) with
-      | <span data-count="37">E</span>rror _e as e -&gt;
+    for i = 0 to Array.lengt<span data-count="34340">h</span> a - 1 do
+      <span data-count="16247">m</span>atch f i (Array.unsafe_ge<span data-count="16247">t</span> a i) with
+      | <span data-count="34">E</span>rror _e as e -&gt;
         err := Some e;
         raise Exit
-      | <span data-count="16223">O</span>k () -&gt; ()
+      | <span data-count="16213">O</span>k () -&gt; ()
     done;
     Ok ()
-  with <span data-count="37">E</span>xit -&gt; ( match !err with None -&gt; assert false | <span data-count="37">S</span>ome e -&gt; e )
+  with <span data-count="34">E</span>xit -&gt; ( match !err with None -&gt; assert false | <span data-count="34">S</span>ome e -&gt; e )
 
 let[@inline] dynarray_iter f a =
   <span data-count="0">l</span>et err = ref None in
@@ -516,17 +516,17 @@ let[@inline] dynarray_iteri f a =
   with <span data-count="0">E</span>xit -&gt; ( match !err with None -&gt; assert false | <span data-count="0">S</span>ome e -&gt; e )
 
 let[@inline] array_map f a =
-  <span data-count="45156">l</span>et err = ref None in
+  <span data-count="48713">l</span>et err = ref None in
   try
-    o<span data-count="45119">k</span>
-    @@ Array.ini<span data-count="45119">t</span> (Array.lengt<span data-count="45156">h</span> a) (fun i -&gt;
-      <span data-count="42821">l</span>et v = Array.get a i in
-      <span data-count="42821">m</span>atch f v with
-      | <span data-count="37">E</span>rror _e as e -&gt;
+    o<span data-count="48670">k</span>
+    @@ Array.ini<span data-count="48670">t</span> (Array.lengt<span data-count="48713">h</span> a) (fun i -&gt;
+      <span data-count="43939">l</span>et v = Array.get a i in
+      <span data-count="43939">m</span>atch f v with
+      | <span data-count="43">E</span>rror _e as e -&gt;
         err := Some e;
         raise Exit
-      | <span data-count="42784">O</span>k v -&gt; v )
-  with <span data-count="37">E</span>xit -&gt; ( match !err with None -&gt; assert false | <span data-count="37">S</span>ome e -&gt; e )
+      | <span data-count="43896">O</span>k v -&gt; v )
+  with <span data-count="43">E</span>xit -&gt; ( match !err with None -&gt; assert false | <span data-count="43">S</span>ome e -&gt; e )
 
 let[@inline] array_mapi f a =
   <span data-count="0">l</span>et err = ref None in

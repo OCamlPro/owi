@@ -620,7 +620,7 @@ let of_expressions exprs =
     []
     (Smtml.Expr.Set.get_symbol<span data-count="0">s</span> exprs)
 
-let of_symbol sym = <span data-count="1077">[</span> Symbol sym ]
+let of_symbol sym = <span data-count="994">[</span> Symbol sym ]
 
 let pp_token fmt token =
   <span data-count="5">m</span>atch token with
@@ -632,8 +632,8 @@ let pp fmt tokens =
   <span data-count="3">F</span>mt.list ~sep:(fun fmt () -&gt; <span data-count="2">F</span>mt.pf fmt " ; ") pp_token fmt tokens
 
 let only_symbols tokens =
-  <span data-count="1077">L</span>ist.filter_map
-    (<span data-count="1077">f</span>unction <span data-count="1077">S</span>ymbol s -&gt; Some s | <span data-count="0">O</span>pen_scope _ | <span data-count="0">C</span>lose_scope -&gt; None)
+  <span data-count="994">L</span>ist.filter_map
+    (<span data-count="994">f</span>unction <span data-count="994">S</span>ymbol s -&gt; Some s | <span data-count="0">O</span>pen_scope _ | <span data-count="0">C</span>lose_scope -&gt; None)
     tokens
 
 let get_value model sym ty =
@@ -775,7 +775,7 @@ let model_of_json json_str =
 
   <span data-count="0">l</span>et* json =
     try Ok (from_strin<span data-count="0">g</span> json_str)
-    with <span data-count="0">_</span> -&gt; Fmt.error_ms<span data-count="0">g</span> "Invalid json string: %s" json_str
+    with <span data-count="0">F</span>ailure _ -&gt; Fmt.error_ms<span data-count="0">g</span> "Invalid json string: %s" json_str
   in
 
   <span data-count="0">l</span>et rec process_json json =

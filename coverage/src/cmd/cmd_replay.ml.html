@@ -702,7 +702,7 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
     let rec make_str m accu i =
       <span data-count="0">l</span>et open Concrete_choice in
       let* p = Concrete_memory.load_8_<span data-count="0">u</span> m i in
-      <span data-count="0">i</span>f Int32.g<span data-count="0">t</span> p 255<span data-count="0">l</span> || Int32.l<span data-count="0">t</span> p 0<span data-count="0">l</span> then <span data-count="0">t</span>rap `Invalid_character_in_memory
+      <span data-count="0">i</span>f Int32.l<span data-count="0">t</span> 255l <span data-count="0">p</span> || Int32.l<span data-count="0">t</span> p 0<span data-count="0">l</span> then <span data-count="0">t</span>rap `Invalid_character_in_memory
       else
         <span data-count="0">l</span>et ch = char_of_int (Int32.to_in<span data-count="0">t</span> p) in
         <span data-count="0">i</span>f Char.equal ch '\x00' then <span data-count="0">r</span>eturn (List.rev accu |&gt; <span data-count="0">A</span>rray.of_lis<span data-count="0">t</span>)

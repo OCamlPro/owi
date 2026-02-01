@@ -162,7 +162,7 @@ let convert_i32_s x = <span data-count="22">F</span>loat32.of_float (Int32.to_fl
 let convert_i32_u x =
   <span data-count="21">F</span>loat32.of_float
     Int32.(
-      if Int32.ge x zero then <span data-count="11">t</span>o_floa<span data-count="11">t</span> x
+      if Int32.le zero x then <span data-count="11">t</span>o_floa<span data-count="11">t</span> x
       else <span data-count="10">t</span>o_floa<span data-count="10">t</span> (logo<span data-count="10">r</span> (shift_right_logica<span data-count="10">l</span> x 1) (logan<span data-count="10">d</span> x 1l)) *. 2.0 )
 
 (*

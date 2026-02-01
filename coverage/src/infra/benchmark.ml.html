@@ -256,14 +256,14 @@ let empty_stats () =
   }
 
 let handle_time_span atomic_span f =
-  <span data-count="6732">i</span>f Log.is_bench_enabled () then <span data-count="8">(</span>
+  <span data-count="6645">i</span>f Log.is_bench_enabled () then <span data-count="8">(</span>
     let counter = Mtime_clock.counter () in
     (* f is supposed to take a long time! *)
     <span data-count="8">l</span>et res = f () in
     <span data-count="8">l</span>et span = Mtime_clock.count counter in
     <span data-count="8">M</span>ulticore.atomic_modify (Mtime.Span.ad<span data-count="8">d</span> span) atomic_span;
     <span data-count="8">r</span>es )
-  else <span data-count="6724">f</span> ()
+  else <span data-count="6635">f</span> ()
 
 let with_utime f =
   <span data-count="437">i</span>f Log.is_bench_enabled () then

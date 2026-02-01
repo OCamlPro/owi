@@ -300,42 +300,42 @@ let add_solver solver =
   <span data-count="2">M</span>ulticore.atomic_modify (fun instances -&gt; <span data-count="2">s</span>olver :: instances) instances
 
 let fresh solver_ty () =
-  <span data-count="600">l</span>et module Mapping = (val Smtml.Solver_dispatcher.mappings_of_solve<span data-count="600">r</span> solver_ty)
+  <span data-count="603">l</span>et module Mapping = (val Smtml.Solver_dispatcher.mappings_of_solve<span data-count="603">r</span> solver_ty)
   in
   let module Mapping = Mapping.Fresh.Make () in
   let module Batch = Smtml.Solver.Batch (Mapping) in
   let solver_inst = Batch.create ~logic:QF_BVFP () in
-  <span data-count="593">l</span>et solver = S ((module Batch), solver_inst) in
+  <span data-count="596">l</span>et solver = S ((module Batch), solver_inst) in
   if Log.is_bench_enabled () then <span data-count="2">a</span>dd_solve<span data-count="2">r</span> solver;
-  <span data-count="593">s</span>olver
+  <span data-count="596">s</span>olver
 
 let cache = Smtml.Cache.Strong.creat<span data-count="747">e</span> 64
 
 let cache_mutex = Mutex.creat<span data-count="747">e</span> ()
 
 let check (S (solver_module, s)) pc =
-  <span data-count="5407">l</span>et cached =
-    Mutex.protect cache_mutex (fun () -&gt; <span data-count="5407">S</span>mtml.Cache.Strong.find_opt cache pc)
+  <span data-count="5406">l</span>et cached =
+    Mutex.protect cache_mutex (fun () -&gt; <span data-count="5408">S</span>mtml.Cache.Strong.find_opt cache pc)
   in
-  <span data-count="5407">m</span>atch cached with
-  | <span data-count="1079">S</span>ome sat -&gt; sat
-  | <span data-count="4328">N</span>one -&gt;
+  <span data-count="5408">m</span>atch cached with
+  | <span data-count="1068">S</span>ome sat -&gt; sat
+  | <span data-count="4340">N</span>one -&gt;
     let module Solver = (val solver_module) in
     let sat = Solver.check_set s pc in
-    <span data-count="4323">M</span>utex.protect cache_mutex (fun () -&gt;
-      <span data-count="4323">S</span>mtml.Cache.Strong.replace cache pc sat );
-    <span data-count="4323">s</span>at
+    <span data-count="4333">M</span>utex.protect cache_mutex (fun () -&gt;
+      <span data-count="4333">S</span>mtml.Cache.Strong.replace cache pc sat );
+    <span data-count="4333">s</span>at
 
 let model_of_path_condition (S (solver_module, s)) ~path_condition :
   Smtml.Model.t Option.t =
-  <span data-count="242">l</span>et exception Unknown in
+  <span data-count="241">l</span>et exception Unknown in
   let module Solver = (val solver_module) in
   try
     let sub_conditions = Symbolic_path_condition.slice path_condition in
-    <span data-count="242">l</span>et models =
+    <span data-count="241">l</span>et models =
       List.map
         (fun pc -&gt;
-          <span data-count="264">m</span>atch Solver.get_sat_model s pc with
+          <span data-count="263">m</span>atch Solver.get_sat_model s pc with
           | <span data-count="263">`</span>Model model -&gt; model
           | <span data-count="0">`</span>Unknown -&gt;
             (* it can happen if the solver is interrupted, otherwise it is an error, we raise, so the function can return an option that will be handled by the called *)
@@ -352,9 +352,9 @@ let model_of_path_condition (S (solver_module, s)) ~path_condition :
   with <span data-count="0">U</span>nknown -&gt; None
 
 let model_of_set (S (solver_module, s)) ~symbol_scopes ~set =
-  <span data-count="1077">l</span>et module Solver = (val solver_module) in
+  <span data-count="994">l</span>et module Solver = (val solver_module) in
   let symbols = Symbol_scope.only_symbols symbol_scopes in
-  <span data-count="1077">S</span>olver.get_sat_model ~symbols s set
+  <span data-count="994">S</span>olver.get_sat_model ~symbols s set
 
 let empty_stats = Smtml.Statistics.Map.empty
 

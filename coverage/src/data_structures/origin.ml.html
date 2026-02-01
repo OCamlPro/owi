@@ -164,9 +164,9 @@ let map_imported f v =
   <span data-count="0">{</span> v with typ }
 
 let monadic_map_imported f v =
-  <span data-count="2602">l</span>et open Syntax in
-  let+ typ = <span data-count="2602">f</span> v.typ in
-  <span data-count="2600">{</span> v with typ }
+  <span data-count="2758">l</span>et open Syntax in
+  let+ typ = <span data-count="2758">f</span> v.typ in
+  <span data-count="2753">{</span> v with typ }
 
 let pp ~pp_local ~pp_imported:pp fmt = function
   | <span data-count="1">L</span>ocal local -&gt; Fmt.pf fmt "Local (%a)" pp_local local
@@ -181,14 +181,14 @@ let map ~f_local ~f_imported = function
     <span data-count="0">I</span>mported v
 
 let monadic_map ~f_local ~f_imported =
-  <span data-count="14965">l</span>et open Syntax in
+  <span data-count="18650">l</span>et open Syntax in
   function
-  | <span data-count="8916">L</span>ocal v -&gt;
-    let+ v = f_loca<span data-count="8916">l</span> v in
-    <span data-count="8883">L</span>ocal v
-  | <span data-count="2602">I</span>mported v -&gt;
-    let+ v = monadic_map_importe<span data-count="2602">d</span> f_imported v in
-    <span data-count="2600">I</span>mported v
+  | <span data-count="9878">L</span>ocal v -&gt;
+    let+ v = f_loca<span data-count="9878">l</span> v in
+    <span data-count="9842">L</span>ocal v
+  | <span data-count="2758">I</span>mported v -&gt;
+    let+ v = monadic_map_importe<span data-count="2758">d</span> f_imported v in
+    <span data-count="2753">I</span>mported v
 </code></pre>
       </div>
     </div>

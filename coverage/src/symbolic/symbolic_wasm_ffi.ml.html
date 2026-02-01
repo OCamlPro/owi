@@ -540,7 +540,7 @@ module M :
     <span data-count="603">S</span>ymbolic_choice.assume (Symbolic_i32.to_boolea<span data-count="603">n</span> b) None
 
   let assert' (b : Symbolic_i32.t) : unit Symbolic_choice.t =
-    <span data-count="10466">S</span>ymbolic_choice.assertion @@ Symbolic_i32.to_boolea<span data-count="10465">n</span> b
+    <span data-count="10467">S</span>ymbolic_choice.assertion @@ Symbolic_i32.to_boolea<span data-count="10467">n</span> b
 
   let symbol_invisible_bool () =
     (* TODO: should we change this to an i32 too? *)
@@ -567,17 +567,17 @@ module M :
     <span data-count="12">l</span>et open Symbolic_choice in
     let* x = symbol_i3<span data-count="12">2</span> () in
     <span data-count="12">l</span>et* () = assum<span data-count="12">e</span> (Symbolic_i32.l<span data-count="12">e</span> lo x) None in
-    <span data-count="12">l</span>et+ () = assum<span data-count="12">e</span> (Symbolic_i32.g<span data-count="12">t</span> hi x) None in
+    <span data-count="12">l</span>et+ () = assum<span data-count="12">e</span> (Symbolic_i32.l<span data-count="12">t</span> x hi) None in
     <span data-count="12">x</span>
 
   let abort () : unit Symbolic_choice.t = <span data-count="2">S</span>ymbolic_choice.stop
 
   let alloc m (base : Symbolic_i32.t) (size : Symbolic_i32.t) :
     Symbolic_i32.t Symbolic_choice.t =
-    <span data-count="9914">S</span>ymbolic_memory.realloc m ~ptr:base ~size
+    <span data-count="9912">S</span>ymbolic_memory.realloc m ~ptr:base ~size
 
   let free m (ptr : Symbolic_i32.t) : Symbolic_i32.t Symbolic_choice.t =
-    <span data-count="2443">S</span>ymbolic_memory.free m ptr
+    <span data-count="2440">S</span>ymbolic_memory.free m ptr
 
   let exit (_p : Symbolic_i32.t) : unit Symbolic_choice.t = <span data-count="1">a</span>bort ()
 
@@ -596,7 +596,7 @@ module M :
     <span data-count="83">m</span>atch Smtml.Typed.view p with
     | <span data-count="83">V</span>al (Bitv bv) when Smtml.Bitvector.numbit<span data-count="83">s</span> bv = 32 -&gt;
       <span data-count="83">l</span>et c = Smtml.Bitvector.to_int32 bv in
-      <span data-count="83">i</span>f Int32.g<span data-count="83">t</span> c 255<span data-count="0">l</span> || Int32.l<span data-count="83">t</span> c 0<span data-count="0">l</span> then <span data-count="0">t</span>rap `Invalid_character_in_memory
+      <span data-count="83">i</span>f Int32.l<span data-count="83">t</span> 255l <span data-count="0">c</span> || Int32.l<span data-count="83">t</span> c 0<span data-count="0">l</span> then <span data-count="0">t</span>rap `Invalid_character_in_memory
       else
         <span data-count="83">l</span>et ch = char_of_int (Int32.to_in<span data-count="83">t</span> c) in
         <span data-count="83">i</span>f Char.equal ch '\x00' then <span data-count="12">r</span>eturn (List.rev accu |&gt; <span data-count="12">A</span>rray.of_lis<span data-count="12">t</span>)

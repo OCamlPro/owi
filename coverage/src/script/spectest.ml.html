@@ -18,10 +18,10 @@
       <h2>90.48%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:16.74%"></span>
-      <span class="unvisited" style="top:17.21%"></span>
-      <span class="unvisited" style="top:17.67%"></span>
-      <span class="unvisited" style="top:18.14%"></span>
+      <span class="unvisited" style="top:16.67%"></span>
+      <span class="unvisited" style="top:17.13%"></span>
+      <span class="unvisited" style="top:17.59%"></span>
+      <span class="unvisited" style="top:18.06%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -187,27 +187,27 @@
 <a id="L159"></a><span > </span>
 <a id="L160"></a><span > </span>
 <a id="L161"></a><span > </span>
-<a id="L162"></a><span class="visited"> </span>
-<a id="L163"></a><span > </span>
+<a id="L162"></a><span > </span>
+<a id="L163"></a><span class="visited"> </span>
 <a id="L164"></a><span > </span>
 <a id="L165"></a><span > </span>
 <a id="L166"></a><span > </span>
-<a id="L167"></a><span class="visited"> </span>
-<a id="L168"></a><span > </span>
+<a id="L167"></a><span > </span>
+<a id="L168"></a><span class="visited"> </span>
 <a id="L169"></a><span > </span>
 <a id="L170"></a><span > </span>
 <a id="L171"></a><span > </span>
 <a id="L172"></a><span > </span>
-<a id="L173"></a><span class="visited"> </span>
+<a id="L173"></a><span > </span>
 <a id="L174"></a><span class="visited"> </span>
-<a id="L175"></a><span > </span>
+<a id="L175"></a><span class="visited"> </span>
 <a id="L176"></a><span > </span>
 <a id="L177"></a><span > </span>
 <a id="L178"></a><span > </span>
 <a id="L179"></a><span > </span>
-<a id="L180"></a><span class="visited"> </span>
+<a id="L180"></a><span > </span>
 <a id="L181"></a><span class="visited"> </span>
-<a id="L182"></a><span > </span>
+<a id="L182"></a><span class="visited"> </span>
 <a id="L183"></a><span > </span>
 <a id="L184"></a><span > </span>
 <a id="L185"></a><span > </span>
@@ -241,6 +241,7 @@
 <a id="L213"></a><span > </span>
 <a id="L214"></a><span > </span>
 <a id="L215"></a><span > </span>
+<a id="L216"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -460,6 +461,7 @@
 <a href="#L213">213</a>
 <a href="#L214">214</a>
 <a href="#L215">215</a>
+<a href="#L216">216</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -613,11 +615,12 @@ let m =
                      , Bt_raw
                          (None, ([ (None, Num_type I32) ], [ Num_type I32 ])) )
                }
-           ; Mem (Some "memory", { is_i64 = false; min = 1; max = Some 2 })
+           ; Mem (Some "memory", { is_i64 = false; min = "1"; max = Some "2" })
            ; Table
                { id = Some "table"
                ; typ =
-                   ({ is_i64 = false; min = 10; max = Some 20 }, (Null, Func_ht))
+                   ( { is_i64 = false; min = "10"; max = Some "20" }
+                   , (Null, Func_ht) )
                ; init = None
                }
            ; Global

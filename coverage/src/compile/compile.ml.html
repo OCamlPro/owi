@@ -219,22 +219,22 @@ module Text = struct
 
   let until_group ~unsafe m =
     <span data-count="3813">l</span>et+ m = until_text_validat<span data-count="3813">e</span> ~unsafe m in
-    <span data-count="3778">G</span>rouped.of_text m
+    <span data-count="3768">G</span>rouped.of_text m
 
   let until_assign ~unsafe m =
     <span data-count="3813">l</span>et* m = until_grou<span data-count="3813">p</span> ~unsafe m in
-    <span data-count="3778">l</span>et+ assigned = Assigned.of_groupe<span data-count="3778">d</span> m in
-    <span data-count="3750">(</span>m, assigned)
+    <span data-count="3768">l</span>et+ assigned = Assigned.of_groupe<span data-count="3768">d</span> m in
+    <span data-count="3740">(</span>m, assigned)
 
   let until_binary ~unsafe m =
     <span data-count="3813">l</span>et* m, assigned = until_assig<span data-count="3813">n</span> ~unsafe m in
-    <span data-count="3750">R</span>ewrite.modul m assigned
+    <span data-count="3740">R</span>ewrite.modul m assigned
 
   let until_validate ~unsafe m =
     <span data-count="3738">l</span>et* m = until_binar<span data-count="3738">y</span> ~unsafe m in
-    <span data-count="3701">i</span>f unsafe then <span data-count="1">O</span>k m
+    <span data-count="3685">i</span>f unsafe then <span data-count="1">O</span>k m
     else
-      <span data-count="3700">l</span>et+ () = Binary_validate.modu<span data-count="3700">l</span> m in
+      <span data-count="3684">l</span>et+ () = Binary_validate.modu<span data-count="3684">l</span> m in
       <span data-count="2234">m</span>
 
   let until_link ~unsafe ~name link_state m =

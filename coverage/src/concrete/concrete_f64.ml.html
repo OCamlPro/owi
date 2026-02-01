@@ -151,7 +151,7 @@ let convert_i64_s x = <span data-count="19">F</span>loat64.of_float (Int64.to_fl
 let convert_i64_u x =
   <span data-count="32">F</span>loat64.of_float
     Int64.(
-      if Int64.ge x zero then <span data-count="22">t</span>o_floa<span data-count="22">t</span> x
+      if Int64.le zero x then <span data-count="22">t</span>o_floa<span data-count="22">t</span> x
       else <span data-count="10">t</span>o_floa<span data-count="10">t</span> (logo<span data-count="10">r</span> (shift_right_logica<span data-count="10">l</span> x 1) (logan<span data-count="10">d</span> x 1L)) *. 2.0 )
 
 let reinterpret_i64 = Float64.of_bits

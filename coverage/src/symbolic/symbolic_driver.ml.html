@@ -332,9 +332,9 @@ let print_and_count_bugs ~format ~out_file ~no_value
 
 let mk_callback no_stop_at_failure fail_mode res_stack path_count =
  fun ~close_work_queue v -&gt;
-  <span data-count="1740">A</span>tomic.incr path_count;
-  <span data-count="1740">m</span>atch v with
-  | <span data-count="1499">O</span>k (), _thread -&gt; ()
+  <span data-count="1658">A</span>tomic.incr path_count;
+  <span data-count="1658">m</span>atch v with
+  | <span data-count="1417">O</span>k (), _thread -&gt; ()
   | <span data-count="241">E</span>rror bug, _thread -&gt;
     let should_be_added =
       match fail_mode with
@@ -344,7 +344,7 @@ let mk_callback no_stop_at_failure fail_mode res_stack path_count =
     in
     if should_be_added then <span data-count="238">b</span>egin
       Bugs.push bug Prio.dummy res_stack;
-      <span data-count="235">i</span>f not no_stop_at_failure then <span data-count="51">b</span>egin
+      <span data-count="236">i</span>f not no_stop_at_failure then <span data-count="52">b</span>egin
         close_work_queue ()
       end
     end
@@ -365,7 +365,7 @@ let handle_result ~exploration_strategy ~workers ~no_worker_isolation
     Symbolic_choice.run exploration_strategy ~workers solver result thread
       ~no_worker_isolation ~at_worker_value
       ~at_worker_init:(fun () -&gt; <span data-count="794">B</span>ugs.new_pledge bug_stack)
-      ~at_worker_end:(fun () -&gt; <span data-count="776">B</span>ugs.end_pledge bug_stack)
+      ~at_worker_end:(fun () -&gt; <span data-count="775">B</span>ugs.end_pledge bug_stack)
   in
   <span data-count="411">l</span>et results =
     Bugs.read_as_seq bug_stack |&gt; <span data-count="411">B</span>ug.sort_seq_if deterministic_result_order
