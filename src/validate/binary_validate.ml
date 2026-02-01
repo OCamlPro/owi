@@ -986,9 +986,9 @@ let validate_exports modul =
     modul.exports.mem
 
 let validate_table_limits : Binary.Table.Type.limits -> unit Result.t = function
-  | I32 { min; max = Some max } when Int32.gt_u min max ->
+  | I32 { min; max = Some max } when Int32.lt_u max min ->
     Error `Size_minimum_greater_than_maximum
-  | I64 { min; max = Some max } when Int64.gt_u min max ->
+  | I64 { min; max = Some max } when Int64.lt_u max min ->
     Error `Size_minimum_greater_than_maximum
   | _ -> Ok ()
 
@@ -1046,10 +1046,10 @@ let validate_memory_limit : Binary.Mem.Type.limits -> unit Result.t = function
   | I32 { min; max } -> begin
     match max with
     | None ->
-      if Int32.gt_u min 0x1_0000l then Error `Memory_size_too_large else Ok ()
+      if Int32.lt_u 0x1_0000l min then Error `Memory_size_too_large else Ok ()
     | Some max ->
-      if Int32.gt_u min max then Error `Size_minimum_greater_than_maximum
-      else if Int32.gt_u min 0x1_0000l || Int32.gt_u max 0x1_0000l then
+      if Int32.lt_u max min then Error `Size_minimum_greater_than_maximum
+      else if Int32.lt_u 0x1_0000l min || Int32.lt_u 0x1_0000l max then
         Error `Memory_size_too_large
       else Ok ()
   end
