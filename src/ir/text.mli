@@ -143,13 +143,9 @@ type nonrec frelop =
 
 val pp_frelop : frelop Fmt.t
 
-(* TODO: should probably be in a sum type separating the offset into
-   i64 and i32.
-   align only needs to be parsed as i64, it should be conveted later to i32
-   since it will always be a i32. *)
 type nonrec memarg =
-  { offset : Int64.t
-  ; align : Int64.t
+  { offset : string option
+  ; align : string option
   }
 
 val pp_memarg : memarg Fmt.t

@@ -42,12 +42,6 @@ let u32 s =
       | None -> Fmt.kstr failwith "constant out of range %s" s
       | Some v -> v
 
-let u64 s =
-  match Int64.of_string s with
-  | None ->
-    Fmt.kstr failwith "constant out of range %s" s
-  | Some v -> v
-
 let i8 s =
   let i =
     try Int32.of_string_exn s
@@ -227,20 +221,14 @@ let num_type ==
   | F64; { Text.F64 }
   | V128; { Text.V128 }
 
-let align ==
-  | ALIGN; EQUAL; n = NUM; {
-    let n = u64 n in
-    if Int64.eq n 0L || Int64.ne Int64.(logand n (sub n 1L)) 0L then failwith "alignment"
-    else Int64.div n 2L
-  }
+let memarg_align ==
+  | ALIGN; EQUAL; n = NUM; <>
 
 let memarg_offset ==
   | OFFSET; EQUAL; ~ = NUM; <>
 
 let memarg ==
-  | offset = option(memarg_offset); align = option(align); {
-    let offset = u64 @@ Option.value offset ~default:"0" in
-    let align = Option.value align ~default:0L in
+  | offset = option(memarg_offset); align = option(memarg_align); {
     {offset; align}
   }
 

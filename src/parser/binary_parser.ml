@@ -333,26 +333,27 @@ let read_memory_limits input =
   | _c -> parse_fail "integer too large (read_limits)"
 
 let is_malformed align_raw =
-  let reserved_mask = Int64.lognot 0x7FL in
-  Int64.lt 0L (Int64.logand align_raw reserved_mask)
+  let reserved_mask = Int32.lognot 0x7Fl in
+  Int32.lt 0l (Int32.logand align_raw reserved_mask)
 
 let read_memarg max_align input =
   let* align, input = read_UN 32 input in
-  let has_memidx = Int64.ne (Int64.logand align 0x40L) 0L in
+  let align = Int64.to_int32 align in
+  let has_memidx = Int32.ne (Int32.logand align 0x40l) 0l in
   let* memidx, align, input =
     if has_memidx then
       let+ memidx, input = read_indice input in
       (* Unset the 6th bit *)
-      (memidx, Int64.logand align (Int64.lognot 0x40L), input)
+      (memidx, Int32.logand align (Int32.lognot 0x40l), input)
     else Ok (0, align, input)
   in
   if is_malformed align then parse_fail "malformed memop flags"
-  else if Int64.to_int align > max_align then
+  else if Int32.to_int align > max_align then
     parse_fail "alignment must not be larger than natural"
   else
     let+ offset, input = read_U32 input in
     let offset = Int64.of_int offset in
-    (memidx, { Text.align; offset }, input)
+    (memidx, { Binary.align; offset }, input)
 (* TODO: should the checks be moved to validate? *)
 
 let read_FC input =

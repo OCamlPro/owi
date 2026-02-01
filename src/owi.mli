@@ -290,8 +290,8 @@ module Text : sig
     | Ge
 
   type nonrec memarg =
-    { offset : Concrete_i64.t
-    ; align : Concrete_i64.t
+    { offset : string option
+    ; align : string option
     }
 
   type nonrec limits =
@@ -637,6 +637,13 @@ module Binary : sig
     (* TODO: inline this *)
     | Bt_raw of (indice option * Binary.func_type)
 
+  type nonrec memarg =
+    { offset : Int64.t
+    ; align : Int32.t
+    }
+
+  val pp_memarg : memarg Fmt.t
+
   (** Instructions *)
 
   type instr =
@@ -690,16 +697,16 @@ module Binary : sig
     | Table_init of indice * indice
     | Elem_drop of indice
     (* Memory instructions *)
-    | I_load of indice * Text.nn * Text.memarg
-    | F_load of indice * Text.nn * Text.memarg
-    | I_store of indice * Text.nn * Text.memarg
-    | F_store of indice * Text.nn * Text.memarg
-    | I_load8 of indice * Text.nn * Text.sx * Text.memarg
-    | I_load16 of indice * Text.nn * Text.sx * Text.memarg
-    | I64_load32 of indice * Text.sx * Text.memarg
-    | I_store8 of indice * Text.nn * Text.memarg
-    | I_store16 of indice * Text.nn * Text.memarg
-    | I64_store32 of indice * Text.memarg
+    | I_load of indice * Text.nn * memarg
+    | F_load of indice * Text.nn * memarg
+    | I_store of indice * Text.nn * memarg
+    | F_store of indice * Text.nn * memarg
+    | I_load8 of indice * Text.nn * Text.sx * memarg
+    | I_load16 of indice * Text.nn * Text.sx * memarg
+    | I64_load32 of indice * Text.sx * memarg
+    | I_store8 of indice * Text.nn * memarg
+    | I_store16 of indice * Text.nn * memarg
+    | I64_store32 of indice * memarg
     | Memory_size of indice
     | Memory_grow of indice
     | Memory_fill of indice

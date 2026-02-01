@@ -182,11 +182,11 @@ let write_table_limits buf (limits : Binary.Table.Type.limits) : unit =
     write_u64 buf min;
     write_u64 buf max
 
-let write_memarg buf idx ({ offset; align } : Text.memarg) =
-  if idx = 0 then write_u64 buf align
+let write_memarg buf idx ({ offset; align } : memarg) =
+  if idx = 0 then write_u32 buf align
   else (
     (* Set the 6th bit if the id not 0 *)
-    write_u64 buf (Int64.logor align 0x40L);
+    write_u32 buf (Int32.logor align 0x40l);
     write_indice buf idx );
   write_u64 buf offset
 
