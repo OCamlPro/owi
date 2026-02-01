@@ -6,10 +6,10 @@
 let
   smtml = pkgs.ocamlPackages.smtml.overrideAttrs (old: {
     src = pkgs.fetchFromGitHub {
-      owner = "formalsec";
+      owner = "redianthus";
       repo = "smtml";
-      rev = "e259d5b7d108cb2d1102c188132a6c86bbf7705e";
-      hash = "sha256-8OzNJIyJhfqgDw3ioINN0D0WVTSliG9TP4cUNlrm4s8=";
+      rev = "e34d1cb77ee3e15be51df55dede2579590578fd6";
+      hash = "sha256-snfB91EGihRekQWIRb+z5+kfiRSlDwrPLBnpI74TdqE=";
     };
     doCheck = false;
   });
