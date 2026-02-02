@@ -467,55 +467,55 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
     (env, stack)
   | I_load16 (id, nn, _, memarg) ->
     let* is_i64 = check_mem env.modul id in
-    let* _ = check_memarg ~is_i64 memarg 2l in
+    let* () = check_memarg ~is_i64 memarg 2l in
     let* stack = Stack.pop env.modul [ i32 ] stack in
     let+ stack = Stack.push [ itype nn ] stack in
     (env, stack)
   | I_load (id, nn, memarg) ->
     let* is_i64 = check_mem env.modul id in
     let max_allowed = match nn with S32 -> 4l | S64 -> 8l in
-    let* _ = check_memarg ~is_i64 memarg max_allowed in
+    let* () = check_memarg ~is_i64 memarg max_allowed in
     let* stack = Stack.pop env.modul [ i32 ] stack in
     let+ stack = Stack.push [ itype nn ] stack in
     (env, stack)
   | I64_load32 (id, _, memarg) ->
     let* is_i64 = check_mem env.modul id in
-    let* _ = check_memarg ~is_i64 memarg 4l in
+    let* () = check_memarg ~is_i64 memarg 4l in
     let* stack = Stack.pop env.modul [ i32 ] stack in
     let+ stack = Stack.push [ i64 ] stack in
     (env, stack)
   | I_store8 (id, nn, memarg) ->
     let* is_i64 = check_mem env.modul id in
-    let* _ = check_memarg ~is_i64 memarg 1l in
+    let* () = check_memarg ~is_i64 memarg 1l in
     let+ stack = Stack.pop env.modul [ itype nn; i32 ] stack in
     (env, stack)
   | I_store16 (id, nn, memarg) ->
     let* is_i64 = check_mem env.modul id in
-    let* _ = check_memarg ~is_i64 memarg 2l in
+    let* () = check_memarg ~is_i64 memarg 2l in
     let+ stack = Stack.pop env.modul [ itype nn; i32 ] stack in
     (env, stack)
   | I_store (id, nn, memarg) ->
     let* is_i64 = check_mem env.modul id in
     let max_allowed = match nn with S32 -> 4l | S64 -> 8l in
-    let* _ = check_memarg ~is_i64 memarg max_allowed in
+    let* () = check_memarg ~is_i64 memarg max_allowed in
     let+ stack = Stack.pop env.modul [ itype nn; i32 ] stack in
     (env, stack)
   | I64_store32 (id, memarg) ->
     let* is_i64 = check_mem env.modul id in
-    let* _ = check_memarg ~is_i64 memarg 4l in
+    let* () = check_memarg ~is_i64 memarg 4l in
     let+ stack = Stack.pop env.modul [ i64; i32 ] stack in
     (env, stack)
   | F_load (id, nn, memarg) ->
     let* is_i64 = check_mem env.modul id in
     let max_allowed = match nn with S32 -> 4l | S64 -> 8l in
-    let* _ = check_memarg ~is_i64 memarg max_allowed in
+    let* () = check_memarg ~is_i64 memarg max_allowed in
     let* stack = Stack.pop env.modul [ i32 ] stack in
     let+ stack = Stack.push [ ftype nn ] stack in
     (env, stack)
   | F_store (id, nn, memarg) ->
     let* is_i64 = check_mem env.modul id in
     let max_allowed = match nn with S32 -> 4l | S64 -> 8l in
-    let* _ = check_memarg ~is_i64 memarg max_allowed in
+    let* () = check_memarg ~is_i64 memarg max_allowed in
     let+ stack = Stack.pop env.modul [ ftype nn; i32 ] stack in
     (env, stack)
   | I_reinterpret_f (inn, fnn) ->
