@@ -125,7 +125,7 @@ struct
   *)
   let ( let>! ) (v, trap, instr_counter) f =
     if Parameters.throw_away_trap then
-      let* () = Choice.assume (Boolean.not v) instr_counter in
+      let* () = Choice.assume (Boolean.not v) in
       f ()
     else
       (* TODO: can we do something better here? *)
