@@ -40,6 +40,8 @@ val with_new_symbol : Smtml.Ty.t -> (Smtml.Symbol.t -> 'b) -> 'b t
 
 val solver : unit -> Solver.t
 
+val solver_to_use : Smtml.Solver_type.t option ref
+
 val thread : Thread.t t
 
 val get_pc : unit -> Smtml.Expr.Set.t t
@@ -49,19 +51,6 @@ val add_label : int * string -> unit t
 val open_scope : string -> unit t
 
 val close_scope : unit -> unit t
-
-val run :
-     Symbolic_parameters.Exploration_strategy.t
-  -> workers:int option
-  -> Smtml.Solver_type.t
-  -> 'a t
-  -> Thread.t
-  -> no_worker_isolation:bool
-  -> at_worker_value:
-       (close_work_queue:(unit -> unit) -> ('a, Bug.t) result * Thread.t -> unit)
-  -> at_worker_init:(unit -> unit)
-  -> at_worker_end:(unit -> unit)
-  -> unit Domain.t array
 
 val ite :
      Symbolic_boolean.t

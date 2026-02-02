@@ -80,9 +80,9 @@ let cmd ~parameters ~source_file =
     | None -> OS.Dir.tmp "owi_sym_%s"
   in
 
-  let* result, run_time = run_file ~parameters ~source_file in
+  let* to_run, run_time = run_file ~parameters ~source_file in
 
-  Symbolic_driver.handle_result ~exploration_strategy ~fail_mode ~workers
+  Symbolic_driver.run ~exploration_strategy ~fail_mode ~workers
     ~no_worker_isolation ~solver ~deterministic_result_order ~model_format
     ~no_value ~no_assert_failure_expression_printing ~workspace
-    ~no_stop_at_failure ~model_out_file ~with_breadcrumbs ~run_time result
+    ~no_stop_at_failure ~model_out_file ~with_breadcrumbs ~run_time to_run

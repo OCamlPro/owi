@@ -1271,7 +1271,7 @@ module Symbolic_parameters : sig
 end
 
 module Symbolic_driver : sig
-  val handle_result :
+  val run :
        exploration_strategy:Symbolic_parameters.Exploration_strategy.t
     -> workers:Int.t Option.t
     -> no_worker_isolation:Bool.t
