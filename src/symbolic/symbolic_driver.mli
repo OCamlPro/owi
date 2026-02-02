@@ -2,7 +2,7 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-val handle_result :
+val run :
      exploration_strategy:Symbolic_parameters.Exploration_strategy.t
   -> workers:Int.t Option.t
   -> no_worker_isolation:Bool.t

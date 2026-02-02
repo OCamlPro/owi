@@ -78,43 +78,6 @@ let stop = lift_schedulable Scheduler.Schedulable.stop
    Now this is actual symbolic execution stuff!
    ============================================ *)
 
-let run exploration_strategy ~workers solver t thread ~no_worker_isolation
-  ~at_worker_value ~at_worker_init ~at_worker_end =
-  solver_to_use := Some solver;
-  let module M =
-    ( val Symbolic_parameters.Exploration_strategy.to_work_ds_module
-            exploration_strategy )
-  in
-  let module Scheduler = Scheduler.Make (M) in
-  let sched = Scheduler.init () in
-  Scheduler.add_init_task sched (Fun.const @@ State_monad.run t thread);
-
-  (*
-   * TODO: try this at some point? It's likely going to make things bad but who knows...
-   * Domainpc.isolate_current ();
-   *)
-  let workers =
-    match workers with
-    | None ->
-      let n = Domainpc.get_available_cores () in
-      assert (n > 0);
-      n
-    | Some n -> n
-  in
-
-  assert (workers > 0);
-
-  if workers > 1 then Logs_threaded.enable ();
-
-  for _i = 1 to workers do
-    at_worker_init ()
-  done;
-
-  let isolated = not no_worker_isolation in
-
-  Domainpc.spawn_n ~isolated ~n:workers (fun () ->
-    Scheduler.run_worker sched ~at_worker_value ~finally:at_worker_end )
-
 let add_pc (c : Symbolic_boolean.t) =
   let c = Smtml.Typed.simplify c in
   match Smtml.Typed.view c with

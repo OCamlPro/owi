@@ -52,28 +52,67 @@ let mk_callback no_stop_at_failure fail_mode res_stack path_count =
       end
     end
 
-let handle_result ~exploration_strategy ~workers ~no_worker_isolation
-  ~no_stop_at_failure ~no_value ~no_assert_failure_expression_printing
-  ~deterministic_result_order ~fail_mode ~workspace ~solver ~model_format
-  ~model_out_file ~with_breadcrumbs ~run_time (result : unit Symbolic_choice.t)
-    =
-  let thread = Thread.init () in
+let compute_number_of_workers workers =
+  (*
+   * TODO: try this at some point? It's likely going to make things bad but who knows...
+   * Domainpc.isolate_current ();
+   *)
+  let workers =
+    match workers with
+    | None ->
+      let n = Domainpc.get_available_cores () in
+      assert (n > 0);
+      n
+    | Some n ->
+      assert (n > 0);
+      n
+  in
+  if workers > 1 then Logs_threaded.enable ();
+  workers
+
+let run ~exploration_strategy ~workers ~no_worker_isolation ~no_stop_at_failure
+  ~no_value ~no_assert_failure_expression_printing ~deterministic_result_order
+  ~fail_mode ~workspace ~solver ~model_format ~model_out_file ~with_breadcrumbs
+  ~run_time (to_run : unit Symbolic_choice.t) =
+  (* Various initializations *)
   let bug_stack = Bugs.make () in
   let path_count = Atomic.make 0 in
-  let at_worker_value =
-    mk_callback no_stop_at_failure fail_mode bug_stack path_count
-  in
   let time_before = (Unix.times ()).tms_utime in
-  let domains : unit Domain.t Array.t =
-    Symbolic_choice.run exploration_strategy ~workers solver result thread
-      ~no_worker_isolation ~at_worker_value
-      ~at_worker_init:(fun () -> Bugs.new_pledge bug_stack)
-      ~at_worker_end:(fun () -> Bugs.end_pledge bug_stack)
+  let module M =
+    ( val Symbolic_parameters.Exploration_strategy.to_work_ds_module
+            exploration_strategy )
   in
-  let results =
-    Bugs.read_as_seq bug_stack |> Bug.sort_seq_if deterministic_result_order
+  let module Scheduler = Scheduler.Make (M) in
+  let sched = Scheduler.init () in
+  let thread = Thread.init () in
+  let initial_task () = State_monad.run to_run thread in
+  Scheduler.add_init_task sched initial_task;
+
+  (* Compute the number of workers *)
+  let workers = compute_number_of_workers workers in
+
+  (* Set up the bug stack so it knows if more bugs may arrive *)
+  for _i = 1 to workers do
+    Bugs.new_pledge bug_stack
+  done;
+
+  (* Launch workers *)
+  let domains =
+    Symbolic_choice.solver_to_use := Some solver;
+    let at_worker_value =
+      mk_callback no_stop_at_failure fail_mode bug_stack path_count
+    in
+    let finally () = Bugs.end_pledge bug_stack in
+    let isolated = not no_worker_isolation in
+    Domainpc.spawn_n ~isolated ~n:workers (fun () ->
+      Scheduler.run_worker sched ~at_worker_value ~finally )
   in
+
+  (* Handle the bug stack *)
   let* count =
+    let results =
+      Bugs.read_as_seq bug_stack |> Bug.sort_seq_if deterministic_result_order
+    in
     print_and_count_bugs ~format:model_format ~out_file:model_out_file ~no_value
       ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
       ~results ~with_breadcrumbs
@@ -119,7 +158,7 @@ let handle_result ~exploration_strategy ~workers ~no_worker_isolation
     Log.is_debug_enabled () || landmark_profiling_enabled
   then begin
     (* we only do this in debug mode or when landmarks profiling is on because
-       otherwise it makes performances very bad *)
+         otherwise it makes performances very bad *)
     wait_for_all_domains ()
   end;
 
