@@ -441,7 +441,8 @@ let memarg nsize =
     then Owi.Concrete_i64.sub Owi.Concrete_i64.zero offset
     else offset
   in
-  let align = Owi.Concrete_i64.of_int align in
+  let offset = Some (Int64.to_string (Owi.Concrete_i64.to_int64 offset)) in
+  let align = Some (string_of_int align) in
   { offset; align }
 
 let i32_load env : instr gen =
