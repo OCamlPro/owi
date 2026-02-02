@@ -665,7 +665,7 @@
   }
 
 let v ~instr_counter ~distance_to_unreachable ~depth =
-  <span data-count="5447">{</span> instr_counter; distance_to_unreachable; depth }
+  <span data-count="5439">{</span> instr_counter; distance_to_unreachable; depth }
 
 let dummy = { instr_counter = 0; distance_to_unreachable = None; depth = 0 }
 
@@ -673,7 +673,7 @@ let low = { instr_counter = 100_000; distance_to_unreachable = None; depth = 0 }
 
 (* In the following, we use the convention that a path with a *high priority* (i.e. that should be explored first) corresponds to a path with a high "integer". *)
 
-let compare_with_highest_first l r = <span data-count="28232">I</span>nt.compare r l [@@inline]
+let compare_with_highest_first l r = <span data-count="28044">I</span>nt.compare r l [@@inline]
 
 let max_rarity = 1_000_000
 
@@ -718,7 +718,7 @@ module FIFO : T = struct
   let of_metrics =
     let counter = Atomic.make max_int in
     <span data-count="747">f</span>un { instr_counter = _; distance_to_unreachable = _; depth = _ } -&gt;
-      <span data-count="7039">A</span>tomic.fetch_and_add counter ~<span data-count="7039">-</span>1
+      <span data-count="7015">A</span>tomic.fetch_and_add counter ~<span data-count="7015">-</span>1
 
   let compare = compare_with_highest_first
 
@@ -946,19 +946,19 @@ module Make (P : T) : S = struct
 
   let push v prio q = <span data-count="649">S</span>ynchronizer.write q (prio, v)
 
-  let work_while f q = <span data-count="793">S</span>ynchronizer.work_while f q
+  let work_while f q = <span data-count="794">S</span>ynchronizer.work_while f q
 
   let close = Synchronizer.close
 
   let writter (prio, v) q =
-    <span data-count="7095">l</span>et prio = P.of_metrics prio in
-    <span data-count="7095">l</span>et prio_and_value = (prio, v) in
+    <span data-count="7071">l</span>et prio = P.of_metrics prio in
+    <span data-count="7071">l</span>et prio_and_value = (prio, v) in
     Priority_queue.push prio_and_value q
 
   let make () =
     <span data-count="822">l</span>et q = Priority_queue.empty () in
-    <span data-count="822">l</span>et writter prio_and_value = <span data-count="7095">w</span>ritter prio_and_value q in
-    Synchronizer.init (fun () -&gt; <span data-count="9479">P</span>riority_queue.pop q) writter
+    <span data-count="822">l</span>et writter prio_and_value = <span data-count="7071">w</span>ritter prio_and_value q in
+    Synchronizer.init (fun () -&gt; <span data-count="9448">P</span>riority_queue.pop q) writter
 end
 </code></pre>
       </div>

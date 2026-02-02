@@ -148,12 +148,12 @@ type t = Smtml.Expr.Set.t Union_find.t
 let empty : t = Union_find.empty
 
 let add_one (condition : Smtml.Expr.t) pc : t =
-  <span data-count="7662">m</span>atch Smtml.Expr.get_symbols [ condition ] with
-  | <span data-count="7662">h</span>d :: tl -&gt;
+  <span data-count="7622">m</span>atch Smtml.Expr.get_symbols [ condition ] with
+  | <span data-count="7622">h</span>d :: tl -&gt;
     (* We add the first symbol to the UF *)
     let pc =
       let c = Smtml.Expr.Set.singleton condition in
-      <span data-count="7662">U</span>nion_find.ad<span data-count="7662">d</span> ~merge:Smtml.Expr.Set.union hd c pc
+      <span data-count="7622">U</span>nion_find.ad<span data-count="7622">d</span> ~merge:Smtml.Expr.Set.union hd c pc
     in
     (* We union-ize all symbols together, starting with the first one that has already been added *)
     let pc, _last_sym =
@@ -162,23 +162,23 @@ let add_one (condition : Smtml.Expr.t) pc : t =
           <span data-count="3469">(</span>Union_find.unio<span data-count="3469">n</span> ~merge:Smtml.Expr.Set.union last_sym sym pc, sym) )
         (pc, hd) tl
     in
-    <span data-count="7662">p</span>c
+    <span data-count="7622">p</span>c
   | [] -&gt;
     (* It means smtml did not properly simplified an expression! *)
     assert false
 
 let add (condition : Symbolic_boolean.t) (pc : t) : t =
   (* we start by splitting the condition ((P &amp; Q) &amp; R) into a set {P; Q; R} before adding each of P, Q and R into the UF data structure, this way we maximize the independence of the PC *)
-  <span data-count="7307">l</span>et splitted_condition = Smtml.Typed.Bool.split_conjunctions condition in
-  <span data-count="7307">S</span>mtml.Expr.Set.fold add_one splitted_condition pc
+  <span data-count="7267">l</span>et splitted_condition = Smtml.Typed.Bool.split_conjunctions condition in
+  <span data-count="7267">S</span>mtml.Expr.Set.fold add_one splitted_condition pc
 
 (* Get all sub conditions of the path condition as a list of independent sets of constraints. *)
-let slice pc = <span data-count="249">U</span>nion_find.explode pc
+let slice pc = <span data-count="251">U</span>nion_find.explode pc
 
 (* Return the set of constraints from [pc] that are relevant for [sym]. *)
 let slice_on_symbol (sym : Smtml.Symbol.t) pc : Smtml.Expr.Set.t =
-  <span data-count="6404">m</span>atch Union_find.find_opt sym pc with
-  | <span data-count="6404">S</span>ome s -&gt; s
+  <span data-count="6387">m</span>atch Union_find.find_opt sym pc with
+  | <span data-count="6387">S</span>ome s -&gt; s
   | None -&gt;
     (* if there is a symbol, it should have been added to the union-find structure before, otherwise it means `add` has not been called properly before *)
     assert false

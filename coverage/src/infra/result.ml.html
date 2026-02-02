@@ -811,7 +811,7 @@ type err =
 type 'a t = ('a, err) Prelude.Result.t
 
 let rec err_to_string = function
-  | <span data-count="39">`</span>Alignment_too_large -&gt; "alignment must not be larger than natural"
+  | <span data-count="132">`</span>Alignment_too_large -&gt; "alignment must not be larger than natural"
   | <span data-count="0">`</span>Assert_failure -&gt; "script assert failure"
   | <span data-count="0">`</span>Bad_result -&gt; "bad result"
   | <span data-count="0">`</span>Call_stack_exhausted -&gt; "call stack exhausted"
@@ -847,7 +847,7 @@ let rec err_to_string = function
   | <span data-count="14">`</span>Msg msg -&gt; msg
   | <span data-count="1">`</span>Multiple_start_sections -&gt; "multiple start sections"
   | <span data-count="0">`</span>No_error -&gt; "no error"
-  | <span data-count="624">`</span>Parse_fail msg -&gt; msg
+  | <span data-count="578">`</span>Parse_fail msg -&gt; msg
   | <span data-count="3">`</span>Size_minimum_greater_than_maximum -&gt;
     "size minimum must not be greater than maximum"
   | <span data-count="4">`</span>Start_function -&gt; "start function must have type [] -&gt; []"
@@ -900,7 +900,7 @@ let rec err_to_string = function
   | <span data-count="0">`</span>Memory_leak_use_after_free -&gt; "memory leak use after free"
   | <span data-count="1">`</span>Memory_heap_buffer_overflow -&gt; "memory heap buffer overflow"
   | <span data-count="1">`</span>Double_free -&gt; "double free"
-  | <span data-count="4">`</span>Offset_out_of_range -&gt; "offset out of range"
+  | <span data-count="2">`</span>Offset_out_of_range -&gt; "offset out of range"
   | <span data-count="3">`</span>Table_size -&gt; "table size"
 
 let err_to_exit_code = function

@@ -181,11 +181,11 @@ let map ~f_local ~f_imported = function
     <span data-count="0">I</span>mported v
 
 let monadic_map ~f_local ~f_imported =
-  <span data-count="18650">l</span>et open Syntax in
+  <span data-count="18833">l</span>et open Syntax in
   function
-  | <span data-count="9878">L</span>ocal v -&gt;
-    let+ v = f_loca<span data-count="9878">l</span> v in
-    <span data-count="9842">L</span>ocal v
+  | <span data-count="9970">L</span>ocal v -&gt;
+    let+ v = f_loca<span data-count="9970">l</span> v in
+    <span data-count="9887">L</span>ocal v
   | <span data-count="2758">I</span>mported v -&gt;
     let+ v = monadic_map_importe<span data-count="2758">d</span> f_imported v in
     <span data-count="2753">I</span>mported v

@@ -1600,12 +1600,12 @@ struct
     <span data-count="2241">f</span>un buf -&gt;
       <span data-count="1228">L</span>og.info (fun m -&gt; <span data-count="14">m</span> "parsing      ...");
       <span data-count="1228">l</span>et provider () =
-        <span data-count="752402">l</span>et tok = Text_lexer.token buf in
-        <span data-count="752045">l</span>et start, stop = Sedlexing.lexing_positions buf in
-        <span data-count="752045">(</span>tok, start, stop)
+        <span data-count="752824">l</span>et tok = Text_lexer.token buf in
+        <span data-count="752467">l</span>et start, stop = Sedlexing.lexing_positions buf in
+        <span data-count="752467">(</span>tok, start, stop)
       in
-      try Ok (parse<span data-count="492">r</span> provider) with
-      | <span data-count="299">T</span>ext.Parse_fail msg -&gt; Error (`Parse_fail msg)
+      try Ok (parse<span data-count="538">r</span> provider) with
+      | <span data-count="253">T</span>ext.Parse_fail msg -&gt; Error (`Parse_fail msg)
       | <span data-count="0">T</span>ext_lexer.Empty_annotation_id -&gt; Error `Empty_annotation_id
       | <span data-count="6">T</span>ext_lexer.Empty_identifier -&gt; Error `Empty_identifier
       | <span data-count="2">T</span>ext_lexer.Illegal_escape msg -&gt; Error (`Illegal_escape msg)

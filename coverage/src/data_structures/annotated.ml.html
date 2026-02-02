@@ -149,18 +149,18 @@ type 'a t =
 let raw { raw; _ } = <span data-count="0">r</span>aw
 
 let dummy raw =
-  <span data-count="50481359">{</span> raw
-  ; instr_counter = Atomic.mak<span data-count="50481357">e</span> 0
+  <span data-count="50464716">{</span> raw
+  ; instr_counter = Atomic.mak<span data-count="50464717">e</span> 0
   ; functions_called = S.empty
   ; d_true = ref None
   ; d_false = ref None
   }
 
 let dummies l =
-  <span data-count="18878">L</span>ist.map
+  <span data-count="18924">L</span>ist.map
     (fun raw -&gt;
-      <span data-count="48792">{</span> raw
-      ; instr_counter = Atomic.mak<span data-count="48792">e</span> 0
+      <span data-count="48930">{</span> raw
+      ; instr_counter = Atomic.mak<span data-count="48930">e</span> 0
       ; functions_called = S.empty
       ; d_true = ref None
       ; d_false = ref None
@@ -168,9 +168,9 @@ let dummies l =
     l
 
 let dummy_deep raw =
-  <span data-count="16614">l</span>et raw = dummies raw in
-  <span data-count="16614">{</span> raw
-  ; instr_counter = Atomic.mak<span data-count="16614">e</span> 0
+  <span data-count="16660">l</span>et raw = dummies raw in
+  <span data-count="16660">{</span> raw
+  ; instr_counter = Atomic.mak<span data-count="16660">e</span> 0
   ; functions_called = S.empty
   ; d_true = ref None
   ; d_false = ref None

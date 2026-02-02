@@ -37,7 +37,7 @@
             const path_to_root = "";
             const default_light_theme = "frappe";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-26ab7e47.js";
+            window.path_to_searchindex_js = "searchindex-8d6285c8.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-66d4629a.js"></script>
@@ -1495,7 +1495,7 @@ i32.lt_s
     i32.const 4
     local.get $n
     i32.mul
-    i32.load align=1
+    i32.load
     i32.eqz
     (if
       (then
@@ -1511,13 +1511,13 @@ i32.lt_s
         i32.sub
         call $f
         i32.add
-        i32.store align=1
+        i32.store
       )
     )
     local.get $n
     i32.const 4
     i32.mul
-    i32.load align=1
+    i32.load
     return
   )
 )

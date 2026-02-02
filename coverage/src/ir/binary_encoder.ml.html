@@ -2035,7 +2035,7 @@ let rec write_u64 buf i =
   end
 
 let write_u32 buf i =
-  <span data-count="520">w</span>rite_u64 buf (Int64.logan<span data-count="520">d</span> (Int64.of_int3<span data-count="520">2</span> i) 0xffffffffL)
+  <span data-count="534">w</span>rite_u64 buf (Int64.logan<span data-count="534">d</span> (Int64.of_int3<span data-count="534">2</span> i) 0xffffffffL)
 
 let write_u32_of_int buf i =
   <span data-count="515">l</span>et i = Int32.of_int i in
@@ -2183,11 +2183,11 @@ let write_table_limits buf (limits : Binary.Table.Type.limits) : unit =
     <span data-count="0">w</span>rite_u64 buf min;
     <span data-count="0">w</span>rite_u64 buf max
 
-let write_memarg buf idx ({ offset; align } : Text.memarg) =
-  <span data-count="14">i</span>f idx = 0 then <span data-count="14">w</span>rite_u6<span data-count="14">4</span> buf align
+let write_memarg buf idx ({ offset; align } : memarg) =
+  <span data-count="14">i</span>f idx = 0 then <span data-count="14">w</span>rite_u3<span data-count="14">2</span> buf align
   else <span data-count="0">(</span>
     (* Set the 6th bit if the id not 0 *)
-    write_u64 buf (Int64.logo<span data-count="0">r</span> align 0x40L);
+    write_u32 buf (Int32.logo<span data-count="0">r</span> align 0x40l);
     <span data-count="0">w</span>rite_indic<span data-count="0">e</span> buf idx );
   write_u64 buf offset
 
