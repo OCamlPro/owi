@@ -293,13 +293,13 @@ let select_i32 (i : Symbolic_i32.t) : int32 t =
     in
     generator ()
 
-let trap t =
+let bug kind =
   let* thread in
-  let solver = solver () in
-  let path_condition = thread.pc in
-  let stats = thread.bench_stats in
   let* model =
+    let stats = thread.bench_stats in
     Benchmark.handle_time_span stats.solver_final_model_time @@ fun () ->
+    let solver = solver () in
+    let path_condition = thread.pc in
     match Solver.model_of_path_condition solver ~path_condition with
     | Some model -> return model
     | None ->
@@ -308,7 +308,9 @@ let trap t =
              if solver was interrupted then stop else assert false *)
       stop
   in
-  State_monad.return (Error { Bug.kind = `Trap t; model; thread })
+  State_monad.return (Error { Bug.kind; model; thread })
+
+let trap t = bug (`Trap t)
 
 let assertion (c : Symbolic_boolean.t) =
   (* TODO: better prio here ? *)
@@ -316,23 +318,7 @@ let assertion (c : Symbolic_boolean.t) =
     select_inner c ~with_breadcrumbs:false ~instr_counter_true:None
       ~instr_counter_false:None
   in
-  if assertion_true then return ()
-  else
-    let solver = solver () in
-    let* thread in
-    let path_condition = thread.pc in
-    let stats = thread.bench_stats in
-    let* model =
-      Benchmark.handle_time_span stats.solver_final_model_time @@ fun () ->
-      match Solver.model_of_path_condition solver ~path_condition with
-      | Some model -> return model
-      | None ->
-        (* It can happen when the solver is interrupted *)
-        (* TODO: once https://github.com/formalsec/smtml/pull/479 is merged
-                 if solver was interrupted then stop else assert false *)
-        stop
-    in
-    State_monad.return (Error { Bug.kind = `Assertion c; model; thread })
+  if assertion_true then return () else bug (`Assertion c)
 
 let ite (c : Symbolic_boolean.t) ~(if_true : Symbolic_value.t)
   ~(if_false : Symbolic_value.t) : Symbolic_value.t t =
