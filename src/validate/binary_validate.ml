@@ -461,7 +461,7 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
     (env, stack_e1)
   | I_load8 (id, nn, _, memarg) ->
     let* is_i64 = check_mem env.modul id in
-    let* _ = check_memarg ~is_i64 memarg 1l in
+    let* () = check_memarg ~is_i64 memarg 1l in
     let* stack = Stack.pop env.modul [ i32 ] stack in
     let+ stack = Stack.push [ itype nn ] stack in
     (env, stack)
