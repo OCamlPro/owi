@@ -318,10 +318,10 @@ let cmd ~deterministic_result_order ~fail_mode ~exploration_strategy ~files
 
   let compile ~unsafe file = Compile.File.until_validate ~unsafe file in
 
-  Log.info (fun m -> m "Compiling %a" Fpath.pp file1);
+  Log.info (fun m -> m "compiling %a" Fpath.pp file1);
   let* module1 = compile ~unsafe file1 in
 
-  Log.info (fun m -> m "Compiling %a" Fpath.pp file2);
+  Log.info (fun m -> m "compiling %a" Fpath.pp file2);
   let* module2 = compile ~unsafe file2 in
 
   let funcexports1 =

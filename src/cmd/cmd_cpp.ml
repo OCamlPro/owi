@@ -39,7 +39,7 @@ let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file
           Fmt.error_msg
             "clang++ failed: run with -vv if the error is not displayed above" )
     in
-    Log.bench_fn "Compiling time" (fun () -> compile_files files)
+    Log.bench_fn "compiling time" (fun () -> compile_files files)
   in
 
   let* llc_bin = OS.Cmd.resolve @@ Cmd.v "llc" in

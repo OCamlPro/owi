@@ -46,7 +46,7 @@ let compile ~workspace ~entry_point ~includes ~out_file (files : Fpath.t list) :
   in
 
   let+ () =
-    Log.bench_fn "Compiling time" @@ fun () ->
+    Log.bench_fn "compiling time" @@ fun () ->
     match OS.Cmd.run ~err zig with
     | Ok _ as v -> v
     | Error (`Msg e) ->
