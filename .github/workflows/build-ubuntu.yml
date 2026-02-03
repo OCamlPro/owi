@@ -25,6 +25,7 @@ jobs:
             git checkout ${{ github.ref_name }}
           fi
 
+          sudo apt update -yqq
           sudo apt install opam -yqq
 
           # Prepare OCaml stuff
