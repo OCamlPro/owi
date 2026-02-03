@@ -105,11 +105,11 @@
 
 type 'a t = 'a Result.t
 
-let[@inline] return x = <span data-count="165967885">O</span>k x
+let[@inline] return x = <span data-count="165964813">O</span>k x
 
-let[@inline] bind x f = <span data-count="175501020">R</span>esult.bind x f
+let[@inline] bind x f = <span data-count="175497948">R</span>esult.bind x f
 
-let[@inline] ( let* ) x f = <span data-count="175501020">b</span>ind x f
+let[@inline] ( let* ) x f = <span data-count="175497948">b</span>ind x f
 
 let[@inline] map v f = <span data-count="6345046">R</span>esult.map f v
 
@@ -125,7 +125,7 @@ let[@inline] run m = <span data-count="0">m</span>
 
 let[@inline] get_pc () = <span data-count="0">r</span>eturn Smtml.Expr.Set.empty
 
-let[@inline] assume v _instr_counter =
+let[@inline] assume v =
   <span data-count="0">i</span>f v then <span data-count="0">O</span>k ()
   else
     (* TODO: there could be a dedicated error here? *)

@@ -1309,13 +1309,13 @@ let cmd ~deterministic_result_order ~fail_mode ~exploration_strategy ~files
   <span data-count="3">l</span>ist_fold_left
     (fun () (export_name, export_type) -&gt;
       <span data-count="3">L</span>og.info (fun m -&gt; <span data-count="1">m</span> "checking export %s" export_name);
-      <span data-count="3">l</span>et* result = check_is<span data-count="3">o</span> ~unsafe export_name export_type module1 module2 in
+      <span data-count="3">l</span>et* to_run = check_is<span data-count="3">o</span> ~unsafe export_name export_type module1 module2 in
       <span data-count="3">l</span>et run_time = if Log.is_bench_enabled () then <span data-count="0">S</span>ome 0. else <span data-count="3">N</span>one in
 
-      Symbolic_driver.handle_result ~exploration_strategy ~fail_mode ~workers
+      Symbolic_driver.run ~exploration_strategy ~fail_mode ~workers
         ~no_worker_isolation ~solver ~deterministic_result_order ~model_format
         ~no_value ~no_assert_failure_expression_printing ~workspace
-        ~no_stop_at_failure ~model_out_file ~with_breadcrumbs ~run_time result )
+        ~no_stop_at_failure ~model_out_file ~with_breadcrumbs ~run_time to_run )
     () common_exports
 </code></pre>
       </div>

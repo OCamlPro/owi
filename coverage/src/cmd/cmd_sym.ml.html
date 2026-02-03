@@ -285,12 +285,12 @@ let cmd ~parameters ~source_file =
     | <span data-count="196">N</span>one -&gt; OS.Dir.tm<span data-count="196">p</span> "owi_sym_%s"
   in
 
-  <span data-count="410">l</span>et* result, run_time = run_file ~parameters ~source_file in
+  <span data-count="410">l</span>et* to_run, run_time = run_file ~parameters ~source_file in
 
-  <span data-count="408">S</span>ymbolic_driver.handle_result ~exploration_strategy ~fail_mode ~workers
+  <span data-count="408">S</span>ymbolic_driver.run ~exploration_strategy ~fail_mode ~workers
     ~no_worker_isolation ~solver ~deterministic_result_order ~model_format
     ~no_value ~no_assert_failure_expression_printing ~workspace
-    ~no_stop_at_failure ~model_out_file ~with_breadcrumbs ~run_time result
+    ~no_stop_at_failure ~model_out_file ~with_breadcrumbs ~run_time to_run
 </code></pre>
       </div>
     </div>

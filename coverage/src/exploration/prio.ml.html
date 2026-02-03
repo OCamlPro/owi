@@ -665,7 +665,7 @@
   }
 
 let v ~instr_counter ~distance_to_unreachable ~depth =
-  <span data-count="5439">{</span> instr_counter; distance_to_unreachable; depth }
+  <span data-count="5891">{</span> instr_counter; distance_to_unreachable; depth }
 
 let dummy = { instr_counter = 0; distance_to_unreachable = None; depth = 0 }
 
@@ -673,7 +673,7 @@ let low = { instr_counter = 100_000; distance_to_unreachable = None; depth = 0 }
 
 (* In the following, we use the convention that a path with a *high priority* (i.e. that should be explored first) corresponds to a path with a high "integer". *)
 
-let compare_with_highest_first l r = <span data-count="28044">I</span>nt.compare r l [@@inline]
+let compare_with_highest_first l r = <span data-count="28264">I</span>nt.compare r l [@@inline]
 
 let max_rarity = 1_000_000
 
@@ -686,21 +686,21 @@ let max_depth = if use_logarithmic_depth then <span data-count="747">2</span>0 e
 let max_loop_penalty = 10_000
 
 let rarity_of_metrics { instr_counter; _ } =
-  <span data-count="28">l</span>et instr_counter = min instr_counter max_rarity in
-  <span data-count="28">m</span>ax_int - instr_counter
+  <span data-count="20">l</span>et instr_counter = min instr_counter max_rarity in
+  <span data-count="20">m</span>ax_int - instr_counter
 
 let depth_of_metrics { depth; _ } =
-  <span data-count="14">l</span>et depth =
+  <span data-count="10">l</span>et depth =
     if use_logarithmic_depth then
-      <span data-count="14">l</span>et depth = Float.of_int depth in
-      <span data-count="14">l</span>et depth = depth_scale *. lo<span data-count="14">g</span> (depth +. 1.) in
-      Int.of_floa<span data-count="14">t</span> depth
+      <span data-count="10">l</span>et depth = Float.of_int depth in
+      <span data-count="10">l</span>et depth = depth_scale *. lo<span data-count="10">g</span> (depth +. 1.) in
+      Int.of_floa<span data-count="10">t</span> depth
     else <span data-count="0">d</span>epth
   in
   min depth max_depth
 
 let loop_penalty_of_metrics { instr_counter; _ } =
-  <span data-count="14">~</span>-(mi<span data-count="14">n</span> (instr_counter * instr_counter) max_loop_penalty)
+  <span data-count="10">~</span>-(mi<span data-count="10">n</span> (instr_counter * instr_counter) max_loop_penalty)
 
 module type T = sig
   type t
@@ -718,7 +718,7 @@ module FIFO : T = struct
   let of_metrics =
     let counter = Atomic.make max_int in
     <span data-count="747">f</span>un { instr_counter = _; distance_to_unreachable = _; depth = _ } -&gt;
-      <span data-count="7015">A</span>tomic.fetch_and_add counter ~<span data-count="7015">-</span>1
+      <span data-count="6488">A</span>tomic.fetch_and_add counter ~<span data-count="6488">-</span>1
 
   let compare = compare_with_highest_first
 
@@ -731,7 +731,7 @@ module LIFO : T = struct
   let of_metrics =
     let counter = Atomic.make 0 in
     <span data-count="747">f</span>un { instr_counter = _; distance_to_unreachable = _; depth = _ } -&gt;
-      <span data-count="7">A</span>tomic.fetch_and_add counter 1
+      <span data-count="5">A</span>tomic.fetch_and_add counter 1
 
   let compare = compare_with_highest_first
 
@@ -742,7 +742,7 @@ module Random_prio : T = struct
   type t = int
 
   let of_metrics { instr_counter = _; distance_to_unreachable = _; depth = _ } =
-    <span data-count="7">R</span>andom.int 10_000
+    <span data-count="5">R</span>andom.int 10_000
 
   let compare = compare_with_highest_first
 
@@ -753,8 +753,8 @@ module Random_unseen_then_random : T = struct
   type t = int
 
   let of_metrics { instr_counter; distance_to_unreachable = _; depth = _ } =
-    <span data-count="7">m</span>atch instr_counter with
-    | <span data-count="7">0</span> -&gt; max_int - Random.in<span data-count="7">t</span> 10_000
+    <span data-count="5">m</span>atch instr_counter with
+    | <span data-count="5">0</span> -&gt; max_int - Random.in<span data-count="5">t</span> 10_000
     | <span data-count="0">_</span> -&gt; Random.int 10_000
 
   let compare = compare_with_highest_first
@@ -765,7 +765,7 @@ end
 module Rarity : T = struct
   type t = int
 
-  let of_metrics s = <span data-count="7">r</span>arity_of_metrics s
+  let of_metrics s = <span data-count="5">r</span>arity_of_metrics s
 
   let compare = compare_with_highest_first
 
@@ -775,7 +775,7 @@ end
 module Hot_path_penalty : T = struct
   type t = int
 
-  let of_metrics s = <span data-count="7">l</span>oop_penalty_of_metrics s
+  let of_metrics s = <span data-count="5">l</span>oop_penalty_of_metrics s
 
   let compare = compare_with_highest_first
 
@@ -791,9 +791,9 @@ module Rarity_aging : T = struct
   let age_counter = Atomic.mak<span data-count="747">e</span> 0
 
   let of_metrics s =
-    <span data-count="7">l</span>et rarity = rarity_of_metrics s in
-    <span data-count="7">l</span>et age = Atomic.fetch_and_add age_counter ~<span data-count="7">-</span>1 in
-    <span data-count="7">{</span> rarity; age }
+    <span data-count="5">l</span>et rarity = rarity_of_metrics s in
+    <span data-count="5">l</span>et age = Atomic.fetch_and_add age_counter ~<span data-count="5">-</span>1 in
+    <span data-count="5">{</span> rarity; age }
 
   let compare p1 p2 =
     <span data-count="2">l</span>et rarity = compare_with_highest_first p1.rarity p2.rarity in
@@ -812,11 +812,11 @@ module Rarity_depth_aging : T = struct
   let age_counter = Atomic.mak<span data-count="747">e</span> 0
 
   let of_metrics s =
-    <span data-count="7">l</span>et rarity = rarity_of_metrics s in
-    <span data-count="7">l</span>et depth = depth_of_metrics s in
-    <span data-count="7">l</span>et age = Atomic.fetch_and_add age_counter ~<span data-count="7">-</span>1 in
+    <span data-count="5">l</span>et rarity = rarity_of_metrics s in
+    <span data-count="5">l</span>et depth = depth_of_metrics s in
+    <span data-count="5">l</span>et age = Atomic.fetch_and_add age_counter ~<span data-count="5">-</span>1 in
 
-    <span data-count="7">{</span> rarity; depth; age }
+    <span data-count="5">{</span> rarity; depth; age }
 
   let compare p1 p2 =
     <span data-count="2">l</span>et rarity = compare_with_highest_first p1.rarity p2.rarity in
@@ -839,12 +839,12 @@ module Rarity_depth_loop_aging : T = struct
   let age_counter = Atomic.mak<span data-count="747">e</span> 0
 
   let of_metrics s =
-    <span data-count="7">l</span>et rarity = rarity_of_metrics s in
-    <span data-count="7">l</span>et depth = depth_of_metrics s in
-    <span data-count="7">l</span>et loop_penalty = loop_penalty_of_metrics s in
-    <span data-count="7">l</span>et age = Atomic.fetch_and_add age_counter ~<span data-count="7">-</span>1 in
+    <span data-count="5">l</span>et rarity = rarity_of_metrics s in
+    <span data-count="5">l</span>et depth = depth_of_metrics s in
+    <span data-count="5">l</span>et loop_penalty = loop_penalty_of_metrics s in
+    <span data-count="5">l</span>et age = Atomic.fetch_and_add age_counter ~<span data-count="5">-</span>1 in
 
-    <span data-count="7">{</span> rarity; depth; loop_penalty; age }
+    <span data-count="5">{</span> rarity; depth; loop_penalty; age }
 
   let compare p1 p2 =
     <span data-count="2">l</span>et rarity = compare_with_highest_first p1.rarity p2.rarity in
@@ -951,14 +951,14 @@ module Make (P : T) : S = struct
   let close = Synchronizer.close
 
   let writter (prio, v) q =
-    <span data-count="7071">l</span>et prio = P.of_metrics prio in
-    <span data-count="7071">l</span>et prio_and_value = (prio, v) in
+    <span data-count="6528">l</span>et prio = P.of_metrics prio in
+    <span data-count="6528">l</span>et prio_and_value = (prio, v) in
     Priority_queue.push prio_and_value q
 
   let make () =
     <span data-count="822">l</span>et q = Priority_queue.empty () in
-    <span data-count="822">l</span>et writter prio_and_value = <span data-count="7071">w</span>ritter prio_and_value q in
-    Synchronizer.init (fun () -&gt; <span data-count="9448">P</span>riority_queue.pop q) writter
+    <span data-count="822">l</span>et writter prio_and_value = <span data-count="6528">w</span>ritter prio_and_value q in
+    Synchronizer.init (fun () -&gt; <span data-count="8712">P</span>riority_queue.pop q) writter
 end
 </code></pre>
       </div>
