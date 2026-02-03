@@ -284,7 +284,7 @@ extern "C" void check(int x, int y) {
 ```
 {{#endtab }}
 {{#tab name="Go" }}
-<!-- $MDX file=check.go -->
+<!-- $MDX file=mean.go -->
 ```go
 package main
 
@@ -426,7 +426,7 @@ owi: [ERROR] Reached problem!
 {{#endtab }}
 {{#tab name="Go" }}
 ```sh
-$ owi tinygo ./check.go --entry-point=check --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
+$ owi tinygo ./mean.go --entry-point=check --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
 owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32 -2147483648
