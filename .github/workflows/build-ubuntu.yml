@@ -44,7 +44,7 @@ jobs:
           tar xf zig-*.tar.xz -C zig --strip-components 1
           sudo mv zig/* /usr/local/bin/
 
-          # intally tinygo
+          # install tinygo
           wget https://github.com/tinygo-org/tinygo/releases/download/v0.40.1/tinygo_0.40.1_amd64.deb
           sudo dpkg -i tinygo_0.40.1_amd64.deb
 
