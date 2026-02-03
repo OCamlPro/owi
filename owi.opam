@@ -75,7 +75,7 @@ depexts: [
   ["mdbook"] { with-dev-setup }
   ["llvm" "lld"]  {os-family = "debian"}
   ["rust-llvm" "libstd-rust-dev-wasm32" "rustc"] {os-distribution = "debian"}
-  ["zig"] {os-distribution = "fedora"}
+  ["tinygo" "zig"] {os-distribution = "fedora"}
 ]
 post-messages: [
   "Thank you for installing Owi!"
