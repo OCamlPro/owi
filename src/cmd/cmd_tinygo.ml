@@ -32,7 +32,7 @@ let compile ~workspace ~out_file (files : Fpath.t list) : Fpath.t Result.t =
   in
 
   let+ () =
-    Log.bench_fn "Compiling time" @@ fun () ->
+    Log.bench_fn "compiling time" @@ fun () ->
     match OS.Cmd.run ~err tinygo with
     | Ok _ as v -> v
     | Error (`Msg e) ->

@@ -82,6 +82,7 @@ pkgs.mkShell {
     pkgs.llvmPackages.clang-unwrapped
     # lld + llc isn't included in unwrapped, so we pull it in here
     pkgs.llvmPackages.bintools-unwrapped
+    pkgs.tinygo
     pkgs.rustc
     pkgs.zig
     pkgs.makeWrapper
