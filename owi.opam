@@ -73,7 +73,7 @@ dev-repo: "git+https://github.com/ocamlpro/owi.git"
 available: (arch = "x86_32" | arch = "x86_64" | arch = "arm64") & os != "win32" & os != "macos" & os != "homebrew"
 depexts: [
   ["mdbook"] { with-dev-setup }
-  ["llvm" "lld"]  {os-family = "debian"}
+  ["golang" "llvm" "lld"]  {os-family = "debian"}
   ["rust-llvm" "libstd-rust-dev-wasm32" "rustc"] {os-distribution = "debian"}
   ["tinygo" "zig"] {os-distribution = "fedora"}
 ]

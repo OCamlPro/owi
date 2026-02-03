@@ -44,6 +44,10 @@ jobs:
           tar xf zig-*.tar.xz -C zig --strip-components 1
           mv zig/* /usr/local/bin/
 
+          # intally tinygo
+          wget https://github.com/tinygo-org/tinygo/releases/download/v0.40.1/tinygo_0.40.1_amd64.deb
+          sudo dpkg -i tinygo_0.40.1_amd64.deb
+
           # Install system and opam-repo dependencies
           opam install . --depext-only --with-test
           opam install . --deps-only --with-test
