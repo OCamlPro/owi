@@ -125,7 +125,7 @@ let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file
   in
 
   let+ () =
-    Log.bench_fn "Compiling time" @@ fun () ->
+    Log.bench_fn "compiling time" @@ fun () ->
     match OS.Cmd.run ~err clang with
     | Ok _ as v -> v
     | Error (`Msg msg) ->
