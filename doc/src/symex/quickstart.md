@@ -35,6 +35,26 @@ extern "C" int f(int x) {
 }
 ```
 {{#endtab }}
+{{#tab name="Go" }}
+<!-- $MDX file=f.go -->
+```go
+package main
+
+//go:export f
+func f(x int32) int32 {
+	arr := [4]int32{1, 2, 0, 4}
+
+	if x >= 0 && x < 4 {
+		return 10 / arr[x]
+	}
+
+	return -1
+}
+
+// main is required by the tinygo compiler, even if it isn't used.
+func main() {}
+```
+{{#endtab }}
 {{#tab name="Rust" }}
 <!-- $MDX file=f.rs -->
 ```rs
@@ -123,6 +143,17 @@ owi: [ERROR] Reached problem!
 ```sh
 $ owi c++ ./f.cpp --entry-point=f --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
 owi: [ERROR] Trap: integer divide by zero
+model {
+  symbol symbol_0 i32 2
+}
+owi: [ERROR] Reached problem!
+[13]
+```
+{{#endtab }}
+{{#tab name="Go" }}
+```sh
+$ owi tinygo ./f.go --entry-point=f --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
+owi: [ERROR] Trap: unreachable
 model {
   symbol symbol_0 i32 2
 }
@@ -252,6 +283,37 @@ extern "C" void check(int x, int y) {
 }
 ```
 {{#endtab }}
+{{#tab name="Go" }}
+<!-- $MDX file=check.go -->
+```go
+package main
+
+//go:wasm-module owi
+//export i32_symbol
+func i32_symbol() int32
+
+//go:wasm-module owi
+//export assert
+func owi_assert(bool)
+
+
+func mean1(x, y int32) int32 {
+	return (x & y) + ((x ^ y) >> 1)
+}
+
+func mean2(x, y int32) int32 {
+	return (x + y) / 2
+}
+
+//go:export check
+func check(x, y int32) {
+	owi_assert(mean1(x, y) == mean2(x, y))
+}
+
+// main is required by the tinygo compiler, even if it isn't used.
+func main() {}
+```
+{{#endtab }}
 {{#tab name="Rust" }}
 <!-- $MDX file=mean.rs -->
 ```rs
@@ -357,6 +419,18 @@ owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32 -1570748002
   symbol symbol_1 i32 -1425538774
+}
+owi: [ERROR] Reached problem!
+[13]
+```
+{{#endtab }}
+{{#tab name="Go" }}
+```sh
+$ owi tinygo ./check.go --entry-point=check --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
+owi: [ERROR] Assert failure
+model {
+  symbol symbol_0 i32 -2147483648
+  symbol symbol_1 i32 -2147483646
 }
 owi: [ERROR] Reached problem!
 [13]
