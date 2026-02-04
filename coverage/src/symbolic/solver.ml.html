@@ -305,38 +305,38 @@ let fresh solver_ty () =
   let module Mapping = Mapping.Fresh.Make () in
   let module Batch = Smtml.Solver.Batch (Mapping) in
   let solver_inst = Batch.create ~logic:QF_BVFP () in
-  <span data-count="616">l</span>et solver = S ((module Batch), solver_inst) in
+  <span data-count="619">l</span>et solver = S ((module Batch), solver_inst) in
   if Log.is_bench_enabled () then <span data-count="2">a</span>dd_solve<span data-count="2">r</span> solver;
-  <span data-count="616">s</span>olver
+  <span data-count="619">s</span>olver
 
 let cache = Smtml.Cache.Strong.creat<span data-count="758">e</span> 64
 
 let cache_mutex = Mutex.creat<span data-count="758">e</span> ()
 
 let check (S (solver_module, s)) pc =
-  <span data-count="5486">l</span>et cached =
-    Mutex.protect cache_mutex (fun () -&gt; <span data-count="5488">S</span>mtml.Cache.Strong.find_opt cache pc)
+  <span data-count="5432">l</span>et cached =
+    Mutex.protect cache_mutex (fun () -&gt; <span data-count="5432">S</span>mtml.Cache.Strong.find_opt cache pc)
   in
-  <span data-count="5488">m</span>atch cached with
-  | <span data-count="1087">S</span>ome sat -&gt; sat
-  | <span data-count="4401">N</span>one -&gt;
+  <span data-count="5432">m</span>atch cached with
+  | <span data-count="1048">S</span>ome sat -&gt; sat
+  | <span data-count="4384">N</span>one -&gt;
     let module Solver = (val solver_module) in
     let sat = Solver.check_set s pc in
-    <span data-count="4395">M</span>utex.protect cache_mutex (fun () -&gt;
-      <span data-count="4395">S</span>mtml.Cache.Strong.replace cache pc sat );
-    <span data-count="4395">s</span>at
+    <span data-count="4379">M</span>utex.protect cache_mutex (fun () -&gt;
+      <span data-count="4379">S</span>mtml.Cache.Strong.replace cache pc sat );
+    <span data-count="4379">s</span>at
 
 let model_of_path_condition (S (solver_module, s)) ~path_condition :
   Smtml.Model.t Option.t =
-  <span data-count="254">l</span>et exception Unknown in
+  <span data-count="253">l</span>et exception Unknown in
   let module Solver = (val solver_module) in
   try
     let sub_conditions = Symbolic_path_condition.slice path_condition in
-    <span data-count="254">l</span>et models =
+    <span data-count="253">l</span>et models =
       List.map
         (fun pc -&gt;
-          <span data-count="276">m</span>atch Solver.get_sat_model s pc with
-          | <span data-count="275">`</span>Model model -&gt; model
+          <span data-count="275">m</span>atch Solver.get_sat_model s pc with
+          | <span data-count="274">`</span>Model model -&gt; model
           | <span data-count="0">`</span>Unknown -&gt;
             (* it can happen if the solver is interrupted, otherwise it is an error, we raise, so the function can return an option that will be handled by the called *)
             raise Unknown
@@ -346,15 +346,15 @@ let model_of_path_condition (S (solver_module, s)) ~path_condition :
         sub_conditions
     in
     (* We build the new complete model by merging all "sub models" *)
-    <span data-count="253">l</span>et model = Hashtbl.create 64 in
-    <span data-count="253">L</span>ist.iter (Hashtbl.ite<span data-count="253">r</span> (Hashtbl.ad<span data-count="253">d</span> model)) models;
-    <span data-count="253">S</span>ome model
+    <span data-count="252">l</span>et model = Hashtbl.create 64 in
+    <span data-count="252">L</span>ist.iter (Hashtbl.ite<span data-count="252">r</span> (Hashtbl.ad<span data-count="252">d</span> model)) models;
+    <span data-count="252">S</span>ome model
   with <span data-count="0">U</span>nknown -&gt; None
 
 let model_of_set (S (solver_module, s)) ~symbol_scopes ~set =
-  <span data-count="1306">l</span>et module Solver = (val solver_module) in
+  <span data-count="764">l</span>et module Solver = (val solver_module) in
   let symbols = Symbol_scope.only_symbols symbol_scopes in
-  <span data-count="1306">S</span>olver.get_sat_model ~symbols s set
+  <span data-count="764">S</span>olver.get_sat_model ~symbols s set
 
 let empty_stats = Smtml.Statistics.Map.empty
 

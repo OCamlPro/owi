@@ -77,7 +77,7 @@ let is_trap { kind; _ } =
   <span data-count="2">m</span>atch kind with <span data-count="1">`</span>Assertion _ -&gt; false | <span data-count="1">`</span>Trap _ -&gt; true
 
 let is_assertion { kind; _ } =
-  <span data-count="6">m</span>atch kind with <span data-count="3">`</span>Assertion _ -&gt; true | <span data-count="3">`</span>Trap _ -&gt; false
+  <span data-count="5">m</span>atch kind with <span data-count="3">`</span>Assertion _ -&gt; true | <span data-count="2">`</span>Trap _ -&gt; false
 
 let compare_breadcrumbs bug1 bug2 =
   <span data-count="14">l</span>et breadcrumbs1 = List.rev @@ bug1.thread.breadcrumbs in

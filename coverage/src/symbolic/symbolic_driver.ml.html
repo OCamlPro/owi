@@ -410,19 +410,19 @@ let print_and_count_bugs ~format ~out_file ~no_value
 
 let mk_callback no_stop_at_failure fail_mode res_stack path_count =
  fun ~close_work_queue v -&gt;
-  <span data-count="1977">A</span>tomic.incr path_count;
-  <span data-count="1977">m</span>atch v with
-  | <span data-count="1723">O</span>k (), _thread -&gt; ()
-  | <span data-count="254">E</span>rror bug, _thread -&gt;
+  <span data-count="1452">A</span>tomic.incr path_count;
+  <span data-count="1452">m</span>atch v with
+  | <span data-count="1200">O</span>k (), _thread -&gt; ()
+  | <span data-count="252">E</span>rror bug, _thread -&gt;
     let should_be_added =
       match fail_mode with
-      | <span data-count="246">S</span>ymbolic_parameters.Both -&gt; true
-      | <span data-count="6">A</span>ssertion_only -&gt; Bug.is_assertio<span data-count="6">n</span> bug
+      | <span data-count="245">S</span>ymbolic_parameters.Both -&gt; true
+      | <span data-count="5">A</span>ssertion_only -&gt; Bug.is_assertio<span data-count="5">n</span> bug
       | <span data-count="2">T</span>rap_only -&gt; Bug.is_tra<span data-count="2">p</span> bug
     in
-    if should_be_added then <span data-count="250">b</span>egin
+    if should_be_added then <span data-count="249">b</span>egin
       Bugs.push bug Prio.dummy res_stack;
-      <span data-count="247">i</span>f not no_stop_at_failure then <span data-count="63">b</span>egin
+      <span data-count="245">i</span>f not no_stop_at_failure then <span data-count="61">b</span>egin
         close_work_queue ()
       end
     end
@@ -477,7 +477,7 @@ let run ~exploration_strategy ~workers ~no_worker_isolation ~no_stop_at_failure
     let at_worker_value =
       mk_callback no_stop_at_failure fail_mode bug_stack path_count
     in
-    <span data-count="422">l</span>et finally () = <span data-count="803">B</span>ugs.end_pledge bug_stack in
+    <span data-count="422">l</span>et finally () = <span data-count="799">B</span>ugs.end_pledge bug_stack in
     let isolated = not no_worker_isolation in
     Domainpc.spawn_<span data-count="422">n</span> ~isolated ~n:workers (fun () -&gt;
       <span data-count="816">S</span>cheduler.run_worker sched ~at_worker_value ~finally )
