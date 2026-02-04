@@ -1,10 +1,6 @@
 package main
 
 //go:wasm-module owi
-//export i32_symbol
-func i32_symbol() int32
-
-//go:wasm-module owi
 //export assert
 func owi_assert(bool)
 
