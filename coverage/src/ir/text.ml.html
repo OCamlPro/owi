@@ -2061,8 +2061,8 @@ let pp_num_type fmt = function
   | <span data-count="0">V</span>128 -&gt; pf fmt "v128"
 
 let num_type_eq t1 t2 =
-  <span data-count="1644063">m</span>atch (t1, t2) with
-  | <span data-count="1496597">I</span>32, I32 | <span data-count="47022">I</span>64, I64 | <span data-count="46656">F</span>32, F32 | <span data-count="47274">F</span>64, F64 | <span data-count="560">V</span>128, V128 -&gt; true
+  <span data-count="1644418">m</span>atch (t1, t2) with
+  | <span data-count="1496928">I</span>32, I32 | <span data-count="47028">I</span>64, I64 | <span data-count="46662">F</span>32, F32 | <span data-count="47280">F</span>64, F64 | <span data-count="566">V</span>128, V128 -&gt; true
   | <span data-count="5954">(</span><span data-count="1986">I</span>32 | <span data-count="1225">I</span>64 | <span data-count="841">F</span>32 | <span data-count="1902">F</span>64 | <span data-count="0">V</span>128), _ -&gt; false
 
 let compare_num_type t1 t2 =
@@ -2351,9 +2351,9 @@ let is_subtype_ref_type t1 t2 =
   | <span data-count="0">_</span> -&gt; false
 
 let compare_nullable n1 n2 =
-  <span data-count="360">m</span>atch (n1, n2) with
+  <span data-count="363">m</span>atch (n1, n2) with
   | <span data-count="175">N</span>ull, Null | <span data-count="6">N</span>o_null, No_null -&gt; 0
-  | <span data-count="176">N</span>ull, No_null -&gt; -1
+  | <span data-count="179">N</span>ull, No_null -&gt; -1
   | <span data-count="3">N</span>o_null, Null -&gt; 1
 
 let compare_ref_type t1 t2 =
@@ -2372,8 +2372,8 @@ let pp_val_type fmt = function
   | <span data-count="0">R</span>ef_type t -&gt; pp_ref_type fmt t
 
 let val_type_eq t1 t2 =
-  <span data-count="25753">m</span>atch (t1, t2) with
-  | <span data-count="25297">N</span>um_type t1, Num_type t2 -&gt; num_type_eq t1 t2
+  <span data-count="25756">m</span>atch (t1, t2) with
+  | <span data-count="25300">N</span>um_type t1, Num_type t2 -&gt; num_type_eq t1 t2
   | <span data-count="226">R</span>ef_type t1, Ref_type t2 -&gt; ref_type_eq t1 t2
   | <span data-count="230">_</span>, _ -&gt; false
 
@@ -2394,7 +2394,7 @@ type nonrec param = string option * val_type
 
 let pp_param fmt (id, vt) = <span data-count="246">p</span>f fmt "(param%a %a)" pp_id_opt id pp_val_type vt
 
-let param_eq (_, t1) (_, t2) = <span data-count="13242">v</span>al_type_eq t1 t2
+let param_eq (_, t1) (_, t2) = <span data-count="13243">v</span>al_type_eq t1 t2
 
 let compare_param (_, t1) (_, t2) = <span data-count="0">c</span>ompare_val_type t1 t2
 
@@ -2402,7 +2402,7 @@ type nonrec param_type = param list
 
 let pp_param_type fmt params = <span data-count="122">l</span>ist ~sep:sp pp_param fmt params
 
-let param_type_eq t1 t2 = <span data-count="33622">L</span>ist.equal param_eq t1 t2
+let param_type_eq t1 t2 = <span data-count="33628">L</span>ist.equal param_eq t1 t2
 
 let compare_param_type t1 t2 = <span data-count="0">L</span>ist.compare compare_param t1 t2
 
@@ -2412,7 +2412,7 @@ let pp_result_ fmt vt = <span data-count="126">p</span>f fmt "(result %a)" pp_va
 
 let pp_result_type fmt results = <span data-count="126">l</span>ist ~sep:sp pp_result_ fmt results
 
-let result_type_eq t1 t2 = <span data-count="19583">L</span>ist.equal val_type_eq t1 t2
+let result_type_eq t1 t2 = <span data-count="19587">L</span>ist.equal val_type_eq t1 t2
 
 let compare_result_type t1 t2 = <span data-count="0">L</span>ist.compare compare_val_type t1 t2
 
@@ -2431,7 +2431,7 @@ let pp_func_type fmt (params, results) =
     results
 
 let func_type_eq (pt1, rt1) (pt2, rt2) =
-  <span data-count="33622">p</span>aram_type_e<span data-count="33622">q</span> pt1 pt2 &amp;&amp; <span data-count="19583">r</span>esult_type_eq rt1 rt2
+  <span data-count="33628">p</span>aram_type_e<span data-count="33628">q</span> pt1 pt2 &amp;&amp; <span data-count="19587">r</span>esult_type_eq rt1 rt2
 
 type block_type =
   | Bt_ind of indice

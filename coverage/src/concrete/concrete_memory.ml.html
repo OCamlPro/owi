@@ -268,7 +268,7 @@ type t =
   }
 
 let get_min : Binary.Mem.Type.limits -&gt; int = function
-  | <span data-count="904">I</span>32 { min; _ } -&gt; Int32.to_int min
+  | <span data-count="910">I</span>32 { min; _ } -&gt; Int32.to_int min
   | <span data-count="0">I</span>64 { min; _ } -&gt; min
 
 let set_min (limits : Binary.Mem.Type.limits) new_min : Binary.Mem.Type.limits =
@@ -278,8 +278,8 @@ let set_min (limits : Binary.Mem.Type.limits) new_min : Binary.Mem.Type.limits =
 
 let init limits : t =
   (* TODO: overflow check? (page_size * limits.min) / page_size = limits.min? *)
-  <span data-count="831">l</span>et data = Bytes.make (page_size * get_mi<span data-count="831">n</span> limits) '\x00' in
-  <span data-count="831">{</span> limits; data }
+  <span data-count="837">l</span>et data = Bytes.make (page_size * get_mi<span data-count="837">n</span> limits) '\x00' in
+  <span data-count="837">{</span> limits; data }
 
 let update_memory mem data =
   <span data-count="73">l</span>et limits =
@@ -366,7 +366,7 @@ let load_64 mem addr =
   <span data-count="669">l</span>et addr = Int32.to_int addr in
   <span data-count="669">O</span>k (Bytes.get_int64_l<span data-count="669">e</span> mem.data addr)
 
-let size_in_pages mem = <span data-count="317">I</span>nt32.of_int @@ (Bytes.lengt<span data-count="317">h</span> mem.data / page_size)
+let size_in_pages mem = <span data-count="323">I</span>nt32.of_int @@ (Bytes.lengt<span data-count="323">h</span> mem.data / page_size)
 
 let size mem = <span data-count="534788">I</span>nt32.of_int @@ Bytes.lengt<span data-count="534788">h</span> mem.data
 </code></pre>

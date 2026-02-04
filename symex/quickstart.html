@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "frappe";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-2fe1e195.js";
+            window.path_to_searchindex_js = "../searchindex-f234277f.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-66d4629a.js"></script>
@@ -386,62 +386,254 @@ owi: [ERROR] Reached problem!
 <p>Then Owi gives us a <em>model</em>, that is, the set of input values of the program leading to this <em>trap</em>. The model is a list of <em>symbols</em>, each symbols representing an input.</p>
 <p>Here we have a single symbol in the model, whose name is <code>symbol_0</code>, of type <code>i32</code> and whose value is <code>2</code>. And indeed, if we use <code>2</code> as the input value of the function <code>f</code>, there will be a crash in the program because of a division by zero!</p>
 <h2 id="defining-symbols-by-hand"><a class="header" href="#defining-symbols-by-hand">Defining symbols by hand</a></h2>
+<p>In the previous example, we used the <code>--invoke-with-symbol</code> flag.
+It is useful for simple examples, but when building more involved inputs, it is better to get more control.
+This is achieved by defining symbols by hand instead of using the <code>--invoke-with-symbol</code> flag.
+Here is an example which is the exact same as the previous one, but where the unique symbol is created by hand through a function provided by Owi.
+We define this symbol in another function <code>check</code> which simply calls <code>f</code> with the symbol as input.</p>
 <div class="mdbook-tabs-container" data-tabglobal="lang">
 <nav class="mdbook-tabs">
 <button class="mdbook-tab active" data-tabname="C">C</button>
 <button class="mdbook-tab" data-tabname="C++">C++</button>
+<button class="mdbook-tab" data-tabname="Go">Go</button>
 <button class="mdbook-tab" data-tabname="Rust">Rust</button>
 <button class="mdbook-tab" data-tabname="Zig">Zig</button>
 <button class="mdbook-tab" data-tabname="Wasm">Wasm</button>
 </nav>
 <div class="mdbook-tab-content" data-tabname="C">
-<p>TODO</p>
+<!-- $MDX file=f_byhand.c -->
+<pre><code class="language-c">#include &lt;owi.h&gt;
+
+int f(int x) {
+
+  int arr[4] = {1, 2, 0, 4};
+
+  if (x &gt;= 0 &amp;&amp; x &lt; 4) {
+    return 10 / arr[x];
+  }
+
+  return -1;
+}
+
+int check(void) {
+  int x = owi_int();
+  return f(x);
+}
+</code></pre>
 </div>
 
 <div class="mdbook-tab-content hidden" data-tabname="C++">
-<p>TODO</p>
+<!-- $MDX file=f_byhand.cpp -->
+<pre><code class="language-cpp">#include &lt;owi.h&gt;
+
+int f(int x) {
+
+  int arr[4] = {1, 2, 0, 4};
+
+  if (x &gt;= 0 &amp;&amp; x &lt; 4) {
+    return 10 / arr[x];
+  }
+
+  return -1;
+}
+
+extern "C" int check(void) {
+  int x = owi_int();
+  return f(x);
+}
+</code></pre>
+</div>
+
+<div class="mdbook-tab-content hidden" data-tabname="Go">
+<!-- $MDX file=f_byhand.go -->
+<pre><code class="language-go">package main
+
+func f(x int32) int32 {
+	arr := [4]int32{1, 2, 0, 4}
+
+	if x &gt;= 0 &amp;&amp; x &lt; 4 {
+		return 10 / arr[x]
+	}
+
+	return -1
+}
+
+
+//go:wasm-module owi
+//export i32_symbol
+func i32_symbol() int32
+
+//go:export check
+func check() {
+	var x int32 = i32_symbol()
+	var _ int32 = f(x)
+}
+
+// main is required by the tinygo compiler, even if it isn't used.
+func main() {}
+</code></pre>
 </div>
 
 <div class="mdbook-tab-content hidden" data-tabname="Rust">
-<p>TODO</p>
+<!-- $MDX file=f_byhand.rs -->
+<pre><code class="language-rs">#![no_main]
+
+fn f(x: usize) -&gt; i32 {
+
+  let arr = [1, 2, 0, 4];
+
+  if x &lt; arr.len() {
+    return 10 / arr[x];
+  }
+
+  -1
+}
+
+use owi_sym::Symbolic;
+
+#[no_mangle]
+pub extern "C" fn check() -&gt; () {
+  let x = u32::symbol(); // TODO: replace by usize::symbol()
+  let res = f(x.try_into().unwrap());
+}
+</code></pre>
 </div>
 
 <div class="mdbook-tab-content hidden" data-tabname="Zig">
-<p>TODO</p>
+<!-- $MDX file=f_byhand.zig -->
+<pre><code class="language-rs">fn f(x: usize) i32 {
+
+  const arr = [_]i32{ 1, 2, 0, 4 };
+
+  if (x &lt; arr.len) {
+    return @divTrunc(10, arr[x]);
+  }
+
+  return -1;
+}
+
+extern "owi" fn i32_symbol() usize;
+
+export fn check() void {
+  const x: usize = i32_symbol();
+  _ = &amp;f(x);
+}
+</code></pre>
 </div>
 
 <div class="mdbook-tab-content hidden" data-tabname="Wasm">
-<p>TODO</p>
+<!-- $MDX file=f_byhand.wat -->
+<pre><code class="language-wasm">(module
+  (import "owi" "i32_symbol" (func $i32_symbol (result i32)))
+  (memory 1)
+
+  (func $f (param $x i32) (result i32)
+    (local $value i32)
+
+    (i32.store (i32.mul (i32.const 4) (i32.const 0)) (i32.const 1))
+    (i32.store (i32.mul (i32.const 4) (i32.const 1)) (i32.const 2))
+    (i32.store (i32.mul (i32.const 4) (i32.const 2)) (i32.const 0))
+    (i32.store (i32.mul (i32.const 4) (i32.const 3)) (i32.const 4))
+
+    (if (i32.ge_u (local.get $x) (i32.const 4) )
+      (then (return (i32.const -1))))
+
+    (local.set $value
+      (i32.load
+        (i32.mul
+          (local.get $x)
+          (i32.const 4))))
+
+    (i32.div_s
+      (i32.const 10)
+      (local.get $value))
+  )
+
+  (func $check (export "check")
+    call $i32_symbol
+    call $f
+    drop
+  )
+)
+</code></pre>
 </div>
 
 </div>
 
+<p>The invokation on Owi is the same as in the previous example, we simply removed the <code>--invoke-with-symbol</code> flag and changed the entry point from <code>f</code> to <code>check</code>.</p>
 <div class="mdbook-tabs-container" data-tabglobal="lang">
 <nav class="mdbook-tabs">
 <button class="mdbook-tab active" data-tabname="C">C</button>
 <button class="mdbook-tab" data-tabname="C++">C++</button>
+<button class="mdbook-tab" data-tabname="Go">Go</button>
 <button class="mdbook-tab" data-tabname="Rust">Rust</button>
 <button class="mdbook-tab" data-tabname="Zig">Zig</button>
 <button class="mdbook-tab" data-tabname="Wasm">Wasm</button>
 </nav>
 <div class="mdbook-tab-content" data-tabname="C">
-<p>TODO</p>
+<pre><code class="language-sh">$ owi c ./f_byhand.c --entry-point=check --no-assert-failure-expression-printing --verbosity=error
+owi: [ERROR] Trap: integer divide by zero
+model {
+  symbol symbol_0 i32 2
+}
+owi: [ERROR] Reached problem!
+[13]
+</code></pre>
 </div>
 
 <div class="mdbook-tab-content hidden" data-tabname="C++">
-<p>TODO</p>
+<pre><code class="language-sh">$ owi c++ ./f_byhand.cpp --entry-point=check --no-assert-failure-expression-printing --verbosity=error
+owi: [ERROR] Trap: integer divide by zero
+model {
+  symbol symbol_0 i32 2
+}
+owi: [ERROR] Reached problem!
+[13]
+</code></pre>
+</div>
+
+<div class="mdbook-tab-content hidden" data-tabname="Go">
+<pre><code class="language-sh">$ owi tinygo ./f_byhand.go --entry-point=check --no-assert-failure-expression-printing --verbosity=error
+owi: [ERROR] Trap: unreachable
+model {
+  symbol symbol_0 i32 2
+}
+owi: [ERROR] Reached problem!
+[13]
+</code></pre>
 </div>
 
 <div class="mdbook-tab-content hidden" data-tabname="Rust">
-<p>TODO</p>
+<pre><code class="language-sh">$ owi rust ./f_byhand.rs --entry-point=check --no-assert-failure-expression-printing --verbosity=error
+owi: [ERROR] Trap: unreachable
+model {
+  symbol symbol_0 i32 2
+}
+owi: [ERROR] Reached problem!
+[13]
+</code></pre>
 </div>
 
 <div class="mdbook-tab-content hidden" data-tabname="Zig">
-<p>TODO</p>
+<pre><code class="language-sh">$ owi zig ./f_byhand.zig --entry-point=check --no-assert-failure-expression-printing --verbosity=error
+owi: [ERROR] Trap: unreachable
+model {
+  symbol symbol_0 i32 2
+}
+owi: [ERROR] Reached problem!
+[13]
+</code></pre>
 </div>
 
 <div class="mdbook-tab-content hidden" data-tabname="Wasm">
-<p>TODO</p>
+<pre><code class="language-sh">$ owi sym ./f_byhand.wat --entry-point=check --no-assert-failure-expression-printing --verbosity=error
+owi: [ERROR] Trap: integer divide by zero
+model {
+  symbol symbol_0 i32 2
+}
+owi: [ERROR] Reached problem!
+[13]
+</code></pre>
 </div>
 
 </div>
@@ -499,10 +691,6 @@ extern "C" void check(int x, int y) {
 <pre><code class="language-go">package main
 
 //go:wasm-module owi
-//export i32_symbol
-func i32_symbol() int32
-
-//go:wasm-module owi
 //export assert
 func owi_assert(bool)
 
@@ -546,8 +734,7 @@ pub extern "C" fn check(x : i32, y: i32) {
 
 <div class="mdbook-tab-content hidden" data-tabname="Zig">
 <!-- $MDX file=mean.zig -->
-<pre><code class="language-rs">extern "owi" fn i32_symbol() i32;
-extern "owi" fn assert(bool) void;
+<pre><code class="language-rs">extern "owi" fn assert(bool) void;
 
 fn mean1(x: i32, y: i32) i32 {
   return (x &amp; y) + ((x ^ y) &gt;&gt; 1);

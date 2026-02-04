@@ -58,11 +58,11 @@
 type t = Concrete_elem.t
 
 let get (elem : t) i : Symbolic_ref.t =
-  <span data-count="639">m</span>atch elem.value.(i) with <span data-count="639">F</span>unc f -&gt; Func f | _ -&gt; assert false
+  <span data-count="686">m</span>atch elem.value.(i) with <span data-count="686">F</span>unc f -&gt; Func f | _ -&gt; assert false
 
-let size (elem : t) = <span data-count="172">A</span>rray.length elem.value
+let size (elem : t) = <span data-count="175">A</span>rray.length elem.value
 
-let drop (e : t) = <span data-count="172">e</span>.value &lt;- [||]
+let drop (e : t) = <span data-count="175">e</span>.value &lt;- [||]
 </code></pre>
       </div>
     </div>

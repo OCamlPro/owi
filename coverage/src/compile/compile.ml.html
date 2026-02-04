@@ -215,27 +215,27 @@ open Syntax
 
 module Text = struct
   let until_text_validate ~unsafe m =
-    <span data-count="3859">i</span>f unsafe then <span data-count="1">O</span>k m else <span data-count="3858">T</span>ext_validate.modul m
+    <span data-count="3860">i</span>f unsafe then <span data-count="1">O</span>k m else <span data-count="3859">T</span>ext_validate.modul m
 
   let until_group ~unsafe m =
-    <span data-count="3859">l</span>et+ m = until_text_validat<span data-count="3859">e</span> ~unsafe m in
-    <span data-count="3814">G</span>rouped.of_text m
+    <span data-count="3860">l</span>et+ m = until_text_validat<span data-count="3860">e</span> ~unsafe m in
+    <span data-count="3815">G</span>rouped.of_text m
 
   let until_assign ~unsafe m =
-    <span data-count="3859">l</span>et* m = until_grou<span data-count="3859">p</span> ~unsafe m in
-    <span data-count="3814">l</span>et+ assigned = Assigned.of_groupe<span data-count="3814">d</span> m in
-    <span data-count="3786">(</span>m, assigned)
+    <span data-count="3860">l</span>et* m = until_grou<span data-count="3860">p</span> ~unsafe m in
+    <span data-count="3815">l</span>et+ assigned = Assigned.of_groupe<span data-count="3815">d</span> m in
+    <span data-count="3787">(</span>m, assigned)
 
   let until_binary ~unsafe m =
-    <span data-count="3859">l</span>et* m, assigned = until_assig<span data-count="3859">n</span> ~unsafe m in
-    <span data-count="3786">R</span>ewrite.modul m assigned
+    <span data-count="3860">l</span>et* m, assigned = until_assig<span data-count="3860">n</span> ~unsafe m in
+    <span data-count="3787">R</span>ewrite.modul m assigned
 
   let until_validate ~unsafe m =
-    <span data-count="3738">l</span>et* m = until_binar<span data-count="3738">y</span> ~unsafe m in
-    <span data-count="3684">i</span>f unsafe then <span data-count="1">O</span>k m
+    <span data-count="3739">l</span>et* m = until_binar<span data-count="3739">y</span> ~unsafe m in
+    <span data-count="3685">i</span>f unsafe then <span data-count="1">O</span>k m
     else
-      <span data-count="3683">l</span>et+ () = Binary_validate.modu<span data-count="3683">l</span> m in
-      <span data-count="2234">m</span>
+      <span data-count="3684">l</span>et+ () = Binary_validate.modu<span data-count="3684">l</span> m in
+      <span data-count="2235">m</span>
 
   let until_link ~unsafe ~name link_state m =
     <span data-count="3508">l</span>et* m = until_validat<span data-count="3508">e</span> ~unsafe m in
@@ -244,14 +244,14 @@ end
 
 module Binary = struct
   let until_validate ~unsafe m =
-    <span data-count="750">i</span>f unsafe then <span data-count="413">O</span>k m
+    <span data-count="761">i</span>f unsafe then <span data-count="419">O</span>k m
     else
-      <span data-count="337">l</span>et+ () = Binary_validate.modu<span data-count="337">l</span> m in
-      <span data-count="337">m</span>
+      <span data-count="342">l</span>et+ () = Binary_validate.modu<span data-count="342">l</span> m in
+      <span data-count="342">m</span>
 
   let until_link ~unsafe ~name link_state m =
-    <span data-count="529">l</span>et* m = until_validat<span data-count="529">e</span> ~unsafe m in
-    <span data-count="529">L</span>ink.Binary.modul link_state ~name m
+    <span data-count="535">l</span>et* m = until_validat<span data-count="535">e</span> ~unsafe m in
+    <span data-count="535">L</span>ink.Binary.modul link_state ~name m
 end
 
 module Any = struct
@@ -279,11 +279,11 @@ module File = struct
     | Wast _ | Extern _ -&gt; assert false
 
   let until_validate ~unsafe filename =
-    <span data-count="435">l</span>et* m = Parse.guess_from_fil<span data-count="435">e</span> filename in
-    <span data-count="434">L</span>og.bench_fn "validation time" @@ fun () -&gt;
-    <span data-count="434">m</span>atch m with
-    | <span data-count="213">K</span>ind.Wat m -&gt; Text.until_validate ~unsafe m
-    | <span data-count="221">W</span>asm m -&gt; Binary.until_validate ~unsafe m
+    <span data-count="441">l</span>et* m = Parse.guess_from_fil<span data-count="441">e</span> filename in
+    <span data-count="440">L</span>og.bench_fn "validation time" @@ fun () -&gt;
+    <span data-count="440">m</span>atch m with
+    | <span data-count="214">K</span>ind.Wat m -&gt; Text.until_validate ~unsafe m
+    | <span data-count="226">W</span>asm m -&gt; Binary.until_validate ~unsafe m
     | Wast _ | Extern _ -&gt; assert false
 
   let until_link ~unsafe ~name link_state filename =

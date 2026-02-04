@@ -266,34 +266,34 @@
   }
 
 let empty_stats () =
-  <span data-count="416">{</span> solver_sat_time = Atomic.mak<span data-count="416">e</span> Mtime.Span.min_span
-  ; solver_final_model_time = Atomic.mak<span data-count="416">e</span> Mtime.Span.min_span
-  ; solver_intermediate_model_time = Atomic.mak<span data-count="416">e</span> Mtime.Span.min_span
-  ; path_count = Atomic.mak<span data-count="416">e</span> 1
-  ; max_depth = Atomic.mak<span data-count="416">e</span> 1
+  <span data-count="422">{</span> solver_sat_time = Atomic.mak<span data-count="422">e</span> Mtime.Span.min_span
+  ; solver_final_model_time = Atomic.mak<span data-count="422">e</span> Mtime.Span.min_span
+  ; solver_intermediate_model_time = Atomic.mak<span data-count="422">e</span> Mtime.Span.min_span
+  ; path_count = Atomic.mak<span data-count="422">e</span> 1
+  ; max_depth = Atomic.mak<span data-count="422">e</span> 1
   }
 
 let handle_time_span atomic_span f =
-  <span data-count="6764">i</span>f Log.is_bench_enabled () then <span data-count="8">(</span>
+  <span data-count="7049">i</span>f Log.is_bench_enabled () then <span data-count="8">(</span>
     let counter = Mtime_clock.counter () in
     (* f is supposed to take a long time! *)
     <span data-count="8">l</span>et res = f () in
     <span data-count="8">l</span>et span = Mtime_clock.count counter in
     <span data-count="8">M</span>ulticore.atomic_modify (Mtime.Span.ad<span data-count="8">d</span> span) atomic_span;
     <span data-count="8">r</span>es )
-  else <span data-count="6755">f</span> ()
+  else <span data-count="7040">f</span> ()
 
 let with_utime f =
-  <span data-count="442">i</span>f Log.is_bench_enabled () then
+  <span data-count="448">i</span>f Log.is_bench_enabled () then
     <span data-count="2">l</span>et before = (Unix.time<span data-count="2">s</span> ()).tms_utime in
     let r = f () in
     <span data-count="2">l</span>et after = (Unix.time<span data-count="2">s</span> ()).tms_utime in
     (r, Some (after -. before))
-  else <span data-count="440">(</span><span data-count="436">f</span> (), None)
+  else <span data-count="446">(</span><span data-count="442">f</span> (), None)
 
 let set_max_depth stats path_depth =
-  <span data-count="5094">M</span>ulticore.atomic_modify
-    (fun max_depth -&gt; <span data-count="5095">i</span>f path_depth &gt; max_depth then <span data-count="806">p</span>ath_depth else <span data-count="4289">m</span>ax_depth)
+  <span data-count="5360">M</span>ulticore.atomic_modify
+    (fun max_depth -&gt; <span data-count="5360">i</span>f path_depth &gt; max_depth then <span data-count="831">p</span>ath_depth else <span data-count="4529">m</span>ax_depth)
     stats.max_depth
 
 let percentage ~whole ~self =

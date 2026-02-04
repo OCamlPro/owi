@@ -212,48 +212,48 @@ open Syntax
 
 let compile ~workspace ~entry_point ~includes ~out_file (files : Fpath.t list) :
   Fpath.t Result.t =
-  <span data-count="4">l</span>et includes =
-    Cmd.of_list (List.ma<span data-count="4">p</span> (fun p -&gt; <span data-count="0">F</span>mt.str "-I%a" Fpath.pp p) includes)
+  <span data-count="5">l</span>et includes =
+    Cmd.of_list (List.ma<span data-count="5">p</span> (fun p -&gt; <span data-count="0">F</span>mt.str "-I%a" Fpath.pp p) includes)
   in
 
-  <span data-count="4">l</span>et* zig_bin =
+  <span data-count="5">l</span>et* zig_bin =
     let name = "zig" in
-    match OS.Cmd.resolve @@ Cmd.<span data-count="4">v</span> name with
+    match OS.Cmd.resolve @@ Cmd.<span data-count="5">v</span> name with
     | <span data-count="0">E</span>rror _ -&gt;
       Fmt.error_ms<span data-count="0">g</span>
         "The `%s` binary was not found, please make sure it is in your path."
         name
-    | <span data-count="4">O</span>k _ as ok -&gt; ok
+    | <span data-count="5">O</span>k _ as ok -&gt; ok
   in
 
   (* TODO: disabled until zig is properly packaged everywhere
      let* libzig = Cmd_utils.find_installed_zig_file (Fpath.v "libzig.o") in
   *)
-  <span data-count="4">l</span>et out = Option.value ~default:Fpath.(workspace / "out.wasm") out_file in
-  <span data-count="4">l</span>et entry =
+  <span data-count="5">l</span>et out = Option.value ~default:Fpath.(workspace / "out.wasm") out_file in
+  <span data-count="5">l</span>et entry =
     match entry_point with
     | <span data-count="0">N</span>one -&gt; ""
-    | <span data-count="4">S</span>ome entry_point -&gt; Fmt.st<span data-count="4">r</span> "-fentry=%s" entry_point
+    | <span data-count="5">S</span>ome entry_point -&gt; Fmt.st<span data-count="5">r</span> "-fentry=%s" entry_point
   in
   let zig : Cmd.t =
     Cmd.(
-      zig_bin <span data-count="4">%</span> "build-exe" <span data-count="4">%</span> "-target" <span data-count="4">%</span> "wasm32-freestanding"
-      <span data-count="4">%</span> Fmt.st<span data-count="4">r</span> "-femit-bin=%a" Fpath.pp out
-      <span data-count="4">%</span> entry %<span data-count="4">%</span> includes
-      %<span data-count="4">%</span> Cmd.of_lis<span data-count="4">t</span> (List.ma<span data-count="4">p</span> p files)
+      zig_bin <span data-count="5">%</span> "build-exe" <span data-count="5">%</span> "-target" <span data-count="5">%</span> "wasm32-freestanding"
+      <span data-count="5">%</span> Fmt.st<span data-count="5">r</span> "-femit-bin=%a" Fpath.pp out
+      <span data-count="5">%</span> entry %<span data-count="5">%</span> includes
+      %<span data-count="5">%</span> Cmd.of_lis<span data-count="5">t</span> (List.ma<span data-count="5">p</span> p files)
       (* % p libzig *) )
   in
 
   let err =
     match Logs.Src.level Log.main_src with
     | Some (<span data-count="0">L</span>ogs.Debug | <span data-count="0">L</span>ogs.Info) -&gt; OS.Cmd.err_run_out
-    | <span data-count="0">N</span>one | <span data-count="4">S</span>ome _ -&gt; OS.Cmd.err_null
+    | <span data-count="0">N</span>one | <span data-count="5">S</span>ome _ -&gt; OS.Cmd.err_null
   in
 
   let+ () =
-    Log.bench_fn "compiling time<span data-count="4">"</span> @@ fun () -&gt;
-    <span data-count="4">m</span>atch OS.Cmd.run ~err zig with
-    | <span data-count="3">O</span>k _ as v -&gt; v
+    Log.bench_fn "compiling time<span data-count="5">"</span> @@ fun () -&gt;
+    <span data-count="5">m</span>atch OS.Cmd.run ~err zig with
+    | <span data-count="4">O</span>k _ as v -&gt; v
     | <span data-count="1">E</span>rror (`Msg e) -&gt;
       Log.debug (fun m -&gt; <span data-count="0">m</span> "zig failed: %s" e);
       <span data-count="1">F</span>mt.error_msg
@@ -261,28 +261,28 @@ let compile ~workspace ~entry_point ~includes ~out_file (files : Fpath.t list) :
          displayed above"
   in
 
-  <span data-count="3">o</span>ut
+  <span data-count="4">o</span>ut
 
 let cmd ~(symbolic_parameters : Symbolic_parameters.t) ~includes ~files
   ~out_file : unit Result.t =
-  <span data-count="4">l</span>et* workspace =
+  <span data-count="5">l</span>et* workspace =
     match symbolic_parameters.workspace with
     | <span data-count="0">S</span>ome path -&gt; Ok path
-    | <span data-count="4">N</span>one -&gt; OS.Dir.tm<span data-count="4">p</span> "cmd_zig_%s"
+    | <span data-count="5">N</span>one -&gt; OS.Dir.tm<span data-count="5">p</span> "cmd_zig_%s"
   in
-  <span data-count="4">l</span>et* _did_create : bool = OS.Dir.creat<span data-count="4">e</span> workspace in
+  <span data-count="5">l</span>et* _did_create : bool = OS.Dir.creat<span data-count="5">e</span> workspace in
 
-  <span data-count="4">l</span>et includes =
+  <span data-count="5">l</span>et includes =
     (* TODO: disabled until zig is properly packaged
        Cmd_utils.zig_files_location @
     *)
     includes
   in
   let* source_file =
-    compil<span data-count="4">e</span> ~workspace ~entry_point:symbolic_parameters.entry_point ~includes
+    compil<span data-count="5">e</span> ~workspace ~entry_point:symbolic_parameters.entry_point ~includes
       ~out_file files
   in
-  <span data-count="3">l</span>et workspace = Some workspace in
+  <span data-count="4">l</span>et workspace = Some workspace in
 
   let parameters = { symbolic_parameters with workspace } in
 

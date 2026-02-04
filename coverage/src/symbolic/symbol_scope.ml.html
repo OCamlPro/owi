@@ -606,7 +606,7 @@
 
 type t = token list
 
-let symbol s tl : t = <span data-count="1451">S</span>ymbol s :: tl
+let symbol s tl : t = <span data-count="1457">S</span>ymbol s :: tl
 
 let open_scope name tl = <span data-count="10">O</span>pen_scope name :: tl
 
@@ -620,7 +620,7 @@ let of_expressions exprs =
     []
     (Smtml.Expr.Set.get_symbol<span data-count="0">s</span> exprs)
 
-let of_symbol sym = <span data-count="1087">[</span> Symbol sym ]
+let of_symbol sym = <span data-count="1306">[</span> Symbol sym ]
 
 let pp_token fmt token =
   <span data-count="5">m</span>atch token with
@@ -632,31 +632,31 @@ let pp fmt tokens =
   <span data-count="3">F</span>mt.list ~sep:(fun fmt () -&gt; <span data-count="2">F</span>mt.pf fmt " ; ") pp_token fmt tokens
 
 let only_symbols tokens =
-  <span data-count="1087">L</span>ist.filter_map
-    (<span data-count="1087">f</span>unction <span data-count="1087">S</span>ymbol s -&gt; Some s | <span data-count="0">O</span>pen_scope _ | <span data-count="0">C</span>lose_scope -&gt; None)
+  <span data-count="1306">L</span>ist.filter_map
+    (<span data-count="1306">f</span>unction <span data-count="1306">S</span>ymbol s -&gt; Some s | <span data-count="0">O</span>pen_scope _ | <span data-count="0">C</span>lose_scope -&gt; None)
     tokens
 
 let get_value model sym ty =
-  <span data-count="163">m</span>atch Smtml.Model.evaluate model sym with
-  | <span data-count="160">S</span>ome v -&gt; v
+  <span data-count="169">m</span>atch Smtml.Model.evaluate model sym with
+  | <span data-count="166">S</span>ome v -&gt; v
   | <span data-count="3">N</span>one -&gt;
     (* The symbol was created but is not part of the generated model. Thus we can use a dummy value. *)
     (* TODO: allows to hide these symbols or their value through a flag (and make it the default, the flag should actually display them). *)
     Smtml.Value.default_of_type ty
 
 let to_scfg ~no_value model scope_tokens =
-  <span data-count="243">l</span>et open Scfg.Types in
+  <span data-count="249">l</span>et open Scfg.Types in
   let symbol_to_scfg symbol =
-    <span data-count="397">l</span>et open Smtml in
+    <span data-count="403">l</span>et open Smtml in
     let name = Symbol.to_string symbol in
-    <span data-count="397">l</span>et ty = Symbol.type_of symbol in
-    <span data-count="397">l</span>et ty_s = Ty.string_of_type ty in
-    <span data-count="397">l</span>et params =
+    <span data-count="403">l</span>et ty = Symbol.type_of symbol in
+    <span data-count="403">l</span>et ty_s = Ty.string_of_type ty in
+    <span data-count="403">l</span>et params =
       if no_value then <span data-count="234">[</span> name; ty_s ]
       else
-        <span data-count="163">l</span>et value = get_value model symbol ty in
-        <span data-count="163">l</span>et value = Value.to_string value in
-        <span data-count="163">[</span> name; ty_s; value ]
+        <span data-count="169">l</span>et value = get_value model symbol ty in
+        <span data-count="169">l</span>et value = Value.to_string value in
+        <span data-count="169">[</span> name; ty_s; value ]
     in
     { name = "symbol"; params; children = [] }
   in
@@ -683,8 +683,8 @@ let to_scfg ~no_value model scope_tokens =
   in
 
   let rec process_tokens tokens acc =
-    <span data-count="636">m</span>atch tokens with
-    | <span data-count="243">[</span>] -&gt; List.rev acc
+    <span data-count="648">m</span>atch tokens with
+    | <span data-count="249">[</span>] -&gt; List.rev acc
     | <span data-count="5">O</span>pen_scope name :: rest -&gt;
       let content, remaining = process_scope name rest in
       <span data-count="5">l</span>et scope =
@@ -694,13 +694,13 @@ let to_scfg ~no_value model scope_tokens =
         | <span data-count="2">_</span> as children -&gt; { name = "scope"; params = [ name ]; children }
       in
       process_tokens remaining (scope :: acc)
-    | <span data-count="388">S</span>ymbol s :: rest -&gt; process_tokens rest (symbol_to_scf<span data-count="388">g</span> s :: acc)
+    | <span data-count="394">S</span>ymbol s :: rest -&gt; process_tokens rest (symbol_to_scf<span data-count="394">g</span> s :: acc)
     | Close_scope :: _ -&gt; assert false
   in
 
   let rev_scope_tokens = List.rev scope_tokens in
-  <span data-count="243">l</span>et children = process_tokens rev_scope_tokens [] in
-  <span data-count="243">[</span> { name = "model"; params = []; children } ]
+  <span data-count="249">l</span>et children = process_tokens rev_scope_tokens [] in
+  <span data-count="249">[</span> { name = "model"; params = []; children } ]
 
 let to_json ~no_value model scope_tokens =
   <span data-count="0">l</span>et open Smtml in

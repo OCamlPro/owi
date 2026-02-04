@@ -188,42 +188,42 @@ open Syntax
 (* TODO: investigate which parameters makes sense *)
 let compile ~entry_point ~includes:_ ~opt_lvl:_ ~out_file (files : Fpath.t list)
   : Fpath.t Result.t =
-  <span data-count="4">l</span>et* rustc_bin = OS.Cmd.resolv<span data-count="4">e</span> @@ Cmd.<span data-count="4">v</span> "rustc" in
+  <span data-count="5">l</span>et* rustc_bin = OS.Cmd.resolv<span data-count="5">e</span> @@ Cmd.<span data-count="5">v</span> "rustc" in
 
-  <span data-count="4">l</span>et* libowi_sym_rlib =
-    Cmd_utils.find_installed_rust_fil<span data-count="4">e</span> (Fpath.<span data-count="4">v</span> "libowi_sym.rlib")
+  <span data-count="5">l</span>et* libowi_sym_rlib =
+    Cmd_utils.find_installed_rust_fil<span data-count="5">e</span> (Fpath.<span data-count="5">v</span> "libowi_sym.rlib")
   in
 
-  <span data-count="4">l</span>et* tmp = Bos.OS.Dir.tm<span data-count="4">p</span> "owi_rust_%s" in
-  <span data-count="4">l</span>et out = Option.value ~default:Fpath.(tmp / "a.out.wasm") out_file in
+  <span data-count="5">l</span>et* tmp = Bos.OS.Dir.tm<span data-count="5">p</span> "owi_rust_%s" in
+  <span data-count="5">l</span>et out = Option.value ~default:Fpath.(tmp / "a.out.wasm") out_file in
 
-  <span data-count="4">l</span>et rustc_cmd : Cmd.t =
+  <span data-count="5">l</span>et rustc_cmd : Cmd.t =
     Cmd.(
-      rustc_bin <span data-count="4">%</span> "--target=wasm32-unknown-unknown" <span data-count="4">%</span> "--edition=2021"
-      <span data-count="4">%</span> "--extern"
-      <span data-count="4">%</span> Fmt.st<span data-count="4">r</span> "owi_sym=%a" Fpath.pp libowi_sym_rlib
-      <span data-count="4">%</span> "-o" <span data-count="4">%</span> Cmd.<span data-count="4">p</span> out
+      rustc_bin <span data-count="5">%</span> "--target=wasm32-unknown-unknown" <span data-count="5">%</span> "--edition=2021"
+      <span data-count="5">%</span> "--extern"
+      <span data-count="5">%</span> Fmt.st<span data-count="5">r</span> "owi_sym=%a" Fpath.pp libowi_sym_rlib
+      <span data-count="5">%</span> "-o" <span data-count="5">%</span> Cmd.<span data-count="5">p</span> out
       (* link args parameters must be space separated *)
-      <span data-count="4">%</span> "-C"
-      <span data-count="4">%</span> ( match entry_point with
-        | <span data-count="4">S</span>ome entry_point -&gt; Fmt.st<span data-count="4">r</span> "link-args=--entry=%s" entry_point
+      <span data-count="5">%</span> "-C"
+      <span data-count="5">%</span> ( match entry_point with
+        | <span data-count="5">S</span>ome entry_point -&gt; Fmt.st<span data-count="5">r</span> "link-args=--entry=%s" entry_point
         | <span data-count="0">N</span>one -&gt; (* TODO: meh *) "" )
-      %<span data-count="4">%</span> Cmd.of_lis<span data-count="4">t</span> (List.ma<span data-count="4">p</span> Cmd.p files) )
+      %<span data-count="5">%</span> Cmd.of_lis<span data-count="5">t</span> (List.ma<span data-count="5">p</span> Cmd.p files) )
   in
 
   let err =
     match Logs.Src.level Log.main_src with
     | Some (<span data-count="0">L</span>ogs.Debug | <span data-count="0">L</span>ogs.Info) -&gt; OS.Cmd.err_run_out
-    | <span data-count="0">N</span>one | <span data-count="4">S</span>ome _ -&gt; OS.Cmd.err_null
+    | <span data-count="0">N</span>one | <span data-count="5">S</span>ome _ -&gt; OS.Cmd.err_null
   in
 
   (* TODO: does not seem to work, once it does, we can remove the `#![no_main]` in many documentation examples
   let* () = Bos.OS.Env.set_var "RUSTFLAGS" (Some "-Zcrate-attr=no_main") in
   *)
   let+ () =
-    Log.bench_fn "compiling time<span data-count="4">"</span> @@ fun () -&gt;
-    <span data-count="4">m</span>atch OS.Cmd.run ~err rustc_cmd with
-    | <span data-count="3">O</span>k _ as v -&gt; v
+    Log.bench_fn "compiling time<span data-count="5">"</span> @@ fun () -&gt;
+    <span data-count="5">m</span>atch OS.Cmd.run ~err rustc_cmd with
+    | <span data-count="4">O</span>k _ as v -&gt; v
     | <span data-count="1">E</span>rror (`Msg e) -&gt;
       Log.debug (fun m -&gt; <span data-count="0">m</span> "rustc failed: %s" e);
       <span data-count="1">F</span>mt.error_msg
@@ -231,22 +231,22 @@ let compile ~entry_point ~includes:_ ~opt_lvl:_ ~out_file (files : Fpath.t list)
          not displayed above"
   in
 
-  <span data-count="3">o</span>ut
+  <span data-count="4">o</span>ut
 
 let cmd ~(symbolic_parameters : Symbolic_parameters.t) ~arch:_ ~opt_lvl
   ~includes ~files ~out_file : unit Result.t =
-  <span data-count="4">l</span>et* workspace =
+  <span data-count="5">l</span>et* workspace =
     match symbolic_parameters.workspace with
     | <span data-count="0">S</span>ome path -&gt; Ok path
-    | <span data-count="4">N</span>one -&gt; OS.Dir.tm<span data-count="4">p</span> "owi_rust_%s"
+    | <span data-count="5">N</span>one -&gt; OS.Dir.tm<span data-count="5">p</span> "owi_rust_%s"
   in
-  <span data-count="4">l</span>et* _did_create : bool = OS.Dir.creat<span data-count="4">e</span> workspace in
+  <span data-count="5">l</span>et* _did_create : bool = OS.Dir.creat<span data-count="5">e</span> workspace in
 
-  <span data-count="4">l</span>et* source_file =
-    compil<span data-count="4">e</span> ~entry_point:symbolic_parameters.entry_point ~includes ~opt_lvl
+  <span data-count="5">l</span>et* source_file =
+    compil<span data-count="5">e</span> ~entry_point:symbolic_parameters.entry_point ~includes ~opt_lvl
       ~out_file files
   in
-  <span data-count="3">l</span>et workspace = Some workspace in
+  <span data-count="4">l</span>et workspace = Some workspace in
 
   let parameters = { symbolic_parameters with workspace } in
 

@@ -177,41 +177,41 @@ open Bos
 open Syntax
 
 let compile ~workspace ~out_file (files : Fpath.t list) : Fpath.t Result.t =
-  <span data-count="5">l</span>et* tinygo_bin =
+  <span data-count="6">l</span>et* tinygo_bin =
     let name = "tinygo" in
-    match OS.Cmd.resolve @@ Cmd.<span data-count="5">v</span> name with
+    match OS.Cmd.resolve @@ Cmd.<span data-count="6">v</span> name with
     | <span data-count="0">E</span>rror _ -&gt;
       Fmt.error_ms<span data-count="0">g</span>
         "The `%s` binary was not found, please make sure it is in your path."
         name
-    | <span data-count="5">O</span>k _ as ok -&gt; ok
+    | <span data-count="6">O</span>k _ as ok -&gt; ok
   in
 
-  <span data-count="5">l</span>et out = Option.value ~default:Fpath.(workspace / "out.wasm") out_file in
-  <span data-count="5">l</span>et tinygo : Cmd.t =
+  <span data-count="6">l</span>et out = Option.value ~default:Fpath.(workspace / "out.wasm") out_file in
+  <span data-count="6">l</span>et tinygo : Cmd.t =
     Cmd.(
-      tinygo_bin <span data-count="5">%</span> "build" <span data-count="5">%</span> "-target" <span data-count="5">%</span> "wasm" <span data-count="5">%</span> "-no-debug" <span data-count="5">%</span> "-opt" <span data-count="5">%</span> "2"
-      <span data-count="5">%</span> "-panic" <span data-count="5">%</span> "trap"
+      tinygo_bin <span data-count="6">%</span> "build" <span data-count="6">%</span> "-target" <span data-count="6">%</span> "wasm" <span data-count="6">%</span> "-no-debug" <span data-count="6">%</span> "-opt" <span data-count="6">%</span> "2"
+      <span data-count="6">%</span> "-panic" <span data-count="6">%</span> "trap"
       (* initialization time is way too slow otherwise *)
-      <span data-count="5">%</span> "-gc"
-      <span data-count="5">%</span> "leaking"
+      <span data-count="6">%</span> "-gc"
+      <span data-count="6">%</span> "leaking"
       (* output and input *)
-      <span data-count="5">%</span> "-o"
-      <span data-count="5">%</span> <span data-count="5">p</span> out
-      %<span data-count="5">%</span> Cmd.of_lis<span data-count="5">t</span> (List.ma<span data-count="5">p</span> p files)
+      <span data-count="6">%</span> "-o"
+      <span data-count="6">%</span> <span data-count="6">p</span> out
+      %<span data-count="6">%</span> Cmd.of_lis<span data-count="6">t</span> (List.ma<span data-count="6">p</span> p files)
       (* % p libtinygo *) )
   in
 
   let err =
     match Logs.Src.level Log.main_src with
     | Some (<span data-count="0">L</span>ogs.Debug | <span data-count="0">L</span>ogs.Info) -&gt; OS.Cmd.err_run_out
-    | <span data-count="0">N</span>one | <span data-count="5">S</span>ome _ -&gt; OS.Cmd.err_null
+    | <span data-count="0">N</span>one | <span data-count="6">S</span>ome _ -&gt; OS.Cmd.err_null
   in
 
   let+ () =
-    Log.bench_fn "compiling time<span data-count="5">"</span> @@ fun () -&gt;
-    <span data-count="5">m</span>atch OS.Cmd.run ~err tinygo with
-    | <span data-count="5">O</span>k _ as v -&gt; v
+    Log.bench_fn "compiling time<span data-count="6">"</span> @@ fun () -&gt;
+    <span data-count="6">m</span>atch OS.Cmd.run ~err tinygo with
+    | <span data-count="6">O</span>k _ as v -&gt; v
     | <span data-count="0">E</span>rror (`Msg e) -&gt;
       Log.debug (fun m -&gt; <span data-count="0">m</span> "tinygo failed: %s" e);
       <span data-count="0">F</span>mt.error_msg
@@ -219,19 +219,19 @@ let compile ~workspace ~out_file (files : Fpath.t list) : Fpath.t Result.t =
          not displayed above"
   in
 
-  <span data-count="5">o</span>ut
+  <span data-count="6">o</span>ut
 
 let cmd ~(symbolic_parameters : Symbolic_parameters.t) ~files ~out_file :
   unit Result.t =
-  <span data-count="5">l</span>et* workspace =
+  <span data-count="6">l</span>et* workspace =
     match symbolic_parameters.workspace with
     | <span data-count="0">S</span>ome path -&gt; Ok path
-    | <span data-count="5">N</span>one -&gt; OS.Dir.tm<span data-count="5">p</span> "cmd_tinygo_%s"
+    | <span data-count="6">N</span>one -&gt; OS.Dir.tm<span data-count="6">p</span> "cmd_tinygo_%s"
   in
-  <span data-count="5">l</span>et* _did_create : bool = OS.Dir.creat<span data-count="5">e</span> workspace in
+  <span data-count="6">l</span>et* _did_create : bool = OS.Dir.creat<span data-count="6">e</span> workspace in
 
-  <span data-count="5">l</span>et* source_file = compil<span data-count="5">e</span> ~workspace ~out_file files in
-  <span data-count="5">l</span>et workspace = Some workspace in
+  <span data-count="6">l</span>et* source_file = compil<span data-count="6">e</span> ~workspace ~out_file files in
+  <span data-count="6">l</span>et workspace = Some workspace in
 
   let parameters = { symbolic_parameters with workspace } in
 

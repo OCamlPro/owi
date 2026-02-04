@@ -271,7 +271,7 @@ type output_format =
 
 let pp format with_breadcrumbs no_value fmt
   (model, { Thread.symbol_scopes; labels; breadcrumbs; _ }) =
-  <span data-count="243">m</span>atch format with
+  <span data-count="249">m</span>atch format with
   | <span data-count="0">J</span>son -&gt;
     let json = Symbol_scope.to_json ~no_value model symbol_scopes in
     <span data-count="0">l</span>et labels_json =
@@ -295,14 +295,14 @@ let pp format with_breadcrumbs no_value fmt
       else <span data-count="0">j</span>son
     in
     Yojson.Basic.pretty_print fmt json
-  | <span data-count="243">S</span>cfg -&gt;
+  | <span data-count="249">S</span>cfg -&gt;
     let scfg = Symbol_scope.to_scfg ~no_value model symbol_scopes in
-    <span data-count="243">l</span>et model = Scfg.Query.get_dir_exn "model" scfg in
-    <span data-count="243">l</span>et lbls =
+    <span data-count="249">l</span>et model = Scfg.Query.get_dir_exn "model" scfg in
+    <span data-count="249">l</span>et lbls =
       { Scfg.Types.name = "labels"
       ; params = []
       ; children =
-          List.ma<span data-count="243">p</span>
+          List.ma<span data-count="249">p</span>
             (fun (id, lbl_name) -&gt;
               <span data-count="2">{</span> Scfg.Types.name = "label"
               ; params = [ string_of_in<span data-count="2">t</span> id; lbl_name ]
@@ -318,19 +318,19 @@ let pp format with_breadcrumbs no_value fmt
           ; children = []
           }
         ]
-      else <span data-count="242">[</span>]
+      else <span data-count="248">[</span>]
     in
     let ret =
       model
-      :: (if List.lengt<span data-count="243">h</span> lbls.children &gt; 0 then <span data-count="2">l</span>bls :: bcrumbs else <span data-count="241">b</span>crumbs)
+      :: (if List.lengt<span data-count="249">h</span> lbls.children &gt; 0 then <span data-count="2">l</span>bls :: bcrumbs else <span data-count="247">b</span>crumbs)
     in
     Scfg.Pp.config fmt ret
 
 let print ~format ~out_file ~id ~no_value ~no_stop_at_failure
   ~no_assert_failure_expression_printing ~with_breadcrumbs
   ({ Bug.model; thread; _ } as bug) =
-  <span data-count="243">b</span>egin match bug.Bug.kind with
-  | <span data-count="178">`</span>Trap trap -&gt; Log.er<span data-count="178">r</span> (fun m -&gt; <span data-count="178">m</span> "Trap: %s" (Result.err_to_strin<span data-count="178">g</span> trap))
+  <span data-count="249">b</span>egin match bug.Bug.kind with
+  | <span data-count="184">`</span>Trap trap -&gt; Log.er<span data-count="184">r</span> (fun m -&gt; <span data-count="184">m</span> "Trap: %s" (Result.err_to_strin<span data-count="184">g</span> trap))
   | <span data-count="65">`</span>Assertion assertion -&gt;
     if no_assert_failure_expression_printing then
       <span data-count="13">L</span>og.er<span data-count="13">r</span> (fun m -&gt; <span data-count="13">m</span> "Assert failure")
@@ -338,11 +338,11 @@ let print ~format ~out_file ~id ~no_value ~no_stop_at_failure
   end;
 
   match out_file with
-  | <span data-count="240">N</span>one -&gt; begin
+  | <span data-count="246">N</span>one -&gt; begin
     Log.app (fun m -&gt;
-      <span data-count="240">l</span>et fmt = m (if no_stop_at_failure then <span data-count="182">"</span>%a@." else <span data-count="58">"</span>%a") in
-      <span data-count="240">f</span>mt (p<span data-count="240">p</span> format with_breadcrumbs no_value) (model, thread) );
-    <span data-count="240">O</span>k ()
+      <span data-count="246">l</span>et fmt = m (if no_stop_at_failure then <span data-count="182">"</span>%a@." else <span data-count="64">"</span>%a") in
+      <span data-count="246">f</span>mt (p<span data-count="246">p</span> format with_breadcrumbs no_value) (model, thread) );
+    <span data-count="246">O</span>k ()
   end
   | <span data-count="3">S</span>ome path -&gt;
     let ext = match format with <span data-count="0">J</span>son -&gt; "json" | <span data-count="3">S</span>cfg -&gt; "scfg" in
