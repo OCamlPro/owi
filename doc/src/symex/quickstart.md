@@ -204,39 +204,241 @@ Here we have a single symbol in the model, whose name is `symbol_0`, of type `i3
 
 ## Defining symbols by hand
 
-{{#tabs global="lang" }}
-{{#tab name="C" }}
-TODO
-{{#endtab }}
-{{#tab name="C++" }}
-TODO
-{{#endtab }}
-{{#tab name="Rust" }}
-TODO
-{{#endtab }}
-{{#tab name="Zig" }}
-TODO
-{{#endtab }}
-{{#tab name="Wasm" }}
-TODO
-{{#endtab }}
-{{#endtabs }}
+In the previous example, we used the `--invoke-with-symbol` flag.
+It is useful for simple examples, but when building more involved inputs, it is better to get more control.
+This is achieved by defining symbols by hand instead of using the `--invoke-with-symbol` flag.
+Here is an example which is the exact same as the previous one, but where the unique symbol is created by hand through a function provided by Owi.
+We define this symbol in another function `check` which simply calls `f` with the symbol as input.
 
 {{#tabs global="lang" }}
 {{#tab name="C" }}
-TODO
+<!-- $MDX file=f_byhand.c -->
+```c
+#include <owi.h>
+
+int f(int x) {
+
+  int arr[4] = {1, 2, 0, 4};
+
+  if (x >= 0 && x < 4) {
+    return 10 / arr[x];
+  }
+
+  return -1;
+}
+
+int check(void) {
+  int x = owi_int();
+  return f(x);
+}
+```
 {{#endtab }}
 {{#tab name="C++" }}
-TODO
+<!-- $MDX file=f_byhand.cpp -->
+```cpp
+#include <owi.h>
+
+int f(int x) {
+
+  int arr[4] = {1, 2, 0, 4};
+
+  if (x >= 0 && x < 4) {
+    return 10 / arr[x];
+  }
+
+  return -1;
+}
+
+extern "C" int check(void) {
+  int x = owi_int();
+  return f(x);
+}
+```
+{{#endtab }}
+{{#tab name="Go" }}
+<!-- $MDX file=f_byhand.go -->
+```go
+package main
+
+func f(x int32) int32 {
+	arr := [4]int32{1, 2, 0, 4}
+
+	if x >= 0 && x < 4 {
+		return 10 / arr[x]
+	}
+
+	return -1
+}
+
+
+//go:wasm-module owi
+//export i32_symbol
+func i32_symbol() int32
+
+//go:export check
+func check() {
+	var x int32 = i32_symbol()
+	var _ int32 = f(x)
+}
+
+// main is required by the tinygo compiler, even if it isn't used.
+func main() {}
+```
 {{#endtab }}
 {{#tab name="Rust" }}
-TODO
+<!-- $MDX file=f_byhand.rs -->
+```rs
+#![no_main]
+
+fn f(x: usize) -> i32 {
+
+  let arr = [1, 2, 0, 4];
+
+  if x < arr.len() {
+    return 10 / arr[x];
+  }
+
+  -1
+}
+
+use owi_sym::Symbolic;
+
+#[no_mangle]
+pub extern "C" fn check(x: usize) -> () {
+  let x = u32::symbol(); // TODO: replace by usize::symbol()
+  let res = f(x.try_into().unwrap());
+}
+```
 {{#endtab }}
 {{#tab name="Zig" }}
-TODO
+<!-- $MDX file=f_byhand.zig -->
+```rs
+fn f(x: usize) i32 {
+
+  const arr = [_]i32{ 1, 2, 0, 4 };
+
+  if (x < arr.len) {
+    return @divTrunc(10, arr[x]);
+  }
+
+  return -1;
+}
+
+extern "owi" fn i32_symbol() usize;
+
+export fn check() void {
+  const x: usize = i32_symbol();
+  _ = &f(x);
+}
+```
 {{#endtab }}
 {{#tab name="Wasm" }}
-TODO
+<!-- $MDX file=f_byhand.wat -->
+```wasm
+(module
+  (import "owi" "i32_symbol" (func $i32_symbol (result i32)))
+  (memory 1)
+
+  (func $f (param $x i32) (result i32)
+    (local $value i32)
+
+    (i32.store (i32.mul (i32.const 4) (i32.const 0)) (i32.const 1))
+    (i32.store (i32.mul (i32.const 4) (i32.const 1)) (i32.const 2))
+    (i32.store (i32.mul (i32.const 4) (i32.const 2)) (i32.const 0))
+    (i32.store (i32.mul (i32.const 4) (i32.const 3)) (i32.const 4))
+
+    (if (i32.ge_u (local.get $x) (i32.const 4) )
+      (then (return (i32.const -1))))
+
+    (local.set $value
+      (i32.load
+        (i32.mul
+          (local.get $x)
+          (i32.const 4))))
+
+    (i32.div_s
+      (i32.const 10)
+      (local.get $value))
+  )
+
+  (func $check (export "check")
+    call $i32_symbol
+    call $f
+    drop
+  )
+)
+```
+{{#endtab }}
+{{#endtabs }}
+
+The invokation on Owi is the same as in the previous example, we simply removed the `--invoke-with-symbol` flag and changed the entry point from `f` to `check`.
+
+{{#tabs global="lang" }}
+{{#tab name="C" }}
+```sh
+$ owi c ./f_byhand.c --entry-point=check --no-assert-failure-expression-printing --verbosity=error
+owi: [ERROR] Trap: integer divide by zero
+model {
+  symbol symbol_0 i32 2
+}
+owi: [ERROR] Reached problem!
+[13]
+```
+{{#endtab }}
+{{#tab name="C++" }}
+```sh
+$ owi c++ ./f_byhand.cpp --entry-point=check --no-assert-failure-expression-printing --verbosity=error
+owi: [ERROR] Trap: integer divide by zero
+model {
+  symbol symbol_0 i32 2
+}
+owi: [ERROR] Reached problem!
+[13]
+```
+{{#endtab }}
+{{#tab name="Go" }}
+```sh
+$ owi tinygo ./f_byhand.go --entry-point=check --no-assert-failure-expression-printing --verbosity=error
+owi: [ERROR] Trap: unreachable
+model {
+  symbol symbol_0 i32 2
+}
+owi: [ERROR] Reached problem!
+[13]
+```
+{{#endtab }}
+{{#tab name="Rust" }}
+```sh
+$ owi rust ./f_byhand.rs --entry-point=check --no-assert-failure-expression-printing --verbosity=error
+owi: [ERROR] Trap: unreachable
+model {
+  symbol symbol_0 i32 2
+}
+owi: [ERROR] Reached problem!
+[13]
+```
+{{#endtab }}
+{{#tab name="Zig" }}
+```sh
+$ owi zig ./f_byhand.zig --entry-point=check --no-assert-failure-expression-printing --verbosity=error
+owi: [ERROR] Trap: unreachable
+model {
+  symbol symbol_0 i32 2
+}
+owi: [ERROR] Reached problem!
+[13]
+```
+{{#endtab }}
+{{#tab name="Wasm" }}
+```sh
+$ owi sym ./f_byhand.wat --entry-point=check --no-assert-failure-expression-printing --verbosity=error
+owi: [ERROR] Trap: integer divide by zero
+model {
+  symbol symbol_0 i32 2
+}
+owi: [ERROR] Reached problem!
+[13]
+```
 {{#endtab }}
 {{#endtabs }}
 
