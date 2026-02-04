@@ -581,7 +581,7 @@ let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file
   in
 
   let+ () =
-    Log.bench_fn "Compiling time<span data-count="203">"</span> @@ fun () -&gt;
+    Log.bench_fn "compiling time<span data-count="203">"</span> @@ fun () -&gt;
     <span data-count="203">m</span>atch OS.Cmd.run ~err clang with
     | <span data-count="202">O</span>k _ as v -&gt; v
     | <span data-count="1">E</span>rror (`Msg msg) -&gt;

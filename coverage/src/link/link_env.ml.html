@@ -294,40 +294,40 @@ type 'ext t =
   ; id : int
   }
 
-let id (env : _ t) = <span data-count="193475">e</span>nv.id
+let id (env : _ t) = <span data-count="195651">e</span>nv.id
 
 let get_global (env : _ t) id =
-  <span data-count="1125">m</span>atch IMap.find_opt id env.globals with
+  <span data-count="1132">m</span>atch IMap.find_opt id env.globals with
   | None -&gt; assert false
-  | <span data-count="1125">S</span>ome v -&gt; Concrete_choice.return v
+  | <span data-count="1132">S</span>ome v -&gt; Concrete_choice.return v
 
 let get_memory (env : _ t) id =
-  <span data-count="1069774">m</span>atch IMap.find_opt id env.memories with
+  <span data-count="1069784">m</span>atch IMap.find_opt id env.memories with
   | None -&gt; assert false
-  | <span data-count="1069774">S</span>ome v -&gt; Concrete_choice.return v
+  | <span data-count="1069784">S</span>ome v -&gt; Concrete_choice.return v
 
 let get_table (env : _ t) id =
-  <span data-count="1608278">m</span>atch IMap.find_opt id env.tables with
+  <span data-count="1608283">m</span>atch IMap.find_opt id env.tables with
   | None -&gt; assert false
-  | <span data-count="1608278">S</span>ome v -&gt; Concrete_choice.return v
+  | <span data-count="1608283">S</span>ome v -&gt; Concrete_choice.return v
 
 let get_func (env : _ t) id =
-  <span data-count="5117532">m</span>atch IMap.find_opt id env.functions with None -&gt; assert false | <span data-count="5117533">S</span>ome v -&gt; v
+  <span data-count="5113534">m</span>atch IMap.find_opt id env.functions with None -&gt; assert false | <span data-count="5113534">S</span>ome v -&gt; v
 
 let get_data (env : _ t) id =
-  <span data-count="931">m</span>atch IMap.find_opt id env.data with
+  <span data-count="951">m</span>atch IMap.find_opt id env.data with
   | None -&gt; assert false
-  | <span data-count="931">S</span>ome v -&gt; Concrete_choice.return v
+  | <span data-count="951">S</span>ome v -&gt; Concrete_choice.return v
 
 let get_elem (env : _ t) id =
-  <span data-count="1147">m</span>atch IMap.find_opt id env.elem with None -&gt; assert false | <span data-count="1147">S</span>ome v -&gt; v
+  <span data-count="1157">m</span>atch IMap.find_opt id env.elem with None -&gt; assert false | <span data-count="1157">S</span>ome v -&gt; v
 
 let get_tag (env : _ t) id =
   <span data-count="5">m</span>atch IMap.find_opt id env.tags with None -&gt; assert false | <span data-count="5">S</span>ome v -&gt; v
 
 let get_extern_func env id =
-  <span data-count="24955">l</span>et f, _t = Dynarray.get env.extern_funcs id in
-  <span data-count="24956">f</span>
+  <span data-count="24967">l</span>et f, _t = Dynarray.get env.extern_funcs id in
+  <span data-count="24967">f</span>
 
 module Build = struct
   type t =
@@ -351,20 +351,20 @@ module Build = struct
     }
 
   let add_global id const (env : t) =
-    <span data-count="1139">{</span> env with globals = IMap.ad<span data-count="1139">d</span> id const env.globals }
+    <span data-count="1154">{</span> env with globals = IMap.ad<span data-count="1154">d</span> id const env.globals }
 
   let add_memory id mem (env : t) =
-    <span data-count="931">{</span> env with memories = IMap.ad<span data-count="931">d</span> id mem env.memories }
+    <span data-count="936">{</span> env with memories = IMap.ad<span data-count="936">d</span> id mem env.memories }
 
   let add_table id table (env : t) =
-    <span data-count="766">{</span> env with tables = IMap.ad<span data-count="766">d</span> id table env.tables }
+    <span data-count="771">{</span> env with tables = IMap.ad<span data-count="771">d</span> id table env.tables }
 
   let add_func id func (env : t) =
-    <span data-count="12961">{</span> env with functions = IMap.ad<span data-count="12961">d</span> id func env.functions }
+    <span data-count="13127">{</span> env with functions = IMap.ad<span data-count="13127">d</span> id func env.functions }
 
-  let add_data id data (env : t) = <span data-count="650">{</span> env with data = IMap.ad<span data-count="650">d</span> id data env.data }
+  let add_data id data (env : t) = <span data-count="660">{</span> env with data = IMap.ad<span data-count="660">d</span> id data env.data }
 
-  let add_elem id elem (env : t) = <span data-count="885">{</span> env with elem = IMap.ad<span data-count="885">d</span> id elem env.elem }
+  let add_elem id elem (env : t) = <span data-count="890">{</span> env with elem = IMap.ad<span data-count="890">d</span> id elem env.elem }
 
   let add_tag id tag (env : t) = <span data-count="7">{</span> env with tags = IMap.ad<span data-count="7">d</span> id tag env.tags }
 
@@ -380,22 +380,22 @@ module Build = struct
     | <span data-count="0">V</span>ar -&gt; Error `Constant_expression_required
 
   let get_func (env : t) id =
-    <span data-count="2604">m</span>atch IMap.find_opt id env.functions with
+    <span data-count="2624">m</span>atch IMap.find_opt id env.functions with
     | <span data-count="0">N</span>one -&gt; Error (`Unknown_func (Text.Raw id))
-    | <span data-count="2604">S</span>ome v -&gt; Ok v
+    | <span data-count="2624">S</span>ome v -&gt; Ok v
 
   let get_tag (env : t) id =
     <span data-count="0">m</span>atch IMap.find_opt id env.tags with
     | <span data-count="0">N</span>one -&gt; Error (`Unknown_tag (Text.Raw id))
     | <span data-count="0">S</span>ome v -&gt; Ok v
 
-  let get_memories { memories; _ } = <span data-count="449">m</span>emories
+  let get_memories { memories; _ } = <span data-count="459">m</span>emories
 end
 
 let freeze id
   ({ globals; memories; tables; functions; data; elem; tags } : Build.t)
   extern_funcs =
-  <span data-count="2374">{</span> id; globals; memories; tables; functions; data; elem; tags; extern_funcs }
+  <span data-count="2379">{</span> id; globals; memories; tables; functions; data; elem; tags; extern_funcs }
 </code></pre>
       </div>
     </div>

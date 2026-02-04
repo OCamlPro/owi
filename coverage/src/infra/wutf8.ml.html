@@ -160,14 +160,14 @@ and encode' = function
   | <span data-count="0">_</span> -&gt; raise Utf8
 
 let check_utf8 s =
-  <span data-count="35665">l</span>et open Uutf in
+  <span data-count="35706">l</span>et open Uutf in
   let decoder = decoder ~encoding:`UTF_8 (`String s) in
-  <span data-count="35665">l</span>et rec loop () =
-    <span data-count="261114">m</span>atch decode decoder with
+  <span data-count="35706">l</span>et rec loop () =
+    <span data-count="261641">m</span>atch decode decoder with
     | <span data-count="704">`</span>Malformed s -&gt; Error (`Malformed_utf8_encoding s)
     | `Await -&gt; assert false
-    | <span data-count="34961">`</span>End -&gt; Ok ()
-    | <span data-count="225449">`</span>Uchar _ -&gt; loop ()
+    | <span data-count="35002">`</span>End -&gt; Ok ()
+    | <span data-count="225935">`</span>Uchar _ -&gt; loop ()
   in
   loop ()
 </code></pre>

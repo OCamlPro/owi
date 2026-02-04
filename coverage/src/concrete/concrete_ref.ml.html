@@ -181,8 +181,8 @@ let pp fmt = function
   | <span data-count="0">N</span>ullRef -&gt; pf fmt "nullref"
 
 (* TODO: Is this the same as Symbolic_ref.null? *)
-let null = <span data-count="819">f</span>unction
-  | <span data-count="731">B</span>inary.Func_ht | <span data-count="4">N</span>oFunc_ht | <span data-count="16">T</span>ypeUse _ -&gt; Func None
+let null = <span data-count="824">f</span>unction
+  | <span data-count="736">B</span>inary.Func_ht | <span data-count="4">N</span>oFunc_ht | <span data-count="16">T</span>ypeUse _ -&gt; Func None
   (* TODO: is this correct? Are all nulls equal? *)
   | <span data-count="53">E</span>xtern_ht | <span data-count="3">N</span>oExtern_ht -&gt; Extern None
   | <span data-count="3">A</span>ny_ht | <span data-count="3">N</span>one_ht -&gt; NullRef

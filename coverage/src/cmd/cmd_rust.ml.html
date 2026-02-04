@@ -221,7 +221,7 @@ let compile ~entry_point ~includes:_ ~opt_lvl:_ ~out_file (files : Fpath.t list)
   let* () = Bos.OS.Env.set_var "RUSTFLAGS" (Some "-Zcrate-attr=no_main") in
   *)
   let+ () =
-    Log.bench_fn "Compiling time<span data-count="4">"</span> @@ fun () -&gt;
+    Log.bench_fn "compiling time<span data-count="4">"</span> @@ fun () -&gt;
     <span data-count="4">m</span>atch OS.Cmd.run ~err rustc_cmd with
     | <span data-count="3">O</span>k _ as v -&gt; v
     | <span data-count="1">E</span>rror (`Msg e) -&gt;

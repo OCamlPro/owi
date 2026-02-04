@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "frappe";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-8d6285c8.js";
+            window.path_to_searchindex_js = "../searchindex-2fe1e195.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-66d4629a.js"></script>
@@ -182,6 +182,7 @@
 <nav class="mdbook-tabs">
 <button class="mdbook-tab active" data-tabname="C">C</button>
 <button class="mdbook-tab" data-tabname="C++">C++</button>
+<button class="mdbook-tab" data-tabname="Go">Go</button>
 <button class="mdbook-tab" data-tabname="Rust">Rust</button>
 <button class="mdbook-tab" data-tabname="Zig">Zig</button>
 <button class="mdbook-tab" data-tabname="Wasm">Wasm</button>
@@ -213,6 +214,26 @@
 
   return -1;
 }
+</code></pre>
+</div>
+
+<div class="mdbook-tab-content hidden" data-tabname="Go">
+<!-- $MDX file=f.go -->
+<pre><code class="language-go">package main
+
+//go:export f
+func f(x int32) int32 {
+	arr := [4]int32{1, 2, 0, 4}
+
+	if x &gt;= 0 &amp;&amp; x &lt; 4 {
+		return 10 / arr[x]
+	}
+
+	return -1
+}
+
+// main is required by the tinygo compiler, even if it isn't used.
+func main() {}
 </code></pre>
 </div>
 
@@ -288,6 +309,7 @@ pub extern "C" fn f(x: usize) -&gt; i32 {
 <nav class="mdbook-tabs">
 <button class="mdbook-tab active" data-tabname="C">C</button>
 <button class="mdbook-tab" data-tabname="C++">C++</button>
+<button class="mdbook-tab" data-tabname="Go">Go</button>
 <button class="mdbook-tab" data-tabname="Rust">Rust</button>
 <button class="mdbook-tab" data-tabname="Zig">Zig</button>
 <button class="mdbook-tab" data-tabname="Wasm">Wasm</button>
@@ -306,6 +328,17 @@ owi: [ERROR] Reached problem!
 <div class="mdbook-tab-content hidden" data-tabname="C++">
 <pre><code class="language-sh">$ owi c++ ./f.cpp --entry-point=f --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
 owi: [ERROR] Trap: integer divide by zero
+model {
+  symbol symbol_0 i32 2
+}
+owi: [ERROR] Reached problem!
+[13]
+</code></pre>
+</div>
+
+<div class="mdbook-tab-content hidden" data-tabname="Go">
+<pre><code class="language-sh">$ owi tinygo ./f.go --entry-point=f --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
+owi: [ERROR] Trap: unreachable
 model {
   symbol symbol_0 i32 2
 }
@@ -420,6 +453,7 @@ owi: [ERROR] Reached problem!
 <nav class="mdbook-tabs">
 <button class="mdbook-tab active" data-tabname="C">C</button>
 <button class="mdbook-tab" data-tabname="C++">C++</button>
+<button class="mdbook-tab" data-tabname="Go">Go</button>
 <button class="mdbook-tab" data-tabname="Rust">Rust</button>
 <button class="mdbook-tab" data-tabname="Zig">Zig</button>
 <button class="mdbook-tab" data-tabname="Wasm">Wasm</button>
@@ -457,6 +491,37 @@ int mean2(int x, int y) {
 extern "C" void check(int x, int y) {
   owi_assert(mean1(x, y) == mean2(x, y));
 }
+</code></pre>
+</div>
+
+<div class="mdbook-tab-content hidden" data-tabname="Go">
+<!-- $MDX file=mean.go -->
+<pre><code class="language-go">package main
+
+//go:wasm-module owi
+//export i32_symbol
+func i32_symbol() int32
+
+//go:wasm-module owi
+//export assert
+func owi_assert(bool)
+
+
+func mean1(x, y int32) int32 {
+	return (x &amp; y) + ((x ^ y) &gt;&gt; 1)
+}
+
+func mean2(x, y int32) int32 {
+	return (x + y) / 2
+}
+
+//go:export check
+func check(x, y int32) {
+	owi_assert(mean1(x, y) == mean2(x, y))
+}
+
+// main is required by the tinygo compiler, even if it isn't used.
+func main() {}
 </code></pre>
 </div>
 
@@ -548,6 +613,7 @@ export fn check(x: i32, y: i32) void {
 <nav class="mdbook-tabs">
 <button class="mdbook-tab active" data-tabname="C">C</button>
 <button class="mdbook-tab" data-tabname="C++">C++</button>
+<button class="mdbook-tab" data-tabname="Go">Go</button>
 <button class="mdbook-tab" data-tabname="Rust">Rust</button>
 <button class="mdbook-tab" data-tabname="Zig">Zig</button>
 <button class="mdbook-tab" data-tabname="Wasm">Wasm</button>
@@ -570,6 +636,18 @@ owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32 -1570748002
   symbol symbol_1 i32 -1425538774
+}
+owi: [ERROR] Reached problem!
+[13]
+</code></pre>
+</div>
+
+<div class="mdbook-tab-content hidden" data-tabname="Go">
+<pre><code class="language-sh">$ owi tinygo ./mean.go --entry-point=check --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
+owi: [ERROR] Assert failure
+model {
+  symbol symbol_0 i32 -2147483648
+  symbol symbol_1 i32 -2147483646
 }
 owi: [ERROR] Reached problem!
 [13]

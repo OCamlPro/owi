@@ -1224,10 +1224,10 @@ let cmd ~deterministic_result_order ~fail_mode ~exploration_strategy ~files
 
   <span data-count="3">l</span>et compile ~unsafe file = <span data-count="6">C</span>ompile.File.until_validate ~unsafe file in
 
-  Log.info (fun m -&gt; <span data-count="1">m</span> "Compiling %a" Fpath.pp file1);
+  Log.info (fun m -&gt; <span data-count="1">m</span> "compiling %a" Fpath.pp file1);
   <span data-count="3">l</span>et* module1 = compil<span data-count="3">e</span> ~unsafe file1 in
 
-  <span data-count="3">L</span>og.info (fun m -&gt; <span data-count="1">m</span> "Compiling %a" Fpath.pp file2);
+  <span data-count="3">L</span>og.info (fun m -&gt; <span data-count="1">m</span> "compiling %a" Fpath.pp file2);
   <span data-count="3">l</span>et* module2 = compil<span data-count="3">e</span> ~unsafe file2 in
 
   <span data-count="3">l</span>et funcexports1 =

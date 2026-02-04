@@ -58,10 +58,10 @@
 
 (* TODO: remove once there is an equivalent in stdlib *)
 let atomic_modify f atomic =
-  <span data-count="10">l</span>et rec loop f atomic =
-    <span data-count="10">l</span>et v_old = Atomic.get atomic in
-    <span data-count="10">l</span>et v_new = f v_old in
-    <span data-count="10">i</span>f Atomic.compare_and_set atomic v_old v_new then <span data-count="10">(</span>) else <span data-count="0">l</span>oop f atomic
+  <span data-count="5105">l</span>et rec loop f atomic =
+    <span data-count="5105">l</span>et v_old = Atomic.get atomic in
+    <span data-count="5105">l</span>et v_new = f v_old in
+    <span data-count="5105">i</span>f Atomic.compare_and_set atomic v_old v_new then <span data-count="5105">(</span>) else <span data-count="0">l</span>oop f atomic
   in
   loop f atomic
 </code></pre>

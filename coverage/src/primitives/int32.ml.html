@@ -335,13 +335,13 @@ let to_int64 n = <span data-count="648">I</span>nt64.of_int32 n [@@inline]
 
 let eq (x : int32) y = <span data-count="1870519">e</span>qual x y [@@inline]
 
-let ne (x : int32) y = <span data-count="27048">c</span>ompar<span data-count="27048">e</span> x y &lt;&gt; 0 [@@inline]
+let ne (x : int32) y = <span data-count="31253">c</span>ompar<span data-count="31253">e</span> x y &lt;&gt; 0 [@@inline]
 
-let lt (x : int32) y = <span data-count="26243">c</span>ompar<span data-count="26243">e</span> x y &lt; 0 [@@inline]
+let lt (x : int32) y = <span data-count="30448">c</span>ompar<span data-count="30448">e</span> x y &lt; 0 [@@inline]
 
-let le (x : int32) y = <span data-count="27984">c</span>ompar<span data-count="27984">e</span> x y &lt;= 0 [@@inline]
+let le (x : int32) y = <span data-count="32189">c</span>ompar<span data-count="32189">e</span> x y &lt;= 0 [@@inline]
 
-let lt_u (x : int32) y = <span data-count="95555">u</span>nsigned_compar<span data-count="95555">e</span> x y &lt; 0 [@@inline]
+let lt_u (x : int32) y = <span data-count="95565">u</span>nsigned_compar<span data-count="95565">e</span> x y &lt; 0 [@@inline]
 
 let le_u (x : int32) y = <span data-count="848314">u</span>nsigned_compar<span data-count="848314">e</span> x y &lt;= 0 [@@inline]
 
@@ -383,9 +383,9 @@ let hex_digit = function
   | _ -&gt; assert false
 [@@inline]
 
-let max_upper = unsigned_di<span data-count="747">v</span> minus_one 10l
+let max_upper = unsigned_di<span data-count="752">v</span> minus_one 10l
 
-let max_lower = unsigned_re<span data-count="747">m</span> minus_one 10l
+let max_lower = unsigned_re<span data-count="752">m</span> minus_one 10l
 
 let sign_extend i =
   <span data-count="66468">l</span>et sign_bit = logand (of_in<span data-count="66468">t</span> (1 lsl (32 - 1))) i in
@@ -445,7 +445,7 @@ let of_string_exn s =
 
 let of_string s = <span data-count="25410">t</span>ry Some (of_string_ex<span data-count="25409">n</span> s) with <span data-count="1">F</span>ailure _ -&gt; None
 
-let to_string_u = Fmt.st<span data-count="747">r</span> "%lu"
+let to_string_u = Fmt.st<span data-count="752">r</span> "%lu"
 </code></pre>
       </div>
     </div>

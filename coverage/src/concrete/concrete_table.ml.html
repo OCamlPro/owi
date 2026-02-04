@@ -195,11 +195,11 @@ type t =
 let fresh =
   let r = ref (-1) in
   fun () -&gt;
-    <span data-count="711">i</span>ncr r;
-    <span data-count="711">!</span>r
+    <span data-count="716">i</span>ncr r;
+    <span data-count="716">!</span>r
 
 let get_min : Binary.Table.Type.limits -&gt; int = function
-  | <span data-count="711">I</span>32 { min; _ } -&gt; Int32.to_int min
+  | <span data-count="716">I</span>32 { min; _ } -&gt; Int32.to_int min
   | <span data-count="0">I</span>64 { min; _ } -&gt; Int64.to_int min
 
 let max_size t =
@@ -214,10 +214,10 @@ let max_size t =
       max
 
 let init ?label (typ : Binary.Table.Type.t) : t =
-  <span data-count="711">l</span>et limits, ((_null, heap_type) as ref_type) = typ in
+  <span data-count="716">l</span>et limits, ((_null, heap_type) as ref_type) = typ in
   let null = Concrete_ref.null heap_type in
-  <span data-count="711">l</span>et table = Array.make (get_mi<span data-count="711">n</span> limits) null in
-  <span data-count="711">{</span> id = fres<span data-count="711">h</span> (); label; limits; typ = ref_type; data = table }
+  <span data-count="716">l</span>et table = Array.make (get_mi<span data-count="716">n</span> limits) null in
+  <span data-count="716">{</span> id = fres<span data-count="716">h</span> (); label; limits; typ = ref_type; data = table }
 
 let update table data = <span data-count="29">t</span>able.data &lt;- data
 

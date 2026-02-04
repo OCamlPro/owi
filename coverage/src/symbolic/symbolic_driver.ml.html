@@ -384,45 +384,45 @@ module Bugs = Prio.Make (Prio.FIFO)
 let print_and_count_bugs ~format ~out_file ~no_value
   ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure ~results
   ~with_breadcrumbs =
-  <span data-count="411">l</span>et test_suite_dir = Fpath.(workspace / "test-suite") in
+  <span data-count="416">l</span>et test_suite_dir = Fpath.(workspace / "test-suite") in
   let* (_created : bool) =
-    if not no_value then <span data-count="297">O</span>S.Dir.creat<span data-count="297">e</span> test_suite_dir else <span data-count="114">O</span>k false
+    if not no_value then <span data-count="302">O</span>S.Dir.creat<span data-count="302">e</span> test_suite_dir else <span data-count="114">O</span>k false
   in
 
-  <span data-count="411">l</span>et rec aux count results =
-    <span data-count="595">m</span>atch results () with
+  <span data-count="416">l</span>et rec aux count results =
+    <span data-count="600">m</span>atch results () with
     | <span data-count="357">S</span>eq.Nil -&gt; Ok count
-    | <span data-count="238">S</span>eq.Cons (bug, tl) -&gt;
+    | <span data-count="243">S</span>eq.Cons (bug, tl) -&gt;
       let* () =
-        Model.prin<span data-count="238">t</span> ~format ~out_file ~id:count ~no_value ~no_stop_at_failure
+        Model.prin<span data-count="243">t</span> ~format ~out_file ~id:count ~no_value ~no_stop_at_failure
           ~no_assert_failure_expression_printing ~with_breadcrumbs bug
       in
-      <span data-count="238">l</span>et* () =
+      <span data-count="243">l</span>et* () =
         if not no_value then
-          <span data-count="120">l</span>et testcase = Smtml.Model.get_bindings bug.model |&gt; <span data-count="120">L</span>ist.map snd in
-          <span data-count="120">C</span>md_utils.write_testcas<span data-count="120">e</span> ~dir:test_suite_dir testcase
+          <span data-count="125">l</span>et testcase = Smtml.Model.get_bindings bug.model |&gt; <span data-count="125">L</span>ist.map snd in
+          <span data-count="125">C</span>md_utils.write_testcas<span data-count="125">e</span> ~dir:test_suite_dir testcase
         else <span data-count="118">O</span>k ()
       in
-      <span data-count="238">l</span>et count = succ count in
-      <span data-count="238">i</span>f no_stop_at_failure then <span data-count="184">a</span>ux count tl else <span data-count="54">O</span>k count
+      <span data-count="243">l</span>et count = succ count in
+      <span data-count="243">i</span>f no_stop_at_failure then <span data-count="184">a</span>ux count tl else <span data-count="59">O</span>k count
   in
   aux 0 results
 
 let mk_callback no_stop_at_failure fail_mode res_stack path_count =
  fun ~close_work_queue v -&gt;
-  <span data-count="1685">A</span>tomic.incr path_count;
-  <span data-count="1685">m</span>atch v with
-  | <span data-count="1443">O</span>k (), _thread -&gt; ()
-  | <span data-count="242">E</span>rror bug, _thread -&gt;
+  <span data-count="1755">A</span>tomic.incr path_count;
+  <span data-count="1755">m</span>atch v with
+  | <span data-count="1509">O</span>k (), _thread -&gt; ()
+  | <span data-count="246">E</span>rror bug, _thread -&gt;
     let should_be_added =
       match fail_mode with
-      | <span data-count="234">S</span>ymbolic_parameters.Both -&gt; true
-      | <span data-count="6">A</span>ssertion_only -&gt; Bug.is_assertio<span data-count="6">n</span> bug
+      | <span data-count="239">S</span>ymbolic_parameters.Both -&gt; true
+      | <span data-count="5">A</span>ssertion_only -&gt; Bug.is_assertio<span data-count="5">n</span> bug
       | <span data-count="2">T</span>rap_only -&gt; Bug.is_tra<span data-count="2">p</span> bug
     in
-    if should_be_added then <span data-count="238">b</span>egin
+    if should_be_added then <span data-count="243">b</span>egin
       Bugs.push bug Prio.dummy res_stack;
-      <span data-count="236">i</span>f not no_stop_at_failure then <span data-count="52">b</span>egin
+      <span data-count="238">i</span>f not no_stop_at_failure then <span data-count="54">b</span>egin
         close_work_queue ()
       end
     end
@@ -432,43 +432,43 @@ let compute_number_of_workers workers =
    * TODO: try this at some point? It's likely going to make things bad but who knows...
    * Domainpc.isolate_current ();
    *)
-  <span data-count="411">l</span>et workers =
+  <span data-count="416">l</span>et workers =
     match workers with
-    | <span data-count="383">N</span>one -&gt;
+    | <span data-count="388">N</span>one -&gt;
       let n = Domainpc.get_available_cores () in
-      <span data-count="383">a</span>ssert <span data-count="383">(</span>n &gt; 0);
+      <span data-count="388">a</span>ssert <span data-count="388">(</span>n &gt; 0);
       n
     | <span data-count="28">S</span>ome n -&gt;
       assert <span data-count="28">(</span>n &gt; 0);
       n
   in
-  if workers &gt; 1 then <span data-count="383">L</span>ogs_threaded.enabl<span data-count="383">e</span> ();
-  <span data-count="411">w</span>orkers
+  if workers &gt; 1 then <span data-count="388">L</span>ogs_threaded.enabl<span data-count="388">e</span> ();
+  <span data-count="416">w</span>orkers
 
 let run ~exploration_strategy ~workers ~no_worker_isolation ~no_stop_at_failure
   ~no_value ~no_assert_failure_expression_printing ~deterministic_result_order
   ~fail_mode ~workspace ~solver ~model_format ~model_out_file ~with_breadcrumbs
   ~run_time (to_run : unit Symbolic_choice.t) =
   (* Various initializations *)
-  <span data-count="411">l</span>et bug_stack = Bugs.make () in
-  <span data-count="411">l</span>et path_count = Atomic.make 0 in
-  <span data-count="411">l</span>et time_before = (Unix.time<span data-count="411">s</span> ()).tms_utime in
+  <span data-count="416">l</span>et bug_stack = Bugs.make () in
+  <span data-count="416">l</span>et path_count = Atomic.make 0 in
+  <span data-count="416">l</span>et time_before = (Unix.time<span data-count="416">s</span> ()).tms_utime in
   let module M =
-    ( val Symbolic_parameters.Exploration_strategy.to_work_ds_modul<span data-count="411">e</span>
+    ( val Symbolic_parameters.Exploration_strategy.to_work_ds_modul<span data-count="416">e</span>
             exploration_strategy )
   in
   let module Scheduler = Scheduler.Make (M) in
   let sched = Scheduler.init () in
-  <span data-count="411">l</span>et thread = Thread.init () in
-  <span data-count="411">l</span>et initial_task () = <span data-count="411">S</span>tate_monad.run to_run thread in
+  <span data-count="416">l</span>et thread = Thread.init () in
+  <span data-count="416">l</span>et initial_task () = <span data-count="416">S</span>tate_monad.run to_run thread in
   Scheduler.add_init_task sched initial_task;
 
   (* Compute the number of workers *)
-  <span data-count="411">l</span>et workers = compute_number_of_workers workers in
+  <span data-count="416">l</span>et workers = compute_number_of_workers workers in
 
   (* Set up the bug stack so it knows if more bugs may arrive *)
-  <span data-count="411">f</span>or _i = 1 to workers do
-    <span data-count="794">B</span>ugs.new_pledg<span data-count="794">e</span> bug_stack
+  <span data-count="416">f</span>or _i = 1 to workers do
+    <span data-count="804">B</span>ugs.new_pledg<span data-count="804">e</span> bug_stack
   done;
 
   (* Launch workers *)
@@ -477,24 +477,24 @@ let run ~exploration_strategy ~workers ~no_worker_isolation ~no_stop_at_failure
     let at_worker_value =
       mk_callback no_stop_at_failure fail_mode bug_stack path_count
     in
-    <span data-count="411">l</span>et finally () = <span data-count="780">B</span>ugs.end_pledge bug_stack in
+    <span data-count="416">l</span>et finally () = <span data-count="785">B</span>ugs.end_pledge bug_stack in
     let isolated = not no_worker_isolation in
-    Domainpc.spawn_<span data-count="411">n</span> ~isolated ~n:workers (fun () -&gt;
-      <span data-count="794">S</span>cheduler.run_worker sched ~at_worker_value ~finally )
+    Domainpc.spawn_<span data-count="416">n</span> ~isolated ~n:workers (fun () -&gt;
+      <span data-count="804">S</span>cheduler.run_worker sched ~at_worker_value ~finally )
   in
 
   (* Handle the bug stack *)
   let* count =
     let results =
-      Bugs.read_as_seq bug_stack |&gt; <span data-count="411">B</span>ug.sort_seq_if deterministic_result_order
+      Bugs.read_as_seq bug_stack |&gt; <span data-count="416">B</span>ug.sort_seq_if deterministic_result_order
     in
-    <span data-count="411">p</span>rint_and_count_bugs ~format:model_format ~out_file:model_out_file ~no_value
+    <span data-count="416">p</span>rint_and_count_bugs ~format:model_format ~out_file:model_out_file ~no_value
       ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure
       ~results ~with_breadcrumbs
   in
 
   (* We don't want to wait for domain to complete in normal/quiet mode because it may take quite some time (if a solver is running a long query, the interpreter is in a long concrete loop, or if the work queue was not correctly closed for instance) *)
-  <span data-count="411">l</span>et wait_for_all_domains () =
+  <span data-count="416">l</span>et wait_for_all_domains () =
     <span data-count="1">A</span>rray.iter
       (fun domain -&gt;
         <span data-count="1">t</span>ry Domain.joi<span data-count="1">n</span> domain with
@@ -526,11 +526,11 @@ let run ~exploration_strategy ~workers ~no_worker_isolation ~no_stop_at_failure
     Benchmark.print_final ~bench_stats ~execution_time_a:run_time
       ~execution_time_b ~wait_for_all_domains
   end
-  else <span data-count="409">i</span>f
+  else <span data-count="414">i</span>f
     let landmark_profiling_enabled =
-      Option.is_some @@ Bos.OS.Env.va<span data-count="409">r</span> "OCAML_LANDMARKS"
+      Option.is_some @@ Bos.OS.Env.va<span data-count="414">r</span> "OCAML_LANDMARKS"
     in
-    <span data-count="409">L</span>og.is_debug_enable<span data-count="409">d</span> (<span data-count="1">)</span> || landmark_profiling_enable<span data-count="0">d</span>
+    <span data-count="414">L</span>og.is_debug_enable<span data-count="414">d</span> (<span data-count="1">)</span> || landmark_profiling_enable<span data-count="0">d</span>
   then begin
     (* we only do this in debug mode or when landmarks profiling is on because
          otherwise it makes performances very bad *)
@@ -539,7 +539,7 @@ let run ~exploration_strategy ~workers ~no_worker_isolation ~no_stop_at_failure
 
   Log.info (fun m -&gt; <span data-count="2">m</span> "Completed paths: %d" (Atomic.ge<span data-count="2">t</span> path_count));
 
-  <span data-count="411">i</span>f count &gt; 0 then <span data-count="223">E</span>rror (`Found_bug count)
+  <span data-count="416">i</span>f count &gt; 0 then <span data-count="228">E</span>rror (`Found_bug count)
   else <span data-count="188">O</span>k (Log.ap<span data-count="188">p</span> (fun m -&gt; <span data-count="187">m</span> "All OK!"))
 </code></pre>
       </div>

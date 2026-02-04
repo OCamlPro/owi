@@ -339,7 +339,7 @@ let compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file
           <span data-count="0">F</span>mt.error_msg
             "clang++ failed: run with -vv if the error is not displayed above" )
     in
-    Log.bench_f<span data-count="6">n</span> "Compiling time" (fun () -&gt; <span data-count="6">c</span>ompile_files files)
+    Log.bench_f<span data-count="6">n</span> "compiling time" (fun () -&gt; <span data-count="6">c</span>ompile_files files)
   in
 
   <span data-count="6">l</span>et* llc_bin = OS.Cmd.resolv<span data-count="6">e</span> @@ Cmd.<span data-count="6">v</span> "llc" in

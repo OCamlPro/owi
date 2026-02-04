@@ -242,18 +242,18 @@ type t = Symbolic_table0.t =
   }
 
 let get t i =
-  <span data-count="3873">m</span>atch IMap.find_opt i t.data with <span data-count="3873">S</span>ome v -&gt; v | None -&gt; assert false
+  <span data-count="3876">m</span>atch IMap.find_opt i t.data with <span data-count="3876">S</span>ome v -&gt; v | None -&gt; assert false
 
-let replace tbl = <span data-count="786">S</span>ymbolic_choice.modify_thread (Thread.replace_tabl<span data-count="786">e</span> tbl)
+let replace tbl = <span data-count="811">S</span>ymbolic_choice.modify_thread (Thread.replace_tabl<span data-count="811">e</span> tbl)
 
 let set tbl i v =
-  <span data-count="619">l</span>et data = IMap.add i v tbl.data in
-  <span data-count="619">l</span>et tbl = { tbl with data } in
+  <span data-count="639">l</span>et data = IMap.add i v tbl.data in
+  <span data-count="639">l</span>et tbl = { tbl with data } in
   replace tbl
 
-let size t = <span data-count="4036">I</span>Map.cardinal t.data
+let size t = <span data-count="4044">I</span>Map.cardinal t.data
 
-let typ t = <span data-count="3868">t</span>.typ
+let typ t = <span data-count="3871">t</span>.typ
 
 let max_size t =
   <span data-count="0">m</span>atch t.limits with
@@ -303,18 +303,18 @@ let copy ~t_src ~t_dst ~src ~dst ~len =
   loop src dst len t_src.data t_dst.data |&gt; <span data-count="0">r</span>eplace
 
 let convert_ref_values (v : Concrete_ref.t) : Symbolic_ref.t =
-  <span data-count="784">m</span>atch v with <span data-count="784">F</span>unc f -&gt; Func f | _ -&gt; assert false
+  <span data-count="809">m</span>atch v with <span data-count="809">F</span>unc f -&gt; Func f | _ -&gt; assert false
 
 let of_concrete ~env_id ~id (original : Concrete_table.t) =
-  <span data-count="167">l</span>et _i, data =
+  <span data-count="172">l</span>et _i, data =
     Array.fold_left
       (fun (i, map) v -&gt;
-        <span data-count="784">l</span>et v = convert_ref_values v in
-        <span data-count="784">l</span>et map = IMap.add i v map in
-        <span data-count="784">(</span>suc<span data-count="784">c</span> i, map) )
+        <span data-count="809">l</span>et v = convert_ref_values v in
+        <span data-count="809">l</span>et map = IMap.add i v map in
+        <span data-count="809">(</span>suc<span data-count="809">c</span> i, map) )
       (0, IMap.empty) original.data
   in
-  <span data-count="167">{</span> data; limits = original.limits; typ = original.typ; env_id; id }
+  <span data-count="172">{</span> data; limits = original.limits; typ = original.typ; env_id; id }
 </code></pre>
       </div>
     </div>

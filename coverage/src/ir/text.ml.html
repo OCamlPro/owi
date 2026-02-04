@@ -2061,8 +2061,8 @@ let pp_num_type fmt = function
   | <span data-count="0">V</span>128 -&gt; pf fmt "v128"
 
 let num_type_eq t1 t2 =
-  <span data-count="1643920">m</span>atch (t1, t2) with
-  | <span data-count="1496474">I</span>32, I32 | <span data-count="47017">I</span>64, I64 | <span data-count="46651">F</span>32, F32 | <span data-count="47269">F</span>64, F64 | <span data-count="555">V</span>128, V128 -&gt; true
+  <span data-count="1644063">m</span>atch (t1, t2) with
+  | <span data-count="1496597">I</span>32, I32 | <span data-count="47022">I</span>64, I64 | <span data-count="46656">F</span>32, F32 | <span data-count="47274">F</span>64, F64 | <span data-count="560">V</span>128, V128 -&gt; true
   | <span data-count="5954">(</span><span data-count="1986">I</span>32 | <span data-count="1225">I</span>64 | <span data-count="841">F</span>32 | <span data-count="1902">F</span>64 | <span data-count="0">V</span>128), _ -&gt; false
 
 let compare_num_type t1 t2 =
@@ -2351,9 +2351,9 @@ let is_subtype_ref_type t1 t2 =
   | <span data-count="0">_</span> -&gt; false
 
 let compare_nullable n1 n2 =
-  <span data-count="355">m</span>atch (n1, n2) with
+  <span data-count="360">m</span>atch (n1, n2) with
   | <span data-count="175">N</span>ull, Null | <span data-count="6">N</span>o_null, No_null -&gt; 0
-  | <span data-count="171">N</span>ull, No_null -&gt; -1
+  | <span data-count="176">N</span>ull, No_null -&gt; -1
   | <span data-count="3">N</span>o_null, Null -&gt; 1
 
 let compare_ref_type t1 t2 =
