@@ -45,7 +45,7 @@ depends: [
   "domainpc" {>= "0.2"}
   "odoc" {>= "3.0.0" & with-doc}
   "mdx" {with-test & >= "2.1"}
-  "frama-c" {>= "29.0" & with-test}
+  "frama-c" {>= "29.0" & < "32.0" & with-test}
   "z3" {with-test}
   "bisect_ppx" {>= "2.5" & with-dev-setup}
   "crowbar" {>= "0.2.2" & with-dev-setup}
