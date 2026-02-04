@@ -1,4 +1,3 @@
-extern "owi" fn i32_symbol() i32;
 extern "owi" fn assert(bool) void;
 
 fn mean1(x: i32, y: i32) i32 {
