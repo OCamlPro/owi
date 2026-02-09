@@ -33,25 +33,6 @@ let print_and_count_bugs ~format ~out_file ~no_value
   in
   aux 0 results
 
-let mk_callback no_stop_at_failure fail_mode res_stack path_count =
- fun ~close_work_queue v ->
-  Atomic.incr path_count;
-  match v with
-  | Ok (), _thread -> ()
-  | Error bug, _thread ->
-    let should_be_added =
-      match fail_mode with
-      | Symbolic_parameters.Both -> true
-      | Assertion_only -> Bug.is_assertion bug
-      | Trap_only -> Bug.is_trap bug
-    in
-    if should_be_added then begin
-      Bugs.push bug Prio.dummy res_stack;
-      if not no_stop_at_failure then begin
-        close_work_queue ()
-      end
-    end
-
 let compute_number_of_workers workers =
   (*
    * TODO: try this at some point? It's likely going to make things bad but who knows...
@@ -78,15 +59,15 @@ let run ~exploration_strategy ~workers ~no_worker_isolation ~no_stop_at_failure
   let bug_stack = Bugs.make () in
   let path_count = Atomic.make 0 in
   let time_before = (Unix.times ()).tms_utime in
-  let module M =
+  let module Scheduler =
     ( val Symbolic_parameters.Exploration_strategy.to_work_ds_module
             exploration_strategy )
   in
-  let module Scheduler = Scheduler.Make (M) in
-  let sched = Scheduler.init () in
+  let sched = Scheduler.make () in
   let thread = Thread.init () in
-  let initial_task () = to_run thread in
-  Scheduler.add_init_task sched initial_task;
+  let initial_task = fun () -> to_run thread in
+
+  Scheduler.push initial_task Prio.dummy sched;
 
   (* Compute the number of workers *)
   let workers = compute_number_of_workers workers in
@@ -96,16 +77,67 @@ let run ~exploration_strategy ~workers ~no_worker_isolation ~no_stop_at_failure
     Bugs.new_pledge bug_stack
   done;
 
+  Symbolic_choice.solver_to_use := Some solver;
+
   (* Launch workers *)
   let domains =
-    Symbolic_choice.solver_to_use := Some solver;
-    let at_worker_value =
-      mk_callback no_stop_at_failure fail_mode bug_stack path_count
+    (* Decides what to push in the bug stack and close the scheduler if needed. *)
+    let at_result v =
+      Atomic.incr path_count;
+      match v with
+      | Ok (), _thread -> ()
+      | Error bug, _thread ->
+        let should_be_added =
+          match fail_mode with
+          | Symbolic_parameters.Both -> true
+          | Assertion_only -> Bug.is_assertion bug
+          | Trap_only -> Bug.is_trap bug
+        in
+        if should_be_added then begin
+          Bugs.push bug Prio.dummy bug_stack;
+          if not no_stop_at_failure then begin
+            Scheduler.close sched
+          end
+        end
     in
-    let finally () = Bugs.end_pledge bug_stack in
+
+    (* Handles final values from the monad and reschedule them if needed. *)
+    let rec at_schedulable (t : _ Symex.Monad.Schedulable.t) write_back =
+      match t with
+      | Prune -> ()
+      | Now x -> at_result x
+      | Yield (prio, f) -> write_back (prio, f)
+      | Choice (m1, m2) ->
+        at_schedulable m1 write_back;
+        at_schedulable m2 write_back
+    in
+
+    let run_worker () =
+      Fun.protect
+        ~finally:(fun () -> Bugs.end_pledge bug_stack)
+        (fun () ->
+          try
+            (* Pull work from the queue as long as it's possible *)
+            Scheduler.work_while
+              (fun f write_back -> at_schedulable (f ()) write_back)
+              sched
+          with e ->
+            let e_s = Printexc.to_string e in
+            let bt = Printexc.get_raw_backtrace () in
+            let bt_s = Printexc.raw_backtrace_to_string bt in
+            let bt_s =
+              if String.equal "" bt_s then
+                "use OCAMLRUNPARAM=b to get the backtrace"
+              else bt_s
+            in
+            Log.err (fun m ->
+              m "a worker ended with exception %s, backtrace is: @\n@[<v>%s@]"
+                e_s bt_s );
+            Printexc.raise_with_backtrace e bt )
+    in
+
     let isolated = not no_worker_isolation in
-    Domainpc.spawn_n ~isolated ~n:workers (fun () ->
-      Scheduler.run_worker sched ~at_worker_value ~finally )
+    Domainpc.spawn_n ~isolated ~n:workers run_worker
   in
 
   (* Handle the bug stack *)

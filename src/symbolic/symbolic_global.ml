@@ -10,8 +10,7 @@ type t = Symbolic_global0.t =
 
 let value global = global.value
 
-let replace global =
-  Symbolic_choice.modify_state (Thread.replace_global global)
+let replace global = Symbolic_choice.modify_state (Thread.replace_global global)
 
 let set_value global value =
   let global = { global with value } in
