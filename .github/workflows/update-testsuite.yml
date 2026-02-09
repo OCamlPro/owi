@@ -52,5 +52,6 @@ jobs:
           gh pr create \
             --title "Update testsuite subrepo ($time)" \
             --body "Automated update check for \`test/script/reference/\`." \
+            --label "no changelog" \
             --base main \
             --head "$branch"
