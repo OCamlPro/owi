@@ -45,9 +45,9 @@ jobs:
           time=$(date '+%Y-%m-%d')
           branch="update-wasm-testsuite"
 
-          git checkout -b "$branch"
+          git checkout -B "$branch"
           git commit -am "Update WebAssembly testsuite submodule ($time)"
-          git push origin "$branch"
+          git push origin "$branch" -f
 
           gh pr create \
             --title "Update testsuite subrepo ($time)" \
