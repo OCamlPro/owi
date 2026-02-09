@@ -15,7 +15,7 @@ type t = Symbolic_table0.t =
 let get t i =
   match IMap.find_opt i t.data with Some v -> v | None -> assert false
 
-let replace tbl = Symbolic_choice.modify_thread (Thread.replace_table tbl)
+let replace tbl = Symbolic_choice.modify_state (Thread.replace_table tbl)
 
 let set tbl i v =
   let data = IMap.add i v tbl.data in

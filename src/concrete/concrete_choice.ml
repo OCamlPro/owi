@@ -10,9 +10,9 @@ let[@inline] bind x f = Result.bind x f
 
 let[@inline] ( let* ) x f = bind x f
 
-let[@inline] map v f = Result.map f v
+let[@inline] map f v = Result.map f v
 
-let[@inline] ( let+ ) v f = map v f
+let[@inline] ( let+ ) v f = map f v
 
 let[@inline] select b ~instr_counter_true:_ ~instr_counter_false:_ = Ok b
 

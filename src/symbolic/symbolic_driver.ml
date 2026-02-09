@@ -85,13 +85,13 @@ let run ~exploration_strategy ~workers ~no_worker_isolation ~no_stop_at_failure
   let module Scheduler = Scheduler.Make (M) in
   let sched = Scheduler.init () in
   let thread = Thread.init () in
-  let initial_task () = State_monad.run to_run thread in
+  let initial_task () = to_run thread in
   Scheduler.add_init_task sched initial_task;
 
   (* Compute the number of workers *)
   let workers = compute_number_of_workers workers in
 
-  (* Set up the bug stack so it knows if more bugs may arrive *)
+  (* Setup the bug stack so it knows if more bugs may arrive *)
   for _i = 1 to workers do
     Bugs.new_pledge bug_stack
   done;

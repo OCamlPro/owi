@@ -9,7 +9,7 @@ type t = Symbolic_memory0.t =
   }
 
 let replace memory =
-  Symbolic_choice.modify_thread (Thread.replace_memory memory)
+  Symbolic_choice.modify_state (Thread.replace_memory memory)
 
 let address a =
   let open Symbolic_choice in

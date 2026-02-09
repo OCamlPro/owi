@@ -5,46 +5,12 @@
 (* Multicore is based on several layers of monad transformers. The module as a whole is made to provide a monad to explore in parallel different possibilites, with a notion of priority. *)
 
 (* Add a notion of faillibility to the evaluation. "Transformer without module functor" style. *)
-type 'a t = (('a, Bug.t) result, Thread.t) State_monad.t
 
-(* ================================================
-   Functions to operate on the three monads layers.
-   ================================================ *)
+include Symex.Monad
 
-let[@inline] return x : _ t = State_monad.return (Ok x)
+type 'a t = ('a, Bug.t, Prio.metrics, Thread.t) Symex.Monad.t
 
-let[@inline] lift x =
-  let ( let+ ) = State_monad.( let+ ) in
-  let+ x in
-  Ok x
-
-let[@inline] bind (mx : _ t) f : _ t =
-  let ( let* ) = State_monad.( let* ) in
-  let* mx in
-  match mx with Ok x -> f x | Error _ as mx -> State_monad.return mx
-
-let[@inline] ( let* ) mx f = bind mx f
-
-let[@inline] map mx f =
-  let ( let+ ) = State_monad.( let+ ) in
-  let+ mx in
-  match mx with Ok x -> Ok (f x) | Error _ as mx -> mx
-
-let[@inline] ( let+ ) mx f = map mx f
-
-let[@inline] lift_schedulable (v : 'a Scheduler.Schedulable.t) : 'a t =
-  let v = State_monad.lift v in
-  lift v
-
-let[@inline] with_thread (f : Thread.t -> 'a) : 'a t =
-  let x = State_monad.with_state (fun st -> (f st, st)) in
-  lift x
-
-let thread = with_thread Fun.id
-
-let[@inline] modify_thread f = lift (State_monad.modify_state f)
-
-let[@inline] set_thread st = modify_thread (Fun.const st)
+let state : Thread.t t = state ()
 
 let solver_to_use = ref None
 
@@ -57,94 +23,72 @@ let solver_dls_key =
 
 let[@inline] solver () = Domain.DLS.get solver_dls_key
 
-(* Create two new branches, they do not yield so the yield should be created manually! *)
-let[@inline] choose a b = State_monad.liftF2 Scheduler.Schedulable.choose a b
-
-(* Yield the current branch (i.e. add it to the work queue so that it gets executed later. )*)
-let yield prio = lift_schedulable @@ Scheduler.Schedulable.yield prio
-
-(* Child will be a new branch that immediately yields, and parent will execute directly without yielding. *)
-let[@inline] fork ~(parent : 'a t) ~child : 'a t =
-  let prio, child = child in
-  let child =
-    let* () = yield prio in
-    child
-  in
-  choose parent child
-
-let stop = lift_schedulable Scheduler.Schedulable.stop
-
-(* ============================================
-   Now this is actual symbolic execution stuff!
-   ============================================ *)
-
 let add_pc (c : Symbolic_boolean.t) =
   let c = Smtml.Typed.simplify c in
   match Smtml.Typed.view c with
   | Val True -> return ()
-  | Val False -> stop
+  | Val False -> prune ()
   | _ ->
-    let* thread in
-    let new_thread = Thread.add_pc thread c in
-    set_thread new_thread
+    let* state in
+    let new_thread = Thread.add_pc state c in
+    set_state new_thread
 [@@inline]
 
 let get_pc () =
-  let+ thread in
-  let pc = thread.pc in
-  let pc = Symbolic_path_condition.slice pc in
+  let+ state in
+  let pc = state.pc in
+  let pc = Symex.Path_condition.slice pc in
   List.fold_left Smtml.Expr.Set.union Smtml.Expr.Set.empty pc
 
-let add_breadcrumb crumb =
-  modify_thread (fun t -> Thread.add_breadcrumb t crumb)
+let add_breadcrumb crumb = modify_state (fun t -> Thread.add_breadcrumb t crumb)
 
-let add_label label = modify_thread (fun t -> Thread.add_label t label)
+let add_label label = modify_state (fun t -> Thread.add_label t label)
 
-let open_scope scope = modify_thread (fun t -> Thread.open_scope t scope)
+let open_scope scope = modify_state (fun t -> Thread.open_scope t scope)
 
-let close_scope () = modify_thread (fun t -> Thread.close_scope t)
+let close_scope () = modify_state (fun t -> Thread.close_scope t)
 
 let with_new_invisible_symbol ty f =
-  let* thread in
-  let n = thread.num_symbols in
-  let+ () = modify_thread Thread.incr_num_symbols in
+  let* state in
+  let n = state.num_symbols in
+  let+ () = modify_state Thread.incr_num_symbols in
   let sym = Fmt.kstr (Smtml.Symbol.make ty) "symbol_invisible_%i" n in
   f sym
 
 let with_new_symbol ty f =
-  let* thread in
-  let n = thread.num_symbols in
+  let* state in
+  let n = state.num_symbols in
   let sym = Fmt.kstr (Smtml.Symbol.make ty) "symbol_%d" n in
   let+ () =
-    modify_thread (fun thread ->
+    modify_state (fun thread ->
       let thread = Thread.add_symbol thread sym in
       Thread.incr_num_symbols thread )
   in
   f sym
 
 let check_reachability v =
-  let* thread in
+  let* state in
   let solver = solver () in
-  let pc = thread.pc |> Symbolic_path_condition.slice_on_condition v in
-  let stats = thread.bench_stats in
+  let pc = state.pc |> Symex.Path_condition.slice_on_condition v in
+  let stats = state.bench_stats in
   let reachability =
     Benchmark.handle_time_span stats.solver_sat_time @@ fun () ->
     Solver.check solver pc
   in
   return reachability
 
-let get_model_or_stop symbol =
-  let* thread in
+let get_model_or_prune symbol =
+  let* state in
   let solver = solver () in
-  let set = thread.pc |> Symbolic_path_condition.slice_on_symbol symbol in
-  let stats = thread.bench_stats in
+  let set = state.pc |> Symex.Path_condition.slice_on_symbol symbol in
+  let stats = state.bench_stats in
   let symbol_scopes = Symbol_scope.of_symbol symbol in
   let sat_model =
     Benchmark.handle_time_span stats.solver_intermediate_model_time (fun () ->
       Solver.model_of_set solver ~symbol_scopes ~set )
   in
   match sat_model with
-  | `Unsat -> stop
+  | `Unsat -> prune ()
   | `Model model -> begin
     match Smtml.Model.evaluate model symbol with
     | Some v -> return v
@@ -155,8 +99,8 @@ let get_model_or_stop symbol =
   | `Unknown ->
     (* It can happen when the solver is interrupted *)
     (* TODO: once https://github.com/formalsec/smtml/pull/479 is merged
-               if solver was interrupted then stop else assert false *)
-    stop
+               if solver was interrupted then prune () else assert false *)
+    prune ()
 
 let select_inner ~with_breadcrumbs (cond : Symbolic_boolean.t)
   ~instr_counter_true ~instr_counter_false =
@@ -185,42 +129,42 @@ let select_inner ~with_breadcrumbs (cond : Symbolic_boolean.t)
         let* satisfiability = check_reachability condition in
         begin match satisfiability with
         | `Sat ->
-          let* () = modify_thread (Thread.set_priority priority) in
+          let* () = modify_state (Thread.set_priority priority) in
           return final_value
         | `Unsat ->
           Atomic.set is_other_branch_unsat true;
-          stop
+          prune ()
         | `Unknown ->
           (* It can happen when the solver is interrupted *)
           (* TODO: once https://github.com/formalsec/smtml/pull/479 is merged
-                                   if solver was interrupted then stop else assert false *)
-          stop
+                                   if solver was interrupted then prune () else assert false *)
+          prune ()
         end
       end
     in
 
-    let* thread in
+    let* state in
 
     let prio_true =
       let instr_counter =
         match instr_counter_true with
-        | None -> thread.priority.instr_counter
+        | None -> state.priority.instr_counter
         | Some instr_counter -> instr_counter
       in
-      Prio.v ~instr_counter ~distance_to_unreachable:None ~depth:thread.depth
+      Prio.v ~instr_counter ~distance_to_unreachable:None ~depth:state.depth
     in
     let true_branch = branch cond true prio_true in
 
     let prio_false =
       let instr_counter =
         match instr_counter_false with
-        | None -> thread.priority.instr_counter
+        | None -> state.priority.instr_counter
         | Some instr_counter -> instr_counter
       in
-      Prio.v ~instr_counter ~distance_to_unreachable:None ~depth:thread.depth
+      Prio.v ~instr_counter ~distance_to_unreachable:None ~depth:state.depth
     in
     let false_branch = branch (Symbolic_boolean.not cond) false prio_false in
-    Thread.incr_path_count thread;
+    Thread.incr_path_count state;
 
     choose true_branch false_branch
 [@@inline]
@@ -233,12 +177,12 @@ let select (cond : Symbolic_boolean.t) ~instr_counter_true ~instr_counter_false
 
 let summary_symbol (e : Smtml.Typed.Bitv32.t) :
   (Smtml.Typed.Bool.t option * Smtml.Symbol.t) t =
-  let* thread in
+  let* state in
   match Smtml.Typed.view e with
   | Symbol sym -> return (None, sym)
   | _ ->
-    let num_symbols = thread.num_symbols in
-    let+ () = modify_thread Thread.incr_num_symbols in
+    let num_symbols = state.num_symbols in
+    let+ () = modify_state Thread.incr_num_symbols in
     let name = Fmt.str "choice_i32_%i" num_symbols in
     (* TODO: having to build two times the symbol this way is not really elegant... *)
     let sym = Smtml.Symbol.make Smtml.Typed.Types.(to_ty bitv32) name in
@@ -255,7 +199,7 @@ let select_i32 (i : Symbolic_i32.t) : int32 t =
       match assign with Some assign -> add_pc assign | None -> return ()
     in
     let rec generator () =
-      let* possible_value = get_model_or_stop symbol in
+      let* possible_value = get_model_or_prune symbol in
       let i =
         match possible_value with
         | Smtml.Value.Bitv bv ->
@@ -280,13 +224,13 @@ let select_i32 (i : Symbolic_i32.t) : int32 t =
         let* () = add_pc not_this_value_cond in
         generator ()
       in
-      let* thread in
-      Thread.incr_path_count thread;
+      let* state in
+      Thread.incr_path_count state;
 
       (* TODO: better prio here? *)
       let prio =
-        Prio.v ~instr_counter:thread.priority.instr_counter
-          ~distance_to_unreachable:None ~depth:thread.depth
+        Prio.v ~instr_counter:state.priority.instr_counter
+          ~distance_to_unreachable:None ~depth:state.depth
       in
 
       fork ~parent:this_val_branch ~child:(prio, not_this_val_branch)
@@ -294,21 +238,21 @@ let select_i32 (i : Symbolic_i32.t) : int32 t =
     generator ()
 
 let bug kind =
-  let* thread in
+  let* state in
   let* model =
-    let stats = thread.bench_stats in
+    let stats = state.bench_stats in
     Benchmark.handle_time_span stats.solver_final_model_time @@ fun () ->
     let solver = solver () in
-    let path_condition = thread.pc in
+    let path_condition = state.pc in
     match Solver.model_of_path_condition solver ~path_condition with
     | Some model -> return model
     | None ->
       (* It can happen when the solver is interrupted *)
       (* TODO: once https://github.com/formalsec/smtml/pull/479 is merged
-             if solver was interrupted then stop else assert false *)
-      stop
+             if solver was interrupted then prune () else assert false *)
+      prune ()
   in
-  State_monad.return (Error { Bug.kind; model; thread })
+  fail { Bug.kind; model; state }
 
 let trap t = bug (`Trap t)
 
@@ -343,15 +287,15 @@ let assume condition =
   let condition = Smtml.Typed.simplify condition in
   match Smtml.Typed.view condition with
   | Val True -> return ()
-  | Val False -> stop
+  | Val False -> prune ()
   | _ -> (
     let* () = add_pc condition in
     let* satisfiability = check_reachability condition in
     match satisfiability with
     | `Sat -> return ()
-    | `Unsat -> stop
+    | `Unsat -> prune ()
     | `Unknown ->
       (* It can happen when the solver is interrupted *)
       (* TODO: once https://github.com/formalsec/smtml/pull/479 is merged
-                         if solver was interrupted then stop else assert false *)
-      stop )
+                         if solver was interrupted then prune () else assert false *)
+      prune () )

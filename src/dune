@@ -90,7 +90,6 @@
   rewrite
   scheduler
   script
-  state_monad
   symbol_scope
   share
   solver
@@ -109,7 +108,6 @@
   symbolic_i64
   symbolic_memory
   symbolic_memory0
-  symbolic_path_condition
   symbolic_parameters
   symbolic_ref
   symbolic_table
@@ -155,6 +153,7 @@
   prelude
   processor
   sedlex
+  symex
   synchronizer
   uutf
   runtime_events

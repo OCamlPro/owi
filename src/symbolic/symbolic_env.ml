@@ -9,8 +9,8 @@ type t = Symbolic_extern_func.extern_func Link_env.t
 let get_memory (env : t) id : Symbolic_memory.t Symbolic_choice.t =
   let ( let* ) = Symbolic_choice.( let* ) in
   let env_id = Link_env.id env in
-  let* thread = Symbolic_choice.thread in
-  match Thread.Collection.find thread.memories ~env_id ~id with
+  let* state = Symbolic_choice.state in
+  match Thread.Collection.find state.memories ~env_id ~id with
   | Some g -> Symbolic_choice.return g
   | None -> begin
     match get_memory env id with
@@ -24,8 +24,8 @@ let get_memory (env : t) id : Symbolic_memory.t Symbolic_choice.t =
 let get_table (env : t) id : Symbolic_table.t Symbolic_choice.t =
   let ( let* ) = Symbolic_choice.( let* ) in
   let env_id = Link_env.id env in
-  let* thread = Symbolic_choice.thread in
-  match Thread.Collection.find thread.tables ~env_id ~id with
+  let* state = Symbolic_choice.state in
+  match Thread.Collection.find state.tables ~env_id ~id with
   | Some g -> Symbolic_choice.return g
   | None -> begin
     match get_table env id with
@@ -44,8 +44,8 @@ let get_data env n =
 let get_global (env : t) id : Symbolic_global.t Symbolic_choice.t =
   let ( let* ) = Symbolic_choice.( let* ) in
   let env_id = Link_env.id env in
-  let* thread = Symbolic_choice.thread in
-  match Thread.Collection.find thread.globals ~env_id ~id with
+  let* state = Symbolic_choice.state in
+  match Thread.Collection.find state.globals ~env_id ~id with
   | Some g -> Symbolic_choice.return g
   | None -> begin
     match get_global env id with

@@ -15,7 +15,7 @@ val model_of_set :
   -> [ `Unsat | `Unknown | `Model of Smtml.Model.t ]
 
 val model_of_path_condition :
-  t -> path_condition:Symbolic_path_condition.t -> Smtml.Model.t option
+  t -> path_condition:Symex.Path_condition.t -> Smtml.Model.t option
 
 val empty_stats : Smtml.Statistics.t
 

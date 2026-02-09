@@ -43,7 +43,7 @@ let model_of_path_condition (S (solver_module, s)) ~path_condition :
   let exception Unknown in
   let module Solver = (val solver_module) in
   try
-    let sub_conditions = Symbolic_path_condition.slice path_condition in
+    let sub_conditions = Symex.Path_condition.slice path_condition in
     let models =
       List.map
         (fun pc ->

@@ -29,7 +29,7 @@ end
 type t =
   { num_symbols : int
   ; symbol_scopes : Symbol_scope.t
-  ; pc : Symbolic_path_condition.t
+  ; pc : Symex.Path_condition.t
   ; memories : Symbolic_memory0.t Collection.t
   ; tables : Symbolic_table0.t Collection.t
   ; globals : Symbolic_global0.t Collection.t
@@ -45,7 +45,7 @@ type t =
 let init () =
   let num_symbols = 0 in
   let symbol_scopes = Symbol_scope.empty in
-  let pc = Symbolic_path_condition.empty in
+  let pc = Symex.Path_condition.empty in
   let memories = Collection.empty in
   let tables = Collection.empty in
   let globals = Collection.empty in
@@ -72,7 +72,7 @@ let add_symbol t s =
   { t with symbol_scopes = symbol s t.symbol_scopes }
 
 let add_pc t c =
-  let pc = Symbolic_path_condition.add c t.pc in
+  let pc = Symex.Path_condition.add c t.pc in
   { t with pc }
 
 let add_breadcrumb t crumb =

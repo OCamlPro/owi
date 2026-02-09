@@ -62,6 +62,8 @@
    (>= 1.3.0))
   (digestif
    (>= 1.2.0))
+  (domainpc
+   (>= 0.2))
   (logs
    (>= 0.10.0))
   (ocaml_intrinsics
@@ -74,13 +76,13 @@
    (>= 3.3))
   (smtml
    (>= 0.20.0))
+  symex
   (synchronizer
    (>= 0.2))
   (uutf
    (>= 1.0.3))
   (xmlm
    (>= 1.4.0))
-  (domainpc (>= 0.2))
   ;; doc
   (odoc
    (and

@@ -15,7 +15,7 @@ end
 type t = private
   { num_symbols : int
   ; symbol_scopes : Symbol_scope.t
-  ; pc : Symbolic_path_condition.t
+  ; pc : Symex.Path_condition.t
   ; memories : Symbolic_memory0.t Collection.t
   ; tables : Symbolic_table0.t Collection.t
   ; globals : Symbolic_global0.t Collection.t
