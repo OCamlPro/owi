@@ -15,7 +15,7 @@ module type S = sig
 
   val bind : 'a t -> ('a -> 'b t) -> 'b t
 
-  val map : 'a t -> ('a -> 'b) -> 'b t
+  val map : ('a -> 'b) -> 'a t -> 'b t
 
   val select :
        boolean

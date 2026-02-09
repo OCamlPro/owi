@@ -83,7 +83,7 @@ module M :
     let+ () = assume (Symbolic_i32.lt x hi) in
     x
 
-  let abort () : unit Symbolic_choice.t = Symbolic_choice.stop
+  let abort () : unit Symbolic_choice.t = Symbolic_choice.prune ()
 
   let alloc m (base : Symbolic_i32.t) (size : Symbolic_i32.t) :
     Symbolic_i32.t Symbolic_choice.t =

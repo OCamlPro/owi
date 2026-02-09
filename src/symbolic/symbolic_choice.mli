@@ -2,17 +2,17 @@
 (* Copyright © 2021-2024 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type 'a t = (('a, Bug.t) result, Thread.t) State_monad.t
+type 'a t = ('a, Bug.t, Prio.metrics, Thread.t) Symex.Monad.t
 
 val return : 'a -> 'a t
 
-val stop : 'a t
+val prune : unit -> 'a t
 
 val bind : 'a t -> ('a -> 'b t) -> 'b t
 
 val ( let* ) : 'a t -> ('a -> 'b t) -> 'b t
 
-val map : 'a t -> ('a -> 'b) -> 'b t
+val map : ('a -> 'b) -> 'a t -> 'b t
 
 val ( let+ ) : 'a t -> ('a -> 'b) -> 'b t
 
@@ -30,9 +30,7 @@ val assertion : Symbolic_boolean.t -> unit t
 
 val assume : Symbolic_boolean.t -> unit t
 
-val with_thread : (Thread.t -> 'a) -> 'a t
-
-val modify_thread : (Thread.t -> Thread.t) -> unit t
+val modify_state : (Thread.t -> Thread.t) -> unit t
 
 val with_new_invisible_symbol : Smtml.Ty.t -> (Smtml.Symbol.t -> 'b) -> 'b t
 
@@ -42,7 +40,7 @@ val solver : unit -> Solver.t
 
 val solver_to_use : Smtml.Solver_type.t option ref
 
-val thread : Thread.t t
+val state : Thread.t t
 
 val get_pc : unit -> Smtml.Expr.Set.t t
 

@@ -54,6 +54,24 @@ let
     };
     meta.broken = false;
   });
+  symex = pkgs.ocamlPackages.buildDunePackage (finalAttrs: {
+
+    pname = "symex";
+    version = "0.1";
+
+    src = pkgs.fetchFromGitHub {
+      owner = "ocamlpro";
+      repo = "symex";
+      rev = "c9241e0084818f63b5fe915dc353dc6db713a249";
+      hash = "sha256-jKwFtxVcBD8Y1bfKRB8Z/MSeQLQWKvk00i8HqodkBbM=";
+    };
+
+    propagatedBuildInputs = [
+      pkgs.ocamlPackages.fmt
+      pkgs.ocamlPackages.prelude
+      smtml
+    ];
+  });
 in
 
 pkgs.mkShell {
@@ -106,6 +124,7 @@ pkgs.mkShell {
     processor
     scfg
     smtml
+    symex
     synchronizer
     uutf
     xmlm

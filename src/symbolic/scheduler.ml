@@ -1,40 +1,7 @@
-module Schedulable = struct
-  (* A monad representing computation that can be cooperatively scheduled. Computations can yield, and fork (Choice). *)
-  type 'a t =
-    | Stop
-    | Now of 'a
-    | Yield of Prio.metrics * (unit -> 'a t)
-    | Choice of 'a t * 'a t
-
-  let[@inline] return x : _ t = Now x
-
-  let rec bind (mx : 'a t) (f : 'a -> 'b t) : 'b t =
-    match mx with
-    | Stop -> Stop
-    | Now v -> f v
-    | Yield (prio, step) -> Yield (prio, fun () -> bind (step ()) f)
-    | Choice (a, b) ->
-      (* cps to make it tail rec *)
-      Choice (bind a f, bind b f)
-
-  let[@inline] ( let* ) mx f = bind mx f
-
-  let[@inline] map f x =
-    let* x in
-    return (f x)
-
-  let[@inline] ( let+ ) x f = map f x
-
-  let[@inline] yield prio = Yield (prio, Fun.const (Now ()))
-
-  let[@inline] choose a b = Choice (a, b)
-
-  let stop = Stop
-end
-
 module Make (Work_datastructure : Prio.S) = struct
   (* A scheduler for Schedulable values. *)
-  type 'a work_queue = (unit -> 'a Schedulable.t) Work_datastructure.t
+  type 'a work_queue =
+    (unit -> ('a, Prio.metrics) Symex.Monad.Schedulable.t) Work_datastructure.t
 
   type 'a t = { work_queue : 'a work_queue } [@@unboxed]
 
@@ -46,9 +13,9 @@ module Make (Work_datastructure : Prio.S) = struct
     Work_datastructure.push task Prio.dummy sched.work_queue
 
   let work sched at_worker_value =
-    let rec inner (t : _ Schedulable.t) write_back =
+    let rec inner (t : _ Symex.Monad.Schedulable.t) write_back =
       match t with
-      | Stop -> ()
+      | Prune -> ()
       | Now x -> at_worker_value x
       | Yield (prio, f) -> write_back (prio, f)
       | Choice (m1, m2) ->

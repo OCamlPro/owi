@@ -68,7 +68,7 @@ let pp format with_breadcrumbs no_value fmt
 
 let print ~format ~out_file ~id ~no_value ~no_stop_at_failure
   ~no_assert_failure_expression_printing ~with_breadcrumbs
-  ({ Bug.model; thread; _ } as bug) =
+  ({ Bug.model; state; _ } as bug) =
   begin match bug.Bug.kind with
   | `Trap trap -> Log.err (fun m -> m "Trap: %s" (Result.err_to_string trap))
   | `Assertion assertion ->
@@ -81,7 +81,7 @@ let print ~format ~out_file ~id ~no_value ~no_stop_at_failure
   | None -> begin
     Log.app (fun m ->
       let fmt = m (if no_stop_at_failure then "%a@." else "%a") in
-      fmt (pp format with_breadcrumbs no_value) (model, thread) );
+      fmt (pp format with_breadcrumbs no_value) (model, state) );
     Ok ()
   end
   | Some path ->
@@ -105,4 +105,4 @@ let print ~format ~out_file ~id ~no_value ~no_stop_at_failure
     in
     Bos.OS.File.writef path "%a"
       (pp format with_breadcrumbs no_value)
-      (model, thread)
+      (model, state)
