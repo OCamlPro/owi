@@ -13,10 +13,6 @@ module type S = sig
 
   val return : 'a -> 'a t
 
-  val bind : 'a t -> ('a -> 'b t) -> 'b t
-
-  val map : ('a -> 'b) -> 'a t -> 'b t
-
   val select :
        boolean
     -> instr_counter_true:int option
