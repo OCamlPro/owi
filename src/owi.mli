@@ -1129,10 +1129,6 @@ module Symbolic_choice : sig
 
   val prune : unit -> 'a t
 
-  val bind : 'a t -> ('a -> 'b t) -> 'b t
-
-  val map : ('a -> 'b) -> 'a t -> 'b t
-
   val trap : Result.err -> 'a t
 end
 

@@ -8,11 +8,7 @@ val return : 'a -> 'a t
 
 val prune : unit -> 'a t
 
-val bind : 'a t -> ('a -> 'b t) -> 'b t
-
 val ( let* ) : 'a t -> ('a -> 'b t) -> 'b t
-
-val map : ('a -> 'b) -> 'a t -> 'b t
 
 val ( let+ ) : 'a t -> ('a -> 'b) -> 'b t
 
