@@ -39,7 +39,7 @@ jobs:
       - name: Create pull request
         if: steps.update.outputs.changed == 'true'
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.TEST_SUITE_UPDATE_PR_TOKEN }}
         run: |
 
           time=$(date '+%Y-%m-%d')
