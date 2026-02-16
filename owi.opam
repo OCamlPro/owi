@@ -25,7 +25,7 @@ homepage: "https://github.com/ocamlpro/owi"
 bug-reports: "https://github.com/ocamlpro/owi/issues"
 depends: [
   "dune" {>= "3.7"}
-  "ocaml" {>= "5.2"}
+  "ocaml" {>= "5.4"}
   "menhir" {build & >= "20220210"}
   "dune-build-info" {build}
   "dune-site" {build}

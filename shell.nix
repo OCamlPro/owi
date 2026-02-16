@@ -4,7 +4,8 @@
 }:
 
 let
-  domainpc = pkgs.ocamlPackages.buildDunePackage (finalAttrs: {
+  ocamlPackages = pkgs.ocaml-ng.ocamlPackages_5_4;
+  domainpc = ocamlPackages.buildDunePackage (finalAttrs: {
 
     pname = "domainpc";
     version = "0.2";
@@ -17,10 +18,10 @@ let
     };
 
     propagatedBuildInputs = [
-      pkgs.ocamlPackages.processor
+      ocamlPackages.processor
     ];
   });
-  synchronizer = pkgs.ocamlPackages.synchronizer.overrideAttrs (old: {
+  synchronizer = ocamlPackages.synchronizer.overrideAttrs (old: {
     src = pkgs.fetchFromGitHub {
       owner = "ocamlpro";
       repo = "synchronizer";
@@ -28,7 +29,7 @@ let
       hash = "sha256-CKpWGSXV7oXFVWEKrM4nlmSHFRt9et/QYOq97az1vt4=";
     };
   });
-  landmarks = pkgs.ocamlPackages.landmarks.overrideAttrs (old: {
+  landmarks = ocamlPackages.landmarks.overrideAttrs (old: {
     src = pkgs.fetchFromGitHub {
       owner = "hra687261";
       repo = "landmarks";
@@ -36,7 +37,7 @@ let
       hash = "sha256-3ui4uvSAvUgzk2UMVtH9A4BhAX6nWbwx7q0YwkANNv8=";
     };
   });
-  landmarks-ppx = pkgs.ocamlPackages.landmarks-ppx.overrideAttrs (old: {
+  landmarks-ppx = ocamlPackages.landmarks-ppx.overrideAttrs (old: {
     src = pkgs.fetchFromGitHub {
       owner = "hra687261";
       repo = "landmarks";
@@ -50,7 +51,7 @@ in
 pkgs.mkShell {
   name = "owi-dev-shell";
   dontDetectOcamlConflicts = true;
-  nativeBuildInputs = with pkgs.ocamlPackages; [
+  nativeBuildInputs = with ocamlPackages; [
     dune_3
     findlib
     bisect_ppx
@@ -78,7 +79,7 @@ pkgs.mkShell {
     pkgs.zig
     pkgs.makeWrapper
   ];
-  buildInputs = with pkgs.ocamlPackages; [
+  buildInputs = with ocamlPackages; [
     bos
     cmdliner
     crowbar
