@@ -5,30 +5,6 @@
 
 let
   ocamlPackages = pkgs.ocaml-ng.ocamlPackages_5_4;
-  domainpc = ocamlPackages.buildDunePackage (finalAttrs: {
-
-    pname = "domainpc";
-    version = "0.2";
-
-    src = pkgs.fetchFromGitHub {
-      owner = "ocamlpro";
-      repo = "domainpc";
-      rev = "2bc85ccfa008910afc0f511919558e827320bbf2";
-      hash = "sha256-VyCbxVikV0+YZzgC/8i4RLxVWN3TMS6n0qR72SmVwI8=";
-    };
-
-    propagatedBuildInputs = [
-      ocamlPackages.processor
-    ];
-  });
-  synchronizer = ocamlPackages.synchronizer.overrideAttrs (old: {
-    src = pkgs.fetchFromGitHub {
-      owner = "ocamlpro";
-      repo = "synchronizer";
-      rev = "4a12eb003620e249176e2046cc0dd76dbd8ff733";
-      hash = "sha256-CKpWGSXV7oXFVWEKrM4nlmSHFRt9et/QYOq97az1vt4=";
-    };
-  });
   landmarks = ocamlPackages.landmarks.overrideAttrs (old: {
     src = pkgs.fetchFromGitHub {
       owner = "hra687261";

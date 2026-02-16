@@ -78,7 +78,7 @@
    (>= 0.20.0))
   symex
   (synchronizer
-   (>= 0.2))
+   (>= 0.3))
   (uutf
    (>= 1.0.3))
   (xmlm
