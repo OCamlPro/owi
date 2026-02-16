@@ -4,25 +4,16 @@
 }:
 
 let
-  smtml = pkgs.ocamlPackages.smtml.overrideAttrs (old: {
-    src = pkgs.fetchFromGitHub {
-      owner = "formalsec";
-      repo = "smtml";
-      rev = "e259d5b7d108cb2d1102c188132a6c86bbf7705e";
-      hash = "sha256-8OzNJIyJhfqgDw3ioINN0D0WVTSliG9TP4cUNlrm4s8=";
-    };
-    doCheck = false;
-  });
   domainpc = pkgs.ocamlPackages.buildDunePackage (finalAttrs: {
 
     pname = "domainpc";
-    version = "0.1";
+    version = "0.2";
 
     src = pkgs.fetchFromGitHub {
       owner = "ocamlpro";
       repo = "domainpc";
-      rev = "9d5596c57154d925c6d7f17fe37dc2b9da0434bc";
-      hash = "sha256-ttuv/G2J+7DsmDMMRtUOT1jITUtCoj9qQUXzfJ/yRfc=";
+      rev = "2bc85ccfa008910afc0f511919558e827320bbf2";
+      hash = "sha256-VyCbxVikV0+YZzgC/8i4RLxVWN3TMS6n0qR72SmVwI8=";
     };
 
     propagatedBuildInputs = [
@@ -33,8 +24,8 @@ let
     src = pkgs.fetchFromGitHub {
       owner = "ocamlpro";
       repo = "synchronizer";
-      rev = "cb5fd995e8a42e5244acf68f238221594fd19a8d";
-      hash = "sha256-0XtPHpDlyH1h8W2ZlRvJbZjCN9WP5mzk2N01WFd8eLQ=";
+      rev = "4a12eb003620e249176e2046cc0dd76dbd8ff733";
+      hash = "sha256-CKpWGSXV7oXFVWEKrM4nlmSHFRt9et/QYOq97az1vt4=";
     };
   });
   landmarks = pkgs.ocamlPackages.landmarks.overrideAttrs (old: {
@@ -53,24 +44,6 @@ let
       hash = "sha256-3ui4uvSAvUgzk2UMVtH9A4BhAX6nWbwx7q0YwkANNv8=";
     };
     meta.broken = false;
-  });
-  symex = pkgs.ocamlPackages.buildDunePackage (finalAttrs: {
-
-    pname = "symex";
-    version = "0.1";
-
-    src = pkgs.fetchFromGitHub {
-      owner = "ocamlpro";
-      repo = "symex";
-      rev = "c9241e0084818f63b5fe915dc353dc6db713a249";
-      hash = "sha256-jKwFtxVcBD8Y1bfKRB8Z/MSeQLQWKvk00i8HqodkBbM=";
-    };
-
-    propagatedBuildInputs = [
-      pkgs.ocamlPackages.fmt
-      pkgs.ocamlPackages.prelude
-      smtml
-    ];
   });
 in
 
