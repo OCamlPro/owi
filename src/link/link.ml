@@ -111,20 +111,20 @@ module Eval_const = struct
   (* TODO: binary+const instr *)
   let instr env stack instr =
     match instr.Annotated.raw with
-    | Binary.I32_const n -> ok @@ Stack.push_i32 stack n
-    | I64_const n -> ok @@ Stack.push_i64 stack n
-    | F32_const f -> ok @@ Stack.push_f32 stack f
-    | F64_const f -> ok @@ Stack.push_f64 stack f
-    | V128_const f -> ok @@ Stack.push_v128 stack f
-    | I_binop (nn, op) -> ok @@ ibinop stack nn op
-    | Ref_null t -> ok @@ Stack.push_ref stack (Concrete_ref.null t)
+    | Binary.I32_const n -> Result.ok @@ Stack.push_i32 stack n
+    | I64_const n -> Result.ok @@ Stack.push_i64 stack n
+    | F32_const f -> Result.ok @@ Stack.push_f32 stack f
+    | F64_const f -> Result.ok @@ Stack.push_f64 stack f
+    | V128_const f -> Result.ok @@ Stack.push_v128 stack f
+    | I_binop (nn, op) -> Result.ok @@ ibinop stack nn op
+    | Ref_null t -> Result.ok @@ Stack.push_ref stack (Concrete_ref.null t)
     | Ref_func f ->
       let* f = Link_env.Build.get_func env f in
       let value = Concrete_value.Ref (Func (Some f)) in
-      ok @@ Stack.push stack value
+      Result.ok @@ Stack.push stack value
     | Global_get id ->
       let* g = Link_env.Build.get_const_global env id in
-      ok @@ Stack.push stack g
+      Result.ok @@ Stack.push stack g
     | _ -> assert false
 
   (* TODO: binary+const expr *)
@@ -222,7 +222,7 @@ let load_memory (ls : 'f State.t)
 let eval_memory ls (memory : (Binary.Mem.t, Binary.Mem.Type.limits) Origin.t) :
   Concrete_memory.t Result.t =
   match memory with
-  | Local (_label, mem_type) -> ok @@ Concrete_memory.init mem_type
+  | Local (_label, mem_type) -> Result.ok @@ Concrete_memory.init mem_type
   | Imported import -> load_memory ls import
 
 let eval_memories ls env memories =
@@ -255,7 +255,7 @@ let load_table (ls : 'f State.t) (import : Binary.Table.Type.t Origin.imported)
 let eval_table ls (table : (Binary.Table.t, Binary.Table.Type.t) Origin.t) :
   table Result.t =
   match table with
-  | Local { id = label; typ; _ } -> ok @@ Concrete_table.init ?label typ
+  | Local { id = label; typ; _ } -> Result.ok @@ Concrete_table.init ?label typ
   | Imported import -> load_table ls import
 
 let eval_tables ls env tables =
@@ -294,7 +294,7 @@ let load_func (ls : 'f State.t) (import : Binary.block_type Origin.imported) :
 
 let eval_func ls (finished_env : int) func : func Result.t =
   match func with
-  | Origin.Local func -> ok @@ Kind.wasm func finished_env
+  | Origin.Local func -> Result.ok @@ Kind.wasm func finished_env
   | Imported import -> load_func ls import
 
 let eval_functions ls (finished_env : int) env functions =
@@ -311,7 +311,7 @@ let eval_functions ls (finished_env : int) env functions =
 let eval_tag ls (_finished_env : int)
   (tag : (Binary.Tag.t, Binary.block_type) Origin.t) : Binary.Tag.t Result.t =
   match tag with
-  | Origin.Local tag -> ok tag
+  | Origin.Local tag -> Ok tag
   | Imported import ->
     let (Binary.Bt_raw ((None | Some _), import_typ)) = import.typ in
     let* tag =
@@ -375,7 +375,7 @@ let define_data env data =
             let length = Int32.of_int @@ String.length data.init in
             let* offset = get_i32 offset in
             let* v = active_data_expr env ~offset ~length ~mem ~data:id in
-            ok @@ (v :: init)
+            Result.ok @@ (v :: init)
           | Passive -> Ok init
         in
         (env, init, succ id) )
@@ -410,7 +410,8 @@ let define_elem env elem =
             let length = Int32.of_int @@ List.length init in
             let* offset = Eval_const.expr env offset in
             let* offset = get_i32 offset in
-            ok @@ (active_elem_expr ~offset ~length ~table ~elem:i :: inits)
+            Result.ok
+            @@ (active_elem_expr ~offset ~length ~table ~elem:i :: inits)
           | Passive | Declarative -> Ok inits
         in
         (env, inits, succ i) )

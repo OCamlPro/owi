@@ -324,7 +324,7 @@ end = struct
     | Any :: _ -> Ok [ Any ]
     | _ :: tl -> Ok tl
 
-  let push t stack = ok @@ t @ stack
+  let push t stack = Result.ok @@ t @ stack
 
   let pop_push modul (Bt_raw (_, (pt, rt)) : block_type) stack =
     let pt, rt = (List.rev_map typ_of_pt pt, List.rev_map typ_of_val_type rt) in

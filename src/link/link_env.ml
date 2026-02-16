@@ -99,7 +99,7 @@ module Build = struct
   let get_const_global (env : t) id =
     let* g = get_global env id in
     match g.mut with
-    | Const -> ok g.value
+    | Const -> Result.ok g.value
     | Var -> Error `Constant_expression_required
 
   let get_func (env : t) id =

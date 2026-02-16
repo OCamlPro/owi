@@ -97,17 +97,17 @@ let get_const_global env id =
 
 let eval_const_instr env stack instr =
   match instr.Annotated.raw with
-  | Binary.I32_const n -> ok @@ Stack.push_i32 stack n
-  | I64_const n -> ok @@ Stack.push_i64 stack n
-  | F32_const f -> ok @@ Stack.push_f32 stack f
-  | F64_const f -> ok @@ Stack.push_f64 stack f
-  | V128_const f -> ok @@ Stack.push_v128 stack f
-  | I_binop (nn, op) -> ok @@ eval_ibinop stack nn op
-  | Ref_null t -> ok @@ Stack.push_ref stack (Concrete_ref.null t)
+  | Binary.I32_const n -> Result.ok @@ Stack.push_i32 stack n
+  | I64_const n -> Result.ok @@ Stack.push_i64 stack n
+  | F32_const f -> Result.ok @@ Stack.push_f32 stack f
+  | F64_const f -> Result.ok @@ Stack.push_f64 stack f
+  | V128_const f -> Result.ok @@ Stack.push_v128 stack f
+  | I_binop (nn, op) -> Result.ok @@ eval_ibinop stack nn op
+  | Ref_null t -> Result.ok @@ Stack.push_ref stack (Concrete_ref.null t)
   | Global_get id ->
     let* g = get_const_global env id in
-    ok @@ Stack.push_i32 stack g
-  | Ref_func id -> ok @@ Stack.push_i32_of_int stack id
+    Result.ok @@ Stack.push_i32 stack g
+  | Ref_func id -> Result.ok @@ Stack.push_i32_of_int stack id
   | _ -> assert false
 
 let eval_const env exp =
