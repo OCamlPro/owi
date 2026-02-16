@@ -31,7 +31,8 @@ let add_pc (c : Symbolic_boolean.t) =
   | _ ->
     let* state in
     let new_thread = Thread.add_pc state c in
-    set_state new_thread
+    if Symex.Path_condition.is_unsat new_thread.pc then prune ()
+    else set_state new_thread
 [@@inline]
 
 let get_pc () =
@@ -68,39 +69,43 @@ let with_new_symbol ty f =
 
 let check_reachability v =
   let* state in
-  let solver = solver () in
-  let pc = state.pc |> Symex.Path_condition.slice_on_condition v in
-  let stats = state.bench_stats in
-  let reachability =
-    Benchmark.handle_time_span stats.solver_sat_time @@ fun () ->
-    Solver.check solver pc
-  in
-  return reachability
+  if Symex.Path_condition.is_unsat state.pc then return `Unsat
+  else
+    let solver = solver () in
+    let pc = state.pc |> Symex.Path_condition.slice_on_condition v in
+    let stats = state.bench_stats in
+    let reachability =
+      Benchmark.handle_time_span stats.solver_sat_time @@ fun () ->
+      Solver.check solver pc
+    in
+    return reachability
 
 let get_model_or_prune symbol =
   let* state in
-  let solver = solver () in
-  let set = state.pc |> Symex.Path_condition.slice_on_symbol symbol in
-  let stats = state.bench_stats in
-  let symbol_scopes = Symbol_scope.of_symbol symbol in
-  let sat_model =
-    Benchmark.handle_time_span stats.solver_intermediate_model_time (fun () ->
-      Solver.model_of_set solver ~symbol_scopes ~set )
-  in
-  match sat_model with
-  | `Unsat -> prune ()
-  | `Model model -> begin
-    match Smtml.Model.evaluate model symbol with
-    | Some v -> return v
-    | None ->
-      (* the model exists so the symbol should evaluate *)
-      assert false
-  end
-  | `Unknown ->
-    (* It can happen when the solver is interrupted *)
-    (* TODO: once https://github.com/formalsec/smtml/pull/479 is merged
+  if Symex.Path_condition.is_unsat state.pc then prune ()
+  else
+    let solver = solver () in
+    let set = state.pc |> Symex.Path_condition.slice_on_symbol symbol in
+    let stats = state.bench_stats in
+    let symbol_scopes = Symbol_scope.of_symbol symbol in
+    let sat_model =
+      Benchmark.handle_time_span stats.solver_intermediate_model_time (fun () ->
+        Solver.model_of_set solver ~symbol_scopes ~set )
+    in
+    match sat_model with
+    | `Unsat -> prune ()
+    | `Model model -> begin
+      match Smtml.Model.evaluate model symbol with
+      | Some v -> return v
+      | None ->
+        (* the model exists so the symbol should evaluate *)
+        assert false
+    end
+    | `Unknown ->
+      (* It can happen when the solver is interrupted *)
+      (* TODO: once https://github.com/formalsec/smtml/pull/479 is merged
                if solver was interrupted then prune () else assert false *)
-    prune ()
+      prune ()
 
 let select_inner ~with_breadcrumbs (cond : Symbolic_boolean.t)
   ~instr_counter_true ~instr_counter_false =
@@ -239,20 +244,22 @@ let select_i32 (i : Symbolic_i32.t) : int32 t =
 
 let bug kind =
   let* state in
-  let* model =
-    let stats = state.bench_stats in
-    Benchmark.handle_time_span stats.solver_final_model_time @@ fun () ->
-    let solver = solver () in
-    let path_condition = state.pc in
-    match Solver.model_of_path_condition solver ~path_condition with
-    | Some model -> return model
-    | None ->
-      (* It can happen when the solver is interrupted *)
-      (* TODO: once https://github.com/formalsec/smtml/pull/479 is merged
+  if Symex.Path_condition.is_unsat state.pc then prune ()
+  else
+    let* model =
+      let stats = state.bench_stats in
+      Benchmark.handle_time_span stats.solver_final_model_time @@ fun () ->
+      let solver = solver () in
+      let path_condition = state.pc in
+      match Solver.model_of_path_condition solver ~path_condition with
+      | Some model -> return model
+      | None ->
+        (* It can happen when the solver is interrupted *)
+        (* TODO: once https://github.com/formalsec/smtml/pull/479 is merged
              if solver was interrupted then prune () else assert false *)
-      prune ()
-  in
-  fail { Bug.kind; model; state }
+        prune ()
+    in
+    fail { Bug.kind; model; state }
 
 let trap t = bug (`Trap t)
 
