@@ -40,7 +40,7 @@ depends: [
   "processor" {>= "0.2"}
   "sedlex" {>= "3.3"}
   "smtml" {>= "0.20.0"}
-  "symex"
+  "symex" {>= "0.2"}
   "synchronizer" {>= "0.3"}
   "uutf" {>= "1.0.3"}
   "xmlm" {>= "1.4.0"}

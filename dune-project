@@ -76,7 +76,8 @@
    (>= 3.3))
   (smtml
    (>= 0.20.0))
-  symex
+  (symex
+   (>= 0.2))
   (synchronizer
    (>= 0.3))
   (uutf

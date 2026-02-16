@@ -23,21 +23,15 @@ let solver_dls_key =
 
 let[@inline] solver () = Domain.DLS.get solver_dls_key
 
-let add_pc (c : Symbolic_boolean.t) =
-  let c = Smtml.Typed.simplify c in
-  match Smtml.Typed.view c with
-  | Val True -> return ()
-  | Val False -> prune ()
-  | _ ->
-    let* state in
-    let new_thread = Thread.add_pc state c in
-    set_state new_thread
+let add_already_checked_condition_to_pc (condition : Symbolic_boolean.t) =
+  let* state in
+  let state = Thread.add_already_checked_condition_to_pc state condition in
+  set_state state
 [@@inline]
 
 let get_pc () =
   let+ state in
-  let pc = state.pc in
-  let pc = Symex.Path_condition.slice pc in
+  let pc = Symex.Path_condition.to_list state.pc in
   List.fold_left Smtml.Expr.Set.union Smtml.Expr.Set.empty pc
 
 let add_breadcrumb crumb = modify_state (fun t -> Thread.add_breadcrumb t crumb)
@@ -60,16 +54,24 @@ let with_new_symbol ty f =
   let n = state.num_symbols in
   let sym = Fmt.kstr (Smtml.Symbol.make ty) "symbol_%d" n in
   let+ () =
-    modify_state (fun thread ->
-      let thread = Thread.add_symbol thread sym in
-      Thread.incr_num_symbols thread )
+    modify_state (fun state ->
+      let state = Thread.add_symbol state sym in
+      Thread.incr_num_symbols state )
   in
   f sym
 
-let check_reachability v =
+let check_reachability condition =
   let* state in
   let solver = solver () in
-  let pc = state.pc |> Symex.Path_condition.slice_on_condition v in
+  let pc = Symex.Path_condition.slice_on_new_condition condition state.pc in
+  (* the condition must be simplified only *after* slicing when we don't know if it is SAT, otherwise, we may exclude some slices and go to an unsat path! *)
+  let condition =
+    let equalities = Symex.Path_condition.get_known_equalities state.pc in
+    Smtml.Expr.inline_symbol_values equalities
+      (Smtml.Typed.Unsafe.unwrap condition)
+    |> Smtml.Typed.Unsafe.wrap |> Smtml.Typed.simplify
+  in
+  let pc = Smtml.Expr.Set.add (Smtml.Typed.Unsafe.unwrap condition) pc in
   let stats = state.bench_stats in
   let reachability =
     Benchmark.handle_time_span stats.solver_sat_time @@ fun () ->
@@ -111,13 +113,14 @@ let select_inner ~with_breadcrumbs (cond : Symbolic_boolean.t)
   | _ ->
     let is_other_branch_unsat = Atomic.make false in
     let branch condition final_value priority =
-      let* () = add_pc condition in
       let* () =
         if with_breadcrumbs then add_breadcrumb (if final_value then 1 else 0)
         else return ()
       in
+      let* () = yield priority in
       (* this is an optimisation under the assumption that the PC is always SAT (i.e. we are performing eager pruning), in such a case, when a branch is unsat, we don't have to check the reachability of the other's branch negation, because it is always going to be SAT. *)
       if Atomic.get is_other_branch_unsat then begin
+        let* () = add_already_checked_condition_to_pc condition in
         Log.debug (fun m ->
           m "The SMT call for the %b branch was optimized away" final_value );
         (* the other branch is unsat, we must be SAT and don't need to check reachability! *)
@@ -125,10 +128,10 @@ let select_inner ~with_breadcrumbs (cond : Symbolic_boolean.t)
       end
       else begin
         (* the other branch is SAT (or we haven't computed it yet), so we have to check reachability *)
-        let* () = yield priority in
         let* satisfiability = check_reachability condition in
         begin match satisfiability with
         | `Sat ->
+          let* () = add_already_checked_condition_to_pc condition in
           let* () = modify_state (Thread.set_priority priority) in
           return final_value
         | `Unsat ->
@@ -137,7 +140,7 @@ let select_inner ~with_breadcrumbs (cond : Symbolic_boolean.t)
         | `Unknown ->
           (* It can happen when the solver is interrupted *)
           (* TODO: once https://github.com/formalsec/smtml/pull/479 is merged
-                                   if solver was interrupted then prune () else assert false *)
+                                     if solver was interrupted then prune () else assert false *)
           prune ()
         end
       end
@@ -175,28 +178,34 @@ let select (cond : Symbolic_boolean.t) ~instr_counter_true ~instr_counter_false
     ~with_breadcrumbs:true
 [@@inline]
 
-let summary_symbol (e : Smtml.Typed.Bitv32.t) :
-  (Smtml.Typed.Bool.t option * Smtml.Symbol.t) t =
+let select_i32 (e : Symbolic_i32.t) : int32 t =
   let* state in
+  let equalities = Symex.Path_condition.get_known_equalities state.pc in
+  let e =
+    Smtml.Expr.inline_symbol_values equalities (Smtml.Typed.Unsafe.unwrap e)
+    |> Smtml.Typed.Unsafe.wrap |> Smtml.Typed.simplify
+  in
   match Smtml.Typed.view e with
-  | Symbol sym -> return (None, sym)
-  | _ ->
-    let num_symbols = state.num_symbols in
-    let+ () = modify_state Thread.incr_num_symbols in
-    let name = Fmt.str "choice_i32_%i" num_symbols in
-    (* TODO: having to build two times the symbol this way is not really elegant... *)
-    let sym = Smtml.Symbol.make Smtml.Typed.Types.(to_ty bitv32) name in
-    let assign = Smtml.Typed.Bitv32.(eq (symbol sym) e) in
-    (Some assign, sym)
-
-let select_i32 (i : Symbolic_i32.t) : int32 t =
-  match Smtml.Typed.view i with
   | Val (Bitv bv) when Smtml.Bitvector.numbits bv <= 32 ->
     return (Smtml.Bitvector.to_int32 bv)
   | _ ->
-    let* assign, symbol = summary_symbol i in
+    let* assign, symbol =
+      match Smtml.Typed.view e with
+      | Symbol symbol -> return (None, symbol)
+      | _ ->
+        let num_symbols = state.num_symbols in
+        let+ () = modify_state Thread.incr_num_symbols in
+        let name = Fmt.str "choice_i32_%i" num_symbols in
+        let sym = Smtml.Symbol.make Smtml.Typed.Types.(to_ty bitv32) name in
+        let assign = Smtml.Typed.Bitv32.(eq (symbol sym) e) in
+        (Some assign, sym)
+    in
     let* () =
-      match assign with Some assign -> add_pc assign | None -> return ()
+      match assign with
+      | Some assign ->
+        (* it must be SAT because we only introduced a constraint: new_symbol = e *)
+        add_already_checked_condition_to_pc assign
+      | None -> return ()
     in
     let rec generator () =
       let* possible_value = get_model_or_prune symbol in
@@ -215,16 +224,26 @@ let select_i32 (i : Symbolic_i32.t) : int32 t =
       in
       let this_val_branch =
         let* () = add_breadcrumb (Int32.to_int i) in
-        let* () = add_pc this_value_cond in
+        let* () = add_already_checked_condition_to_pc this_value_cond in
         return i
       in
 
-      let not_this_value_cond = Symbolic_boolean.not this_value_cond in
       let not_this_val_branch =
-        let* () = add_pc not_this_value_cond in
-        generator ()
+        let not_this_value_cond = Symbolic_boolean.not this_value_cond in
+        (* TODO: this is annoying as the next call to get_model_or_prune is also going to check for satisfiability which is useless! it can probably be simplified.
+         I'm leaving it for now to be sure this is correct. It may actually not be required but better safe than sorry! *)
+        let* satisfiability = check_reachability not_this_value_cond in
+        match satisfiability with
+        | `Sat ->
+          let* () = add_already_checked_condition_to_pc not_this_value_cond in
+          generator ()
+        | `Unsat -> prune ()
+        | `Unknown ->
+          (* It can happen when the solver is interrupted *)
+          (* TODO: once https://github.com/formalsec/smtml/pull/479 is merged
+                           if solver was interrupted then prune () else assert false *)
+          prune ()
       in
-      let* state in
       Thread.incr_path_count state;
 
       (* TODO: better prio here? *)
@@ -289,13 +308,14 @@ let assume condition =
   | Val True -> return ()
   | Val False -> prune ()
   | _ -> (
-    let* () = add_pc condition in
     let* satisfiability = check_reachability condition in
     match satisfiability with
-    | `Sat -> return ()
+    | `Sat ->
+      let* () = add_already_checked_condition_to_pc condition in
+      return ()
     | `Unsat -> prune ()
     | `Unknown ->
       (* It can happen when the solver is interrupted *)
       (* TODO: once https://github.com/formalsec/smtml/pull/479 is merged
-                         if solver was interrupted then prune () else assert false *)
+                           if solver was interrupted then prune () else assert false *)
       prune () )
