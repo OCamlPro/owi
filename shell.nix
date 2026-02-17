@@ -5,15 +5,24 @@
 
 let
   ocamlPackages = pkgs.ocaml-ng.ocamlPackages_5_4.overrideScope (self: super: {
+    smtml = super.smtml.overrideAttrs (old: {
+      src = pkgs.fetchFromGitHub {
+        owner = "formalsec";
+        repo = "smtml";
+        rev = "a9dff52e7ef2215c786ee8ce2c24d716db0b5ace";
+        hash = "sha256-TIOOE/bsis6oYV3Dt6TcI/r/aN3S1MQNtxDAnvBbVO0=";
+      };
+      doCheck = false;
+    });
     symex = super.symex.overrideAttrs (old: {
       src = pkgs.fetchFromGitHub {
         owner = "ocamlpro";
         repo = "symex";
-        rev = "944c5d6442b7a57500350360543c1abf4b512128";
-        hash = "sha256-Y+myA7uovmnvGCE38IqXrpSL1QDIaa9MVcQOAO59/sI=";
+        rev = "94a7b8bc2afecdf6ee0d3cd3f02a89182a6b30ea";
+        hash = "sha256-dE4wqyAOeAsotQZDD9F7xJrKyTh5zI1hJuxXwUCxjx0=";
       };
     });
-    landmarks = super.ocamlPackages.landmarks.overrideAttrs (old: {
+    landmarks = super.landmarks.overrideAttrs (old: {
       src = pkgs.fetchFromGitHub {
         owner = "hra687261";
         repo = "landmarks";

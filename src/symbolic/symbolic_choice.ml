@@ -30,7 +30,7 @@ let add_pc (c : Symbolic_boolean.t) =
   | Val False -> prune ()
   | _ ->
     let* state in
-    let new_thread = Thread.add_pc state c in
+    let new_thread = Thread.add_already_checked_to_pc state c in
     if Symex.Path_condition.is_unsat new_thread.pc then prune ()
     else set_state new_thread
 [@@inline]
@@ -72,7 +72,10 @@ let check_reachability v =
   if Symex.Path_condition.is_unsat state.pc then return `Unsat
   else
     let solver = solver () in
-    let pc = state.pc |> Symex.Path_condition.slice_on_condition v in
+    let pc =
+      Symex.Path_condition.add v state.pc
+      |> Symex.Path_condition.slice_on_condition v
+    in
     let stats = state.bench_stats in
     let reachability =
       Benchmark.handle_time_span stats.solver_sat_time @@ fun () ->
@@ -116,13 +119,14 @@ let select_inner ~with_breadcrumbs (cond : Symbolic_boolean.t)
   | _ ->
     let is_other_branch_unsat = Atomic.make false in
     let branch condition final_value priority =
-      let* () = add_pc condition in
       let* () =
         if with_breadcrumbs then add_breadcrumb (if final_value then 1 else 0)
         else return ()
       in
+      let* () = yield priority in
       (* this is an optimisation under the assumption that the PC is always SAT (i.e. we are performing eager pruning), in such a case, when a branch is unsat, we don't have to check the reachability of the other's branch negation, because it is always going to be SAT. *)
       if Atomic.get is_other_branch_unsat then begin
+        let* () = add_pc condition in
         Log.debug (fun m ->
           m "The SMT call for the %b branch was optimized away" final_value );
         (* the other branch is unsat, we must be SAT and don't need to check reachability! *)
@@ -130,10 +134,10 @@ let select_inner ~with_breadcrumbs (cond : Symbolic_boolean.t)
       end
       else begin
         (* the other branch is SAT (or we haven't computed it yet), so we have to check reachability *)
-        let* () = yield priority in
         let* satisfiability = check_reachability condition in
         begin match satisfiability with
         | `Sat ->
+          let* () = add_pc condition in
           let* () = modify_state (Thread.set_priority priority) in
           return final_value
         | `Unsat ->
@@ -226,6 +230,7 @@ let select_i32 (i : Symbolic_i32.t) : int32 t =
 
       let not_this_value_cond = Symbolic_boolean.not this_value_cond in
       let not_this_val_branch =
+        (* TODO: it should probably be something else than `add_pc` to avoid using `add_already_checked` but `add` *)
         let* () = add_pc not_this_value_cond in
         generator ()
       in
@@ -296,10 +301,11 @@ let assume condition =
   | Val True -> return ()
   | Val False -> prune ()
   | _ -> (
-    let* () = add_pc condition in
     let* satisfiability = check_reachability condition in
     match satisfiability with
-    | `Sat -> return ()
+    | `Sat ->
+      let* () = add_pc condition in
+      return ()
     | `Unsat -> prune ()
     | `Unknown ->
       (* It can happen when the solver is interrupted *)

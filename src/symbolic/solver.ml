@@ -52,9 +52,7 @@ let model_of_path_condition (S (solver_module, s)) ~path_condition :
           | `Unknown ->
             (* it can happen if the solver is interrupted, otherwise it is an error, we raise, so the function can return an option that will be handled by the called *)
             raise Unknown
-          | `Unsat ->
-            (* it happen because we propagate too agressively in the PC  *)
-            raise Unknown )
+          | `Unsat -> assert false )
         sub_conditions
     in
     (* We build the new complete model by merging all "sub models" *)
