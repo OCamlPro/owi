@@ -30,7 +30,7 @@ type t = private
 
 val init : unit -> t
 
-val add_pc : t -> Symbolic_boolean.t -> t
+val add_already_checked_to_pc : t -> Symbolic_boolean.t -> t
 
 val add_breadcrumb : t -> int -> t
 

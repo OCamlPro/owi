@@ -4,23 +4,41 @@
 }:
 
 let
-  ocamlPackages = pkgs.ocaml-ng.ocamlPackages_5_4;
-  landmarks = ocamlPackages.landmarks.overrideAttrs (old: {
-    src = pkgs.fetchFromGitHub {
-      owner = "hra687261";
-      repo = "landmarks";
-      rev = "17be3567a63650090f9cf94654fcc8d99f946e27";
-      hash = "sha256-3ui4uvSAvUgzk2UMVtH9A4BhAX6nWbwx7q0YwkANNv8=";
-    };
-  });
-  landmarks-ppx = ocamlPackages.landmarks-ppx.overrideAttrs (old: {
-    src = pkgs.fetchFromGitHub {
-      owner = "hra687261";
-      repo = "landmarks";
-      rev = "17be3567a63650090f9cf94654fcc8d99f946e27";
-      hash = "sha256-3ui4uvSAvUgzk2UMVtH9A4BhAX6nWbwx7q0YwkANNv8=";
-    };
-    meta.broken = false;
+  ocamlPackages = pkgs.ocaml-ng.ocamlPackages_5_4.overrideScope (self: super: {
+    smtml = super.smtml.overrideAttrs (old: {
+      src = pkgs.fetchFromGitHub {
+        owner = "formalsec";
+        repo = "smtml";
+        rev = "a9dff52e7ef2215c786ee8ce2c24d716db0b5ace";
+        hash = "sha256-TIOOE/bsis6oYV3Dt6TcI/r/aN3S1MQNtxDAnvBbVO0=";
+      };
+      doCheck = false;
+    });
+    symex = super.symex.overrideAttrs (old: {
+      src = pkgs.fetchFromGitHub {
+        owner = "ocamlpro";
+        repo = "symex";
+        rev = "94a7b8bc2afecdf6ee0d3cd3f02a89182a6b30ea";
+        hash = "sha256-dE4wqyAOeAsotQZDD9F7xJrKyTh5zI1hJuxXwUCxjx0=";
+      };
+    });
+    landmarks = super.landmarks.overrideAttrs (old: {
+      src = pkgs.fetchFromGitHub {
+        owner = "hra687261";
+        repo = "landmarks";
+        rev = "17be3567a63650090f9cf94654fcc8d99f946e27";
+        hash = "sha256-3ui4uvSAvUgzk2UMVtH9A4BhAX6nWbwx7q0YwkANNv8=";
+      };
+    });
+    landmarks-ppx = super.landmarks-ppx.overrideAttrs (old: {
+      src = pkgs.fetchFromGitHub {
+        owner = "hra687261";
+        repo = "landmarks";
+        rev = "17be3567a63650090f9cf94654fcc8d99f946e27";
+        hash = "sha256-3ui4uvSAvUgzk2UMVtH9A4BhAX6nWbwx7q0YwkANNv8=";
+      };
+      meta.broken = false;
+    });
   });
 in
 

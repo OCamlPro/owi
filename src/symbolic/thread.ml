@@ -71,8 +71,8 @@ let add_symbol t s =
   let open Symbol_scope in
   { t with symbol_scopes = symbol s t.symbol_scopes }
 
-let add_pc t c =
-  let pc = Symex.Path_condition.add c t.pc in
+let add_already_checked_to_pc t c =
+  let pc = Symex.Path_condition.add_already_checked c t.pc in
   { t with pc }
 
 let add_breadcrumb t crumb =
