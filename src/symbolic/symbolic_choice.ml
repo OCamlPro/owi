@@ -71,11 +71,10 @@ let check_reachability condition =
       (Smtml.Typed.Unsafe.unwrap condition)
     |> Smtml.Typed.Unsafe.wrap |> Smtml.Typed.simplify
   in
-  let pc = Smtml.Expr.Set.add (Smtml.Typed.Unsafe.unwrap condition) pc in
   let stats = state.bench_stats in
   let reachability =
     Benchmark.handle_time_span stats.solver_sat_time @@ fun () ->
-    Solver.check solver pc
+    Solver.check solver pc condition
   in
   return reachability
 

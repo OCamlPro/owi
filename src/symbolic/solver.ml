@@ -25,18 +25,33 @@ let cache = Smtml.Cache.Strong.create 64
 
 let cache_mutex = Mutex.create ()
 
-let check (S (solver_module, s)) pc =
+let check (S (solver_module, s)) pc condition =
+  let query = Smtml.Expr.Set.add (Smtml.Typed.Unsafe.unwrap condition) pc in
   let cached =
-    Mutex.protect cache_mutex (fun () -> Smtml.Cache.Strong.find_opt cache pc)
+    Mutex.protect cache_mutex (fun () ->
+      Smtml.Cache.Strong.find_opt cache query )
   in
   match cached with
   | Some sat -> sat
-  | None ->
-    let module Solver = (val solver_module) in
-    let sat = Solver.check_set s pc in
-    Mutex.protect cache_mutex (fun () ->
-      Smtml.Cache.Strong.replace cache pc sat );
-    sat
+  | None -> (
+    (* `pc and condition` was not cached, but maybe `pc and not(condition)` is cached *)
+    let cached =
+      let condition = Smtml.Typed.Bool.not condition in
+      let query = Smtml.Expr.Set.add (Smtml.Typed.Unsafe.unwrap condition) pc in
+      Mutex.protect cache_mutex (fun () ->
+        Smtml.Cache.Strong.find_opt cache query )
+    in
+    match cached with
+    | Some `Unsat ->
+      (* (pc and not(cond)) being Unsat implies we are SAT because at least one of them must be SAT! *)
+      `Sat
+    | None | Some (`Sat | `Unknown) ->
+      (* there was nothing useful in the cache and we have to make the check for real! *)
+      let module Solver = (val solver_module) in
+      let sat = Solver.check_set s query in
+      Mutex.protect cache_mutex (fun () ->
+        Smtml.Cache.Strong.replace cache query sat );
+      sat )
 
 let model_of_path_condition (S (solver_module, s)) ~path_condition :
   Smtml.Model.t Option.t =

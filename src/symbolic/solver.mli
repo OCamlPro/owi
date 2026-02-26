@@ -6,7 +6,8 @@ type t
 
 val fresh : Smtml.Solver_type.t -> unit -> t
 
-val check : t -> Smtml.Expr.Set.t -> [ `Sat | `Unknown | `Unsat ]
+val check :
+  t -> Smtml.Expr.Set.t -> Smtml.Typed.Bool.t -> [ `Sat | `Unknown | `Unsat ]
 
 val model_of_set :
      t
