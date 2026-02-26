@@ -1187,6 +1187,10 @@ module Symbolic_extern_func : sig
   end
 end
 
+module Int_abs : sig
+  val expr : Binary.expr Annotated.t -> unit
+end
+
 module Interpret : sig
   module type Parameters = sig
     val use_ite_for_select : bool
@@ -1284,6 +1288,10 @@ module Symbolic_driver : sig
     -> run_time:float option
     -> unit Symbolic_choice.t
     -> unit Result.t
+end
+
+module Cmd_ai : sig
+  val cmd : source_file:Fpath.t -> unit Result.t
 end
 
 module Cmd_sym : sig

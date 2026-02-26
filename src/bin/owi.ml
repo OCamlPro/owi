@@ -295,6 +295,18 @@ let symbolic_parameters default_entry_point =
   ; use_ite_for_select
   }
 
+(* owi ai *)
+
+let ai_info =
+  let doc = "Run the abstract interpreter" in
+  let man = [] @ shared_man in
+  Cmd.info "ai" ~version ~doc ~sdocs ~man
+
+let ai_cmd =
+  let+ source_file
+  and+ () = setup_log in
+  Cmd_ai.cmd ~source_file
+
 (* owi analyze *)
 
 let analyze_info =
@@ -653,6 +665,7 @@ let cli =
   in
   Cmd.group info ~default
     [ Cmd.group analyze_info [ Cmd.v cg_info cg_cmd; Cmd.v cfg_info cfg_cmd ]
+    ; Cmd.v ai_info ai_cmd
     ; Cmd.v c_info c_cmd
     ; Cmd.v cpp_info cpp_cmd
     ; Cmd.v fmt_info fmt_cmd
