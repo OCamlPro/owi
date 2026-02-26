@@ -15,6 +15,7 @@
   bug
   choice_intf
   call_graph
+  cmd_ai
   cmd_utils
   cmd_c
   cmd_call_graph
@@ -70,6 +71,7 @@
   i32_intf
   i64_intf
   interpret
+  int_abs
   iop_intf
   kind
   label
@@ -136,6 +138,7 @@
   domainpc
   dune-build-info
   dune-site
+  codex
   fmt
   fmt.cli
   fmt.tty
