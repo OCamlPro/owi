@@ -148,13 +148,14 @@ and exec_extern_func stack (f : Abs_extern_func.extern_func) =
       apply stack args (f v)
     | Res -> f
   in
-  let (Abs_extern_func.Extern_func (Func (atype, rtype), func)) = f in
-  let args, stack = stack_pop_n stack (get_arrity atype) in
-  let+ r = apply (List.rev args) atype func in
-  match (rtype, r) with
-  | R0, () -> stack
-  | R1 _, v1 -> v1 :: stack
-  | _ -> assert false
+  let (Abs_extern_func.Extern_func (Func (atype, _rtype), func)) = f in
+  let args, _stack = stack_pop_n stack (get_arrity atype) in
+  let+ _r = apply (List.rev args) atype func in
+  assert false
+(* match (rtype, r) with *)
+(* | R0, () -> stack *)
+(* | R1 _, v1 -> v1 :: stack *)
+(* | _ -> assert false *)
 
 and exec_ibinop state : Text.ibinop -> state = function
   | Add ->
@@ -223,6 +224,8 @@ and exec_instr state : instr -> state = function
     let e, stack = stack_pop state.stack in
     state.locals.(i) <- e;
     { state with stack }
+  | Drop ->
+    { state with stack = Domain.Integer_Forward.one state.ctx :: state.stack }
   | instr -> Fmt.failwith "Instr unimplemented %a" (pp_instr ~short:true) instr
 
 and expr (state : state) (expr : expr) : state =
