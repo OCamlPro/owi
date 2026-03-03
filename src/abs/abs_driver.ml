@@ -1,6 +1,5 @@
 open Binary
 open Abs_value
-open Result.Syntax
 
 type value = Domain.integer
 
@@ -97,6 +96,85 @@ let join state_a state_b =
 let join_opt a b =
   match (a, b) with None, x | x, None -> x | Some a, Some b -> Some (join a b)
 
+(*
+let exec_extern_func stack (f : Abs_extern_func.extern_func) =
+  let rec get_arity : type f r. (f, r) Abs_extern_func.atype -> int = function
+    | Mem (_, args) -> 1 + get_arity args
+    | Arg (_, args) -> 1 + get_arity args
+    | UArg _ -> 1
+    | NArg (_, _, args) -> 1 + get_arity args
+    | Res -> 0
+  in
+  let pop_arg (type ty) stack (arg : ty Abs_extern_func.telt) : ty * stack =
+    match arg with
+    | I32 -> stack_pop stack
+    | I64 -> stack_pop stack
+    | _ -> assert false
+  in
+  let rec apply : type f r. stack -> (f, r) Abs_extern_func.atype -> f -> r =
+   fun stack ty f ->
+    match ty with
+    | Mem (_, _) -> Fmt.failwith "no mem args for now >:{"
+    | Arg (arg, args) ->
+      let v, stack = pop_arg stack arg in
+      apply stack args (f v)
+    | UArg args -> apply stack args (f ())
+    | NArg (_, arg, args) ->
+      let v, stack = pop_arg stack arg in
+      apply stack args (f v)
+    | Res -> f
+  in
+  match f with
+  | Abs_extern_func.Extern_func (Func (atype, rtype), func) -> (
+    let args, _stack = stack_pop_n stack (get_arity atype) in
+    let+ r = apply (List.rev args) atype func in
+    match (rtype, r) with
+    | Abs_extern_func.R0, () -> stack
+    | Abs_extern_func.R1 _, v1 -> v1 :: stack
+    | _ -> assert false )
+*)
+
+let exec_extern_func stack (f : Abs_extern_func.extern_func) =
+  let pop_arg (type ty) stack (arg : ty Abs_extern_func.telt) : ty * stack =
+    match arg with I32 -> stack_pop stack | _ -> assert false
+  in
+  let rec split_args : type f r.
+    'stack -> (f, r) Abs_extern_func.atype -> 'stack * 'stack =
+   fun stack ty ->
+    let[@local] split_one_arg args =
+      let elt, stack = stack_pop stack in
+      let elts, stack = split_args stack args in
+      (elt :: elts, stack)
+    in
+    match ty with
+    | Mem (_, args) -> split_args stack args
+    | Arg (_, args) -> split_one_arg args
+    | UArg args -> split_args stack args
+    | NArg (_, _, args) -> split_one_arg args
+    | Res -> ([], stack)
+  in
+  let rec apply : type f r. stack -> (f, r) Abs_extern_func.atype -> f -> r =
+   fun stack ty f ->
+    match ty with
+    | Arg (arg, args) ->
+      let v, stack = pop_arg stack arg in
+      apply stack args (f v)
+    | UArg args -> apply stack args (f ())
+    | NArg (_, arg, args) ->
+      let v, stack = pop_arg stack arg in
+      apply stack args (f v)
+    | Res -> f
+    | Mem (_memid, _args) -> assert false
+  in
+  match f with
+  | Abs_extern_func.Extern_func (Abs_extern_func.Func (atype, rtype), func) -> (
+    let args, stack = split_args stack atype in
+    let r = apply (List.rev args) atype func in
+    match (rtype, r) with
+    | R0, Ok () -> stack
+    | R1 I32, Ok v1 -> v1 :: stack
+    | _ -> assert false )
+
 let rec exec_func (state : state) (func : Func.t) =
   Log.info (fun m ->
     m "calling func  : func %s" (Option.value func.id ~default:"anonymous") );
@@ -120,42 +198,6 @@ let rec exec_func (state : state) (func : Func.t) =
       caller_popped_stack
       @ List.take (List.length result_type) func_end_state.stack
   }
-
-and exec_extern_func stack (f : Abs_extern_func.extern_func) =
-  let rec get_arrity : type f r. (f, r) Abs_extern_func.atype -> int = function
-    | Mem (_, args) -> 1 + get_arrity args
-    | Arg (_, args) -> 1 + get_arrity args
-    | UArg _ -> 1
-    | NArg (_, _, args) -> 1 + get_arrity args
-    | Res -> 0
-  in
-  let pop_arg (type ty) stack (arg : ty Abs_extern_func.telt) : ty * stack =
-    match arg with
-    | I32 -> stack_pop stack
-    | I64 -> stack_pop stack
-    | _ -> assert false
-  in
-  let rec apply : type f r. stack -> (f, r) Abs_extern_func.atype -> f -> r =
-   fun stack ty f ->
-    match ty with
-    | Mem (_, _) -> Fmt.failwith "no mem args for now >:{"
-    | Arg (arg, args) ->
-      let v, stack = pop_arg stack arg in
-      apply stack args (f v)
-    | UArg args -> apply stack args (f ())
-    | NArg (_, arg, args) ->
-      let v, stack = pop_arg stack arg in
-      apply stack args (f v)
-    | Res -> f
-  in
-  let (Abs_extern_func.Extern_func (Func (atype, _rtype), func)) = f in
-  let args, _stack = stack_pop_n stack (get_arrity atype) in
-  let+ _r = apply (List.rev args) atype func in
-  assert false
-(* match (rtype, r) with *)
-(* | R0, () -> stack *)
-(* | R1 _, v1 -> v1 :: stack *)
-(* | _ -> assert false *)
 
 and exec_ibinop state : Text.ibinop -> state = function
   | Add ->
@@ -214,10 +256,7 @@ and exec_instr state : instr -> state = function
     | Extern _ ->
       let f = Link_env.get_extern_func state.env idx in
       let stack = exec_extern_func state.stack f in
-      begin match stack with
-      | Error err -> Fmt.failwith "Error : %s@\n" (Result.err_to_string err)
-      | Ok stack -> { state with stack }
-      end
+      { state with stack }
     end
   | Local_get i -> { state with stack = state.locals.(i) :: state.stack }
   | Local_set i ->
@@ -233,8 +272,8 @@ and expr (state : state) (expr : expr) : state =
     (fun acc (x : instr Annotated.t) -> exec_instr acc x.raw)
     state expr
 
-let expr (link_state : 'extern_func Link.State.t)
-  (m : 'extern_func Linked.Module.t) =
+let expr (link_state : Abs_extern_func.extern_func Link.State.t)
+  (m : Abs_extern_func.extern_func Linked.Module.t) =
   let envs = Link.State.get_envs link_state in
   let ctx = Domain.root_context () in
   let initial_state =
