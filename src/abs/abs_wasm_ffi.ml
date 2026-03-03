@@ -7,8 +7,6 @@
    if one function of M is unused in the FFI module below, an error will be
    displayed *)
 module M = struct
-  module Value = Abs_value.SVA
-
   let assume (b : Symbolic_i32.t) : unit Symbolic_choice.t =
     Symbolic_choice.assume (Symbolic_i32.to_boolean b)
 
@@ -16,7 +14,7 @@ module M = struct
     Symbolic_choice.assertion @@ Symbolic_i32.to_boolean b
 
   let symbol_i32 () =
-    Ok (Value.Bitvector_Lattice.top ~size:(Units.In_bits.of_int 32))
+    Ok (Abs_value.Domain.Integer_Forward.one (Abs_value.Domain.root_context ()))
 
   let abort () : unit Symbolic_choice.t = Symbolic_choice.prune ()
 
@@ -30,9 +28,9 @@ include Abs_extern_func.Syntax
 let symbolic_extern_module =
   let functions =
     [ ("i32_symbol", Extern_func (unit ^->. i32, symbol_i32))
-    (* ; ("assume", Extern_func (i32 ^->. unit, assume)) *)
-    (* ; ("assert", Extern_func (i32 ^->. unit, assert')) *)
-    (* ; ("exit", Extern_func (i32 ^->. unit, exit)) *)
+      (* ; ("assume", Extern_func (i32 ^->. unit, assume)) *)
+      (* ; ("assert", Extern_func (i32 ^->. unit, assert')) *)
+      (* ; ("exit", Extern_func (i32 ^->. unit, exit)) *)
     ]
   in
   { Extern.Module.functions; func_type = Abs_extern_func.extern_type }
