@@ -46,10 +46,10 @@ let
     pname = "codex";
     version = "dev";
     src = pkgs.fetchFromGitHub {
-      owner = "redianthus";
+      owner = "s41d";
       repo = "codex";
-      rev = "ca0d9f6092ee577e445c062a7a944badd956703e";
-      hash = "sha256-+R8IqZXPkkFKGA6vtPT92RJWHVreKZPS9oJ0YnRUprs=";
+      rev = "05977de3acf12e18343a053be0f1fb936f8ec31c";
+      hash = "sha256-u/dD9ucNeY9j3czC9QtPPfNE3pZ1464gsWdJrsLT9hA=";
     };
 
     nativeBuildInputs = with pkgs.ocamlPackages; [
