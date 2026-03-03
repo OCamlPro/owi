@@ -300,12 +300,12 @@ let symbolic_parameters default_entry_point =
 let ai_info =
   let doc = "Run the abstract interpreter" in
   let man = [] @ shared_man in
-  Cmd.info "ai" ~version ~doc ~sdocs ~man
+  Cmd.info "abs" ~version ~doc ~sdocs ~man
 
 let ai_cmd =
   let+ source_file
   and+ () = setup_log in
-  Cmd_ai.cmd ~source_file
+  Cmd_abs.cmd ~source_file
 
 (* owi analyze *)
 

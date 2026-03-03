@@ -1187,8 +1187,11 @@ module Symbolic_extern_func : sig
   end
 end
 
-module Int_abs : sig
-  val expr : Binary.expr Annotated.t -> unit
+module Abs_driver : sig
+  val expr :
+       Abs_extern_func.extern_func Link.State.t
+    -> Abs_extern_func.extern_func Linked.Module.t
+    -> unit
 end
 
 module Interpret : sig
@@ -1290,7 +1293,7 @@ module Symbolic_driver : sig
     -> unit Result.t
 end
 
-module Cmd_ai : sig
+module Cmd_abs : sig
   val cmd : source_file:Fpath.t -> unit Result.t
 end
 
