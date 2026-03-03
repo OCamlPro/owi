@@ -22,6 +22,7 @@ module Text = struct
     Rewrite.modul m assigned
 
   let until_validate ~unsafe m =
+    let* m = until_text_validate ~unsafe m in
     let* m = until_binary ~unsafe m in
     if unsafe then Ok m
     else
