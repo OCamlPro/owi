@@ -7,23 +7,15 @@
    if one function of M is unused in the FFI module below, an error will be
    displayed *)
 module M = struct
-  let assume (b : Symbolic_i32.t) : unit Symbolic_choice.t =
-    Symbolic_choice.assume (Symbolic_i32.to_boolean b)
-
-  let assert' (b : Symbolic_i32.t) : unit Symbolic_choice.t =
-    Symbolic_choice.assertion @@ Symbolic_i32.to_boolean b
 
   let symbol_i32 () =
     Ok (Abs_value.Domain.Integer_Forward.one (Abs_value.Domain.root_context ()))
 
-  let abort () : unit Symbolic_choice.t = Symbolic_choice.prune ()
-
-  let exit (_p : Symbolic_i32.t) : unit Symbolic_choice.t = abort ()
 end
 
 open M
-include Abs_extern_func
-include Abs_extern_func.Syntax
+open Abs_extern_func
+open Abs_extern_func.Syntax
 
 let symbolic_extern_module =
   let functions =
