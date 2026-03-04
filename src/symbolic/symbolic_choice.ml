@@ -69,7 +69,7 @@ let check_reachability condition =
     let equalities = Symex.Path_condition.get_known_equalities state.pc in
     Smtml.Expr.inline_symbol_values equalities
       (Smtml.Typed.Unsafe.unwrap condition)
-    |> Smtml.Typed.Unsafe.wrap |> Smtml.Typed.simplify
+    |> Smtml.Typed.Unsafe.wrap
   in
   let stats = state.bench_stats in
   let reachability =
@@ -105,70 +105,51 @@ let get_model_or_prune symbol =
 
 let select_inner ~with_breadcrumbs (cond : Symbolic_boolean.t)
   ~instr_counter_true ~instr_counter_false =
-  let cond = Smtml.Typed.simplify cond in
-  match Smtml.Typed.view cond with
-  | Val True -> return true
-  | Val False -> return false
-  | _ ->
-    let is_other_branch_unsat = Atomic.make false in
-    let branch condition final_value priority =
-      let* () =
-        if with_breadcrumbs then add_breadcrumb (if final_value then 1 else 0)
-        else return ()
-      in
-      let* () = yield priority in
-      (* this is an optimisation under the assumption that the PC is always SAT (i.e. we are performing eager pruning), in such a case, when a branch is unsat, we don't have to check the reachability of the other's branch negation, because it is always going to be SAT. *)
-      if Atomic.get is_other_branch_unsat then begin
-        let* () = add_already_checked_condition_to_pc condition in
-        Log.debug (fun m ->
-          m "The SMT call for the %b branch was optimized away" final_value );
-        (* the other branch is unsat, we must be SAT and don't need to check reachability! *)
-        return final_value
-      end
-      else begin
-        (* the other branch is SAT (or we haven't computed it yet), so we have to check reachability *)
-        let* satisfiability = check_reachability condition in
-        begin match satisfiability with
-        | `Sat ->
-          let* () = add_already_checked_condition_to_pc condition in
-          let* () = modify_state (Thread.set_priority priority) in
-          return final_value
-        | `Unsat ->
-          Atomic.set is_other_branch_unsat true;
-          prune ()
-        | `Unknown ->
-          (* It can happen when the solver is interrupted *)
-          (* TODO: once https://github.com/formalsec/smtml/pull/479 is merged
+  let branch condition final_value priority =
+    let* () =
+      if with_breadcrumbs then add_breadcrumb (if final_value then 1 else 0)
+      else return ()
+    in
+    let* () = yield priority in
+    let* satisfiability = check_reachability condition in
+    begin match satisfiability with
+    | `Sat ->
+      let* () = add_already_checked_condition_to_pc condition in
+      let* () = modify_state (Thread.set_priority priority) in
+      return final_value
+    | `Unsat -> prune ()
+    | `Unknown ->
+      (* It can happen when the solver is interrupted *)
+      (* TODO: once https://github.com/formalsec/smtml/pull/479 is merged
                                      if solver was interrupted then prune () else assert false *)
-          prune ()
-        end
-      end
+      prune ()
+    end
+  in
+
+  let* state in
+
+  let prio_true =
+    let instr_counter =
+      match instr_counter_true with
+      | None -> state.priority.instr_counter
+      | Some instr_counter -> instr_counter
     in
+    Prio.v ~instr_counter ~distance_to_unreachable:None ~depth:state.depth
+  in
+  let true_branch = branch cond true prio_true in
 
-    let* state in
-
-    let prio_true =
-      let instr_counter =
-        match instr_counter_true with
-        | None -> state.priority.instr_counter
-        | Some instr_counter -> instr_counter
-      in
-      Prio.v ~instr_counter ~distance_to_unreachable:None ~depth:state.depth
+  let prio_false =
+    let instr_counter =
+      match instr_counter_false with
+      | None -> state.priority.instr_counter
+      | Some instr_counter -> instr_counter
     in
-    let true_branch = branch cond true prio_true in
+    Prio.v ~instr_counter ~distance_to_unreachable:None ~depth:state.depth
+  in
+  let false_branch = branch (Symbolic_boolean.not cond) false prio_false in
+  Thread.incr_path_count state;
 
-    let prio_false =
-      let instr_counter =
-        match instr_counter_false with
-        | None -> state.priority.instr_counter
-        | Some instr_counter -> instr_counter
-      in
-      Prio.v ~instr_counter ~distance_to_unreachable:None ~depth:state.depth
-    in
-    let false_branch = branch (Symbolic_boolean.not cond) false prio_false in
-    Thread.incr_path_count state;
-
-    choose true_branch false_branch
+  choose true_branch false_branch
 [@@inline]
 
 let select (cond : Symbolic_boolean.t) ~instr_counter_true ~instr_counter_false
@@ -230,7 +211,7 @@ let select_i32 (e : Symbolic_i32.t) : int32 t =
       let not_this_val_branch =
         let not_this_value_cond = Symbolic_boolean.not this_value_cond in
         (* TODO: this is annoying as the next call to get_model_or_prune is also going to check for satisfiability which is useless! it can probably be simplified.
-         I'm leaving it for now to be sure this is correct. It may actually not be required but better safe than sorry! *)
+           I'm leaving it for now to be sure this is correct. It may actually not be required but better safe than sorry! *)
         let* satisfiability = check_reachability not_this_value_cond in
         match satisfiability with
         | `Sat ->
@@ -302,19 +283,14 @@ let ite (c : Symbolic_boolean.t) ~(if_true : Symbolic_value.t)
   | _, _ -> assert false
 
 let assume condition =
-  let condition = Smtml.Typed.simplify condition in
-  match Smtml.Typed.view condition with
-  | Val True -> return ()
-  | Val False -> prune ()
-  | _ -> (
-    let* satisfiability = check_reachability condition in
-    match satisfiability with
-    | `Sat ->
-      let* () = add_already_checked_condition_to_pc condition in
-      return ()
-    | `Unsat -> prune ()
-    | `Unknown ->
-      (* It can happen when the solver is interrupted *)
-      (* TODO: once https://github.com/formalsec/smtml/pull/479 is merged
+  let* satisfiability = check_reachability condition in
+  match satisfiability with
+  | `Sat ->
+    let* () = add_already_checked_condition_to_pc condition in
+    return ()
+  | `Unsat -> prune ()
+  | `Unknown ->
+    (* It can happen when the solver is interrupted *)
+    (* TODO: once https://github.com/formalsec/smtml/pull/479 is merged
                            if solver was interrupted then prune () else assert false *)
-      prune () )
+    prune ()
