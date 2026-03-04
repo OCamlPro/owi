@@ -30,35 +30,36 @@ let check (S (solver_module, s)) pc condition =
   match Smtml.Typed.view condition with
   | Val True -> `Sat
   | Val False -> `Unsat
-  | _ -> (
+  | _ -> begin
     let query = Smtml.Expr.Set.add (Smtml.Typed.Unsafe.unwrap condition) pc in
     let cached =
       Mutex.protect cache_mutex (fun () ->
-        Smtml.Cache.Strong.find_opt cache query )
+        match Smtml.Cache.Strong.find_opt cache query with
+        | Some sat -> Some sat
+        | None -> (
+          let neg_query =
+            let neg_condition = Smtml.Typed.Bool.not condition in
+            Smtml.Expr.Set.add (Smtml.Typed.Unsafe.unwrap neg_condition) pc
+          in
+          match Smtml.Cache.Strong.find_opt cache neg_query with
+          | Some `Unsat ->
+            (* this is an optimisation under the assumption that the PC is always SAT (i.e. we are performing eager pruning), in such a case, when a branch is unsat, we don't have to check the reachability of the other's branch negation, because it is always going to be SAT. *)
+            Some `Sat
+          | None | Some `Sat ->
+            (* we can't deduce anything *)
+            None
+          | Some `Unknown -> assert false ) )
     in
     match cached with
     | Some sat -> sat
-    | None -> (
-      (* `pc and condition` was not cached, but maybe `pc and not(condition)` is cached *)
-      let cached =
-        let condition = Smtml.Typed.Bool.not condition in
-        let query =
-          Smtml.Expr.Set.add (Smtml.Typed.Unsafe.unwrap condition) pc
-        in
-        Mutex.protect cache_mutex (fun () ->
-          Smtml.Cache.Strong.find_opt cache query )
-      in
-      match cached with
-      | Some `Unsat ->
-        (* this is an optimisation under the assumption that the PC is always SAT (i.e. we are performing eager pruning), in such a case, when a branch is unsat, we don't have to check the reachability of the other's branch negation, because it is always going to be SAT. *)
-        `Sat
-      | None | Some (`Sat | `Unknown) ->
-        (* there was nothing useful in the cache and we have to make the check for real! *)
-        let module Solver = (val solver_module) in
-        let sat = Solver.check_set s query in
-        Mutex.protect cache_mutex (fun () ->
-          Smtml.Cache.Strong.replace cache query sat );
-        sat ) )
+    | None ->
+      (* there was nothing useful in the cache and we have to make the check for real! *)
+      let module Solver = (val solver_module) in
+      let sat = Solver.check_set s query in
+      Mutex.protect cache_mutex (fun () ->
+        Smtml.Cache.Strong.replace cache query sat );
+      sat
+  end
 
 let model_of_path_condition (S (solver_module, s)) ~path_condition :
   Smtml.Model.t Option.t =
@@ -106,7 +107,7 @@ let get_all_stats ~wait_for_all_domains =
   if not (Log.is_bench_enabled ()) then empty_stats
   else begin
     (* interrupt_all is unreliable but is a best effort to try to make sure we don't wait too long on really long requests.
-     The reliable alternative would be to backup the statistics before each SMT request when in benchmark mode, but this would be too costly and lead to less accurate requests than random failures... *)
+       The reliable alternative would be to backup the statistics before each SMT request when in benchmark mode, but this would be too costly and lead to less accurate requests than random failures... *)
     interrupt_all ();
     if Log.is_debug_enabled () then
       (* we only do this in debug mode because otherwise it makes performances very bad *)
