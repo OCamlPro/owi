@@ -1,6 +1,5 @@
 file doesn't exist:
   $ owi sym not_exists.wat --deterministic-result-order
+  Usage: owi sym [--help] [OPTION]… FILE
   owi: FILE argument: no file 'not_exists.wat'
-  Usage: owi sym [OPTION]… FILE
-  Try 'owi sym --help' or 'owi --help' for more information.
   [124]

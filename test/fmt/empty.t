@@ -1,5 +1,4 @@
   $ owi fmt
+  Usage: owi fmt [--help] [--inplace] [OPTION]… FILE…
   owi: required argument FILE is missing
-  Usage: owi fmt [--inplace] [OPTION]… FILE…
-  Try 'owi fmt --help' or 'owi --help' for more information.
   [124]

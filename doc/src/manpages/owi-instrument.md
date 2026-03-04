@@ -9,7 +9,7 @@ SYNOPSIS
        owi instrument COMMAND …
 
 COMMANDS
-       label [--criteria=VAL] [--unsafe] [OPTION]… FILE
+       label [--criteria=VALUE] [--unsafe] [OPTION]… FILE
            Generate an instrumented file with labels corresponding to test
            objectives for a given coverage criteria.
 

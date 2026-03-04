@@ -1,4 +1,4 @@
-  $ owi tinygo check.go --invoke-with-symbol --entry-point check
+  $ owi tinygo check.go --invoke-with-symbols --entry-point check
   owi: [ERROR] Assert failure: (bool.eq
                                 (i32.add (i32.and symbol_0 symbol_1)
                                  (i32.shr_s (i32.xor symbol_0 symbol_1) 1))

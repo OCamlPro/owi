@@ -12,7 +12,7 @@ COMMANDS
        cfg [--entry-point=FUNCTION] [OPTION]… FILE
            Build a Control-Flow Graph
 
-       cg [--call-graph-mode=VAL] [--entry-point=FUNCTION] [OPTION]… FILE
+       cg [--call-graph-mode=VALUE] [--entry-point=FUNCTION] [OPTION]… FILE
            Build a call graph
 
 COMMON OPTIONS

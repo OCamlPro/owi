@@ -1,4 +1,4 @@
-  $ owi c label.c -O0 -w1 --no-stop-at-failure --deterministic
+  $ owi c label.c -O0 -w1 --no-stop-at-failure --deterministic-result-order
   owi: [ERROR] Assert failure: false
   model {
     symbol symbol_0 i32 50
