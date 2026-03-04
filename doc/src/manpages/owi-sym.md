@@ -20,7 +20,7 @@ OPTIONS
        --entry-point=FUNCTION
            entry point of the executable
 
-       --exploration=VAL (absent=fifo)
+       --exploration=VALUE (absent=fifo)
            exploration strategy to use ("fifo", "lifo", "random",
            "random-unseen-then-random", "rarity", "hot-path-penalty",
            "rarity-aging", "rarity-depth-aging", "rarity-depth-loop-aging",
@@ -36,7 +36,7 @@ OPTIONS
            Invoke the entry point of the program with symbolic values instead
            of dummy constants.
 
-       --model-format=VAL (absent=scfg)
+       --model-format=VALUE (absent=scfg)
             The format of the model ("json" or "scfg")
 
        --model-out-file=FILE
@@ -66,7 +66,7 @@ OPTIONS
        -u, --unsafe
            skip typechecking pass
 
-       -w VAL, --workers=VAL (absent=n)
+       -w INT, --workers=INT (absent=n)
            Number of workers for symbolic execution. Defaults to the number
            of physical cores.
 
