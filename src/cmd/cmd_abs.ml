@@ -5,13 +5,12 @@
 open Syntax
 
 let cmd ~source_file =
-  let* m = Compile.File.until_binary ~unsafe:false source_file in
   let link_state =
     Link.State.empty ()
     |> Link.Extern.modul ~name:"owi" Abs_wasm_ffi.symbolic_extern_module
   in
   let+ m, link_state =
-    Compile.Binary.until_link ~unsafe:true ~name:None link_state m
+    Compile.File.until_link ~unsafe:false ~name:None link_state source_file
   in
   (* let start = match m.start with Some i -> i | None -> assert false in *)
   (* let f = m.func.(start) in *)

@@ -7,10 +7,10 @@
    if one function of M is unused in the FFI module below, an error will be
    displayed *)
 module M = struct
-
   let symbol_i32 () =
-    Ok (Abs_value.Domain.Integer_Forward.one (Abs_value.Domain.root_context ()))
-
+    Ok
+      (Abs_value.AbsDomain.binary_unknown ~size:Units.In_bits.s32
+         (Abs_value.AbsDomain.root_context ()) )
 end
 
 open M

@@ -1,13 +1,15 @@
 (module
-  (func $add (param $lhs i32) (param $rhs i32) (result i32)
-    local.get $lhs
-    local.get $rhs
+  (import "owi" "i32_symbol" (func $i32_symbol (result i32)))
+
+  (func $add (param $i i32) (result i32)
+    local.get $i
+    call $i32_symbol
     i32.add
     return
   )
+
   (func $start
     i32.const 42
-    i32.const 28
     call $add
     return
   )
