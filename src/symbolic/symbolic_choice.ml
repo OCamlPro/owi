@@ -103,53 +103,64 @@ let get_model_or_prune symbol =
                if solver was interrupted then prune () else assert false *)
     prune ()
 
-let select_inner ~with_breadcrumbs (cond : Symbolic_boolean.t)
+let select_inner ~with_breadcrumbs (condition : Symbolic_boolean.t)
   ~instr_counter_true ~instr_counter_false =
-  let branch condition final_value priority =
-    let* () =
-      if with_breadcrumbs then add_breadcrumb (if final_value then 1 else 0)
-      else return ()
-    in
-    let* () = yield priority in
-    let* satisfiability = check_reachability condition in
-    begin match satisfiability with
-    | `Sat ->
-      let* () = add_already_checked_condition_to_pc condition in
-      let* () = modify_state (Thread.set_priority priority) in
-      return final_value
-    | `Unsat -> prune ()
-    | `Unknown ->
-      (* It can happen when the solver is interrupted *)
-      (* TODO: once https://github.com/formalsec/smtml/pull/479 is merged
-                                     if solver was interrupted then prune () else assert false *)
-      prune ()
-    end
-  in
-
   let* state in
-
-  let prio_true =
-    let instr_counter =
-      match instr_counter_true with
-      | None -> state.priority.instr_counter
-      | Some instr_counter -> instr_counter
-    in
-    Prio.v ~instr_counter ~distance_to_unreachable:None ~depth:state.depth
+  let condition =
+    let equalities = Symex.Path_condition.get_known_equalities state.pc in
+    Smtml.Expr.inline_symbol_values equalities
+      (Smtml.Typed.Unsafe.unwrap condition)
+    |> Smtml.Typed.Unsafe.wrap |> Smtml.Typed.simplify
   in
-  let true_branch = branch cond true prio_true in
-
-  let prio_false =
-    let instr_counter =
-      match instr_counter_false with
-      | None -> state.priority.instr_counter
-      | Some instr_counter -> instr_counter
+  match Smtml.Typed.view condition with
+  | Val True -> return true
+  | Val False -> return false
+  | _ ->
+    let branch condition final_value priority =
+      let* () =
+        if with_breadcrumbs then add_breadcrumb (if final_value then 1 else 0)
+        else return ()
+      in
+      let* () = yield priority in
+      let* satisfiability = check_reachability condition in
+      begin match satisfiability with
+      | `Sat ->
+        let* () = add_already_checked_condition_to_pc condition in
+        let* () = modify_state (Thread.set_priority priority) in
+        return final_value
+      | `Unsat -> prune ()
+      | `Unknown ->
+        (* It can happen when the solver is interrupted *)
+        (* TODO: once https://github.com/formalsec/smtml/pull/479 is merged
+                                     if solver was interrupted then prune () else assert false *)
+        prune ()
+      end
     in
-    Prio.v ~instr_counter ~distance_to_unreachable:None ~depth:state.depth
-  in
-  let false_branch = branch (Symbolic_boolean.not cond) false prio_false in
-  Thread.incr_path_count state;
 
-  choose true_branch false_branch
+    let prio_true =
+      let instr_counter =
+        match instr_counter_true with
+        | None -> state.priority.instr_counter
+        | Some instr_counter -> instr_counter
+      in
+      Prio.v ~instr_counter ~distance_to_unreachable:None ~depth:state.depth
+    in
+    let true_branch = branch condition true prio_true in
+
+    let prio_false =
+      let instr_counter =
+        match instr_counter_false with
+        | None -> state.priority.instr_counter
+        | Some instr_counter -> instr_counter
+      in
+      Prio.v ~instr_counter ~distance_to_unreachable:None ~depth:state.depth
+    in
+    let false_branch =
+      branch (Symbolic_boolean.not condition) false prio_false
+    in
+    Thread.incr_path_count state;
+
+    choose true_branch false_branch
 [@@inline]
 
 let select (cond : Symbolic_boolean.t) ~instr_counter_true ~instr_counter_false
