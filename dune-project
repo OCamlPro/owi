@@ -75,7 +75,7 @@
   (sedlex
    (>= 3.3))
   (smtml
-   (>= 0.20.0))
+   (>= 0.22.0))
   (symex
    (>= 0.2))
   (synchronizer

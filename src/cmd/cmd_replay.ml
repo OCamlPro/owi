@@ -221,7 +221,8 @@ let parse_model replay_file =
               (`Invalid_model
                  (Fmt.str "can not handle bitvectors of size %d"
                     (Smtml.Bitvector.numbits bv) ) )
-          | Unit | Int _ | Real _ | Str _ | List _ | App _ | Nothing ->
+          | Unit | Int _ | Real _ | Str _ | List _ | App _ | Nothing | Re_none
+          | Re_all | Re_allchar ->
             Error
               (`Invalid_model
                  (Fmt.str "unexpected value type: %a" Smtml.Value.pp v) ) )
