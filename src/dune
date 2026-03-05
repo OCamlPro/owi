@@ -3,6 +3,7 @@
 (library
  (public_name owi)
  (modules
+  abs_datastructures
   abs_driver
   abs_extern_func
   abs_value

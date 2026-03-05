@@ -4,9 +4,9 @@
     i32.const 28
 
     i32.const 0
-    (if (then i32.add) (else i32.sub))
+    (if (param i32) (param i32) (result i32) (then i32.add) (else i32.sub))
 
-    return
+    drop
   )
 
   (start $start)
