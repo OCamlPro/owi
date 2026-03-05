@@ -26,40 +26,34 @@ let cache = Smtml.Cache.Strong.create 64
 let cache_mutex = Mutex.create ()
 
 let check (S (solver_module, s)) pc condition =
-  let condition = Smtml.Typed.simplify condition in
-  match Smtml.Typed.view condition with
-  | Val True -> `Sat
-  | Val False -> `Unsat
-  | _ -> begin
-    let query = Smtml.Expr.Set.add (Smtml.Typed.Unsafe.unwrap condition) pc in
-    let cached =
-      Mutex.protect cache_mutex (fun () ->
-        match Smtml.Cache.Strong.find_opt cache query with
-        | Some sat -> Some sat
-        | None -> (
-          let neg_query =
-            let neg_condition = Smtml.Typed.Bool.not condition in
-            Smtml.Expr.Set.add (Smtml.Typed.Unsafe.unwrap neg_condition) pc
-          in
-          match Smtml.Cache.Strong.find_opt cache neg_query with
-          | Some `Unsat ->
-            (* this is an optimisation under the assumption that the PC is always SAT (i.e. we are performing eager pruning), in such a case, when a branch is unsat, we don't have to check the reachability of the other's branch negation, because it is always going to be SAT. *)
-            Some `Sat
-          | None | Some `Sat ->
-            (* we can't deduce anything *)
-            None
-          | Some `Unknown -> assert false ) )
-    in
-    match cached with
-    | Some sat -> sat
-    | None ->
-      (* there was nothing useful in the cache and we have to make the check for real! *)
-      let module Solver = (val solver_module) in
-      let sat = Solver.check_set s query in
-      Mutex.protect cache_mutex (fun () ->
-        Smtml.Cache.Strong.replace cache query sat );
-      sat
-  end
+  let query = Smtml.Expr.Set.add (Smtml.Typed.Unsafe.unwrap condition) pc in
+  let cached =
+    Mutex.protect cache_mutex (fun () ->
+      match Smtml.Cache.Strong.find_opt cache query with
+      | Some sat -> Some sat
+      | None -> (
+        let neg_query =
+          let neg_condition = Smtml.Typed.Bool.not condition in
+          Smtml.Expr.Set.add (Smtml.Typed.Unsafe.unwrap neg_condition) pc
+        in
+        match Smtml.Cache.Strong.find_opt cache neg_query with
+        | Some `Unsat ->
+          (* this is an optimisation under the assumption that the PC is always SAT (i.e. we are performing eager pruning), in such a case, when a branch is unsat, we don't have to check the reachability of the other's branch negation, because it is always going to be SAT. *)
+          Some `Sat
+        | None | Some `Sat ->
+          (* we can't deduce anything *)
+          None
+        | Some `Unknown -> assert false ) )
+  in
+  match cached with
+  | Some sat -> sat
+  | None ->
+    (* there was nothing useful in the cache and we have to make the check for real! *)
+    let module Solver = (val solver_module) in
+    let sat = Solver.check_set s query in
+    Mutex.protect cache_mutex (fun () ->
+      Smtml.Cache.Strong.replace cache query sat );
+    sat
 
 let model_of_path_condition (S (solver_module, s)) ~path_condition :
   Smtml.Model.t Option.t =
