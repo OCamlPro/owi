@@ -71,13 +71,77 @@ let check_reachability condition =
   in
   return reachability
 
+let assume condition =
+  let* satisfiability = check_reachability condition in
+  match satisfiability with
+  | `Sat ->
+    let* () = add_already_checked_condition_to_pc condition in
+    return ()
+  | `Unsat -> prune ()
+  | `Unknown ->
+    let solver = solver () in
+    if Solver.was_interrupted solver then prune () else assert false
+
+let select_inner ~with_breadcrumbs (condition : Symbolic_boolean.t)
+  ~instr_counter_true ~instr_counter_false =
+  let condition = Smtml.Typed.simplify condition in
+  match Smtml.Typed.view condition with
+  | Val True -> return true
+  | Val False -> return false
+  | _ ->
+    let branch condition final_value priority =
+      let* () =
+        if with_breadcrumbs then add_breadcrumb (if final_value then 1 else 0)
+        else return ()
+      in
+      let* () = yield priority in
+      let* () = assume condition in
+      let* () = modify_state (Thread.set_priority priority) in
+      return final_value
+    in
+
+    let* state in
+    let true_branch =
+      let prio =
+        let instr_counter =
+          match instr_counter_true with
+          | None -> state.priority.instr_counter
+          | Some instr_counter -> instr_counter
+        in
+        Prio.v ~instr_counter ~distance_to_unreachable:None ~depth:state.depth
+      in
+      branch condition true prio
+    in
+
+    let false_branch =
+      let prio =
+        let instr_counter =
+          match instr_counter_false with
+          | None -> state.priority.instr_counter
+          | Some instr_counter -> instr_counter
+        in
+        Prio.v ~instr_counter ~distance_to_unreachable:None ~depth:state.depth
+      in
+      branch (Symbolic_boolean.not condition) false prio
+    in
+    Thread.incr_path_count state;
+
+    choose true_branch false_branch
+[@@inline]
+
+let select (cond : Symbolic_boolean.t) ~instr_counter_true ~instr_counter_false
+    =
+  select_inner cond ~instr_counter_true ~instr_counter_false
+    ~with_breadcrumbs:true
+[@@inline]
+
 let get_model_or_prune symbol =
   let* state in
   let solver = solver () in
-  let set = state.pc |> Symex.Path_condition.slice_on_symbol symbol in
-  let stats = state.bench_stats in
-  let symbol_scopes = Symbol_scope.of_symbol symbol in
   let sat_model =
+    let set = state.pc |> Symex.Path_condition.slice_on_symbol symbol in
+    let stats = state.bench_stats in
+    let symbol_scopes = Symbol_scope.of_symbol symbol in
     Benchmark.handle_time_span stats.solver_intermediate_model_time (fun () ->
       Solver.model_of_set solver ~symbol_scopes ~set )
   in
@@ -90,72 +154,7 @@ let get_model_or_prune symbol =
       (* the model exists so the symbol should evaluate *)
       assert false
   end
-  | `Unknown ->
-    (* It can happen when the solver is interrupted *)
-    (* TODO: once https://github.com/formalsec/smtml/pull/479 is merged
-               if solver was interrupted then prune () else assert false *)
-    prune ()
-
-let select_inner ~with_breadcrumbs (condition : Symbolic_boolean.t)
-  ~instr_counter_true ~instr_counter_false =
-  let* state in
-  let condition = Smtml.Typed.simplify condition in
-  match Smtml.Typed.view condition with
-  | Val True -> return true
-  | Val False -> return false
-  | _ ->
-    let branch condition final_value priority =
-      let* () =
-        if with_breadcrumbs then add_breadcrumb (if final_value then 1 else 0)
-        else return ()
-      in
-      let* () = yield priority in
-      let* satisfiability = check_reachability condition in
-      begin match satisfiability with
-      | `Sat ->
-        let* () = add_already_checked_condition_to_pc condition in
-        let* () = modify_state (Thread.set_priority priority) in
-        return final_value
-      | `Unsat -> prune ()
-      | `Unknown ->
-        (* It can happen when the solver is interrupted *)
-        (* TODO: once https://github.com/formalsec/smtml/pull/479 is merged
-                                     if solver was interrupted then prune () else assert false *)
-        prune ()
-      end
-    in
-
-    let prio_true =
-      let instr_counter =
-        match instr_counter_true with
-        | None -> state.priority.instr_counter
-        | Some instr_counter -> instr_counter
-      in
-      Prio.v ~instr_counter ~distance_to_unreachable:None ~depth:state.depth
-    in
-    let true_branch = branch condition true prio_true in
-
-    let prio_false =
-      let instr_counter =
-        match instr_counter_false with
-        | None -> state.priority.instr_counter
-        | Some instr_counter -> instr_counter
-      in
-      Prio.v ~instr_counter ~distance_to_unreachable:None ~depth:state.depth
-    in
-    let false_branch =
-      branch (Symbolic_boolean.not condition) false prio_false
-    in
-    Thread.incr_path_count state;
-
-    choose true_branch false_branch
-[@@inline]
-
-let select (cond : Symbolic_boolean.t) ~instr_counter_true ~instr_counter_false
-    =
-  select_inner cond ~instr_counter_true ~instr_counter_false
-    ~with_breadcrumbs:true
-[@@inline]
+  | `Unknown -> if Solver.was_interrupted solver then prune () else assert false
 
 let select_i32 (e : Symbolic_i32.t) : int32 t =
   let e = Smtml.Typed.simplify e in
@@ -207,17 +206,8 @@ let select_i32 (e : Symbolic_i32.t) : int32 t =
         let not_this_value_cond = Symbolic_boolean.not this_value_cond in
         (* TODO: this is annoying as the next call to get_model_or_prune is also going to check for satisfiability which is useless! it can probably be simplified.
            I'm leaving it for now to be sure this is correct. It may actually not be required but better safe than sorry! *)
-        let* satisfiability = check_reachability not_this_value_cond in
-        match satisfiability with
-        | `Sat ->
-          let* () = add_already_checked_condition_to_pc not_this_value_cond in
-          generator ()
-        | `Unsat -> prune ()
-        | `Unknown ->
-          (* It can happen when the solver is interrupted *)
-          (* TODO: once https://github.com/formalsec/smtml/pull/479 is merged
-                           if solver was interrupted then prune () else assert false *)
-          prune ()
+        let* () = assume not_this_value_cond in
+        generator ()
       in
       Thread.incr_path_count state;
 
@@ -240,11 +230,7 @@ let bug kind =
     let path_condition = state.pc in
     match Solver.model_of_path_condition solver ~path_condition with
     | Some model -> return model
-    | None ->
-      (* It can happen when the solver is interrupted *)
-      (* TODO: once https://github.com/formalsec/smtml/pull/479 is merged
-             if solver was interrupted then prune () else assert false *)
-      prune ()
+    | None -> if Solver.was_interrupted solver then prune () else assert false
   in
   fail { Bug.kind; model; state }
 
@@ -276,16 +262,3 @@ let ite (c : Symbolic_boolean.t) ~(if_true : Symbolic_value.t)
     let+ b = select c ~instr_counter_true:None ~instr_counter_false:None in
     if b then if_true else if_false
   | _, _ -> assert false
-
-let assume condition =
-  let* satisfiability = check_reachability condition in
-  match satisfiability with
-  | `Sat ->
-    let* () = add_already_checked_condition_to_pc condition in
-    return ()
-  | `Unsat -> prune ()
-  | `Unknown ->
-    (* It can happen when the solver is interrupted *)
-    (* TODO: once https://github.com/formalsec/smtml/pull/479 is merged
-                           if solver was interrupted then prune () else assert false *)
-    prune ()
