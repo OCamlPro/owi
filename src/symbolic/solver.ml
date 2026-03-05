@@ -40,10 +40,9 @@ let check (S (solver_module, s)) pc condition =
         | Some `Unsat ->
           (* this is an optimisation under the assumption that the PC is always SAT (i.e. we are performing eager pruning), in such a case, when a branch is unsat, we don't have to check the reachability of the other's branch negation, because it is always going to be SAT. *)
           Some `Sat
-        | None | Some `Sat ->
+        | None | Some _ ->
           (* we can't deduce anything *)
-          None
-        | Some `Unknown -> assert false ) )
+          None ) )
   in
   match cached with
   | Some sat -> sat
@@ -140,3 +139,6 @@ let get_all_stats ~wait_for_all_domains =
   end
 
 let pp_stats = Smtml.Statistics.pp
+
+let was_interrupted (S (_solver_module, _s)) = true
+(* TODO: actually use the function from smtml! *)
