@@ -64,13 +64,6 @@ let check_reachability condition =
   let* state in
   let solver = solver () in
   let pc = Symex.Path_condition.slice_on_new_condition condition state.pc in
-  (* the condition must be simplified only *after* slicing when we don't know if it is SAT, otherwise, we may exclude some slices and go to an unsat path! *)
-  let condition =
-    let equalities = Symex.Path_condition.get_known_equalities state.pc in
-    Smtml.Expr.inline_symbol_values equalities
-      (Smtml.Typed.Unsafe.unwrap condition)
-    |> Smtml.Typed.Unsafe.wrap
-  in
   let stats = state.bench_stats in
   let reachability =
     Benchmark.handle_time_span stats.solver_sat_time @@ fun () ->
@@ -106,12 +99,7 @@ let get_model_or_prune symbol =
 let select_inner ~with_breadcrumbs (condition : Symbolic_boolean.t)
   ~instr_counter_true ~instr_counter_false =
   let* state in
-  let condition =
-    let equalities = Symex.Path_condition.get_known_equalities state.pc in
-    Smtml.Expr.inline_symbol_values equalities
-      (Smtml.Typed.Unsafe.unwrap condition)
-    |> Smtml.Typed.Unsafe.wrap |> Smtml.Typed.simplify
-  in
+  let condition = Smtml.Typed.simplify condition in
   match Smtml.Typed.view condition with
   | Val True -> return true
   | Val False -> return false
@@ -170,16 +158,12 @@ let select (cond : Symbolic_boolean.t) ~instr_counter_true ~instr_counter_false
 [@@inline]
 
 let select_i32 (e : Symbolic_i32.t) : int32 t =
-  let* state in
-  let equalities = Symex.Path_condition.get_known_equalities state.pc in
-  let e =
-    Smtml.Expr.inline_symbol_values equalities (Smtml.Typed.Unsafe.unwrap e)
-    |> Smtml.Typed.Unsafe.wrap |> Smtml.Typed.simplify
-  in
+  let e = Smtml.Typed.simplify e in
   match Smtml.Typed.view e with
   | Val (Bitv bv) when Smtml.Bitvector.numbits bv <= 32 ->
     return (Smtml.Bitvector.to_int32 bv)
   | _ ->
+    let* state in
     let* assign, symbol =
       match Smtml.Typed.view e with
       | Symbol symbol -> return (None, symbol)
