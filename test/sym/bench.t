@@ -1,4 +1,4 @@
-  $ owi sym div_i32.wat --no-value --deterministic-result-order -w1 --bench 2>&1 | sed 's/: [0-9].*/: X/' | sed 's/[0-9].*)/ X)/'
+  $ owi sym div_i32.wat --no-value --deterministic-result-order -w1 --bench 2>&1 | sed 's/: [0-9].*/: X/' | sed 's/[0-9].*)/ X)/' | grep -v "(time X)"
   owi: [INFO] parsing time : X
   owi: [INFO] typechecking time : X
   owi: [INFO] validation time : X
@@ -72,4 +72,3 @@ Testing with the -q flag:
                              (num checks  X)
                              (propagations  X)
                              (rlimit count  X)
-
