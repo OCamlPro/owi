@@ -140,5 +140,6 @@ let get_all_stats ~wait_for_all_domains =
 
 let pp_stats = Smtml.Statistics.pp
 
-let was_interrupted (S (_solver_module, _s)) = true
-(* TODO: actually use the function from smtml! *)
+let was_interrupted (S (solver_module, s)) =
+  let module Solver = (val solver_module) in
+  Solver.was_interrupted s
