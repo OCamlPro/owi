@@ -32,10 +32,6 @@ val with_new_invisible_symbol : Smtml.Ty.t -> (Smtml.Symbol.t -> 'b) -> 'b t
 
 val with_new_symbol : Smtml.Ty.t -> (Smtml.Symbol.t -> 'b) -> 'b t
 
-val solver : unit -> Solver.t
-
-val solver_to_use : Smtml.Solver_type.t option ref
-
 val state : Thread.t t
 
 val get_pc : unit -> Smtml.Expr.Set.t t

@@ -77,7 +77,7 @@ let run ~exploration_strategy ~workers ~no_worker_isolation ~no_stop_at_failure
     Bugs.new_pledge bug_stack
   done;
 
-  Symbolic_choice.solver_to_use := Some solver;
+  Solver.solver_to_use := Some solver;
 
   (* Launch workers *)
   let domains =
@@ -122,9 +122,7 @@ let run ~exploration_strategy ~workers ~no_worker_isolation ~no_stop_at_failure
               (fun f write_back -> at_schedulable (f ()) write_back)
               sched
           with
-          | Z3.Error _
-            when let solver = Symbolic_choice.solver () in
-                 Solver.was_interrupted solver ->
+          | Z3.Error _ when Solver.was_interrupted () ->
             (* it happens regularly that interrupting Z3 makes it crash, in this case, we simply ignore the exception, otherwise it is confusing for the user as it looks like something went wrong when there's nothing to worry about *)
             ()
           | e ->
