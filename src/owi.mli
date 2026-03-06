@@ -1336,6 +1336,14 @@ module Cmd_fmt : sig
   val cmd : inplace:bool -> files:Fpath.t list -> unit Result.t
 end
 
+module Cmd_haskell : sig
+  val cmd :
+       symbolic_parameters:Symbolic_parameters.t
+    -> files:Fpath.t list
+    -> out_file:Fpath.t option
+    -> unit Result.t
+end
+
 module Cmd_instrument_label : sig
   val cmd :
        unsafe:bool
