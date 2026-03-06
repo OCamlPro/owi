@@ -402,6 +402,22 @@ let fmt_cmd =
   and+ () = setup_log in
   Cmd_fmt.cmd ~inplace ~files
 
+(* owi haskell *)
+
+let haskell_info =
+  let doc =
+    "Compile a Haskell file to Wasm and run the symbolic interpreter on it"
+  in
+  let man = [] @ shared_man in
+  Cmd.info "haskell" ~version ~doc ~sdocs ~man
+
+let haskell_cmd =
+  let+ files
+  and+ out_file
+  and+ () = setup_log
+  and+ symbolic_parameters = symbolic_parameters (Some "_start") in
+  Cmd_haskell.cmd ~symbolic_parameters ~files ~out_file
+
 (* owi instrument *)
 
 let instrument_info =
@@ -658,6 +674,7 @@ let cli =
     ; Cmd.v fmt_info fmt_cmd
     ; Cmd.group instrument_info
         [ Cmd.v instrument_label_info instrument_label_cmd ]
+    ; Cmd.v haskell_info haskell_cmd
     ; Cmd.v iso_info iso_cmd
     ; Cmd.v replay_info replay_cmd
     ; Cmd.v run_info run_cmd
