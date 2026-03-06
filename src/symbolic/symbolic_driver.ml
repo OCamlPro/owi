@@ -121,7 +121,13 @@ let run ~exploration_strategy ~workers ~no_worker_isolation ~no_stop_at_failure
             Scheduler.work_while
               (fun f write_back -> at_schedulable (f ()) write_back)
               sched
-          with e ->
+          with
+          | Z3.Error _
+            when let solver = Symbolic_choice.solver () in
+                 Solver.was_interrupted solver ->
+            (* it happens regularly that interrupting Z3 makes it crash, in this case, we simply ignore the exception, otherwise it is confusing for the user as it looks like something went wrong when there's nothing to worry about *)
+            ()
+          | e ->
             let e_s = Printexc.to_string e in
             let bt = Printexc.get_raw_backtrace () in
             let bt_s = Printexc.raw_backtrace_to_string bt in
