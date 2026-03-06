@@ -12,17 +12,6 @@ type 'a t = ('a, Bug.t, Prio.metrics, Thread.t) Symex.Monad.t
 
 let state : Thread.t t = state ()
 
-let solver_to_use = ref None
-
-let solver_dls_key =
-  Domain.DLS.new_key (fun () ->
-    let solver_to_use = !solver_to_use in
-    match solver_to_use with
-    | None -> assert false
-    | Some solver_to_use -> Solver.fresh solver_to_use () )
-
-let[@inline] solver () = Domain.DLS.get solver_dls_key
-
 let add_already_checked_condition_to_pc (condition : Symbolic_boolean.t) =
   let* state in
   let state = Thread.add_already_checked_condition_to_pc state condition in
@@ -62,12 +51,11 @@ let with_new_symbol ty f =
 
 let check_reachability condition =
   let* state in
-  let solver = solver () in
   let pc = Symex.Path_condition.slice_on_new_condition condition state.pc in
   let stats = state.bench_stats in
   let reachability =
     Benchmark.handle_time_span stats.solver_sat_time @@ fun () ->
-    Solver.check solver pc condition
+    Solver.check pc condition
   in
   return reachability
 
@@ -78,9 +66,7 @@ let assume condition =
     let* () = add_already_checked_condition_to_pc condition in
     return ()
   | `Unsat -> prune ()
-  | `Unknown ->
-    let solver = solver () in
-    if Solver.was_interrupted solver then prune () else assert false
+  | `Unknown -> if Solver.was_interrupted () then prune () else assert false
 
 let select_inner ~with_breadcrumbs (condition : Symbolic_boolean.t)
   ~instr_counter_true ~instr_counter_false =
@@ -137,13 +123,12 @@ let select (cond : Symbolic_boolean.t) ~instr_counter_true ~instr_counter_false
 
 let get_model_or_prune symbol =
   let* state in
-  let solver = solver () in
   let sat_model =
     let set = state.pc |> Symex.Path_condition.slice_on_symbol symbol in
     let stats = state.bench_stats in
     let symbol_scopes = Symbol_scope.of_symbol symbol in
     Benchmark.handle_time_span stats.solver_intermediate_model_time (fun () ->
-      Solver.model_of_set solver ~symbol_scopes ~set )
+      Solver.model_of_set ~symbol_scopes ~set )
   in
   match sat_model with
   | `Unsat -> prune ()
@@ -154,7 +139,7 @@ let get_model_or_prune symbol =
       (* the model exists so the symbol should evaluate *)
       assert false
   end
-  | `Unknown -> if Solver.was_interrupted solver then prune () else assert false
+  | `Unknown -> if Solver.was_interrupted () then prune () else assert false
 
 let select_i32 (e : Symbolic_i32.t) : int32 t =
   let e = Smtml.Typed.simplify e in
@@ -226,11 +211,10 @@ let bug kind =
   let* model =
     let stats = state.bench_stats in
     Benchmark.handle_time_span stats.solver_final_model_time @@ fun () ->
-    let solver = solver () in
     let path_condition = state.pc in
-    match Solver.model_of_path_condition solver ~path_condition with
+    match Solver.model_of_path_condition ~path_condition with
     | Some model -> return model
-    | None -> if Solver.was_interrupted solver then prune () else assert false
+    | None -> if Solver.was_interrupted () then prune () else assert false
   in
   fail { Bug.kind; model; state }
 

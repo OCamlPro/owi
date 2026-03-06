@@ -21,11 +21,22 @@ let fresh solver_ty () =
   if Log.is_bench_enabled () then add_solver solver;
   solver
 
+let solver_to_use = ref None
+
+let dls_key =
+  Domain.DLS.new_key (fun () ->
+    let solver_to_use = !solver_to_use in
+    match solver_to_use with
+    | Some solver_to_use -> fresh solver_to_use ()
+    | None -> assert false )
+
+let[@inline] get_current () = Domain.DLS.get dls_key
+
 let cache = Smtml.Cache.Strong.create 64
 
 let cache_mutex = Mutex.create ()
 
-let check (S (solver_module, s)) pc condition =
+let check pc condition =
   let query = Smtml.Expr.Set.add (Smtml.Typed.Unsafe.unwrap condition) pc in
   let cached =
     Mutex.protect cache_mutex (fun () ->
@@ -48,15 +59,16 @@ let check (S (solver_module, s)) pc condition =
   | Some sat -> sat
   | None ->
     (* there was nothing useful in the cache and we have to make the check for real! *)
+    let (S (solver_module, s)) = get_current () in
     let module Solver = (val solver_module) in
     let sat = Solver.check_set s query in
     Mutex.protect cache_mutex (fun () ->
       Smtml.Cache.Strong.replace cache query sat );
     sat
 
-let model_of_path_condition (S (solver_module, s)) ~path_condition :
-  Smtml.Model.t Option.t =
+let model_of_path_condition ~path_condition : Smtml.Model.t Option.t =
   let exception Unknown in
+  let (S (solver_module, s)) = get_current () in
   let module Solver = (val solver_module) in
   try
     let sub_conditions = Symex.Path_condition.to_list path_condition in
@@ -79,7 +91,8 @@ let model_of_path_condition (S (solver_module, s)) ~path_condition :
     Some model
   with Unknown -> None
 
-let model_of_set (S (solver_module, s)) ~symbol_scopes ~set =
+let model_of_set ~symbol_scopes ~set =
+  let (S (solver_module, s)) = get_current () in
   let module Solver = (val solver_module) in
   let symbols = Symbol_scope.only_symbols symbol_scopes in
   Solver.get_sat_model ~symbols s set
@@ -140,6 +153,7 @@ let get_all_stats ~wait_for_all_domains =
 
 let pp_stats = Smtml.Statistics.pp
 
-let was_interrupted (S (solver_module, s)) =
+let was_interrupted () =
+  let (S (solver_module, s)) = get_current () in
   let module Solver = (val solver_module) in
   Solver.was_interrupted s
