@@ -457,7 +457,11 @@ module Text : sig
     | Store of indice * memarg
 
   (** V128 instructions *)
-  type v128_instr = Const of Concrete_v128.t
+  type v128_instr =
+    | Const of Concrete_v128.t
+    | And
+    | Load of (indice * memarg)
+    | Store of (indice * memarg)
 
   (** I8x16 instructions *)
   type i8x16_instr =
@@ -468,16 +472,19 @@ module Text : sig
   type i16x8_instr =
     | Add
     | Sub
+    | Mul
 
   (* I32x4 instructions *)
   type i32x4_instr =
     | Add
     | Sub
+    | Mul
 
   (** I64x2 instructions *)
   type i64x2_instr =
     | Add
     | Sub
+    | Mul
 
   (** Reference instructions *)
   type ref_instr =
@@ -970,6 +977,13 @@ module Binary : sig
     | Load of indice * memarg
     | Store of indice * memarg
 
+  (** V128 instructions *)
+  type v128_instr =
+    | Const of Concrete_v128.t
+    | And
+    | Load of (indice * memarg)
+    | Store of (indice * memarg)
+
   (** Reference instructions *)
   type ref_instr =
     | Null of heap_type
@@ -1047,7 +1061,7 @@ module Binary : sig
     | I64 of i64_instr
     | F32 of f32_instr
     | F64 of f64_instr
-    | V128 of Text.v128_instr
+    | V128 of v128_instr
     | I8x16 of Text.i8x16_instr
     | I16x8 of Text.i16x8_instr
     | I32x4 of Text.i32x4_instr
@@ -1701,6 +1715,14 @@ module Cmd_fuzz : sig
     -> timeout:float option
     -> timeout_instr:int option
     -> unsafe:bool
+    -> unit Result.t
+end
+
+module Cmd_haskell : sig
+  val cmd :
+       symbolic_parameters:Symbolic_parameters.t
+    -> files:Fpath.t list
+    -> out_file:Fpath.t option
     -> unit Result.t
 end
 

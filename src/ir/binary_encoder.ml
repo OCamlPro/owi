@@ -472,12 +472,13 @@ let write_f64_instr buf : Binary.f64_instr -> _ =
   | Reinterpret_i S32 -> (* TODO *) assert false
   | Reinterpret_i S64 -> add_char '\xBF'
 
-let write_v128_instr buf : Text.v128_instr -> _ = function
+let write_v128_instr buf : Binary.v128_instr -> _ = function
   | Const v ->
     write_fd buf 12;
     let a, b = Concrete_v128.to_i64x2 v in
     write_bytes_8 buf a;
     write_bytes_8 buf b
+  | And | Load _ | Store _ -> raise @@ Failure "TODO"
 
 let write_i8x16_instr buf : Text.i8x16_instr -> _ = function
   | Add -> write_fd buf 110
@@ -486,14 +487,17 @@ let write_i8x16_instr buf : Text.i8x16_instr -> _ = function
 let write_i16x8_instr buf : Text.i16x8_instr -> _ = function
   | Add -> write_fd buf 142
   | Sub -> write_fd buf 145
+  | Mul -> raise @@ Failure "TODO"
 
 let write_i32x4_instr buf : Text.i32x4_instr -> _ = function
   | Add -> write_fd buf 174
   | Sub -> write_fd buf 177
+  | Mul -> raise @@ Failure "TODO"
 
 let write_i64x2_instr buf : Text.i64x2_instr -> _ = function
   | Add -> write_fd buf 206
   | Sub -> write_fd buf 209
+  | Mul -> raise @@ Failure "TODO"
 
 let write_ref_instr buf : Binary.ref_instr -> _ =
   let add_char c = Buffer.add_char buf c in

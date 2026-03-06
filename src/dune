@@ -22,6 +22,7 @@
   cmd_cpp
   cmd_fmt
   cmd_fuzz
+  cmd_haskell
   cmd_instrument_label
   cmd_iso
   cmd_replay

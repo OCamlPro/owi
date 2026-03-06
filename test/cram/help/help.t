@@ -22,6 +22,10 @@ no subcommand should print help
          fuzz [OPTION]… FILE
              Run the fuzzer
   
+         haskell [OPTION]… FILE…
+             Compile a Haskell file to Wasm and run the symbolic interpreter on
+             it
+  
          instrument COMMAND …
              Instrument a program in various ways
   

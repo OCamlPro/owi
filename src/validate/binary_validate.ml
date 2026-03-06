@@ -587,10 +587,15 @@ let typecheck_f64_instr (env : Env.t) stack = function
     let+ stack = Stack.push [ f64 ] stack in
     (env, stack)
 
-let typecheck_v128_instr env stack : Text.v128_instr -> _ = function
+let typecheck_v128_instr (env : Env.t) stack : Binary.v128_instr -> _ = function
   | Const _ ->
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
+  | And ->
+    let* stack = Stack.pop env.modul [ v128; v128 ] stack in
+    let+ stack = Stack.push [ v128 ] stack in
+    (env, stack)
+  | _ -> raise @@ Failure "TODO"
 
 let typecheck_i8x16_instr (env : Env.t) stack = function
   | (Add : Text.i8x16_instr) | Sub ->
@@ -599,19 +604,19 @@ let typecheck_i8x16_instr (env : Env.t) stack = function
     (env, stack)
 
 let typecheck_i16x8_instr (env : Env.t) stack = function
-  | (Add : Text.i16x8_instr) | Sub ->
+  | (Add : Text.i16x8_instr) | Sub | Mul ->
     let* stack = Stack.pop env.modul [ v128; v128 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
 
 let typecheck_i32x4_instr (env : Env.t) stack = function
-  | (Add : Text.i32x4_instr) | Sub ->
+  | (Add : Text.i32x4_instr) | Sub | Mul ->
     let* stack = Stack.pop env.modul [ v128; v128 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
 
 let typecheck_i64x2_instr (env : Env.t) stack = function
-  | (Add : Text.i64x2_instr) | Sub ->
+  | (Add : Text.i64x2_instr) | Sub | Mul ->
     let* stack = Stack.pop env.modul [ v128; v128 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)

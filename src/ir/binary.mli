@@ -231,6 +231,15 @@ type f64_instr =
   | Load of indice * memarg
   | Store of indice * memarg
 
+(** V128 instructions *)
+type v128_instr =
+  | Const of Concrete_v128.t
+  | And
+  | Load of (indice * memarg)
+  | Store of (indice * memarg)
+
+val pp_v128_instr : v128_instr Fmt.t
+
 (** Reference instructions *)
 type ref_instr =
   | Null of heap_type
@@ -308,7 +317,7 @@ type instr =
   | I64 of i64_instr
   | F32 of f32_instr
   | F64 of f64_instr
-  | V128 of Text.v128_instr
+  | V128 of v128_instr
   | I8x16 of Text.i8x16_instr
   | I16x8 of Text.i16x8_instr
   | I32x4 of Text.i32x4_instr

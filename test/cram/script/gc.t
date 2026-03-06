@@ -19,7 +19,7 @@
   owi: [ERROR] unexpected token "$l" in line 30, character 18-20
   [40]
   $ owi script --no-exhaustion reference/call_ref.wast 2>&1 | grep -oE "Failure.*"
-  [1]
+  Failure("TODO")
   $ owi script --no-exhaustion reference/extern.wast 2>&1 | grep -oE "Failure.*"
   Failure("Assigned: unimplemented for rec and sub types")
   $ owi script --no-exhaustion reference/i31.wast 2>&1 | grep -oE "Failure.*"
@@ -30,11 +30,7 @@
   $ owi script --no-exhaustion reference/ref_test.wast 2>&1 | grep -oE "Failure.*"
   Failure("Assigned: unimplemented for rec and sub types")
   $ owi script --no-exhaustion reference/return_call_ref.wast 2>&1 | grep -oE ".*Assertion failed"
-       File "src/interpret/interpret.ml", line 1271, characters 4-10: Assertion failed
-  $ owi script --no-exhaustion reference/struct.wast 2>&1 | grep -oE ".*Failure.*"
-       Failure("Assigned: unimplemented for rec and sub types")
-  $ owi script --no-exhaustion reference/type-subtyping.wast 2>&1 | grep -oE ".*Failure.*"
-       Failure("Assigned: unimplemented for rec and sub types")
+  [1]
   $ owi script --no-exhaustion reference/struct.wast 2>&1 | grep -oE "Failure.*"
   Failure("Assigned: unimplemented for rec and sub types")
   $ owi script --no-exhaustion reference/type-subtyping.wast 2>&1 | grep -oE "Failure.*"

@@ -536,6 +536,21 @@ let pp_f64_instr ppf = function
   | Store (indice, memarg) ->
     pf ppf "f64.store%a%a" pp_indice_not0 indice pp_memarg memarg
 
+(** V128 instructions *)
+type v128_instr =
+  | Const of Concrete_v128.t
+  | And
+  | Load of (indice * memarg)
+  | Store of (indice * memarg)
+
+let pp_v128_instr ppf = function
+  | Const n -> pf ppf "v128.const %a" Concrete_v128.pp n
+  | And -> pf ppf "v128.and"
+  | Load (indice, memarg) ->
+    pf ppf "v128.load%a%a" pp_indice_not0 indice pp_memarg memarg
+  | Store (indice, memarg) ->
+    pf ppf "v128.store%a%a" pp_indice_not0 indice pp_memarg memarg
+
 (** Reference instructions *)
 type ref_instr =
   | Null of heap_type
@@ -686,7 +701,7 @@ type instr =
   | I64 of i64_instr
   | F32 of f32_instr
   | F64 of f64_instr
-  | V128 of Text.v128_instr
+  | V128 of v128_instr
   | I8x16 of Text.i8x16_instr
   | I16x8 of Text.i16x8_instr
   | I32x4 of Text.i32x4_instr
@@ -735,7 +750,7 @@ let rec pp_instr ~short ppf = function
   | I64 i -> pp_i64_instr ppf i
   | F32 i -> pp_f32_instr ppf i
   | F64 i -> pp_f64_instr ppf i
-  | V128 i -> Text.pp_v128_instr ppf i
+  | V128 i -> pp_v128_instr ppf i
   | I8x16 i -> Text.pp_i8x16_instr ppf i
   | I16x8 i -> Text.pp_i16x8_instr ppf i
   | I32x4 i -> Text.pp_i32x4_instr ppf i

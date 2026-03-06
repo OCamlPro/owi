@@ -317,7 +317,11 @@ type f64_instr =
   | Store of indice * memarg
 
 (** V128 instructions *)
-type v128_instr = Const of Concrete_v128.t
+type v128_instr =
+  | Const of Concrete_v128.t
+  | And
+  | Load of (indice * memarg)
+  | Store of (indice * memarg)
 
 val pp_v128_instr : v128_instr Fmt.t
 
@@ -332,6 +336,7 @@ val pp_i8x16_instr : i8x16_instr Fmt.t
 type i16x8_instr =
   | Add
   | Sub
+  | Mul
 
 val pp_i16x8_instr : i16x8_instr Fmt.t
 
@@ -339,6 +344,7 @@ val pp_i16x8_instr : i16x8_instr Fmt.t
 type i32x4_instr =
   | Add
   | Sub
+  | Mul
 
 val pp_i32x4_instr : i32x4_instr Fmt.t
 
@@ -346,6 +352,7 @@ val pp_i32x4_instr : i32x4_instr Fmt.t
 type i64x2_instr =
   | Add
   | Sub
+  | Mul
 
 val pp_i64x2_instr : i64x2_instr Fmt.t
 

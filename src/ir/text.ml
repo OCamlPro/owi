@@ -690,10 +690,19 @@ let pp_f64_instr ppf = function
     pf ppf "f64.store%a%a" pp_indice_not0 indice pp_memarg memarg
 
 (** V128 instructions *)
-type v128_instr = Const of Concrete_v128.t
+type v128_instr =
+  | Const of Concrete_v128.t
+  | And
+  | Load of (indice * memarg)
+  | Store of (indice * memarg)
 
 let pp_v128_instr ppf = function
   | Const n -> pf ppf "v128.const %a" Concrete_v128.pp n
+  | And -> pf ppf "v128.and"
+  | Load (indice, memarg) ->
+    pf ppf "v128.load%a%a" pp_indice_not0 indice pp_memarg memarg
+  | Store (indice, memarg) ->
+    pf ppf "v128.store%a%a" pp_indice_not0 indice pp_memarg memarg
 
 (** I8x16 instructions *)
 type i8x16_instr =
@@ -708,28 +717,34 @@ let pp_i8x16_instr ppf = function
 type i16x8_instr =
   | Add
   | Sub
+  | Mul
 
 let pp_i16x8_instr ppf = function
   | Add -> pf ppf "i16x8.add"
   | Sub -> pf ppf "i16x8.sub"
+  | Mul -> pf ppf "i16x8.mul"
 
 (* I32x4 instructions *)
 type i32x4_instr =
   | Add
   | Sub
+  | Mul
 
 let pp_i32x4_instr ppf = function
   | Add -> pf ppf "i32x4.add"
   | Sub -> pf ppf "i32x4.sub"
+  | Mul -> pf ppf "i32x4.mul"
 
 (** I64x2 instructions *)
 type i64x2_instr =
   | Add
   | Sub
+  | Mul
 
 let pp_i64x2_instr ppf = function
   | Add -> pf ppf "i64x2.add"
   | Sub -> pf ppf "i64x2.sub"
+  | Mul -> pf ppf "i64x2.mul"
 
 (** Reference instructions *)
 type ref_instr =

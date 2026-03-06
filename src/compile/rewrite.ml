@@ -273,6 +273,19 @@ let rewrite_f64_instr assigned : Text.f64_instr -> Binary.f64_instr Result.t =
     let+ indice = Assigned.find_memory assigned indice in
     (Store (indice, memarg) : Binary.f64_instr)
 
+let rewrite_v128_instr assigned : Text.v128_instr -> Binary.v128_instr Result.t
+    = function
+  | Const f -> Ok (Const f : Binary.v128_instr)
+  | And -> Ok And
+  | Load (indice, memarg) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Load (indice, memarg) : Binary.v128_instr)
+  | Store (indice, memarg) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Store (indice, memarg) : Binary.v128_instr)
+
 let rewrite_ref_instr assigned : Text.ref_instr -> Binary.ref_instr Result.t =
   function
   | Null heap_type ->
@@ -458,7 +471,9 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
     | F64 i ->
       let+ i = rewrite_f64_instr assigned i in
       Binary.F64 i
-    | V128 i -> Ok (Binary.V128 i)
+    | V128 i ->
+      let+ i = rewrite_v128_instr assigned i in
+      Binary.V128 i
     | I8x16 i -> Ok (Binary.I8x16 i)
     | I16x8 i -> Ok (Binary.I16x8 i)
     | I32x4 i -> Ok (Binary.I32x4 i)

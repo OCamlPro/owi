@@ -736,14 +736,19 @@ struct
       let+ () = Memory.store_64 mem ~addr (F64.to_bits n) in
       stack
 
-  let exec_v128_instr stack : Text.v128_instr -> _ = function
+  let exec_v128_instr stack : Binary.v128_instr -> _ = function
     | Const n -> Stack.push_concrete_v128 stack n
+    | And | Load _ | Store _ -> raise @@ Failure "todo"
 
   let exec_i8x16_instr _stack : Text.i8x16_instr -> _ = function
-    | _ -> (* TODO *) assert false
+    | _ ->
+      (* TODO *)
+      raise @@ Failure "todo"
 
   let exec_i16x8_instr _stack : Text.i16x8_instr -> _ = function
-    | _ -> (* TODO *) assert false
+    | _ ->
+      (* TODO *)
+      raise @@ Failure "todo"
 
   let exec_i32x4_instr stack : Text.i32x4_instr -> _ = function
     | Add ->
@@ -764,6 +769,7 @@ struct
       let c = I32.sub c1 c2 in
       let d = I32.sub d1 d2 in
       Stack.push_v128 stack (V128.of_i32x4 a b c d)
+    | Mul -> raise @@ Failure "todo"
 
   let exec_i64x2_instr stack : Text.i64x2_instr -> _ = function
     | Add ->
@@ -780,6 +786,7 @@ struct
       let a = I64.sub a1 a2 in
       let b = I64.sub b1 b2 in
       Stack.push_v128 stack (V128.of_i64x2 a b)
+    | Mul -> raise @@ Failure "todo"
 
   let exec_ref_instr env stack : Binary.ref_instr -> _ = function
     | Null t -> Stack.push_ref stack (Ref.null t) |> Choice.return
@@ -1268,7 +1275,7 @@ struct
 
   let call_ref ~return:_ (_state : State.exec_state) _typ_i =
     (* TODO *)
-    assert false
+    raise @@ Failure "TODO"
   (* let fun_ref, stack = Stack.pop_as_ref state.stack in *)
   (* let state = { state with stack } in *)
   (* let func = *)
