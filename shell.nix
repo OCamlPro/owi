@@ -41,6 +41,66 @@ let
       meta.broken = false;
     });
   });
+
+  codex = ocamlPackages.buildDunePackage (finalAttrs: {
+    pname = "codex";
+    version = "dev";
+    src = pkgs.fetchFromGitHub {
+      owner = "s41d";
+      repo = "codex";
+      rev = "05977de3acf12e18343a053be0f1fb936f8ec31c";
+      hash = "sha256-u/dD9ucNeY9j3czC9QtPPfNE3pZ1464gsWdJrsLT9hA=";
+    };
+
+    nativeBuildInputs = with pkgs.ocamlPackages; [
+      dune_3
+      findlib
+      js_of_ocaml
+      # tests
+      mdx
+      mdx.bin
+      qcheck-core
+    ];
+    buildInputs = with pkgs.ocamlPackages; [
+      js_of_ocaml
+      js_of_ocaml-ppx
+      ppx_deriving
+      ppx_inline_test
+    ];
+    propagatedBuildInputs = with pkgs.ocamlPackages; [
+      base64
+      bheap
+      camlp-streams
+      cudd
+      fmt
+      pacomb
+      patricia-tree
+      ppx_inline_test
+      vdom
+      zarith
+    ];
+
+
+    tailwindFile = pkgs.fetchurl {
+      url = "https://github.com/codex-semantics-library/codex/releases/download/1.0-rc4/tailwind4.1.5.css";
+      hash = "sha256-HgE6gWIf2+0W908sYIjhUDYkUnsIz0mJN2nHqXY3QD8=";
+    };
+    graphviz = pkgs.fetchurl {
+      url = "https://github.com/codex-semantics-library/codex/releases/download/1.0-rc4/graphviz.umd.js";
+      hash = "sha256-JeT1R2S8FhCSAcL0zsJjx7ai+bL1X3AjHcgEniwm33c=";
+    };
+    bundleOutput = pkgs.fetchurl {
+      url = "https://github.com/codex-semantics-library/codex/releases/download/1.0-rc4/bundle-output.js";
+      hash = "sha256-zYKJDdu5fkZ52eEzDBuk6mSyxzMDMWDatK/ynlpjU2o=";
+    };
+
+    postUnpack = ''
+      mkdir -p utils/gui/deps/js
+      cp ${finalAttrs.tailwindFile} $sourceRoot/utils/gui/deps/tailwind4.1.5.css
+      cp ${finalAttrs.graphviz} $sourceRoot/utils/gui/deps/graphviz.umd.js
+      cp ${finalAttrs.bundleOutput} $sourceRoot/utils/gui/deps/js/bundle-output.js
+    '';
+  });
 in
 
 pkgs.mkShell {
@@ -77,6 +137,7 @@ pkgs.mkShell {
   buildInputs = with ocamlPackages; [
     bos
     cmdliner
+    codex
     crowbar
     digestif
     dolmen_type

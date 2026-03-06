@@ -1187,6 +1187,13 @@ module Symbolic_extern_func : sig
   end
 end
 
+module Abs_driver : sig
+  val expr :
+       Abs_extern_func.extern_func Link.State.t
+    -> Abs_extern_func.extern_func Linked.Module.t
+    -> unit
+end
+
 module Interpret : sig
   module type Parameters = sig
     val use_ite_for_select : bool
@@ -1284,6 +1291,10 @@ module Symbolic_driver : sig
     -> run_time:float option
     -> unit Symbolic_choice.t
     -> unit Result.t
+end
+
+module Cmd_abs : sig
+  val cmd : source_file:Fpath.t -> unit Result.t
 end
 
 module Cmd_sym : sig
