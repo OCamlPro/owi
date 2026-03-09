@@ -6,7 +6,7 @@ use std::{
     slice::SliceIndex,
 };
 
-use crate::{assume, stop_exploration, sys};
+use crate::{assume, bool_from_wasm_i32_repr, stop_exploration, sys, with_scope};
 
 pub struct DebugWrap<'a, T>(&'a T);
 
@@ -20,15 +20,33 @@ pub trait Symbolic: Sized
 where
     for<'a> DebugWrap<'a, Self>: Debug,
 {
-    fn symbol_inner() -> Self;
+    fn inner_symbol() -> Self;
+
+    fn named_inner_symbol(name: &str) -> Self {
+        with_scope(name, Self::inner_symbol)
+    }
 
     #[track_caller]
     fn symbol() -> Self {
-        let x = Self::symbol_inner();
+        let x = Self::inner_symbol();
         if crate::in_replay_mode() {
             let location = std::panic::Location::caller();
             let msg = format!(
                 "Symbol created at {location} was {debug_wrap:?}\n",
+                debug_wrap = DebugWrap(&x)
+            );
+            crate::write_to_stdout(msg.as_bytes());
+        }
+        x
+    }
+
+    #[track_caller]
+    fn named_symbol(name: &str) -> Self {
+        let x = Self::named_inner_symbol(name);
+        if crate::in_replay_mode() {
+            let location = std::panic::Location::caller();
+            let msg = format!(
+                "Symbol {name} created at {location} was {debug_wrap:?}\n",
                 debug_wrap = DebugWrap(&x)
             );
             crate::write_to_stdout(msg.as_bytes());
@@ -41,30 +59,43 @@ where
         assume(f(&x));
         x
     }
+
+    fn named_symbol_so_that(name: &str, f: impl FnOnce(&Self) -> bool) -> Self {
+        let x = Self::named_symbol(name);
+        assume(f(&x));
+        x
+    }
 }
 
 macro_rules! impl_symbolic_primitive {
     ($type:ty, $sys_fn:ident) => {
         impl Symbolic for $type {
-            fn symbol_inner() -> Self {
+            fn inner_symbol() -> Self {
                 (unsafe { sys::$sys_fn() } as $type)
             }
         }
     };
 }
 
-impl_symbolic_primitive!(bool, bool_symbol);
-impl_symbolic_primitive!(u8, i8_symbol);
-impl_symbolic_primitive!(i8, i8_symbol);
+impl Symbolic for bool {
+    fn inner_symbol() -> Self {
+        bool_from_wasm_i32_repr(unsafe { sys::i32_symbol() })
+    }
+}
+
+impl_symbolic_primitive!(u8, i32_symbol);
+impl_symbolic_primitive!(i8, i32_symbol);
 impl_symbolic_primitive!(i32, i32_symbol);
 impl_symbolic_primitive!(u32, i32_symbol);
+impl_symbolic_primitive!(isize, i32_symbol);
+impl_symbolic_primitive!(usize, i32_symbol);
 impl_symbolic_primitive!(f32, f32_symbol);
 impl_symbolic_primitive!(i64, i64_symbol);
 impl_symbolic_primitive!(u64, i64_symbol);
 impl_symbolic_primitive!(f64, f64_symbol);
 
 impl Symbolic for char {
-    fn symbol_inner() -> Self {
+    fn inner_symbol() -> Self {
         let x = u32::symbol();
         let c = char::from_u32(x).unwrap_or_else(|| stop_exploration());
         c
@@ -72,13 +103,13 @@ impl Symbolic for char {
 }
 
 impl<const N: usize, T: Symbolic + Debug> Symbolic for [T; N] {
-    fn symbol_inner() -> Self {
-        core::array::from_fn(|_| T::symbol_inner())
+    fn inner_symbol() -> Self {
+        core::array::from_fn(|_| T::inner_symbol())
     }
 }
 
 impl Symbolic for () {
-    fn symbol_inner() -> Self {
+    fn inner_symbol() -> Self {
         ()
     }
 }
@@ -86,8 +117,8 @@ impl Symbolic for () {
 macro_rules! impl_symbolic_tuple {
     ($($name:ident)+) => {
         impl<$($name: Symbolic + Debug,)+> Symbolic for ($($name,)+) {
-            fn symbol_inner() -> Self {
-                ($($name::symbol_inner(),)+)
+            fn inner_symbol() -> Self {
+                ($($name::inner_symbol(),)+)
             }
         }
     };
@@ -107,10 +138,10 @@ impl_symbolic_tuple!(A B C D E F G H I J K);
 impl_symbolic_tuple!(A B C D E F G H I J K L);
 
 impl<T: Symbolic + Debug> Symbolic for Option<T> {
-    fn symbol_inner() -> Self {
-        let b = bool::symbol_inner();
+    fn inner_symbol() -> Self {
+        let b = bool::inner_symbol();
         if b {
-            Some(T::symbol_inner())
+            Some(T::inner_symbol())
         } else {
             None
         }
