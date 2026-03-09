@@ -6,6 +6,7 @@
   (run
    rustc
    --target=wasm32-unknown-unknown
+   --edition=2021
    --crate-type=rlib
    --crate-name
    owi_sym
