@@ -1246,23 +1246,25 @@ module Symbolic_parameters : sig
   end
 
   type t =
-    { unsafe : bool
-    ; workers : Int.t Option.t
-    ; no_worker_isolation : Bool.t
+    { deterministic_result_order : bool
+    ; entry_point : string option
+    ; exploration_strategy : Exploration_strategy.t
+    ; fail_mode : fail_mode
+    ; invoke_with_symbols : bool
+    ; model_format : Model.output_format
+    ; model_out_file : Fpath.t option
+    ; no_assert_failure_expression_printing : bool
     ; no_stop_at_failure : bool
     ; no_value : bool
-    ; no_assert_failure_expression_printing : bool
-    ; deterministic_result_order : bool
-    ; fail_mode : fail_mode
-    ; exploration_strategy : Exploration_strategy.t
-    ; workspace : Fpath.t option
+    ; no_worker_isolation : Bool.t
     ; solver : Smtml.Solver_type.t
-    ; model_format : Model.output_format
-    ; entry_point : string option
-    ; invoke_with_symbols : bool
-    ; model_out_file : Fpath.t option
-    ; with_breadcrumbs : bool
+    ; timeout : float option
+    ; timeout_instr : int option
+    ; unsafe : bool
     ; use_ite_for_select : bool
+    ; with_breadcrumbs : bool
+    ; workers : Int.t Option.t
+    ; workspace : Fpath.t option
     }
 end
 

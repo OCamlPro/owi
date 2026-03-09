@@ -37,9 +37,9 @@ let run_file ~parameters ~source_file =
       | Assertion_only -> true
       | Both | Trap_only -> false
 
-    let timeout = None
+    let timeout = parameters.timeout
 
-    let timeout_instr = None
+    let timeout_instr = parameters.timeout_instr
 
     let use_ite_for_select = parameters.use_ite_for_select
   end in

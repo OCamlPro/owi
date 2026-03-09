@@ -76,6 +76,12 @@ OPTIONS
            SMT solver to use. VALUE must be one of the 5 available solvers:
            Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo
 
+       --timeout=S
+           Stop execution after S seconds.
+
+       --timeout-instr=I
+           Stop execution after running I instructions.
+
        -u, --unsafe
            skip typechecking pass
 
