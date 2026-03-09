@@ -44,7 +44,9 @@ module type S0 = sig
 
   val cov_label_set : memory -> Value.i32 -> Value.i32 -> unit t
 
-  val open_scope : memory -> Value.i32 -> unit t
+  val open_scope_null_terminated : memory -> Value.i32 -> unit t
+
+  val open_scope_of_length : memory -> Value.i32 -> Value.i32 -> unit t
 
   val close_scope : unit -> unit t
 end

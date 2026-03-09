@@ -123,14 +123,21 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
 
     let in_replay_mode () = Ok 1l
 
-    let rec make_str m accu i =
+    let rec make_str_null_terminated m accu i =
       let open Concrete_choice in
       let* p = Concrete_memory.load_8_u m i in
-      if Int32.lt 255l p || Int32.lt p 0l then trap `Invalid_character_in_memory
+      let ch = char_of_int (Int32.to_int p) in
+      if Char.equal ch '\x00' then return (List.rev accu |> Array.of_list)
       else
-        let ch = char_of_int (Int32.to_int p) in
-        if Char.equal ch '\x00' then return (List.rev accu |> Array.of_list)
-        else make_str m (ch :: accu) (Int32.add i (Int32.of_int 1))
+        make_str_null_terminated m (ch :: accu) (Int32.add i (Int32.of_int 1))
+
+    let rec make_str_of_length m accu i len =
+      let open Concrete_choice in
+      if Int32.lt len i then return (List.rev accu |> Array.of_list)
+      else
+        let* c = Concrete_memory.load_8_u m i in
+        let ch = char_of_int (Int32.to_int c) in
+        make_str_of_length m (ch :: accu) (Int32.add i 1l) len
 
     let cov_label_is_covered id =
       let open Concrete_choice in
@@ -138,13 +145,18 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
       if Hashtbl.mem covered_labels id then 1l else 0l
 
     let cov_label_set m id str_ptr =
-      let+ chars = make_str m [] str_ptr in
+      let+ chars = make_str_null_terminated m [] str_ptr in
       let str = String.init (Array.length chars) (Array.get chars) in
       Hashtbl.add covered_labels id str;
       Log.debug (fun m -> m "reached %ld@." id)
 
-    let open_scope m strptr =
-      let+ chars = make_str m [] strptr in
+    let open_scope_null_terminated m strptr =
+      let+ chars = make_str_null_terminated m [] strptr in
+      let str = String.init (Array.length chars) (Array.get chars) in
+      scopes := Symbol_scope.open_scope str !scopes
+
+    let open_scope_of_length m strptr length =
+      let+ chars = make_str_of_length m [] strptr length in
       let str = String.init (Array.length chars) (Array.get chars) in
       scopes := Symbol_scope.open_scope str !scopes
 
@@ -171,7 +183,12 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
         , Extern_func (i32 ^->. i32, cov_label_is_covered) )
       ; ( "cov_label_set"
         , Extern_func (memory 0 ^-> i32 ^-> i32 ^->. unit, cov_label_set) )
-      ; ("open_scope", Extern_func (memory 0 ^-> i32 ^->. unit, open_scope))
+      ; ( "open_scope_null_terminated"
+        , Extern_func (memory 0 ^-> i32 ^->. unit, open_scope_null_terminated)
+        )
+      ; ( "open_scope_of_length"
+        , Extern_func (memory 0 ^-> i32 ^-> i32 ^->. unit, open_scope_of_length)
+        )
       ; ("close_scope", Extern_func (unit ^->. unit, close_scope))
       ; ("alloc", Extern_func (memory 0 ^-> i32 ^-> i32 ^->. i32, alloc))
       ; ("dealloc", Extern_func (memory 0 ^-> i32 ^->. i32, free))

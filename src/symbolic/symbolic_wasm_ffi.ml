@@ -103,18 +103,29 @@ module M :
     Log.app (fun m -> m "%c@?" (char_of_int (Int32.to_int c)));
     return ()
 
-  let rec make_str m accu i =
+  let rec make_str_null_terminated m accu i =
     let open Symbolic_choice in
     let* p = Symbolic_memory.load_8_u m (Symbolic_i32.of_int32 i) in
     match Smtml.Typed.view p with
     | Val (Bitv bv) when Smtml.Bitvector.numbits bv = 32 ->
       let c = Smtml.Bitvector.to_int32 bv in
-      if Int32.lt 255l c || Int32.lt c 0l then trap `Invalid_character_in_memory
+      let ch = char_of_int (Int32.to_int c) in
+      if Char.equal ch '\x00' then return (List.rev accu |> Array.of_list)
       else
-        let ch = char_of_int (Int32.to_int c) in
-        if Char.equal ch '\x00' then return (List.rev accu |> Array.of_list)
-        else make_str m (ch :: accu) (Int32.add i (Int32.of_int 1))
+        make_str_null_terminated m (ch :: accu) (Int32.add i (Int32.of_int 1))
     | _ -> assert false
+
+  let rec make_str_of_length m accu i len =
+    let open Symbolic_choice in
+    if len < i then return (List.rev accu |> Array.of_list)
+    else
+      let* p = Symbolic_memory.load_8_u m (Symbolic_i32.of_int i) in
+      match Smtml.Typed.view p with
+      | Val (Bitv bv) when Smtml.Bitvector.numbits bv = 32 ->
+        let c = Smtml.Bitvector.to_int32 bv in
+        let ch = char_of_int (Int32.to_int c) in
+        make_str_of_length m (ch :: accu) (succ i) len
+      | _ -> assert false
 
   let cov_label_is_covered id =
     let open Symbolic_choice in
@@ -136,7 +147,7 @@ module M :
       Mutex.protect cov_lock @@ fun () ->
       if Hashtbl.mem covered_labels id || in_seacoral_store id then abort ()
       else
-        let* chars = make_str m [] ptr in
+        let* chars = make_str_null_terminated m [] ptr in
         let str = String.init (Array.length chars) (Array.get chars) in
         Hashtbl.add covered_labels id str;
         add_label (Int32.to_int id, str)
@@ -148,11 +159,21 @@ module M :
           (Smtml.Typed.Unsafe.unwrap ptr) );
       assert false
 
-  let open_scope m ptr =
+  let open_scope_null_terminated m ptr =
     let open Symbolic_choice in
     let* ptr = select_i32 ptr in
-    let* chars = make_str m [] ptr in
+    let* chars = make_str_null_terminated m [] ptr in
     let str = String.init (Array.length chars) (Array.get chars) in
+    open_scope str
+
+  let open_scope_of_length m ptr len =
+    let open Symbolic_choice in
+    let* ptr = select_i32 ptr in
+    let ptr = Int32.to_int ptr in
+    let* len = select_i32 len in
+    let len = Int32.to_int len in
+    let* bytes = make_str_of_length m [] ptr len in
+    let str = String.init len (Array.get bytes) in
     open_scope str
 
   let close_scope = Symbolic_choice.close_scope
@@ -181,7 +202,11 @@ let symbolic_extern_module =
     ; ( "cov_label_set"
       , Extern_func (memory 0 ^-> i32 ^-> i32 ^->. unit, cov_label_set) )
     ; ("cov_label_is_covered", Extern_func (i32 ^->. i32, cov_label_is_covered))
-    ; ("open_scope", Extern_func (memory 0 ^-> i32 ^->. unit, open_scope))
+    ; ( "open_scope_null_terminated"
+      , Extern_func (memory 0 ^-> i32 ^->. unit, open_scope_null_terminated) )
+    ; ( "open_scope_of_length"
+      , Extern_func (memory 0 ^-> i32 ^-> i32 ^->. unit, open_scope_of_length)
+      )
     ; ("close_scope", Extern_func (unit ^->. unit, close_scope))
     ; ("alloc", Extern_func (memory 0 ^-> i32 ^-> i32 ^->. i32, alloc))
     ; ("dealloc", Extern_func (memory 0 ^-> i32 ^->. i32, free))
