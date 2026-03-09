@@ -85,7 +85,7 @@ __attribute__((import_module("owi"), import_name("invisible_bool_symbol"))) int 
 
 #endif
 
-__attribute__((import_module("owi"), import_name("open_scope"))) void owi_open_scope(const char *name);
+__attribute__((import_module("owi"), import_name("open_scope_null_terminated"))) void owi_open_scope(const char *name);
 __attribute__((import_module("owi"), import_name("close_scope"))) void owi_close_scope(void);
 
 __attribute__((import_module("owi"), import_name("assume"))) void owi_assume(int);
