@@ -258,41 +258,45 @@ let no_ite_for_select =
 (* shared symbolic parameters *)
 
 let symbolic_parameters default_entry_point =
-  let+ unsafe
-  and+ workers
-  and+ no_worker_isolation
+  let+ deterministic_result_order
+  and+ entry_point = entry_point default_entry_point
+  and+ exploration_strategy
+  and+ fail_mode
+  and+ model_format
+  and+ model_out_file
+  and+ invoke_with_symbols
+  and+ no_assert_failure_expression_printing
+  and+ no_ite_for_select
   and+ no_stop_at_failure
   and+ no_value
-  and+ no_assert_failure_expression_printing
-  and+ deterministic_result_order
-  and+ fail_mode
-  and+ exploration_strategy
-  and+ workspace
+  and+ no_worker_isolation
   and+ solver
-  and+ model_format
-  and+ entry_point = entry_point default_entry_point
-  and+ model_out_file
+  and+ timeout
+  and+ timeout_instr
+  and+ unsafe
   and+ with_breadcrumbs
-  and+ invoke_with_symbols
-  and+ no_ite_for_select in
+  and+ workers
+  and+ workspace in
   let use_ite_for_select = not no_ite_for_select in
-  { Symbolic_parameters.unsafe
-  ; workers
-  ; no_worker_isolation
+  { Symbolic_parameters.deterministic_result_order
+  ; entry_point
+  ; exploration_strategy
+  ; fail_mode
+  ; invoke_with_symbols
+  ; model_format
+  ; model_out_file
+  ; no_assert_failure_expression_printing
   ; no_stop_at_failure
   ; no_value
-  ; no_assert_failure_expression_printing
-  ; deterministic_result_order
-  ; fail_mode
-  ; exploration_strategy
-  ; workspace
+  ; no_worker_isolation
   ; solver
-  ; model_format
-  ; entry_point
-  ; model_out_file
-  ; with_breadcrumbs
-  ; invoke_with_symbols
+  ; timeout
+  ; timeout_instr
+  ; unsafe
   ; use_ite_for_select
+  ; with_breadcrumbs
+  ; workers
+  ; workspace
   }
 
 (* owi analyze *)
