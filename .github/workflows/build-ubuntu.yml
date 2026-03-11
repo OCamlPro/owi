@@ -2,7 +2,7 @@ name: build-ubuntu
 on:
   pull_request:
     branches:
-      - main
+      - none
   push:
     branches:
       - main

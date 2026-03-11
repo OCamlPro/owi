@@ -2,7 +2,7 @@ name: build-debian-unstable
 on:
   pull_request:
     branches:
-      - main
+      - none
   push:
     branches:
       - main
