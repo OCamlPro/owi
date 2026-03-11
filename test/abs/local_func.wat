@@ -1,9 +1,7 @@
 (module
-  (import "owi" "i32_symbol" (func $i32_symbol (result i32)))
-
   (func $add (param $i i32) (result i32)
     local.get $i
-    call $i32_symbol
+    local.tee 0 (; should be top ;)
     i32.add
     return
   )
