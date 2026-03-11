@@ -10,7 +10,7 @@ let cmd ~source_file =
     |> Link.Extern.modul ~name:"owi" Abs_wasm_ffi.symbolic_extern_module
   in
   let+ m, link_state =
-    Compile.File.until_link ~unsafe:false ~name:None link_state source_file
+    Compile.File.until_link ~unsafe:true ~name:None link_state source_file
   in
   (* let start = match m.start with Some i -> i | None -> assert false in *)
   (* let f = m.func.(start) in *)

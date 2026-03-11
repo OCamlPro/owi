@@ -27,7 +27,7 @@ let pp_value : ADomain.Context.t -> Format.formatter -> value -> unit =
 
 let pp_state : Format.formatter -> state -> unit =
  fun fmt state ->
-  Fmt.pf fmt "{@\n@[<v 2>  ctx : %a,@;stack : %a,@;locals : %a@]@\n}"
+  Fmt.pf fmt "{@\n@[<hov 2>  ctx : %a,@;stack : %a,@;locals : %a@]@\n}"
     ADomain.context_pretty state.ctx
     (Stack.pp @@ pp_value state.ctx)
     state.stack
@@ -105,7 +105,7 @@ let join_opt a b =
   match (a, b) with None, x | x, None -> x | Some a, Some b -> Some (join a b)
 
 let exec_extern_func state (f : Abs_extern_func.extern_func) =
-  let pop_arg (type ty) stack (arg : ty Abs_extern_func.telt) :
+  let _pop_arg (type ty) stack (arg : ty Abs_extern_func.telt) :
     (ty * Units.In_bits.t) * ty Stack.t =
     match arg with
     | I32 ->
@@ -128,19 +128,19 @@ let exec_extern_func state (f : Abs_extern_func.extern_func) =
     | NArg (_, _, args) -> split_one_arg args
     | Res -> (Stack.empty, stack)
   in
-  let rec apply : type f r.
-    value Stack.t -> (f, r) Abs_extern_func.atype -> f -> r =
-   fun stack ty fn ->
-    match ty with
-    | Arg (arg, args) ->
-      let (v, _size), stack = pop_arg stack arg in
-      apply stack args (fn v)
-    | UArg args -> apply stack args (fn ())
-    | NArg (_, arg, args) ->
-      let (v, _size), stack = pop_arg stack arg in
-      apply stack args (fn v)
-    | Res -> fn
-    | Mem (_memid, _args) -> assert false
+  let apply : type f r. value Stack.t -> (f, r) Abs_extern_func.atype -> f -> r
+      =
+   fun _stack _ty _fn -> assert false
+   (* match ty with *)
+   (* | Arg (arg, args) -> *)
+   (*   let (v, _size), stack = pop_arg stack arg in *)
+   (*   apply stack args (fn v) *)
+   (* | UArg args -> apply stack args (fn ()) *)
+   (* | NArg (_, arg, args) -> *)
+   (*   let (v, _size), stack = pop_arg stack arg in *)
+   (*   apply stack args (fn v) *)
+   (* | Res -> fn *)
+   (* | Mem (_memid, _args) -> assert false *)
   in
   let (Abs_extern_func.Extern_func (Abs_extern_func.Func (atype, rtype), func))
       =
@@ -269,6 +269,9 @@ and exec_instr state : instr -> state = function
     else
       let _, stack = Stack.pop state.stack in
       { state with stack }
+  | Local_tee _i ->
+    let top = ADomain.binary_empty ~size:size32 state.ctx in
+    { state with stack = Stack.push state.stack (top, size32) }
   | instr -> Fmt.failwith "Instr unimplemented %a" (pp_instr ~short:true) instr
 
 and expr (state : state) (expr : expr) : state =
