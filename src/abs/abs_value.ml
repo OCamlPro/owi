@@ -8,10 +8,10 @@ module SVA : Single_value_abstraction.Sig.NUMERIC_ENUM = struct
 end
 
 module NonRelationalDomain = Domains.Term_based.Nonrelational.Make (Terms) (SVA)
-module AbsDomain = Domains.Term_domain.Make (Terms) (NonRelationalDomain)
+module ADomain = Domains.Term_domain.Make (Terms) (NonRelationalDomain)
 
-type t = AbsDomain.binary
+let size32 = Units.In_bits.s32
 
-module Context = AbsDomain.Context
+let size64 = Units.In_bits.of_int 64
 
-let pp ctx = AbsDomain.binary_pretty ~size:Units.In_bits.s32 ctx
+let size_equal size1 size2 = Units.In_bits.compare size1 size2 = 0
