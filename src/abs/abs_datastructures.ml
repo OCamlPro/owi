@@ -1,25 +1,32 @@
 module Stack = struct
-  type t = Abs_value.t list
+  type 'el t = 'el list
 
-  (* let pop : t -> (Abs_value.t * t) Result.t = function *)
-  (*   | [] -> Fmt.error_msg "pop on empty stack" *)
-  (*   | h :: t -> Ok (h, t) *)
+  let empty : 'el t = []
 
-  let pop : t -> Abs_value.t * t = function
+  let pop : 'el t -> 'el * 'el t = function
     | [] -> Fmt.failwith "pop on empty stack"
     | h :: t -> (h, t)
 
-  let push : t -> Abs_value.t -> t = fun stack v -> v :: stack
+  let push : 'el t -> 'el -> 'el t = fun stack v -> v :: stack
 
-  (* let pop_n : t -> int -> (t * t) Result.t = *)
-  (*  fun stack n -> *)
-  (*   let popped = List.take n stack in *)
-  (*   if List.length popped = n then Ok (popped, List.drop n stack) *)
-  (*   else Fmt.error_msg "not enough values to pop" *)
-
-  let pop_n : t -> int -> t * t =
+  let pop_n : 'el t -> int -> 'el t * 'el t =
    fun stack n ->
     let popped = List.take n stack in
     if List.length popped = n then (popped, List.drop n stack)
     else Fmt.failwith "not enough values to pop"
+
+  let pp : 'el Fmt.t -> Format.formatter -> 'el t -> unit =
+   fun el_fmt fmt t -> Fmt.pf fmt "[%a]" (Fmt.list ~sep:Fmt.comma el_fmt) t
+
+  let is_empty : 'el t -> bool = fun t -> List.is_empty t
+
+  let to_list : 'el t -> 'el list = fun t -> t
+
+  let of_list : 'el list -> 'el t = fun t -> t
+
+  let append : 'el t -> 'el t -> 'el t = fun x y -> List.append x y
+
+  let take : int -> 'el t -> 'el t = List.take
+
+  let rev : 'el t -> 'el t = List.rev
 end
