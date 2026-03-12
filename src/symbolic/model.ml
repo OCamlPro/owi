@@ -34,7 +34,7 @@ let pp format with_breadcrumbs no_value fmt
         | _ -> json
       else json
     in
-    Yojson.Basic.pretty_print fmt json
+    Yojson.Safe.pretty_print fmt json
   | Scfg ->
     let scfg = Symbol_scope.to_scfg ~no_value model symbol_scopes in
     let model = Scfg.Query.get_dir_exn "model" scfg in

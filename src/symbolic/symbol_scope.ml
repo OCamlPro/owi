@@ -103,7 +103,7 @@ let to_scfg ~no_value model scope_tokens =
 
 let to_json ~no_value model scope_tokens =
   let open Smtml in
-  let module Json = Yojson.Basic in
+  let module Json = Yojson.Safe in
   let symbol_to_json sym =
     let name = ("symbol", `String (Symbol.to_string sym)) in
     let ty = ("type", `String (Fmt.str "%a" Ty.pp sym.ty)) in

@@ -22,7 +22,7 @@ val to_json :
      no_value:bool
   -> Smtml.Model.t
   -> t
-  -> [> `Assoc of (string * Yojson.Basic.t) list ]
+  -> [> `Assoc of (string * Yojson.Safe.t) list ]
 
 val model_of_json : string -> Smtml.Model.t Result.t
 
