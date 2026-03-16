@@ -1,6 +1,6 @@
 entry_point:
   $ owi rust entry_point.rs --entry-point=fun
-  owi: [ERROR] Assert failure: (i32.le_s 4 symbol_0)
+  owi: [ERROR] Assert failure: false
   model {
     symbol symbol_0 i32 2
   }
