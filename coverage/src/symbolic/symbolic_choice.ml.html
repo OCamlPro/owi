@@ -549,9 +549,9 @@ type 'a t = ('a, Bug.t, Prio.metrics, Thread.t) Symex.Monad.t
 let state : Thread.t t = stat<span data-count="756">e</span> ()
 
 let add_already_checked_condition_to_pc (condition : Symbolic_boolean.t) =
-  <span data-count="16072">l</span>et* state in
-  <span data-count="16072">l</span>et state = Thread.add_already_checked_condition_to_pc state condition in
-  <span data-count="16072">s</span>et_state state
+  <span data-count="16158">l</span>et* state in
+  <span data-count="16158">l</span>et state = Thread.add_already_checked_condition_to_pc state condition in
+  <span data-count="16158">s</span>et_state state
 [@@inline]
 
 let get_pc () =
@@ -559,7 +559,7 @@ let get_pc () =
   <span data-count="8">l</span>et pc = Symex.Path_condition.to_list state.pc in
   <span data-count="8">L</span>ist.fold_left Smtml.Expr.Set.union Smtml.Expr.Set.empty pc
 
-let add_breadcrumb crumb = <span data-count="25930">m</span>odify_state (fun t -&gt; <span data-count="25930">T</span>hread.add_breadcrumb t crumb)
+let add_breadcrumb crumb = <span data-count="25974">m</span>odify_state (fun t -&gt; <span data-count="25974">T</span>hread.add_breadcrumb t crumb)
 
 let add_label label = <span data-count="2">m</span>odify_state (fun t -&gt; <span data-count="2">T</span>hread.add_label t label)
 
@@ -586,91 +586,91 @@ let with_new_symbol ty f =
   <span data-count="1445">f</span> sym
 
 let check_reachability condition =
-  <span data-count="27522">l</span>et* state in
-  <span data-count="27501">l</span>et pc = Symex.Path_condition.slice_on_new_condition condition state.pc in
-  <span data-count="27501">l</span>et stats = state.bench_stats in
+  <span data-count="27580">l</span>et* state in
+  <span data-count="27560">l</span>et pc = Symex.Path_condition.slice_on_new_condition condition state.pc in
+  <span data-count="27560">l</span>et stats = state.bench_stats in
   let reachability =
     Benchmark.handle_time_span stats.solver_sat_time @@ fun () -&gt;
-    <span data-count="27501">S</span>olver.check pc condition
+    <span data-count="27560">S</span>olver.check pc condition
   in
-  <span data-count="27492">r</span>eturn reachability
+  <span data-count="27548">r</span>eturn reachability
 
 let assume condition =
-  <span data-count="27522">l</span>et* satisfiability = check_reachabilit<span data-count="27522">y</span> condition in
-  <span data-count="27492">m</span>atch satisfiability with
-  | <span data-count="15072">`</span>Sat -&gt;
-    let* () = add_already_checked_condition_to_p<span data-count="15072">c</span> condition in
-    <span data-count="15072">r</span>eturn ()
-  | <span data-count="12420">`</span>Unsat -&gt; prune ()
+  <span data-count="27580">l</span>et* satisfiability = check_reachabilit<span data-count="27580">y</span> condition in
+  <span data-count="27548">m</span>atch satisfiability with
+  | <span data-count="15120">`</span>Sat -&gt;
+    let* () = add_already_checked_condition_to_p<span data-count="15120">c</span> condition in
+    <span data-count="15120">r</span>eturn ()
+  | <span data-count="12428">`</span>Unsat -&gt; prune ()
   | <span data-count="0">`</span>Unknown -&gt; if Solver.was_interrupted () then <span data-count="0">p</span>rune () else <span data-count="0">a</span>ssert false
 
 let select_inner ~with_breadcrumbs (condition : Symbolic_boolean.t)
   ~instr_counter_true ~instr_counter_false =
-  <span data-count="1523828">l</span>et condition = Smtml.Typed.simplify condition in
-  <span data-count="1523831">m</span>atch Smtml.Typed.view condition with
-  | <span data-count="204669">V</span>al True -&gt; return true
-  | <span data-count="1306183">V</span>al False -&gt; return false
-  | <span data-count="12978">_</span> -&gt;
+  <span data-count="1523990">l</span>et condition = Smtml.Typed.simplify condition in
+  <span data-count="1523999">m</span>atch Smtml.Typed.view condition with
+  | <span data-count="204705">V</span>al True -&gt; return true
+  | <span data-count="1306316">V</span>al False -&gt; return false
+  | <span data-count="12980">_</span> -&gt;
     let branch condition final_value priority =
-      <span data-count="25956">l</span>et* () =
-        if with_breadcrumbs then <span data-count="25084">a</span>dd_breadcrum<span data-count="25084">b</span> (if final_value then <span data-count="12542">1</span> else <span data-count="12542">0</span>)
-        else <span data-count="872">r</span>etur<span data-count="872">n</span> ()
+      <span data-count="25960">l</span>et* () =
+        if with_breadcrumbs then <span data-count="25090">a</span>dd_breadcrum<span data-count="25089">b</span> (if final_value then <span data-count="12545">1</span> else <span data-count="12545">0</span>)
+        else <span data-count="870">r</span>etur<span data-count="870">n</span> ()
       in
-      <span data-count="25956">l</span>et* () = yiel<span data-count="25956">d</span> priority in
-      <span data-count="25922">l</span>et* () = assum<span data-count="25922">e</span> condition in
-      <span data-count="13809">l</span>et* () = modify_stat<span data-count="13809">e</span> (Thread.set_priorit<span data-count="13809">y</span> priority) in
-      <span data-count="13809">r</span>eturn final_value
+      <span data-count="25960">l</span>et* () = yiel<span data-count="25960">d</span> priority in
+      <span data-count="25933">l</span>et* () = assum<span data-count="25933">e</span> condition in
+      <span data-count="13813">l</span>et* () = modify_stat<span data-count="13813">e</span> (Thread.set_priorit<span data-count="13813">y</span> priority) in
+      <span data-count="13813">r</span>eturn final_value
     in
 
     let* state in
-    <span data-count="12978">l</span>et true_branch =
+    <span data-count="12980">l</span>et true_branch =
       let prio =
         let instr_counter =
           match instr_counter_true with
-          | <span data-count="596">N</span>one -&gt; state.priority.instr_counter
-          | <span data-count="12382">S</span>ome instr_counter -&gt; instr_counter
+          | <span data-count="595">N</span>one -&gt; state.priority.instr_counter
+          | <span data-count="12384">S</span>ome instr_counter -&gt; instr_counter
         in
         Prio.v ~instr_counter ~distance_to_unreachable:None ~depth:state.depth
       in
-      branc<span data-count="12978">h</span> condition true prio
+      branc<span data-count="12980">h</span> condition true prio
     in
 
     let false_branch =
       let prio =
         let instr_counter =
           match instr_counter_false with
-          | <span data-count="743">N</span>one -&gt; state.priority.instr_counter
-          | <span data-count="12235">S</span>ome instr_counter -&gt; instr_counter
+          | <span data-count="742">N</span>one -&gt; state.priority.instr_counter
+          | <span data-count="12238">S</span>ome instr_counter -&gt; instr_counter
         in
         Prio.v ~instr_counter ~distance_to_unreachable:None ~depth:state.depth
       in
-      branc<span data-count="12978">h</span> (Symbolic_boolean.no<span data-count="12978">t</span> condition) false prio
+      branc<span data-count="12980">h</span> (Symbolic_boolean.no<span data-count="12980">t</span> condition) false prio
     in
     Thread.incr_path_count state;
 
-    <span data-count="12978">c</span>hoose true_branch false_branch
+    <span data-count="12980">c</span>hoose true_branch false_branch
 [@@inline]
 
 let select (cond : Symbolic_boolean.t) ~instr_counter_true ~instr_counter_false
     =
-  <span data-count="1426839">s</span>elect_inner cond ~instr_counter_true ~instr_counter_false
+  <span data-count="1426997">s</span>elect_inner cond ~instr_counter_true ~instr_counter_false
     ~with_breadcrumbs:true
 [@@inline]
 
 let get_model_or_prune symbol =
-  <span data-count="847">l</span>et* state in
-  <span data-count="847">l</span>et sat_model =
+  <span data-count="884">l</span>et* state in
+  <span data-count="884">l</span>et sat_model =
     let set = state.pc |&gt; Symex.Path_condition.slice_on_symbol symbol in
-    <span data-count="847">l</span>et stats = state.bench_stats in
+    <span data-count="884">l</span>et stats = state.bench_stats in
     let symbol_scopes = Symbol_scope.of_symbol symbol in
-    <span data-count="847">B</span>enchmark.handle_time_spa<span data-count="846">n</span> stats.solver_intermediate_model_time (fun () -&gt;
-      <span data-count="847">S</span>olver.model_of_set ~symbol_scopes ~set )
+    <span data-count="884">B</span>enchmark.handle_time_spa<span data-count="884">n</span> stats.solver_intermediate_model_time (fun () -&gt;
+      <span data-count="884">S</span>olver.model_of_set ~symbol_scopes ~set )
   in
   match sat_model with
   | <span data-count="0">`</span>Unsat -&gt; prune ()
-  | <span data-count="846">`</span>Model model -&gt; begin
+  | <span data-count="884">`</span>Model model -&gt; begin
     match Smtml.Model.evaluate model symbol with
-    | <span data-count="846">S</span>ome v -&gt; return v
+    | <span data-count="884">S</span>ome v -&gt; return v
     | None -&gt;
       (* the model exists so the symbol should evaluate *)
       assert false
@@ -678,10 +678,10 @@ let get_model_or_prune symbol =
   | <span data-count="0">`</span>Unknown -&gt; if Solver.was_interrupted () then <span data-count="0">p</span>rune () else <span data-count="0">a</span>ssert false
 
 let select_i32 (e : Symbolic_i32.t) : int32 t =
-  <span data-count="53104">l</span>et e = Smtml.Typed.simplify e in
-  <span data-count="53105">m</span>atch Smtml.Typed.view e with
-  | <span data-count="52941">V</span>al (Bitv bv) when Smtml.Bitvector.numbit<span data-count="52938">s</span> bv &lt;= 32 -&gt;
-    <span data-count="52938">r</span>eturn (Smtml.Bitvector.to_int3<span data-count="52947">2</span> bv)
+  <span data-count="53141">l</span>et e = Smtml.Typed.simplify e in
+  <span data-count="53141">m</span>atch Smtml.Typed.view e with
+  | <span data-count="52982">V</span>al (Bitv bv) when Smtml.Bitvector.numbit<span data-count="52982">s</span> bv &lt;= 32 -&gt;
+    <span data-count="52982">r</span>eturn (Smtml.Bitvector.to_int3<span data-count="52983">2</span> bv)
   | <span data-count="158">_</span> -&gt;
     let* state in
     <span data-count="158">l</span>et* assign, symbol =
@@ -703,37 +703,37 @@ let select_i32 (e : Symbolic_i32.t) : int32 t =
       | <span data-count="4">N</span>one -&gt; retur<span data-count="4">n</span> ()
     in
     <span data-count="158">l</span>et rec generator () =
-      <span data-count="847">l</span>et* possible_value = get_model_or_prun<span data-count="847">e</span> symbol in
-      <span data-count="846">l</span>et i =
+      <span data-count="884">l</span>et* possible_value = get_model_or_prun<span data-count="884">e</span> symbol in
+      <span data-count="884">l</span>et i =
         match possible_value with
-        | <span data-count="846">S</span>mtml.Value.Bitv bv -&gt;
-          assert <span data-count="846">(</span>Smtml.Bitvector.numbit<span data-count="846">s</span> bv &lt;= 32);
-          Smtml.Bitvector.to_int3<span data-count="846">2</span> bv
+        | <span data-count="884">S</span>mtml.Value.Bitv bv -&gt;
+          assert <span data-count="884">(</span>Smtml.Bitvector.numbit<span data-count="884">s</span> bv &lt;= 32);
+          Smtml.Bitvector.to_int3<span data-count="884">2</span> bv
         | _ -&gt;
           (* it should be a value! *)
           assert false
       in
       (* TODO: everything which follows look like select_inner and could probably be simplified by calling it directly! *)
       let this_value_cond =
-        Symbolic_i32.eq_concrete (Smtml.Typed.Bitv32.symbo<span data-count="846">l</span> symbol) i
+        Symbolic_i32.eq_concrete (Smtml.Typed.Bitv32.symbo<span data-count="884">l</span> symbol) i
       in
-      <span data-count="846">l</span>et this_val_branch =
-        let* () = add_breadcrum<span data-count="846">b</span> (Int32.to_in<span data-count="846">t</span> i) in
-        <span data-count="846">l</span>et* () = add_already_checked_condition_to_p<span data-count="846">c</span> this_value_cond in
-        <span data-count="846">r</span>eturn i
+      <span data-count="884">l</span>et this_val_branch =
+        let* () = add_breadcrum<span data-count="884">b</span> (Int32.to_in<span data-count="884">t</span> i) in
+        <span data-count="884">l</span>et* () = add_already_checked_condition_to_p<span data-count="884">c</span> this_value_cond in
+        <span data-count="884">r</span>eturn i
       in
 
       let not_this_val_branch =
         let not_this_value_cond = Symbolic_boolean.not this_value_cond in
         (* TODO: this is annoying as the next call to get_model_or_prune is also going to check for satisfiability which is useless! it can probably be simplified.
            I'm leaving it for now to be sure this is correct. It may actually not be required but better safe than sorry! *)
-        <span data-count="846">l</span>et* () = assum<span data-count="846">e</span> not_this_value_cond in
-        <span data-count="689">g</span>enerator ()
+        <span data-count="884">l</span>et* () = assum<span data-count="884">e</span> not_this_value_cond in
+        <span data-count="726">g</span>enerator ()
       in
       Thread.incr_path_count state;
 
       (* TODO: better prio here? *)
-      <span data-count="846">l</span>et prio =
+      <span data-count="884">l</span>et prio =
         Prio.v ~instr_counter:state.priority.instr_counter
           ~distance_to_unreachable:None ~depth:state.depth
       in
@@ -743,26 +743,26 @@ let select_i32 (e : Symbolic_i32.t) : int32 t =
     generator ()
 
 let bug kind =
-  <span data-count="252">l</span>et* state in
-  <span data-count="252">l</span>et* model =
+  <span data-count="254">l</span>et* state in
+  <span data-count="254">l</span>et* model =
     let stats = state.bench_stats in
-    Benchmark.handle_time_span stats.solver_final_model_tim<span data-count="252">e</span> @@ fun () -&gt;
-    <span data-count="252">l</span>et path_condition = state.pc in
+    Benchmark.handle_time_span stats.solver_final_model_tim<span data-count="253">e</span> @@ fun () -&gt;
+    <span data-count="254">l</span>et path_condition = state.pc in
     match Solver.model_of_path_condition ~path_condition with
-    | <span data-count="252">S</span>ome model -&gt; return model
+    | <span data-count="253">S</span>ome model -&gt; return model
     | <span data-count="0">N</span>one -&gt; if Solver.was_interrupted () then <span data-count="0">p</span>rune () else <span data-count="0">a</span>ssert false
   in
-  <span data-count="252">f</span>ail { Bug.kind; model; state }
+  <span data-count="253">f</span>ail { Bug.kind; model; state }
 
-let trap t = <span data-count="186">b</span>ug (`Trap t)
+let trap t = <span data-count="187">b</span>ug (`Trap t)
 
 let assertion (c : Symbolic_boolean.t) =
   (* TODO: better prio here ? *)
-  <span data-count="96986">l</span>et* assertion_true =
-    select_inne<span data-count="96986">r</span> c ~with_breadcrumbs:false ~instr_counter_true:None
+  <span data-count="96993">l</span>et* assertion_true =
+    select_inne<span data-count="96993">r</span> c ~with_breadcrumbs:false ~instr_counter_true:None
       ~instr_counter_false:None
   in
-  <span data-count="97025">i</span>f assertion_true then <span data-count="96959">r</span>eturn () else <span data-count="66">b</span>ug (`Assertion c)
+  <span data-count="97032">i</span>f assertion_true then <span data-count="96965">r</span>eturn () else <span data-count="67">b</span>ug (`Assertion c)
 
 let ite (c : Symbolic_boolean.t) ~(if_true : Symbolic_value.t)
   ~(if_false : Symbolic_value.t) : Symbolic_value.t t =

@@ -294,12 +294,12 @@ type 'ext t =
   ; id : int
   }
 
-let id (env : _ t) = <span data-count="2172105">e</span>nv.id
+let id (env : _ t) = <span data-count="2172286">e</span>nv.id
 
 let get_global (env : _ t) id =
-  <span data-count="1139">m</span>atch IMap.find_opt id env.globals with
+  <span data-count="1140">m</span>atch IMap.find_opt id env.globals with
   | None -&gt; assert false
-  | <span data-count="1139">S</span>ome v -&gt; Concrete_choice.return v
+  | <span data-count="1140">S</span>ome v -&gt; Concrete_choice.return v
 
 let get_memory (env : _ t) id =
   <span data-count="1069797">m</span>atch IMap.find_opt id env.memories with
@@ -312,7 +312,7 @@ let get_table (env : _ t) id =
   | <span data-count="1608286">S</span>ome v -&gt; Concrete_choice.return v
 
 let get_func (env : _ t) id =
-  <span data-count="5498979">m</span>atch IMap.find_opt id env.functions with None -&gt; assert false | <span data-count="5498979">S</span>ome v -&gt; v
+  <span data-count="5499011">m</span>atch IMap.find_opt id env.functions with None -&gt; assert false | <span data-count="5499011">S</span>ome v -&gt; v
 
 let get_data (env : _ t) id =
   <span data-count="967">m</span>atch IMap.find_opt id env.data with
@@ -326,8 +326,8 @@ let get_tag (env : _ t) id =
   <span data-count="5">m</span>atch IMap.find_opt id env.tags with None -&gt; assert false | <span data-count="5">S</span>ome v -&gt; v
 
 let get_extern_func env id =
-  <span data-count="111597">l</span>et f, _t = Dynarray.get env.extern_funcs id in
-  <span data-count="111596">f</span>
+  <span data-count="111606">l</span>et f, _t = Dynarray.get env.extern_funcs id in
+  <span data-count="111606">f</span>
 
 module Build = struct
   type t =
@@ -360,7 +360,7 @@ module Build = struct
     <span data-count="774">{</span> env with tables = IMap.ad<span data-count="774">d</span> id table env.tables }
 
   let add_func id func (env : t) =
-    <span data-count="13418">{</span> env with functions = IMap.ad<span data-count="13418">d</span> id func env.functions }
+    <span data-count="13422">{</span> env with functions = IMap.ad<span data-count="13422">d</span> id func env.functions }
 
   let add_data id data (env : t) = <span data-count="668">{</span> env with data = IMap.ad<span data-count="668">d</span> id data env.data }
 

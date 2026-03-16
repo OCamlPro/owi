@@ -107,32 +107,32 @@
 <pre><code class="ocaml">include Smtml.Typed.Bitv32
 
 let to_boolean (e : t) : Symbolic_boolean.t =
-  <span data-count="340157">m</span>atch Smtml.Typed.view e with
-  | <span data-count="316164">V</span>al (Bitv bv) -&gt;
-    if Smtml.Bitvector.eqz bv then <span data-count="111697">S</span>ymbolic_boolean.false_
-    else <span data-count="204468">S</span>ymbolic_boolean.true_
-  | <span data-count="2483">P</span>tr _ -&gt; Symbolic_boolean.true_
+  <span data-count="340213">m</span>atch Smtml.Typed.view e with
+  | <span data-count="316212">V</span>al (Bitv bv) -&gt;
+    if Smtml.Bitvector.eqz bv then <span data-count="111718">S</span>ymbolic_boolean.false_
+    else <span data-count="204494">S</span>ymbolic_boolean.true_
+  | <span data-count="2489">P</span>tr _ -&gt; Symbolic_boolean.true_
   | <span data-count="0">S</span>ymbol { ty = Ty_bool; _ } -&gt; Smtml.Typed.Bitv32.to_bool e
-  | <span data-count="20801">C</span>vtop (_, OfBool, cond) -&gt; Smtml.Typed.Unsafe.wrap cond
+  | <span data-count="20802">C</span>vtop (_, OfBool, cond) -&gt; Smtml.Typed.Unsafe.wrap cond
   | <span data-count="710">_</span> -&gt; Smtml.Typed.Bitv32.to_bool e
 
 let of_boolean (e : Symbolic_boolean.t) : t =
-  <span data-count="226417">m</span>atch Smtml.Typed.view e with
-  | <span data-count="96020">V</span>al True -&gt; one
-  | <span data-count="108050">V</span>al False -&gt; zero
-  | <span data-count="22347">_</span> -&gt; Smtml.Typed.Bitv32.of_bool e
+  <span data-count="226454">m</span>atch Smtml.Typed.view e with
+  | <span data-count="96042">V</span>al True -&gt; one
+  | <span data-count="108064">V</span>al False -&gt; zero
+  | <span data-count="22348">_</span> -&gt; Smtml.Typed.Bitv32.of_bool e
 
 let boolify e =
-  <span data-count="39598">m</span>atch Smtml.Typed.view e with
-  | <span data-count="30387">V</span>al (Bitv bv) when Smtml.Bitvector.eq<span data-count="30387">z</span> bv -&gt; <span data-count="205">S</span>ome Symbolic_boolean.false_
-  | <span data-count="30182">V</span>al (Bitv bv) when Smtml.Bitvector.eq_on<span data-count="30182">e</span> bv -&gt; <span data-count="392">S</span>ome Symbolic_boolean.true_
+  <span data-count="39608">m</span>atch Smtml.Typed.view e with
+  | <span data-count="30396">V</span>al (Bitv bv) when Smtml.Bitvector.eq<span data-count="30396">z</span> bv -&gt; <span data-count="207">S</span>ome Symbolic_boolean.false_
+  | <span data-count="30189">V</span>al (Bitv bv) when Smtml.Bitvector.eq_on<span data-count="30189">e</span> bv -&gt; <span data-count="396">S</span>ome Symbolic_boolean.true_
   | <span data-count="547">C</span>vtop (_, OfBool, cond) -&gt; Some (Smtml.Typed.Unsafe.wra<span data-count="547">p</span> cond)
-  | <span data-count="38454">_</span> -&gt; None
+  | <span data-count="38458">_</span> -&gt; None
 
 let logand e1 e2 =
-  <span data-count="19713">m</span>atch (boolif<span data-count="19713">y</span> e1, boolif<span data-count="19713">y</span> e2) with
-  | <span data-count="374">S</span>ome b1, Some b2 -&gt; of_boolean (Symbolic_boolean.and<span data-count="374">_</span> b1 b2)
-  | <span data-count="19339">_</span> -&gt; Smtml.Typed.Bitv32.logand e1 e2
+  <span data-count="19718">m</span>atch (boolif<span data-count="19718">y</span> e1, boolif<span data-count="19718">y</span> e2) with
+  | <span data-count="376">S</span>ome b1, Some b2 -&gt; of_boolean (Symbolic_boolean.and<span data-count="376">_</span> b1 b2)
+  | <span data-count="19342">_</span> -&gt; Smtml.Typed.Bitv32.logand e1 e2
 
 let logor e1 e2 =
   <span data-count="86">m</span>atch (boolif<span data-count="86">y</span> e1, boolif<span data-count="86">y</span> e2) with
@@ -140,8 +140,8 @@ let logor e1 e2 =
   | <span data-count="58">_</span> -&gt; Smtml.Typed.Bitv32.logor e1 e2
 
 let eq_concrete (e : t) (c : Int32.t) : Symbolic_boolean.t =
-  <span data-count="847">l</span>et c = of_int32 c in
-  <span data-count="846">S</span>mtml.Typed.Bitv32.eq c e
+  <span data-count="884">l</span>et c = of_int32 c in
+  <span data-count="884">S</span>mtml.Typed.Bitv32.eq c e
 </code></pre>
       </div>
     </div>
