@@ -269,7 +269,7 @@ and exec_instr state : instr -> state = function
     else
       let _, stack = Stack.pop state.stack in
       { state with stack }
-  | Local_tee _i ->
+  | Nop ->
     let top = ADomain.binary_empty ~size:size32 state.ctx in
     { state with stack = Stack.push state.stack (top, size32) }
   | instr -> Fmt.failwith "Instr unimplemented %a" (pp_instr ~short:true) instr
