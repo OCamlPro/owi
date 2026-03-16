@@ -95,23 +95,23 @@
 <a href="#L33">33</a>
 <a href="#L34">34</a>
 </pre>
-<pre><code class="ocaml">let main_src = Logs.Src.creat<span data-count="758">e</span> "owi" ~doc:"Owi's main logs"
+<pre><code class="ocaml">let main_src = Logs.Src.creat<span data-count="756">e</span> "owi" ~doc:"Owi's main logs"
 
-let bench_src = Logs.Src.creat<span data-count="758">e</span> "owi-bench" ~doc:"Owi's benchmark logs"
+let bench_src = Logs.Src.creat<span data-count="756">e</span> "owi-bench" ~doc:"Owi's benchmark logs"
 
-include (val Logs.src_lo<span data-count="758">g</span> main_src : Logs.LOG)
+include (val Logs.src_lo<span data-count="756">g</span> main_src : Logs.LOG)
 
 let is_bench_enabled () =
-  <span data-count="7948">m</span>atch Logs.Src.level bench_src with <span data-count="7932">N</span>one -&gt; false | <span data-count="16">S</span>ome _ -&gt; true
+  <span data-count="30101">m</span>atch Logs.Src.level bench_src with <span data-count="30085">N</span>one -&gt; false | <span data-count="16">S</span>ome _ -&gt; true
 
 let is_debug_enabled () =
-  <span data-count="422">m</span>atch Logs.Src.level main_src with
+  <span data-count="423">m</span>atch Logs.Src.level main_src with
   | <span data-count="1">S</span>ome Logs.Debug -&gt; true
-  | <span data-count="1">N</span>one | <span data-count="420">S</span>ome _ -&gt; false
+  | <span data-count="1">N</span>one | <span data-count="421">S</span>ome _ -&gt; false
 
 let bench_fn str fn =
-  <span data-count="5189">m</span>atch Logs.Src.level bench_src with
-  | <span data-count="5181">N</span>one -&gt; fn ()
+  <span data-count="5193">m</span>atch Logs.Src.level bench_src with
+  | <span data-count="5185">N</span>one -&gt; fn ()
   | <span data-count="8">S</span>ome _ -&gt;
     let c = Mtime_clock.counter () in
     <span data-count="8">l</span>et r = fn () in

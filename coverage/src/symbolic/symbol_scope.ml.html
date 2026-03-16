@@ -606,7 +606,7 @@
 
 type t = token list
 
-let symbol s tl : t = <span data-count="1457">S</span>ymbol s :: tl
+let symbol s tl : t = <span data-count="1458">S</span>ymbol s :: tl
 
 let open_scope name tl = <span data-count="10">O</span>pen_scope name :: tl
 
@@ -620,7 +620,7 @@ let of_expressions exprs =
     []
     (Smtml.Expr.Set.get_symbol<span data-count="0">s</span> exprs)
 
-let of_symbol sym = <span data-count="764">[</span> Symbol sym ]
+let of_symbol sym = <span data-count="847">[</span> Symbol sym ]
 
 let pp_token fmt token =
   <span data-count="5">m</span>atch token with
@@ -632,8 +632,8 @@ let pp fmt tokens =
   <span data-count="3">F</span>mt.list ~sep:(fun fmt () -&gt; <span data-count="2">F</span>mt.pf fmt " ; ") pp_token fmt tokens
 
 let only_symbols tokens =
-  <span data-count="764">L</span>ist.filter_map
-    (<span data-count="764">f</span>unction <span data-count="764">S</span>ymbol s -&gt; Some s | <span data-count="0">O</span>pen_scope _ | <span data-count="0">C</span>lose_scope -&gt; None)
+  <span data-count="847">L</span>ist.filter_map
+    (<span data-count="847">f</span>unction <span data-count="847">S</span>ymbol s -&gt; Some s | <span data-count="0">O</span>pen_scope _ | <span data-count="0">C</span>lose_scope -&gt; None)
     tokens
 
 let get_value model sym ty =
@@ -704,8 +704,8 @@ let to_scfg ~no_value model scope_tokens =
 
 let to_json ~no_value model scope_tokens =
   <span data-count="0">l</span>et open Smtml in
-  let module Json = Yojson.Basic in
-  let symbol_to_json sym =
+  let module Json = Yojson.Safe in
+  let symbol_to_json sym : Yojson.Safe.t =
     <span data-count="0">l</span>et name = ("symbol", `String (Symbol.to_strin<span data-count="0">g</span> sym)) in
     let ty = ("type", `String (Fmt.st<span data-count="0">r</span> "%a" Ty.pp sym.ty)) in
     if no_value then <span data-count="0">`</span>Assoc [ name; ty ]
@@ -769,7 +769,7 @@ let to_json ~no_value model scope_tokens =
   <span data-count="0">`</span>Assoc [ ("model", `List result) ]
 
 let model_of_json json_str =
-  <span data-count="0">l</span>et open Yojson.Basic in
+  <span data-count="0">l</span>et open Yojson.Safe in
   let open Syntax in
   let tbl = Hashtbl.create 16 in
 
@@ -813,7 +813,7 @@ let model_of_json json_str =
     | <span data-count="0">N</span>one -&gt; Fmt.error_msg "JSON does not contain model field" )
   | <span data-count="0">_</span> -&gt;
     Fmt.error_msg "Invalid JSON format for symbol scope:@. %a"
-      (Yojson.Basic.pretty_print ~std:true)
+      (Yojson.Safe.pretty_print ~std:true)
       json
 
 let model_of_scfg scfg =

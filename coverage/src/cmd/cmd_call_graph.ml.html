@@ -635,17 +635,17 @@ let get_const_global env id =
 
 let eval_const_instr env stack instr =
   <span data-count="7">m</span>atch instr.Annotated.raw with
-  | <span data-count="4">B</span>inary.I32_const n -&gt; ok @@ Stack.push_i3<span data-count="4">2</span> stack n
-  | <span data-count="0">I</span>64_const n -&gt; ok @@ Stack.push_i6<span data-count="0">4</span> stack n
-  | <span data-count="0">F</span>32_const f -&gt; ok @@ Stack.push_f3<span data-count="0">2</span> stack f
-  | <span data-count="0">F</span>64_const f -&gt; ok @@ Stack.push_f6<span data-count="0">4</span> stack f
-  | <span data-count="0">V</span>128_const f -&gt; ok @@ Stack.push_v12<span data-count="0">8</span> stack f
-  | <span data-count="2">I</span>_binop (nn, op) -&gt; ok @@ eval_ibino<span data-count="2">p</span> stack nn op
-  | <span data-count="0">R</span>ef_null t -&gt; ok @@ Stack.push_re<span data-count="0">f</span> stack (Concrete_ref.nul<span data-count="0">l</span> t)
+  | <span data-count="4">B</span>inary.I32_const n -&gt; Result.ok @@ Stack.push_i3<span data-count="4">2</span> stack n
+  | <span data-count="0">I</span>64_const n -&gt; Result.ok @@ Stack.push_i6<span data-count="0">4</span> stack n
+  | <span data-count="0">F</span>32_const f -&gt; Result.ok @@ Stack.push_f3<span data-count="0">2</span> stack f
+  | <span data-count="0">F</span>64_const f -&gt; Result.ok @@ Stack.push_f6<span data-count="0">4</span> stack f
+  | <span data-count="0">V</span>128_const f -&gt; Result.ok @@ Stack.push_v12<span data-count="0">8</span> stack f
+  | <span data-count="2">I</span>_binop (nn, op) -&gt; Result.ok @@ eval_ibino<span data-count="2">p</span> stack nn op
+  | <span data-count="0">R</span>ef_null t -&gt; Result.ok @@ Stack.push_re<span data-count="0">f</span> stack (Concrete_ref.nul<span data-count="0">l</span> t)
   | <span data-count="0">G</span>lobal_get id -&gt;
     let* g = get_const_globa<span data-count="0">l</span> env id in
-    <span data-count="0">o</span>k @@ Stack.push_i3<span data-count="0">2</span> stack g
-  | <span data-count="1">R</span>ef_func id -&gt; ok @@ Stack.push_i32_of_in<span data-count="1">t</span> stack id
+    <span data-count="0">R</span>esult.ok @@ Stack.push_i3<span data-count="0">2</span> stack g
+  | <span data-count="1">R</span>ef_func id -&gt; Result.ok @@ Stack.push_i32_of_in<span data-count="1">t</span> stack id
   | _ -&gt; assert false
 
 let eval_const env exp =

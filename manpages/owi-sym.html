@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "frappe";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-f234277f.js";
+            window.path_to_searchindex_js = "../searchindex-437aca43.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-66d4629a.js"></script>
@@ -195,7 +195,7 @@ OPTIONS
        --entry-point=FUNCTION
            entry point of the executable
 
-       --exploration=VAL (absent=fifo)
+       --exploration=VALUE (absent=fifo)
            exploration strategy to use ("fifo", "lifo", "random",
            "random-unseen-then-random", "rarity", "hot-path-penalty",
            "rarity-aging", "rarity-depth-aging", "rarity-depth-loop-aging",
@@ -211,7 +211,7 @@ OPTIONS
            Invoke the entry point of the program with symbolic values instead
            of dummy constants.
 
-       --model-format=VAL (absent=scfg)
+       --model-format=VALUE (absent=scfg)
             The format of the model ("json" or "scfg")
 
        --model-out-file=FILE
@@ -235,13 +235,19 @@ OPTIONS
            Do not force each worker to run on an isolated physical core.
 
        -s VALUE, --solver=VALUE (absent=Z3)
-           SMT solver to use. VALUE must be one of the 5 available solvers:
-           Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo
+           SMT solver to use. VALUE must be one of the 6 available solvers:
+           Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo, SMTZilla
+
+       --timeout=S
+           Stop execution after S seconds.
+
+       --timeout-instr=I
+           Stop execution after running I instructions.
 
        -u, --unsafe
            skip typechecking pass
 
-       -w VAL, --workers=VAL (absent=n)
+       -w INT, --workers=INT (absent=n)
            Number of workers for symbolic execution. Defaults to the number
            of physical cores.
 

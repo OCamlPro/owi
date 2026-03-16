@@ -78,6 +78,8 @@
 <a id="L54"></a><span > </span>
 <a id="L55"></a><span > </span>
 <a id="L56"></a><span > </span>
+<a id="L57"></a><span > </span>
+<a id="L58"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -138,6 +140,8 @@
 <a href="#L54">54</a>
 <a href="#L55">55</a>
 <a href="#L56">56</a>
+<a href="#L57">57</a>
+<a href="#L58">58</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -185,7 +189,9 @@ module type S0 = sig
 
   val cov_label_set : memory -&gt; Value.i32 -&gt; Value.i32 -&gt; unit t
 
-  val open_scope : memory -&gt; Value.i32 -&gt; unit t
+  val open_scope_null_terminated : memory -&gt; Value.i32 -&gt; unit t
+
+  val open_scope_of_length : memory -&gt; Value.i32 -&gt; Value.i32 -&gt; unit t
 
   val close_scope : unit -&gt; unit t
 end

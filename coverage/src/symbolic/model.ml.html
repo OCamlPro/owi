@@ -294,7 +294,7 @@ let pp format with_breadcrumbs no_value fmt
         | <span data-count="0">_</span> -&gt; json
       else <span data-count="0">j</span>son
     in
-    Yojson.Basic.pretty_print fmt json
+    Yojson.Safe.pretty_print fmt json
   | <span data-count="249">S</span>cfg -&gt;
     let scfg = Symbol_scope.to_scfg ~no_value model symbol_scopes in
     <span data-count="249">l</span>et model = Scfg.Query.get_dir_exn "model" scfg in
@@ -328,7 +328,7 @@ let pp format with_breadcrumbs no_value fmt
 
 let print ~format ~out_file ~id ~no_value ~no_stop_at_failure
   ~no_assert_failure_expression_printing ~with_breadcrumbs
-  ({ Bug.model; thread; _ } as bug) =
+  ({ Bug.model; state; _ } as bug) =
   <span data-count="249">b</span>egin match bug.Bug.kind with
   | <span data-count="184">`</span>Trap trap -&gt; Log.er<span data-count="184">r</span> (fun m -&gt; <span data-count="184">m</span> "Trap: %s" (Result.err_to_strin<span data-count="184">g</span> trap))
   | <span data-count="65">`</span>Assertion assertion -&gt;
@@ -341,7 +341,7 @@ let print ~format ~out_file ~id ~no_value ~no_stop_at_failure
   | <span data-count="246">N</span>one -&gt; begin
     Log.app (fun m -&gt;
       <span data-count="246">l</span>et fmt = m (if no_stop_at_failure then <span data-count="182">"</span>%a@." else <span data-count="64">"</span>%a") in
-      <span data-count="246">f</span>mt (p<span data-count="246">p</span> format with_breadcrumbs no_value) (model, thread) );
+      <span data-count="246">f</span>mt (p<span data-count="246">p</span> format with_breadcrumbs no_value) (model, state) );
     <span data-count="246">O</span>k ()
   end
   | <span data-count="3">S</span>ome path -&gt;
@@ -365,7 +365,7 @@ let print ~format ~out_file ~id ~no_value ~no_stop_at_failure
     in
     <span data-count="3">B</span>os.OS.File.writef path "%a"
       (p<span data-count="3">p</span> format with_breadcrumbs no_value)
-      (model, thread)
+      (model, state)
 </code></pre>
       </div>
     </div>

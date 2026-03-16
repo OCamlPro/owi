@@ -824,7 +824,7 @@ module Stack = Stack.Make [@inlined hint] (Concrete_value)
 module Host_externref = struct
   type t = int
 
-  let ty : t Type.Id.t = Type.Id.mak<span data-count="758">e</span> ()
+  let ty : t Type.Id.t = Type.Id.mak<span data-count="756">e</span> ()
 
   let value i = <span data-count="31">C</span>oncrete_ref.extern ty i
 end
@@ -884,11 +884,11 @@ let check_error_result expected = function
   | <span data-count="5171">E</span>rror got -&gt; check_error ~expected ~got
 
 let load_module ls mod_id =
-  <span data-count="25157">m</span>atch mod_id with
-  | <span data-count="25009">N</span>one -&gt; begin
+  <span data-count="25158">m</span>atch mod_id with
+  | <span data-count="25010">N</span>one -&gt; begin
     match Link.State.get_last ls with
     | <span data-count="0">N</span>one -&gt; Error `Unbound_last_module
-    | <span data-count="25009">S</span>ome m -&gt; Ok m
+    | <span data-count="25010">S</span>ome m -&gt; Ok m
   end
   | <span data-count="148">S</span>ome mod_id -&gt; (
     match Link.State.get_by_id ls mod_id with
@@ -896,10 +896,10 @@ let load_module ls mod_id =
     | <span data-count="148">S</span>ome exports -&gt; Ok exports )
 
 let load_func_from_module ls mod_id f_name =
-  <span data-count="25146">l</span>et* exports, env_id = load_modul<span data-count="25146">e</span> ls mod_id in
-  <span data-count="25146">m</span>atch Link.StringMap.find_opt f_name exports.functions with
+  <span data-count="25147">l</span>et* exports, env_id = load_modul<span data-count="25147">e</span> ls mod_id in
+  <span data-count="25147">m</span>atch Link.StringMap.find_opt f_name exports.functions with
   | <span data-count="0">N</span>one -&gt; Error (`Unbound_name f_name)
-  | <span data-count="25146">S</span>ome v -&gt; Ok (v, env_id)
+  | <span data-count="25147">S</span>ome v -&gt; Ok (v, env_id)
 
 let load_global_from_module ls mod_id name =
   <span data-count="11">l</span>et* exports, _env_id = load_modul<span data-count="11">e</span> ls mod_id in
@@ -908,8 +908,8 @@ let load_global_from_module ls mod_id name =
   | <span data-count="11">S</span>ome v -&gt; Ok v
 
 let compare_result_const result (const : Concrete_value.t) =
-  <span data-count="22128">m</span>atch (result, const) with
-  | <span data-count="13053">W</span>ast.Result_const (Literal (Const_I32 n)), I32 n' -&gt; Int32.eq n n'
+  <span data-count="22129">m</span>atch (result, const) with
+  | <span data-count="13054">W</span>ast.Result_const (Literal (Const_I32 n)), I32 n' -&gt; Int32.eq n n'
   | <span data-count="1007">R</span>esult_const (Literal (Const_I64 n)), I64 n' -&gt; Int64.eq n n'
   | <span data-count="2919">R</span>esult_const (Literal (Const_F32 n)), F32 n' -&gt;
     Float32.e<span data-count="2919">q</span> n n<span data-count="2820">'</span> || String.equal (Float32.to_strin<span data-count="99">g</span> n) (Float32.to_strin<span data-count="99">g</span> n')
@@ -987,15 +987,15 @@ let value_of_const : Wast.const -&gt; Concrete_value.t = <span data-count="35825
 
 let action (link_state : Concrete_extern_func.extern_func Link.State.t) =
   function
-  | <span data-count="25146">W</span>ast.Invoke (mod_id, f, args) -&gt; begin
+  | <span data-count="25147">W</span>ast.Invoke (mod_id, f, args) -&gt; begin
     Log.info (fun m -&gt;
       <span data-count="0">m</span> "invoke %a %s %a..."
         (Fmt.optio<span data-count="0">n</span> ~none:Fmt.nop Fmt.string)
         mod_id f Wast.pp_consts args );
-    <span data-count="25146">l</span>et* f, env_id = load_func_from_modul<span data-count="25146">e</span> link_state mod_id f in
-    <span data-count="25146">l</span>et stack = List.rev_map value_of_const args in
-    <span data-count="25146">l</span>et envs = Link.State.get_envs link_state in
-    <span data-count="25146">l</span>et module I = Interpret.Concrete (Interpret.Default_parameters) in
+    <span data-count="25147">l</span>et* f, env_id = load_func_from_modul<span data-count="25147">e</span> link_state mod_id f in
+    <span data-count="25147">l</span>et stack = List.rev_map value_of_const args in
+    <span data-count="25147">l</span>et envs = Link.State.get_envs link_state in
+    <span data-count="25147">l</span>et module I = Interpret.Concrete (Interpret.Default_parameters) in
     I.exec_vfunc_from_outside ~locals:stack ~env:env_id ~envs f
   end
   | <span data-count="11">G</span>et (mod_id, name) -&gt;
@@ -1016,7 +1016,7 @@ let run ~no_exhaustion script =
   let module I = Interpret.Concrete (Interpret.Default_parameters) in
   list_fold_left
     (fun (link_state : Concrete_extern_func.extern_func Link.State.t) -&gt;
-      <span data-count="30479">f</span>unction
+      <span data-count="30480">f</span>unction
       | <span data-count="1762">W</span>ast.Text_module (false, m) -&gt;
         if !curr_module = 0 then
           (* TODO: disable printing*)
@@ -1117,19 +1117,19 @@ let run ~no_exhaustion script =
         <span data-count="0">l</span>et got = Compile.Text.until_link ~unsafe ~name:None link_state m in
         <span data-count="0">l</span>et+ () = check_error_resul<span data-count="0">t</span> expected got in
         <span data-count="0">a</span>ssert false
-      | <span data-count="22334">A</span>ssert (Assert_return (a, res)) -&gt;
+      | <span data-count="22335">A</span>ssert (Assert_return (a, res)) -&gt;
         Log.info (fun m -&gt; <span data-count="0">m</span> "*** assert_return");
-        <span data-count="22334">l</span>et* stack = actio<span data-count="22332">n</span> link_state a in
-        <span data-count="22332">l</span>et stack = List.rev stack in
-        <span data-count="22332">i</span>f
-          List.compare_length<span data-count="22332">s</span> res stack &lt;&gt; <span data-count="0">0</span>
-          || not (List.for_all<span data-count="22332">2</span> compare_result_const res stack<span data-count="0">)</span>
+        <span data-count="22335">l</span>et* stack = actio<span data-count="22333">n</span> link_state a in
+        <span data-count="22333">l</span>et stack = List.rev stack in
+        <span data-count="22333">i</span>f
+          List.compare_length<span data-count="22333">s</span> res stack &lt;&gt; <span data-count="0">0</span>
+          || not (List.for_all<span data-count="22333">2</span> compare_result_const res stack<span data-count="0">)</span>
         then <span data-count="0">b</span>egin
           Log.err (fun m -&gt;
             <span data-count="0">m</span> "got:      %a@.expected: %a" Stack.pp stack Wast.pp_results res );
           <span data-count="0">E</span>rror `Bad_result
         end
-        else <span data-count="22332">O</span>k link_state
+        else <span data-count="22333">O</span>k link_state
       | <span data-count="2619">A</span>ssert (Assert_trap (a, expected)) -&gt;
         Log.info (fun m -&gt; <span data-count="0">m</span> "*** assert_trap");
         <span data-count="2619">l</span>et got = action link_state a in

@@ -153,7 +153,7 @@ type ('a, 'b) t =
   | Imported of 'b imported
 
 let imported ~modul_name ~name ~assigned_name ~typ =
-  <span data-count="4625">I</span>mported { modul_name; name; assigned_name; typ }
+  <span data-count="4634">I</span>mported { modul_name; name; assigned_name; typ }
 
 let pp_imported pp_typ fmt { modul_name; name; assigned_name; typ } =
   <span data-count="1">F</span>mt.pf fmt "{@\n  @[&lt;v&gt;modul: %S@\nname: %S@\nassigned_name: %a@\ntyp: %a@]}"
@@ -183,9 +183,9 @@ let map ~f_local ~f_imported = function
 let monadic_map ~f_local ~f_imported =
   <span data-count="18838">l</span>et open Syntax in
   function
-  | <span data-count="9973">L</span>ocal v -&gt;
-    let+ v = f_loca<span data-count="9973">l</span> v in
-    <span data-count="9890">L</span>ocal v
+  | <span data-count="9974">L</span>ocal v -&gt;
+    let+ v = f_loca<span data-count="9974">l</span> v in
+    <span data-count="9891">L</span>ocal v
   | <span data-count="2759">I</span>mported v -&gt;
     let+ v = monadic_map_importe<span data-count="2759">d</span> f_imported v in
     <span data-count="2754">I</span>mported v

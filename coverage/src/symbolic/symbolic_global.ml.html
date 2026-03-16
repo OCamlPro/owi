@@ -18,8 +18,8 @@
       <h2>84.21%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="bottom:18.75%"></span>
-      <span class="unvisited" style="bottom:15.62%"></span>
+      <span class="unvisited" style="bottom:19.35%"></span>
+      <span class="unvisited" style="bottom:16.13%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -36,26 +36,25 @@
 <a id="L10"></a><span > </span>
 <a id="L11"></a><span class="visited"> </span>
 <a id="L12"></a><span > </span>
-<a id="L13"></a><span > </span>
-<a id="L14"></a><span class="visited"> </span>
+<a id="L13"></a><span class="visited"> </span>
+<a id="L14"></a><span > </span>
 <a id="L15"></a><span > </span>
-<a id="L16"></a><span > </span>
-<a id="L17"></a><span class="visited"> </span>
+<a id="L16"></a><span class="visited"> </span>
+<a id="L17"></a><span > </span>
 <a id="L18"></a><span > </span>
 <a id="L19"></a><span > </span>
-<a id="L20"></a><span > </span>
+<a id="L20"></a><span class="visited"> </span>
 <a id="L21"></a><span class="visited"> </span>
 <a id="L22"></a><span class="visited"> </span>
 <a id="L23"></a><span class="visited"> </span>
 <a id="L24"></a><span class="visited"> </span>
-<a id="L25"></a><span class="visited"> </span>
+<a id="L25"></a><span class="unvisited"> </span>
 <a id="L26"></a><span class="unvisited"> </span>
-<a id="L27"></a><span class="unvisited"> </span>
+<a id="L27"></a><span > </span>
 <a id="L28"></a><span > </span>
 <a id="L29"></a><span > </span>
-<a id="L30"></a><span > </span>
+<a id="L30"></a><span class="visited"> </span>
 <a id="L31"></a><span class="visited"> </span>
-<a id="L32"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -91,7 +90,6 @@
 <a href="#L29">29</a>
 <a href="#L30">30</a>
 <a href="#L31">31</a>
-<a href="#L32">32</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -105,16 +103,15 @@ type t = Symbolic_global0.t =
 
 let value global = <span data-count="505">g</span>lobal.value
 
-let replace global =
-  <span data-count="1620">S</span>ymbolic_choice.modify_thread (Thread.replace_globa<span data-count="1620">l</span> global)
+let replace global = <span data-count="2125">S</span>ymbolic_choice.modify_state (Thread.replace_globa<span data-count="2125">l</span> global)
 
 let set_value global value =
-  <span data-count="1382">l</span>et global = { global with value } in
+  <span data-count="1886">l</span>et global = { global with value } in
   replace global
 
 let convert_values (v : Concrete_value.t) : Symbolic_value.t =
-  <span data-count="238">m</span>atch v with
-  | <span data-count="208">I</span>32 v -&gt; I32 (Symbolic_i32.of_int3<span data-count="208">2</span> v)
+  <span data-count="239">m</span>atch v with
+  | <span data-count="209">I</span>32 v -&gt; I32 (Symbolic_i32.of_int3<span data-count="209">2</span> v)
   | <span data-count="10">I</span>64 v -&gt; I64 (Symbolic_i64.of_int6<span data-count="10">4</span> v)
   | <span data-count="10">F</span>32 v -&gt; F32 (Symbolic_f32.of_float3<span data-count="10">2</span> v)
   | <span data-count="10">F</span>64 v -&gt; F64 (Symbolic_f64.of_floa<span data-count="10">t</span> (Float64.to_floa<span data-count="10">t</span> v))
@@ -123,8 +120,8 @@ let convert_values (v : Concrete_value.t) : Symbolic_value.t =
   | Ref _ -&gt; assert false
 
 let of_concrete ~env_id ~id (v : Concrete_global.t) : t =
-  <span data-count="238">l</span>et value = convert_values v.Concrete_global.value in
-  <span data-count="238">{</span> value; env_id; id }
+  <span data-count="239">l</span>et value = convert_values v.Concrete_global.value in
+  <span data-count="239">{</span> value; env_id; id }
 </code></pre>
       </div>
     </div>

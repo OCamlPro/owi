@@ -37,7 +37,7 @@
             const path_to_root = "";
             const default_light_theme = "frappe";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-f234277f.js";
+            window.path_to_searchindex_js = "searchindex-437aca43.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-66d4629a.js"></script>
@@ -927,8 +927,8 @@ owi: [ERROR] Reached problem!
 <pre><code class="language-sh">$ owi rust ./mean.rs --entry-point=check --invoke-with-symbols -w1 --fail-on-assertion-only --no-assert-failure-expression-printing --deterministic-result-order
 owi: [ERROR] Assert failure
 model {
-  symbol symbol_0 i32 915013628
-  symbol symbol_1 i32 -1225654275
+  symbol symbol_0 i32 755812345
+  symbol symbol_1 i32 -755812346
 }
 
 owi: [ERROR] Reached problem!
@@ -940,8 +940,8 @@ owi: [ERROR] Reached problem!
 <pre><code class="language-sh">$ owi zig ./mean.zig --entry-point=check --invoke-with-symbols -w1 --fail-on-assertion-only --no-assert-failure-expression-printing --deterministic-result-order
 owi: [ERROR] Assert failure
 model {
-  symbol symbol_0 i32 -722535840
-  symbol symbol_1 i32 -418314849
+  symbol symbol_0 i32 -1001584422
+  symbol symbol_1 i32 -72157403
 }
 
 owi: [ERROR] Reached problem!
@@ -1067,9 +1067,11 @@ owi: [INFO] module owi_iso_module2 is ./mul2.wat
 owi: [INFO] compiling ./mul1.wat
 owi: [INFO] parsing      ...
 owi: [INFO] checking     ...
+owi: [INFO] checking     ...
 owi: [INFO] typechecking ...
 owi: [INFO] compiling ./mul2.wat
 owi: [INFO] parsing      ...
+owi: [INFO] checking     ...
 owi: [INFO] checking     ...
 owi: [INFO] typechecking ...
 owi: [INFO] common exports: mul
@@ -1336,7 +1338,8 @@ int main(void) {
     return 0;
 }
 </code></pre>
-<pre><code class="language-sh">$ # owi c --e-acsl primes2.c -w1
+<pre><code class="language-sh">$ owi c --e-acsl primes2.c -w1
+All OK!
 </code></pre>
 <p>All the specified properties have been satisfied during the execution.</p>
 <div style="break-before: page; page-break-before: always;"></div>
@@ -1808,6 +1811,7 @@ i32.lt_s
 <pre><code class="language-sh">$ owi run ./42.wat -v
 owi: [INFO] parsing      ...
 owi: [INFO] checking     ...
+owi: [INFO] checking     ...
 owi: [INFO] typechecking ...
 owi: [INFO] linking      ...
 owi: [INFO] interpreting ...
@@ -1865,6 +1869,7 @@ owi: [ERROR] type mismatch (expected [i32 i32] but stack is [i32])
 <pre><code class="language-sh">$ owi validate ./type_error.wat -v
 owi: [INFO] parsing      ...
 owi: [INFO] checking     ...
+owi: [INFO] checking     ...
 owi: [INFO] typechecking ...
 owi: [ERROR] type mismatch (expected [i32 i32] but stack is [i32])
 [35]
@@ -1885,6 +1890,7 @@ $ cat result.wat
 )
 $ owi run result.wat -v
 owi: [INFO] parsing      ...
+owi: [INFO] checking     ...
 owi: [INFO] checking     ...
 owi: [INFO] typechecking ...
 owi: [INFO] linking      ...
@@ -2084,7 +2090,7 @@ COMMANDS
        cfg [--entry-point=FUNCTION] [OPTION]… FILE
            Build a Control-Flow Graph
 
-       cg [--call-graph-mode=VAL] [--entry-point=FUNCTION] [OPTION]… FILE
+       cg [--call-graph-mode=VALUE] [--entry-point=FUNCTION] [OPTION]… FILE
            Build a call graph
 
 COMMON OPTIONS
@@ -2141,7 +2147,7 @@ OPTIONS
        --entry-point=FUNCTION (absent=main)
            entry point of the executable
 
-       --exploration=VAL (absent=fifo)
+       --exploration=VALUE (absent=fifo)
            exploration strategy to use ("fifo", "lifo", "random",
            "random-unseen-then-random", "rarity", "hot-path-penalty",
            "rarity-aging", "rarity-depth-aging", "rarity-depth-loop-aging",
@@ -2153,17 +2159,17 @@ OPTIONS
        --fail-on-trap-only
            ignore assertion violations and only report traps
 
-       -I VAL
+       -I VALUE
            headers path
 
        --invoke-with-symbols
            Invoke the entry point of the program with symbolic values instead
            of dummy constants.
 
-       -m VAL, --arch=VAL (absent=32)
+       -m INT, --arch=INT (absent=32)
            data model
 
-       --model-format=VAL (absent=scfg)
+       --model-format=VALUE (absent=scfg)
             The format of the model ("json" or "scfg")
 
        --model-out-file=FILE
@@ -2196,16 +2202,22 @@ OPTIONS
            property file
 
        -s VALUE, --solver=VALUE (absent=Z3)
-           SMT solver to use. VALUE must be one of the 5 available solvers:
-           Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo
+           SMT solver to use. VALUE must be one of the 6 available solvers:
+           Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo, SMTZilla
 
        --testcomp
            test-comp mode
 
+       --timeout=S
+           Stop execution after S seconds.
+
+       --timeout-instr=I
+           Stop execution after running I instructions.
+
        -u, --unsafe
            skip typechecking pass
 
-       -w VAL, --workers=VAL (absent=n)
+       -w INT, --workers=INT (absent=n)
            Number of workers for symbolic execution. Defaults to the number
            of physical cores.
 
@@ -2287,7 +2299,7 @@ OPTIONS
        --entry-point=FUNCTION (absent=main)
            entry point of the executable
 
-       --exploration=VAL (absent=fifo)
+       --exploration=VALUE (absent=fifo)
            exploration strategy to use ("fifo", "lifo", "random",
            "random-unseen-then-random", "rarity", "hot-path-penalty",
            "rarity-aging", "rarity-depth-aging", "rarity-depth-loop-aging",
@@ -2299,17 +2311,17 @@ OPTIONS
        --fail-on-trap-only
            ignore assertion violations and only report traps
 
-       -I VAL
+       -I VALUE
            headers path
 
        --invoke-with-symbols
            Invoke the entry point of the program with symbolic values instead
            of dummy constants.
 
-       -m VAL, --arch=VAL (absent=32)
+       -m INT, --arch=INT (absent=32)
            data model
 
-       --model-format=VAL (absent=scfg)
+       --model-format=VALUE (absent=scfg)
             The format of the model ("json" or "scfg")
 
        --model-out-file=FILE
@@ -2339,13 +2351,19 @@ OPTIONS
            specify which optimization level to use
 
        -s VALUE, --solver=VALUE (absent=Z3)
-           SMT solver to use. VALUE must be one of the 5 available solvers:
-           Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo
+           SMT solver to use. VALUE must be one of the 6 available solvers:
+           Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo, SMTZilla
+
+       --timeout=S
+           Stop execution after S seconds.
+
+       --timeout-instr=I
+           Stop execution after running I instructions.
 
        -u, --unsafe
            skip typechecking pass
 
-       -w VAL, --workers=VAL (absent=n)
+       -w INT, --workers=INT (absent=n)
            Number of workers for symbolic execution. Defaults to the number
            of physical cores.
 
@@ -2482,7 +2500,7 @@ SYNOPSIS
        owi instrument COMMAND …
 
 COMMANDS
-       label [--criteria=VAL] [--unsafe] [OPTION]… FILE
+       label [--criteria=VALUE] [--unsafe] [OPTION]… FILE
            Generate an instrumented file with labels corresponding to test
            objectives for a given coverage criteria.
 
@@ -2532,7 +2550,7 @@ OPTIONS
            Guarantee a fixed deterministic order of found failures. This
            implies --no-stop-at-failure.
 
-       --exploration=VAL (absent=fifo)
+       --exploration=VALUE (absent=fifo)
            exploration strategy to use ("fifo", "lifo", "random",
            "random-unseen-then-random", "rarity", "hot-path-penalty",
            "rarity-aging", "rarity-depth-aging", "rarity-depth-loop-aging",
@@ -2544,7 +2562,7 @@ OPTIONS
        --fail-on-trap-only
            ignore assertion violations and only report traps
 
-       --model-format=VAL (absent=scfg)
+       --model-format=VALUE (absent=scfg)
             The format of the model ("json" or "scfg")
 
        --model-out-file=FILE
@@ -2565,13 +2583,13 @@ OPTIONS
            Do not force each worker to run on an isolated physical core.
 
        -s VALUE, --solver=VALUE (absent=Z3)
-           SMT solver to use. VALUE must be one of the 5 available solvers:
-           Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo
+           SMT solver to use. VALUE must be one of the 6 available solvers:
+           Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo, SMTZilla
 
        -u, --unsafe
            skip typechecking pass
 
-       -w VAL, --workers=VAL (absent=n)
+       -w INT, --workers=INT (absent=n)
            Number of workers for symbolic execution. Defaults to the number
            of physical cores.
 
@@ -2804,7 +2822,7 @@ OPTIONS
        --entry-point=FUNCTION (absent=main)
            entry point of the executable
 
-       --exploration=VAL (absent=fifo)
+       --exploration=VALUE (absent=fifo)
            exploration strategy to use ("fifo", "lifo", "random",
            "random-unseen-then-random", "rarity", "hot-path-penalty",
            "rarity-aging", "rarity-depth-aging", "rarity-depth-loop-aging",
@@ -2816,17 +2834,17 @@ OPTIONS
        --fail-on-trap-only
            ignore assertion violations and only report traps
 
-       -I VAL
+       -I VALUE
            headers path
 
        --invoke-with-symbols
            Invoke the entry point of the program with symbolic values instead
            of dummy constants.
 
-       -m VAL, --arch=VAL (absent=32)
+       -m INT, --arch=INT (absent=32)
            data model
 
-       --model-format=VAL (absent=scfg)
+       --model-format=VALUE (absent=scfg)
             The format of the model ("json" or "scfg")
 
        --model-out-file=FILE
@@ -2856,13 +2874,19 @@ OPTIONS
            specify which optimization level to use
 
        -s VALUE, --solver=VALUE (absent=Z3)
-           SMT solver to use. VALUE must be one of the 5 available solvers:
-           Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo
+           SMT solver to use. VALUE must be one of the 6 available solvers:
+           Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo, SMTZilla
+
+       --timeout=S
+           Stop execution after S seconds.
+
+       --timeout-instr=I
+           Stop execution after running I instructions.
 
        -u, --unsafe
            skip typechecking pass
 
-       -w VAL, --workers=VAL (absent=n)
+       -w INT, --workers=INT (absent=n)
            Number of workers for symbolic execution. Defaults to the number
            of physical cores.
 
@@ -3010,7 +3034,7 @@ OPTIONS
        --entry-point=FUNCTION
            entry point of the executable
 
-       --exploration=VAL (absent=fifo)
+       --exploration=VALUE (absent=fifo)
            exploration strategy to use ("fifo", "lifo", "random",
            "random-unseen-then-random", "rarity", "hot-path-penalty",
            "rarity-aging", "rarity-depth-aging", "rarity-depth-loop-aging",
@@ -3026,7 +3050,7 @@ OPTIONS
            Invoke the entry point of the program with symbolic values instead
            of dummy constants.
 
-       --model-format=VAL (absent=scfg)
+       --model-format=VALUE (absent=scfg)
             The format of the model ("json" or "scfg")
 
        --model-out-file=FILE
@@ -3050,13 +3074,19 @@ OPTIONS
            Do not force each worker to run on an isolated physical core.
 
        -s VALUE, --solver=VALUE (absent=Z3)
-           SMT solver to use. VALUE must be one of the 5 available solvers:
-           Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo
+           SMT solver to use. VALUE must be one of the 6 available solvers:
+           Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo, SMTZilla
+
+       --timeout=S
+           Stop execution after S seconds.
+
+       --timeout-instr=I
+           Stop execution after running I instructions.
 
        -u, --unsafe
            skip typechecking pass
 
-       -w VAL, --workers=VAL (absent=n)
+       -w INT, --workers=INT (absent=n)
            Number of workers for symbolic execution. Defaults to the number
            of physical cores.
 
@@ -3402,7 +3432,7 @@ OPTIONS
        --entry-point=FUNCTION (absent=_start)
            entry point of the executable
 
-       --exploration=VAL (absent=fifo)
+       --exploration=VALUE (absent=fifo)
            exploration strategy to use ("fifo", "lifo", "random",
            "random-unseen-then-random", "rarity", "hot-path-penalty",
            "rarity-aging", "rarity-depth-aging", "rarity-depth-loop-aging",
@@ -3414,14 +3444,14 @@ OPTIONS
        --fail-on-trap-only
            ignore assertion violations and only report traps
 
-       -I VAL
+       -I VALUE
            headers path
 
        --invoke-with-symbols
            Invoke the entry point of the program with symbolic values instead
            of dummy constants.
 
-       --model-format=VAL (absent=scfg)
+       --model-format=VALUE (absent=scfg)
             The format of the model ("json" or "scfg")
 
        --model-out-file=FILE
@@ -3448,13 +3478,19 @@ OPTIONS
            Output the generated .wasm or .wat to FILE.
 
        -s VALUE, --solver=VALUE (absent=Z3)
-           SMT solver to use. VALUE must be one of the 5 available solvers:
-           Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo
+           SMT solver to use. VALUE must be one of the 6 available solvers:
+           Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo, SMTZilla
+
+       --timeout=S
+           Stop execution after S seconds.
+
+       --timeout-instr=I
+           Stop execution after running I instructions.
 
        -u, --unsafe
            skip typechecking pass
 
-       -w VAL, --workers=VAL (absent=n)
+       -w INT, --workers=INT (absent=n)
            Number of workers for symbolic execution. Defaults to the number
            of physical cores.
 
@@ -3537,6 +3573,7 @@ mdx_gen.bc.exe: [INFO] parsing      ...
     match Compile.Text.until_link (Link.State.empty ()) ~unsafe:false ~name:None m with
     | Ok v -&gt; v
     | Error _ -&gt; assert false;;
+mdx_gen.bc.exe: [INFO] checking     ...
 mdx_gen.bc.exe: [INFO] checking     ...
 mdx_gen.bc.exe: [INFO] typechecking ...
 ...

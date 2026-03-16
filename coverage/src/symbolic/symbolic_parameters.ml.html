@@ -18,18 +18,18 @@
       <h2>68.42%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:34.52%"></span>
-      <span class="unvisited" style="top:48.81%"></span>
+      <span class="unvisited" style="top:33.72%"></span>
+      <span class="unvisited" style="top:47.67%"></span>
+      <span class="unvisited" style="top:48.84%"></span>
       <span class="unvisited" style="top:50.00%"></span>
-      <span class="unvisited" style="bottom:48.81%"></span>
-      <span class="unvisited" style="bottom:47.62%"></span>
-      <span class="unvisited" style="bottom:46.43%"></span>
-      <span class="unvisited" style="bottom:45.24%"></span>
-      <span class="unvisited" style="bottom:44.05%"></span>
-      <span class="unvisited" style="bottom:42.86%"></span>
-      <span class="unvisited" style="bottom:41.67%"></span>
-      <span class="unvisited" style="bottom:26.19%"></span>
-      <span class="unvisited" style="bottom:25.00%"></span>
+      <span class="unvisited" style="bottom:48.84%"></span>
+      <span class="unvisited" style="bottom:47.67%"></span>
+      <span class="unvisited" style="bottom:46.51%"></span>
+      <span class="unvisited" style="bottom:45.35%"></span>
+      <span class="unvisited" style="bottom:44.19%"></span>
+      <span class="unvisited" style="bottom:43.02%"></span>
+      <span class="unvisited" style="bottom:27.91%"></span>
+      <span class="unvisited" style="bottom:26.74%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -118,6 +118,8 @@
 <a id="L82"></a><span > </span>
 <a id="L83"></a><span > </span>
 <a id="L84"></a><span > </span>
+<a id="L85"></a><span > </span>
+<a id="L86"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -206,6 +208,8 @@
 <a href="#L82">82</a>
 <a href="#L83">83</a>
 <a href="#L84">84</a>
+<a href="#L85">85</a>
+<a href="#L86">86</a>
 </pre>
 <pre><code class="ocaml">type fail_mode =
   | Trap_only
@@ -227,7 +231,7 @@ module Exploration_strategy = struct
 
   let to_priority_module : t -&gt; (module Prio.T) = function
     | <span data-count="1">L</span>IFO -&gt; (module Prio.LIFO : Prio.T)
-    | <span data-count="414">F</span>IFO -&gt; (module Prio.FIFO)
+    | <span data-count="415">F</span>IFO -&gt; (module Prio.FIFO)
     | <span data-count="1">R</span>andom -&gt; (module Prio.Random_prio)
     | <span data-count="1">R</span>andom_unseen_then_random -&gt; (module Prio.Random_unseen_then_random)
     | <span data-count="1">R</span>arity -&gt; (module Prio.Rarity)
@@ -238,9 +242,9 @@ module Exploration_strategy = struct
     | <span data-count="0">R</span>arity_depth_loop_aging_random -&gt; (module Prio.Rarity_depth_loop_aging)
 
   let to_work_ds_module strategy : (module Prio.S) =
-    <span data-count="422">l</span>et module M = (val to_priority_modul<span data-count="422">e</span> strategy) in
+    <span data-count="423">l</span>et module M = (val to_priority_modul<span data-count="423">e</span> strategy) in
     if M.requires_random then <span data-count="2">R</span>andom.ini<span data-count="2">t</span> 42;
-    <span data-count="422">(</span>module Prio.Make (M))
+    <span data-count="423">(</span>module Prio.Make (M))
 
   let pp fmt v =
     <span data-count="6">F</span>mt.string fmt
@@ -273,23 +277,25 @@ module Exploration_strategy = struct
 end
 
 type t =
-  { unsafe : bool
-  ; workers : Int.t Option.t
-  ; no_worker_isolation : Bool.t
+  { deterministic_result_order : bool
+  ; entry_point : string option
+  ; exploration_strategy : Exploration_strategy.t
+  ; fail_mode : fail_mode
+  ; invoke_with_symbols : bool
+  ; model_format : Model.output_format
+  ; model_out_file : Fpath.t option
+  ; no_assert_failure_expression_printing : bool
   ; no_stop_at_failure : bool
   ; no_value : bool
-  ; no_assert_failure_expression_printing : bool
-  ; deterministic_result_order : bool
-  ; fail_mode : fail_mode
-  ; exploration_strategy : Exploration_strategy.t
-  ; workspace : Fpath.t option
+  ; no_worker_isolation : Bool.t
   ; solver : Smtml.Solver_type.t
-  ; model_format : Model.output_format
-  ; entry_point : string option
-  ; invoke_with_symbols : bool
-  ; model_out_file : Fpath.t option
-  ; with_breadcrumbs : bool
+  ; timeout : float option
+  ; timeout_instr : int option
+  ; unsafe : bool
   ; use_ite_for_select : bool
+  ; with_breadcrumbs : bool
+  ; workers : Int.t Option.t
+  ; workspace : Fpath.t option
   }
 </code></pre>
       </div>
