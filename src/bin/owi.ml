@@ -200,7 +200,7 @@ let solver =
   let docv = Arg.conv_docv solver_conv in
   let doc =
     let pp_bold_solver fmt ty = Fmt.pf fmt "$(b,%a)" Smtml.Solver_type.pp ty in
-    let supported_solvers = Smtml.Solver_dispatcher.supported_solvers in
+    let supported_solvers = Smtml.Solver_type.supported_solvers in
     Fmt.str
       "SMT solver to use. $(i,%s) must be one of the %d available solvers: %a"
       docv
