@@ -73,8 +73,8 @@ OPTIONS
            specify which optimization level to use
 
        -s VALUE, --solver=VALUE (absent=Z3)
-           SMT solver to use. VALUE must be one of the 5 available solvers:
-           Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo
+           SMT solver to use. VALUE must be one of the 6 available solvers:
+           Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo, SMTZilla
 
        --timeout=S
            Stop execution after S seconds.

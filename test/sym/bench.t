@@ -43,7 +43,7 @@
                              (rlimit count  X)
   owi: [ERROR] Reached 2 problems!
 Testing with the -q flag:
-  $ owi sym div_i32.wat --unsafe --fail-on-assertion-only --no-value -w1 --bench --workspace . -q 2>&1 | sed 's/: [0-9].*/: X/' | sed 's/[0-9].*)/ X)/'
+  $ owi sym div_i32.wat --unsafe --fail-on-assertion-only --no-value -w1 --bench --workspace . -q 2>&1 | sed 's/: [0-9].*/: X/' | sed 's/[0-9].*)/ X)/' | grep -v "(time X)"
   owi: [INFO] parsing time : X
   owi: [INFO] validation time : X
   owi: [INFO] whole execution time          : X

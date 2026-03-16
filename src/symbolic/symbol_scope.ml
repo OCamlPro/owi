@@ -104,7 +104,7 @@ let to_scfg ~no_value model scope_tokens =
 let to_json ~no_value model scope_tokens =
   let open Smtml in
   let module Json = Yojson.Safe in
-  let symbol_to_json sym =
+  let symbol_to_json sym : Yojson.Safe.t =
     let name = ("symbol", `String (Symbol.to_string sym)) in
     let ty = ("type", `String (Fmt.str "%a" Ty.pp sym.ty)) in
     if no_value then `Assoc [ name; ty ]
@@ -168,7 +168,7 @@ let to_json ~no_value model scope_tokens =
   `Assoc [ ("model", `List result) ]
 
 let model_of_json json_str =
-  let open Yojson.Basic in
+  let open Yojson.Safe in
   let open Syntax in
   let tbl = Hashtbl.create 16 in
 
@@ -212,7 +212,7 @@ let model_of_json json_str =
     | None -> Fmt.error_msg "JSON does not contain model field" )
   | _ ->
     Fmt.error_msg "Invalid JSON format for symbol scope:@. %a"
-      (Yojson.Basic.pretty_print ~std:true)
+      (Yojson.Safe.pretty_print ~std:true)
       json
 
 let model_of_scfg scfg =
