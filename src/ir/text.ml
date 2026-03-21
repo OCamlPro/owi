@@ -16,6 +16,28 @@ type indice =
 
 let pp_id fmt id = pf fmt "$%s" id
 
+let pp_name_inner fmt s =
+  let pp_hex_char fmt c = pf fmt "\\%02x" (Char.code c) in
+  let pp_char fmt = function
+    | '\n' -> string fmt "\\n"
+    | '\r' -> string fmt "\\r"
+    | '\t' -> string fmt "\\t"
+    | '\'' -> string fmt "\\'"
+    | '"' -> string fmt "\\\""
+    | '\\' -> string fmt "\\\\"
+    | c ->
+      let ci = Char.code c in
+      if 0x20 <= ci && ci < 0x7f then char fmt c else pp_hex_char fmt c
+  in
+  let pp_unicode_char fmt = function
+    | (0x09 | 0x0a) as c -> pp_char fmt (Char.chr c)
+    | uc when 0x20 <= uc && uc < 0x7f -> pp_char fmt (Char.chr uc)
+    | uc -> pf fmt "\\u{%02x}" uc
+  in
+  String.iter (fun c -> pp_unicode_char fmt (Char.code c)) s
+
+let pp_name fmt s = pf fmt {|"%a"|} pp_name_inner s
+
 let pp_id_opt fmt = function None -> () | Some i -> pf fmt " %a" pp_id i
 
 let pp_indice fmt = function Raw u -> int fmt u | Text i -> pp_id fmt i
@@ -761,7 +783,7 @@ module Data = struct
     }
 
   let pp fmt (d : t) =
-    pf fmt {|(data%a %a %S)|} pp_id_opt d.id Mode.pp d.mode d.init
+    pf fmt {|(data%a %a %a)|} pp_id_opt d.id Mode.pp d.mode pp_name d.init
 end
 
 module Tag = struct
