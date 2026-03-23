@@ -299,6 +299,22 @@ let symbolic_parameters default_entry_point =
   ; workspace
   }
 
+(* owi drun *)
+
+let drun_info =
+  let doc = "Run the denotational interpreter" in
+  let man = [] @ shared_man in
+  Cmd.info "drun" ~version ~doc ~sdocs ~man
+
+let drun_cmd =
+  let+ source_file
+  and+ no_input =
+    let doc = "disable interactive mode" in
+    Arg.(value & flag & info [ "no-input" ] ~doc)
+  and+ () = setup_log in
+  let compiled = Compile.File.until_binary ~unsafe:false source_file in
+  Denot_concrete.run ~no_input compiled
+
 (* owi ai *)
 
 let abs_info =
@@ -669,6 +685,7 @@ let cli =
   in
   Cmd.group info ~default
     [ Cmd.group analyze_info [ Cmd.v cg_info cg_cmd; Cmd.v cfg_info cfg_cmd ]
+    ; Cmd.v drun_info drun_cmd
     ; Cmd.v abs_info abs_cmd
     ; Cmd.v c_info c_cmd
     ; Cmd.v cpp_info cpp_cmd

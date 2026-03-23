@@ -32,6 +32,7 @@ module Concrete_f32 = Concrete_f32
 module Concrete_f64 = Concrete_f64
 module Extern = Extern
 module Abs_driver = Abs_driver
+module Denot_concrete = Denot_concrete
 module Interpret = Interpret
 module Kind = Kind
 module Label = Label

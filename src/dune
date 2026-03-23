@@ -6,6 +6,7 @@
   abs_datastructures
   abs_driver
   abs_extern_func
+  abs_monad
   abs_value
   abs_wasm_ffi
   annotated
@@ -60,6 +61,7 @@
   concrete_wasm_ffi
   control_flow_graph
   data_intf
+  denot_concrete
   elem_intf
   env_intf
   exploration_smart
