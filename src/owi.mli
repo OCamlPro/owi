@@ -1418,6 +1418,10 @@ module Link : sig
 end
 
 module Compile : sig
+  module File : sig
+    val until_binary : unsafe:bool -> Fpath.t -> Binary.Module.t Result.t
+  end
+
   module Text : sig
     val until_binary : unsafe:bool -> Text.Module.t -> Binary.Module.t Result.t
 
@@ -1567,6 +1571,10 @@ module Abs_driver : sig
        Abs_extern_func.extern_func Link.State.t
     -> Abs_extern_func.extern_func Linked.Module.t
     -> unit
+end
+
+module Denot_concrete : sig
+  val run : no_input:bool -> Binary.Module.t Result.t -> unit Result.t
 end
 
 module Interpret : sig

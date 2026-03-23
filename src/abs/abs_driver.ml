@@ -1,14 +1,8 @@
-(* interger -> bitvector *)
-(* C smith - generator des programme C *)
-(* C vise/C reduce - genere des prog plus petit pour trouver les bugs *)
-(* fromalisation *)
-(* Instantation du domaine pour la mémoire *)
-
 open Binary
 open Abs_value
 open Abs_datastructures
 
-type value = Abs_value.ADomain.binary * Units.In_bits.t
+type value = Abs_value.ADomain.binary
 
 type state =
   { ctx : ADomain.Context.t
@@ -22,8 +16,9 @@ type state =
 module Flags = Operator.Flags
 
 let pp_value : ADomain.Context.t -> Format.formatter -> value -> unit =
- fun ctx fmt (bin, size) ->
-  Fmt.pf fmt "%a" (ADomain.binary_pretty ~size ctx) bin
+ fun ctx fmt v ->
+  (*don't know what to do about this size*)
+  Fmt.pf fmt "%a" (ADomain.binary_pretty ~size:Size.b32 ctx) v
 
 let pp_state : Format.formatter -> state -> unit =
  fun fmt state ->
@@ -40,13 +35,12 @@ let serialize ~widens : state -> state -> (state, 'a) ADomain.Context.result =
     match (lhs, rhs) with
     | [], [] -> result
     | [], _ | _, [] -> Fmt.failwith "join on stacks of different sizes"
-    | (i1, size1) :: rest_a, (i2, size2) :: rest_b ->
-      assert (size_equal size1 size2);
+    | i1 :: rest_a, i2 :: rest_b ->
       let (ADomain.Context.Result (included, in_tuple, continue)) = result in
       if ADomain.Binary.equal i1 i2 then serialize_lists rest_a rest_b result
       else
         let (ADomain.Context.Result (included, in_tuple, local_continue)) =
-          ADomain.serialize_binary ~size:size32 ~widens state_a.ctx i1
+          ADomain.serialize_binary ~size:Size.b32 ~widens state_a.ctx i1
             state_b.ctx i2 (included, in_tuple)
         in
         let new_result =
@@ -56,7 +50,7 @@ let serialize ~widens : state -> state -> (state, 'a) ADomain.Context.result =
             , fun ctx out_tuple ->
                 let integer, out_tuple = local_continue ctx out_tuple in
                 let stack, out_tuple = continue ctx out_tuple in
-                ((integer, size1) :: stack, out_tuple) )
+                (integer :: stack, out_tuple) )
         in
         serialize_lists rest_a rest_b new_result
   in
@@ -104,14 +98,10 @@ let join state_a state_b =
 let join_opt a b =
   match (a, b) with None, x | x, None -> x | Some a, Some b -> Some (join a b)
 
-let exec_extern_func state (f : Abs_extern_func.extern_func) =
-  let _pop_arg (type ty) stack (arg : ty Abs_extern_func.telt) :
-    (ty * Units.In_bits.t) * ty Stack.t =
-    match arg with
-    | I32 ->
-      let popped, stack = Stack.pop stack in
-      ((popped, size32), stack)
-    | _ -> assert false
+let exec_extern_func stack (f : Abs_extern_func.extern_func) =
+  let pop_arg (type ty) (stack : value Stack.t) (arg : ty Abs_extern_func.telt)
+    : ty * value Stack.t =
+    match arg with I32 -> Stack.pop stack | _ -> assert false
   in
   let rec split_args : type f r.
     'stack -> (f, r) Abs_extern_func.atype -> 'stack * 'stack =
@@ -128,31 +118,28 @@ let exec_extern_func state (f : Abs_extern_func.extern_func) =
     | NArg (_, _, args) -> split_one_arg args
     | Res -> (Stack.empty, stack)
   in
-  let apply : type f r. value Stack.t -> (f, r) Abs_extern_func.atype -> f -> r
-      =
-   fun _stack _ty _fn -> assert false
-   (* match ty with *)
-   (* | Arg (arg, args) -> *)
-   (*   let (v, _size), stack = pop_arg stack arg in *)
-   (*   apply stack args (fn v) *)
-   (* | UArg args -> apply stack args (fn ()) *)
-   (* | NArg (_, arg, args) -> *)
-   (*   let (v, _size), stack = pop_arg stack arg in *)
-   (*   apply stack args (fn v) *)
-   (* | Res -> fn *)
-   (* | Mem (_memid, _args) -> assert false *)
+  let rec apply : type f r.
+    value Stack.t -> (f, r) Abs_extern_func.atype -> f -> r =
+   fun stack ty f ->
+    match ty with
+    | Arg (arg, args) ->
+      let v, stack = pop_arg stack arg in
+      apply stack args (f v)
+    | UArg args -> apply stack args (f ())
+    | NArg (_, arg, args) ->
+      let v, stack = pop_arg stack arg in
+      apply stack args (f v)
+    | Res -> f
+    | Mem (_memid, _args) -> assert false
   in
-  let (Abs_extern_func.Extern_func (Abs_extern_func.Func (atype, rtype), func))
-      =
-    f
-  in
-  let args, stack = split_args state.stack atype in
-  let r = apply (Stack.rev args) atype func in
-  match (rtype, r) with
-  | R0, Ok () -> stack
-  | R1 I32, Ok _v1 ->
-    Stack.push stack @@ (ADomain.binary_unknown ~size:size32 state.ctx, size32)
-  | _ -> assert false
+  match f with
+  | Abs_extern_func.Extern_func (Abs_extern_func.Func (atype, rtype), func) -> (
+    let args, stack = split_args stack atype in
+    let r = apply (Stack.rev args) atype func in
+    match (rtype, r) with
+    | R0, Ok () -> stack
+    | R1 I32, Ok v1 -> Stack.push stack v1
+    | _ -> assert false )
 
 let rec exec_func (state : state) (func : Func.t) =
   Log.info (fun m ->
@@ -170,7 +157,7 @@ let rec exec_func (state : state) (func : Func.t) =
     }
   in
   Log.info (fun m -> m "Func start state : %a" pp_state fn_state);
-  let func_end_state = expr fn_state func.body.raw in
+  let func_end_state = exec_expr fn_state func.body.raw in
   (* We should probably copy state and join back the return values in the context here *)
   Log.info (fun m -> m "Func end state : %a@." pp_state func_end_state);
   { state with
@@ -179,60 +166,71 @@ let rec exec_func (state : state) (func : Func.t) =
       @@ Stack.take (List.length result_type) func_end_state.stack
   }
 
-and exec_ibinop state : Text.ibinop -> state = function
+and exec_ibinop state size : Text.ibinop -> state = function
   | Add ->
-    let (e1, size), stack = Stack.pop state.stack in
-    let (e2, size2), stack = Stack.pop stack in
-    assert (size_equal size size2);
+    let e1, stack = Stack.pop state.stack in
+    let e2, stack = Stack.pop stack in
     let e =
       ADomain.Binary_Forward.biadd state.ctx e1 e2 ~size
         ~flags:Flags.Biadd.no_overflow
     in
-    { state with stack = Stack.push stack (e, size) }
+    { state with stack = Stack.push stack e }
   | Sub ->
-    let (e1, size), stack = Stack.pop state.stack in
-    let (e2, size2), stack = Stack.pop stack in
-    assert (size_equal size size2);
+    let e1, stack = Stack.pop state.stack in
+    let e2, stack = Stack.pop stack in
     let e =
       ADomain.Binary_Forward.bisub state.ctx e1 e2 ~size
         ~flags:Operator.Flags.Bisub.no_overflow
     in
-    { state with stack = Stack.push stack (e, size) }
+    { state with stack = Stack.push stack e }
   | Mul ->
-    let (e1, size), stack = Stack.pop state.stack in
-    let (e2, size2), stack = Stack.pop stack in
-    assert (size_equal size size2);
+    let e1, stack = Stack.pop state.stack in
+    let e2, stack = Stack.pop stack in
     let e =
       ADomain.Binary_Forward.bimul state.ctx e1 e2 ~size
         ~flags:(Flags.Bimul.pack ~nsw:false ~nuw:false)
     in
-    { state with stack = Stack.push stack (e, size) }
+    { state with stack = Stack.push stack e }
   | Div _sx ->
-    let (e1, size), stack = Stack.pop state.stack in
-    let (e2, size2), stack = Stack.pop stack in
-    assert (size_equal size size2);
+    let e1, stack = Stack.pop state.stack in
+    let e2, stack = Stack.pop stack in
     let e = ADomain.Binary_Forward.bisdiv ~size state.ctx e1 e2 in
-    { state with stack = Stack.push stack (e, size) }
+    { state with stack = Stack.push stack e }
   | _ -> assert false
 
 and exec_instr state : instr -> state = function
   | I32_const i ->
     let abs_i =
-      ADomain.Binary_Forward.biconst ~size:size32 (Z.of_int32 i) state.ctx
+      ADomain.Binary_Forward.biconst ~size:Size.b32 (Z.of_int32 i) state.ctx
     in
-    { state with stack = Stack.push state.stack (abs_i, size32) }
+    { state with stack = Stack.push state.stack abs_i }
   | I64_const i ->
     let abs_i =
-      ADomain.Binary_Forward.biconst ~size:size64 (Z.of_int64 i) state.ctx
+      ADomain.Binary_Forward.biconst ~size:Size.b64 (Z.of_int64 i) state.ctx
     in
-    { state with stack = Stack.push state.stack (abs_i, size64) }
+    { state with stack = Stack.push state.stack abs_i }
   | Unreachable -> Fmt.failwith "unreachable"
-  | I_binop (_nn, op) -> exec_ibinop state op
-  | If_else (_, _, expr_true, expr_false) ->
+  | I_binop (nn, op) ->
+    let size = match nn with Text.S32 -> Size.b32 | Text.S64 -> Size.b64 in
+    exec_ibinop state size op
+  | Block (_, bt, expr) -> (
+    match bt with
+    | Some (Bt_raw (_, ft)) ->
+      let param_type, result_type = ft in
+      let block_stack = Stack.take (List.length param_type) state.stack in
+      let res = exec_expr { state with stack = block_stack } expr.raw in
+      let stack = Stack.take (List.length result_type) res.stack in
+      { state with stack = Stack.append state.stack stack; locals = res.locals }
+    | None -> exec_expr state expr.raw )
+  | If_else (_, bt, expr_true, expr_false) ->
     let _b, stack = Stack.pop state.stack in
     (* should check b *)
-    let state_true = expr { state with stack } expr_true.raw in
-    let state_false = expr { state with stack } expr_false.raw in
+    let state_true =
+      exec_instr { state with stack } (Block (None, bt, expr_true))
+    in
+    let state_false =
+      exec_instr { state with stack } (Block (None, bt, expr_false))
+    in
     join state_true state_false
   | Return -> (
     match state.func_rt with
@@ -253,7 +251,7 @@ and exec_instr state : instr -> state = function
       exec_func { state with env } func
     | Extern _ ->
       let f = Link_env.get_extern_func state.env idx in
-      let stack = exec_extern_func state f in
+      let stack = exec_extern_func state.stack f in
       { state with stack }
     end
   | Local_get i ->
@@ -270,11 +268,11 @@ and exec_instr state : instr -> state = function
       let _, stack = Stack.pop state.stack in
       { state with stack }
   | Nop ->
-    let top = ADomain.binary_empty ~size:size32 state.ctx in
-    { state with stack = Stack.push state.stack (top, size32) }
+    let top = ADomain.binary_unknown ~size:Size.b32 state.ctx in
+    { state with stack = Stack.push state.stack top }
   | instr -> Fmt.failwith "Instr unimplemented %a" (pp_instr ~short:true) instr
 
-and expr (state : state) (expr : expr) : state =
+and exec_expr (state : state) (expr : expr) : state =
   List.fold_left
     (fun acc (x : instr Annotated.t) -> exec_instr acc x.raw)
     state expr
@@ -295,7 +293,7 @@ let expr (link_state : Abs_extern_func.extern_func Link.State.t)
 
   List.iter
     begin fun (e : expr Annotated.t) ->
-      let _end_state = expr initial_state e.raw in
+      let _end_state = exec_expr initial_state e.raw in
       ()
       (* Fmt.pr "End State : %a" pp_state end_state *)
     end
