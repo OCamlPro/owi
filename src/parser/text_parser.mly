@@ -22,7 +22,7 @@
 %token PARAM
 %token QUOTE
 %token REC REF REF_ARRAY REF_AS_NON_NULL REF_CAST REF_EQ REF_EXTERN REF_FUNC REF_HOST REF_I31 REF_IS_NULL REF_NULL REF_STRUCT REF_TEST REGISTER RESULT RETURN RETURN_CALL RETURN_CALL_INDIRECT RETURN_CALL_REF RPAR
-%token SELECT START STRUCT STRUCT_GET STRUCT_GET_S STRUCT_NEW_CANON STRUCT_NEW_CANON_DEFAULT STRUCTREF STRUCT_SET SUB
+%token SELECT START STRUCT STRUCT_GET STRUCT_GET_S STRUCT_NEW_CANON STRUCT_NEW_CANON_DEFAULT STRUCT_REF STRUCT_SET SUB
 %token TABLE TABLE_COPY TABLE_FILL TABLE_GET TABLE_GROW TABLE_INIT TABLE_SET TABLE_SIZE THEN TYPE
 %token UNREACHABLE
 
@@ -133,6 +133,10 @@ let null_opt ==
 
 let heap_type ==
   | ANY; { Any_ht }
+  | EQ; { Eq_ht }
+  | I31; { I31_ht }
+  | STRUCT; { Struct_ht }
+  | ARRAY; { Array_ht }
   | NONE; { None_ht }
   | FUNC; { Func_ht }
   | NOFUNC; { NoFunc_ht }
@@ -145,6 +149,10 @@ let heap_type ==
 let ref_type ==
   | LPAR; REF; ~ = null_opt; ~ = heap_type; RPAR; <>
   | ANY_REF; { (Null : nullable), Any_ht }
+  | EQ_REF; { (Null : nullable), Eq_ht }
+  | I31_REF; { (Null : nullable), I31_ht }
+  | STRUCT_REF; { (Null : nullable), Struct_ht }
+  | ARRAY_REF; { (Null : nullable), Array_ht }
   | NULL_REF; { (Null : nullable), None_ht }
   | FUNC_REF; { (Null : nullable), Func_ht }
   | NULL_FUNC_REF; { (Null : nullable), NoFunc_ht }

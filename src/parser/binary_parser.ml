@@ -236,6 +236,10 @@ let read_vectype input =
 let read_heap_type ?(abs = false) input b =
   match b with
   | -0x17 -> Ok (Exn_ht, input)
+  | -0x16 -> Ok (Array_ht, input)
+  | -0x15 -> Ok (Struct_ht, input)
+  | -0x14 -> Ok (I31_ht, input)
+  | -0x13 -> Ok (Eq_ht, input)
   | -0x12 -> Ok (Any_ht, input)
   | -0x11 -> Ok (Extern_ht, input)
   | -0x10 -> Ok (Func_ht, input)

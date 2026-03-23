@@ -32,7 +32,7 @@ let token_to_string = function
   | STRUCT_NEW_CANON -> "struct.new_canon"
   | STRUCT_GET_S -> "struct.get_s"
   | STRUCT_GET -> "struct.get"
-  | STRUCTREF -> "structref"
+  | STRUCT_REF -> "structref"
   | STRUCT -> "struct"
   | START -> "start"
   | SELECT -> "select"

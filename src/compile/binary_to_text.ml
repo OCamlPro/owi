@@ -7,6 +7,10 @@ let convert_indice : Binary.indice -> Text.indice = function i -> Text.Raw i
 let convert_heap_type : Binary.heap_type -> Text.heap_type = function
   | TypeUse id -> TypeUse (Raw id)
   | Any_ht -> Any_ht
+  | Eq_ht -> Eq_ht
+  | I31_ht -> I31_ht
+  | Struct_ht -> Struct_ht
+  | Array_ht -> Array_ht
   | None_ht -> None_ht
   | Func_ht -> Func_ht
   | NoFunc_ht -> NoFunc_ht

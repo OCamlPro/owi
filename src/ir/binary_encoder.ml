@@ -83,6 +83,10 @@ let write_reftype buf nullable ht =
     write_indice buf id
   | Binary.TypeUse id -> write_indice buf id
   | Exn_ht -> Buffer.add_char buf '\x69'
+  | Array_ht -> Buffer.add_char buf '\x6A'
+  | Struct_ht -> Buffer.add_char buf '\x6B'
+  | I31_ht -> Buffer.add_char buf '\x6C'
+  | Eq_ht -> Buffer.add_char buf '\x6D'
   | Any_ht -> Buffer.add_char buf '\x6E'
   | Extern_ht -> Buffer.add_char buf '\x6F'
   | Func_ht -> Buffer.add_char buf '\x70'

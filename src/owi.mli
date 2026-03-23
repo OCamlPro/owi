@@ -246,6 +246,10 @@ module Text : sig
     | TypeUse of indice
     (* abs_heap_type *)
     | Any_ht
+    | Eq_ht
+    | I31_ht
+    | Struct_ht
+    | Array_ht
     | None_ht
     | Func_ht
     | NoFunc_ht
@@ -700,6 +704,10 @@ module Binary : sig
     | TypeUse of indice
     (* abs_heap_type *)
     | Any_ht
+    | Eq_ht
+    | I31_ht
+    | Struct_ht
+    | Array_ht
     | None_ht
     | Func_ht
     | NoFunc_ht

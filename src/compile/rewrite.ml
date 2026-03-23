@@ -11,6 +11,10 @@ let rewrite_heap_type (assigned : Assigned.t) (ht : Text.heap_type) :
     let* id = Assigned.find_type assigned id in
     Ok (Binary.TypeUse id)
   | Any_ht -> Ok Any_ht
+  | Eq_ht -> Ok Eq_ht
+  | I31_ht -> Ok I31_ht
+  | Struct_ht -> Ok Struct_ht
+  | Array_ht -> Ok Array_ht
   | None_ht -> Ok None_ht
   | Func_ht -> Ok Func_ht
   | NoFunc_ht -> Ok NoFunc_ht

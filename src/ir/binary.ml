@@ -24,6 +24,10 @@ type heap_type =
   | TypeUse of indice
   (* abs_heap_type *)
   | Any_ht
+  | Eq_ht
+  | I31_ht
+  | Struct_ht
+  | Array_ht
   | None_ht
   | Func_ht
   | NoFunc_ht
@@ -32,16 +36,20 @@ type heap_type =
   | Extern_ht
   | NoExtern_ht
 
-let pp_heap_type ppf = function
-  | TypeUse id -> pf ppf "%a" pp_indice id
-  | Any_ht -> pf ppf "any"
-  | None_ht -> pf ppf "none"
-  | Func_ht -> pf ppf "func"
-  | NoFunc_ht -> pf ppf "nofunc"
-  | Exn_ht -> pf ppf "exn"
-  | NoExn_ht -> pf ppf "noexn"
-  | Extern_ht -> pf ppf "extern"
-  | NoExtern_ht -> pf ppf "noextern"
+let pp_heap_type fmt = function
+  | TypeUse id -> pf fmt "%a" pp_indice id
+  | Any_ht -> pf fmt "any"
+  | Eq_ht -> pf fmt "eq"
+  | I31_ht -> pf fmt "i31"
+  | Struct_ht -> pf fmt "struct"
+  | Array_ht -> pf fmt "any"
+  | None_ht -> pf fmt "none"
+  | Func_ht -> pf fmt "func"
+  | NoFunc_ht -> pf fmt "nofunc"
+  | Exn_ht -> pf fmt "exn"
+  | NoExn_ht -> pf fmt "noexn"
+  | Extern_ht -> pf fmt "extern"
+  | NoExtern_ht -> pf fmt "noextern"
 
 let heap_type_eq t1 t2 =
   (* TODO: this is wrong *)

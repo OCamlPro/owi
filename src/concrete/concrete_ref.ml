@@ -34,6 +34,7 @@ let null = function
   | Extern_ht | NoExtern_ht -> Extern None
   | Any_ht | None_ht -> NullRef
   | Exn_ht | NoExn_ht -> NullExn
+  | Eq_ht | I31_ht | Struct_ht | Array_ht -> assert false
 
 let func (f : Kind.func) = Func (Some f)
 
