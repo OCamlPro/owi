@@ -10,8 +10,10 @@ end
 module NonRelationalDomain = Domains.Term_based.Nonrelational.Make (Terms) (SVA)
 module ADomain = Domains.Term_domain.Make (Terms) (NonRelationalDomain)
 
-let size32 = Units.In_bits.s32
+module Size = struct
+  let b32 = Units.In_bits.s32
 
-let size64 = Units.In_bits.of_int 64
+  let b64 = Units.In_bits.of_int 64
 
-let size_equal size1 size2 = Units.In_bits.compare size1 size2 = 0
+  let equal s1 s2 = Units.In_bits.compare s1 s2 = 0
+end
