@@ -1,3 +1,20 @@
+  $ owi script --no-exhaustion reference/array_copy.wast
+  owi: [ERROR] unexpected token "i8" in line 7, character 20-22
+  [40]
+  $ owi script --no-exhaustion reference/array_fill.wast
+  owi: [ERROR] unexpected token "i8" in line 7, character 20-22
+  [40]
+  $ owi script --no-exhaustion reference/array_init_data.wast
+  owi: [ERROR] unexpected token "i8" in line 7, character 20-22
+  [40]
+  $ owi script --no-exhaustion reference/array_init_elem.wast
+  owi: [ERROR] unexpected token "funcref" in line 7, character 20-27
+  [40]
+  $ owi script --no-exhaustion reference/array_new_data.wast
+  owi: [ERROR] unexpected token "(" in line 2, character 20-21
+  [40]
+  $ owi script --no-exhaustion reference/array_new_elem.wast 2>&1 | grep -oE ".*unknown operator.*"
+       Owi__Text_lexer.Unknown_operator("unknown operator \"i31ref\"")
   $ owi script --no-exhaustion reference/array.wast
   owi: [ERROR] unexpected token "i8" in line 4, character 15-17
   [40]

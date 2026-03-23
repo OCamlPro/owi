@@ -53,6 +53,12 @@
   42
   123
   $ owi script --no-exhaustion reference/nop.wast
+  $ owi script --no-exhaustion reference/ref_as_non_null.wast
+  owi: [ERROR] expected null reference but got (type mismatch (ref.as_non_null expected a non-null reference but got null))
+  [55]
+  $ owi script --no-exhaustion reference/ref.wast
+  owi: [ERROR] expected unknown type but there was no error
+  [7]
   $ owi script --no-exhaustion reference/ref_func.wast
   $ owi script --no-exhaustion reference/ref_is_null.wast
   $ owi script --no-exhaustion reference/ref_null.wast

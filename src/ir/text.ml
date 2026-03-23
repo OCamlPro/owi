@@ -160,32 +160,32 @@ let heap_type_eq t1 t2 =
 let compare_heap_type t1 t2 =
   (* TODO: this is wrong *)
   match (t1, t2) with
-  | Func_ht, Func_ht
-  | Extern_ht, Extern_ht
   | Any_ht, Any_ht
   | None_ht, None_ht
+  | Func_ht, Func_ht
   | NoFunc_ht, NoFunc_ht
   | Exn_ht, Exn_ht
   | NoExn_ht, NoExn_ht
+  | Extern_ht, Extern_ht
   | NoExtern_ht, NoExtern_ht ->
     0
   | TypeUse id1, TypeUse id2 -> compare_indice id1 id2
   | TypeUse _, _ -> 1
   | _, TypeUse _ -> -1
-  | Extern_ht, _ -> 1
-  | _, Extern_ht -> -1
-  | NoExtern_ht, _ -> 1
-  | _, NoExtern_ht -> -1
   | Any_ht, _ -> 1
   | _, Any_ht -> -1
   | None_ht, _ -> 1
   | _, None_ht -> -1
+  | Func_ht, _ -> 1
+  | _, Func_ht -> -1
+  | NoFunc_ht, _ -> 1
+  | _, NoFunc_ht -> -1
   | Exn_ht, _ -> 1
   | _, Exn_ht -> -1
   | NoExn_ht, _ -> 1
   | _, NoExn_ht -> -1
-  | Func_ht, _ -> 1
-  | _, Func_ht -> -1
+  | Extern_ht, _ -> 1
+  | _, Extern_ht -> -1
 
 type nonrec ref_type = nullable * heap_type
 

@@ -132,25 +132,25 @@ let null_opt ==
   | { No_null }
 
 let heap_type ==
-  | FUNC; { Func_ht }
-  | EXTERN; { Extern_ht }
   | ANY; { Any_ht }
   | NONE; { None_ht }
-  | EXN; { Exn_ht }
+  | FUNC; { Func_ht }
   | NOFUNC; { NoFunc_ht }
+  | EXN; { Exn_ht }
   | NO_EXN; { NoExn_ht }
+  | EXTERN; { Extern_ht }
   | NOEXTERN; { NoExtern_ht }
   | ~ = indice; <TypeUse>
 
 let ref_type ==
   | LPAR; REF; ~ = null_opt; ~ = heap_type; RPAR; <>
-  | FUNC_REF; { (Null : nullable), Func_ht }
-  | EXTERN_REF; { (Null : nullable), Extern_ht }
   | ANY_REF; { (Null : nullable), Any_ht }
-  | EXN_REF; { (Null : nullable), Exn_ht }
-  | NULL_FUNC_REF; { (Null : nullable), NoFunc_ht }
   | NULL_REF; { (Null : nullable), None_ht }
+  | FUNC_REF; { (Null : nullable), Func_ht }
+  | NULL_FUNC_REF; { (Null : nullable), NoFunc_ht }
+  | EXN_REF; { (Null : nullable), Exn_ht }
   | NULL_EXN_REF; { (Null : nullable), NoExn_ht }
+  | EXTERN_REF; { (Null : nullable), Extern_ht }
   | NULL_EXTERN_REF; { (Null : nullable), NoExtern_ht }
 
 let packed_type :=
