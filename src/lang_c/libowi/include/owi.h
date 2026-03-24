@@ -98,4 +98,37 @@ __attribute__((import_module("owi"), import_name("exit"))) void exit(int);
 }
 #endif
 
+
+// ##__VA_ARGS__ removes the preceding comma when empty
+// so when we have no args -> (_, owi_name_t(_), owi_t()) = owi_t()
+// but when we have an arg -> (_, arg, owi_named_t(arg), owi_t()) = owi_named_t(arg)
+#define _OWI_PICK(_0, _1, N, ...) N
+#define OWI_MAKE(type, ...) \
+  _OWI_PICK(, ##__VA_ARGS__, owi_named_##type(__VA_ARGS__), owi_##type())
+
+#define owi_int32(...) OWI_MAKE(int32, ##__VA_ARGS__)
+#define owi_uint32(...) OWI_MAKE(uint32, ##__VA_ARGS__)
+#define owi_int64(...) OWI_MAKE(int64, ##__VA_ARGS__)
+#define owi_uint64(...) OWI_MAKE(uint64, ##__VA_ARGS__)
+
+#ifndef __FRAMAC__
+#define owi_int128(...) OWI_MAKE(int128, ##__VA_ARGS__)
+#define owi_uint128(...) OWI_MAKE(uint128, ##__VA_ARGS__)
+#endif
+
+#define owi_float(...) OWI_MAKE(float, ##__VA_ARGS__)
+#define owi_double(...) OWI_MAKE(double, ##__VA_ARGS__)
+
+#define owi_bool(...) OWI_MAKE(bool, ##__VA_ARGS__)
+#define owi_char(...) OWI_MAKE(char, ##__VA_ARGS__)
+#define owi_unsigned_char(...) OWI_MAKE(unsigned_char, ##__VA_ARGS__)
+#define owi_short(...) OWI_MAKE(short, ##__VA_ARGS__)
+#define owi_unsigned_short(...) OWI_MAKE(unsigned_short, ##__VA_ARGS__)
+#define owi_int(...) OWI_MAKE(int, ##__VA_ARGS__)
+#define owi_unsigned_int(...) OWI_MAKE(unsigned_int, ##__VA_ARGS__)
+#define owi_long(...) OWI_MAKE(long, ##__VA_ARGS__)
+#define owi_unsigned_long(...) OWI_MAKE(unsigned_long, ##__VA_ARGS__)
+#define owi_long_long(...) OWI_MAKE(long_long, ##__VA_ARGS__)
+#define owi_unsigned_long_long(...) OWI_MAKE(unsigned_long_long, ##__VA_ARGS__)
+
 #endif
