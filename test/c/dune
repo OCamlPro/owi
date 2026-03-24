@@ -17,6 +17,7 @@
   malloc_aligned.c
   malloc_zero.c
   multi_model.c
+  named.c
   range.c
   scopes.c)
  (alias quicktest))
