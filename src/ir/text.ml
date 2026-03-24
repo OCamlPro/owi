@@ -25,16 +25,14 @@ let pp_name_inner fmt s =
     | '\'' -> string fmt "\\'"
     | '"' -> string fmt "\\\""
     | '\\' -> string fmt "\\\\"
-    | c ->
-      let ci = Char.code c in
-      if 0x20 <= ci && ci < 0x7f then char fmt c else pp_hex_char fmt c
+    | '\x20' .. '\x7e' as c -> char fmt c
+    | c -> pp_hex_char fmt c
   in
   let pp_unicode_char fmt = function
-    | (0x09 | 0x0a) as c -> pp_char fmt (Char.chr c)
-    | uc when 0x20 <= uc && uc < 0x7f -> pp_char fmt (Char.chr uc)
-    | uc -> pf fmt "\\u{%02x}" uc
+    | ('\t' | '\n' | '\x20' .. '\x7e') as c -> pp_char fmt c
+    | c -> pf fmt "\\u{%02x}" (Char.code c)
   in
-  String.iter (fun c -> pp_unicode_char fmt (Char.code c)) s
+  String.iter (pp_unicode_char fmt) s
 
 let pp_name fmt s = pf fmt {|"%a"|} pp_name_inner s
 
