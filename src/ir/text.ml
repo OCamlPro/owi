@@ -246,9 +246,17 @@ type nonrec val_type =
   | Num_type of num_type
   | Ref_type of ref_type
 
-let pp_val_type ppf = function
-  | Num_type t -> pp_num_type ppf t
-  | Ref_type t -> pp_ref_type ppf t
+type pack_type =
+  | I8
+  | I16
+
+type storage_type =
+  | Val_type of val_type
+  | Pack_type of pack_type
+
+let pp_val_type fmt = function
+  | Num_type t -> pp_num_type fmt t
+  | Ref_type t -> pp_ref_type fmt t
 
 let val_type_eq t1 t2 =
   match (t1, t2) with
@@ -311,6 +319,21 @@ let pp_func_type ppf (params, results) =
 
 let func_type_eq (pt1, rt1) (pt2, rt2) =
   param_type_eq pt1 pt2 && result_type_eq rt1 rt2
+
+type field_type = mut * storage_type
+
+type field = indice option * field_type
+
+type comp_type =
+  | Def_struct_t of field list
+  | Def_array_t of field_type
+  | Def_func_t of func_type
+
+type sub_type =
+  { final : bool
+  ; ids : indice list
+  ; ct : comp_type
+  }
 
 type block_type =
   | Bt_ind of indice
@@ -879,9 +902,10 @@ module Func = struct
 end
 
 module Typedef = struct
-  type t = string option * func_type
+  type t = string option * sub_type
 
-  let pp ppf (id, t) = pf ppf "(type%a %a)" pp_id_opt id pp_func_type t
+  let pp _fmt (_id, _t) = assert false
+  (* pf fmt "(type%a %a)" pp_id_opt id pp_func_type t *)
 end
 
 module Table = struct

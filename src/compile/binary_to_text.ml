@@ -423,8 +423,8 @@ let convert_data : Binary.Data.t -> Text.Data.t = function
 
 let from_types types : Text.Module.Field.t list =
   Array.map
-    (fun ((id, ft) : Binary.Typedef.t) ->
-      Text.Module.Field.Typedef (id, convert_func_type ft) )
+    (fun ((id, _ft) : Binary.Typedef.t) ->
+      Text.Module.Field.Typedef (id, assert false) )
     types
   |> Array.to_list
 

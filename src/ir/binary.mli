@@ -36,6 +36,14 @@ type val_type =
   | Num_type of Text.num_type
   | Ref_type of ref_type
 
+type pack_type =
+  | I8
+  | I16
+
+type storage_type =
+  | Val_type of val_type
+  | Pack_type of pack_type
+
 val val_type_eq : val_type -> val_type -> bool
 
 val is_subtype_val_type : val_type -> val_type -> bool

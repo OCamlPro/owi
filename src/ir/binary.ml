@@ -69,6 +69,14 @@ type val_type =
   | Num_type of Text.num_type
   | Ref_type of ref_type
 
+type pack_type =
+  | I8
+  | I16
+
+type storage_type =
+  | Val_type of val_type
+  | Pack_type of pack_type
+
 let ref_type_eq t1 t2 =
   match (t1, t2) with
   | ((Text.Null : Text.nullable), t1), ((Text.Null : Text.nullable), t2)
@@ -600,6 +608,48 @@ type instr =
   | Call of indice
   | Call_indirect of indice * block_type
   | Call_ref of indice
+(*
+  (* aggregate instructions *)
+  (* struct *)
+  | Struct_new of indice
+  | Struct_new_default of indice
+  | Struct_get of indice
+  (* s? u32? *)
+  | Struct_set of indice
+  (* u32? *)
+  (* array *)
+  | Array_new of indice
+  | Array_new_default of indice
+  | Array_new_fixed of indice (* u32 *)
+  | Array_new_data of
+      { idx : indice
+      ; dataidx : indice
+      }
+  | Array_new_elem of
+      { idx : indice
+      ; elemidx : indice
+      }
+  | Array_get of indice
+  (* s? *)
+  | Array_set of indice
+  | Array_len
+  | Array_fill of indice
+  | Array_copy of indice * indice
+  | Array_init_data of
+      { idx : indice
+      ; dataidx : indice
+      }
+  | Array_init_elem of
+      { idx : indice
+      ; elemidx : indice
+      }
+  (* i31 *)
+  | Ref_i31
+  | I31_get
+  (* s? *)
+  (* extern *)
+  | Extern_convert_any
+  | Any_convert_extern *)
 
 and expr = instr Annotated.t list
 

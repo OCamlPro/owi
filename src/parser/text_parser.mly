@@ -169,12 +169,20 @@ let val_type :=
   | ~ = num_type; <Num_type>
   | ~ = ref_type; <Ref_type>
 
-let global_type ==
+let global_type :=
   | ~ = val_type; { (Const : mut), val_type }
   | val_type = par(preceded(MUTABLE, val_type)); { Var, val_type }
 
-let type_def ==
-    | TYPE; id = option(id); LPAR; FUNC; ~ = func_type; RPAR; { id, func_type }
+let storage_type ==
+  | ~ = packed_type; <Pack_type>
+  | ~ = val_type; <Val_type>
+
+let field_type ==
+  | st = storage_type; { Const, st }
+  | LPAR; MUTABLE; t = storage_type; RPAR; { Var, t }
+
+let field ==
+  | FIELD; id = option(indice); ft = field_type; { id, ft }
 
 let func_type :=
   | o = list(par(preceded(RESULT, list(val_type)))); { [], List.flatten o }
@@ -184,6 +192,23 @@ let func_type :=
   | LPAR; PARAM; ~ = id; ~ = val_type; RPAR; (i2, o) = func_type; {
     (Some id, val_type)::i2, o
   }
+
+let comp_type :=
+  | LPAR; STRUCT; fs = list(field); RPAR; { Def_struct_t fs }
+  | LPAR; ARRAY; ft = field_type; RPAR; { Def_array_t ft }
+  | LPAR; FUNC; ft = func_type; RPAR; { Def_func_t ft }
+
+let sub_type :=
+  | ct = comp_type;
+    {{ final = true; ids = []; ct }}
+  | SUB; indices = list(indice); ct = comp_type;
+    {{ final = false; ids = indices; ct }}
+  | SUB; FINAL; indices = list(indice); ct = comp_type;
+    {{ final = true; ids = indices; ct }}
+
+let type_def :=
+  // | TYPE; id = option(id); LPAR; FUNC; ~ = func_type; RPAR; { id, func_type }
+  | TYPE; id = option(id); st = sub_type; { id, st }
 
 let table_type ==
   | ~ = limits; ~ = ref_type; { limits, ref_type }

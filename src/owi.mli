@@ -268,6 +268,14 @@ module Text : sig
     | Num_type of num_type
     | Ref_type of ref_type
 
+  type pack_type =
+    | I8
+    | I16
+
+  type storage_type =
+    | Val_type of val_type
+    | Pack_type of pack_type
+
   val val_type_eq : val_type -> val_type -> bool
 
   type nonrec param = string option * val_type
@@ -277,6 +285,21 @@ module Text : sig
   type nonrec result_type = val_type list
 
   type nonrec func_type = param_type * result_type
+
+  type field_type = mut * storage_type
+
+  type field = indice option * field_type
+
+  type comp_type =
+    | Def_struct_t of field list
+    | Def_array_t of field_type
+    | Def_func_t of func_type
+
+  type sub_type =
+    { final : bool
+    ; ids : indice list
+    ; ct : comp_type
+    }
 
   val pp_func_type : func_type Fmt.t
 
@@ -549,7 +572,7 @@ module Text : sig
   end
 
   module Typedef : sig
-    type t = string option * func_type
+    type t = string option * sub_type
 
     val pp : t Fmt.t
   end

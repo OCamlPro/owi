@@ -133,14 +133,14 @@ let of_grouped
    ; elem
    ; data
    ; type_checks
-   ; typ
+   ; typ = _
    ; decl_types
    ; tag
    ; _
    } :
     Grouped.t ) : t Result.t =
   Log.debug (fun m -> m "assigning    ...");
-  let typ, typ_names = assign_types typ decl_types in
+  let typ, typ_names = assign_types (assert false) decl_types in
   let* global_names =
     name "global"
       ~get_name:(get_origin_name (fun ({ id; _ } : Text.Global.t) -> id))
