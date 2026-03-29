@@ -1489,6 +1489,24 @@ struct
       call_indirect ~return:true state (tbl_i, typ_i)
     | Call_ref typ_i -> call_ref ~return:false state typ_i
     | Return_call_ref typ_i -> call_ref ~return:true state typ_i
+    | ( Ref_i31 | I31_get_s | I31_get_u | Struct_new _ | Struct_new_default _
+      | Struct_get (_, _)
+      | Struct_get_s (_, _)
+      | Struct_get_u (_, _)
+      | Struct_set (_, _)
+      | Array_new _ | Array_new_default _
+      | Array_new_fixed (_, _)
+      | Array_new_data (_, _)
+      | Array_new_elem (_, _)
+      | Array_get _ | Array_get_s _ | Array_get_u _ | Array_set _ | Array_len
+      | Array_fill _
+      | Array_copy (_, _)
+      | Array_init_data (_, _)
+      | Array_init_elem (_, _)
+      | Any_convert_extern | Extern_convert_any ) as i ->
+      Log.err (fun m ->
+        m "unimplemented instruction: %a" (pp_instr ~short:false) i );
+      assert false
 
   let rec loop ~heartbeat (state : State.exec_state) =
     let* () =

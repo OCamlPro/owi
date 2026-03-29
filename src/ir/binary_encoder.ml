@@ -616,6 +616,110 @@ let rec write_instr buf instr =
   | Return_call _ | Return_call_indirect _ | Return_call_ref _ | Call_ref _ ->
     (* TODO *)
     assert false
+  | Struct_new x ->
+    add_char '\xFB';
+    write_u32 buf 0l;
+    write_indice buf x
+  | Struct_new_default x ->
+    add_char '\xFB';
+    write_u32 buf 1l;
+    write_indice buf x
+  | Struct_get (x, i) ->
+    add_char '\xFB';
+    write_u32 buf 2l;
+    write_indice buf x;
+    write_u32 buf i
+  | Struct_get_s (x, i) ->
+    add_char '\xFB';
+    write_u32 buf 3l;
+    write_indice buf x;
+    write_u32 buf i
+  | Struct_get_u (x, i) ->
+    add_char '\xFB';
+    write_u32 buf 4l;
+    write_indice buf x;
+    write_u32 buf i
+  | Struct_set (x, i) ->
+    add_char '\xFB';
+    write_u32 buf 5l;
+    write_indice buf x;
+    write_u32 buf i
+  | Array_new x ->
+    add_char '\xFB';
+    write_u32 buf 6l;
+    write_indice buf x
+  | Array_new_default x ->
+    add_char '\xFB';
+    write_u32 buf 7l;
+    write_indice buf x
+  | Array_new_fixed (x, i) ->
+    add_char '\xFB';
+    write_u32 buf 8l;
+    write_indice buf x;
+    write_u32 buf i
+  | Array_new_data (x, y) ->
+    add_char '\xFB';
+    write_u32 buf 9l;
+    write_indice buf x;
+    write_indice buf y
+  | Array_new_elem (x, y) ->
+    add_char '\xFB';
+    write_u32 buf 10l;
+    write_indice buf x;
+    write_indice buf y
+  | Array_get x ->
+    add_char '\xFB';
+    write_u32 buf 11l;
+    write_indice buf x
+  | Array_get_s x ->
+    add_char '\xFB';
+    write_u32 buf 12l;
+    write_indice buf x
+  | Array_get_u x ->
+    add_char '\xFB';
+    write_u32 buf 13l;
+    write_indice buf x
+  | Array_set x ->
+    add_char '\xFB';
+    write_u32 buf 14l;
+    write_indice buf x
+  | Array_len ->
+    add_char '\xFB';
+    write_u32 buf 15l
+  | Array_fill x ->
+    add_char '\xFB';
+    write_u32 buf 16l;
+    write_indice buf x
+  | Array_copy (x, y) ->
+    add_char '\xFB';
+    write_u32 buf 17l;
+    write_indice buf x;
+    write_indice buf y
+  | Array_init_data (x, y) ->
+    add_char '\xFB';
+    write_u32 buf 18l;
+    write_indice buf x;
+    write_indice buf y
+  | Array_init_elem (x, y) ->
+    add_char '\xFB';
+    write_u32 buf 19l;
+    write_indice buf x;
+    write_indice buf y
+  | Any_convert_extern ->
+    add_char '\xFB';
+    write_u32 buf 26l
+  | Extern_convert_any ->
+    add_char '\xFB';
+    write_u32 buf 27l
+  | Ref_i31 ->
+    add_char '\xFB';
+    write_u32 buf 28l
+  | I31_get_s ->
+    add_char '\xFB';
+    write_u32 buf 29l
+  | I31_get_u ->
+    add_char '\xFB';
+    write_u32 buf 30l
 
 and write_expr buf expr ~end_op_code =
   List.iter (write_instr buf) expr.Annotated.raw;

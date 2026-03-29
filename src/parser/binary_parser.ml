@@ -361,6 +361,84 @@ let read_memarg max_align input =
     (memidx, { Binary.align; offset }, input)
 (* TODO: should the checks be moved to validate? *)
 
+let read_FB input =
+  let* i, input = read_U32 input in
+  match i with
+  | 0 ->
+    let+ id, input = read_indice input in
+    (Struct_new id, input)
+  | 1 ->
+    let+ id, input = read_indice input in
+    (Struct_new_default id, input)
+  | 2 ->
+    let* id, input = read_indice input in
+    let+ i, input = read_S32 input in
+    (Struct_get (id, i), input)
+  | 3 ->
+    let* id, input = read_indice input in
+    let+ i, input = read_S32 input in
+    (Struct_get_s (id, i), input)
+  | 4 ->
+    let* id, input = read_indice input in
+    let+ i, input = read_S32 input in
+    (Struct_get_u (id, i), input)
+  | 5 ->
+    let* id, input = read_indice input in
+    let+ i, input = read_S32 input in
+    (Struct_set (id, i), input)
+  | 6 ->
+    let+ id, input = read_indice input in
+    (Array_new id, input)
+  | 7 ->
+    let+ id, input = read_indice input in
+    (Array_new_default id, input)
+  | 8 ->
+    let* id, input = read_indice input in
+    let+ i, input = read_S32 input in
+    (Array_new_fixed (id, i), input)
+  | 9 ->
+    let* id1, input = read_indice input in
+    let+ id2, input = read_indice input in
+    (Array_new_data (id1, id2), input)
+  | 10 ->
+    let* id1, input = read_indice input in
+    let+ id2, input = read_indice input in
+    (Array_new_elem (id1, id2), input)
+  | 11 ->
+    let+ id, input = read_indice input in
+    (Array_get id, input)
+  | 12 ->
+    let+ id, input = read_indice input in
+    (Array_get_s id, input)
+  | 13 ->
+    let+ id, input = read_indice input in
+    (Array_get_u id, input)
+  | 14 ->
+    let+ id, input = read_indice input in
+    (Array_set id, input)
+  | 15 -> Ok (Array_len, input)
+  | 16 ->
+    let+ id, input = read_indice input in
+    (Array_fill id, input)
+  | 17 ->
+    let* id1, input = read_indice input in
+    let+ id2, input = read_indice input in
+    (Array_copy (id1, id2), input)
+  | 18 ->
+    let* id1, input = read_indice input in
+    let+ id2, input = read_indice input in
+    (Array_init_data (id1, id2), input)
+  | 19 ->
+    let* id1, input = read_indice input in
+    let+ id2, input = read_indice input in
+    (Array_init_elem (id1, id2), input)
+  | 26 -> Ok (Any_convert_extern, input)
+  | 27 -> Ok (Extern_convert_any, input)
+  | 28 -> Ok (Ref_i31, input)
+  | 29 -> Ok (I31_get_s, input)
+  | 30 -> Ok (I31_get_u, input)
+  | i -> parse_fail "illegal opcode (1) %i" i
+
 let read_FC input =
   let* i, input = read_U32 input in
   match i with
@@ -764,6 +842,7 @@ let rec read_instr types input =
   | '\xD6' ->
     let+ idx, input = read_indice input in
     (Br_on_non_null idx, input)
+  | '\xFB' -> read_FB input
   | '\xFC' -> read_FC input
   | '\xFD' -> read_FD input
   | c -> parse_fail "illegal opcode %2x" (Char.code c)

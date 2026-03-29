@@ -522,6 +522,88 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
     | Drop -> Ok Binary.Drop
     | Nop -> Ok Binary.Nop
     | Return -> Ok Binary.Return
+    | I_load8 (id, nn, sx, memarg) ->
+      let* memarg = rewrite_memarg memarg in
+      let+ id = Assigned.find_memory assigned id in
+      Binary.I_load8 (id, nn, sx, memarg)
+    | I_store8 (id, nn, memarg) ->
+      let* memarg = rewrite_memarg memarg in
+      let+ id = Assigned.find_memory assigned id in
+      Binary.I_store8 (id, nn, memarg)
+    | I_load16 (id, nn, sx, memarg) ->
+      let* memarg = rewrite_memarg memarg in
+      let+ id = Assigned.find_memory assigned id in
+      Binary.I_load16 (id, nn, sx, memarg)
+    | I_store16 (id, nn, memarg) ->
+      let* memarg = rewrite_memarg memarg in
+      let+ id = Assigned.find_memory assigned id in
+      Binary.I_store16 (id, nn, memarg)
+    | I64_load32 (id, sx, memarg) ->
+      let* memarg = rewrite_memarg memarg in
+      let+ id = Assigned.find_memory assigned id in
+      Binary.I64_load32 (id, sx, memarg)
+    | I64_store32 (id, memarg) ->
+      let* memarg = rewrite_memarg memarg in
+      let+ id = Assigned.find_memory assigned id in
+      Binary.I64_store32 (id, memarg)
+    | I_load (id, nn, memarg) ->
+      let* memarg = rewrite_memarg memarg in
+      let+ id = Assigned.find_memory assigned id in
+      Binary.I_load (id, nn, memarg)
+    | F_load (id, nn, memarg) ->
+      let* memarg = rewrite_memarg memarg in
+      let+ id = Assigned.find_memory assigned id in
+      Binary.F_load (id, nn, memarg)
+    | F_store (id, nn, memarg) ->
+      let* memarg = rewrite_memarg memarg in
+      let+ id = Assigned.find_memory assigned id in
+      Binary.F_store (id, nn, memarg)
+    | I_store (id, nn, memarg) ->
+      let* memarg = rewrite_memarg memarg in
+      let+ id = Assigned.find_memory assigned id in
+      Binary.I_store (id, nn, memarg)
+    | Memory_copy (id1, id2) ->
+      let* id1 = Assigned.find_memory assigned id1 in
+      let+ id2 = Assigned.find_memory assigned id2 in
+      Binary.Memory_copy (id1, id2)
+    | Memory_size id ->
+      let+ id = Assigned.find_memory assigned id in
+      Binary.Memory_size id
+    | Memory_fill id ->
+      let+ id = Assigned.find_memory assigned id in
+      Binary.Memory_fill id
+    | Memory_grow id ->
+      let+ id = Assigned.find_memory assigned id in
+      Binary.Memory_grow id
+    | V_ibinop (shape, op) -> Ok (Binary.V_ibinop (shape, op))
+    | Ref_null t ->
+      let* t = rewrite_heap_type assigned t in
+      Ok (Binary.Ref_null t)
+    | Ref_i31 -> Ok Binary.Ref_i31
+    | I31_get_s -> Ok Binary.I31_get_s
+    | I31_get_u -> Ok Binary.I31_get_u
+    | Struct_new _id -> assert false
+    | Struct_new_default _id -> assert false
+    | Struct_get (_id1, _id2) -> assert false
+    | Struct_get_s (_id1, _id2) -> assert false
+    | Struct_get_u (_id1, _id2) -> assert false
+    | Struct_set (_id1, _id2) -> assert false
+    | Array_new _id -> assert false
+    | Array_new_default _id -> assert false
+    | Array_new_fixed (_id, _n) -> assert false
+    | Array_new_data (_id1, _id2) -> assert false
+    | Array_new_elem (_id1, _id2) -> assert false
+    | Array_get _id -> assert false
+    | Array_get_s _id -> assert false
+    | Array_get_u _id -> assert false
+    | Array_set _id -> assert false
+    | Array_len -> assert false
+    | Array_fill _id -> assert false
+    | Array_copy (_id1, _id2) -> assert false
+    | Array_init_data (_id1, _id2) -> assert false
+    | Array_init_elem (_id1, _id2) -> assert false
+    | Any_convert_extern -> assert false
+    | Extern_convert_any -> assert false
   and expr (e : Text.expr) (loop_count, block_ids) :
     Binary.expr Annotated.t Result.t =
     let+ e =

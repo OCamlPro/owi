@@ -31,6 +31,7 @@ let token_to_string = function
   | STRUCT_NEW_CANON_DEFAULT -> "struct.new_canon_default"
   | STRUCT_NEW_CANON -> "struct.new_canon"
   | STRUCT_GET_S -> "struct.get_s"
+  | STRUCT_GET_U -> "struct.get_u"
   | STRUCT_GET -> "struct.get"
   | STRUCT_REF -> "structref"
   | STRUCT -> "struct"
@@ -314,6 +315,8 @@ let token_to_string = function
   | ASSERT_MALFORMED -> "assert_malformed"
   | ASSERT_INVALID -> "assert_exhaustion"
   | ASSERT_EXHAUSTION -> "assert_exhaustion"
+  | ARRAY_COPY -> "array.copy"
+  | ARRAY_FILL -> "array.fill"
   | ARRAY_SET -> "array.set"
   | ARRAY_REF -> "arrayrref"
   | ARRAY_NEW_CANON_FIXED -> "array.new_canon_fixed"
@@ -322,9 +325,12 @@ let token_to_string = function
   | ARRAY_NEW_CANON_DATA -> "array.new_canon_data"
   | ARRAY_NEW_CANON -> "array.new_canon"
   | ARRAY_LEN -> "array.len"
+  | ARRAY_GET_S -> "array.get_s"
   | ARRAY_GET_U -> "array.get_u"
   | ARRAY_GET -> "array.get"
   | ARRAY -> "array"
+  | ARRAY_INIT_DATA -> "array.init_data"
+  | ARRAY_INIT_ELEM -> "array.init_elem"
   | ANY_REF -> "anyref"
   | ANY -> "any"
   | EXN -> "exn"
@@ -335,6 +341,8 @@ let token_to_string = function
   | NUM s -> Fmt.str "%s" s
   | NAME s -> Fmt.str {|"%s"|} s
   | ID s -> Fmt.str "$%s" s
+  | ANY_CONVERT_EXTERN -> "any.convert_extern"
+  | EXTERN_CONVERT_ANY -> "extern.convert_any"
 
 module Make (M : sig
   type t

@@ -1,6 +1,6 @@
 %token <String.t> NUM
 %token <String.t> ID NAME
-%token ALIGN ANY_REF ARRAY ARRAY_GET ARRAY_GET_U ARRAY_LEN ARRAY_NEW_CANON ARRAY_NEW_CANON_DATA ARRAY_NEW_CANON_DEFAULT ARRAY_NEW_CANON_ELEM ARRAY_NEW_CANON_FIXED ARRAY_REF ARRAY_SET ASSERT_EXHAUSTION ASSERT_INVALID ASSERT_MALFORMED ASSERT_RETURN ASSERT_TRAP ASSERT_UNLINKABLE ANY
+%token ALIGN ANY_REF ARRAY ARRAY_FILL ARRAY_COPY ARRAY_GET ARRAY_GET_S ARRAY_GET_U ARRAY_LEN ARRAY_NEW_CANON ARRAY_NEW_CANON_DATA ARRAY_NEW_CANON_DEFAULT ARRAY_NEW_CANON_ELEM ARRAY_NEW_CANON_FIXED ARRAY_REF ARRAY_SET ARRAY_INIT_DATA ARRAY_INIT_ELEM ASSERT_EXHAUSTION ASSERT_INVALID ASSERT_MALFORMED ASSERT_RETURN ASSERT_TRAP ASSERT_UNLINKABLE ANY ANY_CONVERT_EXTERN EXTERN_CONVERT_ANY
 %token BINARY BLOCK BR BR_IF BR_ON_CAST BR_ON_CAST_FAIL BR_ON_NON_NULL BR_ON_NULL BR_TABLE
 %token CALL CALL_INDIRECT CALL_REF
 %token DATA DATA_DROP DECLARE DROP
@@ -22,7 +22,7 @@
 %token PARAM
 %token QUOTE
 %token REC REF REF_ARRAY REF_AS_NON_NULL REF_CAST REF_EQ REF_EXTERN REF_FUNC REF_HOST REF_I31 REF_IS_NULL REF_NULL REF_STRUCT REF_TEST REGISTER RESULT RETURN RETURN_CALL RETURN_CALL_INDIRECT RETURN_CALL_REF RPAR
-%token SELECT START STRUCT STRUCT_GET STRUCT_GET_S STRUCT_NEW_CANON STRUCT_NEW_CANON_DEFAULT STRUCT_REF STRUCT_SET SUB
+%token SELECT START STRUCT STRUCT_GET STRUCT_GET_S STRUCT_GET_U STRUCT_NEW_CANON STRUCT_NEW_CANON_DEFAULT STRUCT_REF STRUCT_SET SUB
 %token TABLE TABLE_COPY TABLE_FILL TABLE_GET TABLE_GROW TABLE_INIT TABLE_SET TABLE_SIZE THEN TYPE
 %token UNREACHABLE
 
@@ -537,6 +537,35 @@ let plain_instr :=
     | memidx :: dataidx :: _ -> Memory (Init (memidx, dataidx))
   }
   | DATA_DROP; ~ = indice; { Data (Drop indice) }
+  (* aggregate types *)
+  (* i31 *)
+  | REF_I31; { Ref_i31 }
+  | I31_GET_S; { I31_get_s }
+  | I31_GET_U; { I31_get_u }
+  (* struct *)
+  | STRUCT_NEW_CANON; ~ = indice; <Struct_new>
+  | STRUCT_NEW_CANON_DEFAULT; ~ = indice; <Struct_new_default>
+  | STRUCT_GET; x = indice; i = indice; <Struct_get>
+  | STRUCT_GET_S; x = indice; i = indice; <Struct_get_s>
+  | STRUCT_GET_U; x = indice; i = indice; <Struct_get_u>
+  | STRUCT_SET; x = indice; i = indice; <Struct_set>
+  (* array *)
+  | ARRAY_NEW_CANON; ~ = indice; <Array_new>
+  | ARRAY_NEW_CANON_DEFAULT; x = indice; <Array_new_default>
+  | ARRAY_NEW_CANON_FIXED; x = indice; n = NUM; {Array_new_fixed (x, i32 n)}
+  | ARRAY_NEW_CANON_DATA; x = indice; y = indice; <Array_new_data>
+  | ARRAY_NEW_CANON_ELEM; x = indice; y = indice; <Array_new_elem>
+  | ARRAY_GET; ~ = indice; <Array_get>
+  | ARRAY_GET_S; ~ = indice; <Array_get_s>
+  | ARRAY_GET_U; ~ = indice; <Array_get_u>
+  | ARRAY_SET; ~ = indice; <Array_set>
+  | ARRAY_LEN; { Array_len }
+  | ARRAY_FILL; ~ = indice; <Array_fill>
+  | ARRAY_COPY; x1 = indice; x2 = indice; <Array_copy>
+  | ARRAY_INIT_DATA; x = indice; y = indice; <Array_init_data>
+  | ARRAY_INIT_ELEM; x = indice; y = indice; <Array_init_elem>
+  | ANY_CONVERT_EXTERN; { Any_convert_extern }
+  | EXTERN_CONVERT_ANY; { Extern_convert_any }
 
 (* Instructions & Expressions *)
 

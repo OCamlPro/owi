@@ -909,6 +909,34 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
     let* jt = Env.block_type_get i env in
     let+ _stack = Stack.pop env.modul jt stack in
     (env, stack)
+  | Table_get i ->
+    let* t = Env.table_type_get i env.modul in
+    let* stack = Stack.pop env.modul [ i32 ] stack in
+    let+ stack = Stack.push [ Ref_type t ] stack in
+    (env, stack)
+  | Table_set i ->
+    let* t = Env.table_type_get i env.modul in
+    let+ stack = Stack.pop env.modul [ Ref_type t; i32 ] stack in
+    (env, stack)
+  | ( Ref_i31 | I31_get_s | I31_get_u | Struct_new _ | Struct_new_default _
+    | Struct_get (_, _)
+    | Struct_get_s (_, _)
+    | Struct_get_u (_, _)
+    | Struct_set (_, _)
+    | Array_new _ | Array_new_default _
+    | Array_new_fixed (_, _)
+    | Array_new_data (_, _)
+    | Array_new_elem (_, _)
+    | Array_get _ | Array_get_s _ | Array_get_u _ | Array_set _ | Array_len
+    | Array_fill _
+    | Array_copy (_, _)
+    | Array_init_data (_, _)
+    | Array_init_elem (_, _)
+    | Any_convert_extern | Extern_convert_any ) as i ->
+    Log.err (fun m ->
+      m "TODO: unimplemented instruction typecheking %a" (pp_instr ~short:false)
+        i );
+    assert false
 
 and typecheck_expr env expr ~is_loop (block_type : block_type option)
   ~stack:previous_stack : stack Result.t =

@@ -151,6 +151,7 @@ let keywords =
      ; ("array", ARRAY)
      ; ("arrayref", ARRAY_REF)
      ; ("array.get", ARRAY_GET)
+     ; ("array.get_s", ARRAY_GET_S)
      ; ("array.get_u", ARRAY_GET_U)
      ; ("array.len", ARRAY_LEN)
      ; ("array.new", ARRAY_NEW_CANON)
@@ -159,6 +160,8 @@ let keywords =
      ; ("array.new_elem", ARRAY_NEW_CANON_ELEM)
      ; ("array.new_fixed", ARRAY_NEW_CANON_FIXED)
      ; ("array.set", ARRAY_SET)
+     ; ("array.init_data", ARRAY_INIT_DATA)
+     ; ("array.init_elem", ARRAY_INIT_ELEM)
      ; ("assert_exhaustion", ASSERT_EXHAUSTION)
      ; ("assert_invalid", ASSERT_INVALID)
      ; ("assert_malformed", ASSERT_MALFORMED)
@@ -439,6 +442,7 @@ let keywords =
      ; ("structref", STRUCT_REF)
      ; ("struct.get", STRUCT_GET)
      ; ("struct.get_s", STRUCT_GET_S)
+     ; ("struct.get_u", STRUCT_GET_U)
      ; ("struct.new", STRUCT_NEW_CANON)
      ; ("struct.new_default", STRUCT_NEW_CANON_DEFAULT)
      ; ("struct.set", STRUCT_SET)
@@ -464,6 +468,8 @@ let keywords =
      ; ("noexn", NO_EXN)
      ; ("exnref", EXN_REF)
      ; ("nullexnref", NULL_EXN_REF)
+     ; ("any.convert_extern", ANY_CONVERT_EXTERN)
+     ; ("extern.convert_any", EXTERN_CONVERT_ANY)
     |];
   tbl
 

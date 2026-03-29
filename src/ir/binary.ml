@@ -608,48 +608,36 @@ type instr =
   | Call of indice
   | Call_indirect of indice * block_type
   | Call_ref of indice
-(*
-  (* aggregate instructions *)
+  (* aggregate types *)
+  (* i31 *)
+  | Ref_i31
+  | I31_get_s
+  | I31_get_u
   (* struct *)
   | Struct_new of indice
   | Struct_new_default of indice
-  | Struct_get of indice
-  (* s? u32? *)
-  | Struct_set of indice
-  (* u32? *)
+  | Struct_get of indice * Int32.t
+  | Struct_get_s of indice * Int32.t
+  | Struct_get_u of indice * Int32.t
+  | Struct_set of indice * Int32.t
   (* array *)
   | Array_new of indice
   | Array_new_default of indice
-  | Array_new_fixed of indice (* u32 *)
-  | Array_new_data of
-      { idx : indice
-      ; dataidx : indice
-      }
-  | Array_new_elem of
-      { idx : indice
-      ; elemidx : indice
-      }
+  | Array_new_fixed of indice * Int32.t
+  | Array_new_data of indice * indice
+  | Array_new_elem of indice * indice
   | Array_get of indice
-  (* s? *)
+  | Array_get_s of indice
+  | Array_get_u of indice
   | Array_set of indice
   | Array_len
   | Array_fill of indice
   | Array_copy of indice * indice
-  | Array_init_data of
-      { idx : indice
-      ; dataidx : indice
-      }
-  | Array_init_elem of
-      { idx : indice
-      ; elemidx : indice
-      }
-  (* i31 *)
-  | Ref_i31
-  | I31_get
-  (* s? *)
-  (* extern *)
+  | Array_init_data of indice * indice
+  | Array_init_elem of indice * indice
+  (* convesion *)
+  | Any_convert_extern
   | Extern_convert_any
-  | Any_convert_extern *)
 
 and expr = instr Annotated.t list
 
@@ -716,8 +704,38 @@ let rec pp_instr ~short ppf = function
   | Return_call_ref ty_id -> pf ppf "return_call_ref %a" pp_block_type ty_id
   | Call id -> pf ppf "call %a" pp_indice id
   | Call_indirect (tbl_id, ty_id) ->
-    pf ppf "call_indirect %a %a" pp_indice tbl_id pp_block_type ty_id
-  | Call_ref ty_id -> pf ppf "call_ref %a" pp_indice ty_id
+    pf fmt "call_indirect %a %a" pp_indice tbl_id pp_block_type ty_id
+  | Call_ref ty_id -> pf fmt "call_ref %a" pp_indice ty_id
+  | Ref_i31 -> pf fmt "ref.i31"
+  | I31_get_s -> pf fmt "i31.get_s"
+  | I31_get_u -> pf fmt "i31.get_u"
+  | Struct_new id -> pf fmt "struct.new %a" pp_indice id
+  | Struct_new_default id -> pf fmt "struct.new_default %a" pp_indice id
+  | Struct_get (id1, id2) -> pf fmt "struct.get %a %ld" pp_indice id1 id2
+  | Struct_get_s (id1, id2) -> pf fmt "struct.get_s %a %ld" pp_indice id1 id2
+  | Struct_get_u (id1, id2) -> pf fmt "struct.get_u %a %ld" pp_indice id1 id2
+  | Struct_set (id1, id2) -> pf fmt "struct.set %a %ld" pp_indice id1 id2
+  | Array_new id -> pf fmt "array.new %a" pp_indice id
+  | Array_new_default id -> pf fmt "array.new_default %a" pp_indice id
+  | Array_new_fixed (id, n) -> pf fmt "array.new_fixed %a %ld" pp_indice id n
+  | Array_new_data (id1, id2) ->
+    pf fmt "array.new_data %a %a" pp_indice id1 pp_indice id2
+  | Array_new_elem (id1, id2) ->
+    pf fmt "array.new_elem %a %a" pp_indice id1 pp_indice id2
+  | Array_get id -> pf fmt "array.get %a" pp_indice id
+  | Array_get_s id -> pf fmt "array.get_s %a" pp_indice id
+  | Array_get_u id -> pf fmt "array.get_u %a" pp_indice id
+  | Array_set id -> pf fmt "array.set %a" pp_indice id
+  | Array_len -> pf fmt "array.len"
+  | Array_fill id -> pf fmt "array.fill %a" pp_indice id
+  | Array_copy (id1, id2) ->
+    pf fmt "array.copy %a %a" pp_indice id1 pp_indice id2
+  | Array_init_data (id1, id2) ->
+    pf fmt "array.init_data %a %a" pp_indice id1 pp_indice id2
+  | Array_init_elem (id1, id2) ->
+    pf fmt "array.init_elem %a %a" pp_indice id1 pp_indice id2
+  | Any_convert_extern -> pf fmt "any.convert_extern"
+  | Extern_convert_any -> pf fmt "extern.convert_any"
 
 and pp_expr ~short ppf instrs =
   Annotated.iter
@@ -742,7 +760,22 @@ and iter_instr f instr =
       | Return_call_indirect (_, _)
       | Return_call_ref _ | Call _
       | Call_indirect (_, _)
-      | Call_ref _ ->
+      | Call_ref _ | Ref_i31 | I31_get_s | I31_get_u | Struct_new _
+      | Struct_new_default _
+      | Struct_get (_, _)
+      | Struct_get_s (_, _)
+      | Struct_get_u (_, _)
+      | Struct_set (_, _)
+      | Array_new _ | Array_new_default _
+      | Array_new_fixed (_, _)
+      | Array_new_data (_, _)
+      | Array_new_elem (_, _)
+      | Array_get _ | Array_get_s _ | Array_get_u _ | Array_set _ | Array_len
+      | Array_fill _
+      | Array_copy (_, _)
+      | Array_init_data (_, _)
+      | Array_init_elem (_, _)
+      | Any_convert_extern | Extern_convert_any ->
         ()
       | Block (_, _, e) | Loop (_, _, e) -> iter_expr f e
       | If_else (_, _, e1, e2) ->

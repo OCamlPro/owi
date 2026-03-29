@@ -392,6 +392,62 @@ let rec convert_instr : Binary.instr -> Text.instr = function
   | Drop -> Drop
   | Nop -> Nop
   | Return -> Return
+  | I_load8 (id, nn, sx, memarg) ->
+    I_load8 (convert_indice id, nn, sx, convert_memarg memarg)
+  | I_store8 (id, nn, memarg) ->
+    I_store8 (convert_indice id, nn, convert_memarg memarg)
+  | I_load16 (id, nn, sx, memarg) ->
+    I_load16 (convert_indice id, nn, sx, convert_memarg memarg)
+  | I_store16 (id, nn, memarg) ->
+    I_store16 (convert_indice id, nn, convert_memarg memarg)
+  | I64_load32 (id, sx, memarg) ->
+    I64_load32 (convert_indice id, sx, convert_memarg memarg)
+  | I64_store32 (id, memarg) ->
+    I64_store32 (convert_indice id, convert_memarg memarg)
+  | I_load (id, nn, memarg) ->
+    I_load (convert_indice id, nn, convert_memarg memarg)
+  | F_load (id, nn, memarg) ->
+    F_load (convert_indice id, nn, convert_memarg memarg)
+  | F_store (id, nn, memarg) ->
+    F_store (convert_indice id, nn, convert_memarg memarg)
+  | I_store (id, nn, memarg) ->
+    I_store (convert_indice id, nn, convert_memarg memarg)
+  | Memory_copy (id1, id2) ->
+    Memory_copy (convert_indice id1, convert_indice id2)
+  | Memory_size id -> Memory_size (convert_indice id)
+  | Memory_fill id -> Memory_fill (convert_indice id)
+  | Memory_grow id -> Memory_grow (convert_indice id)
+  | V_ibinop (shape, op) -> V_ibinop (shape, op)
+  | Ref_null t -> Ref_null (convert_heap_type t)
+  | Ref_i31 -> Ref_i31
+  | I31_get_s -> I31_get_s
+  | I31_get_u -> I31_get_u
+  | Struct_new id -> Struct_new (convert_indice id)
+  | Struct_new_default id -> Struct_new_default (convert_indice id)
+  | Struct_get (id1, _) -> Struct_get (convert_indice id1, assert false)
+  | Struct_get_s (id1, _) -> Struct_get_s (convert_indice id1, assert false)
+  | Struct_get_u (id1, _) -> Struct_get_u (convert_indice id1, assert false)
+  | Struct_set (id1, _) -> Struct_set (convert_indice id1, assert false)
+  | Array_new id -> Array_new (convert_indice id)
+  | Array_new_default id -> Array_new_default (convert_indice id)
+  | Array_new_fixed (id, n) -> Array_new_fixed (convert_indice id, n)
+  | Array_new_data (id1, id2) ->
+    Array_new_data (convert_indice id1, convert_indice id2)
+  | Array_new_elem (id1, id2) ->
+    Array_new_elem (convert_indice id1, convert_indice id2)
+  | Array_get id -> Array_get (convert_indice id)
+  | Array_get_s id -> Array_get_s (convert_indice id)
+  | Array_get_u id -> Array_get_u (convert_indice id)
+  | Array_set id -> Array_set (convert_indice id)
+  | Array_len -> Array_len
+  | Array_fill id -> Array_fill (convert_indice id)
+  | Array_copy (id1, id2) -> Array_copy (convert_indice id1, convert_indice id2)
+  | Array_init_data (id1, id2) ->
+    Array_init_data (convert_indice id1, convert_indice id2)
+  | Array_init_elem (id1, id2) ->
+    Array_init_elem (convert_indice id1, convert_indice id2)
+  | Any_convert_extern -> Any_convert_extern
+  | Extern_convert_any -> Extern_convert_any
 
 and convert_expr (e : Binary.expr Annotated.t) : Text.expr =
   List.map (fun i -> convert_instr i.Annotated.raw) e.raw

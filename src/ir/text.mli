@@ -415,6 +415,36 @@ type instr =
   | Call of indice
   | Call_indirect of indice * block_type
   | Call_ref of indice
+  (* aggregate types *)
+  (* i31 *)
+  | Ref_i31
+  | I31_get_s
+  | I31_get_u
+  (* struct *)
+  | Struct_new of indice
+  | Struct_new_default of indice
+  | Struct_get of indice * indice
+  | Struct_get_s of indice * indice
+  | Struct_get_u of indice * indice
+  | Struct_set of indice * indice
+  (* array *)
+  | Array_new of indice
+  | Array_new_default of indice
+  | Array_new_fixed of indice * Int32.t
+  | Array_new_data of indice * indice
+  | Array_new_elem of indice * indice
+  | Array_get of indice
+  | Array_get_s of indice
+  | Array_get_u of indice
+  | Array_set of indice
+  | Array_len
+  | Array_fill of indice
+  | Array_copy of indice * indice
+  | Array_init_data of indice * indice
+  | Array_init_elem of indice * indice
+  (* convesion *)
+  | Any_convert_extern
+  | Extern_convert_any
 
 and expr = instr list
 
