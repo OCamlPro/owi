@@ -5,24 +5,6 @@
 
 let
   ocamlPackages = pkgs.ocaml-ng.ocamlPackages_5_4.overrideScope (self: super: {
-    smtml = super.smtml.overrideAttrs (old: {
-      src = pkgs.fetchFromGitHub {
-        owner = "formalsec";
-        repo = "smtml";
-        rev = "69f8a14eac70ced2721a5d71a94196eb9736a571";
-        hash = "sha256-loDLnu86Zf+SDT2XHK1l+PTJ5Et0blxVlmEcrbyE2r8=";
-      };
-      propagatedBuildInputs = old.propagatedBuildInputs ++ [ ocamlPackages.dune-site ocamlPackages.ppx_enumerate ];
-      doCheck = false;
-    });
-    symex = super.symex.overrideAttrs (old: {
-      src = pkgs.fetchFromGitHub {
-        owner = "ocamlpro";
-        repo = "symex";
-        rev = "c4200e160f69d3cd9443301c1c4dc4224c3cab2e";
-        hash = "sha256-KX+OHiCsAHEw0kBWLUDVakIcshUNXLYjm2f2le75Mj8=";
-      };
-    });
     landmarks = super.landmarks.overrideAttrs (old: {
       src = pkgs.fetchFromGitHub {
         owner = "hra687261";
@@ -41,6 +23,9 @@ let
       meta.broken = false;
     });
   });
+  tinygo = pkgs.tinygo.overrideAttrs (old: {
+    doCheck = false;
+  });
 in
 
 pkgs.mkShell {
@@ -51,8 +36,8 @@ pkgs.mkShell {
     findlib
     bisect_ppx
     pkgs.framac
-    landmarks
-    landmarks-ppx
+    # landmarks
+    # landmarks-ppx
     pkgs.mdbook
     pkgs.mdbook-plugins
     mdx
@@ -69,7 +54,7 @@ pkgs.mkShell {
     pkgs.llvmPackages.clang-unwrapped
     # lld + llc isn't included in unwrapped, so we pull it in here
     pkgs.llvmPackages.bintools-unwrapped
-    pkgs.tinygo
+    tinygo
     pkgs.rustc
     pkgs.zig
     pkgs.makeWrapper

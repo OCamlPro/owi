@@ -90,3 +90,5 @@ let eq_concrete (v1 : t) (v2 : Int32.t) = eq v1 v2
 let pp = Fmt.int32
 
 let of_int32 (v : int32) : t = v
+
+let to_int32 (v : t) : int32 = v

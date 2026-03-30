@@ -15,6 +15,6 @@ use owi_sym::Symbolic;
 
 #[no_mangle]
 pub extern "C" fn check() -> () {
-  let x = u32::symbol(); // TODO: replace by usize::symbol()
-  let res = f(x.try_into().unwrap());
+  let x = usize::symbol();
+  let res = f(x);
 }

@@ -19,11 +19,11 @@ module M :
       Option.bind (Bos.OS.Env.var "SC_STORE_MAP_FILE") @@ fun path ->
       let seacoral_size =
         match Bos.OS.Env.var "SC_LABEL_COUNT" with
-        | Some s -> begin
-          match int_of_string_opt s with
+        | Some s ->
+          begin match int_of_string_opt s with
           | Some i -> i
           | None -> Fmt.failwith "SC_LABEL_COUNT should be a number"
-        end
+          end
         | None ->
           Fmt.failwith "SC_STORE_MAP_FILE specified but not SC_LABEL_COUNT"
       in

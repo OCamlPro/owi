@@ -477,7 +477,7 @@ let rec token buf =
     match Hashtbl.find_opt keywords operator with
     | None -> unknown_operator buf
     | Some v -> v
-  end
+    end
   (* comment *)
   | ";;" ->
     single_comment buf;

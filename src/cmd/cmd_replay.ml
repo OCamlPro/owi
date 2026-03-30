@@ -163,7 +163,8 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
     let close_scope () =
       scopes := Symbol_scope.close_scope !scopes;
       Concrete_choice.return ()
-  end in
+  end
+  in
   let replay_extern_module =
     let open M in
     let open Concrete_extern_func in

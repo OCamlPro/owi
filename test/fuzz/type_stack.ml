@@ -10,7 +10,9 @@ type stack_op =
 
 let apply_stack_op stack op =
   match op with
-  | Pop -> begin match stack with [] -> assert false | _hd :: tl -> tl end
+  | Pop ->
+    begin match stack with [] -> assert false | _hd :: tl -> tl
+    end
   | Push t -> t :: stack
   | Nothing -> stack
   | Whatever stack -> stack

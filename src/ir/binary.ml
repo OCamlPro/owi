@@ -299,12 +299,12 @@ let rec pp_instr ~short fmt = function
   | Ref_as_non_null -> pf fmt "ref.as_non_null"
   | Ref_func fid -> pf fmt "ref.func %a" pp_indice fid
   | Drop -> pf fmt "drop"
-  | Select vt -> begin
-    match vt with
+  | Select vt ->
+    begin match vt with
     | None -> pf fmt "select"
     | Some vt -> pf fmt "select (%a)" pp_result_type vt
     (* TODO: are the parens needed ? *)
-  end
+    end
   | Local_get id -> pf fmt "local.get %a" pp_indice id
   | Local_set id -> pf fmt "local.set %a" pp_indice id
   | Local_tee id -> pf fmt "local.tee %a" pp_indice id

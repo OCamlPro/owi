@@ -142,15 +142,15 @@ let rec convert_instr : Binary.instr -> Text.instr = function
   | Elem_drop id ->
     let id = convert_indice id in
     Elem_drop id
-  | Select typ -> begin
-    match typ with
+  | Select typ ->
+    begin match typ with
     | None -> Select None
     | Some [ t ] -> Select (Some [ convert_val_type t ])
     | Some [] | Some (_ :: _ :: _) ->
       (* invalid result arity *)
       (* TODO: maybe we could change the type of Binary.Select to prevent this from happening? *)
       assert false
-  end
+    end
   | I_unop (nn, op) -> I_unop (nn, op)
   | I_binop (nn, op) -> I_binop (nn, op)
   | I_testop (nn, op) -> I_testop (nn, op)

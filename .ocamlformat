@@ -1,4 +1,4 @@
-version=0.28.1
+version=0.29.0
 assignment-operator=end-line
 break-cases=fit
 break-fun-decl=wrap

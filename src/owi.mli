@@ -126,6 +126,8 @@ module Concrete_i32 : sig
 
   val of_int32 : Int32.t -> t
 
+  val to_int32 : t -> Int32.t
+
   val add : t -> t -> t
 
   val sub : t -> t -> t

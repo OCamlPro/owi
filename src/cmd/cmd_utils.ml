@@ -137,11 +137,13 @@ let set_entry_point entry_point invoke_with_symbols (m : Binary.Module.t) =
     (* If there is none and we have an entry point passed in argument we search for it *)
     let* export =
       match entry_point with
-      | Some entry_point -> begin
-        match Binary.Module.find_exported_func_from_name entry_point m with
+      | Some entry_point ->
+        begin match
+          Binary.Module.find_exported_func_from_name entry_point m
+        with
         | None -> Fmt.error_msg "Entry point %s not found" entry_point
         | Some ep -> Ok ep
-      end
+        end
       (* If we have no entry point argument then we search for common entry function names *)
       | None ->
         Fmt.error_msg

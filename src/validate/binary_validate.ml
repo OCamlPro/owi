@@ -703,8 +703,8 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
   | Select t ->
     let* stack = Stack.pop env.modul [ i32 ] stack in
     begin match t with
-    | None -> begin
-      match stack with
+    | None ->
+      begin match stack with
       | Ref_type _ :: _tl -> Error (`Type_mismatch "select implicit")
       | Any :: _ -> Ok (env, [ Something; Any ])
       | hd :: Any :: _ -> Ok (env, hd :: [ Any ])
@@ -712,7 +712,7 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
         let* b = Stack.match_types env.modul ~expected:hd ~got:hd' in
         if b then Ok (env, hd :: tl) else Error (`Type_mismatch "select")
       | _ -> Error (`Type_mismatch "select")
-    end
+      end
     | Some t ->
       let t = List.map typ_of_val_type t in
       let* stack = Stack.pop env.modul t stack in
@@ -722,13 +722,13 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
     end
   | Ref_func i ->
     if not @@ Hashtbl.mem env.refs i then Error `Undeclared_function_reference
-    else begin
-      match get_func_type_id env i with
+    else
+      begin match get_func_type_id env i with
       | None -> assert false
       | Some id ->
         let+ stack = Stack.push [ Ref_type (Text.No_null, TypeUse id) ] stack in
         (env, stack)
-    end
+      end
   | Br i ->
     let* jt = Env.block_type_get i env in
     let+ _stack = Stack.pop env.modul jt stack in
@@ -998,8 +998,8 @@ let validate_table_limits : Binary.Table.Type.limits -> unit Result.t = function
 
 let validate_table_init modul refs id init ((nullable, _) as rt) =
   match init with
-  | None -> begin
-    match nullable with
+  | None ->
+    begin match nullable with
     | Text.Null -> Ok ()
     | No_null ->
       let has_init_elem =
@@ -1017,7 +1017,7 @@ let validate_table_init modul refs id init ((nullable, _) as rt) =
              (Fmt.str
                 "Table type is %a but init was not provided and is not nullable"
                 pp_ref_type rt ) )
-  end
+    end
   | Some init ->
     let* res_tys = typecheck_const_expr ~is_init:true modul refs init in
     begin match res_tys with
@@ -1047,8 +1047,8 @@ let validate_tables modul refs =
   array_iteri (validate_table modul refs) modul.table
 
 let validate_memory_limit : Binary.Mem.Type.limits -> unit Result.t = function
-  | I32 { min; max } -> begin
-    match max with
+  | I32 { min; max } ->
+    begin match max with
     | None ->
       if Int32.lt_u 0x1_0000l min then Error `Memory_size_too_large else Ok ()
     | Some max ->
@@ -1056,9 +1056,9 @@ let validate_memory_limit : Binary.Mem.Type.limits -> unit Result.t = function
       else if Int32.lt_u 0x1_0000l min || Int32.lt_u 0x1_0000l max then
         Error `Memory_size_too_large
       else Ok ()
-  end
-  | I64 { min; max } -> begin
-    match max with
+    end
+  | I64 { min; max } ->
+    begin match max with
     | None ->
       if min > 0x1_0000_0000_0000 then Error `Memory_size_too_large else Ok ()
     | Some max ->
@@ -1066,7 +1066,7 @@ let validate_memory_limit : Binary.Mem.Type.limits -> unit Result.t = function
       else if min > 0x1_0000_0000_0000 || max > 0x1_0000_0000_0000 then
         Error `Memory_size_too_large
       else Ok ()
-  end
+    end
 
 let validate_mem modul =
   array_iter

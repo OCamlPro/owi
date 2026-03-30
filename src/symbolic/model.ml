@@ -83,7 +83,7 @@ let print ~format ~out_file ~id ~no_value ~no_stop_at_failure
       let fmt = m (if no_stop_at_failure then "%a@." else "%a") in
       fmt (pp format with_breadcrumbs no_value) (model, state) );
     Ok ()
-  end
+    end
   | Some path ->
     let ext = match format with Json -> "json" | Scfg -> "scfg" in
     let contains_ext =

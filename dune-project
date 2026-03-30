@@ -112,7 +112,7 @@
   (landmarks-ppx :with-dev-setup)
   (ocamlformat
    (and
-    (>= 0.28)
+    (>= 0.29)
     :with-dev-setup))
   (ocb
    (and
