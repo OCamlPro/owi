@@ -132,13 +132,13 @@ let get_model_or_prune symbol =
   in
   match sat_model with
   | `Unsat -> prune ()
-  | `Model model -> begin
-    match Smtml.Model.evaluate model symbol with
+  | `Model model ->
+    begin match Smtml.Model.evaluate model symbol with
     | Some v -> return v
     | None ->
       (* the model exists so the symbol should evaluate *)
       assert false
-  end
+    end
   | `Unknown -> if Solver.was_interrupted () then prune () else assert false
 
 let select_i32 (e : Symbolic_i32.t) : int32 t =

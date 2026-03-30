@@ -28,12 +28,12 @@ let existing_file_conv =
   let parse s =
     match Fpath.of_string s with
     | Error _ as e -> e
-    | Ok path -> begin
-      match Bos.OS.File.exists path with
+    | Ok path ->
+      begin match Bos.OS.File.exists path with
       | Ok true -> Ok path
       | Ok false -> Fmt.error_msg "no file '%a'" Fpath.pp path
       | Error _ as e -> e
-    end
+      end
   in
   Arg.conv (parse, Fpath.pp)
 
@@ -41,12 +41,12 @@ let existing_dir_conv =
   let parse s =
     match Fpath.of_string s with
     | Error _ as e -> e
-    | Ok path -> begin
-      match Bos.OS.Dir.exists path with
+    | Ok path ->
+      begin match Bos.OS.Dir.exists path with
       | Ok true -> Ok path
       | Ok false -> Fmt.error_msg "no directory '%a'" Fpath.pp path
       | Error _ as e -> e
-    end
+      end
   in
   Arg.conv (parse, Fpath.pp)
 
@@ -680,14 +680,14 @@ let exit_code =
   let open Cmd.Exit in
   match Cmd.eval_value cli with
   | Ok (`Help | `Version) -> ok
-  | Ok (`Ok result) -> begin
-    match result with
+  | Ok (`Ok result) ->
+    begin match result with
     | Ok () -> ok
     | Error e -> begin
       Log.err (fun m -> m "%s" (Result.err_to_string e));
       Result.err_to_exit_code e
+      end
     end
-  end
   | Error (`Parse | `Term) -> cli_error
   | Error `Exn -> internal_error
 

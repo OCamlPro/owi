@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: zapashcanon/gitea-ocaml-ci:latest
+      image: debian:unstable
       options: --user root
     steps:
       - name: test
@@ -20,6 +20,9 @@ jobs:
           # GitHub sucks
           export HOME=/root
           cd $HOME
+
+          apt update -yqq
+          apt install git opam -yqq
 
           git clone https://github.com/${{ github.repository }}.git
           cd $(basename ${{ github.repository }})
@@ -32,10 +35,11 @@ jobs:
           fi
 
           # Prepare OCaml stuff
+          opam init --disable-sandboxing --bare -ya
+          opam switch create ocaml ocaml-base-compiler --criteria="-notuptodate"
           eval "$(opam env)"
           export OPAMCONFIRMLEVEL=unsafe-yes
           opam update
-          apt update
 
           # Install zig
           # TODO: remove the following once the conf-zig package works

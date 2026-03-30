@@ -163,7 +163,7 @@ let if_else expr ~locals ~stack env =
     and+ pt_descr = const @@ (S.Pop :: List.map (fun _ -> S.Pop) pt)
     and+ rt_descr = const @@ List.rev_map (fun t -> S.Push t) rt in
     (instr, pt_descr @ rt_descr)
-  end
+    end
   | _ -> assert false
 
 let block expr ~locals ~stack env =

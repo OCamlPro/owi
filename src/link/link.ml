@@ -522,11 +522,11 @@ let register_last_module (ls : 'f State.t) ~name ~(id : string option) :
   'f State.t Result.t =
   let* exports, _env_id =
     match id with
-    | Some id -> begin
-      match StringMap.find_opt id ls.by_id with
+    | Some id ->
+      begin match StringMap.find_opt id ls.by_id with
       | None -> Error (`Unbound_module id)
       | Some e -> Ok e
-    end
+      end
     | None -> (
       match ls.last with Some e -> Ok e | None -> Error `Unbound_last_module )
   in

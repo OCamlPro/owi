@@ -434,14 +434,14 @@ let read_block_type types input =
   | Ok (i, input) when Int64.le 0L i ->
     let block_type = block_type_of_type_def types.(Int64.to_int i) in
     Ok (block_type, input)
-  | Error _ | Ok _ -> begin
-    match read_byte ~msg:"read_block_type" input with
+  | Error _ | Ok _ ->
+    begin match read_byte ~msg:"read_block_type" input with
     | Ok ('\x40', input) -> Ok (Bt_raw (None, ([], [])), input)
     | Error _ | Ok _ ->
       let* vt, input = read_valtype input in
       let pt, rt = ([], [ vt ]) in
       Ok (Bt_raw (None, (pt, rt)), input)
-  end
+    end
 
 let rec read_instr types input =
   let* b, input = read_byte ~msg:"read_instr" input in
@@ -773,7 +773,7 @@ and read_expr types input =
       let* id, input = read_indice input in
       let instr = Annotated.dummy (Ref_func id) in
       aux (instr :: acc) input
-    end
+      end
     | Ok _ ->
       let* instr, input = read_instr types input in
       let instr = Annotated.dummy instr in
@@ -913,7 +913,7 @@ let read_table input =
       read_const [| (None, ([], [ Ref_type ref_type ])) |] input
     in
     ((limits, ref_type, Some value), input)
-  end
+    end
   | _ -> parse_fail "malformed reference type: %d  %d" b1 (-0x40)
 
 let read_memory input =

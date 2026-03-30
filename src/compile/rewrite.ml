@@ -84,15 +84,15 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
   let block_id_to_raw (loop_count, block_ids) id =
     let* id =
       match id with
-      | Text.Text id -> begin
-        match
+      | Text.Text id ->
+        begin match
           List.find_index
             (function Some id' -> String.equal id id' | None -> false)
             block_ids
         with
         | None -> Error (`Unknown_label (Text.Text id))
         | Some id -> Ok id
-      end
+        end
       | Raw id -> Ok id
     in
     (* this is > and not >= because you can `br 0` without any block to target the function *)
@@ -239,14 +239,14 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
     | Elem_drop id ->
       let+ id = Assigned.find_elem assigned id in
       Binary.Elem_drop id
-    | Select typ -> begin
-      match typ with
+    | Select typ ->
+      begin match typ with
       | None -> Ok (Binary.Select None)
       | Some [ t ] ->
         let+ t = rewrite_val_type assigned t in
         Binary.Select (Some [ t ])
       | Some [] | Some (_ :: _ :: _) -> Error `Invalid_result_arity
-    end
+      end
     | I_unop (nn, op) -> Ok (Binary.I_unop (nn, op))
     | I_binop (nn, op) -> Ok (I_binop (nn, op))
     | I_testop (nn, op) -> Ok (Binary.I_testop (nn, op))

@@ -66,7 +66,7 @@
   owi: [INFO] running instr : unreachable (executed 0 times)
   owi: [DEBUG] path condition smt query:
                 (let-const symbol_0 i32)
-                (assert (i32.lt_u symbol_0 (i32 1)))
+                (assert (i32.lt_u symbol_0 (i32 0x1)))
                 (check-sat)
   owi: [ERROR] Trap: unreachable
   model {

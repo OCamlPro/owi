@@ -90,25 +90,25 @@ let modul m =
     in
     let get_table name =
       match name with
-      | None -> begin
-        match Hashtbl.find_opt seen 0 with
+      | None ->
+        begin match Hashtbl.find_opt seen 0 with
         | None -> assert false
         | Some ty -> Ok ty
-      end
-      | Some (Text name) -> begin
-        match Hashtbl.find_opt names2ids name with
+        end
+      | Some (Text name) ->
+        begin match Hashtbl.find_opt names2ids name with
         | None -> Error (`Unknown_table (Text name))
-        | Some id -> begin
-          match Hashtbl.find_opt seen id with
+        | Some id ->
+          begin match Hashtbl.find_opt seen id with
           | None -> assert false
           | Some ty -> Ok ty
+          end
         end
-      end
-      | Some (Raw id) -> begin
-        match Hashtbl.find_opt seen id with
+      | Some (Raw id) ->
+        begin match Hashtbl.find_opt seen id with
         | None -> Error (`Unknown_table (Raw id))
         | Some ty -> Ok ty
-      end
+        end
     in
     (add_table, get_table)
   in
@@ -169,8 +169,8 @@ let modul m =
           else if env.declared_memory then Error `Import_after_memory
           else if env.tables then Error `Import_after_table
           else if env.globals then Error `Import_after_global
-          else begin
-            match i.typ with
+          else
+            begin match i.typ with
             | Mem (id, _) ->
               let* () = add_memory id in
               Ok env
@@ -182,7 +182,7 @@ let modul m =
               let+ () = add_table id ty in
               env
             | Tag _ -> Ok env
-          end
+            end
         | Data _d -> Ok env
         | Tag _t -> Ok env
         | Elem { typ; mode; explicit_typ; init; _ } ->

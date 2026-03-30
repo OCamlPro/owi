@@ -12,14 +12,14 @@ let get_memory (env : t) id : Symbolic_memory.t Symbolic_choice.t =
   let* state = Symbolic_choice.state in
   match Thread.Collection.find state.memories ~env_id ~id with
   | Some g -> Symbolic_choice.return g
-  | None -> begin
-    match get_memory env id with
+  | None ->
+    begin match get_memory env id with
     | Error _e -> assert false
     | Ok original ->
       let symbolic = Symbolic_memory.of_concrete ~env_id ~id original in
       let* () = Symbolic_memory.replace symbolic in
       Symbolic_choice.return symbolic
-  end
+    end
 
 let get_table (env : t) id : Symbolic_table.t Symbolic_choice.t =
   let ( let* ) = Symbolic_choice.( let* ) in
@@ -27,14 +27,14 @@ let get_table (env : t) id : Symbolic_table.t Symbolic_choice.t =
   let* state = Symbolic_choice.state in
   match Thread.Collection.find state.tables ~env_id ~id with
   | Some g -> Symbolic_choice.return g
-  | None -> begin
-    match get_table env id with
+  | None ->
+    begin match get_table env id with
     | Error _e -> assert false
     | Ok original ->
       let symbolic = Symbolic_table.of_concrete ~env_id ~id original in
       let* () = Symbolic_table.replace symbolic in
       Symbolic_choice.return symbolic
-  end
+    end
 
 let get_data env n =
   match get_data env n with
@@ -47,11 +47,11 @@ let get_global (env : t) id : Symbolic_global.t Symbolic_choice.t =
   let* state = Symbolic_choice.state in
   match Thread.Collection.find state.globals ~env_id ~id with
   | Some g -> Symbolic_choice.return g
-  | None -> begin
-    match get_global env id with
+  | None ->
+    begin match get_global env id with
     | Error _e -> assert false
     | Ok original ->
       let symbolic = Symbolic_global.of_concrete ~env_id ~id original in
       let* () = Symbolic_global.replace symbolic in
       Symbolic_choice.return symbolic
-  end
+    end
