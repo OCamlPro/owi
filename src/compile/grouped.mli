@@ -17,7 +17,7 @@ type t = private
           duplication. *)
   ; type_checks : (indice * func_type) Array.t
       (* Types checks to perform after assignment.
-         Come from function declarations with type indicies *)
+         Come from function declarations with type indices *)
   ; global : (Global.t, Global.Type.t) Origin.t Array.t
   ; table : (Table.t, Table.Type.t) Origin.t Array.t
   ; mem : (Mem.t, limits) Origin.t Array.t

@@ -287,7 +287,7 @@ let memory env : Module.Field.t gen =
 let typ env : Module.Field.t gen =
   let+ typ = B.func_type in
   let id = Some (Env.add_type env typ) in
-  Module.Field.Typedef (id, typ)
+  Module.Field.Typedef (id, assert false)
 
 let elem env : Module.Field.t gen =
   let+ typ = B.ref_type

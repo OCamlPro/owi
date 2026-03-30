@@ -65,18 +65,6 @@ let pp_ref_type ppf (n, ht) =
   | Text.No_null -> pf ppf "(ref %a)" pp_heap_type ht
   | Null -> pf ppf "(ref null %a)" pp_heap_type ht
 
-type val_type =
-  | Num_type of Text.num_type
-  | Ref_type of ref_type
-
-type pack_type =
-  | I8
-  | I16
-
-type storage_type =
-  | Val_type of val_type
-  | Pack_type of pack_type
-
 let ref_type_eq t1 t2 =
   match (t1, t2) with
   | ((Text.Null : Text.nullable), t1), ((Text.Null : Text.nullable), t2)
@@ -84,9 +72,17 @@ let ref_type_eq t1 t2 =
     heap_type_eq t1 t2
   | _ -> false
 
-let pp_val_type ppf = function
-  | Num_type t -> Text.pp_num_type ppf t
-  | Ref_type t -> pp_ref_type ppf t
+type val_type =
+  | Num_type of Text.num_type
+  | Ref_type of ref_type
+
+type storage_type =
+  | Val_type of val_type
+  | Pack_type of Text.pack_type
+
+let pp_val_type fmt = function
+  | Num_type t -> Text.pp_num_type fmt t
+  | Ref_type t -> pp_ref_type fmt t
 
 let val_type_eq t1 t2 =
   match (t1, t2) with
