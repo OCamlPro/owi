@@ -774,6 +774,10 @@ module Binary : sig
     | Num_type of Text.num_type
     | Ref_type of ref_type
 
+  type storage_type =
+    | Val_type of val_type
+    | Pack_type of Text.pack_type
+
   type param = string option * val_type
 
   type param_type = param list
@@ -781,6 +785,21 @@ module Binary : sig
   type result_type = val_type list
 
   type func_type = param_type * result_type
+
+  type field_type = Text.mut * storage_type
+
+  type field = indice option * field_type
+
+  type comp_type =
+    | Def_struct_t of field list
+    | Def_array_t of field_type
+    | Def_func_t of func_type
+
+  type sub_type =
+    { final : bool
+    ; ids : indice list
+    ; ct : comp_type
+    }
 
   type block_type =
     (* TODO: inline this *)
@@ -1076,7 +1095,7 @@ module Binary : sig
   end
 
   module Typedef : sig
-    type t = string option * func_type
+    type t = string option * sub_type
   end
 
   module Table : sig

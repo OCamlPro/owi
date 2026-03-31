@@ -76,10 +76,6 @@ type val_type =
   | Num_type of Text.num_type
   | Ref_type of ref_type
 
-type storage_type =
-  | Val_type of val_type
-  | Pack_type of Text.pack_type
-
 let pp_val_type fmt = function
   | Num_type t -> Text.pp_num_type fmt t
   | Ref_type t -> pp_ref_type fmt t
@@ -89,6 +85,15 @@ let val_type_eq t1 t2 =
   | Num_type t1, Num_type t2 -> Text.num_type_eq t1 t2
   | Ref_type t1, Ref_type t2 -> ref_type_eq t1 t2
   | _, _ -> false
+
+type storage_type =
+  | Val_type of val_type
+  | Pack_type of Text.pack_type
+
+let pp_storage_type fmt = function
+  | Val_type vt -> pp_val_type fmt vt
+  | Pack_type I8 -> Fmt.pf fmt "i8"
+  | Pack_type I16 -> Fmt.pf fmt "i16"
 
 let is_subtype_ref_type t1 t2 =
   match (t1, t2) with
@@ -143,6 +148,52 @@ let pp_func_type ppf (params, results) =
 
 let func_type_eq (pt1, rt1) (pt2, rt2) =
   param_type_eq pt1 pt2 && result_type_eq rt1 rt2
+
+type field_type = Text.mut * storage_type
+
+let pp_field_type fmt (m, st) =
+  Fmt.pf fmt "%a %a" Text.pp_mut m pp_storage_type st
+
+type field = indice option * field_type
+
+let pp_field fmt (id_opt, ft) =
+  match id_opt with
+  | None -> Fmt.pf fmt "%a" pp_field_type ft
+  | Some id -> Fmt.pf fmt "%a %a" pp_indice id pp_field_type ft
+
+type comp_type =
+  | Def_struct_t of field list
+  | Def_array_t of field_type
+  | Def_func_t of func_type
+
+let comp_type_eq ct1 ct2 =
+  match (ct1, ct2) with
+  | Def_struct_t _, Def_struct_t _ -> assert false
+  | Def_array_t _, Def_array_t _ -> assert false
+  | Def_func_t _, Def_func_t _ -> assert false
+  | _ -> false
+
+let pp_comp_type fmt = function
+  | Def_struct_t fl ->
+    Fmt.pf fmt "struct {%a}" (Fmt.list ~sep:Fmt.comma pp_field) fl
+  | Def_array_t ft -> Fmt.pf fmt "array %a" pp_field_type ft
+  | Def_func_t ft -> Fmt.pf fmt "func %a" pp_func_type ft
+
+type sub_type =
+  { final : bool
+  ; ids : indice list
+  ; ct : comp_type
+  }
+
+let sub_type_eq { final = f1; ct = ct1; _ } { final = f2; ct = ct2; _ } =
+  Bool.equal f1 f2 && comp_type_eq ct1 ct2
+
+let pp_sub_type fmt { final; ids; ct } =
+  Fmt.pf fmt "%a%a %a"
+    (fun fmt b -> if b then Fmt.pf fmt "final")
+    final
+    (Fmt.list (fun fmt id -> Fmt.pf fmt " %a" pp_indice id))
+    ids pp_comp_type ct
 
 type block_type =
   (* TODO: inline this *)
@@ -807,10 +858,10 @@ module Export = struct
 end
 
 module Typedef = struct
-  type t = string option * func_type
+  type t = string option * sub_type
 
-  let pp ppf (id, t) =
-    pf ppf "(type%a %a)" (Fmt.option Fmt.string) id pp_func_type t
+  let pp fmt (id, t) =
+    pf fmt "(type%a %a)" (Fmt.option Fmt.string) id pp_sub_type t
 end
 
 module Table = struct

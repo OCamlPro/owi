@@ -58,6 +58,27 @@ val pp_func_type : Format.formatter -> func_type -> unit
 
 val func_type_eq : func_type -> func_type -> bool
 
+type field_type = Text.mut * storage_type
+
+type field = indice option * field_type
+
+type comp_type =
+  | Def_struct_t of field list
+  | Def_array_t of field_type
+  | Def_func_t of func_type
+
+val pp_comp_type : comp_type Fmt.t
+
+type sub_type =
+  { final : bool
+  ; ids : indice list
+  ; ct : comp_type
+  }
+
+val pp_sub_type : sub_type Fmt.t
+
+val sub_type_eq : sub_type -> sub_type -> bool
+
 type block_type =
   (* TODO: inline this *)
   | Bt_raw of (indice option * func_type)
@@ -354,7 +375,7 @@ module Export : sig
 end
 
 module Typedef : sig
-  type t = string option * func_type
+  type t = string option * sub_type
 
   val pp : t Fmt.t
 end

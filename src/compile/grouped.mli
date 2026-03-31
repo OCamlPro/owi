@@ -13,7 +13,7 @@ type t = private
   { id : string option
   ; typ : Typedef.t Array.t
   ; decl_types : func_type Array.t
-      (** Types comming from function or tag declarations. It contains potential
+      (** Types coming from function or tag declarations. It contains potential
           duplication. *)
   ; type_checks : (indice * func_type) Array.t
       (* Types checks to perform after assignment.
