@@ -1,8 +1,10 @@
 open Binary
-open Abs_value
 open Abs_datastructures
+open Result.Syntax
+module ADomain = Abs_value.ADomain
+module Size = Abs_value.Size
 
-type value = Abs_value.ADomain.binary
+type value = Abs_value.t
 
 type state =
   { ctx : ADomain.Context.t
@@ -15,33 +17,29 @@ type state =
 
 module Flags = Operator.Flags
 
-let pp_value : ADomain.Context.t -> Format.formatter -> value -> unit =
- fun ctx fmt v ->
-  (*don't know what to do about this size*)
-  Fmt.pf fmt "%a" (ADomain.binary_pretty ~size:Size.b32 ctx) v
-
 let pp_state : Format.formatter -> state -> unit =
  fun fmt state ->
   Fmt.pf fmt "{@\n@[<hov 2>  ctx : %a,@;stack : %a,@;locals : %a@]@\n}"
     ADomain.context_pretty state.ctx
-    (Stack.pp @@ pp_value state.ctx)
+    (Stack.pp @@ Abs_value.pp state.ctx)
     state.stack
-    (Fmt.array ~sep:Fmt.semi (pp_value state.ctx))
+    (Fmt.array ~sep:Fmt.semi (Abs_value.pp state.ctx))
     (Dynarray.to_array state.locals)
 
 let serialize ~widens : state -> state -> (state, 'a) ADomain.Context.result =
  fun state_a state_b ->
-  let rec serialize_lists lhs rhs result =
+  let rec serialize_lists lhs rhs acc_res =
     match (lhs, rhs) with
-    | [], [] -> result
-    | [], _ | _, [] -> Fmt.failwith "join on stacks of different sizes"
-    | i1 :: rest_a, i2 :: rest_b ->
-      let (ADomain.Context.Result (included, in_tuple, continue)) = result in
-      if ADomain.Binary.equal i1 i2 then serialize_lists rest_a rest_b result
+    | [], [] -> acc_res
+    | [], _ :: _ | _ :: _, [] ->
+      Fmt.failwith "join on stacks of different sizes"
+    | Abs_value.I32 b1 :: rest_a, Abs_value.I32 b2 :: rest_b -> begin
+      let (ADomain.Context.Result (included, in_tuple, continue)) = acc_res in
+      if ADomain.Binary.equal b1 b2 then serialize_lists rest_a rest_b acc_res
       else
         let (ADomain.Context.Result (included, in_tuple, local_continue)) =
-          ADomain.serialize_binary ~size:Size.b32 ~widens state_a.ctx i1
-            state_b.ctx i2 (included, in_tuple)
+          ADomain.serialize_binary ~size:Size.b32 ~widens state_a.ctx b1
+            state_b.ctx b2 (included, in_tuple)
         in
         let new_result =
           ADomain.Context.Result
@@ -50,9 +48,32 @@ let serialize ~widens : state -> state -> (state, 'a) ADomain.Context.result =
             , fun ctx out_tuple ->
                 let integer, out_tuple = local_continue ctx out_tuple in
                 let stack, out_tuple = continue ctx out_tuple in
-                (integer :: stack, out_tuple) )
+                (Abs_value.I32 integer :: stack, out_tuple) )
         in
         serialize_lists rest_a rest_b new_result
+    end
+    | Abs_value.I64 b1 :: rest_a, Abs_value.I64 b2 :: rest_b -> begin
+      let (ADomain.Context.Result (included, in_tuple, continue)) = acc_res in
+      if ADomain.Binary.equal b1 b2 then serialize_lists rest_a rest_b acc_res
+      else
+        let (ADomain.Context.Result (included, in_tuple, local_continue)) =
+          ADomain.serialize_binary ~size:Size.b64 ~widens state_a.ctx b1
+            state_b.ctx b2 (included, in_tuple)
+        in
+        let new_result =
+          ADomain.Context.Result
+            ( included
+            , in_tuple
+            , fun ctx out_tuple ->
+                let integer, out_tuple = local_continue ctx out_tuple in
+                let stack, out_tuple = continue ctx out_tuple in
+                (Abs_value.I64 integer :: stack, out_tuple) )
+        in
+        serialize_lists rest_a rest_b new_result
+    end
+    | lhs :: _, rhs :: _ ->
+      Fmt.failwith "serializing failed, type of %a does not match %a"
+        (Abs_value.pp state_a.ctx) lhs (Abs_value.pp state_b.ctx) rhs
   in
   let locals_result =
     serialize_lists
@@ -98,54 +119,11 @@ let join state_a state_b =
 let join_opt a b =
   match (a, b) with None, x | x, None -> x | Some a, Some b -> Some (join a b)
 
-let exec_extern_func stack (f : Abs_extern_func.extern_func) =
-  let pop_arg (type ty) (stack : value Stack.t) (arg : ty Abs_extern_func.telt)
-    : ty * value Stack.t =
-    match arg with I32 -> Stack.pop stack | _ -> assert false
-  in
-  let rec split_args : type f r.
-    'stack -> (f, r) Abs_extern_func.atype -> 'stack * 'stack =
-   fun stack ty ->
-    let[@local] split_one_arg args =
-      let elt, stack = Stack.pop stack in
-      let elts, stack = split_args stack args in
-      (Stack.push elts elt, stack)
-    in
-    match ty with
-    | Mem (_, args) -> split_args stack args
-    | Arg (_, args) -> split_one_arg args
-    | UArg args -> split_args stack args
-    | NArg (_, _, args) -> split_one_arg args
-    | Res -> (Stack.empty, stack)
-  in
-  let rec apply : type f r.
-    value Stack.t -> (f, r) Abs_extern_func.atype -> f -> r =
-   fun stack ty f ->
-    match ty with
-    | Arg (arg, args) ->
-      let v, stack = pop_arg stack arg in
-      apply stack args (f v)
-    | UArg args -> apply stack args (f ())
-    | NArg (_, arg, args) ->
-      let v, stack = pop_arg stack arg in
-      apply stack args (f v)
-    | Res -> f
-    | Mem (_memid, _args) -> assert false
-  in
-  match f with
-  | Abs_extern_func.Extern_func (Abs_extern_func.Func (atype, rtype), func) -> (
-    let args, stack = split_args stack atype in
-    let r = apply (Stack.rev args) atype func in
-    match (rtype, r) with
-    | R0, Ok () -> stack
-    | R1 I32, Ok v1 -> Stack.push stack v1
-    | _ -> assert false )
-
 let rec exec_func (state : state) (func : Func.t) =
   Log.info (fun m ->
     m "calling func  : func %s" (Option.value func.id ~default:"anonymous") );
   let (Bt_raw ((None | Some _), (param_type, result_type))) = func.type_f in
-  let args, caller_popped_stack =
+  let* args, caller_popped_stack =
     Stack.pop_n state.stack (List.length param_type)
   in
   let fn_state =
@@ -157,7 +135,7 @@ let rec exec_func (state : state) (func : Func.t) =
     }
   in
   Log.info (fun m -> m "Func start state : %a" pp_state fn_state);
-  let func_end_state = exec_expr fn_state func.body.raw in
+  let+ func_end_state = exec_expr fn_state func.body.raw in
   (* We should probably copy state and join back the return values in the context here *)
   Log.info (fun m -> m "Func end state : %a@." pp_state func_end_state);
   { state with
@@ -166,50 +144,55 @@ let rec exec_func (state : state) (func : Func.t) =
       @@ Stack.take (List.length result_type) func_end_state.stack
   }
 
-and exec_ibinop state size : Text.ibinop -> state = function
+and exec_ibinop state size (op : Text.ibinop) : state Result.t =
+  let* e1, e2, stack = Stack.pop_2 state.stack in
+  match op with
   | Add ->
-    let e1, stack = Stack.pop state.stack in
-    let e2, stack = Stack.pop stack in
-    let e =
-      ADomain.Binary_Forward.biadd state.ctx e1 e2 ~size
-        ~flags:Flags.Biadd.no_overflow
+    let flags = Flags.Biadd.no_overflow in
+    let+ e =
+      Abs_value.binop size
+        (ADomain.Binary_Forward.biadd ~flags ~size state.ctx)
+        e1 e2
     in
     { state with stack = Stack.push stack e }
   | Sub ->
-    let e1, stack = Stack.pop state.stack in
-    let e2, stack = Stack.pop stack in
-    let e =
-      ADomain.Binary_Forward.bisub state.ctx e1 e2 ~size
-        ~flags:Operator.Flags.Bisub.no_overflow
+    let flags = Operator.Flags.Bisub.no_overflow in
+    let+ e =
+      Abs_value.binop size
+        (ADomain.Binary_Forward.bisub ~flags ~size state.ctx)
+        e1 e2
     in
     { state with stack = Stack.push stack e }
   | Mul ->
-    let e1, stack = Stack.pop state.stack in
-    let e2, stack = Stack.pop stack in
-    let e =
-      ADomain.Binary_Forward.bimul state.ctx e1 e2 ~size
-        ~flags:(Flags.Bimul.pack ~nsw:false ~nuw:false)
+    let flags = Flags.Bimul.pack ~nsw:true ~nuw:true in
+    let+ e =
+      Abs_value.binop size
+        (ADomain.Binary_Forward.bimul ~flags ~size state.ctx)
+        e1 e2
     in
     { state with stack = Stack.push stack e }
-  | Div _sx ->
-    let e1, stack = Stack.pop state.stack in
-    let e2, stack = Stack.pop stack in
-    let e = ADomain.Binary_Forward.bisdiv ~size state.ctx e1 e2 in
+  | Div sx ->
+    let op =
+      match sx with
+      | S -> ADomain.Binary_Forward.bisdiv ~size state.ctx
+      | U -> ADomain.Binary_Forward.biudiv ~size state.ctx
+    in
+    let+ e = Abs_value.binop size op e1 e2 in
     { state with stack = Stack.push stack e }
   | _ -> assert false
 
-and exec_instr state : instr -> state = function
+and exec_instr state : instr -> state Result.t = function
   | I32_const i ->
     let abs_i =
       ADomain.Binary_Forward.biconst ~size:Size.b32 (Z.of_int32 i) state.ctx
     in
-    { state with stack = Stack.push state.stack abs_i }
+    Ok { state with stack = Stack.push state.stack (I32 abs_i) }
   | I64_const i ->
     let abs_i =
       ADomain.Binary_Forward.biconst ~size:Size.b64 (Z.of_int64 i) state.ctx
     in
-    { state with stack = Stack.push state.stack abs_i }
-  | Unreachable -> Fmt.failwith "unreachable"
+    Ok { state with stack = Stack.push state.stack (I64 abs_i) }
+  | Unreachable -> Fmt.error_msg "Unreachable@."
   | I_binop (nn, op) ->
     let size = match nn with Text.S32 -> Size.b32 | Text.S64 -> Size.b64 in
     exec_ibinop state size op
@@ -218,17 +201,17 @@ and exec_instr state : instr -> state = function
     | Some (Bt_raw (_, ft)) ->
       let param_type, result_type = ft in
       let block_stack = Stack.take (List.length param_type) state.stack in
-      let res = exec_expr { state with stack = block_stack } expr.raw in
+      let+ res = exec_expr { state with stack = block_stack } expr.raw in
       let stack = Stack.take (List.length result_type) res.stack in
       { state with stack = Stack.append state.stack stack; locals = res.locals }
     | None -> exec_expr state expr.raw )
   | If_else (_, bt, expr_true, expr_false) ->
     let _b, stack = Stack.pop state.stack in
     (* should check b *)
-    let state_true =
+    let* state_true =
       exec_instr { state with stack } (Block (None, bt, expr_true))
     in
-    let state_false =
+    let+ state_false =
       exec_instr { state with stack } (Block (None, bt, expr_false))
     in
     join state_true state_false
@@ -236,12 +219,12 @@ and exec_instr state : instr -> state = function
     match state.func_rt with
     | [] ->
       (* Fmt.pr "Returning in root with state %a" pp_state state; *)
-      state
+      Ok state
     | rt ->
-      let return_values, _ = Stack.pop_n state.stack (List.length rt) in
+      let+ return_values, _ = Stack.pop_n state.stack (List.length rt) in
       assert (
         List.length (Stack.to_list return_values) = List.length state.func_rt );
-      Fmt.pr "returning %a@\n" (Stack.pp @@ pp_value state.ctx) state.stack;
+      Fmt.pr "returning %a@\n" (Stack.pp @@ Abs_value.pp state.ctx) state.stack;
       { state with stack = return_values } )
   | Call idx ->
     let func = Link_env.get_func state.env idx in
@@ -249,33 +232,47 @@ and exec_instr state : instr -> state = function
     | Wasm { func; idx } ->
       let env = Dynarray.get state.envs idx in
       exec_func { state with env } func
-    | Extern _ ->
-      let f = Link_env.get_extern_func state.env idx in
-      let stack = exec_extern_func state.stack f in
-      { state with stack }
+    | Extern { idx } -> (
+      match idx with
+      | 0 ->
+        (* assume that it's correctly typed to returning an i32 *)
+        let v = ADomain.binary_unknown ~size:Size.b32 state.ctx in
+        let stack = Stack.push state.stack (I32 v) in
+        Ok { state with stack }
+      | 1 ->
+        (* assume that it's correctly typed to returning an i64 *)
+        let v = ADomain.binary_unknown ~size:Size.b64 state.ctx in
+        let stack = Stack.push state.stack (I64 v) in
+        Ok { state with stack }
+      | _ ->
+        Fmt.error_msg "Some day we will have proper external function support" )
     end
   | Local_get i ->
     let var = Dynarray.get state.locals i in
-    { state with stack = Stack.push state.stack var }
+    Ok { state with stack = Stack.push state.stack var }
   | Local_set i ->
     let e, stack = Stack.pop state.stack in
     Dynarray.set state.locals i e;
-    { state with stack }
+    Ok { state with stack }
   | Drop ->
-    Fmt.pr "dropping, stack : %a" (Stack.pp @@ pp_value state.ctx) state.stack;
+    Fmt.pr "dropping, stack : %a"
+      (Stack.pp @@ Abs_value.pp state.ctx)
+      state.stack;
     if Stack.is_empty state.stack then Fmt.failwith "Drop on empty stack"
     else
       let _, stack = Stack.pop state.stack in
-      { state with stack }
+      Ok { state with stack }
   | Nop ->
     let top = ADomain.binary_unknown ~size:Size.b32 state.ctx in
-    { state with stack = Stack.push state.stack top }
+    Ok { state with stack = Stack.push state.stack (I32 top) }
   | instr -> Fmt.failwith "Instr unimplemented %a" (pp_instr ~short:true) instr
 
-and exec_expr (state : state) (expr : expr) : state =
+and exec_expr (state : state) (expr : expr) : state Result.t =
   List.fold_left
-    (fun acc (x : instr Annotated.t) -> exec_instr acc x.raw)
-    state expr
+    (fun acc (x : instr Annotated.t) ->
+      let* acc in
+      exec_instr acc x.raw )
+    (Ok state) expr
 
 let expr (link_state : Abs_extern_func.extern_func Link.State.t)
   (m : Abs_extern_func.extern_func Linked.Module.t) =
@@ -284,7 +281,7 @@ let expr (link_state : Abs_extern_func.extern_func Link.State.t)
   let initial_state =
     { ctx
     ; stack = Stack.empty
-    ; locals = Dynarray.of_list []
+    ; locals = Dynarray.create ()
     ; env = m.env
     ; func_rt = []
     ; envs
