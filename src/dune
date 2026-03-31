@@ -3,6 +3,12 @@
 (library
  (public_name owi)
  (modules
+  abs_datastructures
+  abs_driver
+  abs_extern_func
+  abs_monad
+  abs_value
+  abs_wasm_ffi
   annotated
   assigned
   benchmark
@@ -15,6 +21,7 @@
   bug
   choice_intf
   call_graph
+  cmd_abs
   cmd_utils
   cmd_c
   cmd_call_graph
@@ -54,6 +61,7 @@
   concrete_wasm_ffi
   control_flow_graph
   data_intf
+  denot_concrete
   elem_intf
   env_intf
   exploration_smart
@@ -136,6 +144,7 @@
   domainpc
   dune-build-info
   dune-site
+  codex
   fmt
   fmt.cli
   fmt.tty

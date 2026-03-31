@@ -1041,6 +1041,10 @@ module Link : sig
 end
 
 module Compile : sig
+  module File : sig
+    val until_binary : unsafe:bool -> Fpath.t -> Binary.Module.t Result.t
+  end
+
   module Text : sig
     val until_binary : unsafe:bool -> Text.Module.t -> Binary.Module.t Result.t
 
@@ -1187,6 +1191,17 @@ module Symbolic_extern_func : sig
   end
 end
 
+module Abs_driver : sig
+  val expr :
+       Abs_extern_func.extern_func Link.State.t
+    -> Abs_extern_func.extern_func Linked.Module.t
+    -> unit
+end
+
+module Denot_concrete : sig
+  val run : no_input:bool -> Binary.Module.t Result.t -> unit Result.t
+end
+
 module Interpret : sig
   module type Parameters = sig
     val use_ite_for_select : bool
@@ -1286,6 +1301,10 @@ module Symbolic_driver : sig
     -> run_time:float option
     -> unit Symbolic_choice.t
     -> unit Result.t
+end
+
+module Cmd_abs : sig
+  val cmd : source_file:Fpath.t -> unit Result.t
 end
 
 module Cmd_sym : sig
