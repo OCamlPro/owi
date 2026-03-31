@@ -175,9 +175,10 @@ let comp_type_eq ct1 ct2 =
 
 let pp_comp_type fmt = function
   | Def_struct_t fl ->
-    Fmt.pf fmt "struct {%a}" (Fmt.list ~sep:Fmt.comma pp_field) fl
-  | Def_array_t ft -> Fmt.pf fmt "array %a" pp_field_type ft
-  | Def_func_t ft -> Fmt.pf fmt "func %a" pp_func_type ft
+    Fmt.pf fmt "(struct %a)" (Fmt.list ~sep:Fmt.comma pp_field) fl
+  | Def_array_t ft -> Fmt.pf fmt "(array %a)" pp_field_type ft
+  | Def_func_t ft -> Fmt.pf fmt "%a" pp_func_type ft
+(* TODO: ensure proper printing *)
 
 type sub_type =
   { final : bool
@@ -189,10 +190,10 @@ let sub_type_eq { final = f1; ct = ct1; _ } { final = f2; ct = ct2; _ } =
   Bool.equal f1 f2 && comp_type_eq ct1 ct2
 
 let pp_sub_type fmt { final; ids; ct } =
-  Fmt.pf fmt "%a%a %a"
-    (fun fmt b -> if b then Fmt.pf fmt "final")
+  Fmt.pf fmt "%a%a%a"
+    (fun fmt b -> if b then Fmt.pf fmt "final ")
     final
-    (Fmt.list (fun fmt id -> Fmt.pf fmt " %a" pp_indice id))
+    (Fmt.list (fun fmt id -> Fmt.pf fmt "%a " pp_indice id))
     ids pp_comp_type ct
 
 type block_type =

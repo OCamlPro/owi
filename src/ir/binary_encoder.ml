@@ -866,10 +866,13 @@ let encode_section buf id encode_func data =
 
 (* type: section 1 *)
 let encode_types buf types =
-  encode_vector_array buf types (fun buf (_id, (pt, rt)) ->
-    Buffer.add_char buf '\x60';
-    write_paramtype buf pt;
-    write_resulttype buf rt )
+  encode_vector_array buf types (fun buf (_id, st) ->
+    match st with
+    | { final = false; ids = []; ct = Def_func_t (pt, rt) } ->
+      Buffer.add_char buf '\x60';
+      write_paramtype buf pt;
+      write_resulttype buf rt
+    | _ -> assert false )
 
 (* import: section 2 *)
 let encode_imports buf (funcs, tables, memories, globals) =

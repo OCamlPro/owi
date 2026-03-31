@@ -508,9 +508,12 @@ let read_FD input =
   | 209 -> Ok (I64x2 Sub, input)
   | i -> parse_fail "illegal opcode (1) %i" i
 
-let block_type_of_type_def (_id, (pt, rt)) =
+let block_type_of_type_def (_id, td) =
   (* TODO: this is a ugly hack, it is necessary for now and should be removed at some point... *)
-  Bt_raw (None, (pt, rt))
+  match td with
+  | { final = false; ids = []; ct = Def_func_t (pt, rt) } ->
+    Bt_raw (None, (pt, rt))
+  | _ -> assert false
 
 let read_block_type types input =
   match read_S33 input with
@@ -942,7 +945,18 @@ let section_custom input =
 
 let read_type _id input =
   let* fcttype, input = read_byte ~msg:"read_type" input in
-  let* () =
+  match fcttype with
+  | '\x5E' -> assert false
+  | '\x5F' -> assert false
+  | '\x60' ->
+    let* params, input = read_valtypes input in
+    let+ results, input = read_valtypes input in
+    let params = List.map (fun param -> (None, param)) params in
+    ( (None, { final = false; ids = []; ct = Def_func_t (params, results) })
+    , input )
+  | _ -> parse_fail "integer representation too long (read_type)"
+
+(* let* () =
     match fcttype with
     | '\x60' -> Ok ()
     | _ -> parse_fail "integer representation too long (read_type)"
@@ -950,7 +964,7 @@ let read_type _id input =
   let* params, input = read_valtypes input in
   let+ results, input = read_valtypes input in
   let params = List.map (fun param -> (None, param)) params in
-  ((None, (params, results)), input)
+  ((None, (params, results)), input) *)
 
 let read_global_type input =
   let* val_type, input = read_valtype input in
@@ -994,7 +1008,14 @@ let read_table input =
     let* ref_type, input = read_reftype input in
     let* limits, input = read_table_limits input in
     let+ value, input =
-      read_const [| (None, ([], [ Ref_type ref_type ])) |] input
+      read_const
+        [| ( None
+           , { final = false
+             ; ids = []
+             ; ct = Def_func_t ([], [ Ref_type ref_type ])
+             } )
+        |]
+        input
     in
     ((limits, ref_type, Some value), input)
     end

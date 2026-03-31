@@ -477,10 +477,18 @@ let convert_data : Binary.Data.t -> Text.Data.t = function
     let mode = convert_data_mode mode in
     { Text.Data.id; init; mode }
 
+let convert_sub_type Binary.{ final; ids; ct } : Text.sub_type =
+  match (final, ids, ct) with
+  | false, [], Def_func_t ft ->
+    Text.{ final; ids = []; ct = Def_func_t (convert_func_type ft) }
+  | _ ->
+    Fmt.failwith
+      "Uninmplemented: conversion from Binary.sub_type to Text.sub_type"
+
 let from_types types : Text.Module.Field.t list =
   Array.map
-    (fun ((id, _ft) : Binary.Typedef.t) ->
-      Text.Module.Field.Typedef (id, assert false) )
+    (fun ((id, ft) : Binary.Typedef.t) ->
+      Text.Module.Field.Typedef (id, convert_sub_type ft) )
     types
   |> Array.to_list
 

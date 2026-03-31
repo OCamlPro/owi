@@ -57,20 +57,25 @@ module Typetbl = Hashtbl.Make (struct
   let hash = Hashtbl.hash
 end)
 
-let assign_types typ decl_types :
+let assign_types (typ : Text.Typedef.t array) decl_types :
   Text.func_type Array.t * (string, int) Hashtbl.t =
   let all_types = Typetbl.create 64 in
   let named_types = Hashtbl.create 64 in
   let declared_types = Dynarray.create () in
   Array.iter
     (fun (name, typ) ->
-      let id = Dynarray.length declared_types in
-      begin match name with
-      | None -> ()
-      | Some name -> Hashtbl.add named_types name id
-      end;
-      Dynarray.add_last declared_types typ;
-      Typetbl.add all_types typ id )
+      match typ with
+      | Text.{ final = false; ids = []; ct = Def_func_t typ } ->
+        let id = Dynarray.length declared_types in
+        begin match name with
+        | None -> ()
+        | Some name -> Hashtbl.add named_types name id
+        end;
+        Dynarray.add_last declared_types typ;
+        Typetbl.add all_types typ id
+      | { final; ids; _ } ->
+        Fmt.failwith "unsupported  final:%b  subtype of:[%a]" final
+          (Fmt.list Text.pp_indice) ids )
     typ;
   Array.iter
     (fun typ ->
@@ -133,14 +138,14 @@ let of_grouped
    ; elem
    ; data
    ; type_checks
-   ; typ = _
+   ; typ
    ; decl_types
    ; tag
    ; _
    } :
     Grouped.t ) : t Result.t =
   Log.debug (fun m -> m "assigning    ...");
-  let typ, typ_names = assign_types (assert false) decl_types in
+  let typ, typ_names = assign_types typ decl_types in
   let* global_names =
     name "global"
       ~get_name:(get_origin_name (fun ({ id; _ } : Text.Global.t) -> id))

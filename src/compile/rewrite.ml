@@ -769,7 +769,7 @@ let rewrite_tag (assigned : Assigned.t) ({ id; typ } : Text.Tag.t) :
 let rewrite_types (assigned : Assigned.t) (ft : Text.func_type) :
   Binary.Typedef.t Result.t =
   let* ft = rewrite_func_type assigned ft in
-  Ok (None, ft)
+  Ok (None, Binary.{ final = false; ids = []; ct = Def_func_t ft })
 
 let modul (modul : Grouped.t) (assigned : Assigned.t) : Binary.Module.t Result.t
     =

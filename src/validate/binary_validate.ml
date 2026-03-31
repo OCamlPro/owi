@@ -73,7 +73,8 @@ module Env = struct
   let type_get i m =
     match Module.get_type i m with
     | None -> Error (`Unknown_type (Text.Raw i))
-    | Some (_, ty) -> Ok ty
+    | Some (_, { ct = Def_func_t ty; _ }) -> Ok ty
+    | _ -> assert false
 
   let local_get i env =
     match Index.Map.find_opt i env.locals with
@@ -166,7 +167,13 @@ let get_func_type_id (env : Env.t) i =
     | Origin.Local { type_f = Bt_raw (_, typ); _ } -> typ
     | Imported { typ = Bt_raw (_, typ); _ } -> typ
   in
-  Array.find_index (fun (_, typ') -> func_type_eq typ typ') env.modul.types
+  Array.find_index
+    (fun (_, typ') ->
+      match typ' with
+      | { final = false; ids = []; ct = Def_func_t typ' } ->
+        func_type_eq typ typ'
+      | _ -> assert false )
+    env.modul.types
 
 (* TODO: move type matching functions outside of the stack module? *)
 module Stack : sig
@@ -999,7 +1006,12 @@ let typecheck_const_instr ?known_globals ~is_init (modul : Module.t) refs stack
     let* ity = Env.func_get i modul in
     let resty =
       match
-        Array.find_index (fun (_, ty) -> func_type_eq ty ity) modul.types
+        Array.find_index
+          (fun (_, ty) ->
+            match ty.ct with
+            | Def_func_t ty -> func_type_eq ty ity
+            | _ -> assert false )
+          modul.types
       with
       | Some tyid -> TypeUse tyid
       | None -> Func_ht
