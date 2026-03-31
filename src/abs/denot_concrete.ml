@@ -21,8 +21,7 @@ type bt =
   }
 
 type l =
-  { id : int
-  ; form : bf
+  { form : bf
   ; ty : bt
   ; code : Binary.expr
   }
@@ -39,8 +38,8 @@ let pp_t fmt : t -> unit = function
   | I32 -> Fmt.pf fmt "i32"
   | I64 -> Fmt.pf fmt "i64"
 
-let pp_l fmt { id; form; ty; code } =
-  Fmt.pf fmt "(%i %s (%a)->(%a) %s)" id
+let pp_l fmt { form; ty; code } =
+  Fmt.pf fmt "(%s (%a)->(%a) %s)"
     (match form with Block -> "b" | Loop -> "l" | Func -> "f")
     (Fmt.list ~sep:(Fmt.any ", ") pp_t)
     ty.arg
@@ -49,14 +48,14 @@ let pp_l fmt { id; form; ty; code } =
     (if List.length code > 0 then "I" else "[]")
 
 let pp_v fmt = function
-  | I32 i -> Fmt.pf fmt "i32 %ld" i
-  | I64 i -> Fmt.pf fmt "i64 %Ld" i
+  | I32 i -> Fmt.pf fmt "(i32 %ld)" i
+  | I64 i -> Fmt.pf fmt "(i64 %Ld)" i
 
 let pp_map fmt map =
   let bindings = Map.bindings map in
   Fmt.pf fmt "@[<hov>{%a}@]"
     (Fmt.list ~sep:(Fmt.any ",@ ") (fun fmt (k, v) ->
-       Fmt.pf fmt "%d: %a" k pp_v v ) )
+       Fmt.pf fmt "%d->%a" k pp_v v ) )
     bindings
 
 let print_state (state : state) =
@@ -96,7 +95,7 @@ let func_type_to_bt ((params, results) : Binary.func_type) =
 
 (*=========================================================================*)
 
-let exec_ibinop (state : state) (size : Text.nn) (op : Text.ibinop) :
+let eval_ibinop (state : state) (size : Text.nn) (op : Text.ibinop) :
   state Result.t =
   match state with
   | (l, sigma, rho) :: state' -> begin
@@ -134,12 +133,57 @@ let exec_ibinop (state : state) (size : Text.nn) (op : Text.ibinop) :
   end
   | [] -> Fmt.error_msg "empty state"
 
-let rec exec_instr ~no_input (instrs : Binary.instr Annotated.t list)
+let eval_irelop (state : state) (size : Text.nn) (op : Text.irelop) =
+  match state with
+  | (l, sigma, rho) :: state' -> begin
+    match size with
+    | Text.S32 -> (
+      let op =
+        match op with
+        | Text.Eq -> Int32.eq
+        | Ne -> Int32.ne
+        | Lt s -> ( match s with U -> Int32.lt_u | S -> Int32.lt )
+        | Gt s -> (
+          fun x y ->
+            match s with U -> not @@ Int32.le_u x y | S -> not @@ Int32.le x y )
+        | Le s -> ( match s with U -> Int32.le_u | S -> Int32.le )
+        | Ge s -> (
+          fun x y ->
+            match s with U -> not @@ Int32.lt_u x y | S -> not @@ Int32.lt x y )
+      in
+      match sigma with
+      | I32 n1 :: I32 n2 :: sigma' ->
+        let to_int32 x = match x with false -> 0l | true -> 1l in
+        Ok ((l, I32 (op n1 n2 |> to_int32) :: sigma', rho) :: state')
+      | _ -> assert false )
+    | S64 -> (
+      let op =
+        match op with
+        | Text.Eq -> Int64.eq
+        | Ne -> Int64.ne
+        | Lt s -> ( match s with U -> Int64.lt_u | S -> Int64.lt )
+        | Gt s -> (
+          fun x y ->
+            match s with U -> not @@ Int64.le_u x y | S -> not @@ Int64.le x y )
+        | Le s -> ( match s with U -> Int64.le_u | S -> Int64.le )
+        | Ge s -> (
+          fun x y ->
+            match s with U -> not @@ Int64.lt_u x y | S -> not @@ Int64.lt x y )
+      in
+      match sigma with
+      | I64 n1 :: I64 n2 :: sigma' ->
+        let to_int64 x = match x with false -> 0L | true -> 1L in
+        Ok ((l, I64 (op n1 n2 |> to_int64) :: sigma', rho) :: state')
+      | _ -> assert false )
+  end
+  | [] -> assert false
+
+let rec eval_instr ~no_input (instrs : Binary.instr Annotated.t list)
   (state : state) : state Result.t =
   let* (l, sigma, rho), state' =
     match state with
     | (l, sigma, rho) :: state' -> Ok ((l, sigma, rho), state')
-    | [] -> Fmt.error_msg "exec_instr: empty state"
+    | [] -> Fmt.error_msg "eval_instr: empty state"
   in
   match instrs with
   | i :: instrs -> begin
@@ -153,7 +197,10 @@ let rec exec_instr ~no_input (instrs : Binary.instr Annotated.t list)
       | Binary.I32_const i -> Ok ((l, I32 i :: sigma, rho) :: state', instrs)
       | I64_const i -> Ok ((l, I64 i :: sigma, rho) :: state', instrs)
       | I_binop (size, op) ->
-        let+ res = exec_ibinop state size op in
+        let+ res = eval_ibinop state size op in
+        (res, instrs)
+      | I_relop (nn, relop) ->
+        let+ res = eval_irelop state nn relop in
         (res, instrs)
       | Local_get i -> (
         match Map.find_opt i rho with
@@ -177,57 +224,42 @@ let rec exec_instr ~no_input (instrs : Binary.instr Annotated.t list)
         | [] -> Fmt.error_msg "drop: empty stack" )
       | Unreachable -> Fmt.error_msg "unreachable"
       | Block (_str_opt, bt, block_instrs) -> (
-        let ty, id =
+        let ty =
           match bt with
-          | None -> ({ arg = []; result = [] }, None)
-          | Some bt ->
-            let (Bt_raw (id, ft)) = bt in
-            (func_type_to_bt ft, id)
+          | None -> { arg = []; result = [] }
+          | Some (Bt_raw (_, ft)) -> func_type_to_bt ft
         in
-        let* id =
-          match id with
-          | Some id -> Ok id
-          | None -> 
-              (* Fmt.error_msg "block: id should not be none ?" *)
-              Ok 0
-        in
-        let l' = Some { id; form = Block; ty; code = [] } in
+        let l' = Some { form = Block; ty; code = [] } in
         let args = List.take (List.length ty.arg) sigma in
         let+ res =
-          exec_instr ~no_input block_instrs.raw ((l', args, rho) :: state)
+          eval_instr ~no_input block_instrs.raw ((l', args, rho) :: state)
         in
         match res with
         | (_, sigma', rho') :: _ -> ((l, sigma' @ sigma, rho') :: state', instrs)
         | [] -> assert false )
       | Loop (_str_opt, bt, block_instrs) -> (
-        match bt with
-        | None -> Fmt.error_msg "loop: no block type ?"
-        | Some bt -> (
-          let (Bt_raw (id, ft)) = bt in
-          let ty = func_type_to_bt ft in
-          let* id =
-            match id with
-            | Some id -> Ok id
-            | None -> Fmt.error_msg "loop: id should not be none ?"
-          in
-          let l' = Some { id; form = Loop; ty; code = block_instrs.raw } in
-          let args = List.take (List.length ty.arg) sigma in
-          let+ res =
-            exec_instr ~no_input block_instrs.raw ((l', args, rho) :: state)
-          in
-          match res with
-          | (_, sigma', rho') :: _ ->
-            ((l, sigma' @ sigma, rho') :: state', instrs)
-          | [] -> assert false ) )
+        let ty =
+          match bt with
+          | None -> { arg = []; result = [] }
+          | Some (Bt_raw (_, ft)) -> func_type_to_bt ft
+        in
+        let l' = Some { form = Loop; ty; code = block_instrs.raw } in
+        let args = List.take (List.length ty.arg) sigma in
+        let+ res =
+          eval_instr ~no_input block_instrs.raw ((l', args, rho) :: state)
+        in
+        match res with
+        | (_, sigma', rho') :: _ -> ((l, sigma' @ sigma, rho') :: state', instrs)
+        | [] -> assert false )
       | If_else (_str_opt, bt, then_instrs, else_instrs) ->
         let+ res =
           match sigma with
           | I32 0l :: sigma | I64 0L :: sigma ->
-            exec_instr ~no_input
+            eval_instr ~no_input
               [ Binary.Block (_str_opt, bt, then_instrs) |> Annotated.dummy ]
               ((l, sigma, rho) :: state')
           | _ ->
-            exec_instr ~no_input
+            eval_instr ~no_input
               [ Binary.Block (_str_opt, bt, else_instrs) |> Annotated.dummy ]
               ((l, sigma, rho) :: state')
         in
@@ -235,7 +267,7 @@ let rec exec_instr ~no_input (instrs : Binary.instr Annotated.t list)
       | Br id -> (
         match l with
         | None -> Fmt.error_msg "br: on root (should be typechecked)"
-        | Some lbl when lbl.id = id -> (
+        | Some lbl when id = 0 -> (
           match lbl.form with
           | Block ->
             let results = List.take (List.length lbl.ty.result) sigma in
@@ -275,7 +307,7 @@ let rec exec_instr ~no_input (instrs : Binary.instr Annotated.t list)
       end
     in
     if not no_input then input_loop res;
-    exec_instr ~no_input res_instrs res
+    eval_instr ~no_input res_instrs res
   end
   | [] ->
     print_state state;
@@ -286,7 +318,7 @@ let run ~no_input (m : Binary.Module.t Result.t) =
   let start = m.func.(option_get m.start) in
   let start = match start with Local a -> a | _ -> assert false in
   let state = (None, [], Map.empty) :: [] in
-  let res = exec_instr start.body.raw state ~no_input in
+  let res = eval_instr start.body.raw state ~no_input in
   match res with
-  | Ok _state -> ()
+  | Ok _state -> Fmt.pr "Ok@."
   | Error e -> Fmt.epr "%s@." (Result.err_to_string e)
