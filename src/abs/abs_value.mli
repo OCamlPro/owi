@@ -16,13 +16,15 @@ val pp : ADomain.Context.t -> Format.formatter -> t -> unit
 
 val to_binary : t -> ADomain.binary
 
-val of_binary : Units.In_bits.t -> ADomain.binary -> t Result.t
+val of_binary : Units.In_bits.t -> ADomain.binary -> t
 
 val equal : t -> t -> bool
+
+val size_of : t -> Units.In_bits.t
 
 val binop :
      Units.In_bits.t
   -> (ADomain.binary -> ADomain.binary -> ADomain.binary)
   -> t
   -> t
-  -> t Result.t
+  -> t

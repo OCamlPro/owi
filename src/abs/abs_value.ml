@@ -36,9 +36,11 @@ let to_binary = function I32 b -> b | I64 b -> b
 
 let of_binary size binary =
   match Units.In_bits.to_int size with
-  | 32 -> Ok (I32 binary)
-  | 64 -> Ok (I64 binary)
-  | size -> Fmt.error_msg "Abs_value.of_binary: unsupported size %i" size
+  | 32 -> I32 binary
+  | 64 -> I64 binary
+  | _ -> assert false
+
+let size_of = function I32 _ -> Size.b32 | I64 _ -> Size.b64
 
 let binop size fn lhs rhs =
   let lhs, rhs = (to_binary lhs, to_binary rhs) in
