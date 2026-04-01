@@ -374,7 +374,7 @@ let fresh solver_ty () =
   let module Mapping = Mapping.Fresh.Make () in
   let module Batch = Smtml.Solver.Batch (Mapping) in
   let solver_inst = Batch.create ~logic:QF_BVFP () in
-  <span data-count="618">l</span>et solver = S ((module Batch), solver_inst) in
+  <span data-count="616">l</span>et solver = S ((module Batch), solver_inst) in
   if Log.is_bench_enabled () then <span data-count="2">a</span>dd_solve<span data-count="2">r</span> solver;
   <span data-count="617">s</span>olver
 
@@ -387,49 +387,49 @@ let dls_key =
     | <span data-count="624">S</span>ome solver_to_use -&gt; fresh solver_to_use ()
     | None -&gt; assert false )
 
-let[@inline] get_current () = <span data-count="24968">D</span>omain.DLS.get dls_key
+let[@inline] get_current () = <span data-count="25397">D</span>omain.DLS.get dls_key
 
 let cache = Smtml.Cache.Strong.creat<span data-count="756">e</span> 64
 
 let cache_mutex = Mutex.creat<span data-count="756">e</span> ()
 
 let check pc condition =
-  <span data-count="27408">l</span>et query = Smtml.Expr.Set.add (Smtml.Typed.Unsafe.unwra<span data-count="27408">p</span> condition) pc in
-  <span data-count="27408">l</span>et cached =
+  <span data-count="27647">l</span>et query = Smtml.Expr.Set.add (Smtml.Typed.Unsafe.unwra<span data-count="27647">p</span> condition) pc in
+  <span data-count="27647">l</span>et cached =
     Mutex.protect cache_mutex (fun () -&gt;
-      <span data-count="27408">m</span>atch Smtml.Cache.Strong.find_opt cache query with
-      | <span data-count="2561">S</span>ome sat -&gt; Some sat
-      | <span data-count="24847">N</span>one -&gt; (
+      <span data-count="27647">m</span>atch Smtml.Cache.Strong.find_opt cache query with
+      | <span data-count="2569">S</span>ome sat -&gt; Some sat
+      | <span data-count="25078">N</span>one -&gt; (
         let neg_query =
           let neg_condition = Smtml.Typed.Bool.not condition in
-          <span data-count="24847">S</span>mtml.Expr.Set.ad<span data-count="24847">d</span> (Smtml.Typed.Unsafe.unwra<span data-count="24847">p</span> neg_condition) pc
+          <span data-count="25078">S</span>mtml.Expr.Set.ad<span data-count="25078">d</span> (Smtml.Typed.Unsafe.unwra<span data-count="25078">p</span> neg_condition) pc
         in
         match Smtml.Cache.Strong.find_opt cache neg_query with
-        | <span data-count="882">S</span>ome `Unsat -&gt;
+        | <span data-count="906">S</span>ome `Unsat -&gt;
           (* this is an optimisation under the assumption that the PC is always SAT (i.e. we are performing eager pruning), in such a case, when a branch is unsat, we don't have to check the reachability of the other's branch negation, because it is always going to be SAT. *)
           Some `Sat
-        | <span data-count="13486">N</span>one | <span data-count="10479">S</span>ome _ -&gt;
+        | <span data-count="13670">N</span>one | <span data-count="10502">S</span>ome _ -&gt;
           (* we can't deduce anything *)
           None ) )
   in
-  <span data-count="27408">m</span>atch cached with
-  | <span data-count="3443">S</span>ome sat -&gt; sat
-  | <span data-count="23965">N</span>one -&gt;
+  <span data-count="27647">m</span>atch cached with
+  | <span data-count="3475">S</span>ome sat -&gt; sat
+  | <span data-count="24172">N</span>one -&gt;
     (* there was nothing useful in the cache and we have to make the check for real! *)
     let (S (solver_module, s)) = get_current () in
-    <span data-count="23959">l</span>et module Solver = (val solver_module) in
+    <span data-count="24166">l</span>et module Solver = (val solver_module) in
     let sat = Solver.check_set s query in
-    <span data-count="23956">M</span>utex.protect cache_mutex (fun () -&gt;
-      <span data-count="23956">S</span>mtml.Cache.Strong.replace cache query sat );
-    <span data-count="23956">s</span>at
+    <span data-count="24158">M</span>utex.protect cache_mutex (fun () -&gt;
+      <span data-count="24158">S</span>mtml.Cache.Strong.replace cache query sat );
+    <span data-count="24158">s</span>at
 
 let model_of_path_condition ~path_condition : Smtml.Model.t Option.t =
-  <span data-count="254">l</span>et exception Unknown in
+  <span data-count="253">l</span>et exception Unknown in
   let (S (solver_module, s)) = get_current () in
-  <span data-count="254">l</span>et module Solver = (val solver_module) in
+  <span data-count="253">l</span>et module Solver = (val solver_module) in
   try
     let sub_conditions = Symex.Path_condition.to_list path_condition in
-    <span data-count="254">l</span>et models =
+    <span data-count="253">l</span>et models =
       List.map
         (fun pc -&gt;
           <span data-count="305">m</span>atch Solver.get_sat_model s pc with
@@ -443,16 +443,16 @@ let model_of_path_condition ~path_condition : Smtml.Model.t Option.t =
         sub_conditions
     in
     (* We build the new complete model by merging all "sub models" *)
-    <span data-count="253">l</span>et model = Hashtbl.create 64 in
-    <span data-count="253">L</span>ist.iter (Hashtbl.ite<span data-count="253">r</span> (Hashtbl.ad<span data-count="253">d</span> model)) models;
-    <span data-count="253">S</span>ome model
+    <span data-count="252">l</span>et model = Hashtbl.create 64 in
+    <span data-count="252">L</span>ist.iter (Hashtbl.ite<span data-count="252">r</span> (Hashtbl.ad<span data-count="252">d</span> model)) models;
+    <span data-count="252">S</span>ome model
   with <span data-count="0">U</span>nknown -&gt; None
 
 let model_of_set ~symbol_scopes ~set =
-  <span data-count="749">l</span>et (S (solver_module, s)) = get_current () in
-  <span data-count="749">l</span>et module Solver = (val solver_module) in
+  <span data-count="972">l</span>et (S (solver_module, s)) = get_current () in
+  <span data-count="972">l</span>et module Solver = (val solver_module) in
   let symbols = Symbol_scope.only_symbols symbol_scopes in
-  <span data-count="749">S</span>olver.get_sat_model ~symbols s set
+  <span data-count="972">S</span>olver.get_sat_model ~symbols s set
 
 let empty_stats = Smtml.Statistics.Map.empty
 
