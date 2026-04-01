@@ -1,3 +1,4 @@
+#define OWI_NO_MACROS
 #include <owi.h>
 
 #define magic_size_signed(T)                                                   \

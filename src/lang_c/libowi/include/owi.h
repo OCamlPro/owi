@@ -99,6 +99,7 @@ __attribute__((import_module("owi"), import_name("exit"))) void exit(int);
 #endif
 
 
+#ifndef OWI_NO_MACROS
 // ##__VA_ARGS__ removes the preceding comma when empty
 // so when we have no args -> (_, owi_name_t(_), owi_t()) = owi_t()
 // but when we have an arg -> (_, arg, owi_named_t(arg), owi_t()) = owi_named_t(arg)
@@ -130,5 +131,6 @@ __attribute__((import_module("owi"), import_name("exit"))) void exit(int);
 #define owi_unsigned_long(...) OWI_MAKE(unsigned_long, ##__VA_ARGS__)
 #define owi_long_long(...) OWI_MAKE(long_long, ##__VA_ARGS__)
 #define owi_unsigned_long_long(...) OWI_MAKE(unsigned_long_long, ##__VA_ARGS__)
+#endif /* OWI_NO_MACROS */
 
 #endif
