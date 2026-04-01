@@ -885,11 +885,11 @@ let check_error_result expected = function
 
 let load_module ls mod_id =
   <span data-count="25158">m</span>atch mod_id with
-  | <span data-count="25010">N</span>one -&gt; begin
-    match Link.State.get_last ls with
+  | <span data-count="25010">N</span>one -&gt;
+    begin match Link.State.get_last ls with
     | <span data-count="0">N</span>one -&gt; Error `Unbound_last_module
     | <span data-count="25010">S</span>ome m -&gt; Ok m
-  end
+    end
   | <span data-count="148">S</span>ome mod_id -&gt; (
     match Link.State.get_by_id ls mod_id with
     | <span data-count="0">N</span>one -&gt; Error (`Unbound_module mod_id)
@@ -931,11 +931,11 @@ let compare_result_const result (const : Concrete_value.t) =
   | <span data-count="5">R</span>esult_const (Literal (Const_null (Some (<span data-count="3">A</span>ny_ht | <span data-count="2">N</span>one_ht)))), Ref NullRef
     -&gt;
     true
-  | <span data-count="31">R</span>esult_const (Literal (Const_extern n)), Ref (Extern (Some ref)) -&gt; begin
-    match Concrete_ref.Extern.cast ref Host_externref.ty with
+  | <span data-count="31">R</span>esult_const (Literal (Const_extern n)), Ref (Extern (Some ref)) -&gt;
+    begin match Concrete_ref.Extern.cast ref Host_externref.ty with
     | <span data-count="0">N</span>one -&gt; false
     | <span data-count="31">S</span>ome n' -&gt; n = n'
-  end
+    end
   | <span data-count="466">R</span>esult_const (Nan_canon S32), F32 f -&gt;
     Float32.is_pos_na<span data-count="466">n</span> <span data-count="256">f</span> || Float32.is_neg_nan f
   | <span data-count="467">R</span>esult_const (Nan_canon S64), F64 f -&gt;
@@ -997,7 +997,7 @@ let action (link_state : Concrete_extern_func.extern_func Link.State.t) =
     <span data-count="25147">l</span>et envs = Link.State.get_envs link_state in
     <span data-count="25147">l</span>et module I = Interpret.Concrete (Interpret.Default_parameters) in
     I.exec_vfunc_from_outside ~locals:stack ~env:env_id ~envs f
-  end
+    end
   | <span data-count="11">G</span>et (mod_id, name) -&gt;
     Log.info (fun m -&gt; <span data-count="0">m</span> "get...");
     <span data-count="11">l</span>et+ global = load_global_from_modul<span data-count="11">e</span> link_state mod_id name in
@@ -1081,13 +1081,13 @@ let run ~no_exhaustion script =
         <span data-count="11">l</span>et+ () =
           match got with
           | <span data-count="2">E</span>rror got -&gt; check_error ~expected ~got
-          | <span data-count="9">O</span>k m -&gt; begin
-            match Binary_validate.modul m with
+          | <span data-count="9">O</span>k m -&gt;
+            begin match Binary_validate.modul m with
             | <span data-count="9">E</span>rror got -&gt; check_error ~expected ~got
             | <span data-count="0">O</span>k () -&gt;
               let got = Link.Binary.modul link_state ~name:None m in
               <span data-count="0">c</span>heck_error_resul<span data-count="0">t</span> expected got
-          end
+            end
         in
         <span data-count="11">l</span>ink_state
       | <span data-count="1520">A</span>ssert (Assert_invalid (m, expected)) -&gt;

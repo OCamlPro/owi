@@ -1461,12 +1461,12 @@ let existing_file_conv =
   let parse s =
     <span data-count="2944">m</span>atch Fpath.of_string s with
     | <span data-count="0">E</span>rror _ as e -&gt; e
-    | <span data-count="2944">O</span>k path -&gt; begin
-      match Bos.OS.File.exists path with
+    | <span data-count="2944">O</span>k path -&gt;
+      begin match Bos.OS.File.exists path with
       | <span data-count="2936">O</span>k true -&gt; Ok path
       | <span data-count="8">O</span>k false -&gt; Fmt.error_msg "no file '%a'" Fpath.pp path
       | <span data-count="0">E</span>rror _ as e -&gt; e
-    end
+      end
   in
   Arg.con<span data-count="727">v</span> (parse, Fpath.pp)
 
@@ -1474,12 +1474,12 @@ let existing_dir_conv =
   let parse s =
     <span data-count="161">m</span>atch Fpath.of_string s with
     | <span data-count="0">E</span>rror _ as e -&gt; e
-    | <span data-count="161">O</span>k path -&gt; begin
-      match Bos.OS.Dir.exists path with
+    | <span data-count="161">O</span>k path -&gt;
+      begin match Bos.OS.Dir.exists path with
       | <span data-count="161">O</span>k true -&gt; Ok path
       | <span data-count="0">O</span>k false -&gt; Fmt.error_msg "no directory '%a'" Fpath.pp path
       | <span data-count="0">E</span>rror _ as e -&gt; e
-    end
+      end
   in
   Arg.con<span data-count="727">v</span> (parse, Fpath.pp)
 
@@ -2113,14 +2113,14 @@ let exit_code =
   let open Cmd.Exit in
   match Cmd.eval_value cli with
   | Ok (<span data-count="18">`</span>Help | <span data-count="0">`</span>Version) -&gt; ok
-  | <span data-count="685">O</span>k (`Ok result) -&gt; begin
-    match result with
+  | <span data-count="685">O</span>k (`Ok result) -&gt;
+    begin match result with
     | <span data-count="421">O</span>k () -&gt; ok
     | <span data-count="264">E</span>rror e -&gt; begin
       Log.err (fun m -&gt; <span data-count="264">m</span> "%s" (Result.err_to_strin<span data-count="264">g</span> e));
       <span data-count="264">R</span>esult.err_to_exit_cod<span data-count="264">e</span> e
+      end
     end
-  end
   | Error (<span data-count="8">`</span>Parse | <span data-count="10">`</span>Term) -&gt; cli_error
   | <span data-count="2">E</span>rror `Exn -&gt; internal_error
 

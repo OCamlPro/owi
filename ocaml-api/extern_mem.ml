@@ -6,13 +6,13 @@ let extern_module : Concrete_extern_func.extern_func Extern.Module.t =
   let memset m start byte length =
     let rec loop offset =
       let b = Concrete_i32.le offset length |> Concrete_boolean.to_bool in
-      if b then begin
-        match
+      if b then
+        begin match
           Concrete_memory.store_8 m ~addr:(Concrete_i32.add start offset) byte
         with
         | Error _ as e -> e
         | Ok () -> loop (Concrete_i32.add offset (Concrete_i32.of_int 1))
-      end
+        end
       else Ok ()
     in
     loop Concrete_i32.zero

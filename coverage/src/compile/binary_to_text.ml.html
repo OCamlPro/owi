@@ -1123,15 +1123,15 @@ let rec convert_instr : Binary.instr -&gt; Text.instr = function
   | <span data-count="0">E</span>lem_drop id -&gt;
     let id = convert_indice id in
     <span data-count="0">E</span>lem_drop id
-  | <span data-count="0">S</span>elect typ -&gt; begin
-    match typ with
+  | <span data-count="0">S</span>elect typ -&gt;
+    begin match typ with
     | <span data-count="0">N</span>one -&gt; Select None
     | <span data-count="0">S</span>ome [ t ] -&gt; Select (Some [ convert_val_typ<span data-count="0">e</span> t ])
     | Some [] | Some (_ :: _ :: _) -&gt;
       (* invalid result arity *)
       (* TODO: maybe we could change the type of Binary.Select to prevent this from happening? *)
       assert false
-  end
+    end
   | <span data-count="0">I</span>_unop (nn, op) -&gt; I_unop (nn, op)
   | <span data-count="28">I</span>_binop (nn, op) -&gt; I_binop (nn, op)
   | <span data-count="1">I</span>_testop (nn, op) -&gt; I_testop (nn, op)

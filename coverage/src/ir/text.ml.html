@@ -2061,8 +2061,8 @@ let pp_num_type fmt = function
   | <span data-count="0">V</span>128 -&gt; pf fmt "v128"
 
 let num_type_eq t1 t2 =
-  <span data-count="1644383">m</span>atch (t1, t2) with
-  | <span data-count="1496889">I</span>32, I32 | <span data-count="47029">I</span>64, I64 | <span data-count="46663">F</span>32, F32 | <span data-count="47281">F</span>64, F64 | <span data-count="567">V</span>128, V128 -&gt; true
+  <span data-count="1644306">m</span>atch (t1, t2) with
+  | <span data-count="1496812">I</span>32, I32 | <span data-count="47029">I</span>64, I64 | <span data-count="46663">F</span>32, F32 | <span data-count="47281">F</span>64, F64 | <span data-count="567">V</span>128, V128 -&gt; true
   | <span data-count="5954">(</span><span data-count="1986">I</span>32 | <span data-count="1225">I</span>64 | <span data-count="841">F</span>32 | <span data-count="1902">F</span>64 | <span data-count="0">V</span>128), _ -&gt; false
 
 let compare_num_type t1 t2 =
@@ -2583,12 +2583,12 @@ let rec pp_instr ~short fmt = function
   | <span data-count="0">R</span>ef_as_non_null -&gt; pf fmt "ref.as_non_null"
   | <span data-count="4">R</span>ef_func fid -&gt; pf fmt "ref.func %a" pp_indice fid
   | <span data-count="115">D</span>rop -&gt; pf fmt "drop"
-  | <span data-count="3">S</span>elect vt -&gt; begin
-    match vt with
+  | <span data-count="3">S</span>elect vt -&gt;
+    begin match vt with
     | <span data-count="3">N</span>one -&gt; pf fmt "select"
     | <span data-count="0">S</span>ome vt -&gt; pf fmt "select (%a)" pp_result_type vt
     (* TODO: are the parens needed ? *)
-  end
+    end
   | <span data-count="159">L</span>ocal_get id -&gt; pf fmt "local.get %a" pp_indice id
   | <span data-count="6">L</span>ocal_set id -&gt; pf fmt "local.set %a" pp_indice id
   | <span data-count="7">L</span>ocal_tee id -&gt; pf fmt "local.tee %a" pp_indice id

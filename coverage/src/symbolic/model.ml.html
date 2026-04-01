@@ -343,7 +343,7 @@ let print ~format ~out_file ~id ~no_value ~no_stop_at_failure
       <span data-count="246">l</span>et fmt = m (if no_stop_at_failure then <span data-count="182">"</span>%a@." else <span data-count="64">"</span>%a") in
       <span data-count="246">f</span>mt (p<span data-count="246">p</span> format with_breadcrumbs no_value) (model, state) );
     <span data-count="246">O</span>k ()
-  end
+    end
   | <span data-count="3">S</span>ome path -&gt;
     let ext = match format with <span data-count="0">J</span>son -&gt; "json" | <span data-count="3">S</span>cfg -&gt; "scfg" in
     let contains_ext =

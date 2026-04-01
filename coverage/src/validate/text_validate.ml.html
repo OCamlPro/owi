@@ -209,8 +209,8 @@
 <a id="L169"></a><span class="visited"> </span>
 <a id="L170"></a><span class="visited"> </span>
 <a id="L171"></a><span class="visited"> </span>
-<a id="L172"></a><span class="visited"> </span>
-<a id="L173"></a><span > </span>
+<a id="L172"></a><span > </span>
+<a id="L173"></a><span class="visited"> </span>
 <a id="L174"></a><span class="visited"> </span>
 <a id="L175"></a><span class="visited"> </span>
 <a id="L176"></a><span class="visited"> </span>
@@ -553,25 +553,25 @@ let modul m =
     in
     let get_table name =
       <span data-count="855">m</span>atch name with
-      | <span data-count="88">N</span>one -&gt; begin
-        match Hashtbl.find_opt seen 0 with
+      | <span data-count="88">N</span>one -&gt;
+        begin match Hashtbl.find_opt seen 0 with
         | None -&gt; assert false
         | <span data-count="88">S</span>ome ty -&gt; Ok ty
-      end
-      | <span data-count="436">S</span>ome (Text name) -&gt; begin
-        match Hashtbl.find_opt names2ids name with
+        end
+      | <span data-count="436">S</span>ome (Text name) -&gt;
+        begin match Hashtbl.find_opt names2ids name with
         | <span data-count="0">N</span>one -&gt; Error (`Unknown_table (Text name))
-        | <span data-count="436">S</span>ome id -&gt; begin
-          match Hashtbl.find_opt seen id with
+        | <span data-count="436">S</span>ome id -&gt;
+          begin match Hashtbl.find_opt seen id with
           | None -&gt; assert false
           | <span data-count="436">S</span>ome ty -&gt; Ok ty
+          end
         end
-      end
-      | <span data-count="331">S</span>ome (Raw id) -&gt; begin
-        match Hashtbl.find_opt seen id with
+      | <span data-count="331">S</span>ome (Raw id) -&gt;
+        begin match Hashtbl.find_opt seen id with
         | <span data-count="7">N</span>one -&gt; Error (`Unknown_table (Raw id))
         | <span data-count="324">S</span>ome ty -&gt; Ok ty
-      end
+        end
     in
     (add_table, get_table)
   in
@@ -632,8 +632,8 @@ let modul m =
           else <span data-count="5526">i</span>f env.declared_memory then <span data-count="4">E</span>rror `Import_after_memory
           else <span data-count="5522">i</span>f env.tables then <span data-count="4">E</span>rror `Import_after_table
           else <span data-count="5518">i</span>f env.globals then <span data-count="4">E</span>rror `Import_after_global
-          else <span data-count="5514">b</span>egin
-            match i.typ with
+          else
+            <span data-count="5514">b</span>egin match i.typ with
             | <span data-count="315">M</span>em (id, _) -&gt;
               let* () = add_memor<span data-count="315">y</span> id in
               <span data-count="314">O</span>k env
@@ -645,7 +645,7 @@ let modul m =
               let+ () = add_tabl<span data-count="167">e</span> id ty in
               <span data-count="166">e</span>nv
             | <span data-count="14">T</span>ag _ -&gt; Ok env
-          end
+            end
         | <span data-count="1054">D</span>ata _d -&gt; Ok env
         | <span data-count="10">T</span>ag _t -&gt; Ok env
         | <span data-count="1635">E</span>lem { typ; mode; explicit_typ; init; _ } -&gt;

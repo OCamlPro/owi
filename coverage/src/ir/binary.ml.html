@@ -1802,8 +1802,8 @@ let pp_val_type fmt = function
   | <span data-count="0">R</span>ef_type t -&gt; pp_ref_type fmt t
 
 let val_type_eq t1 t2 =
-  <span data-count="1617993">m</span>atch (t1, t2) with
-  | <span data-count="1617963">N</span>um_type t1, Num_type t2 -&gt; Text.num_type_eq t1 t2
+  <span data-count="1617916">m</span>atch (t1, t2) with
+  | <span data-count="1617886">N</span>um_type t1, Num_type t2 -&gt; Text.num_type_eq t1 t2
   | <span data-count="30">R</span>ef_type t1, Ref_type t2 -&gt; ref_type_eq t1 t2
   | <span data-count="0">_</span>, _ -&gt; false
 
@@ -1828,17 +1828,17 @@ type param = string option * val_type
 let pp_param fmt ((id, vt) : param) =
   <span data-count="25">p</span>f fmt "(param%a %a)" pp_str_opt id pp_val_type vt
 
-let param_eq (_, t1) (_, t2) = <span data-count="810880">v</span>al_type_eq t1 t2
+let param_eq (_, t1) (_, t2) = <span data-count="810824">v</span>al_type_eq t1 t2
 
 type param_type = param list
 
 let pp_param_type fmt (params : param_type) = <span data-count="25">l</span>ist ~sep:sp pp_param fmt params
 
-let param_type_eq t1 t2 = <span data-count="813530">L</span>ist.equal param_eq t1 t2
+let param_type_eq t1 t2 = <span data-count="813501">L</span>ist.equal param_eq t1 t2
 
 type result_type = val_type list
 
-let result_type_eq t1 t2 = <span data-count="812325">L</span>ist.equal val_type_eq t1 t2
+let result_type_eq t1 t2 = <span data-count="812299">L</span>ist.equal val_type_eq t1 t2
 
 let pp_result_ fmt vt = <span data-count="19">p</span>f fmt "(result %a)" pp_val_type vt
 
@@ -1857,7 +1857,7 @@ let pp_func_type fmt (params, results) =
     results
 
 let func_type_eq (pt1, rt1) (pt2, rt2) =
-  <span data-count="813530">p</span>aram_type_e<span data-count="813530">q</span> pt1 pt2 &amp;&amp; <span data-count="812325">r</span>esult_type_eq rt1 rt2
+  <span data-count="813501">p</span>aram_type_e<span data-count="813500">q</span> pt1 pt2 &amp;&amp; <span data-count="812299">r</span>esult_type_eq rt1 rt2
 
 type block_type =
   (* TODO: inline this *)
@@ -2029,12 +2029,12 @@ let rec pp_instr ~short fmt = function
   | <span data-count="0">R</span>ef_as_non_null -&gt; pf fmt "ref.as_non_null"
   | <span data-count="0">R</span>ef_func fid -&gt; pf fmt "ref.func %a" pp_indice fid
   | <span data-count="44">D</span>rop -&gt; pf fmt "drop"
-  | <span data-count="2">S</span>elect vt -&gt; begin
-    match vt with
+  | <span data-count="2">S</span>elect vt -&gt;
+    begin match vt with
     | <span data-count="2">N</span>one -&gt; pf fmt "select"
     | <span data-count="0">S</span>ome vt -&gt; pf fmt "select (%a)" pp_result_type vt
     (* TODO: are the parens needed ? *)
-  end
+    end
   | <span data-count="65">L</span>ocal_get id -&gt; pf fmt "local.get %a" pp_indice id
   | <span data-count="11">L</span>ocal_set id -&gt; pf fmt "local.set %a" pp_indice id
   | <span data-count="16">L</span>ocal_tee id -&gt; pf fmt "local.tee %a" pp_indice id
@@ -2131,23 +2131,23 @@ and pp_expr ~short fmt instrs =
     instrs
 
 let rec iter_expr f (e : expr Annotated.t) =
-  <span data-count="7069">A</span>nnotated.iter (List.ite<span data-count="7069">r</span> (iter_inst<span data-count="7069">r</span> f)) e
+  <span data-count="6990">A</span>nnotated.iter (List.ite<span data-count="6990">r</span> (iter_inst<span data-count="6990">r</span> f)) e
 
 and iter_instr f instr =
-  <span data-count="170707">A</span>nnotated.iter f instr;
-  <span data-count="170707">A</span>nnotated.iter
-    (<span data-count="170707">f</span>unction
-      | <span data-count="25437">I</span>32_const _ | <span data-count="479">I</span>64_const _ | <span data-count="10">F</span>32_const _ | <span data-count="0">F</span>64_const _ | <span data-count="0">V</span>128_const _
-      | <span data-count="369">I</span>_unop (_, _)
+  <span data-count="168802">A</span>nnotated.iter f instr;
+  <span data-count="168802">A</span>nnotated.iter
+    (<span data-count="168802">f</span>unction
+      | <span data-count="25108">I</span>32_const _ | <span data-count="474">I</span>64_const _ | <span data-count="10">F</span>32_const _ | <span data-count="0">F</span>64_const _ | <span data-count="0">V</span>128_const _
+      | <span data-count="371">I</span>_unop (_, _)
       | <span data-count="0">F</span>_unop (_, _)
-      | <span data-count="15913">I</span>_binop (_, _)
+      | <span data-count="15638">I</span>_binop (_, _)
       | <span data-count="33">F</span>_binop (_, _)
       | <span data-count="0">V</span>_ibinop (_, _)
-      | <span data-count="1918">I</span>_testop (_, _)
-      | <span data-count="4382">I</span>_relop (_, _)
+      | <span data-count="1891">I</span>_testop (_, _)
+      | <span data-count="4321">I</span>_relop (_, _)
       | <span data-count="8">F</span>_relop (_, _)
-      | <span data-count="26">I</span>_extend8_s _ | <span data-count="0">I</span>_extend16_s _ | <span data-count="0">I</span>64_extend32_s | <span data-count="38">I</span>32_wrap_i64
-      | <span data-count="92">I</span>64_extend_i32 _
+      | <span data-count="26">I</span>_extend8_s _ | <span data-count="0">I</span>_extend16_s _ | <span data-count="0">I</span>64_extend32_s | <span data-count="37">I</span>32_wrap_i64
+      | <span data-count="81">I</span>64_extend_i32 _
       | <span data-count="0">I</span>_trunc_f (_, _, _)
       | <span data-count="33">I</span>_trunc_sat_f (_, _, _)
       | <span data-count="0">F</span>32_demote_f64 | <span data-count="0">F</span>64_promote_f32
@@ -2155,32 +2155,32 @@ and iter_instr f instr =
       | <span data-count="0">I</span>_reinterpret_f (_, _)
       | <span data-count="0">F</span>_reinterpret_i (_, _)
       | <span data-count="0">R</span>ef_null _ | <span data-count="0">R</span>ef_is_null | <span data-count="0">R</span>ef_as_non_null | <span data-count="0">R</span>ef_func _ | <span data-count="1918">D</span>rop
-      | <span data-count="1176">S</span>elect _ | <span data-count="49618">L</span>ocal_get _ | <span data-count="10182">L</span>ocal_set _ | <span data-count="7517">L</span>ocal_tee _ | <span data-count="430">G</span>lobal_get _
-      | <span data-count="834">G</span>lobal_set _ | <span data-count="0">T</span>able_get _ | <span data-count="0">T</span>able_set _ | <span data-count="0">T</span>able_size _ | <span data-count="0">T</span>able_grow _
+      | <span data-count="1174">S</span>elect _ | <span data-count="49105">L</span>ocal_get _ | <span data-count="10020">L</span>ocal_set _ | <span data-count="7448">L</span>ocal_tee _ | <span data-count="421">G</span>lobal_get _
+      | <span data-count="817">G</span>lobal_set _ | <span data-count="0">T</span>able_get _ | <span data-count="0">T</span>able_set _ | <span data-count="0">T</span>able_size _ | <span data-count="0">T</span>able_grow _
       | <span data-count="0">T</span>able_fill _
       | <span data-count="0">T</span>able_copy (_, _)
       | <span data-count="0">T</span>able_init (_, _)
       | <span data-count="0">E</span>lem_drop _
-      | <span data-count="11960">I</span>_load (_, _, _)
+      | <span data-count="11885">I</span>_load (_, _, _)
       | <span data-count="45">F</span>_load (_, _, _)
-      | <span data-count="9433">I</span>_store (_, _, _)
+      | <span data-count="9394">I</span>_store (_, _, _)
       | <span data-count="12">F</span>_store (_, _, _)
-      | <span data-count="1352">I</span>_load8 (_, _, _, _)
-      | <span data-count="54">I</span>_load16 (_, _, _, _)
+      | <span data-count="1318">I</span>_load8 (_, _, _, _)
+      | <span data-count="53">I</span>_load16 (_, _, _, _)
       | <span data-count="0">I</span>64_load32 (_, _, _)
-      | <span data-count="2007">I</span>_store8 (_, _, _)
+      | <span data-count="1997">I</span>_store8 (_, _, _)
       | <span data-count="28">I</span>_store16 (_, _, _)
       | <span data-count="0">I</span>64_store32 _ | <span data-count="0">M</span>emory_size _ | <span data-count="4">M</span>emory_grow _ | <span data-count="12">M</span>emory_fill _
-      | <span data-count="28">M</span>emory_copy _ | <span data-count="0">M</span>emory_init _ | <span data-count="1">D</span>ata_drop _ | <span data-count="0">N</span>op | <span data-count="493">U</span>nreachable | <span data-count="1926">B</span>r _
-      | <span data-count="6108">B</span>r_if _
-      | <span data-count="22">B</span>r_table (_, _)
-      | <span data-count="0">B</span>r_on_null _ | <span data-count="0">B</span>r_on_non_null _ | <span data-count="1165">R</span>eturn | <span data-count="0">R</span>eturn_call _
+      | <span data-count="28">M</span>emory_copy _ | <span data-count="0">M</span>emory_init _ | <span data-count="1">D</span>ata_drop _ | <span data-count="0">N</span>op | <span data-count="484">U</span>nreachable | <span data-count="1907">B</span>r _
+      | <span data-count="6021">B</span>r_if _
+      | <span data-count="21">B</span>r_table (_, _)
+      | <span data-count="0">B</span>r_on_null _ | <span data-count="0">B</span>r_on_non_null _ | <span data-count="1142">R</span>eturn | <span data-count="0">R</span>eturn_call _
       | <span data-count="0">R</span>eturn_call_indirect (_, _)
-      | <span data-count="0">R</span>eturn_call_ref _ | <span data-count="7701">C</span>all _
-      | <span data-count="1046">C</span>all_indirect (_, _)
+      | <span data-count="0">R</span>eturn_call_ref _ | <span data-count="7672">C</span>all _
+      | <span data-count="1026">C</span>all_indirect (_, _)
       | <span data-count="0">C</span>all_ref _ | <span data-count="0">E</span>xtern_externalize | <span data-count="0">E</span>xtern_internalize -&gt;
         ()
-      | <span data-count="5983">B</span>lock (_, _, e) | <span data-count="877">L</span>oop (_, _, e) -&gt; iter_expr f e
+      | <span data-count="5922">B</span>lock (_, _, e) | <span data-count="859">L</span>oop (_, _, e) -&gt; iter_expr f e
       | <span data-count="0">I</span>f_else (_, _, e1, e2) -&gt;
         iter_expr f e1;
         <span data-count="0">i</span>ter_expr f e2 )
@@ -2379,44 +2379,44 @@ module Module = struct
     Log.warn (fun m -&gt;
       m "insert_func_at_idx is still incomplete and you may run into issues" );
     *)
-    <span data-count="968">l</span>et update_idx idx = <span data-count="37045">i</span>f idx &gt;= i then <span data-count="30231">i</span>dx + 1 else <span data-count="6814">i</span>dx in
+    <span data-count="968">l</span>et update_idx idx = <span data-count="36886">i</span>f idx &gt;= i then <span data-count="30072">i</span>dx + 1 else <span data-count="6814">i</span>dx in
 
     let rec handle_instr instr =
-      <span data-count="888061">A</span>nnotated.map
+      <span data-count="879172">A</span>nnotated.map
         (function
-          | <span data-count="33021">C</span>all idx -&gt; Call (update_id<span data-count="33021">x</span> idx)
+          | <span data-count="32887">C</span>all idx -&gt; Call (update_id<span data-count="32887">x</span> idx)
           | <span data-count="0">R</span>eturn_call idx -&gt; Return_call (update_id<span data-count="0">x</span> idx)
-          | <span data-count="2712">R</span>ef_func idx -&gt; Ref_func (update_id<span data-count="2712">x</span> idx)
-          | <span data-count="27456">B</span>lock (id, typ, body) -&gt;
+          | <span data-count="2687">R</span>ef_func idx -&gt; Ref_func (update_id<span data-count="2687">x</span> idx)
+          | <span data-count="27165">B</span>lock (id, typ, body) -&gt;
             let body = handle_expr body in
-            <span data-count="27456">B</span>lock (id, typ, body)
-          | <span data-count="4487">L</span>oop (id, typ, body) -&gt;
+            <span data-count="27165">B</span>lock (id, typ, body)
+          | <span data-count="4403">L</span>oop (id, typ, body) -&gt;
             let body = handle_expr body in
-            <span data-count="4487">L</span>oop (id, typ, body)
+            <span data-count="4403">L</span>oop (id, typ, body)
           | <span data-count="7825">I</span>f_else (id, typ, true_branch, false_branch) -&gt;
             let true_branch = handle_expr true_branch in
             <span data-count="7825">l</span>et false_branch = handle_expr false_branch in
             <span data-count="7825">I</span>f_else (id, typ, true_branch, false_branch)
-          | <span data-count="812560">i</span>nstr -&gt;
+          | <span data-count="804205">i</span>nstr -&gt;
             (* TODO: make this match non fragile *)
             instr )
         instr
     and handle_expr expr =
-      <span data-count="64659">A</span>nnotated.map (fun expr -&gt; <span data-count="64659">L</span>ist.map handle_instr expr) expr
+      <span data-count="64167">A</span>nnotated.map (fun expr -&gt; <span data-count="64167">L</span>ist.map handle_instr expr) expr
     in
     let update_function = function
       | <span data-count="6094">O</span>rigin.Imported _ as f -&gt; f
-      | <span data-count="13330">O</span>rigin.Local (f : Func.t) -&gt;
+      | <span data-count="13238">O</span>rigin.Local (f : Func.t) -&gt;
         let body = handle_expr f.body in
-        <span data-count="13330">O</span>rigin.Local { f with body }
+        <span data-count="13238">O</span>rigin.Local { f with body }
     in
     let func =
       Array.init
         (Array.lengt<span data-count="968">h</span> m.func + 1)
         (fun j -&gt;
-          <span data-count="19424">i</span>f i = j then <span data-count="968">i</span>f update_function_itself then <span data-count="968">u</span>pdate_function f else <span data-count="0">f</span>
-          else <span data-count="18456">b</span>egin
-            update_function @@ if i &lt; j then <span data-count="13330">m</span>.func.(j - 1) else <span data-count="5126">m</span>.func.(j)
+          <span data-count="19332">i</span>f i = j then <span data-count="968">i</span>f update_function_itself then <span data-count="968">u</span>pdate_function f else <span data-count="0">f</span>
+          else <span data-count="18364">b</span>egin
+            update_function @@ if i &lt; j then <span data-count="13238">m</span>.func.(j - 1) else <span data-count="5126">m</span>.func.(j)
           end )
     in
     <span data-count="968">l</span>et elem =
@@ -2458,7 +2458,7 @@ module Module = struct
     <span data-count="259">l</span>et func =
       Array.init
         (Array.lengt<span data-count="259">h</span> m.func + 1)
-        (fun i -&gt; <span data-count="5457">i</span>f i = len then <span data-count="259">f</span> else <span data-count="5198">m</span>.func.(i))
+        (fun i -&gt; <span data-count="5436">i</span>f i = len then <span data-count="259">f</span> else <span data-count="5177">m</span>.func.(i))
     in
 
     <span data-count="259">(</span>{ m with func }, len)
@@ -2497,7 +2497,7 @@ module Module = struct
             ; typ = _
             } -&gt;
           String.equa<span data-count="12688">l</span> modul_name modul_name' &amp;&amp; <span data-count="12572">S</span>tring.equal func_name name
-        | <span data-count="13336">L</span>ocal _ -&gt; false )
+        | <span data-count="13244">L</span>ocal _ -&gt; false )
       m.func
 
   (** Finds the index of the last imported function. Will be `~-1` if there are
@@ -2506,7 +2506,7 @@ module Module = struct
     <span data-count="968">l</span>et _i, last =
       Array.fold_left
         (fun (i, last) -&gt; function
-          | <span data-count="5126">O</span>rigin.Imported _ -&gt; (suc<span data-count="5126">c</span> i, i) | <span data-count="13330">O</span>rigin.Local _ -&gt; (suc<span data-count="13330">c</span> i, last) )
+          | <span data-count="5126">O</span>rigin.Imported _ -&gt; (suc<span data-count="5126">c</span> i, i) | <span data-count="13238">O</span>rigin.Local _ -&gt; (suc<span data-count="13238">c</span> i, last) )
         (0, ~<span data-count="968">-</span>1) m.func
     in
     <span data-count="968">l</span>ast

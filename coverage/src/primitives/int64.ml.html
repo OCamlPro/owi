@@ -337,14 +337,14 @@ let ne (x : int64) y = <span data-count="25999">n</span>ot (equa<span data-count
 
 let lt (x : int64) y = <span data-count="1973">c</span>ompar<span data-count="1973">e</span> x y &lt; 0 [@@inline]
 
-let le (x : int64) y = <span data-count="10317">c</span>ompar<span data-count="10317">e</span> x y &lt;= 0 [@@inline]
+let le (x : int64) y = <span data-count="10238">c</span>ompar<span data-count="10238">e</span> x y &lt;= 0 [@@inline]
 
-let lt_u (x : int64) y = <span data-count="2185457">u</span>nsigned_compar<span data-count="2185462">e</span> x y &lt; 0 [@@inline]
+let lt_u (x : int64) y = <span data-count="2185192">u</span>nsigned_compar<span data-count="2185192">e</span> x y &lt; 0 [@@inline]
 
 let le_u (x : int64) y = <span data-count="607679">u</span>nsigned_compar<span data-count="607679">e</span> x y &lt;= 0 [@@inline]
 
 (* In OCaml, `shift_{left,right,right_logical} are unspecified if y &lt; 0 or y &gt;= 64, but they're not in Wasm and thus we need to mask `y`` to only keep the low 7 bits. *)
-let shl x y = <span data-count="76696">s</span>hift_left x (to_in<span data-count="76696">t</span> (logan<span data-count="76696">d</span> y 63L)) [@@inline]
+let shl x y = <span data-count="75988">s</span>hift_left x (to_in<span data-count="75988">t</span> (logan<span data-count="75988">d</span> y 63L)) [@@inline]
 
 let ashr x y = <span data-count="20">s</span>hift_right x (to_in<span data-count="20">t</span> (logan<span data-count="20">d</span> y 63L)) [@@inline]
 

@@ -1229,7 +1229,7 @@ module Eval_const = struct
 
   (* TODO: binary+const instr *)
   let instr env stack instr =
-    <span data-count="4834">m</span>atch instr.Annotated.raw with
+    <span data-count="4828">m</span>atch instr.Annotated.raw with
     | <span data-count="1501">B</span>inary.I32_const n -&gt; Result.ok @@ Stack.push_i3<span data-count="1501">2</span> stack n
     | <span data-count="195">I</span>64_const n -&gt; Result.ok @@ Stack.push_i6<span data-count="195">4</span> stack n
     | <span data-count="184">F</span>32_const f -&gt; Result.ok @@ Stack.push_f3<span data-count="184">2</span> stack f
@@ -1237,10 +1237,10 @@ module Eval_const = struct
     | <span data-count="5">V</span>128_const f -&gt; Result.ok @@ Stack.push_v12<span data-count="5">8</span> stack f
     | <span data-count="20">I</span>_binop (nn, op) -&gt; Result.ok @@ ibino<span data-count="20">p</span> stack nn op
     | <span data-count="60">R</span>ef_null t -&gt; Result.ok @@ Stack.push_re<span data-count="60">f</span> stack (Concrete_ref.nul<span data-count="60">l</span> t)
-    | <span data-count="2655">R</span>ef_func f -&gt;
-      let* f = Link_env.Build.get_fun<span data-count="2655">c</span> env f in
-      <span data-count="2655">l</span>et value = Concrete_value.Ref (Func (Some f)) in
-      Result.ok @@ Stack.pus<span data-count="2655">h</span> stack value
+    | <span data-count="2649">R</span>ef_func f -&gt;
+      let* f = Link_env.Build.get_fun<span data-count="2649">c</span> env f in
+      <span data-count="2649">l</span>et value = Concrete_value.Ref (Func (Some f)) in
+      Result.ok @@ Stack.pus<span data-count="2649">h</span> stack value
     | <span data-count="35">G</span>lobal_get id -&gt;
       let* g = Link_env.Build.get_const_globa<span data-count="35">l</span> env id in
       <span data-count="35">R</span>esult.ok @@ Stack.pus<span data-count="35">h</span> stack g
@@ -1248,12 +1248,12 @@ module Eval_const = struct
 
   (* TODO: binary+const expr *)
   let expr env e : Concrete_value.t Result.t =
-    <span data-count="4794">l</span>et* stack = list_fold_lef<span data-count="4794">t</span> (inst<span data-count="4794">r</span> env) Stack.empty e.Annotated.raw in
-    <span data-count="4794">m</span>atch stack with
+    <span data-count="4788">l</span>et* stack = list_fold_lef<span data-count="4788">t</span> (inst<span data-count="4788">r</span> env) Stack.empty e.Annotated.raw in
+    <span data-count="4788">m</span>atch stack with
     | <span data-count="0">[</span>] -&gt; Error (`Type_mismatch "const expr returning zero values")
     | <span data-count="0">_</span> :: _ :: _ -&gt;
       Error (`Type_mismatch "const expr returning more than one value")
-    | <span data-count="4794">[</span> result ] -&gt; Ok result
+    | <span data-count="4788">[</span> result ] -&gt; Ok result
 end
 
 let eval_global ls env
@@ -1412,17 +1412,17 @@ let load_func (ls : 'f State.t) (import : Binary.block_type Origin.imported) :
     <span data-count="18">E</span>rror (`Incompatible_import_type msg)
 
 let eval_func ls (finished_env : int) func : func Result.t =
-  <span data-count="13452">m</span>atch func with
-  | <span data-count="9231">O</span>rigin.Local func -&gt; Result.ok @@ Kind.was<span data-count="9231">m</span> func finished_env
+  <span data-count="13431">m</span>atch func with
+  | <span data-count="9210">O</span>rigin.Local func -&gt; Result.ok @@ Kind.was<span data-count="9210">m</span> func finished_env
   | <span data-count="4221">I</span>mported import -&gt; load_func ls import
 
 let eval_functions ls (finished_env : int) env functions =
   <span data-count="2549">l</span>et+ env, _i =
     array_fold_lef<span data-count="2549">t</span>
       (fun (env, i) func -&gt;
-        <span data-count="13452">l</span>et+ func = eval_fun<span data-count="13452">c</span> ls finished_env func in
-        <span data-count="13422">l</span>et env = Link_env.Build.add_func i func env in
-        <span data-count="13422">(</span>env, suc<span data-count="13422">c</span> i) )
+        <span data-count="13431">l</span>et+ func = eval_fun<span data-count="13431">c</span> ls finished_env func in
+        <span data-count="13401">l</span>et env = Link_env.Build.add_func i func env in
+        <span data-count="13401">(</span>env, suc<span data-count="13401">c</span> i) )
       (env, 0) functions
   in
   <span data-count="2519">e</span>nv
@@ -1510,7 +1510,7 @@ let define_elem env elem =
         <span data-count="893">l</span>et* init_as_ref =
           list_ma<span data-count="893">p</span>
             (function
-              | <span data-count="2649">C</span>oncrete_value.Ref v -&gt; Ok v
+              | <span data-count="2643">C</span>oncrete_value.Ref v -&gt; Ok v
               | <span data-count="0">_</span> -&gt; Error `Constant_expression_required )
             init
         in
@@ -1641,11 +1641,11 @@ let register_last_module (ls : 'f State.t) ~name ~(id : string option) :
   'f State.t Result.t =
   <span data-count="212">l</span>et* exports, _env_id =
     match id with
-    | <span data-count="191">S</span>ome id -&gt; begin
-      match StringMap.find_opt id ls.by_id with
+    | <span data-count="191">S</span>ome id -&gt;
+      begin match StringMap.find_opt id ls.by_id with
       | <span data-count="0">N</span>one -&gt; Error (`Unbound_module id)
       | <span data-count="191">S</span>ome e -&gt; Ok e
-    end
+      end
     | <span data-count="21">N</span>one -&gt; (
       match ls.last with <span data-count="21">S</span>ome e -&gt; Ok e | <span data-count="0">N</span>one -&gt; Error `Unbound_last_module )
   in
