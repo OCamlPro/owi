@@ -6,7 +6,6 @@
   abs_datastructures
   abs_driver
   abs_extern_func
-  abs_monad
   abs_value
   abs_wasm_ffi
   annotated

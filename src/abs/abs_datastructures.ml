@@ -9,14 +9,12 @@ module Stack = struct
 
   let push : 'el t -> 'el -> 'el t = fun stack v -> v :: stack
 
-  let pop_n : 'el t -> int -> ('el list * 'el t) Result.t =
-   fun stack n ->
-    if List.length stack > n then Ok (List.take n stack, List.drop n stack)
-    else Fmt.error_msg ""
+  let pop_n : 'el t -> int -> ('el list * 'el t) =
+   fun stack n -> (List.take n stack, List.drop n stack)
 
-  let pop_2 : 'el t -> ('el * 'el * 'el t) Result.t = function
-    | v1 :: v2 :: stack' -> Ok (v1, v2, stack')
-    | _ -> Fmt.error_msg "no enough values to pop"
+  let pop_2 : 'el t -> 'el * 'el * 'el t = function
+    | v1 :: v2 :: stack' -> (v1, v2, stack')
+    | _ -> assert false
 
   let pp : 'el Fmt.t -> Format.formatter -> 'el t -> unit =
    fun el_fmt fmt t -> Fmt.pf fmt "[%a]" (Fmt.list ~sep:Fmt.comma el_fmt) t
