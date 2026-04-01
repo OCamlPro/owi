@@ -1802,8 +1802,8 @@ let pp_val_type fmt = function
   | <span data-count="0">R</span>ef_type t -&gt; pp_ref_type fmt t
 
 let val_type_eq t1 t2 =
-  <span data-count="1617961">m</span>atch (t1, t2) with
-  | <span data-count="1617931">N</span>um_type t1, Num_type t2 -&gt; Text.num_type_eq t1 t2
+  <span data-count="1617927">m</span>atch (t1, t2) with
+  | <span data-count="1617897">N</span>um_type t1, Num_type t2 -&gt; Text.num_type_eq t1 t2
   | <span data-count="30">R</span>ef_type t1, Ref_type t2 -&gt; ref_type_eq t1 t2
   | <span data-count="0">_</span>, _ -&gt; false
 
@@ -1828,17 +1828,17 @@ type param = string option * val_type
 let pp_param fmt ((id, vt) : param) =
   <span data-count="25">p</span>f fmt "(param%a %a)" pp_str_opt id pp_val_type vt
 
-let param_eq (_, t1) (_, t2) = <span data-count="810854">v</span>al_type_eq t1 t2
+let param_eq (_, t1) (_, t2) = <span data-count="810828">v</span>al_type_eq t1 t2
 
 type param_type = param list
 
 let pp_param_type fmt (params : param_type) = <span data-count="25">l</span>ist ~sep:sp pp_param fmt params
 
-let param_type_eq t1 t2 = <span data-count="813516">L</span>ist.equal param_eq t1 t2
+let param_type_eq t1 t2 = <span data-count="813509">L</span>ist.equal param_eq t1 t2
 
 type result_type = val_type list
 
-let result_type_eq t1 t2 = <span data-count="812315">L</span>ist.equal val_type_eq t1 t2
+let result_type_eq t1 t2 = <span data-count="812308">L</span>ist.equal val_type_eq t1 t2
 
 let pp_result_ fmt vt = <span data-count="19">p</span>f fmt "(result %a)" pp_val_type vt
 
@@ -1857,7 +1857,7 @@ let pp_func_type fmt (params, results) =
     results
 
 let func_type_eq (pt1, rt1) (pt2, rt2) =
-  <span data-count="813516">p</span>aram_type_e<span data-count="813516">q</span> pt1 pt2 &amp;&amp; <span data-count="812315">r</span>esult_type_eq rt1 rt2
+  <span data-count="813509">p</span>aram_type_e<span data-count="813509">q</span> pt1 pt2 &amp;&amp; <span data-count="812308">r</span>esult_type_eq rt1 rt2
 
 type block_type =
   (* TODO: inline this *)
@@ -2131,20 +2131,20 @@ and pp_expr ~short fmt instrs =
     instrs
 
 let rec iter_expr f (e : expr Annotated.t) =
-  <span data-count="6990">A</span>nnotated.iter (List.ite<span data-count="6990">r</span> (iter_inst<span data-count="6990">r</span> f)) e
+  <span data-count="6991">A</span>nnotated.iter (List.ite<span data-count="6991">r</span> (iter_inst<span data-count="6991">r</span> f)) e
 
 and iter_instr f instr =
-  <span data-count="168802">A</span>nnotated.iter f instr;
-  <span data-count="168802">A</span>nnotated.iter
-    (<span data-count="168802">f</span>unction
-      | <span data-count="25108">I</span>32_const _ | <span data-count="474">I</span>64_const _ | <span data-count="10">F</span>32_const _ | <span data-count="0">F</span>64_const _ | <span data-count="0">V</span>128_const _
+  <span data-count="168816">A</span>nnotated.iter f instr;
+  <span data-count="168816">A</span>nnotated.iter
+    (<span data-count="168816">f</span>unction
+      | <span data-count="25111">I</span>32_const _ | <span data-count="474">I</span>64_const _ | <span data-count="10">F</span>32_const _ | <span data-count="0">F</span>64_const _ | <span data-count="0">V</span>128_const _
       | <span data-count="371">I</span>_unop (_, _)
       | <span data-count="0">F</span>_unop (_, _)
       | <span data-count="15638">I</span>_binop (_, _)
       | <span data-count="33">F</span>_binop (_, _)
       | <span data-count="0">V</span>_ibinop (_, _)
       | <span data-count="1891">I</span>_testop (_, _)
-      | <span data-count="4321">I</span>_relop (_, _)
+      | <span data-count="4322">I</span>_relop (_, _)
       | <span data-count="8">F</span>_relop (_, _)
       | <span data-count="26">I</span>_extend8_s _ | <span data-count="0">I</span>_extend16_s _ | <span data-count="0">I</span>64_extend32_s | <span data-count="37">I</span>32_wrap_i64
       | <span data-count="81">I</span>64_extend_i32 _
@@ -2155,7 +2155,7 @@ and iter_instr f instr =
       | <span data-count="0">I</span>_reinterpret_f (_, _)
       | <span data-count="0">F</span>_reinterpret_i (_, _)
       | <span data-count="0">R</span>ef_null _ | <span data-count="0">R</span>ef_is_null | <span data-count="0">R</span>ef_as_non_null | <span data-count="0">R</span>ef_func _ | <span data-count="1918">D</span>rop
-      | <span data-count="1174">S</span>elect _ | <span data-count="49105">L</span>ocal_get _ | <span data-count="10020">L</span>ocal_set _ | <span data-count="7448">L</span>ocal_tee _ | <span data-count="421">G</span>lobal_get _
+      | <span data-count="1174">S</span>elect _ | <span data-count="49107">L</span>ocal_get _ | <span data-count="10021">L</span>ocal_set _ | <span data-count="7448">L</span>ocal_tee _ | <span data-count="421">G</span>lobal_get _
       | <span data-count="817">G</span>lobal_set _ | <span data-count="0">T</span>able_get _ | <span data-count="0">T</span>able_set _ | <span data-count="0">T</span>able_size _ | <span data-count="0">T</span>able_grow _
       | <span data-count="0">T</span>able_fill _
       | <span data-count="0">T</span>able_copy (_, _)
@@ -2176,7 +2176,7 @@ and iter_instr f instr =
       | <span data-count="21">B</span>r_table (_, _)
       | <span data-count="0">B</span>r_on_null _ | <span data-count="0">B</span>r_on_non_null _ | <span data-count="1142">R</span>eturn | <span data-count="0">R</span>eturn_call _
       | <span data-count="0">R</span>eturn_call_indirect (_, _)
-      | <span data-count="0">R</span>eturn_call_ref _ | <span data-count="7672">C</span>all _
+      | <span data-count="0">R</span>eturn_call_ref _ | <span data-count="7679">C</span>all _
       | <span data-count="1026">C</span>all_indirect (_, _)
       | <span data-count="0">C</span>all_ref _ | <span data-count="0">E</span>xtern_externalize | <span data-count="0">E</span>xtern_internalize -&gt;
         ()
@@ -2373,18 +2373,18 @@ module Module = struct
 
   (** Insert a function [f] to a module [m] at index [i] and returns the module.
       It will update all function indices accordingly. *)
-  let insert_func_at_idx ?(update_function_itself = <span data-count="968">t</span>rue) f m i =
+  let insert_func_at_idx ?(update_function_itself = <span data-count="972">t</span>rue) f m i =
     (* TODO: we should also update elements and everything... *)
     (*
     Log.warn (fun m -&gt;
       m "insert_func_at_idx is still incomplete and you may run into issues" );
     *)
-    <span data-count="968">l</span>et update_idx idx = <span data-count="36886">i</span>f idx &gt;= i then <span data-count="30072">i</span>dx + 1 else <span data-count="6814">i</span>dx in
+    <span data-count="972">l</span>et update_idx idx = <span data-count="36918">i</span>f idx &gt;= i then <span data-count="30088">i</span>dx + 1 else <span data-count="6830">i</span>dx in
 
     let rec handle_instr instr =
-      <span data-count="879172">A</span>nnotated.map
+      <span data-count="879232">A</span>nnotated.map
         (function
-          | <span data-count="32887">C</span>all idx -&gt; Call (update_id<span data-count="32887">x</span> idx)
+          | <span data-count="32915">C</span>all idx -&gt; Call (update_id<span data-count="32915">x</span> idx)
           | <span data-count="0">R</span>eturn_call idx -&gt; Return_call (update_id<span data-count="0">x</span> idx)
           | <span data-count="2687">R</span>ef_func idx -&gt; Ref_func (update_id<span data-count="2687">x</span> idx)
           | <span data-count="27165">B</span>lock (id, typ, body) -&gt;
@@ -2397,56 +2397,56 @@ module Module = struct
             let true_branch = handle_expr true_branch in
             <span data-count="7825">l</span>et false_branch = handle_expr false_branch in
             <span data-count="7825">I</span>f_else (id, typ, true_branch, false_branch)
-          | <span data-count="804205">i</span>nstr -&gt;
+          | <span data-count="804237">i</span>nstr -&gt;
             (* TODO: make this match non fragile *)
             instr )
         instr
     and handle_expr expr =
-      <span data-count="64167">A</span>nnotated.map (fun expr -&gt; <span data-count="64167">L</span>ist.map handle_instr expr) expr
+      <span data-count="64183">A</span>nnotated.map (fun expr -&gt; <span data-count="64183">L</span>ist.map handle_instr expr) expr
     in
     let update_function = function
-      | <span data-count="6094">O</span>rigin.Imported _ as f -&gt; f
-      | <span data-count="13238">O</span>rigin.Local (f : Func.t) -&gt;
+      | <span data-count="6120">O</span>rigin.Imported _ as f -&gt; f
+      | <span data-count="13250">O</span>rigin.Local (f : Func.t) -&gt;
         let body = handle_expr f.body in
-        <span data-count="13238">O</span>rigin.Local { f with body }
+        <span data-count="13250">O</span>rigin.Local { f with body }
     in
     let func =
       Array.init
-        (Array.lengt<span data-count="968">h</span> m.func + 1)
+        (Array.lengt<span data-count="972">h</span> m.func + 1)
         (fun j -&gt;
-          <span data-count="19332">i</span>f i = j then <span data-count="968">i</span>f update_function_itself then <span data-count="968">u</span>pdate_function f else <span data-count="0">f</span>
-          else <span data-count="18364">b</span>egin
-            update_function @@ if i &lt; j then <span data-count="13238">m</span>.func.(j - 1) else <span data-count="5126">m</span>.func.(j)
+          <span data-count="19370">i</span>f i = j then <span data-count="972">i</span>f update_function_itself then <span data-count="972">u</span>pdate_function f else <span data-count="0">f</span>
+          else <span data-count="18398">b</span>egin
+            update_function @@ if i &lt; j then <span data-count="13250">m</span>.func.(j - 1) else <span data-count="5148">m</span>.func.(j)
           end )
     in
-    <span data-count="968">l</span>et elem =
+    <span data-count="972">l</span>et elem =
       Array.map
         (fun (elem : Elem.t) -&gt;
           <span data-count="701">l</span>et init = List.map handle_expr elem.init in
           <span data-count="701">{</span> elem with init } )
         m.elem
     in
-    <span data-count="968">l</span>et global =
+    <span data-count="972">l</span>et global =
       Array.map
         (function
           | <span data-count="0">O</span>rigin.Imported _ as v -&gt; v
-          | <span data-count="1024">L</span>ocal (global : Global.t) -&gt;
+          | <span data-count="1028">L</span>ocal (global : Global.t) -&gt;
             let init = handle_expr global.init in
-            <span data-count="1024">L</span>ocal { global with init } )
+            <span data-count="1028">L</span>ocal { global with init } )
         m.global
     in
 
-    <span data-count="968">l</span>et start = Option.map update_idx m.start in
+    <span data-count="972">l</span>et start = Option.map update_idx m.start in
 
-    <span data-count="968">l</span>et exports =
+    <span data-count="972">l</span>et exports =
       let func =
         Array.map
           (fun export -&gt;
-            <span data-count="1312">l</span>et id = update_idx (export : Export.t).id in
-            <span data-count="1312">{</span> export with id } )
+            <span data-count="1316">l</span>et id = update_idx (export : Export.t).id in
+            <span data-count="1316">{</span> export with id } )
           m.exports.func
       in
-      <span data-count="968">{</span> m.exports with func }
+      <span data-count="972">{</span> m.exports with func }
     in
 
     { m with func; elem; start; global; exports }
@@ -2454,21 +2454,21 @@ module Module = struct
   (** Add a function [f] at the end of a module [m] and returns the module and
       the index of the added function. *)
   let add_func f m =
-    <span data-count="259">l</span>et len = Array.length m.func in
-    <span data-count="259">l</span>et func =
+    <span data-count="260">l</span>et len = Array.length m.func in
+    <span data-count="260">l</span>et func =
       Array.init
-        (Array.lengt<span data-count="259">h</span> m.func + 1)
-        (fun i -&gt; <span data-count="5436">i</span>f i = len then <span data-count="259">f</span> else <span data-count="5177">m</span>.func.(i))
+        (Array.lengt<span data-count="260">h</span> m.func + 1)
+        (fun i -&gt; <span data-count="5448">i</span>f i = len then <span data-count="260">f</span> else <span data-count="5188">m</span>.func.(i))
     in
 
-    <span data-count="259">(</span>{ m with func }, len)
+    <span data-count="260">(</span>{ m with func }, len)
 
   (** Return the type of the function at index [id]. *)
   let get_func_type id m =
-    <span data-count="244">i</span>f id &gt;= Array.lengt<span data-count="244">h</span> m.func then <span data-count="0">N</span>one
+    <span data-count="245">i</span>f id &gt;= Array.lengt<span data-count="245">h</span> m.func then <span data-count="0">N</span>one
     else
-      <span data-count="244">m</span>atch m.func.(id) with
-      | <span data-count="244">L</span>ocal f -&gt; Some f.type_f
+      <span data-count="245">m</span>atch m.func.(id) with
+      | <span data-count="245">L</span>ocal f -&gt; Some f.type_f
       | <span data-count="0">I</span>mported i -&gt; Some i.typ
 
   let get_type id m =
@@ -2479,8 +2479,8 @@ module Module = struct
   (** Return the first function exported as [name] if it exists. Return [None]
       otherwise.*)
   let find_exported_func_from_name name m =
-    <span data-count="233">A</span>rray.find_opt
-      (function <span data-count="265">{</span> Export.name = name'; _ } -&gt; String.equal name name')
+    <span data-count="234">A</span>rray.find_opt
+      (function <span data-count="266">{</span> Export.name = name'; _ } -&gt; String.equal name name')
       m.exports.func
 
   (** Imports *)
@@ -2488,39 +2488,39 @@ module Module = struct
   (** Return the index of a function imported from a given [modul_name] and
       [func_name] if it exists. Return [None] otherwise. *)
   let find_imported_func_index ~modul_name ~func_name m =
-    <span data-count="2339">A</span>rray.find_index
+    <span data-count="2349">A</span>rray.find_index
       (function
-        | <span data-count="12688">O</span>rigin.Imported
+        | <span data-count="12744">O</span>rigin.Imported
             { Origin.modul_name = modul_name'
             ; name
             ; assigned_name = _
             ; typ = _
             } -&gt;
-          String.equa<span data-count="12688">l</span> modul_name modul_name' &amp;&amp; <span data-count="12572">S</span>tring.equal func_name name
-        | <span data-count="13244">L</span>ocal _ -&gt; false )
+          String.equa<span data-count="12744">l</span> modul_name modul_name' &amp;&amp; <span data-count="12628">S</span>tring.equal func_name name
+        | <span data-count="13256">L</span>ocal _ -&gt; false )
       m.func
 
   (** Finds the index of the last imported function. Will be `~-1` if there are
       no imported functions. *)
   let find_last_import_index m =
-    <span data-count="968">l</span>et _i, last =
+    <span data-count="972">l</span>et _i, last =
       Array.fold_left
         (fun (i, last) -&gt; function
-          | <span data-count="5126">O</span>rigin.Imported _ -&gt; (suc<span data-count="5126">c</span> i, i) | <span data-count="13238">O</span>rigin.Local _ -&gt; (suc<span data-count="13238">c</span> i, last) )
-        (0, ~<span data-count="968">-</span>1) m.func
+          | <span data-count="5148">O</span>rigin.Imported _ -&gt; (suc<span data-count="5148">c</span> i, i) | <span data-count="13250">O</span>rigin.Local _ -&gt; (suc<span data-count="13250">c</span> i, last) )
+        (0, ~<span data-count="972">-</span>1) m.func
     in
-    <span data-count="968">l</span>ast
+    <span data-count="972">l</span>ast
 
   (** Look for an imported function index, adding it if not already imported. *)
   let add_import_if_not_present ~modul_name ~func_name ~typ m =
-    <span data-count="1168">m</span>atch find_imported_func_index ~modul_name ~func_name m with
-    | <span data-count="200">S</span>ome _i -&gt; m
-    | <span data-count="968">N</span>one -&gt;
+    <span data-count="1173">m</span>atch find_imported_func_index ~modul_name ~func_name m with
+    | <span data-count="201">S</span>ome _i -&gt; m
+    | <span data-count="972">N</span>one -&gt;
       let f =
         Origin.imported ~modul_name ~name:func_name ~assigned_name:None ~typ
       in
 
-      let idx = find_last_import_inde<span data-count="968">x</span> m + 1 in
+      let idx = find_last_import_inde<span data-count="972">x</span> m + 1 in
 
       insert_func_at_idx f m idx
 end

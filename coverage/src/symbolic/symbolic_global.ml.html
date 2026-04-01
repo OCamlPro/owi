@@ -101,17 +101,17 @@ type t = Symbolic_global0.t =
   ; id : int
   }
 
-let value global = <span data-count="472">g</span>lobal.value
+let value global = <span data-count="501">g</span>lobal.value
 
-let replace global = <span data-count="2241">S</span>ymbolic_choice.modify_state (Thread.replace_globa<span data-count="2241">l</span> global)
+let replace global = <span data-count="2224">S</span>ymbolic_choice.modify_state (Thread.replace_globa<span data-count="2224">l</span> global)
 
 let set_value global value =
-  <span data-count="2002">l</span>et global = { global with value } in
+  <span data-count="1984">l</span>et global = { global with value } in
   replace global
 
 let convert_values (v : Concrete_value.t) : Symbolic_value.t =
-  <span data-count="239">m</span>atch v with
-  | <span data-count="209">I</span>32 v -&gt; I32 (Symbolic_i32.of_int3<span data-count="209">2</span> v)
+  <span data-count="240">m</span>atch v with
+  | <span data-count="210">I</span>32 v -&gt; I32 (Symbolic_i32.of_int3<span data-count="210">2</span> v)
   | <span data-count="10">I</span>64 v -&gt; I64 (Symbolic_i64.of_int6<span data-count="10">4</span> v)
   | <span data-count="10">F</span>32 v -&gt; F32 (Symbolic_f32.of_float3<span data-count="10">2</span> v)
   | <span data-count="10">F</span>64 v -&gt; F64 (Symbolic_f64.of_floa<span data-count="10">t</span> (Float64.to_floa<span data-count="10">t</span> v))
@@ -120,8 +120,8 @@ let convert_values (v : Concrete_value.t) : Symbolic_value.t =
   | Ref _ -&gt; assert false
 
 let of_concrete ~env_id ~id (v : Concrete_global.t) : t =
-  <span data-count="239">l</span>et value = convert_values v.Concrete_global.value in
-  <span data-count="239">{</span> value; env_id; id }
+  <span data-count="240">l</span>et value = convert_values v.Concrete_global.value in
+  <span data-count="240">{</span> value; env_id; id }
 </code></pre>
       </div>
     </div>
