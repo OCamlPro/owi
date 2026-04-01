@@ -203,6 +203,8 @@ let rec convert_instr : Binary.instr -> Text.instr = function
     F_store (convert_indice id, nn, convert_memarg memarg)
   | I_store (id, nn, memarg) ->
     I_store (convert_indice id, nn, convert_memarg memarg)
+  | V128_load (_id, _memarg) -> raise (Failure "TODO: V128_load")
+  | V128_store (_id, _memarg) -> raise (Failure "TODO: V128_store")
   | Memory_copy (id1, id2) ->
     Memory_copy (convert_indice id1, convert_indice id2)
   | Memory_size id -> Memory_size (convert_indice id)

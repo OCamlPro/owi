@@ -709,6 +709,8 @@ module Binary : sig
     | I_store8 of indice * Text.nn * memarg
     | I_store16 of indice * Text.nn * memarg
     | I64_store32 of indice * memarg
+    | V128_load of indice * memarg
+    | V128_store of indice * memarg
     | Memory_size of indice
     | Memory_grow of indice
     | Memory_fill of indice

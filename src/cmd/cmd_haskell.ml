@@ -7,7 +7,7 @@ open Syntax
 
 let compile ~workspace ~out_file (files : Fpath.t list) : Fpath.t Result.t =
   let* haskell_bin =
-    let name = "haskell" in
+    let name = "wasm32-wasi-ghc" in
     match OS.Cmd.resolve @@ Cmd.v name with
     | Error _ ->
       Fmt.error_msg

@@ -1556,6 +1556,8 @@ struct
         Memory.store_32 mem ~addr:(I32.wrap_i64 addr) n
       in
       st stack
+    | V128_load _ -> raise (Failure "TODO: V128_load")
+    | V128_store _ -> raise (Failure "TODO: V128_store")
     | Data_drop i ->
       let* data = Env.get_data env i in
       Data.drop data;

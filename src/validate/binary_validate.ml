@@ -518,6 +518,8 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
     let* () = check_memarg ~is_i64 memarg max_allowed in
     let+ stack = Stack.pop env.modul [ ftype nn; i32 ] stack in
     (env, stack)
+  | V128_load _ -> raise (Failure "TODO: V128_load")
+  | V128_store _ -> raise (Failure "TODO: V128_store")
   | I_reinterpret_f (inn, fnn) ->
     let* stack = Stack.pop env.modul [ ftype fnn ] stack in
     let+ stack = Stack.push [ itype inn ] stack in

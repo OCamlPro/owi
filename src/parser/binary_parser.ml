@@ -402,12 +402,18 @@ let read_FC input =
   | 17 ->
     let+ tableidx, input = read_indice input in
     (Table_fill tableidx, input)
-  | i -> parse_fail "illegal opcode (1) %i" i
+  | i -> parse_fail "illegal opcode (read_FC) %i" i
 
 let read_FD input =
   let* i, input = read_U32 input in
   match i with
-  | 12 ->
+  | 0x00 ->
+    let+ idx, memarg, input = read_memarg 128 input in
+    (V128_load (idx, memarg), input)
+  | 0x0b ->
+    let+ idx, memarg, input = read_memarg 128 input in
+    (V128_store (idx, memarg), input)
+  | 0x0C ->
     let* data = Input.sub_prefix 16 input in
     let+ input = Input.sub_suffix 16 input in
     let data = Input.as_string data in
@@ -415,15 +421,15 @@ let read_FD input =
     let low = String.get_int64_le data 8 in
     let v128 = Concrete_v128.of_i64x2 high low in
     (V128_const v128, input)
-  | 110 -> Ok (V_ibinop (I8x16, Add), input)
-  | 113 -> Ok (V_ibinop (I8x16, Sub), input)
-  | 142 -> Ok (V_ibinop (I16x8, Add), input)
-  | 145 -> Ok (V_ibinop (I16x8, Sub), input)
-  | 174 -> Ok (V_ibinop (I32x4, Add), input)
-  | 177 -> Ok (V_ibinop (I32x4, Sub), input)
-  | 206 -> Ok (V_ibinop (I64x2, Add), input)
-  | 209 -> Ok (V_ibinop (I64x2, Sub), input)
-  | i -> parse_fail "illegal opcode (1) %i" i
+  | 0x6E -> Ok (V_ibinop (I8x16, Add), input)
+  | 0x71 -> Ok (V_ibinop (I8x16, Sub), input)
+  | 0x8E -> Ok (V_ibinop (I16x8, Add), input)
+  | 0x91 -> Ok (V_ibinop (I16x8, Sub), input)
+  | 0xAE -> Ok (V_ibinop (I32x4, Add), input)
+  | 0xB1 -> Ok (V_ibinop (I32x4, Sub), input)
+  | 0xCE -> Ok (V_ibinop (I64x2, Add), input)
+  | 0xD1 -> Ok (V_ibinop (I64x2, Sub), input)
+  | i -> parse_fail "illegal opcode (read_FD) 0x%02X" i
 
 let block_type_of_type_def (_id, (pt, rt)) =
   (* TODO: this is a ugly hack, it is necessary for now and should be removed at some point... *)
@@ -761,7 +767,7 @@ let rec read_instr types input =
     (Br_on_non_null idx, input)
   | '\xFC' -> read_FC input
   | '\xFD' -> read_FD input
-  | c -> parse_fail "illegal opcode %2x" (Char.code c)
+  | c -> parse_fail "illegal opcode (read_instr) %2x" (Char.code c)
 
 and read_expr types input =
   let rec aux acc input =

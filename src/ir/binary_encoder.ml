@@ -342,6 +342,8 @@ let rec write_instr buf instr =
   | I64_store32 (idx, memarg) ->
     add_char '\x3E';
     write_memarg buf idx memarg
+  | V128_load (_idx, _memarg) -> raise (Failure "TODO: V128_load")
+  | V128_store (_idx, _memarg) -> raise (Failure "TODO: V128_load")
   | Memory_size idx -> write_char_indice buf '\x3F' idx
   | Memory_grow idx -> write_char_indice buf '\x40' idx
   | I32_const i ->
