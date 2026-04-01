@@ -7,9 +7,9 @@ module Stack : sig
 
   val pop : 'el t -> 'el * 'el t
 
-  val pop_2 : 'el t -> ('el * 'el * 'el t) Result.t
+  val pop_2 : 'el t -> 'el * 'el * 'el t
 
-  val pop_n : 'el t -> int -> ('el t * 'el t) Owi__Result.t
+  val pop_n : 'el t -> int -> 'el t * 'el t
 
   val pp : 'el Fmt.t -> Format.formatter -> 'el t -> unit
 
