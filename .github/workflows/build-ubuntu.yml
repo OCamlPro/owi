@@ -35,15 +35,6 @@ jobs:
           export OPAMCONFIRMLEVEL=unsafe-yes
           opam update
 
-          rustup target add wasm32-unknown-unknown
-
-          # Install zig
-          # TODO: remove the following once the conf-zig package works
-          wget  https://ziglang.org/download/0.14.0/zig-linux-x86_64-0.14.0.tar.xz
-          mkdir zig
-          tar xf zig-*.tar.xz -C zig --strip-components 1
-          sudo mv zig/* /usr/local/bin/
-
           # install tinygo
           wget https://github.com/tinygo-org/tinygo/releases/download/v0.40.1/tinygo_0.40.1_amd64.deb
           sudo dpkg -i tinygo_0.40.1_amd64.deb
@@ -51,6 +42,8 @@ jobs:
           # Install system and opam-repo dependencies
           opam install . --depext-only --with-test
           opam install . --deps-only --with-test
+
+          rustup target add wasm32-unknown-unknown
 
           # Build and test
           dune build @install
