@@ -1,0 +1,47 @@
+name: build-arch
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+    steps:
+      - name: test
+        run: |
+          set -x
+
+          # Update system and install base dependencies
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm git base-devel opam wget
+
+          git clone https://github.com/${{ github.repository }}.git
+          cd $(basename ${{ github.repository }})
+
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch origin pull/${{ github.event.pull_request.number }}/head:pr-${{ github.event.pull_request.number }}
+            git checkout pr-${{ github.event.pull_request.number }}
+          else
+            git checkout ${{ github.ref_name }}
+          fi
+
+          # Prepare OCaml stuff
+          opam init --disable-sandboxing --bare -ya
+          opam switch create ocaml ocaml-base-compiler --criteria="-notuptodate"
+          eval "$(opam env)"
+          export OPAMCONFIRMLEVEL=unsafe-yes
+          opam update
+
+          # Install system and opam-repo dependencies
+          opam install . --depext-only --with-test
+          opam install . --deps-only --with-test
+
+          # Build and test
+          dune build @install
+          dune build @quicktest
