@@ -32,3 +32,15 @@ print simplified:
     )
     (start 1)
   )
+print data with special chars:
+  $ owi fmt data_special_chars.wat
+  (module
+    (memory 1)
+    (data (memory 0) (offset i32.const 0) "hello\n\t\u{0d}\"\'\\world")
+  )
+print data with raw bytes:
+  $ owi fmt data_bytes.wat
+  (module
+    (memory 1)
+    (data (memory 0) (offset i32.const 0) "Hello\u{00}World\u{01}\u{02}\u{03}\u{ff}")
+  )
