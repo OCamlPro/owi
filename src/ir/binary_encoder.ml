@@ -95,6 +95,16 @@ let write_reftype buf nullable ht =
   | NoFunc_ht -> Buffer.add_char buf '\x73'
   | NoExn_ht -> Buffer.add_char buf '\x74'
 
+let write_reftype buf nullable ht =
+  let is_null =
+    match nullable with
+    | Text.Null -> true
+    | No_null ->
+      Buffer.add_char buf '\x64';
+      false
+  in
+  write_heaptype ~is_null buf ht
+
 let get_char_valtype = function
   | Binary.Num_type I32 -> '\x7F'
   | Num_type I64 -> '\x7E'
@@ -616,6 +626,23 @@ let rec write_instr buf instr =
   | Return_call _ | Return_call_indirect _ | Return_call_ref _ | Call_ref _ ->
     (* TODO *)
     assert false
+  | Ref_test (No_null, ht) ->
+    add_char '\xFB';
+    write_u32 buf 20l;
+    write_heaptype buf ht
+  | Ref_test (Null, ht) ->
+    add_char '\xFB';
+    write_u32 buf 21l;
+    write_heaptype buf ht
+  | Ref_cast (No_null, ht) ->
+    add_char '\xFB';
+    write_u32 buf 22l;
+    write_heaptype buf ht
+  | Ref_cast (Null, ht) ->
+    add_char '\xFB';
+    write_u32 buf 23l;
+    write_heaptype buf ht
+
   | Struct_new x ->
     add_char '\xFB';
     write_u32 buf 0l;

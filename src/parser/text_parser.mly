@@ -499,6 +499,9 @@ let plain_instr :=
   | REF_IS_NULL; { Ref (Is_null) }
   | REF_AS_NON_NULL; { Ref (As_non_null) }
   | REF_FUNC; ~ = indice; { Ref (Func indice) }
+  | REF_EQ; { Ref_eq }
+  | REF_TEST; ~ = ref_type; <Ref_test>
+  | REF_CAST; ~ = ref_type; <Ref_cast>
   (* i32 *)
   | I32_LOAD; id = memidx; memarg = memarg; { I32 (Load (id, memarg)) }
   | I64_LOAD; id = memidx; memarg = memarg; { I64 (Load (id, memarg)) }

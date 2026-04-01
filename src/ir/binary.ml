@@ -636,6 +636,11 @@ type instr =
   | Elem of elem_instr
   | Memory of memory_instr
   | Data of data_instr
+  (* Reference instructions *)
+  | Ref_eq
+  | Ref_test of ref_type
+  | Ref_cast of ref_type
+  (* Parametric instructions *)
   | Drop
   | Select of val_type list option
   | Nop
@@ -709,6 +714,10 @@ let rec pp_instr ~short ppf = function
   | Memory i -> pp_memory_instr ppf i
   | Data i -> pp_data_instr ppf i
   | Drop -> pf ppf "drop"
+  | Ref_eq -> pf fmt "ref.eq"
+  | Ref_test rt -> pf fmt "ref.test %a" pp_ref_type rt
+  | Ref_cast rt -> pf fmt "ref.cast %a" pp_ref_type rt
+  | Drop -> pf fmt "drop"
   | Select vt ->
     begin match vt with
     | None -> pf ppf "select"
@@ -823,7 +832,8 @@ and iter_instr f instr =
       | Array_copy (_, _)
       | Array_init_data (_, _)
       | Array_init_elem (_, _)
-      | Any_convert_extern | Extern_convert_any ->
+      | Any_convert_extern | Extern_convert_any | Ref_eq | Ref_test _
+      | Ref_cast _ ->
         ()
       | Block (_, _, e) | Loop (_, _, e) -> iter_expr f e
       | If_else (_, _, e1, e2) ->

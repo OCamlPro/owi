@@ -538,6 +538,11 @@ module Text : sig
     | Elem of elem_instr
     | Memory of memory_instr
     | Data of data_instr
+    (* Reference instructions *)
+    | Ref_eq
+    | Ref_test of ref_type
+    | Ref_cast of ref_type
+    (* Parametric instructions *)
     | Drop
     | Select of val_type list option
     | Nop
@@ -1014,6 +1019,11 @@ module Binary : sig
     | Elem of elem_instr
     | Memory of memory_instr
     | Data of data_instr
+    (* Reference instructions *)
+    | Ref_eq
+    | Ref_test of ref_type
+    | Ref_cast of ref_type
+    (* Parametric instructions *)
     | Drop
     | Select of val_type list option
     | Nop

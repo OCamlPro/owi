@@ -1503,7 +1503,9 @@ struct
       | Array_copy (_, _)
       | Array_init_data (_, _)
       | Array_init_elem (_, _)
-      | Any_convert_extern | Extern_convert_any ) as i ->
+      | Any_convert_extern | Extern_convert_any
+      | Ref_eq | Ref_test _ | Ref_cast _
+      ) as i ->
       Log.err (fun m ->
         m "unimplemented instruction: %a" (pp_instr ~short:false) i );
       assert false
