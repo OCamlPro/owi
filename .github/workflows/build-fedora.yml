@@ -25,11 +25,6 @@ jobs:
           dnf update -y
           dnf install -y ca-certificates sed gzip grep git wget tar xz opam lld llvm
 
-          # Rustup
-          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --profile minimal --default-toolchain nightly -y
-          . "$HOME/.cargo/env"
-          rustup target add wasm32-unknown-unknown
-
           git clone https://github.com/${{ github.repository }}.git
           cd $(basename ${{ github.repository }})
 
@@ -50,6 +45,10 @@ jobs:
           # Install system and opam-repo dependencies
           opam install . --depext-only --with-test
           opam install . --deps-only --with-test
+
+          # Rustup
+          # TODO: it seems there is a rust-std-static-wasm32-unknown-unknown package now, maybe we could replace rustup and use it instead?
+          rustup target add wasm32-unknown-unknown
 
           # Build and test
           dune build @install

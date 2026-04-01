@@ -74,9 +74,10 @@ dev-repo: "git+https://github.com/ocamlpro/owi.git"
 available: (arch = "x86_32" | arch = "x86_64" | arch = "arm64") & os != "win32" & os != "macos" & os != "homebrew"
 depexts: [
   ["mdbook"] { with-dev-setup }
-  ["golang" "llvm" "lld"]  {os-family = "debian"}
-  ["rust-llvm" "libstd-rust-dev-wasm32" "rustc" "clang"] {os-distribution = "debian"}
-  ["tinygo" "zig"] {os-distribution = "fedora"}
+  ["clang" "golang" "llvm" "lld" "rustc"]  {os-family = "debian"}
+  ["rust-llvm" "libstd-rust-dev-wasm32"] {os-distribution = "debian"}
+  ["rustup" "zig"] {os-distribution = "ubuntu"}
+  ["rustup" "tinygo" "zig"] {os-distribution = "fedora"}
 ]
 post-messages: [
   "Thank you for installing Owi!"
