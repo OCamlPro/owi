@@ -958,6 +958,7 @@ struct
       st stack
     | F_binop (nn, op) -> st @@ exec_fbinop stack nn op
     | V_ibinop (shape, op) -> st @@ exec_vibinop stack shape op
+  | V128_and -> raise (Failure "TODO: V128_and")
     | I_testop (nn, op) -> st @@ exec_itestop stack nn op
     | I_relop (nn, op) -> st @@ exec_irelop stack nn op
     | F_relop (nn, op) -> st @@ exec_frelop stack nn op
@@ -1556,6 +1557,8 @@ struct
         Memory.store_32 mem ~addr:(I32.wrap_i64 addr) n
       in
       st stack
+    | V128_load _ -> raise (Failure "TODO: V128_load")
+    | V128_store _ -> raise (Failure "TODO: V128_store")
     | Data_drop i ->
       let* data = Env.get_data env i in
       Data.drop data;

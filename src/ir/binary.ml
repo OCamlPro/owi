@@ -180,6 +180,7 @@ type instr =
   | I_binop of Text.nn * Text.ibinop
   | F_binop of Text.nn * Text.fbinop
   | V_ibinop of Text.ishape * Text.vibinop
+  | V128_and
   | I_testop of Text.nn * Text.itestop
   | I_relop of Text.nn * Text.irelop
   | F_relop of Text.nn * Text.frelop
@@ -229,6 +230,8 @@ type instr =
   | I_store8 of indice * Text.nn * memarg
   | I_store16 of indice * Text.nn * memarg
   | I64_store32 of indice * memarg
+  | V128_load of indice * memarg
+  | V128_store of indice * memarg
   | Memory_size of indice
   | Memory_grow of indice
   | Memory_fill of indice
@@ -274,6 +277,7 @@ let rec pp_instr ~short fmt = function
   | F_binop (n, op) -> pf fmt "f%a.%a" Text.pp_nn n Text.pp_fbinop op
   | V_ibinop (shape, op) ->
     pf fmt "%a.%a" Text.pp_ishape shape Text.pp_vibinop op
+  | V128_and -> raise (Failure "TODO: V128_and")
   | I_testop (n, op) -> pf fmt "i%a.%a" Text.pp_nn n Text.pp_itestop op
   | I_relop (n, op) -> pf fmt "i%a.%a" Text.pp_nn n Text.pp_irelop op
   | F_relop (n, op) -> pf fmt "f%a.%a" Text.pp_nn n Text.pp_frelop op
@@ -341,6 +345,8 @@ let rec pp_instr ~short fmt = function
     pf fmt "i%a.store16%a %a" Text.pp_nn n pp_indice_not0 id pp_memarg memarg
   | I64_store32 (id, memarg) ->
     pf fmt "i64.store32%a %a" pp_indice_not0 id pp_memarg memarg
+  | V128_load (_id, _memarg) -> raise (Failure "TODO: V128_load")
+  | V128_store (_id, _memarg) -> raise (Failure "TODO: V128_store")
   | Memory_size id -> pf fmt "memory.size%a" pp_indice_not0 id
   | Memory_grow id -> pf fmt "memory.grow%a" pp_indice_not0 id
   | Memory_fill id -> pf fmt "memory.fill%a" pp_indice_not0 id
@@ -413,6 +419,7 @@ and iter_instr f instr =
       | I_binop (_, _)
       | F_binop (_, _)
       | V_ibinop (_, _)
+      | V128_and
       | I_testop (_, _)
       | I_relop (_, _)
       | F_relop (_, _)
@@ -440,9 +447,9 @@ and iter_instr f instr =
       | I64_load32 (_, _, _)
       | I_store8 (_, _, _)
       | I_store16 (_, _, _)
-      | I64_store32 _ | Memory_size _ | Memory_grow _ | Memory_fill _
-      | Memory_copy _ | Memory_init _ | Data_drop _ | Nop | Unreachable | Br _
-      | Br_if _
+      | I64_store32 _ | V128_load _ | V128_store _ | Memory_size _
+      | Memory_grow _ | Memory_fill _ | Memory_copy _ | Memory_init _
+      | Data_drop _ | Nop | Unreachable | Br _ | Br_if _
       | Br_table (_, _)
       | Br_on_null _ | Br_on_non_null _ | Return | Return_call _
       | Return_call_indirect (_, _)

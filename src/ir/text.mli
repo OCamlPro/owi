@@ -88,6 +88,7 @@ val pp_funop : funop Fmt.t
 type nonrec vibinop =
   | Add
   | Sub
+  | Mul
 
 val pp_vibinop : vibinop Fmt.t
 

@@ -342,6 +342,8 @@ let rec write_instr buf instr =
   | I64_store32 (idx, memarg) ->
     add_char '\x3E';
     write_memarg buf idx memarg
+  | V128_load (_idx, _memarg) -> raise (Failure "TODO: V128_load")
+  | V128_store (_idx, _memarg) -> raise (Failure "TODO: V128_load")
   | Memory_size idx -> write_char_indice buf '\x3F' idx
   | Memory_grow idx -> write_char_indice buf '\x40' idx
   | I32_const i ->
@@ -539,12 +541,14 @@ let rec write_instr buf instr =
     write_bytes_8 buf b
   | V_ibinop (I8x16, Add) -> write_fd buf 110
   | V_ibinop (I8x16, Sub) -> write_fd buf 113
+  | V_ibinop (I8x16, Mul) -> (* it does not exits *) assert false
   | V_ibinop (I16x8, Add) -> write_fd buf 142
   | V_ibinop (I16x8, Sub) -> write_fd buf 145
   | V_ibinop (I32x4, Add) -> write_fd buf 174
   | V_ibinop (I32x4, Sub) -> write_fd buf 177
   | V_ibinop (I64x2, Add) -> write_fd buf 206
   | V_ibinop (I64x2, Sub) -> write_fd buf 209
+  | V128_and -> raise (Failure "TODO: V128_and")
   | I_reinterpret_f _ | F_reinterpret_i _ | Return_call _
   | Return_call_indirect _ | Return_call_ref _ | Call_ref _ | Extern_externalize
   | Extern_internalize ->

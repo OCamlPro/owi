@@ -75,6 +75,7 @@ type instr =
   | I_binop of Text.nn * Text.ibinop
   | F_binop of Text.nn * Text.fbinop
   | V_ibinop of Text.ishape * Text.vibinop
+  | V128_and
   | I_testop of Text.nn * Text.itestop
   | I_relop of Text.nn * Text.irelop
   | F_relop of Text.nn * Text.frelop
@@ -124,6 +125,8 @@ type instr =
   | I_store8 of indice * Text.nn * memarg
   | I_store16 of indice * Text.nn * memarg
   | I64_store32 of indice * memarg
+  | V128_load of indice * memarg
+  | V128_store of indice * memarg
   | Memory_size of indice
   | Memory_grow of indice
   | Memory_fill of indice
