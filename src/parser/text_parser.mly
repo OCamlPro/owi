@@ -17,7 +17,7 @@
 %token LOCAL LOCAL_GET LOCAL_SET LOCAL_TEE LOOP LPAR
 %token MEMORY MEMORY_COPY MEMORY_FILL MEMORY_GROW MEMORY_INIT MEMORY_SIZE MODULE MUTABLE DEFINITION INSTANCE
 %token NAN_ARITH NAN_CANON NOEXTERN NOFUNC NONE NOP NULL NULL_EXTERN_REF NULL_FUNC_REF NULL_REF
-%token TAG EXN NO_EXN EXN_REF NULL_EXN_REF
+%token TAG EXN NO_EXN EXN_REF NULL_EXN_REF REF_EXN
 %token OFFSET
 %token PARAM
 %token QUOTE
@@ -102,6 +102,10 @@ let get_id_def0 = function
   | None -> Raw 0
   | Some v -> v
 
+let addr n =
+  match int_of_string_opt n with
+  | None -> assert false
+  | Some num -> num
 %}
 
 %start <Wast.script> script
@@ -1175,6 +1179,7 @@ let module_quoted :=
     String.concat "" lines
   }
 
+
 let literal_const ==
   | I32_CONST; num = NUM; { Const_I32 (i32 num) }
   | I64_CONST; num = NUM; { Const_I64 (i64 num) }
@@ -1182,6 +1187,12 @@ let literal_const ==
   | F64_CONST; num = NUM; { Const_F64 (f64 num) }
   | n = v128_const; { Const_V128 n }
   | REF_NULL; ht = heap_type; { Const_null (Some ht)}
+
+  | REF_STRUCT; num = NUM; { Const_struct (addr num) }
+  | REF_ARRAY; num = NUM; { Const_array (addr num) }
+  | REF_FUNC; num = NUM; { Const_func (addr num) }
+  | REF_EXN; num = NUM; { Const_exn (addr num) }
+
   | REF_EXTERN; num = NUM; {
     match int_of_string_opt num with
     | None -> assert false
@@ -1205,6 +1216,7 @@ let result ==
   | REF_EXTERN; { Result_extern_ref }
   | REF_FUNC; { Result_func_ref }
   | REF_NULL; { Result_const (Literal (Const_null None)) }
+  | REF_ARRAY; { Result_array_ref }
 
 let assert_ ==
   | ASSERT_RETURN; ~ = par(action); ~ = list(par(result)); <Assert_return>

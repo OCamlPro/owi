@@ -12,6 +12,10 @@ type const =
   | Const_null of heap_type option
   | Const_host of int
   | Const_extern of int
+  | Const_struct of int
+  | Const_array of int
+  | Const_func of int
+  | Const_exn of int
 
 let pp_const fmt c =
   pf fmt "(%a)"
@@ -25,7 +29,11 @@ let pp_const fmt c =
       | Const_null None -> pf fmt "ref.null"
       | Const_null (Some rt) -> pf fmt "ref.null %a" pp_heap_type rt
       | Const_host i -> pf fmt "ref.host %d" i
-      | Const_extern i -> pf fmt "ref.extern %d" i )
+      | Const_extern i -> pf fmt "ref.extern %d" i
+      | Const_struct i -> pf fmt "ref.struct %d" i
+      | Const_array i -> pf fmt "ref.array %d" i
+      | Const_func i -> pf fmt "ref.func %d" i
+      | Const_exn i -> pf fmt "ref.exn %d" i )
     c
 
 let pp_consts fmt c = list ~sep:sp pp_const fmt c
@@ -53,11 +61,14 @@ type result =
   | Result_const of result_const
   | Result_extern_ref
   | Result_func_ref
+  | Result_array_ref
+(* TODO: replace with `Result_const (Literal (Const heap_type))`? *)
 
 let pp_result_bis fmt = function
   | Result_const c -> pf fmt "%a" pp_result_const c
   | Result_extern_ref -> pf fmt "ref.extern"
   | Result_func_ref -> pf fmt "ref.func"
+  | Result_array_ref -> pf fmt "ref.array"
 
 let pp_result fmt r = Fmt.pf fmt "(%a)" pp_result_bis r
 
