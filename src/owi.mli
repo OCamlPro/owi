@@ -248,6 +248,7 @@ module Text : sig
   type nonrec vibinop =
     | Add
     | Sub
+    | Mul
 
   type nonrec ibinop =
     | Add
@@ -660,6 +661,7 @@ module Binary : sig
     | I_binop of Text.nn * Text.ibinop
     | F_binop of Text.nn * Text.fbinop
     | V_ibinop of Text.ishape * Text.vibinop
+    | V128_and
     | I_testop of Text.nn * Text.itestop
     | I_relop of Text.nn * Text.irelop
     | F_relop of Text.nn * Text.frelop

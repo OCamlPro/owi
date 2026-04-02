@@ -421,14 +421,18 @@ let read_FD input =
     let low = String.get_int64_le data 8 in
     let v128 = Concrete_v128.of_i64x2 high low in
     (V128_const v128, input)
+  | 0x4E -> Ok (V128_and, input)
   | 0x6E -> Ok (V_ibinop (I8x16, Add), input)
   | 0x71 -> Ok (V_ibinop (I8x16, Sub), input)
   | 0x8E -> Ok (V_ibinop (I16x8, Add), input)
   | 0x91 -> Ok (V_ibinop (I16x8, Sub), input)
+  | 0x95 -> Ok (V_ibinop (I16x8, Mul), input)
   | 0xAE -> Ok (V_ibinop (I32x4, Add), input)
   | 0xB1 -> Ok (V_ibinop (I32x4, Sub), input)
+  | 0xB5 -> Ok (V_ibinop (I32x4, Mul), input)
   | 0xCE -> Ok (V_ibinop (I64x2, Add), input)
   | 0xD1 -> Ok (V_ibinop (I64x2, Sub), input)
+  | 0xD5 -> Ok (V_ibinop (I64x2, Mul), input)
   | i -> parse_fail "illegal opcode (read_FD) 0x%02X" i
 
 let block_type_of_type_def (_id, (pt, rt)) =

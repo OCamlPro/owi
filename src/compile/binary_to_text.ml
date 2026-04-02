@@ -211,6 +211,7 @@ let rec convert_instr : Binary.instr -> Text.instr = function
   | Memory_fill id -> Memory_fill (convert_indice id)
   | Memory_grow id -> Memory_grow (convert_indice id)
   | V_ibinop (shape, op) -> V_ibinop (shape, op)
+  | V128_and -> raise (Failure "TODO: V128_and")
   | Ref_null t -> Ref_null (convert_heap_type t)
 
 and convert_expr (e : Binary.expr Annotated.t) : Text.expr Annotated.t =

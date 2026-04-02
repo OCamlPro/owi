@@ -132,8 +132,9 @@ let pp_funop fmt = function
 type nonrec vibinop =
   | Add
   | Sub
+  | Mul
 
-let pp_vibinop fmt = function Add -> pf fmt "add" | Sub -> pf fmt "sub"
+let pp_vibinop fmt = function Add -> pf fmt "add" | Sub -> pf fmt "sub" | Mul -> pf fmt "mul"
 
 type nonrec ibinop =
   | Add

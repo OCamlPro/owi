@@ -541,12 +541,14 @@ let rec write_instr buf instr =
     write_bytes_8 buf b
   | V_ibinop (I8x16, Add) -> write_fd buf 110
   | V_ibinop (I8x16, Sub) -> write_fd buf 113
+  | V_ibinop (I8x16, Mul) -> (* it does not exits *) assert false
   | V_ibinop (I16x8, Add) -> write_fd buf 142
   | V_ibinop (I16x8, Sub) -> write_fd buf 145
   | V_ibinop (I32x4, Add) -> write_fd buf 174
   | V_ibinop (I32x4, Sub) -> write_fd buf 177
   | V_ibinop (I64x2, Add) -> write_fd buf 206
   | V_ibinop (I64x2, Sub) -> write_fd buf 209
+  | V128_and -> raise (Failure "TODO: V128_and")
   | I_reinterpret_f _ | F_reinterpret_i _ | Return_call _
   | Return_call_indirect _ | Return_call_ref _ | Call_ref _ | Extern_externalize
   | Extern_internalize ->

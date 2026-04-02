@@ -180,6 +180,7 @@ type instr =
   | I_binop of Text.nn * Text.ibinop
   | F_binop of Text.nn * Text.fbinop
   | V_ibinop of Text.ishape * Text.vibinop
+  | V128_and
   | I_testop of Text.nn * Text.itestop
   | I_relop of Text.nn * Text.irelop
   | F_relop of Text.nn * Text.frelop
@@ -276,6 +277,7 @@ let rec pp_instr ~short fmt = function
   | F_binop (n, op) -> pf fmt "f%a.%a" Text.pp_nn n Text.pp_fbinop op
   | V_ibinop (shape, op) ->
     pf fmt "%a.%a" Text.pp_ishape shape Text.pp_vibinop op
+  | V128_and -> raise (Failure "TODO: V128_and")
   | I_testop (n, op) -> pf fmt "i%a.%a" Text.pp_nn n Text.pp_itestop op
   | I_relop (n, op) -> pf fmt "i%a.%a" Text.pp_nn n Text.pp_irelop op
   | F_relop (n, op) -> pf fmt "f%a.%a" Text.pp_nn n Text.pp_frelop op
@@ -417,6 +419,7 @@ and iter_instr f instr =
       | I_binop (_, _)
       | F_binop (_, _)
       | V_ibinop (_, _)
+      | V128_and
       | I_testop (_, _)
       | I_relop (_, _)
       | F_relop (_, _)

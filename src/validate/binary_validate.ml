@@ -405,6 +405,7 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
     let* stack = Stack.pop env.modul [ v128; v128 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
+  | V128_and -> raise (Failure "TODO: V128_and")
   | I_testop (nn, _) ->
     let* stack = Stack.pop env.modul [ itype nn ] stack in
     let+ stack = Stack.push [ i32 ] stack in
