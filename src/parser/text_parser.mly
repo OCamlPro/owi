@@ -1221,6 +1221,9 @@ let result ==
   | REF_FUNC; { Result_func_ref }
   | REF_NULL; { Result_const (Literal (Const_null None)) }
   | REF_ARRAY; { Result_array_ref }
+  | REF_STRUCT; { Result_struct_ref }
+  | REF_EQ; { Result_eq_ref }
+  | REF_I31; { Result_i31_ref }
 
 let assert_ ==
   | ASSERT_RETURN; ~ = par(action); ~ = list(par(result)); <Assert_return>

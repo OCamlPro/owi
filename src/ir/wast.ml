@@ -62,6 +62,9 @@ type result =
   | Result_extern_ref
   | Result_func_ref
   | Result_array_ref
+  | Result_struct_ref
+  | Result_eq_ref
+  | Result_i31_ref
 (* TODO: replace with `Result_const (Literal (Const heap_type))`? *)
 
 let pp_result_bis fmt = function
@@ -69,6 +72,9 @@ let pp_result_bis fmt = function
   | Result_extern_ref -> pf fmt "ref.extern"
   | Result_func_ref -> pf fmt "ref.func"
   | Result_array_ref -> pf fmt "ref.array"
+  | Result_struct_ref -> pf fmt "ref.struct"
+  | Result_eq_ref -> pf fmt "ref.eq"
+  | Result_i31_ref -> pf fmt "ref.i31"
 
 let pp_result fmt r = Fmt.pf fmt "(%a)" pp_result_bis r
 

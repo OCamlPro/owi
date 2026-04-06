@@ -122,7 +122,6 @@ let pp_limits ppf { is_i64; min; max } =
 
 (** Types *)
 
-(* TODO: add i31, array, struct and  Eq  *)
 type heap_type =
   | TypeUse of indice
   (* abs_heap_type *)
