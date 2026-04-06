@@ -477,7 +477,9 @@ module Func : sig
 end
 
 module Typedef : sig
-  type t = string option * sub_type
+  type t =
+    | SimpleType of (string option * sub_type)
+    | RecType of (string option * sub_type) list
 
   val pp : t Fmt.t
 end

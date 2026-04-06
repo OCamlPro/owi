@@ -73,7 +73,7 @@ module Env = struct
   let type_get i m =
     match Module.get_type i m with
     | None -> Error (`Unknown_type (Text.Raw i))
-    | Some (_, { ct = Def_func_t ty; _ }) -> Ok ty
+    | Some (SimpleType (_, { ct = Def_func_t ty; _ })) -> Ok ty
     | _ -> assert false
 
   let local_get i env =
@@ -168,9 +168,10 @@ let get_func_type_id (env : Env.t) i =
     | Imported { typ = Bt_raw (_, typ); _ } -> typ
   in
   Array.find_index
-    (fun (_, typ') ->
+    (fun typ' ->
       match typ' with
-      | { final = false; ids = []; ct = Def_func_t typ' } ->
+      | Typedef.SimpleType (_, { final = false; ids = []; ct = Def_func_t typ' })
+        ->
         func_type_eq typ typ'
       | _ -> assert false )
     env.modul.types
@@ -1008,9 +1009,10 @@ let typecheck_const_instr ?known_globals ~is_init (modul : Module.t) refs stack
     let resty =
       match
         Array.find_index
-          (fun (_, ty) ->
-            match ty.ct with
-            | Def_func_t ty -> func_type_eq ty ity
+          (fun ty ->
+            match ty with
+            | Typedef.SimpleType (_, { ct = Def_func_t ty; _ }) ->
+              func_type_eq ty ity
             | _ -> assert false )
           modul.types
       with

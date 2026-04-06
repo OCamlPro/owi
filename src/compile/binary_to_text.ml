@@ -487,8 +487,11 @@ let convert_sub_type Binary.{ final; ids; ct } : Text.sub_type =
 
 let from_types types : Text.Module.Field.t list =
   Array.map
-    (fun ((id, ft) : Binary.Typedef.t) ->
-      Text.Module.Field.Typedef (id, convert_sub_type ft) )
+    (fun (ty : Binary.Typedef.t) ->
+      match ty with
+      | SimpleType (id, ft) ->
+        Text.Module.Field.Typedef (SimpleType (id, convert_sub_type ft))
+      | _ -> assert false )
     types
   |> Array.to_list
 

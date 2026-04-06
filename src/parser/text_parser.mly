@@ -210,9 +210,13 @@ let sub_type :=
   | SUB; FINAL; indices = list(indice); ct = comp_type;
     {{ final = true; ids = indices; ct }}
 
-let type_def :=
+let simple_type_def :=
   // | TYPE; id = option(id); LPAR; FUNC; ~ = func_type; RPAR; { id, func_type }
-  | TYPE; id = option(id); st = sub_type; { id, st }
+  | TYPE; id = option(id); st = sub_type; { (id, st) }
+
+let type_def :=
+  | ty=simple_type_def; { SimpleType ty }
+  | REC; tdl = list(par(simple_type_def)); { RecType tdl }
 
 let table_type ==
   | ~ = limits; ~ = ref_type; { limits, ref_type }

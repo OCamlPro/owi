@@ -63,9 +63,10 @@ let assign_types (typ : Text.Typedef.t array) decl_types :
   let named_types = Hashtbl.create 64 in
   let declared_types = Dynarray.create () in
   Array.iter
-    (fun (name, typ) ->
+    (fun typ ->
       match typ with
-      | Text.{ final = false; ids = []; ct = Def_func_t typ } ->
+      | Text.Typedef.SimpleType
+          (name, { final = false; ids = []; ct = Def_func_t typ }) ->
         let id = Dynarray.length declared_types in
         begin match name with
         | None -> ()
@@ -73,9 +74,7 @@ let assign_types (typ : Text.Typedef.t array) decl_types :
         end;
         Dynarray.add_last declared_types typ;
         Typetbl.add all_types typ id
-      | { final; ids; _ } ->
-        Fmt.failwith "unsupported  final:%b  subtype of:[%a]" final
-          (Fmt.list Text.pp_indice) ids )
+      | _ -> assert false )
     typ;
   Array.iter
     (fun typ ->

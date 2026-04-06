@@ -869,10 +869,17 @@ module Export = struct
 end
 
 module Typedef = struct
-  type t = string option * sub_type
+  type t =
+    | SimpleType of (string option * sub_type)
+    | RecType of (string option * sub_type) list
 
-  let pp fmt (id, t) =
-    pf fmt "(type%a %a)" (Fmt.option Fmt.string) id pp_sub_type t
+  let pp_ty fmt (id, ty) =
+    pf fmt "(type%a %a)" (Fmt.option Fmt.string) id pp_sub_type ty
+
+  let pp fmt t =
+    match t with
+    | SimpleType (id, ty) -> Fmt.pf fmt "%a" pp_ty (id, ty)
+    | RecType tyl -> Fmt.pf fmt "(rec %a)" (Fmt.list ~sep:Fmt.sp pp_ty) tyl
 end
 
 module Table = struct

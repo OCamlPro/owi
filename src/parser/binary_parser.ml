@@ -524,10 +524,11 @@ let read_FD input =
   | 209 -> Ok (I64x2 Sub, input)
   | i -> parse_fail "illegal opcode (1) %i" i
 
-let block_type_of_type_def (_id, td) =
+let block_type_of_type_def ty =
   (* TODO: this is a ugly hack, it is necessary for now and should be removed at some point... *)
-  match td with
-  | { final = false; ids = []; ct = Def_func_t (pt, rt) } ->
+  match ty with
+  | Typedef.SimpleType
+      (_id, { final = false; ids = []; ct = Def_func_t (pt, rt) }) ->
     Bt_raw (None, (pt, rt))
   | _ -> assert false
 
@@ -969,7 +970,8 @@ let read_type _id input =
     let* params, input = read_valtypes input in
     let+ results, input = read_valtypes input in
     let params = List.map (fun param -> (None, param)) params in
-    ( (None, { final = false; ids = []; ct = Def_func_t (params, results) })
+    ( Typedef.SimpleType
+        (None, { final = false; ids = []; ct = Def_func_t (params, results) })
     , input )
   | _ -> parse_fail "integer representation too long (read_type)"
 
@@ -1026,11 +1028,12 @@ let read_table input =
     let* limits, input = read_table_limits input in
     let+ value, input =
       read_const
-        [| ( None
-           , { final = false
-             ; ids = []
-             ; ct = Def_func_t ([], [ Ref_type ref_type ])
-             } )
+        [| Typedef.SimpleType
+             ( None
+             , { final = false
+               ; ids = []
+               ; ct = Def_func_t ([], [ Ref_type ref_type ])
+               } )
         |]
         input
     in
