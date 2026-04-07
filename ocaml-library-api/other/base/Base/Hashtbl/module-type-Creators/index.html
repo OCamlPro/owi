@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Creators (docs.other.base.Base.Hashtbl.Creators)</title><meta charset="utf-8"/><link rel="stylesheet" href="../../../../../odoc.support/odoc.css"/><meta name="generator" content="odoc 3.1.0"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../../../../../odoc.support/highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script></head><body class="odoc"><nav class="odoc-nav"><a href="../index.html">Up</a> – <a href="../../../../../../index.html">Index</a> &#x00BB; <a href="../../../../../index.html">docs</a> &#x00BB; <a href="../../../../index.html">other</a> &#x00BB; <a href="../../../index.html">base</a> &#x00BB; <a href="../../index.html">Base</a> &#x00BB; <a href="../index.html">Hashtbl</a> &#x00BB; Creators</nav><header class="odoc-preamble"><h1>Module type <code><span>Hashtbl.Creators</span></code></h1></header><div class="odoc-tocs"><nav class="odoc-toc odoc-local-toc"><ul><li><a href="#creators">Creators</a></li></ul></nav></div><div class="odoc-content"><div class="odoc-spec"><div class="spec type anchored" id="type-t"><a href="#type-t" class="anchor"></a><code><span><span class="keyword">type</span> <span>('a, 'b) t</span></span></code></div></div><h3 id="creators"><a href="#creators" class="anchor"></a>Creators</h3><div class="odoc-spec"><div class="spec value anchored" id="val-create"><a href="#val-create" class="anchor"></a><code><span><span class="keyword">val</span> create : <span><span class="optlabel">?growth_allowed</span>:bool <span class="arrow">&#45;&gt;</span></span> <span><span class="optlabel">?size</span>:int <span class="arrow">&#45;&gt;</span></span> <span><span><span class="type-var">'a</span> <a href="../Key/index.html#type-t">Key.t</a></span> <span class="arrow">&#45;&gt;</span></span> <span><span>(<span class="type-var">'a</span>, <span class="type-var">'b</span>)</span> <a href="#type-t">t</a></span></span></code></div><div class="spec-doc"><p>The module you pass to <code>create</code> must have a type that is hashable, sexpable, and comparable.</p><p>Example:</p><pre>  Hashtbl.create (module Int);;
+  - : (int, '_a) Hashtbl.t = &lt;abstr&gt;;;</pre></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-of_alist"><a href="#val-of_alist" class="anchor"></a><code><span><span class="keyword">val</span> of_alist : 
+  <span><span class="optlabel">?growth_allowed</span>:bool <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="optlabel">?size</span>:int <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span class="type-var">'a</span> <a href="../Key/index.html#type-t">Key.t</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span>(<span class="type-var">'a</span> * <span class="type-var">'b</span>)</span> list</span> <span class="arrow">&#45;&gt;</span></span>
+  <span>[ <span>`Ok of <span><span>(<span class="type-var">'a</span>, <span class="type-var">'b</span>)</span> <a href="#type-t">t</a></span></span> <span><span>| `Duplicate_key</span> of <span class="type-var">'a</span></span> ]</span></span></code></div><div class="spec-doc"><p>Example:</p><pre>   Hashtbl.of_alist (module Int) [(3, &quot;something&quot;); (2, &quot;whatever&quot;)]
+   - : [ `Duplicate_key of int | `Ok of (int, string) Hashtbl.t ] = `Ok &lt;abstr&gt;</pre></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-of_alist_report_all_dups"><a href="#val-of_alist_report_all_dups" class="anchor"></a><code><span><span class="keyword">val</span> of_alist_report_all_dups : 
+  <span><span class="optlabel">?growth_allowed</span>:bool <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="optlabel">?size</span>:int <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span class="type-var">'a</span> <a href="../Key/index.html#type-t">Key.t</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span>(<span class="type-var">'a</span> * <span class="type-var">'b</span>)</span> list</span> <span class="arrow">&#45;&gt;</span></span>
+  <span>[ <span>`Ok of <span><span>(<span class="type-var">'a</span>, <span class="type-var">'b</span>)</span> <a href="#type-t">t</a></span></span> <span><span>| `Duplicate_keys</span> of <span><span class="type-var">'a</span> list</span></span> ]</span></span></code></div><div class="spec-doc"><p>Whereas <code>of_alist</code> will report <code>Duplicate_key</code> no matter how many dups there are in your list, <code>of_alist_report_all_dups</code> will report each and every duplicate entry.</p><p>For example:</p><pre>  Hashtbl.of_alist (module Int) [(1, &quot;foo&quot;); (1, &quot;bar&quot;); (2, &quot;foo&quot;); (2, &quot;bar&quot;)];;
+  - : [ `Duplicate_key of int | `Ok of (int, string) Hashtbl.t ] = `Duplicate_key 1
+
+  Hashtbl.of_alist_report_all_dups (module Int) [(1, &quot;foo&quot;); (1, &quot;bar&quot;); (2, &quot;foo&quot;); (2, &quot;bar&quot;)];;
+  - : [ `Duplicate_keys of int list | `Ok of (int, string) Hashtbl.t ] = `Duplicate_keys [1; 2]</pre></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-of_alist_or_error"><a href="#val-of_alist_or_error" class="anchor"></a><code><span><span class="keyword">val</span> of_alist_or_error : 
+  <span><span class="optlabel">?growth_allowed</span>:bool <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="optlabel">?size</span>:int <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span class="type-var">'a</span> <a href="../Key/index.html#type-t">Key.t</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span>(<span class="type-var">'a</span> * <span class="type-var">'b</span>)</span> list</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span>(<span class="type-var">'a</span>, <span class="type-var">'b</span>)</span> <a href="#type-t">t</a></span> <a href="../../Or_error/index.html#type-t">Or_error.t</a></span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-of_alist_exn"><a href="#val-of_alist_exn" class="anchor"></a><code><span><span class="keyword">val</span> of_alist_exn : 
+  <span><span class="optlabel">?growth_allowed</span>:bool <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="optlabel">?size</span>:int <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span class="type-var">'a</span> <a href="../Key/index.html#type-t">Key.t</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span>(<span class="type-var">'a</span> * <span class="type-var">'b</span>)</span> list</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span>(<span class="type-var">'a</span>, <span class="type-var">'b</span>)</span> <a href="#type-t">t</a></span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-of_alist_multi"><a href="#val-of_alist_multi" class="anchor"></a><code><span><span class="keyword">val</span> of_alist_multi : 
+  <span><span class="optlabel">?growth_allowed</span>:bool <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="optlabel">?size</span>:int <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span class="type-var">'a</span> <a href="../Key/index.html#type-t">Key.t</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span>(<span class="type-var">'a</span> * <span class="type-var">'b</span>)</span> list</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span>(<span class="type-var">'a</span>, <span><span class="type-var">'b</span> list</span>)</span> <a href="#type-t">t</a></span></span></code></div><div class="spec-doc"><p>Creates a <a href="../module-type-Multi/index.html" title="Multi">&quot;multi&quot;</a> hashtable, i.e., a hashtable where each key points to a list potentially containing multiple values. So instead of short-circuiting with a <code>`Duplicate_key</code> variant on duplicates, as in <code>of_alist</code>, <code>of_alist_multi</code> folds those values into a list for the given key:</p><pre>let h = Hashtbl.of_alist_multi (module Int) [(1, &quot;a&quot;); (1, &quot;b&quot;); (2, &quot;c&quot;); (2, &quot;d&quot;)];;
+val h : (int, string list) Hashtbl.t = &lt;abstr&gt;
+
+Hashtbl.find_exn h 1;;
+- : string list = [&quot;b&quot;; &quot;a&quot;]</pre></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-create_mapped"><a href="#val-create_mapped" class="anchor"></a><code><span><span class="keyword">val</span> create_mapped : 
+  <span><span class="optlabel">?growth_allowed</span>:bool <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="optlabel">?size</span>:int <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span class="type-var">'a</span> <a href="../Key/index.html#type-t">Key.t</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="label">get_key</span>:<span>(<span><span class="type-var">'r</span> <span class="arrow">&#45;&gt;</span></span> <span class="type-var">'a</span>)</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="label">get_data</span>:<span>(<span><span class="type-var">'r</span> <span class="arrow">&#45;&gt;</span></span> <span class="type-var">'b</span>)</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span class="type-var">'r</span> list</span> <span class="arrow">&#45;&gt;</span></span>
+  <span>[ <span>`Ok of <span><span>(<span class="type-var">'a</span>, <span class="type-var">'b</span>)</span> <a href="#type-t">t</a></span></span> <span><span>| `Duplicate_keys</span> of <span><span class="type-var">'a</span> list</span></span> ]</span></span></code></div><div class="spec-doc"><p>Applies the <code>get_key</code> and <code>get_data</code> functions to the <code>'r list</code> to create the initial keys and values, respectively, for the new hashtable.</p><pre class="language-ocaml"><code> create_mapped get_key get_data [x1;...;xn]
+   = of_alist [get_key x1, get_data x1; ...; get_key xn, get_data xn]</code></pre><p>Example:</p><pre>  let h =
+    Hashtbl.create_mapped (module Int)
+      ~get_key:(local_ (fun x -&gt; x))
+      ~get_data:(local_ (fun x -&gt; x + 1))
+     [1; 2; 3];;
+  val h : [ `Duplicate_keys of int list | `Ok of (int, int) Hashtbl.t ] = `Ok &lt;abstr&gt;
+
+  let h =
+    match h with
+    | `Ok x -&gt; x
+    | `Duplicate_keys _ -&gt; failwith &quot;&quot;
+  in
+  Hashtbl.find_exn h 1;;
+  - : int = 2</pre></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-create_with_key"><a href="#val-create_with_key" class="anchor"></a><code><span><span class="keyword">val</span> create_with_key : 
+  <span><span class="optlabel">?growth_allowed</span>:bool <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="optlabel">?size</span>:int <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span class="type-var">'a</span> <a href="../Key/index.html#type-t">Key.t</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="label">get_key</span>:<span>(<span><span class="type-var">'r</span> <span class="arrow">&#45;&gt;</span></span> <span class="type-var">'a</span>)</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span class="type-var">'r</span> list</span> <span class="arrow">&#45;&gt;</span></span>
+  <span>[ <span>`Ok of <span><span>(<span class="type-var">'a</span>, <span class="type-var">'r</span>)</span> <a href="#type-t">t</a></span></span> <span><span>| `Duplicate_keys</span> of <span><span class="type-var">'a</span> list</span></span> ]</span></span></code></div><div class="spec-doc"><pre class="language-ocaml"><code> create_with_key ~get_key [x1;...;xn]
+   = of_alist [get_key x1, x1; ...; get_key xn, xn] </code></pre></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-create_with_key_or_error"><a href="#val-create_with_key_or_error" class="anchor"></a><code><span><span class="keyword">val</span> create_with_key_or_error : 
+  <span><span class="optlabel">?growth_allowed</span>:bool <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="optlabel">?size</span>:int <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span class="type-var">'a</span> <a href="../Key/index.html#type-t">Key.t</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="label">get_key</span>:<span>(<span><span class="type-var">'r</span> <span class="arrow">&#45;&gt;</span></span> <span class="type-var">'a</span>)</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span class="type-var">'r</span> list</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span>(<span class="type-var">'a</span>, <span class="type-var">'r</span>)</span> <a href="#type-t">t</a></span> <a href="../../Or_error/index.html#type-t">Or_error.t</a></span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-create_with_key_exn"><a href="#val-create_with_key_exn" class="anchor"></a><code><span><span class="keyword">val</span> create_with_key_exn : 
+  <span><span class="optlabel">?growth_allowed</span>:bool <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="optlabel">?size</span>:int <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span class="type-var">'a</span> <a href="../Key/index.html#type-t">Key.t</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="label">get_key</span>:<span>(<span><span class="type-var">'r</span> <span class="arrow">&#45;&gt;</span></span> <span class="type-var">'a</span>)</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span class="type-var">'r</span> list</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span>(<span class="type-var">'a</span>, <span class="type-var">'r</span>)</span> <a href="#type-t">t</a></span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-group"><a href="#val-group" class="anchor"></a><code><span><span class="keyword">val</span> group : 
+  <span><span class="optlabel">?growth_allowed</span>:bool <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="optlabel">?size</span>:int <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span class="type-var">'a</span> <a href="../Key/index.html#type-t">Key.t</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="label">get_key</span>:<span>(<span><span class="type-var">'r</span> <span class="arrow">&#45;&gt;</span></span> <span class="type-var">'a</span>)</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="label">get_data</span>:<span>(<span><span class="type-var">'r</span> <span class="arrow">&#45;&gt;</span></span> <span class="type-var">'b</span>)</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="label">combine</span>:<span>(<span><span class="type-var">'b</span> <span class="arrow">&#45;&gt;</span></span> <span><span class="type-var">'b</span> <span class="arrow">&#45;&gt;</span></span> <span class="type-var">'b</span>)</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span class="type-var">'r</span> list</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span>(<span class="type-var">'a</span>, <span class="type-var">'b</span>)</span> <a href="#type-t">t</a></span></span></code></div><div class="spec-doc"><p>Like <code>create_mapped</code>, applies the <code>get_key</code> and <code>get_data</code> functions to the <code>'r list</code> to create the initial keys and values, respectively, for the new hashtable -- and then, like <code>add_multi</code>, folds together values belonging to the same keys. Here, though, the function used for the folding is given by <code>combine</code> (instead of just being a <code>cons</code>).</p><p>Example:</p><pre>   Hashtbl.group (module Int)
+     ~get_key:(local_ (fun x -&gt; x / 2))
+     ~get_data:(local_ (fun x -&gt; x))
+     ~combine:(local_ (fun x y -&gt; x * y))
+      [ 1; 2; 3; 4]
+   |&gt; Hashtbl.to_alist;;
+   - : (int * int) list = [(2, 4); (1, 6); (0, 1)]</pre></div></div></div></body></html>

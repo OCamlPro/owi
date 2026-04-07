@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Deriving (docs.other.ppxlib.Ppxlib.Deriving)</title><meta charset="utf-8"/><link rel="stylesheet" href="../../../../odoc.support/odoc.css"/><meta name="generator" content="odoc 3.1.0"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../../../../odoc.support/highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script></head><body class="odoc"><nav class="odoc-nav"><a href="../index.html">Up</a> – <a href="../../../../../index.html">Index</a> &#x00BB; <a href="../../../../index.html">docs</a> &#x00BB; <a href="../../../index.html">other</a> &#x00BB; <a href="../../index.html">ppxlib</a> &#x00BB; <a href="../index.html">Ppxlib</a> &#x00BB; Deriving</nav><header class="odoc-preamble"><h1>Module <code><span>Ppxlib.Deriving</span></code></h1><p>Deriving code from type declarations.</p></header><div class="odoc-tocs"><nav class="odoc-toc odoc-local-toc"><ul><li><a href="#generator-registration">Generator registration</a></li></ul></nav></div><div class="odoc-content"><div class="odoc-spec"><div class="spec module anchored" id="module-Args"><a href="#module-Args" class="anchor"></a><code><span><span class="keyword">module</span> <a href="Args/index.html">Args</a></span><span> : <span class="keyword">sig</span> ... <span class="keyword">end</span></span></code></div><div class="spec-doc"><p>Specification of generator arguments</p></div></div><h6 id="generator-registration"><a href="#generator-registration" class="anchor"></a>Generator registration</h6><div class="odoc-spec"><div class="spec type anchored" id="type-t"><a href="#type-t" class="anchor"></a><code><span><span class="keyword">type</span> t</span></code></div><div class="spec-doc"><p>Type of registered derivers</p></div></div><div class="odoc-spec"><div class="spec module anchored" id="module-Generator"><a href="#module-Generator" class="anchor"></a><code><span><span class="keyword">module</span> <a href="Generator/index.html">Generator</a></span><span> : <span class="keyword">sig</span> ... <span class="keyword">end</span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-add"><a href="#val-add" class="anchor"></a><code><span><span class="keyword">val</span> add : 
+  <span><span class="optlabel">?str_type_decl</span>:
+    <span><span>(<span><a href="../../../ppxlib.astlib/Astlib/Ast_502/Parsetree/index.html#type-structure_item">Astlib.Ast_502.Parsetree.structure_item</a> list</span>,
+      <a href="../../../ppxlib.astlib/Astlib/Ast_502/Asttypes/index.html#type-rec_flag">Astlib.Ast_502.Asttypes.rec_flag</a>
+      * <span><a href="../../../ppxlib.astlib/Astlib/Ast_502/Parsetree/index.html#type-type_declaration">Astlib.Ast_502.Parsetree.type_declaration</a> list</span>)</span>
+      <a href="Generator/index.html#type-t">Generator.t</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="optlabel">?str_class_type_decl</span>:
+    <span><span>(<span><a href="../../../ppxlib.astlib/Astlib/Ast_502/Parsetree/index.html#type-structure_item">Astlib.Ast_502.Parsetree.structure_item</a> list</span>,
+      <span><span><a href="../../../ppxlib.astlib/Astlib/Ast_502/Parsetree/index.html#type-class_type">Astlib.Ast_502.Parsetree.class_type</a> <a href="../../../ppxlib.astlib/Astlib/Ast_502/Parsetree/index.html#type-class_infos">Astlib.Ast_502.Parsetree.class_infos</a></span>
+        list</span>)</span>
+      <a href="Generator/index.html#type-t">Generator.t</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="optlabel">?str_type_ext</span>:
+    <span><span>(<span><a href="../../../ppxlib.astlib/Astlib/Ast_502/Parsetree/index.html#type-structure_item">Astlib.Ast_502.Parsetree.structure_item</a> list</span>,
+      <a href="../../../ppxlib.astlib/Astlib/Ast_502/Parsetree/index.html#type-type_extension">Astlib.Ast_502.Parsetree.type_extension</a>)</span>
+      <a href="Generator/index.html#type-t">Generator.t</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="optlabel">?str_exception</span>:
+    <span><span>(<span><a href="../../../ppxlib.astlib/Astlib/Ast_502/Parsetree/index.html#type-structure_item">Astlib.Ast_502.Parsetree.structure_item</a> list</span>,
+      <a href="../../../ppxlib.astlib/Astlib/Ast_502/Parsetree/index.html#type-type_exception">Astlib.Ast_502.Parsetree.type_exception</a>)</span>
+      <a href="Generator/index.html#type-t">Generator.t</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="optlabel">?str_module_type_decl</span>:
+    <span><span>(<span><a href="../../../ppxlib.astlib/Astlib/Ast_502/Parsetree/index.html#type-structure_item">Astlib.Ast_502.Parsetree.structure_item</a> list</span>,
+      <a href="../../../ppxlib.astlib/Astlib/Ast_502/Parsetree/index.html#type-module_type_declaration">Astlib.Ast_502.Parsetree.module_type_declaration</a>)</span>
+      <a href="Generator/index.html#type-t">Generator.t</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="optlabel">?str_module_binding</span>:
+    <span><span>(<span><a href="../../../ppxlib.astlib/Astlib/Ast_502/Parsetree/index.html#type-structure_item">Astlib.Ast_502.Parsetree.structure_item</a> list</span>,
+      <a href="../../../ppxlib.astlib/Astlib/Ast_502/Parsetree/index.html#type-module_binding">Astlib.Ast_502.Parsetree.module_binding</a>)</span>
+      <a href="Generator/index.html#type-t">Generator.t</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="optlabel">?sig_type_decl</span>:
+    <span><span>(<span><a href="../../../ppxlib.astlib/Astlib/Ast_502/Parsetree/index.html#type-signature_item">Astlib.Ast_502.Parsetree.signature_item</a> list</span>,
+      <a href="../../../ppxlib.astlib/Astlib/Ast_502/Asttypes/index.html#type-rec_flag">Astlib.Ast_502.Asttypes.rec_flag</a>
+      * <span><a href="../../../ppxlib.astlib/Astlib/Ast_502/Parsetree/index.html#type-type_declaration">Astlib.Ast_502.Parsetree.type_declaration</a> list</span>)</span>
+      <a href="Generator/index.html#type-t">Generator.t</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="optlabel">?sig_class_type_decl</span>:
+    <span><span>(<span><a href="../../../ppxlib.astlib/Astlib/Ast_502/Parsetree/index.html#type-signature_item">Astlib.Ast_502.Parsetree.signature_item</a> list</span>,
+      <span><span><a href="../../../ppxlib.astlib/Astlib/Ast_502/Parsetree/index.html#type-class_type">Astlib.Ast_502.Parsetree.class_type</a> <a href="../../../ppxlib.astlib/Astlib/Ast_502/Parsetree/index.html#type-class_infos">Astlib.Ast_502.Parsetree.class_infos</a></span>
+        list</span>)</span>
+      <a href="Generator/index.html#type-t">Generator.t</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="optlabel">?sig_type_ext</span>:
+    <span><span>(<span><a href="../../../ppxlib.astlib/Astlib/Ast_502/Parsetree/index.html#type-signature_item">Astlib.Ast_502.Parsetree.signature_item</a> list</span>,
+      <a href="../../../ppxlib.astlib/Astlib/Ast_502/Parsetree/index.html#type-type_extension">Astlib.Ast_502.Parsetree.type_extension</a>)</span>
+      <a href="Generator/index.html#type-t">Generator.t</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="optlabel">?sig_exception</span>:
+    <span><span>(<span><a href="../../../ppxlib.astlib/Astlib/Ast_502/Parsetree/index.html#type-signature_item">Astlib.Ast_502.Parsetree.signature_item</a> list</span>,
+      <a href="../../../ppxlib.astlib/Astlib/Ast_502/Parsetree/index.html#type-type_exception">Astlib.Ast_502.Parsetree.type_exception</a>)</span>
+      <a href="Generator/index.html#type-t">Generator.t</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="optlabel">?sig_module_type_decl</span>:
+    <span><span>(<span><a href="../../../ppxlib.astlib/Astlib/Ast_502/Parsetree/index.html#type-signature_item">Astlib.Ast_502.Parsetree.signature_item</a> list</span>,
+      <a href="../../../ppxlib.astlib/Astlib/Ast_502/Parsetree/index.html#type-module_type_declaration">Astlib.Ast_502.Parsetree.module_type_declaration</a>)</span>
+      <a href="Generator/index.html#type-t">Generator.t</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="optlabel">?sig_module_decl</span>:
+    <span><span>(<span><a href="../../../ppxlib.astlib/Astlib/Ast_502/Parsetree/index.html#type-signature_item">Astlib.Ast_502.Parsetree.signature_item</a> list</span>,
+      <a href="../../../ppxlib.astlib/Astlib/Ast_502/Parsetree/index.html#type-module_declaration">Astlib.Ast_502.Parsetree.module_declaration</a>)</span>
+      <a href="Generator/index.html#type-t">Generator.t</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="optlabel">?extension</span>:
+    <span>(<span><span class="label">loc</span>:<a href="../Location/index.html#type-t">Location.t</a> <span class="arrow">&#45;&gt;</span></span>
+      <span><span class="label">path</span>:string <span class="arrow">&#45;&gt;</span></span>
+      <span><a href="../../../ppxlib.astlib/Astlib/Ast_502/Parsetree/index.html#type-core_type">Astlib.Ast_502.Parsetree.core_type</a> <span class="arrow">&#45;&gt;</span></span>
+      <a href="../../../ppxlib.astlib/Astlib/Ast_502/Parsetree/index.html#type-expression">Astlib.Ast_502.Parsetree.expression</a>)</span> <span class="arrow">&#45;&gt;</span></span>
+  <span>string <span class="arrow">&#45;&gt;</span></span>
+  <a href="#type-t">t</a></span></code></div><div class="spec-doc"><p>Register a new deriving generator.</p><p>The various arguments are for the various items on which derivers can be attached in structure and signatures.</p><p>We distinguish <code>exception</code> from <code>type_extension</code> as <code>exception E</code> is not exactly the same as <code>type exn += E</code>. Indeed if the type <code>exn</code> is redefined, then <code>type exn += E</code> will add <code>E</code> to the new <code>exn</code> type while <code>exception E</code> will add <code>E</code> to the predefined <code>exn</code> type.</p><p><code>extension</code> register an expander for extension with the name of the deriver. This is here mostly to support the ppx_deriving backend.</p></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-add_alias"><a href="#val-add_alias" class="anchor"></a><code><span><span class="keyword">val</span> add_alias : 
+  <span>string <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="optlabel">?str_type_decl</span>:<span><a href="#type-t">t</a> list</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="optlabel">?str_class_type_decl</span>:<span><a href="#type-t">t</a> list</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="optlabel">?str_type_ext</span>:<span><a href="#type-t">t</a> list</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="optlabel">?str_exception</span>:<span><a href="#type-t">t</a> list</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="optlabel">?str_module_type_decl</span>:<span><a href="#type-t">t</a> list</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="optlabel">?str_module_binding</span>:<span><a href="#type-t">t</a> list</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="optlabel">?sig_type_decl</span>:<span><a href="#type-t">t</a> list</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="optlabel">?sig_class_type_decl</span>:<span><a href="#type-t">t</a> list</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="optlabel">?sig_type_ext</span>:<span><a href="#type-t">t</a> list</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="optlabel">?sig_exception</span>:<span><a href="#type-t">t</a> list</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="optlabel">?sig_module_type_decl</span>:<span><a href="#type-t">t</a> list</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="optlabel">?sig_module_decl</span>:<span><a href="#type-t">t</a> list</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><a href="#type-t">t</a> list</span> <span class="arrow">&#45;&gt;</span></span>
+  <a href="#type-t">t</a></span></code></div><div class="spec-doc"><p><code>add_alias name set</code> add an alias. When the user write the alias, all the generator of <code>set</code> will be used instead. It is possible to override the set for any of the context by passing the specific set in the approriate optional argument of <code>add_alias</code>.</p></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-ignore"><a href="#val-ignore" class="anchor"></a><code><span><span class="keyword">val</span> ignore : <span><a href="#type-t">t</a> <span class="arrow">&#45;&gt;</span></span> unit</span></code></div><div class="spec-doc"><p>Ignore a deriver. So that one can write: <code>Deriving.add ... |&gt; Deriving.ignore</code></p></div></div></div></body></html>

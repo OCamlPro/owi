@@ -341,9 +341,9 @@ let extend_s n x =
 
 (* String conversion that allows leading signs and unsigned values *)
 
-let max_upper = unsigned_di<span data-count="757">v</span> minus_one 10l
+let max_upper = unsigned_di<span data-count="762">v</span> minus_one 10l
 
-let max_lower = unsigned_re<span data-count="757">m</span> minus_one 10l
+let max_lower = unsigned_re<span data-count="762">m</span> minus_one 10l
 
 let sign_extend i =
   <span data-count="67908">l</span>et sign_bit = logand (of_in<span data-count="67908">t</span> (1 lsl (32 - 1))) i in
@@ -403,7 +403,7 @@ let of_string_exn s =
 
 let of_string s = <span data-count="25410">t</span>ry Some (of_string_ex<span data-count="25409">n</span> s) with <span data-count="1">F</span>ailure _ -&gt; None
 
-let to_string_u = Fmt.st<span data-count="757">r</span> "%lu"
+let to_string_u = Fmt.st<span data-count="762">r</span> "%lu"
 </code></pre>
       </div>
     </div>

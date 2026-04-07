@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Core_type (docs.other.ppxlib_jane.Ppxlib_jane.Jane_syntax.Core_type)</title><meta charset="utf-8"/><link rel="stylesheet" href="../../../../../odoc.support/odoc.css"/><meta name="generator" content="odoc 3.1.0"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../../../../../odoc.support/highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script></head><body class="odoc"><nav class="odoc-nav"><a href="../index.html">Up</a> – <a href="../../../../../../index.html">Index</a> &#x00BB; <a href="../../../../../index.html">docs</a> &#x00BB; <a href="../../../../index.html">other</a> &#x00BB; <a href="../../../index.html">ppxlib_jane</a> &#x00BB; <a href="../../index.html">Ppxlib_jane</a> &#x00BB; <a href="../index.html">Jane_syntax</a> &#x00BB; Core_type</nav><header class="odoc-preamble"><h1>Module <code><span>Jane_syntax.Core_type</span></code></h1><p>Novel syntax in types</p></header><div class="odoc-content"><div class="odoc-spec"><div class="spec type anchored" id="type-t"><a href="#type-t" class="anchor"></a><code><span><span class="keyword">type</span> t</span><span> = </span></code><ol><li id="type-t.Jtyp_layout" class="def variant constructor anchored"><a href="#type-t.Jtyp_layout" class="anchor"></a><code><span>| </span><span><span class="constructor">Jtyp_layout</span> <span class="keyword">of</span> <a href="../Layouts/index.html#type-core_type">Layouts.core_type</a></span></code></li><li id="type-t.Jtyp_tuple" class="def variant constructor anchored"><a href="#type-t.Jtyp_tuple" class="anchor"></a><code><span>| </span><span><span class="constructor">Jtyp_tuple</span> <span class="keyword">of</span> <a href="../Labeled_tuples/index.html#type-core_type">Labeled_tuples.core_type</a></span></code></li></ol></div></div><div class="odoc-include"><details open="open"><summary class="spec include"><code><span><span class="keyword">include</span> <a href="../module-type-AST/index.html">AST</a>
+  <span class="keyword">with</span> <span><span class="keyword">type</span> <a href="../module-type-AST/index.html#type-t">t</a> := <a href="#type-t">t</a> * <a href="../../../../ppxlib.astlib/Astlib/Ast_502/Parsetree/index.html#type-attributes">Ppxlib_ast.Parsetree.attributes</a></span>
+   <span class="keyword">and</span> <span><span class="keyword">type</span> <a href="../module-type-AST/index.html#type-ast">ast</a> := <a href="../../../../ppxlib.astlib/Astlib/Ast_502/Parsetree/index.html#type-core_type">Ppxlib_ast.Parsetree.core_type</a></span></span></code></summary><div class="odoc-spec"><div class="spec value anchored" id="val-of_ast"><a href="#val-of_ast" class="anchor"></a><code><span><span class="keyword">val</span> of_ast : 
+  <span><a href="../../../../ppxlib.astlib/Astlib/Ast_502/Parsetree/index.html#type-core_type">Ppxlib_ast.Parsetree.core_type</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><span>(<a href="#type-t">t</a> * <a href="../../../../ppxlib.astlib/Astlib/Ast_502/Parsetree/index.html#type-attributes">Ppxlib_ast.Parsetree.attributes</a>)</span> option</span></span></code></div><div class="spec-doc"><p>Given an OCaml AST node, check to see if it corresponds to an embedded term from our novel syntax. If it does, as long as the feature isn't a disabled language extension, then return it; if it's not a piece of novel syntax, return <code>None</code>; if it's an embedded term from a disabled language extension, raise an error.</p><p>AN IMPORTANT NOTE: The design of this function is careful to make merge conflicts with upstream less likely: we want no edits at all -- not even indentation -- to surrounding code. This is why we return a <code>t option</code>, not some structure that could include the <code>ast_desc</code> if there is no extension.</p><p>Indentation: we *do not change the indentation level* when we match on this function's result! E.g. from <code>type_expect_</code> in <code>typecore.ml</code>:</p><pre class="language-ocaml"><code>  match Jane_syntax.Expression.of_ast sexp with
+  | Some jexp -&gt;
+      type_expect_jane_syntax
+        ~loc
+        ~env
+        ~expected_mode
+        ~ty_expected
+        ~explanation
+        ~attributes:sexp.pexp_attributes
+        jexp
+  | None      -&gt; match sexp.pexp_desc with
+  | Pexp_ident lid -&gt;
+      let path, mode, desc, kind = type_ident env ~recarg lid in
+      (* ... *)
+  | Pexp_constant(Pconst_string (str, _, _) as cst) -&gt;
+      register_allocation expected_mode;
+      (* ... *)
+  | (* ... *)
+  | Pexp_unreachable -&gt;
+      re { exp_desc = Texp_unreachable;
+           exp_loc = loc; exp_extra = [];
+           exp_type = instance ty_expected;
+           exp_mode = expected_mode.mode;
+           exp_attributes = sexp.pexp_attributes;
+           exp_env = env }</code></pre><p>Note that we match on the result of this function, forward to <code>type_expect_jane_syntax</code> if we get something, and otherwise do the real match on <code>sexp.pexp_desc</code> *without going up an indentation level*. This is important to reduce the number of merge conflicts.</p></div></div></details></div><div class="odoc-spec"><div class="spec value anchored" id="val-core_type_of"><a href="#val-core_type_of" class="anchor"></a><code><span><span class="keyword">val</span> core_type_of : 
+  <span><span class="label">loc</span>:<a href="../../../../../findlib-194/compiler-libs/Location/index.html#type-t">Location.t</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="label">attrs</span>:<a href="../../../../ppxlib.astlib/Astlib/Ast_502/Parsetree/index.html#type-attributes">Ppxlib_ast.Parsetree.attributes</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="#type-t">t</a> <span class="arrow">&#45;&gt;</span></span>
+  <a href="../../../../ppxlib.astlib/Astlib/Ast_502/Parsetree/index.html#type-core_type">Ppxlib_ast.Parsetree.core_type</a></span></code></div></div></div></body></html>

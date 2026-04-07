@@ -37,10 +37,10 @@
             const path_to_root = "";
             const default_light_theme = "frappe";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-f817ea5a.js";
+            window.path_to_searchindex_js = "searchindex-509dda2c.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-2f55a7f2.js"></script>
+        <script src="toc-72dc2516.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -190,7 +190,7 @@ It is designed for researchers, engineers, programming language enthusiasts and 
 </ul>
 <p>The engine is designed for precision, scalability, interoperability across languages, and extensibility toward both experimental and applied verification use-cases.
 It offers a practical path from fuzzing to formal proofs.</p>
-<h3 id="-the-wasm-swiss-army-knife"><a class="header" href="#-the-wasm-swiss-army-knife">🔧 The <a href="#overview">Wasm Swiss Army Knife</a></a></h3>
+<h3 id="-the-wasm-swiss-army-knife"><a class="header" href="#-the-wasm-swiss-army-knife">🔧 The <a href="wasm-toolkit/overview.html">Wasm Swiss Army Knife</a></a></h3>
 <p>Owi offers a set of practical tools for Wasm development and analysis:</p>
 <ul>
 <li><strong>Formatter</strong> and <strong>optimizer</strong> for Wasm modules;</li>
@@ -200,7 +200,7 @@ It offers a practical path from fuzzing to formal proofs.</p>
 <li><strong>Randomized fuzzer</strong> generating valid (well-typed) Wasm modules.</li>
 </ul>
 <p>These tools aim to support everyday development tasks as well as research on program analysis, fuzzing, and program transformation.</p>
-<h3 id="--native-ocaml-library-for-wasm-integration"><a class="header" href="#--native-ocaml-library-for-wasm-integration">🐪  Native <a href="#overview-1">OCaml Library for Wasm</a> Integration</a></h3>
+<h3 id="--native-ocaml-library-for-wasm-integration"><a class="header" href="#--native-ocaml-library-for-wasm-integration">🐪  Native <a href="#overview">OCaml Library for Wasm</a> Integration</a></h3>
 <p>Owi is written in <a href="https://ocaml.org">OCaml</a>, thus it also provides a library for:</p>
 <ul>
 <li><strong>Embedding Wasm modules</strong> into OCaml applications;</li>
@@ -960,8 +960,6 @@ owi: [ERROR] Reached problem!
 
 <p>And indeed, in the <code>mean1</code> function, when using these values, there will be an overflow, leading to a wrong result.</p>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="examples-of-bug-finding"><a class="header" href="#examples-of-bug-finding">Examples of Bug Finding</a></h1>
-<div style="break-before: page; page-break-before: always;"></div>
 <h1 id="replaying-a-model"><a class="header" href="#replaying-a-model">Replaying a model</a></h1>
 <p>Let’s say you found a bug and want to check what is going on with the concrete input it contains.
 The <code>replay</code> commands can help with that.</p>
@@ -1665,12 +1663,99 @@ owi: [ERROR] Reached problem!
 [13]
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="how-to-speed-it-up"><a class="header" href="#how-to-speed-it-up">How to Speed it Up</a></h1>
+<h1 id="concrete-interpreter-1"><a href="#concrete-interpreter-1" class="header">Concrete Interpreter</a></h1>
+<h2 id="concrete-interpreter"><a class="header" href="#concrete-interpreter">Concrete Interpreter</a></h2>
+<p>Given a file <code>42.wat</code> with the following content:</p>
+<!-- $MDX file=42.wat -->
+<pre><code class="language-wat">(module $quickstart
+  (func $f
+    i32.const 20
+    i32.const 22
+    i32.add
+    drop
+  )
+  (start $f)
+)
+</code></pre>
+<p>Running the interpreter is as simple as:</p>
+<pre><code class="language-sh">$ owi run ./42.wat
+</code></pre>
+<p>Nothing is happening, so you can add the <code>-v</code> option to print an execution trace:</p>
+<pre><code class="language-sh">$ owi run ./42.wat -v
+owi: [INFO] parsing      ...
+owi: [INFO] checking     ...
+owi: [INFO] checking     ...
+owi: [INFO] typechecking ...
+owi: [INFO] linking      ...
+owi: [INFO] interpreting ...
+owi: [INFO] stack         : [  ]
+owi: [INFO] running instr : call 0 (executed 0 times)
+owi: [INFO] calling func  : func f
+owi: [INFO] stack         : [  ]
+owi: [INFO] running instr : i32.const 20 (executed 0 times)
+owi: [INFO] stack         : [ i32.const 20 ]
+owi: [INFO] running instr : i32.const 22 (executed 0 times)
+owi: [INFO] stack         : [ i32.const 22 ; i32.const 20 ]
+owi: [INFO] running instr : i32.add (executed 0 times)
+owi: [INFO] stack         : [ i32.const 42 ]
+owi: [INFO] running instr : drop (executed 0 times)
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="comparison-to-rosette-prolog-etc"><a class="header" href="#comparison-to-rosette-prolog-etc">Comparison to Rosette, Prolog, etc.</a></h1>
+<h1 id="converter"><a class="header" href="#converter">Converter</a></h1>
+<h2 id="wasm2wat"><a class="header" href="#wasm2wat">Wasm2wat</a></h2>
+<p>Given a file <code>42.wasm</code>, you can convert it to <code>result.wat</code> and then run it:</p>
+<pre><code class="language-sh">$ owi wasm2wat 42.wasm -o result.wat
+$ cat result.wat
+(module
+  (type (func))
+  (func
+    i32.const 20
+    i32.const 22
+    i32.add
+    drop
+  )
+  (start 0)
+)
+$ owi run result.wat -v
+owi: [INFO] parsing      ...
+owi: [INFO] checking     ...
+owi: [INFO] checking     ...
+owi: [INFO] typechecking ...
+owi: [INFO] linking      ...
+owi: [INFO] interpreting ...
+owi: [INFO] stack         : [  ]
+owi: [INFO] running instr : call 0 (executed 0 times)
+owi: [INFO] calling func  : func anonymous
+owi: [INFO] stack         : [  ]
+owi: [INFO] running instr : i32.const 20 (executed 0 times)
+owi: [INFO] stack         : [ i32.const 20 ]
+owi: [INFO] running instr : i32.const 22 (executed 0 times)
+owi: [INFO] stack         : [ i32.const 22 ; i32.const 20 ]
+owi: [INFO] running instr : i32.add (executed 0 times)
+owi: [INFO] stack         : [ i32.const 42 ]
+owi: [INFO] running instr : drop (executed 0 times)
+</code></pre>
+<h2 id="wat2wasm"><a class="header" href="#wat2wasm">Wat2wasm</a></h2>
+<p>Given a file <code>42.wat</code>, you can convert it to <code>result.wasm</code> and then run it:</p>
+<pre><code class="language-sh">$ owi wat2wasm 42.wat -o result.wasm
+$ owi run result.wasm -v
+owi: [INFO] typechecking ...
+owi: [INFO] linking      ...
+owi: [INFO] interpreting ...
+owi: [INFO] stack         : [  ]
+owi: [INFO] running instr : call 0 (executed 0 times)
+owi: [INFO] calling func  : func anonymous
+owi: [INFO] stack         : [  ]
+owi: [INFO] running instr : i32.const 20 (executed 0 times)
+owi: [INFO] stack         : [ i32.const 20 ]
+owi: [INFO] running instr : i32.const 22 (executed 0 times)
+owi: [INFO] stack         : [ i32.const 22 ; i32.const 20 ]
+owi: [INFO] running instr : i32.add (executed 0 times)
+owi: [INFO] stack         : [ i32.const 42 ]
+owi: [INFO] running instr : drop (executed 0 times)
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="overview"><a class="header" href="#overview">Overview</a></h1>
-<h2 id="formatter"><a class="header" href="#formatter">Formatter</a></h2>
+<h1 id="formatter"><a class="header" href="#formatter">Formatter</a></h1>
 <p>Given a file <code>horrible.wat</code>:</p>
 <details>
 <!-- $MDX file=horrible.wat -->
@@ -1759,141 +1844,8 @@ i32.lt_s
 )
 </code></pre>
 <p>Are you able to recognize the program now?</p>
-<h2 id="interpreter"><a class="header" href="#interpreter">Interpreter</a></h2>
-<p>Given a file <code>42.wat</code> with the following content:</p>
-<!-- $MDX file=42.wat -->
-<pre><code class="language-wat">(module $quickstart
-  (func $f
-    i32.const 20
-    i32.const 22
-    i32.add
-    drop
-  )
-  (start $f)
-)
-</code></pre>
-<p>Running the interpreter is as simple as:</p>
-<pre><code class="language-sh">$ owi run ./42.wat
-</code></pre>
-<p>Nothing is happening, so you can add the <code>-v</code> option to print an execution trace:</p>
-<pre><code class="language-sh">$ owi run ./42.wat -v
-owi: [INFO] parsing      ...
-owi: [INFO] checking     ...
-owi: [INFO] checking     ...
-owi: [INFO] typechecking ...
-owi: [INFO] linking      ...
-owi: [INFO] interpreting ...
-owi: [INFO] stack         : [  ]
-owi: [INFO] running instr : call 0 (executed 0 times)
-owi: [INFO] calling func  : func f
-owi: [INFO] stack         : [  ]
-owi: [INFO] running instr : i32.const 20 (executed 0 times)
-owi: [INFO] stack         : [ i32.const 20 ]
-owi: [INFO] running instr : i32.const 22 (executed 0 times)
-owi: [INFO] stack         : [ i32.const 22 ; i32.const 20 ]
-owi: [INFO] running instr : i32.add (executed 0 times)
-owi: [INFO] stack         : [ i32.const 42 ]
-owi: [INFO] running instr : drop (executed 0 times)
-</code></pre>
-<h2 id="script-using-the-spectest-module"><a class="header" href="#script-using-the-spectest-module">Script using the <code>spectest</code> module</a></h2>
-<p>Given the following <code>print.wast</code> file:</p>
-<!-- $MDX file=print.wast -->
-<pre><code class="language-wast">(module
-
-  (func $print_i32 (import "spectest" "print_i32") (param i32))
-
-  (func $main
-    i32.const 42
-    call $print_i32
-  )
-
-  (start $main)
-)
-</code></pre>
-<p>You can print the value thanks to the <code>print_i32</code> function imported from the <code>spectest</code> module:</p>
-<pre><code class="language-sh">$ owi script ./print.wast
-42
-</code></pre>
-<h2 id="validator"><a class="header" href="#validator">Validator</a></h2>
-<p>Given a file <code>type_error.wat</code> with the following content:</p>
-<!-- $MDX file=type_error.wat -->
-<pre><code class="language-wat">(module $quickstart
-  (func $f
-    i32.const 20
-    i32.const 22
-    i32.add
-    i32.add
-    drop
-  )
-  (start $f)
-)
-</code></pre>
-<p>Running the validator is as simple as:</p>
-<pre><code class="language-sh">$ owi validate ./type_error.wat
-owi: [ERROR] type mismatch (expected [i32 i32] but stack is [i32])
-[35]
-</code></pre>
-<p>You can also print a more detailed trace with the <code>-v</code> option:</p>
-<pre><code class="language-sh">$ owi validate ./type_error.wat -v
-owi: [INFO] parsing      ...
-owi: [INFO] checking     ...
-owi: [INFO] checking     ...
-owi: [INFO] typechecking ...
-owi: [ERROR] type mismatch (expected [i32 i32] but stack is [i32])
-[35]
-</code></pre>
-<h2 id="wasm2wat"><a class="header" href="#wasm2wat">Wasm2wat</a></h2>
-<p>Given a file <code>42.wasm</code>, you can convert it to <code>result.wat</code> and then run it:</p>
-<pre><code class="language-sh">$ owi wasm2wat 42.wasm -o result.wat
-$ cat result.wat
-(module
-  (type (func))
-  (func
-    i32.const 20
-    i32.const 22
-    i32.add
-    drop
-  )
-  (start 0)
-)
-$ owi run result.wat -v
-owi: [INFO] parsing      ...
-owi: [INFO] checking     ...
-owi: [INFO] checking     ...
-owi: [INFO] typechecking ...
-owi: [INFO] linking      ...
-owi: [INFO] interpreting ...
-owi: [INFO] stack         : [  ]
-owi: [INFO] running instr : call 0 (executed 0 times)
-owi: [INFO] calling func  : func anonymous
-owi: [INFO] stack         : [  ]
-owi: [INFO] running instr : i32.const 20 (executed 0 times)
-owi: [INFO] stack         : [ i32.const 20 ]
-owi: [INFO] running instr : i32.const 22 (executed 0 times)
-owi: [INFO] stack         : [ i32.const 22 ; i32.const 20 ]
-owi: [INFO] running instr : i32.add (executed 0 times)
-owi: [INFO] stack         : [ i32.const 42 ]
-owi: [INFO] running instr : drop (executed 0 times)
-</code></pre>
-<h2 id="wat2wasm"><a class="header" href="#wat2wasm">Wat2wasm</a></h2>
-<p>Given a file <code>42.wat</code>, you can convert it to <code>result.wasm</code> and then run it:</p>
-<pre><code class="language-sh">$ owi wat2wasm 42.wat -o result.wasm
-$ owi run result.wasm -v
-owi: [INFO] typechecking ...
-owi: [INFO] linking      ...
-owi: [INFO] interpreting ...
-owi: [INFO] stack         : [  ]
-owi: [INFO] running instr : call 0 (executed 0 times)
-owi: [INFO] calling func  : func anonymous
-owi: [INFO] stack         : [  ]
-owi: [INFO] running instr : i32.const 20 (executed 0 times)
-owi: [INFO] stack         : [ i32.const 20 ]
-owi: [INFO] running instr : i32.const 22 (executed 0 times)
-owi: [INFO] stack         : [ i32.const 22 ; i32.const 20 ]
-owi: [INFO] running instr : i32.add (executed 0 times)
-owi: [INFO] stack         : [ i32.const 42 ]
-owi: [INFO] running instr : drop (executed 0 times)
-</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="program-analyzer"><a class="header" href="#program-analyzer">Program Analyzer</a></h1>
 <h2 id="call-graph"><a class="header" href="#call-graph">Call Graph</a></h2>
 <p>Given a file <code>useless.wat</code> with the following content:</p>
 <pre><code class="language-wat">(module
@@ -1954,7 +1906,55 @@ owi: [INFO] running instr : drop (executed 0 times)
 </code></pre>
 <p><img src="wasm-toolkit/control-flow_graph.svg" alt="image"></p>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="comparison-with-other-tools-1"><a class="header" href="#comparison-with-other-tools-1">Comparison with Other Tools</a></h1>
+<h1 id="script-interpreter"><a href="#script-interpreter" class="header">Script Interpreter</a></h1>
+<h2 id="script-interpreter-using-the-spectest-module"><a class="header" href="#script-interpreter-using-the-spectest-module">Script Interpreter using the <code>spectest</code> module</a></h2>
+<p>Given the following <code>print.wast</code> file:</p>
+<!-- $MDX file=print.wast -->
+<pre><code class="language-wast">(module
+
+  (func $print_i32 (import "spectest" "print_i32") (param i32))
+
+  (func $main
+    i32.const 42
+    call $print_i32
+  )
+
+  (start $main)
+)
+</code></pre>
+<p>You can print the value thanks to the <code>print_i32</code> function imported from the <code>spectest</code> module:</p>
+<pre><code class="language-sh">$ owi script ./print.wast
+42
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="validator"><a class="header" href="#validator">Validator</a></h1>
+<p>Given a file <code>type_error.wat</code> with the following content:</p>
+<!-- $MDX file=type_error.wat -->
+<pre><code class="language-wat">(module $quickstart
+  (func $f
+    i32.const 20
+    i32.const 22
+    i32.add
+    i32.add
+    drop
+  )
+  (start $f)
+)
+</code></pre>
+<p>Running the validator is as simple as:</p>
+<pre><code class="language-sh">$ owi validate ./type_error.wat
+owi: [ERROR] type mismatch (expected [i32 i32] but stack is [i32])
+[35]
+</code></pre>
+<p>You can also print a more detailed trace with the <code>-v</code> option:</p>
+<pre><code class="language-sh">$ owi validate ./type_error.wat -v
+owi: [INFO] parsing      ...
+owi: [INFO] checking     ...
+owi: [INFO] checking     ...
+owi: [INFO] typechecking ...
+owi: [ERROR] type mismatch (expected [i32 i32] but stack is [i32])
+[35]
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="owi"><a class="header" href="#owi"><code>owi</code></a></h1>
 <pre><code class="language-sh">$ owi --help=plain
@@ -3519,7 +3519,7 @@ SEE ALSO
 
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="overview-1"><a class="header" href="#overview-1">Overview</a></h1>
+<h1 id="overview"><a class="header" href="#overview">Overview</a></h1>
 <p>Given a file <code>quickstart.wat</code>, here’s how to parse and run this file:</p>
 <pre><code class="language-ocaml"># open Prelude;;
 # open Owi;;
@@ -3704,7 +3704,7 @@ in the <code>$start</code> function, we initialize the memory starting at addres
 <code>(i32.const 0)</code> with a sequence of length <code>(i32.const 8)</code> with bytes of
 <code>(i32.const 0xAA)</code>.</p>
 <p>The definition of the external functions follows the same format as the
-<a href="ocaml-api/README.html#dealing-with-the-stack">previous example</a>. The difference is that, now, in the GADT definition of
+[previous example]. The difference is that, now, in the GADT definition of
 memset to allow the memory to be passed to this function, we need to wrap
 the three I32 arguments in a Mem variant. That is, instead of writing
 memset as:</p>
@@ -3782,11 +3782,6 @@ let () =
 <pre><code class="language-sh">$ ./extern_mem.exe
 0xAAAAAAAAAAAAAAAA
 </code></pre>
-<h2 id="advanced-usage"><a class="header" href="#advanced-usage">Advanced Usage</a></h2>
-<p>To learn more, see our advanced <a href="ocaml-api/life_game">Game of Life</a> example
-based on the famous cellular automaton by Conway. It show how to link several modules from different <code>.wat</code> files.</p>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="generated-api-documentation"><a class="header" href="#generated-api-documentation">Generated API Documentation</a></h1>
 
                     </main>
 

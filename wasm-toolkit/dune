@@ -8,4 +8,10 @@
   print.wast
   type_error.wat
   useless.wat)
- (files overview.md))
+ (files
+  concrete-interpreter.md
+  converter.md
+  formatter.md
+  program-analyzer.md
+  script-interpreter.md
+  validator.md))
