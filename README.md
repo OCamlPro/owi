@@ -9,7 +9,7 @@
 <div align="center">
 <br />
 
-[![build-badge]][build status] [![coverage-badge]][code coverage] [📘 documentation] [💬 zulip]
+[![build-badge]][build status] [![coverage-badge]][code coverage]
 
 </div>
 
@@ -19,12 +19,98 @@
 
 ### Key resources
 
-<div>
-  📘 <kbd><a href="https://ocamlpro.github.io/owi">Documentation</a></kbd> → Read the documentation<br />
-  💬 <kbd><a href="https://owi.zulipchat.com">Zulip community</a></kbd> → Ask questions and collaborate<br />
-</div>
+- 📘 [User Manual](https://ocamlpro.github.io/owi)
+  - [Install Owi](https://ocamlpro.github.io/owi/installation.html)
+  - [Quickstart](https://ocamlpro.github.io/owi/symex/quickstart.html)
+- 💬 [Zulip community](https://owi.zulipchat.com)
+- [List of supported Wasm proposals](https://webassembly.org/features)
+- [Changelog](./CHANGES.md)
+- [Hacking on Owi](./HACKING.md)
 
-### License
+### Explanations
+
+<details>
+
+  <summary>List of talks</summary>
+
+- [september 2023]: [ICFP OCaml track] @ The Westin Seattle - Seattle
+- [october 2023]: Wasm Research Day organized by the [WebAssembly Research Center] @ Google - Munich
+- april 2024: [OUPS (OCaml UserS in Paris)] @ Sorbonne Université - Paris
+- [november 2024]: [LVP working group] day of the [GdR GPL] @ Université Paris-Cité - Paris
+- [december 2024]: Léo Andrès' PhD defense @ Université Paris-Saclay - Gif-sur-Yvette
+- january 2025: [JFLA 2025] @ Domaine de Roiffé - Roiffé
+- [february 2025]: [Wasm Research Day 2025] (remote) @ Fastly - San Francisco
+- february 2025: [PPS Seminar] @ Université Paris-Cité - Paris
+- may 2025: [15th MirageOS hack retreat] @ Priscilla Queen of the Medina - Marrakech
+- june 2025: [\<Programming\> 2025] @ Faculty of Mathematics and Physics, Charles University - Prague
+- june 2025: [Dagstuhl Seminar 25241 - Utilising and Scaling the WebAssembly Semantics] @ Leibniz-Zentrum für Informatik - Dagstuhl
+- october 2025: [Wasm Research Day October 2025] @ Google - Munich
+
+</details>
+
+<details>
+
+  <summary>List of publications</summary>
+
+- [Owi: Performant Parallel Symbolic Execution Made Easy, an Application to WebAssembly], 2024
+- [Exécution symbolique pour tous ou Compilation d'OCaml vers WebAssembly], 2024
+- [Cross-Language Symbolic Runtime Annotation Checking], 2025
+- [Exécution symbolique pour la génération de tests ciblant des labels], 2026
+
+[Cross-Language Symbolic Runtime Annotation Checking]: https://inria.hal.science/hal-04798756/file/cross_language_symbolic_runtime_annotation_checking.pdf
+[Exécution symbolique pour la génération de tests ciblant des labels]: https://hal.science/hal-05427949
+[Exécution symbolique pour tous ou Compilation d'OCaml vers WebAssembly]: https://fs.zapashcanon.fr/pdf/manuscrit_these_leo_andres.pdf
+[Owi: Performant Parallel Symbolic Execution Made Easy, an Application to WebAssembly]: https://hal.science/hal-04627413
+
+[september 2023]: https://youtu.be/IM76cMP3Eqo
+[october 2023]: https://youtu.be/os_pknmiqmU
+[november 2024]: https://groupes.renater.fr/wiki/lvp/public/journee_lvp_novembre2024
+[december 2024]: https://fs.zapashcanon.fr/mp4/phd_defense.mp4
+[february 2025]: https://youtu.be/x6V-NJ9agjg
+
+[15th MirageOS hack retreat]: https://retreat.mirage.io
+[Dagstuhl Seminar 25241 - Utilising and Scaling the WebAssembly Semantics]: https://www.dagstuhl.de/seminars/seminar-calendar/seminar-details/25241
+[JFLA 2025]: https://jfla.inria.fr/jfla2025.html
+[GdR GPL]: https://gdr-gpl.cnrs.fr/
+[ICFP OCaml track]: https://icfp23.sigplan.org/home/ocaml-2023
+[LVP working group]: https://gdrgpl.myxwiki.org/xwiki/bin/view/Main/GTs/GT%20Langages%20et%20v%C3%A9rification%20de%20programmes%20(LVP)
+[OUPS (OCaml UserS in Paris)]: https://oups.frama.io
+[PPS Seminar]: https://www.irif.fr/seminaires/pps/index
+[\<Programming\> 2025]: https://2025.programming-conference.org
+[WebAssembly Research Center]: https://www.cs.cmu.edu/wrc
+[Wasm Research Day 2025]: https://www.cs.cmu.edu/~wasm/wasm-research-day-2025.html
+[Wasm Research Day October 2025]: https://www.cs.cmu.edu/~wasm/wasm-research-day-2025b.html
+
+</details>
+
+### References
+
+- TODO: man pages (see [here](https://ocamlpro.github.io/owi/manpages/owi.html#owi) for now)
+- TODO: high-level API for each language
+- TODO: Wasm API
+
+### About
+
+#### Fundings & Sponsors
+
+This project was partly funded through the [NGI0 Core] Fund, a fund established by [NLnet] with financial support from the European Commission's [Next Generation Internet] program :
+
+1. [First grant].
+2. [Second grant].
+
+[Next Generation Internet]: https://ngi.eu
+[NGI0 Core]: https://nlnet.nl/core
+[NLnet]: https://nlnet.nl
+[First grant]: https://nlnet.nl/project/OWI
+[Second grant]: https://nlnet.nl/project/OWI-2/
+
+#### Spelling and pronunciation
+
+Although the name Owi comes from an acronym (OCaml WebAssembly Interpreter), it must be written as a proper noun and only the first letter must be capitalized. It is possible to write the name in full lowercase when referring to the opam package or to the name of the binary.
+
+The reason we chose this spelling rather than the fully capitalized version is that in French, Owi is pronounced [o’wi(ʃ)] which sounds like "Oh oui !" which means "Oh yes!". Thus it should be pronounced this way and not by spelling the three letters it is made of.
+
+#### License
 
     Owi
     Copyright (C) 2021-2024 OCamlPro
@@ -56,5 +142,3 @@ Some code has been taken from the E-ACSL plugin of Frama-C. It is licensed under
 [build status]: https://github.com/ocamlpro/owi/actions
 [coverage-badge]: https://raw.githubusercontent.com/ocamlpro/owi/gh-pages/coverage/badge.svg
 [code coverage]: https://ocamlpro.github.io/owi/coverage
-[📘 documentation]: https://ocamlpro.github.io/owi
-[💬 zulip]: https://owi.zulipchat.com
