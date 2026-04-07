@@ -288,7 +288,7 @@ let typ env : Module.Field.t gen =
   let+ typ = B.func_type in
   let id = Some (Env.add_type env typ) in
   Module.Field.Typedef
-    (SimpleType (id, { final = false; ids = []; ct = Def_func_t typ }))
+    (SimpleType (id, { final = true; ids = []; ct = Def_func_t typ }))
 
 let elem env : Module.Field.t gen =
   let+ typ = B.ref_type

@@ -896,7 +896,7 @@ let encode_types buf types =
   encode_vector_array buf types (fun buf st ->
     match st with
     | Typedef.SimpleType
-        (_, { final = false; ids = []; ct = Def_func_t (pt, rt) }) ->
+        (_, { final = true; ids = []; ct = Def_func_t (pt, rt) }) ->
       Buffer.add_char buf '\x60';
       write_paramtype buf pt;
       write_resulttype buf rt

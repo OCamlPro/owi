@@ -170,7 +170,7 @@ let get_func_type_id (env : Env.t) i =
   Array.find_index
     (fun typ' ->
       match typ' with
-      | Typedef.SimpleType (_, { final = false; ids = []; ct = Def_func_t typ' })
+      | Typedef.SimpleType (_, { final = true; ids = []; ct = Def_func_t typ' })
         ->
         func_type_eq typ typ'
       | _ -> assert false )

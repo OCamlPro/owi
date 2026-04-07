@@ -483,7 +483,7 @@ let convert_sub_type Binary.{ final; ids; ct } : Text.sub_type =
     Text.{ final; ids = []; ct = Def_func_t (convert_func_type ft) }
   | _ ->
     Fmt.failwith
-      "Uninmplemented: conversion from Binary.sub_type to Text.sub_type"
+      "Unimplemented: conversion from Binary.sub_type to Text.sub_type"
 
 let from_types types : Text.Module.Field.t list =
   Array.map

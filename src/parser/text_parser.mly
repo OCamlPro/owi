@@ -207,7 +207,7 @@ let comp_type :=
 
 let sub_type :=
   | ct = comp_type;
-    {{ final = false; ids = []; ct }}
+    {{ final = true; ids = []; ct }}
   | LPAR; SUB; indices = list(indice); ct = comp_type; RPAR;
     {{ final = false; ids = indices; ct }}
   | LPAR; SUB; FINAL; indices = list(indice); ct = comp_type; RPAR;

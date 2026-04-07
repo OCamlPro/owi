@@ -771,7 +771,7 @@ let rewrite_types (assigned : Assigned.t) (ft : Text.func_type) :
   let* ft = rewrite_func_type assigned ft in
   Ok
     (Binary.Typedef.SimpleType
-       (None, { final = false; ids = []; ct = Def_func_t ft }) )
+       (None, { final = true; ids = []; ct = Def_func_t ft }) )
 
 let modul (modul : Grouped.t) (assigned : Assigned.t) : Binary.Module.t Result.t
     =

@@ -66,7 +66,7 @@ let assign_types (typ : Text.Typedef.t array) decl_types :
     (fun typ ->
       match typ with
       | Text.Typedef.SimpleType
-          (name, { final = false; ids = []; ct = Def_func_t typ }) ->
+          (name, { final = true; ids = []; ct = Def_func_t typ }) ->
         let id = Dynarray.length declared_types in
         begin match name with
         | None -> ()

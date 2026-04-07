@@ -528,7 +528,7 @@ let block_type_of_type_def ty =
   (* TODO: this is a ugly hack, it is necessary for now and should be removed at some point... *)
   match ty with
   | Typedef.SimpleType
-      (_id, { final = false; ids = []; ct = Def_func_t (pt, rt) }) ->
+      (_id, { final = true; ids = []; ct = Def_func_t (pt, rt) }) ->
     Bt_raw (None, (pt, rt))
   | _ -> assert false
 
@@ -971,7 +971,7 @@ let read_type _id input =
     let+ results, input = read_valtypes input in
     let params = List.map (fun param -> (None, param)) params in
     ( Typedef.SimpleType
-        (None, { final = false; ids = []; ct = Def_func_t (params, results) })
+        (None, { final = true; ids = []; ct = Def_func_t (params, results) })
     , input )
   | _ -> parse_fail "integer representation too long (read_type)"
 
@@ -1030,7 +1030,7 @@ let read_table input =
       read_const
         [| Typedef.SimpleType
              ( None
-             , { final = false
+             , { final = true
                ; ids = []
                ; ct = Def_func_t ([], [ Ref_type ref_type ])
                } )
