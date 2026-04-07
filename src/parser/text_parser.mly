@@ -205,9 +205,9 @@ let comp_type :=
 let sub_type :=
   | ct = comp_type;
     {{ final = false; ids = []; ct }}
-  | SUB; indices = list(indice); ct = comp_type;
+  | LPAR; SUB; indices = list(indice); ct = comp_type; RPAR;
     {{ final = false; ids = indices; ct }}
-  | SUB; FINAL; indices = list(indice); ct = comp_type;
+  | LPAR; SUB; FINAL; indices = list(indice); ct = comp_type; RPAR;
     {{ final = true; ids = indices; ct }}
 
 let simple_type_def :=
