@@ -185,8 +185,11 @@ let field_type ==
   | st = storage_type; { Const, st }
   | LPAR; MUTABLE; t = storage_type; RPAR; { Var, t }
 
-let field ==
-  | FIELD; id = option(indice); ft = field_type; { id, ft }
+let struct_field :=
+  | LPAR; FIELD; id = indice; ft = field_type; RPAR; { [(Some id, ft)] }
+  | LPAR; FIELD; hdl = list(field_type); RPAR; {
+    List.map (fun ft -> (None, ft)) hdl
+   }
 
 let func_type :=
   | o = list(par(preceded(RESULT, list(val_type)))); { [], List.flatten o }
@@ -198,7 +201,7 @@ let func_type :=
   }
 
 let comp_type :=
-  | LPAR; STRUCT; fs = list(field); RPAR; { Def_struct_t fs }
+  | LPAR; STRUCT; fs = list(struct_field); RPAR; { Def_struct_t (List.flatten fs) }
   | LPAR; ARRAY; ft = field_type; RPAR; { Def_array_t ft }
   | LPAR; FUNC; ft = func_type; RPAR; { Def_func_t ft }
 
