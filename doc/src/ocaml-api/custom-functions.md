@@ -235,11 +235,3 @@ Running the above program should yield:
 $ ./extern_mem.exe
 0xAAAAAAAAAAAAAAAA
 ```
-
-## Advanced Usage
-
-To learn more, see our advanced [Game of Life] example
-based on the famous cellular automaton by Conway. It show how to link several modules from different `.wat` files.
-
-[Game of Life]: ./life_game
-[previous example]: ./README.md#dealing-with-the-stack

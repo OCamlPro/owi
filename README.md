@@ -88,6 +88,7 @@
 - TODO: man pages (see [here](https://ocamlpro.github.io/owi/manpages/owi.html#owi) for now)
 - TODO: high-level API for each language
 - TODO: Wasm API
+- [OCaml library API](https://ocamlpro.github.io/owi/ocaml-library-api/local/owi/index.html)
 
 ### About
 

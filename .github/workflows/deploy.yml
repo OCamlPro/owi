@@ -37,9 +37,8 @@ jobs:
           touch doc/.nojekyll
 
           nix-shell --run "
-            dune build @doc &&
-            rm -rf doc/api &&
-            mv _build/default/_doc/_html doc/api &&
+            dune build @doc-new &&
+            mv _build/default/_doc_new/html/docs doc/ocaml-library-api &&
             BISECT_FILE=\$(pwd)/bisect dune runtest --force --instrument-with bisect_ppx &&
             bisect-ppx-report html -o doc/coverage &&
             label=coverage &&
@@ -48,7 +47,7 @@ jobs:
             ocb --style classic --label \$label --status \${percentage}'%' --color \$color > doc/coverage/badge.svg &&
             cd doc &&
             mdbook build &&
-            mv api book/api &&
+            mv ocaml-library-api book/ocaml-library-api &&
             mv coverage book/coverage
           "
 

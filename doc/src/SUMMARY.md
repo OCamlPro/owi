@@ -7,7 +7,6 @@
 
 # Bug-Finding, Testing & Pen-testing
 
-- [Examples of Bug Finding](bugfinding/examples.md)
 - [Replaying a model](bugfinding/replay.md)
 - [Checking iso-behaviour of two modules](bugfinding/iso.md)
 - [Bugs Found by Owi](bugfinding/bugs-found.md)
@@ -24,14 +23,18 @@
 # Solver-Aided Programming
 
 - [Examples of Problem Solving](sap/examples.md)
-- [How to Speed it Up](sap/optimizations.md)
-- [Comparison to Rosette, Prolog, etc.](sap/comparison.md)
 
 # WebAssembly Toolkit
-- [Overview](wasm-toolkit/overview.md)
-- [Comparison with Other Tools](wasm-toolkit/comparison.md)
+
+- [Concrete Interpreter](wasm-toolkit/concrete-interpreter.md)
+- [Converter (`wasm2wat` and `wat2wasm`)](wasm-toolkit/converter.md)
+- [Formatter](wasm-toolkit/formatter.md)
+- [Program Analyzer](wasm-toolkit/program-analyzer.md)
+- [Script Interpreter](wasm-toolkit/script-interpreter.md)
+- [Validator](wasm-toolkit/validator.md)
 
 # Man pages
+
 - [`owi`](manpages/owi.md)
     - [`owi analyze`](manpages/owi-analyze.md)
     - [`owi c`](manpages/owi-c.md)
@@ -51,6 +54,6 @@
     - [`owi zig`](manpages/owi-zig.md)
 
 # Public OCaml API
+
 - [Overview](ocaml-api/overview.md)
 - [How to Define Custom Functions](ocaml-api/custom-functions.md)
-- [Generated API Documentation](ocaml-api/odoc.md)
