@@ -115,17 +115,21 @@ module M :
         make_str_null_terminated m (ch :: accu) (Int32.add i (Int32.of_int 1))
     | _ -> assert false
 
-  let rec make_str_of_length m accu i len =
-    let open Symbolic_choice in
-    if len < i then return (List.rev accu |> Array.of_list)
-    else
-      let* p = Symbolic_memory.load_8_u m (Symbolic_i32.of_int i) in
-      match Smtml.Typed.view p with
-      | Val (Bitv bv) when Smtml.Bitvector.numbits bv = 32 ->
-        let c = Smtml.Bitvector.to_int32 bv in
-        let ch = char_of_int (Int32.to_int c) in
-        make_str_of_length m (ch :: accu) (succ i) len
-      | _ -> assert false
+  let make_str_of_length ~mem ~ptr ~len =
+    let rec aux acc i =
+      let open Symbolic_choice in
+      if i >= len then return (List.rev acc |> Array.of_list)
+      else
+        let* p = Symbolic_memory.load_8_u mem (Symbolic_i32.of_int (ptr + i)) in
+        match Smtml.Typed.view p with
+        | Val (Bitv bv) when Smtml.Bitvector.numbits bv = 32 ->
+          let c = Smtml.Bitvector.to_int32 bv in
+          let ch = char_of_int (Int32.to_int c) in
+          let i = succ i in
+          aux (ch :: acc) i
+        | _ -> assert false
+    in
+    aux [] 0
 
   let cov_label_is_covered id =
     let open Symbolic_choice in
@@ -166,13 +170,13 @@ module M :
     let str = String.init (Array.length chars) (Array.get chars) in
     open_scope str
 
-  let open_scope_of_length m ptr len =
+  let open_scope_of_length mem ptr len =
     let open Symbolic_choice in
     let* ptr = select_i32 ptr in
     let ptr = Int32.to_int ptr in
     let* len = select_i32 len in
     let len = Int32.to_int len in
-    let* bytes = make_str_of_length m [] ptr len in
+    let* bytes = make_str_of_length ~mem ~ptr ~len in
     let str = String.init len (Array.get bytes) in
     open_scope str
 
