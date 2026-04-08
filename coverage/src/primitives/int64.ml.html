@@ -337,14 +337,14 @@ let ne (x : int64) y = <span data-count="25999">n</span>ot (equa<span data-count
 
 let lt (x : int64) y = <span data-count="1973">c</span>ompar<span data-count="1973">e</span> x y &lt; 0 [@@inline]
 
-let le (x : int64) y = <span data-count="10238">c</span>ompar<span data-count="10238">e</span> x y &lt;= 0 [@@inline]
+let le (x : int64) y = <span data-count="10745">c</span>ompar<span data-count="10745">e</span> x y &lt;= 0 [@@inline]
 
-let lt_u (x : int64) y = <span data-count="2185177">u</span>nsigned_compar<span data-count="2185177">e</span> x y &lt; 0 [@@inline]
+let lt_u (x : int64) y = <span data-count="2186818">u</span>nsigned_compar<span data-count="2186816">e</span> x y &lt; 0 [@@inline]
 
 let le_u (x : int64) y = <span data-count="607679">u</span>nsigned_compar<span data-count="607679">e</span> x y &lt;= 0 [@@inline]
 
 (* In OCaml, `shift_{left,right,right_logical} are unspecified if y &lt; 0 or y &gt;= 64, but they're not in Wasm and thus we need to mask `y`` to only keep the low 7 bits. *)
-let shl x y = <span data-count="76031">s</span>hift_left x (to_in<span data-count="76031">t</span> (logan<span data-count="76031">d</span> y 63L)) [@@inline]
+let shl x y = <span data-count="79614">s</span>hift_left x (to_in<span data-count="79614">t</span> (logan<span data-count="79614">d</span> y 63L)) [@@inline]
 
 let ashr x y = <span data-count="20">s</span>hift_right x (to_in<span data-count="20">t</span> (logan<span data-count="20">d</span> y 63L)) [@@inline]
 
@@ -364,9 +364,9 @@ let extend_s n x =
 
 (* String conversion that allows leading signs and unsigned values *)
 
-let max_upper = unsigned_di<span data-count="762">v</span> minus_one 10L
+let max_upper = unsigned_di<span data-count="763">v</span> minus_one 10L
 
-let max_lower = unsigned_re<span data-count="762">m</span> minus_one 10L
+let max_lower = unsigned_re<span data-count="763">m</span> minus_one 10L
 
 let of_string_exn s =
   <span data-count="6701">l</span>et len = String.length s in
@@ -416,7 +416,7 @@ let of_string s = <span data-count="2269">t</span>ry Some (of_string_ex<span dat
 
 let fits_in_u32 n = <span data-count="0">u</span>nsigned_compar<span data-count="0">e</span> n 0xFFFF_FFFFL &lt;= 0
 
-let to_string_u = Fmt.st<span data-count="762">r</span> "%Lu"
+let to_string_u = Fmt.st<span data-count="763">r</span> "%Lu"
 </code></pre>
       </div>
     </div>
