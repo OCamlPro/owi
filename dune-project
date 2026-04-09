@@ -59,7 +59,7 @@
   (bos
    (>= 0.2.1))
   (cmdliner
-   (>= 2.1.0))
+   (>= 1.3.0))
   (digestif
    (>= 1.2.0))
   (domainpc
@@ -75,7 +75,7 @@
   (sedlex
    (>= 3.3))
   (smtml
-   (>= 0.22.0))
+   (>= 0.24.0))
   (symex
    (>= 0.2))
   (synchronizer
@@ -84,6 +84,8 @@
    (>= 1.0.3))
   (xmlm
    (>= 1.4.0))
+  (ocamlgraph
+   (>= 2.2.0))
   ;; doc
   (odoc
    (and
