@@ -22,6 +22,14 @@ let
       };
       meta.broken = false;
     });
+    smtml = super.smtml.overrideAttrs (old: {
+      src = pkgs.fetchFromGitHub {
+        owner = "formalsec";
+        repo = "smtml";
+        rev = "3d19685d6859df7695eb697571b2a8ec41638068";
+        hash = "sha256-dWZrN0hTxxqGC2queit91GDuw/x5fyRPwHbmKxkvc/w=";
+      };
+    });
   });
   tinygo = pkgs.tinygo.overrideAttrs (old: {
     doCheck = false;
@@ -45,6 +53,7 @@ pkgs.mkShell {
     merlin
     ocaml
     ocamlformat
+    ocaml-lsp
     ocp-browser
     ocp-index
     ocb

@@ -173,7 +173,7 @@ let store_8 m ~addr v =
   let open Symbolic_choice in
   let* a = must_be_valid_address m addr 1 in
   let data =
-    replace_byte a (Smtml.Typed.Bitv32.extract v ~high:1 ~low:0) m.data
+    replace_byte a (Smtml.Typed.Bitv32.extract v ~high:7 ~low:0) m.data
   in
   replace { m with data }
 
@@ -181,9 +181,9 @@ let store_16 m ~addr v =
   let open Symbolic_choice in
   let* a = must_be_valid_address m addr 2 in
   let data =
-    replace_byte a (Smtml.Typed.Bitv32.extract v ~high:1 ~low:0) m.data
+    replace_byte a (Smtml.Typed.Bitv32.extract v ~high:7 ~low:0) m.data
     |> replace_byte (Int32.add a 1l)
-         (Smtml.Typed.Bitv32.extract v ~high:2 ~low:1)
+         (Smtml.Typed.Bitv32.extract v ~high:15 ~low:8)
   in
   replace { m with data }
 
@@ -213,7 +213,7 @@ let store_64 m ~(addr : Symbolic_i32.t) v =
 let store_8_no_replace m data ~(addr : Symbolic_i32.t) v =
   let open Symbolic_choice in
   let+ a = must_be_valid_address m addr 1 in
-  replace_byte a (Smtml.Typed.Bitv32.extract v ~high:1 ~low:0) data
+  replace_byte a (Smtml.Typed.Bitv32.extract v ~high:7 ~low:0) data
 
 let fill m ~(pos : Symbolic_i32.t) ~(len : Symbolic_i32.t) (c : char) =
   let open Symbolic_choice in
