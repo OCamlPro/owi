@@ -369,7 +369,7 @@ let sub_type_eq { final = f1; ct = ct1; _ } { final = f2; ct = ct2; _ } =
 
 let pp_sub_type fmt { final; ids; ct } =
   Fmt.pf fmt "%a%a%a"
-    (fun fmt b -> if b then Fmt.pf fmt "final ")
+    (fun fmt b -> if b && not (List.is_empty ids) then Fmt.pf fmt "final ")
     final
     (Fmt.list (fun fmt id -> Fmt.pf fmt "%a " pp_indice id))
     ids pp_comp_type ct
