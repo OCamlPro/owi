@@ -891,16 +891,53 @@ let encode_section buf id encode_func data =
     Buffer.add_buffer buf section_buf
   end
 
+let encode_storage_type buf st =
+  match st with
+  | Val_type vt -> write_valtype buf vt
+  | Pack_type I16 -> Buffer.add_char buf '\x77'
+  | Pack_type I8 -> Buffer.add_char buf '\x78'
+
+let encode_mut buf = function
+  | Text.Const -> Buffer.add_char buf '\x00'
+  | Var -> Buffer.add_char buf '\x01'
+
+let encode_field_type buf (mut, st) =
+  encode_storage_type buf st;
+  encode_mut buf mut
+
+let encode_comp_type buf ct =
+  match ct with
+  | Def_array_t ft ->
+    Buffer.add_char buf '\x5E';
+    encode_field_type buf ft
+  | Def_struct_t ftl ->
+    Buffer.add_char buf '\x5F';
+    List.iter (fun (_, ft) -> encode_field_type buf ft) ftl
+  | Def_func_t (pt, rt) ->
+    Buffer.add_char buf '\x60';
+    write_paramtype buf pt;
+    write_resulttype buf rt
+
+let encode_sub_type buf st =
+  match st with
+  | { final = true; ids = []; ct } -> encode_comp_type buf ct
+  | { final = true; ids; ct } ->
+    Buffer.add_char buf '\x4F';
+    List.iter (write_indice buf) ids;
+    encode_comp_type buf ct
+  | { final = false; ids; ct } ->
+    Buffer.add_char buf '\x50';
+    List.iter (write_indice buf) ids;
+    encode_comp_type buf ct
+
 (* type: section 1 *)
 let encode_types buf types =
   encode_vector_array buf types (fun buf st ->
     match st with
-    | Typedef.SimpleType
-        (_, { final = true; ids = []; ct = Def_func_t (pt, rt) }) ->
-      Buffer.add_char buf '\x60';
-      write_paramtype buf pt;
-      write_resulttype buf rt
-    | _ -> assert false )
+    | Typedef.SimpleType (_, st) -> encode_sub_type buf st
+    | Typedef.RecType stl ->
+      Buffer.add_char buf '\x4E';
+      List.iter (fun (_, st) -> encode_sub_type buf st) stl )
 
 (* import: section 2 *)
 let encode_imports buf (funcs, tables, memories, globals) =

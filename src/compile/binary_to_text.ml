@@ -479,7 +479,7 @@ let convert_data : Binary.Data.t -> Text.Data.t = function
 
 let convert_sub_type Binary.{ final; ids; ct } : Text.sub_type =
   match (final, ids, ct) with
-  | false, [], Def_func_t ft ->
+  | true, [], Def_func_t ft ->
     Text.{ final; ids = []; ct = Def_func_t (convert_func_type ft) }
   | _ ->
     Fmt.failwith

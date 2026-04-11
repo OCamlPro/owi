@@ -961,29 +961,87 @@ let section_custom input =
   let+ (), input = consume_to_end () input in
   (Some name, input)
 
+let read_storage_type input =
+  let* b, input' = read_byte ~msg:"read_type" input in
+  match b with
+  | '\x77' -> Ok (Pack_type I16, input')
+  | '\x78' -> Ok (Pack_type I8, input')
+  | _ ->
+    let* vt, input = read_valtype input in
+    Ok (Val_type vt, input)
+
+let read_field_type input =
+  let* st, input = read_storage_type input in
+  let* mut, input = read_mut input in
+  Ok ((mut, st), input)
+
+let read_comp_type ?b input =
+  let* fcttype, input =
+    match b with
+    | Some b -> Ok (b, input)
+    | None -> read_byte ~msg:"read_type" input
+  in
+  match fcttype with
+  | '\x5E' ->
+    let+ ft, input = read_field_type input in
+    (Def_array_t ft, input)
+  | '\x5F' ->
+    let+ ftl, input =
+      vector_no_id
+        (fun input ->
+          let+ ft, input = read_field_type input in
+          ((None, ft), input) )
+        input
+    in
+    (Def_struct_t ftl, input)
+  | '\x60' ->
+    let* params, input =
+      vector_no_id
+        (fun input ->
+          let+ vt, input = read_valtype input in
+          ((None, vt), input) )
+        input
+    in
+    let+ results, input = read_valtypes input in
+    (Def_func_t (params, results), input)
+  | _ ->
+    parse_fail "integer representation too long (read_type) %2x"
+      (Char.code fcttype)
+
+let read_sub_type ?b input =
+  let* fcttype, input =
+    match b with
+    | Some b -> Ok (b, input)
+    | None -> read_byte ~msg:"read_type" input
+  in
+  match fcttype with
+  | '\x4F' ->
+    let* ids, input = vector_no_id read_indice input in
+    let+ ct, input = read_comp_type input in
+    ({ final = true; ids; ct }, input)
+  | '\x50' ->
+    let* ids, input = vector_no_id read_indice input in
+    let+ ct, input = read_comp_type input in
+    ({ final = false; ids; ct }, input)
+  | _ ->
+    let+ ct, input = read_comp_type ~b:fcttype input in
+    ({ final = true; ids = []; ct }, input)
+
 let read_type _id input =
   let* fcttype, input = read_byte ~msg:"read_type" input in
   match fcttype with
-  | '\x5E' -> assert false
-  | '\x5F' -> assert false
-  | '\x60' ->
-    let* params, input = read_valtypes input in
-    let+ results, input = read_valtypes input in
-    let params = List.map (fun param -> (None, param)) params in
-    ( Typedef.SimpleType
-        (None, { final = true; ids = []; ct = Def_func_t (params, results) })
-    , input )
-  | _ -> parse_fail "integer representation too long (read_type)"
-
-(* let* () =
-    match fcttype with
-    | '\x60' -> Ok ()
-    | _ -> parse_fail "integer representation too long (read_type)"
-  in
-  let* params, input = read_valtypes input in
-  let+ results, input = read_valtypes input in
-  let params = List.map (fun param -> (None, param)) params in
-  ((None, (params, results)), input) *)
+  | '\x4E' ->
+    let+ stl, input =
+      vector_no_id
+        (fun input ->
+          let+ st, input = read_sub_type input in
+          ((None, st), input) )
+        input
+    in
+    (Typedef.RecType stl, input)
+  | _ ->
+    let+ st, input = read_sub_type ~b:fcttype input in
+    (Typedef.SimpleType (None, st), input)
 
 let read_global_type input =
   let* val_type, input = read_valtype input in
