@@ -123,7 +123,6 @@
   text_parser
   text_validate
   thread
-  union_find
   value_intf
   v128_intf
   wasm_ffi_intf
