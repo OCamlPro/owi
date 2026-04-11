@@ -25,28 +25,20 @@ let coverage_criteria_conv =
   Arg.conv (of_string, pp)
 
 let existing_file_conv =
+  let open Prelude.Result.Syntax in
   let parse s =
-    match Fpath.of_string s with
-    | Error _ as e -> e
-    | Ok path ->
-      begin match Bos.OS.File.exists path with
-      | Ok true -> Ok path
-      | Ok false -> Fmt.error_msg "no file '%a'" Fpath.pp path
-      | Error _ as e -> e
-      end
+    let* path = Fpath.of_string s in
+    let* exists = Bos.OS.File.exists path in
+    if exists then Ok path else Fmt.error_msg "no file '%a'" Fpath.pp path
   in
   Arg.conv (parse, Fpath.pp)
 
 let existing_dir_conv =
+  let open Prelude.Result.Syntax in
   let parse s =
-    match Fpath.of_string s with
-    | Error _ as e -> e
-    | Ok path ->
-      begin match Bos.OS.Dir.exists path with
-      | Ok true -> Ok path
-      | Ok false -> Fmt.error_msg "no directory '%a'" Fpath.pp path
-      | Error _ as e -> e
-      end
+    let* path = Fpath.of_string s in
+    let* exists = Bos.OS.Dir.exists path in
+    if exists then Ok path else Fmt.error_msg "no directory '%a'" Fpath.pp path
   in
   Arg.conv (parse, Fpath.pp)
 
