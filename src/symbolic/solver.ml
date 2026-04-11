@@ -63,7 +63,8 @@ let check pc condition =
     let module Solver = (val solver_module) in
     let sat = Solver.check_set s query in
     Mutex.protect cache_mutex (fun () ->
-      Smtml.Cache.Strong.replace cache query sat );
+      (* using `add` is better than `replace` because it avoid comparing the set again which might be huge! *)
+      Smtml.Cache.Strong.add cache query sat );
     sat
 
 let model_of_path_condition ~path_condition : Smtml.Model.t Option.t =
