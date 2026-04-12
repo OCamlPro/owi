@@ -219,7 +219,13 @@ let simple_type_def :=
 
 let type_def :=
   | ty=simple_type_def; { SimpleType ty }
-  | REC; tdl = list(par(simple_type_def)); { RecType tdl }
+  | REC; tdl = list(par(simple_type_def)); {
+    match tdl with
+    | [] ->
+      failwith "recursive type definitions expect at least one type definition"
+    | [ st ] -> SimpleType st
+    | _ -> RecType tdl
+  }
 
 let table_type ==
   | ~ = limits; ~ = ref_type; { limits, ref_type }
