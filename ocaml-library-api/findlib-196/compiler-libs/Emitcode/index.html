@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Emitcode (docs.findlib-196.compiler-libs.Emitcode)</title><meta charset="utf-8"/><link rel="stylesheet" href="../../../odoc.support/odoc.css"/><meta name="generator" content="odoc 3.1.0"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../../../odoc.support/highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script></head><body class="odoc"><nav class="odoc-nav"><a href="../index.html">Up</a> – <a href="../../../../index.html">Index</a> &#x00BB; <a href="../../../index.html">docs</a> &#x00BB; <a href="../../index.html">findlib-196</a> &#x00BB; <a href="../index.html">compiler-libs</a> &#x00BB; Emitcode</nav><header class="odoc-preamble"><h1>Module <code><span>Emitcode</span></code></h1></header><div class="odoc-content"><div class="odoc-spec"><div class="spec value anchored" id="val-to_file"><a href="#val-to_file" class="anchor"></a><code><span><span class="keyword">val</span> to_file : 
+  <span><a href="../../../stdlib/Stdlib/index.html#type-out_channel">out_channel</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="../Unit_info/Artifact/index.html#type-t">Unit_info.Artifact.t</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="label">required_globals</span>:<a href="../Ident/Set/index.html#type-t">Ident.Set.t</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><a href="../Instruct/index.html#type-instruction">Instruct.instruction</a> list</span> <span class="arrow">&#45;&gt;</span></span>
+  unit</span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-to_memory"><a href="#val-to_memory" class="anchor"></a><code><span><span class="keyword">val</span> to_memory : 
+  <span><span><a href="../Instruct/index.html#type-instruction">Instruct.instruction</a> list</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span>(char, <a href="../../../stdlib/Stdlib/Bigarray/index.html#type-int8_unsigned_elt">Bigarray.int8_unsigned_elt</a>, <a href="../../../stdlib/Stdlib/Bigarray/index.html#type-c_layout">Bigarray.c_layout</a>)</span> <a href="../../../stdlib/Stdlib/Bigarray/Array1/index.html#type-t">Bigarray.Array1.t</a></span>
+  * <span><span>(<a href="../Cmo_format/index.html#type-reloc_info">Cmo_format.reloc_info</a> * int)</span> list</span>
+  * <span><a href="../Instruct/index.html#type-debug_event">Instruct.debug_event</a> list</span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-to_packed_file"><a href="#val-to_packed_file" class="anchor"></a><code><span><span class="keyword">val</span> to_packed_file : 
+  <span><a href="../../../stdlib/Stdlib/index.html#type-out_channel">out_channel</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><a href="../Instruct/index.html#type-instruction">Instruct.instruction</a> list</span> <span class="arrow">&#45;&gt;</span></span>
+  int
+  * <span><span>(<a href="../Cmo_format/index.html#type-reloc_info">Cmo_format.reloc_info</a> * int)</span> list</span>
+  * <span><a href="../Instruct/index.html#type-debug_event">Instruct.debug_event</a> list</span>
+  * <a href="../Misc/Stdlib/String/Set/index.html#type-t">Misc.Stdlib.String.Set.t</a></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-marshal_to_channel_with_possibly_32bit_compat"><a href="#val-marshal_to_channel_with_possibly_32bit_compat" class="anchor"></a><code><span><span class="keyword">val</span> marshal_to_channel_with_possibly_32bit_compat : 
+  <span><span class="label">filename</span>:string <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="label">kind</span>:string <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="../../../stdlib/Stdlib/index.html#type-out_channel">out_channel</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="type-var">'a</span> <span class="arrow">&#45;&gt;</span></span>
+  unit</span></code></div></div></div></body></html>
