@@ -14,24 +14,22 @@ let
       #spaceTimeSupport = true;
     };
     landmarks = super.landmarks.overrideAttrs (old: {
-      src = pkgs.fetchGit {
+      src = fetchGit {
         url = "https://github.com/hra687261/landmarks";
         rev = "17be3567a63650090f9cf94654fcc8d99f946e27";
       };
     });
     landmarks-ppx = super.landmarks-ppx.overrideAttrs (old: {
-      src = pkgs.fetchGit {
+      src = fetchGit {
         url = "https://github.com/hra687261/landmarks";
         rev = "17be3567a63650090f9cf94654fcc8d99f946e27";
       };
       meta.broken = false;
     });
     smtml = super.smtml.overrideAttrs (old: {
-      src = pkgs.fetchFromGitHub {
-        owner = "formalsec";
-        repo = "smtml";
+      src = fetchGit {
+        url = "https://github.com/formalsec/smtml";
         rev = "3d19685d6859df7695eb697571b2a8ec41638068";
-        hash = "sha256-dWZrN0hTxxqGC2queit91GDuw/x5fyRPwHbmKxkvc/w=";
       };
     });
   });
