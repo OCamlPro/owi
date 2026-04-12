@@ -11,5 +11,7 @@
   m.wat
   locals.wat
   locals_drop.wat
+  data_special_chars.wat
+  data_bytes.wat
   script.wast
   script.t))
