@@ -4,21 +4,25 @@
 }:
 
 let
-  ocamlPackages = pkgs.ocaml-ng.ocamlPackages_5_4.overrideScope (self: super: {
+  ocamlPackages = pkgs.ocamlPackages.overrideScope (self: super: {
+    ocaml = (super.ocaml.overrideAttrs {
+      doCheck = false;
+    }).override {
+      #aflSupport = true;
+      #flambdaSupport = true;
+      #framePointerSupport = true;
+      #spaceTimeSupport = true;
+    };
     landmarks = super.landmarks.overrideAttrs (old: {
-      src = pkgs.fetchFromGitHub {
-        owner = "hra687261";
-        repo = "landmarks";
+      src = pkgs.fetchGit {
+        url = "https://github.com/hra687261/landmarks";
         rev = "17be3567a63650090f9cf94654fcc8d99f946e27";
-        hash = "sha256-3ui4uvSAvUgzk2UMVtH9A4BhAX6nWbwx7q0YwkANNv8=";
       };
     });
     landmarks-ppx = super.landmarks-ppx.overrideAttrs (old: {
-      src = pkgs.fetchFromGitHub {
-        owner = "hra687261";
-        repo = "landmarks";
+      src = pkgs.fetchGit {
+        url = "https://github.com/hra687261/landmarks";
         rev = "17be3567a63650090f9cf94654fcc8d99f946e27";
-        hash = "sha256-3ui4uvSAvUgzk2UMVtH9A4BhAX6nWbwx7q0YwkANNv8=";
       };
       meta.broken = false;
     });
