@@ -102,7 +102,7 @@ let get_id_def0 = function
   | None -> Raw 0
   | Some v -> v
 
-let addr n =
+let int_of_string n =
   match int_of_string_opt n with
   | None -> assert false
   | Some num -> num
@@ -1186,7 +1186,6 @@ let module_quoted :=
     String.concat "" lines
   }
 
-
 let literal_const ==
   | I32_CONST; num = NUM; { Const_I32 (i32 num) }
   | I64_CONST; num = NUM; { Const_I64 (i64 num) }
@@ -1194,22 +1193,12 @@ let literal_const ==
   | F64_CONST; num = NUM; { Const_F64 (f64 num) }
   | n = v128_const; { Const_V128 n }
   | REF_NULL; ht = heap_type; { Const_null (Some ht)}
-
-  | REF_STRUCT; num = NUM; { Const_struct (addr num) }
-  | REF_ARRAY; num = NUM; { Const_array (addr num) }
-  | REF_FUNC; num = NUM; { Const_func (addr num) }
-  | REF_EXN; num = NUM; { Const_exn (addr num) }
-
-  | REF_EXTERN; num = NUM; {
-    match int_of_string_opt num with
-    | None -> assert false
-    | Some num -> Const_extern num
-  }
-  | REF_HOST; num = NUM; {
-    match int_of_string_opt num with
-    | None -> assert false
-    | Some num -> Const_host num
-  }
+  | REF_STRUCT; num = NUM; { Const_struct (int_of_string num) }
+  | REF_ARRAY; num = NUM; { Const_array (int_of_string num) }
+  | REF_FUNC; num = NUM; { Const_func (int_of_string num) }
+  | REF_EXN; num = NUM; { Const_exn (int_of_string num) }
+  | REF_EXTERN; num = NUM; { Const_extern (int_of_string num) }
+  | REF_HOST; num = NUM; { Const_host (int_of_string num) }
 
 let const ==
   | ~ = literal_const; <Literal>

@@ -344,19 +344,21 @@ type comp_type =
   | Def_array_t of field_type
   | Def_func_t of func_type
 
-let comp_type_eq ct1 ct2 =
-  match (ct1, ct2) with
-  | Def_struct_t _, Def_struct_t _ -> assert false
-  | Def_array_t _, Def_array_t _ -> assert false
-  | Def_func_t _, Def_func_t _ -> assert false
-  | _ -> false
-
 let pp_comp_type fmt = function
   | Def_struct_t fl ->
     Fmt.pf fmt "(struct %a)" (Fmt.list ~sep:Fmt.comma pp_field) fl
   | Def_array_t ft -> Fmt.pf fmt "(array %a)" pp_field_type ft
   | Def_func_t ft -> Fmt.pf fmt "%a" pp_func_type ft
 (* TODO: ensure proper printing *)
+
+let comp_type_eq ct1 ct2 =
+  match (ct1, ct2) with
+  | Def_struct_t _, Def_struct_t _ | Def_array_t _, Def_array_t _ ->
+    Fmt.failwith
+      "comp_type_eq: unimplemented for struct and array types %a and %a"
+      pp_comp_type ct1 pp_comp_type ct2
+  | Def_func_t ft1, Def_func_t ft2 -> func_type_eq ft1 ft2
+  | _ -> false
 
 type sub_type =
   { final : bool

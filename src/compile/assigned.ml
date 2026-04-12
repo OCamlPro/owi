@@ -74,7 +74,7 @@ let assign_types (typ : Text.Typedef.t array) decl_types :
         end;
         Dynarray.add_last declared_types typ;
         Typetbl.add all_types typ id
-      | _ -> assert false )
+      | _ -> Fmt.failwith "Assigned: unimplemented for rec and sub types" )
     typ;
   Array.iter
     (fun typ ->

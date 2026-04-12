@@ -479,13 +479,28 @@ let convert_data : Binary.Data.t -> Text.Data.t = function
     let mode = convert_data_mode mode in
     { Text.Data.id; init; mode }
 
+let convert_storage_type : Binary.storage_type -> Text.storage_type = function
+  | Val_type vt -> Val_type (convert_val_type vt)
+  | Pack_type pt -> Pack_type pt
+
 let convert_sub_type Binary.{ final; ids; ct } : Text.sub_type =
-  match (final, ids, ct) with
-  | true, [], Def_func_t ft ->
-    Text.{ final; ids = []; ct = Def_func_t (convert_func_type ft) }
-  | _ ->
-    Fmt.failwith
-      "Unimplemented: conversion from Binary.sub_type to Text.sub_type"
+  let ids = List.map convert_indice ids in
+  match ct with
+  | Def_func_t ft -> { final; ids; ct = Def_func_t (convert_func_type ft) }
+  | Def_array_t (mut, st) ->
+    { final; ids; ct = Def_array_t (mut, convert_storage_type st) }
+  | Def_struct_t fl ->
+    { final
+    ; ids
+    ; ct =
+        Def_struct_t
+          (List.map
+             (fun (id, (mut, st)) ->
+               let id = Option.map convert_indice id in
+               let st = convert_storage_type st in
+               (id, (mut, st)) )
+             fl )
+    }
 
 let from_types types : Text.Module.Field.t list =
   Array.map
@@ -493,7 +508,9 @@ let from_types types : Text.Module.Field.t list =
       match ty with
       | SimpleType (id, ft) ->
         Text.Module.Field.Typedef (SimpleType (id, convert_sub_type ft))
-      | _ -> assert false )
+      | RecType ftl ->
+        Text.Module.Field.Typedef
+          (RecType (List.map (fun (id, ft) -> (id, convert_sub_type ft)) ftl)) )
     types
   |> Array.to_list
 

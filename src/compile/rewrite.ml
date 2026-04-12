@@ -579,31 +579,20 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
     | Ref_null t ->
       let* t = rewrite_heap_type assigned t in
       Ok (Binary.Ref_null t)
-    | Ref_i31 -> Ok Binary.Ref_i31
-    | I31_get_s -> Ok Binary.I31_get_s
-    | I31_get_u -> Ok Binary.I31_get_u
-    | Struct_new _id -> assert false
-    | Struct_new_default _id -> assert false
-    | Struct_get (_id1, _id2) -> assert false
-    | Struct_get_s (_id1, _id2) -> assert false
-    | Struct_get_u (_id1, _id2) -> assert false
-    | Struct_set (_id1, _id2) -> assert false
-    | Array_new _id -> assert false
-    | Array_new_default _id -> assert false
-    | Array_new_fixed (_id, _n) -> assert false
-    | Array_new_data (_id1, _id2) -> assert false
-    | Array_new_elem (_id1, _id2) -> assert false
-    | Array_get _id -> assert false
-    | Array_get_s _id -> assert false
-    | Array_get_u _id -> assert false
-    | Array_set _id -> assert false
-    | Array_len -> assert false
-    | Array_fill _id -> assert false
-    | Array_copy (_id1, _id2) -> assert false
-    | Array_init_data (_id1, _id2) -> assert false
-    | Array_init_elem (_id1, _id2) -> assert false
-    | Any_convert_extern -> assert false
+    | Ref_i31 -> Ok Ref_i31
+    | I31_get_s -> Ok I31_get_s
+    | I31_get_u -> Ok I31_get_u
+    | Array_len -> Ok Array_len
+    | Any_convert_extern -> Ok Any_convert_extern
     | Extern_convert_any -> assert false
+    | Struct_new _ | Struct_new_default _ | Struct_get _ | Struct_get_s _
+    | Struct_get_u _ | Struct_set _ | Array_new _ | Array_new_default _
+    | Array_new_fixed _ | Array_new_data _ | Array_new_elem _ | Array_get _
+    | Array_get_s _ | Array_get_u _ | Array_set _ | Array_fill _ | Array_copy _
+    | Array_init_data _ | Array_init_elem _ ->
+      Fmt.failwith "Rewrite: unimplemented for the GC instruction %a"
+        (Text.pp_instr ~short:true)
+        instr.raw
   and expr (e : Text.expr) (loop_count, block_ids) :
     Binary.expr Annotated.t Result.t =
     let+ e =

@@ -530,7 +530,8 @@ let block_type_of_type_def ty =
   | Typedef.SimpleType
       (_id, { final = true; ids = []; ct = Def_func_t (pt, rt) }) ->
     Bt_raw (None, (pt, rt))
-  | _ -> assert false
+  | _ ->
+    Fmt.failwith "block_type_of_type_def: unimplemented for %a" Typedef.pp ty
 
 let read_block_type types input =
   match read_S33 input with

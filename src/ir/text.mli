@@ -465,6 +465,10 @@ type instr =
 
 and expr = instr list
 
+val pp_instr : short:bool -> instr Fmt.t
+
+val pp_expr : short:bool -> expr Annotated.t Fmt.t
+
 module Func : sig
   type t =
     { type_f : block_type

@@ -74,7 +74,8 @@ module Env = struct
     match Module.get_type i m with
     | None -> Error (`Unknown_type (Text.Raw i))
     | Some (SimpleType (_, { ct = Def_func_t ty; _ })) -> Ok ty
-    | _ -> assert false
+    | Some ty ->
+      Fmt.failwith "type_get: unimplemented for type: %a" Typedef.pp ty
 
   let local_get i env =
     match Index.Map.find_opt i env.locals with
@@ -173,7 +174,9 @@ let get_func_type_id (env : Env.t) i =
       | Typedef.SimpleType (_, { final = true; ids = []; ct = Def_func_t typ' })
         ->
         func_type_eq typ typ'
-      | _ -> assert false )
+      | ty ->
+        Fmt.failwith "get_func_type_id: unimplemented for type: %a" Typedef.pp
+          ty )
     env.modul.types
 
 (* TODO: move type matching functions outside of the stack module? *)
@@ -1013,7 +1016,9 @@ let typecheck_const_instr ?known_globals ~is_init (modul : Module.t) refs stack
             match ty with
             | Typedef.SimpleType (_, { ct = Def_func_t ty; _ }) ->
               func_type_eq ty ity
-            | _ -> assert false )
+            | ty ->
+              Fmt.failwith "typecheck_const_instr unimplemented for type: %a"
+                Typedef.pp ty )
           modul.types
       with
       | Some tyid -> TypeUse tyid
