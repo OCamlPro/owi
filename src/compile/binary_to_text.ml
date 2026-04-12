@@ -424,10 +424,12 @@ let rec convert_instr : Binary.instr -> Text.instr = function
   | I31_get_u -> I31_get_u
   | Struct_new id -> Struct_new (convert_indice id)
   | Struct_new_default id -> Struct_new_default (convert_indice id)
-  | Struct_get (id1, _) -> Struct_get (convert_indice id1, assert false)
-  | Struct_get_s (id1, _) -> Struct_get_s (convert_indice id1, assert false)
-  | Struct_get_u (id1, _) -> Struct_get_u (convert_indice id1, assert false)
-  | Struct_set (id1, _) -> Struct_set (convert_indice id1, assert false)
+  | Struct_get (id1, id2) -> Struct_get (convert_indice id1, convert_indice id2)
+  | Struct_get_s (id1, id2) ->
+    Struct_get_s (convert_indice id1, convert_indice id2)
+  | Struct_get_u (id1, id2) ->
+    Struct_get_u (convert_indice id1, convert_indice id2)
+  | Struct_set (id1, id2) -> Struct_set (convert_indice id1, convert_indice id2)
   | Array_new id -> Array_new (convert_indice id)
   | Array_new_default id -> Array_new_default (convert_indice id)
   | Array_new_fixed (id, n) -> Array_new_fixed (convert_indice id, n)

@@ -669,10 +669,10 @@ type instr =
   (* struct *)
   | Struct_new of indice
   | Struct_new_default of indice
-  | Struct_get of indice * Int32.t
-  | Struct_get_s of indice * Int32.t
-  | Struct_get_u of indice * Int32.t
-  | Struct_set of indice * Int32.t
+  | Struct_get of indice * indice
+  | Struct_get_s of indice * indice
+  | Struct_get_u of indice * indice
+  | Struct_set of indice * indice
   (* array *)
   | Array_new of indice
   | Array_new_default of indice
@@ -768,10 +768,14 @@ let rec pp_instr ~short ppf = function
   | I31_get_u -> pf fmt "i31.get_u"
   | Struct_new id -> pf fmt "struct.new %a" pp_indice id
   | Struct_new_default id -> pf fmt "struct.new_default %a" pp_indice id
-  | Struct_get (id1, id2) -> pf fmt "struct.get %a %ld" pp_indice id1 id2
-  | Struct_get_s (id1, id2) -> pf fmt "struct.get_s %a %ld" pp_indice id1 id2
-  | Struct_get_u (id1, id2) -> pf fmt "struct.get_u %a %ld" pp_indice id1 id2
-  | Struct_set (id1, id2) -> pf fmt "struct.set %a %ld" pp_indice id1 id2
+  | Struct_get (id1, id2) ->
+    pf fmt "struct.get %a %a" pp_indice id1 pp_indice id2
+  | Struct_get_s (id1, id2) ->
+    pf fmt "struct.get_s %a %a" pp_indice id1 pp_indice id2
+  | Struct_get_u (id1, id2) ->
+    pf fmt "struct.get_u %a %a" pp_indice id1 pp_indice id2
+  | Struct_set (id1, id2) ->
+    pf fmt "struct.set %a %a" pp_indice id1 pp_indice id2
   | Array_new id -> pf fmt "array.new %a" pp_indice id
   | Array_new_default id -> pf fmt "array.new_default %a" pp_indice id
   | Array_new_fixed (id, n) -> pf fmt "array.new_fixed %a %ld" pp_indice id n

@@ -655,22 +655,22 @@ let rec write_instr buf instr =
     add_char '\xFB';
     write_u32 buf 2l;
     write_indice buf x;
-    write_u32 buf i
+    write_indice buf i
   | Struct_get_s (x, i) ->
     add_char '\xFB';
     write_u32 buf 3l;
     write_indice buf x;
-    write_u32 buf i
+    write_indice buf i
   | Struct_get_u (x, i) ->
     add_char '\xFB';
     write_u32 buf 4l;
     write_indice buf x;
-    write_u32 buf i
+    write_indice buf i
   | Struct_set (x, i) ->
     add_char '\xFB';
     write_u32 buf 5l;
     write_indice buf x;
-    write_u32 buf i
+    write_indice buf i
   | Array_new x ->
     add_char '\xFB';
     write_u32 buf 6l;

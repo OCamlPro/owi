@@ -324,10 +324,10 @@ type instr =
   (* struct *)
   | Struct_new of indice
   | Struct_new_default of indice
-  | Struct_get of indice * Int32.t
-  | Struct_get_s of indice * Int32.t
-  | Struct_get_u of indice * Int32.t
-  | Struct_set of indice * Int32.t
+  | Struct_get of indice * indice
+  | Struct_get_s of indice * indice
+  | Struct_get_u of indice * indice
+  | Struct_set of indice * indice
   (* array *)
   | Array_new of indice
   | Array_new_default of indice

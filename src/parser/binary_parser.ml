@@ -372,19 +372,19 @@ let read_FB input =
     (Struct_new_default id, input)
   | 2 ->
     let* id, input = read_indice input in
-    let+ i, input = read_S32 input in
+    let+ i, input = read_indice input in
     (Struct_get (id, i), input)
   | 3 ->
     let* id, input = read_indice input in
-    let+ i, input = read_S32 input in
+    let+ i, input = read_indice input in
     (Struct_get_s (id, i), input)
   | 4 ->
     let* id, input = read_indice input in
-    let+ i, input = read_S32 input in
+    let+ i, input = read_indice input in
     (Struct_get_u (id, i), input)
   | 5 ->
     let* id, input = read_indice input in
-    let+ i, input = read_S32 input in
+    let+ i, input = read_indice input in
     (Struct_set (id, i), input)
   | 6 ->
     let+ id, input = read_indice input in
