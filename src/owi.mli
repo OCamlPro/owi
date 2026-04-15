@@ -424,10 +424,9 @@ module Text : sig
     (* Control instructions *)
     | Nop
     | Unreachable
-    | Block of string option * block_type option * expr Annotated.t
-    | Loop of string option * block_type option * expr Annotated.t
-    | If_else of
-        string option * block_type option * expr Annotated.t * expr Annotated.t
+    | Block of string option * block_type option * expr
+    | Loop of string option * block_type option * expr
+    | If_else of string option * block_type option * expr * expr
     | Br of indice
     | Br_if of indice
     | Br_table of indice array * indice
@@ -444,13 +443,13 @@ module Text : sig
     | Extern_externalize
     | Extern_internalize
 
-  and expr = instr Annotated.t list
+  and expr = instr list
 
   module Func : sig
     type t =
       { type_f : block_type
       ; locals : param list
-      ; body : expr Annotated.t
+      ; body : expr
       ; id : string option
       }
 
@@ -473,7 +472,7 @@ module Text : sig
     type t =
       { id : string option
       ; typ : Type.t
-      ; init : expr Annotated.t option
+      ; init : expr option
       }
 
     val pp : t Fmt.t
@@ -488,7 +487,7 @@ module Text : sig
 
     type t =
       { typ : Type.t
-      ; init : expr Annotated.t
+      ; init : expr
       ; id : string option
       }
 
@@ -499,7 +498,7 @@ module Text : sig
     module Mode : sig
       type t =
         | Passive
-        | Active of indice option * expr Annotated.t
+        | Active of indice option * expr
     end
 
     type t =
@@ -516,13 +515,13 @@ module Text : sig
       type t =
         | Passive
         | Declarative
-        | Active of indice option * expr Annotated.t
+        | Active of indice option * expr
     end
 
     type t =
       { id : string option
       ; typ : ref_type
-      ; init : expr Annotated.t list
+      ; init : expr list
       ; mode : Mode.t
       ; explicit_typ : bool
       }

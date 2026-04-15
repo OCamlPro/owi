@@ -514,10 +514,9 @@ type instr =
   (* Control instructions *)
   | Nop
   | Unreachable
-  | Block of string option * block_type option * expr Annotated.t
-  | Loop of string option * block_type option * expr Annotated.t
-  | If_else of
-      string option * block_type option * expr Annotated.t * expr Annotated.t
+  | Block of string option * block_type option * expr
+  | Loop of string option * block_type option * expr
+  | If_else of string option * block_type option * expr * expr
   | Br of indice
   | Br_if of indice
   | Br_table of indice array * indice
@@ -534,7 +533,7 @@ type instr =
   | Extern_externalize
   | Extern_internalize
 
-and expr = instr Annotated.t list
+and expr = instr list
 
 let pp_newline ppf () = pf ppf "@\n"
 
@@ -635,12 +634,10 @@ let rec pp_instr ~short fmt = function
       pf fmt "(loop%a%a@\n  @[<v>%a@])" pp_id_opt id pp_block_type_opt bt
         (pp_expr ~short) e
   | If_else (id, bt, e1, e2) ->
-    let pp_else fmt e =
-      Annotated.iter
-        (function
-          | [] -> ()
-          | _ -> pf fmt "@\n(else@\n  @[<v>%a@]@\n)" (pp_expr ~short) e )
-        e
+    let pp_else fmt =
+     (function
+     | [] -> ()
+     | e -> pf fmt "@\n(else@\n  @[<v>%a@]@\n)" (pp_expr ~short) e )
     in
     if short then pf fmt "if%a%a" pp_id_opt id pp_block_type_opt bt
     else
@@ -665,18 +662,13 @@ let rec pp_instr ~short fmt = function
   | Extern_internalize -> pf fmt "extern.internalize"
 
 and pp_expr ~short fmt instrs =
-  Annotated.iter
-    (fun instrs ->
-      list ~sep:pp_newline
-        (fun fmt i -> Annotated.iter (pp_instr ~short fmt) i)
-        fmt instrs )
-    instrs
+  list ~sep:pp_newline (fun fmt i -> (pp_instr ~short fmt) i) fmt instrs
 
 module Func = struct
   type t =
     { type_f : block_type
     ; locals : param list
-    ; body : expr Annotated.t
+    ; body : expr
     ; id : string option
     }
 
@@ -708,7 +700,7 @@ module Table = struct
   type t =
     { id : string option
     ; typ : Type.t
-    ; init : expr Annotated.t option
+    ; init : expr option
     }
 
   let pp fmt { id; typ; init } =
@@ -732,7 +724,7 @@ module Global = struct
 
   type t =
     { typ : Type.t
-    ; init : expr Annotated.t
+    ; init : expr
     ; id : string option
     }
 
@@ -745,7 +737,7 @@ module Data = struct
   module Mode = struct
     type t =
       | Passive
-      | Active of indice option * expr Annotated.t
+      | Active of indice option * expr
 
     let pp fmt = function
       | Passive -> ()
@@ -778,7 +770,7 @@ module Elem = struct
     type t =
       | Passive
       | Declarative
-      | Active of indice option * expr Annotated.t
+      | Active of indice option * expr
 
     let pp fmt = function
       | Passive -> ()
@@ -793,7 +785,7 @@ module Elem = struct
   type t =
     { id : string option
     ; typ : ref_type
-    ; init : expr Annotated.t list
+    ; init : expr list
     ; mode : Mode.t
     ; explicit_typ : bool
     }

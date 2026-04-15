@@ -211,11 +211,8 @@ let rec convert_instr : Binary.instr -> Text.instr = function
   | V_ibinop (shape, op) -> V_ibinop (shape, op)
   | Ref_null t -> Ref_null (convert_heap_type t)
 
-and convert_expr (e : Binary.expr Annotated.t) : Text.expr Annotated.t =
-  Annotated.map
-    (fun (e : Binary.expr) ->
-      List.map (fun i -> Annotated.map convert_instr i) e )
-    e
+and convert_expr (e : Binary.expr Annotated.t) : Text.expr =
+  List.map (fun i -> convert_instr i.Annotated.raw) e.raw
 
 let convert_elem_mode : Binary.Elem.Mode.t -> Text.Elem.Mode.t = function
   | Binary.Elem.Mode.Passive -> Text.Elem.Mode.Passive

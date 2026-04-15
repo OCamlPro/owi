@@ -108,8 +108,7 @@ let add_func_type decl_types type_checks = function
     Option.iter (fun id -> Dynarray.add_last type_checks (id, typ)) id
 
 let rec extract_block_types expr =
-  let aux instr =
-    match instr.Annotated.raw with
+  let aux = function
     | Block (_str_opt, bt, expr1) | Loop (_str_opt, bt, expr1) ->
       Option.to_list bt @ extract_block_types expr1
     | If_else (_str_opt, bt, expr1, expr2) ->
@@ -119,7 +118,7 @@ let rec extract_block_types expr =
       [ bt ]
     | _ -> []
   in
-  List.concat_map aux expr.raw
+  List.concat_map aux expr
 
 let add_func value decl_types type_checks func =
   begin match value with

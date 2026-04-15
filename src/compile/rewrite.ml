@@ -79,7 +79,7 @@ let rewrite_memarg ({ offset; align } : Text.memarg) : Binary.memarg Result.t =
   Binary.{ offset; align }
 
 let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
-  (iexpr : Text.expr Annotated.t) : Binary.expr Annotated.t Result.t =
+  (iexpr : Text.expr) : Binary.expr Annotated.t Result.t =
   (* block_ids handling *)
   let block_id_to_raw (loop_count, block_ids) id =
     let* id =
@@ -134,9 +134,9 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
       | Some id -> id )
   in
 
-  let rec body (loop_count, block_ids) (instr : Text.instr Annotated.t) :
+  let rec body (loop_count, block_ids) (instr : Text.instr) :
     Binary.instr Result.t =
-    match instr.Annotated.raw with
+    match instr with
     | Br_table (ids, id) ->
       let block_id_to_raw = block_id_to_raw (loop_count, block_ids) in
       let* ids = array_map block_id_to_raw ids in
@@ -336,14 +336,14 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
     | Ref_null t ->
       let* t = rewrite_heap_type assigned t in
       Ok (Binary.Ref_null t)
-  and expr (e : Text.expr Annotated.t) (loop_count, block_ids) :
+  and expr (e : Text.expr) (loop_count, block_ids) :
     Binary.expr Annotated.t Result.t =
     let+ e =
       list_map
         (fun i ->
           let+ i = body (loop_count, block_ids) i in
           Annotated.dummy i )
-        e.Annotated.raw
+        e
     in
     Annotated.dummy e
   in

@@ -194,7 +194,7 @@ let loop expr ~locals ~stack env : (instr * S.stack_op list) gen =
   and+ rt_descr = const @@ List.rev_map (fun t -> S.Push t) rt in
   (instr, pt_descr @ rt_descr)
 
-let rec expr ~block_type ~stack ~locals env : expr Owi.Annotated.t gen =
+let rec expr ~block_type ~stack ~locals env : expr gen =
   let _pt, rt =
     match block_type with
     | Bt_raw (_indice, (pt, rt)) -> (pt, rt)
@@ -203,7 +203,7 @@ let rec expr ~block_type ~stack ~locals env : expr Owi.Annotated.t gen =
   Env.use_fuel env;
   if Env.has_no_fuel env then
     match (rt, stack) with
-    | [], [] -> const (Owi.Annotated.dummy_deep [ Nop ])
+    | [], [] -> const [ Nop ]
     | rt, l ->
       (* TODO: if we have a matching prefix, keep it *)
       (* TODO: try to consume them instead of just dropping *)
@@ -216,7 +216,7 @@ let rec expr ~block_type ~stack ~locals env : expr Owi.Annotated.t gen =
             cst :: acc )
           (const []) (List.rev rt)
       in
-      Owi.Annotated.dummy_deep (drops @ adds)
+      drops @ adds
   else
     let expr_available_with_current_stack =
       (* TODO: complete this *)
@@ -260,9 +260,8 @@ let rec expr ~block_type ~stack ~locals env : expr Owi.Annotated.t gen =
     let+ next =
       let stack = S.apply_stack_ops stack ops in
       expr ~block_type ~stack ~locals env
-    and+ i = const (Owi.Annotated.dummy i) in
-    let res : expr = i :: Owi.Annotated.raw next in
-    Owi.Annotated.dummy res
+    and+ i = const i in
+    i :: next
 
 let data env : Module.Field.t gen =
   let+ mode = B.data_mode env
@@ -306,7 +305,6 @@ let global env : Module.Field.t gen =
   let+ init = B.const_of_val_type t in
   let id = Some (Env.add_global env typ) in
   let init = [ init ] in
-  let init = Owi.Annotated.dummy_deep init in
   Module.Field.Global { typ; init; id }
 
 let func env : Module.Field.t gen =

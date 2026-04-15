@@ -576,13 +576,12 @@ let block_instr ==
   | IF; id = option(id); (bt, es) = block; END; id2 = option(id); {
     if Option.is_some id2 && not @@ Option.equal String.equal id id2
     then failwith "mismatching label";
-    If_else (id, bt, es, Annotated.dummy [])
+    If_else (id, bt, es, [])
   }
   | IF; id = option(id); (bt, es1) = block; ELSE; id2 = option(id); ~ = instr_list; END; id3 = option(id); {
     if (Option.is_some id2 && not @@ Option.equal String.equal id id2)
     || (Option.is_some id3 && not @@ Option.equal String.equal id id3)
     then failwith "mismatching label";
-    let instr_list = Annotated.dummy_deep instr_list in
     If_else (id, bt, es1, instr_list)
   }
 
@@ -592,7 +591,6 @@ let block ==
     | ([], []) -> Bt_ind type_use
     | (pt, rt) -> Bt_raw ((Some type_use), (List.map (fun t -> None, t) pt, rt))
     in
-    let r = Annotated.dummy_deep r in
     Some block_type, r
   }
   | (l, r) = block_param_body; {
@@ -600,7 +598,6 @@ let block ==
       | [], [] -> None
       | (pt, rt) -> Some (Bt_raw (None, (List.map (fun t -> None, t) pt, rt)))
     in
-    let r = Annotated.dummy_deep r in
     block_type, r
   }
 
@@ -618,11 +615,9 @@ let block_result_body :=
 
 let expr_aux ==
   | ~ = plain_instr; ~ = expr_list; {
-    let expr_list = Annotated.dummy expr_list in
     expr_list, plain_instr
   }
   | SELECT; (b, ts, es) = select_expr_result; {
-    let es = Annotated.dummy es in
     es, Select (if b then Some ts else None)
   }
   | ~ = call_indirect_prim; ~ = indice; (x, es) = call_expr_type; {
@@ -632,12 +627,10 @@ let expr_aux ==
     es, call_indirect_prim (Raw 0, x)
   }
   | BLOCK; id = option(id); (bt, es) = block; {
-    let l = Annotated.dummy [] in
-    l, Block (id, bt, es)
+    [], Block (id, bt, es)
   }
   | LOOP; id = option(id); (bt, es) = block; {
-    let l = Annotated.dummy [] in
-    l, Loop (id, bt, es)
+    [], Loop (id, bt, es)
   }
   | IF; id = option(id); (bt, ((pt, rt), (es, es1, es2))) = if_block; {
     let bt = match pt, rt with
@@ -651,14 +644,12 @@ let expr_aux ==
       | None -> Some (Bt_raw (None, raw))
       end
     in
-    let es1 = Annotated.dummy_deep es1 in
-    let es2 = Annotated.dummy_deep es2.raw in
     es, If_else (id, bt, es1, es2)
   }
 
 let expr :=
   | (es, e) = par(expr_aux); {
-    let expr = es.raw @ [e] in
+    let expr = es @ [e] in
     expr
   }
 
@@ -683,7 +674,6 @@ let call_expr_params :=
     (l @ ts1, ts2), es
   }
   | (ts, es) = call_expr_results; {
-    let es = Annotated.dummy es in
     ([], ts), es
   }
 
@@ -713,18 +703,17 @@ let if_block_result_body :=
 
 let if_ :=
   | ~ = expr; (es0, es1, es2) = if_; {
-    let es0 = Annotated.dummy (expr @ es0.raw) in
+    let es0 = (expr @ es0) in
     es0, es1, es2
   }
   | LPAR; THEN; es1 = instr_list; RPAR; LPAR; ELSE; es2 = instr_list; RPAR; {
-    let es0 = Annotated.dummy [] in
-    let es2 = Annotated.dummy es2 in
+    let es0 = [] in
     es0, es1, es2
   }
   | LPAR; THEN; ~ = instr_list; RPAR; {
-    let es0 = Annotated.dummy [] in
+    let es0 = [] in
     let es1 = instr_list in
-    let es2 = Annotated.dummy [] in
+    let es2 = [] in
     es0, es1, es2
   }
 
@@ -819,7 +808,6 @@ let func_result_body :=
 
 let func_body :=
   | body = instr_list; {
-    let body = Annotated.dummy_deep body in
     { type_f = Bt_ind (Raw Int.max_int); locals = []; body; id = None }
   }
   | LPAR; LOCAL; l = list(val_type); RPAR; ~ = func_body; {
@@ -854,7 +842,7 @@ let elem_expr ==
 
 let elem_var ==
   | id = indice; {
-    Annotated.dummies [Ref_func id]
+    [ Ref_func id ]
   }
 
 let elem_list ==
@@ -862,32 +850,23 @@ let elem_list ==
     elem_kind, (l : expr list), false
   }
   | ~ = ref_type; l = list(elem_expr); {
-    let l : expr list = List.map (List.map Annotated.dummy) l in
     ref_type, l, true
   }
 
 let elem ==
   | ELEM; id = option(id); (typ, init, explicit_typ) = elem_list; {
-    let init = Annotated.dummies init in
     [ Elem { id; typ; init; mode = Passive; explicit_typ } ]
   }
   | ELEM; id = option(id); table_use = par(table_use); ~ = offset; (typ, init, explicit_typ) = elem_list; {
-    let init = Annotated.dummies init in
-    let offset = Annotated.dummy_deep offset in
     [ Elem { id; typ; init; mode = Active (Some table_use, offset); explicit_typ } ]
   }
   | ELEM; id = option(id); DECLARE; (typ, init, explicit_typ) = elem_list; {
-    let init = Annotated.dummies init in
     [ Elem { id; typ; init; mode = Declarative; explicit_typ } ]
   }
   | ELEM; id = option(id); ~ = offset; (typ, init, explicit_typ) = elem_list; {
-    let init = Annotated.dummies init in
-    let offset = Annotated.dummy_deep offset in
     [ Elem { id; typ; init; mode = Active (Some (Raw 0), offset); explicit_typ } ]
   }
   | ELEM; id = option(id); ~ = offset; init = list(elem_var); {
-    let init =  Annotated.dummies init in
-    let offset = Annotated.dummy_deep offset in
     [ Elem { id; typ = (Null, Func_ht); init; mode = Active (Some (Raw 0), offset); explicit_typ = false } ]
   }
 
@@ -898,7 +877,7 @@ let table ==
     | Module.Field.Table { id = _; typ; init } -> Module.Field.Table { id; typ; init }
     | Export e -> Export { e with typ = Table tbl_id }
     | Elem e ->
-      let mode = Elem.Mode.Active (tbl_id, Annotated.dummy_deep [ I32_const 0l ]) in
+      let mode = Elem.Mode.Active (tbl_id, [ I32_const 0l ]) in
       Elem { e with mode }
     | Import i -> begin match i.typ with
       | Table (_id, table_type) -> Import { i with typ = Table (id, table_type) }
@@ -912,16 +891,15 @@ let table ==
 }
 
 let init ==
-  | l = list(elem_var); { List.map Annotated.dummy l }
-  | l = nonempty_list(elem_expr); { List.map Annotated.dummy_deep l }
+  | l = list(elem_var); { l }
+  | l = nonempty_list(elem_expr); { l }
 
 let table_fields :=
   | ~ = table_type; {
     [ Module.Field.Table { id = None; typ = table_type; init = None } ]
   }
   | ~ = table_type; init = expr; {
-    [ Table { id = None; typ = table_type;
-      init = Some (Annotated.dummy (List.map Annotated.dummy init)) } ]
+    [ Table { id = None; typ = table_type; init = Some (init) } ]
   }
   | (modul_name, name) = inline_import; ~ = table_type; {
     [ Import { modul_name; name; typ = Table (None, table_type) }]
@@ -931,10 +909,10 @@ let table_fields :=
   }
   | ~ = ref_type; LPAR; ELEM; ~ = init; RPAR; {
     let min = List.fold_left (fun sum l ->
-        sum + ((List.length l.Annotated.raw))
+        sum + (List.length l)
       ) 0 init
     in
-    let mode = Elem.Mode.Active (None, Annotated.dummy []) in
+    let mode = Elem.Mode.Active (None, []) in
     [ Module.Field.Elem { id = None; typ = ref_type; init; mode; explicit_typ = true }
     ; Table  { id = None; typ = ({ is_i64 = false; min = string_of_int min; max = Some (string_of_int min) }, ref_type); init = None } ]
   }
@@ -945,7 +923,6 @@ let data ==
   }
   | DATA; id = option(id); memory_use = ioption(par(memory_use)); ~ = offset; init = string_list; {
     let memory_use = Option.value memory_use ~default:(Raw 0) in
-    let offset = Annotated.dummy_deep offset in
     [ Data { id; init; mode = Active (Some memory_use, offset) } ]
   }
 
@@ -956,7 +933,7 @@ let memory ==
       | Module.Field.Mem (_id, m) -> Module.Field.Mem (id, m)
       | Export e -> Export { e with typ = Mem mem_id }
       | Data d ->
-        let mode = Data.Mode.Active (mem_id, Annotated.dummy_deep [ I32_const 0l ]) in
+        let mode = Data.Mode.Active (mem_id, [ I32_const 0l ]) in
         Data { d with mode }
       | Import i -> begin match i.typ with
         | Mem (_id, mem_type ) -> Import { i with typ = Mem (id, mem_type) }
@@ -981,7 +958,7 @@ let memory_fields :=
   }
   | LPAR; DATA; init = string_list; RPAR; {
     let min = ((((String.length init)) + 65535) / 65536) in
-    [ Module.Field.Data { id = None; init; mode = Data.Mode.Active (None, Annotated.dummy []) }
+    [ Module.Field.Data { id = None; init; mode = Data.Mode.Active (None, []) }
     ; Mem (None, { is_i64 = false; min = string_of_int min; max = Some (string_of_int min)}) ]
   }
 
@@ -1005,7 +982,7 @@ let global ==
 
 let global_fields :=
   | typ = global_type; init = const_expr; {
-    let init : expr Annotated.t = Annotated.dummy_deep init in
+    let init : expr = init in
     [ Module.Field.Global { typ; init; id = None } ]
   }
   | (modul_name, name) = inline_import; ~ = global_type; {

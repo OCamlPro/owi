@@ -160,26 +160,22 @@ let m =
                }
            ; Global
                { typ = (Const, Num_type I32)
-               ; init = [ Text.I32_const 666l ] |> Annotated.dummy_deep
+               ; init = [ Text.I32_const 666l ]
                ; id = Some "global_i32"
                }
            ; Global
                { typ = (Const, Num_type I64)
-               ; init = [ Text.I64_const 666L ] |> Annotated.dummy_deep
+               ; init = [ Text.I64_const 666L ]
                ; id = Some "global_i64"
                }
            ; Global
                { typ = (Const, Num_type F32)
-               ; init =
-                   [ Text.F32_const (Float32.of_float 666.6) ]
-                   |> Annotated.dummy_deep
+               ; init = [ Text.F32_const (Float32.of_float 666.6) ]
                ; id = Some "global_f32"
                }
            ; Global
                { typ = (Const, Num_type F64)
-               ; init =
-                   [ Text.F64_const (Float64.of_float 666.6) ]
-                   |> Annotated.dummy_deep
+               ; init = [ Text.F64_const (Float64.of_float 666.6) ]
                ; id = Some "global_f64"
                }
            ; Export { name = "func"; typ = Func (Some (Text "func")) }

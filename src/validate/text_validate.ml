@@ -141,8 +141,8 @@ let modul m =
   in
   let rec elem_check_init = function
     | [] -> Ok ()
-    | { Annotated.raw = l; _ } :: t ->
-      let* () = check_expr l in
+    | l :: t ->
+      let* () = check_expr (List.map Annotated.dummy l) in
       elem_check_init t
   in
   let add_memory =
@@ -200,7 +200,9 @@ let modul m =
         | Table { id; typ; init } ->
           let* () = add_table id typ in
           let* () =
-            match init with None -> Ok () | Some e -> check_expr e.raw
+            match init with
+            | None -> Ok ()
+            | Some e -> check_expr (List.map Annotated.dummy e)
           in
           Ok { env with tables = true } )
       (empty_env ()) m.fields

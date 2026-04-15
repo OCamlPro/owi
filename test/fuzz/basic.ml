@@ -366,7 +366,7 @@ let elem_active (env : Env.t) =
     (fun (name, _) ->
       let+ ind = const (Some (Owi.Text.Text name))
       and+ instr = const_i32 in
-      Owi.Text.Elem.Mode.Active (ind, [ instr ] |> Owi.Annotated.dummy_deep) )
+      Owi.Text.Elem.Mode.Active (ind, [ instr ]) )
     env.tables
 
 let elem_mode (env : Env.t) =
@@ -542,7 +542,7 @@ let i64_store32 env : instr gen =
 
 let data_active name =
   let+ inst = const_i32 in
-  let exp = [ inst ] |> Owi.Annotated.dummy_deep in
+  let exp = [ inst ] in
   Owi.Text.Data.Mode.Active (Some (Text name), exp)
 
 let data_mode (env : Env.t) =
