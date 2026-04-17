@@ -160,15 +160,15 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
     | Return_call id ->
       let+ id = Assigned.find_func assigned id in
       Binary.Return_call id
-    | Local_set id ->
+    | Local (Set id) ->
       let id = find_local id in
-      Ok (Binary.Local_set id)
-    | Local_get id ->
+      Ok (Local (Set id))
+    | Local (Get id) ->
       let id = find_local id in
-      Ok (Binary.Local_get id)
-    | Local_tee id ->
+      Ok (Local (Get id))
+    | Local (Tee id) ->
       let id = find_local id in
-      Ok (Binary.Local_tee id)
+      Ok (Local (Tee id))
     | If_else (id, bt, e1, e2) ->
       let* bt = block_ty_opt_rewrite bt in
       let block_ids = id :: block_ids in
@@ -197,48 +197,48 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
     | Return_call_ref bt ->
       let+ _, bt = rewrite_block_type assigned bt in
       Binary.Return_call_ref bt
-    | Global_set id ->
+    | Global (Set id) ->
       let+ idx = Assigned.find_global assigned id in
-      Binary.Global_set idx
-    | Global_get id ->
+      Binary.Global (Set idx)
+    | Global (Get id) ->
       let* idx = Assigned.find_global assigned id in
-      Ok (Binary.Global_get idx)
-    | Ref_func id ->
+      Ok (Binary.Global (Get idx))
+    | Ref (Func id) ->
       let+ id = Assigned.find_func assigned id in
-      Binary.Ref_func id
-    | Table_size id ->
+      Binary.Ref (Func id)
+    | Table (Size id) ->
       let+ id = Assigned.find_table assigned id in
-      Binary.Table_size id
-    | Table_get id ->
+      Binary.Table (Size id)
+    | Table (Get id) ->
       let+ id = Assigned.find_table assigned id in
-      Binary.Table_get id
-    | Table_set id ->
+      Binary.Table (Get id)
+    | Table (Set id) ->
       let+ id = Assigned.find_table assigned id in
-      Binary.Table_set id
-    | Table_grow id ->
+      Binary.Table (Set id)
+    | Table (Grow id) ->
       let+ id = Assigned.find_table assigned id in
-      Binary.Table_grow id
-    | Table_init (i, i') ->
+      Binary.Table (Grow id)
+    | Table (Init (i, i')) ->
       let* table = Assigned.find_table assigned i in
       let+ elem = Assigned.find_elem assigned i' in
-      Binary.Table_init (table, elem)
-    | Table_fill id ->
+      Binary.Table (Init (table, elem))
+    | Table (Fill id) ->
       let+ id = Assigned.find_table assigned id in
-      Binary.Table_fill id
-    | Table_copy (i, i') ->
+      Binary.Table (Fill id)
+    | Table (Copy (i, i')) ->
       let* table = Assigned.find_table assigned i in
       let+ table' = Assigned.find_table assigned i' in
-      Binary.Table_copy (table, table')
-    | Memory_init (memidx, dataidx) ->
+      Binary.Table (Copy (table, table'))
+    | Memory (Init (memidx, dataidx)) ->
       let* memidx = Assigned.find_memory assigned memidx in
       let+ dataidx = Assigned.find_data assigned dataidx in
-      Binary.Memory_init (memidx, dataidx)
-    | Data_drop id ->
+      Binary.Memory (Init (memidx, dataidx))
+    | Data (Drop id) ->
       let+ id = Assigned.find_data assigned id in
-      Binary.Data_drop id
-    | Elem_drop id ->
+      Binary.Data (Drop id)
+    | Elem (Drop id) ->
       let+ id = Assigned.find_elem assigned id in
-      Binary.Elem_drop id
+      Binary.Elem (Drop id)
     | Select typ ->
       begin match typ with
       | None -> Ok (Binary.Select None)

@@ -14,18 +14,18 @@ type indice =
   | Text of string
   | Raw of int
 
-let pp_id fmt id = pf fmt "$%s" id
+let pp_id ppf id = pf ppf "$%s" id
 
-let pp_id_opt fmt = function None -> () | Some i -> pf fmt " %a" pp_id i
+let pp_id_opt ppf = function None -> () | Some i -> pf ppf " %a" pp_id i
 
-let pp_indice fmt = function Raw u -> int fmt u | Text i -> pp_id fmt i
+let pp_indice ppf = function Raw u -> int ppf u | Text i -> pp_id ppf i
 
-let pp_indice_not0 fmt = function
-  | Text i -> pp_id fmt i
+let pp_indice_not0 ppf = function
+  | Text i -> pp_id ppf i
   | Raw 0 -> ()
-  | Raw u -> Fmt.pf fmt " %d" u
+  | Raw u -> Fmt.pf ppf " %d" u
 
-let pp_indice_opt fmt = function None -> () | Some i -> pp_indice fmt i
+let pp_indice_opt ppf = function None -> () | Some i -> pp_indice ppf i
 
 let compare_indice id1 id2 =
   match (id1, id2) with
@@ -41,12 +41,12 @@ type nonrec num_type =
   | F64
   | V128
 
-let pp_num_type fmt = function
-  | I32 -> pf fmt "i32"
-  | I64 -> pf fmt "i64"
-  | F32 -> pf fmt "f32"
-  | F64 -> pf fmt "f64"
-  | V128 -> pf fmt "v128"
+let pp_num_type ppf = function
+  | I32 -> pf ppf "i32"
+  | I64 -> pf ppf "i64"
+  | F32 -> pf ppf "f32"
+  | F64 -> pf ppf "f64"
+  | V128 -> pf ppf "v128"
 
 let num_type_eq t1 t2 =
   match (t1, t2) with
@@ -77,19 +77,7 @@ type nonrec nn =
   | S32
   | S64
 
-let pp_nn fmt = function S32 -> pf fmt "32" | S64 -> pf fmt "64"
-
-type nonrec ishape =
-  | I8x16
-  | I16x8
-  | I32x4
-  | I64x2
-
-let pp_ishape fmt = function
-  | I8x16 -> pf fmt "i8x16"
-  | I16x8 -> pf fmt "i16x8"
-  | I32x4 -> pf fmt "i32x4"
-  | I64x2 -> pf fmt "i64x2"
+let pp_nn ppf = function S32 -> pf ppf "32" | S64 -> pf ppf "64"
 
 type nonrec fshape =
   | F32x4
@@ -99,136 +87,19 @@ type nonrec sx =
   | U
   | S
 
-let pp_sx fmt = function U -> pf fmt "u" | S -> pf fmt "s"
-
-type nonrec iunop =
-  | Clz
-  | Ctz
-  | Popcnt
-
-let pp_iunop fmt = function
-  | Clz -> pf fmt "clz"
-  | Ctz -> pf fmt "ctz"
-  | Popcnt -> pf fmt "popcnt"
-
-type nonrec funop =
-  | Abs
-  | Neg
-  | Sqrt
-  | Ceil
-  | Floor
-  | Trunc
-  | Nearest
-
-let pp_funop fmt = function
-  | Abs -> pf fmt "abs"
-  | Neg -> pf fmt "neg"
-  | Sqrt -> pf fmt "sqrt"
-  | Ceil -> pf fmt "ceil"
-  | Floor -> pf fmt "floor"
-  | Trunc -> pf fmt "trunc"
-  | Nearest -> pf fmt "nearest"
-
-type nonrec vibinop =
-  | Add
-  | Sub
-
-let pp_vibinop fmt = function Add -> pf fmt "add" | Sub -> pf fmt "sub"
-
-type nonrec ibinop =
-  | Add
-  | Sub
-  | Mul
-  | Div of sx
-  | Rem of sx
-  | And
-  | Or
-  | Xor
-  | Shl
-  | Shr of sx
-  | Rotl
-  | Rotr
-
-let pp_ibinop fmt = function
-  | (Add : ibinop) -> pf fmt "add"
-  | Sub -> pf fmt "sub"
-  | Mul -> pf fmt "mul"
-  | Div s -> pf fmt "div_%a" pp_sx s
-  | Rem s -> pf fmt "rem_%a" pp_sx s
-  | And -> pf fmt "and"
-  | Or -> pf fmt "or"
-  | Xor -> pf fmt "xor"
-  | Shl -> pf fmt "shl"
-  | Shr s -> pf fmt "shr_%a" pp_sx s
-  | Rotl -> pf fmt "rotl"
-  | Rotr -> pf fmt "rotr"
-
-type nonrec fbinop =
-  | Add
-  | Sub
-  | Mul
-  | Div
-  | Min
-  | Max
-  | Copysign
-
-let pp_fbinop fmt = function
-  | (Add : fbinop) -> pf fmt "add"
-  | Sub -> pf fmt "sub"
-  | Mul -> pf fmt "mul"
-  | Div -> pf fmt "div"
-  | Min -> pf fmt "min"
-  | Max -> pf fmt "max"
-  | Copysign -> pf fmt "copysign"
-
-(* TODO: inline this *)
-type nonrec itestop = Eqz
-
-let pp_itestop fmt = function Eqz -> pf fmt "eqz"
-
-type nonrec irelop =
-  | Eq
-  | Ne
-  | Lt of sx
-  | Gt of sx
-  | Le of sx
-  | Ge of sx
-
-let pp_irelop fmt : irelop -> Unit.t = function
-  | Eq -> pf fmt "eq"
-  | Ne -> pf fmt "ne"
-  | Lt sx -> pf fmt "lt_%a" pp_sx sx
-  | Gt sx -> pf fmt "gt_%a" pp_sx sx
-  | Le sx -> pf fmt "le_%a" pp_sx sx
-  | Ge sx -> pf fmt "ge_%a" pp_sx sx
-
-type nonrec frelop =
-  | Eq
-  | Ne
-  | Lt
-  | Gt
-  | Le
-  | Ge
-
-let pp_frelop fmt : frelop -> Unit.t = function
-  | Eq -> pf fmt "eq"
-  | Ne -> pf fmt "ne"
-  | Lt -> pf fmt "lt"
-  | Gt -> pf fmt "gt"
-  | Le -> pf fmt "le"
-  | Ge -> pf fmt "ge"
+let pp_sx ppf = function U -> pf ppf "u" | S -> pf ppf "s"
 
 type nonrec memarg =
   { offset : string option
   ; align : string option
   }
 
-let pp_memarg fmt { offset; align } =
+let pp_memarg ppf { offset; align } =
   match (offset, align) with
   | None, None -> ()
-  | Some offset, Some align -> Fmt.pf fmt " offset=%s align=%s" offset align
-  | Some offset, None -> Fmt.pf fmt " offset=%s" offset
-  | None, Some align -> Fmt.pf fmt " align=%s" align
+  | Some offset, Some align -> Fmt.pf ppf " offset=%s align=%s" offset align
+  | Some offset, None -> Fmt.pf ppf " offset=%s" offset
+  | None, Some align -> Fmt.pf ppf " align=%s" align
 
 type nonrec limits =
   { is_i64 : bool
@@ -236,12 +107,12 @@ type nonrec limits =
   ; max : string option
   }
 
-let pp_addr_type fmt is_i64 = if is_i64 then Fmt.pf fmt "i64 "
+let pp_addr_type ppf is_i64 = if is_i64 then Fmt.pf ppf "i64 "
 
-let pp_limits fmt { is_i64; min; max } =
+let pp_limits ppf { is_i64; min; max } =
   match max with
-  | None -> pf fmt "%a%s" pp_addr_type is_i64 min
-  | Some max -> pf fmt "%a%s %s" pp_addr_type is_i64 min max
+  | None -> pf ppf "%a%s" pp_addr_type is_i64 min
+  | Some max -> pf ppf "%a%s %s" pp_addr_type is_i64 min max
 
 (** Structure *)
 
@@ -260,16 +131,16 @@ type heap_type =
   | Extern_ht
   | NoExtern_ht
 
-let pp_heap_type fmt = function
-  | TypeUse id -> pf fmt "%a" pp_indice id
-  | Any_ht -> pf fmt "any"
-  | None_ht -> pf fmt "none"
-  | Func_ht -> pf fmt "func"
-  | NoFunc_ht -> pf fmt "nofunc"
-  | Exn_ht -> pf fmt "exn"
-  | NoExn_ht -> pf fmt "noexn"
-  | Extern_ht -> pf fmt "extern"
-  | NoExtern_ht -> pf fmt "noextern"
+let pp_heap_type ppf = function
+  | TypeUse id -> pf ppf "%a" pp_indice id
+  | Any_ht -> pf ppf "any"
+  | None_ht -> pf ppf "none"
+  | Func_ht -> pf ppf "func"
+  | NoFunc_ht -> pf ppf "nofunc"
+  | Exn_ht -> pf ppf "exn"
+  | NoExn_ht -> pf ppf "noexn"
+  | Extern_ht -> pf ppf "extern"
+  | NoExtern_ht -> pf ppf "noextern"
 
 let heap_type_eq t1 t2 =
   (* TODO: this is wrong *)
@@ -318,10 +189,10 @@ let compare_heap_type t1 t2 =
 
 type nonrec ref_type = nullable * heap_type
 
-let pp_ref_type fmt (n, ht) =
+let pp_ref_type ppf (n, ht) =
   match n with
-  | No_null -> pf fmt "(ref %a)" pp_heap_type ht
-  | Null -> pf fmt "(ref null %a)" pp_heap_type ht
+  | No_null -> pf ppf "(ref %a)" pp_heap_type ht
+  | Null -> pf ppf "(ref null %a)" pp_heap_type ht
 
 let ref_type_eq t1 t2 =
   match (t1, t2) with
@@ -355,9 +226,9 @@ type nonrec val_type =
   | Num_type of num_type
   | Ref_type of ref_type
 
-let pp_val_type fmt = function
-  | Num_type t -> pp_num_type fmt t
-  | Ref_type t -> pp_ref_type fmt t
+let pp_val_type ppf = function
+  | Num_type t -> pp_num_type ppf t
+  | Ref_type t -> pp_ref_type ppf t
 
 let val_type_eq t1 t2 =
   match (t1, t2) with
@@ -380,7 +251,7 @@ let compare_val_type t1 t2 =
 
 type nonrec param = string option * val_type
 
-let pp_param fmt (id, vt) = pf fmt "(param%a %a)" pp_id_opt id pp_val_type vt
+let pp_param ppf (id, vt) = pf ppf "(param%a %a)" pp_id_opt id pp_val_type vt
 
 let param_eq (_, t1) (_, t2) = val_type_eq t1 t2
 
@@ -388,7 +259,7 @@ let compare_param (_, t1) (_, t2) = compare_val_type t1 t2
 
 type nonrec param_type = param list
 
-let pp_param_type fmt params = list ~sep:sp pp_param fmt params
+let pp_param_type ppf params = list ~sep:sp pp_param ppf params
 
 let param_type_eq t1 t2 = List.equal param_eq t1 t2
 
@@ -396,9 +267,9 @@ let compare_param_type t1 t2 = List.compare compare_param t1 t2
 
 type nonrec result_type = val_type list
 
-let pp_result_ fmt vt = pf fmt "(result %a)" pp_val_type vt
+let pp_result_ ppf vt = pf ppf "(result %a)" pp_val_type vt
 
-let pp_result_type fmt results = list ~sep:sp pp_result_ fmt results
+let pp_result_type ppf results = list ~sep:sp pp_result_ ppf results
 
 let result_type_eq t1 t2 = List.equal val_type_eq t1 t2
 
@@ -406,13 +277,13 @@ let compare_result_type t1 t2 = List.compare compare_val_type t1 t2
 
 (* wrap printer to print a space before a non empty list *)
 (* TODO or make it an optional arg of pp_list? *)
-let with_space_list printer fmt l =
-  match l with [] -> () | _l -> pf fmt " %a" printer l
+let with_space_list printer ppf l =
+  match l with [] -> () | _l -> pf ppf " %a" printer l
 
 type nonrec func_type = param_type * result_type
 
-let pp_func_type fmt (params, results) =
-  pf fmt "(func%a%a)"
+let pp_func_type ppf (params, results) =
+  pf ppf "(func%a%a)"
     (with_space_list pp_param_type)
     params
     (with_space_list pp_result_type)
@@ -425,93 +296,462 @@ type block_type =
   | Bt_ind of indice
   | Bt_raw of (indice option * func_type)
 
-let pp_block_type fmt = function
-  | Bt_ind ind -> pf fmt "(type %a)" pp_indice ind
+let pp_block_type ppf = function
+  | Bt_ind ind -> pf ppf "(type %a)" pp_indice ind
   | Bt_raw (_ind, (pt, rt)) ->
-    pf fmt "%a%a"
+    pf ppf "%a%a"
       (with_space_list pp_param_type)
       pt
       (with_space_list pp_result_type)
       rt
 
-let pp_block_type_opt fmt = function
+let pp_block_type_opt ppf = function
   | None -> ()
-  | Some bt -> pp_block_type fmt bt
+  | Some bt -> pp_block_type ppf bt
 
 let compare_func_type (pt1, rt1) (pt2, rt2) =
   let pt = compare_param_type pt1 pt2 in
   if pt = 0 then compare_result_type rt1 rt2 else pt
 
+(** I32 instructions *)
+
+type i32_instr =
+  | Const of Int32.t
+  | Clz
+  | Ctz
+  | Popcnt
+  | Add
+  | Sub
+  | Mul
+  | Div of sx
+  | Rem of sx
+  | And
+  | Or
+  | Xor
+  | Shl
+  | Shr of sx
+  | Rotl
+  | Rotr
+  | Eqz
+  | Eq
+  | Ne
+  | Lt of sx
+  | Gt of sx
+  | Le of sx
+  | Ge of sx
+  | Extend8_s
+  | Extend16_s
+  | Wrap_i64
+  | Trunc_f of nn * sx
+  | Trunc_sat_f of nn * sx
+  | Reinterpret_f of nn
+  | Load of indice * memarg
+  | Load8 of indice * sx * memarg
+  | Load16 of indice * sx * memarg
+  | Store of indice * memarg
+  | Store8 of indice * memarg
+  | Store16 of indice * memarg
+
+let pp_i32_instr ppf = function
+  | Const i -> pf ppf "i32.const %ld" i
+  | Clz -> pf ppf "i32.clz"
+  | Ctz -> pf ppf "i32.ctz"
+  | Popcnt -> pf ppf "i32.popcnt"
+  | Add -> pf ppf "i32.add"
+  | Sub -> pf ppf "i32.sub"
+  | Mul -> pf ppf "i32.mul"
+  | Div sx -> pf ppf "i32.div_%a" pp_sx sx
+  | Rem sx -> pf ppf "i32.div_%a" pp_sx sx
+  | And -> pf ppf "i32.and"
+  | Or -> pf ppf "i32.or"
+  | Xor -> pf ppf "i32.xor"
+  | Shl -> pf ppf "i32.shl"
+  | Shr sx -> pf ppf "i32.shr_%a" pp_sx sx
+  | Rotl -> pf ppf "i32.rotl"
+  | Rotr -> pf ppf "i32.rotr"
+  | Eqz -> pf ppf "i32.eqz"
+  | Eq -> pf ppf "i32.eq"
+  | Ne -> pf ppf "i32.ne"
+  | Lt sx -> pf ppf "i32.lt_%a" pp_sx sx
+  | Gt sx -> pf ppf "i32.gt_%a" pp_sx sx
+  | Le sx -> pf ppf "i32.le_%a" pp_sx sx
+  | Ge sx -> pf ppf "i32.ge_%a" pp_sx sx
+  | Extend8_s -> pf ppf "i32.extend8_s"
+  | Extend16_s -> pf ppf "i32.extend16_s"
+  | Wrap_i64 -> pf ppf "i32.wrap_i64"
+  | Trunc_f (nn, sx) -> pf ppf "i32.trunc_f%a_%a" pp_nn nn pp_sx sx
+  | Trunc_sat_f (nn, sx) -> pf ppf "i32.truc_sat_f%a_%a" pp_nn nn pp_sx sx
+  | Reinterpret_f nn -> pf ppf "i32.reinterpret_f%a" pp_nn nn
+  | Load (indice, memarg) ->
+    pf ppf "i32.load%a%a" pp_indice_not0 indice pp_memarg memarg
+  | Load8 (indice, sx, memarg) ->
+    pf ppf "i32.load8_%a%a%a" pp_sx sx pp_indice_not0 indice pp_memarg memarg
+  | Load16 (indice, sx, memarg) ->
+    pf ppf "i32.load16_%a%a%a" pp_sx sx pp_indice_not0 indice pp_memarg memarg
+  | Store (indice, memarg) ->
+    pf ppf "i32.store%a%a" pp_indice_not0 indice pp_memarg memarg
+  | Store8 (indice, memarg) ->
+    pf ppf "i32.store8%a%a" pp_indice_not0 indice pp_memarg memarg
+  | Store16 (indice, memarg) ->
+    pf ppf "i32.store16%a%a" pp_indice_not0 indice pp_memarg memarg
+
+(** I64 instructions *)
+
+type i64_instr =
+  | Const of Int64.t
+  | Clz
+  | Ctz
+  | Popcnt
+  | Add
+  | Sub
+  | Mul
+  | Div of sx
+  | Rem of sx
+  | And
+  | Or
+  | Xor
+  | Shl
+  | Shr of sx
+  | Rotl
+  | Rotr
+  | Eqz
+  | Eq
+  | Ne
+  | Lt of sx
+  | Gt of sx
+  | Le of sx
+  | Ge of sx
+  | Extend8_s
+  | Extend16_s
+  | Extend32_s
+  | Extend_i32 of sx
+  | Trunc_f of nn * sx
+  | Trunc_sat_f of nn * sx
+  | Reinterpret_f of nn
+  | Load of indice * memarg
+  | Load8 of indice * sx * memarg
+  | Load16 of indice * sx * memarg
+  | Load32 of indice * sx * memarg
+  | Store of indice * memarg
+  | Store8 of indice * memarg
+  | Store16 of indice * memarg
+  | Store32 of indice * memarg
+
+let pp_i64_instr ppf = function
+  | Const i -> pf ppf "i64.const %Ld" i
+  | Clz -> pf ppf "i64.clz"
+  | Ctz -> pf ppf "i64.ctz"
+  | Popcnt -> pf ppf "i64.popcnt"
+  | Add -> pf ppf "i64.add"
+  | Sub -> pf ppf "i64.sub"
+  | Mul -> pf ppf "i64.mul"
+  | Div sx -> pf ppf "i64.div_%a" pp_sx sx
+  | Rem sx -> pf ppf "i64.rem_%a" pp_sx sx
+  | And -> pf ppf "i64.and"
+  | Or -> pf ppf "i64.or"
+  | Xor -> pf ppf "i64.xor"
+  | Shl -> pf ppf "i64.shl"
+  | Shr sx -> pf ppf "i64.shr_%a" pp_sx sx
+  | Rotl -> pf ppf "i64.rotl"
+  | Rotr -> pf ppf "i64.rotr"
+  | Eqz -> pf ppf "i64.eqz"
+  | Eq -> pf ppf "i64.eq"
+  | Ne -> pf ppf "i64.ne"
+  | Lt sx -> pf ppf "i64.lt_%a" pp_sx sx
+  | Gt sx -> pf ppf "i64.gt_%a" pp_sx sx
+  | Le sx -> pf ppf "i64.le_%a" pp_sx sx
+  | Ge sx -> pf ppf "i64.ge_%a" pp_sx sx
+  | Extend8_s -> pf ppf "i64.extend8_s"
+  | Extend16_s -> pf ppf "i64.extend16_s"
+  | Extend32_s -> pf ppf "i64.extend32_s"
+  | Extend_i32 sx -> pf ppf "i64.extend_i32_%a" pp_sx sx
+  | Trunc_f (nn, sx) -> pf ppf "i64.trunc_f%a_%a" pp_nn nn pp_sx sx
+  | Trunc_sat_f (nn, sx) -> pf ppf "i64.trunc_sat_f%a_%a" pp_nn nn pp_sx sx
+  | Reinterpret_f nn -> pf ppf "i64.reinterpret_f%a" pp_nn nn
+  | Load (indice, memarg) ->
+    pf ppf "i64.load%a%a" pp_indice_not0 indice pp_memarg memarg
+  | Load8 (indice, sx, memarg) ->
+    pf ppf "i64.load8_%a%a%a" pp_indice_not0 indice pp_sx sx pp_memarg memarg
+  | Load16 (indice, sx, memarg) ->
+    pf ppf "i64.load16_%a%a%a" pp_indice_not0 indice pp_sx sx pp_memarg memarg
+  | Load32 (indice, sx, memarg) ->
+    pf ppf "i64.load32_%a%a%a" pp_indice_not0 indice pp_sx sx pp_memarg memarg
+  | Store (indice, memarg) ->
+    pf ppf "i64.store%a%a" pp_indice_not0 indice pp_memarg memarg
+  | Store8 (indice, memarg) ->
+    pf ppf "i64.store8%a%a" pp_indice_not0 indice pp_memarg memarg
+  | Store16 (indice, memarg) ->
+    pf ppf "i64.store16%a%a" pp_indice_not0 indice pp_memarg memarg
+  | Store32 (indice, memarg) ->
+    pf ppf "i64.store32%a%a" pp_indice_not0 indice pp_memarg memarg
+
+(** F32 instructions *)
+
+type f32_instr =
+  | Const of Float32.t
+  | Abs
+  | Neg
+  | Sqrt
+  | Ceil
+  | Floor
+  | Trunc
+  | Nearest
+  | Add
+  | Sub
+  | Mul
+  | Div
+  | Min
+  | Max
+  | Copysign
+  | Eq
+  | Ne
+  | Lt
+  | Gt
+  | Le
+  | Ge
+  | Demote_f64
+  | Convert_i of nn * sx
+  | Reinterpret_i of nn
+  | Load of indice * memarg
+  | Store of indice * memarg
+
+let pp_f32_instr ppf = function
+  | Const f -> pf ppf "f32.const %a" Float32.pp f
+  | Abs -> pf ppf "f32.abs"
+  | Neg -> pf ppf "f32.neg"
+  | Sqrt -> pf ppf "f32.sqrt"
+  | Ceil -> pf ppf "f32.ceil"
+  | Floor -> pf ppf "f32.floor"
+  | Trunc -> pf ppf "f32.trunc"
+  | Nearest -> pf ppf "f32.nearest"
+  | Add -> pf ppf "f32.add"
+  | Sub -> pf ppf "f32.sub"
+  | Mul -> pf ppf "f32.mul"
+  | Div -> pf ppf "f32.div"
+  | Min -> pf ppf "f32.min"
+  | Max -> pf ppf "f32.max"
+  | Copysign -> pf ppf "f32.copysign"
+  | Eq -> pf ppf "f32.eq"
+  | Ne -> pf ppf "f32.ne"
+  | Lt -> pf ppf "f32.lt"
+  | Gt -> pf ppf "f32.gt"
+  | Le -> pf ppf "f32.le"
+  | Ge -> pf ppf "f32.ge"
+  | Demote_f64 -> pf ppf "f32.demote_f64"
+  | Convert_i (nn, sx) -> pf ppf "f32.convert_i%a%a" pp_nn nn pp_sx sx
+  | Reinterpret_i nn -> pf ppf "f32.reinterpret_i%a" pp_nn nn
+  | Load (indice, memarg) ->
+    pf ppf "f32.load%a%a" pp_indice_not0 indice pp_memarg memarg
+  | Store (indice, memarg) ->
+    pf ppf "f32.store%a%a" pp_indice_not0 indice pp_memarg memarg
+
+(** F64 instructions *)
+
+type f64_instr =
+  | Const of Float64.t
+  | Abs
+  | Neg
+  | Sqrt
+  | Ceil
+  | Floor
+  | Trunc
+  | Nearest
+  | Add
+  | Sub
+  | Mul
+  | Div
+  | Min
+  | Max
+  | Copysign
+  | Eq
+  | Ne
+  | Lt
+  | Gt
+  | Le
+  | Ge
+  | Promote_f32
+  | Convert_i of nn * sx
+  | Reinterpret_i of nn
+  | Load of indice * memarg
+  | Store of indice * memarg
+
+let pp_f64_instr ppf = function
+  | Const f -> pf ppf "f64.const %a" Float64.pp f
+  | Abs -> pf ppf "f64.abs"
+  | Neg -> pf ppf "f64.neg"
+  | Sqrt -> pf ppf "f64.sqrt"
+  | Ceil -> pf ppf "f64.ceil"
+  | Floor -> pf ppf "f64.floor"
+  | Trunc -> pf ppf "f64.trunc"
+  | Nearest -> pf ppf "f64.nearest"
+  | Add -> pf ppf "f64.add"
+  | Sub -> pf ppf "f64.sub"
+  | Mul -> pf ppf "f64.mul"
+  | Div -> pf ppf "f64.div"
+  | Min -> pf ppf "f64.min"
+  | Max -> pf ppf "f64.max"
+  | Copysign -> pf ppf "f64.copysign"
+  | Eq -> pf ppf "f64.eq"
+  | Ne -> pf ppf "f64.ne"
+  | Lt -> pf ppf "f64.lt"
+  | Gt -> pf ppf "f64.gt"
+  | Le -> pf ppf "f64.le"
+  | Ge -> pf ppf "f64.ge"
+  | Promote_f32 -> pf ppf "f64.promote_f32"
+  | Convert_i (nn, sx) -> pf ppf "f64.convert_i%a_%a" pp_nn nn pp_sx sx
+  | Reinterpret_i nn -> pf ppf "f64.reinterpret_i%a" pp_nn nn
+  | Load (indice, memarg) ->
+    pf ppf "f64.load%a%a" pp_indice_not0 indice pp_memarg memarg
+  | Store (indice, memarg) ->
+    pf ppf "f64.store%a%a" pp_indice_not0 indice pp_memarg memarg
+
+(** V128 instructions *)
+type v128_instr = Const of Concrete_v128.t
+
+let pp_v128_instr ppf = function
+  | Const n -> pf ppf "v128.const %a" Concrete_v128.pp n
+
+(** I8x16 instructions *)
+type i8x16_instr =
+  | Add
+  | Sub
+
+let pp_i8x16_instr ppf = function
+  | Add -> pf ppf "i8x16.add"
+  | Sub -> pf ppf "i8x16.sub"
+
+(** I16x8 instructions *)
+type i16x8_instr =
+  | Add
+  | Sub
+
+let pp_i16x8_instr ppf = function
+  | Add -> pf ppf "i16x8.add"
+  | Sub -> pf ppf "i16x8.sub"
+
+(* I32x4 instructions *)
+type i32x4_instr =
+  | Add
+  | Sub
+
+let pp_i32x4_instr ppf = function
+  | Add -> pf ppf "i32x4.add"
+  | Sub -> pf ppf "i32x4.sub"
+
+(** I64x2 instructions *)
+type i64x2_instr =
+  | Add
+  | Sub
+
+let pp_i64x2_instr ppf = function
+  | Add -> pf ppf "i64x2.add"
+  | Sub -> pf ppf "i64x2.sub"
+
+(** Reference instructions *)
+type ref_instr =
+  | Null of heap_type
+  | Is_null
+  | As_non_null
+  | Func of indice
+
+let pp_ref_instr ppf = function
+  | Null t -> pf ppf "ref.null %a" pp_heap_type t
+  | Is_null -> pf ppf "ref.is_null"
+  | As_non_null -> pf ppf "ref.as_non_null"
+  | Func indice -> pf ppf "ref.func %a" pp_indice indice
+
+(* Local instructions *)
+type local_instr =
+  | Get of indice
+  | Set of indice
+  | Tee of indice
+
+let pp_local_instr ppf = function
+  | Get indice -> pf ppf "local.get %a" pp_indice indice
+  | Set indice -> pf ppf "local.set %a" pp_indice indice
+  | Tee indice -> pf ppf "local.tee %a" pp_indice indice
+
+(** Global instructions *)
+type global_instr =
+  | Get of indice
+  | Set of indice
+
+let pp_global_instr ppf = function
+  | Get indice -> pf ppf "global.get %a" pp_indice indice
+  | Set indice -> pf ppf "global.set %a" pp_indice indice
+
+(** Table instructions *)
+type table_instr =
+  | Get of indice
+  | Set of indice
+  | Size of indice
+  | Grow of indice
+  | Fill of indice
+  | Copy of indice * indice
+  | Init of indice * indice
+
+let pp_table_instr ppf = function
+  | Get indice -> pf ppf "table.get %a" pp_indice indice
+  | Set indice -> pf ppf "table.set %a" pp_indice indice
+  | Size indice -> pf ppf "table.size %a" pp_indice indice
+  | Grow indice -> pf ppf "table.grow %a" pp_indice indice
+  | Fill indice -> pf ppf "table.fill %a" pp_indice indice
+  | Copy (indice, indice') ->
+    pf ppf "table.copy %a %a" pp_indice indice pp_indice indice'
+  | Init (table_indice, elem_indice) ->
+    pf ppf "table.init %a %a" pp_indice table_indice pp_indice elem_indice
+
+(** Elem instructions *)
+type elem_instr = Drop of indice
+
+let pp_elem_instr ppf = function
+  | Drop indice -> pf ppf "elem.drop %a" pp_indice indice
+
+(** Memory instructions *)
+type memory_instr =
+  | Size of indice
+  | Grow of indice
+  | Fill of indice
+  | Copy of indice * indice
+  | Init of indice * indice
+
+let pp_memory_instr ppf = function
+  | Size indice -> pf ppf "memory.size%a" pp_indice_not0 indice
+  | Grow indice -> pf ppf "memory.grow%a" pp_indice_not0 indice
+  | Fill indice -> pf ppf "memory.fill%a" pp_indice_not0 indice
+  | Copy (Raw 0, Raw 0) -> pf ppf "memory.copy"
+  | Copy (indice1, indice2) ->
+    pf ppf "memory.copy %a %a" pp_indice indice1 pp_indice indice2
+  | Init (mem_indice, data_indice) ->
+    pf ppf "memory.init%a %a" pp_indice_not0 mem_indice pp_indice data_indice
+
+(** Data instructions *)
+type data_instr = Drop of indice
+
+let pp_data_instr ppf = function
+  | Drop indice -> pf ppf "data.drop %a" pp_indice indice
+
 (** Instructions *)
 
 type instr =
-  (* Numeric Instructions *)
-  | I32_const of Int32.t
-  | I64_const of Int64.t
-  | F32_const of Float32.t
-  | F64_const of Float64.t
-  | V128_const of Concrete_v128.t
-  | I_unop of nn * iunop
-  | F_unop of nn * funop
-  | I_binop of nn * ibinop
-  | F_binop of nn * fbinop
-  | V_ibinop of ishape * vibinop
-  | I_testop of nn * itestop
-  | I_relop of nn * irelop
-  | F_relop of nn * frelop
-  | I_extend8_s of nn
-  | I_extend16_s of nn
-  | I64_extend32_s
-  | I32_wrap_i64
-  | I64_extend_i32 of sx
-  | I_trunc_f of nn * nn * sx
-  | I_trunc_sat_f of nn * nn * sx
-  | F32_demote_f64
-  | F64_promote_f32
-  | F_convert_i of nn * nn * sx
-  | I_reinterpret_f of nn * nn
-  | F_reinterpret_i of nn * nn
-  (* Reference instructions *)
-  | Ref_null of heap_type
-  | Ref_is_null
-  | Ref_as_non_null
-  | Ref_func of indice
-  (* Parametric instructions *)
+  | I32 of i32_instr
+  | I64 of i64_instr
+  | F32 of f32_instr
+  | F64 of f64_instr
+  | V128 of v128_instr
+  | I8x16 of i8x16_instr
+  | I16x8 of i16x8_instr
+  | I32x4 of i32x4_instr
+  | I64x2 of i64x2_instr
+  | Ref of ref_instr
+  | Local of local_instr
+  | Global of global_instr
+  | Table of table_instr
+  | Elem of elem_instr
+  | Memory of memory_instr
+  | Data of data_instr
   | Drop
   | Select of val_type list option
-  (* Variable instructions *)
-  | Local_get of indice
-  | Local_set of indice
-  | Local_tee of indice
-  | Global_get of indice
-  | Global_set of indice
-  (* Table instructions *)
-  | Table_get of indice
-  | Table_set of indice
-  | Table_size of indice
-  | Table_grow of indice
-  | Table_fill of indice
-  | Table_copy of indice * indice
-  | Table_init of indice * indice
-  | Elem_drop of indice
-  (* Memory instructions *)
-  | I_load of indice * nn * memarg
-  | F_load of indice * nn * memarg
-  | I_store of indice * nn * memarg
-  | F_store of indice * nn * memarg
-  | I_load8 of indice * nn * sx * memarg
-  | I_load16 of indice * nn * sx * memarg
-  | I64_load32 of indice * sx * memarg
-  | I_store8 of indice * nn * memarg
-  | I_store16 of indice * nn * memarg
-  | I64_store32 of indice * memarg
-  | Memory_size of indice
-  | Memory_grow of indice
-  | Memory_fill of indice
-  | Memory_copy of indice * indice
-  | Memory_init of indice * indice
-  | Data_drop of indice
-  (* Control instructions *)
   | Nop
   | Unreachable
   | Block of string option * block_type option * expr
@@ -537,132 +777,72 @@ and expr = instr list
 
 let pp_newline ppf () = pf ppf "@\n"
 
-let rec pp_instr ~short fmt = function
-  | I32_const i -> pf fmt "i32.const %ld" i
-  | I64_const i -> pf fmt "i64.const %Ld" i
-  | F32_const f -> pf fmt "f32.const %a" Float32.pp f
-  | F64_const f -> pf fmt "f64.const %a" Float64.pp f
-  | V128_const f -> pf fmt "v128.const %a" Concrete_v128.pp f
-  | I_unop (n, op) -> pf fmt "i%a.%a" pp_nn n pp_iunop op
-  | F_unop (n, op) -> pf fmt "f%a.%a" pp_nn n pp_funop op
-  | I_binop (n, op) -> pf fmt "i%a.%a" pp_nn n pp_ibinop op
-  | F_binop (n, op) -> pf fmt "f%a.%a" pp_nn n pp_fbinop op
-  | V_ibinop (shape, op) -> pf fmt "%a.%a" pp_ishape shape pp_vibinop op
-  | I_testop (n, op) -> pf fmt "i%a.%a" pp_nn n pp_itestop op
-  | I_relop (n, op) -> pf fmt "i%a.%a" pp_nn n pp_irelop op
-  | F_relop (n, op) -> pf fmt "f%a.%a" pp_nn n pp_frelop op
-  | I_extend8_s n -> pf fmt "i%a.extend8_s" pp_nn n
-  | I_extend16_s n -> pf fmt "i%a.extend16_s" pp_nn n
-  | I64_extend32_s -> pf fmt "i64.extend32_s"
-  | I32_wrap_i64 -> pf fmt "i32.wrap_i64"
-  | I64_extend_i32 sx -> pf fmt "i64.extend_i32_%a" pp_sx sx
-  | I_trunc_f (n, n', sx) -> pf fmt "i%a.trunc_f%a_%a" pp_nn n pp_nn n' pp_sx sx
-  | I_trunc_sat_f (n, n', sx) ->
-    pf fmt "i%a.trunc_sat_f%a_%a" pp_nn n pp_nn n' pp_sx sx
-  | F32_demote_f64 -> pf fmt "f32.demote_f64"
-  | F64_promote_f32 -> pf fmt "f64.promote_f32"
-  | F_convert_i (n, n', sx) ->
-    pf fmt "f%a.convert_i%a_%a" pp_nn n pp_nn n' pp_sx sx
-  | I_reinterpret_f (n, n') -> pf fmt "i%a.reinterpret_f%a" pp_nn n pp_nn n'
-  | F_reinterpret_i (n, n') -> pf fmt "f%a.reinterpret_i%a" pp_nn n pp_nn n'
-  | Ref_null t -> pf fmt "ref.null %a" pp_heap_type t
-  | Ref_is_null -> pf fmt "ref.is_null"
-  | Ref_as_non_null -> pf fmt "ref.as_non_null"
-  | Ref_func fid -> pf fmt "ref.func %a" pp_indice fid
-  | Drop -> pf fmt "drop"
+let rec pp_instr ~short ppf = function
+  | I32 i -> pp_i32_instr ppf i
+  | I64 i -> pp_i64_instr ppf i
+  | F32 i -> pp_f32_instr ppf i
+  | F64 i -> pp_f64_instr ppf i
+  | V128 i -> pp_v128_instr ppf i
+  | I8x16 i -> pp_i8x16_instr ppf i
+  | I16x8 i -> pp_i16x8_instr ppf i
+  | I32x4 i -> pp_i32x4_instr ppf i
+  | I64x2 i -> pp_i64x2_instr ppf i
+  | Ref i -> pp_ref_instr ppf i
+  | Local i -> pp_local_instr ppf i
+  | Global i -> pp_global_instr ppf i
+  | Table i -> pp_table_instr ppf i
+  | Elem i -> pp_elem_instr ppf i
+  | Memory i -> pp_memory_instr ppf i
+  | Data i -> pp_data_instr ppf i
+  | Drop -> pf ppf "drop"
   | Select vt ->
     begin match vt with
-    | None -> pf fmt "select"
-    | Some vt -> pf fmt "select (%a)" pp_result_type vt
+    | None -> pf ppf "select"
+    | Some vt -> pf ppf "select (%a)" pp_result_type vt
     (* TODO: are the parens needed ? *)
     end
-  | Local_get id -> pf fmt "local.get %a" pp_indice id
-  | Local_set id -> pf fmt "local.set %a" pp_indice id
-  | Local_tee id -> pf fmt "local.tee %a" pp_indice id
-  | Global_get id -> pf fmt "global.get %a" pp_indice id
-  | Global_set id -> pf fmt "global.set %a" pp_indice id
-  | Table_get id -> pf fmt "table.get %a" pp_indice id
-  | Table_set id -> pf fmt "table.set %a" pp_indice id
-  | Table_size id -> pf fmt "table.size %a" pp_indice id
-  | Table_grow id -> pf fmt "table.grow %a" pp_indice id
-  | Table_fill id -> pf fmt "table.fill %a" pp_indice id
-  | Table_copy (id, id') -> pf fmt "table.copy %a %a" pp_indice id pp_indice id'
-  | Table_init (tid, eid) ->
-    pf fmt "table.init %a %a" pp_indice tid pp_indice eid
-  | Elem_drop id -> pf fmt "elem.drop %a" pp_indice id
-  | I_load (id, n, memarg) ->
-    pf fmt "i%a.load%a%a" pp_nn n pp_indice_not0 id pp_memarg memarg
-  | F_load (id, n, memarg) ->
-    pf fmt "f%a.load%a%a" pp_nn n pp_indice_not0 id pp_memarg memarg
-  | I_store (id, n, memarg) ->
-    pf fmt "i%a.store%a%a" pp_nn n pp_indice_not0 id pp_memarg memarg
-  | F_store (id, n, memarg) ->
-    pf fmt "f%a.store%a%a" pp_nn n pp_indice_not0 id pp_memarg memarg
-  | I_load8 (id, n, sx, memarg) ->
-    pf fmt "i%a.load8_%a%a%a" pp_nn n pp_sx sx pp_indice_not0 id pp_memarg
-      memarg
-  | I_load16 (id, n, sx, memarg) ->
-    pf fmt "i%a.load16_%a%a%a" pp_nn n pp_sx sx pp_indice_not0 id pp_memarg
-      memarg
-  | I64_load32 (id, sx, memarg) ->
-    pf fmt "i64.load32_%a%a%a" pp_sx sx pp_indice_not0 id pp_memarg memarg
-  | I_store8 (id, n, memarg) ->
-    pf fmt "i%a.store8%a%a" pp_nn n pp_indice_not0 id pp_memarg memarg
-  | I_store16 (id, n, memarg) ->
-    pf fmt "i%a.store16%a%a" pp_nn n pp_indice_not0 id pp_memarg memarg
-  | I64_store32 (id, memarg) ->
-    pf fmt "i64.store32%a%a" pp_indice_not0 id pp_memarg memarg
-  | Memory_size id -> pf fmt "memory.size%a" pp_indice_not0 id
-  | Memory_grow id -> pf fmt "memory.grow%a" pp_indice_not0 id
-  | Memory_fill id -> pf fmt "memory.fill%a" pp_indice_not0 id
-  | Memory_copy (Raw 0, Raw 0) -> pf fmt "memory.copy"
-  | Memory_copy (id1, id2) ->
-    pf fmt "memory.copy %a %a" pp_indice id1 pp_indice id2
-  | Memory_init (memidx, dataidx) ->
-    pf fmt "memory.init%a %a" pp_indice_not0 memidx pp_indice dataidx
-  | Data_drop id -> pf fmt "data.drop %a" pp_indice id
-  | Nop -> pf fmt "nop"
-  | Unreachable -> pf fmt "unreachable"
+  | Nop -> pf ppf "nop"
+  | Unreachable -> pf ppf "unreachable"
   | Block (id, bt, e) ->
-    if short then pf fmt "block%a%a" pp_id_opt id pp_block_type_opt bt
+    if short then pf ppf "block%a%a" pp_id_opt id pp_block_type_opt bt
     else
-      pf fmt "(block%a%a@\n  @[<v>%a@])" pp_id_opt id pp_block_type_opt bt
+      pf ppf "(block%a%a@\n  @[<v>%a@])" pp_id_opt id pp_block_type_opt bt
         (pp_expr ~short) e
   | Loop (id, bt, e) ->
-    if short then pf fmt "loop%a%a" pp_id_opt id pp_block_type_opt bt
+    if short then pf ppf "loop%a%a" pp_id_opt id pp_block_type_opt bt
     else
-      pf fmt "(loop%a%a@\n  @[<v>%a@])" pp_id_opt id pp_block_type_opt bt
+      pf ppf "(loop%a%a@\n  @[<v>%a@])" pp_id_opt id pp_block_type_opt bt
         (pp_expr ~short) e
   | If_else (id, bt, e1, e2) ->
-    let pp_else fmt =
+    let pp_else ppf =
      (function
      | [] -> ()
-     | e -> pf fmt "@\n(else@\n  @[<v>%a@]@\n)" (pp_expr ~short) e )
+     | e -> pf ppf "@\n(else@\n  @[<v>%a@]@\n)" (pp_expr ~short) e )
     in
-    if short then pf fmt "if%a%a" pp_id_opt id pp_block_type_opt bt
+    if short then pf ppf "if%a%a" pp_id_opt id pp_block_type_opt bt
     else
-      pf fmt "(if%a%a@\n  @[<v>(then@\n  @[<v>%a@]@\n)%a@]@\n)" pp_id_opt id
+      pf ppf "(if%a%a@\n  @[<v>(then@\n  @[<v>%a@]@\n)%a@]@\n)" pp_id_opt id
         pp_block_type_opt bt (pp_expr ~short) e1 pp_else e2
-  | Br id -> pf fmt "br %a" pp_indice id
-  | Br_if id -> pf fmt "br_if %a" pp_indice id
+  | Br id -> pf ppf "br %a" pp_indice id
+  | Br_if id -> pf ppf "br_if %a" pp_indice id
   | Br_table (ids, id) ->
-    pf fmt "br_table %a %a" (array ~sep:sp pp_indice) ids pp_indice id
-  | Br_on_null id -> pf fmt "br_on_null %a" pp_indice id
-  | Br_on_non_null id -> pf fmt "br_on_non_null %a" pp_indice id
-  | Return -> pf fmt "return"
-  | Return_call id -> pf fmt "return_call %a" pp_indice id
+    pf ppf "br_table %a %a" (array ~sep:sp pp_indice) ids pp_indice id
+  | Br_on_null id -> pf ppf "br_on_null %a" pp_indice id
+  | Br_on_non_null id -> pf ppf "br_on_non_null %a" pp_indice id
+  | Return -> pf ppf "return"
+  | Return_call id -> pf ppf "return_call %a" pp_indice id
   | Return_call_indirect (tbl_id, ty_id) ->
-    pf fmt "return_call_indirect %a %a" pp_indice tbl_id pp_block_type ty_id
-  | Return_call_ref ty_id -> pf fmt "return_call_ref %a" pp_block_type ty_id
-  | Call id -> pf fmt "call %a" pp_indice id
+    pf ppf "return_call_indirect %a %a" pp_indice tbl_id pp_block_type ty_id
+  | Return_call_ref ty_id -> pf ppf "return_call_ref %a" pp_block_type ty_id
+  | Call id -> pf ppf "call %a" pp_indice id
   | Call_indirect (tbl_id, ty_id) ->
-    pf fmt "call_indirect %a %a" pp_indice tbl_id pp_block_type ty_id
-  | Call_ref ty_id -> pf fmt "call_ref %a" pp_indice ty_id
-  | Extern_externalize -> pf fmt "extern.externalize"
-  | Extern_internalize -> pf fmt "extern.internalize"
+    pf ppf "call_indirect %a %a" pp_indice tbl_id pp_block_type ty_id
+  | Call_ref ty_id -> pf ppf "call_ref %a" pp_indice ty_id
+  | Extern_externalize -> pf ppf "extern.externalize"
+  | Extern_internalize -> pf ppf "extern.internalize"
 
-and pp_expr ~short fmt instrs =
-  list ~sep:pp_newline (fun fmt i -> (pp_instr ~short fmt) i) fmt instrs
+and pp_expr ~short ppf instrs =
+  list ~sep:pp_newline (fun ppf i -> (pp_instr ~short ppf) i) ppf instrs
 
 module Func = struct
   type t =
@@ -672,13 +852,13 @@ module Func = struct
     ; id : string option
     }
 
-  let pp_local fmt (id, t) = pf fmt "(local%a %a)" pp_id_opt id pp_val_type t
+  let pp_local ppf (id, t) = pf ppf "(local%a %a)" pp_id_opt id pp_val_type t
 
-  let pp_locals fmt locals = list ~sep:sp pp_local fmt locals
+  let pp_locals ppf locals = list ~sep:sp pp_local ppf locals
 
-  let pp fmt f =
+  let pp ppf f =
     (* TODO: type_use ? *)
-    pf fmt "(func%a%a%a@\n  @[<v>%a@]@\n)" pp_id_opt f.id pp_block_type f.type_f
+    pf ppf "(func%a%a%a@\n  @[<v>%a@]@\n)" pp_id_opt f.id pp_block_type f.type_f
       (with_space_list pp_locals)
       f.locals (pp_expr ~short:false) f.body
 end
@@ -686,15 +866,15 @@ end
 module Typedef = struct
   type t = string option * func_type
 
-  let pp fmt (id, t) = pf fmt "(type%a %a)" pp_id_opt id pp_func_type t
+  let pp ppf (id, t) = pf ppf "(type%a %a)" pp_id_opt id pp_func_type t
 end
 
 module Table = struct
   module Type = struct
     type nonrec t = limits * ref_type
 
-    let pp fmt (limits, ref_type) =
-      pf fmt "%a %a" pp_limits limits pp_ref_type ref_type
+    let pp ppf (limits, ref_type) =
+      pf ppf "%a %a" pp_limits limits pp_ref_type ref_type
   end
 
   type t =
@@ -703,12 +883,12 @@ module Table = struct
     ; init : expr option
     }
 
-  let pp fmt { id; typ; init } =
-    pf fmt "(table%a %a%a)" pp_id_opt id Type.pp typ
-      (fun fmt e ->
+  let pp ppf { id; typ; init } =
+    pf ppf "(table%a %a%a)" pp_id_opt id Type.pp typ
+      (fun ppf e ->
         match e with
         | None -> ()
-        | Some e -> Fmt.pf fmt " %a" (pp_expr ~short:true) e )
+        | Some e -> Fmt.pf ppf " %a" (pp_expr ~short:true) e )
       init
 end
 
@@ -716,10 +896,10 @@ module Global = struct
   module Type = struct
     type nonrec t = mut * val_type
 
-    let pp fmt (mut, val_type) =
+    let pp ppf (mut, val_type) =
       match mut with
-      | Var -> pf fmt "(mut %a)" pp_val_type val_type
-      | Const -> pf fmt "%a" pp_val_type val_type
+      | Var -> pf ppf "(mut %a)" pp_val_type val_type
+      | Const -> pf ppf "%a" pp_val_type val_type
   end
 
   type t =
@@ -728,8 +908,8 @@ module Global = struct
     ; id : string option
     }
 
-  let pp fmt (g : t) =
-    pf fmt "(global%a %a %a)" pp_id_opt g.id Type.pp g.typ
+  let pp ppf (g : t) =
+    pf ppf "(global%a %a %a)" pp_id_opt g.id Type.pp g.typ
       (pp_expr ~short:false) g.init
 end
 
@@ -739,10 +919,10 @@ module Data = struct
       | Passive
       | Active of indice option * expr
 
-    let pp fmt = function
+    let pp ppf = function
       | Passive -> ()
       | Active (i, e) ->
-        pf fmt "(memory %a) (offset %a)" pp_indice_opt i (pp_expr ~short:false)
+        pf ppf "(memory %a) (offset %a)" pp_indice_opt i (pp_expr ~short:false)
           e
   end
 
@@ -752,8 +932,8 @@ module Data = struct
     ; mode : Mode.t
     }
 
-  let pp fmt (d : t) =
-    pf fmt {|(data%a %a %S)|} pp_id_opt d.id Mode.pp d.mode d.init
+  let pp ppf (d : t) =
+    pf ppf {|(data%a %a %S)|} pp_id_opt d.id Mode.pp d.mode d.init
 end
 
 module Tag = struct
@@ -762,7 +942,7 @@ module Tag = struct
     ; typ : block_type
     }
 
-  let pp fmt { id; typ } = pf fmt {|(tag%a %a)|} pp_id_opt id pp_block_type typ
+  let pp ppf { id; typ } = pf ppf {|(tag%a %a)|} pp_id_opt id pp_block_type typ
 end
 
 module Elem = struct
@@ -772,14 +952,14 @@ module Elem = struct
       | Declarative
       | Active of indice option * expr
 
-    let pp fmt = function
+    let pp ppf = function
       | Passive -> ()
-      | Declarative -> pf fmt "declare"
+      | Declarative -> pf ppf "declare"
       | Active (i, e) -> (
         match i with
-        | None -> pf fmt "(offset %a)" (pp_expr ~short:false) e
+        | None -> pf ppf "(offset %a)" (pp_expr ~short:false) e
         | Some i ->
-          pf fmt "(table %a) (offset %a)" pp_indice i (pp_expr ~short:false) e )
+          pf ppf "(table %a) (offset %a)" pp_indice i (pp_expr ~short:false) e )
   end
 
   type t =
@@ -790,10 +970,10 @@ module Elem = struct
     ; explicit_typ : bool
     }
 
-  let pp_items fmt e = pf fmt "(item %a)" (pp_expr ~short:false) e
+  let pp_items ppf e = pf ppf "(item %a)" (pp_expr ~short:false) e
 
-  let pp fmt (e : t) =
-    pf fmt "@[<hov 2>(elem%a %a %a %a)@]" pp_id_opt e.id Mode.pp e.mode
+  let pp ppf (e : t) =
+    pf ppf "@[<hov 2>(elem%a %a %a %a)@]" pp_id_opt e.id Mode.pp e.mode
       pp_ref_type e.typ
       (list ~sep:pp_newline pp_items)
       e.init
@@ -802,7 +982,7 @@ end
 module Mem = struct
   type nonrec t = string option * limits
 
-  let pp fmt (id, ty) = pf fmt "(memory%a %a)" pp_id_opt id pp_limits ty
+  let pp ppf (id, ty) = pf ppf "(memory%a %a)" pp_id_opt id pp_limits ty
 end
 
 module Import = struct
@@ -814,12 +994,12 @@ module Import = struct
       | Global of string option * Global.Type.t
       | Tag of string option * block_type
 
-    let pp fmt = function
-      | Func (id, t) -> pf fmt "(func%a %a)" pp_id_opt id pp_block_type t
-      | Table (id, t) -> pf fmt "(table%a %a)" pp_id_opt id Table.Type.pp t
-      | Mem (id, t) -> pf fmt "(memory%a %a)" pp_id_opt id pp_limits t
-      | Global (id, t) -> pf fmt "(global%a %a)" pp_id_opt id Global.Type.pp t
-      | Tag (id, t) -> pf fmt "(tag%a %a)" pp_id_opt id pp_block_type t
+    let pp ppf = function
+      | Func (id, t) -> pf ppf "(func%a %a)" pp_id_opt id pp_block_type t
+      | Table (id, t) -> pf ppf "(table%a %a)" pp_id_opt id Table.Type.pp t
+      | Mem (id, t) -> pf ppf "(memory%a %a)" pp_id_opt id pp_limits t
+      | Global (id, t) -> pf ppf "(global%a %a)" pp_id_opt id Global.Type.pp t
+      | Tag (id, t) -> pf ppf "(tag%a %a)" pp_id_opt id pp_block_type t
   end
 
   type t =
@@ -829,8 +1009,8 @@ module Import = struct
     ; typ : Type.t
     }
 
-  let pp fmt i =
-    pf fmt {|(import "%a" "%a" %a)|} string i.modul_name string i.name Type.pp
+  let pp ppf i =
+    pf ppf {|(import "%a" "%a" %a)|} string i.modul_name string i.name Type.pp
       i.typ
 end
 
@@ -843,12 +1023,12 @@ module Export = struct
       | Global of indice option
       | Tag of indice option
 
-    let pp fmt = function
-      | Func id -> pf fmt "(func %a)" pp_indice_opt id
-      | Table id -> pf fmt "(table %a)" pp_indice_opt id
-      | Mem id -> pf fmt "(memory %a)" pp_indice_opt id
-      | Global id -> pf fmt "(global %a)" pp_indice_opt id
-      | Tag id -> pf fmt "(tag %a)" pp_indice_opt id
+    let pp ppf = function
+      | Func id -> pf ppf "(func %a)" pp_indice_opt id
+      | Table id -> pf ppf "(table %a)" pp_indice_opt id
+      | Mem id -> pf ppf "(memory %a)" pp_indice_opt id
+      | Global id -> pf ppf "(global %a)" pp_indice_opt id
+      | Tag id -> pf ppf "(tag %a)" pp_indice_opt id
   end
 
   type t =
@@ -856,7 +1036,7 @@ module Export = struct
     ; typ : Type.t
     }
 
-  let pp fmt (e : t) = pf fmt {|(export "%s" %a)|} e.name Type.pp e.typ
+  let pp ppf (e : t) = pf ppf {|(export "%s" %a)|} e.name Type.pp e.typ
 end
 
 module Module = struct
@@ -874,20 +1054,20 @@ module Module = struct
       | Import of Import.t
       | Export of Export.t
 
-    let pp_start fmt start = pf fmt "(start %a)" pp_indice start
+    let pp_start ppf start = pf ppf "(start %a)" pp_indice start
 
-    let pp fmt = function
-      | Typedef t -> Typedef.pp fmt t
-      | Global g -> Global.pp fmt g
-      | Table t -> Table.pp fmt t
-      | Mem m -> Mem.pp fmt m
-      | Func f -> Func.pp fmt f
-      | Elem e -> Elem.pp fmt e
-      | Data d -> Data.pp fmt d
-      | Tag t -> Tag.pp fmt t
-      | Start s -> pp_start fmt s
-      | Import i -> Import.pp fmt i
-      | Export e -> Export.pp fmt e
+    let pp ppf = function
+      | Typedef t -> Typedef.pp ppf t
+      | Global g -> Global.pp ppf g
+      | Table t -> Table.pp ppf t
+      | Mem m -> Mem.pp ppf m
+      | Func f -> Func.pp ppf f
+      | Elem e -> Elem.pp ppf e
+      | Data d -> Data.pp ppf d
+      | Tag t -> Tag.pp ppf t
+      | Start s -> pp_start ppf s
+      | Import i -> Import.pp ppf i
+      | Export e -> Export.pp ppf e
   end
 
   type t =
@@ -895,9 +1075,9 @@ module Module = struct
     ; fields : Field.t list
     }
 
-  let pp_fields fmt fields =
-    Fmt.pf fmt "%a" (list ~sep:pp_newline Field.pp) fields
+  let pp_fields ppf fields =
+    Fmt.pf ppf "%a" (list ~sep:pp_newline Field.pp) fields
 
-  let pp fmt m =
-    pf fmt "(module%a@\n  @[<v>%a@]@\n)" pp_id_opt m.id pp_fields m.fields
+  let pp ppf m =
+    pf ppf "(module%a@\n  @[<v>%a@]@\n)" pp_id_opt m.id pp_fields m.fields
 end

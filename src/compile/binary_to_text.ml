@@ -41,11 +41,295 @@ let convert_memarg ({ offset; align } : Binary.memarg) : Text.memarg =
   in
   { offset; align }
 
+let convert_i32_instr : Binary.i32_instr -> Text.i32_instr = function
+  | (Binary.Const i : Binary.i32_instr) -> Const i
+  | Clz -> Clz
+  | Ctz -> Ctz
+  | Popcnt -> Popcnt
+  | Add -> Add
+  | Sub -> Sub
+  | Mul -> Mul
+  | Div sx -> Div sx
+  | Rem sx -> Rem sx
+  | And -> And
+  | Or -> Or
+  | Xor -> Xor
+  | Shl -> Shl
+  | Shr sx -> Shr sx
+  | Rotl -> Rotl
+  | Rotr -> Rotr
+  | Eqz -> Eqz
+  | Eq -> Eq
+  | Ne -> Ne
+  | Lt sx -> Lt sx
+  | Gt sx -> Gt sx
+  | Le sx -> Le sx
+  | Ge sx -> Ge sx
+  | Extend8_s -> Extend8_s
+  | Extend16_s -> Extend16_s
+  | Wrap_i64 -> Wrap_i64
+  | Trunc_f (nn, sx) -> Trunc_f (nn, sx)
+  | Trunc_sat_f (nn, sx) -> Trunc_sat_f (nn, sx)
+  | Reinterpret_f nn -> Reinterpret_f nn
+  | Load (indice, memarg) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Load (indice, memarg)
+  | Load8 (indice, sx, memarg) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Load8 (indice, sx, memarg)
+  | Load16 (indice, sx, memarg) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Load16 (indice, sx, memarg)
+  | Store (indice, memarg) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Store (indice, memarg)
+  | Store8 (indice, memarg) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Store8 (indice, memarg)
+  | Store16 (indice, memarg) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Store16 (indice, memarg)
+
+let convert_i64_instr : Binary.i64_instr -> Text.i64_instr = function
+  | Const i -> Const i
+  | Clz -> Clz
+  | Ctz -> Ctz
+  | Popcnt -> Popcnt
+  | Add -> Add
+  | Sub -> Sub
+  | Mul -> Mul
+  | Div sx -> Div sx
+  | Rem sx -> Rem sx
+  | And -> And
+  | Or -> Or
+  | Xor -> Xor
+  | Shl -> Shl
+  | Shr sx -> Shr sx
+  | Rotl -> Rotl
+  | Rotr -> Rotr
+  | Eqz -> Eqz
+  | Eq -> Eq
+  | Ne -> Ne
+  | Lt sx -> Lt sx
+  | Gt sx -> Gt sx
+  | Le sx -> Le sx
+  | Ge sx -> Ge sx
+  | Extend8_s -> Extend8_s
+  | Extend16_s -> Extend16_s
+  | Extend32_s -> Extend32_s
+  | Extend_i32 sx -> Extend_i32 sx
+  | Trunc_f (nn, sx) -> Trunc_f (nn, sx)
+  | Trunc_sat_f (nn, sx) -> Trunc_sat_f (nn, sx)
+  | Reinterpret_f nn -> Reinterpret_f nn
+  | Load (indice, memarg) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Load (indice, memarg)
+  | Load8 (indice, sx, memarg) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Load8 (indice, sx, memarg)
+  | Load16 (indice, sx, memarg) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Load16 (indice, sx, memarg)
+  | Load32 (indice, sx, memarg) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Load32 (indice, sx, memarg)
+  | Store (indice, memarg) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Store (indice, memarg)
+  | Store8 (indice, memarg) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Store8 (indice, memarg)
+  | Store16 (indice, memarg) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Store16 (indice, memarg)
+  | Store32 (indice, memarg) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Store32 (indice, memarg)
+
+let convert_f32_instr : Binary.f32_instr -> Text.f32_instr = function
+  | (Const f : Binary.f32_instr) -> Const f
+  | Abs -> Abs
+  | Neg -> Neg
+  | Sqrt -> Sqrt
+  | Ceil -> Ceil
+  | Floor -> Floor
+  | Trunc -> Trunc
+  | Nearest -> Nearest
+  | Add -> Add
+  | Sub -> Sub
+  | Mul -> Mul
+  | Div -> Div
+  | Min -> Min
+  | Max -> Max
+  | Copysign -> Copysign
+  | Eq -> Eq
+  | Ne -> Ne
+  | Lt -> Lt
+  | Gt -> Gt
+  | Le -> Le
+  | Ge -> Ge
+  | Demote_f64 -> Demote_f64
+  | Convert_i (nn, sx) -> Convert_i (nn, sx)
+  | Reinterpret_i nn -> Reinterpret_i nn
+  | Load (indice, memarg) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Load (indice, memarg)
+  | Store (indice, memarg) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Store (indice, memarg)
+
+let convert_f64_instr : Binary.f64_instr -> Text.f64_instr = function
+  | (Const f : Binary.f64_instr) -> Const f
+  | Abs -> Abs
+  | Neg -> Neg
+  | Sqrt -> Sqrt
+  | Ceil -> Ceil
+  | Floor -> Floor
+  | Trunc -> Trunc
+  | Nearest -> Nearest
+  | Add -> Add
+  | Sub -> Sub
+  | Mul -> Mul
+  | Div -> Div
+  | Min -> Min
+  | Max -> Max
+  | Copysign -> Copysign
+  | Eq -> Eq
+  | Ne -> Ne
+  | Lt -> Lt
+  | Gt -> Gt
+  | Le -> Le
+  | Ge -> Ge
+  | Promote_f32 -> Promote_f32
+  | Convert_i (nn, sx) -> Convert_i (nn, sx)
+  | Reinterpret_i nn -> Reinterpret_i nn
+  | Load (indice, memarg) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Load (indice, memarg)
+  | Store (indice, memarg) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Store (indice, memarg)
+
+let convert_ref_instr : Binary.ref_instr -> Text.ref_instr = function
+  | Null heap_type -> Null (convert_heap_type heap_type)
+  | Is_null -> Is_null
+  | As_non_null -> As_non_null
+  | Func indice ->
+    let indice = convert_indice indice in
+    Func indice
+
+let convert_local_instr : Binary.local_instr -> Text.local_instr = function
+  | Get indice ->
+    let indice = convert_indice indice in
+    Get indice
+  | Set indice ->
+    let indice = convert_indice indice in
+    Set indice
+  | Tee indice ->
+    let indice = convert_indice indice in
+    Tee indice
+
+let convert_global_instr : Binary.global_instr -> Text.global_instr = function
+  | Get indice ->
+    let indice = convert_indice indice in
+    Get indice
+  | Set indice ->
+    let indice = convert_indice indice in
+    Set indice
+
+let convert_table_instr : Binary.table_instr -> Text.table_instr = function
+  | Get indice ->
+    let indice = convert_indice indice in
+    Get indice
+  | Set indice ->
+    let indice = convert_indice indice in
+    Set indice
+  | Size indice ->
+    let indice = convert_indice indice in
+    Size indice
+  | Grow indice ->
+    let indice = convert_indice indice in
+    Grow indice
+  | Fill indice ->
+    let indice = convert_indice indice in
+    Fill indice
+  | Copy (indice1, indice2) ->
+    let indice1 = convert_indice indice1 in
+    let indice2 = convert_indice indice2 in
+    Copy (indice1, indice2)
+  | Init (indice1, indice2) ->
+    let indice1 = convert_indice indice1 in
+    let indice2 = convert_indice indice2 in
+    Init (indice1, indice2)
+
+let convert_elem_instr : Binary.elem_instr -> Text.elem_instr = function
+  | Drop indice ->
+    let indice = convert_indice indice in
+    Drop indice
+
+let convert_memory_instr : Binary.memory_instr -> Text.memory_instr = function
+  | Size indice ->
+    let indice = convert_indice indice in
+    Size indice
+  | Grow indice ->
+    let indice = convert_indice indice in
+    Grow indice
+  | Fill indice ->
+    let indice = convert_indice indice in
+    Fill indice
+  | Copy (indice1, indice2) ->
+    let indice1 = convert_indice indice1 in
+    let indice2 = convert_indice indice2 in
+    Copy (indice1, indice2)
+  | Init (indice1, indice2) ->
+    let indice1 = convert_indice indice1 in
+    let indice2 = convert_indice indice2 in
+    Init (indice1, indice2)
+
+let convert_data_instr : Binary.data_instr -> Text.data_instr = function
+  | Drop indice ->
+    let indice = convert_indice indice in
+    Drop indice
+
 let rec convert_instr : Binary.instr -> Text.instr = function
-  | Binary.Br_table (ids, id) ->
+  | Binary.I32 i -> Text.I32 (convert_i32_instr i)
+  | I64 i -> Text.I64 (convert_i64_instr i)
+  | F32 i -> Text.F32 (convert_f32_instr i)
+  | F64 i -> Text.F64 (convert_f64_instr i)
+  | V128 i -> Text.V128 i
+  | I8x16 i -> Text.I8x16 i
+  | I16x8 i -> Text.I16x8 i
+  | I32x4 i -> Text.I32x4 i
+  | I64x2 i -> Text.I64x2 i
+  | Ref i -> Ref (convert_ref_instr i)
+  | Local i -> Local (convert_local_instr i)
+  | Global i -> Global (convert_global_instr i)
+  | Table i -> Table (convert_table_instr i)
+  | Elem i -> Elem (convert_elem_instr i)
+  | Memory i -> Memory (convert_memory_instr i)
+  | Data i -> Data (convert_data_instr i)
+  | Br_table (ids, id) ->
     let ids = Array.map convert_indice ids in
     let id = convert_indice id in
-    Text.Br_table (ids, id)
+    Br_table (ids, id)
   | Br_if id ->
     let id = convert_indice id in
     Br_if id
@@ -64,15 +348,6 @@ let rec convert_instr : Binary.instr -> Text.instr = function
   | Return_call id ->
     let id = convert_indice id in
     Return_call id
-  | Local_set id ->
-    let id = convert_indice id in
-    Local_set id
-  | Local_get id ->
-    let id = convert_indice id in
-    Local_get id
-  | Local_tee id ->
-    let id = convert_indice id in
-    Local_tee id
   | If_else (id, bt, e1, e2) ->
     let bt = Option.map convert_block_type bt in
     let e1 = convert_expr e1 in
@@ -100,48 +375,6 @@ let rec convert_instr : Binary.instr -> Text.instr = function
   | Return_call_ref bt ->
     let bt = convert_block_type bt in
     Return_call_ref bt
-  | Global_set id ->
-    let id = convert_indice id in
-    Global_set id
-  | Global_get id ->
-    let id = convert_indice id in
-    Global_get id
-  | Ref_func id ->
-    let id = convert_indice id in
-    Ref_func id
-  | Table_size id ->
-    let id = convert_indice id in
-    Table_size id
-  | Table_get id ->
-    let id = convert_indice id in
-    Table_get id
-  | Table_set id ->
-    let id = convert_indice id in
-    Table_set id
-  | Table_grow id ->
-    let id = convert_indice id in
-    Table_grow id
-  | Table_init (i, i') ->
-    let table = convert_indice i in
-    let elem = convert_indice i' in
-    Table_init (table, elem)
-  | Table_fill id ->
-    let id = convert_indice id in
-    Table_fill id
-  | Table_copy (i, i') ->
-    let table = convert_indice i in
-    let table' = convert_indice i' in
-    Table_copy (table, table')
-  | Memory_init (memidx, dataidx) ->
-    let memidx = convert_indice memidx in
-    let dataidx = convert_indice dataidx in
-    Memory_init (memidx, dataidx)
-  | Data_drop id ->
-    let id = convert_indice id in
-    Data_drop id
-  | Elem_drop id ->
-    let id = convert_indice id in
-    Elem_drop id
   | Select typ ->
     begin match typ with
     | None -> Select None
@@ -151,65 +384,12 @@ let rec convert_instr : Binary.instr -> Text.instr = function
       (* TODO: maybe we could change the type of Binary.Select to prevent this from happening? *)
       assert false
     end
-  | I_unop (nn, op) -> I_unop (nn, op)
-  | I_binop (nn, op) -> I_binop (nn, op)
-  | I_testop (nn, op) -> I_testop (nn, op)
-  | I_relop (nn, op) -> I_relop (nn, op)
-  | F_unop (nn, op) -> F_unop (nn, op)
-  | F_relop (nn, op) -> F_relop (nn, op)
-  | I32_wrap_i64 -> I32_wrap_i64
-  | F_reinterpret_i (nn1, nn2) -> F_reinterpret_i (nn1, nn2)
-  | I_reinterpret_f (nn1, nn2) -> I_reinterpret_f (nn1, nn2)
-  | I64_extend_i32 sx -> I64_extend_i32 sx
-  | I64_extend32_s -> I64_extend32_s
-  | F32_demote_f64 -> F32_demote_f64
-  | I_extend8_s nn -> I_extend8_s nn
-  | I_extend16_s nn -> I_extend16_s nn
-  | F64_promote_f32 -> F64_promote_f32
-  | F_convert_i (nn1, nn2, sx) -> F_convert_i (nn1, nn2, sx)
-  | I_trunc_f (nn1, nn2, sx) -> I_trunc_f (nn1, nn2, sx)
-  | I_trunc_sat_f (nn1, nn2, sx) -> I_trunc_sat_f (nn1, nn2, sx)
-  | Ref_as_non_null -> Ref_as_non_null
-  | Ref_is_null -> Ref_is_null
-  | F_binop (nn, op) -> F_binop (nn, op)
-  | F32_const v -> F32_const v
-  | F64_const v -> F64_const v
-  | I32_const v -> I32_const v
-  | I64_const v -> I64_const v
-  | V128_const v -> V128_const v
   | Unreachable -> Unreachable
   | Drop -> Drop
   | Nop -> Nop
   | Return -> Return
   | Extern_externalize -> Extern_externalize
   | Extern_internalize -> Extern_internalize
-  | I_load8 (id, nn, sx, memarg) ->
-    I_load8 (convert_indice id, nn, sx, convert_memarg memarg)
-  | I_store8 (id, nn, memarg) ->
-    I_store8 (convert_indice id, nn, convert_memarg memarg)
-  | I_load16 (id, nn, sx, memarg) ->
-    I_load16 (convert_indice id, nn, sx, convert_memarg memarg)
-  | I_store16 (id, nn, memarg) ->
-    I_store16 (convert_indice id, nn, convert_memarg memarg)
-  | I64_load32 (id, sx, memarg) ->
-    I64_load32 (convert_indice id, sx, convert_memarg memarg)
-  | I64_store32 (id, memarg) ->
-    I64_store32 (convert_indice id, convert_memarg memarg)
-  | I_load (id, nn, memarg) ->
-    I_load (convert_indice id, nn, convert_memarg memarg)
-  | F_load (id, nn, memarg) ->
-    F_load (convert_indice id, nn, convert_memarg memarg)
-  | F_store (id, nn, memarg) ->
-    F_store (convert_indice id, nn, convert_memarg memarg)
-  | I_store (id, nn, memarg) ->
-    I_store (convert_indice id, nn, convert_memarg memarg)
-  | Memory_copy (id1, id2) ->
-    Memory_copy (convert_indice id1, convert_indice id2)
-  | Memory_size id -> Memory_size (convert_indice id)
-  | Memory_fill id -> Memory_fill (convert_indice id)
-  | Memory_grow id -> Memory_grow (convert_indice id)
-  | V_ibinop (shape, op) -> V_ibinop (shape, op)
-  | Ref_null t -> Ref_null (convert_heap_type t)
 
 and convert_expr (e : Binary.expr Annotated.t) : Text.expr =
   List.map (fun i -> convert_instr i.Annotated.raw) e.raw

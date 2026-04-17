@@ -215,10 +215,10 @@ let read_indice input : (indice * Input.t, _) result =
   let+ indice, input = read_U32 input in
   (indice, input)
 
-let read_numtype input =
+let read_numtype input : (Text.num_type * Input.t) Result.t =
   let* b, input = read_S7 input in
   match b with
-  | -0x01 -> Ok (Text.I32, input)
+  | -0x01 -> Ok ((Text.I32 : Text.num_type), input)
   | -0x02 -> Ok (I64, input)
   | -0x03 -> Ok (F32, input)
   | -0x04 -> Ok (F64, input)
@@ -249,14 +249,15 @@ let read_heap_type ?(abs = false) input b =
     else parse_fail "malformed reference type: %d" b
   | _ -> parse_fail "malformed reference type: %d" b
 
-let read_reftype input =
+let read_reftype input : ((Text.nullable * Binary.heap_type) * Input.t) Result.t
+    =
   let* b1, input = read_S7 input in
   match b1 with
   | -0x1d ->
     (* 0x63 *)
     let* b2, input = read_S7 input in
     let* ht, input = read_heap_type input b2 in
-    Ok ((Text.Null, ht), input)
+    Ok (((Text.Null : Text.nullable), ht), input)
   | -0x1c ->
     (* 0x64 *)
     let* b2, input = read_S7 input in
@@ -264,7 +265,7 @@ let read_reftype input =
     Ok ((Text.No_null, ht), input)
   | _ ->
     let* ht, input = read_heap_type ~abs:true input b1 in
-    Ok ((Text.Null, ht), input)
+    Ok (((Text.Null : Text.nullable), ht), input)
 
 let read_valtype input =
   match read_numtype input with
@@ -282,7 +283,7 @@ let read_valtypes input = vector_no_id read_valtype input
 let read_mut input =
   let* b, input = read_byte ~msg:"read_mut" input in
   match b with
-  | '\x00' -> Ok (Text.Const, input)
+  | '\x00' -> Ok ((Text.Const : Text.mut), input)
   | '\x01' -> Ok (Var, input)
   | _c -> parse_fail "malformed mutability"
 
@@ -359,49 +360,49 @@ let read_memarg max_align input =
 let read_FC input =
   let* i, input = read_U32 input in
   match i with
-  | 0 -> Ok (I_trunc_sat_f (S32, S32, S), input)
-  | 1 -> Ok (I_trunc_sat_f (S32, S32, U), input)
-  | 2 -> Ok (I_trunc_sat_f (S32, S64, S), input)
-  | 3 -> Ok (I_trunc_sat_f (S32, S64, U), input)
-  | 4 -> Ok (I_trunc_sat_f (S64, S32, S), input)
-  | 5 -> Ok (I_trunc_sat_f (S64, S32, U), input)
-  | 6 -> Ok (I_trunc_sat_f (S64, S64, S), input)
-  | 7 -> Ok (I_trunc_sat_f (S64, S64, U), input)
+  | 0 -> Ok (I32 (Trunc_sat_f (S32, S)), input)
+  | 1 -> Ok (I32 (Trunc_sat_f (S32, U)), input)
+  | 2 -> Ok (I32 (Trunc_sat_f (S64, S)), input)
+  | 3 -> Ok (I32 (Trunc_sat_f (S64, U)), input)
+  | 4 -> Ok (I64 (Trunc_sat_f (S32, S)), input)
+  | 5 -> Ok (I64 (Trunc_sat_f (S32, U)), input)
+  | 6 -> Ok (I64 (Trunc_sat_f (S64, S)), input)
+  | 7 -> Ok (I64 (Trunc_sat_f (S64, U)), input)
   | 8 ->
     let* dataidx, input = read_indice input in
     let* memidx, input = read_indice input in
     let+ input = check_zero_opcode input in
-    (Memory_init (memidx, dataidx), input)
+    (Memory (Init (memidx, dataidx)), input)
   | 9 ->
     let+ dataidx, input = read_indice input in
-    (Data_drop dataidx, input)
+    (Data (Drop dataidx), input)
   | 10 ->
     let* id1, input = read_indice input in
     let+ id2, input = read_indice input in
-    (Memory_copy (id1, id2), input)
+    (Memory (Copy (id1, id2)), input)
   | 11 ->
     let+ id, input = read_indice input in
-    (Memory_fill id, input)
+    (Memory (Fill id), input)
   | 12 ->
     let* elemidx, input = read_indice input in
     let+ tableidx, input = read_indice input in
-    (Table_init (tableidx, elemidx), input)
+    (Table (Init (tableidx, elemidx)), input)
   | 13 ->
     let+ elemidx, input = read_indice input in
-    (Elem_drop elemidx, input)
+    (Elem (Drop elemidx), input)
   | 14 ->
     let* tableidx1, input = read_indice input in
     let+ tableidx2, input = read_indice input in
-    (Table_copy (tableidx1, tableidx2), input)
+    (Table (Copy (tableidx1, tableidx2)), input)
   | 15 ->
     let+ tableidx, input = read_indice input in
-    (Table_grow tableidx, input)
+    (Table (Grow tableidx), input)
   | 16 ->
     let+ tableidx, input = read_indice input in
-    (Table_size tableidx, input)
+    (Table (Size tableidx), input)
   | 17 ->
     let+ tableidx, input = read_indice input in
-    (Table_fill tableidx, input)
+    (Table (Fill tableidx), input)
   | i -> parse_fail "illegal opcode (1) %i" i
 
 let read_FD input =
@@ -414,15 +415,15 @@ let read_FD input =
     let high = String.get_int64_le data 0 in
     let low = String.get_int64_le data 8 in
     let v128 = Concrete_v128.of_i64x2 high low in
-    (V128_const v128, input)
-  | 110 -> Ok (V_ibinop (I8x16, Add), input)
-  | 113 -> Ok (V_ibinop (I8x16, Sub), input)
-  | 142 -> Ok (V_ibinop (I16x8, Add), input)
-  | 145 -> Ok (V_ibinop (I16x8, Sub), input)
-  | 174 -> Ok (V_ibinop (I32x4, Add), input)
-  | 177 -> Ok (V_ibinop (I32x4, Sub), input)
-  | 206 -> Ok (V_ibinop (I64x2, Add), input)
-  | 209 -> Ok (V_ibinop (I64x2, Sub), input)
+    (V128 (Const v128), input)
+  | 110 -> Ok (I8x16 Add, input)
+  | 113 -> Ok (I8x16 Sub, input)
+  | 142 -> Ok (I16x8 Add, input)
+  | 145 -> Ok (I16x8 Sub, input)
+  | 174 -> Ok (I32x4 Add, input)
+  | 177 -> Ok (I32x4 Sub, input)
+  | 206 -> Ok (I64x2 Add, input)
+  | 209 -> Ok (I64x2 Sub, input)
   | i -> parse_fail "illegal opcode (1) %i" i
 
 let block_type_of_type_def (_id, (pt, rt)) =
@@ -511,248 +512,248 @@ let rec read_instr types input =
     (Select (Some valtypes), input)
   | '\x20' ->
     let+ localidx, input = read_indice input in
-    (Local_get localidx, input)
+    (Local (Get localidx), input)
   | '\x21' ->
     let+ localidx, input = read_indice input in
-    (Local_set localidx, input)
+    (Local (Set localidx), input)
   | '\x22' ->
     let+ localidx, input = read_indice input in
-    (Local_tee localidx, input)
+    (Local (Tee localidx), input)
   | '\x23' ->
     let+ globalidx, input = read_indice input in
-    (Global_get globalidx, input)
+    (Global (Get globalidx), input)
   | '\x24' ->
     let+ globalidx, input = read_indice input in
-    (Global_set globalidx, input)
+    (Global (Set globalidx), input)
   | '\x25' ->
     let+ tableidx, input = read_indice input in
-    (Table_get tableidx, input)
+    (Table (Get tableidx), input)
   | '\x26' ->
     let+ tableidx, input = read_indice input in
-    (Table_set tableidx, input)
+    (Table (Set tableidx), input)
   | '\x28' ->
     let+ idx, memarg, input = read_memarg 32 input in
-    (I_load (idx, S32, memarg), input)
+    (I32 (Load (idx, memarg)), input)
   | '\x29' ->
     let+ idx, memarg, input = read_memarg 64 input in
-    (I_load (idx, S64, memarg), input)
+    (I64 (Load (idx, memarg)), input)
   | '\x2A' ->
     let+ idx, memarg, input = read_memarg 32 input in
-    (F_load (idx, S32, memarg), input)
+    (F32 (Load (idx, memarg)), input)
   | '\x2B' ->
     let+ idx, memarg, input = read_memarg 64 input in
-    (F_load (idx, S64, memarg), input)
+    (F64 (Load (idx, memarg)), input)
   | '\x2C' ->
     let+ idx, memarg, input = read_memarg 32 input in
-    (I_load8 (idx, S32, S, memarg), input)
+    (I32 (Load8 (idx, S, memarg)), input)
   | '\x2D' ->
     let+ idx, memarg, input = read_memarg 32 input in
-    (I_load8 (idx, S32, U, memarg), input)
+    (I32 (Load8 (idx, U, memarg)), input)
   | '\x2E' ->
     let+ idx, memarg, input = read_memarg 32 input in
-    (I_load16 (idx, S32, S, memarg), input)
+    (I32 (Load16 (idx, S, memarg)), input)
   | '\x2F' ->
     let+ idx, memarg, input = read_memarg 32 input in
-    (I_load16 (idx, S32, U, memarg), input)
+    (I64 (Load16 (idx, U, memarg)), input)
   | '\x30' ->
     let+ idx, memarg, input = read_memarg 64 input in
-    (I_load8 (idx, S64, S, memarg), input)
+    (I64 (Load8 (idx, S, memarg)), input)
   | '\x31' ->
     let+ idx, memarg, input = read_memarg 64 input in
-    (I_load8 (idx, S64, U, memarg), input)
+    (I64 (Load8 (idx, U, memarg)), input)
   | '\x32' ->
     let+ idx, memarg, input = read_memarg 64 input in
-    (I_load16 (idx, S64, S, memarg), input)
+    (I64 (Load16 (idx, S, memarg)), input)
   | '\x33' ->
     let+ idx, memarg, input = read_memarg 64 input in
-    (I_load16 (idx, S64, U, memarg), input)
+    (I64 (Load16 (idx, U, memarg)), input)
   | '\x34' ->
     let+ idx, memarg, input = read_memarg 32 input in
-    (I64_load32 (idx, S, memarg), input)
+    (I64 (Load32 (idx, S, memarg)), input)
   | '\x35' ->
     let+ idx, memarg, input = read_memarg 32 input in
-    (I64_load32 (idx, U, memarg), input)
+    (I64 (Load32 (idx, U, memarg)), input)
   | '\x36' ->
     let+ idx, memarg, input = read_memarg 32 input in
-    (I_store (idx, S32, memarg), input)
+    (I32 (Store (idx, memarg)), input)
   | '\x37' ->
     let+ idx, memarg, input = read_memarg 64 input in
-    (I_store (idx, S64, memarg), input)
+    (I32 (Store (idx, memarg)), input)
   | '\x38' ->
     let+ idx, memarg, input = read_memarg 32 input in
-    (F_store (idx, S32, memarg), input)
+    (F32 (Store (idx, memarg)), input)
   | '\x39' ->
     let+ idx, memarg, input = read_memarg 64 input in
-    (F_store (idx, S64, memarg), input)
+    (F64 (Store (idx, memarg)), input)
   | '\x3A' ->
     let+ idx, memarg, input = read_memarg 32 input in
-    (I_store8 (idx, S32, memarg), input)
+    (I32 (Store8 (idx, memarg)), input)
   | '\x3B' ->
     let+ idx, memarg, input = read_memarg 32 input in
-    (I_store16 (idx, S32, memarg), input)
+    (I32 (Store16 (idx, memarg)), input)
   | '\x3C' ->
     let+ idx, memarg, input = read_memarg 64 input in
-    (I_store8 (idx, S64, memarg), input)
+    (I64 (Store8 (idx, memarg)), input)
   | '\x3D' ->
     let+ idx, memarg, input = read_memarg 64 input in
-    (I_store16 (idx, S64, memarg), input)
+    (I64 (Store16 (idx, memarg)), input)
   | '\x3E' ->
     let+ idx, memarg, input = read_memarg 32 input in
-    (I64_store32 (idx, memarg), input)
+    (I64 (Store32 (idx, memarg)), input)
   | '\x3F' ->
     let+ id, input = read_indice input in
-    (Memory_size id, input)
+    (Memory (Size id), input)
   | '\x40' ->
     let+ id, input = read_indice input in
-    (Memory_grow id, input)
+    (Memory (Grow id), input)
   | '\x41' ->
     let+ i32, input = read_S32 input in
-    (I32_const i32, input)
+    (I32 (Const i32), input)
   | '\x42' ->
     let+ i64, input = read_S64 input in
-    (I64_const i64, input)
+    (I64 (Const i64), input)
   | '\x43' ->
     let+ f32, input = read_F32 input in
-    (F32_const f32, input)
+    (F32 (Const f32), input)
   | '\x44' ->
     let+ f64, input = read_F64 input in
-    (F64_const f64, input)
-  | '\x45' -> Ok (I_testop (S32, Eqz), input)
-  | '\x46' -> Ok (I_relop (S32, Eq), input)
-  | '\x47' -> Ok (I_relop (S32, Ne), input)
-  | '\x48' -> Ok (I_relop (S32, Lt S), input)
-  | '\x49' -> Ok (I_relop (S32, Lt U), input)
-  | '\x4A' -> Ok (I_relop (S32, Gt S), input)
-  | '\x4B' -> Ok (I_relop (S32, Gt U), input)
-  | '\x4C' -> Ok (I_relop (S32, Le S), input)
-  | '\x4D' -> Ok (I_relop (S32, Le U), input)
-  | '\x4E' -> Ok (I_relop (S32, Ge S), input)
-  | '\x4F' -> Ok (I_relop (S32, Ge U), input)
-  | '\x50' -> Ok (I_testop (S64, Eqz), input)
-  | '\x51' -> Ok (I_relop (S64, Eq), input)
-  | '\x52' -> Ok (I_relop (S64, Ne), input)
-  | '\x53' -> Ok (I_relop (S64, Lt S), input)
-  | '\x54' -> Ok (I_relop (S64, Lt U), input)
-  | '\x55' -> Ok (I_relop (S64, Gt S), input)
-  | '\x56' -> Ok (I_relop (S64, Gt U), input)
-  | '\x57' -> Ok (I_relop (S64, Le S), input)
-  | '\x58' -> Ok (I_relop (S64, Le U), input)
-  | '\x59' -> Ok (I_relop (S64, Ge S), input)
-  | '\x5A' -> Ok (I_relop (S64, Ge U), input)
-  | '\x5B' -> Ok (F_relop (S32, Eq), input)
-  | '\x5C' -> Ok (F_relop (S32, Ne), input)
-  | '\x5D' -> Ok (F_relop (S32, Lt), input)
-  | '\x5E' -> Ok (F_relop (S32, Gt), input)
-  | '\x5F' -> Ok (F_relop (S32, Le), input)
-  | '\x60' -> Ok (F_relop (S32, Ge), input)
-  | '\x61' -> Ok (F_relop (S64, Eq), input)
-  | '\x62' -> Ok (F_relop (S64, Ne), input)
-  | '\x63' -> Ok (F_relop (S64, Lt), input)
-  | '\x64' -> Ok (F_relop (S64, Gt), input)
-  | '\x65' -> Ok (F_relop (S64, Le), input)
-  | '\x66' -> Ok (F_relop (S64, Ge), input)
-  | '\x67' -> Ok (I_unop (S32, Clz), input)
-  | '\x68' -> Ok (I_unop (S32, Ctz), input)
-  | '\x69' -> Ok (I_unop (S32, Popcnt), input)
-  | '\x6A' -> Ok (I_binop (S32, Add), input)
-  | '\x6B' -> Ok (I_binop (S32, Sub), input)
-  | '\x6C' -> Ok (I_binop (S32, Mul), input)
-  | '\x6D' -> Ok (I_binop (S32, Div S), input)
-  | '\x6E' -> Ok (I_binop (S32, Div U), input)
-  | '\x6F' -> Ok (I_binop (S32, Rem S), input)
-  | '\x70' -> Ok (I_binop (S32, Rem U), input)
-  | '\x71' -> Ok (I_binop (S32, And), input)
-  | '\x72' -> Ok (I_binop (S32, Or), input)
-  | '\x73' -> Ok (I_binop (S32, Xor), input)
-  | '\x74' -> Ok (I_binop (S32, Shl), input)
-  | '\x75' -> Ok (I_binop (S32, Shr S), input)
-  | '\x76' -> Ok (I_binop (S32, Shr U), input)
-  | '\x77' -> Ok (I_binop (S32, Rotl), input)
-  | '\x78' -> Ok (I_binop (S32, Rotr), input)
-  | '\x79' -> Ok (I_unop (S64, Clz), input)
-  | '\x7A' -> Ok (I_unop (S64, Ctz), input)
-  | '\x7B' -> Ok (I_unop (S64, Popcnt), input)
-  | '\x7C' -> Ok (I_binop (S64, Add), input)
-  | '\x7D' -> Ok (I_binop (S64, Sub), input)
-  | '\x7E' -> Ok (I_binop (S64, Mul), input)
-  | '\x7F' -> Ok (I_binop (S64, Div S), input)
-  | '\x80' -> Ok (I_binop (S64, Div U), input)
-  | '\x81' -> Ok (I_binop (S64, Rem S), input)
-  | '\x82' -> Ok (I_binop (S64, Rem U), input)
-  | '\x83' -> Ok (I_binop (S64, And), input)
-  | '\x84' -> Ok (I_binop (S64, Or), input)
-  | '\x85' -> Ok (I_binop (S64, Xor), input)
-  | '\x86' -> Ok (I_binop (S64, Shl), input)
-  | '\x87' -> Ok (I_binop (S64, Shr S), input)
-  | '\x88' -> Ok (I_binop (S64, Shr U), input)
-  | '\x89' -> Ok (I_binop (S64, Rotl), input)
-  | '\x8A' -> Ok (I_binop (S64, Rotr), input)
-  | '\x8B' -> Ok (F_unop (S32, Abs), input)
-  | '\x8C' -> Ok (F_unop (S32, Neg), input)
-  | '\x8D' -> Ok (F_unop (S32, Ceil), input)
-  | '\x8E' -> Ok (F_unop (S32, Floor), input)
-  | '\x8F' -> Ok (F_unop (S32, Trunc), input)
-  | '\x90' -> Ok (F_unop (S32, Nearest), input)
-  | '\x91' -> Ok (F_unop (S32, Sqrt), input)
-  | '\x92' -> Ok (F_binop (S32, Add), input)
-  | '\x93' -> Ok (F_binop (S32, Sub), input)
-  | '\x94' -> Ok (F_binop (S32, Mul), input)
-  | '\x95' -> Ok (F_binop (S32, Div), input)
-  | '\x96' -> Ok (F_binop (S32, Min), input)
-  | '\x97' -> Ok (F_binop (S32, Max), input)
-  | '\x98' -> Ok (F_binop (S32, Copysign), input)
-  | '\x99' -> Ok (F_unop (S64, Abs), input)
-  | '\x9A' -> Ok (F_unop (S64, Neg), input)
-  | '\x9B' -> Ok (F_unop (S64, Ceil), input)
-  | '\x9C' -> Ok (F_unop (S64, Floor), input)
-  | '\x9D' -> Ok (F_unop (S64, Trunc), input)
-  | '\x9E' -> Ok (F_unop (S64, Nearest), input)
-  | '\x9F' -> Ok (F_unop (S64, Sqrt), input)
-  | '\xA0' -> Ok (F_binop (S64, Add), input)
-  | '\xA1' -> Ok (F_binop (S64, Sub), input)
-  | '\xA2' -> Ok (F_binop (S64, Mul), input)
-  | '\xA3' -> Ok (F_binop (S64, Div), input)
-  | '\xA4' -> Ok (F_binop (S64, Min), input)
-  | '\xA5' -> Ok (F_binop (S64, Max), input)
-  | '\xA6' -> Ok (F_binop (S64, Copysign), input)
-  | '\xA7' -> Ok (I32_wrap_i64, input)
-  | '\xA8' -> Ok (I_trunc_f (S32, S32, S), input)
-  | '\xA9' -> Ok (I_trunc_f (S32, S32, U), input)
-  | '\xAA' -> Ok (I_trunc_f (S32, S64, S), input)
-  | '\xAB' -> Ok (I_trunc_f (S32, S64, U), input)
-  | '\xAC' -> Ok (I64_extend_i32 S, input)
-  | '\xAD' -> Ok (I64_extend_i32 U, input)
-  | '\xAE' -> Ok (I_trunc_f (S64, S32, S), input)
-  | '\xAF' -> Ok (I_trunc_f (S64, S32, U), input)
-  | '\xB0' -> Ok (I_trunc_f (S64, S64, S), input)
-  | '\xB1' -> Ok (I_trunc_f (S64, S64, U), input)
-  | '\xB2' -> Ok (F_convert_i (S32, S32, S), input)
-  | '\xB3' -> Ok (F_convert_i (S32, S32, U), input)
-  | '\xB4' -> Ok (F_convert_i (S32, S64, S), input)
-  | '\xB5' -> Ok (F_convert_i (S32, S64, U), input)
-  | '\xB6' -> Ok (F32_demote_f64, input)
-  | '\xB7' -> Ok (F_convert_i (S64, S32, S), input)
-  | '\xB8' -> Ok (F_convert_i (S64, S32, U), input)
-  | '\xB9' -> Ok (F_convert_i (S64, S64, S), input)
-  | '\xBA' -> Ok (F_convert_i (S64, S64, U), input)
-  | '\xBB' -> Ok (F64_promote_f32, input)
-  | '\xBC' -> Ok (I_reinterpret_f (S32, S32), input)
-  | '\xBD' -> Ok (I_reinterpret_f (S64, S64), input)
-  | '\xBE' -> Ok (F_reinterpret_i (S32, S32), input)
-  | '\xBF' -> Ok (F_reinterpret_i (S64, S64), input)
-  | '\xC0' -> Ok (I_extend8_s S32, input)
-  | '\xC1' -> Ok (I_extend16_s S32, input)
-  | '\xC2' -> Ok (I_extend8_s S64, input)
-  | '\xC3' -> Ok (I_extend16_s S64, input)
-  | '\xC4' -> Ok (I64_extend32_s, input)
+    (F64 (Const f64), input)
+  | '\x45' -> Ok (I32 Eqz, input)
+  | '\x46' -> Ok (I32 Eq, input)
+  | '\x47' -> Ok (I32 Ne, input)
+  | '\x48' -> Ok (I32 (Lt S), input)
+  | '\x49' -> Ok (I32 (Lt U), input)
+  | '\x4A' -> Ok (I32 (Gt S), input)
+  | '\x4B' -> Ok (I32 (Gt U), input)
+  | '\x4C' -> Ok (I32 (Le S), input)
+  | '\x4D' -> Ok (I32 (Le U), input)
+  | '\x4E' -> Ok (I32 (Ge S), input)
+  | '\x4F' -> Ok (I32 (Ge U), input)
+  | '\x50' -> Ok (I64 Eqz, input)
+  | '\x51' -> Ok (I64 Eq, input)
+  | '\x52' -> Ok (I64 Ne, input)
+  | '\x53' -> Ok (I64 (Lt S), input)
+  | '\x54' -> Ok (I64 (Lt U), input)
+  | '\x55' -> Ok (I64 (Gt S), input)
+  | '\x56' -> Ok (I64 (Gt U), input)
+  | '\x57' -> Ok (I64 (Le S), input)
+  | '\x58' -> Ok (I64 (Le U), input)
+  | '\x59' -> Ok (I64 (Ge S), input)
+  | '\x5A' -> Ok (I64 (Ge U), input)
+  | '\x5B' -> Ok (F32 Eq, input)
+  | '\x5C' -> Ok (F32 Ne, input)
+  | '\x5D' -> Ok (F32 Lt, input)
+  | '\x5E' -> Ok (F32 Gt, input)
+  | '\x5F' -> Ok (F32 Le, input)
+  | '\x60' -> Ok (F32 Ge, input)
+  | '\x61' -> Ok (F64 Eq, input)
+  | '\x62' -> Ok (F64 Ne, input)
+  | '\x63' -> Ok (F64 Lt, input)
+  | '\x64' -> Ok (F64 Gt, input)
+  | '\x65' -> Ok (F64 Le, input)
+  | '\x66' -> Ok (F64 Ge, input)
+  | '\x67' -> Ok (I32 Clz, input)
+  | '\x68' -> Ok (I32 Ctz, input)
+  | '\x69' -> Ok (I32 Popcnt, input)
+  | '\x6A' -> Ok (I32 Add, input)
+  | '\x6B' -> Ok (I32 Sub, input)
+  | '\x6C' -> Ok (I32 Mul, input)
+  | '\x6D' -> Ok (I32 (Div S), input)
+  | '\x6E' -> Ok (I32 (Div U), input)
+  | '\x6F' -> Ok (I32 (Rem S), input)
+  | '\x70' -> Ok (I32 (Rem U), input)
+  | '\x71' -> Ok (I32 And, input)
+  | '\x72' -> Ok (I32 Or, input)
+  | '\x73' -> Ok (I32 Xor, input)
+  | '\x74' -> Ok (I32 Shl, input)
+  | '\x75' -> Ok (I32 (Shr S), input)
+  | '\x76' -> Ok (I32 (Shr U), input)
+  | '\x77' -> Ok (I32 Rotl, input)
+  | '\x78' -> Ok (I32 Rotr, input)
+  | '\x79' -> Ok (I64 Clz, input)
+  | '\x7A' -> Ok (I64 Ctz, input)
+  | '\x7B' -> Ok (I64 Popcnt, input)
+  | '\x7C' -> Ok (I64 Add, input)
+  | '\x7D' -> Ok (I64 Sub, input)
+  | '\x7E' -> Ok (I64 Mul, input)
+  | '\x7F' -> Ok (I64 (Div S), input)
+  | '\x80' -> Ok (I64 (Div U), input)
+  | '\x81' -> Ok (I64 (Rem S), input)
+  | '\x82' -> Ok (I64 (Rem U), input)
+  | '\x83' -> Ok (I64 And, input)
+  | '\x84' -> Ok (I64 Or, input)
+  | '\x85' -> Ok (I64 Xor, input)
+  | '\x86' -> Ok (I64 Shl, input)
+  | '\x87' -> Ok (I64 (Shr S), input)
+  | '\x88' -> Ok (I64 (Shr U), input)
+  | '\x89' -> Ok (I64 Rotl, input)
+  | '\x8A' -> Ok (I64 Rotr, input)
+  | '\x8B' -> Ok (F32 Abs, input)
+  | '\x8C' -> Ok (F32 Neg, input)
+  | '\x8D' -> Ok (F32 Ceil, input)
+  | '\x8E' -> Ok (F32 Floor, input)
+  | '\x8F' -> Ok (F32 Trunc, input)
+  | '\x90' -> Ok (F32 Nearest, input)
+  | '\x91' -> Ok (F32 Sqrt, input)
+  | '\x92' -> Ok (F32 Add, input)
+  | '\x93' -> Ok (F32 Sub, input)
+  | '\x94' -> Ok (F32 Mul, input)
+  | '\x95' -> Ok (F32 Div, input)
+  | '\x96' -> Ok (F32 Min, input)
+  | '\x97' -> Ok (F32 Max, input)
+  | '\x98' -> Ok (F32 Copysign, input)
+  | '\x99' -> Ok (F64 Abs, input)
+  | '\x9A' -> Ok (F64 Neg, input)
+  | '\x9B' -> Ok (F64 Ceil, input)
+  | '\x9C' -> Ok (F64 Floor, input)
+  | '\x9D' -> Ok (F64 Trunc, input)
+  | '\x9E' -> Ok (F64 Nearest, input)
+  | '\x9F' -> Ok (F64 Sqrt, input)
+  | '\xA0' -> Ok (F64 Add, input)
+  | '\xA1' -> Ok (F64 Sub, input)
+  | '\xA2' -> Ok (F64 Mul, input)
+  | '\xA3' -> Ok (F64 Div, input)
+  | '\xA4' -> Ok (F64 Min, input)
+  | '\xA5' -> Ok (F64 Max, input)
+  | '\xA6' -> Ok (F64 Copysign, input)
+  | '\xA7' -> Ok (I32 Wrap_i64, input)
+  | '\xA8' -> Ok (I32 (Trunc_f (S32, S)), input)
+  | '\xA9' -> Ok (I32 (Trunc_f (S32, U)), input)
+  | '\xAA' -> Ok (I32 (Trunc_f (S64, S)), input)
+  | '\xAB' -> Ok (I32 (Trunc_f (S64, U)), input)
+  | '\xAC' -> Ok (I64 (Extend_i32 S), input)
+  | '\xAD' -> Ok (I64 (Extend_i32 U), input)
+  | '\xAE' -> Ok (I64 (Trunc_f (S32, S)), input)
+  | '\xAF' -> Ok (I64 (Trunc_f (S32, U)), input)
+  | '\xB0' -> Ok (I64 (Trunc_f (S64, S)), input)
+  | '\xB1' -> Ok (I64 (Trunc_f (S64, U)), input)
+  | '\xB2' -> Ok (F32 (Convert_i (S32, S)), input)
+  | '\xB3' -> Ok (F32 (Convert_i (S32, U)), input)
+  | '\xB4' -> Ok (F32 (Convert_i (S64, S)), input)
+  | '\xB5' -> Ok (F32 (Convert_i (S64, U)), input)
+  | '\xB6' -> Ok (F32 Demote_f64, input)
+  | '\xB7' -> Ok (F64 (Convert_i (S32, S)), input)
+  | '\xB8' -> Ok (F64 (Convert_i (S32, U)), input)
+  | '\xB9' -> Ok (F64 (Convert_i (S64, S)), input)
+  | '\xBA' -> Ok (F64 (Convert_i (S64, U)), input)
+  | '\xBB' -> Ok (F64 Promote_f32, input)
+  | '\xBC' -> Ok (I32 (Reinterpret_f S32), input)
+  | '\xBD' -> Ok (I64 (Reinterpret_f S64), input)
+  | '\xBE' -> Ok (F32 (Reinterpret_i S32), input)
+  | '\xBF' -> Ok (F64 (Reinterpret_i S64), input)
+  | '\xC0' -> Ok (I32 Extend8_s, input)
+  | '\xC1' -> Ok (I32 Extend16_s, input)
+  | '\xC2' -> Ok (I64 Extend8_s, input)
+  | '\xC3' -> Ok (I64 Extend16_s, input)
+  | '\xC4' -> Ok (I64 Extend32_s, input)
   | '\xD0' ->
     let+ (_null, reftype), input = read_reftype input in
-    (Ref_null reftype, input)
-  | '\xD1' -> Ok (Ref_is_null, input)
+    (Ref (Null reftype), input)
+  | '\xD1' -> Ok (Ref Is_null, input)
   | '\xD2' ->
     let+ funcidx, input = read_indice input in
-    (Ref_func funcidx, input)
-  | '\xD4' -> Ok (Ref_as_non_null, input)
+    (Ref (Func funcidx), input)
+  | '\xD4' -> Ok (Ref As_non_null, input)
   | '\xD5' ->
     let+ idx, input = read_indice input in
     (Br_on_null idx, input)
@@ -771,7 +772,7 @@ and read_expr types input =
       Ok (acc, input)
     | Ok ('\xd2', input) -> begin
       let* id, input = read_indice input in
-      let instr = Annotated.dummy (Ref_func id) in
+      let instr = Annotated.dummy (Ref (Func id)) in
       aux (instr :: acc) input
       end
     | Ok _ ->
@@ -901,10 +902,10 @@ let read_table input =
   match b1 with
   | -0x10 ->
     let+ limits, input = read_table_limits input in
-    ((limits, (Text.Null, Binary.Func_ht), None), input)
+    ((limits, ((Text.Null : Text.nullable), Binary.Func_ht), None), input)
   | -0x11 ->
     let+ limits, input = read_table_limits input in
-    ((limits, (Text.Null, Binary.Extern_ht), None), input)
+    ((limits, ((Text.Null : Text.nullable), Binary.Extern_ht), None), input)
   | -0x40 -> begin
     let* input = check_zero_opcode input in
     let* ref_type, input = read_reftype input in
@@ -943,12 +944,13 @@ let read_elem_active_zero types input =
 
 let read_elem_index input =
   let+ index, input = read_indice input in
-  ([ Ref_func index ], input)
+  ([ Ref (Func index) ], input)
 
 let read_elem_kind input =
   let msg = "malformed element kind" in
   match read_byte ~msg input with
-  | Ok ('\x00', input) -> Ok ((Text.Null, Binary.Func_ht), input)
+  | Ok ('\x00', input) ->
+    Ok (((Text.Null : Text.nullable), Binary.Func_ht), input)
   | Ok (c, _input) ->
     parse_fail "%s (expected 0x00 but got %s)" msg (Char.escaped c)
   | Error _ as e -> e
@@ -984,7 +986,7 @@ let read_element types input =
   | 4 ->
     let* mode, input = read_elem_active_zero types input in
     let+ init, input = vector_no_id (read_const types) input in
-    let typ = (Text.Null, Binary.Func_ht) in
+    let typ = ((Text.Null : Text.nullable), Binary.Func_ht) in
     ({ Elem.id; typ; init; mode; explicit_typ = true }, input)
   | 5 ->
     let mode = Elem.Mode.Passive in
@@ -1228,7 +1230,7 @@ let sections_iterate (input : Input.t) =
     | _data_len, None ->
       let code_use_dataidx = ref false in
       let f_iter = function
-        | Data_drop _ | Memory_init _ -> code_use_dataidx := true
+        | Data (Drop _) | Memory (Init _) -> code_use_dataidx := true
         | _ -> ()
       in
       let expr =

@@ -132,18 +132,17 @@ let modul m =
   in
   let rec check_expr = function
     | [] -> Ok ()
-    | { Annotated.raw = Global_get (Text id); _ } :: _
-      when not (global_exists id) ->
-      Error (`Unknown_global (Text id))
-    | { Annotated.raw = Global_get (Text _id); _ } :: _ -> Ok ()
-    | { raw = _; _ } :: t -> check_expr t
+    | Global (Get (Text id)) :: tl ->
+      if not (global_exists id) then Error (`Unknown_global (Text id))
+      else check_expr tl
+    | _hd :: t -> check_expr t
     (* TODO: complete for other operations *)
   in
   let rec elem_check_init = function
     | [] -> Ok ()
-    | l :: t ->
-      let* () = check_expr (List.map Annotated.dummy l) in
-      elem_check_init t
+    | hd :: tl ->
+      let* () = check_expr hd in
+      elem_check_init tl
   in
   let add_memory =
     let seen = Hashtbl.create 512 in
@@ -199,11 +198,7 @@ let modul m =
           { env with globals = true }
         | Table { id; typ; init } ->
           let* () = add_table id typ in
-          let* () =
-            match init with
-            | None -> Ok ()
-            | Some e -> check_expr (List.map Annotated.dummy e)
-          in
+          let* () = match init with None -> Ok () | Some e -> check_expr e in
           Ok { env with tables = true } )
       (empty_env ()) m.fields
   in

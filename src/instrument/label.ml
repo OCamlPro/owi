@@ -38,7 +38,7 @@ let annotate_fc m cov_label_set_idx =
               (fun expr ->
                 incr count;
                 Annotated.dummies
-                  [ Binary.I32_const (Int32.of_int !count)
+                  [ Binary.I32 (Const (Int32.of_int !count))
                   ; Call cov_label_set_idx
                   ]
                 @ expr )
@@ -64,7 +64,7 @@ let annotate_sc m cov_label_set_idx =
             incr count;
             let prefix =
               Annotated.dummies
-                [ Binary.I32_const (Int32.of_int !count)
+                [ Binary.I32 (Const (Int32.of_int !count))
                 ; Call cov_label_set_idx
                 ]
             in
@@ -120,12 +120,12 @@ let annotate_dc m cov_label_set_idx =
                       ( None
                       , None
                       , Annotated.dummy_deep
-                          [ Binary.I32_const (Int32.of_int count_true)
+                          [ Binary.I32 (Const (Int32.of_int count_true))
                           ; Call cov_label_set_idx
                           ; Br (idx + 1)
                           ]
                       , Annotated.dummy_deep
-                          [ Binary.I32_const (Int32.of_int count_false)
+                          [ Binary.I32 (Const (Int32.of_int count_false))
                           ; Call cov_label_set_idx
                           ] )
                   | Binary.If_else (id, typ, true_branch, false_branch) ->
@@ -135,7 +135,7 @@ let annotate_dc m cov_label_set_idx =
                       Annotated.map
                         (fun expr ->
                           Annotated.dummies
-                            [ Binary.I32_const (Int32.of_int count_true)
+                            [ Binary.I32 (Const (Int32.of_int count_true))
                             ; Call cov_label_set_idx
                             ]
                           @ expr )
@@ -148,7 +148,7 @@ let annotate_dc m cov_label_set_idx =
                       Annotated.map
                         (fun expr ->
                           Annotated.dummies
-                            [ Binary.I32_const (Int32.of_int count_false)
+                            [ Binary.I32 (Const (Int32.of_int count_false))
                             ; Call cov_label_set_idx
                             ]
                           @ expr )

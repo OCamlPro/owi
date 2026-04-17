@@ -231,66 +231,6 @@ module Text : sig
     | U
     | S
 
-  type nonrec iunop =
-    | Clz
-    | Ctz
-    | Popcnt
-
-  type nonrec funop =
-    | Abs
-    | Neg
-    | Sqrt
-    | Ceil
-    | Floor
-    | Trunc
-    | Nearest
-
-  type nonrec vibinop =
-    | Add
-    | Sub
-
-  type nonrec ibinop =
-    | Add
-    | Sub
-    | Mul
-    | Div of sx
-    | Rem of sx
-    | And
-    | Or
-    | Xor
-    | Shl
-    | Shr of sx
-    | Rotl
-    | Rotr
-
-  type nonrec fbinop =
-    | Add
-    | Sub
-    | Mul
-    | Div
-    | Min
-    | Max
-    | Copysign
-
-  (* TODO: inline this *)
-  type nonrec itestop = Eqz
-
-  type nonrec irelop =
-    | Eq
-    | Ne
-    | Lt of sx
-    | Gt of sx
-    | Le of sx
-    | Ge of sx
-
-  type nonrec frelop =
-    | Eq
-    | Ne
-    | Lt
-    | Gt
-    | Le
-    | Ge
-
   type nonrec memarg =
     { offset : string option
     ; align : string option
@@ -354,74 +294,231 @@ module Text : sig
 
   (** Instructions *)
 
+  (** I32 instructions *)
+
+  type i32_instr =
+    | Const of Int32.t
+    | Clz
+    | Ctz
+    | Popcnt
+    | Add
+    | Sub
+    | Mul
+    | Div of sx
+    | Rem of sx
+    | And
+    | Or
+    | Xor
+    | Shl
+    | Shr of sx
+    | Rotl
+    | Rotr
+    | Eqz
+    | Eq
+    | Ne
+    | Lt of sx
+    | Gt of sx
+    | Le of sx
+    | Ge of sx
+    | Extend8_s
+    | Extend16_s
+    | Wrap_i64
+    | Trunc_f of nn * sx
+    | Trunc_sat_f of nn * sx
+    | Reinterpret_f of nn
+    | Load of indice * memarg
+    | Load8 of indice * sx * memarg
+    | Load16 of indice * sx * memarg
+    | Store of indice * memarg
+    | Store8 of indice * memarg
+    | Store16 of indice * memarg
+
+  (** I64 instructions *)
+
+  type i64_instr =
+    | Const of Int64.t
+    | Clz
+    | Ctz
+    | Popcnt
+    | Add
+    | Sub
+    | Mul
+    | Div of sx
+    | Rem of sx
+    | And
+    | Or
+    | Xor
+    | Shl
+    | Shr of sx
+    | Rotl
+    | Rotr
+    | Eqz
+    | Eq
+    | Ne
+    | Lt of sx
+    | Gt of sx
+    | Le of sx
+    | Ge of sx
+    | Extend8_s
+    | Extend16_s
+    | Extend32_s
+    | Extend_i32 of sx
+    | Trunc_f of nn * sx
+    | Trunc_sat_f of nn * sx
+    | Reinterpret_f of nn
+    | Load of indice * memarg
+    | Load8 of indice * sx * memarg
+    | Load16 of indice * sx * memarg
+    | Load32 of indice * sx * memarg
+    | Store of indice * memarg
+    | Store8 of indice * memarg
+    | Store16 of indice * memarg
+    | Store32 of indice * memarg
+
+  (** F32 instructions *)
+
+  type f32_instr =
+    | Const of Float32.t
+    | Abs
+    | Neg
+    | Sqrt
+    | Ceil
+    | Floor
+    | Trunc
+    | Nearest
+    | Add
+    | Sub
+    | Mul
+    | Div
+    | Min
+    | Max
+    | Copysign
+    | Eq
+    | Ne
+    | Lt
+    | Gt
+    | Le
+    | Ge
+    | Demote_f64
+    | Convert_i of nn * sx
+    | Reinterpret_i of nn
+    | Load of indice * memarg
+    | Store of indice * memarg
+
+  (** F64 instructions *)
+
+  type f64_instr =
+    | Const of Float64.t
+    | Abs
+    | Neg
+    | Sqrt
+    | Ceil
+    | Floor
+    | Trunc
+    | Nearest
+    | Add
+    | Sub
+    | Mul
+    | Div
+    | Min
+    | Max
+    | Copysign
+    | Eq
+    | Ne
+    | Lt
+    | Gt
+    | Le
+    | Ge
+    | Promote_f32
+    | Convert_i of nn * sx
+    | Reinterpret_i of nn
+    | Load of indice * memarg
+    | Store of indice * memarg
+
+  (** V128 instructions *)
+  type v128_instr = Const of Concrete_v128.t
+
+  (** I8x16 instructions *)
+  type i8x16_instr =
+    | Add
+    | Sub
+
+  (** I16x8 instructions *)
+  type i16x8_instr =
+    | Add
+    | Sub
+
+  (* I32x4 instructions *)
+  type i32x4_instr =
+    | Add
+    | Sub
+
+  (** I64x2 instructions *)
+  type i64x2_instr =
+    | Add
+    | Sub
+
+  (** Reference instructions *)
+  type ref_instr =
+    | Null of heap_type
+    | Is_null
+    | As_non_null
+    | Func of indice
+
+  (* Local instructions *)
+  type local_instr =
+    | Get of indice
+    | Set of indice
+    | Tee of indice
+
+  (** Global instructions *)
+  type global_instr =
+    | Get of indice
+    | Set of indice
+
+  (** Table instructions *)
+  type table_instr =
+    | Get of indice
+    | Set of indice
+    | Size of indice
+    | Grow of indice
+    | Fill of indice
+    | Copy of indice * indice
+    | Init of indice * indice
+
+  (** Elem instructions *)
+  type elem_instr = Drop of indice
+
+  (** Memory instructions *)
+  type memory_instr =
+    | Size of indice
+    | Grow of indice
+    | Fill of indice
+    | Copy of indice * indice
+    | Init of indice * indice
+
+  (** Data instructions *)
+  type data_instr = Drop of indice
+
   type instr =
-    (* Numeric Instructions *)
-    | I32_const of Concrete_i32.t
-    | I64_const of Concrete_i64.t
-    | F32_const of Concrete_f32.t
-    | F64_const of Concrete_f64.t
-    | V128_const of Concrete_v128.t
-    | I_unop of nn * iunop
-    | F_unop of nn * funop
-    | I_binop of nn * ibinop
-    | F_binop of nn * fbinop
-    | V_ibinop of ishape * vibinop
-    | I_testop of nn * itestop
-    | I_relop of nn * irelop
-    | F_relop of nn * frelop
-    | I_extend8_s of nn
-    | I_extend16_s of nn
-    | I64_extend32_s
-    | I32_wrap_i64
-    | I64_extend_i32 of sx
-    | I_trunc_f of nn * nn * sx
-    | I_trunc_sat_f of nn * nn * sx
-    | F32_demote_f64
-    | F64_promote_f32
-    | F_convert_i of nn * nn * sx
-    | I_reinterpret_f of nn * nn
-    | F_reinterpret_i of nn * nn
-    (* Reference instructions *)
-    | Ref_null of heap_type
-    | Ref_is_null
-    | Ref_as_non_null
-    | Ref_func of indice
-    (* Parametric instructions *)
+    | I32 of i32_instr
+    | I64 of i64_instr
+    | F32 of f32_instr
+    | F64 of f64_instr
+    | V128 of v128_instr
+    | I8x16 of i8x16_instr
+    | I16x8 of i16x8_instr
+    | I32x4 of i32x4_instr
+    | I64x2 of i64x2_instr
+    | Ref of ref_instr
+    | Local of local_instr
+    | Global of global_instr
+    | Table of table_instr
+    | Elem of elem_instr
+    | Memory of memory_instr
+    | Data of data_instr
     | Drop
     | Select of val_type list option
-    (* Variable instructions *)
-    | Local_get of indice
-    | Local_set of indice
-    | Local_tee of indice
-    | Global_get of indice
-    | Global_set of indice
-    (* Table instructions *)
-    | Table_get of indice
-    | Table_set of indice
-    | Table_size of indice
-    | Table_grow of indice
-    | Table_fill of indice
-    | Table_copy of indice * indice
-    | Table_init of indice * indice
-    | Elem_drop of indice
-    (* Memory instructions *)
-    | I_load of indice * nn * memarg
-    | F_load of indice * nn * memarg
-    | I_store of indice * nn * memarg
-    | F_store of indice * nn * memarg
-    | I_load8 of indice * nn * sx * memarg
-    | I_load16 of indice * nn * sx * memarg
-    | I64_load32 of indice * sx * memarg
-    | I_store8 of indice * nn * memarg
-    | I_store16 of indice * nn * memarg
-    | I64_store32 of indice * memarg
-    | Memory_size of indice
-    | Memory_grow of indice
-    | Memory_fill of indice
-    | Memory_copy of indice * indice
-    | Memory_init of indice * indice
-    | Data_drop of indice
-    (* Control instructions *)
     | Nop
     | Unreachable
     | Block of string option * block_type option * expr
@@ -647,74 +744,208 @@ module Binary : sig
 
   (** Instructions *)
 
+  (** I32 instructions *)
+
+  type i32_instr =
+    | Const of Int32.t
+    | Clz
+    | Ctz
+    | Popcnt
+    | Add
+    | Sub
+    | Mul
+    | Div of Text.sx
+    | Rem of Text.sx
+    | And
+    | Or
+    | Xor
+    | Shl
+    | Shr of Text.sx
+    | Rotl
+    | Rotr
+    | Eqz
+    | Eq
+    | Ne
+    | Lt of Text.sx
+    | Gt of Text.sx
+    | Le of Text.sx
+    | Ge of Text.sx
+    | Extend8_s
+    | Extend16_s
+    | Wrap_i64
+    | Trunc_f of Text.nn * Text.sx
+    | Trunc_sat_f of Text.nn * Text.sx
+    | Reinterpret_f of Text.nn
+    | Load of indice * memarg
+    | Load8 of indice * Text.sx * memarg
+    | Load16 of indice * Text.sx * memarg
+    | Store of indice * memarg
+    | Store8 of indice * memarg
+    | Store16 of indice * memarg
+
+  (** I64 instructions *)
+
+  type i64_instr =
+    | Const of Int64.t
+    | Clz
+    | Ctz
+    | Popcnt
+    | Add
+    | Sub
+    | Mul
+    | Div of Text.sx
+    | Rem of Text.sx
+    | And
+    | Or
+    | Xor
+    | Shl
+    | Shr of Text.sx
+    | Rotl
+    | Rotr
+    | Eqz
+    | Eq
+    | Ne
+    | Lt of Text.sx
+    | Gt of Text.sx
+    | Le of Text.sx
+    | Ge of Text.sx
+    | Extend8_s
+    | Extend16_s
+    | Extend32_s
+    | Extend_i32 of Text.sx
+    | Trunc_f of Text.nn * Text.sx
+    | Trunc_sat_f of Text.nn * Text.sx
+    | Reinterpret_f of Text.nn
+    | Load of indice * memarg
+    | Load8 of indice * Text.sx * memarg
+    | Load16 of indice * Text.sx * memarg
+    | Load32 of indice * Text.sx * memarg
+    | Store of indice * memarg
+    | Store8 of indice * memarg
+    | Store16 of indice * memarg
+    | Store32 of indice * memarg
+
+  (** F32 instructions *)
+
+  type f32_instr =
+    | Const of Float32.t
+    | Abs
+    | Neg
+    | Sqrt
+    | Ceil
+    | Floor
+    | Trunc
+    | Nearest
+    | Add
+    | Sub
+    | Mul
+    | Div
+    | Min
+    | Max
+    | Copysign
+    | Eq
+    | Ne
+    | Lt
+    | Gt
+    | Le
+    | Ge
+    | Demote_f64
+    | Convert_i of Text.nn * Text.sx
+    | Reinterpret_i of Text.nn
+    | Load of indice * memarg
+    | Store of indice * memarg
+
+  (** F64 instructions *)
+
+  type f64_instr =
+    | Const of Float64.t
+    | Abs
+    | Neg
+    | Sqrt
+    | Ceil
+    | Floor
+    | Trunc
+    | Nearest
+    | Add
+    | Sub
+    | Mul
+    | Div
+    | Min
+    | Max
+    | Copysign
+    | Eq
+    | Ne
+    | Lt
+    | Gt
+    | Le
+    | Ge
+    | Promote_f32
+    | Convert_i of Text.nn * Text.sx
+    | Reinterpret_i of Text.nn
+    | Load of indice * memarg
+    | Store of indice * memarg
+
+  (** Reference instructions *)
+  type ref_instr =
+    | Null of heap_type
+    | Is_null
+    | As_non_null
+    | Func of indice
+
+  (* Local instructions *)
+  type local_instr =
+    | Get of indice
+    | Set of indice
+    | Tee of indice
+
+  (** Global instructions *)
+  type global_instr =
+    | Get of indice
+    | Set of indice
+
+  (** Table instructions *)
+  type table_instr =
+    | Get of indice
+    | Set of indice
+    | Size of indice
+    | Grow of indice
+    | Fill of indice
+    | Copy of indice * indice
+    | Init of indice * indice
+
+  (** Elem instructions *)
+  type elem_instr = Drop of indice
+
+  (** Memory instructions *)
+  type memory_instr =
+    | Size of indice
+    | Grow of indice
+    | Fill of indice
+    | Copy of indice * indice
+    | Init of indice * indice
+
+  (** Data instructions *)
+  type data_instr = Drop of indice
+
   type instr =
-    (* Numeric Instructions *)
-    | I32_const of Concrete_i32.t
-    | I64_const of Concrete_i64.t
-    | F32_const of Concrete_f32.t
-    | F64_const of Concrete_f64.t
-    | V128_const of Concrete_v128.t
-    | I_unop of Text.nn * Text.iunop
-    | F_unop of Text.nn * Text.funop
-    | I_binop of Text.nn * Text.ibinop
-    | F_binop of Text.nn * Text.fbinop
-    | V_ibinop of Text.ishape * Text.vibinop
-    | I_testop of Text.nn * Text.itestop
-    | I_relop of Text.nn * Text.irelop
-    | F_relop of Text.nn * Text.frelop
-    | I_extend8_s of Text.nn
-    | I_extend16_s of Text.nn
-    | I64_extend32_s
-    | I32_wrap_i64
-    | I64_extend_i32 of Text.sx
-    | I_trunc_f of Text.nn * Text.nn * Text.sx
-    | I_trunc_sat_f of Text.nn * Text.nn * Text.sx
-    | F32_demote_f64
-    | F64_promote_f32
-    | F_convert_i of Text.nn * Text.nn * Text.sx
-    | I_reinterpret_f of Text.nn * Text.nn
-    | F_reinterpret_i of Text.nn * Text.nn
-    (* Reference instructions *)
-    | Ref_null of heap_type
-    | Ref_is_null
-    | Ref_as_non_null
-    | Ref_func of indice
-    (* Parametric instructions *)
+    | I32 of i32_instr
+    | I64 of i64_instr
+    | F32 of f32_instr
+    | F64 of f64_instr
+    | V128 of Text.v128_instr
+    | I8x16 of Text.i8x16_instr
+    | I16x8 of Text.i16x8_instr
+    | I32x4 of Text.i32x4_instr
+    | I64x2 of Text.i64x2_instr
+    | Ref of ref_instr
+    | Local of local_instr
+    | Global of global_instr
+    | Table of table_instr
+    | Elem of elem_instr
+    | Memory of memory_instr
+    | Data of data_instr
     | Drop
     | Select of val_type list option
-    (* Variable instructions *)
-    | Local_get of indice
-    | Local_set of indice
-    | Local_tee of indice
-    | Global_get of indice
-    | Global_set of indice
-    (* Table instructions *)
-    | Table_get of indice
-    | Table_set of indice
-    | Table_size of indice
-    | Table_grow of indice
-    | Table_fill of indice
-    | Table_copy of indice * indice
-    | Table_init of indice * indice
-    | Elem_drop of indice
-    (* Memory instructions *)
-    | I_load of indice * Text.nn * memarg
-    | F_load of indice * Text.nn * memarg
-    | I_store of indice * Text.nn * memarg
-    | F_store of indice * Text.nn * memarg
-    | I_load8 of indice * Text.nn * Text.sx * memarg
-    | I_load16 of indice * Text.nn * Text.sx * memarg
-    | I64_load32 of indice * Text.sx * memarg
-    | I_store8 of indice * Text.nn * memarg
-    | I_store16 of indice * Text.nn * memarg
-    | I64_store32 of indice * memarg
-    | Memory_size of indice
-    | Memory_grow of indice
-    | Memory_fill of indice
-    | Memory_copy of indice * indice
-    | Memory_init of indice * indice
-    | Data_drop of indice
-    (* Control instructions *)
     | Nop
     | Unreachable
     | Block of string option * block_type option * expr Annotated.t

@@ -35,12 +35,12 @@ let write_testcase =
 (* Entry-point *)
 
 let dummy_value_of_t = function
-  | Binary.Num_type I32 -> Ok (Binary.I32_const 0l)
-  | Num_type I64 -> Ok (Binary.I64_const 0L)
-  | Num_type F32 -> Ok (Binary.F32_const (Float32.of_float 0.))
-  | Num_type F64 -> Ok (Binary.F64_const (Float64.of_float 0.))
-  | Num_type V128 -> Ok (Binary.V128_const (Concrete_v128.of_i64x2 0L 0L))
-  | Ref_type (Text.Null, t) -> Ok (Binary.Ref_null t)
+  | Binary.Num_type I32 -> Ok (Binary.I32 (Const 0l))
+  | Num_type I64 -> Ok (Binary.I64 (Const 0L))
+  | Num_type F32 -> Ok (Binary.F32 (Const (Float32.of_float 0.)))
+  | Num_type F64 -> Ok (Binary.F64 (Const (Float64.of_float 0.)))
+  | Num_type V128 -> Ok (Binary.V128 (Const (Concrete_v128.of_i64x2 0L 0L)))
+  | Ref_type (Text.Null, t) -> Ok (Binary.Ref (Null t))
   | Ref_type (Text.No_null, t) ->
     Fmt.error_msg "can not create default value of type %a" Binary.pp_heap_type
       t
