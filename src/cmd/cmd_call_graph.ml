@@ -37,7 +37,7 @@ let rec find_children mode tables (funcs : 'a array) acc (l : Binary.expr) =
     Annotated.update_functions_called instr children;
     let acc = S.union children acc in
     find_children mode tables funcs acc l
-  | ( { raw = I32_const x; _ }
+  | ( { raw = I32 (Const x); _ }
       :: ( { raw = Call_indirect (i, _) | Return_call_indirect (i, _); _ } as
            instr )
       :: l
@@ -71,43 +71,49 @@ let build_graph mode tables funcs (g, i) (f : (Binary.Func.t, 'a) Origin.t) =
     ((i, Some cfg, s) :: g, i + 1)
   | Origin.Imported _ -> ((i, None, S.empty) :: g, i + 1)
 
-let eval_ibinop stack nn (op : Text.ibinop) =
-  match nn with
-  | Text.S32 ->
+(* TODO: this should be factored out somewhere in a place dedicated to constant expression evaluation *)
+let eval_i32_instr stack : Binary.i32_instr -> _ = function
+  | Binary.Const n -> Stack.push_i32 stack n
+  | Add ->
     let (n1, n2), stack = Stack.pop2_i32 stack in
-    Stack.push_i32 stack
-      (let open Int32 in
-       match op with
-       | Add -> add n1 n2
-       | Sub -> sub n1 n2
-       | Mul -> mul n1 n2
-       | _ -> assert false )
-  | S64 ->
+    Stack.push_i32 stack (Int32.add n1 n2)
+  | Sub ->
+    let (n1, n2), stack = Stack.pop2_i32 stack in
+    Stack.push_i32 stack (Int32.sub n1 n2)
+  | Mul ->
+    let (n1, n2), stack = Stack.pop2_i32 stack in
+    Stack.push_i32 stack (Int32.mul n1 n2)
+  | _ -> assert false
+
+(* TODO: this should be factored out somewhere in a place dedicated to constant expression evaluation *)
+let eval_i64_instr stack : Binary.i64_instr -> _ = function
+  | Binary.Const n -> Stack.push_i64 stack n
+  | Add ->
     let (n1, n2), stack = Stack.pop2_i64 stack in
-    Stack.push_i64 stack
-      (let open Int64 in
-       match op with
-       | Add -> add n1 n2
-       | Sub -> sub n1 n2
-       | Mul -> mul n1 n2
-       | _ -> assert false )
+    Stack.push_i64 stack (Int64.add n1 n2)
+  | Sub ->
+    let (n1, n2), stack = Stack.pop2_i64 stack in
+    Stack.push_i64 stack (Int64.sub n1 n2)
+  | Mul ->
+    let (n1, n2), stack = Stack.pop2_i64 stack in
+    Stack.push_i64 stack (Int64.mul n1 n2)
+  | _ -> assert false
 
 let get_const_global env id =
   match M.find_opt id env with Some n -> n | None -> assert false
 
 let eval_const_instr env stack instr =
   match instr.Annotated.raw with
-  | Binary.I32_const n -> Result.ok @@ Stack.push_i32 stack n
-  | I64_const n -> Result.ok @@ Stack.push_i64 stack n
-  | F32_const f -> Result.ok @@ Stack.push_f32 stack f
-  | F64_const f -> Result.ok @@ Stack.push_f64 stack f
-  | V128_const f -> Result.ok @@ Stack.push_v128 stack f
-  | I_binop (nn, op) -> Result.ok @@ eval_ibinop stack nn op
-  | Ref_null t -> Result.ok @@ Stack.push_ref stack (Concrete_ref.null t)
-  | Global_get id ->
+  | Binary.I32 i -> Ok (eval_i32_instr stack i)
+  | Binary.I64 i -> Ok (eval_i64_instr stack i)
+  | F32 (Const f) -> Result.ok @@ Stack.push_f32 stack f
+  | F64 (Const f) -> Result.ok @@ Stack.push_f64 stack f
+  | V128 (Const f) -> Result.ok @@ Stack.push_v128 stack f
+  | Ref (Null t) -> Result.ok @@ Stack.push_ref stack (Concrete_ref.null t)
+  | Global (Get id) ->
     let* g = get_const_global env id in
     Result.ok @@ Stack.push_i32 stack g
-  | Ref_func id -> Result.ok @@ Stack.push_i32_of_int stack id
+  | Ref (Func id) -> Result.ok @@ Stack.push_i32_of_int stack id
   | _ -> assert false
 
 let eval_const env exp =
@@ -138,9 +144,10 @@ let build_env (env, n) (global : (Binary.Global.t, 'a) Origin.t) =
     | _ -> (env, n + 1) )
   | _ -> (env, n + 1)
 
+(* TODO: it looks like this is looking at the wrong tables or not all of them *)
 let rec find_tables acc (e : Binary.instr Annotated.t) =
   match e.raw with
-  | Table_set i | Table_fill i | Table_copy (i, _) -> i :: acc
+  | Table (Set i | Fill i | Copy (i, _)) -> i :: acc
   | Block (_, _, exp) | Loop (_, _, exp) ->
     List.fold_left find_tables acc exp.raw
   | If_else (_, _, e1, e2) ->
@@ -205,7 +212,7 @@ let build_call_graph call_graph_mode (m : Binary.Module.t) entry_point =
         in
         let t = find_tables_to_remove (Array.to_list m.exports.table) funcs in
         remove_tables
-          (List.sort_uniq (fun x y -> compare (fst x) (fst y)) elems)
+          (List.sort_uniq (fun (x, _) (y, _) -> compare x y) elems)
           (List.sort_uniq compare t) []
       in
       let env, _ = Array.fold_left build_env (M.empty, 0) m.global in
