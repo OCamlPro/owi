@@ -86,43 +86,45 @@ end
 module Eval_const = struct
   module Stack = Stack.Make [@inlined hint] (Concrete_value)
 
-  (* TODO: const ibinop *)
-  let ibinop stack nn (op : Text.ibinop) =
-    match nn with
-    | Text.S32 ->
+  let i32_instr stack : Binary.i32_instr -> _ = function
+    | Const i -> Stack.push_i32 stack i
+    | Add ->
       let (n1, n2), stack = Stack.pop2_i32 stack in
-      Stack.push_i32 stack
-        (let open Int32 in
-         match op with
-         | Add -> add n1 n2
-         | Sub -> sub n1 n2
-         | Mul -> mul n1 n2
-         | _ -> assert false )
-    | S64 ->
-      let (n1, n2), stack = Stack.pop2_i64 stack in
-      Stack.push_i64 stack
-        (let open Int64 in
-         match op with
-         | Add -> add n1 n2
-         | Sub -> sub n1 n2
-         | Mul -> mul n1 n2
-         | _ -> assert false )
+      Stack.push_i32 stack (I32.add n1 n2)
+    | Sub ->
+      let (n1, n2), stack = Stack.pop2_i32 stack in
+      Stack.push_i32 stack (I32.sub n1 n2)
+    | Mul ->
+      let (n1, n2), stack = Stack.pop2_i32 stack in
+      Stack.push_i32 stack (I32.mul n1 n2)
+    | _ -> assert false
 
-  (* TODO: binary+const instr *)
+  let i64_instr stack : Binary.i64_instr -> _ = function
+    | Const i -> Stack.push_i64 stack i
+    | Add ->
+      let (n1, n2), stack = Stack.pop2_i64 stack in
+      Stack.push_i64 stack (I64.add n1 n2)
+    | Sub ->
+      let (n1, n2), stack = Stack.pop2_i64 stack in
+      Stack.push_i64 stack (I64.sub n1 n2)
+    | Mul ->
+      let (n1, n2), stack = Stack.pop2_i64 stack in
+      Stack.push_i64 stack (I64.mul n1 n2)
+    | _ -> assert false
+
   let instr env stack instr =
     match instr.Annotated.raw with
-    | Binary.I32_const n -> Result.ok @@ Stack.push_i32 stack n
-    | I64_const n -> Result.ok @@ Stack.push_i64 stack n
-    | F32_const f -> Result.ok @@ Stack.push_f32 stack f
-    | F64_const f -> Result.ok @@ Stack.push_f64 stack f
-    | V128_const f -> Result.ok @@ Stack.push_v128 stack f
-    | I_binop (nn, op) -> Result.ok @@ ibinop stack nn op
-    | Ref_null t -> Result.ok @@ Stack.push_ref stack (Concrete_ref.null t)
-    | Ref_func f ->
+    | Binary.I32 i -> Result.ok (i32_instr stack i)
+    | Binary.I64 i -> Result.ok (i64_instr stack i)
+    | F32 (Const f) -> Result.ok @@ Stack.push_f32 stack f
+    | F64 (Const f) -> Result.ok @@ Stack.push_f64 stack f
+    | V128 (Const f) -> Result.ok @@ Stack.push_v128 stack f
+    | Ref (Null t) -> Result.ok @@ Stack.push_ref stack (Concrete_ref.null t)
+    | Ref (Func f) ->
       let* f = Link_env.Build.get_func env f in
       let value = Concrete_value.Ref (Func (Some f)) in
       Result.ok @@ Stack.push stack value
-    | Global_get id ->
+    | Global (Get id) ->
       let* g = Link_env.Build.get_const_global env id in
       Result.ok @@ Stack.push stack g
     | _ -> assert false
@@ -339,11 +341,11 @@ let eval_tags ls (finished_env : int) env
   env
 
 let active_elem_expr ~offset ~length ~table ~elem =
-  [ Binary.I32_const offset
-  ; I32_const 0l
-  ; I32_const length
-  ; Table_init (table, elem)
-  ; Elem_drop elem
+  [ Binary.I32 (Const offset)
+  ; I32 (Const 0l)
+  ; I32 (Const length)
+  ; Table (Init (table, elem))
+  ; Elem (Drop elem)
   ]
 
 let active_data_expr env ~offset ~length ~mem ~data =
@@ -351,11 +353,11 @@ let active_data_expr env ~offset ~length ~mem ~data =
     Error (`Unknown_memory (Text.Raw mem))
   else
     Ok
-      [ Binary.I32_const offset
-      ; I32_const 0l
-      ; I32_const length
-      ; Memory_init (mem, data)
-      ; Data_drop data
+      [ Binary.I32 (Const offset)
+      ; I32 (Const 0l)
+      ; I32 (Const length)
+      ; Memory (Init (mem, data))
+      ; Data (Drop data)
       ]
 
 let get_i32 = function
