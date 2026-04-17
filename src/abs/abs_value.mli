@@ -28,3 +28,7 @@ val binop :
   -> t
   -> t
   -> t
+
+val to_boolean : ADomain.Context.t -> t -> ADomain.boolean
+
+val top : Units.In_bits.t -> ADomain.Context.t -> t

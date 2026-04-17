@@ -8,7 +8,9 @@ module SVA : Single_value_abstraction.Sig.NUMERIC_ENUM = struct
 end
 
 module NonRelationalDomain = Domains.Term_based.Nonrelational.Make (Terms) (SVA)
-module ADomain = Domains.Term_domain.Make (Terms) (NonRelationalDomain)
+
+module ADomain : Codex.Domains.Sig.BASE_WITH_INTEGER =
+  Domains.Term_domain.Make (Terms) (NonRelationalDomain)
 
 module Size = struct
   let b32 = Units.In_bits.s32
@@ -41,6 +43,16 @@ let of_binary size binary =
   | _ -> assert false
 
 let size_of = function I32 _ -> Size.b32 | I64 _ -> Size.b64
+
+let to_boolean ctx x =
+  let size = size_of x in
+  let zero = ADomain.Binary_Forward.biconst ~size Z.zero ctx in
+  let bool = ADomain.Binary.equal (to_binary x) zero in
+  match bool with
+  | true -> ADomain.Boolean_Forward.true_ ctx
+  | false -> ADomain.Boolean_Forward.false_ ctx
+
+let top size ctx = of_binary size @@ ADomain.binary_empty ~size ctx
 
 let binop size fn lhs rhs =
   let lhs, rhs = (to_binary lhs, to_binary rhs) in

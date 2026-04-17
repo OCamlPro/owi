@@ -4,12 +4,12 @@ module Stack = struct
   let empty : 'el t = []
 
   let pop : 'el t -> 'el * 'el t = function
-    | [] -> Fmt.failwith "pop on empty stack"
     | h :: t -> (h, t)
+    | [] -> assert false
 
   let push : 'el t -> 'el -> 'el t = fun stack v -> v :: stack
 
-  let pop_n : 'el t -> int -> ('el list * 'el t) =
+  let pop_n : 'el t -> int -> 'el list * 'el t =
    fun stack n -> (List.take n stack, List.drop n stack)
 
   let pop_2 : 'el t -> 'el * 'el * 'el t = function
