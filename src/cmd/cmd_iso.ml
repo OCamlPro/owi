@@ -127,7 +127,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
     let body =
       let put_on_stack =
         List.mapi
-          (fun id (_name, _symbol) -> [ Binary.Local_get id ])
+          (fun id (_name, _symbol) -> [ Binary.Local (Get id) ])
           (fst export_type)
         |> List.flatten
       in
@@ -135,42 +135,42 @@ let check_iso ~unsafe export_name export_type module1 module2 =
 
       put_on_stack @ [ Binary.Call idf1 ] @ put_on_stack @ [ Binary.Call idf2 ]
       @ ( match snd export_type with
-        | [] -> [ Binary.I32_const 1l ]
-        | [ Num_type I32 ] -> [ I_relop (S32, Eq) ]
-        | [ Num_type I64 ] -> [ I_relop (S64, Eq) ]
+        | [] -> [ Binary.I32 (Const 1l) ]
+        | [ Num_type I32 ] -> [ I32 Eq ]
+        | [ Num_type I64 ] -> [ I64 Eq ]
         | [ Num_type F32 ] ->
           (* Here we can not simply compare the two numbers, because they may both be nan and then the comparison on float will return false. *)
           [ (* We store the two floats *)
-            Local_set (local_offset + 0)
-          ; Local_set (local_offset + 1)
+            Local (Set (local_offset + 0))
+          ; Local (Set (local_offset + 1))
           ; (* We compare the first one with itself to see if it is nan. *)
-            Local_get (local_offset + 0)
-          ; Local_get (local_offset + 0)
-          ; F_relop (S32, Eq)
+            Local (Get (local_offset + 0))
+          ; Local (Get (local_offset + 0))
+          ; F32 Eq
           ; If_else
               ( None
               , Some (Bt_raw (None, ([], [ Num_type I32 ])))
               , [ (* Not nan case, we can directly compare the two numbers *)
-                  Binary.Local_get (local_offset + 0)
-                ; Local_get (local_offset + 1)
-                ; F_relop (S32, Eq)
+                  Binary.Local (Get (local_offset + 0))
+                ; Local (Get (local_offset + 1))
+                ; F32 Eq
                 ]
                 |> Annotated.dummy_deep
               , [ (* Nan case, we must check if the second one is nan *)
-                  Binary.Local_get (local_offset + 1)
-                ; Local_get (local_offset + 1)
-                ; F_relop (S32, Eq)
+                  Binary.Local (Get (local_offset + 1))
+                ; Local (Get (local_offset + 1))
+                ; F32 Eq
                 ; If_else
                     ( None
                     , Some (Bt_raw (None, ([], [ Num_type I32 ])))
                     , [ (* Not nan case, we can compare the two numbers *)
-                        Binary.Local_get (local_offset + 0)
-                      ; Local_get (local_offset + 1)
-                      ; F_relop (S32, Eq)
+                        Binary.Local (Get (local_offset + 0))
+                      ; Local (Get (local_offset + 1))
+                      ; F32 Eq
                       ]
                       |> Annotated.dummy_deep
                     , [ (* Nan case, they are both nan, we return true *)
-                        Binary.I32_const 1l
+                        Binary.I32 (Const 1l)
                       ]
                       |> Annotated.dummy_deep )
                 ]
@@ -179,36 +179,36 @@ let check_iso ~unsafe export_name export_type module1 module2 =
         | [ Num_type F64 ] ->
           (* Here we can not simply compare the two numbers, because they may both be nan and then the comparison on float will return false. *)
           [ (* We store the two floats *)
-            Local_set (local_offset + 2)
-          ; Local_set (local_offset + 3)
+            Local (Set (local_offset + 2))
+          ; Local (Set (local_offset + 3))
           ; (* We compare the first one with itself to see if it is nan. *)
-            Local_get (local_offset + 2)
-          ; Local_get (local_offset + 2)
-          ; F_relop (S64, Eq)
+            Local (Get (local_offset + 2))
+          ; Local (Get (local_offset + 2))
+          ; F64 Eq
           ; If_else
               ( None
               , Some (Bt_raw (None, ([], [ Num_type I32 ])))
               , [ (* Not nan case, we can directly compare the two numbers *)
-                  Binary.Local_get (local_offset + 2)
-                ; Local_get (local_offset + 3)
-                ; F_relop (S64, Eq)
+                  Binary.Local (Get (local_offset + 2))
+                ; Local (Get (local_offset + 3))
+                ; F64 Eq
                 ]
                 |> Annotated.dummy_deep
               , [ (* Nan case, we must check if the second one is nan *)
-                  Binary.Local_get (local_offset + 3)
-                ; Local_get (local_offset + 3)
-                ; F_relop (S64, Eq)
+                  Binary.Local (Get (local_offset + 3))
+                ; Local (Get (local_offset + 3))
+                ; F64 Eq
                 ; If_else
                     ( None
                     , Some (Bt_raw (None, ([], [ Num_type I32 ])))
                     , [ (* Not nan case, we can compare the two numbers *)
-                        Binary.Local_get (local_offset + 2)
-                      ; Local_get (local_offset + 3)
-                      ; F_relop (S64, Eq)
+                        Binary.Local (Get (local_offset + 2))
+                      ; Local (Get (local_offset + 3))
+                      ; F64 Eq
                       ]
                       |> Annotated.dummy_deep
                     , [ (* Nan case, they are both nan, we return true *)
-                        Binary.I32_const 1l
+                        Binary.I32 (Const 1l)
                       ]
                       |> Annotated.dummy_deep )
                 ]
