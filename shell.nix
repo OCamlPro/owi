@@ -55,7 +55,7 @@ pkgs.mkShell {
     merlin
     ocaml
     ocamlformat
-    ocaml-lsp
+    #ocaml-lsp
     ocp-browser
     ocp-index
     ocb

@@ -78,6 +78,275 @@ let rewrite_memarg ({ offset; align } : Text.memarg) : Binary.memarg Result.t =
   in
   Binary.{ offset; align }
 
+let rewrite_i32_instr assigned : Text.i32_instr -> Binary.i32_instr Result.t =
+  function
+  | Const i -> Ok (Binary.Const i : Binary.i32_instr)
+  | Clz -> Ok Clz
+  | Ctz -> Ok Ctz
+  | Popcnt -> Ok Popcnt
+  | Add -> Ok Add
+  | Sub -> Ok Sub
+  | Mul -> Ok Mul
+  | Div sx -> Ok (Div sx)
+  | Rem sx -> Ok (Rem sx)
+  | And -> Ok And
+  | Or -> Ok Or
+  | Xor -> Ok Xor
+  | Shl -> Ok Shl
+  | Shr sx -> Ok (Shr sx)
+  | Rotl -> Ok Rotl
+  | Rotr -> Ok Rotr
+  | Eqz -> Ok Eqz
+  | Eq -> Ok Eq
+  | Ne -> Ok Ne
+  | Lt sx -> Ok (Lt sx)
+  | Gt sx -> Ok (Gt sx)
+  | Le sx -> Ok (Le sx)
+  | Ge sx -> Ok (Ge sx)
+  | Extend8_s -> Ok Extend8_s
+  | Extend16_s -> Ok Extend16_s
+  | Wrap_i64 -> Ok Wrap_i64
+  | Trunc_f (nn, sx) -> Ok (Trunc_f (nn, sx))
+  | Trunc_sat_f (nn, sx) -> Ok (Trunc_sat_f (nn, sx))
+  | Reinterpret_f nn -> Ok (Reinterpret_f nn)
+  | Load (indice, memarg) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Load (indice, memarg) : Binary.i32_instr)
+  | Load8 (indice, sx, memarg) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Load8 (indice, sx, memarg) : Binary.i32_instr)
+  | Load16 (indice, sx, memarg) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Load16 (indice, sx, memarg) : Binary.i32_instr)
+  | Store (indice, memarg) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Store (indice, memarg) : Binary.i32_instr)
+  | Store8 (indice, memarg) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Store8 (indice, memarg) : Binary.i32_instr)
+  | Store16 (indice, memarg) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Store16 (indice, memarg) : Binary.i32_instr)
+
+let rewrite_i64_instr assigned : Text.i64_instr -> Binary.i64_instr Result.t =
+  function
+  | Const i -> Ok (Binary.Const i : Binary.i64_instr)
+  | Clz -> Ok Clz
+  | Ctz -> Ok Ctz
+  | Popcnt -> Ok Popcnt
+  | Add -> Ok Add
+  | Sub -> Ok Sub
+  | Mul -> Ok Mul
+  | Div sx -> Ok (Div sx)
+  | Rem sx -> Ok (Rem sx)
+  | And -> Ok And
+  | Or -> Ok Or
+  | Xor -> Ok Xor
+  | Shl -> Ok Shl
+  | Shr sx -> Ok (Shr sx)
+  | Rotl -> Ok Rotl
+  | Rotr -> Ok Rotr
+  | Eqz -> Ok Eqz
+  | Eq -> Ok Eq
+  | Ne -> Ok Ne
+  | Lt sx -> Ok (Lt sx)
+  | Gt sx -> Ok (Gt sx)
+  | Le sx -> Ok (Le sx)
+  | Ge sx -> Ok (Ge sx)
+  | Extend8_s -> Ok Extend8_s
+  | Extend16_s -> Ok Extend16_s
+  | Extend32_s -> Ok Extend32_s
+  | Extend_i32 sx -> Ok (Extend_i32 sx)
+  | Trunc_f (nn, sx) -> Ok (Trunc_f (nn, sx))
+  | Trunc_sat_f (nn, sx) -> Ok (Trunc_sat_f (nn, sx))
+  | Reinterpret_f nn -> Ok (Reinterpret_f nn)
+  | Load (indice, memarg) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Load (indice, memarg) : Binary.i64_instr)
+  | Load8 (indice, sx, memarg) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Load8 (indice, sx, memarg) : Binary.i64_instr)
+  | Load16 (indice, sx, memarg) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Load16 (indice, sx, memarg) : Binary.i64_instr)
+  | Load32 (indice, sx, memarg) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Load32 (indice, sx, memarg) : Binary.i64_instr)
+  | Store (indice, memarg) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Store (indice, memarg) : Binary.i64_instr)
+  | Store8 (indice, memarg) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Store8 (indice, memarg) : Binary.i64_instr)
+  | Store16 (indice, memarg) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Store16 (indice, memarg) : Binary.i64_instr)
+  | Store32 (indice, memarg) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Store32 (indice, memarg) : Binary.i64_instr)
+
+let rewrite_f32_instr assigned : Text.f32_instr -> Binary.f32_instr Result.t =
+  function
+  | Const f -> Ok (Const f : Binary.f32_instr)
+  | Abs -> Ok Abs
+  | Neg -> Ok Neg
+  | Sqrt -> Ok Sqrt
+  | Ceil -> Ok Ceil
+  | Floor -> Ok Floor
+  | Trunc -> Ok Trunc
+  | Nearest -> Ok Nearest
+  | Add -> Ok Add
+  | Sub -> Ok Sub
+  | Mul -> Ok Mul
+  | Div -> Ok Div
+  | Min -> Ok Min
+  | Max -> Ok Max
+  | Copysign -> Ok Copysign
+  | Eq -> Ok Eq
+  | Ne -> Ok Ne
+  | Lt -> Ok Lt
+  | Gt -> Ok Gt
+  | Le -> Ok Le
+  | Ge -> Ok Ge
+  | Demote_f64 -> Ok Demote_f64
+  | Convert_i (nn, sx) -> Ok (Convert_i (nn, sx))
+  | Reinterpret_i nn -> Ok (Reinterpret_i nn)
+  | Load (indice, memarg) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Load (indice, memarg) : Binary.f32_instr)
+  | Store (indice, memarg) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Store (indice, memarg) : Binary.f32_instr)
+
+let rewrite_f64_instr assigned : Text.f64_instr -> Binary.f64_instr Result.t =
+  function
+  | Const f -> Ok (Const f : Binary.f64_instr)
+  | Abs -> Ok Abs
+  | Neg -> Ok Neg
+  | Sqrt -> Ok Sqrt
+  | Ceil -> Ok Ceil
+  | Floor -> Ok Floor
+  | Trunc -> Ok Trunc
+  | Nearest -> Ok Nearest
+  | Add -> Ok Add
+  | Sub -> Ok Sub
+  | Mul -> Ok Mul
+  | Div -> Ok Div
+  | Min -> Ok Min
+  | Max -> Ok Max
+  | Copysign -> Ok Copysign
+  | Eq -> Ok Eq
+  | Ne -> Ok Ne
+  | Lt -> Ok Lt
+  | Gt -> Ok Gt
+  | Le -> Ok Le
+  | Ge -> Ok Ge
+  | Promote_f32 -> Ok Promote_f32
+  | Convert_i (nn, sx) -> Ok (Convert_i (nn, sx))
+  | Reinterpret_i nn -> Ok (Reinterpret_i nn)
+  | Load (indice, memarg) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Load (indice, memarg) : Binary.f64_instr)
+  | Store (indice, memarg) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Store (indice, memarg) : Binary.f64_instr)
+
+let rewrite_ref_instr assigned : Text.ref_instr -> Binary.ref_instr Result.t =
+  function
+  | Null heap_type ->
+    let+ heap_type = rewrite_heap_type assigned heap_type in
+    Binary.Null heap_type
+  | Is_null -> Ok Binary.Is_null
+  | As_non_null -> Ok Binary.As_non_null
+  | Func indice ->
+    let+ indice = Assigned.find_func assigned indice in
+    Binary.Func indice
+
+let rewrite_global_instr assigned :
+  Text.global_instr -> Binary.global_instr Result.t = function
+  | Set id ->
+    let+ idx = Assigned.find_global assigned id in
+    (Set idx : Binary.global_instr)
+  | Get id ->
+    let+ idx = Assigned.find_global assigned id in
+    (Get idx : Binary.global_instr)
+
+let rewrite_table_instr assigned :
+  Text.table_instr -> Binary.table_instr Result.t = function
+  | Size indice ->
+    let+ indice = Assigned.find_table assigned indice in
+    (Size indice : Binary.table_instr)
+  | Get indice ->
+    let+ indice = Assigned.find_table assigned indice in
+    Binary.Get indice
+  | Set indice ->
+    let+ indice = Assigned.find_table assigned indice in
+    Binary.Set indice
+  | Grow indice ->
+    let+ indice = Assigned.find_table assigned indice in
+    (Grow indice : Binary.table_instr)
+  | Init (indice, indice') ->
+    let* table = Assigned.find_table assigned indice in
+    let+ elem = Assigned.find_elem assigned indice' in
+    (Init (table, elem) : Binary.table_instr)
+  | Fill indice ->
+    let+ indice = Assigned.find_table assigned indice in
+    (Fill indice : Binary.table_instr)
+  | Copy (indice, indice') ->
+    let* table = Assigned.find_table assigned indice in
+    let+ table' = Assigned.find_table assigned indice' in
+    (Copy (table, table') : Binary.table_instr)
+
+let rewrite_elem_instr assigned : Text.elem_instr -> Binary.elem_instr Result.t
+    = function
+  | Drop id ->
+    let+ id = Assigned.find_elem assigned id in
+    (Drop id : Binary.elem_instr)
+
+let rewrite_memory_instr assigned :
+  Text.memory_instr -> Binary.memory_instr Result.t = function
+  | Init (mem_indice, data_indice) ->
+    let* mem_indice = Assigned.find_memory assigned mem_indice in
+    let+ data_indice = Assigned.find_data assigned data_indice in
+    Binary.Init (mem_indice, data_indice)
+  | Copy (indice1, indice2) ->
+    let* indice1 = Assigned.find_memory assigned indice1 in
+    let+ indice2 = Assigned.find_memory assigned indice2 in
+    Binary.Copy (indice1, indice2)
+  | Size indice ->
+    let+ indice = Assigned.find_memory assigned indice in
+    Binary.Size indice
+  | Fill indice ->
+    let+ indice = Assigned.find_memory assigned indice in
+    Binary.Fill indice
+  | Grow indice ->
+    let+ indice = Assigned.find_memory assigned indice in
+    Binary.Grow indice
+
+let rewrite_data_instr assigned : Text.data_instr -> Binary.data_instr Result.t
+    = function
+  | Drop id ->
+    let+ id = Assigned.find_data assigned id in
+    (Drop id : Binary.data_instr)
+
 let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
   (iexpr : Text.expr) : Binary.expr Annotated.t Result.t =
   (* block_ids handling *)
@@ -130,13 +399,62 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
     | Raw i -> i
     | Text name -> (
       match Hashtbl.find_opt seen_locals name with
-      | None -> assert false
-      | Some id -> id )
+      | Some id -> id
+      | None -> assert false )
   in
 
-  let rec body (loop_count, block_ids) (instr : Text.instr) :
-    Binary.instr Result.t =
-    match instr with
+  let rewrite_local_instr : Text.local_instr -> Binary.local_instr = function
+    | Set id ->
+      let id = find_local id in
+      Set id
+    | Get id ->
+      let id = find_local id in
+      Get id
+    | Tee id ->
+      let id = find_local id in
+      Tee id
+  in
+
+  let rec rewrite_instr (loop_count, block_ids) :
+    Text.instr -> Binary.instr Result.t = function
+    | I32 i ->
+      let+ i = rewrite_i32_instr assigned i in
+      Binary.I32 i
+    | I64 i ->
+      let+ i = rewrite_i64_instr assigned i in
+      Binary.I64 i
+    | F32 i ->
+      let+ i = rewrite_f32_instr assigned i in
+      Binary.F32 i
+    | F64 i ->
+      let+ i = rewrite_f64_instr assigned i in
+      Binary.F64 i
+    | V128 i -> Ok (Binary.V128 i)
+    | I8x16 i -> Ok (Binary.I8x16 i)
+    | I16x8 i -> Ok (Binary.I16x8 i)
+    | I32x4 i -> Ok (Binary.I32x4 i)
+    | I64x2 i -> Ok (Binary.I64x2 i)
+    | Ref i ->
+      let+ i = rewrite_ref_instr assigned i in
+      Binary.Ref i
+    | Local i ->
+      let i = rewrite_local_instr i in
+      Ok (Binary.Local i)
+    | Global i ->
+      let+ i = rewrite_global_instr assigned i in
+      Binary.Global i
+    | Table i ->
+      let+ i = rewrite_table_instr assigned i in
+      Binary.Table i
+    | Elem i ->
+      let+ i = rewrite_elem_instr assigned i in
+      Binary.Elem i
+    | Memory i ->
+      let+ i = rewrite_memory_instr assigned i in
+      Binary.Memory i
+    | Data i ->
+      let+ i = rewrite_data_instr assigned i in
+      Binary.Data i
     | Br_table (ids, id) ->
       let block_id_to_raw = block_id_to_raw (loop_count, block_ids) in
       let* ids = array_map block_id_to_raw ids in
@@ -160,15 +478,6 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
     | Return_call id ->
       let+ id = Assigned.find_func assigned id in
       Binary.Return_call id
-    | Local (Set id) ->
-      let id = find_local id in
-      Ok (Local (Set id))
-    | Local (Get id) ->
-      let id = find_local id in
-      Ok (Local (Get id))
-    | Local (Tee id) ->
-      let id = find_local id in
-      Ok (Local (Tee id))
     | If_else (id, bt, e1, e2) ->
       let* bt = block_ty_opt_rewrite bt in
       let block_ids = id :: block_ids in
@@ -197,48 +506,6 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
     | Return_call_ref bt ->
       let+ _, bt = rewrite_block_type assigned bt in
       Binary.Return_call_ref bt
-    | Global (Set id) ->
-      let+ idx = Assigned.find_global assigned id in
-      Binary.Global (Set idx)
-    | Global (Get id) ->
-      let* idx = Assigned.find_global assigned id in
-      Ok (Binary.Global (Get idx))
-    | Ref (Func id) ->
-      let+ id = Assigned.find_func assigned id in
-      Binary.Ref (Func id)
-    | Table (Size id) ->
-      let+ id = Assigned.find_table assigned id in
-      Binary.Table (Size id)
-    | Table (Get id) ->
-      let+ id = Assigned.find_table assigned id in
-      Binary.Table (Get id)
-    | Table (Set id) ->
-      let+ id = Assigned.find_table assigned id in
-      Binary.Table (Set id)
-    | Table (Grow id) ->
-      let+ id = Assigned.find_table assigned id in
-      Binary.Table (Grow id)
-    | Table (Init (i, i')) ->
-      let* table = Assigned.find_table assigned i in
-      let+ elem = Assigned.find_elem assigned i' in
-      Binary.Table (Init (table, elem))
-    | Table (Fill id) ->
-      let+ id = Assigned.find_table assigned id in
-      Binary.Table (Fill id)
-    | Table (Copy (i, i')) ->
-      let* table = Assigned.find_table assigned i in
-      let+ table' = Assigned.find_table assigned i' in
-      Binary.Table (Copy (table, table'))
-    | Memory (Init (memidx, dataidx)) ->
-      let* memidx = Assigned.find_memory assigned memidx in
-      let+ dataidx = Assigned.find_data assigned dataidx in
-      Binary.Memory (Init (memidx, dataidx))
-    | Data (Drop id) ->
-      let+ id = Assigned.find_data assigned id in
-      Binary.Data (Drop id)
-    | Elem (Drop id) ->
-      let+ id = Assigned.find_elem assigned id in
-      Binary.Elem (Drop id)
     | Select typ ->
       begin match typ with
       | None -> Ok (Binary.Select None)
@@ -247,101 +514,18 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
         Binary.Select (Some [ t ])
       | Some [] | Some (_ :: _ :: _) -> Error `Invalid_result_arity
       end
-    | I_unop (nn, op) -> Ok (Binary.I_unop (nn, op))
-    | I_binop (nn, op) -> Ok (I_binop (nn, op))
-    | I_testop (nn, op) -> Ok (Binary.I_testop (nn, op))
-    | I_relop (nn, op) -> Ok (I_relop (nn, op))
-    | F_unop (nn, op) -> Ok (Binary.F_unop (nn, op))
-    | F_relop (nn, op) -> Ok (F_relop (nn, op))
-    | I32_wrap_i64 -> Ok Binary.I32_wrap_i64
-    | F_reinterpret_i (nn1, nn2) -> Ok (F_reinterpret_i (nn1, nn2))
-    | I_reinterpret_f (nn1, nn2) -> Ok (I_reinterpret_f (nn1, nn2))
-    | I64_extend_i32 sx -> Ok (Binary.I64_extend_i32 sx)
-    | I64_extend32_s -> Ok Binary.I64_extend32_s
-    | F32_demote_f64 -> Ok Binary.F32_demote_f64
-    | I_extend8_s nn -> Ok (I_extend8_s nn)
-    | I_extend16_s nn -> Ok (I_extend16_s nn)
-    | F64_promote_f32 -> Ok Binary.F64_promote_f32
-    | F_convert_i (nn1, nn2, sx) -> Ok (Binary.F_convert_i (nn1, nn2, sx))
-    | I_trunc_f (nn1, nn2, sx) -> Ok (Binary.I_trunc_f (nn1, nn2, sx))
-    | I_trunc_sat_f (nn1, nn2, sx) -> Ok (Binary.I_trunc_sat_f (nn1, nn2, sx))
-    | Ref_as_non_null -> Ok Binary.Ref_as_non_null
-    | Ref_is_null -> Ok Binary.Ref_is_null
-    | F_binop (nn, op) -> Ok (Binary.F_binop (nn, op))
-    | F32_const v -> Ok (Binary.F32_const v)
-    | F64_const v -> Ok (Binary.F64_const v)
-    | I32_const v -> Ok (Binary.I32_const v)
-    | I64_const v -> Ok (Binary.I64_const v)
-    | V128_const v -> Ok (Binary.V128_const v)
     | Unreachable -> Ok Binary.Unreachable
     | Drop -> Ok Binary.Drop
     | Nop -> Ok Binary.Nop
     | Return -> Ok Binary.Return
     | Extern_externalize -> Ok Binary.Extern_externalize
     | Extern_internalize -> Ok Binary.Extern_internalize
-    | I_load8 (id, nn, sx, memarg) ->
-      let* memarg = rewrite_memarg memarg in
-      let+ id = Assigned.find_memory assigned id in
-      Binary.I_load8 (id, nn, sx, memarg)
-    | I_store8 (id, nn, memarg) ->
-      let* memarg = rewrite_memarg memarg in
-      let+ id = Assigned.find_memory assigned id in
-      Binary.I_store8 (id, nn, memarg)
-    | I_load16 (id, nn, sx, memarg) ->
-      let* memarg = rewrite_memarg memarg in
-      let+ id = Assigned.find_memory assigned id in
-      Binary.I_load16 (id, nn, sx, memarg)
-    | I_store16 (id, nn, memarg) ->
-      let* memarg = rewrite_memarg memarg in
-      let+ id = Assigned.find_memory assigned id in
-      Binary.I_store16 (id, nn, memarg)
-    | I64_load32 (id, sx, memarg) ->
-      let* memarg = rewrite_memarg memarg in
-      let+ id = Assigned.find_memory assigned id in
-      Binary.I64_load32 (id, sx, memarg)
-    | I64_store32 (id, memarg) ->
-      let* memarg = rewrite_memarg memarg in
-      let+ id = Assigned.find_memory assigned id in
-      Binary.I64_store32 (id, memarg)
-    | I_load (id, nn, memarg) ->
-      let* memarg = rewrite_memarg memarg in
-      let+ id = Assigned.find_memory assigned id in
-      Binary.I_load (id, nn, memarg)
-    | F_load (id, nn, memarg) ->
-      let* memarg = rewrite_memarg memarg in
-      let+ id = Assigned.find_memory assigned id in
-      Binary.F_load (id, nn, memarg)
-    | F_store (id, nn, memarg) ->
-      let* memarg = rewrite_memarg memarg in
-      let+ id = Assigned.find_memory assigned id in
-      Binary.F_store (id, nn, memarg)
-    | I_store (id, nn, memarg) ->
-      let* memarg = rewrite_memarg memarg in
-      let+ id = Assigned.find_memory assigned id in
-      Binary.I_store (id, nn, memarg)
-    | Memory_copy (id1, id2) ->
-      let* id1 = Assigned.find_memory assigned id1 in
-      let+ id2 = Assigned.find_memory assigned id2 in
-      Binary.Memory_copy (id1, id2)
-    | Memory_size id ->
-      let+ id = Assigned.find_memory assigned id in
-      Binary.Memory_size id
-    | Memory_fill id ->
-      let+ id = Assigned.find_memory assigned id in
-      Binary.Memory_fill id
-    | Memory_grow id ->
-      let+ id = Assigned.find_memory assigned id in
-      Binary.Memory_grow id
-    | V_ibinop (shape, op) -> Ok (Binary.V_ibinop (shape, op))
-    | Ref_null t ->
-      let* t = rewrite_heap_type assigned t in
-      Ok (Binary.Ref_null t)
   and expr (e : Text.expr) (loop_count, block_ids) :
     Binary.expr Annotated.t Result.t =
     let+ e =
       list_map
         (fun i ->
-          let+ i = body (loop_count, block_ids) i in
+          let+ i = rewrite_instr (loop_count, block_ids) i in
           Annotated.dummy i )
         e
     in
