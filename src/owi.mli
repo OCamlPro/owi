@@ -217,12 +217,6 @@ module Text : sig
 
   val pp_nn : nn Fmt.t
 
-  type nonrec ishape =
-    | I8x16
-    | I16x8
-    | I32x4
-    | I64x2
-
   type nonrec fshape =
     | F32x4
     | F64x8
