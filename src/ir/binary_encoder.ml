@@ -72,7 +72,7 @@ let write_char_indice buf c idx =
 let write_reftype buf nullable ht =
   let is_null =
     match nullable with
-    | Text.Null -> true
+    | (Text.Null : Text.nullable) -> true
     | No_null ->
       Buffer.add_char buf '\x64';
       false
@@ -225,9 +225,352 @@ let write_fd buf i =
   Buffer.add_char buf '\xFD';
   write_u32_of_int buf i
 
+let write_i32_instr buf : Binary.i32_instr -> _ =
+  let add_char c = Buffer.add_char buf c in
+  function
+  | Load (idx, memarg) ->
+    add_char '\x28';
+    write_memarg buf idx memarg
+  | Load8 (idx, S, memarg) ->
+    add_char '\x2C';
+    write_memarg buf idx memarg
+  | Load8 (idx, U, memarg) ->
+    add_char '\x2D';
+    write_memarg buf idx memarg
+  | Load16 (idx, S, memarg) ->
+    add_char '\x2E';
+    write_memarg buf idx memarg
+  | Load16 (idx, U, memarg) ->
+    add_char '\x2F';
+    write_memarg buf idx memarg
+  | Store (idx, memarg) ->
+    add_char '\x36';
+    write_memarg buf idx memarg
+  | Store8 (idx, memarg) ->
+    add_char '\x3A';
+    write_memarg buf idx memarg
+  | Store16 (idx, memarg) ->
+    add_char '\x3B';
+    write_memarg buf idx memarg
+  | Const i ->
+    add_char '\x41';
+    write_s32 buf i
+  | Eqz -> add_char '\x45'
+  | Eq -> add_char '\x46'
+  | Ne -> add_char '\x47'
+  | Lt S -> add_char '\x48'
+  | Lt U -> add_char '\x49'
+  | Gt S -> add_char '\x4A'
+  | Gt U -> add_char '\x4B'
+  | Le S -> add_char '\x4C'
+  | Le U -> add_char '\x4D'
+  | Ge S -> add_char '\x4E'
+  | Ge U -> add_char '\x4F'
+  | Clz -> add_char '\x67'
+  | Ctz -> add_char '\x68'
+  | Popcnt -> add_char '\x69'
+  | Add -> add_char '\x6A'
+  | Sub -> add_char '\x6B'
+  | Mul -> add_char '\x6C'
+  | Div S -> add_char '\x6D'
+  | Div U -> add_char '\x6E'
+  | Rem S -> add_char '\x6F'
+  | Rem U -> add_char '\x70'
+  | And -> add_char '\x71'
+  | Or -> add_char '\x72'
+  | Xor -> add_char '\x73'
+  | Shl -> add_char '\x74'
+  | Shr S -> add_char '\x75'
+  | Shr U -> add_char '\x76'
+  | Rotl -> add_char '\x77'
+  | Rotr -> add_char '\x78'
+  | Wrap_i64 -> add_char '\xA7'
+  | Trunc_f (S32, S) -> add_char '\xA8'
+  | Trunc_f (S32, U) -> add_char '\xA9'
+  | Trunc_f (S64, S) -> add_char '\xAA'
+  | Trunc_f (S64, U) -> add_char '\xAB'
+  | Reinterpret_f S32 -> add_char '\xBC'
+  | Reinterpret_f S64 -> (* TODO *) assert false
+  | Extend8_s -> add_char '\xC0'
+  | Extend16_s -> add_char '\xC1'
+  | Trunc_sat_f (S32, S) -> write_fc buf 0
+  | Trunc_sat_f (S32, U) -> write_fc buf 1
+  | Trunc_sat_f (S64, S) -> write_fc buf 2
+  | Trunc_sat_f (S64, U) -> write_fc buf 3
+
+let write_i64_instr buf : Binary.i64_instr -> _ =
+  let add_char c = Buffer.add_char buf c in
+  function
+  | Load (idx, memarg) ->
+    add_char '\x29';
+    write_memarg buf idx memarg
+  | Load8 (idx, S, memarg) ->
+    add_char '\x30';
+    write_memarg buf idx memarg
+  | Load8 (idx, U, memarg) ->
+    add_char '\x31';
+    write_memarg buf idx memarg
+  | Load16 (idx, S, memarg) ->
+    add_char '\x32';
+    write_memarg buf idx memarg
+  | Load16 (idx, U, memarg) ->
+    add_char '\x33';
+    write_memarg buf idx memarg
+  | Load32 (idx, S, memarg) ->
+    add_char '\x34';
+    write_memarg buf idx memarg
+  | Load32 (idx, U, memarg) ->
+    add_char '\x35';
+    write_memarg buf idx memarg
+  | Store (idx, memarg) ->
+    add_char '\x37';
+    write_memarg buf idx memarg
+  | Store8 (idx, memarg) ->
+    add_char '\x3C';
+    write_memarg buf idx memarg
+  | Store16 (idx, memarg) ->
+    add_char '\x3D';
+    write_memarg buf idx memarg
+  | Store32 (idx, memarg) ->
+    add_char '\x3E';
+    write_memarg buf idx memarg
+  | Const i ->
+    add_char '\x42';
+    write_s64 buf i
+  | Eqz -> add_char '\x50'
+  | Eq -> add_char '\x51'
+  | Ne -> add_char '\x52'
+  | Lt S -> add_char '\x53'
+  | Lt U -> add_char '\x54'
+  | Gt S -> add_char '\x55'
+  | Gt U -> add_char '\x56'
+  | Le S -> add_char '\x57'
+  | Le U -> add_char '\x58'
+  | Ge S -> add_char '\x59'
+  | Ge U -> add_char '\x5A'
+  | Clz -> add_char '\x79'
+  | Ctz -> add_char '\x7A'
+  | Popcnt -> add_char '\x7B'
+  | Add -> add_char '\x7C'
+  | Sub -> add_char '\x7D'
+  | Mul -> add_char '\x7E'
+  | Div S -> add_char '\x7F'
+  | Div U -> add_char '\x80'
+  | Rem S -> add_char '\x81'
+  | Rem U -> add_char '\x82'
+  | And -> add_char '\x83'
+  | Or -> add_char '\x84'
+  | Xor -> add_char '\x85'
+  | Shl -> add_char '\x86'
+  | Shr S -> add_char '\x87'
+  | Shr U -> add_char '\x88'
+  | Rotl -> add_char '\x89'
+  | Rotr -> add_char '\x8A'
+  | Extend_i32 S -> add_char '\xAC'
+  | Extend_i32 U -> add_char '\xAD'
+  | Trunc_f (S32, S) -> add_char '\xAE'
+  | Trunc_f (S32, U) -> add_char '\xAF'
+  | Trunc_f (S64, S) -> add_char '\xB0'
+  | Trunc_f (S64, U) -> add_char '\xB1'
+  | Reinterpret_f S32 ->
+    (* TODO *)
+    assert false
+  | Reinterpret_f S64 -> add_char '\xBD'
+  | Extend8_s -> add_char '\xC2'
+  | Extend16_s -> add_char '\xC3'
+  | Extend32_s -> add_char '\xC4'
+  | Trunc_sat_f (S32, S) -> write_fc buf 4
+  | Trunc_sat_f (S32, U) -> write_fc buf 5
+  | Trunc_sat_f (S64, S) -> write_fc buf 6
+  | Trunc_sat_f (S64, U) -> write_fc buf 7
+
+let write_f32_instr buf : Binary.f32_instr -> _ =
+  let add_char c = Buffer.add_char buf c in
+  function
+  | Load (idx, memarg) ->
+    add_char '\x2A';
+    write_memarg buf idx memarg
+  | Store (idx, memarg) ->
+    add_char '\x38';
+    write_memarg buf idx memarg
+  | Const f ->
+    add_char '\x43';
+    write_f32 buf f
+  | Eq -> add_char '\x5B'
+  | Ne -> add_char '\x5C'
+  | Lt -> add_char '\x5D'
+  | Gt -> add_char '\x5E'
+  | Le -> add_char '\x5F'
+  | Ge -> add_char '\x60'
+  | Abs -> add_char '\x8B'
+  | Neg -> add_char '\x8C'
+  | Ceil -> add_char '\x8D'
+  | Floor -> add_char '\x8E'
+  | Trunc -> add_char '\x8F'
+  | Nearest -> add_char '\x90'
+  | Sqrt -> add_char '\x91'
+  | Add -> add_char '\x92'
+  | Sub -> add_char '\x93'
+  | Mul -> add_char '\x94'
+  | Div -> add_char '\x95'
+  | Min -> add_char '\x96'
+  | Max -> add_char '\x97'
+  | Copysign -> add_char '\x98'
+  | Convert_i (S32, S) -> add_char '\xB2'
+  | Convert_i (S32, U) -> add_char '\xB3'
+  | Convert_i (S64, S) -> add_char '\xB4'
+  | Convert_i (S64, U) -> add_char '\xB5'
+  | Demote_f64 -> add_char '\xB6'
+  | Reinterpret_i S32 -> add_char '\xBE'
+  | Reinterpret_i S64 -> (* TODO *) assert false
+
+let write_f64_instr buf : Binary.f64_instr -> _ =
+  let add_char c = Buffer.add_char buf c in
+  function
+  | Load (idx, memarg) ->
+    add_char '\x2B';
+    write_memarg buf idx memarg
+  | Store (idx, memarg) ->
+    add_char '\x39';
+    write_memarg buf idx memarg
+  | Const f ->
+    add_char '\x44';
+    write_f64 buf f
+  | Eq -> add_char '\x61'
+  | Ne -> add_char '\x62'
+  | Lt -> add_char '\x63'
+  | Gt -> add_char '\x64'
+  | Le -> add_char '\x65'
+  | Ge -> add_char '\x66'
+  | Abs -> add_char '\x99'
+  | Neg -> add_char '\x9A'
+  | Ceil -> add_char '\x9B'
+  | Floor -> add_char '\x9C'
+  | Trunc -> add_char '\x9D'
+  | Nearest -> add_char '\x9E'
+  | Sqrt -> add_char '\x9F'
+  | Add -> add_char '\xA0'
+  | Sub -> add_char '\xA1'
+  | Mul -> add_char '\xA2'
+  | Div -> add_char '\xA3'
+  | Min -> add_char '\xA4'
+  | Max -> add_char '\xA5'
+  | Copysign -> add_char '\xA6'
+  | Convert_i (S32, S) -> add_char '\xB7'
+  | Convert_i (S32, U) -> add_char '\xB8'
+  | Convert_i (S64, S) -> add_char '\xB9'
+  | Convert_i (S64, U) -> add_char '\xBA'
+  | Promote_f32 -> add_char '\xBB'
+  | Reinterpret_i S32 -> (* TODO *) assert false
+  | Reinterpret_i S64 -> add_char '\xBF'
+
+let write_v128_instr buf : Text.v128_instr -> _ = function
+  | Const v ->
+    write_fd buf 12;
+    let a, b = Concrete_v128.to_i64x2 v in
+    write_bytes_8 buf a;
+    write_bytes_8 buf b
+
+let write_i8x16_instr buf : Text.i8x16_instr -> _ = function
+  | Add -> write_fd buf 110
+  | Sub -> write_fd buf 113
+
+let write_i16x8_instr buf : Text.i16x8_instr -> _ = function
+  | Add -> write_fd buf 142
+  | Sub -> write_fd buf 145
+
+let write_i32x4_instr buf : Text.i32x4_instr -> _ = function
+  | Add -> write_fd buf 174
+  | Sub -> write_fd buf 177
+
+let write_i64x2_instr buf : Text.i64x2_instr -> _ = function
+  | Add -> write_fd buf 206
+  | Sub -> write_fd buf 209
+
+let write_ref_instr buf : Binary.ref_instr -> _ =
+  let add_char c = Buffer.add_char buf c in
+  function
+  | Null rt ->
+    add_char '\xD0';
+    write_reftype buf Text.Null rt
+  | Is_null -> add_char '\xD1'
+  | Func idx -> write_char_indice buf '\xD2' idx
+  | As_non_null -> add_char '\xD4'
+
+let write_local_instr buf : Binary.local_instr -> _ = function
+  | Get idx -> write_char_indice buf '\x20' idx
+  | Set idx -> write_char_indice buf '\x21' idx
+  | Tee idx -> write_char_indice buf '\x22' idx
+
+let write_global_instr buf : Binary.global_instr -> _ = function
+  | Get idx -> write_char_indice buf '\x23' idx
+  | Set idx -> write_char_indice buf '\x24' idx
+
+let write_table_instr buf : Binary.table_instr -> _ = function
+  | Get idx -> write_char_indice buf '\x25' idx
+  | Set idx -> write_char_indice buf '\x26' idx
+  | Init (tableidx, elemidx) ->
+    write_fc buf 12;
+    write_indice buf elemidx;
+    write_indice buf tableidx
+  | Copy (idx1, idx2) ->
+    write_fc buf 14;
+    write_indice buf idx1;
+    write_indice buf idx2
+  | Grow idx ->
+    write_fc buf 15;
+    write_indice buf idx
+  | Size idx ->
+    write_fc buf 16;
+    write_indice buf idx
+  | Fill idx ->
+    write_fc buf 17;
+    write_indice buf idx
+
+let write_elem_instr buf : Binary.elem_instr -> _ = function
+  | Drop idx ->
+    write_fc buf 13;
+    write_indice buf idx
+
+let write_memory_instr buf : Binary.memory_instr -> _ = function
+  | Size idx -> write_char_indice buf '\x3F' idx
+  | Grow idx -> write_char_indice buf '\x40' idx
+  | Init (memidx, dataidx) ->
+    write_fc buf 8;
+    write_indice buf dataidx;
+    write_indice buf memidx
+  | Copy (id1, id2) ->
+    write_fc buf 10;
+    write_indice buf id1;
+    write_indice buf id2
+  | Fill idx ->
+    write_fc buf 11;
+    write_indice buf idx
+
+let write_data_instr buf : Binary.data_instr -> _ = function
+  | Drop idx ->
+    write_fc buf 9;
+    write_indice buf idx
+
 let rec write_instr buf instr =
   let add_char c = Buffer.add_char buf c in
   match instr.Annotated.raw with
+  | I32 i -> write_i32_instr buf i
+  | I64 i -> write_i64_instr buf i
+  | F32 i -> write_f32_instr buf i
+  | F64 i -> write_f64_instr buf i
+  | V128 i -> write_v128_instr buf i
+  | I8x16 i -> write_i8x16_instr buf i
+  | I16x8 i -> write_i16x8_instr buf i
+  | I32x4 i -> write_i32x4_instr buf i
+  | I64x2 i -> write_i64x2_instr buf i
+  | Ref i -> write_ref_instr buf i
+  | Local i -> write_local_instr buf i
+  | Global i -> write_global_instr buf i
+  | Table i -> write_table_instr buf i
+  | Elem i -> write_elem_instr buf i
+  | Memory i -> write_memory_instr buf i
+  | Data i -> write_data_instr buf i
   | Unreachable -> add_char '\x00'
   | Nop -> add_char '\x01'
   | Block (_str, bt, expr) ->
@@ -266,288 +609,9 @@ let rec write_instr buf instr =
   | Select (Some vts) ->
     add_char '\x1C';
     List.iter (write_valtype buf) vts
-  | Local_get idx -> write_char_indice buf '\x20' idx
-  | Local_set idx -> write_char_indice buf '\x21' idx
-  | Local_tee idx -> write_char_indice buf '\x22' idx
-  | Global_get idx -> write_char_indice buf '\x23' idx
-  | Global_set idx -> write_char_indice buf '\x24' idx
-  | Table_get idx -> write_char_indice buf '\x25' idx
-  | Table_set idx -> write_char_indice buf '\x26' idx
-  | I_load (idx, S32, memarg) ->
-    add_char '\x28';
-    write_memarg buf idx memarg
-  | I_load (idx, S64, memarg) ->
-    add_char '\x29';
-    write_memarg buf idx memarg
-  | F_load (idx, S32, memarg) ->
-    add_char '\x2A';
-    write_memarg buf idx memarg
-  | F_load (idx, S64, memarg) ->
-    add_char '\x2B';
-    write_memarg buf idx memarg
-  | I_load8 (idx, S32, S, memarg) ->
-    add_char '\x2C';
-    write_memarg buf idx memarg
-  | I_load8 (idx, S32, U, memarg) ->
-    add_char '\x2D';
-    write_memarg buf idx memarg
-  | I_load16 (idx, S32, S, memarg) ->
-    add_char '\x2E';
-    write_memarg buf idx memarg
-  | I_load16 (idx, S32, U, memarg) ->
-    add_char '\x2F';
-    write_memarg buf idx memarg
-  | I_load8 (idx, S64, S, memarg) ->
-    add_char '\x30';
-    write_memarg buf idx memarg
-  | I_load8 (idx, S64, U, memarg) ->
-    add_char '\x31';
-    write_memarg buf idx memarg
-  | I_load16 (idx, S64, S, memarg) ->
-    add_char '\x32';
-    write_memarg buf idx memarg
-  | I_load16 (idx, S64, U, memarg) ->
-    add_char '\x33';
-    write_memarg buf idx memarg
-  | I64_load32 (idx, S, memarg) ->
-    add_char '\x34';
-    write_memarg buf idx memarg
-  | I64_load32 (idx, U, memarg) ->
-    add_char '\x35';
-    write_memarg buf idx memarg
-  | I_store (idx, S32, memarg) ->
-    add_char '\x36';
-    write_memarg buf idx memarg
-  | I_store (idx, S64, memarg) ->
-    add_char '\x37';
-    write_memarg buf idx memarg
-  | F_store (idx, S32, memarg) ->
-    add_char '\x38';
-    write_memarg buf idx memarg
-  | F_store (idx, S64, memarg) ->
-    add_char '\x39';
-    write_memarg buf idx memarg
-  | I_store8 (idx, S32, memarg) ->
-    add_char '\x3A';
-    write_memarg buf idx memarg
-  | I_store16 (idx, S32, memarg) ->
-    add_char '\x3B';
-    write_memarg buf idx memarg
-  | I_store8 (idx, S64, memarg) ->
-    add_char '\x3C';
-    write_memarg buf idx memarg
-  | I_store16 (idx, S64, memarg) ->
-    add_char '\x3D';
-    write_memarg buf idx memarg
-  | I64_store32 (idx, memarg) ->
-    add_char '\x3E';
-    write_memarg buf idx memarg
-  | Memory_size idx -> write_char_indice buf '\x3F' idx
-  | Memory_grow idx -> write_char_indice buf '\x40' idx
-  | I32_const i ->
-    add_char '\x41';
-    write_s32 buf i
-  | I64_const i ->
-    add_char '\x42';
-    write_s64 buf i
-  | F32_const f ->
-    add_char '\x43';
-    write_f32 buf f
-  | F64_const f ->
-    add_char '\x44';
-    write_f64 buf f
-  | I_testop (S32, Eqz) -> add_char '\x45'
-  | I_relop (S32, Eq) -> add_char '\x46'
-  | I_relop (S32, Ne) -> add_char '\x47'
-  | I_relop (S32, Lt S) -> add_char '\x48'
-  | I_relop (S32, Lt U) -> add_char '\x49'
-  | I_relop (S32, Gt S) -> add_char '\x4A'
-  | I_relop (S32, Gt U) -> add_char '\x4B'
-  | I_relop (S32, Le S) -> add_char '\x4C'
-  | I_relop (S32, Le U) -> add_char '\x4D'
-  | I_relop (S32, Ge S) -> add_char '\x4E'
-  | I_relop (S32, Ge U) -> add_char '\x4F'
-  | I_testop (S64, Eqz) -> add_char '\x50'
-  | I_relop (S64, Eq) -> add_char '\x51'
-  | I_relop (S64, Ne) -> add_char '\x52'
-  | I_relop (S64, Lt S) -> add_char '\x53'
-  | I_relop (S64, Lt U) -> add_char '\x54'
-  | I_relop (S64, Gt S) -> add_char '\x55'
-  | I_relop (S64, Gt U) -> add_char '\x56'
-  | I_relop (S64, Le S) -> add_char '\x57'
-  | I_relop (S64, Le U) -> add_char '\x58'
-  | I_relop (S64, Ge S) -> add_char '\x59'
-  | I_relop (S64, Ge U) -> add_char '\x5A'
-  | F_relop (S32, Eq) -> add_char '\x5B'
-  | F_relop (S32, Ne) -> add_char '\x5C'
-  | F_relop (S32, Lt) -> add_char '\x5D'
-  | F_relop (S32, Gt) -> add_char '\x5E'
-  | F_relop (S32, Le) -> add_char '\x5F'
-  | F_relop (S32, Ge) -> add_char '\x60'
-  | F_relop (S64, Eq) -> add_char '\x61'
-  | F_relop (S64, Ne) -> add_char '\x62'
-  | F_relop (S64, Lt) -> add_char '\x63'
-  | F_relop (S64, Gt) -> add_char '\x64'
-  | F_relop (S64, Le) -> add_char '\x65'
-  | F_relop (S64, Ge) -> add_char '\x66'
-  | I_unop (S32, Clz) -> add_char '\x67'
-  | I_unop (S32, Ctz) -> add_char '\x68'
-  | I_unop (S32, Popcnt) -> add_char '\x69'
-  | I_binop (S32, Add) -> add_char '\x6A'
-  | I_binop (S32, Sub) -> add_char '\x6B'
-  | I_binop (S32, Mul) -> add_char '\x6C'
-  | I_binop (S32, Div S) -> add_char '\x6D'
-  | I_binop (S32, Div U) -> add_char '\x6E'
-  | I_binop (S32, Rem S) -> add_char '\x6F'
-  | I_binop (S32, Rem U) -> add_char '\x70'
-  | I_binop (S32, And) -> add_char '\x71'
-  | I_binop (S32, Or) -> add_char '\x72'
-  | I_binop (S32, Xor) -> add_char '\x73'
-  | I_binop (S32, Shl) -> add_char '\x74'
-  | I_binop (S32, Shr S) -> add_char '\x75'
-  | I_binop (S32, Shr U) -> add_char '\x76'
-  | I_binop (S32, Rotl) -> add_char '\x77'
-  | I_binop (S32, Rotr) -> add_char '\x78'
-  | I_unop (S64, Clz) -> add_char '\x79'
-  | I_unop (S64, Ctz) -> add_char '\x7A'
-  | I_unop (S64, Popcnt) -> add_char '\x7B'
-  | I_binop (S64, Add) -> add_char '\x7C'
-  | I_binop (S64, Sub) -> add_char '\x7D'
-  | I_binop (S64, Mul) -> add_char '\x7E'
-  | I_binop (S64, Div S) -> add_char '\x7F'
-  | I_binop (S64, Div U) -> add_char '\x80'
-  | I_binop (S64, Rem S) -> add_char '\x81'
-  | I_binop (S64, Rem U) -> add_char '\x82'
-  | I_binop (S64, And) -> add_char '\x83'
-  | I_binop (S64, Or) -> add_char '\x84'
-  | I_binop (S64, Xor) -> add_char '\x85'
-  | I_binop (S64, Shl) -> add_char '\x86'
-  | I_binop (S64, Shr S) -> add_char '\x87'
-  | I_binop (S64, Shr U) -> add_char '\x88'
-  | I_binop (S64, Rotl) -> add_char '\x89'
-  | I_binop (S64, Rotr) -> add_char '\x8A'
-  | F_unop (S32, Abs) -> add_char '\x8B'
-  | F_unop (S32, Neg) -> add_char '\x8C'
-  | F_unop (S32, Ceil) -> add_char '\x8D'
-  | F_unop (S32, Floor) -> add_char '\x8E'
-  | F_unop (S32, Trunc) -> add_char '\x8F'
-  | F_unop (S32, Nearest) -> add_char '\x90'
-  | F_unop (S32, Sqrt) -> add_char '\x91'
-  | F_binop (S32, Add) -> add_char '\x92'
-  | F_binop (S32, Sub) -> add_char '\x93'
-  | F_binop (S32, Mul) -> add_char '\x94'
-  | F_binop (S32, Div) -> add_char '\x95'
-  | F_binop (S32, Min) -> add_char '\x96'
-  | F_binop (S32, Max) -> add_char '\x97'
-  | F_binop (S32, Copysign) -> add_char '\x98'
-  | F_unop (S64, Abs) -> add_char '\x99'
-  | F_unop (S64, Neg) -> add_char '\x9A'
-  | F_unop (S64, Ceil) -> add_char '\x9B'
-  | F_unop (S64, Floor) -> add_char '\x9C'
-  | F_unop (S64, Trunc) -> add_char '\x9D'
-  | F_unop (S64, Nearest) -> add_char '\x9E'
-  | F_unop (S64, Sqrt) -> add_char '\x9F'
-  | F_binop (S64, Add) -> add_char '\xA0'
-  | F_binop (S64, Sub) -> add_char '\xA1'
-  | F_binop (S64, Mul) -> add_char '\xA2'
-  | F_binop (S64, Div) -> add_char '\xA3'
-  | F_binop (S64, Min) -> add_char '\xA4'
-  | F_binop (S64, Max) -> add_char '\xA5'
-  | F_binop (S64, Copysign) -> add_char '\xA6'
-  | I32_wrap_i64 -> add_char '\xA7'
-  | I_trunc_f (S32, S32, S) -> add_char '\xA8'
-  | I_trunc_f (S32, S32, U) -> add_char '\xA9'
-  | I_trunc_f (S32, S64, S) -> add_char '\xAA'
-  | I_trunc_f (S32, S64, U) -> add_char '\xAB'
-  | I64_extend_i32 S -> add_char '\xAC'
-  | I64_extend_i32 U -> add_char '\xAD'
-  | I_trunc_f (S64, S32, S) -> add_char '\xAE'
-  | I_trunc_f (S64, S32, U) -> add_char '\xAF'
-  | I_trunc_f (S64, S64, S) -> add_char '\xB0'
-  | I_trunc_f (S64, S64, U) -> add_char '\xB1'
-  | F_convert_i (S32, S32, S) -> add_char '\xB2'
-  | F_convert_i (S32, S32, U) -> add_char '\xB3'
-  | F_convert_i (S32, S64, S) -> add_char '\xB4'
-  | F_convert_i (S32, S64, U) -> add_char '\xB5'
-  | F32_demote_f64 -> add_char '\xB6'
-  | F_convert_i (S64, S32, S) -> add_char '\xB7'
-  | F_convert_i (S64, S32, U) -> add_char '\xB8'
-  | F_convert_i (S64, S64, S) -> add_char '\xB9'
-  | F_convert_i (S64, S64, U) -> add_char '\xBA'
-  | F64_promote_f32 -> add_char '\xBB'
-  | I_reinterpret_f (S32, S32) -> add_char '\xBC'
-  | I_reinterpret_f (S64, S64) -> add_char '\xBD'
-  | F_reinterpret_i (S32, S32) -> add_char '\xBE'
-  | F_reinterpret_i (S64, S64) -> add_char '\xBF'
-  | I_extend8_s S32 -> add_char '\xC0'
-  | I_extend16_s S32 -> add_char '\xC1'
-  | I_extend8_s S64 -> add_char '\xC2'
-  | I_extend16_s S64 -> add_char '\xC3'
-  | I64_extend32_s -> add_char '\xC4'
-  | Ref_null rt ->
-    add_char '\xD0';
-    write_reftype buf Text.Null rt
-  | Ref_is_null -> add_char '\xD1'
-  | Ref_as_non_null -> add_char '\xD4'
-  | Ref_func idx -> write_char_indice buf '\xD2' idx
-  | I_trunc_sat_f (S32, S32, S) -> write_fc buf 0
-  | I_trunc_sat_f (S32, S32, U) -> write_fc buf 1
-  | I_trunc_sat_f (S32, S64, S) -> write_fc buf 2
-  | I_trunc_sat_f (S32, S64, U) -> write_fc buf 3
-  | I_trunc_sat_f (S64, S32, S) -> write_fc buf 4
-  | I_trunc_sat_f (S64, S32, U) -> write_fc buf 5
-  | I_trunc_sat_f (S64, S64, S) -> write_fc buf 6
-  | I_trunc_sat_f (S64, S64, U) -> write_fc buf 7
-  | Memory_init (memidx, dataidx) ->
-    write_fc buf 8;
-    write_indice buf dataidx;
-    write_indice buf memidx
-  | Data_drop idx ->
-    write_fc buf 9;
-    write_indice buf idx
-  | Memory_copy (id1, id2) ->
-    write_fc buf 10;
-    write_indice buf id1;
-    write_indice buf id2
-  | Memory_fill idx ->
-    write_fc buf 11;
-    write_indice buf idx
-  | Table_init (tableidx, elemidx) ->
-    write_fc buf 12;
-    write_indice buf elemidx;
-    write_indice buf tableidx
-  | Elem_drop idx ->
-    write_fc buf 13;
-    write_indice buf idx
-  | Table_copy (idx1, idx2) ->
-    write_fc buf 14;
-    write_indice buf idx1;
-    write_indice buf idx2
-  | Table_grow idx ->
-    write_fc buf 15;
-    write_indice buf idx
-  | Table_size idx ->
-    write_fc buf 16;
-    write_indice buf idx
-  | Table_fill idx ->
-    write_fc buf 17;
-    write_indice buf idx
-  | V128_const v ->
-    write_fd buf 12;
-    let a, b = Concrete_v128.to_i64x2 v in
-    write_bytes_8 buf a;
-    write_bytes_8 buf b
-  | V_ibinop (I8x16, Add) -> write_fd buf 110
-  | V_ibinop (I8x16, Sub) -> write_fd buf 113
-  | V_ibinop (I16x8, Add) -> write_fd buf 142
-  | V_ibinop (I16x8, Sub) -> write_fd buf 145
-  | V_ibinop (I32x4, Add) -> write_fd buf 174
-  | V_ibinop (I32x4, Sub) -> write_fd buf 177
-  | V_ibinop (I64x2, Add) -> write_fd buf 206
-  | V_ibinop (I64x2, Sub) -> write_fd buf 209
-  | I_reinterpret_f _ | F_reinterpret_i _ | Return_call _
-  | Return_call_indirect _ | Return_call_ref _ | Call_ref _ | Extern_externalize
-  | Extern_internalize ->
+  | Return_call _ | Return_call_indirect _ | Return_call_ref _ | Call_ref _
+  | Extern_externalize | Extern_internalize ->
+    (* TODO *)
     assert false
 
 and write_expr buf expr ~end_op_code =
@@ -610,7 +674,7 @@ let write_element buf ({ typ = nullable, ht; init; mode; _ } : Elem.t) =
     let is_ref_func = ref true in
     encode_vector_list buf init (fun buf expr ->
       match expr.Annotated.raw with
-      | [ { Annotated.raw = Ref_func idx; _ } ] -> write_indice buf idx
+      | [ { Annotated.raw = Ref (Func idx); _ } ] -> write_indice buf idx
       | _ ->
         write_expr buf expr ~end_op_code:None;
         is_ref_func := false );
