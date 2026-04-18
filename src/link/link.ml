@@ -88,28 +88,16 @@ module Eval_const = struct
 
   let i32_instr stack : Binary.i32_instr -> _ = function
     | Const i -> Stack.push_i32 stack i
-    | Add ->
-      let (n1, n2), stack = Stack.pop2_i32 stack in
-      Stack.push_i32 stack (I32.add n1 n2)
-    | Sub ->
-      let (n1, n2), stack = Stack.pop2_i32 stack in
-      Stack.push_i32 stack (I32.sub n1 n2)
-    | Mul ->
-      let (n1, n2), stack = Stack.pop2_i32 stack in
-      Stack.push_i32 stack (I32.mul n1 n2)
+    | Add -> Stack.apply_i32_i32_i32 stack I32.add
+    | Sub -> Stack.apply_i32_i32_i32 stack I32.sub
+    | Mul -> Stack.apply_i32_i32_i32 stack I32.mul
     | _ -> assert false
 
   let i64_instr stack : Binary.i64_instr -> _ = function
     | Const i -> Stack.push_i64 stack i
-    | Add ->
-      let (n1, n2), stack = Stack.pop2_i64 stack in
-      Stack.push_i64 stack (I64.add n1 n2)
-    | Sub ->
-      let (n1, n2), stack = Stack.pop2_i64 stack in
-      Stack.push_i64 stack (I64.sub n1 n2)
-    | Mul ->
-      let (n1, n2), stack = Stack.pop2_i64 stack in
-      Stack.push_i64 stack (I64.mul n1 n2)
+    | Add -> Stack.apply_i64_i64_i64 stack I64.add
+    | Sub -> Stack.apply_i64_i64_i64 stack I64.sub
+    | Mul -> Stack.apply_i64_i64_i64 stack I64.mul
     | _ -> assert false
 
   let instr env stack instr =
