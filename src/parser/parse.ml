@@ -282,8 +282,6 @@ let token_to_string = function
   | F32 -> "f32"
   | EXTERN_REF -> "externref"
   | NULL_EXTERN_REF -> "nullexternref"
-  | EXTERN_INTERNALIZE -> "extern.internalize"
-  | EXTERN_EXTERNALIZE -> "extern.externalize"
   | EXTERN -> "extern"
   | EXPORT -> "export"
   | EQ_REF -> "eqref"

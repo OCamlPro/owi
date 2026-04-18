@@ -388,8 +388,6 @@ let rec convert_instr : Binary.instr -> Text.instr = function
   | Drop -> Drop
   | Nop -> Nop
   | Return -> Return
-  | Extern_externalize -> Extern_externalize
-  | Extern_internalize -> Extern_internalize
 
 and convert_expr (e : Binary.expr Annotated.t) : Text.expr =
   List.map (fun i -> convert_instr i.Annotated.raw) e.raw

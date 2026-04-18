@@ -609,8 +609,7 @@ let rec write_instr buf instr =
   | Select (Some vts) ->
     add_char '\x1C';
     List.iter (write_valtype buf) vts
-  | Return_call _ | Return_call_indirect _ | Return_call_ref _ | Call_ref _
-  | Extern_externalize | Extern_internalize ->
+  | Return_call _ | Return_call_indirect _ | Return_call_ref _ | Call_ref _ ->
     (* TODO *)
     assert false
 

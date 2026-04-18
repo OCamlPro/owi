@@ -282,9 +282,6 @@ type instr =
   | Call of indice
   | Call_indirect of indice * block_type
   | Call_ref of indice
-  (* extern *)
-  | Extern_externalize
-  | Extern_internalize
 
 and expr = instr Annotated.t list
 

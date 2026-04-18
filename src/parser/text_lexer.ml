@@ -189,8 +189,6 @@ let keywords =
      ; ("extern", EXTERN)
      ; ("externref", EXTERN_REF)
      ; ("nullexternref", NULL_EXTERN_REF)
-     ; ("extern.externalize", EXTERN_EXTERNALIZE)
-     ; ("extern.internalize", EXTERN_INTERNALIZE)
      ; ("f32", F32)
      ; ("f32x4", F32X4)
      ; ("f32.abs", F32_ABS)

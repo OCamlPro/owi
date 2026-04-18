@@ -769,9 +769,6 @@ type instr =
   | Call of indice
   | Call_indirect of indice * block_type
   | Call_ref of indice
-  (* extern *)
-  | Extern_externalize
-  | Extern_internalize
 
 and expr = instr list
 
@@ -838,8 +835,6 @@ let rec pp_instr ~short ppf = function
   | Call_indirect (tbl_id, ty_id) ->
     pf ppf "call_indirect %a %a" pp_indice tbl_id pp_block_type ty_id
   | Call_ref ty_id -> pf ppf "call_ref %a" pp_indice ty_id
-  | Extern_externalize -> pf ppf "extern.externalize"
-  | Extern_internalize -> pf ppf "extern.internalize"
 
 and pp_expr ~short ppf instrs =
   list ~sep:pp_newline (fun ppf i -> (pp_instr ~short ppf) i) ppf instrs

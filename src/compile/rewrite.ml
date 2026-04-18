@@ -518,8 +518,6 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
     | Drop -> Ok Binary.Drop
     | Nop -> Ok Binary.Nop
     | Return -> Ok Binary.Return
-    | Extern_externalize -> Ok Binary.Extern_externalize
-    | Extern_internalize -> Ok Binary.Extern_internalize
   and expr (e : Text.expr) (loop_count, block_ids) :
     Binary.expr Annotated.t Result.t =
     let+ e =

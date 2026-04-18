@@ -908,11 +908,6 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
     let* jt = Env.block_type_get i env in
     let+ _stack = Stack.pop env.modul jt stack in
     (env, stack)
-  | (Extern_externalize | Extern_internalize) as i ->
-    Log.err (fun m ->
-      m "TODO: unimplemented instruction typecheking %a" (pp_instr ~short:false)
-        i );
-    assert false
 
 and typecheck_expr env expr ~is_loop (block_type : block_type option)
   ~stack:previous_stack : stack Result.t =

@@ -1489,10 +1489,6 @@ struct
       call_indirect ~return:true state (tbl_i, typ_i)
     | Call_ref typ_i -> call_ref ~return:false state typ_i
     | Return_call_ref typ_i -> call_ref ~return:true state typ_i
-    | (Extern_externalize | Extern_internalize) as i ->
-      Log.err (fun m ->
-        m "unimplemented instruction: %a" (pp_instr ~short:false) i );
-      assert false
 
   let rec loop ~heartbeat (state : State.exec_state) =
     let* () =
