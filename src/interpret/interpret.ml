@@ -87,8 +87,6 @@ struct
     (* TODO: move all of this to I64_intf *)
     let ( + ) = add
 
-    let ( - ) = sub
-
     let ( * ) = mul
 
     let ( / ) = div
@@ -1452,6 +1450,26 @@ struct
       else Choice.return (State.Continue state)
     | Loop (_id, bt, e) -> exec_block state ~is_loop:true bt e
     | Block (_id, bt, e) -> exec_block state ~is_loop:false bt e
+    | Select _t ->
+      if Parameters.use_ite_for_select then begin
+        let b, stack = Stack.pop_bool stack in
+        let o2, stack = Stack.pop stack in
+        let o1, stack = Stack.pop stack in
+        let* res = Choice.ite b ~if_true:o1 ~if_false:o2 in
+        ret @@ Stack.push stack res
+      end
+      else begin
+        let instr_counter_true =
+          Next_instruction.continue state |> Next_instruction.with_instr_counter
+        in
+        let instr_counter_false = instr_counter_true in
+        let* b, stack =
+          pop_choice stack ~instr_counter_true ~instr_counter_false
+        in
+        let o2, stack = Stack.pop stack in
+        let o1, stack = Stack.pop stack in
+        ret @@ Stack.push stack (if b then o1 else o2)
+      end
     | Br_table (inds, i) ->
       let target, stack = Stack.pop_i32 stack in
       let> out = I32.(le_u (I32.of_int (Array.length inds)) target) in
