@@ -9,9 +9,15 @@ type num_size =
   | NS32
   | NS64
 
-let num_type = choose [ const I32; const I64; const F32; const F64 ]
+let num_type =
+  choose
+    [ const (I32 : num_type)
+    ; const (I64 : num_type)
+    ; const (F32 : num_type)
+    ; const (F64 : num_type)
+    ]
 
-let nullable = choose [ const No_null; const Null ]
+let nullable = choose [ const No_null; const (Null : nullable) ]
 
 let heap_type : heap_type Crowbar.gen = const Func_ht
 (* TODO: complete this - Extern_ht and others *)
@@ -42,7 +48,7 @@ let param = pair (const (None : string option)) val_type
 
 let func_type = pair (list param) (list val_type)
 
-let mut = choose [ const Const; const Var ]
+let mut = choose [ const (Const : mut); const Var ]
 
 let div =
   let+ sx in
@@ -156,128 +162,147 @@ let extend_64_i64 : instr gen =
   choose
     [ const (I_extend8_s S64); const (I_extend16_s S64); const I64_extend32_s ]
 
-let funop =
-  choose
-    [ const Abs
-    ; const Neg
-    ; const Sqrt
-    ; const Ceil
-    ; const Floor
-    ; const Trunc
-    ; const Nearest
-    ]
-
-let fbinop =
-  choose
-    [ const Add
-    ; const Sub
-    ; const Mul
-    ; const Div
-    ; const Min
-    ; const Max
-    ; const Copysign
-    ]
-
-let frelop =
-  choose [ const Eq; const Ne; const Lt; const Gt; const Le; const Ge ]
-
 let fbinop_32 : instr gen =
-  let+ fbinop in
-  F_binop (S32, fbinop)
+  let+ fbinop =
+    choose
+      [ const Add
+      ; const Sub
+      ; const Mul
+      ; const Div
+      ; const Min
+      ; const Max
+      ; const Copysign
+      ]
+  in
+  F32 fbinop
 
 let fbinop_64 : instr gen =
-  let+ fbinop in
-  F_binop (S64, fbinop)
+  let+ fbinop =
+    choose
+      [ const Add
+      ; const Sub
+      ; const Mul
+      ; const Div
+      ; const Min
+      ; const Max
+      ; const Copysign
+      ]
+  in
+  F64 fbinop
 
 let funop_32 : instr gen =
-  let+ funop in
-  F_unop (S32, funop)
+  let+ funop =
+    choose
+      [ const Abs
+      ; const Neg
+      ; const Sqrt
+      ; const Ceil
+      ; const Floor
+      ; const Trunc
+      ; const Nearest
+      ]
+  in
+  F32 funop
 
 let funop_64 : instr gen =
-  let+ funop in
-  F_unop (S64, funop)
+  let+ funop =
+    choose
+      [ const Abs
+      ; const Neg
+      ; const Sqrt
+      ; const Ceil
+      ; const Floor
+      ; const Trunc
+      ; const Nearest
+      ]
+  in
+  F64 funop
 
 let frelop_32 : instr gen =
-  let+ frelop in
-  F_relop (S32, frelop)
+  let+ frelop =
+    choose [ const Eq; const Ne; const Lt; const Gt; const Le; const Ge ]
+  in
+  F32 frelop
 
 let frelop_64 : instr gen =
-  let+ frelop in
-  F_relop (S64, frelop)
+  let+ frelop =
+    choose [ const Eq; const Ne; const Lt; const Gt; const Le; const Ge ]
+  in
+  F64 frelop
 
 let const_f32 : instr gen =
   let+ float in
-  F32_const (Owi.Concrete_f32.of_float float)
+  F32 (Const (Owi.Concrete_f32.of_float float))
 
 let const_f64 : instr gen =
   let+ float in
-  F64_const (Owi.Concrete_f64.of_float float)
+  F64 (Const (Owi.Concrete_f64.of_float float))
 
 let f32_convert_i32 : instr gen =
   let+ sx in
-  F_convert_i (S32, S32, sx)
+  F32 (Convert_i (S32, sx))
 
 let f32_convert_i64 : instr gen =
   let+ sx in
-  F_convert_i (S32, S64, sx)
+  F32 (Convert_i (S64, sx))
 
 let f64_convert_i32 : instr gen =
   let+ sx in
-  F_convert_i (S64, S32, sx)
+  F64 (Convert_i (S32, sx))
 
 let f64_convert_i64 : instr gen =
   let+ sx in
-  F_convert_i (S64, S64, sx)
+  F64 (Convert_i (S64, sx))
 
 let i32_trunc_f32 : instr gen =
   let+ sx in
-  I_trunc_f (S32, S32, sx)
+  I32 (Trunc_f (S32, sx))
 
 let i32_trunc_f64 : instr gen =
   let+ sx in
-  I_trunc_f (S32, S64, sx)
+  I32 (Trunc_f (S64, sx))
 
 let i64_trunc_f32 : instr gen =
   let+ sx in
-  I_trunc_f (S64, S32, sx)
+  I64 (Trunc_f (S32, sx))
 
 let i64_trunc_f64 : instr gen =
   let+ sx in
-  I_trunc_f (S64, S64, sx)
+  I64 (Trunc_f (S64, sx))
 
 let i32_trunc_sat_f32 : instr gen =
   let+ sx in
-  I_trunc_sat_f (S32, S32, sx)
+  I64 (Trunc_sat_f (S32, sx))
 
 let i32_trunc_sat_f64 : instr gen =
   let+ sx in
-  I_trunc_sat_f (S32, S64, sx)
+  I32 (Trunc_sat_f (S64, sx))
 
 let i64_trunc_sat_f32 : instr gen =
   let+ sx in
-  I_trunc_sat_f (S64, S32, sx)
+  I64 (Trunc_sat_f (S32, sx))
 
 let i64_trunc_sat_f64 : instr gen =
   let+ sx in
-  I_trunc_sat_f (S64, S64, sx)
+  I64 (Trunc_sat_f (S64, sx))
 
-let f32_demote_f64 : instr gen = const F32_demote_f64
+let f32_demote_f64 : instr gen = const (F32 Demote_f64)
 
-let f64_promote_f32 : instr gen = const F64_promote_f32
+let f64_promote_f32 : instr gen = const (F64 Promote_f32)
 
-let i32_reinterpret_f32 : instr gen = const (I_reinterpret_f (S32, S32))
+let i32_reinterpret_f32 : instr gen = const (I32 (Reinterpret_f S32))
 
-let i64_reinterpret_f64 : instr gen = const (I_reinterpret_f (S64, S64))
+let i64_reinterpret_f64 : instr gen = const (I64 (Reinterpret_f S64))
 
-let f32_reinterpret_i32 : instr gen = const (F_reinterpret_i (S32, S32))
+let f32_reinterpret_i32 : instr gen = const (F32 (Reinterpret_i S32))
 
-let f64_reinterpret_i64 : instr gen = const (F_reinterpret_i (S64, S64))
+let f64_reinterpret_i64 : instr gen = const (F64 (Reinterpret_i S64))
 
 let global ntyp env =
   let globals = Env.get_globals ntyp env ~only_mut:false in
   List.map
     (fun (name, (_, _)) ->
-      pair (const (Global_get (Text name))) (const [ S.Push (Num_type ntyp) ]) )
+      pair (const (Global (Get (Text name)))) (const [ S.Push (Num_type ntyp) ]) )
     globals
 
 let global_i32 env = global I32 env
@@ -292,7 +317,7 @@ let global_set ntyp env =
   let globals = Env.get_globals ntyp env ~only_mut:true in
   List.map
     (fun (name, (_, _)) ->
-      pair (const (Global_set (Text name))) (const [ S.Pop ]) )
+      pair (const (Global (Set (Text name)))) (const [ S.Pop ]) )
     globals
 
 let global_set_i32 env = global_set I32 env
@@ -307,7 +332,7 @@ let local ntyp env =
   let locals = Env.get_locals ntyp env in
   List.map
     (fun (name, _) ->
-      pair (const (Local_get (Text name))) (const [ S.Push (Num_type ntyp) ]) )
+      pair (const (Local (Get (Text name)))) (const [ S.Push (Num_type ntyp) ]) )
     locals
 
 let local_i32 env = local I32 env
@@ -321,7 +346,7 @@ let local_f64 env = local F64 env
 let local_set ntyp env =
   let locals = Env.get_locals ntyp env in
   List.map
-    (fun (name, _) -> pair (const (Local_set (Text name))) (const [ S.Pop ]))
+    (fun (name, _) -> pair (const (Local (Set (Text name)))) (const [ S.Pop ]))
     locals
 
 let local_set_i32 env = local_set I32 env
@@ -335,7 +360,8 @@ let local_set_f64 env = local_set F64 env
 let local_tee ntyp env =
   let locals = Env.get_locals ntyp env in
   List.map
-    (fun (name, _) -> pair (const (Local_tee (Text name))) (const [ S.Nothing ]))
+    (fun (name, _) ->
+      pair (const (Local (Tee (Text name)))) (const [ S.Nothing ]) )
     locals
 
 let local_tee_i32 env = local_tee I32 env
@@ -347,7 +373,7 @@ let local_tee_f32 env = local_tee F32 env
 let local_tee_f64 env = local_tee F64 env
 
 let const_of_num_type = function
-  | I32 -> const_i32
+  | (I32 : num_type) -> const_i32
   | I64 -> const_i64
   | F32 -> const_f32
   | F64 -> const_f64
