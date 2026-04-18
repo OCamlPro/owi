@@ -88,16 +88,16 @@ module Eval_const = struct
 
   let i32_instr stack : Binary.i32_instr -> _ = function
     | Const i -> Stack.push_i32 stack i
-    | Add -> Stack.apply_i32_i32_i32 stack I32.add
-    | Sub -> Stack.apply_i32_i32_i32 stack I32.sub
-    | Mul -> Stack.apply_i32_i32_i32 stack I32.mul
+    | Add -> Stack.apply_i32_i32_i32 stack Concrete_i32.add
+    | Sub -> Stack.apply_i32_i32_i32 stack Concrete_i32.sub
+    | Mul -> Stack.apply_i32_i32_i32 stack Concrete_i32.mul
     | _ -> assert false
 
   let i64_instr stack : Binary.i64_instr -> _ = function
     | Const i -> Stack.push_i64 stack i
-    | Add -> Stack.apply_i64_i64_i64 stack I64.add
-    | Sub -> Stack.apply_i64_i64_i64 stack I64.sub
-    | Mul -> Stack.apply_i64_i64_i64 stack I64.mul
+    | Add -> Stack.apply_i64_i64_i64 stack Concrete_i64.add
+    | Sub -> Stack.apply_i64_i64_i64 stack Concrete_i64.sub
+    | Mul -> Stack.apply_i64_i64_i64 stack Concrete_i64.mul
     | _ -> assert false
 
   let instr env stack instr =
