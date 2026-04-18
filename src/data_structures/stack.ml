@@ -94,6 +94,60 @@ module type S = sig
   val push_ref : t -> ref_value -> t
 
   val push_array : t -> unit Array.t -> t
+
+  (** apply operations *)
+
+  val apply_i32_i32 : t -> (i32 -> i32) -> t
+
+  val apply_i32_i64 : t -> (i32 -> i64) -> t
+
+  val apply_i32_f32 : t -> (i32 -> f32) -> t
+
+  val apply_i32_f64 : t -> (i32 -> f64) -> t
+
+  val apply_i32_boolean : t -> (i32 -> boolean) -> t
+
+  val apply_i32_i32_i32 : t -> (i32 -> i32 -> i32) -> t
+
+  val apply_i32_i32_boolean : t -> (i32 -> i32 -> boolean) -> t
+
+  val apply_i64_i64 : t -> (i64 -> i64) -> t
+
+  val apply_i64_i32 : t -> (i64 -> i32) -> t
+
+  val apply_i64_f32 : t -> (i64 -> f32) -> t
+
+  val apply_i64_f64 : t -> (i64 -> f64) -> t
+
+  val apply_i64_boolean : t -> (i64 -> boolean) -> t
+
+  val apply_i64_i64_i64 : t -> (i64 -> i64 -> i64) -> t
+
+  val apply_i64_i64_boolean : t -> (i64 -> i64 -> boolean) -> t
+
+  val apply_f32_f32 : t -> (f32 -> f32) -> t
+
+  val apply_f32_f64 : t -> (f32 -> f64) -> t
+
+  val apply_f32_i32 : t -> (f32 -> i32) -> t
+
+  val apply_f32_i64 : t -> (f32 -> i64) -> t
+
+  val apply_f32_f32_f32 : t -> (f32 -> f32 -> f32) -> t
+
+  val apply_f32_f32_boolean : t -> (f32 -> f32 -> boolean) -> t
+
+  val apply_f64_f64 : t -> (f64 -> f64) -> t
+
+  val apply_f64_f32 : t -> (f64 -> f32) -> t
+
+  val apply_f64_i32 : t -> (f64 -> i32) -> t
+
+  val apply_f64_i64 : t -> (f64 -> i64) -> t
+
+  val apply_f64_f64_f64 : t -> (f64 -> f64 -> f64) -> t
+
+  val apply_f64_f64_boolean : t -> (f64 -> f64 -> boolean) -> t
 end
 
 module Make (Value : Value_intf.T) :
@@ -217,4 +271,108 @@ module Make (Value : Value_intf.T) :
   let rec drop_n s n =
     if n = 0 then s
     else match s with [] -> assert false | _ :: tl -> drop_n tl (n - 1)
+
+  let apply_i32_boolean s f =
+    let hd, tl = pop_i32 s in
+    push_bool tl (f hd)
+
+  let apply_i32_i32 s f =
+    let hd, tl = pop_i32 s in
+    push_i32 tl (f hd)
+
+  let apply_i32_f32 s f =
+    let hd, tl = pop_i32 s in
+    push_f32 tl (f hd)
+
+  let apply_i32_f64 s f =
+    let hd, tl = pop_i32 s in
+    push_f64 tl (f hd)
+
+  let apply_i32_i64 s f =
+    let hd, tl = pop_i32 s in
+    push_i64 tl (f hd)
+
+  let apply_i32_i32_i32 s f =
+    let (hd1, hd2), tl = pop2_i32 s in
+    push_i32 tl (f hd1 hd2)
+
+  let apply_i32_i32_boolean s f =
+    let (hd1, hd2), tl = pop2_i32 s in
+    push_bool tl (f hd1 hd2)
+
+  let apply_i64_boolean s f =
+    let hd, tl = pop_i64 s in
+    push_bool tl (f hd)
+
+  let apply_i64_i64 s f =
+    let hd, tl = pop_i64 s in
+    push_i64 tl (f hd)
+
+  let apply_i64_i32 s f =
+    let hd, tl = pop_i64 s in
+    push_i32 tl (f hd)
+
+  let apply_i64_f32 s f =
+    let hd, tl = pop_i64 s in
+    push_f32 tl (f hd)
+
+  let apply_i64_f64 s f =
+    let hd, tl = pop_i64 s in
+    push_f64 tl (f hd)
+
+  let apply_i64_i64_i64 s f =
+    let (hd1, hd2), tl = pop2_i64 s in
+    push_i64 tl (f hd1 hd2)
+
+  let apply_i64_i64_boolean s f =
+    let (hd1, hd2), tl = pop2_i64 s in
+    push_bool tl (f hd1 hd2)
+
+  let apply_f32_f32 s f =
+    let hd, tl = pop_f32 s in
+    push_f32 tl (f hd)
+
+  let apply_f32_f64 s f =
+    let hd, tl = pop_f32 s in
+    push_f64 tl (f hd)
+
+  let apply_f32_i32 s f =
+    let hd, tl = pop_f32 s in
+    push_i32 tl (f hd)
+
+  let apply_f32_i64 s f =
+    let hd, tl = pop_f32 s in
+    push_i64 tl (f hd)
+
+  let apply_f32_f32_f32 s f =
+    let (hd1, hd2), tl = pop2_f32 s in
+    push_f32 tl (f hd1 hd2)
+
+  let apply_f32_f32_boolean s f =
+    let (hd1, hd2), tl = pop2_f32 s in
+    push_bool tl (f hd1 hd2)
+
+  let apply_f64_f64 s f =
+    let hd, tl = pop_f64 s in
+    push_f64 tl (f hd)
+
+  let apply_f64_f32 s f =
+    let hd, tl = pop_f64 s in
+    push_f32 tl (f hd)
+
+  let apply_f64_i32 s f =
+    let hd, tl = pop_f64 s in
+    push_i32 tl (f hd)
+
+  let apply_f64_i64 s f =
+    let hd, tl = pop_f64 s in
+    push_i64 tl (f hd)
+
+  let apply_f64_f64_f64 s f =
+    let (hd1, hd2), tl = pop2_f64 s in
+    push_f64 tl (f hd1 hd2)
+
+  let apply_f64_f64_boolean s f =
+    let (hd1, hd2), tl = pop2_f64 s in
+    push_bool tl (f hd1 hd2)
 end
