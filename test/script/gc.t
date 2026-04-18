@@ -8,7 +8,7 @@
   owi: [ERROR] unexpected token "(" in line 5, character 20-21
   [40]
   $ owi script --no-exhaustion reference/call_ref.wast 2>&1 | grep -oE ".*Assertion failed"
-       File "src/interpret/interpret.ml", line 849, characters 4-10: Assertion failed
+       File "src/interpret/interpret.ml", line 1267, characters 4-10: Assertion failed
   $ owi script --no-exhaustion reference/extern.wast
   owi: [ERROR] unexpected token ")" in line 3, character 19-20
   [40]
@@ -23,7 +23,7 @@
   owi: [ERROR] unexpected token ")" in line 5, character 19-20
   [40]
   $ owi script --no-exhaustion reference/return_call_ref.wast 2>&1 | grep -oE ".*Assertion failed"
-       File "src/interpret/interpret.ml", line 849, characters 4-10: Assertion failed
+       File "src/interpret/interpret.ml", line 1267, characters 4-10: Assertion failed
   $ owi script --no-exhaustion reference/struct.wast
   owi: [ERROR] unexpected token ")" in line 4, character 15-16
   [40]

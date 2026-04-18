@@ -44,6 +44,16 @@
                
   owi: [DEBUG] rewriting    ...
   owi: [INFO] typechecking ...
+  owi: [DEBUG] stack             : []
+  owi: [DEBUG] typechecking instr: local.get 0
+  owi: [DEBUG] stack             : [i32]
+  owi: [DEBUG] typechecking instr: i32.const 1
+  owi: [DEBUG] stack             : [i32 i32]
+  owi: [DEBUG] typechecking instr: i32.lt_u
+  owi: [DEBUG] stack             : [i32]
+  owi: [DEBUG] typechecking instr: if
+  owi: [DEBUG] stack             : []
+  owi: [DEBUG] typechecking instr: unreachable
   owi: [INFO] linking      ...
   owi: [INFO] interpreting ...
   owi: [INFO] stack         : [  ]

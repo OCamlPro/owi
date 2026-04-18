@@ -148,9 +148,9 @@ let pp_memarg =
   in
   fun ppf { offset; align } ->
     let pp_offset ppf offset =
-      if Int64.lt_u 0L offset then pf ppf "offset=%Ld " offset
+      if Int64.lt_u 0L offset then pf ppf " offset=%Ld" offset
     in
-    pf ppf "%aalign=%ld" pp_offset offset (pow_2 align)
+    pf ppf "%a align=%ld" pp_offset offset (pow_2 align)
 
 (* wrap printer to print a space before a non empty list *)
 (* TODO or make it an optional arg of pp_list? *)
@@ -218,7 +218,7 @@ let pp_i32_instr ppf = function
   | Sub -> pf ppf "i32.sub"
   | Mul -> pf ppf "i32.mul"
   | Div sx -> pf ppf "i32.div_%a" Text.pp_sx sx
-  | Rem sx -> pf ppf "i32.div_%a" Text.pp_sx sx
+  | Rem sx -> pf ppf "i32.rem_%a" Text.pp_sx sx
   | And -> pf ppf "i32.and"
   | Or -> pf ppf "i32.or"
   | Xor -> pf ppf "i32.xor"

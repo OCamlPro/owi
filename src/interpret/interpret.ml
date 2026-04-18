@@ -432,7 +432,8 @@ struct
         (I64.eqz n2, `Integer_divide_by_zero, (* TODO: get instr counter *) None)
       in
       let>! () =
-        ( Boolean.and_ (I64.eq n1 I64.min_int) @@ I64.eq n2 (I64.of_int ~-1)
+        ( Boolean.and_ (I64.eq n1 I64.min_int)
+          @@ I64.eq n2 (I64.sub (I64.of_int 0) (I64.of_int 1))
         , `Integer_overflow
         , (* TODO: get instr counter *) None )
       in

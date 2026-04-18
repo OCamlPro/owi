@@ -287,7 +287,7 @@ let plain_instr :=
   | LOCAL_SET; ~ = indice; { Local (Set indice) }
   | LOCAL_TEE; ~ = indice; { Local (Tee indice) }
   | GLOBAL_GET; ~ = indice; { Global (Get indice) }
-  | GLOBAL_SET; ~ = indice; { Global (Get indice) }
+  | GLOBAL_SET; ~ = indice; { Global (Set indice) }
   | TABLE_GET; indice = option(indice); {
     Table (Get (Option.value indice ~default:(Raw 0)))
   }
@@ -345,7 +345,7 @@ let plain_instr :=
   | I32_DIV_S; { I32 (Div S) }
   | I64_DIV_S; { I64 (Div S) }
   | I32_DIV_U; { I32 (Div U) }
-  | I64_DIV_U; { I64 (Div S) }
+  | I64_DIV_U; { I64 (Div U) }
   | I32_REM_S; { I32 (Rem S) }
   | I64_REM_S; { I64 (Rem S) }
   | I32_REM_U; { I32 (Rem U) }

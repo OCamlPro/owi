@@ -751,6 +751,9 @@ let typecheck_data_instr (env : Env.t) stack : Binary.data_instr -> _ = function
 
 let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t)
   : (Env.t * stack) Result.t =
+  Log.debug (fun m -> m "stack             : %a" Stack.pp stack);
+  Log.debug (fun m ->
+    m "typechecking instr: %a" (Binary.pp_instr ~short:true) instr.raw );
   match instr.raw with
   | I32 i -> typecheck_i32_instr env stack i
   | I64 i -> typecheck_i64_instr env stack i

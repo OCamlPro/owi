@@ -554,7 +554,7 @@ let rec read_instr types input =
     (I32 (Load16 (idx, S, memarg)), input)
   | '\x2F' ->
     let+ idx, memarg, input = read_memarg 32 input in
-    (I64 (Load16 (idx, U, memarg)), input)
+    (I32 (Load16 (idx, U, memarg)), input)
   | '\x30' ->
     let+ idx, memarg, input = read_memarg 64 input in
     (I64 (Load8 (idx, S, memarg)), input)
@@ -578,7 +578,7 @@ let rec read_instr types input =
     (I32 (Store (idx, memarg)), input)
   | '\x37' ->
     let+ idx, memarg, input = read_memarg 64 input in
-    (I32 (Store (idx, memarg)), input)
+    (I64 (Store (idx, memarg)), input)
   | '\x38' ->
     let+ idx, memarg, input = read_memarg 32 input in
     (F32 (Store (idx, memarg)), input)

@@ -361,7 +361,7 @@ let pp_i32_instr ppf = function
   | Sub -> pf ppf "i32.sub"
   | Mul -> pf ppf "i32.mul"
   | Div sx -> pf ppf "i32.div_%a" pp_sx sx
-  | Rem sx -> pf ppf "i32.div_%a" pp_sx sx
+  | Rem sx -> pf ppf "i32.rem_%a" pp_sx sx
   | And -> pf ppf "i32.and"
   | Or -> pf ppf "i32.or"
   | Xor -> pf ppf "i32.xor"
