@@ -50,156 +50,208 @@ let func_type = pair (list param) (list val_type)
 
 let mut = choose [ const (Const : mut); const Var ]
 
-let div =
-  let+ sx in
-  (Div sx : ibinop)
+let i32_binop =
+  let div =
+    let+ sx in
+    (Div sx : i32_instr)
+  in
 
-let rem =
-  let+ sx in
-  (Rem sx : ibinop)
+  let rem =
+    let+ sx in
+    (Rem sx : i32_instr)
+  in
 
-let shr =
-  let+ sx in
-  (Shr sx : ibinop)
+  let shr =
+    let+ sx in
+    (Shr sx : i32_instr)
+  in
 
-let ibinop =
-  choose
-    [ const (Add : ibinop)
-    ; const (Sub : ibinop)
-    ; const (Mul : ibinop)
-    ; div
-    ; rem
-    ; const (And : ibinop)
-    ; const (Or : ibinop)
-    ; const (Xor : ibinop)
-    ; const (Shl : ibinop)
-    ; shr
-    ; const (Rotl : ibinop)
-    ; const (Rotr : ibinop)
-    ]
+  let+ i =
+    choose
+      [ const (Add : i32_instr)
+      ; const (Sub : i32_instr)
+      ; const (Mul : i32_instr)
+      ; div
+      ; rem
+      ; const (And : i32_instr)
+      ; const (Or : i32_instr)
+      ; const (Xor : i32_instr)
+      ; const (Shl : i32_instr)
+      ; shr
+      ; const (Rotl : i32_instr)
+      ; const (Rotr : i32_instr)
+      ]
+  in
+  I32 i
 
-let iunop = choose [ const Clz; const Ctz; const Popcnt ]
+let i64_binop =
+  let div =
+    let+ sx in
+    (Div sx : i64_instr)
+  in
 
-let itestop = const Eqz
+  let rem =
+    let+ sx in
+    (Rem sx : i64_instr)
+  in
 
-let ilt =
-  let+ sx in
-  (Lt sx : irelop)
+  let shr =
+    let+ sx in
+    (Shr sx : i64_instr)
+  in
+  let+ i =
+    choose
+      [ const (Add : i64_instr)
+      ; const (Sub : i64_instr)
+      ; const (Mul : i64_instr)
+      ; div
+      ; rem
+      ; const (And : i64_instr)
+      ; const (Or : i64_instr)
+      ; const (Xor : i64_instr)
+      ; const (Shl : i64_instr)
+      ; shr
+      ; const (Rotl : i64_instr)
+      ; const (Rotr : i64_instr)
+      ]
+  in
+  I64 i
 
-let igt =
-  let+ sx in
-  (Gt sx : irelop)
+let i32_unop = choose [ const (I32 Clz); const (I32 Ctz); const (I32 Popcnt) ]
 
-let ile =
-  let+ sx in
-  (Le sx : irelop)
+let i64_unop = choose [ const (I64 Clz); const (I64 Ctz); const (I64 Popcnt) ]
 
-let ige =
-  let+ sx in
-  (Ge sx : irelop)
+let i32_testop : Owi.Text.instr gen = const (I32 Eqz)
 
-let irelop =
-  choose [ const (Eq : irelop); const (Ne : irelop); ilt; igt; ile; ige ]
+let i64_testop : Owi.Text.instr gen = const (I64 Eqz)
+
+let i32_relop =
+  let ilt =
+    let+ sx in
+    (Lt sx : Owi.Text.i32_instr)
+  in
+
+  let igt =
+    let+ sx in
+    (Gt sx : Owi.Text.i32_instr)
+  in
+  let ile =
+    let+ sx in
+    (Le sx : Owi.Text.i32_instr)
+  in
+  let ige =
+    let+ sx in
+    (Ge sx : Owi.Text.i32_instr)
+  in
+  let+ i =
+    choose
+      [ const (Eq : Owi.Text.i32_instr)
+      ; const (Ne : Owi.Text.i32_instr)
+      ; ilt
+      ; igt
+      ; ile
+      ; ige
+      ]
+  in
+  I32 i
+
+let i64_relop =
+  let ilt =
+    let+ sx in
+    (Lt sx : Owi.Text.i64_instr)
+  in
+
+  let igt =
+    let+ sx in
+    (Gt sx : Owi.Text.i64_instr)
+  in
+  let ile =
+    let+ sx in
+    (Le sx : Owi.Text.i64_instr)
+  in
+  let ige =
+    let+ sx in
+    (Ge sx : Owi.Text.i64_instr)
+  in
+  let+ i =
+    choose
+      [ const (Eq : Owi.Text.i64_instr)
+      ; const (Ne : Owi.Text.i64_instr)
+      ; ilt
+      ; igt
+      ; ile
+      ; ige
+      ]
+  in
+  I64 i
 
 let const_i32 =
   let+ int32 in
   let int32 = Owi.Concrete_i32.of_int32 int32 in
-  I32_const int32
+  I32 (Const int32)
 
 let const_i64 =
   let+ int64 in
   let int64 = Owi.Concrete_i64.of_int64 int64 in
-  I64_const int64
+  I64 (Const int64)
 
 let const_v128 =
   let* a = int64 in
   let+ b = int64 in
   let v128 = Owi.Concrete_v128.of_i64x2 a b in
-  V128_const v128
+  V128 (Const v128)
 
-let ibinop_32 : instr gen =
-  let+ ibinop in
-  I_binop (S32, ibinop)
-
-let ibinop_64 : instr gen =
-  let+ ibinop in
-  I_binop (S64, ibinop)
-
-let iunop_32 : instr gen =
-  let+ iunop in
-  I_unop (S32, iunop)
-
-let iunop_64 : instr gen =
-  let+ iunop in
-  I_unop (S64, iunop)
-
-let itestop_32 : instr gen =
-  let+ itestop in
-  I_testop (S32, itestop)
-
-let itestop_64 : instr gen =
-  let+ itestop in
-  I_testop (S64, itestop)
-
-let irelop_32 : instr gen =
-  let+ irelop in
-  I_relop (S32, irelop)
-
-let irelop_64 : instr gen =
-  let+ irelop in
-  I_relop (S64, irelop)
-
-let i32_wrap_i64 : instr gen = const I32_wrap_i64
+let i32_wrap_i64 : instr gen = const (I32 Wrap_i64)
 
 let i64_extend_i32 : instr gen =
   let+ sx in
-  I64_extend_i32 sx
+  I64 (Extend_i32 sx)
 
-let extend_32_i32 : instr gen =
-  choose [ const (I_extend8_s S32); const (I_extend16_s S32) ]
+let i32_extend_32 : instr gen =
+  choose [ const (I32 Extend8_s); const (I32 Extend16_s) ]
 
-let extend_64_i64 : instr gen =
+let i64_extend_64 : instr gen =
   choose
-    [ const (I_extend8_s S64); const (I_extend16_s S64); const I64_extend32_s ]
+    [ const (I32 Extend8_s); const (I32 Extend16_s); const (I64 Extend32_s) ]
 
 let fbinop_32 : instr gen =
   let+ fbinop =
     choose
-      [ const Add
-      ; const Sub
-      ; const Mul
-      ; const Div
-      ; const Min
-      ; const Max
-      ; const Copysign
+      [ const (Add : Owi.Text.f32_instr)
+      ; const (Sub : Owi.Text.f32_instr)
+      ; const (Mul : Owi.Text.f32_instr)
+      ; const (Div : Owi.Text.f32_instr)
+      ; const (Min : Owi.Text.f32_instr)
+      ; const (Max : Owi.Text.f32_instr)
+      ; const (Copysign : Owi.Text.f32_instr)
       ]
   in
   F32 fbinop
 
 let fbinop_64 : instr gen =
-  let+ fbinop =
+  let+ fbinop : Owi.Text.f64_instr =
     choose
-      [ const Add
-      ; const Sub
-      ; const Mul
-      ; const Div
-      ; const Min
-      ; const Max
-      ; const Copysign
+      [ const (Add : Owi.Text.f64_instr)
+      ; const (Sub : Owi.Text.f64_instr)
+      ; const (Mul : Owi.Text.f64_instr)
+      ; const (Div : Owi.Text.f64_instr)
+      ; const (Min : Owi.Text.f64_instr)
+      ; const (Max : Owi.Text.f64_instr)
+      ; const (Copysign : Owi.Text.f64_instr)
       ]
   in
   F64 fbinop
 
 let funop_32 : instr gen =
-  let+ funop =
+  let+ funop : Owi.Text.f32_instr =
     choose
-      [ const Abs
-      ; const Neg
-      ; const Sqrt
-      ; const Ceil
-      ; const Floor
-      ; const Trunc
-      ; const Nearest
+      [ const (Abs : Owi.Text.f32_instr)
+      ; const (Neg : Owi.Text.f32_instr)
+      ; const (Sqrt : Owi.Text.f32_instr)
+      ; const (Ceil : Owi.Text.f32_instr)
+      ; const (Floor : Owi.Text.f32_instr)
+      ; const (Trunc : Owi.Text.f32_instr)
+      ; const (Nearest : Owi.Text.f32_instr)
       ]
   in
   F32 funop
@@ -219,8 +271,15 @@ let funop_64 : instr gen =
   F64 funop
 
 let frelop_32 : instr gen =
-  let+ frelop =
-    choose [ const Eq; const Ne; const Lt; const Gt; const Le; const Ge ]
+  let+ frelop : Owi.Text.f32_instr =
+    choose
+      [ const (Eq : Owi.Text.f32_instr)
+      ; const (Ne : Owi.Text.f32_instr)
+      ; const (Lt : Owi.Text.f32_instr)
+      ; const (Gt : Owi.Text.f32_instr)
+      ; const (Le : Owi.Text.f32_instr)
+      ; const (Ge : Owi.Text.f32_instr)
+      ]
   in
   F32 frelop
 
@@ -417,26 +476,26 @@ let memid (env : Env.t) =
 let memory_size env : (instr * S.stack_op list) gen =
   pair
     (let+ id = memid env in
-     Memory_size id )
+     Memory (Size id) )
     (const [ S.Push (Num_type I32) ])
 
 let memory_grow env : (instr * S.stack_op list) gen =
   pair
     (let+ id = memid env in
-     Memory_grow id )
+     Memory (Grow id) )
     (const [ S.Nothing ])
 
 let memory_copy env : (instr * S.stack_op list) gen =
   pair
     (let+ id1 = memid env
      and+ id2 = memid env in
-     Memory_copy (id1, id2) )
+     Memory (Copy (id1, id2)) )
     (const [ S.Pop; S.Pop; S.Pop ])
 
 let memory_fill env : (instr * S.stack_op list) gen =
   pair
     (let+ id = memid env in
-     Memory_fill id )
+     Memory (Fill id) )
     (const [ S.Pop; S.Pop; S.Pop ])
 
 let memory_init (env : Env.t) =
@@ -444,7 +503,7 @@ let memory_init (env : Env.t) =
     (fun name ->
       pair
         (let+ id = memid env in
-         Memory_init (id, Text name) )
+         Memory (Init (id, Text name)) )
         (const [ S.Pop; S.Pop; S.Pop ]) )
     env.datas
 
@@ -474,97 +533,97 @@ let memarg nsize =
 let i32_load env : instr gen =
   let+ memarg = memarg NS32
   and+ id = memid env in
-  I_load (id, S32, memarg)
+  I32 (Load (id, memarg))
 
 let i64_load env : instr gen =
   let+ memarg = memarg NS64
   and+ id = memid env in
-  I_load (id, S64, memarg)
+  I64 (Load (id, memarg))
 
 let f32_load env : instr gen =
   let+ memarg = memarg NS32
   and+ id = memid env in
-  F_load (id, S32, memarg)
+  F32 (Load (id, memarg))
 
 let f64_load env : instr gen =
   let+ memarg = memarg NS64
   and+ id = memid env in
-  F_load (id, S64, memarg)
+  F64 (Load (id, memarg))
 
 let i32_load8 env : instr gen =
   let+ memarg = memarg NS8
   and+ id = memid env
   and+ sx in
-  I_load8 (id, S32, sx, memarg)
+  I32 (Load8 (id, sx, memarg))
 
 let i32_load16 env : instr gen =
   let+ memarg = memarg NS16
   and+ id = memid env
   and+ sx in
-  I_load16 (id, S32, sx, memarg)
+  I32 (Load16 (id, sx, memarg))
 
 let i64_load8 env : instr gen =
   let+ memarg = memarg NS8
   and+ id = memid env
   and+ sx in
-  I_load8 (id, S64, sx, memarg)
+  I64 (Load8 (id, sx, memarg))
 
 let i64_load16 env : instr gen =
   let+ memarg = memarg NS16
   and+ id = memid env
   and+ sx in
-  I_load16 (id, S64, sx, memarg)
+  I64 (Load16 (id, sx, memarg))
 
 let i64_load32 env : instr gen =
   let+ memarg = memarg NS32
   and+ id = memid env
   and+ sx in
-  I64_load32 (id, sx, memarg)
+  I64 (Load32 (id, sx, memarg))
 
 let i32_store env : instr gen =
   let+ memarg = memarg NS32
   and+ id = memid env in
-  I_store (id, S32, memarg)
+  I32 (Store (id, memarg))
 
 let i64_store env : instr gen =
   let+ memarg = memarg NS64
   and+ id = memid env in
-  I_store (id, S64, memarg)
+  I64 (Store (id, memarg))
 
 let f32_store env : instr gen =
   let+ memarg = memarg NS32
   and+ id = memid env in
-  F_store (id, S32, memarg)
+  F32 (Store (id, memarg))
 
 let f64_store env : instr gen =
   let+ memarg = memarg NS64
   and+ id = memid env in
-  F_store (id, S64, memarg)
+  F64 (Store (id, memarg))
 
 let i32_store8 env : instr gen =
   let+ memarg = memarg NS8
   and+ id = memid env in
-  I_store8 (id, S32, memarg)
+  I32 (Store8 (id, memarg))
 
 let i64_store8 env : instr gen =
   let+ memarg = memarg NS8
   and+ id = memid env in
-  I_store8 (id, S64, memarg)
+  I64 (Store8 (id, memarg))
 
 let i32_store16 env : instr gen =
   let+ memarg = memarg NS16
   and+ id = memid env in
-  I_store16 (id, S32, memarg)
+  I32 (Store16 (id, memarg))
 
 let i64_store16 env : instr gen =
   let+ memarg = memarg NS16
   and+ id = memid env in
-  I_store16 (id, S64, memarg)
+  I64 (Store16 (id, memarg))
 
 let i64_store32 env : instr gen =
   let+ memarg = memarg NS32
   and+ id = memid env in
-  I64_store32 (id, memarg)
+  I64 (Store32 (id, memarg))
 
 let data_active name =
   let+ inst = const_i32 in
@@ -578,12 +637,13 @@ let data_mode (env : Env.t) =
 
 let data_drop (env : Env.t) =
   List.map
-    (fun name -> pair (const (Data_drop (Text name))) (const [ S.Nothing ]))
+    (fun name -> pair (const (Data (Drop (Text name)))) (const [ S.Nothing ]))
     env.datas
 
 let elem_drop (env : Env.t) =
   List.map
-    (fun (name, _) -> pair (const (Elem_drop (Text name))) (const [ S.Nothing ]))
+    (fun (name, _) ->
+      pair (const (Elem (Drop (Text name)))) (const [ S.Nothing ]) )
     env.elems
 
 let table_init (env : Env.t) =
@@ -596,7 +656,7 @@ let table_init (env : Env.t) =
       let* name_t, _ = choose tables
       and+ name_e, _ = choose elems in
       pair
-        (const (Table_init (Text name_t, Text name_e)))
+        (const (Table (Init (Text name_t, Text name_e))))
         (const [ S.Pop; S.Pop; S.Pop ])
     in
     [ instr ]
@@ -613,45 +673,45 @@ let table_copy (env : Env.t) =
       | ((Null, ht1), (Null, ht2) | (No_null, ht1), (No_null, ht2))
         when heap_type_eq ht1 ht2 ->
         pair
-          (const (Table_copy (Text name_x, Text name_y)))
+          (const (Table (Copy (Text name_x, Text name_y))))
           (const [ S.Pop; S.Pop; S.Pop ])
       | _ -> pair (const Nop) (const [ S.Nothing ])
       (* TODO: avoid if ... then ... else pair (const (Nop)) (const [ S.Nothing ])
-         https://github.com/OCamlPro/owi/pull/28#discussion_r1275222846 *)
+                                               https://github.com/OCamlPro/owi/pull/28#discussion_r1275222846 *)
     in
     [ instr ]
 
 let table_size (env : Env.t) =
   List.map
     (fun (name, _) ->
-      pair (const (Table_size (Text name))) (const [ S.Push (Num_type I32) ]) )
+      pair (const (Table (Size (Text name)))) (const [ S.Push (Num_type I32) ]) )
     env.tables
 
 let table_grow (env : Env.t) =
   List.map
     (fun (name, _) ->
       pair
-        (const (Table_grow (Text name)))
+        (const (Table (Grow (Text name))))
         (const [ S.Pop; S.Pop; S.Push (Num_type I32) ]) )
     env.tables
 
 let table_fill (env : Env.t) =
   List.map
     (fun (name, _) ->
-      pair (const (Table_fill (Text name))) (const [ S.Pop; S.Pop; S.Pop ]) )
+      pair (const (Table (Fill (Text name)))) (const [ S.Pop; S.Pop; S.Pop ]) )
     env.tables
 
 let table_set (env : Env.t) =
   List.map
     (fun (name, _) ->
-      pair (const (Table_set (Text name))) (const [ S.Pop; S.Pop ]) )
+      pair (const (Table (Set (Text name)))) (const [ S.Pop; S.Pop ]) )
     env.tables
 
 let table_get (env : Env.t) =
   List.map
     (fun (name, _) ->
       pair
-        (const (Table_get (Text name)))
+        (const (Table (Get (Text name))))
         (const [ S.Pop; S.Push (Ref_type (No_null, Func_ht)) ]) )
     env.tables
 

@@ -35,10 +35,10 @@ let expr_available_1_i32 if_else expr ~locals ~stack env =
     ; pair (B.i64_load32 env) (const [ S.Pop; S.Push (Num_type I64) ])
     ]
   in
-  [ pair B.iunop_32 (const [ S.Nothing ])
-  ; pair B.itestop_32 (const [ S.Nothing ])
+  [ pair B.i32_unop (const [ S.Nothing ])
+  ; pair B.i32_testop (const [ S.Nothing ])
   ; pair B.i64_extend_i32 (const [ S.Pop; S.Push (Num_type I64) ])
-  ; pair B.extend_32_i32 (const [ S.Nothing ])
+  ; pair B.i32_extend_32 (const [ S.Nothing ])
   ; pair B.f32_convert_i32 (const [ S.Pop; S.Push (Num_type F32) ])
   ; pair B.f64_convert_i32 (const [ S.Pop; S.Push (Num_type F64) ])
   ; pair B.f32_reinterpret_i32 (const [ S.Pop; S.Push (Num_type F32) ])
@@ -55,7 +55,7 @@ let expr_available_2_i32 (env : Env.t) =
     ; pair (B.i32_store16 env) (const [ S.Pop; S.Pop ])
     ]
   in
-  [ pair B.ibinop_32 (const [ S.Pop ]); pair B.irelop_32 (const [ S.Pop ]) ]
+  [ pair B.i32_binop (const [ S.Pop ]); pair B.i32_relop (const [ S.Pop ]) ]
   @ if B.memory_exists env then store_instr else []
 
 let expr_available_2_i64_i32 (env : Env.t) =
@@ -87,10 +87,10 @@ let expr_available_3_i32 env =
   mem_expr @ table_expr
 
 let expr_available_1_i64 env =
-  [ pair B.iunop_64 (const [ S.Nothing ])
-  ; pair B.itestop_64 (const [ S.Pop; S.Push (Num_type I32) ])
+  [ pair B.i64_unop (const [ S.Nothing ])
+  ; pair B.i64_testop (const [ S.Pop; S.Push (Num_type I32) ])
   ; pair B.i32_wrap_i64 (const [ S.Pop; S.Push (Num_type I32) ])
-  ; pair B.extend_64_i64 (const [ S.Nothing ])
+  ; pair B.i64_extend_64 (const [ S.Nothing ])
   ; pair B.f32_convert_i64 (const [ S.Pop; S.Push (Num_type F32) ])
   ; pair B.f64_convert_i64 (const [ S.Pop; S.Push (Num_type F64) ])
   ; pair B.f64_reinterpret_i64 (const [ S.Pop; S.Push (Num_type F64) ])
@@ -98,8 +98,8 @@ let expr_available_1_i64 env =
   @ B.local_set_i64 env @ B.local_tee_i64 env @ B.global_set_i64 env
 
 let expr_available_2_i64 =
-  [ pair B.ibinop_64 (const [ S.Pop ])
-  ; pair B.irelop_64 (const [ S.Pop; S.Pop; S.Push (Num_type I32) ])
+  [ pair B.i64_binop (const [ S.Pop ])
+  ; pair B.i64_relop (const [ S.Pop; S.Pop; S.Push (Num_type I32) ])
   ]
 
 (* let expr_available_3_i64 = [] *)

@@ -291,7 +291,7 @@ module Text : sig
   (** I32 instructions *)
 
   type i32_instr =
-    | Const of Int32.t
+    | Const of Concrete_i32.t
     | Clz
     | Ctz
     | Popcnt
@@ -330,7 +330,7 @@ module Text : sig
   (** I64 instructions *)
 
   type i64_instr =
-    | Const of Int64.t
+    | Const of Concrete_i64.t
     | Clz
     | Ctz
     | Popcnt
@@ -372,7 +372,7 @@ module Text : sig
   (** F32 instructions *)
 
   type f32_instr =
-    | Const of Float32.t
+    | Const of Concrete_f32.t
     | Abs
     | Neg
     | Sqrt
@@ -402,7 +402,7 @@ module Text : sig
   (** F64 instructions *)
 
   type f64_instr =
-    | Const of Float64.t
+    | Const of Concrete_f64.t
     | Abs
     | Neg
     | Sqrt
