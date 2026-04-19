@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>binary_encoder.ml &mdash; Coverage report</title>
-    <meta name="description" content="48.06% coverage in src/ir/binary_encoder.ml">
+    <meta name="description" content="48.45% coverage in src/ir/binary_encoder.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,323 +15,333 @@
           <span class="dirname">src/ir/</span>binary_encoder.ml
         </a>
       </h1>
-      <h2>48.06%</h2>
+      <h2>48.45%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:3.74%"></span>
-      <span class="unvisited" style="top:3.98%"></span>
-      <span class="unvisited" style="top:9.17%"></span>
-      <span class="unvisited" style="top:9.41%"></span>
-      <span class="unvisited" style="top:9.77%"></span>
-      <span class="unvisited" style="top:9.89%"></span>
-      <span class="unvisited" style="top:10.01%"></span>
-      <span class="unvisited" style="top:10.13%"></span>
-      <span class="unvisited" style="top:10.25%"></span>
-      <span class="unvisited" style="top:10.37%"></span>
-      <span class="unvisited" style="top:10.49%"></span>
-      <span class="unvisited" style="top:10.74%"></span>
-      <span class="unvisited" style="top:10.86%"></span>
-      <span class="unvisited" style="top:10.98%"></span>
+      <span class="unvisited" style="top:3.48%"></span>
+      <span class="unvisited" style="top:3.70%"></span>
+      <span class="unvisited" style="top:8.52%"></span>
+      <span class="unvisited" style="top:8.74%"></span>
+      <span class="unvisited" style="top:9.08%"></span>
+      <span class="unvisited" style="top:9.19%"></span>
+      <span class="unvisited" style="top:9.30%"></span>
+      <span class="unvisited" style="top:9.42%"></span>
+      <span class="unvisited" style="top:9.53%"></span>
+      <span class="unvisited" style="top:9.64%"></span>
+      <span class="unvisited" style="top:9.75%"></span>
+      <span class="unvisited" style="top:9.98%"></span>
+      <span class="unvisited" style="top:10.09%"></span>
+      <span class="unvisited" style="top:10.20%"></span>
+      <span class="unvisited" style="top:10.31%"></span>
       <span class="unvisited" style="top:11.10%"></span>
-      <span class="unvisited" style="top:11.94%"></span>
-      <span class="unvisited" style="top:12.06%"></span>
-      <span class="unvisited" style="top:12.18%"></span>
-      <span class="some-visited" style="top:16.16%"></span>
-      <span class="unvisited" style="top:16.28%"></span>
-      <span class="unvisited" style="top:18.82%"></span>
+      <span class="unvisited" style="top:11.21%"></span>
+      <span class="unvisited" style="top:11.32%"></span>
+      <span class="some-visited" style="top:15.02%"></span>
+      <span class="unvisited" style="top:15.13%"></span>
+      <span class="unvisited" style="top:17.49%"></span>
+      <span class="unvisited" style="top:17.71%"></span>
+      <span class="unvisited" style="top:17.83%"></span>
+      <span class="unvisited" style="top:17.94%"></span>
+      <span class="unvisited" style="top:18.16%"></span>
+      <span class="unvisited" style="top:18.27%"></span>
+      <span class="unvisited" style="top:18.50%"></span>
+      <span class="unvisited" style="top:18.61%"></span>
       <span class="unvisited" style="top:19.06%"></span>
-      <span class="unvisited" style="top:19.18%"></span>
-      <span class="unvisited" style="top:19.30%"></span>
-      <span class="unvisited" style="top:19.54%"></span>
-      <span class="unvisited" style="top:19.66%"></span>
-      <span class="unvisited" style="top:19.90%"></span>
-      <span class="unvisited" style="top:20.02%"></span>
-      <span class="unvisited" style="top:20.51%"></span>
-      <span class="unvisited" style="top:20.75%"></span>
-      <span class="unvisited" style="top:21.35%"></span>
-      <span class="unvisited" style="top:21.59%"></span>
-      <span class="unvisited" style="top:21.71%"></span>
-      <span class="unvisited" style="top:21.95%"></span>
-      <span class="unvisited" style="top:22.07%"></span>
-      <span class="unvisited" style="top:22.56%"></span>
-      <span class="unvisited" style="top:22.80%"></span>
-      <span class="unvisited" style="top:22.92%"></span>
-      <span class="unvisited" style="top:24.00%"></span>
-      <span class="unvisited" style="top:24.13%"></span>
-      <span class="unvisited" style="top:24.25%"></span>
-      <span class="unvisited" style="top:24.37%"></span>
-      <span class="unvisited" style="top:24.97%"></span>
-      <span class="unvisited" style="top:25.09%"></span>
-      <span class="unvisited" style="top:25.21%"></span>
-      <span class="unvisited" style="top:25.33%"></span>
-      <span class="unvisited" style="top:25.45%"></span>
-      <span class="unvisited" style="top:26.66%"></span>
-      <span class="unvisited" style="top:26.78%"></span>
-      <span class="unvisited" style="top:27.14%"></span>
-      <span class="unvisited" style="top:27.26%"></span>
-      <span class="unvisited" style="top:30.40%"></span>
-      <span class="unvisited" style="top:30.64%"></span>
-      <span class="unvisited" style="top:30.76%"></span>
-      <span class="unvisited" style="top:30.88%"></span>
-      <span class="unvisited" style="top:31.00%"></span>
-      <span class="unvisited" style="top:31.97%"></span>
-      <span class="unvisited" style="top:32.09%"></span>
-      <span class="unvisited" style="top:32.33%"></span>
-      <span class="unvisited" style="top:33.05%"></span>
-      <span class="unvisited" style="top:33.17%"></span>
-      <span class="unvisited" style="top:34.74%"></span>
+      <span class="unvisited" style="top:19.28%"></span>
+      <span class="unvisited" style="top:19.84%"></span>
+      <span class="unvisited" style="top:20.07%"></span>
+      <span class="unvisited" style="top:20.18%"></span>
+      <span class="unvisited" style="top:20.40%"></span>
+      <span class="unvisited" style="top:20.52%"></span>
+      <span class="unvisited" style="top:20.96%"></span>
+      <span class="unvisited" style="top:21.19%"></span>
+      <span class="unvisited" style="top:21.30%"></span>
+      <span class="unvisited" style="top:22.31%"></span>
+      <span class="unvisited" style="top:22.42%"></span>
+      <span class="unvisited" style="top:22.53%"></span>
+      <span class="unvisited" style="top:22.65%"></span>
+      <span class="unvisited" style="top:23.21%"></span>
+      <span class="unvisited" style="top:23.32%"></span>
+      <span class="unvisited" style="top:23.43%"></span>
+      <span class="unvisited" style="top:23.54%"></span>
+      <span class="unvisited" style="top:23.65%"></span>
+      <span class="unvisited" style="top:24.78%"></span>
+      <span class="unvisited" style="top:24.89%"></span>
+      <span class="unvisited" style="top:25.22%"></span>
+      <span class="unvisited" style="top:25.34%"></span>
+      <span class="unvisited" style="top:26.23%"></span>
+      <span class="unvisited" style="top:26.46%"></span>
+      <span class="unvisited" style="top:26.57%"></span>
+      <span class="unvisited" style="top:26.79%"></span>
+      <span class="unvisited" style="top:26.91%"></span>
+      <span class="unvisited" style="top:27.13%"></span>
+      <span class="unvisited" style="top:27.24%"></span>
+      <span class="unvisited" style="top:27.47%"></span>
+      <span class="unvisited" style="top:27.91%"></span>
+      <span class="unvisited" style="top:28.14%"></span>
+      <span class="unvisited" style="top:28.25%"></span>
+      <span class="unvisited" style="top:28.48%"></span>
+      <span class="unvisited" style="top:29.04%"></span>
+      <span class="unvisited" style="top:29.37%"></span>
+      <span class="unvisited" style="top:29.48%"></span>
+      <span class="unvisited" style="top:29.60%"></span>
+      <span class="unvisited" style="top:29.82%"></span>
+      <span class="unvisited" style="top:29.93%"></span>
+      <span class="unvisited" style="top:30.04%"></span>
+      <span class="unvisited" style="top:30.16%"></span>
+      <span class="unvisited" style="top:30.27%"></span>
+      <span class="unvisited" style="top:30.38%"></span>
+      <span class="unvisited" style="top:30.83%"></span>
+      <span class="unvisited" style="top:30.94%"></span>
+      <span class="unvisited" style="top:31.05%"></span>
+      <span class="unvisited" style="top:31.17%"></span>
+      <span class="unvisited" style="top:31.28%"></span>
+      <span class="unvisited" style="top:31.39%"></span>
+      <span class="unvisited" style="top:31.50%"></span>
+      <span class="unvisited" style="top:31.61%"></span>
+      <span class="unvisited" style="top:31.73%"></span>
+      <span class="unvisited" style="top:31.84%"></span>
+      <span class="unvisited" style="top:31.95%"></span>
+      <span class="unvisited" style="top:32.06%"></span>
+      <span class="unvisited" style="top:32.17%"></span>
+      <span class="unvisited" style="top:32.29%"></span>
+      <span class="unvisited" style="top:32.40%"></span>
+      <span class="unvisited" style="top:32.51%"></span>
+      <span class="unvisited" style="top:32.62%"></span>
+      <span class="unvisited" style="top:32.74%"></span>
+      <span class="unvisited" style="top:32.96%"></span>
+      <span class="unvisited" style="top:33.07%"></span>
+      <span class="unvisited" style="top:33.18%"></span>
+      <span class="unvisited" style="top:33.30%"></span>
+      <span class="unvisited" style="top:33.41%"></span>
+      <span class="unvisited" style="top:33.52%"></span>
+      <span class="unvisited" style="top:34.42%"></span>
+      <span class="unvisited" style="top:34.64%"></span>
+      <span class="unvisited" style="top:34.75%"></span>
       <span class="unvisited" style="top:34.98%"></span>
-      <span class="unvisited" style="top:35.10%"></span>
-      <span class="unvisited" style="top:35.34%"></span>
-      <span class="unvisited" style="top:35.46%"></span>
-      <span class="unvisited" style="top:35.71%"></span>
-      <span class="unvisited" style="top:35.83%"></span>
-      <span class="unvisited" style="top:36.07%"></span>
-      <span class="unvisited" style="top:36.19%"></span>
-      <span class="unvisited" style="top:36.43%"></span>
-      <span class="unvisited" style="top:36.55%"></span>
-      <span class="unvisited" style="top:36.79%"></span>
-      <span class="unvisited" style="top:36.91%"></span>
-      <span class="unvisited" style="top:37.15%"></span>
-      <span class="unvisited" style="top:37.27%"></span>
-      <span class="unvisited" style="top:37.52%"></span>
-      <span class="unvisited" style="top:37.64%"></span>
-      <span class="unvisited" style="top:37.88%"></span>
-      <span class="unvisited" style="top:38.00%"></span>
-      <span class="unvisited" style="top:38.24%"></span>
-      <span class="unvisited" style="top:39.81%"></span>
-      <span class="unvisited" style="top:40.05%"></span>
-      <span class="unvisited" style="top:40.17%"></span>
-      <span class="unvisited" style="top:40.41%"></span>
-      <span class="unvisited" style="top:40.53%"></span>
-      <span class="unvisited" style="top:40.77%"></span>
-      <span class="unvisited" style="top:40.89%"></span>
-      <span class="unvisited" style="top:41.13%"></span>
-      <span class="unvisited" style="top:41.25%"></span>
-      <span class="unvisited" style="top:41.50%"></span>
-      <span class="unvisited" style="top:43.43%"></span>
-      <span class="unvisited" style="top:43.79%"></span>
-      <span class="unvisited" style="top:43.91%"></span>
-      <span class="unvisited" style="top:44.03%"></span>
-      <span class="unvisited" style="top:44.27%"></span>
-      <span class="unvisited" style="top:44.39%"></span>
-      <span class="unvisited" style="top:44.51%"></span>
-      <span class="unvisited" style="top:44.63%"></span>
-      <span class="unvisited" style="top:44.75%"></span>
-      <span class="unvisited" style="top:44.87%"></span>
-      <span class="unvisited" style="top:44.99%"></span>
-      <span class="unvisited" style="top:45.11%"></span>
-      <span class="unvisited" style="top:45.24%"></span>
-      <span class="unvisited" style="top:45.36%"></span>
-      <span class="unvisited" style="top:45.48%"></span>
-      <span class="unvisited" style="top:45.60%"></span>
-      <span class="unvisited" style="top:45.72%"></span>
-      <span class="unvisited" style="top:45.84%"></span>
+      <span class="unvisited" style="top:35.09%"></span>
+      <span class="unvisited" style="top:35.31%"></span>
+      <span class="unvisited" style="top:35.43%"></span>
+      <span class="unvisited" style="top:35.65%"></span>
+      <span class="unvisited" style="top:35.76%"></span>
+      <span class="unvisited" style="top:35.99%"></span>
+      <span class="unvisited" style="top:36.10%"></span>
+      <span class="unvisited" style="top:36.32%"></span>
+      <span class="unvisited" style="top:36.77%"></span>
+      <span class="unvisited" style="top:37.00%"></span>
+      <span class="unvisited" style="top:37.11%"></span>
+      <span class="unvisited" style="top:37.33%"></span>
+      <span class="unvisited" style="top:37.44%"></span>
+      <span class="unvisited" style="top:37.67%"></span>
+      <span class="unvisited" style="top:38.12%"></span>
+      <span class="unvisited" style="top:38.23%"></span>
+      <span class="unvisited" style="top:38.34%"></span>
+      <span class="unvisited" style="top:38.45%"></span>
+      <span class="unvisited" style="top:38.57%"></span>
+      <span class="unvisited" style="top:38.68%"></span>
+      <span class="unvisited" style="top:38.79%"></span>
+      <span class="unvisited" style="top:38.90%"></span>
+      <span class="unvisited" style="top:39.01%"></span>
+      <span class="unvisited" style="top:39.13%"></span>
+      <span class="unvisited" style="top:39.24%"></span>
+      <span class="unvisited" style="top:39.35%"></span>
+      <span class="unvisited" style="top:39.46%"></span>
+      <span class="unvisited" style="top:39.57%"></span>
+      <span class="unvisited" style="top:39.80%"></span>
+      <span class="unvisited" style="top:39.91%"></span>
+      <span class="unvisited" style="top:40.02%"></span>
+      <span class="unvisited" style="top:40.13%"></span>
+      <span class="unvisited" style="top:40.25%"></span>
+      <span class="unvisited" style="top:40.36%"></span>
+      <span class="unvisited" style="top:40.47%"></span>
+      <span class="unvisited" style="top:40.58%"></span>
+      <span class="unvisited" style="top:40.70%"></span>
+      <span class="unvisited" style="top:40.81%"></span>
+      <span class="unvisited" style="top:40.92%"></span>
+      <span class="unvisited" style="top:41.03%"></span>
+      <span class="unvisited" style="top:41.14%"></span>
+      <span class="unvisited" style="top:41.26%"></span>
+      <span class="unvisited" style="top:41.37%"></span>
+      <span class="unvisited" style="top:41.48%"></span>
+      <span class="unvisited" style="top:41.59%"></span>
+      <span class="unvisited" style="top:41.70%"></span>
+      <span class="unvisited" style="top:41.82%"></span>
+      <span class="unvisited" style="top:41.93%"></span>
+      <span class="unvisited" style="top:42.38%"></span>
+      <span class="unvisited" style="top:42.49%"></span>
+      <span class="unvisited" style="top:42.60%"></span>
+      <span class="unvisited" style="top:42.71%"></span>
+      <span class="unvisited" style="top:42.83%"></span>
+      <span class="unvisited" style="top:42.94%"></span>
+      <span class="unvisited" style="top:43.05%"></span>
+      <span class="unvisited" style="top:43.16%"></span>
+      <span class="unvisited" style="top:44.73%"></span>
+      <span class="unvisited" style="top:44.84%"></span>
+      <span class="unvisited" style="top:44.96%"></span>
+      <span class="unvisited" style="top:45.07%"></span>
+      <span class="unvisited" style="top:45.18%"></span>
+      <span class="unvisited" style="top:45.29%"></span>
+      <span class="unvisited" style="top:45.40%"></span>
+      <span class="unvisited" style="top:45.52%"></span>
+      <span class="unvisited" style="top:45.63%"></span>
+      <span class="unvisited" style="top:45.74%"></span>
+      <span class="unvisited" style="top:45.85%"></span>
       <span class="unvisited" style="top:45.96%"></span>
       <span class="unvisited" style="top:46.08%"></span>
-      <span class="unvisited" style="top:46.20%"></span>
-      <span class="unvisited" style="top:46.32%"></span>
-      <span class="unvisited" style="top:46.44%"></span>
-      <span class="unvisited" style="top:46.56%"></span>
-      <span class="unvisited" style="top:46.68%"></span>
-      <span class="unvisited" style="top:46.80%"></span>
-      <span class="unvisited" style="top:46.92%"></span>
-      <span class="unvisited" style="top:47.04%"></span>
-      <span class="unvisited" style="top:47.17%"></span>
-      <span class="unvisited" style="top:47.29%"></span>
-      <span class="unvisited" style="top:47.41%"></span>
+      <span class="unvisited" style="top:46.30%"></span>
+      <span class="unvisited" style="top:46.41%"></span>
+      <span class="unvisited" style="top:46.52%"></span>
+      <span class="unvisited" style="top:46.64%"></span>
+      <span class="unvisited" style="top:46.75%"></span>
+      <span class="unvisited" style="top:46.86%"></span>
+      <span class="unvisited" style="top:46.97%"></span>
+      <span class="unvisited" style="top:47.09%"></span>
+      <span class="unvisited" style="top:47.20%"></span>
+      <span class="unvisited" style="top:47.31%"></span>
+      <span class="unvisited" style="top:47.42%"></span>
       <span class="unvisited" style="top:47.53%"></span>
-      <span class="unvisited" style="top:47.65%"></span>
-      <span class="unvisited" style="top:48.13%"></span>
-      <span class="unvisited" style="top:48.25%"></span>
-      <span class="unvisited" style="top:48.37%"></span>
-      <span class="unvisited" style="top:48.49%"></span>
-      <span class="unvisited" style="top:48.61%"></span>
-      <span class="unvisited" style="top:48.73%"></span>
-      <span class="unvisited" style="top:48.85%"></span>
-      <span class="unvisited" style="top:48.97%"></span>
-      <span class="unvisited" style="top:49.10%"></span>
       <span class="unvisited" style="top:49.22%"></span>
-      <span class="unvisited" style="top:49.34%"></span>
-      <span class="unvisited" style="top:49.46%"></span>
-      <span class="unvisited" style="top:49.58%"></span>
-      <span class="unvisited" style="top:49.70%"></span>
-      <span class="unvisited" style="top:49.82%"></span>
-      <span class="unvisited" style="bottom:49.94%"></span>
-      <span class="unvisited" style="bottom:49.82%"></span>
-      <span class="unvisited" style="bottom:49.70%"></span>
-      <span class="unvisited" style="bottom:49.58%"></span>
-      <span class="unvisited" style="bottom:49.46%"></span>
-      <span class="unvisited" style="bottom:49.34%"></span>
+      <span class="unvisited" style="top:49.33%"></span>
+      <span class="unvisited" style="top:49.44%"></span>
+      <span class="unvisited" style="top:49.55%"></span>
+      <span class="unvisited" style="top:49.66%"></span>
+      <span class="unvisited" style="top:49.78%"></span>
+      <span class="unvisited" style="top:49.89%"></span>
+      <span class="unvisited" style="top:50.00%"></span>
+      <span class="unvisited" style="bottom:49.89%"></span>
+      <span class="unvisited" style="bottom:49.78%"></span>
+      <span class="unvisited" style="bottom:49.66%"></span>
+      <span class="unvisited" style="bottom:49.55%"></span>
+      <span class="unvisited" style="bottom:49.44%"></span>
+      <span class="unvisited" style="bottom:49.33%"></span>
       <span class="unvisited" style="bottom:49.22%"></span>
       <span class="unvisited" style="bottom:49.10%"></span>
-      <span class="unvisited" style="bottom:48.97%"></span>
-      <span class="unvisited" style="bottom:48.85%"></span>
-      <span class="unvisited" style="bottom:48.73%"></span>
-      <span class="unvisited" style="bottom:48.61%"></span>
-      <span class="unvisited" style="bottom:48.49%"></span>
-      <span class="unvisited" style="bottom:48.37%"></span>
-      <span class="unvisited" style="bottom:48.25%"></span>
-      <span class="unvisited" style="bottom:48.13%"></span>
-      <span class="unvisited" style="bottom:48.01%"></span>
-      <span class="unvisited" style="bottom:47.89%"></span>
-      <span class="unvisited" style="bottom:47.77%"></span>
-      <span class="unvisited" style="bottom:47.65%"></span>
+      <span class="unvisited" style="bottom:48.99%"></span>
+      <span class="unvisited" style="bottom:48.88%"></span>
+      <span class="unvisited" style="bottom:48.77%"></span>
+      <span class="unvisited" style="bottom:48.65%"></span>
+      <span class="unvisited" style="bottom:48.54%"></span>
+      <span class="unvisited" style="bottom:48.43%"></span>
+      <span class="unvisited" style="bottom:48.32%"></span>
+      <span class="unvisited" style="bottom:48.21%"></span>
+      <span class="unvisited" style="bottom:48.09%"></span>
+      <span class="unvisited" style="bottom:47.87%"></span>
       <span class="unvisited" style="bottom:47.53%"></span>
-      <span class="unvisited" style="bottom:47.29%"></span>
-      <span class="unvisited" style="bottom:47.17%"></span>
-      <span class="unvisited" style="bottom:47.04%"></span>
-      <span class="unvisited" style="bottom:46.92%"></span>
-      <span class="unvisited" style="bottom:46.80%"></span>
-      <span class="unvisited" style="bottom:46.68%"></span>
-      <span class="unvisited" style="bottom:46.56%"></span>
-      <span class="unvisited" style="bottom:46.44%"></span>
-      <span class="unvisited" style="bottom:46.32%"></span>
-      <span class="unvisited" style="bottom:46.20%"></span>
-      <span class="unvisited" style="bottom:46.08%"></span>
-      <span class="unvisited" style="bottom:45.96%"></span>
-      <span class="unvisited" style="bottom:45.84%"></span>
-      <span class="unvisited" style="bottom:45.72%"></span>
-      <span class="unvisited" style="bottom:45.60%"></span>
-      <span class="unvisited" style="bottom:45.48%"></span>
-      <span class="unvisited" style="bottom:45.36%"></span>
-      <span class="unvisited" style="bottom:45.24%"></span>
-      <span class="unvisited" style="bottom:45.11%"></span>
-      <span class="unvisited" style="bottom:44.99%"></span>
-      <span class="unvisited" style="bottom:44.87%"></span>
-      <span class="unvisited" style="bottom:44.75%"></span>
-      <span class="unvisited" style="bottom:44.63%"></span>
+      <span class="unvisited" style="bottom:47.31%"></span>
+      <span class="unvisited" style="bottom:47.20%"></span>
+      <span class="unvisited" style="bottom:47.09%"></span>
+      <span class="unvisited" style="bottom:46.75%"></span>
+      <span class="unvisited" style="bottom:46.64%"></span>
+      <span class="unvisited" style="bottom:46.30%"></span>
+      <span class="unvisited" style="bottom:46.19%"></span>
+      <span class="unvisited" style="bottom:45.85%"></span>
+      <span class="unvisited" style="bottom:45.74%"></span>
+      <span class="unvisited" style="bottom:45.40%"></span>
+      <span class="unvisited" style="bottom:45.29%"></span>
+      <span class="unvisited" style="bottom:44.96%"></span>
+      <span class="unvisited" style="bottom:44.73%"></span>
       <span class="unvisited" style="bottom:44.51%"></span>
       <span class="unvisited" style="bottom:44.39%"></span>
-      <span class="unvisited" style="bottom:44.27%"></span>
-      <span class="unvisited" style="bottom:44.15%"></span>
-      <span class="unvisited" style="bottom:44.03%"></span>
-      <span class="unvisited" style="bottom:43.91%"></span>
-      <span class="unvisited" style="bottom:43.79%"></span>
-      <span class="unvisited" style="bottom:43.67%"></span>
-      <span class="unvisited" style="bottom:43.55%"></span>
-      <span class="unvisited" style="bottom:43.43%"></span>
-      <span class="unvisited" style="bottom:43.31%"></span>
-      <span class="unvisited" style="bottom:43.18%"></span>
-      <span class="unvisited" style="bottom:43.06%"></span>
-      <span class="unvisited" style="bottom:42.94%"></span>
-      <span class="unvisited" style="bottom:42.82%"></span>
-      <span class="unvisited" style="bottom:42.70%"></span>
-      <span class="unvisited" style="bottom:42.58%"></span>
-      <span class="unvisited" style="bottom:42.46%"></span>
-      <span class="unvisited" style="bottom:42.34%"></span>
-      <span class="unvisited" style="bottom:42.22%"></span>
-      <span class="unvisited" style="bottom:42.10%"></span>
-      <span class="unvisited" style="bottom:41.98%"></span>
-      <span class="unvisited" style="bottom:41.86%"></span>
-      <span class="unvisited" style="bottom:41.74%"></span>
-      <span class="unvisited" style="bottom:41.62%"></span>
-      <span class="unvisited" style="bottom:41.50%"></span>
-      <span class="unvisited" style="bottom:41.38%"></span>
-      <span class="unvisited" style="bottom:41.25%"></span>
-      <span class="unvisited" style="bottom:41.01%"></span>
-      <span class="unvisited" style="bottom:40.89%"></span>
-      <span class="unvisited" style="bottom:40.77%"></span>
-      <span class="unvisited" style="bottom:40.65%"></span>
-      <span class="unvisited" style="bottom:40.53%"></span>
-      <span class="unvisited" style="bottom:40.41%"></span>
-      <span class="unvisited" style="bottom:40.29%"></span>
-      <span class="unvisited" style="bottom:40.17%"></span>
-      <span class="unvisited" style="bottom:40.05%"></span>
-      <span class="unvisited" style="bottom:39.93%"></span>
-      <span class="unvisited" style="bottom:39.81%"></span>
+      <span class="unvisited" style="bottom:44.28%"></span>
+      <span class="unvisited" style="bottom:44.17%"></span>
+      <span class="unvisited" style="bottom:42.83%"></span>
+      <span class="unvisited" style="bottom:42.71%"></span>
+      <span class="unvisited" style="bottom:42.60%"></span>
+      <span class="unvisited" style="bottom:42.38%"></span>
+      <span class="unvisited" style="bottom:42.26%"></span>
+      <span class="unvisited" style="bottom:42.15%"></span>
+      <span class="unvisited" style="bottom:41.93%"></span>
+      <span class="unvisited" style="bottom:41.82%"></span>
+      <span class="unvisited" style="bottom:41.70%"></span>
+      <span class="unvisited" style="bottom:41.48%"></span>
+      <span class="unvisited" style="bottom:41.37%"></span>
+      <span class="unvisited" style="bottom:41.14%"></span>
+      <span class="unvisited" style="bottom:41.03%"></span>
+      <span class="unvisited" style="bottom:40.81%"></span>
+      <span class="unvisited" style="bottom:40.47%"></span>
+      <span class="unvisited" style="bottom:40.25%"></span>
       <span class="unvisited" style="bottom:39.69%"></span>
-      <span class="unvisited" style="bottom:39.57%"></span>
-      <span class="unvisited" style="bottom:39.32%"></span>
-      <span class="unvisited" style="bottom:39.20%"></span>
-      <span class="unvisited" style="bottom:39.08%"></span>
-      <span class="unvisited" style="bottom:38.84%"></span>
-      <span class="unvisited" style="bottom:38.72%"></span>
-      <span class="unvisited" style="bottom:38.48%"></span>
-      <span class="unvisited" style="bottom:38.36%"></span>
-      <span class="unvisited" style="bottom:38.24%"></span>
+      <span class="unvisited" style="bottom:39.46%"></span>
+      <span class="unvisited" style="bottom:39.35%"></span>
+      <span class="unvisited" style="bottom:39.24%"></span>
+      <span class="unvisited" style="bottom:39.01%"></span>
+      <span class="unvisited" style="bottom:38.90%"></span>
+      <span class="unvisited" style="bottom:38.79%"></span>
+      <span class="unvisited" style="bottom:38.57%"></span>
+      <span class="unvisited" style="bottom:38.23%"></span>
       <span class="unvisited" style="bottom:38.00%"></span>
-      <span class="unvisited" style="bottom:37.88%"></span>
-      <span class="unvisited" style="bottom:37.64%"></span>
-      <span class="unvisited" style="bottom:37.52%"></span>
-      <span class="unvisited" style="bottom:37.39%"></span>
-      <span class="unvisited" style="bottom:37.15%"></span>
-      <span class="unvisited" style="bottom:37.03%"></span>
-      <span class="unvisited" style="bottom:36.79%"></span>
-      <span class="unvisited" style="bottom:36.67%"></span>
+      <span class="unvisited" style="bottom:37.00%"></span>
+      <span class="unvisited" style="bottom:36.88%"></span>
+      <span class="unvisited" style="bottom:36.77%"></span>
+      <span class="unvisited" style="bottom:36.66%"></span>
       <span class="unvisited" style="bottom:36.55%"></span>
-      <span class="unvisited" style="bottom:36.31%"></span>
-      <span class="unvisited" style="bottom:36.19%"></span>
-      <span class="unvisited" style="bottom:35.95%"></span>
-      <span class="unvisited" style="bottom:35.83%"></span>
-      <span class="unvisited" style="bottom:35.59%"></span>
-      <span class="unvisited" style="bottom:35.46%"></span>
-      <span class="unvisited" style="bottom:35.22%"></span>
-      <span class="unvisited" style="bottom:35.10%"></span>
-      <span class="unvisited" style="bottom:34.98%"></span>
-      <span class="unvisited" style="bottom:34.86%"></span>
-      <span class="unvisited" style="bottom:34.74%"></span>
-      <span class="unvisited" style="bottom:34.62%"></span>
-      <span class="unvisited" style="bottom:34.50%"></span>
-      <span class="unvisited" style="bottom:34.38%"></span>
-      <span class="unvisited" style="bottom:34.26%"></span>
-      <span class="unvisited" style="bottom:34.14%"></span>
-      <span class="unvisited" style="bottom:34.02%"></span>
-      <span class="unvisited" style="bottom:32.45%"></span>
-      <span class="unvisited" style="bottom:32.21%"></span>
-      <span class="unvisited" style="bottom:32.09%"></span>
-      <span class="unvisited" style="bottom:31.97%"></span>
-      <span class="unvisited" style="bottom:31.85%"></span>
-      <span class="unvisited" style="bottom:31.12%"></span>
-      <span class="unvisited" style="bottom:31.00%"></span>
-      <span class="unvisited" style="bottom:30.88%"></span>
-      <span class="unvisited" style="bottom:29.79%"></span>
-      <span class="unvisited" style="bottom:29.67%"></span>
-      <span class="unvisited" style="bottom:29.55%"></span>
-      <span class="unvisited" style="bottom:29.43%"></span>
-      <span class="unvisited" style="bottom:29.31%"></span>
-      <span class="unvisited" style="bottom:28.23%"></span>
-      <span class="unvisited" style="bottom:28.11%"></span>
-      <span class="unvisited" style="bottom:25.93%"></span>
-      <span class="unvisited" style="bottom:25.69%"></span>
-      <span class="unvisited" style="bottom:25.21%"></span>
-      <span class="unvisited" style="bottom:24.97%"></span>
-      <span class="unvisited" style="bottom:24.85%"></span>
-      <span class="unvisited" style="bottom:24.61%"></span>
-      <span class="unvisited" style="bottom:24.49%"></span>
-      <span class="unvisited" style="bottom:24.25%"></span>
-      <span class="unvisited" style="bottom:24.00%"></span>
+      <span class="unvisited" style="bottom:36.43%"></span>
+      <span class="unvisited" style="bottom:36.10%"></span>
+      <span class="unvisited" style="bottom:35.99%"></span>
+      <span class="unvisited" style="bottom:35.76%"></span>
+      <span class="unvisited" style="bottom:33.30%"></span>
+      <span class="unvisited" style="bottom:33.07%"></span>
+      <span class="unvisited" style="bottom:32.96%"></span>
+      <span class="unvisited" style="bottom:32.85%"></span>
+      <span class="unvisited" style="bottom:32.74%"></span>
+      <span class="unvisited" style="bottom:31.84%"></span>
+      <span class="unvisited" style="bottom:31.73%"></span>
+      <span class="unvisited" style="bottom:31.50%"></span>
+      <span class="unvisited" style="bottom:30.16%"></span>
+      <span class="unvisited" style="bottom:29.93%"></span>
+      <span class="unvisited" style="bottom:29.82%"></span>
+      <span class="unvisited" style="bottom:29.71%"></span>
+      <span class="unvisited" style="bottom:29.60%"></span>
+      <span class="unvisited" style="bottom:28.92%"></span>
+      <span class="unvisited" style="bottom:28.81%"></span>
+      <span class="unvisited" style="bottom:28.70%"></span>
+      <span class="unvisited" style="bottom:27.69%"></span>
+      <span class="unvisited" style="bottom:27.58%"></span>
+      <span class="unvisited" style="bottom:27.47%"></span>
+      <span class="unvisited" style="bottom:27.35%"></span>
+      <span class="unvisited" style="bottom:27.24%"></span>
+      <span class="unvisited" style="bottom:26.23%"></span>
+      <span class="unvisited" style="bottom:26.12%"></span>
+      <span class="unvisited" style="bottom:24.10%"></span>
       <span class="unvisited" style="bottom:23.88%"></span>
-      <span class="unvisited" style="bottom:23.64%"></span>
-      <span class="unvisited" style="bottom:23.40%"></span>
-      <span class="unvisited" style="bottom:23.28%"></span>
-      <span class="unvisited" style="bottom:23.04%"></span>
-      <span class="unvisited" style="bottom:22.92%"></span>
-      <span class="unvisited" style="bottom:22.68%"></span>
-      <span class="unvisited" style="bottom:22.44%"></span>
-      <span class="unvisited" style="bottom:22.32%"></span>
-      <span class="some-visited" style="bottom:21.71%"></span>
-      <span class="unvisited" style="bottom:21.35%"></span>
-      <span class="unvisited" style="bottom:21.11%"></span>
-      <span class="unvisited" style="bottom:20.99%"></span>
-      <span class="unvisited" style="bottom:20.75%"></span>
-      <span class="unvisited" style="bottom:20.63%"></span>
-      <span class="unvisited" style="bottom:20.51%"></span>
-      <span class="unvisited" style="bottom:20.39%"></span>
-      <span class="unvisited" style="bottom:20.14%"></span>
-      <span class="unvisited" style="bottom:19.90%"></span>
-      <span class="unvisited" style="bottom:19.78%"></span>
-      <span class="unvisited" style="bottom:19.66%"></span>
-      <span class="unvisited" style="bottom:19.54%"></span>
-      <span class="unvisited" style="bottom:18.82%"></span>
-      <span class="unvisited" style="bottom:18.58%"></span>
-      <span class="unvisited" style="bottom:17.97%"></span>
-      <span class="unvisited" style="bottom:17.73%"></span>
-      <span class="unvisited" style="bottom:17.61%"></span>
+      <span class="unvisited" style="bottom:23.43%"></span>
+      <span class="unvisited" style="bottom:23.21%"></span>
+      <span class="unvisited" style="bottom:23.09%"></span>
+      <span class="unvisited" style="bottom:22.87%"></span>
+      <span class="unvisited" style="bottom:22.76%"></span>
+      <span class="unvisited" style="bottom:22.53%"></span>
+      <span class="unvisited" style="bottom:22.31%"></span>
+      <span class="unvisited" style="bottom:22.20%"></span>
+      <span class="unvisited" style="bottom:21.97%"></span>
+      <span class="unvisited" style="bottom:21.75%"></span>
+      <span class="unvisited" style="bottom:21.64%"></span>
+      <span class="unvisited" style="bottom:21.41%"></span>
+      <span class="unvisited" style="bottom:21.30%"></span>
+      <span class="unvisited" style="bottom:21.08%"></span>
+      <span class="unvisited" style="bottom:20.85%"></span>
+      <span class="unvisited" style="bottom:20.74%"></span>
+      <span class="some-visited" style="bottom:20.18%"></span>
+      <span class="unvisited" style="bottom:19.84%"></span>
+      <span class="unvisited" style="bottom:19.62%"></span>
+      <span class="unvisited" style="bottom:19.51%"></span>
+      <span class="unvisited" style="bottom:19.28%"></span>
+      <span class="unvisited" style="bottom:19.17%"></span>
+      <span class="unvisited" style="bottom:19.06%"></span>
+      <span class="unvisited" style="bottom:18.95%"></span>
+      <span class="unvisited" style="bottom:18.72%"></span>
+      <span class="unvisited" style="bottom:18.50%"></span>
+      <span class="unvisited" style="bottom:18.39%"></span>
+      <span class="unvisited" style="bottom:18.27%"></span>
+      <span class="unvisited" style="bottom:18.16%"></span>
       <span class="unvisited" style="bottom:17.49%"></span>
-      <span class="unvisited" style="bottom:10.49%"></span>
-      <span class="some-visited" style="bottom:8.93%"></span>
-      <span class="some-visited" style="bottom:0.36%"></span>
+      <span class="unvisited" style="bottom:17.26%"></span>
+      <span class="unvisited" style="bottom:16.70%"></span>
+      <span class="unvisited" style="bottom:16.48%"></span>
+      <span class="unvisited" style="bottom:16.37%"></span>
+      <span class="unvisited" style="bottom:16.26%"></span>
+      <span class="unvisited" style="bottom:9.75%"></span>
+      <span class="some-visited" style="bottom:8.30%"></span>
+      <span class="some-visited" style="bottom:0.34%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -567,141 +577,141 @@
 <a id="L229"></a><span class="visited"> </span>
 <a id="L230"></a><span > </span>
 <a id="L231"></a><span class="visited"> </span>
-<a id="L232"></a><span class="visited"> </span>
+<a id="L232"></a><span > </span>
 <a id="L233"></a><span class="visited"> </span>
-<a id="L234"></a><span > </span>
-<a id="L235"></a><span class="visited"> </span>
-<a id="L236"></a><span class="visited"> </span>
-<a id="L237"></a><span class="visited"> </span>
+<a id="L234"></a><span class="unvisited"> </span>
+<a id="L235"></a><span > </span>
+<a id="L236"></a><span class="unvisited"> </span>
+<a id="L237"></a><span class="unvisited"> </span>
 <a id="L238"></a><span > </span>
-<a id="L239"></a><span class="visited"> </span>
-<a id="L240"></a><span class="visited"> </span>
-<a id="L241"></a><span class="visited"> </span>
-<a id="L242"></a><span > </span>
-<a id="L243"></a><span class="visited"> </span>
-<a id="L244"></a><span class="visited"> </span>
-<a id="L245"></a><span class="visited"> </span>
+<a id="L239"></a><span class="unvisited"> </span>
+<a id="L240"></a><span class="unvisited"> </span>
+<a id="L241"></a><span > </span>
+<a id="L242"></a><span class="unvisited"> </span>
+<a id="L243"></a><span class="unvisited"> </span>
+<a id="L244"></a><span > </span>
+<a id="L245"></a><span class="unvisited"> </span>
 <a id="L246"></a><span class="visited"> </span>
 <a id="L247"></a><span > </span>
 <a id="L248"></a><span class="visited"> </span>
-<a id="L249"></a><span > </span>
-<a id="L250"></a><span class="visited"> </span>
-<a id="L251"></a><span class="visited"> </span>
+<a id="L249"></a><span class="unvisited"> </span>
+<a id="L250"></a><span > </span>
+<a id="L251"></a><span class="unvisited"> </span>
 <a id="L252"></a><span class="unvisited"> </span>
 <a id="L253"></a><span > </span>
 <a id="L254"></a><span class="unvisited"> </span>
-<a id="L255"></a><span class="unvisited"> </span>
-<a id="L256"></a><span class="unvisited"> </span>
-<a id="L257"></a><span class="unvisited"> </span>
+<a id="L255"></a><span class="visited"> </span>
+<a id="L256"></a><span > </span>
+<a id="L257"></a><span class="visited"> </span>
 <a id="L258"></a><span class="visited"> </span>
-<a id="L259"></a><span class="visited"> </span>
+<a id="L259"></a><span class="unvisited"> </span>
 <a id="L260"></a><span class="visited"> </span>
-<a id="L261"></a><span > </span>
-<a id="L262"></a><span class="visited"> </span>
-<a id="L263"></a><span class="visited"> </span>
-<a id="L264"></a><span class="visited"> </span>
-<a id="L265"></a><span class="unvisited"> </span>
+<a id="L261"></a><span class="visited"> </span>
+<a id="L262"></a><span class="unvisited"> </span>
+<a id="L263"></a><span class="unvisited"> </span>
+<a id="L264"></a><span class="unvisited"> </span>
+<a id="L265"></a><span class="visited"> </span>
 <a id="L266"></a><span class="unvisited"> </span>
-<a id="L267"></a><span > </span>
+<a id="L267"></a><span class="unvisited"> </span>
 <a id="L268"></a><span class="unvisited"> </span>
-<a id="L269"></a><span class="visited"> </span>
-<a id="L270"></a><span class="visited"> </span>
-<a id="L271"></a><span class="visited"> </span>
+<a id="L269"></a><span class="unvisited"> </span>
+<a id="L270"></a><span class="unvisited"> </span>
+<a id="L271"></a><span class="unvisited"> </span>
 <a id="L272"></a><span class="visited"> </span>
 <a id="L273"></a><span class="visited"> </span>
-<a id="L274"></a><span class="unvisited"> </span>
+<a id="L274"></a><span class="visited"> </span>
 <a id="L275"></a><span class="unvisited"> </span>
-<a id="L276"></a><span class="visited"> </span>
-<a id="L277"></a><span > </span>
-<a id="L278"></a><span class="visited"> </span>
-<a id="L279"></a><span class="visited"> </span>
-<a id="L280"></a><span > </span>
-<a id="L281"></a><span class="visited"> </span>
-<a id="L282"></a><span class="visited"> </span>
-<a id="L283"></a><span > </span>
-<a id="L284"></a><span class="visited"> </span>
-<a id="L285"></a><span class="visited"> </span>
-<a id="L286"></a><span > </span>
-<a id="L287"></a><span class="visited"> </span>
+<a id="L276"></a><span class="unvisited"> </span>
+<a id="L277"></a><span class="unvisited"> </span>
+<a id="L278"></a><span class="unvisited"> </span>
+<a id="L279"></a><span class="unvisited"> </span>
+<a id="L280"></a><span class="unvisited"> </span>
+<a id="L281"></a><span class="unvisited"> </span>
+<a id="L282"></a><span class="unvisited"> </span>
+<a id="L283"></a><span class="unvisited"> </span>
+<a id="L284"></a><span class="unvisited"> </span>
+<a id="L285"></a><span class="unvisited"> </span>
+<a id="L286"></a><span class="unvisited"> </span>
+<a id="L287"></a><span class="unvisited"> </span>
 <a id="L288"></a><span class="unvisited"> </span>
-<a id="L289"></a><span > </span>
+<a id="L289"></a><span class="unvisited"> </span>
 <a id="L290"></a><span class="unvisited"> </span>
 <a id="L291"></a><span class="unvisited"> </span>
-<a id="L292"></a><span > </span>
-<a id="L293"></a><span class="unvisited"> </span>
+<a id="L292"></a><span class="unvisited"> </span>
+<a id="L293"></a><span > </span>
 <a id="L294"></a><span class="unvisited"> </span>
-<a id="L295"></a><span > </span>
+<a id="L295"></a><span class="unvisited"> </span>
 <a id="L296"></a><span class="unvisited"> </span>
 <a id="L297"></a><span class="unvisited"> </span>
-<a id="L298"></a><span > </span>
+<a id="L298"></a><span class="unvisited"> </span>
 <a id="L299"></a><span class="unvisited"> </span>
-<a id="L300"></a><span class="unvisited"> </span>
+<a id="L300"></a><span > </span>
 <a id="L301"></a><span > </span>
-<a id="L302"></a><span class="unvisited"> </span>
-<a id="L303"></a><span class="unvisited"> </span>
-<a id="L304"></a><span > </span>
-<a id="L305"></a><span class="unvisited"> </span>
-<a id="L306"></a><span class="unvisited"> </span>
-<a id="L307"></a><span > </span>
-<a id="L308"></a><span class="unvisited"> </span>
+<a id="L302"></a><span class="visited"> </span>
+<a id="L303"></a><span > </span>
+<a id="L304"></a><span class="visited"> </span>
+<a id="L305"></a><span > </span>
+<a id="L306"></a><span class="visited"> </span>
+<a id="L307"></a><span class="unvisited"> </span>
+<a id="L308"></a><span > </span>
 <a id="L309"></a><span class="unvisited"> </span>
-<a id="L310"></a><span > </span>
-<a id="L311"></a><span class="unvisited"> </span>
+<a id="L310"></a><span class="unvisited"> </span>
+<a id="L311"></a><span > </span>
 <a id="L312"></a><span class="unvisited"> </span>
-<a id="L313"></a><span > </span>
-<a id="L314"></a><span class="unvisited"> </span>
+<a id="L313"></a><span class="unvisited"> </span>
+<a id="L314"></a><span > </span>
 <a id="L315"></a><span class="unvisited"> </span>
-<a id="L316"></a><span > </span>
-<a id="L317"></a><span class="unvisited"> </span>
-<a id="L318"></a><span class="visited"> </span>
-<a id="L319"></a><span > </span>
-<a id="L320"></a><span class="visited"> </span>
-<a id="L321"></a><span class="visited"> </span>
-<a id="L322"></a><span > </span>
-<a id="L323"></a><span class="visited"> </span>
-<a id="L324"></a><span class="visited"> </span>
-<a id="L325"></a><span > </span>
-<a id="L326"></a><span class="visited"> </span>
+<a id="L316"></a><span class="unvisited"> </span>
+<a id="L317"></a><span > </span>
+<a id="L318"></a><span class="unvisited"> </span>
+<a id="L319"></a><span class="unvisited"> </span>
+<a id="L320"></a><span > </span>
+<a id="L321"></a><span class="unvisited"> </span>
+<a id="L322"></a><span class="unvisited"> </span>
+<a id="L323"></a><span > </span>
+<a id="L324"></a><span class="unvisited"> </span>
+<a id="L325"></a><span class="visited"> </span>
+<a id="L326"></a><span > </span>
 <a id="L327"></a><span class="visited"> </span>
-<a id="L328"></a><span > </span>
-<a id="L329"></a><span class="visited"> </span>
+<a id="L328"></a><span class="unvisited"> </span>
+<a id="L329"></a><span > </span>
 <a id="L330"></a><span class="unvisited"> </span>
-<a id="L331"></a><span > </span>
-<a id="L332"></a><span class="unvisited"> </span>
+<a id="L331"></a><span class="unvisited"> </span>
+<a id="L332"></a><span > </span>
 <a id="L333"></a><span class="unvisited"> </span>
-<a id="L334"></a><span > </span>
-<a id="L335"></a><span class="unvisited"> </span>
+<a id="L334"></a><span class="unvisited"> </span>
+<a id="L335"></a><span > </span>
 <a id="L336"></a><span class="unvisited"> </span>
-<a id="L337"></a><span > </span>
-<a id="L338"></a><span class="unvisited"> </span>
-<a id="L339"></a><span class="unvisited"> </span>
-<a id="L340"></a><span > </span>
+<a id="L337"></a><span class="visited"> </span>
+<a id="L338"></a><span > </span>
+<a id="L339"></a><span class="visited"> </span>
+<a id="L340"></a><span class="unvisited"> </span>
 <a id="L341"></a><span class="unvisited"> </span>
 <a id="L342"></a><span class="unvisited"> </span>
-<a id="L343"></a><span > </span>
+<a id="L343"></a><span class="unvisited"> </span>
 <a id="L344"></a><span class="unvisited"> </span>
-<a id="L345"></a><span class="visited"> </span>
-<a id="L346"></a><span class="visited"> </span>
-<a id="L347"></a><span class="visited"> </span>
-<a id="L348"></a><span > </span>
-<a id="L349"></a><span class="visited"> </span>
-<a id="L350"></a><span class="visited"> </span>
-<a id="L351"></a><span > </span>
-<a id="L352"></a><span class="visited"> </span>
-<a id="L353"></a><span class="visited"> </span>
-<a id="L354"></a><span > </span>
-<a id="L355"></a><span class="visited"> </span>
-<a id="L356"></a><span class="visited"> </span>
-<a id="L357"></a><span > </span>
-<a id="L358"></a><span class="visited"> </span>
-<a id="L359"></a><span class="visited"> </span>
+<a id="L345"></a><span class="unvisited"> </span>
+<a id="L346"></a><span class="unvisited"> </span>
+<a id="L347"></a><span class="unvisited"> </span>
+<a id="L348"></a><span class="unvisited"> </span>
+<a id="L349"></a><span class="unvisited"> </span>
+<a id="L350"></a><span class="unvisited"> </span>
+<a id="L351"></a><span class="unvisited"> </span>
+<a id="L352"></a><span class="unvisited"> </span>
+<a id="L353"></a><span class="unvisited"> </span>
+<a id="L354"></a><span class="visited"> </span>
+<a id="L355"></a><span class="unvisited"> </span>
+<a id="L356"></a><span class="unvisited"> </span>
+<a id="L357"></a><span class="unvisited"> </span>
+<a id="L358"></a><span class="unvisited"> </span>
+<a id="L359"></a><span class="unvisited"> </span>
 <a id="L360"></a><span class="unvisited"> </span>
-<a id="L361"></a><span class="visited"> </span>
-<a id="L362"></a><span class="visited"> </span>
+<a id="L361"></a><span class="unvisited"> </span>
+<a id="L362"></a><span class="unvisited"> </span>
 <a id="L363"></a><span class="unvisited"> </span>
 <a id="L364"></a><span class="unvisited"> </span>
 <a id="L365"></a><span class="unvisited"> </span>
-<a id="L366"></a><span class="visited"> </span>
+<a id="L366"></a><span class="unvisited"> </span>
 <a id="L367"></a><span class="unvisited"> </span>
 <a id="L368"></a><span class="unvisited"> </span>
 <a id="L369"></a><span class="unvisited"> </span>
@@ -710,9 +720,9 @@
 <a id="L372"></a><span class="unvisited"> </span>
 <a id="L373"></a><span class="unvisited"> </span>
 <a id="L374"></a><span class="unvisited"> </span>
-<a id="L375"></a><span class="unvisited"> </span>
-<a id="L376"></a><span class="unvisited"> </span>
-<a id="L377"></a><span class="unvisited"> </span>
+<a id="L375"></a><span > </span>
+<a id="L376"></a><span > </span>
+<a id="L377"></a><span > </span>
 <a id="L378"></a><span class="unvisited"> </span>
 <a id="L379"></a><span class="unvisited"> </span>
 <a id="L380"></a><span class="unvisited"> </span>
@@ -721,18 +731,18 @@
 <a id="L383"></a><span class="unvisited"> </span>
 <a id="L384"></a><span class="unvisited"> </span>
 <a id="L385"></a><span class="unvisited"> </span>
-<a id="L386"></a><span class="unvisited"> </span>
-<a id="L387"></a><span class="unvisited"> </span>
-<a id="L388"></a><span class="unvisited"> </span>
-<a id="L389"></a><span class="unvisited"> </span>
-<a id="L390"></a><span class="unvisited"> </span>
-<a id="L391"></a><span class="unvisited"> </span>
-<a id="L392"></a><span class="unvisited"> </span>
-<a id="L393"></a><span class="unvisited"> </span>
-<a id="L394"></a><span class="unvisited"> </span>
-<a id="L395"></a><span class="unvisited"> </span>
+<a id="L386"></a><span > </span>
+<a id="L387"></a><span > </span>
+<a id="L388"></a><span class="visited"> </span>
+<a id="L389"></a><span > </span>
+<a id="L390"></a><span class="visited"> </span>
+<a id="L391"></a><span > </span>
+<a id="L392"></a><span class="visited"> </span>
+<a id="L393"></a><span class="visited"> </span>
+<a id="L394"></a><span > </span>
+<a id="L395"></a><span class="visited"> </span>
 <a id="L396"></a><span class="visited"> </span>
-<a id="L397"></a><span class="visited"> </span>
+<a id="L397"></a><span > </span>
 <a id="L398"></a><span class="visited"> </span>
 <a id="L399"></a><span class="unvisited"> </span>
 <a id="L400"></a><span class="unvisited"> </span>
@@ -747,9 +757,9 @@
 <a id="L409"></a><span class="unvisited"> </span>
 <a id="L410"></a><span class="unvisited"> </span>
 <a id="L411"></a><span class="unvisited"> </span>
-<a id="L412"></a><span class="unvisited"> </span>
+<a id="L412"></a><span class="visited"> </span>
 <a id="L413"></a><span class="unvisited"> </span>
-<a id="L414"></a><span class="visited"> </span>
+<a id="L414"></a><span class="unvisited"> </span>
 <a id="L415"></a><span class="unvisited"> </span>
 <a id="L416"></a><span class="unvisited"> </span>
 <a id="L417"></a><span class="unvisited"> </span>
@@ -760,20 +770,20 @@
 <a id="L422"></a><span class="unvisited"> </span>
 <a id="L423"></a><span class="unvisited"> </span>
 <a id="L424"></a><span class="unvisited"> </span>
-<a id="L425"></a><span class="unvisited"> </span>
-<a id="L426"></a><span class="unvisited"> </span>
-<a id="L427"></a><span class="unvisited"> </span>
-<a id="L428"></a><span class="unvisited"> </span>
-<a id="L429"></a><span class="unvisited"> </span>
-<a id="L430"></a><span class="unvisited"> </span>
-<a id="L431"></a><span class="unvisited"> </span>
-<a id="L432"></a><span class="unvisited"> </span>
-<a id="L433"></a><span class="unvisited"> </span>
-<a id="L434"></a><span class="unvisited"> </span>
-<a id="L435"></a><span class="unvisited"> </span>
+<a id="L425"></a><span > </span>
+<a id="L426"></a><span > </span>
+<a id="L427"></a><span > </span>
+<a id="L428"></a><span class="visited"> </span>
+<a id="L429"></a><span > </span>
+<a id="L430"></a><span class="visited"> </span>
+<a id="L431"></a><span > </span>
+<a id="L432"></a><span class="visited"> </span>
+<a id="L433"></a><span class="visited"> </span>
+<a id="L434"></a><span > </span>
+<a id="L435"></a><span class="visited"> </span>
 <a id="L436"></a><span class="visited"> </span>
-<a id="L437"></a><span class="unvisited"> </span>
-<a id="L438"></a><span class="unvisited"> </span>
+<a id="L437"></a><span > </span>
+<a id="L438"></a><span class="visited"> </span>
 <a id="L439"></a><span class="unvisited"> </span>
 <a id="L440"></a><span class="unvisited"> </span>
 <a id="L441"></a><span class="unvisited"> </span>
@@ -799,51 +809,51 @@
 <a id="L461"></a><span class="unvisited"> </span>
 <a id="L462"></a><span class="unvisited"> </span>
 <a id="L463"></a><span class="unvisited"> </span>
-<a id="L464"></a><span class="unvisited"> </span>
+<a id="L464"></a><span > </span>
 <a id="L465"></a><span class="unvisited"> </span>
-<a id="L466"></a><span class="unvisited"> </span>
-<a id="L467"></a><span class="unvisited"> </span>
+<a id="L466"></a><span > </span>
+<a id="L467"></a><span > </span>
 <a id="L468"></a><span class="unvisited"> </span>
-<a id="L469"></a><span class="unvisited"> </span>
+<a id="L469"></a><span > </span>
 <a id="L470"></a><span class="unvisited"> </span>
 <a id="L471"></a><span class="unvisited"> </span>
 <a id="L472"></a><span class="unvisited"> </span>
-<a id="L473"></a><span class="unvisited"> </span>
-<a id="L474"></a><span class="unvisited"> </span>
+<a id="L473"></a><span > </span>
+<a id="L474"></a><span > </span>
 <a id="L475"></a><span class="unvisited"> </span>
 <a id="L476"></a><span class="unvisited"> </span>
-<a id="L477"></a><span class="unvisited"> </span>
-<a id="L478"></a><span class="unvisited"> </span>
+<a id="L477"></a><span > </span>
+<a id="L478"></a><span > </span>
 <a id="L479"></a><span class="unvisited"> </span>
 <a id="L480"></a><span class="unvisited"> </span>
-<a id="L481"></a><span class="unvisited"> </span>
-<a id="L482"></a><span class="unvisited"> </span>
+<a id="L481"></a><span > </span>
+<a id="L482"></a><span > </span>
 <a id="L483"></a><span class="unvisited"> </span>
 <a id="L484"></a><span class="unvisited"> </span>
-<a id="L485"></a><span class="unvisited"> </span>
-<a id="L486"></a><span class="unvisited"> </span>
+<a id="L485"></a><span > </span>
+<a id="L486"></a><span > </span>
 <a id="L487"></a><span class="unvisited"> </span>
-<a id="L488"></a><span > </span>
-<a id="L489"></a><span class="unvisited"> </span>
-<a id="L490"></a><span class="unvisited"> </span>
+<a id="L488"></a><span class="unvisited"> </span>
+<a id="L489"></a><span > </span>
+<a id="L490"></a><span > </span>
 <a id="L491"></a><span class="unvisited"> </span>
-<a id="L492"></a><span class="unvisited"> </span>
+<a id="L492"></a><span > </span>
 <a id="L493"></a><span class="unvisited"> </span>
-<a id="L494"></a><span class="unvisited"> </span>
+<a id="L494"></a><span > </span>
 <a id="L495"></a><span class="unvisited"> </span>
 <a id="L496"></a><span class="unvisited"> </span>
 <a id="L497"></a><span class="unvisited"> </span>
 <a id="L498"></a><span class="unvisited"> </span>
-<a id="L499"></a><span class="unvisited"> </span>
-<a id="L500"></a><span class="unvisited"> </span>
-<a id="L501"></a><span class="unvisited"> </span>
-<a id="L502"></a><span > </span>
-<a id="L503"></a><span class="unvisited"> </span>
-<a id="L504"></a><span class="unvisited"> </span>
-<a id="L505"></a><span class="unvisited"> </span>
-<a id="L506"></a><span > </span>
-<a id="L507"></a><span class="unvisited"> </span>
-<a id="L508"></a><span class="unvisited"> </span>
+<a id="L499"></a><span > </span>
+<a id="L500"></a><span > </span>
+<a id="L501"></a><span class="visited"> </span>
+<a id="L502"></a><span class="visited"> </span>
+<a id="L503"></a><span class="visited"> </span>
+<a id="L504"></a><span > </span>
+<a id="L505"></a><span > </span>
+<a id="L506"></a><span class="visited"> </span>
+<a id="L507"></a><span class="visited"> </span>
+<a id="L508"></a><span > </span>
 <a id="L509"></a><span > </span>
 <a id="L510"></a><span class="unvisited"> </span>
 <a id="L511"></a><span class="unvisited"> </span>
@@ -851,79 +861,79 @@
 <a id="L513"></a><span > </span>
 <a id="L514"></a><span class="unvisited"> </span>
 <a id="L515"></a><span class="unvisited"> </span>
-<a id="L516"></a><span > </span>
-<a id="L517"></a><span class="unvisited"> </span>
+<a id="L516"></a><span class="unvisited"> </span>
+<a id="L517"></a><span > </span>
 <a id="L518"></a><span class="unvisited"> </span>
 <a id="L519"></a><span class="unvisited"> </span>
-<a id="L520"></a><span > </span>
-<a id="L521"></a><span class="unvisited"> </span>
+<a id="L520"></a><span class="unvisited"> </span>
+<a id="L521"></a><span > </span>
 <a id="L522"></a><span class="unvisited"> </span>
-<a id="L523"></a><span > </span>
-<a id="L524"></a><span class="unvisited"> </span>
+<a id="L523"></a><span class="unvisited"> </span>
+<a id="L524"></a><span > </span>
 <a id="L525"></a><span class="unvisited"> </span>
 <a id="L526"></a><span class="unvisited"> </span>
 <a id="L527"></a><span > </span>
 <a id="L528"></a><span class="unvisited"> </span>
-<a id="L529"></a><span class="unvisited"> </span>
+<a id="L529"></a><span > </span>
 <a id="L530"></a><span > </span>
 <a id="L531"></a><span class="unvisited"> </span>
-<a id="L532"></a><span class="unvisited"> </span>
-<a id="L533"></a><span > </span>
-<a id="L534"></a><span class="unvisited"> </span>
-<a id="L535"></a><span class="unvisited"> </span>
-<a id="L536"></a><span > </span>
-<a id="L537"></a><span class="unvisited"> </span>
+<a id="L532"></a><span > </span>
+<a id="L533"></a><span class="unvisited"> </span>
+<a id="L534"></a><span > </span>
+<a id="L535"></a><span > </span>
+<a id="L536"></a><span class="visited"> </span>
+<a id="L537"></a><span class="visited"> </span>
 <a id="L538"></a><span class="unvisited"> </span>
-<a id="L539"></a><span class="unvisited"> </span>
+<a id="L539"></a><span > </span>
 <a id="L540"></a><span class="unvisited"> </span>
 <a id="L541"></a><span class="unvisited"> </span>
 <a id="L542"></a><span class="unvisited"> </span>
-<a id="L543"></a><span class="unvisited"> </span>
+<a id="L543"></a><span > </span>
 <a id="L544"></a><span class="unvisited"> </span>
 <a id="L545"></a><span class="unvisited"> </span>
 <a id="L546"></a><span class="unvisited"> </span>
-<a id="L547"></a><span class="unvisited"> </span>
-<a id="L548"></a><span > </span>
+<a id="L547"></a><span > </span>
+<a id="L548"></a><span class="unvisited"> </span>
 <a id="L549"></a><span > </span>
 <a id="L550"></a><span > </span>
-<a id="L551"></a><span > </span>
+<a id="L551"></a><span class="unvisited"> </span>
 <a id="L552"></a><span > </span>
-<a id="L553"></a><span > </span>
-<a id="L554"></a><span class="visited"> </span>
-<a id="L555"></a><span class="visited"> </span>
+<a id="L553"></a><span class="unvisited"> </span>
+<a id="L554"></a><span > </span>
+<a id="L555"></a><span > </span>
 <a id="L556"></a><span class="visited"> </span>
 <a id="L557"></a><span > </span>
-<a id="L558"></a><span > </span>
+<a id="L558"></a><span class="visited"> </span>
 <a id="L559"></a><span class="visited"> </span>
-<a id="L560"></a><span class="unvisited"> </span>
-<a id="L561"></a><span > </span>
+<a id="L560"></a><span class="visited"> </span>
+<a id="L561"></a><span class="visited"> </span>
 <a id="L562"></a><span class="unvisited"> </span>
 <a id="L563"></a><span class="unvisited"> </span>
 <a id="L564"></a><span class="unvisited"> </span>
 <a id="L565"></a><span class="unvisited"> </span>
-<a id="L566"></a><span class="visited"> </span>
-<a id="L567"></a><span > </span>
+<a id="L566"></a><span class="unvisited"> </span>
+<a id="L567"></a><span class="unvisited"> </span>
 <a id="L568"></a><span class="visited"> </span>
-<a id="L569"></a><span > </span>
-<a id="L570"></a><span > </span>
+<a id="L569"></a><span class="visited"> </span>
+<a id="L570"></a><span class="unvisited"> </span>
 <a id="L571"></a><span class="unvisited"> </span>
-<a id="L572"></a><span class="unvisited"> </span>
+<a id="L572"></a><span class="visited"> </span>
 <a id="L573"></a><span class="unvisited"> </span>
-<a id="L574"></a><span > </span>
-<a id="L575"></a><span > </span>
+<a id="L574"></a><span class="visited"> </span>
+<a id="L575"></a><span class="visited"> </span>
 <a id="L576"></a><span class="visited"> </span>
-<a id="L577"></a><span class="visited"> </span>
-<a id="L578"></a><span > </span>
-<a id="L579"></a><span > </span>
-<a id="L580"></a><span > </span>
+<a id="L577"></a><span > </span>
+<a id="L578"></a><span class="visited"> </span>
+<a id="L579"></a><span class="visited"> </span>
+<a id="L580"></a><span class="visited"> </span>
 <a id="L581"></a><span > </span>
-<a id="L582"></a><span class="unvisited"> </span>
-<a id="L583"></a><span class="unvisited"> </span>
-<a id="L584"></a><span class="unvisited"> </span>
-<a id="L585"></a><span class="unvisited"> </span>
-<a id="L586"></a><span class="unvisited"> </span>
-<a id="L587"></a><span > </span>
-<a id="L588"></a><span > </span>
+<a id="L582"></a><span class="visited"> </span>
+<a id="L583"></a><span class="visited"> </span>
+<a id="L584"></a><span class="visited"> </span>
+<a id="L585"></a><span > </span>
+<a id="L586"></a><span class="visited"> </span>
+<a id="L587"></a><span class="visited"> </span>
+<a id="L588"></a><span class="visited"> </span>
 <a id="L589"></a><span class="visited"> </span>
 <a id="L590"></a><span > </span>
 <a id="L591"></a><span class="visited"> </span>
@@ -931,217 +941,217 @@
 <a id="L593"></a><span class="visited"> </span>
 <a id="L594"></a><span class="visited"> </span>
 <a id="L595"></a><span class="unvisited"> </span>
-<a id="L596"></a><span class="unvisited"> </span>
-<a id="L597"></a><span class="visited"> </span>
-<a id="L598"></a><span > </span>
-<a id="L599"></a><span > </span>
-<a id="L600"></a><span class="visited"> </span>
+<a id="L596"></a><span > </span>
+<a id="L597"></a><span class="unvisited"> </span>
+<a id="L598"></a><span class="unvisited"> </span>
+<a id="L599"></a><span class="unvisited"> </span>
+<a id="L600"></a><span class="unvisited"> </span>
 <a id="L601"></a><span class="visited"> </span>
 <a id="L602"></a><span class="visited"> </span>
-<a id="L603"></a><span > </span>
-<a id="L604"></a><span class="visited"> </span>
+<a id="L603"></a><span class="visited"> </span>
+<a id="L604"></a><span > </span>
 <a id="L605"></a><span class="visited"> </span>
-<a id="L606"></a><span > </span>
-<a id="L607"></a><span > </span>
-<a id="L608"></a><span > </span>
-<a id="L609"></a><span class="visited"> </span>
-<a id="L610"></a><span class="visited"> </span>
-<a id="L611"></a><span > </span>
-<a id="L612"></a><span class="visited"> </span>
-<a id="L613"></a><span class="visited"> </span>
-<a id="L614"></a><span class="unvisited"> </span>
+<a id="L606"></a><span class="visited"> </span>
+<a id="L607"></a><span class="visited"> </span>
+<a id="L608"></a><span class="unvisited"> </span>
+<a id="L609"></a><span class="unvisited"> </span>
+<a id="L610"></a><span > </span>
+<a id="L611"></a><span class="unvisited"> </span>
+<a id="L612"></a><span > </span>
+<a id="L613"></a><span > </span>
+<a id="L614"></a><span > </span>
 <a id="L615"></a><span > </span>
-<a id="L616"></a><span class="unvisited"> </span>
+<a id="L616"></a><span > </span>
 <a id="L617"></a><span class="visited"> </span>
-<a id="L618"></a><span > </span>
-<a id="L619"></a><span > </span>
-<a id="L620"></a><span class="unvisited"> </span>
+<a id="L618"></a><span class="visited"> </span>
+<a id="L619"></a><span class="visited"> </span>
+<a id="L620"></a><span > </span>
 <a id="L621"></a><span > </span>
-<a id="L622"></a><span class="unvisited"> </span>
+<a id="L622"></a><span class="visited"> </span>
 <a id="L623"></a><span class="unvisited"> </span>
 <a id="L624"></a><span > </span>
 <a id="L625"></a><span class="unvisited"> </span>
 <a id="L626"></a><span class="unvisited"> </span>
-<a id="L627"></a><span > </span>
+<a id="L627"></a><span class="unvisited"> </span>
 <a id="L628"></a><span class="unvisited"> </span>
-<a id="L629"></a><span > </span>
-<a id="L630"></a><span class="unvisited"> </span>
-<a id="L631"></a><span class="unvisited"> </span>
+<a id="L629"></a><span class="visited"> </span>
+<a id="L630"></a><span > </span>
+<a id="L631"></a><span class="visited"> </span>
 <a id="L632"></a><span > </span>
-<a id="L633"></a><span class="unvisited"> </span>
-<a id="L634"></a><span > </span>
+<a id="L633"></a><span > </span>
+<a id="L634"></a><span class="unvisited"> </span>
 <a id="L635"></a><span class="unvisited"> </span>
 <a id="L636"></a><span class="unvisited"> </span>
 <a id="L637"></a><span > </span>
-<a id="L638"></a><span class="unvisited"> </span>
-<a id="L639"></a><span class="unvisited"> </span>
-<a id="L640"></a><span > </span>
-<a id="L641"></a><span class="unvisited"> </span>
+<a id="L638"></a><span > </span>
+<a id="L639"></a><span class="visited"> </span>
+<a id="L640"></a><span class="visited"> </span>
+<a id="L641"></a><span > </span>
 <a id="L642"></a><span > </span>
-<a id="L643"></a><span class="unvisited"> </span>
-<a id="L644"></a><span class="unvisited"> </span>
-<a id="L645"></a><span > </span>
-<a id="L646"></a><span class="visited"> </span>
-<a id="L647"></a><span > </span>
-<a id="L648"></a><span class="visited"> </span>
-<a id="L649"></a><span class="some-visited"> </span>
+<a id="L643"></a><span > </span>
+<a id="L644"></a><span > </span>
+<a id="L645"></a><span class="unvisited"> </span>
+<a id="L646"></a><span class="unvisited"> </span>
+<a id="L647"></a><span class="unvisited"> </span>
+<a id="L648"></a><span class="unvisited"> </span>
+<a id="L649"></a><span class="unvisited"> </span>
 <a id="L650"></a><span > </span>
-<a id="L651"></a><span class="visited"> </span>
-<a id="L652"></a><span class="unvisited"> </span>
+<a id="L651"></a><span > </span>
+<a id="L652"></a><span class="visited"> </span>
 <a id="L653"></a><span > </span>
-<a id="L654"></a><span class="unvisited"> </span>
-<a id="L655"></a><span class="unvisited"> </span>
-<a id="L656"></a><span > </span>
-<a id="L657"></a><span class="unvisited"> </span>
+<a id="L654"></a><span class="visited"> </span>
+<a id="L655"></a><span > </span>
+<a id="L656"></a><span class="visited"> </span>
+<a id="L657"></a><span class="visited"> </span>
 <a id="L658"></a><span class="unvisited"> </span>
 <a id="L659"></a><span class="unvisited"> </span>
-<a id="L660"></a><span class="unvisited"> </span>
+<a id="L660"></a><span class="visited"> </span>
 <a id="L661"></a><span > </span>
-<a id="L662"></a><span class="unvisited"> </span>
-<a id="L663"></a><span > </span>
-<a id="L664"></a><span class="unvisited"> </span>
-<a id="L665"></a><span class="unvisited"> </span>
-<a id="L666"></a><span class="unvisited"> </span>
-<a id="L667"></a><span class="unvisited"> </span>
-<a id="L668"></a><span > </span>
+<a id="L662"></a><span > </span>
+<a id="L663"></a><span class="visited"> </span>
+<a id="L664"></a><span class="visited"> </span>
+<a id="L665"></a><span class="visited"> </span>
+<a id="L666"></a><span > </span>
+<a id="L667"></a><span class="visited"> </span>
+<a id="L668"></a><span class="visited"> </span>
 <a id="L669"></a><span > </span>
 <a id="L670"></a><span > </span>
 <a id="L671"></a><span > </span>
 <a id="L672"></a><span class="visited"> </span>
-<a id="L673"></a><span class="unvisited"> </span>
+<a id="L673"></a><span class="visited"> </span>
 <a id="L674"></a><span > </span>
-<a id="L675"></a><span class="unvisited"> </span>
+<a id="L675"></a><span class="visited"> </span>
 <a id="L676"></a><span class="visited"> </span>
-<a id="L677"></a><span > </span>
-<a id="L678"></a><span class="visited"> </span>
-<a id="L679"></a><span class="visited"> </span>
-<a id="L680"></a><span class="unvisited"> </span>
+<a id="L677"></a><span class="unvisited"> </span>
+<a id="L678"></a><span > </span>
+<a id="L679"></a><span class="unvisited"> </span>
+<a id="L680"></a><span class="visited"> </span>
 <a id="L681"></a><span > </span>
-<a id="L682"></a><span class="unvisited"> </span>
+<a id="L682"></a><span > </span>
 <a id="L683"></a><span class="unvisited"> </span>
-<a id="L684"></a><span class="unvisited"> </span>
-<a id="L685"></a><span > </span>
-<a id="L686"></a><span > </span>
-<a id="L687"></a><span class="visited"> </span>
-<a id="L688"></a><span class="visited"> </span>
-<a id="L689"></a><span class="visited"> </span>
-<a id="L690"></a><span class="visited"> </span>
-<a id="L691"></a><span > </span>
-<a id="L692"></a><span class="visited"> </span>
-<a id="L693"></a><span class="visited"> </span>
-<a id="L694"></a><span > </span>
+<a id="L684"></a><span > </span>
+<a id="L685"></a><span class="unvisited"> </span>
+<a id="L686"></a><span class="unvisited"> </span>
+<a id="L687"></a><span > </span>
+<a id="L688"></a><span class="unvisited"> </span>
+<a id="L689"></a><span class="unvisited"> </span>
+<a id="L690"></a><span > </span>
+<a id="L691"></a><span class="unvisited"> </span>
+<a id="L692"></a><span > </span>
+<a id="L693"></a><span class="unvisited"> </span>
+<a id="L694"></a><span class="unvisited"> </span>
 <a id="L695"></a><span > </span>
-<a id="L696"></a><span > </span>
+<a id="L696"></a><span class="unvisited"> </span>
 <a id="L697"></a><span > </span>
-<a id="L698"></a><span class="visited"> </span>
-<a id="L699"></a><span class="visited"> </span>
-<a id="L700"></a><span class="visited"> </span>
-<a id="L701"></a><span class="visited"> </span>
-<a id="L702"></a><span > </span>
+<a id="L698"></a><span class="unvisited"> </span>
+<a id="L699"></a><span class="unvisited"> </span>
+<a id="L700"></a><span > </span>
+<a id="L701"></a><span class="unvisited"> </span>
+<a id="L702"></a><span class="unvisited"> </span>
 <a id="L703"></a><span > </span>
-<a id="L704"></a><span > </span>
-<a id="L705"></a><span class="visited"> </span>
-<a id="L706"></a><span class="visited"> </span>
-<a id="L707"></a><span class="visited"> </span>
-<a id="L708"></a><span class="visited"> </span>
-<a id="L709"></a><span > </span>
-<a id="L710"></a><span class="visited"> </span>
+<a id="L704"></a><span class="unvisited"> </span>
+<a id="L705"></a><span > </span>
+<a id="L706"></a><span class="unvisited"> </span>
+<a id="L707"></a><span class="unvisited"> </span>
+<a id="L708"></a><span > </span>
+<a id="L709"></a><span class="visited"> </span>
+<a id="L710"></a><span > </span>
 <a id="L711"></a><span class="visited"> </span>
-<a id="L712"></a><span class="visited"> </span>
-<a id="L713"></a><span class="visited"> </span>
+<a id="L712"></a><span class="some-visited"> </span>
+<a id="L713"></a><span > </span>
 <a id="L714"></a><span class="visited"> </span>
-<a id="L715"></a><span class="visited"> </span>
+<a id="L715"></a><span class="unvisited"> </span>
 <a id="L716"></a><span > </span>
-<a id="L717"></a><span > </span>
-<a id="L718"></a><span > </span>
-<a id="L719"></a><span class="visited"> </span>
-<a id="L720"></a><span > </span>
-<a id="L721"></a><span class="visited"> </span>
-<a id="L722"></a><span class="visited"> </span>
-<a id="L723"></a><span > </span>
+<a id="L717"></a><span class="unvisited"> </span>
+<a id="L718"></a><span class="unvisited"> </span>
+<a id="L719"></a><span > </span>
+<a id="L720"></a><span class="unvisited"> </span>
+<a id="L721"></a><span class="unvisited"> </span>
+<a id="L722"></a><span class="unvisited"> </span>
+<a id="L723"></a><span class="unvisited"> </span>
 <a id="L724"></a><span > </span>
-<a id="L725"></a><span class="visited"> </span>
+<a id="L725"></a><span class="unvisited"> </span>
 <a id="L726"></a><span > </span>
-<a id="L727"></a><span > </span>
-<a id="L728"></a><span class="visited"> </span>
-<a id="L729"></a><span > </span>
-<a id="L730"></a><span > </span>
-<a id="L731"></a><span class="visited"> </span>
+<a id="L727"></a><span class="unvisited"> </span>
+<a id="L728"></a><span class="unvisited"> </span>
+<a id="L729"></a><span class="unvisited"> </span>
+<a id="L730"></a><span class="unvisited"> </span>
+<a id="L731"></a><span > </span>
 <a id="L732"></a><span > </span>
 <a id="L733"></a><span > </span>
 <a id="L734"></a><span > </span>
 <a id="L735"></a><span class="visited"> </span>
-<a id="L736"></a><span class="visited"> </span>
-<a id="L737"></a><span class="visited"> </span>
-<a id="L738"></a><span class="visited"> </span>
-<a id="L739"></a><span > </span>
+<a id="L736"></a><span class="unvisited"> </span>
+<a id="L737"></a><span > </span>
+<a id="L738"></a><span class="unvisited"> </span>
+<a id="L739"></a><span class="visited"> </span>
 <a id="L740"></a><span > </span>
 <a id="L741"></a><span class="visited"> </span>
-<a id="L742"></a><span class="unvisited"> </span>
-<a id="L743"></a><span > </span>
+<a id="L742"></a><span class="visited"> </span>
+<a id="L743"></a><span class="unvisited"> </span>
 <a id="L744"></a><span > </span>
-<a id="L745"></a><span class="visited"> </span>
-<a id="L746"></a><span class="visited"> </span>
-<a id="L747"></a><span class="visited"> </span>
-<a id="L748"></a><span class="visited"> </span>
-<a id="L749"></a><span class="visited"> </span>
+<a id="L745"></a><span class="unvisited"> </span>
+<a id="L746"></a><span class="unvisited"> </span>
+<a id="L747"></a><span class="unvisited"> </span>
+<a id="L748"></a><span > </span>
+<a id="L749"></a><span > </span>
 <a id="L750"></a><span class="visited"> </span>
 <a id="L751"></a><span class="visited"> </span>
-<a id="L752"></a><span > </span>
-<a id="L753"></a><span > </span>
+<a id="L752"></a><span class="visited"> </span>
+<a id="L753"></a><span class="visited"> </span>
 <a id="L754"></a><span > </span>
-<a id="L755"></a><span class="some-visited"> </span>
-<a id="L756"></a><span > </span>
+<a id="L755"></a><span class="visited"> </span>
+<a id="L756"></a><span class="visited"> </span>
 <a id="L757"></a><span > </span>
-<a id="L758"></a><span class="visited"> </span>
+<a id="L758"></a><span > </span>
 <a id="L759"></a><span > </span>
 <a id="L760"></a><span > </span>
-<a id="L761"></a><span > </span>
+<a id="L761"></a><span class="visited"> </span>
 <a id="L762"></a><span class="visited"> </span>
 <a id="L763"></a><span class="visited"> </span>
-<a id="L764"></a><span > </span>
+<a id="L764"></a><span class="visited"> </span>
 <a id="L765"></a><span > </span>
 <a id="L766"></a><span > </span>
-<a id="L767"></a><span class="visited"> </span>
+<a id="L767"></a><span > </span>
 <a id="L768"></a><span class="visited"> </span>
 <a id="L769"></a><span class="visited"> </span>
 <a id="L770"></a><span class="visited"> </span>
 <a id="L771"></a><span class="visited"> </span>
-<a id="L772"></a><span class="visited"> </span>
-<a id="L773"></a><span > </span>
-<a id="L774"></a><span > </span>
+<a id="L772"></a><span > </span>
+<a id="L773"></a><span class="visited"> </span>
+<a id="L774"></a><span class="visited"> </span>
 <a id="L775"></a><span class="visited"> </span>
-<a id="L776"></a><span > </span>
-<a id="L777"></a><span > </span>
+<a id="L776"></a><span class="visited"> </span>
+<a id="L777"></a><span class="visited"> </span>
 <a id="L778"></a><span class="visited"> </span>
-<a id="L779"></a><span class="visited"> </span>
-<a id="L780"></a><span class="visited"> </span>
+<a id="L779"></a><span > </span>
+<a id="L780"></a><span > </span>
 <a id="L781"></a><span > </span>
-<a id="L782"></a><span > </span>
-<a id="L783"></a><span class="visited"> </span>
+<a id="L782"></a><span class="visited"> </span>
+<a id="L783"></a><span > </span>
 <a id="L784"></a><span class="visited"> </span>
 <a id="L785"></a><span class="visited"> </span>
 <a id="L786"></a><span > </span>
 <a id="L787"></a><span > </span>
-<a id="L788"></a><span > </span>
+<a id="L788"></a><span class="visited"> </span>
 <a id="L789"></a><span > </span>
-<a id="L790"></a><span class="visited"> </span>
-<a id="L791"></a><span > </span>
-<a id="L792"></a><span class="visited"> </span>
-<a id="L793"></a><span class="visited"> </span>
+<a id="L790"></a><span > </span>
+<a id="L791"></a><span class="visited"> </span>
+<a id="L792"></a><span > </span>
+<a id="L793"></a><span > </span>
 <a id="L794"></a><span class="visited"> </span>
-<a id="L795"></a><span class="visited"> </span>
-<a id="L796"></a><span class="visited"> </span>
-<a id="L797"></a><span class="visited"> </span>
+<a id="L795"></a><span > </span>
+<a id="L796"></a><span > </span>
+<a id="L797"></a><span > </span>
 <a id="L798"></a><span class="visited"> </span>
 <a id="L799"></a><span class="visited"> </span>
-<a id="L800"></a><span > </span>
+<a id="L800"></a><span class="visited"> </span>
 <a id="L801"></a><span class="visited"> </span>
 <a id="L802"></a><span > </span>
-<a id="L803"></a><span class="visited"> </span>
-<a id="L804"></a><span > </span>
-<a id="L805"></a><span class="visited"> </span>
-<a id="L806"></a><span class="visited"> </span>
+<a id="L803"></a><span > </span>
+<a id="L804"></a><span class="visited"> </span>
+<a id="L805"></a><span class="unvisited"> </span>
+<a id="L806"></a><span > </span>
 <a id="L807"></a><span > </span>
 <a id="L808"></a><span class="visited"> </span>
 <a id="L809"></a><span class="visited"> </span>
@@ -1150,21 +1160,84 @@
 <a id="L812"></a><span class="visited"> </span>
 <a id="L813"></a><span class="visited"> </span>
 <a id="L814"></a><span class="visited"> </span>
-<a id="L815"></a><span class="visited"> </span>
-<a id="L816"></a><span class="visited"> </span>
-<a id="L817"></a><span class="visited"> </span>
-<a id="L818"></a><span class="visited"> </span>
+<a id="L815"></a><span > </span>
+<a id="L816"></a><span > </span>
+<a id="L817"></a><span > </span>
+<a id="L818"></a><span class="some-visited"> </span>
 <a id="L819"></a><span > </span>
 <a id="L820"></a><span > </span>
 <a id="L821"></a><span class="visited"> </span>
-<a id="L822"></a><span class="visited"> </span>
-<a id="L823"></a><span class="visited"> </span>
+<a id="L822"></a><span > </span>
+<a id="L823"></a><span > </span>
 <a id="L824"></a><span > </span>
-<a id="L825"></a><span > </span>
-<a id="L826"></a><span class="some-visited"> </span>
-<a id="L827"></a><span class="visited"> </span>
-<a id="L828"></a><span class="visited"> </span>
-<a id="L829"></a><span class="visited"> </span>
+<a id="L825"></a><span class="visited"> </span>
+<a id="L826"></a><span class="visited"> </span>
+<a id="L827"></a><span > </span>
+<a id="L828"></a><span > </span>
+<a id="L829"></a><span > </span>
+<a id="L830"></a><span class="visited"> </span>
+<a id="L831"></a><span class="visited"> </span>
+<a id="L832"></a><span class="visited"> </span>
+<a id="L833"></a><span class="visited"> </span>
+<a id="L834"></a><span class="visited"> </span>
+<a id="L835"></a><span class="visited"> </span>
+<a id="L836"></a><span > </span>
+<a id="L837"></a><span > </span>
+<a id="L838"></a><span class="visited"> </span>
+<a id="L839"></a><span > </span>
+<a id="L840"></a><span > </span>
+<a id="L841"></a><span class="visited"> </span>
+<a id="L842"></a><span class="visited"> </span>
+<a id="L843"></a><span class="visited"> </span>
+<a id="L844"></a><span > </span>
+<a id="L845"></a><span > </span>
+<a id="L846"></a><span class="visited"> </span>
+<a id="L847"></a><span class="visited"> </span>
+<a id="L848"></a><span class="visited"> </span>
+<a id="L849"></a><span > </span>
+<a id="L850"></a><span > </span>
+<a id="L851"></a><span > </span>
+<a id="L852"></a><span > </span>
+<a id="L853"></a><span class="visited"> </span>
+<a id="L854"></a><span > </span>
+<a id="L855"></a><span class="visited"> </span>
+<a id="L856"></a><span class="visited"> </span>
+<a id="L857"></a><span class="visited"> </span>
+<a id="L858"></a><span class="visited"> </span>
+<a id="L859"></a><span class="visited"> </span>
+<a id="L860"></a><span class="visited"> </span>
+<a id="L861"></a><span class="visited"> </span>
+<a id="L862"></a><span class="visited"> </span>
+<a id="L863"></a><span > </span>
+<a id="L864"></a><span class="visited"> </span>
+<a id="L865"></a><span > </span>
+<a id="L866"></a><span class="visited"> </span>
+<a id="L867"></a><span > </span>
+<a id="L868"></a><span class="visited"> </span>
+<a id="L869"></a><span class="visited"> </span>
+<a id="L870"></a><span > </span>
+<a id="L871"></a><span class="visited"> </span>
+<a id="L872"></a><span class="visited"> </span>
+<a id="L873"></a><span class="visited"> </span>
+<a id="L874"></a><span class="visited"> </span>
+<a id="L875"></a><span class="visited"> </span>
+<a id="L876"></a><span class="visited"> </span>
+<a id="L877"></a><span class="visited"> </span>
+<a id="L878"></a><span class="visited"> </span>
+<a id="L879"></a><span class="visited"> </span>
+<a id="L880"></a><span class="visited"> </span>
+<a id="L881"></a><span class="visited"> </span>
+<a id="L882"></a><span > </span>
+<a id="L883"></a><span > </span>
+<a id="L884"></a><span class="visited"> </span>
+<a id="L885"></a><span class="visited"> </span>
+<a id="L886"></a><span class="visited"> </span>
+<a id="L887"></a><span > </span>
+<a id="L888"></a><span > </span>
+<a id="L889"></a><span class="some-visited"> </span>
+<a id="L890"></a><span class="visited"> </span>
+<a id="L891"></a><span class="visited"> </span>
+<a id="L892"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -1998,6 +2071,69 @@
 <a href="#L827">827</a>
 <a href="#L828">828</a>
 <a href="#L829">829</a>
+<a href="#L830">830</a>
+<a href="#L831">831</a>
+<a href="#L832">832</a>
+<a href="#L833">833</a>
+<a href="#L834">834</a>
+<a href="#L835">835</a>
+<a href="#L836">836</a>
+<a href="#L837">837</a>
+<a href="#L838">838</a>
+<a href="#L839">839</a>
+<a href="#L840">840</a>
+<a href="#L841">841</a>
+<a href="#L842">842</a>
+<a href="#L843">843</a>
+<a href="#L844">844</a>
+<a href="#L845">845</a>
+<a href="#L846">846</a>
+<a href="#L847">847</a>
+<a href="#L848">848</a>
+<a href="#L849">849</a>
+<a href="#L850">850</a>
+<a href="#L851">851</a>
+<a href="#L852">852</a>
+<a href="#L853">853</a>
+<a href="#L854">854</a>
+<a href="#L855">855</a>
+<a href="#L856">856</a>
+<a href="#L857">857</a>
+<a href="#L858">858</a>
+<a href="#L859">859</a>
+<a href="#L860">860</a>
+<a href="#L861">861</a>
+<a href="#L862">862</a>
+<a href="#L863">863</a>
+<a href="#L864">864</a>
+<a href="#L865">865</a>
+<a href="#L866">866</a>
+<a href="#L867">867</a>
+<a href="#L868">868</a>
+<a href="#L869">869</a>
+<a href="#L870">870</a>
+<a href="#L871">871</a>
+<a href="#L872">872</a>
+<a href="#L873">873</a>
+<a href="#L874">874</a>
+<a href="#L875">875</a>
+<a href="#L876">876</a>
+<a href="#L877">877</a>
+<a href="#L878">878</a>
+<a href="#L879">879</a>
+<a href="#L880">880</a>
+<a href="#L881">881</a>
+<a href="#L882">882</a>
+<a href="#L883">883</a>
+<a href="#L884">884</a>
+<a href="#L885">885</a>
+<a href="#L886">886</a>
+<a href="#L887">887</a>
+<a href="#L888">888</a>
+<a href="#L889">889</a>
+<a href="#L890">890</a>
+<a href="#L891">891</a>
+<a href="#L892">892</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -2073,7 +2209,7 @@ let write_char_indice buf c idx =
 let write_reftype buf nullable ht =
   <span data-count="1">l</span>et is_null =
     match nullable with
-    | <span data-count="1">T</span>ext.Null -&gt; true
+    | <span data-count="1">(</span>Text.Null : Text.nullable) -&gt; true
     | <span data-count="0">N</span>o_null -&gt;
       Buffer.add_char buf '\x64';
       <span data-count="0">f</span>alse
@@ -2226,9 +2362,352 @@ let write_fd buf i =
   <span data-count="0">B</span>uffer.add_char buf '\xFD';
   <span data-count="0">w</span>rite_u32_of_int buf i
 
+let write_i32_instr buf : Binary.i32_instr -&gt; _ =
+  <span data-count="63">l</span>et add_char c = <span data-count="63">B</span>uffer.add_char buf c in
+  function
+  | <span data-count="5">L</span>oad (idx, memarg) -&gt;
+    add_char '\x28';
+    <span data-count="5">w</span>rite_memarg buf idx memarg
+  | <span data-count="0">L</span>oad8 (idx, S, memarg) -&gt;
+    add_char '\x2C';
+    <span data-count="0">w</span>rite_memarg buf idx memarg
+  | <span data-count="0">L</span>oad8 (idx, U, memarg) -&gt;
+    add_char '\x2D';
+    <span data-count="0">w</span>rite_memarg buf idx memarg
+  | <span data-count="0">L</span>oad16 (idx, S, memarg) -&gt;
+    add_char '\x2E';
+    <span data-count="0">w</span>rite_memarg buf idx memarg
+  | <span data-count="0">L</span>oad16 (idx, U, memarg) -&gt;
+    add_char '\x2F';
+    <span data-count="0">w</span>rite_memarg buf idx memarg
+  | <span data-count="3">S</span>tore (idx, memarg) -&gt;
+    add_char '\x36';
+    <span data-count="3">w</span>rite_memarg buf idx memarg
+  | <span data-count="0">S</span>tore8 (idx, memarg) -&gt;
+    add_char '\x3A';
+    <span data-count="0">w</span>rite_memarg buf idx memarg
+  | <span data-count="0">S</span>tore16 (idx, memarg) -&gt;
+    add_char '\x3B';
+    <span data-count="0">w</span>rite_memarg buf idx memarg
+  | <span data-count="38">C</span>onst i -&gt;
+    add_char '\x41';
+    <span data-count="38">w</span>rite_s32 buf i
+  | <span data-count="1">E</span>qz -&gt; add_char '\x45'
+  | <span data-count="0">E</span>q -&gt; add_char '\x46'
+  | <span data-count="1">N</span>e -&gt; add_char '\x47'
+  | <span data-count="4">L</span>t S -&gt; add_char '\x48'
+  | <span data-count="0">L</span>t U -&gt; add_char '\x49'
+  | <span data-count="0">G</span>t S -&gt; add_char '\x4A'
+  | <span data-count="0">G</span>t U -&gt; add_char '\x4B'
+  | <span data-count="1">L</span>e S -&gt; add_char '\x4C'
+  | <span data-count="0">L</span>e U -&gt; add_char '\x4D'
+  | <span data-count="0">G</span>e S -&gt; add_char '\x4E'
+  | <span data-count="0">G</span>e U -&gt; add_char '\x4F'
+  | <span data-count="0">C</span>lz -&gt; add_char '\x67'
+  | <span data-count="0">C</span>tz -&gt; add_char '\x68'
+  | <span data-count="0">P</span>opcnt -&gt; add_char '\x69'
+  | <span data-count="5">A</span>dd -&gt; add_char '\x6A'
+  | <span data-count="2">S</span>ub -&gt; add_char '\x6B'
+  | <span data-count="3">M</span>ul -&gt; add_char '\x6C'
+  | <span data-count="0">D</span>iv S -&gt; add_char '\x6D'
+  | <span data-count="0">D</span>iv U -&gt; add_char '\x6E'
+  | <span data-count="0">R</span>em S -&gt; add_char '\x6F'
+  | <span data-count="0">R</span>em U -&gt; add_char '\x70'
+  | <span data-count="0">A</span>nd -&gt; add_char '\x71'
+  | <span data-count="0">O</span>r -&gt; add_char '\x72'
+  | <span data-count="0">X</span>or -&gt; add_char '\x73'
+  | <span data-count="0">S</span>hl -&gt; add_char '\x74'
+  | <span data-count="0">S</span>hr S -&gt; add_char '\x75'
+  | <span data-count="0">S</span>hr U -&gt; add_char '\x76'
+  | <span data-count="0">R</span>otl -&gt; add_char '\x77'
+  | <span data-count="0">R</span>otr -&gt; add_char '\x78'
+  | <span data-count="0">W</span>rap_i64 -&gt; add_char '\xA7'
+  | <span data-count="0">T</span>runc_f (S32, S) -&gt; add_char '\xA8'
+  | <span data-count="0">T</span>runc_f (S32, U) -&gt; add_char '\xA9'
+  | <span data-count="0">T</span>runc_f (S64, S) -&gt; add_char '\xAA'
+  | <span data-count="0">T</span>runc_f (S64, U) -&gt; add_char '\xAB'
+  | <span data-count="0">R</span>einterpret_f S32 -&gt; add_char '\xBC'
+  | Reinterpret_f S64 -&gt; (* TODO *) assert false
+  | <span data-count="0">E</span>xtend8_s -&gt; add_char '\xC0'
+  | <span data-count="0">E</span>xtend16_s -&gt; add_char '\xC1'
+  | <span data-count="0">T</span>runc_sat_f (S32, S) -&gt; write_fc buf 0
+  | <span data-count="0">T</span>runc_sat_f (S32, U) -&gt; write_fc buf 1
+  | <span data-count="0">T</span>runc_sat_f (S64, S) -&gt; write_fc buf 2
+  | <span data-count="0">T</span>runc_sat_f (S64, U) -&gt; write_fc buf 3
+
+let write_i64_instr buf : Binary.i64_instr -&gt; _ =
+  <span data-count="9">l</span>et add_char c = <span data-count="9">B</span>uffer.add_char buf c in
+  function
+  | <span data-count="1">L</span>oad (idx, memarg) -&gt;
+    add_char '\x29';
+    <span data-count="1">w</span>rite_memarg buf idx memarg
+  | <span data-count="0">L</span>oad8 (idx, S, memarg) -&gt;
+    add_char '\x30';
+    <span data-count="0">w</span>rite_memarg buf idx memarg
+  | <span data-count="0">L</span>oad8 (idx, U, memarg) -&gt;
+    add_char '\x31';
+    <span data-count="0">w</span>rite_memarg buf idx memarg
+  | <span data-count="0">L</span>oad16 (idx, S, memarg) -&gt;
+    add_char '\x32';
+    <span data-count="0">w</span>rite_memarg buf idx memarg
+  | <span data-count="0">L</span>oad16 (idx, U, memarg) -&gt;
+    add_char '\x33';
+    <span data-count="0">w</span>rite_memarg buf idx memarg
+  | <span data-count="0">L</span>oad32 (idx, S, memarg) -&gt;
+    add_char '\x34';
+    <span data-count="0">w</span>rite_memarg buf idx memarg
+  | <span data-count="0">L</span>oad32 (idx, U, memarg) -&gt;
+    add_char '\x35';
+    <span data-count="0">w</span>rite_memarg buf idx memarg
+  | <span data-count="1">S</span>tore (idx, memarg) -&gt;
+    add_char '\x37';
+    <span data-count="1">w</span>rite_memarg buf idx memarg
+  | <span data-count="0">S</span>tore8 (idx, memarg) -&gt;
+    add_char '\x3C';
+    <span data-count="0">w</span>rite_memarg buf idx memarg
+  | <span data-count="0">S</span>tore16 (idx, memarg) -&gt;
+    add_char '\x3D';
+    <span data-count="0">w</span>rite_memarg buf idx memarg
+  | <span data-count="0">S</span>tore32 (idx, memarg) -&gt;
+    add_char '\x3E';
+    <span data-count="0">w</span>rite_memarg buf idx memarg
+  | <span data-count="6">C</span>onst i -&gt;
+    add_char '\x42';
+    <span data-count="6">w</span>rite_s64 buf i
+  | <span data-count="0">E</span>qz -&gt; add_char '\x50'
+  | <span data-count="0">E</span>q -&gt; add_char '\x51'
+  | <span data-count="0">N</span>e -&gt; add_char '\x52'
+  | <span data-count="0">L</span>t S -&gt; add_char '\x53'
+  | <span data-count="0">L</span>t U -&gt; add_char '\x54'
+  | <span data-count="0">G</span>t S -&gt; add_char '\x55'
+  | <span data-count="0">G</span>t U -&gt; add_char '\x56'
+  | <span data-count="0">L</span>e S -&gt; add_char '\x57'
+  | <span data-count="0">L</span>e U -&gt; add_char '\x58'
+  | <span data-count="0">G</span>e S -&gt; add_char '\x59'
+  | <span data-count="0">G</span>e U -&gt; add_char '\x5A'
+  | <span data-count="0">C</span>lz -&gt; add_char '\x79'
+  | <span data-count="0">C</span>tz -&gt; add_char '\x7A'
+  | <span data-count="0">P</span>opcnt -&gt; add_char '\x7B'
+  | <span data-count="1">A</span>dd -&gt; add_char '\x7C'
+  | <span data-count="0">S</span>ub -&gt; add_char '\x7D'
+  | <span data-count="0">M</span>ul -&gt; add_char '\x7E'
+  | <span data-count="0">D</span>iv S -&gt; add_char '\x7F'
+  | <span data-count="0">D</span>iv U -&gt; add_char '\x80'
+  | <span data-count="0">R</span>em S -&gt; add_char '\x81'
+  | <span data-count="0">R</span>em U -&gt; add_char '\x82'
+  | <span data-count="0">A</span>nd -&gt; add_char '\x83'
+  | <span data-count="0">O</span>r -&gt; add_char '\x84'
+  | <span data-count="0">X</span>or -&gt; add_char '\x85'
+  | <span data-count="0">S</span>hl -&gt; add_char '\x86'
+  | <span data-count="0">S</span>hr S -&gt; add_char '\x87'
+  | <span data-count="0">S</span>hr U -&gt; add_char '\x88'
+  | <span data-count="0">R</span>otl -&gt; add_char '\x89'
+  | <span data-count="0">R</span>otr -&gt; add_char '\x8A'
+  | <span data-count="0">E</span>xtend_i32 S -&gt; add_char '\xAC'
+  | <span data-count="0">E</span>xtend_i32 U -&gt; add_char '\xAD'
+  | <span data-count="0">T</span>runc_f (S32, S) -&gt; add_char '\xAE'
+  | <span data-count="0">T</span>runc_f (S32, U) -&gt; add_char '\xAF'
+  | <span data-count="0">T</span>runc_f (S64, S) -&gt; add_char '\xB0'
+  | <span data-count="0">T</span>runc_f (S64, U) -&gt; add_char '\xB1'
+  | Reinterpret_f S32 -&gt;
+    (* TODO *)
+    assert false
+  | <span data-count="0">R</span>einterpret_f S64 -&gt; add_char '\xBD'
+  | <span data-count="0">E</span>xtend8_s -&gt; add_char '\xC2'
+  | <span data-count="0">E</span>xtend16_s -&gt; add_char '\xC3'
+  | <span data-count="0">E</span>xtend32_s -&gt; add_char '\xC4'
+  | <span data-count="0">T</span>runc_sat_f (S32, S) -&gt; write_fc buf 4
+  | <span data-count="0">T</span>runc_sat_f (S32, U) -&gt; write_fc buf 5
+  | <span data-count="0">T</span>runc_sat_f (S64, S) -&gt; write_fc buf 6
+  | <span data-count="0">T</span>runc_sat_f (S64, U) -&gt; write_fc buf 7
+
+let write_f32_instr buf : Binary.f32_instr -&gt; _ =
+  <span data-count="9">l</span>et add_char c = <span data-count="9">B</span>uffer.add_char buf c in
+  function
+  | <span data-count="1">L</span>oad (idx, memarg) -&gt;
+    add_char '\x2A';
+    <span data-count="1">w</span>rite_memarg buf idx memarg
+  | <span data-count="1">S</span>tore (idx, memarg) -&gt;
+    add_char '\x38';
+    <span data-count="1">w</span>rite_memarg buf idx memarg
+  | <span data-count="5">C</span>onst f -&gt;
+    add_char '\x43';
+    <span data-count="5">w</span>rite_f32 buf f
+  | <span data-count="0">E</span>q -&gt; add_char '\x5B'
+  | <span data-count="0">N</span>e -&gt; add_char '\x5C'
+  | <span data-count="0">L</span>t -&gt; add_char '\x5D'
+  | <span data-count="0">G</span>t -&gt; add_char '\x5E'
+  | <span data-count="0">L</span>e -&gt; add_char '\x5F'
+  | <span data-count="0">G</span>e -&gt; add_char '\x60'
+  | <span data-count="0">A</span>bs -&gt; add_char '\x8B'
+  | <span data-count="0">N</span>eg -&gt; add_char '\x8C'
+  | <span data-count="0">C</span>eil -&gt; add_char '\x8D'
+  | <span data-count="0">F</span>loor -&gt; add_char '\x8E'
+  | <span data-count="0">T</span>runc -&gt; add_char '\x8F'
+  | <span data-count="0">N</span>earest -&gt; add_char '\x90'
+  | <span data-count="0">S</span>qrt -&gt; add_char '\x91'
+  | <span data-count="2">A</span>dd -&gt; add_char '\x92'
+  | <span data-count="0">S</span>ub -&gt; add_char '\x93'
+  | <span data-count="0">M</span>ul -&gt; add_char '\x94'
+  | <span data-count="0">D</span>iv -&gt; add_char '\x95'
+  | <span data-count="0">M</span>in -&gt; add_char '\x96'
+  | <span data-count="0">M</span>ax -&gt; add_char '\x97'
+  | <span data-count="0">C</span>opysign -&gt; add_char '\x98'
+  | <span data-count="0">C</span>onvert_i (S32, S) -&gt; add_char '\xB2'
+  | <span data-count="0">C</span>onvert_i (S32, U) -&gt; add_char '\xB3'
+  | <span data-count="0">C</span>onvert_i (S64, S) -&gt; add_char '\xB4'
+  | <span data-count="0">C</span>onvert_i (S64, U) -&gt; add_char '\xB5'
+  | <span data-count="0">D</span>emote_f64 -&gt; add_char '\xB6'
+  | <span data-count="0">R</span>einterpret_i S32 -&gt; add_char '\xBE'
+  | Reinterpret_i S64 -&gt; (* TODO *) assert false
+
+let write_f64_instr buf : Binary.f64_instr -&gt; _ =
+  <span data-count="3">l</span>et add_char c = <span data-count="3">B</span>uffer.add_char buf c in
+  function
+  | <span data-count="1">L</span>oad (idx, memarg) -&gt;
+    add_char '\x2B';
+    <span data-count="1">w</span>rite_memarg buf idx memarg
+  | <span data-count="1">S</span>tore (idx, memarg) -&gt;
+    add_char '\x39';
+    <span data-count="1">w</span>rite_memarg buf idx memarg
+  | <span data-count="1">C</span>onst f -&gt;
+    add_char '\x44';
+    <span data-count="1">w</span>rite_f64 buf f
+  | <span data-count="0">E</span>q -&gt; add_char '\x61'
+  | <span data-count="0">N</span>e -&gt; add_char '\x62'
+  | <span data-count="0">L</span>t -&gt; add_char '\x63'
+  | <span data-count="0">G</span>t -&gt; add_char '\x64'
+  | <span data-count="0">L</span>e -&gt; add_char '\x65'
+  | <span data-count="0">G</span>e -&gt; add_char '\x66'
+  | <span data-count="0">A</span>bs -&gt; add_char '\x99'
+  | <span data-count="0">N</span>eg -&gt; add_char '\x9A'
+  | <span data-count="0">C</span>eil -&gt; add_char '\x9B'
+  | <span data-count="0">F</span>loor -&gt; add_char '\x9C'
+  | <span data-count="0">T</span>runc -&gt; add_char '\x9D'
+  | <span data-count="0">N</span>earest -&gt; add_char '\x9E'
+  | <span data-count="0">S</span>qrt -&gt; add_char '\x9F'
+  | <span data-count="0">A</span>dd -&gt; add_char '\xA0'
+  | <span data-count="0">S</span>ub -&gt; add_char '\xA1'
+  | <span data-count="0">M</span>ul -&gt; add_char '\xA2'
+  | <span data-count="0">D</span>iv -&gt; add_char '\xA3'
+  | <span data-count="0">M</span>in -&gt; add_char '\xA4'
+  | <span data-count="0">M</span>ax -&gt; add_char '\xA5'
+  | <span data-count="0">C</span>opysign -&gt; add_char '\xA6'
+  | <span data-count="0">C</span>onvert_i (S32, S) -&gt; add_char '\xB7'
+  | <span data-count="0">C</span>onvert_i (S32, U) -&gt; add_char '\xB8'
+  | <span data-count="0">C</span>onvert_i (S64, S) -&gt; add_char '\xB9'
+  | <span data-count="0">C</span>onvert_i (S64, U) -&gt; add_char '\xBA'
+  | <span data-count="0">P</span>romote_f32 -&gt; add_char '\xBB'
+  | Reinterpret_i S32 -&gt; (* TODO *) assert false
+  | <span data-count="0">R</span>einterpret_i S64 -&gt; add_char '\xBF'
+
+let write_v128_instr buf : Text.v128_instr -&gt; _ = function
+  | <span data-count="0">C</span>onst v -&gt;
+    write_fd buf 12;
+    <span data-count="0">l</span>et a, b = Concrete_v128.to_i64x2 v in
+    <span data-count="0">w</span>rite_bytes_8 buf a;
+    <span data-count="0">w</span>rite_bytes_8 buf b
+
+let write_i8x16_instr buf : Text.i8x16_instr -&gt; _ = function
+  | <span data-count="0">A</span>dd -&gt; write_fd buf 110
+  | <span data-count="0">S</span>ub -&gt; write_fd buf 113
+
+let write_i16x8_instr buf : Text.i16x8_instr -&gt; _ = function
+  | <span data-count="0">A</span>dd -&gt; write_fd buf 142
+  | <span data-count="0">S</span>ub -&gt; write_fd buf 145
+
+let write_i32x4_instr buf : Text.i32x4_instr -&gt; _ = function
+  | <span data-count="0">A</span>dd -&gt; write_fd buf 174
+  | <span data-count="0">S</span>ub -&gt; write_fd buf 177
+
+let write_i64x2_instr buf : Text.i64x2_instr -&gt; _ = function
+  | <span data-count="0">A</span>dd -&gt; write_fd buf 206
+  | <span data-count="0">S</span>ub -&gt; write_fd buf 209
+
+let write_ref_instr buf : Binary.ref_instr -&gt; _ =
+  <span data-count="0">l</span>et add_char c = <span data-count="0">B</span>uffer.add_char buf c in
+  function
+  | <span data-count="0">N</span>ull rt -&gt;
+    add_char '\xD0';
+    <span data-count="0">w</span>rite_reftype buf Text.Null rt
+  | <span data-count="0">I</span>s_null -&gt; add_char '\xD1'
+  | <span data-count="0">F</span>unc idx -&gt; write_char_indice buf '\xD2' idx
+  | <span data-count="0">A</span>s_non_null -&gt; add_char '\xD4'
+
+let write_local_instr buf : Binary.local_instr -&gt; _ = function
+  | <span data-count="24">G</span>et idx -&gt; write_char_indice buf '\x20' idx
+  | <span data-count="3">S</span>et idx -&gt; write_char_indice buf '\x21' idx
+  | <span data-count="5">T</span>ee idx -&gt; write_char_indice buf '\x22' idx
+
+let write_global_instr buf : Binary.global_instr -&gt; _ = function
+  | <span data-count="2">G</span>et idx -&gt; write_char_indice buf '\x23' idx
+  | <span data-count="1">S</span>et idx -&gt; write_char_indice buf '\x24' idx
+
+let write_table_instr buf : Binary.table_instr -&gt; _ = function
+  | <span data-count="0">G</span>et idx -&gt; write_char_indice buf '\x25' idx
+  | <span data-count="0">S</span>et idx -&gt; write_char_indice buf '\x26' idx
+  | <span data-count="0">I</span>nit (tableidx, elemidx) -&gt;
+    write_fc buf 12;
+    <span data-count="0">w</span>rite_indice buf elemidx;
+    <span data-count="0">w</span>rite_indice buf tableidx
+  | <span data-count="0">C</span>opy (idx1, idx2) -&gt;
+    write_fc buf 14;
+    <span data-count="0">w</span>rite_indice buf idx1;
+    <span data-count="0">w</span>rite_indice buf idx2
+  | <span data-count="0">G</span>row idx -&gt;
+    write_fc buf 15;
+    <span data-count="0">w</span>rite_indice buf idx
+  | <span data-count="0">S</span>ize idx -&gt;
+    write_fc buf 16;
+    <span data-count="0">w</span>rite_indice buf idx
+  | <span data-count="0">F</span>ill idx -&gt;
+    write_fc buf 17;
+    <span data-count="0">w</span>rite_indice buf idx
+
+let write_elem_instr buf : Binary.elem_instr -&gt; _ = function
+  | <span data-count="0">D</span>rop idx -&gt;
+    write_fc buf 13;
+    <span data-count="0">w</span>rite_indice buf idx
+
+let write_memory_instr buf : Binary.memory_instr -&gt; _ = function
+  | <span data-count="1">S</span>ize idx -&gt; write_char_indice buf '\x3F' idx
+  | <span data-count="1">G</span>row idx -&gt; write_char_indice buf '\x40' idx
+  | <span data-count="0">I</span>nit (memidx, dataidx) -&gt;
+    write_fc buf 8;
+    <span data-count="0">w</span>rite_indice buf dataidx;
+    <span data-count="0">w</span>rite_indice buf memidx
+  | <span data-count="0">C</span>opy (id1, id2) -&gt;
+    write_fc buf 10;
+    <span data-count="0">w</span>rite_indice buf id1;
+    <span data-count="0">w</span>rite_indice buf id2
+  | <span data-count="0">F</span>ill idx -&gt;
+    write_fc buf 11;
+    <span data-count="0">w</span>rite_indice buf idx
+
+let write_data_instr buf : Binary.data_instr -&gt; _ = function
+  | <span data-count="0">D</span>rop idx -&gt;
+    write_fc buf 9;
+    <span data-count="0">w</span>rite_indice buf idx
+
 let rec write_instr buf instr =
-  <span data-count="171">l</span>et add_char c = <span data-count="118">B</span>uffer.add_char buf c in
+  <span data-count="171">l</span>et add_char c = <span data-count="34">B</span>uffer.add_char buf c in
   match instr.Annotated.raw with
+  | <span data-count="63">I</span>32 i -&gt; write_i32_instr buf i
+  | <span data-count="9">I</span>64 i -&gt; write_i64_instr buf i
+  | <span data-count="9">F</span>32 i -&gt; write_f32_instr buf i
+  | <span data-count="3">F</span>64 i -&gt; write_f64_instr buf i
+  | <span data-count="0">V</span>128 i -&gt; write_v128_instr buf i
+  | <span data-count="0">I</span>8x16 i -&gt; write_i8x16_instr buf i
+  | <span data-count="0">I</span>16x8 i -&gt; write_i16x8_instr buf i
+  | <span data-count="0">I</span>32x4 i -&gt; write_i32x4_instr buf i
+  | <span data-count="0">I</span>64x2 i -&gt; write_i64x2_instr buf i
+  | <span data-count="0">R</span>ef i -&gt; write_ref_instr buf i
+  | <span data-count="32">L</span>ocal i -&gt; write_local_instr buf i
+  | <span data-count="3">G</span>lobal i -&gt; write_global_instr buf i
+  | <span data-count="0">T</span>able i -&gt; write_table_instr buf i
+  | <span data-count="0">E</span>lem i -&gt; write_elem_instr buf i
+  | <span data-count="2">M</span>emory i -&gt; write_memory_instr buf i
+  | <span data-count="0">D</span>ata i -&gt; write_data_instr buf i
   | <span data-count="3">U</span>nreachable -&gt; add_char '\x00'
   | <span data-count="1">N</span>op -&gt; add_char '\x01'
   | <span data-count="1">B</span>lock (_str, bt, expr) -&gt;
@@ -2267,288 +2746,8 @@ let rec write_instr buf instr =
   | <span data-count="0">S</span>elect (Some vts) -&gt;
     add_char '\x1C';
     <span data-count="0">L</span>ist.iter (write_valtyp<span data-count="0">e</span> buf) vts
-  | <span data-count="24">L</span>ocal_get idx -&gt; write_char_indice buf '\x20' idx
-  | <span data-count="3">L</span>ocal_set idx -&gt; write_char_indice buf '\x21' idx
-  | <span data-count="5">L</span>ocal_tee idx -&gt; write_char_indice buf '\x22' idx
-  | <span data-count="2">G</span>lobal_get idx -&gt; write_char_indice buf '\x23' idx
-  | <span data-count="1">G</span>lobal_set idx -&gt; write_char_indice buf '\x24' idx
-  | <span data-count="0">T</span>able_get idx -&gt; write_char_indice buf '\x25' idx
-  | <span data-count="0">T</span>able_set idx -&gt; write_char_indice buf '\x26' idx
-  | <span data-count="5">I</span>_load (idx, S32, memarg) -&gt;
-    add_char '\x28';
-    <span data-count="5">w</span>rite_memarg buf idx memarg
-  | <span data-count="1">I</span>_load (idx, S64, memarg) -&gt;
-    add_char '\x29';
-    <span data-count="1">w</span>rite_memarg buf idx memarg
-  | <span data-count="1">F</span>_load (idx, S32, memarg) -&gt;
-    add_char '\x2A';
-    <span data-count="1">w</span>rite_memarg buf idx memarg
-  | <span data-count="1">F</span>_load (idx, S64, memarg) -&gt;
-    add_char '\x2B';
-    <span data-count="1">w</span>rite_memarg buf idx memarg
-  | <span data-count="0">I</span>_load8 (idx, S32, S, memarg) -&gt;
-    add_char '\x2C';
-    <span data-count="0">w</span>rite_memarg buf idx memarg
-  | <span data-count="0">I</span>_load8 (idx, S32, U, memarg) -&gt;
-    add_char '\x2D';
-    <span data-count="0">w</span>rite_memarg buf idx memarg
-  | <span data-count="0">I</span>_load16 (idx, S32, S, memarg) -&gt;
-    add_char '\x2E';
-    <span data-count="0">w</span>rite_memarg buf idx memarg
-  | <span data-count="0">I</span>_load16 (idx, S32, U, memarg) -&gt;
-    add_char '\x2F';
-    <span data-count="0">w</span>rite_memarg buf idx memarg
-  | <span data-count="0">I</span>_load8 (idx, S64, S, memarg) -&gt;
-    add_char '\x30';
-    <span data-count="0">w</span>rite_memarg buf idx memarg
-  | <span data-count="0">I</span>_load8 (idx, S64, U, memarg) -&gt;
-    add_char '\x31';
-    <span data-count="0">w</span>rite_memarg buf idx memarg
-  | <span data-count="0">I</span>_load16 (idx, S64, S, memarg) -&gt;
-    add_char '\x32';
-    <span data-count="0">w</span>rite_memarg buf idx memarg
-  | <span data-count="0">I</span>_load16 (idx, S64, U, memarg) -&gt;
-    add_char '\x33';
-    <span data-count="0">w</span>rite_memarg buf idx memarg
-  | <span data-count="0">I</span>64_load32 (idx, S, memarg) -&gt;
-    add_char '\x34';
-    <span data-count="0">w</span>rite_memarg buf idx memarg
-  | <span data-count="0">I</span>64_load32 (idx, U, memarg) -&gt;
-    add_char '\x35';
-    <span data-count="0">w</span>rite_memarg buf idx memarg
-  | <span data-count="3">I</span>_store (idx, S32, memarg) -&gt;
-    add_char '\x36';
-    <span data-count="3">w</span>rite_memarg buf idx memarg
-  | <span data-count="1">I</span>_store (idx, S64, memarg) -&gt;
-    add_char '\x37';
-    <span data-count="1">w</span>rite_memarg buf idx memarg
-  | <span data-count="1">F</span>_store (idx, S32, memarg) -&gt;
-    add_char '\x38';
-    <span data-count="1">w</span>rite_memarg buf idx memarg
-  | <span data-count="1">F</span>_store (idx, S64, memarg) -&gt;
-    add_char '\x39';
-    <span data-count="1">w</span>rite_memarg buf idx memarg
-  | <span data-count="0">I</span>_store8 (idx, S32, memarg) -&gt;
-    add_char '\x3A';
-    <span data-count="0">w</span>rite_memarg buf idx memarg
-  | <span data-count="0">I</span>_store16 (idx, S32, memarg) -&gt;
-    add_char '\x3B';
-    <span data-count="0">w</span>rite_memarg buf idx memarg
-  | <span data-count="0">I</span>_store8 (idx, S64, memarg) -&gt;
-    add_char '\x3C';
-    <span data-count="0">w</span>rite_memarg buf idx memarg
-  | <span data-count="0">I</span>_store16 (idx, S64, memarg) -&gt;
-    add_char '\x3D';
-    <span data-count="0">w</span>rite_memarg buf idx memarg
-  | <span data-count="0">I</span>64_store32 (idx, memarg) -&gt;
-    add_char '\x3E';
-    <span data-count="0">w</span>rite_memarg buf idx memarg
-  | <span data-count="1">M</span>emory_size idx -&gt; write_char_indice buf '\x3F' idx
-  | <span data-count="1">M</span>emory_grow idx -&gt; write_char_indice buf '\x40' idx
-  | <span data-count="38">I</span>32_const i -&gt;
-    add_char '\x41';
-    <span data-count="38">w</span>rite_s32 buf i
-  | <span data-count="6">I</span>64_const i -&gt;
-    add_char '\x42';
-    <span data-count="6">w</span>rite_s64 buf i
-  | <span data-count="5">F</span>32_const f -&gt;
-    add_char '\x43';
-    <span data-count="5">w</span>rite_f32 buf f
-  | <span data-count="1">F</span>64_const f -&gt;
-    add_char '\x44';
-    <span data-count="1">w</span>rite_f64 buf f
-  | <span data-count="1">I</span>_testop (S32, Eqz) -&gt; add_char '\x45'
-  | <span data-count="0">I</span>_relop (S32, Eq) -&gt; add_char '\x46'
-  | <span data-count="1">I</span>_relop (S32, Ne) -&gt; add_char '\x47'
-  | <span data-count="4">I</span>_relop (S32, Lt S) -&gt; add_char '\x48'
-  | <span data-count="0">I</span>_relop (S32, Lt U) -&gt; add_char '\x49'
-  | <span data-count="0">I</span>_relop (S32, Gt S) -&gt; add_char '\x4A'
-  | <span data-count="0">I</span>_relop (S32, Gt U) -&gt; add_char '\x4B'
-  | <span data-count="1">I</span>_relop (S32, Le S) -&gt; add_char '\x4C'
-  | <span data-count="0">I</span>_relop (S32, Le U) -&gt; add_char '\x4D'
-  | <span data-count="0">I</span>_relop (S32, Ge S) -&gt; add_char '\x4E'
-  | <span data-count="0">I</span>_relop (S32, Ge U) -&gt; add_char '\x4F'
-  | <span data-count="0">I</span>_testop (S64, Eqz) -&gt; add_char '\x50'
-  | <span data-count="0">I</span>_relop (S64, Eq) -&gt; add_char '\x51'
-  | <span data-count="0">I</span>_relop (S64, Ne) -&gt; add_char '\x52'
-  | <span data-count="0">I</span>_relop (S64, Lt S) -&gt; add_char '\x53'
-  | <span data-count="0">I</span>_relop (S64, Lt U) -&gt; add_char '\x54'
-  | <span data-count="0">I</span>_relop (S64, Gt S) -&gt; add_char '\x55'
-  | <span data-count="0">I</span>_relop (S64, Gt U) -&gt; add_char '\x56'
-  | <span data-count="0">I</span>_relop (S64, Le S) -&gt; add_char '\x57'
-  | <span data-count="0">I</span>_relop (S64, Le U) -&gt; add_char '\x58'
-  | <span data-count="0">I</span>_relop (S64, Ge S) -&gt; add_char '\x59'
-  | <span data-count="0">I</span>_relop (S64, Ge U) -&gt; add_char '\x5A'
-  | <span data-count="0">F</span>_relop (S32, Eq) -&gt; add_char '\x5B'
-  | <span data-count="0">F</span>_relop (S32, Ne) -&gt; add_char '\x5C'
-  | <span data-count="0">F</span>_relop (S32, Lt) -&gt; add_char '\x5D'
-  | <span data-count="0">F</span>_relop (S32, Gt) -&gt; add_char '\x5E'
-  | <span data-count="0">F</span>_relop (S32, Le) -&gt; add_char '\x5F'
-  | <span data-count="0">F</span>_relop (S32, Ge) -&gt; add_char '\x60'
-  | <span data-count="0">F</span>_relop (S64, Eq) -&gt; add_char '\x61'
-  | <span data-count="0">F</span>_relop (S64, Ne) -&gt; add_char '\x62'
-  | <span data-count="0">F</span>_relop (S64, Lt) -&gt; add_char '\x63'
-  | <span data-count="0">F</span>_relop (S64, Gt) -&gt; add_char '\x64'
-  | <span data-count="0">F</span>_relop (S64, Le) -&gt; add_char '\x65'
-  | <span data-count="0">F</span>_relop (S64, Ge) -&gt; add_char '\x66'
-  | <span data-count="0">I</span>_unop (S32, Clz) -&gt; add_char '\x67'
-  | <span data-count="0">I</span>_unop (S32, Ctz) -&gt; add_char '\x68'
-  | <span data-count="0">I</span>_unop (S32, Popcnt) -&gt; add_char '\x69'
-  | <span data-count="5">I</span>_binop (S32, Add) -&gt; add_char '\x6A'
-  | <span data-count="2">I</span>_binop (S32, Sub) -&gt; add_char '\x6B'
-  | <span data-count="3">I</span>_binop (S32, Mul) -&gt; add_char '\x6C'
-  | <span data-count="0">I</span>_binop (S32, Div S) -&gt; add_char '\x6D'
-  | <span data-count="0">I</span>_binop (S32, Div U) -&gt; add_char '\x6E'
-  | <span data-count="0">I</span>_binop (S32, Rem S) -&gt; add_char '\x6F'
-  | <span data-count="0">I</span>_binop (S32, Rem U) -&gt; add_char '\x70'
-  | <span data-count="0">I</span>_binop (S32, And) -&gt; add_char '\x71'
-  | <span data-count="0">I</span>_binop (S32, Or) -&gt; add_char '\x72'
-  | <span data-count="0">I</span>_binop (S32, Xor) -&gt; add_char '\x73'
-  | <span data-count="0">I</span>_binop (S32, Shl) -&gt; add_char '\x74'
-  | <span data-count="0">I</span>_binop (S32, Shr S) -&gt; add_char '\x75'
-  | <span data-count="0">I</span>_binop (S32, Shr U) -&gt; add_char '\x76'
-  | <span data-count="0">I</span>_binop (S32, Rotl) -&gt; add_char '\x77'
-  | <span data-count="0">I</span>_binop (S32, Rotr) -&gt; add_char '\x78'
-  | <span data-count="0">I</span>_unop (S64, Clz) -&gt; add_char '\x79'
-  | <span data-count="0">I</span>_unop (S64, Ctz) -&gt; add_char '\x7A'
-  | <span data-count="0">I</span>_unop (S64, Popcnt) -&gt; add_char '\x7B'
-  | <span data-count="1">I</span>_binop (S64, Add) -&gt; add_char '\x7C'
-  | <span data-count="0">I</span>_binop (S64, Sub) -&gt; add_char '\x7D'
-  | <span data-count="0">I</span>_binop (S64, Mul) -&gt; add_char '\x7E'
-  | <span data-count="0">I</span>_binop (S64, Div S) -&gt; add_char '\x7F'
-  | <span data-count="0">I</span>_binop (S64, Div U) -&gt; add_char '\x80'
-  | <span data-count="0">I</span>_binop (S64, Rem S) -&gt; add_char '\x81'
-  | <span data-count="0">I</span>_binop (S64, Rem U) -&gt; add_char '\x82'
-  | <span data-count="0">I</span>_binop (S64, And) -&gt; add_char '\x83'
-  | <span data-count="0">I</span>_binop (S64, Or) -&gt; add_char '\x84'
-  | <span data-count="0">I</span>_binop (S64, Xor) -&gt; add_char '\x85'
-  | <span data-count="0">I</span>_binop (S64, Shl) -&gt; add_char '\x86'
-  | <span data-count="0">I</span>_binop (S64, Shr S) -&gt; add_char '\x87'
-  | <span data-count="0">I</span>_binop (S64, Shr U) -&gt; add_char '\x88'
-  | <span data-count="0">I</span>_binop (S64, Rotl) -&gt; add_char '\x89'
-  | <span data-count="0">I</span>_binop (S64, Rotr) -&gt; add_char '\x8A'
-  | <span data-count="0">F</span>_unop (S32, Abs) -&gt; add_char '\x8B'
-  | <span data-count="0">F</span>_unop (S32, Neg) -&gt; add_char '\x8C'
-  | <span data-count="0">F</span>_unop (S32, Ceil) -&gt; add_char '\x8D'
-  | <span data-count="0">F</span>_unop (S32, Floor) -&gt; add_char '\x8E'
-  | <span data-count="0">F</span>_unop (S32, Trunc) -&gt; add_char '\x8F'
-  | <span data-count="0">F</span>_unop (S32, Nearest) -&gt; add_char '\x90'
-  | <span data-count="0">F</span>_unop (S32, Sqrt) -&gt; add_char '\x91'
-  | <span data-count="2">F</span>_binop (S32, Add) -&gt; add_char '\x92'
-  | <span data-count="0">F</span>_binop (S32, Sub) -&gt; add_char '\x93'
-  | <span data-count="0">F</span>_binop (S32, Mul) -&gt; add_char '\x94'
-  | <span data-count="0">F</span>_binop (S32, Div) -&gt; add_char '\x95'
-  | <span data-count="0">F</span>_binop (S32, Min) -&gt; add_char '\x96'
-  | <span data-count="0">F</span>_binop (S32, Max) -&gt; add_char '\x97'
-  | <span data-count="0">F</span>_binop (S32, Copysign) -&gt; add_char '\x98'
-  | <span data-count="0">F</span>_unop (S64, Abs) -&gt; add_char '\x99'
-  | <span data-count="0">F</span>_unop (S64, Neg) -&gt; add_char '\x9A'
-  | <span data-count="0">F</span>_unop (S64, Ceil) -&gt; add_char '\x9B'
-  | <span data-count="0">F</span>_unop (S64, Floor) -&gt; add_char '\x9C'
-  | <span data-count="0">F</span>_unop (S64, Trunc) -&gt; add_char '\x9D'
-  | <span data-count="0">F</span>_unop (S64, Nearest) -&gt; add_char '\x9E'
-  | <span data-count="0">F</span>_unop (S64, Sqrt) -&gt; add_char '\x9F'
-  | <span data-count="0">F</span>_binop (S64, Add) -&gt; add_char '\xA0'
-  | <span data-count="0">F</span>_binop (S64, Sub) -&gt; add_char '\xA1'
-  | <span data-count="0">F</span>_binop (S64, Mul) -&gt; add_char '\xA2'
-  | <span data-count="0">F</span>_binop (S64, Div) -&gt; add_char '\xA3'
-  | <span data-count="0">F</span>_binop (S64, Min) -&gt; add_char '\xA4'
-  | <span data-count="0">F</span>_binop (S64, Max) -&gt; add_char '\xA5'
-  | <span data-count="0">F</span>_binop (S64, Copysign) -&gt; add_char '\xA6'
-  | <span data-count="0">I</span>32_wrap_i64 -&gt; add_char '\xA7'
-  | <span data-count="0">I</span>_trunc_f (S32, S32, S) -&gt; add_char '\xA8'
-  | <span data-count="0">I</span>_trunc_f (S32, S32, U) -&gt; add_char '\xA9'
-  | <span data-count="0">I</span>_trunc_f (S32, S64, S) -&gt; add_char '\xAA'
-  | <span data-count="0">I</span>_trunc_f (S32, S64, U) -&gt; add_char '\xAB'
-  | <span data-count="0">I</span>64_extend_i32 S -&gt; add_char '\xAC'
-  | <span data-count="0">I</span>64_extend_i32 U -&gt; add_char '\xAD'
-  | <span data-count="0">I</span>_trunc_f (S64, S32, S) -&gt; add_char '\xAE'
-  | <span data-count="0">I</span>_trunc_f (S64, S32, U) -&gt; add_char '\xAF'
-  | <span data-count="0">I</span>_trunc_f (S64, S64, S) -&gt; add_char '\xB0'
-  | <span data-count="0">I</span>_trunc_f (S64, S64, U) -&gt; add_char '\xB1'
-  | <span data-count="0">F</span>_convert_i (S32, S32, S) -&gt; add_char '\xB2'
-  | <span data-count="0">F</span>_convert_i (S32, S32, U) -&gt; add_char '\xB3'
-  | <span data-count="0">F</span>_convert_i (S32, S64, S) -&gt; add_char '\xB4'
-  | <span data-count="0">F</span>_convert_i (S32, S64, U) -&gt; add_char '\xB5'
-  | <span data-count="0">F</span>32_demote_f64 -&gt; add_char '\xB6'
-  | <span data-count="0">F</span>_convert_i (S64, S32, S) -&gt; add_char '\xB7'
-  | <span data-count="0">F</span>_convert_i (S64, S32, U) -&gt; add_char '\xB8'
-  | <span data-count="0">F</span>_convert_i (S64, S64, S) -&gt; add_char '\xB9'
-  | <span data-count="0">F</span>_convert_i (S64, S64, U) -&gt; add_char '\xBA'
-  | <span data-count="0">F</span>64_promote_f32 -&gt; add_char '\xBB'
-  | <span data-count="0">I</span>_reinterpret_f (S32, S32) -&gt; add_char '\xBC'
-  | <span data-count="0">I</span>_reinterpret_f (S64, S64) -&gt; add_char '\xBD'
-  | <span data-count="0">F</span>_reinterpret_i (S32, S32) -&gt; add_char '\xBE'
-  | <span data-count="0">F</span>_reinterpret_i (S64, S64) -&gt; add_char '\xBF'
-  | <span data-count="0">I</span>_extend8_s S32 -&gt; add_char '\xC0'
-  | <span data-count="0">I</span>_extend16_s S32 -&gt; add_char '\xC1'
-  | <span data-count="0">I</span>_extend8_s S64 -&gt; add_char '\xC2'
-  | <span data-count="0">I</span>_extend16_s S64 -&gt; add_char '\xC3'
-  | <span data-count="0">I</span>64_extend32_s -&gt; add_char '\xC4'
-  | <span data-count="0">R</span>ef_null rt -&gt;
-    add_char '\xD0';
-    <span data-count="0">w</span>rite_reftype buf Text.Null rt
-  | <span data-count="0">R</span>ef_is_null -&gt; add_char '\xD1'
-  | <span data-count="0">R</span>ef_as_non_null -&gt; add_char '\xD4'
-  | <span data-count="0">R</span>ef_func idx -&gt; write_char_indice buf '\xD2' idx
-  | <span data-count="0">I</span>_trunc_sat_f (S32, S32, S) -&gt; write_fc buf 0
-  | <span data-count="0">I</span>_trunc_sat_f (S32, S32, U) -&gt; write_fc buf 1
-  | <span data-count="0">I</span>_trunc_sat_f (S32, S64, S) -&gt; write_fc buf 2
-  | <span data-count="0">I</span>_trunc_sat_f (S32, S64, U) -&gt; write_fc buf 3
-  | <span data-count="0">I</span>_trunc_sat_f (S64, S32, S) -&gt; write_fc buf 4
-  | <span data-count="0">I</span>_trunc_sat_f (S64, S32, U) -&gt; write_fc buf 5
-  | <span data-count="0">I</span>_trunc_sat_f (S64, S64, S) -&gt; write_fc buf 6
-  | <span data-count="0">I</span>_trunc_sat_f (S64, S64, U) -&gt; write_fc buf 7
-  | <span data-count="0">M</span>emory_init (memidx, dataidx) -&gt;
-    write_fc buf 8;
-    <span data-count="0">w</span>rite_indice buf dataidx;
-    <span data-count="0">w</span>rite_indice buf memidx
-  | <span data-count="0">D</span>ata_drop idx -&gt;
-    write_fc buf 9;
-    <span data-count="0">w</span>rite_indice buf idx
-  | <span data-count="0">M</span>emory_copy (id1, id2) -&gt;
-    write_fc buf 10;
-    <span data-count="0">w</span>rite_indice buf id1;
-    <span data-count="0">w</span>rite_indice buf id2
-  | <span data-count="0">M</span>emory_fill idx -&gt;
-    write_fc buf 11;
-    <span data-count="0">w</span>rite_indice buf idx
-  | <span data-count="0">T</span>able_init (tableidx, elemidx) -&gt;
-    write_fc buf 12;
-    <span data-count="0">w</span>rite_indice buf elemidx;
-    <span data-count="0">w</span>rite_indice buf tableidx
-  | <span data-count="0">E</span>lem_drop idx -&gt;
-    write_fc buf 13;
-    <span data-count="0">w</span>rite_indice buf idx
-  | <span data-count="0">T</span>able_copy (idx1, idx2) -&gt;
-    write_fc buf 14;
-    <span data-count="0">w</span>rite_indice buf idx1;
-    <span data-count="0">w</span>rite_indice buf idx2
-  | <span data-count="0">T</span>able_grow idx -&gt;
-    write_fc buf 15;
-    <span data-count="0">w</span>rite_indice buf idx
-  | <span data-count="0">T</span>able_size idx -&gt;
-    write_fc buf 16;
-    <span data-count="0">w</span>rite_indice buf idx
-  | <span data-count="0">T</span>able_fill idx -&gt;
-    write_fc buf 17;
-    <span data-count="0">w</span>rite_indice buf idx
-  | <span data-count="0">V</span>128_const v -&gt;
-    write_fd buf 12;
-    <span data-count="0">l</span>et a, b = Concrete_v128.to_i64x2 v in
-    <span data-count="0">w</span>rite_bytes_8 buf a;
-    <span data-count="0">w</span>rite_bytes_8 buf b
-  | <span data-count="0">V</span>_ibinop (I8x16, Add) -&gt; write_fd buf 110
-  | <span data-count="0">V</span>_ibinop (I8x16, Sub) -&gt; write_fd buf 113
-  | <span data-count="0">V</span>_ibinop (I16x8, Add) -&gt; write_fd buf 142
-  | <span data-count="0">V</span>_ibinop (I16x8, Sub) -&gt; write_fd buf 145
-  | <span data-count="0">V</span>_ibinop (I32x4, Add) -&gt; write_fd buf 174
-  | <span data-count="0">V</span>_ibinop (I32x4, Sub) -&gt; write_fd buf 177
-  | <span data-count="0">V</span>_ibinop (I64x2, Add) -&gt; write_fd buf 206
-  | <span data-count="0">V</span>_ibinop (I64x2, Sub) -&gt; write_fd buf 209
-  | I_reinterpret_f _ | F_reinterpret_i _ | Return_call _
-  | Return_call_indirect _ | Return_call_ref _ | Call_ref _ | Extern_externalize
-  | Extern_internalize -&gt;
+  | Return_call _ | Return_call_indirect _ | Return_call_ref _ | Call_ref _ -&gt;
+    (* TODO *)
     assert false
 
 and write_expr buf expr ~end_op_code =
@@ -2611,7 +2810,7 @@ let write_element buf ({ typ = nullable, ht; init; mode; _ } : Elem.t) =
     <span data-count="1">l</span>et is_ref_func = ref true in
     encode_vector_list buf init (fun buf expr -&gt;
       <span data-count="1">m</span>atch expr.Annotated.raw with
-      | <span data-count="1">[</span> { Annotated.raw = Ref_func idx; _ } ] -&gt; write_indice buf idx
+      | <span data-count="1">[</span> { Annotated.raw = Ref (Func idx); _ } ] -&gt; write_indice buf idx
       | <span data-count="0">_</span> -&gt;
         write_expr buf expr ~end_op_code:None;
         <span data-count="0">i</span>s_ref_func := false );
