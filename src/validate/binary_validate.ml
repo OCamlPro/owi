@@ -353,11 +353,11 @@ let ref_type_as_non_null t =
     Ok t
   | _ -> assert false
 
-let typecheck_i32_instr (env : Env.t) stack : Binary.i32_instr -> _ = function
-  | Const _ ->
+let typecheck_i32_instr (env : Env.t) stack = function
+  | (Const _ : Binary.i32_instr) ->
     let+ stack = Stack.push [ i32 ] stack in
     (env, stack)
-  | Clz | Ctz | Popcnt | Eqz | Extend8_s | Extend16_s ->
+  | (Clz : Binary.i32_instr) | Ctz | Popcnt | Eqz | Extend8_s | Extend16_s ->
     (* Unary operators + Test operators *)
     let* stack = Stack.pop env.modul [ i32 ] stack in
     let+ stack = Stack.push [ i32 ] stack in
@@ -415,11 +415,12 @@ let typecheck_i32_instr (env : Env.t) stack : Binary.i32_instr -> _ = function
     let+ stack = Stack.push [ i32 ] stack in
     (env, stack)
 
-let typecheck_i64_instr (env : Env.t) stack : Binary.i64_instr -> _ = function
-  | Const _ ->
+let typecheck_i64_instr (env : Env.t) stack = function
+  | (Const _ : Binary.i64_instr) ->
     let+ stack = Stack.push [ i64 ] stack in
     (env, stack)
-  | Clz | Ctz | Popcnt | Extend8_s | Extend16_s | Extend32_s ->
+  | (Clz : Binary.i64_instr)
+  | Ctz | Popcnt | Extend8_s | Extend16_s | Extend32_s ->
     (* Unary operators *)
     let* stack = Stack.pop env.modul [ i64 ] stack in
     let+ stack = Stack.push [ i64 ] stack in
@@ -493,8 +494,8 @@ let typecheck_i64_instr (env : Env.t) stack : Binary.i64_instr -> _ = function
     let+ stack = Stack.push [ i64 ] stack in
     (env, stack)
 
-let typecheck_f32_instr (env : Env.t) stack : Binary.f32_instr -> _ = function
-  | Const _ ->
+let typecheck_f32_instr (env : Env.t) stack = function
+  | (Const _ : Binary.f32_instr) ->
     let+ stack = Stack.push [ f32 ] stack in
     (env, stack)
   | Abs | Neg | Sqrt | Ceil | Floor | Trunc | Nearest ->
@@ -532,8 +533,8 @@ let typecheck_f32_instr (env : Env.t) stack : Binary.f32_instr -> _ = function
     let+ stack = Stack.push [ f32 ] stack in
     (env, stack)
 
-let typecheck_f64_instr (env : Env.t) stack : Binary.f64_instr -> _ = function
-  | Const _ ->
+let typecheck_f64_instr (env : Env.t) stack = function
+  | (Const _ : Binary.f64_instr) ->
     let+ stack = Stack.push [ f64 ] stack in
     (env, stack)
   | Abs | Neg | Sqrt | Ceil | Floor | Trunc | Nearest ->
@@ -580,26 +581,26 @@ let typecheck_v128_instr env stack : Text.v128_instr -> _ = function
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
 
-let typecheck_i8x16_instr (env : Env.t) stack : Text.i8x16_instr -> _ = function
-  | Add | Sub ->
+let typecheck_i8x16_instr (env : Env.t) stack = function
+  | (Add : Text.i8x16_instr) | Sub ->
     let* stack = Stack.pop env.modul [ v128; v128 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
 
-let typecheck_i16x8_instr (env : Env.t) stack : Text.i16x8_instr -> _ = function
-  | Add | Sub ->
+let typecheck_i16x8_instr (env : Env.t) stack = function
+  | (Add : Text.i16x8_instr) | Sub ->
     let* stack = Stack.pop env.modul [ v128; v128 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
 
-let typecheck_i32x4_instr (env : Env.t) stack : Text.i32x4_instr -> _ = function
-  | Add | Sub ->
+let typecheck_i32x4_instr (env : Env.t) stack = function
+  | (Add : Text.i32x4_instr) | Sub ->
     let* stack = Stack.pop env.modul [ v128; v128 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
 
-let typecheck_i64x2_instr (env : Env.t) stack : Text.i64x2_instr -> _ = function
-  | Add | Sub ->
+let typecheck_i64x2_instr (env : Env.t) stack = function
+  | (Add : Text.i64x2_instr) | Sub ->
     let* stack = Stack.pop env.modul [ v128; v128 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
