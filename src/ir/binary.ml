@@ -716,10 +716,9 @@ let rec pp_instr ~short ppf = function
   | Memory i -> pp_memory_instr ppf i
   | Data i -> pp_data_instr ppf i
   | Drop -> pf ppf "drop"
-  | Ref_eq -> pf fmt "ref.eq"
-  | Ref_test rt -> pf fmt "ref.test %a" pp_ref_type rt
-  | Ref_cast rt -> pf fmt "ref.cast %a" pp_ref_type rt
-  | Drop -> pf fmt "drop"
+  | Ref_eq -> pf ppf "ref.eq"
+  | Ref_test rt -> pf ppf "ref.test %a" pp_ref_type rt
+  | Ref_cast rt -> pf ppf "ref.cast %a" pp_ref_type rt
   | Select vt ->
     begin match vt with
     | None -> pf ppf "select"
@@ -763,42 +762,42 @@ let rec pp_instr ~short ppf = function
   | Return_call_ref ty_id -> pf ppf "return_call_ref %a" pp_block_type ty_id
   | Call id -> pf ppf "call %a" pp_indice id
   | Call_indirect (tbl_id, ty_id) ->
-    pf fmt "call_indirect %a %a" pp_indice tbl_id pp_block_type ty_id
-  | Call_ref ty_id -> pf fmt "call_ref %a" pp_indice ty_id
-  | Ref_i31 -> pf fmt "ref.i31"
-  | I31_get_s -> pf fmt "i31.get_s"
-  | I31_get_u -> pf fmt "i31.get_u"
-  | Struct_new id -> pf fmt "struct.new %a" pp_indice id
-  | Struct_new_default id -> pf fmt "struct.new_default %a" pp_indice id
+    pf ppf "call_indirect %a %a" pp_indice tbl_id pp_block_type ty_id
+  | Call_ref ty_id -> pf ppf "call_ref %a" pp_indice ty_id
+  | Ref_i31 -> pf ppf "ref.i31"
+  | I31_get_s -> pf ppf "i31.get_s"
+  | I31_get_u -> pf ppf "i31.get_u"
+  | Struct_new id -> pf ppf "struct.new %a" pp_indice id
+  | Struct_new_default id -> pf ppf "struct.new_default %a" pp_indice id
   | Struct_get (id1, id2) ->
-    pf fmt "struct.get %a %a" pp_indice id1 pp_indice id2
+    pf ppf "struct.get %a %a" pp_indice id1 pp_indice id2
   | Struct_get_s (id1, id2) ->
-    pf fmt "struct.get_s %a %a" pp_indice id1 pp_indice id2
+    pf ppf "struct.get_s %a %a" pp_indice id1 pp_indice id2
   | Struct_get_u (id1, id2) ->
-    pf fmt "struct.get_u %a %a" pp_indice id1 pp_indice id2
+    pf ppf "struct.get_u %a %a" pp_indice id1 pp_indice id2
   | Struct_set (id1, id2) ->
-    pf fmt "struct.set %a %a" pp_indice id1 pp_indice id2
-  | Array_new id -> pf fmt "array.new %a" pp_indice id
-  | Array_new_default id -> pf fmt "array.new_default %a" pp_indice id
-  | Array_new_fixed (id, n) -> pf fmt "array.new_fixed %a %ld" pp_indice id n
+    pf ppf "struct.set %a %a" pp_indice id1 pp_indice id2
+  | Array_new id -> pf ppf "array.new %a" pp_indice id
+  | Array_new_default id -> pf ppf "array.new_default %a" pp_indice id
+  | Array_new_fixed (id, n) -> pf ppf "array.new_fixed %a %ld" pp_indice id n
   | Array_new_data (id1, id2) ->
-    pf fmt "array.new_data %a %a" pp_indice id1 pp_indice id2
+    pf ppf "array.new_data %a %a" pp_indice id1 pp_indice id2
   | Array_new_elem (id1, id2) ->
-    pf fmt "array.new_elem %a %a" pp_indice id1 pp_indice id2
-  | Array_get id -> pf fmt "array.get %a" pp_indice id
-  | Array_get_s id -> pf fmt "array.get_s %a" pp_indice id
-  | Array_get_u id -> pf fmt "array.get_u %a" pp_indice id
-  | Array_set id -> pf fmt "array.set %a" pp_indice id
-  | Array_len -> pf fmt "array.len"
-  | Array_fill id -> pf fmt "array.fill %a" pp_indice id
+    pf ppf "array.new_elem %a %a" pp_indice id1 pp_indice id2
+  | Array_get id -> pf ppf "array.get %a" pp_indice id
+  | Array_get_s id -> pf ppf "array.get_s %a" pp_indice id
+  | Array_get_u id -> pf ppf "array.get_u %a" pp_indice id
+  | Array_set id -> pf ppf "array.set %a" pp_indice id
+  | Array_len -> pf ppf "array.len"
+  | Array_fill id -> pf ppf "array.fill %a" pp_indice id
   | Array_copy (id1, id2) ->
-    pf fmt "array.copy %a %a" pp_indice id1 pp_indice id2
+    pf ppf "array.copy %a %a" pp_indice id1 pp_indice id2
   | Array_init_data (id1, id2) ->
-    pf fmt "array.init_data %a %a" pp_indice id1 pp_indice id2
+    pf ppf "array.init_data %a %a" pp_indice id1 pp_indice id2
   | Array_init_elem (id1, id2) ->
-    pf fmt "array.init_elem %a %a" pp_indice id1 pp_indice id2
-  | Any_convert_extern -> pf fmt "any.convert_extern"
-  | Extern_convert_any -> pf fmt "extern.convert_any"
+    pf ppf "array.init_elem %a %a" pp_indice id1 pp_indice id2
+  | Any_convert_extern -> pf ppf "any.convert_extern"
+  | Extern_convert_any -> pf ppf "extern.convert_any"
 
 and pp_expr ~short ppf instrs =
   Annotated.iter

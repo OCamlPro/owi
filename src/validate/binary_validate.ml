@@ -920,15 +920,6 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
     let* jt = Env.block_type_get i env in
     let+ _stack = Stack.pop env.modul jt stack in
     (env, stack)
-  | Table_get i ->
-    let* t = Env.table_type_get i env.modul in
-    let* stack = Stack.pop env.modul [ i32 ] stack in
-    let+ stack = Stack.push [ Ref_type t ] stack in
-    (env, stack)
-  | Table_set i ->
-    let* t = Env.table_type_get i env.modul in
-    let+ stack = Stack.pop env.modul [ Ref_type t; i32 ] stack in
-    (env, stack)
   | ( Ref_i31 | I31_get_s | I31_get_u | Struct_new _ | Struct_new_default _
     | Struct_get (_, _)
     | Struct_get_s (_, _)

@@ -69,14 +69,7 @@ let write_char_indice buf c idx =
   Buffer.add_char buf c;
   write_indice buf idx
 
-let write_reftype buf nullable ht =
-  let is_null =
-    match nullable with
-    | (Text.Null : Text.nullable) -> true
-    | No_null ->
-      Buffer.add_char buf '\x64';
-      false
-  in
+let write_heaptype ?(is_null = false) buf ht =
   match ht with
   | Binary.TypeUse id when is_null ->
     write_char_indice buf '\x63' id;
@@ -95,10 +88,10 @@ let write_reftype buf nullable ht =
   | NoFunc_ht -> Buffer.add_char buf '\x73'
   | NoExn_ht -> Buffer.add_char buf '\x74'
 
-let write_reftype buf nullable ht =
+let write_reftype buf (nullable : Text.nullable) ht =
   let is_null =
     match nullable with
-    | Text.Null -> true
+    | Null -> true
     | No_null ->
       Buffer.add_char buf '\x64';
       false
@@ -642,7 +635,6 @@ let rec write_instr buf instr =
     add_char '\xFB';
     write_u32 buf 23l;
     write_heaptype buf ht
-
   | Struct_new x ->
     add_char '\xFB';
     write_u32 buf 0l;
@@ -741,6 +733,7 @@ let rec write_instr buf instr =
   | Ref_i31 ->
     add_char '\xFB';
     write_u32 buf 28l
+  | Ref_eq -> add_char '\xD3'
   | I31_get_s ->
     add_char '\xFB';
     write_u32 buf 29l
@@ -897,8 +890,8 @@ let encode_storage_type buf st =
   | Pack_type I16 -> Buffer.add_char buf '\x77'
   | Pack_type I8 -> Buffer.add_char buf '\x78'
 
-let encode_mut buf = function
-  | Text.Const -> Buffer.add_char buf '\x00'
+let encode_mut buf : Text.mut -> unit = function
+  | Const -> Buffer.add_char buf '\x00'
   | Var -> Buffer.add_char buf '\x01'
 
 let encode_field_type buf (mut, st) =

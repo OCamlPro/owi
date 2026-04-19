@@ -182,7 +182,7 @@ let storage_type ==
   | ~ = val_type; <Val_type>
 
 let field_type ==
-  | st = storage_type; { Const, st }
+  | st = storage_type; { (Const : mut), st }
   | LPAR; MUTABLE; t = storage_type; RPAR; { Var, t }
 
 let struct_field :=

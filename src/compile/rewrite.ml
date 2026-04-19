@@ -522,77 +522,27 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
     | Drop -> Ok Binary.Drop
     | Nop -> Ok Binary.Nop
     | Return -> Ok Binary.Return
-    | I_load8 (id, nn, sx, memarg) ->
-      let* memarg = rewrite_memarg memarg in
-      let+ id = Assigned.find_memory assigned id in
-      Binary.I_load8 (id, nn, sx, memarg)
-    | I_store8 (id, nn, memarg) ->
-      let* memarg = rewrite_memarg memarg in
-      let+ id = Assigned.find_memory assigned id in
-      Binary.I_store8 (id, nn, memarg)
-    | I_load16 (id, nn, sx, memarg) ->
-      let* memarg = rewrite_memarg memarg in
-      let+ id = Assigned.find_memory assigned id in
-      Binary.I_load16 (id, nn, sx, memarg)
-    | I_store16 (id, nn, memarg) ->
-      let* memarg = rewrite_memarg memarg in
-      let+ id = Assigned.find_memory assigned id in
-      Binary.I_store16 (id, nn, memarg)
-    | I64_load32 (id, sx, memarg) ->
-      let* memarg = rewrite_memarg memarg in
-      let+ id = Assigned.find_memory assigned id in
-      Binary.I64_load32 (id, sx, memarg)
-    | I64_store32 (id, memarg) ->
-      let* memarg = rewrite_memarg memarg in
-      let+ id = Assigned.find_memory assigned id in
-      Binary.I64_store32 (id, memarg)
-    | I_load (id, nn, memarg) ->
-      let* memarg = rewrite_memarg memarg in
-      let+ id = Assigned.find_memory assigned id in
-      Binary.I_load (id, nn, memarg)
-    | F_load (id, nn, memarg) ->
-      let* memarg = rewrite_memarg memarg in
-      let+ id = Assigned.find_memory assigned id in
-      Binary.F_load (id, nn, memarg)
-    | F_store (id, nn, memarg) ->
-      let* memarg = rewrite_memarg memarg in
-      let+ id = Assigned.find_memory assigned id in
-      Binary.F_store (id, nn, memarg)
-    | I_store (id, nn, memarg) ->
-      let* memarg = rewrite_memarg memarg in
-      let+ id = Assigned.find_memory assigned id in
-      Binary.I_store (id, nn, memarg)
-    | Memory_copy (id1, id2) ->
-      let* id1 = Assigned.find_memory assigned id1 in
-      let+ id2 = Assigned.find_memory assigned id2 in
-      Binary.Memory_copy (id1, id2)
-    | Memory_size id ->
-      let+ id = Assigned.find_memory assigned id in
-      Binary.Memory_size id
-    | Memory_fill id ->
-      let+ id = Assigned.find_memory assigned id in
-      Binary.Memory_fill id
-    | Memory_grow id ->
-      let+ id = Assigned.find_memory assigned id in
-      Binary.Memory_grow id
-    | V_ibinop (shape, op) -> Ok (Binary.V_ibinop (shape, op))
-    | Ref_null t ->
-      let* t = rewrite_heap_type assigned t in
-      Ok (Binary.Ref_null t)
     | Ref_i31 -> Ok Ref_i31
+    | Ref_eq -> Ok Ref_eq
+    | Ref_test (n, ht) ->
+      let+ ht = rewrite_heap_type assigned ht in
+      Binary.Ref_test (n, ht)
+    | Ref_cast (n, ht) ->
+      let+ ht = rewrite_heap_type assigned ht in
+      Binary.Ref_cast (n, ht)
     | I31_get_s -> Ok I31_get_s
     | I31_get_u -> Ok I31_get_u
     | Array_len -> Ok Array_len
     | Any_convert_extern -> Ok Any_convert_extern
-    | Extern_convert_any -> assert false
-    | Struct_new _ | Struct_new_default _ | Struct_get _ | Struct_get_s _
-    | Struct_get_u _ | Struct_set _ | Array_new _ | Array_new_default _
-    | Array_new_fixed _ | Array_new_data _ | Array_new_elem _ | Array_get _
-    | Array_get_s _ | Array_get_u _ | Array_set _ | Array_fill _ | Array_copy _
-    | Array_init_data _ | Array_init_elem _ ->
+    | Extern_convert_any -> Ok Extern_convert_any
+    | ( Struct_new _ | Struct_new_default _ | Struct_get _ | Struct_get_s _
+      | Struct_get_u _ | Struct_set _ | Array_new _ | Array_new_default _
+      | Array_new_fixed _ | Array_new_data _ | Array_new_elem _ | Array_get _
+      | Array_get_s _ | Array_get_u _ | Array_set _ | Array_fill _
+      | Array_copy _ | Array_init_data _ | Array_init_elem _ ) as instr ->
       Fmt.failwith "Rewrite: unimplemented for the GC instruction %a"
         (Text.pp_instr ~short:true)
-        instr.raw
+        instr
   and expr (e : Text.expr) (loop_count, block_ids) :
     Binary.expr Annotated.t Result.t =
     let+ e =
