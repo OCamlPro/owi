@@ -641,6 +641,11 @@ let typecheck_ref_instr (env : Env.t) stack = function
         let+ stack = Stack.push [ Ref_type (Text.No_null, TypeUse id) ] stack in
         (env, stack)
       end
+  | (Eq | Test _ | Cast _) as r ->
+    Log.err (fun m ->
+      m "TODO: unimplemented instruction typecheking %a" (pp_instr ~short:false)
+        (Ref r) );
+    assert false
 
 let typecheck_local_instr env stack : Binary.local_instr -> _ = function
   | Get i ->
@@ -934,8 +939,7 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
     | Array_copy (_, _)
     | Array_init_data (_, _)
     | Array_init_elem (_, _)
-    | Any_convert_extern | Extern_convert_any | Ref_eq | Ref_test _ | Ref_cast _
-      ) as i ->
+    | Any_convert_extern | Extern_convert_any ) as i ->
     Log.err (fun m ->
       m "TODO: unimplemented instruction typecheking %a" (pp_instr ~short:false)
         i );

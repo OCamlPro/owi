@@ -355,6 +355,9 @@ type ref_instr =
   | Is_null
   | As_non_null
   | Func of indice
+  | Eq
+  | Test of ref_type
+  | Cast of ref_type
 
 (* Local instructions *)
 type local_instr =
@@ -408,10 +411,6 @@ type instr =
   | Elem of elem_instr
   | Memory of memory_instr
   | Data of data_instr
-  (* Reference instructions *)
-  | Ref_eq
-  | Ref_test of ref_type
-  | Ref_cast of ref_type
   (* Parametric instructions *)
   | Drop
   | Select of val_type list option

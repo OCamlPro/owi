@@ -798,6 +798,10 @@ struct
     | Func i ->
       let f = Env.get_func env i in
       Stack.push_ref stack (Ref.func f) |> Choice.return
+    | (Eq | Test _ | Cast _) as r ->
+      Log.err (fun m ->
+        m "unimplemented instruction: %a" (pp_instr ~short:false) (Ref r) );
+      assert false
 
   let exec_local_instr state locals stack : Binary.local_instr -> _ = function
     | Get i ->
@@ -1503,8 +1507,7 @@ struct
       | Array_copy (_, _)
       | Array_init_data (_, _)
       | Array_init_elem (_, _)
-      | Any_convert_extern | Extern_convert_any | Ref_eq | Ref_test _
-      | Ref_cast _ ) as i ->
+      | Any_convert_extern | Extern_convert_any ) as i ->
       Log.err (fun m ->
         m "unimplemented instruction: %a" (pp_instr ~short:false) i );
       assert false

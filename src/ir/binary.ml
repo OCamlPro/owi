@@ -542,12 +542,18 @@ type ref_instr =
   | Is_null
   | As_non_null
   | Func of indice
+  | Eq
+  | Test of ref_type
+  | Cast of ref_type
 
 let pp_ref_instr ppf = function
   | Null t -> pf ppf "ref.null %a" pp_heap_type t
   | Is_null -> pf ppf "ref.is_null"
   | As_non_null -> pf ppf "ref.as_non_null"
   | Func indice -> pf ppf "ref.func %a" pp_indice indice
+  | Eq -> pf ppf "ref.eq"
+  | Test rt -> pf ppf "ref.test %a" pp_ref_type rt
+  | Cast rt -> pf ppf "ref.cast %a" pp_ref_type rt
 
 (* Local instructions *)
 type local_instr =
@@ -638,10 +644,6 @@ type instr =
   | Elem of elem_instr
   | Memory of memory_instr
   | Data of data_instr
-  (* Reference instructions *)
-  | Ref_eq
-  | Ref_test of ref_type
-  | Ref_cast of ref_type
   (* Parametric instructions *)
   | Drop
   | Select of val_type list option
@@ -716,9 +718,6 @@ let rec pp_instr ~short ppf = function
   | Memory i -> pp_memory_instr ppf i
   | Data i -> pp_data_instr ppf i
   | Drop -> pf ppf "drop"
-  | Ref_eq -> pf ppf "ref.eq"
-  | Ref_test rt -> pf ppf "ref.test %a" pp_ref_type rt
-  | Ref_cast rt -> pf ppf "ref.cast %a" pp_ref_type rt
   | Select vt ->
     begin match vt with
     | None -> pf ppf "select"
@@ -837,8 +836,7 @@ and iter_instr f instr =
       | Array_copy (_, _)
       | Array_init_data (_, _)
       | Array_init_elem (_, _)
-      | Any_convert_extern | Extern_convert_any | Ref_eq | Ref_test _
-      | Ref_cast _ ->
+      | Any_convert_extern | Extern_convert_any ->
         ()
       | Block (_, _, e) | Loop (_, _, e) -> iter_expr f e
       | If_else (_, _, e1, e2) ->

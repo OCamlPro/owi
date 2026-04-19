@@ -283,6 +283,13 @@ let rewrite_ref_instr assigned : Text.ref_instr -> Binary.ref_instr Result.t =
   | Func indice ->
     let+ indice = Assigned.find_func assigned indice in
     Binary.Func indice
+  | Eq -> Ok Eq
+  | Test (n, ht) ->
+    let+ ht = rewrite_heap_type assigned ht in
+    Binary.Test (n, ht)
+  | Cast (n, ht) ->
+    let+ ht = rewrite_heap_type assigned ht in
+    Binary.Cast (n, ht)
 
 let rewrite_global_instr assigned :
   Text.global_instr -> Binary.global_instr Result.t = function
@@ -523,13 +530,6 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
     | Nop -> Ok Binary.Nop
     | Return -> Ok Binary.Return
     | Ref_i31 -> Ok Ref_i31
-    | Ref_eq -> Ok Ref_eq
-    | Ref_test (n, ht) ->
-      let+ ht = rewrite_heap_type assigned ht in
-      Binary.Ref_test (n, ht)
-    | Ref_cast (n, ht) ->
-      let+ ht = rewrite_heap_type assigned ht in
-      Binary.Ref_cast (n, ht)
     | I31_get_s -> Ok I31_get_s
     | I31_get_u -> Ok I31_get_u
     | Array_len -> Ok Array_len

@@ -239,6 +239,9 @@ let convert_ref_instr : Binary.ref_instr -> Text.ref_instr = function
   | Func indice ->
     let indice = convert_indice indice in
     Func indice
+  | Eq -> Eq
+  | Test rt -> Test (convert_ref_type rt)
+  | Cast rt -> Cast (convert_ref_type rt)
 
 let convert_local_instr : Binary.local_instr -> Text.local_instr = function
   | Get indice ->
@@ -393,9 +396,6 @@ let rec convert_instr : Binary.instr -> Text.instr = function
   | Nop -> Nop
   | Return -> Return
   | Ref_i31 -> Ref_i31
-  | Ref_eq -> Ref_eq
-  | Ref_test rt -> Ref_test (convert_ref_type rt)
-  | Ref_cast rt -> Ref_cast (convert_ref_type rt)
   | I31_get_s -> I31_get_s
   | I31_get_u -> I31_get_u
   | Struct_new id -> Struct_new (convert_indice id)

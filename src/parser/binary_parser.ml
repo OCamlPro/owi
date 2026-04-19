@@ -435,19 +435,19 @@ let read_FB input =
   | 20 ->
     let* b, input = read_S7 input in
     let+ ht, input = read_heap_type input b in
-    (Ref_test (No_null, ht), input)
+    (Ref (Test (No_null, ht)), input)
   | 21 ->
     let* b, input = read_S7 input in
     let+ ht, input = read_heap_type input b in
-    (Ref_test (Null, ht), input)
+    (Ref (Test (Null, ht)), input)
   | 22 ->
     let* b, input = read_S7 input in
     let+ ht, input = read_heap_type input b in
-    (Ref_cast (No_null, ht), input)
+    (Ref (Cast (No_null, ht)), input)
   | 23 ->
     let* b, input = read_S7 input in
     let+ ht, input = read_heap_type input b in
-    (Ref_cast (Null, ht), input)
+    (Ref (Cast (Null, ht)), input)
   | 26 -> Ok (Any_convert_extern, input)
   | 27 -> Ok (Extern_convert_any, input)
   | 28 -> Ok (Ref_i31, input)
@@ -856,7 +856,7 @@ let rec read_instr types input =
   | '\xD2' ->
     let+ funcidx, input = read_indice input in
     (Ref (Func funcidx), input)
-  | '\xD3' -> Ok (Ref_eq, input)
+  | '\xD3' -> Ok (Ref Eq, input)
   | '\xD4' -> Ok (Ref As_non_null, input)
   | '\xD5' ->
     let+ idx, input = read_indice input in

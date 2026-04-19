@@ -502,7 +502,24 @@ let write_ref_instr buf : Binary.ref_instr -> _ =
     write_reftype buf Text.Null rt
   | Is_null -> add_char '\xD1'
   | Func idx -> write_char_indice buf '\xD2' idx
+  | Eq -> add_char '\xD3'
   | As_non_null -> add_char '\xD4'
+  | Test (No_null, ht) ->
+    add_char '\xFB';
+    write_u32 buf 20l;
+    write_heaptype buf ht
+  | Test (Null, ht) ->
+    add_char '\xFB';
+    write_u32 buf 21l;
+    write_heaptype buf ht
+  | Cast (No_null, ht) ->
+    add_char '\xFB';
+    write_u32 buf 22l;
+    write_heaptype buf ht
+  | Cast (Null, ht) ->
+    add_char '\xFB';
+    write_u32 buf 23l;
+    write_heaptype buf ht
 
 let write_local_instr buf : Binary.local_instr -> _ = function
   | Get idx -> write_char_indice buf '\x20' idx
@@ -619,22 +636,6 @@ let rec write_instr buf instr =
   | Return_call _ | Return_call_indirect _ | Return_call_ref _ | Call_ref _ ->
     (* TODO *)
     assert false
-  | Ref_test (No_null, ht) ->
-    add_char '\xFB';
-    write_u32 buf 20l;
-    write_heaptype buf ht
-  | Ref_test (Null, ht) ->
-    add_char '\xFB';
-    write_u32 buf 21l;
-    write_heaptype buf ht
-  | Ref_cast (No_null, ht) ->
-    add_char '\xFB';
-    write_u32 buf 22l;
-    write_heaptype buf ht
-  | Ref_cast (Null, ht) ->
-    add_char '\xFB';
-    write_u32 buf 23l;
-    write_heaptype buf ht
   | Struct_new x ->
     add_char '\xFB';
     write_u32 buf 0l;
@@ -733,7 +734,6 @@ let rec write_instr buf instr =
   | Ref_i31 ->
     add_char '\xFB';
     write_u32 buf 28l
-  | Ref_eq -> add_char '\xD3'
   | I31_get_s ->
     add_char '\xFB';
     write_u32 buf 29l
