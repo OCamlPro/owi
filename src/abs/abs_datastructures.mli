@@ -23,5 +23,9 @@ module Stack : sig
 
   val take : int -> 'el t -> 'el t
 
+  val drop : int -> 'el t -> 'el t
+
   val rev : 'el t -> 'el t
+
+  val length : 'el t -> int
 end
