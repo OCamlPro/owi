@@ -211,20 +211,30 @@ module DenotFixpoint (S : DATA_STATE) = struct
     let args, caller_popped_stack =
       Stack.pop_n state.stack (List.length param_type)
     in
-    let init_value v =
-      let size = Abs_value.size_of v in
+    let init_value (vt : val_type) =
+      let size =
+        match vt with
+        | Num_type t -> (
+          match t with I32 -> Size.b32 | I64 -> Size.b64 | _ -> assert false )
+        | Ref_type _ -> assert false
+      in
       let zero = ADomain.Binary_Forward.biconst ~size Z.zero state.ctx in
-      match v with Abs_value.I32 _ -> Abs_value.I32 zero | I64 _ -> I64 zero
+      match vt with
+      | Num_type I32 -> Abs_value.I32 zero
+      | Num_type I64 -> I64 zero
+      | _ -> assert false
+    in
+    let locals =
+      List.map (fun (_str_opt, vt) -> init_value vt) func.locals
+      |> List.mapi (fun i v -> (i, v))
+      |> Locals.of_list
     in
     let fn_state =
       { state with
-        stack = Stack.empty
+        stack = args
       ; ctx = state.ctx
       ; func_rt = result_type
-      ; locals =
-          Locals.of_list
-          @@ List.mapi (fun i v -> (i, init_value v))
-          @@ Stack.to_list args
+      ; locals
       }
     in
     Log.info (fun m -> m "Func start state : %a" pp_state fn_state);
@@ -236,12 +246,11 @@ module DenotFixpoint (S : DATA_STATE) = struct
         func_end_state );
     (* We should probably copy state and join back the return values in the context here *)
     let* func_end_state in
-    Some
-      { state with
-        stack =
-          Stack.append caller_popped_stack
-          @@ Stack.take (List.length result_type) func_end_state.stack
-      }
+    let stack =
+      Stack.append caller_popped_stack
+      @@ Stack.take (List.length result_type) func_end_state.stack
+    in
+    Some { state with stack }
 
   and eval_instr : t -> instr -> t option * state list JumpTarget.t =
    fun state instr ->
@@ -312,7 +321,6 @@ module DenotFixpoint (S : DATA_STATE) = struct
       let initial_state = { state with ctx = ADomain.Context.copy state.ctx } in
       let rec fixpoint state =
         let next_state, jt = eval_expr state body.raw in
-
         let to_take =
           match bt with
           | Some (Bt_raw (_i, (params, _res))) -> List.length params
@@ -322,7 +330,7 @@ module DenotFixpoint (S : DATA_STATE) = struct
         let next_head =
           match JumpTarget.find_opt (Some 0) jt with
           | Some jts ->
-            let fp_stack = Stack.take to_take initial_state.stack in
+            let fp_stack = shorten_stack initial_state.stack in
             List.fold_left
               (fun acc state ->
                 let stack = shorten_stack state.stack in
@@ -428,12 +436,14 @@ module DataState : DATA_STATE = struct
     | Local_set i ->
       let e, stack = Stack.pop state.stack in
       (Some { state with stack; locals = Locals.add i e state.locals }, None)
+    | Local_tee i ->
+      let e, stack = Stack.pop state.stack in
+      let stack = Stack.push stack e in
+      (Some { state with stack; locals = Locals.add i e state.locals }, None)
     | Drop ->
       let _, stack = Stack.pop state.stack in
       (Some { state with stack }, None)
-    | Nop ->
-      let top = ADomain.binary_unknown ~size:Size.b32 state.ctx in
-      (Some { state with stack = Stack.push state.stack (I32 top) }, None)
+    | Nop -> (Some state, None)
     | ( If_else _ | Call _ | Block _ | Loop _ | Br _ | Br_if _ | Br_table _
       | Br_on_non_null _ | Br_on_null _ ) as instr ->
       (Some state, Some instr)
