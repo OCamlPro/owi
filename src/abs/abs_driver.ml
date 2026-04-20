@@ -172,8 +172,6 @@ module DenotFixpoint (S : DATA_STATE) = struct
           , out ) )
 
   let join state_a state_b =
-    Fmt.pr "state_a %a@." pp_state state_a;
-    Fmt.pr "state_b %a@." pp_state state_b;
     let (ADomain.Context.Result (_inc, in_tuple, continue)) =
       serialize ~widens:false state_a state_b
     in
@@ -315,37 +313,34 @@ module DenotFixpoint (S : DATA_STATE) = struct
       let rec fixpoint state =
         let next_state, jt = eval_expr state body.raw in
 
-        let shorten_stack stack =
+        let to_take =
           match bt with
-          | Some (Bt_raw (_i, (params, _results))) ->
-            let to_append = Stack.take (List.length params) stack in
-            Fmt.pr "to_append : %a@."
-              (Fmt.list ~sep:(Fmt.any ",") (Abs_value.pp state.ctx))
-              (Stack.to_list to_append);
-            Stack.append to_append initial_state.stack
-          | None -> stack
+          | Some (Bt_raw (_i, (params, _res))) -> List.length params
+          | None -> 0
         in
+        let shorten_stack stack = Stack.take to_take stack in
         let next_head =
           match JumpTarget.find_opt (Some 0) jt with
           | Some jts ->
+            let fp_stack = Stack.take to_take initial_state.stack in
             List.fold_left
               (fun acc state ->
-                Fmt.pr "initial_state %a@." pp_state initial_state;
-                Fmt.pr "current_state %a@." pp_state state;
                 let stack = shorten_stack state.stack in
-                let stack_acc = shorten_stack acc.stack in
-                Fmt.pr "shorten_stack %a@." pp_state { state with stack };
-                join { acc with stack = stack_acc } { state with stack } )
-              initial_state jts
+                join acc { state with stack } )
+              { initial_state with stack = fp_stack }
+              jts
           | None -> assert false
         in
-        Fmt.pr "next_head %a@." pp_state next_head;
-        Fmt.pr "state %a@." pp_state state;
         let widened, included = widen widening_id state next_head in
         if not included then fixpoint widened
         else
           (* fixpoint reached: exit loop, assume condition is false *)
           let jt = JumpTarget.decr jt in
+          let next_state =
+            Option.bind next_state @@ fun next_state ->
+            let stack = Stack.append next_state.stack initial_state.stack in
+            Some { next_state with stack }
+          in
           (next_state, jt)
       in
       fixpoint state
