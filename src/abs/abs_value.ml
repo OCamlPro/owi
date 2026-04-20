@@ -45,12 +45,9 @@ let of_binary size binary =
 let size_of = function I32 _ -> Size.b32 | I64 _ -> Size.b64
 
 let to_boolean ctx x =
-  let size = size_of x in
+  let size = Size.b32 in
   let zero = ADomain.Binary_Forward.biconst ~size Z.zero ctx in
-  let bool = ADomain.Binary.equal (to_binary x) zero in
-  match bool with
-  | true -> ADomain.Boolean_Forward.true_ ctx
-  | false -> ADomain.Boolean_Forward.false_ ctx
+  ADomain.Binary_Forward.beq ~size ctx (to_binary x) zero
 
 let top size ctx = of_binary size @@ ADomain.binary_empty ~size ctx
 
