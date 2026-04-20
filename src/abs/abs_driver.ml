@@ -46,11 +46,8 @@ end
 module DenotFixpoint (S : DATA_STATE) = struct
   type t = state
 
-  let init_domain_result =
-    ADomain.Context.Result
-      (true, ADomain.Context.empty_tuple (), fun _ctx out -> ([], out))
-
   module JumpKey = struct
+    (* TODO c'est mieux de définir le type nous même *)
     type t = int option
 
     let decr = Option.map Int.pred
@@ -69,7 +66,7 @@ module DenotFixpoint (S : DATA_STATE) = struct
 
     let empty = Map.empty
 
-    let find = Map.find_opt
+    let find_opt = Map.find_opt
 
     let remove = Map.remove
 
@@ -85,6 +82,11 @@ module DenotFixpoint (S : DATA_STATE) = struct
           | Some el' -> List.append el el'
           | None -> el )
         neww
+
+    let decr jt =
+      remove (Some 0) jt |> to_list
+      |> List.map (fun (k, v) -> (JumpKey.decr k, v))
+      |> of_list
   end
 
   let ( let> ) (opt, mapp) f =
@@ -101,7 +103,7 @@ module DenotFixpoint (S : DATA_STATE) = struct
          * intup : symbolic repr of all variabls that will be created simultaneously
          * cont : continuation function
          *)
-        let (ADomain.Context.Result (inc, intup, local_cont)) =
+        let (ADomain.Context.Result (inc, in_tup, local_cont)) =
           ADomain.serialize_binary ~size ~widens state_a.ctx
             (Abs_value.to_binary a) state_b.ctx (Abs_value.to_binary b)
             (inc, intup)
@@ -112,16 +114,16 @@ module DenotFixpoint (S : DATA_STATE) = struct
           let b = Abs_value.of_binary size integer in
           (f b list, out_tuple)
         in
-        Some (ADomain.Context.Result (inc, intup, cont))
+        Some (ADomain.Context.Result (inc, in_tup, cont))
     in
-    let rec serliaze_stack lhs rhs acc_res =
+    let rec serialize_stack lhs rhs acc_res =
       match (lhs, rhs) with
       | [], [] -> acc_res
       | [], _ :: _ | _ :: _, [] ->
         Fmt.failwith "join on stacks of different sizes"
       | v1 :: rest_a, v2 :: rest_b -> begin
         let r = gen_new_value ~widens v1 v2 state_a state_b acc_res List.cons in
-        serliaze_stack rest_a rest_b
+        serialize_stack rest_a rest_b
           (match r with Some res -> res | None -> acc_res)
       end
     in
@@ -150,7 +152,7 @@ module DenotFixpoint (S : DATA_STATE) = struct
     in
 
     let (ADomain.Context.Result (included, in_tuple, stack_continue)) =
-      serliaze_stack
+      serialize_stack
         (Stack.to_list state_a.stack)
         (Stack.to_list state_b.stack)
         (ADomain.Context.Result (included, in_tuple, fun _ctx out -> ([], out)))
@@ -170,24 +172,13 @@ module DenotFixpoint (S : DATA_STATE) = struct
           , out ) )
 
   let join state_a state_b =
+    Fmt.pr "state_a %a@." pp_state state_a;
+    Fmt.pr "state_b %a@." pp_state state_b;
     let (ADomain.Context.Result (_inc, in_tuple, continue)) =
       serialize ~widens:false state_a state_b
     in
     let ctx, out = ADomain.typed_nondet2 state_a.ctx state_b.ctx in_tuple in
     fst @@ continue ctx out
-
-  let join_jump_tables :
-       state list JumpTarget.t
-    -> state list JumpTarget.t
-    -> ('a, 'b) ADomain.Context.result =
-   fun _a _b -> assert false
-  (* Map.fold_on_nonequal_union *)
-  (*   (fun k va vb (ADomain.Context.Result (inc, intup, cont)) -> *)
-  (*     gen_new_value ~widens:true ) *)
-  (*   a b *)
-  (*   (ADomain.Context.Result *)
-  (*      (true, ADomain.Context.empty_tuple (), fun _ctx out -> assert false) *)
-  (*   ) *)
 
   let widen widening_id state_a state_b =
     let (ADomain.Context.Result (included, in_tuple, continue)) =
@@ -203,15 +194,17 @@ module DenotFixpoint (S : DATA_STATE) = struct
   let rec eval_expr :
     t -> instr Annotated.t list -> t option * state list JumpTarget.t =
    fun state expr ->
-    List.fold_left
-      (fun (current_state, current_mapping) (x : instr Annotated.t) ->
-        match current_state with
-        | Some current_state ->
-          let new_state, new_mapping = eval_instr current_state x.raw in
-          (new_state, JumpTarget.append current_mapping new_mapping)
-        | None -> assert false )
-      (Some state, JumpTarget.empty)
-      expr
+    let rec loop (state, jt) (expr : instr Annotated.t list) =
+      match expr with
+      | [] -> (Some state, jt)
+      | instr :: instrs -> (
+        let new_state, new_jt = eval_instr state instr.raw in
+        let new_jt = JumpTarget.append jt new_jt in
+        match new_state with
+        | None -> (None, new_jt)
+        | Some s -> loop (s, new_jt) instrs )
+    in
+    loop (state, JumpTarget.empty) expr
 
   and eval_func (state : state) (func : Func.t) =
     Log.info (fun m ->
@@ -281,68 +274,81 @@ module DenotFixpoint (S : DATA_STATE) = struct
         )
       end
     | Block (_str_opt, _bt, expr) ->
+      (* TODO il faut gérer le mapping pour le cas de None *)
       let> res, mapping = eval_expr state expr.raw in
       let state = { state with stack = res.stack; locals = res.locals } in
       let new_state =
-        match JumpTarget.find (Some 0) mapping with
-        | Some (br_state :: br_states) -> List.fold_left join br_state br_states
-        | None | Some [] -> state
+        match JumpTarget.find_opt (Some 0) mapping with
+        | Some br_states -> List.fold_left join state br_states
+        | None -> state
       in
       let mapping =
-        JumpTarget.remove (Some 0) mapping
-        |> JumpTarget.to_list
-        |> List.map (fun (k, v) -> (JumpKey.decr k, v))
-        |> JumpTarget.of_list
+        (* TODO on peut avoir une paire de (int * map) pour ne pas avoir à decr la liste immédiatement *)
+        JumpTarget.decr mapping
       in
       (Some new_state, mapping)
     | If_else (_, bt, expr_true, expr_false) ->
-      let _b, stack = Stack.pop state.stack in
-      (* faire un eq 0 puis donner ça en tête des expression de chaque branche avec un assume *)
-      (* quand assume renvoie none = bottom *)
-      let state_true, _ =
-        eval_instr { state with stack } (Block (None, bt, expr_true))
+      let b, stack = Stack.pop state.stack in
+      let cond = Abs_value.to_boolean state.ctx b in
+      let state_true, jt_true =
+        let> ctx, _ = (ADomain.assume state.ctx cond, JumpTarget.empty) in
+        eval_instr { state with stack; ctx } (Block (None, bt, expr_true))
       in
-      let state_false, _ =
-        eval_instr { state with stack } (Block (None, bt, expr_false))
+      let state_false, jt_false =
+        let not_cond = ADomain.Boolean_Forward.not state.ctx cond in
+        let> ctx, _ = (ADomain.assume state.ctx not_cond, JumpTarget.empty) in
+        eval_instr { state with stack; ctx } (Block (None, bt, expr_false))
       in
+      let jt = JumpTarget.append jt_true jt_false in
       begin match (state_true, state_false) with
       | Some state_true, Some state_false ->
-        (Some (join state_true state_false), JumpTarget.empty)
-      | _ -> (*TODO*) assert false
+        (Some (join state_true state_false), jt)
+      | Some state, None | None, Some state -> (Some state, jt)
+      | None, None ->
+        (* TODO should this be assert false ? *)
+        (None, jt)
       end
-    | Loop (_str_opt, _bt, body) ->
+    | Loop (_str_opt, bt, body) ->
       let widening_id = Domains.Sig.Widening_Id.fresh () in
-      let one_iteration state =
-        (* update the state by one loop iteration: assume the condition and apply the body *)
-        let i, stack = Stack.pop state.stack in
-        let ctx = ADomain.assume state.ctx (Abs_value.to_boolean state.ctx i) in
-        match ctx with
-        | Some ctx -> eval_expr { state with ctx; stack } body.raw
-        | None -> (None, JumpTarget.empty)
-      in
+      (* TODO tester si on a besoin de copie *)
       let initial_state = { state with ctx = ADomain.Context.copy state.ctx } in
-      let rec loop state jt =
-        let next_state, next_jt = one_iteration state in
-        let next_state =
-          match next_state with
-          | Some next_head -> join initial_state next_head
-          | None -> initial_state
+      let rec fixpoint state =
+        let next_state, jt = eval_expr state body.raw in
+
+        let shorten_stack stack =
+          match bt with
+          | Some (Bt_raw (_i, (params, _results))) ->
+            let to_append = Stack.take (List.length params) stack in
+            Fmt.pr "to_append : %a@."
+              (Fmt.list ~sep:(Fmt.any ",") (Abs_value.pp state.ctx))
+              (Stack.to_list to_append);
+            Stack.append to_append initial_state.stack
+          | None -> stack
         in
-        let next_jt = join_jump_tables jt next_jt in
-        let widened, included = widen widening_id state next_state in
-        if not included then loop widened next_jt
-        else (* fixpoint reached: exit loop, assume condition is false *)
-          let cond, stack = Stack.pop state.stack in
-          let ctx =
-            Abs_value.to_boolean next_state.ctx cond
-            |> ADomain.Boolean_Forward.not next_state.ctx
-            |> ADomain.assume next_state.ctx
-          in
-          match ctx with
-          | Some ctx -> (Some { next_state with ctx; stack }, next_jt)
-          | None -> (None, next_jt)
+        let next_head =
+          match JumpTarget.find_opt (Some 0) jt with
+          | Some jts ->
+            List.fold_left
+              (fun acc state ->
+                Fmt.pr "initial_state %a@." pp_state initial_state;
+                Fmt.pr "current_state %a@." pp_state state;
+                let stack = shorten_stack state.stack in
+                let stack_acc = shorten_stack acc.stack in
+                Fmt.pr "shorten_stack %a@." pp_state { state with stack };
+                join { acc with stack = stack_acc } { state with stack } )
+              initial_state jts
+          | None -> assert false
+        in
+        Fmt.pr "next_head %a@." pp_state next_head;
+        Fmt.pr "state %a@." pp_state state;
+        let widened, included = widen widening_id state next_head in
+        if not included then fixpoint widened
+        else
+          (* fixpoint reached: exit loop, assume condition is false *)
+          let jt = JumpTarget.decr jt in
+          (next_state, jt)
       in
-      loop state JumpTarget.empty
+      fixpoint state
     | Br i -> (None, JumpTarget.of_list [ (Some i, [ state ]) ])
     | instr -> (
       let res = S.eval_instr state instr in
@@ -350,12 +356,13 @@ module DenotFixpoint (S : DATA_STATE) = struct
       | Some s, None -> (Some s, JumpTarget.empty)
       | None, Some instr -> eval_instr state instr
       | Some _, Some _ -> (* should not happen *) assert false
-      | None, None -> (None, JumpTarget.empty) )
+      | None, None -> (* unreachable *) (None, JumpTarget.empty) )
 end
 
 (*===========================================================================*)
 
 module DataState : DATA_STATE = struct
+  (*TODO on peut utiliser une exception*)
   type t = state option * instr option
 
   let rec exec_ibinop state size (op : Text.ibinop) : t =

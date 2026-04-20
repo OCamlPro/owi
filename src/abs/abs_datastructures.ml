@@ -29,5 +29,9 @@ module Stack = struct
 
   let take : int -> 'el t -> 'el t = List.take
 
+  let drop : int -> 'el t -> 'el t = List.drop
+
   let rev : 'el t -> 'el t = List.rev
+
+  let length : 'el t -> int = List.length
 end
