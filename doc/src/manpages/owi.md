@@ -21,7 +21,7 @@ COMMANDS
        fmt [--inplace] [OPTION]… FILE…
            Format a .wat or .wast file
 
-       fuzz [--timeout=S] [--timeout-instr=I] [--unsafe] [OPTION]… FILE
+       fuzz [OPTION]… FILE
            Run the fuzzer
 
        instrument COMMAND …

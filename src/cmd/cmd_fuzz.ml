@@ -22,17 +22,17 @@ let extern_module =
   in
   { Extern.Module.functions; func_type = Concrete_extern_func.extern_type }
 
-let rec fuzzing_loop ~max_count f =
+let rec fuzzing_loop ~rounds f =
   match f () with
   | Ok () ->
-    begin match max_count with
-    | None -> fuzzing_loop ~max_count f
+    begin match rounds with
+    | None -> fuzzing_loop ~rounds f
     | Some 0 -> Ok ()
-    | Some n -> fuzzing_loop ~max_count:(Some (pred n)) f
+    | Some n -> fuzzing_loop ~rounds:(Some (pred n)) f
     end
   | Error _ as e -> e
 
-let cmd ~unsafe ~timeout ~timeout_instr ~source_file =
+let cmd ~rounds ~unsafe ~timeout ~timeout_instr ~source_file =
   let link_state =
     Link.State.empty () |> Link.Extern.modul ~name:"owi" extern_module
   in
@@ -51,7 +51,7 @@ let cmd ~unsafe ~timeout ~timeout_instr ~source_file =
   let module I = Interpret.Concrete (Parameters) in
   let res, run_time =
     Benchmark.with_utime @@ fun () ->
-    fuzzing_loop ~max_count:(Some 10_000) (fun () ->
+    fuzzing_loop ~rounds (fun () ->
       (* TODO: check if we should regenerate the link state *)
       I.modul link_state m )
   in

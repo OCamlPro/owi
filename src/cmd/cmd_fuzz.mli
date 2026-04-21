@@ -3,7 +3,8 @@
 (* Written by the Owi programmers *)
 
 val cmd :
-     unsafe:bool
+     rounds:int option
+  -> unsafe:bool
   -> timeout:float option
   -> timeout_instr:int option
   -> source_file:Fpath.t

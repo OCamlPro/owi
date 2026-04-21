@@ -188,6 +188,10 @@ let model_out_file =
     & opt (some path_conv) None
     & info [ "model-out-file" ] ~docv:"FILE" ~doc )
 
+let rounds =
+  let doc = "Stop after a number of fuzzing rounds." in
+  Arg.(value & opt (some int) None & info [ "rounds" ] ~doc ~docv:"I")
+
 let solver =
   let docv = Arg.conv_docv solver_conv in
   let doc =
@@ -407,11 +411,12 @@ let fuzz_info =
 
 let fuzz_cmd =
   let+ unsafe
+  and+ rounds
   and+ timeout
   and+ timeout_instr
   and+ () = setup_log
   and+ source_file in
-  Cmd_fuzz.cmd ~unsafe ~timeout ~timeout_instr ~source_file
+  Cmd_fuzz.cmd ~rounds ~source_file ~timeout ~timeout_instr ~unsafe
 
 (* owi instrument *)
 
