@@ -1,0 +1,35 @@
+name: Check copyright headers
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  license-check:
+    name: Check license headers on new files
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: List new .ml and .mli files
+        id: new-files
+        run: |
+          files=$(git diff --name-only --diff-filter=A \
+            "origin/${{ github.base_ref }}"...HEAD \
+            -- '*.ml' '*.mli')
+          echo "files<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$files" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Check License Header
+        run: |
+          if [ -z "${{ steps.new-files.outputs.files }}" ]; then
+            echo "No new .ml or .mli files in this PR."
+            exit 0
+          fi
+          xargs ./.github/check-headers.sh <<< "${{ steps.new-files.outputs.files }}"
