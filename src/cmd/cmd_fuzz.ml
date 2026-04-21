@@ -6,8 +6,7 @@ open Syntax
 
 let model = ref []
 
-let reset () =
-  model := []
+let reset () = model := []
 
 let pp_model ppf model =
   Fmt.list ~sep:(fun ppf () -> Fmt.pf ppf " ; ") Concrete_value.pp ppf model
@@ -15,7 +14,7 @@ let pp_model ppf model =
 let symbol_i32 () =
   let n = Random.bits32 () in
   let n = Concrete_i32.of_int32 n in
-  model := (Concrete_value.I32 n) :: !model;
+  model := Concrete_value.I32 n :: !model;
   Ok n
 
 let assert' n =
@@ -41,8 +40,8 @@ let rec fuzzing_loop ~rounds f =
     | Some n -> fuzzing_loop ~rounds:(Some (pred n)) f
     end
   | Error _ as e ->
-      Log.app (fun m -> m "Found a bug with model: %a" pp_model !model);
-      e
+    Log.app (fun m -> m "Found a bug with model: %a" pp_model !model);
+    e
 
 let cmd ~rounds ~unsafe ~timeout ~timeout_instr ~source_file =
   let link_state =
