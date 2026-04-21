@@ -1,1 +1,1 @@
-  $ owi fuzz basic.wat --rounds 10000
+  $ owi fuzz basic.wat

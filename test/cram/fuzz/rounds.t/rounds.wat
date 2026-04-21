@@ -3,7 +3,7 @@
   (func $start
     call $i32_symbol
     i32.const 42
-    i32.lt_s
+    i32.eq
     (if (then
       unreachable
     ))
