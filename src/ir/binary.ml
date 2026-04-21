@@ -626,6 +626,60 @@ type data_instr = Drop of indice
 let pp_data_instr ppf = function
   | Drop indice -> pf ppf "data.drop %a" pp_indice indice
 
+(** Struct instructions *)
+type struct_instr =
+  | New of indice
+  | New_default of indice
+  | Get of indice * indice
+  | Get_s of indice * indice
+  | Get_u of indice * indice
+  | Set of indice * indice
+
+let pp_struct_instr ppf = function
+  | New id -> pf ppf "struct.new %a" pp_indice id
+  | New_default id -> pf ppf "struct.new_default %a" pp_indice id
+  | Get (id1, id2) -> pf ppf "struct.get %a %a" pp_indice id1 pp_indice id2
+  | Get_s (id1, id2) -> pf ppf "struct.get_s %a %a" pp_indice id1 pp_indice id2
+  | Get_u (id1, id2) -> pf ppf "struct.get_u %a %a" pp_indice id1 pp_indice id2
+  | Set (id1, id2) -> pf ppf "struct.set %a %a" pp_indice id1 pp_indice id2
+
+(** Array instructions *)
+type array_instr =
+  | New of indice
+  | New_default of indice
+  | New_fixed of indice * Int32.t
+  | New_data of indice * indice
+  | New_elem of indice * indice
+  | Get of indice
+  | Get_s of indice
+  | Get_u of indice
+  | Set of indice
+  | Len
+  | Fill of indice
+  | Copy of indice * indice
+  | Init_data of indice * indice
+  | Init_elem of indice * indice
+
+let pp_array_instr ppf = function
+  | New id -> pf ppf "array.new %a" pp_indice id
+  | New_default id -> pf ppf "array.new_default %a" pp_indice id
+  | New_fixed (id, n) -> pf ppf "array.new_fixed %a %ld" pp_indice id n
+  | New_data (id1, id2) ->
+    pf ppf "array.new_data %a %a" pp_indice id1 pp_indice id2
+  | New_elem (id1, id2) ->
+    pf ppf "array.new_elem %a %a" pp_indice id1 pp_indice id2
+  | Get id -> pf ppf "array.get %a" pp_indice id
+  | Get_s id -> pf ppf "array.get_s %a" pp_indice id
+  | Get_u id -> pf ppf "array.get_u %a" pp_indice id
+  | Set id -> pf ppf "array.set %a" pp_indice id
+  | Len -> pf ppf "array.len"
+  | Fill id -> pf ppf "array.fill %a" pp_indice id
+  | Copy (id1, id2) -> pf ppf "array.copy %a %a" pp_indice id1 pp_indice id2
+  | Init_data (id1, id2) ->
+    pf ppf "array.init_data %a %a" pp_indice id1 pp_indice id2
+  | Init_elem (id1, id2) ->
+    pf ppf "array.init_elem %a %a" pp_indice id1 pp_indice id2
+
 (** Instructions *)
 type instr =
   | I32 of i32_instr
@@ -644,6 +698,9 @@ type instr =
   | Elem of elem_instr
   | Memory of memory_instr
   | Data of data_instr
+  | I31 of Text.i31_instr
+  | Struct of struct_instr
+  | Array of array_instr
   (* Parametric instructions *)
   | Drop
   | Select of val_type list option
@@ -665,34 +722,7 @@ type instr =
   | Call of indice
   | Call_indirect of indice * block_type
   | Call_ref of indice
-  (* aggregate types *)
-  (* i31 *)
-  | Ref_i31
-  | I31_get_s
-  | I31_get_u
-  (* struct *)
-  | Struct_new of indice
-  | Struct_new_default of indice
-  | Struct_get of indice * indice
-  | Struct_get_s of indice * indice
-  | Struct_get_u of indice * indice
-  | Struct_set of indice * indice
-  (* array *)
-  | Array_new of indice
-  | Array_new_default of indice
-  | Array_new_fixed of indice * Int32.t
-  | Array_new_data of indice * indice
-  | Array_new_elem of indice * indice
-  | Array_get of indice
-  | Array_get_s of indice
-  | Array_get_u of indice
-  | Array_set of indice
-  | Array_len
-  | Array_fill of indice
-  | Array_copy of indice * indice
-  | Array_init_data of indice * indice
-  | Array_init_elem of indice * indice
-  (* convesion *)
+  (* GC convesion instructions *)
   | Any_convert_extern
   | Extern_convert_any
 
@@ -717,6 +747,9 @@ let rec pp_instr ~short ppf = function
   | Elem i -> pp_elem_instr ppf i
   | Memory i -> pp_memory_instr ppf i
   | Data i -> pp_data_instr ppf i
+  | I31 i -> Text.pp_i31_instr ppf i
+  | Struct i -> pp_struct_instr ppf i
+  | Array i -> pp_array_instr ppf i
   | Drop -> pf ppf "drop"
   | Select vt ->
     begin match vt with
@@ -763,38 +796,6 @@ let rec pp_instr ~short ppf = function
   | Call_indirect (tbl_id, ty_id) ->
     pf ppf "call_indirect %a %a" pp_indice tbl_id pp_block_type ty_id
   | Call_ref ty_id -> pf ppf "call_ref %a" pp_indice ty_id
-  | Ref_i31 -> pf ppf "ref.i31"
-  | I31_get_s -> pf ppf "i31.get_s"
-  | I31_get_u -> pf ppf "i31.get_u"
-  | Struct_new id -> pf ppf "struct.new %a" pp_indice id
-  | Struct_new_default id -> pf ppf "struct.new_default %a" pp_indice id
-  | Struct_get (id1, id2) ->
-    pf ppf "struct.get %a %a" pp_indice id1 pp_indice id2
-  | Struct_get_s (id1, id2) ->
-    pf ppf "struct.get_s %a %a" pp_indice id1 pp_indice id2
-  | Struct_get_u (id1, id2) ->
-    pf ppf "struct.get_u %a %a" pp_indice id1 pp_indice id2
-  | Struct_set (id1, id2) ->
-    pf ppf "struct.set %a %a" pp_indice id1 pp_indice id2
-  | Array_new id -> pf ppf "array.new %a" pp_indice id
-  | Array_new_default id -> pf ppf "array.new_default %a" pp_indice id
-  | Array_new_fixed (id, n) -> pf ppf "array.new_fixed %a %ld" pp_indice id n
-  | Array_new_data (id1, id2) ->
-    pf ppf "array.new_data %a %a" pp_indice id1 pp_indice id2
-  | Array_new_elem (id1, id2) ->
-    pf ppf "array.new_elem %a %a" pp_indice id1 pp_indice id2
-  | Array_get id -> pf ppf "array.get %a" pp_indice id
-  | Array_get_s id -> pf ppf "array.get_s %a" pp_indice id
-  | Array_get_u id -> pf ppf "array.get_u %a" pp_indice id
-  | Array_set id -> pf ppf "array.set %a" pp_indice id
-  | Array_len -> pf ppf "array.len"
-  | Array_fill id -> pf ppf "array.fill %a" pp_indice id
-  | Array_copy (id1, id2) ->
-    pf ppf "array.copy %a %a" pp_indice id1 pp_indice id2
-  | Array_init_data (id1, id2) ->
-    pf ppf "array.init_data %a %a" pp_indice id1 pp_indice id2
-  | Array_init_elem (id1, id2) ->
-    pf ppf "array.init_elem %a %a" pp_indice id1 pp_indice id2
   | Any_convert_extern -> pf ppf "any.convert_extern"
   | Extern_convert_any -> pf ppf "extern.convert_any"
 
@@ -821,21 +822,23 @@ and iter_instr f instr =
       | Return_call_indirect (_, _)
       | Return_call_ref _ | Call _
       | Call_indirect (_, _)
-      | Call_ref _ | Ref_i31 | I31_get_s | I31_get_u | Struct_new _
-      | Struct_new_default _
-      | Struct_get (_, _)
-      | Struct_get_s (_, _)
-      | Struct_get_u (_, _)
-      | Struct_set (_, _)
-      | Array_new _ | Array_new_default _
-      | Array_new_fixed (_, _)
-      | Array_new_data (_, _)
-      | Array_new_elem (_, _)
-      | Array_get _ | Array_get_s _ | Array_get_u _ | Array_set _ | Array_len
-      | Array_fill _
-      | Array_copy (_, _)
-      | Array_init_data (_, _)
-      | Array_init_elem (_, _)
+      | Call_ref _
+      | I31 (Ref | Get_s | Get_u)
+      | Struct
+          ( New _ | New_default _
+          | Get (_, _)
+          | Get_s (_, _)
+          | Get_u (_, _)
+          | Set (_, _) )
+      | Array
+          ( New _ | New_default _
+          | New_fixed (_, _)
+          | New_data (_, _)
+          | New_elem (_, _)
+          | Get _ | Get_s _ | Get_u _ | Set _ | Len | Fill _
+          | Copy (_, _)
+          | Init_data (_, _)
+          | Init_elem (_, _) )
       | Any_convert_extern | Extern_convert_any ->
         ()
       | Block (_, _, e) | Loop (_, _, e) -> iter_expr f e

@@ -524,6 +524,38 @@ module Text : sig
   (** Data instructions *)
   type data_instr = Drop of indice
 
+  (** I31 instructions *)
+  type i31_instr =
+    | Ref
+    | Get_s
+    | Get_u
+
+  (** Struct instructions *)
+  type struct_instr =
+    | New of indice
+    | New_default of indice
+    | Get of indice * indice
+    | Get_s of indice * indice
+    | Get_u of indice * indice
+    | Set of indice * indice
+
+  (** Array instructions *)
+  type array_instr =
+    | New of indice
+    | New_default of indice
+    | New_fixed of indice * Int32.t
+    | New_data of indice * indice
+    | New_elem of indice * indice
+    | Get of indice
+    | Get_s of indice
+    | Get_u of indice
+    | Set of indice
+    | Len
+    | Fill of indice
+    | Copy of indice * indice
+    | Init_data of indice * indice
+    | Init_elem of indice * indice
+
   type instr =
     | I32 of i32_instr
     | I64 of i64_instr
@@ -541,6 +573,9 @@ module Text : sig
     | Elem of elem_instr
     | Memory of memory_instr
     | Data of data_instr
+    | I31 of i31_instr
+    | Struct of struct_instr
+    | Array of array_instr
     (* Parametric instructions *)
     | Drop
     | Select of val_type list option
@@ -561,33 +596,7 @@ module Text : sig
     | Call of indice
     | Call_indirect of indice * block_type
     | Call_ref of indice
-    (* aggregate types *)
-    (* i31 *)
-    | Ref_i31
-    | I31_get_s
-    | I31_get_u
-    (* struct *)
-    | Struct_new of indice
-    | Struct_new_default of indice
-    | Struct_get of indice * indice
-    | Struct_get_s of indice * indice
-    | Struct_get_u of indice * indice
-    | Struct_set of indice * indice
-    (* array *)
-    | Array_new of indice
-    | Array_new_default of indice
-    | Array_new_fixed of indice * Int32.t
-    | Array_new_data of indice * indice
-    | Array_new_elem of indice * indice
-    | Array_get of indice
-    | Array_get_s of indice
-    | Array_get_u of indice
-    | Array_set of indice
-    | Array_len
-    | Array_fill of indice
-    | Array_copy of indice * indice
-    | Array_init_data of indice * indice
-    | Array_init_elem of indice * indice (* convesion *)
+    (* GC convesion instructions *)
     | Any_convert_extern
     | Extern_convert_any
 
@@ -1006,6 +1015,33 @@ module Binary : sig
   (** Data instructions *)
   type data_instr = Drop of indice
 
+  (** Struct instructions *)
+  type struct_instr =
+    | New of indice
+    | New_default of indice
+    | Get of indice * indice
+    | Get_s of indice * indice
+    | Get_u of indice * indice
+    | Set of indice * indice
+
+  (** Array instructions *)
+  type array_instr =
+    | New of indice
+    | New_default of indice
+    | New_fixed of indice * Int32.t
+    | New_data of indice * indice
+    | New_elem of indice * indice
+    | Get of indice
+    | Get_s of indice
+    | Get_u of indice
+    | Set of indice
+    | Len
+    | Fill of indice
+    | Copy of indice * indice
+    | Init_data of indice * indice
+    | Init_elem of indice * indice
+
+  (** Instructions *)
   type instr =
     | I32 of i32_instr
     | I64 of i64_instr
@@ -1023,6 +1059,9 @@ module Binary : sig
     | Elem of elem_instr
     | Memory of memory_instr
     | Data of data_instr
+    | I31 of Text.i31_instr
+    | Struct of struct_instr
+    | Array of array_instr
     (* Parametric instructions *)
     | Drop
     | Select of val_type list option
@@ -1044,33 +1083,7 @@ module Binary : sig
     | Call of indice
     | Call_indirect of indice * block_type
     | Call_ref of indice
-    (* aggregate types *)
-    (* i31 *)
-    | Ref_i31
-    | I31_get_s
-    | I31_get_u
-    (* struct *)
-    | Struct_new of indice
-    | Struct_new_default of indice
-    | Struct_get of indice * indice
-    | Struct_get_s of indice * indice
-    | Struct_get_u of indice * indice
-    | Struct_set of indice * indice
-    (* array *)
-    | Array_new of indice
-    | Array_new_default of indice
-    | Array_new_fixed of indice * Int32.t
-    | Array_new_data of indice * indice
-    | Array_new_elem of indice * indice
-    | Array_get of indice
-    | Array_get_s of indice
-    | Array_get_u of indice
-    | Array_set of indice
-    | Array_len
-    | Array_fill of indice
-    | Array_copy of indice * indice
-    | Array_init_data of indice * indice
-    | Array_init_elem of indice * indice (* convesion *)
+    (* GC convesion instructions *)
     | Any_convert_extern
     | Extern_convert_any
 

@@ -1493,20 +1493,22 @@ struct
       call_indirect ~return:true state (tbl_i, typ_i)
     | Call_ref typ_i -> call_ref ~return:false state typ_i
     | Return_call_ref typ_i -> call_ref ~return:true state typ_i
-    | ( Ref_i31 | I31_get_s | I31_get_u | Struct_new _ | Struct_new_default _
-      | Struct_get (_, _)
-      | Struct_get_s (_, _)
-      | Struct_get_u (_, _)
-      | Struct_set (_, _)
-      | Array_new _ | Array_new_default _
-      | Array_new_fixed (_, _)
-      | Array_new_data (_, _)
-      | Array_new_elem (_, _)
-      | Array_get _ | Array_get_s _ | Array_get_u _ | Array_set _ | Array_len
-      | Array_fill _
-      | Array_copy (_, _)
-      | Array_init_data (_, _)
-      | Array_init_elem (_, _)
+    | ( I31 (Ref | Get_s | Get_u)
+      | Struct
+          ( New _ | New_default _
+          | Get (_, _)
+          | Get_s (_, _)
+          | Get_u (_, _)
+          | Set (_, _) )
+      | Array
+          ( New _ | New_default _
+          | New_fixed (_, _)
+          | New_data (_, _)
+          | New_elem (_, _)
+          | Get _ | Get_s _ | Get_u _ | Set _ | Len | Fill _
+          | Copy (_, _)
+          | Init_data (_, _)
+          | Init_elem (_, _) )
       | Any_convert_extern | Extern_convert_any ) as i ->
       Log.err (fun m ->
         m "unimplemented instruction: %a" (pp_instr ~short:false) i );

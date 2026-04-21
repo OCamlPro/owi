@@ -316,6 +316,30 @@ let convert_data_instr : Binary.data_instr -> Text.data_instr = function
     let indice = convert_indice indice in
     Drop indice
 
+let convert_struct_instr : Binary.struct_instr -> Text.struct_instr = function
+  | New id -> New (convert_indice id)
+  | New_default id -> New_default (convert_indice id)
+  | Get (id1, id2) -> Get (convert_indice id1, convert_indice id2)
+  | Get_s (id1, id2) -> Get_s (convert_indice id1, convert_indice id2)
+  | Get_u (id1, id2) -> Get_u (convert_indice id1, convert_indice id2)
+  | Set (id1, id2) -> Set (convert_indice id1, convert_indice id2)
+
+let convert_array_instr : Binary.array_instr -> Text.array_instr = function
+  | New id -> New (convert_indice id)
+  | New_default id -> New_default (convert_indice id)
+  | New_fixed (id, n) -> New_fixed (convert_indice id, n)
+  | New_data (id1, id2) -> New_data (convert_indice id1, convert_indice id2)
+  | New_elem (id1, id2) -> New_elem (convert_indice id1, convert_indice id2)
+  | Get id -> Get (convert_indice id)
+  | Get_s id -> Get_s (convert_indice id)
+  | Get_u id -> Get_u (convert_indice id)
+  | Set id -> Set (convert_indice id)
+  | Len -> Len
+  | Fill id -> Fill (convert_indice id)
+  | Copy (id1, id2) -> Copy (convert_indice id1, convert_indice id2)
+  | Init_data (id1, id2) -> Init_data (convert_indice id1, convert_indice id2)
+  | Init_elem (id1, id2) -> Init_elem (convert_indice id1, convert_indice id2)
+
 let rec convert_instr : Binary.instr -> Text.instr = function
   | Binary.I32 i -> Text.I32 (convert_i32_instr i)
   | I64 i -> Text.I64 (convert_i64_instr i)
@@ -333,6 +357,9 @@ let rec convert_instr : Binary.instr -> Text.instr = function
   | Elem i -> Elem (convert_elem_instr i)
   | Memory i -> Memory (convert_memory_instr i)
   | Data i -> Data (convert_data_instr i)
+  | I31 i -> I31 i
+  | Struct i -> Struct (convert_struct_instr i)
+  | Array i -> Array (convert_array_instr i)
   | Br_table (ids, id) ->
     let ids = Array.map convert_indice ids in
     let id = convert_indice id in
@@ -395,35 +422,6 @@ let rec convert_instr : Binary.instr -> Text.instr = function
   | Drop -> Drop
   | Nop -> Nop
   | Return -> Return
-  | Ref_i31 -> Ref_i31
-  | I31_get_s -> I31_get_s
-  | I31_get_u -> I31_get_u
-  | Struct_new id -> Struct_new (convert_indice id)
-  | Struct_new_default id -> Struct_new_default (convert_indice id)
-  | Struct_get (id1, id2) -> Struct_get (convert_indice id1, convert_indice id2)
-  | Struct_get_s (id1, id2) ->
-    Struct_get_s (convert_indice id1, convert_indice id2)
-  | Struct_get_u (id1, id2) ->
-    Struct_get_u (convert_indice id1, convert_indice id2)
-  | Struct_set (id1, id2) -> Struct_set (convert_indice id1, convert_indice id2)
-  | Array_new id -> Array_new (convert_indice id)
-  | Array_new_default id -> Array_new_default (convert_indice id)
-  | Array_new_fixed (id, n) -> Array_new_fixed (convert_indice id, n)
-  | Array_new_data (id1, id2) ->
-    Array_new_data (convert_indice id1, convert_indice id2)
-  | Array_new_elem (id1, id2) ->
-    Array_new_elem (convert_indice id1, convert_indice id2)
-  | Array_get id -> Array_get (convert_indice id)
-  | Array_get_s id -> Array_get_s (convert_indice id)
-  | Array_get_u id -> Array_get_u (convert_indice id)
-  | Array_set id -> Array_set (convert_indice id)
-  | Array_len -> Array_len
-  | Array_fill id -> Array_fill (convert_indice id)
-  | Array_copy (id1, id2) -> Array_copy (convert_indice id1, convert_indice id2)
-  | Array_init_data (id1, id2) ->
-    Array_init_data (convert_indice id1, convert_indice id2)
-  | Array_init_elem (id1, id2) ->
-    Array_init_elem (convert_indice id1, convert_indice id2)
   | Any_convert_extern -> Any_convert_extern
   | Extern_convert_any -> Extern_convert_any
 

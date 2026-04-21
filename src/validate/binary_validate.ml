@@ -687,7 +687,8 @@ let typecheck_global_instr (env : Env.t) stack : Binary.global_instr -> _ =
     let+ stack = Stack.pop env.modul [ t ] stack in
     (env, stack)
 
-let typecheck_table_instr (env : Env.t) stack = function
+let typecheck_table_instr (env : Env.t) stack :
+  table_instr -> (Env.t * Stack.t, Owi__Result.err) result = function
   | Get i ->
     let* t = Env.table_type_get i env.modul in
     let* stack = Stack.pop env.modul [ i32 ] stack in
@@ -925,20 +926,22 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
     let* jt = Env.block_type_get i env in
     let+ _stack = Stack.pop env.modul jt stack in
     (env, stack)
-  | ( Ref_i31 | I31_get_s | I31_get_u | Struct_new _ | Struct_new_default _
-    | Struct_get (_, _)
-    | Struct_get_s (_, _)
-    | Struct_get_u (_, _)
-    | Struct_set (_, _)
-    | Array_new _ | Array_new_default _
-    | Array_new_fixed (_, _)
-    | Array_new_data (_, _)
-    | Array_new_elem (_, _)
-    | Array_get _ | Array_get_s _ | Array_get_u _ | Array_set _ | Array_len
-    | Array_fill _
-    | Array_copy (_, _)
-    | Array_init_data (_, _)
-    | Array_init_elem (_, _)
+  | ( I31 (Ref | Get_s | Get_u)
+    | Struct
+        ( New _ | New_default _
+        | Get (_, _)
+        | Get_s (_, _)
+        | Get_u (_, _)
+        | Set (_, _) )
+    | Array
+        ( New _ | New_default _
+        | New_fixed (_, _)
+        | New_data (_, _)
+        | New_elem (_, _)
+        | Get _ | Get_s _ | Get_u _ | Set _ | Len | Fill _
+        | Copy (_, _)
+        | Init_data (_, _)
+        | Init_elem (_, _) )
     | Any_convert_extern | Extern_convert_any ) as i ->
     Log.err (fun m ->
       m "TODO: unimplemented instruction typecheking %a" (pp_instr ~short:false)

@@ -366,72 +366,72 @@ let read_FB input =
   match i with
   | 0 ->
     let+ id, input = read_indice input in
-    (Struct_new id, input)
+    (Struct (New id), input)
   | 1 ->
     let+ id, input = read_indice input in
-    (Struct_new_default id, input)
+    (Struct (New_default id), input)
   | 2 ->
     let* id, input = read_indice input in
     let+ i, input = read_indice input in
-    (Struct_get (id, i), input)
+    (Struct (Get (id, i)), input)
   | 3 ->
     let* id, input = read_indice input in
     let+ i, input = read_indice input in
-    (Struct_get_s (id, i), input)
+    (Struct (Get_s (id, i)), input)
   | 4 ->
     let* id, input = read_indice input in
     let+ i, input = read_indice input in
-    (Struct_get_u (id, i), input)
+    (Struct (Get_u (id, i)), input)
   | 5 ->
     let* id, input = read_indice input in
     let+ i, input = read_indice input in
-    (Struct_set (id, i), input)
+    (Struct (Set (id, i)), input)
   | 6 ->
     let+ id, input = read_indice input in
-    (Array_new id, input)
+    (Array (New id), input)
   | 7 ->
     let+ id, input = read_indice input in
-    (Array_new_default id, input)
+    (Array (New_default id), input)
   | 8 ->
     let* id, input = read_indice input in
     let+ i, input = read_S32 input in
-    (Array_new_fixed (id, i), input)
+    (Array (New_fixed (id, i)), input)
   | 9 ->
     let* id1, input = read_indice input in
     let+ id2, input = read_indice input in
-    (Array_new_data (id1, id2), input)
+    (Array (New_data (id1, id2)), input)
   | 10 ->
     let* id1, input = read_indice input in
     let+ id2, input = read_indice input in
-    (Array_new_elem (id1, id2), input)
+    (Array (New_elem (id1, id2)), input)
   | 11 ->
     let+ id, input = read_indice input in
-    (Array_get id, input)
+    (Array (Get id), input)
   | 12 ->
     let+ id, input = read_indice input in
-    (Array_get_s id, input)
+    (Array (Get_s id), input)
   | 13 ->
     let+ id, input = read_indice input in
-    (Array_get_u id, input)
+    (Array (Get_u id), input)
   | 14 ->
     let+ id, input = read_indice input in
-    (Array_set id, input)
-  | 15 -> Ok (Array_len, input)
+    (Array (Set id), input)
+  | 15 -> Ok (Array Len, input)
   | 16 ->
     let+ id, input = read_indice input in
-    (Array_fill id, input)
+    (Array (Fill id), input)
   | 17 ->
     let* id1, input = read_indice input in
     let+ id2, input = read_indice input in
-    (Array_copy (id1, id2), input)
+    (Array (Copy (id1, id2)), input)
   | 18 ->
     let* id1, input = read_indice input in
     let+ id2, input = read_indice input in
-    (Array_init_data (id1, id2), input)
+    (Array (Init_data (id1, id2)), input)
   | 19 ->
     let* id1, input = read_indice input in
     let+ id2, input = read_indice input in
-    (Array_init_elem (id1, id2), input)
+    (Array (Init_elem (id1, id2)), input)
   | 20 ->
     let* b, input = read_S7 input in
     let+ ht, input = read_heap_type input b in
@@ -450,9 +450,9 @@ let read_FB input =
     (Ref (Cast (Null, ht)), input)
   | 26 -> Ok (Any_convert_extern, input)
   | 27 -> Ok (Extern_convert_any, input)
-  | 28 -> Ok (Ref_i31, input)
-  | 29 -> Ok (I31_get_s, input)
-  | 30 -> Ok (I31_get_u, input)
+  | 28 -> Ok (I31 Ref, input)
+  | 29 -> Ok (I31 Get_s, input)
+  | 30 -> Ok (I31 Get_u, input)
   | i -> parse_fail "illegal opcode (1) %i" i
 
 let read_FC input =

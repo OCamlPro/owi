@@ -559,31 +559,31 @@ let plain_instr :=
   | DATA_DROP; ~ = indice; { Data (Drop indice) }
   (* aggregate types *)
   (* i31 *)
-  | REF_I31; { Ref_i31 }
-  | I31_GET_S; { I31_get_s }
-  | I31_GET_U; { I31_get_u }
+  | REF_I31; { I31 Ref }
+  | I31_GET_S; { I31 Get_s }
+  | I31_GET_U; { I31 Get_u }
   (* struct *)
-  | STRUCT_NEW_CANON; ~ = indice; <Struct_new>
-  | STRUCT_NEW_CANON_DEFAULT; ~ = indice; <Struct_new_default>
-  | STRUCT_GET; x = indice; i = indice; <Struct_get>
-  | STRUCT_GET_S; x = indice; i = indice; <Struct_get_s>
-  | STRUCT_GET_U; x = indice; i = indice; <Struct_get_u>
-  | STRUCT_SET; x = indice; i = indice; <Struct_set>
+  | STRUCT_NEW_CANON; ~ = indice; {Struct (New indice)}
+  | STRUCT_NEW_CANON_DEFAULT; ~ = indice; {Struct (New_default indice)}
+  | STRUCT_GET; x = indice; i = indice; {Struct (Get (x, i))}
+  | STRUCT_GET_S; x = indice; i = indice; {Struct (Get_s (x, i))}
+  | STRUCT_GET_U; x = indice; i = indice; {Struct (Get_u (x, i))}
+  | STRUCT_SET; x = indice; i = indice; {Struct (Set (x, i))}
   (* array *)
-  | ARRAY_NEW_CANON; ~ = indice; <Array_new>
-  | ARRAY_NEW_CANON_DEFAULT; x = indice; <Array_new_default>
-  | ARRAY_NEW_CANON_FIXED; x = indice; n = NUM; {Array_new_fixed (x, i32 n)}
-  | ARRAY_NEW_CANON_DATA; x = indice; y = indice; <Array_new_data>
-  | ARRAY_NEW_CANON_ELEM; x = indice; y = indice; <Array_new_elem>
-  | ARRAY_GET; ~ = indice; <Array_get>
-  | ARRAY_GET_S; ~ = indice; <Array_get_s>
-  | ARRAY_GET_U; ~ = indice; <Array_get_u>
-  | ARRAY_SET; ~ = indice; <Array_set>
-  | ARRAY_LEN; { Array_len }
-  | ARRAY_FILL; ~ = indice; <Array_fill>
-  | ARRAY_COPY; x1 = indice; x2 = indice; <Array_copy>
-  | ARRAY_INIT_DATA; x = indice; y = indice; <Array_init_data>
-  | ARRAY_INIT_ELEM; x = indice; y = indice; <Array_init_elem>
+  | ARRAY_NEW_CANON; ~ = indice; {Array (New indice)}
+  | ARRAY_NEW_CANON_DEFAULT; ~ = indice; {Array (New_default indice)}
+  | ARRAY_NEW_CANON_FIXED; x = indice; n = NUM; {Array (New_fixed (x, i32 n))}
+  | ARRAY_NEW_CANON_DATA; x = indice; y = indice; {Array (New_data (x, y))}
+  | ARRAY_NEW_CANON_ELEM; x = indice; y = indice; {Array (New_elem (x, y))}
+  | ARRAY_GET; ~ = indice; {Array (Get indice)}
+  | ARRAY_GET_S; ~ = indice; {Array (Get_s indice)}
+  | ARRAY_GET_U; ~ = indice; {Array (Get_u indice)}
+  | ARRAY_SET; ~ = indice; {Array (Set indice)}
+  | ARRAY_LEN; { Array Len }
+  | ARRAY_FILL; ~ = indice; {Array (Fill indice)}
+  | ARRAY_COPY; x1 = indice; x2 = indice; {Array (Copy (x1, x2))}
+  | ARRAY_INIT_DATA; x = indice; y = indice; {Array (Init_data (x, y))}
+  | ARRAY_INIT_ELEM; x = indice; y = indice; {Array (Init_elem (x, y))}
   | ANY_CONVERT_EXTERN; { Any_convert_extern }
   | EXTERN_CONVERT_ANY; { Extern_convert_any }
 

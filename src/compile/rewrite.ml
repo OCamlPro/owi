@@ -307,10 +307,10 @@ let rewrite_table_instr assigned :
     (Size indice : Binary.table_instr)
   | Get indice ->
     let+ indice = Assigned.find_table assigned indice in
-    Binary.Get indice
+    (Binary.Get indice : Binary.table_instr)
   | Set indice ->
     let+ indice = Assigned.find_table assigned indice in
-    Binary.Set indice
+    (Binary.Set indice : Binary.table_instr)
   | Grow indice ->
     let+ indice = Assigned.find_table assigned indice in
     (Grow indice : Binary.table_instr)
@@ -341,13 +341,13 @@ let rewrite_memory_instr assigned :
   | Copy (indice1, indice2) ->
     let* indice1 = Assigned.find_memory assigned indice1 in
     let+ indice2 = Assigned.find_memory assigned indice2 in
-    Binary.Copy (indice1, indice2)
+    (Binary.Copy (indice1, indice2) : Binary.memory_instr)
   | Size indice ->
     let+ indice = Assigned.find_memory assigned indice in
     Binary.Size indice
   | Fill indice ->
     let+ indice = Assigned.find_memory assigned indice in
-    Binary.Fill indice
+    (Binary.Fill indice : Binary.memory_instr)
   | Grow indice ->
     let+ indice = Assigned.find_memory assigned indice in
     Binary.Grow indice
@@ -426,6 +426,24 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
       Tee id
   in
 
+  let rewrite_struct_instr : Text.struct_instr -> Binary.struct_instr Result.t =
+    function
+    | (New _ | New_default _ | Get _ | Get_s _ | Get_u _ | Set _) as i ->
+      Fmt.failwith "Rewrite: unimplemented for the GC instruction %a"
+        (Text.pp_instr ~short:true)
+        (Struct i)
+  in
+
+  let rewrite_array_instr : Text.array_instr -> Binary.array_instr Result.t =
+    function
+    | ( New _ | New_default _ | New_fixed _ | New_data _ | New_elem _ | Get _
+      | Get_s _ | Get_u _ | Set _ | Len | Fill _ | Copy _ | Init_data _
+      | Init_elem _ ) as i ->
+      Fmt.failwith "Rewrite: unimplemented for the GC instruction %a"
+        (Text.pp_instr ~short:true)
+        (Array i)
+  in
+
   let rec rewrite_instr (loop_count, block_ids) :
     Text.instr -> Binary.instr Result.t = function
     | I32 i ->
@@ -466,6 +484,13 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
     | Data i ->
       let+ i = rewrite_data_instr assigned i in
       Binary.Data i
+    | I31 i -> Ok (I31 i)
+    | Struct i ->
+      let+ i = rewrite_struct_instr i in
+      Binary.Struct i
+    | Array i ->
+      let+ i = rewrite_array_instr i in
+      Binary.Array i
     | Br_table (ids, id) ->
       let block_id_to_raw = block_id_to_raw (loop_count, block_ids) in
       let* ids = array_map block_id_to_raw ids in
@@ -529,20 +554,8 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
     | Drop -> Ok Binary.Drop
     | Nop -> Ok Binary.Nop
     | Return -> Ok Binary.Return
-    | Ref_i31 -> Ok Ref_i31
-    | I31_get_s -> Ok I31_get_s
-    | I31_get_u -> Ok I31_get_u
-    | Array_len -> Ok Array_len
     | Any_convert_extern -> Ok Any_convert_extern
     | Extern_convert_any -> Ok Extern_convert_any
-    | ( Struct_new _ | Struct_new_default _ | Struct_get _ | Struct_get_s _
-      | Struct_get_u _ | Struct_set _ | Array_new _ | Array_new_default _
-      | Array_new_fixed _ | Array_new_data _ | Array_new_elem _ | Array_get _
-      | Array_get_s _ | Array_get_u _ | Array_set _ | Array_fill _
-      | Array_copy _ | Array_init_data _ | Array_init_elem _ ) as instr ->
-      Fmt.failwith "Rewrite: unimplemented for the GC instruction %a"
-        (Text.pp_instr ~short:true)
-        instr
   and expr (e : Text.expr) (loop_count, block_ids) :
     Binary.expr Annotated.t Result.t =
     let+ e =
