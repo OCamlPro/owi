@@ -1,0 +1,1 @@
+  $ owi fuzz basic.wat

@@ -8,6 +8,7 @@ module Cmd_call_graph = Cmd_call_graph
 module Cmd_cfg = Cmd_cfg
 module Cmd_cpp = Cmd_cpp
 module Cmd_fmt = Cmd_fmt
+module Cmd_fuzz = Cmd_fuzz
 module Cmd_instrument_label = Cmd_instrument_label
 module Cmd_iso = Cmd_iso
 module Cmd_replay = Cmd_replay

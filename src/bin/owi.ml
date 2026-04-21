@@ -398,6 +398,21 @@ let fmt_cmd =
   and+ () = setup_log in
   Cmd_fmt.cmd ~inplace ~files
 
+(* owi fuzz *)
+
+let fuzz_info =
+  let doc = "Run the fuzzer" in
+  let man = [] @ shared_man in
+  Cmd.info "fuzz" ~version ~doc ~sdocs ~man
+
+let fuzz_cmd =
+  let+ unsafe
+  and+ timeout
+  and+ timeout_instr
+  and+ () = setup_log
+  and+ source_file in
+  Cmd_fuzz.cmd ~unsafe ~timeout ~timeout_instr ~source_file
+
 (* owi instrument *)
 
 let instrument_info =
@@ -652,6 +667,7 @@ let cli =
     ; Cmd.v c_info c_cmd
     ; Cmd.v cpp_info cpp_cmd
     ; Cmd.v fmt_info fmt_cmd
+    ; Cmd.v fuzz_info fuzz_cmd
     ; Cmd.group instrument_info
         [ Cmd.v instrument_label_info instrument_label_cmd ]
     ; Cmd.v iso_info iso_cmd

@@ -87,7 +87,7 @@ See [test/fuzz].
 #### Landmarks
 
 ```shell-session
-OCAML_LANDMARKS=on dune exec --instrument-with landmarks --profile release -- owi run test/run/binary_loop.wasm
+OCAML_LANDMARKS=on dune exec --instrument-with landmarks --profile release -- owi run test/cram/run/binary_loop.wasm
 ```
 
 See the discussion in [#871] to understand landmarks limitations in Owi.

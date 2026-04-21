@@ -1558,6 +1558,15 @@ module Cmd_fmt : sig
   val cmd : inplace:bool -> files:Fpath.t list -> unit Result.t
 end
 
+module Cmd_fuzz : sig
+  val cmd :
+       unsafe:bool
+    -> timeout:float option
+    -> timeout_instr:int option
+    -> source_file:Fpath.t
+    -> unit Result.t
+end
+
 module Cmd_instrument_label : sig
   val cmd :
        unsafe:bool
