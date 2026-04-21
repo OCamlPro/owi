@@ -3,7 +3,8 @@ let random_state =
   fun seed ->
     if not !init then begin
       let seed = Option.value seed ~default:42 in
-      Random.init seed
+      Random.init seed;
+      init := true
     end
     else begin
       Logs.warn (fun m ->
