@@ -54,6 +54,9 @@ OPTIONS
            SMT solver to use. VALUE must be one of the 6 available solvers:
            Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo, SMTZilla
 
+       --seed=I
+           Initial seed for the PRNG state
+
        -u, --unsafe
            skip typechecking pass
 

@@ -20,7 +20,7 @@ module Exploration_strategy : sig
 
   val pp : t Fmt.t
 
-  val to_work_ds_module : t -> (module Prio.S)
+  val to_work_ds_module : t -> seed:int option -> (module Prio.S)
 end
 
 type t =
@@ -35,6 +35,7 @@ type t =
   ; no_stop_at_failure : bool
   ; no_value : bool
   ; no_worker_isolation : Bool.t
+  ; seed : int option
   ; solver : Smtml.Solver_type.t
   ; timeout : float option
   ; timeout_instr : int option

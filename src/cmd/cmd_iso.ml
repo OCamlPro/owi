@@ -297,7 +297,7 @@ module String_set = Set.Make (String)
 
 let cmd ~deterministic_result_order ~fail_mode ~exploration_strategy ~files
   ~model_format ~no_assert_failure_expression_printing ~no_stop_at_failure
-  ~no_value ~solver ~unsafe ~workers ~no_worker_isolation ~workspace
+  ~no_value ~seed ~solver ~unsafe ~workers ~no_worker_isolation ~workspace
   ~model_out_file ~with_breadcrumbs =
   let* workspace =
     match workspace with
@@ -407,7 +407,8 @@ let cmd ~deterministic_result_order ~fail_mode ~exploration_strategy ~files
       let run_time = if Log.is_bench_enabled () then Some 0. else None in
 
       Symbolic_driver.run ~exploration_strategy ~fail_mode ~workers
-        ~no_worker_isolation ~solver ~deterministic_result_order ~model_format
-        ~no_value ~no_assert_failure_expression_printing ~workspace
-        ~no_stop_at_failure ~model_out_file ~with_breadcrumbs ~run_time to_run )
+        ~no_worker_isolation ~seed ~solver ~deterministic_result_order
+        ~model_format ~no_value ~no_assert_failure_expression_printing
+        ~workspace ~no_stop_at_failure ~model_out_file ~with_breadcrumbs
+        ~run_time to_run )
     () common_exports

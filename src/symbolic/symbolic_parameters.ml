@@ -28,9 +28,9 @@ module Exploration_strategy = struct
     | Rarity_depth_loop_aging -> (module Prio.Rarity_depth_loop_aging)
     | Rarity_depth_loop_aging_random -> (module Prio.Rarity_depth_loop_aging)
 
-  let to_work_ds_module strategy : (module Prio.S) =
+  let to_work_ds_module strategy ~seed : (module Prio.S) =
     let module M = (val to_priority_module strategy) in
-    if M.requires_random then Random.init 42;
+    if M.requires_random then Init.random_state seed;
     (module Prio.Make (M))
 
   let pp fmt v =
@@ -75,6 +75,7 @@ type t =
   ; no_stop_at_failure : bool
   ; no_value : bool
   ; no_worker_isolation : Bool.t
+  ; seed : int option
   ; solver : Smtml.Solver_type.t
   ; timeout : float option
   ; timeout_instr : int option

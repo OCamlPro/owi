@@ -66,6 +66,7 @@
   f64_intf
   global_intf
   grouped
+  init
   int32
   int64
   i32_intf

@@ -7,6 +7,7 @@ val cmd :
   -> no_assert_failure_expression_printing:bool
   -> no_stop_at_failure:bool
   -> no_value:bool
+  -> seed:int option
   -> solver:Smtml.Solver_type.t
   -> unsafe:bool
   -> workers:Int.t Option.t

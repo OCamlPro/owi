@@ -12,6 +12,7 @@ val run :
   -> deterministic_result_order:bool
   -> fail_mode:Symbolic_parameters.fail_mode
   -> workspace:Fpath.t
+  -> seed:int option
   -> solver:Smtml.Solver_type.t
   -> model_format:Model.output_format
   -> model_out_file:Fpath.t option

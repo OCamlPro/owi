@@ -43,7 +43,8 @@ let rec fuzzing_loop ~rounds f =
     Log.app (fun m -> m "Found a bug with model: %a" pp_model !model);
     e
 
-let cmd ~rounds ~unsafe ~timeout ~timeout_instr ~source_file =
+let cmd ~rounds ~seed ~source_file ~timeout ~timeout_instr ~unsafe =
+  Init.random_state seed;
   let link_state =
     Link.State.empty () |> Link.Extern.modul ~name:"owi" extern_module
   in

@@ -1111,6 +1111,10 @@ module Binary : sig
   end
 end
 
+module Init : sig
+  val random_state : int option -> unit
+end
+
 module Kind : sig
   type func = private
     | Wasm of
@@ -1477,6 +1481,7 @@ module Symbolic_parameters : sig
     ; no_stop_at_failure : bool
     ; no_value : bool
     ; no_worker_isolation : Bool.t
+    ; seed : int option
     ; solver : Smtml.Solver_type.t
     ; timeout : float option
     ; timeout_instr : int option
@@ -1499,6 +1504,7 @@ module Symbolic_driver : sig
     -> deterministic_result_order:bool
     -> fail_mode:Symbolic_parameters.fail_mode
     -> workspace:Fpath.t
+    -> seed:int option
     -> solver:Smtml.Solver_type.t
     -> model_format:Model.output_format
     -> model_out_file:Fpath.t option
@@ -1561,10 +1567,11 @@ end
 module Cmd_fuzz : sig
   val cmd :
        rounds:int option
-    -> unsafe:bool
+    -> seed:int option
+    -> source_file:Fpath.t
     -> timeout:float option
     -> timeout_instr:int option
-    -> source_file:Fpath.t
+    -> unsafe:bool
     -> unit Result.t
 end
 
@@ -1586,6 +1593,7 @@ module Cmd_iso : sig
     -> no_assert_failure_expression_printing:bool
     -> no_stop_at_failure:bool
     -> no_value:bool
+    -> seed:int option
     -> solver:Smtml.Solver_type.t
     -> unsafe:bool
     -> workers:Int.t Option.t

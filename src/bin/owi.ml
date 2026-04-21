@@ -192,6 +192,10 @@ let rounds =
   let doc = "Stop after a number of fuzzing rounds." in
   Arg.(value & opt (some int) None & info [ "rounds" ] ~doc ~docv:"I")
 
+let seed =
+  let doc = "Initial seed for the PRNG state" in
+  Arg.(value & opt (some int) None & info [ "seed" ] ~doc ~docv:"I")
+
 let solver =
   let docv = Arg.conv_docv solver_conv in
   let doc =
@@ -266,6 +270,7 @@ let symbolic_parameters default_entry_point =
   and+ no_stop_at_failure
   and+ no_value
   and+ no_worker_isolation
+  and+ seed
   and+ solver
   and+ timeout
   and+ timeout_instr
@@ -285,6 +290,7 @@ let symbolic_parameters default_entry_point =
   ; no_stop_at_failure
   ; no_value
   ; no_worker_isolation
+  ; seed
   ; solver
   ; timeout
   ; timeout_instr
@@ -415,8 +421,9 @@ let fuzz_cmd =
   and+ timeout
   and+ timeout_instr
   and+ () = setup_log
+  and+ seed
   and+ source_file in
-  Cmd_fuzz.cmd ~rounds ~source_file ~timeout ~timeout_instr ~unsafe
+  Cmd_fuzz.cmd ~rounds ~seed ~source_file ~timeout ~timeout_instr ~unsafe
 
 (* owi instrument *)
 
@@ -462,6 +469,7 @@ let iso_cmd =
   and+ no_stop_at_failure
   and+ no_value
   and+ () = setup_log
+  and+ seed
   and+ solver
   and+ unsafe
   and+ workers
@@ -472,8 +480,8 @@ let iso_cmd =
 
   Cmd_iso.cmd ~deterministic_result_order ~fail_mode ~exploration_strategy
     ~files ~model_format ~no_assert_failure_expression_printing
-    ~no_stop_at_failure ~no_value ~solver ~unsafe ~workers ~no_worker_isolation
-    ~workspace ~model_out_file ~with_breadcrumbs
+    ~no_stop_at_failure ~no_value ~seed ~solver ~unsafe ~workers
+    ~no_worker_isolation ~workspace ~model_out_file ~with_breadcrumbs
 
 (* owi replay *)
 

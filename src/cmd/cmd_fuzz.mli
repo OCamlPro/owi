@@ -4,8 +4,9 @@
 
 val cmd :
      rounds:int option
-  -> unsafe:bool
+  -> seed:int option
+  -> source_file:Fpath.t
   -> timeout:float option
   -> timeout_instr:int option
-  -> source_file:Fpath.t
+  -> unsafe:bool
   -> unit Result.t

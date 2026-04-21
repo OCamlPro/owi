@@ -31,6 +31,7 @@ module Concrete_i64 = Concrete_i64
 module Concrete_f32 = Concrete_f32
 module Concrete_f64 = Concrete_f64
 module Extern = Extern
+module Init = Init
 module Interpret = Interpret
 module Kind = Kind
 module Label = Label
