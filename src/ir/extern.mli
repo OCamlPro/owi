@@ -54,8 +54,6 @@ module Func : sig
 
       type elt
 
-      type mem
-
       type (_, _, _) t
 
       val i32 : (lr, elt, i32) t
@@ -72,7 +70,7 @@ module Func : sig
 
       val unit : (lr, unit, unit) t
 
-      val memory : int -> (l, mem, memory) t
+      val memory : int -> (l, memory, memory) t
 
       val label : string -> (lr, elt, 'a) t -> (l, string * elt, 'a) t
 

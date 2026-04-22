@@ -50,8 +50,6 @@ module Func = struct
 
       type elt
 
-      type mem
-
       type (_, _, _) t
 
       val i32 : (lr, elt, i32) t
@@ -68,7 +66,7 @@ module Func = struct
 
       val unit : (lr, unit, unit) t
 
-      val memory : int -> (l, mem, memory) t
+      val memory : int -> (l, memory, memory) t
 
       val label : string -> (lr, elt, 'a) t -> (l, string * elt, 'a) t
 
@@ -193,17 +191,15 @@ module Func = struct
         !r
 
     module Syntax = struct
-      type l
+      type l = private [ `L ]
 
-      type lr
+      type lr = private [ `Lr ]
 
-      type elt
-
-      type mem
+      type elt = private [ `Elt ]
 
       type (_, _, _) t =
         | Unit : (lr, unit, unit) t
-        | Memory : int -> (l, mem, memory) t
+        | Memory : int -> (l, memory, memory) t
         | Elt : 'a telt -> (lr, elt, 'a) t
         | Elt_labeled : string * 'a telt -> (l, string * elt, 'a) t
 

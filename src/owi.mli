@@ -1159,8 +1159,6 @@ module Concrete_extern_func : sig
 
     type elt
 
-    type mem
-
     type (_, _, _) t
 
     val ( ^-> ) : ('r, 'k, 'a) t -> 'b func_type -> ('a -> 'b) func_type
@@ -1192,7 +1190,7 @@ module Concrete_extern_func : sig
 
     val unit : (lr, unit, unit) t
 
-    val memory : int -> (l, mem, Concrete_memory.t) t
+    val memory : int -> (l, Concrete_memory.t, Concrete_memory.t) t
 
     val externref : 'a Type.Id.t -> (lr, elt, 'a) t
   end
@@ -1370,8 +1368,6 @@ module Symbolic_extern_func : sig
 
     type elt
 
-    type mem
-
     type (_, _, _) t
 
     val ( ^-> ) : ('r, 'k, 'a) t -> 'b func_type -> ('a -> 'b) func_type
@@ -1405,7 +1401,7 @@ module Symbolic_extern_func : sig
 
     val unit : (lr, unit, unit) t
 
-    val memory : int -> (l, mem, Symbolic_memory.t) t
+    val memory : int -> (l, Symbolic_memory.t, Symbolic_memory.t) t
 
     val externref : 'a Type.Id.t -> (lr, elt, 'a) t
   end
