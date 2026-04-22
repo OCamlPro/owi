@@ -31,6 +31,8 @@ let run ~rounds f =
           "No symbol was created and I did not find any bug. Did you use the \
            right entry point and wrote your harness correctly?" );
       Ok ()
-    | _model -> handle_ok ~rounds f
+    | _model ->
+      let rounds = Option.map pred rounds in
+      handle_ok ~rounds f
     end
   | Error _ -> handle_error ()
