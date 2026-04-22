@@ -64,6 +64,9 @@
   fop_intf
   f32_intf
   f64_intf
+  fuzz_driver
+  fuzz_state
+  fuzz_wasm_ffi
   global_intf
   grouped
   init
