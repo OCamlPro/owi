@@ -69,11 +69,8 @@ let write_char_indice buf c idx =
   Buffer.add_char buf c;
   write_indice buf idx
 
-let write_heaptype ?(is_null = false) buf ht =
+let write_heaptype buf ht =
   match ht with
-  | Binary.TypeUse id when is_null ->
-    write_char_indice buf '\x63' id;
-    write_indice buf id
   | Binary.TypeUse id -> write_indice buf id
   | Exn_ht -> Buffer.add_char buf '\x69'
   | Array_ht -> Buffer.add_char buf '\x6A'
@@ -89,14 +86,18 @@ let write_heaptype ?(is_null = false) buf ht =
   | NoExn_ht -> Buffer.add_char buf '\x74'
 
 let write_reftype buf (nullable : Text.nullable) ht =
-  let is_null =
-    match nullable with
-    | Null -> true
-    | No_null ->
-      Buffer.add_char buf '\x64';
-      false
-  in
-  write_heaptype ~is_null buf ht
+  match nullable with
+  | No_null ->
+    Buffer.add_char buf '\x64';
+    write_heaptype buf ht
+  | Null -> (
+    match ht with
+    | Binary.TypeUse id ->
+      write_char_indice buf '\x63' id;
+      write_indice buf id
+    | _ ->
+      (* When it's nullable and an abs_heap_type write it directly *)
+      write_heaptype buf ht )
 
 let get_char_valtype = function
   | Binary.Num_type I32 -> '\x7F'
