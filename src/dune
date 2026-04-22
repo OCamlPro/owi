@@ -91,7 +91,9 @@
   fop_intf
   f32_intf
   f64_intf
+  fuzz_dict
   fuzz_driver
+  fuzz_gen
   fuzz_state
   fuzz_wasm_ffi
   global_intf
