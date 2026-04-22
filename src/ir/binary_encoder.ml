@@ -924,11 +924,7 @@ let encode_comp_type buf ct =
 let encode_sub_type buf st =
   match st with
   | { final = true; ids = []; ct } -> encode_comp_type buf ct
-  | { final = true; ids; ct } ->
-    Buffer.add_char buf '\x4F';
-    List.iter (write_indice buf) ids;
-    encode_comp_type buf ct
-  | { final = false; ids; ct } ->
+  | { final; ids; ct } ->
     Buffer.add_char buf (if final then '\x4F' else '\x50');
     List.iter (write_indice buf) ids;
     encode_comp_type buf ct
