@@ -285,7 +285,14 @@ let frelop_32 : instr gen =
 
 let frelop_64 : instr gen =
   let+ frelop =
-    choose [ const Eq; const Ne; const Lt; const Gt; const Le; const Ge ]
+    choose
+      [ const (Owi.Text.Eq : f64_instr)
+      ; const Ne
+      ; const Lt
+      ; const Gt
+      ; const Le
+      ; const Ge
+      ]
   in
   F64 frelop
 
