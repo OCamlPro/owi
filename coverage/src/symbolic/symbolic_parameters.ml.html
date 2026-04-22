@@ -18,18 +18,18 @@
       <h2>68.42%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:33.72%"></span>
-      <span class="unvisited" style="top:47.67%"></span>
-      <span class="unvisited" style="top:48.84%"></span>
-      <span class="unvisited" style="top:50.00%"></span>
-      <span class="unvisited" style="bottom:48.84%"></span>
-      <span class="unvisited" style="bottom:47.67%"></span>
-      <span class="unvisited" style="bottom:46.51%"></span>
-      <span class="unvisited" style="bottom:45.35%"></span>
-      <span class="unvisited" style="bottom:44.19%"></span>
-      <span class="unvisited" style="bottom:43.02%"></span>
-      <span class="unvisited" style="bottom:27.91%"></span>
-      <span class="unvisited" style="bottom:26.74%"></span>
+      <span class="unvisited" style="top:33.33%"></span>
+      <span class="unvisited" style="top:47.13%"></span>
+      <span class="unvisited" style="top:48.28%"></span>
+      <span class="unvisited" style="top:49.43%"></span>
+      <span class="unvisited" style="bottom:49.43%"></span>
+      <span class="unvisited" style="bottom:48.28%"></span>
+      <span class="unvisited" style="bottom:47.13%"></span>
+      <span class="unvisited" style="bottom:45.98%"></span>
+      <span class="unvisited" style="bottom:44.83%"></span>
+      <span class="unvisited" style="bottom:43.68%"></span>
+      <span class="unvisited" style="bottom:28.74%"></span>
+      <span class="unvisited" style="bottom:27.59%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -120,6 +120,7 @@
 <a id="L84"></a><span > </span>
 <a id="L85"></a><span > </span>
 <a id="L86"></a><span > </span>
+<a id="L87"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -210,6 +211,7 @@
 <a href="#L84">84</a>
 <a href="#L85">85</a>
 <a href="#L86">86</a>
+<a href="#L87">87</a>
 </pre>
 <pre><code class="ocaml">type fail_mode =
   | Trap_only
@@ -241,9 +243,9 @@ module Exploration_strategy = struct
     | <span data-count="1">R</span>arity_depth_loop_aging -&gt; (module Prio.Rarity_depth_loop_aging)
     | <span data-count="0">R</span>arity_depth_loop_aging_random -&gt; (module Prio.Rarity_depth_loop_aging)
 
-  let to_work_ds_module strategy : (module Prio.S) =
+  let to_work_ds_module strategy ~seed : (module Prio.S) =
     <span data-count="425">l</span>et module M = (val to_priority_modul<span data-count="425">e</span> strategy) in
-    if M.requires_random then <span data-count="2">R</span>andom.ini<span data-count="2">t</span> 42;
+    if M.requires_random then <span data-count="2">I</span>nit.random_stat<span data-count="2">e</span> seed;
     <span data-count="425">(</span>module Prio.Make (M))
 
   let pp fmt v =
@@ -288,6 +290,7 @@ type t =
   ; no_stop_at_failure : bool
   ; no_value : bool
   ; no_worker_isolation : Bool.t
+  ; seed : int option
   ; solver : Smtml.Solver_type.t
   ; timeout : float option
   ; timeout_instr : int option

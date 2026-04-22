@@ -294,7 +294,7 @@ type 'ext t =
   ; id : int
   }
 
-let id (env : _ t) = <span data-count="2172220">e</span>nv.id
+let id (env : _ t) = <span data-count="2172003">e</span>nv.id
 
 let get_global (env : _ t) id =
   <span data-count="1143">m</span>atch IMap.find_opt id env.globals with
@@ -312,7 +312,7 @@ let get_table (env : _ t) id =
   | <span data-count="1608287">S</span>ome v -&gt; Concrete_choice.return v
 
 let get_func (env : _ t) id =
-  <span data-count="5501099">m</span>atch IMap.find_opt id env.functions with None -&gt; assert false | <span data-count="5501100">S</span>ome v -&gt; v
+  <span data-count="5502677">m</span>atch IMap.find_opt id env.functions with None -&gt; assert false | <span data-count="5502678">S</span>ome v -&gt; v
 
 let get_data (env : _ t) id =
   <span data-count="971">m</span>atch IMap.find_opt id env.data with
@@ -326,8 +326,8 @@ let get_tag (env : _ t) id =
   <span data-count="5">m</span>atch IMap.find_opt id env.tags with None -&gt; assert false | <span data-count="5">S</span>ome v -&gt; v
 
 let get_extern_func env id =
-  <span data-count="111614">l</span>et f, _t = Dynarray.get env.extern_funcs id in
-  <span data-count="111614">f</span>
+  <span data-count="121618">l</span>et f, _t = Dynarray.get env.extern_funcs id in
+  <span data-count="121618">f</span>
 
 module Build = struct
   type t =
@@ -360,7 +360,7 @@ module Build = struct
     <span data-count="775">{</span> env with tables = IMap.ad<span data-count="775">d</span> id table env.tables }
 
   let add_func id func (env : t) =
-    <span data-count="13599">{</span> env with functions = IMap.ad<span data-count="13599">d</span> id func env.functions }
+    <span data-count="13603">{</span> env with functions = IMap.ad<span data-count="13603">d</span> id func env.functions }
 
   let add_data id data (env : t) = <span data-count="670">{</span> env with data = IMap.ad<span data-count="670">d</span> id data env.data }
 
@@ -395,7 +395,7 @@ end
 let freeze id
   ({ globals; memories; tables; functions; data; elem; tags } : Build.t)
   extern_funcs =
-  <span data-count="2388">{</span> id; globals; memories; tables; functions; data; elem; tags; extern_funcs }
+  <span data-count="2390">{</span> id; globals; memories; tables; functions; data; elem; tags; extern_funcs }
 </code></pre>
       </div>
     </div>

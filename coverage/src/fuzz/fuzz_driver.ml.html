@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>fuzz_driver.ml &mdash; Coverage report</title>
+    <meta name="description" content="83.33% coverage in src/fuzz/fuzz_driver.ml">
+    <link rel="stylesheet" href="../../coverage.css"/>
+    <script src="../../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../../index.html">
+          <span class="dirname">src/fuzz/</span>fuzz_driver.ml
+        </a>
+      </h1>
+      <h2>83.33%</h2>
+    </div>
+    <div id="navbar">
+      <span class="some-visited" style="top:13.33%"></span>
+      <span class="unvisited" style="bottom:40.00%"></span>
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span class="some-visited"> </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span class="visited"> </span>
+<a id="L6"></a><span class="visited"> </span>
+<a id="L7"></a><span > </span>
+<a id="L8"></a><span class="visited"> </span>
+<a id="L9"></a><span class="unvisited"> </span>
+<a id="L10"></a><span class="visited"> </span>
+<a id="L11"></a><span class="visited"> </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span class="visited"> </span>
+<a id="L14"></a><span class="visited"> </span>
+<a id="L15"></a><span class="visited"> </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1"> 1</a>
+<a href="#L2"> 2</a>
+<a href="#L3"> 3</a>
+<a href="#L4"> 4</a>
+<a href="#L5"> 5</a>
+<a href="#L6"> 6</a>
+<a href="#L7"> 7</a>
+<a href="#L8"> 8</a>
+<a href="#L9"> 9</a>
+<a href="#L10">10</a>
+<a href="#L11">11</a>
+<a href="#L12">12</a>
+<a href="#L13">13</a>
+<a href="#L14">14</a>
+<a href="#L15">15</a>
+</pre>
+<pre><code class="ocaml">let pp_model ppf model =
+  <span data-count="1">F</span>mt.list ~sep:(fun ppf () -&gt; <span data-count="0">F</span>mt.pf ppf " ; ") Concrete_value.pp ppf model
+
+let rec run ~rounds f =
+  <span data-count="10002">m</span>atch f () with
+  | <span data-count="10001">O</span>k () -&gt;
+    Fuzz_state.reset ();
+    <span data-count="10001">b</span>egin match rounds with
+    | <span data-count="0">N</span>one -&gt; run ~rounds f
+    | <span data-count="1">S</span>ome 0 -&gt; Ok ()
+    | <span data-count="10000">S</span>ome n -&gt; run ~rounds:(Some (pre<span data-count="10000">d</span> n)) f
+    end
+  | <span data-count="1">E</span>rror _ as e -&gt;
+    Log.app (fun m -&gt; <span data-count="1">m</span> "Found a bug with model: %a" pp_model !Fuzz_state.model);
+    <span data-count="1">e</span>
+</code></pre>
+      </div>
+    </div>
+    <script src="../../coverage.js"></script>
+  </body>
+</html>

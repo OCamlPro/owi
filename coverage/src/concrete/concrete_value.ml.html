@@ -150,9 +150,9 @@ type t =
   | Ref of reference
 
 let pp ppf =
-  <span data-count="282">l</span>et open Fmt in
+  <span data-count="283">l</span>et open Fmt in
   function
-  | <span data-count="252">I</span>32 i -&gt; pf ppf "i32.const %a" I32.pp i
+  | <span data-count="253">I</span>32 i -&gt; pf ppf "i32.const %a" I32.pp i
   | <span data-count="12">I</span>64 i -&gt; pf ppf "i64.const %a" I64.pp i
   | <span data-count="15">F</span>32 f -&gt; pf ppf "f32.const %a" F32.pp f
   | <span data-count="3">F</span>64 f -&gt; pf ppf "f64.const %a" F64.pp f

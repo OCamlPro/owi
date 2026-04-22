@@ -497,17 +497,17 @@ let extern_m =
   let open Concrete_extern_func in
   let open Concrete_extern_func.Syntax in
   let functions =
-    [ ("print", Extern_func (unit ^-&gt;<span data-count="763">.</span> unit, print))
-    ; ("print_i32", Extern_func (i32 ^-&gt;<span data-count="763">.</span> unit, print_i32))
-    ; ("print_i64", Extern_func (i64 ^-&gt;<span data-count="763">.</span> unit, print_i64))
-    ; ("print_f32", Extern_func (f32 ^-&gt;<span data-count="763">.</span> unit, print_f32))
-    ; ("print_f64", Extern_func (f64 ^-&gt;<span data-count="763">.</span> unit, print_f64))
-    ; ("print_i32_f32", Extern_func (i32 ^-<span data-count="763">&gt;</span> f32 ^-&gt;<span data-count="763">.</span> unit, print_i32_f32))
-    ; ("print_f64_f64", Extern_func (f64 ^-<span data-count="763">&gt;</span> f64 ^-&gt;<span data-count="763">.</span> unit, print_f64_f64))
-    ; ("func", Extern_func (unit ^-&gt;<span data-count="763">.</span> unit, func))
-    ; ("func-i32", Extern_func (i32 ^-&gt;<span data-count="763">.</span> unit, func_in_i32))
-    ; ("func-&gt;i32", Extern_func (unit ^-&gt;<span data-count="763">.</span> i32, func_out_i32))
-    ; ("func-i32-&gt;i32", Extern_func (i32 ^-&gt;<span data-count="763">.</span> i32, func_in_i32_out_i32))
+    [ ("print", Extern_func (unit ^-&gt;<span data-count="765">.</span> unit, print))
+    ; ("print_i32", Extern_func (i32 ^-&gt;<span data-count="765">.</span> unit, print_i32))
+    ; ("print_i64", Extern_func (i64 ^-&gt;<span data-count="765">.</span> unit, print_i64))
+    ; ("print_f32", Extern_func (f32 ^-&gt;<span data-count="765">.</span> unit, print_f32))
+    ; ("print_f64", Extern_func (f64 ^-&gt;<span data-count="765">.</span> unit, print_f64))
+    ; ("print_i32_f32", Extern_func (i32 ^-<span data-count="765">&gt;</span> f32 ^-&gt;<span data-count="765">.</span> unit, print_i32_f32))
+    ; ("print_f64_f64", Extern_func (f64 ^-<span data-count="765">&gt;</span> f64 ^-&gt;<span data-count="765">.</span> unit, print_f64_f64))
+    ; ("func", Extern_func (unit ^-&gt;<span data-count="765">.</span> unit, func))
+    ; ("func-i32", Extern_func (i32 ^-&gt;<span data-count="765">.</span> unit, func_in_i32))
+    ; ("func-&gt;i32", Extern_func (unit ^-&gt;<span data-count="765">.</span> i32, func_out_i32))
+    ; ("func-i32-&gt;i32", Extern_func (i32 ^-&gt;<span data-count="765">.</span> i32, func_in_i32_out_i32))
     ]
   in
 
@@ -627,12 +627,12 @@ let m =
                }
            ; Global
                { typ = (Const, Num_type F32)
-               ; init = [ Text.F32 (Const (Float32.of_floa<span data-count="763">t</span> 666.6)) ]
+               ; init = [ Text.F32 (Const (Float32.of_floa<span data-count="765">t</span> 666.6)) ]
                ; id = Some "global_f32"
                }
            ; Global
                { typ = (Const, Num_type F64)
-               ; init = [ Text.F64 (Const (Float64.of_floa<span data-count="763">t</span> 666.6)) ]
+               ; init = [ Text.F64 (Const (Float64.of_floa<span data-count="765">t</span> 666.6)) ]
                ; id = Some "global_f64"
                }
            ; Export { name = "func"; typ = Func (Some (Text "func")) }

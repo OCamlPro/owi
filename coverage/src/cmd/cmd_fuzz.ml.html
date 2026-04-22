@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>cmd_fuzz.ml &mdash; Coverage report</title>
+    <meta name="description" content="83.33% coverage in src/cmd/cmd_fuzz.ml">
+    <link rel="stylesheet" href="../../coverage.css"/>
+    <script src="../../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../../index.html">
+          <span class="dirname">src/cmd/</span>cmd_fuzz.ml
+        </a>
+      </h1>
+      <h2>83.33%</h2>
+    </div>
+    <div id="navbar">
+      <span class="unvisited" style="bottom:5.56%"></span>
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span > </span>
+<a id="L7"></a><span > </span>
+<a id="L8"></a><span class="visited"> </span>
+<a id="L9"></a><span class="visited"> </span>
+<a id="L10"></a><span > </span>
+<a id="L11"></a><span class="visited"> </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span class="visited"> </span>
+<a id="L14"></a><span class="visited"> </span>
+<a id="L15"></a><span > </span>
+<a id="L16"></a><span class="visited"> </span>
+<a id="L17"></a><span > </span>
+<a id="L18"></a><span > </span>
+<a id="L19"></a><span > </span>
+<a id="L20"></a><span > </span>
+<a id="L21"></a><span > </span>
+<a id="L22"></a><span > </span>
+<a id="L23"></a><span > </span>
+<a id="L24"></a><span > </span>
+<a id="L25"></a><span > </span>
+<a id="L26"></a><span > </span>
+<a id="L27"></a><span > </span>
+<a id="L28"></a><span class="visited"> </span>
+<a id="L29"></a><span > </span>
+<a id="L30"></a><span class="visited"> </span>
+<a id="L31"></a><span > </span>
+<a id="L32"></a><span class="visited"> </span>
+<a id="L33"></a><span > </span>
+<a id="L34"></a><span class="unvisited"> </span>
+<a id="L35"></a><span > </span>
+<a id="L36"></a><span class="visited"> </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1"> 1</a>
+<a href="#L2"> 2</a>
+<a href="#L3"> 3</a>
+<a href="#L4"> 4</a>
+<a href="#L5"> 5</a>
+<a href="#L6"> 6</a>
+<a href="#L7"> 7</a>
+<a href="#L8"> 8</a>
+<a href="#L9"> 9</a>
+<a href="#L10">10</a>
+<a href="#L11">11</a>
+<a href="#L12">12</a>
+<a href="#L13">13</a>
+<a href="#L14">14</a>
+<a href="#L15">15</a>
+<a href="#L16">16</a>
+<a href="#L17">17</a>
+<a href="#L18">18</a>
+<a href="#L19">19</a>
+<a href="#L20">20</a>
+<a href="#L21">21</a>
+<a href="#L22">22</a>
+<a href="#L23">23</a>
+<a href="#L24">24</a>
+<a href="#L25">25</a>
+<a href="#L26">26</a>
+<a href="#L27">27</a>
+<a href="#L28">28</a>
+<a href="#L29">29</a>
+<a href="#L30">30</a>
+<a href="#L31">31</a>
+<a href="#L32">32</a>
+<a href="#L33">33</a>
+<a href="#L34">34</a>
+<a href="#L35">35</a>
+<a href="#L36">36</a>
+</pre>
+<pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
+(* Copyright © 2021-2024 OCamlPro *)
+(* Written by the Owi programmers *)
+
+open Syntax
+
+let cmd ~rounds ~seed ~source_file ~timeout ~timeout_instr ~unsafe =
+  <span data-count="2">I</span>nit.random_state seed;
+  <span data-count="2">l</span>et link_state =
+    Link.State.empty ()
+    |&gt; <span data-count="2">L</span>ink.Extern.modul ~name:"owi" Fuzz_wasm_ffi.extern_module
+  in
+  <span data-count="2">l</span>et* m, link_state =
+    Compile.File.until_lin<span data-count="2">k</span> ~unsafe ~name:None link_state source_file
+  in
+  <span data-count="2">l</span>et module Parameters = struct
+    let timeout = timeout
+
+    let timeout_instr = timeout_instr
+
+    let use_ite_for_select = true
+
+    let throw_away_trap = false
+  end in
+  let module I = Interpret.Concrete (Parameters) in
+  let res, run_time =
+    Benchmark.with_utime @@ fun () -&gt;
+    <span data-count="2">F</span>uzz_driver.run ~rounds (fun () -&gt;
+      (* TODO: check if we should regenerate the link state *)
+      <span data-count="10002">I</span>.modul link_state m )
+  in
+  <span data-count="2">L</span>og.bench (fun m -&gt;
+    (* run_time shouldn't be none in bench mode *)
+    <span data-count="0">l</span>et run_time = match run_time with None -&gt; assert false | <span data-count="0">S</span>ome t -&gt; t in
+    m "Benchmarks:@\n@[&lt;v&gt;interpreter time: %fms@]" (run_time *. 1000.) );
+  <span data-count="2">r</span>es
+</code></pre>
+      </div>
+    </div>
+    <script src="../../coverage.js"></script>
+  </body>
+</html>

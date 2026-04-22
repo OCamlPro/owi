@@ -94,22 +94,23 @@
 <a id="L70"></a><span > </span>
 <a id="L71"></a><span > </span>
 <a id="L72"></a><span > </span>
-<a id="L73"></a><span class="visited"> </span>
-<a id="L74"></a><span > </span>
+<a id="L73"></a><span > </span>
+<a id="L74"></a><span class="visited"> </span>
 <a id="L75"></a><span > </span>
 <a id="L76"></a><span > </span>
 <a id="L77"></a><span > </span>
 <a id="L78"></a><span > </span>
-<a id="L79"></a><span class="visited"> </span>
+<a id="L79"></a><span > </span>
 <a id="L80"></a><span class="visited"> </span>
-<a id="L81"></a><span > </span>
+<a id="L81"></a><span class="visited"> </span>
 <a id="L82"></a><span > </span>
-<a id="L83"></a><span class="visited"> </span>
-<a id="L84"></a><span > </span>
-<a id="L85"></a><span class="visited"> </span>
-<a id="L86"></a><span > </span>
+<a id="L83"></a><span > </span>
+<a id="L84"></a><span class="visited"> </span>
+<a id="L85"></a><span > </span>
+<a id="L86"></a><span class="visited"> </span>
 <a id="L87"></a><span > </span>
 <a id="L88"></a><span > </span>
+<a id="L89"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -202,6 +203,7 @@
 <a href="#L86">86</a>
 <a href="#L87">87</a>
 <a href="#L88">88</a>
+<a href="#L89">89</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2024 OCamlPro *)
@@ -265,6 +267,7 @@ let cmd ~parameters ~source_file =
       ; model_format
       ; no_value
       ; no_assert_failure_expression_printing
+      ; seed
       ; workspace
       ; model_out_file
       ; with_breadcrumbs
@@ -275,7 +278,7 @@ let cmd ~parameters ~source_file =
 
   (* deterministic_result_order implies no_stop_at_failure *)
   let no_stop_at_failure =
-    parameters.deterministic_result_orde<span data-count="46">r</span> || parameters.no_stop_at_failur<span data-count="137">e</span>
+    parameters.deterministic_result_orde<span data-count="47">r</span> || parameters.no_stop_at_failur<span data-count="136">e</span>
   in
 
   (* TODO: can we handle this at the cmdliner level? *)
@@ -290,7 +293,7 @@ let cmd ~parameters ~source_file =
   <span data-count="422">S</span>ymbolic_driver.run ~exploration_strategy ~fail_mode ~workers
     ~no_worker_isolation ~solver ~deterministic_result_order ~model_format
     ~no_value ~no_assert_failure_expression_printing ~workspace
-    ~no_stop_at_failure ~model_out_file ~with_breadcrumbs ~run_time to_run
+    ~no_stop_at_failure ~model_out_file ~with_breadcrumbs ~seed ~run_time to_run
 </code></pre>
       </div>
     </div>

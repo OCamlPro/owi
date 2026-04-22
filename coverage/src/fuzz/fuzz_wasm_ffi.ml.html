@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>fuzz_wasm_ffi.ml &mdash; Coverage report</title>
+    <meta name="description" content="43.90% coverage in src/fuzz/fuzz_wasm_ffi.ml">
+    <link rel="stylesheet" href="../../coverage.css"/>
+    <script src="../../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../../index.html">
+          <span class="dirname">src/fuzz/</span>fuzz_wasm_ffi.ml
+        </a>
+      </h1>
+      <h2>43.90%</h2>
+    </div>
+    <div id="navbar">
+      <span class="unvisited" style="top:5.79%"></span>
+      <span class="unvisited" style="top:8.26%"></span>
+      <span class="unvisited" style="top:10.74%"></span>
+      <span class="unvisited" style="top:12.40%"></span>
+      <span class="unvisited" style="top:19.83%"></span>
+      <span class="unvisited" style="top:20.66%"></span>
+      <span class="unvisited" style="top:21.49%"></span>
+      <span class="unvisited" style="top:25.62%"></span>
+      <span class="unvisited" style="top:26.45%"></span>
+      <span class="unvisited" style="top:27.27%"></span>
+      <span class="unvisited" style="top:28.10%"></span>
+      <span class="unvisited" style="top:31.40%"></span>
+      <span class="unvisited" style="top:32.23%"></span>
+      <span class="unvisited" style="top:33.06%"></span>
+      <span class="unvisited" style="top:33.88%"></span>
+      <span class="unvisited" style="top:37.19%"></span>
+      <span class="unvisited" style="top:38.02%"></span>
+      <span class="unvisited" style="top:38.84%"></span>
+      <span class="unvisited" style="top:39.67%"></span>
+      <span class="unvisited" style="top:43.80%"></span>
+      <span class="unvisited" style="top:46.28%"></span>
+      <span class="unvisited" style="top:47.11%"></span>
+      <span class="unvisited" style="top:49.59%"></span>
+      <span class="unvisited" style="bottom:48.76%"></span>
+      <span class="unvisited" style="bottom:45.45%"></span>
+      <span class="unvisited" style="bottom:41.32%"></span>
+      <span class="unvisited" style="bottom:40.50%"></span>
+      <span class="unvisited" style="bottom:38.84%"></span>
+      <span class="unvisited" style="bottom:37.19%"></span>
+      <span class="unvisited" style="bottom:35.54%"></span>
+      <span class="unvisited" style="bottom:33.88%"></span>
+      <span class="unvisited" style="bottom:32.23%"></span>
+      <span class="unvisited" style="bottom:30.58%"></span>
+      <span class="unvisited" style="bottom:28.93%"></span>
+      <span class="unvisited" style="bottom:27.27%"></span>
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span > </span>
+<a id="L7"></a><span class="unvisited"> </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span > </span>
+<a id="L10"></a><span class="unvisited"> </span>
+<a id="L11"></a><span > </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span class="unvisited"> </span>
+<a id="L14"></a><span > </span>
+<a id="L15"></a><span class="unvisited"> </span>
+<a id="L16"></a><span > </span>
+<a id="L17"></a><span > </span>
+<a id="L18"></a><span class="visited"> </span>
+<a id="L19"></a><span class="visited"> </span>
+<a id="L20"></a><span class="visited"> </span>
+<a id="L21"></a><span > </span>
+<a id="L22"></a><span > </span>
+<a id="L23"></a><span > </span>
+<a id="L24"></a><span class="unvisited"> </span>
+<a id="L25"></a><span class="unvisited"> </span>
+<a id="L26"></a><span class="unvisited"> </span>
+<a id="L27"></a><span > </span>
+<a id="L28"></a><span > </span>
+<a id="L29"></a><span > </span>
+<a id="L30"></a><span > </span>
+<a id="L31"></a><span class="unvisited"> </span>
+<a id="L32"></a><span class="unvisited"> </span>
+<a id="L33"></a><span class="unvisited"> </span>
+<a id="L34"></a><span class="unvisited"> </span>
+<a id="L35"></a><span > </span>
+<a id="L36"></a><span > </span>
+<a id="L37"></a><span > </span>
+<a id="L38"></a><span class="unvisited"> </span>
+<a id="L39"></a><span class="unvisited"> </span>
+<a id="L40"></a><span class="unvisited"> </span>
+<a id="L41"></a><span class="unvisited"> </span>
+<a id="L42"></a><span > </span>
+<a id="L43"></a><span > </span>
+<a id="L44"></a><span > </span>
+<a id="L45"></a><span class="unvisited"> </span>
+<a id="L46"></a><span class="unvisited"> </span>
+<a id="L47"></a><span class="unvisited"> </span>
+<a id="L48"></a><span class="unvisited"> </span>
+<a id="L49"></a><span > </span>
+<a id="L50"></a><span > </span>
+<a id="L51"></a><span > </span>
+<a id="L52"></a><span > </span>
+<a id="L53"></a><span class="unvisited"> </span>
+<a id="L54"></a><span > </span>
+<a id="L55"></a><span > </span>
+<a id="L56"></a><span class="unvisited"> </span>
+<a id="L57"></a><span class="unvisited"> </span>
+<a id="L58"></a><span > </span>
+<a id="L59"></a><span > </span>
+<a id="L60"></a><span class="unvisited"> </span>
+<a id="L61"></a><span > </span>
+<a id="L62"></a><span class="unvisited"> </span>
+<a id="L63"></a><span > </span>
+<a id="L64"></a><span > </span>
+<a id="L65"></a><span > </span>
+<a id="L66"></a><span class="unvisited"> </span>
+<a id="L67"></a><span > </span>
+<a id="L68"></a><span > </span>
+<a id="L69"></a><span > </span>
+<a id="L70"></a><span > </span>
+<a id="L71"></a><span class="unvisited"> </span>
+<a id="L72"></a><span class="unvisited"> </span>
+<a id="L73"></a><span > </span>
+<a id="L74"></a><span class="unvisited"> </span>
+<a id="L75"></a><span > </span>
+<a id="L76"></a><span class="unvisited"> </span>
+<a id="L77"></a><span > </span>
+<a id="L78"></a><span class="unvisited"> </span>
+<a id="L79"></a><span > </span>
+<a id="L80"></a><span class="unvisited"> </span>
+<a id="L81"></a><span > </span>
+<a id="L82"></a><span class="unvisited"> </span>
+<a id="L83"></a><span > </span>
+<a id="L84"></a><span class="unvisited"> </span>
+<a id="L85"></a><span > </span>
+<a id="L86"></a><span class="unvisited"> </span>
+<a id="L87"></a><span > </span>
+<a id="L88"></a><span class="unvisited"> </span>
+<a id="L89"></a><span > </span>
+<a id="L90"></a><span > </span>
+<a id="L91"></a><span > </span>
+<a id="L92"></a><span > </span>
+<a id="L93"></a><span > </span>
+<a id="L94"></a><span > </span>
+<a id="L95"></a><span > </span>
+<a id="L96"></a><span class="visited"> </span>
+<a id="L97"></a><span class="visited"> </span>
+<a id="L98"></a><span class="visited"> </span>
+<a id="L99"></a><span class="visited"> </span>
+<a id="L100"></a><span class="visited"> </span>
+<a id="L101"></a><span class="visited"> </span>
+<a id="L102"></a><span class="visited"> </span>
+<a id="L103"></a><span class="visited"> </span>
+<a id="L104"></a><span class="visited"> </span>
+<a id="L105"></a><span class="visited"> </span>
+<a id="L106"></a><span class="visited"> </span>
+<a id="L107"></a><span > </span>
+<a id="L108"></a><span class="visited"> </span>
+<a id="L109"></a><span > </span>
+<a id="L110"></a><span class="visited"> </span>
+<a id="L111"></a><span > </span>
+<a id="L112"></a><span class="visited"> </span>
+<a id="L113"></a><span > </span>
+<a id="L114"></a><span class="visited"> </span>
+<a id="L115"></a><span class="visited"> </span>
+<a id="L116"></a><span class="visited"> </span>
+<a id="L117"></a><span class="visited"> </span>
+<a id="L118"></a><span class="visited"> </span>
+<a id="L119"></a><span > </span>
+<a id="L120"></a><span > </span>
+<a id="L121"></a><span > </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1">  1</a>
+<a href="#L2">  2</a>
+<a href="#L3">  3</a>
+<a href="#L4">  4</a>
+<a href="#L5">  5</a>
+<a href="#L6">  6</a>
+<a href="#L7">  7</a>
+<a href="#L8">  8</a>
+<a href="#L9">  9</a>
+<a href="#L10"> 10</a>
+<a href="#L11"> 11</a>
+<a href="#L12"> 12</a>
+<a href="#L13"> 13</a>
+<a href="#L14"> 14</a>
+<a href="#L15"> 15</a>
+<a href="#L16"> 16</a>
+<a href="#L17"> 17</a>
+<a href="#L18"> 18</a>
+<a href="#L19"> 19</a>
+<a href="#L20"> 20</a>
+<a href="#L21"> 21</a>
+<a href="#L22"> 22</a>
+<a href="#L23"> 23</a>
+<a href="#L24"> 24</a>
+<a href="#L25"> 25</a>
+<a href="#L26"> 26</a>
+<a href="#L27"> 27</a>
+<a href="#L28"> 28</a>
+<a href="#L29"> 29</a>
+<a href="#L30"> 30</a>
+<a href="#L31"> 31</a>
+<a href="#L32"> 32</a>
+<a href="#L33"> 33</a>
+<a href="#L34"> 34</a>
+<a href="#L35"> 35</a>
+<a href="#L36"> 36</a>
+<a href="#L37"> 37</a>
+<a href="#L38"> 38</a>
+<a href="#L39"> 39</a>
+<a href="#L40"> 40</a>
+<a href="#L41"> 41</a>
+<a href="#L42"> 42</a>
+<a href="#L43"> 43</a>
+<a href="#L44"> 44</a>
+<a href="#L45"> 45</a>
+<a href="#L46"> 46</a>
+<a href="#L47"> 47</a>
+<a href="#L48"> 48</a>
+<a href="#L49"> 49</a>
+<a href="#L50"> 50</a>
+<a href="#L51"> 51</a>
+<a href="#L52"> 52</a>
+<a href="#L53"> 53</a>
+<a href="#L54"> 54</a>
+<a href="#L55"> 55</a>
+<a href="#L56"> 56</a>
+<a href="#L57"> 57</a>
+<a href="#L58"> 58</a>
+<a href="#L59"> 59</a>
+<a href="#L60"> 60</a>
+<a href="#L61"> 61</a>
+<a href="#L62"> 62</a>
+<a href="#L63"> 63</a>
+<a href="#L64"> 64</a>
+<a href="#L65"> 65</a>
+<a href="#L66"> 66</a>
+<a href="#L67"> 67</a>
+<a href="#L68"> 68</a>
+<a href="#L69"> 69</a>
+<a href="#L70"> 70</a>
+<a href="#L71"> 71</a>
+<a href="#L72"> 72</a>
+<a href="#L73"> 73</a>
+<a href="#L74"> 74</a>
+<a href="#L75"> 75</a>
+<a href="#L76"> 76</a>
+<a href="#L77"> 77</a>
+<a href="#L78"> 78</a>
+<a href="#L79"> 79</a>
+<a href="#L80"> 80</a>
+<a href="#L81"> 81</a>
+<a href="#L82"> 82</a>
+<a href="#L83"> 83</a>
+<a href="#L84"> 84</a>
+<a href="#L85"> 85</a>
+<a href="#L86"> 86</a>
+<a href="#L87"> 87</a>
+<a href="#L88"> 88</a>
+<a href="#L89"> 89</a>
+<a href="#L90"> 90</a>
+<a href="#L91"> 91</a>
+<a href="#L92"> 92</a>
+<a href="#L93"> 93</a>
+<a href="#L94"> 94</a>
+<a href="#L95"> 95</a>
+<a href="#L96"> 96</a>
+<a href="#L97"> 97</a>
+<a href="#L98"> 98</a>
+<a href="#L99"> 99</a>
+<a href="#L100">100</a>
+<a href="#L101">101</a>
+<a href="#L102">102</a>
+<a href="#L103">103</a>
+<a href="#L104">104</a>
+<a href="#L105">105</a>
+<a href="#L106">106</a>
+<a href="#L107">107</a>
+<a href="#L108">108</a>
+<a href="#L109">109</a>
+<a href="#L110">110</a>
+<a href="#L111">111</a>
+<a href="#L112">112</a>
+<a href="#L113">113</a>
+<a href="#L114">114</a>
+<a href="#L115">115</a>
+<a href="#L116">116</a>
+<a href="#L117">117</a>
+<a href="#L118">118</a>
+<a href="#L119">119</a>
+<a href="#L120">120</a>
+<a href="#L121">121</a>
+</pre>
+<pre><code class="ocaml">module M :
+  Wasm_ffi_intf.S0
+    with type 'a t := 'a Result.t
+     and type memory := Concrete_memory.t
+     and module Value := Concrete_value = struct
+  let assume b =
+    <span data-count="0">i</span>f not @@ Prelude.Int32.equa<span data-count="0">l</span> 0l (Concrete_i32.to_int3<span data-count="0">2</span> b) then <span data-count="0">O</span>k ()
+    else
+      (* TODO: stop current round properly *)
+      <span data-count="0">r</span>aise @@ Failure "TODO"
+
+  let assert' n =
+    <span data-count="0">i</span>f Prelude.Int32.equal 0l n then <span data-count="0">E</span>rror (`Msg "I found a bug") else <span data-count="0">O</span>k ()
+
+  let symbol_invisible_bool () = <span data-count="0">O</span>k (if Random.bool () then <span data-count="0">1</span>l else <span data-count="0">0</span>l)
+
+  let symbol_i32 () =
+    <span data-count="10002">l</span>et n = Random.bits32 () in
+    <span data-count="10002">l</span>et n = Concrete_i32.of_int32 n in
+    <span data-count="10002">F</span>uzz_state.model := Concrete_value.I32 n :: !Fuzz_state.model;
+    Ok n
+
+  let symbol_i64 () =
+    <span data-count="0">l</span>et n = Random.bits64 () in
+    <span data-count="0">l</span>et n = Concrete_i64.of_int64 n in
+    <span data-count="0">F</span>uzz_state.model := Concrete_value.I64 n :: !Fuzz_state.model;
+    Ok n
+
+  let symbol_f32 () =
+    (* TODO: avoid going through 64 bits *)
+    <span data-count="0">l</span>et n = Random.bits64 () in
+    <span data-count="0">l</span>et n = Int64.float_of_bits n in
+    <span data-count="0">l</span>et n = Concrete_f32.of_float n in
+    <span data-count="0">F</span>uzz_state.model := Concrete_value.F32 n :: !Fuzz_state.model;
+    Ok n
+
+  let symbol_f64 () =
+    <span data-count="0">l</span>et n = Random.bits64 () in
+    <span data-count="0">l</span>et n = Int64.float_of_bits n in
+    <span data-count="0">l</span>et n = Concrete_f64.of_float n in
+    <span data-count="0">F</span>uzz_state.model := Concrete_value.F64 n :: !Fuzz_state.model;
+    Ok n
+
+  let symbol_v128 () =
+    <span data-count="0">l</span>et n1 = Random.bits64 () in
+    <span data-count="0">l</span>et n2 = Random.bits64 () in
+    <span data-count="0">l</span>et n = Concrete_v128.of_i64x2 n1 n2 in
+    <span data-count="0">F</span>uzz_state.model := Concrete_value.V128 n :: !Fuzz_state.model;
+    Ok n
+
+  let abort () =
+    (* TODO: stop the round properly *)
+    <span data-count="0">E</span>rror (`Msg "abort")
+
+  let alloc _m _addr size =
+    <span data-count="0">l</span>et r = !Fuzz_state.brk in
+    Fuzz_state.brk := Int32.ad<span data-count="0">d</span> !Fuzz_state.brk size;
+    Ok r
+
+  let free (_ : Concrete_memory.t) adr = <span data-count="0">O</span>k adr
+
+  let exit (n : Concrete_value.i32) = <span data-count="0">e</span>xit (Int32.to_in<span data-count="0">t</span> n)
+
+  let symbol_range min max =
+    (* TODO: ensure min &lt;= max *)
+    <span data-count="0">l</span>et n = Random.int32_in_range ~min ~max in
+    Fuzz_state.model := Concrete_value.I32 n :: !Fuzz_state.model;
+    Ok n
+
+  let print_char c =
+    <span data-count="0">L</span>og.app (fun m -&gt; <span data-count="0">m</span> "%c" (char_of_in<span data-count="0">t</span> (Int32.to_in<span data-count="0">t</span> c)));
+    <span data-count="0">O</span>k ()
+
+  let in_replay_mode () = <span data-count="0">O</span>k 0l
+
+  let _make_str_null_terminated _m _accu _i = <span data-count="0">r</span>aise @@ Failure "TODO"
+
+  let _make_str_of_length _m _accu _i _len = <span data-count="0">r</span>aise @@ Failure "TODO"
+
+  let cov_label_is_covered _id = <span data-count="0">r</span>aise @@ Failure "TODO"
+
+  let cov_label_set _m _id _str_ptr = <span data-count="0">r</span>aise @@ Failure "TODO"
+
+  let open_scope_null_terminated _m _strptr = <span data-count="0">r</span>aise @@ Failure "TODO"
+
+  let open_scope_of_length _m _strptr _length = <span data-count="0">r</span>aise @@ Failure "TODO"
+
+  let close_scope () = <span data-count="0">r</span>aise @@ Failure "TODO"
+end
+
+let extern_module =
+  let open M in
+  let open Concrete_extern_func in
+  let open Concrete_extern_func.Syntax in
+  let functions =
+    [ ("i32_symbol", Extern_func (unit ^-&gt;<span data-count="765">.</span> i32, symbol_i32))
+    ; ("i64_symbol", Extern_func (unit ^-&gt;<span data-count="765">.</span> i64, symbol_i64))
+    ; ("f32_symbol", Extern_func (unit ^-&gt;<span data-count="765">.</span> f32, symbol_f32))
+    ; ("f64_symbol", Extern_func (unit ^-&gt;<span data-count="765">.</span> f64, symbol_f64))
+    ; ("v128_symbol", Extern_func (unit ^-&gt;<span data-count="765">.</span> v128, symbol_v128))
+    ; ("range_symbol", Extern_func (i32 ^-<span data-count="765">&gt;</span> i32 ^-&gt;<span data-count="765">.</span> i32, symbol_range))
+    ; ("assume", Extern_func (i32 ^-&gt;<span data-count="765">.</span> unit, assume))
+    ; ("assert", Extern_func (i32 ^-&gt;<span data-count="765">.</span> unit, assert'))
+    ; ("in_replay_mode", Extern_func (unit ^-&gt;<span data-count="765">.</span> i32, in_replay_mode))
+    ; ("print_char", Extern_func (i32 ^-&gt;<span data-count="765">.</span> unit, print_char))
+    ; ("cov_label_is_covered", Extern_func (i32 ^-&gt;<span data-count="765">.</span> i32, cov_label_is_covered))
+    ; ( "cov_label_set"
+      , Extern_func (memor<span data-count="765">y</span> 0 ^-<span data-count="765">&gt;</span> i32 ^-<span data-count="765">&gt;</span> i32 ^-&gt;<span data-count="765">.</span> unit, cov_label_set) )
+    ; ( "open_scope_null_terminated"
+      , Extern_func (memor<span data-count="765">y</span> 0 ^-<span data-count="765">&gt;</span> i32 ^-&gt;<span data-count="765">.</span> unit, open_scope_null_terminated) )
+    ; ( "open_scope_of_length"
+      , Extern_func (memor<span data-count="765">y</span> 0 ^-<span data-count="765">&gt;</span> i32 ^-<span data-count="765">&gt;</span> i32 ^-&gt;<span data-count="765">.</span> unit, open_scope_of_length)
+      )
+    ; ("close_scope", Extern_func (unit ^-&gt;<span data-count="765">.</span> unit, close_scope))
+    ; ("alloc", Extern_func (memor<span data-count="765">y</span> 0 ^-<span data-count="765">&gt;</span> i32 ^-<span data-count="765">&gt;</span> i32 ^-&gt;<span data-count="765">.</span> i32, alloc))
+    ; ("dealloc", Extern_func (memor<span data-count="765">y</span> 0 ^-<span data-count="765">&gt;</span> i32 ^-&gt;<span data-count="765">.</span> i32, free))
+    ; ("abort", Extern_func (unit ^-&gt;<span data-count="765">.</span> unit, abort))
+    ; ("exit", Extern_func (i32 ^-&gt;<span data-count="765">.</span> unit, exit))
+    ]
+  in
+  { Extern.Module.functions; func_type = Concrete_extern_func.extern_type }
+</code></pre>
+      </div>
+    </div>
+    <script src="../../coverage.js"></script>
+  </body>
+</html>

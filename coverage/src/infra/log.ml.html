@@ -95,14 +95,14 @@
 <a href="#L33">33</a>
 <a href="#L34">34</a>
 </pre>
-<pre><code class="ocaml">let main_src = Logs.Src.creat<span data-count="763">e</span> "owi" ~doc:"Owi's main logs"
+<pre><code class="ocaml">let main_src = Logs.Src.creat<span data-count="765">e</span> "owi" ~doc:"Owi's main logs"
 
-let bench_src = Logs.Src.creat<span data-count="763">e</span> "owi-bench" ~doc:"Owi's benchmark logs"
+let bench_src = Logs.Src.creat<span data-count="765">e</span> "owi-bench" ~doc:"Owi's benchmark logs"
 
-include (val Logs.src_lo<span data-count="763">g</span> main_src : Logs.LOG)
+include (val Logs.src_lo<span data-count="765">g</span> main_src : Logs.LOG)
 
 let is_bench_enabled () =
-  <span data-count="30312">m</span>atch Logs.Src.level bench_src with <span data-count="30296">N</span>one -&gt; false | <span data-count="16">S</span>ome _ -&gt; true
+  <span data-count="29622">m</span>atch Logs.Src.level bench_src with <span data-count="29605">N</span>one -&gt; false | <span data-count="16">S</span>ome _ -&gt; true
 
 let is_debug_enabled () =
   <span data-count="425">m</span>atch Logs.Src.level main_src with
@@ -110,8 +110,8 @@ let is_debug_enabled () =
   | <span data-count="1">N</span>one | <span data-count="423">S</span>ome _ -&gt; false
 
 let bench_fn str fn =
-  <span data-count="5201">m</span>atch Logs.Src.level bench_src with
-  | <span data-count="5193">N</span>one -&gt; fn ()
+  <span data-count="5205">m</span>atch Logs.Src.level bench_src with
+  | <span data-count="5197">N</span>one -&gt; fn ()
   | <span data-count="8">S</span>ome _ -&gt;
     let c = Mtime_clock.counter () in
     <span data-count="8">l</span>et r = fn () in
@@ -120,15 +120,15 @@ let bench_fn str fn =
     <span data-count="8">r</span>
 
 let bench f =
-  <span data-count="45">m</span>atch Logs.Src.level bench_src with
-  | <span data-count="25">N</span>one -&gt; ()
+  <span data-count="47">m</span>atch Logs.Src.level bench_src with
+  | <span data-count="27">N</span>one -&gt; ()
   | <span data-count="20">S</span>ome _ -&gt; Logs.info ~src:bench_src f
 
 let setup style_renderer level ~bench =
-  <span data-count="695">F</span>mt_tty.setup_std_outputs ?style_renderer ();
-  <span data-count="695">L</span>ogs.Src.set_level main_src level;
-  <span data-count="695">L</span>ogs.Src.set_level bench_src (if bench then <span data-count="2">S</span>ome Logs.Info else <span data-count="693">N</span>one);
-  <span data-count="695">L</span>ogs.set_reporter (Logs.format_reporte<span data-count="695">r</span> ())
+  <span data-count="697">F</span>mt_tty.setup_std_outputs ?style_renderer ();
+  <span data-count="697">L</span>ogs.Src.set_level main_src level;
+  <span data-count="697">L</span>ogs.Src.set_level bench_src (if bench then <span data-count="2">S</span>ome Logs.Info else <span data-count="695">N</span>one);
+  <span data-count="697">L</span>ogs.set_reporter (Logs.format_reporte<span data-count="697">r</span> ())
 </code></pre>
       </div>
     </div>
