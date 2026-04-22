@@ -928,7 +928,7 @@ let encode_sub_type buf st =
     List.iter (write_indice buf) ids;
     encode_comp_type buf ct
   | { final = false; ids; ct } ->
-    Buffer.add_char buf '\x50';
+    Buffer.add_char buf (if final then '\x4F' else '\x50');
     List.iter (write_indice buf) ids;
     encode_comp_type buf ct
 
