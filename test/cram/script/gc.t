@@ -30,14 +30,11 @@
   $ owi script --no-exhaustion reference/ref_test.wast 2>&1 | grep -oE "Failure.*"
   Failure("Assigned: unimplemented for rec and sub types")
   $ owi script --no-exhaustion reference/return_call_ref.wast 2>&1 | grep -oE ".*Assertion failed"
-       File "src/interpret/interpret.ml", line 1267, characters 4-10: Assertion failed
-  $ owi script --no-exhaustion reference/struct.wast
-  owi: [ERROR] unexpected token ")" in line 4, character 15-16
-  [40]
-  $ owi script --no-exhaustion reference/type-subtyping.wast
-  owi: [ERROR] unexpected token "(" in line 4, character 17-18
-  [40]
-       File "src/interpret/interpret.ml", line 849, characters 4-10: Assertion failed
+       File "src/interpret/interpret.ml", line 1271, characters 4-10: Assertion failed
+  $ owi script --no-exhaustion reference/struct.wast 2>&1 | grep -oE ".*Failure.*"
+       Failure("Assigned: unimplemented for rec and sub types")
+  $ owi script --no-exhaustion reference/type-subtyping.wast 2>&1 | grep -oE ".*Failure.*"
+       Failure("Assigned: unimplemented for rec and sub types")
   $ owi script --no-exhaustion reference/struct.wast 2>&1 | grep -oE "Failure.*"
   Failure("Assigned: unimplemented for rec and sub types")
   $ owi script --no-exhaustion reference/type-subtyping.wast 2>&1 | grep -oE "Failure.*"
