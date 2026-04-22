@@ -153,3 +153,73 @@ let f64 =
      ; Float.min_float
      ; Float.epsilon
     |]
+
+module Collect = struct
+  type t =
+    { i32 : Concrete_i32.t list
+    ; i64 : Concrete_i64.t list
+    ; f32 : Concrete_f32.t list
+    ; f64 : Concrete_f64.t list
+    }
+
+  let empty = { i32 = []; i64 = []; f32 = []; f64 = [] }
+
+  let rec from_instr collect instr =
+    match instr.Annotated.raw with
+    | Binary.I32 (Const n) -> { collect with i32 = n :: collect.i32 }
+    | I64 (Const n) -> { collect with i64 = n :: collect.i64 }
+    | F32 (Const n) -> { collect with f32 = n :: collect.f32 }
+    | F64 (Const n) -> { collect with f64 = n :: collect.f64 }
+    | Block (_, _, e) | Loop (_, _, e) -> from_expr collect e
+    | If_else (_, _, e1, e2) ->
+      let collect = from_expr collect e1 in
+      from_expr collect e2
+    | I32 _ | I64 _ | F32 _ | F64 _ | V128 _ | I8x16 _ | I16x8 _ | I32x4 _
+    | I64x2 _ | Ref _ | Local _ | Global _ | Table _ | Elem _ | Memory _
+    | Data _ | Drop | Select _ | Nop | Unreachable | Br _ | Br_if _ | Br_table _
+    | Br_on_null _ | Br_on_non_null _ | Return | Return_call _
+    | Return_call_ref _ | Return_call_indirect _ | Call _ | Call_indirect _
+    | Call_ref _ | Any_convert_extern | Extern_convert_any | F32x4 _ | F64x2 _
+    | I31 _ | Struct _ | Array _
+    | Br_on_cast (_, _, _)
+    | Br_on_cast_fail (_, _, _) ->
+      collect
+
+  and from_expr collect expr =
+    List.fold_left from_instr collect expr.Annotated.raw
+
+  let from_global _globals _collect = raise @@ Failure "TODO"
+
+  let from_table _tables _collect = raise @@ Failure "TODO"
+
+  let from_mem _memories _collect = raise @@ Failure "TODO"
+
+  let from_func funcs collect =
+    Array.fold_left
+      (fun collect -> function
+        | Origin.Imported _ -> raise @@ Failure "TODO"
+        | Local { Binary.Func.body; type_f = _; locals = _; id = _ } ->
+          from_expr collect body )
+      collect funcs
+
+  let from_elem _elem _collect = raise @@ Failure "TODO"
+
+  let from_data _data _collect = raise @@ Failure "TODO"
+
+  let from_module
+    { Binary.Module.id = _
+    ; types = _
+    ; global
+    ; table
+    ; mem
+    ; func
+    ; tag = _
+    ; elem
+    ; data
+    ; exports = _
+    ; start = _
+    ; custom = _
+    } =
+    empty |> from_global global |> from_table table |> from_mem mem
+    |> from_func func |> from_elem elem |> from_data data
+end
