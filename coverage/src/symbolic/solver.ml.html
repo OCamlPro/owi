@@ -371,72 +371,72 @@ let add_solver solver =
   <span data-count="2">M</span>ulticore.atomic_modify (fun instances -&gt; <span data-count="2">s</span>olver :: instances) instances
 
 let fresh solver_ty () =
-  <span data-count="626">l</span>et module Mapping = (val Smtml.Solver_dispatcher.mappings_of_solve<span data-count="626">r</span> solver_ty)
+  <span data-count="631">l</span>et module Mapping = (val Smtml.Solver_dispatcher.mappings_of_solve<span data-count="631">r</span> solver_ty)
   in
   let module Mapping = Mapping.Fresh.Make () in
   let module Batch = Smtml.Solver.Batch (Mapping) in
   let solver_inst = Batch.create ~logic:QF_BVFP () in
-  <span data-count="623">l</span>et solver = S ((module Batch), solver_inst) in
+  <span data-count="626">l</span>et solver = S ((module Batch), solver_inst) in
   if Log.is_bench_enabled () then <span data-count="2">a</span>dd_solve<span data-count="2">r</span> solver;
-  <span data-count="622">s</span>olver
+  <span data-count="625">s</span>olver
 
 let solver_to_use = ref None
 
 let dls_key =
   Domain.DLS.new_ke<span data-count="765">y</span> (fun () -&gt;
-    <span data-count="626">l</span>et solver_to_use = !solver_to_use in
+    <span data-count="631">l</span>et solver_to_use = !solver_to_use in
     match solver_to_use with
-    | <span data-count="626">S</span>ome solver_to_use -&gt; fresh solver_to_use ()
+    | <span data-count="631">S</span>ome solver_to_use -&gt; fresh solver_to_use ()
     | None -&gt; assert false )
 
-let[@inline] get_current () = <span data-count="24695">D</span>omain.DLS.get dls_key
+let[@inline] get_current () = <span data-count="25607">D</span>omain.DLS.get dls_key
 
 let cache = Smtml.Cache.Strong.creat<span data-count="765">e</span> 64
 
 let cache_mutex = Mutex.creat<span data-count="765">e</span> ()
 
 let check pc condition =
-  <span data-count="27251">l</span>et query = Smtml.Expr.Set.add (Smtml.Typed.Unsafe.unwra<span data-count="27251">p</span> condition) pc in
-  <span data-count="27251">l</span>et cached =
+  <span data-count="27745">l</span>et query = Smtml.Expr.Set.add (Smtml.Typed.Unsafe.unwra<span data-count="27745">p</span> condition) pc in
+  <span data-count="27745">l</span>et cached =
     Mutex.protect cache_mutex (fun () -&gt;
-      <span data-count="27251">m</span>atch Smtml.Cache.Strong.find_opt cache query with
-      | <span data-count="2520">S</span>ome sat -&gt; Some sat
-      | <span data-count="24731">N</span>one -&gt; (
+      <span data-count="27745">m</span>atch Smtml.Cache.Strong.find_opt cache query with
+      | <span data-count="2581">S</span>ome sat -&gt; Some sat
+      | <span data-count="25164">N</span>one -&gt; (
         let neg_query =
           let neg_condition = Smtml.Typed.Bool.not condition in
-          <span data-count="24731">S</span>mtml.Expr.Set.ad<span data-count="24731">d</span> (Smtml.Typed.Unsafe.unwra<span data-count="24731">p</span> neg_condition) pc
+          <span data-count="25164">S</span>mtml.Expr.Set.ad<span data-count="25164">d</span> (Smtml.Typed.Unsafe.unwra<span data-count="25164">p</span> neg_condition) pc
         in
         match Smtml.Cache.Strong.find_opt cache neg_query with
-        | <span data-count="898">S</span>ome `Unsat -&gt;
+        | <span data-count="863">S</span>ome `Unsat -&gt;
           (* this is an optimisation under the assumption that the PC is always SAT (i.e. we are performing eager pruning), in such a case, when a branch is unsat, we don't have to check the reachability of the other's branch negation, because it is always going to be SAT. *)
           Some `Sat
-        | <span data-count="13406">N</span>one | <span data-count="10427">S</span>ome _ -&gt;
+        | <span data-count="13852">N</span>one | <span data-count="10449">S</span>ome _ -&gt;
           (* we can't deduce anything *)
           None ) )
   in
-  <span data-count="27251">m</span>atch cached with
-  | <span data-count="3418">S</span>ome sat -&gt; sat
-  | <span data-count="23833">N</span>one -&gt;
+  <span data-count="27745">m</span>atch cached with
+  | <span data-count="3444">S</span>ome sat -&gt; sat
+  | <span data-count="24301">N</span>one -&gt;
     (* there was nothing useful in the cache and we have to make the check for real! *)
     let (S (solver_module, s)) = get_current () in
-    <span data-count="23830">l</span>et module Solver = (val solver_module) in
+    <span data-count="24296">l</span>et module Solver = (val solver_module) in
     let sat = Solver.check_set s query in
-    <span data-count="23824">M</span>utex.protect cache_mutex (fun () -&gt;
+    <span data-count="24288">M</span>utex.protect cache_mutex (fun () -&gt;
       (* using `add` is better than `replace` because it avoid comparing the set again which might be huge! *)
-      <span data-count="23825">S</span>mtml.Cache.Strong.add cache query sat );
-    <span data-count="23825">s</span>at
+      <span data-count="24288">S</span>mtml.Cache.Strong.add cache query sat );
+    <span data-count="24288">s</span>at
 
 let model_of_path_condition ~path_condition : Smtml.Model.t Option.t =
-  <span data-count="254">l</span>et exception Unknown in
+  <span data-count="256">l</span>et exception Unknown in
   let (S (solver_module, s)) = get_current () in
-  <span data-count="254">l</span>et module Solver = (val solver_module) in
+  <span data-count="256">l</span>et module Solver = (val solver_module) in
   try
     let sub_conditions = Symex.Path_condition.to_list path_condition in
-    <span data-count="254">l</span>et models =
+    <span data-count="256">l</span>et models =
       List.map
         (fun pc -&gt;
-          <span data-count="305">m</span>atch Solver.get_sat_model s pc with
-          | <span data-count="305">`</span>Model model -&gt; model
+          <span data-count="307">m</span>atch Solver.get_sat_model s pc with
+          | <span data-count="306">`</span>Model model -&gt; model
           | <span data-count="0">`</span>Unknown -&gt;
             (* it can happen if the solver is interrupted, otherwise it is an error, we raise, so the function can return an option that will be handled by the called *)
             raise Unknown
@@ -446,16 +446,16 @@ let model_of_path_condition ~path_condition : Smtml.Model.t Option.t =
         sub_conditions
     in
     (* We build the new complete model by merging all "sub models" *)
-    <span data-count="254">l</span>et model = Hashtbl.create 64 in
-    <span data-count="254">L</span>ist.iter (Hashtbl.ite<span data-count="254">r</span> (Hashtbl.ad<span data-count="254">d</span> model)) models;
-    <span data-count="254">S</span>ome model
+    <span data-count="255">l</span>et model = Hashtbl.create 64 in
+    <span data-count="255">L</span>ist.iter (Hashtbl.ite<span data-count="255">r</span> (Hashtbl.ad<span data-count="255">d</span> model)) models;
+    <span data-count="255">S</span>ome model
   with <span data-count="0">U</span>nknown -&gt; None
 
 let model_of_set ~symbol_scopes ~set =
-  <span data-count="608">l</span>et (S (solver_module, s)) = get_current () in
-  <span data-count="608">l</span>et module Solver = (val solver_module) in
+  <span data-count="1050">l</span>et (S (solver_module, s)) = get_current () in
+  <span data-count="1050">l</span>et module Solver = (val solver_module) in
   let symbols = Symbol_scope.only_symbols symbol_scopes in
-  <span data-count="608">S</span>olver.get_sat_model ~symbols s set
+  <span data-count="1050">S</span>olver.get_sat_model ~symbols s set
 
 let empty_stats = Smtml.Statistics.Map.empty
 
