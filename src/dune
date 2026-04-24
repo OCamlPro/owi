@@ -25,6 +25,7 @@
   cmd_haskell
   cmd_instrument_label
   cmd_iso
+  cmd_llvm
   cmd_replay
   cmd_run
   cmd_rust

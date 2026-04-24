@@ -12,6 +12,7 @@ module Cmd_fuzz = Cmd_fuzz
 module Cmd_haskell = Cmd_haskell
 module Cmd_instrument_label = Cmd_instrument_label
 module Cmd_iso = Cmd_iso
+module Cmd_llvm = Cmd_llvm
 module Cmd_replay = Cmd_replay
 module Cmd_run = Cmd_run
 module Cmd_rust = Cmd_rust
