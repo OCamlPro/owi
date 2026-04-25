@@ -499,6 +499,22 @@ let iso_cmd =
     ~no_stop_at_failure ~no_value ~seed ~solver ~unsafe ~workers
     ~no_worker_isolation ~workspace ~model_out_file ~with_breadcrumbs
 
+(* owi llvm *)
+
+let llvm_info =
+  let doc =
+    "Compile LLVM IR/bitcode to Wasm and run the symbolic interpreter on it"
+  in
+  let man = [] @ shared_man in
+  Cmd.info "llvm" ~version ~doc ~sdocs ~man
+
+let llvm_cmd =
+  let+ files
+  and+ out_file
+  and+ () = setup_log
+  and+ symbolic_parameters = symbolic_parameters None in
+  Cmd_llvm.cmd ~symbolic_parameters ~files ~out_file
+
 (* owi replay *)
 
 let replay_info =
@@ -701,6 +717,7 @@ let cli =
         [ Cmd.v instrument_label_info instrument_label_cmd ]
     ; Cmd.v haskell_info haskell_cmd
     ; Cmd.v iso_info iso_cmd
+    ; Cmd.v llvm_info llvm_cmd
     ; Cmd.v replay_info replay_cmd
     ; Cmd.v run_info run_cmd
     ; Cmd.v rust_info rust_cmd
