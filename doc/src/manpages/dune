@@ -10,6 +10,7 @@
   owi-fmt.md
   owi-instrument.md
   owi-iso.md
+  owi-llvm.md
   owi-replay.md
   owi-run.md
   owi-rust.md
