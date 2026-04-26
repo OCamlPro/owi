@@ -42,6 +42,7 @@
     - [`owi fmt`](manpages/owi-fmt.md)
     - [`owi instrument`](manpages/owi-instrument.md)
     - [`owi iso`](manpages/owi-iso.md)
+    - [`owi llvm`](manpages/owi-llvm.md)
     - [`owi replay`](manpages/owi-replay.md)
     - [`owi run`](manpages/owi-run.md)
     - [`owi rust`](manpages/owi-rust.md)
