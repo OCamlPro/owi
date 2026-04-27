@@ -148,6 +148,14 @@ module type S = sig
   val apply_f64_f64_f64 : t -> (f64 -> f64 -> f64) -> t
 
   val apply_f64_f64_boolean : t -> (f64 -> f64 -> boolean) -> t
+
+  val apply_v128_v128 : t -> (v128 -> v128) -> t
+
+  val apply_v128_boolean : t -> (v128 -> boolean) -> t
+
+  val apply_v128_i32 : t -> (v128 -> i32) -> t
+
+  val apply_v128_v128_v128 : t -> (v128 -> v128 -> v128) -> t
 end
 
 module Make (Value : Value_intf.T) :
@@ -375,4 +383,20 @@ module Make (Value : Value_intf.T) :
   let apply_f64_f64_boolean s f =
     let (hd1, hd2), tl = pop2_f64 s in
     push_bool tl (f hd1 hd2)
+
+  let apply_v128_v128 s f =
+    let hd, tl = pop_v128 s in
+    push_v128 tl (f hd)
+
+  let apply_v128_boolean s f =
+    let hd, tl = pop_v128 s in
+    push_bool tl (f hd)
+
+  let apply_v128_i32 s f =
+    let hd, tl = pop_v128 s in
+    push_i32 tl (f hd)
+
+  let apply_v128_v128_v128 s f =
+    let (hd1, hd2), tl = pop2_v128 s in
+    push_v128 tl (f hd1 hd2)
 end

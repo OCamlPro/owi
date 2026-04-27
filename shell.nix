@@ -4,6 +4,10 @@
 }:
 
 let
+  bootstrapGhcWasm = pkgs.fetchurl {
+    url = "https://gitlab.haskell.org/haskell-wasm/ghc-wasm-meta/-/raw/master/bootstrap.sh";
+    sha256 = "sha256-ma3MaYD8TWhTGb/Sohivp08GJMYR/2Nqt5ymuX7cvJc=";
+  };
   ocamlPackages = pkgs.ocamlPackages.overrideScope (self: super: {
     ocaml = (super.ocaml.overrideAttrs {
       doCheck = false;
@@ -29,7 +33,7 @@ let
     smtml = super.smtml.overrideAttrs (old: {
       src = fetchGit {
         url = "https://github.com/formalsec/smtml";
-        rev = "d1f09d5aeb4c6cbde5f2604c3e25915fbb28817d";
+        rev = "475b438b64ee2ccf6016d7d185cca31c3ccdf62d";
       };
     });
     symex = super.symex.overrideAttrs (old: {
@@ -128,10 +132,13 @@ pkgs.mkShell {
     ocb
     odoc
     sedlex
-    # unwrapped because wrapped tries to enforce a target and the build script wants to do its own thing
-    pkgs.llvmPackages.clang-unwrapped
+    pkgs.curl
+    pkgs.git
+    pkgs.jq
     # lld + llc isn't included in unwrapped, so we pull it in here
     pkgs.llvmPackages.bintools-unwrapped
+    # unwrapped because wrapped tries to enforce a target and the build script wants to do its own thing
+    pkgs.llvmPackages.clang-unwrapped
     tinygo
     pkgs.rustc
     pkgs.zig
@@ -172,5 +179,13 @@ pkgs.mkShell {
       pkgs.rustc
       pkgs.zig
     ]}
+
+    # uncomment if you want Haskell support
+    #if [ ! -f "$HOME/.ghc-wasm/env" ]; then
+    #  echo "Running ghc-wasm bootstrap..."
+    #  bash "${bootstrapGhcWasm}"
+    #fi
+    #
+    #source "$HOME/.ghc-wasm/env"
   '';
 }

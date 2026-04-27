@@ -234,7 +234,26 @@ let convert_f64_instr : Binary.f64_instr -> Text.f64_instr = function
 
 let convert_v128_instr : Binary.v128_instr -> Text.v128_instr = function
   | Const n -> Const n
+  | Not -> Not
   | And -> And
+  | Or -> Or
+  | Any_true -> Any_true
+  | Load16x4_s (indice, memarg) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Load16x4_s (indice, memarg)
+  | Load16x4_u (indice, memarg) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Load16x4_u (indice, memarg)
+  | Load32_lane (indice, memarg, n) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Load32_lane (indice, memarg, n)
+  | Load64_zero (indice, memarg) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Load64_zero (indice, memarg)
   | Load (indice, memarg) ->
     let indice = convert_indice indice in
     let memarg = convert_memarg memarg in

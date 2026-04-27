@@ -263,13 +263,13 @@ let funop_32 : instr gen =
 let funop_64 : instr gen =
   let+ funop =
     choose
-      [ const Abs
-      ; const Neg
-      ; const Sqrt
-      ; const Ceil
-      ; const Floor
-      ; const Trunc
-      ; const Nearest
+      [ const (Abs : f64_instr)
+      ; const (Neg : f64_instr)
+      ; const (Sqrt : f64_instr)
+      ; const (Ceil : f64_instr)
+      ; const (Floor : f64_instr)
+      ; const (Trunc : f64_instr)
+      ; const (Nearest : f64_instr)
       ]
   in
   F64 funop
@@ -291,11 +291,11 @@ let frelop_64 : instr gen =
   let+ frelop =
     choose
       [ const (Owi.Text.Eq : f64_instr)
-      ; const Ne
-      ; const Lt
-      ; const Gt
-      ; const Le
-      ; const Ge
+      ; const (Ne : f64_instr)
+      ; const (Lt : f64_instr)
+      ; const (Gt : f64_instr)
+      ; const (Le : f64_instr)
+      ; const (Ge : f64_instr)
       ]
   in
   F64 frelop

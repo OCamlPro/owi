@@ -37,6 +37,7 @@ type err =
   | `Multiple_start_sections
   | `No_error
   | `Parse_fail of string
+  | `Proc_exit of int
   | `Size_minimum_greater_than_maximum
   | `Start_function
   | `Timeout
@@ -130,6 +131,7 @@ let rec err_to_string = function
   | `Multiple_start_sections -> "multiple start sections"
   | `No_error -> "no error"
   | `Parse_fail msg -> msg
+  | `Proc_exit n -> Fmt.str "proc_exit %d" n
   | `Size_minimum_greater_than_maximum ->
     "size minimum must not be greater than maximum"
   | `Start_function -> "start function must have type [] -> []"
@@ -284,3 +286,4 @@ let err_to_exit_code = function
   | `Invalid_character_in_memory -> 97
   | `Offset_out_of_range -> 98
   | `Table_size -> 99
+  | `Proc_exit _n -> 100

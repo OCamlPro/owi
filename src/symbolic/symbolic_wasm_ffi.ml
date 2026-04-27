@@ -4,6 +4,33 @@
 
 module Expr = Smtml.Expr
 
+let rec make_str_null_terminated m accu i =
+  let open Symbolic_choice in
+  let* p = Symbolic_memory.load_8_u m (Symbolic_i32.of_int32 i) in
+  match Smtml.Typed.view p with
+  | Val (Bitv bv) when Smtml.Bitvector.numbits bv = 32 ->
+    let c = Smtml.Bitvector.to_int32 bv in
+    let ch = char_of_int (Int32.to_int c) in
+    if Char.equal ch '\x00' then return (List.rev accu |> Array.of_list)
+    else make_str_null_terminated m (ch :: accu) (Int32.add i (Int32.of_int 1))
+  | _ -> assert false
+
+let make_str_of_length ~mem ~ptr ~len =
+  let rec aux acc i =
+    let open Symbolic_choice in
+    if i >= len then return (List.rev acc |> Array.of_list)
+    else
+      let* p = Symbolic_memory.load_8_u mem (Symbolic_i32.of_int (ptr + i)) in
+      match Smtml.Typed.view p with
+      | Val (Bitv bv) when Smtml.Bitvector.numbits bv = 32 ->
+        let c = Smtml.Bitvector.to_int32 bv in
+        let ch = char_of_int (Int32.to_int c) in
+        let i = succ i in
+        aux (ch :: acc) i
+      | _ -> assert false
+  in
+  aux [] 0
+
 (* The constraint is used here to make sure we don't forget to define one of the expected FFI functions, this whole file is further constrained such that if one function of M is unused in the FFI module below, an error will be displayed *)
 module M :
   Wasm_ffi_intf.S0
@@ -103,34 +130,6 @@ module M :
     Log.app (fun m -> m "%c@?" (char_of_int (Int32.to_int c)));
     return ()
 
-  let rec make_str_null_terminated m accu i =
-    let open Symbolic_choice in
-    let* p = Symbolic_memory.load_8_u m (Symbolic_i32.of_int32 i) in
-    match Smtml.Typed.view p with
-    | Val (Bitv bv) when Smtml.Bitvector.numbits bv = 32 ->
-      let c = Smtml.Bitvector.to_int32 bv in
-      let ch = char_of_int (Int32.to_int c) in
-      if Char.equal ch '\x00' then return (List.rev accu |> Array.of_list)
-      else
-        make_str_null_terminated m (ch :: accu) (Int32.add i (Int32.of_int 1))
-    | _ -> assert false
-
-  let make_str_of_length ~mem ~ptr ~len =
-    let rec aux acc i =
-      let open Symbolic_choice in
-      if i >= len then return (List.rev acc |> Array.of_list)
-      else
-        let* p = Symbolic_memory.load_8_u mem (Symbolic_i32.of_int (ptr + i)) in
-        match Smtml.Typed.view p with
-        | Val (Bitv bv) when Smtml.Bitvector.numbits bv = 32 ->
-          let c = Smtml.Bitvector.to_int32 bv in
-          let ch = char_of_int (Int32.to_int c) in
-          let i = succ i in
-          aux (ch :: acc) i
-        | _ -> assert false
-    in
-    aux [] 0
-
   let cov_label_is_covered id =
     let open Symbolic_choice in
     let* id = select_i32 id in
@@ -220,19 +219,108 @@ let symbolic_extern_module =
   in
   { Extern.Module.functions; func_type = Symbolic_extern_func.extern_type }
 
-let fd_write _ _ _ _ = assert false
+let args_get _ _ =
+  (* TODO *)
+  Log.warn (fun m -> m "used dummy args_get implementation");
+  Symbolic_choice.return Symbolic_i32.zero
 
-let proc_exit _ =
-  Log.warn (fun m -> m "used dummy proc_exit implementation");
-  Symbolic_choice.return ()
+let args_sizes_get _ _ =
+  (* TODO *)
+  Log.warn (fun m -> m "used dummy args_sizes_get implementation");
+
+  Symbolic_choice.return Symbolic_i32.zero
+
+let clock_time_get _ _ _ =
+  (* TODO *)
+  Log.warn (fun m -> m "used dummy clock_time_get implementation");
+  Symbolic_choice.return Symbolic_i32.zero
+
+let environ_get _ _ = assert false
+
+let environ_sizes_get _ _ =
+  (* TODO *)
+  Log.warn (fun m -> m "used dummy environ_sizes_get implementation");
+  Symbolic_choice.return Symbolic_i32.zero
+
+let fd_close _ = assert false
+
+let fd_fdstat_get _ _ = assert false
+
+let fd_fdstat_set_flags _ _ = assert false
+
+let fd_filestat_get _ _ = assert false
+
+let fd_filestat_set_size _ _ = assert false
+
+let fd_prestat_get _ _ = assert false
+
+let fd_prestat_dir_name _ _ _ = assert false
+
+let fd_read _ _ _ _ = assert false
+
+let fd_seek _ _ _ _ = assert false
+
+let fd_write _ _ _ _ _ =
+  (* TODO *)
+  Log.warn (fun m -> m "used dummy fd_write implementation");
+  Symbolic_choice.return (Symbolic_i32.of_int 1)
+
+let path_create_directory _ _ _ = assert false
+
+let path_filestat_get _ _ _ _ _ = assert false
+
+let path_open _ _ _ _ _ _ _ _ _ = assert false
+
+let poll_oneoff _ _ _ _ = assert false
+
+let proc_exit (code : Symbolic_i32.t) =
+  let open Symbolic_choice in
+  let* code = select_i32 code in
+  Log.app (fun m -> m "proc_exit called with code=%ld" code);
+  if Concrete_i32.eq code 0l then abort ()
+  else trap (`Proc_exit (Concrete_i32.to_int code))
 
 let random_get _ _ =
+  (* TODO *)
   Log.warn (fun m -> m "used dummy random_get implementation");
-  Symbolic_choice.return @@ Symbolic_i32.zero
+  Symbolic_choice.return Symbolic_i32.zero
 
 let wasi_snapshot_preview1 =
   let functions =
-    [ ("fd_write", Extern_func (i32 ^-> i32 ^-> i32 ^-> i32 ^->. i32, fd_write))
+    [ ("args_get", Extern_func (i32 ^-> i32 ^->. i32, args_get))
+    ; ("args_sizes_get", Extern_func (i32 ^-> i32 ^->. i32, args_sizes_get))
+    ; ("environ_get", Extern_func (i32 ^-> i32 ^->. i32, environ_get))
+    ; ( "environ_sizes_get"
+      , Extern_func (i32 ^-> i32 ^->. i32, environ_sizes_get) )
+    ; ( "clock_time_get"
+      , Extern_func (i32 ^-> i64 ^-> i32 ^->. i32, clock_time_get) )
+    ; ("fd_close", Extern_func (i32 ^->. i32, fd_close))
+    ; ("fd_fdstat_get", Extern_func (i32 ^-> i32 ^->. i32, fd_fdstat_get))
+    ; ( "fd_fdstat_set_flags"
+      , Extern_func (i32 ^-> i32 ^->. i32, fd_fdstat_set_flags) )
+    ; ("fd_filestat_get", Extern_func (i32 ^-> i32 ^->. i32, fd_filestat_get))
+    ; ( "fd_filestat_set_size"
+      , Extern_func (i32 ^-> i64 ^->. i32, fd_filestat_set_size) )
+    ; ("fd_prestat_get", Extern_func (i32 ^-> i32 ^->. i32, fd_prestat_get))
+    ; ( "fd_prestat_dir_name"
+      , Extern_func (i32 ^-> i32 ^-> i32 ^->. i32, fd_prestat_dir_name) )
+    ; ("fd_read", Extern_func (i32 ^-> i32 ^-> i32 ^-> i32 ^->. i32, fd_read))
+    ; ("fd_seek", Extern_func (i32 ^-> i64 ^-> i32 ^-> i32 ^->. i32, fd_seek))
+    ; ( "fd_write"
+      , Extern_func (memory 0 ^-> i32 ^-> i32 ^-> i32 ^-> i32 ^->. i32, fd_write)
+      )
+    ; ( "path_create_directory"
+      , Extern_func (i32 ^-> i32 ^-> i32 ^->. i32, path_create_directory) )
+    ; ( "path_filestat_get"
+      , Extern_func
+          (i32 ^-> i32 ^-> i32 ^-> i32 ^-> i32 ^->. i32, path_filestat_get) )
+    ; ( "path_open"
+      , Extern_func
+          ( i32 ^-> i32 ^-> i32 ^-> i32 ^-> i32 ^-> i64 ^-> i64 ^-> i32 ^-> i32
+            ^->. i32
+          , path_open ) )
+    ; ( "poll_oneoff"
+      , Extern_func (i32 ^-> i32 ^-> i32 ^-> i32 ^->. i32, poll_oneoff) )
     ; ("proc_exit", Extern_func (i32 ^->. unit, proc_exit))
     ; ("random_get", Extern_func (i32 ^-> i32 ^->. i32, random_get))
     ]

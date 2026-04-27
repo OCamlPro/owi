@@ -96,3 +96,23 @@ let pp = Fmt.int32
 let of_int32 (v : int32) : t = v
 
 let to_int32 (v : t) : int32 = v
+
+let min_int = Int32.min_int
+
+let eqz (v : t) = eq v zero
+
+let ( = ) = eq
+
+let ( + ) = add
+
+let of_i16x2 a b =
+  let lower = logand (of_int a) 0xFFFFl in
+  let upper = shl (of_int b) 16l in
+  logor lower upper
+
+let of_i8x4 a b c d =
+  of_i16x2 (Concrete_i16.of_i8x2 a b) (Concrete_i16.of_i8x2 c d)
+
+let to_i8 x = logand x 0xFFl |> to_int
+
+let to_i16 x = logand x 0xFFFFl |> to_int

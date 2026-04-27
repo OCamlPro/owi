@@ -97,3 +97,31 @@ let pp = Fmt.int64
 let of_int64 (v : int64) : t = v
 
 let to_int64 (v : t) : int64 = v
+
+let min_int = Int64.min_int
+
+let eqz (v : t) = eq v zero
+
+let ( = ) = eq
+
+let ( + ) = add
+
+let ( * ) = mul
+
+let ( / ) = div
+
+let of_i32x2 a b =
+  let lower = logand (Concrete_i32.to_int64 a) 0xFFFFFFFFL in
+  let upper = shl (Concrete_i32.to_int64 b) 32L in
+  logor lower upper
+
+let of_i16x4 a b c d =
+  of_i32x2 (Concrete_i32.of_i16x2 a b) (Concrete_i32.of_i16x2 c d)
+
+let of_i8x8 a b c d e f g h =
+  of_i32x2 (Concrete_i32.of_i8x4 a b c d) (Concrete_i32.of_i8x4 e f g h)
+
+let to_i32x2 a =
+  let low = to_int32 a in
+  let high = to_int32 (shift_right_logical a 32) in
+  (low, high)

@@ -40,3 +40,15 @@ let logor e1 e2 =
 let eq_concrete (e : t) (c : Int32.t) : Symbolic_boolean.t =
   let c = of_int32 c in
   Smtml.Typed.Bitv32.eq c e
+
+let min_int = of_int32 Int32.min_int
+
+let eqz (v : t) = eq v zero
+
+let ( = ) = eq
+
+let ( + ) = add
+
+let to_i8 x = Smtml.Typed.Bitv32.extract x ~high:7 ~low:0
+
+let to_i16 x = Smtml.Typed.Bitv32.extract x ~high:15 ~low:0
