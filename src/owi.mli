@@ -1765,10 +1765,10 @@ end
 
 module Cmd_llvm : sig
   val cmd :
-      symbolic_parameters:Symbolic_parameters.t
-  -> files:Fpath.t list
-  -> out_file:Fpath.t option
-  -> unit Result.t
+       symbolic_parameters:Symbolic_parameters.t
+    -> files:Fpath.t list
+    -> out_file:Fpath.t option
+    -> unit Result.t
 end
 
 module Cmd_replay : sig

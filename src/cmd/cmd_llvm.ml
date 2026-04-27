@@ -9,8 +9,7 @@ let resolve_binary name =
   match OS.Cmd.resolve @@ Cmd.v name with
   | Error _ ->
     Fmt.error_msg
-      "The `%s` binary was not found, please make sure it is in your path."
-      name
+      "The `%s` binary was not found, please make sure it is in your path." name
   | Ok _ as ok -> ok
 
 let err_output =
@@ -30,8 +29,8 @@ let bitcode_of_input ~workspace ~llvm_as_bin file : Fpath.t Result.t =
       | Error (`Msg e) ->
         Log.debug (fun m -> m "llvm-as failed: %s" e);
         Fmt.error_msg
-          "llvm-as failed: run with -vv to get the full error message if it was \
-           not displayed above"
+          "llvm-as failed: run with -vv to get the full error message if it \
+           was not displayed above"
     in
     out_bc
   | ext ->
@@ -45,9 +44,7 @@ let compile ~workspace ~entry_point ~out_file (files : Fpath.t list) :
   let* llc_bin = resolve_binary "llc" in
   let* wasmld_bin = resolve_binary "wasm-ld" in
 
-  let* bc_files =
-    list_map (bitcode_of_input ~workspace ~llvm_as_bin) files
-  in
+  let* bc_files = list_map (bitcode_of_input ~workspace ~llvm_as_bin) files in
 
   let files_bc = Cmd.of_list (List.map Cmd.p bc_files) in
   let llc_cmd : Cmd.t =
@@ -63,7 +60,9 @@ let compile ~workspace ~entry_point ~out_file (files : Fpath.t list) :
       Fmt.error_msg "llc failed: run with -vv to get the full error message"
   in
 
-  let files_o = Cmd.of_list (List.map (fun file -> Cmd.p Fpath.(file -+ ".o")) bc_files) in
+  let files_o =
+    Cmd.of_list (List.map (fun file -> Cmd.p Fpath.(file -+ ".o")) bc_files)
+  in
 
   let out = Option.value ~default:Fpath.(workspace / "a.out.wasm") out_file in
 

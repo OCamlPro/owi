@@ -1,3 +1,9 @@
 (cram
- (deps %{bin:owi} bad.txt simple.ll simple.bc trap_div_zero.ll trap_div_zero.bc)
+ (deps
+  %{bin:owi}
+  bad.txt
+  simple.ll
+  simple.bc
+  trap_div_zero.ll
+  trap_div_zero.bc)
  (alias quicktest))
