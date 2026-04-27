@@ -3,7 +3,7 @@
 (library
  (public_name owi)
  (modules
-  abs_datastructures
+  abs_stack
   abs_driver
   abs_extern_func
   abs_value
@@ -63,7 +63,6 @@
   concrete_wasm_ffi
   control_flow_graph
   data_intf
-  denot_concrete
   elem_intf
   env_intf
   exploration_smart

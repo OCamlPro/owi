@@ -1573,9 +1573,9 @@ module Abs_driver : sig
     -> unit
 end
 
-module Denot_concrete : sig
+(* module Denot_concrete : sig
   val run : no_input:bool -> Binary.Module.t Result.t -> unit Result.t
-end
+end *)
 
 module Interpret : sig
   module type Parameters = sig

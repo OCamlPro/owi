@@ -1,4 +1,5 @@
 open Syntax
+module Stack = Abs_stack
 
 type t =
   | I32
@@ -8,7 +9,7 @@ type v =
   | I32 of int32
   | I64 of int64
 
-type sigma = v list
+type sigma = v Stack.t
 
 type bf =
   | Block
@@ -30,7 +31,7 @@ module Map = Map.Make (Int)
 
 type e = v Map.t
 
-type state = (l option * sigma * e) list
+type states = (l option * sigma * e) list
 
 (*=========================================================================*)
 
@@ -58,15 +59,14 @@ let pp_map fmt map =
        Fmt.pf fmt "%d->%a" k pp_v v ) )
     bindings
 
-let print_state (state : state) =
+let print_state (states : states) =
   Fmt.pr "%a@."
     (Fmt.list ~sep:(Fmt.any " ::@; ") (fun fmt (l, sigma, e) ->
        Fmt.pf fmt "@[<hov>ℓ:%a;@;σ:[%a];@;ρ:%a@]"
          (Fmt.option pp_l ~none:(Fmt.any "∅"))
          l
-         (Fmt.list ~sep:(Fmt.any ",") pp_v)
-         sigma pp_map e ) )
-    state
+         (Stack.pp pp_v) sigma pp_map e ) )
+    states
 
 let rec input_loop state =
   match In_channel.input_line In_channel.stdin with
@@ -95,8 +95,27 @@ let func_type_to_bt ((params, results) : Binary.func_type) =
 
 (*=========================================================================*)
 
-let eval_ibinop (state : state) (size : Text.nn) (op : Text.ibinop) :
-  state Result.t =
+module Binop = struct
+  (* let run_op op e1 e2 = *)
+  (*   match op with *)
+  (*   | `Plus -> *)
+  (*       match e1 with *)
+  (*       | I32  -> Int32.add *)
+  (*       | I64 -> Int64.add *)
+
+  (* let binop stack op = *)
+  (*   let e1, e2, stack = Stack.pop_2 stack in *)
+  (*   match e1, e2 with *)
+  (*   | I64 e1, I64 e2 -> *)
+  (*   | I32 e1, I32 e2 -> *)
+
+  (* let add state size = *)
+  (*   assert false *)
+
+end
+
+let eval_ibinop (state : states) (size : Text.nn) (op : Text.ibinop) :
+  states Result.t =
   match state with
   | (l, sigma, rho) :: state' -> begin
     match size with
@@ -133,7 +152,7 @@ let eval_ibinop (state : state) (size : Text.nn) (op : Text.ibinop) :
   end
   | [] -> Fmt.error_msg "empty state"
 
-let eval_irelop (state : state) (size : Text.nn) (op : Text.irelop) =
+let eval_irelop (state : states) (size : Text.nn) (op : Text.irelop) =
   match state with
   | (l, sigma, rho) :: state' -> begin
     match size with
@@ -178,10 +197,33 @@ let eval_irelop (state : state) (size : Text.nn) (op : Text.irelop) =
   end
   | [] -> assert false
 
+let i32_binop stack op =
+  let v1, v2, stack = Stack.pop_2 stack in
+  match (v1, v2) with
+  | I32 i1, I32 i2 -> Stack.push stack (I32 (op i1 i2))
+  | _ -> assert false
+
+  
+
+let eval_i32 (l, sigma, rho) : Binary.i32_instr -> _ = function
+  | Binary.Const i -> 
+      let sigma = Stack.push sigma (I32 i) in
+      (l, sigma, rho)
+  | Add -> 
+      let sigma = (i32_binop sigma (Int32.add)) in
+      (l, sigma, rho)
+  | Sub -> (
+      let sigma = (i32_binop sigma (Int32.sub)) in
+      (l, sigma, rho))
+  | _ -> assert false
+
+let eval_i64 (l, sigma, rho) : Binary.i32_instr -> _ = function
+  | _ -> assert false
+
 let rec eval_instr ~no_input (instrs : Binary.instr Annotated.t list)
-  (state : state) : state Result.t =
-  let* (l, sigma, rho), state' =
-    match state with
+  (states : states) : states Result.t =
+  let* (l, sigma, rho) as state, states' =
+    match states with
     | (l, sigma, rho) :: state' -> Ok ((l, sigma, rho), state')
     | [] -> Fmt.error_msg "eval_instr: empty state"
   in
@@ -190,37 +232,31 @@ let rec eval_instr ~no_input (instrs : Binary.instr Annotated.t list)
     if no_input then (
       let instr_str = Fmt.str "%a" (Binary.pp_instr ~short:false) i.raw in
       Fmt.pr "# %-40s" instr_str;
-      print_state state )
+      print_state states )
     else Fmt.pr "# %a@." (Binary.pp_instr ~short:false) i.raw;
     let* res, res_instrs =
       begin match i.raw with
-      | Binary.I32_const i -> Ok ((l, I32 i :: sigma, rho) :: state', instrs)
-      | I64_const i -> Ok ((l, I64 i :: sigma, rho) :: state', instrs)
-      | I_binop (size, op) ->
-        let+ res = eval_ibinop state size op in
-        (res, instrs)
-      | I_relop (nn, relop) ->
-        let+ res = eval_irelop state nn relop in
-        (res, instrs)
+      | Binary.I32 instr -> Ok (eval_i32 state instr :: states', instrs)
+      | Binary.I64 instr -> Ok (eval_i64 state instr :: states', instrs)
       | Local_get i -> (
         match Map.find_opt i rho with
         | None -> Fmt.error_msg "local.get: local %i is not set" i
-        | Some v -> Ok ((l, v :: sigma, rho) :: state', instrs) )
+        | Some v -> Ok ((l, v :: sigma, rho) :: states', instrs) )
       | Local_set i -> (
         match sigma with
         | v :: sigma ->
           let rho = Map.add i v rho in
-          Ok ((l, sigma, rho) :: state', instrs)
+          Ok ((l, sigma, rho) :: states', instrs)
         | _ -> Fmt.error_msg "local.set: empty stack" )
       | Local_tee i -> (
         match sigma with
         | v :: sigma ->
           let rho = Map.add i v rho in
-          Ok ((l, v :: sigma, rho) :: state', instrs)
+          Ok ((l, v :: sigma, rho) :: states', instrs)
         | _ -> Fmt.error_msg "local.tee: empty stack" )
       | Drop -> (
         match sigma with
-        | _ :: sigma -> Ok ((l, sigma, rho) :: state', instrs)
+        | _ :: sigma -> Ok ((l, sigma, rho) :: states', instrs)
         | [] -> Fmt.error_msg "drop: empty stack" )
       | Unreachable -> Fmt.error_msg "unreachable"
       | Block (_str_opt, bt, block_instrs) -> (
@@ -232,10 +268,10 @@ let rec eval_instr ~no_input (instrs : Binary.instr Annotated.t list)
         let l' = Some { form = Block; ty; code = [] } in
         let args = List.take (List.length ty.arg) sigma in
         let+ res =
-          eval_instr ~no_input block_instrs.raw ((l', args, rho) :: state)
+          eval_instr ~no_input block_instrs.raw ((l', args, rho) :: states)
         in
         match res with
-        | (_, sigma', rho') :: _ -> ((l, sigma' @ sigma, rho') :: state', instrs)
+        | (_, sigma', rho') :: _ -> ((l, sigma' @ sigma, rho') :: states', instrs)
         | [] -> assert false )
       | Loop (_str_opt, bt, block_instrs) -> (
         let ty =
@@ -246,10 +282,10 @@ let rec eval_instr ~no_input (instrs : Binary.instr Annotated.t list)
         let l' = Some { form = Loop; ty; code = block_instrs.raw } in
         let args = List.take (List.length ty.arg) sigma in
         let+ res =
-          eval_instr ~no_input block_instrs.raw ((l', args, rho) :: state)
+          eval_instr ~no_input block_instrs.raw ((l', args, rho) :: states)
         in
         match res with
-        | (_, sigma', rho') :: _ -> ((l, sigma' @ sigma, rho') :: state', instrs)
+        | (_, sigma', rho') :: _ -> ((l, sigma' @ sigma, rho') :: states', instrs)
         | [] -> assert false )
       | If_else (_str_opt, bt, then_instrs, else_instrs) ->
         let+ res =
@@ -257,11 +293,11 @@ let rec eval_instr ~no_input (instrs : Binary.instr Annotated.t list)
           | I32 0l :: sigma | I64 0L :: sigma ->
             eval_instr ~no_input
               [ Binary.Block (_str_opt, bt, then_instrs) |> Annotated.dummy ]
-              ((l, sigma, rho) :: state')
+              ((l, sigma, rho) :: states')
           | _ ->
             eval_instr ~no_input
               [ Binary.Block (_str_opt, bt, else_instrs) |> Annotated.dummy ]
-              ((l, sigma, rho) :: state')
+              ((l, sigma, rho) :: states')
         in
         (res, instrs)
       | Br id -> (
@@ -271,10 +307,10 @@ let rec eval_instr ~no_input (instrs : Binary.instr Annotated.t list)
           match lbl.form with
           | Block ->
             let results = List.take (List.length lbl.ty.result) sigma in
-            Ok ((Some lbl, results, rho) :: state', instrs)
+            Ok ((Some lbl, results, rho) :: states', instrs)
           | Loop ->
             let args = List.take (List.length lbl.ty.arg) sigma in
-            Ok ((Some lbl, args, rho) :: state', instrs)
+            Ok ((Some lbl, args, rho) :: states', instrs)
           | Func -> Fmt.error_msg "TODO: br func" )
         | Some lbl -> (
           match lbl.form with
@@ -282,7 +318,7 @@ let rec eval_instr ~no_input (instrs : Binary.instr Annotated.t list)
             Fmt.error_msg
               "br: trying to go higher than func (should be typechecked)"
           | _ -> (
-            match state with
+            match states with
             | _ :: f -> Ok (f, i :: instrs)
             | [] -> Fmt.error_msg "br: reached the top (should be typechecked)"
             ) ) )
@@ -290,11 +326,11 @@ let rec eval_instr ~no_input (instrs : Binary.instr Annotated.t list)
         match sigma with
         | I32 0l :: sigma | I64 0L :: sigma ->
           let br = Annotated.dummy (Binary.Br id) in
-          Ok ((l, sigma, rho) :: state', br :: instrs)
-        | _ :: sigma -> Ok ((l, sigma, rho) :: state', instrs)
+          Ok ((l, sigma, rho) :: states', br :: instrs)
+        | _ :: sigma -> Ok ((l, sigma, rho) :: states', instrs)
         | [] -> Fmt.error_msg "br_if: empty stack" )
       | Return -> (
-        match state' with
+        match states' with
         | (l', sigma', rho') :: state' ->
           Ok ((l', sigma @ sigma', rho') :: state', instrs)
         | [] ->
@@ -310,8 +346,8 @@ let rec eval_instr ~no_input (instrs : Binary.instr Annotated.t list)
     eval_instr ~no_input res_instrs res
   end
   | [] ->
-    print_state state;
-    Ok state
+    print_state states;
+    Ok states
 
 let run ~no_input (m : Binary.Module.t Result.t) =
   let+ m in
