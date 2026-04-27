@@ -84,6 +84,13 @@ let store_64 mem ~addr n =
   let addr = Int32.to_int addr in
   Ok (Bytes.set_int64_le mem.data addr n)
 
+let store_128 mem ~addr n =
+  let addr = Int32.to_int addr in
+  let left, right = Concrete_v128.to_i64x2 n in
+  Bytes.set_int64_le mem.data addr left;
+  Bytes.set_int64_le mem.data (addr + 8) right;
+  Ok ()
+
 let load_8_s mem addr =
   let addr = Int32.to_int addr in
   Ok (Int32.of_int @@ Bytes.get_int8 mem.data addr)
@@ -107,6 +114,13 @@ let load_32 mem addr =
 let load_64 mem addr =
   let addr = Int32.to_int addr in
   Ok (Bytes.get_int64_le mem.data addr)
+
+let load_128 mem addr =
+  let addr = Int32.to_int addr in
+  let left = Bytes.get_int64_le mem.data addr in
+  let right = Bytes.get_int64_le mem.data (addr + 8) in
+  let v = Concrete_v128.of_i64x2 left right in
+  Ok v
 
 let size_in_pages mem = Int32.of_int @@ (Bytes.length mem.data / page_size)
 

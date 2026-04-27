@@ -97,3 +97,15 @@ let pp = Fmt.int64
 let of_int64 (v : int64) : t = v
 
 let to_int64 (v : t) : int64 = v
+
+let min_int = Int64.min_int
+
+let eqz (v : t) = eq v zero
+
+let ( = ) = eq
+
+let ( + ) = add
+
+let ( * ) = mul
+
+let ( / ) = div

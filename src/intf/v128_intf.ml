@@ -5,11 +5,57 @@
 module type T = sig
   type t
 
+  type i8
+
+  type i16
+
   type i32
 
   type i64
 
   val zero : t
+
+  val of_i8x16 :
+       i8
+    -> i8
+    -> i8
+    -> i8
+    -> i8
+    -> i8
+    -> i8
+    -> i8
+    -> i8
+    -> i8
+    -> i8
+    -> i8
+    -> i8
+    -> i8
+    -> i8
+    -> i8
+    -> t
+
+  val to_i8x16 :
+       t
+    -> i8
+       * i8
+       * i8
+       * i8
+       * i8
+       * i8
+       * i8
+       * i8
+       * i8
+       * i8
+       * i8
+       * i8
+       * i8
+       * i8
+       * i8
+       * i8
+
+  val of_i16x8 : i16 -> i16 -> i16 -> i16 -> i16 -> i16 -> i16 -> i16 -> t
+
+  val to_i16x8 : t -> i16 * i16 * i16 * i16 * i16 * i16 * i16 * i16
 
   val of_i32x4 : i32 -> i32 -> i32 -> i32 -> t
 

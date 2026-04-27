@@ -319,7 +319,14 @@ type f64_instr =
 (** V128 instructions *)
 type v128_instr =
   | Const of Concrete_v128.t
+  | Not
   | And
+  | Or
+  | Any_true
+  | Load16x4_s of (indice * memarg)
+  | Load16x4_u of (indice * memarg)
+  | Load32_lane of (indice * memarg * int)
+  | Load64_zero of (indice * memarg)
   | Load of (indice * memarg)
   | Store of (indice * memarg)
 
@@ -329,6 +336,20 @@ val pp_v128_instr : v128_instr Fmt.t
 type i8x16_instr =
   | Add
   | Sub
+  | Eq
+  | Ne
+  | Lt of sx
+  | Gt of sx
+  | Le of sx
+  | Ge of sx
+  | Abs
+  | Neg
+  | Popcnt
+  | All_true
+  | Bitmask
+  | Shuffle of int array (* TODO: make this immutable at some point *)
+  | Swizzle
+  | Splat
 
 val pp_i8x16_instr : i8x16_instr Fmt.t
 
@@ -337,6 +358,15 @@ type i16x8_instr =
   | Add
   | Sub
   | Mul
+  | Eq
+  | Ne
+  | Lt of sx
+  | Gt of sx
+  | Le of sx
+  | Ge of sx
+  | Splat
+  | Extract_lane_s of int
+  | Extract_lane_u of int
 
 val pp_i16x8_instr : i16x8_instr Fmt.t
 
@@ -345,6 +375,21 @@ type i32x4_instr =
   | Add
   | Sub
   | Mul
+  | Shl
+  | Shr of sx
+  | Eq
+  | Ne
+  | Lt of sx
+  | Gt of sx
+  | Le of sx
+  | Ge of sx
+  | Splat
+  | Extract_lane of int
+  | Replace_lane of int
+  | Extend_low_i16x8_s
+  | Extend_high_i16x8_s
+  | Extend_low_i16x8_u
+  | Extend_high_i16x8_u
 
 val pp_i32x4_instr : i32x4_instr Fmt.t
 
@@ -353,6 +398,14 @@ type i64x2_instr =
   | Add
   | Sub
   | Mul
+  | Eq
+  | Ne
+  | Lt_s
+  | Gt_s
+  | Le_s
+  | Ge_s
+  | Splat
+  | Extend_low_i32x4 of sx
 
 val pp_i64x2_instr : i64x2_instr Fmt.t
 

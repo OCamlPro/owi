@@ -96,3 +96,11 @@ let pp = Fmt.int32
 let of_int32 (v : int32) : t = v
 
 let to_int32 (v : t) : int32 = v
+
+let min_int = Int32.min_int
+
+let eqz (v : t) = eq v zero
+
+let ( = ) = eq
+
+let ( + ) = add

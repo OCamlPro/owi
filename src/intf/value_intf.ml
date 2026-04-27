@@ -3,6 +3,10 @@
 (* Written by the Owi programmers *)
 
 module type T = sig
+  type i8
+
+  type i16
+
   type i32
 
   type i64
@@ -50,7 +54,12 @@ module type T = sig
        and type i64 := i64
 
   module V128 :
-    V128_intf.T with type t := v128 and type i32 := i32 and type i64 := i64
+    V128_intf.T
+      with type t := v128
+       and type i8 := i8
+       and type i16 := i16
+       and type i32 := i32
+       and type i64 := i64
 
   module Ref : Ref_intf.T
 

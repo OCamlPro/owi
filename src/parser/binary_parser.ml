@@ -159,6 +159,10 @@ let read_F32 input =
   let i32 = Int32.logor i32 i1 in
   (Float32.of_bits i32, input)
 
+let read_u8 input =
+  let+ b, input = read_byte ~msg:"read_u8" input in
+  (int_of_char b, input)
+
 let read_F64 input =
   let i64_of_byte input =
     let+ b, input = read_byte ~msg:"read_F64" input in
@@ -354,12 +358,12 @@ let read_memarg max_align input =
   in
   if is_malformed align then parse_fail "malformed memop flags"
   else if Int32.to_int align > max_align then
+    (* TODO: move this to validation phase *)
     parse_fail "alignment must not be larger than natural"
   else
     let+ offset, input = read_U32 input in
     let offset = Int64.of_int offset in
     (memidx, { Binary.align; offset }, input)
-(* TODO: should the checks be moved to validate? *)
 
 let read_castop input =
   let* b, input =
@@ -534,11 +538,17 @@ let read_FD input =
   let* i, input = read_U32 input in
   match i with
   | 0x00 ->
-    let+ idx, memarg, input = read_memarg 128 input in
-    (V128 (Load (idx, memarg)), input)
+    let+ indice, memarg, input = read_memarg 128 input in
+    (V128 (Load (indice, memarg)), input)
+  | 0x03 ->
+    let+ indice, memarg, input = read_memarg 128 input in
+    (V128 (Load16x4_s (indice, memarg)), input)
+  | 0x04 ->
+    let+ indice, memarg, input = read_memarg 128 input in
+    (V128 (Load16x4_u (indice, memarg)), input)
   | 0x0b ->
-    let+ idx, memarg, input = read_memarg 128 input in
-    (V128 (Store (idx, memarg)), input)
+    let+ indice, memarg, input = read_memarg 128 input in
+    (V128 (Store (indice, memarg)), input)
   | 0x0C ->
     let* data = Input.sub_prefix 16 input in
     let+ input = Input.sub_suffix 16 input in
@@ -547,18 +557,116 @@ let read_FD input =
     let low = String.get_int64_le data 8 in
     let v128 = Concrete_v128.of_i64x2 high low in
     (V128 (Const v128), input)
+  | 0x0D ->
+    let* i0, input = read_u8 input in
+    let* i1, input = read_u8 input in
+    let* i2, input = read_u8 input in
+    let* i3, input = read_u8 input in
+    let* i4, input = read_u8 input in
+    let* i5, input = read_u8 input in
+    let* i6, input = read_u8 input in
+    let* i7, input = read_u8 input in
+    let* i8, input = read_u8 input in
+    let* i9, input = read_u8 input in
+    let* i10, input = read_u8 input in
+    let* i11, input = read_u8 input in
+    let* i12, input = read_u8 input in
+    let* i13, input = read_u8 input in
+    let* i14, input = read_u8 input in
+    let* i15, input = read_u8 input in
+    let is =
+      [| i0; i1; i2; i3; i4; i5; i6; i7; i8; i9; i10; i11; i12; i13; i14; i15 |]
+    in
+    Ok (I8x16 (Shuffle is), input)
+  | 0x0E -> Ok (I8x16 Swizzle, input)
+  | 0x0F -> Ok (I8x16 Splat, input)
+  | 0x10 -> Ok (I16x8 Splat, input)
+  | 0x11 -> Ok (I32x4 Splat, input)
+  | 0x12 -> Ok (I64x2 Splat, input)
+  | 0x18 ->
+    let* n, input = read_u8 input in
+    Ok (I16x8 (Extract_lane_s n), input)
+  | 0x19 ->
+    let* n, input = read_u8 input in
+    Ok (I16x8 (Extract_lane_u n), input)
+  | 0x1B ->
+    let* n, input = read_u8 input in
+    Ok (I32x4 (Extract_lane n), input)
+  | 0x1C ->
+    let* n, input = read_u8 input in
+    Ok (I32x4 (Replace_lane n), input)
+  | 0x23 -> Ok (I8x16 Eq, input)
+  | 0x24 -> Ok (I8x16 Ne, input)
+  | 0x25 -> Ok (I8x16 (Lt S), input)
+  | 0x26 -> Ok (I8x16 (Lt U), input)
+  | 0x27 -> Ok (I8x16 (Gt S), input)
+  | 0x28 -> Ok (I8x16 (Gt U), input)
+  | 0x29 -> Ok (I8x16 (Le S), input)
+  | 0x2A -> Ok (I8x16 (Le U), input)
+  | 0x2B -> Ok (I8x16 (Ge S), input)
+  | 0x2C -> Ok (I8x16 (Ge U), input)
+  | 0x2D -> Ok (I16x8 Eq, input)
+  | 0x2E -> Ok (I16x8 Ne, input)
+  | 0x2F -> Ok (I16x8 (Lt S), input)
+  | 0x30 -> Ok (I16x8 (Lt U), input)
+  | 0x31 -> Ok (I16x8 (Gt S), input)
+  | 0x32 -> Ok (I16x8 (Gt U), input)
+  | 0x33 -> Ok (I16x8 (Le S), input)
+  | 0x34 -> Ok (I16x8 (Le U), input)
+  | 0x35 -> Ok (I16x8 (Ge S), input)
+  | 0x36 -> Ok (I16x8 (Ge U), input)
+  | 0x37 -> Ok (I32x4 Eq, input)
+  | 0x38 -> Ok (I32x4 Ne, input)
+  | 0x39 -> Ok (I32x4 (Lt S), input)
+  | 0x3A -> Ok (I32x4 (Lt U), input)
+  | 0x3B -> Ok (I32x4 (Gt S), input)
+  | 0x3C -> Ok (I32x4 (Gt U), input)
+  | 0x3D -> Ok (I32x4 (Le S), input)
+  | 0x3E -> Ok (I32x4 (Le U), input)
+  | 0x3F -> Ok (I32x4 (Ge S), input)
+  | 0x40 -> Ok (I32x4 (Ge U), input)
+  | 0x4D -> Ok (V128 Not, input)
   | 0x4E -> Ok (V128 And, input)
+  | 0x50 -> Ok (V128 Or, input)
+  | 0x53 -> Ok (V128 Any_true, input)
+  | 0x56 ->
+    let* idx, memarg, input = read_memarg 128 input in
+    let+ n, input = read_u8 input in
+    (V128 (Load32_lane (idx, memarg, n)), input)
+  | 0x5C ->
+    let+ idx, memarg, input = read_memarg 128 input in
+    (V128 (Load64_zero (idx, memarg)), input)
+  | 0x60 -> Ok (I8x16 Abs, input)
+  | 0x61 -> Ok (I8x16 Neg, input)
+  | 0x62 -> Ok (I8x16 Popcnt, input)
+  | 0x63 -> Ok (I8x16 All_true, input)
+  | 0x64 -> Ok (I8x16 Bitmask, input)
   | 0x6E -> Ok (I8x16 Add, input)
   | 0x71 -> Ok (I8x16 Sub, input)
   | 0x8E -> Ok (I16x8 Add, input)
   | 0x91 -> Ok (I16x8 Sub, input)
   | 0x95 -> Ok (I16x8 Mul, input)
+  | 0xA7 -> Ok (I32x4 Extend_low_i16x8_s, input)
+  | 0xA8 -> Ok (I32x4 Extend_high_i16x8_s, input)
+  | 0xA9 -> Ok (I32x4 Extend_low_i16x8_u, input)
+  | 0xAA -> Ok (I32x4 Extend_high_i16x8_u, input)
+  | 0xAB -> Ok (I32x4 Shl, input)
+  | 0xAC -> Ok (I32x4 (Shr S), input)
+  | 0xAD -> Ok (I32x4 (Shr U), input)
   | 0xAE -> Ok (I32x4 Add, input)
   | 0xB1 -> Ok (I32x4 Sub, input)
   | 0xB5 -> Ok (I32x4 Mul, input)
+  | 0xC8 -> Ok (I64x2 (Extend_low_i32x4 S), input)
+  | 0xC9 -> Ok (I64x2 (Extend_low_i32x4 U), input)
   | 0xCE -> Ok (I64x2 Add, input)
   | 0xD1 -> Ok (I64x2 Sub, input)
   | 0xD5 -> Ok (I64x2 Mul, input)
+  | 0xD6 -> Ok (I64x2 Eq, input)
+  | 0xD7 -> Ok (I64x2 Ne, input)
+  | 0xD8 -> Ok (I64x2 Lt_s, input)
+  | 0xD9 -> Ok (I64x2 Gt_s, input)
+  | 0xDA -> Ok (I64x2 Le_s, input)
+  | 0xDB -> Ok (I64x2 Ge_s, input)
   | i -> parse_fail "illegal opcode (read_FD) 0x%02X" i
 
 let block_type_of_type_def ty =
