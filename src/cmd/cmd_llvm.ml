@@ -48,7 +48,9 @@ let compile ~workspace ~entry_point ~out_file (files : Fpath.t list) :
 
   let files_bc = Cmd.of_list (List.map Cmd.p bc_files) in
   let llc_cmd : Cmd.t =
-    Cmd.(llc_bin % "-O0" % "-march=wasm32" % "-filetype=obj" %% files_bc)
+    Cmd.(
+      llc_bin % "-O0" % "-march=wasm32" % "-mtriple=wasm32-unknown-unknown"
+      % "-filetype=obj" %% files_bc )
   in
 
   let* () =
