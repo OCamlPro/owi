@@ -736,7 +736,8 @@ struct
       let+ () = Memory.store_64 mem ~addr (F64.to_bits n) in
       stack
 
-  let exec_v128_instr stack : Binary.v128_instr -> _ = function
+  let exec_v128_instr stack (i : Binary.v128_instr) =
+    match i with
     | Const n -> Stack.push_concrete_v128 stack n
     | And | Load _ | Store _ -> raise @@ Failure "todo"
 
@@ -788,7 +789,8 @@ struct
       Stack.push_v128 stack (V128.of_i64x2 a b)
     | Mul -> raise @@ Failure "todo"
 
-  let exec_ref_instr env stack : Binary.ref_instr -> _ = function
+  let exec_ref_instr env stack (i : Binary.ref_instr) =
+    match i with
     | Null t -> Stack.push_ref stack (Ref.null t) |> Choice.return
     | Is_null ->
       let r, stack = Stack.pop_as_ref stack in

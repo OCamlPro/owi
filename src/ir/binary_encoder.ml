@@ -472,7 +472,8 @@ let write_f64_instr buf : Binary.f64_instr -> _ =
   | Reinterpret_i S32 -> (* TODO *) assert false
   | Reinterpret_i S64 -> add_char '\xBF'
 
-let write_v128_instr buf : Binary.v128_instr -> _ = function
+let write_v128_instr buf (i : Binary.v128_instr) =
+  match i with
   | Const v ->
     write_fd buf 12;
     let a, b = Concrete_v128.to_i64x2 v in
