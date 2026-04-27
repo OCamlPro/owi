@@ -1,5 +1,5 @@
 open Binary
-module Stack = Abs_stack
+module Stack = Abs_stack.Make (Abs_value)
 module D = Abs_value.ADomain
 module Size = Abs_value.Size
 
@@ -15,7 +15,7 @@ type value = Abs_value.t
 
 type state =
   { ctx : D.Context.t
-  ; stack : value Stack.t
+  ; stack : Stack.t
   ; locals : value Locals.t
   ; func_rt : val_type list
   ; env : Abs_extern_func.extern_func Link_env.t
