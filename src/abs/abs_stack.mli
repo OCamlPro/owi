@@ -1,29 +1,33 @@
-type 'el t
+module Make (M : sig
+  type t
+end) : sig
+  type t = M.t list
 
-val empty : 'el t
+  val empty : M.t list
 
-val push : 'el t -> 'el -> 'el t
+  val pop : t -> M.t * t
 
-val pop : 'el t -> 'el * 'el t
+  val push : t -> M.t -> t
 
-val pop_2 : 'el t -> 'el * 'el * 'el t
+  val pop_n : t -> int -> M.t list * t
 
-val pop_n : 'el t -> int -> 'el t * 'el t
+  val pop_2 : t -> M.t * M.t * t
 
-val pp : 'el Fmt.t -> Format.formatter -> 'el t -> unit
+  val pp : M.t Fmt.t -> Format.formatter -> t -> unit
 
-val is_empty : 'el t -> bool
+  val is_empty : t -> bool
 
-val of_list : 'el list -> 'el t
+  val to_list : t -> M.t list
 
-val to_list : 'el t -> 'el list
+  val of_list : M.t list -> t
 
-val append : 'el t -> 'el t -> 'el t
+  val append : t -> t -> t
 
-val take : int -> 'el t -> 'el t
+  val take : int -> t -> t
 
-val drop : int -> 'el t -> 'el t
+  val drop : int -> t -> t
 
-val rev : 'el t -> 'el t
+  val rev : t -> t
 
-val length : 'el t -> int
+  val length : t -> int
+end
