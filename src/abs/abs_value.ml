@@ -42,6 +42,19 @@ let of_binary size binary =
   | 64 -> I64 binary
   | _ -> assert false
 
+let of_boolean ctx size boolean =
+  let true_ = ADomain.Boolean_Forward.true_ ctx in
+  if ADomain.Boolean.equal boolean true_ then
+    (match Units.In_bits.to_int size with
+    | 32 -> I32(ADomain.Binary_Forward.biconst ~size (Z.of_int32 1l) ctx)
+    | 64 -> I64(ADomain.Binary_Forward.biconst ~size (Z.of_int64 1L) ctx)
+    | _ -> assert false)
+  else
+    (match Units.In_bits.to_int size with
+    | 32 -> I32(ADomain.Binary_Forward.biconst ~size (Z.of_int32 1l) ctx)
+    | 64 -> I64(ADomain.Binary_Forward.biconst ~size (Z.of_int64 1L) ctx)
+    | _ -> assert false)
+
 let size_of = function I32 _ -> Size.b32 | I64 _ -> Size.b64
 
 let to_boolean ctx x =
@@ -51,7 +64,3 @@ let to_boolean ctx x =
 
 let top size ctx = of_binary size @@ ADomain.binary_empty ~size ctx
 
-let binop size fn lhs rhs =
-  let lhs, rhs = (to_binary lhs, to_binary rhs) in
-  let r = fn lhs rhs in
-  of_binary size r

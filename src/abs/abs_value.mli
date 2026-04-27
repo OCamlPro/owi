@@ -22,13 +22,8 @@ val equal : t -> t -> bool
 
 val size_of : t -> Units.In_bits.t
 
-val binop :
-     Units.In_bits.t
-  -> (ADomain.binary -> ADomain.binary -> ADomain.binary)
-  -> t
-  -> t
-  -> t
-
 val to_boolean : ADomain.Context.t -> t -> ADomain.boolean
 
 val top : Units.In_bits.t -> ADomain.Context.t -> t
+
+val of_boolean : ADomain.Context.t -> Units.In_bits.t -> ADomain.boolean -> t
