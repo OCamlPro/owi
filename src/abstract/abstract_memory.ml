@@ -8,6 +8,8 @@ type i32
 
 type i64
 
+type v128
+
 type 'a choice
 
 let load_8_s _m _i = assert false
@@ -22,6 +24,8 @@ let load_32 _m _i = assert false
 
 let load_64 _m _i = assert false
 
+let load_128 _m _i = assert false
+
 let store_8 _m ~addr:_ _i = assert false
 
 let store_16 _m ~addr:_ _i = assert false
@@ -29,6 +33,8 @@ let store_16 _m ~addr:_ _i = assert false
 let store_32 _m ~addr:_ _i = assert false
 
 let store_64 _m ~addr:_ _i = assert false
+
+let store_128 _m ~addr:_ _i = assert false
 
 let grow _m _i = assert false
 

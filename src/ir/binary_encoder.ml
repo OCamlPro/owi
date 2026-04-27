@@ -490,26 +490,91 @@ let write_v128_instr buf (i : Binary.v128_instr) =
     let a, b = Concrete_v128.to_i64x2 v in
     write_bytes_8 buf a;
     write_bytes_8 buf b
-  | And | Load _ | Store _ -> raise @@ Failure "TODO"
+  | Not -> write_fd buf 0x4D
+  | And -> write_fd buf 0x4E
+  | Or -> write_fd buf 0x50
+  | Any_true -> write_fd buf 0x53
+  | Load32_lane _ | Load64_zero _ | Load _ | Store _ | Load16x4_s _
+  | Load16x4_u _ ->
+    raise @@ Failure "TODO"
 
 let write_i8x16_instr buf : Text.i8x16_instr -> _ = function
-  | Add -> write_fd buf 110
-  | Sub -> write_fd buf 113
+  | Add -> write_fd buf 0x6E
+  | Sub -> write_fd buf 0x71
+  | Eq -> write_fd buf 0x23
+  | Ne -> write_fd buf 0x24
+  | Lt S -> write_fd buf 0x25
+  | Lt U -> write_fd buf 0x26
+  | Gt S -> write_fd buf 0x27
+  | Gt U -> write_fd buf 0x28
+  | Le S -> write_fd buf 0x29
+  | Le U -> write_fd buf 0x2A
+  | Ge S -> write_fd buf 0x2B
+  | Ge U -> write_fd buf 0x2C
+  | Abs -> write_fd buf 0x60
+  | Neg -> write_fd buf 0x61
+  | Popcnt -> write_fd buf 0x62
+  | All_true -> write_fd buf 0x63
+  | Bitmask -> write_fd buf 0x64
+  | Shuffle _ -> raise @@ Failure "TODO"
+  | Swizzle -> write_fd buf 0x0E
+  | Splat -> write_fd buf 0x0F
 
 let write_i16x8_instr buf : Text.i16x8_instr -> _ = function
-  | Add -> write_fd buf 142
-  | Sub -> write_fd buf 145
-  | Mul -> raise @@ Failure "TODO"
+  | Eq -> write_fd buf 0x2D
+  | Ne -> write_fd buf 0x2E
+  | Lt S -> write_fd buf 0x2F
+  | Lt U -> write_fd buf 0x30
+  | Gt S -> write_fd buf 0x31
+  | Gt U -> write_fd buf 0x32
+  | Le S -> write_fd buf 0x33
+  | Le U -> write_fd buf 0x34
+  | Ge S -> write_fd buf 0x35
+  | Ge U -> write_fd buf 0x36
+  | Add -> write_fd buf 0x8E
+  | Sub -> write_fd buf 0x91
+  | Mul -> write_fd buf 0x95
+  | Splat -> write_fd buf 0x10
+  | Extract_lane_s _n -> raise @@ Failure "TODO"
+  | Extract_lane_u _n -> raise @@ Failure "TODO"
 
 let write_i32x4_instr buf : Text.i32x4_instr -> _ = function
   | Add -> write_fd buf 174
   | Sub -> write_fd buf 177
-  | Mul -> raise @@ Failure "TODO"
+  | Mul -> write_fd buf 0xB5
+  | Shl -> write_fd buf 0xAB
+  | Shr S -> write_fd buf 0xAC
+  | Shr U -> write_fd buf 0xAD
+  | Eq -> write_fd buf 0x37
+  | Ne -> write_fd buf 0x38
+  | Lt S -> write_fd buf 0x39
+  | Lt U -> write_fd buf 0x3A
+  | Gt S -> write_fd buf 0x3B
+  | Gt U -> write_fd buf 0x3C
+  | Le S -> write_fd buf 0x3D
+  | Le U -> write_fd buf 0x3E
+  | Ge S -> write_fd buf 0x3F
+  | Ge U -> write_fd buf 0x40
+  | Splat -> write_fd buf 0x11
+  | Extract_lane _n -> raise @@ Failure "TODO"
+  | Replace_lane _n -> raise @@ Failure "TODO"
+  | Extend_low_i16x8_s -> write_fd buf 0xA7
+  | Extend_high_i16x8_s -> write_fd buf 0xA8
+  | Extend_low_i16x8_u -> write_fd buf 0xA9
+  | Extend_high_i16x8_u -> write_fd buf 0xAA
 
 let write_i64x2_instr buf : Text.i64x2_instr -> _ = function
-  | Add -> write_fd buf 206
-  | Sub -> write_fd buf 209
-  | Mul -> raise @@ Failure "TODO"
+  | Add -> write_fd buf 0xCE
+  | Sub -> write_fd buf 0xD1
+  | Mul -> write_fd buf 0xD5
+  | Eq -> write_fd buf 0xD6
+  | Ne -> write_fd buf 0xD7
+  | Lt_s -> write_fd buf 0xD8
+  | Gt_s -> write_fd buf 0xD9
+  | Le_s -> write_fd buf 0xDA
+  | Ge_s -> write_fd buf 0xDB
+  | Splat -> write_fd buf 0x12
+  | Extend_low_i32x4 _ -> raise @@ Failure "TODO"
 
 let write_ref_instr buf : Binary.ref_instr -> _ =
   let add_char c = Buffer.add_char buf c in

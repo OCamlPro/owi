@@ -238,7 +238,14 @@ type f64_instr =
 (** V128 instructions *)
 type v128_instr =
   | Const of Concrete_v128.t
+  | Not
   | And
+  | Or
+  | Any_true
+  | Load16x4_s of (indice * memarg)
+  | Load16x4_u of (indice * memarg)
+  | Load32_lane of (indice * memarg * int)
+  | Load64_zero of (indice * memarg)
   | Load of (indice * memarg)
   | Store of (indice * memarg)
 

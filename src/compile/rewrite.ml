@@ -276,7 +276,26 @@ let rewrite_f64_instr assigned : Text.f64_instr -> Binary.f64_instr Result.t =
 let rewrite_v128_instr assigned : Text.v128_instr -> Binary.v128_instr Result.t
     = function
   | Const f -> Ok (Const f : Binary.v128_instr)
+  | Not -> Ok Not
   | And -> Ok And
+  | Or -> Ok Or
+  | Any_true -> Ok Any_true
+  | Load16x4_s (indice, memarg) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Load16x4_s (indice, memarg) : Binary.v128_instr)
+  | Load16x4_u (indice, memarg) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Load16x4_u (indice, memarg) : Binary.v128_instr)
+  | Load32_lane (indice, memarg, n) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Load32_lane (indice, memarg, n) : Binary.v128_instr)
+  | Load64_zero (indice, memarg) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Load64_zero (indice, memarg) : Binary.v128_instr)
   | Load (indice, memarg) ->
     let* memarg = rewrite_memarg memarg in
     let+ indice = Assigned.find_memory assigned indice in

@@ -47,6 +47,7 @@ module Make
       Memory_intf.T
         with type i32 := Value.i32
          and type i64 := Value.i64
+         and type v128 := Value.v128
          and type 'a choice := 'a Choice.t)
     (Extern_func :
       Extern.Func.T
@@ -71,36 +72,6 @@ struct
   open Value
   open Choice
   module Stack = Stack.Make [@inlined hint] (Value)
-
-  module I32 = struct
-    include I32
-
-    (* TODO: move all of this to I32_intf *)
-    let ( + ) = add
-
-    let ( = ) = eq
-
-    let eqz v = v = zero
-
-    let min_int = I32.of_int32 Int32.min_int
-  end
-
-  module I64 = struct
-    include I64
-
-    (* TODO: move all of this to I64_intf *)
-    let ( + ) = add
-
-    let ( * ) = mul
-
-    let ( / ) = div
-
-    let ( = ) = eq
-
-    let eqz v = v = zero
-
-    let min_int = I64.of_int64 Int64.min_int
-  end
 
   let page_size = I64.of_int64 65_536L
 
@@ -271,6 +242,8 @@ struct
   let mk_addr_check_bounds_4L = mk_addr_check_bounds 4L
 
   let mk_addr_check_bounds_8L = mk_addr_check_bounds 8L
+
+  let mk_addr_check_bounds_16L = mk_addr_check_bounds 16L
 
   let exec_i32_instr (env : Env.t) instr_counter stack ~uuid :
     Binary.i32_instr -> Stack.t Choice.t =
@@ -823,58 +796,116 @@ struct
       let+ () = Memory.store_64 mem ~addr (F64.to_bits n) in
       stack
 
-  let exec_v128_instr stack (i : Binary.v128_instr) =
+  let exec_v128_instr env instr_counter stack (i : Binary.v128_instr) :
+    Stack.t Choice.t =
     match i with
-    | Const n -> Stack.push_concrete_v128 stack n
-    | And | Load _ | Store _ -> raise @@ Failure "todo"
+    | Const n ->
+      let stack = Stack.push_concrete_v128 stack n in
+      Choice.return stack
+    | Not -> raise @@ Failure "TODO (Not)"
+    | And -> Stack.apply_v128_v128_v128 stack V128.logand |> Choice.return
+    | Or -> Stack.apply_v128_v128_v128 stack V128.logor |> Choice.return
+    | Load32_lane _ -> raise @@ Failure "TODO (Load32_lane)"
+    | Load64_zero _ -> raise @@ Failure "TODO (Load64_zero)"
+    | Load (memory_indice, { offset; _ }) ->
+      let pos, stack = Stack.pop_i32 stack in
+      let* addr =
+        mk_addr_check_bounds_16L env memory_indice ~pos ~offset instr_counter
+      in
+      let* mem = Env.get_memory env memory_indice in
+      let+ res = Memory.load_128 mem addr in
+      Stack.push_v128 stack res
+    | Store (memory_indice, { offset; _ }) ->
+      let n, stack = Stack.pop_v128 stack in
+      let pos, stack = Stack.pop_i32 stack in
+      let* addr =
+        mk_addr_check_bounds_16L env memory_indice ~pos ~offset instr_counter
+      in
+      let* mem = Env.get_memory env memory_indice in
+      let+ () = Memory.store_128 mem ~addr n in
+      stack
+    | Load16x4_s _ -> raise @@ Failure "TODO (Load16x4_s)"
+    | Load16x4_u _ -> raise @@ Failure "TODO (Load16x4_u)"
+    | Any_true -> Stack.apply_v128_boolean stack V128.any_true |> Choice.return
 
-  let exec_i8x16_instr _stack : Text.i8x16_instr -> _ = function
-    | _ ->
-      (* TODO *)
-      raise @@ Failure "todo"
+  let exec_i8x16_instr stack : Text.i8x16_instr -> _ Choice.t = function
+    | Add -> raise @@ Failure "TODO (i8x16.add)"
+    | Sub -> raise @@ Failure "TODO (i8x16.sub)"
+    | Eq -> Stack.apply_v128_v128_v128 stack V128.I8x16.eq |> Choice.return
+    | Ne -> raise @@ Failure "TODO (i8x16.ne)"
+    | Abs -> raise @@ Failure "TODO (i8x16.abs)"
+    | Neg -> raise @@ Failure "TODO (i8x16.neg)"
+    | Popcnt -> raise @@ Failure "TODO (i8x16.popcnt)"
+    | All_true -> raise @@ Failure "TODO (i8x16.all_true)"
+    | Bitmask -> Stack.apply_v128_i32 stack V128.I8x16.bitmask |> Choice.return
+    | Swizzle -> raise @@ Failure "TODO (i8x16.swizzle)"
+    | Splat ->
+      let v, stack = Stack.pop_i32 stack in
+      let v = Value.I32.to_i8 v in
+      let v = V128.I8x16.splat v in
+      Stack.push_v128 stack v |> Choice.return
+    | Lt _ -> raise @@ Failure "TODO (i8x16.lt)"
+    | Gt _ -> raise @@ Failure "TODO (i8x16.gt)"
+    | Le _ -> raise @@ Failure "TODO (i8x16.le)"
+    | Ge _ -> raise @@ Failure "TODO (i8x16.ge)"
+    | Shuffle _ -> raise @@ Failure "TODO (i8x16.shuffle)"
 
-  let exec_i16x8_instr _stack : Text.i16x8_instr -> _ = function
-    | _ ->
-      (* TODO *)
-      raise @@ Failure "todo"
+  let exec_i16x8_instr stack : Text.i16x8_instr -> _ Choice.t = function
+    | Add -> Stack.apply_v128_v128_v128 stack V128.I16x8.add |> Choice.return
+    | Sub -> Stack.apply_v128_v128_v128 stack V128.I16x8.sub |> Choice.return
+    | Mul -> raise @@ Failure "TODO (i16x8.mul)"
+    | Eq -> Stack.apply_v128_v128_v128 stack V128.I16x8.eq |> Choice.return
+    | Ne -> raise @@ Failure "TODO (i16x8.ne)"
+    | Splat ->
+      let v, stack = Stack.pop_i32 stack in
+      let v = Value.I32.to_i16 v in
+      let v = V128.I16x8.splat v in
+      Stack.push_v128 stack v |> Choice.return
+    | Lt _ -> raise @@ Failure "TODO (i16x8.lt)"
+    | Gt _ -> raise @@ Failure "TODO (i16x8.gt)"
+    | Le _ -> raise @@ Failure "TODO (i16x8.le)"
+    | Ge _ -> raise @@ Failure "TODO (i16x8.ge)"
+    | Extract_lane_s _ -> raise @@ Failure "TODO (i16x8.extract_lane_s)"
+    | Extract_lane_u _ -> raise @@ Failure "TODO (i16x8.extract_lane_u)"
 
   let exec_i32x4_instr stack : Text.i32x4_instr -> _ = function
-    | Add ->
-      let (n1, n2), stack = Stack.pop2_v128 stack in
-      let a1, b1, c1, d1 = V128.to_i32x4 n1 in
-      let a2, b2, c2, d2 = V128.to_i32x4 n2 in
-      let a = I32.add a1 a2 in
-      let b = I32.add b1 b2 in
-      let c = I32.add c1 c2 in
-      let d = I32.add d1 d2 in
-      Stack.push_v128 stack (V128.of_i32x4 a b c d)
-    | Sub ->
-      let (n1, n2), stack = Stack.pop2_v128 stack in
-      let a1, b1, c1, d1 = V128.to_i32x4 n1 in
-      let a2, b2, c2, d2 = V128.to_i32x4 n2 in
-      let a = I32.sub a1 a2 in
-      let b = I32.sub b1 b2 in
-      let c = I32.sub c1 c2 in
-      let d = I32.sub d1 d2 in
-      Stack.push_v128 stack (V128.of_i32x4 a b c d)
-    | Mul -> raise @@ Failure "todo"
+    | Add -> Stack.apply_v128_v128_v128 stack V128.I32x4.add |> Choice.return
+    | Sub -> Stack.apply_v128_v128_v128 stack V128.I32x4.sub |> Choice.return
+    | Mul -> raise @@ Failure "TODO (i32x4.Mul)"
+    | Shl -> raise @@ Failure "TODO (i32x4.Shl)"
+    | Shr _ -> raise @@ Failure "TODO (i32x4.Shr)"
+    | Eq -> Stack.apply_v128_v128_v128 stack V128.I32x4.eq |> Choice.return
+    | Ne -> raise @@ Failure "TODO (i32x4.Ne)"
+    | Lt _ -> raise @@ Failure "TODO (i32x4.Lt)"
+    | Gt _ -> raise @@ Failure "TODO (i32x4.Gt)"
+    | Le _ -> raise @@ Failure "TODO (i32x4.Le)"
+    | Ge _ -> raise @@ Failure "TODO (i32x4.Ge)"
+    | Splat ->
+      let v, stack = Stack.pop_i32 stack in
+      let v = V128.I32x4.splat v in
+      Stack.push_v128 stack v |> Choice.return
+    | Extract_lane _ -> raise @@ Failure "TODO (i32x4.Extract_lane)"
+    | Replace_lane _ -> raise @@ Failure "TODO (i32x4.Replace_lane)"
+    | Extend_low_i16x8_s -> raise @@ Failure "TODO (i32x4.Extend_low_i16x8_s)"
+    | Extend_high_i16x8_s -> raise @@ Failure "TODO (i32x4.Extend_high_i16x8_s)"
+    | Extend_low_i16x8_u -> raise @@ Failure "TODO (i32x4.Extend_low_i16x8_u)"
+    | Extend_high_i16x8_u -> raise @@ Failure "TODO (i32x4.Extend_high_i16x8_u)"
 
   let exec_i64x2_instr stack : Text.i64x2_instr -> _ = function
-    | Add ->
-      let (n1, n2), stack = Stack.pop2_v128 stack in
-      let a1, b1 = V128.to_i64x2 n1 in
-      let a2, b2 = V128.to_i64x2 n2 in
-      let a = I64.add a1 a2 in
-      let b = I64.add b1 b2 in
-      Stack.push_v128 stack (V128.of_i64x2 a b)
-    | Sub ->
-      let (n1, n2), stack = Stack.pop2_v128 stack in
-      let a1, b1 = V128.to_i64x2 n1 in
-      let a2, b2 = V128.to_i64x2 n2 in
-      let a = I64.sub a1 a2 in
-      let b = I64.sub b1 b2 in
-      Stack.push_v128 stack (V128.of_i64x2 a b)
-    | Mul -> raise @@ Failure "todo"
+    | Add -> Stack.apply_v128_v128_v128 stack V128.I64x2.add |> Choice.return
+    | Sub -> Stack.apply_v128_v128_v128 stack V128.I64x2.sub |> Choice.return
+    | Mul -> raise @@ Failure "TODO (i64x2.Mul)"
+    | Extend_low_i32x4 _ -> raise @@ Failure "TODO (i64x2.Extend_low_i32x4)"
+    | Splat ->
+      let v, stack = Stack.pop_i64 stack in
+      let v = V128.I64x2.splat v in
+      Stack.push_v128 stack v |> Choice.return
+    | Eq -> raise @@ Failure "TODO (i64x2.Eq)"
+    | Ne -> raise @@ Failure "TODO (i64x2.Ne)"
+    | Lt_s -> raise @@ Failure "TODO (i64x2.Lt_s)"
+    | Gt_s -> raise @@ Failure "TODO (i64x2.Gt_s)"
+    | Le_s -> raise @@ Failure "TODO (i64x2.Le_s)"
+    | Ge_s -> raise @@ Failure "TODO (i64x2.Ge_s)"
 
   let exec_ref_instr env stack (i : Binary.ref_instr) =
     match i with
@@ -1474,11 +1505,21 @@ struct
     | F64 i ->
       let* stack = exec_f64_instr env instr_counter stack i in
       ret stack
-    | V128 i -> ret @@ exec_v128_instr stack i
-    | I8x16 i -> exec_i8x16_instr stack i
-    | I16x8 i -> exec_i16x8_instr stack i
-    | I32x4 i -> ret @@ exec_i32x4_instr stack i
-    | I64x2 i -> ret @@ exec_i64x2_instr stack i
+    | V128 i ->
+      let* stack = exec_v128_instr env instr_counter stack i in
+      ret stack
+    | I8x16 i ->
+      let* stack = exec_i8x16_instr stack i in
+      ret stack
+    | I16x8 i ->
+      let* stack = exec_i16x8_instr stack i in
+      ret stack
+    | I32x4 i ->
+      let* stack = exec_i32x4_instr stack i in
+      ret stack
+    | I64x2 i ->
+      let* stack = exec_i64x2_instr stack i in
+      ret stack
     | Ref i ->
       let* stack = exec_ref_instr env stack i in
       ret stack

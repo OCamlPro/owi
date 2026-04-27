@@ -5,21 +5,73 @@
 module type T = sig
   type t
 
+  val pp : t Fmt.t
+
+  type boolean
+
+  type i8
+
+  type i16
+
   type i32
 
   type i64
 
   val zero : t
 
-  val of_i32x4 : i32 -> i32 -> i32 -> i32 -> t
-
-  val to_i32x4 : t -> i32 * i32 * i32 * i32
-
-  val of_i64x2 : i64 -> i64 -> t
-
-  val to_i64x2 : t -> i64 * i64
-
   val of_concrete : Concrete_v128.t -> t
 
-  val pp : t Fmt.t
+  val logor : t -> t -> t
+
+  val logand : t -> t -> t
+
+  val any_true : t -> boolean
+
+  module I8x16 : sig
+    val eq : t -> t -> t
+
+    val splat : i8 -> t
+
+    val bitmask : t -> i32
+
+    val add : t -> t -> t
+
+    val sub : t -> t -> t
+  end
+
+  module I16x8 : sig
+    val eq : t -> t -> t
+
+    val splat : i16 -> t
+
+    val bitmask : t -> i32
+
+    val add : t -> t -> t
+
+    val sub : t -> t -> t
+  end
+
+  module I32x4 : sig
+    val eq : t -> t -> t
+
+    val splat : i32 -> t
+
+    val bitmask : t -> i32
+
+    val add : t -> t -> t
+
+    val sub : t -> t -> t
+  end
+
+  module I64x2 : sig
+    val eq : t -> t -> t
+
+    val splat : i64 -> t
+
+    val bitmask : t -> i32
+
+    val add : t -> t -> t
+
+    val sub : t -> t -> t
+  end
 end

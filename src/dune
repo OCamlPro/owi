@@ -69,6 +69,8 @@
   concrete_f32
   concrete_f64
   concrete_global
+  concrete_i8
+  concrete_i16
   concrete_i32
   concrete_i64
   concrete_memory
@@ -97,6 +99,8 @@
   init
   int32
   int64
+  i8_intf
+  i16_intf
   i32_intf
   i64_intf
   interpret
@@ -133,6 +137,8 @@
   symbolic_f64
   symbolic_global
   symbolic_global0
+  symbolic_i8
+  symbolic_i16
   symbolic_i32
   symbolic_i64
   symbolic_memory

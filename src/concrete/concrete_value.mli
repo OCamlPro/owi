@@ -5,9 +5,11 @@
 include
   Value_intf.T
     with type boolean = Concrete_boolean.t
-     and type i32 = Int32.t
-     and type i64 = Int64.t
-     and type f32 = Float32.t
-     and type f64 = Float64.t
+     and type i8 = Concrete_i8.t
+     and type i16 = Concrete_i16.t
+     and type i32 = Concrete_i32.t
+     and type i64 = Concrete_i64.t
+     and type f32 = Concrete_f32.t
+     and type f64 = Concrete_f64.t
      and type v128 = Concrete_v128.t
      and module Ref = Concrete_ref

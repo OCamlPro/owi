@@ -36,6 +36,7 @@ type err =
   | `Msg of string
   | `Multiple_start_sections
   | `No_error
+  | `Proc_exit of int
   | `Parse_fail of string
   | `Size_minimum_greater_than_maximum
   | `Start_function

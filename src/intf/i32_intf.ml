@@ -7,6 +7,10 @@ module type T = sig
 
   type boolean
 
+  type i8
+
+  type i16
+
   type f32
 
   type f64
@@ -23,6 +27,10 @@ module type T = sig
 
   val to_boolean : t -> boolean
 
+  val to_i8 : t -> i8
+
+  val to_i16 : t -> i16
+
   val of_boolean : boolean -> t
 
   val reinterpret_f32 : f32 -> t
@@ -34,4 +42,12 @@ module type T = sig
   val of_int : int -> t
 
   val pp : t Fmt.t
+
+  val min_int : t
+
+  val eqz : t -> boolean
+
+  val ( = ) : t -> t -> boolean
+
+  val ( + ) : t -> t -> t
 end
