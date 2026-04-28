@@ -18,13 +18,7 @@ jobs:
 
       - name: Check License Header
         run: |
-          files=$(git diff --name-only --diff-filter=A \
-            "origin/${{ github.base_ref }}"...HEAD \
-            -- '*.ml' '*.mli')
-          if [ -z "$files" ]; then
-            echo "No new .ml or .mli files in this PR."
-            exit 0
-          fi
+          files=$(git ls-files '*.ml' '*.mli')
           missing_copyright=false
 
           for f in $files; do
