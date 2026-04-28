@@ -128,47 +128,39 @@ module DenotFixpoint (S : DATA_STATE) = struct
     in
     let (D.Context.Result (included, in_tuple, locals_continue)) =
       Locals.fold_on_nonequal_union
-        (fun k v1 v2 res ->
+        begin fun k v1 v2 res ->
           let size =
-            match (v1, v2) with
-            | Some v, _ | _, Some v -> Abs_value.size_of v
-            | _ ->
-              (* at least one of the two has to be defined *)
-              assert false
+            (* v1 and v2 should have the same size *)
+            match v1 with
+            | Some v -> Abs_value.size_of v
+            | None -> assert false
           in
           let v1 = Option.value v1 ~default:(Abs_value.top size state_a.ctx) in
           let v2 = Option.value v2 ~default:(Abs_value.top size state_b.ctx) in
-          match
-            gen_new_value ~widens v1 v2 state_a state_b res (Locals.add k)
-          with
+          let f = Locals.add k in
+          match gen_new_value ~widens v1 v2 state_a state_b res f with
           | Some res -> res
-          | None -> res )
+          | None -> res
+        end
         state_a.locals state_b.locals
         (D.Context.Result
            ( true
            , D.Context.empty_tuple ()
            , fun _ctx out -> (state_a.locals, out) ) )
     in
-
-    let (D.Context.Result (included, in_tuple, stack_continue)) =
+    let (D.Context.Result (inc, in_tup, stack_continue)) =
       serialize_stack
         (Stack.to_list state_a.stack)
         (Stack.to_list state_b.stack)
         (D.Context.Result (included, in_tuple, fun _ctx out -> ([], out)))
-      (* TODO can we use this ? (D.Context.Result *)
-      (*    (true, D.Context.empty_tuple (), fun _ctx out -> ([], out)) ) *)
     in
-
-    (* TODO can we use this ? (D.Context.Result *)
-    (*    (true, D.Context.empty_tuple (), ) *)
-    D.Context.Result
-      ( included
-      , in_tuple
-      , fun ctx out ->
-          let stack, out = stack_continue ctx out in
-          let locals, out = locals_continue ctx out in
-          ( { state_a with ctx; stack = Stack.of_list @@ List.rev stack; locals }
-          , out ) )
+    let cont ctx out =
+      let stack, out = stack_continue ctx out in
+      let locals, out = locals_continue ctx out in
+      ( { state_a with ctx; stack = Stack.of_list @@ List.rev stack; locals }
+      , out )
+    in
+    D.Context.Result (inc, in_tup, cont)
 
   let join state_a state_b =
     let (D.Context.Result (_inc, in_tuple, continue)) =
