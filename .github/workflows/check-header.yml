@@ -16,20 +16,24 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: List new .ml and .mli files
-        id: new-files
+      - name: Check License Header
         run: |
           files=$(git diff --name-only --diff-filter=A \
             "origin/${{ github.base_ref }}"...HEAD \
             -- '*.ml' '*.mli')
-          echo "files<<EOF" >> "$GITHUB_OUTPUT"
-          echo "$files" >> "$GITHUB_OUTPUT"
-          echo "EOF" >> "$GITHUB_OUTPUT"
-
-      - name: Check License Header
-        run: |
-          if [ -z "${{ steps.new-files.outputs.files }}" ]; then
+          if [ -z "$files" ]; then
             echo "No new .ml or .mli files in this PR."
             exit 0
           fi
-          xargs ./.github/check-headers.sh <<< "${{ steps.new-files.outputs.files }}"
+          missing_copyright=false
+
+          for f in $files; do
+            if ! grep -q "Copyright © 2021-2024 OCamlPro" "$f"; then
+              echo "missing copyright header in: $f"
+              missing_copyright=true
+            fi
+          done
+
+          if [ "$missing_copyright" = true ]; then
+            exit 1
+          fi
