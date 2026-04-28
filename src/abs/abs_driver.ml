@@ -48,11 +48,16 @@ module DenotFixpoint (S : DATA_STATE) = struct
 
   module JumpKey = struct
     (* TODO c'est mieux de définir le type nous même *)
-    type t = int option
+    type t =
+      | I of int
+      | Ret
 
-    let decr = Option.map Int.pred
+    let map : (int -> int) -> t -> t =
+     fun f key -> match key with I i -> I (f i) | Ret -> Ret
 
-    let to_int = Option.value ~default:(-1)
+    let decr = map Int.pred
+
+    let to_int = function I i -> i | Ret -> -1
   end
 
   module JumpTarget = struct
@@ -84,7 +89,7 @@ module DenotFixpoint (S : DATA_STATE) = struct
         neww
 
     let decr jt =
-      remove (Some 0) jt |> to_list
+      remove (I 0) jt |> to_list
       |> List.map (fun (k, v) -> (JumpKey.decr k, v))
       |> of_list
   end
@@ -276,7 +281,7 @@ module DenotFixpoint (S : DATA_STATE) = struct
       let> res, mapping = eval_expr state expr.raw in
       let state = { state with stack = res.stack; locals = res.locals } in
       let new_state =
-        match JumpTarget.find_opt (Some 0) mapping with
+        match JumpTarget.find_opt (I 0) mapping with
         | Some br_states -> List.fold_left join state br_states
         | None -> state
       in
@@ -319,7 +324,7 @@ module DenotFixpoint (S : DATA_STATE) = struct
         in
         let shorten_stack stack = Stack.take to_take stack in
         let next_head =
-          match JumpTarget.find_opt (Some 0) jt with
+          match JumpTarget.find_opt (I 0) jt with
           | Some jts ->
             let fp_stack = shorten_stack initial_state.stack in
             List.fold_left
@@ -343,7 +348,7 @@ module DenotFixpoint (S : DATA_STATE) = struct
           (next_state, jt)
       in
       fixpoint state
-    | Br i -> (None, JumpTarget.of_list [ (Some i, [ state ]) ])
+    | Br i -> (None, JumpTarget.of_list [ (I i, [ state ]) ])
     | instr -> (
       let res = S.eval_instr state instr in
       match res with
