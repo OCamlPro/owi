@@ -9,6 +9,9 @@ permissions:
   contents: write
   pull-requests: write
 
+env:
+  TESTSUITE_SUBMODULE_PATH: test/cram/script/reference
+
 jobs:
   update:
     if: "github.repository == 'OCamlPro/owi' || !github.event.schedule"
@@ -28,9 +31,9 @@ jobs:
       - name: Check for changes and update submodule
         id: update
         run: |
-          git submodule update --remote test/cram/script/reference
+          git submodule update --remote $TESTSUITE_SUBMODULE_PATH
 
-          if git diff --quiet test/cram/script/reference; then
+          if git diff --quiet $TESTSUITE_SUBMODULE_PATH; then
             echo "changed=false" | tee -a "$GITHUB_OUTPUT"
           else
             echo "changed=true" | tee -a "$GITHUB_OUTPUT"
@@ -55,7 +58,7 @@ jobs:
           gh pr create \
             --title "Update testsuite subrepo ($time)" \
             --body "Automated update check for \
-            \`test/cram/script/reference/\`." \
+            \`$TESTSUITE_SUBMODULE_PATH/\`." \
             --label "no changelog" \
             --base main \
             --head "$branch"
