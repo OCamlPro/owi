@@ -28,9 +28,9 @@ jobs:
       - name: Check for changes and update submodule
         id: update
         run: |
-          git submodule update --remote test/script/reference
+          git submodule update --remote test/cram/script/reference
 
-          if git diff --quiet test/script/reference; then
+          if git diff --quiet test/cram/script/reference; then
             echo "changed=false" | tee -a "$GITHUB_OUTPUT"
           else
             echo "changed=true" | tee -a "$GITHUB_OUTPUT"
@@ -54,7 +54,8 @@ jobs:
 
           gh pr create \
             --title "Update testsuite subrepo ($time)" \
-            --body "Automated update check for \`test/script/reference/\`." \
+            --body "Automated update check for \
+            \`test/cram/script/reference/\`." \
             --label "no changelog" \
             --base main \
             --head "$branch"
