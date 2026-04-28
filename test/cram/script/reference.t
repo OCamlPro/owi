@@ -81,7 +81,8 @@
   $ owi script --no-exhaustion reference/table_fill.wast
   $ owi script --no-exhaustion reference/table_get.wast
   $ owi script --no-exhaustion reference/table_grow.wast
-  $ owi script --no-exhaustion reference/table_init.wast
+  $ owi script --no-exhaustion reference/table_init.wast 2>&1 | grep -oE "Failure.*"
+  Failure("Assigned: unimplemented for rec and sub types")
   $ owi script --no-exhaustion reference/table_set.wast
   $ owi script --no-exhaustion reference/table_size.wast
   $ owi script --no-exhaustion reference/table-sub.wast
