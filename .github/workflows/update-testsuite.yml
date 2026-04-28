@@ -51,9 +51,9 @@ jobs:
           git checkout -B "$branch"
           git commit -am "Update WebAssembly testsuite submodule ($time)"
 
-          git remote set-url origin \
-            "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git"
-          git push origin "$branch" -f
+          git -c http.https://github.com/.extraHeader="" \
+            push "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" \
+            "$branch" -f
 
           gh pr create \
             --title "Update testsuite subrepo ($time)" \
