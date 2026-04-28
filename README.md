@@ -45,6 +45,7 @@
 - june 2025: [\<Programming\> 2025] @ Faculty of Mathematics and Physics, Charles University - Prague
 - june 2025: [Dagstuhl Seminar 25241 - Utilising and Scaling the WebAssembly Semantics] @ Leibniz-Zentrum für Informatik - Dagstuhl
 - october 2025: [Wasm Research Day October 2025] @ Google - Munich
+- february 2026: [JFLA 2026] @ Hôtellerie du Couvent - Vosges du Nord
 - april 2026: [ETAPS 2026 Industry Day] @ Lingotto Congress Center - Turin
 
 </details>
@@ -81,6 +82,7 @@
 [WebAssembly Research Center]: https://www.cs.cmu.edu/wrc
 [Wasm Research Day 2025]: https://www.cs.cmu.edu/~wasm/wasm-research-day-2025.html
 [Wasm Research Day October 2025]: https://www.cs.cmu.edu/~wasm/wasm-research-day-2025b.html
+[JFLA 2026]: https://jfla.inria.fr/jfla2026.html
 [ETAPS 2026 Industry Day]: https://etaps.org/2026/industry-day/
 
 </details>
