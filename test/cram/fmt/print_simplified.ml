@@ -1,3 +1,7 @@
+(* SPDX-License-Identifier: AGPL-3.0-or-later *)
+(* Copyright © 2021-2026 OCamlPro *)
+(* Written by the Owi programmers *)
+
 (** Parse a Wasm module, simplify it, then try to reparse the output produced by
     printing the simplified module. If it succeed, it will also print the
     reparsed module to stdout *)

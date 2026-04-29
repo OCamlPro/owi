@@ -18,11 +18,11 @@ jobs:
 
       - name: Check License Header
         run: |
-          files=$(git ls-files '*.ml' '*.mli')
+          files=$(git ls-files '*.ml' '*.mli' | grep -v "^doc/")
           missing_copyright=false
 
           for f in $files; do
-            if ! grep -q "Copyright © 2021-2024 OCamlPro" "$f"; then
+            if ! grep -q "Copyright © 2021-2026 OCamlPro" "$f"; then
               echo "missing copyright header in: $f"
               missing_copyright=true
             fi
