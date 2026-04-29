@@ -1,3 +1,7 @@
+(* SPDX-License-Identifier: AGPL-3.0-or-later *)
+(* Copyright © 2021-2026 OCamlPro *)
+(* Written by the Owi programmers *)
+
 type metrics =
   { instr_counter : int
   ; distance_to_unreachable : int Option.t

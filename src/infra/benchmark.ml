@@ -1,3 +1,7 @@
+(* SPDX-License-Identifier: AGPL-3.0-or-later *)
+(* Copyright © 2021-2026 OCamlPro *)
+(* Written by the Owi programmers *)
+
 type stats =
   { solver_sat_time :
       Mtime.Span.t Atomic.t (* time taken by the solver to answer SAT queries *)

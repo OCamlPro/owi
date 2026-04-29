@@ -1,3 +1,7 @@
+(* SPDX-License-Identifier: AGPL-3.0-or-later *)
+(* Copyright © 2021-2026 OCamlPro *)
+(* Written by the Owi programmers *)
+
 val cmd :
      deterministic_result_order:bool
   -> fail_mode:Symbolic_parameters.fail_mode

@@ -1,3 +1,7 @@
+(* SPDX-License-Identifier: AGPL-3.0-or-later *)
+(* Copyright © 2021-2026 OCamlPro *)
+(* Written by the Owi programmers *)
+
 module Vertex = struct
   (** A node of the control flow graph is an expression. The invariant is that
       it should not contain any "block". *)

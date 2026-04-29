@@ -1,3 +1,7 @@
+(* SPDX-License-Identifier: AGPL-3.0-or-later *)
+(* Copyright © 2021-2026 OCamlPro *)
+(* Written by the Owi programmers *)
+
 type t =
   | F32x4 of Float32.t * Float32.t * Float32.t * Float32.t
   | F64x2 of Float64.t * Float64.t

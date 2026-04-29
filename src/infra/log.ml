@@ -1,3 +1,7 @@
+(* SPDX-License-Identifier: AGPL-3.0-or-later *)
+(* Copyright © 2021-2026 OCamlPro *)
+(* Written by the Owi programmers *)
+
 let main_src = Logs.Src.create "owi" ~doc:"Owi's main logs"
 
 let bench_src = Logs.Src.create "owi-bench" ~doc:"Owi's benchmark logs"

@@ -1,3 +1,7 @@
+(* SPDX-License-Identifier: AGPL-3.0-or-later *)
+(* Copyright © 2021-2026 OCamlPro *)
+(* Written by the Owi programmers *)
+
 (* TODO: OCaml Arg module could not be used (conflict with crowbar)
    https://github.com/OCamlPro/owi/pull/28#discussion_r1231983824 *)
 
