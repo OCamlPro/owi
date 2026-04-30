@@ -1,4 +1,4 @@
-name: Check copyright headers
+name: check-copyright-headers
 
 on:
   pull_request:
