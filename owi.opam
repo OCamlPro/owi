@@ -76,7 +76,7 @@ depexts: [
   ["mdbook"] { with-dev-setup }
   ["clang" "golang" "llvm" "lld" "rustc"]  {os-family = "debian"}
   ["rust-llvm" "libstd-rust-dev-wasm32"] {os-distribution = "debian"}
-  ["rustup" "zig"] {os-distribution = "ubuntu"}
+  ["lld" "rustup" "zig"] {os-distribution = "ubuntu"}
   ["rustup" "tinygo" "zig"] {os-distribution = "fedora"}
   ["rust" "tinygo" "zig"] {os-distribution = "arch"}
 ]
