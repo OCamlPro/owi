@@ -58,7 +58,7 @@ jobs:
           if ! gh pr list --head "$branch" --state open --json number --jq '.[0].number' | grep -q .; then
             gh pr create \
               --title "Update testsuite subrepo ($time)" \
-              --body "Automated update check for `$TESTSUITE_SUBMODULE_PATH/\`." \
+              --body "Automated update check for \`$TESTSUITE_SUBMODULE_PATH/\`." \
               --label "no changelog" \
               --base main \
               --head "$branch"
