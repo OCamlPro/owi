@@ -2,7 +2,7 @@ name: build-arch
 on:
   pull_request:
     branches:
-      - main
+      - none
   push:
     branches:
       - main
