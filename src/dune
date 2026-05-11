@@ -8,6 +8,7 @@
   abs_extern_func
   abs_value
   abs_wasm_ffi
+  denot_concrete
   annotated
   assigned
   benchmark
