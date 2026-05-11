@@ -349,6 +349,37 @@ module DenotFixpoint (S : DATA_STATE) = struct
       in
       fixpoint state
     | Br i -> (None, JumpTarget.of_list [ (I i, [ state ]) ])
+    | Br_table (cases, default) ->
+      let v, stack = Stack.pop state.stack in
+      let v_bin = Abs_value.to_binary v in
+      let size = Size.b32 in
+      let equals =
+        let f acc i =
+          let const = D.Binary_Forward.biconst ~size (Z.of_int i) state.ctx in
+          let bool = D.Binary_Forward.beq ~size state.ctx const v_bin in
+          match D.assume state.ctx bool with Some _ -> i :: acc | None -> acc
+        in
+        Array.fold_left f [] cases
+      in
+      let non_equals =
+        let f acc i =
+          let const = D.Binary_Forward.biconst ~size (Z.of_int i) state.ctx in
+          let bool = D.Binary_Forward.beq ~size state.ctx const v_bin in
+          let not = D.Boolean_Forward.not state.ctx bool in
+          D.Boolean_Forward.( && ) state.ctx acc not
+        in
+        let predicate =
+          Array.fold_left f (D.Boolean_Forward.true_ state.ctx) cases
+        in
+        match D.assume state.ctx predicate with
+        | Some _ -> [ default ]
+        | None -> []
+      in
+      let jt_list =
+        List.append equals non_equals
+        |> List.map (fun i -> (JumpKey.I i, [ { state with stack } ]))
+      in
+      (None, JumpTarget.of_list jt_list)
     | instr -> (
       let res = S.eval_instr state instr in
       match res with
