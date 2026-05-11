@@ -290,20 +290,20 @@ module DenotFixpoint (S : DATA_STATE) = struct
         JumpTarget.decr mapping
       in
       (Some new_state, mapping)
-    | If_else (_, bt, expr_true, expr_false) ->
+    | If_else (_, bt, expr_then, expr_else) ->
       let b, stack = Stack.pop state.stack in
       let cond = Abs_value.to_boolean state.ctx b in
-      let state_true, jt_true =
+      let state_then, jt_true =
         let> ctx, _ = (D.assume state.ctx cond, JumpTarget.empty) in
-        eval_instr { state with stack; ctx } (Block (None, bt, expr_true))
+        eval_instr { state with stack; ctx } (Block (None, bt, expr_then))
       in
-      let state_false, jt_false =
+      let state_else, jt_false =
         let not_cond = D.Boolean_Forward.not state.ctx cond in
         let> ctx, _ = (D.assume state.ctx not_cond, JumpTarget.empty) in
-        eval_instr { state with stack; ctx } (Block (None, bt, expr_false))
+        eval_instr { state with stack; ctx } (Block (None, bt, expr_else))
       in
       let jt = JumpTarget.append jt_true jt_false in
-      begin match (state_true, state_false) with
+      begin match (state_then, state_else) with
       | Some state_true, Some state_false ->
         (Some (join state_true state_false), jt)
       | Some state, None | None, Some state -> (Some state, jt)
