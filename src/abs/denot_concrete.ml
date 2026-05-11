@@ -109,8 +109,7 @@ let pp_v fmt = function
   | I32 i -> Fmt.pf fmt "(i32 %ld)" i
   | I64 i -> Fmt.pf fmt "(i64 %Ld)" i
 
-let pp_map fmt map =
-  Locals.pretty (fun fmt k v -> Fmt.pf fmt "%i->%a" k pp_v v) fmt map
+let pp_map = Locals.pretty (fun fmt k v -> Fmt.pf fmt "%i->%a" k pp_v v)
 
 let print_state (state : state) =
   let sigma, rho = state in
@@ -127,7 +126,7 @@ let rec input_loop state =
     Fmt.pr "Input should be <cr>|n|p@.";
     input_loop state
 
-let option_get = function Some x -> x | None -> assert false
+let option_get = function Some x -> x | None -> assert false [@@inline]
 
 let func_type_to_bt ((params, results) : Binary.func_type) =
   let val_type_to_bt : Binary.val_type -> t = function
@@ -217,8 +216,8 @@ and eval_instr : state -> Binary.instr -> state option * state JumpTarget.t =
  fun state instr ->
   let sigma, rho = state in
   match instr with
-  | Binary.I32 instr -> (Some (eval_i32 (sigma, rho) instr), JumpTarget.empty)
-  | Binary.I64 instr -> (Some (eval_i64 (sigma, rho) instr), JumpTarget.empty)
+  | Binary.I32 instr -> (Some (eval_i32 state instr), JumpTarget.empty)
+  | Binary.I64 instr -> (Some (eval_i64 state instr), JumpTarget.empty)
   | Drop ->
     let _, sigma = Stack.pop sigma in
     (Some (sigma, rho), JumpTarget.empty)
@@ -242,6 +241,17 @@ and eval_instr : state -> Binary.instr -> state option * state JumpTarget.t =
     | _ ->
       (* br i *)
       (None, JumpTarget.of_list [ (I id, state) ]) )
+  | Br_table (cases, default) ->
+    let v, sigma = Stack.pop sigma in
+    let v_int =
+      match v with
+      (* br_table works only on int32 *)
+      | I32 i -> Int32.to_int i
+      | _ -> assert false
+    in
+    let matched = Array.find_index (fun case -> case = v_int) cases in
+    let jt = match matched with Some i -> i | None -> default in
+    (None, JumpTarget.of_list [ (I jt, (sigma, rho)) ])
   | Return -> (None, JumpTarget.of_list [ (Ret, state) ])
   | instr ->
     Fmt.failwith "TODO implement instr %a@\n"
