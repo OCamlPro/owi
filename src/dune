@@ -6,6 +6,11 @@
   abs_stack
   abs_driver
   abs_extern_func
+  abstract_value0
+  abstract_domain_intv
+  abstract_i32
+  abstract_i64
+  abstract_state
   abs_value
   abs_wasm_ffi
   denot_concrete

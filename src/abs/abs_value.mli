@@ -1,29 +1,71 @@
-module Size : sig
-  val b32 : Units.In_bits.t
+(* recup le context depuis le monade *)
 
-  val b64 : Units.In_bits.t
+module Boolean : sig
+  type t := Abstract_value0.boolean
 
-  val equal : Units.In_bits.t -> Units.In_bits.t -> bool
+  val of_i32 : Abstract_value0.i32 -> t
+
+  val to_i32 : t -> Abstract_value0.i32
+
+  val _true : t
+
+  val _false : t
+
+  val not : Abstract_value0.boolean -> Abstract_value0.boolean
 end
 
-module ADomain : Codex.Domains.Sig.BASE_WITH_INTEGER
+module I32 : sig
+  type t := Abstract_value0.i32
 
-type t =
-  | I32 of ADomain.binary
-  | I64 of ADomain.binary
+  val zero : t
 
-val pp : ADomain.Context.t -> Format.formatter -> t -> unit
+  val of_concrete : Concrete_i32.t -> t
 
-val to_binary : t -> ADomain.binary
+  val eqz : t -> bool
 
-val of_binary : Units.In_bits.t -> ADomain.binary -> t
+  val add : t -> t -> t
 
-val equal : t -> t -> bool
+  val sub : t -> t -> t
 
-val size_of : t -> Units.In_bits.t
+  val mul : t -> t -> t
 
-val to_boolean : ADomain.Context.t -> t -> ADomain.boolean
+  val div : Text.sx -> t -> t -> t
 
-val top : Units.In_bits.t -> ADomain.Context.t -> t
+  val to_int : t -> int
 
-val of_boolean : ADomain.Context.t -> Units.In_bits.t -> ADomain.boolean -> t
+  val logand : t -> t -> t
+
+  val logor : t -> t -> t
+
+  (* val lt : ?state:State.t -> t -> t -> boolean *)
+  (**)
+  (* val le : ?state:State.t -> t -> t -> boolean *)
+  (**)
+  (* val gt : ?state:State.t -> t -> t -> boolean *)
+  (**)
+  (* val ge : ?state:State.t -> t -> t -> boolean *)
+end
+
+module I64 : sig
+  type t := Abstract_value0.i64
+
+  val zero : t
+
+  val of_concrete : Concrete_i64.t -> t
+
+  val eqz : t -> bool
+
+  val add : t -> t -> t
+
+  val sub : t -> t -> t
+
+  val mul : t -> t -> t
+
+  val div : Text.sx -> t -> t -> t
+
+  val logand : t -> t -> t
+
+  val logor : t -> t -> t
+end
+
+val pp : Abstract_value0.t Fmt.t
