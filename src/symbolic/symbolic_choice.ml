@@ -11,47 +11,43 @@ include Symex.Monad
 type 'a t = ('a, Bug.t, Prio.metrics, Thread.t) Symex.Monad.t
 
 let add_already_checked_condition_to_pc (condition : Symbolic_boolean.t) =
-  map_state (fun state ->
-    Thread.add_already_checked_condition_to_pc state condition )
+  map_state (Thread.add_already_checked_condition_to_pc condition)
 [@@inline]
 
 let get_pc () =
-  let+ pc = fold_state (fun (state : Thread.t) -> state.pc) in
-  let pc = Symex.Path_condition.to_list pc in
-  List.fold_left Smtml.Expr.Set.union Smtml.Expr.Set.empty pc
+  fold_state (fun (state : Thread.t) ->
+    let pc = Symex.Path_condition.to_list state.pc in
+    List.fold_left Smtml.Expr.Set.union Smtml.Expr.Set.empty pc )
 
-let add_breadcrumb crumb =
-  map_state (fun state -> Thread.add_breadcrumb state crumb)
+let add_breadcrumb crumb = map_state (Thread.add_breadcrumb crumb)
 
-let add_label label = map_state (fun state -> Thread.add_label state label)
+let add_label label = map_state (Thread.add_label label)
 
-let open_scope scope = map_state (fun state -> Thread.open_scope state scope)
+let open_scope scope = map_state (Thread.open_scope scope)
 
-let close_scope () = map_state (fun state -> Thread.close_scope state)
+let close_scope = map_state Thread.close_scope
 
 let with_new_invisible_symbol ty f =
-  let* num_symbols = fold_state (fun (state : Thread.t) -> state.num_symbols) in
+  let* sym =
+    fold_state (fun (state : Thread.t) ->
+      Fmt.kstr (Smtml.Symbol.make ty) "symbol_invisible_%i" state.num_symbols )
+  in
   let+ () = map_state Thread.incr_num_symbols in
-  let sym = Fmt.kstr (Smtml.Symbol.make ty) "symbol_invisible_%i" num_symbols in
   f sym
 
 let with_new_symbol ty f =
-  let* num_symbols = fold_state (fun (state : Thread.t) -> state.num_symbols) in
-  let sym = Fmt.kstr (Smtml.Symbol.make ty) "symbol_%d" num_symbols in
-  let+ () =
-    map_state (fun state ->
-      let state = Thread.add_symbol state sym in
-      Thread.incr_num_symbols state )
+  let* sym =
+    fold_state (fun (state : Thread.t) ->
+      Fmt.kstr (Smtml.Symbol.make ty) "symbol_%d" state.num_symbols )
   in
+  let+ () = map_state (Thread.add_symbol sym) in
   f sym
 
 let check_reachability condition =
-  let+ pc, bench_stats =
-    fold_state (fun (state : Thread.t) -> (state.pc, state.bench_stats))
-  in
-  let pc = Symex.Path_condition.slice_on_new_condition condition pc in
-  Benchmark.handle_time_span bench_stats.solver_sat_time @@ fun () ->
-  Solver.check pc condition
+  fold_state (fun (state : Thread.t) ->
+    let pc = Symex.Path_condition.slice_on_new_condition condition state.pc in
+    Benchmark.handle_time_span state.bench_stats.solver_sat_time @@ fun () ->
+    Solver.check pc condition )
 
 let assume condition =
   let* satisfiability = check_reachability condition in
@@ -146,12 +142,12 @@ let select_i32 (e : Symbolic_i32.t) : int32 t =
       match Smtml.Typed.view e with
       | Symbol symbol -> return (None, symbol)
       | _ ->
-        let* num_symbols =
-          fold_state (fun (state : Thread.t) -> state.num_symbols)
+        let* sym =
+          fold_state (fun (state : Thread.t) ->
+            Fmt.str "choice_i32_%i" state.num_symbols
+            |> Smtml.Symbol.make Smtml.Typed.Types.(to_ty bitv32) )
         in
         let+ () = map_state Thread.incr_num_symbols in
-        let name = Fmt.str "choice_i32_%i" num_symbols in
-        let sym = Smtml.Symbol.make Smtml.Typed.Types.(to_ty bitv32) name in
         let assign = Smtml.Typed.Bitv32.(eq (symbol sym) e) in
         (Some assign, sym)
     in

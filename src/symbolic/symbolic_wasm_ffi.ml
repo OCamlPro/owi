@@ -180,7 +180,7 @@ module M :
     let str = String.init len (Array.get bytes) in
     open_scope str
 
-  let close_scope = Symbolic_choice.close_scope
+  let close_scope () = Symbolic_choice.close_scope
 end
 
 type extern_func = Symbolic_extern_func.extern_func
