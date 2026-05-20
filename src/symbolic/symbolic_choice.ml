@@ -10,54 +10,48 @@ include Symex.Monad
 
 type 'a t = ('a, Bug.t, Prio.metrics, Thread.t) Symex.Monad.t
 
-let state : Thread.t t = state ()
-
 let add_already_checked_condition_to_pc (condition : Symbolic_boolean.t) =
-  let* state in
-  let state = Thread.add_already_checked_condition_to_pc state condition in
-  set_state state
+  map_state (fun state ->
+    Thread.add_already_checked_condition_to_pc state condition )
 [@@inline]
 
 let get_pc () =
-  let+ state in
-  let pc = Symex.Path_condition.to_list state.pc in
+  let+ pc = fold_state (fun (state : Thread.t) -> state.pc) in
+  let pc = Symex.Path_condition.to_list pc in
   List.fold_left Smtml.Expr.Set.union Smtml.Expr.Set.empty pc
 
-let add_breadcrumb crumb = modify_state (fun t -> Thread.add_breadcrumb t crumb)
+let add_breadcrumb crumb =
+  map_state (fun state -> Thread.add_breadcrumb state crumb)
 
-let add_label label = modify_state (fun t -> Thread.add_label t label)
+let add_label label = map_state (fun state -> Thread.add_label state label)
 
-let open_scope scope = modify_state (fun t -> Thread.open_scope t scope)
+let open_scope scope = map_state (fun state -> Thread.open_scope state scope)
 
-let close_scope () = modify_state (fun t -> Thread.close_scope t)
+let close_scope () = map_state (fun state -> Thread.close_scope state)
 
 let with_new_invisible_symbol ty f =
-  let* state in
-  let n = state.num_symbols in
-  let+ () = modify_state Thread.incr_num_symbols in
-  let sym = Fmt.kstr (Smtml.Symbol.make ty) "symbol_invisible_%i" n in
+  let* num_symbols = fold_state (fun (state : Thread.t) -> state.num_symbols) in
+  let+ () = map_state Thread.incr_num_symbols in
+  let sym = Fmt.kstr (Smtml.Symbol.make ty) "symbol_invisible_%i" num_symbols in
   f sym
 
 let with_new_symbol ty f =
-  let* state in
-  let n = state.num_symbols in
-  let sym = Fmt.kstr (Smtml.Symbol.make ty) "symbol_%d" n in
+  let* num_symbols = fold_state (fun (state : Thread.t) -> state.num_symbols) in
+  let sym = Fmt.kstr (Smtml.Symbol.make ty) "symbol_%d" num_symbols in
   let+ () =
-    modify_state (fun state ->
+    map_state (fun state ->
       let state = Thread.add_symbol state sym in
       Thread.incr_num_symbols state )
   in
   f sym
 
 let check_reachability condition =
-  let* state in
-  let pc = Symex.Path_condition.slice_on_new_condition condition state.pc in
-  let stats = state.bench_stats in
-  let reachability =
-    Benchmark.handle_time_span stats.solver_sat_time @@ fun () ->
-    Solver.check pc condition
+  let+ pc, bench_stats =
+    fold_state (fun (state : Thread.t) -> (state.pc, state.bench_stats))
   in
-  return reachability
+  let pc = Symex.Path_condition.slice_on_new_condition condition pc in
+  Benchmark.handle_time_span bench_stats.solver_sat_time @@ fun () ->
+  Solver.check pc condition
 
 let assume condition =
   let* satisfiability = check_reachability condition in
@@ -82,19 +76,20 @@ let select_inner ~with_breadcrumbs (condition : Symbolic_boolean.t)
       in
       let* () = yield priority in
       let* () = assume condition in
-      let* () = modify_state (Thread.set_priority priority) in
+      let* () = map_state (Thread.set_priority priority) in
       return final_value
     in
 
-    let* state in
+    let* instr_counter, depth =
+      fold_state (fun (state : Thread.t) ->
+        (state.priority.instr_counter, state.depth) )
+    in
     let true_branch =
       let prio =
         let instr_counter =
-          match instr_counter_true with
-          | None -> state.priority.instr_counter
-          | Some instr_counter -> instr_counter
+          Option.value instr_counter_true ~default:instr_counter
         in
-        Prio.v ~instr_counter ~distance_to_unreachable:None ~depth:state.depth
+        Prio.v ~instr_counter ~distance_to_unreachable:None ~depth
       in
       branch condition true prio
     in
@@ -102,15 +97,14 @@ let select_inner ~with_breadcrumbs (condition : Symbolic_boolean.t)
     let false_branch =
       let prio =
         let instr_counter =
-          match instr_counter_false with
-          | None -> state.priority.instr_counter
-          | Some instr_counter -> instr_counter
+          Option.value instr_counter_false ~default:instr_counter
         in
-        Prio.v ~instr_counter ~distance_to_unreachable:None ~depth:state.depth
+        Prio.v ~instr_counter ~distance_to_unreachable:None ~depth
       in
       branch (Symbolic_boolean.not condition) false prio
     in
-    Thread.incr_path_count state;
+
+    let* () = fold_state Thread.incr_path_count in
 
     choose true_branch false_branch
 [@@inline]
@@ -122,13 +116,14 @@ let select (cond : Symbolic_boolean.t) ~instr_counter_true ~instr_counter_false
 [@@inline]
 
 let get_model_or_prune symbol =
-  let* state in
+  let* pc, bench_stats =
+    fold_state (fun (state : Thread.t) -> (state.pc, state.bench_stats))
+  in
   let sat_model =
-    let set = state.pc |> Symex.Path_condition.slice_on_symbol symbol in
-    let stats = state.bench_stats in
+    let set = pc |> Symex.Path_condition.slice_on_symbol symbol in
     let symbol_scopes = Symbol_scope.of_symbol symbol in
-    Benchmark.handle_time_span stats.solver_intermediate_model_time (fun () ->
-      Solver.model_of_set ~symbol_scopes ~set )
+    Benchmark.handle_time_span bench_stats.solver_intermediate_model_time
+      (fun () -> Solver.model_of_set ~symbol_scopes ~set )
   in
   match sat_model with
   | `Unsat -> prune ()
@@ -147,13 +142,14 @@ let select_i32 (e : Symbolic_i32.t) : int32 t =
   | Val (Bitv bv) when Smtml.Bitvector.numbits bv <= 32 ->
     return (Smtml.Bitvector.to_int32 bv)
   | _ ->
-    let* state in
     let* assign, symbol =
       match Smtml.Typed.view e with
       | Symbol symbol -> return (None, symbol)
       | _ ->
-        let num_symbols = state.num_symbols in
-        let+ () = modify_state Thread.incr_num_symbols in
+        let* num_symbols =
+          fold_state (fun (state : Thread.t) -> state.num_symbols)
+        in
+        let+ () = map_state Thread.incr_num_symbols in
         let name = Fmt.str "choice_i32_%i" num_symbols in
         let sym = Smtml.Symbol.make Smtml.Typed.Types.(to_ty bitv32) name in
         let assign = Smtml.Typed.Bitv32.(eq (symbol sym) e) in
@@ -194,28 +190,32 @@ let select_i32 (e : Symbolic_i32.t) : int32 t =
         let* () = assume not_this_value_cond in
         generator ()
       in
-      Thread.incr_path_count state;
+
+      let* instr_counter, depth =
+        fold_state (fun (state : Thread.t) ->
+          Thread.incr_path_count state;
+          (state.priority.instr_counter, state.depth) )
+      in
 
       (* TODO: better prio here? *)
-      let prio =
-        Prio.v ~instr_counter:state.priority.instr_counter
-          ~distance_to_unreachable:None ~depth:state.depth
-      in
+      let prio = Prio.v ~instr_counter ~distance_to_unreachable:None ~depth in
 
       fork ~parent:this_val_branch ~child:(prio, not_this_val_branch)
     in
     generator ()
 
 let bug kind =
-  let* state in
+  let* path_condition, solver_final_model_time =
+    fold_state (fun (state : Thread.t) ->
+      (state.pc, state.bench_stats.solver_final_model_time) )
+  in
   let* model =
-    let stats = state.bench_stats in
-    Benchmark.handle_time_span stats.solver_final_model_time @@ fun () ->
-    let path_condition = state.pc in
+    Benchmark.handle_time_span solver_final_model_time @@ fun () ->
     match Solver.model_of_path_condition ~path_condition with
     | Some model -> return model
     | None -> if Solver.was_interrupted () then prune () else assert false
   in
+  let* state = fold_state Fun.id in
   fail { Bug.kind; model; state }
 
 let trap t = bug (`Trap t)
