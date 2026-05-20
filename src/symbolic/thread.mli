@@ -30,13 +30,13 @@ type t = private
 
 val init : unit -> t
 
-val add_already_checked_condition_to_pc : t -> Symbolic_boolean.t -> t
+val add_already_checked_condition_to_pc : Symbolic_boolean.t -> t -> t
 
-val add_breadcrumb : t -> int -> t
+val add_breadcrumb : int -> t -> t
 
-val add_symbol : t -> Smtml.Symbol.t -> t
+val add_symbol : Smtml.Symbol.t -> t -> t
 
-val add_label : t -> int * string -> t
+val add_label : int * string -> t -> t
 
 val replace_memory : Symbolic_memory0.t -> t -> t
 
@@ -44,7 +44,7 @@ val replace_table : Symbolic_table0.t -> t -> t
 
 val replace_global : Symbolic_global0.t -> t -> t
 
-val open_scope : t -> string -> t
+val open_scope : string -> t -> t
 
 val close_scope : t -> t
 

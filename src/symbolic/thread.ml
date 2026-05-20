@@ -67,15 +67,17 @@ let init () =
   ; priority
   }
 
-let add_symbol t s =
+let add_symbol s t =
   let open Symbol_scope in
-  { t with symbol_scopes = symbol s t.symbol_scopes }
+  let num_symbols = succ t.num_symbols in
+  let symbol_scopes = symbol s t.symbol_scopes in
+  { t with symbol_scopes; num_symbols }
 
-let add_already_checked_condition_to_pc t c =
+let add_already_checked_condition_to_pc c t =
   let pc = Symex.Path_condition.add_checked_sat_condition c t.pc in
   { t with pc }
 
-let add_breadcrumb t crumb =
+let add_breadcrumb crumb t =
   let breadcrumbs = crumb :: t.breadcrumbs in
   let depth = t.depth + 1 in
   Benchmark.set_max_depth t.bench_stats depth;
@@ -85,9 +87,9 @@ let incr_num_symbols t =
   let num_symbols = succ t.num_symbols in
   { t with num_symbols }
 
-let add_label t label = { t with labels = label :: t.labels }
+let add_label label t = { t with labels = label :: t.labels }
 
-let open_scope t scope =
+let open_scope scope t =
   let open Symbol_scope in
   { t with symbol_scopes = open_scope scope t.symbol_scopes }
 

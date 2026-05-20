@@ -40,7 +40,7 @@ val add_label : int * string -> unit t
 
 val open_scope : string -> unit t
 
-val close_scope : unit -> unit t
+val close_scope : unit t
 
 val ite :
      Symbolic_boolean.t
