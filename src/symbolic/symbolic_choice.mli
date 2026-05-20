@@ -26,13 +26,13 @@ val assertion : Symbolic_boolean.t -> unit t
 
 val assume : Symbolic_boolean.t -> unit t
 
-val modify_state : (Thread.t -> Thread.t) -> unit t
+val map_state : (Thread.t -> Thread.t) -> unit t
+
+val fold_state : (Thread.t -> 'a) -> 'a t
 
 val with_new_invisible_symbol : Smtml.Ty.t -> (Smtml.Symbol.t -> 'b) -> 'b t
 
 val with_new_symbol : Smtml.Ty.t -> (Smtml.Symbol.t -> 'b) -> 'b t
-
-val state : Thread.t t
 
 val get_pc : unit -> Smtml.Expr.Set.t t
 

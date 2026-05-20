@@ -82,30 +82,28 @@ let run ~exploration_strategy ~workers ~no_worker_isolation ~no_stop_at_failure
   (* Launch workers *)
   let domains =
     (* Decides what to push in the bug stack and close the scheduler if needed. *)
-    let at_result v =
-      Atomic.incr path_count;
-      match v with
-      | Ok (), _thread -> ()
-      | Error bug, _thread ->
-        let should_be_added =
-          match fail_mode with
-          | Symbolic_parameters.Both -> true
-          | Assertion_only -> Bug.is_assertion bug
-          | Trap_only -> Bug.is_trap bug
-        in
-        if should_be_added then begin
-          Bugs.push bug Prio.dummy bug_stack;
-          if not no_stop_at_failure then begin
-            Scheduler.close sched
-          end
+    let at_bug bug =
+      let should_be_added =
+        match fail_mode with
+        | Symbolic_parameters.Both -> true
+        | Assertion_only -> Bug.is_assertion bug
+        | Trap_only -> Bug.is_trap bug
+      in
+      if should_be_added then begin
+        Bugs.push bug Prio.dummy bug_stack;
+        if not no_stop_at_failure then begin
+          Scheduler.close sched
         end
+      end
     in
 
     (* Handles final values from the monad and reschedule them if needed. *)
     let rec at_schedulable (t : _ Symex.Monad.Schedulable.t) write_back =
       match t with
-      | Prune -> ()
-      | Now x -> at_result x
+      | Prune | Ok _ -> Atomic.incr path_count
+      | Error bug ->
+        Atomic.incr path_count;
+        at_bug bug
       | Yield (prio, f) -> write_back (prio, f)
       | Choice (m1, m2) ->
         at_schedulable m1 write_back;

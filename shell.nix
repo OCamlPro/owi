@@ -32,6 +32,12 @@ let
         rev = "d1f09d5aeb4c6cbde5f2604c3e25915fbb28817d";
       };
     });
+    symex = super.symex.overrideAttrs (old: {
+      src = fetchGit {
+        url = "https://github.com/ocamlpro/symex";
+        rev = "9c8111eae86be15c54d24b615fd278aef0240898";
+      };
+    });
   });
   tinygo = pkgs.tinygo.overrideAttrs (old: {
     doCheck = false;
