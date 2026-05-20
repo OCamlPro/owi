@@ -1,17 +1,17 @@
 #include <owi.h>
 
 int main(void) {
-    int x = owi_int();
-    owi_assume(x >= -1);
+  int x = owi_int("x");
+  owi_assume(x >= -1);
 
-    //@ ghost int num;
+  //@ ghost int num;
 
-    if (x >= 0) {
-        //@ ghost num = 42;
-    }
-    //@ ghost else num = 0;
+  if (x >= 0) {
+    //@ ghost num = 42;
+  }
+  //@ ghost else num = 0;
 
-   //@ assert num == 42;
+  //@ assert num == 42;
 
-    return 0;
+  return 0;
 }

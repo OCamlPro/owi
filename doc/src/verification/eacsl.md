@@ -69,26 +69,29 @@ We can then call the function with symbolic values and see what happens. We shou
             (i >= 2 && \forall integer j; 2 <= j < i ==> i % j != 0));
 */
 void primes(int *is_prime, int n) {
-    for (int i = 0; i < n; ++i) is_prime[i] = 1;
-    for (int i = 2; i * i < n; ++i) {
-        if (!is_prime[i]) continue;
-        for (int j = i; i * j < n; ++j) {
-            is_prime[i * j] = 0;
-        }
+  for (int i = 0; i < n; ++i) {
+    is_prime[i] = 1;
+  }
+  for (int i = 2; i * i < n; ++i) {
+    if (!is_prime[i]) {
+      continue;
     }
+    for (int j = i; i * j < n; ++j) {
+      is_prime[i * j] = 0;
+    }
+  }
 }
 
 int main(void) {
-    int *is_prime;
-    is_prime = malloc(MAX_SIZE * sizeof(int));
+  int *is_prime = malloc(MAX_SIZE * sizeof(int));
 
-    int n = owi_int();
-    owi_assume(n >= 2);
-    owi_assume(n <= MAX_SIZE);
+  int n = owi_int("n");
+  owi_assume(n >= 2);
+  owi_assume(n <= MAX_SIZE);
 
-    primes(is_prime, n);
-    free(is_prime);
-    return 0;
+  primes(is_prime, n);
+  free(is_prime);
+  return 0;
 }
 ```
 
@@ -96,7 +99,7 @@ int main(void) {
 $ owi c --e-acsl primes.c -w1
 owi: [ERROR] Assert failure: false
 model {
-  symbol symbol_0 i32 2
+  symbol symbol_0 i32 2 n
 }
 owi: [ERROR] Reached problem!
 [13]
@@ -120,27 +123,29 @@ The problem is that we should mark `0` and `1` as non-prime during the initializ
             (i >= 2 && \forall integer j; 2 <= j < i ==> i % j != 0));
 */
 void primes(int *is_prime, int n) {
-    for (int i = 0; i < n; ++i) is_prime[i] = 1;
-    is_prime[0] = is_prime[1] = 0;
-    for (int i = 2; i * i < n; ++i) {
-        if (!is_prime[i]) continue;
-        for (int j = i; i * j < n; ++j) {
-            is_prime[i * j] = 0;
-        }
+  for (int i = 0; i < n; ++i)
+    is_prime[i] = 1;
+  is_prime[0] = is_prime[1] = 0;
+  for (int i = 2; i * i < n; ++i) {
+    if (!is_prime[i])
+      continue;
+    for (int j = i; i * j < n; ++j) {
+      is_prime[i * j] = 0;
     }
+  }
 }
 
 int main(void) {
-    int *is_prime;
-    is_prime = malloc(MAX_SIZE * sizeof(int));
+  int *is_prime;
+  is_prime = malloc(MAX_SIZE * sizeof(int));
 
-    int n = owi_int();
-    owi_assume(n >= 2);
-    owi_assume(n <= MAX_SIZE);
+  int n = owi_int("n");
+  owi_assume(n >= 2);
+  owi_assume(n <= MAX_SIZE);
 
-    primes(is_prime, n);
-    free(is_prime);
-    return 0;
+  primes(is_prime, n);
+  free(is_prime);
+  return 0;
 }
 ```
 

@@ -3,35 +3,37 @@
 #include <stdlib.h>
 
 typedef struct List {
-    int element;
-    struct List* next;
+  int element;
+  struct List *next;
 } List;
 
-void traverse(List* node) /*@ ghost (int length) */ {
-    /*@ loop variant length;
-    */
-    while (node != NULL) {
-        node = node->next;
-        //@ ghost length --;
-    }
+void traverse(List *node) /*@ ghost (int length) */ {
+  /*@ loop variant length;
+   */
+  while (node != NULL) {
+    node = node->next;
+    //@ ghost length --;
+  }
 }
 
-List* makeList(int element, List* next) {
-    List *node = (List *)malloc(sizeof(List));
-    if (node == NULL) return NULL;
-    node->element = element;
-    node->next = next;
-    return node;
+List *makeList(int element, List *next) {
+  List *node = (List *)malloc(sizeof(List));
+  if (node == NULL)
+    return NULL;
+  node->element = element;
+  node->next = next;
+  return node;
 }
 
-int size(List* node) {
-    if (node == NULL) return 0;
-    int cnt = 0;
-    while (node != NULL) {
-        node = node->next;
-        cnt ++;
-    }
-    return cnt;
+int size(List *node) {
+  if (node == NULL)
+    return 0;
+  int cnt = 0;
+  while (node != NULL) {
+    node = node->next;
+    cnt++;
+  }
+  return cnt;
 }
 
 /*@ ghost int ghost_size(List* node) {
@@ -45,11 +47,12 @@ int size(List* node) {
 }*/
 
 int main(void) {
-    int n = owi_int();
-    owi_assume(n >= 10);
-    owi_assume(n <= 20);
-    List *node = NULL;
-    while (n--) node = makeList(0, node);
-    traverse(node) /*@ ghost (ghost_size(node)) */ ;
-    return 0;
+  int n = owi_int("n");
+  owi_assume(n >= 10);
+  owi_assume(n <= 20);
+  List *node = NULL;
+  while (n--)
+    node = makeList(0, node);
+  traverse(node) /*@ ghost (ghost_size(node)) */;
+  return 0;
 }

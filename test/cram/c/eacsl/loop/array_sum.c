@@ -1,13 +1,13 @@
 #include <owi.h>
 #include <stdlib.h>
 
-int main (void) {
+int main(void) {
   int n = 10;
   int *t;
   t = (int *)malloc(n * sizeof(int));
 
   for (int i = 0; i < n; i++) {
-    t[i] = owi_int();
+    t[i] = owi_int("t[i]");
   }
 
   int sum = 0;

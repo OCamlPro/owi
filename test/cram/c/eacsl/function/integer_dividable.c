@@ -7,13 +7,11 @@
     behavior no:
       assumes x % y != 0;
       ensures \result == 1; */
-int is_dividable(int x, int y) {
-  return x % y == 0;
-}
+int is_dividable(int x, int y) { return x % y == 0; }
 
 int main(void) {
-  int numerator = owi_int();
-  int denominator = owi_int();
+  int numerator = owi_int("numerator");
+  int denominator = owi_int("denominator");
 
   owi_assume(denominator != 0);
 

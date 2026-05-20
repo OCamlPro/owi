@@ -32,13 +32,11 @@
     disjoint behaviors neg, pos;
     disjoint behaviors odd, even;
 */
-int f(int value) {
-    return value;
-}
+int f(int value) { return value; }
 
 int main() {
-    int value = owi_int();
-    owi_assume(value > INT_MIN);
-    f(value);
-    return 0;
+  int value = owi_int("value");
+  owi_assume(value > INT_MIN);
+  f(value);
+  return 0;
 }

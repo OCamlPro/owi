@@ -10,13 +10,11 @@
     disjoint behaviors;
     complete behaviors;
 */
-int max(int x, int y) {
-    return (x > y) ? x : y;
-}
+int max(int x, int y) { return (x > y) ? x : y; }
 
 int main(void) {
-    int x = owi_int();
-    int y = owi_int();
-    max(x, y);
-    return 0;
+  int x = owi_int("x");
+  int y = owi_int("y");
+  max(x, y);
+  return 0;
 }
