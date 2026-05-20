@@ -6,16 +6,16 @@
     ensures cnt < 20;
 */
 void loop(int n) {
-    //@ ghost cnt = 0;
-    while (n--) {
-        //@ ghost cnt += 1;
-    }
+  //@ ghost cnt = 0;
+  while (n--) {
+    //@ ghost cnt += 1;
+  }
 }
 
 int main(void) {
-    int n = owi_int();
-    owi_assume(n > 10);
-    owi_assume(n <= 20);
-    loop(n);
-    return 0;
+  int n = owi_int("n");
+  owi_assume(n > 10);
+  owi_assume(n <= 20);
+  loop(n);
+  return 0;
 }

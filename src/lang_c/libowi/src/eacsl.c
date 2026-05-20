@@ -22,6 +22,10 @@ __attribute__((import_module("owi"), import_name("dealloc"))) void *free(void *)
 void __e_acsl_memory_init(int *argc_ref, char ***argv, size_t ptr_size) {}
 void __e_acsl_memory_clean(void) {}
 
+int __e_acsl_aligned(void *ptr, size_t alignment) {
+  return (ptr == NULL) || ((uintptr_t)ptr % alignment == 0);
+}
+
 /* Tracking */
 void *__e_acsl_store_block(void *ptr, size_t size) {}
 void *__e_acsl_store_block_duplicate(void *ptr, size_t size) {}
