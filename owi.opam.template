@@ -4,14 +4,14 @@ depexts: [
   ["clang" "golang" "llvm" "lld" "rustc"]  {os-family = "debian"}
   ["rust-llvm" "libstd-rust-dev-wasm32"] {os-distribution = "debian"}
   ["lld" "rustup" "zig"] {os-distribution = "ubuntu"}
-  ["rustup" "tinygo" "zig"] {os-distribution = "fedora"}
+  ["lld" "llvm" "rust-std-static-wasm32-unknown-unknown" "tinygo" "zig"] {os-distribution = "fedora"}
   ["rust" "tinygo" "zig"] {os-distribution = "arch"}
 ]
 post-messages: [
   "Thank you for installing Owi!"
   "To fully utilize Owi, consider installing a solver such as Z3"
-  "Join our community on Zulip: https://owi.zulipchat.com/"
-  "Explore tutorials and documentation here: https://ocamlpro.github.io/owi/"
+  "Join our community on Zulip: https://owi.zulipchat.com"
+  "Explore tutorials and documentation here: https://ocamlpro.github.io/owi"
 ]
 pin-depends: [
   ["landmarks.1.5" "git+https://github.com/hra687261/landmarks.git#cfc017b604f2c41ac0d8841f30a0b55b0d89cbaf"]
