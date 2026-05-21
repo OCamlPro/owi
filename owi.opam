@@ -78,7 +78,7 @@ depexts: [
   ["rust-llvm" "libstd-rust-dev-wasm32"] {os-distribution = "debian"}
   ["lld" "rustup" "zig"] {os-distribution = "ubuntu"}
   ["lld" "llvm" "rust-std-static-wasm32-unknown-unknown" "tinygo" "zig"] {os-distribution = "fedora"}
-  ["rust" "tinygo" "zig"] {os-distribution = "arch"}
+  ["lld" "llvm" "rust" "rustup" "tinygo" "zig"] {os-distribution = "arch"}
 ]
 post-messages: [
   "Thank you for installing Owi!"
