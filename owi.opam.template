@@ -1,9 +1,11 @@
 available: (arch = "x86_32" | arch = "x86_64" | arch = "arm64") & os != "win32" & os != "macos" & os != "homebrew"
 depexts: [
   ["mdbook"] { with-dev-setup }
-  ["clang" "golang" "llvm" "lld" "rustc"]  {os-family = "debian"}
-  ["rust-llvm" "libstd-rust-dev-wasm32"] {os-distribution = "debian"}
-  ["lld" "rustup" "zig"] {os-distribution = "ubuntu"}
+  ["clang" "golang" "libstd-rust-dev-wasm32" "llvm" "lld" "rustc" "rust-llvm" ] {os-distribution = "debian"}
+  ["clang" "golang" "llvm" "lld" "rustup" "zig"] {os-distribution = "ubuntu"}
+  # there is no libstd-rust-dev-wasm32 in ubuntu for now
+  # thus we have to install rustup in order to be able to have somethign manageable in CI
+  # it forces user to install the target by hand for now...
   ["lld" "llvm" "rust-std-static-wasm32-unknown-unknown" "tinygo" "zig"] {os-distribution = "fedora"}
   ["lld" "llvm" "rust" "rustup" "tinygo" "zig"] {os-distribution = "arch"}
 ]
