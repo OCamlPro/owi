@@ -78,8 +78,8 @@ depexts: [
   # there is no libstd-rust-dev-wasm32 in ubuntu for now
   # thus we have to install rustup in order to be able to have somethign manageable in CI
   # it forces user to install the target by hand for now...
-  ["lld" "llvm" "rust-std-static-wasm32-unknown-unknown" "tinygo" "zig"] {os-distribution = "fedora"}
-  ["lld" "llvm" "rust" "rust-wasm" "tinygo" "zig"] {os-distribution = "arch"}
+  ["clang" "lld" "llvm" "rust-std-static-wasm32-unknown-unknown" "tinygo" "zig"] {os-distribution = "fedora"}
+  ["clang" "lld" "llvm" "rust" "rust-wasm" "tinygo" "zig"] {os-distribution = "arch"}
 ]
 post-messages: [
   "Thank you for installing Owi!"
