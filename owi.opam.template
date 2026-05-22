@@ -7,7 +7,7 @@ depexts: [
   # thus we have to install rustup in order to be able to have somethign manageable in CI
   # it forces user to install the target by hand for now...
   ["lld" "llvm" "rust-std-static-wasm32-unknown-unknown" "tinygo" "zig"] {os-distribution = "fedora"}
-  ["lld" "llvm" "rust" "rustup" "tinygo" "zig"] {os-distribution = "arch"}
+  ["lld" "llvm" "rust" "rust-wasm" "tinygo" "zig"] {os-distribution = "arch"}
 ]
 post-messages: [
   "Thank you for installing Owi!"
