@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>cmd_llvm.ml &mdash; Coverage report</title>
+    <meta name="description" content="81.40% coverage in src/cmd/cmd_llvm.ml">
+    <link rel="stylesheet" href="../../coverage.css"/>
+    <script src="../../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../../index.html">
+          <span class="dirname">src/cmd/</span>cmd_llvm.ml
+        </a>
+      </h1>
+      <h2>81.40%</h2>
+    </div>
+    <div id="navbar">
+      <span class="unvisited" style="top:8.26%"></span>
+      <span class="unvisited" style="top:14.05%"></span>
+      <span class="some-visited" style="top:14.88%"></span>
+      <span class="unvisited" style="top:23.97%"></span>
+      <span class="unvisited" style="top:24.79%"></span>
+      <span class="unvisited" style="top:25.62%"></span>
+      <span class="unvisited" style="top:49.59%"></span>
+      <span class="unvisited" style="bottom:49.59%"></span>
+      <span class="unvisited" style="bottom:48.76%"></span>
+      <span class="unvisited" style="bottom:33.88%"></span>
+      <span class="unvisited" style="bottom:21.49%"></span>
+      <span class="unvisited" style="bottom:20.66%"></span>
+      <span class="unvisited" style="bottom:19.83%"></span>
+      <span class="unvisited" style="bottom:10.74%"></span>
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span > </span>
+<a id="L7"></a><span > </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span class="visited"> </span>
+<a id="L10"></a><span class="unvisited"> </span>
+<a id="L11"></a><span > </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span class="visited"> </span>
+<a id="L14"></a><span > </span>
+<a id="L15"></a><span > </span>
+<a id="L16"></a><span > </span>
+<a id="L17"></a><span class="unvisited"> </span>
+<a id="L18"></a><span class="some-visited"> </span>
+<a id="L19"></a><span > </span>
+<a id="L20"></a><span > </span>
+<a id="L21"></a><span class="visited"> </span>
+<a id="L22"></a><span class="visited"> </span>
+<a id="L23"></a><span class="visited"> </span>
+<a id="L24"></a><span class="visited"> </span>
+<a id="L25"></a><span class="visited"> </span>
+<a id="L26"></a><span > </span>
+<a id="L27"></a><span > </span>
+<a id="L28"></a><span class="visited"> </span>
+<a id="L29"></a><span class="unvisited"> </span>
+<a id="L30"></a><span class="unvisited"> </span>
+<a id="L31"></a><span class="unvisited"> </span>
+<a id="L32"></a><span > </span>
+<a id="L33"></a><span > </span>
+<a id="L34"></a><span > </span>
+<a id="L35"></a><span class="visited"> </span>
+<a id="L36"></a><span class="visited"> </span>
+<a id="L37"></a><span > </span>
+<a id="L38"></a><span > </span>
+<a id="L39"></a><span > </span>
+<a id="L40"></a><span > </span>
+<a id="L41"></a><span > </span>
+<a id="L42"></a><span > </span>
+<a id="L43"></a><span class="visited"> </span>
+<a id="L44"></a><span class="visited"> </span>
+<a id="L45"></a><span class="visited"> </span>
+<a id="L46"></a><span > </span>
+<a id="L47"></a><span class="visited"> </span>
+<a id="L48"></a><span > </span>
+<a id="L49"></a><span class="visited"> </span>
+<a id="L50"></a><span class="visited"> </span>
+<a id="L51"></a><span > </span>
+<a id="L52"></a><span class="visited"> </span>
+<a id="L53"></a><span class="visited"> </span>
+<a id="L54"></a><span > </span>
+<a id="L55"></a><span > </span>
+<a id="L56"></a><span > </span>
+<a id="L57"></a><span class="visited"> </span>
+<a id="L58"></a><span class="visited"> </span>
+<a id="L59"></a><span class="visited"> </span>
+<a id="L60"></a><span class="unvisited"> </span>
+<a id="L61"></a><span class="unvisited"> </span>
+<a id="L62"></a><span class="unvisited"> </span>
+<a id="L63"></a><span > </span>
+<a id="L64"></a><span > </span>
+<a id="L65"></a><span class="visited"> </span>
+<a id="L66"></a><span class="visited"> </span>
+<a id="L67"></a><span > </span>
+<a id="L68"></a><span > </span>
+<a id="L69"></a><span class="visited"> </span>
+<a id="L70"></a><span > </span>
+<a id="L71"></a><span class="visited"> </span>
+<a id="L72"></a><span class="visited"> </span>
+<a id="L73"></a><span > </span>
+<a id="L74"></a><span class="visited"> </span>
+<a id="L75"></a><span > </span>
+<a id="L76"></a><span > </span>
+<a id="L77"></a><span class="visited"> </span>
+<a id="L78"></a><span > </span>
+<a id="L79"></a><span > </span>
+<a id="L80"></a><span class="unvisited"> </span>
+<a id="L81"></a><span class="visited"> </span>
+<a id="L82"></a><span class="visited"> </span>
+<a id="L83"></a><span class="visited"> </span>
+<a id="L84"></a><span > </span>
+<a id="L85"></a><span > </span>
+<a id="L86"></a><span class="visited"> </span>
+<a id="L87"></a><span class="visited"> </span>
+<a id="L88"></a><span class="visited"> </span>
+<a id="L89"></a><span > </span>
+<a id="L90"></a><span > </span>
+<a id="L91"></a><span > </span>
+<a id="L92"></a><span class="visited"> </span>
+<a id="L93"></a><span class="visited"> </span>
+<a id="L94"></a><span class="visited"> </span>
+<a id="L95"></a><span class="unvisited"> </span>
+<a id="L96"></a><span class="unvisited"> </span>
+<a id="L97"></a><span class="unvisited"> </span>
+<a id="L98"></a><span > </span>
+<a id="L99"></a><span > </span>
+<a id="L100"></a><span > </span>
+<a id="L101"></a><span > </span>
+<a id="L102"></a><span class="visited"> </span>
+<a id="L103"></a><span > </span>
+<a id="L104"></a><span > </span>
+<a id="L105"></a><span > </span>
+<a id="L106"></a><span class="visited"> </span>
+<a id="L107"></a><span > </span>
+<a id="L108"></a><span class="unvisited"> </span>
+<a id="L109"></a><span class="visited"> </span>
+<a id="L110"></a><span > </span>
+<a id="L111"></a><span class="visited"> </span>
+<a id="L112"></a><span > </span>
+<a id="L113"></a><span class="visited"> </span>
+<a id="L114"></a><span class="visited"> </span>
+<a id="L115"></a><span > </span>
+<a id="L116"></a><span > </span>
+<a id="L117"></a><span class="visited"> </span>
+<a id="L118"></a><span > </span>
+<a id="L119"></a><span > </span>
+<a id="L120"></a><span > </span>
+<a id="L121"></a><span > </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1">  1</a>
+<a href="#L2">  2</a>
+<a href="#L3">  3</a>
+<a href="#L4">  4</a>
+<a href="#L5">  5</a>
+<a href="#L6">  6</a>
+<a href="#L7">  7</a>
+<a href="#L8">  8</a>
+<a href="#L9">  9</a>
+<a href="#L10"> 10</a>
+<a href="#L11"> 11</a>
+<a href="#L12"> 12</a>
+<a href="#L13"> 13</a>
+<a href="#L14"> 14</a>
+<a href="#L15"> 15</a>
+<a href="#L16"> 16</a>
+<a href="#L17"> 17</a>
+<a href="#L18"> 18</a>
+<a href="#L19"> 19</a>
+<a href="#L20"> 20</a>
+<a href="#L21"> 21</a>
+<a href="#L22"> 22</a>
+<a href="#L23"> 23</a>
+<a href="#L24"> 24</a>
+<a href="#L25"> 25</a>
+<a href="#L26"> 26</a>
+<a href="#L27"> 27</a>
+<a href="#L28"> 28</a>
+<a href="#L29"> 29</a>
+<a href="#L30"> 30</a>
+<a href="#L31"> 31</a>
+<a href="#L32"> 32</a>
+<a href="#L33"> 33</a>
+<a href="#L34"> 34</a>
+<a href="#L35"> 35</a>
+<a href="#L36"> 36</a>
+<a href="#L37"> 37</a>
+<a href="#L38"> 38</a>
+<a href="#L39"> 39</a>
+<a href="#L40"> 40</a>
+<a href="#L41"> 41</a>
+<a href="#L42"> 42</a>
+<a href="#L43"> 43</a>
+<a href="#L44"> 44</a>
+<a href="#L45"> 45</a>
+<a href="#L46"> 46</a>
+<a href="#L47"> 47</a>
+<a href="#L48"> 48</a>
+<a href="#L49"> 49</a>
+<a href="#L50"> 50</a>
+<a href="#L51"> 51</a>
+<a href="#L52"> 52</a>
+<a href="#L53"> 53</a>
+<a href="#L54"> 54</a>
+<a href="#L55"> 55</a>
+<a href="#L56"> 56</a>
+<a href="#L57"> 57</a>
+<a href="#L58"> 58</a>
+<a href="#L59"> 59</a>
+<a href="#L60"> 60</a>
+<a href="#L61"> 61</a>
+<a href="#L62"> 62</a>
+<a href="#L63"> 63</a>
+<a href="#L64"> 64</a>
+<a href="#L65"> 65</a>
+<a href="#L66"> 66</a>
+<a href="#L67"> 67</a>
+<a href="#L68"> 68</a>
+<a href="#L69"> 69</a>
+<a href="#L70"> 70</a>
+<a href="#L71"> 71</a>
+<a href="#L72"> 72</a>
+<a href="#L73"> 73</a>
+<a href="#L74"> 74</a>
+<a href="#L75"> 75</a>
+<a href="#L76"> 76</a>
+<a href="#L77"> 77</a>
+<a href="#L78"> 78</a>
+<a href="#L79"> 79</a>
+<a href="#L80"> 80</a>
+<a href="#L81"> 81</a>
+<a href="#L82"> 82</a>
+<a href="#L83"> 83</a>
+<a href="#L84"> 84</a>
+<a href="#L85"> 85</a>
+<a href="#L86"> 86</a>
+<a href="#L87"> 87</a>
+<a href="#L88"> 88</a>
+<a href="#L89"> 89</a>
+<a href="#L90"> 90</a>
+<a href="#L91"> 91</a>
+<a href="#L92"> 92</a>
+<a href="#L93"> 93</a>
+<a href="#L94"> 94</a>
+<a href="#L95"> 95</a>
+<a href="#L96"> 96</a>
+<a href="#L97"> 97</a>
+<a href="#L98"> 98</a>
+<a href="#L99"> 99</a>
+<a href="#L100">100</a>
+<a href="#L101">101</a>
+<a href="#L102">102</a>
+<a href="#L103">103</a>
+<a href="#L104">104</a>
+<a href="#L105">105</a>
+<a href="#L106">106</a>
+<a href="#L107">107</a>
+<a href="#L108">108</a>
+<a href="#L109">109</a>
+<a href="#L110">110</a>
+<a href="#L111">111</a>
+<a href="#L112">112</a>
+<a href="#L113">113</a>
+<a href="#L114">114</a>
+<a href="#L115">115</a>
+<a href="#L116">116</a>
+<a href="#L117">117</a>
+<a href="#L118">118</a>
+<a href="#L119">119</a>
+<a href="#L120">120</a>
+<a href="#L121">121</a>
+</pre>
+<pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
+(* Copyright © 2021-2026 OCamlPro *)
+(* Written by the Owi programmers *)
+
+open Bos
+open Syntax
+
+let resolve_binary name =
+  <span data-count="15">m</span>atch OS.Cmd.resolve @@ Cmd.<span data-count="15">v</span> name with
+  | <span data-count="0">E</span>rror _ -&gt;
+    Fmt.error_msg
+      "The `%s` binary was not found, please make sure it is in your path." name
+  | <span data-count="15">O</span>k _ as ok -&gt; ok
+
+let err_output =
+  match Logs.Src.level Log.main_src with
+  | Some (<span data-count="0">L</span>ogs.Debug | <span data-count="0">L</span>ogs.Info) -&gt; OS.Cmd.err_run_out
+  | <span data-count="0">N</span>one | <span data-count="785">S</span>ome _ -&gt; OS.Cmd.err_null
+
+let bitcode_of_input ~workspace ~llvm_as_bin file : Fpath.t Result.t =
+  <span data-count="5">m</span>atch Fpath.get_ext ~multi:false file with
+  | <span data-count="2">"</span>.bc" -&gt; Ok file
+  | <span data-count="2">"</span>.ll" -&gt;
+    let out_bc = Fpath.(workspace /<span data-count="2">/</span> Fpath.bas<span data-count="2">e</span> (file -<span data-count="2">+</span> ".bc")) in
+    let llvm_as_cmd : Cmd.t = Cmd.(llvm_as_bin <span data-count="2">%</span> <span data-count="2">p</span> file <span data-count="2">%</span> "-o" <span data-count="2">%</span> <span data-count="2">p</span> out_bc) in
+    let+ () =
+      match OS.Cmd.run ~err:err_output llvm_as_cmd with
+      | <span data-count="2">O</span>k _ as v -&gt; v
+      | <span data-count="0">E</span>rror (`Msg e) -&gt;
+        Log.debug (fun m -&gt; <span data-count="0">m</span> "llvm-as failed: %s" e);
+        <span data-count="0">F</span>mt.error_ms<span data-count="0">g</span>
+          "llvm-as failed: run with -vv to get the full error message if it \
+           was not displayed above"
+    in
+    <span data-count="2">o</span>ut_bc
+  | <span data-count="1">e</span>xt -&gt;
+    Fmt.error_msg
+      "Unsupported file extension `%s` for LLVM command, expected .ll or .bc"
+      ext
+
+let compile ~workspace ~entry_point ~out_file (files : Fpath.t list) :
+  Fpath.t Result.t =
+  <span data-count="5">l</span>et* llvm_as_bin = resolve_binar<span data-count="5">y</span> "llvm-as" in
+  <span data-count="5">l</span>et* llc_bin = resolve_binar<span data-count="5">y</span> "llc" in
+  <span data-count="5">l</span>et* wasmld_bin = resolve_binar<span data-count="5">y</span> "wasm-ld" in
+
+  <span data-count="5">l</span>et* bc_files = list_ma<span data-count="5">p</span> (bitcode_of_input ~workspace ~llvm_as_bin) files in
+
+  <span data-count="4">l</span>et files_bc = Cmd.of_list (List.ma<span data-count="4">p</span> Cmd.p bc_files) in
+  <span data-count="4">l</span>et llc_cmd : Cmd.t =
+    Cmd.(
+      llc_bin <span data-count="4">%</span> "-O0" <span data-count="4">%</span> "-march=wasm32" <span data-count="4">%</span> "-mtriple=wasm32-unknown-unknown"
+      <span data-count="4">%</span> "-filetype=obj" %<span data-count="4">%</span> files_bc )
+  in
+
+  let* () =
+    Log.bench_fn "llc time<span data-count="4">"</span> @@ fun () -&gt;
+    <span data-count="4">m</span>atch OS.Cmd.run ~err:err_output llc_cmd with
+    | <span data-count="4">O</span>k _ as v -&gt; v
+    | <span data-count="0">E</span>rror (`Msg e) -&gt;
+      Log.debug (fun m -&gt; <span data-count="0">m</span> "llc failed: %s" e);
+      <span data-count="0">F</span>mt.error_msg "llc failed: run with -vv to get the full error message"
+  in
+
+  <span data-count="4">l</span>et files_o =
+    Cmd.of_list (List.ma<span data-count="4">p</span> (fun file -&gt; <span data-count="4">C</span>md.p Fpath.(file -<span data-count="4">+</span> ".o")) bc_files)
+  in
+
+  <span data-count="4">l</span>et out = Option.value ~default:Fpath.(workspace / "a.out.wasm") out_file in
+
+  <span data-count="4">l</span>et* libc = Cmd_utils.find_installed_c_fil<span data-count="4">e</span> (Fpath.<span data-count="4">v</span> "libc.wasm") in
+  <span data-count="4">l</span>et* libowi = Cmd_utils.find_installed_c_fil<span data-count="4">e</span> (Fpath.<span data-count="4">v</span> "libowi.wasm") in
+
+  <span data-count="4">l</span>et wasmld_cmd : Cmd.t =
+    Cmd.(
+      wasmld_bin
+      %<span data-count="4">%</span> of_lis<span data-count="4">t</span>
+           ( [ "-z"; "stack-size=8388608" ]
+           @ ( match entry_point with
+             | <span data-count="0">N</span>one -&gt; []
+             | <span data-count="4">S</span>ome entry_point -&gt;
+               [ Fmt.st<span data-count="4">r</span> "--export=%s" entry_point
+               ; Fmt.st<span data-count="4">r</span> "--entry=%s" entry_point
+               ] )
+           @ [ "--allow-undefined" ]
+           @ [ <span data-count="4">p</span> libc; <span data-count="4">p</span> libowi ]
+           @ [ "-o"; <span data-count="4">p</span> out ] )
+      %<span data-count="4">%</span> files_o )
+  in
+
+  let+ () =
+    Log.bench_fn "wasm-ld time<span data-count="4">"</span> @@ fun () -&gt;
+    <span data-count="4">m</span>atch OS.Cmd.run ~err:err_output wasmld_cmd with
+    | <span data-count="4">O</span>k _ as v -&gt; v
+    | <span data-count="0">E</span>rror (`Msg e) -&gt;
+      Log.debug (fun m -&gt; <span data-count="0">m</span> "wasm-ld failed: %s" e);
+      <span data-count="0">F</span>mt.error_msg
+        "wasm-ld failed: run with -vv to get the full error message if it was \
+         not displayed above"
+  in
+
+  <span data-count="4">o</span>ut
+
+let cmd ~(symbolic_parameters : Symbolic_parameters.t) ~files ~out_file :
+  unit Result.t =
+  <span data-count="5">l</span>et* workspace =
+    match symbolic_parameters.workspace with
+    | <span data-count="0">S</span>ome path -&gt; Ok path
+    | <span data-count="5">N</span>one -&gt; OS.Dir.tm<span data-count="5">p</span> "owi_llvm_%s"
+  in
+  <span data-count="5">l</span>et* _did_create : bool = OS.Dir.creat<span data-count="5">e</span> ~path:true workspace in
+
+  <span data-count="5">l</span>et* source_file =
+    compil<span data-count="5">e</span> ~workspace ~entry_point:symbolic_parameters.entry_point ~out_file
+      files
+  in
+  <span data-count="4">l</span>et workspace = Some workspace in
+
+  let parameters = { symbolic_parameters with workspace } in
+
+  Cmd_sym.cmd ~parameters ~source_file
+</code></pre>
+      </div>
+    </div>
+    <script src="../../coverage.js"></script>
+  </body>
+</html>

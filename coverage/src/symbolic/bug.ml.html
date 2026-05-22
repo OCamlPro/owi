@@ -29,19 +29,23 @@
 <a id="L5"></a><span > </span>
 <a id="L6"></a><span > </span>
 <a id="L7"></a><span > </span>
-<a id="L8"></a><span class="visited"> </span>
+<a id="L8"></a><span > </span>
 <a id="L9"></a><span > </span>
 <a id="L10"></a><span > </span>
-<a id="L11"></a><span class="visited"> </span>
-<a id="L12"></a><span > </span>
+<a id="L11"></a><span > </span>
+<a id="L12"></a><span class="visited"> </span>
 <a id="L13"></a><span > </span>
-<a id="L14"></a><span class="visited"> </span>
+<a id="L14"></a><span > </span>
 <a id="L15"></a><span class="visited"> </span>
-<a id="L16"></a><span class="visited"> </span>
+<a id="L16"></a><span > </span>
 <a id="L17"></a><span > </span>
-<a id="L18"></a><span > </span>
+<a id="L18"></a><span class="visited"> </span>
 <a id="L19"></a><span class="visited"> </span>
 <a id="L20"></a><span class="visited"> </span>
+<a id="L21"></a><span > </span>
+<a id="L22"></a><span > </span>
+<a id="L23"></a><span class="visited"> </span>
+<a id="L24"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -66,8 +70,16 @@
 <a href="#L18">18</a>
 <a href="#L19">19</a>
 <a href="#L20">20</a>
+<a href="#L21">21</a>
+<a href="#L22">22</a>
+<a href="#L23">23</a>
+<a href="#L24">24</a>
 </pre>
-<pre><code class="ocaml">type t =
+<pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
+(* Copyright © 2021-2026 OCamlPro *)
+(* Written by the Owi programmers *)
+
+type t =
   { kind : [ `Trap of Result.err | `Assertion of Symbolic_boolean.t ]
   ; model : Smtml.Model.t
   ; state : Thread.t
@@ -77,7 +89,7 @@ let is_trap { kind; _ } =
   <span data-count="2">m</span>atch kind with <span data-count="1">`</span>Assertion _ -&gt; false | <span data-count="1">`</span>Trap _ -&gt; true
 
 let is_assertion { kind; _ } =
-  <span data-count="6">m</span>atch kind with <span data-count="3">`</span>Assertion _ -&gt; true | <span data-count="3">`</span>Trap _ -&gt; false
+  <span data-count="5">m</span>atch kind with <span data-count="3">`</span>Assertion _ -&gt; true | <span data-count="2">`</span>Trap _ -&gt; false
 
 let compare_breadcrumbs bug1 bug2 =
   <span data-count="15">l</span>et breadcrumbs1 = List.rev @@ bug1.state.breadcrumbs in
@@ -85,8 +97,8 @@ let compare_breadcrumbs bug1 bug2 =
   <span data-count="15">L</span>ist.compare compare breadcrumbs1 breadcrumbs2
 
 let sort_seq_if b seq =
-  <span data-count="425">i</span>f b then <span data-count="47">L</span>ist.of_seq seq |&gt; <span data-count="47">L</span>ist.sort compare_breadcrumbs |&gt; <span data-count="47">L</span>ist.to_seq
-  else <span data-count="378">s</span>eq
+  <span data-count="429">i</span>f b then <span data-count="47">L</span>ist.of_seq seq |&gt; <span data-count="47">L</span>ist.sort compare_breadcrumbs |&gt; <span data-count="47">L</span>ist.to_seq
+  else <span data-count="382">s</span>eq
 </code></pre>
       </div>
     </div>

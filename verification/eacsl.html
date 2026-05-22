@@ -36,10 +36,10 @@
             const path_to_root = "../";
             const default_light_theme = "frappe";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-2e5f150a.js";
+            window.path_to_searchindex_js = "../searchindex-d3067b77.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-72dc2516.js"></script>
+        <script src="../toc-f5ed29f3.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -239,32 +239,35 @@ void primes(int *is_prime, int n) {
             (i &gt;= 2 &amp;&amp; \forall integer j; 2 &lt;= j &lt; i ==&gt; i % j != 0));
 */
 void primes(int *is_prime, int n) {
-    for (int i = 0; i &lt; n; ++i) is_prime[i] = 1;
-    for (int i = 2; i * i &lt; n; ++i) {
-        if (!is_prime[i]) continue;
-        for (int j = i; i * j &lt; n; ++j) {
-            is_prime[i * j] = 0;
-        }
+  for (int i = 0; i &lt; n; ++i) {
+    is_prime[i] = 1;
+  }
+  for (int i = 2; i * i &lt; n; ++i) {
+    if (!is_prime[i]) {
+      continue;
     }
+    for (int j = i; i * j &lt; n; ++j) {
+      is_prime[i * j] = 0;
+    }
+  }
 }
 
 int main(void) {
-    int *is_prime;
-    is_prime = malloc(MAX_SIZE * sizeof(int));
+  int *is_prime = malloc(MAX_SIZE * sizeof(int));
 
-    int n = owi_int();
-    owi_assume(n &gt;= 2);
-    owi_assume(n &lt;= MAX_SIZE);
+  int n = owi_int("n");
+  owi_assume(n &gt;= 2);
+  owi_assume(n &lt;= MAX_SIZE);
 
-    primes(is_prime, n);
-    free(is_prime);
-    return 0;
+  primes(is_prime, n);
+  free(is_prime);
+  return 0;
 }
 </code></pre>
 <pre><code class="language-sh">$ owi c --e-acsl primes.c -w1
 owi: [ERROR] Assert failure: false
 model {
-  symbol symbol_0 i32 2
+  symbol symbol_0 i32 2 n
 }
 owi: [ERROR] Reached problem!
 [13]
@@ -284,27 +287,29 @@ owi: [ERROR] Reached problem!
             (i &gt;= 2 &amp;&amp; \forall integer j; 2 &lt;= j &lt; i ==&gt; i % j != 0));
 */
 void primes(int *is_prime, int n) {
-    for (int i = 0; i &lt; n; ++i) is_prime[i] = 1;
-    is_prime[0] = is_prime[1] = 0;
-    for (int i = 2; i * i &lt; n; ++i) {
-        if (!is_prime[i]) continue;
-        for (int j = i; i * j &lt; n; ++j) {
-            is_prime[i * j] = 0;
-        }
+  for (int i = 0; i &lt; n; ++i)
+    is_prime[i] = 1;
+  is_prime[0] = is_prime[1] = 0;
+  for (int i = 2; i * i &lt; n; ++i) {
+    if (!is_prime[i])
+      continue;
+    for (int j = i; i * j &lt; n; ++j) {
+      is_prime[i * j] = 0;
     }
+  }
 }
 
 int main(void) {
-    int *is_prime;
-    is_prime = malloc(MAX_SIZE * sizeof(int));
+  int *is_prime;
+  is_prime = malloc(MAX_SIZE * sizeof(int));
 
-    int n = owi_int();
-    owi_assume(n &gt;= 2);
-    owi_assume(n &lt;= MAX_SIZE);
+  int n = owi_int("n");
+  owi_assume(n &gt;= 2);
+  owi_assume(n &lt;= MAX_SIZE);
 
-    primes(is_prime, n);
-    free(is_prime);
-    return 0;
+  primes(is_prime, n);
+  free(is_prime);
+  return 0;
 }
 </code></pre>
 <pre><code class="language-sh">$ owi c --e-acsl primes2.c -w1

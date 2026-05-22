@@ -293,11 +293,11 @@
 (* This file is originally from the WebAssembly reference interpreter available at https://github.com/WebAssembly/spec/tree/main/interpreter *)
 
 (* SPDX-License-Identifier: MIT *)
-(* Copyright (c) 2016--2024 Jane Street Group, LLC &lt;opensource-contacts@janestreet.com&gt; *)
+(* Copyright (c) 2016--2026 Jane Street Group, LLC &lt;opensource-contacts@janestreet.com&gt; *)
 (* The code of the `popcnt` function is originally from the `base` library available at https://github.com/janestreet/base *)
 
 (* SPDX-License-Identifier: AGPL-3.0-or-later *)
-(* Copyright © 2021-2024 OCamlPro *)
+(* Copyright © 2021-2026 OCamlPro *)
 (* Modified by the Owi programmers *)
 
 include Prelude.Int64
@@ -333,18 +333,18 @@ let popcnt =
 
 let eq (x : int64) y = <span data-count="5031285">e</span>qual x y [@@inline]
 
-let ne (x : int64) y = <span data-count="25999">n</span>ot (equa<span data-count="25999">l</span> x y) [@@inline]
+let ne (x : int64) y = <span data-count="26038">n</span>ot (equa<span data-count="26038">l</span> x y) [@@inline]
 
 let lt (x : int64) y = <span data-count="1973">c</span>ompar<span data-count="1973">e</span> x y &lt; 0 [@@inline]
 
-let le (x : int64) y = <span data-count="10780">c</span>ompar<span data-count="10780">e</span> x y &lt;= 0 [@@inline]
+let le (x : int64) y = <span data-count="10851">c</span>ompar<span data-count="10851">e</span> x y &lt;= 0 [@@inline]
 
-let lt_u (x : int64) y = <span data-count="2186962">u</span>nsigned_compar<span data-count="2186969">e</span> x y &lt; 0 [@@inline]
+let lt_u (x : int64) y = <span data-count="2339415">u</span>nsigned_compar<span data-count="2339415">e</span> x y &lt; 0 [@@inline]
 
 let le_u (x : int64) y = <span data-count="607679">u</span>nsigned_compar<span data-count="607679">e</span> x y &lt;= 0 [@@inline]
 
 (* In OCaml, `shift_{left,right,right_logical} are unspecified if y &lt; 0 or y &gt;= 64, but they're not in Wasm and thus we need to mask `y`` to only keep the low 7 bits. *)
-let shl x y = <span data-count="77880">s</span>hift_left x (to_in<span data-count="77880">t</span> (logan<span data-count="77880">d</span> y 63L)) [@@inline]
+let shl x y = <span data-count="79157">s</span>hift_left x (to_in<span data-count="79157">t</span> (logan<span data-count="79157">d</span> y 63L)) [@@inline]
 
 let ashr x y = <span data-count="20">s</span>hift_right x (to_in<span data-count="20">t</span> (logan<span data-count="20">d</span> y 63L)) [@@inline]
 
@@ -364,14 +364,14 @@ let extend_s n x =
 
 (* String conversion that allows leading signs and unsigned values *)
 
-let max_upper = unsigned_di<span data-count="765">v</span> minus_one 10L
+let max_upper = unsigned_di<span data-count="785">v</span> minus_one 10L
 
-let max_lower = unsigned_re<span data-count="765">m</span> minus_one 10L
+let max_lower = unsigned_re<span data-count="785">m</span> minus_one 10L
 
 let of_string_exn s =
-  <span data-count="6701">l</span>et len = String.length s in
+  <span data-count="6703">l</span>et len = String.length s in
 
-  <span data-count="6701">l</span>et rec parse_hex i num =
+  <span data-count="6703">l</span>et rec parse_hex i num =
     <span data-count="33618">i</span>f i = len then <span data-count="3858">n</span>um
     else
       <span data-count="29760">l</span>et c = s.[i] in
@@ -385,23 +385,23 @@ let of_string_exn s =
   in
 
   let rec parse_dec i num =
-    <span data-count="8958">i</span>f i = len then <span data-count="2841">n</span>um
+    <span data-count="8962">i</span>f i = len then <span data-count="2843">n</span>um
     else
-      <span data-count="6117">l</span>et c = s.[i] in
-      <span data-count="6117">i</span>f Char.equal c '_' then <span data-count="78">p</span>arse_dec (i + 1) num
-      else <span data-count="6039">b</span>egin
-        let digit = of_int (Char.Ascii.digit_to_in<span data-count="6039">t</span> c) in
-        <span data-count="6039">i</span>f not (lt_<span data-count="6039">u</span> num max_uppe<span data-count="6032">r</span> || (e<span data-count="7">q</span> num max_upper &amp;&amp; <span data-count="7">l</span>e_<span data-count="7">u</span> digit max_lower<span data-count="6">)</span>)
+      <span data-count="6119">l</span>et c = s.[i] in
+      <span data-count="6119">i</span>f Char.equal c '_' then <span data-count="78">p</span>arse_dec (i + 1) num
+      else <span data-count="6041">b</span>egin
+        let digit = of_int (Char.Ascii.digit_to_in<span data-count="6041">t</span> c) in
+        <span data-count="6041">i</span>f not (lt_<span data-count="6041">u</span> num max_uppe<span data-count="6034">r</span> || (e<span data-count="7">q</span> num max_upper &amp;&amp; <span data-count="7">l</span>e_<span data-count="7">u</span> digit max_lower<span data-count="6">)</span>)
         then <span data-count="1">F</span>mt.failwith "of_string (int64)"
-        else <span data-count="6038">p</span>arse_dec (i + 1) (ad<span data-count="6038">d</span> (mu<span data-count="6038">l</span> num 10L) digit)
+        else <span data-count="6040">p</span>arse_dec (i + 1) (ad<span data-count="6040">d</span> (mu<span data-count="6040">l</span> num 10L) digit)
       end
   in
 
   let parse_int i =
-    <span data-count="6701">i</span>f not (len - i &gt; 0) then <span data-count="0">F</span>mt.failwith "of_string (int64)"
-    else <span data-count="6701">i</span>f i + 2 &lt;= len &amp;&amp; <span data-count="4619">C</span>har.equa<span data-count="4619">l</span> s.[i] '0' &amp;&amp; <span data-count="3865">C</span>har.equa<span data-count="3865">l</span> s.[i + 1] 'x'
+    <span data-count="6703">i</span>f not (len - i &gt; 0) then <span data-count="0">F</span>mt.failwith "of_string (int64)"
+    else <span data-count="6703">i</span>f i + 2 &lt;= len &amp;&amp; <span data-count="4619">C</span>har.equa<span data-count="4619">l</span> s.[i] '0' &amp;&amp; <span data-count="3865">C</span>har.equa<span data-count="3865">l</span> s.[i + 1] 'x'
     then <span data-count="3859">p</span>arse_hex (i + 2) zero
-    else <span data-count="2842">p</span>arse_dec i zero
+    else <span data-count="2844">p</span>arse_dec i zero
   in
 
   match s.[0] with
@@ -410,13 +410,13 @@ let of_string_exn s =
     let n = parse_int 1 in
     <span data-count="333">i</span>f not (l<span data-count="333">e</span> minus_one (su<span data-count="333">b</span> n one)) then <span data-count="2">F</span>mt.failwith "of_string (int64)"
     else <span data-count="331">n</span>eg n
-  | <span data-count="6365">_</span> -&gt; parse_int 0
+  | <span data-count="6367">_</span> -&gt; parse_int 0
 
 let of_string s = <span data-count="2269">t</span>ry Some (of_string_ex<span data-count="2269">n</span> s) with <span data-count="0">F</span>ailure _ -&gt; None
 
 let fits_in_u32 n = <span data-count="0">u</span>nsigned_compar<span data-count="0">e</span> n 0xFFFF_FFFFL &lt;= 0
 
-let to_string_u = Fmt.st<span data-count="765">r</span> "%Lu"
+let to_string_u = Fmt.st<span data-count="785">r</span> "%Lu"
 </code></pre>
       </div>
     </div>

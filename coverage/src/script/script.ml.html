@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>script.ml &mdash; Coverage report</title>
-    <meta name="description" content="73.86% coverage in src/script/script.ml">
+    <meta name="description" content="74.77% coverage in src/script/script.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">src/script/</span>script.ml
         </a>
       </h1>
-      <h2>73.86%</h2>
+      <h2>74.77%</h2>
     </div>
     <div id="navbar">
       <span class="some-visited" style="top:6.20%"></span>
@@ -33,9 +33,6 @@
       <span class="some-visited" style="top:13.80%"></span>
       <span class="unvisited" style="top:15.77%"></span>
       <span class="unvisited" style="top:16.34%"></span>
-      <span class="some-visited" style="top:16.62%"></span>
-      <span class="unvisited" style="top:17.18%"></span>
-      <span class="unvisited" style="top:18.87%"></span>
       <span class="unvisited" style="top:20.85%"></span>
       <span class="unvisited" style="top:22.25%"></span>
       <span class="unvisited" style="top:23.94%"></span>
@@ -157,15 +154,15 @@
 <a id="L56"></a><span class="unvisited"> </span>
 <a id="L57"></a><span > </span>
 <a id="L58"></a><span class="unvisited"> </span>
-<a id="L59"></a><span class="some-visited"> </span>
+<a id="L59"></a><span class="visited"> </span>
 <a id="L60"></a><span > </span>
-<a id="L61"></a><span class="unvisited"> </span>
+<a id="L61"></a><span class="visited"> </span>
 <a id="L62"></a><span > </span>
 <a id="L63"></a><span > </span>
 <a id="L64"></a><span class="visited"> </span>
 <a id="L65"></a><span > </span>
 <a id="L66"></a><span > </span>
-<a id="L67"></a><span class="unvisited"> </span>
+<a id="L67"></a><span class="visited"> </span>
 <a id="L68"></a><span class="visited"> </span>
 <a id="L69"></a><span > </span>
 <a id="L70"></a><span > </span>
@@ -815,7 +812,7 @@
 <a href="#L355">355</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
-(* Copyright © 2021-2024 OCamlPro *)
+(* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
 open Syntax
@@ -824,15 +821,15 @@ module Stack = Stack.Make [@inlined hint] (Concrete_value)
 module Host_externref = struct
   type t = int
 
-  let ty : t Type.Id.t = Type.Id.mak<span data-count="765">e</span> ()
+  let ty : t Type.Id.t = Type.Id.mak<span data-count="785">e</span> ()
 
   let value i = <span data-count="31">C</span>oncrete_ref.extern ty i
 end
 
 let check_error ~expected ~got : unit Result.t =
-  <span data-count="5861">l</span>et ok =
-    String.equa<span data-count="5861">l</span> (Result.err_to_strin<span data-count="5861">g</span> got) expecte<span data-count="1353">d</span>
-    || String.starts_wit<span data-count="4508">h</span> ~prefix:expected (Result.err_to_strin<span data-count="4508">g</span> got<span data-count="4449">)</span>
+  <span data-count="5865">l</span>et ok =
+    String.equa<span data-count="5865">l</span> (Result.err_to_strin<span data-count="5865">g</span> got) expecte<span data-count="1356">d</span>
+    || String.starts_wit<span data-count="4509">h</span> ~prefix:expected (Result.err_to_strin<span data-count="4509">g</span> got<span data-count="4449">)</span>
     ||
     match got with
     | (<span data-count="0">`</span>Msg s | <span data-count="47">`</span>Parse_fail s)
@@ -872,23 +869,23 @@ let check_error ~expected ~got : unit Result.t =
     | <span data-count="0">`</span>Offset_out_of_range -&gt;
       (* TODO: should be removed *)
       String.equa<span data-count="0">l</span> "alignment must not be larger than natural" expected
-    | <span data-count="0">_</span> -&gt; fals<span data-count="59">e</span>
+    | <span data-count="1">_</span> -&gt; fals<span data-count="59">e</span>
   in
-  if not ok then <span data-count="0">b</span>egin
+  if not ok then <span data-count="1">b</span>egin
     Error (`Failed_with_but_expected (got, expected))
   end
-  else <span data-count="5861">O</span>k ()
+  else <span data-count="5864">O</span>k ()
 
 let check_error_result expected = function
-  | <span data-count="0">O</span>k _whatever -&gt; Error (`Did_not_fail_but_expected expected)
-  | <span data-count="5171">E</span>rror got -&gt; check_error ~expected ~got
+  | <span data-count="1">O</span>k _whatever -&gt; Error (`Did_not_fail_but_expected expected)
+  | <span data-count="5175">E</span>rror got -&gt; check_error ~expected ~got
 
 let load_module ls mod_id =
-  <span data-count="25158">m</span>atch mod_id with
-  | <span data-count="25010">N</span>one -&gt;
+  <span data-count="25165">m</span>atch mod_id with
+  | <span data-count="25017">N</span>one -&gt;
     begin match Link.State.get_last ls with
     | <span data-count="0">N</span>one -&gt; Error `Unbound_last_module
-    | <span data-count="25010">S</span>ome m -&gt; Ok m
+    | <span data-count="25017">S</span>ome m -&gt; Ok m
     end
   | <span data-count="148">S</span>ome mod_id -&gt; (
     match Link.State.get_by_id ls mod_id with
@@ -896,10 +893,10 @@ let load_module ls mod_id =
     | <span data-count="148">S</span>ome exports -&gt; Ok exports )
 
 let load_func_from_module ls mod_id f_name =
-  <span data-count="25147">l</span>et* exports, env_id = load_modul<span data-count="25147">e</span> ls mod_id in
-  <span data-count="25147">m</span>atch Link.StringMap.find_opt f_name exports.functions with
+  <span data-count="25154">l</span>et* exports, env_id = load_modul<span data-count="25154">e</span> ls mod_id in
+  <span data-count="25154">m</span>atch Link.StringMap.find_opt f_name exports.functions with
   | <span data-count="0">N</span>one -&gt; Error (`Unbound_name f_name)
-  | <span data-count="25147">S</span>ome v -&gt; Ok (v, env_id)
+  | <span data-count="25154">S</span>ome v -&gt; Ok (v, env_id)
 
 let load_global_from_module ls mod_id name =
   <span data-count="11">l</span>et* exports, _env_id = load_modul<span data-count="11">e</span> ls mod_id in
@@ -908,8 +905,8 @@ let load_global_from_module ls mod_id name =
   | <span data-count="11">S</span>ome v -&gt; Ok v
 
 let compare_result_const result (const : Concrete_value.t) =
-  <span data-count="22129">m</span>atch (result, const) with
-  | <span data-count="13054">W</span>ast.Result_const (Literal (Const_I32 n)), I32 n' -&gt; Int32.eq n n'
+  <span data-count="22130">m</span>atch (result, const) with
+  | <span data-count="13055">W</span>ast.Result_const (Literal (Const_I32 n)), I32 n' -&gt; Int32.eq n n'
   | <span data-count="1007">R</span>esult_const (Literal (Const_I64 n)), I64 n' -&gt; Int64.eq n n'
   | <span data-count="2919">R</span>esult_const (Literal (Const_F32 n)), F32 n' -&gt;
     Float32.e<span data-count="2919">q</span> n n<span data-count="2820">'</span> || String.equal (Float32.to_strin<span data-count="99">g</span> n) (Float32.to_strin<span data-count="99">g</span> n')
@@ -987,15 +984,15 @@ let value_of_const : Wast.const -&gt; Concrete_value.t = <span data-count="35825
 
 let action (link_state : Concrete_extern_func.extern_func Link.State.t) =
   function
-  | <span data-count="25147">W</span>ast.Invoke (mod_id, f, args) -&gt; begin
+  | <span data-count="25154">W</span>ast.Invoke (mod_id, f, args) -&gt; begin
     Log.info (fun m -&gt;
       <span data-count="0">m</span> "invoke %a %s %a..."
         (Fmt.optio<span data-count="0">n</span> ~none:Fmt.nop Fmt.string)
         mod_id f Wast.pp_consts args );
-    <span data-count="25147">l</span>et* f, env_id = load_func_from_modul<span data-count="25147">e</span> link_state mod_id f in
-    <span data-count="25147">l</span>et stack = List.rev_map value_of_const args in
-    <span data-count="25147">l</span>et envs = Link.State.get_envs link_state in
-    <span data-count="25147">l</span>et module I = Interpret.Concrete (Interpret.Default_parameters) in
+    <span data-count="25154">l</span>et* f, env_id = load_func_from_modul<span data-count="25154">e</span> link_state mod_id f in
+    <span data-count="25154">l</span>et stack = List.rev_map value_of_const args in
+    <span data-count="25154">l</span>et envs = Link.State.get_envs link_state in
+    <span data-count="25154">l</span>et module I = Interpret.Concrete (Interpret.Default_parameters) in
     I.exec_vfunc_from_outside ~locals:stack ~env:env_id ~envs f
     end
   | <span data-count="11">G</span>et (mod_id, name) -&gt;
@@ -1006,29 +1003,29 @@ let action (link_state : Concrete_extern_func.extern_func Link.State.t) =
 let unsafe = false
 
 let run ~no_exhaustion script =
-  <span data-count="166">l</span>et state =
+  <span data-count="185">l</span>et state =
     Link.State.empty ()
-    |&gt; <span data-count="166">L</span>ink.Extern.modul ~name:"spectest_extern" Spectest.extern_m
+    |&gt; <span data-count="185">L</span>ink.Extern.modul ~name:"spectest_extern" Spectest.extern_m
   in
-  <span data-count="166">l</span>et script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
+  <span data-count="185">l</span>et script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
   let registered = ref false in
   let curr_module = ref 0 in
   let module I = Interpret.Concrete (Interpret.Default_parameters) in
   list_fold_left
     (fun (link_state : Concrete_extern_func.extern_func Link.State.t) -&gt;
-      <span data-count="30480">f</span>unction
-      | <span data-count="1762">W</span>ast.Text_module (false, m) -&gt;
+      <span data-count="30546">f</span>unction
+      | <span data-count="1797">W</span>ast.Text_module (false, m) -&gt;
         if !curr_module = 0 then
           (* TODO: disable printing*)
-          <span data-count="166">(</span>);
-        <span data-count="1762">L</span>og.info (fun m -&gt; <span data-count="0">m</span> "*** module");
-        <span data-count="1762">i</span>ncr curr_module;
-        <span data-count="1762">l</span>et* m, link_state =
-          Compile.Text.until_lin<span data-count="1762">k</span> link_state ~unsafe ~name:None m
+          <span data-count="185">(</span>);
+        <span data-count="1797">L</span>og.info (fun m -&gt; <span data-count="0">m</span> "*** module");
+        <span data-count="1797">i</span>ncr curr_module;
+        <span data-count="1797">l</span>et* m, link_state =
+          Compile.Text.until_lin<span data-count="1785">k</span> link_state ~unsafe ~name:None m
         in
-        <span data-count="1762">l</span>et+ () = I.modu<span data-count="1762">l</span> link_state m in
+        <span data-count="1785">l</span>et+ () = I.modu<span data-count="1785">l</span> link_state m in
         (* TODO: enable printing again! *)
-        <span data-count="1762">l</span>ink_state
+        <span data-count="1785">l</span>ink_state
       | <span data-count="2">W</span>ast.Quoted_module (false, m) -&gt;
         Log.info (fun m -&gt; <span data-count="0">m</span> "*** quoted module");
         <span data-count="2">i</span>ncr curr_module;
@@ -1090,10 +1087,10 @@ let run ~no_exhaustion script =
             end
         in
         <span data-count="11">l</span>ink_state
-      | <span data-count="1520">A</span>ssert (Assert_invalid (m, expected)) -&gt;
+      | <span data-count="1525">A</span>ssert (Assert_invalid (m, expected)) -&gt;
         Log.info (fun m -&gt; <span data-count="0">m</span> "*** assert_invalid");
-        <span data-count="1520">l</span>et got = Compile.Text.until_link link_state ~unsafe ~name:None m in
-        <span data-count="1520">l</span>et+ () = check_error_resul<span data-count="1520">t</span> expected got in
+        <span data-count="1525">l</span>et got = Compile.Text.until_link link_state ~unsafe ~name:None m in
+        <span data-count="1521">l</span>et+ () = check_error_resul<span data-count="1521">t</span> expected got in
         <span data-count="1520">l</span>ink_state
       | <span data-count="4">A</span>ssert (Assert_invalid_quote (m, expected)) -&gt;
         Log.info (fun m -&gt; <span data-count="0">m</span> "*** assert_invalid_quote");
@@ -1117,24 +1114,24 @@ let run ~no_exhaustion script =
         <span data-count="0">l</span>et got = Compile.Text.until_link ~unsafe ~name:None link_state m in
         <span data-count="0">l</span>et+ () = check_error_resul<span data-count="0">t</span> expected got in
         <span data-count="0">a</span>ssert false
-      | <span data-count="22335">A</span>ssert (Assert_return (a, res)) -&gt;
+      | <span data-count="22338">A</span>ssert (Assert_return (a, res)) -&gt;
         Log.info (fun m -&gt; <span data-count="0">m</span> "*** assert_return");
-        <span data-count="22335">l</span>et* stack = actio<span data-count="22333">n</span> link_state a in
-        <span data-count="22333">l</span>et stack = List.rev stack in
-        <span data-count="22333">i</span>f
-          List.compare_length<span data-count="22333">s</span> res stack &lt;&gt; <span data-count="0">0</span>
-          || not (List.for_all<span data-count="22333">2</span> compare_result_const res stack<span data-count="0">)</span>
+        <span data-count="22338">l</span>et* stack = actio<span data-count="22334">n</span> link_state a in
+        <span data-count="22334">l</span>et stack = List.rev stack in
+        <span data-count="22334">i</span>f
+          List.compare_length<span data-count="22334">s</span> res stack &lt;&gt; <span data-count="0">0</span>
+          || not (List.for_all<span data-count="22334">2</span> compare_result_const res stack<span data-count="0">)</span>
         then <span data-count="0">b</span>egin
           Log.err (fun m -&gt;
             <span data-count="0">m</span> "got:      %a@.expected: %a" Stack.pp stack Wast.pp_results res );
           <span data-count="0">E</span>rror `Bad_result
         end
-        else <span data-count="22333">O</span>k link_state
-      | <span data-count="2619">A</span>ssert (Assert_trap (a, expected)) -&gt;
+        else <span data-count="22334">O</span>k link_state
+      | <span data-count="2623">A</span>ssert (Assert_trap (a, expected)) -&gt;
         Log.info (fun m -&gt; <span data-count="0">m</span> "*** assert_trap");
-        <span data-count="2619">l</span>et got = action link_state a in
-        <span data-count="2619">l</span>et+ () = check_error_resul<span data-count="2619">t</span> expected got in
-        <span data-count="2619">l</span>ink_state
+        <span data-count="2623">l</span>et got = action link_state a in
+        <span data-count="2623">l</span>et+ () = check_error_resul<span data-count="2623">t</span> expected got in
+        <span data-count="2622">l</span>ink_state
       | <span data-count="15">A</span>ssert (Assert_exhaustion (a, expected)) -&gt;
         Log.info (fun m -&gt; <span data-count="0">m</span> "*** assert_exhaustion");
         <span data-count="15">l</span>et+ () =
@@ -1144,12 +1141,12 @@ let run ~no_exhaustion script =
             <span data-count="0">c</span>heck_error_resul<span data-count="0">t</span> expected got
         in
         <span data-count="15">l</span>ink_state
-      | <span data-count="212">R</span>egister (name, mod_name) -&gt;
-        if !curr_module = 1 &amp;&amp; <span data-count="166">n</span>ot !registered then (* TODO: disable debug *) <span data-count="166">(</span>);
-        <span data-count="212">L</span>og.info (fun m -&gt; <span data-count="0">m</span> "*** register");
-        <span data-count="212">l</span>et+ state = Link.register_last_modul<span data-count="212">e</span> link_state ~name ~id:mod_name in
+      | <span data-count="231">R</span>egister (name, mod_name) -&gt;
+        if !curr_module = 1 &amp;&amp; <span data-count="185">n</span>ot !registered then (* TODO: disable debug *) <span data-count="185">(</span>);
+        <span data-count="231">L</span>og.info (fun m -&gt; <span data-count="0">m</span> "*** register");
+        <span data-count="231">l</span>et+ state = Link.register_last_modul<span data-count="231">e</span> link_state ~name ~id:mod_name in
         (* TODO: enable debug again! *)
-        <span data-count="212">s</span>tate
+        <span data-count="231">s</span>tate
       | <span data-count="204">A</span>ction a -&gt;
         Log.info (fun m -&gt; <span data-count="0">m</span> "*** action");
         <span data-count="204">l</span>et+ _stack = actio<span data-count="204">n</span> link_state a in
@@ -1167,8 +1164,8 @@ let run ~no_exhaustion script =
     state script
 
 let exec ~no_exhaustion script =
-  <span data-count="166">l</span>et+ _link_state = ru<span data-count="164">n</span> ~no_exhaustion script in
-  <span data-count="164">(</span>)
+  <span data-count="185">l</span>et+ _link_state = ru<span data-count="165">n</span> ~no_exhaustion script in
+  <span data-count="163">(</span>)
 </code></pre>
       </div>
     </div>

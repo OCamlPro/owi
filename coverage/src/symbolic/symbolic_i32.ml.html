@@ -18,7 +18,7 @@
       <h2>97.22%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:23.68%"></span>
+      <span class="unvisited" style="top:30.95%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -26,41 +26,45 @@
 <a id="L1"></a><span > </span>
 <a id="L2"></a><span > </span>
 <a id="L3"></a><span > </span>
-<a id="L4"></a><span class="visited"> </span>
-<a id="L5"></a><span class="visited"> </span>
-<a id="L6"></a><span class="visited"> </span>
-<a id="L7"></a><span class="visited"> </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span > </span>
+<a id="L7"></a><span > </span>
 <a id="L8"></a><span class="visited"> </span>
-<a id="L9"></a><span class="unvisited"> </span>
+<a id="L9"></a><span class="visited"> </span>
 <a id="L10"></a><span class="visited"> </span>
 <a id="L11"></a><span class="visited"> </span>
-<a id="L12"></a><span > </span>
-<a id="L13"></a><span > </span>
+<a id="L12"></a><span class="visited"> </span>
+<a id="L13"></a><span class="unvisited"> </span>
 <a id="L14"></a><span class="visited"> </span>
 <a id="L15"></a><span class="visited"> </span>
-<a id="L16"></a><span class="visited"> </span>
-<a id="L17"></a><span class="visited"> </span>
-<a id="L18"></a><span > </span>
-<a id="L19"></a><span > </span>
+<a id="L16"></a><span > </span>
+<a id="L17"></a><span > </span>
+<a id="L18"></a><span class="visited"> </span>
+<a id="L19"></a><span class="visited"> </span>
 <a id="L20"></a><span class="visited"> </span>
 <a id="L21"></a><span class="visited"> </span>
-<a id="L22"></a><span class="visited"> </span>
-<a id="L23"></a><span class="visited"> </span>
+<a id="L22"></a><span > </span>
+<a id="L23"></a><span > </span>
 <a id="L24"></a><span class="visited"> </span>
-<a id="L25"></a><span > </span>
-<a id="L26"></a><span > </span>
+<a id="L25"></a><span class="visited"> </span>
+<a id="L26"></a><span class="visited"> </span>
 <a id="L27"></a><span class="visited"> </span>
 <a id="L28"></a><span class="visited"> </span>
-<a id="L29"></a><span class="visited"> </span>
+<a id="L29"></a><span > </span>
 <a id="L30"></a><span > </span>
-<a id="L31"></a><span > </span>
+<a id="L31"></a><span class="visited"> </span>
 <a id="L32"></a><span class="visited"> </span>
 <a id="L33"></a><span class="visited"> </span>
-<a id="L34"></a><span class="visited"> </span>
+<a id="L34"></a><span > </span>
 <a id="L35"></a><span > </span>
-<a id="L36"></a><span > </span>
+<a id="L36"></a><span class="visited"> </span>
 <a id="L37"></a><span class="visited"> </span>
 <a id="L38"></a><span class="visited"> </span>
+<a id="L39"></a><span > </span>
+<a id="L40"></a><span > </span>
+<a id="L41"></a><span class="visited"> </span>
+<a id="L42"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -103,45 +107,53 @@
 <a href="#L36">36</a>
 <a href="#L37">37</a>
 <a href="#L38">38</a>
+<a href="#L39">39</a>
+<a href="#L40">40</a>
+<a href="#L41">41</a>
+<a href="#L42">42</a>
 </pre>
-<pre><code class="ocaml">include Smtml.Typed.Bitv32
+<pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
+(* Copyright © 2021-2026 OCamlPro *)
+(* Written by the Owi programmers *)
+
+include Smtml.Typed.Bitv32
 
 let to_boolean (e : t) : Symbolic_boolean.t =
-  <span data-count="340227">m</span>atch Smtml.Typed.view e with
-  | <span data-count="316235">V</span>al (Bitv bv) -&gt;
-    if Smtml.Bitvector.eqz bv then <span data-count="111739">S</span>ymbolic_boolean.false_
-    else <span data-count="204496">S</span>ymbolic_boolean.true_
-  | <span data-count="2478">P</span>tr _ -&gt; Symbolic_boolean.true_
+  <span data-count="359433">m</span>atch Smtml.Typed.view e with
+  | <span data-count="322371">V</span>al (Bitv bv) -&gt;
+    if Smtml.Bitvector.eqz bv then <span data-count="111707">S</span>ymbolic_boolean.false_
+    else <span data-count="210664">S</span>ymbolic_boolean.true_
+  | <span data-count="9008">P</span>tr _ -&gt; Symbolic_boolean.true_
   | <span data-count="0">S</span>ymbol { ty = Ty_bool; _ } -&gt; Smtml.Typed.Bitv32.to_bool e
-  | <span data-count="20803">C</span>vtop (_, OfBool, cond) -&gt; Smtml.Typed.Unsafe.wrap cond
-  | <span data-count="711">_</span> -&gt; Smtml.Typed.Bitv32.to_bool e
+  | <span data-count="27345">C</span>vtop (_, OfBool, cond) -&gt; Smtml.Typed.Unsafe.wrap cond
+  | <span data-count="709">_</span> -&gt; Smtml.Typed.Bitv32.to_bool e
 
 let of_boolean (e : Symbolic_boolean.t) : t =
-  <span data-count="226489">m</span>atch Smtml.Typed.view e with
-  | <span data-count="96042">V</span>al True -&gt; one
-  | <span data-count="108099">V</span>al False -&gt; zero
-  | <span data-count="22348">_</span> -&gt; Smtml.Typed.Bitv32.of_bool e
+  <span data-count="232969">m</span>atch Smtml.Typed.view e with
+  | <span data-count="96014">V</span>al True -&gt; one
+  | <span data-count="108065">V</span>al False -&gt; zero
+  | <span data-count="28890">_</span> -&gt; Smtml.Typed.Bitv32.of_bool e
 
 let boolify e =
   <span data-count="39610">m</span>atch Smtml.Typed.view e with
-  | <span data-count="30400">V</span>al (Bitv bv) when Smtml.Bitvector.eq<span data-count="30400">z</span> bv -&gt; <span data-count="211">S</span>ome Symbolic_boolean.false_
-  | <span data-count="30189">V</span>al (Bitv bv) when Smtml.Bitvector.eq_on<span data-count="30189">e</span> bv -&gt; <span data-count="394">S</span>ome Symbolic_boolean.true_
+  | <span data-count="30403">V</span>al (Bitv bv) when Smtml.Bitvector.eq<span data-count="30403">z</span> bv -&gt; <span data-count="214">S</span>ome Symbolic_boolean.false_
+  | <span data-count="30189">V</span>al (Bitv bv) when Smtml.Bitvector.eq_on<span data-count="30189">e</span> bv -&gt; <span data-count="399">S</span>ome Symbolic_boolean.true_
   | <span data-count="543">C</span>vtop (_, OfBool, cond) -&gt; Some (Smtml.Typed.Unsafe.wra<span data-count="543">p</span> cond)
-  | <span data-count="38462">_</span> -&gt; None
+  | <span data-count="38454">_</span> -&gt; None
 
 let logand e1 e2 =
-  <span data-count="19724">m</span>atch (boolif<span data-count="19724">y</span> e1, boolif<span data-count="19724">y</span> e2) with
+  <span data-count="19719">m</span>atch (boolif<span data-count="19719">y</span> e1, boolif<span data-count="19719">y</span> e2) with
   | <span data-count="379">S</span>ome b1, Some b2 -&gt; of_boolean (Symbolic_boolean.and<span data-count="379">_</span> b1 b2)
-  | <span data-count="19345">_</span> -&gt; Smtml.Typed.Bitv32.logand e1 e2
+  | <span data-count="19340">_</span> -&gt; Smtml.Typed.Bitv32.logand e1 e2
 
 let logor e1 e2 =
-  <span data-count="81">m</span>atch (boolif<span data-count="81">y</span> e1, boolif<span data-count="81">y</span> e2) with
-  | <span data-count="23">S</span>ome b1, Some b2 -&gt; of_boolean (Symbolic_boolean.or<span data-count="23">_</span> b1 b2)
+  <span data-count="86">m</span>atch (boolif<span data-count="86">y</span> e1, boolif<span data-count="86">y</span> e2) with
+  | <span data-count="28">S</span>ome b1, Some b2 -&gt; of_boolean (Symbolic_boolean.or<span data-count="28">_</span> b1 b2)
   | <span data-count="58">_</span> -&gt; Smtml.Typed.Bitv32.logor e1 e2
 
 let eq_concrete (e : t) (c : Int32.t) : Symbolic_boolean.t =
-  <span data-count="1050">l</span>et c = of_int32 c in
-  <span data-count="1050">S</span>mtml.Typed.Bitv32.eq c e
+  <span data-count="831">l</span>et c = of_int32 c in
+  <span data-count="831">S</span>mtml.Typed.Bitv32.eq c e
 </code></pre>
       </div>
     </div>

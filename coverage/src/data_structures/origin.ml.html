@@ -138,7 +138,7 @@
 <a href="#L52">52</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
-(* Copyright © 2021-2024 OCamlPro *)
+(* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
 type 'a imported =
@@ -153,7 +153,7 @@ type ('a, 'b) t =
   | Imported of 'b imported
 
 let imported ~modul_name ~name ~assigned_name ~typ =
-  <span data-count="4654">I</span>mported { modul_name; name; assigned_name; typ }
+  <span data-count="4907">I</span>mported { modul_name; name; assigned_name; typ }
 
 let pp_imported pp_typ fmt { modul_name; name; assigned_name; typ } =
   <span data-count="1">F</span>mt.pf fmt "{@\n  @[&lt;v&gt;modul: %S@\nname: %S@\nassigned_name: %a@\ntyp: %a@]}"
@@ -164,9 +164,9 @@ let map_imported f v =
   <span data-count="0">{</span> v with typ }
 
 let monadic_map_imported f v =
-  <span data-count="2761">l</span>et open Syntax in
-  let+ typ = <span data-count="2761">f</span> v.typ in
-  <span data-count="2756">{</span> v with typ }
+  <span data-count="2970">l</span>et open Syntax in
+  let+ typ = <span data-count="2970">f</span> v.typ in
+  <span data-count="2965">{</span> v with typ }
 
 let pp ~pp_local ~pp_imported:pp fmt = function
   | <span data-count="1">L</span>ocal local -&gt; Fmt.pf fmt "Local (%a)" pp_local local
@@ -181,14 +181,14 @@ let map ~f_local ~f_imported = function
     <span data-count="0">I</span>mported v
 
 let monadic_map ~f_local ~f_imported =
-  <span data-count="18848">l</span>et open Syntax in
+  <span data-count="18972">l</span>et open Syntax in
   function
-  | <span data-count="9976">L</span>ocal v -&gt;
-    let+ v = f_loca<span data-count="9976">l</span> v in
-    <span data-count="9893">L</span>ocal v
-  | <span data-count="2761">I</span>mported v -&gt;
-    let+ v = monadic_map_importe<span data-count="2761">d</span> f_imported v in
-    <span data-count="2756">I</span>mported v
+  | <span data-count="10118">L</span>ocal v -&gt;
+    let+ v = f_loca<span data-count="10117">l</span> v in
+    <span data-count="10034">L</span>ocal v
+  | <span data-count="2970">I</span>mported v -&gt;
+    let+ v = monadic_map_importe<span data-count="2970">d</span> f_imported v in
+    <span data-count="2965">I</span>mported v
 </code></pre>
       </div>
     </div>

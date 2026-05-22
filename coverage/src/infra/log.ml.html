@@ -22,40 +22,44 @@
     <div id="report">
       <div id="lines-layer">
         <pre>
-<a id="L1"></a><span class="visited"> </span>
+<a id="L1"></a><span > </span>
 <a id="L2"></a><span > </span>
-<a id="L3"></a><span class="visited"> </span>
+<a id="L3"></a><span > </span>
 <a id="L4"></a><span > </span>
 <a id="L5"></a><span class="visited"> </span>
 <a id="L6"></a><span > </span>
-<a id="L7"></a><span > </span>
-<a id="L8"></a><span class="visited"> </span>
-<a id="L9"></a><span > </span>
+<a id="L7"></a><span class="visited"> </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span class="visited"> </span>
 <a id="L10"></a><span > </span>
-<a id="L11"></a><span class="visited"> </span>
+<a id="L11"></a><span > </span>
 <a id="L12"></a><span class="visited"> </span>
-<a id="L13"></a><span class="visited"> </span>
+<a id="L13"></a><span > </span>
 <a id="L14"></a><span > </span>
-<a id="L15"></a><span > </span>
+<a id="L15"></a><span class="visited"> </span>
 <a id="L16"></a><span class="visited"> </span>
 <a id="L17"></a><span class="visited"> </span>
-<a id="L18"></a><span class="visited"> </span>
+<a id="L18"></a><span > </span>
 <a id="L19"></a><span > </span>
 <a id="L20"></a><span class="visited"> </span>
 <a id="L21"></a><span class="visited"> </span>
 <a id="L22"></a><span class="visited"> </span>
-<a id="L23"></a><span class="visited"> </span>
-<a id="L24"></a><span > </span>
-<a id="L25"></a><span > </span>
+<a id="L23"></a><span > </span>
+<a id="L24"></a><span class="visited"> </span>
+<a id="L25"></a><span class="visited"> </span>
 <a id="L26"></a><span class="visited"> </span>
 <a id="L27"></a><span class="visited"> </span>
-<a id="L28"></a><span class="visited"> </span>
+<a id="L28"></a><span > </span>
 <a id="L29"></a><span > </span>
-<a id="L30"></a><span > </span>
+<a id="L30"></a><span class="visited"> </span>
 <a id="L31"></a><span class="visited"> </span>
 <a id="L32"></a><span class="visited"> </span>
-<a id="L33"></a><span class="visited"> </span>
-<a id="L34"></a><span class="visited"> </span>
+<a id="L33"></a><span > </span>
+<a id="L34"></a><span > </span>
+<a id="L35"></a><span class="visited"> </span>
+<a id="L36"></a><span class="visited"> </span>
+<a id="L37"></a><span class="visited"> </span>
+<a id="L38"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -94,24 +98,32 @@
 <a href="#L32">32</a>
 <a href="#L33">33</a>
 <a href="#L34">34</a>
+<a href="#L35">35</a>
+<a href="#L36">36</a>
+<a href="#L37">37</a>
+<a href="#L38">38</a>
 </pre>
-<pre><code class="ocaml">let main_src = Logs.Src.creat<span data-count="765">e</span> "owi" ~doc:"Owi's main logs"
+<pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
+(* Copyright © 2021-2026 OCamlPro *)
+(* Written by the Owi programmers *)
 
-let bench_src = Logs.Src.creat<span data-count="765">e</span> "owi-bench" ~doc:"Owi's benchmark logs"
+let main_src = Logs.Src.creat<span data-count="785">e</span> "owi" ~doc:"Owi's main logs"
 
-include (val Logs.src_lo<span data-count="765">g</span> main_src : Logs.LOG)
+let bench_src = Logs.Src.creat<span data-count="785">e</span> "owi-bench" ~doc:"Owi's benchmark logs"
+
+include (val Logs.src_lo<span data-count="785">g</span> main_src : Logs.LOG)
 
 let is_bench_enabled () =
-  <span data-count="30560">m</span>atch Logs.Src.level bench_src with <span data-count="30544">N</span>one -&gt; false | <span data-count="16">S</span>ome _ -&gt; true
+  <span data-count="30085">m</span>atch Logs.Src.level bench_src with <span data-count="30068">N</span>one -&gt; false | <span data-count="16">S</span>ome _ -&gt; true
 
 let is_debug_enabled () =
-  <span data-count="425">m</span>atch Logs.Src.level main_src with
+  <span data-count="429">m</span>atch Logs.Src.level main_src with
   | <span data-count="1">S</span>ome Logs.Debug -&gt; true
-  | <span data-count="1">N</span>one | <span data-count="423">S</span>ome _ -&gt; false
+  | <span data-count="1">N</span>one | <span data-count="427">S</span>ome _ -&gt; false
 
 let bench_fn str fn =
-  <span data-count="5205">m</span>atch Logs.Src.level bench_src with
-  | <span data-count="5197">N</span>one -&gt; fn ()
+  <span data-count="5249">m</span>atch Logs.Src.level bench_src with
+  | <span data-count="5241">N</span>one -&gt; fn ()
   | <span data-count="8">S</span>ome _ -&gt;
     let c = Mtime_clock.counter () in
     <span data-count="8">l</span>et r = fn () in
@@ -125,10 +137,10 @@ let bench f =
   | <span data-count="20">S</span>ome _ -&gt; Logs.info ~src:bench_src f
 
 let setup style_renderer level ~bench =
-  <span data-count="697">F</span>mt_tty.setup_std_outputs ?style_renderer ();
-  <span data-count="697">L</span>ogs.Src.set_level main_src level;
-  <span data-count="697">L</span>ogs.Src.set_level bench_src (if bench then <span data-count="2">S</span>ome Logs.Info else <span data-count="695">N</span>one);
-  <span data-count="697">L</span>ogs.set_reporter (Logs.format_reporte<span data-count="697">r</span> ())
+  <span data-count="713">F</span>mt_tty.setup_std_outputs ?style_renderer ();
+  <span data-count="713">L</span>ogs.Src.set_level main_src level;
+  <span data-count="713">L</span>ogs.Src.set_level bench_src (if bench then <span data-count="2">S</span>ome Logs.Info else <span data-count="711">N</span>one);
+  <span data-count="713">L</span>ogs.set_reporter (Logs.format_reporte<span data-count="713">r</span> ())
 </code></pre>
       </div>
     </div>

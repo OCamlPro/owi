@@ -18,8 +18,8 @@
       <h2>94.34%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:10.71%"></span>
-      <span class="unvisited" style="bottom:7.14%"></span>
+      <span class="unvisited" style="top:16.67%"></span>
+      <span class="unvisited" style="bottom:6.67%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -29,12 +29,12 @@
 <a id="L3"></a><span > </span>
 <a id="L4"></a><span > </span>
 <a id="L5"></a><span > </span>
-<a id="L6"></a><span class="unvisited"> </span>
+<a id="L6"></a><span > </span>
 <a id="L7"></a><span > </span>
 <a id="L8"></a><span > </span>
-<a id="L9"></a><span class="visited"> </span>
-<a id="L10"></a><span > </span>
-<a id="L11"></a><span class="visited"> </span>
+<a id="L9"></a><span > </span>
+<a id="L10"></a><span class="unvisited"> </span>
+<a id="L11"></a><span > </span>
 <a id="L12"></a><span > </span>
 <a id="L13"></a><span class="visited"> </span>
 <a id="L14"></a><span > </span>
@@ -42,44 +42,48 @@
 <a id="L16"></a><span > </span>
 <a id="L17"></a><span class="visited"> </span>
 <a id="L18"></a><span > </span>
-<a id="L19"></a><span > </span>
-<a id="L20"></a><span class="visited"> </span>
+<a id="L19"></a><span class="visited"> </span>
+<a id="L20"></a><span > </span>
 <a id="L21"></a><span class="visited"> </span>
-<a id="L22"></a><span class="visited"> </span>
+<a id="L22"></a><span > </span>
 <a id="L23"></a><span > </span>
-<a id="L24"></a><span > </span>
+<a id="L24"></a><span class="visited"> </span>
 <a id="L25"></a><span class="visited"> </span>
 <a id="L26"></a><span class="visited"> </span>
-<a id="L27"></a><span class="visited"> </span>
+<a id="L27"></a><span > </span>
 <a id="L28"></a><span > </span>
-<a id="L29"></a><span > </span>
+<a id="L29"></a><span class="visited"> </span>
 <a id="L30"></a><span class="visited"> </span>
-<a id="L31"></a><span > </span>
-<a id="L32"></a><span class="visited"> </span>
+<a id="L31"></a><span class="visited"> </span>
+<a id="L32"></a><span > </span>
 <a id="L33"></a><span > </span>
 <a id="L34"></a><span class="visited"> </span>
-<a id="L35"></a><span class="visited"> </span>
+<a id="L35"></a><span > </span>
 <a id="L36"></a><span class="visited"> </span>
 <a id="L37"></a><span > </span>
-<a id="L38"></a><span > </span>
+<a id="L38"></a><span class="visited"> </span>
 <a id="L39"></a><span class="visited"> </span>
 <a id="L40"></a><span class="visited"> </span>
-<a id="L41"></a><span class="visited"> </span>
-<a id="L42"></a><span class="visited"> </span>
+<a id="L41"></a><span > </span>
+<a id="L42"></a><span > </span>
 <a id="L43"></a><span class="visited"> </span>
-<a id="L44"></a><span > </span>
-<a id="L45"></a><span > </span>
-<a id="L46"></a><span > </span>
+<a id="L44"></a><span class="visited"> </span>
+<a id="L45"></a><span class="visited"> </span>
+<a id="L46"></a><span class="visited"> </span>
 <a id="L47"></a><span class="visited"> </span>
-<a id="L48"></a><span class="visited"> </span>
+<a id="L48"></a><span > </span>
 <a id="L49"></a><span > </span>
-<a id="L50"></a><span class="visited"> </span>
+<a id="L50"></a><span > </span>
 <a id="L51"></a><span class="visited"> </span>
-<a id="L52"></a><span class="unvisited"> </span>
-<a id="L53"></a><span class="visited"> </span>
+<a id="L52"></a><span class="visited"> </span>
+<a id="L53"></a><span > </span>
 <a id="L54"></a><span class="visited"> </span>
 <a id="L55"></a><span class="visited"> </span>
-<a id="L56"></a><span > </span>
+<a id="L56"></a><span class="unvisited"> </span>
+<a id="L57"></a><span class="visited"> </span>
+<a id="L58"></a><span class="visited"> </span>
+<a id="L59"></a><span class="visited"> </span>
+<a id="L60"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -140,8 +144,16 @@
 <a href="#L54">54</a>
 <a href="#L55">55</a>
 <a href="#L56">56</a>
+<a href="#L57">57</a>
+<a href="#L58">58</a>
+<a href="#L59">59</a>
+<a href="#L60">60</a>
 </pre>
-<pre><code class="ocaml">module Make (Prio : Map.OrderedType) = struct
+<pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
+(* Copyright © 2021-2026 OCamlPro *)
+(* Written by the Owi programmers *)
+
+module Make (Prio : Map.OrderedType) = struct
   type 'a t = (Prio.t * 'a) Dynarray.t
 
   let empty = Dynarray.create
@@ -149,53 +161,53 @@
   let is_empty h = <span data-count="0">D</span>ynarray.lengt<span data-count="0">h</span> h = 0
 
   let rec move_up (h : 'a t) x i =
-    <span data-count="27705">i</span>f i = 0 then <span data-count="1512">D</span>ynarray.set h i x
+    <span data-count="27452">i</span>f i = 0 then <span data-count="1504">D</span>ynarray.set h i x
     else
-      <span data-count="26193">l</span>et fi = (i - 1) / 2 in
+      <span data-count="25948">l</span>et fi = (i - 1) / 2 in
       let y = Dynarray.get h fi in
-      <span data-count="26193">i</span>f Prio.compar<span data-count="26193">e</span> (fs<span data-count="26193">t</span> y) (fs<span data-count="26193">t</span> x) &gt; 0 then <span data-count="4">b</span>egin
+      <span data-count="25948">i</span>f Prio.compar<span data-count="25948">e</span> (fs<span data-count="25948">t</span> y) (fs<span data-count="25948">t</span> x) &gt; 0 then <span data-count="4">b</span>egin
         Dynarray.set h i y;
         <span data-count="4">m</span>ove_up h x fi
       end
-      else <span data-count="26189">D</span>ynarray.set h i x
+      else <span data-count="25944">D</span>ynarray.set h i x
 
   let push x h =
-    <span data-count="27701">l</span>et n = Dynarray.length h in
-    <span data-count="27701">D</span>ynarray.add_last h x;
-    <span data-count="27701">m</span>ove_up h x n
+    <span data-count="27448">l</span>et n = Dynarray.length h in
+    <span data-count="27448">D</span>ynarray.add_last h x;
+    <span data-count="27448">m</span>ove_up h x n
 
   let min (h : 'a t) l r =
-    <span data-count="123923">l</span>et xr = Dynarray.get h r in
-    <span data-count="123923">l</span>et xl = Dynarray.get h l in
-    <span data-count="123923">i</span>f Prio.compar<span data-count="123923">e</span> (fs<span data-count="123923">t</span> xr) (fs<span data-count="123923">t</span> xl) &lt; 0 then <span data-count="57630">r</span> else <span data-count="66293">l</span>
+    <span data-count="123745">l</span>et xr = Dynarray.get h r in
+    <span data-count="123745">l</span>et xl = Dynarray.get h l in
+    <span data-count="123745">i</span>f Prio.compar<span data-count="123745">e</span> (fs<span data-count="123745">t</span> xr) (fs<span data-count="123745">t</span> xl) &lt; 0 then <span data-count="57583">r</span> else <span data-count="66162">l</span>
 
   let smallest_node h x i =
-    <span data-count="150926">l</span>et l = (2 * i) + 1 in
+    <span data-count="150439">l</span>et l = (2 * i) + 1 in
     let n = Dynarray.length h in
-    <span data-count="150926">i</span>f l &gt;= n then <span data-count="25833">i</span>
+    <span data-count="150439">i</span>f l &gt;= n then <span data-count="25608">i</span>
     else
-      <span data-count="125093">l</span>et r = l + 1 in
-      let j = if r &lt; n then <span data-count="123923">m</span>i<span data-count="123923">n</span> h l r else <span data-count="1170">l</span> in
-      if Prio.compar<span data-count="125093">e</span> (fs<span data-count="125093">t</span> (Dynarray.ge<span data-count="125093">t</span> h j)) (fs<span data-count="125093">t</span> x) &lt; 0 then <span data-count="124767">j</span> else <span data-count="326">i</span>
+      <span data-count="124831">l</span>et r = l + 1 in
+      let j = if r &lt; n then <span data-count="123745">m</span>i<span data-count="123745">n</span> h l r else <span data-count="1086">l</span> in
+      if Prio.compar<span data-count="124831">e</span> (fs<span data-count="124831">t</span> (Dynarray.ge<span data-count="124831">t</span> h j)) (fs<span data-count="124831">t</span> x) &lt; 0 then <span data-count="124518">j</span> else <span data-count="313">i</span>
 
   let rec move_down h x i =
-    <span data-count="150926">l</span>et j = smallest_node h x i in
-    <span data-count="150926">i</span>f j = i then <span data-count="26159">D</span>ynarray.set h i x
-    else <span data-count="124767">b</span>egin
-      Dynarray.set h i (Dynarray.ge<span data-count="124767">t</span> h j);
-      <span data-count="124767">m</span>ove_down h x j
+    <span data-count="150439">l</span>et j = smallest_node h x i in
+    <span data-count="150439">i</span>f j = i then <span data-count="25921">D</span>ynarray.set h i x
+    else <span data-count="124518">b</span>egin
+      Dynarray.set h i (Dynarray.ge<span data-count="124518">t</span> h j);
+      <span data-count="124518">m</span>ove_down h x j
     end
 
   let pop h =
-    <span data-count="30079">l</span>et n = Dynarray.length h in
-    <span data-count="30079">i</span>f n = 0 then <span data-count="2421">N</span>one
+    <span data-count="29833">l</span>et n = Dynarray.length h in
+    <span data-count="29832">i</span>f n = 0 then <span data-count="2421">N</span>one
     else
-      <span data-count="27658">l</span>et y = Dynarray.get h 0 in
-      <span data-count="27658">m</span>atch Dynarray.pop_last_opt h with
+      <span data-count="27411">l</span>et y = Dynarray.get h 0 in
+      <span data-count="27411">m</span>atch Dynarray.pop_last_opt h with
       | <span data-count="0">N</span>one -&gt; None
-      | <span data-count="27658">S</span>ome x -&gt;
-        if n &gt; 1 then <span data-count="26159">m</span>ove_dow<span data-count="26159">n</span> h x 0;
-        <span data-count="27658">S</span>ome (sn<span data-count="27658">d</span> y)
+      | <span data-count="27411">S</span>ome x -&gt;
+        if n &gt; 1 then <span data-count="25921">m</span>ove_dow<span data-count="25921">n</span> h x 0;
+        <span data-count="27411">S</span>ome (sn<span data-count="27411">d</span> y)
 end
 </code></pre>
       </div>

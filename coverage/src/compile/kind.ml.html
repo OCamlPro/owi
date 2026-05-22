@@ -68,7 +68,7 @@
 <a href="#L20">20</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
-(* Copyright © 2021-2024 OCamlPro *)
+(* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
 type func =
@@ -78,9 +78,9 @@ type func =
       }
   | Extern of { idx : int }
 
-let wasm func idx : func = <span data-count="9391">W</span>asm { func; idx }
+let wasm func idx : func = <span data-count="9448">W</span>asm { func; idx }
 
-let extern idx : func = <span data-count="11853">E</span>xtern { idx }
+let extern idx : func = <span data-count="12154">E</span>xtern { idx }
 
 type 'f t =
   | Wat of Text.Module.t

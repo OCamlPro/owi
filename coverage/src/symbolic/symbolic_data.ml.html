@@ -24,30 +24,42 @@
         <pre>
 <a id="L1"></a><span > </span>
 <a id="L2"></a><span > </span>
-<a id="L3"></a><span class="visited"> </span>
+<a id="L3"></a><span > </span>
 <a id="L4"></a><span > </span>
-<a id="L5"></a><span class="visited"> </span>
+<a id="L5"></a><span > </span>
 <a id="L6"></a><span > </span>
 <a id="L7"></a><span class="visited"> </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span class="visited"> </span>
+<a id="L10"></a><span > </span>
+<a id="L11"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
         <pre id="line-numbers">
-<a href="#L1">1</a>
-<a href="#L2">2</a>
-<a href="#L3">3</a>
-<a href="#L4">4</a>
-<a href="#L5">5</a>
-<a href="#L6">6</a>
-<a href="#L7">7</a>
+<a href="#L1"> 1</a>
+<a href="#L2"> 2</a>
+<a href="#L3"> 3</a>
+<a href="#L4"> 4</a>
+<a href="#L5"> 5</a>
+<a href="#L6"> 6</a>
+<a href="#L7"> 7</a>
+<a href="#L8"> 8</a>
+<a href="#L9"> 9</a>
+<a href="#L10">10</a>
+<a href="#L11">11</a>
 </pre>
-<pre><code class="ocaml">type t = Concrete_data.t
+<pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
+(* Copyright © 2021-2026 OCamlPro *)
+(* Written by the Owi programmers *)
 
-let value data = <span data-count="220">d</span>ata.Concrete_data.value
+type t = Concrete_data.t
 
-let size data = <span data-count="220">S</span>tring.length data.Concrete_data.value
+let value data = <span data-count="221">d</span>ata.Concrete_data.value
 
-let drop data = <span data-count="220">d</span>ata.Concrete_data.value &lt;- ""
+let size data = <span data-count="221">S</span>tring.length data.Concrete_data.value
+
+let drop data = <span data-count="221">d</span>ata.Concrete_data.value &lt;- ""
 </code></pre>
       </div>
     </div>

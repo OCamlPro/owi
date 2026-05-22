@@ -54,18 +54,18 @@
 <a href="#L13">13</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
-(* Copyright © 2021-2024 OCamlPro *)
+(* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
 open Syntax
 
 let run_file exec filename =
-  <span data-count="176">l</span>et* script = Parse.Text.Script.from_fil<span data-count="176">e</span> filename in
-  <span data-count="166">e</span>xec script
+  <span data-count="186">l</span>et* script = Parse.Text.Script.from_fil<span data-count="186">e</span> filename in
+  <span data-count="185">e</span>xec script
 
 let cmd ~files ~no_exhaustion =
-  <span data-count="176">l</span>et exec = Script.exec ~no_exhaustion in
-  list_iter (run_fil<span data-count="176">e</span> exec) files
+  <span data-count="186">l</span>et exec = Script.exec ~no_exhaustion in
+  list_iter (run_fil<span data-count="186">e</span> exec) files
 </code></pre>
       </div>
     </div>

@@ -131,7 +131,7 @@
 (* This file is originally from the WebAssembly reference interpreter available at https://github.com/WebAssembly/spec/tree/main/interpreter *)
 
 (* SPDX-License-Identifier: AGPL-3.0-or-later *)
-(* Copyright © 2021-2024 OCamlPro *)
+(* Copyright © 2021-2026 OCamlPro *)
 (* Modified by the Owi programmers *)
 
 exception Utf8
@@ -160,14 +160,14 @@ and encode' = function
   | <span data-count="0">_</span> -&gt; raise Utf8
 
 let check_utf8 s =
-  <span data-count="35795">l</span>et open Uutf in
+  <span data-count="36705">l</span>et open Uutf in
   let decoder = decoder ~encoding:`UTF_8 (`String s) in
-  <span data-count="35795">l</span>et rec loop () =
-    <span data-count="262521">m</span>atch decode decoder with
+  <span data-count="36705">l</span>et rec loop () =
+    <span data-count="272021">m</span>atch decode decoder with
     | <span data-count="704">`</span>Malformed s -&gt; Error (`Malformed_utf8_encoding s)
     | `Await -&gt; assert false
-    | <span data-count="35091">`</span>End -&gt; Ok ()
-    | <span data-count="226726">`</span>Uchar _ -&gt; loop ()
+    | <span data-count="36001">`</span>End -&gt; Ok ()
+    | <span data-count="235316">`</span>Uchar _ -&gt; loop ()
   in
   loop ()
 </code></pre>
