@@ -2795,8 +2795,8 @@ let pp_val_type fmt = function
   | <span data-count="0">R</span>ef_type t -&gt; pp_ref_type fmt t
 
 let val_type_eq t1 t2 =
-  <span data-count="1618434">m</span>atch (t1, t2) with
-  | <span data-count="1618404">N</span>um_type t1, Num_type t2 -&gt; Text.num_type_eq t1 t2
+  <span data-count="1618428">m</span>atch (t1, t2) with
+  | <span data-count="1618398">N</span>um_type t1, Num_type t2 -&gt; Text.num_type_eq t1 t2
   | <span data-count="30">R</span>ef_type t1, Ref_type t2 -&gt; ref_type_eq t1 t2
   | <span data-count="0">_</span>, _ -&gt; false
 
@@ -2832,17 +2832,17 @@ type param = string option * val_type
 let pp_param ppf ((id, vt) : param) =
   <span data-count="25">p</span>f ppf "(param%a %a)" pp_str_opt id pp_val_type vt
 
-let param_eq (_, t1) (_, t2) = <span data-count="811223">v</span>al_type_eq t1 t2
+let param_eq (_, t1) (_, t2) = <span data-count="811219">v</span>al_type_eq t1 t2
 
 type param_type = param list
 
 let pp_param_type ppf (params : param_type) = <span data-count="25">l</span>ist ~sep:sp pp_param ppf params
 
-let param_type_eq t1 t2 = <span data-count="813949">L</span>ist.equal param_eq t1 t2
+let param_type_eq t1 t2 = <span data-count="813947">L</span>ist.equal param_eq t1 t2
 
 type result_type = val_type list
 
-let result_type_eq t1 t2 = <span data-count="812638">L</span>ist.equal val_type_eq t1 t2
+let result_type_eq t1 t2 = <span data-count="812636">L</span>ist.equal val_type_eq t1 t2
 
 let pp_result_ ppf vt = <span data-count="19">p</span>f ppf "(result %a)" pp_val_type vt
 
@@ -2861,7 +2861,7 @@ let pp_func_type ppf (params, results) =
     results
 
 let func_type_eq (pt1, rt1) (pt2, rt2) =
-  <span data-count="813949">p</span>aram_type_e<span data-count="813949">q</span> pt1 pt2 &amp;&amp; <span data-count="812638">r</span>esult_type_eq rt1 rt2
+  <span data-count="813947">p</span>aram_type_e<span data-count="813947">q</span> pt1 pt2 &amp;&amp; <span data-count="812636">r</span>esult_type_eq rt1 rt2
 
 type field_type = Text.mut * storage_type
 
