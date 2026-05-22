@@ -38,6 +38,7 @@ let
   });
 
   codex = ocamlPackages.buildDunePackage (finalAttrs: {
+    dontDetectOcamlConflicts = true;
     pname = "codex";
     version = "dev";
     src = pkgs.fetchFromGitHub {
@@ -47,7 +48,7 @@ let
       hash = "sha256-u/dD9ucNeY9j3czC9QtPPfNE3pZ1464gsWdJrsLT9hA=";
     };
 
-    nativeBuildInputs = with pkgs.ocamlPackages; [
+    nativeBuildInputs = with ocamlPackages; [
       dune_3
       findlib
       js_of_ocaml
@@ -56,13 +57,13 @@ let
       mdx.bin
       qcheck-core
     ];
-    buildInputs = with pkgs.ocamlPackages; [
+    buildInputs = with ocamlPackages; [
       js_of_ocaml
       js_of_ocaml-ppx
       ppx_deriving
       ppx_inline_test
     ];
-    propagatedBuildInputs = with pkgs.ocamlPackages; [
+    propagatedBuildInputs = with ocamlPackages; [
       base64
       bheap
       camlp-streams

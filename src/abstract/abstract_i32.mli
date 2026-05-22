@@ -1,0 +1,55 @@
+(* SPDX-License-Identifier: AGPL-3.0-or-later *)
+(* Copyright © 2021-2026 OCamlPro *)
+(* Written by the Owi programmers *)
+
+type t
+
+val pp : Abstract_domain.Context.t -> t Fmt.t
+
+(** Construction and conversion functions *)
+
+val zero : Abstract_domain.Context.t -> t
+
+val unknown : Abstract_domain.Context.t -> t
+
+val of_int : Abstract_domain.Context.t -> int -> t
+
+val of_int32 : Abstract_domain.Context.t -> int32 -> t
+
+val of_binary : Abstract_domain.Binary.t -> t
+
+val to_binary : t -> Abstract_domain.Binary.t
+
+val of_boolean : Abstract_domain.Context.t -> Abstract_boolean.t -> t
+
+val to_boolean : t -> Abstract_boolean.t
+
+(** Comparison functions *)
+
+val eq : Abstract_domain.Context.t -> t -> t -> Abstract_boolean.t
+
+val equal : t -> t -> bool
+
+(* *)
+
+val add : Abstract_domain.Context.t -> t -> t -> t
+
+val sub : Abstract_domain.Context.t -> t -> t -> t
+
+val mul : Abstract_domain.Context.t -> t -> t -> t
+
+val div_s : Abstract_domain.Context.t -> t -> t -> t
+
+val div_u : Abstract_domain.Context.t -> t -> t -> t
+
+val and_ : Abstract_domain.Context.t -> t -> t -> t
+
+val or_ : Abstract_domain.Context.t -> t -> t -> t
+
+val lt_s : Abstract_domain.Context.t -> t -> t -> Abstract_boolean.t
+
+val lt_u : Abstract_domain.Context.t -> t -> t -> Abstract_boolean.t
+
+val le_s : Abstract_domain.Context.t -> t -> t -> Abstract_boolean.t
+
+val le_u : Abstract_domain.Context.t -> t -> t -> Abstract_boolean.t
