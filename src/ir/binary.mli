@@ -36,6 +36,8 @@ type val_type =
   | Num_type of Text.num_type
   | Ref_type of ref_type
 
+val pp_val_type : val_type Fmt.t
+
 type storage_type =
   | Val_type of val_type
   | Pack_type of Text.pack_type

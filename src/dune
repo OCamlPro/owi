@@ -3,12 +3,21 @@
 (library
  (public_name owi)
  (modules
-  abs_stack
-  abs_driver
-  abs_extern_func
-  abs_value
-  abs_wasm_ffi
-  denot_concrete
+  abstract_boolean
+  abstract_domain
+  abstract_driver
+  abstract_extern_func
+  abstract_i32
+  abstract_i64
+  abstract_f32
+  abstract_f64
+  abstract_locals
+  abstract_ref
+  abstract_stack
+  abstract_state
+  abstract_v128
+  abstract_value
+  abstract_wasm_ffi
   annotated
   assigned
   benchmark
@@ -64,6 +73,7 @@
   concrete_wasm_ffi
   control_flow_graph
   data_intf
+  denot_interpreter
   elem_intf
   env_intf
   exploration_smart

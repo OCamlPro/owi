@@ -1566,10 +1566,10 @@ module Symbolic_extern_func : sig
   end
 end
 
-module Abs_driver : sig
+module Abstract_driver : sig
   val expr :
-       Abs_extern_func.extern_func Link.State.t
-    -> Abs_extern_func.extern_func Linked.Module.t
+       Abstract_extern_func.extern_func Link.State.t
+    -> Abstract_extern_func.extern_func Linked.Module.t
     -> unit
 end
 

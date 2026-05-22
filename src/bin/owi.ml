@@ -737,7 +737,7 @@ let cli =
   in
   Cmd.group info ~default
     [ Cmd.group analyze_info [ Cmd.v cg_info cg_cmd; Cmd.v cfg_info cfg_cmd ]
-    (* ; Cmd.v drun_info drun_cmd *)
+      (* ; Cmd.v drun_info drun_cmd *)
     ; Cmd.v abs_info abs_cmd
     ; Cmd.v c_info c_cmd
     ; Cmd.v cpp_info cpp_cmd

@@ -7,6 +7,9 @@ no subcommand should print help
          owi [COMMAND] …
   
   COMMANDS
+         abs [OPTION]… FILE
+             Run the abstract interpreter
+  
          analyze COMMAND …
              Analyze a program in different possible ways
   
