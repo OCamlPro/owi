@@ -540,9 +540,9 @@ let run ~exploration_strategy ~workers ~no_worker_isolation ~no_stop_at_failure
   let domains =
     (* Decides what to push in the bug stack and close the scheduler if needed. *)
     let at_result v =
-      <span data-count="1886">A</span>tomic.incr path_count;
-      <span data-count="1886">m</span>atch v with
-      | <span data-count="1630">O</span>k (), _thread -&gt; ()
+      <span data-count="1856">A</span>tomic.incr path_count;
+      <span data-count="1856">m</span>atch v with
+      | <span data-count="1600">O</span>k (), _thread -&gt; ()
       | <span data-count="256">E</span>rror bug, _thread -&gt;
         let should_be_added =
           match fail_mode with
@@ -560,23 +560,23 @@ let run ~exploration_strategy ~workers ~no_worker_isolation ~no_stop_at_failure
 
     (* Handles final values from the monad and reschedule them if needed. *)
     let rec at_schedulable (t : _ Symex.Monad.Schedulable.t) write_back =
-      <span data-count="55183">m</span>atch t with
+      <span data-count="55089">m</span>atch t with
       | <span data-count="12432">P</span>rune -&gt; ()
-      | <span data-count="1886">N</span>ow x -&gt; at_result x
-      | <span data-count="26922">Y</span>ield (prio, f) -&gt; write_back (prio, f)
-      | <span data-count="13943">C</span>hoice (m1, m2) -&gt;
+      | <span data-count="1856">N</span>ow x -&gt; at_result x
+      | <span data-count="26889">Y</span>ield (prio, f) -&gt; write_back (prio, f)
+      | <span data-count="13912">C</span>hoice (m1, m2) -&gt;
         at_schedulable m1 write_back;
-        <span data-count="13943">a</span>t_schedulable m2 write_back
+        <span data-count="13912">a</span>t_schedulable m2 write_back
     in
 
     let run_worker () =
-      <span data-count="827">F</span>un.protect
-        ~finally:(fun () -&gt; <span data-count="826">B</span>ugs.end_pledge bug_stack)
+      <span data-count="828">F</span>un.protect
+        ~finally:(fun () -&gt; <span data-count="822">B</span>ugs.end_pledge bug_stack)
         (fun () -&gt;
-          <span data-count="827">t</span>ry
+          <span data-count="828">t</span>ry
             (* Pull work from the queue as long as it's possible *)
-            Scheduler.work_whil<span data-count="826">e</span>
-              (fun f write_back -&gt; <span data-count="27298">a</span>t_schedulable (<span data-count="27297">f</span> ()) write_back)
+            Scheduler.work_whil<span data-count="822">e</span>
+              (fun f write_back -&gt; <span data-count="27271">a</span>t_schedulable (<span data-count="27265">f</span> ()) write_back)
               sched
           with
           | <span data-count="0">Z</span>3.Error _ when Solver.was_interrupte<span data-count="0">d</span> () -&gt;
