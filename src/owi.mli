@@ -1573,9 +1573,9 @@ module Abstract_driver : sig
     -> unit
 end
 
-(* module Denot_concrete : sig
-  val run : no_input:bool -> Binary.Module.t Result.t -> unit Result.t
-end *)
+module Denot_interpreter : sig
+  val run : no_input:bool -> Binary.Module.t -> unit Result.t
+end
 
 module Interpret : sig
   module type Parameters = sig

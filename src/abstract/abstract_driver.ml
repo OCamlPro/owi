@@ -46,11 +46,6 @@ module DenotFixpoint (S : DATA_STATE) = struct
 
     let remove = Map.remove
 
-    let add m k state =
-      match Map.find_opt k m with
-      | Some state_list -> Map.add k (state :: state_list) m
-      | None -> Map.add k [ state ] m
-
     let append (old : 'a list t) (neww : 'a list t) =
       Map.mapi
         (fun k el ->
@@ -365,7 +360,6 @@ end
 (*===========================================================================*)
 
 module DataAbstract_state : DATA_STATE = struct
-  (*TODO on peut utiliser une exception*)
   type t = Abstract_state.t option * Binary.instr option
 
   let eval_i32 ({ stack; ctx; _ } as state : Abstract_state.t) :
