@@ -28,6 +28,7 @@ let zero ctx = Abstract_domain.Binary_Forward.biconst ~size Z.zero ctx
 
 let unknown ctx = Abstract_domain.binary_unknown ~size ctx
 
+(* TODO: check and probably remove all `equal` functions, checks are either useless or should us `eq` instead*)
 let equal i1 i2 = Abstract_domain.Binary.equal i1 i2
 
 let eq ctx i1 i2 = Abstract_domain.Binary_Forward.beq ~size ctx i1 i2
