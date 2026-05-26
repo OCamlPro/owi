@@ -53,6 +53,7 @@
    (>= 0.2.1))
   (cmdliner
    (>= 2.1.1))
+  codex
   (digestif
    (>= 1.2.0))
   (domainpc
