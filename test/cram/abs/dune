@@ -1,0 +1,2 @@
+(cram
+ (deps %{bin:owi} add.wat fact.wat if.wat loop.wat local_func.wat return.wat))

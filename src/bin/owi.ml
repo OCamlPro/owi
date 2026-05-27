@@ -314,10 +314,9 @@ let drun_cmd =
     let doc = "disable interactive mode" in
     Arg.(value & flag & info [ "no-input" ] ~doc)
   and+ () = setup_log in
-  let compiled = Compile.File.until_binary ~unsafe:false source_file in
-  Prelude.Result.bind compiled (fun m -> Denot_interpreter.run ~no_input m)
+  Cmd_drun.cmd ~source_file ~no_input
 
-(* owi ai *)
+(* owi abs *)
 
 let abs_info =
   let doc = "Run the abstract interpreter" in

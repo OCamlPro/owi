@@ -2,7 +2,7 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type t = Abstract_domain.Boolean.t
+type t = Abstract_domain.boolean
 
 val false_ : Abstract_domain.Context.t -> t
 

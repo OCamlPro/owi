@@ -37,7 +37,7 @@ module I32 : sig
 
   val of_int32 : Abstract_domain.Context.t -> int32 -> i32
 
-  val to_boolean : i32 -> boolean
+  val to_boolean : Abstract_domain.Context.t -> i32 -> boolean
 end
 
 module I64 : sig

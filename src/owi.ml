@@ -8,6 +8,7 @@ module Binary = Binary
 module Binary_validate = Binary_validate
 module Binary_to_text = Binary_to_text
 module Cmd_abs = Cmd_abs
+module Cmd_drun = Cmd_drun
 module Cmd_sym = Cmd_sym
 module Cmd_c = Cmd_c
 module Cmd_call_graph = Cmd_call_graph

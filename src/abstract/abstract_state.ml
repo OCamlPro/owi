@@ -11,10 +11,10 @@ type t =
   ; envs : Abstract_extern_func.extern_func Link_env.t Dynarray.t
   }
 
-let pp : t Fmt.t =
+let pp ctx : t Fmt.t =
  fun fmt state ->
   Fmt.pf fmt "{@\n@[<hov 2>  ctx : %a,@;stack : %a,@;locals : %a@]@\n}"
-    Abstract_domain.context_pretty state.ctx Abstract_stack.pp state.stack
+    Abstract_domain.context_pretty state.ctx (Abstract_stack.pp ctx) state.stack
     (Fmt.list ~sep:Fmt.semi (Abstract_value.pp_with_ctx state.ctx))
     (Abstract_locals.to_list state.locals |> List.map snd)
 
