@@ -21,6 +21,9 @@ COMMANDS
        c++ [OPTION]… FILE…
            Compile a C++ file to Wasm and run the symbolic interpreter on it
 
+       drun [--no-input] [OPTION]… FILE
+           Run the denotational interpreter
+
        fmt [--inplace] [OPTION]… FILE…
            Format a .wat or .wast file
 
