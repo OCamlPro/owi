@@ -125,7 +125,7 @@ model {
   symbol symbol_0 i32 0
   symbol symbol_1 i32 0
 }
-owi: [INFO] Completed paths: 1
+owi: [INFO] Completed paths: 2
 owi: [ERROR] Reached problem!
 [13]
 ```
