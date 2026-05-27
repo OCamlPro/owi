@@ -4,12 +4,9 @@
 
 open Syntax
 
-let cmd ~source_file =
-  let link_state =
-    Link.State.empty ()
-    |> Link.Extern.modul ~name:"owi" Abstract_wasm_ffi.symbolic_extern_module
-  in
+let cmd ~source_file ~no_input =
+  let link_state = Link.State.empty () in
   let+ m, link_state =
     Compile.File.until_link ~unsafe:true ~name:None link_state source_file
   in
-  Abstract_driver.expr link_state m
+  Denot_interpreter.run ~no_input link_state m

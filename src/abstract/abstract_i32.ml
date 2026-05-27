@@ -17,7 +17,9 @@ let of_boolean ctx boolean =
   let n = if Abstract_boolean.equal boolean true_ then 1 else 0 in
   Abstract_domain.Binary_Forward.biconst ~size (Z.of_int n) ctx
 
-let to_boolean _ = assert false
+let to_boolean ctx x =
+  let zero = Abstract_domain.Binary_Forward.biconst ~size Z.zero ctx in
+  Abstract_domain.Binary_Forward.beq ~size ctx x zero
 
 let of_int32 ctx i =
   Abstract_domain.Binary_Forward.biconst ~size (Z.of_int32 i) ctx

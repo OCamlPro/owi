@@ -1574,7 +1574,11 @@ module Abstract_driver : sig
 end
 
 module Denot_interpreter : sig
-  val run : no_input:bool -> Binary.Module.t -> unit Result.t
+  val run :
+       no_input:bool
+    -> Concrete_extern_func.extern_func Link.State.t
+    -> Concrete_extern_func.extern_func Linked.Module.t
+    -> unit
 end
 
 module Interpret : sig
@@ -1682,6 +1686,10 @@ end
 
 module Cmd_abs : sig
   val cmd : source_file:Fpath.t -> unit Result.t
+end
+
+module Cmd_drun : sig
+  val cmd : source_file:Fpath.t -> no_input:bool -> unit Result.t
 end
 
 module Cmd_sym : sig

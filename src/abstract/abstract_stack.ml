@@ -41,8 +41,8 @@ let push_ref s r = push s (Value.Ref r)
 
 let push_array _ _ = assert false
 
-let pp fmt (s : t) =
-  Fmt.list ~sep:(fun fmt () -> Fmt.string fmt " ; ") Value.pp fmt s
+let pp ctx fmt (s : t) =
+  Fmt.list ~sep:(fun fmt () -> Fmt.string fmt " ; ") (Value.pp_with_ctx ctx) fmt s
 
 let pop = function [] -> raise Empty | hd :: tl -> (hd, tl)
 
@@ -111,10 +111,10 @@ let pop_as_ref s =
   let hd, tl = pop s in
   match hd with Value.Ref hd -> (hd, tl) | _ -> assert false
 
-let pop_bool s =
+let pop_bool s ctx =
   let hd, tl = pop s in
   match hd with
-  | Value.I32 n -> (Value.I32.to_boolean n, tl)
+  | Value.I32 n -> (Value.I32.to_boolean ctx n, tl)
   | _ -> assert false
 
 let pop_n s n =

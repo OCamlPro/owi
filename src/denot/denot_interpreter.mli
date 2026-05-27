@@ -2,4 +2,8 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-val run : no_input:bool -> Binary.Module.t -> unit Result.t
+val run :
+     no_input:bool
+  -> Concrete_extern_func.extern_func Link.State.t
+  -> Concrete_extern_func.extern_func Linked.Module.t
+  -> unit

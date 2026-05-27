@@ -1,7 +1,7 @@
 (module
   (func $add (param $i i32) (result i32)
     local.get $i
-    nop (; should be top ;)
+    local.get $i
     i32.add
     return
   )

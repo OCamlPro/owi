@@ -1,9 +1,9 @@
 (module
-  (func $start (result i32)
+  (func $start
     (local $n i32)
     (local $result i32)
     
-    i32.const 5
+    i32.const 2
     local.set $n
     
     i32.const 1
@@ -34,6 +34,7 @@
     )
     
     local.get $result
+    drop
   )
   
   (start $start)

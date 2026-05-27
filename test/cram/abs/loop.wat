@@ -6,8 +6,10 @@
       (local.get $res)
       i32.const 2
       i32.add
-      (local.tee $res)
-      br 0)
+      local.set $res
+      ;; ce qui marche pas : (i32.le_s (i32.const 100) (local.get $res))
+      (i32.le_s (local.get $res) (i32.const 100))
+      br_if 0)
     drop
   )
 
