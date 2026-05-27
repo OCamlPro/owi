@@ -53,7 +53,8 @@
    (>= 0.2.1))
   (cmdliner
    (>= 2.1.1))
-  codex
+  (codex
+   (= "dev"))
   (digestif
    (>= 1.2.0))
   (domainpc

@@ -31,7 +31,7 @@ depends: [
   "dune-site" {build}
   "bos" {>= "0.2.1"}
   "cmdliner" {>= "2.1.1"}
-  "codex"
+  "codex" {= "dev"}
   "digestif" {>= "1.2.0"}
   "domainpc" {>= "0.2"}
   "logs" {>= "0.10.0"}
@@ -91,5 +91,5 @@ post-messages: [
 pin-depends: [
   ["landmarks.1.5" "git+https://github.com/hra687261/landmarks.git#cfc017b604f2c41ac0d8841f30a0b55b0d89cbaf"]
   ["landmarks-ppx.1.5" "git+https://github.com/hra687261/landmarks.git#cfc017b604f2c41ac0d8841f30a0b55b0d89cbaf"]
-  ["codex" "git+https://github.com/s41d/codex.git#05977de3acf12e18343a053be0f1fb936f8ec31c"]
+  ["codex.dev" "git+https://github.com/s41d/codex.git#05977de3acf12e18343a053be0f1fb936f8ec31c"]
 ]
