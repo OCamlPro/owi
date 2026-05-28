@@ -4,9 +4,9 @@
 
 open Syntax
 
-let cmd ~source_file ~no_input =
+let cmd ~source_file ~no_input ~unsafe =
   let link_state = Link.State.empty () in
   let+ m, link_state =
-    Compile.File.until_link ~unsafe:true ~name:None link_state source_file
+    Compile.File.until_link ~unsafe ~name:None link_state source_file
   in
   Denot_interpreter.run ~no_input link_state m

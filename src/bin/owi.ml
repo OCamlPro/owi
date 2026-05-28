@@ -310,11 +310,12 @@ let drun_info =
 
 let drun_cmd =
   let+ source_file
+  and+ unsafe
   and+ no_input =
     let doc = "disable interactive mode" in
     Arg.(value & flag & info [ "no-input" ] ~doc)
   and+ () = setup_log in
-  Cmd_drun.cmd ~source_file ~no_input
+  Cmd_drun.cmd ~source_file ~no_input ~unsafe
 
 (* owi abs *)
 
@@ -325,8 +326,9 @@ let abs_info =
 
 let abs_cmd =
   let+ source_file
-  and+ () = setup_log in
-  Cmd_abs.cmd ~source_file
+  and+ () = setup_log
+  and+ unsafe in
+  Cmd_abs.cmd ~source_file ~unsafe
 
 (* owi analyze *)
 

@@ -19,7 +19,8 @@ let of_boolean ctx boolean =
 
 let to_boolean ctx x =
   let zero = Abstract_domain.Binary_Forward.biconst ~size Z.zero ctx in
-  Abstract_domain.Binary_Forward.beq ~size ctx x zero
+  let b = Abstract_domain.Binary_Forward.beq ~size ctx x zero in
+  Abstract_boolean.not ctx b
 
 let of_int32 ctx i =
   Abstract_domain.Binary_Forward.biconst ~size (Z.of_int32 i) ctx

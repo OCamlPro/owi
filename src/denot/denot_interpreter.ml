@@ -24,8 +24,7 @@ module State = struct
 
   let pp_map = Locals.pretty (fun fmt k v -> Fmt.pf fmt "%i->%a " k Value.pp v)
 
-  let pp ppf (state : t) =
-    let { stack; locals; _ } = state in
+  let pp ppf ({ stack; locals; _ } : t) =
     Fmt.pf ppf "@[<hov>σ:[%a];@;ρ:%a@]@." Stack.pp stack pp_map locals
 end
 

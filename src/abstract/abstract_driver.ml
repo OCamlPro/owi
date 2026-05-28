@@ -159,7 +159,8 @@ module DenotFixpoint (S : DATA_STATE) = struct
       Abstract_domain.widened_fixpoint_step ~widening_id ~previous:state_a.ctx
         ~next:state_b.ctx (included, in_tuple)
     in
-    let state, _ = continue ctx out in
+    (* TODO find out why is the out tuple ignored *)
+    let state, _out_tuple = continue ctx out in
     ({ state with ctx }, included)
 
   let rec eval_expr :
@@ -196,17 +197,18 @@ module DenotFixpoint (S : DATA_STATE) = struct
       |> List.mapi (fun i x -> (i, x))
       |> Abstract_locals.of_list
     in
-    let fn_state =
-      { state with stack = []; ctx = state.ctx; func_rt = result_type; locals }
-    in
+    let fn_state = { state with stack = []; func_rt = result_type; locals } in
     Log.debug (fun m ->
       m "Func start state : %a" (Abstract_state.pp state.ctx) fn_state );
     (* TODO: handle mapping *)
     let func_end_state, _ = eval_expr fn_state func.body.raw in
-    (* Log.debug (fun m -> *)
-    (*   m "Func end state : %a@." *)
-    (*     (Fmt.option ~none:(Fmt.any "None") (Abstract_state.pp func_end_state.ctx)) *)
-    (*     func_end_state ); *)
+    ( match func_end_state with
+    | Some state ->
+      Log.debug (fun m ->
+        m "Func end state : %a@."
+          (Fmt.option ~none:(Fmt.any "None") (Abstract_state.pp state.ctx))
+          func_end_state )
+    | None -> Log.debug (fun m -> m "Func end state : None @.") );
     (* We should probably copy state and join back the return values in the context here *)
     let* func_end_state in
     let stack =
@@ -266,13 +268,17 @@ module DenotFixpoint (S : DATA_STATE) = struct
     | If_else (_, bt, expr_then, expr_else) ->
       let b, stack = Stack.pop_bool stack ctx in
       let state_then, jt_true =
-        let> ctx, _ = (Abstract_domain.assume ctx b, JumpTarget.empty) in
-        eval_instr { state with stack; ctx } (Block (None, bt, expr_then))
+        match Abstract_domain.assume ctx b with
+        | Some ctx ->
+          eval_instr { state with stack; ctx } (Block (None, bt, expr_then))
+        | None -> (None, JumpTarget.empty)
       in
       let state_else, jt_false =
         let not_cond = Abstract_boolean.not ctx b in
-        let> ctx, _ = (Abstract_domain.assume ctx not_cond, JumpTarget.empty) in
-        eval_instr { state with stack; ctx } (Block (None, bt, expr_else))
+        match Abstract_domain.assume ctx not_cond with
+        | Some ctx ->
+          eval_instr { state with stack; ctx } (Block (None, bt, expr_else))
+        | None -> (None, JumpTarget.empty)
       in
       let jt = JumpTarget.append jt_true jt_false in
       begin match (state_then, state_else) with
@@ -327,12 +333,13 @@ module DenotFixpoint (S : DATA_STATE) = struct
       let b, stack = Stack.pop_bool stack ctx in
       let jt_if =
         match Abstract_domain.assume ctx b with
-        | Some _ -> JumpTarget.of_list [ (I i, [ state ]) ]
+        | Some ctx ->
+          JumpTarget.of_list [ (I i, [ { state with stack; ctx } ]) ]
         | None -> JumpTarget.empty
       in
       let state =
         match Abstract_domain.assume ctx (Abstract_boolean.not ctx b) with
-        | Some _ -> Some { state with stack }
+        | Some ctx -> Some { state with stack; ctx }
         | None -> None
       in
       (state, jt_if)
@@ -528,7 +535,8 @@ let expr (link_state : Abstract_extern_func.extern_func Link.State.t)
 
   List.iter
     begin fun (e : Binary.expr Annotated.t) ->
-      let end_state, _ = ConcreteFixpoint.eval_expr state e.raw in
+      (* TODO handle *)
+      let end_state, _mapping = ConcreteFixpoint.eval_expr state e.raw in
       Fmt.pr "End Abstract_state : %a@."
         (Fmt.option ~none:(Fmt.any "none") (Abstract_state.pp state.ctx))
         end_state
