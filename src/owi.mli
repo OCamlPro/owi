@@ -1685,11 +1685,11 @@ module Symbolic_driver : sig
 end
 
 module Cmd_abs : sig
-  val cmd : source_file:Fpath.t -> unit Result.t
+  val cmd : source_file:Fpath.t -> unsafe:bool -> unit Result.t
 end
 
 module Cmd_drun : sig
-  val cmd : source_file:Fpath.t -> no_input:bool -> unit Result.t
+  val cmd : source_file:Fpath.t -> no_input:bool -> unsafe:bool -> unit Result.t
 end
 
 module Cmd_sym : sig
