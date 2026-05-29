@@ -10,6 +10,8 @@ include Symex.Monad
 
 type 'a t = ('a, Bug.t, Prio.metrics, Thread.t) Symex.Monad.t
 
+let prune () = fail `Prune
+
 let add_already_checked_condition_to_pc (condition : Symbolic_boolean.t) =
   map_state (Thread.add_already_checked_condition_to_pc condition)
 [@@inline]
@@ -200,7 +202,7 @@ let select_i32 (e : Symbolic_i32.t) : int32 t =
     in
     generator ()
 
-let bug kind =
+let bug () =
   let* path_condition, solver_final_model_time =
     fold_state (fun (state : Thread.t) ->
       (state.pc, state.bench_stats.solver_final_model_time) )
@@ -211,18 +213,23 @@ let bug kind =
     | Some model -> return model
     | None -> if Solver.was_interrupted () then prune () else assert false
   in
-  let* state = fold_state Fun.id in
-  fail { Bug.kind; model; state }
+  let+ state = fold_state Fun.id in
+  (state, model)
 
-let trap t = bug (`Trap t)
+let trap err =
+  let* state, model = bug () in
+  fail @@ `Trap { Bug.err; state; model }
 
-let assertion (c : Symbolic_boolean.t) =
+let assertion (assertion : Symbolic_boolean.t) =
   (* TODO: better prio here ? *)
   let* assertion_true =
-    select_inner c ~with_breadcrumbs:false ~instr_counter_true:None
+    select_inner assertion ~with_breadcrumbs:false ~instr_counter_true:None
       ~instr_counter_false:None
   in
-  if assertion_true then return () else bug (`Assertion c)
+  if assertion_true then return ()
+  else
+    let* state, model = bug () in
+    fail @@ `Assertion { Bug.assertion; state; model }
 
 let ite (c : Symbolic_boolean.t) ~(if_true : Symbolic_value.t)
   ~(if_false : Symbolic_value.t) : Symbolic_value.t t =

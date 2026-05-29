@@ -35,7 +35,7 @@ let
     symex = super.symex.overrideAttrs (old: {
       src = fetchGit {
         url = "https://github.com/ocamlpro/symex";
-        rev = "9c8111eae86be15c54d24b615fd278aef0240898";
+        rev = "3885298408df002085a180d2c7eae25d99e7262c";
       };
     });
   });
