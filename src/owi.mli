@@ -1575,7 +1575,7 @@ end
 
 module Denot_interpreter : sig
   val run :
-       no_input:bool
+       interactive:bool
     -> Concrete_extern_func.extern_func Link.State.t
     -> Concrete_extern_func.extern_func Linked.Module.t
     -> unit
@@ -1689,7 +1689,8 @@ module Cmd_abs : sig
 end
 
 module Cmd_drun : sig
-  val cmd : source_file:Fpath.t -> no_input:bool -> unsafe:bool -> unit Result.t
+  val cmd :
+    source_file:Fpath.t -> interactive:bool -> unsafe:bool -> unit Result.t
 end
 
 module Cmd_sym : sig

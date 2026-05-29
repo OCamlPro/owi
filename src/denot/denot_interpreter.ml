@@ -30,16 +30,13 @@ end
 
 (*=========================================================================*)
 
-let rec input_loop state =
+let rec wait_for_input () =
   match In_channel.input_line In_channel.stdin with
-  | None | Some "n" | Some "" -> ()
-  | Some "p" ->
-    Log.debug (fun m -> m "%a" State.pp state);
-    input_loop state
+  | None | Some "" -> ()
   | Some "q" -> exit 0
   | _ ->
     Fmt.pr "Input should be <cr>|n|p@.";
-    input_loop state
+    wait_for_input ()
 
 (*=========================================================================*)
 
@@ -94,16 +91,16 @@ module Fixpoint (DS : DATA_STATE) = struct
   let join lhs rhs = match rhs with Some x -> Some x | None -> lhs
 
   let rec eval_expr :
-       no_input:bool
+       interactive:bool
     -> State.t
     -> Binary.instr Annotated.t list
     -> State.t option * State.t JumpTarget.t =
-   fun ~no_input state expr ->
+   fun ~interactive state expr ->
     let rec loop (state, jt) (expr : Binary.instr Annotated.t list) =
       match expr with
       | [] -> (Some state, jt)
       | instr :: instrs -> (
-        let new_state, new_jt = eval_instr ~no_input state instr.raw in
+        let new_state, new_jt = eval_instr ~interactive state instr.raw in
         let new_jt = JumpTarget.append jt new_jt in
         match new_state with
         | None -> (None, new_jt)
@@ -111,7 +108,7 @@ module Fixpoint (DS : DATA_STATE) = struct
     in
     loop (state, JumpTarget.empty) expr
 
-  and eval_func ~no_input (state : State.t) (func : Binary.Func.t) =
+  and eval_func ~interactive (state : State.t) (func : Binary.Func.t) =
     Log.info (fun m ->
       m "calling func  : func %s" (Option.value func.id ~default:"anonymous") );
     let (Bt_raw ((None | Some _), (param_type, result_type))) = func.type_f in
@@ -133,7 +130,7 @@ module Fixpoint (DS : DATA_STATE) = struct
     let fn_state = { state with stack = args; func_rt = result_type; locals } in
     Log.debug (fun m -> m "Func start state : %a" State.pp fn_state);
     (* TODO: handle mapping *)
-    let func_end_state, _ = eval_expr ~no_input fn_state func.body.raw in
+    let func_end_state, _ = eval_expr ~interactive fn_state func.body.raw in
     Log.debug (fun m ->
       m "Func end state : %a@."
         (Fmt.option ~none:(Fmt.any "None") State.pp)
@@ -147,23 +144,23 @@ module Fixpoint (DS : DATA_STATE) = struct
     Some { state with stack }
 
   and eval_instr :
-       no_input:bool
+       interactive:bool
     -> State.t
     -> Binary.instr
     -> State.t option * State.t JumpTarget.t =
-   fun ~no_input ({ stack; locals; env; envs; _ } as state) instr ->
+   fun ~interactive ({ stack; locals; env; envs; _ } as state) instr ->
     Log.info (fun m -> m "stack         : [ %a ]" Stack.pp stack);
     Log.info (fun m -> m "locals        : [ %a ]" State.pp_map locals);
     Log.info (fun m ->
       m "running instr : %a" (Binary.pp_instr ~short:true) instr );
-    if no_input then () else input_loop state;
+    if interactive then wait_for_input () else ();
     match instr with
     | Call idx ->
       let func = Link_env.get_func env idx in
       begin match func with
       | Wasm { func; idx } ->
         let env = Dynarray.get envs idx in
-        let r = eval_func ~no_input { state with env } func in
+        let r = eval_func ~interactive { state with env } func in
         (r, JumpTarget.empty)
       | Extern { idx } -> (
         match idx with
@@ -178,7 +175,7 @@ module Fixpoint (DS : DATA_STATE) = struct
         )
       end
     | Block (_str_opt, _bt, body) ->
-      let state, mapping = eval_expr ~no_input state body.raw in
+      let state, mapping = eval_expr ~interactive state body.raw in
       let m_decr = JumpTarget.decr mapping in
       let state = join state (JumpTarget.find_opt (I 0) mapping) in
       let state = join state (JumpTarget.find_opt Ret mapping) in
@@ -194,7 +191,7 @@ module Fixpoint (DS : DATA_STATE) = struct
         let loop_state =
           { state with stack = Stack.keep initial_stack to_keep }
         in
-        let next_state, mapping = eval_expr ~no_input loop_state body.raw in
+        let next_state, mapping = eval_expr ~interactive loop_state body.raw in
         (* TODO handle returns *)
         match JumpTarget.find_opt (I 0) mapping with
         | Some br_state ->
@@ -212,7 +209,7 @@ module Fixpoint (DS : DATA_STATE) = struct
     | If_else (str_opt, bt, expr_then, expr_else) ->
       let v, stack = Stack.pop state.stack in
       let to_exec = match v with I32 0l -> expr_else | _ -> expr_then in
-      eval_instr ~no_input { state with stack } (Block (str_opt, bt, to_exec))
+      eval_instr ~interactive { state with stack } (Block (str_opt, bt, to_exec))
     | Br i -> (None, JumpTarget.of_list [ (I i, state) ])
     | Br_if id -> (
       let v, stack = Stack.pop stack in
@@ -237,7 +234,7 @@ module Fixpoint (DS : DATA_STATE) = struct
       let res = DS.eval_instr state instr in
       match res with
       | Some s, None -> (Some s, JumpTarget.empty)
-      | None, Some instr -> eval_instr ~no_input state instr
+      | None, Some instr -> eval_instr ~interactive state instr
       | Some _, Some _ -> (* should not happen *) assert false
       | None, None -> (* unreachable *) (None, JumpTarget.empty) )
 end
@@ -373,7 +370,8 @@ end
 
 module Concrete_fixpoint = Fixpoint (DataDenotConcrete_state)
 
-let run ~no_input (link_state : Concrete_extern_func.extern_func Link.State.t)
+let run ~interactive
+  (link_state : Concrete_extern_func.extern_func Link.State.t)
   (m : Concrete_extern_func.extern_func Linked.Module.t) =
   let envs = Link.State.get_envs link_state in
   let state =
@@ -387,7 +385,7 @@ let run ~no_input (link_state : Concrete_extern_func.extern_func Link.State.t)
   in
   List.iter
     begin fun (e : Binary.expr Annotated.t) ->
-      let end_state, _ = Concrete_fixpoint.eval_expr ~no_input state e.raw in
+      let end_state, _ = Concrete_fixpoint.eval_expr ~interactive state e.raw in
       Log.info (fun m ->
         m "End Abstract_state : %a@."
           (Fmt.option ~none:(Fmt.any "none") State.pp)

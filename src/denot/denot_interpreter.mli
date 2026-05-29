@@ -3,7 +3,7 @@
 (* Written by the Owi programmers *)
 
 val run :
-     no_input:bool
+     interactive:bool
   -> Concrete_extern_func.extern_func Link.State.t
   -> Concrete_extern_func.extern_func Linked.Module.t
   -> unit
