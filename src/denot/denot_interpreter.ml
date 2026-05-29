@@ -152,10 +152,11 @@ module Fixpoint (DS : DATA_STATE) = struct
     -> Binary.instr
     -> State.t option * State.t JumpTarget.t =
    fun ~no_input ({ stack; locals; env; envs; _ } as state) instr ->
-    if no_input then Log.debug (fun m -> m "%a" State.pp state)
-    else (
-      Log.debug (fun m -> m "%a@\n" (Binary.pp_instr ~short:true) instr);
-      input_loop state );
+    Log.info (fun m -> m "stack         : [ %a ]" Stack.pp stack);
+    Log.info (fun m -> m "locals        : [ %a ]" State.pp_map locals);
+    Log.info (fun m ->
+      m "running instr : %a" (Binary.pp_instr ~short:true) instr );
+    if no_input then () else input_loop state;
     match instr with
     | Call idx ->
       let func = Link_env.get_func env idx in
@@ -387,8 +388,9 @@ let run ~no_input (link_state : Concrete_extern_func.extern_func Link.State.t)
   List.iter
     begin fun (e : Binary.expr Annotated.t) ->
       let end_state, _ = Concrete_fixpoint.eval_expr ~no_input state e.raw in
-      Fmt.pr "End Abstract_state : %a@."
-        (Fmt.option ~none:(Fmt.any "none") State.pp)
-        end_state
+      Log.info (fun m ->
+        m "End Abstract_state : %a@."
+          (Fmt.option ~none:(Fmt.any "none") State.pp)
+          end_state )
     end
     m.to_run
