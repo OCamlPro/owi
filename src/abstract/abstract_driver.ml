@@ -29,6 +29,8 @@ module DenotFixpoint (S : DATA_STATE) = struct
     let decr = map Int.pred
 
     let to_int = function I i -> i | Ret -> -1
+
+    (* let pp fmt = function I i -> Fmt.pf fmt "%i" i | Ret -> Fmt.pf fmt "ret" *)
   end
 
   module JumpTarget = struct
@@ -58,6 +60,11 @@ module DenotFixpoint (S : DATA_STATE) = struct
       remove (I 0) jt |> to_list
       |> List.map (fun (k, v) -> (JumpKey.decr k, v))
       |> of_list
+
+    (* let pp pp_v fmt = *)
+    (*   Map.pretty *)
+    (*     (fun fmt jk v -> Fmt.pf fmt "%a -> %a" JumpKey.pp jk pp_v v) *)
+    (*     fmt *)
   end
 
   let ( let> ) (opt, mapp) f =
@@ -70,7 +77,12 @@ module DenotFixpoint (S : DATA_STATE) = struct
    fun state_a state_b ->
     let gen_new_value ~widens a b state_a state_b
       (Abstract_domain.Context.Result (inc, intup, cont)) f =
-      if Abstract_value.equal a b then None
+      if Abstract_value.equal a b then
+        let cont ctx out_tuple =
+          let list, out_tuple = cont ctx out_tuple in
+          (f a list, out_tuple)
+        in
+        Abstract_domain.Context.Result (inc, intup, cont)
       else
         let size = Abstract_value.size_of a in
         (* inc : whether the new value is included in the old one
@@ -86,12 +98,12 @@ module DenotFixpoint (S : DATA_STATE) = struct
             (inc, intup)
         in
         let cont ctx out_tuple =
-          let integer, out_tuple = local_cont ctx out_tuple in
-          let list, out_tuple = cont ctx out_tuple in
-          let b = Abstract_value.of_binary size integer in
-          (f b list, out_tuple)
+          let value, out_tuple = local_cont ctx out_tuple in
+          let container, out_tuple = cont ctx out_tuple in
+          let b = Abstract_value.of_binary size value in
+          (f b container, out_tuple)
         in
-        Some (Abstract_domain.Context.Result (inc, in_tup, cont))
+        Abstract_domain.Context.Result (inc, in_tup, cont)
     in
     let rec serialize_stack lhs rhs acc_res =
       match (lhs, rhs) with
@@ -100,8 +112,7 @@ module DenotFixpoint (S : DATA_STATE) = struct
         Fmt.failwith "join on stacks of different sizes"
       | v1 :: rest_a, v2 :: rest_b -> begin
         let r = gen_new_value ~widens v1 v2 state_a state_b acc_res List.cons in
-        serialize_stack rest_a rest_b
-          (match r with Some res -> res | None -> acc_res)
+        serialize_stack rest_a rest_b r
         end
     in
     let (Abstract_domain.Context.Result (included, in_tuple, locals_continue)) =
@@ -120,16 +131,23 @@ module DenotFixpoint (S : DATA_STATE) = struct
             Option.value v2 ~default:(Abstract_value.top size state_b.ctx)
           in
           let f = Abstract_locals.add k in
-          match gen_new_value ~widens v1 v2 state_a state_b res f with
-          | Some res -> res
-          | None -> res
+          gen_new_value ~widens v1 v2 state_a state_b res f
         end
         state_a.locals state_b.locals
         (Abstract_domain.Context.Result
            ( true
            , Abstract_domain.Context.empty_tuple ()
-           , fun _ctx out -> (state_a.locals, out) ) )
+           , fun _ctx out -> (Abstract_locals.empty, out) ) )
     in
+
+    Log.debug (fun m ->
+      m "serializing stacks (%s) : @\n first : %a @\n second : %a"
+        (if widens then "widen" else "join")
+        (Abstract_stack.pp state_a.ctx)
+        state_a.stack
+        (Abstract_stack.pp state_b.ctx)
+        state_b.stack );
+
     let (Abstract_domain.Context.Result (inc, in_tup, stack_continue)) =
       serialize_stack state_a.stack state_b.stack
         (Abstract_domain.Context.Result
@@ -205,10 +223,10 @@ module DenotFixpoint (S : DATA_STATE) = struct
     ( match func_end_state with
     | Some state ->
       Log.debug (fun m ->
-        m "Func end state : %a@."
+        m "func end state : %a@."
           (Fmt.option ~none:(Fmt.any "None") (Abstract_state.pp state.ctx))
           func_end_state )
-    | None -> Log.debug (fun m -> m "Func end state : None @.") );
+    | None -> Log.debug (fun m -> m "func end state : None @.") );
     (* We should probably copy state and join back the return values in the context here *)
     let* func_end_state in
     let stack =
@@ -217,13 +235,19 @@ module DenotFixpoint (S : DATA_STATE) = struct
     in
     Some { state with stack }
 
-  and eval_instr ({ ctx; stack; env; envs; _ } as state : Abstract_state.t) :
+  and eval_instr
+    ({ ctx; stack; env; envs; locals; _ } as state : Abstract_state.t) :
     Binary.instr -> t option * Abstract_state.t list JumpTarget.t =
    fun instr ->
-    Log.debug (fun m ->
-      m "#%a\t\t%a@."
-        (Binary.pp_instr ~short:true)
-        instr (Abstract_state.pp ctx) state );
+    Log.info (fun m -> m "stack         : [ %a ]" (Abstract_stack.pp ctx) stack);
+    (* Log.info (fun m -> *)
+    (*   m "ctx           : [ %a ]" Abstract_domain.context_pretty ctx ); *)
+    Log.info (fun m ->
+      m "locals        : [ %a ]"
+        (Abstract_locals.pp (Abstract_value.pp_with_ctx state.ctx))
+        locals );
+    Log.info (fun m ->
+      m "running instr : %a" (Binary.pp_instr ~short:true) instr );
     match instr with
     | Call idx ->
       let func = Link_env.get_func env idx in
@@ -310,10 +334,17 @@ module DenotFixpoint (S : DATA_STATE) = struct
             List.fold_left
               (fun acc state ->
                 let stack = shorten_stack state.Abstract_state.stack in
-                join acc { state with stack } )
+                let joined = join acc { state with stack } in
+                joined )
               { initial_state with stack = fp_stack }
               jts
-          | None -> state
+          | None -> (
+            (* TODO handle the none case properly *)
+            match next_state with
+            | Some state ->
+              let stack = shorten_stack state.stack in
+              { state with stack }
+            | None -> assert false )
         in
         let widened, included = widen widening_id state next_head in
         if not included then fixpoint widened
@@ -337,12 +368,12 @@ module DenotFixpoint (S : DATA_STATE) = struct
           JumpTarget.of_list [ (I i, [ { state with stack; ctx } ]) ]
         | None -> JumpTarget.empty
       in
-      let state =
+      let new_state =
         match Abstract_domain.assume ctx (Abstract_boolean.not ctx b) with
         | Some ctx -> Some { state with stack; ctx }
         | None -> None
       in
-      (state, jt_if)
+      (new_state, jt_if)
     | Br_table (cases, default) ->
       let v, stack = Stack.pop_i32 stack in
       let equals =

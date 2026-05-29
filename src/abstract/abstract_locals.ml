@@ -7,3 +7,8 @@ include PatriciaTree.MakeMap (struct
 
   let to_int x = x
 end)
+
+let pp pp_v fmt =
+  pretty ~pp_sep:(Fmt.any "; @;")
+    (fun fmt k v -> Fmt.pf fmt "(%i -> %a)" k pp_v v)
+    fmt
