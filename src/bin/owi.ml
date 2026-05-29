@@ -311,11 +311,14 @@ let drun_info =
 let drun_cmd =
   let+ source_file
   and+ unsafe
-  and+ no_input =
-    let doc = "disable interactive mode" in
-    Arg.(value & flag & info [ "no-input" ] ~doc)
+  and+ interactive =
+    let doc =
+      "enable interactive mode (pressing space after each instruction to \
+       continue)"
+    in
+    Arg.(value & flag & info [ "interactive" ] ~doc)
   and+ () = setup_log in
-  Cmd_drun.cmd ~source_file ~no_input ~unsafe
+  Cmd_drun.cmd ~source_file ~interactive ~unsafe
 
 (* owi abs *)
 
