@@ -1,5 +1,7 @@
-  $ owi drun local_func.wat -vv --no-input
+  $ owi drun local_func.wat -vv
   owi: [INFO] parsing      ...
+  owi: [INFO] checking     ...
+  owi: [INFO] checking     ...
   owi: [DEBUG] grouping     ...
   owi: [DEBUG] {id: 
                  typ: 
@@ -37,36 +39,60 @@
                Tag names: 
                
   owi: [DEBUG] rewriting    ...
+  owi: [INFO] typechecking ...
+  owi: [DEBUG] stack             : []
+  owi: [DEBUG] typechecking instr: local.get 0
+  owi: [DEBUG] stack             : [i32]
+  owi: [DEBUG] typechecking instr: local.get 0
+  owi: [DEBUG] stack             : [i32 i32]
+  owi: [DEBUG] typechecking instr: i32.add
+  owi: [DEBUG] stack             : [i32]
+  owi: [DEBUG] typechecking instr: return
+  owi: [DEBUG] stack             : []
+  owi: [DEBUG] typechecking instr: i32.const 42
+  owi: [DEBUG] stack             : [i32]
+  owi: [DEBUG] typechecking instr: call 0
+  owi: [DEBUG] stack             : [i32]
+  owi: [DEBUG] typechecking instr: return
   owi: [INFO] linking      ...
-  owi: [DEBUG] σ:[]; ρ:
-  
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] locals        : [  ]
+  owi: [INFO] running instr : call 1
   owi: [INFO] calling func  : func start
   owi: [DEBUG] Func start state : σ:[]; ρ:
   
-  owi: [DEBUG] σ:[]; ρ:
-  
-  owi: [DEBUG] σ:[i32.const 42]; ρ:
-  
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] locals        : [  ]
+  owi: [INFO] running instr : i32.const 42
+  owi: [INFO] stack         : [ i32.const 42 ]
+  owi: [INFO] locals        : [  ]
+  owi: [INFO] running instr : call 0
   owi: [INFO] calling func  : func add
   owi: [DEBUG] Func start state : σ:[i32.const 42]; ρ:0->i32.const 42 
   
-  owi: [DEBUG] σ:[i32.const 42]; ρ:0->i32.const 42 
-  
-  owi: [DEBUG] σ:[i32.const 42 ; i32.const 42]; ρ:0->i32.const 42 
-  
-  owi: [DEBUG] σ:[i32.const 42 ; i32.const 42 ; i32.const 42];
-               ρ:0->i32.const 42 
-  
-  owi: [DEBUG] σ:[i32.const 84 ; i32.const 42]; ρ:0->i32.const 42 
-  
+  owi: [INFO] stack         : [ i32.const 42 ]
+  owi: [INFO] locals        : [ 0->i32.const 42  ]
+  owi: [INFO] running instr : local.get 0
+  owi: [INFO] stack         : [ i32.const 42 ; i32.const 42 ]
+  owi: [INFO] locals        : [ 0->i32.const 42  ]
+  owi: [INFO] running instr : local.get 0
+  owi: [INFO] stack         : [ i32.const 42 ; i32.const 42 ; i32.const 42 ]
+  owi: [INFO] locals        : [ 0->i32.const 42  ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ i32.const 84 ; i32.const 42 ]
+  owi: [INFO] locals        : [ 0->i32.const 42  ]
+  owi: [INFO] running instr : return
   owi: [DEBUG] Func end state : None
   
   owi: [DEBUG] Func end state : None
   
-  End Abstract_state : none
+  owi: [INFO] End Abstract_state : none
+  
 
   $ owi abs local_func.wat -vv 
   owi: [INFO] parsing      ...
+  owi: [INFO] checking     ...
+  owi: [INFO] checking     ...
   owi: [DEBUG] grouping     ...
   owi: [DEBUG] {id: 
                  typ: 
@@ -104,44 +130,53 @@
                Tag names: 
                
   owi: [DEBUG] rewriting    ...
+  owi: [INFO] typechecking ...
+  owi: [DEBUG] stack             : []
+  owi: [DEBUG] typechecking instr: local.get 0
+  owi: [DEBUG] stack             : [i32]
+  owi: [DEBUG] typechecking instr: local.get 0
+  owi: [DEBUG] stack             : [i32 i32]
+  owi: [DEBUG] typechecking instr: i32.add
+  owi: [DEBUG] stack             : [i32]
+  owi: [DEBUG] typechecking instr: return
+  owi: [DEBUG] stack             : []
+  owi: [DEBUG] typechecking instr: i32.const 42
+  owi: [DEBUG] stack             : [i32]
+  owi: [DEBUG] typechecking instr: call 0
+  owi: [DEBUG] stack             : [i32]
+  owi: [DEBUG] typechecking instr: return
   owi: [INFO] linking      ...
-  owi: [DEBUG] #call 1		{
-                 ctx : Context{id=1, <empty>}, stack : , locals : 
-               }
-  
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] locals        : [  ]
+  owi: [INFO] running instr : call 1
   owi: [INFO] calling func  : func start
   owi: [DEBUG] Func start state : {
                  ctx : Context{id=1, <empty>}, stack : , locals : 
                }
-  owi: [DEBUG] #i32.const 42		{
-                 ctx : Context{id=1, <empty>}, stack : , locals : 
-               }
-  
-  owi: [DEBUG] #call 0		{
-                 ctx : Context{id=1, <empty>}, stack : i32 {42}, locals : 
-               }
-  
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] locals        : [  ]
+  owi: [INFO] running instr : i32.const 42
+  owi: [INFO] stack         : [ i32 {42} ]
+  owi: [INFO] locals        : [  ]
+  owi: [INFO] running instr : call 0
   owi: [INFO] calling func  : func add
   owi: [DEBUG] Func start state : {
                  ctx : Context{id=1, <empty>}, stack : , locals : i32 {42}
                }
-  owi: [DEBUG] #local.get 0		{
-                 ctx : Context{id=1, <empty>}, stack : , locals : i32 {42}
-               }
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] locals        : [ (0 -> i32 {42}) ]
+  owi: [INFO] running instr : local.get 0
+  owi: [INFO] stack         : [ i32 {42} ]
+  owi: [INFO] locals        : [ (0 -> i32 {42}) ]
+  owi: [INFO] running instr : local.get 0
+  owi: [INFO] stack         : [ i32 {42} ; i32 {42} ]
+  owi: [INFO] locals        : [ (0 -> i32 {42}) ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ i32 {84} ]
+  owi: [INFO] locals        : [ (0 -> i32 {42}) ]
+  owi: [INFO] running instr : return
+  owi: [DEBUG] func end state : None 
   
-  owi: [DEBUG] #local.get 0		{
-                 ctx : Context{id=1, <empty>}, stack : i32 {42},
-                 locals : i32 {42}
-               }
-  
-  owi: [DEBUG] #i32.add		{
-                 ctx : Context{id=1, <empty>}, stack : i32 {42} ; i32 {42},
-                 locals : i32 {42}
-               }
-  
-  owi: [DEBUG] #return		{
-                 ctx : Context{id=1, <empty>}, stack : i32 {84},
-                 locals : i32 {42}
-               }
+  owi: [DEBUG] func end state : None 
   
   End Abstract_state : none

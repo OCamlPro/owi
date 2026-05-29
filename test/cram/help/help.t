@@ -7,7 +7,7 @@ no subcommand should print help
          owi [COMMAND] …
   
   COMMANDS
-         abs [OPTION]… FILE
+         abs [--unsafe] [OPTION]… FILE
              Run the abstract interpreter
   
          analyze COMMAND …
@@ -19,7 +19,7 @@ no subcommand should print help
          c++ [OPTION]… FILE…
              Compile a C++ file to Wasm and run the symbolic interpreter on it
   
-         drun [--no-input] [OPTION]… FILE
+         drun [--interactive] [--unsafe] [OPTION]… FILE
              Run the denotational interpreter
   
          fmt [--inplace] [OPTION]… FILE…
