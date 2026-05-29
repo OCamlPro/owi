@@ -7,7 +7,7 @@
       i32.const 2
       i32.add
       local.set $res
-      (i32.le_s (local.get $res) (i32.const 100))
+      (i32.le_s (i32.const 100) (local.get $res))
       br_if 0)
     drop
   )

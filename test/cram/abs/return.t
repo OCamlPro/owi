@@ -1,5 +1,7 @@
-  $ owi drun return.wat -vv --no-input
+  $ owi drun return.wat -vv
   owi: [INFO] parsing      ...
+  owi: [INFO] checking     ...
+  owi: [INFO] checking     ...
   owi: [DEBUG] grouping     ...
   owi: [DEBUG] {id: 
                  typ: 
@@ -28,22 +30,33 @@
                Tag names: 
                
   owi: [DEBUG] rewriting    ...
+  owi: [INFO] typechecking ...
+  owi: [DEBUG] stack             : []
+  owi: [DEBUG] typechecking instr: i32.const 2
+  owi: [DEBUG] stack             : [i32]
+  owi: [DEBUG] typechecking instr: return
   owi: [INFO] linking      ...
-  owi: [DEBUG] σ:[]; ρ:
-  
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] locals        : [  ]
+  owi: [INFO] running instr : call 0
   owi: [INFO] calling func  : func start
   owi: [DEBUG] Func start state : σ:[]; ρ:
   
-  owi: [DEBUG] σ:[]; ρ:
-  
-  owi: [DEBUG] σ:[i32.const 2]; ρ:
-  
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] locals        : [  ]
+  owi: [INFO] running instr : i32.const 2
+  owi: [INFO] stack         : [ i32.const 2 ]
+  owi: [INFO] locals        : [  ]
+  owi: [INFO] running instr : return
   owi: [DEBUG] Func end state : None
   
-  End Abstract_state : none
+  owi: [INFO] End Abstract_state : none
+  
 
   $ owi abs return.wat -vv 
   owi: [INFO] parsing      ...
+  owi: [INFO] checking     ...
+  owi: [INFO] checking     ...
   owi: [DEBUG] grouping     ...
   owi: [DEBUG] {id: 
                  typ: 
@@ -72,21 +85,25 @@
                Tag names: 
                
   owi: [DEBUG] rewriting    ...
+  owi: [INFO] typechecking ...
+  owi: [DEBUG] stack             : []
+  owi: [DEBUG] typechecking instr: i32.const 2
+  owi: [DEBUG] stack             : [i32]
+  owi: [DEBUG] typechecking instr: return
   owi: [INFO] linking      ...
-  owi: [DEBUG] #call 0		{
-                 ctx : Context{id=1, <empty>}, stack : , locals : 
-               }
-  
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] locals        : [  ]
+  owi: [INFO] running instr : call 0
   owi: [INFO] calling func  : func start
   owi: [DEBUG] Func start state : {
                  ctx : Context{id=1, <empty>}, stack : , locals : 
                }
-  owi: [DEBUG] #i32.const 2		{
-                 ctx : Context{id=1, <empty>}, stack : , locals : 
-               }
-  
-  owi: [DEBUG] #return		{
-                 ctx : Context{id=1, <empty>}, stack : i32 {2}, locals : 
-               }
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] locals        : [  ]
+  owi: [INFO] running instr : i32.const 2
+  owi: [INFO] stack         : [ i32 {2} ]
+  owi: [INFO] locals        : [  ]
+  owi: [INFO] running instr : return
+  owi: [DEBUG] func end state : None 
   
   End Abstract_state : none
