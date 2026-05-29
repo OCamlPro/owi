@@ -68,14 +68,17 @@ let pp format with_breadcrumbs no_value fmt
 
 let print ~format ~out_file ~id ~no_value ~no_stop_at_failure
   ~no_assert_failure_expression_printing ~with_breadcrumbs
-  ({ Bug.model; state; _ } as bug) =
-  begin match bug.Bug.kind with
-  | `Trap trap -> Log.err (fun m -> m "Trap: %s" (Result.err_to_string trap))
-  | `Assertion assertion ->
+  (bug : [ `Trap of Bug.trap | `Assertion of Bug.assertion ]) =
+  begin match bug with
+  | `Trap { err; _ } ->
+    Log.err (fun m -> m "Trap: %s" (Result.err_to_string err))
+  | `Assertion { assertion; _ } ->
     if no_assert_failure_expression_printing then
       Log.err (fun m -> m "Assert failure")
     else Log.err (fun m -> m "Assert failure: %a" Symbolic_boolean.pp assertion)
   end;
+  let model = Bug.get_model bug in
+  let state = Bug.get_state bug in
 
   match out_file with
   | None -> begin

@@ -15,5 +15,5 @@ val print :
   -> no_stop_at_failure:bool
   -> no_assert_failure_expression_printing:bool
   -> with_breadcrumbs:bool
-  -> Bug.t
+  -> [ `Trap of Bug.trap | `Assertion of Bug.assertion ]
   -> unit Result.t

@@ -24,7 +24,8 @@ let print_and_count_bugs ~format ~out_file ~no_value
       in
       let* () =
         if not no_value then
-          let testcase = Smtml.Model.get_bindings bug.model |> List.map snd in
+          let model = Bug.get_model bug in
+          let testcase = Smtml.Model.get_bindings model |> List.map snd in
           Cmd_utils.write_testcase ~dir:test_suite_dir testcase
         else Ok ()
       in
@@ -82,7 +83,7 @@ let run ~exploration_strategy ~workers ~no_worker_isolation ~no_stop_at_failure
   (* Launch workers *)
   let domains =
     (* Decides what to push in the bug stack and close the scheduler if needed. *)
-    let at_bug bug =
+    let at_bug (bug : [ `Trap of Bug.trap | `Assertion of Bug.assertion ]) =
       let should_be_added =
         match fail_mode with
         | Symbolic_parameters.Both -> true
@@ -98,10 +99,10 @@ let run ~exploration_strategy ~workers ~no_worker_isolation ~no_stop_at_failure
     in
 
     (* Handles final values from the monad and reschedule them if needed. *)
-    let rec at_schedulable (t : _ Symex.Monad.Schedulable.t) write_back =
+    let rec at_schedulable (t : _ Symex.Monad.schedulable) write_back =
       match t with
-      | Prune | Ok _ -> Atomic.incr path_count
-      | Error bug ->
+      | Ok _ | Error `Prune -> Atomic.incr path_count
+      | Error ((`Assertion _ | `Trap _) as bug) ->
         Atomic.incr path_count;
         at_bug bug
       | Yield (prio, f) -> write_back (prio, f)
