@@ -9,6 +9,7 @@ include
     with type t := t
      and type i32 := Symbolic_i32.t
      and type i64 := Symbolic_i64.t
+     and type v128 := Symbolic_v128.t
      and type 'a choice := 'a Symbolic_choice.t
 
 val replace : t -> unit Symbolic_choice.t

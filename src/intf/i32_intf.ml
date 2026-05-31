@@ -34,4 +34,12 @@ module type T = sig
   val of_int : int -> t
 
   val pp : t Fmt.t
+
+  val min_int : t
+
+  val eqz : t -> boolean
+
+  val ( = ) : t -> t -> boolean
+
+  val ( + ) : t -> t -> t
 end

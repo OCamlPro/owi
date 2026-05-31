@@ -9,6 +9,8 @@ module type T = sig
 
   type i64
 
+  type v128
+
   type 'a choice
 
   val load_8_s : t -> i32 -> i32 choice
@@ -23,6 +25,8 @@ module type T = sig
 
   val load_64 : t -> i32 -> i64 choice
 
+  val load_128 : t -> i32 -> v128 choice
+
   val store_8 : t -> addr:i32 -> i32 -> unit choice
 
   val store_16 : t -> addr:i32 -> i32 -> unit choice
@@ -30,6 +34,8 @@ module type T = sig
   val store_32 : t -> addr:i32 -> i32 -> unit choice
 
   val store_64 : t -> addr:i32 -> i64 -> unit choice
+
+  val store_128 : t -> addr:i32 -> v128 -> unit choice
 
   val grow : t -> i32 -> unit choice
 

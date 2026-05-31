@@ -4,6 +4,10 @@
 
 type boolean = Concrete_boolean.t
 
+type i8 = int
+
+type i16 = int
+
 type i32 = Concrete_i32.t
 
 type i64 = Concrete_i64.t
@@ -17,12 +21,12 @@ type v128 = Concrete_v128.t
 type reference = Concrete_ref.t
 
 module Boolean = Concrete_boolean
-module Ref = Concrete_ref
 module I32 = Concrete_i32
 module I64 = Concrete_i64
 module F32 = Concrete_f32
 module F64 = Concrete_f64
 module V128 = Concrete_v128
+module Ref = Concrete_ref
 
 type t =
   | I32 of i32

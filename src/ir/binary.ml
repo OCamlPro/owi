@@ -539,13 +539,31 @@ let pp_f64_instr ppf = function
 (** V128 instructions *)
 type v128_instr =
   | Const of Concrete_v128.t
+  | Not
   | And
+  | Or
+  | Any_true
+  | Load16x4_s of (indice * memarg)
+  | Load16x4_u of (indice * memarg)
+  | Load32_lane of (indice * memarg * int)
+  | Load64_zero of (indice * memarg)
   | Load of (indice * memarg)
   | Store of (indice * memarg)
 
 let pp_v128_instr ppf = function
   | Const n -> pf ppf "v128.const %a" Concrete_v128.pp n
+  | Not -> pf ppf "v128.not"
   | And -> pf ppf "v128.and"
+  | Or -> pf ppf "v128.or"
+  | Any_true -> pf ppf "v128.any_true"
+  | Load16x4_s (indice, memarg) ->
+    pf ppf "v128.load16x4_s%a%a" pp_indice_not0 indice pp_memarg memarg
+  | Load16x4_u (indice, memarg) ->
+    pf ppf "v128.load16x4_u%a%a" pp_indice_not0 indice pp_memarg memarg
+  | Load32_lane (indice, memarg, n) ->
+    pf ppf "v128.load32_lane%a%a %d" pp_indice_not0 indice pp_memarg memarg n
+  | Load64_zero (indice, memarg) ->
+    pf ppf "v128.load64_zero%a%a" pp_indice_not0 indice pp_memarg memarg
   | Load (indice, memarg) ->
     pf ppf "v128.load%a%a" pp_indice_not0 indice pp_memarg memarg
   | Store (indice, memarg) ->

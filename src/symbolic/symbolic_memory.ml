@@ -166,12 +166,25 @@ let load_32 m a =
   let v = load_32_unchecked m a in
   Smtml.Typed.simplify v
 
-let load_64 m a =
-  let open Symbolic_choice in
-  let+ a = must_be_valid_address m a 8 in
+let load_64_unchecked m a : Smtml.Typed.Bitv64.t =
   let low = load_32_unchecked m a in
   let high = load_32_unchecked m (Int32.add a 4l) in
   Smtml.Typed.Bitv32.concat high low
+
+let load_64 m a =
+  let open Symbolic_choice in
+  let+ a = must_be_valid_address m a 8 in
+  load_64_unchecked m a
+
+let load_128_unchecked m a : Smtml.Typed.Bitv128.t =
+  let low = load_64_unchecked m a in
+  let high = load_64_unchecked m (Int32.add a 8l) in
+  Smtml.Typed.Bitv64.concat high low
+
+let load_128 m a =
+  let open Symbolic_choice in
+  let+ a = must_be_valid_address m a 16 in
+  load_128_unchecked m a
 
 let store_8 m ~addr v =
   let open Symbolic_choice in
@@ -211,6 +224,12 @@ let store_64 m ~(addr : Symbolic_i32.t) v =
   let open Symbolic_choice in
   let* a = must_be_valid_address m addr 8 in
   let data = store_byte_list m.data a (Smtml.Typed.Bitv64.to_bytes v) in
+  replace { m with data }
+
+let store_128 m ~(addr : Symbolic_i32.t) v =
+  let open Symbolic_choice in
+  let* a = must_be_valid_address m addr 16 in
+  let data = store_byte_list m.data a (Smtml.Typed.Bitv128.to_bytes v) in
   replace { m with data }
 
 (* This function uses `m` for bounds checks but return an updated version of `data` *)

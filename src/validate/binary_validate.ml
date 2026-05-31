@@ -593,33 +593,133 @@ let typecheck_v128_instr (env : Env.t) stack : Binary.v128_instr -> _ = function
   | Const _ ->
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
-  | And ->
+  | Not ->
+    let* stack = Stack.pop env.modul [ v128 ] stack in
+    let+ stack = Stack.push [ v128 ] stack in
+    (env, stack)
+  | Any_true ->
+    let* stack = Stack.pop env.modul [ v128 ] stack in
+    let+ stack = Stack.push [ i32 ] stack in
+    (env, stack)
+  | And | Or ->
     let* stack = Stack.pop env.modul [ v128; v128 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
-  | _ -> raise @@ Failure "TODO"
+  | Load (indice, memarg)
+  | Load16x4_s (indice, memarg)
+  | Load16x4_u (indice, memarg) ->
+    let* is_i64 = check_mem env.modul indice in
+    let* () = check_memarg ~is_i64 memarg 16l in
+    let* stack = Stack.pop env.modul [ i32 ] stack in
+    let+ stack = Stack.push [ v128 ] stack in
+    (env, stack)
+  | Load32_lane (indice, memarg, lane) ->
+    if lane >= 4 then Fmt.error_msg "invalid lane index"
+    else
+      let* is_i64 = check_mem env.modul indice in
+      let* () = check_memarg ~is_i64 memarg 8l in
+      let* stack = Stack.pop env.modul [ v128; i32 ] stack in
+      let+ stack = Stack.push [ v128 ] stack in
+      (env, stack)
+  | Load64_zero (indice, memarg) ->
+    let* is_i64 = check_mem env.modul indice in
+    let* () = check_memarg ~is_i64 memarg 8l in
+    let* stack = Stack.pop env.modul [ i32 ] stack in
+    let+ stack = Stack.push [ v128 ] stack in
+    (env, stack)
+  | Store (indice, memarg) ->
+    let* is_i64 = check_mem env.modul indice in
+    let* () = check_memarg ~is_i64 memarg 16l in
+    let+ stack = Stack.pop env.modul [ v128; i32 ] stack in
+    (env, stack)
 
 let typecheck_i8x16_instr (env : Env.t) stack = function
-  | (Add : Text.i8x16_instr) | Sub ->
+  | (Add : Text.i8x16_instr)
+  | Sub | Eq | Ne | Lt _ | Gt _ | Le _ | Ge _ | Swizzle ->
     let* stack = Stack.pop env.modul [ v128; v128 ] stack in
+    let+ stack = Stack.push [ v128 ] stack in
+    (env, stack)
+  | Shuffle indices ->
+    if Array.exists (fun i -> i >= 32) indices then
+      Fmt.error_msg "invalid lane index"
+    else
+      let* stack = Stack.pop env.modul [ v128; v128 ] stack in
+      let+ stack = Stack.push [ v128 ] stack in
+      (env, stack)
+  | Splat ->
+    let* stack = Stack.pop env.modul [ i32 ] stack in
+    let+ stack = Stack.push [ v128 ] stack in
+    (env, stack)
+  | Bitmask | All_true ->
+    let* stack = Stack.pop env.modul [ v128 ] stack in
+    let+ stack = Stack.push [ i32 ] stack in
+    (env, stack)
+  | Abs | Neg | Popcnt ->
+    let* stack = Stack.pop env.modul [ v128 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
 
 let typecheck_i16x8_instr (env : Env.t) stack = function
-  | (Add : Text.i16x8_instr) | Sub | Mul ->
+  | (Add : Text.i16x8_instr) | Sub | Mul | Eq | Ne | Lt _ | Gt _ | Le _ | Ge _
+    ->
     let* stack = Stack.pop env.modul [ v128; v128 ] stack in
+    let+ stack = Stack.push [ v128 ] stack in
+    (env, stack)
+  | Extract_lane_s i | Extract_lane_u i ->
+    if i >= 8 then Fmt.error_msg "invalid lane index"
+    else
+      let* stack = Stack.pop env.modul [ v128 ] stack in
+      let+ stack = Stack.push [ i32 ] stack in
+      (env, stack)
+  | Splat ->
+    let* stack = Stack.pop env.modul [ i32 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
 
 let typecheck_i32x4_instr (env : Env.t) stack = function
-  | (Add : Text.i32x4_instr) | Sub | Mul ->
+  | (Add : Text.i32x4_instr) | Sub | Mul | Lt _ | Gt _ | Le _ | Ge _ | Eq | Ne
+    ->
     let* stack = Stack.pop env.modul [ v128; v128 ] stack in
+    let+ stack = Stack.push [ v128 ] stack in
+    (env, stack)
+  | Shl | Shr (S | U) ->
+    let* stack = Stack.pop env.modul [ i32; v128 ] stack in
+    let+ stack = Stack.push [ v128 ] stack in
+    (env, stack)
+  | Extract_lane i ->
+    if i >= 4 then Fmt.error_msg "invalid lane index"
+    else
+      let* stack = Stack.pop env.modul [ v128 ] stack in
+      let+ stack = Stack.push [ i32 ] stack in
+      (env, stack)
+  | Splat ->
+    let* stack = Stack.pop env.modul [ i32 ] stack in
+    let+ stack = Stack.push [ v128 ] stack in
+    (env, stack)
+  | Replace_lane i ->
+    if i >= 4 then Fmt.error_msg "invalid lane index"
+    else
+      let* stack = Stack.pop env.modul [ i32; v128 ] stack in
+      let+ stack = Stack.push [ v128 ] stack in
+      (env, stack)
+  | Extend_low_i16x8_s | Extend_high_i16x8_s | Extend_low_i16x8_u
+  | Extend_high_i16x8_u ->
+    let* stack = Stack.pop env.modul [ v128 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
 
 let typecheck_i64x2_instr (env : Env.t) stack = function
-  | (Add : Text.i64x2_instr) | Sub | Mul ->
+  | (Add : Text.i64x2_instr) | Sub | Mul | Eq | Ne | Lt_s | Gt_s | Le_s | Ge_s
+    ->
     let* stack = Stack.pop env.modul [ v128; v128 ] stack in
+    let+ stack = Stack.push [ v128 ] stack in
+    (env, stack)
+  | Splat ->
+    let* stack = Stack.pop env.modul [ i64 ] stack in
+    let+ stack = Stack.push [ v128 ] stack in
+    (env, stack)
+  | Extend_low_i32x4 (S | U) ->
+    let* stack = Stack.pop env.modul [ v128 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
 
@@ -633,9 +733,9 @@ let typecheck_ref_instr (env : Env.t) stack = function
     let* t = ref_type_as_non_null t in
     let+ stack = Stack.push [ t ] stack in
     (env, stack)
-    (* TODO: The type can be Something/Any, and if its a Ref_type the heap_type
-      can be a TypeUse or Extern_ht. The pushed type should account for that
-      and restrict whatever the type is to non_null. *)
+  (* TODO: The type can be Something/Any, and if its a Ref_type the heap_type
+     can be a TypeUse or Extern_ht. The pushed type should account for that
+     and restrict whatever the type is to non_null. *)
   | Null rt ->
     let+ stack = Stack.push [ Ref_type (Null, rt) ] stack in
     (env, stack)

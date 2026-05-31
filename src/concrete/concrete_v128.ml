@@ -68,6 +68,10 @@ let to_i32x4 = function
   | I32x4 (a, b, c, d) -> (a, b, c, d)
   | v -> i64x2_to_i32x4 (to_i64x2 v)
 
+let to_i8x16 _ = raise @@ Failure "TODO"
+
+let to_i16x8 _ = raise @@ Failure "TODO"
+
 let zero = of_i64x2 0L 0L
 
 let eq a b =
