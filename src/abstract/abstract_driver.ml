@@ -137,8 +137,15 @@ module DenotFixpoint (S : DATA_STATE) = struct
         (Abstract_domain.Context.Result
            ( true
            , Abstract_domain.Context.empty_tuple ()
-           , fun _ctx out -> (Abstract_locals.empty, out) ) )
+           , fun _ctx out -> (state_a.locals, out) ) )
     in
+
+    Log.debug (fun m ->
+      let pp_locals ctx = Abstract_locals.pp (Abstract_value.pp_with_ctx ctx) in
+      m "serializing locals (%s) : @\n first : %a @\n second : %a"
+        (if widens then "widen" else "join")
+        (pp_locals state_a.ctx) state_a.locals (pp_locals state_b.ctx)
+        state_b.locals );
 
     Log.debug (fun m ->
       m "serializing stacks (%s) : @\n first : %a @\n second : %a"
