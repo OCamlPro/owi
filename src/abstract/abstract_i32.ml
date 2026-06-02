@@ -62,8 +62,12 @@ let le_s ctx x1 x2 = Abstract_domain.Binary_Forward.bisle ~size ctx x1 x2
 
 let le_u ctx x1 x2 = Abstract_domain.Binary_Forward.biule ~size ctx x1 x2
 
-(* TODO: no lt function ?*)
-let lt_s _ctx _x1 _x2 = assert false
+let lt_s ctx x1 x2 =
+  let le = le_s ctx x1 x2 in
+  let eq = eq ctx x1 x2 in
+  Abstract_boolean.and_ ctx le eq
 
-(* TODO: no lt function ?*)
-let lt_u _ctx _x1 _x2 = assert false
+let lt_u ctx x1 x2 =
+  let le = le_u ctx x1 x2 in
+  let eq = eq ctx x1 x2 in
+  Abstract_boolean.and_ ctx le eq
