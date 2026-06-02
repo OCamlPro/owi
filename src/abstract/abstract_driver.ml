@@ -319,9 +319,7 @@ module DenotFixpoint (S : DATA_STATE) = struct
         let next_state, jt = eval_expr state body.raw in
         let shorten_stack stack = Stack.keep stack to_take in
         let next_head =
-          match JumpTarget.find_opt (I 0) jt with
-          (*todo do ret too*)
-          | Some jts ->
+          let handle_jts jts =
             let fp_stack = shorten_stack initial_state.stack in
             List.fold_left
               (fun acc state ->
@@ -330,13 +328,18 @@ module DenotFixpoint (S : DATA_STATE) = struct
                 joined )
               { initial_state with stack = fp_stack }
               jts
+          in
+          match JumpTarget.find_opt (I 0) jt with
+          | Some jts -> handle_jts jts
           | None -> (
-            (* TODO handle the none case properly *)
-            match next_state with
-            | Some state ->
-              let stack = shorten_stack state.stack in
-              { state with stack }
-            | None -> assert false )
+            match JumpTarget.find_opt Ret jt with
+            | Some jts -> handle_jts jts
+            | None -> (
+              match next_state with
+              | Some state ->
+                let stack = shorten_stack state.stack in
+                { state with stack }
+              | None -> assert false ) )
         in
         let widened, included = widen widening_id state next_head in
         if not included then fixpoint widened
