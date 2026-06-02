@@ -64,10 +64,10 @@ let le_u ctx x1 x2 = Abstract_domain.Binary_Forward.biule ~size ctx x1 x2
 
 let lt_s ctx x1 x2 =
   let le = le_s ctx x1 x2 in
-  let eq = eq ctx x1 x2 in
-  Abstract_boolean.and_ ctx le eq
+  let neq = Abstract_boolean.not ctx (eq ctx x1 x2) in
+  Abstract_boolean.and_ ctx le neq
 
 let lt_u ctx x1 x2 =
   let le = le_u ctx x1 x2 in
-  let eq = eq ctx x1 x2 in
-  Abstract_boolean.and_ ctx le eq
+  let neq = Abstract_boolean.not ctx (eq ctx x1 x2) in
+  Abstract_boolean.and_ ctx le neq
