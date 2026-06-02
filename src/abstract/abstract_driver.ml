@@ -30,45 +30,24 @@ module DenotFixpoint (S : DATA_STATE) = struct
 
     let to_int = function I i -> i | Ret -> -1
 
-    (* let pp fmt = function I i -> Fmt.pf fmt "%i" i | Ret -> Fmt.pf fmt "ret" *)
+    let pp fmt = function I i -> Fmt.pf fmt "%i" i | Ret -> Fmt.pf fmt "ret"
   end
 
   module JumpTarget = struct
-    module Map = PatriciaTree.MakeMap (JumpKey)
+    include PatriciaTree.MakeMap (JumpKey)
 
-    type 'a t = 'a Map.t
+    let append = idempotent_union (fun _ v1 v2 -> List.append v1 v2)
 
-    let of_list = Map.of_list
+    let decr map =
+      fold
+        (fun k v acc ->
+          match k with I 0 -> acc | k -> add (JumpKey.decr k) v acc )
+        map empty
 
-    let to_list = Map.to_list
-
-    let empty = Map.empty
-
-    let find_opt = Map.find_opt
-
-    let remove = Map.remove
-
-    let append (old : 'a list t) (neww : 'a list t) =
-      Map.mapi
-        (fun k el ->
-          match Map.find_opt k old with
-          | Some el' -> List.append el el'
-          | None -> el )
-        neww
-
-    let decr jt =
-      remove (I 0) jt |> to_list
-      |> List.map (fun (k, v) -> (JumpKey.decr k, v))
-      |> of_list
-
-    (* let pp pp_v fmt = *)
-    (*   Map.pretty *)
-    (*     (fun fmt jk v -> Fmt.pf fmt "%a -> %a" JumpKey.pp jk pp_v v) *)
-    (*     fmt *)
+    let pp ctx fmt =
+      let pp_v = Fmt.list ~sep:Fmt.semi (Abstract_state.pp ctx) in
+      pretty (fun fmt jk v -> Fmt.pf fmt "%a -> %a" JumpKey.pp jk pp_v v) fmt
   end
-
-  let ( let> ) (opt, mapp) f =
-    match opt with Some v -> f (v, mapp) | None -> (None, mapp)
 
   let serialize ~widens :
        Abstract_state.t
@@ -192,6 +171,8 @@ module DenotFixpoint (S : DATA_STATE) = struct
     t -> Binary.expr -> t option * Abstract_state.t list JumpTarget.t =
    fun state expr ->
     let rec loop (state, jt) (expr : Binary.expr) =
+      Log.info (fun m ->
+        m "jt            :  %a" (JumpTarget.pp state.Abstract_state.ctx) jt );
       match expr with
       | [] -> (Some state, jt)
       | instr :: instrs -> (
@@ -246,7 +227,6 @@ module DenotFixpoint (S : DATA_STATE) = struct
     ({ ctx; stack; env; envs; locals; _ } as state : Abstract_state.t) :
     Binary.instr -> t option * Abstract_state.t list JumpTarget.t =
    fun instr ->
-
     Log.debug (fun m ->
       m "abstract state : %a" (Abstract_state.pp state.ctx) state );
     Log.info (fun m -> m "stack         : [ %a ]" (Abstract_stack.pp ctx) stack);
@@ -280,25 +260,26 @@ module DenotFixpoint (S : DATA_STATE) = struct
           Fmt.failwith "Some day we will have proper external function support"
         )
       end
-    | Block (_str_opt, _bt, expr) ->
-      (* TODO il faut gérer le mapping pour le cas de None *)
-      let> { stack; locals; _ }, mapping = eval_expr state expr.raw in
-      let state = { state with stack; locals } in
-      let state =
-        match JumpTarget.find_opt (I 0) mapping with
-        | Some br_states -> List.fold_left join state br_states
-        | None -> state
-      in
-      let state =
-        match JumpTarget.find_opt Ret mapping with
-        | Some ret_states -> List.fold_left join state ret_states
-        | None -> state
-      in
-      let mapping =
-        (* TODO on peut avoir une paire de (int * map) pour ne pas avoir à decr la liste immédiatement *)
-        JumpTarget.decr mapping
-      in
-      (Some state, mapping)
+    | Block (_str_opt, _bt, expr) -> (
+      match eval_expr state expr.raw with
+      | None, jt -> (None, JumpTarget.decr jt)
+      | Some { stack; locals; _ }, jt ->
+        let state = { state with stack; locals } in
+        let state =
+          match JumpTarget.find_opt (I 0) jt with
+          | Some br_states -> List.fold_left join state br_states
+          | None -> state
+        in
+        let state =
+          match JumpTarget.find_opt Ret jt with
+          | Some ret_states -> List.fold_left join state ret_states
+          | None -> state
+        in
+        let jt =
+          (* TODO on peut avoir une paire de (int * map) pour ne pas avoir à decr la liste immédiatement *)
+          JumpTarget.decr jt
+        in
+        (Some state, jt) )
     | If_else (_, bt, expr_then, expr_else) ->
       let b, stack = Stack.pop_bool stack ctx in
       let state_then, jt_true =
@@ -329,16 +310,17 @@ module DenotFixpoint (S : DATA_STATE) = struct
       let initial_state =
         { state with ctx = Abstract_domain.Context.copy ctx }
       in
+      let to_take =
+        match bt with
+        | Some (Bt_raw (_i, (params, _res))) -> List.length params
+        | None -> 0
+      in
       let rec fixpoint state =
         let next_state, jt = eval_expr state body.raw in
-        let to_take =
-          match bt with
-          | Some (Bt_raw (_i, (params, _res))) -> List.length params
-          | None -> 0
-        in
         let shorten_stack stack = Stack.keep stack to_take in
         let next_head =
           match JumpTarget.find_opt (I 0) jt with
+          (*todo do ret too*)
           | Some jts ->
             let fp_stack = shorten_stack initial_state.stack in
             List.fold_left
