@@ -224,16 +224,16 @@ module DenotFixpoint (S : DATA_STATE) = struct
     in
     let fn_state = { state with stack = []; func_rt = result_type; locals } in
     Log.debug (fun m ->
-      m "Func start state : %a" (Abstract_state.pp state.ctx) fn_state );
+      m "abstract state : %a" (Abstract_state.pp state.ctx) fn_state );
     (* TODO: handle mapping *)
     let func_end_state, _ = eval_expr fn_state func.body.raw in
     ( match func_end_state with
     | Some state ->
       Log.debug (fun m ->
-        m "func end state : %a@."
+        m "abstract state : %a@."
           (Fmt.option ~none:(Fmt.any "None") (Abstract_state.pp state.ctx))
           func_end_state )
-    | None -> Log.debug (fun m -> m "func end state : None @.") );
+    | None -> Log.debug (fun m -> m "abstract state : None @.") );
     (* We should probably copy state and join back the return values in the context here *)
     let* func_end_state in
     let stack =
@@ -246,6 +246,9 @@ module DenotFixpoint (S : DATA_STATE) = struct
     ({ ctx; stack; env; envs; locals; _ } as state : Abstract_state.t) :
     Binary.instr -> t option * Abstract_state.t list JumpTarget.t =
    fun instr ->
+
+    Log.debug (fun m ->
+      m "abstract state : %a" (Abstract_state.pp state.ctx) state );
     Log.info (fun m -> m "stack         : [ %a ]" (Abstract_stack.pp ctx) stack);
     (* Log.info (fun m -> *)
     (*   m "ctx           : [ %a ]" Abstract_domain.context_pretty ctx ); *)
@@ -575,7 +578,7 @@ let expr (link_state : Abstract_extern_func.extern_func Link.State.t)
     begin fun (e : Binary.expr Annotated.t) ->
       (* TODO handle *)
       let end_state, _mapping = ConcreteFixpoint.eval_expr state e.raw in
-      Fmt.pr "End Abstract_state : %a@."
+      Fmt.pr "abstract state : %a@."
         (Fmt.option ~none:(Fmt.any "none") (Abstract_state.pp state.ctx))
         end_state
     end

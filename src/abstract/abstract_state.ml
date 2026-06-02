@@ -13,7 +13,7 @@ type t =
 
 let pp ctx : t Fmt.t =
  fun fmt state ->
-  Fmt.pf fmt "{@\n@[<hov 2>  ctx : %a,@;stack : %a,@;locals : %a@]@\n}"
+  Fmt.pf fmt "@\n  @[<v>context: %a@\nstack  : %a@\nlocals : %a@]"
     Abstract_domain.context_pretty state.ctx (Abstract_stack.pp ctx) state.stack
     (Fmt.list ~sep:Fmt.semi (Abstract_value.pp_with_ctx state.ctx))
     (Abstract_locals.to_list state.locals |> List.map snd)
