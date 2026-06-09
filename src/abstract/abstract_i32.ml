@@ -54,9 +54,13 @@ let mul ctx x1 x2 =
   let flags = Operator.Flags.Bimul.pack ~nsw:true ~nuw:true in
   Abstract_domain.Binary_Forward.bimul ~flags ~size ctx x1 x2
 
-let div_s ctx x1 x2 = Abstract_domain.Binary_Forward.bisdiv ~size ctx x1 x2
+let div_s = Abstract_domain.Binary_Forward.bisdiv ~size
 
 let div_u ctx x1 x2 = Abstract_domain.Binary_Forward.biudiv ~size ctx x1 x2
+
+let rem_s ctx x1 x2 = Abstract_domain.Binary_Forward.bismod ~size ctx x1 x2
+
+let rem_u ctx x1 x2 = Abstract_domain.Binary_Forward.biumod ~size ctx x1 x2
 
 let and_ ctx x1 x2 = Abstract_domain.Binary_Forward.band ~size ctx x1 x2
 

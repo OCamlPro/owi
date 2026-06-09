@@ -52,6 +52,10 @@ let div_s ctx x1 x2 = Abstract_domain.Binary_Forward.bisdiv ~size ctx x1 x2
 
 let div_u ctx x1 x2 = Abstract_domain.Binary_Forward.biudiv ~size ctx x1 x2
 
+let rem_s ctx x1 x2 = Abstract_domain.Binary_Forward.bismod ~size ctx x1 x2
+
+let rem_u ctx x1 x2 = Abstract_domain.Binary_Forward.biumod ~size ctx x1 x2
+
 let and_ ctx x1 x2 = Abstract_domain.Binary_Forward.band ~size ctx x1 x2
 
 let or_ ctx x1 x2 = Abstract_domain.Binary_Forward.bor ~size ctx x1 x2
