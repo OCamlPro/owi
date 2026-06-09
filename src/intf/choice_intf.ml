@@ -32,4 +32,6 @@ module type S = sig
   val ite : boolean -> if_true:value -> if_false:value -> value t
 
   val assume : boolean -> unit t
+
+  val assume_no_check : boolean -> unit t
 end

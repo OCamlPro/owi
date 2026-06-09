@@ -12,6 +12,8 @@ module type Parameters = sig
   val timeout : float option
 
   val timeout_instr : int option
+
+  val abstract_invariant : Abstract_invariant.t
 end
 
 module Default_parameters = struct
@@ -22,6 +24,8 @@ module Default_parameters = struct
   let timeout = None
 
   let timeout_instr = None
+
+  let abstract_invariant = Abstract_invariant.empty ()
 end
 
 module Make
@@ -117,13 +121,22 @@ struct
     let* v = select v ~instr_counter_false ~instr_counter_true in
     f v
 
-  (* In case of throw_away_trap, this is only going in the non-trapping branch, to avoid a useless solver call.
+  (* If skip is true, it means we proved it can not happen (for instance via Abstract Interpretation. Thus we know it is impossible and the other branch is SAT, and we assume it without checking if it is SAT.
+     In case of throw_away_trap, this is only going in the non-trapping branch, to avoid a useless solver call.
      Otherwise, this will properly try both branches (one trapping, one non-trapping).
      I.e. this can be read as `if v then trap else f` (or assume (not v) and f) in the non-trapping mode).
   *)
-  let ( let>! ) (v, trap, instr_counter) f =
-    if Parameters.throw_away_trap then
-      let* () = Choice.assume (Boolean.not v) in
+  let ( let>! ) (v, trap, instr_counter, skip) f =
+    if skip then begin
+      let cond = Boolean.not v in
+      Log.debug (fun m ->
+        m "skipped check on %a and assuming directly" Boolean.pp v );
+      let* () = Choice.assume_no_check cond in
+      f ()
+    end
+    else if Parameters.throw_away_trap then
+      let cond = Boolean.not v in
+      let* () = Choice.assume cond in
       f ()
     else
       (* TODO: can we do something better here? *)
@@ -238,10 +251,11 @@ struct
         let mem_size = Memory.size mem |> I64.extend_i32_u in
         (* mem_size <=u len || mem_size - len <u pos *)
         (* TODO: experiment with splitting the disjunction and doing the
-           checks one at a time. *)
+         checks one at a time. *)
         ( Boolean.or_ I64.(le_u mem_size len) I64.(lt_u (sub mem_size len) pos)
         , `Out_of_bounds_memory_access
-        , Some instr_counter )
+        , Some instr_counter
+        , false )
       in
       let addr = I32.wrap_i64 I64.(add pos (of_int64 offset)) in
       Choice.return addr
@@ -254,7 +268,7 @@ struct
 
   let mk_addr_check_bounds_8L = mk_addr_check_bounds 8L
 
-  let exec_i32_instr env instr_counter stack :
+  let exec_i32_instr (env : Env.t) instr_counter stack ~uuid :
     Binary.i32_instr -> Stack.t Choice.t = function
     | Const n -> Stack.push_concrete_i32 stack n |> Choice.return
     | Clz -> Stack.apply_i32_i32 stack I32.clz |> Choice.return
@@ -265,31 +279,48 @@ struct
     | Mul -> Stack.apply_i32_i32_i32 stack I32.mul |> Choice.return
     | Div S ->
       let (n1, n2), stack = Stack.pop2_i32 stack in
+      let cant_divide_by_zero =
+        Abstract_invariant.cant_divide_by_zero Parameters.abstract_invariant
+          uuid
+      in
       let>! () =
-        (I32.eqz n2, `Integer_divide_by_zero, (* TODO: get instr counter *) None)
+        ( I32.eqz n2
+        , `Integer_divide_by_zero
+        , (* TODO: get instr counter *) None
+        , cant_divide_by_zero )
       in
       let>! () =
         ( Boolean.and_ (I32.eq n1 I32.min_int) @@ I32.eq n2 (I32.of_int (-1))
         , `Integer_overflow
-        , (* TODO: get instr counter *) None )
+        , (* TODO: get instr counter *) None
+        , false )
       in
       Stack.push_i32 stack (I32.div n1 n2) |> Choice.return
     | Div U ->
       let (n1, n2), stack = Stack.pop2_i32 stack in
       let>! () =
-        (I32.eqz n2, `Integer_divide_by_zero, (* TODO: get instr counter *) None)
+        ( I32.eqz n2
+        , `Integer_divide_by_zero
+        , (* TODO: get instr counter *) None
+        , false )
       in
       Stack.push_i32 stack (I32.unsigned_div n1 n2) |> Choice.return
     | Rem S ->
       let (n1, n2), stack = Stack.pop2_i32 stack in
       let>! () =
-        (I32.eqz n2, `Integer_divide_by_zero, (* TODO: get instr counter *) None)
+        ( I32.eqz n2
+        , `Integer_divide_by_zero
+        , (* TODO: get instr counter *) None
+        , false )
       in
       Stack.push_i32 stack (I32.rem n1 n2) |> Choice.return
     | Rem U ->
       let (n1, n2), stack = Stack.pop2_i32 stack in
       let>! () =
-        (I32.eqz n2, `Integer_divide_by_zero, (* TODO: get instr counter *) None)
+        ( I32.eqz n2
+        , `Integer_divide_by_zero
+        , (* TODO: get instr counter *) None
+        , false )
       in
       Stack.push_i32 stack (I32.unsigned_rem n1 n2) |> Choice.return
     | And -> Stack.apply_i32_i32_i32 stack I32.logand |> Choice.return
@@ -429,31 +460,44 @@ struct
     | Div S ->
       let (n1, n2), stack = Stack.pop2_i64 stack in
       let>! () =
-        (I64.eqz n2, `Integer_divide_by_zero, (* TODO: get instr counter *) None)
+        ( I64.eqz n2
+        , `Integer_divide_by_zero
+        , (* TODO: get instr counter *) None
+        , false )
       in
       let>! () =
         ( Boolean.and_ (I64.eq n1 I64.min_int)
           @@ I64.eq n2 (I64.sub (I64.of_int 0) (I64.of_int 1))
         , `Integer_overflow
-        , (* TODO: get instr counter *) None )
+        , (* TODO: get instr counter *) None
+        , false )
       in
       Stack.push_i64 stack (I64.div n1 n2) |> Choice.return
     | Div U ->
       let (n1, n2), stack = Stack.pop2_i64 stack in
       let>! () =
-        (I64.eqz n2, `Integer_divide_by_zero, (* TODO: get instr counter *) None)
+        ( I64.eqz n2
+        , `Integer_divide_by_zero
+        , (* TODO: get instr counter *) None
+        , false )
       in
       Stack.push_i64 stack (I64.unsigned_div n1 n2) |> Choice.return
     | Rem S ->
       let (n1, n2), stack = Stack.pop2_i64 stack in
       let>! () =
-        (I64.eqz n2, `Integer_divide_by_zero, (* TODO: get instr counter *) None)
+        ( I64.eqz n2
+        , `Integer_divide_by_zero
+        , (* TODO: get instr counter *) None
+        , false )
       in
       Stack.push_i64 stack (I64.rem n1 n2) |> Choice.return
     | Rem U ->
       let (n1, n2), stack = Stack.pop2_i64 stack in
       let>! () =
-        (I64.eqz n2, `Integer_divide_by_zero, (* TODO: get instr counter *) None)
+        ( I64.eqz n2
+        , `Integer_divide_by_zero
+        , (* TODO: get instr counter *) None
+        , false )
       in
       Stack.push_i64 stack (I64.unsigned_rem n1 n2) |> Choice.return
     | And -> Stack.apply_i64_i64_i64 stack I64.logand |> Choice.return
@@ -900,7 +944,8 @@ struct
         let size = I64.extend_i32_u (I32.of_int @@ Table.size t) in
         ( I64.lt_u size I64.(add pos len)
         , `Out_of_bounds_table_access
-        , Some instr_counter )
+        , Some instr_counter
+        , false )
       in
       let* pos = Choice.select_i32 pos in
       let* len = Choice.select_i32 len in
@@ -923,7 +968,8 @@ struct
             (I64.lt_u src_size I64.(add src len))
             (I64.lt_u dst_size I64.(add dst len))
         , `Out_of_bounds_table_access
-        , Some instr_counter )
+        , Some instr_counter
+        , false )
       in
       let+ () =
         let> len_eqz = I32.eqz len in
@@ -954,7 +1000,8 @@ struct
             I64.(lt_u elem_size (add len pos_x))
             I64.(lt_u tbl_size (add len pos))
         , `Out_of_bounds_table_access
-        , Some instr_counter )
+        , Some instr_counter
+        , false )
       in
       let* len = Choice.select_i32 len in
       let* pos_x = Choice.select_i32 pos_x in
@@ -1016,7 +1063,8 @@ struct
         let pos = I64.extend_i32_u pos in
         ( I64.lt_u size I64.(add pos len)
         , `Out_of_bounds_memory_access
-        , Some instr_counter )
+        , Some instr_counter
+        , false )
       in
       (* TODO: should we have something like select_i8 here? or rather, mask it correctly before calling select_i32? *)
       let* c = Choice.select_i32 c in
@@ -1044,7 +1092,8 @@ struct
             (I64.lt_u size1 I64.(add src_idx len))
             (I64.lt_u size2 I64.(add dst_idx len))
         , `Out_of_bounds_memory_access
-        , Some instr_counter )
+        , Some instr_counter
+        , false )
       in
       let* srcmem = Env.get_memory env srcmemid in
       let* dstmem = Env.get_memory env dstmemid in
@@ -1066,7 +1115,8 @@ struct
             (I64.lt_u memsize I64.(add dst len))
             (I64.lt_u datasize I64.(add src len))
         , `Out_of_bounds_memory_access
-        , Some instr_counter )
+        , Some instr_counter
+        , false )
       in
       let data = Data.value data in
       let* mem = Env.get_memory env memid in
@@ -1305,7 +1355,8 @@ struct
       let>! () =
         ( I32.(le_u (I32.of_int size) fun_i)
         , `Undefined_element
-        , (* TODO: get instr counter *) None )
+        , (* TODO: get instr counter *) None
+        , false )
       in
       let* fun_i = Choice.select_i32 fun_i in
       let* t = Env.get_table state.env tbl_i in
@@ -1371,7 +1422,8 @@ struct
     match instr.raw with
     | I32 i ->
       (* TODO: pass ret or state directly to avoid the cost of the monad here and do the same for all cases of the match *)
-      let* stack = exec_i32_instr env instr_counter stack i in
+      let uuid = instr.uuid in
+      let* stack = exec_i32_instr env instr_counter stack i ~uuid in
       ret stack
     | I64 i ->
       let* stack = exec_i64_instr env instr_counter stack i in
@@ -1636,11 +1688,11 @@ struct
         (fun () ->
           let fuel_left = Atomic.fetch_and_add fuel (-1) in
           (* If we only use [timeout_instr], we want to stop all as
-                          soon as [fuel_left <= 0]. But if we only use [timeout],
-                          we don't want to run into the slow path below on each
-                          instruction after [fuel_left] becomes negative. We avoid
-                          this repeated slow path by bumping [fuel] to [max_int]
-                          again in this case. *)
+                         soon as [fuel_left <= 0]. But if we only use [timeout],
+                         we don't want to run into the slow path below on each
+                         instruction after [fuel_left] becomes negative. We avoid
+                         this repeated slow path by bumping [fuel] to [max_int]
+                         again in this case. *)
           if fuel_left mod 1024 = 0 || fuel_left < 0 then begin
             let stop =
               match (Parameters.timeout, Parameters.timeout_instr) with

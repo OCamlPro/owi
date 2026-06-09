@@ -1566,11 +1566,15 @@ module Symbolic_extern_func : sig
   end
 end
 
+module Abstract_invariant : sig
+  type t
+end
+
 module Abstract_driver : sig
   val expr :
        Abstract_extern_func.extern_func Link.State.t
     -> Abstract_extern_func.extern_func Linked.Module.t
-    -> unit
+    -> Abstract_invariant.t
 end
 
 module Denot_interpreter : sig
@@ -1590,6 +1594,8 @@ module Interpret : sig
     val timeout : float option
 
     val timeout_instr : int option
+
+    val abstract_invariant : Abstract_invariant.t
   end
 
   module Default_parameters : Parameters
@@ -1644,6 +1650,7 @@ module Symbolic_parameters : sig
     ; entry_point : string option
     ; exploration_strategy : Exploration_strategy.t
     ; fail_mode : fail_mode
+    ; generate_abstract_invariant : bool
     ; invoke_with_symbols : bool
     ; model_format : Model.output_format
     ; model_out_file : Fpath.t option

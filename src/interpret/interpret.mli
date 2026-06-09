@@ -10,6 +10,8 @@ module type Parameters = sig
   val timeout : float option
 
   val timeout_instr : int option
+
+  val abstract_invariant : Abstract_invariant.t
 end
 
 module Default_parameters : Parameters

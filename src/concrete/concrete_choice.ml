@@ -26,5 +26,12 @@ let[@inline] assume v =
     (* TODO: there could be a dedicated error here? *)
     assert false
 
+let[@inline] assume_no_check v =
+  (* TODO: we are supposed not to check here, but we check anyway, it may detect some bugs. *)
+  if v then Ok ()
+  else
+    (* TODO: there could be a dedicated error here? *)
+    assert false
+
 let[@inline] ite cond ~if_true ~if_false =
   if cond then return if_true else return if_false

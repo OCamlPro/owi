@@ -21,6 +21,13 @@ let run_file ~parameters ~source_file =
   | _ -> () );
   *)
   let* m = Cmd_utils.set_entry_point entry_point invoke_with_symbols m in
+
+  let* abstract_invariant =
+    if parameters.generate_abstract_invariant then
+      Cmd_abs.from_binary m ~unsafe:true
+    else Ok (Abstract_invariant.empty ())
+  in
+
   let link_state =
     Link.State.empty ()
     |> Link.Extern.modul ~name:"wasi_snapshot_preview1"
@@ -42,6 +49,8 @@ let run_file ~parameters ~source_file =
     let timeout_instr = parameters.timeout_instr
 
     let use_ite_for_select = parameters.use_ite_for_select
+
+    let abstract_invariant = abstract_invariant
   end in
   let module I = Interpret.Symbolic (Parameters) in
   Benchmark.with_utime @@ fun () -> I.modul link_state m

@@ -21,6 +21,8 @@ let cmd ~rounds ~seed ~source_file ~timeout ~timeout_instr ~unsafe =
     let use_ite_for_select = true
 
     let throw_away_trap = false
+
+    let abstract_invariant = Abstract_invariant.empty ()
   end in
   let module I = Interpret.Concrete (Parameters) in
   let res, run_time =

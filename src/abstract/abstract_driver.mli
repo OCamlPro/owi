@@ -5,4 +5,4 @@
 val expr :
      Abstract_extern_func.extern_func Link.State.t
   -> Abstract_extern_func.extern_func Linked.Module.t
-  -> unit
+  -> Abstract_invariant.t
