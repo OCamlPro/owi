@@ -28,6 +28,8 @@ val to_boolean : t -> Abstract_boolean.t
 
 val eq : Abstract_domain.Context.t -> t -> t -> Abstract_boolean.t
 
+val eqz : Abstract_domain.Context.t -> t -> Abstract_boolean.t
+
 val equal : t -> t -> bool
 
 (* *)

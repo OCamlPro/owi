@@ -32,6 +32,8 @@ let zero ctx = Abstract_domain.Binary_Forward.biconst ~size Z.zero ctx
 
 let unknown ctx = Abstract_domain.binary_unknown ~size ctx
 
+let eqz ctx i = eq ctx (zero ctx) i
+
 (* TODO: proper handling of overflow *)
 
 let add ctx x1 x2 =
@@ -58,8 +60,12 @@ let le_s ctx x1 x2 = Abstract_domain.Binary_Forward.bisle ~size ctx x1 x2
 
 let le_u ctx x1 x2 = Abstract_domain.Binary_Forward.biule ~size ctx x1 x2
 
-(* TODO: no lt function ?*)
-let lt_s _ctx _x1 _x2 = assert false
+let lt_s ctx x1 x2 =
+  let le = le_s ctx x1 x2 in
+  let neq = Abstract_boolean.not ctx (eq ctx x1 x2) in
+  Abstract_boolean.and_ ctx le neq
 
-(* TODO: no lt function ?*)
-let lt_u _ctx _x1 _x2 = assert false
+let lt_u ctx x1 x2 =
+  let le = le_u ctx x1 x2 in
+  let neq = Abstract_boolean.not ctx (eq ctx x1 x2) in
+  Abstract_boolean.and_ ctx le neq
