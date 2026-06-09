@@ -60,6 +60,9 @@ let assume condition =
   | `Unsat -> prune ()
   | `Unknown -> if Solver.was_interrupted () then prune () else assert false
 
+let assume_no_check condition =
+  add_already_checked_condition_to_pc condition
+
 let select_inner ~with_breadcrumbs (condition : Symbolic_boolean.t)
   ~instr_counter_true ~instr_counter_false =
   let condition = Smtml.Typed.simplify condition in

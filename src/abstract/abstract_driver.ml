@@ -411,7 +411,7 @@ end
 module DataAbstract_state : DATA_STATE = struct
   type t = Abstract_state.t option * Binary.instr option
 
-  let eval_i32 ({ stack; ctx; _ } as state : Abstract_state.t) :
+  let eval_i32 ({ stack; ctx; invariant; _ } as state : Abstract_state.t) :
     Binary.i32_instr -> _ = function
     | Const i ->
       let stack = Stack.push_i32 stack (Abstract_i32.of_int32 ctx i) in
@@ -426,7 +426,15 @@ module DataAbstract_state : DATA_STATE = struct
       let stack = Stack.apply_i32_i32_i32 stack (Abstract_i32.mul ctx) in
       { state with stack }
     | Div S ->
-      let stack = Stack.apply_i32_i32_i32 stack (Abstract_i32.div_s ctx) in
+      let (hd1, hd2), stack = Stack.pop2_i32 stack in
+      let _ = invariant in
+      (* TODO:
+        begin match Abstract_domain.assume ctx (TODO: hd2 <> 0 ) with
+        | Some _ctx -> Abstract_invariant.add_cant_divide_by_zero invariant uuid
+        | None -> ()
+        end;
+        *)
+      let stack = Stack.push_i32 stack (Abstract_i32.div_s ctx hd1 hd2) in
       { state with stack }
     | Div U ->
       let stack = Stack.apply_i32_i32_i32 stack (Abstract_i32.div_u ctx) in
@@ -573,4 +581,6 @@ let expr (link_state : Abstract_extern_func.extern_func Link.State.t)
         (Fmt.option ~none:(Fmt.any "none") (Abstract_state.pp state.ctx))
         end_state
     end
-    m.to_run
+    m.to_run;
+
+  state.invariant

@@ -26,6 +26,8 @@ val assertion : Symbolic_boolean.t -> unit t
 
 val assume : Symbolic_boolean.t -> unit t
 
+val assume_no_check : Symbolic_boolean.t -> unit t
+
 val map_state : (Thread.t -> Thread.t) -> unit t
 
 val fold_state : (Thread.t -> 'a) -> 'a t

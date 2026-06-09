@@ -32,6 +32,7 @@ type t =
   ; entry_point : string option
   ; exploration_strategy : Exploration_strategy.t
   ; fail_mode : fail_mode
+  ; generate_abstract_invariant : bool
   ; invoke_with_symbols : bool
   ; model_format : Model.output_format
   ; model_out_file : Fpath.t option

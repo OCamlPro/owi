@@ -138,6 +138,12 @@ let files =
   let doc = "source files" in
   Arg.(non_empty & pos_all existing_file_conv [] (info [] ~doc ~docv:"FILE"))
 
+let generate_abstract_invariant =
+  let doc =
+    "Generate invariants by running the abstract interpretation engine."
+  in
+  Arg.(value & flag & info [ "generate-abstract-invariant" ] ~doc)
+
 let includes =
   let doc = "headers path" in
   Arg.(value & opt_all existing_dir_conv [] & info [ "I" ] ~doc)
@@ -262,6 +268,7 @@ let symbolic_parameters default_entry_point =
   and+ entry_point = entry_point default_entry_point
   and+ exploration_strategy
   and+ fail_mode
+  and+ generate_abstract_invariant
   and+ model_format
   and+ model_out_file
   and+ invoke_with_symbols
@@ -283,6 +290,7 @@ let symbolic_parameters default_entry_point =
   ; entry_point
   ; exploration_strategy
   ; fail_mode
+  ; generate_abstract_invariant
   ; invoke_with_symbols
   ; model_format
   ; model_out_file

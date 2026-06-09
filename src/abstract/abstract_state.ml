@@ -9,6 +9,7 @@ type t =
   ; func_rt : Binary.val_type list
   ; env : Abstract_extern_func.extern_func Link_env.t
   ; envs : Abstract_extern_func.extern_func Link_env.t Dynarray.t
+  ; invariant : Abstract_invariant.t
   }
 
 let pp ctx : t Fmt.t =
@@ -23,4 +24,5 @@ let empty env envs () =
   let stack = Abstract_stack.empty in
   let locals = Abstract_locals.empty in
   let func_rt = [] in
-  { ctx; stack; locals; env; func_rt; envs }
+  let invariant = Abstract_invariant.empty () in
+  { ctx; stack; locals; env; func_rt; envs; invariant }
