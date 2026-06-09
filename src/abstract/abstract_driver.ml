@@ -7,9 +7,9 @@ module Stack = Abstract_stack
 let ( let* ) = Option.bind
 
 module type DATA_STATE = sig
-  type t = Abstract_state.t option * Binary.instr option
+  type t = Abstract_state.t option * Binary.instr Annotated.t option
 
-  val eval_instr : Abstract_state.t -> Binary.instr -> t
+  val eval_instr : Abstract_state.t -> Binary.instr Annotated.t -> t
 end
 
 (*===========================================================================*)
@@ -168,7 +168,9 @@ module DenotFixpoint (S : DATA_STATE) = struct
     ({ state with ctx }, included)
 
   let rec eval_expr :
-    t -> Binary.expr -> t option * Abstract_state.t list JumpTarget.t =
+       t
+    -> Binary.expr Annotated.t
+    -> t option * Abstract_state.t list JumpTarget.t =
    fun state expr ->
     let rec loop (state, jt) (expr : Binary.expr) =
       Log.info (fun m ->
@@ -176,13 +178,13 @@ module DenotFixpoint (S : DATA_STATE) = struct
       match expr with
       | [] -> (Some state, jt)
       | instr :: instrs -> (
-        let new_state, new_jt = eval_instr state instr.raw in
+        let new_state, new_jt = eval_instr state instr in
         let new_jt = JumpTarget.append jt new_jt in
         match new_state with
         | None -> (None, new_jt)
         | Some s -> loop (s, new_jt) instrs )
     in
-    loop (state, JumpTarget.empty) expr
+    loop (state, JumpTarget.empty) expr.raw
 
   and eval_func (state : Abstract_state.t) (func : Binary.Func.t) =
     Log.info (fun m ->
@@ -207,7 +209,7 @@ module DenotFixpoint (S : DATA_STATE) = struct
     Log.debug (fun m ->
       m "abstract state : %a" (Abstract_state.pp state.ctx) fn_state );
     (* TODO: handle mapping *)
-    let func_end_state, _ = eval_expr fn_state func.body.raw in
+    let func_end_state, _ = eval_expr fn_state func.body in
     ( match func_end_state with
     | Some state ->
       Log.debug (fun m ->
@@ -225,7 +227,7 @@ module DenotFixpoint (S : DATA_STATE) = struct
 
   and eval_instr
     ({ ctx; stack; env; envs; locals; _ } as state : Abstract_state.t) :
-    Binary.instr -> t option * Abstract_state.t list JumpTarget.t =
+    Binary.instr Annotated.t -> t option * Abstract_state.t list JumpTarget.t =
    fun instr ->
     Log.debug (fun m ->
       m "abstract state : %a" (Abstract_state.pp state.ctx) state );
@@ -237,8 +239,8 @@ module DenotFixpoint (S : DATA_STATE) = struct
         (Abstract_locals.pp (Abstract_value.pp_with_ctx state.ctx))
         locals );
     Log.info (fun m ->
-      m "running instr : %a" (Binary.pp_instr ~short:true) instr );
-    match instr with
+      m "running instr : %a" (Binary.pp_instr ~short:true) instr.raw );
+    match instr.raw with
     | Call idx ->
       let func = Link_env.get_func env idx in
       begin match func with
@@ -261,7 +263,7 @@ module DenotFixpoint (S : DATA_STATE) = struct
         )
       end
     | Block (_str_opt, _bt, expr) -> (
-      match eval_expr state expr.raw with
+      match eval_expr state expr with
       | None, jt -> (None, JumpTarget.decr jt)
       | Some { stack; locals; _ }, jt ->
         let state = { state with stack; locals } in
@@ -285,14 +287,16 @@ module DenotFixpoint (S : DATA_STATE) = struct
       let state_then, jt_true =
         match Abstract_domain.assume ctx b with
         | Some ctx ->
-          eval_instr { state with stack; ctx } (Block (None, bt, expr_then))
+          eval_instr { state with stack; ctx }
+            (Annotated.dummy (Binary.Block (None, bt, expr_then)))
         | None -> (None, JumpTarget.empty)
       in
       let state_else, jt_false =
         let not_cond = Abstract_boolean.not ctx b in
         match Abstract_domain.assume ctx not_cond with
         | Some ctx ->
-          eval_instr { state with stack; ctx } (Block (None, bt, expr_else))
+          eval_instr { state with stack; ctx }
+            (Annotated.dummy (Binary.Block (None, bt, expr_else)))
         | None -> (None, JumpTarget.empty)
       in
       let jt = JumpTarget.append jt_true jt_false in
@@ -316,7 +320,7 @@ module DenotFixpoint (S : DATA_STATE) = struct
         | None -> 0
       in
       let rec fixpoint state =
-        let next_state, jt = eval_expr state body.raw in
+        let next_state, jt = eval_expr state body in
         let shorten_stack stack = Stack.keep stack to_take in
         let next_head =
           let handle_jts jts =
@@ -397,7 +401,7 @@ module DenotFixpoint (S : DATA_STATE) = struct
       in
       (None, JumpTarget.of_list jt_list)
     | Return -> (None, JumpTarget.of_list [ (Ret, [ state ]) ])
-    | instr -> (
+    | _ -> (
       let res = S.eval_instr state instr in
       match res with
       | Some s, None -> (Some s, JumpTarget.empty)
@@ -409,9 +413,9 @@ end
 (*===========================================================================*)
 
 module DataAbstract_state : DATA_STATE = struct
-  type t = Abstract_state.t option * Binary.instr option
+  type t = Abstract_state.t option * Binary.instr Annotated.t option
 
-  let eval_i32 ({ stack; ctx; invariant; _ } as state : Abstract_state.t) :
+  let eval_i32 ({ stack; ctx; invariant; _ } as state : Abstract_state.t) uuid :
     Binary.i32_instr -> _ = function
     | Const i ->
       let stack = Stack.push_i32 stack (Abstract_i32.of_int32 ctx i) in
@@ -427,17 +431,23 @@ module DataAbstract_state : DATA_STATE = struct
       { state with stack }
     | Div S ->
       let (hd1, hd2), stack = Stack.pop2_i32 stack in
-      let _ = invariant in
-      (* TODO:
-        begin match Abstract_domain.assume ctx (TODO: hd2 <> 0 ) with
+      let _ =
+        begin match Abstract_domain.assume ctx (Abstract_i32.eqz ctx hd2) with
         | Some _ctx -> Abstract_invariant.add_cant_divide_by_zero invariant uuid
         | None -> ()
-        end;
-        *)
+        end
+      in
       let stack = Stack.push_i32 stack (Abstract_i32.div_s ctx hd1 hd2) in
       { state with stack }
     | Div U ->
-      let stack = Stack.apply_i32_i32_i32 stack (Abstract_i32.div_u ctx) in
+      let (hd1, hd2), stack = Stack.pop2_i32 stack in
+      let _ =
+        begin match Abstract_domain.assume ctx (Abstract_i32.eqz ctx hd2) with
+        | Some _ctx -> Abstract_invariant.add_cant_divide_by_zero invariant uuid
+        | None -> ()
+        end
+      in
+      let stack = Stack.push_i32 stack (Abstract_i32.div_s ctx hd1 hd2) in
       { state with stack }
     | And ->
       let stack = Stack.apply_i32_i32_i32 stack (Abstract_i32.and_ ctx) in
@@ -475,7 +485,7 @@ module DataAbstract_state : DATA_STATE = struct
       Fmt.epr "not implemented yet";
       assert false
 
-  let eval_i64 ({ stack; ctx; _ } as state : Abstract_state.t) :
+  let eval_i64 ({ stack; ctx; invariant; _ } as state : Abstract_state.t) uuid :
     Binary.i64_instr -> _ = function
     | Const i ->
       let stack = Stack.push_i64 stack (Abstract_i64.of_int64 ctx i) in
@@ -490,10 +500,24 @@ module DataAbstract_state : DATA_STATE = struct
       let stack = Stack.apply_i64_i64_i64 stack (Abstract_i64.mul ctx) in
       { state with stack }
     | Div S ->
-      let stack = Stack.apply_i64_i64_i64 stack (Abstract_i64.div_s ctx) in
+      let (hd1, hd2), stack = Stack.pop2_i64 stack in
+      let _ =
+        begin match Abstract_domain.assume ctx (Abstract_i64.eqz ctx hd2) with
+        | Some _ctx -> Abstract_invariant.add_cant_divide_by_zero invariant uuid
+        | None -> ()
+        end
+      in
+      let stack = Stack.push_i64 stack (Abstract_i64.div_s ctx hd1 hd2) in
       { state with stack }
     | Div U ->
-      let stack = Stack.apply_i64_i64_i64 stack (Abstract_i64.div_u ctx) in
+      let (hd1, hd2), stack = Stack.pop2_i64 stack in
+      let _ =
+        begin match Abstract_domain.assume ctx (Abstract_i64.eqz ctx hd2) with
+        | Some _ctx -> Abstract_invariant.add_cant_divide_by_zero invariant uuid
+        | None -> ()
+        end
+      in
+      let stack = Stack.push_i64 stack (Abstract_i64.div_s ctx hd1 hd2) in
       { state with stack }
     | And ->
       let stack = Stack.apply_i64_i64_i64 stack (Abstract_i64.and_ ctx) in
@@ -539,13 +563,15 @@ module DataAbstract_state : DATA_STATE = struct
       let locals = Abstract_locals.add i e locals in
       { state with stack; locals }
 
-  let eval_instr ({ stack; _ } as state : Abstract_state.t) : Binary.instr -> t
-      = function
+  let eval_instr ({ stack; _ } as state : Abstract_state.t) :
+    Binary.instr Annotated.t -> t =
+   fun ({ raw; uuid; _ } as instr) ->
+    match raw with
     | I32 instr ->
-      let r = eval_i32 state instr in
+      let r = eval_i32 state uuid instr in
       (Some r, None)
     | I64 instr ->
-      let r = eval_i64 state instr in
+      let r = eval_i64 state uuid instr in
       (Some r, None)
     | Unreachable ->
       (*TODO à gèrer proprement*)
@@ -557,8 +583,8 @@ module DataAbstract_state : DATA_STATE = struct
       let _, stack = Stack.pop stack in
       (Some { state with stack }, None)
     | Nop -> (Some state, None)
-    | ( If_else _ | Call _ | Block _ | Loop _ | Br _ | Br_if _ | Br_table _
-      | Br_on_non_null _ | Br_on_null _ ) as instr ->
+    | If_else _ | Call _ | Block _ | Loop _ | Br _ | Br_if _ | Br_table _
+    | Br_on_non_null _ | Br_on_null _ ->
       (None, Some instr)
     | instr ->
       Fmt.failwith "DataAbstract_state.eval_instr not implemented for %a"
@@ -576,7 +602,7 @@ let expr (link_state : Abstract_extern_func.extern_func Link.State.t)
   List.iter
     begin fun (e : Binary.expr Annotated.t) ->
       (* TODO handle *)
-      let end_state, _mapping = ConcreteFixpoint.eval_expr state e.raw in
+      let end_state, _mapping = ConcreteFixpoint.eval_expr state e in
       Fmt.pr "abstract state : %a@."
         (Fmt.option ~none:(Fmt.any "none") (Abstract_state.pp state.ctx))
         end_state
