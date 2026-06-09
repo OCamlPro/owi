@@ -457,6 +457,12 @@ module DataAbstract_state : DATA_STATE = struct
         Stack.apply_i32_i32_boolean stack ctx (Abstract_i32.le_u ctx)
       in
       { state with stack }
+    | Ne ->
+      let stack = Stack.apply_i32_i32_boolean stack ctx (Abstract_i32.ne ctx) in
+      { state with stack }
+    | Eqz ->
+      let stack = Stack.apply_i32_boolean stack ctx (Abstract_i32.eqz ctx) in
+      { state with stack }
     | _ ->
       Fmt.epr "not implemented yet";
       assert false
