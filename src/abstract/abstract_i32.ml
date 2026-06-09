@@ -36,6 +36,10 @@ let equal i1 i2 = Abstract_domain.Binary.equal i1 i2
 
 let eq ctx i1 i2 = Abstract_domain.Binary_Forward.beq ~size ctx i1 i2
 
+let eqz ctx i = eq ctx (zero ctx) i
+
+let ne ctx i1 i2 = Abstract_boolean.not ctx (eq ctx i1 i2)
+
 (* TODO: proper handling of overflow *)
 
 let add ctx x1 x2 =

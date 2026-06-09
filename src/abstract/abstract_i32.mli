@@ -26,7 +26,11 @@ val to_boolean : Abstract_domain.Context.t -> t -> Abstract_boolean.t
 
 (** Comparison functions *)
 
+val eqz : Abstract_domain.Context.t -> t -> Abstract_boolean.t
+
 val eq : Abstract_domain.Context.t -> t -> t -> Abstract_boolean.t
+
+val ne : Abstract_domain.Context.t -> t -> t -> Abstract_boolean.t
 
 val equal : t -> t -> bool
 
