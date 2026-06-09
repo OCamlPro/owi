@@ -44,6 +44,10 @@ val div_s : Abstract_domain.Context.t -> t -> t -> t
 
 val div_u : Abstract_domain.Context.t -> t -> t -> t
 
+val rem_s : Abstract_domain.Context.t -> t -> t -> t
+
+val rem_u : Abstract_domain.Context.t -> t -> t -> t
+
 val and_ : Abstract_domain.Context.t -> t -> t -> t
 
 val or_ : Abstract_domain.Context.t -> t -> t -> t

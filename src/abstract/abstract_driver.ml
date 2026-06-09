@@ -449,6 +449,26 @@ module DataAbstract_state : DATA_STATE = struct
       in
       let stack = Stack.push_i32 stack (Abstract_i32.div_s ctx hd1 hd2) in
       { state with stack }
+    | Rem S ->
+      let (hd1, hd2), stack = Stack.pop2_i32 stack in
+      let _ =
+        begin match Abstract_domain.assume ctx (Abstract_i32.eqz ctx hd2) with
+        | Some _ctx -> Abstract_invariant.add_cant_divide_by_zero invariant uuid
+        | None -> ()
+        end
+      in
+      let stack = Stack.push_i32 stack (Abstract_i32.rem_s ctx hd1 hd2) in
+      { state with stack }
+    | Rem U ->
+      let (hd1, hd2), stack = Stack.pop2_i32 stack in
+      let _ =
+        begin match Abstract_domain.assume ctx (Abstract_i32.eqz ctx hd2) with
+        | Some _ctx -> Abstract_invariant.add_cant_divide_by_zero invariant uuid
+        | None -> ()
+        end
+      in
+      let stack = Stack.push_i32 stack (Abstract_i32.rem_u ctx hd1 hd2) in
+      { state with stack }
     | And ->
       let stack = Stack.apply_i32_i32_i32 stack (Abstract_i32.and_ ctx) in
       { state with stack }
@@ -518,6 +538,26 @@ module DataAbstract_state : DATA_STATE = struct
         end
       in
       let stack = Stack.push_i64 stack (Abstract_i64.div_s ctx hd1 hd2) in
+      { state with stack }
+    | Rem S ->
+      let (hd1, hd2), stack = Stack.pop2_i64 stack in
+      let _ =
+        begin match Abstract_domain.assume ctx (Abstract_i64.eqz ctx hd2) with
+        | Some _ctx -> Abstract_invariant.add_cant_divide_by_zero invariant uuid
+        | None -> ()
+        end
+      in
+      let stack = Stack.push_i64 stack (Abstract_i64.rem_s ctx hd1 hd2) in
+      { state with stack }
+    | Rem U ->
+      let (hd1, hd2), stack = Stack.pop2_i64 stack in
+      let _ =
+        begin match Abstract_domain.assume ctx (Abstract_i64.eqz ctx hd2) with
+        | Some _ctx -> Abstract_invariant.add_cant_divide_by_zero invariant uuid
+        | None -> ()
+        end
+      in
+      let stack = Stack.push_i64 stack (Abstract_i64.rem_u ctx hd1 hd2) in
       { state with stack }
     | And ->
       let stack = Stack.apply_i64_i64_i64 stack (Abstract_i64.and_ ctx) in
