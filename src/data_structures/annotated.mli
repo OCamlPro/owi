@@ -6,6 +6,7 @@
 type 'a t = private
   { raw : 'a
   ; instr_counter : int Atomic.t
+  ; uuid : int
   ; mutable functions_called : Set.Make(Int).t
   ; d_true : int array option ref
   ; d_false : int array option ref
