@@ -83,6 +83,11 @@
 <a id="L59"></a><span > </span>
 <a id="L60"></a><span > </span>
 <a id="L61"></a><span > </span>
+<a id="L62"></a><span > </span>
+<a id="L63"></a><span > </span>
+<a id="L64"></a><span > </span>
+<a id="L65"></a><span > </span>
+<a id="L66"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -148,15 +153,24 @@
 <a href="#L59">59</a>
 <a href="#L60">60</a>
 <a href="#L61">61</a>
+<a href="#L62">62</a>
+<a href="#L63">63</a>
+<a href="#L64">64</a>
+<a href="#L65">65</a>
+<a href="#L66">66</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
+module Abstract_driver = Abstract_driver
+module Abstract_invariant = Abstract_invariant
 module Annotated = Annotated
 module Binary = Binary
 module Binary_validate = Binary_validate
 module Binary_to_text = Binary_to_text
+module Cmd_abs = Cmd_abs
+module Cmd_drun = Cmd_drun
 module Cmd_sym = Cmd_sym
 module Cmd_c = Cmd_c
 module Cmd_call_graph = Cmd_call_graph
@@ -187,6 +201,7 @@ module Concrete_i32 = Concrete_i32
 module Concrete_i64 = Concrete_i64
 module Concrete_f32 = Concrete_f32
 module Concrete_f64 = Concrete_f64
+module Denot_interpreter = Denot_interpreter
 module Extern = Extern
 module Init = Init
 module Interpret = Interpret

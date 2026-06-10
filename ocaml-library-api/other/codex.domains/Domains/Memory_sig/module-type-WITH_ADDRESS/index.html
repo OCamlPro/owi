@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>WITH_ADDRESS (docs.other.codex.domains.Domains.Memory_sig.WITH_ADDRESS)</title><meta charset="utf-8"/><link rel="stylesheet" href="../../../../../odoc.support/odoc.css"/><meta name="generator" content="odoc 3.2.1"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../../../../../odoc.support/highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script><link rel="stylesheet" href="../../../../../odoc.support/katex.min.css"/><script src="../../../../../odoc.support/katex.min.js"></script><script>
+//<![CDATA[
+
+          document.addEventListener("DOMContentLoaded", function () {
+            var macros = {};
+            var elements = Array.from(document.getElementsByClassName("odoc-katex-math"));
+            for (var i = 0; i < elements.length; i++) {
+              var el = elements[i];
+              var content = el.textContent;
+              var new_el = document.createElement("span");
+              new_el.setAttribute("class", "odoc-katex-math-rendered");
+              var display = el.classList.contains("display");
+              katex.render(content, new_el, { throwOnError: false, displayMode: display, macros });
+              el.replaceWith(new_el);
+            }
+          });
+        
+//]]>
+</script></head><body class="odoc"><nav class="odoc-nav"><a href="../index.html">Up</a> – <a href="../../../../../../index.html">Index</a> &#x00BB; <a href="../../../../../index.html">docs</a> &#x00BB; <a href="../../../../index.html">other</a> &#x00BB; <a href="../../../index.html">codex.domains</a> &#x00BB; <a href="../../index.html">Domains</a> &#x00BB; <a href="../index.html">Memory_sig</a> &#x00BB; WITH_ADDRESS</nav><header class="odoc-preamble"><h1>Module type <code><span>Memory_sig.WITH_ADDRESS</span></code></h1><p>Abstraction of an address, pointing to a region in a C-like memory model. The type adress is named binary for historical reasons, and also to help sharing with bitvectors in whole.</p></header><div class="odoc-content"><div class="odoc-include"><details open="open"><summary class="spec include"><code><span><span class="keyword">include</span> <a href="../module-type-AADT/index.html">AADT</a></span></code></summary><div class="odoc-spec"><div class="spec module anchored" id="module-Scalar"><a href="#module-Scalar" class="anchor"></a><code><span><span class="keyword">module</span> <a href="Scalar/index.html">Scalar</a></span><span> : <a href="../../Sig/module-type-BASE/index.html">Sig.BASE</a></span></code></div></div></details></div><div class="odoc-spec"><div class="spec type anchored" id="type-boolean"><a href="#type-boolean" class="anchor"></a><code><span><span class="keyword">type</span> boolean</span></code></div></div><div class="odoc-spec"><div class="spec type anchored" id="type-binary"><a href="#type-binary" class="anchor"></a><code><span><span class="keyword">type</span> binary</span></code></div></div><div class="odoc-spec"><div class="spec module anchored" id="module-Binary"><a href="#module-Binary" class="anchor"></a><code><span><span class="keyword">module</span> <a href="Binary/index.html">Binary</a></span><span> : <a href="../../../../codex.datatype_sig/Datatype_sig/module-type-S/index.html">Datatype_sig.S</a> <span class="keyword">with</span> <span><span class="keyword">type</span> <a href="../../../../codex.datatype_sig/Datatype_sig/module-type-S/index.html#type-t">t</a> = <a href="#type-binary">binary</a></span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-binary_pretty"><a href="#val-binary_pretty" class="anchor"></a><code><span><span class="keyword">val</span> binary_pretty : 
+  <span><span class="label">size</span>:<a href="../../../../codex.units/Units/In_bits/index.html#type-t">Units.In_bits.t</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="Scalar/Context/index.html#type-t">Scalar.Context.t</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="../../../../../stdlib/Stdlib/Format/index.html#type-formatter">Format.formatter</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="#type-binary">binary</a> <span class="arrow">&#45;&gt;</span></span>
+  unit</span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-binary_empty"><a href="#val-binary_empty" class="anchor"></a><code><span><span class="keyword">val</span> binary_empty : <span><span class="label">size</span>:<a href="../../../../codex.units/Units/In_bits/index.html#type-t">Units.In_bits.t</a> <span class="arrow">&#45;&gt;</span></span> <span><a href="Scalar/Context/index.html#type-t">Scalar.Context.t</a> <span class="arrow">&#45;&gt;</span></span> <a href="#type-binary">binary</a></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-satisfiable"><a href="#val-satisfiable" class="anchor"></a><code><span><span class="keyword">val</span> satisfiable : <span><a href="Scalar/Context/index.html#type-t">Scalar.Context.t</a> <span class="arrow">&#45;&gt;</span></span> <span><a href="#type-boolean">boolean</a> <span class="arrow">&#45;&gt;</span></span> <a href="../../../../codex.smtbackend/Smtbackend/Smtlib_sig/index.html#type-sat">Smtbackend.Smtlib_sig.sat</a></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-serialize"><a href="#val-serialize" class="anchor"></a><code><span><span class="keyword">val</span> serialize : 
+  <span><span class="label">widens</span>:bool <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="label">size</span>:<a href="../../../../codex.units/Units/In_bits/index.html#type-t">Units.In_bits.t</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="Scalar/Context/index.html#type-t">Scalar.Context.t</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="#type-binary">binary</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="Scalar/Context/index.html#type-t">Scalar.Context.t</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="#type-binary">binary</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span class="type-var">'a</span> <a href="Scalar/Context/index.html#type-in_acc">Scalar.Context.in_acc</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span>(<a href="#type-binary">binary</a>, <span class="type-var">'a</span>)</span> <a href="Scalar/Context/index.html#type-result">Scalar.Context.result</a></span></span></code></div><div class="spec-doc"><p>Serialize functions also return their de-serializer.</p></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-bchoose"><a href="#val-bchoose" class="anchor"></a><code><span><span class="keyword">val</span> bchoose : 
+  <span><span class="label">size</span>:<a href="../../../../codex.units/Units/In_bits/index.html#type-t">Units.In_bits.t</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="../../../../codex.operator/Operator/Choice/index.html#type-t">Operator.Choice.t</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="Scalar/Context/index.html#type-t">Scalar.Context.t</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="#type-binary">binary</a> <span class="arrow">&#45;&gt;</span></span>
+  <a href="#type-binary">binary</a></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-bindex"><a href="#val-bindex" class="anchor"></a><code><span><span class="keyword">val</span> bindex : 
+  <span><span class="label">size</span>:<a href="../../../../codex.units/Units/In_bits/index.html#type-t">Units.In_bits.t</a> <span class="arrow">&#45;&gt;</span></span>
+  <span>int <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="Scalar/Context/index.html#type-t">Scalar.Context.t</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="#type-binary">binary</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="Scalar/index.html#type-binary">Scalar.binary</a> <span class="arrow">&#45;&gt;</span></span>
+  <a href="#type-binary">binary</a></span></code></div><div class="spec-doc"><p><code>bindex ~size k ctx address expr</code> is <code>address + k * expr</code></p></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-bisub"><a href="#val-bisub" class="anchor"></a><code><span><span class="keyword">val</span> bisub : 
+  <span><span class="label">size</span>:<a href="../../../../codex.units/Units/In_bits/index.html#type-t">Units.In_bits.t</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="Scalar/Context/index.html#type-t">Scalar.Context.t</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="#type-binary">binary</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="#type-binary">binary</a> <span class="arrow">&#45;&gt;</span></span>
+  <a href="Scalar/index.html#type-binary">Scalar.binary</a></span></code></div><div class="spec-doc"><p>pointer substraction.</p></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-bshift"><a href="#val-bshift" class="anchor"></a><code><span><span class="keyword">val</span> bshift : 
+  <span><span class="label">size</span>:<a href="../../../../codex.units/Units/In_bits/index.html#type-t">Units.In_bits.t</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="label">offset</span>:int <span class="arrow">&#45;&gt;</span></span>
+  <span><span class="label">max</span>:<span>int option</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="Scalar/Context/index.html#type-t">Scalar.Context.t</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="#type-binary">binary</a> <span class="arrow">&#45;&gt;</span></span>
+  <a href="#type-binary">binary</a></span></code></div><div class="spec-doc"><p><code>bshift ~size ~offset ~max ctx address</code> is <code>address + offset</code>. In addition, further shifts/index are bounded by max.</p></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-ble"><a href="#val-ble" class="anchor"></a><code><span><span class="keyword">val</span> ble : 
+  <span><span class="label">size</span>:<a href="../../../../codex.units/Units/In_bits/index.html#type-t">Units.In_bits.t</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="Scalar/Context/index.html#type-t">Scalar.Context.t</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="#type-binary">binary</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="#type-binary">binary</a> <span class="arrow">&#45;&gt;</span></span>
+  <a href="#type-boolean">boolean</a></span></code></div><div class="spec-doc"><p>Pointer comparison.</p></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-beq"><a href="#val-beq" class="anchor"></a><code><span><span class="keyword">val</span> beq : 
+  <span><span class="label">size</span>:<a href="../../../../codex.units/Units/In_bits/index.html#type-t">Units.In_bits.t</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="Scalar/Context/index.html#type-t">Scalar.Context.t</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="#type-binary">binary</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="#type-binary">binary</a> <span class="arrow">&#45;&gt;</span></span>
+  <a href="#type-boolean">boolean</a></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-binary_unknown"><a href="#val-binary_unknown" class="anchor"></a><code><span><span class="keyword">val</span> binary_unknown : <span><span class="label">size</span>:<a href="../../../../codex.units/Units/In_bits/index.html#type-t">Units.In_bits.t</a> <span class="arrow">&#45;&gt;</span></span> <span><a href="Scalar/Context/index.html#type-t">Scalar.Context.t</a> <span class="arrow">&#45;&gt;</span></span> <a href="#type-binary">binary</a></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-binary_unknown_typed"><a href="#val-binary_unknown_typed" class="anchor"></a><code><span><span class="keyword">val</span> binary_unknown_typed : 
+  <span><span class="label">size</span>:<a href="../../../../codex.units/Units/In_bits/index.html#type-t">Units.In_bits.t</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="Scalar/Context/index.html#type-t">Scalar.Context.t</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="../../../../codex.types/Codex_types/TypedC/index.html#type-typ">Codex_types.TypedC.typ</a> <span class="arrow">&#45;&gt;</span></span>
+  <a href="#type-binary">binary</a></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-check_type"><a href="#val-check_type" class="anchor"></a><code><span><span class="keyword">val</span> check_type : 
+  <span><span class="label">size</span>:<a href="../../../../codex.units/Units/In_bits/index.html#type-t">Units.In_bits.t</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="Scalar/Context/index.html#type-t">Scalar.Context.t</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="../../../../codex.types/Codex_types/TypedC/index.html#type-typ">Codex_types.TypedC.typ</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="#type-binary">binary</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="#type-binary">binary</a> <a href="../../../../codex.types/Codex_types/Type_check_tree/index.html#type-t">Codex_types.Type_check_tree.t</a></span></span></code></div><div class="spec-doc"><p>Type check a <a href="#type-binary"><code>binary</code></a> value</p></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-binary2scalar_binary"><a href="#val-binary2scalar_binary" class="anchor"></a><code><span><span class="keyword">val</span> binary2scalar_binary : 
+  <span><span class="label">size</span>:<a href="../../../../codex.units/Units/In_bits/index.html#type-t">Units.In_bits.t</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="Scalar/Context/index.html#type-t">Scalar.Context.t</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="#type-binary">binary</a> <span class="arrow">&#45;&gt;</span></span>
+  <a href="Scalar/index.html#type-binary">Scalar.binary</a></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-type_of"><a href="#val-type_of" class="anchor"></a><code><span><span class="keyword">val</span> type_of : 
+  <span><span class="label">size</span>:<a href="../../../../codex.units/Units/In_bits/index.html#type-t">Units.In_bits.t</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="Scalar/Context/index.html#type-t">Scalar.Context.t</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="#type-binary">binary</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="../../../../codex.types/Codex_types/TypedC/index.html#type-typ">Codex_types.TypedC.typ</a> option</span></span></code></div><div class="spec-doc"><p>Returns the type of a function, or None if unknown.</p></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-within_bounds"><a href="#val-within_bounds" class="anchor"></a><code><span><span class="keyword">val</span> within_bounds : 
+  <span><span class="label">size</span>:<a href="../../../../codex.units/Units/In_bits/index.html#type-t">Units.In_bits.t</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="Scalar/Context/index.html#type-t">Scalar.Context.t</a> <span class="arrow">&#45;&gt;</span></span>
+  <span><a href="#type-binary">binary</a> <span class="arrow">&#45;&gt;</span></span>
+  <a href="#type-boolean">boolean</a></span></code></div><div class="spec-doc"><p>Check that all array indices operation are within bound.</p></div></div><div class="odoc-spec"><div class="spec module anchored" id="module-Query"><a href="#module-Query" class="anchor"></a><code><span><span class="keyword">module</span> <a href="Query/index.html">Query</a></span><span> : <span class="keyword">sig</span> ... <span class="keyword">end</span></span></code></div></div></div></body></html>

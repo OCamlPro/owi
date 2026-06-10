@@ -18,18 +18,18 @@
       <h2>68.42%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:36.26%"></span>
-      <span class="unvisited" style="top:49.45%"></span>
-      <span class="unvisited" style="bottom:49.45%"></span>
-      <span class="unvisited" style="bottom:48.35%"></span>
-      <span class="unvisited" style="bottom:47.25%"></span>
-      <span class="unvisited" style="bottom:46.15%"></span>
-      <span class="unvisited" style="bottom:45.05%"></span>
-      <span class="unvisited" style="bottom:43.96%"></span>
-      <span class="unvisited" style="bottom:42.86%"></span>
-      <span class="unvisited" style="bottom:41.76%"></span>
-      <span class="unvisited" style="bottom:27.47%"></span>
-      <span class="unvisited" style="bottom:26.37%"></span>
+      <span class="unvisited" style="top:35.87%"></span>
+      <span class="unvisited" style="top:48.91%"></span>
+      <span class="unvisited" style="top:50.00%"></span>
+      <span class="unvisited" style="bottom:48.91%"></span>
+      <span class="unvisited" style="bottom:47.83%"></span>
+      <span class="unvisited" style="bottom:46.74%"></span>
+      <span class="unvisited" style="bottom:45.65%"></span>
+      <span class="unvisited" style="bottom:44.57%"></span>
+      <span class="unvisited" style="bottom:43.48%"></span>
+      <span class="unvisited" style="bottom:42.39%"></span>
+      <span class="unvisited" style="bottom:28.26%"></span>
+      <span class="unvisited" style="bottom:27.17%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -125,6 +125,7 @@
 <a id="L89"></a><span > </span>
 <a id="L90"></a><span > </span>
 <a id="L91"></a><span > </span>
+<a id="L92"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -220,6 +221,7 @@
 <a href="#L89">89</a>
 <a href="#L90">90</a>
 <a href="#L91">91</a>
+<a href="#L92">92</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2026 OCamlPro *)
@@ -295,6 +297,7 @@ type t =
   ; entry_point : string option
   ; exploration_strategy : Exploration_strategy.t
   ; fail_mode : fail_mode
+  ; generate_abstract_invariant : bool
   ; invoke_with_symbols : bool
   ; model_format : Model.output_format
   ; model_out_file : Fpath.t option

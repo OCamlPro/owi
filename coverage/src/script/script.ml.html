@@ -821,14 +821,14 @@ module Stack = Stack.Make [@inlined hint] (Concrete_value)
 module Host_externref = struct
   type t = int
 
-  let ty : t Type.Id.t = Type.Id.mak<span data-count="785">e</span> ()
+  let ty : t Type.Id.t = Type.Id.mak<span data-count="798">e</span> ()
 
   let value i = <span data-count="31">C</span>oncrete_ref.extern ty i
 end
 
 let check_error ~expected ~got : unit Result.t =
-  <span data-count="5865">l</span>et ok =
-    String.equa<span data-count="5865">l</span> (Result.err_to_strin<span data-count="5865">g</span> got) expecte<span data-count="1356">d</span>
+  <span data-count="5869">l</span>et ok =
+    String.equa<span data-count="5869">l</span> (Result.err_to_strin<span data-count="5869">g</span> got) expecte<span data-count="1360">d</span>
     || String.starts_wit<span data-count="4509">h</span> ~prefix:expected (Result.err_to_strin<span data-count="4509">g</span> got<span data-count="4449">)</span>
     ||
     match got with
@@ -874,18 +874,18 @@ let check_error ~expected ~got : unit Result.t =
   if not ok then <span data-count="1">b</span>egin
     Error (`Failed_with_but_expected (got, expected))
   end
-  else <span data-count="5864">O</span>k ()
+  else <span data-count="5868">O</span>k ()
 
 let check_error_result expected = function
   | <span data-count="1">O</span>k _whatever -&gt; Error (`Did_not_fail_but_expected expected)
-  | <span data-count="5175">E</span>rror got -&gt; check_error ~expected ~got
+  | <span data-count="5179">E</span>rror got -&gt; check_error ~expected ~got
 
 let load_module ls mod_id =
-  <span data-count="25165">m</span>atch mod_id with
-  | <span data-count="25017">N</span>one -&gt;
+  <span data-count="25175">m</span>atch mod_id with
+  | <span data-count="25027">N</span>one -&gt;
     begin match Link.State.get_last ls with
     | <span data-count="0">N</span>one -&gt; Error `Unbound_last_module
-    | <span data-count="25017">S</span>ome m -&gt; Ok m
+    | <span data-count="25027">S</span>ome m -&gt; Ok m
     end
   | <span data-count="148">S</span>ome mod_id -&gt; (
     match Link.State.get_by_id ls mod_id with
@@ -893,10 +893,10 @@ let load_module ls mod_id =
     | <span data-count="148">S</span>ome exports -&gt; Ok exports )
 
 let load_func_from_module ls mod_id f_name =
-  <span data-count="25154">l</span>et* exports, env_id = load_modul<span data-count="25154">e</span> ls mod_id in
-  <span data-count="25154">m</span>atch Link.StringMap.find_opt f_name exports.functions with
+  <span data-count="25164">l</span>et* exports, env_id = load_modul<span data-count="25164">e</span> ls mod_id in
+  <span data-count="25164">m</span>atch Link.StringMap.find_opt f_name exports.functions with
   | <span data-count="0">N</span>one -&gt; Error (`Unbound_name f_name)
-  | <span data-count="25154">S</span>ome v -&gt; Ok (v, env_id)
+  | <span data-count="25164">S</span>ome v -&gt; Ok (v, env_id)
 
 let load_global_from_module ls mod_id name =
   <span data-count="11">l</span>et* exports, _env_id = load_modul<span data-count="11">e</span> ls mod_id in
@@ -984,15 +984,15 @@ let value_of_const : Wast.const -&gt; Concrete_value.t = <span data-count="35825
 
 let action (link_state : Concrete_extern_func.extern_func Link.State.t) =
   function
-  | <span data-count="25154">W</span>ast.Invoke (mod_id, f, args) -&gt; begin
+  | <span data-count="25164">W</span>ast.Invoke (mod_id, f, args) -&gt; begin
     Log.info (fun m -&gt;
       <span data-count="0">m</span> "invoke %a %s %a..."
         (Fmt.optio<span data-count="0">n</span> ~none:Fmt.nop Fmt.string)
         mod_id f Wast.pp_consts args );
-    <span data-count="25154">l</span>et* f, env_id = load_func_from_modul<span data-count="25154">e</span> link_state mod_id f in
-    <span data-count="25154">l</span>et stack = List.rev_map value_of_const args in
-    <span data-count="25154">l</span>et envs = Link.State.get_envs link_state in
-    <span data-count="25154">l</span>et module I = Interpret.Concrete (Interpret.Default_parameters) in
+    <span data-count="25164">l</span>et* f, env_id = load_func_from_modul<span data-count="25164">e</span> link_state mod_id f in
+    <span data-count="25164">l</span>et stack = List.rev_map value_of_const args in
+    <span data-count="25164">l</span>et envs = Link.State.get_envs link_state in
+    <span data-count="25164">l</span>et module I = Interpret.Concrete (Interpret.Default_parameters) in
     I.exec_vfunc_from_outside ~locals:stack ~env:env_id ~envs f
     end
   | <span data-count="11">G</span>et (mod_id, name) -&gt;
@@ -1013,19 +1013,19 @@ let run ~no_exhaustion script =
   let module I = Interpret.Concrete (Interpret.Default_parameters) in
   list_fold_left
     (fun (link_state : Concrete_extern_func.extern_func Link.State.t) -&gt;
-      <span data-count="30546">f</span>unction
-      | <span data-count="1797">W</span>ast.Text_module (false, m) -&gt;
+      <span data-count="30566">f</span>unction
+      | <span data-count="1807">W</span>ast.Text_module (false, m) -&gt;
         if !curr_module = 0 then
           (* TODO: disable printing*)
           <span data-count="185">(</span>);
-        <span data-count="1797">L</span>og.info (fun m -&gt; <span data-count="0">m</span> "*** module");
-        <span data-count="1797">i</span>ncr curr_module;
-        <span data-count="1797">l</span>et* m, link_state =
-          Compile.Text.until_lin<span data-count="1785">k</span> link_state ~unsafe ~name:None m
+        <span data-count="1807">L</span>og.info (fun m -&gt; <span data-count="0">m</span> "*** module");
+        <span data-count="1807">i</span>ncr curr_module;
+        <span data-count="1807">l</span>et* m, link_state =
+          Compile.Text.until_lin<span data-count="1795">k</span> link_state ~unsafe ~name:None m
         in
-        <span data-count="1785">l</span>et+ () = I.modu<span data-count="1785">l</span> link_state m in
+        <span data-count="1795">l</span>et+ () = I.modu<span data-count="1795">l</span> link_state m in
         (* TODO: enable printing again! *)
-        <span data-count="1785">l</span>ink_state
+        <span data-count="1795">l</span>ink_state
       | <span data-count="2">W</span>ast.Quoted_module (false, m) -&gt;
         Log.info (fun m -&gt; <span data-count="0">m</span> "*** quoted module");
         <span data-count="2">i</span>ncr curr_module;
@@ -1127,11 +1127,11 @@ let run ~no_exhaustion script =
           <span data-count="0">E</span>rror `Bad_result
         end
         else <span data-count="22334">O</span>k link_state
-      | <span data-count="2623">A</span>ssert (Assert_trap (a, expected)) -&gt;
+      | <span data-count="2627">A</span>ssert (Assert_trap (a, expected)) -&gt;
         Log.info (fun m -&gt; <span data-count="0">m</span> "*** assert_trap");
-        <span data-count="2623">l</span>et got = action link_state a in
-        <span data-count="2623">l</span>et+ () = check_error_resul<span data-count="2623">t</span> expected got in
-        <span data-count="2622">l</span>ink_state
+        <span data-count="2627">l</span>et got = action link_state a in
+        <span data-count="2627">l</span>et+ () = check_error_resul<span data-count="2627">t</span> expected got in
+        <span data-count="2626">l</span>ink_state
       | <span data-count="15">A</span>ssert (Assert_exhaustion (a, expected)) -&gt;
         Log.info (fun m -&gt; <span data-count="0">m</span> "*** assert_exhaustion");
         <span data-count="15">l</span>et+ () =
@@ -1147,10 +1147,10 @@ let run ~no_exhaustion script =
         <span data-count="231">l</span>et+ state = Link.register_last_modul<span data-count="231">e</span> link_state ~name ~id:mod_name in
         (* TODO: enable debug again! *)
         <span data-count="231">s</span>tate
-      | <span data-count="204">A</span>ction a -&gt;
+      | <span data-count="210">A</span>ction a -&gt;
         Log.info (fun m -&gt; <span data-count="0">m</span> "*** action");
-        <span data-count="204">l</span>et+ _stack = actio<span data-count="204">n</span> link_state a in
-        <span data-count="204">l</span>ink_state
+        <span data-count="210">l</span>et+ _stack = actio<span data-count="210">n</span> link_state a in
+        <span data-count="210">l</span>ink_state
       | <span data-count="2">T</span>ext_module (true, _)
       | <span data-count="0">B</span>inary_module (true, _, _)
       | <span data-count="0">Q</span>uoted_module (true, _) -&gt;

@@ -268,7 +268,7 @@ type t =
   }
 
 let get_min : Binary.Mem.Type.limits -&gt; int = function
-  | <span data-count="936">I</span>32 { min; _ } -&gt; Int32.to_int min
+  | <span data-count="941">I</span>32 { min; _ } -&gt; Int32.to_int min
   | <span data-count="0">I</span>64 { min; _ } -&gt; min
 
 let set_min (limits : Binary.Mem.Type.limits) new_min : Binary.Mem.Type.limits =
@@ -278,8 +278,8 @@ let set_min (limits : Binary.Mem.Type.limits) new_min : Binary.Mem.Type.limits =
 
 let init limits : t =
   (* TODO: overflow check? (page_size * limits.min) / page_size = limits.min? *)
-  <span data-count="863">l</span>et data = Bytes.make (page_size * get_mi<span data-count="863">n</span> limits) '\x00' in
-  <span data-count="863">{</span> limits; data }
+  <span data-count="868">l</span>et data = Bytes.make (page_size * get_mi<span data-count="868">n</span> limits) '\x00' in
+  <span data-count="868">{</span> limits; data }
 
 let update_memory mem data =
   <span data-count="73">l</span>et limits =
@@ -311,11 +311,11 @@ let blit ~src ~src_idx ~dst ~dst_idx ~len =
   <span data-count="137">O</span>k ()
 
 let blit_string mem str ~src ~dst ~len =
-  <span data-count="245">l</span>et src = Int32.to_int src in
-  <span data-count="245">l</span>et dst = Int32.to_int dst in
-  <span data-count="245">l</span>et len = Int32.to_int len in
-  <span data-count="245">B</span>ytes.unsafe_blit_string str src mem.data dst len;
-  <span data-count="245">O</span>k ()
+  <span data-count="248">l</span>et src = Int32.to_int src in
+  <span data-count="248">l</span>et dst = Int32.to_int dst in
+  <span data-count="248">l</span>et len = Int32.to_int len in
+  <span data-count="248">B</span>ytes.unsafe_blit_string str src mem.data dst len;
+  <span data-count="248">O</span>k ()
 
 let get_limit_max { limits; _ } =
   <span data-count="89">m</span>atch limits with
@@ -368,7 +368,7 @@ let load_64 mem addr =
 
 let size_in_pages mem = <span data-count="327">I</span>nt32.of_int @@ (Bytes.lengt<span data-count="327">h</span> mem.data / page_size)
 
-let size mem = <span data-count="534788">I</span>nt32.of_int @@ Bytes.lengt<span data-count="534788">h</span> mem.data
+let size mem = <span data-count="534793">I</span>nt32.of_int @@ Bytes.lengt<span data-count="534793">h</span> mem.data
 </code></pre>
       </div>
     </div>

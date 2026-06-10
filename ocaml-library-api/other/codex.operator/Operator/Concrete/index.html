@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Concrete (docs.other.codex.operator.Operator.Concrete)</title><meta charset="utf-8"/><link rel="stylesheet" href="../../../../odoc.support/odoc.css"/><meta name="generator" content="odoc 3.2.1"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../../../../odoc.support/highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script><link rel="stylesheet" href="../../../../odoc.support/katex.min.css"/><script src="../../../../odoc.support/katex.min.js"></script><script>
+//<![CDATA[
+
+          document.addEventListener("DOMContentLoaded", function () {
+            var macros = {};
+            var elements = Array.from(document.getElementsByClassName("odoc-katex-math"));
+            for (var i = 0; i < elements.length; i++) {
+              var el = elements[i];
+              var content = el.textContent;
+              var new_el = document.createElement("span");
+              new_el.setAttribute("class", "odoc-katex-math-rendered");
+              var display = el.classList.contains("display");
+              katex.render(content, new_el, { throwOnError: false, displayMode: display, macros });
+              el.replaceWith(new_el);
+            }
+          });
+        
+//]]>
+</script></head><body class="odoc"><nav class="odoc-nav"><a href="../index.html">Up</a> – <a href="../../../../../index.html">Index</a> &#x00BB; <a href="../../../../index.html">docs</a> &#x00BB; <a href="../../../index.html">other</a> &#x00BB; <a href="../../index.html">codex.operator</a> &#x00BB; <a href="../index.html">Operator</a> &#x00BB; Concrete</nav><header class="odoc-preamble"><h1>Module <code><span>Operator.Concrete</span></code></h1><p>Concrete interpreter using OCaml boolean and <code>Z.t</code> for values.</p></header><div class="odoc-content"><p>The interpreter values can be:</p><ul><li><code>{true, false, empty}</code> for booleans;</li><li>any <code>Z.t</code> or <code>empty</code> for integers;</li><li>the set of bitvectors (represented by <code>Z.t</code> + empty). Empty is not an error, just a special value representing the absence of value.</li></ul><p>But, considering that whenever an argument is empty, the result is empty, we can build an interpreter by focusing on the non-empty values, and just return an exception for the (infrequent) empty cases.</p><div class="odoc-spec"><div class="spec exception anchored" id="exception-Empty"><a href="#exception-Empty" class="anchor"></a><code><span><span class="keyword">exception</span> </span><span><span class="exception">Empty</span></span></code></div></div><div class="odoc-spec"><div class="spec module anchored" id="module-In_bits"><a href="#module-In_bits" class="anchor"></a><code><span><span class="keyword">module</span> In_bits</span><span> = <a href="../../../codex.units/Units/In_bits/index.html">Units.In_bits</a></span></code></div></div><div class="odoc-spec"><div class="spec module anchored" id="module-Types"><a href="#module-Types" class="anchor"></a><code><span><span class="keyword">module</span> <a href="Types/index.html">Types</a></span><span> : <span class="keyword">sig</span> ... <span class="keyword">end</span></span></code></div></div><div class="odoc-spec"><div class="spec module anchored" id="module-Boolean_Interp"><a href="#module-Boolean_Interp" class="anchor"></a><code><span><span class="keyword">module</span> <a href="Boolean_Interp/index.html">Boolean_Interp</a></span><span> : <span class="keyword">sig</span> ... <span class="keyword">end</span></span></code></div></div><div class="odoc-spec"><div class="spec module anchored" id="module-Bitvector_Interp"><a href="#module-Bitvector_Interp" class="anchor"></a><code><span><span class="keyword">module</span> <a href="Bitvector_Interp/index.html">Bitvector_Interp</a></span><span> : <span class="keyword">sig</span> ... <span class="keyword">end</span></span></code></div></div></div></body></html>

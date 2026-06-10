@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Nonrelational (docs.other.codex.domains.Domains.Term_based.Nonrelational)</title><meta charset="utf-8"/><link rel="stylesheet" href="../../../../../odoc.support/odoc.css"/><meta name="generator" content="odoc 3.2.1"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><script src="../../../../../odoc.support/highlight.pack.js"></script><script>hljs.initHighlightingOnLoad();</script><link rel="stylesheet" href="../../../../../odoc.support/katex.min.css"/><script src="../../../../../odoc.support/katex.min.js"></script><script>
+//<![CDATA[
+
+          document.addEventListener("DOMContentLoaded", function () {
+            var macros = {};
+            var elements = Array.from(document.getElementsByClassName("odoc-katex-math"));
+            for (var i = 0; i < elements.length; i++) {
+              var el = elements[i];
+              var content = el.textContent;
+              var new_el = document.createElement("span");
+              new_el.setAttribute("class", "odoc-katex-math-rendered");
+              var display = el.classList.contains("display");
+              katex.render(content, new_el, { throwOnError: false, displayMode: display, macros });
+              el.replaceWith(new_el);
+            }
+          });
+        
+//]]>
+</script></head><body class="odoc"><nav class="odoc-nav"><a href="../index.html">Up</a> – <a href="../../../../../../index.html">Index</a> &#x00BB; <a href="../../../../../index.html">docs</a> &#x00BB; <a href="../../../../index.html">other</a> &#x00BB; <a href="../../../index.html">codex.domains</a> &#x00BB; <a href="../../index.html">Domains</a> &#x00BB; <a href="../index.html">Term_based</a> &#x00BB; Nonrelational</nav><header class="odoc-preamble"><h1>Module <code><span>Term_based.Nonrelational</span></code></h1></header><div class="odoc-content"><div class="odoc-spec"><div class="spec module anchored" id="module-Make"><a href="#module-Make" class="anchor"></a><code><span><span class="keyword">module</span> <a href="Make/index.html">Make</a></span><span>
+  (<a href="Make/argument-1-Terms/index.html">Terms</a> : 
+    <a href="../../../../codex.terms/Terms/Sig/module-type-TERMS/index.html">Terms.Sig.TERMS</a>
+      <span class="keyword">with</span> <span><span class="keyword">type</span> <span>('a, 'b) <a href="../../../../codex.terms/Terms/Sig/module-type-TERMS/Relation/index.html#type-t">Relation.t</a></span> = <span><span>(<span class="type-var">'a</span>, <span class="type-var">'b</span>)</span> <a href="../../../../codex.terms/Terms/Relations/Equality/index.html#type-t">Terms.Relations.Equality.t</a></span></span>)
+  (<a href="Make/argument-2-SVA/index.html">SVA</a> : <a href="../../../../codex.single_value_abstraction/Single_value_abstraction/Sig/module-type-NUMERIC_ENUM/index.html">Single_value_abstraction.Sig.NUMERIC_ENUM</a>) : 
+  <a href="../../Term_based_sig/module-type-Domain_S/index.html">Term_based_sig.Domain_S</a>
+    <span class="keyword">with</span> <span><span class="keyword">module</span> <a href="../../Term_based_sig/module-type-Domain_S/Query/Boolean_Lattice/index.html">Query.Boolean_Lattice</a> = <a href="Make/argument-2-SVA/Boolean_Lattice/index.html">SVA.Boolean_Lattice</a></span>
+     <span class="keyword">and</span> <span><span class="keyword">module</span> <a href="../../Term_based_sig/module-type-Domain_S/Query/Integer_Lattice/index.html">Query.Integer_Lattice</a> = <a href="Make/argument-2-SVA/Integer_Lattice/index.html">SVA.Integer_Lattice</a></span>
+     <span class="keyword">and</span> <span><span class="keyword">module</span> <a href="../../Term_based_sig/module-type-Domain_S/Terms/index.html">Terms</a> = <a href="Make/argument-1-Terms/index.html">Terms</a></span></span></code></div><div class="spec-doc"><p>Simple non-relational abstraction, maps terms to the numeric abstraction provided in <code>SVA</code>. This is for the case where there are no relations between the terms (besides equality).</p></div></div><div class="odoc-spec"><div class="spec module anchored" id="module-MakeUF"><a href="#module-MakeUF" class="anchor"></a><code><span><span class="keyword">module</span> <a href="MakeUF/index.html">MakeUF</a></span><span>
+  (<a href="MakeUF/argument-1-T/index.html">T</a> : <a href="../../../../codex.terms/Terms/Sig/module-type-TERMS/index.html">Terms.Sig.TERMS</a>)
+  (<a href="MakeUF/argument-2-SVA/index.html">SVA</a> : <a href="../../../../codex.single_value_abstraction/Single_value_abstraction/Sig/module-type-NUMERIC_ENUM/index.html">Single_value_abstraction.Sig.NUMERIC_ENUM</a>)
+  (<a href="MakeUF/argument-3-_/index.html">_</a> : 
+    <a href="../../../../codex.terms/Terms/Relations/module-type-GROUP_ACTION/index.html">Terms.Relations.GROUP_ACTION</a>
+      <span class="keyword">with</span> <span><span class="keyword">type</span> <a href="../../../../codex.terms/Terms/Relations/module-type-GROUP_ACTION/index.html#type-bitvector">bitvector</a> = <a href="MakeUF/argument-2-SVA/index.html#type-bitvector">SVA.bitvector</a></span>
+       <span class="keyword">and</span> <span><span class="keyword">type</span> <a href="../../../../codex.terms/Terms/Relations/module-type-GROUP_ACTION/index.html#type-integer">integer</a> = <a href="MakeUF/argument-2-SVA/index.html#type-integer">SVA.integer</a></span>
+       <span class="keyword">and</span> <span><span class="keyword">type</span> <a href="../../../../codex.terms/Terms/Relations/module-type-GROUP_ACTION/index.html#type-boolean">boolean</a> = <a href="MakeUF/argument-2-SVA/index.html#type-boolean">SVA.boolean</a></span>
+       <span class="keyword">and</span> <span><span class="keyword">type</span> <a href="../../../../codex.terms/Terms/Relations/module-type-GROUP_ACTION/index.html#type-enum">enum</a> = <a href="MakeUF/argument-2-SVA/index.html#type-enum">SVA.enum</a></span>
+       <span class="keyword">and</span> <span><span class="keyword">type</span> <span>('a, 'b) <a href="../../../../codex.terms/Terms/Relations/module-type-GROUP_ACTION/index.html#type-relation">relation</a></span> = <span><span>(<span class="type-var">'a</span>, <span class="type-var">'b</span>)</span> <a href="MakeUF/argument-1-T/Relation/index.html#type-t">T.Relation.t</a></span></span>) : 
+  <a href="../../Term_based_sig/module-type-DOMAIN_WITH_UNION/index.html">Term_based_sig.DOMAIN_WITH_UNION</a>
+    <span class="keyword">with</span> <span><span class="keyword">module</span> <a href="../../Term_based_sig/module-type-DOMAIN_WITH_UNION/Query/Boolean_Lattice/index.html">Query.Boolean_Lattice</a> = <a href="MakeUF/argument-2-SVA/Boolean_Lattice/index.html">SVA.Boolean_Lattice</a></span>
+     <span class="keyword">and</span> <span><span class="keyword">module</span> <a href="../../Term_based_sig/module-type-DOMAIN_WITH_UNION/Query/Integer_Lattice/index.html">Query.Integer_Lattice</a> = <a href="MakeUF/argument-2-SVA/Integer_Lattice/index.html">SVA.Integer_Lattice</a></span>
+     <span class="keyword">and</span> <span><span class="keyword">module</span> <a href="../../Term_based_sig/module-type-DOMAIN_WITH_UNION/Terms/index.html">Terms</a> = <a href="MakeUF/argument-1-T/index.html">T</a></span></span></code></div><div class="spec-doc"><p>Make the reduced product of a non-relational domain and a labeled union-find. This should then be passed to one of the functions in <a href="../Union_find/index.html"><code>Union_find</code></a>, as these are the ones that create relation</p></div></div></div></body></html>

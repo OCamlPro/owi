@@ -242,18 +242,18 @@ type t = Symbolic_table0.t =
   }
 
 let get t i =
-  <span data-count="3880">m</span>atch IMap.find_opt i t.data with <span data-count="3880">S</span>ome v -&gt; v | None -&gt; assert false
+  <span data-count="3876">m</span>atch IMap.find_opt i t.data with <span data-count="3876">S</span>ome v -&gt; v | None -&gt; assert false
 
-let replace tbl = <span data-count="879">S</span>ymbolic_choice.modify_state (Thread.replace_tabl<span data-count="879">e</span> tbl)
+let replace tbl = <span data-count="879">S</span>ymbolic_choice.map_state (Thread.replace_tabl<span data-count="879">e</span> tbl)
 
 let set tbl i v =
   <span data-count="703">l</span>et data = IMap.add i v tbl.data in
   <span data-count="703">l</span>et tbl = { tbl with data } in
   replace tbl
 
-let size t = <span data-count="4052">I</span>Map.cardinal t.data
+let size t = <span data-count="4048">I</span>Map.cardinal t.data
 
-let typ t = <span data-count="3875">t</span>.typ
+let typ t = <span data-count="3871">t</span>.typ
 
 let max_size t =
   <span data-count="0">m</span>atch t.limits with
