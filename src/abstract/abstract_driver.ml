@@ -178,7 +178,7 @@ module DenotFixpoint (S : DATA_STATE) = struct
       | instr :: instrs -> (
         let new_state, new_jt = eval_instr state instr in
         let new_jt = JumpTarget.append jt new_jt in
-        Log.info (fun m ->
+        Log.debug (fun m ->
           m "jt            :  %a"
             (JumpTarget.pp state.Abstract_state.ctx)
             new_jt );
