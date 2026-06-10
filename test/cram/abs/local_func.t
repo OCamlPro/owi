@@ -165,7 +165,7 @@
   owi: [INFO] stack         : [  ]
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : i32.const 42
-  owi: [INFO] jt            :  
+  owi: [DEBUG] jt            :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=1, <empty>}
                  stack  : i32 {42}
@@ -185,7 +185,7 @@
   owi: [INFO] stack         : [  ]
   owi: [INFO] locals        : [ (0 -> i32 {42}) ]
   owi: [INFO] running instr : local.get 0
-  owi: [INFO] jt            :  
+  owi: [DEBUG] jt            :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=1, <empty>}
                  stack  : i32 {42}
@@ -193,7 +193,7 @@
   owi: [INFO] stack         : [ i32 {42} ]
   owi: [INFO] locals        : [ (0 -> i32 {42}) ]
   owi: [INFO] running instr : local.get 0
-  owi: [INFO] jt            :  
+  owi: [DEBUG] jt            :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=1, <empty>}
                  stack  : i32 {42} ; i32 {42}
@@ -201,7 +201,7 @@
   owi: [INFO] stack         : [ i32 {42} ; i32 {42} ]
   owi: [INFO] locals        : [ (0 -> i32 {42}) ]
   owi: [INFO] running instr : i32.add
-  owi: [INFO] jt            :  
+  owi: [DEBUG] jt            :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=1, <empty>}
                  stack  : i32 {84}
@@ -209,13 +209,13 @@
   owi: [INFO] stack         : [ i32 {84} ]
   owi: [INFO] locals        : [ (0 -> i32 {42}) ]
   owi: [INFO] running instr : return
-  owi: [INFO] jt            :  ret -> 
-                context: Context{id=1, <empty>}
-                stack  : i32 {84}
-                locals : i32 {42}
+  owi: [DEBUG] jt            :  ret -> 
+                 context: Context{id=1, <empty>}
+                 stack  : i32 {84}
+                 locals : i32 {42}
   owi: [DEBUG] abstract state : None 
   
-  owi: [INFO] jt            :  
+  owi: [DEBUG] jt            :  
   owi: [DEBUG] abstract state : None 
   
-  owi: [INFO] jt            :  
+  owi: [DEBUG] jt            :  

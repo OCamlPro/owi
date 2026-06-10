@@ -110,7 +110,7 @@
   owi: [INFO] stack         : [  ]
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : i32.const 2
-  owi: [INFO] jt            :  
+  owi: [DEBUG] jt            :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=1, <empty>}
                  stack  : i32 {2}
@@ -118,10 +118,10 @@
   owi: [INFO] stack         : [ i32 {2} ]
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : return
-  owi: [INFO] jt            :  ret -> 
-                context: Context{id=1, <empty>}
-                stack  : i32 {2}
-                locals : 
+  owi: [DEBUG] jt            :  ret -> 
+                 context: Context{id=1, <empty>}
+                 stack  : i32 {2}
+                 locals : 
   owi: [DEBUG] abstract state : None 
   
-  owi: [INFO] jt            :  
+  owi: [DEBUG] jt            :  
