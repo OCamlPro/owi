@@ -279,15 +279,16 @@ struct
     | Mul -> Stack.apply_i32_i32_i32 stack I32.mul |> Choice.return
     | Div S ->
       let (n1, n2), stack = Stack.pop2_i32 stack in
-      let cant_divide_by_zero =
-        Abstract_invariant.cant_divide_by_zero Parameters.abstract_invariant
-          uuid
+      let skip_divide_by_zero_check =
+        not
+        @@ Abstract_invariant.can_divide_by_zero Parameters.abstract_invariant
+             ~uuid
       in
       let>! () =
         ( I32.eqz n2
         , `Integer_divide_by_zero
         , (* TODO: get instr counter *) None
-        , cant_divide_by_zero )
+        , skip_divide_by_zero_check )
       in
       let>! () =
         ( Boolean.and_ (I32.eq n1 I32.min_int) @@ I32.eq n2 (I32.of_int (-1))
