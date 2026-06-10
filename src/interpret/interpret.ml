@@ -279,12 +279,12 @@ struct
     | Mul -> Stack.apply_i32_i32_i32 stack I32.mul |> Choice.return
     | Div S ->
       let (n1, n2), stack = Stack.pop2_i32 stack in
-      let skip_divide_by_zero_check =
-        not
-        @@ Abstract_invariant.can_divide_by_zero Parameters.abstract_invariant
-             ~uuid
-      in
       let>! () =
+        let skip_divide_by_zero_check =
+          not
+          @@ Abstract_invariant.can_divide_by_zero Parameters.abstract_invariant
+               ~uuid
+        in
         ( I32.eqz n2
         , `Integer_divide_by_zero
         , (* TODO: get instr counter *) None
@@ -300,28 +300,43 @@ struct
     | Div U ->
       let (n1, n2), stack = Stack.pop2_i32 stack in
       let>! () =
+        let skip_divide_by_zero_check =
+          not
+          @@ Abstract_invariant.can_divide_by_zero Parameters.abstract_invariant
+               ~uuid
+        in
         ( I32.eqz n2
         , `Integer_divide_by_zero
         , (* TODO: get instr counter *) None
-        , false )
+        , skip_divide_by_zero_check )
       in
       Stack.push_i32 stack (I32.unsigned_div n1 n2) |> Choice.return
     | Rem S ->
       let (n1, n2), stack = Stack.pop2_i32 stack in
       let>! () =
+        let skip_divide_by_zero_check =
+          not
+          @@ Abstract_invariant.can_divide_by_zero Parameters.abstract_invariant
+               ~uuid
+        in
         ( I32.eqz n2
         , `Integer_divide_by_zero
         , (* TODO: get instr counter *) None
-        , false )
+        , skip_divide_by_zero_check )
       in
       Stack.push_i32 stack (I32.rem n1 n2) |> Choice.return
     | Rem U ->
       let (n1, n2), stack = Stack.pop2_i32 stack in
       let>! () =
+        let skip_divide_by_zero_check =
+          not
+          @@ Abstract_invariant.can_divide_by_zero Parameters.abstract_invariant
+               ~uuid
+        in
         ( I32.eqz n2
         , `Integer_divide_by_zero
         , (* TODO: get instr counter *) None
-        , false )
+        , skip_divide_by_zero_check )
       in
       Stack.push_i32 stack (I32.unsigned_rem n1 n2) |> Choice.return
     | And -> Stack.apply_i32_i32_i32 stack I32.logand |> Choice.return
@@ -449,7 +464,7 @@ struct
       let+ () = Memory.store_32 mem ~addr n in
       stack
 
-  let exec_i64_instr env instr_counter stack :
+  let exec_i64_instr env instr_counter stack ~uuid :
     Binary.i64_instr -> Stack.t Choice.t = function
     | Const n -> Stack.push_concrete_i64 stack n |> Choice.return
     | Clz -> Stack.apply_i64_i64 stack I64.clz |> Choice.return
@@ -461,10 +476,15 @@ struct
     | Div S ->
       let (n1, n2), stack = Stack.pop2_i64 stack in
       let>! () =
+        let skip_divide_by_zero_check =
+          not
+          @@ Abstract_invariant.can_divide_by_zero Parameters.abstract_invariant
+               ~uuid
+        in
         ( I64.eqz n2
         , `Integer_divide_by_zero
         , (* TODO: get instr counter *) None
-        , false )
+        , skip_divide_by_zero_check )
       in
       let>! () =
         ( Boolean.and_ (I64.eq n1 I64.min_int)
@@ -477,28 +497,43 @@ struct
     | Div U ->
       let (n1, n2), stack = Stack.pop2_i64 stack in
       let>! () =
+        let skip_divide_by_zero_check =
+          not
+          @@ Abstract_invariant.can_divide_by_zero Parameters.abstract_invariant
+               ~uuid
+        in
         ( I64.eqz n2
         , `Integer_divide_by_zero
         , (* TODO: get instr counter *) None
-        , false )
+        , skip_divide_by_zero_check )
       in
       Stack.push_i64 stack (I64.unsigned_div n1 n2) |> Choice.return
     | Rem S ->
       let (n1, n2), stack = Stack.pop2_i64 stack in
       let>! () =
+        let skip_divide_by_zero_check =
+          not
+          @@ Abstract_invariant.can_divide_by_zero Parameters.abstract_invariant
+               ~uuid
+        in
         ( I64.eqz n2
         , `Integer_divide_by_zero
         , (* TODO: get instr counter *) None
-        , false )
+        , skip_divide_by_zero_check )
       in
       Stack.push_i64 stack (I64.rem n1 n2) |> Choice.return
     | Rem U ->
       let (n1, n2), stack = Stack.pop2_i64 stack in
       let>! () =
+        let skip_divide_by_zero_check =
+          not
+          @@ Abstract_invariant.can_divide_by_zero Parameters.abstract_invariant
+               ~uuid
+        in
         ( I64.eqz n2
         , `Integer_divide_by_zero
         , (* TODO: get instr counter *) None
-        , false )
+        , skip_divide_by_zero_check )
       in
       Stack.push_i64 stack (I64.unsigned_rem n1 n2) |> Choice.return
     | And -> Stack.apply_i64_i64_i64 stack I64.logand |> Choice.return
