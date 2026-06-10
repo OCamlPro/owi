@@ -416,7 +416,11 @@ module DataAbstract_state : DATA_STATE = struct
   type t = Abstract_state.t option * Binary.instr Annotated.t option
 
   let eval_i32 ({ stack; ctx; invariant; _ } as state : Abstract_state.t) uuid :
-    Binary.i32_instr -> _ = function
+    Binary.i32_instr -> _ =
+    let can_be_zero ctx v =
+      Option.is_some @@ Abstract_domain.assume ctx (Abstract_i32.eqz ctx v)
+    in
+    function
     | Const i ->
       let stack = Stack.push_i32 stack (Abstract_i32.of_int32 ctx i) in
       { state with stack }
@@ -431,34 +435,26 @@ module DataAbstract_state : DATA_STATE = struct
       { state with stack }
     | Div S ->
       let (hd1, hd2), stack = Stack.pop2_i32 stack in
-      begin match Abstract_domain.assume ctx (Abstract_i32.eqz ctx hd2) with
-      | Some _ctx -> Abstract_invariant.add_cant_divide_by_zero invariant uuid
-      | None -> ()
-      end;
+      Abstract_invariant.add_cant_divide_by_zero invariant uuid
+        (can_be_zero ctx hd2);
       let stack = Stack.push_i32 stack (Abstract_i32.div_s ctx hd1 hd2) in
       { state with stack }
     | Div U ->
       let (hd1, hd2), stack = Stack.pop2_i32 stack in
-      begin match Abstract_domain.assume ctx (Abstract_i32.eqz ctx hd2) with
-      | Some _ctx -> Abstract_invariant.add_cant_divide_by_zero invariant uuid
-      | None -> ()
-      end;
+      Abstract_invariant.add_cant_divide_by_zero invariant uuid
+        (can_be_zero ctx hd2);
       let stack = Stack.push_i32 stack (Abstract_i32.div_u ctx hd1 hd2) in
       { state with stack }
     | Rem S ->
       let (hd1, hd2), stack = Stack.pop2_i32 stack in
-      begin match Abstract_domain.assume ctx (Abstract_i32.eqz ctx hd2) with
-      | Some _ctx -> Abstract_invariant.add_cant_divide_by_zero invariant uuid
-      | None -> ()
-      end;
+      Abstract_invariant.add_cant_divide_by_zero invariant uuid
+        (can_be_zero ctx hd2);
       let stack = Stack.push_i32 stack (Abstract_i32.rem_s ctx hd1 hd2) in
       { state with stack }
     | Rem U ->
       let (hd1, hd2), stack = Stack.pop2_i32 stack in
-      begin match Abstract_domain.assume ctx (Abstract_i32.eqz ctx hd2) with
-      | Some _ctx -> Abstract_invariant.add_cant_divide_by_zero invariant uuid
-      | None -> ()
-      end;
+      Abstract_invariant.add_cant_divide_by_zero invariant uuid
+        (can_be_zero ctx hd2);
       let stack = Stack.push_i32 stack (Abstract_i32.rem_u ctx hd1 hd2) in
       { state with stack }
     | And ->
@@ -498,7 +494,11 @@ module DataAbstract_state : DATA_STATE = struct
       assert false
 
   let eval_i64 ({ stack; ctx; invariant; _ } as state : Abstract_state.t) uuid :
-    Binary.i64_instr -> _ = function
+    Binary.i64_instr -> _ =
+    let can_be_zero ctx v =
+      Option.is_some @@ Abstract_domain.assume ctx (Abstract_i64.eqz ctx v)
+    in
+    function
     | Const i ->
       let stack = Stack.push_i64 stack (Abstract_i64.of_int64 ctx i) in
       { state with stack }
@@ -513,34 +513,26 @@ module DataAbstract_state : DATA_STATE = struct
       { state with stack }
     | Div S ->
       let (hd1, hd2), stack = Stack.pop2_i64 stack in
-      begin match Abstract_domain.assume ctx (Abstract_i64.eqz ctx hd2) with
-      | Some _ctx -> Abstract_invariant.add_cant_divide_by_zero invariant uuid
-      | None -> ()
-      end;
+      Abstract_invariant.add_cant_divide_by_zero invariant uuid
+        (can_be_zero ctx hd2);
       let stack = Stack.push_i64 stack (Abstract_i64.div_s ctx hd1 hd2) in
       { state with stack }
     | Div U ->
       let (hd1, hd2), stack = Stack.pop2_i64 stack in
-      begin match Abstract_domain.assume ctx (Abstract_i64.eqz ctx hd2) with
-      | Some _ctx -> Abstract_invariant.add_cant_divide_by_zero invariant uuid
-      | None -> ()
-      end;
+      Abstract_invariant.add_cant_divide_by_zero invariant uuid
+        (can_be_zero ctx hd2);
       let stack = Stack.push_i64 stack (Abstract_i64.div_u ctx hd1 hd2) in
       { state with stack }
     | Rem S ->
       let (hd1, hd2), stack = Stack.pop2_i64 stack in
-      begin match Abstract_domain.assume ctx (Abstract_i64.eqz ctx hd2) with
-      | Some _ctx -> Abstract_invariant.add_cant_divide_by_zero invariant uuid
-      | None -> ()
-      end;
+      Abstract_invariant.add_cant_divide_by_zero invariant uuid
+        (can_be_zero ctx hd2);
       let stack = Stack.push_i64 stack (Abstract_i64.rem_s ctx hd1 hd2) in
       { state with stack }
     | Rem U ->
       let (hd1, hd2), stack = Stack.pop2_i64 stack in
-      begin match Abstract_domain.assume ctx (Abstract_i64.eqz ctx hd2) with
-      | Some _ctx -> Abstract_invariant.add_cant_divide_by_zero invariant uuid
-      | None -> ()
-      end;
+      Abstract_invariant.add_cant_divide_by_zero invariant uuid
+        (can_be_zero ctx hd2);
       let stack = Stack.push_i64 stack (Abstract_i64.rem_u ctx hd1 hd2) in
       { state with stack }
     | And ->

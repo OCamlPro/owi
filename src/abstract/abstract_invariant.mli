@@ -8,4 +8,4 @@ val empty : unit -> t
 
 val cant_divide_by_zero : t -> int -> bool
 
-val add_cant_divide_by_zero : t -> int -> unit
+val add_cant_divide_by_zero : t -> int -> bool -> unit
