@@ -4,8 +4,10 @@
 
 type t
 
+val pp : t Fmt.t
+
 val empty : unit -> t
 
 val can_divide_by_zero : t -> uuid:int -> bool
 
-val add_divide_by_zero_invariant : t -> uuid:int -> possible:bool -> t
+val add_divide_by_zero_invariant : t -> uuid:int -> possible:bool -> unit

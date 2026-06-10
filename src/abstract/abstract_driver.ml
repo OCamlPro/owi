@@ -172,7 +172,7 @@ module DenotFixpoint (S : DATA_STATE) = struct
     -> Binary.expr Annotated.t
     -> t option * Abstract_state.t list JumpTarget.t =
    fun state expr ->
-    let rec loop (state, jt) (expr : Binary.expr) =
+    let rec loop ((state : Abstract_state.t), jt) (expr : Binary.expr) =
       Log.info (fun m ->
         m "jt            :  %a" (JumpTarget.pp state.Abstract_state.ctx) jt );
       match expr with
@@ -434,40 +434,40 @@ module DataAbstract_state : DATA_STATE = struct
       { state with stack }
     | Div S ->
       let (hd1, hd2), stack = Stack.pop2_i32 stack in
-      let invariant =
+      let () =
         let possible = i32_can_be_zero ctx hd2 in
         Abstract_invariant.add_divide_by_zero_invariant invariant ~uuid
           ~possible
       in
       let stack = Stack.push_i32 stack (Abstract_i32.div_s ctx hd1 hd2) in
-      { state with stack; invariant }
+      { state with stack }
     | Div U ->
       let (hd1, hd2), stack = Stack.pop2_i32 stack in
-      let invariant =
+      let () =
         let possible = i32_can_be_zero ctx hd2 in
         Abstract_invariant.add_divide_by_zero_invariant invariant ~uuid
           ~possible
       in
       let stack = Stack.push_i32 stack (Abstract_i32.div_u ctx hd1 hd2) in
-      { state with stack; invariant }
+      { state with stack }
     | Rem S ->
       let (hd1, hd2), stack = Stack.pop2_i32 stack in
-      let invariant =
+      let () =
         let possible = i32_can_be_zero ctx hd2 in
         Abstract_invariant.add_divide_by_zero_invariant invariant ~uuid
           ~possible
       in
       let stack = Stack.push_i32 stack (Abstract_i32.rem_s ctx hd1 hd2) in
-      { state with stack; invariant }
+      { state with stack }
     | Rem U ->
       let (hd1, hd2), stack = Stack.pop2_i32 stack in
-      let invariant =
+      let () =
         let possible = i32_can_be_zero ctx hd2 in
         Abstract_invariant.add_divide_by_zero_invariant invariant ~uuid
           ~possible
       in
       let stack = Stack.push_i32 stack (Abstract_i32.rem_u ctx hd1 hd2) in
-      { state with stack; invariant }
+      { state with stack }
     | And ->
       let stack = Stack.apply_i32_i32_i32 stack (Abstract_i32.and_ ctx) in
       { state with stack }
@@ -523,40 +523,40 @@ module DataAbstract_state : DATA_STATE = struct
       { state with stack }
     | Div S ->
       let (hd1, hd2), stack = Stack.pop2_i64 stack in
-      let invariant =
+      let () =
         let possible = i64_can_be_zero ctx hd2 in
         Abstract_invariant.add_divide_by_zero_invariant invariant ~uuid
           ~possible
       in
       let stack = Stack.push_i64 stack (Abstract_i64.div_s ctx hd1 hd2) in
-      { state with stack; invariant }
+      { state with stack }
     | Div U ->
       let (hd1, hd2), stack = Stack.pop2_i64 stack in
-      let invariant =
+      let () =
         let possible = i64_can_be_zero ctx hd2 in
         Abstract_invariant.add_divide_by_zero_invariant invariant ~uuid
           ~possible
       in
       let stack = Stack.push_i64 stack (Abstract_i64.div_u ctx hd1 hd2) in
-      { state with stack; invariant }
+      { state with stack }
     | Rem S ->
       let (hd1, hd2), stack = Stack.pop2_i64 stack in
-      let invariant =
+      let () =
         let possible = i64_can_be_zero ctx hd2 in
         Abstract_invariant.add_divide_by_zero_invariant invariant ~uuid
           ~possible
       in
       let stack = Stack.push_i64 stack (Abstract_i64.rem_s ctx hd1 hd2) in
-      { state with stack; invariant }
+      { state with stack }
     | Rem U ->
       let (hd1, hd2), stack = Stack.pop2_i64 stack in
-      let invariant =
+      let () =
         let possible = i64_can_be_zero ctx hd2 in
         Abstract_invariant.add_divide_by_zero_invariant invariant ~uuid
           ~possible
       in
       let stack = Stack.push_i64 stack (Abstract_i64.rem_u ctx hd1 hd2) in
-      { state with stack; invariant }
+      { state with stack }
     | And ->
       let stack = Stack.apply_i64_i64_i64 stack (Abstract_i64.and_ ctx) in
       { state with stack }
@@ -637,14 +637,14 @@ let expr (link_state : Abstract_extern_func.extern_func Link.State.t)
   let envs = Link.State.get_envs link_state in
   let state = Abstract_state.empty m.env envs () in
 
-  List.iter
-    begin fun (e : Binary.expr Annotated.t) ->
-      (* TODO handle *)
-      let end_state, _mapping = ConcreteFixpoint.eval_expr state e in
-      Fmt.pr "abstract state : %a@."
-        (Fmt.option ~none:(Fmt.any "none") (Abstract_state.pp state.ctx))
-        end_state
-    end
-    m.to_run;
+  let state =
+    List.fold_left
+      (fun (state : Abstract_state.t) (e : Binary.expr Annotated.t) ->
+        (* TODO handle this properly *)
+        match ConcreteFixpoint.eval_expr state e with
+        | None, _mapping -> state
+        | Some state, _mapping -> state )
+      state m.to_run
+  in
 
   state.invariant
