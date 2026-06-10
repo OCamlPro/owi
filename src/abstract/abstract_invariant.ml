@@ -2,30 +2,38 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-module Int_map = Map.Make (Int)
-
-type t = { can_divide_by_zero : bool Int_map.t }
+type t = { can_divide_by_zero : (int, bool) Hashtbl.t }
 
 let empty () =
-  let can_divide_by_zero = Int_map.empty in
+  let can_divide_by_zero = Hashtbl.create 512 in
   { can_divide_by_zero }
 
 let can_divide_by_zero { can_divide_by_zero } ~uuid =
-  let possible = Int_map.find_opt uuid can_divide_by_zero in
+  let possible = Hashtbl.find_opt can_divide_by_zero uuid in
   (* by default, we don't know, and assume it is possible to be on the safe-side *)
   Option.value ~default:true possible
 
-let add_divide_by_zero_invariant ({ can_divide_by_zero } as invariant) ~uuid
-  ~possible =
-  match Int_map.find_opt uuid can_divide_by_zero with
-  | None | Some false ->
-    (* we had no information or it was impossible  *)
+let add_divide_by_zero_invariant { can_divide_by_zero } ~uuid ~possible =
+  match Hashtbl.find_opt can_divide_by_zero uuid with
+  | None -> begin Hashtbl.add can_divide_by_zero uuid possible end
+  | Some false ->
     if possible then begin
-      (* it is now possible, thus we update with the new information *)
-      let can_divide_by_zero = Int_map.add uuid possible can_divide_by_zero in
-      { can_divide_by_zero }
+      (* it was impossible but it is now possible *)
+      Hashtbl.add can_divide_by_zero uuid true
     end
-    else invariant
+    else begin
+      (* it was impossible and it is still impossible *)
+      ()
+    end
   | Some true ->
-    (* if it was possible at some point, we never mark it as impossible *)
-    invariant
+    (* it was possible, so it must stay true *)
+    ()
+
+let pp_can_divide_by_zero fmt m =
+  Fmt.iter_bindings ~sep:Fmt.semi Hashtbl.iter
+    (fun ppf (k, v) -> Fmt.pf ppf "%d -> %b" k v)
+    fmt m
+
+let pp fmt { can_divide_by_zero } =
+  Fmt.pf fmt "{ can_divide_by_zero : %a }" pp_can_divide_by_zero
+    can_divide_by_zero
