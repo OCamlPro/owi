@@ -32,6 +32,9 @@ OPTIONS
        --fail-on-trap-only
            ignore assertion violations and only report traps
 
+       --generate-abstract-invariant
+           Generate invariants by running the abstract interpretation engine.
+
        --invoke-with-symbols
            Invoke the entry point of the program with symbolic values instead
            of dummy constants.

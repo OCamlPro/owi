@@ -33,6 +33,9 @@ OPTIONS
        --fail-on-trap-only
            ignore assertion violations and only report traps
 
+       --generate-abstract-invariant
+           Generate invariants by running the abstract interpretation engine.
+
        -I VALUE
            headers path
 
