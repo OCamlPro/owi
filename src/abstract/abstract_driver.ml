@@ -172,14 +172,16 @@ module DenotFixpoint (S : DATA_STATE) = struct
     -> Binary.expr Annotated.t
     -> t option * Abstract_state.t list JumpTarget.t =
    fun state expr ->
-    let rec loop ((state : Abstract_state.t), jt) (expr : Binary.expr) =
-      Log.info (fun m ->
-        m "jt            :  %a" (JumpTarget.pp state.Abstract_state.ctx) jt );
+    let rec loop (state, jt) (expr : Binary.expr) =
       match expr with
       | [] -> (Some state, jt)
       | instr :: instrs -> (
         let new_state, new_jt = eval_instr state instr in
         let new_jt = JumpTarget.append jt new_jt in
+        Log.info (fun m ->
+          m "jt            :  %a"
+            (JumpTarget.pp state.Abstract_state.ctx)
+            new_jt );
         match new_state with
         | None -> (None, new_jt)
         | Some s -> loop (s, new_jt) instrs )
@@ -207,15 +209,21 @@ module DenotFixpoint (S : DATA_STATE) = struct
     in
     let fn_state = { state with stack = []; func_rt = result_type; locals } in
     Log.debug (fun m ->
-      m "abstract state : %a" (Abstract_state.pp state.ctx) fn_state );
+      m "call (%a): abstract state : %a"
+        (Fmt.option ~none:(Fmt.any "$") Fmt.string)
+        func.id
+        (Abstract_state.pp fn_state.ctx)
+        fn_state );
     (* TODO: handle mapping *)
     let func_end_state, _ = eval_expr fn_state func.body in
     ( match func_end_state with
     | Some state ->
       Log.debug (fun m ->
-        m "abstract state : %a@."
-          (Fmt.option ~none:(Fmt.any "None") (Abstract_state.pp state.ctx))
-          func_end_state )
+        m "after call(%a): abstract state : %a@."
+          (Fmt.option ~none:(Fmt.any "$") Fmt.string)
+          func.id
+          (Abstract_state.pp state.ctx)
+          state )
     | None -> Log.debug (fun m -> m "abstract state : None @.") );
     (* We should probably copy state and join back the return values in the context here *)
     let* func_end_state in
@@ -223,7 +231,7 @@ module DenotFixpoint (S : DATA_STATE) = struct
       caller_popped_stack
       @ Stack.keep func_end_state.stack (List.length result_type)
     in
-    Some { state with stack }
+    Some { state with stack; ctx = func_end_state.ctx }
 
   and eval_instr
     ({ ctx; stack; env; envs; locals; _ } as state : Abstract_state.t) :
@@ -265,8 +273,7 @@ module DenotFixpoint (S : DATA_STATE) = struct
     | Block (_str_opt, _bt, expr) -> (
       match eval_expr state expr with
       | None, jt -> (None, JumpTarget.decr jt)
-      | Some { stack; locals; _ }, jt ->
-        let state = { state with stack; locals } in
+      | Some state, jt ->
         let state =
           match JumpTarget.find_opt (I 0) jt with
           | Some br_states -> List.fold_left join state br_states
@@ -351,7 +358,7 @@ module DenotFixpoint (S : DATA_STATE) = struct
           (* fixpoint reached: exit loop, assume condition is false *)
           let jt = JumpTarget.decr jt in
           let next_state =
-            Option.bind next_state @@ fun next_state ->
+            let* next_state in
             let stack = next_state.stack @ initial_state.stack in
             Some { next_state with stack }
           in
