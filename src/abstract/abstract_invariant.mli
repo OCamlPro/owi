@@ -6,6 +6,6 @@ type t
 
 val empty : unit -> t
 
-val cant_divide_by_zero : t -> int -> bool
+val can_divide_by_zero : t -> uuid:int -> bool
 
-val add_cant_divide_by_zero : t -> int -> bool -> unit
+val add_divide_by_zero_invariant : t -> uuid:int -> possible:bool -> t
