@@ -1378,7 +1378,6 @@
   owi: [DEBUG] stack             : [i32]
   owi: [DEBUG] typechecking instr: drop
   owi: [INFO] linking      ...
-  owi: [INFO] jt            :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=1, <empty>}
                  stack  : 
@@ -1387,11 +1386,10 @@
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : call 0
   owi: [INFO] calling func  : func start
-  owi: [DEBUG] abstract state : 
+  owi: [DEBUG] call (start): abstract state : 
                  context: Context{id=1, <empty>}
                  stack  : 
                  locals : i32 {0}
-  owi: [INFO] jt            :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=1, <empty>}
                  stack  : 
@@ -1407,7 +1405,6 @@
   owi: [INFO] stack         : [ i32 {0} ]
   owi: [INFO] locals        : [ (0 -> i32 {0}) ]
   owi: [INFO] running instr : loop (param i32) (result i32)
-  owi: [INFO] jt            :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=1, <empty>}
                  stack  : i32 {0}
@@ -1471,6 +1468,10 @@
   owi: [INFO] stack         : [ i32 {1} ; i32 {0} ]
   owi: [INFO] locals        : [ (0 -> i32 {2}) ]
   owi: [INFO] running instr : br_if 0
+  owi: [INFO] jt            :  0 -> 
+                context: Context{id=1, <empty>}
+                stack  : i32 {0}
+                locals : i32 {2}
   owi: [DEBUG] serializing locals (join) : 
                 first : (0 -> i32 {0}) 
                 second : (0 -> i32 {2})
@@ -1483,7 +1484,6 @@
   owi: [DEBUG] serializing stacks (widen) : 
                 first : i32 {0} 
                 second : i32 {0}
-  owi: [INFO] jt            :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=3, <(B:17)> -> {0; 2}
                                         }
@@ -1562,6 +1562,14 @@
   owi: [INFO] stack         : [ i32 {1} ; i32 {0} ]
   owi: [INFO] locals        : [ (0 -> i32 {2; 4}) ]
   owi: [INFO] running instr : br_if 0
+  owi: [INFO] jt            :  0 -> 
+                context: Context{id=3,
+                                 <(b:19)> -> {true};
+                                 <(B:17)> -> {0; 2}
+                                 <(B:18)> -> {2; 4}
+                                 }
+                stack  : i32 {0}
+                locals : i32 {2; 4}
   owi: [DEBUG] serializing locals (join) : 
                 first : (0 -> i32 {0}) 
                 second : (0 -> i32 {2; 4})
@@ -1574,7 +1582,6 @@
   owi: [DEBUG] serializing stacks (widen) : 
                 first : i32 {0} 
                 second : i32 {0}
-  owi: [INFO] jt            :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=5, <(B:17)> -> [0..0x7FFFFFFE],0%2
                                         }
@@ -1664,7 +1671,6 @@
   owi: [DEBUG] serializing stacks (widen) : 
                 first : i32 {0} 
                 second : i32 {0}
-  owi: [INFO] jt            :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=6,
                                   <(b:19)> -> {true;false};
@@ -1780,7 +1786,7 @@
   owi: [INFO] locals        : [ (0 -> i32 [2..0x80000000],0%2) ]
   owi: [INFO] running instr : drop
   owi: [INFO] jt            :  
-  owi: [DEBUG] abstract state : 
+  owi: [DEBUG] after call(start): abstract state : 
                  context: Context{id=6,
                                   <(b:19)> -> {true;false};
                                   <(B:17)> -> [2..0xFFFFFFFE],0%2
@@ -1790,10 +1796,6 @@
                  locals : i32 [2..0x80000000],0%2
   
   owi: [INFO] jt            :  
-  abstract state : 
-    context: Context{id=1, <empty>}
-    stack  : 
-    locals : 
 
   $ owi abs loop2.wat -vv
   owi: [INFO] parsing      ...
@@ -1862,7 +1864,6 @@
   owi: [DEBUG] stack             : [i32]
   owi: [DEBUG] typechecking instr: drop
   owi: [INFO] linking      ...
-  owi: [INFO] jt            :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=1, <empty>}
                  stack  : 
@@ -1871,11 +1872,10 @@
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : call 0
   owi: [INFO] calling func  : func start
-  owi: [DEBUG] abstract state : 
+  owi: [DEBUG] call (start): abstract state : 
                  context: Context{id=1, <empty>}
                  stack  : 
                  locals : i32 {0}
-  owi: [INFO] jt            :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=1, <empty>}
                  stack  : 
@@ -1891,7 +1891,6 @@
   owi: [INFO] stack         : [ i32 {0} ]
   owi: [INFO] locals        : [ (0 -> i32 {0}) ]
   owi: [INFO] running instr : loop (param i32) (result i32)
-  owi: [INFO] jt            :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=1, <empty>}
                  stack  : i32 {0}
@@ -1962,7 +1961,6 @@
   owi: [DEBUG] serializing stacks (widen) : 
                 first : i32 {0} 
                 second : i32 {0}
-  owi: [INFO] jt            :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=2, <(B:13)> -> {2}
                                         }
@@ -2046,7 +2044,6 @@
   owi: [DEBUG] serializing stacks (widen) : 
                 first : i32 {0} 
                 second : i32 {0}
-  owi: [INFO] jt            :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=3, <(B:13)> -> {4}
                                         <(B:14)> -> {4}
@@ -2148,7 +2145,7 @@
   owi: [INFO] locals        : [ (0 -> i32 BottomMod) ]
   owi: [INFO] running instr : drop
   owi: [INFO] jt            :  
-  owi: [DEBUG] abstract state : 
+  owi: [DEBUG] after call(start): abstract state : 
                  context: Context{id=3,
                                   <(b:17)> -> {};
                                   <(B:13)> -> {4}
@@ -2158,7 +2155,3 @@
                  locals : i32 BottomMod
   
   owi: [INFO] jt            :  
-  abstract state : 
-    context: Context{id=1, <empty>}
-    stack  : 
-    locals : 

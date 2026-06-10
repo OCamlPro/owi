@@ -146,7 +146,6 @@
   owi: [DEBUG] stack             : [i32]
   owi: [DEBUG] typechecking instr: return
   owi: [INFO] linking      ...
-  owi: [INFO] jt            :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=1, <empty>}
                  stack  : 
@@ -155,11 +154,10 @@
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : call 1
   owi: [INFO] calling func  : func start
-  owi: [DEBUG] abstract state : 
+  owi: [DEBUG] call (start): abstract state : 
                  context: Context{id=1, <empty>}
                  stack  : 
                  locals : 
-  owi: [INFO] jt            :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=1, <empty>}
                  stack  : 
@@ -176,11 +174,10 @@
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : call 0
   owi: [INFO] calling func  : func add
-  owi: [DEBUG] abstract state : 
+  owi: [DEBUG] call (add): abstract state : 
                  context: Context{id=1, <empty>}
                  stack  : 
                  locals : i32 {42}
-  owi: [INFO] jt            :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=1, <empty>}
                  stack  : 
@@ -212,8 +209,13 @@
   owi: [INFO] stack         : [ i32 {84} ]
   owi: [INFO] locals        : [ (0 -> i32 {42}) ]
   owi: [INFO] running instr : return
+  owi: [INFO] jt            :  ret -> 
+                context: Context{id=1, <empty>}
+                stack  : i32 {84}
+                locals : i32 {42}
   owi: [DEBUG] abstract state : None 
   
+  owi: [INFO] jt            :  
   owi: [DEBUG] abstract state : None 
   
-  abstract state : none
+  owi: [INFO] jt            :  
