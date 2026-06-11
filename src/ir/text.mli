@@ -94,6 +94,8 @@ val pp_heap_type : heap_type Fmt.t
 
 val heap_type_eq : heap_type -> heap_type -> bool
 
+val is_subtype_heap_type : heap_type -> heap_type -> bool
+
 type nonrec ref_type = nullable * heap_type
 
 val pp_ref_type : ref_type Fmt.t
