@@ -14,6 +14,9 @@ let can_divide_by_zero { can_divide_by_zero } ~uuid =
   Option.value ~default:true possible
 
 let add_divide_by_zero_invariant { can_divide_by_zero } ~uuid ~possible =
+  Log.debug (fun m ->
+    m "marked %d as %s divide by zero" uuid
+      (if possible then "POSSIBLE" else "IMPOSSIBLE") );
   match Hashtbl.find_opt can_divide_by_zero uuid with
   | None -> begin Hashtbl.add can_divide_by_zero uuid possible end
   | Some false ->

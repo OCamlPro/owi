@@ -4,6 +4,7 @@
   add.wat
   fact.wat
   if.wat
+  ./invariant_gen1.wat
   loop.wat
   loop2.wat
   local_func.wat

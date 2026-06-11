@@ -32,8 +32,6 @@ val eq : Abstract_domain.Context.t -> t -> t -> Abstract_boolean.t
 
 val ne : Abstract_domain.Context.t -> t -> t -> Abstract_boolean.t
 
-val equal : t -> t -> bool
-
 (* *)
 
 val add : Abstract_domain.Context.t -> t -> t -> t

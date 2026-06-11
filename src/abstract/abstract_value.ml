@@ -48,13 +48,6 @@ let pp_with_ctx ctx ppf = function
   | I64 b -> Fmt.pf ppf "i64 %a" (Abstract_i64.pp ctx) b
   | _ -> .
 
-let equal v1 v2 =
-  match (v1, v2) with
-  | I32 v1, I32 v2 -> Abstract_i32.equal v1 v2
-  | I64 v1, I64 v2 -> Abstract_i64.equal v1 v2
-  | I32 _, I64 _ | I64 _, I32 _ -> false
-  | _ -> .
-
 let to_binary = function
   | I32 b -> Abstract_i32.to_binary b
   | I64 b -> Abstract_i64.to_binary b
@@ -64,14 +57,6 @@ let of_binary size x =
   match Units.In_bits.to_int size with
   | 32 -> I32 (I32.of_binary x)
   | 64 -> I64 (I64.of_binary x)
-  | _ -> assert false
-
-let of_boolean ctx size boolean =
-  let true_ = Abstract_boolean.true_ ctx in
-  let n = if Abstract_boolean.equal boolean true_ then 1 else 0 in
-  match Units.In_bits.to_int size with
-  | 32 -> I32 (Abstract_i32.of_int ctx n)
-  | 64 -> I64 (Abstract_i64.of_int ctx n)
   | _ -> assert false
 
 let size_of = function I32 _ -> Size.b32 | I64 _ -> Size.b64 | _ -> .
