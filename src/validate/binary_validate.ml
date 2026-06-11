@@ -69,6 +69,13 @@ module Env = struct
     ; refs : (int, unit) Hashtbl.t
     }
 
+  let type_get_sub i m =
+    match Module.get_type i m with
+    | None -> Error (`Unknown_type (Text.Raw i))
+    | Some (SimpleType (_, sub)) -> Ok sub
+    | Some ty ->
+      Fmt.failwith "type_get_sub: unimplemented for type: %a" Typedef.pp ty
+
   let type_get i m =
     match Module.get_type i m with
     | None -> Error (`Unknown_type (Text.Raw i))
@@ -170,12 +177,9 @@ let get_func_type_id (env : Env.t) i =
   Array.find_index
     (fun typ' ->
       match typ' with
-      | Typedef.SimpleType (_, { final = true; ids = []; ct = Def_func_t typ' })
-        ->
+      | Typedef.SimpleType (_, { ct = Def_func_t typ'; _ }) ->
         func_type_eq typ typ'
-      | ty ->
-        Fmt.failwith "get_func_type_id: unimplemented for type: %a" Typedef.pp
-          ty )
+      | Typedef.SimpleType _ | Typedef.RecType _ -> false )
     env.modul.types
 
 (* TODO: move type matching functions outside of the stack module? *)
@@ -228,42 +232,64 @@ end = struct
     | V128, V128 -> Ok true
     | _, _ -> Ok false
 
-  (* TODO: replace this by a comparison function, that returns 0 if the types
-     are equal, and -1 if typ1 is a subtype of typ2, 1 otherwise *)
+  let rec is_typeuse_subtype modul ~expected ~got =
+    if Int.equal got expected then true
+    else
+      match Env.type_get_sub got modul with
+      | Error _ -> false
+      | Ok { ids; _ } ->
+        List.exists (Int.equal expected) ids
+        || List.exists
+             (fun super_id ->
+               (not (Int.equal super_id got))
+               && is_typeuse_subtype modul ~expected ~got:super_id )
+             ids
+
   let match_heap_type ?(subtype = false) modul ~expected ~got =
     match (got, expected) with
     | Func_ht, Func_ht
     | Extern_ht, Extern_ht
     | Any_ht, Any_ht
+    | Eq_ht, Eq_ht
+    | I31_ht, I31_ht
+    | Struct_ht, Struct_ht
+    | Array_ht, Array_ht
     | None_ht, None_ht
     | NoFunc_ht, NoFunc_ht
     | Exn_ht, Exn_ht
     | NoExn_ht, NoExn_ht
     | NoExtern_ht, NoExtern_ht ->
       Ok true
-    | TypeUse id1, TypeUse id2 ->
-      (* TODO: add subtyping check *)
-      let* pt1, rt1 = Env.type_get id1 modul in
-      let* pt2, rt2 = Env.type_get id2 modul in
-      let res =
-        List.compare_lengths pt1 pt2 = 0
-        && List.compare_lengths rt1 rt2 = 0
-        && List.for_all2 (fun (_, t1) (_, t2) -> val_type_eq t1 t2) pt1 pt2
-        && List.for_all2 val_type_eq rt1 rt2
-      in
-      Ok res
-    (* TODO: proper subtype checking *)
-    | TypeUse _, Func_ht
+    | TypeUse got, TypeUse expected ->
+      Ok (is_typeuse_subtype modul ~expected ~got)
+    | TypeUse id, Func_ht ->
+      begin match Env.type_get_sub id modul with
+      | Ok { ct = Def_func_t _; _ } -> Ok true
+      | _ -> Ok false
+      end
+    | TypeUse id, Struct_ht when subtype ->
+      begin match Env.type_get_sub id modul with
+      | Ok { ct = Def_struct_t _; _ } -> Ok true
+      | _ -> Ok false
+      end
+    | TypeUse id, Array_ht when subtype ->
+      begin match Env.type_get_sub id modul with
+      | Ok { ct = Def_array_t _; _ } -> Ok true
+      | _ -> Ok false
+      end
+    | TypeUse id, (Eq_ht | Any_ht) when subtype ->
+      begin match Env.type_get_sub id modul with
+      | Ok { ct = Def_struct_t _ | Def_array_t _; _ } -> Ok true
+      | _ -> Ok false
+      end
     | NoFunc_ht, (TypeUse _ | Func_ht)
+    | None_ht, (I31_ht | Struct_ht | Array_ht | Eq_ht | Any_ht)
+    | (I31_ht | Struct_ht | Array_ht), (Eq_ht | Any_ht)
+    | Eq_ht, Any_ht
     | NoExn_ht, Exn_ht
     | NoExtern_ht, Extern_ht
-    | None_ht, Any_ht
       when subtype ->
       Ok true
-    | TypeUse id, Func_ht ->
-      (* TODO: not ideal *)
-      let* pt1, rt1 = Env.type_get id modul in
-      if List.is_empty pt1 && List.is_empty rt1 then Ok true else Ok false
     | _ -> Ok false
 
   let match_ref_type ?(subtype = false) modul ~expected ~got =
@@ -1380,9 +1406,7 @@ let typecheck_const_instr ?known_globals ~is_init (modul : Module.t) refs stack
             match ty with
             | Typedef.SimpleType (_, { ct = Def_func_t ty; _ }) ->
               func_type_eq ty ity
-            | ty ->
-              Fmt.failwith "typecheck_const_instr unimplemented for type: %a"
-                Typedef.pp ty )
+            | Typedef.SimpleType _ | Typedef.RecType _ -> false )
           modul.types
       with
       | Some tyid -> TypeUse tyid
