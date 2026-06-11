@@ -131,6 +131,10 @@ struct
       let cond = Boolean.not v in
       Log.debug (fun m ->
         m "skipped check on %a and assuming directly" Boolean.pp v );
+      (* TODO: optimize more and use:
+         let* () = Choice.assume_no_check cond in
+         TODO: but to be valid, it requires also to get more information that skip provides, we need to know if the negation is also impossible, in which case, we should stop etc.
+      *)
       let* () = Choice.assume_no_check cond in
       f ()
     end
@@ -251,7 +255,7 @@ struct
         let mem_size = Memory.size mem |> I64.extend_i32_u in
         (* mem_size <=u len || mem_size - len <u pos *)
         (* TODO: experiment with splitting the disjunction and doing the
-         checks one at a time. *)
+           checks one at a time. *)
         ( Boolean.or_ I64.(le_u mem_size len) I64.(lt_u (sub mem_size len) pos)
         , `Out_of_bounds_memory_access
         , Some instr_counter
@@ -269,7 +273,10 @@ struct
   let mk_addr_check_bounds_8L = mk_addr_check_bounds 8L
 
   let exec_i32_instr (env : Env.t) instr_counter stack ~uuid :
-    Binary.i32_instr -> Stack.t Choice.t = function
+    Binary.i32_instr -> Stack.t Choice.t =
+   fun x ->
+    Log.debug (fun m -> m "UUID IS: %d" uuid);
+    x |> function
     | Const n -> Stack.push_concrete_i32 stack n |> Choice.return
     | Clz -> Stack.apply_i32_i32 stack I32.clz |> Choice.return
     | Ctz -> Stack.apply_i32_i32 stack I32.ctz |> Choice.return
@@ -1434,17 +1441,15 @@ struct
     | Ref.Extern (Some _) -> ( match ht with Extern_ht -> true | _ -> false )
     | Func None | Extern None | NullExn | NullRef -> false
 
-  let exec_instr instr (state : State.exec_state) : State.instr_result Choice.t
-      =
-    let stack = state.stack in
-    let env = state.env in
-    let locals = state.locals in
-    let instr_counter = Atomic.fetch_and_add instr.Annotated.instr_counter 1 in
+  let exec_instr ({ raw; uuid; instr_counter; _ } : _ Annotated.t)
+    ({ stack; env; locals; _ } as state : State.exec_state) :
+    State.instr_result Choice.t =
+    let instr_counter = Atomic.fetch_and_add instr_counter 1 in
     let ret stack = Choice.return (State.Continue { state with stack }) in
     Log.info (fun m -> m "stack         : [ %a ]" Stack.pp stack);
     Log.info (fun m ->
-      m "running instr : %a (executed %d times)" (pp_instr ~short:true)
-        instr.Annotated.raw instr_counter );
+      m "running instr : %a (executed %d times)" (pp_instr ~short:true) raw
+        instr_counter );
     let* () =
       match Logs.Src.level Log.main_src with
       | Some Logs.Debug ->
@@ -1455,14 +1460,13 @@ struct
               (Smtml.Expr.Set.to_list pc) )
       | None | Some _ -> return ()
     in
-    match instr.raw with
+    match raw with
     | I32 i ->
       (* TODO: pass ret or state directly to avoid the cost of the monad here and do the same for all cases of the match *)
-      let uuid = instr.uuid in
       let* stack = exec_i32_instr env instr_counter stack i ~uuid in
       ret stack
     | I64 i ->
-      let* stack = exec_i64_instr env instr_counter stack i in
+      let* stack = exec_i64_instr env instr_counter stack i ~uuid in
       ret stack
     | F32 i ->
       let* stack = exec_f32_instr env instr_counter stack i in
@@ -1724,11 +1728,11 @@ struct
         (fun () ->
           let fuel_left = Atomic.fetch_and_add fuel (-1) in
           (* If we only use [timeout_instr], we want to stop all as
-                         soon as [fuel_left <= 0]. But if we only use [timeout],
-                         we don't want to run into the slow path below on each
-                         instruction after [fuel_left] becomes negative. We avoid
-                         this repeated slow path by bumping [fuel] to [max_int]
-                         again in this case. *)
+                           soon as [fuel_left <= 0]. But if we only use [timeout],
+                           we don't want to run into the slow path below on each
+                           instruction after [fuel_left] becomes negative. We avoid
+                           this repeated slow path by bumping [fuel] to [max_int]
+                           again in this case. *)
           if fuel_left mod 1024 = 0 || fuel_left < 0 then begin
             let stop =
               match (Parameters.timeout, Parameters.timeout_instr) with

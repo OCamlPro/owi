@@ -131,6 +131,8 @@ type i32_instr =
   | Store8 of indice * memarg
   | Store16 of indice * memarg
 
+val pp_i32_instr : i32_instr Fmt.t
+
 (** I64 instructions *)
 
 type i64_instr =

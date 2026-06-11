@@ -56,33 +56,26 @@ module DenotFixpoint (S : DATA_STATE) = struct
    fun state_a state_b ->
     let gen_new_value ~widens a b state_a state_b
       (Abstract_domain.Context.Result (inc, intup, cont)) f =
-      if Abstract_value.equal a b then
-        let cont ctx out_tuple =
-          let list, out_tuple = cont ctx out_tuple in
-          (f a list, out_tuple)
-        in
-        Abstract_domain.Context.Result (inc, intup, cont)
-      else
-        let size = Abstract_value.size_of a in
-        (* inc : whether the new value is included in the old one
-         * intup : symbolic repr of all variabls that will be created simultaneously
-         * cont : continuation function
-         *)
-        let (Abstract_domain.Context.Result (inc, in_tup, local_cont)) =
-          Abstract_domain.serialize_binary ~size ~widens
-            state_a.Abstract_state.ctx
-            (Abstract_value.to_binary a)
-            state_b.Abstract_state.ctx
-            (Abstract_value.to_binary b)
-            (inc, intup)
-        in
-        let cont ctx out_tuple =
-          let value, out_tuple = local_cont ctx out_tuple in
-          let container, out_tuple = cont ctx out_tuple in
-          let b = Abstract_value.of_binary size value in
-          (f b container, out_tuple)
-        in
-        Abstract_domain.Context.Result (inc, in_tup, cont)
+      let size = Abstract_value.size_of a in
+      (* inc : whether the new value is included in the old one
+       * intup : symbolic repr of all variabls that will be created simultaneously
+       * cont : continuation function
+       *)
+      let (Abstract_domain.Context.Result (inc, in_tup, local_cont)) =
+        Abstract_domain.serialize_binary ~size ~widens
+          state_a.Abstract_state.ctx
+          (Abstract_value.to_binary a)
+          state_b.Abstract_state.ctx
+          (Abstract_value.to_binary b)
+          (inc, intup)
+      in
+      let cont ctx out_tuple =
+        let value, out_tuple = local_cont ctx out_tuple in
+        let container, out_tuple = cont ctx out_tuple in
+        let b = Abstract_value.of_binary size value in
+        (f b container, out_tuple)
+      in
+      Abstract_domain.Context.Result (inc, in_tup, cont)
     in
     let rec serialize_stack lhs rhs acc_res =
       match (lhs, rhs) with
@@ -296,7 +289,7 @@ module DenotFixpoint (S : DATA_STATE) = struct
         | Some ctx ->
           eval_instr { state with stack; ctx }
             (Annotated.dummy (Binary.Block (None, bt, expr_then)))
-        | None -> (None, JumpTarget.empty)
+        | None -> (Some { state with stack }, JumpTarget.empty)
       in
       let state_else, jt_false =
         let not_cond = Abstract_boolean.not ctx b in
@@ -304,16 +297,13 @@ module DenotFixpoint (S : DATA_STATE) = struct
         | Some ctx ->
           eval_instr { state with stack; ctx }
             (Annotated.dummy (Binary.Block (None, bt, expr_else)))
-        | None -> (None, JumpTarget.empty)
+        | None -> (Some { state with stack }, JumpTarget.empty)
       in
       let jt = JumpTarget.append jt_true jt_false in
       begin match (state_then, state_else) with
       | Some state_true, Some state_false ->
         (Some (join state_true state_false), jt)
-      | Some state, None | None, Some state -> (Some state, jt)
-      | None, None ->
-        (* TODO should this be assert false ? *)
-        (None, jt)
+      | (Some _ | None), (Some _ | None) -> assert false
       end
     | Loop (_str_opt, bt, body) ->
       let widening_id = Domains.Sig.Widening_Id.fresh () in
@@ -507,8 +497,11 @@ module DataAbstract_state : DATA_STATE = struct
     | Eqz ->
       let stack = Stack.apply_i32_boolean stack ctx (Abstract_i32.eqz ctx) in
       { state with stack }
-    | _ ->
-      Fmt.epr "not implemented yet";
+    | Eq ->
+      let stack = Stack.apply_i32_i32_boolean stack ctx (Abstract_i32.eq ctx) in
+      { state with stack }
+    | instr ->
+      Fmt.epr "not implemented yet: %a" Binary.pp_i32_instr instr;
       assert false
 
   let i64_can_be_zero ctx v =

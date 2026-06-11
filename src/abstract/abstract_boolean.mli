@@ -8,6 +8,8 @@ val false_ : Abstract_domain.Context.t -> t
 
 val true_ : Abstract_domain.Context.t -> t
 
+val eq : Abstract_domain.Context.t -> t -> t -> t
+
 val of_bool : Abstract_domain.Context.t -> bool -> t
 
 val not : Abstract_domain.Context.t -> t -> t
@@ -17,5 +19,3 @@ val or_ : Abstract_domain.Context.t -> t -> t -> t
 val and_ : Abstract_domain.Context.t -> t -> t -> t
 
 val pp : t Fmt.t
-
-val equal : t -> t -> bool

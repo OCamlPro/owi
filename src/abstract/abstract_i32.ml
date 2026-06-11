@@ -14,7 +14,13 @@ let to_binary x = x
 
 let of_boolean ctx boolean =
   let true_ = Abstract_boolean.true_ ctx in
-  let n = if Abstract_boolean.equal boolean true_ then 1 else 0 in
+  let n =
+    match
+      Abstract_domain.assume ctx @@ Abstract_boolean.eq ctx boolean true_
+    with
+    | Some _ -> 1
+    | None -> 0
+  in
   Abstract_domain.Binary_Forward.biconst ~size (Z.of_int n) ctx
 
 let to_boolean ctx x =
@@ -30,9 +36,6 @@ let of_int ctx i = Abstract_domain.Binary_Forward.biconst ~size (Z.of_int i) ctx
 let zero ctx = Abstract_domain.Binary_Forward.biconst ~size Z.zero ctx
 
 let unknown ctx = Abstract_domain.binary_unknown ~size ctx
-
-(* TODO: check and probably remove all `equal` functions, checks are either useless or should us `eq` instead*)
-let equal i1 i2 = Abstract_domain.Binary.equal i1 i2
 
 let eq ctx i1 i2 = Abstract_domain.Binary_Forward.beq ~size ctx i1 i2
 
