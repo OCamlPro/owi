@@ -99,10 +99,10 @@ type t =
 
 let pp ctx : t Fmt.t =
  fun fmt state -&gt;
-  <span data-count="186">F</span>mt.pf fmt "@\n  @[&lt;v&gt;context: %a@\nstack  : %a@\nlocals : %a@]"
-    Abstract_domain.context_pretty state.ctx (Abstract_stack.p<span data-count="186">p</span> ctx) state.stack
-    (Fmt.lis<span data-count="186">t</span> ~sep:Fmt.semi (Abstract_value.pp_with_ct<span data-count="186">x</span> state.ctx))
-    (Abstract_locals.to_list state.locals |&gt; <span data-count="186">L</span>ist.ma<span data-count="186">p</span> snd)
+  <span data-count="194">F</span>mt.pf fmt "@\n  @[&lt;v&gt;context: %a@\nstack  : %a@\nlocals : %a@]"
+    Abstract_domain.context_pretty state.ctx (Abstract_stack.p<span data-count="194">p</span> ctx) state.stack
+    (Fmt.lis<span data-count="194">t</span> ~sep:Fmt.semi (Abstract_value.pp_with_ct<span data-count="194">x</span> state.ctx))
+    (Abstract_locals.to_list state.locals |&gt; <span data-count="194">L</span>ist.ma<span data-count="194">p</span> snd)
 
 let empty env envs () =
   <span data-count="7">l</span>et ctx = Abstract_domain.root_context () in

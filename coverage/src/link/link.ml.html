@@ -1583,16 +1583,16 @@ module Extern = struct
     <span data-count="1067">l</span>et functions, collection =
       List.fold_left
         (fun (functions, collection) (name, func) -&gt;
-          <span data-count="12154">l</span>et typ = modul.func_type func in
-          <span data-count="12154">D</span>ynarray.add_last collection (func, typ);
-          <span data-count="12154">l</span>et id = Dynarray.lengt<span data-count="12154">h</span> collection - 1 in
-          ((name, (Kind.exter<span data-count="12154">n</span> id : Kind.func)) :: functions, collection) )
+          <span data-count="12161">l</span>et typ = modul.func_type func in
+          <span data-count="12161">D</span>ynarray.add_last collection (func, typ);
+          <span data-count="12161">l</span>et id = Dynarray.lengt<span data-count="12161">h</span> collection - 1 in
+          ((name, (Kind.exter<span data-count="12161">n</span> id : Kind.func)) :: functions, collection) )
         ([], ls.collection) modul.functions
     in
     <span data-count="1067">l</span>et functions = StringMap.of_seq (List.to_se<span data-count="1067">q</span> functions) in
     <span data-count="1067">l</span>et defined_names =
       StringMap.fold
-        (fun name _ set -&gt; <span data-count="12154">S</span>tringSet.add name set)
+        (fun name _ set -&gt; <span data-count="12161">S</span>tringSet.add name set)
         functions StringSet.empty
     in
     <span data-count="1067">l</span>et exports =

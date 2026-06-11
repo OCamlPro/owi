@@ -631,9 +631,9 @@ let push_ref s r = <span data-count="0">p</span>ush s (Value.Ref r)
 let push_array _ _ = <span data-count="0">a</span>ssert false
 
 let pp ctx fmt (s : t) =
-  <span data-count="400">F</span>mt.list
+  <span data-count="408">F</span>mt.list
     ~sep:(fun fmt () -&gt; <span data-count="166">F</span>mt.string fmt " ; ")
-    (Value.pp_with_ct<span data-count="400">x</span> ctx) fmt s
+    (Value.pp_with_ct<span data-count="408">x</span> ctx) fmt s
 
 let pop = function <span data-count="0">[</span>] -&gt; raise Empty | <span data-count="108">h</span>d :: tl -&gt; (hd, tl)
 

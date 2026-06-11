@@ -593,7 +593,7 @@ module M :
     <span data-count="607">S</span>ymbolic_choice.assume (Symbolic_i32.to_boolea<span data-count="607">n</span> b)
 
   let assert' (b : Symbolic_i32.t) : unit Symbolic_choice.t =
-    <span data-count="109741">S</span>ymbolic_choice.assertion @@ Symbolic_i32.to_boolea<span data-count="109741">n</span> b
+    <span data-count="109738">S</span>ymbolic_choice.assertion @@ Symbolic_i32.to_boolea<span data-count="109738">n</span> b
 
   let symbol_invisible_bool () =
     (* TODO: should we change this to an i32 too? *)
@@ -627,7 +627,7 @@ module M :
 
   let alloc m (base : Symbolic_i32.t) (size : Symbolic_i32.t) :
     Symbolic_i32.t Symbolic_choice.t =
-    <span data-count="9915">S</span>ymbolic_memory.realloc m ~ptr:base ~size
+    <span data-count="9918">S</span>ymbolic_memory.realloc m ~ptr:base ~size
 
   let free m (ptr : Symbolic_i32.t) : Symbolic_i32.t Symbolic_choice.t =
     <span data-count="2542">S</span>ymbolic_memory.free m ptr
