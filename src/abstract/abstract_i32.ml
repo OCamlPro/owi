@@ -19,19 +19,7 @@ let eq ctx i1 i2 = Abstract_domain.Binary_Forward.beq ~size ctx i1 i2
 let ne ctx i1 i2 = Abstract_boolean.not ctx (eq ctx i1 i2)
 
 let of_boolean ctx boolean =
-  let true_ = Abstract_boolean.true_ ctx in
-  let false_ = Abstract_boolean.false_ ctx in
-  (* TODO: handle {true;false} *)
-  match
-    ( Abstract_boolean.eq ctx boolean true_
-      |> Abstract_domain.assume ctx |> Option.is_some
-    , Abstract_boolean.eq ctx boolean false_
-      |> Abstract_domain.assume ctx |> Option.is_some )
-  with
-  | true, true -> unknown ctx
-  | true, false -> Abstract_domain.Binary_Forward.biconst ~size (Z.of_int 1) ctx
-  | false, true -> Abstract_domain.Binary_Forward.biconst ~size (Z.of_int 0) ctx
-  | false, false -> Abstract_domain.binary_empty ~size ctx
+  Abstract_domain.Binary_Forward.bofbool ~size ctx boolean
 
 let to_boolean ctx x =
   let zero = Abstract_domain.Binary_Forward.biconst ~size Z.zero ctx in
