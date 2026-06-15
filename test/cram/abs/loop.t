@@ -1773,7 +1773,7 @@
                                   <(b:22)> -> {true;false};
                                   <(B:17)> -> [-0x80000000..0x7FFFFFFE],0%2
                                   <(B:18)> -> [-0x80000000..0x7FFFFFFE],0%2
-                                  <(B:29)> -> [--..--]
+                                  <(B:28)> -> [--..--]
                                   }
                  stack  : i32 [--..--] ; i32 {0}
                  locals : i32 [-0x80000000..0x7FFFFFFE],0%2
@@ -1784,10 +1784,10 @@
                  context: Context{id=14,
                                   <(b:19)> -> {true;false};
                                   <(b:22)> -> {true;false};
-                                  <(b:30)> -> {false}; <(b:31)> -> {true};
+                                  <(b:29)> -> {false}; <(b:30)> -> {true};
                                   <(B:17)> -> [-0x80000000..0x7FFFFFFE],0%2
                                   <(B:18)> -> [-0x80000000..0x7FFFFFFE],0%2
-                                  <(B:29)> -> [1..0xFFFFFFFF]
+                                  <(B:28)> -> [1..0xFFFFFFFF]
                                   }
                  stack  : i32 {0}
                  locals : i32 [-0x80000000..0x7FFFFFFE],0%2
@@ -1807,11 +1807,11 @@
   owi: [DEBUG] abstract state : 
                  context: Context{id=15,
                                   <(b:19)> -> {true;false};
-                                  <(b:22)> -> {true;false}; <(b:30)> -> {true};
-                                  <(b:31)> -> {true;false};
+                                  <(b:22)> -> {true;false}; <(b:29)> -> {true};
+                                  <(b:30)> -> {true;false};
                                   <(B:17)> -> [-0x80000000..0x7FFFFFFE],0%2
                                   <(B:18)> -> [-0x80000000..0x7FFFFFFE],0%2
-                                  <(B:29)> -> {0}
+                                  <(B:28)> -> {0}
                                   }
                  stack  : i32 {0} ; i32 {0}
                  locals : i32 [-0x80000000..0x7FFFFFFE],0%2
@@ -1822,11 +1822,11 @@
   owi: [DEBUG] after call(start): abstract state : 
                  context: Context{id=15,
                                   <(b:19)> -> {true;false};
-                                  <(b:22)> -> {true;false}; <(b:30)> -> {true};
-                                  <(b:31)> -> {true;false};
+                                  <(b:22)> -> {true;false}; <(b:29)> -> {true};
+                                  <(b:30)> -> {true;false};
                                   <(B:17)> -> [-0x80000000..0x7FFFFFFE],0%2
                                   <(B:18)> -> [-0x80000000..0x7FFFFFFE],0%2
-                                  <(B:29)> -> {0}
+                                  <(B:28)> -> {0}
                                   }
                  stack  : i32 {0}
                  locals : i32 [-0x80000000..0x7FFFFFFE],0%2
@@ -2163,15 +2163,15 @@
   owi: [INFO] running instr : br_if 0
   owi: [DEBUG] jt            :  
   owi: internal error, uncaught exception:
-       File "src/abstract/abstract_driver.ml", line 351, characters 14-20: Assertion failed
-       Raised at Owi__Abstract_driver.DenotFixpoint.eval_instr.(fun).fixpoint in file "src/abstract/abstract_driver.ml", line 351, characters 14-26
+       File "src/abstract/abstract_driver.ml", line 352, characters 14-20: Assertion failed
+       Raised at Owi__Abstract_driver.DenotFixpoint.eval_instr.(fun).fixpoint in file "src/abstract/abstract_driver.ml", line 352, characters 14-26
        Called from Owi__Abstract_driver.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_driver.ml", line 179, characters 32-54
        Called from Owi__Abstract_driver.DenotFixpoint.eval_func in file "src/abstract/abstract_driver.ml", line 218, characters 28-56
        Called from Owi__Abstract_driver.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_driver.ml", line 257, characters 16-49
        Called from Owi__Abstract_driver.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_driver.ml", line 179, characters 32-54
-       Called from Owi__Abstract_driver.expr.(fun) in file "src/abstract/abstract_driver.ml", line 652, characters 14-48
+       Called from Owi__Abstract_driver.expr.(fun) in file "src/abstract/abstract_driver.ml", line 656, characters 14-48
        Called from Stdlib__List.fold_left in file "list.ml", line 125, characters 24-34
-       Called from Owi__Abstract_driver.expr in file "src/abstract/abstract_driver.ml", lines 649-655, characters 4-20
+       Called from Owi__Abstract_driver.expr in file "src/abstract/abstract_driver.ml", lines 653-659, characters 4-20
        Called from Owi__Cmd_abs.cmd in file "src/cmd/cmd_abs.ml", line 17, characters 4-37
        Called from Stdlib__Result.map in file "result.ml", line 27, characters 32-37
        Called from Cmdliner_term.app.(fun) in file "cmdliner_term.ml", line 22, characters 19-24
