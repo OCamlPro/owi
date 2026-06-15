@@ -135,7 +135,7 @@ struct
          let* () = Choice.assume_no_check cond in
          TODO: but to be valid, it requires also to get more information that skip provides, we need to know if the negation is also impossible, in which case, we should stop etc.
       *)
-      let* () = Choice.assume_no_check cond in
+      let* () = Choice.assume cond in
       f ()
     end
     else if Parameters.throw_away_trap then
