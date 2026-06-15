@@ -48,10 +48,10 @@ let
     pname = "codex";
     version = "dev";
     src = pkgs.fetchFromGitHub {
-      owner = "s41d";
+      owner = "redianthus";
       repo = "codex";
-      rev = "05977de3acf12e18343a053be0f1fb936f8ec31c";
-      hash = "sha256-u/dD9ucNeY9j3czC9QtPPfNE3pZ1464gsWdJrsLT9hA=";
+      rev = "bda2db6d8c6271b26edf948d24b09860037d4761";
+      hash = "sha256-7jeIN+U7lGfwWzWc55SMXEgKWyDt8GAPbmZo+fxcA9Q=";
     };
 
     nativeBuildInputs = with ocamlPackages; [

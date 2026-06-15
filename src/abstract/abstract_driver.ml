@@ -290,11 +290,10 @@ module DenotFixpoint (S : DATA_STATE) = struct
         in
         (Some state, jt) )
     | If_else (_, bt, expr_then, expr_else) ->
-      let b, stack = Stack.pop_i32 stack in
+      let b, stack = Stack.pop_bool stack ctx in
       begin match
-        ( Abstract_domain.assume ctx
-            (Abstract_i32.ne ctx (Abstract_i32.of_int ctx 0) b)
-        , Abstract_domain.assume ctx (Abstract_i32.eqz ctx b) )
+        ( Abstract_domain.assume ctx b
+        , Abstract_domain.assume ctx (Abstract_boolean.not ctx b) )
       with
       | Some ctx, None ->
         eval_instr { state with stack; ctx }
@@ -366,18 +365,15 @@ module DenotFixpoint (S : DATA_STATE) = struct
       fixpoint state
     | Br i -> (None, JumpTarget.of_list [ (I i, [ state ]) ])
     | Br_if i ->
-      let b, stack = Stack.pop_i32 stack in
+      let b, stack = Stack.pop_bool stack ctx in
       let jt_if =
-        match
-          Abstract_domain.assume ctx
-            (Abstract_i32.ne ctx (Abstract_i32.of_int ctx 0) b)
-        with
+        match Abstract_domain.assume ctx b with
         | Some ctx ->
           JumpTarget.of_list [ (I i, [ { state with stack; ctx } ]) ]
         | None -> JumpTarget.empty
       in
       let new_state =
-        match Abstract_domain.assume ctx (Abstract_i32.eqz ctx b) with
+        match Abstract_domain.assume ctx (Abstract_boolean.not ctx b) with
         | Some ctx -> Some { state with stack; ctx }
         | None -> None
       in
