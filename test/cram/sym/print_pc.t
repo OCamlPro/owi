@@ -68,8 +68,10 @@
   owi: [INFO] running instr : local.get 0 (executed 0 times)
   owi: [INFO] stack         : [ symbol_0 ]
   owi: [INFO] running instr : i32.const 1 (executed 0 times)
+  owi: [DEBUG] UUID IS: 1
   owi: [INFO] stack         : [ 1 ; symbol_0 ]
   owi: [INFO] running instr : i32.lt_u (executed 0 times)
+  owi: [DEBUG] UUID IS: 2
   owi: [INFO] stack         : [ (i32.of_bool (i32.lt_u symbol_0 1)) ]
   owi: [INFO] running instr : if (executed 0 times)
   owi: [INFO] stack         : [  ]

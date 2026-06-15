@@ -148,6 +148,12 @@ module DenotFixpoint (S : DATA_STATE) = struct
     in
     fst @@ continue ctx out
 
+  let join_X (state_a, jt_a) (state_b, jt_b) =
+    let jt = JumpTarget.append jt_a jt_b in
+    match (state_a, state_b) with
+    | Some state_a, Some state_b -> (Some (join state_a state_b), jt)
+    | (Some _ | None), (Some _ | None) -> assert false
+
   let widen widening_id state_a state_b =
     let (Abstract_domain.Context.Result (included, in_tuple, continue)) =
       serialize ~widens:true state_a state_b
@@ -284,26 +290,25 @@ module DenotFixpoint (S : DATA_STATE) = struct
         (Some state, jt) )
     | If_else (_, bt, expr_then, expr_else) ->
       let b, stack = Stack.pop_bool stack ctx in
-      let state_then, jt_true =
-        match Abstract_domain.assume ctx b with
-        | Some ctx ->
-          eval_instr { state with stack; ctx }
-            (Annotated.dummy (Binary.Block (None, bt, expr_then)))
-        | None -> (Some { state with stack }, JumpTarget.empty)
-      in
-      let state_else, jt_false =
-        let not_cond = Abstract_boolean.not ctx b in
-        match Abstract_domain.assume ctx not_cond with
-        | Some ctx ->
-          eval_instr { state with stack; ctx }
-            (Annotated.dummy (Binary.Block (None, bt, expr_else)))
-        | None -> (Some { state with stack }, JumpTarget.empty)
-      in
-      let jt = JumpTarget.append jt_true jt_false in
-      begin match (state_then, state_else) with
-      | Some state_true, Some state_false ->
-        (Some (join state_true state_false), jt)
-      | (Some _ | None), (Some _ | None) -> assert false
+      begin match
+        ( Abstract_domain.assume ctx b
+        , Abstract_domain.assume ctx (Abstract_boolean.not ctx b) )
+      with
+      | Some ctx, None ->
+        eval_instr { state with stack; ctx }
+          (Annotated.dummy (Binary.Block (None, bt, expr_then)))
+      | None, Some ctx ->
+        eval_instr { state with stack; ctx }
+          (Annotated.dummy (Binary.Block (None, bt, expr_else)))
+      | None, None -> assert false
+      | Some ctx_true, Some ctx_false ->
+        join_X
+          (eval_instr
+             { state with stack; ctx = ctx_true }
+             (Annotated.dummy (Binary.Block (None, bt, expr_then))) )
+          (eval_instr
+             { state with stack; ctx = ctx_false }
+             (Annotated.dummy (Binary.Block (None, bt, expr_else))) )
       end
     | Loop (_str_opt, bt, body) ->
       let widening_id = Domains.Sig.Widening_Id.fresh () in
@@ -333,14 +338,16 @@ module DenotFixpoint (S : DATA_STATE) = struct
           match JumpTarget.find_opt (I 0) jt with
           | Some jts -> handle_jts jts
           | None -> (
-            match JumpTarget.find_opt Ret jt with
-            | Some jts -> handle_jts jts
-            | None -> (
-              match next_state with
-              | Some state ->
-                let stack = shorten_stack state.stack in
-                { state with stack }
-              | None -> assert false ) )
+            (* TODO handle rets *)
+            match next_state with
+            | Some state ->
+              let stack = shorten_stack state.stack in
+              { state with stack }
+            | None ->
+              (* Should not be possible
+                     We have no targets to jump to and no state to continue on during the fixpoint iteration
+                   *)
+              assert false )
         in
         let widened, included = widen widening_id state next_head in
         if not included then fixpoint widened
