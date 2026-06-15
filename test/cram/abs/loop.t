@@ -2152,18 +2152,7 @@
   owi: [INFO] locals        : [ (0 -> i32 BottomMod) ]
   owi: [INFO] running instr : br_if 0
   owi: [DEBUG] jt            :  
-  owi: internal error, uncaught exception:
-       File "src/abstract/abstract_driver.ml", line 351, characters 14-20: Assertion failed
-       Raised at Owi__Abstract_driver.DenotFixpoint.eval_instr.(fun).fixpoint in file "src/abstract/abstract_driver.ml", line 351, characters 14-26
-       Called from Owi__Abstract_driver.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_driver.ml", line 179, characters 32-54
-       Called from Owi__Abstract_driver.DenotFixpoint.eval_func in file "src/abstract/abstract_driver.ml", line 218, characters 28-56
-       Called from Owi__Abstract_driver.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_driver.ml", line 257, characters 16-49
-       Called from Owi__Abstract_driver.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_driver.ml", line 179, characters 32-54
-       Called from Owi__Abstract_driver.expr.(fun) in file "src/abstract/abstract_driver.ml", line 652, characters 14-48
-       Called from Stdlib__List.fold_left in file "list.ml", line 125, characters 24-34
-       Called from Owi__Abstract_driver.expr in file "src/abstract/abstract_driver.ml", lines 649-655, characters 4-20
-       Called from Owi__Cmd_abs.cmd in file "src/cmd/cmd_abs.ml", line 17, characters 4-37
-       Called from Stdlib__Result.map in file "result.ml", line 27, characters 32-37
-       Called from Cmdliner_term.app.(fun) in file "cmdliner_term.ml", line 22, characters 19-24
-       Called from Cmdliner_eval.run_parser in file "cmdliner_eval.ml", line 41, characters 7-16
-  [125]
+  owi: [DEBUG] jt            :  
+  owi: [DEBUG] abstract state : None 
+  
+  owi: [DEBUG] jt            :  

@@ -331,36 +331,38 @@ module DenotFixpoint (S : DATA_STATE) = struct
             List.fold_left
               (fun acc state ->
                 let stack = shorten_stack state.Abstract_state.stack in
-                let joined = join acc { state with stack } in
-                joined )
+                join acc { state with stack } )
               { initial_state with stack = fp_stack }
               jts
           in
           match JumpTarget.find_opt (I 0) jt with
-          | Some jts -> handle_jts jts
-          | None -> (
-            (* TODO handle rets *)
-            match next_state with
+          | Some jts -> Some (handle_jts jts)
+          | None ->
+            (* TODO: handle return too! *)
+            begin match next_state with
             | Some state ->
               let stack = shorten_stack state.stack in
-              { state with stack }
-            | None ->
-              (* Should not be possible
-                     We have no targets to jump to and no state to continue on during the fixpoint iteration
-                   *)
-              assert false )
+              Some { state with stack }
+            | None -> None
+            end
         in
-        let widened, included = widen widening_id state next_head in
-        if not included then fixpoint widened
-        else
-          (* fixpoint reached: exit loop, assume condition is false *)
+
+        match next_head with
+        | None ->
           let jt = JumpTarget.decr jt in
-          let next_state =
-            let* next_state in
-            let stack = next_state.stack @ initial_state.stack in
-            Some { next_state with stack }
-          in
-          (next_state, jt)
+          (None, jt)
+        | Some next_head ->
+          let widened, included = widen widening_id state next_head in
+          if not included then fixpoint widened
+          else
+            (* fixpoint reached: exit loop, assume condition is false *)
+            let jt = JumpTarget.decr jt in
+            let next_state =
+              let* next_state in
+              let stack = next_state.stack @ initial_state.stack in
+              Some { next_state with stack }
+            in
+            (next_state, jt)
       in
       fixpoint state
     | Br i -> (None, JumpTarget.of_list [ (I i, [ state ]) ])
