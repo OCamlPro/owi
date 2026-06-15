@@ -10,7 +10,7 @@ let false_ ctx = Abstract_domain.Boolean_Forward.false_ ctx
 
 let of_bool ctx = function true -> true_ ctx | false -> false_ ctx
 
-let pp _ = assert false
+let pp = Abstract_domain.boolean_pretty
 
 let not ctx b = Abstract_domain.Boolean_Forward.not ctx b
 
