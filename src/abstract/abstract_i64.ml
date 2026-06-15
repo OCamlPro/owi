@@ -15,12 +15,12 @@ let of_binary x = x
 let to_binary x = x
 
 let of_boolean ctx boolean =
-  let true_ = Abstract_boolean.true_ ctx in
-  (* TODO: handle {true;false} *)
-  let n = if Abstract_domain.Boolean.equal boolean true_ then 1 else 0 in
-  Abstract_domain.Binary_Forward.biconst ~size (Z.of_int n) ctx
+  Abstract_domain.Binary_Forward.bofbool ~size ctx boolean
 
-let to_boolean _ = assert false
+let to_boolean ctx x =
+  let zero = Abstract_domain.Binary_Forward.biconst ~size Z.zero ctx in
+  let b = Abstract_domain.Binary_Forward.beq ~size ctx x zero in
+  Abstract_boolean.not ctx b
 
 let of_int ctx i = Abstract_domain.Binary_Forward.biconst ~size (Z.of_int i) ctx
 

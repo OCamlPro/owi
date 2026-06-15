@@ -22,7 +22,7 @@ val to_binary : t -> Abstract_domain.Binary.t
 
 val of_boolean : Abstract_domain.Context.t -> Abstract_boolean.t -> t
 
-val to_boolean : t -> Abstract_boolean.t
+val to_boolean : Abstract_domain.Context.t -> t -> Abstract_boolean.t
 
 (** Comparison functions *)
 
