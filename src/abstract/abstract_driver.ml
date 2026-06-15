@@ -152,7 +152,8 @@ module DenotFixpoint (S : DATA_STATE) = struct
     let jt = JumpTarget.append jt_a jt_b in
     match (state_a, state_b) with
     | Some state_a, Some state_b -> (Some (join state_a state_b), jt)
-    | (Some _ | None), (Some _ | None) -> assert false
+    | Some state, None | None, Some state -> (Some state, jt)
+    | None, None -> assert false
 
   let widen widening_id state_a state_b =
     let (Abstract_domain.Context.Result (included, in_tuple, continue)) =
