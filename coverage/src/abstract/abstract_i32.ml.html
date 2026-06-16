@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>abstract_i32.ml &mdash; Coverage report</title>
-    <meta name="description" content="61.11% coverage in src/abstract/abstract_i32.ml">
+    <meta name="description" content="56.76% coverage in src/abstract/abstract_i32.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,20 +15,22 @@
           <span class="dirname">src/abstract/</span>abstract_i32.ml
         </a>
       </h1>
-      <h2>61.11%</h2>
+      <h2>56.76%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:25.00%"></span>
-      <span class="unvisited" style="top:42.11%"></span>
-      <span class="unvisited" style="bottom:28.95%"></span>
-      <span class="unvisited" style="bottom:26.32%"></span>
-      <span class="unvisited" style="bottom:23.68%"></span>
-      <span class="unvisited" style="bottom:21.05%"></span>
-      <span class="unvisited" style="bottom:18.42%"></span>
-      <span class="unvisited" style="bottom:13.16%"></span>
-      <span class="unvisited" style="bottom:2.63%"></span>
-      <span class="unvisited" style="bottom:1.32%"></span>
-      <span class="unvisited" style="bottom:0.00%"></span>
+      <span class="unvisited" style="top:23.17%"></span>
+      <span class="unvisited" style="top:39.02%"></span>
+      <span class="unvisited" style="bottom:34.15%"></span>
+      <span class="unvisited" style="bottom:31.71%"></span>
+      <span class="unvisited" style="bottom:29.27%"></span>
+      <span class="unvisited" style="bottom:26.83%"></span>
+      <span class="unvisited" style="bottom:24.39%"></span>
+      <span class="unvisited" style="bottom:19.51%"></span>
+      <span class="unvisited" style="bottom:14.63%"></span>
+      <span class="unvisited" style="bottom:9.76%"></span>
+      <span class="unvisited" style="bottom:7.32%"></span>
+      <span class="unvisited" style="bottom:4.88%"></span>
+      <span class="unvisited" style="bottom:1.22%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -100,15 +102,21 @@
 <a id="L65"></a><span > </span>
 <a id="L66"></a><span class="unvisited"> </span>
 <a id="L67"></a><span > </span>
-<a id="L68"></a><span > </span>
-<a id="L69"></a><span class="visited"> </span>
-<a id="L70"></a><span class="visited"> </span>
-<a id="L71"></a><span class="visited"> </span>
-<a id="L72"></a><span > </span>
+<a id="L68"></a><span class="visited"> </span>
+<a id="L69"></a><span > </span>
+<a id="L70"></a><span class="unvisited"> </span>
+<a id="L71"></a><span > </span>
+<a id="L72"></a><span class="visited"> </span>
 <a id="L73"></a><span > </span>
 <a id="L74"></a><span class="unvisited"> </span>
-<a id="L75"></a><span class="unvisited"> </span>
+<a id="L75"></a><span > </span>
 <a id="L76"></a><span class="unvisited"> </span>
+<a id="L77"></a><span > </span>
+<a id="L78"></a><span class="unvisited"> </span>
+<a id="L79"></a><span > </span>
+<a id="L80"></a><span > </span>
+<a id="L81"></a><span class="unvisited"> </span>
+<a id="L82"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -189,6 +197,12 @@
 <a href="#L74">74</a>
 <a href="#L75">75</a>
 <a href="#L76">76</a>
+<a href="#L77">77</a>
+<a href="#L78">78</a>
+<a href="#L79">79</a>
+<a href="#L80">80</a>
+<a href="#L81">81</a>
+<a href="#L82">82</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2026 OCamlPro *)
@@ -206,7 +220,7 @@ let to_binary x = <span data-count="82">x</span>
 
 let unknown ctx = <span data-count="1">A</span>bstract_domain.binary_unknown ~size ctx
 
-let eq ctx i1 i2 = <span data-count="10">A</span>bstract_domain.Binary_Forward.beq ~size ctx i1 i2
+let eq ctx i1 i2 = <span data-count="6">A</span>bstract_domain.Binary_Forward.beq ~size ctx i1 i2
 
 let ne ctx i1 i2 = <span data-count="0">A</span>bstract_boolean.not ctx (e<span data-count="0">q</span> ctx i1 i2)
 
@@ -257,15 +271,21 @@ let le_s ctx x1 x2 = <span data-count="14">A</span>bstract_domain.Binary_Forward
 
 let le_u ctx x1 x2 = <span data-count="0">A</span>bstract_domain.Binary_Forward.biule ~size ctx x1 x2
 
-let lt_s ctx x1 x2 =
-  <span data-count="4">l</span>et le = le_s ctx x1 x2 in
-  <span data-count="4">l</span>et neq = Abstract_boolean.not ctx (e<span data-count="4">q</span> ctx x1 x2) in
-  <span data-count="4">A</span>bstract_boolean.and_ ctx le neq
+let ge_s ctx x1 x2 = <span data-count="4">l</span>e_s ctx x2 x1
 
-let lt_u ctx x1 x2 =
-  <span data-count="0">l</span>et le = le_u ctx x1 x2 in
-  <span data-count="0">l</span>et neq = Abstract_boolean.not ctx (e<span data-count="0">q</span> ctx x1 x2) in
-  <span data-count="0">A</span>bstract_boolean.and_ ctx le neq
+let ge_u ctx x1 x2 = <span data-count="0">l</span>e_u ctx x2 x1
+
+let lt_s ctx x1 x2 = <span data-count="4">A</span>bstract_boolean.not ctx (ge_<span data-count="4">s</span> ctx x1 x2)
+
+let lt_u ctx x1 x2 = <span data-count="0">A</span>bstract_boolean.not ctx (ge_<span data-count="0">u</span> ctx x1 x2)
+
+let gt_s ctx x1 x2 = <span data-count="0">l</span>t_s ctx x2 x1
+
+let gt_u ctx x1 x2 = <span data-count="0">l</span>t_u ctx x2 x1
+
+let shl ctx x1 x2 =
+  <span data-count="0">l</span>et flags = Operator.Flags.Bshl.pack ~nsw:true ~nuw:true in
+  Abstract_domain.Binary_Forward.bshl ~flags ~size ctx x1 x2
 </code></pre>
       </div>
     </div>

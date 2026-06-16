@@ -2795,7 +2795,7 @@ let pp_val_type fmt = function
 
 let val_type_eq t1 t2 =
   <span data-count="1618526">m</span>atch (t1, t2) with
-  | <span data-count="1618495">N</span>um_type t1, Num_type t2 -&gt; Text.num_type_eq t1 t2
+  | <span data-count="1618496">N</span>um_type t1, Num_type t2 -&gt; Text.num_type_eq t1 t2
   | <span data-count="30">R</span>ef_type t1, Ref_type t2 -&gt; ref_type_eq t1 t2
   | <span data-count="0">_</span>, _ -&gt; false
 
