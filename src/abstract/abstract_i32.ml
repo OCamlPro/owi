@@ -65,12 +65,18 @@ let le_s ctx x1 x2 = Abstract_domain.Binary_Forward.bisle ~size ctx x1 x2
 
 let le_u ctx x1 x2 = Abstract_domain.Binary_Forward.biule ~size ctx x1 x2
 
-let lt_s ctx x1 x2 =
-  let le = le_s ctx x1 x2 in
-  let neq = Abstract_boolean.not ctx (eq ctx x1 x2) in
-  Abstract_boolean.and_ ctx le neq
+let ge_s ctx x1 x2 = le_s ctx x2 x1
 
-let lt_u ctx x1 x2 =
-  let le = le_u ctx x1 x2 in
-  let neq = Abstract_boolean.not ctx (eq ctx x1 x2) in
-  Abstract_boolean.and_ ctx le neq
+let ge_u ctx x1 x2 = le_u ctx x2 x1
+
+let lt_s ctx x1 x2 = Abstract_boolean.not ctx (ge_s ctx x1 x2)
+
+let lt_u ctx x1 x2 = Abstract_boolean.not ctx (ge_u ctx x1 x2)
+
+let gt_s ctx x1 x2 = lt_s ctx x2 x1
+
+let gt_u ctx x1 x2 = lt_u ctx x2 x1
+
+let shl ctx x1 x2 =
+  let flags = Operator.Flags.Bshl.pack ~nsw:true ~nuw:true in
+  Abstract_domain.Binary_Forward.bshl ~flags ~size ctx x1 x2

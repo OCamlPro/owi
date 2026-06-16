@@ -481,9 +481,17 @@ module DataAbstract_state : DATA_STATE = struct
     | Or ->
       let stack = Stack.apply_i32_i32_i32 stack (Abstract_i32.or_ ctx) in
       { state with stack }
+    | Shl ->
+      let stack = Stack.apply_i32_i32_i32 stack (Abstract_i32.shl ctx) in
+      { state with stack }
     | Lt S ->
       let stack =
         Stack.apply_i32_i32_boolean stack ctx (Abstract_i32.lt_s ctx)
+      in
+      { state with stack }
+    | Gt S ->
+      let stack =
+        Stack.apply_i32_i32_boolean stack ctx (Abstract_i32.gt_s ctx)
       in
       { state with stack }
     | Lt U ->
@@ -491,14 +499,29 @@ module DataAbstract_state : DATA_STATE = struct
         Stack.apply_i32_i32_boolean stack ctx (Abstract_i32.lt_u ctx)
       in
       { state with stack }
+    | Gt U ->
+      let stack =
+        Stack.apply_i32_i32_boolean stack ctx (Abstract_i32.gt_u ctx)
+      in
+      { state with stack }
     | Le S ->
       let stack =
         Stack.apply_i32_i32_boolean stack ctx (Abstract_i32.le_s ctx)
       in
       { state with stack }
+    | Ge S ->
+      let stack =
+        Stack.apply_i32_i32_boolean stack ctx (Abstract_i32.ge_s ctx)
+      in
+      { state with stack }
     | Le U ->
       let stack =
         Stack.apply_i32_i32_boolean stack ctx (Abstract_i32.le_u ctx)
+      in
+      { state with stack }
+    | Ge U ->
+      let stack =
+        Stack.apply_i32_i32_boolean stack ctx (Abstract_i32.ge_u ctx)
       in
       { state with stack }
     | Ne ->
