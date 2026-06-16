@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>abstract_invariant.ml &mdash; Coverage report</title>
-    <meta name="description" content="30.77% coverage in src/abstract/abstract_invariant.ml">
+    <meta name="description" content="52.94% coverage in src/abstract/abstract_invariant.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,18 +15,16 @@
           <span class="dirname">src/abstract/</span>abstract_invariant.ml
         </a>
       </h1>
-      <h2>30.77%</h2>
+      <h2>52.94%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:43.59%"></span>
-      <span class="unvisited" style="top:46.15%"></span>
-      <span class="unvisited" style="top:48.72%"></span>
-      <span class="unvisited" style="bottom:48.72%"></span>
-      <span class="unvisited" style="bottom:38.46%"></span>
-      <span class="unvisited" style="bottom:28.21%"></span>
-      <span class="unvisited" style="bottom:15.38%"></span>
-      <span class="unvisited" style="bottom:12.82%"></span>
-      <span class="unvisited" style="bottom:2.56%"></span>
+      <span class="unvisited" style="top:42.86%"></span>
+      <span class="unvisited" style="top:45.24%"></span>
+      <span class="unvisited" style="bottom:45.24%"></span>
+      <span class="unvisited" style="bottom:26.19%"></span>
+      <span class="unvisited" style="bottom:14.29%"></span>
+      <span class="unvisited" style="bottom:11.90%"></span>
+      <span class="unvisited" style="bottom:2.38%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -47,29 +45,32 @@
 <a id="L14"></a><span class="visited"> </span>
 <a id="L15"></a><span > </span>
 <a id="L16"></a><span > </span>
-<a id="L17"></a><span class="unvisited"> </span>
+<a id="L17"></a><span class="visited"> </span>
 <a id="L18"></a><span class="unvisited"> </span>
 <a id="L19"></a><span class="unvisited"> </span>
-<a id="L20"></a><span class="unvisited"> </span>
-<a id="L21"></a><span > </span>
-<a id="L22"></a><span > </span>
-<a id="L23"></a><span > </span>
-<a id="L24"></a><span class="unvisited"> </span>
+<a id="L20"></a><span class="visited"> </span>
+<a id="L21"></a><span class="visited"> </span>
+<a id="L22"></a><span class="visited"> </span>
+<a id="L23"></a><span class="unvisited"> </span>
+<a id="L24"></a><span > </span>
 <a id="L25"></a><span > </span>
 <a id="L26"></a><span > </span>
-<a id="L27"></a><span > </span>
-<a id="L28"></a><span class="unvisited"> </span>
+<a id="L27"></a><span class="visited"> </span>
+<a id="L28"></a><span > </span>
 <a id="L29"></a><span > </span>
 <a id="L30"></a><span > </span>
-<a id="L31"></a><span > </span>
+<a id="L31"></a><span class="unvisited"> </span>
 <a id="L32"></a><span > </span>
-<a id="L33"></a><span class="unvisited"> </span>
-<a id="L34"></a><span class="unvisited"> </span>
+<a id="L33"></a><span > </span>
+<a id="L34"></a><span > </span>
 <a id="L35"></a><span > </span>
-<a id="L36"></a><span > </span>
-<a id="L37"></a><span > </span>
-<a id="L38"></a><span class="unvisited"> </span>
+<a id="L36"></a><span class="unvisited"> </span>
+<a id="L37"></a><span class="unvisited"> </span>
+<a id="L38"></a><span > </span>
 <a id="L39"></a><span > </span>
+<a id="L40"></a><span > </span>
+<a id="L41"></a><span class="unvisited"> </span>
+<a id="L42"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -113,6 +114,9 @@
 <a href="#L37">37</a>
 <a href="#L38">38</a>
 <a href="#L39">39</a>
+<a href="#L40">40</a>
+<a href="#L41">41</a>
+<a href="#L42">42</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2026 OCamlPro *)
@@ -121,23 +125,26 @@
 type t = { can_divide_by_zero : (int, bool) Hashtbl.t }
 
 let empty () =
-  <span data-count="1252">l</span>et can_divide_by_zero = Hashtbl.create 512 in
-  <span data-count="1252">{</span> can_divide_by_zero }
+  <span data-count="1254">l</span>et can_divide_by_zero = Hashtbl.create 512 in
+  <span data-count="1254">{</span> can_divide_by_zero }
 
 let can_divide_by_zero { can_divide_by_zero } ~uuid =
-  <span data-count="81">l</span>et possible = Hashtbl.find_opt can_divide_by_zero uuid in
+  <span data-count="96828">l</span>et possible = Hashtbl.find_opt can_divide_by_zero uuid in
   (* by default, we don't know, and assume it is possible to be on the safe-side *)
-  <span data-count="81">O</span>ption.value ~default:true possible
+  <span data-count="96828">O</span>ption.value ~default:true possible
 
 let add_divide_by_zero_invariant { can_divide_by_zero } ~uuid ~possible =
-  <span data-count="0">m</span>atch Hashtbl.find_opt can_divide_by_zero uuid with
-  | <span data-count="0">N</span>one -&gt; begin Hashtbl.add can_divide_by_zero uuid possible end
-  | <span data-count="0">S</span>ome false -&gt;
+  <span data-count="5">L</span>og.debug (fun m -&gt;
+    <span data-count="0">m</span> "marked %d as %s divide by zero" uuid
+      (if possible then <span data-count="0">"</span>POSSIBLE" else <span data-count="0">"</span>IMPOSSIBLE") );
+  <span data-count="5">m</span>atch Hashtbl.find_opt can_divide_by_zero uuid with
+  | <span data-count="2">N</span>one -&gt; begin Hashtbl.add can_divide_by_zero uuid possible end
+  | <span data-count="3">S</span>ome false -&gt;
     if possible then <span data-count="0">b</span>egin
       (* it was impossible but it is now possible *)
       Hashtbl.add can_divide_by_zero uuid true
     end
-    else <span data-count="0">b</span>egin
+    else <span data-count="3">b</span>egin
       (* it was impossible and it is still impossible *)
       ()
     end

@@ -294,7 +294,7 @@ type 'ext t =
   ; id : int
   }
 
-let id (env : _ t) = <span data-count="2477366">e</span>nv.id
+let id (env : _ t) = <span data-count="2477120">e</span>nv.id
 
 let get_global (env : _ t) id =
   <span data-count="1219">m</span>atch IMap.find_opt id env.globals with
@@ -312,7 +312,7 @@ let get_table (env : _ t) id =
   | <span data-count="1608367">S</span>ome v -&gt; Concrete_choice.return v
 
 let get_func (env : _ t) id =
-  <span data-count="5591368">m</span>atch IMap.find_opt id env.functions with None -&gt; assert false | <span data-count="5591368">S</span>ome v -&gt; v
+  <span data-count="5593435">m</span>atch IMap.find_opt id env.functions with None -&gt; assert false | <span data-count="5593434">S</span>ome v -&gt; v
 
 let get_data (env : _ t) id =
   <span data-count="982">m</span>atch IMap.find_opt id env.data with
@@ -327,7 +327,7 @@ let get_tag (env : _ t) id =
 
 let get_extern_func env id =
   <span data-count="134414">l</span>et f, _t = Dynarray.get env.extern_funcs id in
-  <span data-count="134414">f</span>
+  <span data-count="134415">f</span>
 
 module Build = struct
   type t =
@@ -360,7 +360,7 @@ module Build = struct
     <span data-count="804">{</span> env with tables = IMap.ad<span data-count="804">d</span> id table env.tables }
 
   let add_func id func (env : t) =
-    <span data-count="13987">{</span> env with functions = IMap.ad<span data-count="13987">d</span> id func env.functions }
+    <span data-count="13991">{</span> env with functions = IMap.ad<span data-count="13991">d</span> id func env.functions }
 
   let add_data id data (env : t) = <span data-count="676">{</span> env with data = IMap.ad<span data-count="676">d</span> id data env.data }
 
@@ -395,7 +395,7 @@ end
 let freeze id
   ({ globals; memories; tables; functions; data; elem; tags } : Build.t)
   extern_funcs =
-  <span data-count="2441">{</span> id; globals; memories; tables; functions; data; elem; tags; extern_funcs }
+  <span data-count="2443">{</span> id; globals; memories; tables; functions; data; elem; tags; extern_funcs }
 </code></pre>
       </div>
     </div>

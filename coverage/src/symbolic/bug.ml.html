@@ -148,17 +148,17 @@ type t =
 
 let is_trap = function <span data-count="1">`</span>Assertion _ | <span data-count="0">`</span>Prune -&gt; false | <span data-count="1">`</span>Trap _ -&gt; true
 
-let is_assertion = function <span data-count="3">`</span>Assertion _ -&gt; true | <span data-count="0">`</span>Prune | <span data-count="3">`</span>Trap _ -&gt; false
+let is_assertion = function <span data-count="3">`</span>Assertion _ -&gt; true | <span data-count="0">`</span>Prune | <span data-count="2">`</span>Trap _ -&gt; false
 
 let is_prune = function <span data-count="0">`</span>Prune -&gt; true | <span data-count="0">`</span>Assertion _ | <span data-count="0">`</span>Trap _ -&gt; false
 
 let get_state : [ `Trap of trap | `Assertion of assertion ] -&gt; Thread.t =
   function
-  | <span data-count="213">`</span>Trap { state; _ } | <span data-count="70">`</span>Assertion { state; _ } -&gt; state
+  | <span data-count="214">`</span>Trap { state; _ } | <span data-count="70">`</span>Assertion { state; _ } -&gt; state
 
 let get_model : [ `Trap of trap | `Assertion of assertion ] -&gt; Smtml.Model.t =
   function
-  | <span data-count="284">`</span>Trap { model; _ } | <span data-count="101">`</span>Assertion { model; _ } -&gt; model
+  | <span data-count="286">`</span>Trap { model; _ } | <span data-count="101">`</span>Assertion { model; _ } -&gt; model
 
 let compare_breadcrumbs (bug1 : [ `Trap of trap | `Assertion of assertion ])
   (bug2 : [ `Trap of trap | `Assertion of assertion ]) =
@@ -169,8 +169,8 @@ let compare_breadcrumbs (bug1 : [ `Trap of trap | `Assertion of assertion ])
   <span data-count="15">L</span>ist.compare compare breadcrumbs1 breadcrumbs2
 
 let sort_seq_if b (seq : [ `Trap of trap | `Assertion of assertion ] Seq.t) =
-  <span data-count="429">i</span>f b then <span data-count="47">L</span>ist.of_seq seq |&gt; <span data-count="47">L</span>ist.sort compare_breadcrumbs |&gt; <span data-count="47">L</span>ist.to_seq
-  else <span data-count="382">s</span>eq
+  <span data-count="430">i</span>f b then <span data-count="47">L</span>ist.of_seq seq |&gt; <span data-count="47">L</span>ist.sort compare_breadcrumbs |&gt; <span data-count="47">L</span>ist.to_seq
+  else <span data-count="383">s</span>eq
 </code></pre>
       </div>
     </div>

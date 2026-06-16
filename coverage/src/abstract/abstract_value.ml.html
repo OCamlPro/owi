@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>abstract_value.ml &mdash; Coverage report</title>
-    <meta name="description" content="33.33% coverage in src/abstract/abstract_value.ml">
+    <meta name="description" content="43.48% coverage in src/abstract/abstract_value.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,24 +15,18 @@
           <span class="dirname">src/abstract/</span>abstract_value.ml
         </a>
       </h1>
-      <h2>33.33%</h2>
+      <h2>43.48%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:11.90%"></span>
-      <span class="unvisited" style="top:50.00%"></span>
-      <span class="unvisited" style="bottom:48.81%"></span>
-      <span class="unvisited" style="bottom:42.86%"></span>
-      <span class="unvisited" style="bottom:35.71%"></span>
-      <span class="unvisited" style="bottom:34.52%"></span>
-      <span class="unvisited" style="bottom:28.57%"></span>
-      <span class="unvisited" style="bottom:21.43%"></span>
-      <span class="unvisited" style="bottom:16.67%"></span>
-      <span class="unvisited" style="bottom:15.48%"></span>
-      <span class="unvisited" style="bottom:13.10%"></span>
-      <span class="unvisited" style="bottom:11.90%"></span>
-      <span class="some-visited" style="bottom:8.33%"></span>
-      <span class="unvisited" style="bottom:4.76%"></span>
-      <span class="unvisited" style="bottom:2.38%"></span>
+      <span class="unvisited" style="top:14.49%"></span>
+      <span class="unvisited" style="bottom:39.13%"></span>
+      <span class="unvisited" style="bottom:37.68%"></span>
+      <span class="unvisited" style="bottom:30.43%"></span>
+      <span class="unvisited" style="bottom:23.19%"></span>
+      <span class="unvisited" style="bottom:14.49%"></span>
+      <span class="some-visited" style="bottom:10.14%"></span>
+      <span class="unvisited" style="bottom:5.80%"></span>
+      <span class="unvisited" style="bottom:2.90%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -89,38 +83,23 @@
 <a id="L50"></a><span > </span>
 <a id="L51"></a><span > </span>
 <a id="L52"></a><span class="visited"> </span>
-<a id="L53"></a><span class="visited"> </span>
-<a id="L54"></a><span class="unvisited"> </span>
-<a id="L55"></a><span class="unvisited"> </span>
+<a id="L53"></a><span class="unvisited"> </span>
+<a id="L54"></a><span > </span>
+<a id="L55"></a><span > </span>
 <a id="L56"></a><span > </span>
-<a id="L57"></a><span > </span>
-<a id="L58"></a><span > </span>
-<a id="L59"></a><span class="visited"> </span>
-<a id="L60"></a><span class="unvisited"> </span>
+<a id="L57"></a><span class="visited"> </span>
+<a id="L58"></a><span class="visited"> </span>
+<a id="L59"></a><span class="unvisited"> </span>
+<a id="L60"></a><span > </span>
 <a id="L61"></a><span > </span>
-<a id="L62"></a><span > </span>
+<a id="L62"></a><span class="some-visited"> </span>
 <a id="L63"></a><span > </span>
-<a id="L64"></a><span class="visited"> </span>
-<a id="L65"></a><span class="visited"> </span>
-<a id="L66"></a><span class="unvisited"> </span>
-<a id="L67"></a><span > </span>
+<a id="L64"></a><span > </span>
+<a id="L65"></a><span class="unvisited"> </span>
+<a id="L66"></a><span > </span>
+<a id="L67"></a><span class="unvisited"> </span>
 <a id="L68"></a><span > </span>
-<a id="L69"></a><span > </span>
-<a id="L70"></a><span class="unvisited"> </span>
-<a id="L71"></a><span class="unvisited"> </span>
-<a id="L72"></a><span > </span>
-<a id="L73"></a><span class="unvisited"> </span>
-<a id="L74"></a><span class="unvisited"> </span>
-<a id="L75"></a><span > </span>
-<a id="L76"></a><span > </span>
-<a id="L77"></a><span class="some-visited"> </span>
-<a id="L78"></a><span > </span>
-<a id="L79"></a><span > </span>
-<a id="L80"></a><span class="unvisited"> </span>
-<a id="L81"></a><span > </span>
-<a id="L82"></a><span class="unvisited"> </span>
-<a id="L83"></a><span > </span>
-<a id="L84"></a><span class="visited"> </span>
+<a id="L69"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -194,21 +173,6 @@
 <a href="#L67">67</a>
 <a href="#L68">68</a>
 <a href="#L69">69</a>
-<a href="#L70">70</a>
-<a href="#L71">71</a>
-<a href="#L72">72</a>
-<a href="#L73">73</a>
-<a href="#L74">74</a>
-<a href="#L75">75</a>
-<a href="#L76">76</a>
-<a href="#L77">77</a>
-<a href="#L78">78</a>
-<a href="#L79">79</a>
-<a href="#L80">80</a>
-<a href="#L81">81</a>
-<a href="#L82">82</a>
-<a href="#L83">83</a>
-<a href="#L84">84</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2026 OCamlPro *)
@@ -217,7 +181,7 @@
 module Size = struct
   let b32 = Units.In_bits.s32
 
-  let b64 = Units.In_bits.of_in<span data-count="798">t</span> 64
+  let b64 = Units.In_bits.of_in<span data-count="799">t</span> 64
 
   let equal s1 s2 = <span data-count="0">U</span>nits.In_bits.compar<span data-count="0">e</span> s1 s2 = 0
 end
@@ -256,44 +220,29 @@ let pp ppf = function
   | _ -&gt; .
 
 let pp_with_ctx ctx ppf = function
-  | <span data-count="1007">I</span>32 b -&gt; Fmt.pf ppf "i32 %a" (Abstract_i32.p<span data-count="1007">p</span> ctx) b
+  | <span data-count="791">I</span>32 b -&gt; Fmt.pf ppf "i32 %a" (Abstract_i32.p<span data-count="791">p</span> ctx) b
   | <span data-count="0">I</span>64 b -&gt; Fmt.pf ppf "i64 %a" (Abstract_i64.p<span data-count="0">p</span> ctx) b
   | _ -&gt; .
 
-let equal v1 v2 =
-  <span data-count="42">m</span>atch (v1, v2) with
-  | <span data-count="42">I</span>32 v1, I32 v2 -&gt; Abstract_i32.equal v1 v2
-  | <span data-count="0">I</span>64 v1, I64 v2 -&gt; Abstract_i64.equal v1 v2
-  | <span data-count="0">I</span>32 _, I64 _ | <span data-count="0">I</span>64 _, I32 _ -&gt; false
-  | _ -&gt; .
-
 let to_binary = function
-  | <span data-count="66">I</span>32 b -&gt; Abstract_i32.to_binary b
+  | <span data-count="82">I</span>32 b -&gt; Abstract_i32.to_binary b
   | <span data-count="0">I</span>64 b -&gt; Abstract_i64.to_binary b
   | _ -&gt; .
 
 let of_binary size x =
-  <span data-count="99">m</span>atch Units.In_bits.to_int size with
-  | <span data-count="99">3</span>2 -&gt; I32 (I32.of_binar<span data-count="99">y</span> x)
+  <span data-count="103">m</span>atch Units.In_bits.to_int size with
+  | <span data-count="103">3</span>2 -&gt; I32 (I32.of_binar<span data-count="103">y</span> x)
   | <span data-count="0">6</span>4 -&gt; I64 (I64.of_binar<span data-count="0">y</span> x)
   | _ -&gt; assert false
 
-let of_boolean ctx size boolean =
-  <span data-count="0">l</span>et true_ = Abstract_boolean.true_ ctx in
-  <span data-count="0">l</span>et n = if Abstract_boolean.equal boolean true_ then <span data-count="0">1</span> else <span data-count="0">0</span> in
-  match Units.In_bits.to_int size with
-  | <span data-count="0">3</span>2 -&gt; I32 (Abstract_i32.of_in<span data-count="0">t</span> ctx n)
-  | <span data-count="0">6</span>4 -&gt; I64 (Abstract_i64.of_in<span data-count="0">t</span> ctx n)
-  | _ -&gt; assert false
-
-let size_of = function <span data-count="66">I</span>32 _ -&gt; Size.b32 | <span data-count="0">I</span>64 _ -&gt; Size.b64 | _ -&gt; .
+let size_of = function <span data-count="72">I</span>32 _ -&gt; Size.b32 | <span data-count="0">I</span>64 _ -&gt; Size.b64 | _ -&gt; .
 
 let to_boolean ctx x =
   <span data-count="0">l</span>et size = Size.b32 in
   let zero = Abstract_domain.Binary_Forward.biconst ~size Z.zero ctx in
   <span data-count="0">A</span>bstract_domain.Binary_Forward.beq ~size ctx (to_binar<span data-count="0">y</span> x) zero
 
-let top size ctx = <span data-count="66">o</span>f_binary size @@ Abstract_domain.binary_empt<span data-count="66">y</span> ~size ctx
+let top size ctx = <span data-count="62">o</span>f_binary size @@ Abstract_domain.binary_empt<span data-count="62">y</span> ~size ctx
 </code></pre>
       </div>
     </div>

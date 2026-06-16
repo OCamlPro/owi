@@ -101,12 +101,12 @@ type t = Symbolic_global0.t =
   ; id : int
   }
 
-let value global = <span data-count="474">g</span>lobal.value
+let value global = <span data-count="476">g</span>lobal.value
 
-let replace global = <span data-count="2175">S</span>ymbolic_choice.map_state (Thread.replace_globa<span data-count="2175">l</span> global)
+let replace global = <span data-count="2016">S</span>ymbolic_choice.map_state (Thread.replace_globa<span data-count="2016">l</span> global)
 
 let set_value global value =
-  <span data-count="1935">l</span>et global = { global with value } in
+  <span data-count="1776">l</span>et global = { global with value } in
   replace global
 
 let convert_values (v : Concrete_value.t) : Symbolic_value.t =
