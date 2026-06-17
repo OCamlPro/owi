@@ -6,6 +6,7 @@ type t =
   { ctx : Abstract_domain.Context.t
   ; stack : Abstract_stack.t
   ; locals : Abstract_value.t Abstract_locals.t
+  ; globals : Abstract_value.t Abstract_globals.t
   ; func_rt : Binary.val_type list
   ; env : Abstract_extern_func.extern_func Link_env.t
   ; envs : Abstract_extern_func.extern_func Link_env.t Dynarray.t
@@ -23,6 +24,7 @@ let empty env envs () =
   let ctx = Abstract_domain.root_context () in
   let stack = Abstract_stack.empty in
   let locals = Abstract_locals.empty in
+  let globals = Abstract_globals.empty in
   let func_rt = [] in
   let invariant = Abstract_invariant.empty () in
-  { ctx; stack; locals; env; func_rt; envs; invariant }
+  { ctx; stack; locals; env; func_rt; envs; invariant; globals }
