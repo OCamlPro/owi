@@ -658,30 +658,14 @@ module DataAbstract_state : DATA_STATE = struct
       let locals = Abstract_locals.add i e locals in
       { state with stack; locals }
 
-  let eval_global ({ stack; globals; env; ctx; _ } as state : Abstract_state.t)
-    : Binary.global_instr -> _ = function
+  let eval_global ({ stack; globals; _ } as state : Abstract_state.t) :
+    Binary.global_instr -> _ = function
     | Set i ->
       let e, stack = Stack.pop stack in
       let globals = Abstract_globals.add i e globals in
       { state with stack; globals }
     | Get i ->
-      let v = Abstract_globals.find_opt i globals in
-      let v, globals =
-        match v with
-        | Some v -> (v, globals)
-        | None -> (
-          let r = Link_env.get_global env i in
-          match r with
-          | Error _ -> assert false
-          | Ok v ->
-            let v =
-              match v.value with
-              | I32 i -> Abstract_value.I32 (Abstract_i32.of_int32 ctx i)
-              | I64 i -> Abstract_value.I64 (Abstract_i64.of_int64 ctx i)
-              | _ -> assert false
-            in
-            (v, Abstract_globals.add i v globals) )
-      in
+      let v = Abstract_globals.find i globals in
       let stack = Stack.push stack v in
       { state with stack; globals }
 

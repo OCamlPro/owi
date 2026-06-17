@@ -24,7 +24,18 @@ let empty env envs () =
   let ctx = Abstract_domain.root_context () in
   let stack = Abstract_stack.empty in
   let locals = Abstract_locals.empty in
-  let globals = Abstract_globals.empty in
+  let globals =
+    let f i (v : Concrete_global.t) acc =
+      let v =
+        match v.value with
+        | I32 i -> Abstract_value.I32 (Abstract_i32.of_int32 ctx i)
+        | I64 i -> Abstract_value.I64 (Abstract_i64.of_int64 ctx i)
+        | _ -> assert false
+      in
+      Abstract_globals.add i v acc
+    in
+    Link_env.fold_globals f Abstract_globals.empty env
+  in
   let func_rt = [] in
   let invariant = Abstract_invariant.empty () in
   { ctx; stack; locals; env; func_rt; envs; invariant; globals }
