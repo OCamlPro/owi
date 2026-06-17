@@ -72,21 +72,27 @@ module Env = struct
   let type_get_sub i m =
     match Module.get_type i m with
     | None -> Error (`Unknown_type (Text.Raw i))
-    | Some sub -> Ok sub
+    | Some (Typedef.SimpleType (_, sub)) -> Ok sub
+    | Some (Typedef.RecType _) ->
+      Error (`Type_mismatch (Fmt.str "expected a simple type at index %d" i))
 
   let type_get i m =
     match Module.get_type i m with
     | None -> Error (`Unknown_type (Text.Raw i))
-    | Some { ct = Def_func_t ty; _ } -> Ok ty
+    | Some (Typedef.SimpleType (_, { ct = Def_func_t ty; _ })) -> Ok ty
     | Some _ ->
-      Error (`Type_mismatch (Fmt.str "expected a function type at index %d" i))
+      Error
+        (`Type_mismatch
+           (Fmt.str "expected a simple function type at index %d" i) )
 
   let type_get_struct i m =
     match Module.get_type i m with
     | None -> Error (`Unknown_type (Text.Raw i))
-    | Some { ct = Def_struct_t fields; _ } -> Ok fields
+    | Some (Typedef.SimpleType (_, { ct = Def_struct_t fields; _ })) ->
+      Ok fields
     | Some _ ->
-      Error (`Type_mismatch (Fmt.str "expected a struct type at index %d" i))
+      Error
+        (`Type_mismatch (Fmt.str "expected a simple struct type at index %d" i))
 
   let get_struct_field fields fid =
     match List.nth_opt fields fid with
@@ -96,9 +102,10 @@ module Env = struct
   let type_get_array i m =
     match Module.get_type i m with
     | None -> Error (`Unknown_type (Text.Raw i))
-    | Some { ct = Def_array_t ft; _ } -> Ok ft
+    | Some (Typedef.SimpleType (_, { ct = Def_array_t ft; _ })) -> Ok ft
     | Some _ ->
-      Error (`Type_mismatch (Fmt.str "expected an array type at index %d" i))
+      Error
+        (`Type_mismatch (Fmt.str "expected a simple array type at index %d" i))
 
   let local_get i env =
     match Index.Map.find_opt i env.locals with
