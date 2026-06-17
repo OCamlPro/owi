@@ -112,6 +112,29 @@ module DenotFixpoint (S : DATA_STATE) = struct
            , fun _ctx out -> (state_a.locals, out) ) )
     in
 
+    let (Abstract_domain.Context.Result (included, in_tuple, globals_continue))
+        =
+      Abstract_globals.fold_on_nonequal_union
+        begin fun k v1 v2 res ->
+          let size =
+            match v1 with
+            | Some v -> Abstract_value.size_of v
+            | None -> assert false
+          in
+          let v1 =
+            Option.value v1 ~default:(Abstract_value.top size state_a.ctx)
+          in
+          let v2 =
+            Option.value v2 ~default:(Abstract_value.top size state_b.ctx)
+          in
+          let f = Abstract_globals.add k in
+          gen_new_value ~widens v1 v2 state_a state_b res f
+        end
+        state_a.globals state_b.globals
+        (Abstract_domain.Context.Result
+           (included, in_tuple, fun _ctx out -> (state_a.globals, out)) )
+    in
+
     Log.debug (fun m ->
       let pp_locals ctx = Abstract_locals.pp (Abstract_value.pp_with_ctx ctx) in
       m "serializing locals (%s) : @\n first : %a @\n second : %a"
@@ -134,8 +157,9 @@ module DenotFixpoint (S : DATA_STATE) = struct
     in
     let cont ctx out =
       let stack, out = stack_continue ctx out in
+      let globals, out = globals_continue ctx out in
       let locals, out = locals_continue ctx out in
-      ({ state_a with ctx; stack = List.rev stack; locals }, out)
+      ({ state_a with ctx; stack = List.rev stack; locals; globals }, out)
     in
     Abstract_domain.Context.Result (inc, in_tup, cont)
 
