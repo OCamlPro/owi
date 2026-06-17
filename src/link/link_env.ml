@@ -52,6 +52,9 @@ let get_extern_func env id =
   let f, _t = Dynarray.get env.extern_funcs id in
   f
 
+let fold_globals f acc (env : _ t) =
+  IMap.fold (fun k v acc -> f k v acc) env.globals acc
+
 module Build = struct
   type t =
     { globals : Concrete_global.t IMap.t

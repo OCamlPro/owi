@@ -87,7 +87,7 @@
   owi: [INFO] running instr : call 0
   owi: [DEBUG] jt            :  
   owi: [DEBUG] abstract state : 
-                 context: Context{id=1, <(B:8)> -> [--..--]
+                 context: Context{id=1, <(B:9)> -> [--..--]
                                         }
                  stack  : i32 [--..--]
                  locals : 
@@ -96,8 +96,8 @@
   owi: [INFO] running instr : if
   owi: [DEBUG] abstract state : 
                  context: Context{id=3,
-                                  <(b:10)> -> {true}; <(b:11)> -> {true;false};
-                                  <(B:8)> -> {0}
+                                  <(b:11)> -> {true}; <(b:12)> -> {true;false};
+                                  <(B:9)> -> {0}
                                   }
                  stack  : 
                  locals : 
@@ -106,8 +106,8 @@
   owi: [INFO] running instr : block
   owi: [DEBUG] abstract state : 
                  context: Context{id=3,
-                                  <(b:10)> -> {true}; <(b:11)> -> {true;false};
-                                  <(B:8)> -> {0}
+                                  <(b:11)> -> {true}; <(b:12)> -> {true;false};
+                                  <(B:9)> -> {0}
                                   }
                  stack  : 
                  locals : 
@@ -117,8 +117,8 @@
   owi: [DEBUG] jt            :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=3,
-                                  <(b:10)> -> {true}; <(b:11)> -> {true;false};
-                                  <(B:8)> -> {0}
+                                  <(b:11)> -> {true}; <(b:12)> -> {true;false};
+                                  <(B:9)> -> {0}
                                   }
                  stack  : i32 {54}
                  locals : 
@@ -128,8 +128,8 @@
   owi: [DEBUG] jt            :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=2,
-                                  <(b:10)> -> {false}; <(b:11)> -> {true};
-                                  <(B:8)> -> [1..0xFFFFFFFF]
+                                  <(b:11)> -> {false}; <(b:12)> -> {true};
+                                  <(B:9)> -> [1..0xFFFFFFFF]
                                   }
                  stack  : 
                  locals : 
@@ -138,8 +138,8 @@
   owi: [INFO] running instr : block
   owi: [DEBUG] abstract state : 
                  context: Context{id=2,
-                                  <(b:10)> -> {false}; <(b:11)> -> {true};
-                                  <(B:8)> -> [1..0xFFFFFFFF]
+                                  <(b:11)> -> {false}; <(b:12)> -> {true};
+                                  <(B:9)> -> [1..0xFFFFFFFF]
                                   }
                  stack  : 
                  locals : 
@@ -149,8 +149,8 @@
   owi: [DEBUG] jt            :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=2,
-                                  <(b:10)> -> {false}; <(b:11)> -> {true};
-                                  <(B:8)> -> [1..0xFFFFFFFF]
+                                  <(b:11)> -> {false}; <(b:12)> -> {true};
+                                  <(B:9)> -> [1..0xFFFFFFFF]
                                   }
                  stack  : i32 {42}
                  locals : 
@@ -167,9 +167,9 @@
   owi: [DEBUG] jt            :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=4,
-                                  <(b:10)> -> {true;false};
                                   <(b:11)> -> {true;false};
-                                  <(B:8)> -> [--..--]
+                                  <(b:12)> -> {true;false};
+                                  <(B:9)> -> [--..--]
                                   <(B:17)> -> {42; 54}
                                   }
                  stack  : 
@@ -180,9 +180,9 @@
   owi: [DEBUG] jt            :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=4,
-                                  <(b:10)> -> {true;false};
                                   <(b:11)> -> {true;false};
-                                  <(B:8)> -> [--..--]
+                                  <(b:12)> -> {true;false};
+                                  <(B:9)> -> [--..--]
                                   <(B:17)> -> {42; 54}
                                   }
                  stack  : i32 {42; 54}
@@ -193,9 +193,9 @@
   owi: [DEBUG] jt            :  
   owi: [DEBUG] after call(start): abstract state : 
                  context: Context{id=4,
-                                  <(b:10)> -> {true;false};
                                   <(b:11)> -> {true;false};
-                                  <(B:8)> -> [--..--]
+                                  <(b:12)> -> {true;false};
+                                  <(B:9)> -> [--..--]
                                   <(B:17)> -> {42; 54}
                                   }
                  stack  : 

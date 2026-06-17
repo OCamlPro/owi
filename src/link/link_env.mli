@@ -24,6 +24,8 @@ val get_extern_func : 'ext t -> int -> 'ext
 
 val id : _ t -> int
 
+val fold_globals : (int -> Concrete_global.t -> 'a -> 'a) -> 'a -> 'b t -> 'a
+
 module Build : sig
   type t
 
