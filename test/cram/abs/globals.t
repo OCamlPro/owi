@@ -5,15 +5,30 @@
   owi: [DEBUG] grouping     ...
   owi: [DEBUG] {id: 
                  typ: 
-                 decl_types: (func)
+                 decl_types: (func (result i32))
+                 (func)
                  type_checks: 
                  global: Local ((global $x (mut i32) i32.const 42))
                  table: 
                  mem: 
-                 func: Local ((func $start
+                 func: Imported ({
+                   modul: "owi"
+                   name: "i32_symbol"
+                   assigned_name:  $i32_symbol
+                   typ:  (result i32)})
+                 Local ((func $start
+                   call $i32_symbol
+                   (if
+                     (then
+                       i32.const 42
+                       global.set $x
+                     )
+                     (else
+                       i32.const 54
+                       global.set $x
+                     )
+                   )
                    global.get $x
-                   i32.const 1
-                   i32.add
                    drop
                  ))
                  elem: 
@@ -21,12 +36,13 @@
                  start: $start
                  }
   owi: [DEBUG] assigning    ...
-  owi: [DEBUG] Types: (func)
+  owi: [DEBUG] Types: (func (result i32))
+               (func)
                Types names: 
                Global names: ("x", 0)
                Table names: 
                Mem names: 
-               Func names: ("start", 0)
+               Func names: ("start", 1) ; ("i32_symbol", 0)
                Elem names: 
                Data names: 
                Tag names: 
@@ -34,11 +50,19 @@
   owi: [DEBUG] rewriting    ...
   owi: [INFO] typechecking ...
   owi: [DEBUG] stack             : []
-  owi: [DEBUG] typechecking instr: global.get 0
+  owi: [DEBUG] typechecking instr: call 0
   owi: [DEBUG] stack             : [i32]
-  owi: [DEBUG] typechecking instr: i32.const 1
-  owi: [DEBUG] stack             : [i32 i32]
-  owi: [DEBUG] typechecking instr: i32.add
+  owi: [DEBUG] typechecking instr: if
+  owi: [DEBUG] stack             : []
+  owi: [DEBUG] typechecking instr: i32.const 42
+  owi: [DEBUG] stack             : [i32]
+  owi: [DEBUG] typechecking instr: global.set 0
+  owi: [DEBUG] stack             : []
+  owi: [DEBUG] typechecking instr: i32.const 54
+  owi: [DEBUG] stack             : [i32]
+  owi: [DEBUG] typechecking instr: global.set 0
+  owi: [DEBUG] stack             : []
+  owi: [DEBUG] typechecking instr: global.get 0
   owi: [DEBUG] stack             : [i32]
   owi: [DEBUG] typechecking instr: drop
   owi: [INFO] linking      ...
@@ -48,7 +72,7 @@
                  locals : 
   owi: [INFO] stack         : [  ]
   owi: [INFO] locals        : [  ]
-  owi: [INFO] running instr : call 0
+  owi: [INFO] running instr : call 1
   owi: [INFO] calling func  : func start
   owi: [DEBUG] call (start): abstract state : 
                  context: Context{id=1, <empty>}
@@ -60,34 +84,120 @@
                  locals : 
   owi: [INFO] stack         : [  ]
   owi: [INFO] locals        : [  ]
-  owi: [INFO] running instr : global.get 0
+  owi: [INFO] running instr : call 0
   owi: [DEBUG] jt            :  
   owi: [DEBUG] abstract state : 
-                 context: Context{id=1, <empty>}
+                 context: Context{id=1, <(B:8)> -> [--..--]
+                                        }
+                 stack  : i32 [--..--]
+                 locals : 
+  owi: [INFO] stack         : [ i32 [--..--] ]
+  owi: [INFO] locals        : [  ]
+  owi: [INFO] running instr : if
+  owi: [DEBUG] abstract state : 
+                 context: Context{id=3,
+                                  <(b:10)> -> {true}; <(b:11)> -> {true;false};
+                                  <(B:8)> -> {0}
+                                  }
+                 stack  : 
+                 locals : 
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] locals        : [  ]
+  owi: [INFO] running instr : block
+  owi: [DEBUG] abstract state : 
+                 context: Context{id=3,
+                                  <(b:10)> -> {true}; <(b:11)> -> {true;false};
+                                  <(B:8)> -> {0}
+                                  }
+                 stack  : 
+                 locals : 
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] locals        : [  ]
+  owi: [INFO] running instr : i32.const 54
+  owi: [DEBUG] jt            :  
+  owi: [DEBUG] abstract state : 
+                 context: Context{id=3,
+                                  <(b:10)> -> {true}; <(b:11)> -> {true;false};
+                                  <(B:8)> -> {0}
+                                  }
+                 stack  : i32 {54}
+                 locals : 
+  owi: [INFO] stack         : [ i32 {54} ]
+  owi: [INFO] locals        : [  ]
+  owi: [INFO] running instr : global.set 0
+  owi: [DEBUG] jt            :  
+  owi: [DEBUG] abstract state : 
+                 context: Context{id=2,
+                                  <(b:10)> -> {false}; <(b:11)> -> {true};
+                                  <(B:8)> -> [1..0xFFFFFFFF]
+                                  }
+                 stack  : 
+                 locals : 
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] locals        : [  ]
+  owi: [INFO] running instr : block
+  owi: [DEBUG] abstract state : 
+                 context: Context{id=2,
+                                  <(b:10)> -> {false}; <(b:11)> -> {true};
+                                  <(B:8)> -> [1..0xFFFFFFFF]
+                                  }
+                 stack  : 
+                 locals : 
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] locals        : [  ]
+  owi: [INFO] running instr : i32.const 42
+  owi: [DEBUG] jt            :  
+  owi: [DEBUG] abstract state : 
+                 context: Context{id=2,
+                                  <(b:10)> -> {false}; <(b:11)> -> {true};
+                                  <(B:8)> -> [1..0xFFFFFFFF]
+                                  }
                  stack  : i32 {42}
                  locals : 
   owi: [INFO] stack         : [ i32 {42} ]
   owi: [INFO] locals        : [  ]
-  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] running instr : global.set 0
+  owi: [DEBUG] jt            :  
+  owi: [DEBUG] serializing locals (join) : 
+                first :  
+                second : 
+  owi: [DEBUG] serializing stacks (join) : 
+                first :  
+                second : 
   owi: [DEBUG] jt            :  
   owi: [DEBUG] abstract state : 
-                 context: Context{id=1, <empty>}
-                 stack  : i32 {1} ; i32 {42}
+                 context: Context{id=4,
+                                  <(b:10)> -> {true;false};
+                                  <(b:11)> -> {true;false};
+                                  <(B:8)> -> [--..--]
+                                  <(B:17)> -> {42; 54}
+                                  }
+                 stack  : 
                  locals : 
-  owi: [INFO] stack         : [ i32 {1} ; i32 {42} ]
+  owi: [INFO] stack         : [  ]
   owi: [INFO] locals        : [  ]
-  owi: [INFO] running instr : i32.add
+  owi: [INFO] running instr : global.get 0
   owi: [DEBUG] jt            :  
   owi: [DEBUG] abstract state : 
-                 context: Context{id=1, <empty>}
-                 stack  : i32 {43}
+                 context: Context{id=4,
+                                  <(b:10)> -> {true;false};
+                                  <(b:11)> -> {true;false};
+                                  <(B:8)> -> [--..--]
+                                  <(B:17)> -> {42; 54}
+                                  }
+                 stack  : i32 {42; 54}
                  locals : 
-  owi: [INFO] stack         : [ i32 {43} ]
+  owi: [INFO] stack         : [ i32 {42; 54} ]
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : drop
   owi: [DEBUG] jt            :  
   owi: [DEBUG] after call(start): abstract state : 
-                 context: Context{id=1, <empty>}
+                 context: Context{id=4,
+                                  <(b:10)> -> {true;false};
+                                  <(b:11)> -> {true;false};
+                                  <(B:8)> -> [--..--]
+                                  <(B:17)> -> {42; 54}
+                                  }
                  stack  : 
                  locals : 
   
