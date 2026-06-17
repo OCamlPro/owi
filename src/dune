@@ -7,11 +7,12 @@
   abstract_domain
   abstract_driver
   abstract_extern_func
+  abstract_f32
+  abstract_f64
+  abstract_globals
   abstract_i32
   abstract_i64
   abstract_invariant
-  abstract_f32
-  abstract_f64
   abstract_locals
   abstract_ref
   abstract_stack

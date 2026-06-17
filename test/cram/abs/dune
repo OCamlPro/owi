@@ -3,9 +3,10 @@
   %{bin:owi}
   add.wat
   fact.wat
+  globals.wat
   if.wat
-  ./invariant_gen1.wat
+  invariant_gen1.wat
+  local_func.wat
   loop.wat
   loop2.wat
-  local_func.wat
   return.wat))
