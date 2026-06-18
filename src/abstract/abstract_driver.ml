@@ -558,10 +558,12 @@ module DataAbstract_state : DATA_STATE = struct
       let stack = Stack.apply_i32_i32_boolean stack ctx (Abstract_i32.eq ctx) in
       { state with stack }
     | Store _ ->
+      (* TODO: handle this correctly *)
       let _, stack = Stack.pop2_i32 stack in
       let stack = Stack.push_i32 stack (Abstract_i32.unknown ctx) in
       { state with stack }
     | Load _ ->
+      (* TODO: handle this correctly *)
       let _, stack = Stack.pop_i32 stack in
       let stack = Stack.push_i32 stack (Abstract_i32.unknown ctx) in
       { state with stack }
@@ -649,15 +651,18 @@ module DataAbstract_state : DATA_STATE = struct
       in
       { state with stack }
     | Store _ ->
+      (* TODO: handle this correctly *)
       let _, stack = Stack.pop2_i64 stack in
       let stack = Stack.push_i64 stack (Abstract_i64.unknown ctx) in
       { state with stack }
     | Load _ ->
+      (* TODO: handle this correctly *)
       let _, stack = Stack.pop_i64 stack in
       let stack = Stack.push_i64 stack (Abstract_i64.unknown ctx) in
       { state with stack }
     | _ -> assert false
 
+  (* TODO: handle this correctly *)
   let eval_f32 ({ stack; ctx; _ } as state : Abstract_state.t) _uuid :
     Binary.f32_instr -> _ = function
     | Const f ->
@@ -669,6 +674,7 @@ module DataAbstract_state : DATA_STATE = struct
       { state with stack }
     | _ -> assert false
 
+  (* TODO: handle this correctly *)
   let eval_f64 ({ stack; ctx; _ } as state : Abstract_state.t) _uuid :
     Binary.f64_instr -> _ = function
     | Add | Sub | Mul | Div | Lt | Le | Gt | Ge ->
@@ -704,11 +710,13 @@ module DataAbstract_state : DATA_STATE = struct
       let stack = Stack.push stack v in
       { state with stack; globals }
 
+  (* TODO: handle this correctly *)
   let eval_memory (state : Abstract_state.t) : Binary.memory_instr -> _ =
     function
     | Size _i | Grow _i | Fill _i -> state
     | Init (_i1, _i2) | Copy (_i1, _i2) -> state
 
+  (* TODO: handle this correctly *)
   let eval_data (state : Abstract_state.t) : Binary.data_instr -> _ = function
     | Drop _i -> state
 
