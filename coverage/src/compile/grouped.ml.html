@@ -554,38 +554,38 @@ type t =
   ; start : indice option
   }
 
-let pp_id fmt id = <span data-count="14">T</span>ext.pp_id_opt fmt id
+let pp_id fmt id = <span data-count="15">T</span>ext.pp_id_opt fmt id
 
-let pp_typ fmt typ = <span data-count="14">F</span>mt.array Text.Typedef.pp fmt typ
+let pp_typ fmt typ = <span data-count="15">F</span>mt.array Text.Typedef.pp fmt typ
 
-let pp_function_type fmt decl_types = <span data-count="14">F</span>mt.array Text.pp_func_type fmt decl_types
+let pp_function_type fmt decl_types = <span data-count="15">F</span>mt.array Text.pp_func_type fmt decl_types
 
 let pp_type_check fmt (indice, func_type) =
   <span data-count="0">F</span>mt.pf fmt "(%a, %a)" pp_indice indice pp_func_type func_type
 
-let pp_type_checks fmt type_checks = <span data-count="14">F</span>mt.array pp_type_check fmt type_checks
+let pp_type_checks fmt type_checks = <span data-count="15">F</span>mt.array pp_type_check fmt type_checks
 
 let pp_runtime_array ~pp_local ~pp_imported fmt l =
-  <span data-count="56">F</span>mt.array (Origin.pp ~pp_local ~pp_imported) fmt l
+  <span data-count="60">F</span>mt.array (Origin.pp ~pp_local ~pp_imported) fmt l
 
 let pp_global fmt g =
-  <span data-count="14">p</span>p_runtime_array ~pp_local:Text.Global.pp ~pp_imported:Text.Global.Type.pp fmt
+  <span data-count="15">p</span>p_runtime_array ~pp_local:Text.Global.pp ~pp_imported:Text.Global.Type.pp fmt
     g
 
 let pp_table fmt t =
-  <span data-count="14">p</span>p_runtime_array ~pp_local:Text.Table.pp ~pp_imported:Text.Table.Type.pp fmt t
+  <span data-count="15">p</span>p_runtime_array ~pp_local:Text.Table.pp ~pp_imported:Text.Table.Type.pp fmt t
 
 let pp_mem fmt m =
-  <span data-count="14">p</span>p_runtime_array ~pp_local:Text.Mem.pp ~pp_imported:Text.pp_limits fmt m
+  <span data-count="15">p</span>p_runtime_array ~pp_local:Text.Mem.pp ~pp_imported:Text.pp_limits fmt m
 
 let pp_func fmt f =
-  <span data-count="14">p</span>p_runtime_array ~pp_local:Text.Func.pp ~pp_imported:Text.pp_block_type fmt f
+  <span data-count="15">p</span>p_runtime_array ~pp_local:Text.Func.pp ~pp_imported:Text.pp_block_type fmt f
 
-let pp_elem fmt e = <span data-count="14">F</span>mt.array Text.Elem.pp fmt e
+let pp_elem fmt e = <span data-count="15">F</span>mt.array Text.Elem.pp fmt e
 
-let pp_data fmt d = <span data-count="14">F</span>mt.array Text.Data.pp fmt d
+let pp_data fmt d = <span data-count="15">F</span>mt.array Text.Data.pp fmt d
 
-let pp_start fmt s = <span data-count="14">T</span>ext.pp_indice_opt fmt s
+let pp_start fmt s = <span data-count="15">T</span>ext.pp_indice_opt fmt s
 
 let pp fmt
   { id
@@ -602,7 +602,7 @@ let pp fmt
   ; _
   } =
   (* TODO: print exports once again *)
-  <span data-count="14">F</span>mt.pf fmt
+  <span data-count="15">F</span>mt.pf fmt
     "{id: %a@\n\
     \  @[&lt;v&gt;typ: %a@\n\
      decl_types: %a@\n\
@@ -621,30 +621,30 @@ let pp fmt
 
 let add_func_type decl_types type_checks = function
   | <span data-count="513">B</span>t_ind _ -&gt; ()
-  | <span data-count="11258">B</span>t_raw (id, typ) -&gt;
+  | <span data-count="11260">B</span>t_raw (id, typ) -&gt;
     Dynarray.add_last decl_types typ;
-    <span data-count="11258">O</span>ption.iter (fun id -&gt; <span data-count="41">D</span>ynarray.add_last type_checks (id, typ)) id
+    <span data-count="11260">O</span>ption.iter (fun id -&gt; <span data-count="41">D</span>ynarray.add_last type_checks (id, typ)) id
 
 let rec extract_block_types expr =
-  <span data-count="10409">l</span>et aux = <span data-count="34760">f</span>unction
+  <span data-count="10412">l</span>et aux = <span data-count="34768">f</span>unction
     | <span data-count="1258">B</span>lock (_str_opt, bt, expr1) | <span data-count="314">L</span>oop (_str_opt, bt, expr1) -&gt;
       Option.to_lis<span data-count="1572">t</span> bt @ extract_block_type<span data-count="1572">s</span> expr1
-    | <span data-count="655">I</span>f_else (_str_opt, bt, expr1, expr2) -&gt;
-      Option.to_lis<span data-count="655">t</span> bt @ extract_block_type<span data-count="655">s</span> expr1 @ extract_block_type<span data-count="655">s</span> expr2
+    | <span data-count="656">I</span>f_else (_str_opt, bt, expr1, expr2) -&gt;
+      Option.to_lis<span data-count="656">t</span> bt @ extract_block_type<span data-count="656">s</span> expr1 @ extract_block_type<span data-count="656">s</span> expr2
     | <span data-count="54">R</span>eturn_call_indirect (_, bt) | <span data-count="17">R</span>eturn_call_ref bt | <span data-count="360">C</span>all_indirect (_, bt)
       -&gt;
       [ bt ]
-    | <span data-count="32102">_</span> -&gt; []
+    | <span data-count="32109">_</span> -&gt; []
   in
   List.concat_map aux expr
 
 let add_func value decl_types type_checks func =
-  <span data-count="10122">b</span>egin match value with
-  | <span data-count="2595">O</span>rigin.Imported f -&gt; add_func_typ<span data-count="2595">e</span> decl_types type_checks f.typ
-  | <span data-count="7527">L</span>ocal (f : Func.t) -&gt;
-    List.ite<span data-count="7527">r</span>
-      (add_func_typ<span data-count="7527">e</span> decl_types type_checks)
-      (f.type_f :: extract_block_type<span data-count="7527">s</span> f.body)
+  <span data-count="10124">b</span>egin match value with
+  | <span data-count="2596">O</span>rigin.Imported f -&gt; add_func_typ<span data-count="2596">e</span> decl_types type_checks f.typ
+  | <span data-count="7528">L</span>ocal (f : Func.t) -&gt;
+    List.ite<span data-count="7528">r</span>
+      (add_func_typ<span data-count="7528">e</span> decl_types type_checks)
+      (f.type_f :: extract_block_type<span data-count="7528">s</span> f.body)
   end;
   Dynarray.add_last func value
 
@@ -661,7 +661,7 @@ let add_field typ decl_types type_checks global table mem func elem data tag
   global_exports mem_exports table_exports func_exports tag_exports start :
   Text.Module.Field.t -&gt; unit = function
   | <span data-count="409">T</span>ypedef t -&gt; Dynarray.add_last typ t
-  | <span data-count="992">G</span>lobal g -&gt; Dynarray.add_last global (Origin.Local g)
+  | <span data-count="993">G</span>lobal g -&gt; Dynarray.add_last global (Origin.Local g)
   | <span data-count="134">I</span>mport { typ = Global (assigned_name, typ); modul_name; name } -&gt;
     let imported = Origin.imported ~modul_name ~name ~assigned_name ~typ in
     Dynarray.add_last global imported
@@ -682,8 +682,8 @@ let add_field typ decl_types type_checks global table mem func elem data tag
   | <span data-count="291">E</span>xport { name; typ = Mem id } -&gt;
     let id = curr_id (Dynarray.lengt<span data-count="291">h</span> mem) id in
     <span data-count="291">D</span>ynarray.add_last mem_exports { name; id }
-  | <span data-count="7527">F</span>unc f -&gt; add_func (Origin.Local f) decl_types type_checks func
-  | <span data-count="2595">I</span>mport { typ = Func (assigned_name, typ); modul_name; name } -&gt;
+  | <span data-count="7528">F</span>unc f -&gt; add_func (Origin.Local f) decl_types type_checks func
+  | <span data-count="2596">I</span>mport { typ = Func (assigned_name, typ); modul_name; name } -&gt;
     let imported = Origin.imported ~modul_name ~name ~assigned_name ~typ in
     add_func imported decl_types type_checks func
   | <span data-count="7">I</span>mport { typ = Tag (assigned_name, typ); modul_name; name } -&gt;
@@ -714,52 +714,52 @@ let add_field typ decl_types type_checks global table mem func elem data tag
     in
     Dynarray.add_last data { d with mode }
   | <span data-count="5">T</span>ag t -&gt; add_tag (Origin.Local t) decl_types type_checks tag
-  | <span data-count="263">S</span>tart id -&gt; start := Some id
+  | <span data-count="264">S</span>tart id -&gt; start := Some id
 
 let of_text { Text.Module.fields; id } =
-  <span data-count="3881">L</span>og.debug (fun m -&gt; <span data-count="14">m</span> "grouping     ...");
-  <span data-count="3881">l</span>et typ = Dynarray.create () in
-  <span data-count="3881">l</span>et decl_types = Dynarray.create () in
-  <span data-count="3881">l</span>et type_checks = Dynarray.create () in
-  <span data-count="3881">l</span>et global = Dynarray.create () in
-  <span data-count="3881">l</span>et table = Dynarray.create () in
-  <span data-count="3881">l</span>et mem = Dynarray.create () in
-  <span data-count="3881">l</span>et func = Dynarray.create () in
-  <span data-count="3881">l</span>et elem = Dynarray.create () in
-  <span data-count="3881">l</span>et data = Dynarray.create () in
-  <span data-count="3881">l</span>et tag = Dynarray.create () in
-  <span data-count="3881">l</span>et global_exports = Dynarray.create () in
-  <span data-count="3881">l</span>et mem_exports = Dynarray.create () in
-  <span data-count="3881">l</span>et table_exports = Dynarray.create () in
-  <span data-count="3881">l</span>et func_exports = Dynarray.create () in
-  <span data-count="3881">l</span>et tag_exports = Dynarray.create () in
-  <span data-count="3881">l</span>et start = ref None in
+  <span data-count="3882">L</span>og.debug (fun m -&gt; <span data-count="15">m</span> "grouping     ...");
+  <span data-count="3882">l</span>et typ = Dynarray.create () in
+  <span data-count="3882">l</span>et decl_types = Dynarray.create () in
+  <span data-count="3882">l</span>et type_checks = Dynarray.create () in
+  <span data-count="3882">l</span>et global = Dynarray.create () in
+  <span data-count="3882">l</span>et table = Dynarray.create () in
+  <span data-count="3882">l</span>et mem = Dynarray.create () in
+  <span data-count="3882">l</span>et func = Dynarray.create () in
+  <span data-count="3882">l</span>et elem = Dynarray.create () in
+  <span data-count="3882">l</span>et data = Dynarray.create () in
+  <span data-count="3882">l</span>et tag = Dynarray.create () in
+  <span data-count="3882">l</span>et global_exports = Dynarray.create () in
+  <span data-count="3882">l</span>et mem_exports = Dynarray.create () in
+  <span data-count="3882">l</span>et table_exports = Dynarray.create () in
+  <span data-count="3882">l</span>et func_exports = Dynarray.create () in
+  <span data-count="3882">l</span>et tag_exports = Dynarray.create () in
+  <span data-count="3882">l</span>et start = ref None in
   List.iter
-    (add_fiel<span data-count="3881">d</span> typ decl_types type_checks global table mem func elem data tag
+    (add_fiel<span data-count="3882">d</span> typ decl_types type_checks global table mem func elem data tag
        global_exports mem_exports table_exports func_exports tag_exports start )
     fields;
-  <span data-count="3881">l</span>et modul =
+  <span data-count="3882">l</span>et modul =
     { id
-    ; typ = Dynarray.to_arra<span data-count="3881">y</span> typ
-    ; decl_types = Dynarray.to_arra<span data-count="3881">y</span> decl_types
-    ; type_checks = Dynarray.to_arra<span data-count="3881">y</span> type_checks
-    ; global = Dynarray.to_arra<span data-count="3881">y</span> global
-    ; table = Dynarray.to_arra<span data-count="3881">y</span> table
-    ; mem = Dynarray.to_arra<span data-count="3881">y</span> mem
-    ; func = Dynarray.to_arra<span data-count="3881">y</span> func
-    ; elem = Dynarray.to_arra<span data-count="3881">y</span> elem
-    ; data = Dynarray.to_arra<span data-count="3881">y</span> data
-    ; tag = Dynarray.to_arra<span data-count="3881">y</span> tag
-    ; global_exports = Dynarray.to_arra<span data-count="3881">y</span> global_exports
-    ; mem_exports = Dynarray.to_arra<span data-count="3881">y</span> mem_exports
-    ; table_exports = Dynarray.to_arra<span data-count="3881">y</span> table_exports
-    ; func_exports = Dynarray.to_arra<span data-count="3881">y</span> func_exports
-    ; tag_exports = Dynarray.to_arra<span data-count="3881">y</span> tag_exports
+    ; typ = Dynarray.to_arra<span data-count="3882">y</span> typ
+    ; decl_types = Dynarray.to_arra<span data-count="3882">y</span> decl_types
+    ; type_checks = Dynarray.to_arra<span data-count="3882">y</span> type_checks
+    ; global = Dynarray.to_arra<span data-count="3882">y</span> global
+    ; table = Dynarray.to_arra<span data-count="3882">y</span> table
+    ; mem = Dynarray.to_arra<span data-count="3882">y</span> mem
+    ; func = Dynarray.to_arra<span data-count="3882">y</span> func
+    ; elem = Dynarray.to_arra<span data-count="3882">y</span> elem
+    ; data = Dynarray.to_arra<span data-count="3882">y</span> data
+    ; tag = Dynarray.to_arra<span data-count="3882">y</span> tag
+    ; global_exports = Dynarray.to_arra<span data-count="3882">y</span> global_exports
+    ; mem_exports = Dynarray.to_arra<span data-count="3882">y</span> mem_exports
+    ; table_exports = Dynarray.to_arra<span data-count="3882">y</span> table_exports
+    ; func_exports = Dynarray.to_arra<span data-count="3882">y</span> func_exports
+    ; tag_exports = Dynarray.to_arra<span data-count="3882">y</span> tag_exports
     ; start = !start
     }
   in
-  Log.debug (fun m -&gt; <span data-count="14">m</span> "%a" pp modul);
-  <span data-count="3881">m</span>odul
+  Log.debug (fun m -&gt; <span data-count="15">m</span> "%a" pp modul);
+  <span data-count="3882">m</span>odul
 </code></pre>
       </div>
     </div>

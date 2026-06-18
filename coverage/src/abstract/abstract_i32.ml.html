@@ -212,13 +212,13 @@ type t = Abstract_domain.binary
 
 let size = Units.In_bits.s32
 
-let pp ctx = <span data-count="791">A</span>bstract_domain.binary_pretty ctx ~size
+let pp ctx = <span data-count="799">A</span>bstract_domain.binary_pretty ctx ~size
 
-let of_binary x = <span data-count="103">x</span>
+let of_binary x = <span data-count="106">x</span>
 
-let to_binary x = <span data-count="82">x</span>
+let to_binary x = <span data-count="84">x</span>
 
-let unknown ctx = <span data-count="1">A</span>bstract_domain.binary_unknown ~size ctx
+let unknown ctx = <span data-count="2">A</span>bstract_domain.binary_unknown ~size ctx
 
 let eq ctx i1 i2 = <span data-count="6">A</span>bstract_domain.Binary_Forward.beq ~size ctx i1 i2
 
@@ -228,12 +228,12 @@ let of_boolean ctx boolean =
   <span data-count="15">A</span>bstract_domain.Binary_Forward.bofbool ~size ctx boolean
 
 let to_boolean ctx x =
-  <span data-count="16">l</span>et zero = Abstract_domain.Binary_Forward.biconst ~size Z.zero ctx in
-  <span data-count="16">l</span>et b = Abstract_domain.Binary_Forward.beq ~size ctx x zero in
-  <span data-count="16">A</span>bstract_boolean.not ctx b
+  <span data-count="17">l</span>et zero = Abstract_domain.Binary_Forward.biconst ~size Z.zero ctx in
+  <span data-count="17">l</span>et b = Abstract_domain.Binary_Forward.beq ~size ctx x zero in
+  <span data-count="17">A</span>bstract_boolean.not ctx b
 
 let of_int32 ctx i =
-  <span data-count="47">A</span>bstract_domain.Binary_Forward.biconst ~size (Z.of_int3<span data-count="47">2</span> i) ctx
+  <span data-count="50">A</span>bstract_domain.Binary_Forward.biconst ~size (Z.of_int3<span data-count="50">2</span> i) ctx
 
 let of_int ctx i = <span data-count="0">A</span>bstract_domain.Binary_Forward.biconst ~size (Z.of_in<span data-count="0">t</span> i) ctx
 

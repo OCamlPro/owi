@@ -539,15 +539,15 @@ let run ~exploration_strategy ~workers ~no_worker_isolation ~no_stop_at_failure
   let domains =
     (* Decides what to push in the bug stack and close the scheduler if needed. *)
     let at_bug (bug : [ `Trap of Bug.trap | `Assertion of Bug.assertion ]) =
-      <span data-count="259">l</span>et should_be_added =
+      <span data-count="257">l</span>et should_be_added =
         match fail_mode with
-        | <span data-count="251">S</span>ymbolic_parameters.Both -&gt; true
-        | <span data-count="6">A</span>ssertion_only -&gt; Bug.is_assertio<span data-count="6">n</span> bug
+        | <span data-count="250">S</span>ymbolic_parameters.Both -&gt; true
+        | <span data-count="5">A</span>ssertion_only -&gt; Bug.is_assertio<span data-count="5">n</span> bug
         | <span data-count="2">T</span>rap_only -&gt; Bug.is_tra<span data-count="2">p</span> bug
       in
-      if should_be_added then <span data-count="255">b</span>egin
+      if should_be_added then <span data-count="254">b</span>egin
         Bugs.push bug Prio.dummy bug_stack;
-        <span data-count="255">i</span>f not no_stop_at_failure then <span data-count="71">b</span>egin
+        <span data-count="254">i</span>f not no_stop_at_failure then <span data-count="70">b</span>egin
           Scheduler.close sched
         end
       end
@@ -555,15 +555,15 @@ let run ~exploration_strategy ~workers ~no_worker_isolation ~no_stop_at_failure
 
     (* Handles final values from the monad and reschedule them if needed. *)
     let rec at_schedulable (t : _ Symex.Monad.schedulable) write_back =
-      <span data-count="55444">m</span>atch t with
-      | <span data-count="1707">O</span>k _ | <span data-count="12431">E</span>rror `Prune -&gt; Atomic.incr path_count
-      | Error ((<span data-count="68">`</span>Assertion _ | <span data-count="191">`</span>Trap _) as bug) -&gt;
+      <span data-count="55279">m</span>atch t with
+      | <span data-count="1654">O</span>k _ | <span data-count="12432">E</span>rror `Prune -&gt; Atomic.incr path_count
+      | Error ((<span data-count="67">`</span>Assertion _ | <span data-count="190">`</span>Trap _) as bug) -&gt;
         Atomic.incr path_count;
-        <span data-count="259">a</span>t_bug bug
-      | <span data-count="27017">Y</span>ield (prio, f) -&gt; write_back (prio, f)
-      | <span data-count="14030">C</span>hoice (m1, m2) -&gt;
+        <span data-count="257">a</span>t_bug bug
+      | <span data-count="26961">Y</span>ield (prio, f) -&gt; write_back (prio, f)
+      | <span data-count="13975">C</span>hoice (m1, m2) -&gt;
         at_schedulable m1 write_back;
-        <span data-count="14030">a</span>t_schedulable m2 write_back
+        <span data-count="13975">a</span>t_schedulable m2 write_back
     in
 
     let run_worker () =
@@ -573,7 +573,7 @@ let run ~exploration_strategy ~workers ~no_worker_isolation ~no_stop_at_failure
           <span data-count="830">t</span>ry
             (* Pull work from the queue as long as it's possible *)
             Scheduler.work_whil<span data-count="826">e</span>
-              (fun f write_back -&gt; <span data-count="27388">a</span>t_schedulable (<span data-count="27384">f</span> ()) write_back)
+              (fun f write_back -&gt; <span data-count="27333">a</span>t_schedulable (<span data-count="27329">f</span> ()) write_back)
               sched
           with
           | <span data-count="0">Z</span>3.Error _ when Solver.was_interrupte<span data-count="0">d</span> () -&gt;

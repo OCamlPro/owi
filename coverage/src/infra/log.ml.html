@@ -107,14 +107,14 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-let main_src = Logs.Src.creat<span data-count="799">e</span> "owi" ~doc:"Owi's main logs"
+let main_src = Logs.Src.creat<span data-count="800">e</span> "owi" ~doc:"Owi's main logs"
 
-let bench_src = Logs.Src.creat<span data-count="799">e</span> "owi-bench" ~doc:"Owi's benchmark logs"
+let bench_src = Logs.Src.creat<span data-count="800">e</span> "owi-bench" ~doc:"Owi's benchmark logs"
 
-include (val Logs.src_lo<span data-count="799">g</span> main_src : Logs.LOG)
+include (val Logs.src_lo<span data-count="800">g</span> main_src : Logs.LOG)
 
 let is_bench_enabled () =
-  <span data-count="30549">m</span>atch Logs.Src.level bench_src with <span data-count="30533">N</span>one -&gt; false | <span data-count="16">S</span>ome _ -&gt; true
+  <span data-count="30439">m</span>atch Logs.Src.level bench_src with <span data-count="30423">N</span>one -&gt; false | <span data-count="16">S</span>ome _ -&gt; true
 
 let is_debug_enabled () =
   <span data-count="430">m</span>atch Logs.Src.level main_src with
@@ -122,8 +122,8 @@ let is_debug_enabled () =
   | <span data-count="1">N</span>one | <span data-count="428">S</span>ome _ -&gt; false
 
 let bench_fn str fn =
-  <span data-count="5288">m</span>atch Logs.Src.level bench_src with
-  | <span data-count="5280">N</span>one -&gt; fn ()
+  <span data-count="5290">m</span>atch Logs.Src.level bench_src with
+  | <span data-count="5282">N</span>one -&gt; fn ()
   | <span data-count="8">S</span>ome _ -&gt;
     let c = Mtime_clock.counter () in
     <span data-count="8">l</span>et r = fn () in
@@ -137,10 +137,10 @@ let bench f =
   | <span data-count="20">S</span>ome _ -&gt; Logs.info ~src:bench_src f
 
 let setup style_renderer level ~bench =
-  <span data-count="727">F</span>mt_tty.setup_std_outputs ?style_renderer ();
-  <span data-count="727">L</span>ogs.Src.set_level main_src level;
-  <span data-count="727">L</span>ogs.Src.set_level bench_src (if bench then <span data-count="2">S</span>ome Logs.Info else <span data-count="725">N</span>one);
-  <span data-count="727">L</span>ogs.set_reporter (Logs.format_reporte<span data-count="727">r</span> ())
+  <span data-count="728">F</span>mt_tty.setup_std_outputs ?style_renderer ();
+  <span data-count="728">L</span>ogs.Src.set_level main_src level;
+  <span data-count="728">L</span>ogs.Src.set_level bench_src (if bench then <span data-count="2">S</span>ome Logs.Info else <span data-count="726">N</span>one);
+  <span data-count="728">L</span>ogs.set_reporter (Logs.format_reporte<span data-count="728">r</span> ())
 </code></pre>
       </div>
     </div>

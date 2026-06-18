@@ -153,10 +153,10 @@ type ('a, 'b) t =
   | Imported of 'b imported
 
 let imported ~modul_name ~name ~assigned_name ~typ =
-  <span data-count="4908">I</span>mported { modul_name; name; assigned_name; typ }
+  <span data-count="4909">I</span>mported { modul_name; name; assigned_name; typ }
 
 let pp_imported pp_typ fmt { modul_name; name; assigned_name; typ } =
-  <span data-count="1">F</span>mt.pf fmt "{@\n  @[&lt;v&gt;modul: %S@\nname: %S@\nassigned_name: %a@\ntyp: %a@]}"
+  <span data-count="2">F</span>mt.pf fmt "{@\n  @[&lt;v&gt;modul: %S@\nname: %S@\nassigned_name: %a@\ntyp: %a@]}"
     modul_name name Text.pp_id_opt assigned_name pp_typ typ
 
 let map_imported f v =
@@ -164,13 +164,13 @@ let map_imported f v =
   <span data-count="0">{</span> v with typ }
 
 let monadic_map_imported f v =
-  <span data-count="2971">l</span>et open Syntax in
-  let+ typ = <span data-count="2971">f</span> v.typ in
-  <span data-count="2966">{</span> v with typ }
+  <span data-count="2972">l</span>et open Syntax in
+  let+ typ = <span data-count="2972">f</span> v.typ in
+  <span data-count="2967">{</span> v with typ }
 
 let pp ~pp_local ~pp_imported:pp fmt = function
-  | <span data-count="16">L</span>ocal local -&gt; Fmt.pf fmt "Local (%a)" pp_local local
-  | <span data-count="1">I</span>mported imported -&gt; Fmt.pf fmt "Imported (%a)" (pp_importe<span data-count="1">d</span> pp) imported
+  | <span data-count="18">L</span>ocal local -&gt; Fmt.pf fmt "Local (%a)" pp_local local
+  | <span data-count="2">I</span>mported imported -&gt; Fmt.pf fmt "Imported (%a)" (pp_importe<span data-count="2">d</span> pp) imported
 
 let map ~f_local ~f_imported = function
   | <span data-count="0">L</span>ocal v -&gt;
@@ -181,14 +181,14 @@ let map ~f_local ~f_imported = function
     <span data-count="0">I</span>mported v
 
 let monadic_map ~f_local ~f_imported =
-  <span data-count="19092">l</span>et open Syntax in
+  <span data-count="19097">l</span>et open Syntax in
   function
-  | <span data-count="10209">L</span>ocal v -&gt;
-    let+ v = f_loca<span data-count="10208">l</span> v in
-    <span data-count="10125">L</span>ocal v
-  | <span data-count="2971">I</span>mported v -&gt;
-    let+ v = monadic_map_importe<span data-count="2971">d</span> f_imported v in
-    <span data-count="2966">I</span>mported v
+  | <span data-count="10211">L</span>ocal v -&gt;
+    let+ v = f_loca<span data-count="10210">l</span> v in
+    <span data-count="10127">L</span>ocal v
+  | <span data-count="2972">I</span>mported v -&gt;
+    let+ v = monadic_map_importe<span data-count="2972">d</span> f_imported v in
+    <span data-count="2967">I</span>mported v
 </code></pre>
       </div>
     </div>

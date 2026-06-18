@@ -300,7 +300,7 @@ let resolve_binary name =
 let err_output =
   match Logs.Src.level Log.main_src with
   | Some (<span data-count="0">L</span>ogs.Debug | <span data-count="0">L</span>ogs.Info) -&gt; OS.Cmd.err_run_out
-  | <span data-count="0">N</span>one | <span data-count="799">S</span>ome _ -&gt; OS.Cmd.err_null
+  | <span data-count="0">N</span>one | <span data-count="800">S</span>ome _ -&gt; OS.Cmd.err_null
 
 let bitcode_of_input ~workspace ~llvm_as_bin file : Fpath.t Result.t =
   <span data-count="5">m</span>atch Fpath.get_ext ~multi:false file with

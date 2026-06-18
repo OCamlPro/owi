@@ -86,18 +86,18 @@
 open Syntax
 
 let link_state () =
-  <span data-count="8">L</span>ink.State.empty ()
-  |&gt; <span data-count="8">L</span>ink.Extern.modul ~name:"owi" Abstract_wasm_ffi.symbolic_extern_module
+  <span data-count="9">L</span>ink.State.empty ()
+  |&gt; <span data-count="9">L</span>ink.Extern.modul ~name:"owi" Abstract_wasm_ffi.symbolic_extern_module
 
 let cmd ~source_file ~unsafe =
-  <span data-count="7">l</span>et link_state = link_state () in
-  <span data-count="7">l</span>et+ m, link_state =
-    Compile.File.until_lin<span data-count="7">k</span> ~unsafe ~name:None link_state source_file
+  <span data-count="8">l</span>et link_state = link_state () in
+  <span data-count="8">l</span>et+ m, link_state =
+    Compile.File.until_lin<span data-count="8">k</span> ~unsafe ~name:None link_state source_file
   in
-  <span data-count="7">l</span>et (_abstract_invariant : Abstract_invariant.t) =
+  <span data-count="8">l</span>et (_abstract_invariant : Abstract_invariant.t) =
     Abstract_driver.expr link_state m
   in
-  <span data-count="7">(</span>)
+  <span data-count="8">(</span>)
 
 let from_binary m ~unsafe =
   <span data-count="1">l</span>et link_state = link_state () in

@@ -411,29 +411,29 @@ let extern_module =
   let open Concrete_extern_func in
   let open Concrete_extern_func.Syntax in
   let functions =
-    [ ("i32_symbol", Extern_func (unit ^-&gt;<span data-count="799">.</span> i32, symbol_i32))
-    ; ("i64_symbol", Extern_func (unit ^-&gt;<span data-count="799">.</span> i64, symbol_i64))
-    ; ("f32_symbol", Extern_func (unit ^-&gt;<span data-count="799">.</span> f32, symbol_f32))
-    ; ("f64_symbol", Extern_func (unit ^-&gt;<span data-count="799">.</span> f64, symbol_f64))
-    ; ("v128_symbol", Extern_func (unit ^-&gt;<span data-count="799">.</span> v128, symbol_v128))
-    ; ("range_symbol", Extern_func (i32 ^-<span data-count="799">&gt;</span> i32 ^-&gt;<span data-count="799">.</span> i32, symbol_range))
-    ; ("assume", Extern_func (i32 ^-&gt;<span data-count="799">.</span> unit, assume))
-    ; ("assert", Extern_func (i32 ^-&gt;<span data-count="799">.</span> unit, assert'))
-    ; ("in_replay_mode", Extern_func (unit ^-&gt;<span data-count="799">.</span> i32, in_replay_mode))
-    ; ("print_char", Extern_func (i32 ^-&gt;<span data-count="799">.</span> unit, print_char))
-    ; ("cov_label_is_covered", Extern_func (i32 ^-&gt;<span data-count="799">.</span> i32, cov_label_is_covered))
+    [ ("i32_symbol", Extern_func (unit ^-&gt;<span data-count="800">.</span> i32, symbol_i32))
+    ; ("i64_symbol", Extern_func (unit ^-&gt;<span data-count="800">.</span> i64, symbol_i64))
+    ; ("f32_symbol", Extern_func (unit ^-&gt;<span data-count="800">.</span> f32, symbol_f32))
+    ; ("f64_symbol", Extern_func (unit ^-&gt;<span data-count="800">.</span> f64, symbol_f64))
+    ; ("v128_symbol", Extern_func (unit ^-&gt;<span data-count="800">.</span> v128, symbol_v128))
+    ; ("range_symbol", Extern_func (i32 ^-<span data-count="800">&gt;</span> i32 ^-&gt;<span data-count="800">.</span> i32, symbol_range))
+    ; ("assume", Extern_func (i32 ^-&gt;<span data-count="800">.</span> unit, assume))
+    ; ("assert", Extern_func (i32 ^-&gt;<span data-count="800">.</span> unit, assert'))
+    ; ("in_replay_mode", Extern_func (unit ^-&gt;<span data-count="800">.</span> i32, in_replay_mode))
+    ; ("print_char", Extern_func (i32 ^-&gt;<span data-count="800">.</span> unit, print_char))
+    ; ("cov_label_is_covered", Extern_func (i32 ^-&gt;<span data-count="800">.</span> i32, cov_label_is_covered))
     ; ( "cov_label_set"
-      , Extern_func (memor<span data-count="799">y</span> 0 ^-<span data-count="799">&gt;</span> i32 ^-<span data-count="799">&gt;</span> i32 ^-&gt;<span data-count="799">.</span> unit, cov_label_set) )
+      , Extern_func (memor<span data-count="800">y</span> 0 ^-<span data-count="800">&gt;</span> i32 ^-<span data-count="800">&gt;</span> i32 ^-&gt;<span data-count="800">.</span> unit, cov_label_set) )
     ; ( "open_scope_null_terminated"
-      , Extern_func (memor<span data-count="799">y</span> 0 ^-<span data-count="799">&gt;</span> i32 ^-&gt;<span data-count="799">.</span> unit, open_scope_null_terminated) )
+      , Extern_func (memor<span data-count="800">y</span> 0 ^-<span data-count="800">&gt;</span> i32 ^-&gt;<span data-count="800">.</span> unit, open_scope_null_terminated) )
     ; ( "open_scope_of_length"
-      , Extern_func (memor<span data-count="799">y</span> 0 ^-<span data-count="799">&gt;</span> i32 ^-<span data-count="799">&gt;</span> i32 ^-&gt;<span data-count="799">.</span> unit, open_scope_of_length)
+      , Extern_func (memor<span data-count="800">y</span> 0 ^-<span data-count="800">&gt;</span> i32 ^-<span data-count="800">&gt;</span> i32 ^-&gt;<span data-count="800">.</span> unit, open_scope_of_length)
       )
-    ; ("close_scope", Extern_func (unit ^-&gt;<span data-count="799">.</span> unit, close_scope))
-    ; ("alloc", Extern_func (memor<span data-count="799">y</span> 0 ^-<span data-count="799">&gt;</span> i32 ^-<span data-count="799">&gt;</span> i32 ^-&gt;<span data-count="799">.</span> i32, alloc))
-    ; ("dealloc", Extern_func (memor<span data-count="799">y</span> 0 ^-<span data-count="799">&gt;</span> i32 ^-&gt;<span data-count="799">.</span> i32, free))
-    ; ("abort", Extern_func (unit ^-&gt;<span data-count="799">.</span> unit, abort))
-    ; ("exit", Extern_func (i32 ^-&gt;<span data-count="799">.</span> unit, exit))
+    ; ("close_scope", Extern_func (unit ^-&gt;<span data-count="800">.</span> unit, close_scope))
+    ; ("alloc", Extern_func (memor<span data-count="800">y</span> 0 ^-<span data-count="800">&gt;</span> i32 ^-<span data-count="800">&gt;</span> i32 ^-&gt;<span data-count="800">.</span> i32, alloc))
+    ; ("dealloc", Extern_func (memor<span data-count="800">y</span> 0 ^-<span data-count="800">&gt;</span> i32 ^-&gt;<span data-count="800">.</span> i32, free))
+    ; ("abort", Extern_func (unit ^-&gt;<span data-count="800">.</span> unit, abort))
+    ; ("exit", Extern_func (i32 ^-&gt;<span data-count="800">.</span> unit, exit))
     ]
   in
   { Extern.Module.functions; func_type = Concrete_extern_func.extern_type }

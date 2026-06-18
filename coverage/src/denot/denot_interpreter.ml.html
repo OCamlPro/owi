@@ -913,7 +913,7 @@ module State = struct
     ; func_rt : Binary.val_type list
     }
 
-  let pp_map = Locals.prett<span data-count="799">y</span> (fun fmt k v -&gt; <span data-count="466">F</span>mt.pf fmt "%i-&gt;%a " k Value.pp v)
+  let pp_map = Locals.prett<span data-count="800">y</span> (fun fmt k v -&gt; <span data-count="466">F</span>mt.pf fmt "%i-&gt;%a " k Value.pp v)
 
   let pp ppf ({ stack; locals; _ } : t) =
     <span data-count="11">F</span>mt.pf ppf "@[&lt;hov&gt;σ:[%a];@;ρ:%a@]@." Stack.pp stack pp_map locals
@@ -947,7 +947,7 @@ module Fixpoint (DS : DATA_STATE) = struct
       let map : (int -&gt; int) -&gt; t -&gt; t =
        fun f key -&gt; <span data-count="1">m</span>atch key with <span data-count="1">I</span> i -&gt; I (<span data-count="1">f</span> i) | <span data-count="0">R</span>et -&gt; Ret
 
-      let decr = ma<span data-count="799">p</span> Int.pred
+      let decr = ma<span data-count="800">p</span> Int.pred
 
       let to_int = function <span data-count="218">I</span> i -&gt; i | <span data-count="6">R</span>et -&gt; -1
     end

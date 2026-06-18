@@ -148,7 +148,7 @@ type t =
 
 let is_trap = function <span data-count="1">`</span>Assertion _ | <span data-count="0">`</span>Prune -&gt; false | <span data-count="1">`</span>Trap _ -&gt; true
 
-let is_assertion = function <span data-count="3">`</span>Assertion _ -&gt; true | <span data-count="0">`</span>Prune | <span data-count="3">`</span>Trap _ -&gt; false
+let is_assertion = function <span data-count="3">`</span>Assertion _ -&gt; true | <span data-count="0">`</span>Prune | <span data-count="2">`</span>Trap _ -&gt; false
 
 let is_prune = function <span data-count="0">`</span>Prune -&gt; true | <span data-count="0">`</span>Assertion _ | <span data-count="0">`</span>Trap _ -&gt; false
 

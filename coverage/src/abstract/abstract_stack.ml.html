@@ -599,13 +599,13 @@ exception Empty
 
 let empty = []
 
-let push s v = <span data-count="143">v</span> :: s
+let push s v = <span data-count="147">v</span> :: s
 
 let push_bool s ctx b = <span data-count="15">p</span>ush s (Value.I32 (Value.I32.of_boolea<span data-count="15">n</span> ctx b))
 
 let push_concrete_i32 s ctx i = <span data-count="0">p</span>ush s (Value.I32 (Value.I32.of_int3<span data-count="0">2</span> ctx i))
 
-let push_i32 s i = <span data-count="77">p</span>ush s (Value.I32 i)
+let push_i32 s i = <span data-count="80">p</span>ush s (Value.I32 i)
 
 let push_i32_of_int s ctx i = <span data-count="0">p</span>ush_concrete_i32 s ctx (Int32.of_in<span data-count="0">t</span> i)
 
@@ -631,11 +631,11 @@ let push_ref s r = <span data-count="0">p</span>ush s (Value.Ref r)
 let push_array _ _ = <span data-count="0">a</span>ssert false
 
 let pp ctx fmt (s : t) =
-  <span data-count="337">F</span>mt.list
+  <span data-count="363">F</span>mt.list
     ~sep:(fun fmt () -&gt; <span data-count="146">F</span>mt.string fmt " ; ")
-    (Value.pp_with_ct<span data-count="337">x</span> ctx) fmt s
+    (Value.pp_with_ct<span data-count="363">x</span> ctx) fmt s
 
-let pop = function <span data-count="0">[</span>] -&gt; raise Empty | <span data-count="138">h</span>d :: tl -&gt; (hd, tl)
+let pop = function <span data-count="0">[</span>] -&gt; raise Empty | <span data-count="142">h</span>d :: tl -&gt; (hd, tl)
 
 let drop = function <span data-count="0">[</span>] -&gt; raise Empty | <span data-count="0">_</span>hd :: tl -&gt; tl
 
@@ -703,15 +703,15 @@ let pop_as_ref s =
   <span data-count="0">m</span>atch hd with <span data-count="0">V</span>alue.Ref hd -&gt; (hd, tl) | _ -&gt; assert false
 
 let pop_bool s ctx =
-  <span data-count="16">l</span>et hd, tl = pop s in
-  <span data-count="16">m</span>atch hd with
-  | <span data-count="16">V</span>alue.I32 n -&gt; (Value.I32.to_boolea<span data-count="16">n</span> ctx n, tl)
+  <span data-count="17">l</span>et hd, tl = pop s in
+  <span data-count="17">m</span>atch hd with
+  | <span data-count="17">V</span>alue.I32 n -&gt; (Value.I32.to_boolea<span data-count="17">n</span> ctx n, tl)
   | _ -&gt; assert false
 
 let pop_n s n =
-  <span data-count="9">(</span>List.filter<span data-count="9">i</span> (fun i _hd -&gt; <span data-count="1">i</span> &lt; n) s, List.filter<span data-count="9">i</span> (fun i _hd -&gt; <span data-count="1">i</span> &gt;= n) s)
+  <span data-count="10">(</span>List.filter<span data-count="10">i</span> (fun i _hd -&gt; <span data-count="1">i</span> &lt; n) s, List.filter<span data-count="10">i</span> (fun i _hd -&gt; <span data-count="1">i</span> &gt;= n) s)
 
-let keep s n = <span data-count="27">L</span>ist.filteri (fun i _hd -&gt; <span data-count="11">i</span> &lt; n) s
+let keep s n = <span data-count="28">L</span>ist.filteri (fun i _hd -&gt; <span data-count="11">i</span> &lt; n) s
 
 let rec drop_n s n =
   <span data-count="0">i</span>f n = 0 then <span data-count="0">s</span>
