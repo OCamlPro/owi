@@ -41,16 +41,22 @@ type t =
 let pp ppf = function
   | I32 _b -> Fmt.pf ppf "i32 ..."
   | I64 _b -> Fmt.pf ppf "i64 ..."
+  | F32 _b -> Fmt.pf ppf "f32 ..."
+  | F64 _b -> Fmt.pf ppf "f64 ..."
   | _ -> .
 
 let pp_with_ctx ctx ppf = function
   | I32 b -> Fmt.pf ppf "i32 %a" (Abstract_i32.pp ctx) b
   | I64 b -> Fmt.pf ppf "i64 %a" (Abstract_i64.pp ctx) b
+  | F32 _b -> Fmt.pf ppf "f32 ..."
+  | F64 _b -> Fmt.pf ppf "f64 ..."
   | _ -> .
 
 let to_binary = function
   | I32 b -> Abstract_i32.to_binary b
   | I64 b -> Abstract_i64.to_binary b
+  | F32 b -> Abstract_f32.to_binary b
+  | F64 b -> Abstract_f64.to_binary b
   | _ -> .
 
 let of_binary size x =
@@ -59,7 +65,10 @@ let of_binary size x =
   | 64 -> I64 (I64.of_binary x)
   | _ -> assert false
 
-let size_of = function I32 _ -> Size.b32 | I64 _ -> Size.b64 | _ -> .
+let size_of = function
+  | I32 _ | F32 _ -> Size.b32
+  | I64 _ | F64 _ -> Size.b64
+  | _ -> .
 
 let to_boolean ctx x =
   let size = Size.b32 in

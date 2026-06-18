@@ -24,12 +24,12 @@ let push_concrete_i64 s ctx i = push s (Value.I64 (Value.I64.of_int64 ctx i))
 
 let push_i64 s i = push s (Value.I64 i)
 
-let push_concrete_f32 s f = push s (Value.F32 (Value.F32.of_float32 f))
+let push_concrete_f32 s ctx f = push s (Value.F32 (Value.F32.of_float32 ctx f))
 
 let push_f32 s f = push s (Value.F32 f)
 
-let push_concrete_f64 s f =
-  push s (Value.F64 (Value.F64.of_float (Float64.to_float f)))
+let push_concrete_f64 s ctx f =
+  push s (Value.F64 (Value.F64.of_float ctx (Float64.to_float f)))
 
 let push_f64 s f = push s (Value.F64 f)
 

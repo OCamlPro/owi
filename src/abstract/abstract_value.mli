@@ -45,11 +45,11 @@ module I64 : sig
 end
 
 module F32 : sig
-  val of_float32 : Concrete_f32.t -> f32
+  val of_float32 : Abstract_domain.Context.t -> Concrete_f32.t -> f32
 end
 
 module F64 : sig
-  val of_float : float -> f64
+  val of_float : Abstract_domain.Context.t -> float -> f64
 end
 
 module V128 : sig

@@ -642,6 +642,25 @@ module DataAbstract_state : DATA_STATE = struct
       { state with stack }
     | _ -> assert false
 
+  let eval_f32 ({ stack; ctx; _ } as state : Abstract_state.t) _uuid :
+    Binary.f32_instr -> _ = function
+    | Const f ->
+      let stack = Stack.push_f32 stack (Abstract_f32.of_float32 ctx f) in
+      { state with stack }
+    | Add | Sub | Mul | Div | Lt | Le | Gt | Ge ->
+      let _, stack = Stack.pop2_f32 stack in
+      let stack = Stack.push_f32 stack (Abstract_f32.unknown ctx) in
+      { state with stack }
+    | _ -> assert false
+
+  let eval_f64 ({ stack; ctx; _ } as state : Abstract_state.t) _uuid :
+    Binary.f64_instr -> _ = function
+    | Add | Sub | Mul | Div | Lt | Le | Gt | Ge ->
+      let _, stack = Stack.pop2_f64 stack in
+      let stack = Stack.push_f64 stack (Abstract_f64.unknown ctx) in
+      { state with stack }
+    | _ -> assert false
+
   let eval_local ({ stack; locals; _ } as state : Abstract_state.t) :
     Binary.local_instr -> _ = function
     | Get i ->
@@ -678,6 +697,12 @@ module DataAbstract_state : DATA_STATE = struct
       (Some r, None)
     | I64 instr ->
       let r = eval_i64 state uuid instr in
+      (Some r, None)
+    | F32 instr ->
+      let r = eval_f32 state uuid instr in
+      (Some r, None)
+    | F64 instr ->
+      let r = eval_f64 state uuid instr in
       (Some r, None)
     | Unreachable ->
       (*TODO à gèrer proprement*)
