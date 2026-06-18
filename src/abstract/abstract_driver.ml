@@ -693,6 +693,9 @@ module DataAbstract_state : DATA_STATE = struct
     | Size _i | Grow _i | Fill _i -> state
     | Init (_i1, _i2) | Copy (_i1, _i2) -> state
 
+  let eval_data (state : Abstract_state.t) : Binary.data_instr -> _ = function
+    | Drop _i -> state
+
   let eval_instr ({ stack; _ } as state : Abstract_state.t) :
     Binary.instr Annotated.t -> t =
    fun ({ raw; uuid; _ } as instr) ->
@@ -723,6 +726,9 @@ module DataAbstract_state : DATA_STATE = struct
       (Some { state with stack }, None)
     | Memory instr ->
       let state = eval_memory state instr in
+      (Some state, None)
+    | Data instr ->
+      let state = eval_data state instr in
       (Some state, None)
     | Nop -> (Some state, None)
     | If_else _ | Call _ | Block _ | Loop _ | Br _ | Br_if _ | Br_table _
