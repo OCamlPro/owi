@@ -557,6 +557,14 @@ module DataAbstract_state : DATA_STATE = struct
     | Eq ->
       let stack = Stack.apply_i32_i32_boolean stack ctx (Abstract_i32.eq ctx) in
       { state with stack }
+    | Store _ ->
+      let _, stack = Stack.pop2_i32 stack in
+      let stack = Stack.push_i32 stack (Abstract_i32.unknown ctx) in
+      { state with stack }
+    | Load _ ->
+      let _, stack = Stack.pop_i32 stack in
+      let stack = Stack.push_i32 stack (Abstract_i32.unknown ctx) in
+      { state with stack }
     | instr ->
       Fmt.epr "not implemented yet: %a" Binary.pp_i32_instr instr;
       assert false
@@ -639,6 +647,14 @@ module DataAbstract_state : DATA_STATE = struct
       let stack =
         Stack.apply_i64_i64_boolean stack ctx (Abstract_i64.le_u ctx)
       in
+      { state with stack }
+    | Store _ ->
+      let _, stack = Stack.pop2_i64 stack in
+      let stack = Stack.push_i64 stack (Abstract_i64.unknown ctx) in
+      { state with stack }
+    | Load _ ->
+      let _, stack = Stack.pop_i64 stack in
+      let stack = Stack.push_i64 stack (Abstract_i64.unknown ctx) in
       { state with stack }
     | _ -> assert false
 
