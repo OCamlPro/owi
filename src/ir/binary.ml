@@ -1069,9 +1069,8 @@ module Module = struct
 
   type t =
     { id : string option
-    ; types : Typedef.t array
-        (* TODO: should only contain simple types, information about recursive
-           types should be stored separately *)
+    ; type_defs : Typedef.t array
+    ; types : sub_type array
     ; global : (Global.t, Global.Type.t) Origin.t array
     ; table : (Table.t, Table.Type.t) Origin.t array
     ; mem : (Mem.t, Mem.Type.limits) Origin.t array
@@ -1086,6 +1085,7 @@ module Module = struct
 
   let empty =
     { id = None
+    ; type_defs = [||]
     ; types = [||]
     ; global = [||]
     ; table = [||]

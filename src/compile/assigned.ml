@@ -5,8 +5,9 @@
 open Syntax
 
 type t =
-  { typ : Text.func_type Array.t
+  { typ : Text.sub_type Array.t
   ; typ_names : (string, int) Hashtbl.t
+  ; field_names : (int, (string, int) Hashtbl.t) Hashtbl.t
   ; global_names : (string, int) Hashtbl.t
   ; table_names : (string, int) Hashtbl.t
   ; mem_names : (string, int) Hashtbl.t
@@ -26,6 +27,7 @@ let pp_table fmt tbl =
 let pp fmt
   { typ
   ; typ_names
+  ; field_names = _
   ; global_names
   ; table_names
   ; mem_names
@@ -44,7 +46,7 @@ let pp fmt
      Elem names: %a@\n\
      Data names: %a@\n\
      Tag names: %a@\n"
-    (Fmt.array Text.pp_func_type)
+    (Fmt.array Text.pp_sub_type)
     typ pp_table typ_names pp_table global_names pp_table table_names pp_table
     mem_names pp_table func_names pp_table elem_names pp_table data_names
     pp_table tag_names
@@ -57,36 +59,65 @@ module Typetbl = Hashtbl.Make (struct
   let hash = Hashtbl.hash
 end)
 
+let add_sub_type ~name ~sub_type ~declared_types ~named_types ~field_names =
+  let id = Dynarray.length declared_types in
+  Option.iter (fun n -> Hashtbl.add named_types n id) name;
+  match sub_type with
+  | Text.{ ct = Def_struct_t fields; _ } ->
+    let tbl = Hashtbl.create 16 in
+    List.iteri
+      (fun field_idx (field_id, _) ->
+        match field_id with
+        | Some (Text.Text n) -> Hashtbl.add tbl n field_idx
+        | Some (Text.Raw _) | None -> () )
+      fields;
+    if Hashtbl.length tbl > 0 then Hashtbl.add field_names id tbl;
+    Dynarray.add_last declared_types sub_type
+  | _ -> Dynarray.add_last declared_types sub_type
+
 let assign_types (typ : Text.Typedef.t array) decl_types :
-  Text.func_type Array.t * (string, int) Hashtbl.t =
-  let all_types = Typetbl.create 64 in
+  Text.sub_type Array.t
+  * (string, int) Hashtbl.t
+  * (int, (string, int) Hashtbl.t) Hashtbl.t =
+  let all_func_types = Typetbl.create 64 in
   let named_types = Hashtbl.create 64 in
-  let declared_types = Dynarray.create () in
+  let field_names : (int, (string, int) Hashtbl.t) Hashtbl.t =
+    Hashtbl.create 16
+  in
+  let declared_types : Text.sub_type Dynarray.t = Dynarray.create () in
   Array.iter
-    (fun typ ->
-      match typ with
+    (fun typedef ->
+      match typedef with
       | Text.Typedef.SimpleType
-          (name, { final = true; ids = []; ct = Def_func_t typ }) ->
+          ( name
+          , ( { Text.final = true; ids = []; ct = Text.Def_func_t ft } as
+              sub_type ) ) ->
         let id = Dynarray.length declared_types in
-        begin match name with
-        | None -> ()
-        | Some name -> Hashtbl.add named_types name id
-        end;
-        Dynarray.add_last declared_types typ;
-        Typetbl.add all_types typ id
-      | _ -> Fmt.failwith "Assigned: unimplemented for rec and sub types" )
+        Typetbl.add all_func_types ft id;
+        add_sub_type ~name ~sub_type ~declared_types ~named_types ~field_names
+      | Text.Typedef.SimpleType (name, sub_type) ->
+        add_sub_type ~name ~sub_type ~declared_types ~named_types ~field_names
+      | Text.Typedef.RecType members ->
+        List.iter
+          (fun (name, sub_type) ->
+            add_sub_type ~name ~sub_type ~declared_types ~named_types
+              ~field_names )
+          members )
     typ;
   Array.iter
-    (fun typ ->
-      match Typetbl.find_opt all_types typ with
+    (fun func_type ->
+      match Typetbl.find_opt all_func_types func_type with
       | Some _id -> ()
       | None ->
         let id = Dynarray.length declared_types in
-        Dynarray.add_last declared_types typ;
-        Typetbl.add all_types typ id )
+        let sub_type =
+          { Text.final = true; ids = []; ct = Text.Def_func_t func_type }
+        in
+        Dynarray.add_last declared_types sub_type;
+        Typetbl.add all_func_types func_type id )
     decl_types;
-  let declared_types = Dynarray.to_array declared_types in
-  (declared_types, named_types)
+  (* decl_types contains implicitly declared function types *)
+  (Dynarray.to_array declared_types, named_types, field_names)
 
 let get_origin_name (get_name : 'a -> string option) (elt : ('a, 'b) Origin.t) :
   string option =
@@ -112,7 +143,7 @@ let name kind ~get_name values =
   in
   named
 
-let check_type_id (types : Text.func_type Array.t)
+let check_type_id (types : Text.sub_type Array.t)
   (typ_names : (string, int) Hashtbl.t) (id, func_type) =
   let id =
     match id with
@@ -124,10 +155,12 @@ let check_type_id (types : Text.func_type Array.t)
   in
   if id >= Array.length types then Error (`Unknown_type (Text.Raw id))
   else
-    let func_type' = Array.unsafe_get types id in
-    if not (Text.func_type_eq func_type func_type') then
-      Error `Inline_function_type
-    else Ok ()
+    match Array.unsafe_get types id with
+    | Text.{ ct = Def_func_t func_type'; _ } ->
+      if not (Text.func_type_eq func_type func_type') then
+        Error `Inline_function_type
+      else Ok ()
+    | _ -> Error `Inline_function_type
 
 let of_grouped
   ({ global
@@ -144,7 +177,7 @@ let of_grouped
    } :
     Grouped.t ) : t Result.t =
   Log.debug (fun m -> m "assigning    ...");
-  let typ, typ_names = assign_types typ decl_types in
+  let typ, typ_names, field_names = assign_types typ decl_types in
   let* global_names =
     name "global"
       ~get_name:(get_origin_name (fun ({ id; _ } : Text.Global.t) -> id))
@@ -181,6 +214,7 @@ let of_grouped
   let modul =
     { typ
     ; typ_names
+    ; field_names
     ; global_names
     ; table_names
     ; mem_names
@@ -215,13 +249,37 @@ let find_type modul id = find modul.typ_names (`Unknown_type id) id
 
 let find_tag modul id = find modul.tag_names (`Unknown_tag id) id
 
-let get_type modul idx =
+let get_func_type modul idx =
   if idx >= Array.length modul.typ then None
-  else Some (Array.unsafe_get modul.typ idx)
+  else
+    match Array.unsafe_get modul.typ idx with
+    | Text.{ ct = Def_func_t ft; _ } -> Some ft
+    | _ -> None
 
 let get_types modul = modul.typ
 
-let find_raw_type modul func_type =
-  match Array.find_index (Text.func_type_eq func_type) modul.typ with
-  | None -> assert false
-  | Some idx -> idx
+let find_raw_func_type modul func_type =
+  let ty_opt =
+    Array.find_index
+      (function
+        | Text.{ ct = Def_func_t ft; _ } -> Text.func_type_eq func_type ft
+        | _ -> false )
+      modul.typ
+  in
+  match ty_opt with None -> assert false | Some idx -> idx
+
+let find_field modul type_idx field_id =
+  match field_id with
+  | Text.Raw i -> Ok i
+  | Text name -> (
+    match Hashtbl.find_opt modul.field_names type_idx with
+    | None ->
+      Error
+        (`Type_mismatch (Fmt.str "no named fields for struct type %d" type_idx))
+    | Some tbl -> (
+      match Hashtbl.find_opt tbl name with
+      | None ->
+        Error
+          (`Type_mismatch
+             (Fmt.str "unknown field %s in struct type %d" name type_idx) )
+      | Some i -> Ok i ) )
