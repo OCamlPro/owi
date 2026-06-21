@@ -1038,12 +1038,12 @@ let typecheck_ref_instr (env : Env.t) stack = function
     in
     let+ stack = Stack.push [ i32 ] stack in
     (env, stack)
-  | Test rt ->
-    let* stack = Stack.pop env.modul [ Ref_type rt ] stack in
+  | Test _rt ->
+    let* _t, stack = Stack.pop_ref stack in
     let+ stack = Stack.push [ i32 ] stack in
     (env, stack)
   | Cast rt ->
-    let* stack = Stack.pop env.modul [ Ref_type rt ] stack in
+    let* _t, stack = Stack.pop_ref stack in
     let+ stack = Stack.push [ Ref_type rt ] stack in
     (env, stack)
 
@@ -1348,9 +1348,7 @@ let typecheck_array_instr (env : Env.t) stack : Binary.array_instr -> _ =
   | Fill id ->
     let* mut, st = Env.type_get_array id env.modul in
     let* () =
-      match mut with
-      | Var -> Ok ()
-      | Const -> Error (`Type_mismatch "array.fill: array is not mutable")
+      match mut with Var -> Ok () | Const -> Error (`Msg "immutable array")
     in
     let val_ty = unpack_storage_type st in
     let+ stack =
@@ -1363,18 +1361,11 @@ let typecheck_array_instr (env : Env.t) stack : Binary.array_instr -> _ =
     let* dst_mut, dst_ft = Env.type_get_array dst_id env.modul in
     let* _, src_ft = Env.type_get_array src_id env.modul in
     let* () =
-      match dst_mut with
-      | Var -> Ok ()
-      | Const ->
-        Error (`Type_mismatch "array.copy: destination array is not mutable")
+      match dst_mut with Var -> Ok () | Const -> Error (`Msg "immutable array")
     in
     let* () =
       if is_subtype_storage_type src_ft dst_ft then Ok ()
-      else
-        Error
-          (`Type_mismatch
-             "array.copy: source array field type is not a subtype of \
-              destination array field type" )
+      else Error (`Msg "array types do not match")
     in
     let+ stack =
       Stack.pop env.modul
@@ -1390,17 +1381,12 @@ let typecheck_array_instr (env : Env.t) stack : Binary.array_instr -> _ =
   | Init_data (id, data_id) ->
     let* mut, st = Env.type_get_array id env.modul in
     let* () =
-      match mut with
-      | Var -> Ok ()
-      | Const ->
-        Error
-          (`Type_mismatch "array.init_data: destination array is not mutable")
+      match mut with Var -> Ok () | Const -> Error (`Msg "immutable array")
     in
     let* () =
       match st with
       | Val_type (Binary.Ref_type _) ->
-        Error
-          (`Type_mismatch "array.init_data: elem type must be numeric or packed")
+        Error (`Msg "array type is not numeric or vector")
       | Val_type (Binary.Num_type _) | Pack_type _ -> Ok ()
     in
     let* () = check_data env.modul data_id in
@@ -1411,11 +1397,7 @@ let typecheck_array_instr (env : Env.t) stack : Binary.array_instr -> _ =
   | Init_elem (id, elem_id) ->
     let* mut, st = Env.type_get_array id env.modul in
     let* () =
-      match mut with
-      | Var -> Ok ()
-      | Const ->
-        Error
-          (`Type_mismatch "array.init_elem: destination array is not mutable")
+      match mut with Var -> Ok () | Const -> Error (`Msg "immutable array")
     in
     let* rt =
       match st with
@@ -1790,22 +1772,22 @@ let typecheck_const_instr ?known_globals ~is_init (modul : Module.t) refs stack
     Stack.push [ Ref_type (No_null, TypeUse id) ] stack
   | Array (New_default id) ->
     let* () =
-      if id >= Array.length modul.types then
-        Error (`Unknown_type (Text.Raw id))
+      if id >= Array.length modul.types then Error (`Unknown_type (Text.Raw id))
       else Ok ()
     in
     let* stack = Stack.pop modul [ i32 ] stack in
     Stack.push [ Ref_type (No_null, TypeUse id) ] stack
   | Struct (New_default id) ->
     let* () =
-      if id >= Array.length modul.types then
-        Error (`Unknown_type (Text.Raw id))
+      if id >= Array.length modul.types then Error (`Unknown_type (Text.Raw id))
       else Ok ()
     in
     Stack.push [ Ref_type (No_null, TypeUse id) ] stack
   | Struct (New id) ->
     let* fields = Env.type_get_struct id modul in
-    let field_typs = List.rev_map (fun (_, (_, st)) -> unpack_storage_type st) fields in
+    let field_typs =
+      List.rev_map (fun (_, (_, st)) -> unpack_storage_type st) fields
+    in
     let* stack = Stack.pop modul field_typs stack in
     Stack.push [ Ref_type (No_null, TypeUse id) ] stack
   | _ -> Error `Constant_expression_required

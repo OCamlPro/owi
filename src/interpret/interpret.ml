@@ -1458,10 +1458,7 @@ struct
       Stack.push_bool stack is_null |> Choice.return
     | As_non_null ->
       let r, stack = Stack.pop_as_ref stack in
-      if Ref.is_null r then
-        Choice.trap
-          (`Type_mismatch
-             "ref.as_non_null expected a non-null reference but got null" )
+      if Ref.is_null r then Choice.trap (`Msg "null reference")
       else Stack.push_ref stack r |> Choice.return
     (* TODO: restrict to non_null refs *)
     | Func i ->
