@@ -2011,10 +2011,34 @@ let validate_mem modul =
       | Origin.Local (_, typ) | Imported { typ; _ } -> validate_memory_limit typ )
     modul.mem
 
+let validate_value_type (modul : Module.t) = function
+  | Binary.Ref_type (_, TypeUse i) when i >= Array.length modul.types ->
+    Error (`Unknown_type (Text.Raw i))
+  | Ref_type _ | Num_type _ -> Ok ()
+
+let validate_storage_type (modul : Module.t) = function
+  | Val_type vt -> validate_value_type modul vt
+  | Pack_type _ -> Ok ()
+
+let validate_type_defs (modul : Module.t) =
+  array_iter
+    (fun ({ ct; _ } : sub_type) ->
+      match ct with
+      | Def_func_t (params, results) ->
+        let* () =
+          list_iter (fun (_, vt) -> validate_value_type modul vt) params
+        in
+        list_iter (validate_value_type modul) results
+      | Def_struct_t fields ->
+        list_iter (fun (_, (_, st)) -> validate_storage_type modul st) fields
+      | Def_array_t (_, st) -> validate_storage_type modul st )
+    modul.types
+
 let modul (modul : Module.t) =
   Log.info (fun m -> m "typechecking ...");
   Log.bench_fn "typechecking time" @@ fun () ->
   let refs = Hashtbl.create 512 in
+  let* () = validate_type_defs modul in
   let* () = array_iteri (typecheck_global modul refs) modul.global in
   let* () = array_iter (typecheck_elem modul refs) modul.elem in
   let* () = array_iter (typecheck_data modul refs) modul.data in
