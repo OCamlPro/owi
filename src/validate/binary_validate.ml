@@ -1774,6 +1774,40 @@ let typecheck_const_instr ?known_globals ~is_init (modul : Module.t) refs stack
       | Shr_s | Shr_u | Rotl | Rotr ) ->
     let* stack = Stack.pop modul [ i64; i64 ] stack in
     Stack.push [ i64 ] stack
+  | I31 Ref ->
+    let* stack = Stack.pop modul [ i32 ] stack in
+    Stack.push [ Ref_type (No_null, I31_ht) ] stack
+  | Extern_convert_any ->
+    let* stack = Stack.pop modul [ Ref_type (Null, Any_ht) ] stack in
+    Stack.push [ Ref_type (Null, Extern_ht) ] stack
+  | Any_convert_extern ->
+    let* stack = Stack.pop modul [ Ref_type (Null, Extern_ht) ] stack in
+    Stack.push [ Ref_type (Null, Any_ht) ] stack
+  | Array (New id) ->
+    let* _mut, st = Env.type_get_array id modul in
+    let elem_ty = unpack_storage_type st in
+    let* stack = Stack.pop modul [ i32; elem_ty ] stack in
+    Stack.push [ Ref_type (No_null, TypeUse id) ] stack
+  | Array (New_default id) ->
+    let* () =
+      if id >= Array.length modul.types then
+        Error (`Unknown_type (Text.Raw id))
+      else Ok ()
+    in
+    let* stack = Stack.pop modul [ i32 ] stack in
+    Stack.push [ Ref_type (No_null, TypeUse id) ] stack
+  | Struct (New_default id) ->
+    let* () =
+      if id >= Array.length modul.types then
+        Error (`Unknown_type (Text.Raw id))
+      else Ok ()
+    in
+    Stack.push [ Ref_type (No_null, TypeUse id) ] stack
+  | Struct (New id) ->
+    let* fields = Env.type_get_struct id modul in
+    let field_typs = List.rev_map (fun (_, (_, st)) -> unpack_storage_type st) fields in
+    let* stack = Stack.pop modul field_typs stack in
+    Stack.push [ Ref_type (No_null, TypeUse id) ] stack
   | _ -> Error `Constant_expression_required
 
 let typecheck_const_expr ?known_globals ?(is_init = false) (modul : Module.t)
