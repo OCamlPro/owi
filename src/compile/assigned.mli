@@ -22,10 +22,12 @@ val find_type : t -> Text.indice -> Binary.indice Result.t
 
 val find_tag : t -> Text.indice -> Binary.indice Result.t
 
-val get_type : t -> int -> Text.func_type Option.t
+val get_func_type : t -> int -> Text.func_type Option.t
 
-val get_types : t -> Text.func_type Array.t
+val get_types : t -> Text.sub_type Array.t
 
-val find_raw_type : t -> Text.func_type -> Binary.indice
+val find_raw_func_type : t -> Text.func_type -> Binary.indice
+
+val find_field : t -> int -> Text.indice -> Binary.indice Result.t
 
 val pp : t Fmt.t
