@@ -36,9 +36,8 @@ let null = function
   | Binary.Func_ht | NoFunc_ht | TypeUse _ -> Func None
   (* TODO: is this correct? Are all nulls equal? *)
   | Extern_ht | NoExtern_ht -> Extern None
-  | Any_ht | None_ht -> NullRef
   | Exn_ht | NoExn_ht -> NullExn
-  | Eq_ht | I31_ht | Struct_ht | Array_ht -> assert false
+  | Any_ht | None_ht | Eq_ht | I31_ht | Struct_ht | Array_ht -> NullRef
 
 let func (f : Kind.func) = Func (Some f)
 
