@@ -669,19 +669,17 @@ let read_FD input =
   | 0xDB -> Ok (I64x2 Ge_s, input)
   | i -> parse_fail "illegal opcode (read_FD) 0x%02X" i
 
-let block_type_of_type_def ty =
+let block_type_of_sub_type st =
   (* TODO: this is a ugly hack, it is necessary for now and should be removed at some point... *)
-  match ty with
-  | Typedef.SimpleType
-      (_id, { final = true; ids = []; ct = Def_func_t (pt, rt) }) ->
+  match st with
+  | { final = true; ids = []; ct = Def_func_t (pt, rt) } ->
     Bt_raw (None, (pt, rt))
-  | _ ->
-    Fmt.failwith "block_type_of_type_def: unimplemented for %a" Typedef.pp ty
+  | _ -> Fmt.failwith "block_type_of_sub_type: not a function type"
 
 let read_block_type types input =
   match read_S33 input with
   | Ok (i, input) when Int64.le 0L i ->
-    let block_type = block_type_of_type_def types.(Int64.to_int i) in
+    let block_type = block_type_of_sub_type types.(Int64.to_int i) in
     Ok (block_type, input)
   | Error _ | Ok _ ->
     begin match read_byte ~msg:"read_block_type" input with
@@ -738,21 +736,21 @@ let rec read_instr types input =
   | '\x11' ->
     let* typeidx, input = read_indice input in
     let+ tableidx, input = read_indice input in
-    (Call_indirect (tableidx, block_type_of_type_def types.(typeidx)), input)
+    (Call_indirect (tableidx, block_type_of_sub_type types.(typeidx)), input)
   | '\x12' ->
     let+ funcidx, input = read_indice input in
     (Return_call funcidx, input)
   | '\x13' ->
     let* typeidx, input = read_indice input in
     let+ tableidx, input = read_indice input in
-    ( Return_call_indirect (tableidx, block_type_of_type_def types.(typeidx))
+    ( Return_call_indirect (tableidx, block_type_of_sub_type types.(typeidx))
     , input )
   | '\x14' ->
     let+ funcidx, input = read_indice input in
     (Call_ref funcidx, input)
   | '\x15' ->
     let+ typeidx, input = read_indice input in
-    (Return_call_ref (block_type_of_type_def types.(typeidx)), input)
+    (Return_call_ref (block_type_of_sub_type types.(typeidx)), input)
   | '\x1A' -> Ok (Drop, input)
   | '\x1B' -> Ok (Select None, input)
   | '\x1C' ->
@@ -1234,12 +1232,10 @@ let read_table input =
     let* limits, input = read_table_limits input in
     let+ value, input =
       read_const
-        [| Typedef.SimpleType
-             ( None
-             , { final = true
-               ; ids = []
-               ; ct = Def_func_t ([], [ Ref_type ref_type ])
-               } )
+        [| { final = true
+           ; ids = []
+           ; ct = Def_func_t ([], [ Ref_type ref_type ])
+           }
         |]
         input
     in
@@ -1429,10 +1425,22 @@ let sections_iterate (input : Input.t) =
   let* custom_sections, input = parse_many_custom_section input in
 
   (* Type *)
-  let* types, input =
+  let* type_defs, input =
     section_parse input ~expected_id:'\x01' [] (vector read_type)
   in
-  let types = Array.of_list types in
+  let type_defs = Array.of_list type_defs in
+  let types =
+    let types =
+      Array.fold_left
+        (fun acc ty ->
+          match ty with
+          | Typedef.SimpleType (_, st) -> st :: acc
+          | Typedef.RecType stl ->
+            List.fold_left (fun acc (_, st) -> st :: acc) acc stl )
+        [] type_defs
+    in
+    Array.of_list (List.rev types)
+  in
 
   (* Custom *)
   let* custom_sections', input = parse_many_custom_section input in
@@ -1620,7 +1628,7 @@ let sections_iterate (input : Input.t) =
       List.map2
         (fun typeidx (locals, body) ->
           Origin.Local
-            { Func.type_f = block_type_of_type_def types.(typeidx)
+            { Func.type_f = block_type_of_sub_type types.(typeidx)
             ; locals
             ; body
             ; id = None
@@ -1631,7 +1639,7 @@ let sections_iterate (input : Input.t) =
       List.filter_map
         (function
           | modul_name, name, Func idx ->
-            let typ = block_type_of_type_def types.(idx) in
+            let typ = block_type_of_sub_type types.(idx) in
             Option.some
             @@ Origin.imported ~modul_name ~name ~assigned_name:None ~typ
           | _not_a_function_import -> None )
@@ -1670,14 +1678,14 @@ let sections_iterate (input : Input.t) =
       List.map
         (fun typeidx ->
           Origin.Local
-            { Tag.typ = block_type_of_type_def types.(typeidx); id = None } )
+            { Tag.typ = block_type_of_sub_type types.(typeidx); id = None } )
         tag_section
     in
     let imported =
       List.filter_map
         (function
           | modul_name, name, Tag idx ->
-            let typ = block_type_of_type_def types.(idx) in
+            let typ = block_type_of_sub_type types.(idx) in
             Option.some
             @@ Origin.imported ~modul_name ~name ~assigned_name:None ~typ
           | _ -> None )
@@ -1725,6 +1733,7 @@ let sections_iterate (input : Input.t) =
   in
 
   { Module.id = None
+  ; type_defs
   ; types
   ; global
   ; mem

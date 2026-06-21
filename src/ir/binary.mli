@@ -573,7 +573,8 @@ module Module : sig
 
   type t =
     { id : string option
-    ; types : Typedef.t array
+    ; type_defs : Typedef.t array
+    ; types : sub_type array
     ; global : (Global.t, Global.Type.t) Origin.t array
     ; table : (Table.t, Table.Type.t) Origin.t array
     ; mem : (Mem.t, Mem.Type.limits) Origin.t array
@@ -595,7 +596,7 @@ module Module : sig
 
   val get_func_type : indice -> t -> block_type option
 
-  val get_type : indice -> t -> Typedef.t option
+  val get_type : indice -> t -> sub_type option
 
   val find_imported_func_index :
     modul_name:string -> func_name:string -> t -> indice option

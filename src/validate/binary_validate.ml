@@ -72,14 +72,12 @@ module Env = struct
   let type_get_sub i m =
     match Module.get_type i m with
     | None -> Error (`Unknown_type (Text.Raw i))
-    | Some (Typedef.SimpleType (_, sub)) -> Ok sub
-    | Some (Typedef.RecType _) ->
-      Error (`Type_mismatch (Fmt.str "expected a simple type at index %d" i))
+    | Some sub -> Ok sub
 
   let type_get i m =
     match Module.get_type i m with
     | None -> Error (`Unknown_type (Text.Raw i))
-    | Some (Typedef.SimpleType (_, { ct = Def_func_t ty; _ })) -> Ok ty
+    | Some { ct = Def_func_t ty; _ } -> Ok ty
     | Some _ ->
       Error
         (`Type_mismatch
@@ -88,8 +86,7 @@ module Env = struct
   let type_get_struct i m =
     match Module.get_type i m with
     | None -> Error (`Unknown_type (Text.Raw i))
-    | Some (Typedef.SimpleType (_, { ct = Def_struct_t fields; _ })) ->
-      Ok fields
+    | Some { ct = Def_struct_t fields; _ } -> Ok fields
     | Some _ ->
       Error
         (`Type_mismatch (Fmt.str "expected a simple struct type at index %d" i))
@@ -102,7 +99,7 @@ module Env = struct
   let type_get_array i m =
     match Module.get_type i m with
     | None -> Error (`Unknown_type (Text.Raw i))
-    | Some (Typedef.SimpleType (_, { ct = Def_array_t ft; _ })) -> Ok ft
+    | Some { ct = Def_array_t ft; _ } -> Ok ft
     | Some _ ->
       Error
         (`Type_mismatch (Fmt.str "expected a simple array type at index %d" i))
@@ -218,7 +215,7 @@ let get_func_type_id (env : Env.t) i =
       | Typedef.SimpleType (_, { ct = Def_func_t typ'; _ }) ->
         func_type_eq typ typ'
       | Typedef.SimpleType _ | Typedef.RecType _ -> false )
-    env.modul.types
+    env.modul.type_defs
 
 (* TODO: move type matching functions outside of the stack module? *)
 module Stack : sig
@@ -1743,7 +1740,7 @@ let typecheck_const_instr ?known_globals ~is_init (modul : Module.t) refs stack
             | Typedef.SimpleType (_, { ct = Def_func_t ty; _ }) ->
               func_type_eq ty ity
             | Typedef.SimpleType _ | Typedef.RecType _ -> false )
-          modul.types
+          modul.type_defs
       with
       | Some tyid -> TypeUse tyid
       | None -> Func_ht
