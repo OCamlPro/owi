@@ -65,45 +65,60 @@ let add_sub_type ~name ~sub_type ~declared_types ~named_types ~field_names =
   match sub_type with
   | Text.{ ct = Def_struct_t fields; _ } ->
     let tbl = Hashtbl.create 16 in
-    List.iteri
-      (fun field_idx (field_id, _) ->
-        match field_id with
-        | Some (Text.Text n) -> Hashtbl.add tbl n field_idx
-        | Some (Text.Raw _) | None -> () )
-      fields;
+    let* _idx =
+      list_fold_left
+        (fun idx (field_id, _) ->
+          let* () =
+            match field_id with
+            | Some (Text.Text n) when Hashtbl.mem tbl n ->
+              Error (`Msg "duplicate field")
+            | Some (Text.Text n) ->
+              Hashtbl.add tbl n idx;
+              Ok ()
+            | Some (Text.Raw _) | None -> Ok ()
+          in
+          Ok (idx + 1) )
+        0 fields
+    in
     if Hashtbl.length tbl > 0 then Hashtbl.add field_names id tbl;
-    Dynarray.add_last declared_types sub_type
-  | _ -> Dynarray.add_last declared_types sub_type
+    Dynarray.add_last declared_types sub_type;
+    Ok ()
+  | _ ->
+    Dynarray.add_last declared_types sub_type;
+    Ok ()
 
 let assign_types (typ : Text.Typedef.t array) decl_types :
-  Text.sub_type Array.t
+  ( Text.sub_type Array.t
   * (string, int) Hashtbl.t
-  * (int, (string, int) Hashtbl.t) Hashtbl.t =
+  * (int, (string, int) Hashtbl.t) Hashtbl.t )
+  Result.t =
   let all_func_types = Typetbl.create 64 in
   let named_types = Hashtbl.create 64 in
   let field_names : (int, (string, int) Hashtbl.t) Hashtbl.t =
     Hashtbl.create 16
   in
   let declared_types : Text.sub_type Dynarray.t = Dynarray.create () in
-  Array.iter
-    (fun typedef ->
-      match typedef with
-      | Text.Typedef.SimpleType
-          ( name
-          , ( { Text.final = true; ids = []; ct = Text.Def_func_t ft } as
-              sub_type ) ) ->
-        let id = Dynarray.length declared_types in
-        Typetbl.add all_func_types ft id;
-        add_sub_type ~name ~sub_type ~declared_types ~named_types ~field_names
-      | Text.Typedef.SimpleType (name, sub_type) ->
-        add_sub_type ~name ~sub_type ~declared_types ~named_types ~field_names
-      | Text.Typedef.RecType members ->
-        List.iter
-          (fun (name, sub_type) ->
-            add_sub_type ~name ~sub_type ~declared_types ~named_types
-              ~field_names )
-          members )
-    typ;
+  let* () =
+    array_iter
+      (fun typedef ->
+        match typedef with
+        | Text.Typedef.SimpleType
+            ( name
+            , ( { Text.final = true; ids = []; ct = Text.Def_func_t ft } as
+                sub_type ) ) ->
+          let id = Dynarray.length declared_types in
+          Typetbl.add all_func_types ft id;
+          add_sub_type ~name ~sub_type ~declared_types ~named_types ~field_names
+        | Text.Typedef.SimpleType (name, sub_type) ->
+          add_sub_type ~name ~sub_type ~declared_types ~named_types ~field_names
+        | Text.Typedef.RecType members ->
+          list_iter
+            (fun (name, sub_type) ->
+              add_sub_type ~name ~sub_type ~declared_types ~named_types
+                ~field_names )
+            members )
+      typ
+  in
   Array.iter
     (fun func_type ->
       match Typetbl.find_opt all_func_types func_type with
@@ -117,7 +132,7 @@ let assign_types (typ : Text.Typedef.t array) decl_types :
         Typetbl.add all_func_types func_type id )
     decl_types;
   (* decl_types contains implicitly declared function types *)
-  (Dynarray.to_array declared_types, named_types, field_names)
+  Ok (Dynarray.to_array declared_types, named_types, field_names)
 
 let get_origin_name (get_name : 'a -> string option) (elt : ('a, 'b) Origin.t) :
   string option =
@@ -177,7 +192,7 @@ let of_grouped
    } :
     Grouped.t ) : t Result.t =
   Log.debug (fun m -> m "assigning    ...");
-  let typ, typ_names, field_names = assign_types typ decl_types in
+  let* typ, typ_names, field_names = assign_types typ decl_types in
   let* global_names =
     name "global"
       ~get_name:(get_origin_name (fun ({ id; _ } : Text.Global.t) -> id))
