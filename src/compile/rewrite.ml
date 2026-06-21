@@ -572,20 +572,77 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
 
   let rewrite_struct_instr : Text.struct_instr -> Binary.struct_instr Result.t =
     function
-    | (New _ | New_default _ | Get _ | Get_s _ | Get_u _ | Set _) as i ->
-      Fmt.failwith "Rewrite: unimplemented for the GC instruction %a"
-        (Text.pp_instr ~short:true)
-        (Struct i)
+    | New id ->
+      let+ id = Assigned.find_type assigned id in
+      (Binary.New id : Binary.struct_instr)
+    | New_default id ->
+      let+ id = Assigned.find_type assigned id in
+      (Binary.New_default id : Binary.struct_instr)
+    | Get (tid, fid) ->
+      let* tid = Assigned.find_type assigned tid in
+      let+ fid = Assigned.find_field assigned tid fid in
+      (Binary.Get (tid, fid) : Binary.struct_instr)
+    | Get_s (tid, fid) ->
+      let* tid = Assigned.find_type assigned tid in
+      let+ fid = Assigned.find_field assigned tid fid in
+      (Binary.Get_s (tid, fid) : Binary.struct_instr)
+    | Get_u (tid, fid) ->
+      let* tid = Assigned.find_type assigned tid in
+      let+ fid = Assigned.find_field assigned tid fid in
+      (Binary.Get_u (tid, fid) : Binary.struct_instr)
+    | Set (tid, fid) ->
+      let* tid = Assigned.find_type assigned tid in
+      let+ fid = Assigned.find_field assigned tid fid in
+      (Binary.Set (tid, fid) : Binary.struct_instr)
   in
 
   let rewrite_array_instr : Text.array_instr -> Binary.array_instr Result.t =
     function
-    | ( New _ | New_default _ | New_fixed _ | New_data _ | New_elem _ | Get _
-      | Get_s _ | Get_u _ | Set _ | Len | Fill _ | Copy _ | Init_data _
-      | Init_elem _ ) as i ->
-      Fmt.failwith "Rewrite: unimplemented for the GC instruction %a"
-        (Text.pp_instr ~short:true)
-        (Array i)
+    | New id ->
+      let+ id = Assigned.find_type assigned id in
+      Binary.New id
+    | New_default id ->
+      let+ id = Assigned.find_type assigned id in
+      Binary.New_default id
+    | New_fixed (id, n) ->
+      let+ id = Assigned.find_type assigned id in
+      Binary.New_fixed (id, n)
+    | New_data (id, did) ->
+      let* id = Assigned.find_type assigned id in
+      let+ did = Assigned.find_data assigned did in
+      Binary.New_data (id, did)
+    | New_elem (id, eid) ->
+      let* id = Assigned.find_type assigned id in
+      let+ eid = Assigned.find_elem assigned eid in
+      Binary.New_elem (id, eid)
+    | Get id ->
+      let+ id = Assigned.find_type assigned id in
+      Binary.Get id
+    | Get_s id ->
+      let+ id = Assigned.find_type assigned id in
+      Binary.Get_s id
+    | Get_u id ->
+      let+ id = Assigned.find_type assigned id in
+      Binary.Get_u id
+    | Set id ->
+      let+ id = Assigned.find_type assigned id in
+      Binary.Set id
+    | Len -> Ok Binary.Len
+    | Fill id ->
+      let+ id = Assigned.find_type assigned id in
+      Binary.Fill id
+    | Copy (dst_id, src_id) ->
+      let* dst_id = Assigned.find_type assigned dst_id in
+      let+ src_id = Assigned.find_type assigned src_id in
+      Binary.Copy (dst_id, src_id)
+    | Init_data (id, did) ->
+      let* id = Assigned.find_type assigned id in
+      let+ did = Assigned.find_data assigned did in
+      Binary.Init_data (id, did)
+    | Init_elem (id, eid) ->
+      let* id = Assigned.find_type assigned id in
+      let+ eid = Assigned.find_elem assigned eid in
+      Binary.Init_elem (id, eid)
   in
 
   let rec rewrite_instr (loop_count, block_ids) :
