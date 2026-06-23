@@ -18,6 +18,8 @@ module Func : sig
 
     type memory
 
+    type context
+
     type _ telt = private
       | I32 : i32 telt
       | I64 : i64 telt
@@ -29,6 +31,7 @@ module Func : sig
     type (_, _) atype = private
       | Mem : int * ('b, 'r) atype -> (memory -> 'b, 'r) atype
       | UArg : ('b, 'r) atype -> (unit -> 'b, 'r) atype
+      | Ctx : ('b, 'r) atype -> (context -> 'b, 'r) atype
       | Arg : 'a telt * ('b, 'r) atype -> ('a -> 'b, 'r) atype
       | NArg : string * 'a telt * ('b, 'r) atype -> ('a -> 'b, 'r) atype
       | Res : ('r, 'r) atype
@@ -72,6 +75,8 @@ module Func : sig
 
       val memory : int -> (l, memory, memory) t
 
+      val context : (l, context, context) t
+
       val label : string -> (lr, elt, 'a) t -> (l, string * elt, 'a) t
 
       val ( ^-> ) : ('r, 'k, 'a) t -> 'b func_type -> ('a -> 'b) func_type
@@ -114,6 +119,9 @@ module Func : sig
   end) (Memory : sig
     (** The memory type *)
     type t
+  end) (Context : sig
+    (** The abstract context type *)
+    type t
   end) : sig
     val fresh : unit -> int
 
@@ -126,6 +134,7 @@ module Func : sig
          and type v128 := Value.v128
          and type 'a m := 'a M.t
          and type memory := Memory.t
+         and type context := Context.t
   end
 end
 

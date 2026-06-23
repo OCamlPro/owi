@@ -18,6 +18,8 @@ module Func = struct
 
     type memory
 
+    type context
+
     type _ telt = private
       | I32 : i32 telt
       | I64 : i64 telt
@@ -29,6 +31,7 @@ module Func = struct
     type (_, _) atype = private
       | Mem : int * ('b, 'r) atype -> (memory -> 'b, 'r) atype
       | UArg : ('b, 'r) atype -> (unit -> 'b, 'r) atype
+      | Ctx : ('b, 'r) atype -> (context -> 'b, 'r) atype
       | Arg : 'a telt * ('b, 'r) atype -> ('a -> 'b, 'r) atype
       | NArg : string * 'a telt * ('b, 'r) atype -> ('a -> 'b, 'r) atype
       | Res : ('r, 'r) atype
@@ -72,6 +75,8 @@ module Func = struct
 
       val memory : int -> (l, memory, memory) t
 
+      val context : (l, context, context) t
+
       val label : string -> (lr, elt, 'a) t -> (l, string * elt, 'a) t
 
       val ( ^-> ) : ('r, 'k, 'a) t -> 'b func_type -> ('a -> 'b) func_type
@@ -114,6 +119,8 @@ module Func = struct
   end) (Memory : sig
     (** The memory type *)
     type t
+  end) (Context : sig
+    type t
   end) : sig
     val fresh : unit -> int
 
@@ -126,10 +133,13 @@ module Func = struct
          and type v128 := Value.v128
          and type 'a m := 'a M.t
          and type memory := Memory.t
+         and type context := Context.t
   end = struct
     type 'a m = 'a M.t
 
     type memory = Memory.t
+
+    type context = Context.t
 
     type _ telt =
       | I32 : Value.i32 telt
@@ -149,6 +159,7 @@ module Func = struct
     type (_, _) atype =
       | Mem : int * ('b, 'r) atype -> (memory -> 'b, 'r) atype
       | UArg : ('b, 'r) atype -> (unit -> 'b, 'r) atype
+      | Ctx : ('b, 'r) atype -> (context -> 'b, 'r) atype
       | Arg : 'a telt * ('b, 'r) atype -> ('a -> 'b, 'r) atype
       | NArg : string * 'a telt * ('b, 'r) atype -> ('a -> 'b, 'r) atype
       | Res : ('r, 'r) atype
@@ -178,6 +189,7 @@ module Func = struct
       let rec aux : type t r. (t, r) atype -> Binary.param_type = function
         | Mem (_, tl) -> aux tl
         | UArg tl -> aux tl
+        | Ctx tl -> aux tl
         | Arg (hd, tl) -> (None, elt_type hd) :: aux tl
         | NArg (name, hd, tl) -> (Some name, elt_type hd) :: aux tl
         | Res -> []
@@ -203,6 +215,7 @@ module Func = struct
 
       type (_, _, _) t =
         | Unit : (lr, unit, unit) t
+        | Ctx : (l, context, context) t
         | Memory : int -> (l, memory, memory) t
         | Elt : 'a telt -> (lr, elt, 'a) t
         | Elt_labeled : string * 'a telt -> (l, string * elt, 'a) t
@@ -235,6 +248,8 @@ module Func = struct
 
       let memory id = Memory id
 
+      let context = Ctx
+
       let label s (Elt v) = Elt_labeled (s, v)
 
       let ( ^-> ) =
@@ -245,6 +260,7 @@ module Func = struct
           | Elt a -> Func (Arg (a, b), r)
           | Elt_labeled (label, a) -> Func (NArg (label, a, b), r)
           | Unit -> Func (UArg b, r)
+          | Ctx -> Func (Ctx b, r)
           | Memory id -> Func (Mem (id, b), r)
         in
         aux

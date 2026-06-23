@@ -2,4 +2,6 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-include Extern.Func.Make (Abstract_value) (Result) (Concrete_memory)
+include
+  Extern.Func.Make (Abstract_value) (Result) (Concrete_memory)
+    (Abstract_domain.Context)
