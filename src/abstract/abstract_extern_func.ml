@@ -3,5 +3,10 @@
 (* Written by the Owi programmers *)
 
 include
-  Extern.Func.Make (Abstract_value) (Result) (Concrete_memory)
+  Extern.Func.Make
+    (Abstract_value)
+    (struct
+      type 'a t = 'a
+    end)
+    (Abstract_memory)
     (Abstract_domain.Context)

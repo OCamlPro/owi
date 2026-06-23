@@ -252,8 +252,6 @@ module DenotFixpoint (S : DATA_STATE) = struct
         (* TODO: handle when we start thinking about refs *)
         assert false
     in
-    let ( let+ ) = Result.Syntax.( let+ ) in
-    let+ r in
     match (rtype, r) with
     | R0, () -> stack
     | R1 t1, v1 -> push_val t1 v1 stack
@@ -352,13 +350,10 @@ module DenotFixpoint (S : DATA_STATE) = struct
         let env = Dynarray.get envs idx in
         let r = eval_func { state with env } func in
         (r, JumpTarget.empty)
-      | Extern { idx } -> (
+      | Extern { idx } ->
         let f = Link_env.get_extern_func state.env idx in
-        match exec_extern_func state.ctx state.stack f with
-        | Ok stack -> (Some { state with stack }, JumpTarget.empty)
-        | Error err ->
-          Log.err (fun m -> m "%s" (Result.err_to_string err));
-          assert false )
+        let stack = exec_extern_func state.ctx state.stack f in
+        (Some { state with stack }, JumpTarget.empty)
       end
     | Block (_str_opt, _bt, expr) -> (
       match eval_expr state expr with

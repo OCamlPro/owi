@@ -120,7 +120,7 @@ module Func : sig
     (** The memory type *)
     type t
   end) (Context : sig
-    (** The abstract context type *)
+    (** The context type *)
     type t
   end) : sig
     val fresh : unit -> int

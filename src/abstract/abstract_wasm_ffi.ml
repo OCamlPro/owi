@@ -7,13 +7,11 @@
    if one function of M is unused in the FFI module below, an error will be
    displayed *)
 module M = struct
-  let symbol_i32 ctx = Ok (Abstract_i32.unknown ctx)
+  let symbol_i32 ctx = Abstract_i32.unknown ctx
 
-  let symbol_i64 ctx = Ok (Abstract_i64.unknown ctx)
+  let symbol_i64 ctx = Abstract_i64.unknown ctx
 
-  let assume ctx i =
-    Option.to_result
-    @@ Abstract_domain.assume ctx (Abstract_i32.to_boolean ctx i)
+  let assume ctx i = Abstract_domain.assume ctx (Abstract_i32.to_boolean ctx i)
 end
 
 open M
