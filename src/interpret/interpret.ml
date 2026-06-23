@@ -56,6 +56,7 @@ module Make
          and type f64 := Value.f64
          and type v128 := Value.v128
          and type memory := Memory.t
+         and type context := unit
          and type 'a m := 'a Choice.t)
     (Env :
       Env_intf.T
@@ -1210,6 +1211,7 @@ struct
       | Mem (_, args) -> split_args stack args
       | Arg (_, args) -> split_one_arg args
       | UArg args -> split_args stack args
+      | Ctx _args -> assert false
       | NArg (_, _, args) -> split_one_arg args
       | Res -> ([], stack)
     in
@@ -1224,6 +1226,7 @@ struct
         let* v, stack = pop_arg stack arg in
         apply stack args (f v)
       | UArg args -> apply stack args (f ())
+      | Ctx _args -> assert false
       | NArg (_, arg, args) ->
         let* v, stack = pop_arg stack arg in
         apply stack args (f v)
