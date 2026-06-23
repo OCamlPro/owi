@@ -1211,7 +1211,7 @@ struct
       | Mem (_, args) -> split_args stack args
       | Arg (_, args) -> split_one_arg args
       | UArg args -> split_args stack args
-      | Ctx _args -> assert false
+      | Ctx args -> split_args stack args
       | NArg (_, _, args) -> split_one_arg args
       | Res -> ([], stack)
     in
