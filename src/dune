@@ -16,6 +16,7 @@
   abstract_invariant
   abstract_locals
   abstract_memory
+  abstract_monad
   abstract_ref
   abstract_stack
   abstract_state
