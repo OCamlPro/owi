@@ -4,7 +4,6 @@
  (public_name owi)
  (modules
   abstract_boolean
-  abstract_data_state
   abstract_domain
   abstract_driver
   abstract_extern_func
@@ -13,6 +12,7 @@
   abstract_globals
   abstract_i32
   abstract_i64
+  abstract_interpreter_simple
   abstract_invariant
   abstract_locals
   abstract_memory
