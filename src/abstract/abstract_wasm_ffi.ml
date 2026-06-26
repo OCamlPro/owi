@@ -9,17 +9,17 @@ open Abstract_extern_func.Syntax
    the expected FFI functions, this whole file is further constrained such that
    if one function of M is unused in the FFI module below, an error will be
    displayed *)
-let symbol_i32 ctx = Abstract_i32.unknown ctx
+let symbol_i32 () = raise (ExternFuncException I32_symbol)
 
-let symbol_i64 ctx = Abstract_i64.unknown ctx
+let symbol_i64 () = raise (ExternFuncException I64_symbol)
 
-let assume ctx = raise (ExternFuncException (Assume ctx))
+let assume () = raise (ExternFuncException Assume)
 
 let symbolic_extern_module =
   let functions =
-    [ ("i32_symbol", Extern_func (context ^->. i32, symbol_i32))
-    ; ("i64_symbol", Extern_func (context ^->. i64, symbol_i64))
-    ; ("assume", Extern_func (context ^-> i32 ^->. unit, assume))
+    [ ("i32_symbol", Extern_func (unit ^->. i32, symbol_i32))
+    ; ("i64_symbol", Extern_func (unit ^->. i64, symbol_i64))
+    ; ("assume", Extern_func (unit ^-> i32 ^->. unit, assume))
       (* ; ("assert", Extern_func (i32 ^->. unit, assert')) *)
       (* ; ("exit", Extern_func (i32 ^->. unit, exit)) *)
     ]

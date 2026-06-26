@@ -2,5 +2,4 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-include
-  Extern.Func.Make (Symbolic_value) (Symbolic_choice) (Symbolic_memory) (Unit)
+include Extern.Func.Make (Symbolic_value) (Symbolic_choice) (Symbolic_memory)

@@ -3,14 +3,11 @@
 (* Written by the Owi programmers *)
 
 include
-  Extern.Func.Make
-    (Abstract_value)
-    (struct
-      type 'a t = 'a
-    end)
-    (Abstract_memory)
-    (Abstract_domain.Context)
+  Extern.Func.Make (Abstract_value) (Abstract_monad) (Abstract_memory)
 
-type abs_extern_func = Assume of Abstract_domain.Context.t
+type abs_extern_func = 
+  | Assume
+  | I32_symbol
+  | I64_symbol
 
 exception ExternFuncException of abs_extern_func

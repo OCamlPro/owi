@@ -191,7 +191,7 @@ module DenotFixpoint (S : DATA_STATE) = struct
     let state, _out_tuple = continue ctx out in
     ({ state with ctx }, included)
 
-  let exec_extern_func ctx stack (f : Abstract_extern_func.extern_func) =
+  let exec_extern_func stack (f : Abstract_extern_func.extern_func) =
     let open Abstract_extern_func in
     let pop_arg (type ty) stack (arg : ty Abstract_extern_func.telt) :
       ty * Stack.t =
@@ -217,7 +217,6 @@ module DenotFixpoint (S : DATA_STATE) = struct
       | Mem (_, args) -> split_args stack args
       | Arg (_, args) -> split_one_arg args
       | UArg args -> split_args stack args
-      | Ctx args -> split_args stack args
       | NArg (_, _, args) -> split_one_arg args
       | Res -> ([], stack)
     in
@@ -232,7 +231,6 @@ module DenotFixpoint (S : DATA_STATE) = struct
         let v, stack = pop_arg stack arg in
         apply stack args (f v)
       | UArg args -> apply stack args (f ())
-      | Ctx args -> apply stack args (f ctx)
       | NArg (_, arg, args) ->
         let v, stack = pop_arg stack arg in
         apply stack args (f v)
@@ -352,9 +350,15 @@ module DenotFixpoint (S : DATA_STATE) = struct
         (r, JumpTarget.empty)
       | Extern { idx } -> (
         let f = Link_env.get_extern_func state.env idx in
-        match exec_extern_func state.ctx state.stack f with
+        match exec_extern_func state.stack f with
         | (stack : Stack.t) -> (Some { state with stack }, JumpTarget.empty)
-        | exception Abstract_extern_func.ExternFuncException (Assume ctx) -> (
+        | exception Abstract_extern_func.ExternFuncException I32_symbol ->
+          let stack = Stack.push_i32 stack (Abstract_i32.unknown ctx) in
+          (Some { state with stack }, JumpTarget.empty)
+        | exception Abstract_extern_func.ExternFuncException I64_symbol ->
+          let stack = Stack.push_i64 stack (Abstract_i64.unknown ctx) in
+          (Some { state with stack }, JumpTarget.empty)
+        | exception Abstract_extern_func.ExternFuncException Assume -> (
           let b, stack = Stack.pop_bool state.stack ctx in
           match Abstract_domain.assume ctx b with
           | Some ctx -> (Some { state with stack; ctx }, JumpTarget.empty)
