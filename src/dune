@@ -4,6 +4,7 @@
  (public_name owi)
  (modules
   abstract_boolean
+  abstract_data_state
   abstract_domain
   abstract_driver
   abstract_extern_func
