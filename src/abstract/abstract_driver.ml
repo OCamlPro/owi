@@ -513,7 +513,7 @@ end
 
 (*===========================================================================*)
 
-module ConcreteFixpoint = DenotFixpoint (Abstract_data_state)
+module ConcreteFixpoint = DenotFixpoint (Abstract_interpreter_simple)
 
 let expr (link_state : Abstract_extern_func.extern_func Link.State.t)
   (m : Abstract_extern_func.extern_func Linked.Module.t) =
