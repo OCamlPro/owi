@@ -22,3 +22,5 @@ let eq ctx b1 b2 =
   let both_true = and_ ctx b1 b2 in
   let both_false = and_ ctx (not ctx b1) (not ctx b2) in
   or_ ctx both_true both_false
+
+let unknown ctx = Abstract_domain.boolean_unknown ctx
