@@ -156,9 +156,9 @@ let apply_i32_i32_boolean s ctx f =
   let (hd1, hd2), tl = pop2_i32 s in
   push_bool tl ctx (f hd1 hd2)
 
-let apply_i64_boolean s f =
+let apply_i64_boolean s ctx f =
   let hd, tl = pop_i64 s in
-  push_bool tl (f hd)
+  push_bool tl ctx (f hd)
 
 let apply_i64_i64 s f =
   let hd, tl = pop_i64 s in
@@ -204,9 +204,9 @@ let apply_f32_f32_f32 s f =
   let (hd1, hd2), tl = pop2_f32 s in
   push_f32 tl (f hd1 hd2)
 
-let apply_f32_f32_boolean s f =
+let apply_f32_f32_boolean s ctx f =
   let (hd1, hd2), tl = pop2_f32 s in
-  push_bool tl (f hd1 hd2)
+  push_bool tl ctx (f hd1 hd2)
 
 let apply_f64_f64 s f =
   let hd, tl = pop_f64 s in
@@ -228,6 +228,6 @@ let apply_f64_f64_f64 s f =
   let (hd1, hd2), tl = pop2_f64 s in
   push_f64 tl (f hd1 hd2)
 
-let apply_f64_f64_boolean s f =
+let apply_f64_f64_boolean s ctx f =
   let (hd1, hd2), tl = pop2_f64 s in
-  push_bool tl (f hd1 hd2)
+  push_bool tl ctx (f hd1 hd2)

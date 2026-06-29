@@ -196,20 +196,87 @@ let eval_f32 ({ stack; ctx; _ } as state : Abstract_state.t) _uuid :
   | Const f ->
     let stack = Stack.push_f32 stack (Abstract_f32.of_float32 ctx f) in
     { state with stack }
-  | Add | Sub | Mul | Div | Lt | Le | Gt | Ge ->
-    let _, stack = Stack.pop2_f32 stack in
-    let stack = Stack.push_f32 stack (Abstract_f32.unknown ctx) in
+  | Add | Sub | Mul | Div | Min | Max | Copysign ->
+    let stack =
+      Stack.apply_f32_f32_f32 stack (fun _ _ -> Abstract_f32.unknown ctx)
+    in
     { state with stack }
-  | _ -> assert false
+  | Lt | Le | Gt | Ge | Eq | Ne ->
+    let stack =
+      Stack.apply_f32_f32_boolean stack ctx (fun _ _ ->
+        Abstract_boolean.unknown ctx )
+    in
+    { state with stack }
+  | Convert_i (nn, _sx) ->
+    let stack =
+      match nn with
+      | S32 -> Stack.apply_i32_f32 stack (fun _ -> Abstract_f32.unknown ctx)
+      | S64 -> Stack.apply_i64_f32 stack (fun _ -> Abstract_f32.unknown ctx)
+    in
+    { state with stack }
+  | Abs | Neg | Ceil | Floor | Trunc | Nearest | Sqrt ->
+    let stack = Stack.apply_f32_f32 stack (fun _ -> Abstract_f32.unknown ctx) in
+    { state with stack }
+  | Demote_f64 ->
+    let stack = Stack.apply_f64_f32 stack (fun _ -> Abstract_f32.unknown ctx) in
+    { state with stack }
+  | Reinterpret_i S32 ->
+    let stack = Stack.apply_i32_f32 stack (fun _ -> Abstract_f32.unknown ctx) in
+    { state with stack }
+  | Reinterpret_i S64 ->
+    let stack = Stack.apply_i64_f32 stack (fun _ -> Abstract_f32.unknown ctx) in
+    { state with stack }
+  | Load (_i, _m) ->
+    let stack = Stack.apply_i32_f32 stack (fun _ -> Abstract_f32.unknown ctx) in
+    { state with stack }
+  | Store (_i, _m) ->
+    let _, stack = Stack.pop_f32 stack in
+    let _, stack = Stack.pop_i32 stack in
+    { state with stack }
 
 (* TODO: handle this correctly *)
 let eval_f64 ({ stack; ctx; _ } as state : Abstract_state.t) _uuid :
   Binary.f64_instr -> _ = function
-  | Add | Sub | Mul | Div | Lt | Le | Gt | Ge ->
-    let _, stack = Stack.pop2_f64 stack in
+  | Const _ ->
     let stack = Stack.push_f64 stack (Abstract_f64.unknown ctx) in
     { state with stack }
-  | _ -> assert false
+  | Add | Sub | Mul | Div | Min | Max | Copysign ->
+    let stack =
+      Stack.apply_f64_f64_f64 stack (fun _ _ -> Abstract_f64.unknown ctx)
+    in
+    { state with stack }
+  | Lt | Le | Gt | Ge | Eq | Ne ->
+    let stack =
+      Stack.apply_f64_f64_boolean stack ctx (fun _ _ ->
+        Abstract_boolean.unknown ctx )
+    in
+    { state with stack }
+  | Convert_i (nn, _sx) ->
+    let stack =
+      match nn with
+      | S32 -> Stack.apply_i32_f64 stack (fun _ -> Abstract_f64.unknown ctx)
+      | S64 -> Stack.apply_i64_f64 stack (fun _ -> Abstract_f64.unknown ctx)
+    in
+    { state with stack }
+  | Abs | Neg | Ceil | Floor | Trunc | Nearest | Sqrt ->
+    let stack = Stack.apply_f64_f64 stack (fun _ -> Abstract_f64.unknown ctx) in
+    { state with stack }
+  | Promote_f32 ->
+    let stack = Stack.apply_f32_f64 stack (fun _ -> Abstract_f64.unknown ctx) in
+    { state with stack }
+  | Reinterpret_i S32 ->
+    let stack = Stack.apply_i32_f64 stack (fun _ -> Abstract_f64.unknown ctx) in
+    { state with stack }
+  | Reinterpret_i S64 ->
+    let stack = Stack.apply_i64_f64 stack (fun _ -> Abstract_f64.unknown ctx) in
+    { state with stack }
+  | Load (_i, _m) ->
+    let stack = Stack.apply_i32_f64 stack (fun _ -> Abstract_f64.unknown ctx) in
+    { state with stack }
+  | Store (_i, _m) ->
+    let _, stack = Stack.pop_f64 stack in
+    let _, stack = Stack.pop_i32 stack in
+    { state with stack }
 
 let eval_local ({ stack; locals; _ } as state : Abstract_state.t) :
   Binary.local_instr -> _ = function
