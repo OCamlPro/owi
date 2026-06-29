@@ -4,6 +4,12 @@
 
 include Smtml.Typed.Bitv32
 
+(* See: https://github.com/formalsec/smtml/pull/629 *)
+(* in the future, we might change to rotate_right but it'll require to use a select_i32 (which would not cost anything in the case of an integer) ? *)
+let rotate_right = ext_rotate_right
+
+let rotate_left = ext_rotate_left
+
 let to_boolean (e : t) : Symbolic_boolean.t =
   match Smtml.Typed.view e with
   | Val (Bitv bv) ->
