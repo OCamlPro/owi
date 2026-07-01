@@ -354,6 +354,7 @@ type v128_instr =
   | Load32_splat of (indice * memarg)
   | Load32_lane of (indice * memarg * int)
   | Load32_zero of (indice * memarg)
+  | Load64_splat of (indice * memarg)
   | Load64_lane of (indice * memarg * int)
   | Load64_zero of (indice * memarg)
   | Load of (indice * memarg)
@@ -364,6 +365,7 @@ type v128_instr =
   | Store32_lane of (indice * memarg * int)
   | Store16_lane of (indice * memarg * int)
   | Bitselect
+  | Xor
 
 val pp_v128_instr : v128_instr Fmt.t
 
@@ -443,6 +445,9 @@ type i16x8_instr =
   | Sub_sat_u
   | Max_s
   | Max_u
+  | Shl
+  | Neg
+  | All_true
 
 val pp_i16x8_instr : i16x8_instr Fmt.t
 
@@ -512,6 +517,7 @@ type i64x2_instr =
   | Extmul_high_i32x4_u
   | Abs
   | Neg
+  | Extract_lane of int
 
 val pp_i64x2_instr : i64x2_instr Fmt.t
 
@@ -539,6 +545,9 @@ type f32x4_instr =
   | Convert_low_i32x4_u
   | Convert_high_i32x4_s
   | Convert_high_i32x4_u
+  | Splat
+  | Nearest
+  | Div
 
 val pp_f32x4_instr : f32x4_instr Fmt.t
 
@@ -564,6 +573,8 @@ type f64x2_instr =
   | Convert_low_i32x4_u
   | Convert_high_i32x4_s
   | Convert_high_i32x4_u
+  | Nearest
+  | Div
 
 val pp_f64x2_instr : f64x2_instr Fmt.t
 
