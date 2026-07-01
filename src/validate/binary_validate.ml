@@ -375,24 +375,24 @@ let typecheck_i32_instr (env : Env.t) stack = function
     let* stack = Stack.pop env.modul [ i32 ] stack in
     let+ stack = Stack.push [ i32 ] stack in
     (env, stack)
-  | Add | Sub | Mul | Div _ | Rem _ | And | Or | Xor | Shl | Shr _ | Rotl | Rotr
-    ->
+  | Add | Sub | Mul | Div_s | Div_u | Rem_s | Rem_u | And | Or | Xor | Shl
+  | Shr_s | Shr_u | Rotl | Rotr ->
     (* Binary operators *)
     let* stack = Stack.pop env.modul [ i32; i32 ] stack in
     let+ stack = Stack.push [ i32 ] stack in
     (env, stack)
-  | Eq | Ne | Lt _ | Gt _ | Le _ | Ge _ ->
+  | Eq | Ne | Lt_s | Lt_u | Gt_s | Gt_u | Le_s | Le_u | Ge_s | Ge_u ->
     (* Relation operators *)
     let* stack = Stack.pop env.modul [ i32; i32 ] stack in
     let+ stack = Stack.push [ i32 ] stack in
     (env, stack)
-  | Load8 (id, _, memarg) ->
+  | Load8_s (id, memarg) | Load8_u (id, memarg) ->
     let* is_i64 = check_mem env.modul id in
     let* () = check_memarg ~is_i64 memarg 1l in
     let* stack = Stack.pop env.modul [ i32 ] stack in
     let+ stack = Stack.push [ i32 ] stack in
     (env, stack)
-  | Load16 (id, _, memarg) ->
+  | Load16_s (id, memarg) | Load16_u (id, memarg) ->
     let* is_i64 = check_mem env.modul id in
     let* () = check_memarg ~is_i64 memarg 2l in
     let* stack = Stack.pop env.modul [ i32 ] stack in
@@ -419,7 +419,11 @@ let typecheck_i32_instr (env : Env.t) stack = function
     let* () = check_memarg ~is_i64 memarg 4l in
     let+ stack = Stack.pop env.modul [ i32; i32 ] stack in
     (env, stack)
-  | Reinterpret_f fnn | Trunc_f (fnn, _) | Trunc_sat_f (fnn, _) ->
+  | Reinterpret_f fnn
+  | Trunc_f_s fnn
+  | Trunc_f_u fnn
+  | Trunc_sat_f_s fnn
+  | Trunc_sat_f_u fnn ->
     let* stack = Stack.pop env.modul [ ftype fnn ] stack in
     let+ stack = Stack.push [ i32 ] stack in
     (env, stack)
@@ -443,30 +447,30 @@ let typecheck_i64_instr (env : Env.t) stack = function
     let* stack = Stack.pop env.modul [ i64 ] stack in
     let+ stack = Stack.push [ i32 ] stack in
     (env, stack)
-  | Add | Sub | Mul | Div _ | Rem _ | And | Or | Xor | Shl | Shr _ | Rotl | Rotr
-    ->
+  | Add | Sub | Mul | Div_s | Div_u | Rem_s | Rem_u | And | Or | Xor | Shl
+  | Shr_s | Shr_u | Rotl | Rotr ->
     (* Binary operators *)
     let* stack = Stack.pop env.modul [ i64; i64 ] stack in
     let+ stack = Stack.push [ i64 ] stack in
     (env, stack)
-  | Eq | Ne | Lt _ | Gt _ | Le _ | Ge _ ->
+  | Eq | Ne | Lt_s | Lt_u | Gt_s | Gt_u | Le_s | Le_u | Ge_s | Ge_u ->
     (* Relation operators *)
     let* stack = Stack.pop env.modul [ i64; i64 ] stack in
     let+ stack = Stack.push [ i32 ] stack in
     (env, stack)
-  | Load8 (id, _, memarg) ->
+  | Load8_s (id, memarg) | Load8_u (id, memarg) ->
     let* is_i64 = check_mem env.modul id in
     let* () = check_memarg ~is_i64 memarg 1l in
     let* stack = Stack.pop env.modul [ i32 ] stack in
     let+ stack = Stack.push [ i64 ] stack in
     (env, stack)
-  | Load16 (id, _, memarg) ->
+  | Load16_s (id, memarg) | Load16_u (id, memarg) ->
     let* is_i64 = check_mem env.modul id in
     let* () = check_memarg ~is_i64 memarg 2l in
     let* stack = Stack.pop env.modul [ i32 ] stack in
     let+ stack = Stack.push [ i64 ] stack in
     (env, stack)
-  | Load32 (id, _, memarg) ->
+  | Load32_s (id, memarg) | Load32_u (id, memarg) ->
     let* is_i64 = check_mem env.modul id in
     let* () = check_memarg ~is_i64 memarg 4l in
     let* stack = Stack.pop env.modul [ i32 ] stack in
@@ -498,11 +502,15 @@ let typecheck_i64_instr (env : Env.t) stack = function
     let* () = check_memarg ~is_i64 memarg 8l in
     let+ stack = Stack.pop env.modul [ i64; i32 ] stack in
     (env, stack)
-  | Reinterpret_f fnn | Trunc_f (fnn, _) | Trunc_sat_f (fnn, _) ->
+  | Reinterpret_f fnn
+  | Trunc_f_s fnn
+  | Trunc_sat_f_s fnn
+  | Trunc_f_u fnn
+  | Trunc_sat_f_u fnn ->
     let* stack = Stack.pop env.modul [ ftype fnn ] stack in
     let+ stack = Stack.push [ i64 ] stack in
     (env, stack)
-  | Extend_i32 _ ->
+  | Extend_i32_s | Extend_i32_u ->
     let* stack = Stack.pop env.modul [ i32 ] stack in
     let+ stack = Stack.push [ i64 ] stack in
     (env, stack)
@@ -537,7 +545,7 @@ let typecheck_f32_instr (env : Env.t) stack = function
     let* () = check_memarg ~is_i64 memarg 4l in
     let+ stack = Stack.pop env.modul [ f32; i32 ] stack in
     (env, stack)
-  | Reinterpret_i inn | Convert_i (inn, _) ->
+  | Reinterpret_i inn | Convert_i_s inn | Convert_i_u inn ->
     let* stack = Stack.pop env.modul [ itype inn ] stack in
     let+ stack = Stack.push [ f32 ] stack in
     (env, stack)
@@ -580,7 +588,7 @@ let typecheck_f64_instr (env : Env.t) stack = function
     let* stack = Stack.pop env.modul [ itype inn ] stack in
     let+ stack = Stack.push [ f64 ] stack in
     (env, stack)
-  | Convert_i (inn, _) ->
+  | Convert_i_s inn | Convert_i_u inn ->
     let* stack = Stack.pop env.modul [ itype inn ] stack in
     let+ stack = Stack.push [ f64 ] stack in
     (env, stack)
@@ -636,7 +644,8 @@ let typecheck_v128_instr (env : Env.t) stack : Binary.v128_instr -> _ = function
 
 let typecheck_i8x16_instr (env : Env.t) stack = function
   | (Add : Text.i8x16_instr)
-  | Sub | Eq | Ne | Lt _ | Gt _ | Le _ | Ge _ | Swizzle ->
+  | Sub | Eq | Ne | Lt_s | Lt_u | Gt_s | Gt_u | Le_s | Le_u | Ge_s | Ge_u
+  | Swizzle ->
     let* stack = Stack.pop env.modul [ v128; v128 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
@@ -666,7 +675,8 @@ let typecheck_i8x16_instr (env : Env.t) stack = function
   | _ -> assert false
 
 let typecheck_i16x8_instr (env : Env.t) stack = function
-  | (Add : Text.i16x8_instr) | Sub | Mul | Eq | Ne | Lt _ | Gt _ | Le _ | Ge _
+  | (Add : Text.i16x8_instr)
+  | Sub | Mul | Eq | Ne | Lt_s | Lt_u | Gt_s | Gt_u | Le_s | Le_u | Ge_s | Ge_u
     ->
     let* stack = Stack.pop env.modul [ v128; v128 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
@@ -684,12 +694,13 @@ let typecheck_i16x8_instr (env : Env.t) stack = function
   | _ -> assert false
 
 let typecheck_i32x4_instr (env : Env.t) stack = function
-  | (Add : Text.i32x4_instr) | Sub | Mul | Lt _ | Gt _ | Le _ | Ge _ | Eq | Ne
+  | (Add : Text.i32x4_instr)
+  | Sub | Mul | Lt_s | Lt_u | Gt_s | Gt_u | Le_s | Le_u | Ge_s | Ge_u | Eq | Ne
     ->
     let* stack = Stack.pop env.modul [ v128; v128 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
-  | Shl | Shr (S | U) ->
+  | Shl | Shr_s | Shr_u ->
     let* stack = Stack.pop env.modul [ i32; v128 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
@@ -726,7 +737,7 @@ let typecheck_i64x2_instr (env : Env.t) stack = function
     let* stack = Stack.pop env.modul [ i64 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
-  | Extend_low_i32x4 (S | U) ->
+  | Extend_low_i32x4_s | Extend_low_i32x4_u ->
     let* stack = Stack.pop env.modul [ v128 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
@@ -1204,13 +1215,13 @@ let typecheck_const_instr ?known_globals ~is_init (modul : Module.t) refs stack
       in
       Stack.push [ typ_of_val_type typ ] stack
   | I32
-      ( Add | Mul | Sub | Div _ | Rem _ | And | Or | Xor | Shl | Shr _ | Rotl
-      | Rotr ) ->
+      ( Add | Mul | Sub | Div_s | Div_u | Rem_s | Rem_u | And | Or | Xor | Shl
+      | Shr_s | Shr_u | Rotl | Rotr ) ->
     let* stack = Stack.pop modul [ i32; i32 ] stack in
     Stack.push [ i32 ] stack
   | I64
-      ( Add | Mul | Sub | Div _ | Rem _ | And | Or | Xor | Shl | Shr _ | Rotl
-      | Rotr ) ->
+      ( Add | Mul | Sub | Div_s | Div_u | Rem_s | Rem_u | And | Or | Xor | Shl
+      | Shr_s | Shr_u | Rotl | Rotr ) ->
     let* stack = Stack.pop modul [ i64; i64 ] stack in
     Stack.push [ i64 ] stack
   | _ -> Error `Constant_expression_required

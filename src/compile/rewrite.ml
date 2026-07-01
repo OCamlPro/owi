@@ -91,40 +91,57 @@ let rewrite_i32_instr assigned : Text.i32_instr -> Binary.i32_instr Result.t =
   | Add -> Ok Add
   | Sub -> Ok Sub
   | Mul -> Ok Mul
-  | Div sx -> Ok (Div sx)
-  | Rem sx -> Ok (Rem sx)
+  | Div_s -> Ok Div_s
+  | Div_u -> Ok Div_u
+  | Rem_s -> Ok Rem_s
+  | Rem_u -> Ok Rem_u
   | And -> Ok And
   | Or -> Ok Or
   | Xor -> Ok Xor
   | Shl -> Ok Shl
-  | Shr sx -> Ok (Shr sx)
+  | Shr_s -> Ok Shr_s
+  | Shr_u -> Ok Shr_u
   | Rotl -> Ok Rotl
   | Rotr -> Ok Rotr
   | Eqz -> Ok Eqz
   | Eq -> Ok Eq
   | Ne -> Ok Ne
-  | Lt sx -> Ok (Lt sx)
-  | Gt sx -> Ok (Gt sx)
-  | Le sx -> Ok (Le sx)
-  | Ge sx -> Ok (Ge sx)
+  | Lt_s -> Ok Lt_s
+  | Lt_u -> Ok Lt_u
+  | Gt_s -> Ok Gt_s
+  | Gt_u -> Ok Gt_u
+  | Le_s -> Ok Le_s
+  | Le_u -> Ok Le_u
+  | Ge_s -> Ok Ge_s
+  | Ge_u -> Ok Ge_u
   | Extend8_s -> Ok Extend8_s
   | Extend16_s -> Ok Extend16_s
   | Wrap_i64 -> Ok Wrap_i64
-  | Trunc_f (nn, sx) -> Ok (Trunc_f (nn, sx))
-  | Trunc_sat_f (nn, sx) -> Ok (Trunc_sat_f (nn, sx))
+  | Trunc_f_s nn -> Ok (Trunc_f_s nn)
+  | Trunc_f_u nn -> Ok (Trunc_f_u nn)
+  | Trunc_sat_f_s nn -> Ok (Trunc_sat_f_s nn)
+  | Trunc_sat_f_u nn -> Ok (Trunc_sat_f_u nn)
   | Reinterpret_f nn -> Ok (Reinterpret_f nn)
   | Load (indice, memarg) ->
     let* memarg = rewrite_memarg memarg in
     let+ indice = Assigned.find_memory assigned indice in
     (Load (indice, memarg) : Binary.i32_instr)
-  | Load8 (indice, sx, memarg) ->
+  | Load8_s (indice, memarg) ->
     let* memarg = rewrite_memarg memarg in
     let+ indice = Assigned.find_memory assigned indice in
-    (Load8 (indice, sx, memarg) : Binary.i32_instr)
-  | Load16 (indice, sx, memarg) ->
+    (Load8_s (indice, memarg) : Binary.i32_instr)
+  | Load8_u (indice, memarg) ->
     let* memarg = rewrite_memarg memarg in
     let+ indice = Assigned.find_memory assigned indice in
-    (Load16 (indice, sx, memarg) : Binary.i32_instr)
+    (Load8_u (indice, memarg) : Binary.i32_instr)
+  | Load16_s (indice, memarg) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Load16_s (indice, memarg) : Binary.i32_instr)
+  | Load16_u (indice, memarg) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Load16_u (indice, memarg) : Binary.i32_instr)
   | Store (indice, memarg) ->
     let* memarg = rewrite_memarg memarg in
     let+ indice = Assigned.find_memory assigned indice in
@@ -147,45 +164,67 @@ let rewrite_i64_instr assigned : Text.i64_instr -> Binary.i64_instr Result.t =
   | Add -> Ok Add
   | Sub -> Ok Sub
   | Mul -> Ok Mul
-  | Div sx -> Ok (Div sx)
-  | Rem sx -> Ok (Rem sx)
+  | Div_s -> Ok Div_s
+  | Div_u -> Ok Div_u
+  | Rem_s -> Ok Rem_s
+  | Rem_u -> Ok Rem_u
   | And -> Ok And
   | Or -> Ok Or
   | Xor -> Ok Xor
   | Shl -> Ok Shl
-  | Shr sx -> Ok (Shr sx)
+  | Shr_s -> Ok Shr_s
+  | Shr_u -> Ok Shr_u
   | Rotl -> Ok Rotl
   | Rotr -> Ok Rotr
   | Eqz -> Ok Eqz
   | Eq -> Ok Eq
   | Ne -> Ok Ne
-  | Lt sx -> Ok (Lt sx)
-  | Gt sx -> Ok (Gt sx)
-  | Le sx -> Ok (Le sx)
-  | Ge sx -> Ok (Ge sx)
+  | Lt_s -> Ok Lt_s
+  | Lt_u -> Ok Lt_u
+  | Gt_s -> Ok Gt_s
+  | Gt_u -> Ok Gt_u
+  | Le_s -> Ok Le_s
+  | Le_u -> Ok Le_u
+  | Ge_s -> Ok Ge_s
+  | Ge_u -> Ok Ge_u
   | Extend8_s -> Ok Extend8_s
   | Extend16_s -> Ok Extend16_s
   | Extend32_s -> Ok Extend32_s
-  | Extend_i32 sx -> Ok (Extend_i32 sx)
-  | Trunc_f (nn, sx) -> Ok (Trunc_f (nn, sx))
-  | Trunc_sat_f (nn, sx) -> Ok (Trunc_sat_f (nn, sx))
+  | Extend_i32_s -> Ok Extend_i32_s
+  | Extend_i32_u -> Ok Extend_i32_u
+  | Trunc_f_s nn -> Ok (Trunc_f_s nn)
+  | Trunc_f_u nn -> Ok (Trunc_f_u nn)
+  | Trunc_sat_f_s nn -> Ok (Trunc_sat_f_s nn)
+  | Trunc_sat_f_u nn -> Ok (Trunc_sat_f_u nn)
   | Reinterpret_f nn -> Ok (Reinterpret_f nn)
   | Load (indice, memarg) ->
     let* memarg = rewrite_memarg memarg in
     let+ indice = Assigned.find_memory assigned indice in
     (Load (indice, memarg) : Binary.i64_instr)
-  | Load8 (indice, sx, memarg) ->
+  | Load8_s (indice, memarg) ->
     let* memarg = rewrite_memarg memarg in
     let+ indice = Assigned.find_memory assigned indice in
-    (Load8 (indice, sx, memarg) : Binary.i64_instr)
-  | Load16 (indice, sx, memarg) ->
+    (Load8_s (indice, memarg) : Binary.i64_instr)
+  | Load8_u (indice, memarg) ->
     let* memarg = rewrite_memarg memarg in
     let+ indice = Assigned.find_memory assigned indice in
-    (Load16 (indice, sx, memarg) : Binary.i64_instr)
-  | Load32 (indice, sx, memarg) ->
+    (Load8_u (indice, memarg) : Binary.i64_instr)
+  | Load16_s (indice, memarg) ->
     let* memarg = rewrite_memarg memarg in
     let+ indice = Assigned.find_memory assigned indice in
-    (Load32 (indice, sx, memarg) : Binary.i64_instr)
+    (Load16_s (indice, memarg) : Binary.i64_instr)
+  | Load16_u (indice, memarg) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Load16_u (indice, memarg) : Binary.i64_instr)
+  | Load32_s (indice, memarg) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Load32_s (indice, memarg) : Binary.i64_instr)
+  | Load32_u (indice, memarg) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Load32_u (indice, memarg) : Binary.i64_instr)
   | Store (indice, memarg) ->
     let* memarg = rewrite_memarg memarg in
     let+ indice = Assigned.find_memory assigned indice in
@@ -227,7 +266,8 @@ let rewrite_f32_instr assigned : Text.f32_instr -> Binary.f32_instr Result.t =
   | Le -> Ok Le
   | Ge -> Ok Ge
   | Demote_f64 -> Ok Demote_f64
-  | Convert_i (nn, sx) -> Ok (Convert_i (nn, sx))
+  | Convert_i_s nn -> Ok (Convert_i_s nn)
+  | Convert_i_u nn -> Ok (Convert_i_u nn)
   | Reinterpret_i nn -> Ok (Reinterpret_i nn)
   | Load (indice, memarg) ->
     let* memarg = rewrite_memarg memarg in
@@ -262,7 +302,8 @@ let rewrite_f64_instr assigned : Text.f64_instr -> Binary.f64_instr Result.t =
   | Le -> Ok Le
   | Ge -> Ok Ge
   | Promote_f32 -> Ok Promote_f32
-  | Convert_i (nn, sx) -> Ok (Convert_i (nn, sx))
+  | Convert_i_s nn -> Ok (Convert_i_s nn)
+  | Convert_i_u nn -> Ok (Convert_i_u nn)
   | Reinterpret_i nn -> Ok (Reinterpret_i nn)
   | Load (indice, memarg) ->
     let* memarg = rewrite_memarg memarg in

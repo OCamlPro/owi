@@ -23,7 +23,7 @@ let eval_i32 ({ stack; ctx; invariant; _ } as state : Abstract_state.t) uuid :
   | Mul ->
     let stack = Stack.apply_i32_i32_i32 stack (Abstract_i32.mul ctx) in
     { state with stack }
-  | Div S ->
+  | Div_s ->
     let (hd1, hd2), stack = Stack.pop2_i32 stack in
     let () =
       let possible = i32_can_be_zero ctx hd2 in
@@ -31,7 +31,7 @@ let eval_i32 ({ stack; ctx; invariant; _ } as state : Abstract_state.t) uuid :
     in
     let stack = Stack.push_i32 stack (Abstract_i32.div_s ctx hd1 hd2) in
     { state with stack }
-  | Div U ->
+  | Div_u ->
     let (hd1, hd2), stack = Stack.pop2_i32 stack in
     let () =
       let possible = i32_can_be_zero ctx hd2 in
@@ -39,7 +39,7 @@ let eval_i32 ({ stack; ctx; invariant; _ } as state : Abstract_state.t) uuid :
     in
     let stack = Stack.push_i32 stack (Abstract_i32.div_u ctx hd1 hd2) in
     { state with stack }
-  | Rem S ->
+  | Rem_s ->
     let (hd1, hd2), stack = Stack.pop2_i32 stack in
     let () =
       let possible = i32_can_be_zero ctx hd2 in
@@ -47,7 +47,7 @@ let eval_i32 ({ stack; ctx; invariant; _ } as state : Abstract_state.t) uuid :
     in
     let stack = Stack.push_i32 stack (Abstract_i32.rem_s ctx hd1 hd2) in
     { state with stack }
-  | Rem U ->
+  | Rem_u ->
     let (hd1, hd2), stack = Stack.pop2_i32 stack in
     let () =
       let possible = i32_can_be_zero ctx hd2 in
@@ -64,28 +64,28 @@ let eval_i32 ({ stack; ctx; invariant; _ } as state : Abstract_state.t) uuid :
   | Shl ->
     let stack = Stack.apply_i32_i32_i32 stack (Abstract_i32.shl ctx) in
     { state with stack }
-  | Lt S ->
+  | Lt_s ->
     let stack = Stack.apply_i32_i32_boolean stack ctx (Abstract_i32.lt_s ctx) in
     { state with stack }
-  | Gt S ->
+  | Gt_s ->
     let stack = Stack.apply_i32_i32_boolean stack ctx (Abstract_i32.gt_s ctx) in
     { state with stack }
-  | Lt U ->
+  | Lt_u ->
     let stack = Stack.apply_i32_i32_boolean stack ctx (Abstract_i32.lt_u ctx) in
     { state with stack }
-  | Gt U ->
+  | Gt_u ->
     let stack = Stack.apply_i32_i32_boolean stack ctx (Abstract_i32.gt_u ctx) in
     { state with stack }
-  | Le S ->
+  | Le_s ->
     let stack = Stack.apply_i32_i32_boolean stack ctx (Abstract_i32.le_s ctx) in
     { state with stack }
-  | Ge S ->
+  | Ge_s ->
     let stack = Stack.apply_i32_i32_boolean stack ctx (Abstract_i32.ge_s ctx) in
     { state with stack }
-  | Le U ->
+  | Le_u ->
     let stack = Stack.apply_i32_i32_boolean stack ctx (Abstract_i32.le_u ctx) in
     { state with stack }
-  | Ge U ->
+  | Ge_u ->
     let stack = Stack.apply_i32_i32_boolean stack ctx (Abstract_i32.ge_u ctx) in
     { state with stack }
   | Ne ->
@@ -128,7 +128,7 @@ let eval_i64 ({ stack; ctx; invariant; _ } as state : Abstract_state.t) uuid :
   | Mul ->
     let stack = Stack.apply_i64_i64_i64 stack (Abstract_i64.mul ctx) in
     { state with stack }
-  | Div S ->
+  | Div_s ->
     let (hd1, hd2), stack = Stack.pop2_i64 stack in
     let () =
       let possible = i64_can_be_zero ctx hd2 in
@@ -136,7 +136,7 @@ let eval_i64 ({ stack; ctx; invariant; _ } as state : Abstract_state.t) uuid :
     in
     let stack = Stack.push_i64 stack (Abstract_i64.div_s ctx hd1 hd2) in
     { state with stack }
-  | Div U ->
+  | Div_u ->
     let (hd1, hd2), stack = Stack.pop2_i64 stack in
     let () =
       let possible = i64_can_be_zero ctx hd2 in
@@ -144,7 +144,7 @@ let eval_i64 ({ stack; ctx; invariant; _ } as state : Abstract_state.t) uuid :
     in
     let stack = Stack.push_i64 stack (Abstract_i64.div_u ctx hd1 hd2) in
     { state with stack }
-  | Rem S ->
+  | Rem_s ->
     let (hd1, hd2), stack = Stack.pop2_i64 stack in
     let () =
       let possible = i64_can_be_zero ctx hd2 in
@@ -152,7 +152,7 @@ let eval_i64 ({ stack; ctx; invariant; _ } as state : Abstract_state.t) uuid :
     in
     let stack = Stack.push_i64 stack (Abstract_i64.rem_s ctx hd1 hd2) in
     { state with stack }
-  | Rem U ->
+  | Rem_u ->
     let (hd1, hd2), stack = Stack.pop2_i64 stack in
     let () =
       let possible = i64_can_be_zero ctx hd2 in
@@ -166,16 +166,16 @@ let eval_i64 ({ stack; ctx; invariant; _ } as state : Abstract_state.t) uuid :
   | Or ->
     let stack = Stack.apply_i64_i64_i64 stack (Abstract_i64.or_ ctx) in
     { state with stack }
-  | Lt S ->
+  | Lt_s ->
     let stack = Stack.apply_i64_i64_boolean stack ctx (Abstract_i64.lt_s ctx) in
     { state with stack }
-  | Lt U ->
+  | Lt_u ->
     let stack = Stack.apply_i64_i64_boolean stack ctx (Abstract_i64.lt_u ctx) in
     { state with stack }
-  | Le S ->
+  | Le_s ->
     let stack = Stack.apply_i64_i64_boolean stack ctx (Abstract_i64.le_s ctx) in
     { state with stack }
-  | Le U ->
+  | Le_u ->
     let stack = Stack.apply_i64_i64_boolean stack ctx (Abstract_i64.le_u ctx) in
     { state with stack }
   | Store _ ->
@@ -207,7 +207,14 @@ let eval_f32 ({ stack; ctx; _ } as state : Abstract_state.t) _uuid :
         Abstract_boolean.unknown ctx )
     in
     { state with stack }
-  | Convert_i (nn, _sx) ->
+  | Convert_i_s nn ->
+    let stack =
+      match nn with
+      | S32 -> Stack.apply_i32_f32 stack (fun _ -> Abstract_f32.unknown ctx)
+      | S64 -> Stack.apply_i64_f32 stack (fun _ -> Abstract_f32.unknown ctx)
+    in
+    { state with stack }
+  | Convert_i_u nn ->
     let stack =
       match nn with
       | S32 -> Stack.apply_i32_f32 stack (fun _ -> Abstract_f32.unknown ctx)
@@ -251,7 +258,14 @@ let eval_f64 ({ stack; ctx; _ } as state : Abstract_state.t) _uuid :
         Abstract_boolean.unknown ctx )
     in
     { state with stack }
-  | Convert_i (nn, _sx) ->
+  | Convert_i_s nn ->
+    let stack =
+      match nn with
+      | S32 -> Stack.apply_i32_f64 stack (fun _ -> Abstract_f64.unknown ctx)
+      | S64 -> Stack.apply_i64_f64 stack (fun _ -> Abstract_f64.unknown ctx)
+    in
+    { state with stack }
+  | Convert_i_u nn ->
     let stack =
       match nn with
       | S32 -> Stack.apply_i32_f64 stack (fun _ -> Abstract_f64.unknown ctx)
