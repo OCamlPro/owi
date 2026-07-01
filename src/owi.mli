@@ -668,6 +668,8 @@ module Text : sig
     | Splat
     | Extend_low_i32x4_s
     | Extend_low_i32x4_u
+    | Extend_high_i32x4_s
+    | Extend_high_i32x4_u
     | Extmul_low_i32x4_s
     | Extmul_low_i32x4_u
     | Extmul_high_i32x4_s
@@ -676,6 +678,7 @@ module Text : sig
     | Neg
     | Extract_lane of int
     | All_true
+    | Bitmask
 
   type f32x4_instr =
     | Pmin
@@ -707,6 +710,7 @@ module Text : sig
     | Neg
     | Extract_lane of int
     | Sqrt
+    | Replace_lane of int
 
   val pp_f32x4_instr : f32x4_instr Fmt.t
 
@@ -738,6 +742,8 @@ module Text : sig
     | Sqrt
     | Splat
     | Extract_lane of int
+    | Promote_low_f32x4
+    | Replace_lane of int
 
   val pp_f64x2_instr : f64x2_instr Fmt.t
 
