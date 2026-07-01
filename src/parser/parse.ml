@@ -522,6 +522,23 @@ let token_to_string : Text_parser.token -> _ = function
   | I8X16_NARROW_I16X8_S -> "i8x16.narrow_i16x8_s"
   | V128_ANDNOT -> "v128.andnot"
   | V128_LOAD32X2_S -> "v128.load32x2_s"
+  | F32X4_GE -> "f32x4.ge"
+  | F32X4_SQRT -> "f32x4.sqrt"
+  | F64X2_GE -> "f64x2.ge"
+  | F64X2_SPLAT -> "f64x2.splat"
+  | F64X2_SQRT -> "f64x2.sqrt"
+  | I16X8_ABS -> "i16x8.abs"
+  | I16X8_LE_U -> "i16x8.le_u"
+  | I16X8_SHR_U -> "i16x8.shr_u"
+  | I32X4_ALL_TRUE -> "i32x4.all_true"
+  | I32X4_EXTEND_HIGH_I16X8_U -> "i32x4.extend_high_i16x8_u"
+  | I32X4_LE_U -> "i32x4.le_u"
+  | I64X2_GE_S -> "i64x2.ge_s"
+  | I8X16_ABS -> "i8x16.abs"
+  | I8X16_LE_U -> "i8x16.le_u"
+  | I8X16_NARROW_I16X8_U -> "i8x16.narrow_i16x8_u"
+  | I8X16_REPLACE_LANE -> "i8x16.replace_lane"
+  | V128_LOAD32X2_U -> "v128.load32x2_u"
 
 module Make (M : sig
   type t
