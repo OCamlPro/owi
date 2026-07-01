@@ -471,6 +471,8 @@ module Text : sig
     | Load8_splat of (indice * memarg)
     | Load8_lane of (indice * memarg * int)
     | Load8x8_s of (indice * memarg)
+    | Load8x8_u of (indice * memarg)
+    | Load16_splat of (indice * memarg)
     | Load16_lane of (indice * memarg * int)
     | Load16x4_s of (indice * memarg)
     | Load16x4_u of (indice * memarg)
@@ -485,6 +487,7 @@ module Text : sig
     | Store32_zero of (indice * memarg)
     | Store32_lane of (indice * memarg * int)
     | Store16_lane of (indice * memarg * int)
+    | Bitselect
 
   (** I8x16 instructions *)
   type i8x16_instr =
@@ -505,9 +508,14 @@ module Text : sig
     | Swizzle
     | Splat
     | Shl
+    | Shr_s
+    | Shr_u
     | Min_s
+    | Min_u
     | Extract_lane_s of int
+    | Extract_lane_u of int
     | Add_sat_s
+    | Add_sat_u
 
   (** I16x8 instructions *)
   type i16x8_instr =
@@ -525,11 +533,20 @@ module Text : sig
     | Extract_lane_u of int
     | Q15mulr_sat_s
     | Min_s
+    | Min_u
     | Min
     | Extmul_low_i8x16_s
+    | Extmul_low_i8x16_u
+    | Extmul_high_i8x16_s
+    | Extmul_high_i8x16_u
+    | Extend_low_i8x16_s
+    | Extend_low_i8x16_u
     | Extend_high_i8x16_s
+    | Extend_high_i8x16_u
     | Extadd_pairwise_i8x16_s
+    | Extadd_pairwise_i8x16_u
     | Add_sat_s
+    | Add_sat_u
 
   (* I32x4 instructions *)
   type i32x4_instr =
@@ -552,12 +569,21 @@ module Text : sig
     | Extend_low_i16x8_u
     | Extend_high_i16x8_u
     | Trunc_sat_f64x2_s_zero
+    | Trunc_sat_f64x2_u_zero
     | Trunc_sat_f32x4_s_zero
+    | Trunc_sat_f32x4_u_zero
     | Trunc_sat_f32x4_s
+    | Trunc_sat_f32x4_u
     | Min_s
+    | Min_u
     | Extmul_low_i16x8_s
+    | Extmul_low_i16x8_u
+    | Extmul_high_i16x8_s
+    | Extmul_high_i16x8_u
     | Extadd_pairwise_i16x8_s
+    | Extadd_pairwise_i16x8_u
     | Dot_i16x8_s
+    | Neg
 
   (** I64x2 instructions *)
   type i64x2_instr =
@@ -573,15 +599,25 @@ module Text : sig
     | Splat
     | Extend_low_i32x4 of sx
     | Extmul_low_i32x4_s
+    | Extmul_low_i32x4_u
+    | Extmul_high_i32x4_s
+    | Extmul_high_i32x4_u
     | Abs
+    | Neg
 
   type f32x4_instr =
     | Pmin
     | Min
     | Eq
     | Convert_i32x4_s
+    | Convert_i32x4_u
     | Ceil
     | Add
+    | Max
+    | Floor
+    | Pmax
+    | Ne
+    | Sub
 
   val pp_f32x4_instr : f32x4_instr Fmt.t
 
@@ -591,6 +627,11 @@ module Text : sig
     | Eq
     | Ceil
     | Add
+    | Max
+    | Floor
+    | Pmax
+    | Ne
+    | Sub
 
   val pp_f64x2_instr : f64x2_instr Fmt.t
 
@@ -1099,6 +1140,8 @@ module Binary : sig
     | Load8_splat of (indice * memarg)
     | Load8_lane of (indice * memarg * int)
     | Load8x8_s of (indice * memarg)
+    | Load8x8_u of (indice * memarg)
+    | Load16_splat of (indice * memarg)
     | Load16_lane of (indice * memarg * int)
     | Load16x4_s of (indice * memarg)
     | Load16x4_u of (indice * memarg)
@@ -1113,6 +1156,7 @@ module Binary : sig
     | Store32_zero of (indice * memarg)
     | Store32_lane of (indice * memarg * int)
     | Store16_lane of (indice * memarg * int)
+    | Bitselect
 
   (** Reference instructions *)
   type ref_instr =

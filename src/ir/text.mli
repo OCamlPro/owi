@@ -326,6 +326,8 @@ type v128_instr =
   | Load8_splat of (indice * memarg)
   | Load8_lane of (indice * memarg * int)
   | Load8x8_s of (indice * memarg)
+  | Load8x8_u of (indice * memarg)
+  | Load16_splat of (indice * memarg)
   | Load16_lane of (indice * memarg * int)
   | Load16x4_s of (indice * memarg)
   | Load16x4_u of (indice * memarg)
@@ -340,6 +342,7 @@ type v128_instr =
   | Store32_zero of (indice * memarg)
   | Store32_lane of (indice * memarg * int)
   | Store16_lane of (indice * memarg * int)
+  | Bitselect
 
 val pp_v128_instr : v128_instr Fmt.t
 
@@ -362,9 +365,14 @@ type i8x16_instr =
   | Swizzle
   | Splat
   | Shl
+  | Shr_s
+  | Shr_u
   | Min_s
+  | Min_u
   | Extract_lane_s of int
+  | Extract_lane_u of int
   | Add_sat_s
+  | Add_sat_u
 
 val pp_i8x16_instr : i8x16_instr Fmt.t
 
@@ -384,11 +392,20 @@ type i16x8_instr =
   | Extract_lane_u of int
   | Q15mulr_sat_s
   | Min_s
+  | Min_u
   | Min
   | Extmul_low_i8x16_s
+  | Extmul_low_i8x16_u
+  | Extmul_high_i8x16_s
+  | Extmul_high_i8x16_u
+  | Extend_low_i8x16_s
+  | Extend_low_i8x16_u
   | Extend_high_i8x16_s
+  | Extend_high_i8x16_u
   | Extadd_pairwise_i8x16_s
+  | Extadd_pairwise_i8x16_u
   | Add_sat_s
+  | Add_sat_u
 
 val pp_i16x8_instr : i16x8_instr Fmt.t
 
@@ -413,12 +430,21 @@ type i32x4_instr =
   | Extend_low_i16x8_u
   | Extend_high_i16x8_u
   | Trunc_sat_f64x2_s_zero
+  | Trunc_sat_f64x2_u_zero
   | Trunc_sat_f32x4_s_zero
+  | Trunc_sat_f32x4_u_zero
   | Trunc_sat_f32x4_s
+  | Trunc_sat_f32x4_u
   | Min_s
+  | Min_u
   | Extmul_low_i16x8_s
+  | Extmul_low_i16x8_u
+  | Extmul_high_i16x8_s
+  | Extmul_high_i16x8_u
   | Extadd_pairwise_i16x8_s
+  | Extadd_pairwise_i16x8_u
   | Dot_i16x8_s
+  | Neg
 
 val pp_i32x4_instr : i32x4_instr Fmt.t
 
@@ -436,7 +462,11 @@ type i64x2_instr =
   | Splat
   | Extend_low_i32x4 of sx
   | Extmul_low_i32x4_s
+  | Extmul_low_i32x4_u
+  | Extmul_high_i32x4_s
+  | Extmul_high_i32x4_u
   | Abs
+  | Neg
 
 val pp_i64x2_instr : i64x2_instr Fmt.t
 
@@ -445,8 +475,14 @@ type f32x4_instr =
   | Min
   | Eq
   | Convert_i32x4_s
+  | Convert_i32x4_u
   | Ceil
   | Add
+  | Max
+  | Floor
+  | Pmax
+  | Ne
+  | Sub
 
 val pp_f32x4_instr : f32x4_instr Fmt.t
 
@@ -456,6 +492,11 @@ type f64x2_instr =
   | Eq
   | Ceil
   | Add
+  | Max
+  | Floor
+  | Pmax
+  | Ne
+  | Sub
 
 val pp_f64x2_instr : f64x2_instr Fmt.t
 
