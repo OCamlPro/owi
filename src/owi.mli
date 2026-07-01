@@ -493,6 +493,8 @@ module Text : sig
     | Shuffle of int array (* TODO: make this immutable at some point *)
     | Swizzle
     | Splat
+    | Shl
+    | Min_s
 
   (** I16x8 instructions *)
   type i16x8_instr =

@@ -378,6 +378,64 @@ let plain_instr :=
   | F32_CONST; n = NUM; { F32 (Const (f32 n)) }
   | F64_CONST; n = NUM; { F64 (Const (f64 n)) }
   | n = v128_const; { V128 (Const n) }
+
+  | V128_ANY_TRUE; { V128 Any_true }
+  | V128_LOAD; { V128 Load }
+  | V128_LOAD16_LANE; { V128 Load16_lane }
+  | V128_LOAD32_LANE; { V128 Load32_lane }
+  | V128_LOAD32_ZERO; { V128 Load32_zero }
+  | V128_LOAD64_LANE; { V128 Load64_lane }
+  | V128_LOAD8X8_S; { V128 Load8x8_s }
+  | V128_LOAD8_LANE; { V128 Load8_lane }
+  | V128_LOAD8_SPLAT; { V128 Load8_splat }
+  | V128_NOT; { V128 Not }
+  | V128_STORE; { V128 Store }
+  | V128_STORE16_LANE; { V128 Store16_lane }
+  | V128_STORE32_LANE; { V128 Store32_lane }
+  | V128_STORE32_ZERO; { V128 Store32_zero }
+  | V128_STORE64_LANE; { V128 Store64_lane }
+  | V128_STORE8_LANE; { V128 Store8_lane }
+  | F32X4_ADD; { F32x4 Add }
+  | F32X4_CEIL; { F32x4 Ceil }
+  | F32X4_CONVERT_I32X4_S; { F32x4 Convert_i32x4_s }
+  | F32X4_EQ; { F32x4 Eq }
+  | F32X4_MIN; { F32x4 Min }
+  | F32X4_PMIN; { F32x4 Pmin }
+  | F64X2_ADD; { F64x2 Add }
+  | F64X2_CEIL; { F64x2 Ceil }
+  | F64X2_EQ; { F64x2 Eq }
+  | F64X2_MIN; { F64x3 Min }
+  | F64X2_PMIN; { F64x2 Pmin }
+  | I16X8_ADD; { I16x8 Add }
+  | I16X8_ADD_SAT_S; { I16x8 Add_sat_s }
+  | I16X8_EQ; { I16x8 Eq }
+  | I16X8_EXTADD_PAIRWISE_I8X16_S; { I16x8 Extadd_pairwise_i8x16_s }
+  | I16X8_EXTEND_HIGH_I8X16_S; { I16x8 Extend_high_i8x16_s }
+  | I16X8_EXTMUL_LOW_I8X16_S; { I16x8 Extmul_low_i8x16_s }
+  | I16X8_MIN; { I16x8 Min }
+  | I16X8_MIN_S; { I16x8 Min_s }
+  | I16X8_Q15MULR_SAT_S; { I16x8 Q15mulr_sat_s }
+  | I32X4_DOT_I16X8_S; { I32x4 Dot_i16x8_s }
+  | I32X4_EQ; { I32x4 Eq }
+  | I32X4_EXTADD_PAIRWISE_I16X8_S; { I32x4 Extadd_pairwise_i16x8_s }
+  | I32X4_EXTMUL_LOW_I16X8_S; { I32x4 Extmul_low_i16x8_s }
+  | I32X4_MIN_S; { I32x4 Min_s }
+  | I32X4_MUL; { I32x4 Mul }
+  | I32X4_TRUNC_SAT_F32X4_S; { I32x4 Trunc_sat_f32x4_s }
+  | I32X4_TRUNC_SAT_F32X4_S_ZERO; { I32x4 Trunc_sat_f32x4_s_zero }
+  | I32X4_TRUNC_SAT_F64X2_S_ZERO; { I32x4 Trunct_sat_f64x2_s_zero }
+  | I64X2_ABS; { I64x2 Abs }
+  | I64X2_EQ; { I64x2 Eq }
+  | I64X2_EXTMUL_LOW_I32X4_S; { I64x2 Extmul_low_i32x4_s }
+  | I64X2_MUL; { I64x2 Mul }
+  | I8X16_ADD; { I8x16 Add }
+  | I8X16_ADD_SAT_S; { I8x16 Add_sat_s }
+  | I8X16_EQ; { I8x16 Eq }
+  | I8X16_EXTRACT_LANE_S; { I8x16 Extract_lane_s }
+  | I8X16_MIN_S; { I8x16 Min_s }
+  | I8X16_SHL; { I8x16 Shl }
+  | I8X16_SPLAT; { I8x16 Splat }
+
   | I32_CLZ; { I32 Clz }
   | I64_CLZ; { I64 Clz }
   | I32_CTZ; { I32 Ctz }

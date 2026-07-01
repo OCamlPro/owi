@@ -740,6 +740,8 @@ type i8x16_instr =
   | Shuffle of int array (* TODO: make this immutable at some point *)
   | Swizzle
   | Splat
+  | Shl
+  | Min_s
 
 let pp_i8x16_instr ppf = function
   | Add -> pf ppf "i8x16.add"
@@ -765,6 +767,8 @@ let pp_i8x16_instr ppf = function
       is
   | Swizzle -> pf ppf "i8x16.swizzle"
   | Splat -> pf ppf "i8x16.splat"
+  | Shl -> pf ppf "i8x16.shl"
+  | Min_s -> pf ppf "i8x16.min_s"
 
 (** I16x8 instructions *)
 type i16x8_instr =

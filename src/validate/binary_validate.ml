@@ -658,6 +658,8 @@ let typecheck_i8x16_instr (env : Env.t) stack = function
     let* stack = Stack.pop env.modul [ v128 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
+  | Shl -> raise @@ Failure "TODO (i8x16.shl)"
+  | Min_s -> raise @@ Failure "TODO (i8x16.min_s)"
 
 let typecheck_i16x8_instr (env : Env.t) stack = function
   | (Add : Text.i16x8_instr) | Sub | Mul | Eq | Ne | Lt _ | Gt _ | Le _ | Ge _

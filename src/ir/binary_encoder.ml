@@ -516,9 +516,11 @@ let write_i8x16_instr buf : Text.i8x16_instr -> _ = function
   | Popcnt -> write_fd buf 0x62
   | All_true -> write_fd buf 0x63
   | Bitmask -> write_fd buf 0x64
-  | Shuffle _ -> raise @@ Failure "TODO"
   | Swizzle -> write_fd buf 0x0E
   | Splat -> write_fd buf 0x0F
+  | Shuffle _ -> raise @@ Failure "TODO (i8x16.shuffle)"
+  | Shl -> raise @@ Failure "TODO (i8x16.shl)"
+  | Min_s -> raise @@ Failure "TODO (i8x16.min_s)"
 
 let write_i16x8_instr buf : Text.i16x8_instr -> _ = function
   | Eq -> write_fd buf 0x2D
