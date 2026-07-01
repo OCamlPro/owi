@@ -616,6 +616,7 @@ type v128_instr =
   | Bitselect
   | Xor
   | Load32x2_s of (indice * memarg)
+  | Load32x2_u of (indice * memarg)
   | Andnot
 
 let pp_v128_instr ppf = function

@@ -771,6 +771,7 @@ type v128_instr =
   | Bitselect
   | Xor
   | Load32x2_s of (indice * memarg)
+  | Load32x2_u of (indice * memarg)
   | Andnot
 
 let pp_v128_instr ppf = function
@@ -831,6 +832,7 @@ type i8x16_instr =
   | Narrow_i16x8_s
   | Narrow_i16x8_u
   | Avgr_u
+  | Replace_lane of int
 
 let pp_i8x16_instr ppf = function
   | Add -> pf ppf "i8x16.add"
@@ -907,6 +909,7 @@ type i16x8_instr =
   | Shr_u
   | Bitmask
   | Avgr_u
+  | Abs
 
 let pp_i16x8_instr ppf = function
   | Add -> pf ppf "i16x8.add"
@@ -971,6 +974,7 @@ type i32x4_instr =
   | Max_s
   | Max_u
   | Abs
+  | All_true
 
 let pp_i32x4_instr ppf = function
   | Add -> pf ppf "i32x4.add"
@@ -1064,6 +1068,7 @@ type f32x4_instr =
   | Div
   | Neg
   | Extract_lane of int
+  | Sqrt
 
 let pp_f32x4_instr _ppf : f32x4_instr -> _ = function _ -> assert false
 
@@ -1092,6 +1097,8 @@ type f64x2_instr =
   | Nearest
   | Div
   | Neg
+  | Sqrt
+  | Splat
 
 let pp_f64x2_instr _ppf : f64x2_instr -> _ = function _ -> assert false
 

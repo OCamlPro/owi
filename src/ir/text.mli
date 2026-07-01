@@ -367,6 +367,7 @@ type v128_instr =
   | Bitselect
   | Xor
   | Load32x2_s of (indice * memarg)
+  | Load32x2_u of (indice * memarg)
   | Andnot
 
 val pp_v128_instr : v128_instr Fmt.t
@@ -409,6 +410,7 @@ type i8x16_instr =
   | Narrow_i16x8_s
   | Narrow_i16x8_u
   | Avgr_u
+  | Replace_lane of int
 
 val pp_i8x16_instr : i8x16_instr Fmt.t
 
@@ -457,6 +459,7 @@ type i16x8_instr =
   | Shr_u
   | Bitmask
   | Avgr_u
+  | Abs
 
 val pp_i16x8_instr : i16x8_instr Fmt.t
 
@@ -504,6 +507,7 @@ type i32x4_instr =
   | Max_s
   | Max_u
   | Abs
+  | All_true
 
 val pp_i32x4_instr : i32x4_instr Fmt.t
 
@@ -560,6 +564,7 @@ type f32x4_instr =
   | Div
   | Neg
   | Extract_lane of int
+  | Sqrt
 
 val pp_f32x4_instr : f32x4_instr Fmt.t
 
@@ -588,6 +593,8 @@ type f64x2_instr =
   | Nearest
   | Div
   | Neg
+  | Sqrt
+  | Splat
 
 val pp_f64x2_instr : f64x2_instr Fmt.t
 
