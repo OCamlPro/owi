@@ -291,6 +291,8 @@ type v128_instr =
   | Store16_lane of (indice * memarg * int)
   | Bitselect
   | Xor
+  | Load32x2_s of (indice * memarg)
+  | Andnot
 
 val pp_v128_instr : v128_instr Fmt.t
 

@@ -615,6 +615,8 @@ type v128_instr =
   | Store16_lane of (indice * memarg * int)
   | Bitselect
   | Xor
+  | Load32x2_s of (indice * memarg)
+  | Andnot
 
 let pp_v128_instr ppf = function
   | Const n -> pf ppf "v128.const %a" Concrete_v128.pp n
