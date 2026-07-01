@@ -460,6 +460,8 @@ type i16x8_instr =
   | Bitmask
   | Avgr_u
   | Abs
+  | Replace_lane of int
+  | Narrow_i32x4_s
 
 val pp_i16x8_instr : i16x8_instr Fmt.t
 
@@ -508,6 +510,7 @@ type i32x4_instr =
   | Max_u
   | Abs
   | All_true
+  | Bitmask
 
 val pp_i32x4_instr : i32x4_instr Fmt.t
 
@@ -595,6 +598,7 @@ type f64x2_instr =
   | Neg
   | Sqrt
   | Splat
+  | Extract_lane of int
 
 val pp_f64x2_instr : f64x2_instr Fmt.t
 
