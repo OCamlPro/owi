@@ -849,6 +849,8 @@ struct
     | Le _ -> raise @@ Failure "TODO (i8x16.le)"
     | Ge _ -> raise @@ Failure "TODO (i8x16.ge)"
     | Shuffle _ -> raise @@ Failure "TODO (i8x16.shuffle)"
+    | Shl -> raise @@ Failure "TODO (i8x16.shl)"
+    | Min_s -> raise @@ Failure "TODO (i8x16.min_s)"
 
   let exec_i16x8_instr stack : Text.i16x8_instr -> _ Choice.t = function
     | Add -> Stack.apply_v128_v128_v128 stack V128.I16x8.add |> Choice.return

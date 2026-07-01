@@ -350,6 +350,8 @@ type i8x16_instr =
   | Shuffle of int array (* TODO: make this immutable at some point *)
   | Swizzle
   | Splat
+  | Shl
+  | Min_s
 
 val pp_i8x16_instr : i8x16_instr Fmt.t
 
