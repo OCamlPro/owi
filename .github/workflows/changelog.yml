@@ -4,6 +4,9 @@ on:
     types: [assigned, opened, synchronize, reopened, labeled, unlabeled]
     branches:
       - main
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   check-changelog:
     name: check-changelog

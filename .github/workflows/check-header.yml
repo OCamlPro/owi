@@ -1,10 +1,11 @@
 name: check-copyright-headers
-
 on:
   pull_request:
     branches:
       - main
-
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   license-check:
     name: Check license headers on new files
