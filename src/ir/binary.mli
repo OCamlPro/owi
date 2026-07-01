@@ -242,12 +242,23 @@ type v128_instr =
   | And
   | Or
   | Any_true
+  | Load8_splat of (indice * memarg)
+  | Load8_lane of (indice * memarg * int)
+  | Load8x8_s of (indice * memarg)
+  | Load16_lane of (indice * memarg * int)
   | Load16x4_s of (indice * memarg)
   | Load16x4_u of (indice * memarg)
   | Load32_lane of (indice * memarg * int)
+  | Load32_zero of (indice * memarg)
+  | Load64_lane of (indice * memarg * int)
   | Load64_zero of (indice * memarg)
   | Load of (indice * memarg)
   | Store of (indice * memarg)
+  | Store8_lane of (indice * memarg * int)
+  | Store64_lane of (indice * memarg * int)
+  | Store32_zero of (indice * memarg)
+  | Store32_lane of (indice * memarg * int)
+  | Store16_lane of (indice * memarg * int)
 
 val pp_v128_instr : v128_instr Fmt.t
 
@@ -333,6 +344,8 @@ type instr =
   | I16x8 of Text.i16x8_instr
   | I32x4 of Text.i32x4_instr
   | I64x2 of Text.i64x2_instr
+  | F32x4 of Text.f32x4_instr
+  | F64x2 of Text.f64x2_instr
   | Ref of ref_instr
   | Local of local_instr
   | Global of global_instr

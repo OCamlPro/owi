@@ -632,6 +632,7 @@ let typecheck_v128_instr (env : Env.t) stack : Binary.v128_instr -> _ = function
     let* () = check_memarg ~is_i64 memarg 16l in
     let+ stack = Stack.pop env.modul [ v128; i32 ] stack in
     (env, stack)
+  | _ -> assert false
 
 let typecheck_i8x16_instr (env : Env.t) stack = function
   | (Add : Text.i8x16_instr)
@@ -660,6 +661,9 @@ let typecheck_i8x16_instr (env : Env.t) stack = function
     (env, stack)
   | Shl -> raise @@ Failure "TODO (i8x16.shl)"
   | Min_s -> raise @@ Failure "TODO (i8x16.min_s)"
+  | Extract_lane_s _lane_index -> raise @@ Failure "TODO (i8x16.extract_lane_s)"
+  | Add_sat_s -> raise @@ Failure "TODO (i8x16.add_sat_s)"
+  | _ -> .
 
 let typecheck_i16x8_instr (env : Env.t) stack = function
   | (Add : Text.i16x8_instr) | Sub | Mul | Eq | Ne | Lt _ | Gt _ | Le _ | Ge _
@@ -677,6 +681,7 @@ let typecheck_i16x8_instr (env : Env.t) stack = function
     let* stack = Stack.pop env.modul [ i32 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
+  | _ -> assert false
 
 let typecheck_i32x4_instr (env : Env.t) stack = function
   | (Add : Text.i32x4_instr) | Sub | Mul | Lt _ | Gt _ | Le _ | Ge _ | Eq | Ne
@@ -709,6 +714,7 @@ let typecheck_i32x4_instr (env : Env.t) stack = function
     let* stack = Stack.pop env.modul [ v128 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
+  | _ -> assert false
 
 let typecheck_i64x2_instr (env : Env.t) stack = function
   | (Add : Text.i64x2_instr) | Sub | Mul | Eq | Ne | Lt_s | Gt_s | Le_s | Ge_s
@@ -724,6 +730,15 @@ let typecheck_i64x2_instr (env : Env.t) stack = function
     let* stack = Stack.pop env.modul [ v128 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
+  | _ -> assert false
+
+let typecheck_f32x4_instr (_env : Env.t) _stack : Text.f32x4_instr -> _ =
+  function
+  | _ -> assert false
+
+let typecheck_f64x2_instr (_env : Env.t) _stack : Text.f64x2_instr -> _ =
+  function
+  | _ -> assert false
 
 let typecheck_ref_instr (env : Env.t) stack = function
   | Is_null ->
@@ -891,6 +906,8 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
   | I16x8 i -> typecheck_i16x8_instr env stack i
   | I32x4 i -> typecheck_i32x4_instr env stack i
   | I64x2 i -> typecheck_i64x2_instr env stack i
+  | F32x4 i -> typecheck_f32x4_instr env stack i
+  | F64x2 i -> typecheck_f64x2_instr env stack i
   | Ref i -> typecheck_ref_instr env stack i
   | Local i -> typecheck_local_instr env stack i
   | Global i -> typecheck_global_instr env stack i

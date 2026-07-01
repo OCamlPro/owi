@@ -468,12 +468,23 @@ module Text : sig
     | And
     | Or
     | Any_true
+    | Load8_splat of (indice * memarg)
+    | Load8_lane of (indice * memarg * int)
+    | Load8x8_s of (indice * memarg)
+    | Load16_lane of (indice * memarg * int)
     | Load16x4_s of (indice * memarg)
     | Load16x4_u of (indice * memarg)
     | Load32_lane of (indice * memarg * int)
+    | Load32_zero of (indice * memarg)
+    | Load64_lane of (indice * memarg * int)
     | Load64_zero of (indice * memarg)
     | Load of (indice * memarg)
     | Store of (indice * memarg)
+    | Store8_lane of (indice * memarg * int)
+    | Store64_lane of (indice * memarg * int)
+    | Store32_zero of (indice * memarg)
+    | Store32_lane of (indice * memarg * int)
+    | Store16_lane of (indice * memarg * int)
 
   (** I8x16 instructions *)
   type i8x16_instr =
@@ -495,6 +506,8 @@ module Text : sig
     | Splat
     | Shl
     | Min_s
+    | Extract_lane_s of int
+    | Add_sat_s
 
   (** I16x8 instructions *)
   type i16x8_instr =
@@ -510,6 +523,13 @@ module Text : sig
     | Splat
     | Extract_lane_s of int
     | Extract_lane_u of int
+    | Q15mulr_sat_s
+    | Min_s
+    | Min
+    | Extmul_low_i8x16_s
+    | Extend_high_i8x16_s
+    | Extadd_pairwise_i8x16_s
+    | Add_sat_s
 
   (* I32x4 instructions *)
   type i32x4_instr =
@@ -531,6 +551,13 @@ module Text : sig
     | Extend_high_i16x8_s
     | Extend_low_i16x8_u
     | Extend_high_i16x8_u
+    | Trunc_sat_f64x2_s_zero
+    | Trunc_sat_f32x4_s_zero
+    | Trunc_sat_f32x4_s
+    | Min_s
+    | Extmul_low_i16x8_s
+    | Extadd_pairwise_i16x8_s
+    | Dot_i16x8_s
 
   (** I64x2 instructions *)
   type i64x2_instr =
@@ -545,6 +572,27 @@ module Text : sig
     | Ge_s
     | Splat
     | Extend_low_i32x4 of sx
+    | Extmul_low_i32x4_s
+    | Abs
+
+  type f32x4_instr =
+    | Pmin
+    | Min
+    | Eq
+    | Convert_i32x4_s
+    | Ceil
+    | Add
+
+  val pp_f32x4_instr : f32x4_instr Fmt.t
+
+  type f64x2_instr =
+    | Pmin
+    | Min
+    | Eq
+    | Ceil
+    | Add
+
+  val pp_f64x2_instr : f64x2_instr Fmt.t
 
   (** Reference instructions *)
   type ref_instr =
@@ -633,6 +681,8 @@ module Text : sig
     | I16x8 of i16x8_instr
     | I32x4 of i32x4_instr
     | I64x2 of i64x2_instr
+    | F32x4 of f32x4_instr
+    | F64x2 of f64x2_instr
     | Ref of ref_instr
     | Local of local_instr
     | Global of global_instr
@@ -1046,12 +1096,23 @@ module Binary : sig
     | And
     | Or
     | Any_true
+    | Load8_splat of (indice * memarg)
+    | Load8_lane of (indice * memarg * int)
+    | Load8x8_s of (indice * memarg)
+    | Load16_lane of (indice * memarg * int)
     | Load16x4_s of (indice * memarg)
     | Load16x4_u of (indice * memarg)
     | Load32_lane of (indice * memarg * int)
+    | Load32_zero of (indice * memarg)
+    | Load64_lane of (indice * memarg * int)
     | Load64_zero of (indice * memarg)
     | Load of (indice * memarg)
     | Store of (indice * memarg)
+    | Store8_lane of (indice * memarg * int)
+    | Store64_lane of (indice * memarg * int)
+    | Store32_zero of (indice * memarg)
+    | Store32_lane of (indice * memarg * int)
+    | Store16_lane of (indice * memarg * int)
 
   (** Reference instructions *)
   type ref_instr =
@@ -1135,6 +1196,8 @@ module Binary : sig
     | I16x8 of Text.i16x8_instr
     | I32x4 of Text.i32x4_instr
     | I64x2 of Text.i64x2_instr
+    | F32x4 of Text.f32x4_instr
+    | F64x2 of Text.f64x2_instr
     | Ref of ref_instr
     | Local of local_instr
     | Global of global_instr

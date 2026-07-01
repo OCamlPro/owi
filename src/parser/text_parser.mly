@@ -380,21 +380,21 @@ let plain_instr :=
   | n = v128_const; { V128 (Const n) }
 
   | V128_ANY_TRUE; { V128 Any_true }
-  | V128_LOAD; { V128 Load }
-  | V128_LOAD16_LANE; { V128 Load16_lane }
-  | V128_LOAD32_LANE; { V128 Load32_lane }
-  | V128_LOAD32_ZERO; { V128 Load32_zero }
-  | V128_LOAD64_LANE; { V128 Load64_lane }
-  | V128_LOAD8X8_S; { V128 Load8x8_s }
-  | V128_LOAD8_LANE; { V128 Load8_lane }
-  | V128_LOAD8_SPLAT; { V128 Load8_splat }
+  | V128_LOAD; ~ = memidx; ~ = memarg;  { V128 (Load(memidx, memarg)) }
+  | V128_LOAD16_LANE; ~ = memidx; ~ = memarg; n = NUM;  { V128 (Load16_lane (memidx, memarg, (int_of_string n)))}
+  | V128_LOAD32_LANE; ~ = memidx; ~ = memarg; n = NUM;  { V128 (Load32_lane (memidx, memarg, (int_of_string n)))}
+  | V128_LOAD32_ZERO; ~ = memidx; ~ = memarg;  { V128 (Load32_zero (memidx, memarg))}
+  | V128_LOAD64_LANE; ~ = memidx; ~ = memarg; n = NUM;  { V128 (Load64_lane (memidx, memarg, (int_of_string n)))}
+  | V128_LOAD8X8_S; ~ = memidx; ~ = memarg;  { V128 (Load8x8_s (memidx, memarg))}
+  | V128_LOAD8_LANE; ~ = memidx; ~ = memarg; n = NUM;  { V128 (Load8_lane (memidx, memarg, (int_of_string n)))}
+  | V128_LOAD8_SPLAT; ~ = memidx; ~ = memarg;  { V128 (Load8_splat (memidx, memarg))}
   | V128_NOT; { V128 Not }
-  | V128_STORE; { V128 Store }
-  | V128_STORE16_LANE; { V128 Store16_lane }
-  | V128_STORE32_LANE; { V128 Store32_lane }
-  | V128_STORE32_ZERO; { V128 Store32_zero }
-  | V128_STORE64_LANE; { V128 Store64_lane }
-  | V128_STORE8_LANE; { V128 Store8_lane }
+  | V128_STORE; ~ = memidx; ~ = memarg; { V128 (Store(memidx, memarg)) }
+  | V128_STORE16_LANE; ~ = memidx; ~ = memarg; n = NUM; { V128 (Store16_lane(memidx, memarg, (int_of_string n))) }
+  | V128_STORE32_LANE; ~ = memidx; ~ = memarg; n = NUM; { V128 (Store32_lane(memidx, memarg, (int_of_string n))) }
+  | V128_STORE32_ZERO; ~ = memidx; ~ = memarg; { V128 (Store32_zero(memidx, memarg)) }
+  | V128_STORE64_LANE; ~ = memidx; ~ = memarg; n = NUM; { V128 (Store64_lane(memidx, memarg, (int_of_string n))) }
+  | V128_STORE8_LANE; ~ = memidx; ~ = memarg; n = NUM; { V128 (Store8_lane(memidx, memarg, (int_of_string n))) }
   | F32X4_ADD; { F32x4 Add }
   | F32X4_CEIL; { F32x4 Ceil }
   | F32X4_CONVERT_I32X4_S; { F32x4 Convert_i32x4_s }
@@ -404,7 +404,7 @@ let plain_instr :=
   | F64X2_ADD; { F64x2 Add }
   | F64X2_CEIL; { F64x2 Ceil }
   | F64X2_EQ; { F64x2 Eq }
-  | F64X2_MIN; { F64x3 Min }
+  | F64X2_MIN; { F64x2 Min }
   | F64X2_PMIN; { F64x2 Pmin }
   | I16X8_ADD; { I16x8 Add }
   | I16X8_ADD_SAT_S; { I16x8 Add_sat_s }
@@ -423,7 +423,7 @@ let plain_instr :=
   | I32X4_MUL; { I32x4 Mul }
   | I32X4_TRUNC_SAT_F32X4_S; { I32x4 Trunc_sat_f32x4_s }
   | I32X4_TRUNC_SAT_F32X4_S_ZERO; { I32x4 Trunc_sat_f32x4_s_zero }
-  | I32X4_TRUNC_SAT_F64X2_S_ZERO; { I32x4 Trunct_sat_f64x2_s_zero }
+  | I32X4_TRUNC_SAT_F64X2_S_ZERO; { I32x4 Trunc_sat_f64x2_s_zero }
   | I64X2_ABS; { I64x2 Abs }
   | I64X2_EQ; { I64x2 Eq }
   | I64X2_EXTMUL_LOW_I32X4_S; { I64x2 Extmul_low_i32x4_s }
@@ -431,7 +431,7 @@ let plain_instr :=
   | I8X16_ADD; { I8x16 Add }
   | I8X16_ADD_SAT_S; { I8x16 Add_sat_s }
   | I8X16_EQ; { I8x16 Eq }
-  | I8X16_EXTRACT_LANE_S; { I8x16 Extract_lane_s }
+  | I8X16_EXTRACT_LANE_S; n = NUM; { I8x16 (Extract_lane_s (int_of_string n)) }
   | I8X16_MIN_S; { I8x16 Min_s }
   | I8X16_SHL; { I8x16 Shl }
   | I8X16_SPLAT; { I8x16 Splat }
