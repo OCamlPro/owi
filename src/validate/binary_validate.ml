@@ -663,7 +663,7 @@ let typecheck_i8x16_instr (env : Env.t) stack = function
   | Min_s -> raise @@ Failure "TODO (i8x16.min_s)"
   | Extract_lane_s _lane_index -> raise @@ Failure "TODO (i8x16.extract_lane_s)"
   | Add_sat_s -> raise @@ Failure "TODO (i8x16.add_sat_s)"
-  | _ -> .
+  | _ -> assert false
 
 let typecheck_i16x8_instr (env : Env.t) stack = function
   | (Add : Text.i16x8_instr) | Sub | Mul | Eq | Ne | Lt _ | Gt _ | Le _ | Ge _

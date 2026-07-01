@@ -72,6 +72,39 @@
  V128_LOAD16_SPLAT
  V128_LOAD64_ZERO
  I16X8_SPLAT
+ V128_LOAD16X4_S
+ I8X16_SHR_U
+ V128_OR
+ I8X16_BITMASK
+ F64X2_CONVERT_LOW_I32X4_S
+ F32X4_MUL
+ F32X4_LT
+ F32X4_TRUNC
+ F32X4_ABS
+ F64X2_MUL
+ F64X2_LT
+ F64X2_TRUNC
+ F64X2_ABS
+ I16X8_MAX_S
+ I16X8_MUL
+ I16X8_LT_S
+ I16X8_EXTMUL_LOW_I8X16_U
+ I16X8_SUB_SAT_S
+ I32X4_MAX_S
+ I32X4_LT_S
+ I32X4_EXTMUL_LOW_I16X8_U
+ I64X2_LT_S
+ I64X2_EXTMUL_LOW_I32X4_U
+ I8X16_MAX_S
+ I8X16_NEG
+ I8X16_LT_S
+ I8X16_SUB_SAT_S
+ I16X8_EXTEND_LOW_I8X16_S
+ I16X8_EXTRACT_LANE_S
+ V128_LOAD32_SPLAT
+ V128_BITSELECT
+ I32X4_EXTRACT_LANE
+ I32X4_SPLAT
 
 %{
 
@@ -517,6 +550,40 @@ let plain_instr :=
   | V128_LOAD16_SPLAT; ~ = memidx; ~ = memarg; { V128 (Load16_splat (memidx, memarg)) }
   | V128_LOAD64_ZERO; ~ = memidx; ~ = memarg; { V128 (Load64_zero (memidx, memarg)) }
   | I16X8_SPLAT; { I16x8 Splat }
+
+  | V128_LOAD16X4_S; ~ = memidx; ~ = memarg; { V128 (Load16x4_s (memidx, memarg)) }
+  | I8X16_SHR_U; { I8x16 Shr_u }
+  | V128_OR; { V128 Or }
+  | I8X16_BITMASK; { I8x16 Bitmask }
+  | F64X2_CONVERT_LOW_I32X4_S; { F64x2 Convert_low_i32x4_s }
+  | F32X4_MUL; { F32x4 Mul }
+  | F32X4_LT; { F32x4 Lt }
+  | F32X4_TRUNC; { F32x4 Trunc }
+  | F32X4_ABS; { F32x4 Abs }
+  | F64X2_MUL; { F64x2 Mul }
+  | F64X2_LT; { F64x2 Lt }
+  | F64X2_TRUNC; { F64x2 Trunc }
+  | F64X2_ABS; { F64x2 Abs }
+  | I16X8_MAX_S; { I16x8 Max_s }
+  | I16X8_MUL; { I16x8 Mul }
+  | I16X8_LT_S; { I16x8 Lt_s }
+  | I16X8_EXTMUL_LOW_I8X16_U; { I16x8 Extmul_low_i8x16_u }
+  | I16X8_SUB_SAT_S; { I16x8 Sub_sat_s }
+  | I32X4_MAX_S; { I32x4 Max_s }
+  | I32X4_LT_S; { I32x4 Lt_s }
+  | I32X4_EXTMUL_LOW_I16X8_U; { I32x4 Extmul_low_i16x8_u }
+  | I64X2_LT_S; { I64x2 Lt_s }
+  | I64X2_EXTMUL_LOW_I32X4_U; { I64x2 Extmul_low_i32x4_u }
+  | I8X16_MAX_S; { I8x16 Max_s }
+  | I8X16_NEG; { I8x16 Neg }
+  | I8X16_LT_S; { I8x16 Lt_s }
+  | I8X16_SUB_SAT_S; { I8x16 Sub_sat_s }
+  | I16X8_EXTEND_LOW_I8X16_S; { I16x8 Extend_low_i8x16_s }
+  | I16X8_EXTRACT_LANE_S; n = NUM; { I16x8 (Extract_lane_s (int_of_string n)) }
+  | V128_LOAD32_SPLAT; ~ = memidx; ~ = memarg; { V128 (Load32_splat (memidx, memarg)) }
+  | V128_BITSELECT; { V128 Bitselect }
+  | I32X4_EXTRACT_LANE; n = NUM; { I32x4 (Extract_lane (int_of_string n)) }
+  | I32X4_SPLAT; { I32x4 Splat }
 
   | I32_CLZ; { I32 Clz }
   | I64_CLZ; { I64 Clz }

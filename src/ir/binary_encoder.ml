@@ -524,7 +524,7 @@ let write_i8x16_instr buf : Text.i8x16_instr -> _ = function
   | Min_s -> raise @@ Failure "TODO (i8x16.min_s)"
   | Extract_lane_s _lane_index -> raise @@ Failure "TODO (i8x16.extract_lane_s)"
   | Add_sat_s -> raise @@ Failure "TODO (i8x16.add_sat_s)"
-  | _ -> .
+  | _ -> assert false
 
 let write_i16x8_instr buf : Text.i16x8_instr -> _ = function
   | Eq -> write_fd buf 0x2D

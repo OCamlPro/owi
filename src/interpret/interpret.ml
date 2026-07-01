@@ -855,7 +855,7 @@ struct
     | Extract_lane_s _lane_index ->
       raise @@ Failure "TODO (i8x16.extract_lane_s)"
     | Add_sat_s -> raise @@ Failure "TODO (i8x16.add_sat_s)"
-    | _ -> .
+    | _ -> assert false
 
   let exec_i16x8_instr stack : Text.i16x8_instr -> _ Choice.t = function
     | Add -> Stack.apply_v128_v128_v128 stack V128.I16x8.add |> Choice.return

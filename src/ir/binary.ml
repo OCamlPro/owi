@@ -546,6 +546,8 @@ type v128_instr =
   | Load8_splat of (indice * memarg)
   | Load8_lane of (indice * memarg * int)
   | Load8x8_s of (indice * memarg)
+  | Load8x8_u of (indice * memarg)
+  | Load16_splat of (indice * memarg)
   | Load16_lane of (indice * memarg * int)
   | Load16x4_s of (indice * memarg)
   | Load16x4_u of (indice * memarg)
@@ -560,6 +562,7 @@ type v128_instr =
   | Store32_zero of (indice * memarg)
   | Store32_lane of (indice * memarg * int)
   | Store16_lane of (indice * memarg * int)
+  | Bitselect
 
 let pp_v128_instr ppf = function
   | Const n -> pf ppf "v128.const %a" Concrete_v128.pp n
