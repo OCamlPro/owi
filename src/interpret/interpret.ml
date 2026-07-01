@@ -916,10 +916,7 @@ struct
       Stack.push_bool stack is_null |> Choice.return
     | As_non_null ->
       let r, stack = Stack.pop_as_ref stack in
-      if Ref.is_null r then
-        Choice.trap
-          (`Type_mismatch
-             "ref.as_non_null expected a non-null reference but got null" )
+      if Ref.is_null r then Choice.trap (`Msg "null reference")
       else Stack.push_ref stack r |> Choice.return
     (* TODO: restrict to non_null refs *)
     | Func i ->
@@ -1401,7 +1398,7 @@ struct
 
   let call_ref ~return:_ (_state : State.exec_state) _typ_i =
     (* TODO *)
-    Fmt.failwith "TODO: uninmplemented `call_ref`"
+    Fmt.failwith "TODO: unimplemented `call_ref`"
   (* let fun_ref, stack = Stack.pop_as_ref state.stack in *)
   (* let state = { state with stack } in *)
   (* let func = *)
@@ -1715,9 +1712,8 @@ struct
           | Init_data (_, _)
           | Init_elem (_, _) )
       | Any_convert_extern | Extern_convert_any ) as i ->
-      Log.err (fun m ->
-        m "unimplemented instruction: %a" (pp_instr ~short:false) i );
-      assert false
+      Fmt.failwith "TODO: unimplemented instruction interpretation: %a"
+        (pp_instr ~short:false) i
 
   let rec loop ~heartbeat (state : State.exec_state) =
     let* () =

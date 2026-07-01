@@ -69,12 +69,40 @@ module Env = struct
     ; refs : (int, unit) Hashtbl.t
     }
 
+  let type_get_sub i m =
+    match Module.get_type i m with
+    | None -> Error (`Unknown_type (Text.Raw i))
+    | Some sub -> Ok sub
+
   let type_get i m =
     match Module.get_type i m with
     | None -> Error (`Unknown_type (Text.Raw i))
-    | Some (SimpleType (_, { ct = Def_func_t ty; _ })) -> Ok ty
-    | Some ty ->
-      Fmt.failwith "type_get: unimplemented for type: %a" Typedef.pp ty
+    | Some { ct = Def_func_t ty; _ } -> Ok ty
+    | Some _ ->
+      Error
+        (`Type_mismatch
+           (Fmt.str "expected a simple function type at index %d" i) )
+
+  let type_get_struct i m =
+    match Module.get_type i m with
+    | None -> Error (`Unknown_type (Text.Raw i))
+    | Some { ct = Def_struct_t fields; _ } -> Ok fields
+    | Some _ ->
+      Error
+        (`Type_mismatch (Fmt.str "expected a simple struct type at index %d" i))
+
+  let get_struct_field fields fid =
+    match List.nth_opt fields fid with
+    | None -> Error (`Type_mismatch (Fmt.str "field index %d out of bounds" fid))
+    | Some (_, ft) -> Ok ft
+
+  let type_get_array i m =
+    match Module.get_type i m with
+    | None -> Error (`Unknown_type (Text.Raw i))
+    | Some { ct = Def_array_t ft; _ } -> Ok ft
+    | Some _ ->
+      Error
+        (`Type_mismatch (Fmt.str "expected a simple array type at index %d" i))
 
   let local_get i env =
     match Index.Map.find_opt i env.locals with
@@ -160,6 +188,20 @@ let itype = function Text.S32 -> i32 | S64 -> i64
 
 let ftype = function Text.S32 -> f32 | S64 -> f64
 
+let unpack_storage_type st =
+  match st with Val_type vt -> typ_of_val_type vt | Pack_type _ -> i32
+
+let is_subtype_storage_type src dst =
+  match (src, dst) with
+  | Pack_type I8, Pack_type I8 | Pack_type I16, Pack_type I16 -> true
+  | Val_type v1, Val_type v2 -> is_subtype_val_type v1 v2
+  | _ -> false
+
+(* https://webassembly.github.io/gc/core/valid/types.html#id2 *)
+let is_defaultable : storage_type -> bool = function
+  | Val_type (Ref_type (No_null, _)) -> false
+  | _ -> true
+
 (* TODO: Maybe add the type id to Bt_raw to avoid having to look it this way? *)
 let get_func_type_id (env : Env.t) i =
   let typ =
@@ -170,13 +212,10 @@ let get_func_type_id (env : Env.t) i =
   Array.find_index
     (fun typ' ->
       match typ' with
-      | Typedef.SimpleType (_, { final = true; ids = []; ct = Def_func_t typ' })
-        ->
+      | Typedef.SimpleType (_, { ct = Def_func_t typ'; _ }) ->
         func_type_eq typ typ'
-      | ty ->
-        Fmt.failwith "get_func_type_id: unimplemented for type: %a" Typedef.pp
-          ty )
-    env.modul.types
+      | Typedef.SimpleType _ | Typedef.RecType _ -> false )
+    env.modul.type_defs
 
 (* TODO: move type matching functions outside of the stack module? *)
 module Stack : sig
@@ -228,42 +267,64 @@ end = struct
     | V128, V128 -> Ok true
     | _, _ -> Ok false
 
-  (* TODO: replace this by a comparison function, that returns 0 if the types
-     are equal, and -1 if typ1 is a subtype of typ2, 1 otherwise *)
+  let rec is_typeuse_subtype modul ~expected ~got =
+    if Int.equal got expected then true
+    else
+      match Env.type_get_sub got modul with
+      | Error _ -> false
+      | Ok { ids; _ } ->
+        List.exists (Int.equal expected) ids
+        || List.exists
+             (fun super_id ->
+               (not (Int.equal super_id got))
+               && is_typeuse_subtype modul ~expected ~got:super_id )
+             ids
+
   let match_heap_type ?(subtype = false) modul ~expected ~got =
     match (got, expected) with
     | Func_ht, Func_ht
     | Extern_ht, Extern_ht
     | Any_ht, Any_ht
+    | Eq_ht, Eq_ht
+    | I31_ht, I31_ht
+    | Struct_ht, Struct_ht
+    | Array_ht, Array_ht
     | None_ht, None_ht
     | NoFunc_ht, NoFunc_ht
     | Exn_ht, Exn_ht
     | NoExn_ht, NoExn_ht
     | NoExtern_ht, NoExtern_ht ->
       Ok true
-    | TypeUse id1, TypeUse id2 ->
-      (* TODO: add subtyping check *)
-      let* pt1, rt1 = Env.type_get id1 modul in
-      let* pt2, rt2 = Env.type_get id2 modul in
-      let res =
-        List.compare_lengths pt1 pt2 = 0
-        && List.compare_lengths rt1 rt2 = 0
-        && List.for_all2 (fun (_, t1) (_, t2) -> val_type_eq t1 t2) pt1 pt2
-        && List.for_all2 val_type_eq rt1 rt2
-      in
-      Ok res
-    (* TODO: proper subtype checking *)
-    | TypeUse _, Func_ht
+    | TypeUse got, TypeUse expected ->
+      Ok (is_typeuse_subtype modul ~expected ~got)
+    | TypeUse id, Func_ht ->
+      begin match Env.type_get_sub id modul with
+      | Ok { ct = Def_func_t _; _ } -> Ok true
+      | _ -> Ok false
+      end
+    | TypeUse id, Struct_ht when subtype ->
+      begin match Env.type_get_sub id modul with
+      | Ok { ct = Def_struct_t _; _ } -> Ok true
+      | _ -> Ok false
+      end
+    | TypeUse id, Array_ht when subtype ->
+      begin match Env.type_get_sub id modul with
+      | Ok { ct = Def_array_t _; _ } -> Ok true
+      | _ -> Ok false
+      end
+    | TypeUse id, (Eq_ht | Any_ht) when subtype ->
+      begin match Env.type_get_sub id modul with
+      | Ok { ct = Def_struct_t _ | Def_array_t _; _ } -> Ok true
+      | _ -> Ok false
+      end
     | NoFunc_ht, (TypeUse _ | Func_ht)
+    | None_ht, (I31_ht | Struct_ht | Array_ht | Eq_ht | Any_ht)
+    | (I31_ht | Struct_ht | Array_ht), (Eq_ht | Any_ht)
+    | Eq_ht, Any_ht
     | NoExn_ht, Exn_ht
     | NoExtern_ht, Extern_ht
-    | None_ht, Any_ht
       when subtype ->
       Ok true
-    | TypeUse id, Func_ht ->
-      (* TODO: not ideal *)
-      let* pt1, rt1 = Env.type_get id modul in
-      if List.is_empty pt1 && List.is_empty rt1 then Ok true else Ok false
     | _ -> Ok false
 
   let match_ref_type ?(subtype = false) modul ~expected ~got =
@@ -748,11 +809,22 @@ let typecheck_ref_instr (env : Env.t) stack = function
         let+ stack = Stack.push [ Ref_type (Text.No_null, TypeUse id) ] stack in
         (env, stack)
       end
-  | (Eq | Test _ | Cast _) as r ->
-    Log.err (fun m ->
-      m "TODO: unimplemented instruction typecheking %a" (pp_instr ~short:false)
-        (Ref r) );
-    assert false
+  | Eq ->
+    let* stack =
+      Stack.pop env.modul
+        [ Ref_type (Null, Eq_ht); Ref_type (Null, Eq_ht) ]
+        stack
+    in
+    let+ stack = Stack.push [ i32 ] stack in
+    (env, stack)
+  | Test _rt ->
+    let* _t, stack = Stack.pop_ref stack in
+    let+ stack = Stack.push [ i32 ] stack in
+    (env, stack)
+  | Cast rt ->
+    let* _t, stack = Stack.pop_ref stack in
+    let+ stack = Stack.push [ Ref_type rt ] stack in
+    (env, stack)
 
 let typecheck_local_instr env stack : Binary.local_instr -> _ = function
   | Get i ->
@@ -872,6 +944,262 @@ let typecheck_memory_instr (env : Env.t) stack = function
 let typecheck_data_instr (env : Env.t) stack : Binary.data_instr -> _ = function
   | Drop id ->
     let+ () = check_data env.modul id in
+    (env, stack)
+
+let typecheck_i31_instr (env : Env.t) stack : Text.i31_instr -> _ = function
+  | Ref ->
+    let* stack = Stack.pop env.modul [ i32 ] stack in
+    let+ stack = Stack.push [ Ref_type (No_null, I31_ht) ] stack in
+    (env, stack)
+  | Get_s | Get_u ->
+    let* stack = Stack.pop env.modul [ Ref_type (Null, I31_ht) ] stack in
+    let+ stack = Stack.push [ i32 ] stack in
+    (env, stack)
+
+let typecheck_struct_instr (env : Env.t) stack : Binary.struct_instr -> _ =
+  function
+  | New id ->
+    let* fields = Env.type_get_struct id env.modul in
+    let field_typs =
+      List.rev_map (fun (_, (_, st)) -> unpack_storage_type st) fields
+    in
+    let* stack = Stack.pop env.modul field_typs stack in
+    let+ stack = Stack.push [ Ref_type (No_null, TypeUse id) ] stack in
+    (env, stack)
+  | New_default id ->
+    let* fields = Env.type_get_struct id env.modul in
+    let* () =
+      if List.for_all (fun (_, (_, st)) -> is_defaultable st) fields then Ok ()
+      else
+        Error
+          (`Type_mismatch
+             "struct.new_default: all field types must be defaultable" )
+    in
+    let+ stack = Stack.push [ Ref_type (No_null, TypeUse id) ] stack in
+    (env, stack)
+  | Get (id, fid) ->
+    let* fields = Env.type_get_struct id env.modul in
+    let* _, st = Env.get_struct_field fields fid in
+    let* push_ty =
+      match st with
+      | Val_type vt -> Ok (typ_of_val_type vt)
+      | Pack_type _ ->
+        Error
+          (`Type_mismatch
+             "struct.get: packed field, use struct.get_s or struct.get_u" )
+    in
+    let* stack = Stack.pop env.modul [ Ref_type (Null, TypeUse id) ] stack in
+    let+ stack = Stack.push [ push_ty ] stack in
+    (env, stack)
+  | Get_s (id, fid) | Get_u (id, fid) ->
+    let* fields = Env.type_get_struct id env.modul in
+    let* _, st = Env.get_struct_field fields fid in
+    let* () =
+      match st with
+      | Pack_type _ -> Ok ()
+      | Val_type _ ->
+        Error (`Type_mismatch "struct.get_s/u: field must be a packed type")
+    in
+    let* stack = Stack.pop env.modul [ Ref_type (Null, TypeUse id) ] stack in
+    let+ stack = Stack.push [ i32 ] stack in
+    (env, stack)
+  | Set (id, fid) ->
+    let* fields = Env.type_get_struct id env.modul in
+    let* mut, st = Env.get_struct_field fields fid in
+    let* () =
+      match mut with
+      | Var -> Ok ()
+      | Const -> Error (`Type_mismatch "struct.set: field is not mutable")
+    in
+    let val_ty = unpack_storage_type st in
+    let+ stack =
+      Stack.pop env.modul [ val_ty; Ref_type (Null, TypeUse id) ] stack
+    in
+    (env, stack)
+
+let typecheck_array_instr (env : Env.t) stack : Binary.array_instr -> _ =
+  function
+  | New id ->
+    let* _, st = Env.type_get_array id env.modul in
+    let elem_ty = unpack_storage_type st in
+    let* stack = Stack.pop env.modul [ i32; elem_ty ] stack in
+    let+ stack = Stack.push [ Ref_type (No_null, TypeUse id) ] stack in
+    (env, stack)
+  | New_default id ->
+    let* _, st = Env.type_get_array id env.modul in
+    let* () =
+      if is_defaultable st then Ok ()
+      else
+        Error
+          (`Type_mismatch "array.new_default: element type must be defaultable")
+    in
+    let* stack = Stack.pop env.modul [ i32 ] stack in
+    let+ stack = Stack.push [ Ref_type (No_null, TypeUse id) ] stack in
+    (env, stack)
+  | New_fixed (id, n) ->
+    let* _, st = Env.type_get_array id env.modul in
+    let elem_ty = unpack_storage_type st in
+    let n = Int32.to_int n in
+    let* stack = Stack.pop env.modul (List.init n (fun _ -> elem_ty)) stack in
+    let+ stack = Stack.push [ Ref_type (No_null, TypeUse id) ] stack in
+    (env, stack)
+  | New_data (id, did) ->
+    let* _, st = Env.type_get_array id env.modul in
+    let* () =
+      match st with
+      | Val_type (Ref_type _) ->
+        Error
+          (`Type_mismatch "array.new_data: elem type must be numeric or packed")
+      | Val_type (Num_type _) | Pack_type _ -> Ok ()
+    in
+    let* () = check_data env.modul did in
+    let* stack = Stack.pop env.modul [ i32; i32 ] stack in
+    let+ stack = Stack.push [ Ref_type (No_null, TypeUse id) ] stack in
+    (env, stack)
+  | New_elem (id, eid) ->
+    let* _, st = Env.type_get_array id env.modul in
+    let* rt =
+      match st with
+      | Val_type (Ref_type rt) -> Ok rt
+      | Val_type (Num_type _) | Pack_type _ ->
+        Error
+          (`Type_mismatch "array.new_elem: elem type must be a reference type")
+    in
+    let* rt' = Env.elem_type_get eid env.modul in
+    let* ok =
+      Stack.match_ref_type ~subtype:true env.modul ~expected:rt ~got:rt'
+    in
+    let* () =
+      if ok then Ok ()
+      else
+        Error
+          (`Type_mismatch
+             "array.new_elem: element segment type is not a subtype of array \
+              element type" )
+    in
+    let* stack = Stack.pop env.modul [ i32; i32 ] stack in
+    let+ stack = Stack.push [ Ref_type (No_null, TypeUse id) ] stack in
+    (env, stack)
+  | Get id ->
+    let* _, st = Env.type_get_array id env.modul in
+    let* push_ty =
+      match st with
+      | Val_type vt -> Ok (typ_of_val_type vt)
+      | Pack_type _ ->
+        Error
+          (`Type_mismatch
+             "array.get: packed elem type, use array.get_s or array.get_u" )
+    in
+    let* stack =
+      Stack.pop env.modul [ i32; Ref_type (Null, TypeUse id) ] stack
+    in
+    let+ stack = Stack.push [ push_ty ] stack in
+    (env, stack)
+  | Get_s id | Get_u id ->
+    let* _, st = Env.type_get_array id env.modul in
+    let* () =
+      match st with
+      | Pack_type _ -> Ok ()
+      | Val_type _ ->
+        Error (`Type_mismatch "array.get_s/u: elem type must be packed")
+    in
+    let* stack =
+      Stack.pop env.modul [ i32; Ref_type (Null, TypeUse id) ] stack
+    in
+    let+ stack = Stack.push [ i32 ] stack in
+    (env, stack)
+  | Set id ->
+    let* mut, st = Env.type_get_array id env.modul in
+    let* () =
+      match mut with
+      | Var -> Ok ()
+      | Const -> Error (`Type_mismatch "array.set: array is not mutable")
+    in
+    let val_ty = unpack_storage_type st in
+    let+ stack =
+      Stack.pop env.modul [ val_ty; i32; Ref_type (Null, TypeUse id) ] stack
+    in
+    (env, stack)
+  | Len ->
+    let* stack = Stack.pop env.modul [ Ref_type (Null, Array_ht) ] stack in
+    let+ stack = Stack.push [ i32 ] stack in
+    (env, stack)
+  | Fill id ->
+    let* mut, st = Env.type_get_array id env.modul in
+    let* () =
+      match mut with Var -> Ok () | Const -> Error (`Msg "immutable array")
+    in
+    let val_ty = unpack_storage_type st in
+    let+ stack =
+      Stack.pop env.modul
+        [ i32; val_ty; i32; Ref_type (Null, TypeUse id) ]
+        stack
+    in
+    (env, stack)
+  | Copy (dst_id, src_id) ->
+    let* dst_mut, dst_ft = Env.type_get_array dst_id env.modul in
+    let* _, src_ft = Env.type_get_array src_id env.modul in
+    let* () =
+      match dst_mut with Var -> Ok () | Const -> Error (`Msg "immutable array")
+    in
+    let* () =
+      if is_subtype_storage_type src_ft dst_ft then Ok ()
+      else Error (`Msg "array types do not match")
+    in
+    let+ stack =
+      Stack.pop env.modul
+        [ i32
+        ; i32
+        ; Ref_type (Null, TypeUse src_id)
+        ; i32
+        ; Ref_type (Null, TypeUse dst_id)
+        ]
+        stack
+    in
+    (env, stack)
+  | Init_data (id, data_id) ->
+    let* mut, st = Env.type_get_array id env.modul in
+    let* () =
+      match mut with Var -> Ok () | Const -> Error (`Msg "immutable array")
+    in
+    let* () =
+      match st with
+      | Val_type (Binary.Ref_type _) ->
+        Error (`Msg "array type is not numeric or vector")
+      | Val_type (Binary.Num_type _) | Pack_type _ -> Ok ()
+    in
+    let* () = check_data env.modul data_id in
+    let+ stack =
+      Stack.pop env.modul [ i32; i32; i32; Ref_type (Null, TypeUse id) ] stack
+    in
+    (env, stack)
+  | Init_elem (id, elem_id) ->
+    let* mut, st = Env.type_get_array id env.modul in
+    let* () =
+      match mut with Var -> Ok () | Const -> Error (`Msg "immutable array")
+    in
+    let* rt =
+      match st with
+      | Val_type (Binary.Ref_type rt) -> Ok rt
+      | Val_type (Binary.Num_type _) | Pack_type _ ->
+        Error
+          (`Type_mismatch "array.init_elem: array type must be a reference type")
+    in
+    let* rt' = Env.elem_type_get elem_id env.modul in
+    let* ok =
+      Stack.match_ref_type ~subtype:true env.modul ~expected:rt ~got:rt'
+    in
+    let* () =
+      if ok then Ok ()
+      else
+        Error
+          (`Type_mismatch
+             "array.init_elem: elem type is not a subtype of destination array \
+              type" )
+    in
+    let+ stack =
+      Stack.pop env.modul [ i32; i32; i32; Ref_type (Null, TypeUse id) ] stack
+    in
     (env, stack)
 
 let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t)
@@ -1069,27 +1397,40 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
       (* push rt2 *)
       let+ stack = Stack.push [ Ref_type rt2 ] stack in
       (env, stack)
-  | ( I31 (Ref | Get_s | Get_u)
-    | Struct
-        ( New _ | New_default _
-        | Get (_, _)
-        | Get_s (_, _)
-        | Get_u (_, _)
-        | Set (_, _) )
-    | Array
-        ( New _ | New_default _
-        | New_fixed (_, _)
-        | New_data (_, _)
-        | New_elem (_, _)
-        | Get _ | Get_s _ | Get_u _ | Set _ | Len | Fill _
-        | Copy (_, _)
-        | Init_data (_, _)
-        | Init_elem (_, _) )
-    | Any_convert_extern | Extern_convert_any ) as i ->
-    Log.err (fun m ->
-      m "TODO: unimplemented instruction typecheking %a" (pp_instr ~short:false)
-        i );
-    assert false
+  | I31 i -> typecheck_i31_instr env stack i
+  | Struct i -> typecheck_struct_instr env stack i
+  | Array i -> typecheck_array_instr env stack i
+  | Any_convert_extern ->
+    let* t, stack = Stack.pop_ref stack in
+    let+ stack =
+      match t with
+      | Ref_type (null, ht) ->
+        let* ok =
+          Stack.match_heap_type ~subtype:true env.modul ~expected:Extern_ht
+            ~got:ht
+        in
+        if ok then Stack.push [ Ref_type (null, Any_ht) ] stack
+        else Error (`Type_mismatch "any.convert_extern: expected extern ref")
+      | (Any | Something) as ref -> Stack.push [ ref ] stack
+      | Num_type _ ->
+        Error (`Type_mismatch "any.convert_extern: expected a ref type")
+    in
+    (env, stack)
+  | Extern_convert_any ->
+    let* t, stack = Stack.pop_ref stack in
+    let+ stack =
+      match t with
+      | Ref_type (null, ht) ->
+        let* ok =
+          Stack.match_heap_type ~subtype:true env.modul ~expected:Any_ht ~got:ht
+        in
+        if ok then Stack.push [ Ref_type (null, Extern_ht) ] stack
+        else Error (`Type_mismatch "extern.convert_any: expected any ref")
+      | (Any | Something) as ref -> Stack.push [ ref ] stack
+      | Num_type _ ->
+        Error (`Type_mismatch "extern.convert_any: expected a ref type")
+    in
+    (env, stack)
 
 and typecheck_expr env expr ~is_loop (block_type : block_type option)
   ~stack:previous_stack : stack Result.t =
@@ -1157,10 +1498,8 @@ let typecheck_const_instr ?known_globals ~is_init (modul : Module.t) refs stack
             match ty with
             | Typedef.SimpleType (_, { ct = Def_func_t ty; _ }) ->
               func_type_eq ty ity
-            | ty ->
-              Fmt.failwith "typecheck_const_instr unimplemented for type: %a"
-                Typedef.pp ty )
-          modul.types
+            | Typedef.SimpleType _ | Typedef.RecType _ -> false )
+          modul.type_defs
       with
       | Some tyid -> TypeUse tyid
       | None -> Func_ht
@@ -1194,6 +1533,40 @@ let typecheck_const_instr ?known_globals ~is_init (modul : Module.t) refs stack
       | Rotr ) ->
     let* stack = Stack.pop modul [ i64; i64 ] stack in
     Stack.push [ i64 ] stack
+  | I31 Ref ->
+    let* stack = Stack.pop modul [ i32 ] stack in
+    Stack.push [ Ref_type (No_null, I31_ht) ] stack
+  | Extern_convert_any ->
+    let* stack = Stack.pop modul [ Ref_type (Null, Any_ht) ] stack in
+    Stack.push [ Ref_type (Null, Extern_ht) ] stack
+  | Any_convert_extern ->
+    let* stack = Stack.pop modul [ Ref_type (Null, Extern_ht) ] stack in
+    Stack.push [ Ref_type (Null, Any_ht) ] stack
+  | Array (New id) ->
+    let* _mut, st = Env.type_get_array id modul in
+    let elem_ty = unpack_storage_type st in
+    let* stack = Stack.pop modul [ i32; elem_ty ] stack in
+    Stack.push [ Ref_type (No_null, TypeUse id) ] stack
+  | Array (New_default id) ->
+    let* () =
+      if id >= Array.length modul.types then Error (`Unknown_type (Text.Raw id))
+      else Ok ()
+    in
+    let* stack = Stack.pop modul [ i32 ] stack in
+    Stack.push [ Ref_type (No_null, TypeUse id) ] stack
+  | Struct (New_default id) ->
+    let* () =
+      if id >= Array.length modul.types then Error (`Unknown_type (Text.Raw id))
+      else Ok ()
+    in
+    Stack.push [ Ref_type (No_null, TypeUse id) ] stack
+  | Struct (New id) ->
+    let* fields = Env.type_get_struct id modul in
+    let field_typs =
+      List.rev_map (fun (_, (_, st)) -> unpack_storage_type st) fields
+    in
+    let* stack = Stack.pop modul field_typs stack in
+    Stack.push [ Ref_type (No_null, TypeUse id) ] stack
   | _ -> Error `Constant_expression_required
 
 let typecheck_const_expr ?known_globals ?(is_init = false) (modul : Module.t)
@@ -1397,10 +1770,34 @@ let validate_mem modul =
       | Origin.Local (_, typ) | Imported { typ; _ } -> validate_memory_limit typ )
     modul.mem
 
+let validate_value_type (modul : Module.t) = function
+  | Binary.Ref_type (_, TypeUse i) when i >= Array.length modul.types ->
+    Error (`Unknown_type (Text.Raw i))
+  | Ref_type _ | Num_type _ -> Ok ()
+
+let validate_storage_type (modul : Module.t) = function
+  | Val_type vt -> validate_value_type modul vt
+  | Pack_type _ -> Ok ()
+
+let validate_type_defs (modul : Module.t) =
+  array_iter
+    (fun ({ ct; _ } : sub_type) ->
+      match ct with
+      | Def_func_t (params, results) ->
+        let* () =
+          list_iter (fun (_, vt) -> validate_value_type modul vt) params
+        in
+        list_iter (validate_value_type modul) results
+      | Def_struct_t fields ->
+        list_iter (fun (_, (_, st)) -> validate_storage_type modul st) fields
+      | Def_array_t (_, st) -> validate_storage_type modul st )
+    modul.types
+
 let modul (modul : Module.t) =
   Log.info (fun m -> m "typechecking ...");
   Log.bench_fn "typechecking time" @@ fun () ->
   let refs = Hashtbl.create 512 in
+  let* () = validate_type_defs modul in
   let* () = array_iteri (typecheck_global modul refs) modul.global in
   let* () = array_iter (typecheck_elem modul refs) modul.elem in
   let* () = array_iter (typecheck_data modul refs) modul.data in

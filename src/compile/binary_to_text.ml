@@ -517,7 +517,7 @@ let convert_sub_type Binary.{ final; ids; ct } : Text.sub_type =
              fl )
     }
 
-let from_types types : Text.Module.Field.t list =
+let from_type_defs type_defs : Text.Module.Field.t list =
   Array.map
     (fun (ty : Binary.Typedef.t) ->
       match ty with
@@ -526,7 +526,7 @@ let from_types types : Text.Module.Field.t list =
       | RecType ftl ->
         Text.Module.Field.Typedef
           (RecType (List.map (fun (id, ft) -> (id, convert_sub_type ft)) ftl)) )
-    types
+    type_defs
   |> Array.to_list
 
 let from_global (global : (Binary.Global.t, Binary.Global.Type.t) Origin.t array)
@@ -675,7 +675,7 @@ let from_start = function
 
 let modul
   { Binary.Module.id
-  ; types
+  ; type_defs
   ; global
   ; table
   ; mem
@@ -687,9 +687,9 @@ let modul
   ; _
   } =
   let fields =
-    from_types types @ from_global global @ from_table table @ from_mem mem
-    @ from_func func @ from_elem elem @ from_data data @ from_exports exports
-    @ from_start start
+    from_type_defs type_defs @ from_global global @ from_table table
+    @ from_mem mem @ from_func func @ from_elem elem @ from_data data
+    @ from_exports exports @ from_start start
   in
   let imported, locals =
     List.partition_map

@@ -115,7 +115,10 @@ module Eval_const = struct
     | Global (Get id) ->
       let* g = Link_env.Build.get_const_global env id in
       Result.ok @@ Stack.push stack g
-    | _ -> assert false
+    | _ ->
+      Fmt.failwith "TODO: Link: unimplemented instruction: %a"
+        (Binary.pp_instr ~short:true)
+        instr.Annotated.raw
 
   (* TODO: binary+const expr *)
   let expr env e : Concrete_value.t Result.t =
