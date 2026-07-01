@@ -226,10 +226,6 @@ module Text : sig
     | F32x4
     | F64x8
 
-  type nonrec sx =
-    | U
-    | S
-
   type nonrec memarg =
     { offset : string option
     ; align : string option
@@ -330,31 +326,42 @@ module Text : sig
     | Add
     | Sub
     | Mul
-    | Div of sx
-    | Rem of sx
+    | Div_s
+    | Div_u
+    | Rem_s
+    | Rem_u
     | And
     | Or
     | Xor
     | Shl
-    | Shr of sx
+    | Shr_s
+    | Shr_u
     | Rotl
     | Rotr
     | Eqz
     | Eq
     | Ne
-    | Lt of sx
-    | Gt of sx
-    | Le of sx
-    | Ge of sx
+    | Lt_s
+    | Lt_u
+    | Gt_s
+    | Gt_u
+    | Le_s
+    | Le_u
+    | Ge_s
+    | Ge_u
     | Extend8_s
     | Extend16_s
     | Wrap_i64
-    | Trunc_f of nn * sx
-    | Trunc_sat_f of nn * sx
+    | Trunc_f_s of nn
+    | Trunc_f_u of nn
+    | Trunc_sat_f_s of nn
+    | Trunc_sat_f_u of nn
     | Reinterpret_f of nn
     | Load of indice * memarg
-    | Load8 of indice * sx * memarg
-    | Load16 of indice * sx * memarg
+    | Load8_s of indice * memarg
+    | Load8_u of indice * memarg
+    | Load16_s of indice * memarg
+    | Load16_u of indice * memarg
     | Store of indice * memarg
     | Store8 of indice * memarg
     | Store16 of indice * memarg
@@ -369,33 +376,46 @@ module Text : sig
     | Add
     | Sub
     | Mul
-    | Div of sx
-    | Rem of sx
+    | Div_s
+    | Div_u
+    | Rem_s
+    | Rem_u
     | And
     | Or
     | Xor
     | Shl
-    | Shr of sx
+    | Shr_s
+    | Shr_u
     | Rotl
     | Rotr
     | Eqz
     | Eq
     | Ne
-    | Lt of sx
-    | Gt of sx
-    | Le of sx
-    | Ge of sx
+    | Lt_s
+    | Lt_u
+    | Gt_s
+    | Gt_u
+    | Le_s
+    | Le_u
+    | Ge_s
+    | Ge_u
     | Extend8_s
     | Extend16_s
     | Extend32_s
-    | Extend_i32 of sx
-    | Trunc_f of nn * sx
-    | Trunc_sat_f of nn * sx
+    | Extend_i32_s
+    | Extend_i32_u
+    | Trunc_f_s of nn
+    | Trunc_f_u of nn
+    | Trunc_sat_f_s of nn
+    | Trunc_sat_f_u of nn
     | Reinterpret_f of nn
     | Load of indice * memarg
-    | Load8 of indice * sx * memarg
-    | Load16 of indice * sx * memarg
-    | Load32 of indice * sx * memarg
+    | Load8_s of indice * memarg
+    | Load8_u of indice * memarg
+    | Load16_s of indice * memarg
+    | Load16_u of indice * memarg
+    | Load32_s of indice * memarg
+    | Load32_u of indice * memarg
     | Store of indice * memarg
     | Store8 of indice * memarg
     | Store16 of indice * memarg
@@ -426,7 +446,8 @@ module Text : sig
     | Le
     | Ge
     | Demote_f64
-    | Convert_i of nn * sx
+    | Convert_i_s of nn
+    | Convert_i_u of nn
     | Reinterpret_i of nn
     | Load of indice * memarg
     | Store of indice * memarg
@@ -456,7 +477,8 @@ module Text : sig
     | Le
     | Ge
     | Promote_f32
-    | Convert_i of nn * sx
+    | Convert_i_s of nn
+    | Convert_i_u of nn
     | Reinterpret_i of nn
     | Load of indice * memarg
     | Store of indice * memarg
@@ -476,6 +498,7 @@ module Text : sig
     | Load16_lane of (indice * memarg * int)
     | Load16x4_s of (indice * memarg)
     | Load16x4_u of (indice * memarg)
+    | Load32_splat of (indice * memarg)
     | Load32_lane of (indice * memarg * int)
     | Load32_zero of (indice * memarg)
     | Load64_lane of (indice * memarg * int)
@@ -495,10 +518,14 @@ module Text : sig
     | Sub
     | Eq
     | Ne
-    | Lt of sx
-    | Gt of sx
-    | Le of sx
-    | Ge of sx
+    | Lt_s
+    | Lt_u
+    | Gt_s
+    | Gt_u
+    | Le_s
+    | Le_u
+    | Ge_s
+    | Ge_u
     | Abs
     | Neg
     | Popcnt
@@ -516,6 +543,10 @@ module Text : sig
     | Extract_lane_u of int
     | Add_sat_s
     | Add_sat_u
+    | Sub_sat_s
+    | Sub_sat_u
+    | Max_s
+    | Max_u
 
   (** I16x8 instructions *)
   type i16x8_instr =
@@ -524,10 +555,14 @@ module Text : sig
     | Mul
     | Eq
     | Ne
-    | Lt of sx
-    | Gt of sx
-    | Le of sx
-    | Ge of sx
+    | Lt_s
+    | Lt_u
+    | Gt_s
+    | Gt_u
+    | Le_s
+    | Le_u
+    | Ge_s
+    | Ge_u
     | Splat
     | Extract_lane_s of int
     | Extract_lane_u of int
@@ -547,6 +582,10 @@ module Text : sig
     | Extadd_pairwise_i8x16_u
     | Add_sat_s
     | Add_sat_u
+    | Sub_sat_s
+    | Sub_sat_u
+    | Max_s
+    | Max_u
 
   (* I32x4 instructions *)
   type i32x4_instr =
@@ -554,13 +593,18 @@ module Text : sig
     | Sub
     | Mul
     | Shl
-    | Shr of sx
+    | Shr_s
+    | Shr_u
     | Eq
     | Ne
-    | Lt of sx
-    | Gt of sx
-    | Le of sx
-    | Ge of sx
+    | Lt_s
+    | Lt_u
+    | Gt_s
+    | Gt_u
+    | Le_s
+    | Le_u
+    | Ge_s
+    | Ge_u
     | Splat
     | Extract_lane of int
     | Replace_lane of int
@@ -584,6 +628,8 @@ module Text : sig
     | Extadd_pairwise_i16x8_u
     | Dot_i16x8_s
     | Neg
+    | Max_s
+    | Max_u
 
   (** I64x2 instructions *)
   type i64x2_instr =
@@ -597,7 +643,8 @@ module Text : sig
     | Le_s
     | Ge_s
     | Splat
-    | Extend_low_i32x4 of sx
+    | Extend_low_i32x4_s
+    | Extend_low_i32x4_u
     | Extmul_low_i32x4_s
     | Extmul_low_i32x4_u
     | Extmul_high_i32x4_s
@@ -618,6 +665,17 @@ module Text : sig
     | Pmax
     | Ne
     | Sub
+    | Abs
+    | Trunc
+    | Lt
+    | Gt
+    | Le
+    | Ge
+    | Mul
+    | Convert_low_i32x4_s
+    | Convert_low_i32x4_u
+    | Convert_high_i32x4_s
+    | Convert_high_i32x4_u
 
   val pp_f32x4_instr : f32x4_instr Fmt.t
 
@@ -632,6 +690,17 @@ module Text : sig
     | Pmax
     | Ne
     | Sub
+    | Abs
+    | Trunc
+    | Lt
+    | Gt
+    | Le
+    | Ge
+    | Mul
+    | Convert_low_i32x4_s
+    | Convert_low_i32x4_u
+    | Convert_high_i32x4_s
+    | Convert_high_i32x4_u
 
   val pp_f64x2_instr : f64x2_instr Fmt.t
 
@@ -999,31 +1068,42 @@ module Binary : sig
     | Add
     | Sub
     | Mul
-    | Div of Text.sx
-    | Rem of Text.sx
+    | Div_s
+    | Div_u
+    | Rem_s
+    | Rem_u
     | And
     | Or
     | Xor
     | Shl
-    | Shr of Text.sx
+    | Shr_s
+    | Shr_u
     | Rotl
     | Rotr
     | Eqz
     | Eq
     | Ne
-    | Lt of Text.sx
-    | Gt of Text.sx
-    | Le of Text.sx
-    | Ge of Text.sx
+    | Lt_s
+    | Lt_u
+    | Gt_s
+    | Gt_u
+    | Le_s
+    | Le_u
+    | Ge_s
+    | Ge_u
     | Extend8_s
     | Extend16_s
     | Wrap_i64
-    | Trunc_f of Text.nn * Text.sx
-    | Trunc_sat_f of Text.nn * Text.sx
+    | Trunc_f_s of Text.nn
+    | Trunc_f_u of Text.nn
+    | Trunc_sat_f_s of Text.nn
+    | Trunc_sat_f_u of Text.nn
     | Reinterpret_f of Text.nn
     | Load of indice * memarg
-    | Load8 of indice * Text.sx * memarg
-    | Load16 of indice * Text.sx * memarg
+    | Load8_s of indice * memarg
+    | Load8_u of indice * memarg
+    | Load16_s of indice * memarg
+    | Load16_u of indice * memarg
     | Store of indice * memarg
     | Store8 of indice * memarg
     | Store16 of indice * memarg
@@ -1038,33 +1118,46 @@ module Binary : sig
     | Add
     | Sub
     | Mul
-    | Div of Text.sx
-    | Rem of Text.sx
+    | Div_s
+    | Div_u
+    | Rem_s
+    | Rem_u
     | And
     | Or
     | Xor
     | Shl
-    | Shr of Text.sx
+    | Shr_s
+    | Shr_u
     | Rotl
     | Rotr
     | Eqz
     | Eq
     | Ne
-    | Lt of Text.sx
-    | Gt of Text.sx
-    | Le of Text.sx
-    | Ge of Text.sx
+    | Lt_s
+    | Lt_u
+    | Gt_s
+    | Gt_u
+    | Le_s
+    | Le_u
+    | Ge_s
+    | Ge_u
     | Extend8_s
     | Extend16_s
     | Extend32_s
-    | Extend_i32 of Text.sx
-    | Trunc_f of Text.nn * Text.sx
-    | Trunc_sat_f of Text.nn * Text.sx
+    | Extend_i32_s
+    | Extend_i32_u
+    | Trunc_f_s of Text.nn
+    | Trunc_f_u of Text.nn
+    | Trunc_sat_f_s of Text.nn
+    | Trunc_sat_f_u of Text.nn
     | Reinterpret_f of Text.nn
     | Load of indice * memarg
-    | Load8 of indice * Text.sx * memarg
-    | Load16 of indice * Text.sx * memarg
-    | Load32 of indice * Text.sx * memarg
+    | Load8_s of indice * memarg
+    | Load8_u of indice * memarg
+    | Load16_s of indice * memarg
+    | Load16_u of indice * memarg
+    | Load32_s of indice * memarg
+    | Load32_u of indice * memarg
     | Store of indice * memarg
     | Store8 of indice * memarg
     | Store16 of indice * memarg
@@ -1095,7 +1188,8 @@ module Binary : sig
     | Le
     | Ge
     | Demote_f64
-    | Convert_i of Text.nn * Text.sx
+    | Convert_i_s of Text.nn
+    | Convert_i_u of Text.nn
     | Reinterpret_i of Text.nn
     | Load of indice * memarg
     | Store of indice * memarg
@@ -1125,7 +1219,8 @@ module Binary : sig
     | Le
     | Ge
     | Promote_f32
-    | Convert_i of Text.nn * Text.sx
+    | Convert_i_s of Text.nn
+    | Convert_i_u of Text.nn
     | Reinterpret_i of Text.nn
     | Load of indice * memarg
     | Store of indice * memarg
@@ -1145,6 +1240,7 @@ module Binary : sig
     | Load16_lane of (indice * memarg * int)
     | Load16x4_s of (indice * memarg)
     | Load16x4_u of (indice * memarg)
+    | Load32_splat of (indice * memarg)
     | Load32_lane of (indice * memarg * int)
     | Load32_zero of (indice * memarg)
     | Load64_lane of (indice * memarg * int)
@@ -1747,14 +1843,6 @@ module Abstract_driver : sig
     -> Abstract_invariant.t
 end
 
-module Denot_interpreter : sig
-  val run :
-       interactive:bool
-    -> Concrete_extern_func.extern_func Link.State.t
-    -> Concrete_extern_func.extern_func Linked.Module.t
-    -> unit
-end
-
 module Interpret : sig
   module type Parameters = sig
     val use_ite_for_select : bool
@@ -1863,11 +1951,6 @@ end
 
 module Cmd_abs : sig
   val cmd : source_file:Fpath.t -> unsafe:bool -> unit Result.t
-end
-
-module Cmd_drun : sig
-  val cmd :
-    source_file:Fpath.t -> interactive:bool -> unsafe:bool -> unit Result.t
 end
 
 module Cmd_sym : sig

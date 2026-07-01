@@ -53,40 +53,57 @@ let convert_i32_instr : Binary.i32_instr -> Text.i32_instr = function
   | Add -> Add
   | Sub -> Sub
   | Mul -> Mul
-  | Div sx -> Div sx
-  | Rem sx -> Rem sx
+  | Div_s -> Div_s
+  | Div_u -> Div_u
+  | Rem_s -> Rem_s
+  | Rem_u -> Rem_u
   | And -> And
   | Or -> Or
   | Xor -> Xor
   | Shl -> Shl
-  | Shr sx -> Shr sx
+  | Shr_s -> Shr_s
+  | Shr_u -> Shr_u
   | Rotl -> Rotl
   | Rotr -> Rotr
   | Eqz -> Eqz
   | Eq -> Eq
   | Ne -> Ne
-  | Lt sx -> Lt sx
-  | Gt sx -> Gt sx
-  | Le sx -> Le sx
-  | Ge sx -> Ge sx
+  | Lt_s -> Lt_s
+  | Lt_u -> Lt_u
+  | Gt_s -> Gt_s
+  | Gt_u -> Gt_u
+  | Le_s -> Le_s
+  | Le_u -> Le_u
+  | Ge_s -> Ge_s
+  | Ge_u -> Ge_u
   | Extend8_s -> Extend8_s
   | Extend16_s -> Extend16_s
   | Wrap_i64 -> Wrap_i64
-  | Trunc_f (nn, sx) -> Trunc_f (nn, sx)
-  | Trunc_sat_f (nn, sx) -> Trunc_sat_f (nn, sx)
+  | Trunc_f_s nn -> Trunc_f_s nn
+  | Trunc_f_u nn -> Trunc_f_u nn
+  | Trunc_sat_f_s nn -> Trunc_sat_f_s nn
+  | Trunc_sat_f_u nn -> Trunc_sat_f_u nn
   | Reinterpret_f nn -> Reinterpret_f nn
   | Load (indice, memarg) ->
     let indice = convert_indice indice in
     let memarg = convert_memarg memarg in
     Load (indice, memarg)
-  | Load8 (indice, sx, memarg) ->
+  | Load8_s (indice, memarg) ->
     let indice = convert_indice indice in
     let memarg = convert_memarg memarg in
-    Load8 (indice, sx, memarg)
-  | Load16 (indice, sx, memarg) ->
+    Load8_s (indice, memarg)
+  | Load8_u (indice, memarg) ->
     let indice = convert_indice indice in
     let memarg = convert_memarg memarg in
-    Load16 (indice, sx, memarg)
+    Load8_u (indice, memarg)
+  | Load16_s (indice, memarg) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Load16_s (indice, memarg)
+  | Load16_u (indice, memarg) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Load16_u (indice, memarg)
   | Store (indice, memarg) ->
     let indice = convert_indice indice in
     let memarg = convert_memarg memarg in
@@ -108,45 +125,67 @@ let convert_i64_instr : Binary.i64_instr -> Text.i64_instr = function
   | Add -> Add
   | Sub -> Sub
   | Mul -> Mul
-  | Div sx -> Div sx
-  | Rem sx -> Rem sx
+  | Div_s -> Div_s
+  | Div_u -> Div_u
+  | Rem_s -> Rem_s
+  | Rem_u -> Rem_u
   | And -> And
   | Or -> Or
   | Xor -> Xor
   | Shl -> Shl
-  | Shr sx -> Shr sx
+  | Shr_s -> Shr_s
+  | Shr_u -> Shr_u
   | Rotl -> Rotl
   | Rotr -> Rotr
   | Eqz -> Eqz
   | Eq -> Eq
   | Ne -> Ne
-  | Lt sx -> Lt sx
-  | Gt sx -> Gt sx
-  | Le sx -> Le sx
-  | Ge sx -> Ge sx
+  | Lt_s -> Lt_s
+  | Lt_u -> Lt_u
+  | Gt_s -> Gt_s
+  | Gt_u -> Gt_u
+  | Le_s -> Le_s
+  | Le_u -> Le_u
+  | Ge_s -> Ge_s
+  | Ge_u -> Ge_u
   | Extend8_s -> Extend8_s
   | Extend16_s -> Extend16_s
   | Extend32_s -> Extend32_s
-  | Extend_i32 sx -> Extend_i32 sx
-  | Trunc_f (nn, sx) -> Trunc_f (nn, sx)
-  | Trunc_sat_f (nn, sx) -> Trunc_sat_f (nn, sx)
+  | Extend_i32_s -> Extend_i32_s
+  | Extend_i32_u -> Extend_i32_u
+  | Trunc_f_s nn -> Trunc_f_s nn
+  | Trunc_f_u nn -> Trunc_f_u nn
+  | Trunc_sat_f_s nn -> Trunc_sat_f_s nn
+  | Trunc_sat_f_u nn -> Trunc_sat_f_u nn
   | Reinterpret_f nn -> Reinterpret_f nn
   | Load (indice, memarg) ->
     let indice = convert_indice indice in
     let memarg = convert_memarg memarg in
     Load (indice, memarg)
-  | Load8 (indice, sx, memarg) ->
+  | Load8_s (indice, memarg) ->
     let indice = convert_indice indice in
     let memarg = convert_memarg memarg in
-    Load8 (indice, sx, memarg)
-  | Load16 (indice, sx, memarg) ->
+    Load8_s (indice, memarg)
+  | Load8_u (indice, memarg) ->
     let indice = convert_indice indice in
     let memarg = convert_memarg memarg in
-    Load16 (indice, sx, memarg)
-  | Load32 (indice, sx, memarg) ->
+    Load8_u (indice, memarg)
+  | Load16_s (indice, memarg) ->
     let indice = convert_indice indice in
     let memarg = convert_memarg memarg in
-    Load32 (indice, sx, memarg)
+    Load16_s (indice, memarg)
+  | Load16_u (indice, memarg) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Load16_u (indice, memarg)
+  | Load32_s (indice, memarg) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Load32_s (indice, memarg)
+  | Load32_u (indice, memarg) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Load32_u (indice, memarg)
   | Store (indice, memarg) ->
     let indice = convert_indice indice in
     let memarg = convert_memarg memarg in
@@ -187,7 +226,8 @@ let convert_f32_instr : Binary.f32_instr -> Text.f32_instr = function
   | Le -> Le
   | Ge -> Ge
   | Demote_f64 -> Demote_f64
-  | Convert_i (nn, sx) -> Convert_i (nn, sx)
+  | Convert_i_s nn -> Convert_i_s nn
+  | Convert_i_u nn -> Convert_i_u nn
   | Reinterpret_i nn -> Reinterpret_i nn
   | Load (indice, memarg) ->
     let indice = convert_indice indice in
@@ -221,7 +261,8 @@ let convert_f64_instr : Binary.f64_instr -> Text.f64_instr = function
   | Le -> Le
   | Ge -> Ge
   | Promote_f32 -> Promote_f32
-  | Convert_i (nn, sx) -> Convert_i (nn, sx)
+  | Convert_i_s nn -> Convert_i_s nn
+  | Convert_i_u nn -> Convert_i_u nn
   | Reinterpret_i nn -> Reinterpret_i nn
   | Load (indice, memarg) ->
     let indice = convert_indice indice in

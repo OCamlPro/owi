@@ -87,12 +87,6 @@ type nonrec fshape =
   | F32x4
   | F64x8
 
-type nonrec sx =
-  | U
-  | S
-
-let pp_sx ppf = function U -> pf ppf "u" | S -> pf ppf "s"
-
 type nonrec memarg =
   { offset : string option
   ; align : string option
@@ -407,31 +401,42 @@ type i32_instr =
   | Add
   | Sub
   | Mul
-  | Div of sx
-  | Rem of sx
+  | Div_s
+  | Div_u
+  | Rem_s
+  | Rem_u
   | And
   | Or
   | Xor
   | Shl
-  | Shr of sx
+  | Shr_s
+  | Shr_u
   | Rotl
   | Rotr
   | Eqz
   | Eq
   | Ne
-  | Lt of sx
-  | Gt of sx
-  | Le of sx
-  | Ge of sx
+  | Lt_s
+  | Lt_u
+  | Gt_s
+  | Gt_u
+  | Le_s
+  | Le_u
+  | Ge_s
+  | Ge_u
   | Extend8_s
   | Extend16_s
   | Wrap_i64
-  | Trunc_f of nn * sx
-  | Trunc_sat_f of nn * sx
+  | Trunc_f_s of nn
+  | Trunc_f_u of nn
+  | Trunc_sat_f_s of nn
+  | Trunc_sat_f_u of nn
   | Reinterpret_f of nn
   | Load of indice * memarg
-  | Load8 of indice * sx * memarg
-  | Load16 of indice * sx * memarg
+  | Load8_s of indice * memarg
+  | Load8_u of indice * memarg
+  | Load16_s of indice * memarg
+  | Load16_u of indice * memarg
   | Store of indice * memarg
   | Store8 of indice * memarg
   | Store16 of indice * memarg
@@ -444,34 +449,47 @@ let pp_i32_instr ppf = function
   | Add -> pf ppf "i32.add"
   | Sub -> pf ppf "i32.sub"
   | Mul -> pf ppf "i32.mul"
-  | Div sx -> pf ppf "i32.div_%a" pp_sx sx
-  | Rem sx -> pf ppf "i32.rem_%a" pp_sx sx
+  | Div_s -> pf ppf "i32.div_s"
+  | Div_u -> pf ppf "i32.div_u"
+  | Rem_s -> pf ppf "i32.rem_s"
+  | Rem_u -> pf ppf "i32.rem_u"
   | And -> pf ppf "i32.and"
   | Or -> pf ppf "i32.or"
   | Xor -> pf ppf "i32.xor"
   | Shl -> pf ppf "i32.shl"
-  | Shr sx -> pf ppf "i32.shr_%a" pp_sx sx
+  | Shr_s -> pf ppf "i32.shr_s"
+  | Shr_u -> pf ppf "i32.shr_u"
   | Rotl -> pf ppf "i32.rotl"
   | Rotr -> pf ppf "i32.rotr"
   | Eqz -> pf ppf "i32.eqz"
   | Eq -> pf ppf "i32.eq"
   | Ne -> pf ppf "i32.ne"
-  | Lt sx -> pf ppf "i32.lt_%a" pp_sx sx
-  | Gt sx -> pf ppf "i32.gt_%a" pp_sx sx
-  | Le sx -> pf ppf "i32.le_%a" pp_sx sx
-  | Ge sx -> pf ppf "i32.ge_%a" pp_sx sx
+  | Lt_s -> pf ppf "i32.lt_s"
+  | Lt_u -> pf ppf "i32.lt_u"
+  | Gt_s -> pf ppf "i32.gt_s"
+  | Gt_u -> pf ppf "i32.gt_u"
+  | Le_s -> pf ppf "i32.le_s"
+  | Le_u -> pf ppf "i32.le_u"
+  | Ge_s -> pf ppf "i32.ge_s"
+  | Ge_u -> pf ppf "i32.ge_u"
   | Extend8_s -> pf ppf "i32.extend8_s"
   | Extend16_s -> pf ppf "i32.extend16_s"
   | Wrap_i64 -> pf ppf "i32.wrap_i64"
-  | Trunc_f (nn, sx) -> pf ppf "i32.trunc_f%a_%a" pp_nn nn pp_sx sx
-  | Trunc_sat_f (nn, sx) -> pf ppf "i32.truc_sat_f%a_%a" pp_nn nn pp_sx sx
+  | Trunc_f_s nn -> pf ppf "i32.trunc_f%a_s" pp_nn nn
+  | Trunc_f_u nn -> pf ppf "i32.trunc_f%a_u" pp_nn nn
+  | Trunc_sat_f_s nn -> pf ppf "i32.truc_sat_f%a_s" pp_nn nn
+  | Trunc_sat_f_u nn -> pf ppf "i32.truc_sat_f%a_u" pp_nn nn
   | Reinterpret_f nn -> pf ppf "i32.reinterpret_f%a" pp_nn nn
   | Load (indice, memarg) ->
     pf ppf "i32.load%a%a" pp_indice_not0 indice pp_memarg memarg
-  | Load8 (indice, sx, memarg) ->
-    pf ppf "i32.load8_%a%a%a" pp_sx sx pp_indice_not0 indice pp_memarg memarg
-  | Load16 (indice, sx, memarg) ->
-    pf ppf "i32.load16_%a%a%a" pp_sx sx pp_indice_not0 indice pp_memarg memarg
+  | Load8_s (indice, memarg) ->
+    pf ppf "i32.load8_s%a%a" pp_indice_not0 indice pp_memarg memarg
+  | Load8_u (indice, memarg) ->
+    pf ppf "i32.load8_u%a%a" pp_indice_not0 indice pp_memarg memarg
+  | Load16_s (indice, memarg) ->
+    pf ppf "i32.load16_s%a%a" pp_indice_not0 indice pp_memarg memarg
+  | Load16_u (indice, memarg) ->
+    pf ppf "i32.load16_u%a%a" pp_indice_not0 indice pp_memarg memarg
   | Store (indice, memarg) ->
     pf ppf "i32.store%a%a" pp_indice_not0 indice pp_memarg memarg
   | Store8 (indice, memarg) ->
@@ -489,33 +507,46 @@ type i64_instr =
   | Add
   | Sub
   | Mul
-  | Div of sx
-  | Rem of sx
+  | Div_s
+  | Div_u
+  | Rem_s
+  | Rem_u
   | And
   | Or
   | Xor
   | Shl
-  | Shr of sx
+  | Shr_s
+  | Shr_u
   | Rotl
   | Rotr
   | Eqz
   | Eq
   | Ne
-  | Lt of sx
-  | Gt of sx
-  | Le of sx
-  | Ge of sx
+  | Lt_s
+  | Lt_u
+  | Gt_s
+  | Gt_u
+  | Le_s
+  | Le_u
+  | Ge_s
+  | Ge_u
   | Extend8_s
   | Extend16_s
   | Extend32_s
-  | Extend_i32 of sx
-  | Trunc_f of nn * sx
-  | Trunc_sat_f of nn * sx
+  | Extend_i32_s
+  | Extend_i32_u
+  | Trunc_f_s of nn
+  | Trunc_f_u of nn
+  | Trunc_sat_f_s of nn
+  | Trunc_sat_f_u of nn
   | Reinterpret_f of nn
   | Load of indice * memarg
-  | Load8 of indice * sx * memarg
-  | Load16 of indice * sx * memarg
-  | Load32 of indice * sx * memarg
+  | Load8_s of indice * memarg
+  | Load8_u of indice * memarg
+  | Load16_s of indice * memarg
+  | Load16_u of indice * memarg
+  | Load32_s of indice * memarg
+  | Load32_u of indice * memarg
   | Store of indice * memarg
   | Store8 of indice * memarg
   | Store16 of indice * memarg
@@ -529,37 +560,53 @@ let pp_i64_instr ppf = function
   | Add -> pf ppf "i64.add"
   | Sub -> pf ppf "i64.sub"
   | Mul -> pf ppf "i64.mul"
-  | Div sx -> pf ppf "i64.div_%a" pp_sx sx
-  | Rem sx -> pf ppf "i64.rem_%a" pp_sx sx
+  | Div_s -> pf ppf "i64.div_s"
+  | Div_u -> pf ppf "i64.div_u"
+  | Rem_s -> pf ppf "i64.rem_s"
+  | Rem_u -> pf ppf "i64.rem_u"
   | And -> pf ppf "i64.and"
   | Or -> pf ppf "i64.or"
   | Xor -> pf ppf "i64.xor"
   | Shl -> pf ppf "i64.shl"
-  | Shr sx -> pf ppf "i64.shr_%a" pp_sx sx
+  | Shr_s -> pf ppf "i64.shr_s"
+  | Shr_u -> pf ppf "i64.shr_u"
   | Rotl -> pf ppf "i64.rotl"
   | Rotr -> pf ppf "i64.rotr"
   | Eqz -> pf ppf "i64.eqz"
   | Eq -> pf ppf "i64.eq"
   | Ne -> pf ppf "i64.ne"
-  | Lt sx -> pf ppf "i64.lt_%a" pp_sx sx
-  | Gt sx -> pf ppf "i64.gt_%a" pp_sx sx
-  | Le sx -> pf ppf "i64.le_%a" pp_sx sx
-  | Ge sx -> pf ppf "i64.ge_%a" pp_sx sx
+  | Lt_s -> pf ppf "i64.lt_s"
+  | Lt_u -> pf ppf "i64.lt_u"
+  | Gt_s -> pf ppf "i64.gt_s"
+  | Gt_u -> pf ppf "i64.gt_u"
+  | Le_s -> pf ppf "i64.le_s"
+  | Le_u -> pf ppf "i64.le_u"
+  | Ge_s -> pf ppf "i64.ge_s"
+  | Ge_u -> pf ppf "i64.ge_u"
   | Extend8_s -> pf ppf "i64.extend8_s"
   | Extend16_s -> pf ppf "i64.extend16_s"
   | Extend32_s -> pf ppf "i64.extend32_s"
-  | Extend_i32 sx -> pf ppf "i64.extend_i32_%a" pp_sx sx
-  | Trunc_f (nn, sx) -> pf ppf "i64.trunc_f%a_%a" pp_nn nn pp_sx sx
-  | Trunc_sat_f (nn, sx) -> pf ppf "i64.trunc_sat_f%a_%a" pp_nn nn pp_sx sx
+  | Extend_i32_s -> pf ppf "i64.extend_i32_s"
+  | Extend_i32_u -> pf ppf "i64.extend_i32_u"
+  | Trunc_f_s nn -> pf ppf "i64.trunc_f%a_s" pp_nn nn
+  | Trunc_f_u nn -> pf ppf "i64.trunc_f%a_u" pp_nn nn
+  | Trunc_sat_f_s nn -> pf ppf "i64.trunc_sat_f%a_s" pp_nn nn
+  | Trunc_sat_f_u nn -> pf ppf "i64.trunc_sat_f%a_u" pp_nn nn
   | Reinterpret_f nn -> pf ppf "i64.reinterpret_f%a" pp_nn nn
   | Load (indice, memarg) ->
     pf ppf "i64.load%a%a" pp_indice_not0 indice pp_memarg memarg
-  | Load8 (indice, sx, memarg) ->
-    pf ppf "i64.load8_%a%a%a" pp_indice_not0 indice pp_sx sx pp_memarg memarg
-  | Load16 (indice, sx, memarg) ->
-    pf ppf "i64.load16_%a%a%a" pp_indice_not0 indice pp_sx sx pp_memarg memarg
-  | Load32 (indice, sx, memarg) ->
-    pf ppf "i64.load32_%a%a%a" pp_indice_not0 indice pp_sx sx pp_memarg memarg
+  | Load8_s (indice, memarg) ->
+    pf ppf "i64.load8_s%a%a" pp_indice_not0 indice pp_memarg memarg
+  | Load8_u (indice, memarg) ->
+    pf ppf "i64.load8_u%a%a" pp_indice_not0 indice pp_memarg memarg
+  | Load16_s (indice, memarg) ->
+    pf ppf "i64.load16_s%a%a" pp_indice_not0 indice pp_memarg memarg
+  | Load16_u (indice, memarg) ->
+    pf ppf "i64.load16_u%a%a" pp_indice_not0 indice pp_memarg memarg
+  | Load32_s (indice, memarg) ->
+    pf ppf "i64.load32_s%a%a" pp_indice_not0 indice pp_memarg memarg
+  | Load32_u (indice, memarg) ->
+    pf ppf "i64.load32_u%a%a" pp_indice_not0 indice pp_memarg memarg
   | Store (indice, memarg) ->
     pf ppf "i64.store%a%a" pp_indice_not0 indice pp_memarg memarg
   | Store8 (indice, memarg) ->
@@ -594,7 +641,8 @@ type f32_instr =
   | Le
   | Ge
   | Demote_f64
-  | Convert_i of nn * sx
+  | Convert_i_s of nn
+  | Convert_i_u of nn
   | Reinterpret_i of nn
   | Load of indice * memarg
   | Store of indice * memarg
@@ -622,7 +670,8 @@ let pp_f32_instr ppf = function
   | Le -> pf ppf "f32.le"
   | Ge -> pf ppf "f32.ge"
   | Demote_f64 -> pf ppf "f32.demote_f64"
-  | Convert_i (nn, sx) -> pf ppf "f32.convert_i%a%a" pp_nn nn pp_sx sx
+  | Convert_i_s nn -> pf ppf "f32.convert_i%a_s" pp_nn nn
+  | Convert_i_u nn -> pf ppf "f32.convert_i%a_u" pp_nn nn
   | Reinterpret_i nn -> pf ppf "f32.reinterpret_i%a" pp_nn nn
   | Load (indice, memarg) ->
     pf ppf "f32.load%a%a" pp_indice_not0 indice pp_memarg memarg
@@ -654,7 +703,8 @@ type f64_instr =
   | Le
   | Ge
   | Promote_f32
-  | Convert_i of nn * sx
+  | Convert_i_s of nn
+  | Convert_i_u of nn
   | Reinterpret_i of nn
   | Load of indice * memarg
   | Store of indice * memarg
@@ -682,7 +732,8 @@ let pp_f64_instr ppf = function
   | Le -> pf ppf "f64.le"
   | Ge -> pf ppf "f64.ge"
   | Promote_f32 -> pf ppf "f64.promote_f32"
-  | Convert_i (nn, sx) -> pf ppf "f64.convert_i%a_%a" pp_nn nn pp_sx sx
+  | Convert_i_s nn -> pf ppf "f64.convert_i%a_s" pp_nn nn
+  | Convert_i_u nn -> pf ppf "f64.convert_i%a_u" pp_nn nn
   | Reinterpret_i nn -> pf ppf "f64.reinterpret_i%a" pp_nn nn
   | Load (indice, memarg) ->
     pf ppf "f64.load%a%a" pp_indice_not0 indice pp_memarg memarg
@@ -704,6 +755,7 @@ type v128_instr =
   | Load16_lane of (indice * memarg * int)
   | Load16x4_s of (indice * memarg)
   | Load16x4_u of (indice * memarg)
+  | Load32_splat of (indice * memarg)
   | Load32_lane of (indice * memarg * int)
   | Load32_zero of (indice * memarg)
   | Load64_lane of (indice * memarg * int)
@@ -743,10 +795,14 @@ type i8x16_instr =
   | Sub
   | Eq
   | Ne
-  | Lt of sx
-  | Gt of sx
-  | Le of sx
-  | Ge of sx
+  | Lt_s
+  | Lt_u
+  | Gt_s
+  | Gt_u
+  | Le_s
+  | Le_u
+  | Ge_s
+  | Ge_u
   | Abs
   | Neg
   | Popcnt
@@ -764,20 +820,24 @@ type i8x16_instr =
   | Extract_lane_u of int
   | Add_sat_s
   | Add_sat_u
+  | Sub_sat_s
+  | Sub_sat_u
+  | Max_s
+  | Max_u
 
 let pp_i8x16_instr ppf = function
   | Add -> pf ppf "i8x16.add"
   | Sub -> pf ppf "i8x16.sub"
   | Eq -> pf ppf "i8x16.eq"
   | Ne -> pf ppf "i8x16.ne"
-  | Lt S -> pf ppf "i8x16.lt_s"
-  | Lt U -> pf ppf "i8x16.lt_u"
-  | Gt S -> pf ppf "i8x16.gt_s"
-  | Gt U -> pf ppf "i8x16.gt_u"
-  | Le S -> pf ppf "i8x16.le_s"
-  | Le U -> pf ppf "i8x16.le_u"
-  | Ge S -> pf ppf "i8x16.ge_s"
-  | Ge U -> pf ppf "i8x16.ge_u"
+  | Lt_s -> pf ppf "i8x16.lt_s"
+  | Lt_u -> pf ppf "i8x16.lt_u"
+  | Gt_s -> pf ppf "i8x16.gt_s"
+  | Gt_u -> pf ppf "i8x16.gt_u"
+  | Le_s -> pf ppf "i8x16.le_s"
+  | Le_u -> pf ppf "i8x16.le_u"
+  | Ge_s -> pf ppf "i8x16.ge_s"
+  | Ge_u -> pf ppf "i8x16.ge_u"
   | Abs -> pf ppf "i8x16.abs"
   | Neg -> pf ppf "i8x16.neg"
   | Popcnt -> pf ppf "i8x16.popcnt"
@@ -802,10 +862,14 @@ type i16x8_instr =
   | Mul
   | Eq
   | Ne
-  | Lt of sx
-  | Gt of sx
-  | Le of sx
-  | Ge of sx
+  | Lt_s
+  | Lt_u
+  | Gt_s
+  | Gt_u
+  | Le_s
+  | Le_u
+  | Ge_s
+  | Ge_u
   | Splat
   | Extract_lane_s of int
   | Extract_lane_u of int
@@ -825,6 +889,10 @@ type i16x8_instr =
   | Extadd_pairwise_i8x16_u
   | Add_sat_s
   | Add_sat_u
+  | Sub_sat_s
+  | Sub_sat_u
+  | Max_s
+  | Max_u
 
 let pp_i16x8_instr ppf = function
   | Add -> pf ppf "i16x8.add"
@@ -832,14 +900,14 @@ let pp_i16x8_instr ppf = function
   | Mul -> pf ppf "i16x8.mul"
   | Eq -> pf ppf "i16x8.eq"
   | Ne -> pf ppf "i16x8.ne"
-  | Lt S -> pf ppf "i16x8.lt_s"
-  | Lt U -> pf ppf "i16x8.lt_u"
-  | Gt S -> pf ppf "i16x8.gt_s"
-  | Gt U -> pf ppf "i16x8.gt_u"
-  | Le S -> pf ppf "i16x8.le_s"
-  | Le U -> pf ppf "i16x8.le_u"
-  | Ge S -> pf ppf "i16x8.ge_s"
-  | Ge U -> pf ppf "i16x8.ge_u"
+  | Lt_s -> pf ppf "i16x8.lt_s"
+  | Lt_u -> pf ppf "i16x8.lt_u"
+  | Gt_s -> pf ppf "i16x8.gt_s"
+  | Gt_u -> pf ppf "i16x8.gt_u"
+  | Le_s -> pf ppf "i16x8.le_s"
+  | Le_u -> pf ppf "i16x8.le_u"
+  | Ge_s -> pf ppf "i16x8.ge_s"
+  | Ge_u -> pf ppf "i16x8.ge_u"
   | Splat -> pf ppf "i16x8.splat"
   | Extract_lane_s n -> pf ppf "i16x8.extract_lane_s %d" n
   | Extract_lane_u n -> pf ppf "i16x8.extract_lane_u %d" n
@@ -851,13 +919,18 @@ type i32x4_instr =
   | Sub
   | Mul
   | Shl
-  | Shr of sx
+  | Shr_s
+  | Shr_u
   | Eq
   | Ne
-  | Lt of sx
-  | Gt of sx
-  | Le of sx
-  | Ge of sx
+  | Lt_s
+  | Lt_u
+  | Gt_s
+  | Gt_u
+  | Le_s
+  | Le_u
+  | Ge_s
+  | Ge_u
   | Splat
   | Extract_lane of int
   | Replace_lane of int
@@ -881,24 +954,26 @@ type i32x4_instr =
   | Extadd_pairwise_i16x8_u
   | Dot_i16x8_s
   | Neg
+  | Max_s
+  | Max_u
 
 let pp_i32x4_instr ppf = function
   | Add -> pf ppf "i32x4.add"
   | Sub -> pf ppf "i32x4.sub"
   | Mul -> pf ppf "i32x4.mul"
   | Shl -> pf ppf "i32x4.shl"
-  | Shr S -> pf ppf "i32x4.shr_s"
-  | Shr U -> pf ppf "i32x4.shr_u"
+  | Shr_s -> pf ppf "i32x4.shr_s"
+  | Shr_u -> pf ppf "i32x4.shr_u"
   | Eq -> pf ppf "i32x4.eq"
   | Ne -> pf ppf "i32x4.ne"
-  | Lt S -> pf ppf "i32x4.lt_s"
-  | Lt U -> pf ppf "i32x4.lt_u"
-  | Gt S -> pf ppf "i32x4.gt_s"
-  | Gt U -> pf ppf "i32x4.gt_u"
-  | Le S -> pf ppf "i32x4.le_s"
-  | Le U -> pf ppf "i32x4.le_u"
-  | Ge S -> pf ppf "i32x4.ge_s"
-  | Ge U -> pf ppf "i32x4.ge_u"
+  | Lt_s -> pf ppf "i32x4.lt_s"
+  | Lt_u -> pf ppf "i32x4.lt_u"
+  | Gt_s -> pf ppf "i32x4.gt_s"
+  | Gt_u -> pf ppf "i32x4.gt_u"
+  | Le_s -> pf ppf "i32x4.le_s"
+  | Le_u -> pf ppf "i32x4.le_u"
+  | Ge_s -> pf ppf "i32x4.ge_s"
+  | Ge_u -> pf ppf "i32x4.ge_u"
   | Splat -> pf ppf "i32x4.splat"
   | Extract_lane n -> pf ppf "i32x4.extract_lane %d" n
   | Replace_lane n -> pf ppf "i32x4.replace_lane %d" n
@@ -920,7 +995,8 @@ type i64x2_instr =
   | Le_s
   | Ge_s
   | Splat
-  | Extend_low_i32x4 of sx
+  | Extend_low_i32x4_s
+  | Extend_low_i32x4_u
   | Extmul_low_i32x4_s
   | Extmul_low_i32x4_u
   | Extmul_high_i32x4_s
@@ -939,8 +1015,8 @@ let pp_i64x2_instr ppf = function
   | Le_s -> pf ppf "i64x2.le_s"
   | Ge_s -> pf ppf "i64x2.ge_s"
   | Splat -> pf ppf "i64x2.splat"
-  | Extend_low_i32x4 S -> pf ppf "i64x2.extend_low_i32x4_s"
-  | Extend_low_i32x4 U -> pf ppf "i64x2.extend_low_i32x4_u"
+  | Extend_low_i32x4_s -> pf ppf "i64x2.extend_low_i32x4_s"
+  | Extend_low_i32x4_u -> pf ppf "i64x2.extend_low_i32x4_u"
   | _ -> assert false
 
 type f32x4_instr =
@@ -956,6 +1032,17 @@ type f32x4_instr =
   | Pmax
   | Ne
   | Sub
+  | Abs
+  | Trunc
+  | Lt
+  | Gt
+  | Le
+  | Ge
+  | Mul
+  | Convert_low_i32x4_s
+  | Convert_low_i32x4_u
+  | Convert_high_i32x4_s
+  | Convert_high_i32x4_u
 
 let pp_f32x4_instr _ppf : f32x4_instr -> _ = function _ -> assert false
 
@@ -970,6 +1057,17 @@ type f64x2_instr =
   | Pmax
   | Ne
   | Sub
+  | Abs
+  | Trunc
+  | Lt
+  | Gt
+  | Le
+  | Ge
+  | Mul
+  | Convert_low_i32x4_s
+  | Convert_low_i32x4_u
+  | Convert_high_i32x4_s
+  | Convert_high_i32x4_u
 
 let pp_f64x2_instr _ppf : f64x2_instr -> _ = function _ -> assert false
 

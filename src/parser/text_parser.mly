@@ -611,14 +611,14 @@ let plain_instr :=
   | I64_SUB; { I64 Sub }
   | I32_MUL; { I32 Mul }
   | I64_MUL; { I64 Mul }
-  | I32_DIV_S; { I32 (Div S) }
-  | I64_DIV_S; { I64 (Div S) }
-  | I32_DIV_U; { I32 (Div U) }
-  | I64_DIV_U; { I64 (Div U) }
-  | I32_REM_S; { I32 (Rem S) }
-  | I64_REM_S; { I64 (Rem S) }
-  | I32_REM_U; { I32 (Rem U) }
-  | I64_REM_U; { I64 (Rem U) }
+  | I32_DIV_S; { I32 Div_s }
+  | I64_DIV_S; { I64 Div_s }
+  | I32_DIV_U; { I32 Div_u }
+  | I64_DIV_U; { I64 Div_u }
+  | I32_REM_S; { I32 Rem_s }
+  | I64_REM_S; { I64 Rem_s }
+  | I32_REM_U; { I32 Rem_u }
+  | I64_REM_U; { I64 Rem_u }
   | I32_AND; { I32 And }
   | I64_AND; { I64 And }
   | I32_OR; { I32 Or }
@@ -627,10 +627,10 @@ let plain_instr :=
   | I64_XOR; { I64 Xor }
   | I32_SHL; { I32 Shl }
   | I64_SHL; { I64 Shl }
-  | I32_SHR_S; { I32 (Shr S) }
-  | I64_SHR_S; { I64 (Shr S) }
-  | I32_SHR_U; { I32 (Shr U) }
-  | I64_SHR_U; { I64 (Shr U) }
+  | I32_SHR_S; { I32 Shr_s }
+  | I64_SHR_S; { I64 Shr_s }
+  | I32_SHR_U; { I32 Shr_u }
+  | I64_SHR_U; { I64 Shr_u }
   | I32_ROTL; { I32 Rotl }
   | I64_ROTL; { I64 Rotl }
   | I32_ROTR; { I32 Rotr }
@@ -655,22 +655,22 @@ let plain_instr :=
   | I64_EQ; { I64 Eq }
   | I32_NE; { I32 Ne }
   | I64_NE; { I64 Ne }
-  | I32_LT_S; { I32 (Lt S) }
-  | I64_LT_S; { I64 (Lt S) }
-  | I32_LT_U; { I32 (Lt U) }
-  | I64_LT_U; { I64 (Lt U) }
-  | I32_GT_S; { I32 (Gt S) }
-  | I64_GT_S; { I64 (Gt S) }
-  | I32_GT_U; { I32 (Gt U) }
-  | I64_GT_U; { I64 (Gt U) }
-  | I32_LE_S; { I32 (Le S) }
-  | I64_LE_S; { I64 (Le S) }
-  | I32_LE_U; { I32 (Le U) }
-  | I64_LE_U; { I64 (Le U) }
-  | I32_GE_S; { I32 (Ge S) }
-  | I64_GE_S; { I64 (Ge S) }
-  | I32_GE_U; { I32 (Ge U) }
-  | I64_GE_U; { I64 (Ge U) }
+  | I32_LT_S; { I32 Lt_s }
+  | I64_LT_S; { I64 Lt_s }
+  | I32_LT_U; { I32 Lt_u }
+  | I64_LT_U; { I64 Lt_u }
+  | I32_GT_S; { I32 Gt_s }
+  | I64_GT_S; { I64 Gt_s }
+  | I32_GT_U; { I32 Gt_u }
+  | I64_GT_U; { I64 Gt_u }
+  | I32_LE_S; { I32 Le_s }
+  | I64_LE_S; { I64 Le_s }
+  | I32_LE_U; { I32 Le_u }
+  | I64_LE_U; { I64 Le_u }
+  | I32_GE_S; { I32 Ge_s }
+  | I64_GE_S; { I64 Ge_s }
+  | I32_GE_U; { I32 Ge_u }
+  | I64_GE_U; { I64 Ge_u }
   | F32_EQ; { F32 Eq }
   | F64_EQ; { F64 Eq }
   | F32_NE; { F32 Ne }
@@ -689,34 +689,34 @@ let plain_instr :=
   | I64_EXTEND16_S; { I64 Extend16_s }
   | I64_EXTEND32_S; { I64 Extend32_s }
   | I32_WRAP_I64; { I32 Wrap_i64 }
-  | I64_EXTEND_I32_S; { I64 (Extend_i32 S) }
-  | I64_EXTEND_I32_U; { I64 (Extend_i32 U) }
-  | I32_TRUNC_F32_S; { I32 (Trunc_f (S32, S)) }
-  | I32_TRUNC_F32_U; { I32 (Trunc_f (S32, U)) }
-  | I32_TRUNC_F64_S; { I32 (Trunc_f (S64, S)) }
-  | I32_TRUNC_F64_U; { I32 (Trunc_f (S64, U)) }
-  | I64_TRUNC_F32_S; { I64 (Trunc_f (S32, S)) }
-  | I64_TRUNC_F32_U; { I64 (Trunc_f (S32, U)) }
-  | I64_TRUNC_F64_S; { I64 (Trunc_f (S64, S)) }
-  | I64_TRUNC_F64_U; { I64 (Trunc_f (S64, U)) }
-  | I32_TRUNC_SAT_F32_S; { I32 (Trunc_sat_f (S32, S)) }
-  | I32_TRUNC_SAT_F32_U; { I32 (Trunc_sat_f (S32, U)) }
-  | I32_TRUNC_SAT_F64_S; { I32 (Trunc_sat_f (S64, S)) }
-  | I32_TRUNC_SAT_F64_U; { I32 (Trunc_sat_f (S64, U)) }
-  | I64_TRUNC_SAT_F32_S; { I64 (Trunc_sat_f (S32, S)) }
-  | I64_TRUNC_SAT_F32_U; { I64 (Trunc_sat_f (S32, U)) }
-  | I64_TRUNC_SAT_F64_S; { I64 (Trunc_sat_f (S64, S)) }
-  | I64_TRUNC_SAT_F64_U; { I64 (Trunc_sat_f (S64, U)) }
+  | I64_EXTEND_I32_S; { I64 (Extend_i32_s) }
+  | I64_EXTEND_I32_U; { I64 (Extend_i32_u) }
+  | I32_TRUNC_F32_S; { I32 (Trunc_f_s S32) }
+  | I32_TRUNC_F32_U; { I32 (Trunc_f_u S32) }
+  | I32_TRUNC_F64_S; { I32 (Trunc_f_s S64) }
+  | I32_TRUNC_F64_U; { I32 (Trunc_f_u S64) }
+  | I64_TRUNC_F32_S; { I64 (Trunc_f_s S32) }
+  | I64_TRUNC_F32_U; { I64 (Trunc_f_u S32) }
+  | I64_TRUNC_F64_S; { I64 (Trunc_f_s S64) }
+  | I64_TRUNC_F64_U; { I64 (Trunc_f_u S64) }
+  | I32_TRUNC_SAT_F32_S; { I32 (Trunc_sat_f_s S32) }
+  | I32_TRUNC_SAT_F32_U; { I32 (Trunc_sat_f_u S32) }
+  | I32_TRUNC_SAT_F64_S; { I32 (Trunc_sat_f_s S64) }
+  | I32_TRUNC_SAT_F64_U; { I32 (Trunc_sat_f_u S64) }
+  | I64_TRUNC_SAT_F32_S; { I64 (Trunc_sat_f_s S32) }
+  | I64_TRUNC_SAT_F32_U; { I64 (Trunc_sat_f_u S32) }
+  | I64_TRUNC_SAT_F64_S; { I64 (Trunc_sat_f_s S64) }
+  | I64_TRUNC_SAT_F64_U; { I64 (Trunc_sat_f_u S64) }
   | F32_DEMOTE_F64; { F32 (Demote_f64) }
   | F64_PROMOTE_F32; { F64 (Promote_f32) }
-  | F32_CONVERT_I32_S; { F32 (Convert_i (S32, S)) }
-  | F32_CONVERT_I32_U; { F32 (Convert_i (S32, U)) }
-  | F32_CONVERT_I64_S; { F32 (Convert_i (S64, S)) }
-  | F32_CONVERT_I64_U; { F32 (Convert_i (S64, U)) }
-  | F64_CONVERT_I32_S; { F64 (Convert_i (S32, S)) }
-  | F64_CONVERT_I32_U; { F64 (Convert_i (S32, U)) }
-  | F64_CONVERT_I64_S; { F64 (Convert_i (S64, S)) }
-  | F64_CONVERT_I64_U; { F64 (Convert_i (S64, U)) }
+  | F32_CONVERT_I32_S; { F32 (Convert_i_s S32) }
+  | F32_CONVERT_I32_U; { F32 (Convert_i_u S32) }
+  | F32_CONVERT_I64_S; { F32 (Convert_i_s S64) }
+  | F32_CONVERT_I64_U; { F32 (Convert_i_u S64) }
+  | F64_CONVERT_I32_S; { F64 (Convert_i_s S32) }
+  | F64_CONVERT_I32_U; { F64 (Convert_i_u S32) }
+  | F64_CONVERT_I64_S; { F64 (Convert_i_s S64) }
+  | F64_CONVERT_I64_U; { F64 (Convert_i_u S64) }
   | I32_REINTERPRET_F32; { I32 (Reinterpret_f S32) }
   | I32_REINTERPRET_F64; { I32 (Reinterpret_f S64) }
   | I64_REINTERPRET_F32; { I64 (Reinterpret_f S32) }
@@ -747,16 +747,16 @@ let plain_instr :=
   | I64_STORE; id = memidx; memarg = memarg; { I64 (Store (id, memarg)) }
   | F32_STORE; id = memidx; memarg = memarg; { F32 (Store (id, memarg)) }
   | F64_STORE; id = memidx; memarg = memarg; { F64 (Store (id, memarg)) }
-  | I32_LOAD8_S; id = memidx; memarg = memarg; { I32 (Load8 (id, S, memarg) ) }
-  | I32_LOAD8_U; id = memidx; memarg = memarg; { I32 (Load8 (id, U, memarg) ) }
-  | I64_LOAD8_S; id = memidx; memarg = memarg; { I64 (Load8 (id, S, memarg) ) }
-  | I64_LOAD8_U; id = memidx; memarg = memarg; { I64 (Load8 (id, U, memarg) ) }
-  | I32_LOAD16_S; id = memidx; memarg = memarg; { I32 (Load16 (id, S, memarg) )  }
-  | I32_LOAD16_U; id = memidx; memarg = memarg; { I32 (Load16 (id, U, memarg) ) }
-  | I64_LOAD16_S; id = memidx; memarg = memarg; { I64 (Load16 (id, S, memarg) ) }
-  | I64_LOAD16_U; id = memidx; memarg = memarg; { I64 (Load16 (id, U, memarg) ) }
-  | I64_LOAD32_S; id = memidx; memarg = memarg; { I64 (Load32 (id, S, memarg)) }
-  | I64_LOAD32_U; id = memidx; memarg = memarg; { I64 (Load32 (id, U, memarg)) }
+  | I32_LOAD8_S; id = memidx; memarg = memarg; { I32 (Load8_s (id, memarg) ) }
+  | I32_LOAD8_U; id = memidx; memarg = memarg; { I32 (Load8_u (id, memarg) ) }
+  | I64_LOAD8_S; id = memidx; memarg = memarg; { I64 (Load8_s (id, memarg) ) }
+  | I64_LOAD8_U; id = memidx; memarg = memarg; { I64 (Load8_u (id, memarg) ) }
+  | I32_LOAD16_S; id = memidx; memarg = memarg; { I32 (Load16_s (id, memarg) )  }
+  | I32_LOAD16_U; id = memidx; memarg = memarg; { I32 (Load16_u (id, memarg) ) }
+  | I64_LOAD16_S; id = memidx; memarg = memarg; { I64 (Load16_s (id, memarg) ) }
+  | I64_LOAD16_U; id = memidx; memarg = memarg; { I64 (Load16_u (id, memarg) ) }
+  | I64_LOAD32_S; id = memidx; memarg = memarg; { I64 (Load32_s (id, memarg)) }
+  | I64_LOAD32_U; id = memidx; memarg = memarg; { I64 (Load32_u (id, memarg)) }
   | I32_STORE8; id = memidx; memarg = memarg; { I32 (Store8 (id, memarg)) }
   | I64_STORE8; id = memidx; memarg = memarg; { I64 (Store8 (id, memarg)) }
   | I32_STORE16; id = memidx; memarg = memarg; { I32 (Store16 (id, memarg)) }
