@@ -770,6 +770,8 @@ type v128_instr =
   | Store16_lane of (indice * memarg * int)
   | Bitselect
   | Xor
+  | Load32x2_s of (indice * memarg)
+  | Andnot
 
 let pp_v128_instr ppf = function
   | Const n -> pf ppf "v128.const %a" Concrete_v128.pp n
@@ -826,6 +828,9 @@ type i8x16_instr =
   | Sub_sat_u
   | Max_s
   | Max_u
+  | Narrow_i16x8_s
+  | Narrow_i16x8_u
+  | Avgr_u
 
 let pp_i8x16_instr ppf = function
   | Add -> pf ppf "i8x16.add"
@@ -898,6 +903,10 @@ type i16x8_instr =
   | Shl
   | Neg
   | All_true
+  | Shr_s
+  | Shr_u
+  | Bitmask
+  | Avgr_u
 
 let pp_i16x8_instr ppf = function
   | Add -> pf ppf "i16x8.add"
@@ -961,6 +970,7 @@ type i32x4_instr =
   | Neg
   | Max_s
   | Max_u
+  | Abs
 
 let pp_i32x4_instr ppf = function
   | Add -> pf ppf "i32x4.add"
@@ -1052,6 +1062,8 @@ type f32x4_instr =
   | Splat
   | Nearest
   | Div
+  | Neg
+  | Extract_lane of int
 
 let pp_f32x4_instr _ppf : f32x4_instr -> _ = function _ -> assert false
 
@@ -1079,6 +1091,7 @@ type f64x2_instr =
   | Convert_high_i32x4_u
   | Nearest
   | Div
+  | Neg
 
 let pp_f64x2_instr _ppf : f64x2_instr -> _ = function _ -> assert false
 

@@ -513,6 +513,8 @@ module Text : sig
     | Store16_lane of (indice * memarg * int)
     | Bitselect
     | Xor
+    | Load32x2_s of (indice * memarg)
+    | Andnot
 
   (** I8x16 instructions *)
   type i8x16_instr =
@@ -549,6 +551,9 @@ module Text : sig
     | Sub_sat_u
     | Max_s
     | Max_u
+    | Narrow_i16x8_s
+    | Narrow_i16x8_u
+    | Avgr_u
 
   (** I16x8 instructions *)
   type i16x8_instr =
@@ -591,6 +596,10 @@ module Text : sig
     | Shl
     | Neg
     | All_true
+    | Shr_s
+    | Shr_u
+    | Bitmask
+    | Avgr_u
 
   (* I32x4 instructions *)
   type i32x4_instr =
@@ -635,6 +644,7 @@ module Text : sig
     | Neg
     | Max_s
     | Max_u
+    | Abs
 
   (** I64x2 instructions *)
   type i64x2_instr =
@@ -684,7 +694,9 @@ module Text : sig
     | Convert_high_i32x4_u
     | Splat
     | Nearest
-  | Div
+    | Div
+    | Neg
+    | Extract_lane of int
 
   val pp_f32x4_instr : f32x4_instr Fmt.t
 
@@ -712,6 +724,7 @@ module Text : sig
     | Convert_high_i32x4_u
     | Nearest
     | Div
+    | Neg
 
   val pp_f64x2_instr : f64x2_instr Fmt.t
 
@@ -1266,6 +1279,8 @@ module Binary : sig
     | Store16_lane of (indice * memarg * int)
     | Bitselect
     | Xor
+    | Load32x2_s of (indice * memarg)
+    | Andnot
 
   (** Reference instructions *)
   type ref_instr =

@@ -135,6 +135,25 @@
  V128_LOAD16X4_U
  V128_LOAD64_SPLAT
  V128_XOR
+ F32X4_EXTRACT_LANE
+ F32X4_GT
+ F32X4_NEG
+ F64X2_GT
+ F64X2_NEG
+ I16X8_AVGR_U
+ I16X8_BITMASK
+ I16X8_LE_S
+ I16X8_SHR_S
+ I32X4_ABS
+ I32X4_EXTEND_HIGH_I16X8_S
+ I32X4_LE_S
+ I64X2_GT_S
+ I64X2_SPLAT
+ I8X16_AVGR_U
+ I8X16_LE_S
+ I8X16_NARROW_I16X8_S
+ V128_ANDNOT
+ V128_LOAD32X2_S
 
 %{
 
@@ -644,6 +663,25 @@ let plain_instr :=
   | V128_LOAD16X4_U; ~ = memidx; ~ = memarg; { V128 (Load16x4_u (memidx, memarg)) }
   | V128_LOAD64_SPLAT; ~ = memidx; ~ = memarg; { V128 (Load64_splat (memidx, memarg)) }
   | V128_XOR; { V128 Xor }
+  | F32X4_EXTRACT_LANE; n = NUM; { F32x4 (Extract_lane (int_of_string n)) }
+  | F32X4_GT; { F32x4 Gt }
+  | F32X4_NEG; { F32x4 Neg }
+  | F64X2_GT; { F64x2 Gt }
+  | F64X2_NEG; { F64x2 Neg }
+  | I16X8_AVGR_U; { I16x8 Avgr_u }
+  | I16X8_BITMASK; { I16x8 Bitmask }
+  | I16X8_LE_S; { I16x8 Le_s }
+  | I16X8_SHR_S; { I16x8 Shr_s }
+  | I32X4_ABS; { I32x4 Abs }
+  | I32X4_EXTEND_HIGH_I16X8_S; { I32x4 Extend_high_i16x8_s }
+  | I32X4_LE_S; { I32x4 Le_s }
+  | I64X2_GT_S; { I64x2 Gt_s }
+  | I64X2_SPLAT; { I64x2 Splat }
+  | I8X16_AVGR_U; { I8x16 Avgr_u }
+  | I8X16_LE_S; { I8x16 Le_s }
+  | I8X16_NARROW_I16X8_S; { I8x16 Narrow_i16x8_s }
+  | V128_ANDNOT; { V128 Andnot }
+  | V128_LOAD32X2_S; ~ = memidx; ~ = memarg; { V128 (Load32x2_s (memidx, memarg)) }
 
   | I32_CLZ; { I32 Clz }
   | I64_CLZ; { I64 Clz }
