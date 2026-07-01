@@ -323,12 +323,23 @@ type v128_instr =
   | And
   | Or
   | Any_true
+  | Load8_splat of (indice * memarg)
+  | Load8_lane of (indice * memarg * int)
+  | Load8x8_s of (indice * memarg)
+  | Load16_lane of (indice * memarg * int)
   | Load16x4_s of (indice * memarg)
   | Load16x4_u of (indice * memarg)
   | Load32_lane of (indice * memarg * int)
+  | Load32_zero of (indice * memarg)
+  | Load64_lane of (indice * memarg * int)
   | Load64_zero of (indice * memarg)
   | Load of (indice * memarg)
   | Store of (indice * memarg)
+  | Store8_lane of (indice * memarg * int)
+  | Store64_lane of (indice * memarg * int)
+  | Store32_zero of (indice * memarg)
+  | Store32_lane of (indice * memarg * int)
+  | Store16_lane of (indice * memarg * int)
 
 val pp_v128_instr : v128_instr Fmt.t
 
@@ -352,6 +363,8 @@ type i8x16_instr =
   | Splat
   | Shl
   | Min_s
+  | Extract_lane_s of int
+  | Add_sat_s
 
 val pp_i8x16_instr : i8x16_instr Fmt.t
 
@@ -369,6 +382,13 @@ type i16x8_instr =
   | Splat
   | Extract_lane_s of int
   | Extract_lane_u of int
+  | Q15mulr_sat_s
+  | Min_s
+  | Min
+  | Extmul_low_i8x16_s
+  | Extend_high_i8x16_s
+  | Extadd_pairwise_i8x16_s
+  | Add_sat_s
 
 val pp_i16x8_instr : i16x8_instr Fmt.t
 
@@ -392,6 +412,13 @@ type i32x4_instr =
   | Extend_high_i16x8_s
   | Extend_low_i16x8_u
   | Extend_high_i16x8_u
+  | Trunc_sat_f64x2_s_zero
+  | Trunc_sat_f32x4_s_zero
+  | Trunc_sat_f32x4_s
+  | Min_s
+  | Extmul_low_i16x8_s
+  | Extadd_pairwise_i16x8_s
+  | Dot_i16x8_s
 
 val pp_i32x4_instr : i32x4_instr Fmt.t
 
@@ -408,8 +435,29 @@ type i64x2_instr =
   | Ge_s
   | Splat
   | Extend_low_i32x4 of sx
+  | Extmul_low_i32x4_s
+  | Abs
 
 val pp_i64x2_instr : i64x2_instr Fmt.t
+
+type f32x4_instr =
+  | Pmin
+  | Min
+  | Eq
+  | Convert_i32x4_s
+  | Ceil
+  | Add
+
+val pp_f32x4_instr : f32x4_instr Fmt.t
+
+type f64x2_instr =
+  | Pmin
+  | Min
+  | Eq
+  | Ceil
+  | Add
+
+val pp_f64x2_instr : f64x2_instr Fmt.t
 
 (** Reference instructions *)
 type ref_instr =
@@ -500,6 +548,8 @@ type instr =
   | I16x8 of i16x8_instr
   | I32x4 of i32x4_instr
   | I64x2 of i64x2_instr
+  | F32x4 of f32x4_instr
+  | F64x2 of f64x2_instr
   | Ref of ref_instr
   | Local of local_instr
   | Global of global_instr

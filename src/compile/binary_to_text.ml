@@ -262,6 +262,7 @@ let convert_v128_instr : Binary.v128_instr -> Text.v128_instr = function
     let indice = convert_indice indice in
     let memarg = convert_memarg memarg in
     Store (indice, memarg)
+  | _ -> assert false
 
 let convert_ref_instr : Binary.ref_instr -> Text.ref_instr = function
   | Null heap_type -> Null (convert_heap_type heap_type)
@@ -381,6 +382,8 @@ let rec convert_instr : Binary.instr -> Text.instr = function
   | I16x8 i -> Text.I16x8 i
   | I32x4 i -> Text.I32x4 i
   | I64x2 i -> Text.I64x2 i
+  | F32x4 i -> Text.F32x4 i
+  | F64x2 i -> Text.F64x2 i
   | Ref i -> Ref (convert_ref_instr i)
   | Local i -> Local (convert_local_instr i)
   | Global i -> Global (convert_global_instr i)

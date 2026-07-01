@@ -696,12 +696,23 @@ type v128_instr =
   | And
   | Or
   | Any_true
+  | Load8_splat of (indice * memarg)
+  | Load8_lane of (indice * memarg * int)
+  | Load8x8_s of (indice * memarg)
+  | Load16_lane of (indice * memarg * int)
   | Load16x4_s of (indice * memarg)
   | Load16x4_u of (indice * memarg)
   | Load32_lane of (indice * memarg * int)
+  | Load32_zero of (indice * memarg)
+  | Load64_lane of (indice * memarg * int)
   | Load64_zero of (indice * memarg)
   | Load of (indice * memarg)
   | Store of (indice * memarg)
+  | Store8_lane of (indice * memarg * int)
+  | Store64_lane of (indice * memarg * int)
+  | Store32_zero of (indice * memarg)
+  | Store32_lane of (indice * memarg * int)
+  | Store16_lane of (indice * memarg * int)
 
 let pp_v128_instr ppf = function
   | Const n -> pf ppf "v128.const %a" Concrete_v128.pp n
@@ -721,6 +732,7 @@ let pp_v128_instr ppf = function
     pf ppf "v128.load%a%a" pp_indice_not0 indice pp_memarg memarg
   | Store (indice, memarg) ->
     pf ppf "v128.store%a%a" pp_indice_not0 indice pp_memarg memarg
+  | _ -> assert false
 
 (** I8x16 instructions *)
 type i8x16_instr =
@@ -742,6 +754,8 @@ type i8x16_instr =
   | Splat
   | Shl
   | Min_s
+  | Extract_lane_s of int
+  | Add_sat_s
 
 let pp_i8x16_instr ppf = function
   | Add -> pf ppf "i8x16.add"
@@ -769,6 +783,9 @@ let pp_i8x16_instr ppf = function
   | Splat -> pf ppf "i8x16.splat"
   | Shl -> pf ppf "i8x16.shl"
   | Min_s -> pf ppf "i8x16.min_s"
+  | Extract_lane_s lane_index -> pf ppf "i8x16.extract_lane_s %d" lane_index
+  | Add_sat_s -> pf ppf "i8x16.add_sat_s"
+  | _ -> .
 
 (** I16x8 instructions *)
 type i16x8_instr =
@@ -784,6 +801,13 @@ type i16x8_instr =
   | Splat
   | Extract_lane_s of int
   | Extract_lane_u of int
+  | Q15mulr_sat_s
+  | Min_s
+  | Min
+  | Extmul_low_i8x16_s
+  | Extend_high_i8x16_s
+  | Extadd_pairwise_i8x16_s
+  | Add_sat_s
 
 let pp_i16x8_instr ppf = function
   | Add -> pf ppf "i16x8.add"
@@ -802,6 +826,7 @@ let pp_i16x8_instr ppf = function
   | Splat -> pf ppf "i16x8.splat"
   | Extract_lane_s n -> pf ppf "i16x8.extract_lane_s %d" n
   | Extract_lane_u n -> pf ppf "i16x8.extract_lane_u %d" n
+  | _ -> assert false
 
 (* I32x4 instructions *)
 type i32x4_instr =
@@ -823,6 +848,13 @@ type i32x4_instr =
   | Extend_high_i16x8_s
   | Extend_low_i16x8_u
   | Extend_high_i16x8_u
+  | Trunc_sat_f64x2_s_zero
+  | Trunc_sat_f32x4_s_zero
+  | Trunc_sat_f32x4_s
+  | Min_s
+  | Extmul_low_i16x8_s
+  | Extadd_pairwise_i16x8_s
+  | Dot_i16x8_s
 
 let pp_i32x4_instr ppf = function
   | Add -> pf ppf "i32x4.add"
@@ -848,6 +880,7 @@ let pp_i32x4_instr ppf = function
   | Extend_high_i16x8_s -> pf ppf "i32x4.extend_high_i16x8_s"
   | Extend_low_i16x8_u -> pf ppf "i32x4.extend_low_i16x8_u"
   | Extend_high_i16x8_u -> pf ppf "i32x4.extend_high_i16x8_u"
+  | _ -> assert false
 
 (** I64x2 instructions *)
 type i64x2_instr =
@@ -862,6 +895,8 @@ type i64x2_instr =
   | Ge_s
   | Splat
   | Extend_low_i32x4 of sx
+  | Extmul_low_i32x4_s
+  | Abs
 
 let pp_i64x2_instr ppf = function
   | Add -> pf ppf "i64x2.add"
@@ -876,6 +911,26 @@ let pp_i64x2_instr ppf = function
   | Splat -> pf ppf "i64x2.splat"
   | Extend_low_i32x4 S -> pf ppf "i64x2.extend_low_i32x4_s"
   | Extend_low_i32x4 U -> pf ppf "i64x2.extend_low_i32x4_u"
+  | _ -> assert false
+
+type f32x4_instr =
+  | Pmin
+  | Min
+  | Eq
+  | Convert_i32x4_s
+  | Ceil
+  | Add
+
+let pp_f32x4_instr _ppf : f32x4_instr -> _ = function _ -> assert false
+
+type f64x2_instr =
+  | Pmin
+  | Min
+  | Eq
+  | Ceil
+  | Add
+
+let pp_f64x2_instr _ppf : f64x2_instr -> _ = function _ -> assert false
 
 (** Reference instructions *)
 type ref_instr =
@@ -1044,6 +1099,8 @@ type instr =
   | I16x8 of i16x8_instr
   | I32x4 of i32x4_instr
   | I64x2 of i64x2_instr
+  | F32x4 of f32x4_instr
+  | F64x2 of f64x2_instr
   | Ref of ref_instr
   | Local of local_instr
   | Global of global_instr
@@ -1094,6 +1151,8 @@ let rec pp_instr ~short ppf = function
   | I16x8 i -> pp_i16x8_instr ppf i
   | I32x4 i -> pp_i32x4_instr ppf i
   | I64x2 i -> pp_i64x2_instr ppf i
+  | F32x4 i -> pp_f32x4_instr ppf i
+  | F64x2 i -> pp_f64x2_instr ppf i
   | Ref i -> pp_ref_instr ppf i
   | Local i -> pp_local_instr ppf i
   | Global i -> pp_global_instr ppf i

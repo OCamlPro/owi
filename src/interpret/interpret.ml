@@ -827,6 +827,7 @@ struct
     | Load16x4_s _ -> raise @@ Failure "TODO (Load16x4_s)"
     | Load16x4_u _ -> raise @@ Failure "TODO (Load16x4_u)"
     | Any_true -> Stack.apply_v128_boolean stack V128.any_true |> Choice.return
+    | _ -> assert false
 
   let exec_i8x16_instr stack : Text.i8x16_instr -> _ Choice.t = function
     | Add -> raise @@ Failure "TODO (i8x16.add)"
@@ -851,6 +852,10 @@ struct
     | Shuffle _ -> raise @@ Failure "TODO (i8x16.shuffle)"
     | Shl -> raise @@ Failure "TODO (i8x16.shl)"
     | Min_s -> raise @@ Failure "TODO (i8x16.min_s)"
+    | Extract_lane_s _lane_index ->
+      raise @@ Failure "TODO (i8x16.extract_lane_s)"
+    | Add_sat_s -> raise @@ Failure "TODO (i8x16.add_sat_s)"
+    | _ -> .
 
   let exec_i16x8_instr stack : Text.i16x8_instr -> _ Choice.t = function
     | Add -> Stack.apply_v128_v128_v128 stack V128.I16x8.add |> Choice.return
@@ -869,6 +874,7 @@ struct
     | Ge _ -> raise @@ Failure "TODO (i16x8.ge)"
     | Extract_lane_s _ -> raise @@ Failure "TODO (i16x8.extract_lane_s)"
     | Extract_lane_u _ -> raise @@ Failure "TODO (i16x8.extract_lane_u)"
+    | _ -> assert false
 
   let exec_i32x4_instr stack : Text.i32x4_instr -> _ = function
     | Add -> Stack.apply_v128_v128_v128 stack V128.I32x4.add |> Choice.return
@@ -892,6 +898,7 @@ struct
     | Extend_high_i16x8_s -> raise @@ Failure "TODO (i32x4.Extend_high_i16x8_s)"
     | Extend_low_i16x8_u -> raise @@ Failure "TODO (i32x4.Extend_low_i16x8_u)"
     | Extend_high_i16x8_u -> raise @@ Failure "TODO (i32x4.Extend_high_i16x8_u)"
+    | _ -> assert false
 
   let exec_i64x2_instr stack : Text.i64x2_instr -> _ = function
     | Add -> Stack.apply_v128_v128_v128 stack V128.I64x2.add |> Choice.return
@@ -908,6 +915,13 @@ struct
     | Gt_s -> raise @@ Failure "TODO (i64x2.Gt_s)"
     | Le_s -> raise @@ Failure "TODO (i64x2.Le_s)"
     | Ge_s -> raise @@ Failure "TODO (i64x2.Ge_s)"
+    | _ -> assert false
+
+  let exec_f32x4_instr _stack : Text.f32x4_instr -> _ = function
+    | _ -> assert false
+
+  let exec_f64x2_instr _stack : Text.f64x2_instr -> _ = function
+    | _ -> assert false
 
   let exec_ref_instr env stack (i : Binary.ref_instr) =
     match i with
@@ -1521,6 +1535,12 @@ struct
       ret stack
     | I64x2 i ->
       let* stack = exec_i64x2_instr stack i in
+      ret stack
+    | F32x4 i ->
+      let* stack = exec_f32x4_instr stack i in
+      ret stack
+    | F64x2 i ->
+      let* stack = exec_f64x2_instr stack i in
       ret stack
     | Ref i ->
       let* stack = exec_ref_instr env stack i in

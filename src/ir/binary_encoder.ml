@@ -497,6 +497,7 @@ let write_v128_instr buf (i : Binary.v128_instr) =
   | Load32_lane _ | Load64_zero _ | Load _ | Store _ | Load16x4_s _
   | Load16x4_u _ ->
     raise @@ Failure "TODO"
+  | _ -> assert false
 
 let write_i8x16_instr buf : Text.i8x16_instr -> _ = function
   | Add -> write_fd buf 0x6E
@@ -521,6 +522,9 @@ let write_i8x16_instr buf : Text.i8x16_instr -> _ = function
   | Shuffle _ -> raise @@ Failure "TODO (i8x16.shuffle)"
   | Shl -> raise @@ Failure "TODO (i8x16.shl)"
   | Min_s -> raise @@ Failure "TODO (i8x16.min_s)"
+  | Extract_lane_s _lane_index -> raise @@ Failure "TODO (i8x16.extract_lane_s)"
+  | Add_sat_s -> raise @@ Failure "TODO (i8x16.add_sat_s)"
+  | _ -> .
 
 let write_i16x8_instr buf : Text.i16x8_instr -> _ = function
   | Eq -> write_fd buf 0x2D
@@ -539,6 +543,7 @@ let write_i16x8_instr buf : Text.i16x8_instr -> _ = function
   | Splat -> write_fd buf 0x10
   | Extract_lane_s _n -> raise @@ Failure "TODO"
   | Extract_lane_u _n -> raise @@ Failure "TODO"
+  | _ -> assert false
 
 let write_i32x4_instr buf : Text.i32x4_instr -> _ = function
   | Add -> write_fd buf 174
@@ -564,6 +569,7 @@ let write_i32x4_instr buf : Text.i32x4_instr -> _ = function
   | Extend_high_i16x8_s -> write_fd buf 0xA8
   | Extend_low_i16x8_u -> write_fd buf 0xA9
   | Extend_high_i16x8_u -> write_fd buf 0xAA
+  | _ -> assert false
 
 let write_i64x2_instr buf : Text.i64x2_instr -> _ = function
   | Add -> write_fd buf 0xCE
@@ -577,6 +583,13 @@ let write_i64x2_instr buf : Text.i64x2_instr -> _ = function
   | Ge_s -> write_fd buf 0xDB
   | Splat -> write_fd buf 0x12
   | Extend_low_i32x4 _ -> raise @@ Failure "TODO"
+  | _ -> assert false
+
+let write_f32x4_instr _buf : Text.f32x4_instr -> _ = function
+  | _ -> assert false
+
+let write_f64x2_instr _buf : Text.f64x2_instr -> _ = function
+  | _ -> assert false
 
 let write_ref_instr buf : Binary.ref_instr -> _ =
   let add_char c = Buffer.add_char buf c in
@@ -776,6 +789,8 @@ let rec write_instr buf instr =
   | I16x8 i -> write_i16x8_instr buf i
   | I32x4 i -> write_i32x4_instr buf i
   | I64x2 i -> write_i64x2_instr buf i
+  | F32x4 i -> write_f32x4_instr buf i
+  | F64x2 i -> write_f64x2_instr buf i
   | Ref i -> write_ref_instr buf i
   | Local i -> write_local_instr buf i
   | Global i -> write_global_instr buf i

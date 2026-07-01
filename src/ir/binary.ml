@@ -543,12 +543,23 @@ type v128_instr =
   | And
   | Or
   | Any_true
+  | Load8_splat of (indice * memarg)
+  | Load8_lane of (indice * memarg * int)
+  | Load8x8_s of (indice * memarg)
+  | Load16_lane of (indice * memarg * int)
   | Load16x4_s of (indice * memarg)
   | Load16x4_u of (indice * memarg)
   | Load32_lane of (indice * memarg * int)
+  | Load32_zero of (indice * memarg)
+  | Load64_lane of (indice * memarg * int)
   | Load64_zero of (indice * memarg)
   | Load of (indice * memarg)
   | Store of (indice * memarg)
+  | Store8_lane of (indice * memarg * int)
+  | Store64_lane of (indice * memarg * int)
+  | Store32_zero of (indice * memarg)
+  | Store32_lane of (indice * memarg * int)
+  | Store16_lane of (indice * memarg * int)
 
 let pp_v128_instr ppf = function
   | Const n -> pf ppf "v128.const %a" Concrete_v128.pp n
@@ -568,6 +579,7 @@ let pp_v128_instr ppf = function
     pf ppf "v128.load%a%a" pp_indice_not0 indice pp_memarg memarg
   | Store (indice, memarg) ->
     pf ppf "v128.store%a%a" pp_indice_not0 indice pp_memarg memarg
+  | _ -> assert false
 
 (** Reference instructions *)
 type ref_instr =
@@ -724,6 +736,8 @@ type instr =
   | I16x8 of Text.i16x8_instr
   | I32x4 of Text.i32x4_instr
   | I64x2 of Text.i64x2_instr
+  | F32x4 of Text.f32x4_instr
+  | F64x2 of Text.f64x2_instr
   | Ref of ref_instr
   | Local of local_instr
   | Global of global_instr
@@ -775,6 +789,8 @@ let rec pp_instr ~short ppf = function
   | I16x8 i -> Text.pp_i16x8_instr ppf i
   | I32x4 i -> Text.pp_i32x4_instr ppf i
   | I64x2 i -> Text.pp_i64x2_instr ppf i
+  | F32x4 i -> Text.pp_f32x4_instr ppf i
+  | F64x2 i -> Text.pp_f64x2_instr ppf i
   | Ref i -> pp_ref_instr ppf i
   | Local i -> pp_local_instr ppf i
   | Global i -> pp_global_instr ppf i
@@ -855,8 +871,9 @@ and iter_instr f instr =
   Annotated.iter
     (function
       | I32 _ | I64 _ | F32 _ | F64 _ | V128 _ | I8x16 _ | I16x8 _ | I32x4 _
-      | I64x2 _ | Ref _ | Local _ | Global _ | Table _ | Elem _ | Memory _
-      | Data _ | Drop | Select _ | Nop | Unreachable | Br _ | Br_if _
+      | I64x2 _ | F32x4 _ | F64x2 _ | Ref _ | Local _ | Global _ | Table _
+      | Elem _ | Memory _ | Data _ | Drop | Select _ | Nop | Unreachable | Br _
+      | Br_if _
       | Br_table (_, _)
       | Br_on_null _ | Br_on_non_null _
       | Br_on_cast (_, _, _)

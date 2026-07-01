@@ -304,6 +304,7 @@ let rewrite_v128_instr assigned : Text.v128_instr -> Binary.v128_instr Result.t
     let* memarg = rewrite_memarg memarg in
     let+ indice = Assigned.find_memory assigned indice in
     (Store (indice, memarg) : Binary.v128_instr)
+  | _ -> assert false
 
 let rewrite_ref_instr assigned : Text.ref_instr -> Binary.ref_instr Result.t =
   function
@@ -497,6 +498,8 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
     | I16x8 i -> Ok (Binary.I16x8 i)
     | I32x4 i -> Ok (Binary.I32x4 i)
     | I64x2 i -> Ok (Binary.I64x2 i)
+    | F32x4 i -> Ok (Binary.F32x4 i)
+    | F64x2 i -> Ok (Binary.F64x2 i)
     | Ref i ->
       let+ i = rewrite_ref_instr assigned i in
       Binary.Ref i
