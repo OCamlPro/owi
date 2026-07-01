@@ -603,6 +603,8 @@ module Text : sig
     | Bitmask
     | Avgr_u
     | Abs
+    | Replace_lane of int
+    | Narrow_i32x4_s
 
   (* I32x4 instructions *)
   type i32x4_instr =
@@ -649,6 +651,7 @@ module Text : sig
     | Max_u
     | Abs
     | All_true
+    | Bitmask
 
   (** I64x2 instructions *)
   type i64x2_instr =
@@ -732,6 +735,7 @@ module Text : sig
     | Neg
     | Sqrt
     | Splat
+    | Extract_lane of int
 
   val pp_f64x2_instr : f64x2_instr Fmt.t
 

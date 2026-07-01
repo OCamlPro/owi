@@ -671,6 +671,16 @@ let keywords =
      ; ("i8x16.narrow_i16x8_u", I8X16_NARROW_I16X8_U)
      ; ("i8x16.replace_lane", I8X16_REPLACE_LANE)
      ; ("v128.load32x2_u", V128_LOAD32X2_U)
+     ; ("i32x4.shl", I32X4_SHL)
+     ; ("i32x4.bitmask", I32X4_BITMASK)
+     ; ("i16x8.narrow_i32x4_s", I16X8_NARROW_I32X4_S)
+     ; ("i16x8.gt_s", I16X8_GT_S)
+     ; ("i32x4.gt_s", I32X4_GT_S)
+     ; ("i8x16.popcnt", I8X16_POPCNT)
+     ; ("i8x16.gt_s", I8X16_GT_S)
+     ; ("i32x4.extend_low_i16x8_s", I32X4_EXTEND_LOW_I16X8_S)
+     ; ("i16x8.replace_lane", I16X8_REPLACE_LANE)
+     ; ("f64x2.extract_lane", F64X2_EXTRACT_LANE)
     |];
   tbl
 

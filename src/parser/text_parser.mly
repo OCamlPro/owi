@@ -171,6 +171,16 @@
  I8X16_NARROW_I16X8_U
  I8X16_REPLACE_LANE
  V128_LOAD32X2_U
+ I32X4_SHL
+ I32X4_BITMASK
+ I16X8_NARROW_I32X4_S
+ I16X8_GT_S
+ I32X4_GT_S
+ I8X16_POPCNT
+ I8X16_GT_S
+ I32X4_EXTEND_LOW_I16X8_S
+ I16X8_REPLACE_LANE
+ F64X2_EXTRACT_LANE
 
 %{
 
@@ -716,6 +726,17 @@ let plain_instr :=
   | I8X16_NARROW_I16X8_U; { I8x16 Narrow_i16x8_u }
   | I8X16_REPLACE_LANE; n = NUM; { I8x16 (Replace_lane (int_of_string n)) }
   | V128_LOAD32X2_U; ~ = memidx; ~ = memarg; { V128 (Load32x2_u (memidx, memarg)) }
+
+  | I32X4_SHL; { I32x4 Shl }
+  | I32X4_BITMASK; { I32x4 Bitmask }
+  | I16X8_NARROW_I32X4_S; { I16x8 Narrow_i32x4_s }
+  | I16X8_GT_S; { I16x8 Gt_s }
+  | I32X4_GT_S; { I32x4 Gt_s }
+  | I8X16_POPCNT; { I8x16 Popcnt }
+  | I8X16_GT_S; { I8x16 Gt_s }
+  | I32X4_EXTEND_LOW_I16X8_S; { I32x4 Extend_low_i16x8_s }
+  | I16X8_REPLACE_LANE; n = NUM; { I16x8 (Replace_lane (int_of_string n)) }
+  | F64X2_EXTRACT_LANE; n = NUM; { F64x2 (Extract_lane (int_of_string n)) }
 
   | I32_CLZ; { I32 Clz }
   | I64_CLZ; { I64 Clz }

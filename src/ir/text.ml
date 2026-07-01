@@ -910,6 +910,8 @@ type i16x8_instr =
   | Bitmask
   | Avgr_u
   | Abs
+  | Replace_lane of int
+  | Narrow_i32x4_s
 
 let pp_i16x8_instr ppf = function
   | Add -> pf ppf "i16x8.add"
@@ -975,6 +977,7 @@ type i32x4_instr =
   | Max_u
   | Abs
   | All_true
+  | Bitmask
 
 let pp_i32x4_instr ppf = function
   | Add -> pf ppf "i32x4.add"
@@ -1099,6 +1102,7 @@ type f64x2_instr =
   | Neg
   | Sqrt
   | Splat
+  | Extract_lane of int
 
 let pp_f64x2_instr _ppf : f64x2_instr -> _ = function _ -> assert false
 
