@@ -190,6 +190,15 @@
  I64X2_ALL_TRUE
  I8X16_GT_U
 
+ F32X4_REPLACE_LANE
+ F64X2_PROMOTE_LOW_F32X4
+ I16X8_GE_S
+ I32X4_GE_S
+ I32X4_SHR_U
+ I64X2_BITMASK
+ I64X2_EXTEND_HIGH_I32X4_S
+ I8X16_GE_S
+
 %{
 
 open Wast
@@ -754,6 +763,14 @@ let plain_instr :=
   | I32X4_SHR_S; { I32x4 Shr_s }
   | I64X2_ALL_TRUE; { I64x2 All_true }
   | I8X16_GT_U; { I8x16 Gt_u }
+  | F32X4_REPLACE_LANE; n = NUM; { F32x4 (Replace_lane (int_of_string n)) }
+  | F64X2_PROMOTE_LOW_F32X4; { F64x2 Promote_low_f32x4 }
+  | I16X8_GE_S; { I16x8 Ge_s }
+  | I32X4_GE_S; { I32x4 Ge_s }
+  | I32X4_SHR_U; { I32x4 Shr_u }
+  | I64X2_BITMASK; { I64x2 Bitmask }
+  | I64X2_EXTEND_HIGH_I32X4_S; { I64x2 Extend_high_i32x4_s }
+  | I8X16_GE_S; { I8x16 Ge_s }
 
   | I32_CLZ; { I32 Clz }
   | I64_CLZ; { I64 Clz }

@@ -1020,6 +1020,8 @@ type i64x2_instr =
   | Splat
   | Extend_low_i32x4_s
   | Extend_low_i32x4_u
+  | Extend_high_i32x4_s
+  | Extend_high_i32x4_u
   | Extmul_low_i32x4_s
   | Extmul_low_i32x4_u
   | Extmul_high_i32x4_s
@@ -1028,6 +1030,7 @@ type i64x2_instr =
   | Neg
   | Extract_lane of int
   | All_true
+  | Bitmask
 
 let pp_i64x2_instr ppf = function
   | Add -> pf ppf "i64x2.add"
@@ -1074,6 +1077,7 @@ type f32x4_instr =
   | Neg
   | Extract_lane of int
   | Sqrt
+  | Replace_lane of int
 
 let pp_f32x4_instr _ppf : f32x4_instr -> _ = function _ -> assert false
 
@@ -1105,6 +1109,8 @@ type f64x2_instr =
   | Sqrt
   | Splat
   | Extract_lane of int
+  | Promote_low_f32x4
+  | Replace_lane of int
 
 let pp_f64x2_instr _ppf : f64x2_instr -> _ = function _ -> assert false
 

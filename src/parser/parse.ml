@@ -557,6 +557,14 @@ let token_to_string : Text_parser.token -> _ = function
   | I32X4_SHR_S -> "i32x4.shr_s"
   | I64X2_ALL_TRUE -> "i64x2.all_true"
   | I8X16_GT_U -> "i8x16.gt_u"
+  | F32X4_REPLACE_LANE -> "f32x4.replace_lane"
+  | F64X2_PROMOTE_LOW_F32X4 -> "f64x2.promote_low_f32x4"
+  | I16X8_GE_S -> "i16x8.ge_s"
+  | I32X4_GE_S -> "i32x4.ge_s"
+  | I32X4_SHR_U -> "i32x4.shr_u"
+  | I64X2_BITMASK -> "i64x2.bitmask"
+  | I64X2_EXTEND_HIGH_I32X4_S -> "i64x2.extend_high_i32x4_s"
+  | I8X16_GE_S -> "i8x16.ge_s"
 
 module Make (M : sig
   type t

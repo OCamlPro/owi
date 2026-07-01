@@ -529,6 +529,8 @@ type i64x2_instr =
   | Splat
   | Extend_low_i32x4_s
   | Extend_low_i32x4_u
+  | Extend_high_i32x4_s
+  | Extend_high_i32x4_u
   | Extmul_low_i32x4_s
   | Extmul_low_i32x4_u
   | Extmul_high_i32x4_s
@@ -537,6 +539,7 @@ type i64x2_instr =
   | Neg
   | Extract_lane of int
   | All_true
+  | Bitmask
 
 val pp_i64x2_instr : i64x2_instr Fmt.t
 
@@ -570,6 +573,7 @@ type f32x4_instr =
   | Neg
   | Extract_lane of int
   | Sqrt
+  | Replace_lane of int
 
 val pp_f32x4_instr : f32x4_instr Fmt.t
 
@@ -601,6 +605,8 @@ type f64x2_instr =
   | Sqrt
   | Splat
   | Extract_lane of int
+  | Promote_low_f32x4
+  | Replace_lane of int
 
 val pp_f64x2_instr : f64x2_instr Fmt.t
 
