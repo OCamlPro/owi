@@ -105,6 +105,36 @@
  V128_BITSELECT
  I32X4_EXTRACT_LANE
  I32X4_SPLAT
+ F32X4_DIV
+ F32X4_LE
+ F32X4_NEAREST
+ F32X4_SPLAT
+ F64X2_CONVERT_LOW_I32X4_U
+ F64X2_DIV
+ F64X2_LE
+ F64X2_NEAREST
+ I16X8_ALL_TRUE
+ I16X8_EXTEND_LOW_I8X16_U
+ I16X8_EXTMUL_HIGH_I8X16_U
+ I16X8_EXTRACT_LANE_U
+ I16X8_LT_U
+ I16X8_MAX_U
+ I16X8_NEG
+ I16X8_SHL
+ I16X8_SUB_SAT_U
+ I32X4_EXTMUL_HIGH_I16X8_U
+ I32X4_LT_U
+ I32X4_MAX_U
+ I64X2_EXTMUL_HIGH_I32X4_U
+ I64X2_EXTRACT_LANE
+ I64X2_LE_S
+ I8X16_LT_U
+ I8X16_MAX_U
+ I8X16_SUB_SAT_U
+ I8X16_SWIZZLE
+ V128_LOAD16X4_U
+ V128_LOAD64_SPLAT
+ V128_XOR
 
 %{
 
@@ -584,6 +614,36 @@ let plain_instr :=
   | V128_BITSELECT; { V128 Bitselect }
   | I32X4_EXTRACT_LANE; n = NUM; { I32x4 (Extract_lane (int_of_string n)) }
   | I32X4_SPLAT; { I32x4 Splat }
+  | F32X4_DIV; { F32x4 Div }
+  | F32X4_LE; { F32x4 Le }
+  | F32X4_NEAREST; { F32x4 Nearest }
+  | F32X4_SPLAT; { F32x4 Splat }
+  | F64X2_CONVERT_LOW_I32X4_U; { F64x2 Convert_low_i32x4_u }
+  | F64X2_DIV; { F64x2 Div }
+  | F64X2_LE; { F64x2 Le }
+  | F64X2_NEAREST; { F64x2 Nearest }
+  | I16X8_ALL_TRUE; { I16x8 All_true }
+  | I16X8_EXTEND_LOW_I8X16_U; { I16x8 Extend_low_i8x16_u }
+  | I16X8_EXTMUL_HIGH_I8X16_U; { I16x8 Extmul_high_i8x16_u }
+  | I16X8_EXTRACT_LANE_U; n = NUM; { I16x8 (Extract_lane_u (int_of_string n)) }
+  | I16X8_LT_U; { I16x8 Lt_u }
+  | I16X8_MAX_U; { I16x8 Max_u }
+  | I16X8_NEG; { I16x8 Neg }
+  | I16X8_SHL; { I16x8 Shl }
+  | I16X8_SUB_SAT_U; { I16x8 Sub_sat_u }
+  | I32X4_EXTMUL_HIGH_I16X8_U; { I32x4 Extmul_high_i16x8_u }
+  | I32X4_LT_U; { I32x4 Lt_u }
+  | I32X4_MAX_U; { I32x4 Max_u }
+  | I64X2_EXTMUL_HIGH_I32X4_U; { I64x2 Extmul_high_i32x4_u }
+  | I64X2_EXTRACT_LANE; n = NUM; { I64x2 (Extract_lane (int_of_string n)) }
+  | I64X2_LE_S; { I64x2 Le_s }
+  | I8X16_LT_U; { I8x16 Lt_u }
+  | I8X16_MAX_U; { I8x16 Max_u }
+  | I8X16_SUB_SAT_U; { I8x16 Sub_sat_u }
+  | I8X16_SWIZZLE; { I8x16 Swizzle }
+  | V128_LOAD16X4_U; ~ = memidx; ~ = memarg; { V128 (Load16x4_u (memidx, memarg)) }
+  | V128_LOAD64_SPLAT; ~ = memidx; ~ = memarg; { V128 (Load64_splat (memidx, memarg)) }
+  | V128_XOR; { V128 Xor }
 
   | I32_CLZ; { I32 Clz }
   | I64_CLZ; { I64 Clz }
