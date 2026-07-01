@@ -605,6 +605,7 @@ module Text : sig
     | Abs
     | Replace_lane of int
     | Narrow_i32x4_s
+    | Narrow_i32x4_u
 
   (* I32x4 instructions *)
   type i32x4_instr =
@@ -674,6 +675,7 @@ module Text : sig
     | Abs
     | Neg
     | Extract_lane of int
+    | All_true
 
   type f32x4_instr =
     | Pmin

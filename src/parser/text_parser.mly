@@ -181,6 +181,14 @@
  I32X4_EXTEND_LOW_I16X8_S
  I16X8_REPLACE_LANE
  F64X2_EXTRACT_LANE
+ I16X8_GT_U
+ I16X8_NARROW_I32X4_U
+ I32X4_EXTEND_LOW_I16X8_U
+ I32X4_GT_U
+ I32X4_REPLACE_LANE
+ I32X4_SHR_S
+ I64X2_ALL_TRUE
+ I8X16_GT_U
 
 %{
 
@@ -737,6 +745,15 @@ let plain_instr :=
   | I32X4_EXTEND_LOW_I16X8_S; { I32x4 Extend_low_i16x8_s }
   | I16X8_REPLACE_LANE; n = NUM; { I16x8 (Replace_lane (int_of_string n)) }
   | F64X2_EXTRACT_LANE; n = NUM; { F64x2 (Extract_lane (int_of_string n)) }
+
+  | I16X8_GT_U; { I16x8 Gt_u }
+  | I16X8_NARROW_I32X4_U; { I16x8 Narrow_i32x4_u }
+  | I32X4_EXTEND_LOW_I16X8_U; { I32x4 Extend_low_i16x8_u }
+  | I32X4_GT_U; { I32x4 Gt_u }
+  | I32X4_REPLACE_LANE; n = NUM; { I32x4 (Replace_lane (int_of_string n)) }
+  | I32X4_SHR_S; { I32x4 Shr_s }
+  | I64X2_ALL_TRUE; { I64x2 All_true }
+  | I8X16_GT_U; { I8x16 Gt_u }
 
   | I32_CLZ; { I32 Clz }
   | I64_CLZ; { I64 Clz }

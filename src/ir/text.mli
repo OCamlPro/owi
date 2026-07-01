@@ -462,6 +462,7 @@ type i16x8_instr =
   | Abs
   | Replace_lane of int
   | Narrow_i32x4_s
+  | Narrow_i32x4_u
 
 val pp_i16x8_instr : i16x8_instr Fmt.t
 
@@ -535,6 +536,7 @@ type i64x2_instr =
   | Abs
   | Neg
   | Extract_lane of int
+  | All_true
 
 val pp_i64x2_instr : i64x2_instr Fmt.t
 

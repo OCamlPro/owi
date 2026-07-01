@@ -912,6 +912,7 @@ type i16x8_instr =
   | Abs
   | Replace_lane of int
   | Narrow_i32x4_s
+  | Narrow_i32x4_u
 
 let pp_i16x8_instr ppf = function
   | Add -> pf ppf "i16x8.add"
@@ -1026,6 +1027,7 @@ type i64x2_instr =
   | Abs
   | Neg
   | Extract_lane of int
+  | All_true
 
 let pp_i64x2_instr ppf = function
   | Add -> pf ppf "i64x2.add"
