@@ -565,6 +565,9 @@ let keywords : (string * Text_parser.token) Array.t =
    ; ("f64x2.replace_lane", F64X2_REPLACE_LANE)
    ; ("i64x2.extend_low_i32x4_s", I64X2_EXTEND_LOW_I32X4_S)
    ; ("i64x2.shr_s", I64X2_SHR_S)
+   ; ("i64x2.shr_u", I64X2_SHR_U)
+   ; ("i64x2.extend_low_i32x4_u", I64X2_EXTEND_LOW_I32X4_U)
+   ; ("i8x16.shuffle", I8X16_SHUFFLE)
   |]
 
 let string_to_token = Hashtbl.create 512
