@@ -309,25 +309,6 @@ let symbolic_parameters default_entry_point =
   ; workspace
   }
 
-(* owi drun *)
-
-let drun_info =
-  let doc = "Run the denotational interpreter" in
-  let man = [] @ shared_man in
-  Cmd.info "drun" ~version ~doc ~sdocs ~man
-
-let drun_cmd =
-  let+ source_file
-  and+ unsafe
-  and+ interactive =
-    let doc =
-      "enable interactive mode (pressing space after each instruction to \
-       continue)"
-    in
-    Arg.(value & flag & info [ "interactive" ] ~doc)
-  and+ () = setup_log in
-  Cmd_drun.cmd ~source_file ~interactive ~unsafe
-
 (* owi abs *)
 
 let abs_info =
@@ -749,7 +730,6 @@ let cli =
   in
   Cmd.group info ~default
     [ Cmd.group analyze_info [ Cmd.v cg_info cg_cmd; Cmd.v cfg_info cfg_cmd ]
-    ; Cmd.v drun_info drun_cmd
     ; Cmd.v abs_info abs_cmd
     ; Cmd.v c_info c_cmd
     ; Cmd.v cpp_info cpp_cmd

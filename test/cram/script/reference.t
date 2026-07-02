@@ -71,7 +71,65 @@
   $ owi script --no-exhaustion reference/return.wast
   $ owi script --no-exhaustion reference/select.wast
   $ owi script --no-exhaustion reference/skip-stack-guard-page.wast
+  $ owi script --no-exhaustion reference/simd_address.wast
+  $ owi script --no-exhaustion reference/simd_align.wast
+  $ owi script --no-exhaustion reference/simd_bit_shift.wast
+  $ owi script --no-exhaustion reference/simd_bitwise.wast
+  $ owi script --no-exhaustion reference/simd_boolean.wast
   $ owi script --no-exhaustion reference/simd_const.wast
+  $ owi script --no-exhaustion reference/simd_conversions.wast
+  $ owi script --no-exhaustion reference/simd_f32x4_arith.wast
+  $ owi script --no-exhaustion reference/simd_f32x4_cmp.wast
+  $ owi script --no-exhaustion reference/simd_f32x4_pmin_pmax.wast
+  $ owi script --no-exhaustion reference/simd_f32x4_rounding.wast
+  $ owi script --no-exhaustion reference/simd_f32x4.wast
+  $ owi script --no-exhaustion reference/simd_f64x2_arith.wast
+  $ owi script --no-exhaustion reference/simd_f64x2_cmp.wast
+  $ owi script --no-exhaustion reference/simd_f64x2_pmin_pmax.wast
+  $ owi script --no-exhaustion reference/simd_f64x2_rounding.wast
+  $ owi script --no-exhaustion reference/simd_f64x2.wast
+  $ owi script --no-exhaustion reference/simd_i16x8_arith2.wast
+  $ owi script --no-exhaustion reference/simd_i16x8_arith.wast
+  $ owi script --no-exhaustion reference/simd_i16x8_cmp.wast
+  $ owi script --no-exhaustion reference/simd_i16x8_extadd_pairwise_i8x16.wast
+  $ owi script --no-exhaustion reference/simd_i16x8_extmul_i8x16.wast
+  $ owi script --no-exhaustion reference/simd_i16x8_q15mulr_sat_s.wast
+  $ owi script --no-exhaustion reference/simd_i16x8_sat_arith.wast
+  $ owi script --no-exhaustion reference/simd_i32x4_arith2.wast
+  $ owi script --no-exhaustion reference/simd_i32x4_arith.wast
+  $ owi script --no-exhaustion reference/simd_i32x4_cmp.wast
+  $ owi script --no-exhaustion reference/simd_i32x4_dot_i16x8.wast
+  $ owi script --no-exhaustion reference/simd_i32x4_extadd_pairwise_i16x8.wast
+  $ owi script --no-exhaustion reference/simd_i32x4_extmul_i16x8.wast
+  $ owi script --no-exhaustion reference/simd_i32x4_trunc_sat_f32x4.wast
+  $ owi script --no-exhaustion reference/simd_i32x4_trunc_sat_f64x2.wast
+  $ owi script --no-exhaustion reference/simd_i64x2_arith2.wast
+  $ owi script --no-exhaustion reference/simd_i64x2_arith.wast
+  $ owi script --no-exhaustion reference/simd_i64x2_cmp.wast
+  $ owi script --no-exhaustion reference/simd_i64x2_extmul_i32x4.wast
+  $ owi script --no-exhaustion reference/simd_i8x16_arith2.wast
+  $ owi script --no-exhaustion reference/simd_i8x16_arith.wast
+  $ owi script --no-exhaustion reference/simd_i8x16_cmp.wast
+  $ owi script --no-exhaustion reference/simd_i8x16_sat_arith.wast
+  $ owi script --no-exhaustion reference/simd_int_to_int_extend.wast
+  $ owi script --no-exhaustion reference/simd_lane.wast
+  $ owi script --no-exhaustion reference/simd_linking.wast
+  $ owi script --no-exhaustion reference/simd_load16_lane.wast
+  $ owi script --no-exhaustion reference/simd_load32_lane.wast
+  $ owi script --no-exhaustion reference/simd_load64_lane.wast
+  $ owi script --no-exhaustion reference/simd_load8_lane.wast
+  $ owi script --no-exhaustion reference/simd_load_extend.wast
+  $ owi script --no-exhaustion reference/simd_load_splat.wast
+  $ owi script --no-exhaustion reference/simd_load.wast
+  $ owi script --no-exhaustion reference/simd_load_zero.wast
+  $ owi script --no-exhaustion reference/simd_memory-multi.wast
+  $ owi script --no-exhaustion reference/simd_select.wast
+  $ owi script --no-exhaustion reference/simd_splat.wast
+  $ owi script --no-exhaustion reference/simd_store16_lane.wast
+  $ owi script --no-exhaustion reference/simd_store32_lane.wast
+  $ owi script --no-exhaustion reference/simd_store64_lane.wast
+  $ owi script --no-exhaustion reference/simd_store8_lane.wast
+  $ owi script --no-exhaustion reference/simd_store.wast
   $ owi script --no-exhaustion reference/stack.wast
   $ owi script --no-exhaustion reference/start.wast
   1
@@ -158,8 +216,6 @@
   $ owi script --no-exhaustion reference/memory_trap1.wast
   $ owi script --no-exhaustion reference/memory-multi.wast
   $ owi script --no-exhaustion reference/memory.wast
-;  $ owi script --no-exhaustion reference/simd_memory-multi.wast
-; TODO: simd instructions are not yet fully supported
   $ owi script --no-exhaustion reference/start0.wast
   $ owi script --no-exhaustion reference/store.wast
   $ owi script --no-exhaustion reference/store0.wast

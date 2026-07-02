@@ -102,31 +102,42 @@ type i32_instr =
   | Add
   | Sub
   | Mul
-  | Div of Text.sx
-  | Rem of Text.sx
+  | Div_s
+  | Div_u
+  | Rem_s
+  | Rem_u
   | And
   | Or
   | Xor
   | Shl
-  | Shr of Text.sx
+  | Shr_s
+  | Shr_u
   | Rotl
   | Rotr
   | Eqz
   | Eq
   | Ne
-  | Lt of Text.sx
-  | Gt of Text.sx
-  | Le of Text.sx
-  | Ge of Text.sx
+  | Lt_s
+  | Lt_u
+  | Gt_s
+  | Gt_u
+  | Le_s
+  | Le_u
+  | Ge_s
+  | Ge_u
   | Extend8_s
   | Extend16_s
   | Wrap_i64
-  | Trunc_f of Text.nn * Text.sx
-  | Trunc_sat_f of Text.nn * Text.sx
+  | Trunc_f_s of Text.nn
+  | Trunc_f_u of Text.nn
+  | Trunc_sat_f_s of Text.nn
+  | Trunc_sat_f_u of Text.nn
   | Reinterpret_f of Text.nn
   | Load of indice * memarg
-  | Load8 of indice * Text.sx * memarg
-  | Load16 of indice * Text.sx * memarg
+  | Load8_s of indice * memarg
+  | Load8_u of indice * memarg
+  | Load16_s of indice * memarg
+  | Load16_u of indice * memarg
   | Store of indice * memarg
   | Store8 of indice * memarg
   | Store16 of indice * memarg
@@ -143,33 +154,46 @@ type i64_instr =
   | Add
   | Sub
   | Mul
-  | Div of Text.sx
-  | Rem of Text.sx
+  | Div_s
+  | Div_u
+  | Rem_s
+  | Rem_u
   | And
   | Or
   | Xor
   | Shl
-  | Shr of Text.sx
+  | Shr_s
+  | Shr_u
   | Rotl
   | Rotr
   | Eqz
   | Eq
   | Ne
-  | Lt of Text.sx
-  | Gt of Text.sx
-  | Le of Text.sx
-  | Ge of Text.sx
+  | Lt_s
+  | Lt_u
+  | Gt_s
+  | Gt_u
+  | Le_s
+  | Le_u
+  | Ge_s
+  | Ge_u
   | Extend8_s
   | Extend16_s
   | Extend32_s
-  | Extend_i32 of Text.sx
-  | Trunc_f of Text.nn * Text.sx
-  | Trunc_sat_f of Text.nn * Text.sx
+  | Extend_i32_s
+  | Extend_i32_u
+  | Trunc_f_s of Text.nn
+  | Trunc_f_u of Text.nn
+  | Trunc_sat_f_s of Text.nn
+  | Trunc_sat_f_u of Text.nn
   | Reinterpret_f of Text.nn
   | Load of indice * memarg
-  | Load8 of indice * Text.sx * memarg
-  | Load16 of indice * Text.sx * memarg
-  | Load32 of indice * Text.sx * memarg
+  | Load8_s of indice * memarg
+  | Load8_u of indice * memarg
+  | Load16_s of indice * memarg
+  | Load16_u of indice * memarg
+  | Load32_s of indice * memarg
+  | Load32_u of indice * memarg
   | Store of indice * memarg
   | Store8 of indice * memarg
   | Store16 of indice * memarg
@@ -200,7 +224,8 @@ type f32_instr =
   | Le
   | Ge
   | Demote_f64
-  | Convert_i of Text.nn * Text.sx
+  | Convert_i_s of Text.nn
+  | Convert_i_u of Text.nn
   | Reinterpret_i of Text.nn
   | Load of indice * memarg
   | Store of indice * memarg
@@ -230,7 +255,8 @@ type f64_instr =
   | Le
   | Ge
   | Promote_f32
-  | Convert_i of Text.nn * Text.sx
+  | Convert_i_s of Text.nn
+  | Convert_i_u of Text.nn
   | Reinterpret_i of Text.nn
   | Load of indice * memarg
   | Store of indice * memarg
@@ -242,12 +268,32 @@ type v128_instr =
   | And
   | Or
   | Any_true
+  | Load8_splat of (indice * memarg)
+  | Load8_lane of (indice * memarg * int)
+  | Load8x8_s of (indice * memarg)
+  | Load8x8_u of (indice * memarg)
+  | Load16_splat of (indice * memarg)
+  | Load16_lane of (indice * memarg * int)
   | Load16x4_s of (indice * memarg)
   | Load16x4_u of (indice * memarg)
+  | Load32_splat of (indice * memarg)
   | Load32_lane of (indice * memarg * int)
+  | Load32_zero of (indice * memarg)
+  | Load64_splat of (indice * memarg)
+  | Load64_lane of (indice * memarg * int)
   | Load64_zero of (indice * memarg)
   | Load of (indice * memarg)
   | Store of (indice * memarg)
+  | Store8_lane of (indice * memarg * int)
+  | Store64_lane of (indice * memarg * int)
+  | Store32_zero of (indice * memarg)
+  | Store32_lane of (indice * memarg * int)
+  | Store16_lane of (indice * memarg * int)
+  | Bitselect
+  | Xor
+  | Load32x2_s of (indice * memarg)
+  | Load32x2_u of (indice * memarg)
+  | Andnot
 
 val pp_v128_instr : v128_instr Fmt.t
 
@@ -333,6 +379,8 @@ type instr =
   | I16x8 of Text.i16x8_instr
   | I32x4 of Text.i32x4_instr
   | I64x2 of Text.i64x2_instr
+  | F32x4 of Text.f32x4_instr
+  | F64x2 of Text.f64x2_instr
   | Ref of ref_instr
   | Local of local_instr
   | Global of global_instr

@@ -55,12 +55,6 @@ type nonrec fshape =
   | F32x4
   | F64x8
 
-type nonrec sx =
-  | U
-  | S
-
-val pp_sx : sx Fmt.t
-
 type nonrec memarg =
   { offset : string option
   ; align : string option
@@ -185,31 +179,42 @@ type i32_instr =
   | Add
   | Sub
   | Mul
-  | Div of sx
-  | Rem of sx
+  | Div_s
+  | Div_u
+  | Rem_s
+  | Rem_u
   | And
   | Or
   | Xor
   | Shl
-  | Shr of sx
+  | Shr_s
+  | Shr_u
   | Rotl
   | Rotr
   | Eqz
   | Eq
   | Ne
-  | Lt of sx
-  | Gt of sx
-  | Le of sx
-  | Ge of sx
+  | Lt_s
+  | Lt_u
+  | Gt_s
+  | Gt_u
+  | Le_s
+  | Le_u
+  | Ge_s
+  | Ge_u
   | Extend8_s
   | Extend16_s
   | Wrap_i64
-  | Trunc_f of nn * sx
-  | Trunc_sat_f of nn * sx
+  | Trunc_f_s of nn
+  | Trunc_f_u of nn
+  | Trunc_sat_f_s of nn
+  | Trunc_sat_f_u of nn
   | Reinterpret_f of nn
   | Load of indice * memarg
-  | Load8 of indice * sx * memarg
-  | Load16 of indice * sx * memarg
+  | Load8_s of indice * memarg
+  | Load8_u of indice * memarg
+  | Load16_s of indice * memarg
+  | Load16_u of indice * memarg
   | Store of indice * memarg
   | Store8 of indice * memarg
   | Store16 of indice * memarg
@@ -224,33 +229,46 @@ type i64_instr =
   | Add
   | Sub
   | Mul
-  | Div of sx
-  | Rem of sx
+  | Div_s
+  | Div_u
+  | Rem_s
+  | Rem_u
   | And
   | Or
   | Xor
   | Shl
-  | Shr of sx
+  | Shr_s
+  | Shr_u
   | Rotl
   | Rotr
   | Eqz
   | Eq
   | Ne
-  | Lt of sx
-  | Gt of sx
-  | Le of sx
-  | Ge of sx
+  | Lt_s
+  | Lt_u
+  | Gt_s
+  | Gt_u
+  | Le_s
+  | Le_u
+  | Ge_s
+  | Ge_u
   | Extend8_s
   | Extend16_s
   | Extend32_s
-  | Extend_i32 of sx
-  | Trunc_f of nn * sx
-  | Trunc_sat_f of nn * sx
+  | Extend_i32_s
+  | Extend_i32_u
+  | Trunc_f_s of nn
+  | Trunc_f_u of nn
+  | Trunc_sat_f_s of nn
+  | Trunc_sat_f_u of nn
   | Reinterpret_f of nn
   | Load of indice * memarg
-  | Load8 of indice * sx * memarg
-  | Load16 of indice * sx * memarg
-  | Load32 of indice * sx * memarg
+  | Load8_s of indice * memarg
+  | Load8_u of indice * memarg
+  | Load16_s of indice * memarg
+  | Load16_u of indice * memarg
+  | Load32_s of indice * memarg
+  | Load32_u of indice * memarg
   | Store of indice * memarg
   | Store8 of indice * memarg
   | Store16 of indice * memarg
@@ -281,7 +299,8 @@ type f32_instr =
   | Le
   | Ge
   | Demote_f64
-  | Convert_i of nn * sx
+  | Convert_i_s of nn
+  | Convert_i_u of nn
   | Reinterpret_i of nn
   | Load of indice * memarg
   | Store of indice * memarg
@@ -311,7 +330,8 @@ type f64_instr =
   | Le
   | Ge
   | Promote_f32
-  | Convert_i of nn * sx
+  | Convert_i_s of nn
+  | Convert_i_u of nn
   | Reinterpret_i of nn
   | Load of indice * memarg
   | Store of indice * memarg
@@ -323,12 +343,32 @@ type v128_instr =
   | And
   | Or
   | Any_true
+  | Load8_splat of (indice * memarg)
+  | Load8_lane of (indice * memarg * int)
+  | Load8x8_s of (indice * memarg)
+  | Load8x8_u of (indice * memarg)
+  | Load16_splat of (indice * memarg)
+  | Load16_lane of (indice * memarg * int)
   | Load16x4_s of (indice * memarg)
   | Load16x4_u of (indice * memarg)
+  | Load32_splat of (indice * memarg)
   | Load32_lane of (indice * memarg * int)
+  | Load32_zero of (indice * memarg)
+  | Load64_splat of (indice * memarg)
+  | Load64_lane of (indice * memarg * int)
   | Load64_zero of (indice * memarg)
   | Load of (indice * memarg)
   | Store of (indice * memarg)
+  | Store8_lane of (indice * memarg * int)
+  | Store64_lane of (indice * memarg * int)
+  | Store32_zero of (indice * memarg)
+  | Store32_lane of (indice * memarg * int)
+  | Store16_lane of (indice * memarg * int)
+  | Bitselect
+  | Xor
+  | Load32x2_s of (indice * memarg)
+  | Load32x2_u of (indice * memarg)
+  | Andnot
 
 val pp_v128_instr : v128_instr Fmt.t
 
@@ -338,10 +378,14 @@ type i8x16_instr =
   | Sub
   | Eq
   | Ne
-  | Lt of sx
-  | Gt of sx
-  | Le of sx
-  | Ge of sx
+  | Lt_s
+  | Lt_u
+  | Gt_s
+  | Gt_u
+  | Le_s
+  | Le_u
+  | Ge_s
+  | Ge_u
   | Abs
   | Neg
   | Popcnt
@@ -350,6 +394,23 @@ type i8x16_instr =
   | Shuffle of int array (* TODO: make this immutable at some point *)
   | Swizzle
   | Splat
+  | Shl
+  | Shr_s
+  | Shr_u
+  | Min_s
+  | Min_u
+  | Extract_lane_s of int
+  | Extract_lane_u of int
+  | Add_sat_s
+  | Add_sat_u
+  | Sub_sat_s
+  | Sub_sat_u
+  | Max_s
+  | Max_u
+  | Narrow_i16x8_s
+  | Narrow_i16x8_u
+  | Avgr_u
+  | Replace_lane of int
 
 val pp_i8x16_instr : i8x16_instr Fmt.t
 
@@ -360,13 +421,48 @@ type i16x8_instr =
   | Mul
   | Eq
   | Ne
-  | Lt of sx
-  | Gt of sx
-  | Le of sx
-  | Ge of sx
+  | Lt_s
+  | Lt_u
+  | Gt_s
+  | Gt_u
+  | Le_s
+  | Le_u
+  | Ge_s
+  | Ge_u
   | Splat
   | Extract_lane_s of int
   | Extract_lane_u of int
+  | Q15mulr_sat_s
+  | Min_s
+  | Min_u
+  | Min
+  | Extmul_low_i8x16_s
+  | Extmul_low_i8x16_u
+  | Extmul_high_i8x16_s
+  | Extmul_high_i8x16_u
+  | Extend_low_i8x16_s
+  | Extend_low_i8x16_u
+  | Extend_high_i8x16_s
+  | Extend_high_i8x16_u
+  | Extadd_pairwise_i8x16_s
+  | Extadd_pairwise_i8x16_u
+  | Add_sat_s
+  | Add_sat_u
+  | Sub_sat_s
+  | Sub_sat_u
+  | Max_s
+  | Max_u
+  | Shl
+  | Neg
+  | All_true
+  | Shr_s
+  | Shr_u
+  | Bitmask
+  | Avgr_u
+  | Abs
+  | Replace_lane of int
+  | Narrow_i32x4_s
+  | Narrow_i32x4_u
 
 val pp_i16x8_instr : i16x8_instr Fmt.t
 
@@ -376,13 +472,18 @@ type i32x4_instr =
   | Sub
   | Mul
   | Shl
-  | Shr of sx
+  | Shr_s
+  | Shr_u
   | Eq
   | Ne
-  | Lt of sx
-  | Gt of sx
-  | Le of sx
-  | Ge of sx
+  | Lt_s
+  | Lt_u
+  | Gt_s
+  | Gt_u
+  | Le_s
+  | Le_u
+  | Ge_s
+  | Ge_u
   | Splat
   | Extract_lane of int
   | Replace_lane of int
@@ -390,6 +491,27 @@ type i32x4_instr =
   | Extend_high_i16x8_s
   | Extend_low_i16x8_u
   | Extend_high_i16x8_u
+  | Trunc_sat_f64x2_s_zero
+  | Trunc_sat_f64x2_u_zero
+  | Trunc_sat_f32x4_s_zero
+  | Trunc_sat_f32x4_u_zero
+  | Trunc_sat_f32x4_s
+  | Trunc_sat_f32x4_u
+  | Min_s
+  | Min_u
+  | Extmul_low_i16x8_s
+  | Extmul_low_i16x8_u
+  | Extmul_high_i16x8_s
+  | Extmul_high_i16x8_u
+  | Extadd_pairwise_i16x8_s
+  | Extadd_pairwise_i16x8_u
+  | Dot_i16x8_s
+  | Neg
+  | Max_s
+  | Max_u
+  | Abs
+  | All_true
+  | Bitmask
 
 val pp_i32x4_instr : i32x4_instr Fmt.t
 
@@ -405,9 +527,93 @@ type i64x2_instr =
   | Le_s
   | Ge_s
   | Splat
-  | Extend_low_i32x4 of sx
+  | Extend_low_i32x4_s
+  | Extend_low_i32x4_u
+  | Extend_high_i32x4_s
+  | Extend_high_i32x4_u
+  | Extmul_low_i32x4_s
+  | Extmul_low_i32x4_u
+  | Extmul_high_i32x4_s
+  | Extmul_high_i32x4_u
+  | Abs
+  | Neg
+  | Extract_lane of int
+  | All_true
+  | Bitmask
+  | Shl
+  | Replace_lane of int
+  | Shr_s
+  | Shr_u
 
 val pp_i64x2_instr : i64x2_instr Fmt.t
+
+type f32x4_instr =
+  | Pmin
+  | Min
+  | Eq
+  | Convert_i32x4_s
+  | Convert_i32x4_u
+  | Ceil
+  | Add
+  | Max
+  | Floor
+  | Pmax
+  | Ne
+  | Sub
+  | Abs
+  | Trunc
+  | Lt
+  | Gt
+  | Le
+  | Ge
+  | Mul
+  | Convert_low_i32x4_s
+  | Convert_low_i32x4_u
+  | Convert_high_i32x4_s
+  | Convert_high_i32x4_u
+  | Splat
+  | Nearest
+  | Div
+  | Neg
+  | Extract_lane of int
+  | Sqrt
+  | Replace_lane of int
+  | Demote_f64x2_zero
+
+val pp_f32x4_instr : f32x4_instr Fmt.t
+
+type f64x2_instr =
+  | Pmin
+  | Min
+  | Eq
+  | Ceil
+  | Add
+  | Max
+  | Floor
+  | Pmax
+  | Ne
+  | Sub
+  | Abs
+  | Trunc
+  | Lt
+  | Gt
+  | Le
+  | Ge
+  | Mul
+  | Convert_low_i32x4_s
+  | Convert_low_i32x4_u
+  | Convert_high_i32x4_s
+  | Convert_high_i32x4_u
+  | Nearest
+  | Div
+  | Neg
+  | Sqrt
+  | Splat
+  | Extract_lane of int
+  | Promote_low_f32x4
+  | Replace_lane of int
+
+val pp_f64x2_instr : f64x2_instr Fmt.t
 
 (** Reference instructions *)
 type ref_instr =
@@ -498,6 +704,8 @@ type instr =
   | I16x8 of i16x8_instr
   | I32x4 of i32x4_instr
   | I64x2 of i64x2_instr
+  | F32x4 of f32x4_instr
+  | F64x2 of f64x2_instr
   | Ref of ref_instr
   | Local of local_instr
   | Global of global_instr

@@ -12,7 +12,13 @@
 %token I16 I31 I31_GET_S I31_GET_U I31_REF
 %token I32 I32_ADD I32_AND I32_CLZ I32_CONST I32_CTZ I32_DIV_S I32_DIV_U I32_EQ I32_EQZ I32_EXTEND16_S I32_EXTEND8_S I32_GE_S I32_GE_U I32_GT_S I32_GT_U I32_LE_S I32_LE_U I32_LOAD I32_LOAD16_S I32_LOAD16_U I32_LOAD8_S I32_LOAD8_U I32_LT_S I32_LT_U I32_MUL I32_NE I32_OR I32_POPCNT I32_REINTERPRET_F32 I32_REINTERPRET_F64 I32_REM_S I32_REM_U I32_ROTL I32_ROTR I32_SHL I32_SHR_S I32_SHR_U I32_STORE I32_STORE16 I32_STORE8 I32_SUB I32_TRUNC_F32_S I32_TRUNC_F32_U I32_TRUNC_F64_S I32_TRUNC_F64_U I32_TRUNC_SAT_F32_S I32_TRUNC_SAT_F32_U I32_TRUNC_SAT_F64_S I32_TRUNC_SAT_F64_U I32_WRAP_I64 I32_XOR
 %token I64 I64_ADD I64_AND I64_CLZ I64_CONST I64_CTZ I64_DIV_S I64_DIV_U I64_EQ I64_EQZ I64_EXTEND16_S I64_EXTEND32_S I64_EXTEND8_S I64_EXTEND_I32_S I64_EXTEND_I32_U I64_GE_S I64_GE_U I64_GT_S I64_GT_U I64_LE_S I64_LE_U I64_LOAD I64_LOAD16_S I64_LOAD16_U I64_LOAD32_S I64_LOAD32_U I64_LOAD8_S I64_LOAD8_U I64_LT_S I64_LT_U I64_MUL I64_NE I64_OR I64_POPCNT I64_REINTERPRET_F32 I64_REINTERPRET_F64 I64_REM_S I64_REM_U I64_ROTL I64_ROTR I64_SHL I64_SHR_S I64_SHR_U I64_STORE I64_STORE16 I64_STORE32 I64_STORE8 I64_SUB I64_TRUNC_F32_S I64_TRUNC_F32_U I64_TRUNC_F64_S I64_TRUNC_F64_U I64_TRUNC_SAT_F32_S I64_TRUNC_SAT_F32_U I64_TRUNC_SAT_F64_S I64_TRUNC_SAT_F64_U I64_XOR
-%token V128 V128_CONST I8X16 I16X8 I32X4 I64X2 F32X4 F64X2 I32X4_ADD I64X2_ADD I32X4_SUB I64X2_SUB
+%token V128 V128_CONST V128_LOAD8_SPLAT V128_STORE64_LANE V128_STORE32_LANE V128_STORE32_ZERO V128_STORE16_LANE V128_STORE8_LANE V128_STORE V128_LOAD V128_LOAD8_LANE V128_LOAD8X8_S V128_LOAD16_LANE V128_LOAD32_ZERO V128_LOAD32_LANE V128_LOAD64_LANE V128_ANY_TRUE V128_NOT
+%token I8X16 I8X16_SPLAT I8X16_SHL I8X16_EXTRACT_LANE_S I8X16_ADD_SAT_S I8X16_EQ I8X16_ADD I8X16_MIN_S
+%token I16X8 I16X8_EXTEND_HIGH_I8X16_S I16X8_ADD_SAT_S I16X8_Q15MULR_SAT_S I16X8_EXTMUL_LOW_I8X16_S I16X8_EXTADD_PAIRWISE_I8X16_S I16X8_ADD I16X8_MIN_S I16X8_MIN I16X8_EQ
+%token I32X4 I32X4_ADD I32X4_SUB I32X4_TRUNC_SAT_F64X2_S_ZERO I32X4_TRUNC_SAT_F32X4_S I32X4_TRUNC_SAT_F32X4_S_ZERO I32X4_EXTMUL_LOW_I16X8_S I32X4_EXTADD_PAIRWISE_I16X8_S I32X4_DOT_I16X8_S I32X4_EQ I32X4_MUL I32X4_MIN_S
+%token I64X2 I64X2_ADD I64X2_SUB I64X2_EXTMUL_LOW_I32X4_S I64X2_EQ I64X2_MUL I64X2_ABS
+%token F32X4 F32X4_MIN F32X4_CEIL F32X4_PMIN F32X4_EQ F32X4_ADD F32X4_CONVERT_I32X4_S
+%token F64X2 F64X2_MIN F64X2_CEIL F64X2_PMIN F64X2_EQ F64X2_ADD
 %token I8 IF IMPORT INVOKE ITEM
 %token LOCAL LOCAL_GET LOCAL_SET LOCAL_TEE LOOP LPAR
 %token MEMORY MEMORY_COPY MEMORY_FILL MEMORY_GROW MEMORY_INIT MEMORY_SIZE MODULE MUTABLE DEFINITION INSTANCE
@@ -25,6 +31,189 @@
 %token SELECT START STRUCT STRUCT_GET STRUCT_GET_S STRUCT_GET_U STRUCT_NEW_CANON STRUCT_NEW_CANON_DEFAULT STRUCT_REF STRUCT_SET SUB
 %token TABLE TABLE_COPY TABLE_FILL TABLE_GET TABLE_GROW TABLE_INIT TABLE_SET TABLE_SIZE THEN TYPE
 %token UNREACHABLE
+%token
+ V128_LOAD8X8_U
+ I8X16_SHR_S
+ V128_AND
+ I8X16_ALL_TRUE
+ F32X2_CONVERT_I32X4_U
+ F32X4_SUB
+ F32X4_NE
+ F32X4_PMAX
+ F32X4_FLOOR
+ F32X4_MAX
+ F64X2_SUB
+ F64X2_NE
+ F64X2_PMAX
+ F64X2_FLOOR
+ F64X2_MAX
+ I16X8_MIN_U
+ I16X8_SUB
+ I16X8_NE
+ I16X8_EXTADD_PAIRWISE_I8X16_U
+ I16X8_EXTMUL_HIGH_I8X16_S
+ I16X8_ADD_SAT_U
+ I32X4_MIN_U
+ I32X4_NEG
+ I32X4_NE
+ I32X4_EXTADD_PAIRWISE_I16X8_U
+ I32X4_EXTMUL_HIGH_I16X8_S
+ I32X4_TRUNC_SAT_F32X4_U
+ I32X4_TRUNC_SAT_F64X2_U_ZERO
+ I64X2_NEG
+ I64X2_NE
+ I64X2_EXTMUL_HIGH_I32X4_S
+ I8X16_MIN_U
+ I8X16_SUB
+ I8X16_NE
+ I8X16_ADD_SAT_U
+ I16X8_EXTEND_HIGH_I8X16_U
+ I8X16_EXTRACT_LANE_U
+ V128_LOAD16_SPLAT
+ V128_LOAD64_ZERO
+ I16X8_SPLAT
+ V128_LOAD16X4_S
+ I8X16_SHR_U
+ V128_OR
+ I8X16_BITMASK
+ F64X2_CONVERT_LOW_I32X4_S
+ F32X4_MUL
+ F32X4_LT
+ F32X4_TRUNC
+ F32X4_ABS
+ F64X2_MUL
+ F64X2_LT
+ F64X2_TRUNC
+ F64X2_ABS
+ I16X8_MAX_S
+ I16X8_MUL
+ I16X8_LT_S
+ I16X8_EXTMUL_LOW_I8X16_U
+ I16X8_SUB_SAT_S
+ I32X4_MAX_S
+ I32X4_LT_S
+ I32X4_EXTMUL_LOW_I16X8_U
+ I64X2_LT_S
+ I64X2_EXTMUL_LOW_I32X4_U
+ I8X16_MAX_S
+ I8X16_NEG
+ I8X16_LT_S
+ I8X16_SUB_SAT_S
+ I16X8_EXTEND_LOW_I8X16_S
+ I16X8_EXTRACT_LANE_S
+ V128_LOAD32_SPLAT
+ V128_BITSELECT
+ I32X4_EXTRACT_LANE
+ I32X4_SPLAT
+ F32X4_DIV
+ F32X4_LE
+ F32X4_NEAREST
+ F32X4_SPLAT
+ F64X2_CONVERT_LOW_I32X4_U
+ F64X2_DIV
+ F64X2_LE
+ F64X2_NEAREST
+ I16X8_ALL_TRUE
+ I16X8_EXTEND_LOW_I8X16_U
+ I16X8_EXTMUL_HIGH_I8X16_U
+ I16X8_EXTRACT_LANE_U
+ I16X8_LT_U
+ I16X8_MAX_U
+ I16X8_NEG
+ I16X8_SHL
+ I16X8_SUB_SAT_U
+ I32X4_EXTMUL_HIGH_I16X8_U
+ I32X4_LT_U
+ I32X4_MAX_U
+ I64X2_EXTMUL_HIGH_I32X4_U
+ I64X2_EXTRACT_LANE
+ I64X2_LE_S
+ I8X16_LT_U
+ I8X16_MAX_U
+ I8X16_SUB_SAT_U
+ I8X16_SWIZZLE
+ V128_LOAD16X4_U
+ V128_LOAD64_SPLAT
+ V128_XOR
+ F32X4_EXTRACT_LANE
+ F32X4_GT
+ F32X4_NEG
+ F64X2_GT
+ F64X2_NEG
+ I16X8_AVGR_U
+ I16X8_BITMASK
+ I16X8_LE_S
+ I16X8_SHR_S
+ I32X4_ABS
+ I32X4_EXTEND_HIGH_I16X8_S
+ I32X4_LE_S
+ I64X2_GT_S
+ I64X2_SPLAT
+ I8X16_AVGR_U
+ I8X16_LE_S
+ I8X16_NARROW_I16X8_S
+ V128_ANDNOT
+ V128_LOAD32X2_S
+ F32X4_GE
+ F32X4_SQRT
+ F64X2_GE
+ F64X2_SPLAT
+ F64X2_SQRT
+ I16X8_ABS
+ I16X8_LE_U
+ I16X8_SHR_U
+ I32X4_ALL_TRUE
+ I32X4_EXTEND_HIGH_I16X8_U
+ I32X4_LE_U
+ I64X2_GE_S
+ I8X16_ABS
+ I8X16_LE_U
+ I8X16_NARROW_I16X8_U
+ I8X16_REPLACE_LANE
+ V128_LOAD32X2_U
+ I32X4_SHL
+ I32X4_BITMASK
+ I16X8_NARROW_I32X4_S
+ I16X8_GT_S
+ I32X4_GT_S
+ I8X16_POPCNT
+ I8X16_GT_S
+ I32X4_EXTEND_LOW_I16X8_S
+ I16X8_REPLACE_LANE
+ F64X2_EXTRACT_LANE
+ I16X8_GT_U
+ I16X8_NARROW_I32X4_U
+ I32X4_EXTEND_LOW_I16X8_U
+ I32X4_GT_U
+ I32X4_REPLACE_LANE
+ I32X4_SHR_S
+ I64X2_ALL_TRUE
+ I8X16_GT_U
+
+ F32X4_REPLACE_LANE
+ F64X2_PROMOTE_LOW_F32X4
+ I16X8_GE_S
+ I32X4_GE_S
+ I32X4_SHR_U
+ I64X2_BITMASK
+ I64X2_EXTEND_HIGH_I32X4_S
+ I8X16_GE_S
+
+ F32X4_DEMOTE_F64X2_ZERO
+ I16X8_GE_U
+ I32X4_GE_U
+ I64X2_EXTEND_HIGH_I32X4_U
+ I64X2_REPLACE_LANE
+ I64X2_SHL
+ I8X16_GE_U
+
+ F64X2_REPLACE_LANE
+ I64X2_EXTEND_LOW_I32X4_S
+ I64X2_SHR_S
+
+ I64X2_SHR_U
+ I64X2_EXTEND_LOW_I32X4_U
+ I8X16_SHUFFLE
 
 %{
 
@@ -372,6 +561,252 @@ let plain_instr :=
   | F32_CONST; n = NUM; { F32 (Const (f32 n)) }
   | F64_CONST; n = NUM; { F64 (Const (f64 n)) }
   | n = v128_const; { V128 (Const n) }
+
+  | V128_ANY_TRUE; { V128 Any_true }
+  | V128_LOAD; ~ = memidx; ~ = memarg;  { V128 (Load(memidx, memarg)) }
+  | V128_LOAD16_LANE; ~ = memidx; ~ = memarg; n = NUM;  { V128 (Load16_lane (memidx, memarg, (int_of_string n)))}
+  | V128_LOAD32_LANE; ~ = memidx; ~ = memarg; n = NUM;  { V128 (Load32_lane (memidx, memarg, (int_of_string n)))}
+  | V128_LOAD32_ZERO; ~ = memidx; ~ = memarg;  { V128 (Load32_zero (memidx, memarg))}
+  | V128_LOAD64_LANE; ~ = memidx; ~ = memarg; n = NUM;  { V128 (Load64_lane (memidx, memarg, (int_of_string n)))}
+  | V128_LOAD8X8_S; ~ = memidx; ~ = memarg;  { V128 (Load8x8_s (memidx, memarg))}
+  | V128_LOAD8_LANE; ~ = memidx; ~ = memarg; n = NUM;  { V128 (Load8_lane (memidx, memarg, (int_of_string n)))}
+  | V128_LOAD8_SPLAT; ~ = memidx; ~ = memarg;  { V128 (Load8_splat (memidx, memarg))}
+  | V128_NOT; { V128 Not }
+  | V128_STORE; ~ = memidx; ~ = memarg; { V128 (Store(memidx, memarg)) }
+  | V128_STORE16_LANE; ~ = memidx; ~ = memarg; n = NUM; { V128 (Store16_lane(memidx, memarg, (int_of_string n))) }
+  | V128_STORE32_LANE; ~ = memidx; ~ = memarg; n = NUM; { V128 (Store32_lane(memidx, memarg, (int_of_string n))) }
+  | V128_STORE32_ZERO; ~ = memidx; ~ = memarg; { V128 (Store32_zero(memidx, memarg)) }
+  | V128_STORE64_LANE; ~ = memidx; ~ = memarg; n = NUM; { V128 (Store64_lane(memidx, memarg, (int_of_string n))) }
+  | V128_STORE8_LANE; ~ = memidx; ~ = memarg; n = NUM; { V128 (Store8_lane(memidx, memarg, (int_of_string n))) }
+  | F32X4_ADD; { F32x4 Add }
+  | F32X4_CEIL; { F32x4 Ceil }
+  | F32X4_CONVERT_I32X4_S; { F32x4 Convert_i32x4_s }
+  | F32X4_EQ; { F32x4 Eq }
+  | F32X4_MIN; { F32x4 Min }
+  | F32X4_PMIN; { F32x4 Pmin }
+  | F64X2_ADD; { F64x2 Add }
+  | F64X2_CEIL; { F64x2 Ceil }
+  | F64X2_EQ; { F64x2 Eq }
+  | F64X2_MIN; { F64x2 Min }
+  | F64X2_PMIN; { F64x2 Pmin }
+  | I16X8_ADD; { I16x8 Add }
+  | I16X8_ADD_SAT_S; { I16x8 Add_sat_s }
+  | I16X8_EQ; { I16x8 Eq }
+  | I16X8_EXTADD_PAIRWISE_I8X16_S; { I16x8 Extadd_pairwise_i8x16_s }
+  | I16X8_EXTEND_HIGH_I8X16_S; { I16x8 Extend_high_i8x16_s }
+  | I16X8_EXTMUL_LOW_I8X16_S; { I16x8 Extmul_low_i8x16_s }
+  | I16X8_MIN; { I16x8 Min }
+  | I16X8_MIN_S; { I16x8 Min_s }
+  | I16X8_Q15MULR_SAT_S; { I16x8 Q15mulr_sat_s }
+  | I32X4_DOT_I16X8_S; { I32x4 Dot_i16x8_s }
+  | I32X4_EQ; { I32x4 Eq }
+  | I32X4_EXTADD_PAIRWISE_I16X8_S; { I32x4 Extadd_pairwise_i16x8_s }
+  | I32X4_EXTMUL_LOW_I16X8_S; { I32x4 Extmul_low_i16x8_s }
+  | I32X4_MIN_S; { I32x4 Min_s }
+  | I32X4_MUL; { I32x4 Mul }
+  | I32X4_TRUNC_SAT_F32X4_S; { I32x4 Trunc_sat_f32x4_s }
+  | I32X4_TRUNC_SAT_F32X4_S_ZERO; { I32x4 Trunc_sat_f32x4_s_zero }
+  | I32X4_TRUNC_SAT_F64X2_S_ZERO; { I32x4 Trunc_sat_f64x2_s_zero }
+  | I64X2_ABS; { I64x2 Abs }
+  | I64X2_EQ; { I64x2 Eq }
+  | I64X2_EXTMUL_LOW_I32X4_S; { I64x2 Extmul_low_i32x4_s }
+  | I64X2_MUL; { I64x2 Mul }
+  | I8X16_ADD; { I8x16 Add }
+  | I8X16_ADD_SAT_S; { I8x16 Add_sat_s }
+  | I8X16_EQ; { I8x16 Eq }
+  | I8X16_EXTRACT_LANE_S; n = NUM; { I8x16 (Extract_lane_s (int_of_string n)) }
+  | I8X16_MIN_S; { I8x16 Min_s }
+  | I8X16_SHL; { I8x16 Shl }
+  | I8X16_SPLAT; { I8x16 Splat }
+
+  | V128_LOAD8X8_U; ~ = memidx; ~ = memarg; { V128 (Load8x8_u (memidx, memarg)) }
+  | I8X16_SHR_S; { I8x16 Shr_s }
+  | V128_AND; { V128 And }
+  | I8X16_ALL_TRUE; { I8x16 All_true }
+  | F32X2_CONVERT_I32X4_U; { F32x4 Convert_i32x4_u }
+  | F32X4_SUB; { F32x4 Sub }
+  | F32X4_NE; { F32x4 Ne }
+  | F32X4_PMAX; { F32x4 Pmax }
+  | F32X4_FLOOR; { F32x4 Floor }
+  | F32X4_MAX; { F32x4 Max }
+  | F64X2_SUB; { F64x2 Sub }
+  | F64X2_NE; { F64x2 Ne }
+  | F64X2_PMAX; { F64x2 Pmax }
+  | F64X2_FLOOR; { F64x2 Floor }
+  | F64X2_MAX; { F64x2 Max }
+  | I16X8_MIN_U; { I16x8 Min_u }
+  | I16X8_SUB; { I16x8 Sub }
+  | I16X8_NE; { I16x8 Ne }
+  | I16X8_EXTADD_PAIRWISE_I8X16_U; { I16x8 Extadd_pairwise_i8x16_u }
+  | I16X8_EXTMUL_HIGH_I8X16_S; { I16x8 Extmul_high_i8x16_s }
+  | I16X8_ADD_SAT_U; { I16x8 Add_sat_u }
+  | I32X4_MIN_U; { I32x4 Min_u }
+  | I32X4_NEG; { I32x4 Neg }
+  | I32X4_NE; { I32x4 Ne }
+  | I32X4_EXTADD_PAIRWISE_I16X8_U; { I32x4 Extadd_pairwise_i16x8_u }
+  | I32X4_EXTMUL_HIGH_I16X8_S; { I32x4 Extmul_high_i16x8_s }
+  | I32X4_TRUNC_SAT_F32X4_U; { I32x4 Trunc_sat_f32x4_u }
+  | I32X4_TRUNC_SAT_F64X2_U_ZERO; { I32x4 Trunc_sat_f64x2_u_zero }
+  | I64X2_NEG; { I64x2 Neg }
+  | I64X2_NE; { I64x2 Ne }
+  | I64X2_EXTMUL_HIGH_I32X4_S; { I64x2 Extmul_high_i32x4_s }
+  | I8X16_MIN_U; { I8x16 Min_u }
+  | I8X16_SUB; { I8x16 Sub }
+  | I8X16_NE; { I8x16 Ne }
+  | I8X16_ADD_SAT_U; { I8x16 Add_sat_u }
+  | I16X8_EXTEND_HIGH_I8X16_U; { I16x8 Extend_high_i8x16_u }
+  | I8X16_EXTRACT_LANE_U; n = NUM; { I8x16 (Extract_lane_u (int_of_string n)) }
+  | V128_LOAD16_SPLAT; ~ = memidx; ~ = memarg; { V128 (Load16_splat (memidx, memarg)) }
+  | V128_LOAD64_ZERO; ~ = memidx; ~ = memarg; { V128 (Load64_zero (memidx, memarg)) }
+  | I16X8_SPLAT; { I16x8 Splat }
+
+  | V128_LOAD16X4_S; ~ = memidx; ~ = memarg; { V128 (Load16x4_s (memidx, memarg)) }
+  | I8X16_SHR_U; { I8x16 Shr_u }
+  | V128_OR; { V128 Or }
+  | I8X16_BITMASK; { I8x16 Bitmask }
+  | F64X2_CONVERT_LOW_I32X4_S; { F64x2 Convert_low_i32x4_s }
+  | F32X4_MUL; { F32x4 Mul }
+  | F32X4_LT; { F32x4 Lt }
+  | F32X4_TRUNC; { F32x4 Trunc }
+  | F32X4_ABS; { F32x4 Abs }
+  | F64X2_MUL; { F64x2 Mul }
+  | F64X2_LT; { F64x2 Lt }
+  | F64X2_TRUNC; { F64x2 Trunc }
+  | F64X2_ABS; { F64x2 Abs }
+  | I16X8_MAX_S; { I16x8 Max_s }
+  | I16X8_MUL; { I16x8 Mul }
+  | I16X8_LT_S; { I16x8 Lt_s }
+  | I16X8_EXTMUL_LOW_I8X16_U; { I16x8 Extmul_low_i8x16_u }
+  | I16X8_SUB_SAT_S; { I16x8 Sub_sat_s }
+  | I32X4_MAX_S; { I32x4 Max_s }
+  | I32X4_LT_S; { I32x4 Lt_s }
+  | I32X4_EXTMUL_LOW_I16X8_U; { I32x4 Extmul_low_i16x8_u }
+  | I64X2_LT_S; { I64x2 Lt_s }
+  | I64X2_EXTMUL_LOW_I32X4_U; { I64x2 Extmul_low_i32x4_u }
+  | I8X16_MAX_S; { I8x16 Max_s }
+  | I8X16_NEG; { I8x16 Neg }
+  | I8X16_LT_S; { I8x16 Lt_s }
+  | I8X16_SUB_SAT_S; { I8x16 Sub_sat_s }
+  | I16X8_EXTEND_LOW_I8X16_S; { I16x8 Extend_low_i8x16_s }
+  | I16X8_EXTRACT_LANE_S; n = NUM; { I16x8 (Extract_lane_s (int_of_string n)) }
+  | V128_LOAD32_SPLAT; ~ = memidx; ~ = memarg; { V128 (Load32_splat (memidx, memarg)) }
+  | V128_BITSELECT; { V128 Bitselect }
+  | I32X4_EXTRACT_LANE; n = NUM; { I32x4 (Extract_lane (int_of_string n)) }
+  | I32X4_SPLAT; { I32x4 Splat }
+  | F32X4_DIV; { F32x4 Div }
+  | F32X4_LE; { F32x4 Le }
+  | F32X4_NEAREST; { F32x4 Nearest }
+  | F32X4_SPLAT; { F32x4 Splat }
+  | F64X2_CONVERT_LOW_I32X4_U; { F64x2 Convert_low_i32x4_u }
+  | F64X2_DIV; { F64x2 Div }
+  | F64X2_LE; { F64x2 Le }
+  | F64X2_NEAREST; { F64x2 Nearest }
+  | I16X8_ALL_TRUE; { I16x8 All_true }
+  | I16X8_EXTEND_LOW_I8X16_U; { I16x8 Extend_low_i8x16_u }
+  | I16X8_EXTMUL_HIGH_I8X16_U; { I16x8 Extmul_high_i8x16_u }
+  | I16X8_EXTRACT_LANE_U; n = NUM; { I16x8 (Extract_lane_u (int_of_string n)) }
+  | I16X8_LT_U; { I16x8 Lt_u }
+  | I16X8_MAX_U; { I16x8 Max_u }
+  | I16X8_NEG; { I16x8 Neg }
+  | I16X8_SHL; { I16x8 Shl }
+  | I16X8_SUB_SAT_U; { I16x8 Sub_sat_u }
+  | I32X4_EXTMUL_HIGH_I16X8_U; { I32x4 Extmul_high_i16x8_u }
+  | I32X4_LT_U; { I32x4 Lt_u }
+  | I32X4_MAX_U; { I32x4 Max_u }
+  | I64X2_EXTMUL_HIGH_I32X4_U; { I64x2 Extmul_high_i32x4_u }
+  | I64X2_EXTRACT_LANE; n = NUM; { I64x2 (Extract_lane (int_of_string n)) }
+  | I64X2_LE_S; { I64x2 Le_s }
+  | I8X16_LT_U; { I8x16 Lt_u }
+  | I8X16_MAX_U; { I8x16 Max_u }
+  | I8X16_SUB_SAT_U; { I8x16 Sub_sat_u }
+  | I8X16_SWIZZLE; { I8x16 Swizzle }
+  | V128_LOAD16X4_U; ~ = memidx; ~ = memarg; { V128 (Load16x4_u (memidx, memarg)) }
+  | V128_LOAD64_SPLAT; ~ = memidx; ~ = memarg; { V128 (Load64_splat (memidx, memarg)) }
+  | V128_XOR; { V128 Xor }
+  | F32X4_EXTRACT_LANE; n = NUM; { F32x4 (Extract_lane (int_of_string n)) }
+  | F32X4_GT; { F32x4 Gt }
+  | F32X4_NEG; { F32x4 Neg }
+  | F64X2_GT; { F64x2 Gt }
+  | F64X2_NEG; { F64x2 Neg }
+  | I16X8_AVGR_U; { I16x8 Avgr_u }
+  | I16X8_BITMASK; { I16x8 Bitmask }
+  | I16X8_LE_S; { I16x8 Le_s }
+  | I16X8_SHR_S; { I16x8 Shr_s }
+  | I32X4_ABS; { I32x4 Abs }
+  | I32X4_EXTEND_HIGH_I16X8_S; { I32x4 Extend_high_i16x8_s }
+  | I32X4_LE_S; { I32x4 Le_s }
+  | I64X2_GT_S; { I64x2 Gt_s }
+  | I64X2_SPLAT; { I64x2 Splat }
+  | I8X16_AVGR_U; { I8x16 Avgr_u }
+  | I8X16_LE_S; { I8x16 Le_s }
+  | I8X16_NARROW_I16X8_S; { I8x16 Narrow_i16x8_s }
+  | V128_ANDNOT; { V128 Andnot }
+  | V128_LOAD32X2_S; ~ = memidx; ~ = memarg; { V128 (Load32x2_s (memidx, memarg)) }
+  | F32X4_GE; { F32x4 Ge }
+  | F32X4_SQRT; { F32x4 Sqrt }
+  | F64X2_GE; { F64x2 Ge }
+  | F64X2_SPLAT; { F64x2 Splat }
+  | F64X2_SQRT; { F64x2 Sqrt }
+  | I16X8_ABS; { I16x8 Abs }
+  | I16X8_LE_U; { I16x8 Le_u }
+  | I16X8_SHR_U; { I16x8 Shr_u }
+  | I32X4_ALL_TRUE; { I32x4 All_true }
+  | I32X4_EXTEND_HIGH_I16X8_U; { I32x4 Extend_high_i16x8_u }
+  | I32X4_LE_U; { I32x4 Le_u }
+  | I64X2_GE_S; { I64x2 Ge_s }
+  | I8X16_ABS; { I8x16 Abs }
+  | I8X16_LE_U; { I8x16 Le_u }
+  | I8X16_NARROW_I16X8_U; { I8x16 Narrow_i16x8_u }
+  | I8X16_REPLACE_LANE; n = NUM; { I8x16 (Replace_lane (int_of_string n)) }
+  | V128_LOAD32X2_U; ~ = memidx; ~ = memarg; { V128 (Load32x2_u (memidx, memarg)) }
+
+  | I32X4_SHL; { I32x4 Shl }
+  | I32X4_BITMASK; { I32x4 Bitmask }
+  | I16X8_NARROW_I32X4_S; { I16x8 Narrow_i32x4_s }
+  | I16X8_GT_S; { I16x8 Gt_s }
+  | I32X4_GT_S; { I32x4 Gt_s }
+  | I8X16_POPCNT; { I8x16 Popcnt }
+  | I8X16_GT_S; { I8x16 Gt_s }
+  | I32X4_EXTEND_LOW_I16X8_S; { I32x4 Extend_low_i16x8_s }
+  | I16X8_REPLACE_LANE; n = NUM; { I16x8 (Replace_lane (int_of_string n)) }
+  | F64X2_EXTRACT_LANE; n = NUM; { F64x2 (Extract_lane (int_of_string n)) }
+
+  | I16X8_GT_U; { I16x8 Gt_u }
+  | I16X8_NARROW_I32X4_U; { I16x8 Narrow_i32x4_u }
+  | I32X4_EXTEND_LOW_I16X8_U; { I32x4 Extend_low_i16x8_u }
+  | I32X4_GT_U; { I32x4 Gt_u }
+  | I32X4_REPLACE_LANE; n = NUM; { I32x4 (Replace_lane (int_of_string n)) }
+  | I32X4_SHR_S; { I32x4 Shr_s }
+  | I64X2_ALL_TRUE; { I64x2 All_true }
+  | I8X16_GT_U; { I8x16 Gt_u }
+  | F32X4_REPLACE_LANE; n = NUM; { F32x4 (Replace_lane (int_of_string n)) }
+  | F64X2_PROMOTE_LOW_F32X4; { F64x2 Promote_low_f32x4 }
+  | I16X8_GE_S; { I16x8 Ge_s }
+  | I32X4_GE_S; { I32x4 Ge_s }
+  | I32X4_SHR_U; { I32x4 Shr_u }
+  | I64X2_BITMASK; { I64x2 Bitmask }
+  | I64X2_EXTEND_HIGH_I32X4_S; { I64x2 Extend_high_i32x4_s }
+  | I8X16_GE_S; { I8x16 Ge_s }
+
+  | F32X4_DEMOTE_F64X2_ZERO; { F32x4 Demote_f64x2_zero }
+  | I16X8_GE_U; { I16x8 Ge_u }
+  | I32X4_GE_U; { I32x4 Ge_u }
+  | I64X2_EXTEND_HIGH_I32X4_U; { I64x2 Extend_high_i32x4_u }
+  | I64X2_REPLACE_LANE; n = NUM; { I64x2 (Replace_lane (int_of_string n)) }
+  | I64X2_SHL; { I64x2 Shl }
+  | I8X16_GE_U; { I8x16 Ge_u }
+
+  | F64X2_REPLACE_LANE; n = NUM; { F64x2 (Replace_lane (int_of_string n)) }
+  | I64X2_EXTEND_LOW_I32X4_S; { I64x2 Extend_low_i32x4_s }
+  | I64X2_SHR_S; { I64x2 Shr_s }
+
+  | I64X2_SHR_U; { I64x2 Shr_u }
+  | I64X2_EXTEND_LOW_I32X4_U; { I64x2 Extend_low_i32x4_u }
+  | I8X16_SHUFFLE; l = nonempty_list(NUM); {
+      let lanes = List.map int_of_string l in
+      I8x16 (Shuffle (Array.of_list lanes))
+    }
+
   | I32_CLZ; { I32 Clz }
   | I64_CLZ; { I64 Clz }
   | I32_CTZ; { I32 Ctz }
@@ -398,14 +833,14 @@ let plain_instr :=
   | I64_SUB; { I64 Sub }
   | I32_MUL; { I32 Mul }
   | I64_MUL; { I64 Mul }
-  | I32_DIV_S; { I32 (Div S) }
-  | I64_DIV_S; { I64 (Div S) }
-  | I32_DIV_U; { I32 (Div U) }
-  | I64_DIV_U; { I64 (Div U) }
-  | I32_REM_S; { I32 (Rem S) }
-  | I64_REM_S; { I64 (Rem S) }
-  | I32_REM_U; { I32 (Rem U) }
-  | I64_REM_U; { I64 (Rem U) }
+  | I32_DIV_S; { I32 Div_s }
+  | I64_DIV_S; { I64 Div_s }
+  | I32_DIV_U; { I32 Div_u }
+  | I64_DIV_U; { I64 Div_u }
+  | I32_REM_S; { I32 Rem_s }
+  | I64_REM_S; { I64 Rem_s }
+  | I32_REM_U; { I32 Rem_u }
+  | I64_REM_U; { I64 Rem_u }
   | I32_AND; { I32 And }
   | I64_AND; { I64 And }
   | I32_OR; { I32 Or }
@@ -414,10 +849,10 @@ let plain_instr :=
   | I64_XOR; { I64 Xor }
   | I32_SHL; { I32 Shl }
   | I64_SHL; { I64 Shl }
-  | I32_SHR_S; { I32 (Shr S) }
-  | I64_SHR_S; { I64 (Shr S) }
-  | I32_SHR_U; { I32 (Shr U) }
-  | I64_SHR_U; { I64 (Shr U) }
+  | I32_SHR_S; { I32 Shr_s }
+  | I64_SHR_S; { I64 Shr_s }
+  | I32_SHR_U; { I32 Shr_u }
+  | I64_SHR_U; { I64 Shr_u }
   | I32_ROTL; { I32 Rotl }
   | I64_ROTL; { I64 Rotl }
   | I32_ROTR; { I32 Rotr }
@@ -442,22 +877,22 @@ let plain_instr :=
   | I64_EQ; { I64 Eq }
   | I32_NE; { I32 Ne }
   | I64_NE; { I64 Ne }
-  | I32_LT_S; { I32 (Lt S) }
-  | I64_LT_S; { I64 (Lt S) }
-  | I32_LT_U; { I32 (Lt U) }
-  | I64_LT_U; { I64 (Lt U) }
-  | I32_GT_S; { I32 (Gt S) }
-  | I64_GT_S; { I64 (Gt S) }
-  | I32_GT_U; { I32 (Gt U) }
-  | I64_GT_U; { I64 (Gt U) }
-  | I32_LE_S; { I32 (Le S) }
-  | I64_LE_S; { I64 (Le S) }
-  | I32_LE_U; { I32 (Le U) }
-  | I64_LE_U; { I64 (Le U) }
-  | I32_GE_S; { I32 (Ge S) }
-  | I64_GE_S; { I64 (Ge S) }
-  | I32_GE_U; { I32 (Ge U) }
-  | I64_GE_U; { I64 (Ge U) }
+  | I32_LT_S; { I32 Lt_s }
+  | I64_LT_S; { I64 Lt_s }
+  | I32_LT_U; { I32 Lt_u }
+  | I64_LT_U; { I64 Lt_u }
+  | I32_GT_S; { I32 Gt_s }
+  | I64_GT_S; { I64 Gt_s }
+  | I32_GT_U; { I32 Gt_u }
+  | I64_GT_U; { I64 Gt_u }
+  | I32_LE_S; { I32 Le_s }
+  | I64_LE_S; { I64 Le_s }
+  | I32_LE_U; { I32 Le_u }
+  | I64_LE_U; { I64 Le_u }
+  | I32_GE_S; { I32 Ge_s }
+  | I64_GE_S; { I64 Ge_s }
+  | I32_GE_U; { I32 Ge_u }
+  | I64_GE_U; { I64 Ge_u }
   | F32_EQ; { F32 Eq }
   | F64_EQ; { F64 Eq }
   | F32_NE; { F32 Ne }
@@ -476,34 +911,34 @@ let plain_instr :=
   | I64_EXTEND16_S; { I64 Extend16_s }
   | I64_EXTEND32_S; { I64 Extend32_s }
   | I32_WRAP_I64; { I32 Wrap_i64 }
-  | I64_EXTEND_I32_S; { I64 (Extend_i32 S) }
-  | I64_EXTEND_I32_U; { I64 (Extend_i32 U) }
-  | I32_TRUNC_F32_S; { I32 (Trunc_f (S32, S)) }
-  | I32_TRUNC_F32_U; { I32 (Trunc_f (S32, U)) }
-  | I32_TRUNC_F64_S; { I32 (Trunc_f (S64, S)) }
-  | I32_TRUNC_F64_U; { I32 (Trunc_f (S64, U)) }
-  | I64_TRUNC_F32_S; { I64 (Trunc_f (S32, S)) }
-  | I64_TRUNC_F32_U; { I64 (Trunc_f (S32, U)) }
-  | I64_TRUNC_F64_S; { I64 (Trunc_f (S64, S)) }
-  | I64_TRUNC_F64_U; { I64 (Trunc_f (S64, U)) }
-  | I32_TRUNC_SAT_F32_S; { I32 (Trunc_sat_f (S32, S)) }
-  | I32_TRUNC_SAT_F32_U; { I32 (Trunc_sat_f (S32, U)) }
-  | I32_TRUNC_SAT_F64_S; { I32 (Trunc_sat_f (S64, S)) }
-  | I32_TRUNC_SAT_F64_U; { I32 (Trunc_sat_f (S64, U)) }
-  | I64_TRUNC_SAT_F32_S; { I64 (Trunc_sat_f (S32, S)) }
-  | I64_TRUNC_SAT_F32_U; { I64 (Trunc_sat_f (S32, U)) }
-  | I64_TRUNC_SAT_F64_S; { I64 (Trunc_sat_f (S64, S)) }
-  | I64_TRUNC_SAT_F64_U; { I64 (Trunc_sat_f (S64, U)) }
+  | I64_EXTEND_I32_S; { I64 (Extend_i32_s) }
+  | I64_EXTEND_I32_U; { I64 (Extend_i32_u) }
+  | I32_TRUNC_F32_S; { I32 (Trunc_f_s S32) }
+  | I32_TRUNC_F32_U; { I32 (Trunc_f_u S32) }
+  | I32_TRUNC_F64_S; { I32 (Trunc_f_s S64) }
+  | I32_TRUNC_F64_U; { I32 (Trunc_f_u S64) }
+  | I64_TRUNC_F32_S; { I64 (Trunc_f_s S32) }
+  | I64_TRUNC_F32_U; { I64 (Trunc_f_u S32) }
+  | I64_TRUNC_F64_S; { I64 (Trunc_f_s S64) }
+  | I64_TRUNC_F64_U; { I64 (Trunc_f_u S64) }
+  | I32_TRUNC_SAT_F32_S; { I32 (Trunc_sat_f_s S32) }
+  | I32_TRUNC_SAT_F32_U; { I32 (Trunc_sat_f_u S32) }
+  | I32_TRUNC_SAT_F64_S; { I32 (Trunc_sat_f_s S64) }
+  | I32_TRUNC_SAT_F64_U; { I32 (Trunc_sat_f_u S64) }
+  | I64_TRUNC_SAT_F32_S; { I64 (Trunc_sat_f_s S32) }
+  | I64_TRUNC_SAT_F32_U; { I64 (Trunc_sat_f_u S32) }
+  | I64_TRUNC_SAT_F64_S; { I64 (Trunc_sat_f_s S64) }
+  | I64_TRUNC_SAT_F64_U; { I64 (Trunc_sat_f_u S64) }
   | F32_DEMOTE_F64; { F32 (Demote_f64) }
   | F64_PROMOTE_F32; { F64 (Promote_f32) }
-  | F32_CONVERT_I32_S; { F32 (Convert_i (S32, S)) }
-  | F32_CONVERT_I32_U; { F32 (Convert_i (S32, U)) }
-  | F32_CONVERT_I64_S; { F32 (Convert_i (S64, S)) }
-  | F32_CONVERT_I64_U; { F32 (Convert_i (S64, U)) }
-  | F64_CONVERT_I32_S; { F64 (Convert_i (S32, S)) }
-  | F64_CONVERT_I32_U; { F64 (Convert_i (S32, U)) }
-  | F64_CONVERT_I64_S; { F64 (Convert_i (S64, S)) }
-  | F64_CONVERT_I64_U; { F64 (Convert_i (S64, U)) }
+  | F32_CONVERT_I32_S; { F32 (Convert_i_s S32) }
+  | F32_CONVERT_I32_U; { F32 (Convert_i_u S32) }
+  | F32_CONVERT_I64_S; { F32 (Convert_i_s S64) }
+  | F32_CONVERT_I64_U; { F32 (Convert_i_u S64) }
+  | F64_CONVERT_I32_S; { F64 (Convert_i_s S32) }
+  | F64_CONVERT_I32_U; { F64 (Convert_i_u S32) }
+  | F64_CONVERT_I64_S; { F64 (Convert_i_s S64) }
+  | F64_CONVERT_I64_U; { F64 (Convert_i_u S64) }
   | I32_REINTERPRET_F32; { I32 (Reinterpret_f S32) }
   | I32_REINTERPRET_F64; { I32 (Reinterpret_f S64) }
   | I64_REINTERPRET_F32; { I64 (Reinterpret_f S32) }
@@ -534,16 +969,16 @@ let plain_instr :=
   | I64_STORE; id = memidx; memarg = memarg; { I64 (Store (id, memarg)) }
   | F32_STORE; id = memidx; memarg = memarg; { F32 (Store (id, memarg)) }
   | F64_STORE; id = memidx; memarg = memarg; { F64 (Store (id, memarg)) }
-  | I32_LOAD8_S; id = memidx; memarg = memarg; { I32 (Load8 (id, S, memarg) ) }
-  | I32_LOAD8_U; id = memidx; memarg = memarg; { I32 (Load8 (id, U, memarg) ) }
-  | I64_LOAD8_S; id = memidx; memarg = memarg; { I64 (Load8 (id, S, memarg) ) }
-  | I64_LOAD8_U; id = memidx; memarg = memarg; { I64 (Load8 (id, U, memarg) ) }
-  | I32_LOAD16_S; id = memidx; memarg = memarg; { I32 (Load16 (id, S, memarg) )  }
-  | I32_LOAD16_U; id = memidx; memarg = memarg; { I32 (Load16 (id, U, memarg) ) }
-  | I64_LOAD16_S; id = memidx; memarg = memarg; { I64 (Load16 (id, S, memarg) ) }
-  | I64_LOAD16_U; id = memidx; memarg = memarg; { I64 (Load16 (id, U, memarg) ) }
-  | I64_LOAD32_S; id = memidx; memarg = memarg; { I64 (Load32 (id, S, memarg)) }
-  | I64_LOAD32_U; id = memidx; memarg = memarg; { I64 (Load32 (id, U, memarg)) }
+  | I32_LOAD8_S; id = memidx; memarg = memarg; { I32 (Load8_s (id, memarg) ) }
+  | I32_LOAD8_U; id = memidx; memarg = memarg; { I32 (Load8_u (id, memarg) ) }
+  | I64_LOAD8_S; id = memidx; memarg = memarg; { I64 (Load8_s (id, memarg) ) }
+  | I64_LOAD8_U; id = memidx; memarg = memarg; { I64 (Load8_u (id, memarg) ) }
+  | I32_LOAD16_S; id = memidx; memarg = memarg; { I32 (Load16_s (id, memarg) )  }
+  | I32_LOAD16_U; id = memidx; memarg = memarg; { I32 (Load16_u (id, memarg) ) }
+  | I64_LOAD16_S; id = memidx; memarg = memarg; { I64 (Load16_s (id, memarg) ) }
+  | I64_LOAD16_U; id = memidx; memarg = memarg; { I64 (Load16_u (id, memarg) ) }
+  | I64_LOAD32_S; id = memidx; memarg = memarg; { I64 (Load32_s (id, memarg)) }
+  | I64_LOAD32_U; id = memidx; memarg = memarg; { I64 (Load32_u (id, memarg)) }
   | I32_STORE8; id = memidx; memarg = memarg; { I32 (Store8 (id, memarg)) }
   | I64_STORE8; id = memidx; memarg = memarg; { I64 (Store8 (id, memarg)) }
   | I32_STORE16; id = memidx; memarg = memarg; { I32 (Store16 (id, memarg)) }

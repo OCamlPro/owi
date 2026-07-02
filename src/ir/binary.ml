@@ -246,31 +246,42 @@ type i32_instr =
   | Add
   | Sub
   | Mul
-  | Div of Text.sx
-  | Rem of Text.sx
+  | Div_s
+  | Div_u
+  | Rem_s
+  | Rem_u
   | And
   | Or
   | Xor
   | Shl
-  | Shr of Text.sx
+  | Shr_s
+  | Shr_u
   | Rotl
   | Rotr
   | Eqz
   | Eq
   | Ne
-  | Lt of Text.sx
-  | Gt of Text.sx
-  | Le of Text.sx
-  | Ge of Text.sx
+  | Lt_s
+  | Lt_u
+  | Gt_s
+  | Gt_u
+  | Le_s
+  | Le_u
+  | Ge_s
+  | Ge_u
   | Extend8_s
   | Extend16_s
   | Wrap_i64
-  | Trunc_f of Text.nn * Text.sx
-  | Trunc_sat_f of Text.nn * Text.sx
+  | Trunc_f_s of Text.nn
+  | Trunc_f_u of Text.nn
+  | Trunc_sat_f_s of Text.nn
+  | Trunc_sat_f_u of Text.nn
   | Reinterpret_f of Text.nn
   | Load of indice * memarg
-  | Load8 of indice * Text.sx * memarg
-  | Load16 of indice * Text.sx * memarg
+  | Load8_s of indice * memarg
+  | Load8_u of indice * memarg
+  | Load16_s of indice * memarg
+  | Load16_u of indice * memarg
   | Store of indice * memarg
   | Store8 of indice * memarg
   | Store16 of indice * memarg
@@ -283,37 +294,47 @@ let pp_i32_instr ppf = function
   | Add -> pf ppf "i32.add"
   | Sub -> pf ppf "i32.sub"
   | Mul -> pf ppf "i32.mul"
-  | Div sx -> pf ppf "i32.div_%a" Text.pp_sx sx
-  | Rem sx -> pf ppf "i32.rem_%a" Text.pp_sx sx
+  | Div_s -> pf ppf "i32.div_s"
+  | Div_u -> pf ppf "i32.div_u"
+  | Rem_s -> pf ppf "i32.rem_s"
+  | Rem_u -> pf ppf "i32.rem_u"
   | And -> pf ppf "i32.and"
   | Or -> pf ppf "i32.or"
   | Xor -> pf ppf "i32.xor"
   | Shl -> pf ppf "i32.shl"
-  | Shr sx -> pf ppf "i32.shr_%a" Text.pp_sx sx
+  | Shr_s -> pf ppf "i32.shr_s"
+  | Shr_u -> pf ppf "i32.shr_u"
   | Rotl -> pf ppf "i32.rotl"
   | Rotr -> pf ppf "i32.rotr"
   | Eqz -> pf ppf "i32.eqz"
   | Eq -> pf ppf "i32.eq"
   | Ne -> pf ppf "i32.ne"
-  | Lt sx -> pf ppf "i32.lt_%a" Text.pp_sx sx
-  | Gt sx -> pf ppf "i32.gt_%a" Text.pp_sx sx
-  | Le sx -> pf ppf "i32.le_%a" Text.pp_sx sx
-  | Ge sx -> pf ppf "i32.ge_%a" Text.pp_sx sx
+  | Lt_s -> pf ppf "i32.lt_s"
+  | Lt_u -> pf ppf "i32.lt_u"
+  | Gt_s -> pf ppf "i32.gt_s"
+  | Gt_u -> pf ppf "i32.gt_u"
+  | Le_s -> pf ppf "i32.le_s"
+  | Le_u -> pf ppf "i32.le_u"
+  | Ge_s -> pf ppf "i32.ge_s"
+  | Ge_u -> pf ppf "i32.ge_u"
   | Extend8_s -> pf ppf "i32.extend8_s"
   | Extend16_s -> pf ppf "i32.extend16_s"
   | Wrap_i64 -> pf ppf "i32.wrap_i64"
-  | Trunc_f (nn, sx) -> pf ppf "i32.trunc_f%a_%a" Text.pp_nn nn Text.pp_sx sx
-  | Trunc_sat_f (nn, sx) ->
-    pf ppf "i32.truc_sat_f%a_%a" Text.pp_nn nn Text.pp_sx sx
+  | Trunc_f_s nn -> pf ppf "i32.trunc_f%a_s" Text.pp_nn nn
+  | Trunc_f_u nn -> pf ppf "i32.trunc_f%a_u" Text.pp_nn nn
+  | Trunc_sat_f_s nn -> pf ppf "i32.truc_sat_f%a_s" Text.pp_nn nn
+  | Trunc_sat_f_u nn -> pf ppf "i32.truc_sat_f%a_u" Text.pp_nn nn
   | Reinterpret_f nn -> pf ppf "i32.reinterpret_f%a" Text.pp_nn nn
   | Load (indice, memarg) ->
     pf ppf "i32.load%a%a" pp_indice_not0 indice pp_memarg memarg
-  | Load8 (indice, sx, memarg) ->
-    pf ppf "i32.load8_%a%a%a" Text.pp_sx sx pp_indice_not0 indice pp_memarg
-      memarg
-  | Load16 (indice, sx, memarg) ->
-    pf ppf "i32.load16_%a%a%a" Text.pp_sx sx pp_indice_not0 indice pp_memarg
-      memarg
+  | Load8_s (indice, memarg) ->
+    pf ppf "i32.load8_s%a%a" pp_indice_not0 indice pp_memarg memarg
+  | Load8_u (indice, memarg) ->
+    pf ppf "i32.load8_u%a%a" pp_indice_not0 indice pp_memarg memarg
+  | Load16_s (indice, memarg) ->
+    pf ppf "i32.load16_s%a%a" pp_indice_not0 indice pp_memarg memarg
+  | Load16_u (indice, memarg) ->
+    pf ppf "i32.load16_u%a%a" pp_indice_not0 indice pp_memarg memarg
   | Store (indice, memarg) ->
     pf ppf "i32.store%a%a" pp_indice_not0 indice pp_memarg memarg
   | Store8 (indice, memarg) ->
@@ -331,33 +352,46 @@ type i64_instr =
   | Add
   | Sub
   | Mul
-  | Div of Text.sx
-  | Rem of Text.sx
+  | Div_s
+  | Div_u
+  | Rem_s
+  | Rem_u
   | And
   | Or
   | Xor
   | Shl
-  | Shr of Text.sx
+  | Shr_s
+  | Shr_u
   | Rotl
   | Rotr
   | Eqz
   | Eq
   | Ne
-  | Lt of Text.sx
-  | Gt of Text.sx
-  | Le of Text.sx
-  | Ge of Text.sx
+  | Lt_s
+  | Lt_u
+  | Gt_s
+  | Gt_u
+  | Le_s
+  | Le_u
+  | Ge_s
+  | Ge_u
   | Extend8_s
   | Extend16_s
   | Extend32_s
-  | Extend_i32 of Text.sx
-  | Trunc_f of Text.nn * Text.sx
-  | Trunc_sat_f of Text.nn * Text.sx
+  | Extend_i32_s
+  | Extend_i32_u
+  | Trunc_f_s of Text.nn
+  | Trunc_f_u of Text.nn
+  | Trunc_sat_f_s of Text.nn
+  | Trunc_sat_f_u of Text.nn
   | Reinterpret_f of Text.nn
   | Load of indice * memarg
-  | Load8 of indice * Text.sx * memarg
-  | Load16 of indice * Text.sx * memarg
-  | Load32 of indice * Text.sx * memarg
+  | Load8_s of indice * memarg
+  | Load8_u of indice * memarg
+  | Load16_s of indice * memarg
+  | Load16_u of indice * memarg
+  | Load32_s of indice * memarg
+  | Load32_u of indice * memarg
   | Store of indice * memarg
   | Store8 of indice * memarg
   | Store16 of indice * memarg
@@ -371,41 +405,53 @@ let pp_i64_instr ppf = function
   | Add -> pf ppf "i64.add"
   | Sub -> pf ppf "i64.sub"
   | Mul -> pf ppf "i64.mul"
-  | Div sx -> pf ppf "i64.div_%a" Text.pp_sx sx
-  | Rem sx -> pf ppf "i64.rem_%a" Text.pp_sx sx
+  | Div_s -> pf ppf "i64.div_s"
+  | Div_u -> pf ppf "i64.div_u"
+  | Rem_s -> pf ppf "i64.rem_s"
+  | Rem_u -> pf ppf "i64.rem_u"
   | And -> pf ppf "i64.and"
   | Or -> pf ppf "i64.or"
   | Xor -> pf ppf "i64.xor"
   | Shl -> pf ppf "i64.shl"
-  | Shr sx -> pf ppf "i64.shr_%a" Text.pp_sx sx
+  | Shr_s -> pf ppf "i64.shr_s"
+  | Shr_u -> pf ppf "i64.shr_u"
   | Rotl -> pf ppf "i64.rotl"
   | Rotr -> pf ppf "i64.rotr"
   | Eqz -> pf ppf "i64.eqz"
   | Eq -> pf ppf "i64.eq"
   | Ne -> pf ppf "i64.ne"
-  | Lt sx -> pf ppf "i64.lt_%a" Text.pp_sx sx
-  | Gt sx -> pf ppf "i64.gt_%a" Text.pp_sx sx
-  | Le sx -> pf ppf "i64.le_%a" Text.pp_sx sx
-  | Ge sx -> pf ppf "i64.ge_%a" Text.pp_sx sx
+  | Lt_s -> pf ppf "i64.lt_s"
+  | Lt_u -> pf ppf "i64.lt_u"
+  | Gt_s -> pf ppf "i64.gt_s"
+  | Gt_u -> pf ppf "i64.gt_u"
+  | Le_s -> pf ppf "i64.le_s"
+  | Le_u -> pf ppf "i64.le_u"
+  | Ge_s -> pf ppf "i64.ge_s"
+  | Ge_u -> pf ppf "i64.ge_u"
   | Extend8_s -> pf ppf "i64.extend8_s"
   | Extend16_s -> pf ppf "i64.extend16_s"
   | Extend32_s -> pf ppf "i64.extend32_s"
-  | Extend_i32 sx -> pf ppf "i64.extend_i32_%a" Text.pp_sx sx
-  | Trunc_f (nn, sx) -> pf ppf "i64.trunc_f%a_%a" Text.pp_nn nn Text.pp_sx sx
-  | Trunc_sat_f (nn, sx) ->
-    pf ppf "i64.trunc_sat_f%a_%a" Text.pp_nn nn Text.pp_sx sx
+  | Extend_i32_s -> pf ppf "i64.extend_i32_s"
+  | Extend_i32_u -> pf ppf "i64.extend_i32_u"
+  | Trunc_f_s nn -> pf ppf "i64.trunc_f%a_s" Text.pp_nn nn
+  | Trunc_f_u nn -> pf ppf "i64.trunc_f%a_u" Text.pp_nn nn
+  | Trunc_sat_f_s nn -> pf ppf "i64.trunc_sat_f%a_s" Text.pp_nn nn
+  | Trunc_sat_f_u nn -> pf ppf "i64.trunc_sat_f%a_u" Text.pp_nn nn
   | Reinterpret_f nn -> pf ppf "i64.reinterpret_f%a" Text.pp_nn nn
   | Load (indice, memarg) ->
-    pf ppf "i64.load%a%a" pp_indice_not0 indice pp_memarg memarg
-  | Load8 (indice, sx, memarg) ->
-    pf ppf "i64.load8_%a%a%a" pp_indice_not0 indice Text.pp_sx sx pp_memarg
-      memarg
-  | Load16 (indice, sx, memarg) ->
-    pf ppf "i64.load16_%a%a%a" pp_indice_not0 indice Text.pp_sx sx pp_memarg
-      memarg
-  | Load32 (indice, sx, memarg) ->
-    pf ppf "i64.load32_%a%a%a" pp_indice_not0 indice Text.pp_sx sx pp_memarg
-      memarg
+    pf ppf "i64.load_s%a%a" pp_indice_not0 indice pp_memarg memarg
+  | Load8_s (indice, memarg) ->
+    pf ppf "i64.load8_u%a%a" pp_indice_not0 indice pp_memarg memarg
+  | Load8_u (indice, memarg) ->
+    pf ppf "i64.load8_s%a%a" pp_indice_not0 indice pp_memarg memarg
+  | Load16_s (indice, memarg) ->
+    pf ppf "i64.load16_u%a%a" pp_indice_not0 indice pp_memarg memarg
+  | Load16_u (indice, memarg) ->
+    pf ppf "i64.load16_s%a%a" pp_indice_not0 indice pp_memarg memarg
+  | Load32_s (indice, memarg) ->
+    pf ppf "i64.load32_u%a%a" pp_indice_not0 indice pp_memarg memarg
+  | Load32_u (indice, memarg) ->
+    pf ppf "i64.load32_s%a%a" pp_indice_not0 indice pp_memarg memarg
   | Store (indice, memarg) ->
     pf ppf "i64.store%a%a" pp_indice_not0 indice pp_memarg memarg
   | Store8 (indice, memarg) ->
@@ -440,7 +486,8 @@ type f32_instr =
   | Le
   | Ge
   | Demote_f64
-  | Convert_i of Text.nn * Text.sx
+  | Convert_i_s of Text.nn
+  | Convert_i_u of Text.nn
   | Reinterpret_i of Text.nn
   | Load of indice * memarg
   | Store of indice * memarg
@@ -468,7 +515,8 @@ let pp_f32_instr ppf = function
   | Le -> pf ppf "f32.le"
   | Ge -> pf ppf "f32.ge"
   | Demote_f64 -> pf ppf "f32.demote_f64"
-  | Convert_i (nn, sx) -> pf ppf "f32.convert_i%a%a" Text.pp_nn nn Text.pp_sx sx
+  | Convert_i_s nn -> pf ppf "f32.convert_i%a_s" Text.pp_nn nn
+  | Convert_i_u nn -> pf ppf "f32.convert_i%a_u" Text.pp_nn nn
   | Reinterpret_i nn -> pf ppf "f32.reinterpret_i%a" Text.pp_nn nn
   | Load (indice, memarg) ->
     pf ppf "f32.load%a%a" pp_indice_not0 indice pp_memarg memarg
@@ -500,7 +548,8 @@ type f64_instr =
   | Le
   | Ge
   | Promote_f32
-  | Convert_i of Text.nn * Text.sx
+  | Convert_i_s of Text.nn
+  | Convert_i_u of Text.nn
   | Reinterpret_i of Text.nn
   | Load of indice * memarg
   | Store of indice * memarg
@@ -528,8 +577,8 @@ let pp_f64_instr ppf = function
   | Le -> pf ppf "f64.le"
   | Ge -> pf ppf "f64.ge"
   | Promote_f32 -> pf ppf "f64.promote_f32"
-  | Convert_i (nn, sx) ->
-    pf ppf "f64.convert_i%a_%a" Text.pp_nn nn Text.pp_sx sx
+  | Convert_i_s nn -> pf ppf "f64.convert_i%a_s" Text.pp_nn nn
+  | Convert_i_u nn -> pf ppf "f64.convert_i%a_u" Text.pp_nn nn
   | Reinterpret_i nn -> pf ppf "f64.reinterpret_i%a" Text.pp_nn nn
   | Load (indice, memarg) ->
     pf ppf "f64.load%a%a" pp_indice_not0 indice pp_memarg memarg
@@ -543,12 +592,32 @@ type v128_instr =
   | And
   | Or
   | Any_true
+  | Load8_splat of (indice * memarg)
+  | Load8_lane of (indice * memarg * int)
+  | Load8x8_s of (indice * memarg)
+  | Load8x8_u of (indice * memarg)
+  | Load16_splat of (indice * memarg)
+  | Load16_lane of (indice * memarg * int)
   | Load16x4_s of (indice * memarg)
   | Load16x4_u of (indice * memarg)
+  | Load32_splat of (indice * memarg)
   | Load32_lane of (indice * memarg * int)
+  | Load32_zero of (indice * memarg)
+  | Load64_splat of (indice * memarg)
+  | Load64_lane of (indice * memarg * int)
   | Load64_zero of (indice * memarg)
   | Load of (indice * memarg)
   | Store of (indice * memarg)
+  | Store8_lane of (indice * memarg * int)
+  | Store64_lane of (indice * memarg * int)
+  | Store32_zero of (indice * memarg)
+  | Store32_lane of (indice * memarg * int)
+  | Store16_lane of (indice * memarg * int)
+  | Bitselect
+  | Xor
+  | Load32x2_s of (indice * memarg)
+  | Load32x2_u of (indice * memarg)
+  | Andnot
 
 let pp_v128_instr ppf = function
   | Const n -> pf ppf "v128.const %a" Concrete_v128.pp n
@@ -568,6 +637,7 @@ let pp_v128_instr ppf = function
     pf ppf "v128.load%a%a" pp_indice_not0 indice pp_memarg memarg
   | Store (indice, memarg) ->
     pf ppf "v128.store%a%a" pp_indice_not0 indice pp_memarg memarg
+  | _ -> assert false
 
 (** Reference instructions *)
 type ref_instr =
@@ -724,6 +794,8 @@ type instr =
   | I16x8 of Text.i16x8_instr
   | I32x4 of Text.i32x4_instr
   | I64x2 of Text.i64x2_instr
+  | F32x4 of Text.f32x4_instr
+  | F64x2 of Text.f64x2_instr
   | Ref of ref_instr
   | Local of local_instr
   | Global of global_instr
@@ -775,6 +847,8 @@ let rec pp_instr ~short ppf = function
   | I16x8 i -> Text.pp_i16x8_instr ppf i
   | I32x4 i -> Text.pp_i32x4_instr ppf i
   | I64x2 i -> Text.pp_i64x2_instr ppf i
+  | F32x4 i -> Text.pp_f32x4_instr ppf i
+  | F64x2 i -> Text.pp_f64x2_instr ppf i
   | Ref i -> pp_ref_instr ppf i
   | Local i -> pp_local_instr ppf i
   | Global i -> pp_global_instr ppf i
@@ -855,8 +929,9 @@ and iter_instr f instr =
   Annotated.iter
     (function
       | I32 _ | I64 _ | F32 _ | F64 _ | V128 _ | I8x16 _ | I16x8 _ | I32x4 _
-      | I64x2 _ | Ref _ | Local _ | Global _ | Table _ | Elem _ | Memory _
-      | Data _ | Drop | Select _ | Nop | Unreachable | Br _ | Br_if _
+      | I64x2 _ | F32x4 _ | F64x2 _ | Ref _ | Local _ | Global _ | Table _
+      | Elem _ | Memory _ | Data _ | Drop | Select _ | Nop | Unreachable | Br _
+      | Br_if _
       | Br_table (_, _)
       | Br_on_null _ | Br_on_non_null _
       | Br_on_cast (_, _, _)
