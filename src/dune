@@ -153,6 +153,7 @@
   syntax
   table_intf
   text
+  text_keywords
   text_lexer
   text_parser
   text_validate
