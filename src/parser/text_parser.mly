@@ -207,6 +207,10 @@
  I64X2_SHL
  I8X16_GE_U
 
+ F64X2_REPLACE_LANE
+ I64X2_EXTEND_LOW_I32X4_S
+ I64X2_SHR_S
+
 %{
 
 open Wast
@@ -787,6 +791,10 @@ let plain_instr :=
   | I64X2_REPLACE_LANE; n = NUM; { I64x2 (Replace_lane (int_of_string n)) }
   | I64X2_SHL; { I64x2 Shl }
   | I8X16_GE_U; { I8x16 Ge_u }
+
+  | F64X2_REPLACE_LANE; n = NUM; { F64x2 (Replace_lane (int_of_string n)) }
+  | I64X2_EXTEND_LOW_I32X4_S; { I64x2 Extend_low_i32x4_s }
+  | I64X2_SHR_S; { I64x2 Shr_s }
 
   | I32_CLZ; { I32 Clz }
   | I64_CLZ; { I64 Clz }

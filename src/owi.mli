@@ -681,6 +681,8 @@ module Text : sig
     | Bitmask
     | Shl
     | Replace_lane of int
+    | Shr_s
+    | Shr_u
 
   type f32x4_instr =
     | Pmin

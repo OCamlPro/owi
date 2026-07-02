@@ -542,6 +542,8 @@ type i64x2_instr =
   | Bitmask
   | Shl
   | Replace_lane of int
+  | Shr_s
+  | Shr_u
 
 val pp_i64x2_instr : i64x2_instr Fmt.t
 
