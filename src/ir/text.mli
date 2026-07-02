@@ -540,6 +540,8 @@ type i64x2_instr =
   | Extract_lane of int
   | All_true
   | Bitmask
+  | Shl
+  | Replace_lane of int
 
 val pp_i64x2_instr : i64x2_instr Fmt.t
 
@@ -574,6 +576,7 @@ type f32x4_instr =
   | Extract_lane of int
   | Sqrt
   | Replace_lane of int
+  | Demote_f64x2_zero
 
 val pp_f32x4_instr : f32x4_instr Fmt.t
 
