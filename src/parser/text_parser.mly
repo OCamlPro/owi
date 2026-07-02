@@ -211,6 +211,10 @@
  I64X2_EXTEND_LOW_I32X4_S
  I64X2_SHR_S
 
+ I64X2_SHR_U
+ I64X2_EXTEND_LOW_I32X4_U
+ I8X16_SHUFFLE
+
 %{
 
 open Wast
@@ -795,6 +799,13 @@ let plain_instr :=
   | F64X2_REPLACE_LANE; n = NUM; { F64x2 (Replace_lane (int_of_string n)) }
   | I64X2_EXTEND_LOW_I32X4_S; { I64x2 Extend_low_i32x4_s }
   | I64X2_SHR_S; { I64x2 Shr_s }
+
+  | I64X2_SHR_U; { I64x2 Shr_u }
+  | I64X2_EXTEND_LOW_I32X4_U; { I64x2 Extend_low_i32x4_u }
+  | I8X16_SHUFFLE; l = nonempty_list(NUM); {
+      let lanes = List.map int_of_string l in
+      I8x16 (Shuffle (Array.of_list lanes))
+    }
 
   | I32_CLZ; { I32 Clz }
   | I64_CLZ; { I64 Clz }
