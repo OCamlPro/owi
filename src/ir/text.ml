@@ -1033,6 +1033,8 @@ type i64x2_instr =
   | Bitmask
   | Shl
   | Replace_lane of int
+  | Shr_s
+  | Shr_u
 
 let pp_i64x2_instr ppf = function
   | Add -> pf ppf "i64x2.add"
