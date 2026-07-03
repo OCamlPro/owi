@@ -303,7 +303,77 @@ let convert_v128_instr : Binary.v128_instr -> Text.v128_instr = function
     let indice = convert_indice indice in
     let memarg = convert_memarg memarg in
     Store (indice, memarg)
-  | _ -> assert false
+  | Bitselect -> Bitselect
+  | Xor -> Xor
+  | Andnot -> Andnot
+  | Load8_splat (indice, memarg) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Load8_splat (indice, memarg)
+  | Load8_lane (indice, memarg, n) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Load8_lane (indice, memarg, n)
+  | Load8x8_s (indice, memarg) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Load8x8_s (indice, memarg)
+  | Load8x8_u (indice, memarg) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Load8x8_u (indice, memarg)
+  | Load16_splat (indice, memarg) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Load16_splat (indice, memarg)
+  | Load16_lane (indice, memarg, n) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Load16_lane (indice, memarg, n)
+  | Load32_splat (indice, memarg) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Load32_splat (indice, memarg)
+  | Load32_zero (indice, memarg) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Load32_zero (indice, memarg)
+  | Load64_splat (indice, memarg) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Load64_splat (indice, memarg)
+  | Load64_lane (indice, memarg, n) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Load64_lane (indice, memarg, n)
+  | Store8_lane (indice, memarg, n) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Store8_lane (indice, memarg, n)
+  | Store64_lane (indice, memarg, n) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Store64_lane (indice, memarg, n)
+  | Store32_zero (indice, memarg) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Store32_zero (indice, memarg)
+  | Store32_lane (indice, memarg, n) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Store32_lane (indice, memarg, n)
+  | Store16_lane (indice, memarg, n) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Store16_lane (indice, memarg, n)
+  | Load32x2_s (indice, memarg) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Load32x2_s (indice, memarg)
+  | Load32x2_u (indice, memarg) ->
+    let indice = convert_indice indice in
+    let memarg = convert_memarg memarg in
+    Load32x2_u (indice, memarg)
 
 let convert_ref_instr : Binary.ref_instr -> Text.ref_instr = function
   | Null heap_type -> Null (convert_heap_type heap_type)
