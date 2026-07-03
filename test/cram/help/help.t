@@ -19,9 +19,6 @@ no subcommand should print help
          c++ [OPTION]… FILE…
              Compile a C++ file to Wasm and run the symbolic interpreter on it
   
-         drun [--interactive] [--unsafe] [OPTION]… FILE
-             Run the denotational interpreter
-  
          fmt [--inplace] [OPTION]… FILE…
              Format a .wat or .wast file
   
