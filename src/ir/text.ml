@@ -976,7 +976,37 @@ let pp_i16x8_instr ppf = function
   | Splat -> pf ppf "i16x8.splat"
   | Extract_lane_s n -> pf ppf "i16x8.extract_lane_s %d" n
   | Extract_lane_u n -> pf ppf "i16x8.extract_lane_u %d" n
-  | _ -> assert false
+  | Q15mulr_sat_s -> pf ppf "i16x8.q15mulr_sat_s"
+  | Min_s -> pf ppf "i16x8.min_s"
+  | Min_u -> pf ppf "i16x8.min_u"
+  | Min -> pf ppf "i16x8.min"
+  | Extmul_low_i8x16_s -> pf ppf "i16x8.extmul_low_i8x16_s"
+  | Extmul_low_i8x16_u -> pf ppf "i16x8.extmul_low_i8x16_u"
+  | Extmul_high_i8x16_s -> pf ppf "i16x8.extmul_high_i8x16_s"
+  | Extmul_high_i8x16_u -> pf ppf "i16x8.extmul_high_i8x16_u"
+  | Extend_low_i8x16_s -> pf ppf "i16x8.extend_low_i8x16_s"
+  | Extend_low_i8x16_u -> pf ppf "i16x8.extend_low_i8x16_u"
+  | Extend_high_i8x16_s -> pf ppf "i16x8.extend_high_i8x16_s"
+  | Extend_high_i8x16_u -> pf ppf "i16x8.extend_high_i8x16_u"
+  | Extadd_pairwise_i8x16_s -> pf ppf "i16x8.extadd_pairwise_i8x16_s"
+  | Extadd_pairwise_i8x16_u -> pf ppf "i16x8.extadd_pairwise_i8x16_u"
+  | Add_sat_s -> pf ppf "i16x8.add_sat_s"
+  | Add_sat_u -> pf ppf "i16x8.add_sat_u"
+  | Sub_sat_s -> pf ppf "i16x8.sub_sat_s"
+  | Sub_sat_u -> pf ppf "i16x8.sub_sat_u"
+  | Max_s -> pf ppf "i16x8.max_s"
+  | Max_u -> pf ppf "i16x8.max_u"
+  | Shl -> pf ppf "i16x8.shl"
+  | Neg -> pf ppf "i16x8.neg"
+  | All_true -> pf ppf "i16x8.all_true"
+  | Shr_s -> pf ppf "i16x8.shr_s"
+  | Shr_u -> pf ppf "i16x8.shr_u"
+  | Bitmask -> pf ppf "i16x8.bitmask"
+  | Avgr_u -> pf ppf "i16x8.avgr_u"
+  | Abs -> pf ppf "i16x8.abs"
+  | Narrow_i32x4_s -> pf ppf "i16x8.narrow_i32x4_s"
+  | Narrow_i32x4_u -> pf ppf "i16x8.narrow_i32x4_u"
+  | Replace_lane lane_index -> pf ppf "i16x8.replace_lane %d" lane_index
 
 (* I32x4 instructions *)
 type i32x4_instr =
