@@ -24,6 +24,10 @@
 
 - [Examples of Problem Solving](sap/examples.md)
 
+# Using Owi on Large Projects
+
+- [Rust: `cargo owi`](large/rust.md)
+
 # WebAssembly Toolkit
 
 - [Concrete Interpreter](wasm-toolkit/concrete-interpreter.md)
