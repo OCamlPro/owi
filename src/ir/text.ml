@@ -792,7 +792,43 @@ let pp_v128_instr ppf = function
     pf ppf "v128.load%a%a" pp_indice_not0 indice pp_memarg memarg
   | Store (indice, memarg) ->
     pf ppf "v128.store%a%a" pp_indice_not0 indice pp_memarg memarg
-  | _ -> assert false
+  | Bitselect -> pf ppf "v128.bitselect"
+  | Xor -> pf ppf "v128.xor"
+  | Andnot -> pf ppf "v128.andnot"
+  | Load8_splat (indice, memarg) ->
+    pf ppf "v128.load8_splat%a%a" pp_indice_not0 indice pp_memarg memarg
+  | Load8_lane (indice, memarg, n) ->
+    pf ppf "v128.load8_lane%a%a %d" pp_indice_not0 indice pp_memarg memarg n
+  | Load8x8_s (indice, memarg) ->
+    pf ppf "v128.load8x8_s%a%a" pp_indice_not0 indice pp_memarg memarg
+  | Load8x8_u (indice, memarg) ->
+    pf ppf "v128.load8x8_u%a%a" pp_indice_not0 indice pp_memarg memarg
+  | Load16_splat (indice, memarg) ->
+    pf ppf "v128.load16_splat%a%a" pp_indice_not0 indice pp_memarg memarg
+  | Load16_lane (indice, memarg, n) ->
+    pf ppf "v128.load16_lane%a%a %d" pp_indice_not0 indice pp_memarg memarg n
+  | Load32_splat (indice, memarg) ->
+    pf ppf "v128.load32_splat%a%a" pp_indice_not0 indice pp_memarg memarg
+  | Load32_zero (indice, memarg) ->
+    pf ppf "v128.load32_zero%a%a" pp_indice_not0 indice pp_memarg memarg
+  | Load64_splat (indice, memarg) ->
+    pf ppf "v128.load64_splat%a%a" pp_indice_not0 indice pp_memarg memarg
+  | Load64_lane (indice, memarg, n) ->
+    pf ppf "v128.load64_lane%a%a %d" pp_indice_not0 indice pp_memarg memarg n
+  | Store8_lane (indice, memarg, n) ->
+    pf ppf "v128.store8_lane%a%a %d" pp_indice_not0 indice pp_memarg memarg n
+  | Store64_lane (indice, memarg, n) ->
+    pf ppf "v128.store64_lane%a%a %d" pp_indice_not0 indice pp_memarg memarg n
+  | Store32_zero (indice, memarg) ->
+    pf ppf "v128.store32_zero%a%a" pp_indice_not0 indice pp_memarg memarg
+  | Store32_lane (indice, memarg, n) ->
+    pf ppf "v128.store32_lane%a%a %d" pp_indice_not0 indice pp_memarg memarg n
+  | Store16_lane (indice, memarg, n) ->
+    pf ppf "v128.store16_lane%a%a %d" pp_indice_not0 indice pp_memarg memarg n
+  | Load32x2_s (indice, memarg) ->
+    pf ppf "v128.load32x2_s%a%a" pp_indice_not0 indice pp_memarg memarg
+  | Load32x2_u (indice, memarg) ->
+    pf ppf "v128.load32x2_u%a%a" pp_indice_not0 indice pp_memarg memarg
 
 (** I8x16 instructions *)
 type i8x16_instr =
