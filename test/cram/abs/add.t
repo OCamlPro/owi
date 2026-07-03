@@ -1,9 +1,4 @@
-  $ owi drun add.wat -vv
-  Usage: owi [--help] [COMMAND] …
-  owi: unknown command drun. Did you mean run?
-  [124]
-
-  $ owi abs add.wat -vv 
+  $ owi abs add.wat -vv
   owi: [INFO] parsing      ...
   owi: [INFO] checking     ...
   owi: [INFO] checking     ...
@@ -97,3 +92,5 @@
   owi: [DEBUG] abstract state : None 
   
   owi: [DEBUG] jt            :  
+
+
