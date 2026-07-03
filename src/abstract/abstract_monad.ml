@@ -2,4 +2,4 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type 'a t = 'a
+type 'a t = Abstract_state.t -> 'a * Abstract_state.t
