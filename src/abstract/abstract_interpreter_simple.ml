@@ -9,9 +9,9 @@ type t = Abstract_state.t option * Binary.instr Annotated.t option
 let i32_can_be_zero ctx v =
   Option.is_some @@ Abstract_domain.assume ctx (Abstract_i32.eqz ctx v)
 
-let eval_i32 ({ stack; ctx; invariant; _ } as state : Abstract_state.t) uuid :
-  Binary.i32_instr -> _ = function
-  | Const i ->
+let eval_i32 ({ stack; ctx; invariant; _ } as state : Abstract_state.t) uuid =
+  function
+  | (Const i : Binary.i32_instr) ->
     let stack = Stack.push_i32 stack (Abstract_i32.of_int32 ctx i) in
     { state with stack }
   | Add ->
@@ -191,9 +191,8 @@ let eval_i64 ({ stack; ctx; invariant; _ } as state : Abstract_state.t) uuid :
   | _ -> assert false
 
 (* TODO: handle this correctly *)
-let eval_f32 ({ stack; ctx; _ } as state : Abstract_state.t) _uuid :
-  Binary.f32_instr -> _ = function
-  | Const f ->
+let eval_f32 ({ stack; ctx; _ } as state : Abstract_state.t) _uuid = function
+  | (Const f : Binary.f32_instr) ->
     let stack = Stack.push_f32 stack (Abstract_f32.of_float32 ctx f) in
     { state with stack }
   | Add | Sub | Mul | Div | Min | Max | Copysign ->
@@ -242,9 +241,8 @@ let eval_f32 ({ stack; ctx; _ } as state : Abstract_state.t) _uuid :
     { state with stack }
 
 (* TODO: handle this correctly *)
-let eval_f64 ({ stack; ctx; _ } as state : Abstract_state.t) _uuid :
-  Binary.f64_instr -> _ = function
-  | Const _ ->
+let eval_f64 ({ stack; ctx; _ } as state : Abstract_state.t) _uuid = function
+  | (Const _ : Binary.f64_instr) ->
     let stack = Stack.push_f64 stack (Abstract_f64.unknown ctx) in
     { state with stack }
   | Add | Sub | Mul | Div | Min | Max | Copysign ->
@@ -320,8 +318,8 @@ let eval_global ({ stack; globals; _ } as state : Abstract_state.t) :
     { state with stack; globals }
 
 (* TODO: handle this correctly *)
-let eval_memory (state : Abstract_state.t) : Binary.memory_instr -> _ = function
-  | Size _i | Grow _i | Fill _i -> state
+let eval_memory (state : Abstract_state.t) = function
+  | (Size _i : Binary.memory_instr) | Grow _i | Fill _i -> state
   | Init (_i1, _i2) | Copy (_i1, _i2) -> state
 
 (* TODO: handle this correctly *)
