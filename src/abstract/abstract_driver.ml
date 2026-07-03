@@ -7,7 +7,9 @@ module Stack = Abstract_stack
 let ( let* ) = Option.bind
 
 module type DATA_STATE = sig
-  type t = Abstract_state.t option * Binary.instr Annotated.t option
+  type t =
+    | State of Abstract_state.t
+    | Unreachable
 
   val eval_instr : Abstract_state.t -> Binary.instr Annotated.t -> t
 end
@@ -18,7 +20,6 @@ module DenotFixpoint (S : DATA_STATE) = struct
   type t = Abstract_state.t
 
   module JumpKey = struct
-    (* TODO c'est mieux de définir le type nous même *)
     type t =
       | I of int
       | Ret
@@ -505,10 +506,8 @@ module DenotFixpoint (S : DATA_STATE) = struct
     | _ -> (
       let res = S.eval_instr state instr in
       match res with
-      | Some s, None -> (Some s, JumpTarget.empty)
-      | None, Some instr -> eval_instr state instr
-      | Some _, Some _ -> (* should not happen *) assert false
-      | None, None -> (* unreachable *) (None, JumpTarget.empty) )
+      | State state -> (Some state, JumpTarget.empty)
+      | Unreachable -> (None, JumpTarget.empty) )
 end
 
 (*===========================================================================*)

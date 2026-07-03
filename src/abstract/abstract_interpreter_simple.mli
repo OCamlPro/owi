@@ -2,6 +2,8 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type t = Abstract_state.t option * Binary.instr Annotated.t option
+type t =
+  | State of Abstract_state.t
+  | Unreachable
 
 val eval_instr : Abstract_state.t -> Binary.instr Annotated.t -> t
