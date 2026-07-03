@@ -1144,7 +1144,21 @@ let pp_i64x2_instr ppf = function
   | Splat -> pf ppf "i64x2.splat"
   | Extend_low_i32x4_s -> pf ppf "i64x2.extend_low_i32x4_s"
   | Extend_low_i32x4_u -> pf ppf "i64x2.extend_low_i32x4_u"
-  | _ -> assert false
+  | Extend_high_i32x4_s -> pf ppf "i64x2.extend_high_i32x4_s"
+  | Extend_high_i32x4_u -> pf ppf "i64x2.extend_high_i32x4_u"
+  | Extmul_low_i32x4_s -> pf ppf "i64x2.extmul_low_i32x4_s"
+  | Extmul_low_i32x4_u -> pf ppf "i64x2.extmul_low_i32x4_u"
+  | Extmul_high_i32x4_s -> pf ppf "i64x2.extmul_high_i32x4_s"
+  | Extmul_high_i32x4_u -> pf ppf "i64x2.extmul_high_i32x4_u"
+  | Abs -> pf ppf "i64x2.abs"
+  | Neg -> pf ppf "i64x2.neg"
+  | All_true -> pf ppf "i64x2.all_true"
+  | Bitmask -> pf ppf "i64x2.bitmask"
+  | Shl -> pf ppf "i64x2.shl"
+  | Shr_s -> pf ppf "i64x2.shr_s"
+  | Shr_u -> pf ppf "i64x2.shr_u"
+  | Extract_lane lane_index -> pf ppf "i64x2.extract_lane %d" lane_index
+  | Replace_lane lane_index -> pf ppf "i64x2.replace_lane %d" lane_index
 
 type f32x4_instr =
   | Pmin
