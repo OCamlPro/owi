@@ -849,8 +849,8 @@ struct
     | Any_true -> Stack.apply_v128_boolean stack V128.any_true |> Choice.return
     | _ -> assert false
 
-  let exec_i8x16_instr stack : Text.i8x16_instr -> _ Choice.t = function
-    | Add -> raise @@ Failure "TODO (i8x16.add)"
+  let exec_i8x16_instr stack = function
+    | (Add : Text.i8x16_instr) -> raise @@ Failure "TODO (i8x16.add)"
     | Sub -> raise @@ Failure "TODO (i8x16.sub)"
     | Eq -> Stack.apply_v128_v128_v128 stack V128.I8x16.eq |> Choice.return
     | Ne -> raise @@ Failure "TODO (i8x16.ne)"
@@ -877,8 +877,9 @@ struct
     | Add_sat_s -> raise @@ Failure "TODO (i8x16.add_sat_s)"
     | _ -> assert false
 
-  let exec_i16x8_instr stack : Text.i16x8_instr -> _ Choice.t = function
-    | Add -> Stack.apply_v128_v128_v128 stack V128.I16x8.add |> Choice.return
+  let exec_i16x8_instr stack = function
+    | (Add : Text.i16x8_instr) ->
+      Stack.apply_v128_v128_v128 stack V128.I16x8.add |> Choice.return
     | Sub -> Stack.apply_v128_v128_v128 stack V128.I16x8.sub |> Choice.return
     | Mul -> raise @@ Failure "TODO (i16x8.mul)"
     | Eq -> Stack.apply_v128_v128_v128 stack V128.I16x8.eq |> Choice.return

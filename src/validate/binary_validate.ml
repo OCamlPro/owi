@@ -597,8 +597,8 @@ let typecheck_f64_instr (env : Env.t) stack = function
     let+ stack = Stack.push [ f64 ] stack in
     (env, stack)
 
-let typecheck_v128_instr (env : Env.t) stack : Binary.v128_instr -> _ = function
-  | Const _ ->
+let typecheck_v128_instr (env : Env.t) stack = function
+  | (Const _ : Binary.v128_instr) ->
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
   | Not ->
