@@ -1079,7 +1079,27 @@ let pp_i32x4_instr ppf = function
   | Extend_high_i16x8_s -> pf ppf "i32x4.extend_high_i16x8_s"
   | Extend_low_i16x8_u -> pf ppf "i32x4.extend_low_i16x8_u"
   | Extend_high_i16x8_u -> pf ppf "i32x4.extend_high_i16x8_u"
-  | _ -> assert false
+  | Trunc_sat_f64x2_s_zero -> pf ppf "i32x4.trunc_sat_f64x2_s_zero"
+  | Trunc_sat_f64x2_u_zero -> pf ppf "i32x4.trunc_sat_f64x2_u_zero"
+  | Trunc_sat_f32x4_s_zero -> pf ppf "i32x4.trunc_sat_f32x4_s_zero"
+  | Trunc_sat_f32x4_u_zero -> pf ppf "i32x4.trunc_sat_f32x4_u_zero"
+  | Trunc_sat_f32x4_s -> pf ppf "i32x4.trunc_sat_f32x4_s"
+  | Trunc_sat_f32x4_u -> pf ppf "i32x4.trunc_sat_f32x4_u"
+  | Min_s -> pf ppf "i32x4.min_s"
+  | Min_u -> pf ppf "i32x4.min_u"
+  | Extmul_low_i16x8_s -> pf ppf "i32x4.extmul_low_i16x8_s"
+  | Extmul_low_i16x8_u -> pf ppf "i32x4.extmul_low_i16x8_u"
+  | Extmul_high_i16x8_s -> pf ppf "i32x4.extmul_high_i16x8_s"
+  | Extmul_high_i16x8_u -> pf ppf "i32x4.extmul_high_i16x8_u"
+  | Extadd_pairwise_i16x8_s -> pf ppf "i32x4.extadd_pairwise_i16x8_s"
+  | Extadd_pairwise_i16x8_u -> pf ppf "i32x4.extadd_pairwise_i16x8_u"
+  | Dot_i16x8_s -> pf ppf "i32x4.dot_i16x8_s"
+  | Neg -> pf ppf "i32x4.neg"
+  | Max_s -> pf ppf "i32x4.max_s"
+  | Max_u -> pf ppf "i32x4.max_u"
+  | Abs -> pf ppf "i32x4.abs"
+  | All_true -> pf ppf "i32x4.all_true"
+  | Bitmask -> pf ppf "i32x4.bitmask"
 
 (** I64x2 instructions *)
 type i64x2_instr =
