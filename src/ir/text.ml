@@ -888,17 +888,26 @@ let pp_i8x16_instr ppf = function
   | Popcnt -> pf ppf "i8x16.popcnt"
   | All_true -> pf ppf "i8x16.all_true"
   | Bitmask -> pf ppf "i8x16.bitmask"
-  | Shuffle is ->
-    pf ppf "i8x16.suffle %a"
-      (Fmt.array ~sep:(fun ppf () -> Fmt.pf ppf " ") Fmt.int)
-      is
+  | Shuffle is -> pf ppf "i8x16.suffle %a" (Fmt.array ~sep:Fmt.sp Fmt.int) is
   | Swizzle -> pf ppf "i8x16.swizzle"
   | Splat -> pf ppf "i8x16.splat"
   | Shl -> pf ppf "i8x16.shl"
-  | Min_s -> pf ppf "i8x16.min_s"
-  | Extract_lane_s lane_index -> pf ppf "i8x16.extract_lane_s %d" lane_index
+  | Shr_s -> pf ppf "i8x16.shr_s"
+  | Shr_u -> pf ppf "i8x16.shr_u"
   | Add_sat_s -> pf ppf "i8x16.add_sat_s"
-  | _ -> assert false
+  | Add_sat_u -> pf ppf "i8x16.add_sat_u"
+  | Min_s -> pf ppf "i8x16.min_s"
+  | Min_u -> pf ppf "i8x16.min_u"
+  | Sub_sat_s -> pf ppf "i8x16.sub_sat_s"
+  | Sub_sat_u -> pf ppf "i8x16.sub_sat_u"
+  | Max_s -> pf ppf "i8x16.max_s"
+  | Max_u -> pf ppf "i8x16.max_u"
+  | Narrow_i16x8_s -> pf ppf "i8x16.narrow_i16x8_s"
+  | Narrow_i16x8_u -> pf ppf "i8x16.narrow_i16x8_u"
+  | Avgr_u -> pf ppf "i8x16.avgr_u"
+  | Extract_lane_s lane_index -> pf ppf "i8x16.extract_lane_s %d" lane_index
+  | Extract_lane_u lane_index -> pf ppf "i8x16.extract_lane_u %d" lane_index
+  | Replace_lane lane_index -> pf ppf "i8x16.replace_lane %d" lane_index
 
 (** I16x8 instructions *)
 type i16x8_instr =
