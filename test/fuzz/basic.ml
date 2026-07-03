@@ -42,8 +42,6 @@ let table_limits =
 
 let table_type = pair table_limits ref_type
 
-let sx = choose [ const U; const S ]
-
 let val_type =
   let+ num_type in
   Num_type num_type
@@ -55,33 +53,21 @@ let func_type = pair (list param) (list val_type)
 let mut = choose [ const (Const : mut); const Var ]
 
 let i32_binop =
-  let div =
-    let+ sx in
-    (Div sx : i32_instr)
-  in
-
-  let rem =
-    let+ sx in
-    (Rem sx : i32_instr)
-  in
-
-  let shr =
-    let+ sx in
-    (Shr sx : i32_instr)
-  in
-
   let+ i =
     choose
       [ const (Add : i32_instr)
       ; const (Sub : i32_instr)
       ; const (Mul : i32_instr)
-      ; div
-      ; rem
+      ; const (Div_s : i32_instr)
+      ; const (Div_u : i32_instr)
+      ; const (Rem_s : i32_instr)
+      ; const (Rem_u : i32_instr)
       ; const (And : i32_instr)
       ; const (Or : i32_instr)
       ; const (Xor : i32_instr)
       ; const (Shl : i32_instr)
-      ; shr
+      ; const (Shr_s : i32_instr)
+      ; const (Shr_u : i32_instr)
       ; const (Rotl : i32_instr)
       ; const (Rotr : i32_instr)
       ]
@@ -89,32 +75,21 @@ let i32_binop =
   I32 i
 
 let i64_binop =
-  let div =
-    let+ sx in
-    (Div sx : i64_instr)
-  in
-
-  let rem =
-    let+ sx in
-    (Rem sx : i64_instr)
-  in
-
-  let shr =
-    let+ sx in
-    (Shr sx : i64_instr)
-  in
   let+ i =
     choose
       [ const (Add : i64_instr)
       ; const (Sub : i64_instr)
       ; const (Mul : i64_instr)
-      ; div
-      ; rem
+      ; const (Div_s : i64_instr)
+      ; const (Div_u : i64_instr)
+      ; const (Rem_s : i64_instr)
+      ; const (Rem_u : i64_instr)
       ; const (And : i64_instr)
       ; const (Or : i64_instr)
       ; const (Xor : i64_instr)
       ; const (Shl : i64_instr)
-      ; shr
+      ; const (Shr_s : i64_instr)
+      ; const (Shr_u : i64_instr)
       ; const (Rotl : i64_instr)
       ; const (Rotr : i64_instr)
       ]
@@ -130,61 +105,35 @@ let i32_testop : Owi.Text.instr gen = const (I32 Eqz)
 let i64_testop : Owi.Text.instr gen = const (I64 Eqz)
 
 let i32_relop =
-  let ilt =
-    let+ sx in
-    (Lt sx : Owi.Text.i32_instr)
-  in
-
-  let igt =
-    let+ sx in
-    (Gt sx : Owi.Text.i32_instr)
-  in
-  let ile =
-    let+ sx in
-    (Le sx : Owi.Text.i32_instr)
-  in
-  let ige =
-    let+ sx in
-    (Ge sx : Owi.Text.i32_instr)
-  in
   let+ i =
     choose
       [ const (Eq : Owi.Text.i32_instr)
       ; const (Ne : Owi.Text.i32_instr)
-      ; ilt
-      ; igt
-      ; ile
-      ; ige
+      ; const (Lt_s : Owi.Text.i32_instr)
+      ; const (Lt_u : Owi.Text.i32_instr)
+      ; const (Gt_s : Owi.Text.i32_instr)
+      ; const (Gt_u : Owi.Text.i32_instr)
+      ; const (Le_s : Owi.Text.i32_instr)
+      ; const (Le_u : Owi.Text.i32_instr)
+      ; const (Ge_s : Owi.Text.i32_instr)
+      ; const (Ge_u : Owi.Text.i32_instr)
       ]
   in
   I32 i
 
 let i64_relop =
-  let ilt =
-    let+ sx in
-    (Lt sx : Owi.Text.i64_instr)
-  in
-
-  let igt =
-    let+ sx in
-    (Gt sx : Owi.Text.i64_instr)
-  in
-  let ile =
-    let+ sx in
-    (Le sx : Owi.Text.i64_instr)
-  in
-  let ige =
-    let+ sx in
-    (Ge sx : Owi.Text.i64_instr)
-  in
   let+ i =
     choose
       [ const (Eq : Owi.Text.i64_instr)
       ; const (Ne : Owi.Text.i64_instr)
-      ; ilt
-      ; igt
-      ; ile
-      ; ige
+      ; const (Lt_s : Owi.Text.i64_instr)
+      ; const (Lt_u : Owi.Text.i64_instr)
+      ; const (Gt_s : Owi.Text.i64_instr)
+      ; const (Gt_u : Owi.Text.i64_instr)
+      ; const (Le_s : Owi.Text.i64_instr)
+      ; const (Le_u : Owi.Text.i64_instr)
+      ; const (Ge_s : Owi.Text.i64_instr)
+      ; const (Ge_u : Owi.Text.i64_instr)
       ]
   in
   I64 i
@@ -208,8 +157,13 @@ let const_v128 =
 let i32_wrap_i64 : instr gen = const (I32 Wrap_i64)
 
 let i64_extend_i32 : instr gen =
-  let+ sx in
-  I64 (Extend_i32 sx)
+  let+ i =
+    choose
+      [ const (Extend_i32_s : Owi.Text.i64_instr)
+      ; const (Extend_i32_u : Owi.Text.i64_instr)
+      ]
+  in
+  I64 i
 
 let i32_extend_32 : instr gen =
   choose [ const (I32 Extend8_s); const (I32 Extend16_s) ]
@@ -309,52 +263,104 @@ let const_f64 : instr gen =
   F64 (Const (Owi.Concrete_f64.of_float float))
 
 let f32_convert_i32 : instr gen =
-  let+ sx in
-  F32 (Convert_i (S32, sx))
+  let+ i =
+    choose
+      [ const (Convert_i_s S32 : f32_instr)
+      ; const (Convert_i_u S32 : f32_instr)
+      ]
+  in
+  F32 i
 
 let f32_convert_i64 : instr gen =
-  let+ sx in
-  F32 (Convert_i (S64, sx))
+  let+ i =
+    choose
+      [ const (Convert_i_s S64 : f32_instr)
+      ; const (Convert_i_u S64 : f32_instr)
+      ]
+  in
+  F32 i
 
 let f64_convert_i32 : instr gen =
-  let+ sx in
-  F64 (Convert_i (S32, sx))
+  let+ i =
+    choose
+      [ const (Convert_i_s S32 : f64_instr)
+      ; const (Convert_i_u S32 : f64_instr)
+      ]
+  in
+  F64 i
 
 let f64_convert_i64 : instr gen =
-  let+ sx in
-  F64 (Convert_i (S64, sx))
+  let+ i =
+    choose
+      [ const (Convert_i_s S64 : f64_instr)
+      ; const (Convert_i_u S64 : f64_instr)
+      ]
+  in
+  F64 i
 
 let i32_trunc_f32 : instr gen =
-  let+ sx in
-  I32 (Trunc_f (S32, sx))
+  let+ i =
+    choose
+      [ const (Trunc_f_s S32 : i32_instr); const (Trunc_f_u S32 : i32_instr) ]
+  in
+  I32 i
 
 let i32_trunc_f64 : instr gen =
-  let+ sx in
-  I32 (Trunc_f (S64, sx))
+  let+ i =
+    choose
+      [ const (Trunc_f_s S64 : i32_instr); const (Trunc_f_u S64 : i32_instr) ]
+  in
+  I32 i
 
 let i64_trunc_f32 : instr gen =
-  let+ sx in
-  I64 (Trunc_f (S32, sx))
+  let+ i =
+    choose
+      [ const (Trunc_f_s S32 : i64_instr); const (Trunc_f_u S32 : i64_instr) ]
+  in
+  I64 i
 
 let i64_trunc_f64 : instr gen =
-  let+ sx in
-  I64 (Trunc_f (S64, sx))
+  let+ i =
+    choose
+      [ const (Trunc_f_s S64 : i64_instr); const (Trunc_f_u S64 : i64_instr) ]
+  in
+  I64 i
 
 let i32_trunc_sat_f32 : instr gen =
-  let+ sx in
-  I64 (Trunc_sat_f (S32, sx))
+  let+ i =
+    choose
+      [ const (Trunc_sat_f_s S32 : i64_instr)
+      ; const (Trunc_sat_f_u S32 : i64_instr)
+      ]
+  in
+  I64 i
 
 let i32_trunc_sat_f64 : instr gen =
-  let+ sx in
-  I32 (Trunc_sat_f (S64, sx))
+  let+ i =
+    choose
+      [ const (Trunc_sat_f_s S64 : i32_instr)
+      ; const (Trunc_sat_f_u S64 : i32_instr)
+      ]
+  in
+  I32 i
 
 let i64_trunc_sat_f32 : instr gen =
-  let+ sx in
-  I64 (Trunc_sat_f (S32, sx))
+  let+ i =
+    choose
+      [ const (Trunc_sat_f_s S32 : i64_instr)
+      ; const (Trunc_sat_f_u S32 : i64_instr)
+      ]
+  in
+  I64 i
 
 let i64_trunc_sat_f64 : instr gen =
-  let+ sx in
-  I64 (Trunc_sat_f (S64, sx))
+  let+ i =
+    choose
+      [ const (Trunc_sat_f_s S64 : i64_instr)
+      ; const (Trunc_sat_f_u S64 : i64_instr)
+      ]
+  in
+  I64 i
 
 let f32_demote_f64 : instr gen = const (F32 Demote_f64)
 
@@ -562,34 +568,59 @@ let f64_load env : instr gen =
   F64 (Load (id, memarg))
 
 let i32_load8 env : instr gen =
-  let+ memarg = memarg NS8
-  and+ id = memid env
-  and+ sx in
-  I32 (Load8 (id, sx, memarg))
+  let* memarg = memarg NS8
+  and+ id = memid env in
+  let+ i =
+    choose
+      [ const (Load8_s (id, memarg) : i32_instr)
+      ; const (Load8_u (id, memarg) : i32_instr)
+      ]
+  in
+  I32 i
 
 let i32_load16 env : instr gen =
-  let+ memarg = memarg NS16
-  and+ id = memid env
-  and+ sx in
-  I32 (Load16 (id, sx, memarg))
+  let* memarg = memarg NS16
+  and+ id = memid env in
+  let+ i =
+    choose
+      [ const (Load16_s (id, memarg) : i32_instr)
+      ; const (Load16_u (id, memarg) : i32_instr)
+      ]
+  in
+  I32 i
 
 let i64_load8 env : instr gen =
-  let+ memarg = memarg NS8
-  and+ id = memid env
-  and+ sx in
-  I64 (Load8 (id, sx, memarg))
+  let* memarg = memarg NS8
+  and+ id = memid env in
+  let+ i =
+    choose
+      [ const (Load8_s (id, memarg) : i64_instr)
+      ; const (Load8_u (id, memarg) : i64_instr)
+      ]
+  in
+  I64 i
 
 let i64_load16 env : instr gen =
-  let+ memarg = memarg NS16
-  and+ id = memid env
-  and+ sx in
-  I64 (Load16 (id, sx, memarg))
+  let* memarg = memarg NS16
+  and+ id = memid env in
+  let+ i =
+    choose
+      [ const (Load16_s (id, memarg) : i64_instr)
+      ; const (Load16_u (id, memarg) : i64_instr)
+      ]
+  in
+  I64 i
 
 let i64_load32 env : instr gen =
-  let+ memarg = memarg NS32
-  and+ id = memid env
-  and+ sx in
-  I64 (Load32 (id, sx, memarg))
+  let* memarg = memarg NS32
+  and+ id = memid env in
+  let+ i =
+    choose
+      [ const (Load32_s (id, memarg) : i64_instr)
+      ; const (Load32_u (id, memarg) : i64_instr)
+      ]
+  in
+  I64 i
 
 let i32_store env : instr gen =
   let+ memarg = memarg NS32
