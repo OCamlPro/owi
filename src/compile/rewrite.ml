@@ -345,7 +345,77 @@ let rewrite_v128_instr assigned : Text.v128_instr -> Binary.v128_instr Result.t
     let* memarg = rewrite_memarg memarg in
     let+ indice = Assigned.find_memory assigned indice in
     (Store (indice, memarg) : Binary.v128_instr)
-  | _ -> assert false
+  | Bitselect -> Ok Bitselect
+  | Xor -> Ok Xor
+  | Andnot -> Ok Andnot
+  | Load8_splat (indice, memarg) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Load8_splat (indice, memarg) : Binary.v128_instr)
+  | Load8_lane (indice, memarg, n) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Load8_lane (indice, memarg, n) : Binary.v128_instr)
+  | Load8x8_s (indice, memarg) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Load8x8_s (indice, memarg) : Binary.v128_instr)
+  | Load8x8_u (indice, memarg) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Load8x8_u (indice, memarg) : Binary.v128_instr)
+  | Load16_splat (indice, memarg) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Load16_splat (indice, memarg) : Binary.v128_instr)
+  | Load16_lane (indice, memarg, n) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Load16_lane (indice, memarg, n) : Binary.v128_instr)
+  | Load32_splat (indice, memarg) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Load32_splat (indice, memarg) : Binary.v128_instr)
+  | Load32_zero (indice, memarg) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Load32_zero (indice, memarg) : Binary.v128_instr)
+  | Load64_splat (indice, memarg) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Load64_splat (indice, memarg) : Binary.v128_instr)
+  | Load64_lane (indice, memarg, n) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Load64_lane (indice, memarg, n) : Binary.v128_instr)
+  | Store8_lane (indice, memarg, n) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Store8_lane (indice, memarg, n) : Binary.v128_instr)
+  | Store64_lane (indice, memarg, n) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Store64_lane (indice, memarg, n) : Binary.v128_instr)
+  | Store32_zero (indice, memarg) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Store32_zero (indice, memarg) : Binary.v128_instr)
+  | Store32_lane (indice, memarg, n) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Store32_lane (indice, memarg, n) : Binary.v128_instr)
+  | Store16_lane (indice, memarg, n) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Store16_lane (indice, memarg, n) : Binary.v128_instr)
+  | Load32x2_s (indice, memarg) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Load32x2_s (indice, memarg) : Binary.v128_instr)
+  | Load32x2_u (indice, memarg) ->
+    let* memarg = rewrite_memarg memarg in
+    let+ indice = Assigned.find_memory assigned indice in
+    (Load32x2_u (indice, memarg) : Binary.v128_instr)
 
 let rewrite_ref_instr assigned : Text.ref_instr -> Binary.ref_instr Result.t =
   function
