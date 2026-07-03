@@ -1193,7 +1193,38 @@ type f32x4_instr =
   | Replace_lane of int
   | Demote_f64x2_zero
 
-let pp_f32x4_instr _ppf : f32x4_instr -> _ = function _ -> assert false
+let pp_f32x4_instr ppf : f32x4_instr -> _ = function
+  | Pmin -> pf ppf "f32x4.pmin"
+  | Min -> pf ppf "f32x4.min"
+  | Eq -> pf ppf "f32x4.eq"
+  | Convert_i32x4_s -> pf ppf "f32x4.convert_i32x4_s"
+  | Convert_i32x4_u -> pf ppf "f32x4.convert_i32x4_u"
+  | Ceil -> pf ppf "f32x4.ceil"
+  | Add -> pf ppf "f32x4.dd"
+  | Max -> pf ppf "f32x4.max"
+  | Floor -> pf ppf "f32x4.floor"
+  | Pmax -> pf ppf "f32x4.pmax"
+  | Ne -> pf ppf "f32x4.ne"
+  | Sub -> pf ppf "f32x4.sub"
+  | Abs -> pf ppf "f32x4.abs"
+  | Trunc -> pf ppf "f32x4.trunc"
+  | Lt -> pf ppf "f32x4.lt"
+  | Gt -> pf ppf "f32x4.gt"
+  | Le -> pf ppf "f32x4.le"
+  | Ge -> pf ppf "f32x4.ge"
+  | Mul -> pf ppf "f32x4.mul"
+  | Convert_low_i32x4_s -> pf ppf "f32x4.convert_low_i32x4_s"
+  | Convert_low_i32x4_u -> pf ppf "f32x4.convert_low_i32x4_u"
+  | Convert_high_i32x4_s -> pf ppf "f32x4.convert_high_i32x4_s"
+  | Convert_high_i32x4_u -> pf ppf "f32x4.convert_high_i32x4_u"
+  | Splat -> pf ppf "f32x4.splat"
+  | Nearest -> pf ppf "f32x4.nearest"
+  | Div -> pf ppf "f32x4.div"
+  | Neg -> pf ppf "f32x4.neg"
+  | Sqrt -> pf ppf "f32x4.sqrt"
+  | Demote_f64x2_zero -> pf ppf "f32x4.demote_f64x2_zero"
+  | Extract_lane lane_index -> pf ppf "f32x4.extract_lane %d" lane_index
+  | Replace_lane lane_index -> pf ppf "f32x4.replace_lane %d" lane_index
 
 type f64x2_instr =
   | Pmin
@@ -1226,7 +1257,36 @@ type f64x2_instr =
   | Promote_low_f32x4
   | Replace_lane of int
 
-let pp_f64x2_instr _ppf : f64x2_instr -> _ = function _ -> assert false
+let pp_f64x2_instr ppf : f64x2_instr -> _ = function
+  | Pmin -> pf ppf "f64x2.pmin"
+  | Min -> pf ppf "f64x2.min"
+  | Eq -> pf ppf "f64x2.eq"
+  | Ceil -> pf ppf "f64x2.ceil"
+  | Add -> pf ppf "f64x2.add"
+  | Max -> pf ppf "f64x2.max"
+  | Floor -> pf ppf "f64x2.floor"
+  | Pmax -> pf ppf "f64x2.pmax"
+  | Ne -> pf ppf "f64x2.ne"
+  | Sub -> pf ppf "f64x2.sub"
+  | Abs -> pf ppf "f64x2.abs"
+  | Trunc -> pf ppf "f64x2.trunc"
+  | Lt -> pf ppf "f64x2.lt"
+  | Gt -> pf ppf "f64x2.gt"
+  | Le -> pf ppf "f64x2.le"
+  | Ge -> pf ppf "f64x2.ge"
+  | Mul -> pf ppf "f64x2.mul"
+  | Convert_low_i32x4_s -> pf ppf "f64x2.convert_low_i32x4_s"
+  | Convert_low_i32x4_u -> pf ppf "f64x2.convert_low_i32x4_u"
+  | Convert_high_i32x4_s -> pf ppf "f64x2.convert_high_i32x4_s"
+  | Convert_high_i32x4_u -> pf ppf "f64x2.convert_high_i32x4_u"
+  | Nearest -> pf ppf "f64x2.nearest"
+  | Div -> pf ppf "f64x2.div"
+  | Neg -> pf ppf "f64x2.neg"
+  | Sqrt -> pf ppf "f64x2.sqrt"
+  | Splat -> pf ppf "f64x2.splat"
+  | Promote_low_f32x4 -> pf ppf "f64x2.promote_low_f32x4"
+  | Extract_lane lane_index -> pf ppf "f64x2.extract_lane %d" lane_index
+  | Replace_lane lane_index -> pf ppf "f64x2.replace_lane %d" lane_index
 
 (** Reference instructions *)
 type ref_instr =
