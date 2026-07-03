@@ -309,7 +309,7 @@ let write_i32_instr buf : Binary.i32_instr -> _ =
   | Trunc_f_s S64 -> add_char '\xAA'
   | Trunc_f_u S64 -> add_char '\xAB'
   | Reinterpret_f S32 -> add_char '\xBC'
-  | Reinterpret_f S64 -> (* TODO *) assert false
+  | Reinterpret_f S64 -> raise @@ Failure "TODO: i32.reinterpret_f64"
   | Extend8_s -> add_char '\xC0'
   | Extend16_s -> add_char '\xC1'
   | Trunc_sat_f_s S32 -> write_fc buf 0
@@ -391,9 +391,7 @@ let write_i64_instr buf : Binary.i64_instr -> _ =
   | Trunc_f_u S32 -> add_char '\xAF'
   | Trunc_f_s S64 -> add_char '\xB0'
   | Trunc_f_u S64 -> add_char '\xB1'
-  | Reinterpret_f S32 ->
-    (* TODO *)
-    assert false
+  | Reinterpret_f S32 -> raise @@ Failure "TODO: i64.reinterpretf32"
   | Reinterpret_f S64 -> add_char '\xBD'
   | Extend8_s -> add_char '\xC2'
   | Extend16_s -> add_char '\xC3'
@@ -441,7 +439,7 @@ let write_f32_instr buf : Binary.f32_instr -> _ =
   | Convert_i_u S64 -> add_char '\xB5'
   | Demote_f64 -> add_char '\xB6'
   | Reinterpret_i S32 -> add_char '\xBE'
-  | Reinterpret_i S64 -> (* TODO *) assert false
+  | Reinterpret_i S64 -> raise @@ Failure "TODO: f32.reinterpret_i64"
 
 let write_f64_instr buf : Binary.f64_instr -> _ =
   let add_char c = Buffer.add_char buf c in
@@ -480,7 +478,7 @@ let write_f64_instr buf : Binary.f64_instr -> _ =
   | Convert_i_s S64 -> add_char '\xB9'
   | Convert_i_u S64 -> add_char '\xBA'
   | Promote_f32 -> add_char '\xBB'
-  | Reinterpret_i S32 -> (* TODO *) assert false
+  | Reinterpret_i S32 -> raise @@ Failure "TODO: f64.reinterpret_i32"
   | Reinterpret_i S64 -> add_char '\xBF'
 
 let write_v128_instr buf (i : Binary.v128_instr) =
@@ -494,10 +492,32 @@ let write_v128_instr buf (i : Binary.v128_instr) =
   | And -> write_fd buf 0x4E
   | Or -> write_fd buf 0x50
   | Any_true -> write_fd buf 0x53
-  | Load32_lane _ | Load64_zero _ | Load _ | Store _ | Load16x4_s _
-  | Load16x4_u _ ->
-    raise @@ Failure "TODO"
-  | _ -> assert false
+  | Load32_lane _ -> raise @@ Failure "TODO: v128.Load32_lane _"
+  | Load64_zero _ -> raise @@ Failure "TODO: v128.Load64_zero _"
+  | Load _ -> raise @@ Failure "TODO: v128.Load _"
+  | Store _ -> raise @@ Failure "TODO: v128.Store _"
+  | Load16x4_s _ -> raise @@ Failure "TODO: v128.Load16x4_s _"
+  | Load16x4_u _ -> raise @@ Failure "TODO: v128.Load16x4_u _"
+  | Bitselect -> raise @@ Failure "TODO: v128.Bitselect"
+  | Xor -> raise @@ Failure "TODO: v128.Xor"
+  | Andnot -> raise @@ Failure "TODO: v128.Andnot"
+  | Load8_splat _ -> raise @@ Failure "TODO: v128.Load8_splat _"
+  | Load8_lane _ -> raise @@ Failure "TODO: v128.Load8_lane _"
+  | Load8x8_s _ -> raise @@ Failure "TODO: v128.Load8x8_s _"
+  | Load8x8_u _ -> raise @@ Failure "TODO: v128.Load8x8_u _"
+  | Load16_splat _ -> raise @@ Failure "TODO: v128.Load16_splat _"
+  | Load16_lane _ -> raise @@ Failure "TODO: v128.Load16_lane _"
+  | Load32_splat _ -> raise @@ Failure "TODO: v128.Load32_splat _"
+  | Load32_zero _ -> raise @@ Failure "TODO: v128.Load32_zero _"
+  | Load64_splat _ -> raise @@ Failure "TODO: v128.Load64_splat _"
+  | Load64_lane _ -> raise @@ Failure "TODO: v128.Load64_lane _"
+  | Store8_lane _ -> raise @@ Failure "TODO: v128.Store8_lane _"
+  | Store64_lane _ -> raise @@ Failure "TODO: v128.Store64_lane _"
+  | Store32_zero _ -> raise @@ Failure "TODO: v128.Store32_zero _"
+  | Store32_lane _ -> raise @@ Failure "TODO: v128.Store32_lane _"
+  | Store16_lane _ -> raise @@ Failure "TODO: v128.Store16_lane _"
+  | Load32x2_s _ -> raise @@ Failure "TODO: v128.Load32x2_s _"
+  | Load32x2_u _ -> raise @@ Failure "TODO: v128.Load32x2_u _"
 
 let write_i8x16_instr buf : Text.i8x16_instr -> _ = function
   | Add -> write_fd buf 0x6E
@@ -524,7 +544,19 @@ let write_i8x16_instr buf : Text.i8x16_instr -> _ = function
   | Min_s -> raise @@ Failure "TODO (i8x16.min_s)"
   | Extract_lane_s _lane_index -> raise @@ Failure "TODO (i8x16.extract_lane_s)"
   | Add_sat_s -> raise @@ Failure "TODO (i8x16.add_sat_s)"
-  | _ -> assert false
+  | Shr_s -> raise @@ Failure "TODO: i8x16.Shr_s"
+  | Shr_u -> raise @@ Failure "TODO: i8x16.Shr_u"
+  | Min_u -> raise @@ Failure "TODO: i8x16.Min_u"
+  | Add_sat_u -> raise @@ Failure "TODO: i8x16.Add_sat_u"
+  | Sub_sat_s -> raise @@ Failure "TODO: i8x16.Sub_sat_s"
+  | Sub_sat_u -> raise @@ Failure "TODO: i8x16.Sub_sat_u"
+  | Max_s -> raise @@ Failure "TODO: i8x16.Max_s"
+  | Max_u -> raise @@ Failure "TODO: i8x16.Max_u"
+  | Narrow_i16x8_s -> raise @@ Failure "TODO: i8x16.Narrow_i16x8_s"
+  | Narrow_i16x8_u -> raise @@ Failure "TODO: i8x16.Narrow_i16x8_u"
+  | Avgr_u -> raise @@ Failure "TODO: i8x16.Avgr_u"
+  | Extract_lane_u _ -> raise @@ Failure "TODO: i8x16.Extract_lane_u _"
+  | Replace_lane _ -> raise @@ Failure "TODO: i8x16.Replace_lane _"
 
 let write_i16x8_instr buf : Text.i16x8_instr -> _ = function
   | Eq -> write_fd buf 0x2D
@@ -541,9 +573,41 @@ let write_i16x8_instr buf : Text.i16x8_instr -> _ = function
   | Sub -> write_fd buf 0x91
   | Mul -> write_fd buf 0x95
   | Splat -> write_fd buf 0x10
-  | Extract_lane_s _n -> raise @@ Failure "TODO"
-  | Extract_lane_u _n -> raise @@ Failure "TODO"
-  | _ -> assert false
+  | Extract_lane_s _n -> raise @@ Failure "TODO: i16x8.Extract_lane_s _n"
+  | Extract_lane_u _n -> raise @@ Failure "TODO: i16x8.Extract_lane_u _n"
+  | Q15mulr_sat_s -> raise @@ Failure "TODO: i16x8.Q15mulr_sat_s"
+  | Min_s -> raise @@ Failure "TODO: i16x8.Min_s"
+  | Min_u -> raise @@ Failure "TODO: i16x8.Min_u"
+  | Min -> raise @@ Failure "TODO: i16x8.Min"
+  | Extmul_low_i8x16_s -> raise @@ Failure "TODO: i16x8.Extmul_low_i8x16_s"
+  | Extmul_low_i8x16_u -> raise @@ Failure "TODO: i16x8.Extmul_low_i8x16_u"
+  | Extmul_high_i8x16_s -> raise @@ Failure "TODO: i16x8.Extmul_high_i8x16_s"
+  | Extmul_high_i8x16_u -> raise @@ Failure "TODO: i16x8.Extmul_high_i8x16_u"
+  | Extend_low_i8x16_s -> raise @@ Failure "TODO: i16x8.Extend_low_i8x16_s"
+  | Extend_low_i8x16_u -> raise @@ Failure "TODO: i16x8.Extend_low_i8x16_u"
+  | Extend_high_i8x16_s -> raise @@ Failure "TODO: i16x8.Extend_high_i8x16_s"
+  | Extend_high_i8x16_u -> raise @@ Failure "TODO: i16x8.Extend_high_i8x16_u"
+  | Extadd_pairwise_i8x16_s ->
+    raise @@ Failure "TODO: i16x8.Extadd_pairwise_i8x16_s"
+  | Extadd_pairwise_i8x16_u ->
+    raise @@ Failure "TODO: i16x8.Extadd_pairwise_i8x16_u"
+  | Add_sat_s -> raise @@ Failure "TODO: i16x8.Add_sat_s"
+  | Add_sat_u -> raise @@ Failure "TODO: i16x8.Add_sat_u"
+  | Sub_sat_s -> raise @@ Failure "TODO: i16x8.Sub_sat_s"
+  | Sub_sat_u -> raise @@ Failure "TODO: i16x8.Sub_sat_u"
+  | Max_s -> raise @@ Failure "TODO: i16x8.Max_s"
+  | Max_u -> raise @@ Failure "TODO: i16x8.Max_u"
+  | Shl -> raise @@ Failure "TODO: i16x8.Shl"
+  | Neg -> raise @@ Failure "TODO: i16x8.Neg"
+  | All_true -> raise @@ Failure "TODO: i16x8.All_true"
+  | Shr_s -> raise @@ Failure "TODO: i16x8.Shr_s"
+  | Shr_u -> raise @@ Failure "TODO: i16x8.Shr_u"
+  | Bitmask -> raise @@ Failure "TODO: i16x8.Bitmask"
+  | Avgr_u -> raise @@ Failure "TODO: i16x8.Avgr_u"
+  | Abs -> raise @@ Failure "TODO: i16x8.Abs"
+  | Narrow_i32x4_s -> raise @@ Failure "TODO: i16x8.Narrow_i32x4_s"
+  | Narrow_i32x4_u -> raise @@ Failure "TODO: i16x8.Narrow_i32x4_u"
+  | Replace_lane _ -> raise @@ Failure "TODO: i16x8.Replace_lane _"
 
 let write_i32x4_instr buf : Text.i32x4_instr -> _ = function
   | Add -> write_fd buf 174
@@ -569,7 +633,33 @@ let write_i32x4_instr buf : Text.i32x4_instr -> _ = function
   | Extend_high_i16x8_s -> write_fd buf 0xA8
   | Extend_low_i16x8_u -> write_fd buf 0xA9
   | Extend_high_i16x8_u -> write_fd buf 0xAA
-  | _ -> assert false
+  | Trunc_sat_f64x2_s_zero ->
+    raise @@ Failure "TODO: i32x4.Trunc_sat_f64x2_s_zero"
+  | Trunc_sat_f64x2_u_zero ->
+    raise @@ Failure "TODO: i32x4.Trunc_sat_f64x2_u_zero"
+  | Trunc_sat_f32x4_s_zero ->
+    raise @@ Failure "TODO: i32x4.Trunc_sat_f32x4_s_zero"
+  | Trunc_sat_f32x4_u_zero ->
+    raise @@ Failure "TODO: i32x4.Trunc_sat_f32x4_u_zero"
+  | Trunc_sat_f32x4_s -> raise @@ Failure "TODO: i32x4.Trunc_sat_f32x4_s"
+  | Trunc_sat_f32x4_u -> raise @@ Failure "TODO: i32x4.Trunc_sat_f32x4_u"
+  | Min_s -> raise @@ Failure "TODO: i32x4.Min_s"
+  | Min_u -> raise @@ Failure "TODO: i32x4.Min_u"
+  | Extmul_low_i16x8_s -> raise @@ Failure "TODO: i32x4.Extmul_low_i16x8_s"
+  | Extmul_low_i16x8_u -> raise @@ Failure "TODO: i32x4.Extmul_low_i16x8_u"
+  | Extmul_high_i16x8_s -> raise @@ Failure "TODO: i32x4.Extmul_high_i16x8_s"
+  | Extmul_high_i16x8_u -> raise @@ Failure "TODO: i32x4.Extmul_high_i16x8_u"
+  | Extadd_pairwise_i16x8_s ->
+    raise @@ Failure "TODO: i32x4.Extadd_pairwise_i16x8_s"
+  | Extadd_pairwise_i16x8_u ->
+    raise @@ Failure "TODO: i32x4.Extadd_pairwise_i16x8_u"
+  | Dot_i16x8_s -> raise @@ Failure "TODO: i32x4.Dot_i16x8_s"
+  | Neg -> raise @@ Failure "TODO: i32x4.Neg"
+  | Max_s -> raise @@ Failure "TODO: i32x4.Max_s"
+  | Max_u -> raise @@ Failure "TODO: i32x4.Max_u"
+  | Abs -> raise @@ Failure "TODO: i32x4.Abs"
+  | All_true -> raise @@ Failure "TODO: i32x4.All_true"
+  | Bitmask -> raise @@ Failure "TODO: i32x4.Bitmask"
 
 let write_i64x2_instr buf : Text.i64x2_instr -> _ = function
   | Add -> write_fd buf 0xCE
@@ -584,13 +674,85 @@ let write_i64x2_instr buf : Text.i64x2_instr -> _ = function
   | Splat -> write_fd buf 0x12
   | Extend_low_i32x4_s -> raise @@ Failure "TODO"
   | Extend_low_i32x4_u -> raise @@ Failure "TODO"
-  | _ -> assert false
+  | Extend_high_i32x4_s -> raise @@ Failure "TODO: i64x2.Extend_high_i32x4_s"
+  | Extend_high_i32x4_u -> raise @@ Failure "TODO: i64x2.Extend_high_i32x4_u"
+  | Extmul_low_i32x4_s -> raise @@ Failure "TODO: i64x2.Extmul_low_i32x4_s"
+  | Extmul_low_i32x4_u -> raise @@ Failure "TODO: i64x2.Extmul_low_i32x4_u"
+  | Extmul_high_i32x4_s -> raise @@ Failure "TODO: i64x2.Extmul_high_i32x4_s"
+  | Extmul_high_i32x4_u -> raise @@ Failure "TODO: i64x2.Extmul_high_i32x4_u"
+  | Abs -> raise @@ Failure "TODO: i64x2.Abs"
+  | Neg -> raise @@ Failure "TODO: i64x2.Neg"
+  | All_true -> raise @@ Failure "TODO: i64x2.All_true"
+  | Bitmask -> raise @@ Failure "TODO: i64x2.Bitmask"
+  | Shl -> raise @@ Failure "TODO: i64x2.Shl"
+  | Shr_s -> raise @@ Failure "TODO: i64x2.Shr_s"
+  | Shr_u -> raise @@ Failure "TODO: i64x2.Shr_u"
+  | Extract_lane _ -> raise @@ Failure "TODO: i64x2.Extract_lane _"
+  | Replace_lane _ -> raise @@ Failure "TODO: i64x2.Replace_lane _"
 
 let write_f32x4_instr _buf : Text.f32x4_instr -> _ = function
-  | _ -> assert false
+  | Abs -> raise @@ Failure "TODO: f32x4.Abs"
+  | Pmin -> raise @@ Failure "TODO: f32x4.Pmin"
+  | Min -> raise @@ Failure "TODO: f32x4.Min"
+  | Eq -> raise @@ Failure "TODO: f32x4.Eq"
+  | Convert_i32x4_s -> raise @@ Failure "TODO: f32x4.Convert_i32x4_s"
+  | Convert_i32x4_u -> raise @@ Failure "TODO: f32x4.Convert_i32x4_u"
+  | Ceil -> raise @@ Failure "TODO: f32x4.Ceil"
+  | Add -> raise @@ Failure "TODO: f32x4.Add"
+  | Max -> raise @@ Failure "TODO: f32x4.Max"
+  | Floor -> raise @@ Failure "TODO: f32x4.Floor"
+  | Pmax -> raise @@ Failure "TODO: f32x4.Pmax"
+  | Ne -> raise @@ Failure "TODO: f32x4.Ne"
+  | Sub -> raise @@ Failure "TODO: f32x4.Sub"
+  | Trunc -> raise @@ Failure "TODO: f32x4.Trunc"
+  | Lt -> raise @@ Failure "TODO: f32x4.Lt"
+  | Gt -> raise @@ Failure "TODO: f32x4.Gt"
+  | Le -> raise @@ Failure "TODO: f32x4.Le"
+  | Ge -> raise @@ Failure "TODO: f32x4.Ge"
+  | Mul -> raise @@ Failure "TODO: f32x4.Mul"
+  | Convert_low_i32x4_s -> raise @@ Failure "TODO: f32x4.Convert_low_i32x4_s"
+  | Convert_low_i32x4_u -> raise @@ Failure "TODO: f32x4.Convert_low_i32x4_u"
+  | Convert_high_i32x4_s -> raise @@ Failure "TODO: f32x4.Convert_high_i32x4_s"
+  | Convert_high_i32x4_u -> raise @@ Failure "TODO: f32x4.Convert_high_i32x4_u"
+  | Splat -> raise @@ Failure "TODO: f32x4.Splat"
+  | Nearest -> raise @@ Failure "TODO: f32x4.Nearest"
+  | Div -> raise @@ Failure "TODO: f32x4.Div"
+  | Neg -> raise @@ Failure "TODO: f32x4.Neg"
+  | Sqrt -> raise @@ Failure "TODO: f32x4.Sqrt"
+  | Demote_f64x2_zero -> raise @@ Failure "TODO: f32x4.Demote_f64x2_zero"
+  | Extract_lane _ -> raise @@ Failure "TODO: f32x4.Extract_lane _"
+  | Replace_lane _ -> raise @@ Failure "TODO: f32x4.Replace_lane _"
 
 let write_f64x2_instr _buf : Text.f64x2_instr -> _ = function
-  | _ -> assert false
+  | Abs -> raise @@ Failure "TODO: f64x2.Abs"
+  | Pmin -> raise @@ Failure "TODO: f64x2.Pmin"
+  | Min -> raise @@ Failure "TODO: f64x2.Min"
+  | Eq -> raise @@ Failure "TODO: f64x2.Eq"
+  | Ceil -> raise @@ Failure "TODO: f64x2.Ceil"
+  | Add -> raise @@ Failure "TODO: f64x2.Add"
+  | Max -> raise @@ Failure "TODO: f64x2.Max"
+  | Floor -> raise @@ Failure "TODO: f64x2.Floor"
+  | Pmax -> raise @@ Failure "TODO: f64x2.Pmax"
+  | Ne -> raise @@ Failure "TODO: f64x2.Ne"
+  | Sub -> raise @@ Failure "TODO: f64x2.Sub"
+  | Trunc -> raise @@ Failure "TODO: f64x2.Trunc"
+  | Lt -> raise @@ Failure "TODO: f64x2.Lt"
+  | Gt -> raise @@ Failure "TODO: f64x2.Gt"
+  | Le -> raise @@ Failure "TODO: f64x2.Le"
+  | Ge -> raise @@ Failure "TODO: f64x2.Ge"
+  | Mul -> raise @@ Failure "TODO: f64x2.Mul"
+  | Convert_low_i32x4_s -> raise @@ Failure "TODO: f64x2.Convert_low_i32x4_s"
+  | Convert_low_i32x4_u -> raise @@ Failure "TODO: f64x2.Convert_low_i32x4_u"
+  | Convert_high_i32x4_s -> raise @@ Failure "TODO: f64x2.Convert_high_i32x4_s"
+  | Convert_high_i32x4_u -> raise @@ Failure "TODO: f64x2.Convert_high_i32x4_u"
+  | Nearest -> raise @@ Failure "TODO: f64x2.Nearest"
+  | Div -> raise @@ Failure "TODO: f64x2.Div"
+  | Neg -> raise @@ Failure "TODO: f64x2.Neg"
+  | Sqrt -> raise @@ Failure "TODO: f64x2.Sqrt"
+  | Splat -> raise @@ Failure "TODO: f64x2.Splat"
+  | Promote_low_f32x4 -> raise @@ Failure "TODO: f64x2.Promote_low_f32x4"
+  | Extract_lane _ -> raise @@ Failure "TODO: f64x2.Extract_lane _"
+  | Replace_lane _ -> raise @@ Failure "TODO: f64x2.Replace_lane _"
 
 let write_ref_instr buf : Binary.ref_instr -> _ =
   let add_char c = Buffer.add_char buf c in
@@ -852,15 +1014,16 @@ let rec write_instr buf instr =
   | Select (Some vts) ->
     add_char '\x1C';
     List.iter (write_valtype buf) vts
-  | Return_call _ | Return_call_indirect _ | Return_call_ref _ | Call_ref _ ->
-    (* TODO *)
-    assert false
   | Any_convert_extern ->
     add_char '\xFB';
     write_u32 buf 26l
   | Extern_convert_any ->
     add_char '\xFB';
     write_u32 buf 27l
+  | Return_call _ -> raise @@ Failure "TODO: Return_call _ "
+  | Return_call_indirect _ -> raise @@ Failure "TODO: Return_call_indirect _ "
+  | Return_call_ref _ -> raise @@ Failure "TODO: Return_call_ref _ "
+  | Call_ref _ -> raise @@ Failure "TODO: call_ref"
 
 and write_expr buf expr ~end_op_code =
   List.iter (write_instr buf) expr.Annotated.raw;
