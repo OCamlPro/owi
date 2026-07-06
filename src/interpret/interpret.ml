@@ -847,7 +847,26 @@ struct
     | Load16x4_s _ -> raise @@ Failure "TODO (Load16x4_s)"
     | Load16x4_u _ -> raise @@ Failure "TODO (Load16x4_u)"
     | Any_true -> Stack.apply_v128_boolean stack V128.any_true |> Choice.return
-    | _ -> assert false
+    | Bitselect -> raise @@ Failure "TODO: v128.Bitselect"
+    | Xor -> raise @@ Failure "TODO: v128.Xor"
+    | Andnot -> raise @@ Failure "TODO: v128.Andnot"
+    | Load8_splat _ -> raise @@ Failure "TODO: v128.Load8_splat _"
+    | Load8_lane _ -> raise @@ Failure "TODO: v128.Load8_lane _"
+    | Load8x8_s _ -> raise @@ Failure "TODO: v128.Load8x8_s _"
+    | Load8x8_u _ -> raise @@ Failure "TODO: v128.Load8x8_u _"
+    | Load16_splat _ -> raise @@ Failure "TODO: v128.Load16_splat _"
+    | Load16_lane _ -> raise @@ Failure "TODO: v128.Load16_lane _"
+    | Load32_splat _ -> raise @@ Failure "TODO: v128.Load32_splat _"
+    | Load32_zero _ -> raise @@ Failure "TODO: v128.Load32_zero _"
+    | Load64_splat _ -> raise @@ Failure "TODO: v128.Load64_splat _"
+    | Load64_lane _ -> raise @@ Failure "TODO: v128.Load64_lane _"
+    | Store8_lane _ -> raise @@ Failure "TODO: v128.Store8_lane _"
+    | Store64_lane _ -> raise @@ Failure "TODO: v128.Store64_lane _"
+    | Store32_zero _ -> raise @@ Failure "TODO: v128.Store32_zero _"
+    | Store32_lane _ -> raise @@ Failure "TODO: v128.Store32_lane _"
+    | Store16_lane _ -> raise @@ Failure "TODO: v128.Store16_lane _"
+    | Load32x2_s _ -> raise @@ Failure "TODO: v128.Load32x2_s _"
+    | Load32x2_u _ -> raise @@ Failure "TODO: v128.Load32x2_u _"
 
   let exec_i8x16_instr stack = function
     | (Add : Text.i8x16_instr) -> raise @@ Failure "TODO (i8x16.add)"
@@ -875,7 +894,19 @@ struct
     | Extract_lane_s _lane_index ->
       raise @@ Failure "TODO (i8x16.extract_lane_s)"
     | Add_sat_s -> raise @@ Failure "TODO (i8x16.add_sat_s)"
-    | _ -> assert false
+    | Shr_s -> raise @@ Failure "TODO: i8x16.Shr_s"
+    | Shr_u -> raise @@ Failure "TODO: i8x16.Shr_u"
+    | Min_u -> raise @@ Failure "TODO: i8x16.Min_u"
+    | Add_sat_u -> raise @@ Failure "TODO: i8x16.Add_sat_u"
+    | Sub_sat_s -> raise @@ Failure "TODO: i8x16.Sub_sat_s"
+    | Sub_sat_u -> raise @@ Failure "TODO: i8x16.Sub_sat_u"
+    | Max_s -> raise @@ Failure "TODO: i8x16.Max_s"
+    | Max_u -> raise @@ Failure "TODO: i8x16.Max_u"
+    | Narrow_i16x8_s -> raise @@ Failure "TODO: i8x16.Narrow_i16x8_s"
+    | Narrow_i16x8_u -> raise @@ Failure "TODO: i8x16.Narrow_i16x8_u"
+    | Avgr_u -> raise @@ Failure "TODO: i8x16.Avgr_u"
+    | Extract_lane_u _ -> raise @@ Failure "TODO: i8x16.Extract_lane_u _"
+    | Replace_lane _ -> raise @@ Failure "TODO: i8x16.Replace_lane _"
 
   let exec_i16x8_instr stack = function
     | (Add : Text.i16x8_instr) ->
@@ -895,7 +926,39 @@ struct
     | Ge_s | Ge_u -> raise @@ Failure "TODO (i16x8.ge)"
     | Extract_lane_s _ -> raise @@ Failure "TODO (i16x8.extract_lane_s)"
     | Extract_lane_u _ -> raise @@ Failure "TODO (i16x8.extract_lane_u)"
-    | _ -> assert false
+    | Q15mulr_sat_s -> raise @@ Failure "TODO: i16x8.Q15mulr_sat_s"
+    | Min_s -> raise @@ Failure "TODO: i16x8.Min_s"
+    | Min_u -> raise @@ Failure "TODO: i16x8.Min_u"
+    | Min -> raise @@ Failure "TODO: i16x8.Min"
+    | Extmul_low_i8x16_s -> raise @@ Failure "TODO: i16x8.Extmul_low_i8x16_s"
+    | Extmul_low_i8x16_u -> raise @@ Failure "TODO: i16x8.Extmul_low_i8x16_u"
+    | Extmul_high_i8x16_s -> raise @@ Failure "TODO: i16x8.Extmul_high_i8x16_s"
+    | Extmul_high_i8x16_u -> raise @@ Failure "TODO: i16x8.Extmul_high_i8x16_u"
+    | Extend_low_i8x16_s -> raise @@ Failure "TODO: i16x8.Extend_low_i8x16_s"
+    | Extend_low_i8x16_u -> raise @@ Failure "TODO: i16x8.Extend_low_i8x16_u"
+    | Extend_high_i8x16_s -> raise @@ Failure "TODO: i16x8.Extend_high_i8x16_s"
+    | Extend_high_i8x16_u -> raise @@ Failure "TODO: i16x8.Extend_high_i8x16_u"
+    | Extadd_pairwise_i8x16_s ->
+      raise @@ Failure "TODO: i16x8.Extadd_pairwise_i8x16_s"
+    | Extadd_pairwise_i8x16_u ->
+      raise @@ Failure "TODO: i16x8.Extadd_pairwise_i8x16_u"
+    | Add_sat_s -> raise @@ Failure "TODO: i16x8.Add_sat_s"
+    | Add_sat_u -> raise @@ Failure "TODO: i16x8.Add_sat_u"
+    | Sub_sat_s -> raise @@ Failure "TODO: i16x8.Sub_sat_s"
+    | Sub_sat_u -> raise @@ Failure "TODO: i16x8.Sub_sat_u"
+    | Max_s -> raise @@ Failure "TODO: i16x8.Max_s"
+    | Max_u -> raise @@ Failure "TODO: i16x8.Max_u"
+    | Shl -> raise @@ Failure "TODO: i16x8.Shl"
+    | Neg -> raise @@ Failure "TODO: i16x8.Neg"
+    | All_true -> raise @@ Failure "TODO: i16x8.All_true"
+    | Shr_s -> raise @@ Failure "TODO: i16x8.Shr_s"
+    | Shr_u -> raise @@ Failure "TODO: i16x8.Shr_u"
+    | Bitmask -> raise @@ Failure "TODO: i16x8.Bitmask"
+    | Avgr_u -> raise @@ Failure "TODO: i16x8.Avgr_u"
+    | Abs -> raise @@ Failure "TODO: i16x8.Abs"
+    | Narrow_i32x4_s -> raise @@ Failure "TODO: i16x8.Narrow_i32x4_s"
+    | Narrow_i32x4_u -> raise @@ Failure "TODO: i16x8.Narrow_i32x4_u"
+    | Replace_lane _ -> raise @@ Failure "TODO: i16x8.Replace_lane _"
 
   let exec_i32x4_instr stack : Text.i32x4_instr -> _ = function
     | Add -> Stack.apply_v128_v128_v128 stack V128.I32x4.add |> Choice.return
@@ -924,7 +987,33 @@ struct
     | Extend_high_i16x8_s -> raise @@ Failure "TODO (i32x4.Extend_high_i16x8_s)"
     | Extend_low_i16x8_u -> raise @@ Failure "TODO (i32x4.Extend_low_i16x8_u)"
     | Extend_high_i16x8_u -> raise @@ Failure "TODO (i32x4.Extend_high_i16x8_u)"
-    | _ -> assert false
+    | Trunc_sat_f64x2_s_zero ->
+      raise @@ Failure "TODO: i32x4.Trunc_sat_f64x2_s_zero"
+    | Trunc_sat_f64x2_u_zero ->
+      raise @@ Failure "TODO: i32x4.Trunc_sat_f64x2_u_zero"
+    | Trunc_sat_f32x4_s_zero ->
+      raise @@ Failure "TODO: i32x4.Trunc_sat_f32x4_s_zero"
+    | Trunc_sat_f32x4_u_zero ->
+      raise @@ Failure "TODO: i32x4.Trunc_sat_f32x4_u_zero"
+    | Trunc_sat_f32x4_s -> raise @@ Failure "TODO: i32x4.Trunc_sat_f32x4_s"
+    | Trunc_sat_f32x4_u -> raise @@ Failure "TODO: i32x4.Trunc_sat_f32x4_u"
+    | Min_s -> raise @@ Failure "TODO: i32x4.Min_s"
+    | Min_u -> raise @@ Failure "TODO: i32x4.Min_u"
+    | Extmul_low_i16x8_s -> raise @@ Failure "TODO: i32x4.Extmul_low_i16x8_s"
+    | Extmul_low_i16x8_u -> raise @@ Failure "TODO: i32x4.Extmul_low_i16x8_u"
+    | Extmul_high_i16x8_s -> raise @@ Failure "TODO: i32x4.Extmul_high_i16x8_s"
+    | Extmul_high_i16x8_u -> raise @@ Failure "TODO: i32x4.Extmul_high_i16x8_u"
+    | Extadd_pairwise_i16x8_s ->
+      raise @@ Failure "TODO: i32x4.Extadd_pairwise_i16x8_s"
+    | Extadd_pairwise_i16x8_u ->
+      raise @@ Failure "TODO: i32x4.Extadd_pairwise_i16x8_u"
+    | Dot_i16x8_s -> raise @@ Failure "TODO: i32x4.Dot_i16x8_s"
+    | Neg -> raise @@ Failure "TODO: i32x4.Neg"
+    | Max_s -> raise @@ Failure "TODO: i32x4.Max_s"
+    | Max_u -> raise @@ Failure "TODO: i32x4.Max_u"
+    | Abs -> raise @@ Failure "TODO: i32x4.Abs"
+    | All_true -> raise @@ Failure "TODO: i32x4.All_true"
+    | Bitmask -> raise @@ Failure "TODO: i32x4.Bitmask"
 
   let exec_i64x2_instr stack : Text.i64x2_instr -> _ = function
     | Add -> Stack.apply_v128_v128_v128 stack V128.I64x2.add |> Choice.return
@@ -942,13 +1031,89 @@ struct
     | Gt_s -> raise @@ Failure "TODO (i64x2.Gt_s)"
     | Le_s -> raise @@ Failure "TODO (i64x2.Le_s)"
     | Ge_s -> raise @@ Failure "TODO (i64x2.Ge_s)"
-    | _ -> assert false
+    | Extend_high_i32x4_s -> raise @@ Failure "TODO: i64x2.Extend_high_i32x4_s"
+    | Extend_high_i32x4_u -> raise @@ Failure "TODO: i64x2.Extend_high_i32x4_u"
+    | Extmul_low_i32x4_s -> raise @@ Failure "TODO: i64x2.Extmul_low_i32x4_s"
+    | Extmul_low_i32x4_u -> raise @@ Failure "TODO: i64x2.Extmul_low_i32x4_u"
+    | Extmul_high_i32x4_s -> raise @@ Failure "TODO: i64x2.Extmul_high_i32x4_s"
+    | Extmul_high_i32x4_u -> raise @@ Failure "TODO: i64x2.Extmul_high_i32x4_u"
+    | Abs -> raise @@ Failure "TODO: i64x2.Abs"
+    | Neg -> raise @@ Failure "TODO: i64x2.Neg"
+    | All_true -> raise @@ Failure "TODO: i64x2.All_true"
+    | Bitmask -> raise @@ Failure "TODO: i64x2.Bitmask"
+    | Shl -> raise @@ Failure "TODO: i64x2.Shl"
+    | Shr_s -> raise @@ Failure "TODO: i64x2.Shr_s"
+    | Shr_u -> raise @@ Failure "TODO: i64x2.Shr_u"
+    | Extract_lane _ -> raise @@ Failure "TODO: i64x2.Extract_lane _"
+    | Replace_lane _ -> raise @@ Failure "TODO: i64x2.Replace_lane _"
 
   let exec_f32x4_instr _stack : Text.f32x4_instr -> _ = function
-    | _ -> assert false
+    | Abs -> raise @@ Failure "TODO: f32x4.Abs"
+    | Pmin -> raise @@ Failure "TODO: f32x4.Pmin"
+    | Min -> raise @@ Failure "TODO: f32x4.Min"
+    | Eq -> raise @@ Failure "TODO: f32x4.Eq"
+    | Convert_i32x4_s -> raise @@ Failure "TODO: f32x4.Convert_i32x4_s"
+    | Convert_i32x4_u -> raise @@ Failure "TODO: f32x4.Convert_i32x4_u"
+    | Ceil -> raise @@ Failure "TODO: f32x4.Ceil"
+    | Add -> raise @@ Failure "TODO: f32x4.Add"
+    | Max -> raise @@ Failure "TODO: f32x4.Max"
+    | Floor -> raise @@ Failure "TODO: f32x4.Floor"
+    | Pmax -> raise @@ Failure "TODO: f32x4.Pmax"
+    | Ne -> raise @@ Failure "TODO: f32x4.Ne"
+    | Sub -> raise @@ Failure "TODO: f32x4.Sub"
+    | Trunc -> raise @@ Failure "TODO: f32x4.Trunc"
+    | Lt -> raise @@ Failure "TODO: f32x4.Lt"
+    | Gt -> raise @@ Failure "TODO: f32x4.Gt"
+    | Le -> raise @@ Failure "TODO: f32x4.Le"
+    | Ge -> raise @@ Failure "TODO: f32x4.Ge"
+    | Mul -> raise @@ Failure "TODO: f32x4.Mul"
+    | Convert_low_i32x4_s -> raise @@ Failure "TODO: f32x4.Convert_low_i32x4_s"
+    | Convert_low_i32x4_u -> raise @@ Failure "TODO: f32x4.Convert_low_i32x4_u"
+    | Convert_high_i32x4_s ->
+      raise @@ Failure "TODO: f32x4.Convert_high_i32x4_s"
+    | Convert_high_i32x4_u ->
+      raise @@ Failure "TODO: f32x4.Convert_high_i32x4_u"
+    | Splat -> raise @@ Failure "TODO: f32x4.Splat"
+    | Nearest -> raise @@ Failure "TODO: f32x4.Nearest"
+    | Div -> raise @@ Failure "TODO: f32x4.Div"
+    | Neg -> raise @@ Failure "TODO: f32x4.Neg"
+    | Sqrt -> raise @@ Failure "TODO: f32x4.Sqrt"
+    | Demote_f64x2_zero -> raise @@ Failure "TODO: f32x4.Demote_f64x2_zero"
+    | Extract_lane _ -> raise @@ Failure "TODO: f32x4.Extract_lane _"
+    | Replace_lane _ -> raise @@ Failure "TODO: f32x4.Replace_lane _"
 
   let exec_f64x2_instr _stack : Text.f64x2_instr -> _ = function
-    | _ -> assert false
+    | Abs -> raise @@ Failure "TODO: f64x2.Abs"
+    | Pmin -> raise @@ Failure "TODO: f64x2.Pmin"
+    | Min -> raise @@ Failure "TODO: f64x2.Min"
+    | Eq -> raise @@ Failure "TODO: f64x2.Eq"
+    | Ceil -> raise @@ Failure "TODO: f64x2.Ceil"
+    | Add -> raise @@ Failure "TODO: f64x2.Add"
+    | Max -> raise @@ Failure "TODO: f64x2.Max"
+    | Floor -> raise @@ Failure "TODO: f64x2.Floor"
+    | Pmax -> raise @@ Failure "TODO: f64x2.Pmax"
+    | Ne -> raise @@ Failure "TODO: f64x2.Ne"
+    | Sub -> raise @@ Failure "TODO: f64x2.Sub"
+    | Trunc -> raise @@ Failure "TODO: f64x2.Trunc"
+    | Lt -> raise @@ Failure "TODO: f64x2.Lt"
+    | Gt -> raise @@ Failure "TODO: f64x2.Gt"
+    | Le -> raise @@ Failure "TODO: f64x2.Le"
+    | Ge -> raise @@ Failure "TODO: f64x2.Ge"
+    | Mul -> raise @@ Failure "TODO: f64x2.Mul"
+    | Convert_low_i32x4_s -> raise @@ Failure "TODO: f64x2.Convert_low_i32x4_s"
+    | Convert_low_i32x4_u -> raise @@ Failure "TODO: f64x2.Convert_low_i32x4_u"
+    | Convert_high_i32x4_s ->
+      raise @@ Failure "TODO: f64x2.Convert_high_i32x4_s"
+    | Convert_high_i32x4_u ->
+      raise @@ Failure "TODO: f64x2.Convert_high_i32x4_u"
+    | Nearest -> raise @@ Failure "TODO: f64x2.Nearest"
+    | Div -> raise @@ Failure "TODO: f64x2.Div"
+    | Neg -> raise @@ Failure "TODO: f64x2.Neg"
+    | Sqrt -> raise @@ Failure "TODO: f64x2.Sqrt"
+    | Splat -> raise @@ Failure "TODO: f64x2.Splat"
+    | Promote_low_f32x4 -> raise @@ Failure "TODO: f64x2.Promote_low_f32x4"
+    | Extract_lane _ -> raise @@ Failure "TODO: f64x2.Extract_lane _"
+    | Replace_lane _ -> raise @@ Failure "TODO: f64x2.Replace_lane _"
 
   let exec_ref_instr env stack (i : Binary.ref_instr) =
     match i with
@@ -1818,11 +1983,11 @@ struct
         (fun () ->
           let fuel_left = Atomic.fetch_and_add fuel (-1) in
           (* If we only use [timeout_instr], we want to stop all as
-                           soon as [fuel_left <= 0]. But if we only use [timeout],
-                           we don't want to run into the slow path below on each
-                           instruction after [fuel_left] becomes negative. We avoid
-                           this repeated slow path by bumping [fuel] to [max_int]
-                           again in this case. *)
+                            soon as [fuel_left <= 0]. But if we only use [timeout],
+                            we don't want to run into the slow path below on each
+                            instruction after [fuel_left] becomes negative. We avoid
+                            this repeated slow path by bumping [fuel] to [max_int]
+                            again in this case. *)
           if fuel_left mod 1024 = 0 || fuel_left < 0 then begin
             let stop =
               match (Parameters.timeout, Parameters.timeout_instr) with
