@@ -16,9 +16,13 @@ end
 
 (*===========================================================================*)
 
-module DenotFixpoint (S : DATA_STATE) = struct
-  type t = Abstract_state.t
+type interpreter_state =
+  { state : Abstract_state.t
+  ; env : Abstract_extern_func.extern_func Link_env.t
+  ; envs : Abstract_extern_func.extern_func Link_env.t Dynarray.t
+  }
 
+module DenotFixpoint (S : DATA_STATE) = struct
   module JumpKey = struct
     type t =
       | I of int
@@ -173,10 +177,12 @@ module DenotFixpoint (S : DATA_STATE) = struct
     in
     fst @@ continue ctx out
 
-  let join_X (state_a, jt_a) (state_b, jt_b) =
+  let join_X (istate_a, jt_a) (istate_b, jt_b) =
     let jt = JumpTarget.append jt_a jt_b in
-    match (state_a, state_b) with
-    | Some state_a, Some state_b -> (Some (join state_a state_b), jt)
+    match (istate_a, istate_b) with
+    | Some istate_a, Some istate_b ->
+      let state = join istate_a.state istate_b.state in
+      (Some { istate_a with state }, jt)
     | Some state, None | None, Some state -> (Some state, jt)
     | _, _ -> assert false
 
@@ -262,28 +268,29 @@ module DenotFixpoint (S : DATA_STATE) = struct
     | R4 (t1, t2, t3, t4), (v1, v2, v3, v4) ->
       push_val t1 v1 stack |> push_val t2 v2 |> push_val t3 v3 |> push_val t4 v4
 
-  let rec eval_expr ~env ~envs :
-       t
+  let rec eval_expr :
+       interpreter_state
     -> Binary.expr Annotated.t
-    -> t option * Abstract_state.t list JumpTarget.t =
-   fun state expr ->
-    let rec loop (state, jt) (expr : Binary.expr) =
+    -> interpreter_state option * Abstract_state.t list JumpTarget.t =
+   fun istate expr ->
+    let rec loop istate jt (expr : Binary.expr) =
       match expr with
-      | [] -> (Some state, jt)
+      | [] -> (Some istate, jt)
       | instr :: instrs -> (
-        let new_state, new_jt = eval_instr ~env ~envs state instr in
+        let new_state, new_jt = eval_instr istate instr in
         let new_jt = JumpTarget.append jt new_jt in
         Log.debug (fun m ->
           m "jt            :  %a"
-            (JumpTarget.pp state.Abstract_state.ctx)
+            (JumpTarget.pp istate.state.Abstract_state.ctx)
             new_jt );
         match new_state with
         | None -> (None, new_jt)
-        | Some s -> loop (s, new_jt) instrs )
+        | Some istate -> loop istate new_jt instrs )
     in
-    loop (state, JumpTarget.empty) expr.raw
+    loop istate JumpTarget.empty expr.raw
 
-  and eval_func (state : Abstract_state.t) (func : Binary.Func.t) ~env ~envs =
+  and eval_func ({ state; _ } as istate : interpreter_state)
+    (func : Binary.Func.t) =
     Log.info (fun m ->
       m "calling func  : func %s" (Option.value func.id ~default:"anonymous") );
     let (Bt_raw ((None | Some _), (param_type, result_type))) = func.type_f in
@@ -310,36 +317,40 @@ module DenotFixpoint (S : DATA_STATE) = struct
         (Abstract_state.pp fn_state.ctx)
         fn_state );
     (* TODO: handle mapping *)
-    let func_end_state, _ = eval_expr ~env ~envs fn_state func.body in
+    let func_end_state, _ =
+      eval_expr { istate with state = fn_state } func.body
+    in
     ( match func_end_state with
-    | Some state ->
+    | Some istate ->
       Log.debug (fun m ->
         m "after call(%a): abstract state : %a@."
           (Fmt.option ~none:(Fmt.any "$") Fmt.string)
           func.id
-          (Abstract_state.pp state.ctx)
-          state )
+          (Abstract_state.pp istate.state.ctx)
+          istate.state )
     | None -> Log.debug (fun m -> m "abstract state : None @.") );
     (* We should probably copy state and join back the return values in the context here *)
     let* func_end_state in
     let stack =
       caller_popped_stack
-      @ Stack.keep func_end_state.stack (List.length result_type)
+      @ Stack.keep func_end_state.state.stack (List.length result_type)
     in
-    Some { state with stack; ctx = func_end_state.ctx }
+    let state = { state with stack; ctx = func_end_state.state.ctx } in
+    Some { istate with state }
 
-  and eval_instr ({ ctx; stack; locals; _ } as state : Abstract_state.t) ~env
-    ~envs :
-    Binary.instr Annotated.t -> t option * Abstract_state.t list JumpTarget.t =
+  and eval_instr ({ state; env; envs } as istate : interpreter_state) :
+       Binary.instr Annotated.t
+    -> interpreter_state option * Abstract_state.t list JumpTarget.t =
    fun instr ->
-    Log.debug (fun m ->
-      m "abstract state : %a" (Abstract_state.pp state.ctx) state );
-    Log.info (fun m -> m "stack         : [ %a ]" (Abstract_stack.pp ctx) stack);
+    let { ctx; stack; locals; _ } : Abstract_state.t = state in
+    Log.debug (fun m -> m "abstract state : %a" (Abstract_state.pp ctx) state);
+    Log.info (fun m ->
+      m "stack         : [ %a ]" (Abstract_stack.pp ctx) stack );
     (* Log.info (fun m -> *)
     (*   m "ctx           : [ %a ]" Abstract_domain.context_pretty ctx ); *)
     Log.info (fun m ->
       m "locals        : [ %a ]"
-        (Abstract_locals.pp (Abstract_value.pp_with_ctx state.ctx))
+        (Abstract_locals.pp (Abstract_value.pp_with_ctx ctx))
         locals );
     Log.info (fun m ->
       m "running instr : %a" (Binary.pp_instr ~short:true) instr.raw );
@@ -349,19 +360,22 @@ module DenotFixpoint (S : DATA_STATE) = struct
       begin match func with
       | Wasm { func; idx } ->
         let env = Dynarray.get envs idx in
-        let r = eval_func state ~env ~envs func in
+        let r = eval_func { istate with env } func in
         (r, JumpTarget.empty)
       | Extern { idx } -> (
         let f = Link_env.get_extern_func env idx in
         let stack = exec_extern_func state f in
         match Abstract_monad.run stack state with
         | None -> (None, JumpTarget.empty)
-        | Some (stack, state) -> (Some { state with stack }, JumpTarget.empty) )
+        | Some (stack, state) ->
+          let state = { state with stack } in
+          (Some { istate with state }, JumpTarget.empty) )
       end
     | Block (_str_opt, _bt, expr) -> (
-      match eval_expr state ~env ~envs expr with
+      match eval_expr istate expr with
       | None, jt -> (None, JumpTarget.decr jt)
-      | Some state, jt ->
+      | Some istate, jt ->
+        let state = istate.state in
         let state =
           match JumpTarget.find_opt (I 0) jt with
           | Some br_states -> List.fold_left join state br_states
@@ -376,7 +390,7 @@ module DenotFixpoint (S : DATA_STATE) = struct
           (* TODO on peut avoir une paire de (int * map) pour ne pas avoir à decr la liste immédiatement *)
           JumpTarget.decr jt
         in
-        (Some state, jt) )
+        (Some { istate with state }, jt) )
     | If_else (_, bt, expr_then, expr_else) ->
       let b, stack = Stack.pop_bool stack ctx in
       begin match
@@ -384,19 +398,23 @@ module DenotFixpoint (S : DATA_STATE) = struct
         , Abstract_domain.assume ctx (Abstract_boolean.not ctx b) )
       with
       | Some ctx, None ->
-        eval_instr ~env ~envs { state with stack; ctx }
+        eval_instr
+          { istate with state = { state with stack; ctx } }
           (Annotated.dummy (Binary.Block (None, bt, expr_then)))
       | None, Some ctx ->
-        eval_instr ~env ~envs { state with stack; ctx }
+        eval_instr
+          { istate with state = { state with stack; ctx } }
           (Annotated.dummy (Binary.Block (None, bt, expr_else)))
       | None, None -> assert false
       | Some ctx_true, Some ctx_false ->
+        let strue = { state with stack; ctx = ctx_true } in
+        let sfalse = { state with stack; ctx = ctx_false } in
         join_X
-          (eval_instr ~env ~envs
-             { state with stack; ctx = ctx_true }
+          (eval_instr
+             { istate with state = strue }
              (Annotated.dummy (Binary.Block (None, bt, expr_then))) )
-          (eval_instr ~env ~envs
-             { state with stack; ctx = ctx_false }
+          (eval_instr
+             { istate with state = sfalse }
              (Annotated.dummy (Binary.Block (None, bt, expr_else))) )
       end
     | Loop (_str_opt, bt, body) ->
@@ -410,8 +428,8 @@ module DenotFixpoint (S : DATA_STATE) = struct
         | Some (Bt_raw (_i, (params, _res))) -> List.length params
         | None -> 0
       in
-      let rec fixpoint state =
-        let next_state, jt = eval_expr ~env ~envs state body in
+      let rec fixpoint istate =
+        let next_state, jt = eval_expr istate body in
         let shorten_stack stack = Stack.keep stack to_take in
         let next_head =
           let handle_jts jts =
@@ -428,9 +446,9 @@ module DenotFixpoint (S : DATA_STATE) = struct
           | None ->
             (* TODO: handle return too! *)
             begin match next_state with
-            | Some state ->
-              let stack = shorten_stack state.stack in
-              Some { state with stack }
+            | Some istate ->
+              let stack = shorten_stack stack in
+              Some { istate.state with stack }
             | None -> None
             end
         in
@@ -440,19 +458,19 @@ module DenotFixpoint (S : DATA_STATE) = struct
           let jt = JumpTarget.decr jt in
           (None, jt)
         | Some next_head ->
-          let widened, included = widen widening_id state next_head in
-          if not included then fixpoint widened
+          let widened, included = widen widening_id istate.state next_head in
+          if not included then fixpoint { istate with state = widened }
           else
             (* fixpoint reached: exit loop, assume condition is false *)
             let jt = JumpTarget.decr jt in
             let next_state =
               let* next_state in
-              let stack = next_state.stack @ initial_state.stack in
-              Some { next_state with stack }
+              let stack = next_state.state.stack @ initial_state.stack in
+              Some { next_state with state = { next_state.state with stack } }
             in
             (next_state, jt)
       in
-      fixpoint state
+      fixpoint istate
     | Br i -> (None, JumpTarget.of_list [ (I i, [ state ]) ])
     | Br_if i ->
       let b, stack = Stack.pop_bool stack ctx in
@@ -462,12 +480,14 @@ module DenotFixpoint (S : DATA_STATE) = struct
           JumpTarget.of_list [ (I i, [ { state with stack; ctx } ]) ]
         | None -> JumpTarget.empty
       in
-      let new_state =
+      let istate =
         match Abstract_domain.assume ctx (Abstract_boolean.not ctx b) with
-        | Some ctx -> Some { state with stack; ctx }
+        | Some ctx ->
+          let state = { state with stack; ctx } in
+          Some { istate with state }
         | None -> None
       in
-      (new_state, jt_if)
+      (istate, jt_if)
     | Br_table (cases, default) ->
       let v, stack = Stack.pop_i32 stack in
       let equals =
@@ -499,7 +519,7 @@ module DenotFixpoint (S : DATA_STATE) = struct
     | _ -> (
       let res = S.eval_instr state instr in
       match res with
-      | State state -> (Some state, JumpTarget.empty)
+      | State state -> (Some { istate with state }, JumpTarget.empty)
       | Unreachable -> (None, JumpTarget.empty) )
 end
 
@@ -513,14 +533,14 @@ let expr (link_state : Abstract_extern_func.extern_func Link.State.t)
   let env = m.env in
   let state = Abstract_state.empty env () in
 
-  let state =
+  let istate =
     List.fold_left
-      (fun (state : Abstract_state.t) (e : Binary.expr Annotated.t) ->
+      (fun (istate : interpreter_state) (e : Binary.expr Annotated.t) ->
         (* TODO handle this properly *)
-        match ConcreteFixpoint.eval_expr ~env ~envs state e with
-        | None, _mapping -> state
+        match ConcreteFixpoint.eval_expr istate e with
+        | None, _mapping -> istate
         | Some state, _mapping -> state )
-      state m.to_run
+      { state; env; envs } m.to_run
   in
 
-  state.invariant
+  istate.state.invariant
