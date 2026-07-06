@@ -51,18 +51,44 @@ let pp_action fmt = function
     pf fmt {|(invoke%a "%s" %a)|} pp_id_opt mod_name name pp_consts c
   | Get _ -> pf fmt "<action_get TODO>"
 
-type result_const =
-  | Literal of const
-  | Nan_canon of nn
-  | Nan_arith of nn
+type result_f32 =
+  | Concrete of Float32.t
+  | Nan_canon
+  | Nan_arith
 
-let pp_result_const fmt = function
-  | Literal c -> pp_const fmt c
-  | Nan_canon n -> pf fmt "f%a.const nan:canonical" pp_nn n
-  | Nan_arith n -> pf fmt "f%a.const nan:arithmetic" pp_nn n
+let pp_result_f32 ppf = function
+  | Concrete f -> pf ppf "f32.const %a" Float32.pp f
+  | Nan_canon -> pf ppf "f32.const nan:canonical"
+  | Nan_arith -> pf ppf "f32.const nan:arithmetic"
+
+type result_f64 =
+  | Concrete of Float64.t
+  | Nan_canon
+  | Nan_arith
+
+let pp_result_f64 ppf = function
+  | Concrete f -> pf ppf "f64.const %a" Float64.pp f
+  | Nan_canon -> pf ppf "f64.const nan:canonical"
+  | Nan_arith -> pf ppf "f64.const nan:arithmetic"
+
+type result_v128 = Concrete of Concrete_v128.t
+
+let pp_result_v128 ppf = function
+  | Concrete v -> pf ppf "v128.const %a" Concrete_v128.pp v
 
 type result =
-  | Result_const of result_const
+  | Result_I32 of Int32.t
+  | Result_I64 of Int64.t
+  | Result_F32 of result_f32
+  | Result_F64 of result_f64
+  | Result_V128 of result_v128
+  | Result_null of heap_type option
+  | Result_host of int
+  | Result_extern of int
+  | Result_struct of int
+  | Result_array of int
+  | Result_func of int
+  | Result_exn of int
   | Result_extern_ref
   | Result_func_ref
   | Result_array_ref
@@ -71,8 +97,20 @@ type result =
   | Result_i31_ref
 (* TODO: replace with `Result_const (Literal (Const heap_type))`? *)
 
-let pp_result_bis fmt = function
-  | Result_const c -> pf fmt "%a" pp_result_const c
+let pp_result_inner fmt = function
+  | Result_I32 i -> pf fmt "i32.const %ld" i
+  | Result_I64 i -> pf fmt "i64.const %Ld" i
+  | Result_F32 f -> pf fmt "%a" pp_result_f32 f
+  | Result_F64 f -> pf fmt "%a" pp_result_f64 f
+  | Result_V128 v -> pf fmt "%a" pp_result_v128 v
+  | Result_null None -> pf fmt "ref.null"
+  | Result_null (Some rt) -> pf fmt "ref.null %a" pp_heap_type rt
+  | Result_host i -> pf fmt "ref.host %d" i
+  | Result_extern i -> pf fmt "ref.extern %d" i
+  | Result_struct i -> pf fmt "ref.struct %d" i
+  | Result_array i -> pf fmt "ref.array %d" i
+  | Result_func i -> pf fmt "ref.func %d" i
+  | Result_exn i -> pf fmt "ref.exn %d" i
   | Result_extern_ref -> pf fmt "ref.extern"
   | Result_func_ref -> pf fmt "ref.func"
   | Result_array_ref -> pf fmt "ref.array"
@@ -80,9 +118,9 @@ let pp_result_bis fmt = function
   | Result_eq_ref -> pf fmt "ref.eq"
   | Result_i31_ref -> pf fmt "ref.i31"
 
-let pp_result fmt r = Fmt.pf fmt "(%a)" pp_result_bis r
+let pp_result fmt r = Fmt.pf fmt "(%a)" pp_result_inner r
 
-let pp_results fmt r = list ~sep:sp pp_result_bis fmt r
+let pp_results fmt r = list ~sep:sp pp_result fmt r
 
 type assertion =
   | Assert_return of action * result list

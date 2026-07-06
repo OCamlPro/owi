@@ -1673,18 +1673,35 @@ let literal_const ==
   | REF_EXTERN; num = NUM; { Const_extern (int_of_string num) }
   | REF_HOST; num = NUM; { Const_host (int_of_string num) }
 
-let const ==
-  | ~ = literal_const; <Literal>
-  | F32_CONST; NAN_CANON; { Nan_canon S32 }
-  | F64_CONST; NAN_CANON; { Nan_canon S64 }
-  | F32_CONST; NAN_ARITH; { Nan_arith S32 }
-  | F64_CONST; NAN_ARITH; { Nan_arith S64 }
+let result_f32 :=
+  | F32_CONST; num = NUM; { Concrete (f32 num) }
+  | F32_CONST; NAN_CANON; { Nan_canon }
+  | F32_CONST; NAN_ARITH; { Nan_arith }
+
+let result_f64 :=
+  | F64_CONST; num = NUM; { Concrete (f64 num) }
+  | F64_CONST; NAN_CANON; { Nan_canon }
+  | F64_CONST; NAN_ARITH; { Nan_arith }
+
+let result_v128 :=
+  | n = v128_const; { Concrete n }
 
 let result ==
-  | ~ = const; <Result_const>
+  | I32_CONST; num = NUM; { Result_I32 (i32 num) }
+  | I64_CONST; num = NUM; { Result_I64 (i64 num) }
+  | ~ = result_f32; <Result_F32>
+  | ~ = result_f64; <Result_F64>
+  | ~ = result_v128; <Result_V128>
+  | REF_NULL; ht = heap_type; { Result_null (Some ht)}
+  | REF_STRUCT; num = NUM; { Result_struct (int_of_string num) }
+  | REF_ARRAY; num = NUM; { Result_array (int_of_string num) }
+  | REF_FUNC; num = NUM; { Result_func (int_of_string num) }
+  | REF_EXN; num = NUM; { Result_exn (int_of_string num) }
+  | REF_EXTERN; num = NUM; { Result_extern (int_of_string num) }
+  | REF_HOST; num = NUM; { Result_host (int_of_string num) }
   | REF_EXTERN; { Result_extern_ref }
   | REF_FUNC; { Result_func_ref }
-  | REF_NULL; { Result_const (Literal (Const_null None)) }
+  | REF_NULL; { (Result_null None) }
   | REF_ARRAY; { Result_array_ref }
   | REF_STRUCT; { Result_struct_ref }
   | REF_EQ; { Result_eq_ref }
