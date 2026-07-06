@@ -2,16 +2,14 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type extern_func
-
 type t =
   { ctx : Abstract_domain.Context.t
   ; stack : Abstract_stack.t
   ; locals : Abstract_value.t Abstract_locals.t
   ; globals : Abstract_value.t Abstract_globals.t
   ; func_rt : Binary.val_type list
-  ; env : extern_func Link_env.t
-  ; envs : extern_func Link_env.t Dynarray.t
+  ; env : Extern_type.extern_func Link_env.t
+  ; envs : Extern_type.extern_func Link_env.t Dynarray.t
   ; invariant : Abstract_invariant.t
   }
 

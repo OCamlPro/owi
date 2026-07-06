@@ -3,6 +3,7 @@
 (library
  (public_name owi)
  (modules
+  extern_type
   abstract_boolean
   abstract_domain
   abstract_driver
