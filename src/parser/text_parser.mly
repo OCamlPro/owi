@@ -461,22 +461,32 @@ let num_type ==
   | V128; { Text.V128 : Text.num_type }
 
 let memarg_align ==
-  | ALIGN; EQUAL; n = NUM; <>
+  | ALIGN; EQUAL; ~ = NUM; <>
 
 let memarg_offset ==
   | OFFSET; EQUAL; ~ = NUM; <>
 
 let memarg ==
-  | offset = option(memarg_offset); align = option(memarg_align); {
+  | offset = ioption(memarg_offset); align = ioption(memarg_align); {
     {offset; align}
   }
+
+let lane_with_mem :=
+  | i = indice; o = memarg_offset; align = ioption(memarg_align); lane = NUM;
+    { (i, { offset = Some o; align }, lane) }
+  | i = indice; align = ioption(memarg_align); lane = NUM;
+    { (i, { offset = None; align }, lane) }
+  | o = memarg_offset; align = ioption(memarg_align); lane = NUM;
+    { (Raw 0, { offset = Some o; align }, lane) }
+  | align = ioption(memarg_align); lane = NUM;
+    { (Raw 0, { offset = None; align }, lane) }
 
 let instr ==
   | ~ = plain_instr; { [plain_instr] }
   | ~ = block_instr; { [ block_instr ] }
   | ~ = expr; { expr }
 
-let v128_const :=
+let v128_const ==
   | V128_CONST; I8X16; n = list(NUM); {
     let (n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12, n13, n14, n15, n16) =
       t16_of_v128_arg_list i8 n
@@ -564,20 +574,36 @@ let plain_instr :=
 
   | V128_ANY_TRUE; { V128 Any_true }
   | V128_LOAD; ~ = memidx; ~ = memarg;  { V128 (Load(memidx, memarg)) }
-  | V128_LOAD16_LANE; ~ = memidx; ~ = memarg; n = NUM;  { V128 (Load16_lane (memidx, memarg, (int_of_string n)))}
-  | V128_LOAD32_LANE; ~ = memidx; ~ = memarg; n = NUM;  { V128 (Load32_lane (memidx, memarg, (int_of_string n)))}
+  | V128_LOAD16_LANE; ~ = lane_with_mem; {
+    let memidx, memarg, n = lane_with_mem in
+    V128 (Load16_lane (memidx, memarg, (int_of_string n)))}
+  | V128_LOAD32_LANE; ~ = lane_with_mem; {
+    let memidx, memarg, n = lane_with_mem in
+    V128 (Load32_lane (memidx, memarg, (int_of_string n)))}
   | V128_LOAD32_ZERO; ~ = memidx; ~ = memarg;  { V128 (Load32_zero (memidx, memarg))}
-  | V128_LOAD64_LANE; ~ = memidx; ~ = memarg; n = NUM;  { V128 (Load64_lane (memidx, memarg, (int_of_string n)))}
+  | V128_LOAD64_LANE; ~ = lane_with_mem; {
+    let memidx, memarg, n = lane_with_mem in
+    V128 (Load64_lane (memidx, memarg, (int_of_string n)))}
   | V128_LOAD8X8_S; ~ = memidx; ~ = memarg;  { V128 (Load8x8_s (memidx, memarg))}
-  | V128_LOAD8_LANE; ~ = memidx; ~ = memarg; n = NUM;  { V128 (Load8_lane (memidx, memarg, (int_of_string n)))}
+  | V128_LOAD8_LANE; ~ = lane_with_mem; {
+    let memidx, memarg, n = lane_with_mem in
+    V128 (Load8_lane (memidx, memarg, (int_of_string n)))}
   | V128_LOAD8_SPLAT; ~ = memidx; ~ = memarg;  { V128 (Load8_splat (memidx, memarg))}
   | V128_NOT; { V128 Not }
   | V128_STORE; ~ = memidx; ~ = memarg; { V128 (Store(memidx, memarg)) }
-  | V128_STORE16_LANE; ~ = memidx; ~ = memarg; n = NUM; { V128 (Store16_lane(memidx, memarg, (int_of_string n))) }
-  | V128_STORE32_LANE; ~ = memidx; ~ = memarg; n = NUM; { V128 (Store32_lane(memidx, memarg, (int_of_string n))) }
+  | V128_STORE16_LANE; ~ = lane_with_mem; {
+    let memidx, memarg, n = lane_with_mem in
+    V128 (Store16_lane(memidx, memarg, (int_of_string n))) }
+  | V128_STORE32_LANE; ~ = lane_with_mem; {
+    let memidx, memarg, n = lane_with_mem in
+    V128 (Store32_lane(memidx, memarg, (int_of_string n))) }
   | V128_STORE32_ZERO; ~ = memidx; ~ = memarg; { V128 (Store32_zero(memidx, memarg)) }
-  | V128_STORE64_LANE; ~ = memidx; ~ = memarg; n = NUM; { V128 (Store64_lane(memidx, memarg, (int_of_string n))) }
-  | V128_STORE8_LANE; ~ = memidx; ~ = memarg; n = NUM; { V128 (Store8_lane(memidx, memarg, (int_of_string n))) }
+  | V128_STORE64_LANE; ~ = lane_with_mem; {
+    let memidx, memarg, n = lane_with_mem in
+    V128 (Store64_lane(memidx, memarg, (int_of_string n))) }
+  | V128_STORE8_LANE; ~ = lane_with_mem; {
+    let memidx, memarg, n = lane_with_mem in
+    V128 (Store8_lane(memidx, memarg, (int_of_string n))) }
   | F32X4_ADD; { F32x4 Add }
   | F32X4_CEIL; { F32x4 Ceil }
   | F32X4_CONVERT_I32X4_S; { F32x4 Convert_i32x4_s }
