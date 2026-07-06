@@ -19,6 +19,10 @@ let assume condition =
     | None -> None
     | Some ctx -> Some { state with ctx } )
 
+let assert' condition = assume condition
+
+let exit _code = return ()
+
 open Abstract_extern_func
 open Abstract_extern_func.Syntax
 
@@ -27,8 +31,8 @@ let symbolic_extern_module =
     [ ("i32_symbol", Extern_func (unit ^->. i32, symbol_i32))
     ; ("i64_symbol", Extern_func (unit ^->. i64, symbol_i64))
     ; ("assume", Extern_func (i32 ^->. unit, assume))
-      (* ; ("assert", Extern_func (i32 ^->. unit, assert')) *)
-      (* ; ("exit", Extern_func (i32 ^->. unit, exit)) *)
+    ; ("assert", Extern_func (i32 ^->. unit, assert'))
+    ; ("exit", Extern_func (i32 ^->. unit, exit))
     ]
   in
   { Extern.Module.functions; func_type = Abstract_extern_func.extern_type }
