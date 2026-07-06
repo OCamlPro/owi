@@ -91,56 +91,54 @@ let load_global_from_module ls mod_id name =
   | None -> Error (`Unbound_name name)
   | Some v -> Ok v
 
+let compare_result_f32 (expected_result : Wast.result_f32) got =
+  match expected_result with
+  | Concrete f ->
+    Float32.eq f got
+    || String.equal (Float32.to_string f) (Float32.to_string got)
+  | Nan_canon -> Float32.is_pos_nan got || Float32.is_neg_nan got
+  | Nan_arith ->
+    let pos_nan = Float32.to_bits Float32.pos_nan in
+    Int32.eq (Int32.logand (Float32.to_bits got) pos_nan) pos_nan
+
+let compare_result_f64 (expected_result : Wast.result_f64) got =
+  match expected_result with
+  | Concrete f ->
+    Float64.eq f got
+    || String.equal (Float64.to_string f) (Float64.to_string got)
+  | Nan_canon -> Float64.is_pos_nan got || Float64.is_neg_nan got
+  | Nan_arith ->
+    let pos_nan = Float64.to_bits Float64.pos_nan in
+    Int64.eq (Int64.logand (Float64.to_bits got) pos_nan) pos_nan
+
+let compare_result_v128 (_expected_result : Wast.result_v128) _ = assert false
+
 let compare_result_const result (const : Concrete_value.t) =
   match (result, const) with
-  | Wast.Result_const (Literal (Const_I32 n)), I32 n' -> Int32.eq n n'
-  | Result_const (Literal (Const_I64 n)), I64 n' -> Int64.eq n n'
-  | Result_const (Literal (Const_F32 n)), F32 n' ->
-    Float32.eq n n' || String.equal (Float32.to_string n) (Float32.to_string n')
-  | Result_const (Literal (Const_F64 n)), F64 n' ->
-    Float64.eq n n' || String.equal (Float64.to_string n) (Float64.to_string n')
-  | Result_const (Literal (Const_V128 n)), V128 n' -> Concrete_v128.eq n n'
-  | ( Result_const (Literal (Const_null None))
-    , Ref (NullRef | NullExn | Func None | Extern None) ) ->
-    true
-  | ( Result_const (Literal (Const_null (Some (NoFunc_ht | Func_ht))))
-    , Ref (Func None) ) ->
-    true
-  | ( Result_const (Literal (Const_null (Some (Extern_ht | NoExtern_ht))))
-    , Ref (Extern None) ) ->
-    true
-  | Result_const (Literal (Const_null (Some (Exn_ht | NoExn_ht)))), Ref NullExn
-    ->
-    true
-  | Result_const (Literal (Const_null (Some (Any_ht | None_ht)))), Ref NullRef
-    ->
-    true
-  | Result_const (Literal (Const_extern n)), Ref (Extern (Some ref)) ->
+  | Wast.Result_I32 n, I32 n' -> Int32.eq n n'
+  | Result_I64 n, I64 n' -> Int64.eq n n'
+  | Result_F32 expected_result, F32 got ->
+    compare_result_f32 expected_result got
+  | Result_F64 expected_result, F64 got ->
+    compare_result_f64 expected_result got
+  | Result_V128 expected_result, V128 got ->
+    compare_result_v128 expected_result got
+  | Result_null None, Ref (NullRef | NullExn | Func None | Extern None) -> true
+  | Result_null (Some (NoFunc_ht | Func_ht)), Ref (Func None) -> true
+  | Result_null (Some (Extern_ht | NoExtern_ht)), Ref (Extern None) -> true
+  | Result_null (Some (Exn_ht | NoExn_ht)), Ref NullExn -> true
+  | Result_null (Some (Any_ht | None_ht)), Ref NullRef -> true
+  | Result_extern n, Ref (Extern (Some ref)) ->
     begin match Concrete_ref.Extern.cast ref Host_externref.ty with
     | None -> false
     | Some n' -> n = n'
     end
-  | Result_const (Nan_canon S32), F32 f ->
-    Float32.is_pos_nan f || Float32.is_neg_nan f
-  | Result_const (Nan_canon S64), F64 f ->
-    Float64.is_pos_nan f || Float64.is_neg_nan f
-  | Result_const (Nan_arith S32), F32 f ->
-    let pos_nan = Float32.to_bits Float32.pos_nan in
-    Int32.eq (Int32.logand (Float32.to_bits f) pos_nan) pos_nan
-  | Result_const (Nan_arith S64), F64 f ->
-    let pos_nan = Float64.to_bits Float64.pos_nan in
-    Int64.eq (Int64.logand (Float64.to_bits f) pos_nan) pos_nan
   | Result_func_ref, Ref (Func _) ->
     (* TODO: FIX! This is probably unsound! *)
     true
-  | Result_const (Nan_arith _), _
-  | Result_const (Nan_canon _), _
-  | Result_const (Literal (Const_I32 _)), _
-  | Result_const (Literal (Const_I64 _)), _
-  | Result_const (Literal (Const_F32 _)), _
-  | Result_const (Literal (Const_F64 _)), _
-  | Result_const (Literal (Const_null _)), _
-  | Result_const (Literal (Const_host _)), _ ->
+  | ( ( Result_I32 _ | Result_I64 _ | Result_F32 _ | Result_F64 _
+      | Result_V128 _ | Result_null _ | Result_host _ )
+    , _ ) ->
     false
   | _, _ ->
     Log.err (fun m ->
@@ -157,7 +155,7 @@ let value_of_const : Wast.const -> Concrete_value.t = function
   | Const_extern i -> Concrete_value.Ref (Host_externref.value i)
   | Const_null None -> assert false (* ? *)
   (* TODO: not ideal, the following are a duplication of Concrete_ref.null
-  applying on Text.heap_type instead of Binary.heap_type. *)
+     applying on Text.heap_type instead of Binary.heap_type. *)
   | Const_null (Some (Func_ht | NoFunc_ht | TypeUse _)) ->
     Concrete_value.Ref (Func None)
   | Const_null (Some (Extern_ht | NoExtern_ht)) ->
@@ -342,9 +340,9 @@ let run ~no_exhaustion script =
       | Binary_module (true, _, _)
       | Quoted_module (true, _) ->
         (* TODO: differentiate between modules and module definitions in the
-           link state, ensure that we can instantiate a module from its module
-           definition, and that module definitions are not treated as "normal",
-           or instantiated module. *)
+            link state, ensure that we can instantiate a module from its module
+            definition, and that module definitions are not treated as "normal",
+            or instantiated module. *)
         Ok link_state
       | Instance (_name, _mod_name) ->
         Error (`Unimplemented "(module instance _)") )
