@@ -760,7 +760,7 @@ let typecheck_i8x16_instr (env : Env.t) stack = function
   | Replace_lane lane ->
     if lane >= 16 then Fmt.error_msg "invalid lane index"
     else
-      let* stack = Stack.pop env.modul [ v128; i32 ] stack in
+      let* stack = Stack.pop env.modul [ i32; v128 ] stack in
       let+ stack = Stack.push [ v128 ] stack in
       (env, stack)
 
@@ -801,7 +801,7 @@ let typecheck_i16x8_instr (env : Env.t) stack = function
   | Replace_lane i ->
     if i >= 8 then Fmt.error_msg "invalid lane index"
     else
-      let* stack = Stack.pop env.modul [ v128; i32 ] stack in
+      let* stack = Stack.pop env.modul [ i32; v128 ] stack in
       let+ stack = Stack.push [ v128 ] stack in
       (env, stack)
 
