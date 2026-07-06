@@ -723,10 +723,13 @@ let typecheck_v128_instr (env : Env.t) stack = function
 let typecheck_i8x16_instr (env : Env.t) stack = function
   | (Add : Text.i8x16_instr)
   | Sub | Eq | Ne | Lt_s | Lt_u | Gt_s | Gt_u | Le_s | Le_u | Ge_s | Ge_u
-  | Swizzle | Shl | Shr_s | Shr_u | Min_s | Min_u | Max_s | Max_u | Add_sat_s
-  | Add_sat_u | Sub_sat_s | Sub_sat_u | Avgr_u | Narrow_i16x8_s | Narrow_i16x8_u
-    ->
+  | Swizzle | Min_s | Min_u | Max_s | Max_u | Add_sat_s | Add_sat_u | Sub_sat_s
+  | Sub_sat_u | Avgr_u | Narrow_i16x8_s | Narrow_i16x8_u ->
     let* stack = Stack.pop env.modul [ v128; v128 ] stack in
+    let+ stack = Stack.push [ v128 ] stack in
+    (env, stack)
+  | Shl | Shr_s | Shr_u ->
+    let* stack = Stack.pop env.modul [ i32; v128 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
   | Shuffle indices ->
@@ -765,10 +768,14 @@ let typecheck_i16x8_instr (env : Env.t) stack = function
   | (Add : Text.i16x8_instr)
   | Sub | Mul | Eq | Ne | Lt_s | Lt_u | Gt_s | Gt_u | Le_s | Le_u | Ge_s | Ge_u
   | Add_sat_s | Add_sat_u | Sub_sat_s | Sub_sat_u | Min_s | Min_u | Max_s
-  | Max_u | Min | Avgr_u | Shl | Shr_s | Shr_u | Extmul_low_i8x16_s
-  | Extmul_low_i8x16_u | Extmul_high_i8x16_s | Extmul_high_i8x16_u
-  | Q15mulr_sat_s | Narrow_i32x4_s | Narrow_i32x4_u ->
+  | Max_u | Min | Avgr_u | Extmul_low_i8x16_s | Extmul_low_i8x16_u
+  | Extmul_high_i8x16_s | Extmul_high_i8x16_u | Q15mulr_sat_s | Narrow_i32x4_s
+  | Narrow_i32x4_u ->
     let* stack = Stack.pop env.modul [ v128; v128 ] stack in
+    let+ stack = Stack.push [ v128 ] stack in
+    (env, stack)
+  | Shl | Shr_s | Shr_u ->
+    let* stack = Stack.pop env.modul [ i32; v128 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
   | Neg | Abs | Extadd_pairwise_i8x16_s | Extadd_pairwise_i8x16_u
@@ -801,10 +808,13 @@ let typecheck_i16x8_instr (env : Env.t) stack = function
 let typecheck_i32x4_instr (env : Env.t) stack = function
   | (Add : Text.i32x4_instr)
   | Sub | Mul | Lt_s | Lt_u | Gt_s | Gt_u | Le_s | Le_u | Ge_s | Ge_u | Eq | Ne
-  | Shl | Shr_s | Shr_u | Min_s | Min_u | Max_s | Max_u | Dot_i16x8_s
-  | Extmul_low_i16x8_s | Extmul_low_i16x8_u | Extmul_high_i16x8_s
-  | Extmul_high_i16x8_u ->
+  | Min_s | Min_u | Max_s | Max_u | Dot_i16x8_s | Extmul_low_i16x8_s
+  | Extmul_low_i16x8_u | Extmul_high_i16x8_s | Extmul_high_i16x8_u ->
     let* stack = Stack.pop env.modul [ v128; v128 ] stack in
+    let+ stack = Stack.push [ v128 ] stack in
+    (env, stack)
+  | Shl | Shr_s | Shr_u ->
+    let* stack = Stack.pop env.modul [ i32; v128 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
   | Splat ->
@@ -839,9 +849,12 @@ let typecheck_i32x4_instr (env : Env.t) stack = function
 let typecheck_i64x2_instr (env : Env.t) stack = function
   | (Add : Text.i64x2_instr)
   | Sub | Mul | Eq | Ne | Lt_s | Gt_s | Le_s | Ge_s | Extmul_low_i32x4_s
-  | Extmul_low_i32x4_u | Extmul_high_i32x4_s | Extmul_high_i32x4_u | Shl | Shr_s
-  | Shr_u ->
+  | Extmul_low_i32x4_u | Extmul_high_i32x4_s | Extmul_high_i32x4_u ->
     let* stack = Stack.pop env.modul [ v128; v128 ] stack in
+    let+ stack = Stack.push [ v128 ] stack in
+    (env, stack)
+  | Shl | Shr_s | Shr_u ->
+    let* stack = Stack.pop env.modul [ i32; v128 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
   | Splat ->
