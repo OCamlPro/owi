@@ -609,8 +609,12 @@ let typecheck_v128_instr (env : Env.t) stack = function
     let* stack = Stack.pop env.modul [ v128 ] stack in
     let+ stack = Stack.push [ i32 ] stack in
     (env, stack)
-  | And | Or ->
+  | And | Or | Xor | Andnot ->
     let* stack = Stack.pop env.modul [ v128; v128 ] stack in
+    let+ stack = Stack.push [ v128 ] stack in
+    (env, stack)
+  | Bitselect ->
+    let* stack = Stack.pop env.modul [ v128; v128; v128 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
   | Load (indice, memarg)
@@ -621,50 +625,107 @@ let typecheck_v128_instr (env : Env.t) stack = function
     let* stack = Stack.pop env.modul [ i32 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
-  | Load32_lane (indice, memarg, lane) ->
-    if lane >= 4 then Fmt.error_msg "invalid lane index"
-    else
-      let* is_i64 = check_mem env.modul indice in
-      let* () = check_memarg ~is_i64 memarg 8l in
-      let* stack = Stack.pop env.modul [ v128; i32 ] stack in
-      let+ stack = Stack.push [ v128 ] stack in
-      (env, stack)
+  | Store (indice, memarg) | Store32_zero (indice, memarg) ->
+    let* is_i64 = check_mem env.modul indice in
+    let* () = check_memarg ~is_i64 memarg 16l in
+    let+ stack = Stack.pop env.modul [ v128; i32 ] stack in
+    (env, stack)
+  | Load8x8_s (indice, memarg)
+  | Load8x8_u (indice, memarg)
+  | Load32x2_s (indice, memarg)
+  | Load32x2_u (indice, memarg)
+  | Load64_splat (indice, memarg)
   | Load64_zero (indice, memarg) ->
     let* is_i64 = check_mem env.modul indice in
     let* () = check_memarg ~is_i64 memarg 8l in
     let* stack = Stack.pop env.modul [ i32 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
-  | Store (indice, memarg) ->
+  | Load64_lane (indice, memarg, lane) ->
+    if lane >= 2 then Fmt.error_msg "invalid lane index"
+    else
+      let* is_i64 = check_mem env.modul indice in
+      let* () = check_memarg ~is_i64 memarg 8l in
+      let* stack = Stack.pop env.modul [ v128; i32 ] stack in
+      let+ stack = Stack.push [ v128 ] stack in
+      (env, stack)
+  | Store64_lane (indice, memarg, lane) ->
+    if lane >= 2 then Fmt.error_msg "invalid lane index"
+    else
+      let* is_i64 = check_mem env.modul indice in
+      let* () = check_memarg ~is_i64 memarg 8l in
+      let+ stack = Stack.pop env.modul [ v128; i32 ] stack in
+      (env, stack)
+  | Load32_splat (indice, memarg) | Load32_zero (indice, memarg) ->
     let* is_i64 = check_mem env.modul indice in
-    let* () = check_memarg ~is_i64 memarg 16l in
-    let+ stack = Stack.pop env.modul [ v128; i32 ] stack in
+    let* () = check_memarg ~is_i64 memarg 4l in
+    let* stack = Stack.pop env.modul [ i32 ] stack in
+    let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
-  | Bitselect -> raise @@ Failure "TODO: v128.Bitselect"
-  | Xor -> raise @@ Failure "TODO: v128.Xor"
-  | Andnot -> raise @@ Failure "TODO: v128.Andnot"
-  | Load8_splat _ -> raise @@ Failure "TODO: v128.Load8_splat _"
-  | Load8_lane _ -> raise @@ Failure "TODO: v128.Load8_lane _"
-  | Load8x8_s _ -> raise @@ Failure "TODO: v128.Load8x8_s _"
-  | Load8x8_u _ -> raise @@ Failure "TODO: v128.Load8x8_u _"
-  | Load16_splat _ -> raise @@ Failure "TODO: v128.Load16_splat _"
-  | Load16_lane _ -> raise @@ Failure "TODO: v128.Load16_lane _"
-  | Load32_splat _ -> raise @@ Failure "TODO: v128.Load32_splat _"
-  | Load32_zero _ -> raise @@ Failure "TODO: v128.Load32_zero _"
-  | Load64_splat _ -> raise @@ Failure "TODO: v128.Load64_splat _"
-  | Load64_lane _ -> raise @@ Failure "TODO: v128.Load64_lane _"
-  | Store8_lane _ -> raise @@ Failure "TODO: v128.Store8_lane _"
-  | Store64_lane _ -> raise @@ Failure "TODO: v128.Store64_lane _"
-  | Store32_zero _ -> raise @@ Failure "TODO: v128.Store32_zero _"
-  | Store32_lane _ -> raise @@ Failure "TODO: v128.Store32_lane _"
-  | Store16_lane _ -> raise @@ Failure "TODO: v128.Store16_lane _"
-  | Load32x2_s _ -> raise @@ Failure "TODO: v128.Load32x2_s _"
-  | Load32x2_u _ -> raise @@ Failure "TODO: v128.Load32x2_u _"
+  | Load32_lane (indice, memarg, lane) ->
+    if lane >= 4 then Fmt.error_msg "invalid lane index"
+    else
+      let* is_i64 = check_mem env.modul indice in
+      let* () = check_memarg ~is_i64 memarg 4l in
+      let* stack = Stack.pop env.modul [ v128; i32 ] stack in
+      let+ stack = Stack.push [ v128 ] stack in
+      (env, stack)
+  | Store32_lane (indice, memarg, lane) ->
+    if lane >= 4 then Fmt.error_msg "invalid lane index"
+    else
+      let* is_i64 = check_mem env.modul indice in
+      let* () = check_memarg ~is_i64 memarg 4l in
+      let+ stack = Stack.pop env.modul [ v128; i32 ] stack in
+      (env, stack)
+  | Load16_splat (indice, memarg) ->
+    let* is_i64 = check_mem env.modul indice in
+    let* () = check_memarg ~is_i64 memarg 2l in
+    let* stack = Stack.pop env.modul [ i32 ] stack in
+    let+ stack = Stack.push [ v128 ] stack in
+    (env, stack)
+  | Load16_lane (indice, memarg, lane) ->
+    if lane >= 8 then Fmt.error_msg "invalid lane index"
+    else
+      let* is_i64 = check_mem env.modul indice in
+      let* () = check_memarg ~is_i64 memarg 2l in
+      let* stack = Stack.pop env.modul [ v128; i32 ] stack in
+      let+ stack = Stack.push [ v128 ] stack in
+      (env, stack)
+  | Store16_lane (indice, memarg, lane) ->
+    if lane >= 8 then Fmt.error_msg "invalid lane index"
+    else
+      let* is_i64 = check_mem env.modul indice in
+      let* () = check_memarg ~is_i64 memarg 2l in
+      let+ stack = Stack.pop env.modul [ v128; i32 ] stack in
+      (env, stack)
+  | Load8_splat (indice, memarg) ->
+    let* is_i64 = check_mem env.modul indice in
+    let* () = check_memarg ~is_i64 memarg 1l in
+    let* stack = Stack.pop env.modul [ i32 ] stack in
+    let+ stack = Stack.push [ v128 ] stack in
+    (env, stack)
+  | Load8_lane (indice, memarg, lane) ->
+    if lane >= 16 then Fmt.error_msg "invalid lane index"
+    else
+      let* is_i64 = check_mem env.modul indice in
+      let* () = check_memarg ~is_i64 memarg 1l in
+      let* stack = Stack.pop env.modul [ v128; i32 ] stack in
+      let+ stack = Stack.push [ v128 ] stack in
+      (env, stack)
+  | Store8_lane (indice, memarg, lane) ->
+    if lane >= 16 then Fmt.error_msg "invalid lane index"
+    else
+      let* is_i64 = check_mem env.modul indice in
+      let* () = check_memarg ~is_i64 memarg 1l in
+      let+ stack = Stack.pop env.modul [ v128; i32 ] stack in
+      (env, stack)
 
 let typecheck_i8x16_instr (env : Env.t) stack = function
   | (Add : Text.i8x16_instr)
   | Sub | Eq | Ne | Lt_s | Lt_u | Gt_s | Gt_u | Le_s | Le_u | Ge_s | Ge_u
-  | Swizzle ->
+  | Swizzle | Shl | Shr_s | Shr_u | Min_s | Min_u | Max_s | Max_u | Add_sat_s
+  | Add_sat_u | Sub_sat_s | Sub_sat_u | Avgr_u | Narrow_i16x8_s | Narrow_i16x8_u
+    ->
     let* stack = Stack.pop env.modul [ v128; v128 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
@@ -687,29 +748,41 @@ let typecheck_i8x16_instr (env : Env.t) stack = function
     let* stack = Stack.pop env.modul [ v128 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
-  | Shl -> raise @@ Failure "TODO (i8x16.shl)"
-  | Min_s -> raise @@ Failure "TODO (i8x16.min_s)"
-  | Extract_lane_s _lane_index -> raise @@ Failure "TODO (i8x16.extract_lane_s)"
-  | Add_sat_s -> raise @@ Failure "TODO (i8x16.add_sat_s)"
-  | Shr_s -> raise @@ Failure "TODO: i8x16.Shr_s"
-  | Shr_u -> raise @@ Failure "TODO: i8x16.Shr_u"
-  | Min_u -> raise @@ Failure "TODO: i8x16.Min_u"
-  | Add_sat_u -> raise @@ Failure "TODO: i8x16.Add_sat_u"
-  | Sub_sat_s -> raise @@ Failure "TODO: i8x16.Sub_sat_s"
-  | Sub_sat_u -> raise @@ Failure "TODO: i8x16.Sub_sat_u"
-  | Max_s -> raise @@ Failure "TODO: i8x16.Max_s"
-  | Max_u -> raise @@ Failure "TODO: i8x16.Max_u"
-  | Narrow_i16x8_s -> raise @@ Failure "TODO: i8x16.Narrow_i16x8_s"
-  | Narrow_i16x8_u -> raise @@ Failure "TODO: i8x16.Narrow_i16x8_u"
-  | Avgr_u -> raise @@ Failure "TODO: i8x16.Avgr_u"
-  | Extract_lane_u _ -> raise @@ Failure "TODO: i8x16.Extract_lane_u _"
-  | Replace_lane _ -> raise @@ Failure "TODO: i8x16.Replace_lane _"
+  | Extract_lane_s lane | Extract_lane_u lane ->
+    if lane >= 16 then Fmt.error_msg "invalid lane index"
+    else
+      let* stack = Stack.pop env.modul [ v128 ] stack in
+      let+ stack = Stack.push [ i32 ] stack in
+      (env, stack)
+  | Replace_lane lane ->
+    if lane >= 16 then Fmt.error_msg "invalid lane index"
+    else
+      let* stack = Stack.pop env.modul [ v128; i32 ] stack in
+      let+ stack = Stack.push [ v128 ] stack in
+      (env, stack)
 
 let typecheck_i16x8_instr (env : Env.t) stack = function
   | (Add : Text.i16x8_instr)
   | Sub | Mul | Eq | Ne | Lt_s | Lt_u | Gt_s | Gt_u | Le_s | Le_u | Ge_s | Ge_u
-    ->
+  | Add_sat_s | Add_sat_u | Sub_sat_s | Sub_sat_u | Min_s | Min_u | Max_s
+  | Max_u | Min | Avgr_u | Shl | Shr_s | Shr_u | Extmul_low_i8x16_s
+  | Extmul_low_i8x16_u | Extmul_high_i8x16_s | Extmul_high_i8x16_u
+  | Q15mulr_sat_s | Narrow_i32x4_s | Narrow_i32x4_u ->
     let* stack = Stack.pop env.modul [ v128; v128 ] stack in
+    let+ stack = Stack.push [ v128 ] stack in
+    (env, stack)
+  | Neg | Abs | Extadd_pairwise_i8x16_s | Extadd_pairwise_i8x16_u
+  | Extend_low_i8x16_s | Extend_low_i8x16_u | Extend_high_i8x16_s
+  | Extend_high_i8x16_u ->
+    let* stack = Stack.pop env.modul [ v128 ] stack in
+    let+ stack = Stack.push [ v128 ] stack in
+    (env, stack)
+  | All_true | Bitmask ->
+    let* stack = Stack.pop env.modul [ v128 ] stack in
+    let+ stack = Stack.push [ i32 ] stack in
+    (env, stack)
+  | Splat ->
+    let* stack = Stack.pop env.modul [ i32 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
   | Extract_lane_s i | Extract_lane_u i ->
@@ -718,53 +791,24 @@ let typecheck_i16x8_instr (env : Env.t) stack = function
       let* stack = Stack.pop env.modul [ v128 ] stack in
       let+ stack = Stack.push [ i32 ] stack in
       (env, stack)
-  | Splat ->
-    let* stack = Stack.pop env.modul [ i32 ] stack in
-    let+ stack = Stack.push [ v128 ] stack in
-    (env, stack)
-  | Q15mulr_sat_s -> raise @@ Failure "TODO: i16x8.Q15mulr_sat_s"
-  | Min_s -> raise @@ Failure "TODO: i16x8.Min_s"
-  | Min_u -> raise @@ Failure "TODO: i16x8.Min_u"
-  | Min -> raise @@ Failure "TODO: i16x8.Min"
-  | Extmul_low_i8x16_s -> raise @@ Failure "TODO: i16x8.Extmul_low_i8x16_s"
-  | Extmul_low_i8x16_u -> raise @@ Failure "TODO: i16x8.Extmul_low_i8x16_u"
-  | Extmul_high_i8x16_s -> raise @@ Failure "TODO: i16x8.Extmul_high_i8x16_s"
-  | Extmul_high_i8x16_u -> raise @@ Failure "TODO: i16x8.Extmul_high_i8x16_u"
-  | Extend_low_i8x16_s -> raise @@ Failure "TODO: i16x8.Extend_low_i8x16_s"
-  | Extend_low_i8x16_u -> raise @@ Failure "TODO: i16x8.Extend_low_i8x16_u"
-  | Extend_high_i8x16_s -> raise @@ Failure "TODO: i16x8.Extend_high_i8x16_s"
-  | Extend_high_i8x16_u -> raise @@ Failure "TODO: i16x8.Extend_high_i8x16_u"
-  | Extadd_pairwise_i8x16_s ->
-    raise @@ Failure "TODO: i16x8.Extadd_pairwise_i8x16_s"
-  | Extadd_pairwise_i8x16_u ->
-    raise @@ Failure "TODO: i16x8.Extadd_pairwise_i8x16_u"
-  | Add_sat_s -> raise @@ Failure "TODO: i16x8.Add_sat_s"
-  | Add_sat_u -> raise @@ Failure "TODO: i16x8.Add_sat_u"
-  | Sub_sat_s -> raise @@ Failure "TODO: i16x8.Sub_sat_s"
-  | Sub_sat_u -> raise @@ Failure "TODO: i16x8.Sub_sat_u"
-  | Max_s -> raise @@ Failure "TODO: i16x8.Max_s"
-  | Max_u -> raise @@ Failure "TODO: i16x8.Max_u"
-  | Shl -> raise @@ Failure "TODO: i16x8.Shl"
-  | Neg -> raise @@ Failure "TODO: i16x8.Neg"
-  | All_true -> raise @@ Failure "TODO: i16x8.All_true"
-  | Shr_s -> raise @@ Failure "TODO: i16x8.Shr_s"
-  | Shr_u -> raise @@ Failure "TODO: i16x8.Shr_u"
-  | Bitmask -> raise @@ Failure "TODO: i16x8.Bitmask"
-  | Avgr_u -> raise @@ Failure "TODO: i16x8.Avgr_u"
-  | Abs -> raise @@ Failure "TODO: i16x8.Abs"
-  | Narrow_i32x4_s -> raise @@ Failure "TODO: i16x8.Narrow_i32x4_s"
-  | Narrow_i32x4_u -> raise @@ Failure "TODO: i16x8.Narrow_i32x4_u"
-  | Replace_lane _ -> raise @@ Failure "TODO: i16x8.Replace_lane _"
+  | Replace_lane i ->
+    if i >= 8 then Fmt.error_msg "invalid lane index"
+    else
+      let* stack = Stack.pop env.modul [ v128; i32 ] stack in
+      let+ stack = Stack.push [ v128 ] stack in
+      (env, stack)
 
 let typecheck_i32x4_instr (env : Env.t) stack = function
   | (Add : Text.i32x4_instr)
   | Sub | Mul | Lt_s | Lt_u | Gt_s | Gt_u | Le_s | Le_u | Ge_s | Ge_u | Eq | Ne
-    ->
+  | Shl | Shr_s | Shr_u | Min_s | Min_u | Max_s | Max_u | Dot_i16x8_s
+  | Extmul_low_i16x8_s | Extmul_low_i16x8_u | Extmul_high_i16x8_s
+  | Extmul_high_i16x8_u ->
     let* stack = Stack.pop env.modul [ v128; v128 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
-  | Shl | Shr_s | Shr_u ->
-    let* stack = Stack.pop env.modul [ i32; v128 ] stack in
+  | Splat ->
+    let* stack = Stack.pop env.modul [ i32 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
   | Extract_lane i ->
@@ -773,10 +817,6 @@ let typecheck_i32x4_instr (env : Env.t) stack = function
       let* stack = Stack.pop env.modul [ v128 ] stack in
       let+ stack = Stack.push [ i32 ] stack in
       (env, stack)
-  | Splat ->
-    let* stack = Stack.pop env.modul [ i32 ] stack in
-    let+ stack = Stack.push [ v128 ] stack in
-    (env, stack)
   | Replace_lane i ->
     if i >= 4 then Fmt.error_msg "invalid lane index"
     else
@@ -784,41 +824,23 @@ let typecheck_i32x4_instr (env : Env.t) stack = function
       let+ stack = Stack.push [ v128 ] stack in
       (env, stack)
   | Extend_low_i16x8_s | Extend_high_i16x8_s | Extend_low_i16x8_u
-  | Extend_high_i16x8_u ->
+  | Extend_high_i16x8_u | Trunc_sat_f32x4_s | Trunc_sat_f32x4_u
+  | Trunc_sat_f32x4_s_zero | Trunc_sat_f32x4_u_zero | Trunc_sat_f64x2_s_zero
+  | Trunc_sat_f64x2_u_zero | Neg | Abs | Extadd_pairwise_i16x8_s
+  | Extadd_pairwise_i16x8_u ->
     let* stack = Stack.pop env.modul [ v128 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
-  | Trunc_sat_f64x2_s_zero ->
-    raise @@ Failure "TODO: i32x4.Trunc_sat_f64x2_s_zero"
-  | Trunc_sat_f64x2_u_zero ->
-    raise @@ Failure "TODO: i32x4.Trunc_sat_f64x2_u_zero"
-  | Trunc_sat_f32x4_s_zero ->
-    raise @@ Failure "TODO: i32x4.Trunc_sat_f32x4_s_zero"
-  | Trunc_sat_f32x4_u_zero ->
-    raise @@ Failure "TODO: i32x4.Trunc_sat_f32x4_u_zero"
-  | Trunc_sat_f32x4_s -> raise @@ Failure "TODO: i32x4.Trunc_sat_f32x4_s"
-  | Trunc_sat_f32x4_u -> raise @@ Failure "TODO: i32x4.Trunc_sat_f32x4_u"
-  | Min_s -> raise @@ Failure "TODO: i32x4.Min_s"
-  | Min_u -> raise @@ Failure "TODO: i32x4.Min_u"
-  | Extmul_low_i16x8_s -> raise @@ Failure "TODO: i32x4.Extmul_low_i16x8_s"
-  | Extmul_low_i16x8_u -> raise @@ Failure "TODO: i32x4.Extmul_low_i16x8_u"
-  | Extmul_high_i16x8_s -> raise @@ Failure "TODO: i32x4.Extmul_high_i16x8_s"
-  | Extmul_high_i16x8_u -> raise @@ Failure "TODO: i32x4.Extmul_high_i16x8_u"
-  | Extadd_pairwise_i16x8_s ->
-    raise @@ Failure "TODO: i32x4.Extadd_pairwise_i16x8_s"
-  | Extadd_pairwise_i16x8_u ->
-    raise @@ Failure "TODO: i32x4.Extadd_pairwise_i16x8_u"
-  | Dot_i16x8_s -> raise @@ Failure "TODO: i32x4.Dot_i16x8_s"
-  | Neg -> raise @@ Failure "TODO: i32x4.Neg"
-  | Max_s -> raise @@ Failure "TODO: i32x4.Max_s"
-  | Max_u -> raise @@ Failure "TODO: i32x4.Max_u"
-  | Abs -> raise @@ Failure "TODO: i32x4.Abs"
-  | All_true -> raise @@ Failure "TODO: i32x4.All_true"
-  | Bitmask -> raise @@ Failure "TODO: i32x4.Bitmask"
+  | All_true | Bitmask ->
+    let* stack = Stack.pop env.modul [ v128 ] stack in
+    let+ stack = Stack.push [ i32 ] stack in
+    (env, stack)
 
 let typecheck_i64x2_instr (env : Env.t) stack = function
-  | (Add : Text.i64x2_instr) | Sub | Mul | Eq | Ne | Lt_s | Gt_s | Le_s | Ge_s
-    ->
+  | (Add : Text.i64x2_instr)
+  | Sub | Mul | Eq | Ne | Lt_s | Gt_s | Le_s | Ge_s | Extmul_low_i32x4_s
+  | Extmul_low_i32x4_u | Extmul_high_i32x4_s | Extmul_high_i32x4_u | Shl | Shr_s
+  | Shr_u ->
     let* stack = Stack.pop env.modul [ v128; v128 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
@@ -826,91 +848,85 @@ let typecheck_i64x2_instr (env : Env.t) stack = function
     let* stack = Stack.pop env.modul [ i64 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
-  | Extend_low_i32x4_s | Extend_low_i32x4_u ->
+  | Extend_low_i32x4_s | Extend_low_i32x4_u | Extend_high_i32x4_s
+  | Extend_high_i32x4_u | Abs | Neg ->
     let* stack = Stack.pop env.modul [ v128 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
-  | Extend_high_i32x4_s -> raise @@ Failure "TODO: i64x2.Extend_high_i32x4_s"
-  | Extend_high_i32x4_u -> raise @@ Failure "TODO: i64x2.Extend_high_i32x4_u"
-  | Extmul_low_i32x4_s -> raise @@ Failure "TODO: i64x2.Extmul_low_i32x4_s"
-  | Extmul_low_i32x4_u -> raise @@ Failure "TODO: i64x2.Extmul_low_i32x4_u"
-  | Extmul_high_i32x4_s -> raise @@ Failure "TODO: i64x2.Extmul_high_i32x4_s"
-  | Extmul_high_i32x4_u -> raise @@ Failure "TODO: i64x2.Extmul_high_i32x4_u"
-  | Abs -> raise @@ Failure "TODO: i64x2.Abs"
-  | Neg -> raise @@ Failure "TODO: i64x2.Neg"
-  | All_true -> raise @@ Failure "TODO: i64x2.All_true"
-  | Bitmask -> raise @@ Failure "TODO: i64x2.Bitmask"
-  | Shl -> raise @@ Failure "TODO: i64x2.Shl"
-  | Shr_s -> raise @@ Failure "TODO: i64x2.Shr_s"
-  | Shr_u -> raise @@ Failure "TODO: i64x2.Shr_u"
-  | Extract_lane _ -> raise @@ Failure "TODO: i64x2.Extract_lane _"
-  | Replace_lane _ -> raise @@ Failure "TODO: i64x2.Replace_lane _"
+  | All_true | Bitmask ->
+    let* stack = Stack.pop env.modul [ v128 ] stack in
+    let+ stack = Stack.push [ i32 ] stack in
+    (env, stack)
+  | Extract_lane i ->
+    if i >= 2 then Fmt.error_msg "invalid lane index"
+    else
+      let* stack = Stack.pop env.modul [ v128 ] stack in
+      let+ stack = Stack.push [ i64 ] stack in
+      (env, stack)
+  | Replace_lane i ->
+    if i >= 2 then Fmt.error_msg "invalid lane index"
+    else
+      let* stack = Stack.pop env.modul [ i64; v128 ] stack in
+      let+ stack = Stack.push [ v128 ] stack in
+      (env, stack)
 
-let typecheck_f32x4_instr (_env : Env.t) _stack : Text.f32x4_instr -> _ =
-  function
-  | Abs -> raise @@ Failure "TODO: f32x4.Abs"
-  | Pmin -> raise @@ Failure "TODO: f32x4.Pmin"
-  | Min -> raise @@ Failure "TODO: f32x4.Min"
-  | Eq -> raise @@ Failure "TODO: f32x4.Eq"
-  | Convert_i32x4_s -> raise @@ Failure "TODO: f32x4.Convert_i32x4_s"
-  | Convert_i32x4_u -> raise @@ Failure "TODO: f32x4.Convert_i32x4_u"
-  | Ceil -> raise @@ Failure "TODO: f32x4.Ceil"
-  | Add -> raise @@ Failure "TODO: f32x4.Add"
-  | Max -> raise @@ Failure "TODO: f32x4.Max"
-  | Floor -> raise @@ Failure "TODO: f32x4.Floor"
-  | Pmax -> raise @@ Failure "TODO: f32x4.Pmax"
-  | Ne -> raise @@ Failure "TODO: f32x4.Ne"
-  | Sub -> raise @@ Failure "TODO: f32x4.Sub"
-  | Trunc -> raise @@ Failure "TODO: f32x4.Trunc"
-  | Lt -> raise @@ Failure "TODO: f32x4.Lt"
-  | Gt -> raise @@ Failure "TODO: f32x4.Gt"
-  | Le -> raise @@ Failure "TODO: f32x4.Le"
-  | Ge -> raise @@ Failure "TODO: f32x4.Ge"
-  | Mul -> raise @@ Failure "TODO: f32x4.Mul"
-  | Convert_low_i32x4_s -> raise @@ Failure "TODO: f32x4.Convert_low_i32x4_s"
-  | Convert_low_i32x4_u -> raise @@ Failure "TODO: f32x4.Convert_low_i32x4_u"
-  | Convert_high_i32x4_s -> raise @@ Failure "TODO: f32x4.Convert_high_i32x4_s"
-  | Convert_high_i32x4_u -> raise @@ Failure "TODO: f32x4.Convert_high_i32x4_u"
-  | Splat -> raise @@ Failure "TODO: f32x4.Splat"
-  | Nearest -> raise @@ Failure "TODO: f32x4.Nearest"
-  | Div -> raise @@ Failure "TODO: f32x4.Div"
-  | Neg -> raise @@ Failure "TODO: f32x4.Neg"
-  | Sqrt -> raise @@ Failure "TODO: f32x4.Sqrt"
-  | Demote_f64x2_zero -> raise @@ Failure "TODO: f32x4.Demote_f64x2_zero"
-  | Extract_lane _ -> raise @@ Failure "TODO: f32x4.Extract_lane _"
-  | Replace_lane _ -> raise @@ Failure "TODO: f32x4.Replace_lane _"
+let typecheck_f32x4_instr (env : Env.t) stack : Text.f32x4_instr -> _ = function
+  | Abs | Ceil | Floor | Trunc | Nearest | Neg | Sqrt | Convert_i32x4_s
+  | Convert_i32x4_u | Convert_low_i32x4_s | Convert_low_i32x4_u
+  | Convert_high_i32x4_s | Convert_high_i32x4_u | Demote_f64x2_zero ->
+    let* stack = Stack.pop env.modul [ v128 ] stack in
+    let+ stack = Stack.push [ v128 ] stack in
+    (env, stack)
+  | Add | Sub | Mul | Div | Eq | Ne | Lt | Gt | Le | Ge | Min | Max | Pmin
+  | Pmax ->
+    let* stack = Stack.pop env.modul [ v128; v128 ] stack in
+    let+ stack = Stack.push [ v128 ] stack in
+    (env, stack)
+  | Splat ->
+    let* stack = Stack.pop env.modul [ f32 ] stack in
+    let+ stack = Stack.push [ v128 ] stack in
+    (env, stack)
+  | Extract_lane i ->
+    if i >= 4 then Fmt.error_msg "invalid lane index"
+    else
+      let* stack = Stack.pop env.modul [ v128 ] stack in
+      let+ stack = Stack.push [ f32 ] stack in
+      (env, stack)
+  | Replace_lane i ->
+    if i >= 4 then Fmt.error_msg "invalid lane index"
+    else
+      let* stack = Stack.pop env.modul [ f32; v128 ] stack in
+      let+ stack = Stack.push [ v128 ] stack in
+      (env, stack)
 
-let typecheck_f64x2_instr (_env : Env.t) _stack : Text.f64x2_instr -> _ =
-  function
-  | Abs -> raise @@ Failure "TODO: f64x2.Abs"
-  | Pmin -> raise @@ Failure "TODO: f64x2.Pmin"
-  | Min -> raise @@ Failure "TODO: f64x2.Min"
-  | Eq -> raise @@ Failure "TODO: f64x2.Eq"
-  | Ceil -> raise @@ Failure "TODO: f64x2.Ceil"
-  | Add -> raise @@ Failure "TODO: f64x2.Add"
-  | Max -> raise @@ Failure "TODO: f64x2.Max"
-  | Floor -> raise @@ Failure "TODO: f64x2.Floor"
-  | Pmax -> raise @@ Failure "TODO: f64x2.Pmax"
-  | Ne -> raise @@ Failure "TODO: f64x2.Ne"
-  | Sub -> raise @@ Failure "TODO: f64x2.Sub"
-  | Trunc -> raise @@ Failure "TODO: f64x2.Trunc"
-  | Lt -> raise @@ Failure "TODO: f64x2.Lt"
-  | Gt -> raise @@ Failure "TODO: f64x2.Gt"
-  | Le -> raise @@ Failure "TODO: f64x2.Le"
-  | Ge -> raise @@ Failure "TODO: f64x2.Ge"
-  | Mul -> raise @@ Failure "TODO: f64x2.Mul"
-  | Convert_low_i32x4_s -> raise @@ Failure "TODO: f64x2.Convert_low_i32x4_s"
-  | Convert_low_i32x4_u -> raise @@ Failure "TODO: f64x2.Convert_low_i32x4_u"
-  | Convert_high_i32x4_s -> raise @@ Failure "TODO: f64x2.Convert_high_i32x4_s"
-  | Convert_high_i32x4_u -> raise @@ Failure "TODO: f64x2.Convert_high_i32x4_u"
-  | Nearest -> raise @@ Failure "TODO: f64x2.Nearest"
-  | Div -> raise @@ Failure "TODO: f64x2.Div"
-  | Neg -> raise @@ Failure "TODO: f64x2.Neg"
-  | Sqrt -> raise @@ Failure "TODO: f64x2.Sqrt"
-  | Splat -> raise @@ Failure "TODO: f64x2.Splat"
-  | Promote_low_f32x4 -> raise @@ Failure "TODO: f64x2.Promote_low_f32x4"
-  | Extract_lane _ -> raise @@ Failure "TODO: f64x2.Extract_lane _"
-  | Replace_lane _ -> raise @@ Failure "TODO: f64x2.Replace_lane _"
+let typecheck_f64x2_instr (env : Env.t) stack : Text.f64x2_instr -> _ = function
+  | Abs | Ceil | Floor | Trunc | Nearest | Neg | Sqrt | Convert_low_i32x4_s
+  | Convert_low_i32x4_u | Convert_high_i32x4_s | Convert_high_i32x4_u
+  | Promote_low_f32x4 ->
+    let* stack = Stack.pop env.modul [ v128 ] stack in
+    let+ stack = Stack.push [ v128 ] stack in
+    (env, stack)
+  | Add | Sub | Mul | Div | Eq | Ne | Lt | Gt | Le | Ge | Min | Max | Pmin
+  | Pmax ->
+    let* stack = Stack.pop env.modul [ v128; v128 ] stack in
+    let+ stack = Stack.push [ v128 ] stack in
+    (env, stack)
+  | Splat ->
+    let* stack = Stack.pop env.modul [ f64 ] stack in
+    let+ stack = Stack.push [ v128 ] stack in
+    (env, stack)
+  | Extract_lane i ->
+    if i >= 2 then Fmt.error_msg "invalid lane index"
+    else
+      let* stack = Stack.pop env.modul [ v128 ] stack in
+      let+ stack = Stack.push [ f64 ] stack in
+      (env, stack)
+  | Replace_lane i ->
+    if i >= 2 then Fmt.error_msg "invalid lane index"
+    else
+      let* stack = Stack.pop env.modul [ f64; v128 ] stack in
+      let+ stack = Stack.push [ v128 ] stack in
+      (env, stack)
 
 let typecheck_ref_instr (env : Env.t) stack = function
   | Is_null ->
