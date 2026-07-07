@@ -3,10 +3,6 @@
 (* Written by the Owi programmers *)
 
 module type T = sig
-  type i8
-
-  type i16
-
   type i32
 
   type i64
@@ -21,16 +17,10 @@ module type T = sig
 
   module Boolean : Boolean_intf.T with type t := boolean
 
-  module I8 : I8_intf.T with type t := i8
-
-  module I16 : I16_intf.T with type t := i16
-
   module I32 :
     I32_intf.T
       with type t := i32
        and type boolean := boolean
-       and type i8 := i8
-       and type i16 := i16
        and type f32 := f32
        and type f64 := f64
        and type i64 := i64
@@ -63,10 +53,10 @@ module type T = sig
     V128_intf.T
       with type t := v128
        and type boolean := boolean
-       and type i8 := i8
-       and type i16 := i16
        and type i32 := i32
        and type i64 := i64
+       and type f32 := f32
+       and type f64 := f64
 
   module Ref : Ref_intf.T
 

@@ -113,6 +113,21 @@ let of_i16x2 a b =
 let of_i8x4 a b c d =
   of_i16x2 (Concrete_i16.of_i8x2 a b) (Concrete_i16.of_i8x2 c d)
 
-let to_i8 x = logand x 0xFFl |> to_int
+let narrow_i16_s x =
+  if lt x (-32768l) then -32768 else if lt 32767l x then 32767 else to_int x
 
-let to_i16 x = logand x 0xFFFFl |> to_int
+let narrow_i16_u x =
+  let x = logand x 0xffff_ffffl in
+  if lt x 0l then 0 else if lt 65535l x then 65535 else to_int x
+
+let neg x = sub 0l x
+
+let abs x = if lt x 0l then neg x else x
+
+let min_s x y = if lt x y then x else y
+
+let min_u x y = if lt (logxor x min_int) (logxor y min_int) then x else y
+
+let max_s x y = if lt x y then y else x
+
+let max_u x y = if lt (logxor x min_int) (logxor y min_int) then y else x

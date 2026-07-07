@@ -125,3 +125,5 @@ let to_i32x2 a =
   let low = to_int32 a in
   let high = to_int32 (shift_right_logical a 32) in
   (low, high)
+
+let neg x = sub 0L x

@@ -930,7 +930,6 @@ type i16x8_instr =
   | Q15mulr_sat_s
   | Min_s
   | Min_u
-  | Min
   | Extmul_low_i8x16_s
   | Extmul_low_i8x16_u
   | Extmul_high_i8x16_s
@@ -979,7 +978,6 @@ let pp_i16x8_instr ppf = function
   | Q15mulr_sat_s -> pf ppf "i16x8.q15mulr_sat_s"
   | Min_s -> pf ppf "i16x8.min_s"
   | Min_u -> pf ppf "i16x8.min_u"
-  | Min -> pf ppf "i16x8.min"
   | Extmul_low_i8x16_s -> pf ppf "i16x8.extmul_low_i8x16_s"
   | Extmul_low_i8x16_u -> pf ppf "i16x8.extmul_low_i8x16_u"
   | Extmul_high_i8x16_s -> pf ppf "i16x8.extmul_high_i8x16_s"
@@ -1035,8 +1033,6 @@ type i32x4_instr =
   | Extend_high_i16x8_u
   | Trunc_sat_f64x2_s_zero
   | Trunc_sat_f64x2_u_zero
-  | Trunc_sat_f32x4_s_zero
-  | Trunc_sat_f32x4_u_zero
   | Trunc_sat_f32x4_s
   | Trunc_sat_f32x4_u
   | Min_s
@@ -1081,8 +1077,6 @@ let pp_i32x4_instr ppf = function
   | Extend_high_i16x8_u -> pf ppf "i32x4.extend_high_i16x8_u"
   | Trunc_sat_f64x2_s_zero -> pf ppf "i32x4.trunc_sat_f64x2_s_zero"
   | Trunc_sat_f64x2_u_zero -> pf ppf "i32x4.trunc_sat_f64x2_u_zero"
-  | Trunc_sat_f32x4_s_zero -> pf ppf "i32x4.trunc_sat_f32x4_s_zero"
-  | Trunc_sat_f32x4_u_zero -> pf ppf "i32x4.trunc_sat_f32x4_u_zero"
   | Trunc_sat_f32x4_s -> pf ppf "i32x4.trunc_sat_f32x4_s"
   | Trunc_sat_f32x4_u -> pf ppf "i32x4.trunc_sat_f32x4_u"
   | Min_s -> pf ppf "i32x4.min_s"

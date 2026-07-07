@@ -69,3 +69,7 @@ val to_float : t -> Float.t
 val of_float : Float.t -> t
 
 val pp : t Fmt.t
+
+val pmin : t -> t -> t
+
+val pmax : t -> t -> t

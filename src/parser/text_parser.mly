@@ -14,8 +14,8 @@
 %token I64 I64_ADD I64_AND I64_CLZ I64_CONST I64_CTZ I64_DIV_S I64_DIV_U I64_EQ I64_EQZ I64_EXTEND16_S I64_EXTEND32_S I64_EXTEND8_S I64_EXTEND_I32_S I64_EXTEND_I32_U I64_GE_S I64_GE_U I64_GT_S I64_GT_U I64_LE_S I64_LE_U I64_LOAD I64_LOAD16_S I64_LOAD16_U I64_LOAD32_S I64_LOAD32_U I64_LOAD8_S I64_LOAD8_U I64_LT_S I64_LT_U I64_MUL I64_NE I64_OR I64_POPCNT I64_REINTERPRET_F32 I64_REINTERPRET_F64 I64_REM_S I64_REM_U I64_ROTL I64_ROTR I64_SHL I64_SHR_S I64_SHR_U I64_STORE I64_STORE16 I64_STORE32 I64_STORE8 I64_SUB I64_TRUNC_F32_S I64_TRUNC_F32_U I64_TRUNC_F64_S I64_TRUNC_F64_U I64_TRUNC_SAT_F32_S I64_TRUNC_SAT_F32_U I64_TRUNC_SAT_F64_S I64_TRUNC_SAT_F64_U I64_XOR
 %token V128 V128_CONST V128_LOAD8_SPLAT V128_STORE64_LANE V128_STORE32_LANE V128_STORE32_ZERO V128_STORE16_LANE V128_STORE8_LANE V128_STORE V128_LOAD V128_LOAD8_LANE V128_LOAD8X8_S V128_LOAD16_LANE V128_LOAD32_ZERO V128_LOAD32_LANE V128_LOAD64_LANE V128_ANY_TRUE V128_NOT
 %token I8X16 I8X16_SPLAT I8X16_SHL I8X16_EXTRACT_LANE_S I8X16_ADD_SAT_S I8X16_EQ I8X16_ADD I8X16_MIN_S
-%token I16X8 I16X8_EXTEND_HIGH_I8X16_S I16X8_ADD_SAT_S I16X8_Q15MULR_SAT_S I16X8_EXTMUL_LOW_I8X16_S I16X8_EXTADD_PAIRWISE_I8X16_S I16X8_ADD I16X8_MIN_S I16X8_MIN I16X8_EQ
-%token I32X4 I32X4_ADD I32X4_SUB I32X4_TRUNC_SAT_F64X2_S_ZERO I32X4_TRUNC_SAT_F32X4_S I32X4_TRUNC_SAT_F32X4_S_ZERO I32X4_EXTMUL_LOW_I16X8_S I32X4_EXTADD_PAIRWISE_I16X8_S I32X4_DOT_I16X8_S I32X4_EQ I32X4_MUL I32X4_MIN_S
+%token I16X8 I16X8_EXTEND_HIGH_I8X16_S I16X8_ADD_SAT_S I16X8_Q15MULR_SAT_S I16X8_EXTMUL_LOW_I8X16_S I16X8_EXTADD_PAIRWISE_I8X16_S I16X8_ADD I16X8_MIN_S I16X8_EQ
+%token I32X4 I32X4_ADD I32X4_SUB I32X4_TRUNC_SAT_F64X2_S_ZERO I32X4_TRUNC_SAT_F32X4_S I32X4_EXTMUL_LOW_I16X8_S I32X4_EXTADD_PAIRWISE_I16X8_S I32X4_DOT_I16X8_S I32X4_EQ I32X4_MUL I32X4_MIN_S
 %token I64X2 I64X2_ADD I64X2_SUB I64X2_EXTMUL_LOW_I32X4_S I64X2_EQ I64X2_MUL I64X2_ABS
 %token F32X4 F32X4_MIN F32X4_CEIL F32X4_PMIN F32X4_EQ F32X4_ADD F32X4_CONVERT_I32X4_S
 %token F64X2 F64X2_MIN F64X2_CEIL F64X2_PMIN F64X2_EQ F64X2_ADD
@@ -449,6 +449,18 @@ let indice ==
 let memidx ==
  | idx = option(indice); { get_id_def0 idx }
 
+let laneidx ==
+ | n = NUM; {
+   if String.starts_with ~prefix:"-" n then failwith "unexpected token"
+   else if String.starts_with ~prefix:"+" n then failwith "unexpected token"
+   else
+     match int_of_string_opt n with
+     | None -> failwith "unexpected token"
+     | Some n ->
+       if n >= 256 then failwith "i8 constant out of range"
+       else n
+ }
+
 (* bind_var *)
 let id ==
   | ~ = ID; <>
@@ -461,10 +473,22 @@ let num_type ==
   | V128; { Text.V128 : Text.num_type }
 
 let memarg_align ==
-  | ALIGN; EQUAL; ~ = NUM; <>
+  | ALIGN; EQUAL; num = NUM; {
+    if String.starts_with ~prefix:"-" num then failwith "unknown operator"
+    else
+      match Int64.of_string num with
+      | None -> "unexpected token"
+      | Some n ->
+        if Concrete_i64.eq n 0L || Concrete_i64.ne (Concrete_i64.logand n (Concrete_i64.sub n 1L)) 0L
+        then failwith "alignment must be a power of two"
+        else num
+  }
 
 let memarg_offset ==
-  | OFFSET; EQUAL; ~ = NUM; <>
+  | OFFSET; EQUAL; num = NUM; {
+    if String.starts_with ~prefix:"-" num then failwith "unknown operator"
+    else num
+  }
 
 let memarg ==
   | offset = ioption(memarg_offset); align = ioption(memarg_align); {
@@ -472,14 +496,14 @@ let memarg ==
   }
 
 let lane_with_mem :=
-  | i = indice; o = memarg_offset; align = ioption(memarg_align); lane = NUM;
-    { (i, { offset = Some o; align }, lane) }
-  | i = indice; align = ioption(memarg_align); lane = NUM;
-    { (i, { offset = None; align }, lane) }
-  | o = memarg_offset; align = ioption(memarg_align); lane = NUM;
-    { (Raw 0, { offset = Some o; align }, lane) }
-  | align = ioption(memarg_align); lane = NUM;
-    { (Raw 0, { offset = None; align }, lane) }
+  | i = indice; o = memarg_offset; align = ioption(memarg_align); ~ = laneidx;
+    { (i, { offset = Some o; align }, laneidx) }
+  | i = indice; align = ioption(memarg_align); ~ = laneidx;
+    { (i, { offset = None; align }, laneidx) }
+  | o = memarg_offset; align = ioption(memarg_align); ~ = laneidx;
+    { (Raw 0, { offset = Some o; align }, laneidx) }
+  | align = ioption(memarg_align); ~ = laneidx;
+    { (Raw 0, { offset = None; align }, laneidx) }
 
 let instr ==
   | ~ = plain_instr; { [plain_instr] }
@@ -575,35 +599,27 @@ let plain_instr :=
   | V128_ANY_TRUE; { V128 Any_true }
   | V128_LOAD; ~ = memidx; ~ = memarg;  { V128 (Load(memidx, memarg)) }
   | V128_LOAD16_LANE; ~ = lane_with_mem; {
-    let memidx, memarg, n = lane_with_mem in
-    V128 (Load16_lane (memidx, memarg, (int_of_string n)))}
+    V128 (Load16_lane lane_with_mem)}
   | V128_LOAD32_LANE; ~ = lane_with_mem; {
-    let memidx, memarg, n = lane_with_mem in
-    V128 (Load32_lane (memidx, memarg, (int_of_string n)))}
+    V128 (Load32_lane  lane_with_mem)}
   | V128_LOAD32_ZERO; ~ = memidx; ~ = memarg;  { V128 (Load32_zero (memidx, memarg))}
   | V128_LOAD64_LANE; ~ = lane_with_mem; {
-    let memidx, memarg, n = lane_with_mem in
-    V128 (Load64_lane (memidx, memarg, (int_of_string n)))}
+    V128 (Load64_lane  lane_with_mem)}
   | V128_LOAD8X8_S; ~ = memidx; ~ = memarg;  { V128 (Load8x8_s (memidx, memarg))}
   | V128_LOAD8_LANE; ~ = lane_with_mem; {
-    let memidx, memarg, n = lane_with_mem in
-    V128 (Load8_lane (memidx, memarg, (int_of_string n)))}
+    V128 (Load8_lane  lane_with_mem)}
   | V128_LOAD8_SPLAT; ~ = memidx; ~ = memarg;  { V128 (Load8_splat (memidx, memarg))}
   | V128_NOT; { V128 Not }
   | V128_STORE; ~ = memidx; ~ = memarg; { V128 (Store(memidx, memarg)) }
   | V128_STORE16_LANE; ~ = lane_with_mem; {
-    let memidx, memarg, n = lane_with_mem in
-    V128 (Store16_lane(memidx, memarg, (int_of_string n))) }
+    V128 (Store16_lane lane_with_mem) }
   | V128_STORE32_LANE; ~ = lane_with_mem; {
-    let memidx, memarg, n = lane_with_mem in
-    V128 (Store32_lane(memidx, memarg, (int_of_string n))) }
+    V128 (Store32_lane lane_with_mem) }
   | V128_STORE32_ZERO; ~ = memidx; ~ = memarg; { V128 (Store32_zero(memidx, memarg)) }
   | V128_STORE64_LANE; ~ = lane_with_mem; {
-    let memidx, memarg, n = lane_with_mem in
-    V128 (Store64_lane(memidx, memarg, (int_of_string n))) }
+    V128 (Store64_lane lane_with_mem) }
   | V128_STORE8_LANE; ~ = lane_with_mem; {
-    let memidx, memarg, n = lane_with_mem in
-    V128 (Store8_lane(memidx, memarg, (int_of_string n))) }
+    V128 (Store8_lane lane_with_mem) }
   | F32X4_ADD; { F32x4 Add }
   | F32X4_CEIL; { F32x4 Ceil }
   | F32X4_CONVERT_I32X4_S; { F32x4 Convert_i32x4_s }
@@ -621,7 +637,6 @@ let plain_instr :=
   | I16X8_EXTADD_PAIRWISE_I8X16_S; { I16x8 Extadd_pairwise_i8x16_s }
   | I16X8_EXTEND_HIGH_I8X16_S; { I16x8 Extend_high_i8x16_s }
   | I16X8_EXTMUL_LOW_I8X16_S; { I16x8 Extmul_low_i8x16_s }
-  | I16X8_MIN; { I16x8 Min }
   | I16X8_MIN_S; { I16x8 Min_s }
   | I16X8_Q15MULR_SAT_S; { I16x8 Q15mulr_sat_s }
   | I32X4_DOT_I16X8_S; { I32x4 Dot_i16x8_s }
@@ -631,8 +646,9 @@ let plain_instr :=
   | I32X4_MIN_S; { I32x4 Min_s }
   | I32X4_MUL; { I32x4 Mul }
   | I32X4_TRUNC_SAT_F32X4_S; { I32x4 Trunc_sat_f32x4_s }
-  | I32X4_TRUNC_SAT_F32X4_S_ZERO; { I32x4 Trunc_sat_f32x4_s_zero }
   | I32X4_TRUNC_SAT_F64X2_S_ZERO; { I32x4 Trunc_sat_f64x2_s_zero }
+  | I32X4_TRUNC_SAT_F32X4_U; { I32x4 Trunc_sat_f32x4_u }
+  | I32X4_TRUNC_SAT_F64X2_U_ZERO; { I32x4 Trunc_sat_f64x2_u_zero }
   | I64X2_ABS; { I64x2 Abs }
   | I64X2_EQ; { I64x2 Eq }
   | I64X2_EXTMUL_LOW_I32X4_S; { I64x2 Extmul_low_i32x4_s }
@@ -640,7 +656,7 @@ let plain_instr :=
   | I8X16_ADD; { I8x16 Add }
   | I8X16_ADD_SAT_S; { I8x16 Add_sat_s }
   | I8X16_EQ; { I8x16 Eq }
-  | I8X16_EXTRACT_LANE_S; n = NUM; { I8x16 (Extract_lane_s (int_of_string n)) }
+  | I8X16_EXTRACT_LANE_S; ~ = laneidx; { I8x16 (Extract_lane_s laneidx) }
   | I8X16_MIN_S; { I8x16 Min_s }
   | I8X16_SHL; { I8x16 Shl }
   | I8X16_SPLAT; { I8x16 Splat }
@@ -671,8 +687,6 @@ let plain_instr :=
   | I32X4_NE; { I32x4 Ne }
   | I32X4_EXTADD_PAIRWISE_I16X8_U; { I32x4 Extadd_pairwise_i16x8_u }
   | I32X4_EXTMUL_HIGH_I16X8_S; { I32x4 Extmul_high_i16x8_s }
-  | I32X4_TRUNC_SAT_F32X4_U; { I32x4 Trunc_sat_f32x4_u }
-  | I32X4_TRUNC_SAT_F64X2_U_ZERO; { I32x4 Trunc_sat_f64x2_u_zero }
   | I64X2_NEG; { I64x2 Neg }
   | I64X2_NE; { I64x2 Ne }
   | I64X2_EXTMUL_HIGH_I32X4_S; { I64x2 Extmul_high_i32x4_s }
@@ -681,7 +695,7 @@ let plain_instr :=
   | I8X16_NE; { I8x16 Ne }
   | I8X16_ADD_SAT_U; { I8x16 Add_sat_u }
   | I16X8_EXTEND_HIGH_I8X16_U; { I16x8 Extend_high_i8x16_u }
-  | I8X16_EXTRACT_LANE_U; n = NUM; { I8x16 (Extract_lane_u (int_of_string n)) }
+  | I8X16_EXTRACT_LANE_U; ~ = laneidx; { I8x16 (Extract_lane_u laneidx) }
   | V128_LOAD16_SPLAT; ~ = memidx; ~ = memarg; { V128 (Load16_splat (memidx, memarg)) }
   | V128_LOAD64_ZERO; ~ = memidx; ~ = memarg; { V128 (Load64_zero (memidx, memarg)) }
   | I16X8_SPLAT; { I16x8 Splat }
@@ -714,10 +728,10 @@ let plain_instr :=
   | I8X16_LT_S; { I8x16 Lt_s }
   | I8X16_SUB_SAT_S; { I8x16 Sub_sat_s }
   | I16X8_EXTEND_LOW_I8X16_S; { I16x8 Extend_low_i8x16_s }
-  | I16X8_EXTRACT_LANE_S; n = NUM; { I16x8 (Extract_lane_s (int_of_string n)) }
+  | I16X8_EXTRACT_LANE_S; ~ = laneidx; { I16x8 (Extract_lane_s laneidx) }
   | V128_LOAD32_SPLAT; ~ = memidx; ~ = memarg; { V128 (Load32_splat (memidx, memarg)) }
   | V128_BITSELECT; { V128 Bitselect }
-  | I32X4_EXTRACT_LANE; n = NUM; { I32x4 (Extract_lane (int_of_string n)) }
+  | I32X4_EXTRACT_LANE; ~ = laneidx; { I32x4 (Extract_lane laneidx) }
   | I32X4_SPLAT; { I32x4 Splat }
   | F32X4_DIV; { F32x4 Div }
   | F32X4_LE; { F32x4 Le }
@@ -730,7 +744,7 @@ let plain_instr :=
   | I16X8_ALL_TRUE; { I16x8 All_true }
   | I16X8_EXTEND_LOW_I8X16_U; { I16x8 Extend_low_i8x16_u }
   | I16X8_EXTMUL_HIGH_I8X16_U; { I16x8 Extmul_high_i8x16_u }
-  | I16X8_EXTRACT_LANE_U; n = NUM; { I16x8 (Extract_lane_u (int_of_string n)) }
+  | I16X8_EXTRACT_LANE_U; ~ = laneidx; { I16x8 (Extract_lane_u laneidx) }
   | I16X8_LT_U; { I16x8 Lt_u }
   | I16X8_MAX_U; { I16x8 Max_u }
   | I16X8_NEG; { I16x8 Neg }
@@ -740,7 +754,7 @@ let plain_instr :=
   | I32X4_LT_U; { I32x4 Lt_u }
   | I32X4_MAX_U; { I32x4 Max_u }
   | I64X2_EXTMUL_HIGH_I32X4_U; { I64x2 Extmul_high_i32x4_u }
-  | I64X2_EXTRACT_LANE; n = NUM; { I64x2 (Extract_lane (int_of_string n)) }
+  | I64X2_EXTRACT_LANE; ~ = laneidx; { I64x2 (Extract_lane laneidx) }
   | I64X2_LE_S; { I64x2 Le_s }
   | I8X16_LT_U; { I8x16 Lt_u }
   | I8X16_MAX_U; { I8x16 Max_u }
@@ -749,7 +763,7 @@ let plain_instr :=
   | V128_LOAD16X4_U; ~ = memidx; ~ = memarg; { V128 (Load16x4_u (memidx, memarg)) }
   | V128_LOAD64_SPLAT; ~ = memidx; ~ = memarg; { V128 (Load64_splat (memidx, memarg)) }
   | V128_XOR; { V128 Xor }
-  | F32X4_EXTRACT_LANE; n = NUM; { F32x4 (Extract_lane (int_of_string n)) }
+  | F32X4_EXTRACT_LANE; ~ = laneidx; { F32x4 (Extract_lane laneidx) }
   | F32X4_GT; { F32x4 Gt }
   | F32X4_NEG; { F32x4 Neg }
   | F64X2_GT; { F64x2 Gt }
@@ -783,7 +797,7 @@ let plain_instr :=
   | I8X16_ABS; { I8x16 Abs }
   | I8X16_LE_U; { I8x16 Le_u }
   | I8X16_NARROW_I16X8_U; { I8x16 Narrow_i16x8_u }
-  | I8X16_REPLACE_LANE; n = NUM; { I8x16 (Replace_lane (int_of_string n)) }
+  | I8X16_REPLACE_LANE; ~ = laneidx; { I8x16 (Replace_lane laneidx) }
   | V128_LOAD32X2_U; ~ = memidx; ~ = memarg; { V128 (Load32x2_u (memidx, memarg)) }
 
   | I32X4_SHL; { I32x4 Shl }
@@ -794,18 +808,18 @@ let plain_instr :=
   | I8X16_POPCNT; { I8x16 Popcnt }
   | I8X16_GT_S; { I8x16 Gt_s }
   | I32X4_EXTEND_LOW_I16X8_S; { I32x4 Extend_low_i16x8_s }
-  | I16X8_REPLACE_LANE; n = NUM; { I16x8 (Replace_lane (int_of_string n)) }
-  | F64X2_EXTRACT_LANE; n = NUM; { F64x2 (Extract_lane (int_of_string n)) }
+  | I16X8_REPLACE_LANE; ~ = laneidx; { I16x8 (Replace_lane laneidx) }
+  | F64X2_EXTRACT_LANE; ~ = laneidx; { F64x2 (Extract_lane laneidx) }
 
   | I16X8_GT_U; { I16x8 Gt_u }
   | I16X8_NARROW_I32X4_U; { I16x8 Narrow_i32x4_u }
   | I32X4_EXTEND_LOW_I16X8_U; { I32x4 Extend_low_i16x8_u }
   | I32X4_GT_U; { I32x4 Gt_u }
-  | I32X4_REPLACE_LANE; n = NUM; { I32x4 (Replace_lane (int_of_string n)) }
+  | I32X4_REPLACE_LANE; ~ = laneidx; { I32x4 (Replace_lane laneidx) }
   | I32X4_SHR_S; { I32x4 Shr_s }
   | I64X2_ALL_TRUE; { I64x2 All_true }
   | I8X16_GT_U; { I8x16 Gt_u }
-  | F32X4_REPLACE_LANE; n = NUM; { F32x4 (Replace_lane (int_of_string n)) }
+  | F32X4_REPLACE_LANE; ~ = laneidx; { F32x4 (Replace_lane laneidx) }
   | F64X2_PROMOTE_LOW_F32X4; { F64x2 Promote_low_f32x4 }
   | I16X8_GE_S; { I16x8 Ge_s }
   | I32X4_GE_S; { I32x4 Ge_s }
@@ -818,19 +832,31 @@ let plain_instr :=
   | I16X8_GE_U; { I16x8 Ge_u }
   | I32X4_GE_U; { I32x4 Ge_u }
   | I64X2_EXTEND_HIGH_I32X4_U; { I64x2 Extend_high_i32x4_u }
-  | I64X2_REPLACE_LANE; n = NUM; { I64x2 (Replace_lane (int_of_string n)) }
+  | I64X2_REPLACE_LANE; ~ = laneidx; { I64x2 (Replace_lane laneidx) }
   | I64X2_SHL; { I64x2 Shl }
   | I8X16_GE_U; { I8x16 Ge_u }
 
-  | F64X2_REPLACE_LANE; n = NUM; { F64x2 (Replace_lane (int_of_string n)) }
+  | F64X2_REPLACE_LANE; ~ = laneidx; { F64x2 (Replace_lane laneidx) }
   | I64X2_EXTEND_LOW_I32X4_S; { I64x2 Extend_low_i32x4_s }
   | I64X2_SHR_S; { I64x2 Shr_s }
 
   | I64X2_SHR_U; { I64x2 Shr_u }
   | I64X2_EXTEND_LOW_I32X4_U; { I64x2 Extend_low_i32x4_u }
-  | I8X16_SHUFFLE; l = nonempty_list(NUM); {
-      let lanes = List.map int_of_string l in
-      I8x16 (Shuffle (Array.of_list lanes))
+  | I8X16_SHUFFLE; l = list(NUM); {
+    (* TODO: we could use laneidx directly and it would be much better but the spec is weird, see:
+      https://github.com/WebAssembly/spec/issues/2209
+      *)
+    if List.exists (fun x -> String.starts_with ~prefix:"-" x) l then
+      failwith "i8 constant out of range"
+    else if List.length l <> 16 then failwith "invalid lane length"
+    else
+      let l = List.map (fun x ->
+        match int_of_string_opt x with
+        | None -> failwith "i8 constant out of range" (* TODO: should be unexpected token but the spec is weird, see the same issue: https://github.com/WebAssembly/spec/issues/2209 *)
+        | Some n -> if n >= 256 then failwith "i8 constant out of range" else n
+      ) l
+      in
+      I8x16 (Shuffle (Array.of_list l))
     }
 
   | I32_CLZ; { I32 Clz }
@@ -1674,23 +1700,50 @@ let literal_const ==
   | REF_HOST; num = NUM; { Const_host (int_of_string num) }
 
 let result_f32 :=
-  | F32_CONST; num = NUM; { Concrete (f32 num) }
-  | F32_CONST; NAN_CANON; { Nan_canon }
-  | F32_CONST; NAN_ARITH; { Nan_arith }
+  | num = NUM; { Concrete (f32 num) }
+  | NAN_CANON; { Nan_canon }
+  | NAN_ARITH; { Nan_arith }
 
 let result_f64 :=
-  | F64_CONST; num = NUM; { Concrete (f64 num) }
-  | F64_CONST; NAN_CANON; { Nan_canon }
-  | F64_CONST; NAN_ARITH; { Nan_arith }
+  | num = NUM; { Concrete (f64 num) }
+  | NAN_CANON; { Nan_canon }
+  | NAN_ARITH; { Nan_arith }
 
 let result_v128 :=
-  | n = v128_const; { Concrete n }
+  | V128_CONST; I8X16; n = list(NUM); {
+    let (n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12, n13, n14, n15, n16) =
+      t16_of_v128_arg_list i8 n
+    in
+    let v = Concrete_v128.of_i8x16 n1 n2 n3 n4 n5 n6 n7 n8 n9 n10 n11 n12 n13 n14 n15 n16 in
+    Concrete v
+  }
+  | V128_CONST; I16X8; n = list(NUM); {
+    let (n1, n2, n3, n4, n5, n6, n7, n8) = t8_of_v128_arg_list i16 n in
+    let v = Concrete_v128.of_i16x8 n1 n2 n3 n4 n5 n6 n7 n8 in
+    Concrete v
+  }
+  | V128_CONST; I32X4; n = list(NUM); {
+    let (n1, n2, n3, n4) = t4_of_v128_arg_list i32 n in
+    let v = Concrete_v128.of_i32x4 n1 n2 n3 n4 in
+    Concrete v
+  }
+  | V128_CONST; I64X2; n = list(NUM); {
+    let (n1, n2) = t2_of_v128_arg_list i64 n in
+    let v = Concrete_v128.of_i64x2 n1 n2 in
+    Concrete v
+  }
+  | V128_CONST; F32X4; a = result_f32; b = result_f32; c = result_f32; d = result_f32; {
+    F32x4 (a, b, c, d)
+  }
+  | V128_CONST; F64X2; a = result_f64; b = result_f64; {
+    F64x2 (a, b)
+  }
 
 let result ==
   | I32_CONST; num = NUM; { Result_I32 (i32 num) }
   | I64_CONST; num = NUM; { Result_I64 (i64 num) }
-  | ~ = result_f32; <Result_F32>
-  | ~ = result_f64; <Result_F64>
+  | F32_CONST; ~ = result_f32; <Result_F32>
+  | F64_CONST; ~ = result_f64; <Result_F64>
   | ~ = result_v128; <Result_V128>
   | REF_NULL; ht = heap_type; { Result_null (Some ht)}
   | REF_STRUCT; num = NUM; { Result_struct (int_of_string num) }

@@ -102,10 +102,6 @@ struct
       let cond = Boolean.not v in
       Log.debug (fun m ->
         m "skipped check on %a and assuming directly" Boolean.pp v );
-      (* TODO: optimize more and use:
-         let* () = Choice.assume_no_check cond in
-         TODO: but to be valid, it requires also to get more information that skip provides, we need to know if the negation is also impossible, in which case, we should stop etc.
-      *)
       let* () = Choice.assume_no_check cond in
       f ()
     end
@@ -215,24 +211,23 @@ struct
           (Continue { state with block_stack; pc = block.continue; stack })
   end
 
-  let mk_addr_check_bounds const env memid ~pos ~offset instr_counter =
-    if Int64.(lt_u (sub 0xFFFF_FFFF_FFFF_FFFFL const) offset) then
+  let mk_addr_check_bounds access_size env memid ~pos ~offset instr_counter =
+    if Int64.(lt_u (sub 0xFFFF_FFFF_FFFF_FFFFL access_size) offset) then
       Choice.trap `Out_of_bounds_memory_access
     else
       let* mem = Env.get_memory env memid in
       let pos = I64.extend_i32_u pos in
       let>! () =
-        let len = I64.of_int64 (Int64.add const offset) in
+        let limit = I64.of_int64 (Int64.add access_size offset) in
         let mem_size = Memory.size mem |> I64.extend_i32_u in
-        (* mem_size <=u len || mem_size - len <u pos *)
-        (* TODO: experiment with splitting the disjunction and doing the
-           checks one at a time. *)
-        ( Boolean.or_ I64.(le_u mem_size len) I64.(lt_u (sub mem_size len) pos)
+        ( Boolean.or_
+            I64.(lt_u mem_size limit)
+            I64.(lt_u (sub mem_size limit) pos)
         , `Out_of_bounds_memory_access
         , Some instr_counter
         , false )
       in
-      let addr = I32.wrap_i64 I64.(add pos (of_int64 offset)) in
+      let addr = I32.wrap_i64 I64.(add pos (I64.of_int64 offset)) in
       Choice.return addr
 
   let mk_addr_check_bounds_1L = mk_addr_check_bounds 1L
@@ -822,11 +817,33 @@ struct
     | Const n ->
       let stack = Stack.push_concrete_v128 stack n in
       Choice.return stack
-    | Not -> raise @@ Failure "TODO (Not)"
+    | Not -> Stack.apply_v128_v128 stack V128.lognot |> Choice.return
     | And -> Stack.apply_v128_v128_v128 stack V128.logand |> Choice.return
+    | Andnot -> Stack.apply_v128_v128_v128 stack V128.andnot |> Choice.return
     | Or -> Stack.apply_v128_v128_v128 stack V128.logor |> Choice.return
-    | Load32_lane _ -> raise @@ Failure "TODO (Load32_lane)"
-    | Load64_zero _ -> raise @@ Failure "TODO (Load64_zero)"
+    | Xor -> Stack.apply_v128_v128_v128 stack V128.logxor |> Choice.return
+    | Any_true -> Stack.apply_v128_boolean stack V128.any_true |> Choice.return
+    | Bitselect ->
+      Stack.apply_v128_v128_v128_v128 stack V128.bitselect |> Choice.return
+    | Load32_lane (memory_indice, { offset; _ }, lane) ->
+      let vec, stack = Stack.pop_v128 stack in
+      let pos, stack = Stack.pop_i32 stack in
+      let* addr =
+        mk_addr_check_bounds_4L env memory_indice ~pos ~offset instr_counter
+      in
+      let* mem = Env.get_memory env memory_indice in
+      let* x = Memory.load_32 mem addr in
+      let vec = V128.replace_lane32 lane x vec in
+      Stack.push_v128 stack vec |> Choice.return
+    | Load64_zero (memory_indice, { offset; _ }) ->
+      let pos, stack = Stack.pop_i32 stack in
+      let* addr =
+        mk_addr_check_bounds_8L env memory_indice ~pos ~offset instr_counter
+      in
+      let* mem = Env.get_memory env memory_indice in
+      let* value = Memory.load_64 mem addr in
+      let res = V128.of_i64x2 value I64.zero in
+      Stack.push_v128 stack res |> Choice.return
     | Load (memory_indice, { offset; _ }) ->
       let pos, stack = Stack.pop_i32 stack in
       let* addr =
@@ -844,276 +861,593 @@ struct
       let* mem = Env.get_memory env memory_indice in
       let+ () = Memory.store_128 mem ~addr n in
       stack
-    | Load16x4_s _ -> raise @@ Failure "TODO (Load16x4_s)"
-    | Load16x4_u _ -> raise @@ Failure "TODO (Load16x4_u)"
-    | Any_true -> Stack.apply_v128_boolean stack V128.any_true |> Choice.return
-    | Bitselect -> raise @@ Failure "TODO: v128.Bitselect"
-    | Xor -> raise @@ Failure "TODO: v128.Xor"
-    | Andnot -> raise @@ Failure "TODO: v128.Andnot"
-    | Load8_splat _ -> raise @@ Failure "TODO: v128.Load8_splat _"
-    | Load8_lane _ -> raise @@ Failure "TODO: v128.Load8_lane _"
-    | Load8x8_s _ -> raise @@ Failure "TODO: v128.Load8x8_s _"
-    | Load8x8_u _ -> raise @@ Failure "TODO: v128.Load8x8_u _"
-    | Load16_splat _ -> raise @@ Failure "TODO: v128.Load16_splat _"
-    | Load16_lane _ -> raise @@ Failure "TODO: v128.Load16_lane _"
-    | Load32_splat _ -> raise @@ Failure "TODO: v128.Load32_splat _"
-    | Load32_zero _ -> raise @@ Failure "TODO: v128.Load32_zero _"
-    | Load64_splat _ -> raise @@ Failure "TODO: v128.Load64_splat _"
-    | Load64_lane _ -> raise @@ Failure "TODO: v128.Load64_lane _"
-    | Store8_lane _ -> raise @@ Failure "TODO: v128.Store8_lane _"
-    | Store64_lane _ -> raise @@ Failure "TODO: v128.Store64_lane _"
-    | Store32_zero _ -> raise @@ Failure "TODO: v128.Store32_zero _"
-    | Store32_lane _ -> raise @@ Failure "TODO: v128.Store32_lane _"
-    | Store16_lane _ -> raise @@ Failure "TODO: v128.Store16_lane _"
-    | Load32x2_s _ -> raise @@ Failure "TODO: v128.Load32x2_s _"
-    | Load32x2_u _ -> raise @@ Failure "TODO: v128.Load32x2_u _"
+    | Load16x4_s (memory_indice, { offset; _ }) ->
+      let pos, stack = Stack.pop_i32 stack in
+      let* addr =
+        mk_addr_check_bounds_8L env memory_indice ~pos ~offset instr_counter
+      in
+      let* mem = Env.get_memory env memory_indice in
+      let* a = Memory.load_16_s mem addr in
+      let* b = Memory.load_16_s mem I32.(add addr (of_int 2)) in
+      let* c = Memory.load_16_s mem I32.(add addr (of_int 4)) in
+      let* d = Memory.load_16_s mem I32.(add addr (of_int 6)) in
+      let res = V128.of_i32x4 a b c d in
+      Stack.push_v128 stack res |> Choice.return
+    | Load16x4_u (memory_indice, { offset; _ }) ->
+      let pos, stack = Stack.pop_i32 stack in
+      let* addr =
+        mk_addr_check_bounds_8L env memory_indice ~pos ~offset instr_counter
+      in
+      let* mem = Env.get_memory env memory_indice in
+      let* a = Memory.load_16_u mem addr in
+      let* b = Memory.load_16_u mem I32.(add addr (of_int 2)) in
+      let* c = Memory.load_16_u mem I32.(add addr (of_int 4)) in
+      let* d = Memory.load_16_u mem I32.(add addr (of_int 6)) in
+      let res = V128.of_i32x4 a b c d in
+      Stack.push_v128 stack res |> Choice.return
+    | Load8_splat (memory_indice, { offset; _ }) ->
+      let pos, stack = Stack.pop_i32 stack in
+      let* addr =
+        mk_addr_check_bounds_1L env memory_indice ~pos ~offset instr_counter
+      in
+      let* mem = Env.get_memory env memory_indice in
+      let* a = Memory.load_8_s mem addr in
+      let a = I32.(logor a (shl a (of_int 8))) in
+      let a = I32.(logor a (shl a (of_int 16))) in
+      let res = V128.of_i32x4 a a a a in
+      Stack.push_v128 stack res |> Choice.return
+    | Load8_lane (memory_indice, { offset; _ }, lane) ->
+      let vec, stack = Stack.pop_v128 stack in
+      let pos, stack = Stack.pop_i32 stack in
+      let* addr =
+        mk_addr_check_bounds_1L env memory_indice ~pos ~offset instr_counter
+      in
+      let* mem = Env.get_memory env memory_indice in
+      let* x = Memory.load_8_u mem addr in
+      let vec = V128.replace_lane8 lane x vec in
+      Stack.push_v128 stack vec |> Choice.return
+    | Load8x8_s (memory_indice, { offset; _ }) ->
+      let pos, stack = Stack.pop_i32 stack in
+      let* addr =
+        mk_addr_check_bounds_8L env memory_indice ~pos ~offset instr_counter
+      in
+      let* mem = Env.get_memory env memory_indice in
+      let* a0 = Memory.load_8_s mem addr in
+      let* a1 = Memory.load_8_s mem I32.(add addr (of_int 1)) in
+      let* a2 = Memory.load_8_s mem I32.(add addr (of_int 2)) in
+      let* a3 = Memory.load_8_s mem I32.(add addr (of_int 3)) in
+      let* a4 = Memory.load_8_s mem I32.(add addr (of_int 4)) in
+      let* a5 = Memory.load_8_s mem I32.(add addr (of_int 5)) in
+      let* a6 = Memory.load_8_s mem I32.(add addr (of_int 6)) in
+      let* a7 = Memory.load_8_s mem I32.(add addr (of_int 7)) in
+      let pack16 lo hi =
+        I32.(
+          logor
+            (logand lo (of_int 0xffff))
+            (shl (logand hi (of_int 0xffff)) (of_int 16)) )
+      in
+      let res =
+        V128.of_i32x4 (pack16 a0 a1) (pack16 a2 a3) (pack16 a4 a5)
+          (pack16 a6 a7)
+      in
+      Stack.push_v128 stack res |> Choice.return
+    | Load8x8_u (memory_indice, { offset; _ }) ->
+      let pos, stack = Stack.pop_i32 stack in
+      let* addr =
+        mk_addr_check_bounds_8L env memory_indice ~pos ~offset instr_counter
+      in
+      let* mem = Env.get_memory env memory_indice in
+      let* a0 = Memory.load_8_u mem addr in
+      let* a1 = Memory.load_8_u mem I32.(add addr (of_int 1)) in
+      let* a2 = Memory.load_8_u mem I32.(add addr (of_int 2)) in
+      let* a3 = Memory.load_8_u mem I32.(add addr (of_int 3)) in
+      let* a4 = Memory.load_8_u mem I32.(add addr (of_int 4)) in
+      let* a5 = Memory.load_8_u mem I32.(add addr (of_int 5)) in
+      let* a6 = Memory.load_8_u mem I32.(add addr (of_int 6)) in
+      let* a7 = Memory.load_8_u mem I32.(add addr (of_int 7)) in
+      let pack16 lo hi =
+        I32.(
+          logor
+            (logand lo (of_int 0xffff))
+            (shl (logand hi (of_int 0xffff)) (of_int 16)) )
+      in
+      let res =
+        V128.of_i32x4 (pack16 a0 a1) (pack16 a2 a3) (pack16 a4 a5)
+          (pack16 a6 a7)
+      in
+      Stack.push_v128 stack res |> Choice.return
+    | Load16_splat (memory_indice, { offset; _ }) ->
+      let pos, stack = Stack.pop_i32 stack in
+      let* addr =
+        mk_addr_check_bounds_2L env memory_indice ~pos ~offset instr_counter
+      in
+      let* mem = Env.get_memory env memory_indice in
+      let* a = Memory.load_16_s mem addr in
+      let a = I32.(logor (logand a (of_int 0xFFFF)) (shl a (of_int 16))) in
+      let res = V128.of_i32x4 a a a a in
+      Stack.push_v128 stack res |> Choice.return
+    | Load16_lane (memory_indice, { offset; _ }, lane) ->
+      let vec, stack = Stack.pop_v128 stack in
+      let pos, stack = Stack.pop_i32 stack in
+      let* addr =
+        mk_addr_check_bounds_2L env memory_indice ~pos ~offset instr_counter
+      in
+      let* mem = Env.get_memory env memory_indice in
+      let* x = Memory.load_16_s mem addr in
+      let vec = V128.replace_lane16 lane x vec in
+      Stack.push_v128 stack vec |> Choice.return
+    | Load32_splat (memory_indice, { offset; _ }) ->
+      let pos, stack = Stack.pop_i32 stack in
+      let* addr =
+        mk_addr_check_bounds_4L env memory_indice ~pos ~offset instr_counter
+      in
+      let* mem = Env.get_memory env memory_indice in
+      let* a = Memory.load_32 mem addr in
+      let res = V128.of_i32x4 a a a a in
+      Stack.push_v128 stack res |> Choice.return
+    | Load32_zero (memory_indice, { offset; _ }) ->
+      let pos, stack = Stack.pop_i32 stack in
+      let* addr =
+        mk_addr_check_bounds_4L env memory_indice ~pos ~offset instr_counter
+      in
+      let* mem = Env.get_memory env memory_indice in
+      let* a = Memory.load_32 mem addr in
+      let res = V128.of_i32x4 a I32.zero I32.zero I32.zero in
+      Stack.push_v128 stack res |> Choice.return
+    | Load64_splat (memory_indice, { offset; _ }) ->
+      let pos, stack = Stack.pop_i32 stack in
+      let* addr =
+        mk_addr_check_bounds_8L env memory_indice ~pos ~offset instr_counter
+      in
+      let* mem = Env.get_memory env memory_indice in
+      let* a = Memory.load_64 mem addr in
+      let res = V128.of_i64x2 a a in
+      Stack.push_v128 stack res |> Choice.return
+    | Load64_lane (memory_indice, { offset; _ }, lane) ->
+      let vec, stack = Stack.pop_v128 stack in
+      let pos, stack = Stack.pop_i32 stack in
+      let* addr =
+        mk_addr_check_bounds_8L env memory_indice ~pos ~offset instr_counter
+      in
+      let* mem = Env.get_memory env memory_indice in
+      let* x = Memory.load_64 mem addr in
+      let vec = V128.replace_lane64 lane x vec in
+      Stack.push_v128 stack vec |> Choice.return
+    | Store8_lane (memory_indice, { offset; _ }, lane) ->
+      let vec, stack = Stack.pop_v128 stack in
+      let pos, stack = Stack.pop_i32 stack in
+      let* addr =
+        mk_addr_check_bounds_1L env memory_indice ~pos ~offset instr_counter
+      in
+      let* mem = Env.get_memory env memory_indice in
+      let+ () = Memory.store_8 mem ~addr (V128.extract_lane8 lane vec) in
+      stack
+    | Store64_lane (memory_indice, { offset; _ }, lane) ->
+      let vec, stack = Stack.pop_v128 stack in
+      let pos, stack = Stack.pop_i32 stack in
+      let* addr =
+        mk_addr_check_bounds_8L env memory_indice ~pos ~offset instr_counter
+      in
+      let* mem = Env.get_memory env memory_indice in
+      let+ () = Memory.store_64 mem ~addr (V128.extract_lane64 lane vec) in
+      stack
+    | Store32_zero (memory_indice, { offset; _ }) ->
+      let vec, stack = Stack.pop_v128 stack in
+      let pos, stack = Stack.pop_i32 stack in
+      let* addr =
+        mk_addr_check_bounds_4L env memory_indice ~pos ~offset instr_counter
+      in
+      let* mem = Env.get_memory env memory_indice in
+      let a, _, _, _ = V128.to_i32x4 vec in
+      let+ () = Memory.store_32 mem ~addr a in
+      stack
+    | Store32_lane (memory_indice, { offset; _ }, lane) ->
+      let vec, stack = Stack.pop_v128 stack in
+      let pos, stack = Stack.pop_i32 stack in
+      let* addr =
+        mk_addr_check_bounds_4L env memory_indice ~pos ~offset instr_counter
+      in
+      let* mem = Env.get_memory env memory_indice in
+      let+ () = Memory.store_32 mem ~addr (V128.extract_lane32 lane vec) in
+      stack
+    | Store16_lane (memory_indice, { offset; _ }, lane) ->
+      let vec, stack = Stack.pop_v128 stack in
+      let pos, stack = Stack.pop_i32 stack in
+      let* addr =
+        mk_addr_check_bounds_2L env memory_indice ~pos ~offset instr_counter
+      in
+      let* mem = Env.get_memory env memory_indice in
+      let+ () = Memory.store_16 mem ~addr (V128.extract_lane16 lane vec) in
+      stack
+    | Load32x2_s (memory_indice, { offset; _ }) ->
+      let pos, stack = Stack.pop_i32 stack in
+      let* addr =
+        mk_addr_check_bounds_8L env memory_indice ~pos ~offset instr_counter
+      in
+      let* mem = Env.get_memory env memory_indice in
+      let* a = Memory.load_32 mem addr in
+      let* b = Memory.load_32 mem I32.(add addr (of_int 4)) in
+      let res = V128.of_i64x2 (I64.of_int32 a) (I64.of_int32 b) in
+      Stack.push_v128 stack res |> Choice.return
+    | Load32x2_u (memory_indice, { offset; _ }) ->
+      let pos, stack = Stack.pop_i32 stack in
+      let* addr =
+        mk_addr_check_bounds_8L env memory_indice ~pos ~offset instr_counter
+      in
+      let* mem = Env.get_memory env memory_indice in
+      let* a = Memory.load_32 mem addr in
+      let* b = Memory.load_32 mem I32.(add addr (of_int 4)) in
+      let res =
+        V128.of_i64x2
+          (I64.logand (I64.of_int32 a) (I64.of_int 0xffff_ffff))
+          (I64.logand (I64.of_int32 b) (I64.of_int 0xffff_ffff))
+      in
+      Stack.push_v128 stack res |> Choice.return
 
   let exec_i8x16_instr stack = function
-    | (Add : Text.i8x16_instr) -> raise @@ Failure "TODO (i8x16.add)"
-    | Sub -> raise @@ Failure "TODO (i8x16.sub)"
+    | (Add : Text.i8x16_instr) ->
+      Stack.apply_v128_v128_v128 stack V128.I8x16.add |> Choice.return
+    | Sub -> Stack.apply_v128_v128_v128 stack V128.I8x16.sub |> Choice.return
     | Eq -> Stack.apply_v128_v128_v128 stack V128.I8x16.eq |> Choice.return
-    | Ne -> raise @@ Failure "TODO (i8x16.ne)"
-    | Abs -> raise @@ Failure "TODO (i8x16.abs)"
-    | Neg -> raise @@ Failure "TODO (i8x16.neg)"
-    | Popcnt -> raise @@ Failure "TODO (i8x16.popcnt)"
-    | All_true -> raise @@ Failure "TODO (i8x16.all_true)"
+    | Ne -> Stack.apply_v128_v128_v128 stack V128.I8x16.ne |> Choice.return
+    | Abs -> Stack.apply_v128_v128 stack V128.I8x16.abs |> Choice.return
+    | Neg -> Stack.apply_v128_v128 stack V128.I8x16.neg |> Choice.return
+    | Popcnt -> Stack.apply_v128_v128 stack V128.I8x16.popcnt |> Choice.return
+    | All_true ->
+      Stack.apply_v128_i32 stack V128.I8x16.all_true |> Choice.return
     | Bitmask -> Stack.apply_v128_i32 stack V128.I8x16.bitmask |> Choice.return
-    | Swizzle -> raise @@ Failure "TODO (i8x16.swizzle)"
-    | Splat ->
-      let v, stack = Stack.pop_i32 stack in
-      let v = Value.I32.to_i8 v in
-      let v = V128.I8x16.splat v in
-      Stack.push_v128 stack v |> Choice.return
-    | Lt_s | Lt_u -> raise @@ Failure "TODO (i8x16.lt)"
-    | Gt_s | Gt_u -> raise @@ Failure "TODO (i8x16.gt)"
-    | Le_s | Le_u -> raise @@ Failure "TODO (i8x16.le)"
-    | Ge_s | Ge_u -> raise @@ Failure "TODO (i8x16.ge)"
-    | Shuffle _ -> raise @@ Failure "TODO (i8x16.shuffle)"
-    | Shl -> raise @@ Failure "TODO (i8x16.shl)"
-    | Min_s -> raise @@ Failure "TODO (i8x16.min_s)"
-    | Extract_lane_s _lane_index ->
-      raise @@ Failure "TODO (i8x16.extract_lane_s)"
-    | Add_sat_s -> raise @@ Failure "TODO (i8x16.add_sat_s)"
-    | Shr_s -> raise @@ Failure "TODO: i8x16.Shr_s"
-    | Shr_u -> raise @@ Failure "TODO: i8x16.Shr_u"
-    | Min_u -> raise @@ Failure "TODO: i8x16.Min_u"
-    | Add_sat_u -> raise @@ Failure "TODO: i8x16.Add_sat_u"
-    | Sub_sat_s -> raise @@ Failure "TODO: i8x16.Sub_sat_s"
-    | Sub_sat_u -> raise @@ Failure "TODO: i8x16.Sub_sat_u"
-    | Max_s -> raise @@ Failure "TODO: i8x16.Max_s"
-    | Max_u -> raise @@ Failure "TODO: i8x16.Max_u"
-    | Narrow_i16x8_s -> raise @@ Failure "TODO: i8x16.Narrow_i16x8_s"
-    | Narrow_i16x8_u -> raise @@ Failure "TODO: i8x16.Narrow_i16x8_u"
-    | Avgr_u -> raise @@ Failure "TODO: i8x16.Avgr_u"
-    | Extract_lane_u _ -> raise @@ Failure "TODO: i8x16.Extract_lane_u _"
-    | Replace_lane _ -> raise @@ Failure "TODO: i8x16.Replace_lane _"
+    | Swizzle ->
+      Stack.apply_v128_v128_v128 stack V128.I8x16.swizzle |> Choice.return
+    | Splat -> Stack.apply_i32_v128 stack V128.I8x16.splat |> Choice.return
+    | Lt_s -> Stack.apply_v128_v128_v128 stack V128.I8x16.lt_s |> Choice.return
+    | Lt_u -> Stack.apply_v128_v128_v128 stack V128.I8x16.lt_u |> Choice.return
+    | Gt_s -> Stack.apply_v128_v128_v128 stack V128.I8x16.gt_s |> Choice.return
+    | Gt_u -> Stack.apply_v128_v128_v128 stack V128.I8x16.gt_u |> Choice.return
+    | Le_s -> Stack.apply_v128_v128_v128 stack V128.I8x16.le_s |> Choice.return
+    | Le_u -> Stack.apply_v128_v128_v128 stack V128.I8x16.le_u |> Choice.return
+    | Ge_s -> Stack.apply_v128_v128_v128 stack V128.I8x16.ge_s |> Choice.return
+    | Ge_u -> Stack.apply_v128_v128_v128 stack V128.I8x16.ge_u |> Choice.return
+    | Shuffle lanes ->
+      Stack.apply_v128_v128_v128 stack (V128.I8x16.shuffle lanes)
+      |> Choice.return
+    | Shl -> Stack.apply_i32_v128_v128 stack V128.I8x16.shl |> Choice.return
+    | Min_s ->
+      Stack.apply_v128_v128_v128 stack V128.I8x16.min_s |> Choice.return
+    | Extract_lane_s lane_index ->
+      Stack.apply_v128_i32 stack (V128.I8x16.extract_lane_s lane_index)
+      |> Choice.return
+    | Extract_lane_u lane ->
+      Stack.apply_v128_i32 stack (V128.I8x16.extract_lane_u lane)
+      |> Choice.return
+    | Add_sat_s ->
+      Stack.apply_v128_v128_v128 stack V128.I8x16.add_sat_s |> Choice.return
+    | Shr_s -> Stack.apply_i32_v128_v128 stack V128.I8x16.shr_s |> Choice.return
+    | Shr_u -> Stack.apply_i32_v128_v128 stack V128.I8x16.shr_u |> Choice.return
+    | Min_u ->
+      Stack.apply_v128_v128_v128 stack V128.I8x16.min_u |> Choice.return
+    | Add_sat_u ->
+      Stack.apply_v128_v128_v128 stack V128.I8x16.add_sat_u |> Choice.return
+    | Sub_sat_s ->
+      Stack.apply_v128_v128_v128 stack V128.I8x16.sub_sat_s |> Choice.return
+    | Sub_sat_u ->
+      Stack.apply_v128_v128_v128 stack V128.I8x16.sub_sat_u |> Choice.return
+    | Max_s ->
+      Stack.apply_v128_v128_v128 stack V128.I8x16.max_s |> Choice.return
+    | Max_u ->
+      Stack.apply_v128_v128_v128 stack V128.I8x16.max_u |> Choice.return
+    | Narrow_i16x8_s ->
+      Stack.apply_v128_v128_v128 stack V128.I8x16.narrow_i16x8_s
+      |> Choice.return
+    | Narrow_i16x8_u ->
+      Stack.apply_v128_v128_v128 stack V128.I8x16.narrow_i16x8_u
+      |> Choice.return
+    | Avgr_u ->
+      Stack.apply_v128_v128_v128 stack V128.I8x16.avgr_u |> Choice.return
+    | Replace_lane lane ->
+      Stack.apply_i32_v128_v128 stack (V128.I8x16.replace_lane lane)
+      |> Choice.return
 
   let exec_i16x8_instr stack = function
     | (Add : Text.i16x8_instr) ->
       Stack.apply_v128_v128_v128 stack V128.I16x8.add |> Choice.return
     | Sub -> Stack.apply_v128_v128_v128 stack V128.I16x8.sub |> Choice.return
-    | Mul -> raise @@ Failure "TODO (i16x8.mul)"
+    | Mul -> Stack.apply_v128_v128_v128 stack V128.I16x8.mul |> Choice.return
     | Eq -> Stack.apply_v128_v128_v128 stack V128.I16x8.eq |> Choice.return
-    | Ne -> raise @@ Failure "TODO (i16x8.ne)"
-    | Splat ->
-      let v, stack = Stack.pop_i32 stack in
-      let v = Value.I32.to_i16 v in
-      let v = V128.I16x8.splat v in
-      Stack.push_v128 stack v |> Choice.return
-    | Lt_s | Lt_u -> raise @@ Failure "TODO (i16x8.lt)"
-    | Gt_s | Gt_u -> raise @@ Failure "TODO (i16x8.gt)"
-    | Le_s | Le_u -> raise @@ Failure "TODO (i16x8.le)"
-    | Ge_s | Ge_u -> raise @@ Failure "TODO (i16x8.ge)"
-    | Extract_lane_s _ -> raise @@ Failure "TODO (i16x8.extract_lane_s)"
-    | Extract_lane_u _ -> raise @@ Failure "TODO (i16x8.extract_lane_u)"
-    | Q15mulr_sat_s -> raise @@ Failure "TODO: i16x8.Q15mulr_sat_s"
-    | Min_s -> raise @@ Failure "TODO: i16x8.Min_s"
-    | Min_u -> raise @@ Failure "TODO: i16x8.Min_u"
-    | Min -> raise @@ Failure "TODO: i16x8.Min"
-    | Extmul_low_i8x16_s -> raise @@ Failure "TODO: i16x8.Extmul_low_i8x16_s"
-    | Extmul_low_i8x16_u -> raise @@ Failure "TODO: i16x8.Extmul_low_i8x16_u"
-    | Extmul_high_i8x16_s -> raise @@ Failure "TODO: i16x8.Extmul_high_i8x16_s"
-    | Extmul_high_i8x16_u -> raise @@ Failure "TODO: i16x8.Extmul_high_i8x16_u"
-    | Extend_low_i8x16_s -> raise @@ Failure "TODO: i16x8.Extend_low_i8x16_s"
-    | Extend_low_i8x16_u -> raise @@ Failure "TODO: i16x8.Extend_low_i8x16_u"
-    | Extend_high_i8x16_s -> raise @@ Failure "TODO: i16x8.Extend_high_i8x16_s"
-    | Extend_high_i8x16_u -> raise @@ Failure "TODO: i16x8.Extend_high_i8x16_u"
+    | Ne -> Stack.apply_v128_v128_v128 stack V128.I16x8.ne |> Choice.return
+    | Splat -> Stack.apply_i32_v128 stack V128.I16x8.splat |> Choice.return
+    | Lt_s -> Stack.apply_v128_v128_v128 stack V128.I16x8.lt_s |> Choice.return
+    | Lt_u -> Stack.apply_v128_v128_v128 stack V128.I16x8.lt_u |> Choice.return
+    | Gt_s -> Stack.apply_v128_v128_v128 stack V128.I16x8.gt_s |> Choice.return
+    | Gt_u -> Stack.apply_v128_v128_v128 stack V128.I16x8.gt_u |> Choice.return
+    | Le_s -> Stack.apply_v128_v128_v128 stack V128.I16x8.le_s |> Choice.return
+    | Le_u -> Stack.apply_v128_v128_v128 stack V128.I16x8.le_u |> Choice.return
+    | Ge_s -> Stack.apply_v128_v128_v128 stack V128.I16x8.ge_s |> Choice.return
+    | Ge_u -> Stack.apply_v128_v128_v128 stack V128.I16x8.ge_u |> Choice.return
+    | Extract_lane_s lane ->
+      Stack.apply_v128_i32 stack (V128.I16x8.extract_lane_s lane)
+      |> Choice.return
+    | Extract_lane_u lane ->
+      Stack.apply_v128_i32 stack (V128.I16x8.extract_lane_u lane)
+      |> Choice.return
+    | Q15mulr_sat_s ->
+      Stack.apply_v128_v128_v128 stack V128.I16x8.q15mulr_sat_s |> Choice.return
+    | Min_s ->
+      Stack.apply_v128_v128_v128 stack V128.I16x8.min_s |> Choice.return
+    | Min_u ->
+      Stack.apply_v128_v128_v128 stack V128.I16x8.min_u |> Choice.return
+    | Extmul_low_i8x16_s ->
+      Stack.apply_v128_v128_v128 stack V128.I16x8.extmul_low_i8x16_s
+      |> Choice.return
+    | Extmul_low_i8x16_u ->
+      Stack.apply_v128_v128_v128 stack V128.I16x8.extmul_low_i8x16_u
+      |> Choice.return
+    | Extmul_high_i8x16_s ->
+      Stack.apply_v128_v128_v128 stack V128.I16x8.extmul_high_i8x16_s
+      |> Choice.return
+    | Extmul_high_i8x16_u ->
+      Stack.apply_v128_v128_v128 stack V128.I16x8.extmul_high_i8x16_u
+      |> Choice.return
+    | Extend_low_i8x16_s ->
+      Stack.apply_v128_v128 stack V128.I16x8.extend_low_i8x16_s |> Choice.return
+    | Extend_low_i8x16_u ->
+      Stack.apply_v128_v128 stack V128.I16x8.extend_low_i8x16_u |> Choice.return
+    | Extend_high_i8x16_s ->
+      Stack.apply_v128_v128 stack V128.I16x8.extend_high_i8x16_s
+      |> Choice.return
+    | Extend_high_i8x16_u ->
+      Stack.apply_v128_v128 stack V128.I16x8.extend_high_i8x16_u
+      |> Choice.return
     | Extadd_pairwise_i8x16_s ->
-      raise @@ Failure "TODO: i16x8.Extadd_pairwise_i8x16_s"
+      Stack.apply_v128_v128 stack V128.I16x8.extadd_pairwise_i8x16_s
+      |> Choice.return
     | Extadd_pairwise_i8x16_u ->
-      raise @@ Failure "TODO: i16x8.Extadd_pairwise_i8x16_u"
-    | Add_sat_s -> raise @@ Failure "TODO: i16x8.Add_sat_s"
-    | Add_sat_u -> raise @@ Failure "TODO: i16x8.Add_sat_u"
-    | Sub_sat_s -> raise @@ Failure "TODO: i16x8.Sub_sat_s"
-    | Sub_sat_u -> raise @@ Failure "TODO: i16x8.Sub_sat_u"
-    | Max_s -> raise @@ Failure "TODO: i16x8.Max_s"
-    | Max_u -> raise @@ Failure "TODO: i16x8.Max_u"
-    | Shl -> raise @@ Failure "TODO: i16x8.Shl"
-    | Neg -> raise @@ Failure "TODO: i16x8.Neg"
-    | All_true -> raise @@ Failure "TODO: i16x8.All_true"
-    | Shr_s -> raise @@ Failure "TODO: i16x8.Shr_s"
-    | Shr_u -> raise @@ Failure "TODO: i16x8.Shr_u"
-    | Bitmask -> raise @@ Failure "TODO: i16x8.Bitmask"
-    | Avgr_u -> raise @@ Failure "TODO: i16x8.Avgr_u"
-    | Abs -> raise @@ Failure "TODO: i16x8.Abs"
-    | Narrow_i32x4_s -> raise @@ Failure "TODO: i16x8.Narrow_i32x4_s"
-    | Narrow_i32x4_u -> raise @@ Failure "TODO: i16x8.Narrow_i32x4_u"
-    | Replace_lane _ -> raise @@ Failure "TODO: i16x8.Replace_lane _"
+      Stack.apply_v128_v128 stack V128.I16x8.extadd_pairwise_i8x16_u
+      |> Choice.return
+    | Add_sat_s ->
+      Stack.apply_v128_v128_v128 stack V128.I16x8.add_sat_s |> Choice.return
+    | Add_sat_u ->
+      Stack.apply_v128_v128_v128 stack V128.I16x8.add_sat_u |> Choice.return
+    | Sub_sat_s ->
+      Stack.apply_v128_v128_v128 stack V128.I16x8.sub_sat_s |> Choice.return
+    | Sub_sat_u ->
+      Stack.apply_v128_v128_v128 stack V128.I16x8.sub_sat_u |> Choice.return
+    | Max_s ->
+      Stack.apply_v128_v128_v128 stack V128.I16x8.max_s |> Choice.return
+    | Max_u ->
+      Stack.apply_v128_v128_v128 stack V128.I16x8.max_u |> Choice.return
+    | Shl -> Stack.apply_i32_v128_v128 stack V128.I16x8.shl |> Choice.return
+    | Neg -> Stack.apply_v128_v128 stack V128.I16x8.neg |> Choice.return
+    | All_true ->
+      Stack.apply_v128_i32 stack V128.I16x8.all_true |> Choice.return
+    | Shr_s -> Stack.apply_i32_v128_v128 stack V128.I16x8.shr_s |> Choice.return
+    | Shr_u -> Stack.apply_i32_v128_v128 stack V128.I16x8.shr_u |> Choice.return
+    | Bitmask -> Stack.apply_v128_i32 stack V128.I16x8.bitmask |> Choice.return
+    | Avgr_u ->
+      Stack.apply_v128_v128_v128 stack V128.I16x8.avgr_u |> Choice.return
+    | Abs -> Stack.apply_v128_v128 stack V128.I16x8.abs |> Choice.return
+    | Narrow_i32x4_s ->
+      Stack.apply_v128_v128_v128 stack V128.I16x8.narrow_i32x4_s
+      |> Choice.return
+    | Narrow_i32x4_u ->
+      Stack.apply_v128_v128_v128 stack V128.I16x8.narrow_i32x4_u
+      |> Choice.return
+    | Replace_lane lane ->
+      Stack.apply_i32_v128_v128 stack (V128.I16x8.replace_lane lane)
+      |> Choice.return
 
   let exec_i32x4_instr stack : Text.i32x4_instr -> _ = function
     | Add -> Stack.apply_v128_v128_v128 stack V128.I32x4.add |> Choice.return
     | Sub -> Stack.apply_v128_v128_v128 stack V128.I32x4.sub |> Choice.return
-    | Mul -> raise @@ Failure "TODO (i32x4.Mul)"
-    | Shl -> raise @@ Failure "TODO (i32x4.Shl)"
-    | Shr_s -> raise @@ Failure "TODO (i32x4.Shr)"
-    | Shr_u -> raise @@ Failure "TODO (i32x4.Shr)"
+    | Mul -> Stack.apply_v128_v128_v128 stack V128.I32x4.mul |> Choice.return
+    | Shl -> Stack.apply_i32_v128_v128 stack V128.I32x4.shl |> Choice.return
+    | Shr_s -> Stack.apply_i32_v128_v128 stack V128.I32x4.shr_s |> Choice.return
+    | Shr_u -> Stack.apply_i32_v128_v128 stack V128.I32x4.shr_u |> Choice.return
     | Eq -> Stack.apply_v128_v128_v128 stack V128.I32x4.eq |> Choice.return
-    | Ne -> raise @@ Failure "TODO (i32x4.Ne)"
-    | Lt_s -> raise @@ Failure "TODO (i32x4.Lt)"
-    | Lt_u -> raise @@ Failure "TODO (i32x4.Lt)"
-    | Gt_s -> raise @@ Failure "TODO (i32x4.Gt)"
-    | Gt_u -> raise @@ Failure "TODO (i32x4.Gt)"
-    | Le_s -> raise @@ Failure "TODO (i32x4.Le)"
-    | Le_u -> raise @@ Failure "TODO (i32x4.Le)"
-    | Ge_s -> raise @@ Failure "TODO (i32x4.Ge)"
-    | Ge_u -> raise @@ Failure "TODO (i32x4.Ge)"
-    | Splat ->
-      let v, stack = Stack.pop_i32 stack in
-      let v = V128.I32x4.splat v in
-      Stack.push_v128 stack v |> Choice.return
-    | Extract_lane _ -> raise @@ Failure "TODO (i32x4.Extract_lane)"
-    | Replace_lane _ -> raise @@ Failure "TODO (i32x4.Replace_lane)"
-    | Extend_low_i16x8_s -> raise @@ Failure "TODO (i32x4.Extend_low_i16x8_s)"
-    | Extend_high_i16x8_s -> raise @@ Failure "TODO (i32x4.Extend_high_i16x8_s)"
-    | Extend_low_i16x8_u -> raise @@ Failure "TODO (i32x4.Extend_low_i16x8_u)"
-    | Extend_high_i16x8_u -> raise @@ Failure "TODO (i32x4.Extend_high_i16x8_u)"
+    | Ne -> Stack.apply_v128_v128_v128 stack V128.I32x4.ne |> Choice.return
+    | Lt_s -> Stack.apply_v128_v128_v128 stack V128.I32x4.lt_s |> Choice.return
+    | Lt_u -> Stack.apply_v128_v128_v128 stack V128.I32x4.lt_u |> Choice.return
+    | Gt_s -> Stack.apply_v128_v128_v128 stack V128.I32x4.gt_s |> Choice.return
+    | Gt_u -> Stack.apply_v128_v128_v128 stack V128.I32x4.gt_u |> Choice.return
+    | Le_s -> Stack.apply_v128_v128_v128 stack V128.I32x4.le_s |> Choice.return
+    | Le_u -> Stack.apply_v128_v128_v128 stack V128.I32x4.le_u |> Choice.return
+    | Ge_s -> Stack.apply_v128_v128_v128 stack V128.I32x4.ge_s |> Choice.return
+    | Ge_u -> Stack.apply_v128_v128_v128 stack V128.I32x4.ge_u |> Choice.return
+    | Splat -> Stack.apply_i32_v128 stack V128.I32x4.splat |> Choice.return
+    | Extract_lane lane ->
+      Stack.apply_v128_i32 stack (V128.I32x4.extract_lane lane) |> Choice.return
+    | Replace_lane lane ->
+      Stack.apply_i32_v128_v128 stack (V128.I32x4.replace_lane lane)
+      |> Choice.return
+    | Extend_low_i16x8_s ->
+      Stack.apply_v128_v128 stack V128.I32x4.extend_low_i16x8_s |> Choice.return
+    | Extend_high_i16x8_s ->
+      Stack.apply_v128_v128 stack V128.I32x4.extend_high_i16x8_s
+      |> Choice.return
+    | Extend_low_i16x8_u ->
+      Stack.apply_v128_v128 stack V128.I32x4.extend_low_i16x8_u |> Choice.return
+    | Extend_high_i16x8_u ->
+      Stack.apply_v128_v128 stack V128.I32x4.extend_high_i16x8_u
+      |> Choice.return
     | Trunc_sat_f64x2_s_zero ->
-      raise @@ Failure "TODO: i32x4.Trunc_sat_f64x2_s_zero"
+      Stack.apply_v128_v128 stack V128.I32x4.trunc_sat_f64x2_s_zero
+      |> Choice.return
     | Trunc_sat_f64x2_u_zero ->
-      raise @@ Failure "TODO: i32x4.Trunc_sat_f64x2_u_zero"
-    | Trunc_sat_f32x4_s_zero ->
-      raise @@ Failure "TODO: i32x4.Trunc_sat_f32x4_s_zero"
-    | Trunc_sat_f32x4_u_zero ->
-      raise @@ Failure "TODO: i32x4.Trunc_sat_f32x4_u_zero"
-    | Trunc_sat_f32x4_s -> raise @@ Failure "TODO: i32x4.Trunc_sat_f32x4_s"
-    | Trunc_sat_f32x4_u -> raise @@ Failure "TODO: i32x4.Trunc_sat_f32x4_u"
-    | Min_s -> raise @@ Failure "TODO: i32x4.Min_s"
-    | Min_u -> raise @@ Failure "TODO: i32x4.Min_u"
-    | Extmul_low_i16x8_s -> raise @@ Failure "TODO: i32x4.Extmul_low_i16x8_s"
-    | Extmul_low_i16x8_u -> raise @@ Failure "TODO: i32x4.Extmul_low_i16x8_u"
-    | Extmul_high_i16x8_s -> raise @@ Failure "TODO: i32x4.Extmul_high_i16x8_s"
-    | Extmul_high_i16x8_u -> raise @@ Failure "TODO: i32x4.Extmul_high_i16x8_u"
+      Stack.apply_v128_v128 stack V128.I32x4.trunc_sat_f64x2_u_zero
+      |> Choice.return
+    | Trunc_sat_f32x4_s ->
+      Stack.apply_v128_v128 stack V128.I32x4.trunc_sat_f32x4_s |> Choice.return
+    | Trunc_sat_f32x4_u ->
+      Stack.apply_v128_v128 stack V128.I32x4.trunc_sat_f32x4_u |> Choice.return
+    | Min_s ->
+      Stack.apply_v128_v128_v128 stack V128.I32x4.min_s |> Choice.return
+    | Min_u ->
+      Stack.apply_v128_v128_v128 stack V128.I32x4.min_u |> Choice.return
+    | Extmul_low_i16x8_s ->
+      Stack.apply_v128_v128_v128 stack V128.I32x4.extmul_low_i16x8_s
+      |> Choice.return
+    | Extmul_low_i16x8_u ->
+      Stack.apply_v128_v128_v128 stack V128.I32x4.extmul_low_i16x8_u
+      |> Choice.return
+    | Extmul_high_i16x8_s ->
+      Stack.apply_v128_v128_v128 stack V128.I32x4.extmul_high_i16x8_s
+      |> Choice.return
+    | Extmul_high_i16x8_u ->
+      Stack.apply_v128_v128_v128 stack V128.I32x4.extmul_high_i16x8_u
+      |> Choice.return
     | Extadd_pairwise_i16x8_s ->
-      raise @@ Failure "TODO: i32x4.Extadd_pairwise_i16x8_s"
+      Stack.apply_v128_v128 stack V128.I32x4.extadd_pairwise_i16x8_s
+      |> Choice.return
     | Extadd_pairwise_i16x8_u ->
-      raise @@ Failure "TODO: i32x4.Extadd_pairwise_i16x8_u"
-    | Dot_i16x8_s -> raise @@ Failure "TODO: i32x4.Dot_i16x8_s"
-    | Neg -> raise @@ Failure "TODO: i32x4.Neg"
-    | Max_s -> raise @@ Failure "TODO: i32x4.Max_s"
-    | Max_u -> raise @@ Failure "TODO: i32x4.Max_u"
-    | Abs -> raise @@ Failure "TODO: i32x4.Abs"
-    | All_true -> raise @@ Failure "TODO: i32x4.All_true"
-    | Bitmask -> raise @@ Failure "TODO: i32x4.Bitmask"
+      Stack.apply_v128_v128 stack V128.I32x4.extadd_pairwise_i16x8_u
+      |> Choice.return
+    | Dot_i16x8_s ->
+      Stack.apply_v128_v128_v128 stack V128.I32x4.dot_i16x8_s |> Choice.return
+    | Neg -> Stack.apply_v128_v128 stack V128.I32x4.neg |> Choice.return
+    | Max_s ->
+      Stack.apply_v128_v128_v128 stack V128.I32x4.max_s |> Choice.return
+    | Max_u ->
+      Stack.apply_v128_v128_v128 stack V128.I32x4.max_u |> Choice.return
+    | Abs -> Stack.apply_v128_v128 stack V128.I32x4.abs |> Choice.return
+    | All_true ->
+      Stack.apply_v128_i32 stack V128.I32x4.all_true |> Choice.return
+    | Bitmask -> Stack.apply_v128_i32 stack V128.I32x4.bitmask |> Choice.return
 
   let exec_i64x2_instr stack : Text.i64x2_instr -> _ = function
     | Add -> Stack.apply_v128_v128_v128 stack V128.I64x2.add |> Choice.return
     | Sub -> Stack.apply_v128_v128_v128 stack V128.I64x2.sub |> Choice.return
-    | Mul -> raise @@ Failure "TODO (i64x2.Mul)"
-    | Extend_low_i32x4_s -> raise @@ Failure "TODO (i64x2.Extend_low_i32x4)"
-    | Extend_low_i32x4_u -> raise @@ Failure "TODO (i64x2.Extend_low_i32x4)"
-    | Splat ->
-      let v, stack = Stack.pop_i64 stack in
-      let v = V128.I64x2.splat v in
-      Stack.push_v128 stack v |> Choice.return
-    | Eq -> raise @@ Failure "TODO (i64x2.Eq)"
-    | Ne -> raise @@ Failure "TODO (i64x2.Ne)"
-    | Lt_s -> raise @@ Failure "TODO (i64x2.Lt_s)"
-    | Gt_s -> raise @@ Failure "TODO (i64x2.Gt_s)"
-    | Le_s -> raise @@ Failure "TODO (i64x2.Le_s)"
-    | Ge_s -> raise @@ Failure "TODO (i64x2.Ge_s)"
-    | Extend_high_i32x4_s -> raise @@ Failure "TODO: i64x2.Extend_high_i32x4_s"
-    | Extend_high_i32x4_u -> raise @@ Failure "TODO: i64x2.Extend_high_i32x4_u"
-    | Extmul_low_i32x4_s -> raise @@ Failure "TODO: i64x2.Extmul_low_i32x4_s"
-    | Extmul_low_i32x4_u -> raise @@ Failure "TODO: i64x2.Extmul_low_i32x4_u"
-    | Extmul_high_i32x4_s -> raise @@ Failure "TODO: i64x2.Extmul_high_i32x4_s"
-    | Extmul_high_i32x4_u -> raise @@ Failure "TODO: i64x2.Extmul_high_i32x4_u"
-    | Abs -> raise @@ Failure "TODO: i64x2.Abs"
-    | Neg -> raise @@ Failure "TODO: i64x2.Neg"
-    | All_true -> raise @@ Failure "TODO: i64x2.All_true"
-    | Bitmask -> raise @@ Failure "TODO: i64x2.Bitmask"
-    | Shl -> raise @@ Failure "TODO: i64x2.Shl"
-    | Shr_s -> raise @@ Failure "TODO: i64x2.Shr_s"
-    | Shr_u -> raise @@ Failure "TODO: i64x2.Shr_u"
-    | Extract_lane _ -> raise @@ Failure "TODO: i64x2.Extract_lane _"
-    | Replace_lane _ -> raise @@ Failure "TODO: i64x2.Replace_lane _"
+    | Mul -> Stack.apply_v128_v128_v128 stack V128.I64x2.mul |> Choice.return
+    | Extend_low_i32x4_s ->
+      Stack.apply_v128_v128 stack V128.I64x2.extend_low_i32x4_s |> Choice.return
+    | Extend_low_i32x4_u ->
+      Stack.apply_v128_v128 stack V128.I64x2.extend_low_i32x4_u |> Choice.return
+    | Splat -> Stack.apply_i64_v128 stack V128.I64x2.splat |> Choice.return
+    | Eq -> Stack.apply_v128_v128_v128 stack V128.I64x2.eq |> Choice.return
+    | Ne -> Stack.apply_v128_v128_v128 stack V128.I64x2.ne |> Choice.return
+    | Lt_s -> Stack.apply_v128_v128_v128 stack V128.I64x2.lt_s |> Choice.return
+    | Gt_s -> Stack.apply_v128_v128_v128 stack V128.I64x2.gt_s |> Choice.return
+    | Le_s -> Stack.apply_v128_v128_v128 stack V128.I64x2.le_s |> Choice.return
+    | Ge_s -> Stack.apply_v128_v128_v128 stack V128.I64x2.ge_s |> Choice.return
+    | Extend_high_i32x4_s ->
+      Stack.apply_v128_v128 stack V128.I64x2.extend_high_i32x4_s
+      |> Choice.return
+    | Extend_high_i32x4_u ->
+      Stack.apply_v128_v128 stack V128.I64x2.extend_high_i32x4_u
+      |> Choice.return
+    | Extmul_low_i32x4_s ->
+      Stack.apply_v128_v128_v128 stack V128.I64x2.extmul_low_i32x4_s
+      |> Choice.return
+    | Extmul_low_i32x4_u ->
+      Stack.apply_v128_v128_v128 stack V128.I64x2.extmul_low_i32x4_u
+      |> Choice.return
+    | Extmul_high_i32x4_s ->
+      Stack.apply_v128_v128_v128 stack V128.I64x2.extmul_high_i32x4_s
+      |> Choice.return
+    | Extmul_high_i32x4_u ->
+      Stack.apply_v128_v128_v128 stack V128.I64x2.extmul_high_i32x4_u
+      |> Choice.return
+    | Abs -> Stack.apply_v128_v128 stack V128.I64x2.abs |> Choice.return
+    | Neg -> Stack.apply_v128_v128 stack V128.I64x2.neg |> Choice.return
+    | All_true ->
+      Stack.apply_v128_i32 stack V128.I64x2.all_true |> Choice.return
+    | Bitmask -> Stack.apply_v128_i32 stack V128.I64x2.bitmask |> Choice.return
+    | Shl -> Stack.apply_i32_v128_v128 stack V128.I64x2.shl |> Choice.return
+    | Shr_s -> Stack.apply_i32_v128_v128 stack V128.I64x2.shr_s |> Choice.return
+    | Shr_u -> Stack.apply_i32_v128_v128 stack V128.I64x2.shr_u |> Choice.return
+    | Extract_lane lane ->
+      Stack.apply_v128_i64 stack (V128.I64x2.extract_lane lane) |> Choice.return
+    | Replace_lane lane ->
+      Stack.apply_i64_v128_v128 stack (V128.I64x2.replace_lane lane)
+      |> Choice.return
 
-  let exec_f32x4_instr _stack : Text.f32x4_instr -> _ = function
-    | Abs -> raise @@ Failure "TODO: f32x4.Abs"
-    | Pmin -> raise @@ Failure "TODO: f32x4.Pmin"
-    | Min -> raise @@ Failure "TODO: f32x4.Min"
-    | Eq -> raise @@ Failure "TODO: f32x4.Eq"
-    | Convert_i32x4_s -> raise @@ Failure "TODO: f32x4.Convert_i32x4_s"
-    | Convert_i32x4_u -> raise @@ Failure "TODO: f32x4.Convert_i32x4_u"
-    | Ceil -> raise @@ Failure "TODO: f32x4.Ceil"
-    | Add -> raise @@ Failure "TODO: f32x4.Add"
-    | Max -> raise @@ Failure "TODO: f32x4.Max"
-    | Floor -> raise @@ Failure "TODO: f32x4.Floor"
-    | Pmax -> raise @@ Failure "TODO: f32x4.Pmax"
-    | Ne -> raise @@ Failure "TODO: f32x4.Ne"
-    | Sub -> raise @@ Failure "TODO: f32x4.Sub"
-    | Trunc -> raise @@ Failure "TODO: f32x4.Trunc"
-    | Lt -> raise @@ Failure "TODO: f32x4.Lt"
-    | Gt -> raise @@ Failure "TODO: f32x4.Gt"
-    | Le -> raise @@ Failure "TODO: f32x4.Le"
-    | Ge -> raise @@ Failure "TODO: f32x4.Ge"
-    | Mul -> raise @@ Failure "TODO: f32x4.Mul"
-    | Convert_low_i32x4_s -> raise @@ Failure "TODO: f32x4.Convert_low_i32x4_s"
-    | Convert_low_i32x4_u -> raise @@ Failure "TODO: f32x4.Convert_low_i32x4_u"
+  let exec_f32x4_instr stack : Text.f32x4_instr -> _ = function
+    | Abs -> Stack.apply_v128_v128 stack V128.F32x4.abs |> Choice.return
+    | Pmin -> Stack.apply_v128_v128_v128 stack V128.F32x4.pmin |> Choice.return
+    | Min -> Stack.apply_v128_v128_v128 stack V128.F32x4.min |> Choice.return
+    | Eq -> Stack.apply_v128_v128_v128 stack V128.F32x4.eq |> Choice.return
+    | Convert_i32x4_s ->
+      Stack.apply_v128_v128 stack V128.F32x4.convert_i32x4_s |> Choice.return
+    | Convert_i32x4_u ->
+      Stack.apply_v128_v128 stack V128.F32x4.convert_i32x4_u |> Choice.return
+    | Ceil -> Stack.apply_v128_v128 stack V128.F32x4.ceil |> Choice.return
+    | Add -> Stack.apply_v128_v128_v128 stack V128.F32x4.add |> Choice.return
+    | Max -> Stack.apply_v128_v128_v128 stack V128.F32x4.max |> Choice.return
+    | Floor -> Stack.apply_v128_v128 stack V128.F32x4.floor |> Choice.return
+    | Pmax -> Stack.apply_v128_v128_v128 stack V128.F32x4.pmax |> Choice.return
+    | Ne -> Stack.apply_v128_v128_v128 stack V128.F32x4.ne |> Choice.return
+    | Sub -> Stack.apply_v128_v128_v128 stack V128.F32x4.sub |> Choice.return
+    | Trunc -> Stack.apply_v128_v128 stack V128.F32x4.trunc |> Choice.return
+    | Lt -> Stack.apply_v128_v128_v128 stack V128.F32x4.lt |> Choice.return
+    | Gt -> Stack.apply_v128_v128_v128 stack V128.F32x4.gt |> Choice.return
+    | Le -> Stack.apply_v128_v128_v128 stack V128.F32x4.le |> Choice.return
+    | Ge -> Stack.apply_v128_v128_v128 stack V128.F32x4.ge |> Choice.return
+    | Mul -> Stack.apply_v128_v128_v128 stack V128.F32x4.mul |> Choice.return
+    | Convert_low_i32x4_s ->
+      Stack.apply_v128_v128 stack V128.F32x4.convert_low_i32x4_s
+      |> Choice.return
+    | Convert_low_i32x4_u ->
+      Stack.apply_v128_v128 stack V128.F32x4.convert_low_i32x4_u
+      |> Choice.return
     | Convert_high_i32x4_s ->
-      raise @@ Failure "TODO: f32x4.Convert_high_i32x4_s"
+      Stack.apply_v128_v128 stack V128.F32x4.convert_high_i32x4_s
+      |> Choice.return
     | Convert_high_i32x4_u ->
-      raise @@ Failure "TODO: f32x4.Convert_high_i32x4_u"
-    | Splat -> raise @@ Failure "TODO: f32x4.Splat"
-    | Nearest -> raise @@ Failure "TODO: f32x4.Nearest"
-    | Div -> raise @@ Failure "TODO: f32x4.Div"
-    | Neg -> raise @@ Failure "TODO: f32x4.Neg"
-    | Sqrt -> raise @@ Failure "TODO: f32x4.Sqrt"
-    | Demote_f64x2_zero -> raise @@ Failure "TODO: f32x4.Demote_f64x2_zero"
-    | Extract_lane _ -> raise @@ Failure "TODO: f32x4.Extract_lane _"
-    | Replace_lane _ -> raise @@ Failure "TODO: f32x4.Replace_lane _"
+      Stack.apply_v128_v128 stack V128.F32x4.convert_high_i32x4_u
+      |> Choice.return
+    | Splat -> Stack.apply_f32_v128 stack V128.F32x4.splat |> Choice.return
+    | Nearest -> Stack.apply_v128_v128 stack V128.F32x4.nearest |> Choice.return
+    | Div -> Stack.apply_v128_v128_v128 stack V128.F32x4.div |> Choice.return
+    | Neg -> Stack.apply_v128_v128 stack V128.F32x4.neg |> Choice.return
+    | Sqrt -> Stack.apply_v128_v128 stack V128.F32x4.sqrt |> Choice.return
+    | Demote_f64x2_zero ->
+      Stack.apply_v128_v128 stack V128.F32x4.demote_f64x2_zero |> Choice.return
+    | Extract_lane lane ->
+      Stack.apply_v128_f32 stack (V128.F32x4.extract_lane lane) |> Choice.return
+    | Replace_lane lane ->
+      Stack.apply_f32_v128_v128 stack (V128.F32x4.replace_lane lane)
+      |> Choice.return
 
-  let exec_f64x2_instr _stack : Text.f64x2_instr -> _ = function
-    | Abs -> raise @@ Failure "TODO: f64x2.Abs"
-    | Pmin -> raise @@ Failure "TODO: f64x2.Pmin"
-    | Min -> raise @@ Failure "TODO: f64x2.Min"
-    | Eq -> raise @@ Failure "TODO: f64x2.Eq"
-    | Ceil -> raise @@ Failure "TODO: f64x2.Ceil"
-    | Add -> raise @@ Failure "TODO: f64x2.Add"
-    | Max -> raise @@ Failure "TODO: f64x2.Max"
-    | Floor -> raise @@ Failure "TODO: f64x2.Floor"
-    | Pmax -> raise @@ Failure "TODO: f64x2.Pmax"
-    | Ne -> raise @@ Failure "TODO: f64x2.Ne"
-    | Sub -> raise @@ Failure "TODO: f64x2.Sub"
-    | Trunc -> raise @@ Failure "TODO: f64x2.Trunc"
-    | Lt -> raise @@ Failure "TODO: f64x2.Lt"
-    | Gt -> raise @@ Failure "TODO: f64x2.Gt"
-    | Le -> raise @@ Failure "TODO: f64x2.Le"
-    | Ge -> raise @@ Failure "TODO: f64x2.Ge"
-    | Mul -> raise @@ Failure "TODO: f64x2.Mul"
-    | Convert_low_i32x4_s -> raise @@ Failure "TODO: f64x2.Convert_low_i32x4_s"
-    | Convert_low_i32x4_u -> raise @@ Failure "TODO: f64x2.Convert_low_i32x4_u"
+  let exec_f64x2_instr stack : Text.f64x2_instr -> _ = function
+    | Abs -> Stack.apply_v128_v128 stack V128.F64x2.abs |> Choice.return
+    | Pmin -> Stack.apply_v128_v128_v128 stack V128.F64x2.pmin |> Choice.return
+    | Min -> Stack.apply_v128_v128_v128 stack V128.F64x2.min |> Choice.return
+    | Eq -> Stack.apply_v128_v128_v128 stack V128.F64x2.eq |> Choice.return
+    | Ceil -> Stack.apply_v128_v128 stack V128.F64x2.ceil |> Choice.return
+    | Add -> Stack.apply_v128_v128_v128 stack V128.F64x2.add |> Choice.return
+    | Max -> Stack.apply_v128_v128_v128 stack V128.F64x2.max |> Choice.return
+    | Floor -> Stack.apply_v128_v128 stack V128.F64x2.floor |> Choice.return
+    | Pmax -> Stack.apply_v128_v128_v128 stack V128.F64x2.pmax |> Choice.return
+    | Ne -> Stack.apply_v128_v128_v128 stack V128.F64x2.ne |> Choice.return
+    | Sub -> Stack.apply_v128_v128_v128 stack V128.F64x2.sub |> Choice.return
+    | Trunc -> Stack.apply_v128_v128 stack V128.F64x2.trunc |> Choice.return
+    | Lt -> Stack.apply_v128_v128_v128 stack V128.F64x2.lt |> Choice.return
+    | Gt -> Stack.apply_v128_v128_v128 stack V128.F64x2.gt |> Choice.return
+    | Le -> Stack.apply_v128_v128_v128 stack V128.F64x2.le |> Choice.return
+    | Ge -> Stack.apply_v128_v128_v128 stack V128.F64x2.ge |> Choice.return
+    | Mul -> Stack.apply_v128_v128_v128 stack V128.F64x2.mul |> Choice.return
+    | Convert_low_i32x4_s ->
+      Stack.apply_v128_v128 stack V128.F64x2.convert_low_i32x4_s
+      |> Choice.return
+    | Convert_low_i32x4_u ->
+      Stack.apply_v128_v128 stack V128.F64x2.convert_low_i32x4_u
+      |> Choice.return
     | Convert_high_i32x4_s ->
-      raise @@ Failure "TODO: f64x2.Convert_high_i32x4_s"
+      Stack.apply_v128_v128 stack V128.F64x2.convert_high_i32x4_s
+      |> Choice.return
     | Convert_high_i32x4_u ->
-      raise @@ Failure "TODO: f64x2.Convert_high_i32x4_u"
-    | Nearest -> raise @@ Failure "TODO: f64x2.Nearest"
-    | Div -> raise @@ Failure "TODO: f64x2.Div"
-    | Neg -> raise @@ Failure "TODO: f64x2.Neg"
-    | Sqrt -> raise @@ Failure "TODO: f64x2.Sqrt"
-    | Splat -> raise @@ Failure "TODO: f64x2.Splat"
-    | Promote_low_f32x4 -> raise @@ Failure "TODO: f64x2.Promote_low_f32x4"
-    | Extract_lane _ -> raise @@ Failure "TODO: f64x2.Extract_lane _"
-    | Replace_lane _ -> raise @@ Failure "TODO: f64x2.Replace_lane _"
+      Stack.apply_v128_v128 stack V128.F64x2.convert_high_i32x4_u
+      |> Choice.return
+    | Nearest -> Stack.apply_v128_v128 stack V128.F64x2.nearest |> Choice.return
+    | Div -> Stack.apply_v128_v128_v128 stack V128.F64x2.div |> Choice.return
+    | Neg -> Stack.apply_v128_v128 stack V128.F64x2.neg |> Choice.return
+    | Sqrt -> Stack.apply_v128_v128 stack V128.F64x2.sqrt |> Choice.return
+    | Splat -> Stack.apply_f64_v128 stack V128.F64x2.splat |> Choice.return
+    | Promote_low_f32x4 ->
+      Stack.apply_v128_v128 stack V128.F64x2.promote_low_f32x4 |> Choice.return
+    | Extract_lane lane ->
+      Stack.apply_v128_f64 stack (V128.F64x2.extract_lane lane) |> Choice.return
+    | Replace_lane lane ->
+      Stack.apply_f64_v128_v128 stack (V128.F64x2.replace_lane lane)
+      |> Choice.return
 
   let exec_ref_instr env stack (i : Binary.ref_instr) =
     match i with
@@ -1141,16 +1475,16 @@ struct
   let exec_local_instr state locals stack : Binary.local_instr -> _ = function
     | Get i ->
       let stack = Stack.push stack (State.Locals.get locals i) in
-      Choice.return (State.Continue { state with stack })
+      State.Continue { state with stack } |> Choice.return
     | Set i ->
       let v, stack = Stack.pop stack in
       let locals = State.Locals.set locals i v in
-      Choice.return (State.Continue { state with locals; stack })
+      State.Continue { state with locals; stack } |> Choice.return
     | Tee i ->
       let v, stack = Stack.pop stack in
       let locals = State.Locals.set locals i v in
       let stack = Stack.push stack v in
-      Choice.return (State.Continue { state with locals; stack })
+      State.Continue { state with locals; stack } |> Choice.return
 
   let exec_global_instr env stack : Binary.global_instr -> _ = function
     | Get i ->
@@ -1983,11 +2317,11 @@ struct
         (fun () ->
           let fuel_left = Atomic.fetch_and_add fuel (-1) in
           (* If we only use [timeout_instr], we want to stop all as
-                            soon as [fuel_left <= 0]. But if we only use [timeout],
-                            we don't want to run into the slow path below on each
-                            instruction after [fuel_left] becomes negative. We avoid
-                            this repeated slow path by bumping [fuel] to [max_int]
-                            again in this case. *)
+                              soon as [fuel_left <= 0]. But if we only use [timeout],
+                              we don't want to run into the slow path below on each
+                              instruction after [fuel_left] becomes negative. We avoid
+                              this repeated slow path by bumping [fuel] to [max_int]
+                              again in this case. *)
           if fuel_left mod 1024 = 0 || fuel_left < 0 then begin
             let stop =
               match (Parameters.timeout, Parameters.timeout_instr) with

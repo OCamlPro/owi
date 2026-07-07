@@ -56,25 +56,37 @@ type result_f32 =
   | Nan_canon
   | Nan_arith
 
-let pp_result_f32 ppf = function
-  | Concrete f -> pf ppf "f32.const %a" Float32.pp f
-  | Nan_canon -> pf ppf "f32.const nan:canonical"
-  | Nan_arith -> pf ppf "f32.const nan:arithmetic"
+let pp_result_f32_inner ppf = function
+  | Concrete f -> pf ppf "%a" Float32.pp f
+  | Nan_canon -> pf ppf "nan:canonical"
+  | Nan_arith -> pf ppf "nan:arithmetic"
+
+let pp_result_f32 ppf f = pf ppf "f32.const %a" pp_result_f32_inner f
 
 type result_f64 =
   | Concrete of Float64.t
   | Nan_canon
   | Nan_arith
 
-let pp_result_f64 ppf = function
-  | Concrete f -> pf ppf "f64.const %a" Float64.pp f
-  | Nan_canon -> pf ppf "f64.const nan:canonical"
-  | Nan_arith -> pf ppf "f64.const nan:arithmetic"
+let pp_result_f64_inner ppf = function
+  | Concrete f -> pf ppf "%a" Float64.pp f
+  | Nan_canon -> pf ppf "nan:canonical"
+  | Nan_arith -> pf ppf "nan:arithmetic"
 
-type result_v128 = Concrete of Concrete_v128.t
+let pp_result_f64 ppf f = pf ppf "f64.const %a" pp_result_f64_inner f
+
+type result_v128 =
+  | Concrete of Concrete_v128.t
+  | F32x4 of result_f32 * result_f32 * result_f32 * result_f32
+  | F64x2 of result_f64 * result_f64
 
 let pp_result_v128 ppf = function
   | Concrete v -> pf ppf "v128.const %a" Concrete_v128.pp v
+  | F32x4 (a, b, c, d) ->
+    pf ppf "v128.const f32x4 %a %a %a %a" pp_result_f32_inner a
+      pp_result_f32_inner b pp_result_f32_inner c pp_result_f32_inner d
+  | F64x2 (a, b) ->
+    pf ppf "v128.const f64x2 %a %a" pp_result_f64_inner a pp_result_f64_inner b
 
 type result =
   | Result_I32 of Int32.t
