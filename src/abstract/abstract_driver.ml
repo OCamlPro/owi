@@ -542,5 +542,8 @@ let expr (link_state : Abstract_extern_func.extern_func Link.State.t)
         | Some state, _mapping -> state )
       { state; env; envs } m.to_run
   in
+  Log.app (fun m ->
+    m "invariants : %a" Abstract_invariant.pp istate.state.invariant );
+  Abstract_checker.expr link_state m istate.state.invariant;
 
   istate.state.invariant
