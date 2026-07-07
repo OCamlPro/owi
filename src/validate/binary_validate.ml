@@ -617,11 +617,15 @@ let typecheck_v128_instr (env : Env.t) stack = function
     let* stack = Stack.pop env.modul [ v128; v128; v128 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
-  | Load (indice, memarg)
-  | Load16x4_s (indice, memarg)
-  | Load16x4_u (indice, memarg) ->
+  | Load (indice, memarg) ->
     let* is_i64 = check_mem env.modul indice in
     let* () = check_memarg ~is_i64 memarg 16l in
+    let* stack = Stack.pop env.modul [ i32 ] stack in
+    let+ stack = Stack.push [ v128 ] stack in
+    (env, stack)
+  | Load16x4_s (indice, memarg) | Load16x4_u (indice, memarg) ->
+    let* is_i64 = check_mem env.modul indice in
+    let* () = check_memarg ~is_i64 memarg 8l in
     let* stack = Stack.pop env.modul [ i32 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
@@ -768,7 +772,7 @@ let typecheck_i16x8_instr (env : Env.t) stack = function
   | (Add : Text.i16x8_instr)
   | Sub | Mul | Eq | Ne | Lt_s | Lt_u | Gt_s | Gt_u | Le_s | Le_u | Ge_s | Ge_u
   | Add_sat_s | Add_sat_u | Sub_sat_s | Sub_sat_u | Min_s | Min_u | Max_s
-  | Max_u | Min | Avgr_u | Extmul_low_i8x16_s | Extmul_low_i8x16_u
+  | Max_u | Avgr_u | Extmul_low_i8x16_s | Extmul_low_i8x16_u
   | Extmul_high_i8x16_s | Extmul_high_i8x16_u | Q15mulr_sat_s | Narrow_i32x4_s
   | Narrow_i32x4_u ->
     let* stack = Stack.pop env.modul [ v128; v128 ] stack in
@@ -835,9 +839,8 @@ let typecheck_i32x4_instr (env : Env.t) stack = function
       (env, stack)
   | Extend_low_i16x8_s | Extend_high_i16x8_s | Extend_low_i16x8_u
   | Extend_high_i16x8_u | Trunc_sat_f32x4_s | Trunc_sat_f32x4_u
-  | Trunc_sat_f32x4_s_zero | Trunc_sat_f32x4_u_zero | Trunc_sat_f64x2_s_zero
-  | Trunc_sat_f64x2_u_zero | Neg | Abs | Extadd_pairwise_i16x8_s
-  | Extadd_pairwise_i16x8_u ->
+  | Trunc_sat_f64x2_s_zero | Trunc_sat_f64x2_u_zero | Neg | Abs
+  | Extadd_pairwise_i16x8_s | Extadd_pairwise_i16x8_u ->
     let* stack = Stack.pop env.modul [ v128 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)

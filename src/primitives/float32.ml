@@ -358,3 +358,7 @@ let to_string' convert is_digit n x =
 let to_string = to_string' (Fmt.str "%.17g") is_digit 3
 
 let pp fmt v = Fmt.string fmt (to_string v)
+
+let pmin x y = if lt y x then y else x
+
+let pmax x y = if lt x y then y else x

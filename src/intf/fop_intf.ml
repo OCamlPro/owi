@@ -62,4 +62,8 @@ module type T = sig
   val of_bits : same_size_int -> t
 
   val to_bits : t -> same_size_int
+
+  val pmin : t -> t -> t
+
+  val pmax : t -> t -> t
 end

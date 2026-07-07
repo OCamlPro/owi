@@ -360,3 +360,7 @@ let to_hex_string x =
   if is_inf x then to_string x else to_string' (Fmt.str "%h") is_hex_digit 4 x
 
 let pp fmt v = Fmt.string fmt (to_string v)
+
+let pmin x y = if lt y x then y else x
+
+let pmax x y = if lt x y then y else x

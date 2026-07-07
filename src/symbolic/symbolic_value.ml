@@ -4,10 +4,6 @@
 
 type boolean = Smtml.Typed.Bool.t
 
-type i8 = Smtml.Typed.Bitv8.t
-
-type i16 = Smtml.Typed.Bitv16.t
-
 type i32 = Smtml.Typed.Bitv32.t
 
 type i64 = Smtml.Typed.Bitv64.t
@@ -19,8 +15,6 @@ type f64 = Smtml.Typed.Float64.t
 type v128 = Smtml.Typed.Bitv128.t
 
 module Boolean = Symbolic_boolean
-module I8 = Symbolic_i8
-module I16 = Symbolic_i16
 module I32 = Symbolic_i32
 module F32 = Symbolic_f32
 module I64 = Symbolic_i64

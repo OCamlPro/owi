@@ -155,7 +155,39 @@ module type S = sig
 
   val apply_v128_i32 : t -> (v128 -> i32) -> t
 
+  val apply_v128_i64 : t -> (v128 -> i64) -> t
+
+  val apply_i32_v128 : t -> (i32 -> v128) -> t
+
+  val apply_f32_v128 : t -> (f32 -> v128) -> t
+
+  val apply_i64_v128 : t -> (i64 -> v128) -> t
+
+  val apply_f64_v128 : t -> (f64 -> v128) -> t
+
+  val apply_v128_f32 : t -> (v128 -> f32) -> t
+
+  val apply_v128_f32_v128 : t -> (v128 -> f32 -> v128) -> t
+
+  val apply_f32_v128_v128 : t -> (f32 -> v128 -> v128) -> t
+
+  val apply_v128_f64 : t -> (v128 -> f64) -> t
+
+  val apply_v128_f64_v128 : t -> (v128 -> f64 -> v128) -> t
+
+  val apply_f64_v128_v128 : t -> (f64 -> v128 -> v128) -> t
+
+  val apply_i32_v128_v128 : t -> (i32 -> v128 -> v128) -> t
+
+  val apply_v128_i32_v128 : t -> (v128 -> i32 -> v128) -> t
+
+  val apply_v128_i64_v128 : t -> (v128 -> i64 -> v128) -> t
+
+  val apply_i64_v128_v128 : t -> (i64 -> v128 -> v128) -> t
+
   val apply_v128_v128_v128 : t -> (v128 -> v128 -> v128) -> t
+
+  val apply_v128_v128_v128_v128 : t -> (v128 -> v128 -> v128 -> v128) -> t
 end
 
 module Make (Value : Value_intf.T) :
@@ -259,6 +291,14 @@ module Make (Value : Value_intf.T) :
     let n1, tl = pop s in
     match (n1, n2) with V128 n1, V128 n2 -> ((n1, n2), tl) | _ -> assert false
 
+  let pop3_v128 s =
+    let n3, s = pop s in
+    let n2, s = pop s in
+    let n1, tl = pop s in
+    match (n1, n2, n3) with
+    | V128 n1, V128 n2, V128 n3 -> ((n1, n2, n3), tl)
+    | _ -> assert false
+
   let pop_ref s =
     let hd, tl = pop s in
     match hd with Ref _ -> (hd, tl) | _ -> assert false
@@ -281,122 +321,194 @@ module Make (Value : Value_intf.T) :
     else match s with [] -> assert false | _ :: tl -> drop_n tl (n - 1)
 
   let apply_i32_boolean s f =
-    let hd, tl = pop_i32 s in
-    push_bool tl (f hd)
+    let hd, s = pop_i32 s in
+    push_bool s (f hd)
 
   let apply_i32_i32 s f =
-    let hd, tl = pop_i32 s in
-    push_i32 tl (f hd)
+    let hd, s = pop_i32 s in
+    push_i32 s (f hd)
 
   let apply_i32_f32 s f =
-    let hd, tl = pop_i32 s in
-    push_f32 tl (f hd)
+    let hd, s = pop_i32 s in
+    push_f32 s (f hd)
 
   let apply_i32_f64 s f =
-    let hd, tl = pop_i32 s in
-    push_f64 tl (f hd)
+    let hd, s = pop_i32 s in
+    push_f64 s (f hd)
 
   let apply_i32_i64 s f =
-    let hd, tl = pop_i32 s in
-    push_i64 tl (f hd)
+    let hd, s = pop_i32 s in
+    push_i64 s (f hd)
 
   let apply_i32_i32_i32 s f =
-    let (hd1, hd2), tl = pop2_i32 s in
-    push_i32 tl (f hd1 hd2)
+    let (hd1, hd2), s = pop2_i32 s in
+    push_i32 s (f hd1 hd2)
 
   let apply_i32_i32_boolean s f =
-    let (hd1, hd2), tl = pop2_i32 s in
-    push_bool tl (f hd1 hd2)
+    let (hd1, hd2), s = pop2_i32 s in
+    push_bool s (f hd1 hd2)
 
   let apply_i64_boolean s f =
-    let hd, tl = pop_i64 s in
-    push_bool tl (f hd)
+    let hd, s = pop_i64 s in
+    push_bool s (f hd)
 
   let apply_i64_i64 s f =
-    let hd, tl = pop_i64 s in
-    push_i64 tl (f hd)
+    let hd, s = pop_i64 s in
+    push_i64 s (f hd)
 
   let apply_i64_i32 s f =
-    let hd, tl = pop_i64 s in
-    push_i32 tl (f hd)
+    let hd, s = pop_i64 s in
+    push_i32 s (f hd)
 
   let apply_i64_f32 s f =
-    let hd, tl = pop_i64 s in
-    push_f32 tl (f hd)
+    let hd, s = pop_i64 s in
+    push_f32 s (f hd)
 
   let apply_i64_f64 s f =
-    let hd, tl = pop_i64 s in
-    push_f64 tl (f hd)
+    let hd, s = pop_i64 s in
+    push_f64 s (f hd)
 
   let apply_i64_i64_i64 s f =
-    let (hd1, hd2), tl = pop2_i64 s in
-    push_i64 tl (f hd1 hd2)
+    let (hd1, hd2), s = pop2_i64 s in
+    push_i64 s (f hd1 hd2)
 
   let apply_i64_i64_boolean s f =
-    let (hd1, hd2), tl = pop2_i64 s in
-    push_bool tl (f hd1 hd2)
+    let (hd1, hd2), s = pop2_i64 s in
+    push_bool s (f hd1 hd2)
 
   let apply_f32_f32 s f =
-    let hd, tl = pop_f32 s in
-    push_f32 tl (f hd)
+    let hd, s = pop_f32 s in
+    push_f32 s (f hd)
 
   let apply_f32_f64 s f =
-    let hd, tl = pop_f32 s in
-    push_f64 tl (f hd)
+    let hd, s = pop_f32 s in
+    push_f64 s (f hd)
 
   let apply_f32_i32 s f =
-    let hd, tl = pop_f32 s in
-    push_i32 tl (f hd)
+    let hd, s = pop_f32 s in
+    push_i32 s (f hd)
 
   let apply_f32_i64 s f =
-    let hd, tl = pop_f32 s in
-    push_i64 tl (f hd)
+    let hd, s = pop_f32 s in
+    push_i64 s (f hd)
 
   let apply_f32_f32_f32 s f =
-    let (hd1, hd2), tl = pop2_f32 s in
-    push_f32 tl (f hd1 hd2)
+    let (hd1, hd2), s = pop2_f32 s in
+    push_f32 s (f hd1 hd2)
 
   let apply_f32_f32_boolean s f =
-    let (hd1, hd2), tl = pop2_f32 s in
-    push_bool tl (f hd1 hd2)
+    let (hd1, hd2), s = pop2_f32 s in
+    push_bool s (f hd1 hd2)
 
   let apply_f64_f64 s f =
-    let hd, tl = pop_f64 s in
-    push_f64 tl (f hd)
+    let hd, s = pop_f64 s in
+    push_f64 s (f hd)
 
   let apply_f64_f32 s f =
-    let hd, tl = pop_f64 s in
-    push_f32 tl (f hd)
+    let hd, s = pop_f64 s in
+    push_f32 s (f hd)
 
   let apply_f64_i32 s f =
-    let hd, tl = pop_f64 s in
-    push_i32 tl (f hd)
+    let hd, s = pop_f64 s in
+    push_i32 s (f hd)
 
   let apply_f64_i64 s f =
-    let hd, tl = pop_f64 s in
-    push_i64 tl (f hd)
+    let hd, s = pop_f64 s in
+    push_i64 s (f hd)
 
   let apply_f64_f64_f64 s f =
-    let (hd1, hd2), tl = pop2_f64 s in
-    push_f64 tl (f hd1 hd2)
+    let (hd1, hd2), s = pop2_f64 s in
+    push_f64 s (f hd1 hd2)
 
   let apply_f64_f64_boolean s f =
-    let (hd1, hd2), tl = pop2_f64 s in
-    push_bool tl (f hd1 hd2)
+    let (hd1, hd2), s = pop2_f64 s in
+    push_bool s (f hd1 hd2)
 
   let apply_v128_v128 s f =
-    let hd, tl = pop_v128 s in
-    push_v128 tl (f hd)
+    let hd, s = pop_v128 s in
+    push_v128 s (f hd)
 
   let apply_v128_boolean s f =
-    let hd, tl = pop_v128 s in
-    push_bool tl (f hd)
+    let hd, s = pop_v128 s in
+    push_bool s (f hd)
 
   let apply_v128_i32 s f =
-    let hd, tl = pop_v128 s in
-    push_i32 tl (f hd)
+    let hd, s = pop_v128 s in
+    push_i32 s (f hd)
+
+  let apply_v128_i64 s f =
+    let hd, s = pop_v128 s in
+    push_i64 s (f hd)
+
+  let apply_i32_v128 s f =
+    let hd, s = pop_i32 s in
+    push_v128 s (f hd)
+
+  let apply_f32_v128 s f =
+    let hd, s = pop_f32 s in
+    push_v128 s (f hd)
+
+  let apply_f64_v128 s f =
+    let hd, s = pop_f64 s in
+    push_v128 s (f hd)
+
+  let apply_i64_v128 s f =
+    let hd, s = pop_i64 s in
+    push_v128 s (f hd)
+
+  let apply_v128_f32 s f =
+    let hd, s = pop_v128 s in
+    push_f32 s (f hd)
+
+  let apply_v128_f64 s f =
+    let hd, s = pop_v128 s in
+    push_f64 s (f hd)
+
+  let apply_v128_f32_v128 s f =
+    let x, s = pop_v128 s in
+    let y, s = pop_f32 s in
+    push_v128 s (f x y)
+
+  let apply_f32_v128_v128 s f =
+    let x, s = pop_f32 s in
+    let y, s = pop_v128 s in
+    push_v128 s (f x y)
+
+  let apply_v128_f64_v128 s f =
+    let x, s = pop_v128 s in
+    let y, s = pop_f64 s in
+    push_v128 s (f x y)
+
+  let apply_f64_v128_v128 s f =
+    let x, s = pop_f64 s in
+    let y, s = pop_v128 s in
+    push_v128 s (f x y)
+
+  let apply_i32_v128_v128 s f =
+    let x, s = pop_i32 s in
+    let y, s = pop_v128 s in
+    push_v128 s (f x y)
+
+  let apply_v128_i32_v128 s f =
+    let x, s = pop_v128 s in
+    let y, s = pop_i32 s in
+    push_v128 s (f x y)
+
+  let apply_v128_i64_v128 s f =
+    let x, s = pop_v128 s in
+    let y, s = pop_i64 s in
+    push_v128 s (f x y)
+
+  let apply_i64_v128_v128 s f =
+    let x, s = pop_i64 s in
+    let y, s = pop_v128 s in
+    push_v128 s (f x y)
 
   let apply_v128_v128_v128 s f =
-    let (hd1, hd2), tl = pop2_v128 s in
-    push_v128 tl (f hd1 hd2)
+    let (hd1, hd2), s = pop2_v128 s in
+    push_v128 s (f hd1 hd2)
+
+  let apply_v128_v128_v128_v128 s f =
+    let (hd1, hd2, hd3), s = pop3_v128 s in
+    push_v128 s (f hd1 hd2 hd3)
 end

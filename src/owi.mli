@@ -578,7 +578,6 @@ module Text : sig
     | Q15mulr_sat_s
     | Min_s
     | Min_u
-    | Min
     | Extmul_low_i8x16_s
     | Extmul_low_i8x16_u
     | Extmul_high_i8x16_s
@@ -634,8 +633,6 @@ module Text : sig
     | Extend_high_i16x8_u
     | Trunc_sat_f64x2_s_zero
     | Trunc_sat_f64x2_u_zero
-    | Trunc_sat_f32x4_s_zero
-    | Trunc_sat_f32x4_u_zero
     | Trunc_sat_f32x4_s
     | Trunc_sat_f32x4_u
     | Min_s

@@ -578,7 +578,6 @@ let write_i16x8_instr buf : Text.i16x8_instr -> _ = function
   | Q15mulr_sat_s -> raise @@ Failure "TODO: i16x8.Q15mulr_sat_s"
   | Min_s -> raise @@ Failure "TODO: i16x8.Min_s"
   | Min_u -> raise @@ Failure "TODO: i16x8.Min_u"
-  | Min -> raise @@ Failure "TODO: i16x8.Min"
   | Extmul_low_i8x16_s -> raise @@ Failure "TODO: i16x8.Extmul_low_i8x16_s"
   | Extmul_low_i8x16_u -> raise @@ Failure "TODO: i16x8.Extmul_low_i8x16_u"
   | Extmul_high_i8x16_s -> raise @@ Failure "TODO: i16x8.Extmul_high_i8x16_s"
@@ -637,10 +636,6 @@ let write_i32x4_instr buf : Text.i32x4_instr -> _ = function
     raise @@ Failure "TODO: i32x4.Trunc_sat_f64x2_s_zero"
   | Trunc_sat_f64x2_u_zero ->
     raise @@ Failure "TODO: i32x4.Trunc_sat_f64x2_u_zero"
-  | Trunc_sat_f32x4_s_zero ->
-    raise @@ Failure "TODO: i32x4.Trunc_sat_f32x4_s_zero"
-  | Trunc_sat_f32x4_u_zero ->
-    raise @@ Failure "TODO: i32x4.Trunc_sat_f32x4_u_zero"
   | Trunc_sat_f32x4_s -> raise @@ Failure "TODO: i32x4.Trunc_sat_f32x4_s"
   | Trunc_sat_f32x4_u -> raise @@ Failure "TODO: i32x4.Trunc_sat_f32x4_u"
   | Min_s -> raise @@ Failure "TODO: i32x4.Min_s"

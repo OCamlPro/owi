@@ -56,6 +56,7 @@ let check_error ~expected ~got : unit Result.t =
     | `Offset_out_of_range ->
       (* TODO: should be removed *)
       String.equal "alignment must not be larger than natural" expected
+    | `Msg got -> String.equal got expected
     | _ -> false
   in
   if not ok then begin
@@ -111,7 +112,26 @@ let compare_result_f64 (expected_result : Wast.result_f64) got =
     let pos_nan = Float64.to_bits Float64.pos_nan in
     Int64.eq (Int64.logand (Float64.to_bits got) pos_nan) pos_nan
 
-let compare_result_v128 (_expected_result : Wast.result_v128) _ = assert false
+let compare_result_v128 (expected_result : Wast.result_v128)
+  (const : Concrete_v128.t) =
+  match expected_result with
+  | Concrete v -> Concrete_v128.eq v const
+  | F32x4 (a, b, c, d) ->
+    let a', b', c', d' = Concrete_v128.to_i32x4 const in
+    let a', b', c', d' =
+      ( Concrete_f32.reinterpret_i32 a'
+      , Concrete_f32.reinterpret_i32 b'
+      , Concrete_f32.reinterpret_i32 c'
+      , Concrete_f32.reinterpret_i32 d' )
+    in
+    compare_result_f32 a a' && compare_result_f32 b b'
+    && compare_result_f32 c c' && compare_result_f32 d d'
+  | F64x2 (a, b) ->
+    let a', b' = Concrete_v128.to_i64x2 const in
+    let a', b' =
+      (Concrete_f64.reinterpret_i64 a', Concrete_f64.reinterpret_i64 b')
+    in
+    compare_result_f64 a a' && compare_result_f64 b b'
 
 let compare_result_const result (const : Concrete_value.t) =
   match (result, const) with
