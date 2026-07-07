@@ -25,7 +25,11 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
     Wasm_ffi_intf.S0
       with type 'a t := 'a Result.t
        and type memory := Concrete_memory.t
-       and module Value := Concrete_value = struct
+       and type i32 := Concrete_value.i32
+       and type i64 := Concrete_value.i64
+       and type f32 := Concrete_value.f32
+       and type f64 := Concrete_value.f64
+       and type v128 := Concrete_value.v128 = struct
     let assume _ = Ok ()
 
     let assert' n =

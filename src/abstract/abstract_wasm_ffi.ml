@@ -8,23 +8,85 @@ open Abstract_monad
    the expected FFI functions, this whole file is further constrained such that
    if one function of M is unused in the FFI module below, an error will be
    displayed *)
-let symbol_i32 () = fold_state (fun { ctx; _ } -> Abstract_i32.unknown ctx)
+module M :
+  Wasm_ffi_intf.S0
+    with type 'a t := 'a Abstract_monad.t
+     and type memory := Abstract_memory.t
+     and type i32 := Abstract_i32.t
+     and type i64 := Abstract_i64.t
+     and type f32 := Abstract_f32.t
+     and type f64 := Abstract_f64.t = struct
+  type v128
 
-let symbol_i64 () = fold_state (fun { ctx; _ } -> Abstract_i64.unknown ctx)
+  let assume condition =
+    map_state (fun ({ ctx; _ } as state) ->
+      let condition = Abstract_i32.to_boolean ctx condition in
+      match Abstract_domain.assume ctx condition with
+      | None -> None
+      | Some ctx -> Some { state with ctx } )
 
-let assume condition =
-  map_state (fun ({ ctx; _ } as state) ->
-    let condition = Abstract_i32.to_boolean ctx condition in
-    match Abstract_domain.assume ctx condition with
-    | None -> None
-    | Some ctx -> Some { state with ctx } )
+  let assert' condition = assume condition
 
-let assert' condition = assume condition
+  let exit _code = return ()
 
-let exit _code = return ()
+  let abort () = return ()
 
+  let symbol_invisible_bool () =
+    fold_state (fun { ctx; _ } -> Abstract_i32.unknown ctx)
+
+  let symbol_i32 () = fold_state (fun { ctx; _ } -> Abstract_i32.unknown ctx)
+
+  let symbol_i64 () = fold_state (fun { ctx; _ } -> Abstract_i64.unknown ctx)
+
+  let symbol_f32 () = fold_state (fun { ctx; _ } -> Abstract_f32.unknown ctx)
+
+  let symbol_f64 () = fold_state (fun { ctx; _ } -> Abstract_f64.unknown ctx)
+
+  let symbol_v128 () = assert false
+
+  let symbol_range lo hi =
+    let* v = fold_state (fun { ctx; _ } -> Abstract_i32.unknown ctx) in
+    let* gt =
+      fold_state (fun { ctx; _ } ->
+        Abstract_i32.gt_s ctx v lo |> Abstract_i32.of_boolean ctx )
+    in
+    let* lt =
+      fold_state (fun { ctx; _ } ->
+        Abstract_i32.lt_s ctx v hi |> Abstract_i32.of_boolean ctx )
+    in
+    let* () = assume gt in
+    let+ () = assume lt in
+    v
+
+  let alloc _m _base _size =
+    Fmt.epr "TODO : implement alloc";
+    fold_state (fun { ctx; _ } -> Abstract_i32.unknown ctx)
+
+  let free _m _ptr =
+    Fmt.epr "TODO : implement free";
+    fold_state (fun { ctx; _ } -> Abstract_i32.unknown ctx)
+
+  let in_replay_mode () = fold_state @@ fun { ctx; _ } -> Abstract_i32.zero ctx
+
+  let print_char _c = return ()
+
+  let cov_label_is_covered _id =
+    fold_state @@ fun { ctx; _ } -> Abstract_i32.unknown ctx
+
+  let cov_label_set _m _id _ptr = return ()
+
+  let open_scope_null_terminated _m _ptr = return ()
+
+  let open_scope_of_length _m _ptr _len = return ()
+
+  let close_scope () = return ()
+end
+
+open M
 open Abstract_extern_func
 open Abstract_extern_func.Syntax
+
+type extern_func = Abstract_extern_func.extern_func
 
 let symbolic_extern_module =
   let functions =
@@ -35,4 +97,4 @@ let symbolic_extern_module =
     ; ("exit", Extern_func (i32 ^->. unit, exit))
     ]
   in
-  { Extern.Module.functions; func_type = Abstract_extern_func.extern_type }
+  { Extern.Module.functions; func_type = extern_type }
