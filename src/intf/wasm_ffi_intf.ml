@@ -7,46 +7,54 @@ module type S0 = sig
 
   type memory
 
-  module Value : Value_intf.T
+  type i32
+
+  type i64
+
+  type f32
+
+  type f64
+
+  type v128
 
   (* TODO: change for invisible_i32? *)
-  val symbol_invisible_bool : unit -> Value.i32 t
+  val symbol_invisible_bool : unit -> i32 t
 
-  val symbol_i32 : unit -> Value.i32 t
+  val symbol_i32 : unit -> i32 t
 
-  val symbol_i64 : unit -> Value.i64 t
+  val symbol_i64 : unit -> i64 t
 
-  val symbol_f32 : unit -> Value.f32 t
+  val symbol_f32 : unit -> f32 t
 
-  val symbol_f64 : unit -> Value.f64 t
+  val symbol_f64 : unit -> f64 t
 
-  val symbol_v128 : unit -> Value.v128 t
+  val symbol_v128 : unit -> v128 t
 
-  val symbol_range : Value.i32 -> Value.i32 -> Value.i32 t
+  val symbol_range : i32 -> i32 -> i32 t
 
-  val assume : Value.i32 -> unit t
+  val assume : i32 -> unit t
 
-  val assert' : Value.i32 -> unit t
+  val assert' : i32 -> unit t
 
   val abort : unit -> unit t
 
-  val alloc : memory -> Value.i32 -> Value.i32 -> Value.i32 t
+  val alloc : memory -> i32 -> i32 -> i32 t
 
-  val free : memory -> Value.i32 -> Value.i32 t
+  val free : memory -> i32 -> i32 t
 
-  val exit : Value.i32 -> unit t
+  val exit : i32 -> unit t
 
-  val in_replay_mode : unit -> Value.i32 t
+  val in_replay_mode : unit -> i32 t
 
-  val print_char : Value.i32 -> unit t
+  val print_char : i32 -> unit t
 
-  val cov_label_is_covered : Value.i32 -> Value.i32 t
+  val cov_label_is_covered : i32 -> i32 t
 
-  val cov_label_set : memory -> Value.i32 -> Value.i32 -> unit t
+  val cov_label_set : memory -> i32 -> i32 -> unit t
 
-  val open_scope_null_terminated : memory -> Value.i32 -> unit t
+  val open_scope_null_terminated : memory -> i32 -> unit t
 
-  val open_scope_of_length : memory -> Value.i32 -> Value.i32 -> unit t
+  val open_scope_of_length : memory -> i32 -> i32 -> unit t
 
   val close_scope : unit -> unit t
 end

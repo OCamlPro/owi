@@ -36,7 +36,11 @@ module M :
   Wasm_ffi_intf.S0
     with type 'a t := 'a Symbolic_choice.t
      and type memory := Symbolic_memory.t
-     and module Value := Symbolic_value = struct
+     and type i32 := Symbolic_value.i32
+     and type i64 := Symbolic_value.i64
+     and type f32 := Symbolic_value.f32
+     and type f64 := Symbolic_value.f64
+     and type v128 := Symbolic_value.v128 = struct
   let covered_labels = Hashtbl.create 16
 
   let cov_lock = Mutex.create ()
