@@ -199,6 +199,8 @@ type i64_instr =
   | Store16 of indice * memarg
   | Store32 of indice * memarg
 
+val pp_i64_instr : i64_instr Fmt.t
+
 (** F32 instructions *)
 
 type f32_instr =
@@ -230,6 +232,8 @@ type f32_instr =
   | Load of indice * memarg
   | Store of indice * memarg
 
+val pp_f32_instr : f32_instr Fmt.t
+
 (** F64 instructions *)
 
 type f64_instr =
@@ -260,6 +264,8 @@ type f64_instr =
   | Reinterpret_i of Text.nn
   | Load of indice * memarg
   | Store of indice * memarg
+
+val pp_f64_instr : f64_instr Fmt.t
 
 (** V128 instructions *)
 type v128_instr =
