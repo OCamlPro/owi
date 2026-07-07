@@ -9,7 +9,9 @@ type t =
   | Unreachable
 
 let i32_can_be_zero ctx v =
-  Option.is_some @@ Abstract_domain.assume ctx (Abstract_i32.eqz ctx v)
+  match Abstract_domain.query_boolean ctx (Abstract_i32.eqz ctx v) with
+  | True | Top -> true
+  | False | Bottom -> false
 
 let eval_i32 ({ stack; ctx; invariant; _ } as state : Abstract_state.t) uuid :
   Binary.i32_instr -> _ = function
@@ -114,7 +116,9 @@ let eval_i32 ({ stack; ctx; invariant; _ } as state : Abstract_state.t) uuid :
     assert false
 
 let i64_can_be_zero ctx v =
-  Option.is_some @@ Abstract_domain.assume ctx (Abstract_i64.eqz ctx v)
+  match Abstract_domain.query_boolean ctx (Abstract_i64.eqz ctx v) with
+  | Top | True -> true
+  | Bottom | False -> false
 
 let eval_i64 ({ stack; ctx; invariant; _ } as state : Abstract_state.t) uuid :
   Binary.i64_instr -> _ = function
