@@ -13,10 +13,8 @@ let cmd ~source_file ~unsafe =
   let+ m, link_state =
     Compile.File.until_link ~unsafe ~name:None link_state source_file
   in
-  let (_abstract_invariant : Abstract_invariant.t) =
-    Abstract_driver.expr link_state m
-  in
-  ()
+  let state = Abstract_driver.expr link_state m in
+  Abstract_checker.check_module link_state m state.invariant
 
 let from_binary m ~unsafe =
   let link_state = link_state () in

@@ -24,7 +24,8 @@ let run_file ~parameters ~source_file =
 
   let* abstract_invariant =
     if parameters.generate_abstract_invariant then
-      Cmd_abs.from_binary m ~unsafe:true
+      let+ state = Cmd_abs.from_binary m ~unsafe:true in
+      state.invariant
     else Ok (Abstract_invariant.empty ())
   in
 
