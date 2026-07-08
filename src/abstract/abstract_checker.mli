@@ -2,7 +2,8 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-val modul :
+val check_module :
      Abstract_extern_func.extern_func Link.State.t
   -> Abstract_extern_func.extern_func Linked.Module.t
-  -> Abstract_state.t
+  -> Abstract_invariant.t
+  -> unit

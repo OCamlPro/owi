@@ -3,8 +3,7 @@
 (* Written by the Owi programmers *)
 
 val eval_exprs :
-     Binary.instr Annotated.t list Annotated.t list
+     Abstract_extern_func.extern_func Linked.Module.t
   -> Abstract_state.t
-  -> Abstract_extern_func.extern_func Link_env.t
   -> Abstract_extern_func.extern_func Link_env.t Dynarray.t
   -> Abstract_state.t
