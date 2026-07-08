@@ -53,7 +53,7 @@ and check_instr (instr : Binary.instr Annotated.t)
   | F64 f64_instr -> check_f64 ~uuid:instr.uuid ~invariants f64_instr
   | _ -> ()
 
-let expr (link_state : Abstract_extern_func.extern_func Link.State.t)
+let check_module (link_state : Abstract_extern_func.extern_func Link.State.t)
   (m : Abstract_extern_func.extern_func Linked.Module.t)
   (invariants : Abstract_invariant.t) =
   let envs = Link.State.get_envs link_state in
