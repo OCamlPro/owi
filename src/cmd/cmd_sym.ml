@@ -24,7 +24,11 @@ let run_file ~parameters ~source_file =
 
   let* abstract_invariant =
     if parameters.generate_abstract_invariant then
-      let+ state = Cmd_abs.from_binary m ~unsafe:true in
+      let link_state = Cmd_abs.link_state () in
+      let+ m, link_state =
+        Compile.Binary.until_link ~unsafe ~name:None link_state m
+      in
+      let state = Abstract_driver.modul link_state m in
       state.invariant
     else Ok (Abstract_invariant.empty ())
   in

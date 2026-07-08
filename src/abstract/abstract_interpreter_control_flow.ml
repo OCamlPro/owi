@@ -531,7 +531,8 @@ end
 
 module ConcreteFixpoint = DenotFixpoint (Abstract_interpreter_simple)
 
-let eval_exprs exprs abs_state env envs =
+let eval_exprs (m : Abstract_extern_func.extern_func Linked.Module.t) abs_state
+  envs =
   let state =
     List.fold_left
       (fun (state : interpreter_state) (e : Binary.expr Annotated.t) ->
@@ -539,6 +540,7 @@ let eval_exprs exprs abs_state env envs =
         match ConcreteFixpoint.eval_expr state e with
         | None, _mapping -> state
         | Some state, _mapping -> state )
-      { abs_state; env; envs } exprs
+      { abs_state; env = m.env; envs }
+      m.to_run
   in
   state.abs_state

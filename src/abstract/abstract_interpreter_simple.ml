@@ -112,7 +112,7 @@ let eval_i32 ({ stack; ctx; invariant; _ } as state : Abstract_state.t) uuid :
     let stack = Stack.push_i32 stack (Abstract_i32.unknown ctx) in
     State { state with stack }
   | instr ->
-    Fmt.epr "not implemented yet: %a" Binary.pp_i32_instr instr;
+    Log.warn (fun m -> m "not implemented yet: %a" Binary.pp_i32_instr instr);
     assert false
 
 let i64_can_be_zero ctx v =
@@ -353,7 +353,7 @@ let eval_instr ({ stack; _ } as state : Abstract_state.t) :
     State { state with stack }
   | If_else _ | Call _ | Block _ | Loop _ | Br _ | Br_if _ | Br_table _
   | Br_on_non_null _ | Br_on_null _ ->
-    Fmt.epr "Control flow instruction given to simple interpreter";
+    Log.warn (fun m -> m "Control flow instruction given to simple interpreter");
     assert false
   | instr ->
     Fmt.failwith "DataAbstract_state.eval_instr not implemented for %a"

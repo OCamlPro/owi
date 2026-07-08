@@ -41,7 +41,9 @@ module M :
 
   let symbol_f64 () = fold_state (fun { ctx; _ } -> Abstract_f64.unknown ctx)
 
-  let symbol_v128 () = assert false
+  let symbol_v128 () =
+    (* TODO *)
+    assert false
 
   let symbol_range lo hi =
     let* v = fold_state (fun { ctx; _ } -> Abstract_i32.unknown ctx) in
@@ -49,20 +51,20 @@ module M :
       fold_state (fun { ctx; _ } ->
         Abstract_i32.gt_s ctx v lo |> Abstract_i32.of_boolean ctx )
     in
+    let* () = assume gt in
     let* lt =
       fold_state (fun { ctx; _ } ->
         Abstract_i32.lt_s ctx v hi |> Abstract_i32.of_boolean ctx )
     in
-    let* () = assume gt in
     let+ () = assume lt in
     v
 
   let alloc _m _base _size =
-    Fmt.epr "TODO : implement alloc";
+    Log.warn (fun m -> m "TODO : implement alloc");
     fold_state (fun { ctx; _ } -> Abstract_i32.unknown ctx)
 
   let free _m _ptr =
-    Fmt.epr "TODO : implement free";
+    Log.warn (fun m -> m "TODO : implement free");
     fold_state (fun { ctx; _ } -> Abstract_i32.unknown ctx)
 
   let in_replay_mode () = fold_state @@ fun { ctx; _ } -> Abstract_i32.zero ctx
