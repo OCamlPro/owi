@@ -26,9 +26,9 @@ module M :
 
   let assert' condition = assume condition
 
-  let exit _code = return ()
+  let exit _code = map_state (fun _ -> None)
 
-  let abort () = return ()
+  let abort () = map_state (fun _ -> None)
 
   let symbol_invisible_bool () =
     fold_state (fun { ctx; _ } -> Abstract_i32.unknown ctx)
