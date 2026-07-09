@@ -4,4 +4,8 @@
 
 val link_state : unit -> Abstract_wasm_ffi.extern_func Link.State.t
 
-val cmd : source_file:Fpath.t -> unsafe:bool -> unit Result.t
+val cmd :
+     source_file:Fpath.t
+  -> entry_point:string option
+  -> unsafe:bool
+  -> unit Result.t
