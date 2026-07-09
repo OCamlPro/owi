@@ -319,8 +319,9 @@ let abs_info =
 let abs_cmd =
   let+ source_file
   and+ () = setup_log
+  and+ entry_point = entry_point None
   and+ unsafe in
-  Cmd_abs.cmd ~source_file ~unsafe
+  Cmd_abs.cmd ~source_file ~entry_point ~unsafe
 
 (* owi analyze *)
 
