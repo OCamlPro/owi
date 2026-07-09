@@ -232,4 +232,5 @@
                  locals : i32 [1..0x7FFFFFFF]
   
   owi: [DEBUG] jt            :  
+  owi: [INFO] Passed division by zero check for expression:(uuid: 7) i32.div_s
   
