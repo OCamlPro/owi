@@ -72,3 +72,5 @@ let lt_u ctx x1 x2 =
   let le = le_u ctx x1 x2 in
   let neq = Abstract_boolean.not ctx (eq ctx x1 x2) in
   Abstract_boolean.and_ ctx le neq
+
+let xor ctx x1 x2 = Abstract_domain.Binary_Forward.bxor ctx ~size x1 x2

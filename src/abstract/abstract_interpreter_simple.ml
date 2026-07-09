@@ -65,6 +65,9 @@ let eval_i32 ({ stack; ctx; invariant; _ } as state : Abstract_state.t) uuid :
   | Or ->
     let stack = Stack.apply_i32_i32_i32 stack (Abstract_i32.or_ ctx) in
     State { state with stack }
+  | Xor ->
+    let stack = Stack.apply_i32_i32_i32 stack (Abstract_i32.xor ctx) in
+    State { state with stack }
   | Shl ->
     let stack = Stack.apply_i32_i32_i32 stack (Abstract_i32.shl ctx) in
     State { state with stack }
@@ -171,6 +174,9 @@ let eval_i64 ({ stack; ctx; invariant; _ } as state : Abstract_state.t) uuid :
     State { state with stack }
   | Or ->
     let stack = Stack.apply_i64_i64_i64 stack (Abstract_i64.or_ ctx) in
+    State { state with stack }
+  | Xor ->
+    let stack = Stack.apply_i64_i64_i64 stack (Abstract_i64.xor ctx) in
     State { state with stack }
   | Lt_s ->
     let stack = Stack.apply_i64_i64_boolean stack ctx (Abstract_i64.lt_s ctx) in
@@ -352,10 +358,8 @@ let eval_instr ({ stack; _ } as state : Abstract_state.t) :
     let _, stack = Stack.pop stack in
     State { state with stack }
   | If_else _ | Call _ | Block _ | Loop _ | Br _ | Br_if _ | Br_table _
-  | Br_on_non_null _ | Br_on_null _ ->
-    Log.warn (fun m -> m "Control flow instruction given to simple interpreter");
+  | Br_on_non_null _ | Br_on_null _ | Select _ ->
+    Log.err (fun m -> m "Control flow instruction given to simple interpreter");
     assert false
   | instr ->
-    Fmt.failwith "DataAbstract_state.eval_instr not implemented for %a"
-      (Binary.pp_instr ~short:true)
-      instr
+    Fmt.failwith "%a not implemented in simple interpreter" (Binary.pp_instr ~short:true) instr

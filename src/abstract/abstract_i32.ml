@@ -80,3 +80,5 @@ let gt_u ctx x1 x2 = lt_u ctx x2 x1
 let shl ctx x1 x2 =
   let flags = Operator.Flags.Bshl.pack ~nsw:true ~nuw:true in
   Abstract_domain.Binary_Forward.bshl ~flags ~size ctx x1 x2
+
+let xor ctx x1 x2 = Abstract_domain.Binary_Forward.bxor ctx ~size x1 x2

@@ -48,6 +48,8 @@ let pp ctx fmt (s : t) =
 
 let pop = function [] -> raise Empty | hd :: tl -> (hd, tl)
 
+let pop2 = function v1 :: v2 :: tl -> ((v1, v2), tl) | _ -> raise Empty
+
 let drop = function [] -> raise Empty | _hd :: tl -> tl
 
 let pop_i32 s =
