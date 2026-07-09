@@ -57,3 +57,5 @@ val lt_u : Abstract_domain.Context.t -> t -> t -> Abstract_boolean.t
 val le_s : Abstract_domain.Context.t -> t -> t -> Abstract_boolean.t
 
 val le_u : Abstract_domain.Context.t -> t -> t -> Abstract_boolean.t
+
+val xor : Abstract_domain.Context.t -> t -> t -> t

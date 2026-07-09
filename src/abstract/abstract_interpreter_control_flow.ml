@@ -52,39 +52,39 @@ module DenotFixpoint (S : DATA_STATE) = struct
       pretty (fun fmt jk v -> Fmt.pf fmt "%a -> %a" JumpKey.pp jk pp_v v) fmt
   end
 
+  let gen_new_value ~widens a b state_a state_b
+    (Abstract_domain.Context.Result (inc, intup, cont))
+    (f : Abstract_value.t -> 'container -> 'container) =
+    let size = Abstract_value.size_of a in
+    (* inc : whether the new value is included in the old one
+     * intup : symbolic repr of all variabls that will be created simultaneously
+     * cont : continuation function
+     *)
+    let (Abstract_domain.Context.Result (inc, in_tup, local_cont)) =
+      Abstract_domain.serialize_binary ~size ~widens state_a.Abstract_state.ctx
+        (Abstract_value.to_binary a)
+        state_b.Abstract_state.ctx
+        (Abstract_value.to_binary b)
+        (inc, intup)
+    in
+    let cont ctx out_tuple =
+      let value, out_tuple = local_cont ctx out_tuple in
+      let container, out_tuple = cont ctx out_tuple in
+      let b = Abstract_value.of_binary size value in
+      (f b container, out_tuple)
+    in
+    Abstract_domain.Context.Result (inc, in_tup, cont)
+
   let serialize ~widens :
        Abstract_state.t
     -> Abstract_state.t
     -> (Abstract_state.t, 'a) Abstract_domain.Context.result =
    fun state_a state_b ->
-    let gen_new_value ~widens a b state_a state_b
-      (Abstract_domain.Context.Result (inc, intup, cont)) f =
-      let size = Abstract_value.size_of a in
-      (* inc : whether the new value is included in the old one
-       * intup : symbolic repr of all variabls that will be created simultaneously
-       * cont : continuation function
-       *)
-      let (Abstract_domain.Context.Result (inc, in_tup, local_cont)) =
-        Abstract_domain.serialize_binary ~size ~widens
-          state_a.Abstract_state.ctx
-          (Abstract_value.to_binary a)
-          state_b.Abstract_state.ctx
-          (Abstract_value.to_binary b)
-          (inc, intup)
-      in
-      let cont ctx out_tuple =
-        let value, out_tuple = local_cont ctx out_tuple in
-        let container, out_tuple = cont ctx out_tuple in
-        let b = Abstract_value.of_binary size value in
-        (f b container, out_tuple)
-      in
-      Abstract_domain.Context.Result (inc, in_tup, cont)
-    in
     let rec serialize_stack lhs rhs acc_res =
       match (lhs, rhs) with
       | [], [] -> acc_res
       | [], _ :: _ | _ :: _, [] ->
-        Fmt.failwith "join on stacks of different sizes"
+        Fmt.failwith "jjjj on stacks of different sizes"
       | v1 :: rest_a, v2 :: rest_b -> begin
         let r = gen_new_value ~widens v1 v2 state_a state_b acc_res List.cons in
         serialize_stack rest_a rest_b r
@@ -494,6 +494,36 @@ module DenotFixpoint (S : DATA_STATE) = struct
         | None -> None
       in
       (state, jt_if)
+    | Select _t ->
+      let b, stack = Stack.pop_bool stack ctx in
+      let (v1, v2), stack = Stack.pop2 stack in
+      let[@inline] state_with ctx v =
+        let stack = Stack.push stack v in
+        let abs_state = { state.abs_state with stack; ctx } in
+        Some { state with abs_state }
+      in
+      let state =
+        match Abstract_domain.query_boolean ctx b with
+        | Top ->
+          (* TODO test *)
+          let init_res =
+            Abstract_domain.Context.Result
+              ( true
+              , Abstract_domain.Context.empty_tuple ()
+              , fun _ctx out -> (v1, out) )
+          in
+          let (Abstract_domain.Context.Result (_inc, intup, cont)) =
+            gen_new_value ~widens:false v1 v2 state.abs_state state.abs_state
+              init_res Fun.const
+          in
+          let out = Abstract_domain.nondet_same_context ctx intup in
+          let v = fst @@ cont ctx out in
+          state_with ctx v
+        | True -> state_with ctx v1
+        | False -> state_with ctx v2
+        | Bottom -> None
+      in
+      (state, JumpTarget.empty)
     | Br_table (cases, default) ->
       let v, stack = Stack.pop_i32 stack in
       let equals =
