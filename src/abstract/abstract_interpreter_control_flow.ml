@@ -302,8 +302,8 @@ module DenotFixpoint (S : DATA_STATE) = struct
     in
 
     let locals =
-      (* TODO check args position *)
       args @ List.map (fun (_str_opt, vt) -> init_value vt) func.locals
+      |> List.rev
       |> List.mapi (fun i x -> (i, x))
       |> Abstract_locals.of_list
     in
