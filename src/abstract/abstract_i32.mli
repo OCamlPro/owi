@@ -52,6 +52,8 @@ val and_ : Abstract_domain.Context.t -> t -> t -> t
 
 val or_ : Abstract_domain.Context.t -> t -> t -> t
 
+val xor : Abstract_domain.Context.t -> t -> t -> t
+
 val lt_s : Abstract_domain.Context.t -> t -> t -> Abstract_boolean.t
 
 val lt_u : Abstract_domain.Context.t -> t -> t -> Abstract_boolean.t
@@ -70,4 +72,4 @@ val ge_u : Abstract_domain.Context.t -> t -> t -> Abstract_boolean.t
 
 val shl : Abstract_domain.Context.t -> t -> t -> t
 
-val xor : Abstract_domain.Context.t -> t -> t -> t
+val extend_s : Abstract_domain.Context.t -> int -> t -> t

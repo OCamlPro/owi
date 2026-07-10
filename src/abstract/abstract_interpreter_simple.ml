@@ -104,19 +104,45 @@ let eval_i32 ({ stack; ctx; invariant; _ } as state : Abstract_state.t) uuid :
   | Eq ->
     let stack = Stack.apply_i32_i32_boolean stack ctx (Abstract_i32.eq ctx) in
     State { state with stack }
-  | Store _ ->
+  | Store (_memid, _) | Store8 (_memid, _) | Store16 (_memid, _) ->
     (* TODO: handle this correctly *)
     let _, stack = Stack.pop2_i32 stack in
     let stack = Stack.push_i32 stack (Abstract_i32.unknown ctx) in
     State { state with stack }
-  | Load _ ->
-    (* TODO: handle this correctly *)
+  | Load (_memid, _)
+  | Load8_s (_memid, _)
+  | Load8_u (_memid, _)
+  | Load16_s (_memid, _)
+  | Load16_u (_memid, _) ->
+    (* TODO: handle it correctly *)
     let _, stack = Stack.pop_i32 stack in
     let stack = Stack.push_i32 stack (Abstract_i32.unknown ctx) in
     State { state with stack }
-  | instr ->
-    Log.warn (fun m -> m "not implemented yet: %a" Binary.pp_i32_instr instr);
+  | Clz | Ctz | Popcnt ->
+    (* TODO: handle it properly *)
+    let _, stack = Stack.pop_i32 stack in
+    let stack = Stack.push_i32 stack (Abstract_i32.unknown ctx) in
+    State { state with stack }
+  | Shr_s | Shr_u ->
+    (* TODO: handle it properly *)
+    let _, stack = Stack.pop2_i32 stack in
+    let stack = Stack.push_i32 stack (Abstract_i32.unknown ctx) in
+    State { state with stack }
+  | Rotl | Rotr ->
+    (* TODO: handle it properly *)
+    let _, stack = Stack.pop2_i32 stack in
+    let stack = Stack.push_i32 stack (Abstract_i32.unknown ctx) in
+    State { state with stack }
+  | Extend8_s ->
+    let stack = Stack.apply_i32_i32 stack (Abstract_i32.extend_s ctx 8) in
+    State { state with stack }
+  | Extend16_s ->
+    let stack = Stack.apply_i32_i32 stack (Abstract_i32.extend_s ctx 16) in
+    State { state with stack }
+  | Wrap_i64 -> assert false
+  | Trunc_f_s _ | Trunc_f_u _ | Trunc_sat_f_s _ | Trunc_sat_f_u _ ->
     assert false
+  | Reinterpret_f _ -> assert false
 
 let i64_can_be_zero ctx v =
   match Abstract_domain.query_boolean ctx (Abstract_i64.eqz ctx v) with
@@ -181,23 +207,62 @@ let eval_i64 ({ stack; ctx; invariant; _ } as state : Abstract_state.t) uuid :
   | Lt_s ->
     let stack = Stack.apply_i64_i64_boolean stack ctx (Abstract_i64.lt_s ctx) in
     State { state with stack }
+  | Gt_s ->
+    let stack = Stack.apply_i64_i64_boolean stack ctx (Abstract_i64.gt_s ctx) in
+    State { state with stack }
   | Lt_u ->
     let stack = Stack.apply_i64_i64_boolean stack ctx (Abstract_i64.lt_u ctx) in
+    State { state with stack }
+  | Gt_u ->
+    let stack = Stack.apply_i64_i64_boolean stack ctx (Abstract_i64.gt_u ctx) in
     State { state with stack }
   | Le_s ->
     let stack = Stack.apply_i64_i64_boolean stack ctx (Abstract_i64.le_s ctx) in
     State { state with stack }
+  | Ge_s ->
+    let stack = Stack.apply_i64_i64_boolean stack ctx (Abstract_i64.ge_s ctx) in
+    State { state with stack }
   | Le_u ->
     let stack = Stack.apply_i64_i64_boolean stack ctx (Abstract_i64.le_u ctx) in
     State { state with stack }
-  | Store _ ->
+  | Ge_u ->
+    let stack = Stack.apply_i64_i64_boolean stack ctx (Abstract_i64.ge_u ctx) in
+    State { state with stack }
+  | Ne ->
+    let stack = Stack.apply_i64_i64_boolean stack ctx (Abstract_i64.ne ctx) in
+    State { state with stack }
+  | Eqz ->
+    let stack = Stack.apply_i64_boolean stack ctx (Abstract_i64.eqz ctx) in
+    State { state with stack }
+  | Eq ->
+    let stack = Stack.apply_i64_i64_boolean stack ctx (Abstract_i64.eq ctx) in
+    State { state with stack }
+  | Extend8_s ->
+    let stack = Stack.apply_i64_i64 stack (Abstract_i64.extend_s ctx 8) in
+    State { state with stack }
+  | Extend16_s ->
+    let stack = Stack.apply_i64_i64 stack (Abstract_i64.extend_s ctx 16) in
+    State { state with stack }
+  | Extend32_s ->
+    let stack = Stack.apply_i64_i64 stack (Abstract_i64.extend_s ctx 32) in
+    State { state with stack }
+  | Store (_memid, _)
+  | Store8 (_memid, _)
+  | Store16 (_memid, _)
+  | Store32 (_memid, _) ->
     (* TODO: handle this correctly *)
-    let _, stack = Stack.pop2_i64 stack in
+    let (_n, _pos), stack = Stack.pop2_i64 stack in
     let stack = Stack.push_i64 stack (Abstract_i64.unknown ctx) in
     State { state with stack }
-  | Load _ ->
+  | Load (_memid, _)
+  | Load8_s (_memid, _)
+  | Load8_u (_memid, _)
+  | Load16_s (_memid, _)
+  | Load16_u (_memid, _)
+  | Load32_s (_memid, _)
+  | Load32_u (_memid, _) ->
     (* TODO: handle this correctly *)
-    let _, stack = Stack.pop_i64 stack in
+    let _pos, stack = Stack.pop_i64 stack in
     let stack = Stack.push_i64 stack (Abstract_i64.unknown ctx) in
     State { state with stack }
   | _ -> assert false
@@ -362,4 +427,6 @@ let eval_instr ({ stack; _ } as state : Abstract_state.t) :
     Log.err (fun m -> m "Control flow instruction given to simple interpreter");
     assert false
   | instr ->
-    Fmt.failwith "%a not implemented in simple interpreter" (Binary.pp_instr ~short:true) instr
+    Fmt.failwith "%a not implemented in simple interpreter"
+      (Binary.pp_instr ~short:true)
+      instr
