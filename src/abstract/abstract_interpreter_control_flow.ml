@@ -84,7 +84,7 @@ module DenotFixpoint (S : DATA_STATE) = struct
       match (lhs, rhs) with
       | [], [] -> acc_res
       | [], _ :: _ | _ :: _, [] ->
-        Fmt.failwith "jjjj on stacks of different sizes"
+        Fmt.failwith "join on stacks of different sizes"
       | v1 :: rest_a, v2 :: rest_b -> begin
         let r = gen_new_value ~widens v1 v2 state_a state_b acc_res List.cons in
         serialize_stack rest_a rest_b r
