@@ -26,9 +26,11 @@ val to_boolean : Abstract_domain.Context.t -> t -> Abstract_boolean.t
 
 (** Comparison functions *)
 
+val eqz : Abstract_domain.Context.t -> t -> Abstract_boolean.t
+
 val eq : Abstract_domain.Context.t -> t -> t -> Abstract_boolean.t
 
-val eqz : Abstract_domain.Context.t -> t -> Abstract_boolean.t
+val ne : Abstract_domain.Context.t -> t -> t -> Abstract_domain.boolean
 
 (* *)
 
@@ -50,6 +52,8 @@ val and_ : Abstract_domain.Context.t -> t -> t -> t
 
 val or_ : Abstract_domain.Context.t -> t -> t -> t
 
+val xor : Abstract_domain.Context.t -> t -> t -> t
+
 val lt_s : Abstract_domain.Context.t -> t -> t -> Abstract_boolean.t
 
 val lt_u : Abstract_domain.Context.t -> t -> t -> Abstract_boolean.t
@@ -58,4 +62,14 @@ val le_s : Abstract_domain.Context.t -> t -> t -> Abstract_boolean.t
 
 val le_u : Abstract_domain.Context.t -> t -> t -> Abstract_boolean.t
 
-val xor : Abstract_domain.Context.t -> t -> t -> t
+val gt_s : Abstract_domain.Context.t -> t -> t -> Abstract_boolean.t
+
+val gt_u : Abstract_domain.Context.t -> t -> t -> Abstract_boolean.t
+
+val ge_s : Abstract_domain.Context.t -> t -> t -> Abstract_boolean.t
+
+val ge_u : Abstract_domain.Context.t -> t -> t -> Abstract_boolean.t
+
+val shl : Abstract_domain.Context.t -> t -> t -> t
+
+val extend_s : Abstract_domain.Context.t -> int -> t -> t

@@ -61,6 +61,8 @@ let and_ ctx x1 x2 = Abstract_domain.Binary_Forward.band ~size ctx x1 x2
 
 let or_ ctx x1 x2 = Abstract_domain.Binary_Forward.bor ~size ctx x1 x2
 
+let xor ctx x1 x2 = Abstract_domain.Binary_Forward.bxor ctx ~size x1 x2
+
 let le_s ctx x1 x2 = Abstract_domain.Binary_Forward.bisle ~size ctx x1 x2
 
 let le_u ctx x1 x2 = Abstract_domain.Binary_Forward.biule ~size ctx x1 x2
@@ -81,4 +83,10 @@ let shl ctx x1 x2 =
   let flags = Operator.Flags.Bshl.pack ~nsw:true ~nuw:true in
   Abstract_domain.Binary_Forward.bshl ~flags ~size ctx x1 x2
 
-let xor ctx x1 x2 = Abstract_domain.Binary_Forward.bxor ctx ~size x1 x2
+let extend_s ctx n x =
+  let n = Units.In_bits.of_int n in
+  let value =
+    Abstract_domain.Binary_Forward.bextract ~index:Units.In_bits.zero ~size:n
+      ~oldsize:size ctx x
+  in
+  Abstract_domain.Binary_Forward.bsext ~size ~oldsize:n ctx value
