@@ -73,3 +73,5 @@ val ge_u : Abstract_domain.Context.t -> t -> t -> Abstract_boolean.t
 val shl : Abstract_domain.Context.t -> t -> t -> t
 
 val extend_s : Abstract_domain.Context.t -> int -> t -> t
+
+val wrap_i64 : Abstract_domain.Context.t -> t -> t

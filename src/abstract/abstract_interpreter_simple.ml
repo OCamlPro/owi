@@ -139,10 +139,16 @@ let eval_i32 ({ stack; ctx; invariant; _ } as state : Abstract_state.t) uuid :
   | Extend16_s ->
     let stack = Stack.apply_i32_i32 stack (Abstract_i32.extend_s ctx 16) in
     State { state with stack }
-  | Wrap_i64 -> assert false
+  | Wrap_i64 ->
+    let stack = Stack.apply_i32_i32 stack (Abstract_i32.wrap_i64 ctx) in
+    State { state with stack }
   | Trunc_f_s _ | Trunc_f_u _ | Trunc_sat_f_s _ | Trunc_sat_f_u _ ->
     assert false
-  | Reinterpret_f _ -> assert false
+  | Reinterpret_f _nn ->
+    (* TODO: handle nn *)
+    let f, stack = Stack.pop_f32 stack in
+    let stack = Stack.push_i32 stack (Abstract_i32.of_binary f) in
+    State { state with stack }
 
 let i64_can_be_zero ctx v =
   match Abstract_domain.query_boolean ctx (Abstract_i64.eqz ctx v) with
@@ -264,6 +270,11 @@ let eval_i64 ({ stack; ctx; invariant; _ } as state : Abstract_state.t) uuid :
     (* TODO: handle this correctly *)
     let _pos, stack = Stack.pop_i64 stack in
     let stack = Stack.push_i64 stack (Abstract_i64.unknown ctx) in
+    State { state with stack }
+  | Reinterpret_f _nn ->
+    (* TODO: handle nn *)
+    let f, stack = Stack.pop_f64 stack in
+    let stack = Stack.push_i64 stack (Abstract_i64.of_binary f) in
     State { state with stack }
   | _ -> assert false
 
