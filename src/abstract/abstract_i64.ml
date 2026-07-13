@@ -90,3 +90,9 @@ let extend_s ctx n x =
       ~oldsize:size ctx x
   in
   Abstract_domain.Binary_Forward.bsext ~size ~oldsize:n ctx value
+
+let extend_i32_s ctx x =
+  Abstract_domain.Binary_Forward.bsext ~size ~oldsize:Units.In_bits.s32 ctx x
+
+let extend_i32_u ctx x =
+  Abstract_domain.Binary_Forward.buext ~size ~oldsize:Units.In_bits.s32 ctx x

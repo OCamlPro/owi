@@ -142,8 +142,11 @@ let eval_i32 ({ stack; ctx; invariant; _ } as state : Abstract_state.t) uuid :
   | Wrap_i64 ->
     let stack = Stack.apply_i32_i32 stack (Abstract_i32.wrap_i64 ctx) in
     State { state with stack }
-  | Trunc_f_s _ | Trunc_f_u _ | Trunc_sat_f_s _ | Trunc_sat_f_u _ ->
-    assert false
+  | Trunc_f_s _nn | Trunc_f_u _nn | Trunc_sat_f_s _nn | Trunc_sat_f_u _nn ->
+    (* TODO: handle correctly *)
+    let _f, stack = Stack.pop_f32 stack in
+    let stack = Stack.push_i32 stack (Abstract_i32.unknown ctx) in
+    State { state with stack }
   | Reinterpret_f _nn ->
     (* TODO: handle nn *)
     let f, stack = Stack.pop_f32 stack in
@@ -210,6 +213,9 @@ let eval_i64 ({ stack; ctx; invariant; _ } as state : Abstract_state.t) uuid :
   | Xor ->
     let stack = Stack.apply_i64_i64_i64 stack (Abstract_i64.xor ctx) in
     State { state with stack }
+  | Shl ->
+    let stack = Stack.apply_i64_i64_i64 stack (Abstract_i64.shl ctx) in
+    State { state with stack }
   | Lt_s ->
     let stack = Stack.apply_i64_i64_boolean stack ctx (Abstract_i64.lt_s ctx) in
     State { state with stack }
@@ -252,6 +258,12 @@ let eval_i64 ({ stack; ctx; invariant; _ } as state : Abstract_state.t) uuid :
   | Extend32_s ->
     let stack = Stack.apply_i64_i64 stack (Abstract_i64.extend_s ctx 32) in
     State { state with stack }
+  | Extend_i32_s ->
+    let stack = Stack.apply_i64_i64 stack (Abstract_i64.extend_i32_s ctx) in
+    State { state with stack }
+  | Extend_i32_u ->
+    let stack = Stack.apply_i64_i64 stack (Abstract_i64.extend_i32_u ctx) in
+    State { state with stack }
   | Store (_memid, _)
   | Store8 (_memid, _)
   | Store16 (_memid, _)
@@ -276,7 +288,26 @@ let eval_i64 ({ stack; ctx; invariant; _ } as state : Abstract_state.t) uuid :
     let f, stack = Stack.pop_f64 stack in
     let stack = Stack.push_i64 stack (Abstract_i64.of_binary f) in
     State { state with stack }
-  | _ -> assert false
+  | Clz | Ctz | Popcnt ->
+    (* TODO: handle it properly *)
+    let _, stack = Stack.pop_i64 stack in
+    let stack = Stack.push_i64 stack (Abstract_i64.unknown ctx) in
+    State { state with stack }
+  | Shr_s | Shr_u ->
+    (* TODO: handle it properly *)
+    let _, stack = Stack.pop2_i64 stack in
+    let stack = Stack.push_i64 stack (Abstract_i64.unknown ctx) in
+    State { state with stack }
+  | Rotl | Rotr ->
+    (* TODO: handle it properly *)
+    let _, stack = Stack.pop2_i64 stack in
+    let stack = Stack.push_i64 stack (Abstract_i64.unknown ctx) in
+    State { state with stack }
+  | Trunc_f_s _nn | Trunc_f_u _nn | Trunc_sat_f_s _nn | Trunc_sat_f_u _nn ->
+    (* TODO: handle correctly *)
+    let _f, stack = Stack.pop_f32 stack in
+    let stack = Stack.push_i32 stack (Abstract_i32.unknown ctx) in
+    State { state with stack }
 
 (* TODO: handle this correctly *)
 let eval_f32 ({ stack; ctx; _ } as state : Abstract_state.t) _uuid :
