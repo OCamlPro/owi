@@ -3,5 +3,4 @@
   model {
     symbol symbol_0 i32 42
   }
-  proc_exit called with code=0
   owi: [ERROR] Reached problem!

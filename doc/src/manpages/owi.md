@@ -9,7 +9,7 @@ SYNOPSIS
        owi [COMMAND] …
 
 COMMANDS
-       abs [--unsafe] [OPTION]… FILE
+       abs [--entry-point=FUNCTION] [--unsafe] [OPTION]… FILE
            Run the abstract interpreter
 
        analyze COMMAND …
