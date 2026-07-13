@@ -464,11 +464,17 @@ let eval_instr ({ stack; _ } as state : Abstract_state.t) :
   | Drop ->
     let _, stack = Stack.pop stack in
     State { state with stack }
-  | If_else _ | Call _ | Block _ | Loop _ | Br _ | Br_if _ | Br_table _
-  | Br_on_non_null _ | Br_on_null _ | Select _ ->
+  | If_else _ | Call _ | Call_indirect _ | Call_ref _ | Return | Return_call _
+  | Return_call_indirect _ | Return_call_ref _ | Block _ | Loop _ | Br _
+  | Br_if _ | Br_table _ | Br_on_non_null _ | Br_on_null _ | Select _
+  | Br_on_cast (_, _, _)
+  | Br_on_cast_fail (_, _, _) ->
     Log.err (fun m -> m "Control flow instruction given to simple interpreter");
     assert false
-  | instr ->
+  | V128 _ | I8x16 _ | I16x8 _ | I32x4 _ | I64x2 _ | F32x4 _ | F64x2 _ ->
+    Fmt.failwith "no SIMD support yet"
+  | ( Ref _ | Table _ | Elem _ | I31 _ | Struct _ | Array _ | Any_convert_extern
+    | Extern_convert_any ) as instr ->
     Fmt.failwith "%a not implemented in simple interpreter"
       (Binary.pp_instr ~short:true)
       instr
