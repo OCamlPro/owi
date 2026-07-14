@@ -53,9 +53,8 @@
   42
   123
   $ owi script --no-exhaustion reference/nop.wast
-  $ owi script --no-exhaustion reference/ref_as_non_null.wast
-  owi: [ERROR] expected null reference but got (type mismatch (ref.as_non_null expected a non-null reference but got null))
-  [55]
+  $ owi script --no-exhaustion reference/ref_as_non_null.wast 2>&1 | grep -oE "Failure.*"
+  Failure("TODO: unimplemented `call_ref`")
   $ owi script --no-exhaustion reference/ref.wast
   owi: [ERROR] expected unknown type but there was no error
   [7]
@@ -139,7 +138,7 @@
   $ owi script --no-exhaustion reference/table_get.wast
   $ owi script --no-exhaustion reference/table_grow.wast
   $ owi script --no-exhaustion reference/table_init.wast 2>&1 | grep -oE "Failure.*"
-  Failure("Assigned: unimplemented for rec and sub types")
+  Failure("TODO: Link: unimplemented instruction: array.new_default 0")
   $ owi script --no-exhaustion reference/table_set.wast
   $ owi script --no-exhaustion reference/table_size.wast
   $ owi script --no-exhaustion reference/table-sub.wast

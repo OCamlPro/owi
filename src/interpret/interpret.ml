@@ -1465,9 +1465,8 @@ struct
       let f = Env.get_func env i in
       Stack.push_ref stack (Ref.func f) |> Choice.return
     | (Eq | Test _ | Cast _) as r ->
-      Log.err (fun m ->
-        m "unimplemented instruction: %a" (pp_instr ~short:false) (Ref r) );
-      assert false
+      Fmt.failwith "TODO: unimplemented ref instruction interpretation: %a"
+        (pp_instr ~short:false) (Ref r)
 
   let exec_local_instr state locals stack : Binary.local_instr -> _ = function
     | Get i ->
@@ -1940,7 +1939,7 @@ struct
 
   let call_ref ~return:_ (_state : State.exec_state) _typ_i =
     (* TODO *)
-    Fmt.failwith "TODO: uninmplemented `call_ref`"
+    Fmt.failwith "TODO: unimplemented `call_ref`"
   (* let fun_ref, stack = Stack.pop_as_ref state.stack in *)
   (* let state = { state with stack } in *)
   (* let func = *)
@@ -2260,9 +2259,8 @@ struct
           | Init_data (_, _)
           | Init_elem (_, _) )
       | Any_convert_extern | Extern_convert_any ) as i ->
-      Log.err (fun m ->
-        m "unimplemented instruction: %a" (pp_instr ~short:false) i );
-      assert false
+      Fmt.failwith "TODO: unimplemented instruction interpretation: %a"
+        (pp_instr ~short:false) i
 
   let rec loop ~heartbeat (state : State.exec_state) =
     let* () =

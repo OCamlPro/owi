@@ -1771,16 +1771,23 @@ let typecheck_const_instr ?known_globals ~is_init (modul : Module.t) refs stack
     let* stack = Stack.pop modul [ i32; elem_ty ] stack in
     Stack.push [ Ref_type (No_null, TypeUse id) ] stack
   | Array (New_default id) ->
+    let* _mut, st = Env.type_get_array id modul in
     let* () =
-      if id >= Array.length modul.types then Error (`Unknown_type (Text.Raw id))
-      else Ok ()
+      if is_defaultable st then Ok ()
+      else
+        Error
+          (`Type_mismatch "array.new_default: element type must be defaultable")
     in
     let* stack = Stack.pop modul [ i32 ] stack in
     Stack.push [ Ref_type (No_null, TypeUse id) ] stack
   | Struct (New_default id) ->
+    let* fields = Env.type_get_struct id modul in
     let* () =
-      if id >= Array.length modul.types then Error (`Unknown_type (Text.Raw id))
-      else Ok ()
+      if List.for_all (fun (_, (_, st)) -> is_defaultable st) fields then Ok ()
+      else
+        Error
+          (`Type_mismatch
+             "struct.new_default: all field types must be defaultable" )
     in
     Stack.push [ Ref_type (No_null, TypeUse id) ] stack
   | Struct (New id) ->
