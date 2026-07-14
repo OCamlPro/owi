@@ -2169,6 +2169,12 @@ struct
            of the typeuse id"
       | _ -> false )
     | Ref.Extern (Some _) -> ( match ht with Extern_ht -> true | _ -> false )
+    | Ref.I31 _ -> (
+      match ht with I31_ht | Eq_ht | Any_ht -> true | _ -> false )
+    | Ref.Struct _ -> (
+      match ht with Struct_ht | Eq_ht | Any_ht -> true | _ -> false )
+    | Ref.Array _ -> (
+      match ht with Array_ht | Eq_ht | Any_ht -> true | _ -> false )
     | Func None | Extern None | NullExn | NullRef -> false
 
   let exec_simple_instruction ({ stack; locals; env; _ } as state : State.t)

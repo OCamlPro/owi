@@ -14,6 +14,10 @@ module type T = sig
     val cast : t -> 'x Type.Id.t -> 'x option
   end
 
+  type array_obj
+
+  type struct_obj
+
   (* TODO; make this private and even opaque at some point *)
   type t =
     | Extern of Extern.t option
@@ -21,6 +25,9 @@ module type T = sig
     (* TODO: Not sure about these two. *)
     | NullExn
     | NullRef
+    | I31 of int32
+    | Array of array_obj
+    | Struct of struct_obj
 
   val pp : t Fmt.t
 

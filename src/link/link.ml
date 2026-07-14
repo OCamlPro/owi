@@ -296,7 +296,27 @@ module Make (M : Link_intf.M) = struct
       | Mul -> Stack.apply_i64_i64_i64 stack Concrete_i64.mul
       | _ -> assert false
 
-    let simple_instruction modul stack = function
+    let value_to_gc_val (v : Concrete_value.t) : Concrete_ref.gc_val =
+      match v with
+      | I32 i -> I32 i
+      | I64 i -> I64 i
+      | F32 f -> F32 f
+      | F64 f -> F64 f
+      | V128 v -> V128 v
+      | Ref r -> Ref r
+
+    let default_gc_val (st : Binary.storage_type) : Concrete_ref.gc_val =
+      match st with
+      | Val_type (Num_type I32) -> I32 0l
+      | Val_type (Num_type I64) -> I64 0L
+      | Val_type (Num_type F32) -> F32 Float32.zero
+      | Val_type (Num_type F64) -> F64 Float64.zero
+      | Val_type (Num_type V128) -> V128 Concrete_v128.zero
+      | Val_type (Ref_type (_, ht)) -> Ref (Concrete_ref.null ht)
+      | Pack_type _ -> I32 0l
+
+    let simple_instruction (types : Binary.sub_type array) modul stack =
+      function
       | Binary.I32 i -> Result.ok (i32_instr stack i)
       | Binary.I64 i -> Result.ok (i64_instr stack i)
       | F32 (Const f) -> Result.ok @@ Stack.push_f32 stack f
@@ -310,20 +330,90 @@ module Make (M : Link_intf.M) = struct
       | Global (Get id) ->
         let* g = Linked_module.Build.get_const_global modul id in
         Result.ok @@ Stack.push stack g
+      | I31 Ref ->
+        let i, stack = Stack.pop_i32 stack in
+        Result.ok @@ Stack.push_ref stack (I31 i)
+      | Struct (New id) ->
+        let fields =
+          match types.(id).ct with
+          | Binary.Def_struct_t fl -> fl
+          | _ -> Fmt.failwith "struct.new: type %d is not a struct type" id
+        in
+        let n = List.length fields in
+        let top_n, stack = Stack.pop_n stack n in
+        let fields = Array.of_list (List.rev_map value_to_gc_val top_n) in
+        Result.ok @@ Stack.push_ref stack (Struct fields)
+      | Struct (New_default id) ->
+        let fields =
+          match types.(id).ct with
+          | Binary.Def_struct_t fl -> fl
+          | _ ->
+            Fmt.failwith "struct.new_default: type %d is not a struct type" id
+        in
+        let defaults =
+          Array.of_list
+            (List.map (fun (_, (_, st)) -> default_gc_val st) fields)
+        in
+        Result.ok @@ Stack.push_ref stack (Struct defaults)
+      | Array (New _) ->
+        let n, stack = Stack.pop_i32 stack in
+        let v, stack = Stack.pop stack in
+        let n = Int32.to_int n in
+        let array = Array.make n (value_to_gc_val v) in
+        Result.ok @@ Stack.push_ref stack (Array array)
+      | Array (New_default id) ->
+        let n, stack = Stack.pop_i32 stack in
+        let st =
+          match types.(id).ct with
+          | Binary.Def_array_t (_, st) -> st
+          | _ ->
+            Fmt.failwith "array.new_default: type %d is not an array type" id
+        in
+        let n = Int32.to_int n in
+        let array = Array.make n (default_gc_val st) in
+        Result.ok @@ Stack.push_ref stack (Array array)
+      | Array (New_fixed (_, n)) ->
+        let n = Int32.to_int n in
+        let top_n, stack = Stack.pop_n stack n in
+        let array = Array.of_list (List.rev_map value_to_gc_val top_n) in
+        Result.ok @@ Stack.push_ref stack (Array array)
+      | Extern_convert_any ->
+        let r, stack = Stack.pop_as_ref stack in
+        let ref =
+          match r with
+          | NullRef -> Concrete_ref.Extern None
+          | _ -> Concrete_ref.extern Concrete_ref.any_as_extern_key r
+        in
+        Result.ok @@ Stack.push_ref stack ref
+      | Any_convert_extern ->
+        let r, stack = Stack.pop_as_ref stack in
+        let ref =
+          match r with
+          | Extern None -> Concrete_ref.NullRef
+          | Extern (Some e) -> (
+            match Concrete_ref.Extern.cast e Concrete_ref.any_as_extern_key with
+            | Some inner -> inner
+            | None -> Fmt.failwith "any.convert_extern: cast failure" )
+          | _ ->
+            Fmt.failwith "any.convert_extern: expected extern ref on stack"
+        in
+        Result.ok @@ Stack.push_ref stack ref
       | instr ->
         Fmt.failwith "TODO: Link: unimplemented instruction: %a"
           Binary.pp_simple_instruction instr
 
-    let instr modul stack instr =
+    let instr types modul stack instr =
       match instr.Annotated.raw with
-      | Binary.Simple i -> simple_instruction modul stack i
+      | Binary.Simple i -> simple_instruction types modul stack i
       | _ ->
         Fmt.failwith "TODO: Link: unimplemented instruction: %a"
           (Binary.pp_instr ~short:true) instr.Annotated.raw
 
     (* TODO: binary+const expr *)
-    let expr modul e : Concrete_value.t Result.t =
-      let* stack = list_fold_left (instr modul) Stack.empty e.Annotated.raw in
+    let expr types modul e : Concrete_value.t Result.t =
+      let* stack =
+        list_fold_left (instr types modul) Stack.empty e.Annotated.raw
+      in
       match stack with
       | [] -> Error (`Type_mismatch "const expr returning zero values")
       | _ :: _ :: _ ->
@@ -331,22 +421,22 @@ module Make (M : Link_intf.M) = struct
       | [ result ] -> Ok result
   end
 
-  let eval_global ls modul
+  let eval_global ls modul types
     (global : (Binary.Global.t, Binary.Global.Type.t) Origin.t) :
     global Result.t =
     match global with
     | Local global ->
-      let* value = Eval_const.expr modul global.init in
+      let* value = Eval_const.expr types modul global.init in
       let mut, typ = global.typ in
       let global : global = { value; mut; typ } in
       Ok global
     | Imported import -> load_global ls import
 
-  let eval_globals ls modul globals : Linked_module.Build.t Result.t =
+  let eval_globals ls modul types globals : Linked_module.Build.t Result.t =
     let+ modul, _i =
       array_fold_left
         (fun (modul, i) global ->
-          let+ global = eval_global ls modul global in
+          let+ global = eval_global ls modul types global in
           let modul = Linked_module.Build.add_global i global modul in
           (modul, succ i) )
         (modul, 0) globals
@@ -548,7 +638,7 @@ module Make (M : Link_intf.M) = struct
     | Concrete_value.I32 i -> Ok i
     | _ -> Error (`Type_mismatch "get_i32")
 
-  let define_data modul data =
+  let define_data types modul data =
     let+ modul, init, _i =
       array_fold_left
         (fun (modul, init, id) (data : Binary.Data.t) ->
@@ -559,7 +649,7 @@ module Make (M : Link_intf.M) = struct
           let+ init =
             match data.mode with
             | Active (mem, offset) ->
-              let* offset = Eval_const.expr modul offset in
+              let* offset = Eval_const.expr types modul offset in
               let length = Int32.of_int @@ String.length data.init in
               let* offset = get_i32 offset in
               let* v = active_data_expr modul ~offset ~length ~mem ~data:id in
@@ -571,11 +661,11 @@ module Make (M : Link_intf.M) = struct
     in
     (modul, List.rev init)
 
-  let define_elem modul elem =
+  let define_elem types modul elem =
     let+ modul, inits, _i =
       array_fold_left
         (fun (modul, inits, i) (elem : Binary.Elem.t) ->
-          let* init = list_map (Eval_const.expr modul) elem.init in
+          let* init = list_map (Eval_const.expr types modul) elem.init in
           let* init_as_ref =
             list_map
               (function
@@ -596,7 +686,7 @@ module Make (M : Link_intf.M) = struct
             | Active (None, _) -> assert false
             | Active (Some table, offset) ->
               let length = Int32.of_int @@ List.length init in
-              let* offset = Eval_const.expr modul offset in
+              let* offset = Eval_const.expr types modul offset in
               let* offset = get_i32 offset in
               Result.ok
               @@ (active_elem_expr ~offset ~length ~table ~elem:i :: inits)
@@ -640,11 +730,15 @@ module Make (M : Link_intf.M) = struct
     let modul = Linked_module.Build.empty in
     let* modul = eval_functions ls next_id modul binary_module.func in
     let* modul = eval_tags ls next_id modul binary_module.tag in
-    let* modul = eval_globals ls modul binary_module.global in
+    let* modul = eval_globals ls modul binary_module.types binary_module.global in
     let* modul = eval_memories ls modul binary_module.mem in
     let* modul = eval_tables ls modul binary_module.table in
-    let* modul, init_active_data = define_data modul binary_module.data in
-    let* modul, init_active_elem = define_elem modul binary_module.elem in
+    let* modul, init_active_data =
+      define_data binary_module.types modul binary_module.data
+    in
+    let* modul, init_active_elem =
+      define_elem binary_module.types modul binary_module.elem
+    in
     let init_code =
       let start =
         Option.map
