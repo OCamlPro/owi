@@ -18,11 +18,28 @@ module Extern = struct
     | Some Equal -> Some r
 end
 
-type t =
+type gc_val =
+  | I32 of int32
+  | I64 of int64
+  | F32 of Float32.t
+  | F64 of Float64.t
+  | V128 of Concrete_v128.t
+  | Ref of t
+
+and struct_obj = gc_val array
+
+and array_obj = gc_val array
+
+and t =
   | Extern of Extern.t option
   | Func of Kind.func option
   | NullExn
   | NullRef
+  | I31 of int32
+  | Array of array_obj
+  | Struct of struct_obj
+
+let any_as_extern_key : t Type.Id.t = Type.Id.make ()
 
 let pp fmt = function
   | Extern None -> pf fmt "externref none"
@@ -30,6 +47,9 @@ let pp fmt = function
   | Func _ -> pf fmt "funcref"
   | NullExn -> pf fmt "nullexnref"
   | NullRef -> pf fmt "nullref"
+  | I31 i -> pf fmt "i31ref %ld" i
+  | Struct _ -> pf fmt "structref"
+  | Array _ -> pf fmt "arrayref"
 
 (* TODO: Is this the same as Symbolic_ref.null? *)
 let null = function
@@ -45,7 +65,7 @@ let extern (type x) (t : x Type.Id.t) (v : x) : t = Extern (Some (E (t, v)))
 
 let is_null = function
   | Func None | Extern None | NullExn | NullRef -> true
-  | Func (Some _) | Extern (Some _) -> false
+  | Func (Some _) | Extern (Some _) | I31 _ | Array _ | Struct _ -> false
 
 let get_func (r : t) : Kind.func get_ref =
   match r with
