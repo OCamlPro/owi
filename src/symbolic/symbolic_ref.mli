@@ -2,4 +2,4 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-include Ref_intf.T
+include Ref_intf.T with type array_obj = unit and type struct_obj = unit
