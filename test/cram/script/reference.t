@@ -138,7 +138,7 @@
   $ owi script --no-exhaustion reference/table_get.wast
   $ owi script --no-exhaustion reference/table_grow.wast
   $ owi script --no-exhaustion reference/table_init.wast 2>&1 | grep -oE "Failure.*"
-  Failure("TODO: Link: unimplemented instruction: array.new_default 0")
+  Failure("TODO: unimplemented ref instruction interpretation: ref.eq")
   $ owi script --no-exhaustion reference/table_set.wast
   $ owi script --no-exhaustion reference/table_size.wast
   $ owi script --no-exhaustion reference/table-sub.wast
