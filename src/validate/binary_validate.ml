@@ -32,6 +32,15 @@ let typ_of_pt pt = typ_of_val_type @@ snd pt
 module Index = struct
   module M = Int
   module Map = Map.Make (Int)
+
+  module PairSet = Set.Make (struct
+    type t = int * int
+
+    let compare (a1, b1) (a2, b2) =
+      let c = Int.compare a1 a2 in
+      if c <> 0 then c else Int.compare b1 b2
+  end)
+
   include M
 end
 
@@ -217,6 +226,142 @@ let get_func_type_id (env : Env.t) i =
       | Typedef.SimpleType _ | Typedef.RecType _ -> false )
     env.modul.type_defs
 
+(* Two type indices are equivalent when they occupy the same position
+    inside two rec groups of the same size whose members are pairwise
+    structurally equivalent. *)
+
+(** [iso_group_bounds modul type_idx] returns [(group_start, group_size)] for
+    the rec group that contains [type_idx] in [modul.type_defs]. *)
+let iso_group_bounds (modul : Module.t) type_idx =
+  snd
+  @@ Array.fold_left
+       (fun (pos, acc) typedef ->
+         match typedef with
+         | Typedef.SimpleType _ ->
+           (pos + 1, if pos = type_idx then (pos, 1) else acc)
+         | Typedef.RecType members ->
+           let size = List.length members in
+           ( pos + size
+           , if type_idx >= pos && type_idx < pos + size then (pos, size)
+             else acc ) )
+       (0, (type_idx, 1))
+       modul.type_defs
+(* TODO: precompute type groups to not have to iterate over all type defs here. *)
+
+(** [is_iso_equiv modul visited a b] tests whether the types identified by the
+    indices [a] and [b] are equivalent. *)
+let rec is_iso_equiv (modul : Module.t) visited a b =
+  if a = b then (true, visited)
+  else
+    let key = if a > b then (b, a) else (a, b) in
+    if Index.PairSet.mem key visited then (true, visited)
+    else
+      let visited = Index.PairSet.add key visited in
+      let ga, ga_sz = iso_group_bounds modul a in
+      let gb, gb_sz = iso_group_bounds modul b in
+      let relpos_a = a - ga in
+      let relpos_b = b - gb in
+      if relpos_a <> relpos_b || ga_sz <> gb_sz then (false, visited)
+      else iso_groups modul visited ga gb ga_sz
+
+(** [iso_groups modul visited ga gb size] checks that all [size] member pairs
+    [(ga+i, gb+i)] are pairwise equivalent via [iso_sub_type]. *)
+and iso_groups (modul : Module.t) visited ga gb size =
+  let rec aux i visited =
+    if i >= size then (true, visited)
+    else
+      let ta = modul.types.(ga + i)
+      and tb = modul.types.(gb + i) in
+      let ok, visited = iso_sub_type modul visited ga gb size ta tb in
+      if ok then aux (i + 1) visited else (false, visited)
+  in
+  aux 0 visited
+
+and iso_sub_type (modul : Module.t) visited ga gb size
+  { final = fa; ids = ia; ct = ca } { final = fb; ids = ib; ct = cb } =
+  if not (Bool.equal fa fb) then (false, visited)
+  else if List.length ia <> List.length ib then (false, visited)
+  else
+    (* TODO: use rec functions instead of fold_left2 *)
+    let ok, visited =
+      List.fold_left2
+        (fun (ok, visited) a b ->
+          if not ok then (false, visited)
+          else iso_heap_type modul visited ga gb size (TypeUse a) (TypeUse b) )
+        (true, visited) ia ib
+    in
+    if not ok then (false, visited)
+    else iso_comp_type modul visited ga gb size ca cb
+
+and iso_comp_type (modul : Module.t) visited ga gb size cta ctb =
+  match (cta, ctb) with
+  | Def_func_t (pt_a, rt_a), Def_func_t (pt_b, rt_b) ->
+    if
+      List.length pt_a <> List.length pt_b
+      || List.length rt_a <> List.length rt_b
+    then (false, visited)
+    else
+      let ok, visited =
+        List.fold_left2
+          (fun (ok, visited) (_, vt_a) (_, vt_b) ->
+            if not ok then (false, visited)
+            else iso_val_type modul visited ga gb size vt_a vt_b )
+          (true, visited) pt_a pt_b
+      in
+      if not ok then (false, visited)
+      else
+        List.fold_left2
+          (fun (ok, visited) vt_a vt_b ->
+            if not ok then (false, visited)
+            else iso_val_type modul visited ga gb size vt_a vt_b )
+          (true, visited) rt_a rt_b
+  | Def_struct_t fl_a, Def_struct_t fl_b ->
+    if List.length fl_a <> List.length fl_b then (false, visited)
+    else
+      List.fold_left2
+        (fun (ok, visited) (_, (m_a, st_a)) (_, (m_b, st_b)) ->
+          if not ok then (false, visited)
+          else if not (Bool.equal (Text.is_mut m_a) (Text.is_mut m_b)) then
+            (false, visited)
+          else iso_storage_type modul visited ga gb size st_a st_b )
+        (true, visited) fl_a fl_b
+  | Def_array_t (m_a, st_a), Def_array_t (m_b, st_b) ->
+    if not (Bool.equal (Text.is_mut m_a) (Text.is_mut m_b)) then (false, visited)
+    else iso_storage_type modul visited ga gb size st_a st_b
+  | _ -> (false, visited)
+
+and iso_storage_type (modul : Module.t) visited ga gb size st_a st_b =
+  match (st_a, st_b) with
+  | Pack_type pa, Pack_type pb ->
+    ( ( match (pa, pb) with
+      | Text.I8, Text.I8 | Text.I16, Text.I16 -> true
+      | _ -> false )
+    , visited )
+  | Val_type vt_a, Val_type vt_b ->
+    iso_val_type modul visited ga gb size vt_a vt_b
+  | _ -> (false, visited)
+
+and iso_val_type (modul : Module.t) visited ga gb size vt_a vt_b =
+  match (vt_a, vt_b) with
+  | Binary.Num_type na, Binary.Num_type nb -> (Text.num_type_eq na nb, visited)
+  | Binary.Ref_type (nulla, hta), Binary.Ref_type (nullb, htb) -> (
+    match (nulla, nullb) with
+    | Text.Null, Text.Null | Text.No_null, Text.No_null ->
+      iso_heap_type modul visited ga gb size hta htb
+    | _ -> (false, visited) )
+  | _ -> (false, visited)
+
+and iso_heap_type (modul : Module.t) visited ga gb size ht_a ht_b =
+  match (ht_a, ht_b) with
+  | TypeUse ia, TypeUse ib ->
+    let a_within_group = ia >= ga && ia < ga + size in
+    let b_within_group = ib >= gb && ib < gb + size in
+    if a_within_group && b_within_group then (ia - ga = ib - gb, visited)
+    else if (not a_within_group) && not b_within_group then
+      is_iso_equiv modul visited ia ib
+    else (false, visited)
+  | _ -> (heap_type_eq ht_a ht_b, visited)
+
 (* TODO: move type matching functions outside of the stack module? *)
 module Stack : sig
   type t = typ list
@@ -279,6 +424,7 @@ end = struct
                (not (Int.equal super_id got))
                && is_typeuse_subtype modul ~expected ~got:super_id )
              ids
+        || fst (is_iso_equiv modul Index.PairSet.empty expected got)
 
   let match_heap_type ?(subtype = false) modul ~expected ~got =
     match (got, expected) with
