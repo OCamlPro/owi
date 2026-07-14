@@ -1622,7 +1622,9 @@ struct
       else Stack.push_ref stack r |> Choice.return
     (* TODO: restrict to non_null refs *)
     | Func i -> Stack.push_ref stack (Ref.func i) |> Choice.return
-    | Eq | Test _ | Cast _ -> (* TODO *) assert false
+    | Eq | Test _ | Cast _ ->
+      Fmt.failwith "TODO: unimplemented ref instruction interpretation: %a"
+        (pp_instr ~short:false) (Binary.Simple (Ref i))
 
   let exec_local_instr (state : State.t) locals stack :
     Binary.local_instr -> State.t = function
@@ -2098,7 +2100,7 @@ struct
 
   let call_ref ~return:_ (_state : State.t) _typ_i =
     (* TODO *)
-    Fmt.failwith "TODO: uninmplemented `call_ref`"
+    Fmt.failwith "TODO: unimplemented `call_ref`"
   (* let fun_ref, stack = Stack.pop_as_ref state.stack in *)
   (* let state = { state with stack } in *)
   (* let func = *)
@@ -2238,24 +2240,25 @@ struct
         let o1, stack = Stack.pop stack in
         ret @@ Stack.push stack (if b then o1 else o2)
       end
-    | I31 (Ref | Get_s | Get_u)
-    | Struct
-        ( New _ | New_default _
-        | Get (_, _)
-        | Get_s (_, _)
-        | Get_u (_, _)
-        | Set (_, _) )
-    | Array
-        ( New _ | New_default _
-        | New_fixed (_, _)
-        | New_data (_, _)
-        | New_elem (_, _)
-        | Get _ | Get_s _ | Get_u _ | Set _ | Len | Fill _
-        | Copy (_, _)
-        | Init_data (_, _)
-        | Init_elem (_, _) )
-    | Any_convert_extern | Extern_convert_any ->
-      (* TODO *) assert false
+    | ( I31 (Ref | Get_s | Get_u)
+      | Struct
+          ( New _ | New_default _
+          | Get (_, _)
+          | Get_s (_, _)
+          | Get_u (_, _)
+          | Set (_, _) )
+      | Array
+          ( New _ | New_default _
+          | New_fixed (_, _)
+          | New_data (_, _)
+          | New_elem (_, _)
+          | Get _ | Get_s _ | Get_u _ | Set _ | Len | Fill _
+          | Copy (_, _)
+          | Init_data (_, _)
+          | Init_elem (_, _) )
+      | Any_convert_extern | Extern_convert_any ) as i ->
+      Fmt.failwith "TODO: unimplemented instruction interpretation: %a"
+        (pp_instr ~short:false) i
 
   let exec_instr ({ raw; uuid; instr_counter; _ } : _ Annotated.t)
     ({ stack; env; _ } as state : State.t) : State.instr_result Choice.t =
