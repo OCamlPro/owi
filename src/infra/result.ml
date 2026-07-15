@@ -89,6 +89,7 @@ type err =
   | `Double_free
   | `Offset_out_of_range
   | `Table_size
+  | `Cast_failure
   ]
 
 type 'a t = ('a, err) Prelude.Result.t
@@ -186,6 +187,7 @@ let rec err_to_string = function
   | `Double_free -> "double free"
   | `Offset_out_of_range -> "offset out of range"
   | `Table_size -> "table size"
+  | `Cast_failure -> "cast failure"
 
 let err_to_exit_code = function
   | `No_error -> Cmdliner.Cmd.Exit.ok
@@ -287,3 +289,4 @@ let err_to_exit_code = function
   | `Offset_out_of_range -> 98
   | `Table_size -> 99
   | `Proc_exit _n -> 100
+  | `Cast_failure -> 101

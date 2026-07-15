@@ -26,6 +26,8 @@ module Make (M : Link_intf.M) = struct
       ; extern_funcs : (M.extern_func * Binary.func_type) Dynarray.t
       ; id : int
       ; init_code : Binary.expr Annotated.t
+      ; types : Binary.sub_type array
+      ; type_groups : (int * int) array
       }
 
     let get_id (modul : t) = modul.id
@@ -115,7 +117,8 @@ module Make (M : Link_intf.M) = struct
 
     let freeze id
       ({ globals; memories; tables; functions; data; elem; tags } : Build.t)
-      init_code extern_funcs =
+      init_code extern_funcs types type_defs =
+      let type_groups = Binary.compute_type_groups type_defs (Array.length types) in
       { id
       ; globals
       ; memories
@@ -126,7 +129,13 @@ module Make (M : Link_intf.M) = struct
       ; tags
       ; extern_funcs
       ; init_code
+      ; types
+      ; type_groups
       }
+
+    let get_types { types; _ } = types
+
+    let get_type_groups { type_groups; _ } = type_groups
 
     let get_init_code { init_code; _ } = init_code
   end
@@ -237,6 +246,7 @@ module Make (M : Link_intf.M) = struct
         end
       | None -> (
         match ls.last with Some e -> Ok e | None -> Error `Unbound_last_module )
+(* TODO; the const evaluation is duplicated in many places and should be moved somewhere else! *)
     in
     Ok { ls with by_name = StringMap.add name exports ls.by_name }
 
@@ -273,6 +283,14 @@ module Make (M : Link_intf.M) = struct
   let get_init_code ~modul state =
     let modul = get_module state modul in
     Linked_module.get_init_code modul
+
+  let get_types ~modul state =
+    let modul = get_module state modul in
+    Linked_module.get_types modul
+
+  let get_type_groups ~modul state =
+    let modul = get_module state modul in
+    Linked_module.get_type_groups modul
 
   let fold_globals ~modul f acc state =
     let modul = get_module state modul in
@@ -549,37 +567,52 @@ module Make (M : Link_intf.M) = struct
     in
     modul
 
-  let load_func (ls : t) (import : Binary.block_type Origin.imported) :
-    func Result.t =
-    let (Binary.Bt_raw ((None | Some _), typ)) = import.typ in
+  let load_func (ls : t) (imp_types : Binary.sub_type array)
+    (imp_type_groups : (int * int) array)
+    (import : Binary.block_type Origin.imported) : func Result.t =
+    let (Binary.Bt_raw (imp_idx_opt, typ)) = import.typ in
     let* func = load_from_module ls (fun (e : exports) -> e.functions) import in
-    let type' =
+    let compatible =
       match func with
-      | Kind.Wasm { func; _ } ->
-        let (Bt_raw ((None | Some _), t)) = func.type_f in
-        t
+      | Kind.Wasm { func; modul = idx } -> (
+        let (Bt_raw (exp_idx_opt, type')) = func.type_f in
+        let exp_modul = Dynarray.get ls.modules idx in
+        let exp_types = Linked_module.get_types exp_modul in
+        let exp_type_groups = Linked_module.get_type_groups exp_modul in
+        match (imp_idx_opt, exp_idx_opt) with
+        | Some imp_idx, Some exp_idx ->
+          Binary.is_subtype exp_types exp_type_groups imp_types imp_type_groups
+            ~got:exp_idx ~expected:imp_idx
+        | _ -> Binary.func_type_eq typ type' )
       | Extern { idx } ->
-        let _f, t = Dynarray.get ls.extern_modules idx in
-        t
+        let _f, type' = Dynarray.get ls.extern_modules idx in
+        Binary.func_type_eq typ type'
     in
-    if Binary.func_type_eq typ type' then Ok func
+    if compatible then Ok func
     else
+      let (Binary.Bt_raw (_, type')) =
+        match func with
+        | Kind.Wasm { func; _ } -> func.type_f
+        | Extern { idx } ->
+          Binary.Bt_raw (None, snd (Dynarray.get ls.extern_modules idx))
+      in
       let msg =
         Fmt.str "%s: expected: %a got: %a" import.name Binary.pp_func_type typ
           Binary.pp_func_type type'
       in
       Error (`Incompatible_import_type msg)
 
-  let eval_func ls (modul : int) func : func Result.t =
+  let eval_func ls (modul : int) imp_types imp_type_groups func : func Result.t =
     match func with
     | Origin.Local func -> Result.ok @@ Kind.wasm func ~modul
-    | Imported import -> load_func ls import
+    | Imported import -> load_func ls imp_types imp_type_groups import
 
-  let eval_functions ls (finished_modul : int) modul functions =
+  let eval_functions ls (finished_modul : int) imp_types imp_type_groups modul
+    functions =
     let+ modul, _i =
       array_fold_left
         (fun (modul, i) func ->
-          let+ func = eval_func ls finished_modul func in
+          let+ func = eval_func ls finished_modul imp_types imp_type_groups func in
           let modul = Linked_module.Build.add_func i func modul in
           (modul, succ i) )
         (modul, 0) functions
@@ -728,7 +761,14 @@ module Make (M : Link_intf.M) = struct
     let ls = clone ls in
     let next_id = Dynarray.length ls.modules in
     let modul = Linked_module.Build.empty in
-    let* modul = eval_functions ls next_id modul binary_module.func in
+    let imp_type_groups =
+      Binary.compute_type_groups binary_module.type_defs
+        (Array.length binary_module.types)
+    in
+    let* modul =
+      eval_functions ls next_id binary_module.types imp_type_groups modul
+        binary_module.func
+    in
     let* modul = eval_tags ls next_id modul binary_module.tag in
     let* modul = eval_globals ls modul binary_module.types binary_module.global in
     let* modul = eval_memories ls modul binary_module.mem in
@@ -752,6 +792,7 @@ module Make (M : Link_intf.M) = struct
 
     let modul : Linked_module.t =
       Linked_module.freeze next_id modul init_code ls.extern_modules
+        binary_module.types binary_module.type_defs
     in
     Dynarray.add_last ls.modules modul;
 

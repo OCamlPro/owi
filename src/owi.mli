@@ -89,6 +89,7 @@ module Result : sig
     | `Double_free
     | `Offset_out_of_range
     | `Table_size
+    | `Cast_failure
     ]
 
   type 'a t = ('a, err) Prelude.Result.t
