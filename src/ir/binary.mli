@@ -83,7 +83,24 @@ val pp_sub_type : sub_type Fmt.t
 
 val sub_type_eq : sub_type -> sub_type -> bool
 
-(* TODO: remove the indice ! *)
+val is_iso_equiv :
+     sub_type array
+  -> (int * int) array
+  -> sub_type array
+  -> (int * int) array
+  -> int
+  -> int
+  -> bool
+
+val is_subtype :
+     sub_type array
+  -> (int * int) array
+  -> sub_type array
+  -> (int * int) array
+  -> got:int
+  -> expected:int
+  -> bool
+
 type block_type = indice option * func_type
 
 val pp_block_type : block_type Fmt.t
@@ -469,6 +486,8 @@ module Typedef : sig
 
   val pp : t Fmt.t
 end
+
+val compute_type_groups : Typedef.t array -> int -> (int * int) array
 
 module Table : sig
   module Type : sig

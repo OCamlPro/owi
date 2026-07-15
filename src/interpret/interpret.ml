@@ -1609,6 +1609,43 @@ struct
       Stack.apply_f64_v128_v128 stack (V128.F64x2.replace_lane lane)
       |> Choice.return
 
+  let ref_matches_ref_type modul env (r : Ref.t) ((nullable, ht) : ref_type) :
+    bool =
+    let is_null = match nullable with Null -> true | No_null -> false in
+    match r with
+    | Ref.Func None when is_null -> (
+      match ht with Func_ht | NoFunc_ht | TypeUse _ -> true | _ -> false )
+    | Ref.Extern None when is_null -> (
+      match ht with Extern_ht | NoExtern_ht -> true | _ -> false )
+    | Ref.NullRef when is_null -> (
+      match ht with
+      | Any_ht | None_ht | Eq_ht | I31_ht | Struct_ht | Array_ht -> true
+      | _ -> false )
+    | Ref.NullExn when is_null -> (
+      match ht with Exn_ht | NoExn_ht -> true | _ -> false )
+    | Ref.Func (Some f) -> (
+      match ht with
+      | Func_ht -> true
+      | TypeUse expected -> (
+        match f with
+        | Kind.Wasm { func; _ } -> (
+          match func.type_f with
+          | Bt_raw (Some got, _) ->
+            let types = Env.get_types ~modul env in
+            let type_groups = Env.get_type_groups ~modul env in
+            Binary.is_subtype types type_groups types type_groups ~expected ~got
+          | Bt_raw (None, _) -> false )
+        | Kind.Extern _ -> false )
+      | _ -> false )
+    | Ref.Extern (Some _) -> ( match ht with Extern_ht -> true | _ -> false )
+    | Ref.I31 _ -> (
+      match ht with I31_ht | Eq_ht | Any_ht -> true | _ -> false )
+    | Ref.Struct _ -> (
+      match ht with Struct_ht | Eq_ht | Any_ht -> true | _ -> false )
+    | Ref.Array _ -> (
+      match ht with Array_ht | Eq_ht | Any_ht -> true | _ -> false )
+    | Func None | Extern None | NullExn | NullRef -> false
+
   let exec_ref_instr stack (i : Binary.ref_instr) =
     match i with
     | Null t -> Stack.push_ref stack (Ref.null t) |> Choice.return
@@ -1622,9 +1659,18 @@ struct
       else Stack.push_ref stack r |> Choice.return
     (* TODO: restrict to non_null refs *)
     | Func i -> Stack.push_ref stack (Ref.func i) |> Choice.return
-    | Eq | Test _ | Cast _ ->
+    | Test rt ->
+      let r, stack = Stack.pop_as_ref stack in
+      let b = ref_matches_ref_type env r rt |> Boolean.of_bool in
+      Stack.push_bool stack b |> Choice.return
+    | Cast rt ->
+      let r, stack = Stack.pop_as_ref stack in
+      if ref_matches_ref_type env r rt then
+        Stack.push_ref stack r |> Choice.return
+      else Choice.trap `Cast_failure
+    | Eq ->
       Fmt.failwith "TODO: unimplemented ref instruction interpretation: %a"
-        (pp_instr ~short:false) (Binary.Simple (Ref i))
+        (pp_instr ~short:false) (Simple (Ref i))
 
   let exec_local_instr (state : State.t) locals stack :
     Binary.local_instr -> State.t = function
@@ -2117,13 +2163,13 @@ struct
   (* exec_vfunc ~return state func *)
 
   let call_indirect ~env ~return (state : State.t)
-    (tbl_i, (((None | Some _), typ_i) : block_type)) =
+    (tbl_i, ((call_type_idx, typ_i) : block_type)) =
     let fun_i, stack = Stack.pop_i32 state.stack in
     let state = { state with stack } in
     let t = Env.get_table ~env tbl_i in
     let _null, ref_kind = Table.typ t in
     match ref_kind with
-    | Func_ht ->
+    | Func_ht | TypeUse _ ->
       let size = Table.size t in
       let>! () =
         ( I32.(le_u (I32.of_int size) fun_i)
@@ -2138,11 +2184,23 @@ struct
       | Null -> Choice.trap (`Uninitialized_element fun_i)
       | Type_mismatch -> Choice.trap `Element_type_error
       | Ref_value func ->
-        let func = Env.get_func ~env:state.env func in
-        let ft = func_type func in
-        let ft' = typ_i in
-        if not (Binary.func_type_eq ft ft') then
-          Choice.trap `Indirect_call_type_mismatch
+        let type_matches =
+          match (call_type_idx, func) with
+          | Some expected, Kind.Wasm func -> (
+            match func.type_f with
+            | Bt_raw (Some got, _) ->
+              let func_types = Env.get_types ~modul:idx env in
+              let func_type_groups = Env.get_type_groups ~modul:idx env in
+              let call_types = Env.get_types ~modul:state.modul env in
+              let call_type_groups =
+                Env.get_type_groups ~modul:state.modul env
+              in
+              Binary.is_subtype func_types func_type_groups call_types
+                call_type_groups ~got ~expected
+            | Bt_raw (None, ft) -> Binary.func_type_eq ft typ_i )
+          | _ -> Binary.func_type_eq (func_type state func) typ_i
+        in
+        if not type_matches then Choice.trap `Indirect_call_type_mismatch
         else exec_vfunc ~return state func
       end
     | _ -> Choice.trap `Indirect_call_type_mismatch
@@ -2264,7 +2322,7 @@ struct
           | Init_elem (_, _) )
       | Any_convert_extern | Extern_convert_any ) as i ->
       Fmt.failwith "TODO: unimplemented instruction interpretation: %a"
-        (pp_instr ~short:false) i
+        (pp_instr ~short:false) (Simple i)
 
   let exec_instr ({ raw; uuid; instr_counter; _ } : _ Annotated.t)
     ({ stack; env; _ } as state : State.t) : State.instr_result Choice.t =
@@ -2372,7 +2430,7 @@ struct
         Next_instruction.continue state |> Next_instruction.with_instr_counter
       in
       let r, stack = Stack.pop_as_ref stack in
-      let matches = ref_matches_ref_type r rt2 |> Boolean.of_bool in
+      let matches = ref_matches_ref_type modul env r rt2 |> Boolean.of_bool in
       let* matches, stack =
         let* matches =
           select matches ~instr_counter_false ~instr_counter_true
@@ -2392,7 +2450,7 @@ struct
         Next_instruction.branch state i |> Next_instruction.with_instr_counter
       in
       let r, stack = Stack.pop_as_ref stack in
-      let matches = ref_matches_ref_type r rt2 |> Boolean.of_bool in
+      let matches = ref_matches_ref_type modul env r rt2 |> Boolean.of_bool in
       let* matches, stack =
         let* matches =
           select matches ~instr_counter_true ~instr_counter_false
@@ -2474,11 +2532,11 @@ struct
         (fun () ->
           let fuel_left = Atomic.fetch_and_add fuel (-1) in
           (* If we only use [timeout_instr], we want to stop all as
-                                  soon as [fuel_left <= 0]. But if we only use [timeout],
-                                  we don't want to run into the slow path below on each
-                                  instruction after [fuel_left] becomes negative. We avoid
-                                  this repeated slow path by bumping [fuel] to [max_int]
-                                  again in this case. *)
+                                 soon as [fuel_left <= 0]. But if we only use [timeout],
+                                 we don't want to run into the slow path below on each
+                                 instruction after [fuel_left] becomes negative. We avoid
+                                 this repeated slow path by bumping [fuel] to [max_int]
+                                 again in this case. *)
           if fuel_left mod 1024 = 0 || fuel_left < 0 then begin
             let stop =
               match (Parameters.timeout, Parameters.timeout_instr) with
