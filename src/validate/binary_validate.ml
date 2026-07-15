@@ -32,15 +32,6 @@ let typ_of_pt pt = typ_of_val_type @@ snd pt
 module Index = struct
   module M = Int
   module Map = Map.Make (Int)
-
-  module PairSet = Set.Make (struct
-    type t = int * int
-
-    let compare (a1, b1) (a2, b2) =
-      let c = Int.compare a1 a2 in
-      if c <> 0 then c else Int.compare b1 b2
-  end)
-
   include M
 end
 
@@ -211,156 +202,14 @@ let is_defaultable : storage_type -> bool = function
   | Val_type (Ref_type (No_null, _)) -> false
   | _ -> true
 
-(* TODO: Maybe add the type id to Bt_raw to avoid having to look it this way? *)
 let get_func_type_id (env : Env.t) i =
-  let typ =
-    match env.modul.func.(i) with
-    | Origin.Local { type_f = Bt_raw (_, typ); _ } -> typ
-    | Imported { typ = Bt_raw (_, typ); _ } -> typ
-  in
-  Array.find_index
-    (fun typ' ->
-      match typ' with
-      | Typedef.SimpleType (_, { ct = Def_func_t typ'; _ }) ->
-        func_type_eq typ typ'
-      | Typedef.SimpleType _ | Typedef.RecType _ -> false )
-    env.modul.type_defs
+  match env.modul.func.(i) with
+  | Origin.Local { type_f = Bt_raw (idx, _); _ }
+  | Imported { typ = Bt_raw (idx, _); _ } ->
+    idx
 
-(* Two type indices are equivalent when they occupy the same position
-    inside two rec groups of the same size whose members are pairwise
-    structurally equivalent. *)
-
-(** [iso_group_bounds modul type_idx] returns [(group_start, group_size)] for
-    the rec group that contains [type_idx] in [modul.type_defs]. *)
-let iso_group_bounds (modul : Module.t) type_idx =
-  snd
-  @@ Array.fold_left
-       (fun (pos, acc) typedef ->
-         match typedef with
-         | Typedef.SimpleType _ ->
-           (pos + 1, if pos = type_idx then (pos, 1) else acc)
-         | Typedef.RecType members ->
-           let size = List.length members in
-           ( pos + size
-           , if type_idx >= pos && type_idx < pos + size then (pos, size)
-             else acc ) )
-       (0, (type_idx, 1))
-       modul.type_defs
-(* TODO: precompute type groups to not have to iterate over all type defs here. *)
-
-(** [is_iso_equiv modul visited a b] tests whether the types identified by the
-    indices [a] and [b] are equivalent. *)
-let rec is_iso_equiv (modul : Module.t) visited a b =
-  if a = b then (true, visited)
-  else
-    let key = if a > b then (b, a) else (a, b) in
-    if Index.PairSet.mem key visited then (true, visited)
-    else
-      let visited = Index.PairSet.add key visited in
-      let ga, ga_sz = iso_group_bounds modul a in
-      let gb, gb_sz = iso_group_bounds modul b in
-      let relpos_a = a - ga in
-      let relpos_b = b - gb in
-      if relpos_a <> relpos_b || ga_sz <> gb_sz then (false, visited)
-      else iso_groups modul visited ga gb ga_sz
-
-(** [iso_groups modul visited ga gb size] checks that all [size] member pairs
-    [(ga+i, gb+i)] are pairwise equivalent via [iso_sub_type]. *)
-and iso_groups (modul : Module.t) visited ga gb size =
-  let rec aux i visited =
-    if i >= size then (true, visited)
-    else
-      let ta = modul.types.(ga + i)
-      and tb = modul.types.(gb + i) in
-      let ok, visited = iso_sub_type modul visited ga gb size ta tb in
-      if ok then aux (i + 1) visited else (false, visited)
-  in
-  aux 0 visited
-
-and iso_sub_type (modul : Module.t) visited ga gb size
-  { final = fa; ids = ia; ct = ca } { final = fb; ids = ib; ct = cb } =
-  if not (Bool.equal fa fb) then (false, visited)
-  else if List.length ia <> List.length ib then (false, visited)
-  else
-    (* TODO: use rec functions instead of fold_left2 *)
-    let ok, visited =
-      List.fold_left2
-        (fun (ok, visited) a b ->
-          if not ok then (false, visited)
-          else iso_heap_type modul visited ga gb size (TypeUse a) (TypeUse b) )
-        (true, visited) ia ib
-    in
-    if not ok then (false, visited)
-    else iso_comp_type modul visited ga gb size ca cb
-
-and iso_comp_type (modul : Module.t) visited ga gb size cta ctb =
-  match (cta, ctb) with
-  | Def_func_t (pt_a, rt_a), Def_func_t (pt_b, rt_b) ->
-    if
-      List.length pt_a <> List.length pt_b
-      || List.length rt_a <> List.length rt_b
-    then (false, visited)
-    else
-      let ok, visited =
-        List.fold_left2
-          (fun (ok, visited) (_, vt_a) (_, vt_b) ->
-            if not ok then (false, visited)
-            else iso_val_type modul visited ga gb size vt_a vt_b )
-          (true, visited) pt_a pt_b
-      in
-      if not ok then (false, visited)
-      else
-        List.fold_left2
-          (fun (ok, visited) vt_a vt_b ->
-            if not ok then (false, visited)
-            else iso_val_type modul visited ga gb size vt_a vt_b )
-          (true, visited) rt_a rt_b
-  | Def_struct_t fl_a, Def_struct_t fl_b ->
-    if List.length fl_a <> List.length fl_b then (false, visited)
-    else
-      List.fold_left2
-        (fun (ok, visited) (_, (m_a, st_a)) (_, (m_b, st_b)) ->
-          if not ok then (false, visited)
-          else if not (Bool.equal (Text.is_mut m_a) (Text.is_mut m_b)) then
-            (false, visited)
-          else iso_storage_type modul visited ga gb size st_a st_b )
-        (true, visited) fl_a fl_b
-  | Def_array_t (m_a, st_a), Def_array_t (m_b, st_b) ->
-    if not (Bool.equal (Text.is_mut m_a) (Text.is_mut m_b)) then (false, visited)
-    else iso_storage_type modul visited ga gb size st_a st_b
-  | _ -> (false, visited)
-
-and iso_storage_type (modul : Module.t) visited ga gb size st_a st_b =
-  match (st_a, st_b) with
-  | Pack_type pa, Pack_type pb ->
-    ( ( match (pa, pb) with
-      | Text.I8, Text.I8 | Text.I16, Text.I16 -> true
-      | _ -> false )
-    , visited )
-  | Val_type vt_a, Val_type vt_b ->
-    iso_val_type modul visited ga gb size vt_a vt_b
-  | _ -> (false, visited)
-
-and iso_val_type (modul : Module.t) visited ga gb size vt_a vt_b =
-  match (vt_a, vt_b) with
-  | Binary.Num_type na, Binary.Num_type nb -> (Text.num_type_eq na nb, visited)
-  | Binary.Ref_type (nulla, hta), Binary.Ref_type (nullb, htb) -> (
-    match (nulla, nullb) with
-    | Text.Null, Text.Null | Text.No_null, Text.No_null ->
-      iso_heap_type modul visited ga gb size hta htb
-    | _ -> (false, visited) )
-  | _ -> (false, visited)
-
-and iso_heap_type (modul : Module.t) visited ga gb size ht_a ht_b =
-  match (ht_a, ht_b) with
-  | TypeUse ia, TypeUse ib ->
-    let a_within_group = ia >= ga && ia < ga + size in
-    let b_within_group = ib >= gb && ib < gb + size in
-    if a_within_group && b_within_group then (ia - ga = ib - gb, visited)
-    else if (not a_within_group) && not b_within_group then
-      is_iso_equiv modul visited ia ib
-    else (false, visited)
-  | _ -> (heap_type_eq ht_a ht_b, visited)
+let modul_type_groups (modul : Module.t) =
+  Binary.compute_type_groups modul.type_defs (Array.length modul.types)
 
 (* TODO: move type matching functions outside of the stack module? *)
 module Stack : sig
@@ -412,19 +261,9 @@ end = struct
     | V128, V128 -> Ok true
     | _, _ -> Ok false
 
-  let rec is_typeuse_subtype modul ~expected ~got =
-    if Int.equal got expected then true
-    else
-      match Env.type_get_sub got modul with
-      | Error _ -> false
-      | Ok { ids; _ } ->
-        List.exists (Int.equal expected) ids
-        || List.exists
-             (fun super_id ->
-               (not (Int.equal super_id got))
-               && is_typeuse_subtype modul ~expected ~got:super_id )
-             ids
-        || fst (is_iso_equiv modul Index.PairSet.empty expected got)
+  let is_typeuse_subtype modul ~expected ~got =
+    let tg = modul_type_groups modul in
+    Binary.is_subtype modul.types tg modul.types tg ~got ~expected
 
   let match_heap_type ?(subtype = false) modul ~expected ~got =
     match (got, expected) with
@@ -559,8 +398,14 @@ let typ_equal modul ~expected ~got =
   | Something, _ | _, Something -> Ok true
   | _, _ -> Ok false
 
-let is_func_type (ref_type : ref_type) =
-  match ref_type with _, Func_ht -> true | _ -> false
+let is_func_type modul (ref_type : ref_type) =
+  match ref_type with
+  | _, Func_ht -> true
+  | _, TypeUse id -> (
+    match Module.get_type id modul with
+    | Some { ct = Def_func_t _; _ } -> true
+    | _ -> false )
+  | _ -> false
 
 let ref_type_as_non_null t =
   match t with
@@ -1617,7 +1462,7 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
   | Call_indirect (tbl_id, bt) ->
     let* _tbl_type = Env.table_type_get tbl_id env.modul in
     let* () =
-      if is_func_type _tbl_type then Ok ()
+      if is_func_type env.modul _tbl_type then Ok ()
       else Error (`Type_mismatch "call_indirect")
     in
     let* stack = Stack.pop env.modul [ i32 ] stack in
@@ -1648,7 +1493,7 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
   | Return_call_indirect (tbl_id, Bt_raw (_, (pt, rt))) ->
     let* _tbl_type = Env.table_type_get tbl_id env.modul in
     let* () =
-      if is_func_type _tbl_type then Ok ()
+      if is_func_type env.modul _tbl_type then Ok ()
       else Error (`Type_mismatch "call_indirect")
     in
     let* b =
@@ -1859,22 +1704,17 @@ let typecheck_const_instr ?known_globals ~is_init (modul : Module.t) refs stack
   | V128 (Const _) -> Stack.push [ v128 ] stack
   | Ref (Null t) -> Stack.push [ Ref_type (Null, t) ] stack
   | Ref (Func i) ->
-    let* ity = Env.func_get i modul in
-    let resty =
-      match
-        Array.find_index
-          (fun ty ->
-            match ty with
-            | Typedef.SimpleType (_, { ct = Def_func_t ty; _ }) ->
-              func_type_eq ty ity
-            | Typedef.SimpleType _ | Typedef.RecType _ -> false )
-          modul.type_defs
-      with
-      | Some tyid -> TypeUse tyid
-      | None -> Func_ht
-    in
-    Hashtbl.add refs i ();
-    Stack.push [ Ref_type (No_null, resty) ] stack
+    if i >= Array.length modul.func then Error (`Unknown_func (Text.Raw i))
+    else
+      let resty =
+        match modul.func.(i) with
+        | Origin.Local { Func.type_f = Bt_raw (Some idx, _); _ }
+        | Imported { typ = Bt_raw (Some idx, _); _ } ->
+          TypeUse idx
+        | _ -> Func_ht
+      in
+      Hashtbl.add refs i ();
+      Stack.push [ Ref_type (No_null, resty) ] stack
   | Global (Get i) ->
     if
       Option.fold ~none:false ~some:(fun n -> i >= n) known_globals
@@ -1956,6 +1796,12 @@ let typecheck_global (modul : Module.t) refs known_globals
   match global with
   | Imported _ -> Ok ()
   | Local { typ; init; _ } -> (
+    let* () =
+      match snd typ with
+      | Binary.Ref_type (_, TypeUse i) when i >= Array.length modul.types ->
+        Error (`Unknown_type (Text.Raw i))
+      | _ -> Ok ()
+    in
     let* real_type = typecheck_const_expr ~known_globals modul refs init in
     match real_type with
     | [ real_type ] ->
@@ -2155,9 +2001,90 @@ let validate_storage_type (modul : Module.t) = function
   | Val_type vt -> validate_value_type modul vt
   | Pack_type _ -> Ok ()
 
+let is_sub_heap_type_mod (modul : Module.t) ha hb =
+  Binary.is_subtype_heap_type ha hb
+  ||
+  match (ha, hb) with
+  | TypeUse i, TypeUse j ->
+    let types = modul.types
+    and tg = modul_type_groups modul in
+    Binary.is_subtype types tg types tg ~got:i ~expected:j
+  | TypeUse i, _ when i < Array.length modul.types ->
+    let abstract =
+      match modul.types.(i).ct with
+      | Def_func_t _ -> Func_ht
+      | Def_struct_t _ -> Struct_ht
+      | Def_array_t _ -> Array_ht
+    in
+    Binary.is_subtype_heap_type abstract hb
+  | _ -> false
+
+let is_sub_storage_type_mod modul sa sb =
+  match (sa, sb) with
+  | Pack_type I8, Pack_type I8 | Pack_type I16, Pack_type I16 -> true
+  | Val_type (Num_type na), Val_type (Num_type nb) -> Text.num_type_eq na nb
+  | Val_type (Ref_type (na, ha)), Val_type (Ref_type (nb, hb)) ->
+    ( match (na, nb) with
+      | Null, Null | No_null, No_null | No_null, Null -> true
+      | _ -> false )
+    && is_sub_heap_type_mod modul ha hb
+  | _ -> false
+
+let storage_type_eq_mod sa sb =
+  match (sa, sb) with
+  | Pack_type I8, Pack_type I8 | Pack_type I16, Pack_type I16 -> true
+  | Val_type va, Val_type vb -> val_type_eq va vb
+  | _ -> false
+
+let check_field_depth modul (m_sub, st_sub) (m_super, st_super) =
+  if not (Bool.equal (Text.is_mut m_sub) (Text.is_mut m_super)) then false
+  else if Text.is_mut m_sub then storage_type_eq_mod st_sub st_super
+  else is_sub_storage_type_mod modul st_sub st_super
+
+let rec list_take n lst =
+  if n = 0 then []
+  else match lst with [] -> [] | x :: xs -> x :: list_take (n - 1) xs
+
+let check_comp_type_depth modul ct_sub ct_super =
+  match (ct_sub, ct_super) with
+  | Def_func_t (ps_sub, rs_sub), Def_func_t (ps_super, rs_super) ->
+    List.length ps_sub = List.length ps_super
+    && List.length rs_sub = List.length rs_super
+    && List.for_all2
+         (fun (_, vt_sub) (_, vt_super) ->
+           is_sub_storage_type_mod modul (Val_type vt_super) (Val_type vt_sub) )
+         ps_sub ps_super
+    && List.for_all2
+         (fun vt_sub vt_super ->
+           is_sub_storage_type_mod modul (Val_type vt_sub) (Val_type vt_super) )
+         rs_sub rs_super
+  | Def_struct_t fl_sub, Def_struct_t fl_super ->
+    List.length fl_sub >= List.length fl_super
+    && List.for_all2
+         (fun (_, ft_sub) (_, ft_super) ->
+           check_field_depth modul ft_sub ft_super )
+         (list_take (List.length fl_super) fl_sub)
+         fl_super
+  | Def_array_t ft_sub, Def_array_t ft_super ->
+    check_field_depth modul ft_sub ft_super
+  | _ -> false
+
+let check_sub_type_decl (modul : Module.t) (st : sub_type) =
+  list_iter
+    (fun super_id ->
+      if super_id >= Array.length modul.types then Error (`Msg "sub type")
+      else
+        let super_st = modul.types.(super_id) in
+        if super_st.final then Error (`Msg "sub type")
+        else if not (check_comp_type_depth modul st.ct super_st.ct) then
+          Error (`Msg "sub type")
+        else Ok () )
+    st.ids
+
 let validate_type_defs (modul : Module.t) =
   array_iter
-    (fun ({ ct; _ } : sub_type) ->
+    (fun ({ ct; _ } as st : sub_type) ->
+      let* () = check_sub_type_decl modul st in
       match ct with
       | Def_func_t (params, results) ->
         let* () =

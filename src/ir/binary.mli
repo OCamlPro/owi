@@ -83,6 +83,24 @@ val pp_sub_type : sub_type Fmt.t
 
 val sub_type_eq : sub_type -> sub_type -> bool
 
+val is_iso_equiv :
+     sub_type array
+  -> (int * int) array
+  -> sub_type array
+  -> (int * int) array
+  -> int
+  -> int
+  -> bool
+
+val is_subtype :
+     sub_type array
+  -> (int * int) array
+  -> sub_type array
+  -> (int * int) array
+  -> got:int
+  -> expected:int
+  -> bool
+
 type block_type =
   (* TODO: inline this *)
   | Bt_raw of (indice option * func_type)
@@ -465,6 +483,8 @@ module Typedef : sig
 
   val pp : t Fmt.t
 end
+
+val compute_type_groups : Typedef.t array -> int -> (int * int) array
 
 module Table : sig
   module Type : sig

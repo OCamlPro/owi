@@ -1449,6 +1449,42 @@ struct
       Stack.apply_f64_v128_v128 stack (V128.F64x2.replace_lane lane)
       |> Choice.return
 
+  let ref_matches_ref_type env (r : Ref.t) ((nullable, ht) : ref_type) : bool =
+    let is_null = match nullable with Null -> true | No_null -> false in
+    match r with
+    | Ref.Func None when is_null -> (
+      match ht with Func_ht | NoFunc_ht | TypeUse _ -> true | _ -> false )
+    | Ref.Extern None when is_null -> (
+      match ht with Extern_ht | NoExtern_ht -> true | _ -> false )
+    | Ref.NullRef when is_null -> (
+      match ht with
+      | Any_ht | None_ht | Eq_ht | I31_ht | Struct_ht | Array_ht -> true
+      | _ -> false )
+    | Ref.NullExn when is_null -> (
+      match ht with Exn_ht | NoExn_ht -> true | _ -> false )
+    | Ref.Func (Some f) -> (
+      match ht with
+      | Func_ht -> true
+      | TypeUse expected -> (
+        match f with
+        | Kind.Wasm { func; _ } -> (
+          match func.type_f with
+          | Bt_raw (Some got, _) ->
+            let types = Env.get_types env in
+            let type_groups = Env.get_type_groups env in
+            Binary.is_subtype types type_groups types type_groups ~expected ~got
+          | Bt_raw (None, _) -> false )
+        | Kind.Extern _ -> false )
+      | _ -> false )
+    | Ref.Extern (Some _) -> ( match ht with Extern_ht -> true | _ -> false )
+    | Ref.I31 _ -> (
+      match ht with I31_ht | Eq_ht | Any_ht -> true | _ -> false )
+    | Ref.Struct _ -> (
+      match ht with Struct_ht | Eq_ht | Any_ht -> true | _ -> false )
+    | Ref.Array _ -> (
+      match ht with Array_ht | Eq_ht | Any_ht -> true | _ -> false )
+    | Func None | Extern None | NullExn | NullRef -> false
+
   let exec_ref_instr env stack (i : Binary.ref_instr) =
     match i with
     | Null t -> Stack.push_ref stack (Ref.null t) |> Choice.return
@@ -1464,9 +1500,18 @@ struct
     | Func i ->
       let f = Env.get_func env i in
       Stack.push_ref stack (Ref.func f) |> Choice.return
-    | (Eq | Test _ | Cast _) as r ->
+    | Test rt ->
+      let r, stack = Stack.pop_as_ref stack in
+      let b = ref_matches_ref_type env r rt |> Boolean.of_bool in
+      Stack.push_bool stack b |> Choice.return
+    | Cast rt ->
+      let r, stack = Stack.pop_as_ref stack in
+      if ref_matches_ref_type env r rt then
+        Stack.push_ref stack r |> Choice.return
+      else Choice.trap `Cast_failure
+    | Eq ->
       Fmt.failwith "TODO: unimplemented ref instruction interpretation: %a"
-        (pp_instr ~short:false) (Ref r)
+        (pp_instr ~short:false) (Ref i)
 
   let exec_local_instr state locals stack : Binary.local_instr -> _ = function
     | Get i ->
@@ -1956,13 +2001,13 @@ struct
   (* exec_vfunc ~return state func *)
 
   let call_indirect ~return (state : State.exec_state)
-    (tbl_i, (Bt_raw ((None | Some _), typ_i) : block_type)) =
+    (tbl_i, (Bt_raw (call_type_idx, typ_i) : block_type)) =
     let fun_i, stack = Stack.pop_i32 state.stack in
     let state = { state with stack } in
     let* t = Env.get_table state.env tbl_i in
     let _null, ref_kind = Table.typ t in
     match ref_kind with
-    | Func_ht ->
+    | Func_ht | TypeUse _ ->
       let size = Table.size t in
       let>! () =
         ( I32.(le_u (I32.of_int size) fun_i)
@@ -1978,43 +2023,24 @@ struct
       | Null -> Choice.trap (`Uninitialized_element fun_i)
       | Type_mismatch -> Choice.trap `Element_type_error
       | Ref_value func ->
-        let ft = func_type state func in
-        let ft' = typ_i in
-        if not (Binary.func_type_eq ft ft') then
-          Choice.trap `Indirect_call_type_mismatch
+        let type_matches =
+          match (call_type_idx, func) with
+          | Some expected, Kind.Wasm { func; idx } -> (
+            match func.type_f with
+            | Bt_raw (Some got, _) ->
+              let exp_env = Dynarray.get state.envs idx in
+              Binary.is_subtype (Env.get_types exp_env)
+                (Env.get_type_groups exp_env)
+                (Env.get_types state.env)
+                (Env.get_type_groups state.env)
+                ~got ~expected
+            | Bt_raw (None, ft) -> Binary.func_type_eq ft typ_i )
+          | _ -> Binary.func_type_eq (func_type state func) typ_i
+        in
+        if not type_matches then Choice.trap `Indirect_call_type_mismatch
         else exec_vfunc ~return state func
       end
     | _ -> Choice.trap `Indirect_call_type_mismatch
-
-  let ref_matches_ref_type (r : Ref.t) ((nullable, ht) : ref_type) : bool =
-    let is_null = match nullable with Null -> true | No_null -> false in
-    match r with
-    | Ref.Func None when is_null -> (
-      match ht with Func_ht | NoFunc_ht | TypeUse _ -> true | _ -> false )
-    | Ref.Extern None when is_null -> (
-      match ht with Extern_ht | NoExtern_ht -> true | _ -> false )
-    | Ref.NullRef when is_null -> (
-      match ht with
-      | Any_ht | None_ht | Eq_ht | I31_ht | Struct_ht | Array_ht -> true
-      | _ -> false )
-    | Ref.NullExn when is_null -> (
-      match ht with Exn_ht | NoExn_ht -> true | _ -> false )
-    | Ref.Func (Some _) -> (
-      match ht with
-      | Func_ht -> true
-      | TypeUse _ ->
-        Fmt.failwith
-          "ref_matches_ref_type: check that the function type matches the type \
-           of the typeuse id"
-      | _ -> false )
-    | Ref.Extern (Some _) -> ( match ht with Extern_ht -> true | _ -> false )
-    | Ref.I31 _ -> (
-      match ht with I31_ht | Eq_ht | Any_ht -> true | _ -> false )
-    | Ref.Struct _ -> (
-      match ht with Struct_ht | Eq_ht | Any_ht -> true | _ -> false )
-    | Ref.Array _ -> (
-      match ht with Array_ht | Eq_ht | Any_ht -> true | _ -> false )
-    | Func None | Extern None | NullExn | NullRef -> false
 
   let exec_instr ({ raw; uuid; instr_counter; _ } : _ Annotated.t)
     ({ stack; env; locals; _ } as state : State.exec_state) :
@@ -2177,7 +2203,7 @@ struct
         Next_instruction.continue state |> Next_instruction.with_instr_counter
       in
       let r, stack = Stack.pop_as_ref stack in
-      let matches = ref_matches_ref_type r rt2 |> Boolean.of_bool in
+      let matches = ref_matches_ref_type env r rt2 |> Boolean.of_bool in
       let* matches, stack =
         let* matches =
           select matches ~instr_counter_false ~instr_counter_true
@@ -2197,7 +2223,7 @@ struct
         Next_instruction.branch state i |> Next_instruction.with_instr_counter
       in
       let r, stack = Stack.pop_as_ref stack in
-      let matches = ref_matches_ref_type r rt2 |> Boolean.of_bool in
+      let matches = ref_matches_ref_type env r rt2 |> Boolean.of_bool in
       let* matches, stack =
         let* matches =
           select matches ~instr_counter_true ~instr_counter_false

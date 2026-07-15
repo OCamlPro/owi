@@ -346,39 +346,55 @@ let eval_tables ls env tables =
   in
   env
 
-let load_func (ls : 'f State.t) (import : Binary.block_type Origin.imported) :
-  func Result.t =
-  let (Binary.Bt_raw ((None | Some _), typ)) = import.typ in
+let load_func (ls : 'f State.t) (imp_types : Binary.sub_type array)
+  (imp_type_groups : (int * int) array)
+  (import : Binary.block_type Origin.imported) : func Result.t =
+  let (Binary.Bt_raw (imp_idx_opt, typ)) = import.typ in
   let* func =
     State.load_from_module ls (fun (e : State.exports) -> e.functions) import
   in
-  let type' =
+  let compatible =
     match func with
-    | Kind.Wasm { func; _ } ->
-      let (Bt_raw ((None | Some _), t)) = func.type_f in
-      t
+    | Kind.Wasm { func; idx } -> (
+      let (Bt_raw (exp_idx_opt, type')) = func.type_f in
+      let exp_env = Dynarray.get ls.envs idx in
+      let exp_types = Link_env.get_types exp_env in
+      let exp_type_groups = Link_env.get_type_groups exp_env in
+      match (imp_idx_opt, exp_idx_opt) with
+      | Some imp_idx, Some exp_idx ->
+        Binary.is_subtype exp_types exp_type_groups imp_types imp_type_groups
+          ~got:exp_idx ~expected:imp_idx
+      | _ -> Binary.func_type_eq typ type' )
     | Extern { idx } ->
-      let _f, t = Dynarray.get ls.collection idx in
-      t
+      let _f, type' = Dynarray.get ls.collection idx in
+      Binary.func_type_eq typ type'
   in
-  if Binary.func_type_eq typ type' then Ok func
+  if compatible then Ok func
   else
+    let (Binary.Bt_raw (_, type')) =
+      match func with
+      | Kind.Wasm { func; _ } -> func.type_f
+      | Extern { idx } ->
+        Binary.Bt_raw (None, snd (Dynarray.get ls.collection idx))
+    in
     let msg =
       Fmt.str "%s: expected: %a got: %a" import.name Binary.pp_func_type typ
         Binary.pp_func_type type'
     in
     Error (`Incompatible_import_type msg)
 
-let eval_func ls (finished_env : int) func : func Result.t =
+let eval_func ls (finished_env : int) imp_types imp_type_groups func :
+  func Result.t =
   match func with
   | Origin.Local func -> Result.ok @@ Kind.wasm func finished_env
-  | Imported import -> load_func ls import
+  | Imported import -> load_func ls imp_types imp_type_groups import
 
-let eval_functions ls (finished_env : int) env functions =
+let eval_functions ls (finished_env : int) imp_types imp_type_groups env
+  functions =
   let+ env, _i =
     array_fold_left
       (fun (env, i) func ->
-        let+ func = eval_func ls finished_env func in
+        let+ func = eval_func ls finished_env imp_types imp_type_groups func in
         let env = Link_env.Build.add_func i func env in
         (env, succ i) )
       (env, 0) functions
@@ -530,14 +546,21 @@ module Binary = struct
     let ls = State.clone ls in
     let next_id = Dynarray.length ls.envs in
     let env = Link_env.Build.empty in
-    let* env = eval_functions ls next_id env modul.func in
+    let imp_type_groups =
+      Link_env.compute_type_groups modul.type_defs (Array.length modul.types)
+    in
+    let* env =
+      eval_functions ls next_id modul.types imp_type_groups env modul.func
+    in
     let* env = eval_tags ls next_id env modul.tag in
     let* env = eval_globals ls env modul.types modul.global in
     let* env = eval_memories ls env modul.mem in
     let* env = eval_tables ls env modul.table in
     let* env, init_active_data = define_data modul.types env modul.data in
     let* env, init_active_elem = define_elem modul.types env modul.elem in
-    let env = Link_env.freeze next_id env ls.collection in
+    let env =
+      Link_env.freeze next_id env ls.collection modul.types modul.type_defs
+    in
     Dynarray.add_last ls.envs env;
     let+ by_id_exports = populate_exports env modul.exports in
     let by_id =

@@ -36,5 +36,3 @@
   $ owi script --no-exhaustion reference/struct.wast 2>&1 | grep -oE "Failure.*"
   Failure("TODO: unimplemented instruction interpretation: struct.new_default 0")
   $ owi script --no-exhaustion reference/type-subtyping.wast 2>&1
-  owi: [ERROR] type mismatch (typecheck global 1)
-  [35]
