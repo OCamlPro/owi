@@ -8,9 +8,9 @@ let size = Units.In_bits.s32
 
 let pp ctx = Abstract_domain.binary_pretty ctx ~size
 
-let of_binary x = x
+let[@inline] of_binary x = x
 
-let to_binary x = x
+let[@inline] to_binary x = x
 
 let unknown ctx = Abstract_domain.binary_unknown ~size ctx
 

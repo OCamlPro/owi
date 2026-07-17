@@ -12,9 +12,9 @@ let ne ctx i1 i2 = Abstract_boolean.not ctx (eq ctx i1 i2)
 
 let pp ctx = Abstract_domain.binary_pretty ctx ~size
 
-let of_binary x = x
+let[@inline] of_binary x = x
 
-let to_binary x = x
+let[@inline] to_binary x = x
 
 let of_boolean ctx boolean =
   Abstract_domain.Binary_Forward.bofbool ~size ctx boolean
@@ -92,7 +92,9 @@ let extend_s ctx n x =
   Abstract_domain.Binary_Forward.bsext ~size ~oldsize:n ctx value
 
 let extend_i32_s ctx x =
-  Abstract_domain.Binary_Forward.bsext ~size ~oldsize:Units.In_bits.s32 ctx x
+  Abstract_domain.Binary_Forward.bsext ~size ~oldsize:Units.In_bits.s32 ctx
+    (Abstract_i32.to_binary x)
 
 let extend_i32_u ctx x =
-  Abstract_domain.Binary_Forward.buext ~size ~oldsize:Units.In_bits.s32 ctx x
+  Abstract_domain.Binary_Forward.buext ~size ~oldsize:Units.In_bits.s32 ctx
+    (Abstract_i32.to_binary x)
