@@ -74,6 +74,6 @@ val shl : Abstract_domain.Context.t -> t -> t -> t
 
 val extend_s : Abstract_domain.Context.t -> int -> t -> t
 
-val extend_i32_u : Abstract_domain.Context.t -> t -> t
+val extend_i32_u : Abstract_domain.Context.t -> Abstract_i32.t -> t
 
-val extend_i32_s : Abstract_domain.Context.t -> t -> t
+val extend_i32_s : Abstract_domain.Context.t -> Abstract_i32.t -> t

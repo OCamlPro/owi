@@ -259,10 +259,10 @@ let eval_i64 ({ stack; ctx; invariant; _ } as state : Abstract_state.t) uuid :
     let stack = Stack.apply_i64_i64 stack (Abstract_i64.extend_s ctx 32) in
     State { state with stack }
   | Extend_i32_s ->
-    let stack = Stack.apply_i64_i64 stack (Abstract_i64.extend_i32_s ctx) in
+    let stack = Stack.apply_i32_i64 stack (Abstract_i64.extend_i32_s ctx) in
     State { state with stack }
   | Extend_i32_u ->
-    let stack = Stack.apply_i64_i64 stack (Abstract_i64.extend_i32_u ctx) in
+    let stack = Stack.apply_i32_i64 stack (Abstract_i64.extend_i32_u ctx) in
     State { state with stack }
   | Store (_memid, _)
   | Store8 (_memid, _)
@@ -395,7 +395,9 @@ let eval_f64 ({ stack; ctx; _ } as state : Abstract_state.t) _uuid :
     let stack = Stack.apply_f64_f64 stack (fun _ -> Abstract_f64.unknown ctx) in
     State { state with stack }
   | Promote_f32 ->
-    let stack = Stack.apply_f32_f64 stack (fun _ -> Abstract_f64.unknown ctx) in
+    let stack =
+      Stack.apply_f32_f64 stack (fun f -> Abstract_f64.of_float ctx f)
+    in
     State { state with stack }
   | Reinterpret_i S32 ->
     let stack = Stack.apply_i32_f64 stack (fun _ -> Abstract_f64.unknown ctx) in
