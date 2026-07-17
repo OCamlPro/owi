@@ -3,7 +3,9 @@
   %{bin:owi}
   add.wat
   assume.wat
+  control_flow.wat
   fact.wat
+  floats.wat
   globals.wat
   if.wat
   invariant_gen1.wat
