@@ -526,31 +526,33 @@ module DenotFixpoint (S : DATA_STATE) = struct
       (state, JumpTarget.empty)
     | Br_table (cases, default) ->
       let v, stack = Stack.pop_i32 stack in
-      let equals =
-        let f acc i =
-          let predicate = Abstract_i32.of_int ctx i |> Abstract_i32.eq ctx v in
-          match Abstract_domain.assume ctx predicate with
-          | Some _ -> i :: acc
-          | None -> acc
-        in
-        Array.fold_left f [] cases
-      in
-      let non_equals =
-        let f acc i =
-          Abstract_i32.of_int ctx i |> Abstract_i32.eq ctx v
-          |> Abstract_boolean.not ctx
-          |> Abstract_boolean.and_ ctx acc
-        in
-        let predicate = Array.fold_left f (Abstract_boolean.true_ ctx) cases in
-        match Abstract_domain.assume ctx predicate with
-        | Some _ -> [ default ]
+      let nb_cases = Array.length cases in
+      let default =
+        match
+          Abstract_domain.assume ctx
+            (Abstract_i32.ge_u ctx v (Abstract_i32.of_int ctx nb_cases))
+        with
+        | Some ctx -> [ (JumpKey.I default, [ { abs_state with ctx; stack } ]) ]
         | None -> []
       in
-      let jt_list =
-        List.append equals non_equals
-        |> List.map (fun i -> (JumpKey.I i, [ { abs_state with stack } ]))
+      let cases =
+        Array.map
+          (fun i ->
+            ( i
+            , Abstract_domain.assume ctx
+                (Abstract_i32.eq ctx v (Abstract_i32.of_int ctx i)) ) )
+          cases
       in
-      (None, JumpTarget.of_list jt_list)
+      let all_cases =
+        Array.fold_left
+          (fun acc (i, c) ->
+            match c with
+            | Some ctx ->
+              (JumpKey.I i, [ { abs_state with ctx; stack } ]) :: acc
+            | None -> acc )
+          default cases
+      in
+      (None, JumpTarget.of_list all_cases)
     | Return -> (None, JumpTarget.of_list [ (Ret, [ abs_state ]) ])
     | _ -> (
       let res = S.eval_instr abs_state instr in
