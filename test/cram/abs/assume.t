@@ -94,7 +94,7 @@
   owi: [INFO] stack         : [  ]
   owi: [INFO] locals        : [ (0 -> i32 {0}) ]
   owi: [INFO] running instr : call 0
-  owi: [DEBUG] jt            :  
+  owi: [DEBUG] jt after (call 0) :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=1, <(B:9)> -> [--..--]
                                         }
@@ -103,7 +103,7 @@
   owi: [INFO] stack         : [ i32 [--..--] ]
   owi: [INFO] locals        : [ (0 -> i32 {0}) ]
   owi: [INFO] running instr : local.tee 0
-  owi: [DEBUG] jt            :  
+  owi: [DEBUG] jt after (local.tee 0) :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=1, <(B:9)> -> [--..--]
                                         }
@@ -112,7 +112,7 @@
   owi: [INFO] stack         : [ i32 [--..--] ]
   owi: [INFO] locals        : [ (0 -> i32 [--..--]) ]
   owi: [INFO] running instr : i32.const 0
-  owi: [DEBUG] jt            :  
+  owi: [DEBUG] jt after (i32.const 0) :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=1, <(B:9)> -> [--..--]
                                         }
@@ -121,7 +121,7 @@
   owi: [INFO] stack         : [ i32 {0} ; i32 [--..--] ]
   owi: [INFO] locals        : [ (0 -> i32 [--..--]) ]
   owi: [INFO] running instr : i32.gt_s
-  owi: [DEBUG] jt            :  
+  owi: [DEBUG] jt after (i32.gt_s) :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=1,
                                   <(b:10)> -> {true;false};
@@ -134,7 +134,7 @@
   owi: [INFO] stack         : [ i32 {0; 1} ]
   owi: [INFO] locals        : [ (0 -> i32 [--..--]) ]
   owi: [INFO] running instr : call 1
-  owi: [DEBUG] jt            :  
+  owi: [DEBUG] jt after (call 1) :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=2,
                                   <(b:10)> -> {false}; <(b:11)> -> {true};
@@ -146,7 +146,7 @@
   owi: [INFO] stack         : [  ]
   owi: [INFO] locals        : [ (0 -> i32 [1..0x7FFFFFFF]) ]
   owi: [INFO] running instr : i32.const 100
-  owi: [DEBUG] jt            :  
+  owi: [DEBUG] jt after (i32.const 100) :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=2,
                                   <(b:10)> -> {false}; <(b:11)> -> {true};
@@ -158,7 +158,7 @@
   owi: [INFO] stack         : [ i32 {100} ]
   owi: [INFO] locals        : [ (0 -> i32 [1..0x7FFFFFFF]) ]
   owi: [INFO] running instr : local.get 0
-  owi: [DEBUG] jt            :  
+  owi: [DEBUG] jt after (local.get 0) :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=2,
                                   <(b:10)> -> {false}; <(b:11)> -> {true};
@@ -171,7 +171,7 @@
   owi: [INFO] locals        : [ (0 -> i32 [1..0x7FFFFFFF]) ]
   owi: [INFO] running instr : i32.div_s
   owi: [DEBUG] marked 7 as IMPOSSIBLE divide by zero
-  owi: [DEBUG] jt            :  
+  owi: [DEBUG] jt after (i32.div_s) :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=2,
                                   <(b:10)> -> {false}; <(b:11)> -> {true};
@@ -185,7 +185,7 @@
   owi: [INFO] stack         : [ i32 [0..100] ]
   owi: [INFO] locals        : [ (0 -> i32 [1..0x7FFFFFFF]) ]
   owi: [INFO] running instr : i32.const 0
-  owi: [DEBUG] jt            :  
+  owi: [DEBUG] jt after (i32.const 0) :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=2,
                                   <(b:10)> -> {false}; <(b:11)> -> {true};
@@ -199,7 +199,7 @@
   owi: [INFO] stack         : [ i32 {0} ; i32 [0..100] ]
   owi: [INFO] locals        : [ (0 -> i32 [1..0x7FFFFFFF]) ]
   owi: [INFO] running instr : i32.gt_s
-  owi: [DEBUG] jt            :  
+  owi: [DEBUG] jt after (i32.gt_s) :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=2,
                                   <(b:10)> -> {false}; <(b:11)> -> {true};
@@ -216,7 +216,7 @@
   owi: [INFO] stack         : [ i32 {0; 1} ]
   owi: [INFO] locals        : [ (0 -> i32 [1..0x7FFFFFFF]) ]
   owi: [INFO] running instr : call 1
-  [Single_value_abstraction.Noop] Warning: No backpropagation for 'bisdiv'owi: [DEBUG] jt            :  
+  [Single_value_abstraction.Noop] Warning: No backpropagation for 'bisdiv'owi: [DEBUG] jt after (call 1) :  
   owi: [DEBUG] after call(start): abstract state : 
                  context: Context{id=3,
                                   <(b:10)> -> {false}; <(b:11)> -> {true};
@@ -230,6 +230,6 @@
                  stack  : 
                  locals : i32 [1..0x7FFFFFFF]
   
-  owi: [DEBUG] jt            :  
+  owi: [DEBUG] jt after (call 2) :  
   owi: [INFO] Passed division by zero check for expression:(uuid: 7) i32.div_s
   
