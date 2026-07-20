@@ -175,6 +175,12 @@ module DenotFixpoint (S : DATA_STATE) = struct
     in
     fst @@ continue ctx out
 
+  let join_opt state_a state_b =
+    match (state_a, state_b) with
+    | Some state_a, Some state_b -> Some (join state_a state_b)
+    | None, Some state | Some state, None -> Some state
+    | None, None -> None
+
   let join_X (state_a, jt_a) (state_b, jt_b) =
     let jt = JumpTarget.append jt_a jt_b in
     match (state_a, state_b) with
@@ -183,6 +189,22 @@ module DenotFixpoint (S : DATA_STATE) = struct
       (Some { state_a with abs_state }, jt)
     | Some state, None | None, Some state -> (Some state, jt)
     | _, _ -> assert false
+
+  let join_jts stack_size = function
+    | None -> None
+    | Some jts -> (
+      match jts with
+      | [] -> None
+      | h :: t ->
+        let abs_state =
+          let h_stack = Stack.keep h.Abstract_state.stack stack_size in
+          List.fold_left
+            (fun acc state ->
+              let stack = Stack.keep state.Abstract_state.stack stack_size in
+              join acc { state with stack } )
+            { h with stack = h_stack } t
+        in
+        Some abs_state )
 
   let widen widening_id state_a state_b =
     let (Abstract_domain.Context.Result (included, in_tuple, continue)) =
@@ -278,7 +300,9 @@ module DenotFixpoint (S : DATA_STATE) = struct
         let new_state, new_jt = eval_instr state instr in
         let new_jt = JumpTarget.append jt new_jt in
         Log.debug (fun m ->
-          m "jt            :  %a"
+          m "jt after (%a) :  %a"
+            (Binary.pp_instr ~short:true)
+            instr.raw
             (JumpTarget.pp state.abs_state.Abstract_state.ctx)
             new_jt );
         match new_state with
@@ -374,26 +398,24 @@ module DenotFixpoint (S : DATA_STATE) = struct
           let abs_state = { abs_state with stack } in
           (Some { state with abs_state }, JumpTarget.empty) )
       end
-    | Block (_str_opt, _bt, expr) -> (
-      match eval_expr state expr with
-      | None, jt -> (None, JumpTarget.decr jt)
-      | Some state, jt ->
-        let abs_state = state.abs_state in
-        let abs_state =
-          match JumpTarget.find_opt (I 0) jt with
-          | Some br_states -> List.fold_left join abs_state br_states
-          | None -> abs_state
-        in
-        let abs_state =
-          match JumpTarget.find_opt Ret jt with
-          | Some ret_states -> List.fold_left join abs_state ret_states
-          | None -> abs_state
-        in
-        let jt =
-          (* TODO on peut avoir une paire de (int * map) pour ne pas avoir à decr la liste immédiatement *)
-          JumpTarget.decr jt
-        in
-        (Some { state with abs_state }, jt) )
+    | Block (_str_opt, bt, expr) ->
+      let next_state, jt = eval_expr state expr in
+      let stack_size =
+        match bt with
+        | Some (Bt_raw (_i, (params, _res))) -> List.length params
+        | None -> 0
+      in
+      let jumps_br0 = join_jts stack_size (JumpTarget.find_opt (I 0) jt) in
+      let abs_state = Option.map (fun s -> s.abs_state) next_state in
+      let abs_state = join_opt abs_state jumps_br0 in
+      let state =
+        Option.map (fun abs_state -> { state with abs_state }) abs_state
+      in
+      let jt =
+        (* TODO on peut avoir une paire de (int * map) pour ne pas avoir à decr la liste immédiatement *)
+        JumpTarget.decr jt
+      in
+      (state, jt)
     | If_else (_, bt, expr_then, expr_else) ->
       let b, stack = Stack.pop_bool stack ctx in
       begin match
@@ -426,31 +448,21 @@ module DenotFixpoint (S : DATA_STATE) = struct
       let initial_state =
         { abs_state with ctx = Abstract_domain.Context.copy ctx }
       in
-      let to_take =
+      let stack_size =
         match bt with
         | Some (Bt_raw (_i, (params, _res))) -> List.length params
         | None -> 0
       in
       let rec fixpoint state =
         let next_state, jt = eval_expr state body in
-        let shorten_stack stack = Stack.keep stack to_take in
         let next_head =
-          let handle_jts jts =
-            let fp_stack = shorten_stack initial_state.stack in
-            List.fold_left
-              (fun acc state ->
-                let stack = shorten_stack state.Abstract_state.stack in
-                join acc { state with stack } )
-              { initial_state with stack = fp_stack }
-              jts
-          in
-          match JumpTarget.find_opt (I 0) jt with
-          | Some jts -> Some (handle_jts jts)
+          match join_jts stack_size (JumpTarget.find_opt (I 0) jt) with
+          | Some state -> Some state
           | None ->
             (* TODO: handle return too! *)
             begin match next_state with
             | Some state ->
-              let stack = shorten_stack stack in
+              let stack = Stack.keep stack stack_size in
               Some { state.abs_state with stack }
             | None -> None
             end

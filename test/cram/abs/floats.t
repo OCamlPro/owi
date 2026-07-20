@@ -84,7 +84,7 @@
   owi: [INFO] stack         : [  ]
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : f32.const 4
-  owi: [DEBUG] jt            :  
+  owi: [DEBUG] jt after (f32.const 4) :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=1, <(B:8)> -> [--..--]
                                         }
@@ -93,7 +93,7 @@
   owi: [INFO] stack         : [ f32 ... ]
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : f32.const 100
-  owi: [DEBUG] jt            :  
+  owi: [DEBUG] jt after (f32.const 100) :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=1, <(B:8)> -> [--..--]
                                         <(B:9)> -> [--..--]
@@ -103,7 +103,7 @@
   owi: [INFO] stack         : [ f32 ... ; f32 ... ]
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : f32.sqrt
-  owi: [DEBUG] jt            :  
+  owi: [DEBUG] jt after (f32.sqrt) :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=1,
                                   <(B:8)> -> [--..--]
@@ -115,7 +115,7 @@
   owi: [INFO] stack         : [ f32 ... ; f32 ... ]
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : f32.add
-  owi: [DEBUG] jt            :  
+  owi: [DEBUG] jt after (f32.add) :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=1,
                                   <(B:8)> -> [--..--]
@@ -128,7 +128,7 @@
   owi: [INFO] stack         : [ f32 ... ]
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : i32.trunc_f32_s
-  owi: [DEBUG] jt            :  
+  owi: [DEBUG] jt after (i32.trunc_f32_s) :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=1,
                                   <(B:8)> -> [--..--]
@@ -142,7 +142,7 @@
   owi: [INFO] stack         : [ i32 [--..--] ]
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : f32.convert_i32_s
-  owi: [DEBUG] jt            :  
+  owi: [DEBUG] jt after (f32.convert_i32_s) :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=1,
                                   <(B:8)> -> [--..--]
@@ -157,7 +157,7 @@
   owi: [INFO] stack         : [ f32 ... ]
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : f64.promote_f32
-  owi: [DEBUG] jt            :  
+  owi: [DEBUG] jt after (f64.promote_f32) :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=1,
                                   <(B:8)> -> [--..--]
@@ -173,7 +173,7 @@
   owi: [INFO] stack         : [ f64 ... ]
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : f64.const 4_294_967_296
-  owi: [DEBUG] jt            :  
+  owi: [DEBUG] jt after (f64.const 4_294_967_296) :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=1,
                                   <(B:8)> -> [--..--]
@@ -190,7 +190,7 @@
   owi: [INFO] stack         : [ f64 ... ; f64 ... ]
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : f64.add
-  owi: [DEBUG] jt            :  
+  owi: [DEBUG] jt after (f64.add) :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=1,
                                   <(B:8)> -> [--..--]
@@ -208,7 +208,7 @@
   owi: [INFO] stack         : [ f64 ... ]
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : f64.const 4_294_967_295
-  owi: [DEBUG] jt            :  
+  owi: [DEBUG] jt after (f64.const 4_294_967_295) :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=1,
                                   <(B:8)> -> [--..--]
@@ -227,7 +227,7 @@
   owi: [INFO] stack         : [ f64 ... ; f64 ... ]
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : f64.sub
-  owi: [DEBUG] jt            :  
+  owi: [DEBUG] jt after (f64.sub) :  
   owi: [DEBUG] abstract state : 
                  context: Context{id=1,
                                   <(B:8)> -> [--..--]
@@ -247,7 +247,7 @@
   owi: [INFO] stack         : [ f64 ... ]
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : return
-  owi: [DEBUG] jt            :  ret -> 
+  owi: [DEBUG] jt after (return) :  ret -> 
                  context: Context{id=1,
                                   <(B:8)> -> [--..--]
                                   <(B:9)> -> [--..--]
@@ -265,4 +265,4 @@
                  locals : 
   owi: [DEBUG] abstract state : None 
   
-  owi: [DEBUG] jt            :  
+  owi: [DEBUG] jt after (call 0) :  
