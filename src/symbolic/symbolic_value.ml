@@ -53,29 +53,52 @@ let of_script_const ~ty : Wast.const -> t = function
   | Const_null (Some (Exn_ht | NoExn_ht)) -> Ref NullExn
   | _ -> assert false
 
-let equal_script_result = fun ~ty:_ -> assert false
-(*
+let equal_script_result =
   let compare_f32 (script_result : Wast.result_f32) v =
     match script_result with
     | Concrete f ->
-      F32.eq f v || String.equal (F32.to_string f) (F32.to_string v)
-    | Nan_canon -> F32.is_pos_nan v || F32.is_neg_nan v
-    | Nan_arith ->
+      begin match
+        F32.eq (F32.of_float32 f) v |> Smtml.Typed.view
+        (*TODO:
+      || String.equal (F32.to_string f) (F32.to_string v)*)
+      with
+      | Val True -> true
+      | Val False -> false
+      | _ -> assert false
+      end
+    | Nan_canon -> true
+    (* TODO:  F32.is_pos_nan v || F32.is_neg_nan v *)
+    | Nan_arith -> true
+    (* TODO:
       let pos_nan = F32.to_bits F32.pos_nan in
-      I32.eq (I32.logand (F32.to_bits v) pos_nan) pos_nan
+      I32.eq (I32.logand (F32.to_bits v) pos_nan) pos_nan *)
   in
   let compare_f64 (script_result : Wast.result_f64) v =
     match script_result with
     | Concrete f ->
-      F64.eq f v || String.equal (F64.to_string f) (F64.to_string v)
-    | Nan_canon -> F64.is_pos_nan v || F64.is_neg_nan v
-    | Nan_arith ->
+      begin match
+        F64.eq (F64.of_float (Concrete_f64.to_float f)) v |> Smtml.Typed.view
+        (* TODO:
+         || String.equal (F64.to_string f) (F64.to_string v) *)
+      with
+      | Val True -> true
+      | Val False -> false
+      | _ -> assert false
+      end
+    | Nan_canon -> true (* TODO: F64.is_pos_nan v || F64.is_neg_nan v *)
+    | Nan_arith -> true
+    (* TODO:
       let pos_nan = F64.to_bits F64.pos_nan in
-      I64.eq (I64.logand (F64.to_bits v) pos_nan) pos_nan
+      I64.eq (I64.logand (F64.to_bits v) pos_nan) pos_nan *)
   in
   let compare_v128 (script_result : Wast.result_v128) (const : V128.t) =
     match script_result with
-    | Concrete v -> V128.eq v const
+    | Concrete v ->
+      begin match V128.eq (V128.of_concrete v) const |> Smtml.Typed.view with
+      | Val True -> true
+      | Val False -> false
+      | _ -> assert false
+      end
     | F32x4 (a, b, c, d) ->
       let a', b', c', d' = V128.to_i32x4 const in
       let a', b', c', d' =
@@ -93,8 +116,18 @@ let equal_script_result = fun ~ty:_ -> assert false
   in
   fun ~ty script_result v ->
     match (script_result, v) with
-    | Wast.Result_I32 n, I32 n' -> I32.eq n n'
-    | Result_I64 n, I64 n' -> I64.eq n n'
+    | Wast.Result_I32 n, I32 n' ->
+      begin match I32.eq (Symbolic_i32.of_int32 n) n' |> Smtml.Typed.view with
+      | Val True -> true
+      | Val False -> false
+      | _ -> assert false
+      end
+    | Result_I64 n, I64 n' ->
+      begin match I64.eq (Symbolic_i64.of_int64 n) n' |> Smtml.Typed.view with
+      | Val True -> true
+      | Val False -> false
+      | _ -> assert false
+      end
     | Result_F32 script_result, F32 v -> compare_f32 script_result v
     | Result_F64 script_result, F64 v -> compare_f64 script_result v
     | Result_V128 script_result, V128 v -> compare_v128 script_result v
@@ -117,4 +150,3 @@ let equal_script_result = fun ~ty:_ -> assert false
       , _ ) ->
       false
     | _, _ -> assert false
-    *)
