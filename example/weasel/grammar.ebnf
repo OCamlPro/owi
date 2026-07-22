@@ -1,0 +1,150 @@
+(*
+    In the grammar below, the following notations are adopted:
+        - The nonterminal symbol `u32` denotes 32-bit unsigned integers.
+        - The nonterminal symbol `integer` denotes arbitrary-precision mathematical integers.
+*)
+
+idchar =
+    "0" | ... | "9"
+  | "A" | ... | "Z"
+  | "a" | ... | "z"
+  | "!" | "#" | "$" | "%" | "&" | "'" | "*" | "+" | "-" | "." | "/"
+  | ":" | "<" | "=" | ">" | "?" | "@" | "\" | "^" | "_" | "`" | "|" | "~" ;
+
+id =
+  idchar , { idchar } ;
+
+ind =
+    "$" , id
+  | u32 ;
+
+wasm_int_type =
+    "i32"
+  | "i64" ;
+
+wasm_float_type =
+    "f32"
+  | "f64" ;
+
+wasm_type =
+    wasm_int_type
+  | wasm_float_type ;
+
+num_type =
+    wasm_type
+  | "integer"
+
+ref_type =
+    "funcref"
+  | "externref" ;
+
+unop =
+    "clz"             (on wasm_int_type)
+  | "ctz"             (on wasm_int_type)
+  | "popcnt"          (on wasm_int_type)
+  | "abs"
+  | "neg"
+  | "sqrt"
+  | "ceil"
+  | "floor"
+  | "trunc"           (on wasm_float_type)
+  | "nearest" ;       (on wasm_float_type)
+
+binop =
+    "add" | "+"
+  | "sub" | "-"
+  | "mul" | "*"
+  | "div" | "/"
+  | "rem" | "%"       (on wasm_int_type or integer)
+  | "min"
+  | "max"
+  | "and" | "&"       (on wasm_int_type or integer)
+  | "or" | "|"        (on wasm_int_type or integer)
+  | "xor" | "^"       (on wasm_int_type or integer)
+  | "shl" | "<<"      (on wasm_int_type or integer)
+  | "shr_s" | ">>"    (on wasm_int_type or integer)
+  | "shr_x" | ">>>"   (on wasm_int_type or integer)
+  | "rotl"            (on wasm_int_type)
+  | "rotr" ;          (on wasm_int_type)
+
+memarg =
+  "(" , "base" , term , ")" ,
+  [ "(" , "offset" , term , ")" ] ,
+  [ "(" , "align" , term , ")" ] ;
+
+term =
+    "result"
+  | "i32_max"
+  | "i32_min"
+  | "i64_max"
+  | "i64_min"
+  | integer
+  | id
+  | pterm ;
+
+pterm =
+    "result" , [ u32 ]
+  | "old" , term
+  | "param" , ind
+  | "global" , ind
+  | "binder" , ind
+  | unop , term
+  | binop , term , term
+  | "ref_null" , ref_type
+  | "ref_func" , ind
+  | "table_get" , ind
+  | "table_size" , ind
+  | "i32_load" , memarg
+  | "i64_load" , memarg
+  | "f32_load" , memarg
+  | "f64_load" , memarg
+  | "memory_size" , ind
+  | "cond" , prop , term , term
+  | "let" , num_type , [ id ] , term , term
+  | "cast" , num_type , term
+  | "call" , ind , { term } ;
+
+unpred =
+    "eqz"
+  | "is_null" ;       (on ref_type)
+
+binpred =
+    "eq" | "="
+  | "ne" | "!="
+  | "lt" | "<"
+  | "gt" | ">"
+  | "le" | "<="
+  | "ge" | ">=" ;
+
+prop =
+    "true"
+  | "false"
+  | "(" , pprop , ")" ;
+
+pprop =
+    "old" , prop
+  | "!" , prop
+  | "&&" , prop , prop
+  | "||" , prop , prop
+  | "^^" , prop , prop
+  | "==>" , prop , prop
+  | "<==>" , prop , prop
+  | "cond" , prop , prop , prop
+  | "let" , num_type , [ id ] , term , prop
+  | unpred , term
+  | binpred , term , term
+  | ("forall" | "∀") , num_type , [ id ] , prop
+  | ("exists" | "∃") , num_type , [ id ] , prop
+  | "call" , ind , { term } ; (the function must return an i32)
+
+requires_clause = "(" , "requires" , prop , ")" ;
+
+assigns_clause = "(" , "assigns" , ( "nothing" | memarg ) , ")" ;
+
+ensures_clause = "(" , "ensures" , prop , ")" ;
+
+simple_behavior = { requires_clause | assigns_clause | ensures_clause } ;
+
+contract = "(@contract" , ind , [ "pure" ] , simple_behavior , ")" ;
+
+annotation = contract ;
