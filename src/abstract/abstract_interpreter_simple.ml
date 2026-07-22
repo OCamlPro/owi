@@ -142,9 +142,13 @@ let eval_i32 ({ stack; ctx; invariant; _ } as state : Abstract_state.t) uuid :
   | Wrap_i64 ->
     let stack = Stack.apply_i32_i32 stack (Abstract_i32.wrap_i64 ctx) in
     State { state with stack }
-  | Trunc_f_s _nn | Trunc_f_u _nn | Trunc_sat_f_s _nn | Trunc_sat_f_u _nn ->
+  | Trunc_f_s nn | Trunc_f_u nn | Trunc_sat_f_s nn | Trunc_sat_f_u nn ->
     (* TODO: handle correctly *)
-    let _f, stack = Stack.pop_f32 stack in
+    let _f, stack =
+      match nn with
+      | Text.S32 -> Stack.pop_f32 stack
+      | Text.S64 -> Stack.pop_f64 stack
+    in
     let stack = Stack.push_i32 stack (Abstract_i32.unknown ctx) in
     State { state with stack }
   | Reinterpret_f _nn ->
@@ -283,8 +287,11 @@ let eval_i64 ({ stack; ctx; invariant; _ } as state : Abstract_state.t) uuid :
     let _pos, stack = Stack.pop_i64 stack in
     let stack = Stack.push_i64 stack (Abstract_i64.unknown ctx) in
     State { state with stack }
-  | Reinterpret_f _nn ->
-    (* TODO: handle nn *)
+  | Reinterpret_f Text.S32 ->
+    let f, stack = Stack.pop_f32 stack in
+    let stack = Stack.push_i64 stack (Abstract_i64.of_binary f) in
+    State { state with stack }
+  | Reinterpret_f Text.S64 ->
     let f, stack = Stack.pop_f64 stack in
     let stack = Stack.push_i64 stack (Abstract_i64.of_binary f) in
     State { state with stack }
@@ -303,10 +310,14 @@ let eval_i64 ({ stack; ctx; invariant; _ } as state : Abstract_state.t) uuid :
     let _, stack = Stack.pop2_i64 stack in
     let stack = Stack.push_i64 stack (Abstract_i64.unknown ctx) in
     State { state with stack }
-  | Trunc_f_s _nn | Trunc_f_u _nn | Trunc_sat_f_s _nn | Trunc_sat_f_u _nn ->
+  | Trunc_f_s nn | Trunc_f_u nn | Trunc_sat_f_s nn | Trunc_sat_f_u nn ->
     (* TODO: handle correctly *)
-    let _f, stack = Stack.pop_f32 stack in
-    let stack = Stack.push_i32 stack (Abstract_i32.unknown ctx) in
+    let _f, stack =
+      match nn with
+      | Text.S32 -> Stack.pop_f32 stack
+      | Text.S64 -> Stack.pop_f64 stack
+    in
+    let stack = Stack.push_i64 stack (Abstract_i64.unknown ctx) in
     State { state with stack }
 
 (* TODO: handle this correctly *)
