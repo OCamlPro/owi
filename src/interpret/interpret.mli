@@ -35,4 +35,11 @@ module Symbolic (_ : Parameters) : sig
        Symbolic_extern_func.extern_func Link.State.t
     -> Symbolic_extern_func.extern_func Linked.Module.t
     -> unit Symbolic_choice.t
+
+  val exec_vfunc_from_outside :
+       locals:Symbolic_value.t list
+    -> env:int
+    -> envs:Symbolic_env.t Dynarray.t
+    -> Kind.func
+    -> Symbolic_value.t list Symbolic_choice.t
 end

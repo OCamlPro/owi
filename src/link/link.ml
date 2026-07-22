@@ -52,6 +52,30 @@ module State = struct
 
   let get_by_id state id = StringMap.find_opt id state.by_id
 
+  let get_module ls mod_id =
+    match mod_id with
+    | None ->
+      begin match get_last ls with
+      | None -> Error `Unbound_last_module
+      | Some m -> Ok m
+      end
+    | Some mod_id -> (
+      match get_by_id ls mod_id with
+      | None -> Error (`Unbound_module mod_id)
+      | Some exports -> Ok exports )
+
+  let get_global_from_module state mod_id global_name =
+    let* exports, _env_id = get_module state mod_id in
+    match StringMap.find_opt global_name exports.globals with
+    | None -> Error (`Unbound_name global_name)
+    | Some v -> Ok v
+
+  let get_func_from_module state mod_id func_name =
+    let* exports, env_id = get_module state mod_id in
+    match StringMap.find_opt func_name exports.functions with
+    | None -> Error (`Unbound_name func_name)
+    | Some v -> Ok (v, env_id)
+
   let load_from_module ls f (import : _ Origin.imported) =
     match StringMap.find_opt import.modul_name ls.by_name with
     | None -> Error (`Unknown_module import.modul_name)

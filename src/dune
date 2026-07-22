@@ -123,6 +123,8 @@
   result
   rewrite
   script
+  script_error
+  script_symbolic
   symbol_scope
   share
   solver
