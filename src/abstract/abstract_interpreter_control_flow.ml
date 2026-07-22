@@ -322,6 +322,8 @@ module DenotFixpoint (S : DATA_STATE) = struct
     let init_value : Binary.val_type -> Abstract_value.t = function
       | Num_type I32 -> I32 (Abstract_i32.zero abs_state.ctx)
       | Num_type I64 -> I64 (Abstract_i64.zero abs_state.ctx)
+      | Num_type F32 -> F32 (Abstract_f32.unknown abs_state.ctx)
+      | Num_type F64 -> F64 (Abstract_f64.unknown abs_state.ctx)
       | _ -> assert false
     in
 

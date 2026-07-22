@@ -4,4 +4,3 @@
     symbol symbol_0 i32 42
   }
   owi: [ERROR] Reached problem!
-  proc_exit called with code=0
