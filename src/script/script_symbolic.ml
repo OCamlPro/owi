@@ -3,33 +3,42 @@
 (* Written by the Owi programmers *)
 
 open Syntax
-module Stack = Stack.Make [@inlined hint] (Concrete_value)
 
+(*
+module Stack = Stack.Make [@inlined hint] (Symbolic_value)
 type host_externref = int
 
 let ty : host_externref Type.Id.t = Type.Id.make ()
+*)
 
-let action (link_state : Concrete_extern_func.extern_func Link.State.t) =
+(*
+let action =
+  (link_state : Symbolic_extern_func.extern_func Link.State.t) =
   function
   | Wast.Invoke (mod_id, f, args) -> begin
     Log.info (fun m ->
       m "invoke %a %s %a..."
         (Fmt.option ~none:Fmt.nop Fmt.string)
         mod_id f Wast.pp_consts args );
-    let* f, env = Link.State.get_func_from_module link_state mod_id f in
-    let locals = List.rev_map (Concrete_value.of_script_const ~ty) args in
+    let* f, env_id = Link.State.get_func_from_module link_state mod_id f in
+    let stack = List.rev_map (Symbolic_value.of_script_const ~ty) args in
     let envs = Link.State.get_envs link_state in
-    let module I = Interpret.Concrete (Interpret.Default_parameters) in
-    I.exec_vfunc_from_outside ~locals ~env ~envs f
+    let module I = Interpret.Symbolic (Interpret.Default_parameters) in
+    I.exec_vfunc_from_outside ~locals:stack ~env:env_id ~envs f
     end
   | Get (mod_id, name) ->
     Log.info (fun m -> m "get...");
     let+ global = Link.State.get_global_from_module link_state mod_id name in
-    [ global.value ]
+    Symex.Monad.return [ global.value ]
+    *)
 
+(*
 let unsafe = false
+*)
 
-let run ~no_exhaustion script =
+let run = fun ~no_exhaustion:_ _ -> assert false
+(*
+  ~no_exhaustion script =
   let state =
     Link.State.empty ()
     |> Link.Extern.modul ~name:"spectest_extern" Spectest.extern_m
@@ -37,9 +46,9 @@ let run ~no_exhaustion script =
   let script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
   let registered = ref false in
   let curr_module = ref 0 in
-  let module I = Interpret.Concrete (Interpret.Default_parameters) in
+  let module I = Interpret.Symbolic (Interpret.Default_parameters) in
   list_fold_left
-    (fun (link_state : Concrete_extern_func.extern_func Link.State.t) ->
+    (fun (link_state : Symbolic_extern_func.extern_func Link.State.t) ->
       function
       | Wast.Text_module (false, m) ->
         if !curr_module = 0 then
@@ -149,7 +158,7 @@ let run ~no_exhaustion script =
           List.compare_lengths res stack <> 0
           || not
                (List.for_all2
-                  (Concrete_value.equal_script_result ~ty)
+                  (Symbolic_value.equal_script_result ~ty)
                   res stack )
         then begin
           Log.err (fun m ->
@@ -192,6 +201,7 @@ let run ~no_exhaustion script =
       | Instance (_name, _mod_name) ->
         Error (`Unimplemented "(module instance _)") )
     state script
+    *)
 
 let exec ~no_exhaustion script =
   let+ _link_state = run ~no_exhaustion script in

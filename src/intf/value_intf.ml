@@ -69,4 +69,8 @@ module type T = sig
     | Ref of Ref.t
 
   val pp : t Fmt.t
+
+  val of_script_const : ty:int Type.Id.t -> Wast.const -> t
+
+  val equal_script_result : ty:int Type.Id.t -> Wast.result -> t -> bool
 end

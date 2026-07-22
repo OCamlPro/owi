@@ -31,9 +31,11 @@ module State : sig
 
   val get_envs : 'f t -> 'f envs
 
-  val get_last : 'f t -> (exports * int) option
+  val get_global_from_module :
+    _ t -> string option -> string -> Concrete_global.t Result.t
 
-  val get_by_id : 'f t -> string -> (exports * int) option
+  val get_func_from_module :
+    _ t -> string option -> string -> (Kind.func * int) Result.t
 end
 
 module Extern : sig
