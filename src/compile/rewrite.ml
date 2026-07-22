@@ -49,14 +49,14 @@ let rewrite_block_type (assigned : Assigned.t) (block_type : Text.block_type) :
   | Bt_ind id ->
     let* idx = Assigned.find_type assigned id in
     let* ((params, _) as t) =
-      match Assigned.get_type assigned idx with
+      match Assigned.get_func_type assigned idx with
       | None -> Error (`Unknown_type id)
       | Some v -> Ok v
     in
     let* t = rewrite_func_type assigned t in
     Ok (params, Binary.Bt_raw (Some idx, t))
   | Bt_raw (_, ((params, _) as func_type)) ->
-    let idx = Assigned.find_raw_type assigned func_type in
+    let idx = Assigned.find_raw_func_type assigned func_type in
     let* func_type = rewrite_func_type assigned func_type in
     Ok (params, Binary.Bt_raw (Some idx, func_type))
 
@@ -572,20 +572,77 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
 
   let rewrite_struct_instr : Text.struct_instr -> Binary.struct_instr Result.t =
     function
-    | (New _ | New_default _ | Get _ | Get_s _ | Get_u _ | Set _) as i ->
-      Fmt.failwith "Rewrite: unimplemented for the GC instruction %a"
-        (Text.pp_instr ~short:true)
-        (Struct i)
+    | New id ->
+      let+ id = Assigned.find_type assigned id in
+      (Binary.New id : Binary.struct_instr)
+    | New_default id ->
+      let+ id = Assigned.find_type assigned id in
+      (Binary.New_default id : Binary.struct_instr)
+    | Get (tid, fid) ->
+      let* tid = Assigned.find_type assigned tid in
+      let+ fid = Assigned.find_field assigned tid fid in
+      (Binary.Get (tid, fid) : Binary.struct_instr)
+    | Get_s (tid, fid) ->
+      let* tid = Assigned.find_type assigned tid in
+      let+ fid = Assigned.find_field assigned tid fid in
+      (Binary.Get_s (tid, fid) : Binary.struct_instr)
+    | Get_u (tid, fid) ->
+      let* tid = Assigned.find_type assigned tid in
+      let+ fid = Assigned.find_field assigned tid fid in
+      (Binary.Get_u (tid, fid) : Binary.struct_instr)
+    | Set (tid, fid) ->
+      let* tid = Assigned.find_type assigned tid in
+      let+ fid = Assigned.find_field assigned tid fid in
+      (Binary.Set (tid, fid) : Binary.struct_instr)
   in
 
   let rewrite_array_instr : Text.array_instr -> Binary.array_instr Result.t =
     function
-    | ( New _ | New_default _ | New_fixed _ | New_data _ | New_elem _ | Get _
-      | Get_s _ | Get_u _ | Set _ | Len | Fill _ | Copy _ | Init_data _
-      | Init_elem _ ) as i ->
-      Fmt.failwith "Rewrite: unimplemented for the GC instruction %a"
-        (Text.pp_instr ~short:true)
-        (Array i)
+    | New id ->
+      let+ id = Assigned.find_type assigned id in
+      Binary.New id
+    | New_default id ->
+      let+ id = Assigned.find_type assigned id in
+      Binary.New_default id
+    | New_fixed (id, n) ->
+      let+ id = Assigned.find_type assigned id in
+      Binary.New_fixed (id, n)
+    | New_data (id, did) ->
+      let* id = Assigned.find_type assigned id in
+      let+ did = Assigned.find_data assigned did in
+      Binary.New_data (id, did)
+    | New_elem (id, eid) ->
+      let* id = Assigned.find_type assigned id in
+      let+ eid = Assigned.find_elem assigned eid in
+      Binary.New_elem (id, eid)
+    | Get id ->
+      let+ id = Assigned.find_type assigned id in
+      Binary.Get id
+    | Get_s id ->
+      let+ id = Assigned.find_type assigned id in
+      Binary.Get_s id
+    | Get_u id ->
+      let+ id = Assigned.find_type assigned id in
+      Binary.Get_u id
+    | Set id ->
+      let+ id = Assigned.find_type assigned id in
+      Binary.Set id
+    | Len -> Ok Binary.Len
+    | Fill id ->
+      let+ id = Assigned.find_type assigned id in
+      Binary.Fill id
+    | Copy (dst_id, src_id) ->
+      let* dst_id = Assigned.find_type assigned dst_id in
+      let+ src_id = Assigned.find_type assigned src_id in
+      Binary.Copy (dst_id, src_id)
+    | Init_data (id, did) ->
+      let* id = Assigned.find_type assigned id in
+      let+ did = Assigned.find_data assigned did in
+      Binary.Init_data (id, did)
+    | Init_elem (id, eid) ->
+      let* id = Assigned.find_type assigned id in
+      let+ eid = Assigned.find_elem assigned eid in
+      Binary.Init_elem (id, eid)
   in
 
   let rec rewrite_instr (loop_count, block_ids) :
@@ -876,12 +933,55 @@ let rewrite_tag (assigned : Assigned.t) ({ id; typ } : Text.Tag.t) :
   let+ _, typ = rewrite_block_type assigned typ in
   Binary.Tag.{ id; typ }
 
-let rewrite_types (assigned : Assigned.t) (ft : Text.func_type) :
-  Binary.Typedef.t Result.t =
-  let* ft = rewrite_func_type assigned ft in
-  Ok
-    (Binary.Typedef.SimpleType
-       (None, { final = true; ids = []; ct = Def_func_t ft }) )
+let rewrite_storage_type (assigned : Assigned.t) :
+  Text.storage_type -> Binary.storage_type Result.t = function
+  | Text.Val_type vt ->
+    let+ vt = rewrite_val_type assigned vt in
+    Binary.Val_type vt
+  | Text.Pack_type pt -> Ok (Binary.Pack_type pt)
+
+let rewrite_field_type (assigned : Assigned.t) ((mut, st) : Text.field_type) :
+  Binary.field_type Result.t =
+  let+ st = rewrite_storage_type assigned st in
+  (mut, st)
+
+let rewrite_field (assigned : Assigned.t) ((_, ft) : Text.field) :
+  Binary.field Result.t =
+  let+ ft = rewrite_field_type assigned ft in
+  (None, ft)
+
+let rewrite_comp_type (assigned : Assigned.t) :
+  Text.comp_type -> Binary.comp_type Result.t = function
+  | Text.Def_func_t ft ->
+    let+ ft = rewrite_func_type assigned ft in
+    Binary.Def_func_t ft
+  | Text.Def_struct_t fields ->
+    let+ fields = list_map (rewrite_field assigned) fields in
+    Binary.Def_struct_t fields
+  | Text.Def_array_t ft ->
+    let+ ft = rewrite_field_type assigned ft in
+    Binary.Def_array_t ft
+
+let rewrite_sub_type (assigned : Assigned.t)
+  ({ Text.final; ids; ct } : Text.sub_type) : Binary.sub_type Result.t =
+  let* ct = rewrite_comp_type assigned ct in
+  let* ids = list_map (Assigned.find_type assigned) ids in
+  Ok { Binary.final; ids; ct }
+
+let rewrite_typedef (assigned : Assigned.t) :
+  Text.Typedef.t -> Binary.Typedef.t Result.t = function
+  | Text.Typedef.SimpleType (name, st) ->
+    let+ st = rewrite_sub_type assigned st in
+    Binary.Typedef.SimpleType (name, st)
+  | Text.Typedef.RecType members ->
+    let+ members =
+      list_map
+        (fun (name, st) ->
+          let+ st = rewrite_sub_type assigned st in
+          (name, st) )
+        members
+    in
+    Binary.Typedef.RecType members
 
 let modul (modul : Grouped.t) (assigned : Assigned.t) : Binary.Module.t Result.t
     =
@@ -929,9 +1029,26 @@ let modul (modul : Grouped.t) (assigned : Assigned.t) : Binary.Module.t Result.t
     let runtime = Origin.monadic_map ~f_local ~f_imported in
     array_map runtime modul.tag
   in
+  (* TODO: should be factorized, we rewrite the types twice, as flat types and
+     as type definitions, and the implicit types are added manually to
+     type_defs. *)
   let* types =
-    array_map (rewrite_types assigned) (Assigned.get_types assigned)
+    array_map (rewrite_sub_type assigned) (Assigned.get_types assigned)
   in
+  let explicit_count =
+    Array.fold_left
+      (fun acc -> function
+        | Text.Typedef.SimpleType _ -> acc + 1
+        | Text.Typedef.RecType members -> acc + List.length members )
+      0 modul.typ
+  in
+  let* explicit_type_defs = array_map (rewrite_typedef assigned) modul.typ in
+  let implicit_type_defs =
+    Array.init
+      (Array.length types - explicit_count)
+      (fun i -> Binary.Typedef.SimpleType (None, types.(explicit_count + i)))
+  in
+  let type_defs = Array.append explicit_type_defs implicit_type_defs in
   let+ start =
     match modul.start with
     | None -> Ok None
@@ -943,6 +1060,7 @@ let modul (modul : Grouped.t) (assigned : Assigned.t) : Binary.Module.t Result.t
   { Binary.Module.id = modul.id
   ; mem
   ; table
+  ; type_defs
   ; types
   ; global
   ; elem

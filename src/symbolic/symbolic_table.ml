@@ -74,7 +74,15 @@ let copy ~t_src ~t_dst ~src ~dst ~len =
   loop src dst len t_src.data t_dst.data |> replace
 
 let convert_ref_values (v : Concrete_ref.t) : Symbolic_ref.t =
-  match v with Func f -> Func f | _ -> assert false
+  match v with
+  | Func f -> Func f
+  | Extern None -> Extern None
+  | Extern (Some _) -> assert false
+  | NullExn -> NullExn
+  | NullRef -> NullRef
+  | I31 i -> I31 i
+  | Struct _ -> Struct ()
+  | Array _ -> Array ()
 
 let of_concrete ~env_id ~id (original : Concrete_table.t) =
   let _i, data =

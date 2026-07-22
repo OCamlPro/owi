@@ -24,6 +24,10 @@ val get_extern_func : 'ext t -> int -> 'ext
 
 val id : _ t -> int
 
+val get_types : _ t -> Binary.sub_type array
+
+val get_type_groups : _ t -> (int * int) array
+
 val fold_globals : (int -> Concrete_global.t -> 'a -> 'a) -> 'a -> 'b t -> 'a
 
 module Build : sig
@@ -54,4 +58,12 @@ module Build : sig
   val get_memories : t -> Concrete_memory.t IMap.t
 end
 
-val freeze : int -> Build.t -> ('ext * Binary.func_type) Dynarray.t -> 'ext t
+val compute_type_groups : Binary.Typedef.t array -> int -> (int * int) array
+
+val freeze :
+     int
+  -> Build.t
+  -> ('ext * Binary.func_type) Dynarray.t
+  -> Binary.sub_type array
+  -> Binary.Typedef.t array
+  -> 'ext t

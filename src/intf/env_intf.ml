@@ -32,4 +32,8 @@ module type T = sig
   val get_global : t -> int -> global choice
 
   val get_extern_func : t -> int -> extern_func
+
+  val get_types : t -> Binary.sub_type array
+
+  val get_type_groups : t -> (int * int) array
 end

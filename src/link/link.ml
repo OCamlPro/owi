@@ -100,7 +100,26 @@ module Eval_const = struct
     | Mul -> Stack.apply_i64_i64_i64 stack Concrete_i64.mul
     | _ -> assert false
 
-  let instr env stack instr =
+  let value_to_gc_val (v : Concrete_value.t) : Concrete_ref.gc_val =
+    match v with
+    | I32 i -> I32 i
+    | I64 i -> I64 i
+    | F32 f -> F32 f
+    | F64 f -> F64 f
+    | V128 v -> V128 v
+    | Ref r -> Ref r
+
+  let default_gc_val (st : Binary.storage_type) : Concrete_ref.gc_val =
+    match st with
+    | Val_type (Num_type I32) -> I32 0l
+    | Val_type (Num_type I64) -> I64 0L
+    | Val_type (Num_type F32) -> F32 Float32.zero
+    | Val_type (Num_type F64) -> F64 Float64.zero
+    | Val_type (Num_type V128) -> V128 Concrete_v128.zero
+    | Val_type (Ref_type (_, ht)) -> Ref (Concrete_ref.null ht)
+    | Pack_type _ -> I32 0l
+
+  let instr (types : Binary.sub_type array) env stack instr =
     match instr.Annotated.raw with
     | Binary.I32 i -> Result.ok (i32_instr stack i)
     | Binary.I64 i -> Result.ok (i64_instr stack i)
@@ -115,11 +134,79 @@ module Eval_const = struct
     | Global (Get id) ->
       let* g = Link_env.Build.get_const_global env id in
       Result.ok @@ Stack.push stack g
-    | _ -> assert false
+    | I31 Ref ->
+      let i, stack = Stack.pop_i32 stack in
+      Result.ok @@ Stack.push_ref stack (I31 i)
+    | Struct (New id) ->
+      let fields =
+        match types.(id).ct with
+        | Binary.Def_struct_t fl -> fl
+        | _ -> Fmt.failwith "struct.new: type %d is not a struct type" id
+      in
+      let n = List.length fields in
+      let top_n, stack = Stack.pop_n stack n in
+      let fields = Array.of_list (List.rev_map value_to_gc_val top_n) in
+      Result.ok @@ Stack.push_ref stack (Struct fields)
+    | Struct (New_default id) ->
+      let fields =
+        match types.(id).ct with
+        | Binary.Def_struct_t fl -> fl
+        | _ ->
+          Fmt.failwith "struct.new_default: type %d is not a struct type" id
+      in
+      let defaults =
+        Array.of_list (List.map (fun (_, (_, st)) -> default_gc_val st) fields)
+      in
+      Result.ok @@ Stack.push_ref stack (Struct defaults)
+    | Array (New _) ->
+      let n, stack = Stack.pop_i32 stack in
+      let v, stack = Stack.pop stack in
+      let n = Int32.to_int n in
+      let array = Array.make n (value_to_gc_val v) in
+      Result.ok @@ Stack.push_ref stack (Array array)
+    | Array (New_default id) ->
+      let n, stack = Stack.pop_i32 stack in
+      let st =
+        match types.(id).ct with
+        | Binary.Def_array_t (_, st) -> st
+        | _ -> Fmt.failwith "array.new_default: type %d is not an array type" id
+      in
+      let n = Int32.to_int n in
+      let array = Array.make n (default_gc_val st) in
+      Result.ok @@ Stack.push_ref stack (Array array)
+    | Array (New_fixed (_, n)) ->
+      let n = Int32.to_int n in
+      let top_n, stack = Stack.pop_n stack n in
+      let array = Array.of_list (List.rev_map value_to_gc_val top_n) in
+      Result.ok @@ Stack.push_ref stack (Array array)
+    | Extern_convert_any ->
+      let r, stack = Stack.pop_as_ref stack in
+      let ref =
+        match r with
+        | NullRef -> Concrete_ref.Extern None
+        | _ -> Concrete_ref.extern Concrete_ref.any_as_extern_key r
+      in
+      Result.ok @@ Stack.push_ref stack ref
+    | Any_convert_extern ->
+      let r, stack = Stack.pop_as_ref stack in
+      let ref =
+        match r with
+        | Extern None -> Concrete_ref.NullRef
+        | Extern (Some e) -> (
+          match Concrete_ref.Extern.cast e Concrete_ref.any_as_extern_key with
+          | Some inner -> inner
+          | None -> Fmt.failwith "any.convert_extern: cast failure" )
+        | _ -> Fmt.failwith "any.convert_extern: expected extern ref on stack"
+      in
+      Result.ok @@ Stack.push_ref stack ref
+    | _ ->
+      Fmt.failwith "TODO: Link: unimplemented instruction: %a"
+        (Binary.pp_instr ~short:true)
+        instr.Annotated.raw
 
   (* TODO: binary+const expr *)
-  let expr env e : Concrete_value.t Result.t =
-    let* stack = list_fold_left (instr env) Stack.empty e.Annotated.raw in
+  let expr types env e : Concrete_value.t Result.t =
+    let* stack = list_fold_left (instr types env) Stack.empty e.Annotated.raw in
     match stack with
     | [] -> Error (`Type_mismatch "const expr returning zero values")
     | _ :: _ :: _ ->
@@ -127,22 +214,22 @@ module Eval_const = struct
     | [ result ] -> Ok result
 end
 
-let eval_global ls env
+let eval_global ls env types
   (global : (Binary.Global.t, Binary.Global.Type.t) Origin.t) : global Result.t
     =
   match global with
   | Local global ->
-    let* value = Eval_const.expr env global.init in
+    let* value = Eval_const.expr types env global.init in
     let mut, typ = global.typ in
     let global : global = { value; mut; typ } in
     Ok global
   | Imported import -> State.load_global ls import
 
-let eval_globals ls env globals : Link_env.Build.t Result.t =
+let eval_globals ls env types globals : Link_env.Build.t Result.t =
   let+ env, _i =
     array_fold_left
       (fun (env, i) global ->
-        let+ global = eval_global ls env global in
+        let+ global = eval_global ls env types global in
         let env = Link_env.Build.add_global i global env in
         (env, succ i) )
       (env, 0) globals
@@ -259,39 +346,55 @@ let eval_tables ls env tables =
   in
   env
 
-let load_func (ls : 'f State.t) (import : Binary.block_type Origin.imported) :
-  func Result.t =
-  let (Binary.Bt_raw ((None | Some _), typ)) = import.typ in
+let load_func (ls : 'f State.t) (imp_types : Binary.sub_type array)
+  (imp_type_groups : (int * int) array)
+  (import : Binary.block_type Origin.imported) : func Result.t =
+  let (Binary.Bt_raw (imp_idx_opt, typ)) = import.typ in
   let* func =
     State.load_from_module ls (fun (e : State.exports) -> e.functions) import
   in
-  let type' =
+  let compatible =
     match func with
-    | Kind.Wasm { func; _ } ->
-      let (Bt_raw ((None | Some _), t)) = func.type_f in
-      t
+    | Kind.Wasm { func; idx } -> (
+      let (Bt_raw (exp_idx_opt, type')) = func.type_f in
+      let exp_env = Dynarray.get ls.envs idx in
+      let exp_types = Link_env.get_types exp_env in
+      let exp_type_groups = Link_env.get_type_groups exp_env in
+      match (imp_idx_opt, exp_idx_opt) with
+      | Some imp_idx, Some exp_idx ->
+        Binary.is_subtype exp_types exp_type_groups imp_types imp_type_groups
+          ~got:exp_idx ~expected:imp_idx
+      | _ -> Binary.func_type_eq typ type' )
     | Extern { idx } ->
-      let _f, t = Dynarray.get ls.collection idx in
-      t
+      let _f, type' = Dynarray.get ls.collection idx in
+      Binary.func_type_eq typ type'
   in
-  if Binary.func_type_eq typ type' then Ok func
+  if compatible then Ok func
   else
+    let (Binary.Bt_raw (_, type')) =
+      match func with
+      | Kind.Wasm { func; _ } -> func.type_f
+      | Extern { idx } ->
+        Binary.Bt_raw (None, snd (Dynarray.get ls.collection idx))
+    in
     let msg =
       Fmt.str "%s: expected: %a got: %a" import.name Binary.pp_func_type typ
         Binary.pp_func_type type'
     in
     Error (`Incompatible_import_type msg)
 
-let eval_func ls (finished_env : int) func : func Result.t =
+let eval_func ls (finished_env : int) imp_types imp_type_groups func :
+  func Result.t =
   match func with
   | Origin.Local func -> Result.ok @@ Kind.wasm func finished_env
-  | Imported import -> load_func ls import
+  | Imported import -> load_func ls imp_types imp_type_groups import
 
-let eval_functions ls (finished_env : int) env functions =
+let eval_functions ls (finished_env : int) imp_types imp_type_groups env
+  functions =
   let+ env, _i =
     array_fold_left
       (fun (env, i) func ->
-        let+ func = eval_func ls finished_env func in
+        let+ func = eval_func ls finished_env imp_types imp_type_groups func in
         let env = Link_env.Build.add_func i func env in
         (env, succ i) )
       (env, 0) functions
@@ -352,7 +455,7 @@ let get_i32 = function
   | Concrete_value.I32 i -> Ok i
   | _ -> Error (`Type_mismatch "get_i32")
 
-let define_data env data =
+let define_data types env data =
   let+ env, init, _i =
     array_fold_left
       (fun (env, init, id) (data : Binary.Data.t) ->
@@ -361,7 +464,7 @@ let define_data env data =
         let+ init =
           match data.mode with
           | Active (mem, offset) ->
-            let* offset = Eval_const.expr env offset in
+            let* offset = Eval_const.expr types env offset in
             let length = Int32.of_int @@ String.length data.init in
             let* offset = get_i32 offset in
             let* v = active_data_expr env ~offset ~length ~mem ~data:id in
@@ -373,11 +476,11 @@ let define_data env data =
   in
   (env, List.rev init)
 
-let define_elem env elem =
+let define_elem types env elem =
   let+ env, inits, _i =
     array_fold_left
       (fun (env, inits, i) (elem : Binary.Elem.t) ->
-        let* init = list_map (Eval_const.expr env) elem.init in
+        let* init = list_map (Eval_const.expr types env) elem.init in
         let* init_as_ref =
           list_map
             (function
@@ -398,7 +501,7 @@ let define_elem env elem =
           | Active (None, _) -> assert false
           | Active (Some table, offset) ->
             let length = Int32.of_int @@ List.length init in
-            let* offset = Eval_const.expr env offset in
+            let* offset = Eval_const.expr types env offset in
             let* offset = get_i32 offset in
             Result.ok
             @@ (active_elem_expr ~offset ~length ~table ~elem:i :: inits)
@@ -443,14 +546,21 @@ module Binary = struct
     let ls = State.clone ls in
     let next_id = Dynarray.length ls.envs in
     let env = Link_env.Build.empty in
-    let* env = eval_functions ls next_id env modul.func in
+    let imp_type_groups =
+      Link_env.compute_type_groups modul.type_defs (Array.length modul.types)
+    in
+    let* env =
+      eval_functions ls next_id modul.types imp_type_groups env modul.func
+    in
     let* env = eval_tags ls next_id env modul.tag in
-    let* env = eval_globals ls env modul.global in
+    let* env = eval_globals ls env modul.types modul.global in
     let* env = eval_memories ls env modul.mem in
     let* env = eval_tables ls env modul.table in
-    let* env, init_active_data = define_data env modul.data in
-    let* env, init_active_elem = define_elem env modul.elem in
-    let env = Link_env.freeze next_id env ls.collection in
+    let* env, init_active_data = define_data modul.types env modul.data in
+    let* env, init_active_elem = define_elem modul.types env modul.elem in
+    let env =
+      Link_env.freeze next_id env ls.collection modul.types modul.type_defs
+    in
     Dynarray.add_last ls.envs env;
     let+ by_id_exports = populate_exports env modul.exports in
     let by_id =

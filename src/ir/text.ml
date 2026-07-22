@@ -148,11 +148,14 @@ let pp_heap_type fmt = function
   | NoExtern_ht -> pf fmt "noextern"
 
 let heap_type_eq t1 t2 =
-  (* TODO: this is wrong *)
   match (t1, t2) with
   | Func_ht, Func_ht
   | Extern_ht, Extern_ht
   | Any_ht, Any_ht
+  | Eq_ht, Eq_ht
+  | I31_ht, I31_ht
+  | Struct_ht, Struct_ht
+  | Array_ht, Array_ht
   | None_ht, None_ht
   | NoFunc_ht, NoFunc_ht
   | Exn_ht, Exn_ht
@@ -160,6 +163,19 @@ let heap_type_eq t1 t2 =
   | NoExtern_ht, NoExtern_ht ->
     true
   | TypeUse id1, TypeUse id2 -> compare_indice id1 id2 = 0
+  | _, _ -> false
+
+let is_subtype_heap_type t1 t2 =
+  heap_type_eq t1 t2
+  ||
+  match (t1, t2) with
+  | None_ht, (I31_ht | Struct_ht | Array_ht | Eq_ht | Any_ht)
+  | (I31_ht | Struct_ht | Array_ht), (Eq_ht | Any_ht)
+  | Eq_ht, Any_ht
+  | NoFunc_ht, Func_ht
+  | NoExtern_ht, Extern_ht
+  | NoExn_ht, Exn_ht ->
+    true
   | _, _ -> false
 
 let compare_heap_type t1 t2 =
@@ -218,12 +234,13 @@ let ref_type_eq t1 t2 =
 
 let is_subtype_ref_type t1 t2 =
   match (t1, t2) with
-  | (No_null, ht1), (Null, ht2) when heap_type_eq ht1 ht2 -> true
+  | (No_null, ht1), (Null, ht2) when is_subtype_heap_type ht1 ht2 -> true
   | (No_null, TypeUse _), (Null, Func_ht)
   | (No_null, TypeUse _), (No_null, Func_ht)
   | (Null, TypeUse _), (Null, Func_ht) ->
     true
-  | (Null, t1), (Null, t2) | (No_null, t1), (No_null, t2) -> heap_type_eq t1 t2
+  | (Null, t1), (Null, t2) | (No_null, t1), (No_null, t2) ->
+    is_subtype_heap_type t1 t2
   | _ -> false
 
 let compare_nullable n1 n2 =
@@ -345,14 +362,28 @@ let pp_comp_type fmt = function
   | Def_func_t ft -> Fmt.pf fmt "%a" pp_func_type ft
 (* TODO: ensure proper printing *)
 
+let storage_type_eq st1 st2 =
+  match (st1, st2) with
+  | Val_type vt1, Val_type vt2 -> val_type_eq vt1 vt2
+  | Pack_type I8, Pack_type I8 -> true
+  | Pack_type I16, Pack_type I16 -> true
+  | _, _ -> false
+
+let field_type_eq (m1, st1) (m2, st2) =
+  let mut_eq =
+    match ((m1 : mut), (m2 : mut)) with
+    | Const, Const | Var, Var -> true
+    | _ -> false
+  in
+  mut_eq && storage_type_eq st1 st2
+
 let comp_type_eq ct1 ct2 =
   match (ct1, ct2) with
-  | Def_struct_t _, Def_struct_t _ | Def_array_t _, Def_array_t _ ->
-    Fmt.failwith
-      "comp_type_eq: unimplemented for struct and array types %a and %a"
-      pp_comp_type ct1 pp_comp_type ct2
+  | Def_struct_t fl1, Def_struct_t fl2 ->
+    List.equal (fun (_, ft1) (_, ft2) -> field_type_eq ft1 ft2) fl1 fl2
+  | Def_array_t ft1, Def_array_t ft2 -> field_type_eq ft1 ft2
   | Def_func_t ft1, Def_func_t ft2 -> func_type_eq ft1 ft2
-  | _ -> false
+  | _, _ -> false
 
 type sub_type =
   { final : bool

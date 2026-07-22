@@ -14,10 +14,16 @@ type 'ext t =
   ; elem : Concrete_elem.t IMap.t
   ; tags : Binary.Tag.t IMap.t
   ; extern_funcs : ('ext * Binary.func_type) Dynarray.t
+  ; types : Binary.sub_type array
+  ; type_groups : (int * int) array
   ; id : int
   }
 
 let id (env : _ t) = env.id
+
+let get_types (env : _ t) = env.types
+
+let get_type_groups (env : _ t) = env.type_groups
 
 let get_global (env : _ t) id =
   match IMap.find_opt id env.globals with
@@ -118,7 +124,21 @@ module Build = struct
   let get_memories { memories; _ } = memories
 end
 
+let compute_type_groups = Binary.compute_type_groups
+
 let freeze id
   ({ globals; memories; tables; functions; data; elem; tags } : Build.t)
-  extern_funcs =
-  { id; globals; memories; tables; functions; data; elem; tags; extern_funcs }
+  extern_funcs types type_defs =
+  let type_groups = compute_type_groups type_defs (Array.length types) in
+  { id
+  ; globals
+  ; memories
+  ; tables
+  ; functions
+  ; data
+  ; elem
+  ; tags
+  ; extern_funcs
+  ; types
+  ; type_groups
+  }

@@ -52,10 +52,34 @@ let pp_heap_type fmt = function
   | NoExtern_ht -> pf fmt "noextern"
 
 let heap_type_eq t1 t2 =
-  (* TODO: this is wrong *)
   match (t1, t2) with
-  | Func_ht, Func_ht | Extern_ht, Extern_ht -> true
+  | Func_ht, Func_ht
+  | Extern_ht, Extern_ht
+  | Any_ht, Any_ht
+  | Eq_ht, Eq_ht
+  | I31_ht, I31_ht
+  | Struct_ht, Struct_ht
+  | Array_ht, Array_ht
+  | None_ht, None_ht
+  | NoFunc_ht, NoFunc_ht
+  | NoExn_ht, NoExn_ht
+  | Exn_ht, Exn_ht
+  | NoExtern_ht, NoExtern_ht ->
+    true
   | TypeUse id1, TypeUse id2 -> Int.equal id1 id2
+  | _, _ -> false
+
+let is_subtype_heap_type t1 t2 =
+  heap_type_eq t1 t2
+  ||
+  match (t1, t2) with
+  | None_ht, (I31_ht | Struct_ht | Array_ht | Eq_ht | Any_ht)
+  | (I31_ht | Struct_ht | Array_ht), (Eq_ht | Any_ht)
+  | Eq_ht, Any_ht
+  | NoFunc_ht, Func_ht
+  | NoExtern_ht, Extern_ht
+  | NoExn_ht, Exn_ht ->
+    true
   | _, _ -> false
 
 type ref_type = Text.nullable * heap_type
@@ -98,13 +122,14 @@ let pp_storage_type fmt = function
 let is_subtype_ref_type t1 t2 =
   match (t1, t2) with
   | (Text.No_null, ht1), ((Text.Null : Text.nullable), ht2)
-    when heap_type_eq ht1 ht2 ->
+    when is_subtype_heap_type ht1 ht2 ->
     true
   | (No_null, TypeUse _), (Null, Func_ht)
   | (No_null, TypeUse _), (No_null, Func_ht)
   | (Null, TypeUse _), (Null, Func_ht) ->
     true
-  | (Null, t1), (Null, t2) | (No_null, t1), (No_null, t2) -> heap_type_eq t1 t2
+  | (Null, t1), (Null, t2) | (No_null, t1), (No_null, t2) ->
+    is_subtype_heap_type t1 t2
   | _ -> false
 
 let is_subtype_val_type t1 t2 =
@@ -173,14 +198,25 @@ let pp_comp_type fmt = function
   | Def_func_t ft -> Fmt.pf fmt "%a" pp_func_type ft
 (* TODO: ensure proper printing *)
 
+let storage_type_eq st1 st2 =
+  match (st1, st2) with
+  | Val_type vt1, Val_type vt2 -> val_type_eq vt1 vt2
+  | Pack_type I8, Pack_type I8 -> true
+  | Pack_type I16, Pack_type I16 -> true
+  | _, _ -> false
+
+let field_type_eq (m1, st1) (m2, st2) =
+  match ((m1 : Text.mut), (m2 : Text.mut)) with
+  | Const, Const | Var, Var -> storage_type_eq st1 st2
+  | _ -> false
+
 let comp_type_eq ct1 ct2 =
   match (ct1, ct2) with
-  | Def_struct_t _, Def_struct_t _ | Def_array_t _, Def_array_t _ ->
-    Fmt.failwith
-      "comp_type_eq: unimplemented for struct and array types %a and %a"
-      pp_comp_type ct1 pp_comp_type ct2
+  | Def_struct_t fl1, Def_struct_t fl2 ->
+    List.equal (fun (_, ft1) (_, ft2) -> field_type_eq ft1 ft2) fl1 fl2
+  | Def_array_t ft1, Def_array_t ft2 -> field_type_eq ft1 ft2
   | Def_func_t ft1, Def_func_t ft2 -> func_type_eq ft1 ft2
-  | _ -> false
+  | _, _ -> false
 
 type sub_type =
   { final : bool
@@ -190,6 +226,181 @@ type sub_type =
 
 let sub_type_eq { final = f1; ct = ct1; _ } { final = f2; ct = ct2; _ } =
   Bool.equal f1 f2 && comp_type_eq ct1 ct2
+
+(* Two type indices are equivalent when they occupy the same position inside two
+   rec groups of the same size whose members are pairwise structurally
+   equivalent. *)
+
+module PairSet = Set.Make (struct
+  type t = int * int
+
+  let compare (a1, b1) (a2, b2) =
+    let c = Int.compare a1 a2 in
+    if c <> 0 then c else Int.compare b1 b2
+end)
+
+(** [iso_group_bounds types type_groups i] returns [(group_start, group_size)]
+    for the rec group that contains [i]. *)
+let iso_group_bounds types groups i =
+  if i < Array.length groups then groups.(i)
+  else if i < Array.length types then (i, 1)
+  else (i, 1)
+
+(** [is_iso_equiv_aux exp_types exp_tg imp_types imp_tg visited a b] tests
+    whether the types identified by indices [a] (in [exp_types]) and [b] (in
+    [imp_types]) are structurally equivalent. *)
+let rec is_iso_equiv_aux exp_types exp_tg imp_types imp_tg visited a b =
+  if PairSet.mem (a, b) visited then (true, visited)
+  else
+    let visited = PairSet.add (a, b) visited in
+    let ga, gsize_a = iso_group_bounds exp_types exp_tg a in
+    let gb, gsize_b = iso_group_bounds imp_types imp_tg b in
+    if gsize_a <> gsize_b || a - ga <> b - gb then (false, visited)
+    else iso_groups exp_types exp_tg imp_types imp_tg visited ga gb gsize_a
+
+(** [iso_groups exp_types exp_tg imp_types imp_tg visited ga gb size] checks
+    that all [size] member pairs [(ga+i, gb+i)] are pairwise equivalent via
+    [iso_sub_type]. *)
+and iso_groups exp_types exp_tg imp_types imp_tg visited ga gb size =
+  let rec aux i visited =
+    if i >= size then (true, visited)
+    else
+      let id_a = ga + i
+      and id_b = gb + i in
+      if id_a >= Array.length exp_types || id_b >= Array.length imp_types then
+        (false, visited)
+      else
+        let ok, visited =
+          iso_sub_type exp_types exp_tg imp_types imp_tg visited ga gb size
+            exp_types.(id_a) imp_types.(id_b)
+        in
+        if ok then aux (i + 1) visited else (false, visited)
+  in
+  aux 0 visited
+
+and iso_sub_type exp_types exp_tg imp_types imp_tg visited ga gb size st_a st_b
+    =
+  if not (Bool.equal st_a.final st_b.final) then (false, visited)
+  else if List.length st_a.ids <> List.length st_b.ids then (false, visited)
+  else
+    let ok, visited =
+      List.fold_left2
+        (fun (ok, visited) id_a id_b ->
+          if not ok then (false, visited)
+          else
+            iso_heap_type exp_types exp_tg imp_types imp_tg visited ga gb size
+              (TypeUse id_a) (TypeUse id_b) )
+        (true, visited) st_a.ids st_b.ids
+    in
+    if not ok then (false, visited)
+    else
+      iso_comp_type exp_types exp_tg imp_types imp_tg visited ga gb size st_a.ct
+        st_b.ct
+
+and iso_comp_type exp_types exp_tg imp_types imp_tg visited ga gb size ct_a ct_b
+    =
+  match (ct_a, ct_b) with
+  | Def_func_t (pt_a, rt_a), Def_func_t (pt_b, rt_b) ->
+    if
+      List.length pt_a <> List.length pt_b
+      || List.length rt_a <> List.length rt_b
+    then (false, visited)
+    else
+      let ok, visited =
+        List.fold_left2
+          (fun (ok, visited) (_, vt_a) (_, vt_b) ->
+            if not ok then (false, visited)
+            else
+              iso_val_type exp_types exp_tg imp_types imp_tg visited ga gb size
+                vt_a vt_b )
+          (true, visited) pt_a pt_b
+      in
+      if not ok then (false, visited)
+      else
+        List.fold_left2
+          (fun (ok, visited) vt_a vt_b ->
+            if not ok then (false, visited)
+            else
+              iso_val_type exp_types exp_tg imp_types imp_tg visited ga gb size
+                vt_a vt_b )
+          (true, visited) rt_a rt_b
+  | Def_struct_t fl_a, Def_struct_t fl_b ->
+    if List.length fl_a <> List.length fl_b then (false, visited)
+    else
+      List.fold_left2
+        (fun (ok, visited) (_, ft_a) (_, ft_b) ->
+          if not ok then (false, visited)
+          else
+            iso_field_type exp_types exp_tg imp_types imp_tg visited ga gb size
+              ft_a ft_b )
+        (true, visited) fl_a fl_b
+  | Def_array_t ft_a, Def_array_t ft_b ->
+    iso_field_type exp_types exp_tg imp_types imp_tg visited ga gb size ft_a
+      ft_b
+  | _ -> (false, visited)
+
+and iso_field_type exp_types exp_tg imp_types imp_tg visited ga gb size
+  (mut_a, st_a) (mut_b, st_b) =
+  if not (Bool.equal (Text.is_mut mut_a) (Text.is_mut mut_b)) then
+    (false, visited)
+  else
+    iso_storage_type exp_types exp_tg imp_types imp_tg visited ga gb size st_a
+      st_b
+
+and iso_storage_type exp_types exp_tg imp_types imp_tg visited ga gb size st_a
+  st_b =
+  match (st_a, st_b) with
+  | Pack_type Text.I8, Pack_type Text.I8
+  | Pack_type Text.I16, Pack_type Text.I16 ->
+    (true, visited)
+  | Val_type vt_a, Val_type vt_b ->
+    iso_val_type exp_types exp_tg imp_types imp_tg visited ga gb size vt_a vt_b
+  | _ -> (false, visited)
+
+and iso_val_type exp_types exp_tg imp_types imp_tg visited ga gb size vt_a vt_b
+    =
+  match (vt_a, vt_b) with
+  | Num_type nt_a, Num_type nt_b -> (Text.num_type_eq nt_a nt_b, visited)
+  | Ref_type (null_a, ht_a), Ref_type (null_b, ht_b) -> (
+    match (null_a, null_b) with
+    | Text.Null, Text.Null | Text.No_null, Text.No_null ->
+      iso_heap_type exp_types exp_tg imp_types imp_tg visited ga gb size ht_a
+        ht_b
+    | _ -> (false, visited) )
+  | _ -> (false, visited)
+
+and iso_heap_type exp_types exp_tg imp_types imp_tg visited ga gb size ht_a ht_b
+    =
+  match (ht_a, ht_b) with
+  | TypeUse id_a, TypeUse id_b ->
+    let a_in = id_a >= ga && id_a < ga + size in
+    let b_in = id_b >= gb && id_b < gb + size in
+    if a_in && b_in then (id_a - ga = id_b - gb, visited)
+    else if (not a_in) && not b_in then
+      is_iso_equiv_aux exp_types exp_tg imp_types imp_tg visited id_a id_b
+    else (false, visited)
+  | _ -> (heap_type_eq ht_a ht_b, visited)
+
+(** iso-equivalence: checks whether type [a] in [(exp_types, exp_tg)] and type
+    [b] in [(imp_types, imp_tg)] are structurally equivalent — same rec-group
+    size, same relative position, pairwise equivalent members. *)
+let is_iso_equiv exp_types exp_tg imp_types imp_tg a b =
+  fst (is_iso_equiv_aux exp_types exp_tg imp_types imp_tg PairSet.empty a b)
+
+(** Subtype check across modules: is [exp_types[got]] a structural subtype of
+    [imp_types[expected]]? Checks iso-equivalence first, then follows the [ids]
+    supertype chain in [exp_types]. *)
+let is_subtype exp_types exp_tg imp_types imp_tg ~got ~expected =
+  let rec aux a b =
+    is_iso_equiv exp_types exp_tg imp_types imp_tg a b
+    ||
+    if a >= Array.length exp_types then false
+    else
+      List.exists
+        (fun id -> (not (Int.equal id a)) && aux id b)
+        exp_types.(a).ids
+  in
+  aux got expected
 
 let pp_sub_type fmt { final; ids; ct } =
   Fmt.pf fmt "%a%a%a"
@@ -1042,6 +1253,25 @@ module Typedef = struct
     | RecType tyl -> Fmt.pf fmt "(rec %a)" (Fmt.list ~sep:Fmt.sp pp_ty) tyl
 end
 
+(** Precompute a mapping from each type index to [(group_start, group_size)] for
+    its rec group. Types not in a [rec] block form singleton groups. *)
+let compute_type_groups (type_defs : Typedef.t array) types_len =
+  let groups = Array.make types_len (0, 1) in
+  let _ =
+    Array.fold_left
+      (fun pos typedef ->
+        match typedef with
+        | Typedef.SimpleType _ ->
+          groups.(pos) <- (pos, 1);
+          pos + 1
+        | Typedef.RecType members ->
+          let size = List.length members in
+          List.iteri (fun i _ -> groups.(pos + i) <- (pos, size)) members;
+          pos + size )
+      0 type_defs
+  in
+  groups
+
 module Table = struct
   module Type = struct
     type limits =
@@ -1162,7 +1392,8 @@ module Module = struct
 
   type t =
     { id : string option
-    ; types : Typedef.t array
+    ; type_defs : Typedef.t array
+    ; types : sub_type array
     ; global : (Global.t, Global.Type.t) Origin.t array
     ; table : (Table.t, Table.Type.t) Origin.t array
     ; mem : (Mem.t, Mem.Type.limits) Origin.t array
@@ -1177,6 +1408,7 @@ module Module = struct
 
   let empty =
     { id = None
+    ; type_defs = [||]
     ; types = [||]
     ; global = [||]
     ; table = [||]

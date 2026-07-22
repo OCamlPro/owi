@@ -89,6 +89,7 @@ module Result : sig
     | `Double_free
     | `Offset_out_of_range
     | `Table_size
+    | `Cast_failure
     ]
 
   type 'a t = ('a, err) Prelude.Result.t
@@ -1566,7 +1567,8 @@ module Binary : sig
 
     type t =
       { id : string option
-      ; types : Typedef.t array
+      ; type_defs : Typedef.t array
+      ; types : sub_type array
       ; global : (Global.t, Global.Type.t) Origin.t array
       ; table : (Table.t, Table.Type.t) Origin.t array
       ; mem : (Mem.t, Mem.Type.limits) Origin.t array

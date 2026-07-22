@@ -26,6 +26,8 @@ val pp_heap_type : heap_type Fmt.t
 
 val heap_type_eq : heap_type -> heap_type -> bool
 
+val is_subtype_heap_type : heap_type -> heap_type -> bool
+
 type ref_type = Text.nullable * heap_type
 
 val pp_ref_type : ref_type Fmt.t
@@ -80,6 +82,24 @@ type sub_type =
 val pp_sub_type : sub_type Fmt.t
 
 val sub_type_eq : sub_type -> sub_type -> bool
+
+val is_iso_equiv :
+     sub_type array
+  -> (int * int) array
+  -> sub_type array
+  -> (int * int) array
+  -> int
+  -> int
+  -> bool
+
+val is_subtype :
+     sub_type array
+  -> (int * int) array
+  -> sub_type array
+  -> (int * int) array
+  -> got:int
+  -> expected:int
+  -> bool
 
 type block_type =
   (* TODO: inline this *)
@@ -464,6 +484,8 @@ module Typedef : sig
   val pp : t Fmt.t
 end
 
+val compute_type_groups : Typedef.t array -> int -> (int * int) array
+
 module Table : sig
   module Type : sig
     type limits =
@@ -571,7 +593,8 @@ module Module : sig
 
   type t =
     { id : string option
-    ; types : Typedef.t array
+    ; type_defs : Typedef.t array
+    ; types : sub_type array
     ; global : (Global.t, Global.Type.t) Origin.t array
     ; table : (Table.t, Table.Type.t) Origin.t array
     ; mem : (Mem.t, Mem.Type.limits) Origin.t array
@@ -593,7 +616,7 @@ module Module : sig
 
   val get_func_type : indice -> t -> block_type option
 
-  val get_type : indice -> t -> Typedef.t option
+  val get_type : indice -> t -> sub_type option
 
   val find_imported_func_index :
     modul_name:string -> func_name:string -> t -> indice option

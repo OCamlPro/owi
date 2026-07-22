@@ -1199,7 +1199,7 @@ let encode_sub_type buf st =
     encode_comp_type buf ct
 
 (* type: section 1 *)
-let encode_types buf types =
+let encode_type_defs buf types =
   encode_vector_array buf types (fun buf st ->
     match st with
     | Typedef.SimpleType (_, st) -> encode_sub_type buf st
@@ -1292,7 +1292,7 @@ let keep_imported values =
     (Array.to_list values)
 
 let encode
-  ({ func; table; global; exports; start; data; mem; types; elem; _ } :
+  ({ func; table; global; exports; start; data; mem; type_defs; elem; _ } :
     Binary.Module.t ) =
   let buf = Buffer.create 256 in
 
@@ -1309,7 +1309,7 @@ let encode
   (* magic *)
   Buffer.add_string buf "\x01\x00\x00\x00";
   (* version *)
-  encode_section buf '\x01' encode_types types;
+  encode_section buf '\x01' encode_type_defs type_defs;
   encode_section buf '\x02' encode_imports
     (imported_funcs, imported_tables, imported_memories, imported_globals);
   encode_section buf '\x03' encode_functions local_funcs;

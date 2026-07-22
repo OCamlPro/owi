@@ -18,24 +18,34 @@ module Extern = struct
     | Some Equal -> Some r
 end
 
+type array_obj = unit
+
+type struct_obj = unit
+
 type t =
   | Extern of Extern.t option
   | Func of Kind.func option
   | NullExn
   | NullRef
+  | I31 of int32
+  | Array of array_obj
+  | Struct of struct_obj
 
 let pp fmt = function
   | Extern _ -> pf fmt "externref"
   | Func _ -> pf fmt "funcref"
   | NullExn -> pf fmt "nullexnref"
   | NullRef -> pf fmt "nullref"
+  | I31 i -> pf fmt "i31ref %ld" i
+  | Struct () -> pf fmt "structref"
+  | Array () -> pf fmt "arrayref"
 
 let null = function
   | Binary.Func_ht | NoFunc_ht | TypeUse _ -> Func None
   (* TODO: is this correct? Are all nulls equal? *)
   | Extern_ht | NoExtern_ht -> Extern None
-  | Any_ht | None_ht | Exn_ht | NoExn_ht -> assert false
-  | Eq_ht | I31_ht | Struct_ht | Array_ht -> assert false
+  | Exn_ht | NoExn_ht -> NullExn
+  | Any_ht | None_ht | Eq_ht | I31_ht | Struct_ht | Array_ht -> NullRef
 
 let func (f : Kind.func) = Func (Some f)
 
@@ -43,7 +53,7 @@ let extern (type x) (t : x Type.Id.t) (v : x) : t = Extern (Some (E (t, v)))
 
 let is_null = function
   | Func None | Extern None | NullExn | NullRef -> true
-  | Func (Some _) | Extern (Some _) -> false
+  | Func (Some _) | Extern (Some _) | I31 _ | Array _ | Struct _ -> false
 
 let get_func (r : t) : Kind.func get_ref =
   match r with
