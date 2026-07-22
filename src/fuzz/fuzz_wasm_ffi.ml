@@ -22,39 +22,15 @@ module M :
 
   let symbol_invisible_bool () = Ok (if Random.bool () then 1l else 0l)
 
-  let symbol_i32 () =
-    let n = Random.bits32 () in
-    let n = Concrete_i32.of_int32 n in
-    Fuzz_state.model := Concrete_value.I32 n :: !Fuzz_state.model;
-    Ok n
+  let symbol_i32 () = Ok (Fuzz_gen.i32 ())
 
-  let symbol_i64 () =
-    let n = Random.bits64 () in
-    let n = Concrete_i64.of_int64 n in
-    Fuzz_state.model := Concrete_value.I64 n :: !Fuzz_state.model;
-    Ok n
+  let symbol_i64 () = Ok (Fuzz_gen.i64 ())
 
-  let symbol_f32 () =
-    (* TODO: avoid going through 64 bits *)
-    let n = Random.bits64 () in
-    let n = Int64.float_of_bits n in
-    let n = Concrete_f32.of_float n in
-    Fuzz_state.model := Concrete_value.F32 n :: !Fuzz_state.model;
-    Ok n
+  let symbol_f32 () = Ok (Fuzz_gen.f32 ())
 
-  let symbol_f64 () =
-    let n = Random.bits64 () in
-    let n = Int64.float_of_bits n in
-    let n = Concrete_f64.of_float n in
-    Fuzz_state.model := Concrete_value.F64 n :: !Fuzz_state.model;
-    Ok n
+  let symbol_f64 () = Ok (Fuzz_gen.f64 ())
 
-  let symbol_v128 () =
-    let n1 = Random.bits64 () in
-    let n2 = Random.bits64 () in
-    let n = Concrete_v128.of_i64x2 n1 n2 in
-    Fuzz_state.model := Concrete_value.V128 n :: !Fuzz_state.model;
-    Ok n
+  let symbol_v128 () = Ok (Fuzz_gen.v128 ())
 
   let abort () =
     (* TODO: stop the round properly *)
