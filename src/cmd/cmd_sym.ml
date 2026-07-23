@@ -28,7 +28,7 @@ let run_file ~parameters ~source_file =
       let+ m, link_state =
         Compile.Binary.until_link ~unsafe ~name:None link_state m
       in
-      let state = Abstract_driver.modul link_state m in
+      let state = Abstract_interpreter_control_flow.modul link_state m in
       state.invariant
     else Ok (Abstract_invariant.empty ())
   in

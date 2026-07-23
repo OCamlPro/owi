@@ -15,3 +15,7 @@ let cmd_concrete ~files ~no_exhaustion =
 let cmd_symbolic ~files ~no_exhaustion =
   let exec = Script_symbolic.exec ~no_exhaustion in
   list_iter (run_file exec) files
+
+let cmd_abstract ~files ~no_exhaustion =
+  let exec = Script_abstract.exec ~no_exhaustion in
+  list_iter (run_file exec) files

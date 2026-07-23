@@ -45,6 +45,7 @@
 - add `--bench` option
 - add `--no-ite-for-select` option
 - support the multi-memory proposal
+- add `script abstract`
 
 ## 0.2 - 2024-04-24
 

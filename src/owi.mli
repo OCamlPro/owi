@@ -1889,13 +1889,6 @@ module Abstract_invariant : sig
   type t
 end
 
-module Abstract_driver : sig
-  val modul :
-       Abstract_extern.Func.t Link.State.t
-    -> Abstract_extern.Func.t Linked.Module.t
-    -> Abstract_state.t
-end
-
 module Interpret : sig
   module type Parameters = sig
     val use_ite_for_select : bool
@@ -2150,6 +2143,8 @@ module Cmd_script : sig
   val cmd_concrete : files:Fpath.t list -> no_exhaustion:bool -> unit Result.t
 
   val cmd_symbolic : files:Fpath.t list -> no_exhaustion:bool -> unit Result.t
+
+  val cmd_abstract : files:Fpath.t list -> no_exhaustion:bool -> unit Result.t
 end
 
 module Cmd_tinygo : sig

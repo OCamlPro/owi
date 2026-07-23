@@ -53,7 +53,7 @@ module F64 : sig
 end
 
 module V128 : sig
-  val of_concrete : Concrete_v128.t -> v128
+  val of_concrete : Abstract_domain.Context.t -> Concrete_v128.t -> v128
 end
 
 module Ref : sig
@@ -73,3 +73,6 @@ val size_of : t -> Units.In_bits.t
 val to_boolean : Abstract_domain.Context.t -> t -> Abstract_boolean.t
 
 val top : Units.In_bits.t -> Abstract_domain.Context.t -> t
+
+val equal_script_result :
+  Abstract_domain.Context.t -> ty:'a -> Wast.result -> t -> bool

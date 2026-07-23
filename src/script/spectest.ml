@@ -100,6 +100,46 @@ let symbolic_extern_m =
   ; ("func-i32->i32", Extern_func (i32 ^->. i32, func_in_i32_out_i32))
   ]
 
+let abstract_extern_m =
+  let open Abstract_monad in
+  let print () = return () in
+  let print_i32 _i = return () in
+  let print_i64 _i = return () in
+  let print_f32 _f = return () in
+  let print_f64 _f = return () in
+  let print_i32_f32 i f =
+    let* () = print_i32 i in
+    let* () = print_f32 f in
+    return ()
+  in
+  let print_f64_f64 f1 f2 =
+    let* () = print_f64 f1 in
+    let* () = print_f64 f2 in
+    return ()
+  in
+  let func () = return () in
+  let func_in_i32 (_i : Abstract_i32.t) = return () in
+  let func_out_i32 () =
+    fold_state (fun { ctx; _ } -> Abstract_i32.of_int ctx 1)
+  in
+  let func_in_i32_out_i32 (_i : Abstract_i32.t) =
+    fold_state (fun { ctx; _ } -> Abstract_i32.of_int ctx 1)
+  in
+  let open Abstract_extern.Func in
+  let open Abstract_extern.Func.Syntax in
+  [ ("print", Extern_func (unit ^->. unit, print))
+  ; ("print_i32", Extern_func (i32 ^->. unit, print_i32))
+  ; ("print_i64", Extern_func (i64 ^->. unit, print_i64))
+  ; ("print_f32", Extern_func (f32 ^->. unit, print_f32))
+  ; ("print_f64", Extern_func (f64 ^->. unit, print_f64))
+  ; ("print_i32_f32", Extern_func (i32 ^-> f32 ^->. unit, print_i32_f32))
+  ; ("print_f64_f64", Extern_func (f64 ^-> f64 ^->. unit, print_f64_f64))
+  ; ("func", Extern_func (unit ^->. unit, func))
+  ; ("func-i32", Extern_func (i32 ^->. unit, func_in_i32))
+  ; ("func->i32", Extern_func (unit ^->. i32, func_out_i32))
+  ; ("func-i32->i32", Extern_func (i32 ^->. i32, func_in_i32_out_i32))
+  ]
+
 let m =
   let open Wast in
   Text_module

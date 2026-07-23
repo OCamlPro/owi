@@ -33,7 +33,8 @@ let push_concrete_f64 s ctx f =
 
 let push_f64 s f = push s (Value.F64 f)
 
-let push_concrete_v128 s f = push s (Value.V128 (Value.V128.of_concrete f))
+let push_concrete_v128 s ctx f =
+  push s (Value.V128 (Value.V128.of_concrete ctx f))
 
 let push_v128 s f = push s (Value.V128 f)
 

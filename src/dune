@@ -6,7 +6,6 @@
   abstract_boolean
   abstract_checker
   abstract_domain
-  abstract_driver
   abstract_extern
   abstract_f32
   abstract_f64
@@ -126,6 +125,7 @@
   script
   script_error
   script_symbolic
+  script_abstract
   symbol_scope
   share
   solver
