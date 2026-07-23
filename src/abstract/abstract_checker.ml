@@ -88,8 +88,8 @@ and check_instr (instr : Binary.instr Annotated.t)
   | Call_ref _ | Any_convert_extern | Extern_convert_any ->
     ()
 
-let check_module (link_state : Abstract_extern_func.extern_func Link.State.t)
-  (m : Abstract_extern_func.extern_func Linked.Module.t)
+let check_module (link_state : Abstract_extern_func.t Link.State.t)
+  (m : Abstract_extern_func.t Linked.Module.t)
   (invariants : Abstract_invariant.t) =
   let envs = Link.State.get_envs link_state in
   let env = m.env in

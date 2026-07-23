@@ -87,7 +87,7 @@ open M
 open Abstract_extern_func
 open Abstract_extern_func.Syntax
 
-type extern_func = Abstract_extern_func.extern_func
+type extern_func = Abstract_extern_func.t
 
 let symbolic_extern_module =
   let functions =

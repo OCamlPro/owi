@@ -43,9 +43,9 @@ module Func : sig
     type _ func_type = private
       | Func : ('f, 'r m) atype * 'r rtype -> 'f func_type
 
-    type extern_func = Extern_func : 'a func_type * 'a -> extern_func
+    type t = Extern_func : 'a func_type * 'a -> t
 
-    val extern_type : extern_func -> Binary.func_type
+    val extern_type : t -> Binary.func_type
 
     module Syntax : sig
       type l

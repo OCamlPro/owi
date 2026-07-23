@@ -6,7 +6,7 @@ module Choice = Concrete_choice
 module Memory = Concrete_memory
 module Value = Concrete_value
 
-type extern_func = Concrete_extern_func.extern_func
+type extern_func = Concrete_extern_func.t
 
 open Concrete_value
 

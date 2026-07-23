@@ -1619,9 +1619,9 @@ end
 module Concrete_extern_func : sig
   type _ func_type
 
-  type extern_func = Extern_func : 'a func_type * 'a -> extern_func
+  type t = Extern_func : 'a func_type * 'a -> t
 
-  val extern_type : extern_func -> Binary.func_type
+  val extern_type : t -> Binary.func_type
 
   module Syntax : sig
     type l
@@ -1832,9 +1832,9 @@ end
 module Symbolic_extern_func : sig
   type _ func_type
 
-  type extern_func = Extern_func : 'a func_type * 'a -> extern_func
+  type t = Extern_func : 'a func_type * 'a -> t
 
-  val extern_type : extern_func -> Binary.func_type
+  val extern_type : t -> Binary.func_type
 
   module Syntax : sig
     type l
@@ -1888,8 +1888,8 @@ end
 
 module Abstract_driver : sig
   val modul :
-       Abstract_extern_func.extern_func Link.State.t
-    -> Abstract_extern_func.extern_func Linked.Module.t
+       Abstract_extern_func.t Link.State.t
+    -> Abstract_extern_func.t Linked.Module.t
     -> Abstract_state.t
 end
 
@@ -1910,15 +1910,15 @@ module Interpret : sig
 
   module Concrete (_ : Parameters) : sig
     val modul :
-         Concrete_extern_func.extern_func Link.State.t
-      -> Concrete_extern_func.extern_func Linked.Module.t
+         Concrete_extern_func.t Link.State.t
+      -> Concrete_extern_func.t Linked.Module.t
       -> unit Result.t
   end
 
   module Symbolic (_ : Parameters) : sig
     val modul :
-         Symbolic_extern_func.extern_func Link.State.t
-      -> Symbolic_extern_func.extern_func Linked.Module.t
+         Symbolic_extern_func.t Link.State.t
+      -> Symbolic_extern_func.t Linked.Module.t
       -> unit Symbolic_choice.t
   end
 end
