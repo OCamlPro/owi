@@ -41,7 +41,23 @@ end
 module Extern : sig
   (** register an extern module with a given link state, producing a new link
       state *)
-  val modul : name:string -> 'f Extern.Module.t -> 'f State.t -> 'f State.t
+  val concrete_module :
+       name:string
+    -> Concrete_extern.Module.t
+    -> Concrete_extern.Func.t State.t
+    -> Concrete_extern.Func.t State.t
+
+  val symbolic_module :
+       name:string
+    -> Symbolic_extern.Module.t
+    -> Symbolic_extern.Func.t State.t
+    -> Symbolic_extern.Func.t State.t
+
+  val abstract_module :
+       name:string
+    -> Abstract_extern.Module.t
+    -> Abstract_extern.Func.t State.t
+    -> Abstract_extern.Func.t State.t
 end
 
 module Binary : sig

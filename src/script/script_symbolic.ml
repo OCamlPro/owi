@@ -8,7 +8,7 @@ type host_externref = int
 
 let ty : host_externref Type.Id.t = Type.Id.make ()
 
-type state = Symbolic_extern_func.t Link.State.t * Thread.t
+type state = Symbolic_extern.Func.t Link.State.t * Thread.t
 
 module I = Interpret.Symbolic (Interpret.Default_parameters)
 
@@ -67,7 +67,7 @@ let log_cmd : Wast.cmd -> unit =
   Log.info (fun m -> m "*** %s" s)
 
 let run_one ~no_exhaustion:_
-  ~(state : Symbolic_extern_func.t Link.State.t * Thread.t) cmd : state Result.t
+  ~(state : Symbolic_extern.Func.t Link.State.t * Thread.t) cmd : state Result.t
     =
   let link_state, monadic_state = state in
   log_cmd cmd;
@@ -173,7 +173,8 @@ let run ~no_exhaustion script : _ Result.t =
   Solver.solver_to_use := Some Smtml.Solver_type.Z3_solver;
   let link_state =
     Link.State.empty ()
-    |> Link.Extern.modul ~name:"spectest_extern" Spectest.symbolic_extern_m
+    |> Link.Extern.symbolic_module ~name:"spectest_extern"
+         Spectest.symbolic_extern_m
   in
   let monadic_state = Thread.init () in
   let script = Spectest.m :: Register ("spectest", Some "spectest") :: script in

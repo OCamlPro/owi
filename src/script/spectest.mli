@@ -5,9 +5,9 @@
 (** The `spectest` module, to run script from the official test suite. *)
 
 (* OCaml definition *)
-val extern_m : Concrete_extern_func.t Extern.Module.t
+val extern_m : Concrete_extern.Module.t
 
-val symbolic_extern_m : Symbolic_extern_func.t Extern.Module.t
+val symbolic_extern_m : Symbolic_extern.Module.t
 
 (* TODO: this can probably be removed by directly registering the previous module in script.ml ? *)
 

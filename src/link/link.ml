@@ -504,15 +504,15 @@ module Binary = struct
 end
 
 module Extern = struct
-  let modul ~name (modul : 'f Extern.Module.t) (ls : 'f State.t) =
+  let aux ~name (ls : 'f State.t) func_type functions =
     let functions, collection =
       List.fold_left
         (fun (functions, collection) (name, func) ->
-          let typ = modul.func_type func in
+          let typ = func_type func in
           Dynarray.add_last collection (func, typ);
           let id = Dynarray.length collection - 1 in
           ((name, (Kind.extern id : Kind.func)) :: functions, collection) )
-        ([], ls.collection) modul.functions
+        ([], ls.collection) functions
     in
     let functions = StringMap.of_seq (List.to_seq functions) in
     let defined_names =
@@ -530,6 +530,18 @@ module Extern = struct
       }
     in
     { ls with by_name = StringMap.add name exports ls.by_name; collection }
+
+  let concrete_module ~name (modul : Concrete_extern.Module.t)
+    (link_state : Concrete_extern.Func.t State.t) =
+    aux ~name link_state Concrete_extern.Func.to_func_type modul
+
+  let symbolic_module ~name (modul : Symbolic_extern.Module.t)
+    (link_state : Symbolic_extern.Func.t State.t) =
+    aux ~name link_state Symbolic_extern.Func.to_func_type modul
+
+  let abstract_module ~name (modul : Abstract_extern.Module.t)
+    (link_state : Abstract_extern.Func.t State.t) =
+    aux ~name link_state Abstract_extern.Func.to_func_type modul
 end
 
 let register_last_module (ls : 'f State.t) ~name ~(id : string option) :

@@ -1602,7 +1602,7 @@ module Kind : sig
     | Wat of Text.Module.t
     | Wast of Wast.script
     | Wasm of Binary.Module.t
-    | Extern of 'f Extern.Module.t
+    | Extern of 'f
 end
 
 module Binary_to_text : sig
@@ -1616,54 +1616,60 @@ module Concrete_memory : sig
   val store_8 : t -> addr:Concrete_i32.t -> Concrete_i32.t -> unit Result.t
 end
 
-module Concrete_extern_func : sig
-  type _ func_type
+module Concrete_extern : sig
+  module Func : sig
+    type _ func_type
 
-  type t = Extern_func : 'a func_type * 'a -> t
+    type t = Extern_func : 'a func_type * 'a -> t
 
-  val extern_type : t -> Binary.func_type
+    val to_func_type : t -> Binary.func_type
 
-  module Syntax : sig
-    type l
+    module Syntax : sig
+      type l
 
-    type lr
+      type lr
 
-    type elt
+      type elt
 
-    type (_, _, _) t
+      type (_, _, _) t
 
-    val ( ^-> ) : ('r, 'k, 'a) t -> 'b func_type -> ('a -> 'b) func_type
+      val ( ^-> ) : ('r, 'k, 'a) t -> 'b func_type -> ('a -> 'b) func_type
 
-    val ( ^->. ) :
-      ('r, 'k, 'a) t -> (lr, 'kk, 'b) t -> ('a -> 'b Result.t) func_type
+      val ( ^->. ) :
+        ('r, 'k, 'a) t -> (lr, 'kk, 'b) t -> ('a -> 'b Result.t) func_type
 
-    val ( ^->.. ) :
-         ('ll, 'k, 'a) t
-      -> (lr, elt, 'b1) t * (lr, elt, 'b2) t
-      -> ('a -> ('b1 * 'b2) Result.t) func_type
+      val ( ^->.. ) :
+           ('ll, 'k, 'a) t
+        -> (lr, elt, 'b1) t * (lr, elt, 'b2) t
+        -> ('a -> ('b1 * 'b2) Result.t) func_type
 
-    val ( ^->... ) :
-         ('ll, 'k, 'a) t
-      -> (lr, elt, 'b1) t * (lr, elt, 'b2) t * (lr, elt, 'b3) t
-      -> ('a -> ('b1 * 'b2 * 'b3) Result.t) func_type
+      val ( ^->... ) :
+           ('ll, 'k, 'a) t
+        -> (lr, elt, 'b1) t * (lr, elt, 'b2) t * (lr, elt, 'b3) t
+        -> ('a -> ('b1 * 'b2 * 'b3) Result.t) func_type
 
-    val ( ^->.... ) :
-         ('ll, 'k, 'a) t
-      -> (lr, elt, 'b1) t
-         * (lr, elt, 'b2) t
-         * (lr, elt, 'b3) t
-         * (lr, elt, 'b4) t
-      -> ('a -> ('b1 * 'b2 * 'b3 * 'b4) Result.t) func_type
+      val ( ^->.... ) :
+           ('ll, 'k, 'a) t
+        -> (lr, elt, 'b1) t
+           * (lr, elt, 'b2) t
+           * (lr, elt, 'b3) t
+           * (lr, elt, 'b4) t
+        -> ('a -> ('b1 * 'b2 * 'b3 * 'b4) Result.t) func_type
 
-    val i32 : (lr, elt, Concrete_i32.t) t
+      val i32 : (lr, elt, Concrete_i32.t) t
 
-    val i64 : (lr, elt, Concrete_i64.t) t
+      val i64 : (lr, elt, Concrete_i64.t) t
 
-    val unit : (lr, unit, unit) t
+      val unit : (lr, unit, unit) t
 
-    val memory : int -> (l, Concrete_memory.t, Concrete_memory.t) t
+      val memory : int -> (l, Concrete_memory.t, Concrete_memory.t) t
 
-    val externref : 'a Type.Id.t -> (lr, elt, 'a) t
+      val externref : 'a Type.Id.t -> (lr, elt, 'a) t
+    end
+  end
+
+  module Module : sig
+    type t = (string * Func.t) list
   end
 end
 
@@ -1704,15 +1710,6 @@ module Linked : sig
   end
 end
 
-module Extern : sig
-  module Module : sig
-    type 'f t =
-      { functions : (string * 'f) list
-      ; func_type : 'f -> Binary.func_type
-      }
-  end
-end
-
 module Link : sig
   module State : sig
     type 'f t
@@ -1729,7 +1726,11 @@ module Link : sig
   end
 
   module Extern : sig
-    val modul : name:string -> 'f Extern.Module.t -> 'f State.t -> 'f State.t
+    val concrete_module :
+         name:string
+      -> Concrete_extern.Module.t
+      -> Concrete_extern.Func.t State.t
+      -> Concrete_extern.Func.t State.t
   end
 end
 
@@ -1829,56 +1830,58 @@ module Symbolic_choice : sig
   val trap : Result.err -> 'a t
 end
 
-module Symbolic_extern_func : sig
-  type _ func_type
+module Symbolic_extern : sig
+  module Func : sig
+    type _ func_type
 
-  type t = Extern_func : 'a func_type * 'a -> t
+    type t = Extern_func : 'a func_type * 'a -> t
 
-  val extern_type : t -> Binary.func_type
+    val to_func_type : t -> Binary.func_type
 
-  module Syntax : sig
-    type l
+    module Syntax : sig
+      type l
 
-    type lr
+      type lr
 
-    type elt
+      type elt
 
-    type (_, _, _) t
+      type (_, _, _) t
 
-    val ( ^-> ) : ('r, 'k, 'a) t -> 'b func_type -> ('a -> 'b) func_type
+      val ( ^-> ) : ('r, 'k, 'a) t -> 'b func_type -> ('a -> 'b) func_type
 
-    val ( ^->. ) :
-         ('r, 'k, 'a) t
-      -> (lr, 'kk, 'b) t
-      -> ('a -> 'b Symbolic_choice.t) func_type
+      val ( ^->. ) :
+           ('r, 'k, 'a) t
+        -> (lr, 'kk, 'b) t
+        -> ('a -> 'b Symbolic_choice.t) func_type
 
-    val ( ^->.. ) :
-         ('ll, 'k, 'a) t
-      -> (lr, elt, 'b1) t * (lr, elt, 'b2) t
-      -> ('a -> ('b1 * 'b2) Symbolic_choice.t) func_type
+      val ( ^->.. ) :
+           ('ll, 'k, 'a) t
+        -> (lr, elt, 'b1) t * (lr, elt, 'b2) t
+        -> ('a -> ('b1 * 'b2) Symbolic_choice.t) func_type
 
-    val ( ^->... ) :
-         ('ll, 'k, 'a) t
-      -> (lr, elt, 'b1) t * (lr, elt, 'b2) t * (lr, elt, 'b3) t
-      -> ('a -> ('b1 * 'b2 * 'b3) Symbolic_choice.t) func_type
+      val ( ^->... ) :
+           ('ll, 'k, 'a) t
+        -> (lr, elt, 'b1) t * (lr, elt, 'b2) t * (lr, elt, 'b3) t
+        -> ('a -> ('b1 * 'b2 * 'b3) Symbolic_choice.t) func_type
 
-    val ( ^->.... ) :
-         ('ll, 'k, 'a) t
-      -> (lr, elt, 'b1) t
-         * (lr, elt, 'b2) t
-         * (lr, elt, 'b3) t
-         * (lr, elt, 'b4) t
-      -> ('a -> ('b1 * 'b2 * 'b3 * 'b4) Symbolic_choice.t) func_type
+      val ( ^->.... ) :
+           ('ll, 'k, 'a) t
+        -> (lr, elt, 'b1) t
+           * (lr, elt, 'b2) t
+           * (lr, elt, 'b3) t
+           * (lr, elt, 'b4) t
+        -> ('a -> ('b1 * 'b2 * 'b3 * 'b4) Symbolic_choice.t) func_type
 
-    val i32 : (lr, elt, Symbolic_i32.t) t
+      val i32 : (lr, elt, Symbolic_i32.t) t
 
-    val i64 : (lr, elt, Symbolic_i64.t) t
+      val i64 : (lr, elt, Symbolic_i64.t) t
 
-    val unit : (lr, unit, unit) t
+      val unit : (lr, unit, unit) t
 
-    val memory : int -> (l, Symbolic_memory.t, Symbolic_memory.t) t
+      val memory : int -> (l, Symbolic_memory.t, Symbolic_memory.t) t
 
-    val externref : 'a Type.Id.t -> (lr, elt, 'a) t
+      val externref : 'a Type.Id.t -> (lr, elt, 'a) t
+    end
   end
 end
 
@@ -1888,8 +1891,8 @@ end
 
 module Abstract_driver : sig
   val modul :
-       Abstract_extern_func.t Link.State.t
-    -> Abstract_extern_func.t Linked.Module.t
+       Abstract_extern.Func.t Link.State.t
+    -> Abstract_extern.Func.t Linked.Module.t
     -> Abstract_state.t
 end
 
@@ -1910,15 +1913,15 @@ module Interpret : sig
 
   module Concrete (_ : Parameters) : sig
     val modul :
-         Concrete_extern_func.t Link.State.t
-      -> Concrete_extern_func.t Linked.Module.t
+         Concrete_extern.Func.t Link.State.t
+      -> Concrete_extern.Func.t Linked.Module.t
       -> unit Result.t
   end
 
   module Symbolic (_ : Parameters) : sig
     val modul :
-         Symbolic_extern_func.t Link.State.t
-      -> Symbolic_extern_func.t Linked.Module.t
+         Symbolic_extern.Func.t Link.State.t
+      -> Symbolic_extern.Func.t Linked.Module.t
       -> unit Symbolic_choice.t
   end
 end

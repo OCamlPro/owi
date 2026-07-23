@@ -16,8 +16,8 @@ end
 
 type interpreter_state =
   { abs_state : Abstract_state.t
-  ; env : Abstract_extern_func.t Link_env.t
-  ; envs : Abstract_extern_func.t Link_env.t Dynarray.t
+  ; env : Abstract_extern.Func.t Link_env.t
+  ; envs : Abstract_extern.Func.t Link_env.t Dynarray.t
   }
 
 module DenotFixpoint (S : DATA_STATE) = struct
@@ -197,9 +197,9 @@ module DenotFixpoint (S : DATA_STATE) = struct
     ({ state with ctx }, included)
 
   let exec_extern_func ({ stack; _ } : Abstract_state.t)
-    (f : Abstract_extern_func.t) =
-    let open Abstract_extern_func in
-    let pop_arg (type ty) stack (arg : ty Abstract_extern_func.telt) :
+    (f : Abstract_extern.Func.t) =
+    let open Abstract_extern.Func in
+    let pop_arg (type ty) stack (arg : ty Abstract_extern.Func.telt) :
       ty * Stack.t =
       match arg with
       | I32 -> Stack.pop_i32 stack
@@ -212,7 +212,7 @@ module DenotFixpoint (S : DATA_STATE) = struct
         assert false
     in
     let rec split_args : type f r.
-      Stack.t -> (f, r) Abstract_extern_func.atype -> Stack.t * Stack.t =
+      Stack.t -> (f, r) Abstract_extern.Func.atype -> Stack.t * Stack.t =
      fun stack ty ->
       let[@local] split_one_arg args =
         let elt, stack = Stack.pop stack in
@@ -227,7 +227,7 @@ module DenotFixpoint (S : DATA_STATE) = struct
       | Res -> ([], stack)
     in
     let rec apply : type f r.
-      Stack.t -> (f, r) Abstract_extern_func.atype -> f -> r =
+      Stack.t -> (f, r) Abstract_extern.Func.atype -> f -> r =
      fun stack ty f ->
       match ty with
       | Mem (_memid, _args) ->
@@ -242,11 +242,11 @@ module DenotFixpoint (S : DATA_STATE) = struct
         apply stack args (f v)
       | Res -> f
     in
-    let (Abstract_extern_func.Extern_func (Func (atype, rtype), func)) = f in
+    let (Abstract_extern.Func.Extern_func (Func (atype, rtype), func)) = f in
     let args, stack = split_args stack atype in
     let open Abstract_monad in
     let+ r = apply (List.rev args) atype func in
-    let push_val (type ty) (arg : ty Abstract_extern_func.telt) (v : ty) stack =
+    let push_val (type ty) (arg : ty Abstract_extern.Func.telt) (v : ty) stack =
       match arg with
       | I32 -> Stack.push_i32 stack v
       | I64 -> Stack.push_i64 stack v
@@ -561,7 +561,7 @@ end
 
 module ConcreteFixpoint = DenotFixpoint (Abstract_interpreter_simple)
 
-let eval_exprs (m : Abstract_extern_func.t Linked.Module.t) abs_state envs =
+let eval_exprs (m : Abstract_extern.Func.t Linked.Module.t) abs_state envs =
   let state =
     List.fold_left
       (fun (state : interpreter_state) (e : Binary.expr Annotated.t) ->

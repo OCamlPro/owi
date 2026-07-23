@@ -8,7 +8,7 @@ let cmd ~rounds ~seed ~source_file ~timeout ~timeout_instr ~unsafe =
   Init.random_state seed;
   let link_state =
     Link.State.empty ()
-    |> Link.Extern.modul ~name:"owi" Fuzz_wasm_ffi.extern_module
+    |> Link.Extern.concrete_module ~name:"owi" Fuzz_wasm_ffi.owi
   in
   let* m, link_state =
     Compile.File.until_link ~unsafe ~name:None link_state source_file

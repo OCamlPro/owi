@@ -4,4 +4,4 @@
 
 include Link_env
 
-type t = Concrete_extern_func.t Link_env.t
+type t = Concrete_extern.Func.t Link_env.t

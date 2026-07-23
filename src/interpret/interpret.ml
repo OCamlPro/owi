@@ -50,7 +50,7 @@ module Make
          and type v128 := Value.v128
          and type 'a choice := 'a Choice.t)
     (Extern_func :
-      Extern.Func.T
+      Extern_intf.T
         with type i32 := Value.i32
          and type i64 := Value.i64
          and type f32 := Value.f32
@@ -1939,7 +1939,7 @@ struct
       t
     | Extern { idx } ->
       let f = Env.get_extern_func state.env idx in
-      Extern_func.extern_type f
+      Extern_func.to_func_type f
 
   let call_ref ~return:_ (_state : State.exec_state) _typ_i =
     (* TODO *)
@@ -2390,7 +2390,7 @@ module Concrete (Parameters : Parameters) =
     (Concrete_table)
     (Concrete_global)
     (Concrete_memory)
-    (Concrete_extern_func)
+    (Concrete_extern.Func)
     (Concrete_env)
     (Parameters)
 module Symbolic (Parameters : Parameters) =
@@ -2399,6 +2399,6 @@ module Symbolic (Parameters : Parameters) =
     (Symbolic_table)
     (Symbolic_global)
     (Symbolic_memory)
-    (Symbolic_extern_func)
+    (Symbolic_extern.Func)
     (Symbolic_env)
     (Parameters)

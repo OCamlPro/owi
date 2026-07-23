@@ -7,7 +7,7 @@
   abstract_checker
   abstract_domain
   abstract_driver
-  abstract_extern_func
+  abstract_extern
   abstract_f32
   abstract_f64
   abstract_globals
@@ -66,7 +66,7 @@
   concrete_data
   concrete_elem
   concrete_env
-  concrete_extern_func
+  concrete_extern
   concrete_f32
   concrete_f64
   concrete_global
@@ -86,6 +86,7 @@
   env_intf
   exploration_smart
   extern
+  extern_intf
   float32
   float64
   fop_intf
@@ -134,7 +135,7 @@
   symbolic_driver
   symbolic_elem
   symbolic_env
-  symbolic_extern_func
+  symbolic_extern
   symbolic_f32
   symbolic_f64
   symbolic_global
