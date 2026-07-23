@@ -11,7 +11,7 @@ let cmd ~rounds ~seed ~source_file ~timeout ~timeout_instr ~unsafe =
     |> Link.Extern.concrete_module ~name:"owi" Fuzz_wasm_ffi.owi
   in
   let* m, link_state =
-    Compile.File.until_link ~unsafe ~name:None link_state source_file
+    Compile.File.until_concrete_link ~unsafe ~name:None link_state source_file
   in
   let module Parameters = struct
     let timeout = timeout

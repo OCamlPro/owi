@@ -4,6 +4,6 @@
 
 type t =
   { value : Symbolic_value.t
-  ; env_id : int
+  ; module_id : int
   ; id : int
   }

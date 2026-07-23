@@ -39,7 +39,7 @@ module Owi_regular : INTERPRET = struct
     let* () = Owi.Binary_validate.modul simplified in
     let link_state = Owi.Link.State.empty () in
     let* regular, link_state =
-      Owi.Link.Binary.modul ~name:None link_state simplified
+      Owi.Link.Binary.concrete_module ~name:None link_state simplified
     in
     let module I = Owi.Interpret.Concrete (Owi.Interpret.Default_parameters) in
     timeout_call_run (fun () -> I.modul link_state regular)

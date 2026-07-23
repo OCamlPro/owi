@@ -8,7 +8,7 @@ type t = Symbolic_table0.t =
   { data : Symbolic_ref.t IMap.t
   ; limits : Binary.Table.Type.limits
   ; typ : Binary.ref_type
-  ; env_id : int
+  ; module_id : int
   ; id : int
   }
 
@@ -76,7 +76,7 @@ let copy ~t_src ~t_dst ~src ~dst ~len =
 let convert_ref_values (v : Concrete_ref.t) : Symbolic_ref.t =
   match v with Func f -> Func f | _ -> assert false
 
-let of_concrete ~env_id ~id (original : Concrete_table.t) =
+let of_concrete ~module_id ~id (original : Concrete_table.t) =
   let _i, data =
     Array.fold_left
       (fun (i, map) v ->
@@ -85,4 +85,4 @@ let of_concrete ~env_id ~id (original : Concrete_table.t) =
         (succ i, map) )
       (0, IMap.empty) original.data
   in
-  { data; limits = original.limits; typ = original.typ; env_id; id }
+  { data; limits = original.limits; typ = original.typ; module_id; id }

@@ -2,6 +2,6 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-include Link_env
+include Link.Linked_module
 
-type t = Concrete_extern.Func.t Link_env.t
+type t = Concrete_extern.Func.t Link.Linked_module.t

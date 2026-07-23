@@ -8,7 +8,7 @@ type t = Symbolic_memory0.t =
   { data : Smtml.Typed.Bitv8.t Map.t
   ; chunks : Symbolic_i32.t Map.t
   ; size : Symbolic_i32.t
-  ; env_id : int
+  ; module_id : int
   ; id : int
   }
 
@@ -303,12 +303,12 @@ let blit_string m str ~src ~dst ~len =
 
 let get_limit_max _m = None (* TODO *)
 
-let of_concrete ~env_id ~id (original : Concrete_memory.t) : t =
+let of_concrete ~module_id ~id (original : Concrete_memory.t) : t =
   let size = Concrete_memory.size_in_pages original in
   (* TODO: how come we don't put anything in here? is it always an uninitialized memory ? *)
   { data = Map.empty
   ; chunks = Map.empty
   ; size = Symbolic_i32.of_int32 size
-  ; env_id
+  ; module_id
   ; id
   }

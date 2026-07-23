@@ -15,11 +15,11 @@ let action (link_state : Concrete_extern.Func.t Link.State.t) = function
       m "invoke %a %s %a..."
         (Fmt.option ~none:Fmt.nop Fmt.string)
         mod_id f Wast.pp_consts args );
-    let* f, env = Link.State.get_func_from_module link_state mod_id f in
+    let* f, modul = Link.State.get_func_from_module link_state mod_id f in
     let locals = List.rev_map (Concrete_value.of_script_const ~ty) args in
-    let envs = Link.State.get_envs link_state in
+    let modules = Link.State.get_modules link_state in
     let module I = Interpret.Concrete (Interpret.Default_parameters) in
-    I.exec_vfunc_from_outside ~locals ~env ~envs f
+    I.exec_vfunc_from_outside ~locals ~modul ~modules f
     end
   | Get (mod_id, name) ->
     Log.info (fun m -> m "get...");
@@ -46,7 +46,7 @@ let run ~no_exhaustion script =
         Log.info (fun m -> m "*** module");
         incr curr_module;
         let* m, link_state =
-          Compile.Text.until_link link_state ~unsafe ~name:None m
+          Compile.Text.until_concrete_link link_state ~unsafe ~name:None m
         in
         let+ () = I.modul link_state m in
         (* TODO: enable printing again! *)
@@ -56,7 +56,7 @@ let run ~no_exhaustion script =
         incr curr_module;
         let* m = Parse.Text.Inline_module.from_string m in
         let* m, link_state =
-          Compile.Text.until_link link_state ~unsafe ~name:None m
+          Compile.Text.until_concrete_link link_state ~unsafe ~name:None m
         in
         let+ () = I.modul link_state m in
         link_state
@@ -66,7 +66,7 @@ let run ~no_exhaustion script =
         let* m = Parse.Binary.Module.from_string m in
         let m = { m with id } in
         let* m, link_state =
-          Compile.Binary.until_link link_state ~unsafe ~name:None m
+          Compile.Binary.until_concrete_link link_state ~unsafe ~name:None m
         in
         let+ () = I.modul link_state m in
         link_state
@@ -74,7 +74,7 @@ let run ~no_exhaustion script =
         Log.info (fun m -> m "*** assert_trap");
         incr curr_module;
         let* m, link_state =
-          Compile.Text.until_link link_state ~unsafe ~name:None m
+          Compile.Text.until_concrete_link link_state ~unsafe ~name:None m
         in
         let got = I.modul link_state m in
         let+ () = Script_error.check_result ~expected ~got in
@@ -107,14 +107,16 @@ let run ~no_exhaustion script =
             begin match Binary_validate.modul m with
             | Error got -> Script_error.check_error ~expected ~got
             | Ok () ->
-              let got = Link.Binary.modul link_state ~name:None m in
+              let got = Link.Binary.concrete_module link_state ~name:None m in
               Script_error.check_result ~expected ~got
             end
         in
         link_state
       | Assert (Assert_invalid (m, expected)) ->
         Log.info (fun m -> m "*** assert_invalid");
-        let got = Compile.Text.until_link link_state ~unsafe ~name:None m in
+        let got =
+          Compile.Text.until_concrete_link link_state ~unsafe ~name:None m
+        in
         let+ () = Script_error.check_result ~expected ~got in
         link_state
       | Assert (Assert_invalid_quote (m, expected)) ->
@@ -131,12 +133,16 @@ let run ~no_exhaustion script =
         link_state
       | Assert (Assert_unlinkable (m, expected)) ->
         Log.info (fun m -> m "*** assert_unlinkable");
-        let got = Compile.Text.until_link link_state ~unsafe ~name:None m in
+        let got =
+          Compile.Text.until_concrete_link link_state ~unsafe ~name:None m
+        in
         let+ () = Script_error.check_result ~expected ~got in
         link_state
       | Assert (Assert_malformed (m, expected)) ->
         Log.info (fun m -> m "*** assert_malformed");
-        let got = Compile.Text.until_link ~unsafe ~name:None link_state m in
+        let got =
+          Compile.Text.until_concrete_link ~unsafe ~name:None link_state m
+        in
         let+ () = Script_error.check_result ~expected ~got in
         assert false
       | Assert (Assert_return (a, res)) ->
@@ -172,7 +178,9 @@ let run ~no_exhaustion script =
       | Register (name, mod_name) ->
         if !curr_module = 1 && not !registered then (* TODO: disable debug *) ();
         Log.info (fun m -> m "*** register");
-        let+ state = Link.register_last_module link_state ~name ~id:mod_name in
+        let+ state =
+          Link.State.register_last_module link_state ~name ~id:mod_name
+        in
         (* TODO: enable debug again! *)
         state
       | Action a ->

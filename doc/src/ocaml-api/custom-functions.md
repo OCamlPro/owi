@@ -83,7 +83,8 @@ let pure_wasm_module =
 (* our pure wasm module, linked with `sausage` *)
 let module_to_run, link_state =
   match
-    Compile.Text.until_link link_state ~unsafe:false ~name:None pure_wasm_module
+    Compile.Text.until_concrete_link link_state ~unsafe:false ~name:None
+      pure_wasm_module
   with
   | Error _ -> assert false
   | Ok v -> v
@@ -207,7 +208,8 @@ let pure_wasm_module =
 (* our pure wasm module, linked with `chorizo` *)
 let module_to_run, link_state =
   match
-    Compile.Text.until_link link_state ~unsafe:false ~name:None pure_wasm_module
+    Compile.Text.until_concrete_link link_state ~unsafe:false ~name:None
+      pure_wasm_module
   with
   | Error _ -> assert false
   | Ok v -> v

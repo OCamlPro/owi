@@ -4,7 +4,7 @@
 
 type t = Symbolic_global0.t =
   { value : Symbolic_value.t
-  ; env_id : int
+  ; module_id : int
   ; id : int
   }
 
@@ -26,6 +26,6 @@ let convert_values (v : Concrete_value.t) : Symbolic_value.t =
   | Ref (Func f) -> Ref (Func f)
   | Ref _ -> assert false
 
-let of_concrete ~env_id ~id (v : Concrete_global.t) : t =
+let of_concrete ~module_id ~id (v : Concrete_global.t) : t =
   let value = convert_values v.Concrete_global.value in
-  { value; env_id; id }
+  { value; module_id; id }
