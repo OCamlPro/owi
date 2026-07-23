@@ -9,6 +9,8 @@ val extern_m : Concrete_extern.Module.t
 
 val symbolic_extern_m : Symbolic_extern.Module.t
 
+val abstract_extern_m : Abstract_extern.Module.t
+
 (* TODO: this can probably be removed by directly registering the previous module in script.ml ? *)
 
 (** the spectest module, which is simply a Wast Text module importing everything

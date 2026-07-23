@@ -7,3 +7,14 @@ val eval_exprs :
   -> Abstract_state.t
   -> Abstract_extern.Func.t Link_env.t Dynarray.t
   -> Abstract_state.t
+
+val modul :
+     Abstract_extern.Func.t Link.State.t
+  -> Abstract_extern.Func.t Linked.Module.t
+  -> Abstract_state.t
+
+val modul_with_ctx :
+     Abstract_domain.Context.t
+  -> Abstract_extern.Func.t Link.State.t
+  -> Abstract_extern.Func.t Linked.Module.t
+  -> Abstract_state.t

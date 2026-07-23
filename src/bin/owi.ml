@@ -605,6 +605,24 @@ let script_info =
   let man = [] @ shared_man in
   Cmd.info "script" ~version ~doc ~sdocs ~man
 
+(* owi script abstract *)
+
+let script_abstract_info =
+  let doc =
+    "Run a reference test suite script using the abstract interpreter"
+  in
+  let man = [] @ shared_man in
+  Cmd.info "abstract" ~version ~doc ~sdocs ~man
+
+let script_abstract_cmd =
+  let+ files
+  and+ () = setup_log
+  and+ no_exhaustion =
+    let doc = "no exhaustion tests" in
+    Arg.(value & flag & info [ "no-exhaustion" ] ~doc)
+  in
+  Cmd_script.cmd_abstract ~files ~no_exhaustion
+
 (* owi script concrete *)
 
 let script_concrete_info =
@@ -777,6 +795,7 @@ let cli =
     ; Cmd.group script_info
         [ Cmd.v script_concrete_info script_concrete_cmd
         ; Cmd.v script_symbolic_info script_symbolic_cmd
+        ; Cmd.v script_abstract_info script_abstract_cmd
         ]
     ; Cmd.v sym_info sym_cmd
     ; Cmd.v tinygo_info tinygo_cmd

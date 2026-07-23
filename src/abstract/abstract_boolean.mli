@@ -21,3 +21,5 @@ val and_ : Abstract_domain.Context.t -> t -> t -> t
 val pp : Abstract_domain.Context.t -> t Fmt.t
 
 val unknown : Abstract_domain.Context.t -> t
+
+val can_be_true : Abstract_domain.Context.t -> t -> bool

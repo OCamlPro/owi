@@ -24,3 +24,8 @@ let eq ctx b1 b2 =
   or_ ctx both_true both_false
 
 let unknown ctx = Abstract_domain.boolean_unknown ctx
+
+let can_be_true ctx b =
+  match Abstract_domain.query_boolean ctx b with
+  | True | Top -> true
+  | False | Bottom -> false

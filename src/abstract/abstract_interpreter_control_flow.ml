@@ -589,3 +589,18 @@ let eval_exprs (m : Abstract_extern.Func.t Linked.Module.t) abs_state envs =
       m.to_run
   in
   state.abs_state
+
+let modul_with_ctx ctx (link_state : Abstract_extern.Func.t Link.State.t)
+  (m : Abstract_extern.Func.t Linked.Module.t) =
+  let envs = Link.State.get_envs link_state in
+  let env = m.env in
+  let abs_state = Abstract_state.empty env () in
+  let abs_state = { abs_state with ctx } in
+  eval_exprs m abs_state envs
+
+let modul (link_state : Abstract_extern.Func.t Link.State.t)
+  (m : Abstract_extern.Func.t Linked.Module.t) =
+  let envs = Link.State.get_envs link_state in
+  let env = m.env in
+  let abs_state = Abstract_state.empty env () in
+  eval_exprs m abs_state envs

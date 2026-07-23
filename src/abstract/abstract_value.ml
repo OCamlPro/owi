@@ -7,6 +7,8 @@ module Size = struct
 
   let b64 = Units.In_bits.of_int 64
 
+  let b128 = Units.In_bits.of_int 128
+
   let equal s1 s2 = Units.In_bits.compare s1 s2 = 0
 end
 
@@ -43,6 +45,7 @@ let pp ppf = function
   | I64 _b -> Fmt.pf ppf "i64 ..."
   | F32 _b -> Fmt.pf ppf "f32 ..."
   | F64 _b -> Fmt.pf ppf "f64 ..."
+  | V128 _v -> Fmt.pf ppf "v128 ..."
   | _ -> .
 
 let pp_with_ctx ctx ppf = function
@@ -50,6 +53,7 @@ let pp_with_ctx ctx ppf = function
   | I64 b -> Fmt.pf ppf "i64 %a" (Abstract_i64.pp ctx) b
   | F32 _b -> Fmt.pf ppf "f32 ..."
   | F64 _b -> Fmt.pf ppf "f64 ..."
+  | V128 _v -> Fmt.pf ppf "v128 ..."
   | _ -> .
 
 let to_binary = function
@@ -57,6 +61,7 @@ let to_binary = function
   | I64 b -> Abstract_i64.to_binary b
   | F32 b -> Abstract_f32.to_binary b
   | F64 b -> Abstract_f64.to_binary b
+  | V128 v -> Abstract_v128.to_binary v
   | _ -> .
 
 let of_binary size x =
@@ -68,6 +73,7 @@ let of_binary size x =
 let size_of = function
   | I32 _ | F32 _ -> Size.b32
   | I64 _ | F64 _ -> Size.b64
+  | V128 _ -> Size.b128
   | _ -> .
 
 let to_boolean ctx x =
@@ -76,3 +82,68 @@ let to_boolean ctx x =
   Abstract_domain.Binary_Forward.beq ~size ctx (to_binary x) zero
 
 let top size ctx = of_binary size @@ Abstract_domain.binary_empty ~size ctx
+
+let equal_script_result ctx =
+  let compare_f32 (script_result : Wast.result_f32) v =
+    match script_result with
+    | Concrete f ->
+      Boolean.can_be_true ctx @@ F32.eq ctx (F32.of_float32 ctx f) v
+    | Nan_canon -> true
+    | Nan_arith -> true
+  in
+  let compare_f64 (script_result : Wast.result_f64) v =
+    match script_result with
+    | Concrete f ->
+      Boolean.can_be_true ctx
+      @@ F64.eq ctx (F64.of_float ctx (Concrete_f64.to_float f)) v
+    | Nan_canon -> true
+    | Nan_arith -> true
+  in
+  let compare_v128 (script_result : Wast.result_v128) (const : V128.t) =
+    match script_result with
+    | Concrete v ->
+      Boolean.can_be_true ctx @@ V128.eq ctx (V128.of_concrete ctx v) const
+    | F32x4 (a, b, c, d) ->
+      let a', b', c', d' = V128.to_i32x4 ctx const in
+      let a', b', c', d' =
+        ( F32.reinterpret_i32 ctx a'
+        , F32.reinterpret_i32 ctx b'
+        , F32.reinterpret_i32 ctx c'
+        , F32.reinterpret_i32 ctx d' )
+      in
+      compare_f32 a a' && compare_f32 b b' && compare_f32 c c'
+      && compare_f32 d d'
+    | F64x2 (a, b) ->
+      let a', b' = V128.to_i64x2 ctx const in
+      let a', b' = (F64.reinterpret_i64 ctx a', F64.reinterpret_i64 ctx b') in
+      compare_f64 a a' && compare_f64 b b'
+  in
+  fun ~ty:_ script_result v ->
+    match (script_result, v) with
+    | Wast.Result_I32 n, I32 n' ->
+      Boolean.can_be_true ctx @@ I32.eq ctx (Abstract_i32.of_int32 ctx n) n'
+    | Result_I64 n, I64 n' ->
+      Boolean.can_be_true ctx @@ I64.eq ctx (Abstract_i64.of_int64 ctx n) n'
+    | Result_F32 script_result, F32 v -> compare_f32 script_result v
+    | Result_F64 script_result, F64 v -> compare_f64 script_result v
+    | Result_V128 script_result, V128 v -> compare_v128 script_result v
+    (* | Result_V128 script_result, V128 v -> compare_v128 script_result v *)
+    (* | Result_null None, Ref (NullRef | NullExn | Func None | Extern None) -> *)
+    (* | Result_null (Some (NoFunc_ht | Func_ht)), Ref (Func None) -> true *)
+    (* | Result_null (Some (Extern_ht | NoExtern_ht)), Ref (Extern None) -> true *)
+    (* | Result_null (Some (Exn_ht | NoExn_ht)), Ref NullExn -> true *)
+    (* | Result_null (Some (Any_ht | None_ht)), Ref NullRef -> true *)
+    (* | Result_null _, Ref _ -> true *)
+    (* | Result_extern n, Ref (Extern (Some ref)) -> *)
+    (*   begin match Ref.Extern.cast ref ty with *)
+    (*   | None -> false *)
+    (*   | Some n' -> n = n' *)
+    (*   end *)
+    (* | Result_func_ref, Ref (Func _) -> *)
+    (*   (* TODO: FIX! This is probably unsound! *) *)
+    (*   true *)
+    | ( ( Result_I32 _ | Result_I64 _ | Result_F32 _ | Result_F64 _
+        | Result_V128 _ | Result_null _ | Result_host _ )
+      , _ ) ->
+      false
+    | _, _ -> assert false
