@@ -88,20 +88,20 @@ let run_one ~no_exhaustion:_
     link_state
   | Assert (Assert_trap_module _) -> return link_state
   (* TODO:
-let*? m, link_state =
-  Compile.Text.until_link link_state ~unsafe ~name:None m
-    in
-    begin match I.modul link_state m with
-    | Error e -> trap e
-    | Ok got ->
+     let*? m, link_state =
+     Compile.Text.until_link link_state ~unsafe ~name:None m
+     in
+     begin match I.modul link_state m with
+     | Error e -> trap e
+     | Ok got ->
       begin match Script_error.check_result ~expected ~got with
       | Error e -> trap e
       | Ok () -> return link_state
       end
-    | _ -> assert false
-    end
-   end
-*)
+     | _ -> assert false
+     end
+     end
+  *)
   | Assert (Assert_malformed_binary _)
   | Assert (Assert_malformed_quote _)
   | Assert (Assert_invalid_binary _)
@@ -124,24 +124,24 @@ let*? m, link_state =
     else return link_state
   | Assert (Assert_trap _) -> return link_state
   (* TODO:
-   let got = action link_state a in
-   begin match Script_error.check_result ~expected ~got with
-   | Error e -> trap e
-   | Ok () -> return link_state
-   end
-*)
+     let got = action link_state a in
+     begin match Script_error.check_result ~expected ~got with
+     | Error e -> trap e
+     | Ok () -> return link_state
+     end
+  *)
   | Assert (Assert_exhaustion _) -> return link_state
   (* TODO:
-   let+ () =
-   if no_exhaustion then return ()
-   else
-    let got = action link_state a in
-    match Script_error.check_result ~expected ~got with
-    | Error e -> trap e
-    | Ok () -> return ()
-   in
-   link_state
-*)
+     let+ () =
+     if no_exhaustion then return ()
+     else
+     let got = action link_state a in
+     match Script_error.check_result ~expected ~got with
+     | Error e -> trap e
+     | Ok () -> return ()
+     in
+     link_state
+  *)
   | Register (name, mod_name) ->
     let*? link_state =
       Link.register_last_module link_state ~name ~id:mod_name
@@ -153,13 +153,14 @@ let*? m, link_state =
   | Text_module (true, _) | Binary_module (true, _, _) | Quoted_module (true, _)
     ->
     (* TODO: differentiate between modules and module definitions in the
-      link state, ensure that we can instantiate a module from its module
-      definition, and that module definitions are not treated as "normal",
-      or instantiated module. *)
+       link state, ensure that we can instantiate a module from its module
+       definition, and that module definitions are not treated as "normal",
+       or instantiated module. *)
     return link_state
   | Instance (_name, _mod_name) -> trap (`Unimplemented "(module instance _)")
 
 let run ~no_exhaustion script =
+  Solver.solver_to_use := Some Smtml.Solver_type.Z3_solver;
   let state =
     Link.State.empty ()
     |> Link.Extern.modul ~name:"spectest_extern" Spectest.symbolic_extern_m
@@ -170,6 +171,6 @@ let run ~no_exhaustion script =
 let exec ~(no_exhaustion : bool) (script : Wast.script) =
   let to_run = run ~no_exhaustion script in
   match Symex.Monad.run to_run (Thread.init ()) with
-  | Error _e -> Error (`Msg "script failed!")
+  | Error e -> Fmt.error_msg "script failed with: %a" Bug.pp e
   | Ok (_link_state, _state) -> Ok ()
   | _ -> assert false

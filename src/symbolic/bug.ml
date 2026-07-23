@@ -20,6 +20,11 @@ type t =
   | `Prune
   ]
 
+let pp ppf = function
+  | `Trap t -> Fmt.pf ppf "trap: %s" (Result.err_to_string t.err)
+  | `Assertion a -> Fmt.pf ppf "assertion: %a" Symbolic_boolean.pp a.assertion
+  | `Prune -> Fmt.pf ppf "prune"
+
 let is_trap = function `Assertion _ | `Prune -> false | `Trap _ -> true
 
 let is_assertion = function `Assertion _ -> true | `Prune | `Trap _ -> false
