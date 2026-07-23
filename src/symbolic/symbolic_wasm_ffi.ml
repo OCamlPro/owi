@@ -186,7 +186,7 @@ module M :
   let close_scope () = Symbolic_choice.close_scope
 end
 
-type extern_func = Symbolic_extern_func.extern_func
+type extern_func = Symbolic_extern_func.t
 
 open M
 open Symbolic_extern_func

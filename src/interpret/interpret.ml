@@ -65,7 +65,7 @@ module Make
          and type global := Global.t
          and type table := Table.t
          and type elem := Elem.t
-         and type extern_func := Extern_func.extern_func
+         and type extern_func := Extern_func.t
          and type 'a choice := 'a Choice.t)
     (Parameters : Parameters) =
 struct
@@ -1753,7 +1753,7 @@ struct
     | Num_type V128 -> V128 V128.zero
     | Ref_type (_null, rt) -> Ref (Ref.null rt)
 
-  type extern_func = Extern_func.extern_func
+  type extern_func = Extern_func.t
 
   let exec_extern_func env stack (f : extern_func) =
     let pop_arg (type ty) stack (arg : ty Extern_func.telt) :

@@ -9,5 +9,5 @@ include
      and type global := Concrete_global.t
      and type elem := Concrete_elem.t
      and type table := Concrete_table.t
-     and type extern_func := Concrete_extern_func.extern_func
+     and type extern_func := Concrete_extern_func.t
      and type 'a choice := 'a Concrete_choice.t

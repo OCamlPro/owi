@@ -16,8 +16,8 @@ end
 
 type interpreter_state =
   { abs_state : Abstract_state.t
-  ; env : Abstract_extern_func.extern_func Link_env.t
-  ; envs : Abstract_extern_func.extern_func Link_env.t Dynarray.t
+  ; env : Abstract_extern_func.t Link_env.t
+  ; envs : Abstract_extern_func.t Link_env.t Dynarray.t
   }
 
 module DenotFixpoint (S : DATA_STATE) = struct
@@ -197,7 +197,7 @@ module DenotFixpoint (S : DATA_STATE) = struct
     ({ state with ctx }, included)
 
   let exec_extern_func ({ stack; _ } : Abstract_state.t)
-    (f : Abstract_extern_func.extern_func) =
+    (f : Abstract_extern_func.t) =
     let open Abstract_extern_func in
     let pop_arg (type ty) stack (arg : ty Abstract_extern_func.telt) :
       ty * Stack.t =
@@ -561,8 +561,7 @@ end
 
 module ConcreteFixpoint = DenotFixpoint (Abstract_interpreter_simple)
 
-let eval_exprs (m : Abstract_extern_func.extern_func Linked.Module.t) abs_state
-  envs =
+let eval_exprs (m : Abstract_extern_func.t Linked.Module.t) abs_state envs =
   let state =
     List.fold_left
       (fun (state : interpreter_state) (e : Binary.expr Annotated.t) ->

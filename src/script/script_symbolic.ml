@@ -8,7 +8,7 @@ type host_externref = int
 
 let ty : host_externref Type.Id.t = Type.Id.make ()
 
-type state = Symbolic_extern_func.extern_func Link.State.t * Thread.t
+type state = Symbolic_extern_func.t Link.State.t * Thread.t
 
 module I = Interpret.Symbolic (Interpret.Default_parameters)
 
@@ -67,8 +67,8 @@ let log_cmd : Wast.cmd -> unit =
   Log.info (fun m -> m "*** %s" s)
 
 let run_one ~no_exhaustion:_
-  ~(state : Symbolic_extern_func.extern_func Link.State.t * Thread.t) cmd :
-  state Result.t =
+  ~(state : Symbolic_extern_func.t Link.State.t * Thread.t) cmd : state Result.t
+    =
   let link_state, monadic_state = state in
   log_cmd cmd;
   match cmd with
