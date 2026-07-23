@@ -1,7 +1,7 @@
 open Owi
 
 (* an extern module that will be linked with a wasm module *)
-let extern_module : Concrete_extern_func.extern_func Extern.Module.t =
+let extern_module : Concrete_extern_func.t Extern.Module.t =
   (* some custom functions *)
   let rint : Concrete_i32.t ref Type.Id.t = Type.Id.make () in
   let fresh i = Ok (ref i) in

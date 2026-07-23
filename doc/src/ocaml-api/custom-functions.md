@@ -47,7 +47,7 @@ You can define the various required external functions in OCaml like this :
 open Owi
 
 (* an extern module that will be linked with a wasm module *)
-let extern_module : Concrete_extern_func.extern_func Extern.Module.t =
+let extern_module : Concrete_extern_func.t Extern.Module.t =
   (* some custom functions *)
   let rint : Concrete_i32.t ref Type.Id.t = Type.Id.make () in
   let fresh i = Ok (ref i) in
@@ -170,7 +170,7 @@ See the module below for the whole implementation:
 open Owi
 
 (* an extern module that will be linked with a wasm module *)
-let extern_module : Concrete_extern_func.extern_func Extern.Module.t =
+let extern_module : Concrete_extern_func.t Extern.Module.t =
   (* some custom functions *)
   let memset m start byte length =
     let rec loop offset =
