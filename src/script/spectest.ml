@@ -35,24 +35,20 @@ let extern_m =
   let func_in_i32 (_i : int32) = Ok () in
   let func_out_i32 () = Ok 1l in
   let func_in_i32_out_i32 (_i : int32) = Ok 1l in
-  let open Concrete_extern_func in
-  let open Concrete_extern_func.Syntax in
-  let functions =
-    [ ("print", Extern_func (unit ^->. unit, print))
-    ; ("print_i32", Extern_func (i32 ^->. unit, print_i32))
-    ; ("print_i64", Extern_func (i64 ^->. unit, print_i64))
-    ; ("print_f32", Extern_func (f32 ^->. unit, print_f32))
-    ; ("print_f64", Extern_func (f64 ^->. unit, print_f64))
-    ; ("print_i32_f32", Extern_func (i32 ^-> f32 ^->. unit, print_i32_f32))
-    ; ("print_f64_f64", Extern_func (f64 ^-> f64 ^->. unit, print_f64_f64))
-    ; ("func", Extern_func (unit ^->. unit, func))
-    ; ("func-i32", Extern_func (i32 ^->. unit, func_in_i32))
-    ; ("func->i32", Extern_func (unit ^->. i32, func_out_i32))
-    ; ("func-i32->i32", Extern_func (i32 ^->. i32, func_in_i32_out_i32))
-    ]
-  in
-
-  { Extern.Module.functions; func_type = Concrete_extern_func.extern_type }
+  let open Concrete_extern.Func in
+  let open Concrete_extern.Func.Syntax in
+  [ ("print", Extern_func (unit ^->. unit, print))
+  ; ("print_i32", Extern_func (i32 ^->. unit, print_i32))
+  ; ("print_i64", Extern_func (i64 ^->. unit, print_i64))
+  ; ("print_f32", Extern_func (f32 ^->. unit, print_f32))
+  ; ("print_f64", Extern_func (f64 ^->. unit, print_f64))
+  ; ("print_i32_f32", Extern_func (i32 ^-> f32 ^->. unit, print_i32_f32))
+  ; ("print_f64_f64", Extern_func (f64 ^-> f64 ^->. unit, print_f64_f64))
+  ; ("func", Extern_func (unit ^->. unit, func))
+  ; ("func-i32", Extern_func (i32 ^->. unit, func_in_i32))
+  ; ("func->i32", Extern_func (unit ^->. i32, func_out_i32))
+  ; ("func-i32->i32", Extern_func (i32 ^->. i32, func_in_i32_out_i32))
+  ]
 
 let symbolic_extern_m =
   let open Symbolic_choice in
@@ -89,24 +85,20 @@ let symbolic_extern_m =
   let func_in_i32_out_i32 (_i : Symbolic_i32.t) =
     return (Symbolic_i32.of_int 1)
   in
-  let open Symbolic_extern_func in
-  let open Symbolic_extern_func.Syntax in
-  let functions =
-    [ ("print", Extern_func (unit ^->. unit, print))
-    ; ("print_i32", Extern_func (i32 ^->. unit, print_i32))
-    ; ("print_i64", Extern_func (i64 ^->. unit, print_i64))
-    ; ("print_f32", Extern_func (f32 ^->. unit, print_f32))
-    ; ("print_f64", Extern_func (f64 ^->. unit, print_f64))
-    ; ("print_i32_f32", Extern_func (i32 ^-> f32 ^->. unit, print_i32_f32))
-    ; ("print_f64_f64", Extern_func (f64 ^-> f64 ^->. unit, print_f64_f64))
-    ; ("func", Extern_func (unit ^->. unit, func))
-    ; ("func-i32", Extern_func (i32 ^->. unit, func_in_i32))
-    ; ("func->i32", Extern_func (unit ^->. i32, func_out_i32))
-    ; ("func-i32->i32", Extern_func (i32 ^->. i32, func_in_i32_out_i32))
-    ]
-  in
-
-  { Extern.Module.functions; func_type = Symbolic_extern_func.extern_type }
+  let open Symbolic_extern.Func in
+  let open Symbolic_extern.Func.Syntax in
+  [ ("print", Extern_func (unit ^->. unit, print))
+  ; ("print_i32", Extern_func (i32 ^->. unit, print_i32))
+  ; ("print_i64", Extern_func (i64 ^->. unit, print_i64))
+  ; ("print_f32", Extern_func (f32 ^->. unit, print_f32))
+  ; ("print_f64", Extern_func (f64 ^->. unit, print_f64))
+  ; ("print_i32_f32", Extern_func (i32 ^-> f32 ^->. unit, print_i32_f32))
+  ; ("print_f64_f64", Extern_func (f64 ^-> f64 ^->. unit, print_f64_f64))
+  ; ("func", Extern_func (unit ^->. unit, func))
+  ; ("func-i32", Extern_func (i32 ^->. unit, func_in_i32))
+  ; ("func->i32", Extern_func (unit ^->. i32, func_out_i32))
+  ; ("func-i32->i32", Extern_func (i32 ^->. i32, func_in_i32_out_i32))
+  ]
 
 let m =
   let open Wast in

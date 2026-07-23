@@ -17,4 +17,4 @@ type 'f t =
   | Wat of Text.Module.t
   | Wast of Wast.script
   | Wasm of Binary.Module.t
-  | Extern of 'f Extern.Module.t
+  | Extern of 'f

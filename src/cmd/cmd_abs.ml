@@ -6,7 +6,7 @@ open Syntax
 
 let link_state () =
   Link.State.empty ()
-  |> Link.Extern.modul ~name:"owi" Abstract_wasm_ffi.symbolic_extern_module
+  |> Link.Extern.abstract_module ~name:"owi" Abstract_wasm_ffi.owi
 
 let cmd ~source_file ~entry_point ~unsafe =
   let link_state = link_state () in

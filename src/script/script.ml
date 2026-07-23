@@ -9,7 +9,7 @@ type host_externref = int
 
 let ty : host_externref Type.Id.t = Type.Id.make ()
 
-let action (link_state : Concrete_extern_func.t Link.State.t) = function
+let action (link_state : Concrete_extern.Func.t Link.State.t) = function
   | Wast.Invoke (mod_id, f, args) -> begin
     Log.info (fun m ->
       m "invoke %a %s %a..."
@@ -31,14 +31,14 @@ let unsafe = false
 let run ~no_exhaustion script =
   let state =
     Link.State.empty ()
-    |> Link.Extern.modul ~name:"spectest_extern" Spectest.extern_m
+    |> Link.Extern.concrete_module ~name:"spectest_extern" Spectest.extern_m
   in
   let script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
   let registered = ref false in
   let curr_module = ref 0 in
   let module I = Interpret.Concrete (Interpret.Default_parameters) in
   list_fold_left
-    (fun (link_state : Concrete_extern_func.t Link.State.t) -> function
+    (fun (link_state : Concrete_extern.Func.t Link.State.t) -> function
       | Wast.Text_module (false, m) ->
         if !curr_module = 0 then
           (* TODO: disable printing*)

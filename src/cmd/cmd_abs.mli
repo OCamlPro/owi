@@ -2,7 +2,7 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-val link_state : unit -> Abstract_wasm_ffi.extern_func Link.State.t
+val link_state : unit -> Abstract_extern.Func.t Link.State.t
 
 val cmd :
      source_file:Fpath.t

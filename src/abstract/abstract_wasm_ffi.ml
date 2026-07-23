@@ -84,38 +84,31 @@ module M :
 end
 
 open M
-open Abstract_extern_func
-open Abstract_extern_func.Syntax
+open Abstract_extern.Func
+open Abstract_extern.Func.Syntax
 
-type extern_func = Abstract_extern_func.t
-
-let symbolic_extern_module =
-  let functions =
-    [ ("i32_symbol", Extern_func (unit ^->. i32, symbol_i32))
-    ; ("i64_symbol", Extern_func (unit ^->. i64, symbol_i64))
-    ; ("f32_symbol", Extern_func (unit ^->. f32, symbol_f32))
-    ; ("f64_symbol", Extern_func (unit ^->. f64, symbol_f64))
-    ; ("v128_symbol", Extern_func (unit ^->. v128, symbol_v128))
-    ; ( "invisible_bool_symbol"
-      , Extern_func (unit ^->. i32, symbol_invisible_bool) )
-    ; ("range_symbol", Extern_func (i32 ^-> i32 ^->. i32, symbol_range))
-    ; ("assume", Extern_func (i32 ^->. unit, assume))
-    ; ("assert", Extern_func (i32 ^->. unit, assert'))
-    ; ("in_replay_mode", Extern_func (unit ^->. i32, in_replay_mode))
-    ; ("print_char", Extern_func (i32 ^->. unit, print_char))
-    ; ( "cov_label_set"
-      , Extern_func (memory 0 ^-> i32 ^-> i32 ^->. unit, cov_label_set) )
-    ; ("cov_label_is_covered", Extern_func (i32 ^->. i32, cov_label_is_covered))
-    ; ( "open_scope_null_terminated"
-      , Extern_func (memory 0 ^-> i32 ^->. unit, open_scope_null_terminated) )
-    ; ( "open_scope_of_length"
-      , Extern_func (memory 0 ^-> i32 ^-> i32 ^->. unit, open_scope_of_length)
-      )
-    ; ("close_scope", Extern_func (unit ^->. unit, close_scope))
-    ; ("alloc", Extern_func (memory 0 ^-> i32 ^-> i32 ^->. i32, alloc))
-    ; ("dealloc", Extern_func (memory 0 ^-> i32 ^->. i32, free))
-    ; ("abort", Extern_func (unit ^->. unit, abort))
-    ; ("exit", Extern_func (i32 ^->. unit, exit))
-    ]
-  in
-  { Extern.Module.functions; func_type = extern_type }
+let owi =
+  [ ("i32_symbol", Extern_func (unit ^->. i32, symbol_i32))
+  ; ("i64_symbol", Extern_func (unit ^->. i64, symbol_i64))
+  ; ("f32_symbol", Extern_func (unit ^->. f32, symbol_f32))
+  ; ("f64_symbol", Extern_func (unit ^->. f64, symbol_f64))
+  ; ("v128_symbol", Extern_func (unit ^->. v128, symbol_v128))
+  ; ("invisible_bool_symbol", Extern_func (unit ^->. i32, symbol_invisible_bool))
+  ; ("range_symbol", Extern_func (i32 ^-> i32 ^->. i32, symbol_range))
+  ; ("assume", Extern_func (i32 ^->. unit, assume))
+  ; ("assert", Extern_func (i32 ^->. unit, assert'))
+  ; ("in_replay_mode", Extern_func (unit ^->. i32, in_replay_mode))
+  ; ("print_char", Extern_func (i32 ^->. unit, print_char))
+  ; ( "cov_label_set"
+    , Extern_func (memory 0 ^-> i32 ^-> i32 ^->. unit, cov_label_set) )
+  ; ("cov_label_is_covered", Extern_func (i32 ^->. i32, cov_label_is_covered))
+  ; ( "open_scope_null_terminated"
+    , Extern_func (memory 0 ^-> i32 ^->. unit, open_scope_null_terminated) )
+  ; ( "open_scope_of_length"
+    , Extern_func (memory 0 ^-> i32 ^-> i32 ^->. unit, open_scope_of_length) )
+  ; ("close_scope", Extern_func (unit ^->. unit, close_scope))
+  ; ("alloc", Extern_func (memory 0 ^-> i32 ^-> i32 ^->. i32, alloc))
+  ; ("dealloc", Extern_func (memory 0 ^-> i32 ^->. i32, free))
+  ; ("abort", Extern_func (unit ^->. unit, abort))
+  ; ("exit", Extern_func (i32 ^->. unit, exit))
+  ]

@@ -58,9 +58,3 @@ module type S0 = sig
 
   val close_scope : unit -> unit t
 end
-
-module type S = sig
-  type extern_func
-
-  val symbolic_extern_module : extern_func Extern.Module.t
-end

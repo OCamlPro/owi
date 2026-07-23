@@ -171,41 +171,37 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
   in
   let replay_extern_module =
     let open M in
-    let open Concrete_extern_func in
-    let open Concrete_extern_func.Syntax in
-    let functions =
-      [ ("i32_symbol", Extern_func (unit ^->. i32, symbol_i32))
-      ; ("i64_symbol", Extern_func (unit ^->. i64, symbol_i64))
-      ; ("f32_symbol", Extern_func (unit ^->. f32, symbol_f32))
-      ; ("f64_symbol", Extern_func (unit ^->. f64, symbol_f64))
-      ; ("v128_symbol", Extern_func (unit ^->. v128, symbol_v128))
-      ; ("range_symbol", Extern_func (i32 ^-> i32 ^->. i32, symbol_range))
-      ; ("assume", Extern_func (i32 ^->. unit, assume))
-      ; ("assert", Extern_func (i32 ^->. unit, assert'))
-      ; ("in_replay_mode", Extern_func (unit ^->. i32, in_replay_mode))
-      ; ("print_char", Extern_func (i32 ^->. unit, print_char))
-      ; ( "cov_label_is_covered"
-        , Extern_func (i32 ^->. i32, cov_label_is_covered) )
-      ; ( "cov_label_set"
-        , Extern_func (memory 0 ^-> i32 ^-> i32 ^->. unit, cov_label_set) )
-      ; ( "open_scope_null_terminated"
-        , Extern_func (memory 0 ^-> i32 ^->. unit, open_scope_null_terminated)
-        )
-      ; ( "open_scope_of_length"
-        , Extern_func (memory 0 ^-> i32 ^-> i32 ^->. unit, open_scope_of_length)
-        )
-      ; ("close_scope", Extern_func (unit ^->. unit, close_scope))
-      ; ("alloc", Extern_func (memory 0 ^-> i32 ^-> i32 ^->. i32, alloc))
-      ; ("dealloc", Extern_func (memory 0 ^-> i32 ^->. i32, free))
-      ; ("abort", Extern_func (unit ^->. unit, abort))
-      ; ("exit", Extern_func (i32 ^->. unit, exit))
-      ]
-    in
-    { Extern.Module.functions; func_type = Concrete_extern_func.extern_type }
+    let open Concrete_extern.Func in
+    let open Concrete_extern.Func.Syntax in
+    [ ("i32_symbol", Extern_func (unit ^->. i32, symbol_i32))
+    ; ("i64_symbol", Extern_func (unit ^->. i64, symbol_i64))
+    ; ("f32_symbol", Extern_func (unit ^->. f32, symbol_f32))
+    ; ("f64_symbol", Extern_func (unit ^->. f64, symbol_f64))
+    ; ("v128_symbol", Extern_func (unit ^->. v128, symbol_v128))
+    ; ("range_symbol", Extern_func (i32 ^-> i32 ^->. i32, symbol_range))
+    ; ("assume", Extern_func (i32 ^->. unit, assume))
+    ; ("assert", Extern_func (i32 ^->. unit, assert'))
+    ; ("in_replay_mode", Extern_func (unit ^->. i32, in_replay_mode))
+    ; ("print_char", Extern_func (i32 ^->. unit, print_char))
+    ; ("cov_label_is_covered", Extern_func (i32 ^->. i32, cov_label_is_covered))
+    ; ( "cov_label_set"
+      , Extern_func (memory 0 ^-> i32 ^-> i32 ^->. unit, cov_label_set) )
+    ; ( "open_scope_null_terminated"
+      , Extern_func (memory 0 ^-> i32 ^->. unit, open_scope_null_terminated) )
+    ; ( "open_scope_of_length"
+      , Extern_func (memory 0 ^-> i32 ^-> i32 ^->. unit, open_scope_of_length)
+      )
+    ; ("close_scope", Extern_func (unit ^->. unit, close_scope))
+    ; ("alloc", Extern_func (memory 0 ^-> i32 ^-> i32 ^->. i32, alloc))
+    ; ("dealloc", Extern_func (memory 0 ^-> i32 ^->. i32, free))
+    ; ("abort", Extern_func (unit ^->. unit, abort))
+    ; ("exit", Extern_func (i32 ^->. unit, exit))
+    ]
   in
 
   let link_state =
-    Link.State.empty () |> Link.Extern.modul ~name:"owi" replay_extern_module
+    Link.State.empty ()
+    |> Link.Extern.concrete_module ~name:"owi" replay_extern_module
   in
 
   let* m = Compile.File.until_binary ~unsafe filename in

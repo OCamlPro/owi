@@ -3,6 +3,6 @@
 (* Written by the Owi programmers *)
 
 val modul :
-     Abstract_extern_func.t Link.State.t
-  -> Abstract_extern_func.t Linked.Module.t
+     Abstract_extern.Func.t Link.State.t
+  -> Abstract_extern.Func.t Linked.Module.t
   -> Abstract_state.t

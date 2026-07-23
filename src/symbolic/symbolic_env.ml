@@ -4,7 +4,7 @@
 
 include Link_env
 
-type t = Symbolic_extern_func.t Link_env.t
+type t = Symbolic_extern.Func.t Link_env.t
 
 let get_memory (env : t) id : Symbolic_memory.t Symbolic_choice.t =
   let ( let* ) = Symbolic_choice.( let* ) in

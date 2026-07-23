@@ -32,21 +32,18 @@ let binaryen_fuzzing_support_module weird_log_i64 =
   let call_export _n1 _n2 = Symbolic_choice.return () in
   let call_export_catch _n = Symbolic_choice.return @@ Symbolic_i32.zero in
   let sleep _ms id = Symbolic_choice.return id in
-  let open Symbolic_extern_func in
-  let open Symbolic_extern_func.Syntax in
-  let functions =
-    [ ("log-i32", Extern_func (i32 ^->. unit, log_i32))
-    ; ( "log-i64"
-      , if weird_log_i64 then Extern_func (i32 ^-> i32 ^->. unit, log_i64_weird)
-        else Extern_func (i64 ^->. unit, log_i64) )
-    ; ("log-f32", Extern_func (f32 ^->. unit, log_f32))
-    ; ("log-f64", Extern_func (f64 ^->. unit, log_f64))
-    ; ("call-export", Extern_func (i32 ^-> i32 ^->. unit, call_export))
-    ; ("call-export-catch", Extern_func (i32 ^->. i32, call_export_catch))
-    ; ("sleep", Extern_func (i32 ^-> i32 ^->. i32, sleep))
-    ]
-  in
-  { Extern.Module.functions; func_type = Symbolic_extern_func.extern_type }
+  let open Symbolic_extern.Func in
+  let open Symbolic_extern.Func.Syntax in
+  [ ("log-i32", Extern_func (i32 ^->. unit, log_i32))
+  ; ( "log-i64"
+    , if weird_log_i64 then Extern_func (i32 ^-> i32 ^->. unit, log_i64_weird)
+      else Extern_func (i64 ^->. unit, log_i64) )
+  ; ("log-f32", Extern_func (f32 ^->. unit, log_f32))
+  ; ("log-f64", Extern_func (f64 ^->. unit, log_f64))
+  ; ("call-export", Extern_func (i32 ^-> i32 ^->. unit, call_export))
+  ; ("call-export-catch", Extern_func (i32 ^->. i32, call_export_catch))
+  ; ("sleep", Extern_func (i32 ^-> i32 ^->. i32, sleep))
+  ]
 
 let emscripten_fuzzing_support_module () =
   let temp_ret_0 = ref Smtml.Typed.Bitv32.zero in
@@ -55,14 +52,11 @@ let emscripten_fuzzing_support_module () =
     Symbolic_choice.return ()
   in
   let get_temp_ret_0 () = Symbolic_choice.return !temp_ret_0 in
-  let open Symbolic_extern_func in
-  let open Symbolic_extern_func.Syntax in
-  let functions =
-    [ ("setTempRet0", Extern_func (i32 ^->. unit, set_temp_ret_0))
-    ; ("getTempRet0", Extern_func (unit ^->. i32, get_temp_ret_0))
-    ]
-  in
-  { Extern.Module.functions; func_type = Symbolic_extern_func.extern_type }
+  let open Symbolic_extern.Func in
+  let open Symbolic_extern.Func.Syntax in
+  [ ("setTempRet0", Extern_func (i32 ^->. unit, set_temp_ret_0))
+  ; ("getTempRet0", Extern_func (unit ^->. i32, get_temp_ret_0))
+  ]
 
 let check_iso ~unsafe export_name export_type module1 module2 =
   let weird_log_i64 =
@@ -80,10 +74,11 @@ let check_iso ~unsafe export_name export_type module1 module2 =
 
   let link_state =
     Link.State.empty ()
-    |> Link.Extern.modul ~name:"owi" Symbolic_wasm_ffi.symbolic_extern_module
-    |> Link.Extern.modul ~name:"fuzzing-support"
+    |> Link.Extern.symbolic_module ~name:"owi" Symbolic_wasm_ffi.owi
+    |> Link.Extern.symbolic_module ~name:"fuzzing-support"
          (binaryen_fuzzing_support_module weird_log_i64)
-    |> Link.Extern.modul ~name:"env" (emscripten_fuzzing_support_module ())
+    |> Link.Extern.symbolic_module ~name:"env"
+         (emscripten_fuzzing_support_module ())
   in
   let* _module, link_state =
     Compile.Binary.until_link ~name:(Some module_name1) ~unsafe link_state

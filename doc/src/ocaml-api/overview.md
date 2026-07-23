@@ -33,8 +33,8 @@ mdx_gen.bc.exe: [INFO] linking      ...
 module I :
   sig
     val modul :
-      Concrete_extern_func.t Link.State.t ->
-      Concrete_extern_func.t Linked.Module.t -> unit Owi.Result.t
+      Concrete_extern.Func.t Link.State.t ->
+      Concrete_extern.Func.t Linked.Module.t -> unit Owi.Result.t
   end
 # let () =
     match I.modul link_state module_to_run with

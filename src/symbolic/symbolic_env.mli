@@ -9,5 +9,5 @@ include
      and type global := Symbolic_global.t
      and type elem := Symbolic_elem.t
      and type table := Symbolic_table.t
-     and type extern_func := Symbolic_extern_func.t
+     and type extern_func := Symbolic_extern.Func.t
      and type 'a choice := 'a Symbolic_choice.t

@@ -2,4 +2,4 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-include Wasm_ffi_intf.S with type extern_func = Abstract_extern_func.t
+val owi : Abstract_extern.Module.t

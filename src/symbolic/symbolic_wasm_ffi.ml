@@ -2,8 +2,6 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-module Expr = Smtml.Expr
-
 let rec make_str_null_terminated m accu i =
   let open Symbolic_choice in
   let* p = Symbolic_memory.load_8_u m (Symbolic_i32.of_int32 i) in
@@ -89,7 +87,7 @@ module M :
   let symbol_invisible_bool () =
     (* TODO: should we change this to an i32 too? *)
     Symbolic_choice.with_new_invisible_symbol (Ty_bitv 1) (fun sym ->
-      Expr.cvtop (Ty_bitv 32) (Zero_extend 31) (Expr.symbol sym)
+      Smtml.Expr.cvtop (Ty_bitv 32) (Zero_extend 31) (Smtml.Expr.symbol sym)
       |> Smtml.Typed.Unsafe.wrap )
 
   let symbol_i32 () =
@@ -160,9 +158,9 @@ module M :
         add_label (Int32.to_int id, str)
     | _ ->
       Log.err (fun m ->
-        m "cov_label_set: invalid type id:%a ptr:%a" Expr.pp
+        m "cov_label_set: invalid type id:%a ptr:%a" Smtml.Expr.pp
           (Smtml.Typed.Unsafe.unwrap id)
-          Expr.pp
+          Smtml.Expr.pp
           (Smtml.Typed.Unsafe.unwrap ptr) );
       assert false
 
@@ -186,42 +184,35 @@ module M :
   let close_scope () = Symbolic_choice.close_scope
 end
 
-type extern_func = Symbolic_extern_func.t
-
 open M
-open Symbolic_extern_func
-open Symbolic_extern_func.Syntax
+open Symbolic_extern.Func
+open Symbolic_extern.Func.Syntax
 
-let symbolic_extern_module =
-  let functions =
-    [ ("i32_symbol", Extern_func (unit ^->. i32, symbol_i32))
-    ; ("i64_symbol", Extern_func (unit ^->. i64, symbol_i64))
-    ; ("f32_symbol", Extern_func (unit ^->. f32, symbol_f32))
-    ; ("f64_symbol", Extern_func (unit ^->. f64, symbol_f64))
-    ; ("v128_symbol", Extern_func (unit ^->. v128, symbol_v128))
-    ; ( "invisible_bool_symbol"
-      , Extern_func (unit ^->. i32, symbol_invisible_bool) )
-    ; ("range_symbol", Extern_func (i32 ^-> i32 ^->. i32, symbol_range))
-    ; ("assume", Extern_func (i32 ^->. unit, assume))
-    ; ("assert", Extern_func (i32 ^->. unit, assert'))
-    ; ("in_replay_mode", Extern_func (unit ^->. i32, in_replay_mode))
-    ; ("print_char", Extern_func (i32 ^->. unit, print_char))
-    ; ( "cov_label_set"
-      , Extern_func (memory 0 ^-> i32 ^-> i32 ^->. unit, cov_label_set) )
-    ; ("cov_label_is_covered", Extern_func (i32 ^->. i32, cov_label_is_covered))
-    ; ( "open_scope_null_terminated"
-      , Extern_func (memory 0 ^-> i32 ^->. unit, open_scope_null_terminated) )
-    ; ( "open_scope_of_length"
-      , Extern_func (memory 0 ^-> i32 ^-> i32 ^->. unit, open_scope_of_length)
-      )
-    ; ("close_scope", Extern_func (unit ^->. unit, close_scope))
-    ; ("alloc", Extern_func (memory 0 ^-> i32 ^-> i32 ^->. i32, alloc))
-    ; ("dealloc", Extern_func (memory 0 ^-> i32 ^->. i32, free))
-    ; ("abort", Extern_func (unit ^->. unit, abort))
-    ; ("exit", Extern_func (i32 ^->. unit, exit))
-    ]
-  in
-  { Extern.Module.functions; func_type = Symbolic_extern_func.extern_type }
+let owi =
+  [ ("i32_symbol", Extern_func (unit ^->. i32, symbol_i32))
+  ; ("i64_symbol", Extern_func (unit ^->. i64, symbol_i64))
+  ; ("f32_symbol", Extern_func (unit ^->. f32, symbol_f32))
+  ; ("f64_symbol", Extern_func (unit ^->. f64, symbol_f64))
+  ; ("v128_symbol", Extern_func (unit ^->. v128, symbol_v128))
+  ; ("invisible_bool_symbol", Extern_func (unit ^->. i32, symbol_invisible_bool))
+  ; ("range_symbol", Extern_func (i32 ^-> i32 ^->. i32, symbol_range))
+  ; ("assume", Extern_func (i32 ^->. unit, assume))
+  ; ("assert", Extern_func (i32 ^->. unit, assert'))
+  ; ("in_replay_mode", Extern_func (unit ^->. i32, in_replay_mode))
+  ; ("print_char", Extern_func (i32 ^->. unit, print_char))
+  ; ( "cov_label_set"
+    , Extern_func (memory 0 ^-> i32 ^-> i32 ^->. unit, cov_label_set) )
+  ; ("cov_label_is_covered", Extern_func (i32 ^->. i32, cov_label_is_covered))
+  ; ( "open_scope_null_terminated"
+    , Extern_func (memory 0 ^-> i32 ^->. unit, open_scope_null_terminated) )
+  ; ( "open_scope_of_length"
+    , Extern_func (memory 0 ^-> i32 ^-> i32 ^->. unit, open_scope_of_length) )
+  ; ("close_scope", Extern_func (unit ^->. unit, close_scope))
+  ; ("alloc", Extern_func (memory 0 ^-> i32 ^-> i32 ^->. i32, alloc))
+  ; ("dealloc", Extern_func (memory 0 ^-> i32 ^->. i32, free))
+  ; ("abort", Extern_func (unit ^->. unit, abort))
+  ; ("exit", Extern_func (i32 ^->. unit, exit))
+  ]
 
 let args_get _ _ =
   (* TODO *)
@@ -290,43 +281,39 @@ let random_get _ _ =
   Symbolic_choice.return Symbolic_i32.zero
 
 let wasi_snapshot_preview1 =
-  let functions =
-    [ ("args_get", Extern_func (i32 ^-> i32 ^->. i32, args_get))
-    ; ("args_sizes_get", Extern_func (i32 ^-> i32 ^->. i32, args_sizes_get))
-    ; ("environ_get", Extern_func (i32 ^-> i32 ^->. i32, environ_get))
-    ; ( "environ_sizes_get"
-      , Extern_func (i32 ^-> i32 ^->. i32, environ_sizes_get) )
-    ; ( "clock_time_get"
-      , Extern_func (i32 ^-> i64 ^-> i32 ^->. i32, clock_time_get) )
-    ; ("fd_close", Extern_func (i32 ^->. i32, fd_close))
-    ; ("fd_fdstat_get", Extern_func (i32 ^-> i32 ^->. i32, fd_fdstat_get))
-    ; ( "fd_fdstat_set_flags"
-      , Extern_func (i32 ^-> i32 ^->. i32, fd_fdstat_set_flags) )
-    ; ("fd_filestat_get", Extern_func (i32 ^-> i32 ^->. i32, fd_filestat_get))
-    ; ( "fd_filestat_set_size"
-      , Extern_func (i32 ^-> i64 ^->. i32, fd_filestat_set_size) )
-    ; ("fd_prestat_get", Extern_func (i32 ^-> i32 ^->. i32, fd_prestat_get))
-    ; ( "fd_prestat_dir_name"
-      , Extern_func (i32 ^-> i32 ^-> i32 ^->. i32, fd_prestat_dir_name) )
-    ; ("fd_read", Extern_func (i32 ^-> i32 ^-> i32 ^-> i32 ^->. i32, fd_read))
-    ; ("fd_seek", Extern_func (i32 ^-> i64 ^-> i32 ^-> i32 ^->. i32, fd_seek))
-    ; ( "fd_write"
-      , Extern_func (memory 0 ^-> i32 ^-> i32 ^-> i32 ^-> i32 ^->. i32, fd_write)
-      )
-    ; ( "path_create_directory"
-      , Extern_func (i32 ^-> i32 ^-> i32 ^->. i32, path_create_directory) )
-    ; ( "path_filestat_get"
-      , Extern_func
-          (i32 ^-> i32 ^-> i32 ^-> i32 ^-> i32 ^->. i32, path_filestat_get) )
-    ; ( "path_open"
-      , Extern_func
-          ( i32 ^-> i32 ^-> i32 ^-> i32 ^-> i32 ^-> i64 ^-> i64 ^-> i32 ^-> i32
-            ^->. i32
-          , path_open ) )
-    ; ( "poll_oneoff"
-      , Extern_func (i32 ^-> i32 ^-> i32 ^-> i32 ^->. i32, poll_oneoff) )
-    ; ("proc_exit", Extern_func (i32 ^->. unit, proc_exit))
-    ; ("random_get", Extern_func (i32 ^-> i32 ^->. i32, random_get))
-    ]
-  in
-  { Extern.Module.functions; func_type = Symbolic_extern_func.extern_type }
+  [ ("args_get", Extern_func (i32 ^-> i32 ^->. i32, args_get))
+  ; ("args_sizes_get", Extern_func (i32 ^-> i32 ^->. i32, args_sizes_get))
+  ; ("environ_get", Extern_func (i32 ^-> i32 ^->. i32, environ_get))
+  ; ("environ_sizes_get", Extern_func (i32 ^-> i32 ^->. i32, environ_sizes_get))
+  ; ( "clock_time_get"
+    , Extern_func (i32 ^-> i64 ^-> i32 ^->. i32, clock_time_get) )
+  ; ("fd_close", Extern_func (i32 ^->. i32, fd_close))
+  ; ("fd_fdstat_get", Extern_func (i32 ^-> i32 ^->. i32, fd_fdstat_get))
+  ; ( "fd_fdstat_set_flags"
+    , Extern_func (i32 ^-> i32 ^->. i32, fd_fdstat_set_flags) )
+  ; ("fd_filestat_get", Extern_func (i32 ^-> i32 ^->. i32, fd_filestat_get))
+  ; ( "fd_filestat_set_size"
+    , Extern_func (i32 ^-> i64 ^->. i32, fd_filestat_set_size) )
+  ; ("fd_prestat_get", Extern_func (i32 ^-> i32 ^->. i32, fd_prestat_get))
+  ; ( "fd_prestat_dir_name"
+    , Extern_func (i32 ^-> i32 ^-> i32 ^->. i32, fd_prestat_dir_name) )
+  ; ("fd_read", Extern_func (i32 ^-> i32 ^-> i32 ^-> i32 ^->. i32, fd_read))
+  ; ("fd_seek", Extern_func (i32 ^-> i64 ^-> i32 ^-> i32 ^->. i32, fd_seek))
+  ; ( "fd_write"
+    , Extern_func (memory 0 ^-> i32 ^-> i32 ^-> i32 ^-> i32 ^->. i32, fd_write)
+    )
+  ; ( "path_create_directory"
+    , Extern_func (i32 ^-> i32 ^-> i32 ^->. i32, path_create_directory) )
+  ; ( "path_filestat_get"
+    , Extern_func
+        (i32 ^-> i32 ^-> i32 ^-> i32 ^-> i32 ^->. i32, path_filestat_get) )
+  ; ( "path_open"
+    , Extern_func
+        ( i32 ^-> i32 ^-> i32 ^-> i32 ^-> i32 ^-> i64 ^-> i64 ^-> i32 ^-> i32
+          ^->. i32
+        , path_open ) )
+  ; ( "poll_oneoff"
+    , Extern_func (i32 ^-> i32 ^-> i32 ^-> i32 ^->. i32, poll_oneoff) )
+  ; ("proc_exit", Extern_func (i32 ^->. unit, proc_exit))
+  ; ("random_get", Extern_func (i32 ^-> i32 ^->. i32, random_get))
+  ]
