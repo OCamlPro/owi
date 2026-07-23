@@ -53,6 +53,14 @@ let of_script_const ~ty : Wast.const -> t = function
   | Const_null (Some (Exn_ht | NoExn_ht)) -> Ref NullExn
   | _ -> assert false
 
+let of_concrete : Concrete_value.t -> t = function
+  | I32 v -> I32 (Symbolic_i32.of_int32 v)
+  | I64 v -> I64 (Symbolic_i64.of_int64 v)
+  | F32 v -> F32 (Symbolic_f32.of_float32 v)
+  | F64 v -> F64 (Symbolic_f64.of_float (Concrete_f64.to_float v))
+  | V128 v -> V128 (Symbolic_v128.of_concrete v)
+  | _ -> assert false
+
 let equal_script_result =
   let compare_f32 (script_result : Wast.result_f32) v =
     match script_result with
