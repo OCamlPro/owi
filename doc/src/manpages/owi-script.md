@@ -9,6 +9,9 @@ SYNOPSIS
        owi script COMMAND …
 
 COMMANDS
+       abstract [--no-exhaustion] [OPTION]… FILE…
+           Run a reference test suite script using the abstract interpreter
+
        concrete [--no-exhaustion] [OPTION]… FILE…
            Run a reference test suite script using the concrete interpreter
 
