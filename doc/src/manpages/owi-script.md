@@ -6,38 +6,20 @@ NAME
        owi-script - Run a reference test suite script
 
 SYNOPSIS
-       owi script [--no-exhaustion] [OPTION]… FILE…
+       owi script COMMAND …
 
-ARGUMENTS
-       FILE (required)
-           source files
+COMMANDS
+       concrete [--no-exhaustion] [OPTION]… FILE…
+           Run a reference test suite script using the concrete interpreter
 
-OPTIONS
-       --no-exhaustion
-           no exhaustion tests
+       symbolic [--no-exhaustion] [OPTION]… FILE…
+           Run a reference test suite script using the symbolic interpreter
 
 COMMON OPTIONS
-       --bench
-           enable benchmarks
-
-       --color=WHEN (absent=auto)
-           Colorize the output. WHEN must be one of auto, always or never.
-
        --help[=FMT] (default=auto)
            Show this help in format FMT. The value FMT must be one of auto,
            pager, groff or plain. With auto, the format is pager or plain
            whenever the TERM env var is dumb or undefined.
-
-       -q, --quiet
-           Be quiet. Takes over -v and --verbosity.
-
-       -v, --verbose
-           Increase verbosity. Repeatable, but more than twice does not bring
-           more.
-
-       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
-           Be more or less verbose. LEVEL must be one of quiet, error,
-           warning, info or debug. Takes over -v.
 
        --version
            Show version information.
@@ -53,14 +35,8 @@ EXIT STATUS
 
        125 on unexpected internal errors (bugs).
 
-ENVIRONMENT
-       These environment variables affect the execution of owi script:
-
-       OWI_VERBOSITY
-           See option --verbosity.
-
 BUGS
-       Email them to <contact@ndrs.fr>.
+       Email them to <owi.wildcat119@passmail.com>.
 
 SEE ALSO
        owi(1)

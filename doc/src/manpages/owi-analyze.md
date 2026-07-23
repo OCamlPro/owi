@@ -36,7 +36,7 @@ EXIT STATUS
        125 on unexpected internal errors (bugs).
 
 BUGS
-       Email them to <contact@ndrs.fr>.
+       Email them to <owi.wildcat119@passmail.com>.
 
 SEE ALSO
        owi(1)

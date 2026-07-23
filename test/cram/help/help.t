@@ -50,7 +50,7 @@ no subcommand should print help
          rust [OPTION]… FILE…
              Compile a Rust file to Wasm and run the symbolic interpreter on it
   
-         script [--no-exhaustion] [OPTION]… FILE…
+         script COMMAND …
              Run a reference test suite script
   
          sym [OPTION]… FILE
@@ -98,6 +98,6 @@ no subcommand should print help
          125 on unexpected internal errors (bugs).
   
   BUGS
-         Email them to <contact@ndrs.fr>.
+         Email them to <owi.wildcat119@passmail.com>.
   
 
