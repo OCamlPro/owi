@@ -604,7 +604,16 @@ let script_info =
   let man = [] @ shared_man in
   Cmd.info "script" ~version ~doc ~sdocs ~man
 
-let script_cmd =
+(* owi script concrete *)
+
+let script_concrete_info =
+  let doc =
+    "Run a reference test suite script using the concrete interpreter"
+  in
+  let man = [] @ shared_man in
+  Cmd.info "concrete" ~version ~doc ~sdocs ~man
+
+let script_concrete_cmd =
   let+ files
   and+ () = setup_log
   and+ no_exhaustion =
@@ -612,6 +621,24 @@ let script_cmd =
     Arg.(value & flag & info [ "no-exhaustion" ] ~doc)
   in
   Cmd_script.cmd_concrete ~files ~no_exhaustion
+
+(* owi script symbolic *)
+
+let script_symbolic_info =
+  let doc =
+    "Run a reference test suite script using the symbolic interpreter"
+  in
+  let man = [] @ shared_man in
+  Cmd.info "symbolic" ~version ~doc ~sdocs ~man
+
+let script_symbolic_cmd =
+  let+ files
+  and+ () = setup_log
+  and+ no_exhaustion =
+    let doc = "no exhaustion tests" in
+    Arg.(value & flag & info [ "no-exhaustion" ] ~doc)
+  in
+  Cmd_script.cmd_symbolic ~files ~no_exhaustion
 
 (* owi sym *)
 
@@ -744,7 +771,10 @@ let cli =
     ; Cmd.v replay_info replay_cmd
     ; Cmd.v run_info run_cmd
     ; Cmd.v rust_info rust_cmd
-    ; Cmd.v script_info script_cmd
+    ; Cmd.group script_info
+        [ Cmd.v script_concrete_info script_concrete_cmd
+        ; Cmd.v script_symbolic_info script_symbolic_cmd
+        ]
     ; Cmd.v sym_info sym_cmd
     ; Cmd.v tinygo_info tinygo_cmd
     ; Cmd.v validate_info validate_cmd
