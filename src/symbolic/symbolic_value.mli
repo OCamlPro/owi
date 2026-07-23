@@ -11,3 +11,5 @@ include
      and type f64 = Smtml.Typed.Float64.t
      and type v128 = Smtml.Typed.Bitv128.t
      and module Ref = Symbolic_ref
+
+val of_concrete : Concrete_value.t -> t

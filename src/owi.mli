@@ -2144,7 +2144,9 @@ module Cmd_rust : sig
 end
 
 module Cmd_script : sig
-  val cmd : files:Fpath.t list -> no_exhaustion:bool -> unit Result.t
+  val cmd_concrete : files:Fpath.t list -> no_exhaustion:bool -> unit Result.t
+
+  val cmd_symbolic : files:Fpath.t list -> no_exhaustion:bool -> unit Result.t
 end
 
 module Cmd_tinygo : sig

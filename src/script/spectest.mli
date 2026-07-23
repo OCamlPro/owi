@@ -7,6 +7,8 @@
 (* OCaml definition *)
 val extern_m : Concrete_extern_func.extern_func Extern.Module.t
 
+val symbolic_extern_m : Symbolic_extern_func.extern_func Extern.Module.t
+
 (* TODO: this can probably be removed by directly registering the previous module in script.ml ? *)
 
 (** the spectest module, which is simply a Wast Text module importing everything

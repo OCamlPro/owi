@@ -611,7 +611,7 @@ let script_cmd =
     let doc = "no exhaustion tests" in
     Arg.(value & flag & info [ "no-exhaustion" ] ~doc)
   in
-  Cmd_script.cmd ~files ~no_exhaustion
+  Cmd_script.cmd_concrete ~files ~no_exhaustion
 
 (* owi sym *)
 

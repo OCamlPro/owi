@@ -2,25 +2,23 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-open Fmt
-open Syntax
-
 let extern_m =
+  let open Syntax in
   let print () = Ok () in
   let print_i32 i =
-    pr "%li@\n%!" i;
+    Fmt.pr "%li@\n%!" i;
     Ok ()
   in
   let print_i64 i =
-    pr "%Li@\n%!" i;
+    Fmt.pr "%Li@\n%!" i;
     Ok ()
   in
   let print_f32 f =
-    pr "%a@\n%!" Float32.pp f;
+    Fmt.pr "%a@\n%!" Float32.pp f;
     Ok ()
   in
   let print_f64 f =
-    pr "%a@\n%!" Float64.pp f;
+    Fmt.pr "%a@\n%!" Float64.pp f;
     Ok ()
   in
   let print_i32_f32 i f =
@@ -55,6 +53,60 @@ let extern_m =
   in
 
   { Extern.Module.functions; func_type = Concrete_extern_func.extern_type }
+
+let symbolic_extern_m =
+  let open Symbolic_choice in
+  let print () = return () in
+  let print_i32 i =
+    Fmt.pr "%a@\n%!" Symbolic_i32.pp i;
+    return ()
+  in
+  let print_i64 i =
+    Fmt.pr "%a@\n%!" Symbolic_i64.pp i;
+    return ()
+  in
+  let print_f32 f =
+    Fmt.pr "%a@\n%!" Symbolic_f32.pp f;
+    return ()
+  in
+  let print_f64 f =
+    Fmt.pr "%a@\n%!" Symbolic_f64.pp f;
+    return ()
+  in
+  let print_i32_f32 i f =
+    let* () = print_i32 i in
+    let* () = print_f32 f in
+    return ()
+  in
+  let print_f64_f64 f1 f2 =
+    let* () = print_f64 f1 in
+    let* () = print_f64 f2 in
+    return ()
+  in
+  let func () = return () in
+  let func_in_i32 (_i : Symbolic_i32.t) = return () in
+  let func_out_i32 () = return (Symbolic_i32.of_int 1) in
+  let func_in_i32_out_i32 (_i : Symbolic_i32.t) =
+    return (Symbolic_i32.of_int 1)
+  in
+  let open Symbolic_extern_func in
+  let open Symbolic_extern_func.Syntax in
+  let functions =
+    [ ("print", Extern_func (unit ^->. unit, print))
+    ; ("print_i32", Extern_func (i32 ^->. unit, print_i32))
+    ; ("print_i64", Extern_func (i64 ^->. unit, print_i64))
+    ; ("print_f32", Extern_func (f32 ^->. unit, print_f32))
+    ; ("print_f64", Extern_func (f64 ^->. unit, print_f64))
+    ; ("print_i32_f32", Extern_func (i32 ^-> f32 ^->. unit, print_i32_f32))
+    ; ("print_f64_f64", Extern_func (f64 ^-> f64 ^->. unit, print_f64_f64))
+    ; ("func", Extern_func (unit ^->. unit, func))
+    ; ("func-i32", Extern_func (i32 ^->. unit, func_in_i32))
+    ; ("func->i32", Extern_func (unit ^->. i32, func_out_i32))
+    ; ("func-i32->i32", Extern_func (i32 ^->. i32, func_in_i32_out_i32))
+    ]
+  in
+
+  { Extern.Module.functions; func_type = Symbolic_extern_func.extern_type }
 
 let m =
   let open Wast in
