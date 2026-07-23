@@ -70,7 +70,8 @@ let copts_t = Term.(const [])
 
 let sdocs = Manpage.s_common_options
 
-let shared_man = [ `S Manpage.s_bugs; `P "Email them to <contact@ndrs.fr>." ]
+let shared_man =
+  [ `S Manpage.s_bugs; `P "Email them to <owi.wildcat119@passmail.com>." ]
 
 let version = Cmd_version.owi_version ()
 
@@ -750,7 +751,9 @@ let zig_cmd =
 let cli =
   let info =
     let doc = "OCaml WebAssembly Interpreter" in
-    let man = [ `S Manpage.s_bugs; `P "Email them to <contact@ndrs.fr>." ] in
+    let man =
+      [ `S Manpage.s_bugs; `P "Email them to <owi.wildcat119@passmail.com>." ]
+    in
     Cmd.info "owi" ~version ~doc ~sdocs ~man
   in
   let default =

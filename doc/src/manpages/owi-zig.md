@@ -139,7 +139,7 @@ ENVIRONMENT
            See option --verbosity.
 
 BUGS
-       Email them to <contact@ndrs.fr>.
+       Email them to <owi.wildcat119@passmail.com>.
 
 SEE ALSO
        owi(1)
