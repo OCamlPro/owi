@@ -8,6 +8,6 @@ type t =
   { data : Smtml.Typed.Bitv8.t Map.t
   ; chunks : Symbolic_i32.t Map.t
   ; size : Symbolic_i32.t
-  ; env_id : int
+  ; module_id : int
   ; id : int
   }

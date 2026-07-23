@@ -17,14 +17,14 @@ let do_action ctx link_state = function
       m "invoke %a %s %a..."
         (Fmt.option ~none:Fmt.nop Fmt.string)
         mod_id f Wast.pp_consts args );
-    let* f, env_id = Link.State.get_func_from_module link_state mod_id f in
+    let* f, modul = Link.State.get_func_from_module link_state mod_id f in
     let stack =
       List.rev_map (Abstract_value.of_script_const ctx ~ty) args
       |> List.mapi (fun i v -> (i, v))
     in
     let locals = Abstract_locals.of_list stack in
-    let envs = Link.State.get_envs link_state in
-    I.exec_vfunc_from_outside ~ctx ~locals ~env:env_id ~envs f
+    let modules = Link.State.get_modules link_state in
+    I.exec_vfunc_from_outside ~ctx ~locals ~modul ~modules f
     end
   | Get (_mod_id, _name) ->
     Log.info (fun m -> m "get...");
@@ -41,7 +41,7 @@ let run_one ~no_exhaustion:_
   match cmd with
   | Wast.Text_module (false, m) ->
     let* m, link_state =
-      Compile.Text.until_link link_state ~unsafe ~name:None m
+      Compile.Text.until_abstract_link link_state ~unsafe ~name:None m
     in
     let state = I.modul_with_ctx ctx link_state m in
     Ok (link_state, state.ctx)

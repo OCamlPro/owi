@@ -14,7 +14,7 @@ let cmd ~source_file ~entry_point ~unsafe =
   let* m = Compile.File.until_binary ~unsafe source_file in
   let* m = Cmd_utils.set_entry_point entry_point false m in
   let+ m, link_state =
-    Compile.Binary.until_link ~unsafe ~name:None link_state m
+    Compile.Binary.until_abstract_link ~unsafe ~name:None link_state m
   in
   let state = Abstract_interpreter_control_flow.modul link_state m in
   Abstract_checker.check_module link_state m state.invariant

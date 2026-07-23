@@ -7,9 +7,9 @@ module Collection : sig
 
   val empty : 'a t
 
-  val find : 'a t -> env_id:int -> id:int -> 'a option
+  val find : 'a t -> module_id:int -> id:int -> 'a option
 
-  val replace : 'a t -> env_id:int -> id:int -> 'a -> 'a t
+  val replace : 'a t -> module_id:int -> id:int -> 'a -> 'a t
 end
 
 type t = private

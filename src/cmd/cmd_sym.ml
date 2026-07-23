@@ -26,7 +26,7 @@ let run_file ~parameters ~source_file =
     if parameters.generate_abstract_invariant then
       let link_state = Cmd_abs.link_state () in
       let+ m, link_state =
-        Compile.Binary.until_link ~unsafe ~name:None link_state m
+        Compile.Binary.until_abstract_link ~unsafe ~name:None link_state m
       in
       let state = Abstract_interpreter_control_flow.modul link_state m in
       state.invariant
@@ -41,7 +41,7 @@ let run_file ~parameters ~source_file =
   in
   let+ m, link_state =
     (* unsafe is set to true because the module was already validated before *)
-    Compile.Binary.until_link ~unsafe:true ~name:None link_state m
+    Compile.Binary.until_symbolic_link ~unsafe:true ~name:None link_state m
   in
   let module Parameters = struct
     let throw_away_trap =

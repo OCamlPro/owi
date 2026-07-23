@@ -43,7 +43,6 @@ module Interpret = Interpret
 module Kind = Kind
 module Label = Label
 module Link = Link
-module Linked = Linked
 module Log = Log
 module Model = Model
 module Parse = Parse

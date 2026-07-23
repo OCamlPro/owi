@@ -28,10 +28,10 @@ let action ((link_state, monadic_state) : state) action : _ Result.t =
       m "invoke %a %s %a..."
         (Fmt.option ~none:Fmt.nop Fmt.string)
         mod_id f Wast.pp_consts args );
-    let* f, env_id = Link.State.get_func_from_module link_state mod_id f in
+    let* f, modul = Link.State.get_func_from_module link_state mod_id f in
     let stack = List.rev_map (Symbolic_value.of_script_const ~ty) args in
-    let envs = Link.State.get_envs link_state in
-    let to_run = I.exec_vfunc_from_outside ~locals:stack ~env:env_id ~envs f in
+    let modules = Link.State.get_modules link_state in
+    let to_run = I.exec_vfunc_from_outside ~locals:stack ~modul ~modules f in
     run_monad ~to_run ~monadic_state
   | Get (mod_id, name) ->
     Log.info (fun m -> m "get...");
@@ -75,7 +75,7 @@ let run_one ~no_exhaustion:_
   | Wast.Text_module (false, m) ->
     let open Syntax in
     let* m, link_state =
-      Compile.Text.until_link link_state ~unsafe ~name:None m
+      Compile.Text.until_symbolic_link link_state ~unsafe ~name:None m
     in
     let to_run = I.modul link_state m in
     let+ _got, monadic_state = run_monad ~to_run ~monadic_state in
@@ -84,7 +84,7 @@ let run_one ~no_exhaustion:_
     let open Syntax in
     let* m = Parse.Text.Inline_module.from_string m in
     let* m, link_state =
-      Compile.Text.until_link link_state ~unsafe ~name:None m
+      Compile.Text.until_symbolic_link link_state ~unsafe ~name:None m
     in
     let to_run = I.modul link_state m in
     let+ _got, monadic_state = run_monad ~to_run ~monadic_state in
@@ -94,7 +94,7 @@ let run_one ~no_exhaustion:_
     let* m = Parse.Binary.Module.from_string m in
     let m = { m with id } in
     let* m, link_state =
-      Compile.Binary.until_link link_state ~unsafe ~name:None m
+      Compile.Binary.until_symbolic_link link_state ~unsafe ~name:None m
     in
     let to_run = I.modul link_state m in
     let+ _got, monadic_state = run_monad ~to_run ~monadic_state in
@@ -102,7 +102,7 @@ let run_one ~no_exhaustion:_
   | Assert (Assert_trap_module (m, expected)) ->
     let open Syntax in
     let* m, link_state =
-      Compile.Text.until_link link_state ~unsafe ~name:None m
+      Compile.Text.until_symbolic_link link_state ~unsafe ~name:None m
     in
     let to_run = I.modul link_state m in
     begin match run_monad ~to_run ~monadic_state with
@@ -154,7 +154,9 @@ let run_one ~no_exhaustion:_
   *)
   | Register (name, mod_name) ->
     let open Syntax in
-    let+ link_state = Link.register_last_module link_state ~name ~id:mod_name in
+    let+ link_state =
+      Link.State.register_last_module link_state ~name ~id:mod_name
+    in
     (link_state, monadic_state)
   | Action a ->
     let open Syntax in

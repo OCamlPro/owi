@@ -108,8 +108,6 @@
   kind
   label
   link
-  linked
-  link_env
   log
   memory_intf
   model

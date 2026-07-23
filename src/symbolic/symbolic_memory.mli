@@ -22,4 +22,4 @@ val realloc :
 
 val free : t -> Symbolic_i32.t -> Symbolic_i32.t Symbolic_choice.t
 
-val of_concrete : env_id:int -> id:int -> Concrete_memory.t -> t
+val of_concrete : module_id:int -> id:int -> Concrete_memory.t -> t

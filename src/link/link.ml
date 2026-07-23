@@ -3,6 +3,145 @@
 (* Written by the Owi programmers *)
 
 open Syntax
+
+(* Link Linked_module *)
+
+module Linked_module = struct
+  module IMap = Map.Make (Int)
+
+  type 'ext t =
+    { globals : Concrete_global.t IMap.t
+    ; memories : Concrete_memory.t IMap.t
+    ; tables : Concrete_table.t IMap.t
+    ; functions : Kind.func IMap.t
+    ; data : Concrete_data.t IMap.t
+    ; elem : Concrete_elem.t IMap.t
+    ; tags : Binary.Tag.t IMap.t
+    ; extern_funcs : ('ext * Binary.func_type) Dynarray.t
+    ; id : int
+    ; to_run : Binary.expr Annotated.t list
+    }
+
+  let get_id (modul : _ t) = modul.id
+
+  let get_global (modul : _ t) id =
+    match IMap.find_opt id modul.globals with
+    | None -> assert false
+    | Some v -> Concrete_choice.return v
+
+  let get_memory (modul : _ t) id =
+    match IMap.find_opt id modul.memories with
+    | None -> assert false
+    | Some v -> Concrete_choice.return v
+
+  let get_table (modul : _ t) id =
+    match IMap.find_opt id modul.tables with
+    | None -> assert false
+    | Some v -> Concrete_choice.return v
+
+  let get_func (modul : _ t) id =
+    match IMap.find_opt id modul.functions with
+    | None -> assert false
+    | Some v -> v
+
+  let get_data (modul : _ t) id =
+    match IMap.find_opt id modul.data with
+    | None -> assert false
+    | Some v -> Concrete_choice.return v
+
+  let get_elem (modul : _ t) id =
+    match IMap.find_opt id modul.elem with None -> assert false | Some v -> v
+
+  let get_tag (modul : _ t) id =
+    match IMap.find_opt id modul.tags with None -> assert false | Some v -> v
+
+  let get_extern_func modul id =
+    let f, _t = Dynarray.get modul.extern_funcs id in
+    f
+
+  let fold_globals f acc (modul : _ t) =
+    IMap.fold (fun k v acc -> f k v acc) modul.globals acc
+
+  module Build = struct
+    type t =
+      { globals : Concrete_global.t IMap.t
+      ; memories : Concrete_memory.t IMap.t
+      ; tables : Concrete_table.t IMap.t
+      ; functions : Kind.func IMap.t
+      ; data : Concrete_data.t IMap.t
+      ; elem : Concrete_elem.t IMap.t
+      ; tags : Binary.Tag.t IMap.t
+      }
+
+    let empty =
+      { globals = IMap.empty
+      ; memories = IMap.empty
+      ; tables = IMap.empty
+      ; functions = IMap.empty
+      ; data = IMap.empty
+      ; elem = IMap.empty
+      ; tags = IMap.empty
+      }
+
+    let add_global id const (modul : t) =
+      { modul with globals = IMap.add id const modul.globals }
+
+    let add_memory id mem (modul : t) =
+      { modul with memories = IMap.add id mem modul.memories }
+
+    let add_table id table (modul : t) =
+      { modul with tables = IMap.add id table modul.tables }
+
+    let add_func id func (modul : t) =
+      { modul with functions = IMap.add id func modul.functions }
+
+    let add_data id data (modul : t) =
+      { modul with data = IMap.add id data modul.data }
+
+    let add_elem id elem (modul : t) =
+      { modul with elem = IMap.add id elem modul.elem }
+
+    let add_tag id tag (modul : t) =
+      { modul with tags = IMap.add id tag modul.tags }
+
+    let get_global (modul : t) id =
+      match IMap.find_opt id modul.globals with
+      | None -> Error (`Unknown_global (Text.Raw id))
+      | Some v -> Ok v
+
+    let get_const_global (modul : t) id =
+      let* g = get_global modul id in
+      match g.mut with
+      | Const -> Result.ok g.value
+      | Var -> Error `Constant_expression_required
+
+    let get_func (modul : t) id =
+      match IMap.find_opt id modul.functions with
+      | None -> Error (`Unknown_func (Text.Raw id))
+      | Some v -> Ok v
+
+    let get_memories { memories; _ } = memories
+  end
+
+  let freeze id
+    ({ globals; memories; tables; functions; data; elem; tags } : Build.t)
+    to_run extern_funcs =
+    { id
+    ; globals
+    ; memories
+    ; tables
+    ; functions
+    ; data
+    ; elem
+    ; tags
+    ; extern_funcs
+    ; to_run
+    }
+
+  let get_expr_to_run { to_run; _ } = to_run
+end
+
+(* Link State *)
 module StringMap = Map.Make (String)
 module StringSet = Set.Make (String)
 
@@ -22,14 +161,14 @@ module State = struct
     ; defined_names : StringSet.t
     }
 
-  type 'f envs = 'f Link_env.t Dynarray.t
+  type 'f modules = 'f Linked_module.t Dynarray.t
 
   type 'f t =
     { by_name : exports StringMap.t
     ; by_id : (exports * int) StringMap.t
     ; last : (exports * int) option
     ; collection : ('f * Binary.func_type) Dynarray.t
-    ; envs : 'f envs
+    ; modules : 'f modules
     }
 
   let empty () =
@@ -37,16 +176,16 @@ module State = struct
     ; by_id = StringMap.empty
     ; last = None
     ; collection = Dynarray.create ()
-    ; envs = Dynarray.create ()
+    ; modules = Dynarray.create ()
     }
 
   (* TODO: I'm not sure it makes sense to try making the Link.State.t persistent, we could change the API to be fully mutable? *)
-  let clone { by_name; by_id; last; collection; envs } =
+  let clone { by_name; by_id; last; collection; modules } =
     let collection = Dynarray.copy collection in
-    let envs = Dynarray.copy envs in
-    { by_name; by_id; last; collection; envs }
+    let modules = Dynarray.copy modules in
+    { by_name; by_id; last; collection; modules }
 
-  let get_envs state = state.envs
+  let get_modules state = state.modules
 
   let get_last state = state.last
 
@@ -65,16 +204,16 @@ module State = struct
       | Some exports -> Ok exports )
 
   let get_global_from_module state mod_id global_name =
-    let* exports, _env_id = get_module state mod_id in
+    let* exports, _module_id = get_module state mod_id in
     match StringMap.find_opt global_name exports.globals with
     | None -> Error (`Unbound_name global_name)
     | Some v -> Ok v
 
   let get_func_from_module state mod_id func_name =
-    let* exports, env_id = get_module state mod_id in
+    let* exports, modul_id = get_module state mod_id in
     match StringMap.find_opt func_name exports.functions with
     | None -> Error (`Unbound_name func_name)
-    | Some v -> Ok (v, env_id)
+    | Some v -> Ok (v, modul_id)
 
   let load_from_module ls f (import : _ Origin.imported) =
     match StringMap.find_opt import.modul_name ls.by_name with
@@ -104,6 +243,20 @@ module State = struct
       Error (`Incompatible_import_type import.name)
     end
     else Ok global
+
+  let register_last_module (ls : 'f t) ~name ~(id : string option) :
+    'f t Result.t =
+    let* exports, _modul_id =
+      match id with
+      | Some id ->
+        begin match StringMap.find_opt id ls.by_id with
+        | None -> Error (`Unbound_module id)
+        | Some e -> Ok e
+        end
+      | None -> (
+        match ls.last with Some e -> Ok e | None -> Error `Unbound_last_module )
+    in
+    Ok { ls with by_name = StringMap.add name exports ls.by_name }
 end
 
 (* TODO; the const evaluation is duplicated in many places and should be moved somewhere else! *)
@@ -124,7 +277,7 @@ module Eval_const = struct
     | Mul -> Stack.apply_i64_i64_i64 stack Concrete_i64.mul
     | _ -> assert false
 
-  let instr env stack instr =
+  let instr modul stack instr =
     match instr.Annotated.raw with
     | Binary.I32 i -> Result.ok (i32_instr stack i)
     | Binary.I64 i -> Result.ok (i64_instr stack i)
@@ -133,17 +286,17 @@ module Eval_const = struct
     | V128 (Const f) -> Result.ok @@ Stack.push_v128 stack f
     | Ref (Null t) -> Result.ok @@ Stack.push_ref stack (Concrete_ref.null t)
     | Ref (Func f) ->
-      let* f = Link_env.Build.get_func env f in
+      let* f = Linked_module.Build.get_func modul f in
       let value = Concrete_value.Ref (Func (Some f)) in
       Result.ok @@ Stack.push stack value
     | Global (Get id) ->
-      let* g = Link_env.Build.get_const_global env id in
+      let* g = Linked_module.Build.get_const_global modul id in
       Result.ok @@ Stack.push stack g
     | _ -> assert false
 
   (* TODO: binary+const expr *)
-  let expr env e : Concrete_value.t Result.t =
-    let* stack = list_fold_left (instr env) Stack.empty e.Annotated.raw in
+  let expr modul e : Concrete_value.t Result.t =
+    let* stack = list_fold_left (instr modul) Stack.empty e.Annotated.raw in
     match stack with
     | [] -> Error (`Type_mismatch "const expr returning zero values")
     | _ :: _ :: _ ->
@@ -151,27 +304,27 @@ module Eval_const = struct
     | [ result ] -> Ok result
 end
 
-let eval_global ls env
+let eval_global ls modul
   (global : (Binary.Global.t, Binary.Global.Type.t) Origin.t) : global Result.t
     =
   match global with
   | Local global ->
-    let* value = Eval_const.expr env global.init in
+    let* value = Eval_const.expr modul global.init in
     let mut, typ = global.typ in
     let global : global = { value; mut; typ } in
     Ok global
   | Imported import -> State.load_global ls import
 
-let eval_globals ls env globals : Link_env.Build.t Result.t =
-  let+ env, _i =
+let eval_globals ls modul globals : Linked_module.Build.t Result.t =
+  let+ modul, _i =
     array_fold_left
-      (fun (env, i) global ->
-        let+ global = eval_global ls env global in
-        let env = Link_env.Build.add_global i global env in
-        (env, succ i) )
-      (env, 0) globals
+      (fun (modul, i) global ->
+        let+ global = eval_global ls modul global in
+        let modul = Linked_module.Build.add_global i global modul in
+        (modul, succ i) )
+      (modul, 0) globals
   in
-  env
+  modul
 
 let memory_limit_is_included ~import ?imported_data_size ~imported () =
   match (import, imported) with
@@ -239,16 +392,16 @@ let eval_memory ls (memory : (Binary.Mem.t, Binary.Mem.Type.limits) Origin.t) :
   | Local (_label, mem_type) -> Result.ok @@ Concrete_memory.init mem_type
   | Imported import -> load_memory ls import
 
-let eval_memories ls env memories =
-  let+ env, _i =
+let eval_memories ls modul memories =
+  let+ modul, _i =
     array_fold_left
-      (fun (env, id) mem ->
+      (fun (modul, id) mem ->
         let+ memory = eval_memory ls mem in
-        let env = Link_env.Build.add_memory id memory env in
-        (env, succ id) )
-      (env, 0) memories
+        let modul = Linked_module.Build.add_memory id memory modul in
+        (modul, succ id) )
+      (modul, 0) memories
   in
-  env
+  modul
 
 let table_types_are_compatible ~imported_data_size
   (import, (t1 : Binary.ref_type)) (imported, t2) =
@@ -272,16 +425,16 @@ let eval_table ls (table : (Binary.Table.t, Binary.Table.Type.t) Origin.t) :
   | Local { id = label; typ; _ } -> Result.ok @@ Concrete_table.init ?label typ
   | Imported import -> load_table ls import
 
-let eval_tables ls env tables =
-  let+ env, _i =
+let eval_tables ls modul tables =
+  let+ modul, _i =
     array_fold_left
-      (fun (env, i) table ->
+      (fun (modul, i) table ->
         let+ table = eval_table ls table in
-        let env = Link_env.Build.add_table i table env in
-        (env, succ i) )
-      (env, 0) tables
+        let modul = Linked_module.Build.add_table i table modul in
+        (modul, succ i) )
+      (modul, 0) tables
   in
-  env
+  modul
 
 let load_func (ls : 'f State.t) (import : Binary.block_type Origin.imported) :
   func Result.t =
@@ -306,23 +459,23 @@ let load_func (ls : 'f State.t) (import : Binary.block_type Origin.imported) :
     in
     Error (`Incompatible_import_type msg)
 
-let eval_func ls (finished_env : int) func : func Result.t =
+let eval_func ls (finished_modul : int) func : func Result.t =
   match func with
-  | Origin.Local func -> Result.ok @@ Kind.wasm func finished_env
+  | Origin.Local func -> Result.ok @@ Kind.wasm func finished_modul
   | Imported import -> load_func ls import
 
-let eval_functions ls (finished_env : int) env functions =
-  let+ env, _i =
+let eval_functions ls (finished_modul : int) modul functions =
+  let+ modul, _i =
     array_fold_left
-      (fun (env, i) func ->
-        let+ func = eval_func ls finished_env func in
-        let env = Link_env.Build.add_func i func env in
-        (env, succ i) )
-      (env, 0) functions
+      (fun (modul, i) func ->
+        let+ func = eval_func ls finished_modul func in
+        let modul = Linked_module.Build.add_func i func modul in
+        (modul, succ i) )
+      (modul, 0) functions
   in
-  env
+  modul
 
-let eval_tag ls (_finished_env : int)
+let eval_tag ls (_finished_modul : int)
   (tag : (Binary.Tag.t, Binary.block_type) Origin.t) : Binary.Tag.t Result.t =
   match tag with
   | Origin.Local tag -> Ok tag
@@ -340,17 +493,17 @@ let eval_tag ls (_finished_env : int)
       in
       Error (`Incompatible_import_type msg)
 
-let eval_tags ls (finished_env : int) env
+let eval_tags ls (finished_modul : int) modul
   (tags : (Binary.Tag.t, Binary.block_type) Origin.t array) =
-  let+ env, _i =
+  let+ modul, _i =
     array_fold_left
-      (fun (env, i) tag ->
-        let+ tag = eval_tag ls finished_env tag in
-        let env = Link_env.Build.add_tag i tag env in
-        (env, succ i) )
-      (env, 0) tags
+      (fun (modul, i) tag ->
+        let+ tag = eval_tag ls finished_modul tag in
+        let modul = Linked_module.Build.add_tag i tag modul in
+        (modul, succ i) )
+      (modul, 0) tags
   in
-  env
+  modul
 
 let active_elem_expr ~offset ~length ~table ~elem =
   [ Binary.I32 (Const offset)
@@ -360,9 +513,9 @@ let active_elem_expr ~offset ~length ~table ~elem =
   ; Elem (Drop elem)
   ]
 
-let active_data_expr env ~offset ~length ~mem ~data =
-  if not (Link_env.IMap.mem mem (Link_env.Build.get_memories env)) then
-    Error (`Unknown_memory (Text.Raw mem))
+let active_data_expr modul ~offset ~length ~mem ~data =
+  if not (Linked_module.IMap.mem mem (Linked_module.Build.get_memories modul))
+  then Error (`Unknown_memory (Text.Raw mem))
   else
     Ok
       [ Binary.I32 (Const offset)
@@ -376,32 +529,32 @@ let get_i32 = function
   | Concrete_value.I32 i -> Ok i
   | _ -> Error (`Type_mismatch "get_i32")
 
-let define_data env data =
-  let+ env, init, _i =
+let define_data modul data =
+  let+ modul, init, _i =
     array_fold_left
-      (fun (env, init, id) (data : Binary.Data.t) ->
+      (fun (modul, init, id) (data : Binary.Data.t) ->
         let data' : Concrete_data.t = { value = data.init } in
-        let env = Link_env.Build.add_data id data' env in
+        let modul = Linked_module.Build.add_data id data' modul in
         let+ init =
           match data.mode with
           | Active (mem, offset) ->
-            let* offset = Eval_const.expr env offset in
+            let* offset = Eval_const.expr modul offset in
             let length = Int32.of_int @@ String.length data.init in
             let* offset = get_i32 offset in
-            let* v = active_data_expr env ~offset ~length ~mem ~data:id in
+            let* v = active_data_expr modul ~offset ~length ~mem ~data:id in
             Result.ok @@ (v :: init)
           | Passive -> Ok init
         in
-        (env, init, succ id) )
-      (env, [], 0) data
+        (modul, init, succ id) )
+      (modul, [], 0) data
   in
-  (env, List.rev init)
+  (modul, List.rev init)
 
-let define_elem env elem =
-  let+ env, inits, _i =
+let define_elem modul elem =
+  let+ modul, inits, _i =
     array_fold_left
-      (fun (env, inits, i) (elem : Binary.Elem.t) ->
-        let* init = list_map (Eval_const.expr env) elem.init in
+      (fun (modul, inits, i) (elem : Binary.Elem.t) ->
+        let* init = list_map (Eval_const.expr modul) elem.init in
         let* init_as_ref =
           list_map
             (function
@@ -416,91 +569,112 @@ let define_elem env elem =
             (* Declarative element have no runtime value *)
             [||]
         in
-        let env = Link_env.Build.add_elem i { value } env in
+        let modul = Linked_module.Build.add_elem i { value } modul in
         let+ inits =
           match elem.mode with
           | Active (None, _) -> assert false
           | Active (Some table, offset) ->
             let length = Int32.of_int @@ List.length init in
-            let* offset = Eval_const.expr env offset in
+            let* offset = Eval_const.expr modul offset in
             let* offset = get_i32 offset in
             Result.ok
             @@ (active_elem_expr ~offset ~length ~table ~elem:i :: inits)
           | Passive | Declarative -> Ok inits
         in
-        (env, inits, succ i) )
-      (env, [], 0) elem
+        (modul, inits, succ i) )
+      (modul, [], 0) elem
   in
-  (env, List.rev inits)
+  (modul, List.rev inits)
 
-let populate_exports env (exports : Binary.Module.Exports.t) :
+let populate_exports modul (exports : Binary.Module.Exports.t) :
   State.exports Result.t =
-  let fill_exports get_env exports names =
+  let fill_exports get_modul exports names =
     array_fold_left
       (fun (acc, names) ({ name; id; _ } : Binary.Export.t) ->
-        let value = get_env env id in
+        let value = get_modul modul id in
         if StringSet.mem name names then Error `Duplicate_export_name
         else Ok (StringMap.add name value acc, StringSet.add name names) )
       (StringMap.empty, names) exports
   in
-  let fill_exports' get_env exports names =
+  let fill_exports' get_modul exports names =
     array_fold_left
       (fun (acc, names) ({ name; id; _ } : Binary.Export.t) ->
-        let* value = get_env env id in
+        let* value = get_modul modul id in
         if StringSet.mem name names then Error `Duplicate_export_name
         else Ok (StringMap.add name value acc, StringSet.add name names) )
       (StringMap.empty, names) exports
   in
   let names = StringSet.empty in
   let* globals, names =
-    fill_exports' Link_env.get_global exports.global names
+    fill_exports' Linked_module.get_global exports.global names
   in
-  let* memories, names = fill_exports' Link_env.get_memory exports.mem names in
-  let* tables, names = fill_exports' Link_env.get_table exports.table names in
-  let* functions, names = fill_exports Link_env.get_func exports.func names in
-  let+ tags, names = fill_exports Link_env.get_tag exports.tag names in
+  let* memories, names =
+    fill_exports' Linked_module.get_memory exports.mem names
+  in
+  let* tables, names =
+    fill_exports' Linked_module.get_table exports.table names
+  in
+  let* functions, names =
+    fill_exports Linked_module.get_func exports.func names
+  in
+  let+ tags, names = fill_exports Linked_module.get_tag exports.tag names in
   { State.globals; memories; tables; functions; tags; defined_names = names }
 
 module Binary = struct
-  let modul ~name (ls : 'f State.t) (modul : Binary.Module.t) =
+  let aux ~name (ls : 'f State.t) (binary_module : Binary.Module.t) =
     Log.info (fun m -> m "linking      ...");
     let ls = State.clone ls in
-    let next_id = Dynarray.length ls.envs in
-    let env = Link_env.Build.empty in
-    let* env = eval_functions ls next_id env modul.func in
-    let* env = eval_tags ls next_id env modul.tag in
-    let* env = eval_globals ls env modul.global in
-    let* env = eval_memories ls env modul.mem in
-    let* env = eval_tables ls env modul.table in
-    let* env, init_active_data = define_data env modul.data in
-    let* env, init_active_elem = define_elem env modul.elem in
-    let env = Link_env.freeze next_id env ls.collection in
-    Dynarray.add_last ls.envs env;
-    let+ by_id_exports = populate_exports env modul.exports in
+    let next_id = Dynarray.length ls.modules in
+    let modul = Linked_module.Build.empty in
+    let* modul = eval_functions ls next_id modul binary_module.func in
+    let* modul = eval_tags ls next_id modul binary_module.tag in
+    let* modul = eval_globals ls modul binary_module.global in
+    let* modul = eval_memories ls modul binary_module.mem in
+    let* modul = eval_tables ls modul binary_module.table in
+    let* modul, init_active_data = define_data modul binary_module.data in
+    let* modul, init_active_elem = define_elem modul binary_module.elem in
+    let to_run =
+      let start =
+        Option.map
+          (fun start_id -> [ Binary.Call start_id ])
+          binary_module.start
+        |> Option.fold ~none:[] ~some:(fun s -> [ s ])
+      in
+      (init_active_elem @ init_active_data) @ start
+      |> List.map Annotated.dummy_deep
+    in
+
+    let modul : _ Linked_module.t =
+      Linked_module.freeze next_id modul to_run ls.collection
+    in
+    Dynarray.add_last ls.modules modul;
+
+    let+ by_id_exports = populate_exports modul binary_module.exports in
     let by_id =
-      match modul.id with
+      match binary_module.id with
       | None -> ls.by_id
-      | Some id -> StringMap.add id (by_id_exports, Link_env.id env) ls.by_id
+      | Some id ->
+        StringMap.add id (by_id_exports, Linked_module.get_id modul) ls.by_id
     in
     let by_name =
       match name with
       | None -> ls.by_name
       | Some name -> StringMap.add name by_id_exports ls.by_name
     in
-    let start =
-      Option.map (fun start_id -> [ Binary.Call start_id ]) modul.start
-    in
-    let start = Option.fold ~none:[] ~some:(fun s -> [ s ]) start in
-    let to_run = (init_active_elem @ init_active_data) @ start in
-    let to_run = List.map Annotated.dummy_deep to_run in
-    let modul = { Linked.Module.id = modul.id; env; to_run } in
+
     ( modul
     , { State.by_id
       ; by_name
-      ; last = Some (by_id_exports, Link_env.id env)
+      ; last = Some (by_id_exports, Linked_module.get_id modul)
       ; collection = ls.collection
-      ; envs = ls.envs
+      ; modules = ls.modules
       } )
+
+  let concrete_module ~name link_state modul = aux ~name link_state modul
+
+  let symbolic_module ~name link_state modul = aux ~name link_state modul
+
+  let abstract_module ~name link_state modul = aux ~name link_state modul
 end
 
 module Extern = struct
@@ -543,17 +717,3 @@ module Extern = struct
     (link_state : Abstract_extern.Func.t State.t) =
     aux ~name link_state Abstract_extern.Func.to_func_type modul
 end
-
-let register_last_module (ls : 'f State.t) ~name ~(id : string option) :
-  'f State.t Result.t =
-  let* exports, _env_id =
-    match id with
-    | Some id ->
-      begin match StringMap.find_opt id ls.by_id with
-      | None -> Error (`Unbound_module id)
-      | Some e -> Ok e
-      end
-    | None -> (
-      match ls.last with Some e -> Ok e | None -> Error `Unbound_last_module )
-  in
-  Ok { ls with by_name = StringMap.add name exports ls.by_name }

@@ -17,12 +17,12 @@ module Collection = struct
 
   let empty = Int_pair_map.empty
 
-  let find collection ~env_id ~id =
-    let loc = (env_id, id) in
+  let find collection ~module_id ~id =
+    let loc = (module_id, id) in
     Int_pair_map.find_opt loc collection
 
-  let replace collection ~env_id ~id v =
-    let loc = (env_id, id) in
+  let replace collection ~module_id ~id v =
+    let loc = (module_id, id) in
     Int_pair_map.add loc v collection
 end
 
@@ -102,21 +102,21 @@ let incr_path_count t = Atomic.incr t.bench_stats.path_count
 let replace_memory (memory : Symbolic_memory0.t) thread =
   let memories = thread.memories in
   let memories =
-    Collection.replace memories ~env_id:memory.env_id ~id:memory.id memory
+    Collection.replace memories ~module_id:memory.module_id ~id:memory.id memory
   in
   { thread with memories }
 
 let replace_table (table : Symbolic_table0.t) thread =
   let tables = thread.tables in
   let tables =
-    Collection.replace tables ~env_id:table.env_id ~id:table.id table
+    Collection.replace tables ~module_id:table.module_id ~id:table.id table
   in
   { thread with tables }
 
 let replace_global (global : Symbolic_global0.t) thread =
   let globals = thread.globals in
   let globals =
-    Collection.replace globals ~env_id:global.env_id ~id:global.id global
+    Collection.replace globals ~module_id:global.module_id ~id:global.id global
   in
   { thread with globals }
 

@@ -81,12 +81,12 @@ let check_iso ~unsafe export_name export_type module1 module2 =
          (emscripten_fuzzing_support_module ())
   in
   let* _module, link_state =
-    Compile.Binary.until_link ~name:(Some module_name1) ~unsafe link_state
-      module1
+    Compile.Binary.until_symbolic_link ~name:(Some module_name1) ~unsafe
+      link_state module1
   in
   let* _module, link_state =
-    Compile.Binary.until_link ~name:(Some module_name2) ~unsafe link_state
-      module2
+    Compile.Binary.until_symbolic_link ~name:(Some module_name2) ~unsafe
+      link_state module2
   in
 
   let typ = Binary.Bt_raw (None, export_type) in
@@ -283,7 +283,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
   Log.debug (fun m ->
     m "generated module:@\n  @[<v>%a@]" Text.Module.pp text_modul );
   let+ m, link_state =
-    Compile.Binary.until_link ~unsafe:false ~name:None link_state modul
+    Compile.Binary.until_symbolic_link ~unsafe:false ~name:None link_state modul
   in
   let module I = Interpret.Symbolic (Interpret.Default_parameters) in
   I.modul link_state m

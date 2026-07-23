@@ -1704,12 +1704,6 @@ module Label : sig
   end
 end
 
-module Linked : sig
-  module Module : sig
-    type 'f t
-  end
-end
-
 module Link : sig
   module State : sig
     type 'f t
@@ -1717,12 +1711,18 @@ module Link : sig
     val empty : unit -> 'f t
   end
 
+  module Linked_module : sig
+    type 'extern t
+  end
+
   module Binary : sig
-    val modul :
+    val concrete_module :
          name:string option
-      -> 'f State.t
+      -> Concrete_extern.Func.t State.t
       -> Binary.Module.t
-      -> ('f Linked.Module.t * 'f State.t) Result.t
+      -> ( Concrete_extern.Func.t Linked_module.t
+         * Concrete_extern.Func.t State.t )
+         Result.t
   end
 
   module Extern : sig
@@ -1742,21 +1742,25 @@ module Compile : sig
   module Text : sig
     val until_binary : unsafe:bool -> Text.Module.t -> Binary.Module.t Result.t
 
-    val until_link :
+    val until_concrete_link :
          unsafe:bool
       -> name:string option
-      -> 'f Link.State.t
+      -> Concrete_extern.Func.t Link.State.t
       -> Text.Module.t
-      -> ('f Linked.Module.t * 'f Link.State.t) Result.t
+      -> ( Concrete_extern.Func.t Link.Linked_module.t
+         * Concrete_extern.Func.t Link.State.t )
+         Result.t
   end
 
   module Binary : sig
-    val until_link :
+    val until_concrete_link :
          unsafe:bool
       -> name:string option
-      -> 'f Link.State.t
+      -> Concrete_extern.Func.t Link.State.t
       -> Binary.Module.t
-      -> ('f Linked.Module.t * 'f Link.State.t) Result.t
+      -> ( Concrete_extern.Func.t Link.Linked_module.t
+         * Concrete_extern.Func.t Link.State.t )
+         Result.t
   end
 end
 
@@ -1907,14 +1911,14 @@ module Interpret : sig
   module Concrete (_ : Parameters) : sig
     val modul :
          Concrete_extern.Func.t Link.State.t
-      -> Concrete_extern.Func.t Linked.Module.t
+      -> Concrete_extern.Func.t Link.Linked_module.t
       -> unit Result.t
   end
 
   module Symbolic (_ : Parameters) : sig
     val modul :
          Symbolic_extern.Func.t Link.State.t
-      -> Symbolic_extern.Func.t Linked.Module.t
+      -> Symbolic_extern.Func.t Link.Linked_module.t
       -> unit Symbolic_choice.t
   end
 end

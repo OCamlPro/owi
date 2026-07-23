@@ -16,8 +16,8 @@ end
 
 type interpreter_state =
   { abs_state : Abstract_state.t
-  ; env : Abstract_extern.Func.t Link_env.t
-  ; envs : Abstract_extern.Func.t Link_env.t Dynarray.t
+  ; modul : Abstract_extern.Func.t Link.Linked_module.t
+  ; modules : Abstract_extern.Func.t Link.Linked_module.t Dynarray.t
   }
 
 module DenotFixpoint (S : DATA_STATE) = struct
@@ -366,7 +366,7 @@ module DenotFixpoint (S : DATA_STATE) = struct
     in
     Some { state with abs_state }
 
-  and eval_instr ({ abs_state; env; envs } as state : interpreter_state) :
+  and eval_instr ({ abs_state; modul; modules } as state : interpreter_state) :
        Binary.instr Annotated.t
     -> interpreter_state option * Abstract_state.t list JumpTarget.t =
    fun instr ->
@@ -385,14 +385,14 @@ module DenotFixpoint (S : DATA_STATE) = struct
       m "running instr : %a" (Binary.pp_instr ~short:true) instr.raw );
     match instr.raw with
     | Call idx ->
-      let func = Link_env.get_func env idx in
+      let func = Link.Linked_module.get_func modul idx in
       begin match func with
       | Wasm { func; idx } ->
-        let env = Dynarray.get envs idx in
-        let r = eval_func { state with env } func in
+        let modul = Dynarray.get modules idx in
+        let r = eval_func { state with modul } func in
         (r, JumpTarget.empty)
       | Extern { idx } -> (
-        let f = Link_env.get_extern_func env idx in
+        let f = Link.Linked_module.get_extern_func modul idx in
         let stack = exec_extern_func abs_state f in
         match Abstract_monad.run stack abs_state with
         | None -> (None, JumpTarget.empty)
@@ -577,7 +577,9 @@ end
 
 module ConcreteFixpoint = DenotFixpoint (Abstract_interpreter_simple)
 
-let eval_exprs (m : Abstract_extern.Func.t Linked.Module.t) abs_state envs =
+let eval_exprs (modul : Abstract_extern.Func.t Link.Linked_module.t) abs_state
+  modules =
+  let to_run = Link.Linked_module.get_expr_to_run modul in
   let state =
     List.fold_left
       (fun (state : interpreter_state) (e : Binary.expr Annotated.t) ->
@@ -585,44 +587,45 @@ let eval_exprs (m : Abstract_extern.Func.t Linked.Module.t) abs_state envs =
         match ConcreteFixpoint.eval_expr state e with
         | None, _mapping -> state
         | Some state, _mapping -> state )
-      { abs_state; env = m.env; envs }
-      m.to_run
+      { abs_state; modul; modules }
+      to_run
   in
   state.abs_state
 
 let modul_with_ctx ctx (link_state : Abstract_extern.Func.t Link.State.t)
-  (m : Abstract_extern.Func.t Linked.Module.t) =
-  let envs = Link.State.get_envs link_state in
-  let env = m.env in
-  let abs_state = Abstract_state.empty env () in
+  (modul : Abstract_extern.Func.t Link.Linked_module.t) =
+  let modules = Link.State.get_modules link_state in
+  let abs_state = Abstract_state.empty modul Link.Linked_module.fold_globals in
   let abs_state = { abs_state with ctx } in
-  eval_exprs m abs_state envs
+  eval_exprs modul abs_state modules
 
 let modul (link_state : Abstract_extern.Func.t Link.State.t)
-  (m : Abstract_extern.Func.t Linked.Module.t) =
-  let envs = Link.State.get_envs link_state in
-  let env = m.env in
-  let abs_state = Abstract_state.empty env () in
-  eval_exprs m abs_state envs
+  (modul : Abstract_extern.Func.t Link.Linked_module.t) =
+  let modules = Link.State.get_modules link_state in
+  let abs_state = Abstract_state.empty modul Link.Linked_module.fold_globals in
+  eval_exprs modul abs_state modules
 
-let exec_vfunc_from_outside ~ctx ~locals ~env ~envs (func : Kind.func) =
-  let env = Dynarray.get envs env in
-  let abs_state = Abstract_state.empty_exec_state ~ctx ~locals ~env in
+let exec_vfunc_from_outside ~ctx ~locals ~modul ~modules (func : Kind.func) =
+  let modul = Dynarray.get modules modul in
+  let abs_state =
+    Abstract_state.empty_exec_state ~ctx ~locals ~modul
+      Link.Linked_module.fold_globals
+  in
   try
     match func with
     | Kind.Wasm { func; idx } -> (
-      let env = Dynarray.get envs idx in
+      let modul = Dynarray.get modules idx in
       let stack =
         Abstract_locals.to_list locals
         |> List.sort (fun (i1, _) (i2, _) -> compare i1 i2)
         |> List.map snd
       in
       let abs_state = { abs_state with stack } in
-      match ConcreteFixpoint.eval_func { abs_state; env; envs } func with
+      match ConcreteFixpoint.eval_func { abs_state; modul; modules } func with
       | Some state -> Ok state.abs_state
       | None -> Fmt.error_msg "failed" )
     | Extern { idx } -> (
-      let f = Link_env.get_extern_func env idx in
+      let f = Link.Linked_module.get_extern_func modul idx in
       let stack = ConcreteFixpoint.exec_extern_func abs_state f in
       match Abstract_monad.run stack abs_state with
       | None -> Fmt.error_msg "failed"

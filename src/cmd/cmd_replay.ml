@@ -206,7 +206,7 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
 
   let* m = Compile.File.until_binary ~unsafe filename in
   let* m = Cmd_utils.set_entry_point entry_point invoke_with_symbols m in
-  Compile.Binary.until_link ~unsafe link_state ~name:None m
+  Compile.Binary.until_concrete_link ~unsafe link_state ~name:None m
 
 let parse_model replay_file =
   let* parse_fn =
