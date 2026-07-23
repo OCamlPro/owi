@@ -2,4 +2,57 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type t = |
+type 'a get_ref =
+  | Null
+  | Ref_value of 'a
+  | Type_mismatch
+
+module Extern = struct
+  type t = E : 'a Type.Id.t * 'a -> t
+
+  let cast (type r) (E (rty, r) : t) (ty : r Type.Id.t) : r option =
+    match Type.Id.provably_equal rty ty with
+    | None -> None
+    | Some Equal -> Some r
+end
+
+type t =
+  | Extern of Extern.t option
+  | Func of Kind.func option
+  | NullExn
+  | NullRef
+
+let pp fmt = function
+  | Extern _ -> Fmt.pf fmt "externref"
+  | Func _ -> Fmt.pf fmt "funcref"
+  | NullExn -> Fmt.pf fmt "nullexnref"
+  | NullRef -> Fmt.pf fmt "nullref"
+
+let null = function
+  | Binary.Func_ht | NoFunc_ht | TypeUse _ -> Func None
+  (* TODO: is this correct? Are all nulls equal? *)
+  | Extern_ht | NoExtern_ht -> Extern None
+  | Any_ht | None_ht | Exn_ht | NoExn_ht -> assert false
+  | Eq_ht | I31_ht | Struct_ht | Array_ht -> assert false
+
+let func (f : Kind.func) = Func (Some f)
+
+let extern (type x) (t : x Type.Id.t) (v : x) : t = Extern (Some (E (t, v)))
+
+let is_null = function
+  | Func None | Extern None | NullExn | NullRef -> true
+  | Func (Some _) | Extern (Some _) -> false
+
+let get_func (r : t) : Kind.func get_ref =
+  match r with
+  | Func (Some f) -> Ref_value f
+  | Func None -> Null
+  | _ -> Type_mismatch
+
+let get_extern (type x) (r : t) (typ : x Type.Id.t) : x get_ref =
+  match r with
+  | Extern (Some (E (ety, v))) -> (
+    match Type.Id.provably_equal typ ety with
+    | None -> assert false
+    | Some Equal -> Ref_value v )
+  | _ -> assert false

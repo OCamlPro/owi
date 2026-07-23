@@ -604,3 +604,29 @@ let modul (link_state : Abstract_extern.Func.t Link.State.t)
   let env = m.env in
   let abs_state = Abstract_state.empty env () in
   eval_exprs m abs_state envs
+
+let exec_vfunc_from_outside ~ctx ~locals ~env ~envs (func : Kind.func) =
+  let env = Dynarray.get envs env in
+  let abs_state = Abstract_state.empty_exec_state ~ctx ~locals ~env in
+  try
+    match func with
+    | Kind.Wasm { func; idx } -> (
+      let env = Dynarray.get envs idx in
+      let stack =
+        Abstract_locals.to_list locals
+        |> List.sort (fun (i1, _) (i2, _) -> compare i1 i2)
+        |> List.map snd
+      in
+      let abs_state = { abs_state with stack } in
+      match ConcreteFixpoint.eval_func { abs_state; env; envs } func with
+      | Some state -> Ok state.abs_state
+      | None -> Fmt.error_msg "failed" )
+    | Extern { idx } -> (
+      let f = Link_env.get_extern_func env idx in
+      let stack = ConcreteFixpoint.exec_extern_func abs_state f in
+      match Abstract_monad.run stack abs_state with
+      | None -> Fmt.error_msg "failed"
+      | Some (stack, abs_state) ->
+        let abs_state = { abs_state with stack } in
+        Ok abs_state )
+  with Stack_overflow -> Error `Call_stack_exhausted

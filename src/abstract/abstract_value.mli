@@ -64,13 +64,17 @@ val pp : t Fmt.t
 
 val pp_with_ctx : Abstract_domain.Context.t -> t Fmt.t
 
-val to_binary : t -> Abstract_domain.binary
-
 val of_binary : Units.In_bits.t -> Abstract_domain.binary -> t
 
-val size_of : t -> Units.In_bits.t
+val to_binary : t -> Abstract_domain.binary
+
+val of_script_const : Abstract_domain.Context.t -> ty:'a -> Wast.const -> t
+
+val of_concrete : Abstract_domain.Context.t -> Concrete_value.t -> t
 
 val to_boolean : Abstract_domain.Context.t -> t -> Abstract_boolean.t
+
+val size_of : t -> Units.In_bits.t
 
 val top : Units.In_bits.t -> Abstract_domain.Context.t -> t
 
