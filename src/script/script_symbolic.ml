@@ -2,37 +2,44 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-open Symbolic_choice
 module Stack = Stack.Make [@inlined hint] (Symbolic_value)
 
 type host_externref = int
 
 let ty : host_externref Type.Id.t = Type.Id.make ()
 
-let ( let*? ) v f = match v with Error e -> trap e | Ok v -> f v
+type state = Symbolic_extern_func.extern_func Link.State.t * Thread.t
 
-let action (link_state : Symbolic_extern_func.extern_func Link.State.t) :
-  _ -> _ Symbolic_choice.t = function
-  | Wast.Invoke (mod_id, f, args) -> begin
+module I = Interpret.Symbolic (Interpret.Default_parameters)
+
+let run_monad ~to_run ~monadic_state =
+  match Symex.Monad.run to_run monadic_state with
+  | Ok (v, monadic_state) -> Ok (v, monadic_state)
+  | Error (`Trap t) -> Error t.Bug.err
+  | Error _ -> Fmt.error_msg "unexpected error from the symbolic monad"
+  | Yield _ -> Fmt.error_msg "unexpected yield from the symbolic monad"
+  | Choice _ -> Fmt.error_msg "unexpected choice from the symbolic monad"
+
+let action ((link_state, monadic_state) : state) action : _ Result.t =
+  let open Syntax in
+  match action with
+  | Wast.Invoke (mod_id, f, args) ->
     Log.info (fun m ->
       m "invoke %a %s %a..."
         (Fmt.option ~none:Fmt.nop Fmt.string)
         mod_id f Wast.pp_consts args );
-    let*? f, env_id = Link.State.get_func_from_module link_state mod_id f in
+    let* f, env_id = Link.State.get_func_from_module link_state mod_id f in
     let stack = List.rev_map (Symbolic_value.of_script_const ~ty) args in
     let envs = Link.State.get_envs link_state in
-    let module I = Interpret.Symbolic (Interpret.Default_parameters) in
-    I.exec_vfunc_from_outside ~locals:stack ~env:env_id ~envs f
-    end
+    let to_run = I.exec_vfunc_from_outside ~locals:stack ~env:env_id ~envs f in
+    run_monad ~to_run ~monadic_state
   | Get (mod_id, name) ->
     Log.info (fun m -> m "get...");
-    let*? global = Link.State.get_global_from_module link_state mod_id name in
+    let* global = Link.State.get_global_from_module link_state mod_id name in
     let v = Symbolic_value.of_concrete global.value in
-    return [ v ]
+    Ok ([ v ], monadic_state)
 
 let unsafe = false
-
-module I = Interpret.Symbolic (Interpret.Default_parameters)
 
 let log_cmd : Wast.cmd -> unit =
  fun cmd ->
@@ -60,48 +67,50 @@ let log_cmd : Wast.cmd -> unit =
   Log.info (fun m -> m "*** %s" s)
 
 let run_one ~no_exhaustion:_
-  (link_state : Symbolic_extern_func.extern_func Link.State.t Symbolic_choice.t)
-  cmd =
-  let* link_state in
+  ~(state : Symbolic_extern_func.extern_func Link.State.t * Thread.t) cmd :
+  state Result.t =
+  let link_state, monadic_state = state in
   log_cmd cmd;
   match cmd with
   | Wast.Text_module (false, m) ->
-    let*? m, link_state =
+    let open Syntax in
+    let* m, link_state =
       Compile.Text.until_link link_state ~unsafe ~name:None m
     in
-    let+ () = I.modul link_state m in
-    link_state
+    let to_run = I.modul link_state m in
+    let+ _got, monadic_state = run_monad ~to_run ~monadic_state in
+    (link_state, monadic_state)
   | Wast.Quoted_module (false, m) ->
-    let*? m = Parse.Text.Inline_module.from_string m in
-    let*? m, link_state =
+    let open Syntax in
+    let* m = Parse.Text.Inline_module.from_string m in
+    let* m, link_state =
       Compile.Text.until_link link_state ~unsafe ~name:None m
     in
-    let+ () = I.modul link_state m in
-    link_state
+    let to_run = I.modul link_state m in
+    let+ _got, monadic_state = run_monad ~to_run ~monadic_state in
+    (link_state, monadic_state)
   | Wast.Binary_module (false, id, m) ->
-    let*? m = Parse.Binary.Module.from_string m in
+    let open Syntax in
+    let* m = Parse.Binary.Module.from_string m in
     let m = { m with id } in
-    let*? m, link_state =
+    let* m, link_state =
       Compile.Binary.until_link link_state ~unsafe ~name:None m
     in
-    let+ () = I.modul link_state m in
-    link_state
-  | Assert (Assert_trap_module _) -> return link_state
-  (* TODO:
-     let*? m, link_state =
-     Compile.Text.until_link link_state ~unsafe ~name:None m
-     in
-     begin match I.modul link_state m with
-     | Error e -> trap e
-     | Ok got ->
-      begin match Script_error.check_result ~expected ~got with
-      | Error e -> trap e
-      | Ok () -> return link_state
-      end
-     | _ -> assert false
-     end
-     end
-  *)
+    let to_run = I.modul link_state m in
+    let+ _got, monadic_state = run_monad ~to_run ~monadic_state in
+    (link_state, monadic_state)
+  | Assert (Assert_trap_module (m, expected)) ->
+    let open Syntax in
+    let* m, link_state =
+      Compile.Text.until_link link_state ~unsafe ~name:None m
+    in
+    let to_run = I.modul link_state m in
+    begin match run_monad ~to_run ~monadic_state with
+    | Ok ((), _monadic_state) -> Error (`Did_not_fail_but_expected expected)
+    | Error got ->
+      let+ () = Script_error.check_error ~expected ~got in
+      (link_state, monadic_state)
+    end
   | Assert (Assert_malformed_binary _)
   | Assert (Assert_malformed_quote _)
   | Assert (Assert_invalid_binary _)
@@ -109,9 +118,10 @@ let run_one ~no_exhaustion:_
   | Assert (Assert_invalid_quote _)
   | Assert (Assert_unlinkable _)
   | Assert (Assert_malformed _) ->
-    return link_state
+    Ok (link_state, monadic_state)
   | Assert (Assert_return (a, res)) ->
-    let* stack = action link_state a in
+    let open Syntax in
+    let* stack, monadic_state = action (link_state, monadic_state) a in
     let stack = List.rev stack in
     if
       List.compare_lengths res stack <> 0
@@ -119,10 +129,10 @@ let run_one ~no_exhaustion:_
     then begin
       Log.err (fun m ->
         m "got:      %a@.expected: %a" Stack.pp stack Wast.pp_results res );
-      trap `Bad_result
+      Error `Bad_result
     end
-    else return link_state
-  | Assert (Assert_trap _) -> return link_state
+    else Ok (link_state, monadic_state)
+  | Assert (Assert_trap _) -> Ok (link_state, monadic_state)
   (* TODO:
      let got = action link_state a in
      begin match Script_error.check_result ~expected ~got with
@@ -130,7 +140,7 @@ let run_one ~no_exhaustion:_
      | Ok () -> return link_state
      end
   *)
-  | Assert (Assert_exhaustion _) -> return link_state
+  | Assert (Assert_exhaustion _) -> Ok (link_state, monadic_state)
   (* TODO:
      let+ () =
      if no_exhaustion then return ()
@@ -143,34 +153,36 @@ let run_one ~no_exhaustion:_
      link_state
   *)
   | Register (name, mod_name) ->
-    let*? link_state =
-      Link.register_last_module link_state ~name ~id:mod_name
-    in
-    return link_state
+    let open Syntax in
+    let+ link_state = Link.register_last_module link_state ~name ~id:mod_name in
+    (link_state, monadic_state)
   | Action a ->
-    let+ _stack = action link_state a in
-    link_state
+    let open Syntax in
+    let+ _stack = action (link_state, monadic_state) a in
+    (link_state, monadic_state)
   | Text_module (true, _) | Binary_module (true, _, _) | Quoted_module (true, _)
     ->
     (* TODO: differentiate between modules and module definitions in the
        link state, ensure that we can instantiate a module from its module
        definition, and that module definitions are not treated as "normal",
        or instantiated module. *)
-    return link_state
-  | Instance (_name, _mod_name) -> trap (`Unimplemented "(module instance _)")
+    Ok (link_state, monadic_state)
+  | Instance (_name, _mod_name) -> Error (`Unimplemented "(module instance _)")
 
-let run ~no_exhaustion script =
+let run ~no_exhaustion script : _ Result.t =
   Solver.solver_to_use := Some Smtml.Solver_type.Z3_solver;
-  let state =
+  let link_state =
     Link.State.empty ()
     |> Link.Extern.modul ~name:"spectest_extern" Spectest.symbolic_extern_m
   in
+  let monadic_state = Thread.init () in
   let script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
-  List.fold_left (run_one ~no_exhaustion) (return state) script
+  Syntax.list_fold_left
+    (fun state cmd -> run_one ~no_exhaustion ~state cmd)
+    (link_state, monadic_state)
+    script
 
 let exec ~(no_exhaustion : bool) (script : Wast.script) =
-  let to_run = run ~no_exhaustion script in
-  match Symex.Monad.run to_run (Thread.init ()) with
-  | Error e -> Fmt.error_msg "script failed with: %a" Bug.pp e
-  | Ok (_link_state, _state) -> Ok ()
-  | _ -> assert false
+  match run ~no_exhaustion script with
+  | Error e -> Fmt.error_msg "script failed with %s" (Result.err_to_string e)
+  | Ok _ -> Ok ()
