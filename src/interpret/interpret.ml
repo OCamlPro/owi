@@ -2339,21 +2339,16 @@ struct
 
   let modul (link_state : Extern_func.t Link.State.t)
     (modul : 'extern_func Link.Linked_module.t) : unit Choice.t =
-    let to_run = Link.Linked_module.get_expr_to_run modul in
+    let init_code = Link.Linked_module.get_init_code modul in
     let heartbeat = make_heartbeat () in
     Log.info (fun m -> m "interpreting ...");
     try
       begin
-        List.fold_left
-          (fun (acc : unit Choice.t) to_run ->
-            (* WARN: it can be tempting to remove the next line, but you shouldn't! (trust me, I've tried before... )*)
-            let* () = acc in
-            let+ _end_stack =
-              exec_expr ~heartbeat link_state modul (State.Locals.of_list [])
-                Stack.empty to_run None
-            in
-            () )
-          (Choice.return ()) to_run
+        let+ _end_stack =
+          exec_expr ~heartbeat link_state modul (State.Locals.of_list [])
+            Stack.empty init_code None
+        in
+        ()
       end
     with Stack_overflow -> Choice.trap `Call_stack_exhausted
 

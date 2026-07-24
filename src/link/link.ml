@@ -19,7 +19,7 @@ module Linked_module = struct
     ; tags : Binary.Tag.t IMap.t
     ; extern_funcs : ('ext * Binary.func_type) Dynarray.t
     ; id : int
-    ; to_run : Binary.expr Annotated.t list
+    ; init_code : Binary.expr Annotated.t
     }
 
   let get_id (modul : _ t) = modul.id
@@ -125,7 +125,7 @@ module Linked_module = struct
 
   let freeze id
     ({ globals; memories; tables; functions; data; elem; tags } : Build.t)
-    to_run extern_funcs =
+    init_code extern_funcs =
     { id
     ; globals
     ; memories
@@ -135,10 +135,10 @@ module Linked_module = struct
     ; elem
     ; tags
     ; extern_funcs
-    ; to_run
+    ; init_code
     }
 
-  let get_expr_to_run { to_run; _ } = to_run
+  let get_init_code { init_code; _ } = init_code
 end
 
 (* Link State *)
@@ -631,7 +631,7 @@ module Binary = struct
     let* modul = eval_tables ls modul binary_module.table in
     let* modul, init_active_data = define_data modul binary_module.data in
     let* modul, init_active_elem = define_elem modul binary_module.elem in
-    let to_run =
+    let init_code =
       let start =
         Option.map
           (fun start_id -> [ Binary.Call start_id ])
@@ -639,11 +639,11 @@ module Binary = struct
         |> Option.fold ~none:[] ~some:(fun s -> [ s ])
       in
       (init_active_elem @ init_active_data) @ start
-      |> List.map Annotated.dummy_deep
+      |> List.flatten |> Annotated.dummy_deep
     in
 
     let modul : _ Linked_module.t =
-      Linked_module.freeze next_id modul to_run ls.collection
+      Linked_module.freeze next_id modul init_code ls.collection
     in
     Dynarray.add_last ls.modules modul;
 
