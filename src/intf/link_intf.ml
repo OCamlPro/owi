@@ -7,6 +7,8 @@ module type T = sig
 
   type extern_module
 
+  type data
+
   module State : sig
     type t
 
@@ -15,7 +17,7 @@ module type T = sig
 
     val get_memory : modul:int -> t -> int -> Concrete_memory.t
 
-    val get_data : modul:int -> t -> int -> Concrete_data.t
+    val get_data : modul:int -> t -> int -> data
 
     val get_func : modul:int -> t -> int -> Kind.func
 
