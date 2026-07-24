@@ -424,6 +424,185 @@ let eval_f64 ({ stack; ctx; _ } as state : Abstract_state.t) _uuid :
     let _, stack = Stack.pop_i32 stack in
     State { state with stack }
 
+(* TODO: handle this correctly *)
+let eval_v128 ({ stack; ctx; _ } as state : Abstract_state.t) :
+  Binary.v128_instr -> _ = function
+  | Const _ ->
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Not ->
+    let _v, stack = Stack.pop_v128 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | And ->
+    let _v, stack = Stack.pop_v128 stack in
+    let _v, stack = Stack.pop_v128 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Andnot ->
+    let _v, stack = Stack.pop_v128 stack in
+    let _v, stack = Stack.pop_v128 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Or ->
+    let _v, stack = Stack.pop_v128 stack in
+    let _v, stack = Stack.pop_v128 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Xor ->
+    let _v, stack = Stack.pop_v128 stack in
+    let _v, stack = Stack.pop_v128 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Any_true ->
+    let _v, stack = Stack.pop_v128 stack in
+    let stack = Stack.push_bool stack ctx (Abstract_boolean.unknown ctx) in
+    State { state with stack }
+  | Bitselect ->
+    let _v, stack = Stack.pop_v128 stack in
+    let _v, stack = Stack.pop_v128 stack in
+    let _v, stack = Stack.pop_v128 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Load32_lane _ ->
+    let _v, stack = Stack.pop_v128 stack in
+    let _v, stack = Stack.pop_i32 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Load64_zero _ ->
+    let _v, stack = Stack.pop_i32 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Load _ ->
+    let _v, stack = Stack.pop_i32 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Store _ ->
+    let _v, stack = Stack.pop_v128 stack in
+    let _v, stack = Stack.pop_i32 stack in
+    State { state with stack }
+  | Load16x4_s _ ->
+    let _v, stack = Stack.pop_i32 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Load16x4_u _ ->
+    let _v, stack = Stack.pop_i32 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Load8_splat _ ->
+    let _v, stack = Stack.pop_i32 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Load8_lane _ ->
+    let _v, stack = Stack.pop_v128 stack in
+    let _v, stack = Stack.pop_i32 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Load8x8_s _ ->
+    let _v, stack = Stack.pop_i32 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Load8x8_u _ ->
+    let _v, stack = Stack.pop_i32 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Load16_splat _ ->
+    let _v, stack = Stack.pop_i32 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Load16_lane _ ->
+    let _v, stack = Stack.pop_v128 stack in
+    let _v, stack = Stack.pop_i32 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Load32_splat _ ->
+    let _v, stack = Stack.pop_i32 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Load32_zero _ ->
+    let _v, stack = Stack.pop_i32 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Load64_splat _ ->
+    let _v, stack = Stack.pop_i32 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Load64_lane _ ->
+    let _v, stack = Stack.pop_v128 stack in
+    let _v, stack = Stack.pop_i32 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Store8_lane _ ->
+    let _v, stack = Stack.pop_v128 stack in
+    let _v, stack = Stack.pop_i32 stack in
+    State { state with stack }
+  | Store64_lane _ ->
+    let _v, stack = Stack.pop_v128 stack in
+    let _v, stack = Stack.pop_i32 stack in
+    State { state with stack }
+  | Store32_zero _ ->
+    let _v, stack = Stack.pop_v128 stack in
+    let _v, stack = Stack.pop_i32 stack in
+    State { state with stack }
+  | Store32_lane _ ->
+    let _v, stack = Stack.pop_v128 stack in
+    let _v, stack = Stack.pop_i32 stack in
+    State { state with stack }
+  | Store16_lane _ ->
+    let _v, stack = Stack.pop_v128 stack in
+    let _v, stack = Stack.pop_i32 stack in
+    State { state with stack }
+  | Load32x2_s _ ->
+    let _v, stack = Stack.pop_i32 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Load32x2_u _ ->
+    let _v, stack = Stack.pop_i32 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+
+let eval_i8x16 ({ stack; _ } as state : Abstract_state.t) :
+  Text.i8x16_instr -> _ = function
+  | _ ->
+    let _ = stack in
+    let _ = state in
+    assert false
+
+let eval_i16x8 ({ stack; _ } as state : Abstract_state.t) :
+  Text.i16x8_instr -> _ = function
+  | _ ->
+    let _ = stack in
+    let _ = state in
+    assert false
+
+let eval_i32x4 ({ stack; _ } as state : Abstract_state.t) :
+  Text.i32x4_instr -> _ = function
+  | _ ->
+    let _ = stack in
+    let _ = state in
+    assert false
+
+let eval_i64x2 ({ stack; _ } as state : Abstract_state.t) :
+  Text.i64x2_instr -> _ = function
+  | _ ->
+    let _ = stack in
+    let _ = state in
+    assert false
+
+let eval_f32x4 ({ stack; _ } as state : Abstract_state.t) :
+  Text.f32x4_instr -> _ = function
+  | _ ->
+    let _ = stack in
+    let _ = state in
+    assert false
+
+let eval_f64x2 ({ stack; _ } as state : Abstract_state.t) :
+  Text.f64x2_instr -> _ = function
+  | _ ->
+    let _ = stack in
+    let _ = state in
+    assert false
+
 let eval_local ({ stack; locals; _ } as state : Abstract_state.t) :
   Binary.local_instr -> _ = function
   | Get i ->
@@ -452,12 +631,37 @@ let eval_global ({ stack; globals; _ } as state : Abstract_state.t) :
     State { state with stack; globals }
 
 (* TODO: handle this correctly *)
-let eval_memory (state : Abstract_state.t) : Binary.memory_instr -> _ = function
-  | Size _i | Grow _i | Fill _i -> State state
-  | Init (_i1, _i2) | Copy (_i1, _i2) -> State state
+let eval_memory ({ stack; ctx; _ } as state : Abstract_state.t) :
+  Binary.memory_instr -> _ = function
+  | Size _i ->
+    let stack = Stack.push_i32 stack (Abstract_i32.unknown ctx) in
+    State { state with stack }
+  | Grow _i ->
+    let _v, stack = Stack.pop_i32 stack in
+    let stack = Stack.push_i32 stack (Abstract_i32.unknown ctx) in
+    State { state with stack }
+  | Fill _i ->
+    let _v, stack = Stack.pop_i32 stack in
+    let _v, stack = Stack.pop_i32 stack in
+    let _v, stack = Stack.pop_i32 stack in
+    State { state with stack }
+  | Init (_i1, _i2) ->
+    let _v, stack = Stack.pop_i32 stack in
+    let _v, stack = Stack.pop_i32 stack in
+    let _v, stack = Stack.pop_i32 stack in
+    State { state with stack }
+  | Copy (_i1, _i2) ->
+    let _v, stack = Stack.pop_i32 stack in
+    let _v, stack = Stack.pop_i32 stack in
+    let _v, stack = Stack.pop_i32 stack in
+    State { state with stack }
 
 (* TODO: handle this correctly *)
 let eval_data (state : Abstract_state.t) : Binary.data_instr -> _ = function
+  | Drop _i -> State state
+
+(* TODO: handle this correctly *)
+let eval_elem (state : Abstract_state.t) : Binary.elem_instr -> _ = function
   | Drop _i -> State state
 
 let eval_instr ({ stack; _ } as state : Abstract_state.t) :
@@ -468,26 +672,32 @@ let eval_instr ({ stack; _ } as state : Abstract_state.t) :
   | I64 instr -> eval_i64 state uuid instr
   | F32 instr -> eval_f32 state uuid instr
   | F64 instr -> eval_f64 state uuid instr
-  | Unreachable -> Unreachable
+  | V128 instr -> eval_v128 state instr
+  | I8x16 instr -> eval_i8x16 state instr
+  | I16x8 instr -> eval_i16x8 state instr
+  | I32x4 instr -> eval_i32x4 state instr
+  | I64x2 instr -> eval_i64x2 state instr
+  | F32x4 instr -> eval_f32x4 state instr
+  | F64x2 instr -> eval_f64x2 state instr
   | Local instr -> eval_local state instr
   | Global instr -> eval_global state instr
   | Memory instr -> eval_memory state instr
   | Data instr -> eval_data state instr
+  | Elem instr -> eval_elem state instr
+  | Unreachable -> Unreachable
   | Nop -> State state
   | Drop ->
     let _, stack = Stack.pop stack in
     State { state with stack }
+  | ( Ref _ | Table _ | I31 _ | Struct _ | Array _ | Any_convert_extern
+    | Extern_convert_any ) as instr ->
+    Fmt.failwith "%a not implemented in simple interpreter"
+      (Binary.pp_instr ~short:true)
+      instr
   | If_else _ | Call _ | Call_indirect _ | Call_ref _ | Return | Return_call _
   | Return_call_indirect _ | Return_call_ref _ | Block _ | Loop _ | Br _
   | Br_if _ | Br_table _ | Br_on_non_null _ | Br_on_null _ | Select _
   | Br_on_cast (_, _, _)
   | Br_on_cast_fail (_, _, _) ->
-    Log.err (fun m -> m "Control flow instruction given to simple interpreter");
+    (* should have been handled by the control flow interpreter! *)
     assert false
-  | V128 _ | I8x16 _ | I16x8 _ | I32x4 _ | I64x2 _ | F32x4 _ | F64x2 _ ->
-    Fmt.failwith "no SIMD support yet"
-  | ( Ref _ | Table _ | Elem _ | I31 _ | Struct _ | Array _ | Any_convert_extern
-    | Extern_convert_any ) as instr ->
-    Fmt.failwith "%a not implemented in simple interpreter"
-      (Binary.pp_instr ~short:true)
-      instr
