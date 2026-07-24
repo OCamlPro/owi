@@ -352,8 +352,11 @@ module DenotFixpoint (S : DATA_STATE) = struct
     (* The stack given to the function is empty so the returned stack should only contain the results *)
     let fn_end_stack_size = List.length result_type in
     let jumps_ret = join_jts fn_end_stack_size (JumpTarget.find_opt Ret jt) in
+    let jumps_br0 = join_jts fn_end_stack_size (JumpTarget.find_opt (I 0) jt) in
     let fn_end_abs_state = Option.map (fun s -> s.abs_state) fn_end_state in
-    let fn_end_abs_state = join_opt fn_end_abs_state jumps_ret in
+    let fn_end_abs_state =
+      join_opt fn_end_abs_state jumps_ret |> join_opt jumps_br0
+    in
     let fn_end_state =
       Option.map (fun abs_state -> { state with abs_state }) fn_end_abs_state
     in
