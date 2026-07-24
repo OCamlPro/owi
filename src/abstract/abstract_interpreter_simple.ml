@@ -1630,8 +1630,23 @@ let eval_elem (state : Abstract_state.t) : Binary.elem_instr -> _ = function
   | Drop _i -> State state
 
 (* TODO: handle this correctly *)
-let eval_ref (_state : Abstract_state.t) : Binary.ref_instr -> _ = function
-  | _ -> assert false
+let eval_ref ({ stack; ctx; _ } as state : Abstract_state.t) :
+  Binary.ref_instr -> _ = function
+  | Null _ ->
+    let stack = Stack.push_ref stack Abstract_ref.NullRef in
+    State { state with stack }
+  | Is_null ->
+    let _v, stack = Stack.pop_ref stack in
+    let stack = Stack.push_bool stack ctx (Abstract_boolean.unknown ctx) in
+    State { state with stack }
+  | As_non_null ->
+    let _v, stack = Stack.pop_ref stack in
+    let stack = Stack.push_ref stack Abstract_ref.NullRef in
+    State { state with stack }
+  | Func _ ->
+    let stack = Stack.push_ref stack Abstract_ref.NullRef in
+    State { state with stack }
+  | Eq | Test _ | Cast _ -> (* TODO *) assert false
 
 (* TODO: handle this correctly *)
 let eval_table ({ stack; ctx; _ } as state : Abstract_state.t) :
