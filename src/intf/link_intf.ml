@@ -2,6 +2,18 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
+module type M = sig
+  type extern_func
+
+  type extern_module = (string * extern_func) list
+
+  val to_func_type : extern_func -> Binary.func_type
+
+  type data
+
+  val data_of_concrete : Concrete_data.t -> data
+end
+
 module type T = sig
   type extern_func
 

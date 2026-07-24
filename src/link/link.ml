@@ -5,16 +5,9 @@
 open Syntax
 
 (* Link Linked_module *)
-module Make (M : sig
-  type extern_func
+module Make (M : Link_intf.M) = struct
+  type extern_module = M.extern_module
 
-  val to_func_type : extern_func -> Binary.func_type
-
-  type data
-
-  val data_of_concrete : Concrete_data.t -> data
-end) =
-struct
   module Linked_module = struct
     module IMap = Map.Make (Int)
 
@@ -727,33 +720,3 @@ struct
     in
     { ls with by_name = StringMap.add name exports ls.by_name; collection }
 end
-
-module Concrete = Make (struct
-  type extern_func = Concrete_extern.Func.t
-
-  let to_func_type = Concrete_extern.Func.to_func_type
-
-  type data = Concrete_data.t
-
-  let data_of_concrete data = data
-end)
-
-module Symbolic = Make (struct
-  type extern_func = Symbolic_extern.Func.t
-
-  let to_func_type = Symbolic_extern.Func.to_func_type
-
-  type data = Symbolic_data.t
-
-  let data_of_concrete data = data
-end)
-
-module Abstract = Make (struct
-  type extern_func = Abstract_extern.Func.t
-
-  let to_func_type = Abstract_extern.Func.to_func_type
-
-  type data = (* TODO *) string
-
-  let data_of_concrete _ = assert false
-end)

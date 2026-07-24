@@ -10,5 +10,5 @@ include
      and type elem := Concrete_elem.t
      and type table := Concrete_table.t
      and type extern_func := Concrete_extern.Func.t
+     and type extern_module = Concrete_extern.Module.t
      and type 'a choice := 'a Concrete_choice.t
-     and type t = Link.Concrete.t

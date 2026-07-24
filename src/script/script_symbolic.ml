@@ -8,7 +8,7 @@ type host_externref = int
 
 let ty : host_externref Type.Id.t = Type.Id.make ()
 
-type state = Link.Symbolic.t * Thread.t
+type state = Symbolic_env.t * Thread.t
 
 module I = Interpret.Symbolic (Interpret.Default_parameters)
 
@@ -29,7 +29,7 @@ let action ((env, monadic_state) : state) action : _ Result.t =
         (Fmt.option ~none:Fmt.nop Fmt.string)
         module_name func_name Wast.pp_consts args );
     let* f, modul =
-      Link.Symbolic.get_exported_func env ~module_name ~func_name
+      Symbolic_env.get_exported_func env ~module_name ~func_name
     in
     let stack = List.rev_map (Symbolic_value.of_script_const ~ty) args in
     let to_run = I.exec_vfunc_from_outside ~locals:stack ~modul ~env f in
@@ -37,7 +37,7 @@ let action ((env, monadic_state) : state) action : _ Result.t =
   | Get (module_name, global_name) ->
     Log.info (fun m -> m "get...");
     let* global =
-      Link.Symbolic.get_exported_global env ~module_name ~global_name
+      Symbolic_env.get_exported_global env ~module_name ~global_name
     in
     let v = Symbolic_value.of_concrete global.value in
     Ok ([ v ], monadic_state)
@@ -69,7 +69,7 @@ let log_cmd : Wast.cmd -> unit =
   in
   Log.info (fun m -> m "*** %s" s)
 
-let run_one ~no_exhaustion:_ ~(state : Link.Symbolic.t * Thread.t) cmd :
+let run_one ~no_exhaustion:_ ~(state : Symbolic_env.t * Thread.t) cmd :
   state Result.t =
   let env, monadic_state = state in
   log_cmd cmd;
@@ -156,7 +156,7 @@ let run_one ~no_exhaustion:_ ~(state : Link.Symbolic.t * Thread.t) cmd :
   *)
   | Register (name, mod_name) ->
     let open Syntax in
-    let+ env = Link.Symbolic.register_last_module env ~name ~id:mod_name in
+    let+ env = Symbolic_env.register_last_module env ~name ~id:mod_name in
     (env, monadic_state)
   | Action a ->
     let open Syntax in
@@ -174,8 +174,8 @@ let run_one ~no_exhaustion:_ ~(state : Link.Symbolic.t * Thread.t) cmd :
 let run ~no_exhaustion script : _ Result.t =
   Solver.solver_to_use := Some Smtml.Solver_type.Z3_solver;
   let env =
-    Link.Symbolic.empty ()
-    |> Link.Symbolic.link_extern_module ~name:"spectest_extern"
+    Symbolic_env.empty ()
+    |> Symbolic_env.link_extern_module ~name:"spectest_extern"
          Spectest.symbolic_extern_m
   in
   let monadic_state = Thread.init () in
