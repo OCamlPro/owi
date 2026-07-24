@@ -3,6 +3,7 @@
   %{bin:owi}
   add.wat
   assume.wat
+  br_table.wat
   control_flow.wat
   fact.wat
   floats.wat

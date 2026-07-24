@@ -72,10 +72,10 @@
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : call 0
   owi: [INFO] calling func  : func start
-  owi: [DEBUG] call (start): abstract state : 
+  owi: [DEBUG] before call (start): caller state : 
                  context: Context{id=1, <empty>}
                  stack  : 
-                 locals : i32 {0}
+                 locals : 
   owi: [DEBUG] abstract state : 
                  context: Context{id=1, <empty>}
                  stack  : 
@@ -413,10 +413,10 @@
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : call 0
   owi: [INFO] calling func  : func start
-  owi: [DEBUG] call (start): abstract state : 
+  owi: [DEBUG] before call (start): caller state : 
                  context: Context{id=1, <empty>}
                  stack  : 
-                 locals : i32 {0}
+                 locals : 
   owi: [DEBUG] abstract state : 
                  context: Context{id=1, <empty>}
                  stack  : 

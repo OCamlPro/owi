@@ -1,0 +1,17 @@
+(cram
+ (deps
+  %{bin:owi}
+  f32_abs.wat
+  f32_ceil.wat
+  f32_convert_i32_s.wat
+  f32_convert_i32_u.wat
+  f32_convert_i64_s.wat
+  f32_convert_i64_u.wat
+  f32_convert_i32_s.wat
+  f32_demote_f64.wat
+  f32_floor.wat
+  f32_nearest.wat
+  f32_neg.wat
+  f32_reinterpret_i32.wat
+  f32_sqrt.wat
+  f32_trunc.wat))
