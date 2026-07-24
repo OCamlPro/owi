@@ -17,7 +17,7 @@ end
 type interpreter_state =
   { abs_state : Abstract_state.t
   ; current_module : int
-  ; link_state : Link.Abstract.State.t
+  ; env : Link.Abstract.State.t
   }
 
 module DenotFixpoint (S : DATA_STATE) = struct
@@ -367,7 +367,7 @@ module DenotFixpoint (S : DATA_STATE) = struct
     Some { state with abs_state }
 
   and eval_instr
-    ({ abs_state; current_module; link_state } as state : interpreter_state) :
+    ({ abs_state; current_module; env } as state : interpreter_state) :
        Binary.instr Annotated.t
     -> interpreter_state option * Abstract_state.t list JumpTarget.t =
    fun instr ->
@@ -386,17 +386,14 @@ module DenotFixpoint (S : DATA_STATE) = struct
       m "running instr : %a" (Binary.pp_instr ~short:true) instr.raw );
     match instr.raw with
     | Call idx ->
-      let func =
-        Link.Abstract.State.get_func ~modul:current_module link_state idx
-      in
+      let func = Link.Abstract.State.get_func ~modul:current_module env idx in
       begin match func with
       | Wasm { func; modul } ->
         let r = eval_func { state with current_module = modul } func in
         (r, JumpTarget.empty)
       | Extern { idx } -> (
         let func =
-          Link.Abstract.State.get_extern_func ~modul:current_module link_state
-            idx
+          Link.Abstract.State.get_extern_func ~modul:current_module env idx
         in
         let stack = exec_extern_func abs_state func in
         match Abstract_monad.run stack abs_state with
@@ -582,10 +579,10 @@ end
 
 module ConcreteFixpoint = DenotFixpoint (Abstract_interpreter_simple)
 
-let eval_exprs ~(modul : int) abs_state link_state =
+let eval_exprs ~(modul : int) abs_state env =
   (* TODO: init_code is no more an exprs, it's a regular expr now, this function can probably be removed and eval_expr could be used instead! *)
-  let init_code = Link.Abstract.State.get_init_code ~modul link_state in
-  let state = { abs_state; current_module = modul; link_state } in
+  let init_code = Link.Abstract.State.get_init_code ~modul env in
+  let state = { abs_state; current_module = modul; env } in
   let state =
     match ConcreteFixpoint.eval_expr state init_code with
     | None, _mapping -> state
@@ -593,24 +590,24 @@ let eval_exprs ~(modul : int) abs_state link_state =
   in
   state.abs_state
 
-let modul_with_ctx ctx (link_state : Link.Abstract.State.t) ~(modul : int) =
+let modul_with_ctx ctx (env : Link.Abstract.State.t) ~(modul : int) =
   let abs_state =
-    Abstract_state.empty modul Link.Abstract.State.fold_globals link_state
+    Abstract_state.empty modul Link.Abstract.State.fold_globals env
   in
   let abs_state = { abs_state with ctx } in
-  eval_exprs ~modul abs_state link_state
+  eval_exprs ~modul abs_state env
 
-let modul (link_state : Link.Abstract.State.t) ~(modul : int) =
+let modul (env : Link.Abstract.State.t) ~(modul : int) =
   let abs_state =
-    Abstract_state.empty modul Link.Abstract.State.fold_globals link_state
+    Abstract_state.empty modul Link.Abstract.State.fold_globals env
   in
-  eval_exprs ~modul abs_state link_state
+  eval_exprs ~modul abs_state env
 
-let exec_vfunc_from_outside ~ctx ~locals ~(modul : int) ~link_state
-  (func : Kind.func) =
+let exec_vfunc_from_outside ~ctx ~locals ~(modul : int) ~env (func : Kind.func)
+    =
   let abs_state =
     Abstract_state.empty_exec_state ~ctx ~locals ~modul
-      Link.Abstract.State.fold_globals link_state
+      Link.Abstract.State.fold_globals env
   in
   try
     match func with
@@ -623,13 +620,13 @@ let exec_vfunc_from_outside ~ctx ~locals ~(modul : int) ~link_state
       let abs_state = { abs_state with stack } in
       match
         ConcreteFixpoint.eval_func
-          { abs_state; current_module = modul; link_state }
+          { abs_state; current_module = modul; env }
           func
       with
       | Some state -> Ok state.abs_state
       | None -> Fmt.error_msg "failed" )
     | Extern { idx } -> (
-      let f = Link.Abstract.State.get_extern_func ~modul link_state idx in
+      let f = Link.Abstract.State.get_extern_func ~modul env idx in
       let stack = ConcreteFixpoint.exec_extern_func abs_state f in
       match Abstract_monad.run stack abs_state with
       | None -> Fmt.error_msg "failed"

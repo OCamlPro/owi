@@ -3,6 +3,8 @@
 (* Written by the Owi programmers *)
 
 module type T = sig
+  type t
+
   type memory
 
   type data
@@ -15,23 +17,21 @@ module type T = sig
 
   type extern_func
 
-  type link_state
-
   type 'a choice
 
-  val get_memory : modul:int -> link_state -> int -> memory choice
+  val get_memory : modul:int -> t -> int -> memory choice
 
-  val get_func : modul:int -> link_state -> int -> Kind.func
+  val get_func : modul:int -> t -> int -> Kind.func
 
-  val get_table : modul:int -> link_state -> int -> table choice
+  val get_table : modul:int -> t -> int -> table choice
 
-  val get_elem : modul:int -> link_state -> int -> elem
+  val get_elem : modul:int -> t -> int -> elem
 
-  val get_data : modul:int -> link_state -> int -> data choice
+  val get_data : modul:int -> t -> int -> data
 
-  val get_global : modul:int -> link_state -> int -> global choice
+  val get_global : modul:int -> t -> int -> global choice
 
-  val get_extern_func : modul:int -> link_state -> int -> extern_func
+  val get_extern_func : modul:int -> t -> int -> extern_func
 
-  val get_init_code : modul:int -> link_state -> Binary.expr Annotated.t
+  val get_init_code : modul:int -> t -> Binary.expr Annotated.t
 end

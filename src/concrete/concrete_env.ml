@@ -2,28 +2,24 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type link_state = Link.Concrete.State.t
+include Link.Concrete.State
 
-let get_memory ~modul link_state id =
-  Link.Concrete.State.get_memory link_state ~modul id
+let get_memory ~modul env id =
+  Result.ok @@ Link.Concrete.State.get_memory env ~modul id
 
-let get_data ~modul link_state id =
-  Link.Concrete.State.get_data link_state ~modul id
+let get_data ~modul env id = Link.Concrete.State.get_data env ~modul id
 
-let get_func ~modul link_state id =
-  Link.Concrete.State.get_func link_state ~modul id
+let get_func ~modul env id = Link.Concrete.State.get_func env ~modul id
 
-let get_table ~modul link_state id =
-  Link.Concrete.State.get_table link_state ~modul id
+let get_table ~modul env id =
+  Result.ok @@ Link.Concrete.State.get_table env ~modul id
 
-let get_elem ~modul link_state id =
-  Link.Concrete.State.get_elem link_state ~modul id
+let get_elem ~modul env id = Link.Concrete.State.get_elem env ~modul id
 
-let get_global ~modul link_state id =
-  Link.Concrete.State.get_global link_state ~modul id
+let get_global ~modul env id =
+  Result.ok @@ Link.Concrete.State.get_global env ~modul id
 
-let get_extern_func ~modul (link_state : Link.Concrete.State.t) id =
-  Link.Concrete.State.get_extern_func link_state ~modul id
+let get_extern_func ~modul (env : Link.Concrete.State.t) id =
+  Link.Concrete.State.get_extern_func env ~modul id
 
-let get_init_code ~modul link_state =
-  Link.Concrete.State.get_init_code ~modul link_state
+let get_init_code ~modul env = Link.Concrete.State.get_init_code ~modul env

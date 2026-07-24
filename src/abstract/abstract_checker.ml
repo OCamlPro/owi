@@ -51,22 +51,21 @@ let check_f64 ~uuid ~invariants : Binary.f64_instr -> unit = function
     ()
 
 let rec check_expr (expr : Binary.expr Annotated.t)
-  ~(invariants : Abstract_invariant.t) ~modul ~link_state =
-  List.iter (check_instr ~invariants ~modul ~link_state) expr.raw
+  ~(invariants : Abstract_invariant.t) ~modul ~env =
+  List.iter (check_instr ~invariants ~modul ~env) expr.raw
 
 and check_instr (instr : Binary.instr Annotated.t)
-  ~(invariants : Abstract_invariant.t) ~modul ~link_state =
+  ~(invariants : Abstract_invariant.t) ~modul ~env =
   match instr.raw with
-  | Block (_str_opt, _, expr) -> check_expr expr ~invariants ~modul ~link_state
+  | Block (_str_opt, _, expr) -> check_expr expr ~invariants ~modul ~env
   | If_else (_str_opt, _bt, expr_then, expr_else) ->
-    check_expr ~invariants ~modul ~link_state expr_then;
-    check_expr ~invariants ~modul ~link_state expr_else
-  | Loop (_str_opt, _bt, expr) -> check_expr ~invariants ~modul ~link_state expr
+    check_expr ~invariants ~modul ~env expr_then;
+    check_expr ~invariants ~modul ~env expr_else
+  | Loop (_str_opt, _bt, expr) -> check_expr ~invariants ~modul ~env expr
   | Call idx ->
-    let func = Link.Abstract.State.get_func ~modul link_state idx in
+    let func = Link.Abstract.State.get_func ~modul env idx in
     begin match func with
-    | Wasm { func; modul } ->
-      check_expr ~invariants ~modul ~link_state func.body
+    | Wasm { func; modul } -> check_expr ~invariants ~modul ~env func.body
     | Extern _ -> ()
     end
   | I32 i32_instr -> check_i32 ~uuid:instr.uuid ~invariants i32_instr
@@ -87,7 +86,7 @@ and check_instr (instr : Binary.instr Annotated.t)
   | Call_ref _ | Any_convert_extern | Extern_convert_any ->
     ()
 
-let check_module (link_state : Link.Abstract.State.t) ~(modul : int)
+let check_module (env : Link.Abstract.State.t) ~(modul : int)
   (invariants : Abstract_invariant.t) =
-  let init_code = Link.Abstract.State.get_init_code ~modul link_state in
-  check_expr ~invariants ~modul ~link_state init_code
+  let init_code = Link.Abstract.State.get_init_code ~modul env in
+  check_expr ~invariants ~modul ~env init_code

@@ -13,19 +13,17 @@ module type T = sig
     (** the empty link state *)
     val empty : unit -> t
 
-    val get_memory :
-      modul:int -> t -> int -> Concrete_memory.t Concrete_choice.t
+    val get_memory : modul:int -> t -> int -> Concrete_memory.t
 
-    val get_data : modul:int -> t -> int -> Concrete_data.t Concrete_choice.t
+    val get_data : modul:int -> t -> int -> Concrete_data.t
 
     val get_func : modul:int -> t -> int -> Kind.func
 
-    val get_table : modul:int -> t -> int -> Concrete_table.t Concrete_choice.t
+    val get_table : modul:int -> t -> int -> Concrete_table.t
 
     val get_elem : modul:int -> t -> int -> Concrete_elem.t
 
-    val get_global :
-      modul:int -> t -> int -> Concrete_global.t Concrete_choice.t
+    val get_global : modul:int -> t -> int -> Concrete_global.t
 
     val fold_globals :
       modul:int -> (int -> Concrete_global.t -> 'a -> 'a) -> 'a -> t -> 'a

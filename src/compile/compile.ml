@@ -29,17 +29,17 @@ module Text = struct
       let+ () = Binary_validate.modul m in
       m
 
-  let until_concrete_link ~unsafe ~name link_state m =
+  let until_concrete_link ~unsafe ~name env m =
     let* m = until_validate ~unsafe m in
-    Link.Concrete.Binary.modul link_state ~name m
+    Link.Concrete.Binary.modul env ~name m
 
-  let until_symbolic_link ~unsafe ~name link_state m =
+  let until_symbolic_link ~unsafe ~name env m =
     let* m = until_validate ~unsafe m in
-    Link.Symbolic.Binary.modul link_state ~name m
+    Link.Symbolic.Binary.modul env ~name m
 
-  let until_abstract_link ~unsafe ~name link_state m =
+  let until_abstract_link ~unsafe ~name env m =
     let* m = until_validate ~unsafe m in
-    Link.Abstract.Binary.modul link_state ~name m
+    Link.Abstract.Binary.modul env ~name m
 end
 
 module Binary = struct
@@ -49,17 +49,17 @@ module Binary = struct
       let+ () = Binary_validate.modul m in
       m
 
-  let until_concrete_link ~unsafe ~name link_state m =
+  let until_concrete_link ~unsafe ~name env m =
     let* m = until_validate ~unsafe m in
-    Link.Concrete.Binary.modul link_state ~name m
+    Link.Concrete.Binary.modul env ~name m
 
-  let until_symbolic_link ~unsafe ~name link_state m =
+  let until_symbolic_link ~unsafe ~name env m =
     let* m = until_validate ~unsafe m in
-    Link.Symbolic.Binary.modul link_state ~name m
+    Link.Symbolic.Binary.modul env ~name m
 
-  let until_abstract_link ~unsafe ~name link_state m =
+  let until_abstract_link ~unsafe ~name env m =
     let* m = until_validate ~unsafe m in
-    Link.Abstract.Binary.modul link_state ~name m
+    Link.Abstract.Binary.modul env ~name m
 end
 
 module Any = struct
@@ -69,25 +69,25 @@ module Any = struct
     | Wast _ -> Fmt.error_msg "can not validate a .wast file"
     | Extern _ -> Fmt.error_msg "can not validate an OCaml module"
 
-  let until_concrete_link ~unsafe ~name link_state = function
-    | Kind.Wat m -> Text.until_concrete_link ~unsafe ~name link_state m
-    | Wasm m -> Binary.until_concrete_link ~unsafe ~name link_state m
+  let until_concrete_link ~unsafe ~name env = function
+    | Kind.Wat m -> Text.until_concrete_link ~unsafe ~name env m
+    | Wasm m -> Binary.until_concrete_link ~unsafe ~name env m
     | Extern _m ->
       (* TODO: Link.Extern.modul m *)
       Fmt.error_msg "can not link an OCaml module"
     | Wast _ -> Fmt.error_msg "can not link a .wast file"
 
-  let until_symbolic_link ~unsafe ~name link_state = function
-    | Kind.Wat m -> Text.until_symbolic_link ~unsafe ~name link_state m
-    | Wasm m -> Binary.until_symbolic_link ~unsafe ~name link_state m
+  let until_symbolic_link ~unsafe ~name env = function
+    | Kind.Wat m -> Text.until_symbolic_link ~unsafe ~name env m
+    | Wasm m -> Binary.until_symbolic_link ~unsafe ~name env m
     | Extern _m ->
       (* TODO: Link.Extern.modul m *)
       Fmt.error_msg "can not link an OCaml module"
     | Wast _ -> Fmt.error_msg "can not link a .wast file"
 
-  let until_abstract_link ~unsafe ~name link_state = function
-    | Kind.Wat m -> Text.until_abstract_link ~unsafe ~name link_state m
-    | Wasm m -> Binary.until_abstract_link ~unsafe ~name link_state m
+  let until_abstract_link ~unsafe ~name env = function
+    | Kind.Wat m -> Text.until_abstract_link ~unsafe ~name env m
+    | Wasm m -> Binary.until_abstract_link ~unsafe ~name env m
     | Extern _m ->
       (* TODO: Link.Extern.modul m *)
       Fmt.error_msg "can not link an OCaml module"
@@ -110,24 +110,24 @@ module File = struct
     | Wasm m -> Binary.until_validate ~unsafe m
     | Wast _ | Extern _ -> assert false
 
-  let until_concrete_link ~unsafe ~name link_state filename =
+  let until_concrete_link ~unsafe ~name env filename =
     let* m = Parse.guess_from_file filename in
     match m with
-    | Kind.Wat m -> Text.until_concrete_link ~unsafe ~name link_state m
-    | Wasm m -> Binary.until_concrete_link ~unsafe ~name link_state m
+    | Kind.Wat m -> Text.until_concrete_link ~unsafe ~name env m
+    | Wasm m -> Binary.until_concrete_link ~unsafe ~name env m
     | Wast _ | Extern _ -> assert false
 
-  let until_symbolic_link ~unsafe ~name link_state filename =
+  let until_symbolic_link ~unsafe ~name env filename =
     let* m = Parse.guess_from_file filename in
     match m with
-    | Kind.Wat m -> Text.until_symbolic_link ~unsafe ~name link_state m
-    | Wasm m -> Binary.until_symbolic_link ~unsafe ~name link_state m
+    | Kind.Wat m -> Text.until_symbolic_link ~unsafe ~name env m
+    | Wasm m -> Binary.until_symbolic_link ~unsafe ~name env m
     | Wast _ | Extern _ -> assert false
 
-  let until_abstract_link ~unsafe ~name link_state filename =
+  let until_abstract_link ~unsafe ~name env filename =
     let* m = Parse.guess_from_file filename in
     match m with
-    | Kind.Wat m -> Text.until_abstract_link ~unsafe ~name link_state m
-    | Wasm m -> Binary.until_abstract_link ~unsafe ~name link_state m
+    | Kind.Wat m -> Text.until_abstract_link ~unsafe ~name env m
+    | Wasm m -> Binary.until_abstract_link ~unsafe ~name env m
     | Wast _ | Extern _ -> assert false
 end

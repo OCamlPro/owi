@@ -17,6 +17,6 @@ val exec_vfunc_from_outside :
      ctx:Abstract_domain.Context.t
   -> locals:Abstract_value.t Abstract_locals.t
   -> modul:int
-  -> link_state:Link.Abstract.State.t
+  -> env:Link.Abstract.State.t
   -> Kind.func
   -> Abstract_state.t Result.t

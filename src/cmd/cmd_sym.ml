@@ -26,24 +26,24 @@ let run_file ~parameters ~source_file =
 
   let* abstract_invariant =
     if parameters.generate_abstract_invariant then
-      let link_state = Cmd_abs.link_state () in
-      let+ modul, link_state =
-        Compile.Binary.until_abstract_link ~unsafe ~name:None link_state modul
+      let env = Cmd_abs.env () in
+      let+ modul, env =
+        Compile.Binary.until_abstract_link ~unsafe ~name:None env modul
       in
-      let state = Abstract_interpreter_control_flow.modul link_state ~modul in
+      let state = Abstract_interpreter_control_flow.modul env ~modul in
       state.invariant
     else Ok (Abstract_invariant.empty ())
   in
 
-  let link_state =
+  let env =
     Link.Symbolic.State.empty ()
     |> Link.Symbolic.Extern.modul ~name:"wasi_snapshot_preview1"
          Symbolic_wasm_ffi.wasi_snapshot_preview1
     |> Link.Symbolic.Extern.modul ~name:"owi" Symbolic_wasm_ffi.owi
   in
-  let+ modul, link_state =
+  let+ modul, env =
     (* unsafe is set to true because the module was already validated before *)
-    Compile.Binary.until_symbolic_link ~unsafe:true ~name:None link_state modul
+    Compile.Binary.until_symbolic_link ~unsafe:true ~name:None env modul
   in
   let module Parameters = struct
     let throw_away_trap =
@@ -60,7 +60,7 @@ let run_file ~parameters ~source_file =
     let abstract_invariant = abstract_invariant
   end in
   let module I = Interpret.Symbolic (Parameters) in
-  Benchmark.with_utime @@ fun () -> I.modul link_state ~modul
+  Benchmark.with_utime @@ fun () -> I.modul env ~modul
 
 (* NB: This function propagates potential errors (Result.err) occurring
              during evaluation (OS, syntax error, etc.), except for Trap and Assert,

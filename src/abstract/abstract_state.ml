@@ -18,7 +18,7 @@ let pp ctx : t Fmt.t =
     (Fmt.list ~sep:Fmt.semi (Abstract_value.pp_with_ctx state.ctx))
     (Abstract_locals.to_list state.locals |> List.map snd)
 
-let init_globals ctx modul fold_globals link_state =
+let init_globals ctx modul fold_globals env =
   let f i (v : Concrete_global.t) acc =
     let v =
       match v.value with
@@ -31,19 +31,19 @@ let init_globals ctx modul fold_globals link_state =
     in
     Abstract_globals.add i v acc
   in
-  fold_globals ~modul f Abstract_globals.empty link_state
+  fold_globals ~modul f Abstract_globals.empty env
 
-let empty modul fold_globals link_state =
+let empty modul fold_globals env =
   let ctx = Abstract_domain.root_context () in
   let stack = Abstract_stack.empty in
   let locals = Abstract_locals.empty in
-  let globals = init_globals ctx modul fold_globals link_state in
+  let globals = init_globals ctx modul fold_globals env in
   let func_rt = [] in
   let invariant = Abstract_invariant.empty () in
   { ctx; stack; locals; func_rt; invariant; globals }
 
-let empty_exec_state ~ctx ~locals ~modul fold_globals link_state =
+let empty_exec_state ~ctx ~locals ~modul fold_globals env =
   let invariant = Abstract_invariant.empty () in
-  let globals = init_globals ctx modul fold_globals link_state in
+  let globals = init_globals ctx modul fold_globals env in
   let stack = Abstract_stack.empty in
   { ctx; stack; locals; func_rt = []; invariant; globals }

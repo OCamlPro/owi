@@ -6,12 +6,12 @@ open Syntax
 
 let cmd ~rounds ~seed ~source_file ~timeout ~timeout_instr ~unsafe =
   Init.random_state seed;
-  let link_state =
+  let env =
     Link.Concrete.State.empty ()
     |> Link.Concrete.Extern.modul ~name:"owi" Fuzz_wasm_ffi.owi
   in
-  let* modul, link_state =
-    Compile.File.until_concrete_link ~unsafe ~name:None link_state source_file
+  let* modul, env =
+    Compile.File.until_concrete_link ~unsafe ~name:None env source_file
   in
   let module Parameters = struct
     let timeout = timeout
@@ -29,7 +29,7 @@ let cmd ~rounds ~seed ~source_file ~timeout ~timeout_instr ~unsafe =
     Benchmark.with_utime @@ fun () ->
     Fuzz_driver.run ~rounds (fun () ->
       (* TODO: check if we should regenerate the link state *)
-      I.modul link_state ~modul )
+      I.modul env ~modul )
   in
   Log.bench (fun m ->
     (* run_time shouldn't be none in bench mode *)

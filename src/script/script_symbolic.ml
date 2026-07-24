@@ -20,7 +20,7 @@ let run_monad ~to_run ~monadic_state =
   | Yield _ -> Fmt.error_msg "unexpected yield from the symbolic monad"
   | Choice _ -> Fmt.error_msg "unexpected choice from the symbolic monad"
 
-let action ((link_state, monadic_state) : state) action : _ Result.t =
+let action ((env, monadic_state) : state) action : _ Result.t =
   let open Syntax in
   match action with
   | Wast.Invoke (module_name, func_name, args) ->
@@ -29,16 +29,15 @@ let action ((link_state, monadic_state) : state) action : _ Result.t =
         (Fmt.option ~none:Fmt.nop Fmt.string)
         module_name func_name Wast.pp_consts args );
     let* f, modul =
-      Link.Symbolic.State.get_exported_func link_state ~module_name ~func_name
+      Link.Symbolic.State.get_exported_func env ~module_name ~func_name
     in
     let stack = List.rev_map (Symbolic_value.of_script_const ~ty) args in
-    let to_run = I.exec_vfunc_from_outside ~locals:stack ~modul ~link_state f in
+    let to_run = I.exec_vfunc_from_outside ~locals:stack ~modul ~env f in
     run_monad ~to_run ~monadic_state
   | Get (module_name, global_name) ->
     Log.info (fun m -> m "get...");
     let* global =
-      Link.Symbolic.State.get_exported_global link_state ~module_name
-        ~global_name
+      Link.Symbolic.State.get_exported_global env ~module_name ~global_name
     in
     let v = Symbolic_value.of_concrete global.value in
     Ok ([ v ], monadic_state)
@@ -72,47 +71,47 @@ let log_cmd : Wast.cmd -> unit =
 
 let run_one ~no_exhaustion:_ ~(state : Link.Symbolic.State.t * Thread.t) cmd :
   state Result.t =
-  let link_state, monadic_state = state in
+  let env, monadic_state = state in
   log_cmd cmd;
   match cmd with
   | Wast.Text_module (false, m) ->
     let open Syntax in
-    let* modul, link_state =
-      Compile.Text.until_symbolic_link link_state ~unsafe ~name:None m
+    let* modul, env =
+      Compile.Text.until_symbolic_link env ~unsafe ~name:None m
     in
-    let to_run = I.modul link_state ~modul in
+    let to_run = I.modul env ~modul in
     let+ _got, monadic_state = run_monad ~to_run ~monadic_state in
-    (link_state, monadic_state)
+    (env, monadic_state)
   | Wast.Quoted_module (false, m) ->
     let open Syntax in
     let* m = Parse.Text.Inline_module.from_string m in
-    let* modul, link_state =
-      Compile.Text.until_symbolic_link link_state ~unsafe ~name:None m
+    let* modul, env =
+      Compile.Text.until_symbolic_link env ~unsafe ~name:None m
     in
-    let to_run = I.modul link_state ~modul in
+    let to_run = I.modul env ~modul in
     let+ _got, monadic_state = run_monad ~to_run ~monadic_state in
-    (link_state, monadic_state)
+    (env, monadic_state)
   | Wast.Binary_module (false, id, m) ->
     let open Syntax in
     let* m = Parse.Binary.Module.from_string m in
     let m = { m with id } in
-    let* modul, link_state =
-      Compile.Binary.until_symbolic_link link_state ~unsafe ~name:None m
+    let* modul, env =
+      Compile.Binary.until_symbolic_link env ~unsafe ~name:None m
     in
-    let to_run = I.modul link_state ~modul in
+    let to_run = I.modul env ~modul in
     let+ _got, monadic_state = run_monad ~to_run ~monadic_state in
-    (link_state, monadic_state)
+    (env, monadic_state)
   | Assert (Assert_trap_module (m, expected)) ->
     let open Syntax in
-    let* modul, link_state =
-      Compile.Text.until_symbolic_link link_state ~unsafe ~name:None m
+    let* modul, env =
+      Compile.Text.until_symbolic_link env ~unsafe ~name:None m
     in
-    let to_run = I.modul link_state ~modul in
+    let to_run = I.modul env ~modul in
     begin match run_monad ~to_run ~monadic_state with
     | Ok ((), _monadic_state) -> Error (`Did_not_fail_but_expected expected)
     | Error got ->
       let+ () = Script_error.check_error ~expected ~got in
-      (link_state, monadic_state)
+      (env, monadic_state)
     end
   | Assert (Assert_malformed_binary _)
   | Assert (Assert_malformed_quote _)
@@ -121,10 +120,10 @@ let run_one ~no_exhaustion:_ ~(state : Link.Symbolic.State.t * Thread.t) cmd :
   | Assert (Assert_invalid_quote _)
   | Assert (Assert_unlinkable _)
   | Assert (Assert_malformed _) ->
-    Ok (link_state, monadic_state)
+    Ok (env, monadic_state)
   | Assert (Assert_return (a, res)) ->
     let open Syntax in
-    let* stack, monadic_state = action (link_state, monadic_state) a in
+    let* stack, monadic_state = action (env, monadic_state) a in
     let stack = List.rev stack in
     if
       List.compare_lengths res stack <> 0
@@ -134,49 +133,49 @@ let run_one ~no_exhaustion:_ ~(state : Link.Symbolic.State.t * Thread.t) cmd :
         m "got:      %a@.expected: %a" Stack.pp stack Wast.pp_results res );
       Error `Bad_result
     end
-    else Ok (link_state, monadic_state)
-  | Assert (Assert_trap _) -> Ok (link_state, monadic_state)
+    else Ok (env, monadic_state)
+  | Assert (Assert_trap _) -> Ok (env, monadic_state)
   (* TODO:
-     let got = action link_state a in
+     let got = action env a in
      begin match Script_error.check_result ~expected ~got with
      | Error e -> trap e
-     | Ok () -> return link_state
+     | Ok () -> return env
      end
   *)
-  | Assert (Assert_exhaustion _) -> Ok (link_state, monadic_state)
+  | Assert (Assert_exhaustion _) -> Ok (env, monadic_state)
   (* TODO:
      let+ () =
      if no_exhaustion then return ()
      else
-     let got = action link_state a in
+     let got = action env a in
      match Script_error.check_result ~expected ~got with
      | Error e -> trap e
      | Ok () -> return ()
      in
-     link_state
+     env
   *)
   | Register (name, mod_name) ->
     let open Syntax in
-    let+ link_state =
-      Link.Symbolic.State.register_last_module link_state ~name ~id:mod_name
+    let+ env =
+      Link.Symbolic.State.register_last_module env ~name ~id:mod_name
     in
-    (link_state, monadic_state)
+    (env, monadic_state)
   | Action a ->
     let open Syntax in
-    let+ _stack = action (link_state, monadic_state) a in
-    (link_state, monadic_state)
+    let+ _stack = action (env, monadic_state) a in
+    (env, monadic_state)
   | Text_module (true, _) | Binary_module (true, _, _) | Quoted_module (true, _)
     ->
     (* TODO: differentiate between modules and module definitions in the
        link state, ensure that we can instantiate a module from its module
        definition, and that module definitions are not treated as "normal",
        or instantiated module. *)
-    Ok (link_state, monadic_state)
+    Ok (env, monadic_state)
   | Instance (_name, _mod_name) -> Error (`Unimplemented "(module instance _)")
 
 let run ~no_exhaustion script : _ Result.t =
   Solver.solver_to_use := Some Smtml.Solver_type.Z3_solver;
-  let link_state =
+  let env =
     Link.Symbolic.State.empty ()
     |> Link.Symbolic.Extern.modul ~name:"spectest_extern"
          Spectest.symbolic_extern_m
@@ -185,8 +184,7 @@ let run ~no_exhaustion script : _ Result.t =
   let script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
   Syntax.list_fold_left
     (fun state cmd -> run_one ~no_exhaustion ~state cmd)
-    (link_state, monadic_state)
-    script
+    (env, monadic_state) script
 
 let exec ~(no_exhaustion : bool) (script : Wast.script) =
   match run ~no_exhaustion script with
