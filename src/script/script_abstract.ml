@@ -12,12 +12,14 @@ type host_externref = int
 let ty : host_externref Type.Id.t = Type.Id.make ()
 
 let do_action ctx link_state = function
-  | Wast.Invoke (mod_id, f, args) -> begin
+  | Wast.Invoke (module_name, func_name, args) -> begin
     Log.info (fun m ->
       m "invoke %a %s %a..."
         (Fmt.option ~none:Fmt.nop Fmt.string)
-        mod_id f Wast.pp_consts args );
-    let* f, modul = Link.State.get_func_from_module link_state mod_id f in
+        module_name func_name Wast.pp_consts args );
+    let* f, modul =
+      Link.State.get_exported_func link_state ~module_name ~func_name
+    in
     let stack =
       List.rev_map (Abstract_value.of_script_const ctx ~ty) args
       |> List.mapi (fun i v -> (i, v))
@@ -25,7 +27,7 @@ let do_action ctx link_state = function
     let locals = Abstract_locals.of_list stack in
     I.exec_vfunc_from_outside ~ctx ~locals ~modul ~link_state f
     end
-  | Get (_mod_id, _name) ->
+  | Get (_module_name, _name) ->
     Log.info (fun m -> m "get...");
     assert false
 (* let* global = Link.State.get_global_from_module link_state mod_id name in *)

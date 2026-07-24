@@ -199,14 +199,14 @@ module State = struct
       | None -> Error (`Unbound_module mod_id)
       | Some exports -> Ok exports )
 
-  let get_global_from_module state mod_id global_name =
-    let* exports, _module_id = get_module state mod_id in
+  let get_exported_global state ~module_name ~global_name =
+    let* exports, _module_id = get_module state module_name in
     match StringMap.find_opt global_name exports.globals with
     | None -> Error (`Unbound_name global_name)
     | Some v -> Ok v
 
-  let get_func_from_module state mod_id func_name =
-    let* exports, modul_id = get_module state mod_id in
+  let get_exported_func state ~module_name ~func_name =
+    let* exports, modul_id = get_module state module_name in
     match StringMap.find_opt func_name exports.functions with
     | None -> Error (`Unbound_name func_name)
     | Some v -> Ok (v, modul_id)

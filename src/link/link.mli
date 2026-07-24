@@ -41,11 +41,17 @@ module State : sig
 
   val get_module : 'extern t -> int -> 'extern Linked_module.t
 
-  val get_global_from_module :
-    _ t -> string option -> string -> Concrete_global.t Result.t
+  val get_exported_global :
+       _ t
+    -> module_name:string option
+    -> global_name:string
+    -> Concrete_global.t Result.t
 
-  val get_func_from_module :
-    _ t -> string option -> string -> (Kind.func * int) Result.t
+  val get_exported_func :
+       _ t
+    -> module_name:string option
+    -> func_name:string
+    -> (Kind.func * int) Result.t
 
   (** give a named to the last linked module in the given link state *)
   val register_last_module :

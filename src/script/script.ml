@@ -12,18 +12,22 @@ let ty : host_externref Type.Id.t = Type.Id.make ()
 module I = Interpret.Concrete (Interpret.Default_parameters)
 
 let action (link_state : Concrete_extern.Func.t Link.State.t) = function
-  | Wast.Invoke (mod_id, f, args) -> begin
+  | Wast.Invoke (module_name, func_name, args) -> begin
     Log.info (fun m ->
       m "invoke %a %s %a..."
         (Fmt.option ~none:Fmt.nop Fmt.string)
-        mod_id f Wast.pp_consts args );
-    let* f, modul = Link.State.get_func_from_module link_state mod_id f in
+        module_name func_name Wast.pp_consts args );
+    let* f, modul =
+      Link.State.get_exported_func link_state ~module_name ~func_name
+    in
     let locals = List.rev_map (Concrete_value.of_script_const ~ty) args in
     I.exec_vfunc_from_outside ~locals ~modul ~link_state f
     end
-  | Get (mod_id, name) ->
+  | Get (module_name, global_name) ->
     Log.info (fun m -> m "get...");
-    let+ global = Link.State.get_global_from_module link_state mod_id name in
+    let+ global =
+      Link.State.get_exported_global link_state ~module_name ~global_name
+    in
     [ global.value ]
 
 let unsafe = false
