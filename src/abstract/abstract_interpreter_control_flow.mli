@@ -3,20 +3,17 @@
 (* Written by the Owi programmers *)
 
 val eval_exprs :
-     Abstract_extern.Func.t Link.Linked_module.t
+     modul:int
   -> Abstract_state.t
   -> Abstract_extern.Func.t Link.State.t
   -> Abstract_state.t
 
-val modul :
-     Abstract_extern.Func.t Link.State.t
-  -> Abstract_extern.Func.t Link.Linked_module.t
-  -> Abstract_state.t
+val modul : Abstract_extern.Func.t Link.State.t -> modul:int -> Abstract_state.t
 
 val modul_with_ctx :
      Abstract_domain.Context.t
   -> Abstract_extern.Func.t Link.State.t
-  -> Abstract_extern.Func.t Link.Linked_module.t
+  -> modul:int
   -> Abstract_state.t
 
 val exec_vfunc_from_outside :

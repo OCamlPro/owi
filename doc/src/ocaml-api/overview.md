@@ -19,7 +19,7 @@ val filename : Fpath.t = <abstr>
     | Error e -> assert false;;
 mdx_gen.bc.exe: [INFO] parsing      ...
 ...
-# let module_to_run, link_state =
+# let modul, link_state =
     match Compile.Text.until_concrete_link (Link.State.empty ()) ~unsafe:false ~name:None m with
     | Ok v -> v
     | Error _ -> assert false;;
@@ -33,11 +33,10 @@ mdx_gen.bc.exe: [INFO] linking      ...
 module I :
   sig
     val modul :
-      Concrete_extern.Func.t Link.State.t ->
-      Concrete_extern.Func.t Link.Linked_module.t -> unit Owi.Result.t
+      Concrete_extern.Func.t Link.State.t -> modul:int -> unit Owi.Result.t
   end
 # let () =
-    match I.modul link_state module_to_run with
+    match I.modul link_state ~modul with
     | Ok () -> ()
     | Error _ -> assert false;;
 mdx_gen.bc.exe: [INFO] interpreting ...

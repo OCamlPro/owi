@@ -73,37 +73,37 @@ let run_one ~no_exhaustion:_
   match cmd with
   | Wast.Text_module (false, m) ->
     let open Syntax in
-    let* m, link_state =
+    let* modul, link_state =
       Compile.Text.until_symbolic_link link_state ~unsafe ~name:None m
     in
-    let to_run = I.modul link_state m in
+    let to_run = I.modul link_state ~modul in
     let+ _got, monadic_state = run_monad ~to_run ~monadic_state in
     (link_state, monadic_state)
   | Wast.Quoted_module (false, m) ->
     let open Syntax in
     let* m = Parse.Text.Inline_module.from_string m in
-    let* m, link_state =
+    let* modul, link_state =
       Compile.Text.until_symbolic_link link_state ~unsafe ~name:None m
     in
-    let to_run = I.modul link_state m in
+    let to_run = I.modul link_state ~modul in
     let+ _got, monadic_state = run_monad ~to_run ~monadic_state in
     (link_state, monadic_state)
   | Wast.Binary_module (false, id, m) ->
     let open Syntax in
     let* m = Parse.Binary.Module.from_string m in
     let m = { m with id } in
-    let* m, link_state =
+    let* modul, link_state =
       Compile.Binary.until_symbolic_link link_state ~unsafe ~name:None m
     in
-    let to_run = I.modul link_state m in
+    let to_run = I.modul link_state ~modul in
     let+ _got, monadic_state = run_monad ~to_run ~monadic_state in
     (link_state, monadic_state)
   | Assert (Assert_trap_module (m, expected)) ->
     let open Syntax in
-    let* m, link_state =
+    let* modul, link_state =
       Compile.Text.until_symbolic_link link_state ~unsafe ~name:None m
     in
-    let to_run = I.modul link_state m in
+    let to_run = I.modul link_state ~modul in
     begin match run_monad ~to_run ~monadic_state with
     | Ok ((), _monadic_state) -> Error (`Did_not_fail_but_expected expected)
     | Error got ->

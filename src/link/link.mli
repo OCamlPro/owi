@@ -84,20 +84,17 @@ module Binary : sig
        name:string option
     -> Concrete_extern.Func.t State.t
     -> Binary.Module.t
-    -> (Concrete_extern.Func.t Linked_module.t * Concrete_extern.Func.t State.t)
-       Result.t
+    -> (int * Concrete_extern.Func.t State.t) Result.t
 
   val symbolic_module :
        name:string option
     -> Symbolic_extern.Func.t State.t
     -> Binary.Module.t
-    -> (Symbolic_extern.Func.t Linked_module.t * Symbolic_extern.Func.t State.t)
-       Result.t
+    -> (int * Symbolic_extern.Func.t State.t) Result.t
 
   val abstract_module :
        name:string option
     -> Abstract_extern.Func.t State.t
     -> Binary.Module.t
-    -> (Abstract_extern.Func.t Linked_module.t * Abstract_extern.Func.t State.t)
-       Result.t
+    -> (int * Abstract_extern.Func.t State.t) Result.t
 end

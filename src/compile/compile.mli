@@ -14,27 +14,21 @@ module Any : sig
     -> name:string option
     -> Concrete_extern.Func.t Link.State.t
     -> Concrete_extern.Func.t Kind.t
-    -> ( Concrete_extern.Func.t Link.Linked_module.t
-       * Concrete_extern.Func.t Link.State.t )
-       Result.t
+    -> (int * Concrete_extern.Func.t Link.State.t) Result.t
 
   val until_symbolic_link :
        unsafe:bool
     -> name:string option
     -> Symbolic_extern.Func.t Link.State.t
     -> Symbolic_extern.Func.t Kind.t
-    -> ( Symbolic_extern.Func.t Link.Linked_module.t
-       * Symbolic_extern.Func.t Link.State.t )
-       Result.t
+    -> (int * Symbolic_extern.Func.t Link.State.t) Result.t
 
   val until_abstract_link :
        unsafe:bool
     -> name:string option
     -> Abstract_extern.Func.t Link.State.t
     -> Abstract_extern.Func.t Kind.t
-    -> ( Abstract_extern.Func.t Link.Linked_module.t
-       * Abstract_extern.Func.t Link.State.t )
-       Result.t
+    -> (int * Abstract_extern.Func.t Link.State.t) Result.t
 end
 
 module File : sig
@@ -49,9 +43,7 @@ module File : sig
     -> name:string option
     -> Concrete_extern.Func.t Link.State.t
     -> Fpath.t
-    -> ( Concrete_extern.Func.t Link.Linked_module.t
-       * Concrete_extern.Func.t Link.State.t )
-       Result.t
+    -> (int * Concrete_extern.Func.t Link.State.t) Result.t
 
   (** compile a file with a given link state and produce a new link state and a
       runnable module *)
@@ -60,9 +52,7 @@ module File : sig
     -> name:string option
     -> Symbolic_extern.Func.t Link.State.t
     -> Fpath.t
-    -> ( Symbolic_extern.Func.t Link.Linked_module.t
-       * Symbolic_extern.Func.t Link.State.t )
-       Result.t
+    -> (int * Symbolic_extern.Func.t Link.State.t) Result.t
 
   (** compile a file with a given link state and produce a new link state and a
       runnable module *)
@@ -71,9 +61,7 @@ module File : sig
     -> name:string option
     -> Abstract_extern.Func.t Link.State.t
     -> Fpath.t
-    -> ( Abstract_extern.Func.t Link.Linked_module.t
-       * Abstract_extern.Func.t Link.State.t )
-       Result.t
+    -> (int * Abstract_extern.Func.t Link.State.t) Result.t
 end
 
 module Text : sig
@@ -88,9 +76,7 @@ module Text : sig
     -> name:string option
     -> Concrete_extern.Func.t Link.State.t
     -> Text.Module.t
-    -> ( Concrete_extern.Func.t Link.Linked_module.t
-       * Concrete_extern.Func.t Link.State.t )
-       Result.t
+    -> (int * Concrete_extern.Func.t Link.State.t) Result.t
 
   (** compile a module with a given link state and produce a new link state and
       a runnable module *)
@@ -99,9 +85,7 @@ module Text : sig
     -> name:string option
     -> Symbolic_extern.Func.t Link.State.t
     -> Text.Module.t
-    -> ( Symbolic_extern.Func.t Link.Linked_module.t
-       * Symbolic_extern.Func.t Link.State.t )
-       Result.t
+    -> (int * Symbolic_extern.Func.t Link.State.t) Result.t
 
   (** compile a module with a given link state and produce a new link state and
       a runnable module *)
@@ -110,9 +94,7 @@ module Text : sig
     -> name:string option
     -> Abstract_extern.Func.t Link.State.t
     -> Text.Module.t
-    -> ( Abstract_extern.Func.t Link.Linked_module.t
-       * Abstract_extern.Func.t Link.State.t )
-       Result.t
+    -> (int * Abstract_extern.Func.t Link.State.t) Result.t
 end
 
 module Binary : sig
@@ -126,9 +108,7 @@ module Binary : sig
     -> name:string option
     -> Concrete_extern.Func.t Link.State.t
     -> Binary.Module.t
-    -> ( Concrete_extern.Func.t Link.Linked_module.t
-       * Concrete_extern.Func.t Link.State.t )
-       Result.t
+    -> (int * Concrete_extern.Func.t Link.State.t) Result.t
 
   (** compile a module with a given link state and produce a new link state and
       a runnable module *)
@@ -137,9 +117,7 @@ module Binary : sig
     -> name:string option
     -> Symbolic_extern.Func.t Link.State.t
     -> Binary.Module.t
-    -> ( Symbolic_extern.Func.t Link.Linked_module.t
-       * Symbolic_extern.Func.t Link.State.t )
-       Result.t
+    -> (int * Symbolic_extern.Func.t Link.State.t) Result.t
 
   (** compile a module with a given link state and produce a new link state and
       a runnable module *)
@@ -148,7 +126,5 @@ module Binary : sig
     -> name:string option
     -> Abstract_extern.Func.t Link.State.t
     -> Binary.Module.t
-    -> ( Abstract_extern.Func.t Link.Linked_module.t
-       * Abstract_extern.Func.t Link.State.t )
-       Result.t
+    -> (int * Abstract_extern.Func.t Link.State.t) Result.t
 end

@@ -10,7 +10,7 @@ let cmd ~rounds ~seed ~source_file ~timeout ~timeout_instr ~unsafe =
     Link.State.empty ()
     |> Link.Extern.concrete_module ~name:"owi" Fuzz_wasm_ffi.owi
   in
-  let* m, link_state =
+  let* modul, link_state =
     Compile.File.until_concrete_link ~unsafe ~name:None link_state source_file
   in
   let module Parameters = struct
@@ -29,7 +29,7 @@ let cmd ~rounds ~seed ~source_file ~timeout ~timeout_instr ~unsafe =
     Benchmark.with_utime @@ fun () ->
     Fuzz_driver.run ~rounds (fun () ->
       (* TODO: check if we should regenerate the link state *)
-      I.modul link_state m )
+      I.modul link_state ~modul )
   in
   Log.bench (fun m ->
     (* run_time shouldn't be none in bench mode *)

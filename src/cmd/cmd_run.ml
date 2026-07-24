@@ -7,7 +7,7 @@ open Syntax
 let cmd ~unsafe ~timeout ~timeout_instr ~source_file =
   let name = None in
   let link_state = Link.State.empty () in
-  let* m, link_state =
+  let* modul, link_state =
     Compile.File.until_concrete_link ~unsafe ~name link_state source_file
   in
   let module Parameters = struct
@@ -22,7 +22,9 @@ let cmd ~unsafe ~timeout ~timeout_instr ~source_file =
     let abstract_invariant = Abstract_invariant.empty ()
   end in
   let module I = Interpret.Concrete (Parameters) in
-  let res, run_time = Benchmark.with_utime @@ fun () -> I.modul link_state m in
+  let res, run_time =
+    Benchmark.with_utime @@ fun () -> I.modul link_state ~modul
+  in
   Log.bench (fun m ->
     (* run_time shouldn't be none in bench mode *)
     let run_time = match run_time with None -> assert false | Some t -> t in
