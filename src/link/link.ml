@@ -256,13 +256,37 @@ module State = struct
 
   let get_module (state : _ t) (i : int) = Dynarray.get state.modules i
 
-  let get_memory state ~modul i =
+  let get_memory ~modul state i =
     let modul = get_module state modul in
     Linked_module.get_memory modul i
 
-  let get_data state ~modul i =
+  let get_data ~modul state i =
     let modul = get_module state modul in
     Linked_module.get_data modul i
+
+  let get_func ~modul state i =
+    let modul = get_module state modul in
+    Linked_module.get_func modul i
+
+  let get_table ~modul state i =
+    let modul = get_module state modul in
+    Linked_module.get_table modul i
+
+  let get_elem ~modul state i =
+    let modul = get_module state modul in
+    Linked_module.get_elem modul i
+
+  let get_global ~modul state i =
+    let modul = get_module state modul in
+    Linked_module.get_global modul i
+
+  let get_extern_func ~modul state i =
+    let modul = get_module state modul in
+    Linked_module.get_extern_func modul i
+
+  let get_init_code ~modul state =
+    let modul = get_module state modul in
+    Linked_module.get_init_code modul
 end
 
 (* TODO; the const evaluation is duplicated in many places and should be moved somewhere else! *)
