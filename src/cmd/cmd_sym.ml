@@ -30,8 +30,11 @@ let run_file ~parameters ~source_file =
       let+ modul, env =
         Compile.Binary.until_abstract_link ~unsafe ~name:None env modul
       in
-      let state = Abstract_interpreter_control_flow.modul env ~modul in
-      state.invariant
+      try
+        let state = Abstract_interpreter_control_flow.modul env ~modul in
+        state.invariant
+      with Abstract_interpreter_control_flow.RecursiveFunctionCall ->
+        Abstract_invariant.empty ()
     else Ok (Abstract_invariant.empty ())
   in
 

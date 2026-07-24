@@ -2,6 +2,8 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
+exception RecursiveFunctionCall
+
 val eval_exprs :
   modul:int -> Abstract_state.t -> Abstract_env.t -> Abstract_state.t
 
