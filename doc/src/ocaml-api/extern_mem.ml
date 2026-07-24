@@ -31,8 +31,8 @@ let extern_module : Concrete_extern.Module.t =
 
 (* a link state that contains our custom module, available under the name `chorizo` *)
 let link_state =
-  Link.Concrete.empty ()
-  |> Link.Concrete.link_extern_module ~name:"chorizo" extern_module
+  Concrete_env.empty ()
+  |> Concrete_env.link_extern_module ~name:"chorizo" extern_module
 
 (* a pure wasm module refering to `$extern_mem` *)
 let pure_wasm_module =

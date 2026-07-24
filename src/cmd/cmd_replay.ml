@@ -200,8 +200,8 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
   in
 
   let env =
-    Link.Concrete.empty ()
-    |> Link.Concrete.link_extern_module ~name:"owi" replay_extern_module
+    Concrete_env.empty ()
+    |> Concrete_env.link_extern_module ~name:"owi" replay_extern_module
   in
 
   let* m = Compile.File.until_binary ~unsafe filename in

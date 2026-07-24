@@ -19,8 +19,8 @@ val filename : Fpath.t = <abstr>
     | Error e -> assert false;;
 mdx_gen.bc.exe: [INFO] parsing      ...
 ...
-# let modul, link_state =
-    match Compile.Text.until_concrete_link (Link.Concrete.State.empty ()) ~unsafe:false ~name:None m with
+# let modul, env =
+    match Compile.Text.until_concrete_link (Concrete_env.empty ()) ~unsafe:false ~name:None m with
     | Ok v -> v
     | Error _ -> assert false;;
 mdx_gen.bc.exe: [INFO] checking     ...
@@ -31,9 +31,9 @@ mdx_gen.bc.exe: [INFO] linking      ...
 ...
 # module I = Interpret.Concrete (Interpret.Default_parameters);;
 module I :
-  sig val modul : Link.Concrete.State.t -> modul:int -> unit Owi.Result.t end
+  sig val modul : Concrete_env.t -> modul:int -> unit Owi.Result.t end
 # let () =
-    match I.modul link_state ~modul with
+    match I.modul env ~modul with
     | Ok () -> ()
     | Error _ -> assert false;;
 mdx_gen.bc.exe: [INFO] interpreting ...

@@ -63,7 +63,7 @@ and check_instr (instr : Binary.instr Annotated.t)
     check_expr ~invariants ~modul ~env expr_else
   | Loop (_str_opt, _bt, expr) -> check_expr ~invariants ~modul ~env expr
   | Call idx ->
-    let func = Link.Abstract.get_func ~modul env idx in
+    let func = Abstract_env.get_func ~modul env idx in
     begin match func with
     | Wasm { func; modul } -> check_expr ~invariants ~modul ~env func.body
     | Extern _ -> ()
@@ -86,7 +86,7 @@ and check_instr (instr : Binary.instr Annotated.t)
   | Call_ref _ | Any_convert_extern | Extern_convert_any ->
     ()
 
-let check_module (env : Link.Abstract.t) ~(modul : int)
+let check_module (env : Abstract_env.t) ~(modul : int)
   (invariants : Abstract_invariant.t) =
-  let init_code = Link.Abstract.get_init_code ~modul env in
+  let init_code = Abstract_env.get_init_code ~modul env in
   check_expr ~invariants ~modul ~env init_code

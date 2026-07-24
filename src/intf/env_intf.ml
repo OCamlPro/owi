@@ -3,19 +3,25 @@
 (* Written by the Owi programmers *)
 
 module type T = sig
-  type t
+  type extern_func
 
-  type memory
+  type extern_module
 
   type data
+
+  include
+    Link_intf.T
+      with type extern_func := extern_func
+       and type extern_module := extern_module
+       and type data := data
+
+  type memory
 
   type global
 
   type elem
 
   type table
-
-  type extern_func
 
   type 'a choice
 

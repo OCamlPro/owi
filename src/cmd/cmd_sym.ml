@@ -36,10 +36,10 @@ let run_file ~parameters ~source_file =
   in
 
   let env =
-    Link.Symbolic.empty ()
-    |> Link.Symbolic.link_extern_module ~name:"wasi_snapshot_preview1"
+    Symbolic_env.empty ()
+    |> Symbolic_env.link_extern_module ~name:"wasi_snapshot_preview1"
          Symbolic_wasm_ffi.wasi_snapshot_preview1
-    |> Link.Symbolic.link_extern_module ~name:"owi" Symbolic_wasm_ffi.owi
+    |> Symbolic_env.link_extern_module ~name:"owi" Symbolic_wasm_ffi.owi
   in
   let+ modul, env =
     (* unsafe is set to true because the module was already validated before *)

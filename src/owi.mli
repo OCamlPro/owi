@@ -1704,39 +1704,37 @@ module Label : sig
   end
 end
 
-module Link : sig
-  module Concrete : sig
-    type t
+module Concrete_env : sig
+  type t
 
-    val empty : unit -> t
+  val empty : unit -> t
 
-    val link_binary_module :
-      name:string option -> t -> Binary.Module.t -> (int * t) Result.t
+  val link_binary_module :
+    name:string option -> t -> Binary.Module.t -> (int * t) Result.t
 
-    val link_extern_module : name:string -> Concrete_extern.Module.t -> t -> t
-  end
+  val link_extern_module : name:string -> Concrete_extern.Module.t -> t -> t
+end
 
-  module Symbolic : sig
-    type t
+module Symbolic_env : sig
+  type t
 
-    val empty : unit -> t
+  val empty : unit -> t
 
-    val link_binary_module :
-      name:string option -> t -> Binary.Module.t -> (int * t) Result.t
+  val link_binary_module :
+    name:string option -> t -> Binary.Module.t -> (int * t) Result.t
 
-    val link_extern_module : name:string -> Symbolic_extern.Module.t -> t -> t
-  end
+  val link_extern_module : name:string -> Symbolic_extern.Module.t -> t -> t
+end
 
-  module Abstract : sig
-    type t
+module Abstract_env : sig
+  type t
 
-    val empty : unit -> t
+  val empty : unit -> t
 
-    val link_binary_module :
-      name:string option -> t -> Binary.Module.t -> (int * t) Result.t
+  val link_binary_module :
+    name:string option -> t -> Binary.Module.t -> (int * t) Result.t
 
-    val link_extern_module : name:string -> Abstract_extern.Module.t -> t -> t
-  end
+  val link_extern_module : name:string -> Abstract_extern.Module.t -> t -> t
 end
 
 module Compile : sig
@@ -1750,18 +1748,18 @@ module Compile : sig
     val until_concrete_link :
          unsafe:bool
       -> name:string option
-      -> Link.Concrete.t
+      -> Concrete_env.t
       -> Text.Module.t
-      -> (int * Link.Concrete.t) Result.t
+      -> (int * Concrete_env.t) Result.t
   end
 
   module Binary : sig
     val until_concrete_link :
          unsafe:bool
       -> name:string option
-      -> Link.Concrete.t
+      -> Concrete_env.t
       -> Binary.Module.t
-      -> (int * Link.Concrete.t) Result.t
+      -> (int * Concrete_env.t) Result.t
   end
 end
 
@@ -1910,11 +1908,11 @@ module Interpret : sig
   module Default_parameters : Parameters
 
   module Concrete (_ : Parameters) : sig
-    val modul : Link.Concrete.t -> modul:int -> unit Result.t
+    val modul : Concrete_env.t -> modul:int -> unit Result.t
   end
 
   module Symbolic (_ : Parameters) : sig
-    val modul : Link.Symbolic.t -> modul:int -> unit Symbolic_choice.t
+    val modul : Symbolic_env.t -> modul:int -> unit Symbolic_choice.t
   end
 end
 

@@ -6,7 +6,7 @@ open Syntax
 
 let cmd ~unsafe ~timeout ~timeout_instr ~source_file =
   let name = None in
-  let env = Link.Concrete.empty () in
+  let env = Concrete_env.empty () in
   let* modul, env =
     Compile.File.until_concrete_link ~unsafe ~name env source_file
   in

@@ -6,6 +6,7 @@
   abstract_boolean
   abstract_checker
   abstract_domain
+  abstract_env
   abstract_extern
   abstract_f32
   abstract_f64

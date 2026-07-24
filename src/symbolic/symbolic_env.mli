@@ -10,5 +10,5 @@ include
      and type elem := Symbolic_elem.t
      and type table := Symbolic_table.t
      and type extern_func := Symbolic_extern.Func.t
+     and type extern_module = Symbolic_extern.Module.t
      and type 'a choice := 'a Symbolic_choice.t
-     and type t = Link.Symbolic.t

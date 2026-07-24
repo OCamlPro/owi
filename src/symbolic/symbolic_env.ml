@@ -2,7 +2,17 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-include Link.Symbolic
+include Link.Make (struct
+  type extern_func = Symbolic_extern.Func.t
+
+  type extern_module = Symbolic_extern.Module.t
+
+  let to_func_type = Symbolic_extern.Func.to_func_type
+
+  type data = Symbolic_data.t
+
+  let data_of_concrete data = data
+end)
 
 let get_memory ~(modul : int) env id : Symbolic_memory.t Symbolic_choice.t =
   let ( let* ) = Symbolic_choice.( let* ) in

@@ -12,23 +12,23 @@ module Any : sig
   val until_concrete_link :
        unsafe:bool
     -> name:string option
-    -> Link.Concrete.t
+    -> Concrete_env.t
     -> Concrete_extern.Func.t Kind.t
-    -> (int * Link.Concrete.t) Result.t
+    -> (int * Concrete_env.t) Result.t
 
   val until_symbolic_link :
        unsafe:bool
     -> name:string option
-    -> Link.Symbolic.t
+    -> Symbolic_env.t
     -> Symbolic_extern.Func.t Kind.t
-    -> (int * Link.Symbolic.t) Result.t
+    -> (int * Symbolic_env.t) Result.t
 
   val until_abstract_link :
        unsafe:bool
     -> name:string option
-    -> Link.Abstract.t
+    -> Abstract_env.t
     -> Abstract_extern.Func.t Kind.t
-    -> (int * Link.Abstract.t) Result.t
+    -> (int * Abstract_env.t) Result.t
 end
 
 module File : sig
@@ -41,27 +41,27 @@ module File : sig
   val until_concrete_link :
        unsafe:bool
     -> name:string option
-    -> Link.Concrete.t
+    -> Concrete_env.t
     -> Fpath.t
-    -> (int * Link.Concrete.t) Result.t
+    -> (int * Concrete_env.t) Result.t
 
   (** compile a file with a given link state and produce a new link state and a
       runnable module *)
   val until_symbolic_link :
        unsafe:bool
     -> name:string option
-    -> Link.Symbolic.t
+    -> Symbolic_env.t
     -> Fpath.t
-    -> (int * Link.Symbolic.t) Result.t
+    -> (int * Symbolic_env.t) Result.t
 
   (** compile a file with a given link state and produce a new link state and a
       runnable module *)
   val until_abstract_link :
        unsafe:bool
     -> name:string option
-    -> Link.Abstract.t
+    -> Abstract_env.t
     -> Fpath.t
-    -> (int * Link.Abstract.t) Result.t
+    -> (int * Abstract_env.t) Result.t
 end
 
 module Text : sig
@@ -74,27 +74,27 @@ module Text : sig
   val until_concrete_link :
        unsafe:bool
     -> name:string option
-    -> Link.Concrete.t
+    -> Concrete_env.t
     -> Text.Module.t
-    -> (int * Link.Concrete.t) Result.t
+    -> (int * Concrete_env.t) Result.t
 
   (** compile a module with a given link state and produce a new link state and
       a runnable module *)
   val until_symbolic_link :
        unsafe:bool
     -> name:string option
-    -> Link.Symbolic.t
+    -> Symbolic_env.t
     -> Text.Module.t
-    -> (int * Link.Symbolic.t) Result.t
+    -> (int * Symbolic_env.t) Result.t
 
   (** compile a module with a given link state and produce a new link state and
       a runnable module *)
   val until_abstract_link :
        unsafe:bool
     -> name:string option
-    -> Link.Abstract.t
+    -> Abstract_env.t
     -> Text.Module.t
-    -> (int * Link.Abstract.t) Result.t
+    -> (int * Abstract_env.t) Result.t
 end
 
 module Binary : sig
@@ -106,25 +106,25 @@ module Binary : sig
   val until_concrete_link :
        unsafe:bool
     -> name:string option
-    -> Link.Concrete.t
+    -> Concrete_env.t
     -> Binary.Module.t
-    -> (int * Link.Concrete.t) Result.t
+    -> (int * Concrete_env.t) Result.t
 
   (** compile a module with a given link state and produce a new link state and
       a runnable module *)
   val until_symbolic_link :
        unsafe:bool
     -> name:string option
-    -> Link.Symbolic.t
+    -> Symbolic_env.t
     -> Binary.Module.t
-    -> (int * Link.Symbolic.t) Result.t
+    -> (int * Symbolic_env.t) Result.t
 
   (** compile a module with a given link state and produce a new link state and
       a runnable module *)
   val until_abstract_link :
        unsafe:bool
     -> name:string option
-    -> Link.Abstract.t
+    -> Abstract_env.t
     -> Binary.Module.t
-    -> (int * Link.Abstract.t) Result.t
+    -> (int * Abstract_env.t) Result.t
 end
