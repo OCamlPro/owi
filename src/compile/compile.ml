@@ -31,15 +31,15 @@ module Text = struct
 
   let until_concrete_link ~unsafe ~name env m =
     let* m = until_validate ~unsafe m in
-    Link.Concrete.Binary.modul env ~name m
+    Link.Concrete.link_binary_module env ~name m
 
   let until_symbolic_link ~unsafe ~name env m =
     let* m = until_validate ~unsafe m in
-    Link.Symbolic.Binary.modul env ~name m
+    Link.Symbolic.link_binary_module env ~name m
 
   let until_abstract_link ~unsafe ~name env m =
     let* m = until_validate ~unsafe m in
-    Link.Abstract.Binary.modul env ~name m
+    Link.Abstract.link_binary_module env ~name m
 end
 
 module Binary = struct
@@ -51,15 +51,15 @@ module Binary = struct
 
   let until_concrete_link ~unsafe ~name env m =
     let* m = until_validate ~unsafe m in
-    Link.Concrete.Binary.modul env ~name m
+    Link.Concrete.link_binary_module env ~name m
 
   let until_symbolic_link ~unsafe ~name env m =
     let* m = until_validate ~unsafe m in
-    Link.Symbolic.Binary.modul env ~name m
+    Link.Symbolic.link_binary_module env ~name m
 
   let until_abstract_link ~unsafe ~name env m =
     let* m = until_validate ~unsafe m in
-    Link.Abstract.Binary.modul env ~name m
+    Link.Abstract.link_binary_module env ~name m
 end
 
 module Any = struct

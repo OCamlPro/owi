@@ -7,8 +7,8 @@ open Syntax
 let cmd ~rounds ~seed ~source_file ~timeout ~timeout_instr ~unsafe =
   Init.random_state seed;
   let env =
-    Link.Concrete.State.empty ()
-    |> Link.Concrete.Extern.modul ~name:"owi" Fuzz_wasm_ffi.owi
+    Link.Concrete.empty ()
+    |> Link.Concrete.link_extern_module ~name:"owi" Fuzz_wasm_ffi.owi
   in
   let* modul, env =
     Compile.File.until_concrete_link ~unsafe ~name:None env source_file

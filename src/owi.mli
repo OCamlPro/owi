@@ -1706,63 +1706,36 @@ end
 
 module Link : sig
   module Concrete : sig
-    module State : sig
-      type t
+    type t
 
-      val empty : unit -> t
-    end
+    val empty : unit -> t
 
-    module Binary : sig
-      val modul :
-           name:string option
-        -> State.t
-        -> Binary.Module.t
-        -> (int * State.t) Result.t
-    end
+    val link_binary_module :
+      name:string option -> t -> Binary.Module.t -> (int * t) Result.t
 
-    module Extern : sig
-      val modul : name:string -> Concrete_extern.Module.t -> State.t -> State.t
-    end
+    val link_extern_module : name:string -> Concrete_extern.Module.t -> t -> t
   end
 
   module Symbolic : sig
-    module State : sig
-      type t
+    type t
 
-      val empty : unit -> t
-    end
+    val empty : unit -> t
 
-    module Binary : sig
-      val modul :
-           name:string option
-        -> State.t
-        -> Binary.Module.t
-        -> (int * State.t) Result.t
-    end
+    val link_binary_module :
+      name:string option -> t -> Binary.Module.t -> (int * t) Result.t
 
-    module Extern : sig
-      val modul : name:string -> Symbolic_extern.Module.t -> State.t -> State.t
-    end
+    val link_extern_module : name:string -> Symbolic_extern.Module.t -> t -> t
   end
 
   module Abstract : sig
-    module State : sig
-      type t
+    type t
 
-      val empty : unit -> t
-    end
+    val empty : unit -> t
 
-    module Binary : sig
-      val modul :
-           name:string option
-        -> State.t
-        -> Binary.Module.t
-        -> (int * State.t) Result.t
-    end
+    val link_binary_module :
+      name:string option -> t -> Binary.Module.t -> (int * t) Result.t
 
-    module Extern : sig
-      val modul : name:string -> Abstract_extern.Module.t -> State.t -> State.t
-    end
+    val link_extern_module : name:string -> Abstract_extern.Module.t -> t -> t
   end
 end
 
@@ -1777,18 +1750,18 @@ module Compile : sig
     val until_concrete_link :
          unsafe:bool
       -> name:string option
-      -> Link.Concrete.State.t
+      -> Link.Concrete.t
       -> Text.Module.t
-      -> (int * Link.Concrete.State.t) Result.t
+      -> (int * Link.Concrete.t) Result.t
   end
 
   module Binary : sig
     val until_concrete_link :
          unsafe:bool
       -> name:string option
-      -> Link.Concrete.State.t
+      -> Link.Concrete.t
       -> Binary.Module.t
-      -> (int * Link.Concrete.State.t) Result.t
+      -> (int * Link.Concrete.t) Result.t
   end
 end
 
@@ -1937,11 +1910,11 @@ module Interpret : sig
   module Default_parameters : Parameters
 
   module Concrete (_ : Parameters) : sig
-    val modul : Link.Concrete.State.t -> modul:int -> unit Result.t
+    val modul : Link.Concrete.t -> modul:int -> unit Result.t
   end
 
   module Symbolic (_ : Parameters) : sig
-    val modul : Link.Symbolic.State.t -> modul:int -> unit Symbolic_choice.t
+    val modul : Link.Symbolic.t -> modul:int -> unit Symbolic_choice.t
   end
 end
 

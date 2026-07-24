@@ -8,8 +8,6 @@ open Syntax
 module Make (M : sig
   type extern_func
 
-  type extern_module = (string * extern_func) list
-
   val to_func_type : extern_func -> Binary.func_type
 
   type data
@@ -167,151 +165,144 @@ struct
 
   type func = Kind.func
 
-  module State = struct
-    type exports =
-      { globals : global StringMap.t
-      ; memories : Concrete_memory.t StringMap.t
-      ; tables : table StringMap.t
-      ; functions : func StringMap.t
-      ; tags : Binary.Tag.t StringMap.t
-      ; defined_names : StringSet.t
-      }
+  type exports =
+    { globals : global StringMap.t
+    ; memories : Concrete_memory.t StringMap.t
+    ; tables : table StringMap.t
+    ; functions : func StringMap.t
+    ; tags : Binary.Tag.t StringMap.t
+    ; defined_names : StringSet.t
+    }
 
-    type t =
-      { by_name : exports StringMap.t
-      ; by_id : (exports * int) StringMap.t
-      ; last : (exports * int) option
-      ; collection : (M.extern_func * Binary.func_type) Dynarray.t
-      ; modules : Linked_module.t Dynarray.t
-      }
+  type t =
+    { by_name : exports StringMap.t
+    ; by_id : (exports * int) StringMap.t
+    ; last : (exports * int) option
+    ; collection : (M.extern_func * Binary.func_type) Dynarray.t
+    ; modules : Linked_module.t Dynarray.t
+    }
 
-    let empty () =
-      { by_name = StringMap.empty
-      ; by_id = StringMap.empty
-      ; last = None
-      ; collection = Dynarray.create ()
-      ; modules = Dynarray.create ()
-      }
+  let empty () =
+    { by_name = StringMap.empty
+    ; by_id = StringMap.empty
+    ; last = None
+    ; collection = Dynarray.create ()
+    ; modules = Dynarray.create ()
+    }
 
-    (* TODO: I'm not sure it makes sense to try making the Link.State.t persistent, we could change the API to be fully mutable? *)
-    let clone { by_name; by_id; last; collection; modules } =
-      let collection = Dynarray.copy collection in
-      let modules = Dynarray.copy modules in
-      { by_name; by_id; last; collection; modules }
+  (* TODO: I'm not sure it makes sense to try making the Link.State.t persistent, we could change the API to be fully mutable? *)
+  let clone { by_name; by_id; last; collection; modules } =
+    let collection = Dynarray.copy collection in
+    let modules = Dynarray.copy modules in
+    { by_name; by_id; last; collection; modules }
 
-    let get_last state = state.last
+  let get_last state = state.last
 
-    let get_by_id state id = StringMap.find_opt id state.by_id
+  let get_by_id state id = StringMap.find_opt id state.by_id
 
-    let get_module ls mod_id =
-      match mod_id with
-      | None ->
-        begin match get_last ls with
-        | None -> Error `Unbound_last_module
-        | Some m -> Ok m
-        end
-      | Some mod_id -> (
-        match get_by_id ls mod_id with
-        | None -> Error (`Unbound_module mod_id)
-        | Some exports -> Ok exports )
-
-    let get_exported_global state ~module_name ~global_name =
-      let* exports, _module_id = get_module state module_name in
-      match StringMap.find_opt global_name exports.globals with
-      | None -> Error (`Unbound_name global_name)
-      | Some v -> Ok v
-
-    let get_exported_func state ~module_name ~func_name =
-      let* exports, modul_id = get_module state module_name in
-      match StringMap.find_opt func_name exports.functions with
-      | None -> Error (`Unbound_name func_name)
-      | Some v -> Ok (v, modul_id)
-
-    let load_from_module ls f (import : _ Origin.imported) =
-      match StringMap.find_opt import.modul_name ls.by_name with
-      | None -> Error (`Unknown_module import.modul_name)
-      | Some exports -> (
-        match StringMap.find_opt import.name (f exports) with
-        | None ->
-          if StringSet.mem import.name exports.defined_names then
-            Error (`Incompatible_import_type import.name)
-          else Error (`Unknown_import (import.modul_name, import.name))
-        | Some v -> Ok v )
-
-    let load_global (ls : t) (import : Binary.Global.Type.t Origin.imported) :
-      global Result.t =
-      let* global =
-        load_from_module ls (fun (e : exports) -> e.globals) import
-      in
-      let* strict =
-        match (fst import.typ, global.mut) with
-        | Var, Const | Const, Var ->
-          Error (`Incompatible_import_type import.name)
-        | Const, Const -> Ok false
-        | Var, Var -> Ok true
-      in
-      if
-        not
-          ( if strict then Binary.val_type_eq global.typ (snd import.typ)
-            else Binary.is_subtype_val_type global.typ (snd import.typ) )
-      then begin
-        Error (`Incompatible_import_type import.name)
+  let get_module ls mod_id =
+    match mod_id with
+    | None ->
+      begin match get_last ls with
+      | None -> Error `Unbound_last_module
+      | Some m -> Ok m
       end
-      else Ok global
+    | Some mod_id -> (
+      match get_by_id ls mod_id with
+      | None -> Error (`Unbound_module mod_id)
+      | Some exports -> Ok exports )
 
-    let register_last_module (ls : t) ~name ~(id : string option) : t Result.t =
-      let* exports, _modul_id =
-        match id with
-        | Some id ->
-          begin match StringMap.find_opt id ls.by_id with
-          | None -> Error (`Unbound_module id)
-          | Some e -> Ok e
-          end
-        | None -> (
-          match ls.last with
-          | Some e -> Ok e
-          | None -> Error `Unbound_last_module )
-      in
-      Ok { ls with by_name = StringMap.add name exports ls.by_name }
+  let get_exported_global state ~module_name ~global_name =
+    let* exports, _module_id = get_module state module_name in
+    match StringMap.find_opt global_name exports.globals with
+    | None -> Error (`Unbound_name global_name)
+    | Some v -> Ok v
 
-    let get_module (state : t) (i : int) = Dynarray.get state.modules i
+  let get_exported_func state ~module_name ~func_name =
+    let* exports, modul_id = get_module state module_name in
+    match StringMap.find_opt func_name exports.functions with
+    | None -> Error (`Unbound_name func_name)
+    | Some v -> Ok (v, modul_id)
 
-    let get_memory ~modul state i =
-      let modul = get_module state modul in
-      Linked_module.get_memory modul i
+  let load_from_module ls f (import : _ Origin.imported) =
+    match StringMap.find_opt import.modul_name ls.by_name with
+    | None -> Error (`Unknown_module import.modul_name)
+    | Some exports -> (
+      match StringMap.find_opt import.name (f exports) with
+      | None ->
+        if StringSet.mem import.name exports.defined_names then
+          Error (`Incompatible_import_type import.name)
+        else Error (`Unknown_import (import.modul_name, import.name))
+      | Some v -> Ok v )
 
-    let get_data ~modul state i =
-      let modul = get_module state modul in
-      Linked_module.get_data modul i
+  let load_global (ls : t) (import : Binary.Global.Type.t Origin.imported) :
+    global Result.t =
+    let* global = load_from_module ls (fun (e : exports) -> e.globals) import in
+    let* strict =
+      match (fst import.typ, global.mut) with
+      | Var, Const | Const, Var -> Error (`Incompatible_import_type import.name)
+      | Const, Const -> Ok false
+      | Var, Var -> Ok true
+    in
+    if
+      not
+        ( if strict then Binary.val_type_eq global.typ (snd import.typ)
+          else Binary.is_subtype_val_type global.typ (snd import.typ) )
+    then begin
+      Error (`Incompatible_import_type import.name)
+    end
+    else Ok global
 
-    let get_func ~modul state i =
-      let modul = get_module state modul in
-      Linked_module.get_func modul i
+  let register_last_module (ls : t) ~name ~(id : string option) : t Result.t =
+    let* exports, _modul_id =
+      match id with
+      | Some id ->
+        begin match StringMap.find_opt id ls.by_id with
+        | None -> Error (`Unbound_module id)
+        | Some e -> Ok e
+        end
+      | None -> (
+        match ls.last with Some e -> Ok e | None -> Error `Unbound_last_module )
+    in
+    Ok { ls with by_name = StringMap.add name exports ls.by_name }
 
-    let get_table ~modul state i =
-      let modul = get_module state modul in
-      Linked_module.get_table modul i
+  let get_module (state : t) (i : int) = Dynarray.get state.modules i
 
-    let get_elem ~modul state i =
-      let modul = get_module state modul in
-      Linked_module.get_elem modul i
+  let get_memory ~modul state i =
+    let modul = get_module state modul in
+    Linked_module.get_memory modul i
 
-    let get_global ~modul state i =
-      let modul = get_module state modul in
-      Linked_module.get_global modul i
+  let get_data ~modul state i =
+    let modul = get_module state modul in
+    Linked_module.get_data modul i
 
-    let get_extern_func ~modul state i =
-      let modul = get_module state modul in
-      Linked_module.get_extern_func modul i
+  let get_func ~modul state i =
+    let modul = get_module state modul in
+    Linked_module.get_func modul i
 
-    let get_init_code ~modul state =
-      let modul = get_module state modul in
-      Linked_module.get_init_code modul
+  let get_table ~modul state i =
+    let modul = get_module state modul in
+    Linked_module.get_table modul i
 
-    let fold_globals ~modul f acc state =
-      let modul = get_module state modul in
-      Linked_module.fold_globals f acc modul
-  end
+  let get_elem ~modul state i =
+    let modul = get_module state modul in
+    Linked_module.get_elem modul i
+
+  let get_global ~modul state i =
+    let modul = get_module state modul in
+    Linked_module.get_global modul i
+
+  let get_extern_func ~modul state i =
+    let modul = get_module state modul in
+    Linked_module.get_extern_func modul i
+
+  let get_init_code ~modul state =
+    let modul = get_module state modul in
+    Linked_module.get_init_code modul
+
+  let fold_globals ~modul f acc state =
+    let modul = get_module state modul in
+    Linked_module.fold_globals f acc modul
 
   (* TODO; the const evaluation is duplicated in many places and should be moved somewhere else! *)
   module Eval_const = struct
@@ -367,7 +358,7 @@ struct
       let mut, typ = global.typ in
       let global : global = { value; mut; typ } in
       Ok global
-    | Imported import -> State.load_global ls import
+    | Imported import -> load_global ls import
 
   let eval_globals ls modul globals : Linked_module.Build.t Result.t =
     let+ modul, _i =
@@ -429,12 +420,9 @@ struct
       end
     | _ -> false
 
-  let load_memory (ls : State.t)
-    (import : Binary.Mem.Type.limits Origin.imported) :
+  let load_memory (ls : t) (import : Binary.Mem.Type.limits Origin.imported) :
     Concrete_memory.t Result.t =
-    let* mem =
-      State.load_from_module ls (fun (e : State.exports) -> e.memories) import
-    in
+    let* mem = load_from_module ls (fun (e : exports) -> e.memories) import in
     let imported_limit = Concrete_memory.get_limits mem in
     if memory_limit_is_included ~import:import.typ ~imported:imported_limit ()
     then Ok mem
@@ -462,12 +450,10 @@ struct
     table_limit_is_included ~imported_data_size ~import ~imported ()
     && Binary.ref_type_eq t1 t2
 
-  let load_table (ls : State.t) (import : Binary.Table.Type.t Origin.imported) :
+  let load_table (ls : t) (import : Binary.Table.Type.t Origin.imported) :
     table Result.t =
     let typ : Binary.Table.Type.t = import.typ in
-    let* t =
-      State.load_from_module ls (fun (e : State.exports) -> e.tables) import
-    in
+    let* t = load_from_module ls (fun (e : exports) -> e.tables) import in
     let imported_data_size = Concrete_table.size t in
     if table_types_are_compatible typ ~imported_data_size (t.limits, t.typ) then
       Ok t
@@ -491,12 +477,10 @@ struct
     in
     modul
 
-  let load_func (ls : State.t) (import : Binary.block_type Origin.imported) :
+  let load_func (ls : t) (import : Binary.block_type Origin.imported) :
     func Result.t =
     let (Binary.Bt_raw ((None | Some _), typ)) = import.typ in
-    let* func =
-      State.load_from_module ls (fun (e : State.exports) -> e.functions) import
-    in
+    let* func = load_from_module ls (fun (e : exports) -> e.functions) import in
     let type' =
       match func with
       | Kind.Wasm { func; _ } ->
@@ -536,9 +520,7 @@ struct
     | Origin.Local tag -> Ok tag
     | Imported import ->
       let (Binary.Bt_raw ((None | Some _), import_typ)) = import.typ in
-      let* tag =
-        State.load_from_module ls (fun (e : State.exports) -> e.tags) import
-      in
+      let* tag = load_from_module ls (fun (e : exports) -> e.tags) import in
       let (Bt_raw ((None | Some _), typ)) = tag.typ in
       if Binary.func_type_eq typ import_typ then Ok tag
       else
@@ -644,7 +626,7 @@ struct
     (modul, List.rev inits)
 
   let populate_exports modul (exports : Binary.Module.Exports.t) :
-    State.exports Result.t =
+    exports Result.t =
     let fill_exports get_value exports names =
       array_fold_left
         (fun (acc, names) ({ name; id; _ } : Binary.Export.t) ->
@@ -667,96 +649,87 @@ struct
       fill_exports Linked_module.get_func exports.func names
     in
     let+ tags, names = fill_exports Linked_module.get_tag exports.tag names in
-    { State.globals; memories; tables; functions; tags; defined_names = names }
+    { globals; memories; tables; functions; tags; defined_names = names }
 
-  module Binary = struct
-    let modul ~name (ls : State.t) (binary_module : Binary.Module.t) =
-      Log.info (fun m -> m "linking      ...");
-      let ls = State.clone ls in
-      let next_id = Dynarray.length ls.modules in
-      let modul = Linked_module.Build.empty in
-      let* modul = eval_functions ls next_id modul binary_module.func in
-      let* modul = eval_tags ls next_id modul binary_module.tag in
-      let* modul = eval_globals ls modul binary_module.global in
-      let* modul = eval_memories ls modul binary_module.mem in
-      let* modul = eval_tables ls modul binary_module.table in
-      let* modul, init_active_data = define_data modul binary_module.data in
-      let* modul, init_active_elem = define_elem modul binary_module.elem in
-      let init_code =
-        let start =
-          Option.map
-            (fun start_id -> [ Binary.Call start_id ])
-            binary_module.start
-          |> Option.fold ~none:[] ~some:(fun s -> [ s ])
-        in
-        (init_active_elem @ init_active_data) @ start
-        |> List.flatten |> Annotated.dummy_deep
+  let link_binary_module ~name (ls : t) (binary_module : Binary.Module.t) =
+    Log.info (fun m -> m "linking      ...");
+    let ls = clone ls in
+    let next_id = Dynarray.length ls.modules in
+    let modul = Linked_module.Build.empty in
+    let* modul = eval_functions ls next_id modul binary_module.func in
+    let* modul = eval_tags ls next_id modul binary_module.tag in
+    let* modul = eval_globals ls modul binary_module.global in
+    let* modul = eval_memories ls modul binary_module.mem in
+    let* modul = eval_tables ls modul binary_module.table in
+    let* modul, init_active_data = define_data modul binary_module.data in
+    let* modul, init_active_elem = define_elem modul binary_module.elem in
+    let init_code =
+      let start =
+        Option.map
+          (fun start_id -> [ Binary.Call start_id ])
+          binary_module.start
+        |> Option.fold ~none:[] ~some:(fun s -> [ s ])
       in
+      (init_active_elem @ init_active_data) @ start
+      |> List.flatten |> Annotated.dummy_deep
+    in
 
-      let modul : Linked_module.t =
-        Linked_module.freeze next_id modul init_code ls.collection
-      in
-      Dynarray.add_last ls.modules modul;
+    let modul : Linked_module.t =
+      Linked_module.freeze next_id modul init_code ls.collection
+    in
+    Dynarray.add_last ls.modules modul;
 
-      let+ by_id_exports = populate_exports modul binary_module.exports in
-      let by_id =
-        match binary_module.id with
-        | None -> ls.by_id
-        | Some id ->
-          StringMap.add id (by_id_exports, Linked_module.get_id modul) ls.by_id
-      in
-      let by_name =
-        match name with
-        | None -> ls.by_name
-        | Some name -> StringMap.add name by_id_exports ls.by_name
-      in
+    let+ by_id_exports = populate_exports modul binary_module.exports in
+    let by_id =
+      match binary_module.id with
+      | None -> ls.by_id
+      | Some id ->
+        StringMap.add id (by_id_exports, Linked_module.get_id modul) ls.by_id
+    in
+    let by_name =
+      match name with
+      | None -> ls.by_name
+      | Some name -> StringMap.add name by_id_exports ls.by_name
+    in
 
-      ( next_id
-      , { State.by_id
-        ; by_name
-        ; last = Some (by_id_exports, Linked_module.get_id modul)
-        ; collection = ls.collection
-        ; modules = ls.modules
-        } )
-  end
+    ( next_id
+    , { by_id
+      ; by_name
+      ; last = Some (by_id_exports, Linked_module.get_id modul)
+      ; collection = ls.collection
+      ; modules = ls.modules
+      } )
 
-  module Extern = struct
-    let aux ~name (ls : State.t) func_type functions =
-      let functions, collection =
-        List.fold_left
-          (fun (functions, collection) (name, func) ->
-            let typ = func_type func in
-            Dynarray.add_last collection (func, typ);
-            let id = Dynarray.length collection - 1 in
-            ((name, (Kind.extern id : Kind.func)) :: functions, collection) )
-          ([], ls.collection) functions
-      in
-      let functions = StringMap.of_seq (List.to_seq functions) in
-      let defined_names =
-        StringMap.fold
-          (fun name _ set -> StringSet.add name set)
-          functions StringSet.empty
-      in
-      let exports =
-        { State.functions
-        ; globals = StringMap.empty
-        ; memories = StringMap.empty
-        ; tables = StringMap.empty
-        ; tags = StringMap.empty
-        ; defined_names
-        }
-      in
-      { ls with by_name = StringMap.add name exports ls.by_name; collection }
-
-    let modul ~name (modul : M.extern_module) (env : State.t) =
-      aux ~name env M.to_func_type modul
-  end
+  let link_extern_module ~name functions (ls : t) =
+    let functions, collection =
+      List.fold_left
+        (fun (functions, collection) (name, func) ->
+          let typ = M.to_func_type func in
+          Dynarray.add_last collection (func, typ);
+          let id = Dynarray.length collection - 1 in
+          ((name, (Kind.extern id : Kind.func)) :: functions, collection) )
+        ([], ls.collection) functions
+    in
+    let functions = StringMap.of_seq (List.to_seq functions) in
+    let defined_names =
+      StringMap.fold
+        (fun name _ set -> StringSet.add name set)
+        functions StringSet.empty
+    in
+    let exports =
+      { functions
+      ; globals = StringMap.empty
+      ; memories = StringMap.empty
+      ; tables = StringMap.empty
+      ; tags = StringMap.empty
+      ; defined_names
+      }
+    in
+    { ls with by_name = StringMap.add name exports ls.by_name; collection }
 end
 
 module Concrete = Make (struct
   type extern_func = Concrete_extern.Func.t
-
-  type extern_module = Concrete_extern.Module.t
 
   let to_func_type = Concrete_extern.Func.to_func_type
 
@@ -768,8 +741,6 @@ end)
 module Symbolic = Make (struct
   type extern_func = Symbolic_extern.Func.t
 
-  type extern_module = Symbolic_extern.Module.t
-
   let to_func_type = Symbolic_extern.Func.to_func_type
 
   type data = Symbolic_data.t
@@ -779,8 +750,6 @@ end)
 
 module Abstract = Make (struct
   type extern_func = Abstract_extern.Func.t
-
-  type extern_module = Abstract_extern.Module.t
 
   let to_func_type = Abstract_extern.Func.to_func_type
 

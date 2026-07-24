@@ -5,8 +5,8 @@
 open Syntax
 
 let env () =
-  Link.Abstract.State.empty ()
-  |> Link.Abstract.Extern.modul ~name:"owi" Abstract_wasm_ffi.owi
+  Link.Abstract.empty ()
+  |> Link.Abstract.link_extern_module ~name:"owi" Abstract_wasm_ffi.owi
 
 let cmd ~source_file ~entry_point ~unsafe =
   let env = env () in
