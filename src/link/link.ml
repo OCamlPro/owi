@@ -255,6 +255,14 @@ module State = struct
     Ok { ls with by_name = StringMap.add name exports ls.by_name }
 
   let get_module (state : _ t) (i : int) = Dynarray.get state.modules i
+
+  let get_memory state ~modul i =
+    let modul = get_module state modul in
+    Linked_module.get_memory modul i
+
+  let get_data state ~modul i =
+    let modul = get_module state modul in
+    Linked_module.get_data modul i
 end
 
 (* TODO; the const evaluation is duplicated in many places and should be moved somewhere else! *)

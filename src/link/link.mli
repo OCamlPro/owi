@@ -10,15 +10,11 @@
 module Linked_module : sig
   type 'ext t
 
-  val get_memory : _ t -> int -> Concrete_memory.t Concrete_choice.t
-
   val get_func : _ t -> int -> Kind.func
 
   val get_table : _ t -> int -> Concrete_table.t Concrete_choice.t
 
   val get_elem : _ t -> int -> Concrete_elem.t
-
-  val get_data : _ t -> int -> Concrete_data.t Concrete_choice.t
 
   val get_global : _ t -> int -> Concrete_global.t Concrete_choice.t
 
@@ -39,6 +35,12 @@ module State : sig
   (** the empty link state *)
   val empty : unit -> _ t
 
+  val get_memory :
+    _ t -> modul:int -> int -> Concrete_memory.t Concrete_choice.t
+
+  val get_data : _ t -> modul:int -> int -> Concrete_data.t Concrete_choice.t
+
+  (* TODO: remove this! *)
   val get_module : 'extern t -> int -> 'extern Linked_module.t
 
   val get_exported_global :
