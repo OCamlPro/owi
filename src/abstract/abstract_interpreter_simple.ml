@@ -1158,12 +1158,133 @@ let eval_i32x4 ({ stack; ctx; _ } as state : Abstract_state.t) :
     let stack = Stack.push_i32 stack (Abstract_i32.unknown ctx) in
     State { state with stack }
 
-let eval_i64x2 ({ stack; _ } as state : Abstract_state.t) :
+let eval_i64x2 ({ stack; ctx; _ } as state : Abstract_state.t) :
   Text.i64x2_instr -> _ = function
-  | _ ->
-    let _ = stack in
-    let _ = state in
-    assert false
+  | Add ->
+    let _v, stack = Stack.pop_v128 stack in
+    let _v, stack = Stack.pop_v128 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Sub ->
+    let _v, stack = Stack.pop_v128 stack in
+    let _v, stack = Stack.pop_v128 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Mul ->
+    let _v, stack = Stack.pop_v128 stack in
+    let _v, stack = Stack.pop_v128 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Extend_low_i32x4_s ->
+    let _v, stack = Stack.pop_v128 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Extend_low_i32x4_u ->
+    let _v, stack = Stack.pop_v128 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Splat ->
+    let _v, stack = Stack.pop_i64 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Eq ->
+    let _v, stack = Stack.pop_v128 stack in
+    let _v, stack = Stack.pop_v128 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Ne ->
+    let _v, stack = Stack.pop_v128 stack in
+    let _v, stack = Stack.pop_v128 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Lt_s ->
+    let _v, stack = Stack.pop_v128 stack in
+    let _v, stack = Stack.pop_v128 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Gt_s ->
+    let _v, stack = Stack.pop_v128 stack in
+    let _v, stack = Stack.pop_v128 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Le_s ->
+    let _v, stack = Stack.pop_v128 stack in
+    let _v, stack = Stack.pop_v128 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Ge_s ->
+    let _v, stack = Stack.pop_v128 stack in
+    let _v, stack = Stack.pop_v128 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Extend_high_i32x4_s ->
+    let _v, stack = Stack.pop_v128 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Extend_high_i32x4_u ->
+    let _v, stack = Stack.pop_v128 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Extmul_low_i32x4_s ->
+    let _v, stack = Stack.pop_v128 stack in
+    let _v, stack = Stack.pop_v128 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Extmul_low_i32x4_u ->
+    let _v, stack = Stack.pop_v128 stack in
+    let _v, stack = Stack.pop_v128 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Extmul_high_i32x4_s ->
+    let _v, stack = Stack.pop_v128 stack in
+    let _v, stack = Stack.pop_v128 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Extmul_high_i32x4_u ->
+    let _v, stack = Stack.pop_v128 stack in
+    let _v, stack = Stack.pop_v128 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Abs ->
+    let _v, stack = Stack.pop_v128 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Neg ->
+    let _v, stack = Stack.pop_v128 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | All_true ->
+    let _v, stack = Stack.pop_v128 stack in
+    let stack = Stack.push_i32 stack (Abstract_i32.unknown ctx) in
+    State { state with stack }
+  | Bitmask ->
+    let _v, stack = Stack.pop_v128 stack in
+    let stack = Stack.push_i32 stack (Abstract_i32.unknown ctx) in
+    State { state with stack }
+  | Shl ->
+    let _v, stack = Stack.pop_i32 stack in
+    let _v, stack = Stack.pop_v128 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Shr_s ->
+    let _v, stack = Stack.pop_i32 stack in
+    let _v, stack = Stack.pop_v128 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Shr_u ->
+    let _v, stack = Stack.pop_i32 stack in
+    let _v, stack = Stack.pop_v128 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
+  | Extract_lane _ ->
+    let _v, stack = Stack.pop_v128 stack in
+    let stack = Stack.push_i64 stack (Abstract_i64.unknown ctx) in
+    State { state with stack }
+  | Replace_lane _ ->
+    let _v, stack = Stack.pop_i64 stack in
+    let _v, stack = Stack.pop_v128 stack in
+    let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
+    State { state with stack }
 
 let eval_f32x4 ({ stack; _ } as state : Abstract_state.t) :
   Text.f32x4_instr -> _ = function
