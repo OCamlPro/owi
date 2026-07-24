@@ -5,14 +5,6 @@
 (** Module to link a binary/extern module and producing a runnable module along
     with a link state. *)
 
-(** Runtime module *)
-
-module Linked_module : sig
-  type 'ext t
-
-  val fold_globals : (int -> Concrete_global.t -> 'a -> 'a) -> 'a -> 'b t -> 'a
-end
-
 (* Link State *)
 
 module State : sig
@@ -35,12 +27,12 @@ module State : sig
   val get_global :
     modul:int -> _ t -> int -> Concrete_global.t Concrete_choice.t
 
+  val fold_globals :
+    modul:int -> (int -> Concrete_global.t -> 'a -> 'a) -> 'a -> 'b t -> 'a
+
   val get_extern_func : modul:int -> 'ext t -> int -> 'ext
 
   val get_init_code : modul:int -> _ t -> Binary.expr Annotated.t
-
-  (* TODO: remove this! *)
-  val get_module : 'extern t -> int -> 'extern Linked_module.t
 
   val get_exported_global :
        _ t

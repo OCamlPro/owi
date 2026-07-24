@@ -1711,10 +1711,6 @@ module Link : sig
     val empty : unit -> 'f t
   end
 
-  module Linked_module : sig
-    type 'extern t
-  end
-
   module Binary : sig
     val concrete_module :
          name:string option
