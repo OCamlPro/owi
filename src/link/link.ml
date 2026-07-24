@@ -34,17 +34,17 @@ struct
     let get_global (modul : t) id =
       match IMap.find_opt id modul.globals with
       | None -> assert false
-      | Some v -> Concrete_choice.return v
+      | Some v -> v
 
     let get_memory (modul : t) id =
       match IMap.find_opt id modul.memories with
       | None -> assert false
-      | Some v -> Concrete_choice.return v
+      | Some v -> v
 
     let get_table (modul : t) id =
       match IMap.find_opt id modul.tables with
       | None -> assert false
-      | Some v -> Concrete_choice.return v
+      | Some v -> v
 
     let get_func (modul : t) id =
       match IMap.find_opt id modul.functions with
@@ -54,7 +54,7 @@ struct
     let get_data (modul : t) id =
       match IMap.find_opt id modul.data with
       | None -> assert false
-      | Some v -> Concrete_choice.return v
+      | Some v -> v
 
     let get_elem (modul : t) id =
       match IMap.find_opt id modul.elem with
@@ -638,31 +638,23 @@ struct
 
   let populate_exports modul (exports : Binary.Module.Exports.t) :
     State.exports Result.t =
-    let fill_exports get_modul exports names =
+    let fill_exports get_value exports names =
       array_fold_left
         (fun (acc, names) ({ name; id; _ } : Binary.Export.t) ->
-          let value = get_modul modul id in
-          if StringSet.mem name names then Error `Duplicate_export_name
-          else Ok (StringMap.add name value acc, StringSet.add name names) )
-        (StringMap.empty, names) exports
-    in
-    let fill_exports' get_modul exports names =
-      array_fold_left
-        (fun (acc, names) ({ name; id; _ } : Binary.Export.t) ->
-          let* value = get_modul modul id in
+          let value = get_value modul id in
           if StringSet.mem name names then Error `Duplicate_export_name
           else Ok (StringMap.add name value acc, StringSet.add name names) )
         (StringMap.empty, names) exports
     in
     let names = StringSet.empty in
     let* globals, names =
-      fill_exports' Linked_module.get_global exports.global names
+      fill_exports Linked_module.get_global exports.global names
     in
     let* memories, names =
-      fill_exports' Linked_module.get_memory exports.mem names
+      fill_exports Linked_module.get_memory exports.mem names
     in
     let* tables, names =
-      fill_exports' Linked_module.get_table exports.table names
+      fill_exports Linked_module.get_table exports.table names
     in
     let* functions, names =
       fill_exports Linked_module.get_func exports.func names
@@ -749,8 +741,8 @@ struct
       in
       { ls with by_name = StringMap.add name exports ls.by_name; collection }
 
-    let modul ~name (modul : M.extern_module) (link_state : State.t) =
-      aux ~name link_state M.to_func_type modul
+    let modul ~name (modul : M.extern_module) (env : State.t) =
+      aux ~name env M.to_func_type modul
   end
 end
 

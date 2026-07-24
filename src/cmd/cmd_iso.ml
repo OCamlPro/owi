@@ -72,7 +72,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
         match List.length pt with 1 -> false | _n -> true ) )
   in
 
-  let link_state =
+  let env =
     Link.Symbolic.State.empty ()
     |> Link.Symbolic.Extern.modul ~name:"owi" Symbolic_wasm_ffi.owi
     |> Link.Symbolic.Extern.modul ~name:"fuzzing-support"
@@ -80,13 +80,13 @@ let check_iso ~unsafe export_name export_type module1 module2 =
     |> Link.Symbolic.Extern.modul ~name:"env"
          (emscripten_fuzzing_support_module ())
   in
-  let* _module, link_state =
-    Compile.Binary.until_symbolic_link ~name:(Some module_name1) ~unsafe
-      link_state module1
+  let* _module, env =
+    Compile.Binary.until_symbolic_link ~name:(Some module_name1) ~unsafe env
+      module1
   in
-  let* _module, link_state =
-    Compile.Binary.until_symbolic_link ~name:(Some module_name2) ~unsafe
-      link_state module2
+  let* _module, env =
+    Compile.Binary.until_symbolic_link ~name:(Some module_name2) ~unsafe env
+      module2
   in
 
   let typ = Binary.Bt_raw (None, export_type) in
@@ -282,11 +282,11 @@ let check_iso ~unsafe export_name export_type module1 module2 =
   let text_modul = Binary_to_text.modul modul in
   Log.debug (fun m ->
     m "generated module:@\n  @[<v>%a@]" Text.Module.pp text_modul );
-  let+ modul, link_state =
-    Compile.Binary.until_symbolic_link ~unsafe:false ~name:None link_state modul
+  let+ modul, env =
+    Compile.Binary.until_symbolic_link ~unsafe:false ~name:None env modul
   in
   let module I = Interpret.Symbolic (Interpret.Default_parameters) in
-  I.modul link_state ~modul
+  I.modul env ~modul
 
 module String_set = Set.Make (String)
 

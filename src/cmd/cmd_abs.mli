@@ -2,7 +2,7 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-val link_state : unit -> Link.Abstract.State.t
+val env : unit -> Link.Abstract.State.t
 
 val cmd :
      source_file:Fpath.t
