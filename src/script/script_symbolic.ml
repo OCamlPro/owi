@@ -30,8 +30,7 @@ let action ((link_state, monadic_state) : state) action : _ Result.t =
         mod_id f Wast.pp_consts args );
     let* f, modul = Link.State.get_func_from_module link_state mod_id f in
     let stack = List.rev_map (Symbolic_value.of_script_const ~ty) args in
-    let modules = Link.State.get_modules link_state in
-    let to_run = I.exec_vfunc_from_outside ~locals:stack ~modul ~modules f in
+    let to_run = I.exec_vfunc_from_outside ~locals:stack ~modul ~link_state f in
     run_monad ~to_run ~monadic_state
   | Get (mod_id, name) ->
     Log.info (fun m -> m "get...");

@@ -161,14 +161,12 @@ module State = struct
     ; defined_names : StringSet.t
     }
 
-  type 'f modules = 'f Linked_module.t Dynarray.t
-
   type 'f t =
     { by_name : exports StringMap.t
     ; by_id : (exports * int) StringMap.t
     ; last : (exports * int) option
     ; collection : ('f * Binary.func_type) Dynarray.t
-    ; modules : 'f modules
+    ; modules : 'f Linked_module.t Dynarray.t
     }
 
   let empty () =
@@ -184,8 +182,6 @@ module State = struct
     let collection = Dynarray.copy collection in
     let modules = Dynarray.copy modules in
     { by_name; by_id; last; collection; modules }
-
-  let get_modules state = state.modules
 
   let get_last state = state.last
 
@@ -257,6 +253,8 @@ module State = struct
         match ls.last with Some e -> Ok e | None -> Error `Unbound_last_module )
     in
     Ok { ls with by_name = StringMap.add name exports ls.by_name }
+
+  let get_module (state : _ t) (i : int) = Dynarray.get state.modules i
 end
 
 (* TODO; the const evaluation is duplicated in many places and should be moved somewhere else! *)

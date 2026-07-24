@@ -9,6 +9,8 @@ type host_externref = int
 
 let ty : host_externref Type.Id.t = Type.Id.make ()
 
+module I = Interpret.Concrete (Interpret.Default_parameters)
+
 let action (link_state : Concrete_extern.Func.t Link.State.t) = function
   | Wast.Invoke (mod_id, f, args) -> begin
     Log.info (fun m ->
@@ -17,9 +19,7 @@ let action (link_state : Concrete_extern.Func.t Link.State.t) = function
         mod_id f Wast.pp_consts args );
     let* f, modul = Link.State.get_func_from_module link_state mod_id f in
     let locals = List.rev_map (Concrete_value.of_script_const ~ty) args in
-    let modules = Link.State.get_modules link_state in
-    let module I = Interpret.Concrete (Interpret.Default_parameters) in
-    I.exec_vfunc_from_outside ~locals ~modul ~modules f
+    I.exec_vfunc_from_outside ~locals ~modul ~link_state f
     end
   | Get (mod_id, name) ->
     Log.info (fun m -> m "get...");
@@ -36,7 +36,6 @@ let run ~no_exhaustion script =
   let script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
   let registered = ref false in
   let curr_module = ref 0 in
-  let module I = Interpret.Concrete (Interpret.Default_parameters) in
   list_fold_left
     (fun (link_state : Concrete_extern.Func.t Link.State.t) -> function
       | Wast.Text_module (false, m) ->

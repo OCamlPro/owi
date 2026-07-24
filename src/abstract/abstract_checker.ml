@@ -51,23 +51,23 @@ let check_f64 ~uuid ~invariants : Binary.f64_instr -> unit = function
     ()
 
 let rec check_expr (expr : Binary.expr Annotated.t)
-  ~(invariants : Abstract_invariant.t) ~modul ~modules =
-  List.iter (check_instr ~invariants ~modul ~modules) expr.raw
+  ~(invariants : Abstract_invariant.t) ~modul ~link_state =
+  List.iter (check_instr ~invariants ~modul ~link_state) expr.raw
 
 and check_instr (instr : Binary.instr Annotated.t)
-  ~(invariants : Abstract_invariant.t) ~modul ~modules =
+  ~(invariants : Abstract_invariant.t) ~modul ~link_state =
   match instr.raw with
-  | Block (_str_opt, _, expr) -> check_expr expr ~invariants ~modul ~modules
+  | Block (_str_opt, _, expr) -> check_expr expr ~invariants ~modul ~link_state
   | If_else (_str_opt, _bt, expr_then, expr_else) ->
-    check_expr ~invariants ~modul ~modules expr_then;
-    check_expr ~invariants ~modul ~modules expr_else
-  | Loop (_str_opt, _bt, expr) -> check_expr ~invariants ~modul ~modules expr
+    check_expr ~invariants ~modul ~link_state expr_then;
+    check_expr ~invariants ~modul ~link_state expr_else
+  | Loop (_str_opt, _bt, expr) -> check_expr ~invariants ~modul ~link_state expr
   | Call idx ->
     let func = Link.Linked_module.get_func modul idx in
     begin match func with
     | Wasm { func; idx } ->
-      let modul = Dynarray.get modules idx in
-      check_expr ~invariants ~modul ~modules func.body
+      let modul = Link.State.get_module link_state idx in
+      check_expr ~invariants ~modul ~link_state func.body
     | Extern _ -> ()
     end
   | I32 i32_instr -> check_i32 ~uuid:instr.uuid ~invariants i32_instr
@@ -91,6 +91,5 @@ and check_instr (instr : Binary.instr Annotated.t)
 let check_module (link_state : Abstract_extern.Func.t Link.State.t)
   (modul : Abstract_extern.Func.t Link.Linked_module.t)
   (invariants : Abstract_invariant.t) =
-  let modules = Link.State.get_modules link_state in
   let to_run = Link.Linked_module.get_expr_to_run modul in
-  List.iter (check_expr ~invariants ~modul ~modules) to_run
+  List.iter (check_expr ~invariants ~modul ~link_state) to_run

@@ -38,14 +38,12 @@ module StringMap : Map.S with type key = string
 module StringSet : Set.S
 
 module State : sig
-  type 'extern modules = 'extern Linked_module.t Dynarray.t
-
   type 'extern t
 
   (** the empty link state *)
-  val empty : unit -> 'extern t
+  val empty : unit -> _ t
 
-  val get_modules : 'extern t -> 'extern modules
+  val get_module : 'extern t -> int -> 'extern Linked_module.t
 
   val get_global_from_module :
     _ t -> string option -> string -> Concrete_global.t Result.t

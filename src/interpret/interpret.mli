@@ -25,7 +25,7 @@ module Concrete (_ : Parameters) : sig
   val exec_vfunc_from_outside :
        locals:Concrete_value.t list
     -> modul:int
-    -> modules:Concrete_env.t Dynarray.t
+    -> link_state:Concrete_extern.Func.t Link.State.t
     -> Kind.func
     -> Concrete_value.t list Concrete_choice.t
 end
@@ -39,7 +39,7 @@ module Symbolic (_ : Parameters) : sig
   val exec_vfunc_from_outside :
        locals:Symbolic_value.t list
     -> modul:int
-    -> modules:Symbolic_env.t Dynarray.t
+    -> link_state:Symbolic_extern.Func.t Link.State.t
     -> Kind.func
     -> Symbolic_value.t list Symbolic_choice.t
 end

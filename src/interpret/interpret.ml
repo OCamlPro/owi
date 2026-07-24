@@ -162,10 +162,10 @@ struct
       ; block_stack : block_stack
       ; func_rt : result_type
       ; modul : Env.t
-      ; modules : Env.t Dynarray.t
+      ; link_state : Extern_func.t Link.State.t
       }
 
-    let empty_exec_state ~locals ~modul ~modules =
+    let empty_exec_state ~locals ~modul ~link_state =
       { return_state = None
       ; stack = []
       ; locals = Locals.of_list locals
@@ -173,7 +173,7 @@ struct
       ; block_stack = []
       ; func_rt = []
       ; modul
-      ; modules
+      ; link_state
       }
 
     type instr_result =
@@ -1918,13 +1918,13 @@ struct
       ; func_rt = result_type
       ; return_state
       ; modul
-      ; modules = state.modules
+      ; link_state = state.link_state
       }
 
   let exec_vfunc ~return (state : State.exec_state) (func : Kind.func) =
     match func with
     | Wasm { func; idx } ->
-      let modul = Dynarray.get state.modules idx in
+      let modul = Link.State.get_module state.link_state idx in
       Choice.return (State.Continue (exec_func ~return state modul func))
     | Extern { idx } ->
       let f = Env.get_extern_func state.modul idx in
@@ -2285,13 +2285,13 @@ struct
       | State.Continue state -> loop ~heartbeat state
       | State.Return res -> Choice.return res )
 
-  let exec_expr ~heartbeat modules modul locals stack expr bt =
+  let exec_expr ~heartbeat link_state modul locals stack expr bt =
     let state : State.exec_state =
       let func_rt = match bt with None -> [] | Some rt -> rt in
       { stack
       ; locals
       ; modul
-      ; modules
+      ; link_state
       ; func_rt
       ; block_stack = []
       ; pc = expr
@@ -2337,9 +2337,8 @@ struct
           end
           else Choice.return () )
 
-  let modul (link_state : 'f Link.State.t)
+  let modul (link_state : Extern_func.t Link.State.t)
     (modul : 'extern_func Link.Linked_module.t) : unit Choice.t =
-    let modules = Link.State.get_modules link_state in
     let to_run = Link.Linked_module.get_expr_to_run modul in
     let heartbeat = make_heartbeat () in
     Log.info (fun m -> m "interpreting ...");
@@ -2350,7 +2349,7 @@ struct
             (* WARN: it can be tempting to remove the next line, but you shouldn't! (trust me, I've tried before... )*)
             let* () = acc in
             let+ _end_stack =
-              exec_expr ~heartbeat modules modul (State.Locals.of_list [])
+              exec_expr ~heartbeat link_state modul (State.Locals.of_list [])
                 Stack.empty to_run None
             in
             () )
@@ -2358,16 +2357,16 @@ struct
       end
     with Stack_overflow -> Choice.trap `Call_stack_exhausted
 
-  let exec_vfunc_from_outside ~locals ~modul ~modules (func : Kind.func) :
+  let exec_vfunc_from_outside ~locals ~modul ~link_state (func : Kind.func) :
     _ list Choice.t =
-    let modul = Dynarray.get modules modul in
-    let exec_state = State.empty_exec_state ~locals ~modul ~modules in
+    let modul = Link.State.get_module link_state modul in
+    let exec_state = State.empty_exec_state ~locals ~modul ~link_state in
     try
       begin
         let* state =
           match func with
           | Kind.Wasm { func; idx } ->
-            let modul = Dynarray.get exec_state.State.modules idx in
+            let modul = Link.State.get_module link_state idx in
             let state = State.{ exec_state with stack = locals } in
             Choice.return
               (State.Continue (exec_func ~return:true state modul func))

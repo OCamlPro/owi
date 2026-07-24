@@ -23,8 +23,7 @@ let do_action ctx link_state = function
       |> List.mapi (fun i v -> (i, v))
     in
     let locals = Abstract_locals.of_list stack in
-    let modules = Link.State.get_modules link_state in
-    I.exec_vfunc_from_outside ~ctx ~locals ~modul ~modules f
+    I.exec_vfunc_from_outside ~ctx ~locals ~modul ~link_state f
     end
   | Get (_mod_id, _name) ->
     Log.info (fun m -> m "get...");
