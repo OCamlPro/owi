@@ -561,6 +561,7 @@ let eval_v128 ({ stack; ctx; _ } as state : Abstract_state.t) :
     let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
     State { state with stack }
 
+(* TODO: handle this correctly *)
 let eval_i8x16 ({ stack; ctx; _ } as state : Abstract_state.t) :
   Text.i8x16_instr -> _ = function
   | Add ->
@@ -741,6 +742,7 @@ let eval_i8x16 ({ stack; ctx; _ } as state : Abstract_state.t) :
     let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
     State { state with stack }
 
+(* TODO: handle this correctly *)
 let eval_i16x8 ({ stack; ctx; _ } as state : Abstract_state.t) :
   Text.i16x8_instr -> _ = function
   | Add ->
@@ -961,6 +963,7 @@ let eval_i16x8 ({ stack; ctx; _ } as state : Abstract_state.t) :
     let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
     State { state with stack }
 
+(* TODO: handle this correctly *)
 let eval_i32x4 ({ stack; ctx; _ } as state : Abstract_state.t) :
   Text.i32x4_instr -> _ = function
   | Add ->
@@ -1158,6 +1161,7 @@ let eval_i32x4 ({ stack; ctx; _ } as state : Abstract_state.t) :
     let stack = Stack.push_i32 stack (Abstract_i32.unknown ctx) in
     State { state with stack }
 
+(* TODO: handle this correctly *)
 let eval_i64x2 ({ stack; ctx; _ } as state : Abstract_state.t) :
   Text.i64x2_instr -> _ = function
   | Add ->
@@ -1286,6 +1290,7 @@ let eval_i64x2 ({ stack; ctx; _ } as state : Abstract_state.t) :
     let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
     State { state with stack }
 
+(* TODO: handle this correctly *)
 let eval_f32x4 ({ stack; ctx; _ } as state : Abstract_state.t) :
   Text.f32x4_instr -> _ = function
   | Abs ->
@@ -1428,6 +1433,7 @@ let eval_f32x4 ({ stack; ctx; _ } as state : Abstract_state.t) :
     let stack = Stack.push_v128 stack (Abstract_v128.unknown ctx) in
     State { state with stack }
 
+(* TODO: handle this correctly *)
 let eval_f64x2 ({ stack; _ } as state : Abstract_state.t) :
   Text.f64x2_instr -> _ = function
   | _ ->
