@@ -583,11 +583,22 @@ module DenotFixpoint (S : DATA_STATE) = struct
       in
       (None, JumpTarget.of_list all_cases)
     | Return -> (None, JumpTarget.of_list [ (Ret, [ abs_state ]) ])
-    | _ -> (
+    | Drop | Nop | Unreachable | Any_convert_extern | Extern_convert_any | I32 _
+    | I64 _ | F32 _ | F64 _ | V128 _ | I8x16 _ | I16x8 _ | I32x4 _ | I64x2 _
+    | F32x4 _ | F64x2 _ | Ref _ | Local _ | Global _ | Table _ | Elem _
+    | Memory _ | Data _ | I31 _ | Struct _ | Array _ -> (
       let res = S.eval_instr abs_state instr in
       match res with
       | State abs_state -> (Some { state with abs_state }, JumpTarget.empty)
       | Unreachable -> (None, JumpTarget.empty) )
+    | Br_on_non_null _
+    | Br_on_cast (_, _, _)
+    | Br_on_cast_fail (_, _, _)
+    | Return_call _
+    | Return_call_indirect (_, _)
+    | Return_call_ref _ | Br_on_null _ | Call_ref _
+    | Call_indirect (_, _) ->
+      (* TODO! *) assert false
 end
 
 module ConcreteFixpoint = DenotFixpoint (Abstract_interpreter_simple)
