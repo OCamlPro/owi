@@ -23,18 +23,22 @@ let run_monad ~to_run ~monadic_state =
 let action ((link_state, monadic_state) : state) action : _ Result.t =
   let open Syntax in
   match action with
-  | Wast.Invoke (mod_id, f, args) ->
+  | Wast.Invoke (module_name, func_name, args) ->
     Log.info (fun m ->
       m "invoke %a %s %a..."
         (Fmt.option ~none:Fmt.nop Fmt.string)
-        mod_id f Wast.pp_consts args );
-    let* f, modul = Link.State.get_func_from_module link_state mod_id f in
+        module_name func_name Wast.pp_consts args );
+    let* f, modul =
+      Link.State.get_exported_func link_state ~module_name ~func_name
+    in
     let stack = List.rev_map (Symbolic_value.of_script_const ~ty) args in
     let to_run = I.exec_vfunc_from_outside ~locals:stack ~modul ~link_state f in
     run_monad ~to_run ~monadic_state
-  | Get (mod_id, name) ->
+  | Get (module_name, global_name) ->
     Log.info (fun m -> m "get...");
-    let* global = Link.State.get_global_from_module link_state mod_id name in
+    let* global =
+      Link.State.get_exported_global link_state ~module_name ~global_name
+    in
     let v = Symbolic_value.of_concrete global.value in
     Ok ([ v ], monadic_state)
 
