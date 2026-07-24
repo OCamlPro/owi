@@ -14,21 +14,23 @@ let run_file ~parameters ~source_file =
       } =
     parameters
   in
-  let* m = Compile.File.until_validate ~unsafe source_file in
+  let* modul = Compile.File.until_validate ~unsafe source_file in
   (* TODO: enable this once the smart strategy is fully implemented
   ( match exploration_strategy with
   | Smart -> Cmd_call_graph.compute_distances m entry_point
   | _ -> () );
   *)
-  let* m = Cmd_utils.set_entry_point entry_point invoke_with_symbols m in
+  let* modul =
+    Cmd_utils.set_entry_point entry_point invoke_with_symbols modul
+  in
 
   let* abstract_invariant =
     if parameters.generate_abstract_invariant then
       let link_state = Cmd_abs.link_state () in
-      let+ m, link_state =
-        Compile.Binary.until_abstract_link ~unsafe ~name:None link_state m
+      let+ modul, link_state =
+        Compile.Binary.until_abstract_link ~unsafe ~name:None link_state modul
       in
-      let state = Abstract_interpreter_control_flow.modul link_state m in
+      let state = Abstract_interpreter_control_flow.modul link_state ~modul in
       state.invariant
     else Ok (Abstract_invariant.empty ())
   in
@@ -39,9 +41,9 @@ let run_file ~parameters ~source_file =
          Symbolic_wasm_ffi.wasi_snapshot_preview1
     |> Link.Extern.symbolic_module ~name:"owi" Symbolic_wasm_ffi.owi
   in
-  let+ m, link_state =
+  let+ modul, link_state =
     (* unsafe is set to true because the module was already validated before *)
-    Compile.Binary.until_symbolic_link ~unsafe:true ~name:None link_state m
+    Compile.Binary.until_symbolic_link ~unsafe:true ~name:None link_state modul
   in
   let module Parameters = struct
     let throw_away_trap =
@@ -58,7 +60,7 @@ let run_file ~parameters ~source_file =
     let abstract_invariant = abstract_invariant
   end in
   let module I = Interpret.Symbolic (Parameters) in
-  Benchmark.with_utime @@ fun () -> I.modul link_state m
+  Benchmark.with_utime @@ fun () -> I.modul link_state ~modul
 
 (* NB: This function propagates potential errors (Result.err) occurring
              during evaluation (OS, syntax error, etc.), except for Trap and Assert,

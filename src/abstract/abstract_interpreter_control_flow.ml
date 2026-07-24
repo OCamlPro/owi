@@ -16,7 +16,7 @@ end
 
 type interpreter_state =
   { abs_state : Abstract_state.t
-  ; modul : Abstract_extern.Func.t Link.Linked_module.t
+  ; current_module : int
   ; link_state : Abstract_extern.Func.t Link.State.t
   }
 
@@ -366,8 +366,8 @@ module DenotFixpoint (S : DATA_STATE) = struct
     in
     Some { state with abs_state }
 
-  and eval_instr ({ abs_state; modul; link_state } as state : interpreter_state)
-    :
+  and eval_instr
+    ({ abs_state; current_module; link_state } as state : interpreter_state) :
        Binary.instr Annotated.t
     -> interpreter_state option * Abstract_state.t list JumpTarget.t =
    fun instr ->
@@ -386,11 +386,11 @@ module DenotFixpoint (S : DATA_STATE) = struct
       m "running instr : %a" (Binary.pp_instr ~short:true) instr.raw );
     match instr.raw with
     | Call idx ->
+      let modul = Link.State.get_module link_state current_module in
       let func = Link.Linked_module.get_func modul idx in
       begin match func with
-      | Wasm { func; idx } ->
-        let modul = Link.State.get_module link_state idx in
-        let r = eval_func { state with modul } func in
+      | Wasm { func; modul } ->
+        let r = eval_func { state with current_module = modul } func in
         (r, JumpTarget.empty)
       | Extern { idx } -> (
         let f = Link.Linked_module.get_extern_func modul idx in
@@ -578,11 +578,13 @@ end
 
 module ConcreteFixpoint = DenotFixpoint (Abstract_interpreter_simple)
 
-let eval_exprs (modul : Abstract_extern.Func.t Link.Linked_module.t) abs_state
-  link_state =
+let eval_exprs ~(modul : int) abs_state link_state =
   (* TODO: init_code is no more an exprs, it's a regular expr now, this function can probably be removed and eval_expr could be used instead! *)
-  let init_code = Link.Linked_module.get_init_code modul in
-  let state = { abs_state; modul; link_state } in
+  let init_code =
+    let modul = Link.State.get_module link_state modul in
+    Link.Linked_module.get_init_code modul
+  in
+  let state = { abs_state; current_module = modul; link_state } in
   let state =
     match ConcreteFixpoint.eval_expr state init_code with
     | None, _mapping -> state
@@ -591,15 +593,20 @@ let eval_exprs (modul : Abstract_extern.Func.t Link.Linked_module.t) abs_state
   state.abs_state
 
 let modul_with_ctx ctx (link_state : Abstract_extern.Func.t Link.State.t)
-  (modul : Abstract_extern.Func.t Link.Linked_module.t) =
-  let abs_state = Abstract_state.empty modul Link.Linked_module.fold_globals in
+  ~(modul : int) =
+  let abs_state =
+    let modul = Link.State.get_module link_state modul in
+    Abstract_state.empty modul Link.Linked_module.fold_globals
+  in
   let abs_state = { abs_state with ctx } in
-  eval_exprs modul abs_state link_state
+  eval_exprs ~modul abs_state link_state
 
-let modul (link_state : Abstract_extern.Func.t Link.State.t)
-  (modul : Abstract_extern.Func.t Link.Linked_module.t) =
-  let abs_state = Abstract_state.empty modul Link.Linked_module.fold_globals in
-  eval_exprs modul abs_state link_state
+let modul (link_state : Abstract_extern.Func.t Link.State.t) ~(modul : int) =
+  let abs_state =
+    let modul = Link.State.get_module link_state modul in
+    Abstract_state.empty modul Link.Linked_module.fold_globals
+  in
+  eval_exprs ~modul abs_state link_state
 
 let exec_vfunc_from_outside ~ctx ~locals ~modul ~link_state (func : Kind.func) =
   let modul = Link.State.get_module link_state modul in
@@ -609,8 +616,7 @@ let exec_vfunc_from_outside ~ctx ~locals ~modul ~link_state (func : Kind.func) =
   in
   try
     match func with
-    | Kind.Wasm { func; idx } -> (
-      let modul = Link.State.get_module link_state idx in
+    | Kind.Wasm { func; modul } -> (
       let stack =
         Abstract_locals.to_list locals
         |> List.sort (fun (i1, _) (i2, _) -> compare i1 i2)
@@ -618,7 +624,9 @@ let exec_vfunc_from_outside ~ctx ~locals ~modul ~link_state (func : Kind.func) =
       in
       let abs_state = { abs_state with stack } in
       match
-        ConcreteFixpoint.eval_func { abs_state; modul; link_state } func
+        ConcreteFixpoint.eval_func
+          { abs_state; current_module = modul; link_state }
+          func
       with
       | Some state -> Ok state.abs_state
       | None -> Fmt.error_msg "failed" )

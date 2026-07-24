@@ -1590,11 +1590,11 @@ module Kind : sig
   type func = private
     | Wasm of
         { func : Binary.Func.t
-        ; idx : int
+        ; modul : int
         }
     | Extern of { idx : int }
 
-  val wasm : Binary.Func.t -> int -> func
+  val wasm : Binary.Func.t -> modul:int -> func
 
   val extern : int -> func
 
@@ -1720,9 +1720,7 @@ module Link : sig
          name:string option
       -> Concrete_extern.Func.t State.t
       -> Binary.Module.t
-      -> ( Concrete_extern.Func.t Linked_module.t
-         * Concrete_extern.Func.t State.t )
-         Result.t
+      -> (int * Concrete_extern.Func.t State.t) Result.t
   end
 
   module Extern : sig
@@ -1747,9 +1745,7 @@ module Compile : sig
       -> name:string option
       -> Concrete_extern.Func.t Link.State.t
       -> Text.Module.t
-      -> ( Concrete_extern.Func.t Link.Linked_module.t
-         * Concrete_extern.Func.t Link.State.t )
-         Result.t
+      -> (int * Concrete_extern.Func.t Link.State.t) Result.t
   end
 
   module Binary : sig
@@ -1758,9 +1754,7 @@ module Compile : sig
       -> name:string option
       -> Concrete_extern.Func.t Link.State.t
       -> Binary.Module.t
-      -> ( Concrete_extern.Func.t Link.Linked_module.t
-         * Concrete_extern.Func.t Link.State.t )
-         Result.t
+      -> (int * Concrete_extern.Func.t Link.State.t) Result.t
   end
 end
 
@@ -1910,16 +1904,12 @@ module Interpret : sig
 
   module Concrete (_ : Parameters) : sig
     val modul :
-         Concrete_extern.Func.t Link.State.t
-      -> Concrete_extern.Func.t Link.Linked_module.t
-      -> unit Result.t
+      Concrete_extern.Func.t Link.State.t -> modul:int -> unit Result.t
   end
 
   module Symbolic (_ : Parameters) : sig
     val modul :
-         Symbolic_extern.Func.t Link.State.t
-      -> Symbolic_extern.Func.t Link.Linked_module.t
-      -> unit Symbolic_choice.t
+      Symbolic_extern.Func.t Link.State.t -> modul:int -> unit Symbolic_choice.t
   end
 end
 

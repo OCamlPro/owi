@@ -81,7 +81,7 @@ let pure_wasm_module =
   | Ok modul -> modul
 
 (* our pure wasm module, linked with `sausage` *)
-let module_to_run, link_state =
+let modul, link_state =
   match
     Compile.Text.until_concrete_link link_state ~unsafe:false ~name:None
       pure_wasm_module
@@ -93,9 +93,7 @@ module I = Interpret.Concrete (Interpret.Default_parameters)
 
 (* let's run it ! it will print the values as defined in the print_i32 function *)
 let () =
-  match I.modul link_state module_to_run with
-  | Error _o -> assert false
-  | Ok () -> ()
+  match I.modul link_state ~modul with Error _o -> assert false | Ok () -> ()
 ```
 
 You'll get the expected result:
@@ -206,7 +204,7 @@ let pure_wasm_module =
   | Ok modul -> modul
 
 (* our pure wasm module, linked with `chorizo` *)
-let module_to_run, link_state =
+let modul, link_state =
   match
     Compile.Text.until_concrete_link link_state ~unsafe:false ~name:None
       pure_wasm_module
@@ -218,9 +216,7 @@ module I = Interpret.Concrete (Interpret.Default_parameters)
 
 (* let's run it ! it will print the values as defined in the print_i64 function *)
 let () =
-  match I.modul link_state module_to_run with
-  | Error _ -> assert false
-  | Ok () -> ()
+  match I.modul link_state ~modul with Error _ -> assert false | Ok () -> ()
 ```
 
 Running the above program should yield:

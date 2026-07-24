@@ -38,11 +38,11 @@ module Owi_regular : INTERPRET = struct
     let* simplified = Owi.Compile.Text.until_binary ~unsafe:false modul in
     let* () = Owi.Binary_validate.modul simplified in
     let link_state = Owi.Link.State.empty () in
-    let* regular, link_state =
+    let* modul, link_state =
       Owi.Link.Binary.concrete_module ~name:None link_state simplified
     in
     let module I = Owi.Interpret.Concrete (Owi.Interpret.Default_parameters) in
-    timeout_call_run (fun () -> I.modul link_state regular)
+    timeout_call_run (fun () -> I.modul link_state ~modul)
 
   let name = "owi_concrete"
 end

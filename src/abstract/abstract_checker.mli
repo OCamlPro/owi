@@ -4,6 +4,6 @@
 
 val check_module :
      Abstract_extern.Func.t Link.State.t
-  -> Abstract_extern.Func.t Link.Linked_module.t
+  -> modul:int
   -> Abstract_invariant.t
   -> unit

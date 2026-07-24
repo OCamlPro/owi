@@ -63,10 +63,12 @@ and check_instr (instr : Binary.instr Annotated.t)
     check_expr ~invariants ~modul ~link_state expr_else
   | Loop (_str_opt, _bt, expr) -> check_expr ~invariants ~modul ~link_state expr
   | Call idx ->
-    let func = Link.Linked_module.get_func modul idx in
+    let func =
+      let modul = Link.State.get_module link_state modul in
+      Link.Linked_module.get_func modul idx
+    in
     begin match func with
-    | Wasm { func; idx } ->
-      let modul = Link.State.get_module link_state idx in
+    | Wasm { func; modul } ->
       check_expr ~invariants ~modul ~link_state func.body
     | Extern _ -> ()
     end
@@ -89,7 +91,9 @@ and check_instr (instr : Binary.instr Annotated.t)
     ()
 
 let check_module (link_state : Abstract_extern.Func.t Link.State.t)
-  (modul : Abstract_extern.Func.t Link.Linked_module.t)
-  (invariants : Abstract_invariant.t) =
-  let init_code = Link.Linked_module.get_init_code modul in
+  ~(modul : int) (invariants : Abstract_invariant.t) =
+  let init_code =
+    let modul = Link.State.get_module link_state modul in
+    Link.Linked_module.get_init_code modul
+  in
   check_expr ~invariants ~modul ~link_state init_code

@@ -39,10 +39,10 @@ let run_one ~no_exhaustion:_
   let* link_state, ctx = state in
   match cmd with
   | Wast.Text_module (false, m) ->
-    let* m, link_state =
+    let* modul, link_state =
       Compile.Text.until_abstract_link link_state ~unsafe ~name:None m
     in
-    let state = I.modul_with_ctx ctx link_state m in
+    let state = I.modul_with_ctx ctx link_state ~modul in
     Ok (link_state, state.ctx)
   | Assert (Assert_return (action, res)) ->
     let* state = do_action ctx link_state action in

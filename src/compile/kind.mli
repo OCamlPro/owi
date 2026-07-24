@@ -5,11 +5,11 @@
 type func = private
   | Wasm of
       { func : Binary.Func.t
-      ; idx : int
+      ; modul : int
       }
   | Extern of { idx : int }
 
-val wasm : Binary.Func.t -> int -> func
+val wasm : Binary.Func.t -> modul:int -> func
 
 val extern : int -> func
 

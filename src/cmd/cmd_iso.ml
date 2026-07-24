@@ -282,11 +282,11 @@ let check_iso ~unsafe export_name export_type module1 module2 =
   let text_modul = Binary_to_text.modul modul in
   Log.debug (fun m ->
     m "generated module:@\n  @[<v>%a@]" Text.Module.pp text_modul );
-  let+ m, link_state =
+  let+ modul, link_state =
     Compile.Binary.until_symbolic_link ~unsafe:false ~name:None link_state modul
   in
   let module I = Interpret.Symbolic (Interpret.Default_parameters) in
-  I.modul link_state m
+  I.modul link_state ~modul
 
 module String_set = Set.Make (String)
 

@@ -38,109 +38,111 @@ let run ~no_exhaustion script =
   let curr_module = ref 0 in
   list_fold_left
     (fun (link_state : Concrete_extern.Func.t Link.State.t) -> function
-      | Wast.Text_module (false, m) ->
+      | Wast.Text_module (false, modul) ->
         if !curr_module = 0 then
           (* TODO: disable printing*)
           ();
         Log.info (fun m -> m "*** module");
         incr curr_module;
-        let* m, link_state =
-          Compile.Text.until_concrete_link link_state ~unsafe ~name:None m
+        let* modul, link_state =
+          Compile.Text.until_concrete_link link_state ~unsafe ~name:None modul
         in
-        let+ () = I.modul link_state m in
+        let+ () = I.modul link_state ~modul in
         (* TODO: enable printing again! *)
         link_state
-      | Wast.Quoted_module (false, m) ->
+      | Wast.Quoted_module (false, modul) ->
         Log.info (fun m -> m "*** quoted module");
         incr curr_module;
-        let* m = Parse.Text.Inline_module.from_string m in
-        let* m, link_state =
-          Compile.Text.until_concrete_link link_state ~unsafe ~name:None m
+        let* modul = Parse.Text.Inline_module.from_string modul in
+        let* modul, link_state =
+          Compile.Text.until_concrete_link link_state ~unsafe ~name:None modul
         in
-        let+ () = I.modul link_state m in
+        let+ () = I.modul link_state ~modul in
         link_state
-      | Wast.Binary_module (false, id, m) ->
+      | Wast.Binary_module (false, id, modul) ->
         Log.info (fun m -> m "*** binary module");
         incr curr_module;
-        let* m = Parse.Binary.Module.from_string m in
-        let m = { m with id } in
-        let* m, link_state =
-          Compile.Binary.until_concrete_link link_state ~unsafe ~name:None m
+        let* modul = Parse.Binary.Module.from_string modul in
+        let modul = { modul with id } in
+        let* modul, link_state =
+          Compile.Binary.until_concrete_link link_state ~unsafe ~name:None modul
         in
-        let+ () = I.modul link_state m in
+        let+ () = I.modul link_state ~modul in
         link_state
-      | Assert (Assert_trap_module (m, expected)) ->
+      | Assert (Assert_trap_module (modul, expected)) ->
         Log.info (fun m -> m "*** assert_trap");
         incr curr_module;
-        let* m, link_state =
-          Compile.Text.until_concrete_link link_state ~unsafe ~name:None m
+        let* modul, link_state =
+          Compile.Text.until_concrete_link link_state ~unsafe ~name:None modul
         in
-        let got = I.modul link_state m in
+        let got = I.modul link_state ~modul in
         let+ () = Script_error.check_result ~expected ~got in
         link_state
-      | Assert (Assert_malformed_binary (m, expected)) ->
+      | Assert (Assert_malformed_binary (modul, expected)) ->
         Log.info (fun m -> m "*** assert_malformed_binary");
-        let got = Parse.Binary.Module.from_string m in
+        let got = Parse.Binary.Module.from_string modul in
         let+ () = Script_error.check_result ~expected ~got in
         link_state
-      | Assert (Assert_malformed_quote (m, expected)) ->
+      | Assert (Assert_malformed_quote (modul, expected)) ->
         Log.info (fun m -> m "*** assert_malformed_quote");
         (* TODO: use Parse.Text.Module.from_string instead *)
-        let got = Parse.Text.Script.from_string m in
+        let got = Parse.Text.Script.from_string modul in
         let+ () =
           match got with
           | Error got -> Script_error.check_error ~expected ~got
-          | Ok [ Text_module (false, m) ] ->
-            let got = Compile.Text.until_binary ~unsafe m in
+          | Ok [ Text_module (false, modul) ] ->
+            let got = Compile.Text.until_binary ~unsafe modul in
             Script_error.check_result ~expected ~got
           | _ -> assert false
         in
         link_state
-      | Assert (Assert_invalid_binary (m, expected)) ->
+      | Assert (Assert_invalid_binary (modul, expected)) ->
         Log.info (fun m -> m "*** assert_invalid_binary");
-        let got = Parse.Binary.Module.from_string m in
+        let got = Parse.Binary.Module.from_string modul in
         let+ () =
           match got with
           | Error got -> Script_error.check_error ~expected ~got
-          | Ok m ->
-            begin match Binary_validate.modul m with
+          | Ok modul ->
+            begin match Binary_validate.modul modul with
             | Error got -> Script_error.check_error ~expected ~got
             | Ok () ->
-              let got = Link.Binary.concrete_module link_state ~name:None m in
+              let got =
+                Link.Binary.concrete_module link_state ~name:None modul
+              in
               Script_error.check_result ~expected ~got
             end
         in
         link_state
-      | Assert (Assert_invalid (m, expected)) ->
+      | Assert (Assert_invalid (modul, expected)) ->
         Log.info (fun m -> m "*** assert_invalid");
         let got =
-          Compile.Text.until_concrete_link link_state ~unsafe ~name:None m
+          Compile.Text.until_concrete_link link_state ~unsafe ~name:None modul
         in
         let+ () = Script_error.check_result ~expected ~got in
         link_state
-      | Assert (Assert_invalid_quote (m, expected)) ->
+      | Assert (Assert_invalid_quote (modul, expected)) ->
         Log.info (fun m -> m "*** assert_invalid_quote");
-        let got = Parse.Text.Script.from_string m in
+        let got = Parse.Text.Script.from_string modul in
         let+ () =
           match got with
           | Error got -> Script_error.check_error ~expected ~got
-          | Ok [ Text_module (false, m) ] ->
-            let got = Compile.Text.until_validate ~unsafe m in
+          | Ok [ Text_module (false, modul) ] ->
+            let got = Compile.Text.until_validate ~unsafe modul in
             Script_error.check_result ~expected ~got
           | _ -> assert false
         in
         link_state
-      | Assert (Assert_unlinkable (m, expected)) ->
+      | Assert (Assert_unlinkable (modul, expected)) ->
         Log.info (fun m -> m "*** assert_unlinkable");
         let got =
-          Compile.Text.until_concrete_link link_state ~unsafe ~name:None m
+          Compile.Text.until_concrete_link link_state ~unsafe ~name:None modul
         in
         let+ () = Script_error.check_result ~expected ~got in
         link_state
-      | Assert (Assert_malformed (m, expected)) ->
+      | Assert (Assert_malformed (modul, expected)) ->
         Log.info (fun m -> m "*** assert_malformed");
         let got =
-          Compile.Text.until_concrete_link ~unsafe ~name:None link_state m
+          Compile.Text.until_concrete_link ~unsafe ~name:None link_state modul
         in
         let+ () = Script_error.check_result ~expected ~got in
         assert false

@@ -457,9 +457,9 @@ let load_func (ls : 'f State.t) (import : Binary.block_type Origin.imported) :
     in
     Error (`Incompatible_import_type msg)
 
-let eval_func ls (finished_modul : int) func : func Result.t =
+let eval_func ls (modul : int) func : func Result.t =
   match func with
-  | Origin.Local func -> Result.ok @@ Kind.wasm func finished_modul
+  | Origin.Local func -> Result.ok @@ Kind.wasm func ~modul
   | Imported import -> load_func ls import
 
 let eval_functions ls (finished_modul : int) modul functions =
@@ -660,7 +660,7 @@ module Binary = struct
       | Some name -> StringMap.add name by_id_exports ls.by_name
     in
 
-    ( modul
+    ( next_id
     , { State.by_id
       ; by_name
       ; last = Some (by_id_exports, Linked_module.get_id modul)

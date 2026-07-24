@@ -1923,8 +1923,8 @@ struct
 
   let exec_vfunc ~return (state : State.exec_state) (func : Kind.func) =
     match func with
-    | Wasm { func; idx } ->
-      let modul = Link.State.get_module state.link_state idx in
+    | Wasm { func; modul } ->
+      let modul = Link.State.get_module state.link_state modul in
       Choice.return (State.Continue (exec_func ~return state modul func))
     | Extern { idx } ->
       let f = Env.get_extern_func state.modul idx in
@@ -2337,8 +2337,9 @@ struct
           end
           else Choice.return () )
 
-  let modul (link_state : Extern_func.t Link.State.t)
-    (modul : 'extern_func Link.Linked_module.t) : unit Choice.t =
+  let modul (link_state : Extern_func.t Link.State.t) ~(modul : int) :
+    unit Choice.t =
+    let modul = Link.State.get_module link_state modul in
     let init_code = Link.Linked_module.get_init_code modul in
     let heartbeat = make_heartbeat () in
     Log.info (fun m -> m "interpreting ...");
@@ -2360,8 +2361,8 @@ struct
       begin
         let* state =
           match func with
-          | Kind.Wasm { func; idx } ->
-            let modul = Link.State.get_module link_state idx in
+          | Kind.Wasm { func; modul } ->
+            let modul = Link.State.get_module link_state modul in
             let state = State.{ exec_state with stack = locals } in
             Choice.return
               (State.Continue (exec_func ~return:true state modul func))

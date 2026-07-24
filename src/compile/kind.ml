@@ -5,11 +5,11 @@
 type func =
   | Wasm of
       { func : Binary.Func.t
-      ; idx : int
+      ; modul : int
       }
   | Extern of { idx : int }
 
-let wasm func idx : func = Wasm { func; idx }
+let wasm func ~modul : func = Wasm { func; modul }
 
 let extern idx : func = Extern { idx }
 
