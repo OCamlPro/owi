@@ -25,8 +25,8 @@ let extern_module : Concrete_extern.Module.t =
 
 (* a link state that contains our custom module, available under the name `sausage` *)
 let link_state =
-  Link.Concrete.State.empty ()
-  |> Link.Concrete.Extern.modul ~name:"sausage" extern_module
+  Link.Concrete.empty ()
+  |> Link.Concrete.link_extern_module ~name:"sausage" extern_module
 
 (* a pure wasm module refering to `sausage` *)
 let pure_wasm_module =

@@ -18,7 +18,7 @@ let do_action ctx env = function
         (Fmt.option ~none:Fmt.nop Fmt.string)
         module_name func_name Wast.pp_consts args );
     let* f, modul =
-      Link.Abstract.State.get_exported_func env ~module_name ~func_name
+      Link.Abstract.get_exported_func env ~module_name ~func_name
     in
     let stack =
       List.rev_map (Abstract_value.of_script_const ctx ~ty) args
@@ -30,12 +30,12 @@ let do_action ctx env = function
   | Get (_module_name, _name) ->
     Log.info (fun m -> m "get...");
     assert false
-(* let* global = Link.State.get_global_from_module env mod_id name in *)
+(* let* global = Link.get_global_from_module env mod_id name in *)
 (* let v = Abstract_value.of_concrete ctx global.value in *)
 (* Ok [ v ] *)
 
 let run_one ~no_exhaustion:_
-  (state : (Link.Abstract.State.t * Abstract_domain.Context.t) Result.t) cmd =
+  (state : (Link.Abstract.t * Abstract_domain.Context.t) Result.t) cmd =
   let* env, ctx = state in
   match cmd with
   | Wast.Text_module (false, m) ->
@@ -63,8 +63,8 @@ let run_one ~no_exhaustion:_
 
 let run ~no_exhaustion script =
   let state =
-    Link.Abstract.State.empty ()
-    |> Link.Abstract.Extern.modul ~name:"spectest_extern"
+    Link.Abstract.empty ()
+    |> Link.Abstract.link_extern_module ~name:"spectest_extern"
          Spectest.abstract_extern_m
   in
   let script = Spectest.m :: Register ("spectest", Some "spectest") :: script in

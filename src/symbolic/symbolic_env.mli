@@ -11,4 +11,4 @@ include
      and type table := Symbolic_table.t
      and type extern_func := Symbolic_extern.Func.t
      and type 'a choice := 'a Symbolic_choice.t
-     and type t = Link.Symbolic.State.t
+     and type t = Link.Symbolic.t
