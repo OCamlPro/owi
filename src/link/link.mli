@@ -33,10 +33,6 @@ end
 
 (* Link State *)
 
-module StringMap : Map.S with type key = string
-
-module StringSet : Set.S
-
 module State : sig
   type 'extern t
 
