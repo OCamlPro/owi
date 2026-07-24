@@ -11,14 +11,14 @@ let ty : host_externref Type.Id.t = Type.Id.make ()
 
 module I = Interpret.Concrete (Interpret.Default_parameters)
 
-let action (link_state : Concrete_extern.Func.t Link.State.t) = function
+let action (link_state : Link.Concrete.State.t) = function
   | Wast.Invoke (module_name, func_name, args) -> begin
     Log.info (fun m ->
       m "invoke %a %s %a..."
         (Fmt.option ~none:Fmt.nop Fmt.string)
         module_name func_name Wast.pp_consts args );
     let* f, modul =
-      Link.State.get_exported_func link_state ~module_name ~func_name
+      Link.Concrete.State.get_exported_func link_state ~module_name ~func_name
     in
     let locals = List.rev_map (Concrete_value.of_script_const ~ty) args in
     I.exec_vfunc_from_outside ~locals ~modul ~link_state f
@@ -26,7 +26,8 @@ let action (link_state : Concrete_extern.Func.t Link.State.t) = function
   | Get (module_name, global_name) ->
     Log.info (fun m -> m "get...");
     let+ global =
-      Link.State.get_exported_global link_state ~module_name ~global_name
+      Link.Concrete.State.get_exported_global link_state ~module_name
+        ~global_name
     in
     [ global.value ]
 
@@ -34,14 +35,14 @@ let unsafe = false
 
 let run ~no_exhaustion script =
   let state =
-    Link.State.empty ()
-    |> Link.Extern.concrete_module ~name:"spectest_extern" Spectest.extern_m
+    Link.Concrete.State.empty ()
+    |> Link.Concrete.Extern.modul ~name:"spectest_extern" Spectest.extern_m
   in
   let script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
   let registered = ref false in
   let curr_module = ref 0 in
   list_fold_left
-    (fun (link_state : Concrete_extern.Func.t Link.State.t) -> function
+    (fun (link_state : Link.Concrete.State.t) -> function
       | Wast.Text_module (false, modul) ->
         if !curr_module = 0 then
           (* TODO: disable printing*)
@@ -111,7 +112,7 @@ let run ~no_exhaustion script =
             | Error got -> Script_error.check_error ~expected ~got
             | Ok () ->
               let got =
-                Link.Binary.concrete_module link_state ~name:None modul
+                Link.Concrete.Binary.modul link_state ~name:None modul
               in
               Script_error.check_result ~expected ~got
             end
@@ -184,7 +185,7 @@ let run ~no_exhaustion script =
         if !curr_module = 1 && not !registered then (* TODO: disable debug *) ();
         Log.info (fun m -> m "*** register");
         let+ state =
-          Link.State.register_last_module link_state ~name ~id:mod_name
+          Link.Concrete.State.register_last_module link_state ~name ~id:mod_name
         in
         (* TODO: enable debug again! *)
         state

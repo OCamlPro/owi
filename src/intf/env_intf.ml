@@ -15,20 +15,23 @@ module type T = sig
 
   type extern_func
 
+  type link_state
+
   type 'a choice
 
-  val get_memory : modul:int -> extern_func Link.State.t -> int -> memory choice
+  val get_memory : modul:int -> link_state -> int -> memory choice
 
-  val get_func : modul:int -> extern_func Link.State.t -> int -> Kind.func
+  val get_func : modul:int -> link_state -> int -> Kind.func
 
-  val get_table : modul:int -> extern_func Link.State.t -> int -> table choice
+  val get_table : modul:int -> link_state -> int -> table choice
 
-  val get_elem : modul:int -> extern_func Link.State.t -> int -> elem
+  val get_elem : modul:int -> link_state -> int -> elem
 
-  val get_data : modul:int -> extern_func Link.State.t -> int -> data choice
+  val get_data : modul:int -> link_state -> int -> data choice
 
-  val get_global : modul:int -> extern_func Link.State.t -> int -> global choice
+  val get_global : modul:int -> link_state -> int -> global choice
 
-  val get_extern_func :
-    modul:int -> extern_func Link.State.t -> int -> extern_func
+  val get_extern_func : modul:int -> link_state -> int -> extern_func
+
+  val get_init_code : modul:int -> link_state -> Binary.expr Annotated.t
 end

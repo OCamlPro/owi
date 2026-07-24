@@ -17,25 +17,23 @@ end
 module Default_parameters : Parameters
 
 module Concrete (_ : Parameters) : sig
-  val modul :
-    Concrete_extern.Func.t Link.State.t -> modul:int -> unit Concrete_choice.t
+  val modul : Link.Concrete.State.t -> modul:int -> unit Concrete_choice.t
 
   val exec_vfunc_from_outside :
        locals:Concrete_value.t list
     -> modul:int
-    -> link_state:Concrete_extern.Func.t Link.State.t
+    -> link_state:Link.Concrete.State.t
     -> Kind.func
     -> Concrete_value.t list Concrete_choice.t
 end
 
 module Symbolic (_ : Parameters) : sig
-  val modul :
-    Symbolic_extern.Func.t Link.State.t -> modul:int -> unit Symbolic_choice.t
+  val modul : Link.Symbolic.State.t -> modul:int -> unit Symbolic_choice.t
 
   val exec_vfunc_from_outside :
        locals:Symbolic_value.t list
     -> modul:int
-    -> link_state:Symbolic_extern.Func.t Link.State.t
+    -> link_state:Link.Symbolic.State.t
     -> Kind.func
     -> Symbolic_value.t list Symbolic_choice.t
 end
