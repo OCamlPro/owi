@@ -162,7 +162,7 @@ struct
       ; block_stack : block_stack
       ; func_rt : result_type
       ; modul : int
-      ; link_state : Extern_func.t Link.State.t
+      ; link_state : Env.link_state
       }
 
     let empty_exec_state ~locals ~modul ~link_state =
@@ -2393,9 +2393,8 @@ struct
           end
           else Choice.return () )
 
-  let modul (link_state : Extern_func.t Link.State.t) ~(modul : int) :
-    unit Choice.t =
-    let init_code = Link.State.get_init_code ~modul link_state in
+  let modul (link_state : Env.link_state) ~(modul : int) : unit Choice.t =
+    let init_code = Env.get_init_code ~modul link_state in
     let heartbeat = make_heartbeat () in
     Log.info (fun m -> m "interpreting ...");
     try

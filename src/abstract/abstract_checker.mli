@@ -3,7 +3,4 @@
 (* Written by the Owi programmers *)
 
 val check_module :
-     Abstract_extern.Func.t Link.State.t
-  -> modul:int
-  -> Abstract_invariant.t
-  -> unit
+  Link.Abstract.State.t -> modul:int -> Abstract_invariant.t -> unit

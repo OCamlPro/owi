@@ -5,8 +5,8 @@
 open Syntax
 
 let link_state () =
-  Link.State.empty ()
-  |> Link.Extern.abstract_module ~name:"owi" Abstract_wasm_ffi.owi
+  Link.Abstract.State.empty ()
+  |> Link.Abstract.Extern.modul ~name:"owi" Abstract_wasm_ffi.owi
 
 let cmd ~source_file ~entry_point ~unsafe =
   let link_state = link_state () in

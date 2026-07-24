@@ -5,95 +5,17 @@
 (** Module to link a binary/extern module and producing a runnable module along
     with a link state. *)
 
-(* Link State *)
+module Concrete :
+  Link_intf.T
+    with type extern_func := Concrete_extern.Func.t
+     and type extern_module := Concrete_extern.Module.t
 
-module State : sig
-  type 'extern t
+module Symbolic :
+  Link_intf.T
+    with type extern_func := Symbolic_extern.Func.t
+     and type extern_module := Symbolic_extern.Module.t
 
-  (** the empty link state *)
-  val empty : unit -> _ t
-
-  val get_memory :
-    modul:int -> _ t -> int -> Concrete_memory.t Concrete_choice.t
-
-  val get_data : modul:int -> _ t -> int -> Concrete_data.t Concrete_choice.t
-
-  val get_func : modul:int -> _ t -> int -> Kind.func
-
-  val get_table : modul:int -> _ t -> int -> Concrete_table.t Concrete_choice.t
-
-  val get_elem : modul:int -> _ t -> int -> Concrete_elem.t
-
-  val get_global :
-    modul:int -> _ t -> int -> Concrete_global.t Concrete_choice.t
-
-  val fold_globals :
-    modul:int -> (int -> Concrete_global.t -> 'a -> 'a) -> 'a -> 'b t -> 'a
-
-  val get_extern_func : modul:int -> 'ext t -> int -> 'ext
-
-  val get_init_code : modul:int -> _ t -> Binary.expr Annotated.t
-
-  val get_exported_global :
-       _ t
-    -> module_name:string option
-    -> global_name:string
-    -> Concrete_global.t Result.t
-
-  val get_exported_func :
-       _ t
-    -> module_name:string option
-    -> func_name:string
-    -> (Kind.func * int) Result.t
-
-  (** give a named to the last linked module in the given link state *)
-  val register_last_module :
-    'extern t -> name:string -> id:string option -> 'extern t Result.t
-end
-
-(* Link *)
-
-module Extern : sig
-  (** register an extern module with a given link state, producing a new link
-      state *)
-  val concrete_module :
-       name:string
-    -> Concrete_extern.Module.t
-    -> Concrete_extern.Func.t State.t
-    -> Concrete_extern.Func.t State.t
-
-  val symbolic_module :
-       name:string
-    -> Symbolic_extern.Module.t
-    -> Symbolic_extern.Func.t State.t
-    -> Symbolic_extern.Func.t State.t
-
-  val abstract_module :
-       name:string
-    -> Abstract_extern.Module.t
-    -> Abstract_extern.Func.t State.t
-    -> Abstract_extern.Func.t State.t
-end
-
-module Binary : sig
-  (* TODO: change this to name:.. -> (state*module) -> (state*module) so that it can be piped easily *)
-  (** link a module with a given link state, producing a runnable module and a
-      new link state *)
-  val concrete_module :
-       name:string option
-    -> Concrete_extern.Func.t State.t
-    -> Binary.Module.t
-    -> (int * Concrete_extern.Func.t State.t) Result.t
-
-  val symbolic_module :
-       name:string option
-    -> Symbolic_extern.Func.t State.t
-    -> Binary.Module.t
-    -> (int * Symbolic_extern.Func.t State.t) Result.t
-
-  val abstract_module :
-       name:string option
-    -> Abstract_extern.Func.t State.t
-    -> Binary.Module.t
-    -> (int * Abstract_extern.Func.t State.t) Result.t
-end
+module Abstract :
+  Link_intf.T
+    with type extern_func := Abstract_extern.Func.t
+     and type extern_module := Abstract_extern.Module.t

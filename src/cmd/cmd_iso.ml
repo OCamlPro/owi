@@ -73,11 +73,11 @@ let check_iso ~unsafe export_name export_type module1 module2 =
   in
 
   let link_state =
-    Link.State.empty ()
-    |> Link.Extern.symbolic_module ~name:"owi" Symbolic_wasm_ffi.owi
-    |> Link.Extern.symbolic_module ~name:"fuzzing-support"
+    Link.Symbolic.State.empty ()
+    |> Link.Symbolic.Extern.modul ~name:"owi" Symbolic_wasm_ffi.owi
+    |> Link.Symbolic.Extern.modul ~name:"fuzzing-support"
          (binaryen_fuzzing_support_module weird_log_i64)
-    |> Link.Extern.symbolic_module ~name:"env"
+    |> Link.Symbolic.Extern.modul ~name:"env"
          (emscripten_fuzzing_support_module ())
   in
   let* _module, link_state =

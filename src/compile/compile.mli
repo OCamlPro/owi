@@ -12,23 +12,23 @@ module Any : sig
   val until_concrete_link :
        unsafe:bool
     -> name:string option
-    -> Concrete_extern.Func.t Link.State.t
+    -> Link.Concrete.State.t
     -> Concrete_extern.Func.t Kind.t
-    -> (int * Concrete_extern.Func.t Link.State.t) Result.t
+    -> (int * Link.Concrete.State.t) Result.t
 
   val until_symbolic_link :
        unsafe:bool
     -> name:string option
-    -> Symbolic_extern.Func.t Link.State.t
+    -> Link.Symbolic.State.t
     -> Symbolic_extern.Func.t Kind.t
-    -> (int * Symbolic_extern.Func.t Link.State.t) Result.t
+    -> (int * Link.Symbolic.State.t) Result.t
 
   val until_abstract_link :
        unsafe:bool
     -> name:string option
-    -> Abstract_extern.Func.t Link.State.t
+    -> Link.Abstract.State.t
     -> Abstract_extern.Func.t Kind.t
-    -> (int * Abstract_extern.Func.t Link.State.t) Result.t
+    -> (int * Link.Abstract.State.t) Result.t
 end
 
 module File : sig
@@ -41,27 +41,27 @@ module File : sig
   val until_concrete_link :
        unsafe:bool
     -> name:string option
-    -> Concrete_extern.Func.t Link.State.t
+    -> Link.Concrete.State.t
     -> Fpath.t
-    -> (int * Concrete_extern.Func.t Link.State.t) Result.t
+    -> (int * Link.Concrete.State.t) Result.t
 
   (** compile a file with a given link state and produce a new link state and a
       runnable module *)
   val until_symbolic_link :
        unsafe:bool
     -> name:string option
-    -> Symbolic_extern.Func.t Link.State.t
+    -> Link.Symbolic.State.t
     -> Fpath.t
-    -> (int * Symbolic_extern.Func.t Link.State.t) Result.t
+    -> (int * Link.Symbolic.State.t) Result.t
 
   (** compile a file with a given link state and produce a new link state and a
       runnable module *)
   val until_abstract_link :
        unsafe:bool
     -> name:string option
-    -> Abstract_extern.Func.t Link.State.t
+    -> Link.Abstract.State.t
     -> Fpath.t
-    -> (int * Abstract_extern.Func.t Link.State.t) Result.t
+    -> (int * Link.Abstract.State.t) Result.t
 end
 
 module Text : sig
@@ -74,27 +74,27 @@ module Text : sig
   val until_concrete_link :
        unsafe:bool
     -> name:string option
-    -> Concrete_extern.Func.t Link.State.t
+    -> Link.Concrete.State.t
     -> Text.Module.t
-    -> (int * Concrete_extern.Func.t Link.State.t) Result.t
+    -> (int * Link.Concrete.State.t) Result.t
 
   (** compile a module with a given link state and produce a new link state and
       a runnable module *)
   val until_symbolic_link :
        unsafe:bool
     -> name:string option
-    -> Symbolic_extern.Func.t Link.State.t
+    -> Link.Symbolic.State.t
     -> Text.Module.t
-    -> (int * Symbolic_extern.Func.t Link.State.t) Result.t
+    -> (int * Link.Symbolic.State.t) Result.t
 
   (** compile a module with a given link state and produce a new link state and
       a runnable module *)
   val until_abstract_link :
        unsafe:bool
     -> name:string option
-    -> Abstract_extern.Func.t Link.State.t
+    -> Link.Abstract.State.t
     -> Text.Module.t
-    -> (int * Abstract_extern.Func.t Link.State.t) Result.t
+    -> (int * Link.Abstract.State.t) Result.t
 end
 
 module Binary : sig
@@ -106,25 +106,25 @@ module Binary : sig
   val until_concrete_link :
        unsafe:bool
     -> name:string option
-    -> Concrete_extern.Func.t Link.State.t
+    -> Link.Concrete.State.t
     -> Binary.Module.t
-    -> (int * Concrete_extern.Func.t Link.State.t) Result.t
+    -> (int * Link.Concrete.State.t) Result.t
 
   (** compile a module with a given link state and produce a new link state and
       a runnable module *)
   val until_symbolic_link :
        unsafe:bool
     -> name:string option
-    -> Symbolic_extern.Func.t Link.State.t
+    -> Link.Symbolic.State.t
     -> Binary.Module.t
-    -> (int * Symbolic_extern.Func.t Link.State.t) Result.t
+    -> (int * Link.Symbolic.State.t) Result.t
 
   (** compile a module with a given link state and produce a new link state and
       a runnable module *)
   val until_abstract_link :
        unsafe:bool
     -> name:string option
-    -> Abstract_extern.Func.t Link.State.t
+    -> Link.Abstract.State.t
     -> Binary.Module.t
-    -> (int * Abstract_extern.Func.t Link.State.t) Result.t
+    -> (int * Link.Abstract.State.t) Result.t
 end

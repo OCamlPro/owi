@@ -18,7 +18,7 @@ let do_action ctx link_state = function
         (Fmt.option ~none:Fmt.nop Fmt.string)
         module_name func_name Wast.pp_consts args );
     let* f, modul =
-      Link.State.get_exported_func link_state ~module_name ~func_name
+      Link.Abstract.State.get_exported_func link_state ~module_name ~func_name
     in
     let stack =
       List.rev_map (Abstract_value.of_script_const ctx ~ty) args
@@ -35,9 +35,7 @@ let do_action ctx link_state = function
 (* Ok [ v ] *)
 
 let run_one ~no_exhaustion:_
-  (state :
-    (Abstract_extern.Func.t Link.State.t * Abstract_domain.Context.t) Result.t
-    ) cmd =
+  (state : (Link.Abstract.State.t * Abstract_domain.Context.t) Result.t) cmd =
   let* link_state, ctx = state in
   match cmd with
   | Wast.Text_module (false, m) ->
@@ -65,8 +63,8 @@ let run_one ~no_exhaustion:_
 
 let run ~no_exhaustion script =
   let state =
-    Link.State.empty ()
-    |> Link.Extern.abstract_module ~name:"spectest_extern"
+    Link.Abstract.State.empty ()
+    |> Link.Abstract.Extern.modul ~name:"spectest_extern"
          Spectest.abstract_extern_m
   in
   let script = Spectest.m :: Register ("spectest", Some "spectest") :: script in

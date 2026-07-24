@@ -8,7 +8,7 @@ type host_externref = int
 
 let ty : host_externref Type.Id.t = Type.Id.make ()
 
-type state = Symbolic_extern.Func.t Link.State.t * Thread.t
+type state = Link.Symbolic.State.t * Thread.t
 
 module I = Interpret.Symbolic (Interpret.Default_parameters)
 
@@ -29,7 +29,7 @@ let action ((link_state, monadic_state) : state) action : _ Result.t =
         (Fmt.option ~none:Fmt.nop Fmt.string)
         module_name func_name Wast.pp_consts args );
     let* f, modul =
-      Link.State.get_exported_func link_state ~module_name ~func_name
+      Link.Symbolic.State.get_exported_func link_state ~module_name ~func_name
     in
     let stack = List.rev_map (Symbolic_value.of_script_const ~ty) args in
     let to_run = I.exec_vfunc_from_outside ~locals:stack ~modul ~link_state f in
@@ -37,7 +37,8 @@ let action ((link_state, monadic_state) : state) action : _ Result.t =
   | Get (module_name, global_name) ->
     Log.info (fun m -> m "get...");
     let* global =
-      Link.State.get_exported_global link_state ~module_name ~global_name
+      Link.Symbolic.State.get_exported_global link_state ~module_name
+        ~global_name
     in
     let v = Symbolic_value.of_concrete global.value in
     Ok ([ v ], monadic_state)
@@ -69,9 +70,8 @@ let log_cmd : Wast.cmd -> unit =
   in
   Log.info (fun m -> m "*** %s" s)
 
-let run_one ~no_exhaustion:_
-  ~(state : Symbolic_extern.Func.t Link.State.t * Thread.t) cmd : state Result.t
-    =
+let run_one ~no_exhaustion:_ ~(state : Link.Symbolic.State.t * Thread.t) cmd :
+  state Result.t =
   let link_state, monadic_state = state in
   log_cmd cmd;
   match cmd with
@@ -158,7 +158,7 @@ let run_one ~no_exhaustion:_
   | Register (name, mod_name) ->
     let open Syntax in
     let+ link_state =
-      Link.State.register_last_module link_state ~name ~id:mod_name
+      Link.Symbolic.State.register_last_module link_state ~name ~id:mod_name
     in
     (link_state, monadic_state)
   | Action a ->
@@ -177,8 +177,8 @@ let run_one ~no_exhaustion:_
 let run ~no_exhaustion script : _ Result.t =
   Solver.solver_to_use := Some Smtml.Solver_type.Z3_solver;
   let link_state =
-    Link.State.empty ()
-    |> Link.Extern.symbolic_module ~name:"spectest_extern"
+    Link.Symbolic.State.empty ()
+    |> Link.Symbolic.Extern.modul ~name:"spectest_extern"
          Spectest.symbolic_extern_m
   in
   let monadic_state = Thread.init () in
