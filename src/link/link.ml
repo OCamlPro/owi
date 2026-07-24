@@ -11,6 +11,10 @@ module Make (M : sig
   type extern_module = (string * extern_func) list
 
   val to_func_type : extern_func -> Binary.func_type
+
+  type data
+
+  val data_of_concrete : Concrete_data.t -> data
 end) =
 struct
   module Linked_module = struct
@@ -21,7 +25,7 @@ struct
       ; memories : Concrete_memory.t IMap.t
       ; tables : Concrete_table.t IMap.t
       ; functions : Kind.func IMap.t
-      ; data : Concrete_data.t IMap.t
+      ; data : M.data IMap.t
       ; elem : Concrete_elem.t IMap.t
       ; tags : Binary.Tag.t IMap.t
       ; extern_funcs : (M.extern_func * Binary.func_type) Dynarray.t
@@ -79,7 +83,7 @@ struct
         ; memories : Concrete_memory.t IMap.t
         ; tables : Concrete_table.t IMap.t
         ; functions : Kind.func IMap.t
-        ; data : Concrete_data.t IMap.t
+        ; data : M.data IMap.t
         ; elem : Concrete_elem.t IMap.t
         ; tags : Binary.Tag.t IMap.t
         }
@@ -107,6 +111,7 @@ struct
         { modul with functions = IMap.add id func modul.functions }
 
       let add_data id data (modul : t) =
+        let data = M.data_of_concrete data in
         { modul with data = IMap.add id data modul.data }
 
       let add_elem id elem (modul : t) =
@@ -583,8 +588,10 @@ struct
     let+ modul, init, _i =
       array_fold_left
         (fun (modul, init, id) (data : Binary.Data.t) ->
-          let data' : Concrete_data.t = { value = data.init } in
-          let modul = Linked_module.Build.add_data id data' modul in
+          let modul =
+            let data' = { Concrete_data.value = data.init } in
+            Linked_module.Build.add_data id data' modul
+          in
           let+ init =
             match data.mode with
             | Active (mem, offset) ->
@@ -752,6 +759,10 @@ module Concrete = Make (struct
   type extern_module = Concrete_extern.Module.t
 
   let to_func_type = Concrete_extern.Func.to_func_type
+
+  type data = Concrete_data.t
+
+  let data_of_concrete data = data
 end)
 
 module Symbolic = Make (struct
@@ -760,6 +771,10 @@ module Symbolic = Make (struct
   type extern_module = Symbolic_extern.Module.t
 
   let to_func_type = Symbolic_extern.Func.to_func_type
+
+  type data = Symbolic_data.t
+
+  let data_of_concrete data = data
 end)
 
 module Abstract = Make (struct
@@ -768,4 +783,8 @@ module Abstract = Make (struct
   type extern_module = Abstract_extern.Module.t
 
   let to_func_type = Abstract_extern.Func.to_func_type
+
+  type data = (* TODO *) string
+
+  let data_of_concrete _ = assert false
 end)

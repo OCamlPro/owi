@@ -2,7 +2,7 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type t = Link.Symbolic.State.t
+include Link.Symbolic.State
 
 let get_memory ~(modul : int) env id : Symbolic_memory.t Symbolic_choice.t =
   let ( let* ) = Symbolic_choice.( let* ) in
@@ -26,8 +26,6 @@ let get_table ~(modul : int) env id : Symbolic_table.t Symbolic_choice.t =
     let* () = Symbolic_table.replace symbolic in
     Symbolic_choice.return symbolic
 
-let get_data ~(modul : int) env n = Link.Symbolic.State.get_data ~modul env n
-
 let get_global ~(modul : int) env id : Symbolic_global.t Symbolic_choice.t =
   let ( let* ) = Symbolic_choice.( let* ) in
   let* globals = Symbolic_choice.fold_state (fun state -> state.globals) in
@@ -38,12 +36,3 @@ let get_global ~(modul : int) env id : Symbolic_global.t Symbolic_choice.t =
     let symbolic = Symbolic_global.of_concrete ~module_id:modul ~id original in
     let* () = Symbolic_global.replace symbolic in
     Symbolic_choice.return symbolic
-
-let get_func ~modul env id = Link.Symbolic.State.get_func env ~modul id
-
-let get_elem ~modul env id = Link.Symbolic.State.get_elem env ~modul id
-
-let get_extern_func ~modul (env : Link.Symbolic.State.t) id =
-  Link.Symbolic.State.get_extern_func env ~modul id
-
-let get_init_code ~modul env = Link.Symbolic.State.get_init_code ~modul env
