@@ -580,16 +580,13 @@ module ConcreteFixpoint = DenotFixpoint (Abstract_interpreter_simple)
 
 let eval_exprs (modul : Abstract_extern.Func.t Link.Linked_module.t) abs_state
   link_state =
-  let to_run = Link.Linked_module.get_expr_to_run modul in
+  (* TODO: init_code is no more an exprs, it's a regular expr now, this function can probably be removed and eval_expr could be used instead! *)
+  let init_code = Link.Linked_module.get_init_code modul in
+  let state = { abs_state; modul; link_state } in
   let state =
-    List.fold_left
-      (fun (state : interpreter_state) (e : Binary.expr Annotated.t) ->
-        (* TODO handle this properly *)
-        match ConcreteFixpoint.eval_expr state e with
-        | None, _mapping -> state
-        | Some state, _mapping -> state )
-      { abs_state; modul; link_state }
-      to_run
+    match ConcreteFixpoint.eval_expr state init_code with
+    | None, _mapping -> state
+    | Some state, _mapping -> state
   in
   state.abs_state
 

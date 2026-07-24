@@ -91,5 +91,5 @@ and check_instr (instr : Binary.instr Annotated.t)
 let check_module (link_state : Abstract_extern.Func.t Link.State.t)
   (modul : Abstract_extern.Func.t Link.Linked_module.t)
   (invariants : Abstract_invariant.t) =
-  let to_run = Link.Linked_module.get_expr_to_run modul in
-  List.iter (check_expr ~invariants ~modul ~link_state) to_run
+  let init_code = Link.Linked_module.get_init_code modul in
+  check_expr ~invariants ~modul ~link_state init_code

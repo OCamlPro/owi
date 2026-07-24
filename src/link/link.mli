@@ -28,7 +28,7 @@ module Linked_module : sig
 
   val fold_globals : (int -> Concrete_global.t -> 'a -> 'a) -> 'a -> 'b t -> 'a
 
-  val get_expr_to_run : _ t -> Binary.expr Annotated.t list
+  val get_init_code : _ t -> Binary.expr Annotated.t
 end
 
 (* Link State *)
