@@ -6,17 +6,19 @@ include Link.Linked_module
 
 type nonrec t = Symbolic_extern.Func.t t
 
-let get_memory (modul : t) id : Symbolic_memory.t Symbolic_choice.t =
+let get_memory ~(modul : int) link_state id :
+  Symbolic_memory.t Symbolic_choice.t =
   let ( let* ) = Symbolic_choice.( let* ) in
-  let module_id = get_id modul in
   let* memories = Symbolic_choice.fold_state (fun state -> state.memories) in
-  match Thread.Collection.find memories ~module_id ~id with
+  match Thread.Collection.find memories ~module_id:modul ~id with
   | Some g -> Symbolic_choice.return g
   | None ->
-    begin match get_memory modul id with
+    begin match Link.State.get_memory link_state ~modul id with
     | Error _e -> assert false
     | Ok original ->
-      let symbolic = Symbolic_memory.of_concrete ~module_id ~id original in
+      let symbolic =
+        Symbolic_memory.of_concrete ~module_id:modul ~id original
+      in
       let* () = Symbolic_memory.replace symbolic in
       Symbolic_choice.return symbolic
     end
@@ -36,8 +38,8 @@ let get_table (modul : t) id : Symbolic_table.t Symbolic_choice.t =
       Symbolic_choice.return symbolic
     end
 
-let get_data modul n =
-  match get_data modul n with
+let get_data ~modul link_state n =
+  match Link.State.get_data ~modul link_state n with
   | Error e -> Symbolic_choice.trap e
   | Ok orig_data -> Symbolic_choice.return orig_data
 

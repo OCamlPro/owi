@@ -19,7 +19,7 @@ module type T = sig
 
   type t = extern_func Link.Linked_module.t
 
-  val get_memory : t -> int -> memory choice
+  val get_memory : modul:int -> extern_func Link.State.t -> int -> memory choice
 
   val get_func : t -> int -> Kind.func
 
@@ -27,7 +27,7 @@ module type T = sig
 
   val get_elem : t -> int -> elem
 
-  val get_data : t -> int -> data choice
+  val get_data : modul:int -> extern_func Link.State.t -> int -> data choice
 
   val get_global : t -> int -> global choice
 
