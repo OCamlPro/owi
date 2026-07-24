@@ -287,6 +287,10 @@ module State = struct
   let get_init_code ~modul state =
     let modul = get_module state modul in
     Linked_module.get_init_code modul
+
+  let fold_globals ~modul f acc state =
+    let modul = get_module state modul in
+    Linked_module.fold_globals f acc modul
 end
 
 (* TODO; the const evaluation is duplicated in many places and should be moved somewhere else! *)

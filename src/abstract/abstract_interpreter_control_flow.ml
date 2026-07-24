@@ -593,25 +593,22 @@ let eval_exprs ~(modul : int) abs_state link_state =
 let modul_with_ctx ctx (link_state : Abstract_extern.Func.t Link.State.t)
   ~(modul : int) =
   let abs_state =
-    let modul = Link.State.get_module link_state modul in
-    Abstract_state.empty modul Link.Linked_module.fold_globals
+    Abstract_state.empty modul Link.State.fold_globals link_state
   in
   let abs_state = { abs_state with ctx } in
   eval_exprs ~modul abs_state link_state
 
 let modul (link_state : Abstract_extern.Func.t Link.State.t) ~(modul : int) =
   let abs_state =
-    let modul = Link.State.get_module link_state modul in
-    Abstract_state.empty modul Link.Linked_module.fold_globals
+    Abstract_state.empty modul Link.State.fold_globals link_state
   in
   eval_exprs ~modul abs_state link_state
 
 let exec_vfunc_from_outside ~ctx ~locals ~(modul : int) ~link_state
   (func : Kind.func) =
   let abs_state =
-    let modul = Link.State.get_module link_state modul in
-    Abstract_state.empty_exec_state ~ctx ~locals ~modul
-      Link.Linked_module.fold_globals
+    Abstract_state.empty_exec_state ~ctx ~locals ~modul Link.State.fold_globals
+      link_state
   in
   try
     match func with
