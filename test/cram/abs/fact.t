@@ -100,11 +100,10 @@
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : call 0
   owi: [INFO] calling func  : func start
-  owi: [DEBUG] call (start): abstract state : 
+  owi: [DEBUG] before call (start): caller state : 
                  context: Context{id=1, <empty>}
                  stack  : 
-                 locals : i32 {0};
-                 i32 {0}
+                 locals : 
   owi: [DEBUG] abstract state : 
                  context: Context{id=1, <empty>}
                  stack  : 
@@ -375,7 +374,7 @@
   owi: [INFO] locals        : [ (0 -> i32 {1});  (1 -> i32 {2}) ]
   owi: [INFO] running instr : drop
   owi: [DEBUG] jt after (drop) :  
-  owi: [DEBUG] after call(start): abstract state : 
+  owi: [DEBUG] after call(start): callee state : 
                  context: Context{id=2,
                                   <(b:17)> -> {true};
                                   <(B:15)> -> {1}

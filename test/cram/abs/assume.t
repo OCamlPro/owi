@@ -83,10 +83,10 @@
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : call 2
   owi: [INFO] calling func  : func start
-  owi: [DEBUG] call (start): abstract state : 
+  owi: [DEBUG] before call (start): caller state : 
                  context: Context{id=1, <empty>}
                  stack  : 
-                 locals : i32 {0}
+                 locals : 
   owi: [DEBUG] abstract state : 
                  context: Context{id=1, <empty>}
                  stack  : 
@@ -217,7 +217,7 @@
   owi: [INFO] locals        : [ (0 -> i32 [1..0x7FFFFFFF]) ]
   owi: [INFO] running instr : call 1
   [Single_value_abstraction.Noop] Warning: No backpropagation for 'bisdiv'owi: [DEBUG] jt after (call 1) :  
-  owi: [DEBUG] after call(start): abstract state : 
+  owi: [DEBUG] after call(start): callee state : 
                  context: Context{id=3,
                                   <(b:10)> -> {false}; <(b:11)> -> {true};
                                   <(b:15)> -> {false}; <(b:17)> -> {false};

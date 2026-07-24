@@ -311,8 +311,12 @@ module DenotFixpoint (S : DATA_STATE) = struct
     in
     loop state JumpTarget.empty expr.raw
 
-  and eval_func ({ abs_state; _ } as state : interpreter_state)
+  and eval_func ({ abs_state; _ } as state : interpreter_state) idx
     (func : Binary.Func.t) =
+    if List.mem idx abs_state.call_stack then begin
+      Log.err (fun m -> m "Recursive function call. Unsupported");
+      exit 1
+    end;
     Log.info (fun m ->
       m "calling func  : func %s" (Option.value func.id ~default:"anonymous") );
     let (Bt_raw ((None | Some _), (param_type, result_type))) = func.type_f in
@@ -333,36 +337,45 @@ module DenotFixpoint (S : DATA_STATE) = struct
       |> List.mapi (fun i x -> (i, x))
       |> Abstract_locals.of_list
     in
-    let fn_state =
-      { abs_state with stack = []; func_rt = result_type; locals }
-    in
     Log.debug (fun m ->
-      m "call (%a): abstract state : %a"
+      m "before call (%a): caller state : %a"
         (Fmt.option ~none:(Fmt.any "$") Fmt.string)
         func.id
-        (Abstract_state.pp fn_state.ctx)
-        fn_state );
-    (* TODO: handle mapping *)
-    let func_end_state, _ =
-      eval_expr { state with abs_state = fn_state } func.body
+        (Abstract_state.pp abs_state.ctx)
+        abs_state );
+    let call_stack = idx :: abs_state.call_stack in
+    let fn_abs_state =
+      { abs_state with stack = []; func_rt = result_type; locals; call_stack }
     in
-    ( match func_end_state with
+    let fn_end_state, jt =
+      eval_expr { state with abs_state = fn_abs_state } func.body
+    in
+    (* The stack given to the function is empty so the returned stack should only contain the results *)
+    let fn_end_stack_size = List.length result_type in
+    let jumps_ret = join_jts fn_end_stack_size (JumpTarget.find_opt Ret jt) in
+    let fn_end_abs_state = Option.map (fun s -> s.abs_state) fn_end_state in
+    let fn_end_abs_state = join_opt fn_end_abs_state jumps_ret in
+    let fn_end_state =
+      Option.map (fun abs_state -> { state with abs_state }) fn_end_abs_state
+    in
+
+    ( match fn_end_state with
     | Some state ->
       Log.debug (fun m ->
-        m "after call(%a): abstract state : %a@."
+        m "after call(%a): callee state : %a@."
           (Fmt.option ~none:(Fmt.any "$") Fmt.string)
           func.id
           (Abstract_state.pp state.abs_state.ctx)
           state.abs_state )
     | None -> Log.debug (fun m -> m "abstract state : None @.") );
     (* We should probably copy state and join back the return values in the context here *)
-    let* func_end_state in
+    let* fn_end_state in
     let stack =
       caller_popped_stack
-      @ Stack.keep func_end_state.abs_state.stack (List.length result_type)
+      @ Stack.keep fn_end_state.abs_state.stack fn_end_stack_size
     in
     let abs_state =
-      { abs_state with stack; ctx = func_end_state.abs_state.ctx }
+      { abs_state with stack; ctx = fn_end_state.abs_state.ctx }
     in
     Some { state with abs_state }
 
@@ -385,11 +398,11 @@ module DenotFixpoint (S : DATA_STATE) = struct
     Log.info (fun m ->
       m "running instr : %a" (Binary.pp_instr ~short:true) instr.raw );
     match instr.raw with
-    | Call idx ->
-      let func = Abstract_env.get_func ~modul:current_module env idx in
+    | Call call_idx ->
+      let func = Abstract_env.get_func ~modul:current_module env call_idx in
       begin match func with
       | Wasm { func; modul } ->
-        let r = eval_func { state with current_module = modul } func in
+        let r = eval_func { state with current_module = modul } call_idx func in
         (r, JumpTarget.empty)
       | Extern { idx } -> (
         let func = Abstract_env.get_extern_func ~modul:current_module env idx in
@@ -615,7 +628,7 @@ let exec_vfunc_from_outside ~ctx ~locals ~(modul : int) ~env (func : Kind.func)
       match
         ConcreteFixpoint.eval_func
           { abs_state; current_module = modul; env }
-          func
+          modul func
       with
       | Some state -> Ok state.abs_state
       | None -> Fmt.error_msg "failed" )

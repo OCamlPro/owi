@@ -73,7 +73,7 @@
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : call 0
   owi: [INFO] calling func  : func start
-  owi: [DEBUG] call (start): abstract state : 
+  owi: [DEBUG] before call (start): caller state : 
                  context: Context{id=1, <empty>}
                  stack  : 
                  locals : 
@@ -263,6 +263,21 @@
                                   }
                  stack  : f64 ...
                  locals : 
-  owi: [DEBUG] abstract state : None 
+  owi: [DEBUG] after call(start): callee state : 
+                 context: Context{id=1,
+                                  <(B:8)> -> [--..--]
+                                  <(B:9)> -> [--..--]
+                                  <(B:10)> -> [--..--]
+                                  <(B:11)> -> [--..--]
+                                  <(B:12)> -> [--..--]
+                                  <(B:13)> -> [--..--]
+                                  <(B:14)> -> [--..--]
+                                  <(B:15)> -> [--..--]
+                                  <(B:16)> -> [--..--]
+                                  <(B:17)> -> [--..--]
+                                  <(B:18)> -> [--..--]
+                                  }
+                 stack  : 
+                 locals : 
   
   owi: [DEBUG] jt after (call 0) :  
