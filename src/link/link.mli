@@ -10,21 +10,9 @@
 module Linked_module : sig
   type 'ext t
 
-  val get_func : _ t -> int -> Kind.func
-
-  val get_table : _ t -> int -> Concrete_table.t Concrete_choice.t
-
-  val get_elem : _ t -> int -> Concrete_elem.t
-
-  val get_global : _ t -> int -> Concrete_global.t Concrete_choice.t
-
-  val get_extern_func : 'ext t -> int -> 'ext
-
   val get_id : _ t -> int
 
   val fold_globals : (int -> Concrete_global.t -> 'a -> 'a) -> 'a -> 'b t -> 'a
-
-  val get_init_code : _ t -> Binary.expr Annotated.t
 end
 
 (* Link State *)
@@ -36,9 +24,22 @@ module State : sig
   val empty : unit -> _ t
 
   val get_memory :
-    _ t -> modul:int -> int -> Concrete_memory.t Concrete_choice.t
+    modul:int -> _ t -> int -> Concrete_memory.t Concrete_choice.t
 
-  val get_data : _ t -> modul:int -> int -> Concrete_data.t Concrete_choice.t
+  val get_data : modul:int -> _ t -> int -> Concrete_data.t Concrete_choice.t
+
+  val get_func : modul:int -> _ t -> int -> Kind.func
+
+  val get_table : modul:int -> _ t -> int -> Concrete_table.t Concrete_choice.t
+
+  val get_elem : modul:int -> _ t -> int -> Concrete_elem.t
+
+  val get_global :
+    modul:int -> _ t -> int -> Concrete_global.t Concrete_choice.t
+
+  val get_extern_func : modul:int -> 'ext t -> int -> 'ext
+
+  val get_init_code : modul:int -> _ t -> Binary.expr Annotated.t
 
   (* TODO: remove this! *)
   val get_module : 'extern t -> int -> 'extern Linked_module.t

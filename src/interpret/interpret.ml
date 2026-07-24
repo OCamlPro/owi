@@ -1496,7 +1496,7 @@ struct
       Stack.apply_f64_v128_v128 stack (V128.F64x2.replace_lane lane)
       |> Choice.return
 
-  let exec_ref_instr modul stack (i : Binary.ref_instr) =
+  let exec_ref_instr modul link_state stack (i : Binary.ref_instr) =
     match i with
     | Null t -> Stack.push_ref stack (Ref.null t) |> Choice.return
     | Is_null ->
@@ -1512,7 +1512,7 @@ struct
       else Stack.push_ref stack r |> Choice.return
     (* TODO: restrict to non_null refs *)
     | Func i ->
-      let f = Env.get_func modul i in
+      let f = Env.get_func ~modul link_state i in
       Stack.push_ref stack (Ref.func f) |> Choice.return
     | (Eq | Test _ | Cast _) as r ->
       Log.err (fun m ->
@@ -1533,28 +1533,29 @@ struct
       let stack = Stack.push stack v in
       State.Continue { state with locals; stack } |> Choice.return
 
-  let exec_global_instr modul stack : Binary.global_instr -> _ = function
+  let exec_global_instr link_state modul stack : Binary.global_instr -> _ =
+    function
     | Get i ->
-      let+ g = Env.get_global modul i in
+      let+ g = Env.get_global ~modul link_state i in
       Stack.push stack (Global.value g)
     | Set i ->
-      let* global = Env.get_global modul i in
+      let* global = Env.get_global ~modul link_state i in
       let v, stack = Stack.pop stack in
       let+ () = Global.set_value global v in
       stack
 
-  let exec_table_instr modul instr_counter stack : Binary.table_instr -> _ =
-    function
+  let exec_table_instr modul link_state instr_counter stack :
+    Binary.table_instr -> _ = function
     | Get tbl_i ->
       (* TODO: this should be rewritten without `select_i32` ! but it requires to change the type of `Table.get` *)
       let i, stack = Stack.pop_i32 stack in
       let* i = Choice.select_i32 i in
       let i = Int32.to_int i in
-      let* t = Env.get_table modul tbl_i in
+      let* t = Env.get_table ~modul link_state tbl_i in
       let size = Table.size t in
       if i < 0 || i >= size then Choice.trap `Out_of_bounds_table_access
       else
-        let* t = Env.get_table modul tbl_i in
+        let* t = Env.get_table ~modul link_state tbl_i in
         let v = Table.get t i in
         Stack.push stack (Ref v) |> Choice.return
     | Set tbl_indice ->
@@ -1563,20 +1564,20 @@ struct
       (* TODO: avoid the select_i32, it requires to change the type of `Table.set` *)
       let* indice = Choice.select_i32 indice in
       let indice = Int32.to_int indice in
-      let* t = Env.get_table modul tbl_indice in
+      let* t = Env.get_table ~modul link_state tbl_indice in
       if indice < 0 || indice >= Table.size t then
         Choice.trap `Out_of_bounds_table_access
       else begin
-        let* t = Env.get_table modul tbl_indice in
+        let* t = Env.get_table ~modul link_state tbl_indice in
         let+ () = Table.set t indice v in
         stack
       end
     | Size indice ->
-      let+ t = Env.get_table modul indice in
+      let+ t = Env.get_table ~modul link_state indice in
       let size = Table.size t in
       Stack.push_i32_of_int stack size
     | Grow indice ->
-      let* t = Env.get_table modul indice in
+      let* t = Env.get_table ~modul link_state indice in
       let size = I32.of_int @@ Table.size t in
       let delta, stack = Stack.pop_i32 stack in
       let new_size = I32.(size + delta) in
@@ -1593,11 +1594,11 @@ struct
       else
         let new_element, stack = Stack.pop_as_ref stack in
         let* new_size = Choice.select_i32 new_size in
-        let* t = Env.get_table modul indice in
+        let* t = Env.get_table ~modul link_state indice in
         let+ () = Table.grow t new_size new_element in
         Stack.push_i32 stack size
     | Fill indice ->
-      let* t = Env.get_table modul indice in
+      let* t = Env.get_table ~modul link_state indice in
       let len, stack = Stack.pop_i32 stack in
       let x, stack = Stack.pop_as_ref stack in
       let pos, stack = Stack.pop_i32 stack in
@@ -1612,12 +1613,12 @@ struct
       in
       let* pos = Choice.select_i32 pos in
       let* len = Choice.select_i32 len in
-      let* t = Env.get_table modul indice in
+      let* t = Env.get_table ~modul link_state indice in
       let+ () = Table.fill t pos len x in
       stack
     | Copy (ti_dst, ti_src) ->
-      let* t_src = Env.get_table modul ti_src in
-      let* t_dst = Env.get_table modul ti_dst in
+      let* t_src = Env.get_table ~modul link_state ti_src in
+      let* t_dst = Env.get_table ~modul link_state ti_dst in
       let len, stack = Stack.pop_i32 stack in
       let src, stack = Stack.pop_i32 stack in
       let dst, stack = Stack.pop_i32 stack in
@@ -1641,15 +1642,15 @@ struct
           let* src = Choice.select_i32 src in
           let* dst = Choice.select_i32 dst in
           let* len = Choice.select_i32 len in
-          let* t_src = Env.get_table modul ti_src in
-          let* t_dst = Env.get_table modul ti_dst in
+          let* t_src = Env.get_table ~modul link_state ti_src in
+          let* t_dst = Env.get_table ~modul link_state ti_dst in
           Table.copy ~t_src ~t_dst ~src ~dst ~len
         end
       in
       stack
     | Init (t_i, e_i) ->
-      let* t = Env.get_table modul t_i in
-      let elem = Env.get_elem modul e_i in
+      let* t = Env.get_table ~modul link_state t_i in
+      let elem = Env.get_elem ~modul link_state e_i in
       let len, stack = Stack.pop_i32 stack in
       let pos_x, stack = Stack.pop_i32 stack in
       let pos, stack = Stack.pop_i32 stack in
@@ -1676,16 +1677,16 @@ struct
         if i = len then return ()
         else
           let elt = Elem.get elem (pos_x + i) in
-          let* t = Env.get_table modul t_i in
+          let* t = Env.get_table ~modul link_state t_i in
           let* () = Table.set t (pos + i) elt in
           loop (i + 1) ()
       in
       let+ () = loop 0 () in
       stack
 
-  let exec_elem_instr modul : Binary.elem_instr -> _ = function
+  let exec_elem_instr modul link_state : Binary.elem_instr -> _ = function
     | Drop i ->
-      let elem = Env.get_elem modul i in
+      let elem = Env.get_elem ~modul link_state i in
       Elem.drop elem
 
   let exec_memory_instr (modul : int) ~link_state instr_counter stack :
@@ -1968,6 +1969,7 @@ struct
       ; link_state = state.link_state
       }
 
+  (* TODO: remove link_state and use exec_state.link_state ... do the same in the whole file *)
   let exec_vfunc ~link_state ~return (state : State.exec_state)
     (func : Kind.func) =
     match func with
@@ -1976,8 +1978,8 @@ struct
       Choice.return (State.Continue (exec_func ~return state modul func))
     | Extern { idx } ->
       let+ stack =
-        let f = Env.get_extern_func state.modul idx in
         let modul = Link.Linked_module.get_id state.modul in
+        let f = Env.get_extern_func ~modul link_state idx in
         exec_extern_func ~link_state modul state.stack f
       in
       let state = { state with stack } in
@@ -1989,7 +1991,8 @@ struct
       let (Bt_raw ((None | Some _), t)) = func.type_f in
       t
     | Extern { idx } ->
-      let f = Env.get_extern_func state.modul idx in
+      let modul = Link.Linked_module.get_id state.modul in
+      let f = Env.get_extern_func ~modul state.link_state idx in
       Extern_func.to_func_type f
 
   let call_ref ~return:_ (_state : State.exec_state) _typ_i =
@@ -2014,7 +2017,10 @@ struct
     (tbl_i, (Bt_raw ((None | Some _), typ_i) : block_type)) =
     let fun_i, stack = Stack.pop_i32 state.stack in
     let state = { state with stack } in
-    let* t = Env.get_table state.modul tbl_i in
+    let* t =
+      let modul = Link.Linked_module.get_id state.modul in
+      Env.get_table ~modul link_state tbl_i
+    in
     let _null, ref_kind = Table.typ t in
     match ref_kind with
     | Func_ht ->
@@ -2026,7 +2032,10 @@ struct
         , false )
       in
       let* fun_i = Choice.select_i32 fun_i in
-      let* t = Env.get_table state.modul tbl_i in
+      let* t =
+        let modul = Link.Linked_module.get_id state.modul in
+        Env.get_table ~modul link_state tbl_i
+      in
       let fun_i = Int32.to_int fun_i in
       let f_ref = Table.get t fun_i in
       begin match Ref.get_func f_ref with
@@ -2135,17 +2144,27 @@ struct
       let* stack = exec_f64x2_instr stack i in
       ret stack
     | Ref i ->
-      let* stack = exec_ref_instr modul stack i in
+      let* stack =
+        let modul = Link.Linked_module.get_id modul in
+        exec_ref_instr modul link_state stack i
+      in
       ret stack
     | Local i -> exec_local_instr state locals stack i
     | Global i ->
-      let* stack = exec_global_instr modul stack i in
+      let* stack =
+        let modul = Link.Linked_module.get_id modul in
+        exec_global_instr link_state modul stack i
+      in
       ret stack
     | Table i ->
-      let* stack = exec_table_instr modul instr_counter stack i in
+      let* stack =
+        let modul = Link.Linked_module.get_id modul in
+        exec_table_instr modul link_state instr_counter stack i
+      in
       ret stack
     | Elem i ->
-      exec_elem_instr modul i;
+      let modul = Link.Linked_module.get_id modul in
+      exec_elem_instr modul link_state i;
       ret stack
     | Memory i ->
       let* stack =
@@ -2178,11 +2197,17 @@ struct
       let state = { state with stack } in
       exec_block state ~is_loop:false bt (if b then e1 else e2)
     | Call i -> begin
-      let func = Env.get_func modul i in
+      let func =
+        let modul = Link.Linked_module.get_id modul in
+        Env.get_func ~modul link_state i
+      in
       exec_vfunc ~link_state ~return:false state func
       end
     | Return_call i -> begin
-      let func = Env.get_func modul i in
+      let func =
+        let modul = Link.Linked_module.get_id modul in
+        Env.get_func ~modul link_state i
+      in
       exec_vfunc ~link_state ~return:true state func
       end
     | Br i -> State.branch state i
@@ -2411,9 +2436,9 @@ struct
 
   let modul (link_state : Extern_func.t Link.State.t) ~(modul : int) :
     unit Choice.t =
-    let modul = Link.State.get_module link_state modul in
-    let init_code = Link.Linked_module.get_init_code modul in
+    let init_code = Link.State.get_init_code ~modul link_state in
     let heartbeat = make_heartbeat () in
+    let modul = Link.State.get_module link_state modul in
     Log.info (fun m -> m "interpreting ...");
     try
       begin
@@ -2425,10 +2450,12 @@ struct
       end
     with Stack_overflow -> Choice.trap `Call_stack_exhausted
 
-  let exec_vfunc_from_outside ~locals ~modul ~link_state (func : Kind.func) :
-    _ list Choice.t =
-    let modul = Link.State.get_module link_state modul in
-    let exec_state = State.empty_exec_state ~locals ~modul ~link_state in
+  let exec_vfunc_from_outside ~locals ~(modul : int) ~link_state
+    (func : Kind.func) : _ list Choice.t =
+    let exec_state =
+      let modul = Link.State.get_module link_state modul in
+      State.empty_exec_state ~locals ~modul ~link_state
+    in
     try
       begin
         let* state =
@@ -2439,9 +2466,9 @@ struct
             Choice.return
               (State.Continue (exec_func ~return:true state modul func))
           | Extern { idx } ->
-            let f = Env.get_extern_func exec_state.modul idx in
+            let modul = Link.Linked_module.get_id exec_state.modul in
+            let f = Env.get_extern_func ~modul link_state idx in
             let+ stack =
-              let modul = Link.Linked_module.get_id exec_state.modul in
               exec_extern_func ~link_state modul exec_state.stack f
             in
             let state = State.{ exec_state with stack } in

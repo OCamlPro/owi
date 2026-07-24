@@ -21,15 +21,16 @@ module type T = sig
 
   val get_memory : modul:int -> extern_func Link.State.t -> int -> memory choice
 
-  val get_func : t -> int -> Kind.func
+  val get_func : modul:int -> extern_func Link.State.t -> int -> Kind.func
 
-  val get_table : t -> int -> table choice
+  val get_table : modul:int -> extern_func Link.State.t -> int -> table choice
 
-  val get_elem : t -> int -> elem
+  val get_elem : modul:int -> extern_func Link.State.t -> int -> elem
 
   val get_data : modul:int -> extern_func Link.State.t -> int -> data choice
 
-  val get_global : t -> int -> global choice
+  val get_global : modul:int -> extern_func Link.State.t -> int -> global choice
 
-  val get_extern_func : t -> int -> extern_func
+  val get_extern_func :
+    modul:int -> extern_func Link.State.t -> int -> extern_func
 end

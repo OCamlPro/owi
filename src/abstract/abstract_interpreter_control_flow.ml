@@ -386,15 +386,16 @@ module DenotFixpoint (S : DATA_STATE) = struct
       m "running instr : %a" (Binary.pp_instr ~short:true) instr.raw );
     match instr.raw with
     | Call idx ->
-      let modul = Link.State.get_module link_state current_module in
-      let func = Link.Linked_module.get_func modul idx in
+      let func = Link.State.get_func ~modul:current_module link_state idx in
       begin match func with
       | Wasm { func; modul } ->
         let r = eval_func { state with current_module = modul } func in
         (r, JumpTarget.empty)
       | Extern { idx } -> (
-        let f = Link.Linked_module.get_extern_func modul idx in
-        let stack = exec_extern_func abs_state f in
+        let func =
+          Link.State.get_extern_func ~modul:current_module link_state idx
+        in
+        let stack = exec_extern_func abs_state func in
         match Abstract_monad.run stack abs_state with
         | None -> (None, JumpTarget.empty)
         | Some (stack, abs_state) ->
@@ -580,10 +581,7 @@ module ConcreteFixpoint = DenotFixpoint (Abstract_interpreter_simple)
 
 let eval_exprs ~(modul : int) abs_state link_state =
   (* TODO: init_code is no more an exprs, it's a regular expr now, this function can probably be removed and eval_expr could be used instead! *)
-  let init_code =
-    let modul = Link.State.get_module link_state modul in
-    Link.Linked_module.get_init_code modul
-  in
+  let init_code = Link.State.get_init_code ~modul link_state in
   let state = { abs_state; current_module = modul; link_state } in
   let state =
     match ConcreteFixpoint.eval_expr state init_code with
@@ -608,9 +606,10 @@ let modul (link_state : Abstract_extern.Func.t Link.State.t) ~(modul : int) =
   in
   eval_exprs ~modul abs_state link_state
 
-let exec_vfunc_from_outside ~ctx ~locals ~modul ~link_state (func : Kind.func) =
-  let modul = Link.State.get_module link_state modul in
+let exec_vfunc_from_outside ~ctx ~locals ~(modul : int) ~link_state
+  (func : Kind.func) =
   let abs_state =
+    let modul = Link.State.get_module link_state modul in
     Abstract_state.empty_exec_state ~ctx ~locals ~modul
       Link.Linked_module.fold_globals
   in
@@ -631,7 +630,7 @@ let exec_vfunc_from_outside ~ctx ~locals ~modul ~link_state (func : Kind.func) =
       | Some state -> Ok state.abs_state
       | None -> Fmt.error_msg "failed" )
     | Extern { idx } -> (
-      let f = Link.Linked_module.get_extern_func modul idx in
+      let f = Link.State.get_extern_func ~modul link_state idx in
       let stack = ConcreteFixpoint.exec_extern_func abs_state f in
       match Abstract_monad.run stack abs_state with
       | None -> Fmt.error_msg "failed"
