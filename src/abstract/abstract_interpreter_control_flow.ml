@@ -6,6 +6,8 @@ module Stack = Abstract_stack
 
 let ( let* ) = Option.bind
 
+exception RecursiveFunctionCall
+
 module type DATA_STATE = sig
   type t =
     | State of Abstract_state.t
@@ -313,10 +315,7 @@ module DenotFixpoint (S : DATA_STATE) = struct
 
   and eval_func ({ abs_state; _ } as state : interpreter_state) idx
     (func : Binary.Func.t) =
-    if List.mem idx abs_state.call_stack then begin
-      Log.err (fun m -> m "Recursive function call. Unsupported");
-      exit 1
-    end;
+    if List.mem idx abs_state.call_stack then raise RecursiveFunctionCall;
     Log.info (fun m ->
       m "calling func  : func %s" (Option.value func.id ~default:"anonymous") );
     let (Bt_raw ((None | Some _), (param_type, result_type))) = func.type_f in

@@ -68,6 +68,5 @@
   owi: [INFO] stack         : [ i32 {2} ]
   owi: [INFO] locals        : [ (0 -> i32 {1}) ]
   owi: [INFO] running instr : call 1
-  owi: [ERROR] Recursive function call. Unsupported
-  [1]
+  owi: [ERROR] Recursive function calls are not supported yet
 
