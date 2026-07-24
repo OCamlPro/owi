@@ -10,8 +10,6 @@
 module Linked_module : sig
   type 'ext t
 
-  val get_id : _ t -> int
-
   val fold_globals : (int -> Concrete_global.t -> 'a -> 'a) -> 'a -> 'b t -> 'a
 end
 

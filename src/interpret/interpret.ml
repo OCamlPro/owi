@@ -161,7 +161,7 @@ struct
       ; pc : expr Annotated.t
       ; block_stack : block_stack
       ; func_rt : result_type
-      ; modul : Env.t
+      ; modul : int
       ; link_state : Extern_func.t Link.State.t
       }
 
@@ -1974,11 +1974,10 @@ struct
     (func : Kind.func) =
     match func with
     | Wasm { func; modul } ->
-      let modul = Link.State.get_module state.link_state modul in
       Choice.return (State.Continue (exec_func ~return state modul func))
     | Extern { idx } ->
       let+ stack =
-        let modul = Link.Linked_module.get_id state.modul in
+        let modul = state.modul in
         let f = Env.get_extern_func ~modul link_state idx in
         exec_extern_func ~link_state modul state.stack f
       in
@@ -1991,8 +1990,7 @@ struct
       let (Bt_raw ((None | Some _), t)) = func.type_f in
       t
     | Extern { idx } ->
-      let modul = Link.Linked_module.get_id state.modul in
-      let f = Env.get_extern_func ~modul state.link_state idx in
+      let f = Env.get_extern_func ~modul:state.modul state.link_state idx in
       Extern_func.to_func_type f
 
   let call_ref ~return:_ (_state : State.exec_state) _typ_i =
@@ -2017,10 +2015,7 @@ struct
     (tbl_i, (Bt_raw ((None | Some _), typ_i) : block_type)) =
     let fun_i, stack = Stack.pop_i32 state.stack in
     let state = { state with stack } in
-    let* t =
-      let modul = Link.Linked_module.get_id state.modul in
-      Env.get_table ~modul link_state tbl_i
-    in
+    let* t = Env.get_table ~modul:state.modul link_state tbl_i in
     let _null, ref_kind = Table.typ t in
     match ref_kind with
     | Func_ht ->
@@ -2032,10 +2027,7 @@ struct
         , false )
       in
       let* fun_i = Choice.select_i32 fun_i in
-      let* t =
-        let modul = Link.Linked_module.get_id state.modul in
-        Env.get_table ~modul link_state tbl_i
-      in
+      let* t = Env.get_table ~modul:state.modul link_state tbl_i in
       let fun_i = Int32.to_int fun_i in
       let f_ref = Table.get t fun_i in
       begin match Ref.get_func f_ref with
@@ -2097,33 +2089,22 @@ struct
     | I32 i ->
       (* TODO: pass ret or state directly to avoid the cost of the monad here and do the same for all cases of the match *)
       let* stack =
-        let modul = Link.Linked_module.get_id modul in
         exec_i32_instr ~link_state modul instr_counter stack i ~uuid
       in
       ret stack
     | I64 i ->
       let* stack =
-        let modul = Link.Linked_module.get_id modul in
         exec_i64_instr ~link_state modul instr_counter stack i ~uuid
       in
       ret stack
     | F32 i ->
-      let* stack =
-        let modul = Link.Linked_module.get_id modul in
-        exec_f32_instr ~link_state modul instr_counter stack i
-      in
+      let* stack = exec_f32_instr ~link_state modul instr_counter stack i in
       ret stack
     | F64 i ->
-      let* stack =
-        let modul = Link.Linked_module.get_id modul in
-        exec_f64_instr ~link_state modul instr_counter stack i
-      in
+      let* stack = exec_f64_instr ~link_state modul instr_counter stack i in
       ret stack
     | V128 i ->
-      let* stack =
-        let modul = Link.Linked_module.get_id modul in
-        exec_v128_instr ~link_state modul instr_counter stack i
-      in
+      let* stack = exec_v128_instr ~link_state modul instr_counter stack i in
       ret stack
     | I8x16 i ->
       let* stack = exec_i8x16_instr stack i in
@@ -2144,39 +2125,23 @@ struct
       let* stack = exec_f64x2_instr stack i in
       ret stack
     | Ref i ->
-      let* stack =
-        let modul = Link.Linked_module.get_id modul in
-        exec_ref_instr modul link_state stack i
-      in
+      let* stack = exec_ref_instr modul link_state stack i in
       ret stack
     | Local i -> exec_local_instr state locals stack i
     | Global i ->
-      let* stack =
-        let modul = Link.Linked_module.get_id modul in
-        exec_global_instr link_state modul stack i
-      in
+      let* stack = exec_global_instr link_state modul stack i in
       ret stack
     | Table i ->
-      let* stack =
-        let modul = Link.Linked_module.get_id modul in
-        exec_table_instr modul link_state instr_counter stack i
-      in
+      let* stack = exec_table_instr modul link_state instr_counter stack i in
       ret stack
     | Elem i ->
-      let modul = Link.Linked_module.get_id modul in
       exec_elem_instr modul link_state i;
       ret stack
     | Memory i ->
-      let* stack =
-        let modul = Link.Linked_module.get_id modul in
-        exec_memory_instr ~link_state modul instr_counter stack i
-      in
+      let* stack = exec_memory_instr ~link_state modul instr_counter stack i in
       ret stack
     | Data i ->
-      let* () =
-        let modul = Link.Linked_module.get_id modul in
-        exec_data_instr modul link_state i
-      in
+      let* () = exec_data_instr modul link_state i in
       ret stack
     | Return -> Choice.return (State.return state)
     | Nop -> Choice.return (State.Continue state)
@@ -2197,17 +2162,11 @@ struct
       let state = { state with stack } in
       exec_block state ~is_loop:false bt (if b then e1 else e2)
     | Call i -> begin
-      let func =
-        let modul = Link.Linked_module.get_id modul in
-        Env.get_func ~modul link_state i
-      in
+      let func = Env.get_func ~modul link_state i in
       exec_vfunc ~link_state ~return:false state func
       end
     | Return_call i -> begin
-      let func =
-        let modul = Link.Linked_module.get_id modul in
-        Env.get_func ~modul link_state i
-      in
+      let func = Env.get_func ~modul link_state i in
       exec_vfunc ~link_state ~return:true state func
       end
     | Br i -> State.branch state i
@@ -2438,7 +2397,6 @@ struct
     unit Choice.t =
     let init_code = Link.State.get_init_code ~modul link_state in
     let heartbeat = make_heartbeat () in
-    let modul = Link.State.get_module link_state modul in
     Log.info (fun m -> m "interpreting ...");
     try
       begin
@@ -2452,22 +2410,19 @@ struct
 
   let exec_vfunc_from_outside ~locals ~(modul : int) ~link_state
     (func : Kind.func) : _ list Choice.t =
-    let exec_state =
-      let modul = Link.State.get_module link_state modul in
-      State.empty_exec_state ~locals ~modul ~link_state
-    in
+    let exec_state = State.empty_exec_state ~locals ~modul ~link_state in
     try
       begin
         let* state =
           match func with
           | Kind.Wasm { func; modul } ->
-            let modul = Link.State.get_module link_state modul in
             let state = State.{ exec_state with stack = locals } in
             Choice.return
               (State.Continue (exec_func ~return:true state modul func))
           | Extern { idx } ->
-            let modul = Link.Linked_module.get_id exec_state.modul in
-            let f = Env.get_extern_func ~modul link_state idx in
+            let f =
+              Env.get_extern_func ~modul:exec_state.modul link_state idx
+            in
             let+ stack =
               exec_extern_func ~link_state modul exec_state.stack f
             in

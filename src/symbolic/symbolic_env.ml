@@ -2,8 +2,6 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type nonrec t = Symbolic_extern.Func.t Link.Linked_module.t
-
 let get_memory ~(modul : int) link_state id :
   Symbolic_memory.t Symbolic_choice.t =
   let ( let* ) = Symbolic_choice.( let* ) in
