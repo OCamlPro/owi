@@ -1629,6 +1629,45 @@ let eval_data (state : Abstract_state.t) : Binary.data_instr -> _ = function
 let eval_elem (state : Abstract_state.t) : Binary.elem_instr -> _ = function
   | Drop _i -> State state
 
+(* TODO: handle this correctly *)
+let eval_ref (_state : Abstract_state.t) : Binary.ref_instr -> _ = function
+  | _ -> assert false
+
+(* TODO: handle this correctly *)
+let eval_table ({ stack; ctx; _ } as state : Abstract_state.t) :
+  Binary.table_instr -> _ = function
+  | Get _ ->
+    let _v, stack = Stack.pop_i32 stack in
+    let stack = Stack.push_ref stack Abstract_ref.NullRef in
+    State { state with stack }
+  | Set _ ->
+    let _v, stack = Stack.pop_ref stack in
+    let _v, stack = Stack.pop_i32 stack in
+    State { state with stack }
+  | Size _ ->
+    let stack = Stack.push_i32 stack (Abstract_i32.unknown ctx) in
+    State { state with stack }
+  | Grow _ ->
+    let _v, stack = Stack.pop_i32 stack in
+    let _v, stack = Stack.pop_ref stack in
+    let stack = Stack.push_i32 stack (Abstract_i32.unknown ctx) in
+    State { state with stack }
+  | Fill _ ->
+    let _v, stack = Stack.pop_i32 stack in
+    let _v, stack = Stack.pop_ref stack in
+    let _v, stack = Stack.pop_i32 stack in
+    State { state with stack }
+  | Copy _ ->
+    let _v, stack = Stack.pop_i32 stack in
+    let _v, stack = Stack.pop_i32 stack in
+    let _v, stack = Stack.pop_i32 stack in
+    State { state with stack }
+  | Init _ ->
+    let _v, stack = Stack.pop_i32 stack in
+    let _v, stack = Stack.pop_i32 stack in
+    let _v, stack = Stack.pop_i32 stack in
+    State { state with stack }
+
 let eval_instr ({ stack; _ } as state : Abstract_state.t) :
   Binary.instr Annotated.t -> t =
  fun { raw; uuid; _ } ->
@@ -1649,13 +1688,15 @@ let eval_instr ({ stack; _ } as state : Abstract_state.t) :
   | Memory instr -> eval_memory state instr
   | Data instr -> eval_data state instr
   | Elem instr -> eval_elem state instr
+  | Ref instr -> eval_ref state instr
+  | Table instr -> eval_table state instr
   | Unreachable -> Unreachable
   | Nop -> State state
   | Drop ->
     let _, stack = Stack.pop stack in
     State { state with stack }
-  | ( Ref _ | Table _ | I31 _ | Struct _ | Array _ | Any_convert_extern
-    | Extern_convert_any ) as instr ->
+  | (I31 _ | Struct _ | Array _ | Any_convert_extern | Extern_convert_any) as
+    instr ->
     Fmt.failwith "%a not implemented in simple interpreter"
       (Binary.pp_instr ~short:true)
       instr
