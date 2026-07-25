@@ -20,12 +20,8 @@ let do_action ctx env = function
     let* f, modul =
       Abstract_env.get_exported_func env ~module_name ~func_name
     in
-    let stack =
-      List.rev_map (Abstract_value.of_script_const ctx ~ty) args
-      |> List.mapi (fun i v -> (i, v))
-    in
-    let locals = Abstract_locals.of_list stack in
-    I.exec_vfunc_from_outside ~ctx ~locals ~modul ~env f
+    let stack = List.rev_map (Abstract_value.of_script_const ctx ~ty) args in
+    I.exec_vfunc_from_outside ~ctx ~stack ~modul ~env f
     end
   | Get (_module_name, _name) ->
     Log.info (fun m -> m "get...");
@@ -33,6 +29,31 @@ let do_action ctx env = function
 (* let* global = Link.get_global_from_module env mod_id name in *)
 (* let v = Abstract_value.of_concrete ctx global.value in *)
 (* Ok [ v ] *)
+
+let log_cmd : Wast.cmd -> unit =
+ fun cmd ->
+  let s =
+    match cmd with
+    | Text_module _ -> "module"
+    | Quoted_module _ -> "quoted module"
+    | Binary_module _ -> "binary module"
+    | Assert (Assert_trap_module _) -> "assert_trap"
+    | Assert (Assert_malformed_binary _)
+    | Assert (Assert_malformed_quote _)
+    | Assert (Assert_invalid_binary _)
+    | Assert (Assert_invalid _)
+    | Assert (Assert_invalid_quote _)
+    | Assert (Assert_unlinkable _)
+    | Assert (Assert_malformed _) ->
+      "assert_{malformed,invalid,unlinkable}_..."
+    | Assert (Assert_return _) -> "assert_return"
+    | Assert (Assert_trap _) -> "assert_trap"
+    | Assert (Assert_exhaustion _) -> "assert_exhaustion"
+    | Register _ -> "register"
+    | Action _ -> "action"
+    | Instance (_name, _mod_name) -> "instance"
+  in
+  Log.info (fun m -> m "*** %s" s)
 
 let run_one ~no_exhaustion:_
   (state : (Abstract_env.t * Abstract_domain.Context.t) Result.t) cmd =
@@ -47,6 +68,10 @@ let run_one ~no_exhaustion:_
   | Assert (Assert_return (action, res)) ->
     let* state = do_action ctx env action in
     let stack = List.rev state.stack in
+    Log.debug (fun m ->
+      m "assert_return : length: %i, check : %b"
+        (List.compare_lengths res stack)
+        (List.for_all2 (Abstract_value.equal_script_result ctx ~ty) res stack) );
     if
       List.compare_lengths res stack <> 0
       || not
@@ -59,6 +84,9 @@ let run_one ~no_exhaustion:_
       Error `Bad_result
     end
     else Ok (env, ctx)
+  | Register (name, mod_name) ->
+    let+ env = Abstract_env.register_last_module env ~name ~id:mod_name in
+    (env, ctx)
   | _ -> assert false
 
 let run ~no_exhaustion script =

@@ -44,9 +44,9 @@ let empty modul fold_globals env =
   let call_stack = [] in
   { ctx; stack; locals; func_rt; invariant; globals; call_stack }
 
-let empty_exec_state ~ctx ~locals ~modul fold_globals env =
+let empty_exec_state ~ctx ~stack ~modul fold_globals env =
   let invariant = Abstract_invariant.empty () in
   let globals = init_globals ctx modul fold_globals env in
-  let stack = Abstract_stack.empty in
+  let locals = Abstract_locals.empty in
   let call_stack = [] in
   { ctx; stack; locals; func_rt = []; invariant; globals; call_stack }

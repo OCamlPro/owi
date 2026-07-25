@@ -331,8 +331,7 @@ module DenotFixpoint (S : DATA_STATE) = struct
     in
 
     let locals =
-      args @ List.map (fun (_str_opt, vt) -> init_value vt) func.locals
-      |> List.rev
+      List.rev args @ List.map (fun (_str_opt, vt) -> init_value vt) func.locals
       |> List.mapi (fun i x -> (i, x))
       |> Abstract_locals.of_list
     in
@@ -623,20 +622,15 @@ let modul (env : Abstract_env.t) ~(modul : int) =
   let abs_state = Abstract_state.empty modul Abstract_env.fold_globals env in
   eval_exprs ~modul abs_state env
 
-let exec_vfunc_from_outside ~ctx ~locals ~(modul : int) ~env (func : Kind.func)
-    =
+let exec_vfunc_from_outside ~ctx ~stack ~(modul : int) ~env (func : Kind.func) =
   let abs_state =
-    Abstract_state.empty_exec_state ~ctx ~locals ~modul
-      Abstract_env.fold_globals env
+    Abstract_state.empty_exec_state ~ctx ~stack ~modul Abstract_env.fold_globals
+      env
   in
+  Log.debug (fun m -> m "%a" (Abstract_state.pp ctx) abs_state);
   try
     match func with
     | Kind.Wasm { func; modul } -> (
-      let stack =
-        Abstract_locals.to_list locals
-        |> List.sort (fun (i1, _) (i2, _) -> compare i1 i2)
-        |> List.map snd
-      in
       let abs_state = { abs_state with stack } in
       match
         ConcreteFixpoint.eval_func
