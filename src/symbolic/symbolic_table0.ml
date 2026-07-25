@@ -8,6 +8,6 @@ type t =
   { data : Symbolic_ref.t IMap.t
   ; limits : Binary.Table.Type.limits
   ; typ : Binary.ref_type
-  ; module_id : int
+  ; modul : int
   ; id : int
   }

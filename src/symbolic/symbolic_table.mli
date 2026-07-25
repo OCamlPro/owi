@@ -13,4 +13,4 @@ include
 
 val replace : t -> unit Symbolic_choice.t
 
-val of_concrete : module_id:int -> id:int -> Concrete_table.t -> t
+val of_concrete : modul:int -> id:int -> Concrete_table.t -> t

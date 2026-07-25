@@ -6,6 +6,6 @@ type t =
   { data : Smtml.Typed.Bitv8.t Map.Make(Int32).t
   ; chunks : Symbolic_i32.t Map.Make(Int32).t
   ; size : Symbolic_i32.t
-  ; module_id : int
+  ; modul : int
   ; id : int
   }

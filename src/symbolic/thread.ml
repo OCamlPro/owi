@@ -78,21 +78,21 @@ let incr_path_count t = Atomic.incr t.bench_stats.path_count
 let replace_memory (memory : Symbolic_memory0.t) thread =
   let memories = thread.memories in
   let memories =
-    Collection.replace memories ~module_id:memory.module_id ~id:memory.id memory
+    Collection.replace memories ~modul:memory.modul ~id:memory.id memory
   in
   { thread with memories }
 
 let replace_table (table : Symbolic_table0.t) thread =
   let tables = thread.tables in
   let tables =
-    Collection.replace tables ~module_id:table.module_id ~id:table.id table
+    Collection.replace tables ~modul:table.modul ~id:table.id table
   in
   { thread with tables }
 
 let replace_global (global : Symbolic_global0.t) thread =
   let globals = thread.globals in
   let globals =
-    Collection.replace globals ~module_id:global.module_id ~id:global.id global
+    Collection.replace globals ~modul:global.modul ~id:global.id global
   in
   { thread with globals }
 
