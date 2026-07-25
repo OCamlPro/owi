@@ -1491,10 +1491,7 @@ struct
     | Func i ->
       let f = Env.get_func ~modul env i in
       Stack.push_ref stack (Ref.func f) |> Choice.return
-    | (Eq | Test _ | Cast _) as r ->
-      Log.err (fun m ->
-        m "unimplemented instruction: %a" (pp_instr ~short:false) (Ref r) );
-      assert false
+    | Eq | Test _ | Cast _ -> (* TODO *) assert false
 
   let exec_local_instr state locals stack : Binary.local_instr -> _ = function
     | Get i ->
@@ -2041,26 +2038,11 @@ struct
     | Ref.Extern (Some _) -> ( match ht with Extern_ht -> true | _ -> false )
     | Func None | Extern None | NullExn | NullRef -> false
 
-  let exec_instr ({ raw; uuid; instr_counter; _ } : _ Annotated.t)
-    ({ stack; modul; locals; env; _ } as state : State.exec_state) :
-    State.instr_result Choice.t =
-    let instr_counter = Atomic.fetch_and_add instr_counter 1 in
+  let exec_simple_instruction
+    ({ stack; modul; locals; env; _ } as state : State.exec_state) instr_counter
+    ~uuid : Binary.simple_instruction -> _ =
     let ret stack = Choice.return (State.Continue { state with stack }) in
-    Log.info (fun m -> m "stack         : [ %a ]" Stack.pp stack);
-    Log.info (fun m ->
-      m "running instr : %a (executed %d times)" (pp_instr ~short:true) raw
-        instr_counter );
-    let* () =
-      match Logs.Src.level Log.main_src with
-      | Some Logs.Debug ->
-        let+ pc = Choice.get_pc () in
-        if not (Smtml.Expr.Set.is_empty pc) then
-          Log.debug (fun m ->
-            m "path condition smt query:@\n @[<v>%a@]" Smtml.Expr.pp_smtml
-              (Smtml.Expr.Set.to_list pc) )
-      | None | Some _ -> return ()
-    in
-    match raw with
+    function
     | I32 i ->
       (* TODO: pass ret or state directly to avoid the cost of the monad here and do the same for all cases of the match *)
       let* stack = exec_i32_instr ~env modul instr_counter stack i ~uuid in
@@ -2114,10 +2096,69 @@ struct
     | Data i ->
       let () = exec_data_instr modul env i in
       ret stack
-    | Return -> Choice.return (State.return state)
     | Nop -> Choice.return (State.Continue state)
     | Unreachable -> Choice.trap `Unreachable
     | Drop -> ret @@ Stack.drop stack
+    | Select _t ->
+      if Parameters.use_ite_for_select then begin
+        let b, stack = Stack.pop_bool stack in
+        let o2, stack = Stack.pop stack in
+        let o1, stack = Stack.pop stack in
+        let* res = Choice.ite b ~if_true:o1 ~if_false:o2 in
+        ret @@ Stack.push stack res
+      end
+      else begin
+        let instr_counter_true =
+          Next_instruction.continue state |> Next_instruction.with_instr_counter
+        in
+        let instr_counter_false = instr_counter_true in
+        let* b, stack =
+          pop_choice stack ~instr_counter_true ~instr_counter_false
+        in
+        let o2, stack = Stack.pop stack in
+        let o1, stack = Stack.pop stack in
+        ret @@ Stack.push stack (if b then o1 else o2)
+      end
+    | I31 (Ref | Get_s | Get_u)
+    | Struct
+        ( New _ | New_default _
+        | Get (_, _)
+        | Get_s (_, _)
+        | Get_u (_, _)
+        | Set (_, _) )
+    | Array
+        ( New _ | New_default _
+        | New_fixed (_, _)
+        | New_data (_, _)
+        | New_elem (_, _)
+        | Get _ | Get_s _ | Get_u _ | Set _ | Len | Fill _
+        | Copy (_, _)
+        | Init_data (_, _)
+        | Init_elem (_, _) )
+    | Any_convert_extern | Extern_convert_any ->
+      (* TODO *) assert false
+
+  let exec_instr ({ raw; uuid; instr_counter; _ } : _ Annotated.t)
+    ({ stack; modul; env; _ } as state : State.exec_state) :
+    State.instr_result Choice.t =
+    let instr_counter = Atomic.fetch_and_add instr_counter 1 in
+    Log.info (fun m -> m "stack         : [ %a ]" Stack.pp stack);
+    Log.info (fun m ->
+      m "running instr : %a (executed %d times)" (pp_instr ~short:true) raw
+        instr_counter );
+    let* () =
+      match Logs.Src.level Log.main_src with
+      | Some Logs.Debug ->
+        let+ pc = Choice.get_pc () in
+        if not (Smtml.Expr.Set.is_empty pc) then
+          Log.debug (fun m ->
+            m "path condition smt query:@\n @[<v>%a@]" Smtml.Expr.pp_smtml
+              (Smtml.Expr.Set.to_list pc) )
+      | None | Some _ -> return ()
+    in
+    match raw with
+    | Simple i -> exec_simple_instruction state instr_counter ~uuid i
+    | Return -> Choice.return (State.return state)
     | If_else (_id, bt, e1, e2) ->
       let* b, stack =
         let instr_counter_true =
@@ -2235,26 +2276,6 @@ struct
       else Choice.return (State.Continue state)
     | Loop (_id, bt, e) -> exec_block state ~is_loop:true bt e
     | Block (_id, bt, e) -> exec_block state ~is_loop:false bt e
-    | Select _t ->
-      if Parameters.use_ite_for_select then begin
-        let b, stack = Stack.pop_bool stack in
-        let o2, stack = Stack.pop stack in
-        let o1, stack = Stack.pop stack in
-        let* res = Choice.ite b ~if_true:o1 ~if_false:o2 in
-        ret @@ Stack.push stack res
-      end
-      else begin
-        let instr_counter_true =
-          Next_instruction.continue state |> Next_instruction.with_instr_counter
-        in
-        let instr_counter_false = instr_counter_true in
-        let* b, stack =
-          pop_choice stack ~instr_counter_true ~instr_counter_false
-        in
-        let o2, stack = Stack.pop stack in
-        let o1, stack = Stack.pop stack in
-        ret @@ Stack.push stack (if b then o1 else o2)
-      end
     | Br_table (inds, i) ->
       let target, stack = Stack.pop_i32 stack in
       let> out = I32.(le_u (I32.of_int (Array.length inds)) target) in
@@ -2273,26 +2294,6 @@ struct
       call_indirect ~env ~return:true state (tbl_i, typ_i)
     | Call_ref typ_i -> call_ref ~return:false state typ_i
     | Return_call_ref typ_i -> call_ref ~return:true state typ_i
-    | ( I31 (Ref | Get_s | Get_u)
-      | Struct
-          ( New _ | New_default _
-          | Get (_, _)
-          | Get_s (_, _)
-          | Get_u (_, _)
-          | Set (_, _) )
-      | Array
-          ( New _ | New_default _
-          | New_fixed (_, _)
-          | New_data (_, _)
-          | New_elem (_, _)
-          | Get _ | Get_s _ | Get_u _ | Set _ | Len | Fill _
-          | Copy (_, _)
-          | Init_data (_, _)
-          | Init_elem (_, _) )
-      | Any_convert_extern | Extern_convert_any ) as i ->
-      Log.err (fun m ->
-        m "unimplemented instruction: %a" (pp_instr ~short:false) i );
-      assert false
 
   let rec loop ~heartbeat (state : State.exec_state) =
     let* () =

@@ -969,11 +969,7 @@ let typecheck_ref_instr (env : Env.t) stack = function
         let+ stack = Stack.push [ Ref_type (Text.No_null, TypeUse id) ] stack in
         (env, stack)
       end
-  | (Eq | Test _ | Cast _) as r ->
-    Log.err (fun m ->
-      m "TODO: unimplemented instruction typecheking %a" (pp_instr ~short:false)
-        (Ref r) );
-    assert false
+  | Eq | Test _ | Cast _ -> (* TODO *) assert false
 
 let typecheck_local_instr env stack : Binary.local_instr -> _ = function
   | Get i ->
@@ -1095,12 +1091,8 @@ let typecheck_data_instr (env : Env.t) stack : Binary.data_instr -> _ = function
     let+ () = check_data env.modul id in
     (env, stack)
 
-let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t)
-  : (Env.t * stack) Result.t =
-  Log.debug (fun m -> m "stack             : %a" Stack.pp stack);
-  Log.debug (fun m ->
-    m "typechecking instr: %a" (Binary.pp_instr ~short:true) instr.raw );
-  match instr.raw with
+let typecheck_simple_instruction (env : Env.t) (stack : stack) :
+  simple_instruction -> (Env.t * stack) Result.t = function
   | I32 i -> typecheck_i32_instr env stack i
   | I64 i -> typecheck_i64_instr env stack i
   | F32 i -> typecheck_f32_instr env stack i
@@ -1123,12 +1115,58 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
   | Drop ->
     let+ stack = Stack.drop stack in
     (env, stack)
+  | Unreachable -> Ok (env, [ any ])
+  | Select t ->
+    let* stack = Stack.pop env.modul [ i32 ] stack in
+    begin match t with
+    | None ->
+      begin match stack with
+      | Ref_type _ :: _tl -> Error (`Type_mismatch "select implicit")
+      | Any :: _ -> Ok (env, [ Something; Any ])
+      | hd :: Any :: _ -> Ok (env, hd :: [ Any ])
+      | hd :: hd' :: tl ->
+        let* b = Stack.match_types env.modul ~expected:hd ~got:hd' in
+        if b then Ok (env, hd :: tl) else Error (`Type_mismatch "select")
+      | _ -> Error (`Type_mismatch "select")
+      end
+    | Some t ->
+      let t = List.map typ_of_val_type t in
+      let* stack = Stack.pop env.modul t stack in
+      let* stack = Stack.pop env.modul t stack in
+      let+ stack = Stack.push t stack in
+      (env, stack)
+    end
+  | I31 (Ref | Get_s | Get_u)
+  | Struct
+      ( New _ | New_default _
+      | Get (_, _)
+      | Get_s (_, _)
+      | Get_u (_, _)
+      | Set (_, _) )
+  | Array
+      ( New _ | New_default _
+      | New_fixed (_, _)
+      | New_data (_, _)
+      | New_elem (_, _)
+      | Get _ | Get_s _ | Get_u _ | Set _ | Len | Fill _
+      | Copy (_, _)
+      | Init_data (_, _)
+      | Init_elem (_, _) )
+  | Any_convert_extern | Extern_convert_any ->
+    (* TODO *) assert false
+
+let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t)
+  : (Env.t * stack) Result.t =
+  Log.debug (fun m -> m "stack             : %a" Stack.pp stack);
+  Log.debug (fun m ->
+    m "typechecking instr: %a" (Binary.pp_instr ~short:true) instr.raw );
+  match instr.raw with
+  | Simple i -> typecheck_simple_instruction env stack i
   | Return ->
     let+ _stack =
       Stack.pop env.modul (List.rev_map typ_of_val_type env.result_type) stack
     in
     (env, [ any ])
-  | Unreachable -> Ok (env, [ any ])
   | If_else (_id, block_type, e1, e2) ->
     let* stack = Stack.pop env.modul [ i32 ] stack in
     let* stack_e1 = typecheck_expr env e1 ~is_loop:false block_type ~stack in
@@ -1198,26 +1236,6 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
       let* _, stack = Stack.pop_ref stack in
       let+ _stack = Stack.pop env.modul (List.rev_map typ_of_pt pt) stack in
       (env, [ any ])
-  | Select t ->
-    let* stack = Stack.pop env.modul [ i32 ] stack in
-    begin match t with
-    | None ->
-      begin match stack with
-      | Ref_type _ :: _tl -> Error (`Type_mismatch "select implicit")
-      | Any :: _ -> Ok (env, [ Something; Any ])
-      | hd :: Any :: _ -> Ok (env, hd :: [ Any ])
-      | hd :: hd' :: tl ->
-        let* b = Stack.match_types env.modul ~expected:hd ~got:hd' in
-        if b then Ok (env, hd :: tl) else Error (`Type_mismatch "select")
-      | _ -> Error (`Type_mismatch "select")
-      end
-    | Some t ->
-      let t = List.map typ_of_val_type t in
-      let* stack = Stack.pop env.modul t stack in
-      let* stack = Stack.pop env.modul t stack in
-      let+ stack = Stack.push t stack in
-      (env, stack)
-    end
   | Br i ->
     let* jt = Env.block_type_get i env in
     let+ _stack = Stack.pop env.modul jt stack in
@@ -1292,27 +1310,6 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
       (* push rt2 *)
       let+ stack = Stack.push [ Ref_type rt2 ] stack in
       (env, stack)
-  | ( I31 (Ref | Get_s | Get_u)
-    | Struct
-        ( New _ | New_default _
-        | Get (_, _)
-        | Get_s (_, _)
-        | Get_u (_, _)
-        | Set (_, _) )
-    | Array
-        ( New _ | New_default _
-        | New_fixed (_, _)
-        | New_data (_, _)
-        | New_elem (_, _)
-        | Get _ | Get_s _ | Get_u _ | Set _ | Len | Fill _
-        | Copy (_, _)
-        | Init_data (_, _)
-        | Init_elem (_, _) )
-    | Any_convert_extern | Extern_convert_any ) as i ->
-    Log.err (fun m ->
-      m "TODO: unimplemented instruction typecheking %a" (pp_instr ~short:false)
-        i );
-    assert false
 
 and typecheck_expr env expr ~is_loop (block_type : block_type option)
   ~stack:previous_stack : stack Result.t =
@@ -1362,9 +1359,8 @@ let typecheck_function (modul : Module.t) func refs =
     let* b = Stack.equal modul required stack in
     if not b then Error (`Type_mismatch "typecheck_function") else Ok ()
 
-let typecheck_const_instr ?known_globals ~is_init (modul : Module.t) refs stack
-  instr =
-  match instr.Annotated.raw with
+let typecheck_simple_const_instruction ?known_globals ~is_init
+  (modul : Module.t) refs stack = function
   | I32 (Const _) -> Stack.push [ i32 ] stack
   | I64 (Const _) -> Stack.push [ i64 ] stack
   | F32 (Const _) -> Stack.push [ f32 ] stack
@@ -1417,6 +1413,14 @@ let typecheck_const_instr ?known_globals ~is_init (modul : Module.t) refs stack
       | Shr_s | Shr_u | Rotl | Rotr ) ->
     let* stack = Stack.pop modul [ i64; i64 ] stack in
     Stack.push [ i64 ] stack
+  | _ -> Error `Constant_expression_required
+
+let typecheck_const_instr ?known_globals ~is_init (modul : Module.t) refs stack
+  instr =
+  match instr.Annotated.raw with
+  | Simple i ->
+    typecheck_simple_const_instruction ?known_globals ~is_init modul refs stack
+      i
   | _ -> Error `Constant_expression_required
 
 let typecheck_const_expr ?known_globals ?(is_init = false) (modul : Module.t)

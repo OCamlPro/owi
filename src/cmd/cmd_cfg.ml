@@ -132,7 +132,7 @@ let rec build_graph (l : Binary.expr) nodes n node edges
       let nodes = (n, node) :: nodes in
       let edges_to_add = (n, End, None) :: edges_to_add in
       (nodes, edges, n + 1, edges_to_add, false)
-    | Unreachable ->
+    | Simple Unreachable ->
       let nodes = (n, instr :: node) :: nodes in
       (nodes, edges, n + 1, edges_to_add, false)
     | Call _ | Call_indirect _ ->

@@ -35,12 +35,12 @@ let write_testcase =
 (* Entry-point *)
 
 let dummy_value_of_t = function
-  | Binary.Num_type I32 -> Ok (Binary.I32 (Const 0l))
-  | Num_type I64 -> Ok (Binary.I64 (Const 0L))
-  | Num_type F32 -> Ok (Binary.F32 (Const (Float32.of_float 0.)))
-  | Num_type F64 -> Ok (Binary.F64 (Const (Float64.of_float 0.)))
-  | Num_type V128 -> Ok (Binary.V128 (Const (Concrete_v128.of_i64x2 0L 0L)))
-  | Ref_type (Text.Null, t) -> Ok (Binary.Ref (Null t))
+  | Binary.Num_type I32 -> Ok (Binary.Simple (I32 (Const 0l)))
+  | Num_type I64 -> Ok (Simple (I64 (Const 0L)))
+  | Num_type F32 -> Ok (Simple (F32 (Const (Float32.of_float 0.))))
+  | Num_type F64 -> Ok (Simple (F64 (Const (Float64.of_float 0.))))
+  | Num_type V128 -> Ok (Simple (V128 (Const (Concrete_v128.of_i64x2 0L 0L))))
+  | Ref_type (Text.Null, t) -> Ok (Simple (Ref (Null t)))
   | Ref_type (Text.No_null, t) ->
     Fmt.error_msg "can not create default value of type %a" Binary.pp_heap_type
       t
@@ -167,7 +167,7 @@ let set_entry_point entry_point invoke_with_symbols (m : Binary.Module.t) =
             pt
         in
         let after_call =
-          List.map (fun (_ : Binary.val_type) -> Binary.Drop) rt
+          List.map (fun (_ : Binary.val_type) -> Binary.Simple Drop) rt
         in
         args @ [ Binary.Call export.id ] @ after_call
         |> Annotated.dummies |> Annotated.dummy

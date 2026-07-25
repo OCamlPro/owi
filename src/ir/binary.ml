@@ -819,8 +819,7 @@ let pp_array_instr ppf = function
   | Init_elem (id1, id2) ->
     pf ppf "array.init_elem %a %a" pp_indice id1 pp_indice id2
 
-(** Instructions *)
-type instr =
+type simple_instruction =
   | I32 of i32_instr
   | I64 of i64_instr
   | F32 of f32_instr
@@ -842,11 +841,17 @@ type instr =
   | I31 of Text.i31_instr
   | Struct of struct_instr
   | Array of array_instr
-  (* Parametric instructions *)
   | Drop
   | Select of val_type list option
   | Nop
   | Unreachable
+  | Any_convert_extern
+  | Extern_convert_any
+
+(** Instructions *)
+type instr =
+  | Simple of simple_instruction
+  (* Parametric instructions *)
   | Block of string option * block_type option * expr Annotated.t
   | Loop of string option * block_type option * expr Annotated.t
   | If_else of
@@ -865,15 +870,12 @@ type instr =
   | Call of indice
   | Call_indirect of indice * block_type
   | Call_ref of indice
-  (* GC convesion instructions *)
-  | Any_convert_extern
-  | Extern_convert_any
 
 and expr = instr Annotated.t list
 
 let pp_newline ppf () = pf ppf "@\n"
 
-let rec pp_instr ~short ppf = function
+let pp_simple_instruction ppf = function
   | I32 i -> pp_i32_instr ppf i
   | I64 i -> pp_i64_instr ppf i
   | F32 i -> pp_f32_instr ppf i
@@ -904,6 +906,11 @@ let rec pp_instr ~short ppf = function
     end
   | Nop -> pf ppf "nop"
   | Unreachable -> pf ppf "unreachable"
+  | Any_convert_extern -> pf ppf "any.convert_extern"
+  | Extern_convert_any -> pf ppf "extern.convert_any"
+
+let rec pp_instr ~short ppf = function
+  | Simple i -> pp_simple_instruction ppf i
   | Block (id, bt, e) ->
     if short then pf ppf "block%a%a" Text.pp_id_opt id pp_block_type_opt bt
     else
@@ -946,8 +953,6 @@ let rec pp_instr ~short ppf = function
   | Call_indirect (tbl_id, ty_id) ->
     pf ppf "call_indirect %a %a" pp_indice tbl_id pp_block_type ty_id
   | Call_ref ty_id -> pf ppf "call_ref %a" pp_indice ty_id
-  | Any_convert_extern -> pf ppf "any.convert_extern"
-  | Extern_convert_any -> pf ppf "extern.convert_any"
 
 and pp_expr ~short ppf instrs =
   Annotated.iter
@@ -964,10 +969,7 @@ and iter_instr f instr =
   Annotated.iter f instr;
   Annotated.iter
     (function
-      | I32 _ | I64 _ | F32 _ | F64 _ | V128 _ | I8x16 _ | I16x8 _ | I32x4 _
-      | I64x2 _ | F32x4 _ | F64x2 _ | Ref _ | Local _ | Global _ | Table _
-      | Elem _ | Memory _ | Data _ | Drop | Select _ | Nop | Unreachable | Br _
-      | Br_if _
+      | Simple _ | Br _ | Br_if _
       | Br_table (_, _)
       | Br_on_null _ | Br_on_non_null _
       | Br_on_cast (_, _, _)
@@ -976,24 +978,7 @@ and iter_instr f instr =
       | Return_call_indirect (_, _)
       | Return_call_ref _ | Call _
       | Call_indirect (_, _)
-      | Call_ref _
-      | I31 (Ref | Get_s | Get_u)
-      | Struct
-          ( New _ | New_default _
-          | Get (_, _)
-          | Get_s (_, _)
-          | Get_u (_, _)
-          | Set (_, _) )
-      | Array
-          ( New _ | New_default _
-          | New_fixed (_, _)
-          | New_data (_, _)
-          | New_elem (_, _)
-          | Get _ | Get_s _ | Get_u _ | Set _ | Len | Fill _
-          | Copy (_, _)
-          | Init_data (_, _)
-          | Init_elem (_, _) )
-      | Any_convert_extern | Extern_convert_any ->
+      | Call_ref _ ->
         ()
       | Block (_, _, e) | Loop (_, _, e) -> iter_expr f e
       | If_else (_, _, e1, e2) ->
@@ -1208,7 +1193,7 @@ module Module = struct
         (function
           | Call idx -> Call (update_idx idx)
           | Return_call idx -> Return_call (update_idx idx)
-          | Ref (Func idx) -> Ref (Func (update_idx idx))
+          | Simple (Ref (Func idx)) -> Simple (Ref (Func (update_idx idx)))
           | Block (id, typ, body) ->
             let body = handle_expr body in
             Block (id, typ, body)

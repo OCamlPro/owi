@@ -590,55 +590,55 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
 
   let rec rewrite_instr (loop_count, block_ids) :
     Text.instr -> Binary.instr Result.t = function
-    | I32 i ->
+    | Text.I32 i ->
       let+ i = rewrite_i32_instr assigned i in
-      Binary.I32 i
+      Binary.Simple (I32 i)
     | I64 i ->
       let+ i = rewrite_i64_instr assigned i in
-      Binary.I64 i
+      Binary.Simple (I64 i)
     | F32 i ->
       let+ i = rewrite_f32_instr assigned i in
-      Binary.F32 i
+      Binary.Simple (F32 i)
     | F64 i ->
       let+ i = rewrite_f64_instr assigned i in
-      Binary.F64 i
+      Binary.Simple (F64 i)
     | V128 i ->
       let+ i = rewrite_v128_instr assigned i in
-      Binary.V128 i
-    | I8x16 i -> Ok (Binary.I8x16 i)
-    | I16x8 i -> Ok (Binary.I16x8 i)
-    | I32x4 i -> Ok (Binary.I32x4 i)
-    | I64x2 i -> Ok (Binary.I64x2 i)
-    | F32x4 i -> Ok (Binary.F32x4 i)
-    | F64x2 i -> Ok (Binary.F64x2 i)
+      Binary.Simple (V128 i)
+    | I8x16 i -> Ok (Simple (I8x16 i))
+    | I16x8 i -> Ok (Simple (I16x8 i))
+    | I32x4 i -> Ok (Simple (I32x4 i))
+    | I64x2 i -> Ok (Simple (I64x2 i))
+    | F32x4 i -> Ok (Simple (F32x4 i))
+    | F64x2 i -> Ok (Simple (F64x2 i))
     | Ref i ->
       let+ i = rewrite_ref_instr assigned i in
-      Binary.Ref i
+      Binary.Simple (Ref i)
     | Local i ->
       let i = rewrite_local_instr i in
-      Ok (Binary.Local i)
+      Ok (Binary.Simple (Local i))
     | Global i ->
       let+ i = rewrite_global_instr assigned i in
-      Binary.Global i
+      Binary.Simple (Global i)
     | Table i ->
       let+ i = rewrite_table_instr assigned i in
-      Binary.Table i
+      Binary.Simple (Table i)
     | Elem i ->
       let+ i = rewrite_elem_instr assigned i in
-      Binary.Elem i
+      Binary.Simple (Elem i)
     | Memory i ->
       let+ i = rewrite_memory_instr assigned i in
-      Binary.Memory i
+      Binary.Simple (Memory i)
     | Data i ->
       let+ i = rewrite_data_instr assigned i in
-      Binary.Data i
-    | I31 i -> Ok (I31 i)
+      Binary.Simple (Data i)
+    | I31 i -> Ok (Simple (I31 i))
     | Struct i ->
       let+ i = rewrite_struct_instr i in
-      Binary.Struct i
+      Binary.Simple (Struct i)
     | Array i ->
       let+ i = rewrite_array_instr i in
-      Binary.Array i
+      Binary.Simple (Array i)
     | Br_table (ids, id) ->
       let block_id_to_raw = block_id_to_raw (loop_count, block_ids) in
       let* ids = array_map block_id_to_raw ids in
@@ -702,18 +702,18 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
       Binary.Return_call_ref bt
     | Select typ ->
       begin match typ with
-      | None -> Ok (Binary.Select None)
+      | None -> Ok (Simple (Select None))
       | Some [ t ] ->
         let+ t = rewrite_val_type assigned t in
-        Binary.Select (Some [ t ])
+        Binary.Simple (Select (Some [ t ]))
       | Some [] | Some (_ :: _ :: _) -> Error `Invalid_result_arity
       end
-    | Unreachable -> Ok Binary.Unreachable
-    | Drop -> Ok Binary.Drop
-    | Nop -> Ok Binary.Nop
+    | Unreachable -> Ok (Simple Unreachable)
+    | Drop -> Ok (Simple Drop)
+    | Nop -> Ok (Simple Nop)
     | Return -> Ok Binary.Return
-    | Any_convert_extern -> Ok Any_convert_extern
-    | Extern_convert_any -> Ok Extern_convert_any
+    | Any_convert_extern -> Ok (Simple Any_convert_extern)
+    | Extern_convert_any -> Ok (Simple Extern_convert_any)
   and expr (e : Text.expr) (loop_count, block_ids) :
     Binary.expr Annotated.t Result.t =
     let+ e =
