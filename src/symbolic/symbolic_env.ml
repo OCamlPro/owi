@@ -17,7 +17,7 @@ end)
 let get_memory ~(modul : int) env id : Symbolic_memory.t Symbolic_choice.t =
   let ( let* ) = Symbolic_choice.( let* ) in
   let* memories = Symbolic_choice.fold_state (fun state -> state.memories) in
-  match Thread.Collection.find memories ~module_id:modul ~id with
+  match Collection.find memories ~module_id:modul ~id with
   | Some g -> Symbolic_choice.return g
   | None ->
     let original = get_memory env ~modul id in
@@ -28,7 +28,7 @@ let get_memory ~(modul : int) env id : Symbolic_memory.t Symbolic_choice.t =
 let get_table ~(modul : int) env id : Symbolic_table.t Symbolic_choice.t =
   let ( let* ) = Symbolic_choice.( let* ) in
   let* tables = Symbolic_choice.fold_state (fun state -> state.tables) in
-  match Thread.Collection.find tables ~module_id:modul ~id with
+  match Collection.find tables ~module_id:modul ~id with
   | Some g -> Symbolic_choice.return g
   | None ->
     let original = get_table env ~modul id in
@@ -39,7 +39,7 @@ let get_table ~(modul : int) env id : Symbolic_table.t Symbolic_choice.t =
 let get_global ~(modul : int) env id : Symbolic_global.t Symbolic_choice.t =
   let ( let* ) = Symbolic_choice.( let* ) in
   let* globals = Symbolic_choice.fold_state (fun state -> state.globals) in
-  match Thread.Collection.find globals ~module_id:modul ~id with
+  match Collection.find globals ~module_id:modul ~id with
   | Some g -> Symbolic_choice.return g
   | None ->
     let original = get_global env ~modul id in
