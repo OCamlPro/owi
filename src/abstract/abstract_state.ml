@@ -10,6 +10,7 @@ type t =
   ; func_rt : Binary.val_type list
   ; invariant : Abstract_invariant.t
   ; call_stack : int list
+  ; current_module : int
   }
 
 let pp ctx : t Fmt.t =
@@ -42,11 +43,27 @@ let empty modul fold_globals env =
   let func_rt = [] in
   let invariant = Abstract_invariant.empty () in
   let call_stack = [] in
-  { ctx; stack; locals; func_rt; invariant; globals; call_stack }
+  { current_module = modul
+  ; ctx
+  ; stack
+  ; locals
+  ; func_rt
+  ; invariant
+  ; globals
+  ; call_stack
+  }
 
 let empty_exec_state ~ctx ~locals ~modul fold_globals env =
   let invariant = Abstract_invariant.empty () in
   let globals = init_globals ctx modul fold_globals env in
   let stack = Abstract_stack.empty in
   let call_stack = [] in
-  { ctx; stack; locals; func_rt = []; invariant; globals; call_stack }
+  { ctx
+  ; stack
+  ; locals
+  ; func_rt = []
+  ; invariant
+  ; globals
+  ; call_stack
+  ; current_module = modul
+  }
