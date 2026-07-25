@@ -3,14 +3,18 @@
 (* Written by the Owi programmers *)
 
 open Syntax
+module IMap = Map.Make (Int)
+module StringMap = Map.Make (String)
+module StringSet = Set.Make (String)
+
+let get_unsafe id map =
+  match IMap.find_opt id map with Some v -> v | None -> assert false
 
 (* Link Linked_module *)
 module Make (M : Link_intf.M) = struct
   type extern_module = M.extern_module
 
   module Linked_module = struct
-    module IMap = Map.Make (Int)
-
     type t =
       { globals : Concrete_global.t IMap.t
       ; memories : Concrete_memory.t IMap.t
@@ -26,40 +30,19 @@ module Make (M : Link_intf.M) = struct
 
     let get_id (modul : t) = modul.id
 
-    let get_global (modul : t) id =
-      match IMap.find_opt id modul.globals with
-      | None -> assert false
-      | Some v -> v
+    let get_global (modul : t) id = get_unsafe id modul.globals
 
-    let get_memory (modul : t) id =
-      match IMap.find_opt id modul.memories with
-      | None -> assert false
-      | Some v -> v
+    let get_memory (modul : t) id = get_unsafe id modul.memories
 
-    let get_table (modul : t) id =
-      match IMap.find_opt id modul.tables with
-      | None -> assert false
-      | Some v -> v
+    let get_table (modul : t) id = get_unsafe id modul.tables
 
-    let get_func (modul : t) id =
-      match IMap.find_opt id modul.functions with
-      | None -> assert false
-      | Some v -> v
+    let get_func (modul : t) id = get_unsafe id modul.functions
 
-    let get_data (modul : t) id =
-      match IMap.find_opt id modul.data with
-      | None -> assert false
-      | Some v -> v
+    let get_data (modul : t) id = get_unsafe id modul.data
 
-    let get_elem (modul : t) id =
-      match IMap.find_opt id modul.elem with
-      | None -> assert false
-      | Some v -> v
+    let get_elem (modul : t) id = get_unsafe id modul.elem
 
-    let get_tag (modul : t) id =
-      match IMap.find_opt id modul.tags with
-      | None -> assert false
-      | Some v -> v
+    let get_tag (modul : t) id = get_unsafe id modul.tags
 
     let get_extern_func modul id =
       let f, _t = Dynarray.get modul.extern_funcs id in
@@ -149,8 +132,6 @@ module Make (M : Link_intf.M) = struct
   end
 
   (* Link State *)
-  module StringMap = Map.Make (String)
-  module StringSet = Set.Make (String)
 
   type global = Concrete_global.t
 
@@ -548,8 +529,8 @@ module Make (M : Link_intf.M) = struct
     ]
 
   let active_data_expr modul ~offset ~length ~mem ~data =
-    if not (Linked_module.IMap.mem mem (Linked_module.Build.get_memories modul))
-    then Error (`Unknown_memory (Text.Raw mem))
+    if not (IMap.mem mem (Linked_module.Build.get_memories modul)) then
+      Error (`Unknown_memory (Text.Raw mem))
     else
       Ok
         [ Binary.Simple (I32 (Const offset))
