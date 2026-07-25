@@ -2,16 +2,6 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-module Collection : sig
-  type 'a t
-
-  val empty : 'a t
-
-  val find : 'a t -> module_id:int -> id:int -> 'a option
-
-  val replace : 'a t -> module_id:int -> id:int -> 'a -> 'a t
-end
-
 type t = private
   { num_symbols : int
   ; symbol_scopes : Symbol_scope.t
