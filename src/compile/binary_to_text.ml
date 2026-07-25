@@ -483,7 +483,8 @@ let convert_array_instr : Binary.array_instr -> Text.array_instr = function
   | Init_data (id1, id2) -> Init_data (convert_indice id1, convert_indice id2)
   | Init_elem (id1, id2) -> Init_elem (convert_indice id1, convert_indice id2)
 
-let rec convert_instr : Binary.instr -> Text.instr = function
+let convert_simple_instruction : Binary.simple_instruction -> Text.instr =
+  function
   | Binary.I32 i -> Text.I32 (convert_i32_instr i)
   | I64 i -> Text.I64 (convert_i64_instr i)
   | F32 i -> Text.F32 (convert_f32_instr i)
@@ -505,6 +506,24 @@ let rec convert_instr : Binary.instr -> Text.instr = function
   | I31 i -> I31 i
   | Struct i -> Struct (convert_struct_instr i)
   | Array i -> Array (convert_array_instr i)
+  | Select typ ->
+    begin match typ with
+    | None -> Select None
+    | Some [ t ] -> Select (Some [ convert_val_type t ])
+    | Some [] | Some (_ :: _ :: _) ->
+      (* invalid result arity *)
+      (* TODO: maybe we could change the type of Binary.Select to prevent this from happening? *)
+      assert false
+    end
+  | Unreachable -> Unreachable
+  | Drop -> Drop
+  | Nop -> Nop
+  | Any_convert_extern -> Any_convert_extern
+  | Extern_convert_any -> Extern_convert_any
+
+let rec convert_instr : Binary.instr -> Text.instr = function
+  | Binary.Simple i -> convert_simple_instruction i
+  | Return -> Return
   | Br_table (ids, id) ->
     let ids = Array.map convert_indice ids in
     let id = convert_indice id in
@@ -564,21 +583,6 @@ let rec convert_instr : Binary.instr -> Text.instr = function
   | Return_call_ref bt ->
     let bt = convert_block_type bt in
     Return_call_ref bt
-  | Select typ ->
-    begin match typ with
-    | None -> Select None
-    | Some [ t ] -> Select (Some [ convert_val_type t ])
-    | Some [] | Some (_ :: _ :: _) ->
-      (* invalid result arity *)
-      (* TODO: maybe we could change the type of Binary.Select to prevent this from happening? *)
-      assert false
-    end
-  | Unreachable -> Unreachable
-  | Drop -> Drop
-  | Nop -> Nop
-  | Return -> Return
-  | Any_convert_extern -> Any_convert_extern
-  | Extern_convert_any -> Extern_convert_any
 
 and convert_expr (e : Binary.expr Annotated.t) : Text.expr =
   List.map (fun i -> convert_instr i.Annotated.raw) e.raw

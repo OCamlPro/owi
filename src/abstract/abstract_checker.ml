@@ -50,13 +50,26 @@ let check_f64 ~uuid ~invariants : Binary.f64_instr -> unit = function
   | Convert_i_s _ | Convert_i_u _ | Reinterpret_i _ | Load _ | Store _ ->
     ()
 
+let check_simple_instruction ~invariants ~uuid : Binary.simple_instruction -> _
+    = function
+  | I32 i32_instr -> check_i32 ~uuid ~invariants i32_instr
+  | I64 i64_instr -> check_i64 ~uuid ~invariants i64_instr
+  | F32 f32_instr -> check_f32 ~uuid ~invariants f32_instr
+  | F64 f64_instr -> check_f64 ~uuid ~invariants f64_instr
+  | V128 _ | I8x16 _ | I16x8 _ | I32x4 _ | I64x2 _ | F32x4 _ | F64x2 _ | Ref _
+  | Local _ | Global _ | Table _ | Elem _ | Memory _ | Data _ | I31 _ | Struct _
+  | Array _ | Drop | Select _ | Nop | Unreachable | Any_convert_extern
+  | Extern_convert_any ->
+    ()
+
 let rec check_expr (expr : Binary.expr Annotated.t)
   ~(invariants : Abstract_invariant.t) ~modul ~env =
   List.iter (check_instr ~invariants ~modul ~env) expr.raw
 
-and check_instr (instr : Binary.instr Annotated.t)
+and check_instr ({ raw; uuid; _ } : Binary.instr Annotated.t)
   ~(invariants : Abstract_invariant.t) ~modul ~env =
-  match instr.raw with
+  match raw with
+  | Simple i -> check_simple_instruction ~invariants ~uuid i
   | Block (_str_opt, _, expr) -> check_expr expr ~invariants ~modul ~env
   | If_else (_str_opt, _bt, expr_then, expr_else) ->
     check_expr ~invariants ~modul ~env expr_then;
@@ -68,13 +81,7 @@ and check_instr (instr : Binary.instr Annotated.t)
     | Wasm { func; modul } -> check_expr ~invariants ~modul ~env func.body
     | Extern _ -> ()
     end
-  | I32 i32_instr -> check_i32 ~uuid:instr.uuid ~invariants i32_instr
-  | I64 i64_instr -> check_i64 ~uuid:instr.uuid ~invariants i64_instr
-  | F32 f32_instr -> check_f32 ~uuid:instr.uuid ~invariants f32_instr
-  | F64 f64_instr -> check_f64 ~uuid:instr.uuid ~invariants f64_instr
-  | V128 _ | I8x16 _ | I16x8 _ | I32x4 _ | I64x2 _ | F32x4 _ | F64x2 _ | Ref _
-  | Local _ | Global _ | Table _ | Elem _ | Memory _ | Data _ | I31 _ | Struct _
-  | Array _ | Drop | Select _ | Nop | Unreachable | Br _ | Br_if _
+  | Br _ | Br_if _
   | Br_table (_, _)
   | Br_on_null _ | Br_on_non_null _
   | Br_on_cast (_, _, _)
@@ -83,7 +90,7 @@ and check_instr (instr : Binary.instr Annotated.t)
   | Return_call_indirect (_, _)
   | Return_call_ref _
   | Call_indirect (_, _)
-  | Call_ref _ | Any_convert_extern | Extern_convert_any ->
+  | Call_ref _ ->
     ()
 
 let check_module (env : Abstract_env.t) ~(modul : int)

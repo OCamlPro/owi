@@ -16,6 +16,7 @@
   abstract_interpreter_simple
   abstract_interpreter_control_flow
   abstract_invariant
+  abstract_jump_map
   abstract_locals
   abstract_memory
   abstract_monad

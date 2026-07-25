@@ -315,8 +315,7 @@ module Make (M : Link_intf.M) = struct
       | Mul -> Stack.apply_i64_i64_i64 stack Concrete_i64.mul
       | _ -> assert false
 
-    let instr modul stack instr =
-      match instr.Annotated.raw with
+    let simple_instruction modul stack = function
       | Binary.I32 i -> Result.ok (i32_instr stack i)
       | Binary.I64 i -> Result.ok (i64_instr stack i)
       | F32 (Const f) -> Result.ok @@ Stack.push_f32 stack f
@@ -330,6 +329,11 @@ module Make (M : Link_intf.M) = struct
       | Global (Get id) ->
         let* g = Linked_module.Build.get_const_global modul id in
         Result.ok @@ Stack.push stack g
+      | _ -> assert false
+
+    let instr modul stack instr =
+      match instr.Annotated.raw with
+      | Binary.Simple i -> simple_instruction modul stack i
       | _ -> assert false
 
     (* TODO: binary+const expr *)
@@ -536,11 +540,11 @@ module Make (M : Link_intf.M) = struct
     modul
 
   let active_elem_expr ~offset ~length ~table ~elem =
-    [ Binary.I32 (Const offset)
-    ; I32 (Const 0l)
-    ; I32 (Const length)
-    ; Table (Init (table, elem))
-    ; Elem (Drop elem)
+    [ Binary.Simple (I32 (Const offset))
+    ; Simple (I32 (Const 0l))
+    ; Simple (I32 (Const length))
+    ; Simple (Table (Init (table, elem)))
+    ; Simple (Elem (Drop elem))
     ]
 
   let active_data_expr modul ~offset ~length ~mem ~data =
@@ -548,11 +552,11 @@ module Make (M : Link_intf.M) = struct
     then Error (`Unknown_memory (Text.Raw mem))
     else
       Ok
-        [ Binary.I32 (Const offset)
-        ; I32 (Const 0l)
-        ; I32 (Const length)
-        ; Memory (Init (mem, data))
-        ; Data (Drop data)
+        [ Binary.Simple (I32 (Const offset))
+        ; Simple (I32 (Const 0l))
+        ; Simple (I32 (Const length))
+        ; Simple (Memory (Init (mem, data)))
+        ; Simple (Data (Drop data))
         ]
 
   let get_i32 = function

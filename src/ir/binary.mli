@@ -375,7 +375,7 @@ type array_instr =
   | Init_elem of indice * indice
 
 (** Instructions *)
-type instr =
+type simple_instruction =
   | I32 of i32_instr
   | I64 of i64_instr
   | F32 of f32_instr
@@ -397,11 +397,17 @@ type instr =
   | I31 of Text.i31_instr
   | Struct of struct_instr
   | Array of array_instr
-  (* Parametric instructions *)
   | Drop
   | Select of val_type list option
   | Nop
   | Unreachable
+  | Any_convert_extern
+  | Extern_convert_any
+
+val pp_simple_instruction : simple_instruction Fmt.t
+
+type instr =
+  | Simple of simple_instruction
   | Block of string option * block_type option * expr Annotated.t
   | Loop of string option * block_type option * expr Annotated.t
   | If_else of
@@ -420,9 +426,6 @@ type instr =
   | Call of indice
   | Call_indirect of indice * block_type
   | Call_ref of indice
-  (* GC convesion instructions *)
-  | Any_convert_extern
-  | Extern_convert_any
 
 and expr = instr Annotated.t list
 

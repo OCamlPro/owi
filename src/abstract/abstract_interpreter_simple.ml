@@ -1683,10 +1683,8 @@ let eval_table ({ stack; ctx; _ } as state : Abstract_state.t) :
     let _v, stack = Stack.pop_i32 stack in
     State { state with stack }
 
-let eval_instr ({ stack; _ } as state : Abstract_state.t) :
-  Binary.instr Annotated.t -> t =
- fun { raw; uuid; _ } ->
-  match raw with
+let eval_instr gen_new_value ({ stack; ctx; _ } as state : Abstract_state.t)
+  ~uuid : Binary.simple_instruction -> t = function
   | I32 instr -> eval_i32 state uuid instr
   | I64 instr -> eval_i64 state uuid instr
   | F32 instr -> eval_f32 state uuid instr
@@ -1710,15 +1708,32 @@ let eval_instr ({ stack; _ } as state : Abstract_state.t) :
   | Drop ->
     let _, stack = Stack.pop stack in
     State { state with stack }
-  | (I31 _ | Struct _ | Array _ | Any_convert_extern | Extern_convert_any) as
-    instr ->
-    Fmt.failwith "%a not implemented in simple interpreter"
-      (Binary.pp_instr ~short:true)
-      instr
-  | If_else _ | Call _ | Call_indirect _ | Call_ref _ | Return | Return_call _
-  | Return_call_indirect _ | Return_call_ref _ | Block _ | Loop _ | Br _
-  | Br_if _ | Br_table _ | Br_on_non_null _ | Br_on_null _ | Select _
-  | Br_on_cast (_, _, _)
-  | Br_on_cast_fail (_, _, _) ->
-    (* should have been handled by the control flow interpreter! *)
-    assert false
+  | Select _t ->
+    let b, stack = Stack.pop_bool stack ctx in
+    let (v1, v2), stack = Stack.pop2 stack in
+    begin match Abstract_domain.query_boolean ctx b with
+    | Top ->
+      (* TODO test *)
+      let init_res =
+        Abstract_domain.Context.Result
+          ( true
+          , Abstract_domain.Context.empty_tuple ()
+          , fun _ctx out -> (v1, out) )
+      in
+      let (Abstract_domain.Context.Result (_inc, intup, cont)) =
+        gen_new_value ~widens:false v1 v2 state state init_res Fun.const
+      in
+      let out = Abstract_domain.nondet_same_context ctx intup in
+      let v = fst @@ cont ctx out in
+      let stack = Stack.push stack v in
+      State { state with stack; ctx }
+    | True ->
+      let stack = Stack.push stack v1 in
+      State { state with stack; ctx }
+    | False ->
+      let stack = Stack.push stack v2 in
+      State { state with stack; ctx }
+    | Bottom -> Unreachable
+    end
+  | I31 _ | Struct _ | Array _ | Any_convert_extern | Extern_convert_any ->
+    (* TODO *) assert false

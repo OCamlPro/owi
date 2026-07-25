@@ -37,7 +37,7 @@ let rec find_children mode tables (funcs : 'a array) acc (l : Binary.expr) =
     Annotated.update_functions_called instr children;
     let acc = S.union children acc in
     find_children mode tables funcs acc l
-  | ( { raw = I32 (Const x); _ }
+  | ( { raw = Simple (I32 (Const x)); _ }
       :: ( { raw = Call_indirect (i, _) | Return_call_indirect (i, _); _ } as
            instr )
       :: l
@@ -102,8 +102,7 @@ let eval_i64_instr stack : Binary.i64_instr -> _ = function
 let get_const_global env id =
   match M.find_opt id env with Some n -> n | None -> assert false
 
-let eval_const_instr env stack instr =
-  match instr.Annotated.raw with
+let eval_const_simple_instruction env stack = function
   | Binary.I32 i -> Ok (eval_i32_instr stack i)
   | Binary.I64 i -> Ok (eval_i64_instr stack i)
   | F32 (Const f) -> Result.ok @@ Stack.push_f32 stack f
@@ -116,9 +115,14 @@ let eval_const_instr env stack instr =
   | Ref (Func id) -> Result.ok @@ Stack.push_i32_of_int stack id
   | _ -> assert false
 
+let eval_const_instruction env stack instr =
+  match instr.Annotated.raw with
+  | Binary.Simple i -> eval_const_simple_instruction env stack i
+  | _ -> assert false
+
 let eval_const env exp =
   let* stack =
-    list_fold_left (eval_const_instr env) Stack.empty exp.Annotated.raw
+    list_fold_left (eval_const_instruction env) Stack.empty exp.Annotated.raw
   in
   match stack with
   | [] -> Error (`Type_mismatch "const expr returning zero values")
@@ -147,7 +151,7 @@ let build_env (env, n) (global : (Binary.Global.t, 'a) Origin.t) =
 (* TODO: it looks like this is looking at the wrong tables or not all of them *)
 let rec find_tables acc (e : Binary.instr Annotated.t) =
   match e.raw with
-  | Table (Set i | Fill i | Copy (i, _)) -> i :: acc
+  | Simple (Table (Set i | Fill i | Copy (i, _))) -> i :: acc
   | Block (_, _, exp) | Loop (_, _, exp) ->
     List.fold_left find_tables acc exp.raw
   | If_else (_, _, e1, e2) ->
