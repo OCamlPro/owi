@@ -4,6 +4,6 @@
 
 type t =
   { value : Symbolic_value.t
-  ; module_id : int
+  ; modul : int
   ; id : int
   }

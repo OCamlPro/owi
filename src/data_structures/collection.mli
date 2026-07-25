@@ -6,6 +6,6 @@ type 'a t
 
 val empty : 'a t
 
-val find : 'a t -> module_id:int -> id:int -> 'a option
+val find : 'a t -> modul:int -> id:int -> 'a option
 
-val replace : 'a t -> module_id:int -> id:int -> 'a -> 'a t
+val replace : 'a t -> modul:int -> id:int -> 'a -> 'a t

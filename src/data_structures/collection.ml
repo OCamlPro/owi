@@ -16,10 +16,10 @@ type 'a t = 'a Int_pair_map.t
 
 let empty = Int_pair_map.empty
 
-let find collection ~module_id ~id =
-  let loc = (module_id, id) in
+let find collection ~modul ~id =
+  let loc = (modul, id) in
   Int_pair_map.find_opt loc collection
 
-let replace collection ~module_id ~id v =
-  let loc = (module_id, id) in
+let replace collection ~modul ~id v =
+  let loc = (modul, id) in
   Int_pair_map.add loc v collection

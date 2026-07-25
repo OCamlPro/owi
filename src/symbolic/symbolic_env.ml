@@ -17,32 +17,32 @@ end)
 let get_memory ~(modul : int) env id : Symbolic_memory.t Symbolic_choice.t =
   let ( let* ) = Symbolic_choice.( let* ) in
   let* memories = Symbolic_choice.fold_state (fun state -> state.memories) in
-  match Collection.find memories ~module_id:modul ~id with
+  match Collection.find memories ~modul ~id with
   | Some g -> Symbolic_choice.return g
   | None ->
     let original = get_memory env ~modul id in
-    let symbolic = Symbolic_memory.of_concrete ~module_id:modul ~id original in
+    let symbolic = Symbolic_memory.of_concrete ~modul ~id original in
     let* () = Symbolic_memory.replace symbolic in
     Symbolic_choice.return symbolic
 
 let get_table ~(modul : int) env id : Symbolic_table.t Symbolic_choice.t =
   let ( let* ) = Symbolic_choice.( let* ) in
   let* tables = Symbolic_choice.fold_state (fun state -> state.tables) in
-  match Collection.find tables ~module_id:modul ~id with
+  match Collection.find tables ~modul ~id with
   | Some g -> Symbolic_choice.return g
   | None ->
     let original = get_table env ~modul id in
-    let symbolic = Symbolic_table.of_concrete ~module_id:modul ~id original in
+    let symbolic = Symbolic_table.of_concrete ~modul ~id original in
     let* () = Symbolic_table.replace symbolic in
     Symbolic_choice.return symbolic
 
 let get_global ~(modul : int) env id : Symbolic_global.t Symbolic_choice.t =
   let ( let* ) = Symbolic_choice.( let* ) in
   let* globals = Symbolic_choice.fold_state (fun state -> state.globals) in
-  match Collection.find globals ~module_id:modul ~id with
+  match Collection.find globals ~modul ~id with
   | Some g -> Symbolic_choice.return g
   | None ->
     let original = get_global env ~modul id in
-    let symbolic = Symbolic_global.of_concrete ~module_id:modul ~id original in
+    let symbolic = Symbolic_global.of_concrete ~modul ~id original in
     let* () = Symbolic_global.replace symbolic in
     Symbolic_choice.return symbolic
