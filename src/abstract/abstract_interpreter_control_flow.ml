@@ -10,7 +10,6 @@ exception RecursiveFunctionCall
 
 type interpreter_state =
   { abs_state : Abstract_state.t
-  ; current_module : int
   ; env : Abstract_env.t
   }
 
@@ -329,8 +328,7 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
       Log.debug (fun m -> m "abstract state : None @.");
       None
 
-  and eval_instr
-    ({ abs_state; current_module; env } as state : interpreter_state) :
+  and eval_instr ({ abs_state; env } as state : interpreter_state) :
        Binary.instr Annotated.t
     -> interpreter_state option * Abstract_state.t list JumpMap.t =
    fun instr ->
@@ -349,13 +347,18 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
       m "running instr : %a" (Binary.pp_instr ~short:true) instr.raw );
     match instr.raw with
     | Call call_idx ->
-      let func = Abstract_env.get_func ~modul:current_module env call_idx in
+      let func =
+        Abstract_env.get_func ~modul:abs_state.current_module env call_idx
+      in
       begin match func with
       | Wasm { func; modul } ->
-        let r = eval_func { state with current_module = modul } call_idx func in
+        let abs_state = { abs_state with current_module = modul } in
+        let r = eval_func { state with abs_state } call_idx func in
         (r, JumpMap.empty)
       | Extern { idx } -> (
-        let func = Abstract_env.get_extern_func ~modul:current_module env idx in
+        let func =
+          Abstract_env.get_extern_func ~modul:abs_state.current_module env idx
+        in
         let stack = exec_extern_func abs_state func in
         match Abstract_monad.run stack abs_state with
         | None -> (None, JumpMap.empty)
@@ -525,7 +528,8 @@ module ConcreteFixpoint = DenotFixpoint (Abstract_interpreter_simple)
 let eval_exprs ~(modul : int) abs_state env =
   (* TODO: init_code is no more an exprs, it's a regular expr now, this function can probably be removed and eval_expr could be used instead! *)
   let init_code = Abstract_env.get_init_code ~modul env in
-  let state = { abs_state; current_module = modul; env } in
+  let abs_state = { abs_state with Abstract_state.current_module = modul } in
+  let state = { abs_state; env } in
   let state =
     match ConcreteFixpoint.eval_expr state init_code with
     | None, _mapping -> state
@@ -556,12 +560,8 @@ let exec_vfunc_from_outside ~ctx ~locals ~(modul : int) ~env (func : Kind.func)
         |> List.sort (fun (i1, _) (i2, _) -> compare i1 i2)
         |> List.map snd
       in
-      let abs_state = { abs_state with stack } in
-      match
-        ConcreteFixpoint.eval_func
-          { abs_state; current_module = modul; env }
-          modul func
-      with
+      let abs_state = { abs_state with stack; current_module = modul } in
+      match ConcreteFixpoint.eval_func { abs_state; env } modul func with
       | Some state -> Ok state.abs_state
       | None -> Fmt.error_msg "failed" )
     | Extern { idx } -> (
