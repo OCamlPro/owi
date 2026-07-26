@@ -152,7 +152,7 @@ module Make (M : Link_intf.M) = struct
     { by_name : exports StringMap.t
     ; by_id : (exports * int) StringMap.t
     ; last : (exports * int) option
-    ; collection : (M.extern_func * Binary.func_type) Dynarray.t
+    ; extern_modules : (M.extern_func * Binary.func_type) Dynarray.t
     ; modules : Linked_module.t Dynarray.t
     }
 
@@ -160,15 +160,15 @@ module Make (M : Link_intf.M) = struct
     { by_name = StringMap.empty
     ; by_id = StringMap.empty
     ; last = None
-    ; collection = Dynarray.create ()
+    ; extern_modules = Dynarray.create ()
     ; modules = Dynarray.create ()
     }
 
   (* TODO: I'm not sure it makes sense to try making the Link.State.t persistent, we could change the API to be fully mutable? *)
-  let clone { by_name; by_id; last; collection; modules } =
-    let collection = Dynarray.copy collection in
+  let clone { by_name; by_id; last; extern_modules; modules } =
+    let extern_modules = Dynarray.copy extern_modules in
     let modules = Dynarray.copy modules in
-    { by_name; by_id; last; collection; modules }
+    { by_name; by_id; last; extern_modules; modules }
 
   let get_last state = state.last
 
@@ -465,7 +465,7 @@ module Make (M : Link_intf.M) = struct
         let (Bt_raw ((None | Some _), t)) = func.type_f in
         t
       | Extern { idx } ->
-        let _f, t = Dynarray.get ls.collection idx in
+        let _f, t = Dynarray.get ls.extern_modules idx in
         t
     in
     if Binary.func_type_eq typ type' then Ok func
@@ -653,7 +653,7 @@ module Make (M : Link_intf.M) = struct
     in
 
     let modul : Linked_module.t =
-      Linked_module.freeze next_id modul init_code ls.collection
+      Linked_module.freeze next_id modul init_code ls.extern_modules
     in
     Dynarray.add_last ls.modules modul;
 
@@ -674,19 +674,19 @@ module Make (M : Link_intf.M) = struct
     , { by_id
       ; by_name
       ; last = Some (by_id_exports, Linked_module.get_id modul)
-      ; collection = ls.collection
+      ; extern_modules = ls.extern_modules
       ; modules = ls.modules
       } )
 
   let link_extern_module ~name functions (ls : t) =
-    let functions, collection =
+    let functions, extern_modules =
       List.fold_left
-        (fun (functions, collection) (name, func) ->
+        (fun (functions, extern_modules) (name, func) ->
           let typ = M.to_func_type func in
-          Dynarray.add_last collection (func, typ);
-          let id = Dynarray.length collection - 1 in
-          ((name, (Kind.extern id : Kind.func)) :: functions, collection) )
-        ([], ls.collection) functions
+          Dynarray.add_last extern_modules (func, typ);
+          let id = Dynarray.length extern_modules - 1 in
+          ((name, (Kind.extern id : Kind.func)) :: functions, extern_modules) )
+        ([], ls.extern_modules) functions
     in
     let functions = StringMap.of_seq (List.to_seq functions) in
     let defined_names =
@@ -703,5 +703,5 @@ module Make (M : Link_intf.M) = struct
       ; defined_names
       }
     in
-    { ls with by_name = StringMap.add name exports ls.by_name; collection }
+    { ls with by_name = StringMap.add name exports ls.by_name; extern_modules }
 end
