@@ -28,12 +28,16 @@ end
 module IntMap = Map.Make (Int)
 module StringMap = Map.Make (String)
 
-module type Runtime_builder_intf = sig end
+module type Runtime_builder_intf = sig
+  type value
+end
 
 module type Runtime_intf = sig
+  type t
+
   type modul
 
-  type t
+  type value
 
   val empty : t
 
@@ -46,7 +50,10 @@ module type Runtime_intf = sig
   val link_binary_module : runtime:t -> modul:Binary.Module.t -> t Result.t
 end
 
-module Make (_ : Runtime_builder_intf) : Runtime_intf = struct
+module Make (M : Runtime_builder_intf) :
+  Runtime_intf with type value = M.value = struct
+  type value = M.value
+
   type modul = int
 
   module SourceId = struct
@@ -62,11 +69,20 @@ module Make (_ : Runtime_builder_intf) : Runtime_intf = struct
 
   module AddressMap = Map.Make (SourceId)
 
+  type global =
+    { value : value
+    ; typ : Binary.Global.Type.t
+    }
+
   type t =
     { functions : Kind.func Allocator.t
         (* map from runtime address to runtime functions *)
     ; functions_map : Allocator.key AddressMap.t
         (* map from function source id to runtime address *)
+    ; globals : global Allocator.t
+        (* map from runtime address to runtime globals *)
+    ; globals_map : Allocator.key AddressMap.t
+        (* map from global source id to runtime address *)
     ; initialization_codes : Binary.expr IntMap.t
         (* map from modul to their initialization code *)
     ; exports : Binary.Module.Exports.t IntMap.t
@@ -79,12 +95,16 @@ module Make (_ : Runtime_builder_intf) : Runtime_intf = struct
   let empty =
     let functions = Allocator.empty in
     let functions_map = AddressMap.empty in
+    let globals = Allocator.empty in
+    let globals_map = AddressMap.empty in
     let initialization_codes = IntMap.empty in
     let exports = IntMap.empty in
     let last_module = None in
     let registered_modules = StringMap.empty in
     { functions
     ; functions_map
+    ; globals
+    ; globals_map
     ; initialization_codes
     ; exports
     ; last_module
@@ -115,6 +135,9 @@ module Make (_ : Runtime_builder_intf) : Runtime_intf = struct
     | Some expr -> expr
     | None -> []
 
+  let eval_constant_expression (_e : Binary.expr Annotated.t) : value =
+    assert false
+
   let link_binary_module ~(runtime : t) ~(modul : Binary.Module.t) : t Result.t
       =
     let new_module = get_next_module ~runtime in
@@ -132,7 +155,7 @@ module Make (_ : Runtime_builder_intf) : Runtime_intf = struct
             Ok (succ id, functions, functions_map)
           | Imported { modul_name; name; typ; _ } -> begin
             (* find the source module *)
-            let* modul = get_registered_module ~runtime ~name in
+            let* modul = get_registered_module ~runtime ~name:modul_name in
             (* find its local id corresponding to the name we want in its exports *)
             let* id =
               match IntMap.find_opt modul runtime.exports with
@@ -191,6 +214,70 @@ module Make (_ : Runtime_builder_intf) : Runtime_intf = struct
     in
     (* tags *)
     (* globals *)
+    let* _i, globals, globals_map =
+      array_fold_left
+        (fun (id, globals, globals_map) global ->
+          match global with
+          | Origin.Local ({ init; typ; id = _ } : Binary.Global.t) ->
+            let value = eval_constant_expression init in
+            let global : global = { value; typ } in
+            let globals, address = Allocator.add global globals in
+            let globals_map =
+              AddressMap.add { id; modul = new_module } address globals_map
+            in
+            Ok (succ id, globals, globals_map)
+          | Imported { modul_name; name; typ; _ } -> begin
+            (* find the source module *)
+            let* modul = get_registered_module ~runtime ~name:modul_name in
+            (* find its local id corresponding to the name we want in its exports *)
+            let* id =
+              match IntMap.find_opt modul runtime.exports with
+              | None -> assert false
+              | Some { global; _ } ->
+                begin match
+                  Array.find_opt
+                    (fun (exported_global : Binary.Export.t) ->
+                      String.equal name exported_global.name )
+                    global
+                with
+                | None -> Error (`Unknown_import (modul_name, name))
+                | Some { id; _ } -> Ok id
+                end
+            in
+            (* find its address in the functions_map *)
+            let address =
+              let source : SourceId.t = { modul; id } in
+              match AddressMap.find_opt source globals_map with
+              | None -> assert false
+              | Some address -> address
+            in
+            (* find its runtime value *)
+            let global =
+              match Allocator.find_opt address globals with
+              | None -> assert false
+              | Some global -> global
+            in
+            (* comparing their types *)
+            let* () =
+              match (global.typ, typ) with
+              | (Var, _), ((Const : Text.mut), _) | (Const, _), (Var, _) ->
+                Error (`Incompatible_import_type name)
+              | (Var, t1), (Var, t2) ->
+                if Binary.val_type_eq t1 t2 then Ok ()
+                else Error (`Incompatible_import_type name)
+              | (Const, t1), (Const, t2) ->
+                if Binary.is_subtype_val_type t1 t2 then Ok ()
+                else Error (`Incompatible_import_type name)
+            in
+
+            let globals_map =
+              AddressMap.add { id; modul = new_module } address globals_map
+            in
+            Ok (succ id, globals, globals_map)
+            end )
+        (0, runtime.globals, runtime.globals_map)
+        modul.global
+    in
     (* memories *)
     (* tables *)
     (* initialization code *)
@@ -215,6 +302,8 @@ module Make (_ : Runtime_builder_intf) : Runtime_intf = struct
     let runtime =
       { functions
       ; functions_map
+      ; globals
+      ; globals_map
       ; initialization_codes
       ; exports
       ; last_module
@@ -224,11 +313,17 @@ module Make (_ : Runtime_builder_intf) : Runtime_intf = struct
     Ok runtime
 end
 
-module Concrete_runtime_builder : Runtime_builder_intf = struct end
+module Concrete_runtime_builder : Runtime_builder_intf = struct
+  type value = Concrete_value.t
+end
 
-module Symbolic_runtime_builder : Runtime_builder_intf = struct end
+module Symbolic_runtime_builder : Runtime_builder_intf = struct
+  type value = Symbolic_value.t
+end
 
-module Abstract_runtime_builder : Runtime_builder_intf = struct end
+module Abstract_runtime_builder : Runtime_builder_intf = struct
+  type value = Abstract_value.t
+end
 
 module Interpret (Runtime : Runtime_intf) = struct
   let run_simple_instruction ~runtime : Binary.simple_instruction -> Runtime.t =
