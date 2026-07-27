@@ -40,6 +40,10 @@
   $ owi script concrete --no-exhaustion reference/labels.wast
   $ owi script concrete --no-exhaustion reference/left-to-right.wast
   $ owi script concrete --no-exhaustion reference/linking.wast
+  owi: [ERROR] got:      i32.const 6
+  expected: (i32.const 5)
+  owi: [ERROR] bad result
+  [3]
   $ owi script concrete --no-exhaustion reference/local_get.wast
   $ owi script concrete --no-exhaustion reference/local_set.wast
   $ owi script concrete --no-exhaustion reference/local_tee.wast
@@ -194,7 +198,13 @@
   $ owi script concrete --no-exhaustion reference/imports3.wast
   $ owi script concrete --no-exhaustion reference/imports4.wast
   $ owi script concrete --no-exhaustion reference/linking0.wast
+  owi: [ERROR] uninitialized element 7
+  [94]
   $ owi script concrete --no-exhaustion reference/linking1.wast
+  owi: [ERROR] got:      i32.const 167
+  expected: (i32.const 242)
+  owi: [ERROR] bad result
+  [3]
   $ owi script concrete --no-exhaustion reference/linking2.wast
   $ owi script concrete --no-exhaustion reference/linking3.wast
   $ owi script concrete --no-exhaustion reference/load.wast

@@ -1090,9 +1090,7 @@ module Binary : sig
     ; ct : comp_type
     }
 
-  type block_type =
-    (* TODO: inline this *)
-    | Bt_raw of (indice option * Binary.func_type)
+  type block_type = indice option * Binary.func_type
 
   type nonrec memarg =
     { offset : Int64.t
@@ -1537,8 +1535,7 @@ module Binary : sig
       type t =
         | Passive
         | Declarative
-        (* TODO: Elem_active binary+const expr*)
-        | Active of int option * expr Annotated.t
+        | Active of int * expr Annotated.t
     end
 
     type t =
@@ -1588,16 +1585,9 @@ module Init : sig
 end
 
 module Kind : sig
-  type func = private
-    | Wasm of
-        { func : Binary.Func.t
-        ; modul : int
-        }
-    | Extern of { idx : int }
-
-  val wasm : Binary.Func.t -> modul:int -> func
-
-  val extern : int -> func
+  type 'extern func = private
+    | Wasm of Binary.Func.t
+    | Extern of 'extern
 
   type 'f t =
     | Wat of Text.Module.t
@@ -1614,7 +1604,7 @@ end
 module Concrete_memory : sig
   type t
 
-  val store_8 : t -> addr:Concrete_i32.t -> Concrete_i32.t -> unit Result.t
+  val store_8 : t -> addr:Concrete_i32.t -> Concrete_i32.t -> t Result.t
 end
 
 module Concrete_extern : sig
@@ -1705,37 +1695,34 @@ module Label : sig
   end
 end
 
-module Concrete_env : sig
-  type t
+module Env : sig
+  module Concrete : sig
+    type t
 
-  val empty : unit -> t
+    type modul
 
-  val link_binary_module :
-    name:string option -> t -> Binary.Module.t -> (int * t) Result.t
+    val empty : t
 
-  val link_extern_module : name:string -> Concrete_extern.Module.t -> t -> t
-end
+    val link_binary_module :
+      env:t -> name:string option -> modul:Binary.Module.t -> t Result.t
 
-module Symbolic_env : sig
-  type t
+    val link_extern_module :
+      env:t -> name:string -> Concrete_extern.Module.t -> t Result.t
+  end
 
-  val empty : unit -> t
+  module Symbolic : sig
+    type t
 
-  val link_binary_module :
-    name:string option -> t -> Binary.Module.t -> (int * t) Result.t
+    type modul
 
-  val link_extern_module : name:string -> Symbolic_extern.Module.t -> t -> t
-end
+    val empty : t
 
-module Abstract_env : sig
-  type t
+    val link_binary_module :
+      env:t -> name:string option -> modul:Binary.Module.t -> t Result.t
 
-  val empty : unit -> t
-
-  val link_binary_module :
-    name:string option -> t -> Binary.Module.t -> (int * t) Result.t
-
-  val link_extern_module : name:string -> Abstract_extern.Module.t -> t -> t
+    val link_extern_module :
+      env:t -> name:string -> Symbolic_extern.Module.t -> t Result.t
+  end
 end
 
 module Compile : sig
@@ -1749,18 +1736,18 @@ module Compile : sig
     val until_concrete_link :
          unsafe:bool
       -> name:string option
-      -> Concrete_env.t
+      -> Env.Concrete.t
       -> Text.Module.t
-      -> (int * Concrete_env.t) Result.t
+      -> (Env.Concrete.modul * Env.Concrete.t) Result.t
   end
 
   module Binary : sig
     val until_concrete_link :
          unsafe:bool
       -> name:string option
-      -> Concrete_env.t
+      -> Env.Concrete.t
       -> Binary.Module.t
-      -> (int * Concrete_env.t) Result.t
+      -> (Env.Concrete.modul * Env.Concrete.t) Result.t
   end
 end
 
@@ -1909,11 +1896,17 @@ module Interpret : sig
   module Default_parameters : Parameters
 
   module Concrete (_ : Parameters) : sig
-    val modul : Concrete_env.t -> modul:int -> unit Result.t
+    val modul :
+         env:Env.Concrete.t
+      -> modul:Env.Concrete.modul
+      -> Env.Concrete.t Concrete_choice.t
   end
 
   module Symbolic (_ : Parameters) : sig
-    val modul : Symbolic_env.t -> modul:int -> unit Symbolic_choice.t
+    val modul :
+         env:Env.Symbolic.t
+      -> modul:Env.Symbolic.modul
+      -> Env.Symbolic.t Symbolic_choice.t
   end
 end
 
@@ -1989,7 +1982,7 @@ module Symbolic_driver : sig
     -> model_out_file:Fpath.t option
     -> with_breadcrumbs:bool
     -> run_time:float option
-    -> unit Symbolic_choice.t
+    -> Env.Symbolic.t Symbolic_choice.t
     -> unit Result.t
 end
 

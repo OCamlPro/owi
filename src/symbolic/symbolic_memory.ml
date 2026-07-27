@@ -4,101 +4,28 @@
 
 module Map = Map.Make (Int32)
 
-type t = Symbolic_memory0.t =
+type t =
   { data : Smtml.Typed.Bitv8.t Map.t
-  ; chunks : Symbolic_i32.t Map.t
   ; size : Symbolic_i32.t
-  ; modul : int
-  ; id : int
+  ; limits : Binary.Mem.Type.limits
   }
-
-let replace memory = Symbolic_choice.map_state (Thread.replace_memory memory)
 
 let address a =
   let open Symbolic_choice in
   match Smtml.Typed.view a with
-  | Val (Bitv bv) when Smtml.Bitvector.numbits bv <= 32 ->
-    return (Smtml.Bitvector.to_int32 bv)
-  | Ptr { base; offset } ->
-    let base =
-      (* TODO: it seems possible to avoid this conversion *)
-      Smtml.Bitvector.to_int32 base |> Symbolic_i32.of_int32
-    in
-    let offset = Smtml.Typed.Unsafe.wrap offset in
-    let addr = Symbolic_i32.add base offset in
-    select_i32 addr
+  | Val (Bitv bv) -> return (Smtml.Bitvector.to_int32 bv)
   | _ -> select_i32 a
 
+let empty_byte = Smtml.Typed.Bitv8.v (Smtml.Bitvector.of_int8 0)
+
 let load_byte a { data; _ } =
-  match Map.find_opt a data with
-  | None -> Smtml.Typed.Bitv8.v (Smtml.Bitvector.of_int8 0)
-  | Some v -> v
+  match Map.find_opt a data with None -> empty_byte | Some v -> v
 
 let replace_byte a (v : Smtml.Typed.Bitv8.t) data = Map.add a v data
 
-let validate_address m a range =
-  let open Symbolic_choice in
-  match Smtml.Typed.view a with
-  | Val (Bitv _) ->
-    (* An i32 is not a pointer to a heap chunk, so its valid *)
-    return (Ok a)
-  | Ptr { base; offset = start_offset } -> (
-    let base = Smtml.Bitvector.to_int32 base in
-    match Map.find_opt base m.chunks with
-    | None -> return (Error `Memory_leak_use_after_free)
-    | Some chunk_size ->
-      let+ is_out_of_bounds =
-        let range = Symbolic_i32.of_int (range - 1) in
-        (* end_offset: last byte we will read/write *)
-        let start_offset = Smtml.Typed.Unsafe.wrap start_offset in
-        let end_offset = Symbolic_i32.add start_offset range in
-        select
-          (Symbolic_boolean.or_
-             (Symbolic_i32.le_u chunk_size start_offset)
-             (Symbolic_i32.le_u chunk_size end_offset) )
-          (* TODO: better prio here *)
-          ~instr_counter_true:None ~instr_counter_false:None
-      in
-      if is_out_of_bounds then Error `Memory_heap_buffer_overflow else Ok a )
-  | _ ->
-    (* A symbolic expression is valid, but we print to check if Ptr's are passing through here  *)
-    Log.warn (fun m -> m "Saw a symbolic address: %a" Smtml.Typed.Bitv32.pp a);
-    return (Ok a)
+let page_size = 65_536
 
-let ptr v =
-  let open Symbolic_choice in
-  match Smtml.Typed.view v with
-  | Ptr { base; _ } ->
-    let base = Smtml.Bitvector.to_int32 base in
-    return base
-  | _ ->
-    Log.err (fun m ->
-      m {|free: cannot fetch pointer base of "%a"|} Smtml.Typed.Bitv32.pp v );
-    assert false
-
-let free m p : Symbolic_i32.t Symbolic_choice.t =
-  let open Symbolic_choice in
-  match Smtml.Typed.view p with
-  | Val (Bitv bv) when Smtml.Bitvector.eqz bv -> return Symbolic_i32.zero
-  | _ ->
-    let* base = ptr p in
-    if not @@ Map.mem base m.chunks then trap `Double_free
-    else begin
-      let chunks = Map.remove base m.chunks in
-      let m = { m with chunks } in
-      let* () = replace m in
-      return (Symbolic_i32.of_int32 base)
-    end
-
-let realloc m ~(ptr : Symbolic_i32.t) ~(size : Symbolic_i32.t) =
-  let open Symbolic_choice in
-  let* base = address ptr in
-  let chunks = Map.add base size m.chunks in
-  let m = { m with chunks } in
-  let+ () = replace m in
-  Smtml.Typed.ptr base Symbolic_i32.zero
-
-let page_size = Symbolic_i32.of_int 65_536
+let page_size_i32 = Symbolic_i32.of_int page_size
 
 (******************************************)
 
@@ -109,32 +36,26 @@ let i32 v =
   | _ -> assert false
 
 let grow m delta =
-  let old_size = Symbolic_i32.mul m.size page_size in
-  let new_size = Symbolic_i32.(div (add old_size delta) page_size) in
+  let old_size = Symbolic_i32.mul m.size page_size_i32 in
+  let new_size = Symbolic_i32.(div (add old_size delta) page_size_i32) in
   let size =
     Symbolic_boolean.ite (Symbolic_i32.lt m.size new_size) new_size m.size
   in
-  let m = { m with size } in
-  replace m
+  { m with size }
 
-let size { size; _ } = Symbolic_i32.mul size page_size
+let size { size; _ } = Symbolic_i32.mul size page_size_i32
 
 let size_in_pages { size; _ } = size
 
-let must_be_valid_address m a n =
-  let open Symbolic_choice in
-  let* addr = validate_address m a n in
-  match addr with Error t -> trap t | Ok ptr -> address ptr
-
 let load_8_s m a =
   let open Symbolic_choice in
-  let+ a = must_be_valid_address m a 1 in
+  let+ a = address a in
   let v = load_byte a m in
   Smtml.Typed.Bitv32.of_int8_s v
 
 let load_8_u m a =
   let open Symbolic_choice in
-  let+ a = must_be_valid_address m a 1 in
+  let+ a = address a in
   let v = load_byte a m in
   Smtml.Typed.Bitv32.of_int8_u v
 
@@ -145,13 +66,13 @@ let load_16_unchecked m a : Smtml.Typed.Bitv16.t =
 
 let load_16_s m a =
   let open Symbolic_choice in
-  let+ a = must_be_valid_address m a 2 in
+  let+ a = address a in
   let v = load_16_unchecked m a in
   Smtml.Typed.Bitv32.of_int16_s v
 
 let load_16_u m a =
   let open Symbolic_choice in
-  let+ a = must_be_valid_address m a 2 in
+  let+ a = address a in
   let v = load_16_unchecked m a in
   Smtml.Typed.Bitv32.of_int16_u v
 
@@ -162,7 +83,7 @@ let load_32_unchecked m a : Smtml.Typed.Bitv32.t =
 
 let load_32 m a =
   let open Symbolic_choice in
-  let+ a = must_be_valid_address m a 4 in
+  let+ a = address a in
   let v = load_32_unchecked m a in
   Smtml.Typed.simplify v
 
@@ -173,7 +94,7 @@ let load_64_unchecked m a : Smtml.Typed.Bitv64.t =
 
 let load_64 m a =
   let open Symbolic_choice in
-  let+ a = must_be_valid_address m a 8 in
+  let+ a = address a in
   load_64_unchecked m a
 
 let load_128_unchecked m a : Smtml.Typed.Bitv128.t =
@@ -183,26 +104,26 @@ let load_128_unchecked m a : Smtml.Typed.Bitv128.t =
 
 let load_128 m a =
   let open Symbolic_choice in
-  let+ a = must_be_valid_address m a 16 in
+  let+ a = address a in
   load_128_unchecked m a
 
 let store_8 m ~addr v =
   let open Symbolic_choice in
-  let* a = must_be_valid_address m addr 1 in
+  let+ addr = address addr in
   let data =
-    replace_byte a (Smtml.Typed.Bitv32.extract v ~high:7 ~low:0) m.data
+    replace_byte addr (Smtml.Typed.Bitv32.extract v ~high:7 ~low:0) m.data
   in
-  replace { m with data }
+  { m with data }
 
 let store_16 m ~addr v =
   let open Symbolic_choice in
-  let* a = must_be_valid_address m addr 2 in
+  let+ addr = address addr in
   let data =
-    replace_byte a (Smtml.Typed.Bitv32.extract v ~high:7 ~low:0) m.data
-    |> replace_byte (Int32.add a 1l)
+    replace_byte addr (Smtml.Typed.Bitv32.extract v ~high:7 ~low:0) m.data
+    |> replace_byte (Int32.add addr 1l)
          (Smtml.Typed.Bitv32.extract v ~high:15 ~low:8)
   in
-  replace { m with data }
+  { m with data }
 
 let store_byte_list data start_addr bytes =
   let rec loop data offset = function
@@ -216,27 +137,21 @@ let store_byte_list data start_addr bytes =
 
 let store_32 m ~addr v =
   let open Symbolic_choice in
-  let* a = must_be_valid_address m addr 4 in
-  let data = store_byte_list m.data a (Smtml.Typed.Bitv32.to_bytes v) in
-  replace { m with data }
+  let+ addr = address addr in
+  let data = store_byte_list m.data addr (Smtml.Typed.Bitv32.to_bytes v) in
+  { m with data }
 
 let store_64 m ~(addr : Symbolic_i32.t) v =
   let open Symbolic_choice in
-  let* a = must_be_valid_address m addr 8 in
-  let data = store_byte_list m.data a (Smtml.Typed.Bitv64.to_bytes v) in
-  replace { m with data }
+  let+ addr = address addr in
+  let data = store_byte_list m.data addr (Smtml.Typed.Bitv64.to_bytes v) in
+  { m with data }
 
 let store_128 m ~(addr : Symbolic_i32.t) v =
   let open Symbolic_choice in
-  let* a = must_be_valid_address m addr 16 in
-  let data = store_byte_list m.data a (Smtml.Typed.Bitv128.to_bytes v) in
-  replace { m with data }
-
-(* This function uses `m` for bounds checks but return an updated version of `data` *)
-let store_8_no_replace m data ~(addr : Symbolic_i32.t) v =
-  let open Symbolic_choice in
-  let+ a = must_be_valid_address m addr 1 in
-  replace_byte a (Smtml.Typed.Bitv32.extract v ~high:7 ~low:0) data
+  let+ addr = address addr in
+  let data = store_byte_list m.data addr (Smtml.Typed.Bitv128.to_bytes v) in
+  { m with data }
 
 let fill m ~(pos : Symbolic_i32.t) ~(len : Symbolic_i32.t) (c : char) =
   let open Symbolic_choice in
@@ -246,15 +161,14 @@ let fill m ~(pos : Symbolic_i32.t) ~(len : Symbolic_i32.t) (c : char) =
   let pos = Int32.to_int pos in
   let c = Symbolic_i32.of_int (int_of_char c) in
 
-  let rec loop i data =
-    if i = len then return data
+  let rec loop i m =
+    if i = len then return m
     else
       let addr = Symbolic_i32.of_int (pos + i) in
-      let* data = store_8_no_replace m data ~addr c in
-      loop (i + 1) data
+      let* m = store_8 m ~addr c in
+      loop (i + 1) m
   in
-  let* data = loop 0 m.data in
-  replace { m with data }
+  loop 0 m
 
 let blit ~src ~src_idx ~dst ~dst_idx ~len =
   let open Symbolic_choice in
@@ -265,17 +179,16 @@ let blit ~src ~src_idx ~dst ~dst_idx ~len =
   let* dst_idx = select_i32 dst_idx in
   let dst_idx = Int32.to_int dst_idx in
 
-  let rec loop i data =
-    if i = len then return data
+  let rec loop i dst =
+    if i = len then return dst
     else
       let addr = Symbolic_i32.of_int (src_idx + i) in
       let* v = load_8_s src addr in
       let addr = Symbolic_i32.of_int (dst_idx + i) in
-      let* data = store_8_no_replace dst data ~addr v in
-      loop (i + 1) data
+      let* dst = store_8 dst ~addr v in
+      loop (i + 1) dst
   in
-  let* data = loop 0 dst.data in
-  replace { dst with data }
+  loop 0 dst
 
 let blit_string m str ~src ~dst ~len =
   (* This function is only used in memory init so everything will be concrete *)
@@ -287,28 +200,29 @@ let blit_string m str ~src ~dst ~len =
   let src = Int32.to_int @@ i32 src in
   let dst = Int32.to_int @@ i32 dst in
   let len = Int32.to_int @@ i32 len in
-  let rec loop i data =
-    if i = len then return data
+  let rec loop i m =
+    if i = len then return m
     else
       let byte = Char.code @@ String.get str (src + i) in
       let addr = Symbolic_i32.of_int (dst + i) in
-      let* data =
-        store_8_no_replace m data ~addr
-          (Smtml.Typed.Bitv32.v (Smtml.Bitvector.of_int8 byte))
+      let* m =
+        store_8 m ~addr (Smtml.Typed.Bitv32.v (Smtml.Bitvector.of_int8 byte))
       in
-      loop (i + 1) data
+      loop (i + 1) m
   in
-  let* data = loop 0 m.data in
-  replace { m with data }
+  loop 0 m
 
-let get_limit_max _m = None (* TODO *)
+let get_limit_max { limits; _ } =
+  match limits with
+  | I32 { max; _ } -> Option.map Int32.to_int max
+  | I64 { max; _ } -> max
 
-let of_concrete ~modul ~id (original : Concrete_memory.t) : t =
-  let size = Concrete_memory.size_in_pages original in
-  (* TODO: how come we don't put anything in here? is it always an uninitialized memory ? *)
-  { data = Map.empty
-  ; chunks = Map.empty
-  ; size = Symbolic_i32.of_int32 size
-  ; modul
-  ; id
-  }
+let get_min : Binary.Mem.Type.limits -> int = function
+  | I32 { min; _ } -> Int32.to_int min
+  | I64 { min; _ } -> min
+
+let init limits =
+  let size = get_min limits in
+  { data = Map.empty; size = Symbolic_i32.of_int size; limits }
+
+let get_limits { limits; _ } = limits

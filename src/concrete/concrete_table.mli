@@ -4,22 +4,6 @@
 
 (** runtime table *)
 
-(* TODO: make private and even opaque! *)
-type table = Concrete_ref.t array
+type t
 
-(* TODO: make private and even opaque! *)
-type t =
-  { id : int
-  ; label : string option
-  ; limits : Binary.Table.Type.limits
-  ; typ : Binary.ref_type
-  ; mutable data : table
-  }
-
-include
-  Table_intf.T
-    with type reference := Concrete_ref.t
-     and type t := t
-     and type 'a choice := 'a Concrete_choice.t
-
-val init : ?label:string -> Binary.Table.Type.t -> t
+include Table_intf.T with type reference := Concrete_ref.t and type t := t

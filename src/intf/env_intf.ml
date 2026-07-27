@@ -3,41 +3,74 @@
 (* Written by the Owi programmers *)
 
 module type T = sig
+  type t
+
+  type value
+
   type extern_func
 
-  type extern_module
-
-  type data
-
-  include
-    Link_intf.T
-      with type extern_func := extern_func
-       and type extern_module := extern_module
-       and type data := data
+  type modul
 
   type memory
 
-  type global
+  type table
 
   type elem
 
-  type table
+  type data
 
-  type 'a choice
+  val empty : t
 
-  val get_memory : modul:int -> t -> int -> memory choice
+  val pp : t Fmt.t
 
-  val get_func : modul:int -> t -> int -> Kind.func
+  val get_last_module : env:t -> modul Result.t
 
-  val get_table : modul:int -> t -> int -> table choice
+  val register_module :
+    env:t -> name:string -> modid:string option -> t Result.t
 
-  val get_elem : modul:int -> t -> int -> elem
+  val get_initialization_code : env:t -> modul:modul -> Binary.expr
 
-  val get_data : modul:int -> t -> int -> data
+  val link_binary_module :
+    env:t -> name:string option -> modul:Binary.Module.t -> t Result.t
 
-  val get_global : modul:int -> t -> int -> global choice
+  (* TODO: the name should be removed and people should call register_module so we get a uniform API compared to link_binary module *)
+  val link_extern_module :
+    env:t -> name:string -> (string * extern_func) list -> t Result.t
 
-  val get_extern_func : modul:int -> t -> int -> extern_func
+  val get_memory : env:t -> int -> memory
 
-  val get_init_code : modul:int -> t -> Binary.expr Annotated.t
+  val set_memory : env:t -> int -> memory -> t
+
+  val get_elem : env:t -> int -> elem
+
+  val set_elem : env:t -> int -> elem -> t
+
+  val get_table : env:t -> int -> table
+
+  val set_table : env:t -> int -> table -> t
+
+  val get_data : env:t -> int -> data
+
+  val set_data : env:t -> int -> data -> t
+
+  val get_global : env:t -> int -> value
+
+  val set_global : env:t -> int -> value -> t
+
+  val get_func : env:t -> int -> extern_func Kind.func
+
+  val get_exported_func :
+       env:t
+    -> module_name:string option
+    -> func_name:string
+    -> extern_func Kind.func Result.t
+
+  val get_exported_global :
+    env:t -> module_name:string option -> global_name:string -> value Result.t
+
+  type context
+
+  val get_context : env:t -> context
+
+  val get_modul_from_modid : env:t -> modid:string -> modul Result.t
 end

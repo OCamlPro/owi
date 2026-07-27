@@ -6,18 +6,10 @@
 type table = Concrete_ref.t array
 
 type t =
-  { id : int
-  ; label : string option
-  ; limits : Binary.Table.Type.limits
+  { limits : Binary.Table.Type.limits
   ; typ : Binary.ref_type
   ; mutable data : table
   }
-
-let fresh =
-  let r = ref (-1) in
-  fun () ->
-    incr r;
-    !r
 
 let get_min : Binary.Table.Type.limits -> int = function
   | I32 { min; _ } -> Int32.to_int min
@@ -34,11 +26,13 @@ let max_size t =
         max2int )
       max
 
-let init ?label (typ : Binary.Table.Type.t) : t =
+let get_type { limits; typ; _ } = (limits, typ)
+
+let init (typ : Binary.Table.Type.t) : t =
   let limits, ((_null, heap_type) as ref_type) = typ in
   let null = Concrete_ref.null heap_type in
   let table = Array.make (get_min limits) null in
-  { id = fresh (); label; limits; typ = ref_type; data = table }
+  { limits; typ = ref_type; data = table }
 
 let update table data = table.data <- data
 
@@ -46,7 +40,7 @@ let get t i = t.data.(i)
 
 let set t i v =
   t.data.(i) <- v;
-  Ok ()
+  t
 
 let size t = Array.length t.data
 
@@ -57,17 +51,17 @@ let grow t new_size x =
   let new_table = Array.make new_size x in
   Array.blit t.data 0 new_table 0 (Array.length t.data);
   update t new_table;
-  Ok ()
+  t
 
 let fill t pos len x =
   let pos = Int32.to_int pos in
   let len = Int32.to_int len in
   Array.fill t.data pos len x;
-  Ok ()
+  t
 
 let copy ~t_src ~t_dst ~src ~dst ~len =
   let src = Int32.to_int src in
   let dst = Int32.to_int dst in
   let len = Int32.to_int len in
   Array.blit t_src.data src t_dst.data dst len;
-  Ok ()
+  t_dst

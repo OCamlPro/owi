@@ -3,14 +3,6 @@
 (* Written by the Owi programmers *)
 
 (** Single table *)
-type t = Symbolic_table0.t
+type t
 
-include
-  Table_intf.T
-    with type reference := Symbolic_ref.t
-     and type t := t
-     and type 'a choice := 'a Symbolic_choice.t
-
-val replace : t -> unit Symbolic_choice.t
-
-val of_concrete : modul:int -> id:int -> Concrete_table.t -> t
+include Table_intf.T with type reference := Symbolic_ref.t and type t := t

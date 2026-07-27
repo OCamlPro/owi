@@ -49,3 +49,7 @@ let size _m = assert false
 let size_in_pages _m = assert false
 
 let get_limit_max _m = assert false
+
+let get_limits _ = assert false
+
+let init _ = assert false

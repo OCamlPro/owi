@@ -35,14 +35,13 @@ let timeout_call_run (run : unit -> (unit, Owi.Result.err) Result.t) :
 
 module Owi_regular : INTERPRET = struct
   let parse_and_run modul =
-    let* simplified = Owi.Compile.Text.until_binary ~unsafe:false modul in
-    let* () = Owi.Binary_validate.modul simplified in
-    let link_state = Owi.Concrete_env.empty () in
-    let* modul, link_state =
-      Owi.Concrete_env.link_binary_module ~name:None link_state simplified
+    let env = Owi.Env.Concrete.empty in
+    let* modul, env =
+      Owi.Compile.Text.until_concrete_link ~name:None ~unsafe:false env modul
     in
     let module I = Owi.Interpret.Concrete (Owi.Interpret.Default_parameters) in
-    timeout_call_run (fun () -> I.modul link_state ~modul)
+    timeout_call_run (fun () ->
+      match I.modul ~env ~modul with Ok _env -> Ok () | Error _ as e -> e )
 
   let name = "owi_concrete"
 end

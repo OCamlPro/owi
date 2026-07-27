@@ -114,13 +114,6 @@ module M :
 
   let abort () : unit Symbolic_choice.t = Symbolic_choice.prune ()
 
-  let alloc m (base : Symbolic_i32.t) (size : Symbolic_i32.t) :
-    Symbolic_i32.t Symbolic_choice.t =
-    Symbolic_memory.realloc m ~ptr:base ~size
-
-  let free m (ptr : Symbolic_i32.t) : Symbolic_i32.t Symbolic_choice.t =
-    Symbolic_memory.free m ptr
-
   let exit (_p : Symbolic_i32.t) : unit Symbolic_choice.t = abort ()
 
   let in_replay_mode () =
@@ -208,8 +201,6 @@ let owi =
   ; ( "open_scope_of_length"
     , Extern_func (memory 0 ^-> i32 ^-> i32 ^->. unit, open_scope_of_length) )
   ; ("close_scope", Extern_func (unit ^->. unit, close_scope))
-  ; ("alloc", Extern_func (memory 0 ^-> i32 ^-> i32 ^->. i32, alloc))
-  ; ("dealloc", Extern_func (memory 0 ^-> i32 ^->. i32, free))
   ; ("abort", Extern_func (unit ^->. unit, abort))
   ; ("exit", Extern_func (i32 ^->. unit, exit))
   ]

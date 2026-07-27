@@ -17,15 +17,13 @@ let do_action ctx env = function
       m "invoke %a %s %a..."
         (Fmt.option ~none:Fmt.nop Fmt.string)
         module_name func_name Wast.pp_consts args );
-    let* f, modul =
-      Abstract_env.get_exported_func env ~module_name ~func_name
-    in
+    let* f = Env.Abstract.get_exported_func ~env ~module_name ~func_name in
     let stack =
       List.rev_map (Abstract_value.of_script_const ctx ~ty) args
       |> List.mapi (fun i v -> (i, v))
     in
     let locals = Abstract_locals.of_list stack in
-    I.exec_vfunc_from_outside ~ctx ~locals ~modul ~env f
+    I.exec_vfunc_from_outside ~ctx ~locals ~env f
     end
   | Get (_module_name, _name) ->
     Log.info (fun m -> m "get...");
@@ -35,14 +33,14 @@ let do_action ctx env = function
 (* Ok [ v ] *)
 
 let run_one ~no_exhaustion:_
-  (state : (Abstract_env.t * Abstract_domain.Context.t) Result.t) cmd =
+  (state : (Env.Abstract.t * Abstract_domain.Context.t) Result.t) cmd =
   let* env, ctx = state in
   match cmd with
   | Wast.Text_module (false, m) ->
     let* modul, env =
       Compile.Text.until_abstract_link env ~unsafe ~name:None m
     in
-    let state = I.modul_with_ctx ctx env ~modul in
+    let state = I.modul_with_ctx ctx ~env ~modul in
     Ok (env, state.ctx)
   | Assert (Assert_return (action, res)) ->
     let* state = do_action ctx env action in
@@ -62,10 +60,9 @@ let run_one ~no_exhaustion:_
   | _ -> assert false
 
 let run ~no_exhaustion script =
-  let state =
-    Abstract_env.empty ()
-    |> Abstract_env.link_extern_module ~name:"spectest_extern"
-         Spectest.abstract_extern_m
+  let* state =
+    Env.Abstract.link_extern_module ~env:Env.Abstract.empty
+      ~name:"spectest_extern" Spectest.abstract_extern_m
   in
   let script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
 

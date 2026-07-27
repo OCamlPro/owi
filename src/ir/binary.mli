@@ -81,9 +81,10 @@ val pp_sub_type : sub_type Fmt.t
 
 val sub_type_eq : sub_type -> sub_type -> bool
 
-type block_type =
-  (* TODO: inline this *)
-  | Bt_raw of (indice option * func_type)
+(* TODO: remove the indice ! *)
+type block_type = indice option * func_type
+
+val pp_block_type : block_type Fmt.t
 
 type nonrec memarg =
   { offset : Int64.t
@@ -544,8 +545,7 @@ module Elem : sig
     type t =
       | Passive
       | Declarative
-      (* TODO: Elem_active binary+const expr*)
-      | Active of int option * expr Annotated.t
+      | Active of int * expr Annotated.t
   end
 
   type t =

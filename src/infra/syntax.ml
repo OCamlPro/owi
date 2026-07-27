@@ -146,6 +146,15 @@ let[@inline] array_fold_left f acc l =
       f acc v )
     (Ok acc) l
 
+let[@inline] array_fold_lefti f acc l =
+  snd
+  @@ Array.fold_left
+       (fun (i, acc) v ->
+         ( succ i
+         , let* acc in
+           f i acc v ) )
+       (0, Ok acc) l
+
 let[@inline] dynarray_fold_left f acc l =
   Dynarray.fold_left
     (fun acc v ->

@@ -11,5 +11,7 @@ module type T = sig
 
   val size : t -> int
 
-  val drop : t -> unit
+  val drop : t -> t
+
+  val init : reference list -> t
 end

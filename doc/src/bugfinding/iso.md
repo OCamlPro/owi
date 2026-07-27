@@ -72,21 +72,21 @@ owi: [INFO] typechecking ...
 owi: [INFO] linking      ...
 owi: [INFO] interpreting ...
 owi: [INFO] stack         : [  ]
-owi: [INFO] running instr : call 8 (executed 0 times)
+owi: [INFO] running instr : call 39 (executed 0 times)
 owi: [INFO] calling func  : func start
 owi: [INFO] stack         : [  ]
-owi: [INFO] running instr : call 3 (executed 0 times)
+owi: [INFO] running instr : call 0 (executed 0 times)
 owi: [INFO] stack         : [ symbol_0 ]
-owi: [INFO] running instr : call 3 (executed 0 times)
+owi: [INFO] running instr : call 0 (executed 0 times)
 owi: [INFO] stack         : [ symbol_1 ; symbol_0 ]
-owi: [INFO] running instr : call 7 (executed 0 times)
+owi: [INFO] running instr : call 38 (executed 0 times)
 owi: [INFO] calling func  : func check_iso_func
 owi: [INFO] stack         : [  ]
 owi: [INFO] running instr : local.get 0 (executed 0 times)
 owi: [INFO] stack         : [ symbol_0 ]
 owi: [INFO] running instr : local.get 1 (executed 0 times)
 owi: [INFO] stack         : [ symbol_1 ; symbol_0 ]
-owi: [INFO] running instr : call 0 (executed 0 times)
+owi: [INFO] running instr : call 28 (executed 0 times)
 owi: [INFO] calling func  : func anonymous
 owi: [INFO] stack         : [  ]
 owi: [INFO] running instr : local.get 0 (executed 0 times)
@@ -100,7 +100,7 @@ owi: [INFO] stack         : [ symbol_0 ; (i32.mul symbol_0 symbol_1) ]
 owi: [INFO] running instr : local.get 1 (executed 0 times)
 owi: [INFO] stack         : [ symbol_1 ; symbol_0 ; (i32.mul symbol_0
                                                      symbol_1) ]
-owi: [INFO] running instr : call 1 (executed 0 times)
+owi: [INFO] running instr : call 30 (executed 0 times)
 owi: [INFO] calling func  : func anonymous
 owi: [INFO] stack         : [  ]
 owi: [INFO] running instr : local.get 1 (executed 0 times)
@@ -118,7 +118,7 @@ owi: [INFO] running instr : i32.eq (executed 0 times)
 owi: [INFO] stack         : [ (i32.of_bool
                                (bool.eq (i32.mul symbol_0 symbol_1)
                                 (i32.add (i32.mul symbol_1 symbol_0) 1))) ]
-owi: [INFO] running instr : call 2 (executed 0 times)
+owi: [INFO] running instr : call 8 (executed 0 times)
 owi: [ERROR] Assert failure: (bool.eq (i32.mul symbol_0 symbol_1)
                               (i32.add (i32.mul symbol_1 symbol_0) 1))
 model {

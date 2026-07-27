@@ -1,12 +1,7 @@
 Bug-triggering tests:
   $ owi c -I files/bugs/include files/bugs/src/array.c files/bugs/src/common.c \
   > files/bugs/src/utils.c files/bugs/testsuite/array_test_remove.c
-  owi: [ERROR] Trap: memory heap buffer overflow
-  model {
-    symbol symbol_0 i32 8
-  }
-  owi: [ERROR] Reached problem!
-  [13]
+  All OK!
   $ owi c -I files/bugs/include files/bugs/src/list.c files/bugs/src/common.c \
   > files/bugs/src/utils.c files/bugs/testsuite/list_test_zipIterAdd.c --no-value
   owi: [ERROR] Assert failure: false

@@ -55,7 +55,6 @@ module Func = struct
       | Mem : int * ('b, 'r) atype -> (memory -> 'b, 'r) atype
       | UArg : ('b, 'r) atype -> (unit -> 'b, 'r) atype
       | Arg : 'a telt * ('b, 'r) atype -> ('a -> 'b, 'r) atype
-      | NArg : string * 'a telt * ('b, 'r) atype -> ('a -> 'b, 'r) atype
       | Res : ('r, 'r) atype
 
     type _ func_type = Func : ('f, 'r m) atype * 'r rtype -> 'f func_type
@@ -84,7 +83,6 @@ module Func = struct
         | Mem (_, tl) -> aux tl
         | UArg tl -> aux tl
         | Arg (hd, tl) -> (None, elt_type hd) :: aux tl
-        | NArg (name, hd, tl) -> (Some name, elt_type hd) :: aux tl
         | Res -> []
       in
       aux
@@ -110,7 +108,6 @@ module Func = struct
         | Unit : (lr, unit, unit) t
         | Memory : int -> (l, memory, memory) t
         | Elt : 'a telt -> (lr, elt, 'a) t
-        | Elt_labeled : string * 'a telt -> (l, string * elt, 'a) t
 
       let return r = Func (Res, r)
 
@@ -140,15 +137,12 @@ module Func = struct
 
       let memory id = Memory id
 
-      let label s (Elt v) = Elt_labeled (s, v)
-
       let ( ^-> ) =
         let aux : type lr k a b.
           (lr, k, a) t -> b func_type -> (a -> b) func_type =
          fun a (Func (b, r)) ->
           match a with
           | Elt a -> Func (Arg (a, b), r)
-          | Elt_labeled (label, a) -> Func (NArg (label, a, b), r)
           | Unit -> Func (UArg b, r)
           | Memory id -> Func (Mem (id, b), r)
         in

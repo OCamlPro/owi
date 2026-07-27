@@ -18,5 +18,5 @@ val run :
   -> model_out_file:Fpath.t option
   -> with_breadcrumbs:bool
   -> run_time:float option
-  -> unit Symbolic_choice.t
+  -> Env.Symbolic.t Symbolic_choice.t
   -> unit Result.t

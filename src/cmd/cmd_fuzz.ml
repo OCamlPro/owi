@@ -6,9 +6,9 @@ open Syntax
 
 let cmd ~rounds ~seed ~source_file ~timeout ~timeout_instr ~unsafe =
   Init.random_state seed;
-  let env =
-    Concrete_env.empty ()
-    |> Concrete_env.link_extern_module ~name:"owi" Fuzz_wasm_ffi.owi
+  let* env =
+    Env.Concrete.link_extern_module ~env:Env.Concrete.empty ~name:"owi"
+      Fuzz_wasm_ffi.owi
   in
   let* modul, env =
     Compile.File.until_concrete_link ~unsafe ~name:None env source_file
@@ -29,7 +29,8 @@ let cmd ~rounds ~seed ~source_file ~timeout ~timeout_instr ~unsafe =
     Benchmark.with_utime @@ fun () ->
     Fuzz_driver.run ~rounds (fun () ->
       (* TODO: check if we should regenerate the link state *)
-      I.modul env ~modul )
+      let* _env = I.modul ~env ~modul in
+      Ok () )
   in
   Log.bench (fun m ->
     (* run_time shouldn't be none in bench mode *)

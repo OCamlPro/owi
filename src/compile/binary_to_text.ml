@@ -31,7 +31,7 @@ let convert_func_type ((pt, rt) : Binary.func_type) : Text.func_type =
   , List.map convert_val_type rt )
 
 let convert_block_type : Binary.block_type -> Text.block_type = function
-  | Binary.Bt_raw (opt, ft) ->
+  | opt, ft ->
     let opt = Option.map convert_indice opt in
     Text.Bt_raw (opt, convert_func_type ft)
 
@@ -590,10 +590,10 @@ and convert_expr (e : Binary.expr Annotated.t) : Text.expr =
 let convert_elem_mode : Binary.Elem.Mode.t -> Text.Elem.Mode.t = function
   | Binary.Elem.Mode.Passive -> Text.Elem.Mode.Passive
   | Declarative -> Declarative
-  | Active (opt, e) ->
-    let opt = Option.map (fun i -> Text.Raw i) opt in
+  | Active (i, e) ->
+    let i = Some (Text.Raw i) in
     let e = convert_expr e in
-    Active (opt, e)
+    Active (i, e)
 
 let convert_elem : Binary.Elem.t -> Text.Elem.t = function
   | { Binary.Elem.id; typ; init; mode; explicit_typ } ->

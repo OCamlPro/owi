@@ -98,8 +98,7 @@ module Env = struct
     if i >= Array.length modul.func then Error (`Unknown_func (Text.Raw i))
     else
       match modul.func.(i) with
-      | Origin.Local { Func.type_f = Bt_raw (_, t); _ }
-      | Imported { typ = Bt_raw (_, t); _ } ->
+      | Origin.Local { Func.type_f = _, t; _ } | Imported { typ = _, t; _ } ->
         Ok t
 
   let block_type_get i env =
@@ -160,12 +159,12 @@ let itype = function Text.S32 -> i32 | S64 -> i64
 
 let ftype = function Text.S32 -> f32 | S64 -> f64
 
-(* TODO: Maybe add the type id to Bt_raw to avoid having to look it this way? *)
+(* TODO: Maybe use the type id from typ to avoid having to look it this way? *)
 let get_func_type_id (env : Env.t) i =
   let typ =
     match env.modul.func.(i) with
-    | Origin.Local { type_f = Bt_raw (_, typ); _ } -> typ
-    | Imported { typ = Bt_raw (_, typ); _ } -> typ
+    | Origin.Local { type_f = _, typ; _ } -> typ
+    | Imported { typ = _, typ; _ } -> typ
   in
   Array.find_index
     (fun typ' ->
@@ -336,7 +335,7 @@ end = struct
 
   let push t stack = Result.ok @@ t @ stack
 
-  let pop_push modul (Bt_raw (_, (pt, rt)) : block_type) stack =
+  let pop_push modul ((_, (pt, rt)) : block_type) stack =
     let pt, rt = (List.rev_map typ_of_pt pt, List.rev_map typ_of_val_type rt) in
     let* stack = pop modul pt stack in
     push rt stack
@@ -1209,7 +1208,7 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
     else
       let+ _stack = Stack.pop env.modul (List.rev_map typ_of_pt pt) stack in
       (env, [ any ])
-  | Return_call_indirect (tbl_id, Bt_raw (_, (pt, rt))) ->
+  | Return_call_indirect (tbl_id, (_, (pt, rt))) ->
     let* _tbl_type = Env.table_type_get tbl_id env.modul in
     let* () =
       if is_func_type _tbl_type then Ok ()
@@ -1225,7 +1224,7 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
       let* stack = Stack.pop env.modul [ i32 ] stack in
       let+ _stack = Stack.pop env.modul (List.rev_map typ_of_pt pt) stack in
       (env, [ any ])
-  | Return_call_ref (Bt_raw (_, (pt, rt))) ->
+  | Return_call_ref (_, (pt, rt)) ->
     let* b =
       Stack.equal env.modul
         (List.rev_map typ_of_val_type env.result_type)
@@ -1315,7 +1314,7 @@ and typecheck_expr env expr ~is_loop (block_type : block_type option)
   ~stack:previous_stack : stack Result.t =
   let pt, rt =
     Option.fold ~none:([], [])
-      ~some:(fun (Bt_raw (_, (pt, rt)) : block_type) ->
+      ~some:(fun ((_, (pt, rt)) : block_type) ->
         (List.rev_map typ_of_pt pt, List.rev_map typ_of_val_type rt) )
       block_type
   in
@@ -1346,13 +1345,13 @@ let typecheck_function (modul : Module.t) func refs =
   match func with
   | Origin.Imported _ -> Ok ()
   | Local (func : Func.t) ->
-    let (Bt_raw (_, (params, result))) = func.type_f in
+    let _, (params, result) = func.type_f in
     let env =
       Env.make ~params ~modul ~locals:func.locals ~result_type:result ~refs
     in
     let* stack =
       typecheck_expr env func.body ~is_loop:false
-        (Some (Bt_raw (None, ([], result))))
+        (Some (None, ([], result)))
         ~stack:[]
     in
     let required = List.rev_map typ_of_val_type result in
@@ -1463,21 +1462,16 @@ let typecheck_elem modul refs (elem : Elem.t) =
   in
   match elem.mode with
   | Passive | Declarative -> Ok ()
-  | Active (None, _e) -> assert false
-  | Active (Some tbl_i, e) -> (
+  | Active (tbl_i, offset) -> (
     let* tbl_null, tbl_ty = Env.table_type_get tbl_i modul in
     if
       (elem.explicit_typ && Text.compare_nullable tbl_null elem_null > 0)
       || not (heap_type_eq tbl_ty elem_ty)
     then Error (`Type_mismatch "typecheck elem 3")
     else
-      let* t = typecheck_const_expr modul refs e in
-      match t with
-      | [ Ref_type (_, t) ] ->
-        if not @@ heap_type_eq t tbl_ty then
-          Error (`Type_mismatch "typecheck_elem 4")
-        else Ok ()
-      | [ _t ] -> Ok ()
+      let* offset = typecheck_const_expr modul refs offset in
+      match offset with
+      | [ Num_type I32 ] -> Ok ()
       | _whatever -> Error (`Type_mismatch "typecheck_elem 5") )
 
 let typecheck_data modul refs (data : Data.t) =
@@ -1487,7 +1481,7 @@ let typecheck_data modul refs (data : Data.t) =
     let* _ = check_mem modul n in
     let* t = typecheck_const_expr modul refs e in
     match t with
-    | [ _t ] -> Ok ()
+    | [ Num_type I32 ] -> Ok ()
     | _whatever -> Error (`Type_mismatch "typecheck_data") )
 
 let typecheck_start { start; func; _ } =
@@ -1499,8 +1493,7 @@ let typecheck_start { start; func; _ } =
       else Ok func.(idx)
     in
     match f with
-    | Local { type_f = Bt_raw (_, ([], [])); _ }
-    | Imported { typ = Bt_raw (_, ([], [])); _ } ->
+    | Local { type_f = _, ([], []); _ } | Imported { typ = _, ([], []); _ } ->
       Ok ()
     | _ -> Error `Start_function )
 
@@ -1556,7 +1549,7 @@ let validate_table_init modul refs id init ((nullable, _) as rt) =
         Array.exists
           (fun e ->
             match e with
-            | Elem.{ mode = Active (Some id', _); _ } when id = id' -> true
+            | Elem.{ mode = Active (id', _); _ } when id = id' -> true
             | _ -> false )
           modul.elem
       in

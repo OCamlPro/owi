@@ -63,22 +63,22 @@ let check_simple_instruction ~invariants ~uuid : Binary.simple_instruction -> _
     ()
 
 let rec check_expr (expr : Binary.expr Annotated.t)
-  ~(invariants : Abstract_invariant.t) ~modul ~env =
-  List.iter (check_instr ~invariants ~modul ~env) expr.raw
+  ~(invariants : Abstract_invariant.t) ~env =
+  List.iter (check_instr ~invariants ~env) expr.raw
 
 and check_instr ({ raw; uuid; _ } : Binary.instr Annotated.t)
-  ~(invariants : Abstract_invariant.t) ~modul ~env =
+  ~(invariants : Abstract_invariant.t) ~env =
   match raw with
   | Simple i -> check_simple_instruction ~invariants ~uuid i
-  | Block (_str_opt, _, expr) -> check_expr expr ~invariants ~modul ~env
+  | Block (_str_opt, _, expr) -> check_expr expr ~invariants ~env
   | If_else (_str_opt, _bt, expr_then, expr_else) ->
-    check_expr ~invariants ~modul ~env expr_then;
-    check_expr ~invariants ~modul ~env expr_else
-  | Loop (_str_opt, _bt, expr) -> check_expr ~invariants ~modul ~env expr
+    check_expr ~invariants ~env expr_then;
+    check_expr ~invariants ~env expr_else
+  | Loop (_str_opt, _bt, expr) -> check_expr ~invariants ~env expr
   | Call idx ->
-    let func = Abstract_env.get_func ~modul env idx in
+    let func = Env.Abstract.get_func ~env idx in
     begin match func with
-    | Wasm { func; modul } -> check_expr ~invariants ~modul ~env func.body
+    | Wasm func -> check_expr ~invariants ~env func.body
     | Extern _ -> ()
     end
   | Br _ | Br_if _
@@ -93,7 +93,7 @@ and check_instr ({ raw; uuid; _ } : Binary.instr Annotated.t)
   | Call_ref _ ->
     ()
 
-let check_module (env : Abstract_env.t) ~(modul : int)
+let check_module ~(env : Env.Abstract.t) ~(modul : Env.Abstract.modul)
   (invariants : Abstract_invariant.t) =
-  let init_code = Abstract_env.get_init_code ~modul env in
-  check_expr ~invariants ~modul ~env init_code
+  let init_code = Env.Abstract.get_initialization_code ~env ~modul in
+  check_expr ~env ~invariants (Annotated.dummy init_code)

@@ -17,23 +17,27 @@ end
 module Default_parameters : Parameters
 
 module Concrete (_ : Parameters) : sig
-  val modul : Concrete_env.t -> modul:int -> unit Concrete_choice.t
+  val modul :
+       env:Env.Concrete.t
+    -> modul:Env.Concrete.modul
+    -> Env.Concrete.t Concrete_choice.t
 
   val exec_vfunc_from_outside :
-       locals:Concrete_value.t list
-    -> modul:int
-    -> env:Concrete_env.t
-    -> Kind.func
-    -> Concrete_value.t list Concrete_choice.t
+       env:Env.Concrete.t
+    -> locals:Concrete_value.t list
+    -> Concrete_extern.Func.t Kind.func
+    -> (Env.Concrete.t * Concrete_value.t list) Concrete_choice.t
 end
 
 module Symbolic (_ : Parameters) : sig
-  val modul : Symbolic_env.t -> modul:int -> unit Symbolic_choice.t
+  val modul :
+       env:Env.Symbolic.t
+    -> modul:Env.Symbolic.modul
+    -> Env.Symbolic.t Symbolic_choice.t
 
   val exec_vfunc_from_outside :
-       locals:Symbolic_value.t list
-    -> modul:int
-    -> env:Symbolic_env.t
-    -> Kind.func
-    -> Symbolic_value.t list Symbolic_choice.t
+       env:Env.Symbolic.t
+    -> locals:Symbolic_value.t list
+    -> Symbolic_extern.Func.t Kind.func
+    -> (Env.Symbolic.t * Symbolic_value.t list) Symbolic_choice.t
 end

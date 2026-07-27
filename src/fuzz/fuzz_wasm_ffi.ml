@@ -60,13 +60,6 @@ module M :
     (* TODO: stop the round properly *)
     Error (`Msg "abort")
 
-  let alloc _m _addr size =
-    let r = !Fuzz_state.brk in
-    Fuzz_state.brk := Int32.add !Fuzz_state.brk size;
-    Ok r
-
-  let free (_ : Concrete_memory.t) adr = Ok adr
-
   let exit (n : Concrete_value.i32) = exit (Int32.to_int n)
 
   let symbol_range min max =
@@ -118,8 +111,6 @@ let owi =
   ; ( "open_scope_of_length"
     , Extern_func (memory 0 ^-> i32 ^-> i32 ^->. unit, open_scope_of_length) )
   ; ("close_scope", Extern_func (unit ^->. unit, close_scope))
-  ; ("alloc", Extern_func (memory 0 ^-> i32 ^-> i32 ^->. i32, alloc))
-  ; ("dealloc", Extern_func (memory 0 ^-> i32 ^->. i32, free))
   ; ("abort", Extern_func (unit ^->. unit, abort))
   ; ("exit", Extern_func (i32 ^->. unit, exit))
   ]

@@ -5,15 +5,16 @@
  (modules
   abstract_boolean
   abstract_checker
+  abstract_data
   abstract_domain
-  abstract_env
+  abstract_elem
   abstract_extern
   abstract_f32
   abstract_f64
-  abstract_globals
   abstract_i32
   abstract_i64
   abstract_interpreter_simple
+  abstract_interpreter_state
   abstract_interpreter_control_flow
   abstract_invariant
   abstract_jump_map
@@ -23,6 +24,7 @@
   abstract_ref
   abstract_stack
   abstract_state
+  abstract_table
   abstract_v128
   abstract_value
   abstract_wasm_ffi
@@ -67,11 +69,9 @@
   concrete_choice
   concrete_data
   concrete_elem
-  concrete_env
   concrete_extern
   concrete_f32
   concrete_f64
-  concrete_global
   concrete_i8
   concrete_i16
   concrete_i32
@@ -82,9 +82,12 @@
   concrete_value
   concrete_v128
   concrete_wasm_ffi
+  constexpr_eval
+  constexpr_eval_intf
   control_flow_graph
   data_intf
   elem_intf
+  env
   env_intf
   exploration_smart
   extern
@@ -97,7 +100,6 @@
   fuzz_driver
   fuzz_state
   fuzz_wasm_ffi
-  global_intf
   grouped
   init
   int32
@@ -110,8 +112,6 @@
   iop_intf
   kind
   label
-  link
-  link_intf
   log
   memory_intf
   model
@@ -136,22 +136,17 @@
   symbolic_data
   symbolic_driver
   symbolic_elem
-  symbolic_env
   symbolic_extern
   symbolic_f32
   symbolic_f64
-  symbolic_global
-  symbolic_global0
   symbolic_i8
   symbolic_i16
   symbolic_i32
   symbolic_i64
   symbolic_memory
-  symbolic_memory0
   symbolic_parameters
   symbolic_ref
   symbolic_table
-  symbolic_table0
   symbolic_value
   symbolic_v128
   symbolic_wasm_ffi

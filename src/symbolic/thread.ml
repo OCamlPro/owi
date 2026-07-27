@@ -6,9 +6,6 @@ type t =
   { num_symbols : int
   ; symbol_scopes : Symbol_scope.t
   ; pc : Symex.Path_condition.t
-  ; memories : Symbolic_memory0.t Collection.t
-  ; tables : Symbolic_table0.t Collection.t
-  ; globals : Symbolic_global0.t Collection.t
       (** Breadcrumbs represent the list of choices that were made so far. They
           identify one given symbolic execution trace. *)
   ; breadcrumbs : int list
@@ -22,9 +19,6 @@ let init () =
   let num_symbols = 0 in
   let symbol_scopes = Symbol_scope.empty in
   let pc = Symex.Path_condition.empty in
-  let memories = Collection.empty in
-  let tables = Collection.empty in
-  let globals = Collection.empty in
   let breadcrumbs = [] in
   let labels = [] in
   let bench_stats = Benchmark.empty_stats () in
@@ -33,9 +27,6 @@ let init () =
   { num_symbols
   ; symbol_scopes
   ; pc
-  ; memories
-  ; tables
-  ; globals
   ; breadcrumbs
   ; labels
   ; bench_stats
@@ -74,26 +65,5 @@ let close_scope t =
   { t with symbol_scopes = close_scope t.symbol_scopes }
 
 let incr_path_count t = Atomic.incr t.bench_stats.path_count
-
-let replace_memory (memory : Symbolic_memory0.t) thread =
-  let memories = thread.memories in
-  let memories =
-    Collection.replace memories ~modul:memory.modul ~id:memory.id memory
-  in
-  { thread with memories }
-
-let replace_table (table : Symbolic_table0.t) thread =
-  let tables = thread.tables in
-  let tables =
-    Collection.replace tables ~modul:table.modul ~id:table.id table
-  in
-  { thread with tables }
-
-let replace_global (global : Symbolic_global0.t) thread =
-  let globals = thread.globals in
-  let globals =
-    Collection.replace globals ~modul:global.modul ~id:global.id global
-  in
-  { thread with globals }
 
 let set_priority priority thread = { thread with priority }

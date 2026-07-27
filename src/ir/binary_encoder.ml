@@ -139,18 +139,16 @@ let write_mut buf (mut : Text.mut) =
 
 let write_block_type buf (typ : Binary.block_type option) =
   match typ with
-  | None | Some (Bt_raw (None, ([], []))) -> Buffer.add_char buf '\x40'
-  | Some (Bt_raw (None, ([], [ vt ]))) -> write_valtype buf vt
-  | Some (Bt_raw (Some idx, _)) -> write_indice buf idx
+  | None | Some (None, ([], [])) -> Buffer.add_char buf '\x40'
+  | Some (None, ([], [ vt ])) -> write_valtype buf vt
+  | Some (Some idx, _) -> write_indice buf idx
   (* TODO: memo
      will this pattern matching be enough with the use of the new modul.types field?
   *)
   | _ -> assert false (* TODO: same, new pattern matching cases ? *)
 
 let write_block_type_idx buf (typ : Binary.block_type) =
-  match typ with
-  | Bt_raw (None, _) -> assert false
-  | Bt_raw (Some idx, _) -> write_indice buf idx
+  match typ with None, _ -> assert false | Some idx, _ -> write_indice buf idx
 
 let write_global_type buf ((mut, vt) : Binary.Global.Type.t) =
   write_valtype buf vt;
@@ -1106,13 +1104,13 @@ let write_element buf ({ typ = nullable, ht; init; mode; _ } : Elem.t) =
       write_reftype buf nullable ht;
       Buffer.add_buffer buf elem_buf
     end
-  | Active (Some 0, expr) ->
+  | Active (0, expr) ->
     let elem_buf = Buffer.create 16 in
     let is_ref_func = write_init elem_buf init in
     if is_ref_func then write_u32_of_int buf 0 else write_u32_of_int buf 4;
     write_expr buf expr ~end_op_code:None;
     Buffer.add_buffer buf elem_buf
-  | Active (Some i, expr) ->
+  | Active (i, expr) ->
     let elem_buf = Buffer.create 16 in
     let is_ref_func = write_init elem_buf init in
     if is_ref_func then begin
@@ -1129,7 +1127,6 @@ let write_element buf ({ typ = nullable, ht; init; mode; _ } : Elem.t) =
       write_reftype buf nullable ht;
       Buffer.add_buffer buf elem_buf
     end
-  | _ -> assert false
 
 let write_data buf ({ init; mode; _ } : Data.t) =
   match mode with

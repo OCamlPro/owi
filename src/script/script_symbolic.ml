@@ -2,15 +2,16 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
+(*
 module Stack = Stack.Make [@inlined hint] (Symbolic_value)
 
 type host_externref = int
 
 let ty : host_externref Type.Id.t = Type.Id.make ()
 
-type state = Symbolic_env.t * Thread.t
+type state = Env.Symbolic.t * Thread.t
 
-module I = Interpret.Symbolic (Interpret.Default_parameters)
+module I = New_interpret.Symbolic (New_interpret.Default_parameters)
 
 let run_monad ~to_run ~monadic_state =
   match Symex.Monad.run to_run monadic_state with
@@ -28,19 +29,18 @@ let action ((env, monadic_state) : state) action : _ Result.t =
       m "invoke %a %s %a..."
         (Fmt.option ~none:Fmt.nop Fmt.string)
         module_name func_name Wast.pp_consts args );
-    let* f, modul =
-      Symbolic_env.get_exported_func env ~module_name ~func_name
+    let* f =
+      Env.Symbolic.get_exported_func ~env ~module_name ~func_name
     in
     let stack = List.rev_map (Symbolic_value.of_script_const ~ty) args in
-    let to_run = I.exec_vfunc_from_outside ~locals:stack ~modul ~env f in
+    let to_run = I.exec_vfunc_from_outside ~locals:stack ~env f in
     run_monad ~to_run ~monadic_state
   | Get (module_name, global_name) ->
     Log.info (fun m -> m "get...");
-    let* global =
-      Symbolic_env.get_exported_global env ~module_name ~global_name
+    let+ global =
+      Env.Symbolic.get_exported_global ~env ~module_name ~global_name
     in
-    let v = Symbolic_value.of_concrete global.value in
-    Ok ([ v ], monadic_state)
+    ([ global ], monadic_state)
 
 let unsafe = false
 
@@ -69,7 +69,7 @@ let log_cmd : Wast.cmd -> unit =
   in
   Log.info (fun m -> m "*** %s" s)
 
-let run_one ~no_exhaustion:_ ~(state : Symbolic_env.t * Thread.t) cmd :
+let run_one ~no_exhaustion:_ ~(state : Env.Symbolic.t * Thread.t) cmd :
   state Result.t =
   let env, monadic_state = state in
   log_cmd cmd;
@@ -156,7 +156,9 @@ let run_one ~no_exhaustion:_ ~(state : Symbolic_env.t * Thread.t) cmd :
   *)
   | Register (name, mod_name) ->
     let open Syntax in
-    let+ env = Symbolic_env.register_last_module env ~name ~id:mod_name in
+    let+ env =
+      Env.Symbolic.register_last_module env ~name ~id:mod_name
+    in
     (env, monadic_state)
   | Action a ->
     let open Syntax in
@@ -174,8 +176,8 @@ let run_one ~no_exhaustion:_ ~(state : Symbolic_env.t * Thread.t) cmd :
 let run ~no_exhaustion script : _ Result.t =
   Solver.solver_to_use := Some Smtml.Solver_type.Z3_solver;
   let env =
-    Symbolic_env.empty ()
-    |> Symbolic_env.link_extern_module ~name:"spectest_extern"
+    Env.Symbolic.empty ()
+    |> Env.Symbolic.link_extern_module ~name:"spectest_extern"
          Spectest.symbolic_extern_m
   in
   let monadic_state = Thread.init () in
@@ -188,3 +190,6 @@ let exec ~(no_exhaustion : bool) (script : Wast.script) =
   match run ~no_exhaustion script with
   | Error e -> Fmt.error_msg "script failed with %s" (Result.err_to_string e)
   | Ok _ -> Ok ()
+*)
+
+let exec ~no_exhaustion:_ = assert false

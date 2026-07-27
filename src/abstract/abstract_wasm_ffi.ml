@@ -59,14 +59,6 @@ module M :
     let+ () = assume lt in
     v
 
-  let alloc _m _base _size =
-    Log.warn (fun m -> m "TODO : implement alloc");
-    fold_state (fun { ctx; _ } -> Abstract_i32.unknown ctx)
-
-  let free _m _ptr =
-    Log.warn (fun m -> m "TODO : implement free");
-    fold_state (fun { ctx; _ } -> Abstract_i32.unknown ctx)
-
   let in_replay_mode () = fold_state @@ fun { ctx; _ } -> Abstract_i32.zero ctx
 
   let print_char _c = return ()
@@ -107,8 +99,6 @@ let owi =
   ; ( "open_scope_of_length"
     , Extern_func (memory 0 ^-> i32 ^-> i32 ^->. unit, open_scope_of_length) )
   ; ("close_scope", Extern_func (unit ^->. unit, close_scope))
-  ; ("alloc", Extern_func (memory 0 ^-> i32 ^-> i32 ^->. i32, alloc))
-  ; ("dealloc", Extern_func (memory 0 ^-> i32 ^->. i32, free))
   ; ("abort", Extern_func (unit ^->. unit, abort))
   ; ("exit", Extern_func (i32 ^->. unit, exit))
   ]

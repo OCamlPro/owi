@@ -78,6 +78,12 @@ val array_fold_left :
   -> 'b array
   -> ('a, 'err) Prelude.Result.t
 
+val array_fold_lefti :
+     (int -> 'a -> 'b -> ('a, 'err) Prelude.Result.t)
+  -> 'a
+  -> 'b array
+  -> ('a, 'err) Prelude.Result.t
+
 val dynarray_fold_left :
      ('a -> 'b -> ('a, 'err) Prelude.Result.t)
   -> 'a

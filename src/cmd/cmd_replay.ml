@@ -11,7 +11,6 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
       incr next;
       !next
   in
-  let brk = ref @@ Int32.of_int 0 in
   let covered_labels = Hashtbl.create 16 in
   let scopes = ref Symbol_scope.empty in
 
@@ -101,13 +100,6 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
       Log.err (fun m -> m "Unexpected abort call.");
       exit 121
 
-    let alloc _m _addr size =
-      let r = !brk in
-      brk := Int32.add !brk size;
-      Ok r
-
-    let free (_ : Concrete_memory.t) adr = Ok adr
-
     let exit (n : Concrete_value.i32) = exit (Int32.to_int n)
 
     let symbol_range _ _ =
@@ -192,16 +184,14 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
       , Extern_func (memory 0 ^-> i32 ^-> i32 ^->. unit, open_scope_of_length)
       )
     ; ("close_scope", Extern_func (unit ^->. unit, close_scope))
-    ; ("alloc", Extern_func (memory 0 ^-> i32 ^-> i32 ^->. i32, alloc))
-    ; ("dealloc", Extern_func (memory 0 ^-> i32 ^->. i32, free))
     ; ("abort", Extern_func (unit ^->. unit, abort))
     ; ("exit", Extern_func (i32 ^->. unit, exit))
     ]
   in
 
-  let env =
-    Concrete_env.empty ()
-    |> Concrete_env.link_extern_module ~name:"owi" replay_extern_module
+  let* env =
+    Env.Concrete.link_extern_module ~env:Env.Concrete.empty ~name:"owi"
+      replay_extern_module
   in
 
   let* m = Compile.File.until_binary ~unsafe filename in
@@ -254,7 +244,11 @@ let cmd ~unsafe ~replay_file ~source_file ~entry_point ~invoke_with_symbols =
     compile_file ~unsafe ~entry_point ~invoke_with_symbols source_file model
   in
   let module I = Interpret.Concrete (Interpret.Default_parameters) in
-  let r, run_time = Benchmark.with_utime @@ fun () -> I.modul env ~modul in
+  let r, run_time =
+    Benchmark.with_utime @@ fun () ->
+    let* _env = I.modul ~env ~modul in
+    Ok ()
+  in
   Log.bench (fun m ->
     (* run_time shouldn't be none in bench mode *)
     let run_time = match run_time with None -> assert false | Some t -> t in

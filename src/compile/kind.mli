@@ -2,16 +2,11 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type func = private
-  | Wasm of
-      { func : Binary.Func.t
-      ; modul : int
-      }
-  | Extern of { idx : int }
+type 'extern func =
+  | Wasm of Binary.Func.t
+  | Extern of 'extern
 
-val wasm : Binary.Func.t -> modul:int -> func
-
-val extern : int -> func
+val pp_func : 'extern func Fmt.t
 
 type 'f t =
   | Wat of Text.Module.t

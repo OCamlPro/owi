@@ -55,7 +55,7 @@ let compute_number_of_workers workers =
 let run ~exploration_strategy ~workers ~no_worker_isolation ~no_stop_at_failure
   ~no_value ~no_assert_failure_expression_printing ~deterministic_result_order
   ~fail_mode ~workspace ~seed ~solver ~model_format ~model_out_file
-  ~with_breadcrumbs ~run_time (to_run : unit Symbolic_choice.t) =
+  ~with_breadcrumbs ~run_time (to_run : Env.Symbolic.t Symbolic_choice.t) =
   (* Various initializations *)
   let bug_stack = Bugs.make () in
   let path_count = Atomic.make 0 in
