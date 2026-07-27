@@ -138,145 +138,125 @@ module Make (M : Runtime_builder_intf) :
   let eval_constant_expression (_e : Binary.expr Annotated.t) : value =
     assert false
 
+  let load_import ~(runtime : t)
+    ~import:({ modul_name; name; _ } : _ Origin.imported) address_map allocator
+      =
+    (* find the source module *)
+    let* modul = get_registered_module ~runtime ~name:modul_name in
+    (* find its local id corresponding to the name we want in its exports *)
+    let* id =
+      match IntMap.find_opt modul runtime.exports with
+      | None ->
+        (* it should be there! *)
+        assert false
+      | Some { func; _ } ->
+        begin match
+          Array.find_opt
+            (fun (export : Binary.Export.t) -> String.equal name export.name)
+            func
+        with
+        | None -> Error (`Unknown_import (modul_name, name))
+        | Some { id; _ } -> Ok id
+        end
+    in
+    (* find its address in the functions_map *)
+    let address =
+      let source : SourceId.t = { modul; id } in
+      match AddressMap.find_opt source address_map with
+      | None ->
+        (* it should be there! *)
+        assert false
+      | Some address -> address
+    in
+    (* find its runtime value *)
+    match Allocator.find_opt address allocator with
+    | None ->
+      (* it should be there! *)
+      assert false
+    | Some func -> Ok (func, address)
+
+  let link_function ~modul id runtime = function
+    | Origin.Local func ->
+      let func : Kind.func = Kind.wasm ~modul func in
+      let functions, address = Allocator.add func runtime.functions in
+      let functions_map =
+        AddressMap.add { id; modul } address runtime.functions_map
+      in
+      Ok { runtime with functions; functions_map }
+    | Imported ({ name; typ; _ } as import) ->
+      let* func, address =
+        load_import ~runtime ~import runtime.functions_map runtime.functions
+      in
+      (* comparing their types *)
+      let* () =
+        let (Binary.Bt_raw (_, typ)) = typ in
+        let typ' =
+          match (func : Kind.func) with
+          | Kind.Wasm { func; _ } ->
+            let (Bt_raw ((None | Some _), t)) = func.type_f in
+            t
+          | Kind.Extern { idx } -> assert false
+          (*
+                let _f, t = Dynarray.get ls.extern_modules idx in
+                t
+                *)
+        in
+        if Binary.func_type_eq typ typ' then Ok ()
+        else
+          let msg =
+            Fmt.str "%s: expected: %a got: %a" name Binary.pp_func_type typ
+              Binary.pp_func_type typ'
+          in
+          Error (`Incompatible_import_type msg)
+      in
+      (* adding new global to the address map *)
+      let functions_map =
+        AddressMap.add { id; modul } address runtime.functions_map
+      in
+      Ok { runtime with functions_map }
+
+  let link_global ~modul id runtime = function
+    | Origin.Local ({ init; typ; id = _ } : Binary.Global.t) ->
+      let value = eval_constant_expression init in
+      let global : global = { value; typ } in
+      let globals, address = Allocator.add global runtime.globals in
+      let globals_map =
+        AddressMap.add { id; modul } address runtime.globals_map
+      in
+      Ok { runtime with globals_map; globals }
+    | Imported ({ name; typ; _ } as import) ->
+      let* global, address =
+        load_import ~runtime ~import runtime.globals_map runtime.globals
+      in
+      (* comparing their types *)
+      let* () =
+        match (global.typ, typ) with
+        | (Var, _), ((Const : Text.mut), _) | (Const, _), (Var, _) ->
+          Error (`Incompatible_import_type name)
+        | (Var, t1), (Var, t2) ->
+          if Binary.val_type_eq t1 t2 then Ok ()
+          else Error (`Incompatible_import_type name)
+        | (Const, t1), (Const, t2) ->
+          if Binary.is_subtype_val_type t1 t2 then Ok ()
+          else Error (`Incompatible_import_type name)
+      in
+      (* adding new global to the address map *)
+      let globals_map =
+        AddressMap.add { id; modul } address runtime.globals_map
+      in
+      Ok { runtime with globals_map }
+
   let link_binary_module ~(runtime : t) ~(modul : Binary.Module.t) : t Result.t
       =
     let new_module = get_next_module ~runtime in
     (* functions *)
-    let* _i, functions, functions_map =
-      array_fold_left
-        (fun (id, functions, functions_map) func ->
-          match func with
-          | Origin.Local func ->
-            let func : Kind.func = Kind.wasm ~modul:new_module func in
-            let functions, address = Allocator.add func functions in
-            let functions_map =
-              AddressMap.add { id; modul = new_module } address functions_map
-            in
-            Ok (succ id, functions, functions_map)
-          | Imported { modul_name; name; typ; _ } -> begin
-            (* find the source module *)
-            let* modul = get_registered_module ~runtime ~name:modul_name in
-            (* find its local id corresponding to the name we want in its exports *)
-            let* id =
-              match IntMap.find_opt modul runtime.exports with
-              | None -> assert false
-              | Some { func; _ } ->
-                begin match
-                  Array.find_opt
-                    (fun (exported_func : Binary.Export.t) ->
-                      String.equal name exported_func.name )
-                    func
-                with
-                | None -> Error (`Unknown_import (modul_name, name))
-                | Some { id; _ } -> Ok id
-                end
-            in
-            (* find its address in the functions_map *)
-            let address =
-              let source : SourceId.t = { modul; id } in
-              match AddressMap.find_opt source functions_map with
-              | None -> assert false
-              | Some address -> address
-            in
-            (* find its runtime value *)
-            let func =
-              match Allocator.find_opt address functions with
-              | None -> assert false
-              | Some func -> func
-            in
-            (* comparing their types *)
-            let (Binary.Bt_raw (_, typ)) = typ in
-            let typ' =
-              match (func : Kind.func) with
-              | Kind.Wasm { func; _ } ->
-                let (Bt_raw ((None | Some _), t)) = func.type_f in
-                t
-              | Kind.Extern { idx } -> assert false
-              (*
-                let _f, t = Dynarray.get ls.extern_modules idx in
-                t
-                *)
-            in
-            if Binary.func_type_eq typ typ' then
-              let functions_map =
-                AddressMap.add { id; modul = new_module } address functions_map
-              in
-              Ok (succ id, functions, functions_map)
-            else
-              let msg =
-                Fmt.str "%s: expected: %a got: %a" name Binary.pp_func_type typ
-                  Binary.pp_func_type typ'
-              in
-              Error (`Incompatible_import_type msg)
-            end )
-        (0, runtime.functions, runtime.functions_map)
-        modul.func
+    let* runtime =
+      array_fold_lefti (link_function ~modul:new_module) runtime modul.func
     in
     (* tags *)
     (* globals *)
-    let* _i, globals, globals_map =
-      array_fold_left
-        (fun (id, globals, globals_map) global ->
-          match global with
-          | Origin.Local ({ init; typ; id = _ } : Binary.Global.t) ->
-            let value = eval_constant_expression init in
-            let global : global = { value; typ } in
-            let globals, address = Allocator.add global globals in
-            let globals_map =
-              AddressMap.add { id; modul = new_module } address globals_map
-            in
-            Ok (succ id, globals, globals_map)
-          | Imported { modul_name; name; typ; _ } -> begin
-            (* find the source module *)
-            let* modul = get_registered_module ~runtime ~name:modul_name in
-            (* find its local id corresponding to the name we want in its exports *)
-            let* id =
-              match IntMap.find_opt modul runtime.exports with
-              | None -> assert false
-              | Some { global; _ } ->
-                begin match
-                  Array.find_opt
-                    (fun (exported_global : Binary.Export.t) ->
-                      String.equal name exported_global.name )
-                    global
-                with
-                | None -> Error (`Unknown_import (modul_name, name))
-                | Some { id; _ } -> Ok id
-                end
-            in
-            (* find its address in the functions_map *)
-            let address =
-              let source : SourceId.t = { modul; id } in
-              match AddressMap.find_opt source globals_map with
-              | None -> assert false
-              | Some address -> address
-            in
-            (* find its runtime value *)
-            let global =
-              match Allocator.find_opt address globals with
-              | None -> assert false
-              | Some global -> global
-            in
-            (* comparing their types *)
-            let* () =
-              match (global.typ, typ) with
-              | (Var, _), ((Const : Text.mut), _) | (Const, _), (Var, _) ->
-                Error (`Incompatible_import_type name)
-              | (Var, t1), (Var, t2) ->
-                if Binary.val_type_eq t1 t2 then Ok ()
-                else Error (`Incompatible_import_type name)
-              | (Const, t1), (Const, t2) ->
-                if Binary.is_subtype_val_type t1 t2 then Ok ()
-                else Error (`Incompatible_import_type name)
-            in
-
-            let globals_map =
-              AddressMap.add { id; modul = new_module } address globals_map
-            in
-            Ok (succ id, globals, globals_map)
-            end )
-        (0, runtime.globals, runtime.globals_map)
-        modul.global
+    let* runtime =
+      array_fold_lefti (link_global ~modul:new_module) runtime modul.global
     in
     (* memories *)
     (* tables *)
@@ -300,11 +280,8 @@ module Make (M : Runtime_builder_intf) :
     in
     let registered_modules = runtime.registered_modules in
     let runtime =
-      { functions
-      ; functions_map
-      ; globals
-      ; globals_map
-      ; initialization_codes
+      { runtime with
+        initialization_codes
       ; exports
       ; last_module
       ; registered_modules
