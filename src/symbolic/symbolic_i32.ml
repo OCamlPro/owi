@@ -15,7 +15,6 @@ let to_boolean (e : t) : Symbolic_boolean.t =
   | Val (Bitv bv) ->
     if Smtml.Bitvector.eqz bv then Symbolic_boolean.false_
     else Symbolic_boolean.true_
-  | Ptr _ -> Symbolic_boolean.true_
   | Symbol { ty = Ty_bool; _ } -> Smtml.Typed.Bitv32.to_bool e
   | Cvtop (_, OfBool, cond) -> Smtml.Typed.Unsafe.wrap cond
   | _ -> Smtml.Typed.Bitv32.to_bool e

@@ -26,6 +26,6 @@ let decr map =
     (fun k v acc -> match k with I 0 -> acc | k -> add (Key.decr k) v acc)
     map empty
 
-let pp ctx fmt =
-  let pp_v = Fmt.list ~sep:Fmt.semi (Abstract_state.pp ctx) in
+let pp fmt =
+  let pp_v = Fmt.list ~sep:Fmt.semi Abstract_interpreter_state.pp in
   pretty (fun fmt jk v -> Fmt.pf fmt "%a -> %a" Key.pp jk pp_v v) fmt

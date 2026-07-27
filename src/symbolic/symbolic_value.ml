@@ -2,6 +2,8 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
+type context = unit
+
 type boolean = Smtml.Typed.Bool.t
 
 type i32 = Smtml.Typed.Bitv32.t
@@ -53,7 +55,7 @@ let of_script_const ~ty : Wast.const -> t = function
   | Const_null (Some (Exn_ht | NoExn_ht)) -> Ref NullExn
   | _ -> assert false
 
-let of_concrete : Concrete_value.t -> t = function
+let of_concrete () : Concrete_value.t -> t = function
   | I32 v -> I32 (Symbolic_i32.of_int32 v)
   | I64 v -> I64 (Symbolic_i64.of_int64 v)
   | F32 v -> F32 (Symbolic_f32.of_float32 v)

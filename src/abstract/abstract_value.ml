@@ -2,6 +2,8 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
+type context = Abstract_domain.Context.t
+
 module Size = struct
   let b32 = Units.In_bits.s32
 

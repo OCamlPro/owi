@@ -6,9 +6,9 @@ open Syntax
 
 let cmd ~unsafe ~timeout ~timeout_instr ~source_file =
   let name = None in
-  let env = Concrete_env.empty () in
+  let env = Env.Concrete.empty in
   let* modul, env =
-    Compile.File.until_concrete_link ~unsafe ~name env source_file
+    Compile.File.until_concrete_link env ~unsafe ~name source_file
   in
   let module Parameters = struct
     let timeout = timeout
@@ -22,7 +22,11 @@ let cmd ~unsafe ~timeout ~timeout_instr ~source_file =
     let abstract_invariant = Abstract_invariant.empty ()
   end in
   let module I = Interpret.Concrete (Parameters) in
-  let res, run_time = Benchmark.with_utime @@ fun () -> I.modul env ~modul in
+  let res, run_time =
+    Benchmark.with_utime @@ fun () ->
+    let* _env = I.modul ~env ~modul in
+    Ok ()
+  in
   Log.bench (fun m ->
     (* run_time shouldn't be none in bench mode *)
     let run_time = match run_time with None -> assert false | Some t -> t in

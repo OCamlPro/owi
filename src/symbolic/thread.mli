@@ -6,9 +6,6 @@ type t = private
   { num_symbols : int
   ; symbol_scopes : Symbol_scope.t
   ; pc : Symex.Path_condition.t
-  ; memories : Symbolic_memory0.t Collection.t
-  ; tables : Symbolic_table0.t Collection.t
-  ; globals : Symbolic_global0.t Collection.t
       (** Breadcrumbs represent the list of choices that were made so far. They
           identify one given symbolic execution trace. *)
   ; breadcrumbs : int list
@@ -27,12 +24,6 @@ val add_breadcrumb : int -> t -> t
 val add_symbol : Smtml.Symbol.t -> t -> t
 
 val add_label : int * string -> t -> t
-
-val replace_memory : Symbolic_memory0.t -> t -> t
-
-val replace_table : Symbolic_table0.t -> t -> t
-
-val replace_global : Symbolic_global0.t -> t -> t
 
 val open_scope : string -> t -> t
 

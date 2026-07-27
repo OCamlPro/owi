@@ -2,5 +2,6 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-include
-  Elem_intf.T with type reference := Symbolic_ref.t and type t = Concrete_elem.t
+type t
+
+include Elem_intf.T with type reference := Symbolic_ref.t and type t := t

@@ -30,16 +30,22 @@ module Text = struct
       m
 
   let until_concrete_link ~unsafe ~name env m =
-    let* m = until_validate ~unsafe m in
-    Concrete_env.link_binary_module env ~name m
+    let* modul = until_validate ~unsafe m in
+    let* env = Env.Concrete.link_binary_module ~env ~name ~modul in
+    let+ modul = Env.Concrete.get_last_module ~env in
+    (modul, env)
 
   let until_symbolic_link ~unsafe ~name env m =
-    let* m = until_validate ~unsafe m in
-    Symbolic_env.link_binary_module env ~name m
+    let* modul = until_validate ~unsafe m in
+    let* env = Env.Symbolic.link_binary_module ~env ~name ~modul in
+    let+ modul = Env.Symbolic.get_last_module ~env in
+    (modul, env)
 
   let until_abstract_link ~unsafe ~name env m =
-    let* m = until_validate ~unsafe m in
-    Abstract_env.link_binary_module env ~name m
+    let* modul = until_validate ~unsafe m in
+    let* env = Env.Abstract.link_binary_module ~env ~name ~modul in
+    let+ modul = Env.Abstract.get_last_module ~env in
+    (modul, env)
 end
 
 module Binary = struct
@@ -50,16 +56,22 @@ module Binary = struct
       m
 
   let until_concrete_link ~unsafe ~name env m =
-    let* m = until_validate ~unsafe m in
-    Concrete_env.link_binary_module env ~name m
+    let* modul = until_validate ~unsafe m in
+    let* env = Env.Concrete.link_binary_module ~env ~name ~modul in
+    let+ modul = Env.Concrete.get_last_module ~env in
+    (modul, env)
 
   let until_symbolic_link ~unsafe ~name env m =
-    let* m = until_validate ~unsafe m in
-    Symbolic_env.link_binary_module env ~name m
+    let* modul = until_validate ~unsafe m in
+    let* env = Env.Symbolic.link_binary_module ~env ~name ~modul in
+    let+ modul = Env.Symbolic.get_last_module ~env in
+    (modul, env)
 
   let until_abstract_link ~unsafe ~name env m =
-    let* m = until_validate ~unsafe m in
-    Abstract_env.link_binary_module env ~name m
+    let* modul = until_validate ~unsafe m in
+    let* env = Env.Abstract.link_binary_module ~env ~name ~modul in
+    let+ modul = Env.Abstract.get_last_module ~env in
+    (modul, env)
 end
 
 module Any = struct

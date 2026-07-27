@@ -3,9 +3,8 @@
 (* Written by the Owi programmers *)
 
 type t =
-  { data : Symbolic_ref.t Map.Make(Int).t
-  ; limits : Binary.Table.Type.limits
-  ; typ : Binary.ref_type
-  ; modul : int
-  ; id : int
+  { abs_state : Abstract_state.t
+  ; env : Env.Abstract.t
   }
+
+let pp ppf { abs_state; _ } = Fmt.pf ppf "%a" Abstract_state.pp abs_state

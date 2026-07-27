@@ -41,15 +41,30 @@ void *malloc(size_t size) {
     start += (align - off_align);
   }
   bump_pointer = size + start;
-  return (void *)owi_malloc(start, size);
+  return (void *)start;
 }
 
-void free(void *ptr) { (void)owi_free(ptr); }
+void free(void *ptr) {}
 
 void *realloc(void *ptr, size_t size) {
-  // TODO: fix
-  (void)free(ptr);
-  return (void *)owi_malloc(ptr, size);
+  // TODO: fix this, it should also do something like:
+  //     memcpy(new_ptr, ptr, old_size < size ? old_size : size);
+  // but I don't have the old size anymore for now...
+
+  if (ptr == NULL)
+    return malloc(size);
+
+  if (size == 0) {
+    free(ptr);
+    return NULL;
+  }
+
+  void *new_ptr = malloc(size);
+  if (new_ptr == NULL)
+    return NULL;
+
+  free(ptr);
+  return new_ptr;
 }
 
 void *alloca(size_t size) { return malloc(size); }

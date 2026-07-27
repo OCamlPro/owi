@@ -38,10 +38,6 @@ module type S0 = sig
 
   val abort : unit -> unit t
 
-  val alloc : memory -> i32 -> i32 -> i32 t
-
-  val free : memory -> i32 -> i32 t
-
   val exit : i32 -> unit t
 
   val in_replay_mode : unit -> i32 t

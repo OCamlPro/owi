@@ -69,31 +69,26 @@ let extern_module : Concrete_extern.Module.t =
   ; ("get_i32r", Extern_func (externref rint ^->. i32, get))
   ]
 
-(* a link state that contains our custom module, available under the name `sausage` *)
-let link_state =
-  Concrete_env.empty ()
-  |> Concrete_env.link_extern_module ~name:"sausage" extern_module
+(* an environment that contains our custom module, available under the name `sausage` *)
+let env =
+  let env = Env.Concrete.empty in
+  Env.Concrete.link_extern_module ~env ~name:"sausage" extern_module
+  |> Stdlib.Result.get_ok
 
 (* a pure wasm module refering to `sausage` *)
 let pure_wasm_module =
-  match Parse.Text.Module.from_file (Fpath.v "extern.wat") with
-  | Error _ -> assert false
-  | Ok modul -> modul
+  Parse.Text.Module.from_file (Fpath.v "extern.wat") |> Stdlib.Result.get_ok
 
 (* our pure wasm module, linked with `sausage` *)
-let modul, link_state =
-  match
-    Compile.Text.until_concrete_link link_state ~unsafe:false ~name:None
-      pure_wasm_module
-  with
-  | Error _ -> assert false
-  | Ok v -> v
+let modul, env =
+  Compile.Text.until_concrete_link env ~unsafe:false ~name:None pure_wasm_module
+  |> Stdlib.Result.get_ok
 
 module I = Interpret.Concrete (Interpret.Default_parameters)
 
 (* let's run it ! it will print the values as defined in the print_i32 function *)
 let () =
-  match I.modul link_state ~modul with Error _o -> assert false | Ok () -> ()
+  match I.modul ~env ~modul with Error _o -> assert false | Ok _env -> ()
 ```
 
 You'll get the expected result:
@@ -174,7 +169,7 @@ let extern_module : Concrete_extern.Module.t =
           Concrete_memory.store_8 m ~addr:(Concrete_i32.add start offset) byte
         with
         | Error _ as e -> e
-        | Ok () -> loop (Concrete_i32.add offset (Concrete_i32.of_int 1))
+        | Ok _mem -> loop (Concrete_i32.add offset (Concrete_i32.of_int 1))
         end
       else Ok ()
     in
@@ -192,10 +187,11 @@ let extern_module : Concrete_extern.Module.t =
   ; ("memset", Extern_func (memory 0 ^-> i32 ^-> i32 ^-> i32 ^->. unit, memset))
   ]
 
-(* a link state that contains our custom module, available under the name `chorizo` *)
-let link_state =
-  Concrete_env.empty ()
-  |> Concrete_env.link_extern_module ~name:"chorizo" extern_module
+(* an environment that contains our custom module, available under the name `chorizo` *)
+let env =
+  let env = Env.Concrete.empty in
+  Env.Concrete.link_extern_module ~env ~name:"chorizo" extern_module
+  |> Stdlib.Result.get_ok
 
 (* a pure wasm module refering to `$extern_mem` *)
 let pure_wasm_module =
@@ -204,9 +200,9 @@ let pure_wasm_module =
   | Ok modul -> modul
 
 (* our pure wasm module, linked with `chorizo` *)
-let modul, link_state =
+let modul, env =
   match
-    Compile.Text.until_concrete_link link_state ~unsafe:false ~name:None
+    Compile.Text.until_concrete_link env ~unsafe:false ~name:None
       pure_wasm_module
   with
   | Error _ -> assert false
@@ -216,7 +212,7 @@ module I = Interpret.Concrete (Interpret.Default_parameters)
 
 (* let's run it ! it will print the values as defined in the print_i64 function *)
 let () =
-  match I.modul link_state ~modul with Error _ -> assert false | Ok () -> ()
+  match I.modul ~env ~modul with Error _ -> assert false | Ok _env -> ()
 ```
 
 Running the above program should yield:

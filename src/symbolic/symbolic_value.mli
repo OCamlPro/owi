@@ -12,4 +12,6 @@ include
      and type v128 = Smtml.Typed.Bitv128.t
      and module Ref = Symbolic_ref
 
-val of_concrete : Concrete_value.t -> t
+type context = unit
+
+val of_concrete : context -> Concrete_value.t -> t

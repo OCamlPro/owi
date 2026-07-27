@@ -674,7 +674,7 @@ let block_type_of_type_def ty =
   match ty with
   | Typedef.SimpleType
       (_id, { final = true; ids = []; ct = Def_func_t (pt, rt) }) ->
-    Bt_raw (None, (pt, rt))
+    (None, (pt, rt))
   | _ ->
     Fmt.failwith "block_type_of_type_def: unimplemented for %a" Typedef.pp ty
 
@@ -685,11 +685,11 @@ let read_block_type types input =
     Ok (block_type, input)
   | Error _ | Ok _ ->
     begin match read_byte ~msg:"read_block_type" input with
-    | Ok ('\x40', input) -> Ok (Bt_raw (None, ([], [])), input)
+    | Ok ('\x40', input) -> Ok ((None, ([], [])), input)
     | Error _ | Ok _ ->
       let* vt, input = read_valtype input in
       let pt, rt = ([], [ vt ]) in
-      Ok (Bt_raw (None, (pt, rt)), input)
+      Ok ((None, (pt, rt)), input)
     end
 
 let rec read_instr types input =
@@ -1270,11 +1270,11 @@ let read_export input =
 let read_elem_active types input =
   let* index, input = read_indice input in
   let+ offset, input = read_const types input in
-  (Elem.Mode.Active (Some index, offset), input)
+  (Elem.Mode.Active (index, offset), input)
 
 let read_elem_active_zero types input =
   let+ offset, input = read_const types input in
-  (Elem.Mode.Active (Some 0, offset), input)
+  (Elem.Mode.Active (0, offset), input)
 
 let read_elem_index input =
   let+ index, input = read_indice input in

@@ -17,7 +17,7 @@ module type T = sig
   (* TODO; make this private and even opaque at some point *)
   type t =
     | Extern of Extern.t option
-    | Func of Kind.func option
+    | Func of int option
     (* TODO: Not sure about these two. *)
     | NullExn
     | NullRef
@@ -26,13 +26,13 @@ module type T = sig
 
   val null : Binary.heap_type -> t
 
-  val func : Kind.func -> t
+  val func : int -> t
 
   val extern : 'x Type.Id.t -> 'x -> t
 
   val is_null : t -> Bool.t
 
-  val get_func : t -> Kind.func get_ref
+  val get_func : t -> int get_ref
 
   val get_extern : t -> 'x Type.Id.t -> 'x get_ref
 end

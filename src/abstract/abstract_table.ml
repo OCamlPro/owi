@@ -2,8 +2,10 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type t =
-  { value : Symbolic_value.t
-  ; modul : int
-  ; id : int
-  }
+type t = |
+
+let init _ = assert false
+
+let size _ = assert false
+
+let get_type _ = assert false

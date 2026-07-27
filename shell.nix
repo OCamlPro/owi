@@ -116,7 +116,7 @@ pkgs.mkShell {
     dune_3
     findlib
     bisect_ppx
-    pkgs.framac
+    pkgs.frama-c
     # landmarks
     # landmarks-ppx
     pkgs.mdbook

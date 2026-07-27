@@ -68,28 +68,32 @@ let check_iso ~unsafe export_name export_type module1 module2 =
     | Some index -> (
       match Binary.Module.get_func_type index module1 with
       | None -> assert false
-      | Some (Binary.Bt_raw (_, (pt, _rt))) -> (
+      | Some (_, (pt, _rt)) -> (
         match List.length pt with 1 -> false | _n -> true ) )
   in
 
-  let env =
-    Symbolic_env.empty ()
-    |> Symbolic_env.link_extern_module ~name:"owi" Symbolic_wasm_ffi.owi
-    |> Symbolic_env.link_extern_module ~name:"fuzzing-support"
-         (binaryen_fuzzing_support_module weird_log_i64)
-    |> Symbolic_env.link_extern_module ~name:"env"
-         (emscripten_fuzzing_support_module ())
+  let env = Env.Symbolic.empty in
+  let* env =
+    Env.Symbolic.link_extern_module ~env ~name:"owi" Symbolic_wasm_ffi.owi
+  in
+  let* env =
+    Env.Symbolic.link_extern_module ~env ~name:"fuzzing-support"
+      (binaryen_fuzzing_support_module weird_log_i64)
+  in
+  let* env =
+    Env.Symbolic.link_extern_module ~env ~name:"env"
+      (emscripten_fuzzing_support_module ())
   in
   let* _module, env =
-    Compile.Binary.until_symbolic_link ~name:(Some module_name1) ~unsafe env
+    Compile.Binary.until_symbolic_link env ~name:(Some module_name1) ~unsafe
       module1
   in
   let* _module, env =
-    Compile.Binary.until_symbolic_link ~name:(Some module_name2) ~unsafe env
+    Compile.Binary.until_symbolic_link env ~name:(Some module_name2) ~unsafe
       module2
   in
 
-  let typ = Binary.Bt_raw (None, export_type) in
+  let typ = (None, export_type) in
 
   let iso_modul = Binary.Module.empty in
   let func1 =
@@ -107,7 +111,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
     Binary.Module.add_func
       (Origin.imported ~modul_name:"owi" ~name:"assert"
          ~assigned_name:(Some "assert")
-         ~typ:(Binary.Bt_raw (None, ([ (None, Binary.Num_type I32) ], []))) )
+         ~typ:(None, ([ (None, Binary.Num_type I32) ], [])) )
       iso_modul
   in
   let iso_func =
@@ -144,7 +148,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
           ; Simple (F32 Eq)
           ; If_else
               ( None
-              , Some (Bt_raw (None, ([], [ Num_type I32 ])))
+              , Some (None, ([], [ Num_type I32 ]))
               , [ (* Not nan case, we can directly compare the two numbers *)
                   Binary.Simple (Local (Get (local_offset + 0)))
                 ; Simple (Local (Get (local_offset + 1)))
@@ -157,7 +161,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
                 ; Simple (F32 Eq)
                 ; If_else
                     ( None
-                    , Some (Bt_raw (None, ([], [ Num_type I32 ])))
+                    , Some (None, ([], [ Num_type I32 ]))
                     , [ (* Not nan case, we can compare the two numbers *)
                         Binary.Simple (Local (Get (local_offset + 0)))
                       ; Simple (Local (Get (local_offset + 1)))
@@ -182,7 +186,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
           ; Simple (F64 Eq)
           ; If_else
               ( None
-              , Some (Bt_raw (None, ([], [ Num_type I32 ])))
+              , Some (None, ([], [ Num_type I32 ]))
               , [ (* Not nan case, we can directly compare the two numbers *)
                   Binary.Simple (Local (Get (local_offset + 2)))
                 ; Simple (Local (Get (local_offset + 3)))
@@ -195,7 +199,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
                 ; Simple (F64 Eq)
                 ; If_else
                     ( None
-                    , Some (Bt_raw (None, ([], [ Num_type I32 ])))
+                    , Some (None, ([], [ Num_type I32 ]))
                     , [ (* Not nan case, we can compare the two numbers *)
                         Binary.Simple (Local (Get (local_offset + 2)))
                       ; Simple (Local (Get (local_offset + 3)))
@@ -218,8 +222,8 @@ let check_iso ~unsafe export_name export_type module1 module2 =
     in
     let body = Annotated.dummies body |> Annotated.dummy in
     let type_f =
-      let (Bt_raw (_, typ) : Binary.block_type) = typ in
-      Binary.Bt_raw (None, (fst typ, []))
+      let ((_, typ) : Binary.block_type) = typ in
+      (None, (fst typ, []))
     in
     Origin.Local { Binary.Func.type_f; locals; body; id }
   in
@@ -228,7 +232,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
     Binary.Module.add_func
       (Origin.imported ~modul_name:"owi" ~name:"i32_symbol"
          ~assigned_name:(Some "i32_symbol")
-         ~typ:(Binary.Bt_raw (None, ([], [ Num_type I32 ]))) )
+         ~typ:(None, ([], [ Binary.Num_type I32 ])) )
       iso_modul
   in
 
@@ -236,7 +240,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
     Binary.Module.add_func
       (Origin.imported ~modul_name:"owi" ~name:"i64_symbol"
          ~assigned_name:(Some "i64_symbol")
-         ~typ:(Binary.Bt_raw (None, ([], [ Num_type I64 ]))) )
+         ~typ:(None, ([], [ Binary.Num_type I64 ])) )
       iso_modul
   in
 
@@ -244,7 +248,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
     Binary.Module.add_func
       (Origin.imported ~modul_name:"owi" ~name:"f32_symbol"
          ~assigned_name:(Some "f32_symbol")
-         ~typ:(Binary.Bt_raw (None, ([], [ Num_type F32 ]))) )
+         ~typ:(None, ([], [ Binary.Num_type F32 ])) )
       iso_modul
   in
 
@@ -252,7 +256,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
     Binary.Module.add_func
       (Origin.imported ~modul_name:"owi" ~name:"f64_symbol"
          ~assigned_name:(Some "f64_symbol")
-         ~typ:(Binary.Bt_raw (None, ([], [ Num_type F64 ]))) )
+         ~typ:(None, ([], [ Binary.Num_type F64 ])) )
       iso_modul
   in
 
@@ -273,7 +277,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
            (fst export_type)
       @ [ Binary.Call iso_check_index ]
     in
-    let type_f = Binary.Bt_raw (None, ([], [])) in
+    let type_f = (None, ([], [])) in
     Origin.Local { Binary.Func.type_f; locals; body; id }
   in
   let iso_modul, index = Binary.Module.add_func start_function iso_modul in
@@ -286,7 +290,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
     Compile.Binary.until_symbolic_link ~unsafe:false ~name:None env modul
   in
   let module I = Interpret.Symbolic (Interpret.Default_parameters) in
-  I.modul env ~modul
+  I.modul ~env ~modul
 
 module String_set = Set.Make (String)
 
@@ -371,9 +375,7 @@ let cmd ~deterministic_result_order ~fail_mode ~exploration_strategy ~files
         in
         let typ1, typ2 =
           match (typ1, typ2) with
-          | Some (_, Some (Bt_raw (_, typ1))), Some (_, Some (Bt_raw (_, typ2)))
-            ->
-            (typ1, typ2)
+          | Some (_, Some (_, typ1)), Some (_, Some (_, typ2)) -> (typ1, typ2)
           | _, _ -> assert false
         in
         if Binary.func_type_eq typ1 typ2 then (name, typ1) :: common_exports
@@ -395,15 +397,21 @@ let cmd ~deterministic_result_order ~fail_mode ~exploration_strategy ~files
          (fun fmt (elt, _ft) -> Fmt.string fmt elt) )
       common_exports );
 
-  list_fold_left
-    (fun () (export_name, export_type) ->
-      Log.info (fun m -> m "checking export %s" export_name);
-      let* to_run = check_iso ~unsafe export_name export_type module1 module2 in
-      let run_time = if Log.is_bench_enabled () then Some 0. else None in
+  let* _env =
+    list_fold_left
+      (fun _env (export_name, export_type) ->
+        Log.info (fun m -> m "checking export %s" export_name);
+        let* to_run =
+          check_iso ~unsafe export_name export_type module1 module2
+        in
+        let run_time = if Log.is_bench_enabled () then Some 0. else None in
 
-      Symbolic_driver.run ~exploration_strategy ~fail_mode ~workers
-        ~no_worker_isolation ~seed ~solver ~deterministic_result_order
-        ~model_format ~no_value ~no_assert_failure_expression_printing
-        ~workspace ~no_stop_at_failure ~model_out_file ~with_breadcrumbs
-        ~run_time to_run )
-    () common_exports
+        Symbolic_driver.run ~exploration_strategy ~fail_mode ~workers
+          ~no_worker_isolation ~seed ~solver ~deterministic_result_order
+          ~model_format ~no_value ~no_assert_failure_expression_printing
+          ~workspace ~no_stop_at_failure ~model_out_file ~with_breadcrumbs
+          ~run_time to_run )
+      () common_exports
+  in
+
+  Ok ()

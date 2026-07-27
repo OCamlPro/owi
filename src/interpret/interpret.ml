@@ -37,12 +37,7 @@ module Make
         with type boolean := Value.boolean
          and type i32 := Value.i32
          and type value := Value.t)
-    (Table :
-      Table_intf.T
-        with type reference := Value.Ref.t
-         and type 'a choice := 'a Choice.t)
-    (Global :
-      Global_intf.T with type value := Value.t and type 'a choice := 'a Choice.t)
+    (Table : Table_intf.T with type reference := Value.Ref.t)
     (Memory :
       Memory_intf.T
         with type i32 := Value.i32
@@ -60,13 +55,12 @@ module Make
          and type 'a m := 'a Choice.t)
     (Env :
       Env_intf.T
-        with type data := Data.t
+        with type extern_func := Extern_func.t
          and type memory := Memory.t
-         and type global := Global.t
+         and type value := Value.t
          and type table := Table.t
          and type elem := Elem.t
-         and type extern_func := Extern_func.t
-         and type 'a choice := 'a Choice.t)
+         and type data := Data.t)
     (Parameters : Parameters) =
 struct
   open Value
@@ -117,20 +111,16 @@ struct
       if v then Choice.trap trap else f ()
 
   module State = struct
-    type stack = Stack.t
-
-    type value = Value.t
-
     module Locals : sig
-      type t = value array
+      type t = Value.t array
 
-      val of_list : value list -> t
+      val of_list : Value.t list -> t
 
-      val get : t -> int -> value
+      val get : t -> int -> Value.t
 
-      val set : t -> int -> value -> t
+      val set : t -> int -> Value.t -> t
     end = struct
-      type t = value array
+      type t = Value.t array
 
       let of_list = Array.of_list
 
@@ -147,7 +137,7 @@ struct
       ; branch_rt : Binary.result_type
       ; continue : expr Annotated.t
       ; continue_rt : Binary.result_type
-      ; stack : stack
+      ; stack : Stack.t
       ; is_loop : Prelude.Bool.t
       }
 
@@ -155,38 +145,36 @@ struct
 
     type t =
       { return_state : t option
-      ; stack : stack
+      ; stack : Stack.t
       ; locals : Locals.t
           (* TODO: rename this PC, it stands for program counter but is easily confused with path condition... *)
       ; pc : expr Annotated.t
       ; block_stack : block_stack
       ; func_rt : result_type
-      ; modul : int
       ; env : Env.t
       }
 
-    let empty ~locals ~modul ~env =
+    let empty ~locals ~env =
       { return_state = None
       ; stack = []
       ; locals = Locals.of_list locals
       ; pc = Annotated.dummy []
       ; block_stack = []
       ; func_rt = []
-      ; modul
       ; env
       }
 
     type instr_result =
-      | Return of value list
+      | Return of t * Value.t list
       | Continue of t
 
     let return (state : t) =
       let args = Stack.keep state.stack (List.length state.func_rt) in
       match state.return_state with
-      | None -> Return args
-      | Some state ->
-        let stack = args @ state.stack in
-        Continue { state with stack }
+      | None -> Return (state, args)
+      | Some state' ->
+        let stack = args @ state'.stack in
+        Continue { state' with stack; env = state.env }
 
     let branch (state : t) n =
       let block_stack = Stack.drop_n state.block_stack n in
@@ -215,7 +203,7 @@ struct
     if Int64.(lt_u (sub 0xFFFF_FFFF_FFFF_FFFFL access_size) offset) then
       Choice.trap `Out_of_bounds_memory_access
     else
-      let* mem = Env.get_memory ~modul:state.modul state.env memid in
+      let mem = Env.get_memory ~env:state.env memid in
       let pos = I64.extend_i32_u pos in
       let>! () =
         let limit = I64.of_int64 (Int64.add access_size offset) in
@@ -228,7 +216,6 @@ struct
         , false )
       in
       let addr = I32.wrap_i64 I64.(add pos (I64.of_int64 offset)) in
-      let* mem = Env.get_memory ~modul:state.modul state.env memid in
       Choice.return (addr, mem)
 
   let mk_addr8 = mk_addr 1L
@@ -241,18 +228,32 @@ struct
 
   let mk_addr128 = mk_addr 16L
 
-  let exec_i32_instr ~state instr_counter stack ~uuid :
-    Binary.i32_instr -> Stack.t Choice.t =
+  let exec_i32_instr ~(state : State.t) instr_counter stack ~uuid :
+    Binary.i32_instr -> State.t Choice.t =
    fun x ->
     Log.debug (fun m -> m "UUID IS: %d" uuid);
     x |> function
-    | Const n -> Stack.push_concrete_i32 stack n |> Choice.return
-    | Clz -> Stack.apply_i32_i32 stack I32.clz |> Choice.return
-    | Ctz -> Stack.apply_i32_i32 stack I32.ctz |> Choice.return
-    | Popcnt -> Stack.apply_i32_i32 stack I32.popcnt |> Choice.return
-    | Add -> Stack.apply_i32_i32_i32 stack I32.add |> Choice.return
-    | Sub -> Stack.apply_i32_i32_i32 stack I32.sub |> Choice.return
-    | Mul -> Stack.apply_i32_i32_i32 stack I32.mul |> Choice.return
+    | Const n ->
+      let stack = Stack.push_concrete_i32 stack n in
+      Choice.return { state with stack }
+    | Clz ->
+      let stack = Stack.apply_i32_i32 stack I32.clz in
+      Choice.return { state with stack }
+    | Ctz ->
+      let stack = Stack.apply_i32_i32 stack I32.ctz in
+      Choice.return { state with stack }
+    | Popcnt ->
+      let stack = Stack.apply_i32_i32 stack I32.popcnt in
+      Choice.return { state with stack }
+    | Add ->
+      let stack = Stack.apply_i32_i32_i32 stack I32.add in
+      Choice.return { state with stack }
+    | Sub ->
+      let stack = Stack.apply_i32_i32_i32 stack I32.sub in
+      Choice.return { state with stack }
+    | Mul ->
+      let stack = Stack.apply_i32_i32_i32 stack I32.mul in
+      Choice.return { state with stack }
     | Div_s ->
       let (n1, n2), stack = Stack.pop2_i32 stack in
       let>! () =
@@ -272,7 +273,8 @@ struct
         , (* TODO: get instr counter *) None
         , false )
       in
-      Stack.push_i32 stack (I32.div n1 n2) |> Choice.return
+      let stack = Stack.push_i32 stack (I32.div n1 n2) in
+      Choice.return { state with stack }
     | Div_u ->
       let (n1, n2), stack = Stack.pop2_i32 stack in
       let>! () =
@@ -286,7 +288,8 @@ struct
         , (* TODO: get instr counter *) None
         , skip_divide_by_zero_check )
       in
-      Stack.push_i32 stack (I32.unsigned_div n1 n2) |> Choice.return
+      let stack = Stack.push_i32 stack (I32.unsigned_div n1 n2) in
+      Choice.return { state with stack }
     | Rem_s ->
       let (n1, n2), stack = Stack.pop2_i32 stack in
       let>! () =
@@ -300,7 +303,8 @@ struct
         , (* TODO: get instr counter *) None
         , skip_divide_by_zero_check )
       in
-      Stack.push_i32 stack (I32.rem n1 n2) |> Choice.return
+      let stack = Stack.push_i32 stack (I32.rem n1 n2) in
+      Choice.return { state with stack }
     | Rem_u ->
       let (n1, n2), stack = Stack.pop2_i32 stack in
       let>! () =
@@ -314,127 +318,206 @@ struct
         , (* TODO: get instr counter *) None
         , skip_divide_by_zero_check )
       in
-      Stack.push_i32 stack (I32.unsigned_rem n1 n2) |> Choice.return
-    | And -> Stack.apply_i32_i32_i32 stack I32.logand |> Choice.return
-    | Or -> Stack.apply_i32_i32_i32 stack I32.logor |> Choice.return
-    | Xor -> Stack.apply_i32_i32_i32 stack I32.logxor |> Choice.return
-    | Shl -> Stack.apply_i32_i32_i32 stack I32.shl |> Choice.return
-    | Shr_s -> Stack.apply_i32_i32_i32 stack I32.ashr |> Choice.return
-    | Shr_u -> Stack.apply_i32_i32_i32 stack I32.lshr |> Choice.return
-    | Rotl -> Stack.apply_i32_i32_i32 stack I32.rotate_left |> Choice.return
-    | Rotr -> Stack.apply_i32_i32_i32 stack I32.rotate_right |> Choice.return
-    | Eqz -> Stack.apply_i32_boolean stack I32.eqz |> Choice.return
-    | Eq -> Stack.apply_i32_i32_boolean stack I32.eq |> Choice.return
-    | Ne -> Stack.apply_i32_i32_boolean stack I32.ne |> Choice.return
-    | Lt_s -> Stack.apply_i32_i32_boolean stack I32.lt |> Choice.return
-    | Lt_u -> Stack.apply_i32_i32_boolean stack I32.lt_u |> Choice.return
+      let stack = Stack.push_i32 stack (I32.unsigned_rem n1 n2) in
+      Choice.return { state with stack }
+    | And ->
+      let stack = Stack.apply_i32_i32_i32 stack I32.logand in
+      Choice.return { state with stack }
+    | Or ->
+      let stack = Stack.apply_i32_i32_i32 stack I32.logor in
+      Choice.return { state with stack }
+    | Xor ->
+      let stack = Stack.apply_i32_i32_i32 stack I32.logxor in
+      Choice.return { state with stack }
+    | Shl ->
+      let stack = Stack.apply_i32_i32_i32 stack I32.shl in
+      Choice.return { state with stack }
+    | Shr_s ->
+      let stack = Stack.apply_i32_i32_i32 stack I32.ashr in
+      Choice.return { state with stack }
+    | Shr_u ->
+      let stack = Stack.apply_i32_i32_i32 stack I32.lshr in
+      Choice.return { state with stack }
+    | Rotl ->
+      let stack = Stack.apply_i32_i32_i32 stack I32.rotate_left in
+      Choice.return { state with stack }
+    | Rotr ->
+      let stack = Stack.apply_i32_i32_i32 stack I32.rotate_right in
+      Choice.return { state with stack }
+    | Eqz ->
+      let stack = Stack.apply_i32_boolean stack I32.eqz in
+      Choice.return { state with stack }
+    | Eq ->
+      let stack = Stack.apply_i32_i32_boolean stack I32.eq in
+      Choice.return { state with stack }
+    | Ne ->
+      let stack = Stack.apply_i32_i32_boolean stack I32.ne in
+      Choice.return { state with stack }
+    | Lt_s ->
+      let stack = Stack.apply_i32_i32_boolean stack I32.lt in
+      Choice.return { state with stack }
+    | Lt_u ->
+      let stack = Stack.apply_i32_i32_boolean stack I32.lt_u in
+      Choice.return { state with stack }
     | Gt_s ->
-      Stack.apply_i32_i32_boolean stack (Fun.flip I32.lt) |> Choice.return
+      let stack = Stack.apply_i32_i32_boolean stack (Fun.flip I32.lt) in
+      Choice.return { state with stack }
     | Gt_u ->
-      Stack.apply_i32_i32_boolean stack (Fun.flip I32.lt_u) |> Choice.return
-    | Le_s -> Stack.apply_i32_i32_boolean stack I32.le |> Choice.return
-    | Le_u -> Stack.apply_i32_i32_boolean stack I32.le_u |> Choice.return
+      let stack = Stack.apply_i32_i32_boolean stack (Fun.flip I32.lt_u) in
+      Choice.return { state with stack }
+    | Le_s ->
+      let stack = Stack.apply_i32_i32_boolean stack I32.le in
+      Choice.return { state with stack }
+    | Le_u ->
+      let stack = Stack.apply_i32_i32_boolean stack I32.le_u in
+      Choice.return { state with stack }
     | Ge_s ->
-      Stack.apply_i32_i32_boolean stack (Fun.flip I32.le) |> Choice.return
+      let stack = Stack.apply_i32_i32_boolean stack (Fun.flip I32.le) in
+      Choice.return { state with stack }
     | Ge_u ->
-      Stack.apply_i32_i32_boolean stack (Fun.flip I32.le_u) |> Choice.return
+      let stack = Stack.apply_i32_i32_boolean stack (Fun.flip I32.le_u) in
+      Choice.return { state with stack }
     | Trunc_f_s Text.S32 ->
       let f, stack = Stack.pop_f32 stack in
       let res = I32.trunc_f32_s f in
       begin match res with
       | Error t -> Choice.trap t
-      | Ok res -> Choice.return @@ Stack.push_i32 stack res
+      | Ok res ->
+        let stack = Stack.push_i32 stack res in
+        Choice.return { state with stack }
       end
     | Trunc_f_u Text.S32 ->
       let f, stack = Stack.pop_f32 stack in
       let res = I32.trunc_f32_u f in
       begin match res with
       | Error t -> Choice.trap t
-      | Ok res -> Choice.return @@ Stack.push_i32 stack res
+      | Ok res ->
+        let stack = Stack.push_i32 stack res in
+        Choice.return { state with stack }
       end
     | Trunc_f_s Text.S64 ->
       let f, stack = Stack.pop_f64 stack in
       let res = I32.trunc_f64_s f in
       begin match res with
       | Error t -> Choice.trap t
-      | Ok res -> Choice.return @@ Stack.push_i32 stack res
+      | Ok res ->
+        let stack = Stack.push_i32 stack res in
+        Choice.return { state with stack }
       end
     | Trunc_f_u Text.S64 ->
       let f, stack = Stack.pop_f64 stack in
       let res = I32.trunc_f64_u f in
       begin match res with
       | Error t -> Choice.trap t
-      | Ok res -> Choice.return @@ Stack.push_i32 stack res
+      | Ok res ->
+        let stack = Stack.push_i32 stack res in
+        Choice.return { state with stack }
       end
     | Trunc_sat_f_s Text.S32 ->
-      Stack.apply_f32_i32 stack I32.trunc_sat_f32_s |> Choice.return
+      let stack = Stack.apply_f32_i32 stack I32.trunc_sat_f32_s in
+      Choice.return { state with stack }
     | Trunc_sat_f_u Text.S32 ->
-      Stack.apply_f32_i32 stack I32.trunc_sat_f32_u |> Choice.return
+      let stack = Stack.apply_f32_i32 stack I32.trunc_sat_f32_u in
+      Choice.return { state with stack }
     | Trunc_sat_f_s Text.S64 ->
-      Stack.apply_f64_i32 stack I32.trunc_sat_f64_s |> Choice.return
+      let stack = Stack.apply_f64_i32 stack I32.trunc_sat_f64_s in
+      Choice.return { state with stack }
     | Trunc_sat_f_u Text.S64 ->
-      Stack.apply_f64_i32 stack I32.trunc_sat_f64_u |> Choice.return
-    | Extend8_s -> Stack.apply_i32_i32 stack (I32.extend_s 8) |> Choice.return
-    | Extend16_s -> Stack.apply_i32_i32 stack (I32.extend_s 16) |> Choice.return
-    | Wrap_i64 -> Stack.apply_i64_i32 stack I32.wrap_i64 |> Choice.return
+      let stack = Stack.apply_f64_i32 stack I32.trunc_sat_f64_u in
+      Choice.return { state with stack }
+    | Extend8_s ->
+      let stack = Stack.apply_i32_i32 stack (I32.extend_s 8) in
+      Choice.return { state with stack }
+    | Extend16_s ->
+      let stack = Stack.apply_i32_i32 stack (I32.extend_s 16) in
+      Choice.return { state with stack }
+    | Wrap_i64 ->
+      let stack = Stack.apply_i64_i32 stack I32.wrap_i64 in
+      Choice.return { state with stack }
     | Reinterpret_f Text.S32 ->
-      Stack.apply_f32_i32 stack I32.reinterpret_f32 |> Choice.return
+      let stack = Stack.apply_f32_i32 stack I32.reinterpret_f32 in
+      Choice.return { state with stack }
     | Reinterpret_f Text.S64 ->
-      Stack.apply_f64_i32 stack (Fun.compose I32.reinterpret_f32 F32.demote_f64)
-      |> Choice.return
+      let stack =
+        Stack.apply_f64_i32 stack
+          (Fun.compose I32.reinterpret_f32 F32.demote_f64)
+      in
+      Choice.return { state with stack }
     | Load8_s (memid, { offset; _ }) ->
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr8 ~state memid ~pos ~offset instr_counter in
       let* res = Memory.load_8_s mem addr in
-      Stack.push_i32 stack res |> Choice.return
+      let stack = Stack.push_i32 stack res in
+      Choice.return { state with stack }
     | Load8_u (memid, { offset; _ }) ->
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr8 ~state memid ~pos ~offset instr_counter in
       let* res = Memory.load_8_u mem addr in
-      Stack.push_i32 stack res |> Choice.return
+      let stack = Stack.push_i32 stack res in
+      Choice.return { state with stack }
     | Load16_s (memid, { offset; _ }) ->
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr16 ~state memid ~pos ~offset instr_counter in
       let* res = Memory.load_16_s mem addr in
-      Stack.push_i32 stack res |> Choice.return
+      let stack = Stack.push_i32 stack res in
+      Choice.return { state with stack }
     | Load16_u (memid, { offset; _ }) ->
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr16 ~state memid ~pos ~offset instr_counter in
       let* res = Memory.load_16_u mem addr in
-      Stack.push_i32 stack res |> Choice.return
+      let stack = Stack.push_i32 stack res in
+      Choice.return { state with stack }
     | Load (memid, { offset; _ }) ->
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr32 ~state memid ~pos ~offset instr_counter in
       let* res = Memory.load_32 mem addr in
-      Stack.push_i32 stack res |> Choice.return
+      let stack = Stack.push_i32 stack res in
+      Choice.return { state with stack }
     | Store8 (memid, { offset; _ }) ->
       let n, stack = Stack.pop_i32 stack in
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr8 ~state memid ~pos ~offset instr_counter in
-      let+ () = Memory.store_8 mem ~addr n in
-      stack
+      let+ mem = Memory.store_8 mem ~addr n in
+      let env = Env.set_memory ~env:state.env memid mem in
+      { state with env; stack }
     | Store16 (memid, { offset; _ }) ->
       let n, stack = Stack.pop_i32 stack in
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr16 ~state memid ~pos ~offset instr_counter in
-      let+ () = Memory.store_16 mem ~addr n in
-      stack
+      let+ mem = Memory.store_16 mem ~addr n in
+      let env = Env.set_memory ~env:state.env memid mem in
+      { state with env; stack }
     | Store (memid, { offset; _ }) ->
       let n, stack = Stack.pop_i32 stack in
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr32 ~state memid ~pos ~offset instr_counter in
-      let+ () = Memory.store_32 mem ~addr n in
-      stack
+      let+ mem = Memory.store_32 mem ~addr n in
+      let env = Env.set_memory ~env:state.env memid mem in
+      { state with env; stack }
 
-  let exec_i64_instr ~state instr_counter stack ~uuid :
-    Binary.i64_instr -> Stack.t Choice.t = function
-    | Const n -> Stack.push_concrete_i64 stack n |> Choice.return
-    | Clz -> Stack.apply_i64_i64 stack I64.clz |> Choice.return
-    | Ctz -> Stack.apply_i64_i64 stack I64.ctz |> Choice.return
-    | Popcnt -> Stack.apply_i64_i64 stack I64.popcnt |> Choice.return
-    | Add -> Stack.apply_i64_i64_i64 stack I64.add |> Choice.return
-    | Sub -> Stack.apply_i64_i64_i64 stack I64.sub |> Choice.return
-    | Mul -> Stack.apply_i64_i64_i64 stack I64.mul |> Choice.return
+  let exec_i64_instr ~(state : State.t) instr_counter stack ~uuid :
+    Binary.i64_instr -> State.t Choice.t = function
+    | Const n ->
+      let stack = Stack.push_concrete_i64 stack n in
+      Choice.return { state with stack }
+    | Clz ->
+      let stack = Stack.apply_i64_i64 stack I64.clz in
+      Choice.return { state with stack }
+    | Ctz ->
+      let stack = Stack.apply_i64_i64 stack I64.ctz in
+      Choice.return { state with stack }
+    | Popcnt ->
+      let stack = Stack.apply_i64_i64 stack I64.popcnt in
+      Choice.return { state with stack }
+    | Add ->
+      let stack = Stack.apply_i64_i64_i64 stack I64.add in
+      Choice.return { state with stack }
+    | Sub ->
+      let stack = Stack.apply_i64_i64_i64 stack I64.sub in
+      Choice.return { state with stack }
+    | Mul ->
+      let stack = Stack.apply_i64_i64_i64 stack I64.mul in
+      Choice.return { state with stack }
     | Div_s ->
       let (n1, n2), stack = Stack.pop2_i64 stack in
       let>! () =
@@ -455,7 +538,8 @@ struct
         , (* TODO: get instr counter *) None
         , false )
       in
-      Stack.push_i64 stack (I64.div n1 n2) |> Choice.return
+      let stack = Stack.push_i64 stack (I64.div n1 n2) in
+      Choice.return { state with stack }
     | Div_u ->
       let (n1, n2), stack = Stack.pop2_i64 stack in
       let>! () =
@@ -469,7 +553,8 @@ struct
         , (* TODO: get instr counter *) None
         , skip_divide_by_zero_check )
       in
-      Stack.push_i64 stack (I64.unsigned_div n1 n2) |> Choice.return
+      let stack = Stack.push_i64 stack (I64.unsigned_div n1 n2) in
+      Choice.return { state with stack }
     | Rem_s ->
       let (n1, n2), stack = Stack.pop2_i64 stack in
       let>! () =
@@ -483,7 +568,8 @@ struct
         , (* TODO: get instr counter *) None
         , skip_divide_by_zero_check )
       in
-      Stack.push_i64 stack (I64.rem n1 n2) |> Choice.return
+      let stack = Stack.push_i64 stack (I64.rem n1 n2) in
+      Choice.return { state with stack }
     | Rem_u ->
       let (n1, n2), stack = Stack.pop2_i64 stack in
       let>! () =
@@ -497,104 +583,167 @@ struct
         , (* TODO: get instr counter *) None
         , skip_divide_by_zero_check )
       in
-      Stack.push_i64 stack (I64.unsigned_rem n1 n2) |> Choice.return
-    | And -> Stack.apply_i64_i64_i64 stack I64.logand |> Choice.return
-    | Or -> Stack.apply_i64_i64_i64 stack I64.logor |> Choice.return
-    | Xor -> Stack.apply_i64_i64_i64 stack I64.logxor |> Choice.return
-    | Shl -> Stack.apply_i64_i64_i64 stack I64.shl |> Choice.return
-    | Shr_s -> Stack.apply_i64_i64_i64 stack I64.ashr |> Choice.return
-    | Shr_u -> Stack.apply_i64_i64_i64 stack I64.lshr |> Choice.return
-    | Rotl -> Stack.apply_i64_i64_i64 stack I64.rotate_left |> Choice.return
-    | Rotr -> Stack.apply_i64_i64_i64 stack I64.rotate_right |> Choice.return
-    | Eqz -> Stack.apply_i64_boolean stack I64.eqz |> Choice.return
-    | Eq -> Stack.apply_i64_i64_boolean stack I64.eq |> Choice.return
-    | Ne -> Stack.apply_i64_i64_boolean stack I64.ne |> Choice.return
-    | Lt_s -> Stack.apply_i64_i64_boolean stack I64.lt |> Choice.return
-    | Lt_u -> Stack.apply_i64_i64_boolean stack I64.lt_u |> Choice.return
+      let stack = Stack.push_i64 stack (I64.unsigned_rem n1 n2) in
+      Choice.return { state with stack }
+    | And ->
+      let stack = Stack.apply_i64_i64_i64 stack I64.logand in
+      Choice.return { state with stack }
+    | Or ->
+      let stack = Stack.apply_i64_i64_i64 stack I64.logor in
+      Choice.return { state with stack }
+    | Xor ->
+      let stack = Stack.apply_i64_i64_i64 stack I64.logxor in
+      Choice.return { state with stack }
+    | Shl ->
+      let stack = Stack.apply_i64_i64_i64 stack I64.shl in
+      Choice.return { state with stack }
+    | Shr_s ->
+      let stack = Stack.apply_i64_i64_i64 stack I64.ashr in
+      Choice.return { state with stack }
+    | Shr_u ->
+      let stack = Stack.apply_i64_i64_i64 stack I64.lshr in
+      Choice.return { state with stack }
+    | Rotl ->
+      let stack = Stack.apply_i64_i64_i64 stack I64.rotate_left in
+      Choice.return { state with stack }
+    | Rotr ->
+      let stack = Stack.apply_i64_i64_i64 stack I64.rotate_right in
+      Choice.return { state with stack }
+    | Eqz ->
+      let stack = Stack.apply_i64_boolean stack I64.eqz in
+      Choice.return { state with stack }
+    | Eq ->
+      let stack = Stack.apply_i64_i64_boolean stack I64.eq in
+      Choice.return { state with stack }
+    | Ne ->
+      let stack = Stack.apply_i64_i64_boolean stack I64.ne in
+      Choice.return { state with stack }
+    | Lt_s ->
+      let stack = Stack.apply_i64_i64_boolean stack I64.lt in
+      Choice.return { state with stack }
+    | Lt_u ->
+      let stack = Stack.apply_i64_i64_boolean stack I64.lt_u in
+      Choice.return { state with stack }
     | Gt_s ->
-      Stack.apply_i64_i64_boolean stack (Fun.flip I64.lt) |> Choice.return
+      let stack = Stack.apply_i64_i64_boolean stack (Fun.flip I64.lt) in
+      Choice.return { state with stack }
     | Gt_u ->
-      Stack.apply_i64_i64_boolean stack (Fun.flip I64.lt_u) |> Choice.return
-    | Le_s -> Stack.apply_i64_i64_boolean stack I64.le |> Choice.return
-    | Le_u -> Stack.apply_i64_i64_boolean stack I64.le_u |> Choice.return
+      let stack = Stack.apply_i64_i64_boolean stack (Fun.flip I64.lt_u) in
+      Choice.return { state with stack }
+    | Le_s ->
+      let stack = Stack.apply_i64_i64_boolean stack I64.le in
+      Choice.return { state with stack }
+    | Le_u ->
+      let stack = Stack.apply_i64_i64_boolean stack I64.le_u in
+      Choice.return { state with stack }
     | Ge_s ->
-      Stack.apply_i64_i64_boolean stack (Fun.flip I64.le) |> Choice.return
+      let stack = Stack.apply_i64_i64_boolean stack (Fun.flip I64.le) in
+      Choice.return { state with stack }
     | Ge_u ->
-      Stack.apply_i64_i64_boolean stack (Fun.flip I64.le_u) |> Choice.return
+      let stack = Stack.apply_i64_i64_boolean stack (Fun.flip I64.le_u) in
+      Choice.return { state with stack }
     | Trunc_f_s Text.S32 ->
       let f, stack = Stack.pop_f32 stack in
       let res = I64.trunc_f32_s f in
       begin match res with
       | Error t -> Choice.trap t
-      | Ok res -> Choice.return @@ Stack.push_i64 stack res
+      | Ok res ->
+        let stack = Stack.push_i64 stack res in
+        Choice.return { state with stack }
       end
     | Trunc_f_u Text.S32 ->
       let f, stack = Stack.pop_f32 stack in
       let res = I64.trunc_f32_u f in
       begin match res with
       | Error t -> Choice.trap t
-      | Ok res -> Choice.return @@ Stack.push_i64 stack res
+      | Ok res ->
+        let stack = Stack.push_i64 stack res in
+        Choice.return { state with stack }
       end
     | Trunc_f_s Text.S64 ->
       let f, stack = Stack.pop_f64 stack in
       let res = I64.trunc_f64_s f in
       begin match res with
       | Error t -> Choice.trap t
-      | Ok res -> Choice.return @@ Stack.push_i64 stack res
+      | Ok res ->
+        let stack = Stack.push_i64 stack res in
+        Choice.return { state with stack }
       end
     | Trunc_f_u Text.S64 ->
       let f, stack = Stack.pop_f64 stack in
       let res = I64.trunc_f64_u f in
       begin match res with
       | Error t -> Choice.trap t
-      | Ok res -> Choice.return @@ Stack.push_i64 stack res
+      | Ok res ->
+        let stack = Stack.push_i64 stack res in
+        Choice.return { state with stack }
       end
     | Trunc_sat_f_s Text.S32 ->
-      Stack.apply_f32_i64 stack I64.trunc_sat_f32_s |> Choice.return
+      let stack = Stack.apply_f32_i64 stack I64.trunc_sat_f32_s in
+      Choice.return { state with stack }
     | Trunc_sat_f_u Text.S32 ->
-      Stack.apply_f32_i64 stack I64.trunc_sat_f32_u |> Choice.return
+      let stack = Stack.apply_f32_i64 stack I64.trunc_sat_f32_u in
+      Choice.return { state with stack }
     | Trunc_sat_f_s Text.S64 ->
-      Stack.apply_f64_i64 stack I64.trunc_sat_f64_s |> Choice.return
+      let stack = Stack.apply_f64_i64 stack I64.trunc_sat_f64_s in
+      Choice.return { state with stack }
     | Trunc_sat_f_u Text.S64 ->
-      Stack.apply_f64_i64 stack I64.trunc_sat_f64_u |> Choice.return
-    | Extend8_s -> Stack.apply_i64_i64 stack (I64.extend_s 8) |> Choice.return
-    | Extend16_s -> Stack.apply_i64_i64 stack (I64.extend_s 16) |> Choice.return
-    | Extend32_s -> Stack.apply_i64_i64 stack (I64.extend_s 32) |> Choice.return
+      let stack = Stack.apply_f64_i64 stack I64.trunc_sat_f64_u in
+      Choice.return { state with stack }
+    | Extend8_s ->
+      let stack = Stack.apply_i64_i64 stack (I64.extend_s 8) in
+      Choice.return { state with stack }
+    | Extend16_s ->
+      let stack = Stack.apply_i64_i64 stack (I64.extend_s 16) in
+      Choice.return { state with stack }
+    | Extend32_s ->
+      let stack = Stack.apply_i64_i64 stack (I64.extend_s 32) in
+      Choice.return { state with stack }
     | Extend_i32_s ->
-      Stack.apply_i32_i64 stack I64.extend_i32_s |> Choice.return
+      let stack = Stack.apply_i32_i64 stack I64.extend_i32_s in
+      Choice.return { state with stack }
     | Extend_i32_u ->
-      Stack.apply_i32_i64 stack I64.extend_i32_u |> Choice.return
+      let stack = Stack.apply_i32_i64 stack I64.extend_i32_u in
+      Choice.return { state with stack }
     | Reinterpret_f S32 ->
-      Stack.apply_f32_i64 stack
-        (Fun.compose I64.reinterpret_f64 F64.promote_f32)
-      |> Choice.return
+      let stack =
+        Stack.apply_f32_i64 stack
+          (Fun.compose I64.reinterpret_f64 F64.promote_f32)
+      in
+      Choice.return { state with stack }
     | Reinterpret_f S64 ->
-      Stack.apply_f64_i64 stack I64.reinterpret_f64 |> Choice.return
+      let stack = Stack.apply_f64_i64 stack I64.reinterpret_f64 in
+      Choice.return { state with stack }
     | Load8_s (memid, { offset; _ }) ->
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr8 ~state memid ~pos ~offset instr_counter in
       let* res = Memory.load_8_s mem addr in
-      Stack.push_i64 stack (I64.of_int32 res) |> Choice.return
+      let stack = Stack.push_i64 stack (I64.of_int32 res) in
+      Choice.return { state with stack }
     | Load8_u (memid, { offset; _ }) ->
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr8 ~state memid ~pos ~offset instr_counter in
       let* res = Memory.load_8_u mem addr in
-      Stack.push_i64 stack (I64.of_int32 res) |> Choice.return
+      let stack = Stack.push_i64 stack (I64.of_int32 res) in
+      Choice.return { state with stack }
     | Load16_s (memid, { offset; _ }) ->
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr16 ~state memid ~pos ~offset instr_counter in
       let* res = Memory.load_16_s mem addr in
-      Stack.push_i64 stack (I64.of_int32 res) |> Choice.return
+      let stack = Stack.push_i64 stack (I64.of_int32 res) in
+      Choice.return { state with stack }
     | Load16_u (memid, { offset; _ }) ->
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr16 ~state memid ~pos ~offset instr_counter in
       let* res = Memory.load_16_u mem addr in
-      Stack.push_i64 stack (I64.of_int32 res) |> Choice.return
+      let stack = Stack.push_i64 stack (I64.of_int32 res) in
+      Choice.return { state with stack }
     | Load32_s (memid, { offset; _ }) ->
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr32 ~state memid ~pos ~offset instr_counter in
       let* res = Memory.load_32 mem addr in
-      Stack.push_i64 stack (I64.of_int32 res) |> Choice.return
+      let stack = Stack.push_i64 stack (I64.of_int32 res) in
+      Choice.return { state with stack }
     | Load32_u (memid, { offset; _ }) ->
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr32 ~state memid ~pos ~offset instr_counter in
@@ -604,216 +753,349 @@ struct
         let b = I64.sub a (I64.of_int 1) in
         I64.logand (I64.of_int32 res) b
       in
-      Stack.push_i64 stack res |> Choice.return
+      let stack = Stack.push_i64 stack res in
+      Choice.return { state with stack }
     | Load (memid, { offset; _ }) ->
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr64 ~state memid ~pos ~offset instr_counter in
       let* res = Memory.load_64 mem addr in
-      Stack.push_i64 stack res |> Choice.return
+      let stack = Stack.push_i64 stack res in
+      Choice.return { state with stack }
     | Store8 (memid, { offset; _ }) ->
       let n, stack = Stack.pop_i64 stack in
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr8 ~state memid ~pos ~offset instr_counter in
-      let+ () =
+      let+ mem =
         let n = I64.to_int32 n in
         Memory.store_8 mem ~addr n
       in
-      stack
+      let env = Env.set_memory ~env:state.env memid mem in
+      { state with stack; env }
     | Store16 (memid, { offset; _ }) ->
       let n, stack = Stack.pop_i64 stack in
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr16 ~state memid ~pos ~offset instr_counter in
-      let+ () =
+      let+ mem =
         let n = I64.to_int32 n in
         Memory.store_16 mem ~addr n
       in
-      stack
+      let env = Env.set_memory ~env:state.env memid mem in
+      { state with stack; env }
     | Store32 (memid, { offset; _ }) ->
       let n, stack = Stack.pop_i64 stack in
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr32 ~state memid ~pos ~offset instr_counter in
-      let+ () =
+      let+ mem =
         let n = I64.to_int32 n in
         Memory.store_32 mem ~addr n
       in
-      stack
+      let env = Env.set_memory ~env:state.env memid mem in
+      { state with stack; env }
     | Store (memid, { offset; _ }) ->
       let n, stack = Stack.pop_i64 stack in
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr64 ~state memid ~pos ~offset instr_counter in
-      let+ () = Memory.store_64 mem ~addr n in
-      stack
+      let+ mem = Memory.store_64 mem ~addr n in
+      let env = Env.set_memory ~env:state.env memid mem in
+      { state with stack; env }
 
-  let exec_f32_instr ~state instr_counter stack :
-    Binary.f32_instr -> Stack.t Choice.t = function
-    | Const n -> Stack.push_concrete_f32 stack n |> Choice.return
-    | Abs -> Stack.apply_f32_f32 stack F32.abs |> Choice.return
-    | Neg -> Stack.apply_f32_f32 stack F32.neg |> Choice.return
-    | Sqrt -> Stack.apply_f32_f32 stack F32.sqrt |> Choice.return
-    | Ceil -> Stack.apply_f32_f32 stack F32.ceil |> Choice.return
-    | Floor -> Stack.apply_f32_f32 stack F32.floor |> Choice.return
-    | Trunc -> Stack.apply_f32_f32 stack F32.trunc |> Choice.return
-    | Nearest -> Stack.apply_f32_f32 stack F32.nearest |> Choice.return
-    | Add -> Stack.apply_f32_f32_f32 stack F32.add |> Choice.return
-    | Sub -> Stack.apply_f32_f32_f32 stack F32.sub |> Choice.return
-    | Mul -> Stack.apply_f32_f32_f32 stack F32.mul |> Choice.return
-    | Div -> Stack.apply_f32_f32_f32 stack F32.div |> Choice.return
-    | Min -> Stack.apply_f32_f32_f32 stack F32.min |> Choice.return
-    | Max -> Stack.apply_f32_f32_f32 stack F32.max |> Choice.return
-    | Copysign -> Stack.apply_f32_f32_f32 stack F32.copy_sign |> Choice.return
-    | Eq -> Stack.apply_f32_f32_boolean stack F32.eq |> Choice.return
-    | Ne -> Stack.apply_f32_f32_boolean stack F32.ne |> Choice.return
-    | Lt -> Stack.apply_f32_f32_boolean stack F32.lt |> Choice.return
-    | Gt -> Stack.apply_f32_f32_boolean stack (Fun.flip F32.lt) |> Choice.return
-    | Le -> Stack.apply_f32_f32_boolean stack F32.le |> Choice.return
-    | Ge -> Stack.apply_f32_f32_boolean stack (Fun.flip F32.le) |> Choice.return
-    | Demote_f64 -> Stack.apply_f64_f32 stack F32.demote_f64 |> Choice.return
+  let exec_f32_instr ~(state : State.t) instr_counter stack :
+    Binary.f32_instr -> State.t Choice.t = function
+    | Const n ->
+      let stack = Stack.push_concrete_f32 stack n in
+      Choice.return { state with stack }
+    | Abs ->
+      let stack = Stack.apply_f32_f32 stack F32.abs in
+      Choice.return { state with stack }
+    | Neg ->
+      let stack = Stack.apply_f32_f32 stack F32.neg in
+      Choice.return { state with stack }
+    | Sqrt ->
+      let stack = Stack.apply_f32_f32 stack F32.sqrt in
+      Choice.return { state with stack }
+    | Ceil ->
+      let stack = Stack.apply_f32_f32 stack F32.ceil in
+      Choice.return { state with stack }
+    | Floor ->
+      let stack = Stack.apply_f32_f32 stack F32.floor in
+      Choice.return { state with stack }
+    | Trunc ->
+      let stack = Stack.apply_f32_f32 stack F32.trunc in
+      Choice.return { state with stack }
+    | Nearest ->
+      let stack = Stack.apply_f32_f32 stack F32.nearest in
+      Choice.return { state with stack }
+    | Add ->
+      let stack = Stack.apply_f32_f32_f32 stack F32.add in
+      Choice.return { state with stack }
+    | Sub ->
+      let stack = Stack.apply_f32_f32_f32 stack F32.sub in
+      Choice.return { state with stack }
+    | Mul ->
+      let stack = Stack.apply_f32_f32_f32 stack F32.mul in
+      Choice.return { state with stack }
+    | Div ->
+      let stack = Stack.apply_f32_f32_f32 stack F32.div in
+      Choice.return { state with stack }
+    | Min ->
+      let stack = Stack.apply_f32_f32_f32 stack F32.min in
+      Choice.return { state with stack }
+    | Max ->
+      let stack = Stack.apply_f32_f32_f32 stack F32.max in
+      Choice.return { state with stack }
+    | Copysign ->
+      let stack = Stack.apply_f32_f32_f32 stack F32.copy_sign in
+      Choice.return { state with stack }
+    | Eq ->
+      let stack = Stack.apply_f32_f32_boolean stack F32.eq in
+      Choice.return { state with stack }
+    | Ne ->
+      let stack = Stack.apply_f32_f32_boolean stack F32.ne in
+      Choice.return { state with stack }
+    | Lt ->
+      let stack = Stack.apply_f32_f32_boolean stack F32.lt in
+      Choice.return { state with stack }
+    | Gt ->
+      let stack = Stack.apply_f32_f32_boolean stack (Fun.flip F32.lt) in
+      Choice.return { state with stack }
+    | Le ->
+      let stack = Stack.apply_f32_f32_boolean stack F32.le in
+      Choice.return { state with stack }
+    | Ge ->
+      let stack = Stack.apply_f32_f32_boolean stack (Fun.flip F32.le) in
+      Choice.return { state with stack }
+    | Demote_f64 ->
+      let stack = Stack.apply_f64_f32 stack F32.demote_f64 in
+      Choice.return { state with stack }
     | Convert_i_s S32 ->
-      Stack.apply_i32_f32 stack F32.convert_i32_s |> Choice.return
+      let stack = Stack.apply_i32_f32 stack F32.convert_i32_s in
+      Choice.return { state with stack }
     | Convert_i_u S32 ->
-      Stack.apply_i32_f32 stack F32.convert_i32_u |> Choice.return
+      let stack = Stack.apply_i32_f32 stack F32.convert_i32_u in
+      Choice.return { state with stack }
     | Convert_i_s S64 ->
-      Stack.apply_i64_f32 stack F32.convert_i64_s |> Choice.return
+      let stack = Stack.apply_i64_f32 stack F32.convert_i64_s in
+      Choice.return { state with stack }
     | Convert_i_u S64 ->
-      Stack.apply_i64_f32 stack F32.convert_i64_u |> Choice.return
+      let stack = Stack.apply_i64_f32 stack F32.convert_i64_u in
+      Choice.return { state with stack }
     | Reinterpret_i S32 ->
-      Stack.apply_i32_f32 stack F32.reinterpret_i32 |> Choice.return
+      let stack = Stack.apply_i32_f32 stack F32.reinterpret_i32 in
+      Choice.return { state with stack }
     | Reinterpret_i S64 ->
-      Stack.apply_i64_f32 stack (Fun.compose F32.reinterpret_i32 I64.to_int32)
-      |> Choice.return
+      let stack =
+        Stack.apply_i64_f32 stack (Fun.compose F32.reinterpret_i32 I64.to_int32)
+      in
+      Choice.return { state with stack }
     | Load (memid, { offset; _ }) ->
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr32 ~state memid ~pos ~offset instr_counter in
       let+ res = Memory.load_32 mem addr in
-      Stack.push_f32 stack (F32.of_bits res)
+      let stack = Stack.push_f32 stack (F32.of_bits res) in
+      { state with stack }
     | Store (memid, { offset; _ }) ->
       let n, stack = Stack.pop_f32 stack in
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr32 ~state memid ~pos ~offset instr_counter in
-      let+ () = Memory.store_32 mem ~addr (F32.to_bits n) in
-      stack
+      let+ mem = Memory.store_32 mem ~addr (F32.to_bits n) in
+      let env = Env.set_memory ~env:state.env memid mem in
+      { state with stack; env }
 
-  let exec_f64_instr ~state instr_counter stack :
-    Binary.f64_instr -> Stack.t Choice.t = function
-    | Const n -> Stack.push_concrete_f64 stack n |> Choice.return
-    | Abs -> Stack.apply_f64_f64 stack F64.abs |> Choice.return
-    | Neg -> Stack.apply_f64_f64 stack F64.neg |> Choice.return
-    | Sqrt -> Stack.apply_f64_f64 stack F64.sqrt |> Choice.return
-    | Ceil -> Stack.apply_f64_f64 stack F64.ceil |> Choice.return
-    | Floor -> Stack.apply_f64_f64 stack F64.floor |> Choice.return
-    | Trunc -> Stack.apply_f64_f64 stack F64.trunc |> Choice.return
-    | Nearest -> Stack.apply_f64_f64 stack F64.nearest |> Choice.return
-    | Add -> Stack.apply_f64_f64_f64 stack F64.add |> Choice.return
-    | Sub -> Stack.apply_f64_f64_f64 stack F64.sub |> Choice.return
-    | Mul -> Stack.apply_f64_f64_f64 stack F64.mul |> Choice.return
-    | Div -> Stack.apply_f64_f64_f64 stack F64.div |> Choice.return
-    | Min -> Stack.apply_f64_f64_f64 stack F64.min |> Choice.return
-    | Max -> Stack.apply_f64_f64_f64 stack F64.max |> Choice.return
-    | Copysign -> Stack.apply_f64_f64_f64 stack F64.copy_sign |> Choice.return
-    | Eq -> Stack.apply_f64_f64_boolean stack F64.eq |> Choice.return
-    | Ne -> Stack.apply_f64_f64_boolean stack F64.ne |> Choice.return
-    | Lt -> Stack.apply_f64_f64_boolean stack F64.lt |> Choice.return
-    | Gt -> Stack.apply_f64_f64_boolean stack (Fun.flip F64.lt) |> Choice.return
-    | Le -> Stack.apply_f64_f64_boolean stack F64.le |> Choice.return
-    | Ge -> Stack.apply_f64_f64_boolean stack (Fun.flip F64.le) |> Choice.return
-    | Promote_f32 -> Stack.apply_f32_f64 stack F64.promote_f32 |> Choice.return
+  let exec_f64_instr ~(state : State.t) instr_counter stack :
+    Binary.f64_instr -> State.t Choice.t = function
+    | Const n ->
+      let stack = Stack.push_concrete_f64 stack n in
+      Choice.return { state with stack }
+    | Abs ->
+      let stack = Stack.apply_f64_f64 stack F64.abs in
+      Choice.return { state with stack }
+    | Neg ->
+      let stack = Stack.apply_f64_f64 stack F64.neg in
+      Choice.return { state with stack }
+    | Sqrt ->
+      let stack = Stack.apply_f64_f64 stack F64.sqrt in
+      Choice.return { state with stack }
+    | Ceil ->
+      let stack = Stack.apply_f64_f64 stack F64.ceil in
+      Choice.return { state with stack }
+    | Floor ->
+      let stack = Stack.apply_f64_f64 stack F64.floor in
+      Choice.return { state with stack }
+    | Trunc ->
+      let stack = Stack.apply_f64_f64 stack F64.trunc in
+      Choice.return { state with stack }
+    | Nearest ->
+      let stack = Stack.apply_f64_f64 stack F64.nearest in
+      Choice.return { state with stack }
+    | Add ->
+      let stack = Stack.apply_f64_f64_f64 stack F64.add in
+      Choice.return { state with stack }
+    | Sub ->
+      let stack = Stack.apply_f64_f64_f64 stack F64.sub in
+      Choice.return { state with stack }
+    | Mul ->
+      let stack = Stack.apply_f64_f64_f64 stack F64.mul in
+      Choice.return { state with stack }
+    | Div ->
+      let stack = Stack.apply_f64_f64_f64 stack F64.div in
+      Choice.return { state with stack }
+    | Min ->
+      let stack = Stack.apply_f64_f64_f64 stack F64.min in
+      Choice.return { state with stack }
+    | Max ->
+      let stack = Stack.apply_f64_f64_f64 stack F64.max in
+      Choice.return { state with stack }
+    | Copysign ->
+      let stack = Stack.apply_f64_f64_f64 stack F64.copy_sign in
+      Choice.return { state with stack }
+    | Eq ->
+      let stack = Stack.apply_f64_f64_boolean stack F64.eq in
+      Choice.return { state with stack }
+    | Ne ->
+      let stack = Stack.apply_f64_f64_boolean stack F64.ne in
+      Choice.return { state with stack }
+    | Lt ->
+      let stack = Stack.apply_f64_f64_boolean stack F64.lt in
+      Choice.return { state with stack }
+    | Gt ->
+      let stack = Stack.apply_f64_f64_boolean stack (Fun.flip F64.lt) in
+      Choice.return { state with stack }
+    | Le ->
+      let stack = Stack.apply_f64_f64_boolean stack F64.le in
+      Choice.return { state with stack }
+    | Ge ->
+      let stack = Stack.apply_f64_f64_boolean stack (Fun.flip F64.le) in
+      Choice.return { state with stack }
+    | Promote_f32 ->
+      let stack = Stack.apply_f32_f64 stack F64.promote_f32 in
+      Choice.return { state with stack }
     | Convert_i_s S32 ->
-      Stack.apply_i32_f64 stack F64.convert_i32_s |> Choice.return
+      let stack = Stack.apply_i32_f64 stack F64.convert_i32_s in
+      Choice.return { state with stack }
     | Convert_i_u S32 ->
-      Stack.apply_i32_f64 stack F64.convert_i32_u |> Choice.return
+      let stack = Stack.apply_i32_f64 stack F64.convert_i32_u in
+      Choice.return { state with stack }
     | Convert_i_s S64 ->
-      Stack.apply_i64_f64 stack F64.convert_i64_s |> Choice.return
+      let stack = Stack.apply_i64_f64 stack F64.convert_i64_s in
+      Choice.return { state with stack }
     | Convert_i_u S64 ->
-      Stack.apply_i64_f64 stack F64.convert_i64_u |> Choice.return
+      let stack = Stack.apply_i64_f64 stack F64.convert_i64_u in
+      Choice.return { state with stack }
     | Reinterpret_i S32 ->
-      Stack.apply_i32_f64 stack (Fun.compose F64.reinterpret_i64 I64.of_int32)
-      |> Choice.return
+      let stack =
+        Stack.apply_i32_f64 stack (Fun.compose F64.reinterpret_i64 I64.of_int32)
+      in
+      Choice.return { state with stack }
     | Reinterpret_i S64 ->
-      Stack.apply_i64_f64 stack F64.reinterpret_i64 |> Choice.return
+      let stack = Stack.apply_i64_f64 stack F64.reinterpret_i64 in
+      Choice.return { state with stack }
     | Load (memid, { offset; _ }) ->
       let pos, stack = Stack.pop_i32 stack in
       (* I32.of_concrete 8l |> I64.extend_i32_u = I64.of_concrete 8L, right?  *)
       let* addr, mem = mk_addr64 ~state memid ~pos ~offset instr_counter in
       let+ res = Memory.load_64 mem addr in
-      Stack.push_f64 stack (F64.of_bits res)
+      let stack = Stack.push_f64 stack (F64.of_bits res) in
+      { state with stack }
     | Store (memid, { offset; _ }) ->
       let n, stack = Stack.pop_f64 stack in
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr64 ~state memid ~pos ~offset instr_counter in
-      let+ () = Memory.store_64 mem ~addr (F64.to_bits n) in
-      stack
+      let+ mem = Memory.store_64 mem ~addr (F64.to_bits n) in
+      let env = Env.set_memory ~env:state.env memid mem in
+      { state with stack; env }
 
-  let exec_v128_instr ~state instr_counter stack (i : Binary.v128_instr) :
-    Stack.t Choice.t =
+  let exec_v128_instr ~(state : State.t) instr_counter stack
+    (i : Binary.v128_instr) : State.t Choice.t =
     match i with
     | Const n ->
       let stack = Stack.push_concrete_v128 stack n in
-      Choice.return stack
-    | Not -> Stack.apply_v128_v128 stack V128.lognot |> Choice.return
-    | And -> Stack.apply_v128_v128_v128 stack V128.logand |> Choice.return
-    | Andnot -> Stack.apply_v128_v128_v128 stack V128.andnot |> Choice.return
-    | Or -> Stack.apply_v128_v128_v128 stack V128.logor |> Choice.return
-    | Xor -> Stack.apply_v128_v128_v128 stack V128.logxor |> Choice.return
-    | Any_true -> Stack.apply_v128_boolean stack V128.any_true |> Choice.return
+      Choice.return { state with stack }
+    | Not ->
+      let stack = Stack.apply_v128_v128 stack V128.lognot in
+      Choice.return { state with stack }
+    | And ->
+      let stack = Stack.apply_v128_v128_v128 stack V128.logand in
+      Choice.return { state with stack }
+    | Andnot ->
+      let stack = Stack.apply_v128_v128_v128 stack V128.andnot in
+      Choice.return { state with stack }
+    | Or ->
+      let stack = Stack.apply_v128_v128_v128 stack V128.logor in
+      Choice.return { state with stack }
+    | Xor ->
+      let stack = Stack.apply_v128_v128_v128 stack V128.logxor in
+      Choice.return { state with stack }
+    | Any_true ->
+      let stack = Stack.apply_v128_boolean stack V128.any_true in
+      Choice.return { state with stack }
     | Bitselect ->
-      Stack.apply_v128_v128_v128_v128 stack V128.bitselect |> Choice.return
+      let stack = Stack.apply_v128_v128_v128_v128 stack V128.bitselect in
+      Choice.return { state with stack }
     | Load32_lane (memid, { offset; _ }, lane) ->
       let vec, stack = Stack.pop_v128 stack in
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr32 ~state memid ~pos ~offset instr_counter in
-      let* x = Memory.load_32 mem addr in
+      let+ x = Memory.load_32 mem addr in
       let vec = V128.replace_lane32 lane x vec in
-      Stack.push_v128 stack vec |> Choice.return
+      let stack = Stack.push_v128 stack vec in
+      { state with stack }
     | Load64_zero (memid, { offset; _ }) ->
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr64 ~state memid ~pos ~offset instr_counter in
-      let* value = Memory.load_64 mem addr in
+      let+ value = Memory.load_64 mem addr in
       let res = V128.of_i64x2 value I64.zero in
-      Stack.push_v128 stack res |> Choice.return
+      let stack = Stack.push_v128 stack res in
+      { state with stack }
     | Load (memid, { offset; _ }) ->
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr128 ~state memid ~pos ~offset instr_counter in
       let+ res = Memory.load_128 mem addr in
-      Stack.push_v128 stack res
+      let stack = Stack.push_v128 stack res in
+      { state with stack }
     | Store (memid, { offset; _ }) ->
       let n, stack = Stack.pop_v128 stack in
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr128 ~state memid ~pos ~offset instr_counter in
-      let+ () = Memory.store_128 mem ~addr n in
-      stack
+      let+ mem = Memory.store_128 mem ~addr n in
+      let env = Env.set_memory ~env:state.env memid mem in
+      { state with stack; env }
     | Load16x4_s (memid, { offset; _ }) ->
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr64 ~state memid ~pos ~offset instr_counter in
       let* a = Memory.load_16_s mem addr in
       let* b = Memory.load_16_s mem I32.(add addr (of_int 2)) in
       let* c = Memory.load_16_s mem I32.(add addr (of_int 4)) in
-      let* d = Memory.load_16_s mem I32.(add addr (of_int 6)) in
+      let+ d = Memory.load_16_s mem I32.(add addr (of_int 6)) in
       let res = V128.of_i32x4 a b c d in
-      Stack.push_v128 stack res |> Choice.return
+      let stack = Stack.push_v128 stack res in
+      { state with stack }
     | Load16x4_u (memid, { offset; _ }) ->
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr64 ~state memid ~pos ~offset instr_counter in
       let* a = Memory.load_16_u mem addr in
       let* b = Memory.load_16_u mem I32.(add addr (of_int 2)) in
       let* c = Memory.load_16_u mem I32.(add addr (of_int 4)) in
-      let* d = Memory.load_16_u mem I32.(add addr (of_int 6)) in
+      let+ d = Memory.load_16_u mem I32.(add addr (of_int 6)) in
       let res = V128.of_i32x4 a b c d in
-      Stack.push_v128 stack res |> Choice.return
+      let stack = Stack.push_v128 stack res in
+      { state with stack }
     | Load8_splat (memid, { offset; _ }) ->
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr8 ~state memid ~pos ~offset instr_counter in
-      let* a = Memory.load_8_s mem addr in
+      let+ a = Memory.load_8_s mem addr in
       let a = I32.(logor a (shl a (of_int 8))) in
       let a = I32.(logor a (shl a (of_int 16))) in
       let res = V128.of_i32x4 a a a a in
-      Stack.push_v128 stack res |> Choice.return
+      let stack = Stack.push_v128 stack res in
+      { state with stack }
     | Load8_lane (memid, { offset; _ }, lane) ->
       let vec, stack = Stack.pop_v128 stack in
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr8 ~state memid ~pos ~offset instr_counter in
-      let* x = Memory.load_8_u mem addr in
+      let+ x = Memory.load_8_u mem addr in
       let vec = V128.replace_lane8 lane x vec in
-      Stack.push_v128 stack vec |> Choice.return
+      let stack = Stack.push_v128 stack vec in
+      { state with stack }
     | Load8x8_s (memid, { offset; _ }) ->
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr64 ~state memid ~pos ~offset instr_counter in
@@ -824,7 +1106,7 @@ struct
       let* a4 = Memory.load_8_s mem I32.(add addr (of_int 4)) in
       let* a5 = Memory.load_8_s mem I32.(add addr (of_int 5)) in
       let* a6 = Memory.load_8_s mem I32.(add addr (of_int 6)) in
-      let* a7 = Memory.load_8_s mem I32.(add addr (of_int 7)) in
+      let+ a7 = Memory.load_8_s mem I32.(add addr (of_int 7)) in
       let pack16 lo hi =
         I32.(
           logor
@@ -835,7 +1117,8 @@ struct
         V128.of_i32x4 (pack16 a0 a1) (pack16 a2 a3) (pack16 a4 a5)
           (pack16 a6 a7)
       in
-      Stack.push_v128 stack res |> Choice.return
+      let stack = Stack.push_v128 stack res in
+      { state with stack }
     | Load8x8_u (memid, { offset; _ }) ->
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr64 ~state memid ~pos ~offset instr_counter in
@@ -846,7 +1129,7 @@ struct
       let* a4 = Memory.load_8_u mem I32.(add addr (of_int 4)) in
       let* a5 = Memory.load_8_u mem I32.(add addr (of_int 5)) in
       let* a6 = Memory.load_8_u mem I32.(add addr (of_int 6)) in
-      let* a7 = Memory.load_8_u mem I32.(add addr (of_int 7)) in
+      let+ a7 = Memory.load_8_u mem I32.(add addr (of_int 7)) in
       let pack16 lo hi =
         I32.(
           logor
@@ -857,95 +1140,109 @@ struct
         V128.of_i32x4 (pack16 a0 a1) (pack16 a2 a3) (pack16 a4 a5)
           (pack16 a6 a7)
       in
-      Stack.push_v128 stack res |> Choice.return
+      let stack = Stack.push_v128 stack res in
+      { state with stack }
     | Load16_splat (memid, { offset; _ }) ->
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr16 ~state memid ~pos ~offset instr_counter in
-      let* a = Memory.load_16_s mem addr in
+      let+ a = Memory.load_16_s mem addr in
       let a = I32.(logor (logand a (of_int 0xFFFF)) (shl a (of_int 16))) in
       let res = V128.of_i32x4 a a a a in
-      Stack.push_v128 stack res |> Choice.return
+      let stack = Stack.push_v128 stack res in
+      { state with stack }
     | Load16_lane (memid, { offset; _ }, lane) ->
       let vec, stack = Stack.pop_v128 stack in
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr16 ~state memid ~pos ~offset instr_counter in
-      let* x = Memory.load_16_s mem addr in
+      let+ x = Memory.load_16_s mem addr in
       let vec = V128.replace_lane16 lane x vec in
-      Stack.push_v128 stack vec |> Choice.return
+      let stack = Stack.push_v128 stack vec in
+      { state with stack }
     | Load32_splat (memid, { offset; _ }) ->
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr32 ~state memid ~pos ~offset instr_counter in
-      let* a = Memory.load_32 mem addr in
+      let+ a = Memory.load_32 mem addr in
       let res = V128.of_i32x4 a a a a in
-      Stack.push_v128 stack res |> Choice.return
+      let stack = Stack.push_v128 stack res in
+      { state with stack }
     | Load32_zero (memid, { offset; _ }) ->
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr32 ~state memid ~pos ~offset instr_counter in
-      let* a = Memory.load_32 mem addr in
+      let+ a = Memory.load_32 mem addr in
       let res = V128.of_i32x4 a I32.zero I32.zero I32.zero in
-      Stack.push_v128 stack res |> Choice.return
+      let stack = Stack.push_v128 stack res in
+      { state with stack }
     | Load64_splat (memid, { offset; _ }) ->
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr64 ~state memid ~pos ~offset instr_counter in
-      let* a = Memory.load_64 mem addr in
+      let+ a = Memory.load_64 mem addr in
       let res = V128.of_i64x2 a a in
-      Stack.push_v128 stack res |> Choice.return
+      let stack = Stack.push_v128 stack res in
+      { state with stack }
     | Load64_lane (memid, { offset; _ }, lane) ->
       let vec, stack = Stack.pop_v128 stack in
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr64 ~state memid ~pos ~offset instr_counter in
-      let* x = Memory.load_64 mem addr in
+      let+ x = Memory.load_64 mem addr in
       let vec = V128.replace_lane64 lane x vec in
-      Stack.push_v128 stack vec |> Choice.return
+      let stack = Stack.push_v128 stack vec in
+      { state with stack }
     | Store8_lane (memid, { offset; _ }, lane) ->
       let vec, stack = Stack.pop_v128 stack in
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr8 ~state memid ~pos ~offset instr_counter in
-      let+ () = Memory.store_8 mem ~addr (V128.extract_lane8 lane vec) in
-      stack
+      let+ mem = Memory.store_8 mem ~addr (V128.extract_lane8 lane vec) in
+      let env = Env.set_memory ~env:state.env memid mem in
+      { state with stack; env }
     | Store64_lane (memid, { offset; _ }, lane) ->
       let vec, stack = Stack.pop_v128 stack in
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr64 ~state memid ~pos ~offset instr_counter in
-      let+ () = Memory.store_64 mem ~addr (V128.extract_lane64 lane vec) in
-      stack
+      let+ mem = Memory.store_64 mem ~addr (V128.extract_lane64 lane vec) in
+      let env = Env.set_memory ~env:state.env memid mem in
+      { state with stack; env }
     | Store32_zero (memid, { offset; _ }) ->
       let vec, stack = Stack.pop_v128 stack in
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr32 ~state memid ~pos ~offset instr_counter in
       let a, _, _, _ = V128.to_i32x4 vec in
-      let+ () = Memory.store_32 mem ~addr a in
-      stack
+      let+ mem = Memory.store_32 mem ~addr a in
+      let env = Env.set_memory ~env:state.env memid mem in
+      { state with stack; env }
     | Store32_lane (memid, { offset; _ }, lane) ->
       let vec, stack = Stack.pop_v128 stack in
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr32 ~state memid ~pos ~offset instr_counter in
-      let+ () = Memory.store_32 mem ~addr (V128.extract_lane32 lane vec) in
-      stack
+      let+ mem = Memory.store_32 mem ~addr (V128.extract_lane32 lane vec) in
+      let env = Env.set_memory ~env:state.env memid mem in
+      { state with stack; env }
     | Store16_lane (memid, { offset; _ }, lane) ->
       let vec, stack = Stack.pop_v128 stack in
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr16 ~state memid ~pos ~offset instr_counter in
-      let+ () = Memory.store_16 mem ~addr (V128.extract_lane16 lane vec) in
-      stack
+      let+ mem = Memory.store_16 mem ~addr (V128.extract_lane16 lane vec) in
+      let env = Env.set_memory ~env:state.env memid mem in
+      { state with stack; env }
     | Load32x2_s (memid, { offset; _ }) ->
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr64 ~state memid ~pos ~offset instr_counter in
       let* a = Memory.load_32 mem addr in
-      let* b = Memory.load_32 mem I32.(add addr (of_int 4)) in
+      let+ b = Memory.load_32 mem I32.(add addr (of_int 4)) in
       let res = V128.of_i64x2 (I64.of_int32 a) (I64.of_int32 b) in
-      Stack.push_v128 stack res |> Choice.return
+      let stack = Stack.push_v128 stack res in
+      { state with stack }
     | Load32x2_u (memid, { offset; _ }) ->
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr64 ~state memid ~pos ~offset instr_counter in
       let* a = Memory.load_32 mem addr in
-      let* b = Memory.load_32 mem I32.(add addr (of_int 4)) in
+      let+ b = Memory.load_32 mem I32.(add addr (of_int 4)) in
       let res =
         V128.of_i64x2
           (I64.logand (I64.of_int32 a) (I64.of_int 0xffff_ffff))
           (I64.logand (I64.of_int32 b) (I64.of_int 0xffff_ffff))
       in
-      Stack.push_v128 stack res |> Choice.return
+      let stack = Stack.push_v128 stack res in
+      { state with stack }
 
   let exec_i8x16_instr stack = function
     | (Add : Text.i8x16_instr) ->
@@ -1312,7 +1609,7 @@ struct
       Stack.apply_f64_v128_v128 stack (V128.F64x2.replace_lane lane)
       |> Choice.return
 
-  let exec_ref_instr modul env stack (i : Binary.ref_instr) =
+  let exec_ref_instr stack (i : Binary.ref_instr) =
     match i with
     | Null t -> Stack.push_ref stack (Ref.null t) |> Choice.return
     | Is_null ->
@@ -1327,69 +1624,70 @@ struct
              "ref.as_non_null expected a non-null reference but got null" )
       else Stack.push_ref stack r |> Choice.return
     (* TODO: restrict to non_null refs *)
-    | Func i ->
-      let f = Env.get_func ~modul env i in
-      Stack.push_ref stack (Ref.func f) |> Choice.return
+    | Func i -> Stack.push_ref stack (Ref.func i) |> Choice.return
     | Eq | Test _ | Cast _ -> (* TODO *) assert false
 
-  let exec_local_instr state locals stack : Binary.local_instr -> _ = function
+  let exec_local_instr (state : State.t) locals stack :
+    Binary.local_instr -> State.t = function
     | Get i ->
       let stack = Stack.push stack (State.Locals.get locals i) in
-      State.Continue { state with stack } |> Choice.return
+      { state with stack }
     | Set i ->
       let v, stack = Stack.pop stack in
       let locals = State.Locals.set locals i v in
-      State.Continue { state with locals; stack } |> Choice.return
+      { state with locals; stack }
     | Tee i ->
       let v, stack = Stack.pop stack in
       let locals = State.Locals.set locals i v in
       let stack = Stack.push stack v in
-      State.Continue { state with locals; stack } |> Choice.return
+      { state with locals; stack }
 
-  let exec_global_instr env modul stack : Binary.global_instr -> _ = function
+  let exec_global_instr ({ stack; env; _ } as state : State.t) :
+    Binary.global_instr -> State.t = function
     | Get i ->
-      let+ g = Env.get_global ~modul env i in
-      Stack.push stack (Global.value g)
+      let g = Env.get_global ~env i in
+      let stack = Stack.push stack g in
+      { state with stack }
     | Set i ->
-      let* global = Env.get_global ~modul env i in
       let v, stack = Stack.pop stack in
-      let+ () = Global.set_value global v in
-      stack
+      let env = Env.set_global ~env i v in
+      { state with env; stack }
 
-  let exec_table_instr modul env instr_counter stack : Binary.table_instr -> _ =
-    function
+  let exec_table_instr ({ stack; env; _ } as state : State.t) instr_counter :
+    Binary.table_instr -> State.t Choice.t = function
     | Get tbl_i ->
       (* TODO: this should be rewritten without `select_i32` ! but it requires to change the type of `Table.get` *)
       let i, stack = Stack.pop_i32 stack in
       let* i = Choice.select_i32 i in
       let i = Int32.to_int i in
-      let* t = Env.get_table ~modul env tbl_i in
+      let t = Env.get_table ~env tbl_i in
       let size = Table.size t in
       if i < 0 || i >= size then Choice.trap `Out_of_bounds_table_access
       else
-        let* t = Env.get_table ~modul env tbl_i in
         let v = Table.get t i in
-        Stack.push stack (Ref v) |> Choice.return
+        let stack = Stack.push stack (Ref v) in
+        Choice.return { state with stack }
     | Set tbl_indice ->
       let v, stack = Stack.pop_as_ref stack in
       let indice, stack = Stack.pop_i32 stack in
       (* TODO: avoid the select_i32, it requires to change the type of `Table.set` *)
       let* indice = Choice.select_i32 indice in
       let indice = Int32.to_int indice in
-      let* t = Env.get_table ~modul env tbl_indice in
+      let t = Env.get_table ~env tbl_indice in
       if indice < 0 || indice >= Table.size t then
         Choice.trap `Out_of_bounds_table_access
       else begin
-        let* t = Env.get_table ~modul env tbl_indice in
-        let+ () = Table.set t indice v in
-        stack
+        let t = Table.set t indice v in
+        let env = Env.set_table ~env tbl_indice t in
+        Choice.return { state with stack; env }
       end
     | Size indice ->
-      let+ t = Env.get_table ~modul env indice in
+      let t = Env.get_table ~env indice in
       let size = Table.size t in
-      Stack.push_i32_of_int stack size
+      let stack = Stack.push_i32_of_int stack size in
+      Choice.return { state with stack }
     | Grow indice ->
-      let* t = Env.get_table ~modul env indice in
+      let t = Env.get_table ~env indice in
       let size = I32.of_int @@ Table.size t in
       let delta, stack = Stack.pop_i32 stack in
       let new_size = I32.(size + delta) in
@@ -1402,15 +1700,17 @@ struct
       in
       if not allowed then
         let stack = Stack.drop stack in
-        Stack.push_i32_of_int stack (-1) |> Choice.return
+        let stack = Stack.push_i32_of_int stack (-1) in
+        Choice.return { state with stack }
       else
         let new_element, stack = Stack.pop_as_ref stack in
-        let* new_size = Choice.select_i32 new_size in
-        let* t = Env.get_table ~modul env indice in
-        let+ () = Table.grow t new_size new_element in
-        Stack.push_i32 stack size
+        let+ new_size = Choice.select_i32 new_size in
+        let t = Table.grow t new_size new_element in
+        let env = Env.set_table ~env indice t in
+        let stack = Stack.push_i32 stack size in
+        { state with stack; env }
     | Fill indice ->
-      let* t = Env.get_table ~modul env indice in
+      let t = Env.get_table ~env indice in
       let len, stack = Stack.pop_i32 stack in
       let x, stack = Stack.pop_as_ref stack in
       let pos, stack = Stack.pop_i32 stack in
@@ -1424,13 +1724,13 @@ struct
         , false )
       in
       let* pos = Choice.select_i32 pos in
-      let* len = Choice.select_i32 len in
-      let* t = Env.get_table ~modul env indice in
-      let+ () = Table.fill t pos len x in
-      stack
+      let+ len = Choice.select_i32 len in
+      let t = Table.fill t pos len x in
+      let env = Env.set_table ~env indice t in
+      { state with stack; env }
     | Copy (ti_dst, ti_src) ->
-      let* t_src = Env.get_table ~modul env ti_src in
-      let* t_dst = Env.get_table ~modul env ti_dst in
+      let t_src = Env.get_table ~env ti_src in
+      let t_dst = Env.get_table ~env ti_dst in
       let len, stack = Stack.pop_i32 stack in
       let src, stack = Stack.pop_i32 stack in
       let dst, stack = Stack.pop_i32 stack in
@@ -1447,22 +1747,19 @@ struct
         , Some instr_counter
         , false )
       in
-      let+ () =
-        let> len_eqz = I32.eqz len in
-        if len_eqz then return ()
-        else begin
-          let* src = Choice.select_i32 src in
-          let* dst = Choice.select_i32 dst in
-          let* len = Choice.select_i32 len in
-          let* t_src = Env.get_table ~modul env ti_src in
-          let* t_dst = Env.get_table ~modul env ti_dst in
-          Table.copy ~t_src ~t_dst ~src ~dst ~len
-        end
-      in
-      stack
+      let> len_eqz = I32.eqz len in
+      if len_eqz then Choice.return { state with stack }
+      else begin
+        let* src = Choice.select_i32 src in
+        let* dst = Choice.select_i32 dst in
+        let+ len = Choice.select_i32 len in
+        let t_dst = Table.copy ~t_src ~t_dst ~src ~dst ~len in
+        let env = Env.set_table ~env ti_dst t_dst in
+        { state with stack; env }
+      end
     | Init (t_i, e_i) ->
-      let* t = Env.get_table ~modul env t_i in
-      let elem = Env.get_elem ~modul env e_i in
+      let t = Env.get_table ~env t_i in
+      let elem = Env.get_elem ~env e_i in
       let len, stack = Stack.pop_i32 stack in
       let pos_x, stack = Stack.pop_i32 stack in
       let pos, stack = Stack.pop_i32 stack in
@@ -1481,35 +1778,41 @@ struct
       in
       let* len = Choice.select_i32 len in
       let* pos_x = Choice.select_i32 pos_x in
-      let* pos = Choice.select_i32 pos in
+      let+ pos = Choice.select_i32 pos in
       let len = Int32.to_int len in
       let pos_x = Int32.to_int pos_x in
       let pos = Int32.to_int pos in
-      let rec loop i () =
-        if i = len then return ()
+      let rec loop i t =
+        if i = len then t
         else
           let elt = Elem.get elem (pos_x + i) in
-          let* t = Env.get_table ~modul env t_i in
-          let* () = Table.set t (pos + i) elt in
-          loop (i + 1) ()
+          let t = Table.set t (pos + i) elt in
+          loop (i + 1) t
       in
-      let+ () = loop 0 () in
-      stack
+      let t = loop 0 t in
+      let env = Env.set_table ~env t_i t in
+      { state with stack; env }
 
-  let exec_elem_instr modul env : Binary.elem_instr -> _ = function
+  let exec_elem_instr ({ env; _ } as state : State.t) : Binary.elem_instr -> _ =
+    function
     | Drop i ->
-      let elem = Env.get_elem ~modul env i in
-      Elem.drop elem
+      let elem = Env.get_elem ~env i in
+      let elem = Elem.drop elem in
+      let env = Env.set_elem ~env i elem in
+      { state with env }
 
-  let exec_memory_instr ~state instr_counter stack : Binary.memory_instr -> _ =
-    let { State.env; modul; _ } = state in
+  let exec_memory_instr ~(state : State.t) instr_counter stack :
+    Binary.memory_instr -> State.t Choice.t =
+    let { State.env; _ } = state in
     function
     | Size memid ->
-      let* mem = Env.get_memory ~modul env memid in
+      let mem = Env.get_memory ~env memid in
       let len = Memory.size_in_pages mem in
-      Stack.push_i32 stack len |> Choice.return
+      let stack = Stack.push_i32 stack len in
+      let env = Env.set_memory ~env memid mem in
+      Choice.return { state with stack; env }
     | Grow memid ->
-      let* mem = Env.get_memory ~modul env memid in
+      let mem = Env.get_memory ~env memid in
       let old_size = I64.of_int32 @@ Memory.size mem in
       let max_size = Memory.get_limit_max mem in
       let delta, stack = Stack.pop_i32 stack in
@@ -1522,18 +1825,21 @@ struct
         | Some max -> I64.(lt_u (of_int max * page_size) new_size)
         | None -> Boolean.false_
       in
-      if too_big then Stack.push_i32 stack (I32.of_int ~-1) |> Choice.return
+      if too_big then
+        let stack = Stack.push_i32 stack (I32.of_int ~-1) in
+        Choice.return { state with stack }
       else begin
-        let* mem = Env.get_memory ~modul env memid in
-        let* () = Memory.grow mem I64.(to_int32 delta) in
+        let mem = Memory.grow mem I64.(to_int32 delta) in
         let res = I64.(to_int32 @@ (old_size / page_size)) in
-        Stack.push_i32 stack res |> Choice.return
+        let stack = Stack.push_i32 stack res in
+        let env = Env.set_memory ~env memid mem in
+        Choice.return { state with env; stack }
       end
     | Fill memid ->
       let len, stack = Stack.pop_i32 stack in
       let c, stack = Stack.pop_i32 stack in
       let pos, stack = Stack.pop_i32 stack in
-      let* mem = Env.get_memory ~modul env memid in
+      let mem = Env.get_memory ~env memid in
       let>! () =
         let size = I64.extend_i32_u (Memory.size mem) in
         let len = I64.extend_i32_u len in
@@ -1550,15 +1856,15 @@ struct
         let c = Int.abs c mod 256 in
         Char.chr c
       in
-      let* mem = Env.get_memory ~modul env memid in
-      let+ () = Memory.fill mem ~pos ~len c in
-      stack
+      let+ mem = Memory.fill mem ~pos ~len c in
+      let env = Env.set_memory ~env:state.env memid mem in
+      { state with stack; env }
     | Copy (dstmemid, srcmemid) ->
       let len, stack = Stack.pop_i32 stack in
       let src_idx, stack = Stack.pop_i32 stack in
       let dst_idx, stack = Stack.pop_i32 stack in
-      let* srcmem = Env.get_memory ~modul env srcmemid in
-      let* dstmem = Env.get_memory ~modul env dstmemid in
+      let srcmem = Env.get_memory ~env srcmemid in
+      let dstmem = Env.get_memory ~env dstmemid in
       let>! () =
         let size1 = I64.extend_i32_u (Memory.size srcmem) in
         let size2 = I64.extend_i32_u (Memory.size dstmem) in
@@ -1572,19 +1878,23 @@ struct
         , Some instr_counter
         , false )
       in
-      let* srcmem = Env.get_memory ~modul env srcmemid in
-      let* dstmem = Env.get_memory ~modul env dstmemid in
-      let+ () = Memory.blit ~src:srcmem ~src_idx ~dst:dstmem ~dst_idx ~len in
-      stack
+      let+ mem = Memory.blit ~src:srcmem ~src_idx ~dst:dstmem ~dst_idx ~len in
+      let env = Env.set_memory ~env:state.env dstmemid mem in
+      { state with stack; env }
     | Init (memid, dataid) ->
       let len, stack = Stack.pop_i32 stack in
       let src, stack = Stack.pop_i32 stack in
       let dst, stack = Stack.pop_i32 stack in
-      let data = Env.get_data ~modul env dataid in
-      let* mem = Env.get_memory ~modul env memid in
+      let data = Env.get_data ~env dataid |> Data.to_string in
+      let datasize =
+        (* TODO: we can probably remove Data.size now that String.length is used ! *)
+        match data with
+        | None -> I64.zero
+        | Some data -> String.length data |> I64.of_int
+      in
+      let mem = Env.get_memory ~env memid in
       let>! () =
         let memsize = I64.extend_i32_u (Memory.size mem) in
-        let datasize = I64.of_int (Data.size data) in
         let len = I64.extend_i32_u len in
         let src = I64.extend_i32_u src in
         let dst = I64.extend_i32_u dst in
@@ -1595,15 +1905,17 @@ struct
         , Some instr_counter
         , false )
       in
-      let data = Data.value data in
-      let* mem = Env.get_memory ~modul env memid in
-      let+ () = Memory.blit_string mem data ~src ~dst ~len in
-      stack
+      let+ mem =
+        Memory.blit_string mem (Option.value data ~default:"") ~src ~dst ~len
+      in
+      let env = Env.set_memory ~env:state.env memid mem in
+      { state with stack; env }
 
-  let exec_data_instr modul env : Binary.data_instr -> _ = function
+  let exec_data_instr env : Binary.data_instr -> Env.t = function
     | Drop i ->
-      let data = Env.get_data ~modul env i in
-      Data.drop data
+      let data = Env.get_data ~env i in
+      let data = Data.drop data in
+      Env.set_data ~env i data
 
   let init_local (_id, t) : Value.t =
     match t with
@@ -1614,70 +1926,63 @@ struct
     | Num_type V128 -> V128 V128.zero
     | Ref_type (_null, rt) -> Ref (Ref.null rt)
 
-  type extern_func = Extern_func.t
+  let rec split_args : type f r.
+    Stack.t -> (f, r) Extern_func.atype -> Stack.t * Stack.t =
+   fun stack ty ->
+    let[@local] split_one_arg args =
+      let elt, stack = Stack.pop stack in
+      let elts, stack = split_args stack args in
+      (elt :: elts, stack)
+    in
+    match ty with
+    | Mem (_, args) -> split_args stack args
+    | Arg (_, args) -> split_one_arg args
+    | UArg args -> split_args stack args
+    | Res -> ([], stack)
 
-  let exec_extern_func ~state (f : extern_func) =
-    let pop_arg (type ty) stack (arg : ty Extern_func.telt) :
-      (ty * Stack.t) Choice.t =
-      match arg with
-      | I32 -> Choice.return @@ Stack.pop_i32 stack
-      | I64 -> Choice.return @@ Stack.pop_i64 stack
-      | F32 -> Choice.return @@ Stack.pop_f32 stack
-      | F64 -> Choice.return @@ Stack.pop_f64 stack
-      | V128 -> Choice.return @@ Stack.pop_v128 stack
-      | Externref ety -> (
-        let v, stack = Stack.pop_as_ref stack in
-        match Ref.get_extern v ety with
-        | Ref_value v -> Choice.return @@ (v, stack)
-        | Type_mismatch -> Choice.trap `Extern_call_arg_type_mismatch
-        | Null -> Choice.trap `Extern_call_null_arg )
-    in
-    let rec split_args : type f r.
-      Stack.t -> (f, r) Extern_func.atype -> Stack.t * Stack.t =
-     fun stack ty ->
-      let[@local] split_one_arg args =
-        let elt, stack = Stack.pop stack in
-        let elts, stack = split_args stack args in
-        (elt :: elts, stack)
-      in
-      match ty with
-      | Mem (_, args) -> split_args stack args
-      | Arg (_, args) -> split_one_arg args
-      | UArg args -> split_args stack args
-      | NArg (_, _, args) -> split_one_arg args
-      | Res -> ([], stack)
-    in
-    let rec apply : type f r.
-      Stack.t -> (f, r) Extern_func.atype -> f -> r Choice.t =
-     fun stack ty f ->
-      match ty with
-      | Mem (memid, args) ->
-        let { State.modul; env; _ } = state in
-        let* mem = Env.get_memory ~modul env memid in
-        apply stack args (f mem)
-      | Arg (arg, args) ->
-        let* v, stack = pop_arg stack arg in
-        apply stack args (f v)
-      | UArg args -> apply stack args (f ())
-      | NArg (_, arg, args) ->
-        let* v, stack = pop_arg stack arg in
-        apply stack args (f v)
-      | Res -> Choice.return f
-    in
+  let pop_arg (type ty) stack (arg : ty Extern_func.telt) :
+    (ty * Stack.t) Choice.t =
+    match arg with
+    | I32 -> Choice.return @@ Stack.pop_i32 stack
+    | I64 -> Choice.return @@ Stack.pop_i64 stack
+    | F32 -> Choice.return @@ Stack.pop_f32 stack
+    | F64 -> Choice.return @@ Stack.pop_f64 stack
+    | V128 -> Choice.return @@ Stack.pop_v128 stack
+    | Externref ety -> (
+      let v, stack = Stack.pop_as_ref stack in
+      match Ref.get_extern v ety with
+      | Ref_value v -> Choice.return @@ (v, stack)
+      | Type_mismatch -> Choice.trap `Extern_call_arg_type_mismatch
+      | Null -> Choice.trap `Extern_call_null_arg )
+
+  let rec apply : type f r.
+    Env.t -> Stack.t -> (f, r) Extern_func.atype -> f -> r Choice.t =
+   fun env stack ty f ->
+    match ty with
+    | Mem (memid, args) ->
+      let mem = Env.get_memory ~env memid in
+      apply env stack args (f mem)
+    | Arg (arg, args) ->
+      let* v, stack = pop_arg stack arg in
+      apply env stack args (f v)
+    | UArg args -> apply env stack args (f ())
+    | Res -> Choice.return f
+
+  let push_val (type ty) (arg : ty Extern_func.telt) (v : ty) stack =
+    match arg with
+    | I32 -> Stack.push_i32 stack v
+    | I64 -> Stack.push_i64 stack v
+    | F32 -> Stack.push_f32 stack v
+    | F64 -> Stack.push_f64 stack v
+    | V128 -> Stack.push_v128 stack v
+    | Externref ty ->
+      let r = Ref.extern ty v in
+      Stack.push_ref stack r
+
+  let exec_extern_func ~(state : State.t) (f : Extern_func.t) =
     let (Extern_func.Extern_func (Func (atype, rtype), func)) = f in
     let args, stack = split_args state.stack atype in
-    let* r = apply (List.rev args) atype func in
-    let push_val (type ty) (arg : ty Extern_func.telt) (v : ty) stack =
-      match arg with
-      | I32 -> Stack.push_i32 stack v
-      | I64 -> Stack.push_i64 stack v
-      | F32 -> Stack.push_f32 stack v
-      | F64 -> Stack.push_f64 stack v
-      | V128 -> Stack.push_v128 stack v
-      | Externref ty ->
-        let r = Ref.extern ty v in
-        Stack.push_ref stack r
-    in
+    let* r = apply state.env (List.rev args) atype func in
     let+ r in
     match (rtype, r) with
     | R0, () -> stack
@@ -1741,7 +2046,7 @@ struct
     let pt, rt =
       match bt with
       | None -> ([], [])
-      | Some (Bt_raw ((None | Some _), (pt, rt))) -> (List.map snd pt, rt)
+      | Some ((None | Some _), (pt, rt)) -> (List.map snd pt, rt)
     in
     let block : State.block =
       let branch_rt, branch = if is_loop then (pt, expr) else (rt, state.pc) in
@@ -1757,10 +2062,10 @@ struct
       (State.Continue
          { state with pc = expr; block_stack = block :: state.block_stack } )
 
-  let exec_func ~return (state : State.t) modul (func : Func.t) =
+  let exec_func ~return (state : State.t) (func : Func.t) =
     Log.info (fun m ->
       m "calling func  : func %s" (Option.value func.id ~default:"anonymous") );
-    let (Bt_raw ((None | Some _), (param_type, result_type))) = func.type_f in
+    let (None | Some _), (param_type, result_type) = func.type_f in
     let args, stack = Stack.pop_n state.stack (List.length param_type) in
     let return_state =
       if return then state.return_state else Some { state with stack }
@@ -1775,32 +2080,24 @@ struct
       ; block_stack = []
       ; func_rt = result_type
       ; return_state
-      ; modul
       ; env = state.env
       }
 
   (* TODO: remove env and use state.env ... do the same in the whole file *)
-  let exec_vfunc ~return (state : State.t) (func : Kind.func) =
+  let exec_vfunc ~return (state : State.t) (func : Extern_func.t Kind.func) =
     match func with
-    | Wasm { func; modul } ->
-      Choice.return (State.Continue (exec_func ~return state modul func))
-    | Extern { idx } ->
-      let+ stack =
-        let modul = state.modul in
-        let f = Env.get_extern_func ~modul state.env idx in
-        exec_extern_func ~state f
-      in
+    | Wasm func -> Choice.return (State.Continue (exec_func ~return state func))
+    | Extern func ->
+      let+ stack = exec_extern_func ~state func in
       let state = { state with stack } in
       if return then State.return state else State.Continue state
 
-  let func_type (state : State.t) (f : Kind.func) =
+  let func_type (f : Extern_func.t Kind.func) =
     match f with
-    | Wasm { func; _ } ->
-      let (Bt_raw ((None | Some _), t)) = func.type_f in
+    | Wasm func ->
+      let (None | Some _), t = func.type_f in
       t
-    | Extern { idx } ->
-      let f = Env.get_extern_func ~modul:state.modul state.env idx in
-      Extern_func.to_func_type f
+    | Extern func -> Extern_func.to_func_type func
 
   let call_ref ~return:_ (_state : State.t) _typ_i =
     (* TODO *)
@@ -1821,10 +2118,10 @@ struct
   (* exec_vfunc ~return state func *)
 
   let call_indirect ~env ~return (state : State.t)
-    (tbl_i, (Bt_raw ((None | Some _), typ_i) : block_type)) =
+    (tbl_i, (((None | Some _), typ_i) : block_type)) =
     let fun_i, stack = Stack.pop_i32 state.stack in
     let state = { state with stack } in
-    let* t = Env.get_table ~modul:state.modul env tbl_i in
+    let t = Env.get_table ~env tbl_i in
     let _null, ref_kind = Table.typ t in
     match ref_kind with
     | Func_ht ->
@@ -1836,14 +2133,14 @@ struct
         , false )
       in
       let* fun_i = Choice.select_i32 fun_i in
-      let* t = Env.get_table ~modul:state.modul env tbl_i in
       let fun_i = Int32.to_int fun_i in
       let f_ref = Table.get t fun_i in
       begin match Ref.get_func f_ref with
       | Null -> Choice.trap (`Uninitialized_element fun_i)
       | Type_mismatch -> Choice.trap `Element_type_error
       | Ref_value func ->
-        let ft = func_type state func in
+        let func = Env.get_func ~env:state.env func in
+        let ft = func_type func in
         let ft' = typ_i in
         if not (Binary.func_type_eq ft ft') then
           Choice.trap `Indirect_call_type_mismatch
@@ -1875,27 +2172,15 @@ struct
     | Ref.Extern (Some _) -> ( match ht with Extern_ht -> true | _ -> false )
     | Func None | Extern None | NullExn | NullRef -> false
 
-  let exec_simple_instruction
-    ({ stack; modul; locals; env; _ } as state : State.t) instr_counter ~uuid :
-    Binary.simple_instruction -> _ =
-    let ret stack = Choice.return (State.Continue { state with stack }) in
+  let exec_simple_instruction ({ stack; locals; env; _ } as state : State.t)
+    instr_counter ~uuid : Binary.simple_instruction -> State.t Choice.t =
+    let ret stack = Choice.return { state with stack } in
     function
-    | I32 i ->
-      (* TODO: pass ret or state directly to avoid the cost of the monad here and do the same for all cases of the match *)
-      let* stack = exec_i32_instr ~state instr_counter stack i ~uuid in
-      ret stack
-    | I64 i ->
-      let* stack = exec_i64_instr ~state instr_counter stack i ~uuid in
-      ret stack
-    | F32 i ->
-      let* stack = exec_f32_instr ~state instr_counter stack i in
-      ret stack
-    | F64 i ->
-      let* stack = exec_f64_instr ~state instr_counter stack i in
-      ret stack
-    | V128 i ->
-      let* stack = exec_v128_instr ~state instr_counter stack i in
-      ret stack
+    | I32 i -> exec_i32_instr ~state instr_counter stack i ~uuid
+    | I64 i -> exec_i64_instr ~state instr_counter stack i ~uuid
+    | F32 i -> exec_f32_instr ~state instr_counter stack i
+    | F64 i -> exec_f64_instr ~state instr_counter stack i
+    | V128 i -> exec_v128_instr ~state instr_counter stack i
     | I8x16 i ->
       let* stack = exec_i8x16_instr stack i in
       ret stack
@@ -1915,25 +2200,25 @@ struct
       let* stack = exec_f64x2_instr stack i in
       ret stack
     | Ref i ->
-      let* stack = exec_ref_instr modul env stack i in
+      let* stack = exec_ref_instr stack i in
       ret stack
-    | Local i -> exec_local_instr state locals stack i
+    | Local i ->
+      let state = exec_local_instr state locals stack i in
+      Choice.return state
     | Global i ->
-      let* stack = exec_global_instr env modul stack i in
-      ret stack
+      let state = exec_global_instr state i in
+      Choice.return state
     | Table i ->
-      let* stack = exec_table_instr modul env instr_counter stack i in
-      ret stack
+      let* state = exec_table_instr state instr_counter i in
+      Choice.return state
     | Elem i ->
-      exec_elem_instr modul env i;
-      ret stack
-    | Memory i ->
-      let* stack = exec_memory_instr ~state instr_counter stack i in
-      ret stack
+      let state = exec_elem_instr state i in
+      Choice.return state
+    | Memory i -> exec_memory_instr ~state instr_counter stack i
     | Data i ->
-      let () = exec_data_instr modul env i in
-      ret stack
-    | Nop -> Choice.return (State.Continue state)
+      let env = exec_data_instr env i in
+      Choice.return { state with env }
+    | Nop -> Choice.return state
     | Unreachable -> Choice.trap `Unreachable
     | Drop -> ret @@ Stack.drop stack
     | Select _t ->
@@ -1976,8 +2261,7 @@ struct
       (* TODO *) assert false
 
   let exec_instr ({ raw; uuid; instr_counter; _ } : _ Annotated.t)
-    ({ stack; modul; env; _ } as state : State.t) : State.instr_result Choice.t
-      =
+    ({ stack; env; _ } as state : State.t) : State.instr_result Choice.t =
     let instr_counter = Atomic.fetch_and_add instr_counter 1 in
     Log.info (fun m -> m "stack         : [ %a ]" Stack.pp stack);
     Log.info (fun m ->
@@ -1994,7 +2278,9 @@ struct
       | None | Some _ -> return ()
     in
     match raw with
-    | Simple i -> exec_simple_instruction state instr_counter ~uuid i
+    | Simple i ->
+      let* state = exec_simple_instruction state instr_counter ~uuid i in
+      Choice.return (State.Continue state)
     | Return -> Choice.return (State.return state)
     | If_else (_id, bt, e1, e2) ->
       let* b, stack =
@@ -2011,11 +2297,11 @@ struct
       let state = { state with stack } in
       exec_block state ~is_loop:false bt (if b then e1 else e2)
     | Call i -> begin
-      let func = Env.get_func ~modul env i in
+      let func = Env.get_func ~env i in
       exec_vfunc ~return:false state func
       end
     | Return_call i -> begin
-      let func = Env.get_func ~modul env i in
+      let func = Env.get_func ~env i in
       exec_vfunc ~return:true state func
       end
     | Br i -> State.branch state i
@@ -2132,7 +2418,7 @@ struct
     | Call_ref typ_i -> call_ref ~return:false state typ_i
     | Return_call_ref typ_i -> call_ref ~return:true state typ_i
 
-  let rec loop ~heartbeat (state : State.t) =
+  let rec loop ~heartbeat (state : State.t) : (Env.t * Value.t list) Choice.t =
     let* () =
       match heartbeat with None -> Choice.return () | Some f -> f ()
     in
@@ -2142,20 +2428,20 @@ struct
       let* state = exec_instr instr { state with pc } in
       match state with
       | State.Continue state -> loop ~heartbeat state
-      | State.Return res -> Choice.return res
+      | State.Return (state, res) -> Choice.return (state.env, res)
       end
     | [] -> (
       let* next_state = State.end_block state in
       match next_state with
       | State.Continue state -> loop ~heartbeat state
-      | State.Return res -> Choice.return res )
+      | State.Return (state, res) -> Choice.return (state.env, res) )
 
-  let exec_expr ~heartbeat env modul locals stack expr bt =
+  let exec_expr ~heartbeat env locals stack expr bt :
+    (Env.t * Value.t list) Choice.t =
     let state : State.t =
       let func_rt = match bt with None -> [] | Some rt -> rt in
       { stack
       ; locals
-      ; modul
       ; env
       ; func_rt
       ; block_stack = []
@@ -2182,11 +2468,11 @@ struct
         (fun () ->
           let fuel_left = Atomic.fetch_and_add fuel (-1) in
           (* If we only use [timeout_instr], we want to stop all as
-                              soon as [fuel_left <= 0]. But if we only use [timeout],
-                              we don't want to run into the slow path below on each
-                              instruction after [fuel_left] becomes negative. We avoid
-                              this repeated slow path by bumping [fuel] to [max_int]
-                              again in this case. *)
+                                  soon as [fuel_left <= 0]. But if we only use [timeout],
+                                  we don't want to run into the slow path below on each
+                                  instruction after [fuel_left] becomes negative. We avoid
+                                  this repeated slow path by bumping [fuel] to [max_int]
+                                  again in this case. *)
           if fuel_left mod 1024 = 0 || fuel_left < 0 then begin
             let stop =
               match (Parameters.timeout, Parameters.timeout_instr) with
@@ -2202,39 +2488,38 @@ struct
           end
           else Choice.return () )
 
-  let modul (env : Env.t) ~(modul : int) : unit Choice.t =
-    let init_code = Env.get_init_code ~modul env in
+  let modul ~(env : Env.t) ~(modul : Env.modul) : Env.t Choice.t =
+    let init_code = Env.get_initialization_code ~modul ~env in
     let heartbeat = make_heartbeat () in
     Log.info (fun m -> m "interpreting ...");
     try
       begin
-        let+ _end_stack =
-          exec_expr ~heartbeat env modul (State.Locals.of_list []) Stack.empty
-            init_code None
+        let+ env, _end_stack =
+          exec_expr ~heartbeat env (State.Locals.of_list []) Stack.empty
+            (Annotated.dummy init_code)
+            None
         in
-        ()
+        env
       end
     with Stack_overflow -> Choice.trap `Call_stack_exhausted
 
-  let exec_vfunc_from_outside ~locals ~(modul : int) ~env (func : Kind.func) :
-    _ list Choice.t =
-    let state = State.empty ~locals ~modul ~env in
+  let exec_vfunc_from_outside ~env ~locals (func : Extern_func.t Kind.func) :
+    (Env.t * Value.t list) Choice.t =
+    let state = State.empty ~locals ~env in
     try
       begin
         let* state =
           match func with
-          | Kind.Wasm { func; modul } ->
+          | Kind.Wasm func ->
             let state = State.{ state with stack = locals } in
-            Choice.return
-              (State.Continue (exec_func ~return:true state modul func))
-          | Extern { idx } ->
-            let f = Env.get_extern_func ~modul:state.modul env idx in
-            let+ stack = exec_extern_func ~state f in
+            Choice.return (State.Continue (exec_func ~return:true state func))
+          | Extern func ->
+            let+ stack = exec_extern_func ~state func in
             let state = State.{ state with stack } in
             State.return state
         in
         match state with
-        | State.Return res -> Choice.return res
+        | State.Return (state, res) -> Choice.return (state.env, res)
         | State.Continue state -> loop ~heartbeat:None state
       end
     with Stack_overflow -> Choice.trap `Call_stack_exhausted
@@ -2244,17 +2529,15 @@ module Concrete (Parameters : Parameters) =
   Make [@inlined hint] (Concrete_value) (Concrete_data) (Concrete_elem)
     (Concrete_choice)
     (Concrete_table)
-    (Concrete_global)
     (Concrete_memory)
     (Concrete_extern.Func)
-    (Concrete_env)
+    (Env.Concrete)
     (Parameters)
 module Symbolic (Parameters : Parameters) =
   Make [@inlined hint] (Symbolic_value) (Symbolic_data) (Symbolic_elem)
     (Symbolic_choice)
     (Symbolic_table)
-    (Symbolic_global)
     (Symbolic_memory)
     (Symbolic_extern.Func)
-    (Symbolic_env)
+    (Env.Symbolic)
     (Parameters)

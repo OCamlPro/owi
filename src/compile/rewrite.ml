@@ -54,11 +54,11 @@ let rewrite_block_type (assigned : Assigned.t) (block_type : Text.block_type) :
       | Some v -> Ok v
     in
     let* t = rewrite_func_type assigned t in
-    Ok (params, Binary.Bt_raw (Some idx, t))
+    Ok (params, (Some idx, t))
   | Bt_raw (_, ((params, _) as func_type)) ->
     let idx = Assigned.find_raw_type assigned func_type in
     let* func_type = rewrite_func_type assigned func_type in
-    Ok (params, Binary.Bt_raw (Some idx, func_type))
+    Ok (params, (Some idx, func_type))
 
 let rewrite_memarg ({ offset; align } : Text.memarg) : Binary.memarg Result.t =
   let* offset =
@@ -811,7 +811,7 @@ let rewrite_elem (assigned : Assigned.t) (elem : Text.Elem.t) :
     | Active (Some id, expr) ->
       let* indice = Assigned.find_table assigned id in
       let+ expr = rewrite_expr assigned [] expr in
-      Binary.Elem.Mode.Active (Some indice, expr)
+      Binary.Elem.Mode.Active (indice, expr)
   in
   let* init = list_map (rewrite_expr assigned []) elem.init in
   let nullable, ht = elem.typ in

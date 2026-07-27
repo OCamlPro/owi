@@ -13,7 +13,7 @@ type mode =
 
 let find_functions_with_func_type func_type (acc, i)
   (f : (Binary.Func.t, Binary.block_type) Origin.t) =
-  let (Bt_raw (_, ft)) =
+  let _, ft =
     match f with Origin.Local x -> x.type_f | Origin.Imported imp -> imp.typ
   in
   if Binary.func_type_eq func_type ft then (S.add i acc, i + 1) else (acc, i + 1)
@@ -24,9 +24,7 @@ let rec find_children mode tables (funcs : 'a array) acc (l : Binary.expr) =
   | ({ raw = Call i | Return_call i; _ } as instr) :: l, _ ->
     Annotated.update_functions_called instr (S.singleton i);
     find_children mode tables funcs (S.add i acc) l
-  | ( ( { raw =
-            ( Call_indirect (_, Bt_raw (_, ft))
-            | Return_call_indirect (_, Bt_raw (_, ft)) )
+  | ( ( { raw = Call_indirect (_, (_, ft)) | Return_call_indirect (_, (_, ft))
         ; _
         } as instr )
       :: l
@@ -210,7 +208,7 @@ let build_call_graph call_graph_mode (m : Binary.Module.t) entry_point =
           List.filter_map
             (fun e ->
               match e.Binary.Elem.mode with
-              | Active (Some n, _) -> Some (n, e)
+              | Active (n, _) -> Some (n, e)
               | _ -> None )
             (Array.to_list m.elem)
         in

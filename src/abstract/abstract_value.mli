@@ -2,6 +2,8 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
+type context = Abstract_domain.Context.t
+
 module Size : sig
   val b32 : Units.In_bits.t
 
@@ -38,10 +40,22 @@ module I32 : sig
   val of_int32 : Abstract_domain.Context.t -> int32 -> i32
 
   val to_boolean : Abstract_domain.Context.t -> i32 -> boolean
+
+  val add : Abstract_domain.Context.t -> i32 -> i32 -> i32
+
+  val sub : Abstract_domain.Context.t -> i32 -> i32 -> i32
+
+  val mul : Abstract_domain.Context.t -> i32 -> i32 -> i32
 end
 
 module I64 : sig
   val of_int64 : Abstract_domain.Context.t -> int64 -> i64
+
+  val add : Abstract_domain.Context.t -> i64 -> i64 -> i64
+
+  val sub : Abstract_domain.Context.t -> i64 -> i64 -> i64
+
+  val mul : Abstract_domain.Context.t -> i64 -> i64 -> i64
 end
 
 module F32 : sig
@@ -57,7 +71,17 @@ module V128 : sig
 end
 
 module Ref : sig
-  type t = Abstract_ref.t
+  module Extern : sig
+    type t = Abstract_ref.Extern.t
+  end
+
+  type t = Abstract_ref.t =
+    | Extern of Extern.t option
+    | Func of int option
+    | NullExn
+    | NullRef
+
+  val null : Abstract_domain.Context.t -> Binary.heap_type -> t
 end
 
 val pp : t Fmt.t

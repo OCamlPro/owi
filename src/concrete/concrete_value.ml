@@ -2,6 +2,8 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
+type context = unit
+
 type boolean = Concrete_boolean.t
 
 type i32 = Concrete_i32.t
@@ -120,3 +122,5 @@ let equal_script_result =
       , _ ) ->
       false
     | _, _ -> assert false
+
+let of_concrete () x = x

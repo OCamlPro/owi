@@ -29,7 +29,6 @@ module type T = sig
     | Mem : int * ('b, 'r) atype -> (memory -> 'b, 'r) atype
     | UArg : ('b, 'r) atype -> (unit -> 'b, 'r) atype
     | Arg : 'a telt * ('b, 'r) atype -> ('a -> 'b, 'r) atype
-    | NArg : string * 'a telt * ('b, 'r) atype -> ('a -> 'b, 'r) atype
     | Res : ('r, 'r) atype
 
   type _ rtype = private
@@ -70,8 +69,6 @@ module type T = sig
     val unit : (lr, unit, unit) t
 
     val memory : int -> (l, memory, memory) t
-
-    val label : string -> (lr, elt, 'a) t -> (l, string * elt, 'a) t
 
     val ( ^-> ) : ('r, 'k, 'a) t -> 'b func_type -> ('a -> 'b) func_type
 

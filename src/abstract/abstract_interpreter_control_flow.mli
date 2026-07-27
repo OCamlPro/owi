@@ -5,17 +5,22 @@
 exception RecursiveFunctionCall
 
 val eval_exprs :
-  modul:int -> Abstract_state.t -> Abstract_env.t -> Abstract_state.t
+     env:Env.Abstract.t
+  -> modul:Env.Abstract.modul
+  -> Abstract_state.t
+  -> Abstract_state.t
 
-val modul : Abstract_env.t -> modul:int -> Abstract_state.t
+val modul : env:Env.Abstract.t -> modul:Env.Abstract.modul -> Abstract_state.t
 
 val modul_with_ctx :
-  Abstract_domain.Context.t -> Abstract_env.t -> modul:int -> Abstract_state.t
+     env:Env.Abstract.t
+  -> modul:Env.Abstract.modul
+  -> Abstract_domain.Context.t
+  -> Abstract_state.t
 
 val exec_vfunc_from_outside :
-     ctx:Abstract_domain.Context.t
+     env:Env.Abstract.t
+  -> ctx:Abstract_domain.Context.t
   -> locals:Abstract_value.t Abstract_locals.t
-  -> modul:int
-  -> env:Abstract_env.t
-  -> Kind.func
+  -> Abstract_extern.Func.t Kind.func
   -> Abstract_state.t Result.t

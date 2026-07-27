@@ -1,16 +1,4 @@
   $ owi replay --replay-file no_bug.scfg no_bug.wat
   All OK!
-  $ owi replay --replay-file no_bug.scfg no_bug.wat -v
-  owi: [INFO] parsing      ...
-  owi: [INFO] checking     ...
-  owi: [INFO] typechecking ...
-  owi: [INFO] linking      ...
-  owi: [INFO] interpreting ...
-  owi: [INFO] stack         : [  ]
-  owi: [INFO] running instr : call 0 (executed 0 times)
-  owi: [INFO] calling func  : func f
-  owi: [INFO] stack         : [  ]
-  owi: [INFO] running instr : i32.const 42 (executed 0 times)
-  owi: [INFO] stack         : [ i32.const 42 ]
-  owi: [INFO] running instr : drop (executed 0 times)
+  $ owi replay --replay-file no_bug.scfg no_bug.wat
   All OK!

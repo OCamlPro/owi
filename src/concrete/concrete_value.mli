@@ -2,6 +2,8 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
+type context = unit
+
 include
   Value_intf.T
     with type boolean = Concrete_boolean.t
@@ -11,3 +13,5 @@ include
      and type f64 = Concrete_f64.t
      and type v128 = Concrete_v128.t
      and module Ref = Concrete_ref
+
+val of_concrete : unit -> t -> t

@@ -2,10 +2,16 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type t = { mutable value : Concrete_ref.t array }
+type t = { mutable value : Concrete_ref.t Iarray.t }
 
-let get (e : t) i = e.value.(i)
+let get (e : t) i = Iarray.get e.value i
 
-let size (e : t) = Array.length e.value
+let size (e : t) = Iarray.length e.value
 
-let drop (e : t) = e.value <- [||]
+let drop (e : t) =
+  e.value <- Iarray.of_list [];
+  e
+
+let init l =
+  let value = Iarray.of_list l in
+  { value }

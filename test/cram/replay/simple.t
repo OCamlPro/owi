@@ -8,7 +8,7 @@
   owi: [INFO] linking      ...
   owi: [INFO] interpreting ...
   owi: [INFO] stack         : [  ]
-  owi: [INFO] running instr : call 1 (executed 0 times)
+  owi: [INFO] running instr : call 18 (executed 0 times)
   owi: [INFO] calling func  : func start
   owi: [INFO] stack         : [  ]
   owi: [INFO] running instr : i32.const 42 (executed 0 times)

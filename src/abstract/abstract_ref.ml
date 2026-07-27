@@ -18,7 +18,7 @@ end
 
 type t =
   | Extern of Extern.t option
-  | Func of Kind.func option
+  | Func of int option
   | NullExn
   | NullRef
 
@@ -28,14 +28,14 @@ let pp fmt = function
   | NullExn -> Fmt.pf fmt "nullexnref"
   | NullRef -> Fmt.pf fmt "nullref"
 
-let null = function
+let null _ctx = function
   | Binary.Func_ht | NoFunc_ht | TypeUse _ -> Func None
   (* TODO: is this correct? Are all nulls equal? *)
   | Extern_ht | NoExtern_ht -> Extern None
   | Any_ht | None_ht | Exn_ht | NoExn_ht -> assert false
   | Eq_ht | I31_ht | Struct_ht | Array_ht -> assert false
 
-let func (f : Kind.func) = Func (Some f)
+let func (f : int) = Func (Some f)
 
 let extern (type x) (t : x Type.Id.t) (v : x) : t = Extern (Some (E (t, v)))
 
@@ -43,7 +43,7 @@ let is_null = function
   | Func None | Extern None | NullExn | NullRef -> true
   | Func (Some _) | Extern (Some _) -> false
 
-let get_func (r : t) : Kind.func get_ref =
+let get_func (r : t) : int get_ref =
   match r with
   | Func (Some f) -> Ref_value f
   | Func None -> Null

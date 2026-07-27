@@ -198,9 +198,7 @@ let pp_sub_type fmt { final; ids; ct } =
     (Fmt.list (fun fmt id -> Fmt.pf fmt "%a " pp_indice id))
     ids pp_comp_type ct
 
-type block_type =
-  (* TODO: inline this *)
-  | Bt_raw of (indice option * func_type)
+type block_type = indice option * func_type
 
 type nonrec memarg =
   { offset : Int64.t
@@ -224,7 +222,7 @@ let with_space_list printer ppf l =
   match l with [] -> () | _l -> pf ppf " %a" printer l
 
 let pp_block_type ppf = function
-  | Bt_raw (_ind, (pt, rt)) ->
+  | _ind, (pt, rt) ->
     pf ppf "%a%a"
       (with_space_list pp_param_type)
       pt
@@ -1117,8 +1115,7 @@ module Elem = struct
     type t =
       | Passive
       | Declarative
-      (* TODO: Elem_active binary+const expr*)
-      | Active of int option * expr Annotated.t
+      | Active of int * expr Annotated.t
   end
 
   type t =
