@@ -821,4 +821,6 @@ let exit_code =
   | Error (`Parse | `Term) -> cli_error
   | Error `Exn -> internal_error
 
+let () = Owi.New_link.run ()
+
 let () = exit exit_code

@@ -2,6 +2,10 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
+module New_link : sig
+  val run : unit -> unit
+end
+
 module Result : sig
   type err =
     [ `Alignment_too_large

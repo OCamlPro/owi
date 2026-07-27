@@ -116,6 +116,7 @@
   memory_intf
   model
   multicore
+  new_link
   origin
   owi
   parse
