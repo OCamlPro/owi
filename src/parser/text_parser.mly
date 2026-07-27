@@ -842,21 +842,9 @@ let plain_instr :=
 
   | I64X2_SHR_U; { I64x2 Shr_u }
   | I64X2_EXTEND_LOW_I32X4_U; { I64x2 Extend_low_i32x4_u }
-  | I8X16_SHUFFLE; l = list(NUM); {
-    (* TODO: we could use laneidx directly and it would be much better but the spec is weird, see:
-      https://github.com/WebAssembly/spec/issues/2209
-      *)
-    if List.exists (fun x -> String.starts_with ~prefix:"-" x) l then
-      failwith "unexpected token"
-    else if List.length l <> 16 then failwith "wrong number of lane indices"
-    else
-      let l = List.map (fun x ->
-        match int_of_string_opt x with
-        | None -> failwith "unexpected token"
-        | Some n -> if n >= 256 then failwith "i8 constant out of range" else n
-      ) l
-      in
-      I8x16 (Shuffle (Array.of_list l))
+  | I8X16_SHUFFLE; l = list(laneidx); {
+    if List.length l <> 16 then failwith "invalid lane length"
+    else I8x16 (Shuffle (Array.of_list l))
     }
 
   | I32_CLZ; { I32 Clz }
