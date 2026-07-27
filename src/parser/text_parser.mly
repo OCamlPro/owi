@@ -843,7 +843,7 @@ let plain_instr :=
   | I64X2_SHR_U; { I64x2 Shr_u }
   | I64X2_EXTEND_LOW_I32X4_U; { I64x2 Extend_low_i32x4_u }
   | I8X16_SHUFFLE; l = list(laneidx); {
-    if List.length l <> 16 then failwith "invalid lane length"
+    if List.length l <> 16 then failwith "wrong number of lane indices"
     else I8x16 (Shuffle (Array.of_list l))
     }
 
