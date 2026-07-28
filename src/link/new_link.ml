@@ -605,9 +605,7 @@ module Make (M : Runtime_builder_intf) :
       match modul.Binary.Module.start with
       | None -> initialization_code
       | Some func ->
-        (* TODO *)
-        let _ = func in
-        initialization_code
+        initialization_code @ [ Annotated.dummy (Binary.Call func) ]
     in
 
     let exports = IntMap.add new_module modul.exports runtime.exports in
