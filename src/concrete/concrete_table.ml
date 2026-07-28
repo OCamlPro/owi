@@ -34,6 +34,8 @@ let max_size t =
         max2int )
       max
 
+let get_type { limits; typ; _ } = (limits, typ)
+
 let init ?label (typ : Binary.Table.Type.t) : t =
   let limits, ((_null, heap_type) as ref_type) = typ in
   let null = Concrete_ref.null heap_type in
