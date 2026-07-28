@@ -26,31 +26,33 @@ module Eval_const = struct
     | Mul -> Stack.apply_i64_i64_i64 stack Value.I64.mul
     | _ -> assert false
 
-  let simple_instruction ~get_func ~get_global stack = function
+  let simple_instruction ~modul ~get_func ~get_global stack = function
     | Binary.I32 i -> Result.ok (i32_instr stack i)
     | Binary.I64 i -> Result.ok (i64_instr stack i)
     | F32 (Const f) -> Result.ok @@ Stack.push_f32 stack f
     | F64 (Const f) -> Result.ok @@ Stack.push_f64 stack f
     | V128 (Const f) -> Result.ok @@ Stack.push_v128 stack f
     | Ref (Null t) -> Result.ok @@ Stack.push_ref stack (Value.Ref.null t)
-    | Ref (Func f) ->
-      let* f = get_func f in
+    | Ref (Func id) ->
+      let* f = get_func ~modul id in
       let value = Value.Ref (Func (Some f)) in
       Result.ok @@ Stack.push stack value
     | Global (Get id) ->
-      let* g = get_global id in
+      let* g = get_global ~modul id in
       Result.ok @@ Stack.push stack g
     | _ -> assert false
 
-  let instr ~get_func ~get_global stack instr =
+  let instr ~modul ~get_func ~get_global stack instr =
     match instr.Annotated.raw with
-    | Binary.Simple i -> simple_instruction ~get_func ~get_global stack i
+    | Binary.Simple i -> simple_instruction ~modul ~get_func ~get_global stack i
     | _ -> assert false
 
-  (* TODO: binary+const expr *)
-  let expr ~get_func ~get_global e : Concrete_value.t Result.t =
+  (* TODO: the modul parameter can probably be removed *)
+  let expr ~modul ~get_func ~get_global e : Concrete_value.t Result.t =
     let* stack =
-      list_fold_left (instr ~get_func ~get_global) Stack.empty e.Annotated.raw
+      list_fold_left
+        (instr ~modul ~get_func ~get_global)
+        Stack.empty e.Annotated.raw
     in
     match stack with
     | [] -> Error (`Type_mismatch "const expr returning zero values")
@@ -106,11 +108,20 @@ module type Runtime_builder_intf = sig
 
   type memory
 
+  type table
+
   val init_memory : Binary.Mem.Type.limits -> memory
 
   val get_memory_limits : memory -> Binary.Mem.Type.limits
 
   val value_of_concrete : Concrete_value.t -> value
+
+  val init_table : ?label:string -> Binary.Table.Type.t -> table
+
+  val get_table_size : table -> int
+
+  (* TODO: could be stored at link time instead *)
+  val get_table_type : table -> Binary.Table.Type.t
 end
 
 module Make (M : Runtime_builder_intf) :
@@ -118,6 +129,8 @@ module Make (M : Runtime_builder_intf) :
   type value = M.value
 
   type memory = M.memory
+
+  type table = M.table
 
   type modul = int
 
@@ -157,6 +170,13 @@ module Make (M : Runtime_builder_intf) :
         (* map from runtime address to runtime memories *)
     ; memories_map : Allocator.key AddressMap.t
         (* map from memory source id to runtime address *)
+    ; tables : table Allocator.t
+        (* map from runtime address to runtime tables *)
+    ; tables_map : Allocator.key AddressMap.t
+        (* map from table source id to runtime address *)
+    ; datas : string Allocator.t (* map from runtime address to runtime datas *)
+    ; datas_map : Allocator.key AddressMap.t
+        (* map from data source id to runtime address *)
     ; initialization_codes : Binary.expr IntMap.t
         (* map from modul to their initialization code *)
     ; exports : Binary.Module.Exports.t IntMap.t
@@ -173,6 +193,10 @@ module Make (M : Runtime_builder_intf) :
     let globals_map = AddressMap.empty in
     let memories = Allocator.empty in
     let memories_map = AddressMap.empty in
+    let tables = Allocator.empty in
+    let tables_map = AddressMap.empty in
+    let datas = Allocator.empty in
+    let datas_map = AddressMap.empty in
     let initialization_codes = IntMap.empty in
     let exports = IntMap.empty in
     let last_module = None in
@@ -183,6 +207,10 @@ module Make (M : Runtime_builder_intf) :
     ; globals_map
     ; memories
     ; memories_map
+    ; tables
+    ; tables_map
+    ; datas
+    ; datas_map
     ; initialization_codes
     ; exports
     ; last_module
@@ -293,9 +321,9 @@ module Make (M : Runtime_builder_intf) :
   let link_global ~modul id runtime = function
     | Origin.Local ({ init; typ; id = _ } : Binary.Global.t) ->
       let* value =
-        Eval_const.expr
-          ~get_func:(fun _ -> assert false)
-          ~get_global:(fun _ -> assert false)
+        Eval_const.expr ~modul
+          ~get_func:(fun ~modul:_ id -> assert false)
+          ~get_global:(fun ~modul:_ id -> assert false)
           init
       in
       let value =
@@ -354,6 +382,37 @@ module Make (M : Runtime_builder_intf) :
       end
     | _ -> false
 
+  let table_limit_is_included ~import ?imported_data_size ~imported () =
+    match (import, imported) with
+    | Binary.Table.Type.I32 import, Binary.Table.Type.I32 imported ->
+      Int32.(
+        le_u import.min
+          (Option.fold ~none:imported.min
+             ~some:(fun v -> of_int v)
+             imported_data_size ) )
+      && begin match (imported.max, import.max) with
+      | _, None -> true
+      | None, Some _ -> false
+      | Some i, Some j -> Int32.le_u i j
+      end
+    | I64 import, I64 imported ->
+      Int64.(
+        le_u import.min
+          (Option.fold ~none:imported.min
+             ~some:(fun v -> of_int v)
+             imported_data_size ) )
+      && begin match (imported.max, import.max) with
+      | _, None -> true
+      | None, Some _ -> false
+      | Some i, Some j -> Int64.le_u i j
+      end
+    | _ -> false
+
+  let table_types_are_compatible ~imported_data_size
+    (import, (t1 : Binary.ref_type)) (imported, t2) =
+    table_limit_is_included ~imported_data_size ~import ~imported ()
+    && Binary.ref_type_eq t1 t2
+
   let link_memory ~modul id runtime = function
     | Origin.Local (_label, typ) ->
       let memory = M.init_memory typ in
@@ -379,6 +438,76 @@ module Make (M : Runtime_builder_intf) :
       in
       Ok { runtime with memories_map }
 
+  let link_table ~modul id runtime = function
+    | Origin.Local { Binary.Table.id = label; typ; _ } ->
+      (* TODO: remove label in the future, it's useless *)
+      let table = M.init_table ?label typ in
+      let tables, address = Allocator.add table runtime.tables in
+      let tables_map =
+        AddressMap.add { id; modul } address runtime.tables_map
+      in
+      Ok { runtime with tables_map; tables }
+    | Imported ({ name; typ; _ } as import) ->
+      let* table, address =
+        load_import ~runtime ~import runtime.tables_map runtime.tables
+      in
+      (* comparing their types *)
+      let* () =
+        let imported_data_size = M.get_table_size table in
+        let typ' = M.get_table_type table in
+        if table_types_are_compatible typ typ' ~imported_data_size then Ok ()
+        else Error (`Incompatible_import_type name)
+      in
+      (* adding new table to the address map *)
+      let tables_map =
+        AddressMap.add { id; modul } address runtime.tables_map
+      in
+      Ok { runtime with tables_map }
+
+  let link_data ~modul id (runtime, (expr : Binary.expr))
+    { Binary.Data.init; mode; _ } =
+    let data = init in
+    let datas, address = Allocator.add data runtime.datas in
+    let datas_map = AddressMap.add { id; modul } address runtime.datas_map in
+    let* expr =
+      match mode with
+      | Passive -> Ok expr
+      | Active (mem, offset) ->
+        begin match
+          AddressMap.find_opt { id = mem; modul } runtime.memories_map
+        with
+        | None -> Error (`Unknown_memory (Text.Raw mem))
+        | Some _ ->
+          let* offset =
+            Eval_const.expr ~modul
+              ~get_func:(fun ~modul:_ _id -> assert false)
+              ~get_global:(fun ~modul:_ _id -> assert false)
+              offset
+          in
+          let offset =
+            match offset with
+            | I32 i -> i
+            | _ ->
+              (* Should have failed earlier at typing *)
+              assert false
+          in
+          let length = String.length init |> Concrete_i32.of_int in
+          (* Jean-Christophe, I'm sorry for writing this, please forgive me... *)
+          Ok
+            ( expr
+            @ Annotated.dummies
+                [ Binary.Simple (I32 (Const offset))
+                ; Simple (I32 (Const 0l))
+                ; Simple (I32 (Const length))
+                ; Simple (Memory (Init (mem, id)))
+                ; Simple (Data (Drop id))
+                ] )
+        end
+    in
+    Ok ({ runtime with datas_map; datas }, expr)
+
+  let link_elem ~modul id (runtime, expr) = assert false
+
   let link_binary_module ~(runtime : t) ~(modul : Binary.Module.t) : t Result.t
       =
     let new_module = get_next_module ~runtime in
@@ -397,22 +526,30 @@ module Make (M : Runtime_builder_intf) :
       array_fold_lefti (link_memory ~modul:new_module) runtime modul.mem
     in
     (* tables *)
-    (* TODO *)
+    let* runtime =
+      array_fold_lefti (link_table ~modul:new_module) runtime modul.table
+    in
     (* initialization code *)
-    (* TODO *)
     (* 1. data *)
-    (* TODO *)
+    let* runtime, initialization_code =
+      array_fold_lefti (link_data ~modul:new_module) (runtime, []) modul.data
+    in
     (* 2. elem *)
-    (* TODO *)
+    let* runtime, initialization_code =
+      array_fold_lefti
+        (link_elem ~modul:new_module)
+        (runtime, initialization_code)
+        modul.elem
+    in
     (* 3. start function *)
     (* TODO *)
     let initialization_code =
       match modul.Binary.Module.start with
-      | None -> []
+      | None -> initialization_code
       | Some func ->
         (* TODO *)
         let _ = func in
-        []
+        initialization_code
     in
 
     let exports = IntMap.add new_module modul.exports runtime.exports in
@@ -434,6 +571,14 @@ module Concrete_runtime_builder : Runtime_builder_intf = struct
   let init_memory = Concrete_memory.init
 
   let get_memory_limits = Concrete_memory.get_limits
+
+  type table = Concrete_table.t
+
+  let init_table ?label:_ = assert false
+
+  let get_table_size _ = assert false
+
+  let get_table_type _ = assert false
 end
 
 module Symbolic_runtime_builder : Runtime_builder_intf = struct
@@ -446,6 +591,14 @@ module Symbolic_runtime_builder : Runtime_builder_intf = struct
   let init_memory _ = assert false
 
   let get_memory_limits _ = assert false
+
+  type table = Symbolic_table.t
+
+  let init_table ?label:_ = assert false
+
+  let get_table_size _ = assert false
+
+  let get_table_type _ = assert false
 end
 
 module Abstract_runtime_builder : Runtime_builder_intf = struct
@@ -458,6 +611,14 @@ module Abstract_runtime_builder : Runtime_builder_intf = struct
   let init_memory _ = assert false
 
   let get_memory_limits _ = assert false
+
+  type table = |
+
+  let init_table ?label:_ = assert false
+
+  let get_table_size _ = assert false
+
+  let get_table_type _ = assert false
 end
 
 module Interpret (Runtime : Runtime_intf) = struct
