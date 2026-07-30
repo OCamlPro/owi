@@ -1,387 +1,85 @@
-  $ owi abs fact.wat -vv 
+  $ owi abs fact.wat -v
   owi: [INFO] parsing      ...
   owi: [INFO] checking     ...
-  owi: [DEBUG] grouping     ...
-  owi: [DEBUG] {id: 
-                 typ: 
-                 decl_types: (func)
-                 type_checks: 
-                 global: 
-                 table: 
-                 mem: 
-                 func: Local ((func $start (local $n i32) (local $result i32)
-                   i32.const 2
-                   local.set $n
-                   i32.const 1
-                   local.set $result
-                   (block $done
-                     (loop $continue
-                       local.get $n
-                       i32.const 1
-                       i32.le_s
-                       br_if $done
-                       local.get $result
-                       local.get $n
-                       i32.mul
-                       local.set $result
-                       local.get $n
-                       i32.const 1
-                       i32.sub
-                       local.set $n
-                       br $continue))
-                   local.get $result
-                   drop
-                 ))
-                 elem: 
-                 data: 
-                 start: $start
-                 }
-  owi: [DEBUG] assigning    ...
-  owi: [DEBUG] Types: (func)
-               Types names: 
-               Global names: 
-               Table names: 
-               Mem names: 
-               Func names: ("start", 0)
-               Elem names: 
-               Data names: 
-               Tag names: 
-               
-  owi: [DEBUG] rewriting    ...
   owi: [INFO] typechecking ...
-  owi: [DEBUG] stack             : []
-  owi: [DEBUG] typechecking instr: i32.const 2
-  owi: [DEBUG] stack             : [i32]
-  owi: [DEBUG] typechecking instr: local.set 0
-  owi: [DEBUG] stack             : []
-  owi: [DEBUG] typechecking instr: i32.const 1
-  owi: [DEBUG] stack             : [i32]
-  owi: [DEBUG] typechecking instr: local.set 1
-  owi: [DEBUG] stack             : []
-  owi: [DEBUG] typechecking instr: block $done
-  owi: [DEBUG] stack             : []
-  owi: [DEBUG] typechecking instr: loop $continue
-  owi: [DEBUG] stack             : []
-  owi: [DEBUG] typechecking instr: local.get 0
-  owi: [DEBUG] stack             : [i32]
-  owi: [DEBUG] typechecking instr: i32.const 1
-  owi: [DEBUG] stack             : [i32 i32]
-  owi: [DEBUG] typechecking instr: i32.le_s
-  owi: [DEBUG] stack             : [i32]
-  owi: [DEBUG] typechecking instr: br_if 1
-  owi: [DEBUG] stack             : []
-  owi: [DEBUG] typechecking instr: local.get 1
-  owi: [DEBUG] stack             : [i32]
-  owi: [DEBUG] typechecking instr: local.get 0
-  owi: [DEBUG] stack             : [i32 i32]
-  owi: [DEBUG] typechecking instr: i32.mul
-  owi: [DEBUG] stack             : [i32]
-  owi: [DEBUG] typechecking instr: local.set 1
-  owi: [DEBUG] stack             : []
-  owi: [DEBUG] typechecking instr: local.get 0
-  owi: [DEBUG] stack             : [i32]
-  owi: [DEBUG] typechecking instr: i32.const 1
-  owi: [DEBUG] stack             : [i32 i32]
-  owi: [DEBUG] typechecking instr: i32.sub
-  owi: [DEBUG] stack             : [i32]
-  owi: [DEBUG] typechecking instr: local.set 0
-  owi: [DEBUG] stack             : []
-  owi: [DEBUG] typechecking instr: br 0
-  owi: [DEBUG] stack             : []
-  owi: [DEBUG] typechecking instr: local.get 1
-  owi: [DEBUG] stack             : [i32]
-  owi: [DEBUG] typechecking instr: drop
-  owi: [INFO] linking      ...
-  owi: [DEBUG] abstract state : 
-                 context: Context{id=1, <empty>}
-                 stack  : 
-                 locals : 
   owi: [INFO] stack         : [  ]
   owi: [INFO] locals        : [  ]
-  owi: [INFO] running instr : call 0
+  owi: [INFO] running instr : call 20
   owi: [INFO] calling func  : func start
-  owi: [DEBUG] before call (start): caller state : 
-                 context: Context{id=1, <empty>}
-                 stack  : 
-                 locals : 
-  owi: [DEBUG] abstract state : 
-                 context: Context{id=1, <empty>}
-                 stack  : 
-                 locals : i32 {0};
-                 i32 {0}
   owi: [INFO] stack         : [  ]
   owi: [INFO] locals        : [ (0 -> i32 {0});  (1 -> i32 {0}) ]
   owi: [INFO] running instr : i32.const 2
-  owi: [DEBUG] jt after (i32.const 2) :  
-  owi: [DEBUG] abstract state : 
-                 context: Context{id=1, <empty>}
-                 stack  : i32 {2}
-                 locals : i32 {0};
-                 i32 {0}
   owi: [INFO] stack         : [ i32 {2} ]
   owi: [INFO] locals        : [ (0 -> i32 {0});  (1 -> i32 {0}) ]
   owi: [INFO] running instr : local.set 0
-  owi: [DEBUG] jt after (local.set 0) :  
-  owi: [DEBUG] abstract state : 
-                 context: Context{id=1, <empty>}
-                 stack  : 
-                 locals : i32 {2};
-                 i32 {0}
   owi: [INFO] stack         : [  ]
   owi: [INFO] locals        : [ (0 -> i32 {2});  (1 -> i32 {0}) ]
   owi: [INFO] running instr : i32.const 1
-  owi: [DEBUG] jt after (i32.const 1) :  
-  owi: [DEBUG] abstract state : 
-                 context: Context{id=1, <empty>}
-                 stack  : i32 {1}
-                 locals : i32 {2};
-                 i32 {0}
   owi: [INFO] stack         : [ i32 {1} ]
   owi: [INFO] locals        : [ (0 -> i32 {2});  (1 -> i32 {0}) ]
   owi: [INFO] running instr : local.set 1
-  owi: [DEBUG] jt after (local.set 1) :  
-  owi: [DEBUG] abstract state : 
-                 context: Context{id=1, <empty>}
-                 stack  : 
-                 locals : i32 {2};
-                 i32 {1}
   owi: [INFO] stack         : [  ]
   owi: [INFO] locals        : [ (0 -> i32 {2});  (1 -> i32 {1}) ]
   owi: [INFO] running instr : block $done
-  owi: [DEBUG] abstract state : 
-                 context: Context{id=1, <empty>}
-                 stack  : 
-                 locals : i32 {2};
-                 i32 {1}
   owi: [INFO] stack         : [  ]
   owi: [INFO] locals        : [ (0 -> i32 {2});  (1 -> i32 {1}) ]
   owi: [INFO] running instr : loop $continue
-  owi: [DEBUG] abstract state : 
-                 context: Context{id=1, <empty>}
-                 stack  : 
-                 locals : i32 {2};
-                 i32 {1}
   owi: [INFO] stack         : [  ]
   owi: [INFO] locals        : [ (0 -> i32 {2});  (1 -> i32 {1}) ]
   owi: [INFO] running instr : local.get 0
-  owi: [DEBUG] jt after (local.get 0) :  
-  owi: [DEBUG] abstract state : 
-                 context: Context{id=1, <empty>}
-                 stack  : i32 {2}
-                 locals : i32 {2};
-                 i32 {1}
   owi: [INFO] stack         : [ i32 {2} ]
   owi: [INFO] locals        : [ (0 -> i32 {2});  (1 -> i32 {1}) ]
   owi: [INFO] running instr : i32.const 1
-  owi: [DEBUG] jt after (i32.const 1) :  
-  owi: [DEBUG] abstract state : 
-                 context: Context{id=1, <empty>}
-                 stack  : i32 {1} ; i32 {2}
-                 locals : i32 {2};
-                 i32 {1}
   owi: [INFO] stack         : [ i32 {1} ; i32 {2} ]
   owi: [INFO] locals        : [ (0 -> i32 {2});  (1 -> i32 {1}) ]
   owi: [INFO] running instr : i32.le_s
-  owi: [DEBUG] jt after (i32.le_s) :  
-  owi: [DEBUG] abstract state : 
-                 context: Context{id=1, <empty>}
-                 stack  : i32 {0}
-                 locals : i32 {2};
-                 i32 {1}
   owi: [INFO] stack         : [ i32 {0} ]
   owi: [INFO] locals        : [ (0 -> i32 {2});  (1 -> i32 {1}) ]
   owi: [INFO] running instr : br_if 1
-  owi: [DEBUG] jt after (br_if 1) :  
-  owi: [DEBUG] abstract state : 
-                 context: Context{id=1, <empty>}
-                 stack  : 
-                 locals : i32 {2};
-                 i32 {1}
   owi: [INFO] stack         : [  ]
   owi: [INFO] locals        : [ (0 -> i32 {2});  (1 -> i32 {1}) ]
   owi: [INFO] running instr : local.get 1
-  owi: [DEBUG] jt after (local.get 1) :  
-  owi: [DEBUG] abstract state : 
-                 context: Context{id=1, <empty>}
-                 stack  : i32 {1}
-                 locals : i32 {2};
-                 i32 {1}
   owi: [INFO] stack         : [ i32 {1} ]
   owi: [INFO] locals        : [ (0 -> i32 {2});  (1 -> i32 {1}) ]
   owi: [INFO] running instr : local.get 0
-  owi: [DEBUG] jt after (local.get 0) :  
-  owi: [DEBUG] abstract state : 
-                 context: Context{id=1, <empty>}
-                 stack  : i32 {2} ; i32 {1}
-                 locals : i32 {2};
-                 i32 {1}
   owi: [INFO] stack         : [ i32 {2} ; i32 {1} ]
   owi: [INFO] locals        : [ (0 -> i32 {2});  (1 -> i32 {1}) ]
   owi: [INFO] running instr : i32.mul
-  owi: [DEBUG] jt after (i32.mul) :  
-  owi: [DEBUG] abstract state : 
-                 context: Context{id=1, <empty>}
-                 stack  : i32 {2}
-                 locals : i32 {2};
-                 i32 {1}
   owi: [INFO] stack         : [ i32 {2} ]
   owi: [INFO] locals        : [ (0 -> i32 {2});  (1 -> i32 {1}) ]
   owi: [INFO] running instr : local.set 1
-  owi: [DEBUG] jt after (local.set 1) :  
-  owi: [DEBUG] abstract state : 
-                 context: Context{id=1, <empty>}
-                 stack  : 
-                 locals : i32 {2};
-                 i32 {2}
   owi: [INFO] stack         : [  ]
   owi: [INFO] locals        : [ (0 -> i32 {2});  (1 -> i32 {2}) ]
   owi: [INFO] running instr : local.get 0
-  owi: [DEBUG] jt after (local.get 0) :  
-  owi: [DEBUG] abstract state : 
-                 context: Context{id=1, <empty>}
-                 stack  : i32 {2}
-                 locals : i32 {2};
-                 i32 {2}
   owi: [INFO] stack         : [ i32 {2} ]
   owi: [INFO] locals        : [ (0 -> i32 {2});  (1 -> i32 {2}) ]
   owi: [INFO] running instr : i32.const 1
-  owi: [DEBUG] jt after (i32.const 1) :  
-  owi: [DEBUG] abstract state : 
-                 context: Context{id=1, <empty>}
-                 stack  : i32 {1} ; i32 {2}
-                 locals : i32 {2};
-                 i32 {2}
   owi: [INFO] stack         : [ i32 {1} ; i32 {2} ]
   owi: [INFO] locals        : [ (0 -> i32 {2});  (1 -> i32 {2}) ]
   owi: [INFO] running instr : i32.sub
-  owi: [DEBUG] jt after (i32.sub) :  
-  owi: [DEBUG] abstract state : 
-                 context: Context{id=1, <empty>}
-                 stack  : i32 {1}
-                 locals : i32 {2};
-                 i32 {2}
   owi: [INFO] stack         : [ i32 {1} ]
   owi: [INFO] locals        : [ (0 -> i32 {2});  (1 -> i32 {2}) ]
   owi: [INFO] running instr : local.set 0
-  owi: [DEBUG] jt after (local.set 0) :  
-  owi: [DEBUG] abstract state : 
-                 context: Context{id=1, <empty>}
-                 stack  : 
-                 locals : i32 {1};
-                 i32 {2}
   owi: [INFO] stack         : [  ]
   owi: [INFO] locals        : [ (0 -> i32 {1});  (1 -> i32 {2}) ]
   owi: [INFO] running instr : br 0
-  owi: [DEBUG] jt after (br 0) :  0 -> 
-                 context: Context{id=1, <empty>}
-                 stack  : 
-                 locals : i32 {1};
-                 i32 {2}
-  owi: [DEBUG] serializing locals (widen) : 
-                first : (0 -> i32 {2}); 
-               (1 -> i32 {1}) 
-                second : (0 -> i32 {1});  (1 -> i32 {2})
-  owi: [DEBUG] serializing stacks (widen) : 
-                first :  
-                second : 
-  owi: [DEBUG] abstract state : 
-                 context: Context{id=2, <(B:15)> -> {1}
-                                        <(B:16)> -> {2}
-                                        }
-                 stack  : 
-                 locals : i32 {1};
-                 i32 {2}
   owi: [INFO] stack         : [  ]
   owi: [INFO] locals        : [ (0 -> i32 {1});  (1 -> i32 {2}) ]
   owi: [INFO] running instr : local.get 0
-  owi: [DEBUG] jt after (local.get 0) :  
-  owi: [DEBUG] abstract state : 
-                 context: Context{id=2, <(B:15)> -> {1}
-                                        <(B:16)> -> {2}
-                                        }
-                 stack  : i32 {1}
-                 locals : i32 {1};
-                 i32 {2}
   owi: [INFO] stack         : [ i32 {1} ]
   owi: [INFO] locals        : [ (0 -> i32 {1});  (1 -> i32 {2}) ]
   owi: [INFO] running instr : i32.const 1
-  owi: [DEBUG] jt after (i32.const 1) :  
-  owi: [DEBUG] abstract state : 
-                 context: Context{id=2, <(B:15)> -> {1}
-                                        <(B:16)> -> {2}
-                                        }
-                 stack  : i32 {1} ; i32 {1}
-                 locals : i32 {1};
-                 i32 {2}
   owi: [INFO] stack         : [ i32 {1} ; i32 {1} ]
   owi: [INFO] locals        : [ (0 -> i32 {1});  (1 -> i32 {2}) ]
   owi: [INFO] running instr : i32.le_s
-  owi: [DEBUG] jt after (i32.le_s) :  
-  owi: [DEBUG] abstract state : 
-                 context: Context{id=2,
-                                  <(b:17)> -> {true};
-                                  <(B:15)> -> {1}
-                                  <(B:16)> -> {2}
-                                  }
-                 stack  : i32 {1}
-                 locals : i32 {1};
-                 i32 {2}
   owi: [INFO] stack         : [ i32 {1} ]
   owi: [INFO] locals        : [ (0 -> i32 {1});  (1 -> i32 {2}) ]
   owi: [INFO] running instr : br_if 1
-  owi: [DEBUG] jt after (br_if 1) :  1 -> 
-                 context: Context{id=2,
-                                  <(b:17)> -> {true};
-                                  <(B:15)> -> {1}
-                                  <(B:16)> -> {2}
-                                  }
-                 stack  : 
-                 locals : i32 {1};
-                 i32 {2}
-  owi: [DEBUG] jt after (loop $continue) :  0 -> 
-                 context: Context{id=2,
-                                  <(b:17)> -> {true};
-                                  <(B:15)> -> {1}
-                                  <(B:16)> -> {2}
-                                  }
-                 stack  : 
-                 locals : i32 {1};
-                 i32 {2}
-  owi: [DEBUG] jt after (block $done) :  
-  owi: [DEBUG] abstract state : 
-                 context: Context{id=2,
-                                  <(b:17)> -> {true};
-                                  <(B:15)> -> {1}
-                                  <(B:16)> -> {2}
-                                  }
-                 stack  : 
-                 locals : i32 {1};
-                 i32 {2}
   owi: [INFO] stack         : [  ]
   owi: [INFO] locals        : [ (0 -> i32 {1});  (1 -> i32 {2}) ]
   owi: [INFO] running instr : local.get 1
-  owi: [DEBUG] jt after (local.get 1) :  
-  owi: [DEBUG] abstract state : 
-                 context: Context{id=2,
-                                  <(b:17)> -> {true};
-                                  <(B:15)> -> {1}
-                                  <(B:16)> -> {2}
-                                  }
-                 stack  : i32 {2}
-                 locals : i32 {1};
-                 i32 {2}
   owi: [INFO] stack         : [ i32 {2} ]
   owi: [INFO] locals        : [ (0 -> i32 {1});  (1 -> i32 {2}) ]
   owi: [INFO] running instr : drop
-  owi: [DEBUG] jt after (drop) :  
-  owi: [DEBUG] after call(start): callee state : 
-                 context: Context{id=2,
-                                  <(b:17)> -> {true};
-                                  <(B:15)> -> {1}
-                                  <(B:16)> -> {2}
-                                  }
-                 stack  : 
-                 locals : i32 {1};
-                 i32 {2}
-  
-  owi: [DEBUG] jt after (call 0) :  
+
+
