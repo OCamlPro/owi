@@ -2,17 +2,16 @@
   owi: [INFO] parsing      ...
   owi: [INFO] checking     ...
   owi: [INFO] typechecking ...
-  owi: [INFO] linking      ...
   owi: [INFO] stack         : [  ]
   owi: [INFO] locals        : [  ]
-  owi: [INFO] running instr : call 1
+  owi: [INFO] running instr : call 21
   owi: [INFO] calling func  : func start
   owi: [INFO] stack         : [  ]
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : i32.const 1
   owi: [INFO] stack         : [ i32 {1} ]
   owi: [INFO] locals        : [  ]
-  owi: [INFO] running instr : call 0
+  owi: [INFO] running instr : call 20
   owi: [INFO] calling func  : func incr
   owi: [INFO] stack         : [  ]
   owi: [INFO] locals        : [ (0 -> i32 {1}) ]
@@ -25,7 +24,7 @@
   owi: [INFO] running instr : i32.add
   owi: [INFO] stack         : [ i32 {2} ]
   owi: [INFO] locals        : [  ]
-  owi: [INFO] running instr : call 0
+  owi: [INFO] running instr : call 20
   owi: [INFO] calling func  : func incr
   owi: [INFO] stack         : [  ]
   owi: [INFO] locals        : [ (0 -> i32 {2}) ]
@@ -44,17 +43,16 @@
   owi: [INFO] parsing      ...
   owi: [INFO] checking     ...
   owi: [INFO] typechecking ...
-  owi: [INFO] linking      ...
   owi: [INFO] stack         : [  ]
   owi: [INFO] locals        : [  ]
-  owi: [INFO] running instr : call 1
+  owi: [INFO] running instr : call 21
   owi: [INFO] calling func  : func start
   owi: [INFO] stack         : [  ]
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : i32.const 1
   owi: [INFO] stack         : [ i32 {1} ]
   owi: [INFO] locals        : [  ]
-  owi: [INFO] running instr : call 0
+  owi: [INFO] running instr : call 20
   owi: [INFO] calling func  : func incr
   owi: [INFO] stack         : [  ]
   owi: [INFO] locals        : [ (0 -> i32 {1}) ]
@@ -67,6 +65,6 @@
   owi: [INFO] running instr : i32.add
   owi: [INFO] stack         : [ i32 {2} ]
   owi: [INFO] locals        : [ (0 -> i32 {1}) ]
-  owi: [INFO] running instr : call 1
+  owi: [INFO] running instr : call 21
   owi: [ERROR] Recursive function calls are not supported yet
 

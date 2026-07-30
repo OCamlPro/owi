@@ -9,10 +9,10 @@
   abstract_extern
   abstract_f32
   abstract_f64
-  abstract_globals
   abstract_i32
   abstract_i64
   abstract_interpreter_simple
+  abstract_interpreter_state
   abstract_interpreter_control_flow
   abstract_invariant
   abstract_jump_map

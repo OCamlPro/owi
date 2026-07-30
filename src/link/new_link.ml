@@ -130,7 +130,8 @@ end
 module Make (M : Runtime_builder_intf.T) :
   Runtime_intf.T
     with type extern_func := M.extern_func
-     and type value := M.value = struct
+     and type value := M.value
+     and type context := M.context = struct
   type memory = M.memory
 
   type table = M.table
@@ -175,6 +176,7 @@ module Make (M : Runtime_builder_intf.T) :
     ; last_module : modul option (* last module that was added to the runtime *)
     ; registered_modules : modul StringMap.t
         (* map from registered names to modul *)
+    ; context : M.context
     }
 
   let pp ppf
@@ -192,6 +194,7 @@ module Make (M : Runtime_builder_intf.T) :
     ; exported_tables
     ; last_module
     ; registered_modules
+    ; context = _
     } =
     let pp_todo ppf _v = Fmt.pf ppf "<TODO>" in
     let pp_global = pp_todo in
@@ -249,6 +252,7 @@ module Make (M : Runtime_builder_intf.T) :
     let exported_tables = IntMap.empty in
     let last_module = None in
     let registered_modules = StringMap.empty in
+    let context = M.empty_context () in
     { functions
     ; extern_functions
     ; globals
@@ -263,6 +267,7 @@ module Make (M : Runtime_builder_intf.T) :
     ; exported_tables
     ; last_module
     ; registered_modules
+    ; context
     }
 
   let register_module ~runtime ~modul ~name =
@@ -369,7 +374,7 @@ module Make (M : Runtime_builder_intf.T) :
       let value =
         match fst typ with
         | Const -> Const value
-        | Var -> Var (M.value_of_concrete value)
+        | Var -> Var (M.value_of_concrete runtime.context value)
       in
       let global : global = { value; typ } in
 
@@ -700,14 +705,32 @@ module Make (M : Runtime_builder_intf.T) :
       | Store16 (i, memarg) -> Store16 (get_unsafe i memories_map, memarg)
       | Store32 (i, memarg) -> Store32 (get_unsafe i memories_map, memarg)
     in
-
+    let rewrite_f32_instruction : Binary.f32_instr -> Binary.f32_instr =
+      function
+      | ( Abs | Neg | Sqrt | Ceil | Floor | Trunc | Nearest | Sub | Mul | Div
+        | Min | Max | Copysign | Eq | Ne | Lt | Gt | Le | Ge | Demote_f64
+        | Const _ | Convert_i_s _ | Convert_i_u _ | Reinterpret_i _ | Add ) as i
+        ->
+        i
+      | Load (i, memarg) -> Load (get_unsafe i memories_map, memarg)
+      | Store (i, memarg) -> Store (get_unsafe i memories_map, memarg)
+    in
+    let rewrite_f64_instruction : Binary.f64_instr -> Binary.f64_instr =
+      function
+      | ( Abs | Neg | Sqrt | Ceil | Floor | Trunc | Nearest | Add | Sub | Mul
+        | Div | Min | Max | Copysign | Eq | Ne | Lt | Gt | Le | Ge | Promote_f32
+        | Const _ | Convert_i_s _ | Convert_i_u _ | Reinterpret_i _ ) as i ->
+        i
+      | Load (i, memarg) -> Load (get_unsafe i memories_map, memarg)
+      | Store (i, memarg) -> Store (get_unsafe i memories_map, memarg)
+    in
     let rewrite_simple_instruction :
       Binary.simple_instruction -> Binary.simple_instruction = function
       | Global i -> Global (rewrite_global_instruction i)
       | I32 i -> I32 (rewrite_i32_instruction i)
       | I64 i -> I64 (rewrite_i64_instruction i)
-      | F32 _ -> assert false
-      | F64 _ -> assert false
+      | F32 i -> F32 (rewrite_f32_instruction i)
+      | F64 i -> F64 (rewrite_f64_instruction i)
       | V128 _ -> assert false
       | I8x16 _ -> assert false
       | I16x8 _ -> assert false
@@ -723,17 +746,17 @@ module Make (M : Runtime_builder_intf.T) :
     in
     let rec rewrite_instruction = function
       | Binary.Simple i -> Binary.Simple (rewrite_simple_instruction i)
-      | Block (_, _, _) -> assert false
+      | Block (a, b, e) -> Block (a, b, rewrite_expression e)
       | Loop (a, b, e) -> Loop (a, b, rewrite_expression e)
-      | If_else (_, _, _, _) -> assert false
-      | Br_table (_, _) -> assert false
+      | If_else (a, b, e1, e2) ->
+        If_else (a, b, rewrite_expression e1, rewrite_expression e2)
       | Return_call _ -> assert false
       | Return_call_indirect (_, Bt_raw (_, (_, _))) -> assert false
       | Return_call_ref (Bt_raw (_, (_, _))) -> assert false
       | Call i -> Call (get_unsafe i functions_map)
       | Call_indirect (_, Bt_raw (_, (_, _))) -> assert false
       | Call_ref _ -> assert false
-      | ( Return | Br _ | Br_if _ | Br_on_null _ | Br_on_non_null _
+      | ( Return | Br _ | Br_if _ | Br_table _ | Br_on_null _ | Br_on_non_null _
         | Br_on_cast _ | Br_on_cast_fail _ ) as i ->
         i
     and rewrite_expression expr =
@@ -753,6 +776,13 @@ module Make (M : Runtime_builder_intf.T) :
           | Kind.Extern _idx -> assert false )
         runtime functions
     in
+    let runtime =
+      List.fold_left
+        (fun runtime (address, global) ->
+          let globals = Allocator.add_manual address global runtime.globals in
+          { runtime with globals } )
+        runtime globals
+    in
 
     (* TODO! *)
     let _ =
@@ -763,8 +793,7 @@ module Make (M : Runtime_builder_intf.T) :
       , tables
       , tables_map
       , memories
-      , memories_map
-      , globals )
+      , memories_map )
     in
 
     let export_array_to_string_map a address_map =
@@ -835,7 +864,17 @@ module Make (M : Runtime_builder_intf.T) :
     let id = Allocator.unsafe_of_int id in
     match Allocator.find_opt id runtime.globals with
     | Some { value = Var v; _ } -> v
-    | Some { value = Const v; _ } -> M.value_of_concrete v
+    | Some { value = Const v; _ } -> M.value_of_concrete runtime.context v
+    | None -> assert false
+
+  let set_global ~runtime id v =
+    let id = Allocator.unsafe_of_int id in
+    match Allocator.find_opt id runtime.globals with
+    | Some { typ; _ } ->
+      let value = Var v in
+      let global = { value; typ } in
+      let globals = Allocator.add_manual id global runtime.globals in
+      { runtime with globals }
     | None -> assert false
 
   let get_func ~runtime id =
@@ -898,4 +937,6 @@ module Make (M : Runtime_builder_intf.T) :
     match Allocator.find_opt address runtime.functions with
     | Some func -> Ok func
     | None -> assert false
+
+  let get_context ~runtime = runtime.context
 end

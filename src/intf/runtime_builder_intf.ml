@@ -5,7 +5,11 @@
 module type T = sig
   type value
 
-  val value_of_concrete : Concrete_value.t -> value
+  type context
+
+  val empty_context : unit -> context
+
+  val value_of_concrete : context -> Concrete_value.t -> value
 
   type memory
 

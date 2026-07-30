@@ -63,22 +63,22 @@ let check_simple_instruction ~invariants ~uuid : Binary.simple_instruction -> _
     ()
 
 let rec check_expr (expr : Binary.expr Annotated.t)
-  ~(invariants : Abstract_invariant.t) ~modul ~runtime =
-  List.iter (check_instr ~invariants ~modul ~runtime) expr.raw
+  ~(invariants : Abstract_invariant.t) ~runtime =
+  List.iter (check_instr ~invariants ~runtime) expr.raw
 
 and check_instr ({ raw; uuid; _ } : Binary.instr Annotated.t)
-  ~(invariants : Abstract_invariant.t) ~modul ~runtime =
+  ~(invariants : Abstract_invariant.t) ~runtime =
   match raw with
   | Simple i -> check_simple_instruction ~invariants ~uuid i
-  | Block (_str_opt, _, expr) -> check_expr expr ~invariants ~modul ~runtime
+  | Block (_str_opt, _, expr) -> check_expr expr ~invariants ~runtime
   | If_else (_str_opt, _bt, expr_then, expr_else) ->
-    check_expr ~invariants ~modul ~runtime expr_then;
-    check_expr ~invariants ~modul ~runtime expr_else
-  | Loop (_str_opt, _bt, expr) -> check_expr ~invariants ~modul ~runtime expr
+    check_expr ~invariants ~runtime expr_then;
+    check_expr ~invariants ~runtime expr_else
+  | Loop (_str_opt, _bt, expr) -> check_expr ~invariants ~runtime expr
   | Call idx ->
     let func = Abstract_runtime.get_func ~runtime idx in
     begin match func with
-    | Wasm func -> check_expr ~invariants ~modul ~runtime func.body
+    | Wasm func -> check_expr ~invariants ~runtime func.body
     | Extern _ -> ()
     end
   | Br _ | Br_if _
@@ -96,4 +96,4 @@ and check_instr ({ raw; uuid; _ } : Binary.instr Annotated.t)
 let check_module ~(runtime : Abstract_runtime.t)
   ~(modul : Abstract_runtime.modul) (invariants : Abstract_invariant.t) =
   let init_code = Abstract_runtime.get_initialization_code ~runtime ~modul in
-  check_expr ~runtime ~invariants ~modul (Annotated.dummy init_code)
+  check_expr ~runtime ~invariants (Annotated.dummy init_code)

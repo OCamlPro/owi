@@ -28,6 +28,8 @@ module type T = sig
 
   val get_global : runtime:t -> int -> value
 
+  val set_global : runtime:t -> int -> value -> t
+
   val get_func : runtime:t -> int -> Kind.func
 
   val get_extern_func : runtime:t -> int -> extern_func
@@ -37,4 +39,8 @@ module type T = sig
     -> module_name:string option
     -> func_name:string
     -> Kind.func Result.t
+
+  type context
+
+  val get_context : runtime:t -> context
 end

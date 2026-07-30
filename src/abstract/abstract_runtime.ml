@@ -3,10 +3,12 @@
 (* Written by the Owi programmers *)
 
 module Abstract_runtime_builder :
-  Runtime_builder_intf.T with type extern_func = Abstract_extern.Func.t = struct
+  Runtime_builder_intf.T
+    with type extern_func = Abstract_extern.Func.t
+     and type value = Abstract_value.t = struct
   type value = Abstract_value.t
 
-  let value_of_concrete _ = assert false
+  let value_of_concrete = Abstract_value.of_concrete
 
   type memory = Abstract_memory.t
 
@@ -29,6 +31,10 @@ module Abstract_runtime_builder :
   type extern_func = Abstract_extern.Func.t
 
   let to_func_type = Abstract_extern.Func.to_func_type
+
+  type context = Abstract_domain.Context.t
+
+  let empty_context = Abstract_domain.root_context
 end
 
 include New_link.Make (Abstract_runtime_builder)

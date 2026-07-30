@@ -5,7 +5,7 @@
 module Concrete_runtime_builder : Runtime_builder_intf.T = struct
   type value = Concrete_value.t
 
-  let value_of_concrete v = v
+  let value_of_concrete () v = v
 
   type memory = Concrete_memory.t
 
@@ -28,6 +28,10 @@ module Concrete_runtime_builder : Runtime_builder_intf.T = struct
   type extern_func = Concrete_extern.Func.t
 
   let to_func_type = Concrete_extern.Func.to_func_type
+
+  type context = unit
+
+  let empty_context () = ()
 end
 
 include New_link.Make (Concrete_runtime_builder)

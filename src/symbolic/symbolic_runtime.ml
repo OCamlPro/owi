@@ -5,7 +5,7 @@
 module Symbolic_runtime_builder : Runtime_builder_intf.T = struct
   type value = Symbolic_value.t
 
-  let value_of_concrete v = Symbolic_value.of_concrete v
+  let value_of_concrete () v = Symbolic_value.of_concrete v
 
   type memory = Symbolic_memory.t
 
@@ -28,6 +28,10 @@ module Symbolic_runtime_builder : Runtime_builder_intf.T = struct
   type extern_func = Symbolic_extern.Func.t
 
   let to_func_type = Symbolic_extern.Func.to_func_type
+
+  type context = unit
+
+  let empty_context () = ()
 end
 
 include New_link.Make (Symbolic_runtime_builder)
