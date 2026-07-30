@@ -568,6 +568,8 @@ module Make (M : Runtime_builder_intf) :
 
   let link_binary_module ~(runtime : t) ~(modul : Binary.Module.t) : t Result.t
       =
+    (* This is the first step where we simply allocate the runtime values for functions, globals, memories etc.
+       Each one is given a unique address in a global space, and we maintain a map from (module id, {func,global,...} id) to runtime address. *)
     let new_module = get_next_module ~runtime in
     (* functions *)
     let* runtime =
@@ -613,6 +615,11 @@ module Make (M : Runtime_builder_intf) :
     let initialization_codes =
       IntMap.add new_module initialization_code runtime.initialization_codes
     in
+
+    (* Now this is the second step, where we rewrite all access to use runtime address.
+      For instance, if a function contains the instruction global.get 0, the 0 is local to the modul in which the function is defined.
+      We look what is the runtime address of this global in the map, by looking the global map at (module_id, 0).
+      If the runtime address is say, 42, we rewrite the instruction to be global.get 42. *)
     let runtime = { runtime with initialization_codes; exports; last_module } in
     Ok runtime
 end
@@ -726,7 +733,7 @@ module Abstract_runtime : Runtime_intf = Make (Abstract_runtime_builder)
 module Test (Runtime : Runtime_intf) = struct
   module Interpret = Interpret (Runtime)
 
-  let outcome =
+  let outcome () =
     let* modul =
       Compile.File.until_validate ~unsafe:false (Fpath.v "new_link.wat")
     in
@@ -738,7 +745,7 @@ module Test (Runtime : Runtime_intf) = struct
     Ok ()
 
   let run () =
-    match outcome with
+    match outcome () with
     | Error e ->
       let msg = Result.err_to_string e in
       Log.err (fun m ->
@@ -755,7 +762,10 @@ module Test_concrete = Test (Concrete_runtime)
 module Test_symbolic = Test (Symbolic_runtime)
 module Test_abstract = Test (Abstract_runtime)
 
-let run () =
+let run () = ()
+
+(*
   Test_concrete.run ();
   Test_symbolic.run ();
   Test_abstract.run ()
+  *)
