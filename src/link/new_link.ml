@@ -2,10 +2,6 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-[@@@warning "-27"]
-
-[@@@warning "-69"]
-
 open Syntax
 
 module Eval_const = struct
@@ -26,7 +22,7 @@ module Eval_const = struct
     | Mul -> Stack.apply_i64_i64_i64 stack Value.I64.mul
     | _ -> assert false
 
-  let simple_instruction ~modul ~get_func ~get_global stack = function
+  let simple_instruction ~get_func ~get_global stack = function
     | Binary.I32 i -> Result.ok (i32_instr stack i)
     | Binary.I64 i -> Result.ok (i64_instr stack i)
     | F32 (Const f) -> Result.ok @@ Stack.push_f32 stack f
@@ -34,25 +30,23 @@ module Eval_const = struct
     | V128 (Const f) -> Result.ok @@ Stack.push_v128 stack f
     | Ref (Null t) -> Result.ok @@ Stack.push_ref stack (Value.Ref.null t)
     | Ref (Func id) ->
-      let* f = get_func ~modul id in
+      let* f = get_func id in
       let value = Value.Ref (Func (Some f)) in
       Result.ok @@ Stack.push stack value
     | Global (Get id) ->
-      let* g = get_global ~modul id in
+      let* g = get_global id in
       Result.ok @@ Stack.push stack g
     | _ -> assert false
 
-  let instr ~modul ~get_func ~get_global stack instr =
+  let instr ~get_func ~get_global stack instr =
     match instr.Annotated.raw with
-    | Binary.Simple i -> simple_instruction ~modul ~get_func ~get_global stack i
+    | Binary.Simple i -> simple_instruction ~get_func ~get_global stack i
     | _ -> assert false
 
   (* TODO: the modul parameter can probably be removed *)
-  let expr ~modul ~get_func ~get_global e : Concrete_value.t Result.t =
+  let expr ~get_func ~get_global e : Concrete_value.t Result.t =
     let* stack =
-      list_fold_left
-        (instr ~modul ~get_func ~get_global)
-        Stack.empty e.Annotated.raw
+      list_fold_left (instr ~get_func ~get_global) Stack.empty e.Annotated.raw
     in
     match stack with
     | [] -> Error (`Type_mismatch "const expr returning zero values")
@@ -71,65 +65,72 @@ module Allocator : sig
   val find_opt : key -> 'a t -> 'a option
 
   val add : 'a -> 'a t -> 'a t * key
+
+  val add_manual : key -> 'a -> 'a t -> 'a t
+
+  val next_key : 'a t -> key
+
+  val succ_key : key -> key
+
+  val plus_key : key -> int -> key
+
+  val unsafe_to_int : key -> int
+
+  val unsafe_of_int : int -> key
+
+  val pp : 'a Fmt.t -> 'a t Fmt.t
+
+  val pp_key : key Fmt.t
 end = struct
   include Map.Make (Int)
 
+  let next_key map = cardinal map
+
+  let add_manual k v map = add k v map
+
   let add v map =
-    let key = cardinal map in
+    let key = next_key map in
     let map = add key v map in
     (map, key)
+
+  let succ_key key = succ key
+
+  let plus_key k n = k + n
+
+  let unsafe_to_int v = v
+
+  let unsafe_of_int v = v
+
+  let pp pp_v =
+    Fmt.braces
+      (Fmt.iter_bindings ~sep:Fmt.semi iter (fun ppf (k, v) ->
+         Fmt.pf ppf "%d -> %a" k pp_v v ) )
+
+  let pp_key ppf key = Fmt.pf ppf "%d" key
 end
 
-module IntMap = Map.Make (Int)
-module StringMap = Map.Make (String)
+module IntMap = struct
+  include Map.Make (Int)
 
-module type Runtime_intf = sig
-  type t
-
-  type modul
-
-  type value
-
-  val empty : t
-
-  val get_last_module : runtime:t -> modul Result.t
-
-  val register_module : runtime:t -> modul:modul -> name:string -> t
-
-  val get_initialization_code : runtime:t -> modul:modul -> Binary.expr
-
-  val link_binary_module : runtime:t -> modul:Binary.Module.t -> t Result.t
+  let pp pp_v =
+    Fmt.braces
+      (Fmt.iter_bindings ~sep:Fmt.semi iter (fun ppf (k, v) ->
+         Fmt.pf ppf "%d -> %a" k pp_v v ) )
 end
 
-module type Runtime_builder_intf = sig
-  type value
+module StringMap = struct
+  include Map.Make (String)
 
-  val value_of_concrete : Concrete_value.t -> value
-
-  type memory
-
-  val init_memory : Binary.Mem.Type.limits -> memory
-
-  val get_memory_limits : memory -> Binary.Mem.Type.limits
-
-  type table
-
-  val init_table : ?label:string -> Binary.Table.Type.t -> table
-
-  val get_table_size : table -> int
-
-  (* TODO: could be stored at link time instead *)
-  val get_table_type : table -> Binary.Table.Type.t
-
-  type elem
-
-  val elem_of_concrete_ref_list : Concrete_ref.t list -> elem
+  let pp pp_v =
+    Fmt.braces
+      (Fmt.iter_bindings ~sep:Fmt.semi iter (fun ppf (k, v) ->
+         Fmt.pf ppf "%S -> %a" k pp_v v ) )
 end
 
-module Make (M : Runtime_builder_intf) :
-  Runtime_intf with type value = M.value = struct
-  type value = M.value
-
+module Make (M : Runtime_builder_intf.T) :
+  Runtime_intf.T
+    with type extern_func := M.extern_func
+     and type value := M.value = struct
   type memory = M.memory
 
   type table = M.table
@@ -138,23 +139,10 @@ module Make (M : Runtime_builder_intf) :
 
   type modul = int
 
-  module SourceId = struct
-    type t =
-      { modul : modul
-      ; id : int
-      }
-
-    let compare x1 x2 =
-      let modul = compare x1.modul x2.modul in
-      if modul = 0 then compare x1.id x2.id else modul
-  end
-
-  module AddressMap = Map.Make (SourceId)
-
   (* when evaluating constant expressions, we don't want to deal with value because building them is annoying and differs too much between the various interpreters, yet, the constant expression builders can read globals that could be values, but we use the fact that it can only read constant globals that are always going to be concrete, doing so allows us to have a single concrete implementation of constant evaluation, with the price of having to convert from concrete to {abstract,symbolic} each time we load a constant global, but who cares, we could simply inline them in the future and don't bother *)
   type global_value =
     | Const of Concrete_value.t
-    | Var of value
+    | Var of M.value
 
   type global =
     { value : global_value
@@ -164,66 +152,115 @@ module Make (M : Runtime_builder_intf) :
   type t =
     { functions : Kind.func Allocator.t
         (* map from runtime address to runtime functions *)
-    ; functions_map : Allocator.key AddressMap.t
-        (* map from function source id to runtime address *)
+    ; extern_functions : (M.extern_func * Binary.func_type) Allocator.t
+        (* map from runtime address to runtime extern functions *)
     ; globals : global Allocator.t
         (* map from runtime address to runtime globals *)
-    ; globals_map : Allocator.key AddressMap.t
-        (* map from global source id to runtime address *)
     ; memories : memory Allocator.t
         (* map from runtime address to runtime memories *)
-    ; memories_map : Allocator.key AddressMap.t
-        (* map from memory source id to runtime address *)
     ; tables : table Allocator.t
         (* map from runtime address to runtime tables *)
-    ; tables_map : Allocator.key AddressMap.t
-        (* map from table source id to runtime address *)
     ; datas : string Allocator.t (* map from runtime address to runtime datas *)
-    ; datas_map : Allocator.key AddressMap.t
-        (* map from data source id to runtime address *)
     ; elems : elem Allocator.t (* map from runtime address to runtime elems *)
-    ; elems_map : Allocator.key AddressMap.t
-        (* map from elem source id to runtime address *)
     ; initialization_codes : Binary.expr IntMap.t
         (* map from modul to their initialization code *)
-    ; exports : Binary.Module.Exports.t IntMap.t
-        (* map from modul to their declared exports *)
+    ; exported_functions : Allocator.key StringMap.t IntMap.t
+        (* map from modul to their exported functions *)
+    ; exported_globals : Allocator.key StringMap.t IntMap.t
+        (* map from modul to their exported globals *)
+    ; exported_memories : Allocator.key StringMap.t IntMap.t
+        (* map from modul to their exported memories *)
+    ; exported_tables : Allocator.key StringMap.t IntMap.t
+        (* map from modul to their exported tables *)
     ; last_module : modul option (* last module that was added to the runtime *)
     ; registered_modules : modul StringMap.t
         (* map from registered names to modul *)
     }
 
+  let pp ppf
+    { functions
+    ; extern_functions
+    ; globals
+    ; memories
+    ; tables
+    ; datas
+    ; elems
+    ; initialization_codes
+    ; exported_functions
+    ; exported_globals
+    ; exported_memories
+    ; exported_tables
+    ; last_module
+    ; registered_modules
+    } =
+    let pp_todo ppf _v = Fmt.pf ppf "<TODO>" in
+    let pp_global = pp_todo in
+    let pp_elem = pp_todo in
+    let pp_table = pp_todo in
+    let pp_memory = pp_todo in
+    let pp_modul ppf v = Fmt.pf ppf "%d" v in
+    Fmt.pf ppf
+      "@[<v>functions: %a@,\
+       extern_functions: %a@,\
+       globals: %a@,\
+       memories: %a@,\
+       tables: %a@,\
+       datas: %a@,\
+       elems: %a@,\
+       initialization_codes: %a@,\
+       exported_functions: %a@,\
+       exported_globals: %a@,\
+       exported_memories: %a@,\
+       exported_tables: %a@,\
+       last_module: %a@,\
+       registered_modules: %a@]"
+      (Allocator.pp Kind.pp_func)
+      functions
+      (Allocator.pp
+         (Fmt.pair (fun ppf _v -> Fmt.pf ppf "<extern>") Binary.pp_func_type) )
+      extern_functions (Allocator.pp pp_global) globals (Allocator.pp pp_memory)
+      memories (Allocator.pp pp_table) tables (Allocator.pp Fmt.string) datas
+      (Allocator.pp pp_elem) elems
+      (IntMap.pp (fun ppf e ->
+         Binary.pp_expr ~short:true ppf (Annotated.dummy e) ) )
+      initialization_codes
+      (IntMap.pp (StringMap.pp Allocator.pp_key))
+      exported_functions
+      (IntMap.pp (StringMap.pp Allocator.pp_key))
+      exported_globals
+      (IntMap.pp (StringMap.pp Allocator.pp_key))
+      exported_memories
+      (IntMap.pp (StringMap.pp Allocator.pp_key))
+      exported_tables (Fmt.option pp_modul) last_module (StringMap.pp pp_modul)
+      registered_modules
+
   let empty =
     let functions = Allocator.empty in
-    let functions_map = AddressMap.empty in
+    let extern_functions = Allocator.empty in
     let globals = Allocator.empty in
-    let globals_map = AddressMap.empty in
     let memories = Allocator.empty in
-    let memories_map = AddressMap.empty in
     let tables = Allocator.empty in
-    let tables_map = AddressMap.empty in
     let datas = Allocator.empty in
-    let datas_map = AddressMap.empty in
     let elems = Allocator.empty in
-    let elems_map = AddressMap.empty in
     let initialization_codes = IntMap.empty in
-    let exports = IntMap.empty in
+    let exported_functions = IntMap.empty in
+    let exported_globals = IntMap.empty in
+    let exported_memories = IntMap.empty in
+    let exported_tables = IntMap.empty in
     let last_module = None in
     let registered_modules = StringMap.empty in
     { functions
-    ; functions_map
+    ; extern_functions
     ; globals
-    ; globals_map
     ; memories
-    ; memories_map
     ; tables
-    ; tables_map
     ; datas
-    ; datas_map
     ; elems
-    ; elems_map
     ; initialization_codes
-    ; exports
+    ; exported_functions
+    ; exported_globals
+    ; exported_memories
+    ; exported_tables
     ; last_module
     ; registered_modules
     }
@@ -252,36 +289,25 @@ module Make (M : Runtime_builder_intf) :
     | Some expr -> expr
     | None -> []
 
-  let load_import ~(runtime : t)
-    ~import:({ modul_name; name; _ } : _ Origin.imported) address_map allocator
-      =
+  let load_exported_key exported ~runtime ~modul_name ~name =
     (* find the source module *)
     let* modul = get_registered_module ~runtime ~name:modul_name in
-    (* find its local id corresponding to the name we want in its exports *)
-    let* id =
-      match IntMap.find_opt modul runtime.exports with
-      | None ->
-        (* it should be there! *)
-        assert false
-      | Some { func; _ } ->
-        begin match
-          Array.find_opt
-            (fun (export : Binary.Export.t) -> String.equal name export.name)
-            func
-        with
-        | None -> Error (`Unknown_import (modul_name, name))
-        | Some { id; _ } -> Ok id
-        end
-    in
-    (* find its address in the functions_map *)
-    let address =
-      let source : SourceId.t = { modul; id } in
-      match AddressMap.find_opt source address_map with
-      | None ->
-        (* it should be there! *)
-        assert false
-      | Some address -> address
-    in
+    (* finc the exports for this module *)
+    match IntMap.find_opt modul exported with
+    | None ->
+      (* it should be there! *)
+      assert false
+    | Some names ->
+      (* find the address for the export with the desired name *)
+      begin match StringMap.find_opt name names with
+      | None -> Error (`Unknown_import (modul_name, name))
+      | Some address -> Ok address
+      end
+
+  let load_import ~runtime ~import:({ modul_name; name; _ } : _ Origin.imported)
+    exported allocator =
+    (* find the address of the map *)
+    let* address = load_exported_key exported ~runtime ~modul_name ~name in
     (* find its runtime value *)
     match Allocator.find_opt address allocator with
     | None ->
@@ -289,31 +315,36 @@ module Make (M : Runtime_builder_intf) :
       assert false
     | Some func -> Ok (func, address)
 
-  let link_function ~modul id runtime = function
+  let link_function ~runtime id (functions, map) = function
     | Origin.Local func ->
-      let func : Kind.func = Kind.wasm ~modul func in
-      let functions, address = Allocator.add func runtime.functions in
-      let functions_map =
-        AddressMap.add { id; modul } address runtime.functions_map
+      let func : Kind.func = Kind.Wasm func in
+      let address =
+        Allocator.plus_key (Allocator.next_key runtime.functions) id
       in
-      Ok { runtime with functions; functions_map }
+      let functions = (address, func) :: functions in
+      let map = IntMap.add id address map in
+      Ok (functions, map)
     | Imported ({ name; typ; _ } as import) ->
       let* func, address =
-        load_import ~runtime ~import runtime.functions_map runtime.functions
+        load_import ~runtime ~import runtime.exported_functions
+          runtime.functions
       in
       (* comparing their types *)
       let* () =
         let (Binary.Bt_raw (_, typ)) = typ in
         let typ' =
           match (func : Kind.func) with
-          | Kind.Wasm { func; _ } ->
+          | Kind.Wasm func ->
             let (Bt_raw ((None | Some _), t)) = func.type_f in
             t
-          | Kind.Extern { idx } -> assert false
-          (*
-                let _f, t = Dynarray.get ls.extern_modules idx in
-                t
-                *)
+          | Kind.Extern addr ->
+            let addr = Allocator.unsafe_of_int addr in
+            let _f, t =
+              match Allocator.find_opt addr runtime.extern_functions with
+              | None -> assert false
+              | Some v -> v
+            in
+            t
         in
         if Binary.func_type_eq typ typ' then Ok ()
         else
@@ -324,17 +355,15 @@ module Make (M : Runtime_builder_intf) :
           Error (`Incompatible_import_type msg)
       in
       (* adding new global to the address map *)
-      let functions_map =
-        AddressMap.add { id; modul } address runtime.functions_map
-      in
-      Ok { runtime with functions_map }
+      let map = IntMap.add id address map in
+      Ok (functions, map)
 
-  let link_global ~modul id runtime = function
+  let link_global ~runtime id (globals, map) = function
     | Origin.Local ({ init; typ; id = _ } : Binary.Global.t) ->
       let* value =
-        Eval_const.expr ~modul
-          ~get_func:(fun ~modul:_ id -> assert false)
-          ~get_global:(fun ~modul:_ id -> assert false)
+        Eval_const.expr
+          ~get_func:(fun _id -> assert false)
+          ~get_global:(fun _id -> assert false)
           init
       in
       let value =
@@ -343,15 +372,19 @@ module Make (M : Runtime_builder_intf) :
         | Var -> Var (M.value_of_concrete value)
       in
       let global : global = { value; typ } in
-      let globals, address = Allocator.add global runtime.globals in
-      let globals_map =
-        AddressMap.add { id; modul } address runtime.globals_map
+
+      let address =
+        Allocator.plus_key (Allocator.next_key runtime.globals) id
       in
-      Ok { runtime with globals_map; globals }
+      let globals = (address, global) :: globals in
+
+      let map = IntMap.add id address map in
+      Ok (globals, map)
     | Imported ({ name; typ; _ } as import) ->
       let* global, address =
-        load_import ~runtime ~import runtime.globals_map runtime.globals
+        load_import ~runtime ~import runtime.exported_globals runtime.globals
       in
+
       (* comparing their types *)
       let* () =
         match (global.typ, typ) with
@@ -365,10 +398,8 @@ module Make (M : Runtime_builder_intf) :
           else Error (`Incompatible_import_type name)
       in
       (* adding new global to the address map *)
-      let globals_map =
-        AddressMap.add { id; modul } address runtime.globals_map
-      in
-      Ok { runtime with globals_map }
+      let map = IntMap.add id address map in
+      Ok (globals, map)
 
   let memory_limit_is_included ~import ?imported_data_size ~imported () =
     match (import, imported) with
@@ -424,17 +455,20 @@ module Make (M : Runtime_builder_intf) :
     table_limit_is_included ~imported_data_size ~import ~imported ()
     && Binary.ref_type_eq t1 t2
 
-  let link_memory ~modul id runtime = function
+  let link_memory ~runtime id (memories, map) = function
     | Origin.Local (_label, typ) ->
       let memory = M.init_memory typ in
-      let memories, address = Allocator.add memory runtime.memories in
-      let memories_map =
-        AddressMap.add { id; modul } address runtime.memories_map
+
+      let address =
+        Allocator.plus_key (Allocator.next_key runtime.memories) id
       in
-      Ok { runtime with memories_map; memories }
+      let memories = (address, memory) :: memories in
+
+      let map = IntMap.add id address map in
+      Ok (memories, map)
     | Imported ({ name; typ; _ } as import) ->
       let* memory, address =
-        load_import ~runtime ~import runtime.memories_map runtime.memories
+        load_import ~runtime ~import runtime.exported_memories runtime.memories
       in
       (* comparing their types *)
       let* () =
@@ -444,23 +478,22 @@ module Make (M : Runtime_builder_intf) :
         else Error (`Incompatible_import_type name)
       in
       (* adding new memory to the address map *)
-      let memories_map =
-        AddressMap.add { id; modul } address runtime.memories_map
-      in
-      Ok { runtime with memories_map }
+      let map = IntMap.add id address map in
+      Ok (memories, map)
 
-  let link_table ~modul id runtime = function
+  let link_table ~runtime id (tables, map) = function
     | Origin.Local { Binary.Table.id = label; typ; _ } ->
       (* TODO: remove label in the future, it's useless *)
       let table = M.init_table ?label typ in
-      let tables, address = Allocator.add table runtime.tables in
-      let tables_map =
-        AddressMap.add { id; modul } address runtime.tables_map
-      in
-      Ok { runtime with tables_map; tables }
+
+      let address = Allocator.plus_key (Allocator.next_key runtime.tables) id in
+      let tables = (address, table) :: tables in
+
+      let map = IntMap.add id address map in
+      Ok (tables, map)
     | Imported ({ name; typ; _ } as import) ->
       let* table, address =
-        load_import ~runtime ~import runtime.tables_map runtime.tables
+        load_import ~runtime ~import runtime.exported_tables runtime.tables
       in
       (* comparing their types *)
       let* () =
@@ -470,29 +503,29 @@ module Make (M : Runtime_builder_intf) :
         else Error (`Incompatible_import_type name)
       in
       (* adding new table to the address map *)
-      let tables_map =
-        AddressMap.add { id; modul } address runtime.tables_map
-      in
-      Ok { runtime with tables_map }
+      let map = IntMap.add id address map in
+      Ok (tables, map)
 
-  let link_data ~modul id (runtime, (initialization_code : Binary.expr))
+  let link_data ~runtime ~memories_map id
+    ((initialization_code : Binary.expr), datas, map)
     { Binary.Data.init; mode; _ } =
     let data = init in
-    let datas, address = Allocator.add data runtime.datas in
-    let datas_map = AddressMap.add { id; modul } address runtime.datas_map in
-    let* expr =
+
+    let address = Allocator.plus_key (Allocator.next_key runtime.datas) id in
+    let datas = (address, data) :: datas in
+
+    let map = IntMap.add id address map in
+    let* initialization_code =
       match mode with
       | Passive -> Ok initialization_code
       | Active (mem, offset) ->
-        begin match
-          AddressMap.find_opt { id = mem; modul } runtime.memories_map
-        with
+        begin match IntMap.find_opt mem memories_map with
         | None -> Error (`Unknown_memory (Text.Raw mem))
         | Some _ ->
           let* offset =
-            Eval_const.expr ~modul
-              ~get_func:(fun ~modul:_ _id -> assert false)
-              ~get_global:(fun ~modul:_ _id -> assert false)
+            Eval_const.expr
+              ~get_func:(fun _id -> assert false)
+              ~get_global:(fun _id -> assert false)
               offset
           in
           let offset =
@@ -515,15 +548,15 @@ module Make (M : Runtime_builder_intf) :
                 ] )
         end
     in
-    Ok ({ runtime with datas_map; datas }, expr)
+    Ok (initialization_code, datas, map)
 
-  let link_elem ~modul id (runtime, initialization_code)
+  let link_elem ~runtime id (initialization_code, elems, map)
     { Binary.Elem.init; mode; _ } =
     let* init =
       list_map
-        (Eval_const.expr ~modul
-           ~get_func:(fun ~modul:_ _id -> assert false)
-           ~get_global:(fun ~modul:_ _id -> assert false) )
+        (Eval_const.expr
+           ~get_func:(fun _id -> assert false)
+           ~get_global:(fun _id -> assert false) )
         init
     in
     let* elem =
@@ -537,20 +570,22 @@ module Make (M : Runtime_builder_intf) :
           init
     in
     let elem = M.elem_of_concrete_ref_list elem in
-    let elems, address = Allocator.add elem runtime.elems in
-    let elems_map = AddressMap.add { id; modul } address runtime.elems_map in
-    let runtime = { runtime with elems_map; elems } in
+
+    let address = Allocator.plus_key (Allocator.next_key runtime.elems) id in
+    let elems = (address, elem) :: elems in
+
+    let map = IntMap.add id address map in
     match mode with
-    | Passive | Declarative -> Ok (runtime, initialization_code)
+    | Passive | Declarative -> Ok (initialization_code, elems, map)
     | Active (None, _) ->
       (* TODO: the type in binary should be changed if the None case is eliminated when going from Text to Binary. *)
       assert false
     | Active (Some table, offset) ->
       let length = Int32.of_int @@ List.length init in
       let* offset =
-        Eval_const.expr ~modul
-          ~get_func:(fun ~modul:_ _id -> assert false)
-          ~get_global:(fun ~modul:_ _id -> assert false)
+        Eval_const.expr
+          ~get_func:(fun _id -> assert false)
+          ~get_global:(fun _id -> assert false)
           offset
       in
       let offset = match offset with I32 i -> i | _ -> assert false in
@@ -564,41 +599,44 @@ module Make (M : Runtime_builder_intf) :
             ; Simple (Elem (Drop id))
             ]
       in
-      Ok (runtime, initialization_code)
+      Ok (initialization_code, elems, map)
 
-  let link_binary_module ~(runtime : t) ~(modul : Binary.Module.t) : t Result.t
-      =
+  let link_binary_module ~(runtime : t) ~name ~(modul : Binary.Module.t) :
+    t Result.t =
+    Log.debug (fun m ->
+      m "linking binary module: %a" (Fmt.option Fmt.string) name );
     (* This is the first step where we simply allocate the runtime values for functions, globals, memories etc.
-       Each one is given a unique address in a global space, and we maintain a map from (module id, {func,global,...} id) to runtime address. *)
+             Each one is given a unique address in a global space, and we maintain a map from (module id, {func,global,...} id) to runtime address. *)
     let new_module = get_next_module ~runtime in
     (* functions *)
-    let* runtime =
-      array_fold_lefti (link_function ~modul:new_module) runtime modul.func
+    let* functions, functions_map =
+      array_fold_lefti (link_function ~runtime) ([], IntMap.empty) modul.func
     in
     (* tags *)
     (* TODO *)
     (* globals *)
-    let* runtime =
-      array_fold_lefti (link_global ~modul:new_module) runtime modul.global
+    let* globals, globals_map =
+      array_fold_lefti (link_global ~runtime) ([], IntMap.empty) modul.global
     in
     (* memories *)
-    let* runtime =
-      array_fold_lefti (link_memory ~modul:new_module) runtime modul.mem
+    let* memories, memories_map =
+      array_fold_lefti (link_memory ~runtime) ([], IntMap.empty) modul.mem
     in
     (* tables *)
-    let* runtime =
-      array_fold_lefti (link_table ~modul:new_module) runtime modul.table
+    let* tables, tables_map =
+      array_fold_lefti (link_table ~runtime) ([], IntMap.empty) modul.table
     in
     (* initialization code *)
     (* 1. data *)
-    let* runtime, initialization_code =
-      array_fold_lefti (link_data ~modul:new_module) (runtime, []) modul.data
+    let* initialization_code, datas, datas_map =
+      array_fold_lefti
+        (link_data ~runtime ~memories_map)
+        ([], [], IntMap.empty) modul.data
     in
     (* 2. elem *)
-    let* runtime, initialization_code =
-      array_fold_lefti
-        (link_elem ~modul:new_module)
-        (runtime, initialization_code)
+    let* initialization_code, elems, elems_map =
+      array_fold_lefti (link_elem ~runtime)
+        (initialization_code, [], IntMap.empty)
         modul.elem
     in
     (* 3. start function *)
@@ -610,162 +648,254 @@ module Make (M : Runtime_builder_intf) :
         initialization_code @ [ Annotated.dummy (Binary.Call func) ]
     in
 
-    let exports = IntMap.add new_module modul.exports runtime.exports in
+    (* Now this is the second step, where we rewrite all access to use runtime address.
+       For instance, if a function contains the instruction global.get 0, the 0 is local to the modul in which the function is defined.
+       We look what is the runtime address of this global in the map, by looking the global map at (module_id, 0).
+       If the runtime address is say, 42, we rewrite the instruction to be global.get 42. *)
+    let get_unsafe k tbl =
+      match IntMap.find_opt k tbl with
+      | Some v -> Allocator.unsafe_to_int v
+      | None -> assert false
+    in
+    let rewrite_global_instruction : Binary.global_instr -> Binary.global_instr
+        = function
+      | Get i -> Get (get_unsafe i globals_map)
+      | Set i -> Set (get_unsafe i globals_map)
+    in
+    let rewrite_i32_instruction : Binary.i32_instr -> Binary.i32_instr =
+      function
+      | ( Const _ | Clz | Ctz | Popcnt | Add | Sub | Mul | Div_s | Div_u | Rem_s
+        | Rem_u | And | Or | Xor | Shl | Shr_s | Shr_u | Rotl | Rotr | Eqz | Eq
+        | Ne | Lt_s | Lt_u | Gt_s | Gt_u | Le_s | Le_u | Ge_s | Ge_u | Extend8_s
+        | Extend16_s | Wrap_i64 | Trunc_f_s _ | Trunc_f_u _ | Trunc_sat_f_s _
+        | Trunc_sat_f_u _ | Reinterpret_f _ ) as i ->
+        i
+      | Load (i, memarg) -> Load (get_unsafe i memories_map, memarg)
+      | Load8_s (i, memarg) -> Load8_s (get_unsafe i memories_map, memarg)
+      | Load8_u (i, memarg) -> Load8_u (get_unsafe i memories_map, memarg)
+      | Load16_s (i, memarg) -> Load16_s (get_unsafe i memories_map, memarg)
+      | Load16_u (i, memarg) -> Load16_u (get_unsafe i memories_map, memarg)
+      | Store (i, memarg) -> Store (get_unsafe i memories_map, memarg)
+      | Store8 (i, memarg) -> Store8 (get_unsafe i memories_map, memarg)
+      | Store16 (i, memarg) -> Store16 (get_unsafe i memories_map, memarg)
+    in
+    let rewrite_i64_instruction : Binary.i64_instr -> Binary.i64_instr =
+      function
+      | ( Const _ | Clz | Ctz | Popcnt | Add | Sub | Mul | Div_s | Div_u | Rem_s
+        | Rem_u | And | Or | Xor | Shl | Shr_s | Shr_u | Rotl | Rotr | Eqz | Eq
+        | Ne | Lt_s | Lt_u | Gt_s | Gt_u | Le_s | Le_u | Ge_s | Ge_u | Extend8_s
+        | Extend16_s | Trunc_f_s _ | Trunc_f_u _ | Trunc_sat_f_s _
+        | Trunc_sat_f_u _ | Reinterpret_f _ | Extend32_s | Extend_i32_s
+        | Extend_i32_u ) as i ->
+        i
+      | Load (i, memarg) -> Load (get_unsafe i memories_map, memarg)
+      | Load8_s (i, memarg) -> Load8_s (get_unsafe i memories_map, memarg)
+      | Load8_u (i, memarg) -> Load8_u (get_unsafe i memories_map, memarg)
+      | Load16_s (i, memarg) -> Load16_s (get_unsafe i memories_map, memarg)
+      | Load16_u (i, memarg) -> Load16_u (get_unsafe i memories_map, memarg)
+      | Load32_s (i, memarg) -> Load32_s (get_unsafe i memories_map, memarg)
+      | Load32_u (i, memarg) -> Load32_u (get_unsafe i memories_map, memarg)
+      | Store (i, memarg) -> Store (get_unsafe i memories_map, memarg)
+      | Store8 (i, memarg) -> Store8 (get_unsafe i memories_map, memarg)
+      | Store16 (i, memarg) -> Store16 (get_unsafe i memories_map, memarg)
+      | Store32 (i, memarg) -> Store32 (get_unsafe i memories_map, memarg)
+    in
+
+    let rewrite_simple_instruction :
+      Binary.simple_instruction -> Binary.simple_instruction = function
+      | Global i -> Global (rewrite_global_instruction i)
+      | I32 i -> I32 (rewrite_i32_instruction i)
+      | I64 i -> I64 (rewrite_i64_instruction i)
+      | F32 _ -> assert false
+      | F64 _ -> assert false
+      | V128 _ -> assert false
+      | I8x16 _ -> assert false
+      | I16x8 _ -> assert false
+      | I32x4 _ -> assert false
+      | I64x2 _ -> assert false
+      | F32x4 _ -> assert false
+      | F64x2 _ -> assert false
+      | Ref _ | Table _ | Elem _ | Memory _ | Data _ -> assert false
+      | ( Nop | Local _ | Drop | Unreachable | Any_convert_extern
+        | Extern_convert_any | Select _ ) as i ->
+        i
+      | I31 _ | Struct _ | Array _ -> assert false
+    in
+    let rec rewrite_instruction = function
+      | Binary.Simple i -> Binary.Simple (rewrite_simple_instruction i)
+      | Block (_, _, _) -> assert false
+      | Loop (a, b, e) -> Loop (a, b, rewrite_expression e)
+      | If_else (_, _, _, _) -> assert false
+      | Br_table (_, _) -> assert false
+      | Return_call _ -> assert false
+      | Return_call_indirect (_, Bt_raw (_, (_, _))) -> assert false
+      | Return_call_ref (Bt_raw (_, (_, _))) -> assert false
+      | Call i -> Call (get_unsafe i functions_map)
+      | Call_indirect (_, Bt_raw (_, (_, _))) -> assert false
+      | Call_ref _ -> assert false
+      | ( Return | Br _ | Br_if _ | Br_on_null _ | Br_on_non_null _
+        | Br_on_cast _ | Br_on_cast_fail _ ) as i ->
+        i
+    and rewrite_expression expr =
+      Annotated.map (List.map (Annotated.map rewrite_instruction)) expr
+    in
+    let runtime =
+      List.fold_left
+        (fun runtime (address, func) ->
+          match (func : Kind.func) with
+          | Kind.Wasm func ->
+            let body = rewrite_expression func.body in
+            let func : Kind.func = Kind.Wasm { func with body } in
+            let functions =
+              Allocator.add_manual address func runtime.functions
+            in
+            { runtime with functions }
+          | Kind.Extern _idx -> assert false )
+        runtime functions
+    in
+
+    (* TODO! *)
+    let _ =
+      ( datas
+      , datas_map
+      , elems
+      , elems_map
+      , tables
+      , tables_map
+      , memories
+      , memories_map
+      , globals )
+    in
+
+    let export_array_to_string_map a address_map =
+      Array.fold_left
+        (fun map { Binary.Export.name; id } ->
+          match IntMap.find_opt id address_map with
+          | None -> assert false
+          | Some addr -> StringMap.add name addr map )
+        StringMap.empty a
+    in
+    let add_exports new_module exports exported_map =
+      if StringMap.is_empty exports then exported_map
+      else IntMap.add new_module exports exported_map
+    in
+    let exported_functions =
+      add_exports new_module
+        (export_array_to_string_map modul.exports.func functions_map)
+        runtime.exported_functions
+    in
+    let exported_globals =
+      add_exports new_module
+        (export_array_to_string_map modul.exports.global globals_map)
+        runtime.exported_globals
+    in
+    let exported_memories =
+      add_exports new_module
+        (export_array_to_string_map modul.exports.mem memories_map)
+        runtime.exported_memories
+    in
+    let exported_tables =
+      add_exports new_module
+        (export_array_to_string_map modul.exports.table tables_map)
+        runtime.exported_tables
+    in
     let last_module = Some new_module in
     let initialization_codes =
-      IntMap.add new_module initialization_code runtime.initialization_codes
+      let initialization_code =
+        rewrite_expression (Annotated.dummy initialization_code)
+      in
+      IntMap.add new_module initialization_code.Annotated.raw
+        runtime.initialization_codes
     in
 
-    (* Now this is the second step, where we rewrite all access to use runtime address.
-      For instance, if a function contains the instruction global.get 0, the 0 is local to the modul in which the function is defined.
-      We look what is the runtime address of this global in the map, by looking the global map at (module_id, 0).
-      If the runtime address is say, 42, we rewrite the instruction to be global.get 42. *)
-    let runtime = { runtime with initialization_codes; exports; last_module } in
+    let runtime =
+      { runtime with
+        initialization_codes
+      ; exported_functions
+      ; exported_memories
+      ; exported_globals
+      ; exported_tables
+      ; last_module
+      }
+    in
+
+    let runtime =
+      match name with
+      | None -> runtime
+      | Some name ->
+        let registered_modules =
+          StringMap.add name new_module runtime.registered_modules
+        in
+        { runtime with registered_modules }
+    in
+    Log.debug (fun m -> m "runtime is: %a" pp runtime);
     Ok runtime
-end
 
-module Concrete_runtime_builder : Runtime_builder_intf = struct
-  type value = Concrete_value.t
+  let get_global ~runtime id =
+    let id = Allocator.unsafe_of_int id in
+    match Allocator.find_opt id runtime.globals with
+    | Some { value = Var v; _ } -> v
+    | Some { value = Const v; _ } -> M.value_of_concrete v
+    | None -> assert false
 
-  let value_of_concrete v = v
+  let get_func ~runtime id =
+    let id = Allocator.unsafe_of_int id in
+    match Allocator.find_opt id runtime.functions with
+    | Some v -> v
+    | None -> assert false
 
-  type memory = Concrete_memory.t
+  let get_extern_func ~runtime id =
+    let id = Allocator.unsafe_of_int id in
+    match Allocator.find_opt id runtime.extern_functions with
+    | Some (f, _typ) -> f
+    | None -> assert false
 
-  let init_memory = Concrete_memory.init
-
-  let get_memory_limits = Concrete_memory.get_limits
-
-  type table = Concrete_table.t
-
-  let init_table = Concrete_table.init
-
-  let get_table_size = Concrete_table.size
-
-  let get_table_type = Concrete_table.get_type
-
-  type elem = Concrete_elem.t
-
-  let elem_of_concrete_ref_list l = { Concrete_elem.value = Array.of_list l }
-end
-
-module Symbolic_runtime_builder : Runtime_builder_intf = struct
-  type value = Symbolic_value.t
-
-  let value_of_concrete v = Symbolic_value.of_concrete v
-
-  type memory = Symbolic_memory.t
-
-  let init_memory _ = assert false
-
-  let get_memory_limits _ = assert false
-
-  type table = Symbolic_table.t
-
-  let init_table ?label:_ = assert false
-
-  let get_table_size _ = assert false
-
-  let get_table_type _ = assert false
-
-  type elem = Symbolic_elem.t
-
-  let elem_of_concrete_ref_list _ = assert false
-end
-
-module Abstract_runtime_builder : Runtime_builder_intf = struct
-  type value = Abstract_value.t
-
-  let value_of_concrete _ = assert false
-
-  type memory = Abstract_memory.t
-
-  let init_memory _ = assert false
-
-  let get_memory_limits _ = assert false
-
-  type table = |
-
-  let init_table ?label:_ = assert false
-
-  let get_table_size _ = assert false
-
-  let get_table_type _ = assert false
-
-  type elem = |
-
-  let elem_of_concrete_ref_list _ = assert false
-end
-
-module Interpret (Runtime : Runtime_intf) = struct
-  let run_simple_instruction ~runtime : Binary.simple_instruction -> Runtime.t =
-    function
-    | I32 (Const i) ->
-      Log.info (fun m -> m "i32.const %ld" i);
-      runtime
-    | _ -> assert false
-
-  let run_instr ~runtime : Binary.instr Annotated.t -> Runtime.t =
-   fun i ->
-    match i.Annotated.raw with
-    | Simple i -> run_simple_instruction ~runtime i
-    | _ -> assert false
-
-  let run_expr ~runtime expr =
-    List.fold_left (fun runtime instr -> run_instr ~runtime instr) runtime expr
-
-  let exported_func ~(runtime : Runtime.t) ~(modul : Runtime.modul)
-    ~(func : string) : Runtime.t =
-    let _ = modul in
-    runtime
-
-  let initialization_code ~(runtime : Runtime.t) ~(modul : Runtime.modul) :
-    Runtime.t =
-    let expr = Runtime.get_initialization_code ~runtime ~modul in
-    run_expr ~runtime expr
-end
-
-module Concrete_runtime : Runtime_intf = Make (Concrete_runtime_builder)
-
-module Symbolic_runtime : Runtime_intf = Make (Symbolic_runtime_builder)
-
-module Abstract_runtime : Runtime_intf = Make (Abstract_runtime_builder)
-
-module Test (Runtime : Runtime_intf) = struct
-  module Interpret = Interpret (Runtime)
-
-  let outcome () =
-    let* modul =
-      Compile.File.until_validate ~unsafe:false (Fpath.v "new_link.wat")
+  let link_extern_module ~runtime ~name m =
+    Log.debug (fun m -> m "linking extern module: %s" name);
+    let new_module = get_next_module ~runtime in
+    let runtime, exports =
+      List.fold_left
+        (fun (runtime, exports) (name, func) ->
+          let typ = M.to_func_type func in
+          let extern_functions, addr =
+            Allocator.add (func, typ) runtime.extern_functions
+          in
+          let functions, addr =
+            Allocator.add
+              (Kind.Extern (Allocator.unsafe_to_int addr) : Kind.func)
+              runtime.functions
+          in
+          let exports = StringMap.add name addr exports in
+          ({ runtime with extern_functions; functions }, exports) )
+        (runtime, StringMap.empty) m
     in
-    let runtime = Runtime.empty in
-    let* runtime = Runtime.link_binary_module ~runtime ~modul in
-    let* modul = Runtime.get_last_module ~runtime in
-    let runtime = Interpret.initialization_code ~runtime ~modul in
-    let _runtime = Interpret.exported_func ~runtime ~modul ~func:"f" in
-    Ok ()
+    let exported_functions =
+      IntMap.add new_module exports runtime.exported_functions
+    in
+    let last_module = Some new_module in
+    let runtime = { runtime with exported_functions; last_module } in
+    register_module ~runtime ~modul:new_module ~name
 
-  let run () =
-    match outcome () with
-    | Error e ->
-      let msg = Result.err_to_string e in
-      Log.err (fun m ->
-        m "******************************************************** %s" msg )
-    | Ok () ->
-      Log.info (fun m ->
-        m
-          "******************************************************** new link \
-           OK!" );
-      ()
+  let get_exported_func ~runtime ~module_name ~func_name =
+    let* modul =
+      match module_name with
+      | None -> get_last_module ~runtime
+      | Some module_name -> (
+        match StringMap.find_opt module_name runtime.registered_modules with
+        | None -> Error (`Unbound_module module_name)
+        | Some modul -> Ok modul )
+    in
+    let functions =
+      match IntMap.find_opt modul runtime.exported_functions with
+      | None -> assert false
+      | Some functions -> functions
+    in
+    let* address =
+      match StringMap.find_opt func_name functions with
+      | None -> Error (`Unbound_name func_name)
+      | Some v -> Ok v
+    in
+    match Allocator.find_opt address runtime.functions with
+    | Some func -> Ok func
+    | None -> assert false
 end
-
-module Test_concrete = Test (Concrete_runtime)
-module Test_symbolic = Test (Symbolic_runtime)
-module Test_abstract = Test (Abstract_runtime)
-
-let run () = ()
-
-(*
-  Test_concrete.run ();
-  Test_symbolic.run ();
-  Test_abstract.run ()
-  *)

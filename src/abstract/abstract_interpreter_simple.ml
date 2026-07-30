@@ -1584,8 +1584,10 @@ let eval_local ({ stack; locals; _ } as state : Abstract_state.t) :
     let locals = Abstract_locals.add i e locals in
     State { state with stack; locals }
 
-let eval_global ({ stack; globals; _ } as state : Abstract_state.t) :
-  Binary.global_instr -> _ = function
+let eval_global ({ stack = _; _ } : Abstract_state.t) : Binary.global_instr -> _
+    = function
+  | _ -> assert false
+(*
   | Set i ->
     let e, stack = Stack.pop stack in
     let globals = Abstract_globals.add i e globals in
@@ -1594,6 +1596,7 @@ let eval_global ({ stack; globals; _ } as state : Abstract_state.t) :
     let v = Abstract_globals.find i globals in
     let stack = Stack.push stack v in
     State { state with stack; globals }
+*)
 
 (* TODO: handle this correctly *)
 let eval_memory ({ stack; ctx; _ } as state : Abstract_state.t) :

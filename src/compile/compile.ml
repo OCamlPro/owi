@@ -37,9 +37,11 @@ module Text = struct
     let* m = until_validate ~unsafe m in
     Symbolic_env.link_binary_module env ~name m
 
-  let until_abstract_link ~unsafe ~name env m =
-    let* m = until_validate ~unsafe m in
-    Abstract_env.link_binary_module env ~name m
+  let until_abstract_link ~unsafe ~name runtime m =
+    let* modul = until_validate ~unsafe m in
+    let* runtime = Abstract_runtime.link_binary_module ~runtime ~name ~modul in
+    let+ modul = Abstract_runtime.get_last_module ~runtime in
+    (modul, runtime)
 end
 
 module Binary = struct
@@ -57,9 +59,11 @@ module Binary = struct
     let* m = until_validate ~unsafe m in
     Symbolic_env.link_binary_module env ~name m
 
-  let until_abstract_link ~unsafe ~name env m =
-    let* m = until_validate ~unsafe m in
-    Abstract_env.link_binary_module env ~name m
+  let until_abstract_link ~unsafe ~name runtime m =
+    let* modul = until_validate ~unsafe m in
+    let* runtime = Abstract_runtime.link_binary_module ~runtime ~name ~modul in
+    let+ modul = Abstract_runtime.get_last_module ~runtime in
+    (modul, runtime)
 end
 
 module Any = struct

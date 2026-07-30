@@ -2,10 +2,6 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-module New_link : sig
-  val run : unit -> unit
-end
-
 module Result : sig
   type err =
     [ `Alignment_too_large
@@ -1593,15 +1589,8 @@ end
 
 module Kind : sig
   type func = private
-    | Wasm of
-        { func : Binary.Func.t
-        ; modul : int
-        }
-    | Extern of { idx : int }
-
-  val wasm : Binary.Func.t -> modul:int -> func
-
-  val extern : int -> func
+    | Wasm of Binary.Func.t
+    | Extern of int
 
   type 'f t =
     | Wat of Text.Module.t
@@ -1729,17 +1718,6 @@ module Symbolic_env : sig
     name:string option -> t -> Binary.Module.t -> (int * t) Result.t
 
   val link_extern_module : name:string -> Symbolic_extern.Module.t -> t -> t
-end
-
-module Abstract_env : sig
-  type t
-
-  val empty : unit -> t
-
-  val link_binary_module :
-    name:string option -> t -> Binary.Module.t -> (int * t) Result.t
-
-  val link_extern_module : name:string -> Abstract_extern.Module.t -> t -> t
 end
 
 module Compile : sig

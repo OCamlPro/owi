@@ -2,8 +2,6 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-module New_link = New_link
-module Abstract_env = Abstract_env
 module Abstract_invariant = Abstract_invariant
 module Annotated = Annotated
 module Binary = Binary

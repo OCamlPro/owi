@@ -26,9 +26,9 @@ module Any : sig
   val until_abstract_link :
        unsafe:bool
     -> name:string option
-    -> Abstract_env.t
+    -> Abstract_runtime.t
     -> Abstract_extern.Func.t Kind.t
-    -> (int * Abstract_env.t) Result.t
+    -> (Abstract_runtime.modul * Abstract_runtime.t) Result.t
 end
 
 module File : sig
@@ -59,9 +59,9 @@ module File : sig
   val until_abstract_link :
        unsafe:bool
     -> name:string option
-    -> Abstract_env.t
+    -> Abstract_runtime.t
     -> Fpath.t
-    -> (int * Abstract_env.t) Result.t
+    -> (Abstract_runtime.modul * Abstract_runtime.t) Result.t
 end
 
 module Text : sig
@@ -92,9 +92,9 @@ module Text : sig
   val until_abstract_link :
        unsafe:bool
     -> name:string option
-    -> Abstract_env.t
+    -> Abstract_runtime.t
     -> Text.Module.t
-    -> (int * Abstract_env.t) Result.t
+    -> (Abstract_runtime.modul * Abstract_runtime.t) Result.t
 end
 
 module Binary : sig
@@ -124,7 +124,7 @@ module Binary : sig
   val until_abstract_link :
        unsafe:bool
     -> name:string option
-    -> Abstract_env.t
+    -> Abstract_runtime.t
     -> Binary.Module.t
-    -> (int * Abstract_env.t) Result.t
+    -> (Abstract_runtime.modul * Abstract_runtime.t) Result.t
 end

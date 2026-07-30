@@ -48,9 +48,6 @@ module Make (M : Link_intf.M) = struct
       let f, _t = Dynarray.get modul.extern_funcs id in
       f
 
-    let fold_globals f acc (modul : t) =
-      IMap.fold (fun k v acc -> f k v acc) modul.globals acc
-
     module Build = struct
       type t =
         { globals : Concrete_global.t IMap.t
@@ -193,10 +190,10 @@ module Make (M : Link_intf.M) = struct
     | Some v -> Ok v
 
   let get_exported_func state ~module_name ~func_name =
-    let* exports, modul_id = get_module state module_name in
+    let* exports, _ = get_module state module_name in
     match StringMap.find_opt func_name exports.functions with
     | None -> Error (`Unbound_name func_name)
-    | Some v -> Ok (v, modul_id)
+    | Some v -> Ok v
 
   let load_from_module ls f (import : _ Origin.imported) =
     match StringMap.find_opt import.modul_name ls.by_name with
@@ -242,41 +239,37 @@ module Make (M : Link_intf.M) = struct
 
   let get_module (state : t) (i : int) = Dynarray.get state.modules i
 
-  let get_memory ~modul state i =
-    let modul = get_module state modul in
+  let get_memory state i =
+    let modul = get_module state 0 in
     Linked_module.get_memory modul i
 
-  let get_data ~modul state i =
-    let modul = get_module state modul in
+  let get_data state i =
+    let modul = get_module state 0 in
     Linked_module.get_data modul i
 
-  let get_func ~modul state i =
-    let modul = get_module state modul in
+  let get_func state i =
+    let modul = get_module state 0 in
     Linked_module.get_func modul i
 
-  let get_table ~modul state i =
-    let modul = get_module state modul in
+  let get_table state i =
+    let modul = get_module state 0 in
     Linked_module.get_table modul i
 
-  let get_elem ~modul state i =
-    let modul = get_module state modul in
+  let get_elem state i =
+    let modul = get_module state 0 in
     Linked_module.get_elem modul i
 
-  let get_global ~modul state i =
-    let modul = get_module state modul in
+  let get_global state i =
+    let modul = get_module state 0 in
     Linked_module.get_global modul i
 
-  let get_extern_func ~modul state i =
-    let modul = get_module state modul in
+  let get_extern_func state i =
+    let modul = get_module state 0 in
     Linked_module.get_extern_func modul i
 
   let get_init_code ~modul state =
     let modul = get_module state modul in
     Linked_module.get_init_code modul
-
-  let fold_globals ~modul f acc state =
-    let modul = get_module state modul in
-    Linked_module.fold_globals f acc modul
 
   (* TODO; the const evaluation is duplicated in many places and should be moved somewhere else! *)
   module Eval_const = struct
@@ -461,10 +454,10 @@ module Make (M : Link_intf.M) = struct
     let* func = load_from_module ls (fun (e : exports) -> e.functions) import in
     let type' =
       match func with
-      | Kind.Wasm { func; _ } ->
+      | Kind.Wasm func ->
         let (Bt_raw ((None | Some _), t)) = func.type_f in
         t
-      | Extern { idx } ->
+      | Extern idx ->
         let _f, t = Dynarray.get ls.extern_modules idx in
         t
     in
@@ -476,16 +469,16 @@ module Make (M : Link_intf.M) = struct
       in
       Error (`Incompatible_import_type msg)
 
-  let eval_func ls (modul : int) func : func Result.t =
+  let eval_func ls func : func Result.t =
     match func with
-    | Origin.Local func -> Result.ok @@ Kind.wasm func ~modul
+    | Origin.Local func -> Result.ok @@ (Kind.Wasm func : Kind.func)
     | Imported import -> load_func ls import
 
-  let eval_functions ls (finished_modul : int) modul functions =
+  let eval_functions ls modul functions =
     let+ modul, _i =
       array_fold_left
         (fun (modul, i) func ->
-          let+ func = eval_func ls finished_modul func in
+          let+ func = eval_func ls func in
           let modul = Linked_module.Build.add_func i func modul in
           (modul, succ i) )
         (modul, 0) functions
@@ -634,7 +627,7 @@ module Make (M : Link_intf.M) = struct
     let ls = clone ls in
     let next_id = Dynarray.length ls.modules in
     let modul = Linked_module.Build.empty in
-    let* modul = eval_functions ls next_id modul binary_module.func in
+    let* modul = eval_functions ls modul binary_module.func in
     let* modul = eval_tags ls next_id modul binary_module.tag in
     let* modul = eval_globals ls modul binary_module.global in
     let* modul = eval_memories ls modul binary_module.mem in
@@ -685,7 +678,7 @@ module Make (M : Link_intf.M) = struct
           let typ = M.to_func_type func in
           Dynarray.add_last extern_modules (func, typ);
           let id = Dynarray.length extern_modules - 1 in
-          ((name, (Kind.extern id : Kind.func)) :: functions, extern_modules) )
+          ((name, (Kind.Extern id : Kind.func)) :: functions, extern_modules) )
         ([], ls.extern_modules) functions
     in
     let functions = StringMap.of_seq (List.to_seq functions) in

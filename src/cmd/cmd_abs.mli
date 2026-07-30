@@ -2,7 +2,7 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-val env : unit -> Abstract_env.t
+val runtime : unit -> Abstract_runtime.t
 
 val cmd :
      source_file:Fpath.t

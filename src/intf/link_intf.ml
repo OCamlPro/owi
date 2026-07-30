@@ -26,22 +26,19 @@ module type T = sig
   (** the empty link state *)
   val empty : unit -> t
 
-  val get_memory : modul:int -> t -> int -> Concrete_memory.t
+  val get_memory : t -> int -> Concrete_memory.t
 
-  val get_data : modul:int -> t -> int -> data
+  val get_data : t -> int -> data
 
-  val get_func : modul:int -> t -> int -> Kind.func
+  val get_func : t -> int -> Kind.func
 
-  val get_table : modul:int -> t -> int -> Concrete_table.t
+  val get_table : t -> int -> Concrete_table.t
 
-  val get_elem : modul:int -> t -> int -> Concrete_elem.t
+  val get_elem : t -> int -> Concrete_elem.t
 
-  val get_global : modul:int -> t -> int -> Concrete_global.t
+  val get_global : t -> int -> Concrete_global.t
 
-  val fold_globals :
-    modul:int -> (int -> Concrete_global.t -> 'a -> 'a) -> 'a -> t -> 'a
-
-  val get_extern_func : modul:int -> t -> int -> extern_func
+  val get_extern_func : t -> int -> extern_func
 
   val get_init_code : modul:int -> t -> Binary.expr Annotated.t
 
@@ -52,10 +49,7 @@ module type T = sig
     -> Concrete_global.t Result.t
 
   val get_exported_func :
-       t
-    -> module_name:string option
-    -> func_name:string
-    -> (Kind.func * int) Result.t
+    t -> module_name:string option -> func_name:string -> Kind.func Result.t
 
   (** give a named to the last linked module in the given link state *)
   val register_last_module : t -> name:string -> id:string option -> t Result.t

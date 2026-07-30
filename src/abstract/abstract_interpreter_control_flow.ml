@@ -10,7 +10,7 @@ exception RecursiveFunctionCall
 
 type interpreter_state =
   { abs_state : Abstract_state.t
-  ; env : Abstract_env.t
+  ; runtime : Abstract_runtime.t
   }
 
 let gen_new_value ~widens a b state_a state_b
@@ -70,6 +70,7 @@ let serialize ~widens :
          , fun _ctx out -> (state_a.locals, out) ) )
   in
 
+  (*
   let (Abstract_domain.Context.Result (included, in_tuple, globals_continue)) =
     Abstract_globals.fold_on_nonequal_union
       begin fun k v1 v2 res ->
@@ -81,11 +82,11 @@ let serialize ~widens :
         let f = Abstract_globals.add k in
         gen_new_value ~widens v1 v2 state_a state_b res f
       end
-      state_a.globals state_b.globals
+      state_a.env.globals state_b.env.globals
       (Abstract_domain.Context.Result
          (included, in_tuple, fun _ctx out -> (state_a.globals, out)) )
   in
-
+  *)
   Log.debug (fun m ->
     let pp_locals ctx = Abstract_locals.pp (Value.pp_with_ctx ctx) in
     m "serializing locals (%s) : @\n first : %a @\n second : %a"
@@ -108,9 +109,11 @@ let serialize ~widens :
   in
   let cont ctx out =
     let stack, out = stack_continue ctx out in
+    (*
     let globals, out = globals_continue ctx out in
+  *)
     let locals, out = locals_continue ctx out in
-    ({ state_a with ctx; stack = List.rev stack; locals; globals }, out)
+    ({ state_a with ctx; stack = List.rev stack; locals }, out)
   in
   Abstract_domain.Context.Result (inc, in_tup, cont)
 
@@ -168,6 +171,7 @@ let widen widening_id state_a state_b =
 
 let exec_extern_func ({ stack; _ } : Abstract_state.t)
   (f : Abstract_extern.Func.t) =
+  Log.debug (fun m -> m "executing extern func");
   let open Abstract_extern.Func in
   let pop_arg (type ty) stack (arg : ty Abstract_extern.Func.telt) :
     ty * Stack.t =
@@ -328,7 +332,7 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
       Log.debug (fun m -> m "abstract state : None @.");
       None
 
-  and eval_instr ({ abs_state; env } as state : interpreter_state) :
+  and eval_instr ({ abs_state; runtime } as state : interpreter_state) :
        Binary.instr Annotated.t
     -> interpreter_state option * Abstract_state.t list JumpMap.t =
    fun instr ->
@@ -347,18 +351,15 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
       m "running instr : %a" (Binary.pp_instr ~short:true) instr.raw );
     match instr.raw with
     | Call call_idx ->
-      let func =
-        Abstract_env.get_func ~modul:abs_state.current_module env call_idx
-      in
+      let func = Abstract_runtime.get_func ~runtime call_idx in
       begin match func with
-      | Wasm { func; modul } ->
-        let abs_state = { abs_state with current_module = modul } in
+      | Wasm func ->
+        Log.debug (fun m -> m "it's a Wasm function");
         let r = eval_func { state with abs_state } call_idx func in
         (r, JumpMap.empty)
-      | Extern { idx } -> (
-        let func =
-          Abstract_env.get_extern_func ~modul:abs_state.current_module env idx
-        in
+      | Extern idx -> (
+        Log.debug (fun m -> m "it's an Extern function");
+        let func = Abstract_runtime.get_extern_func ~runtime idx in
         let stack = exec_extern_func abs_state func in
         match Abstract_monad.run stack abs_state with
         | None -> (None, JumpMap.empty)
@@ -525,47 +526,47 @@ end
 
 module ConcreteFixpoint = DenotFixpoint (Abstract_interpreter_simple)
 
-let eval_exprs ~(modul : int) abs_state env =
+let eval_exprs ~runtime ~(modul : Abstract_runtime.modul) abs_state =
   (* TODO: init_code is no more an exprs, it's a regular expr now, this function can probably be removed and eval_expr could be used instead! *)
-  let init_code = Abstract_env.get_init_code ~modul env in
-  let abs_state = { abs_state with Abstract_state.current_module = modul } in
-  let state = { abs_state; env } in
+  let init_code = Abstract_runtime.get_initialization_code ~runtime ~modul in
+  let state = { abs_state; runtime } in
   let state =
-    match ConcreteFixpoint.eval_expr state init_code with
+    match ConcreteFixpoint.eval_expr state (Annotated.dummy init_code) with
     | None, _mapping -> state
     | Some state, _mapping -> state
   in
   state.abs_state
 
-let modul_with_ctx ctx (env : Abstract_env.t) ~(modul : int) =
-  let abs_state = Abstract_state.empty modul Abstract_env.fold_globals env in
+let modul_with_ctx ~runtime ~(modul : Abstract_runtime.modul) ctx =
+  let abs_state = Abstract_state.empty () in
   let abs_state = { abs_state with ctx } in
-  eval_exprs ~modul abs_state env
+  eval_exprs ~runtime ~modul abs_state
 
-let modul (env : Abstract_env.t) ~(modul : int) =
-  let abs_state = Abstract_state.empty modul Abstract_env.fold_globals env in
-  eval_exprs ~modul abs_state env
+let modul ~(runtime : Abstract_runtime.t) ~(modul : Abstract_runtime.modul) =
+  let abs_state = Abstract_state.empty () in
+  eval_exprs ~runtime ~modul abs_state
 
-let exec_vfunc_from_outside ~ctx ~locals ~(modul : int) ~env (func : Kind.func)
-    =
-  let abs_state =
-    Abstract_state.empty_exec_state ~ctx ~locals ~modul
-      Abstract_env.fold_globals env
-  in
+let exec_vfunc_from_outside ~runtime ~ctx ~locals (func : Kind.func) =
+  let abs_state = Abstract_state.empty_exec_state ~ctx ~locals in
   try
     match func with
-    | Kind.Wasm { func; modul } -> (
+    | Kind.Wasm func -> (
       let stack =
         Abstract_locals.to_list locals
         |> List.sort (fun (i1, _) (i2, _) -> compare i1 i2)
         |> List.map snd
       in
-      let abs_state = { abs_state with stack; current_module = modul } in
-      match ConcreteFixpoint.eval_func { abs_state; env } modul func with
+      let abs_state = { abs_state with stack } in
+      match
+        ConcreteFixpoint.eval_func { abs_state; runtime }
+          (* TODO: attach correct ID to this function to distinguish the call stack, 0 is incorrect here *)
+          0
+          func
+      with
       | Some state -> Ok state.abs_state
       | None -> Fmt.error_msg "failed" )
-    | Extern { idx } -> (
-      let f = Abstract_env.get_extern_func ~modul env idx in
+    | Extern idx -> (
+      let f = Abstract_runtime.get_extern_func ~runtime idx in
       let stack = exec_extern_func abs_state f in
       match Abstract_monad.run stack abs_state with
       | None -> Fmt.error_msg "failed"

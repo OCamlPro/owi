@@ -6,7 +6,6 @@
   abstract_boolean
   abstract_checker
   abstract_domain
-  abstract_env
   abstract_extern
   abstract_f32
   abstract_f64
@@ -21,6 +20,7 @@
   abstract_memory
   abstract_monad
   abstract_ref
+  abstract_runtime
   abstract_stack
   abstract_state
   abstract_v128
@@ -78,6 +78,7 @@
   concrete_i64
   concrete_memory
   concrete_ref
+  concrete_runtime
   concrete_table
   concrete_value
   concrete_v128
@@ -125,6 +126,8 @@
   ref_intf
   result
   rewrite
+  runtime_builder_intf
+  runtime_intf
   script
   script_error
   script_symbolic
@@ -151,6 +154,7 @@
   symbolic_memory0
   symbolic_parameters
   symbolic_ref
+  symbolic_runtime
   symbolic_table
   symbolic_table0
   symbolic_value

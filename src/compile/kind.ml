@@ -3,15 +3,12 @@
 (* Written by the Owi programmers *)
 
 type func =
-  | Wasm of
-      { func : Binary.Func.t
-      ; modul : int
-      }
-  | Extern of { idx : int }
+  | Wasm of Binary.Func.t
+  | Extern of int
 
-let wasm func ~modul : func = Wasm { func; modul }
-
-let extern idx : func = Extern { idx }
+let pp_func ppf = function
+  | Wasm _f -> Fmt.pf ppf "Wasm <code>"
+  | Extern n -> Fmt.pf ppf "Extern %d" n
 
 type 'f t =
   | Wat of Text.Module.t

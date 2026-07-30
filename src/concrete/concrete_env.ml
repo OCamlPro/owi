@@ -14,8 +14,8 @@ include Link.Make (struct
   let data_of_concrete data = data
 end)
 
-let get_memory ~modul env id = Result.ok @@ get_memory env ~modul id
+let get_memory env id = Result.ok @@ get_memory env id
 
-let get_table ~modul env id = Result.ok @@ get_table env ~modul id
+let get_table env id = Result.ok @@ get_table env id
 
-let get_global ~modul env id = Result.ok @@ get_global env ~modul id
+let get_global env id = Result.ok @@ get_global env id

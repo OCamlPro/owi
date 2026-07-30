@@ -26,12 +26,12 @@ let run_file ~parameters ~source_file =
 
   let* abstract_invariant =
     if parameters.generate_abstract_invariant then
-      let env = Cmd_abs.env () in
-      let+ modul, env =
-        Compile.Binary.until_abstract_link ~unsafe ~name:None env modul
+      let runtime = Cmd_abs.runtime () in
+      let+ modul, runtime =
+        Compile.Binary.until_abstract_link ~unsafe ~name:None runtime modul
       in
       try
-        let state = Abstract_interpreter_control_flow.modul env ~modul in
+        let state = Abstract_interpreter_control_flow.modul ~runtime ~modul in
         state.invariant
       with Abstract_interpreter_control_flow.RecursiveFunctionCall ->
         Abstract_invariant.empty ()

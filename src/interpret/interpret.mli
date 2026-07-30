@@ -21,7 +21,6 @@ module Concrete (_ : Parameters) : sig
 
   val exec_vfunc_from_outside :
        locals:Concrete_value.t list
-    -> modul:int
     -> env:Concrete_env.t
     -> Kind.func
     -> Concrete_value.t list Concrete_choice.t
@@ -32,7 +31,6 @@ module Symbolic (_ : Parameters) : sig
 
   val exec_vfunc_from_outside :
        locals:Symbolic_value.t list
-    -> modul:int
     -> env:Symbolic_env.t
     -> Kind.func
     -> Symbolic_value.t list Symbolic_choice.t

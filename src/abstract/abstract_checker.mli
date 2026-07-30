@@ -2,4 +2,8 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-val check_module : Abstract_env.t -> modul:int -> Abstract_invariant.t -> unit
+val check_module :
+     runtime:Abstract_runtime.t
+  -> modul:Abstract_runtime.modul
+  -> Abstract_invariant.t
+  -> unit
