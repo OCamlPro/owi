@@ -43,21 +43,21 @@ let fill mem ~pos ~len c =
   let pos = Int32.to_int pos in
   let len = Int32.to_int len in
   Bytes.unsafe_fill mem.data pos len c;
-  Ok ()
+  Ok mem
 
 let blit ~src ~src_idx ~dst ~dst_idx ~len =
   let src_idx = Int32.to_int src_idx in
   let dst_idx = Int32.to_int dst_idx in
   let len = Int32.to_int len in
   Bytes.unsafe_blit src.data src_idx dst.data dst_idx len;
-  Ok ()
+  Ok dst
 
 let blit_string mem str ~src ~dst ~len =
   let src = Int32.to_int src in
   let dst = Int32.to_int dst in
   let len = Int32.to_int len in
   Bytes.unsafe_blit_string str src mem.data dst len;
-  Ok ()
+  Ok mem
 
 let get_limit_max { limits; _ } =
   match limits with
@@ -69,27 +69,31 @@ let get_limits { limits; _ } = limits
 let store_8 mem ~addr n =
   let addr = Int32.to_int addr in
   let n = Int32.to_int n in
-  Ok (Bytes.set_int8 mem.data addr n)
+  Bytes.set_int8 mem.data addr n;
+  Ok mem
 
 let store_16 mem ~addr n =
   let addr = Int32.to_int addr in
   let n = Int32.to_int n in
-  Ok (Bytes.set_int16_le mem.data addr n)
+  Bytes.set_int16_le mem.data addr n;
+  Ok mem
 
 let store_32 mem ~addr n =
   let addr = Int32.to_int addr in
-  Ok (Bytes.set_int32_le mem.data addr n)
+  Bytes.set_int32_le mem.data addr n;
+  Ok mem
 
 let store_64 mem ~addr n =
   let addr = Int32.to_int addr in
-  Ok (Bytes.set_int64_le mem.data addr n)
+  Bytes.set_int64_le mem.data addr n;
+  Ok mem
 
 let store_128 mem ~addr n =
   let addr = Int32.to_int addr in
   let left, right = Concrete_v128.to_i64x2 n in
   Bytes.set_int64_le mem.data addr left;
   Bytes.set_int64_le mem.data (addr + 8) right;
-  Ok ()
+  Ok mem
 
 let load_8_s mem addr =
   let addr = Int32.to_int addr in

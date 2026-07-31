@@ -409,19 +409,19 @@ struct
       let n, stack = Stack.pop_i32 stack in
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr8 ~state memid ~pos ~offset instr_counter in
-      let+ () = Memory.store_8 mem ~addr n in
+      let+ _ = Memory.store_8 mem ~addr n in
       stack
     | Store16 (memid, { offset; _ }) ->
       let n, stack = Stack.pop_i32 stack in
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr16 ~state memid ~pos ~offset instr_counter in
-      let+ () = Memory.store_16 mem ~addr n in
+      let+ _ = Memory.store_16 mem ~addr n in
       stack
     | Store (memid, { offset; _ }) ->
       let n, stack = Stack.pop_i32 stack in
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr32 ~state memid ~pos ~offset instr_counter in
-      let+ () = Memory.store_32 mem ~addr n in
+      let+ _ = Memory.store_32 mem ~addr n in
       stack
 
   let exec_i64_instr ~state instr_counter stack ~uuid :
@@ -612,7 +612,7 @@ struct
       let n, stack = Stack.pop_i64 stack in
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr8 ~state memid ~pos ~offset instr_counter in
-      let+ () =
+      let+ _ =
         let n = I64.to_int32 n in
         Memory.store_8 mem ~addr n
       in
@@ -621,7 +621,7 @@ struct
       let n, stack = Stack.pop_i64 stack in
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr16 ~state memid ~pos ~offset instr_counter in
-      let+ () =
+      let+ _ =
         let n = I64.to_int32 n in
         Memory.store_16 mem ~addr n
       in
@@ -630,7 +630,7 @@ struct
       let n, stack = Stack.pop_i64 stack in
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr32 ~state memid ~pos ~offset instr_counter in
-      let+ () =
+      let+ _ =
         let n = I64.to_int32 n in
         Memory.store_32 mem ~addr n
       in
@@ -639,7 +639,7 @@ struct
       let n, stack = Stack.pop_i64 stack in
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr64 ~state memid ~pos ~offset instr_counter in
-      let+ () = Memory.store_64 mem ~addr n in
+      let+ _ = Memory.store_64 mem ~addr n in
       stack
 
   let exec_f32_instr ~state instr_counter stack :
@@ -688,7 +688,7 @@ struct
       let n, stack = Stack.pop_f32 stack in
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr32 ~state memid ~pos ~offset instr_counter in
-      let+ () = Memory.store_32 mem ~addr (F32.to_bits n) in
+      let+ _ = Memory.store_32 mem ~addr (F32.to_bits n) in
       stack
 
   let exec_f64_instr ~state instr_counter stack :
@@ -738,7 +738,7 @@ struct
       let n, stack = Stack.pop_f64 stack in
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr64 ~state memid ~pos ~offset instr_counter in
-      let+ () = Memory.store_64 mem ~addr (F64.to_bits n) in
+      let+ _ = Memory.store_64 mem ~addr (F64.to_bits n) in
       stack
 
   let exec_v128_instr ~state instr_counter stack (i : Binary.v128_instr) :
@@ -777,7 +777,7 @@ struct
       let n, stack = Stack.pop_v128 stack in
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr128 ~state memid ~pos ~offset instr_counter in
-      let+ () = Memory.store_128 mem ~addr n in
+      let+ _ = Memory.store_128 mem ~addr n in
       stack
     | Load16x4_s (memid, { offset; _ }) ->
       let pos, stack = Stack.pop_i32 stack in
@@ -899,32 +899,32 @@ struct
       let vec, stack = Stack.pop_v128 stack in
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr8 ~state memid ~pos ~offset instr_counter in
-      let+ () = Memory.store_8 mem ~addr (V128.extract_lane8 lane vec) in
+      let+ _ = Memory.store_8 mem ~addr (V128.extract_lane8 lane vec) in
       stack
     | Store64_lane (memid, { offset; _ }, lane) ->
       let vec, stack = Stack.pop_v128 stack in
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr64 ~state memid ~pos ~offset instr_counter in
-      let+ () = Memory.store_64 mem ~addr (V128.extract_lane64 lane vec) in
+      let+ _ = Memory.store_64 mem ~addr (V128.extract_lane64 lane vec) in
       stack
     | Store32_zero (memid, { offset; _ }) ->
       let vec, stack = Stack.pop_v128 stack in
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr32 ~state memid ~pos ~offset instr_counter in
       let a, _, _, _ = V128.to_i32x4 vec in
-      let+ () = Memory.store_32 mem ~addr a in
+      let+ _ = Memory.store_32 mem ~addr a in
       stack
     | Store32_lane (memid, { offset; _ }, lane) ->
       let vec, stack = Stack.pop_v128 stack in
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr32 ~state memid ~pos ~offset instr_counter in
-      let+ () = Memory.store_32 mem ~addr (V128.extract_lane32 lane vec) in
+      let+ _ = Memory.store_32 mem ~addr (V128.extract_lane32 lane vec) in
       stack
     | Store16_lane (memid, { offset; _ }, lane) ->
       let vec, stack = Stack.pop_v128 stack in
       let pos, stack = Stack.pop_i32 stack in
       let* addr, mem = mk_addr16 ~state memid ~pos ~offset instr_counter in
-      let+ () = Memory.store_16 mem ~addr (V128.extract_lane16 lane vec) in
+      let+ _ = Memory.store_16 mem ~addr (V128.extract_lane16 lane vec) in
       stack
     | Load32x2_s (memid, { offset; _ }) ->
       let pos, stack = Stack.pop_i32 stack in
@@ -1549,7 +1549,7 @@ struct
         Char.chr c
       in
       let* mem = Env.get_memory env memid in
-      let+ () = Memory.fill mem ~pos ~len c in
+      let+ _ = Memory.fill mem ~pos ~len c in
       stack
     | Copy (dstmemid, srcmemid) ->
       let len, stack = Stack.pop_i32 stack in
@@ -1572,7 +1572,7 @@ struct
       in
       let* srcmem = Env.get_memory env srcmemid in
       let* dstmem = Env.get_memory env dstmemid in
-      let+ () = Memory.blit ~src:srcmem ~src_idx ~dst:dstmem ~dst_idx ~len in
+      let+ _ = Memory.blit ~src:srcmem ~src_idx ~dst:dstmem ~dst_idx ~len in
       stack
     | Init (memid, dataid) ->
       let len, stack = Stack.pop_i32 stack in
@@ -1595,7 +1595,7 @@ struct
       in
       let data = Data.value data in
       let* mem = Env.get_memory env memid in
-      let+ () = Memory.blit_string mem data ~src ~dst ~len in
+      let+ _ = Memory.blit_string mem data ~src ~dst ~len in
       stack
 
   let exec_data_instr env : Binary.data_instr -> _ = function

@@ -1607,7 +1607,7 @@ end
 module Concrete_memory : sig
   type t
 
-  val store_8 : t -> addr:Concrete_i32.t -> Concrete_i32.t -> unit Result.t
+  val store_8 : t -> addr:Concrete_i32.t -> Concrete_i32.t -> t Result.t
 end
 
 module Concrete_extern : sig
