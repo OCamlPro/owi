@@ -35,6 +35,8 @@ module Abstract_runtime_builder :
   type context = Abstract_domain.Context.t
 
   let empty_context = Abstract_domain.root_context
+
+  type data = |
 end
 
 include New_link.Make (Abstract_runtime_builder)

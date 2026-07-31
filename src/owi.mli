@@ -1698,15 +1698,18 @@ module Label : sig
   end
 end
 
-module Concrete_env : sig
+module Concrete_runtime : sig
   type t
 
-  val empty : unit -> t
+  type modul
+
+  val empty : t
 
   val link_binary_module :
-    name:string option -> t -> Binary.Module.t -> (int * t) Result.t
+    runtime:t -> name:string option -> modul:Binary.Module.t -> t Result.t
 
-  val link_extern_module : name:string -> Concrete_extern.Module.t -> t -> t
+  val link_extern_module :
+    runtime:t -> name:string -> Concrete_extern.Module.t -> t
 end
 
 module Symbolic_env : sig
@@ -1731,18 +1734,18 @@ module Compile : sig
     val until_concrete_link :
          unsafe:bool
       -> name:string option
-      -> Concrete_env.t
+      -> Concrete_runtime.t
       -> Text.Module.t
-      -> (int * Concrete_env.t) Result.t
+      -> (Concrete_runtime.modul * Concrete_runtime.t) Result.t
   end
 
   module Binary : sig
     val until_concrete_link :
          unsafe:bool
       -> name:string option
-      -> Concrete_env.t
+      -> Concrete_runtime.t
       -> Binary.Module.t
-      -> (int * Concrete_env.t) Result.t
+      -> (Concrete_runtime.modul * Concrete_runtime.t) Result.t
   end
 end
 
@@ -1890,12 +1893,31 @@ module Interpret : sig
 
   module Default_parameters : Parameters
 
-  module Concrete (_ : Parameters) : sig
-    val modul : Concrete_env.t -> modul:int -> unit Result.t
-  end
-
   module Symbolic (_ : Parameters) : sig
     val modul : Symbolic_env.t -> modul:int -> unit Symbolic_choice.t
+  end
+end
+
+module New_interpret : sig
+  module type Parameters = sig
+    val use_ite_for_select : bool
+
+    val throw_away_trap : bool
+
+    val timeout : float option
+
+    val timeout_instr : int option
+
+    val abstract_invariant : Abstract_invariant.t
+  end
+
+  module Default_parameters : Parameters
+
+  module Concrete (_ : Parameters) : sig
+    val modul :
+         runtime:Concrete_runtime.t
+      -> modul:Concrete_runtime.modul
+      -> unit Result.t
   end
 end
 

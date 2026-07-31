@@ -67,7 +67,6 @@
   concrete_choice
   concrete_data
   concrete_elem
-  concrete_env
   concrete_extern
   concrete_f32
   concrete_f64
@@ -108,6 +107,7 @@
   i32_intf
   i64_intf
   interpret
+  new_interpret
   iop_intf
   kind
   label

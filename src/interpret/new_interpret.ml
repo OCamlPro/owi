@@ -41,8 +41,6 @@ module Make
       Table_intf.T
         with type reference := Value.Ref.t
          and type 'a choice := 'a Choice.t)
-    (Global :
-      Global_intf.T with type value := Value.t and type 'a choice := 'a Choice.t)
     (Memory :
       Memory_intf.T
         with type i32 := Value.i32
@@ -58,15 +56,14 @@ module Make
          and type v128 := Value.v128
          and type memory := Memory.t
          and type 'a m := 'a Choice.t)
-    (Env :
-      Env_intf.T
-        with type data := Data.t
+    (Runtime :
+      Runtime_intf.T
+        with type extern_func := Extern_func.t
          and type memory := Memory.t
-         and type global := Global.t
+         and type value := Value.t
          and type table := Table.t
          and type elem := Elem.t
-         and type extern_func := Extern_func.t
-         and type 'a choice := 'a Choice.t)
+         and type data := Data.t)
     (Parameters : Parameters) =
 struct
   open Value
@@ -161,17 +158,17 @@ struct
       ; pc : expr Annotated.t
       ; block_stack : block_stack
       ; func_rt : result_type
-      ; env : Env.t
+      ; runtime : Runtime.t
       }
 
-    let empty ~locals ~env =
+    let empty ~locals ~runtime =
       { return_state = None
       ; stack = []
       ; locals = Locals.of_list locals
       ; pc = Annotated.dummy []
       ; block_stack = []
       ; func_rt = []
-      ; env
+      ; runtime
       }
 
     type instr_result =
@@ -213,7 +210,7 @@ struct
     if Int64.(lt_u (sub 0xFFFF_FFFF_FFFF_FFFFL access_size) offset) then
       Choice.trap `Out_of_bounds_memory_access
     else
-      let* mem = Env.get_memory state.env memid in
+      let mem = Runtime.get_memory ~runtime:state.runtime memid in
       let pos = I64.extend_i32_u pos in
       let>! () =
         let limit = I64.of_int64 (Int64.add access_size offset) in
@@ -226,7 +223,7 @@ struct
         , false )
       in
       let addr = I32.wrap_i64 I64.(add pos (I64.of_int64 offset)) in
-      let* mem = Env.get_memory state.env memid in
+      let mem = Runtime.get_memory ~runtime:state.runtime memid in
       Choice.return (addr, mem)
 
   let mk_addr8 = mk_addr 1L
@@ -1310,7 +1307,7 @@ struct
       Stack.apply_f64_v128_v128 stack (V128.F64x2.replace_lane lane)
       |> Choice.return
 
-  let exec_ref_instr env stack (i : Binary.ref_instr) =
+  let exec_ref_instr runtime stack (i : Binary.ref_instr) =
     match i with
     | Null t -> Stack.push_ref stack (Ref.null t) |> Choice.return
     | Is_null ->
@@ -1326,7 +1323,7 @@ struct
       else Stack.push_ref stack r |> Choice.return
     (* TODO: restrict to non_null refs *)
     | Func i ->
-      let f = Env.get_func env i in
+      let f = Runtime.get_func ~runtime i in
       Stack.push_ref stack (Ref.func f) |> Choice.return
     | Eq | Test _ | Cast _ -> (* TODO *) assert false
 
@@ -1344,28 +1341,29 @@ struct
       let stack = Stack.push stack v in
       State.Continue { state with locals; stack } |> Choice.return
 
-  let exec_global_instr env stack : Binary.global_instr -> _ = function
+  let exec_global_instr ({ stack; runtime; _ } as state : State.t) :
+    Binary.global_instr -> State.t = function
     | Get i ->
-      let+ g = Env.get_global env i in
-      Stack.push stack (Global.value g)
+      let g = Runtime.get_global ~runtime i in
+      let stack = Stack.push stack g in
+      { state with stack }
     | Set i ->
-      let* global = Env.get_global env i in
       let v, stack = Stack.pop stack in
-      let+ () = Global.set_value global v in
-      stack
+      let runtime = Runtime.set_global ~runtime i v in
+      { state with runtime; stack }
 
-  let exec_table_instr env instr_counter stack : Binary.table_instr -> _ =
+  let exec_table_instr runtime instr_counter stack : Binary.table_instr -> _ =
     function
     | Get tbl_i ->
       (* TODO: this should be rewritten without `select_i32` ! but it requires to change the type of `Table.get` *)
       let i, stack = Stack.pop_i32 stack in
       let* i = Choice.select_i32 i in
       let i = Int32.to_int i in
-      let* t = Env.get_table env tbl_i in
+      let t = Runtime.get_table ~runtime tbl_i in
       let size = Table.size t in
       if i < 0 || i >= size then Choice.trap `Out_of_bounds_table_access
       else
-        let* t = Env.get_table env tbl_i in
+        let t = Runtime.get_table ~runtime tbl_i in
         let v = Table.get t i in
         Stack.push stack (Ref v) |> Choice.return
     | Set tbl_indice ->
@@ -1374,20 +1372,20 @@ struct
       (* TODO: avoid the select_i32, it requires to change the type of `Table.set` *)
       let* indice = Choice.select_i32 indice in
       let indice = Int32.to_int indice in
-      let* t = Env.get_table env tbl_indice in
+      let t = Runtime.get_table ~runtime tbl_indice in
       if indice < 0 || indice >= Table.size t then
         Choice.trap `Out_of_bounds_table_access
       else begin
-        let* t = Env.get_table env tbl_indice in
+        let t = Runtime.get_table ~runtime tbl_indice in
         let+ () = Table.set t indice v in
         stack
       end
     | Size indice ->
-      let+ t = Env.get_table env indice in
+      let t = Runtime.get_table ~runtime indice in
       let size = Table.size t in
-      Stack.push_i32_of_int stack size
+      Choice.return @@ Stack.push_i32_of_int stack size
     | Grow indice ->
-      let* t = Env.get_table env indice in
+      let t = Runtime.get_table ~runtime indice in
       let size = I32.of_int @@ Table.size t in
       let delta, stack = Stack.pop_i32 stack in
       let new_size = I32.(size + delta) in
@@ -1404,11 +1402,11 @@ struct
       else
         let new_element, stack = Stack.pop_as_ref stack in
         let* new_size = Choice.select_i32 new_size in
-        let* t = Env.get_table env indice in
+        let t = Runtime.get_table ~runtime indice in
         let+ () = Table.grow t new_size new_element in
         Stack.push_i32 stack size
     | Fill indice ->
-      let* t = Env.get_table env indice in
+      let t = Runtime.get_table ~runtime indice in
       let len, stack = Stack.pop_i32 stack in
       let x, stack = Stack.pop_as_ref stack in
       let pos, stack = Stack.pop_i32 stack in
@@ -1423,12 +1421,12 @@ struct
       in
       let* pos = Choice.select_i32 pos in
       let* len = Choice.select_i32 len in
-      let* t = Env.get_table env indice in
+      let t = Runtime.get_table ~runtime indice in
       let+ () = Table.fill t pos len x in
       stack
     | Copy (ti_dst, ti_src) ->
-      let* t_src = Env.get_table env ti_src in
-      let* t_dst = Env.get_table env ti_dst in
+      let t_src = Runtime.get_table ~runtime ti_src in
+      let t_dst = Runtime.get_table ~runtime ti_dst in
       let len, stack = Stack.pop_i32 stack in
       let src, stack = Stack.pop_i32 stack in
       let dst, stack = Stack.pop_i32 stack in
@@ -1452,15 +1450,15 @@ struct
           let* src = Choice.select_i32 src in
           let* dst = Choice.select_i32 dst in
           let* len = Choice.select_i32 len in
-          let* t_src = Env.get_table env ti_src in
-          let* t_dst = Env.get_table env ti_dst in
+          let t_src = Runtime.get_table ~runtime ti_src in
+          let t_dst = Runtime.get_table ~runtime ti_dst in
           Table.copy ~t_src ~t_dst ~src ~dst ~len
         end
       in
       stack
     | Init (t_i, e_i) ->
-      let* t = Env.get_table env t_i in
-      let elem = Env.get_elem env e_i in
+      let t = Runtime.get_table ~runtime t_i in
+      let elem = Runtime.get_elem ~runtime e_i in
       let len, stack = Stack.pop_i32 stack in
       let pos_x, stack = Stack.pop_i32 stack in
       let pos, stack = Stack.pop_i32 stack in
@@ -1487,27 +1485,27 @@ struct
         if i = len then return ()
         else
           let elt = Elem.get elem (pos_x + i) in
-          let* t = Env.get_table env t_i in
+          let t = Runtime.get_table ~runtime t_i in
           let* () = Table.set t (pos + i) elt in
           loop (i + 1) ()
       in
       let+ () = loop 0 () in
       stack
 
-  let exec_elem_instr env : Binary.elem_instr -> _ = function
+  let exec_elem_instr runtime : Binary.elem_instr -> _ = function
     | Drop i ->
-      let elem = Env.get_elem env i in
+      let elem = Runtime.get_elem ~runtime i in
       Elem.drop elem
 
   let exec_memory_instr ~state instr_counter stack : Binary.memory_instr -> _ =
-    let { State.env; _ } = state in
+    let { State.runtime; _ } = state in
     function
     | Size memid ->
-      let* mem = Env.get_memory env memid in
+      let mem = Runtime.get_memory ~runtime memid in
       let len = Memory.size_in_pages mem in
       Stack.push_i32 stack len |> Choice.return
     | Grow memid ->
-      let* mem = Env.get_memory env memid in
+      let mem = Runtime.get_memory ~runtime memid in
       let old_size = I64.of_int32 @@ Memory.size mem in
       let max_size = Memory.get_limit_max mem in
       let delta, stack = Stack.pop_i32 stack in
@@ -1522,7 +1520,7 @@ struct
       in
       if too_big then Stack.push_i32 stack (I32.of_int ~-1) |> Choice.return
       else begin
-        let* mem = Env.get_memory env memid in
+        let mem = Runtime.get_memory ~runtime memid in
         let* () = Memory.grow mem I64.(to_int32 delta) in
         let res = I64.(to_int32 @@ (old_size / page_size)) in
         Stack.push_i32 stack res |> Choice.return
@@ -1531,7 +1529,7 @@ struct
       let len, stack = Stack.pop_i32 stack in
       let c, stack = Stack.pop_i32 stack in
       let pos, stack = Stack.pop_i32 stack in
-      let* mem = Env.get_memory env memid in
+      let mem = Runtime.get_memory ~runtime memid in
       let>! () =
         let size = I64.extend_i32_u (Memory.size mem) in
         let len = I64.extend_i32_u len in
@@ -1548,15 +1546,15 @@ struct
         let c = Int.abs c mod 256 in
         Char.chr c
       in
-      let* mem = Env.get_memory env memid in
+      let mem = Runtime.get_memory ~runtime memid in
       let+ () = Memory.fill mem ~pos ~len c in
       stack
     | Copy (dstmemid, srcmemid) ->
       let len, stack = Stack.pop_i32 stack in
       let src_idx, stack = Stack.pop_i32 stack in
       let dst_idx, stack = Stack.pop_i32 stack in
-      let* srcmem = Env.get_memory env srcmemid in
-      let* dstmem = Env.get_memory env dstmemid in
+      let srcmem = Runtime.get_memory ~runtime srcmemid in
+      let dstmem = Runtime.get_memory ~runtime dstmemid in
       let>! () =
         let size1 = I64.extend_i32_u (Memory.size srcmem) in
         let size2 = I64.extend_i32_u (Memory.size dstmem) in
@@ -1570,38 +1568,43 @@ struct
         , Some instr_counter
         , false )
       in
-      let* srcmem = Env.get_memory env srcmemid in
-      let* dstmem = Env.get_memory env dstmemid in
+      let srcmem = Runtime.get_memory ~runtime srcmemid in
+      let dstmem = Runtime.get_memory ~runtime dstmemid in
       let+ () = Memory.blit ~src:srcmem ~src_idx ~dst:dstmem ~dst_idx ~len in
       stack
     | Init (memid, dataid) ->
       let len, stack = Stack.pop_i32 stack in
       let src, stack = Stack.pop_i32 stack in
       let dst, stack = Stack.pop_i32 stack in
-      let data = Env.get_data env dataid in
-      let* mem = Env.get_memory env memid in
-      let>! () =
-        let memsize = I64.extend_i32_u (Memory.size mem) in
-        let datasize = I64.of_int (Data.size data) in
-        let len = I64.extend_i32_u len in
-        let src = I64.extend_i32_u src in
-        let dst = I64.extend_i32_u dst in
-        ( Boolean.or_
-            (I64.lt_u memsize I64.(add dst len))
-            (I64.lt_u datasize I64.(add src len))
-        , `Out_of_bounds_memory_access
-        , Some instr_counter
-        , false )
-      in
-      let data = Data.value data in
-      let* mem = Env.get_memory env memid in
-      let+ () = Memory.blit_string mem data ~src ~dst ~len in
-      stack
+      let data = Runtime.get_data ~runtime dataid in
+      begin match Data.to_string data with
+      | None -> trap (`Msg "dropped data!")
+      | Some data ->
+        let mem = Runtime.get_memory ~runtime memid in
+        let>! () =
+          let memsize = I64.extend_i32_u (Memory.size mem) in
+          (* we can probably remove Data.size now! *)
+          let datasize = I64.of_int (String.length data) in
+          let len = I64.extend_i32_u len in
+          let src = I64.extend_i32_u src in
+          let dst = I64.extend_i32_u dst in
+          ( Boolean.or_
+              (I64.lt_u memsize I64.(add dst len))
+              (I64.lt_u datasize I64.(add src len))
+          , `Out_of_bounds_memory_access
+          , Some instr_counter
+          , false )
+        in
+        let mem = Runtime.get_memory ~runtime memid in
+        let+ () = Memory.blit_string mem data ~src ~dst ~len in
+        stack
+      end
 
-  let exec_data_instr env : Binary.data_instr -> _ = function
+  let exec_data_instr runtime : Binary.data_instr -> Runtime.t = function
     | Drop i ->
-      let data = Env.get_data env i in
-      Data.drop data
+      let data = Runtime.get_data ~runtime i in
+      let data = Data.drop data in
+      Runtime.set_data ~runtime i data
 
   let init_local (_id, t) : Value.t =
     match t with
@@ -1643,19 +1646,19 @@ struct
       | Null -> Choice.trap `Extern_call_null_arg )
 
   let rec apply : type f r.
-    Env.t -> Stack.t -> (f, r) Extern_func.atype -> f -> r Choice.t =
-   fun env stack ty f ->
+    Runtime.t -> Stack.t -> (f, r) Extern_func.atype -> f -> r Choice.t =
+   fun runtime stack ty f ->
     match ty with
     | Mem (memid, args) ->
-      let* mem = Env.get_memory env memid in
-      apply env stack args (f mem)
+      let mem = Runtime.get_memory ~runtime memid in
+      apply runtime stack args (f mem)
     | Arg (arg, args) ->
       let* v, stack = pop_arg stack arg in
-      apply env stack args (f v)
-    | UArg args -> apply env stack args (f ())
+      apply runtime stack args (f v)
+    | UArg args -> apply runtime stack args (f ())
     | NArg (_, arg, args) ->
       let* v, stack = pop_arg stack arg in
-      apply env stack args (f v)
+      apply runtime stack args (f v)
     | Res -> Choice.return f
 
   let push_val (type ty) (arg : ty Extern_func.telt) (v : ty) stack =
@@ -1672,7 +1675,7 @@ struct
   let exec_extern_func ~(state : State.t) (f : Extern_func.t) =
     let (Extern_func.Extern_func (Func (atype, rtype), func)) = f in
     let args, stack = split_args state.stack atype in
-    let* r = apply state.env (List.rev args) atype func in
+    let* r = apply state.runtime (List.rev args) atype func in
     let+ r in
     match (rtype, r) with
     | R0, () -> stack
@@ -1770,16 +1773,16 @@ struct
       ; block_stack = []
       ; func_rt = result_type
       ; return_state
-      ; env = state.env
+      ; runtime = state.runtime
       }
 
-  (* TODO: remove env and use state.env ... do the same in the whole file *)
+  (* TODO: remove runtime and use state.runtime ... do the same in the whole file *)
   let exec_vfunc ~return (state : State.t) (func : Kind.func) =
     match func with
     | Wasm func -> Choice.return (State.Continue (exec_func ~return state func))
     | Extern idx ->
       let+ stack =
-        let f = Env.get_extern_func state.env idx in
+        let f = Runtime.get_extern_func ~runtime:state.runtime idx in
         exec_extern_func ~state f
       in
       let state = { state with stack } in
@@ -1791,7 +1794,7 @@ struct
       let (Bt_raw ((None | Some _), t)) = func.type_f in
       t
     | Extern idx ->
-      let f = Env.get_extern_func state.env idx in
+      let f = Runtime.get_extern_func ~runtime:state.runtime idx in
       Extern_func.to_func_type f
 
   let call_ref ~return:_ (_state : State.t) _typ_i =
@@ -1812,11 +1815,11 @@ struct
   (*   trap "indirect call type mismatch"; *)
   (* exec_vfunc ~return state func *)
 
-  let call_indirect ~env ~return (state : State.t)
+  let call_indirect ~runtime ~return (state : State.t)
     (tbl_i, (Bt_raw ((None | Some _), typ_i) : block_type)) =
     let fun_i, stack = Stack.pop_i32 state.stack in
     let state = { state with stack } in
-    let* t = Env.get_table env tbl_i in
+    let t = Runtime.get_table ~runtime tbl_i in
     let _null, ref_kind = Table.typ t in
     match ref_kind with
     | Func_ht ->
@@ -1828,7 +1831,7 @@ struct
         , false )
       in
       let* fun_i = Choice.select_i32 fun_i in
-      let* t = Env.get_table env tbl_i in
+      let t = Runtime.get_table ~runtime tbl_i in
       let fun_i = Int32.to_int fun_i in
       let f_ref = Table.get t fun_i in
       begin match Ref.get_func f_ref with
@@ -1867,7 +1870,7 @@ struct
     | Ref.Extern (Some _) -> ( match ht with Extern_ht -> true | _ -> false )
     | Func None | Extern None | NullExn | NullRef -> false
 
-  let exec_simple_instruction ({ stack; locals; env; _ } as state : State.t)
+  let exec_simple_instruction ({ stack; locals; runtime; _ } as state : State.t)
     instr_counter ~uuid : Binary.simple_instruction -> _ =
     let ret stack = Choice.return (State.Continue { state with stack }) in
     function
@@ -1906,24 +1909,24 @@ struct
       let* stack = exec_f64x2_instr stack i in
       ret stack
     | Ref i ->
-      let* stack = exec_ref_instr env stack i in
+      let* stack = exec_ref_instr runtime stack i in
       ret stack
     | Local i -> exec_local_instr state locals stack i
     | Global i ->
-      let* stack = exec_global_instr env stack i in
-      ret stack
+      let state = exec_global_instr state i in
+      Choice.return (State.Continue state)
     | Table i ->
-      let* stack = exec_table_instr env instr_counter stack i in
+      let* stack = exec_table_instr runtime instr_counter stack i in
       ret stack
     | Elem i ->
-      exec_elem_instr env i;
+      exec_elem_instr runtime i;
       ret stack
     | Memory i ->
       let* stack = exec_memory_instr ~state instr_counter stack i in
       ret stack
     | Data i ->
-      let _ = exec_data_instr env i in
-      ret stack
+      let runtime = exec_data_instr runtime i in
+      Choice.return (State.Continue { state with runtime })
     | Nop -> Choice.return (State.Continue state)
     | Unreachable -> Choice.trap `Unreachable
     | Drop -> ret @@ Stack.drop stack
@@ -1967,7 +1970,7 @@ struct
       (* TODO *) assert false
 
   let exec_instr ({ raw; uuid; instr_counter; _ } : _ Annotated.t)
-    ({ stack; env; _ } as state : State.t) : State.instr_result Choice.t =
+    ({ stack; runtime; _ } as state : State.t) : State.instr_result Choice.t =
     let instr_counter = Atomic.fetch_and_add instr_counter 1 in
     Log.info (fun m -> m "stack         : [ %a ]" Stack.pp stack);
     Log.info (fun m ->
@@ -2001,11 +2004,11 @@ struct
       let state = { state with stack } in
       exec_block state ~is_loop:false bt (if b then e1 else e2)
     | Call i -> begin
-      let func = Env.get_func env i in
+      let func = Runtime.get_func ~runtime i in
       exec_vfunc ~return:false state func
       end
     | Return_call i -> begin
-      let func = Env.get_func env i in
+      let func = Runtime.get_func ~runtime i in
       exec_vfunc ~return:true state func
       end
     | Br i -> State.branch state i
@@ -2116,9 +2119,9 @@ struct
       let state = { state with stack } in
       State.branch state target
     | Call_indirect (tbl_i, typ_i) ->
-      call_indirect ~env ~return:false state (tbl_i, typ_i)
+      call_indirect ~runtime ~return:false state (tbl_i, typ_i)
     | Return_call_indirect (tbl_i, typ_i) ->
-      call_indirect ~env ~return:true state (tbl_i, typ_i)
+      call_indirect ~runtime ~return:true state (tbl_i, typ_i)
     | Call_ref typ_i -> call_ref ~return:false state typ_i
     | Return_call_ref typ_i -> call_ref ~return:true state typ_i
 
@@ -2140,12 +2143,12 @@ struct
       | State.Continue state -> loop ~heartbeat state
       | State.Return res -> Choice.return res )
 
-  let exec_expr ~heartbeat env locals stack expr bt =
+  let exec_expr ~heartbeat runtime locals stack expr bt =
     let state : State.t =
       let func_rt = match bt with None -> [] | Some rt -> rt in
       { stack
       ; locals
-      ; env
+      ; runtime
       ; func_rt
       ; block_stack = []
       ; pc = expr
@@ -2171,11 +2174,11 @@ struct
         (fun () ->
           let fuel_left = Atomic.fetch_and_add fuel (-1) in
           (* If we only use [timeout_instr], we want to stop all as
-                              soon as [fuel_left <= 0]. But if we only use [timeout],
-                              we don't want to run into the slow path below on each
-                              instruction after [fuel_left] becomes negative. We avoid
-                              this repeated slow path by bumping [fuel] to [max_int]
-                              again in this case. *)
+                                 soon as [fuel_left <= 0]. But if we only use [timeout],
+                                 we don't want to run into the slow path below on each
+                                 instruction after [fuel_left] becomes negative. We avoid
+                                 this repeated slow path by bumping [fuel] to [max_int]
+                                 again in this case. *)
           if fuel_left mod 1024 = 0 || fuel_left < 0 then begin
             let stop =
               match (Parameters.timeout, Parameters.timeout_instr) with
@@ -2191,23 +2194,24 @@ struct
           end
           else Choice.return () )
 
-  let modul (env : Env.t) ~(modul : int) : unit Choice.t =
-    let init_code = Env.get_init_code ~modul env in
+  let modul ~(runtime : Runtime.t) ~(modul : Runtime.modul) : unit Choice.t =
+    let init_code = Runtime.get_initialization_code ~modul ~runtime in
     let heartbeat = make_heartbeat () in
     Log.info (fun m -> m "interpreting ...");
     try
       begin
         let+ _end_stack =
-          exec_expr ~heartbeat env (State.Locals.of_list []) Stack.empty
-            init_code None
+          exec_expr ~heartbeat runtime (State.Locals.of_list []) Stack.empty
+            (Annotated.dummy init_code)
+            None
         in
         ()
       end
     with Stack_overflow -> Choice.trap `Call_stack_exhausted
 
-  let exec_vfunc_from_outside ~locals ~env (func : Kind.func) : _ list Choice.t
-      =
-    let state = State.empty ~locals ~env in
+  let exec_vfunc_from_outside ~runtime ~locals (func : Kind.func) :
+    _ list Choice.t =
+    let state = State.empty ~locals ~runtime in
     try
       begin
         let* state =
@@ -2216,7 +2220,7 @@ struct
             let state = State.{ state with stack = locals } in
             Choice.return (State.Continue (exec_func ~return:true state func))
           | Extern idx ->
-            let f = Env.get_extern_func env idx in
+            let f = Runtime.get_extern_func ~runtime idx in
             let+ stack = exec_extern_func ~state f in
             let state = State.{ state with stack } in
             State.return state
@@ -2228,12 +2232,11 @@ struct
     with Stack_overflow -> Choice.trap `Call_stack_exhausted
 end
 
-module Symbolic (Parameters : Parameters) =
-  Make [@inlined hint] (Symbolic_value) (Symbolic_data) (Symbolic_elem)
-    (Symbolic_choice)
-    (Symbolic_table)
-    (Symbolic_global)
-    (Symbolic_memory)
-    (Symbolic_extern.Func)
-    (Symbolic_env)
+module Concrete (Parameters : Parameters) =
+  Make [@inlined hint] (Concrete_value) (Concrete_data) (Concrete_elem)
+    (Concrete_choice)
+    (Concrete_table)
+    (Concrete_memory)
+    (Concrete_extern.Func)
+    (Concrete_runtime)
     (Parameters)

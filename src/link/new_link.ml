@@ -131,14 +131,13 @@ module Make (M : Runtime_builder_intf.T) :
   Runtime_intf.T
     with type extern_func := M.extern_func
      and type value := M.value
-     and type context := M.context = struct
-  type memory = M.memory
-
-  type table = M.table
-
-  type elem = M.elem
-
+     and type elem := M.elem
+     and type data := M.data
+     and type table := M.table
+     and type memory := M.memory = struct
   type modul = int
+
+  type context = M.context
 
   (* when evaluating constant expressions, we don't want to deal with value because building them is annoying and differs too much between the various interpreters, yet, the constant expression builders can read globals that could be values, but we use the fact that it can only read constant globals that are always going to be concrete, doing so allows us to have a single concrete implementation of constant evaluation, with the price of having to convert from concrete to {abstract,symbolic} each time we load a constant global, but who cares, we could simply inline them in the future and don't bother *)
   type global_value =
@@ -157,12 +156,12 @@ module Make (M : Runtime_builder_intf.T) :
         (* map from runtime address to runtime extern functions *)
     ; globals : global Allocator.t
         (* map from runtime address to runtime globals *)
-    ; memories : memory Allocator.t
+    ; memories : M.memory Allocator.t
         (* map from runtime address to runtime memories *)
-    ; tables : table Allocator.t
+    ; tables : M.table Allocator.t
         (* map from runtime address to runtime tables *)
-    ; datas : string Allocator.t (* map from runtime address to runtime datas *)
-    ; elems : elem Allocator.t (* map from runtime address to runtime elems *)
+    ; datas : M.data Allocator.t (* map from runtime address to runtime datas *)
+    ; elems : M.elem Allocator.t (* map from runtime address to runtime elems *)
     ; initialization_codes : Binary.expr IntMap.t
         (* map from modul to their initialization code *)
     ; exported_functions : Allocator.key StringMap.t IntMap.t
@@ -201,6 +200,7 @@ module Make (M : Runtime_builder_intf.T) :
     let pp_elem = pp_todo in
     let pp_table = pp_todo in
     let pp_memory = pp_todo in
+    let pp_data = pp_todo in
     let pp_modul ppf v = Fmt.pf ppf "%d" v in
     Fmt.pf ppf
       "@[<v>functions: %a@,\
@@ -222,7 +222,7 @@ module Make (M : Runtime_builder_intf.T) :
       (Allocator.pp
          (Fmt.pair (fun ppf _v -> Fmt.pf ppf "<extern>") Binary.pp_func_type) )
       extern_functions (Allocator.pp pp_global) globals (Allocator.pp pp_memory)
-      memories (Allocator.pp pp_table) tables (Allocator.pp Fmt.string) datas
+      memories (Allocator.pp pp_table) tables (Allocator.pp pp_data) datas
       (Allocator.pp pp_elem) elems
       (IntMap.pp (fun ppf e ->
          Binary.pp_expr ~short:true ppf (Annotated.dummy e) ) )
@@ -877,6 +877,51 @@ module Make (M : Runtime_builder_intf.T) :
       { runtime with globals }
     | None -> assert false
 
+  let get_memory ~runtime id =
+    let id = Allocator.unsafe_of_int id in
+    match Allocator.find_opt id runtime.memories with
+    | Some m -> m
+    | None -> assert false
+
+  let set_memory ~runtime id memory =
+    let id = Allocator.unsafe_of_int id in
+    let memories = Allocator.add_manual id memory runtime.memories in
+    { runtime with memories }
+
+  let get_table ~runtime id =
+    let id = Allocator.unsafe_of_int id in
+    match Allocator.find_opt id runtime.tables with
+    | Some m -> m
+    | None -> assert false
+
+  let set_table ~runtime id table =
+    let id = Allocator.unsafe_of_int id in
+    let tables = Allocator.add_manual id table runtime.tables in
+    { runtime with tables }
+
+  let get_elem ~runtime id =
+    let id = Allocator.unsafe_of_int id in
+    match Allocator.find_opt id runtime.elems with
+    | Some m -> m
+    | None -> assert false
+
+  (* le bonhomme vert! *)
+  let set_elem ~runtime id elem =
+    let id = Allocator.unsafe_of_int id in
+    let elems = Allocator.add_manual id elem runtime.elems in
+    { runtime with elems }
+
+  let get_data ~runtime id =
+    let id = Allocator.unsafe_of_int id in
+    match Allocator.find_opt id runtime.datas with
+    | Some m -> m
+    | None -> assert false
+
+  let set_data ~runtime id data =
+    let id = Allocator.unsafe_of_int id in
+    let datas = Allocator.add_manual id data runtime.datas in
+    { runtime with datas }
+
   let get_func ~runtime id =
     let id = Allocator.unsafe_of_int id in
     match Allocator.find_opt id runtime.functions with
@@ -936,6 +981,33 @@ module Make (M : Runtime_builder_intf.T) :
     in
     match Allocator.find_opt address runtime.functions with
     | Some func -> Ok func
+    | None -> assert false
+
+  let get_exported_global ~runtime ~module_name ~global_name =
+    let* modul =
+      match module_name with
+      | None -> get_last_module ~runtime
+      | Some module_name -> (
+        match StringMap.find_opt module_name runtime.registered_modules with
+        | None -> Error (`Unbound_module module_name)
+        | Some modul -> Ok modul )
+    in
+    let globals =
+      match IntMap.find_opt modul runtime.exported_globals with
+      | None -> assert false
+      | Some globals -> globals
+    in
+    let* address =
+      match StringMap.find_opt global_name globals with
+      | None -> Error (`Unbound_name global_name)
+      | Some v -> Ok v
+    in
+    match Allocator.find_opt address runtime.globals with
+    | Some global ->
+      begin match global.value with
+      | Var v -> Ok v
+      | Const v -> Ok (M.value_of_concrete runtime.context v)
+      end
     | None -> assert false
 
   let get_context ~runtime = runtime.context

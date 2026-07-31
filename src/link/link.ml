@@ -542,7 +542,7 @@ module Make (M : Link_intf.M) = struct
       array_fold_left
         (fun (modul, init, id) (data : Binary.Data.t) ->
           let modul =
-            let data' = { Concrete_data.value = data.init } in
+            let data' = Concrete_data.of_string data.init in
             Linked_module.Build.add_data id data' modul
           in
           let+ init =

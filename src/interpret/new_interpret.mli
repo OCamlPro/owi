@@ -16,12 +16,15 @@ end
 
 module Default_parameters : Parameters
 
-module Symbolic (_ : Parameters) : sig
-  val modul : Symbolic_env.t -> modul:int -> unit Symbolic_choice.t
+module Concrete (_ : Parameters) : sig
+  val modul :
+       runtime:Concrete_runtime.t
+    -> modul:Concrete_runtime.modul
+    -> unit Concrete_choice.t
 
   val exec_vfunc_from_outside :
-       locals:Symbolic_value.t list
-    -> env:Symbolic_env.t
+       runtime:Concrete_runtime.t
+    -> locals:Concrete_value.t list
     -> Kind.func
-    -> Symbolic_value.t list Symbolic_choice.t
+    -> Concrete_value.t list Concrete_choice.t
 end

@@ -12,9 +12,9 @@ module Any : sig
   val until_concrete_link :
        unsafe:bool
     -> name:string option
-    -> Concrete_env.t
+    -> Concrete_runtime.t
     -> Concrete_extern.Func.t Kind.t
-    -> (int * Concrete_env.t) Result.t
+    -> (Concrete_runtime.modul * Concrete_runtime.t) Result.t
 
   val until_symbolic_link :
        unsafe:bool
@@ -41,9 +41,9 @@ module File : sig
   val until_concrete_link :
        unsafe:bool
     -> name:string option
-    -> Concrete_env.t
+    -> Concrete_runtime.t
     -> Fpath.t
-    -> (int * Concrete_env.t) Result.t
+    -> (Concrete_runtime.modul * Concrete_runtime.t) Result.t
 
   (** compile a file with a given link state and produce a new link state and a
       runnable module *)
@@ -74,9 +74,9 @@ module Text : sig
   val until_concrete_link :
        unsafe:bool
     -> name:string option
-    -> Concrete_env.t
+    -> Concrete_runtime.t
     -> Text.Module.t
-    -> (int * Concrete_env.t) Result.t
+    -> (Concrete_runtime.modul * Concrete_runtime.t) Result.t
 
   (** compile a module with a given link state and produce a new link state and
       a runnable module *)
@@ -106,9 +106,9 @@ module Binary : sig
   val until_concrete_link :
        unsafe:bool
     -> name:string option
-    -> Concrete_env.t
+    -> Concrete_runtime.t
     -> Binary.Module.t
-    -> (int * Concrete_env.t) Result.t
+    -> (Concrete_runtime.modul * Concrete_runtime.t) Result.t
 
   (** compile a module with a given link state and produce a new link state and
       a runnable module *)

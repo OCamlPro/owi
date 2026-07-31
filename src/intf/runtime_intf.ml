@@ -11,6 +11,14 @@ module type T = sig
 
   type modul
 
+  type memory
+
+  type table
+
+  type elem
+
+  type data
+
   val empty : t
 
   val get_last_module : runtime:t -> modul Result.t
@@ -26,6 +34,22 @@ module type T = sig
   val link_extern_module :
     runtime:t -> name:string -> (string * extern_func) list -> t
 
+  val get_memory : runtime:t -> int -> memory
+
+  val set_memory : runtime:t -> int -> memory -> t
+
+  val get_elem : runtime:t -> int -> elem
+
+  val set_elem : runtime:t -> int -> elem -> t
+
+  val get_table : runtime:t -> int -> table
+
+  val set_table : runtime:t -> int -> table -> t
+
+  val get_data : runtime:t -> int -> data
+
+  val set_data : runtime:t -> int -> data -> t
+
   val get_global : runtime:t -> int -> value
 
   val set_global : runtime:t -> int -> value -> t
@@ -39,6 +63,12 @@ module type T = sig
     -> module_name:string option
     -> func_name:string
     -> Kind.func Result.t
+
+  val get_exported_global :
+       runtime:t
+    -> module_name:string option
+    -> global_name:string
+    -> value Result.t
 
   type context
 

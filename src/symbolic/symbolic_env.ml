@@ -11,7 +11,10 @@ include Link.Make (struct
 
   type data = Symbolic_data.t
 
-  let data_of_concrete data = data
+  let data_of_concrete data =
+    match Concrete_data.to_string data with
+    | None -> assert false
+    | Some s -> Symbolic_data.of_string s
 end)
 
 let get_memory _env _id : Symbolic_memory.t Symbolic_choice.t = assert false

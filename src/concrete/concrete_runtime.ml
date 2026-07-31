@@ -2,7 +2,15 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-module Concrete_runtime_builder : Runtime_builder_intf.T = struct
+module Concrete_runtime_builder :
+  Runtime_builder_intf.T
+    with type extern_func = Concrete_extern.Func.t
+     and type value = Concrete_value.t
+     and type data = Concrete_data.t
+     and type context = unit
+     and type memory = Concrete_memory.t
+     and type elem = Concrete_elem.t
+     and type table = Concrete_table.t = struct
   type value = Concrete_value.t
 
   let value_of_concrete () v = v
@@ -32,6 +40,8 @@ module Concrete_runtime_builder : Runtime_builder_intf.T = struct
   type context = unit
 
   let empty_context () = ()
+
+  type data = Concrete_data.t
 end
 
 include New_link.Make (Concrete_runtime_builder)

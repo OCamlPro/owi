@@ -32,6 +32,8 @@ module Symbolic_runtime_builder : Runtime_builder_intf.T = struct
   type context = unit
 
   let empty_context () = ()
+
+  type data = Symbolic_data.t
 end
 
 include New_link.Make (Symbolic_runtime_builder)
