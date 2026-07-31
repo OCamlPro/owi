@@ -28,11 +28,9 @@ let action ((env, monadic_state) : state) action : _ Result.t =
       m "invoke %a %s %a..."
         (Fmt.option ~none:Fmt.nop Fmt.string)
         module_name func_name Wast.pp_consts args );
-    let* f, modul =
-      Symbolic_env.get_exported_func env ~module_name ~func_name
-    in
+    let* f = Symbolic_env.get_exported_func env ~module_name ~func_name in
     let stack = List.rev_map (Symbolic_value.of_script_const ~ty) args in
-    let to_run = I.exec_vfunc_from_outside ~locals:stack ~modul ~env f in
+    let to_run = I.exec_vfunc_from_outside ~locals:stack ~env f in
     run_monad ~to_run ~monadic_state
   | Get (module_name, global_name) ->
     Log.info (fun m -> m "get...");

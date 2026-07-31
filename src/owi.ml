@@ -2,7 +2,6 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-module Abstract_env = Abstract_env
 module Abstract_invariant = Abstract_invariant
 module Annotated = Annotated
 module Binary = Binary
@@ -31,7 +30,7 @@ module Cmd_wasm2wat = Cmd_wasm2wat
 module Cmd_wat2wasm = Cmd_wat2wasm
 module Cmd_zig = Cmd_zig
 module Compile = Compile
-module Concrete_env = Concrete_env
+module Concrete_runtime = Concrete_runtime
 module Concrete_extern = Concrete_extern
 module Concrete_boolean = Concrete_boolean
 module Concrete_memory = Concrete_memory
@@ -42,6 +41,7 @@ module Concrete_f32 = Concrete_f32
 module Concrete_f64 = Concrete_f64
 module Init = Init
 module Interpret = Interpret
+module New_interpret = New_interpret
 module Kind = Kind
 module Label = Label
 module Log = Log

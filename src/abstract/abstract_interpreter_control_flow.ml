@@ -8,11 +8,6 @@ module Value = Abstract_value
 
 exception RecursiveFunctionCall
 
-type interpreter_state =
-  { abs_state : Abstract_state.t
-  ; env : Abstract_env.t
-  }
-
 let gen_new_value ~widens a b state_a state_b
   (Abstract_domain.Context.Result (inc, intup, cont))
   (f : Value.t -> 'container -> 'container) =
@@ -22,9 +17,11 @@ let gen_new_value ~widens a b state_a state_b
    * cont : continuation function
    *)
   let (Abstract_domain.Context.Result (inc, in_tup, local_cont)) =
-    Abstract_domain.serialize_binary ~size ~widens state_a.Abstract_state.ctx
-      (Value.to_binary a) state_b.Abstract_state.ctx (Value.to_binary b)
-      (inc, intup)
+    Abstract_domain.serialize_binary ~size ~widens
+      state_a.Abstract_interpreter_state.abs_state.Abstract_state.ctx
+      (Value.to_binary a)
+      state_b.Abstract_interpreter_state.abs_state.Abstract_state.ctx
+      (Value.to_binary b) (inc, intup)
   in
   let cont ctx out_tuple =
     let value, out_tuple = local_cont ctx out_tuple in
@@ -35,9 +32,9 @@ let gen_new_value ~widens a b state_a state_b
   Abstract_domain.Context.Result (inc, in_tup, cont)
 
 let serialize ~widens :
-     Abstract_state.t
-  -> Abstract_state.t
-  -> (Abstract_state.t, 'a) Abstract_domain.Context.result =
+     Abstract_interpreter_state.t
+  -> Abstract_interpreter_state.t
+  -> (Abstract_interpreter_state.t, 'a) Abstract_domain.Context.result =
  fun state_a state_b ->
   let rec serialize_stack lhs rhs acc_res =
     match (lhs, rhs) with
@@ -58,18 +55,22 @@ let serialize ~widens :
           | Some v -> Value.size_of v
           | None -> assert false
         in
-        let v1 = Option.value v1 ~default:(Value.top size state_a.ctx) in
-        let v2 = Option.value v2 ~default:(Value.top size state_b.ctx) in
+        let v1 =
+          Option.value v1 ~default:(Value.top size state_a.abs_state.ctx)
+        in
+        let v2 =
+          Option.value v2 ~default:(Value.top size state_b.abs_state.ctx)
+        in
         let f = Abstract_locals.add k in
         gen_new_value ~widens v1 v2 state_a state_b res f
       end
-      state_a.locals state_b.locals
+      state_a.abs_state.locals state_b.abs_state.locals
       (Abstract_domain.Context.Result
          ( true
          , Abstract_domain.Context.empty_tuple ()
-         , fun _ctx out -> (state_a.locals, out) ) )
+         , fun _ctx out -> (state_a.abs_state.locals, out) ) )
   in
-
+  (* TODO: fixme
   let (Abstract_domain.Context.Result (included, in_tuple, globals_continue)) =
     Abstract_globals.fold_on_nonequal_union
       begin fun k v1 v2 res ->
@@ -81,36 +82,43 @@ let serialize ~widens :
         let f = Abstract_globals.add k in
         gen_new_value ~widens v1 v2 state_a state_b res f
       end
-      state_a.globals state_b.globals
+      state_a.env.globals state_b.env.globals
       (Abstract_domain.Context.Result
          (included, in_tuple, fun _ctx out -> (state_a.globals, out)) )
   in
-
+  *)
   Log.debug (fun m ->
     let pp_locals ctx = Abstract_locals.pp (Value.pp_with_ctx ctx) in
     m "serializing locals (%s) : @\n first : %a @\n second : %a"
       (if widens then "widen" else "join")
-      (pp_locals state_a.ctx) state_a.locals (pp_locals state_b.ctx)
-      state_b.locals );
+      (pp_locals state_a.abs_state.ctx)
+      state_a.abs_state.locals
+      (pp_locals state_b.abs_state.ctx)
+      state_b.abs_state.locals );
 
   Log.debug (fun m ->
     m "serializing stacks (%s) : @\n first : %a @\n second : %a"
       (if widens then "widen" else "join")
-      (Abstract_stack.pp state_a.ctx)
-      state_a.stack
-      (Abstract_stack.pp state_b.ctx)
-      state_b.stack );
+      (Abstract_stack.pp state_a.abs_state.ctx)
+      state_a.abs_state.stack
+      (Abstract_stack.pp state_b.abs_state.ctx)
+      state_b.abs_state.stack );
 
   let (Abstract_domain.Context.Result (inc, in_tup, stack_continue)) =
-    serialize_stack state_a.stack state_b.stack
+    serialize_stack state_a.abs_state.stack state_b.abs_state.stack
       (Abstract_domain.Context.Result
          (included, in_tuple, fun _ctx out -> ([], out)) )
   in
   let cont ctx out =
     let stack, out = stack_continue ctx out in
+    (*
     let globals, out = globals_continue ctx out in
+  *)
     let locals, out = locals_continue ctx out in
-    ({ state_a with ctx; stack = List.rev stack; locals; globals }, out)
+    let abs_state_a =
+      { state_a.abs_state with ctx; stack = List.rev stack; locals }
+    in
+    ({ state_a with abs_state = abs_state_a }, out)
   in
   Abstract_domain.Context.Result (inc, in_tup, cont)
 
@@ -119,7 +127,8 @@ let join state_a state_b =
     serialize ~widens:false state_a state_b
   in
   let ctx, out =
-    Abstract_domain.typed_nondet2 state_a.ctx state_b.ctx in_tuple
+    Abstract_domain.typed_nondet2 state_a.abs_state.ctx state_b.abs_state.ctx
+      in_tuple
   in
   fst @@ continue ctx out
 
@@ -133,8 +142,8 @@ let join_X (state_a, jt_a) (state_b, jt_b) =
   let jt = JumpMap.append jt_a jt_b in
   match (state_a, state_b) with
   | Some state_a, Some state_b ->
-    let abs_state = join state_a.abs_state state_b.abs_state in
-    (Some { state_a with abs_state }, jt)
+    let state = join state_a state_b in
+    (Some state, jt)
   | Some state, None | None, Some state -> (Some state, jt)
   | _, _ -> assert false
 
@@ -143,14 +152,18 @@ let join_jts stack_size = function
   | Some jts -> (
     match jts with
     | [] -> None
-    | h :: t ->
+    | (h : Abstract_interpreter_state.t) :: t ->
       let abs_state =
-        let h_stack = Stack.keep h.Abstract_state.stack stack_size in
+        let h_stack = Stack.keep h.abs_state.stack stack_size in
+        let h_abs_state = { h.abs_state with stack = h_stack } in
         List.fold_left
-          (fun acc state ->
-            let stack = Stack.keep state.Abstract_state.stack stack_size in
-            join acc { state with stack } )
-          { h with stack = h_stack } t
+          (fun acc (state : Abstract_interpreter_state.t) ->
+            let stack = Stack.keep state.abs_state.stack stack_size in
+            let abs_state = { state.abs_state with stack } in
+            let state = { state with abs_state } in
+            join acc state )
+          { h with abs_state = h_abs_state }
+          t
       in
       Some abs_state )
 
@@ -159,15 +172,18 @@ let widen widening_id state_a state_b =
     serialize ~widens:true state_a state_b
   in
   let ctx, included, out =
-    Abstract_domain.widened_fixpoint_step ~widening_id ~previous:state_a.ctx
-      ~next:state_b.ctx (included, in_tuple)
+    Abstract_domain.widened_fixpoint_step ~widening_id
+      ~previous:state_a.abs_state.ctx ~next:state_b.abs_state.ctx
+      (included, in_tuple)
   in
   (* TODO find out why is the out tuple ignored *)
   let state, _out_tuple = continue ctx out in
-  ({ state with ctx }, included)
+  let abs_state = { state.abs_state with ctx } in
+  ({ state with abs_state }, included)
 
 let exec_extern_func ({ stack; _ } : Abstract_state.t)
   (f : Abstract_extern.Func.t) =
+  Log.debug (fun m -> m "executing extern func");
   let open Abstract_extern.Func in
   let pop_arg (type ty) stack (arg : ty Abstract_extern.Func.telt) :
     ty * Stack.t =
@@ -238,11 +254,13 @@ let exec_extern_func ({ stack; _ } : Abstract_state.t)
 
 module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
   let rec eval_expr :
-       interpreter_state
+       Abstract_interpreter_state.t
     -> Binary.expr Annotated.t
-    -> interpreter_state option * Abstract_state.t list JumpMap.t =
+    -> Abstract_interpreter_state.t option
+       * Abstract_interpreter_state.t list JumpMap.t =
    fun state expr ->
-    let rec loop state jt (expr : Binary.expr) =
+    let rec loop (state : Abstract_interpreter_state.t) jt (expr : Binary.expr)
+        =
       match expr with
       | [] -> (Some state, jt)
       | instr :: instrs -> (
@@ -251,16 +269,14 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
         Log.debug (fun m ->
           m "jt after (%a) :  %a"
             (Binary.pp_instr ~short:true)
-            instr.raw
-            (JumpMap.pp state.abs_state.Abstract_state.ctx)
-            new_jt );
+            instr.raw JumpMap.pp new_jt );
         match new_state with
         | None -> (None, new_jt)
         | Some state -> loop state new_jt instrs )
     in
     loop state JumpMap.empty expr.raw
 
-  and eval_func ({ abs_state; _ } as state : interpreter_state) idx
+  and eval_func ({ abs_state; _ } as state : Abstract_interpreter_state.t) idx
     (func : Binary.Func.t) =
     if List.mem idx abs_state.call_stack then raise RecursiveFunctionCall;
     Log.info (fun m ->
@@ -286,9 +302,7 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
     Log.debug (fun m ->
       m "before call (%a): caller state : %a"
         (Fmt.option ~none:(Fmt.any "$") Fmt.string)
-        func.id
-        (Abstract_state.pp abs_state.ctx)
-        abs_state );
+        func.id Abstract_interpreter_state.pp state );
     let call_stack = idx :: abs_state.call_stack in
     let fn_abs_state =
       { abs_state with stack = []; func_rt = result_type; locals; call_stack }
@@ -300,22 +314,14 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
     let fn_end_stack_size = List.length result_type in
     let jumps_ret = join_jts fn_end_stack_size (JumpMap.find_opt Ret jt) in
     let jumps_br0 = join_jts fn_end_stack_size (JumpMap.find_opt (I 0) jt) in
-    let fn_end_abs_state = Option.map (fun s -> s.abs_state) fn_end_state in
-    let fn_end_abs_state =
-      join_opt fn_end_abs_state jumps_ret |> join_opt jumps_br0
-    in
-    let fn_end_state =
-      Option.map (fun abs_state -> { state with abs_state }) fn_end_abs_state
-    in
+    let fn_end_state = join_opt fn_end_state jumps_ret |> join_opt jumps_br0 in
     (* We should probably copy state and join back the return values in the context here *)
     match fn_end_state with
     | Some fn_end_state ->
       Log.debug (fun m ->
         m "after call(%a): callee state : %a@."
           (Fmt.option ~none:(Fmt.any "$") Fmt.string)
-          func.id
-          (Abstract_state.pp fn_end_state.abs_state.ctx)
-          fn_end_state.abs_state );
+          func.id Abstract_interpreter_state.pp fn_end_state );
       let stack =
         caller_popped_stack
         @ Stack.keep fn_end_state.abs_state.stack fn_end_stack_size
@@ -328,13 +334,15 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
       Log.debug (fun m -> m "abstract state : None @.");
       None
 
-  and eval_instr ({ abs_state; env } as state : interpreter_state) :
+  and eval_instr ({ abs_state; runtime } as state : Abstract_interpreter_state.t)
+    :
        Binary.instr Annotated.t
-    -> interpreter_state option * Abstract_state.t list JumpMap.t =
+    -> Abstract_interpreter_state.t option
+       * Abstract_interpreter_state.t list JumpMap.t =
    fun instr ->
     let { ctx; stack; locals; _ } : Abstract_state.t = abs_state in
     Log.debug (fun m ->
-      m "abstract state : %a" (Abstract_state.pp ctx) abs_state );
+      m "abstract state : %a" Abstract_interpreter_state.pp state );
     Log.info (fun m ->
       m "stack         : [ %a ]" (Abstract_stack.pp ctx) stack );
     (* Log.info (fun m -> *)
@@ -347,18 +355,13 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
       m "running instr : %a" (Binary.pp_instr ~short:true) instr.raw );
     match instr.raw with
     | Call call_idx ->
-      let func =
-        Abstract_env.get_func ~modul:abs_state.current_module env call_idx
-      in
+      let func = Abstract_runtime.get_func ~runtime call_idx in
       begin match func with
-      | Wasm { func; modul } ->
-        let abs_state = { abs_state with current_module = modul } in
-        let r = eval_func { state with abs_state } call_idx func in
+      | Wasm func ->
+        let r = eval_func state call_idx func in
         (r, JumpMap.empty)
-      | Extern { idx } -> (
-        let func =
-          Abstract_env.get_extern_func ~modul:abs_state.current_module env idx
-        in
+      | Extern idx -> (
+        let func = Abstract_runtime.get_extern_func ~runtime idx in
         let stack = exec_extern_func abs_state func in
         match Abstract_monad.run stack abs_state with
         | None -> (None, JumpMap.empty)
@@ -374,11 +377,7 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
         | None -> 0
       in
       let jumps_br0 = join_jts stack_size (JumpMap.find_opt (I 0) jt) in
-      let abs_state = Option.map (fun s -> s.abs_state) next_state in
-      let abs_state = join_opt abs_state jumps_br0 in
-      let state =
-        Option.map (fun abs_state -> { state with abs_state }) abs_state
-      in
+      let state = join_opt next_state jumps_br0 in
       let jt =
         (* TODO on peut avoir une paire de (int * map) pour ne pas avoir à decr la liste immédiatement *)
         JumpMap.decr jt
@@ -431,7 +430,8 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
             begin match next_state with
             | Some state ->
               let stack = Stack.keep stack stack_size in
-              Some { state.abs_state with stack }
+              let abs_state = { state.abs_state with stack } in
+              Some { state with abs_state }
             | None -> None
             end
         in
@@ -440,8 +440,8 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
           let jt = JumpMap.decr jt in
           (None, jt)
         | Some next_head ->
-          let widened, included = widen widening_id state.abs_state next_head in
-          if not included then fixpoint { state with abs_state = widened }
+          let widened, included = widen widening_id state next_head in
+          if not included then fixpoint widened
           else
             (* fixpoint reached: exit loop, assume condition is false *)
             let jt = JumpMap.decr jt in
@@ -459,13 +459,15 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
             end
       in
       fixpoint state
-    | Br i -> (None, JumpMap.of_list [ (I i, [ abs_state ]) ])
+    | Br i -> (None, JumpMap.of_list [ (I i, [ state ]) ])
     | Br_if i ->
       let b, stack = Stack.pop_bool stack ctx in
       let jt_if =
         match Abstract_domain.assume ctx b with
         | Some ctx ->
-          JumpMap.of_list [ (I i, [ { abs_state with stack; ctx } ]) ]
+          let abs_state = { abs_state with stack; ctx } in
+          let state = { state with abs_state } in
+          JumpMap.of_list [ (I i, [ state ]) ]
         | None -> JumpMap.empty
       in
       let state =
@@ -485,7 +487,9 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
             (Abstract_i32.ge_u ctx v (Abstract_i32.of_int ctx nb_cases))
         with
         | Some ctx ->
-          [ (JumpMap.Key.I default, [ { abs_state with ctx; stack } ]) ]
+          let abs_state = { abs_state with ctx; stack } in
+          let state = { state with abs_state } in
+          [ (JumpMap.Key.I default, [ state ]) ]
         | None -> []
       in
       let cases =
@@ -501,17 +505,19 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
           (fun acc (i, c) ->
             match c with
             | Some ctx ->
-              (JumpMap.Key.I i, [ { abs_state with ctx; stack } ]) :: acc
+              let abs_state = { abs_state with ctx; stack } in
+              let state = { state with abs_state } in
+              (JumpMap.Key.I i, [ state ]) :: acc
             | None -> acc )
           default cases
       in
       (None, JumpMap.of_list all_cases)
-    | Return -> (None, JumpMap.of_list [ (Ret, [ abs_state ]) ])
+    | Return -> (None, JumpMap.of_list [ (Ret, [ state ]) ])
     | Simple i -> (
       let uuid = instr.uuid in
-      let res = S.eval_instr gen_new_value abs_state ~uuid i in
+      let res = S.eval_instr gen_new_value state ~uuid i in
       match res with
-      | State abs_state -> (Some { state with abs_state }, JumpMap.empty)
+      | State state -> (Some state, JumpMap.empty)
       | Unreachable -> (None, JumpMap.empty) )
     | Br_on_non_null _
     | Br_on_cast (_, _, _)
@@ -525,47 +531,47 @@ end
 
 module ConcreteFixpoint = DenotFixpoint (Abstract_interpreter_simple)
 
-let eval_exprs ~(modul : int) abs_state env =
+let eval_exprs ~runtime ~(modul : Abstract_runtime.modul) abs_state =
   (* TODO: init_code is no more an exprs, it's a regular expr now, this function can probably be removed and eval_expr could be used instead! *)
-  let init_code = Abstract_env.get_init_code ~modul env in
-  let abs_state = { abs_state with Abstract_state.current_module = modul } in
-  let state = { abs_state; env } in
+  let init_code = Abstract_runtime.get_initialization_code ~runtime ~modul in
+  let state = { Abstract_interpreter_state.abs_state; runtime } in
   let state =
-    match ConcreteFixpoint.eval_expr state init_code with
+    match ConcreteFixpoint.eval_expr state (Annotated.dummy init_code) with
     | None, _mapping -> state
     | Some state, _mapping -> state
   in
   state.abs_state
 
-let modul_with_ctx ctx (env : Abstract_env.t) ~(modul : int) =
-  let abs_state = Abstract_state.empty modul Abstract_env.fold_globals env in
+let modul_with_ctx ~runtime ~(modul : Abstract_runtime.modul) ctx =
+  let abs_state = Abstract_state.empty () in
   let abs_state = { abs_state with ctx } in
-  eval_exprs ~modul abs_state env
+  eval_exprs ~runtime ~modul abs_state
 
-let modul (env : Abstract_env.t) ~(modul : int) =
-  let abs_state = Abstract_state.empty modul Abstract_env.fold_globals env in
-  eval_exprs ~modul abs_state env
+let modul ~(runtime : Abstract_runtime.t) ~(modul : Abstract_runtime.modul) =
+  let abs_state = Abstract_state.empty () in
+  eval_exprs ~runtime ~modul abs_state
 
-let exec_vfunc_from_outside ~ctx ~locals ~(modul : int) ~env (func : Kind.func)
-    =
-  let abs_state =
-    Abstract_state.empty_exec_state ~ctx ~locals ~modul
-      Abstract_env.fold_globals env
-  in
+let exec_vfunc_from_outside ~runtime ~ctx ~locals (func : Kind.func) =
+  let abs_state = Abstract_state.empty_exec_state ~ctx ~locals in
   try
     match func with
-    | Kind.Wasm { func; modul } -> (
+    | Kind.Wasm func -> (
       let stack =
         Abstract_locals.to_list locals
         |> List.sort (fun (i1, _) (i2, _) -> compare i1 i2)
         |> List.map snd
       in
-      let abs_state = { abs_state with stack; current_module = modul } in
-      match ConcreteFixpoint.eval_func { abs_state; env } modul func with
+      let abs_state = { abs_state with stack } in
+      match
+        ConcreteFixpoint.eval_func { abs_state; runtime }
+          (* TODO: attach correct ID to this function to distinguish the call stack, 0 is incorrect here *)
+          0
+          func
+      with
       | Some state -> Ok state.abs_state
       | None -> Fmt.error_msg "failed" )
-    | Extern { idx } -> (
-      let f = Abstract_env.get_extern_func ~modul env idx in
+    | Extern idx -> (
+      let f = Abstract_runtime.get_extern_func ~runtime idx in
       let stack = exec_extern_func abs_state f in
       match Abstract_monad.run stack abs_state with
       | None -> Fmt.error_msg "failed"

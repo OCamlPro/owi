@@ -11,41 +11,41 @@ type host_externref = int
 
 let ty : host_externref Type.Id.t = Type.Id.make ()
 
-let do_action ctx env = function
+let do_action ctx runtime = function
   | Wast.Invoke (module_name, func_name, args) -> begin
     Log.info (fun m ->
       m "invoke %a %s %a..."
         (Fmt.option ~none:Fmt.nop Fmt.string)
         module_name func_name Wast.pp_consts args );
-    let* f, modul =
-      Abstract_env.get_exported_func env ~module_name ~func_name
+    let* f =
+      Abstract_runtime.get_exported_func ~runtime ~module_name ~func_name
     in
     let stack =
       List.rev_map (Abstract_value.of_script_const ctx ~ty) args
       |> List.mapi (fun i v -> (i, v))
     in
     let locals = Abstract_locals.of_list stack in
-    I.exec_vfunc_from_outside ~ctx ~locals ~modul ~env f
+    I.exec_vfunc_from_outside ~ctx ~locals ~runtime f
     end
   | Get (_module_name, _name) ->
     Log.info (fun m -> m "get...");
     assert false
-(* let* global = Link.get_global_from_module env mod_id name in *)
+(* let* global = Link.get_global_from_module runtime mod_id name in *)
 (* let v = Abstract_value.of_concrete ctx global.value in *)
 (* Ok [ v ] *)
 
 let run_one ~no_exhaustion:_
-  (state : (Abstract_env.t * Abstract_domain.Context.t) Result.t) cmd =
-  let* env, ctx = state in
+  (state : (Abstract_runtime.t * Abstract_domain.Context.t) Result.t) cmd =
+  let* runtime, ctx = state in
   match cmd with
   | Wast.Text_module (false, m) ->
-    let* modul, env =
-      Compile.Text.until_abstract_link env ~unsafe ~name:None m
+    let* modul, runtime =
+      Compile.Text.until_abstract_link runtime ~unsafe ~name:None m
     in
-    let state = I.modul_with_ctx ctx env ~modul in
-    Ok (env, state.ctx)
+    let state = I.modul_with_ctx ctx ~runtime ~modul in
+    Ok (runtime, state.ctx)
   | Assert (Assert_return (action, res)) ->
-    let* state = do_action ctx env action in
+    let* state = do_action ctx runtime action in
     let stack = List.rev state.stack in
     if
       List.compare_lengths res stack <> 0
@@ -58,14 +58,13 @@ let run_one ~no_exhaustion:_
       (*   m "got:      %a@.expected: %a" Stack.pp stack Wast.pp_results res ); *)
       Error `Bad_result
     end
-    else Ok (env, ctx)
+    else Ok (runtime, ctx)
   | _ -> assert false
 
 let run ~no_exhaustion script =
   let state =
-    Abstract_env.empty ()
-    |> Abstract_env.link_extern_module ~name:"spectest_extern"
-         Spectest.abstract_extern_m
+    Abstract_runtime.link_extern_module ~runtime:Abstract_runtime.empty
+      ~name:"spectest_extern" Spectest.abstract_extern_m
   in
   let script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
 

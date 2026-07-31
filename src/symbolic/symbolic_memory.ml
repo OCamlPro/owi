@@ -114,8 +114,7 @@ let grow m delta =
   let size =
     Symbolic_boolean.ite (Symbolic_i32.lt m.size new_size) new_size m.size
   in
-  let m = { m with size } in
-  replace m
+  { m with size }
 
 let size { size; _ } = Symbolic_i32.mul size page_size
 
@@ -192,7 +191,9 @@ let store_8 m ~addr v =
   let data =
     replace_byte a (Smtml.Typed.Bitv32.extract v ~high:7 ~low:0) m.data
   in
-  replace { m with data }
+  let m = { m with data } in
+  let+ () = replace m in
+  m
 
 let store_16 m ~addr v =
   let open Symbolic_choice in
@@ -202,7 +203,9 @@ let store_16 m ~addr v =
     |> replace_byte (Int32.add a 1l)
          (Smtml.Typed.Bitv32.extract v ~high:15 ~low:8)
   in
-  replace { m with data }
+  let m = { m with data } in
+  let+ () = replace m in
+  m
 
 let store_byte_list data start_addr bytes =
   let rec loop data offset = function
@@ -218,19 +221,25 @@ let store_32 m ~addr v =
   let open Symbolic_choice in
   let* a = must_be_valid_address m addr 4 in
   let data = store_byte_list m.data a (Smtml.Typed.Bitv32.to_bytes v) in
-  replace { m with data }
+  let m = { m with data } in
+  let+ () = replace m in
+  m
 
 let store_64 m ~(addr : Symbolic_i32.t) v =
   let open Symbolic_choice in
   let* a = must_be_valid_address m addr 8 in
   let data = store_byte_list m.data a (Smtml.Typed.Bitv64.to_bytes v) in
-  replace { m with data }
+  let m = { m with data } in
+  let+ () = replace m in
+  m
 
 let store_128 m ~(addr : Symbolic_i32.t) v =
   let open Symbolic_choice in
   let* a = must_be_valid_address m addr 16 in
   let data = store_byte_list m.data a (Smtml.Typed.Bitv128.to_bytes v) in
-  replace { m with data }
+  let m = { m with data } in
+  let+ () = replace m in
+  m
 
 (* This function uses `m` for bounds checks but return an updated version of `data` *)
 let store_8_no_replace m data ~(addr : Symbolic_i32.t) v =
@@ -254,7 +263,9 @@ let fill m ~(pos : Symbolic_i32.t) ~(len : Symbolic_i32.t) (c : char) =
       loop (i + 1) data
   in
   let* data = loop 0 m.data in
-  replace { m with data }
+  let m = { m with data } in
+  let+ () = replace m in
+  m
 
 let blit ~src ~src_idx ~dst ~dst_idx ~len =
   let open Symbolic_choice in
@@ -275,7 +286,9 @@ let blit ~src ~src_idx ~dst ~dst_idx ~len =
       loop (i + 1) data
   in
   let* data = loop 0 dst.data in
-  replace { dst with data }
+  let m = { dst with data } in
+  let+ () = replace m in
+  m
 
 let blit_string m str ~src ~dst ~len =
   (* This function is only used in memory init so everything will be concrete *)
@@ -299,7 +312,9 @@ let blit_string m str ~src ~dst ~len =
       loop (i + 1) data
   in
   let* data = loop 0 m.data in
-  replace { m with data }
+  let m = { m with data } in
+  let+ () = replace m in
+  m
 
 let get_limit_max _m = None (* TODO *)
 

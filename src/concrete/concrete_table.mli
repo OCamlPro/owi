@@ -23,3 +23,5 @@ include
      and type 'a choice := 'a Concrete_choice.t
 
 val init : ?label:string -> Binary.Table.Type.t -> t
+
+val get_type : t -> Binary.Table.Type.t

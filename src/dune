@@ -6,14 +6,13 @@
   abstract_boolean
   abstract_checker
   abstract_domain
-  abstract_env
   abstract_extern
   abstract_f32
   abstract_f64
-  abstract_globals
   abstract_i32
   abstract_i64
   abstract_interpreter_simple
+  abstract_interpreter_state
   abstract_interpreter_control_flow
   abstract_invariant
   abstract_jump_map
@@ -21,6 +20,7 @@
   abstract_memory
   abstract_monad
   abstract_ref
+  abstract_runtime
   abstract_stack
   abstract_state
   abstract_v128
@@ -67,7 +67,6 @@
   concrete_choice
   concrete_data
   concrete_elem
-  concrete_env
   concrete_extern
   concrete_f32
   concrete_f64
@@ -78,6 +77,7 @@
   concrete_i64
   concrete_memory
   concrete_ref
+  concrete_runtime
   concrete_table
   concrete_value
   concrete_v128
@@ -107,6 +107,7 @@
   i32_intf
   i64_intf
   interpret
+  new_interpret
   iop_intf
   kind
   label
@@ -116,6 +117,7 @@
   memory_intf
   model
   multicore
+  new_link
   origin
   owi
   parse
@@ -124,6 +126,8 @@
   ref_intf
   result
   rewrite
+  runtime_builder_intf
+  runtime_intf
   script
   script_error
   script_symbolic
@@ -150,6 +154,7 @@
   symbolic_memory0
   symbolic_parameters
   symbolic_ref
+  symbolic_runtime
   symbolic_table
   symbolic_table0
   symbolic_value

@@ -29,17 +29,21 @@ module Text = struct
       let+ () = Binary_validate.modul m in
       m
 
-  let until_concrete_link ~unsafe ~name env m =
-    let* m = until_validate ~unsafe m in
-    Concrete_env.link_binary_module env ~name m
+  let until_concrete_link ~unsafe ~name runtime m =
+    let* modul = until_validate ~unsafe m in
+    let* runtime = Concrete_runtime.link_binary_module ~runtime ~name ~modul in
+    let+ modul = Concrete_runtime.get_last_module ~runtime in
+    (modul, runtime)
 
-  let until_symbolic_link ~unsafe ~name env m =
+  let until_symbolic_link ~unsafe ~name runtime m =
     let* m = until_validate ~unsafe m in
-    Symbolic_env.link_binary_module env ~name m
+    Symbolic_env.link_binary_module runtime ~name m
 
-  let until_abstract_link ~unsafe ~name env m =
-    let* m = until_validate ~unsafe m in
-    Abstract_env.link_binary_module env ~name m
+  let until_abstract_link ~unsafe ~name runtime m =
+    let* modul = until_validate ~unsafe m in
+    let* runtime = Abstract_runtime.link_binary_module ~runtime ~name ~modul in
+    let+ modul = Abstract_runtime.get_last_module ~runtime in
+    (modul, runtime)
 end
 
 module Binary = struct
@@ -49,17 +53,21 @@ module Binary = struct
       let+ () = Binary_validate.modul m in
       m
 
-  let until_concrete_link ~unsafe ~name env m =
-    let* m = until_validate ~unsafe m in
-    Concrete_env.link_binary_module env ~name m
+  let until_concrete_link ~unsafe ~name runtime m =
+    let* modul = until_validate ~unsafe m in
+    let* runtime = Concrete_runtime.link_binary_module ~runtime ~name ~modul in
+    let+ modul = Concrete_runtime.get_last_module ~runtime in
+    (modul, runtime)
 
-  let until_symbolic_link ~unsafe ~name env m =
+  let until_symbolic_link ~unsafe ~name runtime m =
     let* m = until_validate ~unsafe m in
-    Symbolic_env.link_binary_module env ~name m
+    Symbolic_env.link_binary_module runtime ~name m
 
-  let until_abstract_link ~unsafe ~name env m =
-    let* m = until_validate ~unsafe m in
-    Abstract_env.link_binary_module env ~name m
+  let until_abstract_link ~unsafe ~name runtime m =
+    let* modul = until_validate ~unsafe m in
+    let* runtime = Abstract_runtime.link_binary_module ~runtime ~name ~modul in
+    let+ modul = Abstract_runtime.get_last_module ~runtime in
+    (modul, runtime)
 end
 
 module Any = struct
@@ -69,25 +77,25 @@ module Any = struct
     | Wast _ -> Fmt.error_msg "can not validate a .wast file"
     | Extern _ -> Fmt.error_msg "can not validate an OCaml module"
 
-  let until_concrete_link ~unsafe ~name env = function
-    | Kind.Wat m -> Text.until_concrete_link ~unsafe ~name env m
-    | Wasm m -> Binary.until_concrete_link ~unsafe ~name env m
+  let until_concrete_link ~unsafe ~name runtime = function
+    | Kind.Wat m -> Text.until_concrete_link ~unsafe ~name runtime m
+    | Wasm m -> Binary.until_concrete_link ~unsafe ~name runtime m
     | Extern _m ->
       (* TODO: Link.Extern.modul m *)
       Fmt.error_msg "can not link an OCaml module"
     | Wast _ -> Fmt.error_msg "can not link a .wast file"
 
-  let until_symbolic_link ~unsafe ~name env = function
-    | Kind.Wat m -> Text.until_symbolic_link ~unsafe ~name env m
-    | Wasm m -> Binary.until_symbolic_link ~unsafe ~name env m
+  let until_symbolic_link ~unsafe ~name runtime = function
+    | Kind.Wat m -> Text.until_symbolic_link ~unsafe ~name runtime m
+    | Wasm m -> Binary.until_symbolic_link ~unsafe ~name runtime m
     | Extern _m ->
       (* TODO: Link.Extern.modul m *)
       Fmt.error_msg "can not link an OCaml module"
     | Wast _ -> Fmt.error_msg "can not link a .wast file"
 
-  let until_abstract_link ~unsafe ~name env = function
-    | Kind.Wat m -> Text.until_abstract_link ~unsafe ~name env m
-    | Wasm m -> Binary.until_abstract_link ~unsafe ~name env m
+  let until_abstract_link ~unsafe ~name runtime = function
+    | Kind.Wat m -> Text.until_abstract_link ~unsafe ~name runtime m
+    | Wasm m -> Binary.until_abstract_link ~unsafe ~name runtime m
     | Extern _m ->
       (* TODO: Link.Extern.modul m *)
       Fmt.error_msg "can not link an OCaml module"
@@ -110,24 +118,24 @@ module File = struct
     | Wasm m -> Binary.until_validate ~unsafe m
     | Wast _ | Extern _ -> assert false
 
-  let until_concrete_link ~unsafe ~name env filename =
+  let until_concrete_link ~unsafe ~name runtime filename =
     let* m = Parse.guess_from_file filename in
     match m with
-    | Kind.Wat m -> Text.until_concrete_link ~unsafe ~name env m
-    | Wasm m -> Binary.until_concrete_link ~unsafe ~name env m
+    | Kind.Wat m -> Text.until_concrete_link ~unsafe ~name runtime m
+    | Wasm m -> Binary.until_concrete_link ~unsafe ~name runtime m
     | Wast _ | Extern _ -> assert false
 
-  let until_symbolic_link ~unsafe ~name env filename =
+  let until_symbolic_link ~unsafe ~name runtime filename =
     let* m = Parse.guess_from_file filename in
     match m with
-    | Kind.Wat m -> Text.until_symbolic_link ~unsafe ~name env m
-    | Wasm m -> Binary.until_symbolic_link ~unsafe ~name env m
+    | Kind.Wat m -> Text.until_symbolic_link ~unsafe ~name runtime m
+    | Wasm m -> Binary.until_symbolic_link ~unsafe ~name runtime m
     | Wast _ | Extern _ -> assert false
 
-  let until_abstract_link ~unsafe ~name env filename =
+  let until_abstract_link ~unsafe ~name runtime filename =
     let* m = Parse.guess_from_file filename in
     match m with
-    | Kind.Wat m -> Text.until_abstract_link ~unsafe ~name env m
-    | Wasm m -> Binary.until_abstract_link ~unsafe ~name env m
+    | Kind.Wat m -> Text.until_abstract_link ~unsafe ~name runtime m
+    | Wasm m -> Binary.until_abstract_link ~unsafe ~name runtime m
     | Wast _ | Extern _ -> assert false
 end

@@ -9,84 +9,82 @@ type host_externref = int
 
 let ty : host_externref Type.Id.t = Type.Id.make ()
 
-module I = Interpret.Concrete (Interpret.Default_parameters)
+module I = New_interpret.Concrete (New_interpret.Default_parameters)
 
-let action (env : Concrete_env.t) = function
+let action (runtime : Concrete_runtime.t) = function
   | Wast.Invoke (module_name, func_name, args) -> begin
     Log.info (fun m ->
       m "invoke %a %s %a..."
         (Fmt.option ~none:Fmt.nop Fmt.string)
         module_name func_name Wast.pp_consts args );
-    let* f, modul =
-      Concrete_env.get_exported_func env ~module_name ~func_name
+    let* f =
+      Concrete_runtime.get_exported_func ~runtime ~module_name ~func_name
     in
     let locals = List.rev_map (Concrete_value.of_script_const ~ty) args in
-    I.exec_vfunc_from_outside ~locals ~modul ~env f
+    let* runtime, stack = I.exec_vfunc_from_outside ~runtime ~locals f in
+    Ok (runtime, stack)
     end
   | Get (module_name, global_name) ->
     Log.info (fun m -> m "get...");
     let+ global =
-      Concrete_env.get_exported_global env ~module_name ~global_name
+      Concrete_runtime.get_exported_global ~runtime ~module_name ~global_name
     in
-    [ global.value ]
+    (runtime, [ global ])
 
 let unsafe = false
 
 let run ~no_exhaustion script =
   let state =
-    Concrete_env.empty ()
-    |> Concrete_env.link_extern_module ~name:"spectest_extern" Spectest.extern_m
+    Concrete_runtime.link_extern_module ~runtime:Concrete_runtime.empty
+      ~name:"spectest_extern" Spectest.extern_m
   in
   let script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
   let registered = ref false in
   let curr_module = ref 0 in
   list_fold_left
-    (fun (env : Concrete_env.t) -> function
+    (fun (runtime : Concrete_runtime.t) -> function
       | Wast.Text_module (false, modul) ->
         if !curr_module = 0 then
           (* TODO: disable printing*)
           ();
         Log.info (fun m -> m "*** module");
         incr curr_module;
-        let* modul, env =
-          Compile.Text.until_concrete_link env ~unsafe ~name:None modul
+        let* modul, runtime =
+          Compile.Text.until_concrete_link runtime ~unsafe ~name:None modul
         in
-        let+ () = I.modul env ~modul in
-        (* TODO: enable printing again! *)
-        env
+        I.modul ~runtime ~modul
       | Wast.Quoted_module (false, modul) ->
         Log.info (fun m -> m "*** quoted module");
         incr curr_module;
         let* modul = Parse.Text.Inline_module.from_string modul in
-        let* modul, env =
-          Compile.Text.until_concrete_link env ~unsafe ~name:None modul
+        let* modul, runtime =
+          Compile.Text.until_concrete_link runtime ~unsafe ~name:None modul
         in
-        let+ () = I.modul env ~modul in
-        env
+        I.modul ~runtime ~modul
       | Wast.Binary_module (false, id, modul) ->
         Log.info (fun m -> m "*** binary module");
         incr curr_module;
         let* modul = Parse.Binary.Module.from_string modul in
         let modul = { modul with id } in
-        let* modul, env =
-          Compile.Binary.until_concrete_link env ~unsafe ~name:None modul
+        let* modul, runtime =
+          Compile.Binary.until_concrete_link runtime ~unsafe ~name:None modul
         in
-        let+ () = I.modul env ~modul in
-        env
+        I.modul ~runtime ~modul
       | Assert (Assert_trap_module (modul, expected)) ->
         Log.info (fun m -> m "*** assert_trap");
         incr curr_module;
-        let* modul, env =
-          Compile.Text.until_concrete_link env ~unsafe ~name:None modul
+        let* modul, runtime =
+          Compile.Text.until_concrete_link runtime ~unsafe ~name:None modul
         in
-        let got = I.modul env ~modul in
+        let got = I.modul ~runtime ~modul in
         let+ () = Script_error.check_result ~expected ~got in
-        env
+        (* TODO: this is wrong! we should get back the runtime after running modul? *)
+        runtime
       | Assert (Assert_malformed_binary (modul, expected)) ->
         Log.info (fun m -> m "*** assert_malformed_binary");
         let got = Parse.Binary.Module.from_string modul in
         let+ () = Script_error.check_result ~expected ~got in
-        env
+        runtime
       | Assert (Assert_malformed_quote (modul, expected)) ->
         Log.info (fun m -> m "*** assert_malformed_quote");
         (* TODO: use Parse.Text.Module.from_string instead *)
@@ -99,7 +97,7 @@ let run ~no_exhaustion script =
             Script_error.check_result ~expected ~got
           | _ -> assert false
         in
-        env
+        runtime
       | Assert (Assert_invalid_binary (modul, expected)) ->
         Log.info (fun m -> m "*** assert_invalid_binary");
         let got = Parse.Binary.Module.from_string modul in
@@ -110,18 +108,20 @@ let run ~no_exhaustion script =
             begin match Binary_validate.modul modul with
             | Error got -> Script_error.check_error ~expected ~got
             | Ok () ->
-              let got = Concrete_env.link_binary_module env ~name:None modul in
+              let got =
+                Concrete_runtime.link_binary_module ~runtime ~name:None ~modul
+              in
               Script_error.check_result ~expected ~got
             end
         in
-        env
+        runtime
       | Assert (Assert_invalid (modul, expected)) ->
         Log.info (fun m -> m "*** assert_invalid");
         let got =
-          Compile.Text.until_concrete_link env ~unsafe ~name:None modul
+          Compile.Text.until_concrete_link runtime ~unsafe ~name:None modul
         in
         let+ () = Script_error.check_result ~expected ~got in
-        env
+        runtime
       | Assert (Assert_invalid_quote (modul, expected)) ->
         Log.info (fun m -> m "*** assert_invalid_quote");
         let got = Parse.Text.Script.from_string modul in
@@ -133,24 +133,24 @@ let run ~no_exhaustion script =
             Script_error.check_result ~expected ~got
           | _ -> assert false
         in
-        env
+        runtime
       | Assert (Assert_unlinkable (modul, expected)) ->
         Log.info (fun m -> m "*** assert_unlinkable");
         let got =
-          Compile.Text.until_concrete_link env ~unsafe ~name:None modul
+          Compile.Text.until_concrete_link runtime ~unsafe ~name:None modul
         in
         let+ () = Script_error.check_result ~expected ~got in
-        env
+        runtime
       | Assert (Assert_malformed (modul, expected)) ->
         Log.info (fun m -> m "*** assert_malformed");
         let got =
-          Compile.Text.until_concrete_link ~unsafe ~name:None env modul
+          Compile.Text.until_concrete_link ~unsafe ~name:None runtime modul
         in
         let+ () = Script_error.check_result ~expected ~got in
         assert false
       | Assert (Assert_return (a, res)) ->
         Log.info (fun m -> m "*** assert_return");
-        let* stack = action env a in
+        let* runtime, stack = action runtime a in
         let stack = List.rev stack in
         if
           List.compare_lengths res stack <> 0
@@ -163,31 +163,33 @@ let run ~no_exhaustion script =
             m "got:      %a@.expected: %a" Stack.pp stack Wast.pp_results res );
           Error `Bad_result
         end
-        else Ok env
+        else Ok runtime
       | Assert (Assert_trap (a, expected)) ->
         Log.info (fun m -> m "*** assert_trap");
-        let got = action env a in
+        (* TODO: this is wrong! we should get back the runtime after running action! *)
+        let got = action runtime a in
         let+ () = Script_error.check_result ~expected ~got in
-        env
+        (* TODO: this is wrong! we should get back the runtime after running modul? *)
+        runtime
       | Assert (Assert_exhaustion (a, expected)) ->
         Log.info (fun m -> m "*** assert_exhaustion");
         let+ () =
           if no_exhaustion then Ok ()
           else
-            let got = action env a in
+            let got = action runtime a in
             Script_error.check_result ~expected ~got
         in
-        env
+        (* TODO: this is wrong! we should get back the runtime after running action? *)
+        runtime
       | Register (name, mod_name) ->
+        (* TODO: is mod_name needed? *)
         if !curr_module = 1 && not !registered then (* TODO: disable debug *) ();
         Log.info (fun m -> m "*** register");
-        let+ state = Concrete_env.register_last_module env ~name ~id:mod_name in
-        (* TODO: enable debug again! *)
-        state
+        Concrete_runtime.register_module ~runtime ~name ~modid:mod_name
       | Action a ->
         Log.info (fun m -> m "*** action");
-        let+ _stack = action env a in
-        env
+        let+ runtime, _stack = action runtime a in
+        runtime
       | Text_module (true, _)
       | Binary_module (true, _, _)
       | Quoted_module (true, _) ->
@@ -195,11 +197,11 @@ let run ~no_exhaustion script =
             link state, ensure that we can instantiate a module from its module
             definition, and that module definitions are not treated as "normal",
             or instantiated module. *)
-        Ok env
+        Ok runtime
       | Instance (_name, _mod_name) ->
         Error (`Unimplemented "(module instance _)") )
     state script
 
 let exec ~no_exhaustion script =
-  let+ _env = run ~no_exhaustion script in
+  let+ _runtime = run ~no_exhaustion script in
   ()

@@ -199,14 +199,14 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
     ]
   in
 
-  let env =
-    Concrete_env.empty ()
-    |> Concrete_env.link_extern_module ~name:"owi" replay_extern_module
+  let runtime =
+    Concrete_runtime.link_extern_module ~runtime:Concrete_runtime.empty
+      ~name:"owi" replay_extern_module
   in
 
   let* m = Compile.File.until_binary ~unsafe filename in
   let* m = Cmd_utils.set_entry_point entry_point invoke_with_symbols m in
-  Compile.Binary.until_concrete_link ~unsafe env ~name:None m
+  Compile.Binary.until_concrete_link ~unsafe runtime ~name:None m
 
 let parse_model replay_file =
   let* parse_fn =
@@ -250,11 +250,15 @@ let parse_model replay_file =
 
 let cmd ~unsafe ~replay_file ~source_file ~entry_point ~invoke_with_symbols =
   let* model = parse_model replay_file in
-  let* modul, env =
+  let* modul, runtime =
     compile_file ~unsafe ~entry_point ~invoke_with_symbols source_file model
   in
-  let module I = Interpret.Concrete (Interpret.Default_parameters) in
-  let r, run_time = Benchmark.with_utime @@ fun () -> I.modul env ~modul in
+  let module I = New_interpret.Concrete (New_interpret.Default_parameters) in
+  let r, run_time =
+    Benchmark.with_utime @@ fun () ->
+    let* _runtime = I.modul ~runtime ~modul in
+    Ok ()
+  in
   Log.bench (fun m ->
     (* run_time shouldn't be none in bench mode *)
     let run_time = match run_time with None -> assert false | Some t -> t in
