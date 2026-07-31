@@ -1523,7 +1523,7 @@ struct
       if too_big then Stack.push_i32 stack (I32.of_int ~-1) |> Choice.return
       else begin
         let* mem = Env.get_memory env memid in
-        let* () = Memory.grow mem I64.(to_int32 delta) in
+        let _mem = Memory.grow mem I64.(to_int32 delta) in
         let res = I64.(to_int32 @@ (old_size / page_size)) in
         Stack.push_i32 stack res |> Choice.return
       end

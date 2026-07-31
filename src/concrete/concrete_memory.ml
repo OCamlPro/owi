@@ -37,7 +37,7 @@ let grow mem delta =
   let new_mem = Bytes.extend mem.data 0 delta in
   Bytes.unsafe_fill new_mem old_size delta (Char.chr 0);
   update_memory mem new_mem;
-  Ok ()
+  mem
 
 let fill mem ~pos ~len c =
   let pos = Int32.to_int pos in

@@ -22,7 +22,7 @@ module Eval_const = struct
     | Mul -> Stack.apply_i64_i64_i64 stack Value.I64.mul
     | _ -> assert false
 
-  let simple_instruction ~get_func ~get_global stack = function
+  let simple_instruction ~get_const_func ~get_const_global stack = function
     | Binary.I32 i -> Result.ok (i32_instr stack i)
     | Binary.I64 i -> Result.ok (i64_instr stack i)
     | F32 (Const f) -> Result.ok @@ Stack.push_f32 stack f
@@ -30,23 +30,26 @@ module Eval_const = struct
     | V128 (Const f) -> Result.ok @@ Stack.push_v128 stack f
     | Ref (Null t) -> Result.ok @@ Stack.push_ref stack (Value.Ref.null t)
     | Ref (Func id) ->
-      let* f = get_func id in
+      let* f = get_const_func id in
       let value = Value.Ref (Func (Some f)) in
       Result.ok @@ Stack.push stack value
     | Global (Get id) ->
-      let* g = get_global id in
+      let* g = get_const_global id in
       Result.ok @@ Stack.push stack g
     | _ -> assert false
 
-  let instr ~get_func ~get_global stack instr =
+  let instr ~get_const_func ~get_const_global stack instr =
     match instr.Annotated.raw with
-    | Binary.Simple i -> simple_instruction ~get_func ~get_global stack i
+    | Binary.Simple i ->
+      simple_instruction ~get_const_func ~get_const_global stack i
     | _ -> assert false
 
   (* TODO: the modul parameter can probably be removed *)
-  let expr ~get_func ~get_global e : Concrete_value.t Result.t =
+  let expr ~get_const_func ~get_const_global e : Concrete_value.t Result.t =
     let* stack =
-      list_fold_left (instr ~get_func ~get_global) Stack.empty e.Annotated.raw
+      list_fold_left
+        (instr ~get_const_func ~get_const_global)
+        Stack.empty e.Annotated.raw
     in
     match stack with
     | [] -> Error (`Type_mismatch "const expr returning zero values")
@@ -176,6 +179,8 @@ module Make (M : Runtime_builder_intf.T) :
     ; registered_modules : modul StringMap.t
         (* map from registered names to modul *)
     ; context : M.context
+    ; raw_names : modul StringMap.t
+        (* this is used only for scripts where modules can get a $id and we have to remember them to be able to register them this way... *)
     }
 
   let pp ppf
@@ -194,6 +199,7 @@ module Make (M : Runtime_builder_intf.T) :
     ; last_module
     ; registered_modules
     ; context = _
+    ; raw_names = _
     } =
     let pp_todo ppf _v = Fmt.pf ppf "<TODO>" in
     let pp_global = pp_todo in
@@ -253,6 +259,7 @@ module Make (M : Runtime_builder_intf.T) :
     let last_module = None in
     let registered_modules = StringMap.empty in
     let context = M.empty_context () in
+    let raw_names = StringMap.empty in
     { functions
     ; extern_functions
     ; globals
@@ -268,18 +275,28 @@ module Make (M : Runtime_builder_intf.T) :
     ; last_module
     ; registered_modules
     ; context
+    ; raw_names
     }
-
-  let register_module ~runtime ~modul ~name =
-    let registered_modules =
-      StringMap.add name modul runtime.registered_modules
-    in
-    { runtime with registered_modules }
 
   let get_last_module ~runtime =
     match runtime.last_module with
     | None -> Error (`Unknown_module "there was no last module")
     | Some modul -> Ok modul
+
+  let register_module ~runtime ~name ~modid =
+    let+ modul =
+      match modid with
+      | None -> get_last_module ~runtime
+      | Some id ->
+        begin match StringMap.find_opt id runtime.raw_names with
+        | None -> Error (`Unknown_module id)
+        | Some id -> Ok id
+        end
+    in
+    let registered_modules =
+      StringMap.add name modul runtime.registered_modules
+    in
+    { runtime with registered_modules }
 
   let get_registered_module ~runtime ~name =
     match StringMap.find_opt name runtime.registered_modules with
@@ -301,7 +318,7 @@ module Make (M : Runtime_builder_intf.T) :
     match IntMap.find_opt modul exported with
     | None ->
       (* it should be there! *)
-      assert false
+      Error (`Unknown_import (modul_name, name))
     | Some names ->
       (* find the address for the export with the desired name *)
       begin match StringMap.find_opt name names with
@@ -363,14 +380,10 @@ module Make (M : Runtime_builder_intf.T) :
       let map = IntMap.add id address map in
       Ok (functions, map)
 
-  let link_global ~runtime id (globals, map) = function
+  let link_global ~get_const_func ~get_const_global ~runtime id
+    ((globals : (Allocator.key * global) list), map) = function
     | Origin.Local ({ init; typ; id = _ } : Binary.Global.t) ->
-      let* value =
-        Eval_const.expr
-          ~get_func:(fun _id -> assert false)
-          ~get_global:(fun _id -> assert false)
-          init
-      in
+      let* value = Eval_const.expr ~get_const_func ~get_const_global init in
       let value =
         match fst typ with
         | Const -> Const value
@@ -511,7 +524,7 @@ module Make (M : Runtime_builder_intf.T) :
       let map = IntMap.add id address map in
       Ok (tables, map)
 
-  let link_data ~runtime ~memories_map id
+  let link_data ~get_const_global ~runtime ~memories_map id
     ((initialization_code : Binary.expr), datas, map)
     { Binary.Data.init; mode; _ } =
     let data = init in
@@ -529,16 +542,17 @@ module Make (M : Runtime_builder_intf.T) :
         | Some _ ->
           let* offset =
             Eval_const.expr
-              ~get_func:(fun _id -> assert false)
-              ~get_global:(fun _id -> assert false)
-              offset
+              ~get_const_func:(fun _ ->
+                (* The offset must be an i32, thus it can not be a function! *)
+                assert false )
+              ~get_const_global offset
           in
-          let offset =
+          let* offset =
             match offset with
-            | I32 i -> i
+            | I32 i -> Ok i
             | _ ->
-              (* Should have failed earlier at typing *)
-              assert false
+              (* TODO: should move to typecheck phase! *)
+              Error (`Type_mismatch "get_i32")
           in
           let length = String.length init |> Concrete_i32.of_int in
           (* Jean-Christophe, I'm sorry for writing this, please forgive me... *)
@@ -555,14 +569,10 @@ module Make (M : Runtime_builder_intf.T) :
     in
     Ok (initialization_code, datas, map)
 
-  let link_elem ~runtime id (initialization_code, elems, map)
-    { Binary.Elem.init; mode; _ } =
+  let link_elem ~get_const_func ~get_const_global ~runtime id
+    (initialization_code, elems, map) { Binary.Elem.init; mode; _ } =
     let* init =
-      list_map
-        (Eval_const.expr
-           ~get_func:(fun _id -> assert false)
-           ~get_global:(fun _id -> assert false) )
-        init
+      list_map (Eval_const.expr ~get_const_func ~get_const_global) init
     in
     let* elem =
       match mode with
@@ -574,7 +584,6 @@ module Make (M : Runtime_builder_intf.T) :
             | _ -> Error `Constant_expression_required )
           init
     in
-    let elem = M.elem_of_concrete_ref_list elem in
 
     let address = Allocator.plus_key (Allocator.next_key runtime.elems) id in
     let elems = (address, elem) :: elems in
@@ -587,13 +596,13 @@ module Make (M : Runtime_builder_intf.T) :
       assert false
     | Active (Some table, offset) ->
       let length = Int32.of_int @@ List.length init in
+      let* offset = Eval_const.expr ~get_const_func ~get_const_global offset in
       let* offset =
-        Eval_const.expr
-          ~get_func:(fun _id -> assert false)
-          ~get_global:(fun _id -> assert false)
-          offset
+        (* TODO: this check should be moved to typecheck phase! *)
+        match offset with
+        | I32 i -> Ok i
+        | _ -> Error (`Type_mismatch "get_i32")
       in
-      let offset = match offset with I32 i -> i | _ -> assert false in
       let initialization_code =
         initialization_code
         @ Annotated.dummies
@@ -619,9 +628,55 @@ module Make (M : Runtime_builder_intf.T) :
     in
     (* tags *)
     (* TODO *)
+
+    let get_const_global ~runtime globals globals_map id =
+      (* we should only make visible previously defined immutable globals and imported immutable globals. *)
+      match IntMap.find_opt id globals_map with
+      | None -> assert false
+      | Some address ->
+        begin match List.assoc_opt address globals with
+        | Some g ->
+          begin match g.value with Const v -> Ok v | Var _ -> assert false
+          end
+        | None ->
+          begin match Allocator.find_opt address runtime.globals with
+          | Some g ->
+            begin match g.value with Const v -> Ok v | Var _ -> assert false
+            end
+          | None -> assert false
+          end
+        end
+    in
+
+    let get_const_func ~runtime functions functions_map id =
+      (* we should only make visible functions that are defined locally, not imported functions *)
+      match IntMap.find_opt id functions_map with
+      | None -> assert false
+      | Some address ->
+        begin match List.assoc_opt address functions with
+        | Some f -> Ok f
+        | None ->
+          (* TODO: I don't really like that we check two times... this can probably be cleaned up in some way. *)
+          begin match Allocator.find_opt address runtime.functions with
+          | Some f -> Ok f
+          | None ->
+            Log.debug (fun m ->
+              m "getting function with id %d and address %d" id
+                (Allocator.unsafe_to_int address) );
+            assert false
+          end
+        end
+    in
+
     (* globals *)
     let* globals, globals_map =
-      array_fold_lefti (link_global ~runtime) ([], IntMap.empty) modul.global
+      array_fold_lefti
+        (fun id ((globals : (Allocator.key * global) list), map) ->
+          link_global
+            ~get_const_func:(get_const_func ~runtime functions functions_map)
+            ~get_const_global:(get_const_global ~runtime globals map)
+            ~runtime id (globals, map) )
+        ([], IntMap.empty) modul.global
     in
     (* memories *)
     let* memories, memories_map =
@@ -635,12 +690,18 @@ module Make (M : Runtime_builder_intf.T) :
     (* 1. data *)
     let* initialization_code, datas, datas_map =
       array_fold_lefti
-        (link_data ~runtime ~memories_map)
+        (link_data
+           ~get_const_global:(get_const_global ~runtime globals globals_map)
+           ~runtime ~memories_map )
         ([], [], IntMap.empty) modul.data
     in
     (* 2. elem *)
     let* initialization_code, elems, elems_map =
-      array_fold_lefti (link_elem ~runtime)
+      array_fold_lefti
+        (link_elem
+           ~get_const_func:(get_const_func ~runtime functions functions_map)
+           ~get_const_global:(get_const_global ~runtime globals globals_map)
+           ~runtime )
         (initialization_code, [], IntMap.empty)
         modul.elem
     in
@@ -724,6 +785,147 @@ module Make (M : Runtime_builder_intf.T) :
       | Load (i, memarg) -> Load (get_unsafe i memories_map, memarg)
       | Store (i, memarg) -> Store (get_unsafe i memories_map, memarg)
     in
+    let rewrite_v128_instruction : Binary.v128_instr -> Binary.v128_instr =
+      function
+      | (And | Not | Or | Any_true | Bitselect | Xor | Andnot | Const _) as i ->
+        i
+      | Load8_splat (i, memarg) ->
+        Load8_splat (get_unsafe i memories_map, memarg)
+      | Load8_lane (i, memarg, n) ->
+        Load8_lane (get_unsafe i memories_map, memarg, n)
+      | Load8x8_s (i, memarg) -> Load8x8_s (get_unsafe i memories_map, memarg)
+      | Load8x8_u (i, memarg) -> Load8x8_u (get_unsafe i memories_map, memarg)
+      | Load16_splat (i, memarg) ->
+        Load16_splat (get_unsafe i memories_map, memarg)
+      | Load16_lane (i, memarg, n) ->
+        Load16_lane (get_unsafe i memories_map, memarg, n)
+      | Load16x4_s (i, memarg) -> Load16x4_s (get_unsafe i memories_map, memarg)
+      | Load16x4_u (i, memarg) -> Load16x4_u (get_unsafe i memories_map, memarg)
+      | Load32_splat (i, memarg) ->
+        Load32_splat (get_unsafe i memories_map, memarg)
+      | Load32_lane (i, memarg, n) ->
+        Load32_lane (get_unsafe i memories_map, memarg, n)
+      | Load32_zero (i, memarg) ->
+        Load32_zero (get_unsafe i memories_map, memarg)
+      | Load64_splat (i, memarg) ->
+        Load64_splat (get_unsafe i memories_map, memarg)
+      | Load64_lane (i, memarg, n) ->
+        Load64_lane (get_unsafe i memories_map, memarg, n)
+      | Load64_zero (i, memarg) ->
+        Load64_zero (get_unsafe i memories_map, memarg)
+      | Load (i, memarg) -> Load (get_unsafe i memories_map, memarg)
+      | Store (i, memarg) -> Store (get_unsafe i memories_map, memarg)
+      | Store8_lane (i, memarg, n) ->
+        Store8_lane (get_unsafe i memories_map, memarg, n)
+      | Store64_lane (i, memarg, n) ->
+        Store64_lane (get_unsafe i memories_map, memarg, n)
+      | Store32_zero (i, memarg) ->
+        Store32_zero (get_unsafe i memories_map, memarg)
+      | Store32_lane (i, memarg, n) ->
+        Store32_lane (get_unsafe i memories_map, memarg, n)
+      | Store16_lane (i, memarg, n) ->
+        Store16_lane (get_unsafe i memories_map, memarg, n)
+      | Load32x2_s (i, memarg) -> Load32x2_s (get_unsafe i memories_map, memarg)
+      | Load32x2_u (i, memarg) -> Load32x2_u (get_unsafe i memories_map, memarg)
+    in
+    let rewrite_i8x16_instruction : Text.i8x16_instr -> Text.i8x16_instr =
+      function
+      | ( Add | Sub | Eq | Ne | Lt_s | Lt_u | Gt_s | Gt_u | Le_s | Le_u | Ge_s
+        | Ge_u | Abs | Neg | Popcnt | All_true | Bitmask | Swizzle | Splat | Shl
+        | Shr_s | Shr_u | Min_s | Min_u | Add_sat_s | Add_sat_u | Sub_sat_s
+        | Sub_sat_u | Max_s | Max_u | Narrow_i16x8_s | Narrow_i16x8_u | Avgr_u
+        | Shuffle _ | Extract_lane_s _ | Extract_lane_u _ | Replace_lane _ ) as
+        i ->
+        i
+    in
+    let rewrite_i16x8_instruction : Text.i16x8_instr -> Text.i16x8_instr =
+      function
+      | ( Add | Sub | Mul | Eq | Ne | Lt_s | Lt_u | Gt_s | Gt_u | Le_s | Le_u
+        | Ge_s | Ge_u | Splat | Q15mulr_sat_s | Min_s | Min_u
+        | Extmul_low_i8x16_s | Extmul_low_i8x16_u | Extmul_high_i8x16_s
+        | Extmul_high_i8x16_u | Extend_low_i8x16_s | Extend_low_i8x16_u
+        | Extend_high_i8x16_s | Extend_high_i8x16_u | Extadd_pairwise_i8x16_s
+        | Extadd_pairwise_i8x16_u | Add_sat_s | Add_sat_u | Sub_sat_s
+        | Sub_sat_u | Max_s | Max_u | Shl | Neg | All_true | Shr_s | Shr_u
+        | Bitmask | Avgr_u | Abs | Narrow_i32x4_s | Narrow_i32x4_u
+        | Extract_lane_s _ | Extract_lane_u _ | Replace_lane _ ) as i ->
+        i
+    in
+    let rewrite_i32x4_instruction : Text.i32x4_instr -> Text.i32x4_instr =
+      function
+      | ( Add | Sub | Mul | Shl | Shr_s | Shr_u | Eq | Ne | Lt_s | Lt_u | Gt_s
+        | Gt_u | Le_s | Le_u | Ge_s | Ge_u | Splat | Extend_low_i16x8_s
+        | Extend_high_i16x8_s | Extend_low_i16x8_u | Extend_high_i16x8_u
+        | Trunc_sat_f64x2_s_zero | Trunc_sat_f64x2_u_zero | Trunc_sat_f32x4_s
+        | Trunc_sat_f32x4_u | Min_s | Min_u | Extmul_low_i16x8_s
+        | Extmul_low_i16x8_u | Extmul_high_i16x8_s | Extmul_high_i16x8_u
+        | Extadd_pairwise_i16x8_s | Extadd_pairwise_i16x8_u | Dot_i16x8_s | Neg
+        | Max_s | Max_u | Abs | All_true | Bitmask | Extract_lane _
+        | Replace_lane _ ) as i ->
+        i
+    in
+    let rewrite_i64x2_instruction : Text.i64x2_instr -> Text.i64x2_instr =
+      function
+      | ( Add | Sub | Mul | Eq | Ne | Lt_s | Gt_s | Le_s | Ge_s | Splat
+        | Extend_low_i32x4_s | Extend_low_i32x4_u | Extend_high_i32x4_s
+        | Extend_high_i32x4_u | Extmul_low_i32x4_s | Extmul_low_i32x4_u
+        | Extmul_high_i32x4_s | Extmul_high_i32x4_u | Abs | Neg | All_true
+        | Bitmask | Shl | Shr_s | Shr_u | Extract_lane _ | Replace_lane _ ) as i
+        ->
+        i
+    in
+    let rewrite_f32x4_instruction : Text.f32x4_instr -> Text.f32x4_instr =
+      function
+      | ( Add | Pmin | Min | Eq | Convert_i32x4_s | Convert_i32x4_u | Ceil | Max
+        | Floor | Pmax | Ne | Sub | Abs | Trunc | Lt | Gt | Le | Ge | Mul
+        | Convert_low_i32x4_s | Convert_low_i32x4_u | Convert_high_i32x4_s
+        | Convert_high_i32x4_u | Splat | Nearest | Div | Neg | Sqrt
+        | Demote_f64x2_zero | Extract_lane _ | Replace_lane _ ) as i ->
+        i
+    in
+    let rewrite_f64x2_instruction : Text.f64x2_instr -> Text.f64x2_instr =
+      function
+      | ( Add | Pmin | Min | Eq | Ceil | Max | Floor | Pmax | Ne | Sub | Abs
+        | Trunc | Lt | Gt | Le | Ge | Mul | Convert_low_i32x4_s
+        | Convert_low_i32x4_u | Convert_high_i32x4_s | Convert_high_i32x4_u
+        | Nearest | Div | Neg | Sqrt | Splat | Promote_low_f32x4
+        | Extract_lane _ | Replace_lane _ ) as i ->
+        i
+    in
+    let rewrite_ref_instruction : Binary.ref_instr -> Binary.ref_instr =
+      function
+      | (Null _ | Is_null | As_non_null | Eq | Test _ | Cast _) as i -> i
+      | Func i -> Func (get_unsafe i functions_map)
+    in
+    let rewrite_table_instruction : Binary.table_instr -> Binary.table_instr =
+      function
+      | Get i -> Get (get_unsafe i tables_map)
+      | Set i -> Set (get_unsafe i tables_map)
+      | Size i -> Size (get_unsafe i tables_map)
+      | Grow i -> Grow (get_unsafe i tables_map)
+      | Fill i -> Fill (get_unsafe i tables_map)
+      | Copy (i1, i2) ->
+        Copy (get_unsafe i1 tables_map, get_unsafe i2 tables_map)
+      | Init (i1, i2) -> Init (get_unsafe i1 tables_map, get_unsafe i2 elems_map)
+    in
+    let rewrite_elem_instruction : Binary.elem_instr -> Binary.elem_instr =
+      function
+      | Drop i -> Drop (get_unsafe i elems_map)
+    in
+    let rewrite_memory_instruction : Binary.memory_instr -> Binary.memory_instr
+        = function
+      | Size i -> Size (get_unsafe i memories_map)
+      | Grow i -> Grow (get_unsafe i memories_map)
+      | Fill i -> Fill (get_unsafe i memories_map)
+      | Copy (i1, i2) ->
+        Copy (get_unsafe i1 memories_map, get_unsafe i2 memories_map)
+      | Init (i1, i2) ->
+        Init (get_unsafe i1 memories_map, get_unsafe i2 datas_map)
+    in
+    let rewrite_data_instruction : Binary.data_instr -> Binary.data_instr =
+      function
+      | Drop i -> Drop (get_unsafe i datas_map)
+    in
     let rewrite_simple_instruction :
       Binary.simple_instruction -> Binary.simple_instruction = function
       | Global i -> Global (rewrite_global_instruction i)
@@ -731,14 +933,18 @@ module Make (M : Runtime_builder_intf.T) :
       | I64 i -> I64 (rewrite_i64_instruction i)
       | F32 i -> F32 (rewrite_f32_instruction i)
       | F64 i -> F64 (rewrite_f64_instruction i)
-      | V128 _ -> assert false
-      | I8x16 _ -> assert false
-      | I16x8 _ -> assert false
-      | I32x4 _ -> assert false
-      | I64x2 _ -> assert false
-      | F32x4 _ -> assert false
-      | F64x2 _ -> assert false
-      | Ref _ | Table _ | Elem _ | Memory _ | Data _ -> assert false
+      | V128 i -> V128 (rewrite_v128_instruction i)
+      | I8x16 i -> I8x16 (rewrite_i8x16_instruction i)
+      | I16x8 i -> I16x8 (rewrite_i16x8_instruction i)
+      | I32x4 i -> I32x4 (rewrite_i32x4_instruction i)
+      | I64x2 i -> I64x2 (rewrite_i64x2_instruction i)
+      | F32x4 i -> F32x4 (rewrite_f32x4_instruction i)
+      | F64x2 i -> F64x2 (rewrite_f64x2_instruction i)
+      | Ref i -> Ref (rewrite_ref_instruction i)
+      | Table i -> Table (rewrite_table_instruction i)
+      | Elem i -> Elem (rewrite_elem_instruction i)
+      | Memory i -> Memory (rewrite_memory_instruction i)
+      | Data i -> Data (rewrite_data_instruction i)
       | ( Nop | Local _ | Drop | Unreachable | Any_convert_extern
         | Extern_convert_any | Select _ ) as i ->
         i
@@ -750,25 +956,31 @@ module Make (M : Runtime_builder_intf.T) :
       | Loop (a, b, e) -> Loop (a, b, rewrite_expression e)
       | If_else (a, b, e1, e2) ->
         If_else (a, b, rewrite_expression e1, rewrite_expression e2)
-      | Return_call _ -> assert false
-      | Return_call_indirect (_, Bt_raw (_, (_, _))) -> assert false
-      | Return_call_ref (Bt_raw (_, (_, _))) -> assert false
+      | Return_call i -> Return_call (get_unsafe i functions_map)
       | Call i -> Call (get_unsafe i functions_map)
-      | Call_indirect (_, Bt_raw (_, (_, _))) -> assert false
-      | Call_ref _ -> assert false
+      | Call_indirect (i, typ) -> Call_indirect (get_unsafe i tables_map, typ)
+      | Return_call_indirect (i, typ) ->
+        Return_call_indirect (get_unsafe i tables_map, typ)
       | ( Return | Br _ | Br_if _ | Br_table _ | Br_on_null _ | Br_on_non_null _
-        | Br_on_cast _ | Br_on_cast_fail _ ) as i ->
+        | Br_on_cast _ | Br_on_cast_fail _
+        (* TODO: It's weird that return_call_ref is not using an indice like call_ref does... *)
+        | Return_call_ref _
+        (* TODO: check that call_ref is taking a raw type and not a typed index *)
+        | Call_ref _ ) as i ->
         i
     and rewrite_expression expr =
       Annotated.map (List.map (Annotated.map rewrite_instruction)) expr
+    in
+    let rewrite_binary_func (func : Binary.Func.t) : Kind.func =
+      let body = rewrite_expression func.body in
+      Kind.Wasm { func with body }
     in
     let runtime =
       List.fold_left
         (fun runtime (address, func) ->
           match (func : Kind.func) with
           | Kind.Wasm func ->
-            let body = rewrite_expression func.body in
-            let func : Kind.func = Kind.Wasm { func with body } in
+            let func = rewrite_binary_func func in
             let functions =
               Allocator.add_manual address func runtime.functions
             in
@@ -784,16 +996,51 @@ module Make (M : Runtime_builder_intf.T) :
         runtime globals
     in
 
-    (* TODO! *)
-    let _ =
-      ( datas
-      , datas_map
-      , elems
-      , elems_map
-      , tables
-      , tables_map
-      , memories
-      , memories_map )
+    let runtime =
+      List.fold_left
+        (fun runtime (address, memory) ->
+          let memories = Allocator.add_manual address memory runtime.memories in
+          { runtime with memories } )
+        runtime memories
+    in
+    let runtime =
+      List.fold_left
+        (fun runtime (address, data) ->
+          let data = M.data_of_string data in
+          let datas = Allocator.add_manual address data runtime.datas in
+          { runtime with datas } )
+        runtime datas
+    in
+
+    let rewrite_ref : Concrete_ref.t -> Concrete_ref.t = function
+      | Extern (Some _extern) -> (* TODO *) assert false
+      | Func (Some (Wasm f)) ->
+        (* TODO: it sucks! we should use an indice instead of the raw function here.. *)
+        let f = rewrite_binary_func f in
+        Func (Some f)
+      | Func (Some (Extern n)) ->
+        (* TODO: I think this is wrong *)
+        Func (Some (Extern n))
+      | (Extern None | Func None | NullExn | NullRef) as i -> i
+    in
+    let runtime =
+      List.fold_left
+        (fun runtime (address, elem) ->
+          (* TODO: missing rewriting here! *)
+          let elem = List.map rewrite_ref elem in
+          let elem = M.elem_of_concrete_ref_list elem in
+          let elems = Allocator.add_manual address elem runtime.elems in
+          { runtime with elems } )
+        runtime elems
+    in
+
+    let runtime =
+      List.fold_left
+        (fun runtime (address, table) ->
+          (* TODO: missing rewriting here! *)
+          let tables = Allocator.add_manual address table runtime.tables in
+          { runtime with tables } )
+        runtime tables
     in
 
     let export_array_to_string_map a address_map =
@@ -857,6 +1104,15 @@ module Make (M : Runtime_builder_intf.T) :
         in
         { runtime with registered_modules }
     in
+
+    let runtime =
+      match modul.id with
+      | None -> runtime
+      | Some id ->
+        let raw_names = StringMap.add id new_module runtime.raw_names in
+        { runtime with raw_names }
+    in
+
     Log.debug (fun m -> m "runtime is: %a" pp runtime);
     Ok runtime
 
@@ -958,14 +1214,17 @@ module Make (M : Runtime_builder_intf.T) :
     in
     let last_module = Some new_module in
     let runtime = { runtime with exported_functions; last_module } in
-    register_module ~runtime ~modul:new_module ~name
+    let registered_modules =
+      StringMap.add name new_module runtime.registered_modules
+    in
+    { runtime with registered_modules }
 
   let get_exported_func ~runtime ~module_name ~func_name =
     let* modul =
       match module_name with
       | None -> get_last_module ~runtime
       | Some module_name -> (
-        match StringMap.find_opt module_name runtime.registered_modules with
+        match StringMap.find_opt module_name runtime.raw_names with
         | None -> Error (`Unbound_module module_name)
         | Some modul -> Ok modul )
     in
@@ -988,7 +1247,7 @@ module Make (M : Runtime_builder_intf.T) :
       match module_name with
       | None -> get_last_module ~runtime
       | Some module_name -> (
-        match StringMap.find_opt module_name runtime.registered_modules with
+        match StringMap.find_opt module_name runtime.raw_names with
         | None -> Error (`Unbound_module module_name)
         | Some modul -> Ok modul )
     in
@@ -1011,4 +1270,9 @@ module Make (M : Runtime_builder_intf.T) :
     | None -> assert false
 
   let get_context ~runtime = runtime.context
+
+  let get_modul_from_modid ~runtime ~modid =
+    match StringMap.find_opt modid runtime.raw_names with
+    | None -> Fmt.error_msg "unbound module %s" modid
+    | Some v -> Ok v
 end

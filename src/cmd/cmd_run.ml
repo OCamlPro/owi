@@ -23,7 +23,9 @@ let cmd ~unsafe ~timeout ~timeout_instr ~source_file =
   end in
   let module I = New_interpret.Concrete (Parameters) in
   let res, run_time =
-    Benchmark.with_utime @@ fun () -> I.modul ~runtime ~modul
+    Benchmark.with_utime @@ fun () ->
+    let* _runtime = I.modul ~runtime ~modul in
+    Ok ()
   in
   Log.bench (fun m ->
     (* run_time shouldn't be none in bench mode *)

@@ -114,20 +114,16 @@ struct
       if v then Choice.trap trap else f ()
 
   module State = struct
-    type stack = Stack.t
-
-    type value = Value.t
-
     module Locals : sig
-      type t = value array
+      type t = Value.t array
 
-      val of_list : value list -> t
+      val of_list : Value.t list -> t
 
-      val get : t -> int -> value
+      val get : t -> int -> Value.t
 
-      val set : t -> int -> value -> t
+      val set : t -> int -> Value.t -> t
     end = struct
-      type t = value array
+      type t = Value.t array
 
       let of_list = Array.of_list
 
@@ -144,7 +140,7 @@ struct
       ; branch_rt : Binary.result_type
       ; continue : expr Annotated.t
       ; continue_rt : Binary.result_type
-      ; stack : stack
+      ; stack : Stack.t
       ; is_loop : Prelude.Bool.t
       }
 
@@ -152,7 +148,7 @@ struct
 
     type t =
       { return_state : t option
-      ; stack : stack
+      ; stack : Stack.t
       ; locals : Locals.t
           (* TODO: rename this PC, it stands for program counter but is easily confused with path condition... *)
       ; pc : expr Annotated.t
@@ -172,13 +168,13 @@ struct
       }
 
     type instr_result =
-      | Return of value list
+      | Return of t * Value.t list
       | Continue of t
 
     let return (state : t) =
       let args = Stack.keep state.stack (List.length state.func_rt) in
       match state.return_state with
-      | None -> Return args
+      | None -> Return (state, args)
       | Some state ->
         let stack = args @ state.stack in
         Continue { state with stack }
@@ -1497,13 +1493,16 @@ struct
       let elem = Runtime.get_elem ~runtime i in
       Elem.drop elem
 
-  let exec_memory_instr ~state instr_counter stack : Binary.memory_instr -> _ =
+  let exec_memory_instr ~state instr_counter stack :
+    Binary.memory_instr -> State.t Choice.t =
     let { State.runtime; _ } = state in
     function
     | Size memid ->
       let mem = Runtime.get_memory ~runtime memid in
       let len = Memory.size_in_pages mem in
-      Stack.push_i32 stack len |> Choice.return
+      let stack = Stack.push_i32 stack len in
+      let runtime = Runtime.set_memory ~runtime memid mem in
+      Choice.return { state with stack; runtime }
     | Grow memid ->
       let mem = Runtime.get_memory ~runtime memid in
       let old_size = I64.of_int32 @@ Memory.size mem in
@@ -1518,12 +1517,16 @@ struct
         | Some max -> I64.(lt_u (of_int max * page_size) new_size)
         | None -> Boolean.false_
       in
-      if too_big then Stack.push_i32 stack (I32.of_int ~-1) |> Choice.return
+      if too_big then
+        let stack = Stack.push_i32 stack (I32.of_int ~-1) in
+        Choice.return { state with stack }
       else begin
         let mem = Runtime.get_memory ~runtime memid in
-        let* () = Memory.grow mem I64.(to_int32 delta) in
+        let mem = Memory.grow mem I64.(to_int32 delta) in
         let res = I64.(to_int32 @@ (old_size / page_size)) in
-        Stack.push_i32 stack res |> Choice.return
+        let stack = Stack.push_i32 stack res in
+        let runtime = Runtime.set_memory ~runtime memid mem in
+        Choice.return { state with runtime; stack }
       end
     | Fill memid ->
       let len, stack = Stack.pop_i32 stack in
@@ -1548,7 +1551,7 @@ struct
       in
       let mem = Runtime.get_memory ~runtime memid in
       let+ () = Memory.fill mem ~pos ~len c in
-      stack
+      { state with stack }
     | Copy (dstmemid, srcmemid) ->
       let len, stack = Stack.pop_i32 stack in
       let src_idx, stack = Stack.pop_i32 stack in
@@ -1571,34 +1574,36 @@ struct
       let srcmem = Runtime.get_memory ~runtime srcmemid in
       let dstmem = Runtime.get_memory ~runtime dstmemid in
       let+ () = Memory.blit ~src:srcmem ~src_idx ~dst:dstmem ~dst_idx ~len in
-      stack
+      { state with stack }
     | Init (memid, dataid) ->
       let len, stack = Stack.pop_i32 stack in
       let src, stack = Stack.pop_i32 stack in
       let dst, stack = Stack.pop_i32 stack in
-      let data = Runtime.get_data ~runtime dataid in
-      begin match Data.to_string data with
-      | None -> trap (`Msg "dropped data!")
-      | Some data ->
-        let mem = Runtime.get_memory ~runtime memid in
-        let>! () =
-          let memsize = I64.extend_i32_u (Memory.size mem) in
-          (* we can probably remove Data.size now! *)
-          let datasize = I64.of_int (String.length data) in
-          let len = I64.extend_i32_u len in
-          let src = I64.extend_i32_u src in
-          let dst = I64.extend_i32_u dst in
-          ( Boolean.or_
-              (I64.lt_u memsize I64.(add dst len))
-              (I64.lt_u datasize I64.(add src len))
-          , `Out_of_bounds_memory_access
-          , Some instr_counter
-          , false )
-        in
-        let mem = Runtime.get_memory ~runtime memid in
-        let+ () = Memory.blit_string mem data ~src ~dst ~len in
-        stack
-      end
+      let data = Runtime.get_data ~runtime dataid |> Data.to_string in
+      let datasize =
+        (* TODO: we can probably remove Data.size now that String.length is used ! *)
+        match data with
+        | None -> I64.zero
+        | Some data -> String.length data |> I64.of_int
+      in
+      let mem = Runtime.get_memory ~runtime memid in
+      let>! () =
+        let memsize = I64.extend_i32_u (Memory.size mem) in
+        let len = I64.extend_i32_u len in
+        let src = I64.extend_i32_u src in
+        let dst = I64.extend_i32_u dst in
+        ( Boolean.or_
+            (I64.lt_u memsize I64.(add dst len))
+            (I64.lt_u datasize I64.(add src len))
+        , `Out_of_bounds_memory_access
+        , Some instr_counter
+        , false )
+      in
+      let mem = Runtime.get_memory ~runtime memid in
+      let+ () =
+        Memory.blit_string mem (Option.value data ~default:"") ~src ~dst ~len
+      in
+      { state with stack }
 
   let exec_data_instr runtime : Binary.data_instr -> Runtime.t = function
     | Drop i ->
@@ -1922,8 +1927,8 @@ struct
       exec_elem_instr runtime i;
       ret stack
     | Memory i ->
-      let* stack = exec_memory_instr ~state instr_counter stack i in
-      ret stack
+      let+ state = exec_memory_instr ~state instr_counter stack i in
+      State.Continue state
     | Data i ->
       let runtime = exec_data_instr runtime i in
       Choice.return (State.Continue { state with runtime })
@@ -2125,7 +2130,8 @@ struct
     | Call_ref typ_i -> call_ref ~return:false state typ_i
     | Return_call_ref typ_i -> call_ref ~return:true state typ_i
 
-  let rec loop ~heartbeat (state : State.t) =
+  let rec loop ~heartbeat (state : State.t) :
+    (Runtime.t * Value.t list) Choice.t =
     let* () =
       match heartbeat with None -> Choice.return () | Some f -> f ()
     in
@@ -2135,15 +2141,16 @@ struct
       let* state = exec_instr instr { state with pc } in
       match state with
       | State.Continue state -> loop ~heartbeat state
-      | State.Return res -> Choice.return res
+      | State.Return (state, res) -> Choice.return (state.runtime, res)
       end
     | [] -> (
       let* next_state = State.end_block state in
       match next_state with
       | State.Continue state -> loop ~heartbeat state
-      | State.Return res -> Choice.return res )
+      | State.Return (state, res) -> Choice.return (state.runtime, res) )
 
-  let exec_expr ~heartbeat runtime locals stack expr bt =
+  let exec_expr ~heartbeat runtime locals stack expr bt :
+    (Runtime.t * Value.t list) Choice.t =
     let state : State.t =
       let func_rt = match bt with None -> [] | Some rt -> rt in
       { stack
@@ -2174,11 +2181,11 @@ struct
         (fun () ->
           let fuel_left = Atomic.fetch_and_add fuel (-1) in
           (* If we only use [timeout_instr], we want to stop all as
-                                 soon as [fuel_left <= 0]. But if we only use [timeout],
-                                 we don't want to run into the slow path below on each
-                                 instruction after [fuel_left] becomes negative. We avoid
-                                 this repeated slow path by bumping [fuel] to [max_int]
-                                 again in this case. *)
+                                soon as [fuel_left <= 0]. But if we only use [timeout],
+                                we don't want to run into the slow path below on each
+                                instruction after [fuel_left] becomes negative. We avoid
+                                this repeated slow path by bumping [fuel] to [max_int]
+                                again in this case. *)
           if fuel_left mod 1024 = 0 || fuel_left < 0 then begin
             let stop =
               match (Parameters.timeout, Parameters.timeout_instr) with
@@ -2194,23 +2201,24 @@ struct
           end
           else Choice.return () )
 
-  let modul ~(runtime : Runtime.t) ~(modul : Runtime.modul) : unit Choice.t =
+  let modul ~(runtime : Runtime.t) ~(modul : Runtime.modul) : Runtime.t Choice.t
+      =
     let init_code = Runtime.get_initialization_code ~modul ~runtime in
     let heartbeat = make_heartbeat () in
     Log.info (fun m -> m "interpreting ...");
     try
       begin
-        let+ _end_stack =
+        let+ runtime, _end_stack =
           exec_expr ~heartbeat runtime (State.Locals.of_list []) Stack.empty
             (Annotated.dummy init_code)
             None
         in
-        ()
+        runtime
       end
     with Stack_overflow -> Choice.trap `Call_stack_exhausted
 
   let exec_vfunc_from_outside ~runtime ~locals (func : Kind.func) :
-    _ list Choice.t =
+    (Runtime.t * Value.t list) Choice.t =
     let state = State.empty ~locals ~runtime in
     try
       begin
@@ -2226,7 +2234,7 @@ struct
             State.return state
         in
         match state with
-        | State.Return res -> Choice.return res
+        | State.Return (state, res) -> Choice.return (state.runtime, res)
         | State.Continue state -> loop ~heartbeat:None state
       end
     with Stack_overflow -> Choice.trap `Call_stack_exhausted

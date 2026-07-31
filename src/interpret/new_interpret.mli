@@ -20,11 +20,11 @@ module Concrete (_ : Parameters) : sig
   val modul :
        runtime:Concrete_runtime.t
     -> modul:Concrete_runtime.modul
-    -> unit Concrete_choice.t
+    -> Concrete_runtime.t Concrete_choice.t
 
   val exec_vfunc_from_outside :
        runtime:Concrete_runtime.t
     -> locals:Concrete_value.t list
     -> Kind.func
-    -> Concrete_value.t list Concrete_choice.t
+    -> (Concrete_runtime.t * Concrete_value.t list) Concrete_choice.t
 end

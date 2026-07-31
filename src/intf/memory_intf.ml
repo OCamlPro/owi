@@ -37,7 +37,7 @@ module type T = sig
 
   val store_128 : t -> addr:i32 -> v128 -> unit choice
 
-  val grow : t -> i32 -> unit choice
+  val grow : t -> i32 -> t
 
   val fill : t -> pos:i32 -> len:i32 -> char -> unit choice
 

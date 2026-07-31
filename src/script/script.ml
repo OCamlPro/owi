@@ -21,14 +21,15 @@ let action (runtime : Concrete_runtime.t) = function
       Concrete_runtime.get_exported_func ~runtime ~module_name ~func_name
     in
     let locals = List.rev_map (Concrete_value.of_script_const ~ty) args in
-    I.exec_vfunc_from_outside ~runtime ~locals f
+    let* runtime, stack = I.exec_vfunc_from_outside ~runtime ~locals f in
+    Ok (runtime, stack)
     end
   | Get (module_name, global_name) ->
     Log.info (fun m -> m "get...");
     let+ global =
       Concrete_runtime.get_exported_global ~runtime ~module_name ~global_name
     in
-    [ global ]
+    (runtime, [ global ])
 
 let unsafe = false
 
@@ -51,9 +52,7 @@ let run ~no_exhaustion script =
         let* modul, runtime =
           Compile.Text.until_concrete_link runtime ~unsafe ~name:None modul
         in
-        let+ () = I.modul ~runtime ~modul in
-        (* TODO: enable printing again! *)
-        runtime
+        I.modul ~runtime ~modul
       | Wast.Quoted_module (false, modul) ->
         Log.info (fun m -> m "*** quoted module");
         incr curr_module;
@@ -61,8 +60,7 @@ let run ~no_exhaustion script =
         let* modul, runtime =
           Compile.Text.until_concrete_link runtime ~unsafe ~name:None modul
         in
-        let+ () = I.modul ~runtime ~modul in
-        runtime
+        I.modul ~runtime ~modul
       | Wast.Binary_module (false, id, modul) ->
         Log.info (fun m -> m "*** binary module");
         incr curr_module;
@@ -71,8 +69,7 @@ let run ~no_exhaustion script =
         let* modul, runtime =
           Compile.Binary.until_concrete_link runtime ~unsafe ~name:None modul
         in
-        let+ () = I.modul ~runtime ~modul in
-        runtime
+        I.modul ~runtime ~modul
       | Assert (Assert_trap_module (modul, expected)) ->
         Log.info (fun m -> m "*** assert_trap");
         incr curr_module;
@@ -81,6 +78,7 @@ let run ~no_exhaustion script =
         in
         let got = I.modul ~runtime ~modul in
         let+ () = Script_error.check_result ~expected ~got in
+        (* TODO: this is wrong! we should get back the runtime after running modul? *)
         runtime
       | Assert (Assert_malformed_binary (modul, expected)) ->
         Log.info (fun m -> m "*** assert_malformed_binary");
@@ -152,7 +150,7 @@ let run ~no_exhaustion script =
         assert false
       | Assert (Assert_return (a, res)) ->
         Log.info (fun m -> m "*** assert_return");
-        let* stack = action runtime a in
+        let* runtime, stack = action runtime a in
         let stack = List.rev stack in
         if
           List.compare_lengths res stack <> 0
@@ -168,8 +166,10 @@ let run ~no_exhaustion script =
         else Ok runtime
       | Assert (Assert_trap (a, expected)) ->
         Log.info (fun m -> m "*** assert_trap");
+        (* TODO: this is wrong! we should get back the runtime after running action! *)
         let got = action runtime a in
         let+ () = Script_error.check_result ~expected ~got in
+        (* TODO: this is wrong! we should get back the runtime after running modul? *)
         runtime
       | Assert (Assert_exhaustion (a, expected)) ->
         Log.info (fun m -> m "*** assert_exhaustion");
@@ -179,16 +179,16 @@ let run ~no_exhaustion script =
             let got = action runtime a in
             Script_error.check_result ~expected ~got
         in
+        (* TODO: this is wrong! we should get back the runtime after running action? *)
         runtime
-      | Register (name, _mod_name) ->
+      | Register (name, mod_name) ->
         (* TODO: is mod_name needed? *)
         if !curr_module = 1 && not !registered then (* TODO: disable debug *) ();
         Log.info (fun m -> m "*** register");
-        let+ id = Concrete_runtime.get_last_module ~runtime in
-        Concrete_runtime.register_module ~runtime ~modul:id ~name
+        Concrete_runtime.register_module ~runtime ~name ~modid:mod_name
       | Action a ->
         Log.info (fun m -> m "*** action");
-        let+ _stack = action runtime a in
+        let+ runtime, _stack = action runtime a in
         runtime
       | Text_module (true, _)
       | Binary_module (true, _, _)

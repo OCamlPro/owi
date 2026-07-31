@@ -254,7 +254,11 @@ let cmd ~unsafe ~replay_file ~source_file ~entry_point ~invoke_with_symbols =
     compile_file ~unsafe ~entry_point ~invoke_with_symbols source_file model
   in
   let module I = New_interpret.Concrete (New_interpret.Default_parameters) in
-  let r, run_time = Benchmark.with_utime @@ fun () -> I.modul ~runtime ~modul in
+  let r, run_time =
+    Benchmark.with_utime @@ fun () ->
+    let* _runtime = I.modul ~runtime ~modul in
+    Ok ()
+  in
   Log.bench (fun m ->
     (* run_time shouldn't be none in bench mode *)
     let run_time = match run_time with None -> assert false | Some t -> t in

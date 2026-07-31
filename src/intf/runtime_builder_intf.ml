@@ -35,4 +35,6 @@ module type T = sig
   val to_func_type : extern_func -> Binary.func_type
 
   type data
+
+  val data_of_string : string -> data
 end

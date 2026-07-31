@@ -114,8 +114,7 @@ let grow m delta =
   let size =
     Symbolic_boolean.ite (Symbolic_i32.lt m.size new_size) new_size m.size
   in
-  let m = { m with size } in
-  replace m
+  { m with size }
 
 let size { size; _ } = Symbolic_i32.mul size page_size
 

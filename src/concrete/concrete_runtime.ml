@@ -42,6 +42,8 @@ module Concrete_runtime_builder :
   let empty_context () = ()
 
   type data = Concrete_data.t
+
+  let data_of_string = Concrete_data.of_string
 end
 
 include New_link.Make (Concrete_runtime_builder)

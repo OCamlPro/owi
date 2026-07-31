@@ -23,7 +23,8 @@ module type T = sig
 
   val get_last_module : runtime:t -> modul Result.t
 
-  val register_module : runtime:t -> modul:modul -> name:string -> t
+  val register_module :
+    runtime:t -> name:string -> modid:string option -> t Result.t
 
   val get_initialization_code : runtime:t -> modul:modul -> Binary.expr
 
@@ -73,4 +74,6 @@ module type T = sig
   type context
 
   val get_context : runtime:t -> context
+
+  val get_modul_from_modid : runtime:t -> modid:string -> modul Result.t
 end

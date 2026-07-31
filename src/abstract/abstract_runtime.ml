@@ -37,6 +37,8 @@ module Abstract_runtime_builder :
   let empty_context = Abstract_domain.root_context
 
   type data = |
+
+  let data_of_string _ = assert false
 end
 
 include New_link.Make (Abstract_runtime_builder)

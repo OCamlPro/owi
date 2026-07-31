@@ -29,7 +29,8 @@ let cmd ~rounds ~seed ~source_file ~timeout ~timeout_instr ~unsafe =
     Benchmark.with_utime @@ fun () ->
     Fuzz_driver.run ~rounds (fun () ->
       (* TODO: check if we should regenerate the link state *)
-      I.modul ~runtime ~modul )
+      let* _runtime = I.modul ~runtime ~modul in
+      Ok () )
   in
   Log.bench (fun m ->
     (* run_time shouldn't be none in bench mode *)

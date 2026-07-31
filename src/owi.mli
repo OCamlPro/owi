@@ -1917,7 +1917,7 @@ module New_interpret : sig
     val modul :
          runtime:Concrete_runtime.t
       -> modul:Concrete_runtime.modul
-      -> unit Result.t
+      -> Concrete_runtime.t Concrete_choice.t
   end
 end
 
