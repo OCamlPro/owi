@@ -83,6 +83,10 @@ let bench =
   let doc = "enable benchmarks" in
   Arg.(value & flag & info [ "bench" ] ~doc ~docs:sdocs)
 
+let progress = 
+  let doc = "Show a progress bar during execution" in
+  Arg.(value & flag & info [ "progress" ] ~doc ~docs:sdocs)
+
 (* Common terms *)
 
 open Term.Syntax
@@ -284,6 +288,7 @@ let symbolic_parameters default_entry_point =
   and+ timeout_instr
   and+ unsafe
   and+ with_breadcrumbs
+  and+ progress
   and+ workers
   and+ workspace in
   let use_ite_for_select = not no_ite_for_select in
@@ -306,6 +311,7 @@ let symbolic_parameters default_entry_point =
   ; unsafe
   ; use_ite_for_select
   ; with_breadcrumbs
+  ; progress
   ; workers
   ; workspace
   }
@@ -515,12 +521,14 @@ let iso_cmd =
   and+ no_worker_isolation
   and+ model_out_file
   and+ with_breadcrumbs
+  and+ progress
   and+ workspace in
 
   Cmd_iso.cmd ~deterministic_result_order ~fail_mode ~exploration_strategy
     ~files ~model_format ~no_assert_failure_expression_printing
     ~no_stop_at_failure ~no_value ~seed ~solver ~unsafe ~workers
     ~no_worker_isolation ~workspace ~model_out_file ~with_breadcrumbs
+    ~progress
 
 (* owi llvm *)
 
