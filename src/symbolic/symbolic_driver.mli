@@ -17,6 +17,7 @@ val run :
   -> model_format:Model.output_format
   -> model_out_file:Fpath.t option
   -> with_breadcrumbs:bool
+  -> progress:bool
   -> run_time:float option
   -> unit Symbolic_choice.t
   -> unit Result.t

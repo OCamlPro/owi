@@ -1967,6 +1967,7 @@ module Symbolic_parameters : sig
     ; unsafe : bool
     ; use_ite_for_select : bool
     ; with_breadcrumbs : bool
+    ; progress : bool
     ; workers : Int.t Option.t
     ; workspace : Fpath.t option
     }
@@ -1988,6 +1989,7 @@ module Symbolic_driver : sig
     -> model_format:Model.output_format
     -> model_out_file:Fpath.t option
     -> with_breadcrumbs:bool
+    -> progress:bool
     -> run_time:float option
     -> unit Symbolic_choice.t
     -> unit Result.t
@@ -2096,6 +2098,7 @@ module Cmd_iso : sig
     -> workspace:Fpath.t option
     -> model_out_file:Fpath.t option
     -> with_breadcrumbs:bool
+    -> progress:bool
     -> unit Result.t
 end
 

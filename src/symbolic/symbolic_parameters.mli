@@ -47,6 +47,7 @@ type t =
   ; unsafe : bool
   ; use_ite_for_select : bool
   ; with_breadcrumbs : bool
+  ; progress: bool
   ; workers : Int.t Option.t
   ; workspace : Fpath.t option
   }
