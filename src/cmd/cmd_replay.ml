@@ -4,37 +4,89 @@
 
 open Syntax
 
-let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
-  let next =
-    let next = ref ~-1 in
-    fun () ->
-      incr next;
-      !next
-  in
-  let brk = ref @@ Int32.of_int 0 in
-  let covered_labels = Hashtbl.create 16 in
-  let scopes = ref Symbol_scope.empty in
+module Reader : sig
+  type env = {
+    next : int ref;
+    brk : int32 ref;
+    covered_labels : (int, string) Hashtbl.t;
+    scopes : Symbol_scope.t ref;
+  }
 
-  let add_sym i =
-    (* the type doesn't matter, we just want the name for now *)
+  type 'a t = env -> 'a Result.t
+
+  val return : 'a -> 'a t
+  val bind : 'a t -> ('a -> 'b t) -> 'b t
+  val run : 'a t -> env -> 'a Result.t
+
+  (* next *)
+  val get_next : int t
+  val incr_next : unit t
+
+  (* brk *)
+  val get_brk : int32 t
+  val set_brk : int32 -> unit t
+
+  (* scopes *)
+  val update_scopes : (Symbol_scope.t -> Symbol_scope.t) -> unit t
+end = struct
+  type env = {
+    next : int ref;
+    brk : int32 ref;
+    covered_labels : (int, string) Hashtbl.t;
+    scopes : Symbol_scope.t ref;
+  }
+
+  type 'a t = env -> 'a Result.t
+
+  let return x = fun _env -> Ok x
+  let bind m f = fun env ->
+    match m env with
+    | Ok x -> f x env
+    | Error e -> Error e
+
+  let run m env = m env
+
+  (* next *)
+  let get_next = fun env -> Ok !(env.next)
+  let incr_next = fun env -> env.next := !(env.next) + 1; Ok ()
+
+  (* brk *)
+  let get_brk = fun env -> Ok !(env.brk)
+  let set_brk v = fun env -> env.brk := v; Ok ()
+
+  (* scopes *)
+  let update_scopes f = fun env -> env.scopes := f !(env.scopes); Ok ()
+end
+
+let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
+  let open Reader in
+  let env = {
+    next = ref (-1);
+    brk = ref 0l;
+    covered_labels = Hashtbl.create 16;
+    scopes = ref Symbol_scope.empty;
+  } in
+
+  let add_sym i : unit Reader.t =
+    let open Reader in
     let sym = Smtml.Symbol.(Fmt.str "symbol_%d" i @: Smtml.Ty.Ty_bitv 0) in
-    scopes := Symbol_scope.symbol sym !scopes
-  in
+    update_scopes (fun s -> Symbol_scope.symbol sym s) in
 
   let module M :
     Wasm_ffi_intf.S0
       with type 'a t := 'a Result.t
-       and type memory := Concrete_memory.t
-       and type i32 := Concrete_value.i32
-       and type i64 := Concrete_value.i64
-       and type f32 := Concrete_value.f32
-       and type f64 := Concrete_value.f64
-       and type v128 := Concrete_value.v128 = struct
+      and type memory := Concrete_memory.t
+      and type i32 := Concrete_value.i32
+      and type i64 := Concrete_value.i64
+      and type f32 := Concrete_value.f32
+      and type f64 := Concrete_value.f64
+      and type v128 := Concrete_value.v128 = struct
+
     let assume _ = Ok ()
 
     let assert' n =
       if Prelude.Int32.equal n 0l then begin
-        Log.info (fun m -> m "scopes : [%a]" Symbol_scope.pp !scopes);
+        Log.info (fun m -> m "scopes : [%a]" Symbol_scope.pp !(env.scopes));
         Log.app (fun m -> m "Assertion failure was correctly reached!");
         exit 0
       end;
@@ -42,84 +94,144 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
 
     let symbol_invisible_bool () = Ok 0l
 
+    (* Helper to run a Reader computation with the captured env *)
+    let run_reader (comp : 'a Reader.t) = Reader.run comp env
+
     let symbol_i32 () =
-      let i = next () in
-      match model.(i) with
-      | Concrete_value.I32 n ->
-        add_sym i;
-        Ok n
-      | v ->
-        Log.err (fun m ->
-          m "Got value %a but expected a i32 value." Concrete_value.pp v );
-        assert false
+      let open Reader in
+      let computation =
+        bind get_next (fun i ->
+          bind incr_next (fun () ->
+            match model.(i) with
+            | Concrete_value.I32 n ->
+                bind (add_sym i) (fun () ->
+                  return n
+                )
+            | v ->
+                Log.err (fun m ->
+                  m "Got value %a but expected a i32 value." Concrete_value.pp v);
+                assert false
+          )
+        )
+      in
+      run_reader computation
 
     let symbol_i64 () =
-      let i = next () in
-      match model.(i) with
-      | Concrete_value.I64 n ->
-        add_sym i;
-        Ok n
-      | v ->
-        Log.err (fun m ->
-          m "Got value %a but expected a i64 value." Concrete_value.pp v );
-        assert false
+      let open Reader in
+      let computation =
+        bind get_next (fun i ->
+          bind incr_next (fun () ->
+            match model.(i) with
+            | Concrete_value.I64 n ->
+              bind (add_sym i) (fun () ->
+                return n
+              )
+            | v ->
+              Log.err (fun m ->
+                m "Got value %a but expected a i64 value." Concrete_value.pp v);
+              assert false
+          )
+        )
+      in
+      run_reader computation
 
     let symbol_f32 () =
-      let i = next () in
-      match model.(i) with
-      | Concrete_value.F32 n ->
-        add_sym i;
-        Ok n
-      | v ->
-        Log.err (fun m ->
-          m "Got value %a but expected a f32 value." Concrete_value.pp v );
-        assert false
+      let open Reader in
+      let computation =
+        bind get_next (fun i ->
+          bind incr_next (fun () ->
+            match model.(i) with
+            | Concrete_value.F32 n ->
+              bind (add_sym i) (fun () ->
+                return n
+              )
+            | v ->
+              Log.err (fun m ->
+                m "Got value %a but expected a f32 value." Concrete_value.pp v);
+              assert false
+          )
+        )
+      in
+      run_reader computation
 
     let symbol_f64 () =
-      let i = next () in
-      match model.(i) with
-      | Concrete_value.F64 n ->
-        add_sym i;
-        Ok n
-      | v ->
-        Log.err (fun m ->
-          m "Got value %a but expected a f64 value." Concrete_value.pp v );
-        assert false
+      let open Reader in
+      let computation =
+        bind get_next (fun i ->
+          bind incr_next (fun () ->
+            match model.(i) with
+            | Concrete_value.F64 n ->
+              bind (add_sym i) (fun () ->
+                return n
+              )
+            | v ->
+              Log.err (fun m ->
+                m "Got value %a but expected a f64 value." Concrete_value.pp v);
+              assert false
+          )
+        )
+      in
+      run_reader computation
 
     let symbol_v128 () =
-      let i = next () in
-      match model.(i) with
-      | Concrete_value.V128 n ->
-        add_sym i;
-        Ok n
-      | v ->
-        Log.err (fun m ->
-          m "Got value %a but expected a v128 value." Concrete_value.pp v );
-        assert false
+      let open Reader in
+      let computation =
+        bind get_next (fun i ->
+          bind incr_next (fun () ->
+            match model.(i) with
+            | Concrete_value.V128 n ->
+              bind (add_sym i) (fun () ->
+                return n
+              )
+            | v ->
+              Log.err (fun m ->
+                m "Got value %a but expected a v128 value." Concrete_value.pp v);
+              assert false
+          )
+        )
+      in
+      run_reader computation
 
     let abort () =
       Log.err (fun m -> m "Unexpected abort call.");
       exit 121
 
-    let alloc _m _addr size =
-      let r = !brk in
-      brk := Int32.add !brk size;
-      Ok r
+    let alloc _mem _addr size =
+      let open Reader in
+      let computation =
+        bind get_brk (fun address ->
+          bind (set_brk (Int32.add address size)) (fun () ->
+            return address
+          )
+        )
+      in
+      run_reader computation
 
     let free (_ : Concrete_memory.t) adr = Ok adr
 
-    let exit (n : Concrete_value.i32) = exit (Int32.to_int n)
+    let exit (n : Concrete_value.i32) =
+      Prelude.exit (Int32.to_int n);
+      assert false
+    [@@warning "-21"]
 
-    let symbol_range _ _ =
-      let i = next () in
-      match model.(i) with
-      | Concrete_value.I32 n ->
-        add_sym i;
-        Ok n
-      | v ->
-        Log.err (fun m ->
-          m "Got value %a but expected a i32 value." Concrete_value.pp v );
-        assert false
+    let symbol_range _lo _hi =
+      let open Reader in
+      let computation =
+        bind get_next (fun i ->
+          bind incr_next (fun () ->
+            match model.(i) with
+            | Concrete_value.I32 n ->
+              bind (add_sym i) (fun () ->
+                return n
+              )
+            | v ->
+              Log.err (fun m ->
+                m "Got value %a but expected a i32 value." Concrete_value.pp v);
+              assert false
+          )
+        )
+      in
+      run_reader computation
 
     let print_char c =
       Log.app (fun m -> m "%c" (char_of_int (Int32.to_int c)));
@@ -146,26 +258,26 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
     let cov_label_is_covered id =
       let open Concrete_choice in
       let+ id = select_i32 id in
-      if Hashtbl.mem covered_labels id then 1l else 0l
+      if Hashtbl.mem env.covered_labels (Int32.to_int id) then 1l else 0l
 
     let cov_label_set m id str_ptr =
       let+ chars = make_str_null_terminated m [] str_ptr in
       let str = String.init (Array.length chars) (Array.get chars) in
-      Hashtbl.add covered_labels id str;
+      Hashtbl.add env.covered_labels (Int32.to_int id) str;
       Log.debug (fun m -> m "reached %ld@." id)
 
     let open_scope_null_terminated m strptr =
       let+ chars = make_str_null_terminated m [] strptr in
       let str = String.init (Array.length chars) (Array.get chars) in
-      scopes := Symbol_scope.open_scope str !scopes
+      env.scopes := Symbol_scope.open_scope str !(env.scopes)
 
     let open_scope_of_length m strptr length =
       let+ chars = make_str_of_length m [] strptr length in
       let str = String.init (Array.length chars) (Array.get chars) in
-      scopes := Symbol_scope.open_scope str !scopes
+      env.scopes := Symbol_scope.open_scope str !(env.scopes)
 
     let close_scope () =
-      scopes := Symbol_scope.close_scope !scopes;
+      env.scopes := Symbol_scope.close_scope !(env.scopes);
       Concrete_choice.return ()
   end
   in
@@ -189,8 +301,7 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
     ; ( "open_scope_null_terminated"
       , Extern_func (memory 0 ^-> i32 ^->. unit, open_scope_null_terminated) )
     ; ( "open_scope_of_length"
-      , Extern_func (memory 0 ^-> i32 ^-> i32 ^->. unit, open_scope_of_length)
-      )
+      , Extern_func (memory 0 ^-> i32 ^-> i32 ^->. unit, open_scope_of_length) )
     ; ("close_scope", Extern_func (unit ^->. unit, close_scope))
     ; ("alloc", Extern_func (memory 0 ^-> i32 ^-> i32 ^->. i32, alloc))
     ; ("dealloc", Extern_func (memory 0 ^-> i32 ^->. i32, free))
