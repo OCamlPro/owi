@@ -4,6 +4,11 @@
 
 open Result
 
+exception Interrupt
+
+let () =
+  Sys.(set_signal sigint (Signal_handle (fun _ -> raise Interrupt)))
+
 let read_line_stdin () =
   let rec read_chars acc =
     let buf = Bytes.create 1 in
@@ -24,7 +29,10 @@ let cmd () =
 
   let rec loop env =
     Fmt.pr "> %!";
-    match try Some (read_line_stdin ()) with End_of_file -> None with
+    match
+      try Some (read_line_stdin ())
+      with End_of_file -> None | Interrupt -> Fmt.pr "\n"; None
+    with
     | None ->
         Log.app (fun m -> m "Bye!");
         Ok ()
