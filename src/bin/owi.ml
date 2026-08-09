@@ -563,6 +563,16 @@ let replay_cmd =
   Cmd_replay.cmd ~unsafe ~replay_file ~source_file ~entry_point
     ~invoke_with_symbols
 
+(* owi repl *)
+let repl_info =
+  let doc = "Start an interactive REPL for WebAssembly" in
+  let man = [] @ shared_man in
+  Cmd.info "repl" ~version ~doc ~sdocs ~man
+
+let repl_cmd =
+  let+ () = setup_log in
+  Cmd_repl.cmd ()
+
 (* owi run *)
 
 let run_info =
@@ -790,6 +800,7 @@ let cli =
     ; Cmd.v iso_info iso_cmd
     ; Cmd.v llvm_info llvm_cmd
     ; Cmd.v replay_info replay_cmd
+    ; Cmd.v repl_info repl_cmd
     ; Cmd.v run_info run_cmd
     ; Cmd.v rust_info rust_cmd
     ; Cmd.group script_info

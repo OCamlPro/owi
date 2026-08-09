@@ -2117,6 +2117,10 @@ module Cmd_replay : sig
     -> unit Result.t
 end
 
+module Cmd_repl : sig
+  val cmd : unit -> unit Result.t
+end
+
 module Cmd_run : sig
   val cmd :
        unsafe:bool

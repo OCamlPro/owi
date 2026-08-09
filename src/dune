@@ -47,6 +47,7 @@
   cmd_fmt
   cmd_fuzz
   cmd_haskell
+  cmd_repl
   cmd_instrument_label
   cmd_iso
   cmd_llvm
