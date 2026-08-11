@@ -118,7 +118,9 @@ module Make (M : Link_intf.M) = struct
     let freeze id
       ({ globals; memories; tables; functions; data; elem; tags } : Build.t)
       init_code extern_funcs types type_defs =
-      let type_groups = Binary.compute_type_groups type_defs (Array.length types) in
+      let type_groups =
+        Binary.compute_type_groups type_defs (Array.length types)
+      in
       { id
       ; globals
       ; memories
@@ -246,7 +248,7 @@ module Make (M : Link_intf.M) = struct
         end
       | None -> (
         match ls.last with Some e -> Ok e | None -> Error `Unbound_last_module )
-(* TODO; the const evaluation is duplicated in many places and should be moved somewhere else! *)
+      (* TODO; the const evaluation is duplicated in many places and should be moved somewhere else! *)
     in
     Ok { ls with by_name = StringMap.add name exports ls.by_name }
 
@@ -412,8 +414,7 @@ module Make (M : Link_intf.M) = struct
             match Concrete_ref.Extern.cast e Concrete_ref.any_as_extern_key with
             | Some inner -> inner
             | None -> Fmt.failwith "any.convert_extern: cast failure" )
-          | _ ->
-            Fmt.failwith "any.convert_extern: expected extern ref on stack"
+          | _ -> Fmt.failwith "any.convert_extern: expected extern ref on stack"
         in
         Result.ok @@ Stack.push_ref stack ref
       | instr ->
@@ -425,7 +426,8 @@ module Make (M : Link_intf.M) = struct
       | Binary.Simple i -> simple_instruction types modul stack i
       | _ ->
         Fmt.failwith "TODO: Link: unimplemented instruction: %a"
-          (Binary.pp_instr ~short:true) instr.Annotated.raw
+          (Binary.pp_instr ~short:true)
+          instr.Annotated.raw
 
     (* TODO: binary+const expr *)
     let expr types modul e : Concrete_value.t Result.t =
@@ -602,7 +604,8 @@ module Make (M : Link_intf.M) = struct
       in
       Error (`Incompatible_import_type msg)
 
-  let eval_func ls (modul : int) imp_types imp_type_groups func : func Result.t =
+  let eval_func ls (modul : int) imp_types imp_type_groups func : func Result.t
+      =
     match func with
     | Origin.Local func -> Result.ok @@ Kind.wasm func ~modul
     | Imported import -> load_func ls imp_types imp_type_groups import
@@ -612,7 +615,9 @@ module Make (M : Link_intf.M) = struct
     let+ modul, _i =
       array_fold_left
         (fun (modul, i) func ->
-          let+ func = eval_func ls finished_modul imp_types imp_type_groups func in
+          let+ func =
+            eval_func ls finished_modul imp_types imp_type_groups func
+          in
           let modul = Linked_module.Build.add_func i func modul in
           (modul, succ i) )
         (modul, 0) functions
@@ -770,7 +775,9 @@ module Make (M : Link_intf.M) = struct
         binary_module.func
     in
     let* modul = eval_tags ls next_id modul binary_module.tag in
-    let* modul = eval_globals ls modul binary_module.types binary_module.global in
+    let* modul =
+      eval_globals ls modul binary_module.types binary_module.global
+    in
     let* modul = eval_memories ls modul binary_module.mem in
     let* modul = eval_tables ls modul binary_module.table in
     let* modul, init_active_data =
