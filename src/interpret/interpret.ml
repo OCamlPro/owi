@@ -1640,11 +1640,13 @@ struct
     | Ref.Extern (Some _) -> ( match ht with Extern_ht -> true | _ -> false )
     | Ref.I31 _ -> (
       match ht with I31_ht | Eq_ht | Any_ht -> true | _ -> false )
+    | Ref.NullI31 when is_null -> (
+      match ht with I31_ht | Eq_ht | Any_ht | None_ht -> true | _ -> false )
     | Ref.Struct _ -> (
       match ht with Struct_ht | Eq_ht | Any_ht -> true | _ -> false )
     | Ref.Array _ -> (
       match ht with Array_ht | Eq_ht | Any_ht -> true | _ -> false )
-    | Func None | Extern None | NullExn | NullRef -> false
+    | Func None | Extern None | NullExn | NullRef | NullI31 -> false
 
   let exec_ref_instr stack (i : Binary.ref_instr) =
     match i with
@@ -2144,23 +2146,13 @@ struct
       t
     | Extern func -> Extern_func.to_func_type func
 
-  let call_ref ~return:_ (_state : State.t) _typ_i =
-    (* TODO *)
-    Fmt.failwith "TODO: unimplemented `call_ref`"
-  (* let fun_ref, stack = Stack.pop_as_ref state.stack in *)
-  (* let state = { state with stack } in *)
-  (* let func = *)
-  (*   match fun_ref with *)
-  (*   | exception Invalid_argument _ -> trap "undefined element" *)
-  (*   | Funcref (Some f) -> f *)
-  (*   | Funcref None -> trap (Printf.sprintf "calling null function reference") *)
-  (*   | _ -> trap "element type error" *)
-  (* in *)
-  (* let pt, rt = Func.typ func in *)
-  (* let pt', rt' = typ_i in *)
-  (* if not (rt = rt' && List.equal p_type_eq pt pt') then *)
-  (*   trap "indirect call type mismatch"; *)
-  (* exec_vfunc ~return state func *)
+  let call_ref ~return (state : State.t) _typ_i =
+    let fun_ref, stack = Stack.pop_as_ref state.stack in
+    let state = { state with stack } in
+    match Ref.get_func fun_ref with
+    | Null -> Choice.trap `Null_function_reference
+    | Type_mismatch -> Choice.trap `Element_type_error
+    | Ref_value func -> exec_vfunc ~return state func
 
   let call_indirect ~env ~return (state : State.t)
     (tbl_i, ((call_type_idx, typ_i) : block_type)) =
@@ -2304,8 +2296,37 @@ struct
         let o1, stack = Stack.pop stack in
         ret @@ Stack.push stack (if b then o1 else o2)
       end
-    | ( I31 (Ref | Get_s | Get_u)
-      | Struct
+    | I31 Ref ->
+      let n, stack = Stack.pop_i32 state.stack in
+      let state = { state with stack } in
+      ret @@ Stack.push_ref state.stack (Ref.make_i31 (I32.to_int32 n))
+    | I31 Get_u ->
+      let r, stack = Stack.pop_as_ref state.stack in
+      let state = { state with stack } in
+      begin match Ref.get_i31 r with
+      | Null -> Choice.trap `Null_i31_reference
+      | Type_mismatch -> Choice.trap `Element_type_error
+      | Ref_value n ->
+        let n31bits = Int32.logand n 0x7FFF_FFFFl in
+        ret @@ Stack.push_i32 state.stack (I32.of_int32 n31bits)
+      end
+    | I31 Get_s ->
+      let r, stack = Stack.pop_as_ref state.stack in
+      let state = { state with stack } in
+      begin match Ref.get_i31 r with
+      | Null -> Choice.trap `Null_i31_reference
+      | Type_mismatch -> Choice.trap `Element_type_error
+      | Ref_value n ->
+        (* sign-extend 31-bit value to 32 bits with bit 30 as the sign bit *)
+        let n31bits = Int32.logand n 0x7FFF_FFFFl in
+        let sign_extended =
+          let sign = Int32.ne (Int32.logand n31bits 0x4000_0000l) 0l in
+          if sign then Int32.logor n31bits (Int32.lognot 0x7FFF_FFFFl)
+          else n31bits
+        in
+        ret @@ Stack.push_i32 state.stack (I32.of_int32 sign_extended)
+      end
+    | ( Struct
           ( New _ | New_default _
           | Get (_, _)
           | Get_s (_, _)

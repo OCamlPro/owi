@@ -71,7 +71,9 @@ module Result : sig
     | `Invalid_model of string
     | `Unimplemented of string
     | (* Trap: *)
-      `Out_of_bounds_table_access
+      `Null_function_reference
+    | `Null_i31_reference
+    | `Out_of_bounds_table_access
     | `Out_of_bounds_memory_access
     | `Undefined_element
     | `Uninitialized_element of int

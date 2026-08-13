@@ -28,6 +28,7 @@ type t =
   | NullExn
   | NullRef
   | I31 of int32
+  | NullI31
   | Array of array_obj
   | Struct of struct_obj
 
@@ -37,6 +38,7 @@ let pp fmt = function
   | NullExn -> pf fmt "nullexnref"
   | NullRef -> pf fmt "nullref"
   | I31 i -> pf fmt "i31ref %ld" i
+  | NullI31 -> pf fmt "i31ref none"
   | Struct () -> pf fmt "structref"
   | Array () -> pf fmt "arrayref"
 
@@ -45,20 +47,30 @@ let null = function
   (* TODO: is this correct? Are all nulls equal? *)
   | Extern_ht | NoExtern_ht -> Extern None
   | Exn_ht | NoExn_ht -> NullExn
-  | Any_ht | None_ht | Eq_ht | I31_ht | Struct_ht | Array_ht -> NullRef
+  | Any_ht | None_ht -> NullRef
+  | Eq_ht | I31_ht -> NullI31
+  | Struct_ht | Array_ht -> assert false
 
 let func (f : int) = Func (Some f)
 
 let extern (type x) (t : x Type.Id.t) (v : x) : t = Extern (Some (E (t, v)))
 
+let make_i31 (n : int32) : t = I31 n
+
 let is_null = function
-  | Func None | Extern None | NullExn | NullRef -> true
+  | Func None | Extern None | NullExn | NullRef | NullI31 -> true
   | Func (Some _) | Extern (Some _) | I31 _ | Array _ | Struct _ -> false
 
 let get_func (r : t) : int get_ref =
   match r with
   | Func (Some f) -> Ref_value f
   | Func None -> Null
+  | _ -> Type_mismatch
+
+let get_i31 (r : t) : int32 get_ref =
+  match r with
+  | I31 n -> Ref_value n
+  | NullI31 -> Null
   | _ -> Type_mismatch
 
 let get_extern (type x) (r : t) (typ : x Type.Id.t) : x get_ref =

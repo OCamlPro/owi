@@ -174,9 +174,10 @@ let is_subtype_heap_type t1 t2 =
   | Eq_ht, Any_ht
   | NoFunc_ht, Func_ht
   | NoExtern_ht, Extern_ht
-  | NoExn_ht, Exn_ht ->
+  | NoExn_ht, Exn_ht
+  | TypeUse _, Func_ht ->
     true
-  | _, _ -> false
+  | _ -> false
 
 let compare_heap_type t1 t2 =
   (* TODO: this is wrong *)
