@@ -60,6 +60,8 @@ module type T = sig
 
   val is_null : t -> Bool.t
 
+  val ref_eq : t -> t -> bool
+
   val get_func : t -> int get_ref
 
   val get_i31 : t -> int32 get_ref
