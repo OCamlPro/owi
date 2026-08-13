@@ -33,6 +33,8 @@ module type T = sig
 
   val of_int64 : Int64.t -> t
 
+  val to_int64 : t -> Int64.t
+
   val of_int : int -> t
 
   val pp : t Fmt.t

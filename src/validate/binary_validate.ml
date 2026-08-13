@@ -1219,9 +1219,7 @@ let typecheck_struct_instr (env : Env.t) stack : Binary.struct_instr -> _ =
     let* fields = Env.type_get_struct id env.modul in
     let* mut, st = Env.get_struct_field fields fid in
     let* () =
-      match mut with
-      | Var -> Ok ()
-      | Const -> Error (`Type_mismatch "struct.set: field is not mutable")
+      match mut with Var -> Ok () | Const -> Error (`Msg "immutable field")
     in
     let val_ty = unpack_storage_type st in
     let+ stack =
@@ -1566,6 +1564,8 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
       (env, [ any ])
   | Return_call_ref (t_opt, (pt, rt)) ->
     let* b =
+      (* TODO: rename to "is_subtype" since its checks subtyping not just
+         equality *)
       Stack.equal env.modul
         (List.rev_map typ_of_val_type env.result_type)
         (List.rev_map typ_of_val_type rt)
@@ -1633,6 +1633,12 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
       let* rt = Env.block_type_get id env in
       let* check_stack = Stack.push [ Ref_type rt2 ] stack in
       let* _ = Stack.pop env.modul rt check_stack in
+      let* _ =
+        (* stack exactly matches rt prefix *)
+        match rt with
+        | _ :: rt_prefix -> Stack.pop ~subtype:false env.modul rt_prefix stack
+        | [] -> Ok stack
+      in
       (* push rt_diff (rt1 \ rt2) *)
       let rt_diff = ref_type_diff rt1 rt2 in
       let+ stack = Stack.push [ Ref_type rt_diff ] stack in
@@ -1651,6 +1657,12 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
       let rt_diff = ref_type_diff rt1 rt2 in
       let* check_stack = Stack.push [ Ref_type rt_diff ] stack in
       let* _ = Stack.pop env.modul rt check_stack in
+      let* _ =
+        (* stack exactly matches rt prefix *)
+        match rt with
+        | _ :: prefix -> Stack.pop ~subtype:false env.modul prefix stack
+        | [] -> Ok stack
+      in
       (* push rt2 *)
       let+ stack = Stack.push [ Ref_type rt2 ] stack in
       (env, stack)
@@ -1783,6 +1795,12 @@ let typecheck_simple_const_instruction ?known_globals ~is_init
           (`Type_mismatch
              "struct.new_default: all field types must be defaultable" )
     in
+    Stack.push [ Ref_type (No_null, TypeUse id) ] stack
+  | Array (New_fixed (id, n)) ->
+    let* _, st = Env.type_get_array id modul in
+    let elem_ty = unpack_storage_type st in
+    let n = Int32.to_int n in
+    let* stack = Stack.pop modul (List.init n (fun _ -> elem_ty)) stack in
     Stack.push [ Ref_type (No_null, TypeUse id) ] stack
   | Struct (New id) ->
     let* fields = Env.type_get_struct id modul in

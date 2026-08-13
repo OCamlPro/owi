@@ -362,7 +362,7 @@ module Make (M : Link_intf.M) = struct
         let n = List.length fields in
         let top_n, stack = Stack.pop_n stack n in
         let fields = Array.of_list (List.rev_map value_to_gc_val top_n) in
-        Result.ok @@ Stack.push_ref stack (Struct fields)
+        Result.ok @@ Stack.push_ref stack (Struct (id, fields))
       | Struct (New_default id) ->
         let fields =
           match types.(id).ct with
@@ -374,13 +374,13 @@ module Make (M : Link_intf.M) = struct
           Array.of_list
             (List.map (fun (_, (_, st)) -> default_gc_val st) fields)
         in
-        Result.ok @@ Stack.push_ref stack (Struct defaults)
-      | Array (New _) ->
+        Result.ok @@ Stack.push_ref stack (Struct (id, defaults))
+      | Array (New id) ->
         let n, stack = Stack.pop_i32 stack in
         let v, stack = Stack.pop stack in
         let n = Int32.to_int n in
         let array = Array.make n (value_to_gc_val v) in
-        Result.ok @@ Stack.push_ref stack (Array array)
+        Result.ok @@ Stack.push_ref stack (Array (id, array))
       | Array (New_default id) ->
         let n, stack = Stack.pop_i32 stack in
         let st =
@@ -391,12 +391,12 @@ module Make (M : Link_intf.M) = struct
         in
         let n = Int32.to_int n in
         let array = Array.make n (default_gc_val st) in
-        Result.ok @@ Stack.push_ref stack (Array array)
-      | Array (New_fixed (_, n)) ->
+        Result.ok @@ Stack.push_ref stack (Array (id, array))
+      | Array (New_fixed (id, n)) ->
         let n = Int32.to_int n in
         let top_n, stack = Stack.pop_n stack n in
         let array = Array.of_list (List.rev_map value_to_gc_val top_n) in
-        Result.ok @@ Stack.push_ref stack (Array array)
+        Result.ok @@ Stack.push_ref stack (Array (id, array))
       | Extern_convert_any ->
         let r, stack = Stack.pop_as_ref stack in
         let ref =

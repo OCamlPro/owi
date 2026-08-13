@@ -11,28 +11,18 @@
   $ owi script concrete --no-exhaustion reference/array_new_elem.wast 2>&1 | grep -oE "Failure.*"
   Failure("TODO: unimplemented instruction interpretation: array.new_elem 0 0")
   $ owi script concrete --no-exhaustion reference/array.wast 2>&1 | grep -oE "Failure.*"
-  Failure("TODO: unimplemented instruction interpretation: array.new_default 0")
-  $ owi script concrete --no-exhaustion reference/br_on_cast_fail.wast 2>&1 | grep -oE "Failure.*"
-  Failure("TODO: unimplemented instruction interpretation: ref.i31")
-  $ owi script concrete --no-exhaustion reference/br_on_cast.wast 2>&1 | grep -oE "Failure.*"
-  Failure("TODO: unimplemented instruction interpretation: ref.i31")
-  $ owi script concrete --no-exhaustion reference/br_on_non_null.wast 2>&1 | grep -oE "Failure.*"
-  Failure("TODO: unimplemented `call_ref`")
-  $ owi script concrete --no-exhaustion reference/br_on_null.wast 2>&1 | grep -oE "Failure.*"
-  Failure("TODO: unimplemented `call_ref`")
-  $ owi script concrete --no-exhaustion reference/call_ref.wast 2>&1 | grep -oE "Failure.*"
-  Failure("TODO: unimplemented `call_ref`")
-  $ owi script concrete --no-exhaustion reference/extern.wast 2>&1 | grep -oE "Failure.*"
-  Failure("TODO: unimplemented instruction interpretation: ref.i31")
-  $ owi script concrete --no-exhaustion reference/i31.wast 2>&1 | grep -oE "Failure.*"
-  Failure("TODO: unimplemented instruction interpretation: ref.i31")
-  $ owi script concrete --no-exhaustion reference/ref_cast.wast 2>&1 | grep -oE "Failure.*"
-  Failure("TODO: unimplemented instruction interpretation: ref.i31")
-  $ true # TODO: enable again: owi script concrete --no-exhaustion reference/ref_eq.wast
-  $ owi script concrete --no-exhaustion reference/ref_test.wast 2>&1 | grep -oE "Failure.*"
-  Failure("TODO: unimplemented instruction interpretation: ref.i31")
-  $ owi script concrete --no-exhaustion reference/return_call_ref.wast 2>&1 | grep -oE "Failure.*"
-  Failure("TODO: unimplemented `call_ref`")
-  $ owi script concrete --no-exhaustion reference/struct.wast 2>&1 | grep -oE "Failure.*"
-  Failure("TODO: unimplemented instruction interpretation: struct.new_default 0")
+  Failure("TODO: unimplemented instruction interpretation: array.new_data 0 0")
+  $ owi script concrete --no-exhaustion reference/br_on_cast_fail.wast
+  $ owi script concrete --no-exhaustion reference/br_on_cast.wast
+  $ owi script concrete --no-exhaustion reference/br_on_non_null.wast
+  $ owi script concrete --no-exhaustion reference/br_on_null.wast
+  $ owi script concrete --no-exhaustion reference/call_ref.wast
+  $ owi script concrete --no-exhaustion reference/extern.wast
+  $ owi script concrete --no-exhaustion reference/i31.wast
+  $ owi script concrete --no-exhaustion reference/ref_cast.wast
+  $ owi script concrete --no-exhaustion reference/ref_eq.wast 2>&1 | grep -oE "Failure.*"
+  Failure("TODO: unimplemented ref instruction interpretation: ref.eq")
+  $ owi script concrete --no-exhaustion reference/ref_test.wast
+  $ owi script concrete --no-exhaustion reference/return_call_ref.wast
+  $ owi script concrete --no-exhaustion reference/struct.wast
   $ owi script concrete --no-exhaustion reference/type-subtyping.wast

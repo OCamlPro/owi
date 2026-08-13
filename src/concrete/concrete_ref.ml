@@ -26,9 +26,10 @@ type gc_val =
   | V128 of Concrete_v128.t
   | Ref of t
 
-and struct_obj = gc_val array
+(* type id x content *)
+and struct_obj = int * gc_val array
 
-and array_obj = gc_val array
+and array_obj = int * gc_val array
 
 and t =
   | Extern of Extern.t option
@@ -39,6 +40,7 @@ and t =
   | NullI31
   | Array of array_obj
   | Struct of struct_obj
+  | ExternAsAny of Extern.t option
 
 let any_as_extern_key : t Type.Id.t = Type.Id.make ()
 
@@ -52,6 +54,8 @@ let pp fmt = function
   | NullI31 -> pf fmt "i31ref none"
   | Struct _ -> pf fmt "structref"
   | Array _ -> pf fmt "arrayref"
+  | ExternAsAny None -> pf fmt "anyref none"
+  | ExternAsAny (Some _) -> pf fmt "anyref"
 
 (* TODO: Is this the same as Symbolic_ref.null? *)
 let null = function
@@ -59,9 +63,8 @@ let null = function
   (* TODO: is this correct? Are all nulls equal? *)
   | Extern_ht | NoExtern_ht -> Extern None
   | Exn_ht | NoExn_ht -> NullExn
-  | Any_ht | None_ht -> NullRef
+  | Any_ht | None_ht | Struct_ht | Array_ht -> NullRef
   | Eq_ht | I31_ht -> NullI31
-  | Struct_ht | Array_ht -> assert false
 
 let func (f : int) = Func (Some f)
 
@@ -69,9 +72,82 @@ let extern (type x) (t : x Type.Id.t) (v : x) : t = Extern (Some (E (t, v)))
 
 let make_i31 (n : int32) : t = I31 n
 
+let make_struct type_idx = Struct (type_idx, [||])
+
+let make_array type_idx = Array (type_idx, [||])
+
+let any_convert_extern = function
+  | Extern None -> NullRef
+  | Extern (Some (E (k, v))) -> (
+    match Type.Id.provably_equal k any_as_extern_key with
+    | Some Equal -> v
+    | None -> ExternAsAny (Some (E (k, v))) )
+  | r -> ExternAsAny (Some (E (any_as_extern_key, r)))
+
+let extern_convert_any = function
+  | NullRef | NullI31 | NullExn -> Extern None
+  | ExternAsAny None -> Extern None
+  | ExternAsAny (Some e) -> Extern (Some e)
+  | r -> Extern (Some (E (any_as_extern_key, r)))
+
 let is_null = function
-  | Func None | Extern None | NullExn | NullRef | NullI31 -> true
-  | Func (Some _) | Extern (Some _) | I31 _ | Array _ | Struct _ -> false
+  | Func None | Extern None | NullExn | NullRef | NullI31 | ExternAsAny None ->
+    true
+  | Func (Some _)
+  | Extern (Some _)
+  | I31 _ | Array _ | Struct _
+  | ExternAsAny (Some _) ->
+    false
+
+let get_struct_type ((i, _) : struct_obj) = Some i
+
+let get_array_type ((i, _) : array_obj) = Some i
+
+let gc_val_of_view : t Ref_intf.gc_view -> gc_val = function
+  | GCv_i32 i -> I32 i
+  | GCv_i64 i -> I64 i
+  | GCv_f32 f -> F32 f
+  | GCv_f64 f -> F64 f
+  | GCv_v128 v -> V128 v
+  | GCv_ref r -> Ref r
+
+let view_gc_val : gc_val -> t Ref_intf.gc_view = function
+  | I32 i -> GCv_i32 i
+  | I64 i -> GCv_i64 i
+  | F32 f -> GCv_f32 f
+  | F64 f -> GCv_f64 f
+  | V128 v -> GCv_v128 v
+  | Ref r -> GCv_ref r
+
+let default_gc_val (st : Binary.storage_type) =
+  match st with
+  | Val_type (Num_type I32) -> I32 0l
+  | Val_type (Num_type I64) -> I64 0L
+  | Val_type (Num_type F32) -> F32 Float32.zero
+  | Val_type (Num_type F64) -> F64 Float64.zero
+  | Val_type (Num_type V128) -> V128 Concrete_v128.zero
+  | Val_type (Ref_type (_, ht)) -> Ref (null ht)
+  | Pack_type _ -> I32 0l
+
+let struct_new_with type_idx fields = Struct (type_idx, fields)
+
+let struct_get_field ((_, fields) : struct_obj) idx = fields.(idx)
+
+let struct_set_field ((type_idx, fields) : struct_obj) idx v =
+  fields.(idx) <- v;
+  (type_idx, fields)
+
+let array_new_fill type_idx v n = Array (type_idx, Array.make n v)
+
+let array_new_fixed_with type_idx elems = Array (type_idx, elems)
+
+let array_get_elem ((_, elems) : array_obj) idx = elems.(idx)
+
+let array_set_elem ((type_idx, elems) : array_obj) idx v =
+  elems.(idx) <- v;
+  (type_idx, elems)
+
+let array_len_of ((_, elems) : array_obj) = Array.length elems
 
 let get_func (r : t) : int get_ref =
   match r with

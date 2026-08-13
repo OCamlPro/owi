@@ -2,6 +2,15 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
+(* TODO: used for conversion, can it be removed? *)
+type 'ref gc_view =
+  | GCv_i32 of int32
+  | GCv_i64 of int64
+  | GCv_f32 of Float32.t
+  | GCv_f64 of Float64.t
+  | GCv_v128 of Concrete_v128.t
+  | GCv_ref of 'ref
+
 module type T = sig
   type 'a get_ref =
     | Null
@@ -29,6 +38,7 @@ module type T = sig
     | NullI31
     | Array of array_obj
     | Struct of struct_obj
+    | ExternAsAny of Extern.t option
 
   val pp : t Fmt.t
 
@@ -40,6 +50,14 @@ module type T = sig
 
   val make_i31 : int32 -> t
 
+  val make_struct : int -> t
+
+  val make_array : int -> t
+
+  val any_convert_extern : t -> t
+
+  val extern_convert_any : t -> t
+
   val is_null : t -> Bool.t
 
   val get_func : t -> int get_ref
@@ -47,4 +65,32 @@ module type T = sig
   val get_i31 : t -> int32 get_ref
 
   val get_extern : t -> 'x Type.Id.t -> 'x get_ref
+
+  val get_struct_type : struct_obj -> int option
+
+  val get_array_type : array_obj -> int option
+
+  type gc_val
+
+  val gc_val_of_view : t gc_view -> gc_val
+
+  val view_gc_val : gc_val -> t gc_view
+
+  val default_gc_val : Binary.storage_type -> gc_val
+
+  val struct_new_with : int -> gc_val array -> t
+
+  val struct_get_field : struct_obj -> int -> gc_val
+
+  val struct_set_field : struct_obj -> int -> gc_val -> struct_obj
+
+  val array_new_fill : int -> gc_val -> int -> t
+
+  val array_new_fixed_with : int -> gc_val array -> t
+
+  val array_get_elem : array_obj -> int -> gc_val
+
+  val array_set_elem : array_obj -> int -> gc_val -> array_obj
+
+  val array_len_of : array_obj -> int
 end
