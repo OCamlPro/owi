@@ -51,7 +51,8 @@ let of_script_const ~ty : Wast.const -> t = function
      applying on Text.heap_type instead of Binary.heap_type. *)
   | Const_null (Some (Func_ht | NoFunc_ht | TypeUse _)) -> Ref (Func None)
   | Const_null (Some (Extern_ht | NoExtern_ht)) -> Ref (Extern None)
-  | Const_null (Some (Any_ht | None_ht)) -> Ref NullRef
+  | Const_null (Some (Any_ht | None_ht | Struct_ht | Array_ht)) -> Ref NullRef
+  | Const_null (Some (Eq_ht | I31_ht)) -> Ref NullI31
   | Const_null (Some (Exn_ht | NoExn_ht)) -> Ref NullExn
   | _ -> assert false
 

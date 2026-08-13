@@ -51,11 +51,13 @@ let of_script_const ~ty : Wast.const -> t = function
   | Const_F64 v -> F64 v
   | Const_V128 v -> V128 v
   | Const_extern i -> Ref (Concrete_ref.extern ty i)
+  | Const_host i ->
+    Ref (Concrete_ref.any_convert_extern (Concrete_ref.extern ty i))
   (* TODO: not ideal, the following are a duplication of Concrete_ref.null
      applying on Text.heap_type instead of Binary.heap_type. *)
   | Const_null (Some (Func_ht | NoFunc_ht | TypeUse _)) -> Ref (Func None)
   | Const_null (Some (Extern_ht | NoExtern_ht)) -> Ref (Extern None)
-  | Const_null (Some (Any_ht | None_ht)) -> Ref NullRef
+  | Const_null (Some (Any_ht | None_ht | Struct_ht | Array_ht)) -> Ref NullRef
   | Const_null (Some (Exn_ht | NoExn_ht)) -> Ref NullExn
   | Const_null (Some (Eq_ht | I31_ht)) -> Ref NullI31
   | _ -> assert false
@@ -110,10 +112,21 @@ let equal_script_result =
     | Result_null (Some (NoFunc_ht | Func_ht)), Ref (Func None) -> true
     | Result_null (Some (Extern_ht | NoExtern_ht)), Ref (Extern None) -> true
     | Result_null (Some (Exn_ht | NoExn_ht)), Ref NullExn -> true
-    | Result_null (Some (Any_ht | None_ht)), Ref NullRef -> true
+    | Result_null (Some (Any_ht | None_ht | Struct_ht | Array_ht)), Ref NullRef
+      ->
+      true
     | Result_null (Some (Eq_ht | I31_ht)), Ref NullI31 -> true
     | Result_i31_ref, Ref (I31 _) -> true
+    | Result_struct_ref, Ref (Struct _) -> true
+    | Result_array_ref, Ref (Array _) -> true
+    | Result_eq_ref, Ref (I31 _ | NullI31 | Struct _ | Array _) -> true
+    | Result_extern_ref, Ref (Extern _) -> true
     | Result_extern n, Ref (Extern (Some ref)) ->
+      begin match Ref.Extern.cast ref ty with
+      | None -> false
+      | Some n' -> n = n'
+      end
+    | Result_host n, Ref (ExternAsAny (Some ref)) ->
       begin match Ref.Extern.cast ref ty with
       | None -> false
       | Some n' -> n = n'
@@ -122,7 +135,10 @@ let equal_script_result =
       (* TODO: FIX! This is probably unsound! *)
       true
     | ( ( Result_I32 _ | Result_I64 _ | Result_F32 _ | Result_F64 _
-        | Result_V128 _ | Result_null _ | Result_host _ | Result_i31_ref )
+        | Result_V128 _ | Result_null _ | Result_host _ | Result_i31_ref
+        | Result_struct_ref | Result_array_ref | Result_eq_ref
+        | Result_extern_ref | Result_struct _ | Result_array _ | Result_func _
+        | Result_exn _ )
       , _ ) ->
       false
     | _, _ -> assert false

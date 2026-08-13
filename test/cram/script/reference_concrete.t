@@ -57,8 +57,7 @@
   42
   123
   $ owi script concrete --no-exhaustion reference/nop.wast
-  $ owi script concrete --no-exhaustion reference/ref_as_non_null.wast 2>&1 | grep -oE "Failure.*"
-  Failure("TODO: unimplemented `call_ref`")
+  $ owi script concrete --no-exhaustion reference/ref_as_non_null.wast
   $ owi script concrete --no-exhaustion reference/ref.wast
   owi: [ERROR] expected unknown type but there was no error
   [7]

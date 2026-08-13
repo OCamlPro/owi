@@ -27,5 +27,7 @@ module type T = sig
 
   val of_float32 : Float32.t -> t
 
+  val to_float32 : t -> Float32.t
+
   val pp : t Fmt.t
 end
