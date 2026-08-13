@@ -71,6 +71,8 @@ type err =
   | `Unbounded_quantification
   | `Invalid_model of string
   | `Unimplemented of string
+  | `Null_function_reference
+  | `Null_i31_reference
   | `Out_of_bounds_table_access
   | `Out_of_bounds_memory_access
   | `Undefined_element
@@ -186,6 +188,8 @@ let rec err_to_string = function
   | `Memory_heap_buffer_overflow -> "memory heap buffer overflow"
   | `Double_free -> "double free"
   | `Offset_out_of_range -> "offset out of range"
+  | `Null_function_reference -> "null function reference"
+  | `Null_i31_reference -> "null i31 reference"
   | `Table_size -> "table size"
   | `Cast_failure -> "cast failure"
 
@@ -287,6 +291,8 @@ let err_to_exit_code = function
   | `Unreachable -> 96
   | `Invalid_character_in_memory -> 97
   | `Offset_out_of_range -> 98
+  | `Null_function_reference -> 101
+  | `Null_i31_reference -> 101
   | `Table_size -> 99
   | `Proc_exit _n -> 100
   | `Cast_failure -> 101

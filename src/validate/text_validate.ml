@@ -120,7 +120,7 @@ let modul m =
       (* Only if elem_ty is explicit, otherwise it can be inferred *)
       if
         (not explicit_typ)
-        || Text.heap_type_eq elemty tabty
+        || Text.is_subtype_heap_type elemty tabty
            && Text.compare_nullable elemnull tabnull >= 0
       then Ok env
       else

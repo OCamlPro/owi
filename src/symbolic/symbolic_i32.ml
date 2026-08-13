@@ -53,3 +53,8 @@ let eqz (v : t) = eq v zero
 let ( = ) = eq
 
 let ( + ) = add
+
+let to_int32 (e : t) : Int32.t =
+  match Smtml.Typed.view e with
+  | Val (Bitv bv) -> Smtml.Bitvector.to_int32 bv
+  | _ -> Fmt.failwith "Symbolic_i32.to_int32: unexpected expr"

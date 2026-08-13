@@ -551,18 +551,38 @@ module Make (M : Link_intf.M) = struct
       Ok t
     else Error (`Incompatible_import_type import.name)
 
-  let eval_table ls (table : (Binary.Table.t, Binary.Table.Type.t) Origin.t) :
-    table Result.t =
+  let eval_table ls modul types
+    (table : (Binary.Table.t, Binary.Table.Type.t) Origin.t) : table Result.t =
     match table with
-    | Local { id = label; typ; _ } ->
-      Result.ok @@ Concrete_table.init ?label typ
+    | Local { id = label; typ; init } ->
+      let t = Concrete_table.init ?label typ in
+      begin match init with
+      | None -> Ok t
+      | Some e ->
+        let* v = Eval_const.expr types modul e in
+        let ref_v =
+          match v with Concrete_value.Ref r -> r | _ -> assert false
+        in
+        let* () =
+          let min_size =
+            match fst typ with
+            | Binary.Table.Type.I32 { min; _ } -> min
+            | Binary.Table.Type.I64 { min; _ } ->
+              (* min sizes of tables are probably not that big in practice *)
+              assert (Int64.le min (Int64.of_int32 Int32.max_int));
+              Int64.to_int32 min
+          in
+          Concrete_table.fill t 0l min_size ref_v
+        in
+        Ok t
+      end
     | Imported import -> load_table ls import
 
-  let eval_tables ls modul tables =
+  let eval_tables ls modul types tables =
     let+ modul, _i =
       array_fold_left
         (fun (modul, i) table ->
-          let+ table = eval_table ls table in
+          let+ table = eval_table ls modul types table in
           let modul = Linked_module.Build.add_table i table modul in
           (modul, succ i) )
         (modul, 0) tables
@@ -779,7 +799,7 @@ module Make (M : Link_intf.M) = struct
       eval_globals ls modul binary_module.types binary_module.global
     in
     let* modul = eval_memories ls modul binary_module.mem in
-    let* modul = eval_tables ls modul binary_module.table in
+    let* modul = eval_tables ls modul binary_module.types binary_module.table in
     let* modul, init_active_data =
       define_data binary_module.types modul binary_module.data
     in

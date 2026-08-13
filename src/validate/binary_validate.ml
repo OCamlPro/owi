@@ -214,7 +214,7 @@ module Stack : sig
 
   val drop : t -> t Result.t
 
-  val pop : Module.t -> t -> t -> t Result.t
+  val pop : ?subtype:bool -> Module.t -> t -> t -> t Result.t
 
   val push : t -> t -> t Result.t
 
@@ -243,7 +243,8 @@ module Stack : sig
 
   val pp : t Fmt.t
 
-  val match_prefix : Module.t -> prefix:t -> stack:t -> t option Result.t
+  val match_prefix :
+    ?subtype:bool -> Module.t -> prefix:t -> stack:t -> t option Result.t
 end = struct
   type t = typ list
 
@@ -279,7 +280,7 @@ end = struct
       Ok true
     | TypeUse got, TypeUse expected ->
       Ok (is_typeuse_subtype modul ~expected ~got)
-    | TypeUse id, Func_ht ->
+    | TypeUse id, Func_ht when subtype ->
       begin match Env.type_get_sub id modul with
       | Ok { ct = Def_func_t _; _ } -> Ok true
       | _ -> Ok false
@@ -343,22 +344,23 @@ end = struct
       let* b = match_types ~subtype:true env ~expected:hd ~got:hd' in
       if not b then Ok false else equal env tl tl'
 
-  let rec match_prefix modul ~prefix ~stack : t option Result.t =
+  let rec match_prefix ?(subtype = true) modul ~prefix ~stack :
+    t option Result.t =
     match (prefix, stack) with
     | [], stack -> Ok (Some stack)
     | _hd :: _tl, [] -> Ok None
     | _hd :: tl, Any :: tl' ->
-      let* m2 = match_prefix modul ~prefix:tl ~stack in
+      let* m2 = match_prefix ~subtype modul ~prefix:tl ~stack in
       begin match m2 with
-      | None -> match_prefix modul ~prefix ~stack:tl'
+      | None -> match_prefix ~subtype modul ~prefix ~stack:tl'
       | _ -> Ok m2
       end
     | hd :: tl, hd' :: tl' ->
-      let* b = match_types ~subtype:true modul ~expected:hd ~got:hd' in
-      if b then match_prefix modul ~prefix:tl ~stack:tl' else Ok None
+      let* b = match_types ~subtype modul ~expected:hd ~got:hd' in
+      if b then match_prefix ~subtype modul ~prefix:tl ~stack:tl' else Ok None
 
-  let pop env required stack =
-    match match_prefix env ~prefix:required ~stack with
+  let pop ?(subtype = true) env required stack =
+    match match_prefix ~subtype env ~prefix:required ~stack with
     | Ok None ->
       let msg = Fmt.str "expected %a but stack is %a" pp required pp stack in
       Error (`Type_mismatch msg)
@@ -1090,7 +1092,8 @@ let typecheck_table_instr (env : Env.t) stack :
     let* _, table_typ = Env.table_type_get ti env.modul in
     let* _, elem_typ = Env.elem_type_get ei env.modul in
     let* b =
-      Stack.match_heap_type env.modul ~expected:table_typ ~got:elem_typ
+      Stack.match_heap_type ~subtype:true env.modul ~expected:table_typ
+        ~got:elem_typ
     in
     if not b then Error (`Type_mismatch "table_init")
     else
@@ -1529,7 +1532,7 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
     let+ stack = Stack.push (List.rev_map typ_of_val_type rt) stack in
     (env, stack)
   | Call_ref t ->
-    let* _, stack = Stack.pop_ref stack in
+    let* stack = Stack.pop env.modul [ Ref_type (Null, TypeUse t) ] stack in
     let* pt, rt = Env.type_get t env.modul in
     let* stack = Stack.pop env.modul (List.rev_map typ_of_pt pt) stack in
     let+ stack = Stack.push (List.rev_map typ_of_val_type rt) stack in
@@ -1561,7 +1564,7 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
       let* stack = Stack.pop env.modul [ i32 ] stack in
       let+ _stack = Stack.pop env.modul (List.rev_map typ_of_pt pt) stack in
       (env, [ any ])
-  | Return_call_ref (_, (pt, rt)) ->
+  | Return_call_ref (t_opt, (pt, rt)) ->
     let* b =
       Stack.equal env.modul
         (List.rev_map typ_of_val_type env.result_type)
@@ -1569,7 +1572,12 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
     in
     if not b then Error (`Type_mismatch "return_call_ref")
     else
-      let* _, stack = Stack.pop_ref stack in
+      let ref_type =
+        match t_opt with
+        | Some t -> Ref_type (Null, TypeUse t)
+        | None -> Ref_type (Null, Func_ht)
+      in
+      let* stack = Stack.pop env.modul [ ref_type ] stack in
       let+ _stack = Stack.pop env.modul (List.rev_map typ_of_pt pt) stack in
       (env, [ any ])
   | Br i ->
@@ -1601,7 +1609,7 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
   | Br_on_null i ->
     let* t, stack = Stack.pop_ref stack in
     let* jt = Env.block_type_get i env in
-    let* _stack = Stack.pop env.modul jt stack in
+    let* _stack = Stack.pop ~subtype:false env.modul jt stack in
     let* t = ref_type_as_non_null t in
     let+ stack = Stack.push [ t ] stack in
     (env, stack)
@@ -1610,7 +1618,7 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
     let* t = ref_type_as_non_null t in
     let* jt = Env.block_type_get i env in
     let* check_stack = Stack.push [ t ] stack in
-    let+ _stack = Stack.pop env.modul jt check_stack in
+    let+ _stack = Stack.pop ~subtype:false env.modul jt check_stack in
     (env, stack)
   | Br_on_cast (id, rt1, rt2) ->
     let* is_sub =
@@ -1843,7 +1851,7 @@ let typecheck_elem modul refs (elem : Elem.t) =
     let* tbl_null, tbl_ty = Env.table_type_get tbl_i modul in
     if
       (elem.explicit_typ && Text.compare_nullable tbl_null elem_null > 0)
-      || not (heap_type_eq tbl_ty elem_ty)
+      || not (is_subtype_heap_type elem_ty tbl_ty)
     then Error (`Type_mismatch "typecheck elem 3")
     else
       let* offset = typecheck_const_expr modul refs offset in

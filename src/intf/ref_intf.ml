@@ -26,6 +26,7 @@ module type T = sig
     | NullExn
     | NullRef
     | I31 of int32
+    | NullI31
     | Array of array_obj
     | Struct of struct_obj
 
@@ -37,9 +38,13 @@ module type T = sig
 
   val extern : 'x Type.Id.t -> 'x -> t
 
+  val make_i31 : int32 -> t
+
   val is_null : t -> Bool.t
 
   val get_func : t -> int get_ref
+
+  val get_i31 : t -> int32 get_ref
 
   val get_extern : t -> 'x Type.Id.t -> 'x get_ref
 end
