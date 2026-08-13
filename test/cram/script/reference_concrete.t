@@ -140,8 +140,7 @@
   $ owi script concrete --no-exhaustion reference/table_fill.wast
   $ owi script concrete --no-exhaustion reference/table_get.wast
   $ owi script concrete --no-exhaustion reference/table_grow.wast
-  $ owi script concrete --no-exhaustion reference/table_init.wast 2>&1 | grep -oE "Failure.*"
-  Failure("TODO: unimplemented ref instruction interpretation: ref.eq")
+  $ owi script concrete --no-exhaustion reference/table_init.wast
   $ owi script concrete --no-exhaustion reference/table_set.wast
   $ owi script concrete --no-exhaustion reference/table_size.wast
   $ owi script concrete --no-exhaustion reference/table-sub.wast

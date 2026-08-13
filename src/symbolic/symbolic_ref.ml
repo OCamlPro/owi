@@ -105,6 +105,9 @@ let array_set_elem (a : array_obj) (_ : int) (_ : gc_val) : array_obj = a
 let array_len_of (_ : array_obj) : int =
   Fmt.failwith "TODO: unimplemented Symbolic_ref.array_len_of"
 
+let ref_eq (_ : t) (_ : t) : bool =
+  Fmt.failwith "TODO: unimplemented Symbolic_ref.ref_eq"
+
 let is_null = function
   | Func None | Extern None | NullExn | NullRef | NullI31 | ExternAsAny None ->
     true

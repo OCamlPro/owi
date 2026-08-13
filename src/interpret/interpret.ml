@@ -1701,8 +1701,10 @@ struct
         Stack.push_ref stack r |> Choice.return
       else Choice.trap `Cast_failure
     | Eq ->
-      Fmt.failwith "TODO: unimplemented ref instruction interpretation: %a"
-        (pp_instr ~short:false) (Simple (Ref i))
+      let r2, stack = Stack.pop_as_ref stack in
+      let r1, stack = Stack.pop_as_ref stack in
+      let eq = Ref.ref_eq r1 r2 in
+      Stack.push_i32 stack (I32.of_int (if eq then 1 else 0)) |> Choice.return
 
   let exec_local_instr (state : State.t) locals stack :
     Binary.local_instr -> State.t = function

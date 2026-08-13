@@ -20,8 +20,7 @@
   $ owi script concrete --no-exhaustion reference/extern.wast
   $ owi script concrete --no-exhaustion reference/i31.wast
   $ owi script concrete --no-exhaustion reference/ref_cast.wast
-  $ owi script concrete --no-exhaustion reference/ref_eq.wast 2>&1 | grep -oE "Failure.*"
-  Failure("TODO: unimplemented ref instruction interpretation: ref.eq")
+  $ owi script concrete --no-exhaustion reference/ref_eq.wast
   $ owi script concrete --no-exhaustion reference/ref_test.wast
   $ owi script concrete --no-exhaustion reference/return_call_ref.wast
   $ owi script concrete --no-exhaustion reference/struct.wast

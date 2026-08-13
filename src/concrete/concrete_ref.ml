@@ -26,10 +26,15 @@ type gc_val =
   | V128 of Concrete_v128.t
   | Ref of t
 
-(* type id x content *)
-and struct_obj = int * gc_val array
+and gc_obj =
+  { obj_id : int32
+  ; type_id : int
+  ; fields : gc_val array
+  }
 
-and array_obj = int * gc_val array
+and struct_obj = gc_obj
+
+and array_obj = gc_obj
 
 and t =
   | Extern of Extern.t option
@@ -43,6 +48,14 @@ and t =
   | ExternAsAny of Extern.t option
 
 let any_as_extern_key : t Type.Id.t = Type.Id.make ()
+
+(* Concrete execution is not parallel, so this should be fine *)
+let obj_id_counter = ref 0l
+
+let fresh_id () =
+  let id = !obj_id_counter in
+  obj_id_counter := Int32.add id 1l;
+  id
 
 let pp fmt = function
   | Extern None -> pf fmt "externref none"
@@ -72,9 +85,10 @@ let extern (type x) (t : x Type.Id.t) (v : x) : t = Extern (Some (E (t, v)))
 
 let make_i31 (n : int32) : t = I31 n
 
-let make_struct type_idx = Struct (type_idx, [||])
+let make_struct type_id =
+  Struct { obj_id = fresh_id (); type_id; fields = [||] }
 
-let make_array type_idx = Array (type_idx, [||])
+let make_array type_id = Array { obj_id = fresh_id (); type_id; fields = [||] }
 
 let any_convert_extern = function
   | Extern None -> NullRef
@@ -99,9 +113,19 @@ let is_null = function
   | ExternAsAny (Some _) ->
     false
 
-let get_struct_type ((i, _) : struct_obj) = Some i
+let ref_eq (r1 : t) (r2 : t) : bool =
+  if is_null r1 && is_null r2 then true
+  else if is_null r1 || is_null r2 then false
+  else
+    match (r1, r2) with
+    | I31 a, I31 b -> Int32.eq a b
+    | Struct { obj_id = id1; _ }, Struct { obj_id = id2; _ } -> Int32.eq id1 id2
+    | Array { obj_id = id1; _ }, Array { obj_id = id2; _ } -> Int32.eq id1 id2
+    | _ -> false
 
-let get_array_type ((i, _) : array_obj) = Some i
+let get_struct_type ({ type_id; _ } : struct_obj) = Some type_id
+
+let get_array_type ({ type_id; _ } : array_obj) = Some type_id
 
 let gc_val_of_view : t Ref_intf.gc_view -> gc_val = function
   | GCv_i32 i -> I32 i
@@ -129,25 +153,28 @@ let default_gc_val (st : Binary.storage_type) =
   | Val_type (Ref_type (_, ht)) -> Ref (null ht)
   | Pack_type _ -> I32 0l
 
-let struct_new_with type_idx fields = Struct (type_idx, fields)
+let struct_new_with type_id fields =
+  Struct { obj_id = fresh_id (); type_id; fields }
 
-let struct_get_field ((_, fields) : struct_obj) idx = fields.(idx)
+let struct_get_field ({ fields; _ } : struct_obj) idx = fields.(idx)
 
-let struct_set_field ((type_idx, fields) : struct_obj) idx v =
-  fields.(idx) <- v;
-  (type_idx, fields)
+let struct_set_field (s : struct_obj) idx v =
+  s.fields.(idx) <- v;
+  s
 
-let array_new_fill type_idx v n = Array (type_idx, Array.make n v)
+let array_new_fill type_id v n =
+  Array { obj_id = fresh_id (); type_id; fields = Array.make n v }
 
-let array_new_fixed_with type_idx elems = Array (type_idx, elems)
+let array_new_fixed_with type_id fields =
+  Array { obj_id = fresh_id (); type_id; fields }
 
-let array_get_elem ((_, elems) : array_obj) idx = elems.(idx)
+let array_get_elem ({ fields; _ } : array_obj) idx = fields.(idx)
 
-let array_set_elem ((type_idx, elems) : array_obj) idx v =
-  elems.(idx) <- v;
-  (type_idx, elems)
+let array_set_elem (a : array_obj) idx v =
+  a.fields.(idx) <- v;
+  a
 
-let array_len_of ((_, elems) : array_obj) = Array.length elems
+let array_len_of ({ fields; _ } : array_obj) = Array.length fields
 
 let get_func (r : t) : int get_ref =
   match r with
