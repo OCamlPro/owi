@@ -85,11 +85,6 @@ let extern (type x) (t : x Type.Id.t) (v : x) : t = Extern (Some (E (t, v)))
 
 let make_i31 (n : int32) : t = I31 n
 
-let make_struct type_id =
-  Struct { obj_id = fresh_id (); type_id; fields = [||] }
-
-let make_array type_id = Array { obj_id = fresh_id (); type_id; fields = [||] }
-
 let any_convert_extern = function
   | Extern None -> NullRef
   | Extern (Some (E (k, v))) -> (
@@ -158,9 +153,7 @@ let struct_new_with type_id fields =
 
 let struct_get_field ({ fields; _ } : struct_obj) idx = fields.(idx)
 
-let struct_set_field (s : struct_obj) idx v =
-  s.fields.(idx) <- v;
-  s
+let struct_set_field (s : struct_obj) idx v = s.fields.(idx) <- v
 
 let array_new_fill type_id v n =
   Array { obj_id = fresh_id (); type_id; fields = Array.make n v }
@@ -170,9 +163,7 @@ let array_new_fixed_with type_id fields =
 
 let array_get_elem ({ fields; _ } : array_obj) idx = fields.(idx)
 
-let array_set_elem (a : array_obj) idx v =
-  a.fields.(idx) <- v;
-  a
+let array_set_elem (a : array_obj) idx v = a.fields.(idx) <- v
 
 let array_len_of ({ fields; _ } : array_obj) = Array.length fields
 

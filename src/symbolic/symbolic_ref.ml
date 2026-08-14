@@ -59,10 +59,6 @@ let extern (type x) (t : x Type.Id.t) (v : x) : t = Extern (Some (E (t, v)))
 
 let make_i31 (n : int32) : t = I31 n
 
-let make_struct (_ : int) : t = Struct ()
-
-let make_array (_ : int) : t = Array ()
-
 let any_convert_extern = function
   | Extern None -> NullRef
   | Extern (Some e) -> ExternAsAny (Some e)
@@ -91,7 +87,7 @@ let struct_new_with (_ : int) (_ : gc_val array) : t = Struct ()
 let struct_get_field (_ : struct_obj) (_ : int) : gc_val =
   Fmt.failwith "TODO: unimplemented Symbolic_ref.struct_get_field"
 
-let struct_set_field (s : struct_obj) (_ : int) (_ : gc_val) : struct_obj = s
+let struct_set_field (_ : struct_obj) (_ : int) (_ : gc_val) : unit = ()
 
 let array_new_fill (_ : int) (_ : gc_val) (_ : int) : t = Array ()
 
@@ -100,7 +96,7 @@ let array_new_fixed_with (_ : int) (_ : gc_val array) : t = Array ()
 let array_get_elem (_ : array_obj) (_ : int) : gc_val =
   Fmt.failwith "TODO: unimplemented Symbolic_ref.array_get_elem"
 
-let array_set_elem (a : array_obj) (_ : int) (_ : gc_val) : array_obj = a
+let array_set_elem (_ : array_obj) (_ : int) (_ : gc_val) : unit = ()
 
 let array_len_of (_ : array_obj) : int =
   Fmt.failwith "TODO: unimplemented Symbolic_ref.array_len_of"
