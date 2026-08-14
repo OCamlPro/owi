@@ -44,6 +44,7 @@ depends: [
   "synchronizer" {>= "0.3"}
   "uutf" {>= "1.0.3"}
   "xmlm" {>= "1.4.0"}
+  "yojson" {>= "2.0.0"}
   "odoc" {>= "3.0.0" & with-doc}
   "mdx" {>= "2.1" & with-test}
   "frama-c" {>= "33.0" & with-test}
