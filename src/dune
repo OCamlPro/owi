@@ -25,6 +25,7 @@
   abstract_stack
   abstract_state
   abstract_table
+  abstract_trace
   abstract_v128
   abstract_value
   abstract_wasm_ffi
@@ -205,7 +206,8 @@
   runtime_events
   mtime
   mtime.clock
-  xmlm)
+  xmlm
+  yojson)
  (flags
   (:standard -open Prelude))
  (preprocess
