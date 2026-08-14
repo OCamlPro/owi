@@ -9,6 +9,7 @@
   floats.wat
   globals.wat
   if.wat
+  if_join.wat
   invariant_gen1.wat
   local_func.wat
   loop.wat

@@ -1,0 +1,109 @@
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Abstract Interpreter Execution trace</title>
+  <link rel="stylesheet" href="style.css">
+  <script>
+    // Applied before first paint so there's no flash of the wrong theme.
+    (function () {
+      var stored = localStorage.getItem("owi-tracer-theme");
+      var theme = stored || (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+      document.documentElement.dataset.theme = theme;
+    })();
+  </script>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <h1>Abstract Interpreter Execution trace</h1>
+      <div class="topbar-actions">
+        <button id="themeToggle" class="theme-toggle" type="button" title="Toggle theme">
+          <svg class="theme-icon-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+          </svg>
+          <svg class="theme-icon-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>
+          </svg>
+        </button>
+        <label class="file-button">
+          Load trace
+          <input id="fileInput" type="file" accept=".json,application/json">
+        </label>
+      </div>
+    </header>
+
+    <section class="layout">
+      <aside class="trace-panel">
+        <div class="panel-title">
+          <span>Execution trace</span>
+          <span id="stepCount" class="muted"></span>
+        </div>
+        <div id="traceList" class="trace-list"></div>
+      </aside>
+
+      <section class="details-panel">
+        <div id="emptyState" class="empty-state">
+          <div class="empty-icon">▶</div>
+          <h2>Select an instruction</h2>
+          <p>Click an execution step to inspect its abstract machine state.</p>
+        </div>
+
+        <div id="details" class="is-hidden">
+          <div class="instruction-header">
+            <div>
+              <div id="stepLabel" class="eyebrow"></div>
+              <h2 id="instruction"></h2>
+            </div>
+            <div id="instrId" class="instruction-id"></div>
+          </div>
+
+          <div id="noStateBanner" class="no-state-banner is-hidden">
+              Empty state
+          </div>
+
+          <div id="stateSections">
+            <div class="state-grid">
+              <section class="state-card">
+                <h3>Locals <span id="localsCount"></span></h3>
+                <div id="locals" class="values"></div>
+              </section>
+
+              <section class="state-card">
+                <h3>Call stack <span id="callStackCount"></span></h3>
+                <div id="callStack" class="values"></div>
+              </section>
+
+              <section class="state-card">
+                <h3>Globals <span id="globalsCount"></span></h3>
+                <div id="globals" class="values"></div>
+              </section>
+            </div>
+
+            <section class="state-card full-width-card">
+              <h3>Stack <span id="stackCount"></span></h3>
+              <div id="stack" class="values"></div>
+            </section>
+          </div>
+
+          <section id="mergeInputsCard" class="state-card full-width-card is-hidden">
+            <h3>
+              <span id="mergeInputsTitle" class="card-title">Inputs</span>
+              <span id="mergeInputsConverged" class="badge"></span>
+            </h3>
+            <div id="mergeInputs" class="jump-targets-list"></div>
+          </section>
+
+          <section id="jumpTargetsCard" class="state-card full-width-card is-hidden">
+            <h3>Jump targets <span id="jumpTargetsCount"></span></h3>
+            <div id="jumpTargets" class="jump-targets-list"></div>
+          </section>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

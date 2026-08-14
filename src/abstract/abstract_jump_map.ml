@@ -19,6 +19,8 @@ end
 
 include PatriciaTree.MakeMap (Key)
 
+type nonrec t = Abstract_interpreter_state.t list t
+
 let append v1 v2 = idempotent_union (fun _ v1 v2 -> List.append v1 v2) v1 v2
 
 let decr map =
