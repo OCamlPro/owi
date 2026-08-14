@@ -1321,9 +1321,7 @@ let typecheck_array_instr (env : Env.t) stack : Binary.array_instr -> _ =
   | Set id ->
     let* mut, st = Env.type_get_array id env.modul in
     let* () =
-      match mut with
-      | Var -> Ok ()
-      | Const -> Error (`Type_mismatch "array.set: array is not mutable")
+      match mut with Var -> Ok () | Const -> Error (`Msg "immutable array")
     in
     let val_ty = unpack_storage_type st in
     let+ stack =

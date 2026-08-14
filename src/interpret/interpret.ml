@@ -2277,6 +2277,64 @@ struct
     | GCv_v128 v -> V128 (V128.of_concrete v)
     | GCv_ref r -> Ref r
 
+  let array_data_elem_size = function
+    | Binary.Pack_type I8 -> 1
+    | Pack_type I16 -> 2
+    | Val_type (Num_type I32) | Val_type (Num_type F32) -> 4
+    | Val_type (Num_type I64) | Val_type (Num_type F64) -> 8
+    | Val_type (Num_type V128) -> 16
+    | Val_type (Ref_type _) -> assert false
+
+  let get_u8 data i = Char.code (String.get data i)
+
+  let read_le16 data off = get_u8 data off lor (get_u8 data (off + 1) lsl 8)
+
+  let read_le32 data off =
+    Int32.of_int (read_le16 data off lor (read_le16 data (off + 2) lsl 16))
+
+  let read_le64 data off =
+    (* of_int32 sign-extends, so set the upper bits to zero  *)
+    let lo = Int64.logand (Int64.of_int32 (read_le32 data off)) 0xFFFFFFFFL in
+    let hi = Int64.shift_left (Int64.of_int32 (read_le32 data (off + 4))) 32 in
+    Int64.logor lo hi
+
+  let read_data_gc_val (st : Binary.storage_type) data off : Ref.gc_val =
+    match st with
+    | Pack_type I8 ->
+      Ref.gc_val_of_view (GCv_i32 (Int32.of_int (get_u8 data off)))
+    | Pack_type I16 ->
+      Ref.gc_val_of_view (GCv_i32 (Int32.of_int (read_le16 data off)))
+    | Val_type (Num_type I32) ->
+      Ref.gc_val_of_view (GCv_i32 (read_le32 data off))
+    | Val_type (Num_type F32) ->
+      Ref.gc_val_of_view (GCv_f32 (Float32.of_bits (read_le32 data off)))
+    | Val_type (Num_type I64) ->
+      Ref.gc_val_of_view (GCv_i64 (read_le64 data off))
+    | Val_type (Num_type F64) ->
+      Ref.gc_val_of_view (GCv_f64 (Float64.of_bits (read_le64 data off)))
+    | Val_type (Num_type V128) ->
+      Fmt.failwith "array data instruction: v128 element type not yet supported"
+    | Val_type (Ref_type _) -> assert false
+
+  let select_int x =
+    let+ x = Choice.select_i32 x in
+    Int32.to_int x
+
+  let check_array_oob off n arr =
+    off < 0 || n < 0 || off + n > Ref.array_len_of arr
+
+  let get_array_ref r =
+    match r with
+    | Ref.Array arr -> Choice.return arr
+    | r when Ref.is_null r -> Choice.trap (`Msg "null array reference")
+    | _ -> Choice.trap `Element_type_error
+
+  let get_array_storage_type (state : State.t) arr_id instr_name =
+    let types = Env.get_types ~modul:state.modul state.env in
+    match types.(arr_id).ct with
+    | Def_array_t (_, st) -> st
+    | _ -> Fmt.failwith "%s: type %d is not an array type" instr_name arr_id
+
   let exec_simple_instruction ({ stack; locals; env; _ } as state : State.t)
     instr_counter ~uuid : Binary.simple_instruction -> State.t Choice.t =
     let ret stack = Choice.return { state with stack } in
@@ -2483,7 +2541,7 @@ struct
       let state = { state with stack } in
       begin match r with
       | Ref.Struct s ->
-        let _ = Ref.struct_set_field s field_id (value_to_gc_val v) in
+        Ref.struct_set_field s field_id (value_to_gc_val v);
         ret state.stack
       | r when Ref.is_null r -> Choice.trap (`Msg "null structure reference")
       | _ -> Choice.trap `Element_type_error
@@ -2624,7 +2682,7 @@ struct
         if idx < 0 || idx >= len then
           Choice.trap (`Msg "out of bounds array access")
         else begin
-          let _ = Ref.array_set_elem a idx (value_to_gc_val v) in
+          Ref.array_set_elem a idx (value_to_gc_val v);
           ret state.stack
         end
       | r when Ref.is_null r -> Choice.trap (`Msg "null array reference")
@@ -2648,15 +2706,135 @@ struct
       let r, stack = Stack.pop_as_ref state.stack in
       let state = { state with stack } in
       ret @@ Stack.push_ref state.stack (Ref.extern_convert_any r)
-    | Array
-        ( New_data (_, _)
-        | New_elem (_, _)
-        | Fill _
-        | Copy (_, _)
-        | Init_data (_, _)
-        | Init_elem (_, _) ) as i ->
-      Fmt.failwith "TODO: unimplemented instruction interpretation: %a"
-        (pp_instr ~short:false) (Simple i)
+    | Array (Fill _id) ->
+      let n, stack = Stack.pop_i32 state.stack in
+      let v, stack = Stack.pop stack in
+      let dst_off, stack = Stack.pop_i32 stack in
+      let array, stack = Stack.pop_as_ref stack in
+      let state = { state with stack } in
+      let* arr = get_array_ref array in
+      let* n = select_int n in
+      let* dst_off = select_int dst_off in
+      if check_array_oob dst_off n arr then
+        Choice.trap (`Msg "out of bounds array access")
+      else begin
+        let gv = value_to_gc_val v in
+        for i = 0 to n - 1 do
+          Ref.array_set_elem arr (dst_off + i) gv
+        done;
+        ret state.stack
+      end
+    | Array (Copy (_dst_id, _src_id)) ->
+      let n, stack = Stack.pop_i32 state.stack in
+      let s_off, stack = Stack.pop_i32 stack in
+      let src, stack = Stack.pop_as_ref stack in
+      let d_off, stack = Stack.pop_i32 stack in
+      let dst, stack = Stack.pop_as_ref stack in
+      let state = { state with stack } in
+      let* d_arr = get_array_ref dst in
+      let* s_arr = get_array_ref src in
+      let* n = select_int n in
+      let* d_off = select_int d_off in
+      let* s_off = select_int s_off in
+      if check_array_oob d_off n d_arr || check_array_oob s_off n s_arr then
+        Choice.trap (`Msg "out of bounds array access")
+      else begin
+        if d_off <= s_off then
+          for i = 0 to n - 1 do
+            let elt = Ref.array_get_elem s_arr (s_off + i) in
+            Ref.array_set_elem d_arr (d_off + i) elt
+          done
+        else
+          for i = n - 1 downto 0 do
+            let elt = Ref.array_get_elem s_arr (s_off + i) in
+            Ref.array_set_elem d_arr (d_off + i) elt
+          done;
+        ret state.stack
+      end
+    | Array (New_data (arr_id, data_id)) ->
+      let n, stack = Stack.pop_i32 state.stack in
+      let offset, stack = Stack.pop_i32 stack in
+      let state = { state with stack } in
+      let* n = select_int n in
+      let* offset = select_int offset in
+      let st = get_array_storage_type state arr_id "array.new_data" in
+      let elem_size = array_data_elem_size st in
+      let data = Env.get_data ~modul:state.modul state.env data_id in
+      if offset < 0 || n < 0 || offset + (n * elem_size) > Data.size data then
+        Choice.trap (`Msg "out of bounds memory access")
+      else begin
+        let data = Data.value data in
+        let elems =
+          Array.init n (fun i ->
+            read_data_gc_val st data (offset + (i * elem_size)) )
+        in
+        ret
+        @@ Stack.push_ref state.stack (Ref.array_new_fixed_with arr_id elems)
+      end
+    | Array (New_elem (arr_id, elem_id)) ->
+      let n, stack = Stack.pop_i32 state.stack in
+      let offset, stack = Stack.pop_i32 stack in
+      let state = { state with stack } in
+      let* n = select_int n in
+      let* offset = select_int offset in
+      let elem = Env.get_elem ~modul:state.modul state.env elem_id in
+      if offset < 0 || n < 0 || offset + n > Elem.size elem then
+        Choice.trap (`Msg "out of bounds table access")
+      else begin
+        let elems =
+          Array.init n (fun i ->
+            Ref.gc_val_of_view (GCv_ref (Elem.get elem (offset + i))) )
+        in
+        ret
+        @@ Stack.push_ref state.stack (Ref.array_new_fixed_with arr_id elems)
+      end
+    | Array (Init_data (arr_id, data_id)) ->
+      let n, stack = Stack.pop_i32 state.stack in
+      let s_off, stack = Stack.pop_i32 stack in
+      let d_off, stack = Stack.pop_i32 stack in
+      let array, stack = Stack.pop_as_ref stack in
+      let state = { state with stack } in
+      let* arr = get_array_ref array in
+      let* n = select_int n in
+      let* s_off = select_int s_off in
+      let* d_off = select_int d_off in
+      let st = get_array_storage_type state arr_id "array.init_data" in
+      let elem_size = array_data_elem_size st in
+      let data = Env.get_data ~modul:state.modul state.env data_id in
+      let data_str = Data.value data in
+      if check_array_oob d_off n arr then
+        Choice.trap (`Msg "out of bounds array access")
+      else if s_off < 0 || s_off + (n * elem_size) > Data.size data then
+        Choice.trap (`Msg "out of bounds memory access")
+      else begin
+        for i = 0 to n - 1 do
+          let v = read_data_gc_val st data_str (s_off + (i * elem_size)) in
+          Ref.array_set_elem arr (d_off + i) v
+        done;
+        ret state.stack
+      end
+    | Array (Init_elem (_arr_id, elem_id)) ->
+      let n, stack = Stack.pop_i32 state.stack in
+      let s_off, stack = Stack.pop_i32 stack in
+      let d_off, stack = Stack.pop_i32 stack in
+      let arr_ref, stack = Stack.pop_as_ref stack in
+      let state = { state with stack } in
+      let* arr = get_array_ref arr_ref in
+      let* n = select_int n in
+      let* s_off = select_int s_off in
+      let* d_off = select_int d_off in
+      let elem = Env.get_elem ~modul:state.modul state.env elem_id in
+      if check_array_oob d_off n arr then
+        Choice.trap (`Msg "out of bounds array access")
+      else if s_off < 0 || s_off + n > Elem.size elem then
+        Choice.trap (`Msg "out of bounds table access")
+      else begin
+        for i = 0 to n - 1 do
+          let v = Ref.gc_val_of_view (GCv_ref (Elem.get elem (s_off + i))) in
+          Ref.array_set_elem arr (d_off + i) v
+        done;
+        ret state.stack
+      end
 
   let exec_instr ({ raw; uuid; instr_counter; _ } : _ Annotated.t)
     ({ stack; env; _ } as state : State.t) : State.instr_result Choice.t =

@@ -50,10 +50,6 @@ module type T = sig
 
   val make_i31 : int32 -> t
 
-  val make_struct : int -> t
-
-  val make_array : int -> t
-
   val any_convert_extern : t -> t
 
   val extern_convert_any : t -> t
@@ -72,6 +68,13 @@ module type T = sig
 
   val get_array_type : array_obj -> int option
 
+  (* TODO: calls to struct_set_field and array_set_elem from the interpreter are
+     correct for the concrete case, in the symbolic case, we'll like want every
+     execution branch to have its own instance of the heap, i.e. they should not
+     be global, but local to every execution branch, so when a worker starts
+     working on a branch, he gets all the information he needs on the living
+     objects in that branch from the local heap instance. *)
+
   type gc_val
 
   val gc_val_of_view : t gc_view -> gc_val
@@ -84,7 +87,7 @@ module type T = sig
 
   val struct_get_field : struct_obj -> int -> gc_val
 
-  val struct_set_field : struct_obj -> int -> gc_val -> struct_obj
+  val struct_set_field : struct_obj -> int -> gc_val -> unit
 
   val array_new_fill : int -> gc_val -> int -> t
 
@@ -92,7 +95,7 @@ module type T = sig
 
   val array_get_elem : array_obj -> int -> gc_val
 
-  val array_set_elem : array_obj -> int -> gc_val -> array_obj
+  val array_set_elem : array_obj -> int -> gc_val -> unit
 
   val array_len_of : array_obj -> int
 end
