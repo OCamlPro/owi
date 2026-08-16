@@ -2198,3 +2198,8 @@ module Log : sig
   val setup :
     Fmt.style_renderer option -> Logs.level option -> bench:bool -> unit
 end
+
+module Unsat_cache_control : sig
+  val enable : unit -> unit
+  val disable : unit -> unit
+end

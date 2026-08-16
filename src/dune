@@ -36,6 +36,7 @@
   binary_validate
   boolean_intf
   bug
+  hash_footprint
   choice_intf
   call_graph
   cmd_abs
@@ -165,6 +166,8 @@
   text_parser
   text_validate
   thread
+  unsat_cache
+  unsat_cache_control
   value_intf
   v128_intf
   wasm_ffi_intf

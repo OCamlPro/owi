@@ -659,6 +659,10 @@ let script_symbolic_cmd =
   in
   Cmd_script.cmd_symbolic ~files ~no_exhaustion
 
+let unsat_cache =
+  let doc = "Enable unsat core caching (experimental)" in
+  Arg.(value & flag & info [ "unsat-cache" ] ~doc)
+
 (* owi sym *)
 
 let sym_info =
@@ -669,8 +673,13 @@ let sym_info =
 let sym_cmd =
   let+ source_file
   and+ () = setup_log
+  and+ unsat_cache = unsat_cache
   and+ parameters = symbolic_parameters None in
-
+  if unsat_cache then (
+    Logs.info (fun m -> m "unsat_cache flag value: %b" unsat_cache);
+    Unsat_cache_control.enable ()
+  )
+  else Unsat_cache_control.disable ();
   Cmd_sym.cmd ~parameters ~source_file
 
 (* owi tinygo *)

@@ -61,3 +61,4 @@ module Symbolic_extern = Symbolic_extern
 module Symbolic_parameters = Symbolic_parameters
 module Text = Text
 module Text_validate = Text_validate
+module Unsat_cache_control = Unsat_cache_control
