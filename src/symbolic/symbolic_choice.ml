@@ -32,7 +32,9 @@ let close_scope = map_state Thread.close_scope
 let with_new_invisible_symbol ty f =
   let* sym =
     fold_state (fun (state : Thread.t) ->
-      Fmt.kstr (Smtml.Symbol.make ty) "symbol_invisible_%i" state.num_symbols )
+      Fmt.kstr
+        (Smtml.Symbol.make_const ty)
+        "symbol_invisible_%i" state.num_symbols )
   in
   let+ () = map_state Thread.incr_num_symbols in
   f sym
@@ -40,7 +42,7 @@ let with_new_invisible_symbol ty f =
 let with_new_symbol ty f =
   let* sym =
     fold_state (fun (state : Thread.t) ->
-      Fmt.kstr (Smtml.Symbol.make ty) "symbol_%d" state.num_symbols )
+      Fmt.kstr (Smtml.Symbol.make_const ty) "symbol_%d" state.num_symbols )
   in
   let+ () = map_state (Thread.add_symbol sym) in
   f sym
@@ -149,7 +151,7 @@ let select_i32 (e : Symbolic_i32.t) : int32 t =
         let* sym =
           fold_state (fun (state : Thread.t) ->
             Fmt.str "choice_i32_%i" state.num_symbols
-            |> Smtml.Symbol.make Smtml.Typed.Types.(to_ty bitv32) )
+            |> Smtml.Symbol.make_const Smtml.Typed.Types.(to_ty bitv32) )
         in
         let+ () = map_state Thread.incr_num_symbols in
         let assign = Smtml.Typed.Bitv32.(eq (symbol sym) e) in
