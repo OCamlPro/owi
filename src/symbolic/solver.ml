@@ -48,14 +48,18 @@ let check pc condition =
   let cached_unsat =
     match Unsat_cache_control.get () with
     | Some cache ->
+        Logs.debug (fun m -> m "Unsat cache: enabled, looking up");
         Unsat_cache.lookup cache query_expr
     | None ->
+        Logs.debug (fun m -> m "Unsat cache: disabled");
         None
   in
   match cached_unsat with
   | Some _core ->
+      Logs.debug (fun m -> m "Unsat cache: HIT, returning Unsat");
       `Unsat
   | None ->
+      Logs.debug (fun m -> m "Unsat cache: MISS, proceeding to solver");
       (* 2. Existing exact-match cache *)
       let cached =
         Mutex.protect cache_mutex (fun () ->
@@ -83,12 +87,11 @@ let check pc condition =
             match sat with
             | `Unsat ->
                 let fp = Hash_footprint.of_expr query_expr in
-                let fp_hash = Hash_footprint.hash fp in
-                Logs.debug (fun m -> m "storing with fp=%d" fp_hash);
+                Logs.debug (fun m -> m "Unsat cache: solver returned Unsat, storing fp=%d" (Hash_footprint.hash fp));
                 (match Unsat_cache_control.get () with
                 | Some cache ->
                     Unsat_cache.add cache fp [query_expr];
-                    Logs.debug (fun m -> m "store successful")
+                    Logs.debug (fun m -> m "Unsat cache: store successful")
                 | None -> ())
             | `Sat ->
                 Logs.debug (fun m -> m "solver returned Sat, not storing")

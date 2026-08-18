@@ -13,13 +13,9 @@ type t = {
 let create () =
   { table = Hashtbl.create 1024; lookups = 0; hits = 0 }
 
-(* let core_to_expr core =
-  match core with
-  | [] -> assert false
-  | [c] -> c
-  | hd :: tl -> List.fold_left (fun acc c -> Expr.Bool.and_ acc c) hd tl *)
-
 let add cache fp core =
+  let fp_hash = Hash_footprint.hash fp in
+  Logs.debug (fun m -> m "Unsat_cache: add fp=%d" fp_hash);
   match Hashtbl.find_opt cache.table fp with
   | None -> Hashtbl.add cache.table fp [core]
   | Some cores -> Hashtbl.replace cache.table fp (core :: cores)
@@ -31,11 +27,14 @@ let lookup cache formula =
   Logs.debug (fun m -> m "lookup: fp_hash=%d" fp_hash);
   match Hashtbl.find_opt cache.table fp with
   | None ->
+      Logs.debug (fun m -> m "Unsat_cache: miss");
       None
   | Some cores ->
+      Logs.debug (fun m -> m "Unsat_cache: found %d cores" (List.length cores));
       match cores with
       | core :: _ ->
           cache.hits <- cache.hits + 1;
+          Logs.debug (fun m -> m "Unsat_cache: HIT!");
           Some core
       | [] -> None
 
