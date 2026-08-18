@@ -848,7 +848,7 @@ let plain_instr :=
       *)
     if List.exists (fun x -> String.starts_with ~prefix:"-" x) l then
       failwith "i8 constant out of range"
-    else if List.length l <> 16 then failwith "invalid lane length"
+    else if List.length l <> 16 then failwith "wrong number of lane indices"
     else
       let l = List.map (fun x ->
         match int_of_string_opt x with
