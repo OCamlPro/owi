@@ -197,7 +197,7 @@ let model_of_json json_str =
       in
       let* value = Smtml.Value.of_string ty value in
       let sym_name = Util.member "symbol" obj |> Util.to_string in
-      let key = Smtml.Symbol.make ty sym_name in
+      let key = Smtml.Symbol.make_const ty sym_name in
       Hashtbl.add tbl key value;
       process_json rest
     | `Assoc obj :: rest when List.mem_assoc "scope" obj ->
@@ -232,7 +232,7 @@ let model_of_scfg scfg =
       let* ty = Smtml.Ty.of_string ty in
       let* value = Scfg.Query.get_param 2 dir in
       let* value = Smtml.Value.of_string ty value in
-      let key = Smtml.Symbol.make ty name in
+      let key = Smtml.Symbol.make_const ty name in
       Hashtbl.add tbl key value;
       process_dirs rest
     | dir :: rest when String.compare dir.name "scope" = 0 ->
