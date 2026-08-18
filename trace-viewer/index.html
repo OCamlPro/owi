@@ -3,13 +3,16 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Abstract Interpreter Execution trace</title>
+  <link id="prismTheme" rel="stylesheet" href="prism/prism-dark.css">
   <link rel="stylesheet" href="style.css">
   <script>
-    // Applied before first paint so there's no flash of the wrong theme.
+    // Applied before first paint so there's no flash of the wrong theme
+    // (app theme, and which Prism theme matches it).
     (function () {
       var stored = localStorage.getItem("owi-tracer-theme");
       var theme = stored || (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
       document.documentElement.dataset.theme = theme;
+      document.getElementById("prismTheme").href = "prism/prism-" + theme + ".css";
     })();
   </script>
 </head>
@@ -54,7 +57,7 @@
           <div class="instruction-header">
             <div>
               <div id="stepLabel" class="eyebrow"></div>
-              <h2 id="instruction"></h2>
+              <h2 id="instruction" class="language-wasm"></h2>
             </div>
             <div id="instrId" class="instruction-id"></div>
           </div>
@@ -104,6 +107,7 @@
     </section>
   </main>
 
+  <script src="prism/prism.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
