@@ -847,12 +847,12 @@ let plain_instr :=
       https://github.com/WebAssembly/spec/issues/2209
       *)
     if List.exists (fun x -> String.starts_with ~prefix:"-" x) l then
-      failwith "i8 constant out of range"
+      failwith "unexpected token"
     else if List.length l <> 16 then failwith "wrong number of lane indices"
     else
       let l = List.map (fun x ->
         match int_of_string_opt x with
-        | None -> failwith "i8 constant out of range" (* TODO: should be unexpected token but the spec is weird, see the same issue: https://github.com/WebAssembly/spec/issues/2209 *)
+        | None -> failwith "unexpected token"
         | Some n -> if n >= 256 then failwith "i8 constant out of range" else n
       ) l
       in
