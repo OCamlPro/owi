@@ -1202,8 +1202,8 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
     let* pt, rt = Env.func_get i env.modul in
     let* b =
       Stack.equal env.modul
-        (List.rev_map typ_of_val_type rt)
         (List.rev_map typ_of_val_type env.result_type)
+        (List.rev_map typ_of_val_type rt)
     in
     if not b then Error (`Type_mismatch "return_call")
     else
@@ -1217,8 +1217,8 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
     in
     let* b =
       Stack.equal env.modul
-        (List.rev_map typ_of_val_type rt)
         (List.rev_map typ_of_val_type env.result_type)
+        (List.rev_map typ_of_val_type rt)
     in
     if not b then Error (`Type_mismatch "return_call_indirect")
     else
@@ -1228,8 +1228,8 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
   | Return_call_ref (Bt_raw (_, (pt, rt))) ->
     let* b =
       Stack.equal env.modul
-        (List.rev_map typ_of_val_type rt)
         (List.rev_map typ_of_val_type env.result_type)
+        (List.rev_map typ_of_val_type rt)
     in
     if not b then Error (`Type_mismatch "return_call_ref")
     else
