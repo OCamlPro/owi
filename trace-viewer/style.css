@@ -299,8 +299,14 @@ h1 {
 }
 
 .instr {
-    display: flex;
-    align-items: center;
+    /*
+     * inline-block, not flex: flex containers collapse whitespace-only
+     * text nodes between their children, which is exactly what sits
+     * between the <span> tokens Prism wraps this instruction's text
+     * in — that ate the spaces between e.g. "call" and "21". Vertical
+     * centering still comes from the parent .row-content flex item.
+     */
+    display: inline-block;
 
     overflow: hidden;
 
@@ -313,6 +319,33 @@ h1 {
         monospace;
 
     text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/*
+ * Prism.js tokenizes WAT instruction text (see prism/prism.js's
+ * bundled "wasm" grammar, applied via the `language-wasm` class),
+ * using whichever of prism/prism-dark.css / prism/prism-light.css
+ * matches the current theme (swapped by the toggle in app.js, via
+ * the #prismTheme <link>) for token colors. Those themes are built
+ * for padded, background-shaded <pre>/<code> blocks though, so
+ * override that here to sit inline in a single row instead.
+ * `.instr.language-wasm` (two classes) is deliberately more specific
+ * than the themes' `code[class*="language-"]` selectors, so this
+ * wins regardless of stylesheet load order.
+ */
+.instr.language-wasm {
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    text-shadow: none;
+    color: var(--text);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: inherit;
+    line-height: 1.4;
     white-space: nowrap;
 }
 

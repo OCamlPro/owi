@@ -26,6 +26,34 @@ function el(tag, className, text) {
   return node;
 }
 
+/*
+ * The bundled highlight-keywords plugin does
+ * `classes.push("keyword-" + token.content)` to add a per-keyword
+ * class — but for a keyword with a nested "inside" grammar (e.g.
+ * "i32.const", whose "." is itself a nested punctuation token),
+ * `token.content` at that point is already-stringified HTML, not
+ * plain text. The embedded quote breaks out of the class="..."
+ * attribute and leaks markup as visible text. Sanitize every class
+ * name Prism generates as a defensive fix, rather than hand-editing
+ * the vendored prism.js.
+ */
+Prism.hooks.add("wrap", (env) => {
+  env.classes = env.classes.map((c) => c.replace(/[^\w-]/g, ""));
+});
+
+/*
+ * Sets an element's text to a WAT instruction and syntax-highlights it
+ * with Prism (see prism.js's bundled "wasm" language grammar). Safe to
+ * call repeatedly on the same element — `language-wasm` is idempotent
+ * and Prism.highlightElement always re-tokenizes from textContent.
+ */
+function highlightWasm(element, text) {
+  element.textContent = text;
+  element.classList.add("language-wasm");
+  Prism.highlightElement(element);
+  return element;
+}
+
 function escapeHtml(value) {
   return String(value)
     .replaceAll("&", "&amp;")
@@ -149,7 +177,7 @@ function renderRow(state, index, blockNode) {
 
   const content = el("span", "row-content");
   content.appendChild(getKindIcon(state.kind, blockNode));
-  content.appendChild(el("span", "instr", state.instr));
+  content.appendChild(highlightWasm(el("code", "instr"), state.instr));
 
   if (state.kind === "join" || state.kind === "widen") {
     content.appendChild(getKindBadge(state));
@@ -278,7 +306,7 @@ function selectState(index) {
   $("details").classList.remove("is-hidden");
 
   $("stepLabel").textContent = getStepLabel(state);
-  $("instruction").textContent = state.instr;
+  highlightWasm($("instruction"), state.instr);
   $("instrId").textContent = `instr_id ${state.instr_id}`;
 
   // `null` means the instruction has no successor state at all (it
@@ -553,6 +581,7 @@ $("themeToggle").addEventListener("click", () => {
 
   document.documentElement.dataset.theme = next;
   localStorage.setItem(THEME_KEY, next);
+  $("prismTheme").href = `prism/prism-${next}.css`;
 });
 
 /* ------------------------------------------------------------------
