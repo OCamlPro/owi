@@ -33,7 +33,7 @@ let eacsl_instrument eacsl ~includes (files : Fpath.t list) :
           [ "-e-acsl"
           ; "-no-frama-c-stdlib"
           ; "-kernel-warn-key"
-          ; "CERT:MSC:38=inactive,unknown-attribute=inactive"
+          ; "CERT:MSC:38=inactive,attrs:unknown=inactive"
           ; "-verbose"
           ; framac_verbosity_level
           ; String.concat "" [ {|-cpp-extra-args="|}; includes; {|"|} ]
