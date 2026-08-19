@@ -183,6 +183,14 @@ function renderRow(state, index, blockNode) {
     content.appendChild(getKindBadge(state));
   }
 
+  if (state.warnings && state.warnings.length > 0) {
+    const badge = el("span", "badge badge-warning row-badge", "warning");
+    badge.title = state.warnings.join("\n");
+    content.appendChild(badge);
+  }
+
+  content.appendChild(el("span", "row-instr-id", `#${state.instr_id}`));
+
   button.appendChild(content);
   button.addEventListener("click", () => selectState(index));
 
@@ -339,8 +347,34 @@ function selectState(index) {
     $("globalsCount").textContent = countLabel(state.globals);
   }
 
+  renderWarnings(state.warnings);
   renderMergeInputs(state);
   renderJumpTargets(state.jts);
+}
+
+/*
+ * Warnings raised by the interpreter's post-hoc invariant checks (e.g.
+ * "possible division by zero"), attached to whichever trace event(s)
+ * correspond to the flagged instruction. Shown regardless of whether
+ * the step has a successor state, since a trap can still be flagged.
+ */
+function renderWarnings(warnings) {
+  const card = $("warningsCard");
+  const container = $("warnings");
+
+  container.innerHTML = "";
+
+  if (!warnings || warnings.length === 0) {
+    card.classList.add("is-hidden");
+    return;
+  }
+
+  card.classList.remove("is-hidden");
+  $("warningsCount").textContent = warnings.length;
+
+  warnings.forEach((message) => {
+    container.appendChild(el("div", "value warning-value", message));
+  });
 }
 
 /*
@@ -376,7 +410,7 @@ function renderMergeInputs(state) {
     );
   }
 
-  const expanded = state.kind === "widen";
+  const expanded = true;
   state.inputs.forEach((input) => {
     container.appendChild(
       renderJumpTargetItem(
@@ -433,7 +467,10 @@ function emptyValue(text, noState = false) {
 function renderJumpTargetItem(jumpTarget, expanded = false) {
   const states = jumpTarget.states || [];
 
-  const header = el("button", `jump-target-header ${expanded ? "is-expanded" : ""}`);
+  const header = el(
+    "button",
+    `jump-target-header ${expanded ? "is-expanded" : ""}`,
+  );
   header.type = "button";
   header.setAttribute("aria-expanded", String(expanded));
   header.appendChild(el("span", "chevron"));
@@ -585,8 +622,82 @@ $("themeToggle").addEventListener("click", () => {
 });
 
 /* ------------------------------------------------------------------
+ * Trace panel resizer
+ * ------------------------------------------------------------------ */
+
+const PANEL_WIDTH_KEY = "owi-tracer-panel-width";
+const PANEL_WIDTH_MIN = 280;
+const PANEL_WIDTH_MAX = 900;
+
+// The inline script in <head> already restored a saved width (to avoid
+// a flash of the default width); this just wires up dragging.
+const panelResizer = $("panelResizer");
+
+function setPanelWidth(width) {
+  const clamped = Math.min(PANEL_WIDTH_MAX, Math.max(PANEL_WIDTH_MIN, width));
+  document.documentElement.style.setProperty(
+    "--trace-panel-width",
+    `${clamped}px`,
+  );
+  localStorage.setItem(PANEL_WIDTH_KEY, String(clamped));
+}
+
+panelResizer.addEventListener("pointerdown", (event) => {
+  panelResizer.setPointerCapture(event.pointerId);
+  panelResizer.classList.add("is-dragging");
+
+  const onMove = (moveEvent) => {
+    const layoutLeft = panelResizer.parentElement.getBoundingClientRect().left;
+    setPanelWidth(moveEvent.clientX - layoutLeft);
+  };
+
+  const onUp = () => {
+    panelResizer.classList.remove("is-dragging");
+    document.removeEventListener("pointermove", onMove);
+    document.removeEventListener("pointerup", onUp);
+  };
+
+  document.addEventListener("pointermove", onMove);
+  document.addEventListener("pointerup", onUp);
+});
+
+panelResizer.addEventListener("keydown", (event) => {
+  const current = panelResizer.parentElement
+    .querySelector(".trace-panel")
+    .getBoundingClientRect().width;
+
+  if (event.key === "ArrowLeft") {
+    event.preventDefault();
+    event.stopPropagation();
+    setPanelWidth(current - 20);
+  } else if (event.key === "ArrowRight") {
+    event.preventDefault();
+    event.stopPropagation();
+    setPanelWidth(current + 20);
+  }
+});
+
+/* ------------------------------------------------------------------
  * JSON file loading
  * ------------------------------------------------------------------ */
+
+function loadTrace(parsed) {
+  if (!Array.isArray(parsed)) {
+    throw new Error("The trace must be a JSON array.");
+  }
+
+  trace = parsed;
+  selected = 0;
+
+  renderList();
+
+  if (trace.length > 0) {
+    selectState(0);
+  } else {
+    $("emptyState").classList.remove("is-hidden");
+    $("details").classList.add("is-hidden");
+  }
+}
 
 $("fileInput").addEventListener("change", async (event) => {
   const file = event.target.files[0];
@@ -596,24 +707,7 @@ $("fileInput").addEventListener("change", async (event) => {
   }
 
   try {
-    const text = await file.text();
-    const parsed = JSON.parse(text);
-
-    if (!Array.isArray(parsed)) {
-      throw new Error("The trace must be a JSON array.");
-    }
-
-    trace = parsed;
-    selected = 0;
-
-    renderList();
-
-    if (trace.length > 0) {
-      selectState(0);
-    } else {
-      $("emptyState").classList.remove("is-hidden");
-      $("details").classList.add("is-hidden");
-    }
+    loadTrace(JSON.parse(await file.text()));
   } catch (error) {
     $("traceList").innerHTML = `
       <div class="error">
@@ -627,10 +721,24 @@ $("fileInput").addEventListener("change", async (event) => {
  * Initial render
  * ------------------------------------------------------------------ */
 
-renderList();
+const embeddedTrace = $("embedded-trace");
 
-if (trace.length > 0) {
-  selectState(0);
+if (embeddedTrace) {
+  try {
+    loadTrace(JSON.parse(embeddedTrace.textContent));
+  } catch (error) {
+    $("traceList").innerHTML = `
+      <div class="error">
+        Could not load embedded trace: ${escapeHtml(error.message)}
+      </div>
+    `;
+  }
+} else {
+  renderList();
+
+  if (trace.length > 0) {
+    selectState(0);
+  }
 }
 
 /* ------------------------------------------------------------------
@@ -638,6 +746,7 @@ if (trace.length > 0) {
  * ------------------------------------------------------------------ */
 
 document.addEventListener("keydown", (event) => {
+  event.preventDefault();
   // Don't intercept keyboard input while interacting with form controls.
   const target = event.target;
 
@@ -665,7 +774,6 @@ document.addEventListener("keydown", (event) => {
       break;
 
     case "ArrowDown":
-    case "Enter":
       nextIndex = Math.min(trace.length - 1, selected + 1);
       break;
 
@@ -682,11 +790,19 @@ document.addEventListener("keydown", (event) => {
       nextIndex = findNextBlock(selected);
       break;
 
+    /*
+     * Expand/collapse the block currently selected (mirrors clicking
+     * its block-start icon).
+     */
+    case "Enter":
+      if (trace[selected].kind === "block_start") {
+        toggleBlock(selected);
+      }
+      return;
+
     default:
       return;
   }
-
-  event.preventDefault();
 
   if (nextIndex !== selected) {
     selectState(nextIndex);

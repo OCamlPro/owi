@@ -371,16 +371,18 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
         let res = eval_func fn_state caller_popped_stack func in
         trace_res ~instr ~kind:Block_end res;
         (res, JumpMap.empty)
-      | Extern idx -> (
+      | Extern idx ->
         let func = Abstract_runtime.get_extern_func ~runtime idx in
-        Trace.record_step ~instr ~kind:Step ~inputs:None ~converged:None
-          ~state:None;
         let stack = exec_extern_func abs_state func in
-        match Abstract_monad.run stack abs_state with
-        | None -> (None, JumpMap.empty)
-        | Some (stack, abs_state) ->
-          let abs_state = { abs_state with stack } in
-          (Some { state with abs_state }, JumpMap.empty) )
+        let res, jts =
+          match Abstract_monad.run stack abs_state with
+          | None -> (None, JumpMap.empty)
+          | Some (stack, abs_state) ->
+            let abs_state = { abs_state with stack } in
+            (Some { state with abs_state }, JumpMap.empty)
+        in
+        trace_res ~instr ~kind:Step res;
+        (res, jts)
       end
     | Block (_str_opt, bt, expr) ->
       Trace.record_step ~kind:Block_start ~instr ~inputs:None ~converged:None
