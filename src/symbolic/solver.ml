@@ -114,6 +114,14 @@ let check pc condition =
           | None -> ());
           sat
 
+let store_unsat_formula formula =
+  let fp = Hash_footprint.of_expr formula in
+  match Unsat_cache_control.get () with
+  | Some cache ->
+      Unsat_cache.add cache fp [formula];
+      Logs.debug (fun m -> m "Unsat cache: stored pruned path fp=%d" (Hash_footprint.hash fp))
+  | None -> ()
+
 let model_of_path_condition ~path_condition : Smtml.Model.t option =
   let exception Unknown in
   let (S (solver_module, s)) = get_current () in

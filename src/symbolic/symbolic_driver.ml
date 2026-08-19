@@ -116,14 +116,17 @@ let run ~exploration_strategy ~workers ~no_worker_isolation ~no_stop_at_failure
         ~finally:(fun () -> Bugs.end_pledge bug_stack)
         (fun () ->
           try
+            Logs.info (fun m -> m "run_worker started");
             (* Pull work from the queue as long as it's possible *)
             Scheduler.work_while
               (fun f write_back -> at_schedulable (f ()) write_back)
               sched
           with
-          | Z3.Error _ when Solver.was_interrupted () ->
-            (* it happens regularly that interrupting Z3 makes it crash, in this case, we simply ignore the exception, otherwise it is confusing for the user as it looks like something went wrong when there's nothing to worry about *)
-            ()
+          | Symex.Path_condition.Unsat formula ->
+            Logs.info (fun m -> m "Caught Unsat exception in run_worker");
+            Solver.store_unsat_formula formula;
+            (* Re-raise the exception so the path is pruned *)
+            raise (Symex.Path_condition.Unsat formula)
           | e ->
             let e_s = Printexc.to_string e in
             let bt = Printexc.get_raw_backtrace () in
@@ -165,6 +168,9 @@ let run ~exploration_strategy ~workers ~no_worker_isolation ~no_stop_at_failure
           Log.info (fun m ->
             m "one domain exited with the following Smtml exception: %a"
               Smtml.Eval.pp_error_kind err )
+        | Symex.Path_condition.Unsat formula ->
+          Solver.store_unsat_formula formula;
+          Log.info (fun m -> m "Unsat formula stored from domain exit")
         | exn ->
           let backtrace = Printexc.get_raw_backtrace () in
           Log.info (fun m ->

@@ -25,3 +25,5 @@ val get_all_stats :
   wait_for_all_domains:(Unit.t -> Unit.t) -> Smtml.Statistics.t
 
 val was_interrupted : unit -> bool
+
+val store_unsat_formula : Smtml.Expr.t -> unit
