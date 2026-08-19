@@ -27,5 +27,5 @@
   owi: [INFO] locals        : [ (0 -> i32 {42}) ]
   owi: [INFO] running instr : return
   owi: [INFO] stack         : [ i32 {84} ]
-  owi: [INFO] locals        : [  ]
+  owi: [INFO] locals        : [ (0 -> i32 {42}) ]
   owi: [INFO] running instr : return

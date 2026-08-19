@@ -327,7 +327,8 @@ let abs_cmd =
       value
       & opt (some string) None
       & info [ "debug-trace" ] ~docv:"FILE"
-          ~doc:"Write a JSON debug trace of the abstract interpreter to $(docv).")
+          ~doc:
+            "Write a JSON debug trace of the abstract interpreter to $(docv)." )
   in
   Cmd_abs.cmd ~source_file ~entry_point ~unsafe ~debug_trace
 
