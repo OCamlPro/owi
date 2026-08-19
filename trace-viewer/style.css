@@ -133,7 +133,7 @@ body {
 }
 
 .app {
-    width: min(1400px, 100%);
+    width: min(1800px, 100%);
     height: 100vh;
     margin: 0 auto;
     padding: 28px;
@@ -245,21 +245,42 @@ h1 {
 
 .layout {
     display: grid;
-    grid-template-columns: minmax(320px, 390px) 1fr;
+    grid-template-columns: minmax(280px, var(--trace-panel-width, 480px)) 6px 1fr;
     flex: 1;
     min-height: 0;
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-radius: 8px;
     overflow: hidden;
     background: var(--surface);
     box-shadow: 0 20px 60px var(--shadow);
+}
+
+.panel-resizer {
+    position: relative;
+    cursor: col-resize;
+    background: var(--border);
+}
+
+.panel-resizer::after {
+    content: "";
+    position: absolute;
+    inset: 0 -4px;
+}
+
+.panel-resizer:hover,
+.panel-resizer.is-dragging {
+    background: var(--accent);
+}
+
+.panel-resizer:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
 }
 
 .trace-panel {
     display: flex;
     flex-direction: column;
     min-height: 0;
-    border-right: 1px solid var(--border);
     background: var(--surface-alt);
 }
 
@@ -296,6 +317,19 @@ h1 {
     align-items: center;
     gap: 8px;
     min-width: 0;
+}
+
+.row-instr-id {
+    flex: none;
+    margin-left: auto;
+    padding-left: 8px;
+    color: var(--text-dim);
+    font:
+        11px ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        Consolas,
+        monospace;
 }
 
 .instr {
@@ -422,14 +456,14 @@ h1 {
 
 .state-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 14px;
     margin-top: 22px;
 }
 
 .state-card {
-    min-height: 180px;
-    padding: 17px;
+    min-height: 100px;
+    padding: 12px;
     border: 1px solid var(--border);
     border-radius: 9px;
     background: var(--surface-card);
@@ -438,6 +472,10 @@ h1 {
 .full-width-card {
     min-height: 0;
     margin-top: 14px;
+}
+
+.warnings-card {
+    border-color: var(--amber);
 }
 
 /*
@@ -604,7 +642,8 @@ h1 {
 }
 
 .badge-widen,
-.badge-iterating {
+.badge-iterating,
+.badge-warning {
     color: var(--amber);
     background: var(--amber-wash);
 }
@@ -612,7 +651,7 @@ h1 {
 .values {
     display: flex;
     flex-direction: column;
-    gap: 7px;
+    gap: 4px;
 }
 
 .value {
@@ -644,6 +683,12 @@ h1 {
 }
 .value-type-v128 {
     border-left: 7px solid var(--type-v128);
+}
+
+.value.warning-value {
+    border-left: 7px solid var(--amber);
+    background: var(--amber-wash);
+    color: var(--text);
 }
 
 .is-hidden {
@@ -732,10 +777,6 @@ h1 {
         overflow-y: visible;
         padding: 22px;
     }
-
-    .state-grid {
-        grid-template-columns: 1fr;
-    }
 }
 
 /* ---------------------------------------------------------------
@@ -747,7 +788,7 @@ h1 {
     display: block;
 
     width: 100%;
-    padding: 8px 15px;
+    padding: 8px 10px;
 
     border: 0;
     border-bottom: 1px solid var(--divider);
@@ -767,7 +808,7 @@ h1 {
 .block-children {
     position: relative;
     margin-left: 19px;
-    padding-left: 8px;
+    padding-left: 4px;
     border-left: 1px solid var(--guide);
 }
 

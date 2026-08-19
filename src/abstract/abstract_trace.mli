@@ -35,6 +35,7 @@ type event =
   ; jts : jump_target list option
   ; inputs : named_state list option
   ; converged : bool option
+  ; warnings : string list
   }
 
 val enable : unit -> unit
@@ -52,5 +53,7 @@ val record_step :
   -> unit
 
 val record_jt : jt:Abstract_jump_map.t -> unit
+
+val record_warning : instr_id:int -> message:string -> unit
 
 val write_json : string -> unit

@@ -2,7 +2,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Abstract Interpreter Execution trace</title>
+  <title>Abstract Interpreter Execution Trace</title>
   <link id="prismTheme" rel="stylesheet" href="prism/prism-dark.css">
   <link rel="stylesheet" href="style.css">
   <script>
@@ -13,13 +13,18 @@
       var theme = stored || (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
       document.documentElement.dataset.theme = theme;
       document.getElementById("prismTheme").href = "prism/prism-" + theme + ".css";
+
+      var storedWidth = localStorage.getItem("owi-tracer-panel-width");
+      if (storedWidth) {
+        document.documentElement.style.setProperty("--trace-panel-width", storedWidth + "px");
+      }
     })();
   </script>
 </head>
 <body>
   <main class="app">
     <header class="topbar">
-      <h1>Abstract Interpreter Execution trace</h1>
+      <h1>Abstract Interpreter Execution Trace</h1>
       <div class="topbar-actions">
         <button id="themeToggle" class="theme-toggle" type="button" title="Toggle theme">
           <svg class="theme-icon-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -46,6 +51,8 @@
         <div id="traceList" class="trace-list"></div>
       </aside>
 
+      <div id="panelResizer" class="panel-resizer" role="separator" aria-orientation="vertical" aria-label="Resize execution trace panel" tabindex="0"></div>
+
       <section class="details-panel">
         <div id="emptyState" class="empty-state">
           <div class="empty-icon">▶</div>
@@ -62,32 +69,38 @@
             <div id="instrId" class="instruction-id"></div>
           </div>
 
+          <section id="warningsCard" class="state-card full-width-card warnings-card is-hidden">
+            <h3>Warnings <span id="warningsCount"></span></h3>
+            <div id="warnings" class="values"></div>
+          </section>
+
           <div id="noStateBanner" class="no-state-banner is-hidden">
               Empty state
           </div>
 
           <div id="stateSections">
+            <section class="state-card" style="grid-row: span 3;">
+              <h3>Call stack <span id="callStackCount"></span></h3>
+              <div id="callStack" class="values"></div>
+            </section>
+
             <div class="state-grid">
+               <section class="state-card">
+                 <h3>Stack <span id="stackCount"></span></h3>
+                 <div id="stack" class="values"></div>
+               </section>
+
               <section class="state-card">
                 <h3>Locals <span id="localsCount"></span></h3>
                 <div id="locals" class="values"></div>
               </section>
 
               <section class="state-card">
-                <h3>Call stack <span id="callStackCount"></span></h3>
-                <div id="callStack" class="values"></div>
-              </section>
-
-              <section class="state-card">
                 <h3>Globals <span id="globalsCount"></span></h3>
                 <div id="globals" class="values"></div>
               </section>
-            </div>
 
-            <section class="state-card full-width-card">
-              <h3>Stack <span id="stackCount"></span></h3>
-              <div id="stack" class="values"></div>
-            </section>
+            </div>
           </div>
 
           <section id="mergeInputsCard" class="state-card full-width-card is-hidden">
