@@ -18,8 +18,8 @@
   owi: [INFO] running instr : block
   owi: [INFO] stack         : [  ]
   owi: [INFO] locals        : [  ]
-  owi: [INFO] running instr : i32.const 54
-  owi: [INFO] stack         : [ i32 {54} ]
+  owi: [INFO] running instr : i32.const 42
+  owi: [INFO] stack         : [ i32 {42} ]
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : global.set 0
   owi: [INFO] stack         : [  ]
@@ -27,8 +27,8 @@
   owi: [INFO] running instr : block
   owi: [INFO] stack         : [  ]
   owi: [INFO] locals        : [  ]
-  owi: [INFO] running instr : i32.const 42
-  owi: [INFO] stack         : [ i32 {42} ]
+  owi: [INFO] running instr : i32.const 54
+  owi: [INFO] stack         : [ i32 {54} ]
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : global.set 0
   owi: [INFO] stack         : [  ]
