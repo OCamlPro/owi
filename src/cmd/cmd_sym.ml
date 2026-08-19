@@ -83,6 +83,7 @@ let cmd ~parameters ~source_file =
       ; workspace
       ; model_out_file
       ; with_breadcrumbs
+      ; progress
       ; _
       } =
     parameters
@@ -105,4 +106,4 @@ let cmd ~parameters ~source_file =
   Symbolic_driver.run ~exploration_strategy ~fail_mode ~workers
     ~no_worker_isolation ~solver ~deterministic_result_order ~model_format
     ~no_value ~no_assert_failure_expression_printing ~workspace
-    ~no_stop_at_failure ~model_out_file ~with_breadcrumbs ~seed ~run_time to_run
+    ~no_stop_at_failure ~model_out_file ~with_breadcrumbs ~seed ~progress ~run_time to_run

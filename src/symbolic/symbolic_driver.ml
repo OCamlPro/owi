@@ -55,7 +55,7 @@ let compute_number_of_workers workers =
 let run ~exploration_strategy ~workers ~no_worker_isolation ~no_stop_at_failure
   ~no_value ~no_assert_failure_expression_printing ~deterministic_result_order
   ~fail_mode ~workspace ~seed ~solver ~model_format ~model_out_file
-  ~with_breadcrumbs ~run_time (to_run : unit Symbolic_choice.t) =
+  ~with_breadcrumbs ~progress ~run_time (to_run : unit Symbolic_choice.t) =
   (* Various initializations *)
   let bug_stack = Bugs.make () in
   let path_count = Atomic.make 0 in
@@ -65,10 +65,23 @@ let run ~exploration_strategy ~workers ~no_worker_isolation ~no_stop_at_failure
             exploration_strategy )
   in
   let sched = Scheduler.make () in
+  
+  (* Create progress reporter if enabled *)
+  let progress_reporter =
+    if progress then
+      let p = Progress.create () in
+      Progress.enable p;
+      Some p
+    else None in
+
   let thread = Thread.init () in
   let initial_task = fun () -> Symex.Monad.run to_run thread in
 
   Scheduler.push initial_task Prio.dummy sched;
+  (* Increment total for the initial task *)
+  (match progress_reporter with
+   | Some p -> Progress.increment_total p
+   | None -> ());
 
   (* Compute the number of workers *)
   let workers = compute_number_of_workers workers in
@@ -100,15 +113,26 @@ let run ~exploration_strategy ~workers ~no_worker_isolation ~no_stop_at_failure
 
     (* Handles final values from the monad and reschedule them if needed. *)
     let rec at_schedulable (t : _ Symex.Monad.schedulable) write_back =
-      match t with
-      | Ok _ | Error `Prune -> Atomic.incr path_count
+    match t with
+      | Ok _ | Error `Prune ->
+        Atomic.incr path_count;
+        (match progress_reporter with
+          | Some p -> Progress.increment_completed p; Progress.report p
+          | None -> ())
       | Error ((`Assertion _ | `Trap _) as bug) ->
         Atomic.incr path_count;
-        at_bug bug
-      | Yield (prio, f) -> write_back (prio, f)
+        (match progress_reporter with
+          | Some p -> Progress.increment_completed p; Progress.report p
+          | None -> ());
+          at_bug bug
+      | Yield (prio, f) ->
+        (match progress_reporter with
+          | Some p -> Progress.increment_total p
+          | None -> ());
+          write_back (prio, f)
       | Choice (m1, m2) ->
-        at_schedulable m1 write_back;
-        at_schedulable m2 write_back
+          at_schedulable m1 write_back;
+          at_schedulable m2 write_back
     in
 
     let run_worker () =
@@ -198,6 +222,11 @@ let run ~exploration_strategy ~workers ~no_worker_isolation ~no_stop_at_failure
   end;
 
   Log.info (fun m -> m "Completed paths: %d" (Atomic.get path_count));
+
+  (* Finish the progress bar if it was enabled *)
+  (match progress_reporter with
+    | Some p -> Progress.finish p
+    | None -> ());
 
   if count > 0 then Error (`Found_bug count)
   else Ok (Log.app (fun m -> m "All OK!"))
