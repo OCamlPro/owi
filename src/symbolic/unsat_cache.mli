@@ -19,3 +19,7 @@ val clear : t -> unit
 
 val stats : t -> int * int * int
 (** [stats cache] returns (number of stored cores, number of lookups). *)
+
+val iter : (Hash_footprint.t -> Smtml.Expr.t list list -> unit) -> t -> unit
+
+val fold : (Hash_footprint.t -> Smtml.Expr.t list list -> 'a -> 'a) -> t -> 'a -> 'a

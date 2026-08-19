@@ -13,4 +13,5 @@ type t
 val of_expr : Smtml.Expr.t -> t
 val equal : t -> t -> bool
 val hash : t -> int
+val of_hash : int -> t
 val pp : t Fmt.t

@@ -2202,4 +2202,5 @@ end
 module Unsat_cache_control : sig
   val enable : unit -> unit
   val disable : unit -> unit
+  val set_file : Fpath.t -> unit
 end

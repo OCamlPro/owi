@@ -77,4 +77,6 @@ let of_expr e =
   h
 let equal a b = a = b
 let hash a = a
+let of_hash h = h
+
 let pp fmt h = pf fmt "Hash(%d)" h

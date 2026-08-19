@@ -33,6 +33,8 @@ let cache = Smtml.Cache.Strong.create 64
 let cache_mutex = Mutex.create ()
 
 let check pc condition =
+  Logs.info (fun m -> m "solver.check called");
+
   let query = Smtml.Expr.Set.add (Smtml.Typed.Unsafe.unwrap condition) pc in
 
   let query_expr =

@@ -44,3 +44,8 @@ let clear cache =
   cache.hits <- 0
 
 let stats cache = (Hashtbl.length cache.table, cache.lookups, cache.hits)
+
+let iter f cache = Hashtbl.iter f cache.table
+
+let fold f cache acc =
+  Hashtbl.fold f cache.table acc

@@ -168,6 +168,7 @@
   thread
   unsat_cache
   unsat_cache_control
+  unsat_cache_io
   value_intf
   v128_intf
   wasm_ffi_intf

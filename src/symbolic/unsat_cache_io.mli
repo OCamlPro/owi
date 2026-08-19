@@ -2,7 +2,5 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-val enable : unit -> unit
-val disable : unit -> unit
-val set_file : Fpath.t -> unit
-val get : unit -> Unsat_cache.t option
+val save : Unsat_cache.t -> Fpath.t -> (unit, string) result
+val load : Fpath.t -> (Unsat_cache.t, string) result

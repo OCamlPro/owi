@@ -663,6 +663,10 @@ let unsat_cache =
   let doc = "Enable unsat core caching (experimental)" in
   Arg.(value & flag & info [ "unsat-cache" ] ~doc)
 
+let unsat_cache_file =
+  let doc = "Path to unsat cache file (default: unsat_cache.json)" in
+  Arg.(value & opt string "unsat_cache.json" & info [ "unsat-cache-file" ] ~doc ~docv:"FILE")
+
 (* owi sym *)
 
 let sym_info =
@@ -674,12 +678,12 @@ let sym_cmd =
   let+ source_file
   and+ () = setup_log
   and+ unsat_cache = unsat_cache
+  and+ cache_file = unsat_cache_file
   and+ parameters = symbolic_parameters None in
   if unsat_cache then (
-    Logs.info (fun m -> m "unsat_cache flag value: %b" unsat_cache);
+    Unsat_cache_control.set_file (Fpath.v cache_file);
     Unsat_cache_control.enable ()
-  )
-  else Unsat_cache_control.disable ();
+  ) else Unsat_cache_control.disable ();
   Cmd_sym.cmd ~parameters ~source_file
 
 (* owi tinygo *)

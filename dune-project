@@ -59,6 +59,8 @@
    (>= 1.2.0))
   (domainpc
    (>= 0.2))
+  (yojson 
+   (>= 3.0.0))
   (logs
    (>= 0.10.0))
   (ocaml_intrinsics
