@@ -35,11 +35,14 @@ type event =
   ; jts : jump_target list option
   ; inputs : named_state list option
   ; converged : bool option
+  ; warnings : string list
   }
 
 let enabled = ref false
 
 let events = ref []
+
+let pending_warnings = ref []
 
 let next_id = ref 0
 
@@ -49,6 +52,7 @@ let is_enabled () = !enabled
 
 let reset () =
   events := [];
+  pending_warnings := [];
   next_id := 0
 
 let string_of_stack ctx stack =
@@ -103,8 +107,21 @@ let record_step ~kind ~(instr : Binary.instr Annotated.t)
            { name; state = Option.map trace_of_state state } ) )
         inputs
     in
+    let warnings, still_pending =
+      List.partition (fun (id, _) -> id = instr_id) !pending_warnings
+    in
+    pending_warnings := still_pending;
     let ev =
-      { id; instr_id; instr; state_trace; kind; jts = None; inputs; converged }
+      { id
+      ; instr_id
+      ; instr
+      ; state_trace
+      ; kind
+      ; jts = None
+      ; inputs
+      ; converged
+      ; warnings = List.map snd warnings
+      }
     in
     events := ev :: !events
 
@@ -116,6 +133,10 @@ let record_jt ~(jt : Abstract_jump_map.t) =
     | ev :: rest ->
       let jts = Some (jump_targets_of_jt jt) in
       events := { ev with jts } :: rest
+
+let record_warning ~instr_id ~message =
+  if not !enabled then ()
+  else pending_warnings := (instr_id, message) :: !pending_warnings
 
 let json_of_string_list l : Yojson.Safe.t =
   `List (List.map (fun s -> `String s) l)
@@ -179,6 +200,7 @@ let json_of_event (ev : event) : Yojson.Safe.t =
         , match ev.converged with
           | None -> `Null
           | Some converged -> `Bool converged )
+      ; ("warnings", json_of_string_list (List.rev ev.warnings))
       ]
     @ state_fields )
 
