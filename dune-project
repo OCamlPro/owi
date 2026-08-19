@@ -87,12 +87,11 @@
   ;; test
   (mdx
    (and
-    :with-test
-    (>= 2.1)))
+    (>= 2.1)
+    :with-test))
   (frama-c
    (and
-    (>= 29.0)
-    (< 32.0)
+    (>= 33.0)
     :with-test))
   (z3 :with-test)
   ;; dev
