@@ -11,6 +11,3 @@ let to_bits x = Smtml.Typed.Float64.to_bv x
 let pmin _ = assert false
 
 let pmax _ = assert false
-
-let to_float64 (_ : t) : Float64.t =
-  Fmt.failwith "TODO: unimplemented Symbolic_f64.to_float64"

@@ -31,8 +31,6 @@ module type T = sig
 
   val of_int32 : Int32.t -> t
 
-  val to_int32 : t -> Int32.t
-
   val of_int : int -> t
 
   val pp : t Fmt.t
