@@ -46,6 +46,7 @@
 - add `--no-ite-for-select` option
 - support the multi-memory proposal
 - add `script abstract`
+- add a gui for viewing execution traces
 
 ## 0.2 - 2024-04-24
 

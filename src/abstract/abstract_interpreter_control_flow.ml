@@ -626,8 +626,7 @@ let exec_vfunc_from_outside ~env ~ctx ~stack
     | Kind.Wasm func -> (
       let abs_state = { abs_state with stack } in
       match
-        ConcreteFixpoint.eval_func { abs_state; env }
-          Abstract_stack.empty func
+        ConcreteFixpoint.eval_func { abs_state; env } Abstract_stack.empty func
       with
       | Some state -> Ok state.abs_state
       | None -> Fmt.error_msg "failed" )

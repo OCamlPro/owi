@@ -14,6 +14,7 @@
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : call 19
   owi: [INFO] calling func  : func start
+  owi: [INFO] calling func  : func start
   owi: [INFO] stack         : [  ]
   owi: [INFO] locals        : [ (0 -> i32 {0});  (1 -> i32 {0}); 
               (2 -> i32 {0});  (3 -> i32 {0});  (4 -> i32 {0}); 
