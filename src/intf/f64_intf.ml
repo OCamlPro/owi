@@ -28,6 +28,4 @@ module type T = sig
   val pp : t Fmt.t
 
   val of_float : Float.t -> t
-
-  val to_float64 : t -> Float64.t
 end

@@ -18,9 +18,6 @@ let min_int = of_int64 Int64.min_int
 
 let eqz (v : t) = eq v zero
 
-let to_int64 (_ : t) : Int64.t =
-  Fmt.failwith "TODO: unimplemented Symbolic_i64.to_int64"
-
 let ( = ) = eq
 
 let ( + ) = add
