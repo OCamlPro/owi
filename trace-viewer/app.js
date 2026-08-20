@@ -348,8 +348,28 @@ function selectState(index) {
   }
 
   renderWarnings(state.warnings);
+  renderContext(state.context);
   renderMergeInputs(state);
   renderJumpTargets(state.jts);
+}
+
+/*
+ * `context` is the abstract domain's pretty-printed internal context for
+ * this step (e.g. constraint/allocation bookkeeping), mainly useful for
+ * debugging the interpreter itself. `null`/`undefined` when the step has
+ * no successor state (see `hasState` above), in which case there's no
+ * context to show.
+ */
+function renderContext(context) {
+  const card = $("contextCard");
+
+  if (!context) {
+    card.classList.add("is-hidden");
+    return;
+  }
+
+  card.classList.remove("is-hidden");
+  $("context").textContent = context;
 }
 
 /*
@@ -436,18 +456,13 @@ function renderJumpTargets(jts) {
 
   container.innerHTML = "";
 
-  if (jts === null || jts === undefined) {
+  if (jts === null || jts === undefined || jts.length === 0) {
     card.classList.add("is-hidden");
     return;
   }
 
   card.classList.remove("is-hidden");
   $("jumpTargetsCount").textContent = jts.length;
-
-  if (jts.length === 0) {
-    container.appendChild(emptyValue("empty"));
-    return;
-  }
 
   jts.forEach((jumpTarget) => {
     container.appendChild(renderJumpTargetItem(jumpTarget, true));
@@ -746,7 +761,6 @@ if (embeddedTrace) {
  * ------------------------------------------------------------------ */
 
 document.addEventListener("keydown", (event) => {
-  event.preventDefault();
   // Don't intercept keyboard input while interacting with form controls.
   const target = event.target;
 
@@ -796,6 +810,7 @@ document.addEventListener("keydown", (event) => {
      */
     case "Enter":
       if (trace[selected].kind === "block_start") {
+        event.preventDefault();
         toggleBlock(selected);
       }
       return;
@@ -803,6 +818,8 @@ document.addEventListener("keydown", (event) => {
     default:
       return;
   }
+
+  event.preventDefault();
 
   if (nextIndex !== selected) {
     selectState(nextIndex);

@@ -13,9 +13,15 @@ let i32_can_be_zero ctx v =
   | True | Top -> true
   | False | Bottom -> false
 
+let add_divide_by_zero_invariant invariant ~uuid ~possible =
+  Abstract_invariant.add_divide_by_zero_invariant invariant ~uuid ~possible;
+  if possible then
+    Abstract_trace.record_warning ~instr_id:uuid
+      ~message:"Possible division by zero"
+
 let eval_i32 env ({ stack; ctx; invariant; _ } as abs_state : Abstract_state.t)
-  uuid = function
-  | (Const i : Binary.i32_instr) ->
+  uuid : Binary.i32_instr -> _ = function
+  | Const i ->
     let stack = Stack.push_i32 stack (Abstract_i32.of_int32 ctx i) in
     let abs_state = { abs_state with stack } in
     State { abs_state; env }
