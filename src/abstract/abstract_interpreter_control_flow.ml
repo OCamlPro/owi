@@ -630,8 +630,7 @@ let exec_vfunc_from_outside ~env ~ctx ~locals
       let call_stack = 0 :: abs_state.call_stack in
       let abs_state = { abs_state with stack; call_stack } in
       match
-        ConcreteFixpoint.eval_func { abs_state; env }
-          Abstract_stack.empty func
+        ConcreteFixpoint.eval_func { abs_state; env } Abstract_stack.empty func
       with
       | Some state -> Ok state.abs_state
       | None -> Fmt.error_msg "failed" )
