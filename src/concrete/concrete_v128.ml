@@ -62,8 +62,6 @@ let pp ppf v =
 
 let of_concrete v = v
 
-let to_concrete v = v
-
 let of_i8x16 a b c d e f g h i j k l m n o p =
   I64x2
     (Concrete_i64.of_i8x8 a b c d e f g h, Concrete_i64.of_i8x8 i j k l m n o p)

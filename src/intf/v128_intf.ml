@@ -21,8 +21,6 @@ module type T = sig
 
   val of_concrete : Concrete_v128.t -> t
 
-  val to_concrete : t -> Concrete_v128.t
-
   val of_i32x4 : i32 -> i32 -> i32 -> i32 -> t
 
   val of_i64x2 : i64 -> i64 -> t

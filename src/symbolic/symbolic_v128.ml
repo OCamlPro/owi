@@ -7,6 +7,3 @@ include Smtml.Typed.Bitv128
 let of_concrete (v : Concrete_v128.t) : t =
   let a, b = Concrete_v128.to_i64x2 v in
   Smtml.Typed.Bitv128.of_int64x2 a b
-
-let to_concrete (_ : t) : Concrete_v128.t =
-  Fmt.failwith "TODO: unimplemented Symbolic_v128.to_concrete"
