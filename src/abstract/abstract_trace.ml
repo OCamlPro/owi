@@ -30,6 +30,7 @@ type event =
   { id : int
   ; instr_id : int
   ; instr : string
+  ; context : string option
   ; state_trace : state_trace option
   ; kind : kind
   ; jts : jump_target list option
@@ -101,6 +102,12 @@ let record_step ~kind ~(instr : Binary.instr Annotated.t)
     let instr_id = instr.uuid in
     let instr = Fmt.str "%a" (Binary.pp_instr ~short:true) instr.raw in
     let state_trace = Option.map trace_of_state state in
+    let context =
+      Option.map
+        (fun (state : Abstract_state.t) ->
+          Fmt.str "%a" Abstract_domain.context_pretty state.ctx )
+        state
+    in
     let inputs =
       Option.map
         (List.map (fun (name, state) ->
@@ -118,6 +125,7 @@ let record_step ~kind ~(instr : Binary.instr Annotated.t)
       ; state_trace
       ; kind
       ; jts = None
+      ; context
       ; inputs
       ; converged
       ; warnings = List.map snd warnings
@@ -188,6 +196,10 @@ let json_of_event (ev : event) : Yojson.Safe.t =
       ; ("instr_id", `Int ev.instr_id)
       ; ("instr", `String ev.instr)
       ; ("kind", `String (string_of_kind ev.kind))
+      ; ( "context"
+        , match ev.context with
+          | None -> `Null
+          | Some context -> `String context )
       ; ( "jts"
         , match ev.jts with
           | None -> `Null

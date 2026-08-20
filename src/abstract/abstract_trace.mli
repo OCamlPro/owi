@@ -30,6 +30,7 @@ type event =
   { id : int
   ; instr_id : int
   ; instr : string
+  ; context : string option
   ; state_trace : state_trace option
   ; kind : kind
   ; jts : jump_target list option
