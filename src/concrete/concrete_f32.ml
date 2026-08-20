@@ -6,8 +6,6 @@ include Float32
 
 type t = Float32.t
 
-let to_float32 (f : t) : Float32.t = f
-
 let demote_f64 x =
   if Float64.eq x x then Float32.of_float @@ Float64.to_float x
   else
