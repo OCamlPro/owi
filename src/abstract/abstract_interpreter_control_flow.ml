@@ -288,7 +288,7 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
     let fn_abs_state =
       { abs_state with stack = []; func_rt = result_type; locals; call_stack }
     in
-    ({ abs_state = fn_abs_state; runtime = state.runtime }, caller_popped_stack)
+    ({ abs_state = fn_abs_state; env = state.env }, caller_popped_stack)
 
   let rec eval_expr :
        Abstract_interpreter_state.t
@@ -339,8 +339,7 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
       Log.debug (fun m -> m "abstract state : None @.");
       None
 
-  and eval_instr ({ abs_state; runtime } as state : Abstract_interpreter_state.t)
-    :
+  and eval_instr ({ abs_state; env } as state : Abstract_interpreter_state.t) :
     Binary.instr Annotated.t -> Abstract_interpreter_state.t option * JumpMap.t
       =
    fun instr ->
@@ -371,8 +370,7 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
         let res = eval_func fn_state caller_popped_stack func in
         trace_res ~instr ~kind:Block_end res;
         (res, JumpMap.empty)
-      | Extern idx ->
-        let func = Abstract_runtime.get_extern_func ~runtime idx in
+      | Extern func ->
         let stack = exec_extern_func abs_state func in
         let res, jts =
           match Abstract_monad.run stack abs_state with
@@ -475,7 +473,7 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
       in
       let rec fixpoint state =
         let next_state, jt = eval_expr state body in
-        let next_head =
+        let next_state =
           match join_jts stack_size (JumpMap.find_opt (I 0) jt) with
           | Some state -> Some state
           | None ->
@@ -488,35 +486,29 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
             | None -> None
             end
         in
-        match next_head with
+        match next_state with
         | None ->
           let jt = JumpMap.decr jt in
           (None, jt)
-        | Some next_head ->
-          let widened, included = widen widening_id state next_head in
+        | Some next_state ->
+          let widened, included = widen widening_id state next_state in
           Trace.record_step ~kind:Widen ~instr
             ~inputs:
               (Some
                  [ ("previous", Some state.abs_state)
-                 ; ("next", Some next_head.abs_state)
+                 ; ("next", Some next_state.abs_state)
                  ] )
             ~converged:(Some included) ~state:None;
           if not included then fixpoint widened
           else
-            (* fixpoint reached: exit loop, assume condition is false *)
+            (* fixpoint reached: exit loop *)
             let jt = JumpMap.decr jt in
-            begin match next_state with
-            | None -> (next_state, jt)
-            | Some next_state ->
-              let stack = next_state.abs_state.stack @ initial_state.stack in
-              let next_state =
-                Some
-                  { next_state with
-                    abs_state = { next_state.abs_state with stack }
-                  }
-              in
-              (next_state, jt)
-            end
+            let stack = next_state.abs_state.stack @ initial_state.stack in
+            let abs_state = { next_state.abs_state with stack } in
+            Log.info (fun m ->
+              m "%a" Abstract_interpreter_state.pp { next_state with abs_state } );
+            let next_state = Some { next_state with abs_state } in
+            (next_state, jt)
       in
       let widened_state, jts = fixpoint state in
       trace_res ~instr ~kind:Block_end widened_state;
@@ -634,12 +626,12 @@ let exec_vfunc_from_outside ~env ~ctx ~locals
         |> List.sort (fun (i1, _) (i2, _) -> compare i1 i2)
         |> List.map snd
       in
-      let abs_state = { abs_state with stack } in
+      (* TODO: attach correct ID to this function to distinguish the call stack, 0 is incorrect here *)
+      let call_stack = 0 :: abs_state.call_stack in
+      let abs_state = { abs_state with stack; call_stack } in
       match
         ConcreteFixpoint.eval_func { abs_state; env }
-          (* TODO: attach correct ID to this function to distinguish the call stack, 0 is incorrect here *)
-          0
-          func
+          Abstract_stack.empty func
       with
       | Some state -> Ok state.abs_state
       | None -> Fmt.error_msg "failed" )

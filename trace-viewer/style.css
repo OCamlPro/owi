@@ -471,7 +471,7 @@ h1 {
 
 .full-width-card {
     min-height: 0;
-    margin-top: 14px;
+    margin: 14px auto;
 }
 
 .warnings-card {
@@ -691,6 +691,23 @@ h1 {
     color: var(--text);
 }
 
+.context-value {
+    margin: 0;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface-inset);
+    color: var(--text-muted);
+    font:
+        12px ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        Consolas,
+        monospace;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
 .is-hidden {
     display: none !important;
 }
@@ -770,7 +787,7 @@ h1 {
 
     .trace-list {
         flex: none;
-        max-height: 320px;
+        max-height: 40vh;
     }
 
     .details-panel {
