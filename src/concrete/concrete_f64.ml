@@ -6,8 +6,6 @@ include Float64
 
 type t = Float64.t
 
-let to_float64 (f : t) : Float64.t = f
-
 let promote_f32 x =
   if Float32.eq x x then Float64.of_float @@ Float32.to_float x
   else
