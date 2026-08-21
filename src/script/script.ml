@@ -17,11 +17,9 @@ let action (env : Env.Concrete.t) = function
       m "invoke %a %s %a..."
         (Fmt.option ~none:Fmt.nop Fmt.string)
         module_name func_name Wast.pp_consts args );
-    let* modul, f =
-      Env.Concrete.get_exported_func ~env ~module_name ~func_name
-    in
+    let* f = Env.Concrete.get_exported_func ~env ~module_name ~func_name in
     let locals = List.rev_map (Concrete_value.of_script_const ~ty) args in
-    let* env, stack = I.exec_vfunc_from_outside ~env ~locals ~modul f in
+    let* env, stack = I.exec_vfunc_from_outside ~env ~locals f in
     Ok (env, stack)
     end
   | Get (module_name, global_name) ->

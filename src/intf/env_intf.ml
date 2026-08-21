@@ -63,16 +63,14 @@ module type T = sig
        env:t
     -> module_name:string option
     -> func_name:string
-    -> (modul * extern_func Kind.func) Result.t
+    -> extern_func Kind.func Result.t
 
   val get_exported_global :
     env:t -> module_name:string option -> global_name:string -> value Result.t
 
-  val get_types : env:t -> modul:modul -> Binary.sub_type array
+  val get_types : env:t -> Binary.sub_type array
 
-  val get_type_groups : env:t -> modul:modul -> (int * int) array
-
-  val default_modul : modul
+  val get_type_groups : env:t -> (int * int) array
 
   type context
 

@@ -154,10 +154,9 @@ struct
       ; block_stack : block_stack
       ; func_rt : result_type
       ; env : Env.t
-      ; modul : Env.modul
       }
 
-    let empty ~locals ~env ?(modul = Env.default_modul) () =
+    let empty ~locals ~env () =
       { return_state = None
       ; stack = []
       ; locals = Locals.of_list locals
@@ -165,7 +164,6 @@ struct
       ; block_stack = []
       ; func_rt = []
       ; env
-      ; modul
       }
 
     type instr_result =
@@ -1613,8 +1611,8 @@ struct
       Stack.apply_f64_v128_v128 stack (V128.F64x2.replace_lane lane)
       |> Choice.return
 
-  let ref_matches_ref_type ~env ~modul (r : Value.t Ref.t)
-    ((nullable, ht) : ref_type) : bool =
+  let ref_matches_ref_type ~env (r : Value.t Ref.t) ((nullable, ht) : ref_type)
+    : bool =
     let is_null = match nullable with Null -> true | No_null -> false in
     match r with
     | Ref.Func None when is_null -> (
@@ -1637,8 +1635,8 @@ struct
         | Kind.Wasm func -> (
           match func.type_f with
           | Some got, _ ->
-            let types = Env.get_types ~env ~modul in
-            let type_groups = Env.get_type_groups ~env ~modul in
+            let types = Env.get_types ~env in
+            let type_groups = Env.get_type_groups ~env in
             Binary.is_subtype types type_groups types type_groups ~expected ~got
           | None, _ -> false )
         | Kind.Extern _ -> false )
@@ -1658,8 +1656,8 @@ struct
         match Ref.get_struct_type s with
         | None -> false
         | Some got ->
-          let types = Env.get_types ~env ~modul in
-          let type_groups = Env.get_type_groups ~env ~modul in
+          let types = Env.get_types ~env in
+          let type_groups = Env.get_type_groups ~env in
           Binary.is_subtype types type_groups types type_groups ~expected ~got )
       | _ -> false )
     | Ref.Array a -> (
@@ -1669,8 +1667,8 @@ struct
         match Ref.get_array_type a with
         | None -> false
         | Some got ->
-          let types = Env.get_types ~env ~modul in
-          let type_groups = Env.get_type_groups ~env ~modul in
+          let types = Env.get_types ~env in
+          let type_groups = Env.get_type_groups ~env in
           Binary.is_subtype types type_groups types type_groups ~expected ~got )
       | _ -> false )
     | Ref.ExternAsAny None when is_null -> (
@@ -1684,8 +1682,8 @@ struct
     | Func None | Extern None | NullExn | NullRef | NullI31 | ExternAsAny _ ->
       false
 
-  let exec_ref_instr ({ stack; env; modul; _ } : State.t) :
-    Binary.ref_instr -> _ = function
+  let exec_ref_instr ({ stack; env; _ } : State.t) : Binary.ref_instr -> _ =
+    function
     | Null t -> Stack.push_ref stack (Ref.null t) |> Choice.return
     | Is_null ->
       let r, stack = Stack.pop_as_ref stack in
@@ -1699,11 +1697,11 @@ struct
     | Func i -> Stack.push_ref stack (Ref.func i) |> Choice.return
     | Test rt ->
       let r, stack = Stack.pop_as_ref stack in
-      let b = ref_matches_ref_type ~env ~modul r rt |> Boolean.of_bool in
+      let b = ref_matches_ref_type ~env r rt |> Boolean.of_bool in
       Stack.push_bool stack b |> Choice.return
     | Cast rt ->
       let r, stack = Stack.pop_as_ref stack in
-      if ref_matches_ref_type ~env ~modul r rt then
+      if ref_matches_ref_type ~env r rt then
         Stack.push_ref stack r |> Choice.return
       else Choice.trap `Cast_failure
     | Eq ->
@@ -2166,7 +2164,6 @@ struct
       ; func_rt = result_type
       ; return_state
       ; env = state.env
-      ; modul = state.modul
       }
 
   (* TODO: remove env and use state.env ... do the same in the whole file *)
@@ -2228,14 +2225,10 @@ struct
         let type_matches =
           match (call_type_idx, func_type) with
           | Some expected, (Some got, _) ->
-            let func_types = Env.get_types ~env ~modul:state.modul in
-            let func_type_groups =
-              Env.get_type_groups ~env ~modul:state.modul
-            in
-            let call_types = Env.get_types ~env ~modul:state.modul in
-            let call_type_groups =
-              Env.get_type_groups ~env ~modul:state.modul
-            in
+            let func_types = Env.get_types ~env:state.env in
+            let func_type_groups = Env.get_type_groups ~env:state.env in
+            let call_types = Env.get_types ~env:state.env in
+            let call_type_groups = Env.get_type_groups ~env:state.env in
             Binary.is_subtype func_types func_type_groups call_types
               call_type_groups ~got ~expected
           | Some _expected, (None, ft) -> Binary.func_type_eq ft typ_i
@@ -2294,15 +2287,14 @@ struct
     | r when Ref.is_null r -> Choice.trap (`Msg "null array reference")
     | _ -> Choice.trap `Element_type_error
 
-  let get_array_storage_type ({ env; modul; _ } : State.t) arr_id instr_name =
-    let types = Env.get_types ~env ~modul in
+  let get_array_storage_type ({ env; _ } : State.t) arr_id instr_name =
+    let types = Env.get_types ~env in
     match types.(arr_id).ct with
     | Def_array_t (_, st) -> st
     | _ -> Fmt.failwith "%s: type %d is not an array type" instr_name arr_id
 
-  let exec_simple_instruction
-    ({ stack; locals; env; modul; _ } as state : State.t) instr_counter ~uuid :
-    Binary.simple_instruction -> State.t Choice.t =
+  let exec_simple_instruction ({ stack; locals; env; _ } as state : State.t)
+    instr_counter ~uuid : Binary.simple_instruction -> State.t Choice.t =
     let ret stack = Choice.return { state with stack } in
     function
     | I32 i -> exec_i32_instr ~state instr_counter stack i ~uuid
@@ -2407,7 +2399,7 @@ struct
         ret @@ Stack.push state.stack sign_extended
       end
     | Struct (New id) ->
-      let types = Env.get_types ~env ~modul in
+      let types = Env.get_types ~env in
       let fields =
         match types.(id).ct with
         | Def_struct_t fl -> fl
@@ -2420,7 +2412,7 @@ struct
       @@ Stack.push_ref state.stack
            (Ref.struct_new_with id (Array.of_list top_n))
     | Struct (New_default id) ->
-      let types = Env.get_types ~env ~modul in
+      let types = Env.get_types ~env in
       let fields =
         match types.(id).ct with
         | Def_struct_t fl -> fl
@@ -2445,7 +2437,7 @@ struct
       let state = { state with stack } in
       begin match r with
       | Ref.Struct s ->
-        let types = Env.get_types ~env ~modul in
+        let types = Env.get_types ~env in
         let packed =
           match types.(type_id).ct with
           | Def_struct_t fl ->
@@ -2487,7 +2479,7 @@ struct
       let state = { state with stack } in
       begin match r with
       | Ref.Struct s ->
-        let types = Env.get_types ~env ~modul in
+        let types = Env.get_types ~env in
         let mask =
           match types.(type_id).ct with
           | Def_struct_t fl ->
@@ -2532,7 +2524,7 @@ struct
     | Array (New_default id) ->
       let n, stack = Stack.pop_i32 state.stack in
       let state = { state with stack } in
-      let types = Env.get_types ~env ~modul in
+      let types = Env.get_types ~env in
       let st =
         match types.(id).ct with
         | Def_array_t (_, st) -> st
@@ -2571,7 +2563,7 @@ struct
       begin match r with
       | Ref.Array a ->
         let len = Ref.array_len_of a in
-        let types = Env.get_types ~env ~modul in
+        let types = Env.get_types ~env in
         let packed =
           match types.(id).ct with
           | Def_array_t (_, st) -> (
@@ -2618,7 +2610,7 @@ struct
       begin match r with
       | Ref.Array a ->
         let len = Ref.array_len_of a in
-        let types = Env.get_types ~env ~modul in
+        let types = Env.get_types ~env in
         let mask =
           match types.(id).ct with
           | Def_array_t (_, st) -> (
@@ -2815,8 +2807,7 @@ struct
       end
 
   let exec_instr ({ raw; uuid; instr_counter; _ } : _ Annotated.t)
-    ({ stack; env; modul; _ } as state : State.t) : State.instr_result Choice.t
-      =
+    ({ stack; env; _ } as state : State.t) : State.instr_result Choice.t =
     let instr_counter = Atomic.fetch_and_add instr_counter 1 in
     Log.info (fun m -> m "stack         : [ %a ]" Stack.pp stack);
     Log.info (fun m ->
@@ -2921,7 +2912,7 @@ struct
         Next_instruction.continue state |> Next_instruction.with_instr_counter
       in
       let r, stack = Stack.pop_as_ref stack in
-      let matches = ref_matches_ref_type ~env ~modul r rt2 |> Boolean.of_bool in
+      let matches = ref_matches_ref_type ~env r rt2 |> Boolean.of_bool in
       let* matches, stack =
         let* matches =
           select matches ~instr_counter_false ~instr_counter_true
@@ -2941,7 +2932,7 @@ struct
         Next_instruction.branch state i |> Next_instruction.with_instr_counter
       in
       let r, stack = Stack.pop_as_ref stack in
-      let matches = ref_matches_ref_type ~env ~modul r rt2 |> Boolean.of_bool in
+      let matches = ref_matches_ref_type ~env r rt2 |> Boolean.of_bool in
       let* matches, stack =
         let* matches =
           select matches ~instr_counter_true ~instr_counter_false
@@ -2991,8 +2982,8 @@ struct
       | State.Continue state -> loop ~heartbeat state
       | State.Return (state, res) -> Choice.return (state.env, res) )
 
-  let exec_expr ~heartbeat ?(modul = Env.default_modul) env locals stack expr bt
-    : (Env.t * Value.t list) Choice.t =
+  let exec_expr ~heartbeat env locals stack expr bt :
+    (Env.t * Value.t list) Choice.t =
     let state : State.t =
       let func_rt = match bt with None -> [] | Some rt -> rt in
       { stack
@@ -3002,7 +2993,6 @@ struct
       ; block_stack = []
       ; pc = expr
       ; return_state = None
-      ; modul
       }
     in
     loop ~heartbeat state
@@ -3051,7 +3041,7 @@ struct
     try
       begin
         let+ env, _end_stack =
-          exec_expr ~heartbeat ~modul env (State.Locals.of_list []) Stack.empty
+          exec_expr ~heartbeat env (State.Locals.of_list []) Stack.empty
             (Annotated.dummy init_code)
             None
         in
@@ -3059,9 +3049,9 @@ struct
       end
     with Stack_overflow -> Choice.trap `Call_stack_exhausted
 
-  let exec_vfunc_from_outside ~env ~locals ?(modul = Env.default_modul)
-    (func : Extern_func.t Kind.func) : (Env.t * Value.t list) Choice.t =
-    let state = State.empty ~locals ~env ~modul () in
+  let exec_vfunc_from_outside ~env ~locals (func : Extern_func.t Kind.func) :
+    (Env.t * Value.t list) Choice.t =
+    let state = State.empty ~locals ~env () in
     try
       begin
         let* state =

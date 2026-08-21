@@ -198,10 +198,10 @@ module Make
     ; context : Context.t
     ; raw_names : modul StringMap.t
         (* this is used only for scripts where modules can get a $id and we have to remember them to be able to register them this way... *)
-    ; types : Binary.sub_type array IntMap.t
-        (* map from modules to their type table *)
-    ; type_groups : (int * int) array IntMap.t
-        (* map from modules to their type group table *)
+    ; types : Binary.sub_type array
+        (* table of all modules types (with the ids shifted) *)
+    ; type_groups : (int * int) array
+        (* table of all type groups (with their bound ids shifted) *)
     }
 
   let pp ppf
@@ -264,8 +264,7 @@ module Make
       exported_memories
       (IntMap.pp (StringMap.pp Allocator.pp_key))
       exported_tables (Fmt.option pp_modul) last_module (StringMap.pp pp_modul)
-      registered_modules (IntMap.pp pp_types) types (IntMap.pp pp_type_groups)
-      type_groups
+      registered_modules pp_types types pp_type_groups type_groups
 
   let empty =
     let functions = Allocator.empty in
@@ -285,8 +284,8 @@ module Make
     let registered_modules = StringMap.empty in
     let context = Context.empty () in
     let raw_names = StringMap.empty in
-    let types = IntMap.empty in
-    let type_groups = IntMap.empty in
+    let types = [||] in
+    let type_groups = [||] in
     { functions
     ; globals
     ; memories
@@ -645,6 +644,10 @@ module Make
     (* This is the first step where we simply allocate the env values for functions, globals, memories etc.
                                              Each one is given a unique address in a global space, and we maintain a map from (module id, {func,global,...} id) to env address. *)
     let new_module = get_next_module ~env in
+    (* type_base_id: the number all previously identified types from the modules
+    that were treated before *)
+    let type_base_id = Array.length env.types in
+    let rewrite_type_id id = type_base_id + id in
     (* TODO: should it be passed to the function instead? *)
     let ctx = Context.empty () in
     (* functions *)
@@ -904,9 +907,45 @@ module Make
         | Extract_lane _ | Replace_lane _ ) as i ->
         i
     in
+    let rewrite_heap_type : Binary.heap_type -> Binary.heap_type = function
+      | TypeUse id -> TypeUse (rewrite_type_id id)
+      | ht -> ht
+    in
+    let rewrite_ref_type : Binary.ref_type -> Binary.ref_type =
+     fun (nullable, ht) -> (nullable, rewrite_heap_type ht)
+    in
+    let rewrite_val_type : Binary.val_type -> Binary.val_type = function
+      | Ref_type rt -> Ref_type (rewrite_ref_type rt)
+      | vt -> vt
+    in
+    let rewrite_storage_type : Binary.storage_type -> Binary.storage_type =
+      function
+      | Val_type vt -> Val_type (rewrite_val_type vt)
+      | Pack_type _ as pt -> pt
+    in
+    let rewrite_field_type : Binary.field_type -> Binary.field_type =
+     fun (mut, st) -> (mut, rewrite_storage_type st)
+    in
+    let rewrite_comp_type : Binary.comp_type -> Binary.comp_type = function
+      | Def_struct_t fields ->
+        Def_struct_t
+          (List.map (fun (id, ft) -> (id, rewrite_field_type ft)) fields)
+      | Def_array_t ft -> Def_array_t (rewrite_field_type ft)
+      | Def_func_t (params, results) ->
+        Def_func_t
+          ( List.map (fun (id, vt) -> (id, rewrite_val_type vt)) params
+          , List.map rewrite_val_type results )
+    in
+    let rewrite_sub_type : Binary.sub_type -> Binary.sub_type =
+     fun { final; ids; ct } ->
+      { final; ids = List.map rewrite_type_id ids; ct = rewrite_comp_type ct }
+    in
     let rewrite_ref_instruction : Binary.ref_instr -> Binary.ref_instr =
       function
-      | (Null _ | Is_null | As_non_null | Eq | Test _ | Cast _) as i -> i
+      | Null ht -> Null (rewrite_heap_type ht)
+      | Test rt -> Test (rewrite_ref_type rt)
+      | Cast rt -> Cast (rewrite_ref_type rt)
+      | (Is_null | As_non_null | Eq) as i -> i
       | Func i -> Func (get_unsafe i functions_map)
     in
     let rewrite_table_instruction : Binary.table_instr -> Binary.table_instr =
@@ -938,15 +977,35 @@ module Make
       function
       | Drop i -> Drop (get_unsafe i datas_map)
     in
+    let rewrite_struct_instruction : Binary.struct_instr -> Binary.struct_instr
+        = function
+      | New id -> New (rewrite_type_id id)
+      | New_default id -> New_default (rewrite_type_id id)
+      | Get (ty, fld) -> Get (rewrite_type_id ty, fld)
+      | Get_s (ty, fld) -> Get_s (rewrite_type_id ty, fld)
+      | Get_u (ty, fld) -> Get_u (rewrite_type_id ty, fld)
+      | Set (ty, fld) -> Set (rewrite_type_id ty, fld)
+    in
     let rewrite_array_instruction : Binary.array_instr -> Binary.array_instr =
       function
-      | New_data (ty, data) -> New_data (ty, get_unsafe data datas_map)
-      | New_elem (ty, elem) -> New_elem (ty, get_unsafe elem elems_map)
-      | Init_data (ty, data) -> Init_data (ty, get_unsafe data datas_map)
-      | Init_elem (ty, elem) -> Init_elem (ty, get_unsafe elem elems_map)
-      | ( New _ | New_default _ | New_fixed _ | Get _ | Get_s _ | Get_u _
-        | Set _ | Len | Fill _ | Copy _ ) as i ->
-        i
+      | New id -> New (rewrite_type_id id)
+      | New_default id -> New_default (rewrite_type_id id)
+      | New_fixed (id, n) -> New_fixed (rewrite_type_id id, n)
+      | New_data (ty, data) ->
+        New_data (rewrite_type_id ty, get_unsafe data datas_map)
+      | New_elem (ty, elem) ->
+        New_elem (rewrite_type_id ty, get_unsafe elem elems_map)
+      | Get id -> Get (rewrite_type_id id)
+      | Get_s id -> Get_s (rewrite_type_id id)
+      | Get_u id -> Get_u (rewrite_type_id id)
+      | Set id -> Set (rewrite_type_id id)
+      | Fill id -> Fill (rewrite_type_id id)
+      | Copy (id1, id2) -> Copy (rewrite_type_id id1, rewrite_type_id id2)
+      | Init_data (ty, data) ->
+        Init_data (rewrite_type_id ty, get_unsafe data datas_map)
+      | Init_elem (ty, elem) ->
+        Init_elem (rewrite_type_id ty, get_unsafe elem elems_map)
+      | Len as i -> i
     in
     let rewrite_simple_instruction :
       Binary.simple_instruction -> Binary.simple_instruction = function
@@ -968,8 +1027,9 @@ module Make
       | Memory i -> Memory (rewrite_memory_instruction i)
       | Data i -> Data (rewrite_data_instruction i)
       | ( Nop | Local _ | Drop | Unreachable | Any_convert_extern
-        | Extern_convert_any | Select _ | I31 _ | Struct _ ) as i ->
+        | Extern_convert_any | Select _ | I31 _ ) as i ->
         i
+      | Struct i -> Struct (rewrite_struct_instruction i)
       | Array i -> Array (rewrite_array_instruction i)
     in
     let rec rewrite_instruction = function
@@ -983,8 +1043,11 @@ module Make
       | Call_indirect (i, typ) -> Call_indirect (get_unsafe i tables_map, typ)
       | Return_call_indirect (i, typ) ->
         Return_call_indirect (get_unsafe i tables_map, typ)
+      | Br_on_cast (id, rt1, rt2) ->
+        Br_on_cast (id, rewrite_ref_type rt1, rewrite_ref_type rt2)
+      | Br_on_cast_fail (id, rt1, rt2) ->
+        Br_on_cast_fail (id, rewrite_ref_type rt1, rewrite_ref_type rt2)
       | ( Return | Br _ | Br_if _ | Br_table _ | Br_on_null _ | Br_on_non_null _
-        | Br_on_cast _ | Br_on_cast_fail _
         (* TODO: It's weird that return_call_ref is not using an indice like call_ref does... *)
         | Return_call_ref _
         (* TODO: check that call_ref is taking a raw type and not a typed index *)
@@ -1135,12 +1198,17 @@ module Make
         env.initialization_codes
     in
 
-    let types = IntMap.add new_module modul.types env.types in
+    let types =
+      Array.append env.types (Array.map rewrite_sub_type modul.types)
+    in
     let type_groups =
-      let groups =
+      let module_groups =
         Binary.compute_type_groups modul.type_defs (Array.length modul.types)
       in
-      IntMap.add new_module groups env.type_groups
+      Array.append env.type_groups
+        (Array.map
+           (fun (lo, hi) -> (rewrite_type_id lo, rewrite_type_id hi))
+           module_groups )
     in
     let env =
       { env with
@@ -1243,13 +1311,9 @@ module Make
     | Some v -> v
     | None -> assert false
 
-  let get_types ~env ~modul =
-    match IntMap.find_opt modul env.types with Some v -> v | None -> [||]
+  let get_types ~env = env.types
 
-  let get_type_groups ~env ~modul =
-    match IntMap.find_opt modul env.type_groups with Some v -> v | None -> [||]
-
-  let default_modul = 0
+  let get_type_groups ~env = env.type_groups
 
   let link_extern_module ~env ~name m =
     Log.debug (fun m -> m "linking extern module: %s" name);
@@ -1295,7 +1359,7 @@ module Make
       | Some v -> Ok v
     in
     match Allocator.find_opt address env.functions with
-    | Some func -> Ok (modul, func)
+    | Some func -> Ok func
     | None -> assert false
 
   let get_exported_global ~env ~module_name ~global_name =
