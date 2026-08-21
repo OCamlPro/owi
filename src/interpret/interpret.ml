@@ -1609,8 +1609,7 @@ struct
       Stack.apply_f64_v128_v128 stack (V128.F64x2.replace_lane lane)
       |> Choice.return
 
-  let ref_matches_ref_type modul env (r : Ref.t) ((nullable, ht) : ref_type) :
-    bool =
+  let ref_matches_ref_type ~env (r : Ref.t) ((nullable, ht) : ref_type) : bool =
     let is_null = match nullable with Null -> true | No_null -> false in
     match r with
     | Ref.Func None when is_null -> (
@@ -1624,18 +1623,19 @@ struct
       | _ -> false )
     | Ref.NullExn when is_null -> (
       match ht with Exn_ht | NoExn_ht -> true | _ -> false )
-    | Ref.Func (Some f) -> (
+    | Ref.Func (Some func) -> (
       match ht with
       | Func_ht -> true
       | TypeUse expected -> (
-        match f with
-        | Kind.Wasm { func; _ } -> (
+        let func = Env.get_func ~env func in
+        match func with
+        | Kind.Wasm func -> (
           match func.type_f with
-          | Bt_raw (Some got, _) ->
-            let types = Env.get_types ~modul env in
-            let type_groups = Env.get_type_groups ~modul env in
+          | Some got, _ ->
+            let types = Env.get_types ~env in
+            let type_groups = Env.get_type_groups ~env in
             Binary.is_subtype types type_groups types type_groups ~expected ~got
-          | Bt_raw (None, _) -> false )
+          | None, _ -> false )
         | Kind.Extern _ -> false )
       | _ -> false )
     | Ref.Extern (Some _) -> ( match ht with Extern_ht -> true | _ -> false )
@@ -1653,8 +1653,8 @@ struct
         match Ref.get_struct_type s with
         | None -> false
         | Some got ->
-          let types = Env.get_types ~modul env in
-          let type_groups = Env.get_type_groups ~modul env in
+          let types = Env.get_types ~env in
+          let type_groups = Env.get_type_groups ~env in
           Binary.is_subtype types type_groups types type_groups ~expected ~got )
       | _ -> false )
     | Ref.Array a -> (
@@ -1664,8 +1664,8 @@ struct
         match Ref.get_array_type a with
         | None -> false
         | Some got ->
-          let types = Env.get_types ~modul env in
-          let type_groups = Env.get_type_groups ~modul env in
+          let types = Env.get_types ~env in
+          let type_groups = Env.get_type_groups ~env in
           Binary.is_subtype types type_groups types type_groups ~expected ~got )
       | _ -> false )
     | Ref.ExternAsAny None when is_null -> (
@@ -1678,8 +1678,8 @@ struct
     | Func None | Extern None | NullExn | NullRef | NullI31 | ExternAsAny _ ->
       false
 
-  let exec_ref_instr stack (i : Binary.ref_instr) =
-    match i with
+  let exec_ref_instr ({ stack; env; _ } : State.t) : Binary.ref_instr -> _ =
+    function
     | Null t -> Stack.push_ref stack (Ref.null t) |> Choice.return
     | Is_null ->
       let r, stack = Stack.pop_as_ref stack in
@@ -1693,11 +1693,11 @@ struct
     | Func i -> Stack.push_ref stack (Ref.func i) |> Choice.return
     | Test rt ->
       let r, stack = Stack.pop_as_ref stack in
-      let b = ref_matches_ref_type env r rt |> Boolean.of_bool in
+      let b = ref_matches_ref_type ~env r rt |> Boolean.of_bool in
       Stack.push_bool stack b |> Choice.return
     | Cast rt ->
       let r, stack = Stack.pop_as_ref stack in
-      if ref_matches_ref_type env r rt then
+      if ref_matches_ref_type ~env r rt then
         Stack.push_ref stack r |> Choice.return
       else Choice.trap `Cast_failure
     | Eq ->
@@ -2184,7 +2184,9 @@ struct
     match Ref.get_func fun_ref with
     | Null -> Choice.trap `Null_function_reference
     | Type_mismatch -> Choice.trap `Element_type_error
-    | Ref_value func -> exec_vfunc ~return state func
+    | Ref_value func ->
+      let func = Env.get_func ~env:state.env func in
+      exec_vfunc ~return state func
 
   let call_indirect ~env ~return (state : State.t)
     (tbl_i, ((call_type_idx, typ_i) : block_type)) =
@@ -2208,60 +2210,32 @@ struct
       | Null -> Choice.trap (`Uninitialized_element fun_i)
       | Type_mismatch -> Choice.trap `Element_type_error
       | Ref_value func ->
+        let func = Env.get_func ~env func in
+        let func_type =
+          match func with
+          | Kind.Wasm func -> func.type_f
+          | Kind.Extern _func -> assert false
+        in
         let type_matches =
-          match (call_type_idx, func) with
-          | Some expected, Kind.Wasm func -> (
-            match func.type_f with
-            | Bt_raw (Some got, _) ->
-              let func_types = Env.get_types ~modul:idx env in
-              let func_type_groups = Env.get_type_groups ~modul:idx env in
-              let call_types = Env.get_types ~modul:state.modul env in
-              let call_type_groups =
-                Env.get_type_groups ~modul:state.modul env
-              in
-              Binary.is_subtype func_types func_type_groups call_types
-                call_type_groups ~got ~expected
-            | Bt_raw (None, ft) -> Binary.func_type_eq ft typ_i )
-          | _ -> Binary.func_type_eq (func_type state func) typ_i
+          match (call_type_idx, func_type) with
+          | Some expected, (Some got, _) ->
+            let func_types = Env.get_types ~env in
+            let func_type_groups = Env.get_type_groups ~env in
+            let call_types = Env.get_types ~env in
+            let call_type_groups = Env.get_type_groups ~env in
+            Binary.is_subtype func_types func_type_groups call_types
+              call_type_groups ~got ~expected
+          | Some _expected, (None, ft) -> Binary.func_type_eq ft typ_i
+          | _, _ -> Binary.func_type_eq (snd func_type) typ_i
         in
         if not type_matches then Choice.trap `Indirect_call_type_mismatch
         else exec_vfunc ~return state func
       end
     | _ -> Choice.trap `Indirect_call_type_mismatch
 
-  let ref_matches_ref_type (r : Ref.t) ((nullable, ht) : ref_type) : bool =
-    let is_null = match nullable with Null -> true | No_null -> false in
-    match r with
-    | Ref.Func None when is_null -> (
-      match ht with Func_ht | NoFunc_ht | TypeUse _ -> true | _ -> false )
-    | Ref.Extern None when is_null -> (
-      match ht with Extern_ht | NoExtern_ht -> true | _ -> false )
-    | Ref.NullRef when is_null -> (
-      match ht with
-      | Any_ht | None_ht | Eq_ht | I31_ht | Struct_ht | Array_ht -> true
-      | _ -> false )
-    | Ref.NullExn when is_null -> (
-      match ht with Exn_ht | NoExn_ht -> true | _ -> false )
-    | Ref.Func (Some _) -> (
-      match ht with
-      | Func_ht -> true
-      | TypeUse _ ->
-        Fmt.failwith
-          "ref_matches_ref_type: check that the function type matches the type \
-           of the typeuse id"
-      | _ -> false )
-    | Ref.Extern (Some _) -> ( match ht with Extern_ht -> true | _ -> false )
-    | Ref.I31 _ -> (
-      match ht with I31_ht | Eq_ht | Any_ht -> true | _ -> false )
-    | Ref.Struct _ -> (
-      match ht with Struct_ht | Eq_ht | Any_ht -> true | _ -> false )
-    | Ref.Array _ -> (
-      match ht with Array_ht | Eq_ht | Any_ht -> true | _ -> false )
-    | Func None | Extern None | NullExn | NullRef -> false
-
   let value_to_gc_val (v : Value.t) : Ref.gc_val =
     match v with
-    | I32 i -> Ref.gc_val_of_view (GCv_i32 (I32.to_int32 i))
+    | I32 i -> Ref.gc_val_of_view (GCv_i32 i)
     | I64 i -> Ref.gc_val_of_view (GCv_i64 (I64.to_int64 i))
     | F32 f -> Ref.gc_val_of_view (GCv_f32 (F32.to_float32 f))
     | F64 f -> Ref.gc_val_of_view (GCv_f64 (F64.to_float64 f))
@@ -2329,8 +2303,8 @@ struct
     | r when Ref.is_null r -> Choice.trap (`Msg "null array reference")
     | _ -> Choice.trap `Element_type_error
 
-  let get_array_storage_type (state : State.t) arr_id instr_name =
-    let types = Env.get_types ~modul:state.modul state.env in
+  let get_array_storage_type ({ env; _ } : State.t) arr_id instr_name =
+    let types = Env.get_types ~env in
     match types.(arr_id).ct with
     | Def_array_t (_, st) -> st
     | _ -> Fmt.failwith "%s: type %d is not an array type" instr_name arr_id
@@ -2942,7 +2916,7 @@ struct
         Next_instruction.continue state |> Next_instruction.with_instr_counter
       in
       let r, stack = Stack.pop_as_ref stack in
-      let matches = ref_matches_ref_type modul env r rt2 |> Boolean.of_bool in
+      let matches = ref_matches_ref_type modul r rt2 |> Boolean.of_bool in
       let* matches, stack =
         let* matches =
           select matches ~instr_counter_false ~instr_counter_true
@@ -3044,11 +3018,11 @@ struct
         (fun () ->
           let fuel_left = Atomic.fetch_and_add fuel (-1) in
           (* If we only use [timeout_instr], we want to stop all as
-                                  soon as [fuel_left <= 0]. But if we only use [timeout],
-                                  we don't want to run into the slow path below on each
-                                  instruction after [fuel_left] becomes negative. We avoid
-                                  this repeated slow path by bumping [fuel] to [max_int]
-                                  again in this case. *)
+                                   soon as [fuel_left <= 0]. But if we only use [timeout],
+                                   we don't want to run into the slow path below on each
+                                   instruction after [fuel_left] becomes negative. We avoid
+                                   this repeated slow path by bumping [fuel] to [max_int]
+                                   again in this case. *)
           if fuel_left mod 1024 = 0 || fuel_left < 0 then begin
             let stop =
               match (Parameters.timeout, Parameters.timeout_instr) with

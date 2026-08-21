@@ -68,6 +68,10 @@ module type T = sig
   val get_exported_global :
     env:t -> module_name:string option -> global_name:string -> value Result.t
 
+  val get_types : env:t -> Binary.sub_type array
+
+  val get_type_groups : env:t -> _
+
   type context
 
   val get_context : env:t -> context
