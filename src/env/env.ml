@@ -1206,6 +1206,10 @@ module Make
     | Some v -> v
     | None -> assert false
 
+  let get_types ~env:_ = assert false
+
+  let get_type_groups ~env:_ = assert false
+
   let link_extern_module ~env ~name m =
     Log.debug (fun m -> m "linking extern module: %s" name);
     let new_module = get_next_module ~env in
