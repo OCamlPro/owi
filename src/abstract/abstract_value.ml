@@ -40,7 +40,7 @@ type t =
   | F32 of f32
   | F64 of f64
   | V128 of v128
-  | Ref of Ref.t
+  | Ref of t Ref.t
 
 let pp ppf = function
   | I32 _b -> Fmt.pf ppf "i32 ..."

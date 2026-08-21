@@ -4,4 +4,7 @@
 
 type t
 
-include Elem_intf.T with type reference := Symbolic_ref.t and type t := t
+include
+  Elem_intf.T
+    with type reference := Symbolic_value.t Symbolic_ref.t
+     and type t := t

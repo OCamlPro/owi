@@ -7,7 +7,7 @@ open Syntax
 module Make (Value : Value_intf.T) :
   Constexpr_eval_intf.T
     with type value := Value.t
-     and type reference := Value.Ref.t
+     and type reference := Value.t Value.Ref.t
      and type context := unit = struct
   module Stack = Stack.Make [@inlined hint] (Value)
 
@@ -64,7 +64,7 @@ module Make (Value : Value_intf.T) :
     | [ result ] -> Ok result
 
   let ref_expr ctx ~get_const_func ~get_const_global (e : Binary.expr) :
-    Value.Ref.t Result.t =
+    Value.t Value.Ref.t Result.t =
     match expr ctx ~get_const_func ~get_const_global e with
     | Ok (Ref v) -> Ok v
     | Ok _ -> Error `Constant_expression_required
@@ -77,7 +77,7 @@ module Symbolic = Make (Symbolic_value)
 module Abstract :
   Constexpr_eval_intf.T
     with type value := Abstract_value.t
-     and type reference := Abstract_ref.t
+     and type reference := Abstract_value.t Abstract_ref.t
      and type context := Abstract_domain.Context.t = struct
   module Value = Abstract_value
   module Stack = Abstract_stack
@@ -135,7 +135,7 @@ module Abstract :
     | [ result ] -> Ok result
 
   let ref_expr ctx ~get_const_func ~get_const_global (e : Binary.expr) :
-    Value.Ref.t Result.t =
+    Value.t Value.Ref.t Result.t =
     match expr ctx ~get_const_func ~get_const_global e with
     | Ok (Ref v) -> Ok v
     | Ok _ -> Error `Constant_expression_required

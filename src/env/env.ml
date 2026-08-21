@@ -92,26 +92,28 @@ module Make
           type t
         end
 
-        type array_obj
+        type i32
 
-        type struct_obj
+        type 'value array_obj
 
-        type t =
+        type 'value struct_obj
+
+        type 'value t =
           | Extern of Extern.t option
           | Func of int option
           | NullExn
           | NullRef
-          | I31 of int32
+          | I31 of i32
           | NullI31
-          | Array of array_obj
-          | Struct of struct_obj
+          | Array of 'value array_obj
+          | Struct of 'value struct_obj
           | ExternAsAny of Extern.t option
       end
     end)
     (Constexpr_eval :
       Constexpr_eval_intf.T
         with type value := Value.t
-         and type reference := Value.Ref.t
+         and type reference := Value.t Value.Ref.t
          and type context := Context.t)
     (Memory : sig
       type t
@@ -130,7 +132,7 @@ module Make
       (* TODO: could be stored at link time instead *)
       val get_type : t -> Binary.Table.Type.t
     end)
-    (Elem : Elem_intf.T with type reference := Value.Ref.t)
+    (Elem : Elem_intf.T with type reference := Value.t Value.Ref.t)
     (Extern_func : sig
       type t
 
@@ -1004,7 +1006,7 @@ module Make
         env datas
     in
 
-    let rewrite_ref : Value.Ref.t -> Value.Ref.t = function
+    let rewrite_ref : 'value Value.Ref.t -> 'value Value.Ref.t = function
       | Func (Some i) ->
         (* TODO: this should be rewritten to the right index? *)
         Func (Some i)

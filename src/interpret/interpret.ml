@@ -31,13 +31,13 @@ end
 module Make
     (Value : Value_intf.T)
     (Data : Data_intf.T)
-    (Elem : Elem_intf.T with type reference := Value.Ref.t)
+    (Elem : Elem_intf.T with type reference := Value.t Value.Ref.t)
     (Choice :
       Choice_intf.S
         with type boolean := Value.boolean
          and type i32 := Value.i32
          and type value := Value.t)
-    (Table : Table_intf.T with type reference := Value.Ref.t)
+    (Table : Table_intf.T with type reference := Value.t Value.Ref.t)
     (Memory :
       Memory_intf.T
         with type i32 := Value.i32
@@ -109,6 +109,8 @@ struct
       let instr_counter_false = instr_counter in
       let* v = select v ~instr_counter_false ~instr_counter_true in
       if v then Choice.trap trap else f ()
+
+  let default_gc_val _ = assert false
 
   module State = struct
     module Locals : sig
@@ -1609,7 +1611,8 @@ struct
       Stack.apply_f64_v128_v128 stack (V128.F64x2.replace_lane lane)
       |> Choice.return
 
-  let ref_matches_ref_type ~env (r : Ref.t) ((nullable, ht) : ref_type) : bool =
+  let ref_matches_ref_type ~env (r : Value.t Ref.t) ((nullable, ht) : ref_type)
+    : bool =
     let is_null = match nullable with Null -> true | No_null -> false in
     match r with
     | Ref.Func None when is_null -> (
@@ -2171,7 +2174,8 @@ struct
       let state = { state with stack } in
       if return then State.return state else State.Continue state
 
-  let func_type (f : Extern_func.t Kind.func) =
+  (* TODO: should be used in many places! *)
+  let _func_type (f : Extern_func.t Kind.func) =
     match f with
     | Wasm func ->
       let (None | Some _), t = func.type_f in
@@ -2212,6 +2216,7 @@ struct
       | Ref_value func ->
         let func = Env.get_func ~env func in
         let func_type =
+          (* TODO: use the func_type function defined above ! *)
           match func with
           | Kind.Wasm func -> func.type_f
           | Kind.Extern _func -> assert false
@@ -2232,24 +2237,6 @@ struct
         else exec_vfunc ~return state func
       end
     | _ -> Choice.trap `Indirect_call_type_mismatch
-
-  let value_to_gc_val (v : Value.t) : Ref.gc_val =
-    match v with
-    | I32 i -> Ref.gc_val_of_view (GCv_i32 i)
-    | I64 i -> Ref.gc_val_of_view (GCv_i64 (I64.to_int64 i))
-    | F32 f -> Ref.gc_val_of_view (GCv_f32 (F32.to_float32 f))
-    | F64 f -> Ref.gc_val_of_view (GCv_f64 (F64.to_float64 f))
-    | V128 v -> Ref.gc_val_of_view (GCv_v128 (V128.to_concrete v))
-    | Ref r -> Ref.gc_val_of_view (GCv_ref r)
-
-  let gc_val_to_value (v : Ref.gc_val) : Value.t =
-    match Ref.view_gc_val v with
-    | GCv_i32 i -> I32 (I32.of_int32 i)
-    | GCv_i64 i -> I64 (I64.of_int64 i)
-    | GCv_f32 f -> F32 (F32.of_float32 f)
-    | GCv_f64 f -> F64 (F64.of_float (Float64.to_float f))
-    | GCv_v128 v -> V128 (V128.of_concrete v)
-    | GCv_ref r -> Ref r
 
   let array_data_elem_size = function
     | Binary.Pack_type I8 -> 1
@@ -2272,20 +2259,16 @@ struct
     let hi = Int64.shift_left (Int64.of_int32 (read_le32 data (off + 4))) 32 in
     Int64.logor lo hi
 
-  let read_data_gc_val (st : Binary.storage_type) data off : Ref.gc_val =
+  let read_data_gc_val (st : Binary.storage_type) data off : Value.t =
     match st with
-    | Pack_type I8 ->
-      Ref.gc_val_of_view (GCv_i32 (Int32.of_int (get_u8 data off)))
-    | Pack_type I16 ->
-      Ref.gc_val_of_view (GCv_i32 (Int32.of_int (read_le16 data off)))
-    | Val_type (Num_type I32) ->
-      Ref.gc_val_of_view (GCv_i32 (read_le32 data off))
+    | Pack_type I8 -> I32 (I32.of_int (get_u8 data off))
+    | Pack_type I16 -> I32 (I32.of_int (read_le16 data off))
+    | Val_type (Num_type I32) -> I32 (I32.of_int32 @@ read_le32 data off)
     | Val_type (Num_type F32) ->
-      Ref.gc_val_of_view (GCv_f32 (Float32.of_bits (read_le32 data off)))
-    | Val_type (Num_type I64) ->
-      Ref.gc_val_of_view (GCv_i64 (read_le64 data off))
+      F32 (F32.of_bits @@ I32.of_int32 (read_le32 data off))
+    | Val_type (Num_type I64) -> I64 (I64.of_int64 @@ read_le64 data off)
     | Val_type (Num_type F64) ->
-      Ref.gc_val_of_view (GCv_f64 (Float64.of_bits (read_le64 data off)))
+      F64 (F64.of_bits @@ I64.of_int64 (read_le64 data off))
     | Val_type (Num_type V128) ->
       Fmt.failwith "array data instruction: v128 element type not yet supported"
     | Val_type (Ref_type _) -> assert false
@@ -2337,7 +2320,7 @@ struct
       let* stack = exec_f64x2_instr stack i in
       ret stack
     | Ref i ->
-      let* stack = exec_ref_instr stack i in
+      let* stack = exec_ref_instr state i in
       ret stack
     | Local i ->
       let state = exec_local_instr state locals stack i in
@@ -2381,7 +2364,7 @@ struct
     | I31 Ref ->
       let n, stack = Stack.pop_i32 state.stack in
       let state = { state with stack } in
-      ret @@ Stack.push_ref state.stack (Ref.make_i31 (I32.to_int32 n))
+      ret @@ Stack.push_ref state.stack (Ref.make_i31 n)
     | I31 Get_u ->
       let r, stack = Stack.pop_as_ref state.stack in
       let state = { state with stack } in
@@ -2389,8 +2372,8 @@ struct
       | Null -> Choice.trap `Null_i31_reference
       | Type_mismatch -> Choice.trap `Element_type_error
       | Ref_value n ->
-        let n31bits = Int32.logand n 0x7FFF_FFFFl in
-        ret @@ Stack.push_i32 state.stack (I32.of_int32 n31bits)
+        let n31bits = I32.logand n (I32.of_int32 0x7FFF_FFFFl) in
+        ret @@ Stack.push_i32 state.stack n31bits
       end
     | I31 Get_s ->
       let r, stack = Stack.pop_as_ref state.stack in
@@ -2400,16 +2383,22 @@ struct
       | Type_mismatch -> Choice.trap `Element_type_error
       | Ref_value n ->
         (* sign-extend 31-bit value to 32 bits with bit 30 as the sign bit *)
-        let n31bits = Int32.logand n 0x7FFF_FFFFl in
-        let sign_extended =
-          let sign = Int32.ne (Int32.logand n31bits 0x4000_0000l) 0l in
-          if sign then Int32.logor n31bits (Int32.lognot 0x7FFF_FFFFl)
-          else n31bits
+        let n31bits = I32.logand n (I32.of_int32 0x7FFF_FFFFl) in
+        let* sign_extended =
+          let sign =
+            I32.ne (I32.logand n31bits (I32.of_int32 0x4000_0000l)) I32.zero
+          in
+          Choice.ite sign
+            ~if_true:
+              (I32
+                 (I32.logor n31bits (I32.of_int32 @@ Int32.lognot 0x7FFF_FFFFl))
+              )
+            ~if_false:(I32 n31bits)
         in
-        ret @@ Stack.push_i32 state.stack (I32.of_int32 sign_extended)
+        ret @@ Stack.push state.stack sign_extended
       end
     | Struct (New id) ->
-      let types = Env.get_types ~modul:state.modul state.env in
+      let types = Env.get_types ~env in
       let fields =
         match types.(id).ct with
         | Def_struct_t fl -> fl
@@ -2418,10 +2407,11 @@ struct
       let n = List.length fields in
       let top_n, stack = Stack.pop_n state.stack n in
       let state = { state with stack } in
-      let gc_vals = Array.of_list (List.rev_map value_to_gc_val top_n) in
-      ret @@ Stack.push_ref state.stack (Ref.struct_new_with id gc_vals)
+      ret
+      @@ Stack.push_ref state.stack
+           (Ref.struct_new_with id (Array.of_list top_n))
     | Struct (New_default id) ->
-      let types = Env.get_types ~modul:state.modul state.env in
+      let types = Env.get_types ~env in
       let fields =
         match types.(id).ct with
         | Def_struct_t fl -> fl
@@ -2429,8 +2419,7 @@ struct
           Fmt.failwith "struct.new_default: type %d is not a struct type" id
       in
       let defaults =
-        Array.of_list
-          (List.map (fun (_, (_, st)) -> Ref.default_gc_val st) fields)
+        Array.of_list (List.map (fun (_, (_, st)) -> default_gc_val st) fields)
       in
       ret @@ Stack.push_ref state.stack (Ref.struct_new_with id defaults)
     | Struct (Get (_type_id, field_id)) ->
@@ -2438,9 +2427,7 @@ struct
       let state = { state with stack } in
       begin match r with
       | Ref.Struct s ->
-        ret
-        @@ Stack.push state.stack
-             (gc_val_to_value (Ref.struct_get_field s field_id))
+        ret @@ Stack.push state.stack (Ref.struct_get_field s field_id)
       | r when Ref.is_null r -> Choice.trap (`Msg "null structure reference")
       | _ -> Choice.trap `Element_type_error
       end
@@ -2449,7 +2436,7 @@ struct
       let state = { state with stack } in
       begin match r with
       | Ref.Struct s ->
-        let types = Env.get_types ~modul:state.modul state.env in
+        let types = Env.get_types ~env in
         let packed =
           match types.(type_id).ct with
           | Def_struct_t fl ->
@@ -2462,20 +2449,24 @@ struct
         in
         let raw = Ref.struct_get_field s field_id in
         let v =
-          match Ref.view_gc_val raw with
-          | Ref_intf.GCv_i32 i -> (
+          match raw with
+          | I32 i ->
+            let _ = (i, packed) in
+            assert false
+            (*
             match packed with
             | Some 8 ->
-              let n = Int32.logand i 0xFFl in
-              if Int32.ne (Int32.logand n 0x80l) 0l then
-                Int32.logor n (Int32.lognot 0xFFl)
+              let n = I32.logand i (I32.of_int32 0xFFl) in
+              if I32.ne (I32.logand n (I32.of_int32 0x80l)) I32.zero then
+                I32.logor n (I32.lognot 0xFFl)
               else n
             | Some 16 ->
-              let n = Int32.logand i 0xFFFFl in
-              if Int32.ne (Int32.logand n 0x8000l) 0l then
-                Int32.logor n (Int32.lognot 0xFFFFl)
+              let n = I32.logand i 0xFFFFl in
+              if I32.ne (I32.logand n 0x8000l) 0l then
+                I32.logor n (I32.lognot 0xFFFFl)
               else n
-            | _ -> i )
+            | _ -> i
+          *)
           | _ -> assert false
         in
         ret @@ Stack.push_i32 state.stack (I32.of_int32 v)
@@ -2487,7 +2478,7 @@ struct
       let state = { state with stack } in
       begin match r with
       | Ref.Struct s ->
-        let types = Env.get_types ~modul:state.modul state.env in
+        let types = Env.get_types ~env in
         let mask =
           match types.(type_id).ct with
           | Def_struct_t fl ->
@@ -2500,12 +2491,14 @@ struct
         in
         let raw = Ref.struct_get_field s field_id in
         let v =
-          match Ref.view_gc_val raw with
-          | Ref_intf.GCv_i32 i -> (
-            match mask with Some m -> Int32.logand i m | None -> i )
+          match raw with
+          | I32 i -> (
+            match mask with
+            | Some m -> I32.logand i (I32.of_int32 m)
+            | None -> i )
           | _ -> assert false
         in
-        ret @@ Stack.push_i32 state.stack (I32.of_int32 v)
+        ret @@ Stack.push_i32 state.stack v
       | r when Ref.is_null r -> Choice.trap (`Msg "null structure reference")
       | _ -> Choice.trap `Element_type_error
       end
@@ -2515,7 +2508,7 @@ struct
       let state = { state with stack } in
       begin match r with
       | Ref.Struct s ->
-        Ref.struct_set_field s field_id (value_to_gc_val v);
+        Ref.struct_set_field s field_id v;
         ret state.stack
       | r when Ref.is_null r -> Choice.trap (`Msg "null structure reference")
       | _ -> Choice.trap `Element_type_error
@@ -2526,13 +2519,11 @@ struct
       let state = { state with stack } in
       let* n = Choice.select_i32 n in
       let n = Int32.to_int n in
-      ret
-      @@ Stack.push_ref state.stack
-           (Ref.array_new_fill id (value_to_gc_val v) n)
+      ret @@ Stack.push_ref state.stack (Ref.array_new_fill id v n)
     | Array (New_default id) ->
       let n, stack = Stack.pop_i32 state.stack in
       let state = { state with stack } in
-      let types = Env.get_types ~modul:state.modul state.env in
+      let types = Env.get_types ~env in
       let st =
         match types.(id).ct with
         | Def_array_t (_, st) -> st
@@ -2542,12 +2533,12 @@ struct
       let n = Int32.to_int n in
       ret
       @@ Stack.push_ref state.stack
-           (Ref.array_new_fill id (Ref.default_gc_val st) n)
+           (Ref.array_new_fill id (default_gc_val st) n)
     | Array (New_fixed (id, n)) ->
       let n = Int32.to_int n in
       let top_n, stack = Stack.pop_n state.stack n in
       let state = { state with stack } in
-      let elems = Array.of_list (List.rev_map value_to_gc_val top_n) in
+      let elems = Array.of_list (List.rev top_n) in
       ret @@ Stack.push_ref state.stack (Ref.array_new_fixed_with id elems)
     | Array (Get _id) ->
       let idx, stack = Stack.pop_i32 state.stack in
@@ -2560,9 +2551,7 @@ struct
         let idx = Int32.to_int idx in
         if idx < 0 || idx >= len then
           Choice.trap (`Msg "out of bounds array access")
-        else
-          ret
-          @@ Stack.push state.stack (gc_val_to_value (Ref.array_get_elem a idx))
+        else ret @@ Stack.push state.stack (Ref.array_get_elem a idx)
       | r when Ref.is_null r -> Choice.trap (`Msg "null array reference")
       | _ -> Choice.trap `Element_type_error
       end
@@ -2573,7 +2562,7 @@ struct
       begin match r with
       | Ref.Array a ->
         let len = Ref.array_len_of a in
-        let types = Env.get_types ~modul:state.modul state.env in
+        let types = Env.get_types ~env in
         let packed =
           match types.(id).ct with
           | Def_array_t (_, st) -> (
@@ -2590,8 +2579,11 @@ struct
         else
           let raw = Ref.array_get_elem a idx in
           let v =
-            match Ref.view_gc_val raw with
-            | Ref_intf.GCv_i32 i -> (
+            match raw with
+            | I32 i ->
+              let _ = (i, packed) in
+              assert false
+              (*
               match packed with
               | Some 8 ->
                 let n = Int32.logand i 0xFFl in
@@ -2603,7 +2595,7 @@ struct
                 if Int32.ne (Int32.logand n 0x8000l) 0l then
                   Int32.logor n (Int32.lognot 0xFFFFl)
                 else n
-              | _ -> i )
+              | _ -> i *)
             | _ -> assert false
           in
           ret @@ Stack.push_i32 state.stack (I32.of_int32 v)
@@ -2617,7 +2609,7 @@ struct
       begin match r with
       | Ref.Array a ->
         let len = Ref.array_len_of a in
-        let types = Env.get_types ~modul:state.modul state.env in
+        let types = Env.get_types ~env in
         let mask =
           match types.(id).ct with
           | Def_array_t (_, st) -> (
@@ -2634,12 +2626,14 @@ struct
         else
           let raw = Ref.array_get_elem a idx in
           let v =
-            match Ref.view_gc_val raw with
-            | Ref_intf.GCv_i32 i -> (
-              match mask with Some m -> Int32.logand i m | None -> i )
+            match raw with
+            | I32 i -> (
+              match mask with
+              | Some m -> I32.logand i (I32.of_int32 m)
+              | None -> i )
             | _ -> assert false
           in
-          ret @@ Stack.push_i32 state.stack (I32.of_int32 v)
+          ret @@ Stack.push_i32 state.stack v
       | r when Ref.is_null r -> Choice.trap (`Msg "null array reference")
       | _ -> Choice.trap `Element_type_error
       end
@@ -2656,7 +2650,7 @@ struct
         if idx < 0 || idx >= len then
           Choice.trap (`Msg "out of bounds array access")
         else begin
-          Ref.array_set_elem a idx (value_to_gc_val v);
+          Ref.array_set_elem a idx v;
           ret state.stack
         end
       | r when Ref.is_null r -> Choice.trap (`Msg "null array reference")
@@ -2692,7 +2686,7 @@ struct
       if check_array_oob dst_off n arr then
         Choice.trap (`Msg "out of bounds array access")
       else begin
-        let gv = value_to_gc_val v in
+        let gv = v in
         for i = 0 to n - 1 do
           Ref.array_set_elem arr (dst_off + i) gv
         done;
@@ -2733,7 +2727,7 @@ struct
       let* offset = select_int offset in
       let st = get_array_storage_type state arr_id "array.new_data" in
       let elem_size = array_data_elem_size st in
-      let data = Env.get_data ~modul:state.modul state.env data_id in
+      let data = Env.get_data ~env data_id in
       if offset < 0 || n < 0 || offset + (n * elem_size) > Data.size data then
         Choice.trap (`Msg "out of bounds memory access")
       else begin
@@ -2751,13 +2745,14 @@ struct
       let state = { state with stack } in
       let* n = select_int n in
       let* offset = select_int offset in
-      let elem = Env.get_elem ~modul:state.modul state.env elem_id in
+      let elem = Env.get_elem ~env elem_id in
       if offset < 0 || n < 0 || offset + n > Elem.size elem then
         Choice.trap (`Msg "out of bounds table access")
       else begin
         let elems =
           Array.init n (fun i ->
-            Ref.gc_val_of_view (GCv_ref (Elem.get elem (offset + i))) )
+            let e = Elem.get elem (offset + i) in
+            Ref e )
         in
         ret
         @@ Stack.push_ref state.stack (Ref.array_new_fixed_with arr_id elems)
@@ -2774,7 +2769,7 @@ struct
       let* d_off = select_int d_off in
       let st = get_array_storage_type state arr_id "array.init_data" in
       let elem_size = array_data_elem_size st in
-      let data = Env.get_data ~modul:state.modul state.env data_id in
+      let data = Env.get_data ~env data_id in
       let data_str = Data.value data in
       if check_array_oob d_off n arr then
         Choice.trap (`Msg "out of bounds array access")
@@ -2797,14 +2792,14 @@ struct
       let* n = select_int n in
       let* s_off = select_int s_off in
       let* d_off = select_int d_off in
-      let elem = Env.get_elem ~modul:state.modul state.env elem_id in
+      let elem = Env.get_elem ~env elem_id in
       if check_array_oob d_off n arr then
         Choice.trap (`Msg "out of bounds array access")
       else if s_off < 0 || s_off + n > Elem.size elem then
         Choice.trap (`Msg "out of bounds table access")
       else begin
         for i = 0 to n - 1 do
-          let v = Ref.gc_val_of_view (GCv_ref (Elem.get elem (s_off + i))) in
+          let v = Ref (Elem.get elem (s_off + i)) in
           Ref.array_set_elem arr (d_off + i) v
         done;
         ret state.stack
@@ -2916,7 +2911,7 @@ struct
         Next_instruction.continue state |> Next_instruction.with_instr_counter
       in
       let r, stack = Stack.pop_as_ref stack in
-      let matches = ref_matches_ref_type modul r rt2 |> Boolean.of_bool in
+      let matches = ref_matches_ref_type ~env r rt2 |> Boolean.of_bool in
       let* matches, stack =
         let* matches =
           select matches ~instr_counter_false ~instr_counter_true
@@ -2936,7 +2931,7 @@ struct
         Next_instruction.branch state i |> Next_instruction.with_instr_counter
       in
       let r, stack = Stack.pop_as_ref stack in
-      let matches = ref_matches_ref_type modul env r rt2 |> Boolean.of_bool in
+      let matches = ref_matches_ref_type ~env r rt2 |> Boolean.of_bool in
       let* matches, stack =
         let* matches =
           select matches ~instr_counter_true ~instr_counter_false
@@ -3018,11 +3013,11 @@ struct
         (fun () ->
           let fuel_left = Atomic.fetch_and_add fuel (-1) in
           (* If we only use [timeout_instr], we want to stop all as
-                                   soon as [fuel_left <= 0]. But if we only use [timeout],
-                                   we don't want to run into the slow path below on each
-                                   instruction after [fuel_left] becomes negative. We avoid
-                                   this repeated slow path by bumping [fuel] to [max_int]
-                                   again in this case. *)
+                                soon as [fuel_left <= 0]. But if we only use [timeout],
+                                we don't want to run into the slow path below on each
+                                instruction after [fuel_left] becomes negative. We avoid
+                                this repeated slow path by bumping [fuel] to [max_int]
+                                again in this case. *)
           if fuel_left mod 1024 = 0 || fuel_left < 0 then begin
             let stop =
               match (Parameters.timeout, Parameters.timeout_instr) with

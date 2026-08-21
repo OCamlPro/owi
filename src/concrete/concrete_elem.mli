@@ -4,4 +4,7 @@
 
 type t
 
-include Elem_intf.T with type reference := Concrete_ref.t and type t := t
+include
+  Elem_intf.T
+    with type reference := Concrete_value.t Concrete_ref.t
+     and type t := t

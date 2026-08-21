@@ -2,7 +2,7 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type reference = Abstract_ref.t
+type reference = Abstract_value.t Abstract_ref.t
 
 type t = |
 

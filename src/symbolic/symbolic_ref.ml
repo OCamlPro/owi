@@ -18,19 +18,21 @@ module Extern = struct
     | Some Equal -> Some r
 end
 
-type array_obj = unit
+type i32 = Symbolic_i32.t
 
-type struct_obj = unit
+type 'value array_obj = unit
 
-type t =
+type 'value struct_obj = unit
+
+type 'value t =
   | Extern of Extern.t option
   | Func of int option
   | NullExn
   | NullRef
-  | I31 of int32
+  | I31 of i32
   | NullI31
-  | Array of array_obj
-  | Struct of struct_obj
+  | Array of 'value array_obj
+  | Struct of 'value struct_obj
   | ExternAsAny of Extern.t option
 
 let pp fmt = function
@@ -38,7 +40,7 @@ let pp fmt = function
   | Func _ -> pf fmt "funcref"
   | NullExn -> pf fmt "nullexnref"
   | NullRef -> pf fmt "nullref"
-  | I31 i -> pf fmt "i31ref %ld" i
+  | I31 i -> pf fmt "i31ref %a" Symbolic_i32.pp i
   | NullI31 -> pf fmt "i31ref none"
   | Struct () -> pf fmt "structref"
   | Array () -> pf fmt "arrayref"
@@ -55,9 +57,9 @@ let null = function
 
 let func (f : int) = Func (Some f)
 
-let extern (type x) (t : x Type.Id.t) (v : x) : t = Extern (Some (E (t, v)))
+let extern (type x) (t : x Type.Id.t) (v : x) : _ t = Extern (Some (E (t, v)))
 
-let make_i31 (n : int32) : t = I31 n
+let make_i31 (n : Symbolic_i32.t) : _ t = I31 n
 
 let any_convert_extern = function
   | Extern None -> NullRef
@@ -73,35 +75,26 @@ let get_struct_type (_ : unit) : int option = None
 
 let get_array_type (_ : unit) : int option = None
 
-type gc_val = unit
+let struct_new_with (_ : int) (_ : 'value array) : 'value t = Struct ()
 
-let gc_val_of_view (_ : t Ref_intf.gc_view) : gc_val = ()
-
-let view_gc_val (_ : gc_val) : t Ref_intf.gc_view =
-  Fmt.failwith "TODO: unimplemented Symbolic_ref.view_gc_val"
-
-let default_gc_val (_ : Binary.storage_type) : gc_val = ()
-
-let struct_new_with (_ : int) (_ : gc_val array) : t = Struct ()
-
-let struct_get_field (_ : struct_obj) (_ : int) : gc_val =
+let struct_get_field (_ : 'value struct_obj) (_ : int) : 'value =
   Fmt.failwith "TODO: unimplemented Symbolic_ref.struct_get_field"
 
-let struct_set_field (_ : struct_obj) (_ : int) (_ : gc_val) : unit = ()
+let struct_set_field (_ : 'value struct_obj) (_ : int) (_ : 'value) : unit = ()
 
-let array_new_fill (_ : int) (_ : gc_val) (_ : int) : t = Array ()
+let array_new_fill (_ : int) (_ : 'value) (_ : int) : 'value t = Array ()
 
-let array_new_fixed_with (_ : int) (_ : gc_val array) : t = Array ()
+let array_new_fixed_with (_ : int) (_ : 'value array) : 'value t = Array ()
 
-let array_get_elem (_ : array_obj) (_ : int) : gc_val =
+let array_get_elem (_ : 'value array_obj) (_ : int) : 'value =
   Fmt.failwith "TODO: unimplemented Symbolic_ref.array_get_elem"
 
-let array_set_elem (_ : array_obj) (_ : int) (_ : gc_val) : unit = ()
+let array_set_elem (_ : 'value array_obj) (_ : int) (_ : 'value) : unit = ()
 
-let array_len_of (_ : array_obj) : int =
+let array_len_of (_ : 'value array_obj) : int =
   Fmt.failwith "TODO: unimplemented Symbolic_ref.array_len_of"
 
-let ref_eq (_ : t) (_ : t) : bool =
+let ref_eq (_ : 'value t) (_ : 'value t) : bool =
   Fmt.failwith "TODO: unimplemented Symbolic_ref.ref_eq"
 
 let is_null = function
@@ -113,16 +106,16 @@ let is_null = function
   | ExternAsAny (Some _) ->
     false
 
-let get_func (r : t) : int get_ref =
+let get_func (r : 'value t) : int get_ref =
   match r with
   | Func (Some f) -> Ref_value f
   | Func None -> Null
   | _ -> Type_mismatch
 
-let get_i31 (r : t) : int32 get_ref =
+let get_i31 (r : 'value t) : i32 get_ref =
   match r with I31 n -> Ref_value n | NullI31 -> Null | _ -> Type_mismatch
 
-let get_extern (type x) (r : t) (typ : x Type.Id.t) : x get_ref =
+let get_extern (type x) (r : 'value t) (typ : x Type.Id.t) : x get_ref =
   match r with
   | Extern (Some (E (ety, v))) -> (
     match Type.Id.provably_equal typ ety with
