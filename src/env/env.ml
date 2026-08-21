@@ -1032,17 +1032,30 @@ module Make
       | Struct i -> Struct (rewrite_struct_instruction i)
       | Array i -> Array (rewrite_array_instruction i)
     in
+    let rewrite_block_type : Binary.block_type -> Binary.block_type =
+     fun (type_id_opt, ft) ->
+      ( Option.map rewrite_type_id type_id_opt
+      , ( List.map (fun (id, vt) -> (id, rewrite_val_type vt)) (fst ft)
+        , List.map rewrite_val_type (snd ft) ) )
+    in
     let rec rewrite_instruction = function
       | Binary.Simple i -> Binary.Simple (rewrite_simple_instruction i)
-      | Block (a, b, e) -> Block (a, b, rewrite_expression e)
-      | Loop (a, b, e) -> Loop (a, b, rewrite_expression e)
+      | Block (a, b, e) ->
+        Block (a, Option.map rewrite_block_type b, rewrite_expression e)
+      | Loop (a, b, e) ->
+        Loop (a, Option.map rewrite_block_type b, rewrite_expression e)
       | If_else (a, b, e1, e2) ->
-        If_else (a, b, rewrite_expression e1, rewrite_expression e2)
+        If_else
+          ( a
+          , Option.map rewrite_block_type b
+          , rewrite_expression e1
+          , rewrite_expression e2 )
       | Return_call i -> Return_call (get_unsafe i functions_map)
       | Call i -> Call (get_unsafe i functions_map)
-      | Call_indirect (i, typ) -> Call_indirect (get_unsafe i tables_map, typ)
+      | Call_indirect (i, typ) ->
+        Call_indirect (get_unsafe i tables_map, rewrite_block_type typ)
       | Return_call_indirect (i, typ) ->
-        Return_call_indirect (get_unsafe i tables_map, typ)
+        Return_call_indirect (get_unsafe i tables_map, rewrite_block_type typ)
       | Br_on_cast (id, rt1, rt2) ->
         Br_on_cast (id, rewrite_ref_type rt1, rewrite_ref_type rt2)
       | Br_on_cast_fail (id, rt1, rt2) ->
@@ -1058,7 +1071,8 @@ module Make
     in
     let rewrite_binary_func (func : Binary.Func.t) : Extern_func.t Kind.func =
       let body = rewrite_expression func.body in
-      Kind.Wasm { func with body }
+      let type_f = rewrite_block_type func.type_f in
+      Kind.Wasm { func with body; type_f }
     in
     let env =
       List.fold_left
@@ -1207,7 +1221,7 @@ module Make
       in
       Array.append env.type_groups
         (Array.map
-           (fun (lo, hi) -> (rewrite_type_id lo, rewrite_type_id hi))
+           (fun (lo, size) -> (rewrite_type_id lo, size))
            module_groups )
     in
     let env =
