@@ -34,6 +34,7 @@ type 'value t =
   | Array of 'value array_obj
   | Struct of 'value struct_obj
   | ExternAsAny of Extern.t option
+  | AnyAsExtern of 'value t
 
 let pp fmt = function
   | Extern _ -> pf fmt "externref"
@@ -46,6 +47,7 @@ let pp fmt = function
   | Array () -> pf fmt "arrayref"
   | ExternAsAny None -> pf fmt "anyref none"
   | ExternAsAny (Some _) -> pf fmt "anyref"
+  | AnyAsExtern _ -> pf fmt "externref"
 
 let null = function
   | Binary.Func_ht | NoFunc_ht | TypeUse _ -> Func None
@@ -61,15 +63,16 @@ let extern (type x) (t : x Type.Id.t) (v : x) : _ t = Extern (Some (E (t, v)))
 
 let make_i31 (n : Symbolic_i32.t) : _ t = I31 n
 
-let any_convert_extern = function
+let any_convert_extern : 'value t -> 'value t = function
   | Extern None -> NullRef
+  | AnyAsExtern r -> r
   | Extern (Some e) -> ExternAsAny (Some e)
-  | r -> ExternAsAny (Some (E (Type.Id.make (), r)))
+  | _ -> assert false
 
-let extern_convert_any = function
+let extern_convert_any : 'value t -> 'value t = function
   | NullRef | NullI31 | NullExn | ExternAsAny None -> Extern None
   | ExternAsAny (Some e) -> Extern (Some e)
-  | r -> Extern (Some (E (Type.Id.make (), r)))
+  | r -> AnyAsExtern r
 
 let get_struct_type (_ : unit) : int option = None
 
@@ -103,7 +106,8 @@ let is_null = function
   | Func (Some _)
   | Extern (Some _)
   | I31 _ | Array _ | Struct _
-  | ExternAsAny (Some _) ->
+  | ExternAsAny (Some _)
+  | AnyAsExtern _ ->
     false
 
 let get_func (r : 'value t) : int get_ref =

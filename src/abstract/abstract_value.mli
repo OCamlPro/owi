@@ -91,6 +91,7 @@ module Ref : sig
     | Array of 'value array_obj
     | Struct of 'value struct_obj
     | ExternAsAny of Extern.t option
+    | AnyAsExtern of 'value t
 
   val null : Abstract_domain.Context.t -> Binary.heap_type -> 'value t
 end
