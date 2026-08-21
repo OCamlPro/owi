@@ -4,9 +4,9 @@
 
 module IntMap = Map.Make (Int)
 
-type t = Symbolic_ref.t IntMap.t
+type t = Symbolic_value.t Symbolic_ref.t IntMap.t
 
-let get (elem : t) i : Symbolic_ref.t =
+let get (elem : t) i : Symbolic_value.t Symbolic_ref.t =
   match IntMap.find_opt i elem with Some v -> v | None -> assert false
 
 let size (elem : t) = IntMap.cardinal elem

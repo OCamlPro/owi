@@ -16,19 +16,21 @@ module Extern = struct
     | Some Equal -> Some r
 end
 
-type array_obj = |
+type 'value array_obj = |
 
-type struct_obj = |
+type 'value struct_obj = |
 
-type t =
+type i32
+
+type 'value t =
   | Extern of Extern.t option
   | Func of int option
   | NullExn
   | NullRef
-  | I31 of int32
+  | I31 of i32
   | NullI31
-  | Array of array_obj
-  | Struct of struct_obj
+  | Array of 'value array_obj
+  | Struct of 'value struct_obj
   | ExternAsAny of Extern.t option
 
 let pp fmt = function
@@ -47,7 +49,7 @@ let null _ctx = function
 
 let func (f : int) = Func (Some f)
 
-let extern (type x) (t : x Type.Id.t) (v : x) : t = Extern (Some (E (t, v)))
+let extern (type x) (t : x Type.Id.t) (v : x) : _ t = Extern (Some (E (t, v)))
 
 let is_null = function
   | Func None | Extern None | NullExn | NullRef | NullI31 -> true
@@ -55,13 +57,13 @@ let is_null = function
     ->
     false
 
-let get_func (r : t) : int get_ref =
+let get_func (r : _ t) : int get_ref =
   match r with
   | Func (Some f) -> Ref_value f
   | Func None -> Null
   | _ -> Type_mismatch
 
-let get_extern (type x) (r : t) (typ : x Type.Id.t) : x get_ref =
+let get_extern (type x) (r : _ t) (typ : x Type.Id.t) : x get_ref =
   match r with
   | Extern (Some (E (ety, v))) -> (
     match Type.Id.provably_equal typ ety with

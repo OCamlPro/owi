@@ -5,7 +5,7 @@
 module IntMap = Map.Make (Int)
 
 type t =
-  { data : Symbolic_ref.t IntMap.t
+  { data : Symbolic_value.t Symbolic_ref.t IntMap.t
   ; limits : Binary.Table.Type.limits
   ; typ : Binary.ref_type
   }

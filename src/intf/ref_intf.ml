@@ -2,15 +2,6 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-(* TODO: used for conversion, can it be removed? *)
-type 'ref gc_view =
-  | GCv_i32 of int32
-  | GCv_i64 of int64
-  | GCv_f32 of Float32.t
-  | GCv_f64 of Float64.t
-  | GCv_v128 of Concrete_v128.t
-  | GCv_ref of 'ref
-
 module type T = sig
   type 'a get_ref =
     | Null
@@ -23,50 +14,52 @@ module type T = sig
     val cast : t -> 'x Type.Id.t -> 'x option
   end
 
-  type array_obj
+  type 'value array_obj
 
-  type struct_obj
+  type 'value struct_obj
+
+  type i32
 
   (* TODO; make this private and even opaque at some point *)
-  type t =
+  type 'value t =
     | Extern of Extern.t option
     | Func of int option
     (* TODO: Not sure about these two. *)
     | NullExn
     | NullRef
-    | I31 of int32
+    | I31 of i32
     | NullI31
-    | Array of array_obj
-    | Struct of struct_obj
+    | Array of 'value array_obj
+    | Struct of 'value struct_obj
     | ExternAsAny of Extern.t option
 
-  val pp : t Fmt.t
+  val pp : 'value t Fmt.t
 
-  val null : Binary.heap_type -> t
+  val null : Binary.heap_type -> 'value t
 
-  val func : int -> t
+  val func : int -> 'value t
 
-  val extern : 'x Type.Id.t -> 'x -> t
+  val extern : 'x Type.Id.t -> 'x -> 'value t
 
-  val make_i31 : int32 -> t
+  val make_i31 : i32 -> 'value t
 
-  val any_convert_extern : t -> t
+  val any_convert_extern : 'value t -> 'value t
 
-  val extern_convert_any : t -> t
+  val extern_convert_any : 'value t -> 'value t
 
-  val is_null : t -> Bool.t
+  val is_null : 'value t -> Bool.t
 
-  val ref_eq : t -> t -> bool
+  val ref_eq : 'value t -> 'value t -> bool
 
-  val get_func : t -> int get_ref
+  val get_func : 'value t -> int get_ref
 
-  val get_i31 : t -> int32 get_ref
+  val get_i31 : 'value t -> i32 get_ref
 
-  val get_extern : t -> 'x Type.Id.t -> 'x get_ref
+  val get_extern : 'value t -> 'x Type.Id.t -> 'x get_ref
 
-  val get_struct_type : struct_obj -> int option
+  val get_struct_type : 'value struct_obj -> int option
 
-  val get_array_type : array_obj -> int option
+  val get_array_type : 'value array_obj -> int option
 
   (* TODO: calls to struct_set_field and array_set_elem from the interpreter are
      correct for the concrete case, in the symbolic case, we'll like want every
@@ -75,27 +68,19 @@ module type T = sig
      working on a branch, he gets all the information he needs on the living
      objects in that branch from the local heap instance. *)
 
-  type gc_val
+  val struct_new_with : int -> 'value array -> 'value t
 
-  val gc_val_of_view : t gc_view -> gc_val
+  val struct_get_field : 'value struct_obj -> int -> 'value
 
-  val view_gc_val : gc_val -> t gc_view
+  val struct_set_field : 'value struct_obj -> int -> 'value -> unit
 
-  val default_gc_val : Binary.storage_type -> gc_val
+  val array_new_fill : int -> 'value -> int -> 'value t
 
-  val struct_new_with : int -> gc_val array -> t
+  val array_new_fixed_with : int -> 'value array -> 'value t
 
-  val struct_get_field : struct_obj -> int -> gc_val
+  val array_get_elem : 'value array_obj -> int -> 'value
 
-  val struct_set_field : struct_obj -> int -> gc_val -> unit
+  val array_set_elem : 'value array_obj -> int -> 'value -> unit
 
-  val array_new_fill : int -> gc_val -> int -> t
-
-  val array_new_fixed_with : int -> gc_val array -> t
-
-  val array_get_elem : array_obj -> int -> gc_val
-
-  val array_set_elem : array_obj -> int -> gc_val -> unit
-
-  val array_len_of : array_obj -> int
+  val array_len_of : 'value array_obj -> int
 end

@@ -30,7 +30,7 @@ type t =
   | F32 of Smtml.Typed.Float32.t
   | F64 of Smtml.Typed.Float64.t
   | V128 of Smtml.Typed.Bitv128.t
-  | Ref of Ref.t
+  | Ref of t Ref.t
 
 let pp fmt = function
   | I32 i -> Smtml.Typed.Bitv32.pp fmt i

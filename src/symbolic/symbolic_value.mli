@@ -4,13 +4,14 @@
 
 include
   Value_intf.T
-    with type boolean = Smtml.Typed.Bool.t
-     and type i32 = Smtml.Typed.Bitv32.t
-     and type i64 = Smtml.Typed.Bitv64.t
-     and type f32 = Smtml.Typed.Float32.t
-     and type f64 = Smtml.Typed.Float64.t
-     and type v128 = Smtml.Typed.Bitv128.t
+    with type boolean = Symbolic_boolean.t
+     and type i32 = Symbolic_i32.t
+     and type i64 = Symbolic_i64.t
+     and type f32 = Symbolic_f32.t
+     and type f64 = Symbolic_f64.t
+     and type v128 = Symbolic_v128.t
      and module Ref = Symbolic_ref
+     and type Ref.i32 = Symbolic_i32.t
 
 type context = unit
 

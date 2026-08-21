@@ -30,7 +30,7 @@ type t =
   | F32 of f32
   | F64 of f64
   | V128 of v128
-  | Ref of Abstract_ref.t
+  | Ref of t Abstract_ref.t
 
 module Boolean : sig end
 
@@ -75,22 +75,24 @@ module Ref : sig
     type t = Abstract_ref.Extern.t
   end
 
-  type array_obj = Abstract_ref.array_obj
+  type 'value array_obj = 'value Abstract_ref.array_obj
 
-  type struct_obj = Abstract_ref.struct_obj
+  type 'value struct_obj = 'value Abstract_ref.struct_obj
 
-  type t = Abstract_ref.t =
+  type i32 = Abstract_ref.i32
+
+  type 'value t = 'value Abstract_ref.t =
     | Extern of Extern.t option
     | Func of int option
     | NullExn
     | NullRef
-    | I31 of int32
+    | I31 of i32
     | NullI31
-    | Array of array_obj
-    | Struct of struct_obj
+    | Array of 'value array_obj
+    | Struct of 'value struct_obj
     | ExternAsAny of Extern.t option
 
-  val null : Abstract_domain.Context.t -> Binary.heap_type -> t
+  val null : Abstract_domain.Context.t -> Binary.heap_type -> 'value t
 end
 
 val pp : t Fmt.t

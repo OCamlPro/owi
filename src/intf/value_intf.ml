@@ -58,7 +58,7 @@ module type T = sig
        and type f32 := f32
        and type f64 := f64
 
-  module Ref : Ref_intf.T
+  module Ref : Ref_intf.T with type i32 = i32
 
   type t =
     | I32 of i32
@@ -66,7 +66,7 @@ module type T = sig
     | F32 of f32
     | F64 of f64
     | V128 of v128
-    | Ref of Ref.t
+    | Ref of t Ref.t
 
   val pp : t Fmt.t
 

@@ -16,8 +16,6 @@ type f64 = Concrete_f64.t
 
 type v128 = Concrete_v128.t
 
-type reference = Concrete_ref.t
-
 module Boolean = Concrete_boolean
 module I32 = Concrete_i32
 module I64 = Concrete_i64
@@ -26,7 +24,9 @@ module F64 = Concrete_f64
 module V128 = Concrete_v128
 module Ref = Concrete_ref
 
-type t =
+type reference = t Concrete_ref.t
+
+and t =
   | I32 of i32
   | I64 of i64
   | F32 of f32

@@ -15,7 +15,7 @@ module type S = sig
 
   type v128
 
-  type ref_value
+  type 'value ref'
 
   type value
 
@@ -61,7 +61,7 @@ module type S = sig
 
   val pop_ref : t -> value * t
 
-  val pop_as_ref : t -> ref_value * t
+  val pop_as_ref : t -> 'value ref' * t
 
   (** push operations *)
 
@@ -91,7 +91,7 @@ module type S = sig
 
   val push_concrete_v128 : t -> Concrete_v128.t -> t
 
-  val push_ref : t -> ref_value -> t
+  val push_ref : t -> 'value ref' -> t
 
   val push_array : t -> unit Array.t -> t
 
@@ -199,7 +199,7 @@ module Make (Value : Value_intf.T) :
      and type f32 := Value.f32
      and type f64 := Value.f64
      and type v128 := Value.v128
-     and type ref_value := Value.Ref.t = struct
+     and type 'value ref' := Value.t Value.Ref.t = struct
   open Value
 
   type t = Value.t list
