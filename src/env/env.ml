@@ -381,7 +381,7 @@ module Make
       assert false
     | Some func -> Ok (func, address)
 
-  let link_function ~env id (functions, map) = function
+  let link_function ~env ~type_base_id id (functions, map) = function
     | Origin.Local func ->
       let func : Extern_func.t Kind.func = Kind.Wasm func in
       let address = Allocator.plus_key (Allocator.next_key env.functions) id in
@@ -394,19 +394,27 @@ module Make
       in
       (* comparing their types *)
       let* () =
-        let _, typ = typ in
-        let typ' =
-          match (func : Extern_func.t Kind.func) with
-          | Kind.Wasm func ->
-            let _, t = func.type_f in
-            t
-          | Kind.Extern func -> Extern_func.to_func_type func
+        let expected_type_id =
+          Option.map (fun id -> id + type_base_id) (fst typ)
         in
-        if Binary.func_type_eq typ typ' then Ok ()
+        let _, expected_ft = typ in
+        let got_type_id, got_ft =
+          match (func : Extern_func.t Kind.func) with
+          | Kind.Wasm f -> f.type_f
+          | Kind.Extern f -> (None, Extern_func.to_func_type f)
+        in
+        let type_matches =
+          match (expected_type_id, got_type_id) with
+          | Some expected, Some got ->
+            Binary.is_subtype env.types env.type_groups env.types
+              env.type_groups ~got ~expected
+          | _ -> Binary.func_type_eq expected_ft got_ft
+        in
+        if type_matches then Ok ()
         else
           let msg =
-            Fmt.str "%s: expected: %a got: %a" name Binary.pp_func_type typ
-              Binary.pp_func_type typ'
+            Fmt.str "%s: expected: %a got: %a" name Binary.pp_func_type
+              expected_ft Binary.pp_func_type got_ft
           in
           Error (`Incompatible_import_type msg)
       in
@@ -648,11 +656,61 @@ module Make
     that were treated before *)
     let type_base_id = Array.length env.types in
     let rewrite_type_id id = type_base_id + id in
+    let rewrite_heap_type : Binary.heap_type -> Binary.heap_type = function
+      | TypeUse id -> TypeUse (rewrite_type_id id)
+      | ht -> ht
+    in
+    let rewrite_ref_type : Binary.ref_type -> Binary.ref_type =
+     fun (nullable, ht) -> (nullable, rewrite_heap_type ht)
+    in
+    let rewrite_val_type : Binary.val_type -> Binary.val_type = function
+      | Ref_type rt -> Ref_type (rewrite_ref_type rt)
+      | vt -> vt
+    in
+    let rewrite_storage_type : Binary.storage_type -> Binary.storage_type =
+      function
+      | Val_type vt -> Val_type (rewrite_val_type vt)
+      | Pack_type _ as pt -> pt
+    in
+    let rewrite_field_type : Binary.field_type -> Binary.field_type =
+     fun (mut, st) -> (mut, rewrite_storage_type st)
+    in
+    let rewrite_comp_type : Binary.comp_type -> Binary.comp_type = function
+      | Def_struct_t fields ->
+        Def_struct_t
+          (List.map (fun (id, ft) -> (id, rewrite_field_type ft)) fields)
+      | Def_array_t ft -> Def_array_t (rewrite_field_type ft)
+      | Def_func_t (params, results) ->
+        Def_func_t
+          ( List.map (fun (id, vt) -> (id, rewrite_val_type vt)) params
+          , List.map rewrite_val_type results )
+    in
+    let rewrite_sub_type : Binary.sub_type -> Binary.sub_type =
+     fun { final; ids; ct } ->
+      { final; ids = List.map rewrite_type_id ids; ct = rewrite_comp_type ct }
+    in
+    let types = Array.map rewrite_sub_type modul.types in
+    let type_groups =
+      let module_groups =
+        Binary.compute_type_groups modul.type_defs (Array.length modul.types)
+      in
+      Array.map (fun (lo, size) -> (rewrite_type_id lo, size)) module_groups
+    in
+    (* We need to compute the updated environment with the new types and type
+       groups earlier so that we can use it for imported functions *)
+    let env =
+      { env with
+        types = Array.append env.types types
+      ; type_groups = Array.append env.type_groups type_groups
+      }
+    in
     (* TODO: should it be passed to the function instead? *)
     let ctx = Context.empty () in
     (* functions *)
     let* functions, functions_map =
-      array_fold_lefti (link_function ~env) ([], IntMap.empty) modul.func
+      array_fold_lefti
+        (link_function ~env ~type_base_id)
+        ([], IntMap.empty) modul.func
     in
     (* tags *)
     (* TODO *)
@@ -906,39 +964,6 @@ module Make
         | Nearest | Div | Neg | Sqrt | Splat | Promote_low_f32x4
         | Extract_lane _ | Replace_lane _ ) as i ->
         i
-    in
-    let rewrite_heap_type : Binary.heap_type -> Binary.heap_type = function
-      | TypeUse id -> TypeUse (rewrite_type_id id)
-      | ht -> ht
-    in
-    let rewrite_ref_type : Binary.ref_type -> Binary.ref_type =
-     fun (nullable, ht) -> (nullable, rewrite_heap_type ht)
-    in
-    let rewrite_val_type : Binary.val_type -> Binary.val_type = function
-      | Ref_type rt -> Ref_type (rewrite_ref_type rt)
-      | vt -> vt
-    in
-    let rewrite_storage_type : Binary.storage_type -> Binary.storage_type =
-      function
-      | Val_type vt -> Val_type (rewrite_val_type vt)
-      | Pack_type _ as pt -> pt
-    in
-    let rewrite_field_type : Binary.field_type -> Binary.field_type =
-     fun (mut, st) -> (mut, rewrite_storage_type st)
-    in
-    let rewrite_comp_type : Binary.comp_type -> Binary.comp_type = function
-      | Def_struct_t fields ->
-        Def_struct_t
-          (List.map (fun (id, ft) -> (id, rewrite_field_type ft)) fields)
-      | Def_array_t ft -> Def_array_t (rewrite_field_type ft)
-      | Def_func_t (params, results) ->
-        Def_func_t
-          ( List.map (fun (id, vt) -> (id, rewrite_val_type vt)) params
-          , List.map rewrite_val_type results )
-    in
-    let rewrite_sub_type : Binary.sub_type -> Binary.sub_type =
-     fun { final; ids; ct } ->
-      { final; ids = List.map rewrite_type_id ids; ct = rewrite_comp_type ct }
     in
     let rewrite_ref_instruction : Binary.ref_instr -> Binary.ref_instr =
       function
@@ -1212,18 +1237,6 @@ module Make
         env.initialization_codes
     in
 
-    let types =
-      Array.append env.types (Array.map rewrite_sub_type modul.types)
-    in
-    let type_groups =
-      let module_groups =
-        Binary.compute_type_groups modul.type_defs (Array.length modul.types)
-      in
-      Array.append env.type_groups
-        (Array.map
-           (fun (lo, size) -> (rewrite_type_id lo, size))
-           module_groups )
-    in
     let env =
       { env with
         initialization_codes
@@ -1233,8 +1246,6 @@ module Make
       ; exported_tables
       ; exported_tags
       ; last_module
-      ; types
-      ; type_groups
       }
     in
 
