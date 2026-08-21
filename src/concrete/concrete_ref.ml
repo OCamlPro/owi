@@ -46,7 +46,7 @@ let any_as_extern_key : _ t Type.Id.t = Type.Id.make ()
 *)
 
 (* Concrete execution is not parallel, so this should be fine *)
-let obj_id_counter = ref 0l
+let obj_id_counter = ref 0
 
 let fresh_id () =
   let id = !obj_id_counter in
