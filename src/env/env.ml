@@ -92,11 +92,20 @@ module Make
           type t
         end
 
+        type array_obj
+
+        type struct_obj
+
         type t =
           | Extern of Extern.t option
           | Func of int option
           | NullExn
           | NullRef
+          | I31 of int32
+          | NullI31
+          | Array of array_obj
+          | Struct of struct_obj
+          | ExternAsAny of Extern.t option
       end
     end)
     (Constexpr_eval :
@@ -999,7 +1008,11 @@ module Make
       | Func (Some i) ->
         (* TODO: this should be rewritten to the right index? *)
         Func (Some i)
-      | (Extern _ | Func None | NullExn | NullRef) as i -> i
+      | ( Extern _
+        | Func None
+        | NullExn | NullRef | NullI31 | I31 _ | Array _ | Struct _
+        | ExternAsAny _ ) as i ->
+        i
     in
     let env =
       List.fold_left

@@ -75,11 +75,20 @@ module Ref : sig
     type t = Abstract_ref.Extern.t
   end
 
+  type array_obj = Abstract_ref.array_obj
+
+  type struct_obj = Abstract_ref.struct_obj
+
   type t = Abstract_ref.t =
     | Extern of Extern.t option
     | Func of int option
     | NullExn
     | NullRef
+    | I31 of int32
+    | NullI31
+    | Array of array_obj
+    | Struct of struct_obj
+    | ExternAsAny of Extern.t option
 
   val null : Abstract_domain.Context.t -> Binary.heap_type -> t
 end

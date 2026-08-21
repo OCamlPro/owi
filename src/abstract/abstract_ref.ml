@@ -16,17 +16,27 @@ module Extern = struct
     | Some Equal -> Some r
 end
 
+type array_obj = |
+
+type struct_obj = |
+
 type t =
   | Extern of Extern.t option
   | Func of int option
   | NullExn
   | NullRef
+  | I31 of int32
+  | NullI31
+  | Array of array_obj
+  | Struct of struct_obj
+  | ExternAsAny of Extern.t option
 
 let pp fmt = function
   | Extern _ -> Fmt.pf fmt "externref"
   | Func _ -> Fmt.pf fmt "funcref"
   | NullExn -> Fmt.pf fmt "nullexnref"
   | NullRef -> Fmt.pf fmt "nullref"
+  | _ -> assert false
 
 let null _ctx = function
   | Binary.Func_ht | NoFunc_ht | TypeUse _ -> Func None
@@ -40,8 +50,10 @@ let func (f : int) = Func (Some f)
 let extern (type x) (t : x Type.Id.t) (v : x) : t = Extern (Some (E (t, v)))
 
 let is_null = function
-  | Func None | Extern None | NullExn | NullRef -> true
-  | Func (Some _) | Extern (Some _) -> false
+  | Func None | Extern None | NullExn | NullRef | NullI31 -> true
+  | Func (Some _) | Extern (Some _) | I31 _ | Array _ | Struct _ | ExternAsAny _
+    ->
+    false
 
 let get_func (r : t) : int get_ref =
   match r with
