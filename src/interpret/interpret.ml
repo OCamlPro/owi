@@ -110,7 +110,14 @@ struct
       let* v = select v ~instr_counter_false ~instr_counter_true in
       if v then Choice.trap trap else f ()
 
-  let default_gc_val _ = assert false
+  let default_gc_val : Binary.storage_type -> Value.t = function
+    | Val_type (Num_type I32) -> I32 (I32.of_int32 0l)
+    | Val_type (Num_type I64) -> I64 (I64.of_int64 0L)
+    | Val_type (Num_type F32) -> F32 (F32.of_bits (I32.of_int32 0l))
+    | Val_type (Num_type F64) -> F64 (F64.of_bits (I64.of_int64 0L))
+    | Val_type (Num_type V128) -> V128 V128.zero
+    | Val_type (Ref_type (_, ht)) -> Ref (Ref.null ht)
+    | Pack_type _ -> I32 (I32.of_int32 0l)
 
   module State = struct
     module Locals : sig
