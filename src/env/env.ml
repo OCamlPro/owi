@@ -222,8 +222,8 @@ module Make
     ; registered_modules
     ; context = _
     ; raw_names = _
-    ; types = _
-    ; type_groups = _
+    ; types
+    ; type_groups
     } =
     let pp_todo ppf _v = Fmt.pf ppf "<TODO>" in
     let pp_elem = pp_todo in
@@ -231,6 +231,8 @@ module Make
     let pp_memory = pp_todo in
     let pp_data = pp_todo in
     let pp_modul ppf v = Fmt.pf ppf "%d" v in
+    let pp_types = pp_todo in
+    let pp_type_groups = pp_todo in
     Fmt.pf ppf
       "@[<v>functions: %a@,\
        globals: %a@,\
@@ -244,7 +246,9 @@ module Make
        exported_memories: %a@,\
        exported_tables: %a@,\
        last_module: %a@,\
-       registered_modules: %a@]"
+       registered_modules: %a@,\
+       types: %a@,\
+       type_groups: %a@]"
       (Allocator.pp Kind.pp_func)
       functions (Allocator.pp pp_global) globals (Allocator.pp pp_memory)
       memories (Allocator.pp pp_table) tables (Allocator.pp pp_data) datas
@@ -260,7 +264,8 @@ module Make
       exported_memories
       (IntMap.pp (StringMap.pp Allocator.pp_key))
       exported_tables (Fmt.option pp_modul) last_module (StringMap.pp pp_modul)
-      registered_modules
+      registered_modules (IntMap.pp pp_types) types (IntMap.pp pp_type_groups)
+      type_groups
 
   let empty =
     let functions = Allocator.empty in
@@ -933,6 +938,16 @@ module Make
       function
       | Drop i -> Drop (get_unsafe i datas_map)
     in
+    let rewrite_array_instruction : Binary.array_instr -> Binary.array_instr =
+      function
+      | New_data (ty, data) -> New_data (ty, get_unsafe data datas_map)
+      | New_elem (ty, elem) -> New_elem (ty, get_unsafe elem elems_map)
+      | Init_data (ty, data) -> Init_data (ty, get_unsafe data datas_map)
+      | Init_elem (ty, elem) -> Init_elem (ty, get_unsafe elem elems_map)
+      | ( New _ | New_default _ | New_fixed _ | Get _ | Get_s _ | Get_u _
+        | Set _ | Len | Fill _ | Copy _ ) as i ->
+        i
+    in
     let rewrite_simple_instruction :
       Binary.simple_instruction -> Binary.simple_instruction = function
       | Global i -> Global (rewrite_global_instruction i)
@@ -953,8 +968,9 @@ module Make
       | Memory i -> Memory (rewrite_memory_instruction i)
       | Data i -> Data (rewrite_data_instruction i)
       | ( Nop | Local _ | Drop | Unreachable | Any_convert_extern
-        | Extern_convert_any | Select _ | I31 _ | Struct _ | Array _ ) as i ->
+        | Extern_convert_any | Select _ | I31 _ | Struct _ ) as i ->
         i
+      | Array i -> Array (rewrite_array_instruction i)
     in
     let rec rewrite_instruction = function
       | Binary.Simple i -> Binary.Simple (rewrite_simple_instruction i)

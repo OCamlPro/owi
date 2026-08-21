@@ -1238,7 +1238,9 @@ module Typedef = struct
 end
 
 (** Precompute a mapping from each type index to [(group_start, group_size)] for
-    its rec group. Types not in a [rec] block form singleton groups. *)
+    its rec group. Types not in a [rec] block form singleton groups.
+
+    TODO: use iarray? *)
 let compute_type_groups (type_defs : Typedef.t array) types_len =
   let groups = Array.make types_len (0, 1) in
   let _ =
