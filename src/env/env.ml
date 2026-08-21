@@ -108,6 +108,7 @@ module Make
           | Array of 'value array_obj
           | Struct of 'value struct_obj
           | ExternAsAny of Extern.t option
+          | AnyAsExtern of 'value t
       end
     end)
     (Constexpr_eval :
@@ -197,6 +198,10 @@ module Make
     ; context : Context.t
     ; raw_names : modul StringMap.t
         (* this is used only for scripts where modules can get a $id and we have to remember them to be able to register them this way... *)
+    ; types : Binary.sub_type array IntMap.t
+        (* map from modules to their type table *)
+    ; type_groups : (int * int) array IntMap.t
+        (* map from modules to their type group table *)
     }
 
   let pp ppf
@@ -217,6 +222,8 @@ module Make
     ; registered_modules
     ; context = _
     ; raw_names = _
+    ; types = _
+    ; type_groups = _
     } =
     let pp_todo ppf _v = Fmt.pf ppf "<TODO>" in
     let pp_elem = pp_todo in
@@ -273,6 +280,8 @@ module Make
     let registered_modules = StringMap.empty in
     let context = Context.empty () in
     let raw_names = StringMap.empty in
+    let types = IntMap.empty in
+    let type_groups = IntMap.empty in
     { functions
     ; globals
     ; memories
@@ -290,6 +299,8 @@ module Make
     ; registered_modules
     ; context
     ; raw_names
+    ; types
+    ; type_groups
     }
 
   let get_last_module ~env =
@@ -942,9 +953,8 @@ module Make
       | Memory i -> Memory (rewrite_memory_instruction i)
       | Data i -> Data (rewrite_data_instruction i)
       | ( Nop | Local _ | Drop | Unreachable | Any_convert_extern
-        | Extern_convert_any | Select _ ) as i ->
+        | Extern_convert_any | Select _ | I31 _ | Struct _ | Array _ ) as i ->
         i
-      | I31 _ | Struct _ | Array _ -> assert false
     in
     let rec rewrite_instruction = function
       | Binary.Simple i -> Binary.Simple (rewrite_simple_instruction i)
@@ -1013,7 +1023,7 @@ module Make
       | ( Extern _
         | Func None
         | NullExn | NullRef | NullI31 | I31 _ | Array _ | Struct _
-        | ExternAsAny _ ) as i ->
+        | ExternAsAny _ | AnyAsExtern _ ) as i ->
         i
     in
     let env =
@@ -1109,6 +1119,13 @@ module Make
         env.initialization_codes
     in
 
+    let types = IntMap.add new_module modul.types env.types in
+    let type_groups =
+      let groups =
+        Binary.compute_type_groups modul.type_defs (Array.length modul.types)
+      in
+      IntMap.add new_module groups env.type_groups
+    in
     let env =
       { env with
         initialization_codes
@@ -1118,6 +1135,8 @@ module Make
       ; exported_tables
       ; exported_tags
       ; last_module
+      ; types
+      ; type_groups
       }
     in
 
@@ -1208,9 +1227,13 @@ module Make
     | Some v -> v
     | None -> assert false
 
-  let get_types ~env:_ = assert false
+  let get_types ~env ~modul =
+    match IntMap.find_opt modul env.types with Some v -> v | None -> [||]
 
-  let get_type_groups ~env:_ = assert false
+  let get_type_groups ~env ~modul =
+    match IntMap.find_opt modul env.type_groups with Some v -> v | None -> [||]
+
+  let default_modul = 0
 
   let link_extern_module ~env ~name m =
     Log.debug (fun m -> m "linking extern module: %s" name);
@@ -1256,7 +1279,7 @@ module Make
       | Some v -> Ok v
     in
     match Allocator.find_opt address env.functions with
-    | Some func -> Ok func
+    | Some func -> Ok (modul, func)
     | None -> assert false
 
   let get_exported_global ~env ~module_name ~global_name =

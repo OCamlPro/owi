@@ -40,10 +40,7 @@ and 'value t =
   | Array of 'value array_obj
   | Struct of 'value struct_obj
   | ExternAsAny of Extern.t option
-
-(*
-let any_as_extern_key : _ t Type.Id.t = Type.Id.make ()
-*)
+  | AnyAsExtern of 'value t
 
 (* Concrete execution is not parallel, so this should be fine *)
 let obj_id_counter = ref 0
@@ -65,6 +62,7 @@ let pp fmt = function
   | Array _ -> pf fmt "arrayref"
   | ExternAsAny None -> pf fmt "anyref none"
   | ExternAsAny (Some _) -> pf fmt "anyref"
+  | AnyAsExtern _ -> pf fmt "externref"
 
 (* TODO: Is this the same as Symbolic_ref.null? *)
 let null = function
@@ -81,23 +79,17 @@ let extern (type x) (t : x Type.Id.t) (v : x) : _ t = Extern (Some (E (t, v)))
 
 let make_i31 (n : i32) : 'value t = I31 n
 
-let any_convert_extern = function _ -> assert false
-(*function
+let any_convert_extern : 'value t -> 'value t = function
   | Extern None -> NullRef
-  | Extern (Some (E (k, v))) -> (
-    match Type.Id.provably_equal k any_as_extern_key with
-    | Some Equal -> v
-    | None -> ExternAsAny (Some (E (k, v))) )
-  | r -> ExternAsAny (Some (E (any_as_extern_key, r)))
-*)
+  | AnyAsExtern r -> r
+  | Extern (Some e) -> ExternAsAny (Some e)
+  | _ -> assert false
 
-let extern_convert_any = function _ -> assert false
-(*function
+let extern_convert_any : 'value t -> 'value t = function
   | NullRef | NullI31 | NullExn -> Extern None
   | ExternAsAny None -> Extern None
   | ExternAsAny (Some e) -> Extern (Some e)
-  | r -> Extern (Some (E (any_as_extern_key, r)))
-*)
+  | r -> AnyAsExtern r
 
 let is_null = function
   | Func None | Extern None | NullExn | NullRef | NullI31 | ExternAsAny None ->
@@ -105,16 +97,18 @@ let is_null = function
   | Func (Some _)
   | Extern (Some _)
   | I31 _ | Array _ | Struct _
-  | ExternAsAny (Some _) ->
+  | ExternAsAny (Some _)
+  | AnyAsExtern _ ->
     false
 
-let ref_eq (r1 : 'value t) (r2 : 'value t) : bool =
+let rec ref_eq (r1 : 'value t) (r2 : 'value t) : bool =
   if is_null r1 || is_null r2 then is_null r1 && is_null r2
   else
     match (r1, r2) with
     | I31 a, I31 b -> Int32.eq a b
     | Struct { obj_id = id1; _ }, Struct { obj_id = id2; _ } -> id1 = id2
     | Array { obj_id = id1; _ }, Array { obj_id = id2; _ } -> id1 = id2
+    | AnyAsExtern a, AnyAsExtern b -> ref_eq a b
     | _ -> false
 
 let get_struct_type ({ type_id; _ } : 'value struct_obj) = Some type_id

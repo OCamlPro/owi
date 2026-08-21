@@ -17,7 +17,9 @@ let do_action ctx env = function
       m "invoke %a %s %a..."
         (Fmt.option ~none:Fmt.nop Fmt.string)
         module_name func_name Wast.pp_consts args );
-    let* f = Env.Abstract.get_exported_func ~env ~module_name ~func_name in
+    let* _modul, f =
+      Env.Abstract.get_exported_func ~env ~module_name ~func_name
+    in
     let stack =
       List.rev_map (Abstract_value.of_script_const ctx ~ty) args
       |> List.mapi (fun i v -> (i, v))

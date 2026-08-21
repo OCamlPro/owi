@@ -32,6 +32,7 @@ type 'value t =
   | Array of 'value array_obj
   | Struct of 'value struct_obj
   | ExternAsAny of Extern.t option
+  | AnyAsExtern of 'value t
 
 let pp fmt = function
   | Extern _ -> Fmt.pf fmt "externref"
@@ -53,8 +54,9 @@ let extern (type x) (t : x Type.Id.t) (v : x) : _ t = Extern (Some (E (t, v)))
 
 let is_null = function
   | Func None | Extern None | NullExn | NullRef | NullI31 -> true
-  | Func (Some _) | Extern (Some _) | I31 _ | Array _ | Struct _ | ExternAsAny _
-    ->
+  | Func (Some _)
+  | Extern (Some _)
+  | I31 _ | Array _ | Struct _ | ExternAsAny _ | AnyAsExtern _ ->
     false
 
 let get_func (r : _ t) : int get_ref =

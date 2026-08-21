@@ -32,6 +32,7 @@ module type T = sig
     | Array of 'value array_obj
     | Struct of 'value struct_obj
     | ExternAsAny of Extern.t option
+    | AnyAsExtern of 'value t
 
   val pp : 'value t Fmt.t
 
