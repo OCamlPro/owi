@@ -21,7 +21,7 @@ end
 type i32 = Concrete_i32.t
 
 type 'value gc_obj =
-  { obj_id : int32
+  { obj_id : int
   ; type_id : int
   ; fields : 'value array
   }
@@ -50,7 +50,7 @@ let obj_id_counter = ref 0
 
 let fresh_id () =
   let id = !obj_id_counter in
-  obj_id_counter := Int32.add id 1l;
+  incr obj_id_counter;
   id
 
 let pp fmt = function
@@ -109,14 +109,12 @@ let is_null = function
     false
 
 let ref_eq (r1 : 'value t) (r2 : 'value t) : bool =
-  if is_null r1 && is_null r2 then true
-  else if is_null r1 || is_null r2 then false
   if is_null r1 || is_null r2 then is_null r1 && is_null r2
   else
     match (r1, r2) with
     | I31 a, I31 b -> Int32.eq a b
-    | Struct { obj_id = id1; _ }, Struct { obj_id = id2; _ } -> Int32.eq id1 id2
-    | Array { obj_id = id1; _ }, Array { obj_id = id2; _ } -> Int32.eq id1 id2
+    | Struct { obj_id = id1; _ }, Struct { obj_id = id2; _ } -> id1 = id2
+    | Array { obj_id = id1; _ }, Array { obj_id = id2; _ } -> id1 = id2
     | _ -> false
 
 let get_struct_type ({ type_id; _ } : 'value struct_obj) = Some type_id
