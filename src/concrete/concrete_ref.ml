@@ -111,6 +111,7 @@ let is_null = function
 let ref_eq (r1 : 'value t) (r2 : 'value t) : bool =
   if is_null r1 && is_null r2 then true
   else if is_null r1 || is_null r2 then false
+  if is_null r1 || is_null r2 then is_null r1 && is_null r2
   else
     match (r1, r2) with
     | I31 a, I31 b -> Int32.eq a b
