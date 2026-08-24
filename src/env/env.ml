@@ -422,11 +422,12 @@ module Make
       let map = IntMap.add id address map in
       Ok (functions, map)
 
-  let link_global ctx ~get_const_func ~get_const_global ~env id
+  let link_global ctx ~get_const_type ~get_const_func ~get_const_global ~env id
     ((globals : (Allocator.key * global) list), map) = function
     | Origin.Local ({ init; typ; id = _ } : Binary.Global.t) ->
       let* value =
-        Constexpr_eval.expr ctx ~get_const_func ~get_const_global init.raw
+        Constexpr_eval.expr ctx ~get_const_type ~get_const_func
+          ~get_const_global init.raw
       in
       let global : global = { value; typ } in
 
@@ -588,13 +589,13 @@ module Make
     in
     Ok (initialization_code, datas, map)
 
-  let link_elem ctx ~get_const_func ~get_const_global ~env id
+  let link_elem ctx ~get_const_type ~get_const_func ~get_const_global ~env id
     (initialization_code, elems, map) { Binary.Elem.init; mode; _ } =
     let* init =
       list_map
         (fun expr ->
-          Constexpr_eval.ref_expr ctx ~get_const_func ~get_const_global
-            expr.Annotated.raw )
+          Constexpr_eval.ref_expr ctx ~get_const_type ~get_const_func
+            ~get_const_global expr.Annotated.raw )
         init
     in
     let elem =
@@ -653,7 +654,7 @@ module Make
                                              Each one is given a unique address in a global space, and we maintain a map from (module id, {func,global,...} id) to env address. *)
     let new_module = get_next_module ~env in
     (* type_base_id: the number all previously identified types from the modules
-    that were treated before *)
+       that were treated before *)
     let type_base_id = Array.length env.types in
     let rewrite_type_id id = type_base_id + id in
     let rewrite_heap_type : Binary.heap_type -> Binary.heap_type = function
@@ -738,11 +739,14 @@ module Make
       | Some address -> Ok (Allocator.unsafe_to_int address)
     in
 
+    (* TODO! *)
+    let get_const_type _id = assert false in
+
     (* globals *)
     let* globals, globals_map =
       array_fold_lefti
         (fun id ((globals : (Allocator.key * global) list), map) ->
-          link_global ctx
+          link_global ctx ~get_const_type
             ~get_const_func:(get_const_func functions_map)
             ~get_const_global:(get_const_global ~env globals map)
             ~env id (globals, map) )
@@ -771,7 +775,7 @@ module Make
     (* 2. elem *)
     let* initialization_code, elems, elems_map =
       array_fold_lefti
-        (link_elem ctx
+        (link_elem ctx ~get_const_type
            ~get_const_func:(get_const_func functions_map)
            ~get_const_global:(get_const_global ~env globals globals_map)
            ~env )
@@ -788,9 +792,9 @@ module Make
     in
 
     (* Now this is the second step, where we rewrite all access to use env address.
-                                       For instance, if a function contains the instruction global.get 0, the 0 is local to the modul in which the function is defined.
-                                       We look what is the env address of this global in the map, by looking the global map at (module_id, 0).
-                                       If the env address is say, 42, we rewrite the instruction to be global.get 42. *)
+                                     For instance, if a function contains the instruction global.get 0, the 0 is local to the modul in which the function is defined.
+                                     We look what is the env address of this global in the map, by looking the global map at (module_id, 0).
+                                     If the env address is say, 42, we rewrite the instruction to be global.get 42. *)
     let get_unsafe k tbl =
       match IntMap.find_opt k tbl with
       | Some v -> Allocator.unsafe_to_int v
