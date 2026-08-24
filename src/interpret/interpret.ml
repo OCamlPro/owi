@@ -2525,9 +2525,8 @@ struct
       let n, stack = Stack.pop_i32 state.stack in
       let v, stack = Stack.pop stack in
       let state = { state with stack } in
-      let* n = Choice.select_i32 n in
-      let n = Int32.to_int n in
-      ret @@ Stack.push_ref state.stack (Ref.array_new_fill id v n)
+      let a = Ref.array_new_fill id v n in
+      ret @@ Stack.push_ref state.stack a
     | Array (New_default id) ->
       let n, stack = Stack.pop_i32 state.stack in
       let state = { state with stack } in
@@ -2537,11 +2536,8 @@ struct
         | Def_array_t (_, st) -> st
         | _ -> Fmt.failwith "array.new_default: type %d is not an array type" id
       in
-      let* n = Choice.select_i32 n in
-      let n = Int32.to_int n in
-      ret
-      @@ Stack.push_ref state.stack
-           (Ref.array_new_fill id (default_gc_val st) n)
+      let a = Ref.array_new_fill id (default_gc_val st) n in
+      ret @@ Stack.push_ref state.stack a
     | Array (New_fixed (id, n)) ->
       let n = Int32.to_int n in
       let top_n, stack = Stack.pop_n state.stack n in
