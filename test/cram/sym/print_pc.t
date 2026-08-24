@@ -130,6 +130,8 @@
                        last_module: 2
                        registered_modules: {"owi" -> 1;
                                             "wasi_snapshot_preview1" -> 0}
+                       types: <TODO>
+                       type_groups: <TODO>
   owi: [INFO] interpreting ...
   owi: [INFO] stack         : [  ]
   owi: [INFO] running instr : call 45 (executed 0 times)
