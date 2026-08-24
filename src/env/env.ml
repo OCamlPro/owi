@@ -713,8 +713,12 @@ module Make
         (link_function ~env ~type_base_id)
         ([], IntMap.empty) modul.func
     in
+
     (* tags *)
     (* TODO *)
+
+    (* TODO: I'm not sure about this *)
+    let get_const_type id = Ok (Array.get types id) in
 
     let get_const_global ~env globals globals_map id =
       (* we should only make visible previously defined immutable globals and imported immutable globals. *)
@@ -738,9 +742,6 @@ module Make
       | None -> assert false
       | Some address -> Ok (Allocator.unsafe_to_int address)
     in
-
-    (* TODO! *)
-    let get_const_type _id = assert false in
 
     (* globals *)
     let* globals, globals_map =
