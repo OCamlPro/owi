@@ -1618,6 +1618,11 @@ struct
       Stack.apply_f64_v128_v128 stack (V128.F64x2.replace_lane lane)
       |> Choice.return
 
+  let get_func_type (f : Extern_func.t Kind.func) =
+    match f with
+    | Wasm func -> func.type_f
+    | Extern func -> (None, Extern_func.to_func_type func)
+
   let ref_matches_ref_type ~env (r : Value.t Ref.t) ((nullable, ht) : ref_type)
     : bool =
     let is_null = match nullable with Null -> true | No_null -> false in
@@ -1638,15 +1643,13 @@ struct
       | Func_ht -> true
       | TypeUse expected -> (
         let func = Env.get_func ~env func in
-        match func with
-        | Kind.Wasm func -> (
-          match func.type_f with
-          | Some got, _ ->
-            let types = Env.get_types ~env in
-            let type_groups = Env.get_type_groups ~env in
-            Binary.is_subtype types type_groups types type_groups ~expected ~got
-          | None, _ -> false )
-        | Kind.Extern _ -> false )
+        let func_type = get_func_type func in
+        match func_type with
+        | Some got, _ ->
+          let types = Env.get_types ~env in
+          let type_groups = Env.get_type_groups ~env in
+          Binary.is_subtype types type_groups types type_groups ~expected ~got
+        | None, _ -> false )
       | _ -> false )
     | Ref.Extern (Some _) -> ( match ht with Extern_ht -> true | _ -> false )
     | Ref.I31 _ -> (
@@ -2182,14 +2185,6 @@ struct
       let state = { state with stack } in
       if return then State.return state else State.Continue state
 
-  (* TODO: should be used in many places! *)
-  let _func_type (f : Extern_func.t Kind.func) =
-    match f with
-    | Wasm func ->
-      let (None | Some _), t = func.type_f in
-      t
-    | Extern func -> Extern_func.to_func_type func
-
   let call_ref ~return (state : State.t) _typ_i =
     let fun_ref, stack = Stack.pop_as_ref state.stack in
     let state = { state with stack } in
@@ -2223,12 +2218,7 @@ struct
       | Type_mismatch -> Choice.trap `Element_type_error
       | Ref_value func ->
         let func = Env.get_func ~env func in
-        let func_type =
-          (* TODO: use the func_type function defined above ! *)
-          match func with
-          | Kind.Wasm func -> func.type_f
-          | Kind.Extern _func -> assert false
-        in
+        let func_type = get_func_type func in
         let type_matches =
           match (call_type_idx, func_type) with
           | Some expected, (Some got, _) ->
