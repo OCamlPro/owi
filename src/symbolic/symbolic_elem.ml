@@ -2,17 +2,12 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-module IntMap = Map.Make (Int)
+type t = Symbolic_value.t Symbolic_ref.t Iarray.t
 
-type t = Symbolic_value.t Symbolic_ref.t IntMap.t
+let get (e : t) i = Iarray.get e i
 
-let get (elem : t) i : Symbolic_value.t Symbolic_ref.t =
-  match IntMap.find_opt i elem with Some v -> v | None -> assert false
+let size (e : t) = Iarray.length e
 
-let size (elem : t) = IntMap.cardinal elem
+let drop (_e : t) = Iarray.of_list []
 
-let drop (_elem : t) = IntMap.empty
-
-let init l =
-  let l = List.mapi (fun i x -> (i, x)) l in
-  List.fold_left (fun elem (i, x) -> IntMap.add i x elem) IntMap.empty l
+let init l = Iarray.of_list l
