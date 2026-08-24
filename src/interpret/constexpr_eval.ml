@@ -11,6 +11,16 @@ module Make (Value : Value_intf.T) :
      and type context := unit = struct
   module Stack = Stack.Make [@inlined hint] (Value)
 
+  (* TODO: this is duplicated between the monadic interpreter and this constexpr interpreter, it should be shared at some point! *)
+  let default_gc_val : Binary.storage_type -> Value.t = function
+    | Val_type (Num_type I32) -> I32 (Value.I32.of_int32 0l)
+    | Val_type (Num_type I64) -> I64 (Value.I64.of_int64 0L)
+    | Val_type (Num_type F32) -> F32 (Value.F32.of_bits (Value.I32.of_int32 0l))
+    | Val_type (Num_type F64) -> F64 (Value.F64.of_bits (Value.I64.of_int64 0L))
+    | Val_type (Num_type V128) -> V128 Value.V128.zero
+    | Val_type (Ref_type (_, ht)) -> Ref (Value.Ref.null ht)
+    | Pack_type _ -> I32 (Value.I32.of_int32 0l)
+
   let i32_instr stack : Binary.i32_instr -> _ = function
     | Const i -> Stack.push_i32 stack (Value.I32.of_int32 i)
     | Add -> Stack.apply_i32_i32_i32 stack Value.I32.add
@@ -25,7 +35,8 @@ module Make (Value : Value_intf.T) :
     | Mul -> Stack.apply_i64_i64_i64 stack Value.I64.mul
     | _ -> assert false
 
-  let simple_instruction ~get_const_func ~get_const_global stack = function
+  let simple_instruction ~get_const_type ~get_const_func ~get_const_global stack
+      = function
     | Binary.I32 i -> Result.ok (i32_instr stack i)
     | Binary.I64 i -> Result.ok (i64_instr stack i)
     | F32 (Const f) ->
@@ -43,19 +54,59 @@ module Make (Value : Value_intf.T) :
     | Global (Get id) ->
       let* g = get_const_global id in
       Result.ok @@ Stack.push stack g
-    | _ -> assert false
+    | Array (New id) ->
+      let n, stack = Stack.pop_i32 stack in
+      let v, stack = Stack.pop stack in
+      let a = Value.Ref.array_new_fill id v n in
+      Result.ok @@ Stack.push_ref stack a
+    | Array (New_default id) ->
+      let n, stack = Stack.pop_i32 stack in
+      let* typ : Binary.sub_type = get_const_type id in
+      let st =
+        match typ.ct with
+        | Def_array_t (_, st) -> st
+        | _ -> Fmt.failwith "array.new_default: type %d is not an array type" id
+      in
+      let a = Value.Ref.array_new_fill id (default_gc_val st) n in
+      Result.ok @@ Stack.push_ref stack a
+    | I31 Ref ->
+      let n, stack = Stack.pop_i32 stack in
+      Result.ok @@ Stack.push_ref stack (Value.Ref.make_i31 n)
+    | Extern_convert_any ->
+      let r, stack = Stack.pop_as_ref stack in
+      Result.ok @@ Stack.push_ref stack (Value.Ref.extern_convert_any r)
+    | Struct (New id) ->
+      let* typ : Binary.sub_type = get_const_type id in
+      let fields =
+        match typ.ct with
+        | Def_struct_t fl -> fl
+        | _ -> Fmt.failwith "struct.new: type %d is not a struct type" id
+      in
+      let n = List.length fields in
+      let top_n, stack = Stack.pop_n stack n in
+      Result.ok
+      @@ Stack.push_ref stack
+           (Value.Ref.struct_new_with id (Array.of_list top_n))
+    | F32 _ | F64 _ | V128 _ | Global _ | Local _ | Ref _ | Drop | Nop
+    | Unreachable | Any_convert_extern | I8x16 _ | I16x8 _ | I32x4 _ | I64x2 _
+    | F32x4 _ | F64x2 _ | Table _ | Elem _ | Memory _ | Data _ | I31 _
+    | Struct _ | Array _ | Select _ ->
+      assert false
 
-  let instr ~get_const_func ~get_const_global stack instr =
+  let instr ~get_const_type ~get_const_func ~get_const_global stack instr =
     match instr.Annotated.raw with
     | Binary.Simple i ->
-      simple_instruction ~get_const_func ~get_const_global stack i
+      simple_instruction ~get_const_type ~get_const_func ~get_const_global stack
+        i
     | _ -> assert false
 
   (* TODO: the modul parameter can probably be removed *)
-  let expr _ctx ~get_const_func ~get_const_global (e : Binary.expr) :
-    Value.t Result.t =
+  let expr _ctx ~get_const_type ~get_const_func ~get_const_global
+    (e : Binary.expr) : Value.t Result.t =
     let* stack =
-      list_fold_left (instr ~get_const_func ~get_const_global) Stack.empty e
+      list_fold_left
+        (instr ~get_const_type ~get_const_func ~get_const_global)
+        Stack.empty e
     in
     match stack with
     | [] -> Error (`Type_mismatch "const expr returning zero values")
@@ -63,9 +114,9 @@ module Make (Value : Value_intf.T) :
       Error (`Type_mismatch "const expr returning more than one value")
     | [ result ] -> Ok result
 
-  let ref_expr ctx ~get_const_func ~get_const_global (e : Binary.expr) :
-    Value.t Value.Ref.t Result.t =
-    match expr ctx ~get_const_func ~get_const_global e with
+  let ref_expr ctx ~get_const_type ~get_const_func ~get_const_global
+    (e : Binary.expr) : Value.t Value.Ref.t Result.t =
+    match expr ctx ~get_const_type ~get_const_func ~get_const_global e with
     | Ok (Ref v) -> Ok v
     | Ok _ -> Error `Constant_expression_required
     | Error _ as e -> e
@@ -96,7 +147,8 @@ module Abstract :
     | Mul -> Stack.apply_i64_i64_i64 stack (Value.I64.mul ctx)
     | _ -> assert false
 
-  let simple_instruction ctx ~get_const_func ~get_const_global stack = function
+  let simple_instruction ctx ~get_const_type:_ ~get_const_func ~get_const_global
+    stack = function
     | Binary.I32 i -> Result.ok (i32_instr ctx stack i)
     | Binary.I64 i -> Result.ok (i64_instr ctx stack i)
     | F32 (Const f) ->
@@ -116,17 +168,20 @@ module Abstract :
       Result.ok @@ Stack.push stack g
     | _ -> assert false
 
-  let instr ctx ~get_const_func ~get_const_global stack instr =
+  let instr ctx ~get_const_type ~get_const_func ~get_const_global stack instr =
     match instr.Annotated.raw with
     | Binary.Simple i ->
-      simple_instruction ctx ~get_const_func ~get_const_global stack i
+      simple_instruction ctx ~get_const_type ~get_const_func ~get_const_global
+        stack i
     | _ -> assert false
 
   (* TODO: the modul parameter can probably be removed *)
-  let expr ctx ~get_const_func ~get_const_global (e : Binary.expr) :
-    Value.t Result.t =
+  let expr ctx ~get_const_type ~get_const_func ~get_const_global
+    (e : Binary.expr) : Value.t Result.t =
     let* stack =
-      list_fold_left (instr ctx ~get_const_func ~get_const_global) Stack.empty e
+      list_fold_left
+        (instr ctx ~get_const_type ~get_const_func ~get_const_global)
+        Stack.empty e
     in
     match stack with
     | [] -> Error (`Type_mismatch "const expr returning zero values")
@@ -134,9 +189,9 @@ module Abstract :
       Error (`Type_mismatch "const expr returning more than one value")
     | [ result ] -> Ok result
 
-  let ref_expr ctx ~get_const_func ~get_const_global (e : Binary.expr) :
-    Value.t Value.Ref.t Result.t =
-    match expr ctx ~get_const_func ~get_const_global e with
+  let ref_expr ctx ~get_const_type ~get_const_func ~get_const_global
+    (e : Binary.expr) : Value.t Value.Ref.t Result.t =
+    match expr ctx ~get_const_type ~get_const_func ~get_const_global e with
     | Ok (Ref v) -> Ok v
     | Ok _ -> Error `Constant_expression_required
     | Error _ as e -> e

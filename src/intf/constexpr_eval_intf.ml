@@ -11,6 +11,7 @@ module type T = sig
 
   val expr :
        context
+    -> get_const_type:(Binary.indice -> Binary.sub_type Result.t)
     -> get_const_func:(Binary.indice -> int Result.t)
     -> get_const_global:(Binary.indice -> value Result.t)
     -> Binary.expr
@@ -18,6 +19,7 @@ module type T = sig
 
   val ref_expr :
        context
+    -> get_const_type:(Binary.indice -> Binary.sub_type Result.t)
     -> get_const_func:(Binary.indice -> int Result.t)
     -> get_const_global:(Binary.indice -> value Result.t)
     -> Binary.expr
