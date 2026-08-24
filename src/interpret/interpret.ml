@@ -2446,28 +2446,27 @@ struct
           | _ -> None
         in
         let raw = Ref.struct_get_field s field_id in
-        let v =
+        let* v =
           match raw with
-          | I32 i ->
-            let _ = (i, packed) in
-            assert false
-            (*
+          | I32 i -> (
             match packed with
             | Some 8 ->
               let n = I32.logand i (I32.of_int32 0xFFl) in
-              if I32.ne (I32.logand n (I32.of_int32 0x80l)) I32.zero then
-                I32.logor n (I32.lognot 0xFFl)
-              else n
+              Choice.ite
+                (I32.ne (I32.logand n (I32.of_int32 0x80l)) I32.zero)
+                ~if_true:(I32 (I32.logor n (I32.of_int32 (Int32.lognot 0xFFl))))
+                ~if_false:(I32 n)
             | Some 16 ->
-              let n = I32.logand i 0xFFFFl in
-              if I32.ne (I32.logand n 0x8000l) 0l then
-                I32.logor n (I32.lognot 0xFFFFl)
-              else n
-            | _ -> i
-          *)
+              let n = I32.logand i (I32.of_int32 0xFFFFl) in
+              Choice.ite
+                (I32.ne (I32.logand n (I32.of_int32 0x8000l)) I32.zero)
+                ~if_true:
+                  (I32 (I32.logor n (I32.of_int32 (Int32.lognot 0xFFFFl))))
+                ~if_false:(I32 n)
+            | _ -> Choice.return @@ I32 i )
           | _ -> assert false
         in
-        ret @@ Stack.push_i32 state.stack (I32.of_int32 v)
+        ret @@ Stack.push state.stack v
       | r when Ref.is_null r -> Choice.trap (`Msg "null structure reference")
       | _ -> Choice.trap `Element_type_error
       end
@@ -2572,27 +2571,28 @@ struct
           Choice.trap (`Msg "out of bounds array access")
         else
           let raw = Ref.array_get_elem a idx in
-          let v =
+          let* v =
             match raw with
-            | I32 i ->
-              let _ = (i, packed) in
-              assert false
-              (*
+            | I32 i -> (
               match packed with
               | Some 8 ->
-                let n = Int32.logand i 0xFFl in
-                if Int32.ne (Int32.logand n 0x80l) 0l then
-                  Int32.logor n (Int32.lognot 0xFFl)
-                else n
+                let n = I32.logand i (I32.of_int32 0xFFl) in
+                Choice.ite
+                  (I32.ne (I32.logand n (I32.of_int32 0x80l)) I32.zero)
+                  ~if_true:
+                    (I32 (I32.logor n (I32.of_int32 (Int32.lognot 0xFFl))))
+                  ~if_false:(I32 n)
               | Some 16 ->
-                let n = Int32.logand i 0xFFFFl in
-                if Int32.ne (Int32.logand n 0x8000l) 0l then
-                  Int32.logor n (Int32.lognot 0xFFFFl)
-                else n
-              | _ -> i *)
+                let n = I32.logand i (I32.of_int32 0xFFFFl) in
+                Choice.ite
+                  (I32.ne (I32.logand n (I32.of_int32 0x8000l)) I32.zero)
+                  ~if_true:
+                    (I32 (I32.logor n (I32.of_int32 @@ Int32.lognot 0xFFFFl)))
+                  ~if_false:(I32 n)
+              | _ -> Choice.return @@ I32 i )
             | _ -> assert false
           in
-          ret @@ Stack.push_i32 state.stack (I32.of_int32 v)
+          ret @@ Stack.push state.stack v
       | r when Ref.is_null r -> Choice.trap (`Msg "null array reference")
       | _ -> Choice.trap `Element_type_error
       end
@@ -3007,11 +3007,11 @@ struct
         (fun () ->
           let fuel_left = Atomic.fetch_and_add fuel (-1) in
           (* If we only use [timeout_instr], we want to stop all as
-                                soon as [fuel_left <= 0]. But if we only use [timeout],
-                                we don't want to run into the slow path below on each
-                                instruction after [fuel_left] becomes negative. We avoid
-                                this repeated slow path by bumping [fuel] to [max_int]
-                                again in this case. *)
+             soon as [fuel_left <= 0]. But if we only use [timeout],
+             we don't want to run into the slow path below on each
+             instruction after [fuel_left] becomes negative. We avoid
+             this repeated slow path by bumping [fuel] to [max_int]
+             again in this case. *)
           if fuel_left mod 1024 = 0 || fuel_left < 0 then begin
             let stop =
               match (Parameters.timeout, Parameters.timeout_instr) with
