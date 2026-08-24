@@ -69,12 +69,15 @@ module Make (Value : Value_intf.T) :
       in
       let a = Value.Ref.array_new_fill id (default_gc_val st) n in
       Result.ok @@ Stack.push_ref stack a
+    | Array (New_fixed (id, n)) ->
+      let n = Int32.to_int n in
+      let top_n, stack = Stack.pop_n stack n in
+      let elems = Array.of_list (List.rev top_n) in
+      Result.ok
+      @@ Stack.push_ref stack (Value.Ref.array_new_fixed_with id elems)
     | I31 Ref ->
       let n, stack = Stack.pop_i32 stack in
       Result.ok @@ Stack.push_ref stack (Value.Ref.make_i31 n)
-    | Extern_convert_any ->
-      let r, stack = Stack.pop_as_ref stack in
-      Result.ok @@ Stack.push_ref stack (Value.Ref.extern_convert_any r)
     | Struct (New id) ->
       let* typ : Binary.sub_type = get_const_type id in
       let fields =
@@ -87,10 +90,28 @@ module Make (Value : Value_intf.T) :
       Result.ok
       @@ Stack.push_ref stack
            (Value.Ref.struct_new_with id (Array.of_list top_n))
+    | Struct (New_default id) ->
+      let* typ : Binary.sub_type = get_const_type id in
+      let fields =
+        match typ.ct with
+        | Def_struct_t fl -> fl
+        | _ ->
+          Fmt.failwith "struct.new_default: type %d is not a struct type" id
+      in
+      let defaults =
+        Array.of_list (List.map (fun (_, (_, st)) -> default_gc_val st) fields)
+      in
+      Result.ok @@ Stack.push_ref stack (Value.Ref.struct_new_with id defaults)
+    | Any_convert_extern ->
+      let r, stack = Stack.pop_as_ref stack in
+      Result.ok @@ Stack.push_ref stack (Value.Ref.any_convert_extern r)
+    | Extern_convert_any ->
+      let r, stack = Stack.pop_as_ref stack in
+      Result.ok @@ Stack.push_ref stack (Value.Ref.extern_convert_any r)
     | F32 _ | F64 _ | V128 _ | Global _ | Local _ | Ref _ | Drop | Nop
-    | Unreachable | Any_convert_extern | I8x16 _ | I16x8 _ | I32x4 _ | I64x2 _
-    | F32x4 _ | F64x2 _ | Table _ | Elem _ | Memory _ | Data _ | I31 _
-    | Struct _ | Array _ | Select _ ->
+    | Unreachable | I8x16 _ | I16x8 _ | I32x4 _ | I64x2 _ | F32x4 _ | F64x2 _
+    | Table _ | Elem _ | Memory _ | Data _ | I31 _ | Struct _ | Array _
+    | Select _ ->
       assert false
 
   let instr ~get_const_type ~get_const_func ~get_const_global stack instr =
