@@ -122,8 +122,10 @@ let struct_get_field ({ fields; _ } : 'value struct_obj) idx = fields.(idx)
 
 let struct_set_field (s : 'value struct_obj) idx v = s.fields.(idx) <- v
 
-let array_new_fill type_id v n =
-  Array { obj_id = fresh_id (); type_id; fields = Array.make n v }
+let array_new_fill type_id v (n : Concrete_i32.t) =
+  let obj_id = fresh_id () in
+  let fields = Array.init (Concrete_i32.to_int n) (fun _i -> v) in
+  Array { obj_id; type_id; fields }
 
 let array_new_fixed_with type_id fields =
   Array { obj_id = fresh_id (); type_id; fields }

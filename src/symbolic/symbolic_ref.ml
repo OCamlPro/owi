@@ -85,7 +85,8 @@ let struct_get_field (_ : 'value struct_obj) (_ : int) : 'value =
 
 let struct_set_field (_ : 'value struct_obj) (_ : int) (_ : 'value) : unit = ()
 
-let array_new_fill (_ : int) (_ : 'value) (_ : int) : 'value t = Array ()
+let array_new_fill (_ : int) (_ : 'value) (_ : Symbolic_i32.t) : 'value t =
+  Array ()
 
 let array_new_fixed_with (_ : int) (_ : 'value array) : 'value t = Array ()
 

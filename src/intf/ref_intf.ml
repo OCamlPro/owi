@@ -75,7 +75,7 @@ module type T = sig
 
   val struct_set_field : 'value struct_obj -> int -> 'value -> unit
 
-  val array_new_fill : int -> 'value -> int -> 'value t
+  val array_new_fill : int -> 'value -> i32 -> 'value t
 
   val array_new_fixed_with : int -> 'value array -> 'value t
 
