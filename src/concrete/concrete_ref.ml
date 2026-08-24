@@ -26,11 +26,11 @@ type 'value gc_obj =
   ; fields : 'value array
   }
 
-and 'value struct_obj = 'value gc_obj
+type 'value struct_obj = 'value gc_obj
 
-and 'value array_obj = 'value gc_obj
+type 'value array_obj = 'value gc_obj
 
-and 'value t =
+type 'value t =
   | Extern of Extern.t option
   | Func of int option
   | NullExn
