@@ -2,13 +2,16 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
+module IntMap := Map.Make(Int)
+
 type t =
-  { globals : int Map.Make(Int).t
-  ; memories : int Map.Make(Int).t
-  ; elems : int Map.Make(Int).t
-  ; datas : int Map.Make(Int).t
-  ; tables : int Map.Make(Int).t
-  ; functions : int Map.Make(Int).t
+  { globals : int IntMap.t
+  ; memories : int IntMap.t
+  ; elems : int IntMap.t
+  ; datas : int IntMap.t
+  ; tables : int IntMap.t
+  ; functions : int IntMap.t
+  ; tags : int IntMap.t
   ; type_base_id : int
   }
 

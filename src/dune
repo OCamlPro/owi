@@ -89,6 +89,8 @@
   data_intf
   elem_intf
   env
+  env0
+  env_linker
   env_rewriter
   env_intf
   exploration_smart

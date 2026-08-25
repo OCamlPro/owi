@@ -11,6 +11,7 @@ type t =
   ; datas : int IntMap.t
   ; tables : int IntMap.t
   ; functions : int IntMap.t
+  ; tags : int IntMap.t
   ; type_base_id : int
   }
 
@@ -21,8 +22,9 @@ let empty =
   let datas = IntMap.empty in
   let tables = IntMap.empty in
   let functions = IntMap.empty in
+  let tags = IntMap.empty in
   let type_base_id = 0 in
-  { globals; memories; elems; datas; tables; functions; type_base_id }
+  { globals; memories; elems; datas; tables; functions; type_base_id; tags }
 
 (* Now this is the second step, where we rewrite all access to use env address.
                                  For instance, if a function contains the instruction global.get 0, the 0 is local to the modul in which the function is defined.
