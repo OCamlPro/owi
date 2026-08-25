@@ -5,12 +5,12 @@
 module IntMap = Map.Make (Int)
 
 type t =
-  { globals : Allocator.key IntMap.t
-  ; memories : Allocator.key IntMap.t
-  ; elems : Allocator.key IntMap.t
-  ; datas : Allocator.key IntMap.t
-  ; tables : Allocator.key IntMap.t
-  ; functions : Allocator.key IntMap.t
+  { globals : int IntMap.t
+  ; memories : int IntMap.t
+  ; elems : int IntMap.t
+  ; datas : int IntMap.t
+  ; tables : int IntMap.t
+  ; functions : int IntMap.t
   ; type_base_id : int
   }
 
@@ -29,9 +29,7 @@ let empty =
                                  We look what is the env address of this global in the map, by looking the global map at (module_id, 0).
                                  If the env address is say, 42, we rewrite the instruction to be global.get 42. *)
 let get_unsafe k tbl =
-  match IntMap.find_opt k tbl with
-  | Some v -> Allocator.unsafe_to_int v
-  | None -> assert false
+  match IntMap.find_opt k tbl with Some v -> v | None -> assert false
 
 let rewrite_global_instruction ~map : Binary.global_instr -> Binary.global_instr
     = function

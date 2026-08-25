@@ -3,12 +3,12 @@
 (* Written by the Owi programmers *)
 
 type t =
-  { globals : Allocator.key Map.Make(Int).t
-  ; memories : Allocator.key Map.Make(Int).t
-  ; elems : Allocator.key Map.Make(Int).t
-  ; datas : Allocator.key Map.Make(Int).t
-  ; tables : Allocator.key Map.Make(Int).t
-  ; functions : Allocator.key Map.Make(Int).t
+  { globals : int Map.Make(Int).t
+  ; memories : int Map.Make(Int).t
+  ; elems : int Map.Make(Int).t
+  ; datas : int Map.Make(Int).t
+  ; tables : int Map.Make(Int).t
+  ; functions : int Map.Make(Int).t
   ; type_base_id : int
   }
 

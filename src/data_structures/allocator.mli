@@ -4,26 +4,14 @@
 
 type !+'a t
 
-type key
-
 val empty : 'a t
 
-val find_opt : key -> 'a t -> 'a option
+val find_opt : int -> 'a t -> 'a option
 
-val add : 'a -> 'a t -> 'a t * key
+val add : 'a -> 'a t -> 'a t * int
 
-val add_manual : key -> 'a -> 'a t -> 'a t
+val add_manual : int -> 'a -> 'a t -> 'a t
 
-val next_key : 'a t -> key
-
-val succ_key : key -> key
-
-val plus_key : key -> int -> key
-
-val unsafe_to_int : key -> int
-
-val unsafe_of_int : int -> key
+val next_key : 'a t -> int
 
 val pp : 'a Fmt.t -> 'a t Fmt.t
-
-val pp_key : key Fmt.t
