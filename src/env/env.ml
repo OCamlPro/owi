@@ -116,15 +116,15 @@ module Make
         Binary.Tag.t Allocator.t (* map from runtime address to runtime tags *)
     ; initialization_codes : Binary.expr IntMap.t
         (* map from modul to their initialization code *)
-    ; exported_functions : Allocator.key StringMap.t IntMap.t
+    ; exported_functions : int StringMap.t IntMap.t
         (* map from modul to their exported functions *)
-    ; exported_globals : Allocator.key StringMap.t IntMap.t
+    ; exported_globals : int StringMap.t IntMap.t
         (* map from modul to their exported globals *)
-    ; exported_memories : Allocator.key StringMap.t IntMap.t
+    ; exported_memories : int StringMap.t IntMap.t
         (* map from modul to their exported memories *)
-    ; exported_tables : Allocator.key StringMap.t IntMap.t
+    ; exported_tables : int StringMap.t IntMap.t
         (* map from modul to their exported tables *)
-    ; exported_tags : Allocator.key StringMap.t IntMap.t
+    ; exported_tags : int StringMap.t IntMap.t
     ; last_module : modul option (* last module that was added to the runtime *)
     ; registered_modules : modul StringMap.t
         (* map from registered names to modul *)
@@ -188,13 +188,13 @@ module Make
       (IntMap.pp (fun ppf e ->
          Binary.pp_expr ~short:true ppf (Annotated.dummy e) ) )
       initialization_codes
-      (IntMap.pp (StringMap.pp Allocator.pp_key))
+      (IntMap.pp (StringMap.pp Fmt.int))
       exported_functions
-      (IntMap.pp (StringMap.pp Allocator.pp_key))
+      (IntMap.pp (StringMap.pp Fmt.int))
       exported_globals
-      (IntMap.pp (StringMap.pp Allocator.pp_key))
+      (IntMap.pp (StringMap.pp Fmt.int))
       exported_memories
-      (IntMap.pp (StringMap.pp Allocator.pp_key))
+      (IntMap.pp (StringMap.pp Fmt.int))
       exported_tables (Fmt.option pp_modul) last_module (StringMap.pp pp_modul)
       registered_modules pp_types types pp_type_groups type_groups
 
@@ -316,7 +316,7 @@ module Make
   let link_function ~env id (functions, (rewrite_map : Env_rewriter.t)) =
     function
     | Origin.Local func ->
-      let address = Allocator.plus_key (Allocator.next_key env.functions) id in
+      let address = Allocator.next_key env.functions + id in
       let functions =
         let func : Extern_func.t Kind.func = Kind.Wasm func in
         (address, func) :: functions
@@ -365,10 +365,9 @@ module Make
       Ok (functions, rewrite_map)
 
   let link_global ctx ~get_const_type ~get_const_func ~get_const_global ~env id
-    ((globals : (Allocator.key * global) list), (rewrite_map : Env_rewriter.t))
-      = function
+    ((globals : (int * global) list), (rewrite_map : Env_rewriter.t)) = function
     | Origin.Local ({ init; typ; id = _ } : Binary.Global.t) ->
-      let address = Allocator.plus_key (Allocator.next_key env.globals) id in
+      let address = Allocator.next_key env.globals + id in
       let* value =
         Constexpr_eval.expr ctx ~get_const_type ~get_const_func
           ~get_const_global init.raw
@@ -461,7 +460,7 @@ module Make
 
   let link_memory ~env id (memories, (rewrite_map : Env_rewriter.t)) = function
     | Origin.Local (_label, typ) ->
-      let address = Allocator.plus_key (Allocator.next_key env.memories) id in
+      let address = Allocator.next_key env.memories + id in
       let memories =
         let memory = Memory.init typ in
         (address, memory) :: memories
@@ -493,7 +492,7 @@ module Make
 
   let link_table ~env id (tables, (rewrite_map : Env_rewriter.t)) = function
     | Origin.Local { Binary.Table.typ; _ } ->
-      let address = Allocator.plus_key (Allocator.next_key env.tables) id in
+      let address = Allocator.next_key env.tables + id in
       let tables =
         let table = Table.init typ in
         (address, table) :: tables
@@ -522,7 +521,7 @@ module Make
   let link_data ~env id
     ((initialization_code : Binary.expr), datas, (rewrite_map : Env_rewriter.t))
     { Binary.Data.init; mode; _ } =
-    let address = Allocator.plus_key (Allocator.next_key env.datas) id in
+    let address = Allocator.next_key env.datas + id in
     let datas = (address, init) :: datas in
 
     let rewrite_map =
@@ -553,7 +552,7 @@ module Make
   let link_elem ctx ~get_const_type ~get_const_func ~get_const_global ~env id
     (initialization_code, elems, (rewrite_map : Env_rewriter.t))
     { Binary.Elem.init; mode; _ } =
-    let address = Allocator.plus_key (Allocator.next_key env.elems) id in
+    let address = Allocator.next_key env.elems + id in
 
     let* init =
       list_map
@@ -591,7 +590,7 @@ module Make
 
   let link_tag ~env id (tags, map) = function
     | Origin.Local tag ->
-      let address = Allocator.plus_key (Allocator.next_key env.tables) id in
+      let address = Allocator.next_key env.tables + id in
       let tags = (address, tag) :: tags in
       let map = IntMap.add id address map in
       Ok (tags, map)
@@ -681,13 +680,13 @@ module Make
       (* TODO: this can probably be changed to remove the Result wrap? *)
       match IntMap.find_opt id rewrite_map.functions with
       | None -> assert false
-      | Some address -> Ok (Allocator.unsafe_to_int address)
+      | Some address -> Ok address
     in
 
     (* globals *)
     let* globals, rewrite_map =
       array_fold_lefti
-        (fun id ((globals : (Allocator.key * global) list), rewrite_map) ->
+        (fun id ((globals : (int * global) list), rewrite_map) ->
           link_global ctx ~get_const_type
             ~get_const_func:(get_const_func rewrite_map)
             ~get_const_global:(get_const_global ~env globals rewrite_map)
@@ -912,13 +911,11 @@ module Make
     Ok env
 
   let get_global ~env id =
-    let id = Allocator.unsafe_of_int id in
     match Allocator.find_opt id env.globals with
     | Some { value = v; _ } -> v
     | None -> assert false
 
   let set_global ~env id value =
-    let id = Allocator.unsafe_of_int id in
     match Allocator.find_opt id env.globals with
     | Some { typ; _ } ->
       let global = { value; typ } in
@@ -927,52 +924,43 @@ module Make
     | None -> assert false
 
   let get_memory ~env id =
-    let id = Allocator.unsafe_of_int id in
     match Allocator.find_opt id env.memories with
     | Some m -> m
     | None -> assert false
 
   let set_memory ~env id memory =
-    let id = Allocator.unsafe_of_int id in
     let memories = Allocator.add_manual id memory env.memories in
     { env with memories }
 
   let get_table ~env id =
-    let id = Allocator.unsafe_of_int id in
     match Allocator.find_opt id env.tables with
     | Some m -> m
     | None -> assert false
 
   let set_table ~env id table =
-    let id = Allocator.unsafe_of_int id in
     let tables = Allocator.add_manual id table env.tables in
     { env with tables }
 
   let get_elem ~env id =
-    let id = Allocator.unsafe_of_int id in
     match Allocator.find_opt id env.elems with
     | Some m -> m
     | None -> assert false
 
   (* le bonhomme vert! *)
   let set_elem ~env id elem =
-    let id = Allocator.unsafe_of_int id in
     let elems = Allocator.add_manual id elem env.elems in
     { env with elems }
 
   let get_data ~env id =
-    let id = Allocator.unsafe_of_int id in
     match Allocator.find_opt id env.datas with
     | Some m -> m
     | None -> assert false
 
   let set_data ~env id data =
-    let id = Allocator.unsafe_of_int id in
     let datas = Allocator.add_manual id data env.datas in
     { env with datas }
 
   let get_func ~env id =
-    let id = Allocator.unsafe_of_int id in
     match Allocator.find_opt id env.functions with
     | Some v -> v
     | None -> assert false
