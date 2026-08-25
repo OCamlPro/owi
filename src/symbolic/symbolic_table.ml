@@ -10,6 +10,13 @@ type t =
   ; typ : Binary.ref_type
   }
 
+let pp_map =
+  Fmt.braces
+    (Fmt.iter_bindings ~sep:Fmt.semi IntMap.iter (fun ppf (k, v) ->
+       Fmt.pf ppf "%d -> %a" k Symbolic_ref.pp v ) )
+
+let pp ppf t = Fmt.pf ppf "%a" pp_map t.data
+
 let get t i =
   match IntMap.find_opt i t.data with Some v -> v | None -> assert false
 

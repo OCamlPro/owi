@@ -27,4 +27,6 @@ module type T = sig
     t_src:t -> t_dst:t -> src:Int32.t -> dst:Int32.t -> len:Int32.t -> t
 
   val init : Binary.Table.Type.t -> t
+
+  val pp : t Fmt.t
 end

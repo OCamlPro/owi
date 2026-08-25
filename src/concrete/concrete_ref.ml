@@ -53,7 +53,7 @@ let fresh_id () =
 let pp fmt = function
   | Extern None -> pf fmt "externref none"
   | Extern _ -> pf fmt "externref"
-  | Func _ -> pf fmt "funcref"
+  | Func i -> pf fmt "funcref %a" (Fmt.option Fmt.int) i
   | NullExn -> pf fmt "nullexnref"
   | NullRef -> pf fmt "nullref"
   | I31 i -> pf fmt "i31ref %ld" i

@@ -4,60 +4,6 @@
 
 open Syntax
 
-module Allocator : sig
-  type !+'a t
-
-  type key
-
-  val empty : 'a t
-
-  val find_opt : key -> 'a t -> 'a option
-
-  val add : 'a -> 'a t -> 'a t * key
-
-  val add_manual : key -> 'a -> 'a t -> 'a t
-
-  val next_key : 'a t -> key
-
-  val succ_key : key -> key
-
-  val plus_key : key -> int -> key
-
-  val unsafe_to_int : key -> int
-
-  val unsafe_of_int : int -> key
-
-  val pp : 'a Fmt.t -> 'a t Fmt.t
-
-  val pp_key : key Fmt.t
-end = struct
-  include Map.Make (Int)
-
-  let next_key map = cardinal map
-
-  let add_manual k v map = add k v map
-
-  let add v map =
-    let key = next_key map in
-    let map = add key v map in
-    (map, key)
-
-  let succ_key key = succ key
-
-  let plus_key k n = k + n
-
-  let unsafe_to_int v = v
-
-  let unsafe_of_int v = v
-
-  let pp pp_v =
-    Fmt.braces
-      (Fmt.iter_bindings ~sep:Fmt.semi iter (fun ppf (k, v) ->
-         Fmt.pf ppf "%d -> %a" k pp_v v ) )
-
-  let pp_key ppf key = Fmt.pf ppf "%d" key
-end
-
 module IntMap = struct
   include Map.Make (Int)
 
@@ -123,27 +69,14 @@ module Make
 
       val init : Binary.Mem.Type.limits -> t
     end)
-    (Table : sig
-      type t
-
-      val init : Binary.Table.Type.t -> t
-
-      val size : t -> int
-
-      (* TODO: could be stored at link time instead *)
-      val get_type : t -> Binary.Table.Type.t
-    end)
+    (Table : Table_intf.T with type reference := Value.t Value.Ref.t)
     (Elem : Elem_intf.T with type reference := Value.t Value.Ref.t)
     (Extern_func : sig
       type t
 
       val to_func_type : t -> Binary.func_type
     end)
-    (Data : sig
-      type t
-
-      val of_string : string -> t
-    end) :
+    (Data : Data_intf.T) :
   Env_intf.T
     with type extern_func := Extern_func.t
      and type value := Value.t
@@ -227,7 +160,6 @@ module Make
     } =
     let pp_todo ppf _v = Fmt.pf ppf "<TODO>" in
     let pp_elem = pp_todo in
-    let pp_table = pp_todo in
     let pp_memory = pp_todo in
     let pp_data = pp_todo in
     let pp_modul ppf v = Fmt.pf ppf "%d" v in
@@ -251,7 +183,7 @@ module Make
        type_groups: %a@]"
       (Allocator.pp Kind.pp_func)
       functions (Allocator.pp pp_global) globals (Allocator.pp pp_memory)
-      memories (Allocator.pp pp_table) tables (Allocator.pp pp_data) datas
+      memories (Allocator.pp Table.pp) tables (Allocator.pp pp_data) datas
       (Allocator.pp pp_elem) elems
       (IntMap.pp (fun ppf e ->
          Binary.pp_expr ~short:true ppf (Annotated.dummy e) ) )
@@ -381,13 +313,20 @@ module Make
       assert false
     | Some func -> Ok (func, address)
 
-  let link_function ~env ~type_base_id id (functions, map) = function
+  let link_function ~env id (functions, (rewrite_map : Env_rewriter.t)) =
+    function
     | Origin.Local func ->
-      let func : Extern_func.t Kind.func = Kind.Wasm func in
       let address = Allocator.plus_key (Allocator.next_key env.functions) id in
-      let functions = (address, func) :: functions in
-      let map = IntMap.add id address map in
-      Ok (functions, map)
+      let functions =
+        let func : Extern_func.t Kind.func = Kind.Wasm func in
+        (address, func) :: functions
+      in
+      let rewrite_map =
+        { rewrite_map with
+          functions = IntMap.add id address rewrite_map.functions
+        }
+      in
+      Ok (functions, rewrite_map)
     | Imported ({ name; typ; _ } as import) ->
       let* func, address =
         load_import ~env ~import env.exported_functions env.functions
@@ -395,7 +334,7 @@ module Make
       (* comparing their types *)
       let* () =
         let expected_type_id =
-          Option.map (fun id -> id + type_base_id) (fst typ)
+          Option.map (fun id -> id + rewrite_map.type_base_id) (fst typ)
         in
         let _, expected_ft = typ in
         let got_type_id, got_ft =
@@ -418,24 +357,31 @@ module Make
           in
           Error (`Incompatible_import_type msg)
       in
-      (* adding new global to the address map *)
-      let map = IntMap.add id address map in
-      Ok (functions, map)
+      let rewrite_map =
+        { rewrite_map with
+          functions = IntMap.add id address rewrite_map.functions
+        }
+      in
+      Ok (functions, rewrite_map)
 
   let link_global ctx ~get_const_type ~get_const_func ~get_const_global ~env id
-    ((globals : (Allocator.key * global) list), map) = function
+    ((globals : (Allocator.key * global) list), (rewrite_map : Env_rewriter.t))
+      = function
     | Origin.Local ({ init; typ; id = _ } : Binary.Global.t) ->
+      let address = Allocator.plus_key (Allocator.next_key env.globals) id in
       let* value =
         Constexpr_eval.expr ctx ~get_const_type ~get_const_func
           ~get_const_global init.raw
       in
-      let global : global = { value; typ } in
+      let globals =
+        let global : global = { value; typ } in
+        (address, global) :: globals
+      in
 
-      let address = Allocator.plus_key (Allocator.next_key env.globals) id in
-      let globals = (address, global) :: globals in
-
-      let map = IntMap.add id address map in
-      Ok (globals, map)
+      let rewrite_map =
+        { rewrite_map with globals = IntMap.add id address rewrite_map.globals }
+      in
+      Ok (globals, rewrite_map)
     | Imported ({ name; typ; _ } as import) ->
       let* global, address =
         load_import ~env ~import env.exported_globals env.globals
@@ -454,8 +400,10 @@ module Make
           else Error (`Incompatible_import_type name)
       in
       (* adding new global to the address map *)
-      let map = IntMap.add id address map in
-      Ok (globals, map)
+      let rewrite_map =
+        { rewrite_map with globals = IntMap.add id address rewrite_map.globals }
+      in
+      Ok (globals, rewrite_map)
 
   let memory_limit_is_included ~import ?imported_data_size ~imported () =
     match (import, imported) with
@@ -511,15 +459,19 @@ module Make
     table_limit_is_included ~imported_data_size ~import ~imported ()
     && Binary.ref_type_eq t1 t2
 
-  let link_memory ~env id (memories, map) = function
+  let link_memory ~env id (memories, (rewrite_map : Env_rewriter.t)) = function
     | Origin.Local (_label, typ) ->
-      let memory = Memory.init typ in
-
       let address = Allocator.plus_key (Allocator.next_key env.memories) id in
-      let memories = (address, memory) :: memories in
-
-      let map = IntMap.add id address map in
-      Ok (memories, map)
+      let memories =
+        let memory = Memory.init typ in
+        (address, memory) :: memories
+      in
+      let rewrite_map =
+        { rewrite_map with
+          memories = IntMap.add id address rewrite_map.memories
+        }
+      in
+      Ok (memories, rewrite_map)
     | Imported ({ name; typ; _ } as import) ->
       let* memory, address =
         load_import ~env ~import env.exported_memories env.memories
@@ -532,18 +484,24 @@ module Make
         else Error (`Incompatible_import_type name)
       in
       (* adding new memory to the address map *)
-      let map = IntMap.add id address map in
-      Ok (memories, map)
+      let rewrite_map =
+        { rewrite_map with
+          memories = IntMap.add id address rewrite_map.memories
+        }
+      in
+      Ok (memories, rewrite_map)
 
-  let link_table ~env id (tables, map) = function
+  let link_table ~env id (tables, (rewrite_map : Env_rewriter.t)) = function
     | Origin.Local { Binary.Table.typ; _ } ->
-      let table = Table.init typ in
-
       let address = Allocator.plus_key (Allocator.next_key env.tables) id in
-      let tables = (address, table) :: tables in
-
-      let map = IntMap.add id address map in
-      Ok (tables, map)
+      let tables =
+        let table = Table.init typ in
+        (address, table) :: tables
+      in
+      let rewrite_map =
+        { rewrite_map with tables = IntMap.add id address rewrite_map.tables }
+      in
+      Ok (tables, rewrite_map)
     | Imported ({ name; typ; _ } as import) ->
       let* table, address =
         load_import ~env ~import env.exported_tables env.tables
@@ -556,23 +514,26 @@ module Make
         else Error (`Incompatible_import_type name)
       in
       (* adding new table to the address map *)
-      let map = IntMap.add id address map in
-      Ok (tables, map)
+      let rewrite_map =
+        { rewrite_map with tables = IntMap.add id address rewrite_map.tables }
+      in
+      Ok (tables, rewrite_map)
 
-  let link_data ~env ~memories_map id
-    ((initialization_code : Binary.expr), datas, map)
+  let link_data ~env id
+    ((initialization_code : Binary.expr), datas, (rewrite_map : Env_rewriter.t))
     { Binary.Data.init; mode; _ } =
-    let data = init in
-
     let address = Allocator.plus_key (Allocator.next_key env.datas) id in
-    let datas = (address, data) :: datas in
+    let datas = (address, init) :: datas in
 
-    let map = IntMap.add id address map in
+    let rewrite_map =
+      { rewrite_map with datas = IntMap.add id address rewrite_map.datas }
+    in
     let* initialization_code =
       match mode with
       | Passive -> Ok initialization_code
       | Active (mem, offset) ->
-        begin match IntMap.find_opt mem memories_map with
+        (* TODO: this check should move to validation time ?! *)
+        begin match IntMap.find_opt mem rewrite_map.memories with
         | None -> Error (`Unknown_memory (Text.Raw mem))
         | Some _ ->
           let length = String.length init |> Concrete_i32.of_int in
@@ -587,10 +548,13 @@ module Make
                 ] )
         end
     in
-    Ok (initialization_code, datas, map)
+    Ok (initialization_code, datas, rewrite_map)
 
   let link_elem ctx ~get_const_type ~get_const_func ~get_const_global ~env id
-    (initialization_code, elems, map) { Binary.Elem.init; mode; _ } =
+    (initialization_code, elems, (rewrite_map : Env_rewriter.t))
+    { Binary.Elem.init; mode; _ } =
+    let address = Allocator.plus_key (Allocator.next_key env.elems) id in
+
     let* init =
       list_map
         (fun expr ->
@@ -598,18 +562,20 @@ module Make
             ~get_const_global expr.Annotated.raw )
         init
     in
-    let elem =
-      match mode with
-      | Declarative -> (* Declarative elements have no env value *) []
-      | Active _ | Passive -> init
+    let elems =
+      let elem =
+        match mode with
+        | Declarative -> (* Declarative elements have no env value *) []
+        | Active _ | Passive -> init
+      in
+      (address, elem) :: elems
     in
 
-    let address = Allocator.plus_key (Allocator.next_key env.elems) id in
-    let elems = (address, elem) :: elems in
-
-    let map = IntMap.add id address map in
+    let rewrite_map =
+      { rewrite_map with elems = IntMap.add id address rewrite_map.elems }
+    in
     match mode with
-    | Passive | Declarative -> Ok (initialization_code, elems, map)
+    | Passive | Declarative -> Ok (initialization_code, elems, rewrite_map)
     | Active (table, offset) ->
       let length = Int32.of_int @@ List.length init in
       let initialization_code =
@@ -621,7 +587,7 @@ module Make
             ; Simple (Elem (Drop id))
             ]
       in
-      Ok (initialization_code, elems, map)
+      Ok (initialization_code, elems, rewrite_map)
 
   let link_tag ~env id (tags, map) = function
     | Origin.Local tag ->
@@ -650,52 +616,29 @@ module Make
   let link_binary_module ~(env : t) ~name ~(modul : Binary.Module.t) :
     t Result.t =
     Log.info (fun m -> m "linking      ...");
+
     (* This is the first step where we simply allocate the env values for functions, globals, memories etc.
-                                             Each one is given a unique address in a global space, and we maintain a map from (module id, {func,global,...} id) to env address. *)
+       Each one is given a unique address in a global space, and we maintain a map from (module id, {func,global,...} id) to env address. *)
     let new_module = get_next_module ~env in
+
     (* type_base_id: the number all previously identified types from the modules
        that were treated before *)
     let type_base_id = Array.length env.types in
-    let rewrite_type_id id = type_base_id + id in
-    let rewrite_heap_type : Binary.heap_type -> Binary.heap_type = function
-      | TypeUse id -> TypeUse (rewrite_type_id id)
-      | ht -> ht
+    let rewrite_map : Env_rewriter.t =
+      { Env_rewriter.empty with type_base_id }
     in
-    let rewrite_ref_type : Binary.ref_type -> Binary.ref_type =
-     fun (nullable, ht) -> (nullable, rewrite_heap_type ht)
+
+    let types =
+      Array.map (Env_rewriter.rewrite_sub_type ~map:rewrite_map) modul.types
     in
-    let rewrite_val_type : Binary.val_type -> Binary.val_type = function
-      | Ref_type rt -> Ref_type (rewrite_ref_type rt)
-      | vt -> vt
-    in
-    let rewrite_storage_type : Binary.storage_type -> Binary.storage_type =
-      function
-      | Val_type vt -> Val_type (rewrite_val_type vt)
-      | Pack_type _ as pt -> pt
-    in
-    let rewrite_field_type : Binary.field_type -> Binary.field_type =
-     fun (mut, st) -> (mut, rewrite_storage_type st)
-    in
-    let rewrite_comp_type : Binary.comp_type -> Binary.comp_type = function
-      | Def_struct_t fields ->
-        Def_struct_t
-          (List.map (fun (id, ft) -> (id, rewrite_field_type ft)) fields)
-      | Def_array_t ft -> Def_array_t (rewrite_field_type ft)
-      | Def_func_t (params, results) ->
-        Def_func_t
-          ( List.map (fun (id, vt) -> (id, rewrite_val_type vt)) params
-          , List.map rewrite_val_type results )
-    in
-    let rewrite_sub_type : Binary.sub_type -> Binary.sub_type =
-     fun { final; ids; ct } ->
-      { final; ids = List.map rewrite_type_id ids; ct = rewrite_comp_type ct }
-    in
-    let types = Array.map rewrite_sub_type modul.types in
     let type_groups =
       let module_groups =
         Binary.compute_type_groups modul.type_defs (Array.length modul.types)
       in
-      Array.map (fun (lo, size) -> (rewrite_type_id lo, size)) module_groups
+      Array.map
+        (fun (lo, size) ->
+          (Env_rewriter.rewrite_type_id ~map:rewrite_map lo, size) )
+        module_groups
     in
     (* We need to compute the updated environment with the new types and type
        groups earlier so that we can use it for imported functions *)
@@ -708,10 +651,8 @@ module Make
     (* TODO: should it be passed to the function instead? *)
     let ctx = Context.empty () in
     (* functions *)
-    let* functions, functions_map =
-      array_fold_lefti
-        (link_function ~env ~type_base_id)
-        ([], IntMap.empty) modul.func
+    let* functions, rewrite_map =
+      array_fold_lefti (link_function ~env) ([], rewrite_map) modul.func
     in
 
     (* tags *)
@@ -720,9 +661,9 @@ module Make
     (* TODO: I'm not sure about this *)
     let get_const_type id = Ok (Array.get types id) in
 
-    let get_const_global ~env globals globals_map id =
+    let get_const_global ~env globals (rewrite_map : Env_rewriter.t) id =
       (* we should only make visible previously defined immutable globals and imported immutable globals. *)
-      match IntMap.find_opt id globals_map with
+      match IntMap.find_opt id rewrite_map.globals with
       | None -> assert false
       | Some address ->
         begin match List.assoc_opt address globals with
@@ -735,56 +676,57 @@ module Make
         end
     in
 
-    let get_const_func functions_map id =
+    let get_const_func (rewrite_map : Env_rewriter.t) id =
       (* we should only make visible functions that are defined locally, not imported functions *)
       (* TODO: this can probably be changed to remove the Result wrap? *)
-      match IntMap.find_opt id functions_map with
+      match IntMap.find_opt id rewrite_map.functions with
       | None -> assert false
       | Some address -> Ok (Allocator.unsafe_to_int address)
     in
 
     (* globals *)
-    let* globals, globals_map =
+    let* globals, rewrite_map =
       array_fold_lefti
-        (fun id ((globals : (Allocator.key * global) list), map) ->
+        (fun id ((globals : (Allocator.key * global) list), rewrite_map) ->
           link_global ctx ~get_const_type
-            ~get_const_func:(get_const_func functions_map)
-            ~get_const_global:(get_const_global ~env globals map)
-            ~env id (globals, map) )
-        ([], IntMap.empty) modul.global
+            ~get_const_func:(get_const_func rewrite_map)
+            ~get_const_global:(get_const_global ~env globals rewrite_map)
+            ~env id (globals, rewrite_map) )
+        ([], rewrite_map) modul.global
     in
     (* memories *)
-    let* memories, memories_map =
-      array_fold_lefti (link_memory ~env) ([], IntMap.empty) modul.mem
+    let* memories, rewrite_map =
+      array_fold_lefti (link_memory ~env) ([], rewrite_map) modul.mem
     in
     (* tables *)
-    let* tables, tables_map =
-      array_fold_lefti (link_table ~env) ([], IntMap.empty) modul.table
+    let* tables, rewrite_map =
+      array_fold_lefti (link_table ~env) ([], rewrite_map) modul.table
     in
     (* tags *)
     (* TODO: rewrite tags later using tags_map, it has not been done for now... *)
     let* tags, tags_map =
       array_fold_lefti (link_tag ~env) ([], IntMap.empty) modul.tag
     in
+    (* let rewrite_map = { rewrite_map with tags = tags_maps } in *)
+
     (* initialization code *)
     (* 1. data *)
-    let* initialization_code, datas, datas_map =
-      array_fold_lefti
-        (link_data ~env ~memories_map)
-        ([], [], IntMap.empty) modul.data
+    let* initialization_code, datas, rewrite_map =
+      array_fold_lefti (link_data ~env) ([], [], rewrite_map) modul.data
     in
+
     (* 2. elem *)
-    let* initialization_code, elems, elems_map =
+    let* initialization_code, elems, rewrite_map =
       array_fold_lefti
         (link_elem ctx ~get_const_type
-           ~get_const_func:(get_const_func functions_map)
-           ~get_const_global:(get_const_global ~env globals globals_map)
+           ~get_const_func:(get_const_func rewrite_map)
+           ~get_const_global:(get_const_global ~env globals rewrite_map)
            ~env )
-        (initialization_code, [], IntMap.empty)
+        (initialization_code, [], rewrite_map)
         modul.elem
     in
+
     (* 3. start function *)
-    (* TODO *)
     let initialization_code =
       match modul.Binary.Module.start with
       | None -> initialization_code
@@ -796,320 +738,12 @@ module Make
                                      For instance, if a function contains the instruction global.get 0, the 0 is local to the modul in which the function is defined.
                                      We look what is the env address of this global in the map, by looking the global map at (module_id, 0).
                                      If the env address is say, 42, we rewrite the instruction to be global.get 42. *)
-    let get_unsafe k tbl =
-      match IntMap.find_opt k tbl with
-      | Some v -> Allocator.unsafe_to_int v
-      | None -> assert false
-    in
-    let rewrite_global_instruction : Binary.global_instr -> Binary.global_instr
-        = function
-      | Get i -> Get (get_unsafe i globals_map)
-      | Set i -> Set (get_unsafe i globals_map)
-    in
-    let rewrite_i32_instruction : Binary.i32_instr -> Binary.i32_instr =
-      function
-      | ( Const _ | Clz | Ctz | Popcnt | Add | Sub | Mul | Div_s | Div_u | Rem_s
-        | Rem_u | And | Or | Xor | Shl | Shr_s | Shr_u | Rotl | Rotr | Eqz | Eq
-        | Ne | Lt_s | Lt_u | Gt_s | Gt_u | Le_s | Le_u | Ge_s | Ge_u | Extend8_s
-        | Extend16_s | Wrap_i64 | Trunc_f_s _ | Trunc_f_u _ | Trunc_sat_f_s _
-        | Trunc_sat_f_u _ | Reinterpret_f _ ) as i ->
-        i
-      | Load (i, memarg) -> Load (get_unsafe i memories_map, memarg)
-      | Load8_s (i, memarg) -> Load8_s (get_unsafe i memories_map, memarg)
-      | Load8_u (i, memarg) -> Load8_u (get_unsafe i memories_map, memarg)
-      | Load16_s (i, memarg) -> Load16_s (get_unsafe i memories_map, memarg)
-      | Load16_u (i, memarg) -> Load16_u (get_unsafe i memories_map, memarg)
-      | Store (i, memarg) -> Store (get_unsafe i memories_map, memarg)
-      | Store8 (i, memarg) -> Store8 (get_unsafe i memories_map, memarg)
-      | Store16 (i, memarg) -> Store16 (get_unsafe i memories_map, memarg)
-    in
-    let rewrite_i64_instruction : Binary.i64_instr -> Binary.i64_instr =
-      function
-      | ( Const _ | Clz | Ctz | Popcnt | Add | Sub | Mul | Div_s | Div_u | Rem_s
-        | Rem_u | And | Or | Xor | Shl | Shr_s | Shr_u | Rotl | Rotr | Eqz | Eq
-        | Ne | Lt_s | Lt_u | Gt_s | Gt_u | Le_s | Le_u | Ge_s | Ge_u | Extend8_s
-        | Extend16_s | Trunc_f_s _ | Trunc_f_u _ | Trunc_sat_f_s _
-        | Trunc_sat_f_u _ | Reinterpret_f _ | Extend32_s | Extend_i32_s
-        | Extend_i32_u ) as i ->
-        i
-      | Load (i, memarg) -> Load (get_unsafe i memories_map, memarg)
-      | Load8_s (i, memarg) -> Load8_s (get_unsafe i memories_map, memarg)
-      | Load8_u (i, memarg) -> Load8_u (get_unsafe i memories_map, memarg)
-      | Load16_s (i, memarg) -> Load16_s (get_unsafe i memories_map, memarg)
-      | Load16_u (i, memarg) -> Load16_u (get_unsafe i memories_map, memarg)
-      | Load32_s (i, memarg) -> Load32_s (get_unsafe i memories_map, memarg)
-      | Load32_u (i, memarg) -> Load32_u (get_unsafe i memories_map, memarg)
-      | Store (i, memarg) -> Store (get_unsafe i memories_map, memarg)
-      | Store8 (i, memarg) -> Store8 (get_unsafe i memories_map, memarg)
-      | Store16 (i, memarg) -> Store16 (get_unsafe i memories_map, memarg)
-      | Store32 (i, memarg) -> Store32 (get_unsafe i memories_map, memarg)
-    in
-    let rewrite_f32_instruction : Binary.f32_instr -> Binary.f32_instr =
-      function
-      | ( Abs | Neg | Sqrt | Ceil | Floor | Trunc | Nearest | Sub | Mul | Div
-        | Min | Max | Copysign | Eq | Ne | Lt | Gt | Le | Ge | Demote_f64
-        | Const _ | Convert_i_s _ | Convert_i_u _ | Reinterpret_i _ | Add ) as i
-        ->
-        i
-      | Load (i, memarg) -> Load (get_unsafe i memories_map, memarg)
-      | Store (i, memarg) -> Store (get_unsafe i memories_map, memarg)
-    in
-    let rewrite_f64_instruction : Binary.f64_instr -> Binary.f64_instr =
-      function
-      | ( Abs | Neg | Sqrt | Ceil | Floor | Trunc | Nearest | Add | Sub | Mul
-        | Div | Min | Max | Copysign | Eq | Ne | Lt | Gt | Le | Ge | Promote_f32
-        | Const _ | Convert_i_s _ | Convert_i_u _ | Reinterpret_i _ ) as i ->
-        i
-      | Load (i, memarg) -> Load (get_unsafe i memories_map, memarg)
-      | Store (i, memarg) -> Store (get_unsafe i memories_map, memarg)
-    in
-    let rewrite_v128_instruction : Binary.v128_instr -> Binary.v128_instr =
-      function
-      | (And | Not | Or | Any_true | Bitselect | Xor | Andnot | Const _) as i ->
-        i
-      | Load8_splat (i, memarg) ->
-        Load8_splat (get_unsafe i memories_map, memarg)
-      | Load8_lane (i, memarg, n) ->
-        Load8_lane (get_unsafe i memories_map, memarg, n)
-      | Load8x8_s (i, memarg) -> Load8x8_s (get_unsafe i memories_map, memarg)
-      | Load8x8_u (i, memarg) -> Load8x8_u (get_unsafe i memories_map, memarg)
-      | Load16_splat (i, memarg) ->
-        Load16_splat (get_unsafe i memories_map, memarg)
-      | Load16_lane (i, memarg, n) ->
-        Load16_lane (get_unsafe i memories_map, memarg, n)
-      | Load16x4_s (i, memarg) -> Load16x4_s (get_unsafe i memories_map, memarg)
-      | Load16x4_u (i, memarg) -> Load16x4_u (get_unsafe i memories_map, memarg)
-      | Load32_splat (i, memarg) ->
-        Load32_splat (get_unsafe i memories_map, memarg)
-      | Load32_lane (i, memarg, n) ->
-        Load32_lane (get_unsafe i memories_map, memarg, n)
-      | Load32_zero (i, memarg) ->
-        Load32_zero (get_unsafe i memories_map, memarg)
-      | Load64_splat (i, memarg) ->
-        Load64_splat (get_unsafe i memories_map, memarg)
-      | Load64_lane (i, memarg, n) ->
-        Load64_lane (get_unsafe i memories_map, memarg, n)
-      | Load64_zero (i, memarg) ->
-        Load64_zero (get_unsafe i memories_map, memarg)
-      | Load (i, memarg) -> Load (get_unsafe i memories_map, memarg)
-      | Store (i, memarg) -> Store (get_unsafe i memories_map, memarg)
-      | Store8_lane (i, memarg, n) ->
-        Store8_lane (get_unsafe i memories_map, memarg, n)
-      | Store64_lane (i, memarg, n) ->
-        Store64_lane (get_unsafe i memories_map, memarg, n)
-      | Store32_zero (i, memarg) ->
-        Store32_zero (get_unsafe i memories_map, memarg)
-      | Store32_lane (i, memarg, n) ->
-        Store32_lane (get_unsafe i memories_map, memarg, n)
-      | Store16_lane (i, memarg, n) ->
-        Store16_lane (get_unsafe i memories_map, memarg, n)
-      | Load32x2_s (i, memarg) -> Load32x2_s (get_unsafe i memories_map, memarg)
-      | Load32x2_u (i, memarg) -> Load32x2_u (get_unsafe i memories_map, memarg)
-    in
-    let rewrite_i8x16_instruction : Text.i8x16_instr -> Text.i8x16_instr =
-      function
-      | ( Add | Sub | Eq | Ne | Lt_s | Lt_u | Gt_s | Gt_u | Le_s | Le_u | Ge_s
-        | Ge_u | Abs | Neg | Popcnt | All_true | Bitmask | Swizzle | Splat | Shl
-        | Shr_s | Shr_u | Min_s | Min_u | Add_sat_s | Add_sat_u | Sub_sat_s
-        | Sub_sat_u | Max_s | Max_u | Narrow_i16x8_s | Narrow_i16x8_u | Avgr_u
-        | Shuffle _ | Extract_lane_s _ | Extract_lane_u _ | Replace_lane _ ) as
-        i ->
-        i
-    in
-    let rewrite_i16x8_instruction : Text.i16x8_instr -> Text.i16x8_instr =
-      function
-      | ( Add | Sub | Mul | Eq | Ne | Lt_s | Lt_u | Gt_s | Gt_u | Le_s | Le_u
-        | Ge_s | Ge_u | Splat | Q15mulr_sat_s | Min_s | Min_u
-        | Extmul_low_i8x16_s | Extmul_low_i8x16_u | Extmul_high_i8x16_s
-        | Extmul_high_i8x16_u | Extend_low_i8x16_s | Extend_low_i8x16_u
-        | Extend_high_i8x16_s | Extend_high_i8x16_u | Extadd_pairwise_i8x16_s
-        | Extadd_pairwise_i8x16_u | Add_sat_s | Add_sat_u | Sub_sat_s
-        | Sub_sat_u | Max_s | Max_u | Shl | Neg | All_true | Shr_s | Shr_u
-        | Bitmask | Avgr_u | Abs | Narrow_i32x4_s | Narrow_i32x4_u
-        | Extract_lane_s _ | Extract_lane_u _ | Replace_lane _ ) as i ->
-        i
-    in
-    let rewrite_i32x4_instruction : Text.i32x4_instr -> Text.i32x4_instr =
-      function
-      | ( Add | Sub | Mul | Shl | Shr_s | Shr_u | Eq | Ne | Lt_s | Lt_u | Gt_s
-        | Gt_u | Le_s | Le_u | Ge_s | Ge_u | Splat | Extend_low_i16x8_s
-        | Extend_high_i16x8_s | Extend_low_i16x8_u | Extend_high_i16x8_u
-        | Trunc_sat_f64x2_s_zero | Trunc_sat_f64x2_u_zero | Trunc_sat_f32x4_s
-        | Trunc_sat_f32x4_u | Min_s | Min_u | Extmul_low_i16x8_s
-        | Extmul_low_i16x8_u | Extmul_high_i16x8_s | Extmul_high_i16x8_u
-        | Extadd_pairwise_i16x8_s | Extadd_pairwise_i16x8_u | Dot_i16x8_s | Neg
-        | Max_s | Max_u | Abs | All_true | Bitmask | Extract_lane _
-        | Replace_lane _ ) as i ->
-        i
-    in
-    let rewrite_i64x2_instruction : Text.i64x2_instr -> Text.i64x2_instr =
-      function
-      | ( Add | Sub | Mul | Eq | Ne | Lt_s | Gt_s | Le_s | Ge_s | Splat
-        | Extend_low_i32x4_s | Extend_low_i32x4_u | Extend_high_i32x4_s
-        | Extend_high_i32x4_u | Extmul_low_i32x4_s | Extmul_low_i32x4_u
-        | Extmul_high_i32x4_s | Extmul_high_i32x4_u | Abs | Neg | All_true
-        | Bitmask | Shl | Shr_s | Shr_u | Extract_lane _ | Replace_lane _ ) as i
-        ->
-        i
-    in
-    let rewrite_f32x4_instruction : Text.f32x4_instr -> Text.f32x4_instr =
-      function
-      | ( Add | Pmin | Min | Eq | Convert_i32x4_s | Convert_i32x4_u | Ceil | Max
-        | Floor | Pmax | Ne | Sub | Abs | Trunc | Lt | Gt | Le | Ge | Mul
-        | Convert_low_i32x4_s | Convert_low_i32x4_u | Convert_high_i32x4_s
-        | Convert_high_i32x4_u | Splat | Nearest | Div | Neg | Sqrt
-        | Demote_f64x2_zero | Extract_lane _ | Replace_lane _ ) as i ->
-        i
-    in
-    let rewrite_f64x2_instruction : Text.f64x2_instr -> Text.f64x2_instr =
-      function
-      | ( Add | Pmin | Min | Eq | Ceil | Max | Floor | Pmax | Ne | Sub | Abs
-        | Trunc | Lt | Gt | Le | Ge | Mul | Convert_low_i32x4_s
-        | Convert_low_i32x4_u | Convert_high_i32x4_s | Convert_high_i32x4_u
-        | Nearest | Div | Neg | Sqrt | Splat | Promote_low_f32x4
-        | Extract_lane _ | Replace_lane _ ) as i ->
-        i
-    in
-    let rewrite_ref_instruction : Binary.ref_instr -> Binary.ref_instr =
-      function
-      | Null ht -> Null (rewrite_heap_type ht)
-      | Test rt -> Test (rewrite_ref_type rt)
-      | Cast rt -> Cast (rewrite_ref_type rt)
-      | (Is_null | As_non_null | Eq) as i -> i
-      | Func i -> Func (get_unsafe i functions_map)
-    in
-    let rewrite_table_instruction : Binary.table_instr -> Binary.table_instr =
-      function
-      | Get i -> Get (get_unsafe i tables_map)
-      | Set i -> Set (get_unsafe i tables_map)
-      | Size i -> Size (get_unsafe i tables_map)
-      | Grow i -> Grow (get_unsafe i tables_map)
-      | Fill i -> Fill (get_unsafe i tables_map)
-      | Copy (i1, i2) ->
-        Copy (get_unsafe i1 tables_map, get_unsafe i2 tables_map)
-      | Init (i1, i2) -> Init (get_unsafe i1 tables_map, get_unsafe i2 elems_map)
-    in
-    let rewrite_elem_instruction : Binary.elem_instr -> Binary.elem_instr =
-      function
-      | Drop i -> Drop (get_unsafe i elems_map)
-    in
-    let rewrite_memory_instruction : Binary.memory_instr -> Binary.memory_instr
-        = function
-      | Size i -> Size (get_unsafe i memories_map)
-      | Grow i -> Grow (get_unsafe i memories_map)
-      | Fill i -> Fill (get_unsafe i memories_map)
-      | Copy (i1, i2) ->
-        Copy (get_unsafe i1 memories_map, get_unsafe i2 memories_map)
-      | Init (i1, i2) ->
-        Init (get_unsafe i1 memories_map, get_unsafe i2 datas_map)
-    in
-    let rewrite_data_instruction : Binary.data_instr -> Binary.data_instr =
-      function
-      | Drop i -> Drop (get_unsafe i datas_map)
-    in
-    let rewrite_struct_instruction : Binary.struct_instr -> Binary.struct_instr
-        = function
-      | New id -> New (rewrite_type_id id)
-      | New_default id -> New_default (rewrite_type_id id)
-      | Get (ty, fld) -> Get (rewrite_type_id ty, fld)
-      | Get_s (ty, fld) -> Get_s (rewrite_type_id ty, fld)
-      | Get_u (ty, fld) -> Get_u (rewrite_type_id ty, fld)
-      | Set (ty, fld) -> Set (rewrite_type_id ty, fld)
-    in
-    let rewrite_array_instruction : Binary.array_instr -> Binary.array_instr =
-      function
-      | New id -> New (rewrite_type_id id)
-      | New_default id -> New_default (rewrite_type_id id)
-      | New_fixed (id, n) -> New_fixed (rewrite_type_id id, n)
-      | New_data (ty, data) ->
-        New_data (rewrite_type_id ty, get_unsafe data datas_map)
-      | New_elem (ty, elem) ->
-        New_elem (rewrite_type_id ty, get_unsafe elem elems_map)
-      | Get id -> Get (rewrite_type_id id)
-      | Get_s id -> Get_s (rewrite_type_id id)
-      | Get_u id -> Get_u (rewrite_type_id id)
-      | Set id -> Set (rewrite_type_id id)
-      | Fill id -> Fill (rewrite_type_id id)
-      | Copy (id1, id2) -> Copy (rewrite_type_id id1, rewrite_type_id id2)
-      | Init_data (ty, data) ->
-        Init_data (rewrite_type_id ty, get_unsafe data datas_map)
-      | Init_elem (ty, elem) ->
-        Init_elem (rewrite_type_id ty, get_unsafe elem elems_map)
-      | Len as i -> i
-    in
-    let rewrite_simple_instruction :
-      Binary.simple_instruction -> Binary.simple_instruction = function
-      | Global i -> Global (rewrite_global_instruction i)
-      | I32 i -> I32 (rewrite_i32_instruction i)
-      | I64 i -> I64 (rewrite_i64_instruction i)
-      | F32 i -> F32 (rewrite_f32_instruction i)
-      | F64 i -> F64 (rewrite_f64_instruction i)
-      | V128 i -> V128 (rewrite_v128_instruction i)
-      | I8x16 i -> I8x16 (rewrite_i8x16_instruction i)
-      | I16x8 i -> I16x8 (rewrite_i16x8_instruction i)
-      | I32x4 i -> I32x4 (rewrite_i32x4_instruction i)
-      | I64x2 i -> I64x2 (rewrite_i64x2_instruction i)
-      | F32x4 i -> F32x4 (rewrite_f32x4_instruction i)
-      | F64x2 i -> F64x2 (rewrite_f64x2_instruction i)
-      | Ref i -> Ref (rewrite_ref_instruction i)
-      | Table i -> Table (rewrite_table_instruction i)
-      | Elem i -> Elem (rewrite_elem_instruction i)
-      | Memory i -> Memory (rewrite_memory_instruction i)
-      | Data i -> Data (rewrite_data_instruction i)
-      | ( Nop | Local _ | Drop | Unreachable | Any_convert_extern
-        | Extern_convert_any | Select _ | I31 _ ) as i ->
-        i
-      | Struct i -> Struct (rewrite_struct_instruction i)
-      | Array i -> Array (rewrite_array_instruction i)
-    in
-    let rewrite_block_type : Binary.block_type -> Binary.block_type =
-     fun (type_id_opt, ft) ->
-      ( Option.map rewrite_type_id type_id_opt
-      , ( List.map (fun (id, vt) -> (id, rewrite_val_type vt)) (fst ft)
-        , List.map rewrite_val_type (snd ft) ) )
-    in
-    let rec rewrite_instruction = function
-      | Binary.Simple i -> Binary.Simple (rewrite_simple_instruction i)
-      | Block (a, b, e) ->
-        Block (a, Option.map rewrite_block_type b, rewrite_expression e)
-      | Loop (a, b, e) ->
-        Loop (a, Option.map rewrite_block_type b, rewrite_expression e)
-      | If_else (a, b, e1, e2) ->
-        If_else
-          ( a
-          , Option.map rewrite_block_type b
-          , rewrite_expression e1
-          , rewrite_expression e2 )
-      | Return_call i -> Return_call (get_unsafe i functions_map)
-      | Call i -> Call (get_unsafe i functions_map)
-      | Call_indirect (i, typ) ->
-        Call_indirect (get_unsafe i tables_map, rewrite_block_type typ)
-      | Return_call_indirect (i, typ) ->
-        Return_call_indirect (get_unsafe i tables_map, rewrite_block_type typ)
-      | Br_on_cast (id, rt1, rt2) ->
-        Br_on_cast (id, rewrite_ref_type rt1, rewrite_ref_type rt2)
-      | Br_on_cast_fail (id, rt1, rt2) ->
-        Br_on_cast_fail (id, rewrite_ref_type rt1, rewrite_ref_type rt2)
-      | ( Return | Br _ | Br_if _ | Br_table _ | Br_on_null _ | Br_on_non_null _
-        (* TODO: It's weird that return_call_ref is not using an indice like call_ref does... *)
-        | Return_call_ref _
-        (* TODO: check that call_ref is taking a raw type and not a typed index *)
-        | Call_ref _ ) as i ->
-        i
-    and rewrite_expression expr =
-      Annotated.map (List.map (Annotated.map rewrite_instruction)) expr
-    in
-    let rewrite_binary_func (func : Binary.Func.t) : Extern_func.t Kind.func =
-      let body = rewrite_expression func.body in
-      let type_f = rewrite_block_type func.type_f in
-      Kind.Wasm { func with body; type_f }
-    in
     let env =
       List.fold_left
         (fun env (address, func) ->
           match (func : Extern_func.t Kind.func) with
           | Kind.Wasm func ->
-            let func = rewrite_binary_func func in
+            let func = Env_rewriter.rewrite_binary_func ~map:rewrite_map func in
             let functions = Allocator.add_manual address func env.functions in
             { env with functions }
           | Kind.Extern _idx -> assert false )
@@ -1210,33 +844,35 @@ module Make
     in
     let exported_functions =
       add_exports new_module
-        (export_array_to_string_map modul.exports.func functions_map)
+        (export_array_to_string_map modul.exports.func rewrite_map.functions)
         env.exported_functions
     in
     let exported_globals =
       add_exports new_module
-        (export_array_to_string_map modul.exports.global globals_map)
+        (export_array_to_string_map modul.exports.global rewrite_map.globals)
         env.exported_globals
     in
     let exported_memories =
       add_exports new_module
-        (export_array_to_string_map modul.exports.mem memories_map)
+        (export_array_to_string_map modul.exports.mem rewrite_map.memories)
         env.exported_memories
     in
     let exported_tables =
       add_exports new_module
-        (export_array_to_string_map modul.exports.table tables_map)
+        (export_array_to_string_map modul.exports.table rewrite_map.tables)
         env.exported_tables
     in
     let exported_tags =
       add_exports new_module
         (export_array_to_string_map modul.exports.tag tags_map)
+        (* TODO: use rewrite_map.tags instead *)
         env.exported_tags
     in
     let last_module = Some new_module in
     let initialization_codes =
       let initialization_code =
-        rewrite_expression (Annotated.dummy initialization_code)
+        Env_rewriter.rewrite_expression ~map:rewrite_map
+          (Annotated.dummy initialization_code)
       in
       IntMap.add new_module initialization_code.Annotated.raw
         env.initialization_codes
