@@ -5,3 +5,11 @@
 type t = |
 
 let of_string _ = assert false
+
+let size _ = assert false
+
+let drop _ = assert false
+
+let to_string _ = assert false
+
+let value _ = assert false

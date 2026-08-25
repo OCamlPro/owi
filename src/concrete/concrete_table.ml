@@ -11,6 +11,13 @@ type t =
   ; mutable data : table
   }
 
+let pp_data =
+  Fmt.braces
+    (Fmt.iter_bindings ~sep:Fmt.semi Array.iteri (fun ppf (i, v) ->
+       Fmt.pf ppf "%d -> %a" i Concrete_ref.pp v ) )
+
+let pp ppf t = Fmt.pf ppf "%a" pp_data t.data
+
 let get_min : Binary.Table.Type.limits -> int = function
   | I32 { min; _ } -> Int32.to_int min
   | I64 { min; _ } -> Int64.to_int min

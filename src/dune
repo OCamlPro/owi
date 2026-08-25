@@ -28,6 +28,7 @@
   abstract_v128
   abstract_value
   abstract_wasm_ffi
+  allocator
   annotated
   assigned
   benchmark
@@ -88,6 +89,7 @@
   data_intf
   elem_intf
   env
+  env_rewriter
   env_intf
   exploration_smart
   extern
