@@ -20,9 +20,9 @@ module Make
 
         type i32
 
-        type 'value array_obj
+        module Array : Array_intf.T
 
-        type 'value struct_obj
+        module Struct : Struct_intf.T
 
         type 'value t =
           | Extern of Extern.t option
@@ -31,8 +31,8 @@ module Make
           | NullRef
           | I31 of i32
           | NullI31
-          | Array of 'value array_obj
-          | Struct of 'value struct_obj
+          | Array of 'value Array.t
+          | Struct of 'value Struct.t
           | ExternAsAny of Extern.t option
           | AnyAsExtern of 'value t
       end

@@ -75,9 +75,9 @@ module Ref : sig
     type t = Abstract_ref.Extern.t
   end
 
-  type 'value array_obj = 'value Abstract_ref.array_obj
+  module Array : Array_intf.T with type 'a t = 'a Abstract_ref.Array.t
 
-  type 'value struct_obj = 'value Abstract_ref.struct_obj
+  module Struct : Struct_intf.T with type 'a t = 'a Abstract_ref.Struct.t
 
   type i32 = Abstract_ref.i32
 
@@ -88,8 +88,8 @@ module Ref : sig
     | NullRef
     | I31 of i32
     | NullI31
-    | Array of 'value array_obj
-    | Struct of 'value struct_obj
+    | Array of 'value Abstract_ref.Array.t
+    | Struct of 'value Abstract_ref.Struct.t
     | ExternAsAny of Extern.t option
     | AnyAsExtern of 'value t
 

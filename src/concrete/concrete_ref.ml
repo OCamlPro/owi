@@ -18,17 +18,12 @@ module Extern = struct
     | Some Equal -> Some r
 end
 
+type boolean = Concrete_boolean.t
+
 type i32 = Concrete_i32.t
 
-type 'value gc_obj =
-  { obj_id : int
-  ; type_id : int
-  ; fields : 'value array
-  }
-
-type 'value struct_obj = 'value gc_obj
-
-type 'value array_obj = 'value gc_obj
+module Array = Concrete_array
+module Struct = Concrete_struct
 
 type 'value t =
   | Extern of Extern.t option
@@ -37,18 +32,10 @@ type 'value t =
   | NullRef
   | I31 of i32
   | NullI31
-  | Array of 'value array_obj
-  | Struct of 'value struct_obj
+  | Array of 'value Array.t
+  | Struct of 'value Struct.t
   | ExternAsAny of Extern.t option
   | AnyAsExtern of 'value t
-
-(* Concrete execution is not parallel, so this should be fine *)
-let obj_id_counter = ref 0
-
-let fresh_id () =
-  let id = !obj_id_counter in
-  incr obj_id_counter;
-  id
 
 let pp fmt = function
   | Extern None -> pf fmt "externref none"
@@ -106,35 +93,10 @@ let rec ref_eq (r1 : 'value t) (r2 : 'value t) : bool =
   else
     match (r1, r2) with
     | I31 a, I31 b -> Int32.eq a b
-    | Struct { obj_id = id1; _ }, Struct { obj_id = id2; _ } -> id1 = id2
-    | Array { obj_id = id1; _ }, Array { obj_id = id2; _ } -> id1 = id2
+    | Struct s1, Struct s2 -> Concrete_struct.phys_equal s1 s2
+    | Array a1, Array a2 -> Concrete_array.phys_equal a1 a2
     | AnyAsExtern a, AnyAsExtern b -> ref_eq a b
     | _ -> false
-
-let get_struct_type ({ type_id; _ } : 'value struct_obj) = Some type_id
-
-let get_array_type ({ type_id; _ } : 'value array_obj) = Some type_id
-
-let struct_new_with type_id fields =
-  Struct { obj_id = fresh_id (); type_id; fields }
-
-let struct_get_field ({ fields; _ } : 'value struct_obj) idx = fields.(idx)
-
-let struct_set_field (s : 'value struct_obj) idx v = s.fields.(idx) <- v
-
-let array_new_fill type_id v (n : Concrete_i32.t) =
-  let obj_id = fresh_id () in
-  let fields = Array.init (Concrete_i32.to_int n) (fun _i -> v) in
-  Array { obj_id; type_id; fields }
-
-let array_new_fixed_with type_id fields =
-  Array { obj_id = fresh_id (); type_id; fields }
-
-let array_get_elem ({ fields; _ } : 'value array_obj) idx = fields.(idx)
-
-let array_set_elem (a : 'value array_obj) idx v = a.fields.(idx) <- v
-
-let array_len_of ({ fields; _ } : 'value array_obj) = Array.length fields
 
 let get_func (r : 'value t) : int get_ref =
   match r with

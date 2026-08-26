@@ -1663,7 +1663,7 @@ struct
       match ht with
       | Struct_ht | Eq_ht | Any_ht -> true
       | TypeUse expected -> (
-        match Ref.get_struct_type s with
+        match Ref.Struct.get_type s with
         | None -> false
         | Some got ->
           let types = Env.get_types ~env in
@@ -1674,7 +1674,7 @@ struct
       match ht with
       | Array_ht | Eq_ht | Any_ht -> true
       | TypeUse expected -> (
-        match Ref.get_array_type a with
+        match Ref.Array.get_type a with
         | None -> false
         | Some got ->
           let types = Env.get_types ~env in
@@ -2276,7 +2276,9 @@ struct
     Int32.to_int x
 
   let check_array_oob off n arr =
-    off < 0 || n < 0 || off + n > Ref.array_len_of arr
+    (* TODO: all of this could be rewritten in a better way I think *)
+    let* length = select_i32 (Ref.Array.length arr) in
+    Choice.return (off < 0 || n < 0 || off + n > Concrete_i32.to_int length)
 
   let get_array_ref r =
     match r with
@@ -2405,9 +2407,8 @@ struct
       let n = List.length fields in
       let top_n, stack = Stack.pop_n state.stack n in
       let state = { state with stack } in
-      ret
-      @@ Stack.push_ref state.stack
-           (Ref.struct_new_with id (Array.of_list top_n))
+      let s = Ref.Struct (Ref.Struct.new_with id (Array.of_list top_n)) in
+      ret @@ Stack.push_ref state.stack s
     | Struct (New_default id) ->
       let types = Env.get_types ~env in
       let fields =
@@ -2419,13 +2420,14 @@ struct
       let defaults =
         Array.of_list (List.map (fun (_, (_, st)) -> default_gc_val st) fields)
       in
-      ret @@ Stack.push_ref state.stack (Ref.struct_new_with id defaults)
+      let s = Ref.Struct (Ref.Struct.new_with id defaults) in
+      ret @@ Stack.push_ref state.stack s
     | Struct (Get (_type_id, field_id)) ->
       let r, stack = Stack.pop_as_ref state.stack in
       let state = { state with stack } in
       begin match r with
       | Ref.Struct s ->
-        ret @@ Stack.push state.stack (Ref.struct_get_field s field_id)
+        ret @@ Stack.push state.stack (Ref.Struct.get_field s field_id)
       | r when Ref.is_null r -> Choice.trap (`Msg "null structure reference")
       | _ -> Choice.trap `Element_type_error
       end
@@ -2445,7 +2447,7 @@ struct
             end
           | _ -> None
         in
-        let raw = Ref.struct_get_field s field_id in
+        let raw = Ref.Struct.get_field s field_id in
         let* v =
           match raw with
           | I32 i -> (
@@ -2486,7 +2488,7 @@ struct
             end
           | _ -> None
         in
-        let raw = Ref.struct_get_field s field_id in
+        let raw = Ref.Struct.get_field s field_id in
         let v =
           match raw with
           | I32 i -> (
@@ -2505,7 +2507,7 @@ struct
       let state = { state with stack } in
       begin match r with
       | Ref.Struct s ->
-        Ref.struct_set_field s field_id v;
+        Ref.Struct.set_field s field_id v;
         ret state.stack
       | r when Ref.is_null r -> Choice.trap (`Msg "null structure reference")
       | _ -> Choice.trap `Element_type_error
@@ -2514,7 +2516,7 @@ struct
       let n, stack = Stack.pop_i32 state.stack in
       let v, stack = Stack.pop stack in
       let state = { state with stack } in
-      let a = Ref.array_new_fill id v n in
+      let a = Ref.Array (Ref.Array.new_fill id v n) in
       ret @@ Stack.push_ref state.stack a
     | Array (New_default id) ->
       let n, stack = Stack.pop_i32 state.stack in
@@ -2525,26 +2527,31 @@ struct
         | Def_array_t (_, st) -> st
         | _ -> Fmt.failwith "array.new_default: type %d is not an array type" id
       in
-      let a = Ref.array_new_fill id (default_gc_val st) n in
+      let a = Ref.Array (Ref.Array.new_fill id (default_gc_val st) n) in
       ret @@ Stack.push_ref state.stack a
     | Array (New_fixed (id, n)) ->
       let n = Int32.to_int n in
       let top_n, stack = Stack.pop_n state.stack n in
       let state = { state with stack } in
       let elems = Array.of_list (List.rev top_n) in
-      ret @@ Stack.push_ref state.stack (Ref.array_new_fixed_with id elems)
+      let a = Ref.Array (Ref.Array.new_fixed_with id elems) in
+      ret @@ Stack.push_ref state.stack a
     | Array (Get _id) ->
       let idx, stack = Stack.pop_i32 state.stack in
       let r, stack = Stack.pop_as_ref stack in
       let state = { state with stack } in
       begin match r with
       | Ref.Array a ->
-        let len = Ref.array_len_of a in
-        let* idx = Choice.select_i32 idx in
-        let idx = Int32.to_int idx in
+        (* TODO: rewrite to avoid select_i32 ! *)
+        let* idx' = Choice.select_i32 idx in
+        let* len = Choice.select_i32 (Ref.Array.length a) in
+        let idx = Concrete_i32.to_int idx' in
+        let len = Concrete_i32.to_int len in
         if idx < 0 || idx >= len then
           Choice.trap (`Msg "out of bounds array access")
-        else ret @@ Stack.push state.stack (Ref.array_get_elem a idx)
+        else
+          ret
+          @@ Stack.push state.stack (Ref.Array.get_elem a (I32.of_int32 idx'))
       | r when Ref.is_null r -> Choice.trap (`Msg "null array reference")
       | _ -> Choice.trap `Element_type_error
       end
@@ -2554,7 +2561,8 @@ struct
       let state = { state with stack } in
       begin match r with
       | Ref.Array a ->
-        let len = Ref.array_len_of a in
+        (* TODO: rewrite to avoid select_i32 ! *)
+        let* len = select_i32 (Ref.Array.length a) in
         let types = Env.get_types ~env in
         let packed =
           match types.(id).ct with
@@ -2565,12 +2573,13 @@ struct
             | _ -> None )
           | _ -> None
         in
-        let* idx = Choice.select_i32 idx in
-        let idx = Int32.to_int idx in
-        if idx < 0 || idx >= len then
+        (* TODO: rewrite to avoid select_i32 ! *)
+        let* idx' = Choice.select_i32 idx in
+        let idx' = Int32.to_int idx' in
+        if idx' < 0 || idx' >= Int32.to_int len then
           Choice.trap (`Msg "out of bounds array access")
         else
-          let raw = Ref.array_get_elem a idx in
+          let raw = Ref.Array.get_elem a idx in
           let* v =
             match raw with
             | I32 i -> (
@@ -2602,7 +2611,8 @@ struct
       let state = { state with stack } in
       begin match r with
       | Ref.Array a ->
-        let len = Ref.array_len_of a in
+        (* TODO: rewrite to avoid select_i32 ! *)
+        let* len = select_i32 (Ref.Array.length a) in
         let types = Env.get_types ~env in
         let mask =
           match types.(id).ct with
@@ -2613,12 +2623,13 @@ struct
             | _ -> None )
           | _ -> None
         in
-        let* idx = Choice.select_i32 idx in
-        let idx = Int32.to_int idx in
-        if idx < 0 || idx >= len then
+        (* TODO: rewrite to avoid select_i32 ! *)
+        let* idx' = Choice.select_i32 idx in
+        let idx' = Int32.to_int idx' in
+        if idx' < 0 || idx' >= Int32.to_int len then
           Choice.trap (`Msg "out of bounds array access")
         else
-          let raw = Ref.array_get_elem a idx in
+          let raw = Ref.Array.get_elem a idx in
           let v =
             match raw with
             | I32 i -> (
@@ -2638,13 +2649,14 @@ struct
       let state = { state with stack } in
       begin match r with
       | Ref.Array a ->
-        let len = Ref.array_len_of a in
-        let* idx = Choice.select_i32 idx in
-        let idx = Int32.to_int idx in
-        if idx < 0 || idx >= len then
+        (* TODO: rewrite to avoid select_i32 ! *)
+        let* len = select_i32 (Ref.Array.length a) in
+        let* idx' = Choice.select_i32 idx in
+        let idx' = Int32.to_int idx' in
+        if idx' < 0 || idx' >= Int32.to_int len then
           Choice.trap (`Msg "out of bounds array access")
         else begin
-          Ref.array_set_elem a idx v;
+          Ref.Array.set_elem a idx v;
           ret state.stack
         end
       | r when Ref.is_null r -> Choice.trap (`Msg "null array reference")
@@ -2655,8 +2667,8 @@ struct
       let state = { state with stack } in
       begin match r with
       | Ref.Array a ->
-        let len = Ref.array_len_of a in
-        ret @@ Stack.push_i32 state.stack (I32.of_int len)
+        let len = Ref.Array.length a in
+        ret @@ Stack.push_i32 state.stack len
       | r when Ref.is_null r -> Choice.trap (`Msg "null array reference")
       | _ -> Choice.trap `Element_type_error
       end
@@ -2677,15 +2689,17 @@ struct
       let* arr = get_array_ref array in
       let* n = select_int n in
       let* dst_off = select_int dst_off in
-      if check_array_oob dst_off n arr then
-        Choice.trap (`Msg "out of bounds array access")
-      else begin
-        let gv = v in
-        for i = 0 to n - 1 do
-          Ref.array_set_elem arr (dst_off + i) gv
-        done;
-        ret state.stack
-      end
+      let* () =
+        (* TODO: rewrite this! *)
+        let* b = check_array_oob dst_off n arr in
+        if b then Choice.trap (`Msg "out of bounds array access")
+        else Choice.return ()
+      in
+      let gv = v in
+      for i = 0 to n - 1 do
+        Ref.Array.set_elem arr (I32.of_int (dst_off + i)) gv
+      done;
+      ret state.stack
     | Array (Copy (_dst_id, _src_id)) ->
       let n, stack = Stack.pop_i32 state.stack in
       let s_off, stack = Stack.pop_i32 stack in
@@ -2698,21 +2712,26 @@ struct
       let* n = select_int n in
       let* d_off = select_int d_off in
       let* s_off = select_int s_off in
-      if check_array_oob d_off n d_arr || check_array_oob s_off n s_arr then
-        Choice.trap (`Msg "out of bounds array access")
-      else begin
-        if d_off <= s_off then
-          for i = 0 to n - 1 do
-            let elt = Ref.array_get_elem s_arr (s_off + i) in
-            Ref.array_set_elem d_arr (d_off + i) elt
-          done
+      let* () =
+        (* TODO: rewrite this! *)
+        let* b = check_array_oob d_off n d_arr in
+        if b then Choice.trap (`Msg "out of bounds array access")
         else
-          for i = n - 1 downto 0 do
-            let elt = Ref.array_get_elem s_arr (s_off + i) in
-            Ref.array_set_elem d_arr (d_off + i) elt
-          done;
-        ret state.stack
-      end
+          let* b = check_array_oob s_off n s_arr in
+          if b then Choice.trap (`Msg "out of bounds array access")
+          else Choice.return ()
+      in
+      if d_off <= s_off then
+        for i = 0 to n - 1 do
+          let elt = Ref.Array.get_elem s_arr (I32.of_int @@ (s_off + i)) in
+          Ref.Array.set_elem d_arr (I32.of_int @@ (d_off + i)) elt
+        done
+      else
+        for i = n - 1 downto 0 do
+          let elt = Ref.Array.get_elem s_arr (I32.of_int @@ (s_off + i)) in
+          Ref.Array.set_elem d_arr (I32.of_int @@ (d_off + i)) elt
+        done;
+      ret state.stack
     | Array (New_data (arr_id, data_id)) ->
       let n, stack = Stack.pop_i32 state.stack in
       let offset, stack = Stack.pop_i32 stack in
@@ -2730,8 +2749,8 @@ struct
           Array.init n (fun i ->
             read_data_gc_val st data (offset + (i * elem_size)) )
         in
-        ret
-        @@ Stack.push_ref state.stack (Ref.array_new_fixed_with arr_id elems)
+        let a = Ref.Array (Ref.Array.new_fixed_with arr_id elems) in
+        ret @@ Stack.push_ref state.stack a
       end
     | Array (New_elem (arr_id, elem_id)) ->
       let n, stack = Stack.pop_i32 state.stack in
@@ -2748,8 +2767,8 @@ struct
             let e = Elem.get elem (offset + i) in
             Ref e )
         in
-        ret
-        @@ Stack.push_ref state.stack (Ref.array_new_fixed_with arr_id elems)
+        let a = Ref.Array (Ref.Array.new_fixed_with arr_id elems) in
+        ret @@ Stack.push_ref state.stack a
       end
     | Array (Init_data (arr_id, data_id)) ->
       let n, stack = Stack.pop_i32 state.stack in
@@ -2765,17 +2784,19 @@ struct
       let elem_size = array_data_elem_size st in
       let data = Env.get_data ~env data_id in
       let data_str = Data.value data in
-      if check_array_oob d_off n arr then
-        Choice.trap (`Msg "out of bounds array access")
-      else if s_off < 0 || s_off + (n * elem_size) > Data.size data then
-        Choice.trap (`Msg "out of bounds memory access")
-      else begin
-        for i = 0 to n - 1 do
-          let v = read_data_gc_val st data_str (s_off + (i * elem_size)) in
-          Ref.array_set_elem arr (d_off + i) v
-        done;
-        ret state.stack
-      end
+      let* () =
+        (* TODO: rewrite this! *)
+        let* b = check_array_oob d_off n arr in
+        if b then Choice.trap (`Msg "out of bounds array access")
+        else if s_off < 0 || s_off + (n * elem_size) > Data.size data then
+          Choice.trap (`Msg "out of bounds memory access")
+        else Choice.return ()
+      in
+      for i = 0 to n - 1 do
+        let v = read_data_gc_val st data_str (s_off + (i * elem_size)) in
+        Ref.Array.set_elem arr (I32.of_int @@ (d_off + i)) v
+      done;
+      ret state.stack
     | Array (Init_elem (_arr_id, elem_id)) ->
       let n, stack = Stack.pop_i32 state.stack in
       let s_off, stack = Stack.pop_i32 stack in
@@ -2787,17 +2808,18 @@ struct
       let* s_off = select_int s_off in
       let* d_off = select_int d_off in
       let elem = Env.get_elem ~env elem_id in
-      if check_array_oob d_off n arr then
-        Choice.trap (`Msg "out of bounds array access")
-      else if s_off < 0 || s_off + n > Elem.size elem then
-        Choice.trap (`Msg "out of bounds table access")
-      else begin
-        for i = 0 to n - 1 do
-          let v = Ref (Elem.get elem (s_off + i)) in
-          Ref.array_set_elem arr (d_off + i) v
-        done;
-        ret state.stack
-      end
+      let* () =
+        let* b = check_array_oob d_off n arr in
+        if b then Choice.trap (`Msg "out of bounds array access")
+        else if s_off < 0 || s_off + n > Elem.size elem then
+          Choice.trap (`Msg "out of bounds table access")
+        else Choice.return ()
+      in
+      for i = 0 to n - 1 do
+        let v = Ref (Elem.get elem (s_off + i)) in
+        Ref.Array.set_elem arr (I32.of_int @@ (d_off + i)) v
+      done;
+      ret state.stack
 
   let exec_instr ({ raw; uuid; instr_counter; _ } : _ Annotated.t)
     ({ stack; env; _ } as state : State.t) : State.instr_result Choice.t =
