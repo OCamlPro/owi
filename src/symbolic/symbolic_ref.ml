@@ -18,11 +18,12 @@ module Extern = struct
     | Some Equal -> Some r
 end
 
+type boolean = Symbolic_boolean.t
+
 type i32 = Symbolic_i32.t
 
-type 'value array_obj = unit
-
-type 'value struct_obj = unit
+module Array = Symbolic_array
+module Struct = Symbolic_struct
 
 type 'value t =
   | Extern of Extern.t option
@@ -31,8 +32,8 @@ type 'value t =
   | NullRef
   | I31 of i32
   | NullI31
-  | Array of 'value array_obj
-  | Struct of 'value struct_obj
+  | Array of 'value Array.t
+  | Struct of 'value Struct.t
   | ExternAsAny of Extern.t option
   | AnyAsExtern of 'value t
 
@@ -43,8 +44,8 @@ let pp fmt = function
   | NullRef -> pf fmt "nullref"
   | I31 i -> pf fmt "i31ref %a" Symbolic_i32.pp i
   | NullI31 -> pf fmt "i31ref none"
-  | Struct () -> pf fmt "structref"
-  | Array () -> pf fmt "arrayref"
+  | Struct _ -> pf fmt "structref"
+  | Array _ -> pf fmt "arrayref"
   | ExternAsAny None -> pf fmt "anyref none"
   | ExternAsAny (Some _) -> pf fmt "anyref"
   | AnyAsExtern _ -> pf fmt "externref"
@@ -73,30 +74,6 @@ let extern_convert_any : 'value t -> 'value t = function
   | NullRef | NullI31 | NullExn | ExternAsAny None -> Extern None
   | ExternAsAny (Some e) -> Extern (Some e)
   | r -> AnyAsExtern r
-
-let get_struct_type (_ : unit) : int option = None
-
-let get_array_type (_ : unit) : int option = None
-
-let struct_new_with (_ : int) (_ : 'value array) : 'value t = Struct ()
-
-let struct_get_field (_ : 'value struct_obj) (_ : int) : 'value =
-  Fmt.failwith "TODO: unimplemented Symbolic_ref.struct_get_field"
-
-let struct_set_field (_ : 'value struct_obj) (_ : int) (_ : 'value) : unit = ()
-
-let array_new_fill (_ : int) (_ : 'value) (_ : Symbolic_i32.t) : 'value t =
-  Array ()
-
-let array_new_fixed_with (_ : int) (_ : 'value array) : 'value t = Array ()
-
-let array_get_elem (_ : 'value array_obj) (_ : int) : 'value =
-  Fmt.failwith "TODO: unimplemented Symbolic_ref.array_get_elem"
-
-let array_set_elem (_ : 'value array_obj) (_ : int) (_ : 'value) : unit = ()
-
-let array_len_of (_ : 'value array_obj) : int =
-  Fmt.failwith "TODO: unimplemented Symbolic_ref.array_len_of"
 
 let ref_eq (_ : 'value t) (_ : 'value t) : bool =
   Fmt.failwith "TODO: unimplemented Symbolic_ref.ref_eq"

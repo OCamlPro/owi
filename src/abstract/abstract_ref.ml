@@ -16,9 +16,43 @@ module Extern = struct
     | Some Equal -> Some r
 end
 
-type 'value array_obj = |
+module Array = struct
+  type i32 = Abstract_i32.t
 
-type 'value struct_obj = |
+  type boolean = Abstract_boolean.t
+
+  type 'value t = |
+
+  let get_type _a = assert false
+
+  let new_fill _type_id _v _n = assert false
+
+  let new_fixed_with _type_id _fields = assert false
+
+  let get_elem _a _index = assert false
+
+  let set_elem _a _index _v = assert false
+
+  let length _a = assert false
+
+  let phys_equal _a1 _a2 = assert false
+end
+
+module Struct = struct
+  type boolean = Abstract_boolean.t
+
+  type 'value t = |
+
+  let new_with _type_id _fields = assert false
+
+  let get_type _s = assert false
+
+  let get_field _s = assert false
+
+  let set_field _s _index _v = assert false
+
+  let phys_equal _a1 _a2 = assert false
+end
 
 type i32
 
@@ -29,8 +63,8 @@ type 'value t =
   | NullRef
   | I31 of i32
   | NullI31
-  | Array of 'value array_obj
-  | Struct of 'value struct_obj
+  | Array of 'value Array.t
+  | Struct of 'value Struct.t
   | ExternAsAny of Extern.t option
   | AnyAsExtern of 'value t
 

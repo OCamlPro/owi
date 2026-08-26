@@ -3,6 +3,6 @@
 (* Written by the Owi programmers *)
 
 include
-  Ref_intf.T
-    with type i32 = Symbolic_i32.t
-     and type boolean = Symbolic_boolean.t
+  Array_intf.T
+    with type i32 = Concrete_i32.t
+     and type boolean = Concrete_boolean.t

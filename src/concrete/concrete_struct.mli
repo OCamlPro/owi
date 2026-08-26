@@ -2,7 +2,4 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-include
-  Ref_intf.T
-    with type i32 = Symbolic_i32.t
-     and type boolean = Symbolic_boolean.t
+include Struct_intf.T with type boolean = Concrete_boolean.t

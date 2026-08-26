@@ -57,7 +57,7 @@ module Make (Value : Value_intf.T) :
     | Array (New id) ->
       let n, stack = Stack.pop_i32 stack in
       let v, stack = Stack.pop stack in
-      let a = Value.Ref.array_new_fill id v n in
+      let a = Value.Ref.Array (Value.Ref.Array.new_fill id v n) in
       Result.ok @@ Stack.push_ref stack a
     | Array (New_default id) ->
       let n, stack = Stack.pop_i32 stack in
@@ -67,14 +67,16 @@ module Make (Value : Value_intf.T) :
         | Def_array_t (_, st) -> st
         | _ -> Fmt.failwith "array.new_default: type %d is not an array type" id
       in
-      let a = Value.Ref.array_new_fill id (default_gc_val st) n in
+      let a =
+        Value.Ref.Array (Value.Ref.Array.new_fill id (default_gc_val st) n)
+      in
       Result.ok @@ Stack.push_ref stack a
     | Array (New_fixed (id, n)) ->
       let n = Int32.to_int n in
       let top_n, stack = Stack.pop_n stack n in
       let elems = Array.of_list (List.rev top_n) in
-      Result.ok
-      @@ Stack.push_ref stack (Value.Ref.array_new_fixed_with id elems)
+      let a = Value.Ref.Array (Value.Ref.Array.new_fixed_with id elems) in
+      Result.ok @@ Stack.push_ref stack a
     | I31 Ref ->
       let n, stack = Stack.pop_i32 stack in
       Result.ok @@ Stack.push_ref stack (Value.Ref.make_i31 n)
@@ -87,9 +89,10 @@ module Make (Value : Value_intf.T) :
       in
       let n = List.length fields in
       let top_n, stack = Stack.pop_n stack n in
-      Result.ok
-      @@ Stack.push_ref stack
-           (Value.Ref.struct_new_with id (Array.of_list top_n))
+      let s =
+        Value.Ref.Struct (Value.Ref.Struct.new_with id (Array.of_list top_n))
+      in
+      Result.ok @@ Stack.push_ref stack s
     | Struct (New_default id) ->
       let* typ : Binary.sub_type = get_const_type id in
       let fields =
@@ -101,7 +104,8 @@ module Make (Value : Value_intf.T) :
       let defaults =
         Array.of_list (List.map (fun (_, (_, st)) -> default_gc_val st) fields)
       in
-      Result.ok @@ Stack.push_ref stack (Value.Ref.struct_new_with id defaults)
+      let s = Value.Ref.Struct (Value.Ref.Struct.new_with id defaults) in
+      Result.ok @@ Stack.push_ref stack s
     | Any_convert_extern ->
       let r, stack = Stack.pop_as_ref stack in
       Result.ok @@ Stack.push_ref stack (Value.Ref.any_convert_extern r)
