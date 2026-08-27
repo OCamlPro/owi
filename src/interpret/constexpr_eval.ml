@@ -90,7 +90,8 @@ module Make (Value : Value_intf.T) :
       let n = List.length fields in
       let top_n, stack = Stack.pop_n stack n in
       let s =
-        Value.Ref.Struct (Value.Ref.Struct.new_with id (Array.of_list top_n))
+        Value.Ref.Struct
+          (Value.Ref.Struct.new_with id (Array.of_list (List.rev top_n)))
       in
       Result.ok @@ Stack.push_ref stack s
     | Struct (New_default id) ->
