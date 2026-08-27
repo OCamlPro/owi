@@ -120,7 +120,7 @@ let equal_script_result =
     | Result_struct_ref, Ref (Struct _) -> true
     | Result_array_ref, Ref (Array _) -> true
     | Result_eq_ref, Ref (I31 _ | NullI31 | Struct _ | Array _) -> true
-    | Result_extern_ref, Ref (Extern _) -> true
+    | Result_extern_ref, Ref (Extern _ | AnyAsExtern _) -> true
     | Result_extern n, Ref (Extern (Some ref)) ->
       begin match Ref.Extern.cast ref ty with
       | None -> false
