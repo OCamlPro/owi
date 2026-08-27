@@ -9,6 +9,8 @@ module type T = sig
 
   type reference
 
+  val default_gc_val : Binary.storage_type -> value
+
   val expr :
        context
     -> get_const_type:(Binary.indice -> Binary.sub_type Result.t)

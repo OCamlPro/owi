@@ -11,7 +11,6 @@ module Make (Value : Value_intf.T) :
      and type context := unit = struct
   module Stack = Stack.Make [@inlined hint] (Value)
 
-  (* TODO: this is duplicated between the monadic interpreter and this constexpr interpreter, it should be shared at some point! *)
   let default_gc_val : Binary.storage_type -> Value.t = function
     | Val_type (Num_type I32) -> I32 (Value.I32.of_int32 0l)
     | Val_type (Num_type I64) -> I64 (Value.I64.of_int64 0L)
@@ -158,6 +157,8 @@ module Abstract :
      and type context := Abstract_domain.Context.t = struct
   module Value = Abstract_value
   module Stack = Abstract_stack
+
+  let default_gc_val _ = assert false
 
   let i32_instr ctx stack : Binary.i32_instr -> _ = function
     | Const i -> Stack.push_i32 stack (Value.I32.of_int32 ctx i)

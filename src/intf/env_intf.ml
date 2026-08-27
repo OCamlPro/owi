@@ -77,4 +77,6 @@ module type T = sig
   val get_context : env:t -> context
 
   val get_modul_from_modid : env:t -> modid:string -> modul Result.t
+
+  val default_gc_val : Binary.storage_type -> value
 end
