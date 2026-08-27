@@ -247,28 +247,27 @@ end = struct
       in
       Ok { link_state with rewrite_map }
 
-  let link_table ctx ~get_const_type ~get_const_func ~get_const_global
-    ~(env : t) id link_state = function
+  let link_table ~(env : t) id link_state = function
     | Origin.Local { Binary.Table.typ; init; _ } ->
       let address = Allocator.next_key env.tables + id in
-      let* table =
-        let table = Table.init typ in
-        match init with
-        | None -> Ok table
-        | Some expr ->
-          let* r =
-            Constexpr_eval.ref_expr ctx ~get_const_type ~get_const_func
-              ~get_const_global expr.Annotated.raw
-          in
-          let len = Int32.of_int (Table.size table) in
-          Ok (Table.fill table 0l len r)
-      in
+      let table = Table.init typ in
       let tables = (address, table) :: link_state.tables in
       let rewrite_map =
         let tables = IntMap.add id address link_state.rewrite_map.tables in
         { link_state.rewrite_map with tables }
       in
-      Ok { link_state with tables; rewrite_map }
+      let initialization_code =
+        match init with
+        | None -> link_state.initialization_code
+        | Some expr ->
+          let len = Int32.of_int (Table.size table) in
+          link_state.initialization_code
+          @ Annotated.dummies [ Binary.Simple (I32 (Const 0l)) ]
+          @ expr.Annotated.raw
+          @ Annotated.dummies
+              [ Binary.Simple (I32 (Const len)); Simple (Table (Fill id)) ]
+      in
+      Ok { link_state with tables; rewrite_map; initialization_code }
     | Imported ({ name; typ; _ } as import) ->
       let* table, address =
         load_import ~env ~import env.exported_tables env.tables
@@ -480,12 +479,7 @@ end = struct
     in
     (* tables *)
     let* link_state =
-      array_fold_lefti
-        (link_table ~env ctx ~get_const_type
-           ~get_const_func:(get_const_func link_state.rewrite_map)
-           ~get_const_global:
-             (get_const_global ~env link_state.globals link_state.rewrite_map) )
-        link_state modul.table
+      array_fold_lefti (link_table ~env) link_state modul.table
     in
     (* tags *)
     (* TODO: rewrite tags later using tags_map, it has not been done for now... *)
