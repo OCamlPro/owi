@@ -243,13 +243,23 @@ end = struct
       in
       Ok { link_state with rewrite_map }
 
-  let link_table ~(env : t) id link_state = function
-    | Origin.Local { Binary.Table.typ; _ } ->
+  let link_table ctx ~get_const_type ~get_const_func ~get_const_global
+    ~(env : t) id link_state = function
+    | Origin.Local { Binary.Table.typ; init; _ } ->
       let address = Allocator.next_key env.tables + id in
-      let tables =
+      let* table =
         let table = Table.init typ in
-        (address, table) :: link_state.tables
+        match init with
+        | None -> Ok table
+        | Some expr ->
+          let* r =
+            Constexpr_eval.ref_expr ctx ~get_const_type ~get_const_func
+              ~get_const_global expr.Annotated.raw
+          in
+          let len = Int32.of_int (Table.size table) in
+          Ok (Table.fill table 0l len r)
       in
+      let tables = (address, table) :: link_state.tables in
       let rewrite_map =
         let tables = IntMap.add id address link_state.rewrite_map.tables in
         { link_state.rewrite_map with tables }
@@ -466,7 +476,12 @@ end = struct
     in
     (* tables *)
     let* link_state =
-      array_fold_lefti (link_table ~env) link_state modul.table
+      array_fold_lefti
+        (link_table ~env ctx ~get_const_type
+           ~get_const_func:(get_const_func link_state.rewrite_map)
+           ~get_const_global:
+             (get_const_global ~env link_state.globals link_state.rewrite_map) )
+        link_state modul.table
     in
     (* tags *)
     (* TODO: rewrite tags later using tags_map, it has not been done for now... *)
