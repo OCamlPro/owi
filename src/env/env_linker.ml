@@ -77,8 +77,12 @@ module Make
 
   val link_binary_module :
     env:t -> name:string option -> modul:Binary.Module.t -> t Result.t
+
+  val default_gc_val : Binary.storage_type -> Value.t
 end = struct
   include Env0
+
+  let default_gc_val = Constexpr_eval.default_gc_val
 
   type context = Context.t
 
