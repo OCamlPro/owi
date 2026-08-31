@@ -50,8 +50,10 @@ let run_one ~no_exhaustion:_ (state : Env.Abstract.t Result.t) cmd =
                  ~ty )
               res stack )
     then begin
-      (* Log.err (fun m -> *)
-      (*   m "got:      %a@.expected: %a" Stack.pp stack Wast.pp_results res ); *)
+      Log.err (fun m ->
+        m "got:      %a@;expected: %a"
+          (Fmt.Dump.list (Abstract_value.pp_with_ctx ctx))
+          stack Wast.pp_results res );
       Error `Bad_result
     end
     else Ok (env, ctx)

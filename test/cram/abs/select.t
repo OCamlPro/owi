@@ -19,7 +19,7 @@
   owi: [INFO] stack         : [ i32 {1} ; i32 {28} ; i32 {42} ]
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : select
-  owi: [INFO] stack         : [ i32 {28} ]
+  owi: [INFO] stack         : [ i32 {42} ]
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : drop
   owi: [INFO] stack         : [  ]
