@@ -4,7 +4,7 @@
 
 type reference = Abstract_value.t Abstract_ref.t
 
-type t = |
+type t = unit
 
 let get _ = assert false
 
@@ -12,4 +12,4 @@ let size _ = assert false
 
 let drop _ = assert false
 
-let init _ = assert false
+let init _ = ()
