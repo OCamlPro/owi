@@ -545,17 +545,12 @@ let modul ~(env : Env.Abstract.t) ~(modul : Env.Abstract.modul) =
   let abs_state = Abstract_state.empty () in
   eval_exprs ~env ~modul abs_state
 
-let exec_vfunc_from_outside ~env ~ctx ~locals
+let exec_vfunc_from_outside ~env ~ctx ~stack
   (func : Abstract_extern.Func.t Kind.func) =
-  let abs_state = Abstract_state.empty_exec_state ~ctx ~locals in
+  let abs_state = Abstract_state.empty_exec_state ~ctx ~stack in
   try
     match func with
     | Kind.Wasm func -> (
-      let stack =
-        Abstract_locals.to_list locals
-        |> List.sort (fun (i1, _) (i2, _) -> compare i1 i2)
-        |> List.map snd
-      in
       let abs_state = { abs_state with stack } in
       match
         ConcreteFixpoint.eval_func { abs_state; env }

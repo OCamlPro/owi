@@ -21,6 +21,6 @@ val modul_with_ctx :
 val exec_vfunc_from_outside :
      env:Env.Abstract.t
   -> ctx:Abstract_domain.Context.t
-  -> locals:Abstract_value.t Abstract_locals.t
+  -> stack:Abstract_stack.t
   -> Abstract_extern.Func.t Kind.func
   -> Abstract_state.t Result.t

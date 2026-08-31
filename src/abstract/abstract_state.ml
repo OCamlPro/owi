@@ -29,8 +29,9 @@ let empty () =
   let call_stack = [] in
   { ctx; stack; locals; func_rt; invariant; call_stack }
 
-let empty_exec_state ~ctx ~locals =
+let empty_exec_state ~ctx ~stack =
   let invariant = Abstract_invariant.empty () in
-  let stack = Abstract_stack.empty in
+  let locals = Abstract_locals.empty in
+  let func_rt = [] in
   let call_stack = [] in
-  { ctx; stack; locals; func_rt = []; invariant; call_stack }
+  { ctx; stack; locals; func_rt; invariant; call_stack }
