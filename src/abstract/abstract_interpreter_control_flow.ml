@@ -371,7 +371,8 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
       let next_state, jt = eval_expr state expr in
       let stack_size =
         match bt with
-        | Some (_i, (params, _res)) -> List.length params
+        | Some (_i, (_params, res)) ->
+          List.length state.abs_state.stack + List.length res
         | None -> 0
       in
       let jumps_br0 = join_jts stack_size (JumpMap.find_opt (I 0) jt) in
