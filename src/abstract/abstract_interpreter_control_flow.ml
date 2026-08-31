@@ -290,8 +290,7 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
     in
 
     let locals =
-      args @ List.map (fun (_str_opt, vt) -> init_value vt) func.locals
-      |> List.rev
+      List.rev args @ List.map (fun (_str_opt, vt) -> init_value vt) func.locals
       |> List.mapi (fun i x -> (i, x))
       |> Abstract_locals.of_list
     in
