@@ -13,6 +13,12 @@ let i32_can_be_zero ctx v =
   | True | Top -> true
   | False | Bottom -> false
 
+let add_divide_by_zero_invariant invariant ~uuid ~possible =
+  Abstract_invariant.add_divide_by_zero_invariant invariant ~uuid ~possible;
+  if possible then
+    Abstract_trace.record_warning ~instr_id:uuid
+      ~message:"Possible division by zero"
+
 let eval_i32 env ({ stack; ctx; invariant; _ } as abs_state : Abstract_state.t)
   uuid : Binary.i32_instr -> _ = function
   | Const i ->
@@ -35,7 +41,7 @@ let eval_i32 env ({ stack; ctx; invariant; _ } as abs_state : Abstract_state.t)
     let (hd1, hd2), stack = Stack.pop2_i32 stack in
     let () =
       let possible = i32_can_be_zero ctx hd2 in
-      Abstract_invariant.add_divide_by_zero_invariant invariant ~uuid ~possible
+      add_divide_by_zero_invariant invariant ~uuid ~possible
     in
     let stack = Stack.push_i32 stack (Abstract_i32.div_s ctx hd1 hd2) in
     let abs_state = { abs_state with stack } in
@@ -44,7 +50,7 @@ let eval_i32 env ({ stack; ctx; invariant; _ } as abs_state : Abstract_state.t)
     let (hd1, hd2), stack = Stack.pop2_i32 stack in
     let () =
       let possible = i32_can_be_zero ctx hd2 in
-      Abstract_invariant.add_divide_by_zero_invariant invariant ~uuid ~possible
+      add_divide_by_zero_invariant invariant ~uuid ~possible
     in
     let stack = Stack.push_i32 stack (Abstract_i32.div_u ctx hd1 hd2) in
     let abs_state = { abs_state with stack } in
@@ -53,7 +59,7 @@ let eval_i32 env ({ stack; ctx; invariant; _ } as abs_state : Abstract_state.t)
     let (hd1, hd2), stack = Stack.pop2_i32 stack in
     let () =
       let possible = i32_can_be_zero ctx hd2 in
-      Abstract_invariant.add_divide_by_zero_invariant invariant ~uuid ~possible
+      add_divide_by_zero_invariant invariant ~uuid ~possible
     in
     let stack = Stack.push_i32 stack (Abstract_i32.rem_s ctx hd1 hd2) in
     let abs_state = { abs_state with stack } in
@@ -62,7 +68,7 @@ let eval_i32 env ({ stack; ctx; invariant; _ } as abs_state : Abstract_state.t)
     let (hd1, hd2), stack = Stack.pop2_i32 stack in
     let () =
       let possible = i32_can_be_zero ctx hd2 in
-      Abstract_invariant.add_divide_by_zero_invariant invariant ~uuid ~possible
+      add_divide_by_zero_invariant invariant ~uuid ~possible
     in
     let stack = Stack.push_i32 stack (Abstract_i32.rem_u ctx hd1 hd2) in
     let abs_state = { abs_state with stack } in
@@ -217,7 +223,7 @@ let eval_i64 env ({ stack; ctx; invariant; _ } as abs_state : Abstract_state.t)
     let (hd1, hd2), stack = Stack.pop2_i64 stack in
     let () =
       let possible = i64_can_be_zero ctx hd2 in
-      Abstract_invariant.add_divide_by_zero_invariant invariant ~uuid ~possible
+      add_divide_by_zero_invariant invariant ~uuid ~possible
     in
     let stack = Stack.push_i64 stack (Abstract_i64.div_s ctx hd1 hd2) in
     let abs_state = { abs_state with stack } in
@@ -226,7 +232,7 @@ let eval_i64 env ({ stack; ctx; invariant; _ } as abs_state : Abstract_state.t)
     let (hd1, hd2), stack = Stack.pop2_i64 stack in
     let () =
       let possible = i64_can_be_zero ctx hd2 in
-      Abstract_invariant.add_divide_by_zero_invariant invariant ~uuid ~possible
+      add_divide_by_zero_invariant invariant ~uuid ~possible
     in
     let stack = Stack.push_i64 stack (Abstract_i64.div_u ctx hd1 hd2) in
     let abs_state = { abs_state with stack } in
@@ -235,7 +241,7 @@ let eval_i64 env ({ stack; ctx; invariant; _ } as abs_state : Abstract_state.t)
     let (hd1, hd2), stack = Stack.pop2_i64 stack in
     let () =
       let possible = i64_can_be_zero ctx hd2 in
-      Abstract_invariant.add_divide_by_zero_invariant invariant ~uuid ~possible
+      add_divide_by_zero_invariant invariant ~uuid ~possible
     in
     let stack = Stack.push_i64 stack (Abstract_i64.rem_s ctx hd1 hd2) in
     let abs_state = { abs_state with stack } in
@@ -244,7 +250,7 @@ let eval_i64 env ({ stack; ctx; invariant; _ } as abs_state : Abstract_state.t)
     let (hd1, hd2), stack = Stack.pop2_i64 stack in
     let () =
       let possible = i64_can_be_zero ctx hd2 in
-      Abstract_invariant.add_divide_by_zero_invariant invariant ~uuid ~possible
+      add_divide_by_zero_invariant invariant ~uuid ~possible
     in
     let stack = Stack.push_i64 stack (Abstract_i64.rem_u ctx hd1 hd2) in
     let abs_state = { abs_state with stack } in

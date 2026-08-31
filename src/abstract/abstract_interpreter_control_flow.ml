@@ -5,6 +5,7 @@
 module Stack = Abstract_stack
 module JumpMap = Abstract_jump_map
 module Value = Abstract_value
+module Trace = Abstract_trace
 
 exception RecursiveFunctionCall
 
@@ -249,31 +250,15 @@ let exec_extern_func ({ stack; _ } : Abstract_state.t)
     push_val t1 v1 stack |> push_val t2 v2 |> push_val t3 v3 |> push_val t4 v4
 
 module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
-  let rec eval_expr :
-       Abstract_interpreter_state.t
-    -> Binary.expr Annotated.t
-    -> Abstract_interpreter_state.t option
-       * Abstract_interpreter_state.t list JumpMap.t =
-   fun state expr ->
-    let rec loop (state : Abstract_interpreter_state.t) jt (expr : Binary.expr)
-        =
-      match expr with
-      | [] -> (Some state, jt)
-      | instr :: instrs -> (
-        let new_state, new_jt = eval_instr state instr in
-        let new_jt = JumpMap.append jt new_jt in
-        Log.debug (fun m ->
-          m "jt after (%a) :  %a"
-            (Binary.pp_instr ~short:true)
-            instr.raw JumpMap.pp new_jt );
-        match new_state with
-        | None -> (None, new_jt)
-        | Some state -> loop state new_jt instrs )
-    in
-    loop state JumpMap.empty expr.raw
+  let abs_state_of =
+    Option.map (fun (state : Abstract_interpreter_state.t) -> state.abs_state)
 
-  and eval_func ({ abs_state; _ } as state : Abstract_interpreter_state.t) idx
-    (func : Binary.Func.t) =
+  let trace_res ~instr ~kind state =
+    Trace.record_step ~kind ~instr ~inputs:None ~converged:None
+      ~state:(abs_state_of state)
+
+  let init_func ({ abs_state; _ } as state : Abstract_interpreter_state.t) idx
+    (func : Binary.Func.t) : Abstract_interpreter_state.t * Value.t list =
     if List.mem idx abs_state.call_stack then raise RecursiveFunctionCall;
     Log.info (fun m ->
       m "calling func  : func %s" (Option.value func.id ~default:"anonymous") );
@@ -303,15 +288,39 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
     let fn_abs_state =
       { abs_state with stack = []; func_rt = result_type; locals; call_stack }
     in
-    let fn_end_state, jt =
-      eval_expr { state with abs_state = fn_abs_state } func.body
+    ({ abs_state = fn_abs_state; env = state.env }, caller_popped_stack)
+
+  let rec eval_expr :
+       Abstract_interpreter_state.t
+    -> Binary.expr Annotated.t
+    -> Abstract_interpreter_state.t option * JumpMap.t =
+   fun state expr ->
+    let rec loop (state : Abstract_interpreter_state.t) jt (expr : Binary.expr)
+        =
+      match expr with
+      | [] -> (Some state, jt)
+      | instr :: instrs -> (
+        let new_state, new_jt = eval_instr state instr in
+        let new_jt = JumpMap.append jt new_jt in
+        Trace.record_jt ~jt:new_jt;
+        Log.debug (fun m ->
+          m "jt after (%a) :  %a"
+            (Binary.pp_instr ~short:true)
+            instr.raw JumpMap.pp new_jt );
+        match new_state with
+        | None -> (None, new_jt)
+        | Some state -> loop state new_jt instrs )
     in
+    loop state JumpMap.empty expr.raw
+
+  and eval_func (fn_state : Abstract_interpreter_state.t) caller_popped_stack
+    (func : Binary.Func.t) =
+    let fn_end_state, jt = eval_expr fn_state func.body in
     (* The stack given to the function is empty so the returned stack should only contain the results *)
-    let fn_end_stack_size = List.length result_type in
+    let fn_end_stack_size = List.length fn_state.abs_state.func_rt in
     let jumps_ret = join_jts fn_end_stack_size (JumpMap.find_opt Ret jt) in
     let jumps_br0 = join_jts fn_end_stack_size (JumpMap.find_opt (I 0) jt) in
     let fn_end_state = join_opt fn_end_state jumps_ret |> join_opt jumps_br0 in
-    (* We should probably copy state and join back the return values in the context here *)
     match fn_end_state with
     | Some fn_end_state ->
       Log.debug (fun m ->
@@ -323,7 +332,7 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
         @ Stack.keep fn_end_state.abs_state.stack fn_end_stack_size
       in
       let abs_state =
-        { abs_state with stack; ctx = fn_end_state.abs_state.ctx }
+        { fn_state.abs_state with stack; ctx = fn_end_state.abs_state.ctx }
       in
       Some { fn_end_state with abs_state }
     | None ->
@@ -331,9 +340,8 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
       None
 
   and eval_instr ({ abs_state; env } as state : Abstract_interpreter_state.t) :
-       Binary.instr Annotated.t
-    -> Abstract_interpreter_state.t option
-       * Abstract_interpreter_state.t list JumpMap.t =
+    Binary.instr Annotated.t -> Abstract_interpreter_state.t option * JumpMap.t
+      =
    fun instr ->
     let { ctx; stack; locals; _ } : Abstract_state.t = abs_state in
     Log.debug (fun m ->
@@ -353,17 +361,30 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
       let func = Env.Abstract.get_func ~env call_idx in
       begin match func with
       | Wasm func ->
-        let r = eval_func state call_idx func in
-        (r, JumpMap.empty)
-      | Extern func -> (
+        let fn_state, caller_popped_stack = init_func state call_idx func in
+        Log.info (fun m ->
+          m "calling func  : func %s"
+            (Option.value func.id ~default:"anonymous") );
+        Trace.record_step ~instr ~kind:Block_start ~inputs:None ~converged:None
+          ~state:(Some fn_state.abs_state);
+        let res = eval_func fn_state caller_popped_stack func in
+        trace_res ~instr ~kind:Block_end res;
+        (res, JumpMap.empty)
+      | Extern func ->
         let stack = exec_extern_func abs_state func in
-        match Abstract_monad.run stack abs_state with
-        | None -> (None, JumpMap.empty)
-        | Some (stack, abs_state) ->
-          let abs_state = { abs_state with stack } in
-          (Some { state with abs_state }, JumpMap.empty) )
+        let res, jts =
+          match Abstract_monad.run stack abs_state with
+          | None -> (None, JumpMap.empty)
+          | Some (stack, abs_state) ->
+            let abs_state = { abs_state with stack } in
+            (Some { state with abs_state }, JumpMap.empty)
+        in
+        trace_res ~instr ~kind:Step res;
+        (res, jts)
       end
     | Block (_str_opt, bt, expr) ->
+      Trace.record_step ~kind:Block_start ~instr ~inputs:None ~converged:None
+        ~state:(Some state.abs_state);
       let next_state, jt = eval_expr state expr in
       let stack_size =
         match bt with
@@ -371,39 +392,75 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
         | None -> 0
       in
       let jumps_br0 = join_jts stack_size (JumpMap.find_opt (I 0) jt) in
-      let state = join_opt next_state jumps_br0 in
+      let joined_state = join_opt next_state jumps_br0 in
+      begin match (next_state, jumps_br0) with
+      | Some _, Some _ ->
+        Trace.record_step ~kind:Join ~instr
+          ~inputs:
+            (Some
+               [ ("fallthrough", abs_state_of next_state)
+               ; ("br 0", abs_state_of jumps_br0)
+               ] )
+          ~converged:None
+          ~state:(abs_state_of joined_state)
+      | _, _ -> ()
+      end;
       let jt =
         (* TODO on peut avoir une paire de (int * map) pour ne pas avoir à decr la liste immédiatement *)
         JumpMap.decr jt
       in
-      (state, jt)
+      trace_res ~instr ~kind:Block_end joined_state;
+      (joined_state, jt)
     | If_else (_, bt, expr_then, expr_else) ->
+      Trace.record_step ~kind:Block_start ~instr ~inputs:None ~converged:None
+        ~state:(Some state.abs_state);
       let b, stack = Stack.pop_bool stack ctx in
-      begin match
-        ( Abstract_domain.assume ctx b
-        , Abstract_domain.assume ctx (Abstract_boolean.not ctx b) )
-      with
-      | Some ctx, None ->
-        eval_instr
-          { state with abs_state = { abs_state with stack; ctx } }
-          (Annotated.dummy (Binary.Block (None, bt, expr_then)))
-      | None, Some ctx ->
-        eval_instr
-          { state with abs_state = { abs_state with stack; ctx } }
-          (Annotated.dummy (Binary.Block (None, bt, expr_else)))
-      | None, None -> assert false
-      | Some ctx_true, Some ctx_false ->
-        let strue = { abs_state with stack; ctx = ctx_true } in
-        let sfalse = { abs_state with stack; ctx = ctx_false } in
-        join_X
-          (eval_instr
-             { state with abs_state = strue }
-             (Annotated.dummy (Binary.Block (None, bt, expr_then))) )
-          (eval_instr
-             { state with abs_state = sfalse }
-             (Annotated.dummy (Binary.Block (None, bt, expr_else))) )
-      end
+      let joined_state, jt =
+        begin match
+          ( Abstract_domain.assume ctx b
+          , Abstract_domain.assume ctx (Abstract_boolean.not ctx b) )
+        with
+        | Some ctx, None ->
+          eval_instr
+            { state with abs_state = { abs_state with stack; ctx } }
+            (Annotated.dummy (Binary.Block (None, bt, expr_then)))
+        | None, Some ctx ->
+          eval_instr
+            { state with abs_state = { abs_state with stack; ctx } }
+            (Annotated.dummy (Binary.Block (None, bt, expr_else)))
+        | None, None -> assert false
+        | Some ctx_true, Some ctx_false ->
+          let strue = { abs_state with stack; ctx = ctx_true } in
+          let sfalse = { abs_state with stack; ctx = ctx_false } in
+          let then_state, then_jt =
+            eval_instr
+              { state with abs_state = strue }
+              (Annotated.dummy (Binary.Block (None, bt, expr_then)))
+          in
+          let else_state, else_jt =
+            eval_instr
+              { state with abs_state = sfalse }
+              (Annotated.dummy (Binary.Block (None, bt, expr_else)))
+          in
+          let joined_state, jt =
+            join_X (then_state, then_jt) (else_state, else_jt)
+          in
+          Trace.record_step ~kind:Join ~instr
+            ~inputs:
+              (Some
+                 [ ("then", abs_state_of then_state)
+                 ; ("else", abs_state_of else_state)
+                 ] )
+            ~converged:None
+            ~state:(abs_state_of joined_state);
+          (joined_state, jt)
+        end
+      in
+      trace_res ~instr ~kind:Block_end joined_state;
+      (joined_state, jt)
     | Loop (_str_opt, bt, body) ->
+      Trace.record_step ~kind:Block_start ~instr ~inputs:None ~converged:None
+        ~state:(Some state.abs_state);
       let widening_id = Domains.Sig.Widening_Id.fresh () in
       (* TODO tester si on a besoin de copie *)
       let initial_state =
@@ -416,7 +473,7 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
       in
       let rec fixpoint state =
         let next_state, jt = eval_expr state body in
-        let next_head =
+        let next_state =
           match join_jts stack_size (JumpMap.find_opt (I 0) jt) with
           | Some state -> Some state
           | None ->
@@ -429,31 +486,38 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
             | None -> None
             end
         in
-        match next_head with
+        match next_state with
         | None ->
           let jt = JumpMap.decr jt in
           (None, jt)
-        | Some next_head ->
-          let widened, included = widen widening_id state next_head in
+        | Some next_state ->
+          let widened, included = widen widening_id state next_state in
+          Trace.record_step ~kind:Widen ~instr
+            ~inputs:
+              (Some
+                 [ ("previous", Some state.abs_state)
+                 ; ("next", Some next_state.abs_state)
+                 ] )
+            ~converged:(Some included) ~state:None;
           if not included then fixpoint widened
           else
-            (* fixpoint reached: exit loop, assume condition is false *)
+            (* fixpoint reached: exit loop *)
             let jt = JumpMap.decr jt in
-            begin match next_state with
-            | None -> (next_state, jt)
-            | Some next_state ->
-              let stack = next_state.abs_state.stack @ initial_state.stack in
-              let next_state =
-                Some
-                  { next_state with
-                    abs_state = { next_state.abs_state with stack }
-                  }
-              in
-              (next_state, jt)
-            end
+            let stack = next_state.abs_state.stack @ initial_state.stack in
+            let abs_state = { next_state.abs_state with stack } in
+            Log.info (fun m ->
+              m "%a" Abstract_interpreter_state.pp { next_state with abs_state } );
+            let next_state = Some { next_state with abs_state } in
+            (next_state, jt)
       in
-      fixpoint state
-    | Br i -> (None, JumpMap.of_list [ (I i, [ state ]) ])
+      let widened_state, jts = fixpoint state in
+      trace_res ~instr ~kind:Block_end widened_state;
+      (widened_state, jts)
+    | Br i ->
+      let res = None in
+      let jts = JumpMap.of_list [ (I i, [ state ]) ] in
+      trace_res ~instr ~kind:Step res;
+      (res, jts)
     | Br_if i ->
       let b, stack = Stack.pop_bool stack ctx in
       let jt_if =
@@ -471,6 +535,7 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
           Some { state with abs_state }
         | None -> None
       in
+      trace_res ~instr ~kind:Step state;
       (state, jt_if)
     | Br_table (cases, default) ->
       let v, stack = Stack.pop_i32 stack in
@@ -505,14 +570,19 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
             | None -> acc )
           default cases
       in
+      trace_res ~instr ~kind:Step None;
       (None, JumpMap.of_list all_cases)
-    | Return -> (None, JumpMap.of_list [ (Ret, [ state ]) ])
-    | Simple i -> (
+    | Return ->
+      trace_res ~instr ~kind:Step None;
+      (None, JumpMap.of_list [ (Ret, [ state ]) ])
+    | Simple i ->
       let uuid = instr.uuid in
-      let res = S.eval_instr gen_new_value state ~uuid i in
-      match res with
-      | State state -> (Some state, JumpMap.empty)
-      | Unreachable -> (None, JumpMap.empty) )
+      let state = S.eval_instr gen_new_value state ~uuid i in
+      let state =
+        match state with State state -> Some state | Unreachable -> None
+      in
+      trace_res ~instr ~kind:Step state;
+      (state, JumpMap.empty)
     | Br_on_non_null _
     | Br_on_cast (_, _, _)
     | Br_on_cast_fail (_, _, _)
@@ -556,12 +626,11 @@ let exec_vfunc_from_outside ~env ~ctx ~locals
         |> List.sort (fun (i1, _) (i2, _) -> compare i1 i2)
         |> List.map snd
       in
-      let abs_state = { abs_state with stack } in
+      (* TODO: attach correct ID to this function to distinguish the call stack, 0 is incorrect here *)
+      let call_stack = 0 :: abs_state.call_stack in
+      let abs_state = { abs_state with stack; call_stack } in
       match
-        ConcreteFixpoint.eval_func { abs_state; env }
-          (* TODO: attach correct ID to this function to distinguish the call stack, 0 is incorrect here *)
-          0
-          func
+        ConcreteFixpoint.eval_func { abs_state; env } Abstract_stack.empty func
       with
       | Some state -> Ok state.abs_state
       | None -> Fmt.error_msg "failed" )

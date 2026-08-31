@@ -321,8 +321,16 @@ let abs_cmd =
   let+ source_file
   and+ () = setup_log
   and+ entry_point = entry_point None
-  and+ unsafe in
-  Cmd_abs.cmd ~source_file ~entry_point ~unsafe
+  and+ unsafe
+  and+ debug_trace =
+    Arg.(
+      value
+      & opt (some string) None
+      & info [ "debug-trace" ] ~docv:"FILE"
+          ~doc:
+            "Write a JSON debug trace of the abstract interpreter to $(docv)." )
+  in
+  Cmd_abs.cmd ~source_file ~entry_point ~unsafe ~debug_trace
 
 (* owi analyze *)
 

@@ -5,10 +5,12 @@
   assume.wat
   br_table.wat
   control_flow.wat
+  div_zero.wat
   fact.wat
   floats.wat
   globals.wat
   if.wat
+  if_join.wat
   invariant_gen1.wat
   local_func.wat
   loop.wat
