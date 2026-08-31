@@ -2098,11 +2098,11 @@ let eval_instr
       let abs_state = { abs_state with stack } in
       State { abs_state; env }
     | True ->
-      let stack = Stack.push stack v1 in
+      let stack = Stack.push stack v2 in
       let abs_state = { abs_state with stack } in
       State { abs_state; env }
     | False ->
-      let stack = Stack.push stack v2 in
+      let stack = Stack.push stack v1 in
       let abs_state = { abs_state with stack } in
       State { abs_state; env }
     | Bottom -> Unreachable
