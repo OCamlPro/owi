@@ -6,6 +6,8 @@ module Stack = Abstract_stack
 module JumpMap = Abstract_jump_map
 module Value = Abstract_value
 
+let max_recursive_calls = 10
+
 exception RecursiveFunctionCall
 
 let gen_new_value ~widens a b state_a state_b
@@ -274,7 +276,10 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
 
   and eval_func ({ abs_state; _ } as state : Abstract_interpreter_state.t) idx
     (func : Binary.Func.t) =
-    if List.mem idx abs_state.call_stack then raise RecursiveFunctionCall;
+    let nb_recursive_calls =
+      List.length (List.filter (( = ) idx) abs_state.call_stack)
+    in
+    if nb_recursive_calls > max_recursive_calls then raise RecursiveFunctionCall;
     Log.info (fun m ->
       m "calling func  : func %s" (Option.value func.id ~default:"anonymous") );
     let (None | Some _), (param_type, result_type) = func.type_f in
