@@ -23,4 +23,4 @@ let cmd ~source_file ~entry_point ~unsafe =
     let state = Abstract_interpreter_control_flow.modul ~env ~modul in
     Abstract_checker.check_module ~env ~modul state.invariant
   with Abstract_interpreter_control_flow.RecursiveFunctionCall ->
-    Log.err (fun m -> m "Recursive function calls are not supported yet")
+    Log.err (fun m -> m "Too many recursive calls")
