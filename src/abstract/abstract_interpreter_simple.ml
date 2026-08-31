@@ -2083,7 +2083,6 @@ let eval_instr
     let (v1, v2), stack = Stack.pop2 stack in
     begin match Abstract_domain.query_boolean abs_state.ctx b with
     | Top ->
-      (* TODO test *)
       let init_res =
         Abstract_domain.Context.Result
           ( true
