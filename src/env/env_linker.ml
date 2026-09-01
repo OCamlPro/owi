@@ -176,13 +176,16 @@ end = struct
       in
       Ok { link_state with rewrite_map }
 
-  let link_global ctx ~get_const_type ~get_const_func ~get_const_global
-    ~(env : t) id link_state = function
+  let link_global ctx ~get_const_type ~get_const_global ~(env : t) id link_state
+      = function
     | Origin.Local ({ init; typ; id = _ } : Binary.Global.t) ->
       let address = Allocator.next_key env.globals + id in
       let value =
-        Constexpr_eval.expr ctx ~get_const_type ~get_const_func
-          ~get_const_global init.raw
+        let e =
+          Env_rewriter.rewrite_expression init ~map:link_state.rewrite_map
+        in
+        Constexpr_eval.expr ctx ~get_const_type ~get_const_global
+          e.Annotated.raw
       in
       let globals =
         let global : _ Env0.global = { value; typ } in
@@ -314,8 +317,8 @@ end = struct
       in
       Ok { link_state with datas; initialization_code; rewrite_map }
 
-  let link_elem ctx ~get_const_type ~get_const_func ~get_const_global ~(env : t)
-    id link_state { Binary.Elem.init; mode; _ } =
+  let link_elem ctx ~get_const_type ~get_const_global ~(env : t) id link_state
+    { Binary.Elem.init; mode; _ } =
     let address = Allocator.next_key env.elems + id in
     let rewrite_map =
       let elems = IntMap.add id address link_state.rewrite_map.elems in
@@ -333,8 +336,12 @@ end = struct
           let init =
             List.map
               (fun expr ->
-                Constexpr_eval.ref_expr ctx ~get_const_type ~get_const_func
-                  ~get_const_global expr.Annotated.raw )
+                let expr =
+                  Env_rewriter.rewrite_expression expr
+                    ~map:link_state.rewrite_map
+                in
+                Constexpr_eval.ref_expr ctx ~get_const_type ~get_const_global
+                  expr.Annotated.raw )
               init
           in
           Ok init
@@ -418,14 +425,13 @@ end = struct
           (Env_rewriter.rewrite_type_id ~map:link_state.rewrite_map lo, size) )
         module_groups
     in
+
+    let types = Array.append env.types types in
+    let type_groups = Array.append env.type_groups type_groups in
     (* We need to compute the updated environment with the new types and type
      groups earlier so that we can use it for imported functions *)
-    let env =
-      { env with
-        types = Array.append env.types types
-      ; type_groups = Array.append env.type_groups type_groups
-      }
-    in
+
+    let env = { env with types; type_groups } in
     (* TODO: should it be passed to the function instead? *)
     let ctx = Context.empty () in
     (* functions *)
@@ -439,26 +445,16 @@ end = struct
     (* TODO: I'm not sure about this *)
     let get_const_type id = Array.get types id in
 
-    let get_const_global ~(env : t) globals (rewrite_map : Env_rewriter.t) id =
+    let get_const_global ~(env : t) globals id =
       (* we should only make visible previously defined immutable globals and imported immutable globals. *)
-      match IntMap.find_opt id rewrite_map.globals with
-      | None -> assert false
-      | Some address ->
-        begin match List.assoc_opt address globals with
-        | Some g -> g.Env0.value
-        | None ->
-          begin match Allocator.find_opt address env.globals with
-          | Some g -> g.value
-          | None -> assert false
-          end
+      begin match List.assoc_opt id globals with
+      | Some g -> g.Env0.value
+      | None ->
+        begin match Allocator.find_opt id env.globals with
+        | Some g -> g.value
+        | None -> assert false
         end
-    in
-
-    let get_const_func (rewrite_map : Env_rewriter.t) id =
-      (* we should only make visible functions that are defined locally, not imported functions *)
-      match IntMap.find_opt id rewrite_map.functions with
-      | None -> assert false
-      | Some address -> address
+      end
     in
 
     (* globals *)
@@ -466,9 +462,7 @@ end = struct
       array_fold_lefti
         (fun id link_state ->
           link_global ctx ~get_const_type
-            ~get_const_func:(get_const_func link_state.rewrite_map)
-            ~get_const_global:
-              (get_const_global ~env link_state.globals link_state.rewrite_map)
+            ~get_const_global:(get_const_global ~env link_state.globals)
             ~env id link_state )
         link_state modul.global
     in
@@ -492,9 +486,7 @@ end = struct
     let* link_state : link_state =
       array_fold_lefti
         (link_elem ctx ~get_const_type
-           ~get_const_func:(get_const_func link_state.rewrite_map)
-           ~get_const_global:
-             (get_const_global ~env link_state.globals link_state.rewrite_map)
+           ~get_const_global:(get_const_global ~env link_state.globals)
            ~env )
         link_state modul.elem
     in
