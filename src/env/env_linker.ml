@@ -297,14 +297,8 @@ end = struct
       { link_state.rewrite_map with datas }
     in
     match mode with
-    | Passive -> Ok { link_state with datas; rewrite_map }
+    | Passive -> { link_state with datas; rewrite_map }
     | Active (mem, offset) ->
-      let* () =
-        (* TODO: this check should move to validation time ?! *)
-        match IntMap.find_opt mem link_state.rewrite_map.memories with
-        | None -> Error (`Unknown_memory (Text.Raw mem))
-        | Some _ -> Ok ()
-      in
       let initialization_code =
         (* Jean-Christophe, I'm sorry for writing this, please forgive me... *)
         link_state.initialization_code @ offset.raw
@@ -315,7 +309,7 @@ end = struct
             ; Simple (Data (Drop id))
             ]
       in
-      Ok { link_state with datas; initialization_code; rewrite_map }
+      { link_state with datas; initialization_code; rewrite_map }
 
   let link_elem ctx ~get_const_type ~get_const_global ~(env : t) id link_state
     { Binary.Elem.init; mode; _ } =
@@ -480,7 +474,11 @@ end = struct
 
     (* initialization code *)
     (* 1. data *)
-    let* link_state = array_fold_lefti (link_data ~env) link_state modul.data in
+    let _n, link_state =
+      Array.fold_left
+        (fun (i, link_state) data -> (i + 1, link_data ~env i link_state data))
+        (0, link_state) modul.data
+    in
 
     (* 2. elem *)
     let* link_state : link_state =
