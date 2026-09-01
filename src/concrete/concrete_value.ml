@@ -44,8 +44,8 @@ let pp ppf =
   | V128 v -> pf ppf "v128.const %a" V128.pp v
   | Ref r -> pf ppf "ref %a" Ref.pp r
 
-let of_script_const ~ty : Wast.const -> t = function
-  | Const_I32 v -> I32 v
+let of_script_const ~ty = function
+  | (Const_I32 v : Wast.const) -> (I32 v : t)
   | Const_I64 v -> I64 v
   | Const_F32 v -> F32 v
   | Const_F64 v -> F64 v

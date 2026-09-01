@@ -38,13 +38,13 @@ let rewrite_global_instruction ~map : Binary.global_instr -> Binary.global_instr
   | Get i -> Get (get_unsafe i map.globals)
   | Set i -> Set (get_unsafe i map.globals)
 
-let rewrite_i32_instruction ~map : Binary.i32_instr -> Binary.i32_instr =
-  function
-  | ( Const _ | Clz | Ctz | Popcnt | Add | Sub | Mul | Div_s | Div_u | Rem_s
-    | Rem_u | And | Or | Xor | Shl | Shr_s | Shr_u | Rotl | Rotr | Eqz | Eq | Ne
-    | Lt_s | Lt_u | Gt_s | Gt_u | Le_s | Le_u | Ge_s | Ge_u | Extend8_s
-    | Extend16_s | Wrap_i64 | Trunc_f_s _ | Trunc_f_u _ | Trunc_sat_f_s _
-    | Trunc_sat_f_u _ | Reinterpret_f _ ) as i ->
+let rewrite_i32_instruction ~map = function
+  | (( Const _ | Clz | Ctz | Popcnt | Add | Sub | Mul | Div_s | Div_u | Rem_s
+     | Rem_u | And | Or | Xor | Shl | Shr_s | Shr_u | Rotl | Rotr | Eqz | Eq
+     | Ne | Lt_s | Lt_u | Gt_s | Gt_u | Le_s | Le_u | Ge_s | Ge_u | Extend8_s
+     | Extend16_s | Wrap_i64 | Trunc_f_s _ | Trunc_f_u _ | Trunc_sat_f_s _
+     | Trunc_sat_f_u _ | Reinterpret_f _ ) :
+      Binary.i32_instr ) as i ->
     i
   | Load (i, memarg) -> Load (get_unsafe i map.memories, memarg)
   | Load8_s (i, memarg) -> Load8_s (get_unsafe i map.memories, memarg)
@@ -55,13 +55,14 @@ let rewrite_i32_instruction ~map : Binary.i32_instr -> Binary.i32_instr =
   | Store8 (i, memarg) -> Store8 (get_unsafe i map.memories, memarg)
   | Store16 (i, memarg) -> Store16 (get_unsafe i map.memories, memarg)
 
-let rewrite_i64_instruction ~map : Binary.i64_instr -> Binary.i64_instr =
-  function
-  | ( Const _ | Clz | Ctz | Popcnt | Add | Sub | Mul | Div_s | Div_u | Rem_s
-    | Rem_u | And | Or | Xor | Shl | Shr_s | Shr_u | Rotl | Rotr | Eqz | Eq | Ne
-    | Lt_s | Lt_u | Gt_s | Gt_u | Le_s | Le_u | Ge_s | Ge_u | Extend8_s
-    | Extend16_s | Trunc_f_s _ | Trunc_f_u _ | Trunc_sat_f_s _ | Trunc_sat_f_u _
-    | Reinterpret_f _ | Extend32_s | Extend_i32_s | Extend_i32_u ) as i ->
+let rewrite_i64_instruction ~map = function
+  | (( Const _ | Clz | Ctz | Popcnt | Add | Sub | Mul | Div_s | Div_u | Rem_s
+     | Rem_u | And | Or | Xor | Shl | Shr_s | Shr_u | Rotl | Rotr | Eqz | Eq
+     | Ne | Lt_s | Lt_u | Gt_s | Gt_u | Le_s | Le_u | Ge_s | Ge_u | Extend8_s
+     | Extend16_s | Trunc_f_s _ | Trunc_f_u _ | Trunc_sat_f_s _
+     | Trunc_sat_f_u _ | Reinterpret_f _ | Extend32_s | Extend_i32_s
+     | Extend_i32_u ) :
+      Binary.i64_instr ) as i ->
     i
   | Load (i, memarg) -> Load (get_unsafe i map.memories, memarg)
   | Load8_s (i, memarg) -> Load8_s (get_unsafe i map.memories, memarg)
@@ -75,27 +76,28 @@ let rewrite_i64_instruction ~map : Binary.i64_instr -> Binary.i64_instr =
   | Store16 (i, memarg) -> Store16 (get_unsafe i map.memories, memarg)
   | Store32 (i, memarg) -> Store32 (get_unsafe i map.memories, memarg)
 
-let rewrite_f32_instruction ~map : Binary.f32_instr -> Binary.f32_instr =
-  function
-  | ( Abs | Neg | Sqrt | Ceil | Floor | Trunc | Nearest | Sub | Mul | Div | Min
-    | Max | Copysign | Eq | Ne | Lt | Gt | Le | Ge | Demote_f64 | Const _
-    | Convert_i_s _ | Convert_i_u _ | Reinterpret_i _ | Add ) as i ->
+let rewrite_f32_instruction ~map = function
+  | (( Abs | Neg | Sqrt | Ceil | Floor | Trunc | Nearest | Sub | Mul | Div | Min
+     | Max | Copysign | Eq | Ne | Lt | Gt | Le | Ge | Demote_f64 | Const _
+     | Convert_i_s _ | Convert_i_u _ | Reinterpret_i _ | Add ) :
+      Binary.f32_instr ) as i ->
     i
   | Load (i, memarg) -> Load (get_unsafe i map.memories, memarg)
   | Store (i, memarg) -> Store (get_unsafe i map.memories, memarg)
 
-let rewrite_f64_instruction ~map : Binary.f64_instr -> Binary.f64_instr =
-  function
-  | ( Abs | Neg | Sqrt | Ceil | Floor | Trunc | Nearest | Add | Sub | Mul | Div
-    | Min | Max | Copysign | Eq | Ne | Lt | Gt | Le | Ge | Promote_f32 | Const _
-    | Convert_i_s _ | Convert_i_u _ | Reinterpret_i _ ) as i ->
+let rewrite_f64_instruction ~map = function
+  | (( Abs | Neg | Sqrt | Ceil | Floor | Trunc | Nearest | Add | Sub | Mul | Div
+     | Min | Max | Copysign | Eq | Ne | Lt | Gt | Le | Ge | Promote_f32
+     | Const _ | Convert_i_s _ | Convert_i_u _ | Reinterpret_i _ ) :
+      Binary.f64_instr ) as i ->
     i
   | Load (i, memarg) -> Load (get_unsafe i map.memories, memarg)
   | Store (i, memarg) -> Store (get_unsafe i map.memories, memarg)
 
-let rewrite_v128_instruction ~map : Binary.v128_instr -> Binary.v128_instr =
-  function
-  | (And | Not | Or | Any_true | Bitselect | Xor | Andnot | Const _) as i -> i
+let rewrite_v128_instruction ~map = function
+  | (And | Not | Or | Any_true | Bitselect | Xor | Andnot | Const _ :
+      Binary.v128_instr ) as i ->
+    i
   | Load8_splat (i, memarg) -> Load8_splat (get_unsafe i map.memories, memarg)
   | Load8_lane (i, memarg, n) ->
     Load8_lane (get_unsafe i map.memories, memarg, n)
@@ -220,9 +222,8 @@ let rewrite_sub_type ~map : Binary.sub_type -> Binary.sub_type =
   let ct = rewrite_comp_type ~map ct in
   { final; ct; ids }
 
-let rewrite_ref_instruction ~map : Binary.ref_instr -> Binary.ref_instr =
-  function
-  | Null ht -> Null (rewrite_heap_type ~map ht)
+let rewrite_ref_instruction ~map = function
+  | (Null ht : Binary.ref_instr) -> Binary.Null (rewrite_heap_type ~map ht)
   | Test rt -> Test (rewrite_ref_type ~map rt)
   | Cast rt -> Cast (rewrite_ref_type ~map rt)
   | (Is_null | As_non_null | Eq) as i -> i
@@ -285,9 +286,9 @@ let rewrite_array_instruction ~map : Binary.array_instr -> Binary.array_instr =
     Init_elem (rewrite_type_id ~map ty, get_unsafe elem map.elems)
   | Len as i -> i
 
-let rewrite_simple_instruction ~map :
-  Binary.simple_instruction -> Binary.simple_instruction = function
-  | Global i -> Global (rewrite_global_instruction ~map i)
+let rewrite_simple_instruction ~map = function
+  | (Global i : Binary.simple_instruction) ->
+    Binary.Global (rewrite_global_instruction ~map i)
   | I32 i -> I32 (rewrite_i32_instruction ~map i)
   | I64 i -> I64 (rewrite_i64_instruction ~map i)
   | F32 i -> F32 (rewrite_f32_instruction ~map i)

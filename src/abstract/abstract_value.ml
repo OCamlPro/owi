@@ -85,12 +85,12 @@ let to_boolean ctx x =
 
 let top size ctx = of_binary size @@ Abstract_domain.binary_empty ~size ctx
 
-let of_script_const ctx ~ty:_ : Wast.const -> t = function
-  | Wast.Const_I32 v -> I32 (I32.of_int32 ctx v)
-  | Wast.Const_I64 v -> I64 (I64.of_int64 ctx v)
-  | Wast.Const_F32 v -> F32 (F32.of_float32 ctx v)
-  | Wast.Const_F64 v -> F64 (F64.of_float ctx v)
-  | Wast.Const_V128 v -> V128 (V128.of_concrete ctx v)
+let of_script_const ctx ~ty:_ = function
+  | Wast.Const_I32 v -> (I32 (I32.of_int32 ctx v) : t)
+  | Const_I64 v -> I64 (I64.of_int64 ctx v)
+  | Const_F32 v -> F32 (F32.of_float32 ctx v)
+  | Const_F64 v -> F64 (F64.of_float ctx v)
+  | Const_V128 v -> V128 (V128.of_concrete ctx v)
   | Const_null (Some (Func_ht | NoFunc_ht | TypeUse _)) -> Ref (Func None)
   | Const_null (Some (Extern_ht | NoExtern_ht)) -> Ref (Extern None)
   | Const_null (Some (Any_ht | None_ht)) -> Ref NullRef
