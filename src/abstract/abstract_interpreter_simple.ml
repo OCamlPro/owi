@@ -14,8 +14,8 @@ let i32_can_be_zero ctx v =
   | False | Bottom -> false
 
 let eval_i32 env ({ stack; ctx; invariant; _ } as abs_state : Abstract_state.t)
-  uuid : Binary.i32_instr -> _ = function
-  | Const i ->
+  uuid = function
+  | (Const i : Binary.i32_instr) ->
     let stack = Stack.push_i32 stack (Abstract_i32.of_int32 ctx i) in
     let abs_state = { abs_state with stack } in
     State { abs_state; env }
@@ -196,8 +196,8 @@ let i64_can_be_zero ctx v =
   | Bottom | False -> false
 
 let eval_i64 env ({ stack; ctx; invariant; _ } as abs_state : Abstract_state.t)
-  uuid : Binary.i64_instr -> _ = function
-  | Const i ->
+  uuid = function
+  | (Const i : Binary.i64_instr) ->
     let stack = Stack.push_i64 stack (Abstract_i64.of_int64 ctx i) in
     let abs_state = { abs_state with stack } in
     State { abs_state; env }
@@ -390,9 +390,9 @@ let eval_i64 env ({ stack; ctx; invariant; _ } as abs_state : Abstract_state.t)
     State { abs_state; env }
 
 (* TODO: handle this correctly *)
-let eval_f32 env ({ stack; ctx; _ } as abs_state : Abstract_state.t) _uuid :
-  Binary.f32_instr -> _ = function
-  | Const f ->
+let eval_f32 env ({ stack; ctx; _ } as abs_state : Abstract_state.t) _uuid =
+  function
+  | (Const f : Binary.f32_instr) ->
     let stack = Stack.push_f32 stack (Abstract_f32.of_float32 ctx f) in
     let abs_state = { abs_state with stack } in
     State { abs_state; env }
@@ -452,9 +452,9 @@ let eval_f32 env ({ stack; ctx; _ } as abs_state : Abstract_state.t) _uuid :
     State { abs_state; env }
 
 (* TODO: handle this correctly *)
-let eval_f64 env ({ stack; ctx; _ } as abs_state : Abstract_state.t) _uuid :
-  Binary.f64_instr -> _ = function
-  | Const _ ->
+let eval_f64 env ({ stack; ctx; _ } as abs_state : Abstract_state.t) _uuid =
+  function
+  | (Const _ : Binary.f64_instr) ->
     let stack = Stack.push_f64 stack (Abstract_f64.unknown ctx) in
     let abs_state = { abs_state with stack } in
     State { abs_state; env }

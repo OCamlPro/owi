@@ -11,8 +11,8 @@ let check_can_divide_by_zero invariants uuid pp instr =
       m "Passed division by zero check for expression:(uuid: %i) %a" uuid pp
         instr )
 
-let check_i32 ~uuid ~invariants : Binary.i32_instr -> unit = function
-  | (Div_s | Div_u | Rem_s | Rem_u) as instr ->
+let check_i32 ~uuid ~invariants = function
+  | (Div_s | Div_u | Rem_s | Rem_u : Binary.i32_instr) as instr ->
     check_can_divide_by_zero invariants uuid Binary.pp_i32_instr instr
   | Const _ | Clz | Ctz | Popcnt | Add | Sub | Mul | And | Or | Xor | Shl
   | Shr_s | Shr_u | Rotl | Rotr | Eqz | Eq | Ne | Lt_s | Lt_u | Gt_s | Gt_u
@@ -22,8 +22,8 @@ let check_i32 ~uuid ~invariants : Binary.i32_instr -> unit = function
   | Store16 _ ->
     ()
 
-let check_i64 ~uuid ~invariants : Binary.i64_instr -> unit = function
-  | (Div_s | Div_u | Rem_s | Rem_u) as instr ->
+let check_i64 ~uuid ~invariants = function
+  | (Div_s | Div_u | Rem_s | Rem_u : Binary.i64_instr) as instr ->
     check_can_divide_by_zero invariants uuid Binary.pp_i64_instr instr
   | Const _ | Clz | Ctz | Popcnt | Add | Sub | Mul | And | Or | Xor | Shl
   | Shr_s | Shr_u | Rotl | Rotr | Eqz | Eq | Ne | Lt_s | Lt_u | Gt_s | Gt_u
@@ -34,25 +34,25 @@ let check_i64 ~uuid ~invariants : Binary.i64_instr -> unit = function
   | Load32_u _ | Store32 _ ->
     ()
 
-let check_f32 ~uuid ~invariants : Binary.f32_instr -> unit = function
-  | Div as instr ->
+let check_f32 ~uuid ~invariants = function
+  | (Div : Binary.f32_instr) as instr ->
     check_can_divide_by_zero invariants uuid Binary.pp_f32_instr instr
   | Const _ | Abs | Neg | Sqrt | Ceil | Floor | Trunc | Nearest | Add | Sub
   | Mul | Min | Max | Copysign | Eq | Ne | Lt | Gt | Le | Ge | Demote_f64
   | Convert_i_s _ | Convert_i_u _ | Reinterpret_i _ | Load _ | Store _ ->
     ()
 
-let check_f64 ~uuid ~invariants : Binary.f64_instr -> unit = function
-  | Div as instr ->
+let check_f64 ~uuid ~invariants = function
+  | (Div : Binary.f64_instr) as instr ->
     check_can_divide_by_zero invariants uuid Binary.pp_f64_instr instr
   | Const _ | Abs | Neg | Sqrt | Ceil | Floor | Trunc | Nearest | Add | Sub
   | Mul | Min | Max | Copysign | Eq | Ne | Lt | Gt | Le | Ge | Promote_f32
   | Convert_i_s _ | Convert_i_u _ | Reinterpret_i _ | Load _ | Store _ ->
     ()
 
-let check_simple_instruction ~invariants ~uuid : Binary.simple_instruction -> _
-    = function
-  | I32 i32_instr -> check_i32 ~uuid ~invariants i32_instr
+let check_simple_instruction ~invariants ~uuid = function
+  | (I32 i32_instr : Binary.simple_instruction) ->
+    check_i32 ~uuid ~invariants i32_instr
   | I64 i64_instr -> check_i64 ~uuid ~invariants i64_instr
   | F32 f32_instr -> check_f32 ~uuid ~invariants f32_instr
   | F64 f64_instr -> check_f64 ~uuid ~invariants f64_instr

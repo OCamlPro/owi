@@ -937,8 +937,9 @@ let typecheck_i64x2_instr (env : Env.t) stack = function
       let+ stack = Stack.push [ v128 ] stack in
       (env, stack)
 
-let typecheck_f32x4_instr (env : Env.t) stack : Text.f32x4_instr -> _ = function
-  | Abs | Ceil | Floor | Trunc | Nearest | Neg | Sqrt | Convert_i32x4_s
+let typecheck_f32x4_instr (env : Env.t) stack = function
+  | (Abs : Text.f32x4_instr)
+  | Ceil | Floor | Trunc | Nearest | Neg | Sqrt | Convert_i32x4_s
   | Convert_i32x4_u | Convert_low_i32x4_s | Convert_low_i32x4_u
   | Convert_high_i32x4_s | Convert_high_i32x4_u | Demote_f64x2_zero ->
     let* stack = Stack.pop env.modul [ v128 ] stack in
@@ -966,10 +967,11 @@ let typecheck_f32x4_instr (env : Env.t) stack : Text.f32x4_instr -> _ = function
       let+ stack = Stack.push [ v128 ] stack in
       (env, stack)
 
-let typecheck_f64x2_instr (env : Env.t) stack : Text.f64x2_instr -> _ = function
-  | Abs | Ceil | Floor | Trunc | Nearest | Neg | Sqrt | Convert_low_i32x4_s
-  | Convert_low_i32x4_u | Convert_high_i32x4_s | Convert_high_i32x4_u
-  | Promote_low_f32x4 ->
+let typecheck_f64x2_instr (env : Env.t) stack = function
+  | (( Abs | Ceil | Floor | Trunc | Nearest | Neg | Sqrt | Convert_low_i32x4_s
+     | Convert_low_i32x4_u | Convert_high_i32x4_s | Convert_high_i32x4_u
+     | Promote_low_f32x4 ) :
+      Text.f64x2_instr ) ->
     let* stack = Stack.pop env.modul [ v128 ] stack in
     let+ stack = Stack.push [ v128 ] stack in
     (env, stack)
@@ -1158,8 +1160,8 @@ let typecheck_data_instr (env : Env.t) stack : Binary.data_instr -> _ = function
     let+ () = check_data env.modul id in
     (env, stack)
 
-let typecheck_i31_instr (env : Env.t) stack : Text.i31_instr -> _ = function
-  | Ref ->
+let typecheck_i31_instr (env : Env.t) stack = function
+  | (Ref : Text.i31_instr) ->
     let* stack = Stack.pop env.modul [ i32 ] stack in
     let+ stack = Stack.push [ Ref_type (No_null, I31_ht) ] stack in
     (env, stack)
@@ -1168,9 +1170,8 @@ let typecheck_i31_instr (env : Env.t) stack : Text.i31_instr -> _ = function
     let+ stack = Stack.push [ i32 ] stack in
     (env, stack)
 
-let typecheck_struct_instr (env : Env.t) stack : Binary.struct_instr -> _ =
-  function
-  | New id ->
+let typecheck_struct_instr (env : Env.t) stack = function
+  | (New id : Binary.struct_instr) ->
     let* fields = Env.type_get_struct id env.modul in
     let field_typs =
       List.rev_map (fun (_, (_, st)) -> unpack_storage_type st) fields
@@ -1227,9 +1228,8 @@ let typecheck_struct_instr (env : Env.t) stack : Binary.struct_instr -> _ =
     in
     (env, stack)
 
-let typecheck_array_instr (env : Env.t) stack : Binary.array_instr -> _ =
-  function
-  | New id ->
+let typecheck_array_instr (env : Env.t) stack = function
+  | (New id : Binary.array_instr) ->
     let* _, st = Env.type_get_array id env.modul in
     let elem_ty = unpack_storage_type st in
     let* stack = Stack.pop env.modul [ i32; elem_ty ] stack in

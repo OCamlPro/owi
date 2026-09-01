@@ -40,8 +40,8 @@ let pp fmt = function
   | V128 e -> Smtml.Typed.Bitv128.pp fmt e
   | Ref r -> Ref.pp fmt r
 
-let of_script_const ~ty : Wast.const -> t = function
-  | Const_I32 v -> I32 (Symbolic_i32.of_int32 v)
+let of_script_const ~ty = function
+  | Wast.Const_I32 v -> (I32 (Symbolic_i32.of_int32 v) : t)
   | Const_I64 v -> I64 (Symbolic_i64.of_int64 v)
   | Const_F32 v -> F32 (Symbolic_f32.of_float32 v)
   | Const_F64 v -> F64 (Symbolic_f64.of_float (Float64.to_float v))
