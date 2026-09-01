@@ -180,7 +180,7 @@ end = struct
     ~(env : t) id link_state = function
     | Origin.Local ({ init; typ; id = _ } : Binary.Global.t) ->
       let address = Allocator.next_key env.globals + id in
-      let* value =
+      let value =
         Constexpr_eval.expr ctx ~get_const_type ~get_const_func
           ~get_const_global init.raw
       in
@@ -330,8 +330,8 @@ end = struct
           (* TODO: could we avoid putting anything in the list then? *)
           Ok []
         | Active _ | Passive ->
-          let* init =
-            list_map
+          let init =
+            List.map
               (fun expr ->
                 Constexpr_eval.ref_expr ctx ~get_const_type ~get_const_func
                   ~get_const_global expr.Annotated.raw )
@@ -437,7 +437,7 @@ end = struct
     (* TODO *)
 
     (* TODO: I'm not sure about this *)
-    let get_const_type id = Ok (Array.get types id) in
+    let get_const_type id = Array.get types id in
 
     let get_const_global ~(env : t) globals (rewrite_map : Env_rewriter.t) id =
       (* we should only make visible previously defined immutable globals and imported immutable globals. *)
@@ -445,10 +445,10 @@ end = struct
       | None -> assert false
       | Some address ->
         begin match List.assoc_opt address globals with
-        | Some g -> Ok g.Env0.value
+        | Some g -> g.Env0.value
         | None ->
           begin match Allocator.find_opt address env.globals with
-          | Some g -> Ok g.value
+          | Some g -> g.value
           | None -> assert false
           end
         end
@@ -456,10 +456,9 @@ end = struct
 
     let get_const_func (rewrite_map : Env_rewriter.t) id =
       (* we should only make visible functions that are defined locally, not imported functions *)
-      (* TODO: this can probably be changed to remove the Result wrap? *)
       match IntMap.find_opt id rewrite_map.functions with
       | None -> assert false
-      | Some address -> Ok address
+      | Some address -> address
     in
 
     (* globals *)
