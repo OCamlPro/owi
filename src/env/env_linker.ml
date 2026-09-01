@@ -538,20 +538,9 @@ end = struct
         env link_state.datas
     in
 
-    let rewrite_ref : 'value Value.Ref.t -> 'value Value.Ref.t = function
-      | Func (Some i) ->
-        (* TODO: this should be rewritten to the right index? *)
-        Func (Some i)
-      | ( Extern _
-        | Func None
-        | NullExn | NullRef | NullI31 | I31 _ | Array _ | Struct _
-        | ExternAsAny _ | AnyAsExtern _ ) as i ->
-        i
-    in
     let env =
       List.fold_left
         (fun (env : t) (address, elem) ->
-          let elem = List.map rewrite_ref elem in
           let elem = Elem.init elem in
           let elems = Allocator.add_manual address elem env.elems in
           { env with elems } )
