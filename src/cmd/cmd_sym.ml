@@ -38,7 +38,7 @@ let run_file ~parameters ~source_file =
     else Ok (Abstract_invariant.empty ())
   in
 
-  let env = Env.Symbolic.empty in
+  let env = Env.Symbolic.empty ~context:() in
   let* env =
     Env.Symbolic.link_extern_module ~env ~name:"wasi_snapshot_preview1"
       Symbolic_wasm_ffi.wasi_snapshot_preview1

@@ -122,7 +122,7 @@ let pp ~pp_global ~pp_table ppf
     exported_tables (Fmt.option pp_modul) last_module (StringMap.pp pp_modul)
     registered_modules pp_types types pp_type_groups type_groups
 
-let empty ~empty_context =
+let empty ~context =
   let functions = Allocator.empty in
   let globals = Allocator.empty in
   let memories = Allocator.empty in
@@ -138,7 +138,6 @@ let empty ~empty_context =
   let exported_tags = IntMap.empty in
   let last_module = None in
   let registered_modules = StringMap.empty in
-  let context = empty_context () in
   let raw_names = StringMap.empty in
   let types = [||] in
   let type_groups = [||] in

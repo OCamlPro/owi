@@ -72,7 +72,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
         match List.length pt with 1 -> false | _n -> true ) )
   in
 
-  let env = Env.Symbolic.empty in
+  let env = Env.Symbolic.empty ~context:() in
   let* env =
     Env.Symbolic.link_extern_module ~env ~name:"owi" Symbolic_wasm_ffi.owi
   in

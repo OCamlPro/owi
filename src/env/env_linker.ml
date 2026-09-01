@@ -9,8 +9,6 @@ module StringMap = Map.Make (String)
 module Make
     (Context : sig
       type t
-
-      val empty : unit -> t
     end)
     (Value : sig
       type t
@@ -424,10 +422,8 @@ end = struct
     let type_groups = Array.append env.type_groups type_groups in
     (* We need to compute the updated environment with the new types and type
      groups earlier so that we can use it for imported functions *)
-
     let env = { env with types; type_groups } in
-    (* TODO: should it be passed to the function instead? *)
-    let ctx = Context.empty () in
+
     (* functions *)
     let* link_state =
       array_fold_lefti (link_function ~env) link_state modul.func
@@ -455,7 +451,7 @@ end = struct
     let* link_state =
       array_fold_lefti
         (fun id link_state ->
-          link_global ctx ~get_const_type
+          link_global env.context ~get_const_type
             ~get_const_global:(get_const_global ~env link_state.globals)
             ~env id link_state )
         link_state modul.global
@@ -483,7 +479,7 @@ end = struct
     (* 2. elem *)
     let* link_state : link_state =
       array_fold_lefti
-        (link_elem ctx ~get_const_type
+        (link_elem env.context ~get_const_type
            ~get_const_global:(get_const_global ~env link_state.globals)
            ~env )
         link_state modul.elem

@@ -1705,7 +1705,7 @@ module Env : sig
 
     type modul
 
-    val empty : t
+    val empty : context:unit -> t
 
     val link_binary_module :
       env:t -> name:string option -> modul:Binary.Module.t -> t Result.t
@@ -1719,7 +1719,7 @@ module Env : sig
 
     type modul
 
-    val empty : t
+    val empty : context:unit -> t
 
     val link_binary_module :
       env:t -> name:string option -> modul:Binary.Module.t -> t Result.t

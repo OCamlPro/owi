@@ -35,7 +35,7 @@ let timeout_call_run (run : unit -> (unit, Owi.Result.err) Result.t) :
 
 module Owi_regular : INTERPRET = struct
   let parse_and_run modul =
-    let env = Owi.Env.Concrete.empty in
+    let env = Owi.Env.Concrete.empty ~context:() in
     let* modul, env =
       Owi.Compile.Text.until_concrete_link ~name:None ~unsafe:false env modul
     in
