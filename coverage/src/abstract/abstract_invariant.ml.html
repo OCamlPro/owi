@@ -129,9 +129,9 @@ let empty () =
   <span data-count="1320">{</span> can_divide_by_zero }
 
 let can_divide_by_zero { can_divide_by_zero } ~uuid =
-  <span data-count="96832">l</span>et possible = Hashtbl.find_opt can_divide_by_zero uuid in
+  <span data-count="96831">l</span>et possible = Hashtbl.find_opt can_divide_by_zero uuid in
   (* by default, we don't know, and assume it is possible to be on the safe-side *)
-  <span data-count="96832">O</span>ption.value ~default:true possible
+  <span data-count="96831">O</span>ption.value ~default:true possible
 
 let add_divide_by_zero_invariant { can_divide_by_zero } ~uuid ~possible =
   <span data-count="7">L</span>og.debug (fun m -&gt;

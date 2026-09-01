@@ -49,8 +49,6 @@
 <a id="L25"></a><span > </span>
 <a id="L26"></a><span > </span>
 <a id="L27"></a><span > </span>
-<a id="L28"></a><span > </span>
-<a id="L29"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -82,8 +80,6 @@
 <a href="#L25">25</a>
 <a href="#L26">26</a>
 <a href="#L27">27</a>
-<a href="#L28">28</a>
-<a href="#L29">29</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2026 OCamlPro *)
@@ -100,19 +96,17 @@ module type T = sig
 
   val expr :
        context
-    -&gt; get_const_type:(Binary.indice -&gt; Binary.sub_type Result.t)
-    -&gt; get_const_func:(Binary.indice -&gt; int Result.t)
-    -&gt; get_const_global:(Binary.indice -&gt; value Result.t)
+    -&gt; get_const_type:(Binary.indice -&gt; Binary.sub_type)
+    -&gt; get_const_global:(Binary.indice -&gt; value)
     -&gt; Binary.expr
-    -&gt; value Result.t
+    -&gt; value
 
   val ref_expr :
        context
-    -&gt; get_const_type:(Binary.indice -&gt; Binary.sub_type Result.t)
-    -&gt; get_const_func:(Binary.indice -&gt; int Result.t)
-    -&gt; get_const_global:(Binary.indice -&gt; value Result.t)
+    -&gt; get_const_type:(Binary.indice -&gt; Binary.sub_type)
+    -&gt; get_const_global:(Binary.indice -&gt; value)
     -&gt; Binary.expr
-    -&gt; reference Result.t
+    -&gt; reference
 end
 </code></pre>
       </div>

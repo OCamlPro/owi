@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>symbolic_wasm_ffi.ml &mdash; Coverage report</title>
-    <meta name="description" content="69.61% coverage in src/symbolic/symbolic_wasm_ffi.ml">
+    <meta name="description" content="69.96% coverage in src/symbolic/symbolic_wasm_ffi.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">src/symbolic/</span>symbolic_wasm_ffi.ml
         </a>
       </h1>
-      <h2>69.61%</h2>
+      <h2>69.96%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:15.81%"></span>
@@ -34,7 +34,6 @@
       <span class="unvisited" style="top:25.16%"></span>
       <span class="unvisited" style="top:25.48%"></span>
       <span class="unvisited" style="top:34.19%"></span>
-      <span class="unvisited" style="top:37.74%"></span>
       <span class="unvisited" style="top:39.68%"></span>
       <span class="unvisited" style="top:40.00%"></span>
       <span class="unvisited" style="top:40.32%"></span>
@@ -198,7 +197,7 @@
 <a id="L114"></a><span > </span>
 <a id="L115"></a><span class="visited"> </span>
 <a id="L116"></a><span > </span>
-<a id="L117"></a><span class="unvisited"> </span>
+<a id="L117"></a><span class="visited"> </span>
 <a id="L118"></a><span > </span>
 <a id="L119"></a><span > </span>
 <a id="L120"></a><span class="visited"> </span>
@@ -821,9 +820,9 @@ module M :
     <span data-count="12">l</span>et+ () = assum<span data-count="12">e</span> (Symbolic_i32.l<span data-count="12">t</span> x hi) in
     <span data-count="12">x</span>
 
-  let abort () : unit Symbolic_choice.t = <span data-count="1">S</span>ymbolic_choice.prune ()
+  let abort () : unit Symbolic_choice.t = <span data-count="2">S</span>ymbolic_choice.prune ()
 
-  let exit (_p : Symbolic_i32.t) : unit Symbolic_choice.t = <span data-count="0">a</span>bort ()
+  let exit (_p : Symbolic_i32.t) : unit Symbolic_choice.t = <span data-count="1">a</span>bort ()
 
   let in_replay_mode () =
     <span data-count="4">S</span>ymbolic_choice.return @@ Symbolic_i32.of_boolea<span data-count="4">n</span> Symbolic_boolean.false_

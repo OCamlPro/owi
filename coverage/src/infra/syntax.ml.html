@@ -434,10 +434,10 @@ let[@inline] list_iter f l =
   aux l
 
 let[@inline] list_map f l =
-  <span data-count="86910">l</span>et rec aux acc = function
-    | <span data-count="86865">[</span>] -&gt; Ok (List.re<span data-count="86865">v</span> acc)
-    | <span data-count="85696">x</span> :: xs -&gt; (
-      match f x with <span data-count="85651">O</span>k v -&gt; aux (v :: acc) xs | <span data-count="45">E</span>rror _ as e -&gt; e )
+  <span data-count="86019">l</span>et rec aux acc = function
+    | <span data-count="85974">[</span>] -&gt; Ok (List.re<span data-count="85974">v</span> acc)
+    | <span data-count="82928">x</span> :: xs -&gt; (
+      match f x with <span data-count="82883">O</span>k v -&gt; aux (v :: acc) xs | <span data-count="45">E</span>rror _ as e -&gt; e )
   in
   aux [] l
 
@@ -452,10 +452,10 @@ let[@inline] list_concat_map f l =
   aux [] l
 
 let[@inline] list_fold_left f acc l =
-  <span data-count="63551">l</span>et rec aux acc = function
-    | <span data-count="61152">[</span>] -&gt; Ok acc
-    | <span data-count="413180">v</span> :: tl -&gt; (
-      match f acc v with <span data-count="410781">O</span>k acc -&gt; aux acc tl | <span data-count="2399">E</span>rror _ as e -&gt; e )
+  <span data-count="59315">l</span>et rec aux acc = function
+    | <span data-count="56916">[</span>] -&gt; Ok acc
+    | <span data-count="408864">v</span> :: tl -&gt; (
+      match f acc v with <span data-count="406465">O</span>k acc -&gt; aux acc tl | <span data-count="2399">E</span>rror _ as e -&gt; e )
   in
   aux acc l
 
@@ -568,12 +568,12 @@ let[@inline] array_fold_left f acc l =
     (Ok acc) l
 
 let[@inline] array_fold_lefti f acc l =
-  <span data-count="19611">s</span>nd
-  @@ Array.fold_lef<span data-count="19611">t</span>
+  <span data-count="16862">s</span>nd
+  @@ Array.fold_lef<span data-count="16862">t</span>
        (fun (i, acc) v -&gt;
-         <span data-count="21284">(</span> suc<span data-count="21284">c</span> i
+         <span data-count="20567">(</span> suc<span data-count="20567">c</span> i
          , let* acc in
-           <span data-count="21275">f</span> i acc v ) )
+           <span data-count="20558">f</span> i acc v ) )
        (0, Ok acc) l
 
 let[@inline] dynarray_fold_left f acc l =

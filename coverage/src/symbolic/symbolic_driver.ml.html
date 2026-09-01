@@ -555,15 +555,15 @@ let run ~exploration_strategy ~workers ~no_worker_isolation ~no_stop_at_failure
 
     (* Handles final values from the monad and reschedule them if needed. *)
     let rec at_schedulable (t : _ Symex.Monad.schedulable) write_back =
-      <span data-count="54356">m</span>atch t with
-      | <span data-count="1427">O</span>k _ | <span data-count="12374">E</span>rror `Prune -&gt; Atomic.incr path_count
+      <span data-count="54904">m</span>atch t with
+      | <span data-count="1595">O</span>k _ | <span data-count="12385">E</span>rror `Prune -&gt; Atomic.incr path_count
       | Error ((<span data-count="68">`</span>Assertion _ | <span data-count="186">`</span>Trap _) as bug) -&gt;
         Atomic.incr path_count;
         <span data-count="254">a</span>t_bug bug
-      | <span data-count="26621">Y</span>ield (prio, f) -&gt; write_back (prio, f)
-      | <span data-count="13680">C</span>hoice (m1, m2) -&gt;
+      | <span data-count="26810">Y</span>ield (prio, f) -&gt; write_back (prio, f)
+      | <span data-count="13860">C</span>hoice (m1, m2) -&gt;
         at_schedulable m1 write_back;
-        <span data-count="13680">a</span>t_schedulable m2 write_back
+        <span data-count="13860">a</span>t_schedulable m2 write_back
     in
 
     let run_worker () =
@@ -573,7 +573,7 @@ let run ~exploration_strategy ~workers ~no_worker_isolation ~no_stop_at_failure
           <span data-count="829">t</span>ry
             (* Pull work from the queue as long as it's possible *)
             Scheduler.work_whil<span data-count="827">e</span>
-              (fun f write_back -&gt; <span data-count="26998">a</span>t_schedulable (<span data-count="26996">f</span> ()) write_back)
+              (fun f write_back -&gt; <span data-count="27185">a</span>t_schedulable (<span data-count="27184">f</span> ()) write_back)
               sched
           with
           | <span data-count="0">Z</span>3.Error _ when Solver.was_interrupte<span data-count="0">d</span> () -&gt;
