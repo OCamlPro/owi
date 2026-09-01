@@ -19,7 +19,9 @@ module type T = sig
 
   type data
 
-  val empty : t
+  type context
+
+  val empty : context:context -> t
 
   val pp : t Fmt.t
 
@@ -71,8 +73,6 @@ module type T = sig
   val get_types : env:t -> Binary.sub_type array
 
   val get_type_groups : env:t -> (int * int) array
-
-  type context
 
   val get_context : env:t -> context
 

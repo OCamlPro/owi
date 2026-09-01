@@ -32,9 +32,10 @@ let action (env : Env.Concrete.t) = function
 let unsafe = false
 
 let run ~no_exhaustion script =
+  let env = Env.Concrete.empty ~context:() in
   let* state =
-    Env.Concrete.link_extern_module ~env:Env.Concrete.empty
-      ~name:"spectest_extern" Spectest.extern_m
+    Env.Concrete.link_extern_module ~env ~name:"spectest_extern"
+      Spectest.extern_m
   in
   let script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
   let registered = ref false in

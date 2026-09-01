@@ -5,8 +5,6 @@
 module Make
     (Context : sig
       type t
-
-      val empty : unit -> t
     end)
     (Value : sig
       type t
@@ -66,9 +64,6 @@ module Make
      and type memory := Memory.t
      and type context = Context.t = struct
   include Env0
-
-  let empty = Env0.empty ~empty_context:Context.empty
-
   include
     Env_linker.Make (Context) (Value) (Constexpr_eval) (Memory) (Table) (Elem)
       (Extern_func)

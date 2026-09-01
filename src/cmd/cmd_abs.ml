@@ -4,9 +4,13 @@
 
 open Syntax
 
+(* TODO: rename this... *)
 let env () =
-  Env.Abstract.link_extern_module ~env:Env.Abstract.empty ~name:"owi"
-    Abstract_wasm_ffi.owi
+  let env =
+    let context = Abstract_domain.root_context () in
+    Env.Abstract.empty ~context
+  in
+  Env.Abstract.link_extern_module ~env ~name:"owi" Abstract_wasm_ffi.owi
 
 let cmd ~source_file ~entry_point ~unsafe =
   let* env = env () in

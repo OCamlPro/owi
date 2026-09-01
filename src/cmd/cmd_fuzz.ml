@@ -6,9 +6,9 @@ open Syntax
 
 let cmd ~rounds ~seed ~source_file ~timeout ~timeout_instr ~unsafe =
   Init.random_state seed;
+  let env = Env.Concrete.empty ~context:() in
   let* env =
-    Env.Concrete.link_extern_module ~env:Env.Concrete.empty ~name:"owi"
-      Fuzz_wasm_ffi.owi
+    Env.Concrete.link_extern_module ~env ~name:"owi" Fuzz_wasm_ffi.owi
   in
   let* modul = Compile.File.until_validate ~unsafe source_file in
   let module Parameters = struct

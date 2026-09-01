@@ -25,7 +25,7 @@ let extern_module : Concrete_extern.Module.t =
 
 (* an environment that contains our custom module, available under the name `sausage` *)
 let env =
-  let env = Env.Concrete.empty in
+  let env = Env.Concrete.empty ~context:() in
   Env.Concrete.link_extern_module ~env ~name:"sausage" extern_module
   |> Stdlib.Result.get_ok
 

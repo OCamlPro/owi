@@ -156,7 +156,7 @@ let run_one ~no_exhaustion ~(env : Env.Symbolic.t) cmd : Env.Symbolic.t Result.t
 
 let run ~no_exhaustion script : _ Result.t =
   Solver.solver_to_use := Some Smtml.Solver_type.Z3_solver;
-  let env = Env.Symbolic.empty in
+  let env = Env.Symbolic.empty ~context:() in
   let* env =
     Env.Symbolic.link_extern_module ~env ~name:"spectest_extern"
       Spectest.symbolic_extern_m
