@@ -33,6 +33,8 @@
 <a id="L9"></a><span class="visited"> </span>
 <a id="L10"></a><span > </span>
 <a id="L11"></a><span class="visited"> </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -48,18 +50,22 @@
 <a href="#L9"> 9</a>
 <a href="#L10">10</a>
 <a href="#L11">11</a>
+<a href="#L12">12</a>
+<a href="#L13">13</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type t = { mutable value : Concrete_ref.t array }
+type t = Concrete_value.t Concrete_ref.t Iarray.t
 
-let get (e : t) i = <span data-count="1245">e</span>.value.(i)
+let get (e : t) i = <span data-count="1303">I</span>array.get e i
 
-let size (e : t) = <span data-count="449">A</span>rray.length e.value
+let size (e : t) = <span data-count="490">I</span>array.length e
 
-let drop (e : t) = <span data-count="393">e</span>.value &lt;- [||]
+let drop (_e : t) = <span data-count="396">I</span>array.of_list []
+
+let init l = <span data-count="772">I</span>array.of_list l
 </code></pre>
       </div>
     </div>

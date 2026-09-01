@@ -131,18 +131,18 @@ include Float64
 type t = Float64.t
 
 let promote_f32 x =
-  <span data-count="83">i</span>f Float32.eq x x then <span data-count="77">F</span>loat64.of_float @@ Float32.to_floa<span data-count="77">t</span> x
+  <span data-count="115">i</span>f Float32.eq x x then <span data-count="101">F</span>loat64.of_float @@ Float32.to_floa<span data-count="101">t</span> x
   else
-    <span data-count="6">l</span>et nan32bits = Concrete_i64.extend_i32_u (Float32.to_bit<span data-count="6">s</span> x) in
-    <span data-count="6">l</span>et sign_field = Int64.(shift_lef<span data-count="6">t</span> (shift_right_logica<span data-count="6">l</span> nan32bits 31) 63) in
+    <span data-count="14">l</span>et nan32bits = Concrete_i64.extend_i32_u (Float32.to_bit<span data-count="14">s</span> x) in
+    <span data-count="14">l</span>et sign_field = Int64.(shift_lef<span data-count="14">t</span> (shift_right_logica<span data-count="14">l</span> nan32bits 31) 63) in
     let significand_field =
-      Int64.(shift_right_logica<span data-count="6">l</span> (shift_lef<span data-count="6">t</span> nan32bits 41) 12)
+      Int64.(shift_right_logica<span data-count="14">l</span> (shift_lef<span data-count="14">t</span> nan32bits 41) 12)
     in
     let fields = Int64.logor sign_field significand_field in
-    <span data-count="6">l</span>et nan64bits = Int64.logor 0x7ff8_0000_0000_0000L fields in
-    <span data-count="6">F</span>loat64.of_bits nan64bits
+    <span data-count="14">l</span>et nan64bits = Int64.logor 0x7ff8_0000_0000_0000L fields in
+    <span data-count="14">F</span>loat64.of_bits nan64bits
 
-let convert_i32_s x = <span data-count="14">F</span>loat64.of_float (Int32.to_floa<span data-count="14">t</span> x)
+let convert_i32_s x = <span data-count="26">F</span>loat64.of_float (Int32.to_floa<span data-count="26">t</span> x)
 
 (*
  * Unlike the other convert_u functions, the high half of the i32 range is
@@ -150,7 +150,7 @@ let convert_i32_s x = <span data-count="14">F</span>loat64.of_float (Int32.to_fl
  * shift. Instead, we can use int64 signed arithmetic.
  *)
 let convert_i32_u x =
-  <span data-count="13">F</span>loat64.of_float Int64.(to_floa<span data-count="13">t</span> (logan<span data-count="13">d</span> (of_int3<span data-count="13">2</span> x) 0x0000_0000_ffff_ffffL))
+  <span data-count="23">F</span>loat64.of_float Int64.(to_floa<span data-count="23">t</span> (logan<span data-count="23">d</span> (of_int3<span data-count="23">2</span> x) 0x0000_0000_ffff_ffffL))
 
 let convert_i64_s x = <span data-count="19">F</span>loat64.of_float (Int64.to_floa<span data-count="19">t</span> x)
 

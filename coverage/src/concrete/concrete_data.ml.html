@@ -28,11 +28,19 @@
 <a id="L4"></a><span > </span>
 <a id="L5"></a><span > </span>
 <a id="L6"></a><span > </span>
-<a id="L7"></a><span class="visited"> </span>
-<a id="L8"></a><span > </span>
+<a id="L7"></a><span > </span>
+<a id="L8"></a><span class="visited"> </span>
 <a id="L9"></a><span class="visited"> </span>
 <a id="L10"></a><span > </span>
-<a id="L11"></a><span class="visited"> </span>
+<a id="L11"></a><span > </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span class="visited"> </span>
+<a id="L14"></a><span > </span>
+<a id="L15"></a><span class="visited"> </span>
+<a id="L16"></a><span > </span>
+<a id="L17"></a><span class="visited"> </span>
+<a id="L18"></a><span > </span>
+<a id="L19"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -48,18 +56,34 @@
 <a href="#L9"> 9</a>
 <a href="#L10">10</a>
 <a href="#L11">11</a>
+<a href="#L12">12</a>
+<a href="#L13">13</a>
+<a href="#L14">14</a>
+<a href="#L15">15</a>
+<a href="#L16">16</a>
+<a href="#L17">17</a>
+<a href="#L18">18</a>
+<a href="#L19">19</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type t = { mutable value : string }
+type t = string option
 
-let value data = <span data-count="248">d</span>ata.value
+let value = function
+  | <span data-count="42">S</span>ome s -&gt; s
+  | <span data-count="2">N</span>one -&gt;
+    (* TODO: is this correct? *)
+    ""
 
-let size data = <span data-count="312">S</span>tring.length data.value
+let size = function <span data-count="3">N</span>one -&gt; 0 | <span data-count="52">S</span>ome s -&gt; String.length s
 
-let drop data = <span data-count="228">d</span>ata.value &lt;- ""
+let drop _data = <span data-count="259">N</span>one
+
+let of_string s = <span data-count="496">S</span>ome s
+
+let to_string s = <span data-count="336">s</span>
 </code></pre>
       </div>
     </div>

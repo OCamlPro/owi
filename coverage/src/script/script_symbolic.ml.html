@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>script_symbolic.ml &mdash; Coverage report</title>
+    <meta name="description" content="0.92% coverage in src/script/script_symbolic.ml">
+    <link rel="stylesheet" href="../../coverage.css"/>
+    <script src="../../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../../index.html">
+          <span class="dirname">src/script/</span>script_symbolic.ml
+        </a>
+      </h1>
+      <h2>0.92%</h2>
+    </div>
+    <div id="navbar">
+      <span class="unvisited" style="top:8.82%"></span>
+      <span class="unvisited" style="top:9.41%"></span>
+      <span class="unvisited" style="top:10.00%"></span>
+      <span class="unvisited" style="top:10.59%"></span>
+      <span class="unvisited" style="top:11.18%"></span>
+      <span class="unvisited" style="top:11.76%"></span>
+      <span class="unvisited" style="top:12.35%"></span>
+      <span class="unvisited" style="top:14.12%"></span>
+      <span class="unvisited" style="top:15.29%"></span>
+      <span class="unvisited" style="top:16.47%"></span>
+      <span class="unvisited" style="top:17.06%"></span>
+      <span class="unvisited" style="top:18.24%"></span>
+      <span class="unvisited" style="top:18.82%"></span>
+      <span class="unvisited" style="top:19.41%"></span>
+      <span class="unvisited" style="top:20.00%"></span>
+      <span class="unvisited" style="top:20.59%"></span>
+      <span class="unvisited" style="top:21.18%"></span>
+      <span class="unvisited" style="top:21.76%"></span>
+      <span class="unvisited" style="top:23.53%"></span>
+      <span class="unvisited" style="top:27.06%"></span>
+      <span class="unvisited" style="top:28.24%"></span>
+      <span class="unvisited" style="top:28.82%"></span>
+      <span class="unvisited" style="top:29.41%"></span>
+      <span class="unvisited" style="top:30.00%"></span>
+      <span class="unvisited" style="top:30.59%"></span>
+      <span class="unvisited" style="top:31.18%"></span>
+      <span class="unvisited" style="top:31.76%"></span>
+      <span class="unvisited" style="top:32.35%"></span>
+      <span class="unvisited" style="top:32.94%"></span>
+      <span class="unvisited" style="top:33.53%"></span>
+      <span class="unvisited" style="top:34.12%"></span>
+      <span class="unvisited" style="top:35.29%"></span>
+      <span class="unvisited" style="top:35.88%"></span>
+      <span class="unvisited" style="top:36.47%"></span>
+      <span class="unvisited" style="top:37.06%"></span>
+      <span class="unvisited" style="top:37.65%"></span>
+      <span class="unvisited" style="top:38.24%"></span>
+      <span class="unvisited" style="top:39.41%"></span>
+      <span class="unvisited" style="top:41.76%"></span>
+      <span class="unvisited" style="top:42.35%"></span>
+      <span class="unvisited" style="top:42.94%"></span>
+      <span class="unvisited" style="top:44.12%"></span>
+      <span class="unvisited" style="top:45.29%"></span>
+      <span class="unvisited" style="top:46.47%"></span>
+      <span class="unvisited" style="top:47.06%"></span>
+      <span class="unvisited" style="top:47.65%"></span>
+      <span class="unvisited" style="top:48.24%"></span>
+      <span class="unvisited" style="top:48.82%"></span>
+      <span class="unvisited" style="top:50.00%"></span>
+      <span class="unvisited" style="bottom:48.82%"></span>
+      <span class="unvisited" style="bottom:48.24%"></span>
+      <span class="unvisited" style="bottom:47.65%"></span>
+      <span class="unvisited" style="bottom:47.06%"></span>
+      <span class="unvisited" style="bottom:45.88%"></span>
+      <span class="unvisited" style="bottom:44.71%"></span>
+      <span class="unvisited" style="bottom:43.53%"></span>
+      <span class="unvisited" style="bottom:42.94%"></span>
+      <span class="unvisited" style="bottom:41.76%"></span>
+      <span class="unvisited" style="bottom:40.59%"></span>
+      <span class="unvisited" style="bottom:39.41%"></span>
+      <span class="unvisited" style="bottom:38.82%"></span>
+      <span class="unvisited" style="bottom:37.65%"></span>
+      <span class="unvisited" style="bottom:36.47%"></span>
+      <span class="unvisited" style="bottom:35.88%"></span>
+      <span class="unvisited" style="bottom:35.29%"></span>
+      <span class="unvisited" style="bottom:34.71%"></span>
+      <span class="unvisited" style="bottom:34.12%"></span>
+      <span class="unvisited" style="bottom:33.53%"></span>
+      <span class="unvisited" style="bottom:32.94%"></span>
+      <span class="unvisited" style="bottom:31.76%"></span>
+      <span class="unvisited" style="bottom:31.18%"></span>
+      <span class="unvisited" style="bottom:30.59%"></span>
+      <span class="unvisited" style="bottom:30.00%"></span>
+      <span class="unvisited" style="bottom:29.41%"></span>
+      <span class="unvisited" style="bottom:28.82%"></span>
+      <span class="unvisited" style="bottom:28.24%"></span>
+      <span class="unvisited" style="bottom:27.06%"></span>
+      <span class="unvisited" style="bottom:26.47%"></span>
+      <span class="unvisited" style="bottom:25.29%"></span>
+      <span class="unvisited" style="bottom:24.71%"></span>
+      <span class="unvisited" style="bottom:23.53%"></span>
+      <span class="unvisited" style="bottom:22.94%"></span>
+      <span class="unvisited" style="bottom:22.35%"></span>
+      <span class="unvisited" style="bottom:21.18%"></span>
+      <span class="unvisited" style="bottom:20.59%"></span>
+      <span class="unvisited" style="bottom:19.41%"></span>
+      <span class="unvisited" style="bottom:18.82%"></span>
+      <span class="unvisited" style="bottom:18.24%"></span>
+      <span class="unvisited" style="bottom:17.65%"></span>
+      <span class="unvisited" style="bottom:16.47%"></span>
+      <span class="unvisited" style="bottom:15.29%"></span>
+      <span class="unvisited" style="bottom:14.71%"></span>
+      <span class="unvisited" style="bottom:14.12%"></span>
+      <span class="unvisited" style="bottom:13.53%"></span>
+      <span class="unvisited" style="bottom:12.94%"></span>
+      <span class="unvisited" style="bottom:8.82%"></span>
+      <span class="unvisited" style="bottom:7.06%"></span>
+      <span class="unvisited" style="bottom:5.29%"></span>
+      <span class="unvisited" style="bottom:3.53%"></span>
+      <span class="unvisited" style="bottom:2.94%"></span>
+      <span class="unvisited" style="bottom:1.18%"></span>
+      <span class="unvisited" style="bottom:0.59%"></span>
+      <span class="unvisited" style="bottom:0.00%"></span>
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span > </span>
+<a id="L7"></a><span > </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span class="visited"> </span>
+<a id="L10"></a><span > </span>
+<a id="L11"></a><span > </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span > </span>
+<a id="L14"></a><span > </span>
+<a id="L15"></a><span class="unvisited"> </span>
+<a id="L16"></a><span class="unvisited"> </span>
+<a id="L17"></a><span class="unvisited"> </span>
+<a id="L18"></a><span class="unvisited"> </span>
+<a id="L19"></a><span class="unvisited"> </span>
+<a id="L20"></a><span class="unvisited"> </span>
+<a id="L21"></a><span class="unvisited"> </span>
+<a id="L22"></a><span > </span>
+<a id="L23"></a><span > </span>
+<a id="L24"></a><span class="unvisited"> </span>
+<a id="L25"></a><span > </span>
+<a id="L26"></a><span class="unvisited"> </span>
+<a id="L27"></a><span > </span>
+<a id="L28"></a><span class="unvisited"> </span>
+<a id="L29"></a><span class="unvisited"> </span>
+<a id="L30"></a><span > </span>
+<a id="L31"></a><span class="unvisited"> </span>
+<a id="L32"></a><span class="unvisited"> </span>
+<a id="L33"></a><span class="unvisited"> </span>
+<a id="L34"></a><span class="unvisited"> </span>
+<a id="L35"></a><span class="unvisited"> </span>
+<a id="L36"></a><span class="unvisited"> </span>
+<a id="L37"></a><span class="unvisited"> </span>
+<a id="L38"></a><span > </span>
+<a id="L39"></a><span > </span>
+<a id="L40"></a><span class="unvisited"> </span>
+<a id="L41"></a><span > </span>
+<a id="L42"></a><span > </span>
+<a id="L43"></a><span > </span>
+<a id="L44"></a><span > </span>
+<a id="L45"></a><span > </span>
+<a id="L46"></a><span class="unvisited"> </span>
+<a id="L47"></a><span > </span>
+<a id="L48"></a><span class="unvisited"> </span>
+<a id="L49"></a><span class="unvisited"> </span>
+<a id="L50"></a><span class="unvisited"> </span>
+<a id="L51"></a><span class="unvisited"> </span>
+<a id="L52"></a><span class="unvisited"> </span>
+<a id="L53"></a><span class="unvisited"> </span>
+<a id="L54"></a><span class="unvisited"> </span>
+<a id="L55"></a><span class="unvisited"> </span>
+<a id="L56"></a><span class="unvisited"> </span>
+<a id="L57"></a><span class="unvisited"> </span>
+<a id="L58"></a><span class="unvisited"> </span>
+<a id="L59"></a><span > </span>
+<a id="L60"></a><span class="unvisited"> </span>
+<a id="L61"></a><span class="unvisited"> </span>
+<a id="L62"></a><span class="unvisited"> </span>
+<a id="L63"></a><span class="unvisited"> </span>
+<a id="L64"></a><span class="unvisited"> </span>
+<a id="L65"></a><span class="unvisited"> </span>
+<a id="L66"></a><span > </span>
+<a id="L67"></a><span class="unvisited"> </span>
+<a id="L68"></a><span > </span>
+<a id="L69"></a><span > </span>
+<a id="L70"></a><span > </span>
+<a id="L71"></a><span class="unvisited"> </span>
+<a id="L72"></a><span class="unvisited"> </span>
+<a id="L73"></a><span class="unvisited"> </span>
+<a id="L74"></a><span > </span>
+<a id="L75"></a><span class="unvisited"> </span>
+<a id="L76"></a><span > </span>
+<a id="L77"></a><span class="unvisited"> </span>
+<a id="L78"></a><span > </span>
+<a id="L79"></a><span class="unvisited"> </span>
+<a id="L80"></a><span class="unvisited"> </span>
+<a id="L81"></a><span class="unvisited"> </span>
+<a id="L82"></a><span class="unvisited"> </span>
+<a id="L83"></a><span class="unvisited"> </span>
+<a id="L84"></a><span > </span>
+<a id="L85"></a><span class="unvisited"> </span>
+<a id="L86"></a><span > </span>
+<a id="L87"></a><span class="unvisited"> </span>
+<a id="L88"></a><span class="unvisited"> </span>
+<a id="L89"></a><span class="unvisited"> </span>
+<a id="L90"></a><span class="unvisited"> </span>
+<a id="L91"></a><span > </span>
+<a id="L92"></a><span class="unvisited"> </span>
+<a id="L93"></a><span > </span>
+<a id="L94"></a><span class="unvisited"> </span>
+<a id="L95"></a><span > </span>
+<a id="L96"></a><span class="unvisited"> </span>
+<a id="L97"></a><span class="unvisited"> </span>
+<a id="L98"></a><span > </span>
+<a id="L99"></a><span class="unvisited"> </span>
+<a id="L100"></a><span > </span>
+<a id="L101"></a><span class="unvisited"> </span>
+<a id="L102"></a><span > </span>
+<a id="L103"></a><span class="unvisited"> </span>
+<a id="L104"></a><span class="unvisited"> </span>
+<a id="L105"></a><span > </span>
+<a id="L106"></a><span class="unvisited"> </span>
+<a id="L107"></a><span > </span>
+<a id="L108"></a><span class="unvisited"> </span>
+<a id="L109"></a><span class="unvisited"> </span>
+<a id="L110"></a><span class="unvisited"> </span>
+<a id="L111"></a><span class="unvisited"> </span>
+<a id="L112"></a><span class="unvisited"> </span>
+<a id="L113"></a><span class="unvisited"> </span>
+<a id="L114"></a><span class="unvisited"> </span>
+<a id="L115"></a><span > </span>
+<a id="L116"></a><span class="unvisited"> </span>
+<a id="L117"></a><span class="unvisited"> </span>
+<a id="L118"></a><span class="unvisited"> </span>
+<a id="L119"></a><span class="unvisited"> </span>
+<a id="L120"></a><span class="unvisited"> </span>
+<a id="L121"></a><span class="unvisited"> </span>
+<a id="L122"></a><span class="unvisited"> </span>
+<a id="L123"></a><span > </span>
+<a id="L124"></a><span class="unvisited"> </span>
+<a id="L125"></a><span class="unvisited"> </span>
+<a id="L126"></a><span > </span>
+<a id="L127"></a><span class="unvisited"> </span>
+<a id="L128"></a><span class="unvisited"> </span>
+<a id="L129"></a><span > </span>
+<a id="L130"></a><span class="unvisited"> </span>
+<a id="L131"></a><span class="unvisited"> </span>
+<a id="L132"></a><span class="unvisited"> </span>
+<a id="L133"></a><span > </span>
+<a id="L134"></a><span class="unvisited"> </span>
+<a id="L135"></a><span class="unvisited"> </span>
+<a id="L136"></a><span > </span>
+<a id="L137"></a><span class="unvisited"> </span>
+<a id="L138"></a><span class="unvisited"> </span>
+<a id="L139"></a><span class="unvisited"> </span>
+<a id="L140"></a><span class="unvisited"> </span>
+<a id="L141"></a><span > </span>
+<a id="L142"></a><span class="unvisited"> </span>
+<a id="L143"></a><span > </span>
+<a id="L144"></a><span class="unvisited"> </span>
+<a id="L145"></a><span class="unvisited"> </span>
+<a id="L146"></a><span class="unvisited"> </span>
+<a id="L147"></a><span class="unvisited"> </span>
+<a id="L148"></a><span class="unvisited"> </span>
+<a id="L149"></a><span > </span>
+<a id="L150"></a><span > </span>
+<a id="L151"></a><span > </span>
+<a id="L152"></a><span > </span>
+<a id="L153"></a><span > </span>
+<a id="L154"></a><span > </span>
+<a id="L155"></a><span class="unvisited"> </span>
+<a id="L156"></a><span > </span>
+<a id="L157"></a><span > </span>
+<a id="L158"></a><span class="unvisited"> </span>
+<a id="L159"></a><span > </span>
+<a id="L160"></a><span > </span>
+<a id="L161"></a><span class="unvisited"> </span>
+<a id="L162"></a><span > </span>
+<a id="L163"></a><span > </span>
+<a id="L164"></a><span class="unvisited"> </span>
+<a id="L165"></a><span class="unvisited"> </span>
+<a id="L166"></a><span > </span>
+<a id="L167"></a><span > </span>
+<a id="L168"></a><span class="unvisited"> </span>
+<a id="L169"></a><span class="unvisited"> </span>
+<a id="L170"></a><span class="unvisited"> </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1">  1</a>
+<a href="#L2">  2</a>
+<a href="#L3">  3</a>
+<a href="#L4">  4</a>
+<a href="#L5">  5</a>
+<a href="#L6">  6</a>
+<a href="#L7">  7</a>
+<a href="#L8">  8</a>
+<a href="#L9">  9</a>
+<a href="#L10"> 10</a>
+<a href="#L11"> 11</a>
+<a href="#L12"> 12</a>
+<a href="#L13"> 13</a>
+<a href="#L14"> 14</a>
+<a href="#L15"> 15</a>
+<a href="#L16"> 16</a>
+<a href="#L17"> 17</a>
+<a href="#L18"> 18</a>
+<a href="#L19"> 19</a>
+<a href="#L20"> 20</a>
+<a href="#L21"> 21</a>
+<a href="#L22"> 22</a>
+<a href="#L23"> 23</a>
+<a href="#L24"> 24</a>
+<a href="#L25"> 25</a>
+<a href="#L26"> 26</a>
+<a href="#L27"> 27</a>
+<a href="#L28"> 28</a>
+<a href="#L29"> 29</a>
+<a href="#L30"> 30</a>
+<a href="#L31"> 31</a>
+<a href="#L32"> 32</a>
+<a href="#L33"> 33</a>
+<a href="#L34"> 34</a>
+<a href="#L35"> 35</a>
+<a href="#L36"> 36</a>
+<a href="#L37"> 37</a>
+<a href="#L38"> 38</a>
+<a href="#L39"> 39</a>
+<a href="#L40"> 40</a>
+<a href="#L41"> 41</a>
+<a href="#L42"> 42</a>
+<a href="#L43"> 43</a>
+<a href="#L44"> 44</a>
+<a href="#L45"> 45</a>
+<a href="#L46"> 46</a>
+<a href="#L47"> 47</a>
+<a href="#L48"> 48</a>
+<a href="#L49"> 49</a>
+<a href="#L50"> 50</a>
+<a href="#L51"> 51</a>
+<a href="#L52"> 52</a>
+<a href="#L53"> 53</a>
+<a href="#L54"> 54</a>
+<a href="#L55"> 55</a>
+<a href="#L56"> 56</a>
+<a href="#L57"> 57</a>
+<a href="#L58"> 58</a>
+<a href="#L59"> 59</a>
+<a href="#L60"> 60</a>
+<a href="#L61"> 61</a>
+<a href="#L62"> 62</a>
+<a href="#L63"> 63</a>
+<a href="#L64"> 64</a>
+<a href="#L65"> 65</a>
+<a href="#L66"> 66</a>
+<a href="#L67"> 67</a>
+<a href="#L68"> 68</a>
+<a href="#L69"> 69</a>
+<a href="#L70"> 70</a>
+<a href="#L71"> 71</a>
+<a href="#L72"> 72</a>
+<a href="#L73"> 73</a>
+<a href="#L74"> 74</a>
+<a href="#L75"> 75</a>
+<a href="#L76"> 76</a>
+<a href="#L77"> 77</a>
+<a href="#L78"> 78</a>
+<a href="#L79"> 79</a>
+<a href="#L80"> 80</a>
+<a href="#L81"> 81</a>
+<a href="#L82"> 82</a>
+<a href="#L83"> 83</a>
+<a href="#L84"> 84</a>
+<a href="#L85"> 85</a>
+<a href="#L86"> 86</a>
+<a href="#L87"> 87</a>
+<a href="#L88"> 88</a>
+<a href="#L89"> 89</a>
+<a href="#L90"> 90</a>
+<a href="#L91"> 91</a>
+<a href="#L92"> 92</a>
+<a href="#L93"> 93</a>
+<a href="#L94"> 94</a>
+<a href="#L95"> 95</a>
+<a href="#L96"> 96</a>
+<a href="#L97"> 97</a>
+<a href="#L98"> 98</a>
+<a href="#L99"> 99</a>
+<a href="#L100">100</a>
+<a href="#L101">101</a>
+<a href="#L102">102</a>
+<a href="#L103">103</a>
+<a href="#L104">104</a>
+<a href="#L105">105</a>
+<a href="#L106">106</a>
+<a href="#L107">107</a>
+<a href="#L108">108</a>
+<a href="#L109">109</a>
+<a href="#L110">110</a>
+<a href="#L111">111</a>
+<a href="#L112">112</a>
+<a href="#L113">113</a>
+<a href="#L114">114</a>
+<a href="#L115">115</a>
+<a href="#L116">116</a>
+<a href="#L117">117</a>
+<a href="#L118">118</a>
+<a href="#L119">119</a>
+<a href="#L120">120</a>
+<a href="#L121">121</a>
+<a href="#L122">122</a>
+<a href="#L123">123</a>
+<a href="#L124">124</a>
+<a href="#L125">125</a>
+<a href="#L126">126</a>
+<a href="#L127">127</a>
+<a href="#L128">128</a>
+<a href="#L129">129</a>
+<a href="#L130">130</a>
+<a href="#L131">131</a>
+<a href="#L132">132</a>
+<a href="#L133">133</a>
+<a href="#L134">134</a>
+<a href="#L135">135</a>
+<a href="#L136">136</a>
+<a href="#L137">137</a>
+<a href="#L138">138</a>
+<a href="#L139">139</a>
+<a href="#L140">140</a>
+<a href="#L141">141</a>
+<a href="#L142">142</a>
+<a href="#L143">143</a>
+<a href="#L144">144</a>
+<a href="#L145">145</a>
+<a href="#L146">146</a>
+<a href="#L147">147</a>
+<a href="#L148">148</a>
+<a href="#L149">149</a>
+<a href="#L150">150</a>
+<a href="#L151">151</a>
+<a href="#L152">152</a>
+<a href="#L153">153</a>
+<a href="#L154">154</a>
+<a href="#L155">155</a>
+<a href="#L156">156</a>
+<a href="#L157">157</a>
+<a href="#L158">158</a>
+<a href="#L159">159</a>
+<a href="#L160">160</a>
+<a href="#L161">161</a>
+<a href="#L162">162</a>
+<a href="#L163">163</a>
+<a href="#L164">164</a>
+<a href="#L165">165</a>
+<a href="#L166">166</a>
+<a href="#L167">167</a>
+<a href="#L168">168</a>
+<a href="#L169">169</a>
+<a href="#L170">170</a>
+</pre>
+<pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
+(* Copyright © 2021-2026 OCamlPro *)
+(* Written by the Owi programmers *)
+
+module Stack = Stack.Make [@inlined hint] (Symbolic_value)
+
+type host_externref = int
+
+let ty : host_externref Type.Id.t = Type.Id.mak<span data-count="858">e</span> ()
+
+module I = Interpret.Symbolic (Interpret.Default_parameters)
+open Syntax
+
+let run_monad ~to_run =
+  <span data-count="0">l</span>et thread = Thread.init () in
+  <span data-count="0">m</span>atch Symex.Monad.run to_run thread with
+  | <span data-count="0">O</span>k (v, _monadic_state) -&gt; Ok v
+  | <span data-count="0">E</span>rror (`Trap t) -&gt; Error t.Bug.err
+  | <span data-count="0">E</span>rror _ -&gt; Fmt.error_msg "unexpected error from the symbolic monad"
+  | <span data-count="0">Y</span>ield _ -&gt; Fmt.error_msg "unexpected yield from the symbolic monad"
+  | <span data-count="0">C</span>hoice _ -&gt; Fmt.error_msg "unexpected choice from the symbolic monad"
+
+let action env action : _ Result.t =
+  <span data-count="0">l</span>et open Syntax in
+  match action with
+  | <span data-count="0">W</span>ast.Invoke (module_name, func_name, args) -&gt;
+    Log.info (fun m -&gt;
+      <span data-count="0">m</span> "invoke %a %s %a..."
+        (Fmt.optio<span data-count="0">n</span> ~none:Fmt.nop Fmt.string)
+        module_name func_name Wast.pp_consts args );
+    <span data-count="0">l</span>et* f = Env.Symbolic.get_exported_func ~env ~module_name ~func_name in
+    <span data-count="0">l</span>et stack = List.rev_map (Symbolic_value.of_script_const ~ty) args in
+    <span data-count="0">l</span>et to_run = I.exec_vfunc_from_outside ~locals:stack ~env f in
+    <span data-count="0">r</span>un_monad ~to_run
+  | <span data-count="0">G</span>et (module_name, global_name) -&gt;
+    Log.info (fun m -&gt; <span data-count="0">m</span> "get...");
+    <span data-count="0">l</span>et+ global =
+      Env.Symbolic.get_exported_global ~env ~module_name ~global_name
+    in
+    <span data-count="0">(</span>env, [ global ])
+
+let unsafe = false
+
+let log_cmd : Wast.cmd -&gt; unit =
+ fun cmd -&gt;
+  <span data-count="0">l</span>et s =
+    match cmd with
+    | <span data-count="0">T</span>ext_module _ -&gt; "module"
+    | <span data-count="0">Q</span>uoted_module _ -&gt; "quoted module"
+    | <span data-count="0">B</span>inary_module _ -&gt; "binary module"
+    | <span data-count="0">A</span>ssert (Assert_trap_module _) -&gt; "assert_trap"
+    | <span data-count="0">A</span>ssert (Assert_malformed_binary _)
+    | <span data-count="0">A</span>ssert (Assert_malformed_quote _)
+    | <span data-count="0">A</span>ssert (Assert_invalid_binary _)
+    | <span data-count="0">A</span>ssert (Assert_invalid _)
+    | <span data-count="0">A</span>ssert (Assert_invalid_quote _)
+    | <span data-count="0">A</span>ssert (Assert_unlinkable _)
+    | <span data-count="0">A</span>ssert (Assert_malformed _) -&gt;
+      "assert_{malformed,invalid,unlinkable}_..."
+    | <span data-count="0">A</span>ssert (Assert_return _) -&gt; "assert_return"
+    | <span data-count="0">A</span>ssert (Assert_trap _) -&gt; "assert_trap"
+    | <span data-count="0">A</span>ssert (Assert_exhaustion _) -&gt; "assert_exhaustion"
+    | <span data-count="0">R</span>egister _ -&gt; "register"
+    | <span data-count="0">A</span>ction _ -&gt; "action"
+    | <span data-count="0">I</span>nstance (_name, _mod_name) -&gt; "instance"
+  in
+  Log.info (fun m -&gt; <span data-count="0">m</span> "*** %s" s)
+
+let run_one ~no_exhaustion ~(env : Env.Symbolic.t) cmd : Env.Symbolic.t Result.t
+    =
+  <span data-count="0">l</span>og_cmd cmd;
+  <span data-count="0">m</span>atch cmd with
+  | <span data-count="0">W</span>ast.Text_module (false, m) -&gt;
+    let* modul, env =
+      Compile.Text.until_symbolic_lin<span data-count="0">k</span> env ~unsafe ~name:None m
+    in
+    <span data-count="0">l</span>et to_run = I.modul ~env ~modul in
+    let+ _got = run_monad ~to_run in
+    <span data-count="0">e</span>nv
+  | <span data-count="0">W</span>ast.Quoted_module (false, m) -&gt;
+    let* m = Parse.Text.Inline_module.from_strin<span data-count="0">g</span> m in
+    <span data-count="0">l</span>et* modul, env =
+      Compile.Text.until_symbolic_lin<span data-count="0">k</span> env ~unsafe ~name:None m
+    in
+    <span data-count="0">l</span>et to_run = I.modul ~env ~modul in
+    let+ _got = run_monad ~to_run in
+    <span data-count="0">e</span>nv
+  | <span data-count="0">W</span>ast.Binary_module (false, id, m) -&gt;
+    let* m = Parse.Binary.Module.from_strin<span data-count="0">g</span> m in
+    <span data-count="0">l</span>et m = { m with id } in
+    let* modul, env =
+      Compile.Binary.until_symbolic_lin<span data-count="0">k</span> env ~unsafe ~name:None m
+    in
+    <span data-count="0">l</span>et to_run = I.modul ~env ~modul in
+    let+ _got = run_monad ~to_run in
+    <span data-count="0">e</span>nv
+  | <span data-count="0">A</span>ssert (Assert_trap_module (m, expected)) -&gt;
+    let* modul, env =
+      Compile.Text.until_symbolic_lin<span data-count="0">k</span> env ~unsafe ~name:None m
+    in
+    <span data-count="0">l</span>et to_run = I.modul ~env ~modul in
+    begin match run_monad ~to_run with
+    | <span data-count="0">O</span>k _env -&gt; Error (`Did_not_fail_but_expected expected)
+    | <span data-count="0">E</span>rror got -&gt;
+      let+ () = Script_error.check_error ~expected ~got in
+      <span data-count="0">e</span>nv
+    end
+  | <span data-count="0">A</span>ssert (Assert_malformed_binary _)
+  | <span data-count="0">A</span>ssert (Assert_malformed_quote _)
+  | <span data-count="0">A</span>ssert (Assert_invalid_binary _)
+  | <span data-count="0">A</span>ssert (Assert_invalid _)
+  | <span data-count="0">A</span>ssert (Assert_invalid_quote _)
+  | <span data-count="0">A</span>ssert (Assert_unlinkable _)
+  | <span data-count="0">A</span>ssert (Assert_malformed _) -&gt;
+    Ok env
+  | <span data-count="0">A</span>ssert (Assert_return (a, res)) -&gt;
+    let* env, stack = actio<span data-count="0">n</span> env a in
+    <span data-count="0">l</span>et stack = List.rev stack in
+    <span data-count="0">i</span>f
+      List.compare_length<span data-count="0">s</span> res stack &lt;&gt; <span data-count="0">0</span>
+      || not (List.for_all<span data-count="0">2</span> (Symbolic_value.equal_script_result ~ty) res stack<span data-count="0">)</span>
+    then <span data-count="0">b</span>egin
+      Log.err (fun m -&gt;
+        <span data-count="0">m</span> "got:      %a@.expected: %a" Stack.pp stack Wast.pp_results res );
+      <span data-count="0">E</span>rror `Bad_result
+    end
+    else <span data-count="0">O</span>k env
+  | <span data-count="0">A</span>ssert (Assert_trap (a, expected)) -&gt;
+    let got = action env a in
+    <span data-count="0">b</span>egin match Script_error.check_result ~expected ~got with
+    | <span data-count="0">E</span>rror e -&gt; Error e
+    | <span data-count="0">O</span>k () -&gt; Ok env
+    end
+  | <span data-count="0">A</span>ssert (Assert_exhaustion (a, expected)) -&gt;
+    if no_exhaustion then <span data-count="0">O</span>k env
+    else
+      <span data-count="0">l</span>et got = action env a in
+      <span data-count="0">b</span>egin match Script_error.check_result ~expected ~got with
+      | <span data-count="0">E</span>rror e -&gt; Error e
+      | <span data-count="0">O</span>k () -&gt; Ok env
+      end
+  | <span data-count="0">R</span>egister (name, mod_name) -&gt;
+    let+ env = Env.Symbolic.register_module ~env ~name ~modid:mod_name in
+    <span data-count="0">e</span>nv
+  | <span data-count="0">A</span>ction a -&gt;
+    let+ env, _stack = actio<span data-count="0">n</span> env a in
+    <span data-count="0">e</span>nv
+  | <span data-count="0">T</span>ext_module (true, _) | <span data-count="0">B</span>inary_module (true, _, _) | <span data-count="0">Q</span>uoted_module (true, _)
+    -&gt;
+    (* TODO: differentiate between modules and module definitions in the
+       link state, ensure that we can instantiate a module from its module
+       definition, and that module definitions are not treated as "normal",
+       or instantiated module. *)
+    Ok env
+  | <span data-count="0">I</span>nstance (_name, _mod_name) -&gt; Error (`Unimplemented "(module instance _)")
+
+let run ~no_exhaustion script : _ Result.t =
+  <span data-count="0">S</span>olver.solver_to_use := Some Smtml.Solver_type.Z3_solver;
+  let env = Env.Symbolic.empty in
+  let* env =
+    Env.Symbolic.link_extern_modul<span data-count="0">e</span> ~env ~name:"spectest_extern"
+      Spectest.symbolic_extern_m
+  in
+  <span data-count="0">l</span>et script = Spectest.m :: Register ("spectest", Some "spectest") :: script in
+  list_fold_left (fun env cmd -&gt; <span data-count="0">r</span>un_one ~no_exhaustion ~env cmd) env script
+
+let exec ~(no_exhaustion : bool) (script : Wast.script) =
+  <span data-count="0">m</span>atch run ~no_exhaustion script with
+  | <span data-count="0">E</span>rror e -&gt; Fmt.error_msg "script failed with %s" (Result.err_to_strin<span data-count="0">g</span> e)
+  | <span data-count="0">O</span>k _ -&gt; Ok ()
+</code></pre>
+      </div>
+    </div>
+    <script src="../../coverage.js"></script>
+  </body>
+</html>

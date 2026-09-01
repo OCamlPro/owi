@@ -1,7 +1,7 @@
 open Owi
 
 (* an extern module that will be linked with a wasm module *)
-let extern_module : Concrete_extern_func.extern_func Extern.Module.t =
+let extern_module : Concrete_extern.Module.t =
   (* some custom functions *)
   let memset m start byte length =
     let rec loop offset =
@@ -11,7 +11,7 @@ let extern_module : Concrete_extern_func.extern_func Extern.Module.t =
           Concrete_memory.store_8 m ~addr:(Concrete_i32.add start offset) byte
         with
         | Error _ as e -> e
-        | Ok () -> loop (Concrete_i32.add offset (Concrete_i32.of_int 1))
+        | Ok _mem -> loop (Concrete_i32.add offset (Concrete_i32.of_int 1))
         end
       else Ok ()
     in
@@ -23,19 +23,17 @@ let extern_module : Concrete_extern_func.extern_func Extern.Module.t =
     Ok ()
   in
   (* we need to describe their types *)
-  let open Concrete_extern_func in
-  let open Concrete_extern_func.Syntax in
-  let functions =
-    [ ("print_x64", Extern_func (i64 ^->. unit, print_x64))
-    ; ( "memset"
-      , Extern_func (memory 0 ^-> i32 ^-> i32 ^-> i32 ^->. unit, memset) )
-    ]
-  in
-  { Extern.Module.functions; func_type = Concrete_extern_func.extern_type }
+  let open Concrete_extern.Func in
+  let open Concrete_extern.Func.Syntax in
+  [ ("print_x64", Extern_func (i64 ^->. unit, print_x64))
+  ; ("memset", Extern_func (memory 0 ^-> i32 ^-> i32 ^-> i32 ^->. unit, memset))
+  ]
 
-(* a link state that contains our custom module, available under the name `chorizo` *)
-let link_state =
-  Link.State.empty () |> Link.Extern.modul ~name:"chorizo" extern_module
+(* an environment that contains our custom module, available under the name `chorizo` *)
+let env =
+  let env = Env.Concrete.empty in
+  Env.Concrete.link_extern_module ~env ~name:"chorizo" extern_module
+  |> Stdlib.Result.get_ok
 
 (* a pure wasm module refering to `$extern_mem` *)
 let pure_wasm_module =
@@ -44,9 +42,10 @@ let pure_wasm_module =
   | Ok modul -> modul
 
 (* our pure wasm module, linked with `chorizo` *)
-let module_to_run, link_state =
+let modul, env =
   match
-    Compile.Text.until_link link_state ~unsafe:false ~name:None pure_wasm_module
+    Compile.Text.until_concrete_link env ~unsafe:false ~name:None
+      pure_wasm_module
   with
   | Error _ -> assert false
   | Ok v -> v
@@ -55,6 +54,4 @@ module I = Interpret.Concrete (Interpret.Default_parameters)
 
 (* let's run it ! it will print the values as defined in the print_i64 function *)
 let () =
-  match I.modul link_state module_to_run with
-  | Error _ -> assert false
-  | Ok () -> ()
+  match I.modul ~env ~modul with Error _ -> assert false | Ok _env -> ()

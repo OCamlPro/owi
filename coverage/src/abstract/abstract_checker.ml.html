@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>abstract_checker.ml &mdash; Coverage report</title>
+    <meta name="description" content="26.17% coverage in src/abstract/abstract_checker.ml">
+    <link rel="stylesheet" href="../../coverage.css"/>
+    <script src="../../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../../index.html">
+          <span class="dirname">src/abstract/</span>abstract_checker.ml
+        </a>
+      </h1>
+      <h2>26.17%</h2>
+    </div>
+    <div id="navbar">
+      <span class="some-visited" style="top:15.15%"></span>
+      <span class="some-visited" style="top:17.17%"></span>
+      <span class="some-visited" style="top:18.18%"></span>
+      <span class="some-visited" style="top:19.19%"></span>
+      <span class="unvisited" style="top:20.20%"></span>
+      <span class="unvisited" style="top:21.21%"></span>
+      <span class="unvisited" style="top:22.22%"></span>
+      <span class="unvisited" style="top:26.26%"></span>
+      <span class="some-visited" style="top:28.28%"></span>
+      <span class="some-visited" style="top:29.29%"></span>
+      <span class="unvisited" style="top:30.30%"></span>
+      <span class="unvisited" style="top:31.31%"></span>
+      <span class="unvisited" style="top:32.32%"></span>
+      <span class="some-visited" style="top:33.33%"></span>
+      <span class="unvisited" style="top:34.34%"></span>
+      <span class="unvisited" style="top:38.38%"></span>
+      <span class="some-visited" style="top:40.40%"></span>
+      <span class="unvisited" style="top:41.41%"></span>
+      <span class="some-visited" style="top:42.42%"></span>
+      <span class="unvisited" style="top:46.46%"></span>
+      <span class="some-visited" style="top:48.48%"></span>
+      <span class="some-visited" style="top:49.49%"></span>
+      <span class="unvisited" style="bottom:49.49%"></span>
+      <span class="unvisited" style="bottom:40.40%"></span>
+      <span class="some-visited" style="bottom:39.39%"></span>
+      <span class="some-visited" style="bottom:38.38%"></span>
+      <span class="unvisited" style="bottom:37.37%"></span>
+      <span class="unvisited" style="bottom:13.13%"></span>
+      <span class="unvisited" style="bottom:12.12%"></span>
+      <span class="unvisited" style="bottom:11.11%"></span>
+      <span class="some-visited" style="bottom:10.10%"></span>
+      <span class="unvisited" style="bottom:9.09%"></span>
+      <span class="unvisited" style="bottom:8.08%"></span>
+      <span class="unvisited" style="bottom:7.07%"></span>
+      <span class="unvisited" style="bottom:6.06%"></span>
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span class="visited"> </span>
+<a id="L7"></a><span class="visited"> </span>
+<a id="L8"></a><span class="visited"> </span>
+<a id="L9"></a><span > </span>
+<a id="L10"></a><span class="visited"> </span>
+<a id="L11"></a><span class="visited"> </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span > </span>
+<a id="L14"></a><span class="visited"> </span>
+<a id="L15"></a><span class="some-visited"> </span>
+<a id="L16"></a><span > </span>
+<a id="L17"></a><span class="some-visited"> </span>
+<a id="L18"></a><span class="some-visited"> </span>
+<a id="L19"></a><span class="some-visited"> </span>
+<a id="L20"></a><span class="unvisited"> </span>
+<a id="L21"></a><span class="unvisited"> </span>
+<a id="L22"></a><span class="unvisited"> </span>
+<a id="L23"></a><span > </span>
+<a id="L24"></a><span > </span>
+<a id="L25"></a><span class="visited"> </span>
+<a id="L26"></a><span class="unvisited"> </span>
+<a id="L27"></a><span > </span>
+<a id="L28"></a><span class="some-visited"> </span>
+<a id="L29"></a><span class="some-visited"> </span>
+<a id="L30"></a><span class="unvisited"> </span>
+<a id="L31"></a><span class="unvisited"> </span>
+<a id="L32"></a><span class="unvisited"> </span>
+<a id="L33"></a><span class="some-visited"> </span>
+<a id="L34"></a><span class="unvisited"> </span>
+<a id="L35"></a><span > </span>
+<a id="L36"></a><span > </span>
+<a id="L37"></a><span class="visited"> </span>
+<a id="L38"></a><span class="unvisited"> </span>
+<a id="L39"></a><span > </span>
+<a id="L40"></a><span class="some-visited"> </span>
+<a id="L41"></a><span class="unvisited"> </span>
+<a id="L42"></a><span class="some-visited"> </span>
+<a id="L43"></a><span > </span>
+<a id="L44"></a><span > </span>
+<a id="L45"></a><span class="visited"> </span>
+<a id="L46"></a><span class="unvisited"> </span>
+<a id="L47"></a><span > </span>
+<a id="L48"></a><span class="some-visited"> </span>
+<a id="L49"></a><span class="some-visited"> </span>
+<a id="L50"></a><span class="unvisited"> </span>
+<a id="L51"></a><span > </span>
+<a id="L52"></a><span > </span>
+<a id="L53"></a><span class="visited"> </span>
+<a id="L54"></a><span class="visited"> </span>
+<a id="L55"></a><span > </span>
+<a id="L56"></a><span class="visited"> </span>
+<a id="L57"></a><span class="visited"> </span>
+<a id="L58"></a><span class="visited"> </span>
+<a id="L59"></a><span class="unvisited"> </span>
+<a id="L60"></a><span class="some-visited"> </span>
+<a id="L61"></a><span class="some-visited"> </span>
+<a id="L62"></a><span class="unvisited"> </span>
+<a id="L63"></a><span > </span>
+<a id="L64"></a><span > </span>
+<a id="L65"></a><span > </span>
+<a id="L66"></a><span > </span>
+<a id="L67"></a><span class="visited"> </span>
+<a id="L68"></a><span > </span>
+<a id="L69"></a><span > </span>
+<a id="L70"></a><span > </span>
+<a id="L71"></a><span class="visited"> </span>
+<a id="L72"></a><span class="visited"> </span>
+<a id="L73"></a><span class="visited"> </span>
+<a id="L74"></a><span class="visited"> </span>
+<a id="L75"></a><span > </span>
+<a id="L76"></a><span class="visited"> </span>
+<a id="L77"></a><span class="visited"> </span>
+<a id="L78"></a><span class="visited"> </span>
+<a id="L79"></a><span > </span>
+<a id="L80"></a><span class="visited"> </span>
+<a id="L81"></a><span class="visited"> </span>
+<a id="L82"></a><span class="visited"> </span>
+<a id="L83"></a><span > </span>
+<a id="L84"></a><span class="visited"> </span>
+<a id="L85"></a><span class="visited"> </span>
+<a id="L86"></a><span class="unvisited"> </span>
+<a id="L87"></a><span class="unvisited"> </span>
+<a id="L88"></a><span class="unvisited"> </span>
+<a id="L89"></a><span class="some-visited"> </span>
+<a id="L90"></a><span class="unvisited"> </span>
+<a id="L91"></a><span class="unvisited"> </span>
+<a id="L92"></a><span class="unvisited"> </span>
+<a id="L93"></a><span class="unvisited"> </span>
+<a id="L94"></a><span > </span>
+<a id="L95"></a><span > </span>
+<a id="L96"></a><span > </span>
+<a id="L97"></a><span > </span>
+<a id="L98"></a><span class="visited"> </span>
+<a id="L99"></a><span class="visited"> </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1"> 1</a>
+<a href="#L2"> 2</a>
+<a href="#L3"> 3</a>
+<a href="#L4"> 4</a>
+<a href="#L5"> 5</a>
+<a href="#L6"> 6</a>
+<a href="#L7"> 7</a>
+<a href="#L8"> 8</a>
+<a href="#L9"> 9</a>
+<a href="#L10">10</a>
+<a href="#L11">11</a>
+<a href="#L12">12</a>
+<a href="#L13">13</a>
+<a href="#L14">14</a>
+<a href="#L15">15</a>
+<a href="#L16">16</a>
+<a href="#L17">17</a>
+<a href="#L18">18</a>
+<a href="#L19">19</a>
+<a href="#L20">20</a>
+<a href="#L21">21</a>
+<a href="#L22">22</a>
+<a href="#L23">23</a>
+<a href="#L24">24</a>
+<a href="#L25">25</a>
+<a href="#L26">26</a>
+<a href="#L27">27</a>
+<a href="#L28">28</a>
+<a href="#L29">29</a>
+<a href="#L30">30</a>
+<a href="#L31">31</a>
+<a href="#L32">32</a>
+<a href="#L33">33</a>
+<a href="#L34">34</a>
+<a href="#L35">35</a>
+<a href="#L36">36</a>
+<a href="#L37">37</a>
+<a href="#L38">38</a>
+<a href="#L39">39</a>
+<a href="#L40">40</a>
+<a href="#L41">41</a>
+<a href="#L42">42</a>
+<a href="#L43">43</a>
+<a href="#L44">44</a>
+<a href="#L45">45</a>
+<a href="#L46">46</a>
+<a href="#L47">47</a>
+<a href="#L48">48</a>
+<a href="#L49">49</a>
+<a href="#L50">50</a>
+<a href="#L51">51</a>
+<a href="#L52">52</a>
+<a href="#L53">53</a>
+<a href="#L54">54</a>
+<a href="#L55">55</a>
+<a href="#L56">56</a>
+<a href="#L57">57</a>
+<a href="#L58">58</a>
+<a href="#L59">59</a>
+<a href="#L60">60</a>
+<a href="#L61">61</a>
+<a href="#L62">62</a>
+<a href="#L63">63</a>
+<a href="#L64">64</a>
+<a href="#L65">65</a>
+<a href="#L66">66</a>
+<a href="#L67">67</a>
+<a href="#L68">68</a>
+<a href="#L69">69</a>
+<a href="#L70">70</a>
+<a href="#L71">71</a>
+<a href="#L72">72</a>
+<a href="#L73">73</a>
+<a href="#L74">74</a>
+<a href="#L75">75</a>
+<a href="#L76">76</a>
+<a href="#L77">77</a>
+<a href="#L78">78</a>
+<a href="#L79">79</a>
+<a href="#L80">80</a>
+<a href="#L81">81</a>
+<a href="#L82">82</a>
+<a href="#L83">83</a>
+<a href="#L84">84</a>
+<a href="#L85">85</a>
+<a href="#L86">86</a>
+<a href="#L87">87</a>
+<a href="#L88">88</a>
+<a href="#L89">89</a>
+<a href="#L90">90</a>
+<a href="#L91">91</a>
+<a href="#L92">92</a>
+<a href="#L93">93</a>
+<a href="#L94">94</a>
+<a href="#L95">95</a>
+<a href="#L96">96</a>
+<a href="#L97">97</a>
+<a href="#L98">98</a>
+<a href="#L99">99</a>
+</pre>
+<pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
+(* Copyright © 2021-2026 OCamlPro *)
+(* Written by the Owi programmers *)
+
+let check_can_divide_by_zero invariants uuid pp instr =
+  <span data-count="3">i</span>f Abstract_invariant.can_divide_by_zero invariants ~uuid then
+    <span data-count="1">L</span>og.warn (fun m -&gt;
+      <span data-count="1">m</span> "Possible division by zero for expression:(uuid: %i) %a" uuid pp instr )
+  else
+    <span data-count="2">L</span>og.info (fun m -&gt;
+      <span data-count="2">m</span> "Passed division by zero check for expression:(uuid: %i) %a" uuid pp
+        instr )
+
+let check_i32 ~uuid ~invariants = <span data-count="67">f</span>unction
+  | (<span data-count="3">D</span>iv_s | <span data-count="0">D</span>iv_u | <span data-count="0">R</span>em_s | <span data-count="0">R</span>em_u : Binary.i32_instr) as instr -&gt;
+    check_can_divide_by_zero invariants uuid Binary.pp_i32_instr instr
+  | <span data-count="40">C</span>onst _ | <span data-count="0">C</span>lz | <span data-count="0">C</span>tz | <span data-count="0">P</span>opcnt | <span data-count="10">A</span>dd | <span data-count="5">S</span>ub | <span data-count="1">M</span>ul | <span data-count="0">A</span>nd | <span data-count="0">O</span>r | <span data-count="0">X</span>or | <span data-count="0">S</span>hl
+  | <span data-count="0">S</span>hr_s | <span data-count="0">S</span>hr_u | <span data-count="0">R</span>otl | <span data-count="0">R</span>otr | <span data-count="0">E</span>qz | <span data-count="1">E</span>q | <span data-count="0">N</span>e | <span data-count="1">L</span>t_s | <span data-count="0">L</span>t_u | <span data-count="2">G</span>t_s | <span data-count="0">G</span>t_u
+  | <span data-count="3">L</span>e_s | <span data-count="0">L</span>e_u | <span data-count="0">G</span>e_s | <span data-count="0">G</span>e_u | <span data-count="0">E</span>xtend8_s | <span data-count="0">E</span>xtend16_s | <span data-count="0">W</span>rap_i64 | <span data-count="1">T</span>runc_f_s _
+  | <span data-count="0">T</span>runc_f_u _ | <span data-count="0">T</span>runc_sat_f_s _ | <span data-count="0">T</span>runc_sat_f_u _ | <span data-count="0">R</span>einterpret_f _ | <span data-count="0">L</span>oad _
+  | <span data-count="0">L</span>oad8_s _ | <span data-count="0">L</span>oad8_u _ | <span data-count="0">L</span>oad16_s _ | <span data-count="0">L</span>oad16_u _ | <span data-count="0">S</span>tore _ | <span data-count="0">S</span>tore8 _
+  | <span data-count="0">S</span>tore16 _ -&gt;
+    ()
+
+let check_i64 ~uuid ~invariants = <span data-count="5">f</span>unction
+  | (<span data-count="0">D</span>iv_s | <span data-count="0">D</span>iv_u | <span data-count="0">R</span>em_s | <span data-count="0">R</span>em_u : Binary.i64_instr) as instr -&gt;
+    check_can_divide_by_zero invariants uuid Binary.pp_i64_instr instr
+  | <span data-count="2">C</span>onst _ | <span data-count="0">C</span>lz | <span data-count="0">C</span>tz | <span data-count="0">P</span>opcnt | <span data-count="1">A</span>dd | <span data-count="0">S</span>ub | <span data-count="0">M</span>ul | <span data-count="0">A</span>nd | <span data-count="0">O</span>r | <span data-count="0">X</span>or | <span data-count="0">S</span>hl
+  | <span data-count="0">S</span>hr_s | <span data-count="0">S</span>hr_u | <span data-count="0">R</span>otl | <span data-count="0">R</span>otr | <span data-count="0">E</span>qz | <span data-count="0">E</span>q | <span data-count="0">N</span>e | <span data-count="0">L</span>t_s | <span data-count="0">L</span>t_u | <span data-count="1">G</span>t_s | <span data-count="0">G</span>t_u
+  | <span data-count="0">L</span>e_s | <span data-count="0">L</span>e_u | <span data-count="0">G</span>e_s | <span data-count="0">G</span>e_u | <span data-count="0">E</span>xtend8_s | <span data-count="0">E</span>xtend16_s | <span data-count="0">T</span>runc_f_s _
+  | <span data-count="0">T</span>runc_f_u _ | <span data-count="0">T</span>runc_sat_f_s _ | <span data-count="0">T</span>runc_sat_f_u _ | <span data-count="0">R</span>einterpret_f _ | <span data-count="0">L</span>oad _
+  | <span data-count="0">L</span>oad8_s _ | <span data-count="0">L</span>oad8_u _ | <span data-count="0">L</span>oad16_s _ | <span data-count="0">L</span>oad16_u _ | <span data-count="0">S</span>tore _ | <span data-count="0">S</span>tore8 _
+  | <span data-count="0">S</span>tore16 _ | <span data-count="0">E</span>xtend32_s | <span data-count="1">E</span>xtend_i32_s | <span data-count="0">E</span>xtend_i32_u | <span data-count="0">L</span>oad32_s _
+  | <span data-count="0">L</span>oad32_u _ | <span data-count="0">S</span>tore32 _ -&gt;
+    ()
+
+let check_f32 ~uuid ~invariants = <span data-count="5">f</span>unction
+  | <span data-count="0">(</span>Div : Binary.f32_instr) as instr -&gt;
+    check_can_divide_by_zero invariants uuid Binary.pp_f32_instr instr
+  | <span data-count="2">C</span>onst _ | <span data-count="0">A</span>bs | <span data-count="0">N</span>eg | <span data-count="1">S</span>qrt | <span data-count="0">C</span>eil | <span data-count="0">F</span>loor | <span data-count="0">T</span>runc | <span data-count="0">N</span>earest | <span data-count="1">A</span>dd | <span data-count="0">S</span>ub
+  | <span data-count="0">M</span>ul | <span data-count="0">M</span>in | <span data-count="0">M</span>ax | <span data-count="0">C</span>opysign | <span data-count="0">E</span>q | <span data-count="0">N</span>e | <span data-count="0">L</span>t | <span data-count="0">G</span>t | <span data-count="0">L</span>e | <span data-count="0">G</span>e | <span data-count="0">D</span>emote_f64
+  | <span data-count="1">C</span>onvert_i_s _ | <span data-count="0">C</span>onvert_i_u _ | <span data-count="0">R</span>einterpret_i _ | <span data-count="0">L</span>oad _ | <span data-count="0">S</span>tore _ -&gt;
+    ()
+
+let check_f64 ~uuid ~invariants = <span data-count="5">f</span>unction
+  | <span data-count="0">(</span>Div : Binary.f64_instr) as instr -&gt;
+    check_can_divide_by_zero invariants uuid Binary.pp_f64_instr instr
+  | <span data-count="2">C</span>onst _ | <span data-count="0">A</span>bs | <span data-count="0">N</span>eg | <span data-count="0">S</span>qrt | <span data-count="0">C</span>eil | <span data-count="0">F</span>loor | <span data-count="0">T</span>runc | <span data-count="0">N</span>earest | <span data-count="1">A</span>dd | <span data-count="1">S</span>ub
+  | <span data-count="0">M</span>ul | <span data-count="0">M</span>in | <span data-count="0">M</span>ax | <span data-count="0">C</span>opysign | <span data-count="0">E</span>q | <span data-count="0">N</span>e | <span data-count="0">L</span>t | <span data-count="0">G</span>t | <span data-count="0">L</span>e | <span data-count="0">G</span>e | <span data-count="1">P</span>romote_f32
+  | <span data-count="0">C</span>onvert_i_s _ | <span data-count="0">C</span>onvert_i_u _ | <span data-count="0">R</span>einterpret_i _ | <span data-count="0">L</span>oad _ | <span data-count="0">S</span>tore _ -&gt;
+    ()
+
+let check_simple_instruction ~invariants ~uuid = <span data-count="133">f</span>unction
+  | <span data-count="67">(</span>I32 i32_instr : Binary.simple_instruction) -&gt;
+    check_i32 ~uuid ~invariants i32_instr
+  | <span data-count="5">I</span>64 i64_instr -&gt; check_i64 ~uuid ~invariants i64_instr
+  | <span data-count="5">F</span>32 f32_instr -&gt; check_f32 ~uuid ~invariants f32_instr
+  | <span data-count="5">F</span>64 f64_instr -&gt; check_f64 ~uuid ~invariants f64_instr
+  | <span data-count="0">V</span>128 _ | <span data-count="0">I</span>8x16 _ | <span data-count="0">I</span>16x8 _ | <span data-count="0">I</span>32x4 _ | <span data-count="0">I</span>64x2 _ | <span data-count="0">F</span>32x4 _ | <span data-count="0">F</span>64x2 _ | <span data-count="0">R</span>ef _
+  | <span data-count="40">L</span>ocal _ | <span data-count="3">G</span>lobal _ | <span data-count="0">T</span>able _ | <span data-count="0">E</span>lem _ | <span data-count="0">M</span>emory _ | <span data-count="0">D</span>ata _ | <span data-count="0">I</span>31 _ | <span data-count="0">S</span>truct _
+  | <span data-count="0">A</span>rray _ | <span data-count="8">D</span>rop | <span data-count="0">S</span>elect _ | <span data-count="0">N</span>op | <span data-count="0">U</span>nreachable | <span data-count="0">A</span>ny_convert_extern
+  | <span data-count="0">E</span>xtern_convert_any -&gt;
+    ()
+
+let rec check_expr (expr : Binary.expr Annotated.t)
+  ~(invariants : Abstract_invariant.t) ~env =
+  <span data-count="44">L</span>ist.iter (check_instr ~invariants ~env) expr.raw
+
+and check_instr ({ raw; uuid; _ } : Binary.instr Annotated.t)
+  ~(invariants : Abstract_invariant.t) ~env =
+  <span data-count="180">m</span>atch raw with
+  | <span data-count="133">S</span>imple i -&gt; check_simple_instruction ~invariants ~uuid i
+  | <span data-count="5">B</span>lock (_str_opt, _, expr) -&gt; check_expr expr ~invariants ~env
+  | <span data-count="3">I</span>f_else (_str_opt, _bt, expr_then, expr_else) -&gt;
+    check_expr ~invariants ~env expr_then;
+    <span data-count="3">c</span>heck_expr ~invariants ~env expr_else
+  | <span data-count="4">L</span>oop (_str_opt, _bt, expr) -&gt; check_expr ~invariants ~env expr
+  | <span data-count="21">C</span>all idx -&gt;
+    let func = Env.Abstract.get_func ~env idx in
+    <span data-count="21">b</span>egin match func with
+    | <span data-count="16">W</span>asm func -&gt; check_expr ~invariants ~env func.body
+    | <span data-count="5">E</span>xtern _ -&gt; ()
+    end
+  | <span data-count="1">B</span>r _ | <span data-count="4">B</span>r_if _
+  | <span data-count="1">B</span>r_table (_, _)
+  | <span data-count="0">B</span>r_on_null _ | <span data-count="0">B</span>r_on_non_null _
+  | <span data-count="0">B</span>r_on_cast (_, _, _)
+  | <span data-count="0">B</span>r_on_cast_fail (_, _, _)
+  | <span data-count="8">R</span>eturn | <span data-count="0">R</span>eturn_call _
+  | <span data-count="0">R</span>eturn_call_indirect (_, _)
+  | <span data-count="0">R</span>eturn_call_ref _
+  | <span data-count="0">C</span>all_indirect (_, _)
+  | <span data-count="0">C</span>all_ref _ -&gt;
+    ()
+
+let check_module ~(env : Env.Abstract.t) ~(modul : Env.Abstract.modul)
+  (invariants : Abstract_invariant.t) =
+  <span data-count="13">l</span>et init_code = Env.Abstract.get_initialization_code ~env ~modul in
+  check_expr ~env ~invariants (Annotated.dumm<span data-count="13">y</span> init_code)
+</code></pre>
+      </div>
+    </div>
+    <script src="../../coverage.js"></script>
+  </body>
+</html>

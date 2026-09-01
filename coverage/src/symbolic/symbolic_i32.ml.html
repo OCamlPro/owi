@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>symbolic_i32.ml &mdash; Coverage report</title>
-    <meta name="description" content="97.22% coverage in src/symbolic/symbolic_i32.ml">
+    <meta name="description" content="97.30% coverage in src/symbolic/symbolic_i32.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,10 +15,10 @@
           <span class="dirname">src/symbolic/</span>symbolic_i32.ml
         </a>
       </h1>
-      <h2>97.22%</h2>
+      <h2>97.30%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:30.95%"></span>
+      <span class="unvisited" style="top:32.73%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -30,29 +30,29 @@
 <a id="L5"></a><span > </span>
 <a id="L6"></a><span > </span>
 <a id="L7"></a><span > </span>
-<a id="L8"></a><span class="visited"> </span>
-<a id="L9"></a><span class="visited"> </span>
-<a id="L10"></a><span class="visited"> </span>
-<a id="L11"></a><span class="visited"> </span>
-<a id="L12"></a><span class="visited"> </span>
-<a id="L13"></a><span class="unvisited"> </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span > </span>
+<a id="L10"></a><span > </span>
+<a id="L11"></a><span > </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span > </span>
 <a id="L14"></a><span class="visited"> </span>
 <a id="L15"></a><span class="visited"> </span>
-<a id="L16"></a><span > </span>
-<a id="L17"></a><span > </span>
-<a id="L18"></a><span class="visited"> </span>
+<a id="L16"></a><span class="visited"> </span>
+<a id="L17"></a><span class="visited"> </span>
+<a id="L18"></a><span class="unvisited"> </span>
 <a id="L19"></a><span class="visited"> </span>
 <a id="L20"></a><span class="visited"> </span>
-<a id="L21"></a><span class="visited"> </span>
+<a id="L21"></a><span > </span>
 <a id="L22"></a><span > </span>
-<a id="L23"></a><span > </span>
+<a id="L23"></a><span class="visited"> </span>
 <a id="L24"></a><span class="visited"> </span>
 <a id="L25"></a><span class="visited"> </span>
 <a id="L26"></a><span class="visited"> </span>
-<a id="L27"></a><span class="visited"> </span>
-<a id="L28"></a><span class="visited"> </span>
-<a id="L29"></a><span > </span>
-<a id="L30"></a><span > </span>
+<a id="L27"></a><span > </span>
+<a id="L28"></a><span > </span>
+<a id="L29"></a><span class="visited"> </span>
+<a id="L30"></a><span class="visited"> </span>
 <a id="L31"></a><span class="visited"> </span>
 <a id="L32"></a><span class="visited"> </span>
 <a id="L33"></a><span class="visited"> </span>
@@ -65,6 +65,19 @@
 <a id="L40"></a><span > </span>
 <a id="L41"></a><span class="visited"> </span>
 <a id="L42"></a><span class="visited"> </span>
+<a id="L43"></a><span class="visited"> </span>
+<a id="L44"></a><span > </span>
+<a id="L45"></a><span > </span>
+<a id="L46"></a><span class="visited"> </span>
+<a id="L47"></a><span class="visited"> </span>
+<a id="L48"></a><span > </span>
+<a id="L49"></a><span class="visited"> </span>
+<a id="L50"></a><span > </span>
+<a id="L51"></a><span class="visited"> </span>
+<a id="L52"></a><span > </span>
+<a id="L53"></a><span > </span>
+<a id="L54"></a><span > </span>
+<a id="L55"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -111,6 +124,19 @@
 <a href="#L40">40</a>
 <a href="#L41">41</a>
 <a href="#L42">42</a>
+<a href="#L43">43</a>
+<a href="#L44">44</a>
+<a href="#L45">45</a>
+<a href="#L46">46</a>
+<a href="#L47">47</a>
+<a href="#L48">48</a>
+<a href="#L49">49</a>
+<a href="#L50">50</a>
+<a href="#L51">51</a>
+<a href="#L52">52</a>
+<a href="#L53">53</a>
+<a href="#L54">54</a>
+<a href="#L55">55</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2026 OCamlPro *)
@@ -118,33 +144,38 @@
 
 include Smtml.Typed.Bitv32
 
+(* See: https://github.com/formalsec/smtml/pull/629 *)
+(* in the future, we might change to rotate_right but it'll require to use a select_i32 (which would not cost anything in the case of an integer) ? *)
+let rotate_right = ext_rotate_right
+
+let rotate_left = ext_rotate_left
+
 let to_boolean (e : t) : Symbolic_boolean.t =
-  <span data-count="369500">m</span>atch Smtml.Typed.view e with
-  | <span data-count="332423">V</span>al (Bitv bv) -&gt;
-    if Smtml.Bitvector.eqz bv then <span data-count="111736">S</span>ymbolic_boolean.false_
-    else <span data-count="220690">S</span>ymbolic_boolean.true_
-  | <span data-count="9006">P</span>tr _ -&gt; Symbolic_boolean.true_
+  <span data-count="320734">m</span>atch Smtml.Typed.view e with
+  | <span data-count="307375">V</span>al (Bitv bv) -&gt;
+    if Smtml.Bitvector.eqz bv then <span data-count="111936">S</span>ymbolic_boolean.false_
+    else <span data-count="195439">S</span>ymbolic_boolean.true_
   | <span data-count="0">S</span>ymbol { ty = Ty_bool; _ } -&gt; Smtml.Typed.Bitv32.to_bool e
-  | <span data-count="27363">C</span>vtop (_, OfBool, cond) -&gt; Smtml.Typed.Unsafe.wrap cond
-  | <span data-count="708">_</span> -&gt; Smtml.Typed.Bitv32.to_bool e
+  | <span data-count="12648">C</span>vtop (_, OfBool, cond) -&gt; Smtml.Typed.Unsafe.wrap cond
+  | <span data-count="711">_</span> -&gt; Smtml.Typed.Bitv32.to_bool e
 
 let of_boolean (e : Symbolic_boolean.t) : t =
-  <span data-count="243020">m</span>atch Smtml.Typed.view e with
-  | <span data-count="106022">V</span>al True -&gt; one
-  | <span data-count="108090">V</span>al False -&gt; zero
-  | <span data-count="28908">_</span> -&gt; Smtml.Typed.Bitv32.of_bool e
+  <span data-count="243574">m</span>atch Smtml.Typed.view e with
+  | <span data-count="120919">V</span>al True -&gt; one
+  | <span data-count="108328">V</span>al False -&gt; zero
+  | <span data-count="14327">_</span> -&gt; Smtml.Typed.Bitv32.of_bool e
 
 let boolify e =
-  <span data-count="39600">m</span>atch Smtml.Typed.view e with
-  | <span data-count="30394">V</span>al (Bitv bv) when Smtml.Bitvector.eq<span data-count="30394">z</span> bv -&gt; <span data-count="211">S</span>ome Symbolic_boolean.false_
-  | <span data-count="30183">V</span>al (Bitv bv) when Smtml.Bitvector.eq_on<span data-count="30183">e</span> bv -&gt; <span data-count="392">S</span>ome Symbolic_boolean.true_
-  | <span data-count="543">C</span>vtop (_, OfBool, cond) -&gt; Some (Smtml.Typed.Unsafe.wra<span data-count="543">p</span> cond)
-  | <span data-count="38454">_</span> -&gt; None
+  <span data-count="39996">m</span>atch Smtml.Typed.view e with
+  | <span data-count="38902">V</span>al (Bitv bv) when Smtml.Bitvector.eq<span data-count="38902">z</span> bv -&gt; <span data-count="258">S</span>ome Symbolic_boolean.false_
+  | <span data-count="38644">V</span>al (Bitv bv) when Smtml.Bitvector.eq_on<span data-count="38644">e</span> bv -&gt; <span data-count="652">S</span>ome Symbolic_boolean.true_
+  | <span data-count="616">C</span>vtop (_, OfBool, cond) -&gt; Some (Smtml.Typed.Unsafe.wra<span data-count="616">p</span> cond)
+  | <span data-count="38470">_</span> -&gt; None
 
 let logand e1 e2 =
-  <span data-count="19719">m</span>atch (boolif<span data-count="19719">y</span> e1, boolif<span data-count="19719">y</span> e2) with
-  | <span data-count="379">S</span>ome b1, Some b2 -&gt; of_boolean (Symbolic_boolean.and<span data-count="379">_</span> b1 b2)
-  | <span data-count="19340">_</span> -&gt; Smtml.Typed.Bitv32.logand e1 e2
+  <span data-count="19917">m</span>atch (boolif<span data-count="19917">y</span> e1, boolif<span data-count="19917">y</span> e2) with
+  | <span data-count="569">S</span>ome b1, Some b2 -&gt; of_boolean (Symbolic_boolean.and<span data-count="569">_</span> b1 b2)
+  | <span data-count="19348">_</span> -&gt; Smtml.Typed.Bitv32.logand e1 e2
 
 let logor e1 e2 =
   <span data-count="81">m</span>atch (boolif<span data-count="81">y</span> e1, boolif<span data-count="81">y</span> e2) with
@@ -152,8 +183,16 @@ let logor e1 e2 =
   | <span data-count="58">_</span> -&gt; Smtml.Typed.Bitv32.logor e1 e2
 
 let eq_concrete (e : t) (c : Int32.t) : Symbolic_boolean.t =
-  <span data-count="989">l</span>et c = of_int32 c in
-  <span data-count="989">S</span>mtml.Typed.Bitv32.eq c e
+  <span data-count="738">l</span>et c = of_int32 c in
+  <span data-count="738">S</span>mtml.Typed.Bitv32.eq c e
+
+let min_int = of_int3<span data-count="858">2</span> Int32.min_int
+
+let eqz (v : t) = <span data-count="201115">e</span>q v zero
+
+let ( = ) = eq
+
+let ( + ) = add
 </code></pre>
       </div>
     </div>

@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>concrete_i32.ml &mdash; Coverage report</title>
-    <meta name="description" content="97.86% coverage in src/concrete/concrete_i32.ml">
+    <meta name="description" content="98.33% coverage in src/concrete/concrete_i32.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,12 +15,12 @@
           <span class="dirname">src/concrete/</span>concrete_i32.ml
         </a>
       </h1>
-      <h2>97.86%</h2>
+      <h2>98.33%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="bottom:8.16%"></span>
-      <span class="unvisited" style="bottom:6.12%"></span>
-      <span class="unvisited" style="bottom:0.00%"></span>
+      <span class="unvisited" style="bottom:32.33%"></span>
+      <span class="unvisited" style="bottom:30.83%"></span>
+      <span class="unvisited" style="bottom:26.32%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -123,108 +123,178 @@
 <a id="L96"></a><span class="visited"> </span>
 <a id="L97"></a><span > </span>
 <a id="L98"></a><span class="unvisited"> </span>
+<a id="L99"></a><span > </span>
+<a id="L100"></a><span > </span>
+<a id="L101"></a><span > </span>
+<a id="L102"></a><span class="visited"> </span>
+<a id="L103"></a><span > </span>
+<a id="L104"></a><span > </span>
+<a id="L105"></a><span > </span>
+<a id="L106"></a><span > </span>
+<a id="L107"></a><span > </span>
+<a id="L108"></a><span > </span>
+<a id="L109"></a><span class="visited"> </span>
+<a id="L110"></a><span class="visited"> </span>
+<a id="L111"></a><span class="visited"> </span>
+<a id="L112"></a><span > </span>
+<a id="L113"></a><span > </span>
+<a id="L114"></a><span class="visited"> </span>
+<a id="L115"></a><span > </span>
+<a id="L116"></a><span > </span>
+<a id="L117"></a><span class="visited"> </span>
+<a id="L118"></a><span > </span>
+<a id="L119"></a><span > </span>
+<a id="L120"></a><span class="visited"> </span>
+<a id="L121"></a><span class="visited"> </span>
+<a id="L122"></a><span > </span>
+<a id="L123"></a><span class="visited"> </span>
+<a id="L124"></a><span > </span>
+<a id="L125"></a><span class="visited"> </span>
+<a id="L126"></a><span > </span>
+<a id="L127"></a><span class="visited"> </span>
+<a id="L128"></a><span > </span>
+<a id="L129"></a><span class="visited"> </span>
+<a id="L130"></a><span > </span>
+<a id="L131"></a><span class="visited"> </span>
+<a id="L132"></a><span > </span>
+<a id="L133"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
         <pre id="line-numbers">
-<a href="#L1"> 1</a>
-<a href="#L2"> 2</a>
-<a href="#L3"> 3</a>
-<a href="#L4"> 4</a>
-<a href="#L5"> 5</a>
-<a href="#L6"> 6</a>
-<a href="#L7"> 7</a>
-<a href="#L8"> 8</a>
-<a href="#L9"> 9</a>
-<a href="#L10">10</a>
-<a href="#L11">11</a>
-<a href="#L12">12</a>
-<a href="#L13">13</a>
-<a href="#L14">14</a>
-<a href="#L15">15</a>
-<a href="#L16">16</a>
-<a href="#L17">17</a>
-<a href="#L18">18</a>
-<a href="#L19">19</a>
-<a href="#L20">20</a>
-<a href="#L21">21</a>
-<a href="#L22">22</a>
-<a href="#L23">23</a>
-<a href="#L24">24</a>
-<a href="#L25">25</a>
-<a href="#L26">26</a>
-<a href="#L27">27</a>
-<a href="#L28">28</a>
-<a href="#L29">29</a>
-<a href="#L30">30</a>
-<a href="#L31">31</a>
-<a href="#L32">32</a>
-<a href="#L33">33</a>
-<a href="#L34">34</a>
-<a href="#L35">35</a>
-<a href="#L36">36</a>
-<a href="#L37">37</a>
-<a href="#L38">38</a>
-<a href="#L39">39</a>
-<a href="#L40">40</a>
-<a href="#L41">41</a>
-<a href="#L42">42</a>
-<a href="#L43">43</a>
-<a href="#L44">44</a>
-<a href="#L45">45</a>
-<a href="#L46">46</a>
-<a href="#L47">47</a>
-<a href="#L48">48</a>
-<a href="#L49">49</a>
-<a href="#L50">50</a>
-<a href="#L51">51</a>
-<a href="#L52">52</a>
-<a href="#L53">53</a>
-<a href="#L54">54</a>
-<a href="#L55">55</a>
-<a href="#L56">56</a>
-<a href="#L57">57</a>
-<a href="#L58">58</a>
-<a href="#L59">59</a>
-<a href="#L60">60</a>
-<a href="#L61">61</a>
-<a href="#L62">62</a>
-<a href="#L63">63</a>
-<a href="#L64">64</a>
-<a href="#L65">65</a>
-<a href="#L66">66</a>
-<a href="#L67">67</a>
-<a href="#L68">68</a>
-<a href="#L69">69</a>
-<a href="#L70">70</a>
-<a href="#L71">71</a>
-<a href="#L72">72</a>
-<a href="#L73">73</a>
-<a href="#L74">74</a>
-<a href="#L75">75</a>
-<a href="#L76">76</a>
-<a href="#L77">77</a>
-<a href="#L78">78</a>
-<a href="#L79">79</a>
-<a href="#L80">80</a>
-<a href="#L81">81</a>
-<a href="#L82">82</a>
-<a href="#L83">83</a>
-<a href="#L84">84</a>
-<a href="#L85">85</a>
-<a href="#L86">86</a>
-<a href="#L87">87</a>
-<a href="#L88">88</a>
-<a href="#L89">89</a>
-<a href="#L90">90</a>
-<a href="#L91">91</a>
-<a href="#L92">92</a>
-<a href="#L93">93</a>
-<a href="#L94">94</a>
-<a href="#L95">95</a>
-<a href="#L96">96</a>
-<a href="#L97">97</a>
-<a href="#L98">98</a>
+<a href="#L1">  1</a>
+<a href="#L2">  2</a>
+<a href="#L3">  3</a>
+<a href="#L4">  4</a>
+<a href="#L5">  5</a>
+<a href="#L6">  6</a>
+<a href="#L7">  7</a>
+<a href="#L8">  8</a>
+<a href="#L9">  9</a>
+<a href="#L10"> 10</a>
+<a href="#L11"> 11</a>
+<a href="#L12"> 12</a>
+<a href="#L13"> 13</a>
+<a href="#L14"> 14</a>
+<a href="#L15"> 15</a>
+<a href="#L16"> 16</a>
+<a href="#L17"> 17</a>
+<a href="#L18"> 18</a>
+<a href="#L19"> 19</a>
+<a href="#L20"> 20</a>
+<a href="#L21"> 21</a>
+<a href="#L22"> 22</a>
+<a href="#L23"> 23</a>
+<a href="#L24"> 24</a>
+<a href="#L25"> 25</a>
+<a href="#L26"> 26</a>
+<a href="#L27"> 27</a>
+<a href="#L28"> 28</a>
+<a href="#L29"> 29</a>
+<a href="#L30"> 30</a>
+<a href="#L31"> 31</a>
+<a href="#L32"> 32</a>
+<a href="#L33"> 33</a>
+<a href="#L34"> 34</a>
+<a href="#L35"> 35</a>
+<a href="#L36"> 36</a>
+<a href="#L37"> 37</a>
+<a href="#L38"> 38</a>
+<a href="#L39"> 39</a>
+<a href="#L40"> 40</a>
+<a href="#L41"> 41</a>
+<a href="#L42"> 42</a>
+<a href="#L43"> 43</a>
+<a href="#L44"> 44</a>
+<a href="#L45"> 45</a>
+<a href="#L46"> 46</a>
+<a href="#L47"> 47</a>
+<a href="#L48"> 48</a>
+<a href="#L49"> 49</a>
+<a href="#L50"> 50</a>
+<a href="#L51"> 51</a>
+<a href="#L52"> 52</a>
+<a href="#L53"> 53</a>
+<a href="#L54"> 54</a>
+<a href="#L55"> 55</a>
+<a href="#L56"> 56</a>
+<a href="#L57"> 57</a>
+<a href="#L58"> 58</a>
+<a href="#L59"> 59</a>
+<a href="#L60"> 60</a>
+<a href="#L61"> 61</a>
+<a href="#L62"> 62</a>
+<a href="#L63"> 63</a>
+<a href="#L64"> 64</a>
+<a href="#L65"> 65</a>
+<a href="#L66"> 66</a>
+<a href="#L67"> 67</a>
+<a href="#L68"> 68</a>
+<a href="#L69"> 69</a>
+<a href="#L70"> 70</a>
+<a href="#L71"> 71</a>
+<a href="#L72"> 72</a>
+<a href="#L73"> 73</a>
+<a href="#L74"> 74</a>
+<a href="#L75"> 75</a>
+<a href="#L76"> 76</a>
+<a href="#L77"> 77</a>
+<a href="#L78"> 78</a>
+<a href="#L79"> 79</a>
+<a href="#L80"> 80</a>
+<a href="#L81"> 81</a>
+<a href="#L82"> 82</a>
+<a href="#L83"> 83</a>
+<a href="#L84"> 84</a>
+<a href="#L85"> 85</a>
+<a href="#L86"> 86</a>
+<a href="#L87"> 87</a>
+<a href="#L88"> 88</a>
+<a href="#L89"> 89</a>
+<a href="#L90"> 90</a>
+<a href="#L91"> 91</a>
+<a href="#L92"> 92</a>
+<a href="#L93"> 93</a>
+<a href="#L94"> 94</a>
+<a href="#L95"> 95</a>
+<a href="#L96"> 96</a>
+<a href="#L97"> 97</a>
+<a href="#L98"> 98</a>
+<a href="#L99"> 99</a>
+<a href="#L100">100</a>
+<a href="#L101">101</a>
+<a href="#L102">102</a>
+<a href="#L103">103</a>
+<a href="#L104">104</a>
+<a href="#L105">105</a>
+<a href="#L106">106</a>
+<a href="#L107">107</a>
+<a href="#L108">108</a>
+<a href="#L109">109</a>
+<a href="#L110">110</a>
+<a href="#L111">111</a>
+<a href="#L112">112</a>
+<a href="#L113">113</a>
+<a href="#L114">114</a>
+<a href="#L115">115</a>
+<a href="#L116">116</a>
+<a href="#L117">117</a>
+<a href="#L118">118</a>
+<a href="#L119">119</a>
+<a href="#L120">120</a>
+<a href="#L121">121</a>
+<a href="#L122">122</a>
+<a href="#L123">123</a>
+<a href="#L124">124</a>
+<a href="#L125">125</a>
+<a href="#L126">126</a>
+<a href="#L127">127</a>
+<a href="#L128">128</a>
+<a href="#L129">129</a>
+<a href="#L130">130</a>
+<a href="#L131">131</a>
+<a href="#L132">132</a>
+<a href="#L133">133</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2026 OCamlPro *)
@@ -234,7 +304,7 @@ include Int32
 
 type t = int32
 
-let wrap_i64 x = <span data-count="533541">I</span>nt64.to_int32 x
+let wrap_i64 x = <span data-count="534728">I</span>nt64.to_int32 x
 
 let trunc_f32_s x =
   <span data-count="30">i</span>f Float32.ne x x then <span data-count="5">E</span>rror `Conversion_to_integer
@@ -277,43 +347,43 @@ let trunc_f64_u x =
   else <span data-count="20">O</span>k Int64.(to_int3<span data-count="20">2</span> (of_floa<span data-count="20">t</span> (Float64.to_floa<span data-count="20">t</span> x)))
 
 let trunc_sat_f32_s x =
-  <span data-count="22">i</span>f Float32.ne x x then <span data-count="4">0</span>l
+  <span data-count="234">i</span>f Float32.ne x x then <span data-count="20">0</span>l
   else
-    <span data-count="18">l</span>et xf = Float32.to_float x |&gt; <span data-count="18">F</span>loat64.of_float in
-    <span data-count="18">l</span>et mif = Int32.(to_floa<span data-count="18">t</span> min_int) in
-    if Float64.(l<span data-count="18">t</span> xf (of_floa<span data-count="18">t</span> mif)) then <span data-count="2">I</span>nt32.min_int
-    else <span data-count="16">i</span>f Float64.(l<span data-count="16">e</span> (of_floa<span data-count="16">t</span> ~-<span data-count="16">.</span>mif) xf) then <span data-count="2">I</span>nt32.max_int
-    else <span data-count="14">I</span>nt32.of_float (Float64.to_floa<span data-count="14">t</span> xf)
+    <span data-count="214">l</span>et xf = Float32.to_float x |&gt; <span data-count="214">F</span>loat64.of_float in
+    <span data-count="214">l</span>et mif = Int32.(to_floa<span data-count="214">t</span> min_int) in
+    if Float64.(l<span data-count="214">t</span> xf (of_floa<span data-count="214">t</span> mif)) then <span data-count="18">I</span>nt32.min_int
+    else <span data-count="196">i</span>f Float64.(l<span data-count="196">e</span> (of_floa<span data-count="196">t</span> ~-<span data-count="196">.</span>mif) xf) then <span data-count="38">I</span>nt32.max_int
+    else <span data-count="158">I</span>nt32.of_float (Float64.to_floa<span data-count="158">t</span> xf)
 
 let trunc_sat_f32_u x =
-  <span data-count="21">i</span>f Float32.ne x x then <span data-count="4">0</span>l
+  <span data-count="225">i</span>f Float32.ne x x then <span data-count="20">0</span>l
   else
-    <span data-count="17">l</span>et xf = Float32.to_float x |&gt; <span data-count="17">F</span>loat64.of_float in
-    <span data-count="17">i</span>f Float64.(l<span data-count="17">e</span> xf (of_floa<span data-count="17">t</span> ~-<span data-count="17">.</span>1.0)) then <span data-count="2">0</span>l
-    else <span data-count="15">i</span>f Float64.(l<span data-count="15">e</span> (of_floa<span data-count="15">t</span> (~-<span data-count="15">.</span>Int32.(to_floa<span data-count="15">t</span> min_int) *. 2.0)) xf) then
-      <span data-count="2">-</span>1l
-    else <span data-count="13">I</span>nt64.(to_int32 @@ of_floa<span data-count="13">t</span> (Float64.to_floa<span data-count="13">t</span> xf))
+    <span data-count="205">l</span>et xf = Float32.to_float x |&gt; <span data-count="205">F</span>loat64.of_float in
+    <span data-count="205">i</span>f Float64.(l<span data-count="205">e</span> xf (of_floa<span data-count="205">t</span> ~-<span data-count="205">.</span>1.0)) then <span data-count="62">0</span>l
+    else <span data-count="143">i</span>f Float64.(l<span data-count="143">e</span> (of_floa<span data-count="143">t</span> (~-<span data-count="143">.</span>Int32.(to_floa<span data-count="143">t</span> min_int) *. 2.0)) xf) then
+      <span data-count="30">-</span>1l
+    else <span data-count="113">I</span>nt64.(to_int32 @@ of_floa<span data-count="113">t</span> (Float64.to_floa<span data-count="113">t</span> xf))
 
 let trunc_sat_f64_s x =
-  <span data-count="23">i</span>f Float64.ne x x then <span data-count="4">0</span>l
-  else <span data-count="19">i</span>f Float64.(le <span data-count="19">x</span> @@ of_floa<span data-count="19">t</span> @@ Int32.(to_floa<span data-count="19">t</span> min_int)) then
-    <span data-count="3">I</span>nt32.min_int
-  else <span data-count="16">i</span>f Float64.(l<span data-count="16">e</span> (of_floa<span data-count="16">t</span> ~-<span data-count="16">.</span>Int32.(to_floa<span data-count="16">t</span> min_int)) x) then
-    <span data-count="3">I</span>nt32.max_int
-  else <span data-count="13">I</span>nt32.of_float @@ Float64.to_floa<span data-count="13">t</span> x
+  <span data-count="125">i</span>f Float64.ne x x then <span data-count="12">0</span>l
+  else <span data-count="113">i</span>f Float64.(le <span data-count="113">x</span> @@ of_floa<span data-count="113">t</span> @@ Int32.(to_floa<span data-count="113">t</span> min_int)) then
+    <span data-count="13">I</span>nt32.min_int
+  else <span data-count="100">i</span>f Float64.(l<span data-count="100">e</span> (of_floa<span data-count="100">t</span> ~-<span data-count="100">.</span>Int32.(to_floa<span data-count="100">t</span> min_int)) x) then
+    <span data-count="19">I</span>nt32.max_int
+  else <span data-count="81">I</span>nt32.of_float @@ Float64.to_floa<span data-count="81">t</span> x
 
 let trunc_sat_f64_u x =
-  <span data-count="25">i</span>f Float64.ne x x then <span data-count="4">0</span>l
-  else <span data-count="21">i</span>f Float64.(le <span data-count="21">x</span> @@ of_floa<span data-count="21">t</span> ~-<span data-count="21">.</span>1.0) then <span data-count="2">0</span>l
-  else <span data-count="19">i</span>f Float64.(l<span data-count="19">e</span> (of_floa<span data-count="19">t</span> ~-<span data-count="19">.</span>(Int32.(to_floa<span data-count="19">t</span> min_int) *. 2.0)) x) then
-    <span data-count="5">-</span>1l
-  else <span data-count="14">I</span>nt64.(to_int32 (of_floa<span data-count="14">t</span> @@ Float64.to_floa<span data-count="14">t</span> x))
+  <span data-count="127">i</span>f Float64.ne x x then <span data-count="12">0</span>l
+  else <span data-count="115">i</span>f Float64.(le <span data-count="115">x</span> @@ of_floa<span data-count="115">t</span> ~-<span data-count="115">.</span>1.0) then <span data-count="32">0</span>l
+  else <span data-count="83">i</span>f Float64.(l<span data-count="83">e</span> (of_floa<span data-count="83">t</span> ~-<span data-count="83">.</span>(Int32.(to_floa<span data-count="83">t</span> min_int) *. 2.0)) x) then
+    <span data-count="13">-</span>1l
+  else <span data-count="70">I</span>nt64.(to_int32 (of_floa<span data-count="70">t</span> @@ Float64.to_floa<span data-count="70">t</span> x))
 
 let reinterpret_f32 = Float32.to_bits
 
-let to_boolean = function <span data-count="6305819">0</span>l -&gt; false | <span data-count="582403">_</span>i -&gt; true
+let to_boolean = function <span data-count="11318812">0</span>l -&gt; false | <span data-count="593420">_</span>i -&gt; true
 
-let of_boolean = function <span data-count="6308857">f</span>alse -&gt; 0l | <span data-count="582687">t</span>rue -&gt; 1l
+let of_boolean = function <span data-count="11322037">f</span>alse -&gt; 0l | <span data-count="593944">t</span>rue -&gt; 1l
 
 let of_concrete (v : t) : t = <span data-count="0">v</span>
 
@@ -321,9 +391,44 @@ let eq_concrete (v1 : t) (v2 : Int32.t) = <span data-count="0">e</span>q v1 v2
 
 let pp = Fmt.int32
 
-let of_int32 (v : int32) : t = <span data-count="2152423">v</span>
+let of_int32 (v : int32) : t = <span data-count="2129337">v</span>
 
 let to_int32 (v : t) : int32 = <span data-count="0">v</span>
+
+let min_int = Int32.min_int
+
+let eqz (v : t) = <span data-count="712455">e</span>q v zero
+
+let ( = ) = eq
+
+let ( + ) = add
+
+let of_i16x2 a b =
+  <span data-count="42016">l</span>et lower = logand (of_in<span data-count="42016">t</span> a) 0xFFFFl in
+  <span data-count="42016">l</span>et upper = shl (of_in<span data-count="42016">t</span> b) 16l in
+  <span data-count="42016">l</span>ogor lower upper
+
+let of_i8x4 a b c d =
+  <span data-count="19400">o</span>f_i16x2 (Concrete_i16.of_i8x<span data-count="19400">2</span> a b) (Concrete_i16.of_i8x<span data-count="19400">2</span> c d)
+
+let narrow_i16_s x =
+  <span data-count="264">i</span>f lt x (-32768l) then <span data-count="48">-</span>32768 else <span data-count="216">i</span>f lt 32767l x then <span data-count="64">3</span>2767 else <span data-count="152">t</span>o_int x
+
+let narrow_i16_u x =
+  <span data-count="192">l</span>et x = logand x 0xffff_ffffl in
+  <span data-count="192">i</span>f lt x 0l then <span data-count="60">0</span> else <span data-count="132">i</span>f lt 65535l x then <span data-count="44">6</span>5535 else <span data-count="88">t</span>o_int x
+
+let neg x = <span data-count="144">s</span>ub 0l x
+
+let abs x = <span data-count="120">i</span>f lt x 0l then <span data-count="72">n</span>eg x else <span data-count="48">x</span>
+
+let min_s x y = <span data-count="116">i</span>f lt x y then <span data-count="52">x</span> else <span data-count="64">y</span>
+
+let min_u x y = <span data-count="116">i</span>f lt (logxo<span data-count="116">r</span> x min_int) (logxo<span data-count="116">r</span> y min_int) then <span data-count="56">x</span> else <span data-count="60">y</span>
+
+let max_s x y = <span data-count="116">i</span>f lt x y then <span data-count="52">y</span> else <span data-count="64">x</span>
+
+let max_u x y = <span data-count="116">i</span>f lt (logxo<span data-count="116">r</span> x min_int) (logxo<span data-count="116">r</span> y min_int) then <span data-count="56">y</span> else <span data-count="60">x</span>
 </code></pre>
       </div>
     </div>

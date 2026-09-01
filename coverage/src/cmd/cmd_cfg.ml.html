@@ -562,7 +562,7 @@ let rec build_graph (l : Binary.expr) nodes n node edges
       let nodes = (n, node) :: nodes in
       let edges_to_add = (n, End, None) :: edges_to_add in
       (nodes, edges, n + 1, edges_to_add, false)
-    | <span data-count="1">U</span>nreachable -&gt;
+    | <span data-count="1">S</span>imple Unreachable -&gt;
       let nodes = (n, instr :: node) :: nodes in
       (nodes, edges, n + 1, edges_to_add, false)
     | <span data-count="12">C</span>all _ | <span data-count="4">C</span>all_indirect _ -&gt;

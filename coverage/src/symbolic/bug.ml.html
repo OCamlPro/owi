@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>bug.ml &mdash; Coverage report</title>
-    <meta name="description" content="78.26% coverage in src/symbolic/bug.ml">
+    <meta name="description" content="66.67% coverage in src/symbolic/bug.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,12 +15,15 @@
           <span class="dirname">src/symbolic/</span>bug.ml
         </a>
       </h1>
-      <h2>78.26%</h2>
+      <h2>66.67%</h2>
     </div>
     <div id="navbar">
-      <span class="some-visited" style="top:48.94%"></span>
-      <span class="some-visited" style="bottom:46.81%"></span>
-      <span class="unvisited" style="bottom:42.55%"></span>
+      <span class="unvisited" style="top:46.15%"></span>
+      <span class="unvisited" style="top:48.08%"></span>
+      <span class="unvisited" style="top:50.00%"></span>
+      <span class="some-visited" style="bottom:46.15%"></span>
+      <span class="some-visited" style="bottom:42.31%"></span>
+      <span class="unvisited" style="bottom:38.46%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -47,31 +50,36 @@
 <a id="L20"></a><span > </span>
 <a id="L21"></a><span > </span>
 <a id="L22"></a><span > </span>
-<a id="L23"></a><span class="some-visited"> </span>
-<a id="L24"></a><span > </span>
-<a id="L25"></a><span class="some-visited"> </span>
-<a id="L26"></a><span > </span>
-<a id="L27"></a><span class="unvisited"> </span>
-<a id="L28"></a><span > </span>
+<a id="L23"></a><span > </span>
+<a id="L24"></a><span class="unvisited"> </span>
+<a id="L25"></a><span class="unvisited"> </span>
+<a id="L26"></a><span class="unvisited"> </span>
+<a id="L27"></a><span > </span>
+<a id="L28"></a><span class="some-visited"> </span>
 <a id="L29"></a><span > </span>
-<a id="L30"></a><span > </span>
-<a id="L31"></a><span class="visited"> </span>
-<a id="L32"></a><span > </span>
+<a id="L30"></a><span class="some-visited"> </span>
+<a id="L31"></a><span > </span>
+<a id="L32"></a><span class="unvisited"> </span>
 <a id="L33"></a><span > </span>
 <a id="L34"></a><span > </span>
-<a id="L35"></a><span class="visited"> </span>
-<a id="L36"></a><span > </span>
+<a id="L35"></a><span > </span>
+<a id="L36"></a><span class="visited"> </span>
 <a id="L37"></a><span > </span>
 <a id="L38"></a><span > </span>
-<a id="L39"></a><span class="visited"> </span>
+<a id="L39"></a><span > </span>
 <a id="L40"></a><span class="visited"> </span>
-<a id="L41"></a><span class="visited"> </span>
-<a id="L42"></a><span class="visited"> </span>
-<a id="L43"></a><span class="visited"> </span>
-<a id="L44"></a><span > </span>
-<a id="L45"></a><span > </span>
+<a id="L41"></a><span > </span>
+<a id="L42"></a><span > </span>
+<a id="L43"></a><span > </span>
+<a id="L44"></a><span class="visited"> </span>
+<a id="L45"></a><span class="visited"> </span>
 <a id="L46"></a><span class="visited"> </span>
 <a id="L47"></a><span class="visited"> </span>
+<a id="L48"></a><span class="visited"> </span>
+<a id="L49"></a><span > </span>
+<a id="L50"></a><span > </span>
+<a id="L51"></a><span class="visited"> </span>
+<a id="L52"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -123,6 +131,11 @@
 <a href="#L45">45</a>
 <a href="#L46">46</a>
 <a href="#L47">47</a>
+<a href="#L48">48</a>
+<a href="#L49">49</a>
+<a href="#L50">50</a>
+<a href="#L51">51</a>
+<a href="#L52">52</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2026 OCamlPro *)
@@ -146,6 +159,11 @@ type t =
   | `Prune
   ]
 
+let pp ppf = function
+  | <span data-count="0">`</span>Trap t -&gt; Fmt.pf ppf "trap: %s" (Result.err_to_strin<span data-count="0">g</span> t.err)
+  | <span data-count="0">`</span>Assertion a -&gt; Fmt.pf ppf "assertion: %a" Symbolic_boolean.pp a.assertion
+  | <span data-count="0">`</span>Prune -&gt; Fmt.pf ppf "prune"
+
 let is_trap = function <span data-count="1">`</span>Assertion _ | <span data-count="0">`</span>Prune -&gt; false | <span data-count="1">`</span>Trap _ -&gt; true
 
 let is_assertion = function <span data-count="3">`</span>Assertion _ -&gt; true | <span data-count="0">`</span>Prune | <span data-count="2">`</span>Trap _ -&gt; false
@@ -154,11 +172,11 @@ let is_prune = function <span data-count="0">`</span>Prune -&gt; true | <span da
 
 let get_state : [ `Trap of trap | `Assertion of assertion ] -&gt; Thread.t =
   function
-  | <span data-count="214">`</span>Trap { state; _ } | <span data-count="70">`</span>Assertion { state; _ } -&gt; state
+  | <span data-count="210">`</span>Trap { state; _ } | <span data-count="70">`</span>Assertion { state; _ } -&gt; state
 
 let get_model : [ `Trap of trap | `Assertion of assertion ] -&gt; Smtml.Model.t =
   function
-  | <span data-count="286">`</span>Trap { model; _ } | <span data-count="101">`</span>Assertion { model; _ } -&gt; model
+  | <span data-count="280">`</span>Trap { model; _ } | <span data-count="101">`</span>Assertion { model; _ } -&gt; model
 
 let compare_breadcrumbs (bug1 : [ `Trap of trap | `Assertion of assertion ])
   (bug2 : [ `Trap of trap | `Assertion of assertion ]) =

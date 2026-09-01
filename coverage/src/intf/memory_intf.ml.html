@@ -70,6 +70,15 @@
 <a id="L46"></a><span > </span>
 <a id="L47"></a><span > </span>
 <a id="L48"></a><span > </span>
+<a id="L49"></a><span > </span>
+<a id="L50"></a><span > </span>
+<a id="L51"></a><span > </span>
+<a id="L52"></a><span > </span>
+<a id="L53"></a><span > </span>
+<a id="L54"></a><span > </span>
+<a id="L55"></a><span > </span>
+<a id="L56"></a><span > </span>
+<a id="L57"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -122,6 +131,15 @@
 <a href="#L46">46</a>
 <a href="#L47">47</a>
 <a href="#L48">48</a>
+<a href="#L49">49</a>
+<a href="#L50">50</a>
+<a href="#L51">51</a>
+<a href="#L52">52</a>
+<a href="#L53">53</a>
+<a href="#L54">54</a>
+<a href="#L55">55</a>
+<a href="#L56">56</a>
+<a href="#L57">57</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2026 OCamlPro *)
@@ -133,6 +151,8 @@ module type T = sig
   type i32
 
   type i64
+
+  type v128
 
   type 'a choice
 
@@ -148,28 +168,35 @@ module type T = sig
 
   val load_64 : t -&gt; i32 -&gt; i64 choice
 
-  val store_8 : t -&gt; addr:i32 -&gt; i32 -&gt; unit choice
+  val load_128 : t -&gt; i32 -&gt; v128 choice
 
-  val store_16 : t -&gt; addr:i32 -&gt; i32 -&gt; unit choice
+  val store_8 : t -&gt; addr:i32 -&gt; i32 -&gt; t choice
 
-  val store_32 : t -&gt; addr:i32 -&gt; i32 -&gt; unit choice
+  val store_16 : t -&gt; addr:i32 -&gt; i32 -&gt; t choice
 
-  val store_64 : t -&gt; addr:i32 -&gt; i64 -&gt; unit choice
+  val store_32 : t -&gt; addr:i32 -&gt; i32 -&gt; t choice
 
-  val grow : t -&gt; i32 -&gt; unit choice
+  val store_64 : t -&gt; addr:i32 -&gt; i64 -&gt; t choice
 
-  val fill : t -&gt; pos:i32 -&gt; len:i32 -&gt; char -&gt; unit choice
+  val store_128 : t -&gt; addr:i32 -&gt; v128 -&gt; t choice
 
-  val blit :
-    src:t -&gt; src_idx:i32 -&gt; dst:t -&gt; dst_idx:i32 -&gt; len:i32 -&gt; unit choice
+  val grow : t -&gt; i32 -&gt; t
 
-  val blit_string : t -&gt; string -&gt; src:i32 -&gt; dst:i32 -&gt; len:i32 -&gt; unit choice
+  val fill : t -&gt; pos:i32 -&gt; len:i32 -&gt; char -&gt; t choice
+
+  val blit : src:t -&gt; src_idx:i32 -&gt; dst:t -&gt; dst_idx:i32 -&gt; len:i32 -&gt; t choice
+
+  val blit_string : t -&gt; string -&gt; src:i32 -&gt; dst:i32 -&gt; len:i32 -&gt; t choice
 
   val size : t -&gt; i32
 
   val size_in_pages : t -&gt; i32
 
   val get_limit_max : t -&gt; int option
+
+  val get_limits : t -&gt; Binary.Mem.Type.limits
+
+  val init : Binary.Mem.Type.limits -&gt; t
 end
 </code></pre>
       </div>

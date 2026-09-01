@@ -87,6 +87,10 @@
 <a id="L63"></a><span > </span>
 <a id="L64"></a><span > </span>
 <a id="L65"></a><span > </span>
+<a id="L66"></a><span > </span>
+<a id="L67"></a><span > </span>
+<a id="L68"></a><span > </span>
+<a id="L69"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -156,6 +160,10 @@
 <a href="#L63">63</a>
 <a href="#L64">64</a>
 <a href="#L65">65</a>
+<a href="#L66">66</a>
+<a href="#L67">67</a>
+<a href="#L68">68</a>
+<a href="#L69">69</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2026 OCamlPro *)
@@ -221,6 +229,10 @@ module type T = sig
   val of_bits : same_size_int -&gt; t
 
   val to_bits : t -&gt; same_size_int
+
+  val pmin : t -&gt; t -&gt; t
+
+  val pmax : t -&gt; t -&gt; t
 end
 </code></pre>
       </div>

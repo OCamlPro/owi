@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>abstract_jump_map.ml &mdash; Coverage report</title>
+    <meta name="description" content="68.42% coverage in src/abstract/abstract_jump_map.ml">
+    <link rel="stylesheet" href="../../coverage.css"/>
+    <script src="../../highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </head>
+  <body>
+    <div id="header">
+      <h1>
+        <a href="../../index.html">
+          <span class="dirname">src/abstract/</span>abstract_jump_map.ml
+        </a>
+      </h1>
+      <h2>68.42%</h2>
+    </div>
+    <div id="navbar">
+      <span class="unvisited" style="bottom:45.16%"></span>
+      <span class="some-visited" style="bottom:29.03%"></span>
+      <span class="unvisited" style="bottom:3.23%"></span>
+      <span class="unvisited" style="bottom:0.00%"></span>
+    </div>
+    <div id="report">
+      <div id="lines-layer">
+        <pre>
+<a id="L1"></a><span > </span>
+<a id="L2"></a><span > </span>
+<a id="L3"></a><span > </span>
+<a id="L4"></a><span > </span>
+<a id="L5"></a><span > </span>
+<a id="L6"></a><span > </span>
+<a id="L7"></a><span > </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span > </span>
+<a id="L10"></a><span > </span>
+<a id="L11"></a><span class="visited"> </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span class="visited"> </span>
+<a id="L14"></a><span > </span>
+<a id="L15"></a><span class="visited"> </span>
+<a id="L16"></a><span > </span>
+<a id="L17"></a><span class="unvisited"> </span>
+<a id="L18"></a><span > </span>
+<a id="L19"></a><span > </span>
+<a id="L20"></a><span > </span>
+<a id="L21"></a><span > </span>
+<a id="L22"></a><span class="some-visited"> </span>
+<a id="L23"></a><span > </span>
+<a id="L24"></a><span > </span>
+<a id="L25"></a><span class="visited"> </span>
+<a id="L26"></a><span class="visited"> </span>
+<a id="L27"></a><span > </span>
+<a id="L28"></a><span > </span>
+<a id="L29"></a><span > </span>
+<a id="L30"></a><span class="unvisited"> </span>
+<a id="L31"></a><span class="unvisited"> </span>
+</pre>
+      </div>
+      <div id="text-layer">
+        <pre id="line-numbers">
+<a href="#L1"> 1</a>
+<a href="#L2"> 2</a>
+<a href="#L3"> 3</a>
+<a href="#L4"> 4</a>
+<a href="#L5"> 5</a>
+<a href="#L6"> 6</a>
+<a href="#L7"> 7</a>
+<a href="#L8"> 8</a>
+<a href="#L9"> 9</a>
+<a href="#L10">10</a>
+<a href="#L11">11</a>
+<a href="#L12">12</a>
+<a href="#L13">13</a>
+<a href="#L14">14</a>
+<a href="#L15">15</a>
+<a href="#L16">16</a>
+<a href="#L17">17</a>
+<a href="#L18">18</a>
+<a href="#L19">19</a>
+<a href="#L20">20</a>
+<a href="#L21">21</a>
+<a href="#L22">22</a>
+<a href="#L23">23</a>
+<a href="#L24">24</a>
+<a href="#L25">25</a>
+<a href="#L26">26</a>
+<a href="#L27">27</a>
+<a href="#L28">28</a>
+<a href="#L29">29</a>
+<a href="#L30">30</a>
+<a href="#L31">31</a>
+</pre>
+<pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
+(* Copyright © 2021-2026 OCamlPro *)
+(* Written by the Owi programmers *)
+
+module Key = struct
+  type t =
+    | I of int
+    | Ret
+
+  let map : (int -&gt; int) -&gt; t -&gt; t =
+   fun f key -&gt; <span data-count="3">m</span>atch key with <span data-count="2">I</span> i -&gt; I (<span data-count="2">f</span> i) | <span data-count="1">R</span>et -&gt; Ret
+
+  let decr = ma<span data-count="858">p</span> Int.pred
+
+  let to_int = function <span data-count="80">I</span> i -&gt; i | <span data-count="43">R</span>et -&gt; -1
+
+  let pp fmt = function <span data-count="0">I</span> i -&gt; Fmt.pf fmt "%i" i | <span data-count="0">R</span>et -&gt; Fmt.pf fmt "ret"
+end
+
+include PatriciaTree.MakeMap (Key)
+
+let append v1 v2 = <span data-count="284">i</span>dempotent_union (fun _ v1 v2 -&gt; <span data-count="0">L</span>ist.append v1 v2) v1 v2
+
+let decr map =
+  <span data-count="14">f</span>old
+    (fun k v acc -&gt; <span data-count="5">m</span>atch k with <span data-count="2">I</span> 0 -&gt; acc | <span data-count="3">k</span> -&gt; add (Key.dec<span data-count="3">r</span> k) v acc)
+    map empty
+
+let pp fmt =
+  <span data-count="0">l</span>et pp_v = Fmt.list ~sep:Fmt.semi Abstract_interpreter_state.pp in
+  <span data-count="0">p</span>retty (fun fmt jk v -&gt; <span data-count="0">F</span>mt.pf fmt "%a -&gt; %a" Key.pp jk pp_v v) fmt
+</code></pre>
+      </div>
+    </div>
+    <script src="../../coverage.js"></script>
+  </body>
+</html>

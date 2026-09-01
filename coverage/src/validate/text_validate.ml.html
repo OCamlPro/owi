@@ -471,7 +471,7 @@ type env =
   }
 
 let empty_env () =
-  <span data-count="7712">{</span> start = false
+  <span data-count="9772">{</span> start = false
   ; declared_memory = false
   ; funcs = false
   ; tables = false
@@ -479,7 +479,7 @@ let empty_env () =
   }
 
 let check_mem_limits { is_i64; min; max } =
-  <span data-count="2037">i</span>f is_i64 then
+  <span data-count="2427">i</span>f is_i64 then
     <span data-count="0">l</span>et* min =
       match int_of_string_opt min with
       | <span data-count="0">S</span>ome min -&gt; Ok min
@@ -497,89 +497,89 @@ let check_mem_limits { is_i64; min; max } =
         else <span data-count="0">O</span>k ()
       | <span data-count="0">N</span>one -&gt; Error `Constant_out_of_range )
   else
-    <span data-count="2037">l</span>et* min =
-      try Ok (Int32.of_string_ex<span data-count="2035">n</span> min)
+    <span data-count="2427">l</span>et* min =
+      try Ok (Int32.of_string_ex<span data-count="2425">n</span> min)
       with <span data-count="2">F</span>ailure _ -&gt; Error `Constant_out_of_range
     in
-    <span data-count="2035">m</span>atch max with
-    | <span data-count="1084">N</span>one -&gt;
-      if Int32.lt_u 0x1_0000l min then <span data-count="3">E</span>rror `Memory_size_too_large else <span data-count="1081">O</span>k ()
-    | <span data-count="951">S</span>ome max -&gt;
+    <span data-count="2425">m</span>atch max with
+    | <span data-count="1358">N</span>one -&gt;
+      if Int32.lt_u 0x1_0000l min then <span data-count="3">E</span>rror `Memory_size_too_large else <span data-count="1355">O</span>k ()
+    | <span data-count="1067">S</span>ome max -&gt;
       let* max =
-        try Ok (Int32.of_string_ex<span data-count="950">n</span> max)
+        try Ok (Int32.of_string_ex<span data-count="1066">n</span> max)
         with <span data-count="1">F</span>ailure _ -&gt; Error `Constant_out_of_range
       in
-      <span data-count="950">i</span>f Int32.lt_u max min then <span data-count="1">E</span>rror `Size_minimum_greater_than_maximum
-      else <span data-count="949">i</span>f Int32.lt_<span data-count="949">u</span> 0x1_0000l mi<span data-count="0">n</span> || Int32.lt_<span data-count="949">u</span> 0x1_0000l ma<span data-count="3">x</span> then
+      <span data-count="1066">i</span>f Int32.lt_u max min then <span data-count="1">E</span>rror `Size_minimum_greater_than_maximum
+      else <span data-count="1065">i</span>f Int32.lt_<span data-count="1065">u</span> 0x1_0000l mi<span data-count="0">n</span> || Int32.lt_<span data-count="1065">u</span> 0x1_0000l ma<span data-count="3">x</span> then
         <span data-count="3">E</span>rror `Memory_size_too_large
-      else <span data-count="946">O</span>k ()
+      else <span data-count="1062">O</span>k ()
 
 let modul m =
-  <span data-count="7712">L</span>og.info (fun m -&gt; <span data-count="50">m</span> "checking     ...");
-  <span data-count="7712">l</span>et add_global, global_exists =
+  <span data-count="9772">L</span>og.info (fun m -&gt; <span data-count="33">m</span> "checking     ...");
+  <span data-count="9772">l</span>et add_global, global_exists =
     let seen = Hashtbl.create 512 in
-    <span data-count="7712">l</span>et add_global = function
-      | <span data-count="452">N</span>one -&gt; Ok ()
-      | <span data-count="1812">S</span>ome id -&gt;
+    <span data-count="9772">l</span>et add_global = function
+      | <span data-count="512">N</span>one -&gt; Ok ()
+      | <span data-count="2317">S</span>ome id -&gt;
         if Hashtbl.mem seen id then <span data-count="3">E</span>rror (`Duplicate_global id)
-        else <span data-count="1809">O</span>k (Hashtbl.replac<span data-count="1809">e</span> seen id ())
+        else <span data-count="2314">O</span>k (Hashtbl.replac<span data-count="2314">e</span> seen id ())
     in
-    let global_exists id = <span data-count="8">H</span>ashtbl.mem seen id in
+    let global_exists id = <span data-count="10">H</span>ashtbl.mem seen id in
     (add_global, global_exists)
   in
   let add_table, get_table =
     let cnt = ref 0 in
     let names2ids = Hashtbl.create 512 in
-    <span data-count="7712">l</span>et seen = Hashtbl.create 512 in
-    <span data-count="7712">l</span>et add_table name ty =
-      <span data-count="1674">m</span>atch name with
-      | <span data-count="796">N</span>one -&gt;
+    <span data-count="9772">l</span>et seen = Hashtbl.create 512 in
+    <span data-count="9772">l</span>et add_table name ty =
+      <span data-count="1778">m</span>atch name with
+      | <span data-count="770">N</span>one -&gt;
         Hashtbl.replace seen !cnt ty;
-        <span data-count="796">i</span>ncr cnt;
-        <span data-count="796">O</span>k ()
-      | <span data-count="878">S</span>ome name -&gt;
+        <span data-count="770">i</span>ncr cnt;
+        <span data-count="770">O</span>k ()
+      | <span data-count="1008">S</span>ome name -&gt;
         if Hashtbl.mem names2ids name then <span data-count="3">E</span>rror (`Duplicate_table name)
-        else <span data-count="875">(</span>
+        else <span data-count="1005">(</span>
           Hashtbl.replace names2ids name !cnt;
-          <span data-count="875">H</span>ashtbl.replace seen !cnt ty;
-          <span data-count="875">i</span>ncr cnt;
-          <span data-count="875">O</span>k () )
+          <span data-count="1005">H</span>ashtbl.replace seen !cnt ty;
+          <span data-count="1005">i</span>ncr cnt;
+          <span data-count="1005">O</span>k () )
     in
     let get_table name =
-      <span data-count="875">m</span>atch name with
-      | <span data-count="88">N</span>one -&gt;
+      <span data-count="869">m</span>atch name with
+      | <span data-count="94">N</span>one -&gt;
         begin match Hashtbl.find_opt seen 0 with
         | None -&gt; assert false
-        | <span data-count="88">S</span>ome ty -&gt; Ok ty
+        | <span data-count="94">S</span>ome ty -&gt; Ok ty
         end
-      | <span data-count="456">S</span>ome (Text name) -&gt;
+      | <span data-count="462">S</span>ome (Text name) -&gt;
         begin match Hashtbl.find_opt names2ids name with
         | <span data-count="0">N</span>one -&gt; Error (`Unknown_table (Text name))
-        | <span data-count="456">S</span>ome id -&gt;
+        | <span data-count="462">S</span>ome id -&gt;
           begin match Hashtbl.find_opt seen id with
           | None -&gt; assert false
-          | <span data-count="456">S</span>ome ty -&gt; Ok ty
+          | <span data-count="462">S</span>ome ty -&gt; Ok ty
           end
         end
-      | <span data-count="331">S</span>ome (Raw id) -&gt;
+      | <span data-count="313">S</span>ome (Raw id) -&gt;
         begin match Hashtbl.find_opt seen id with
         | <span data-count="7">N</span>one -&gt; Error (`Unknown_table (Raw id))
-        | <span data-count="324">S</span>ome ty -&gt; Ok ty
+        | <span data-count="306">S</span>ome ty -&gt; Ok ty
         end
     in
     (add_table, get_table)
   in
   let elem_check_type env (elemnull, elemty) mode explicit_typ =
-    <span data-count="1697">m</span>atch mode with
-    | Text.Elem.Mode.(<span data-count="744">P</span>assive | <span data-count="78">D</span>eclarative) -&gt; Ok env
-    | <span data-count="875">T</span>ext.Elem.Mode.Active (id, _) -&gt;
-      let* _, (tabnull, tabty) = get_tabl<span data-count="875">e</span> id in
+    <span data-count="1773">m</span>atch mode with
+    | Text.Elem.Mode.(<span data-count="774">P</span>assive | <span data-count="130">D</span>eclarative) -&gt; Ok env
+    | <span data-count="869">T</span>ext.Elem.Mode.Active (id, _) -&gt;
+      let* _, (tabnull, tabty) = get_tabl<span data-count="869">e</span> id in
       (* Only if elem_ty is explicit, otherwise it can be inferred *)
-      <span data-count="868">i</span>f
-        (not explicit_typ<span data-count="680">)</span>
-        || Text.heap_type_e<span data-count="188">q</span> elemty tabty
-           &amp;&amp; <span data-count="187">T</span>ext.compare_nullabl<span data-count="187">e</span> elemnull tabnull &gt;= <span data-count="186">0</span>
-      then <span data-count="866">O</span>k env
+      <span data-count="862">i</span>f
+        (not explicit_typ<span data-count="662">)</span>
+        || Text.is_subtype_heap_typ<span data-count="200">e</span> elemty tabty
+           &amp;&amp; <span data-count="199">T</span>ext.compare_nullabl<span data-count="199">e</span> elemnull tabnull &gt;= <span data-count="198">0</span>
+      then <span data-count="860">O</span>k env
       else
         <span data-count="2">E</span>rror
           (`Type_mismatch
@@ -588,79 +588,79 @@ let modul m =
                 (tabnull, tabty) ) )
   in
   let rec check_expr = function
-    | <span data-count="4643">[</span>] -&gt; Ok ()
-    | <span data-count="8">G</span>lobal (Get (Text id)) :: tl -&gt;
-      if not (global_exist<span data-count="8">s</span> id) then <span data-count="0">E</span>rror (`Unknown_global (Text id))
-      else <span data-count="8">c</span>heck_expr tl
-    | <span data-count="4647">_</span>hd :: t -&gt; check_expr t
+    | <span data-count="4783">[</span>] -&gt; Ok ()
+    | <span data-count="10">G</span>lobal (Get (Text id)) :: tl -&gt;
+      if not (global_exist<span data-count="10">s</span> id) then <span data-count="0">E</span>rror (`Unknown_global (Text id))
+      else <span data-count="10">c</span>heck_expr tl
+    | <span data-count="4835">_</span>hd :: t -&gt; check_expr t
     (* TODO: complete for other operations *)
   in
   let rec elem_check_init = function
-    | <span data-count="1688">[</span>] -&gt; Ok ()
-    | <span data-count="4600">h</span>d :: tl -&gt;
-      let* () = check_exp<span data-count="4600">r</span> hd in
-      <span data-count="4600">e</span>lem_check_init tl
+    | <span data-count="1764">[</span>] -&gt; Ok ()
+    | <span data-count="4738">h</span>d :: tl -&gt;
+      let* () = check_exp<span data-count="4738">r</span> hd in
+      <span data-count="4738">e</span>lem_check_init tl
   in
   let add_memory =
     let seen = Hashtbl.create 512 in
-    <span data-count="7712">f</span>unction
-    | <span data-count="1750">N</span>one -&gt; Ok ()
-    | <span data-count="592">S</span>ome id -&gt;
+    <span data-count="9772">f</span>unction
+    | <span data-count="1998">N</span>one -&gt; Ok ()
+    | <span data-count="710">S</span>ome id -&gt;
       if Hashtbl.mem seen id then <span data-count="3">E</span>rror (`Duplicate_memory id)
-      else <span data-count="589">O</span>k (Hashtbl.ad<span data-count="589">d</span> seen id ())
+      else <span data-count="707">O</span>k (Hashtbl.ad<span data-count="707">d</span> seen id ())
   in
   let+ (_env : env) =
     let open Module in
-    list_fold_lef<span data-count="7712">t</span>
+    list_fold_lef<span data-count="9772">t</span>
       (fun env -&gt;
-        <span data-count="46432">l</span>et open Field in
+        <span data-count="59154">l</span>et open Field in
         function
-        | <span data-count="15894">E</span>xport _e -&gt; Ok env
-        | <span data-count="14962">F</span>unc _f -&gt; Ok { env with funcs = true }
-        | <span data-count="517">S</span>tart _start -&gt;
+        | <span data-count="20746">E</span>xport _e -&gt; Ok env
+        | <span data-count="19566">F</span>unc _f -&gt; Ok { env with funcs = true }
+        | <span data-count="502">S</span>tart _start -&gt;
           if env.start then <span data-count="1">E</span>rror `Multiple_start_sections
-          else <span data-count="516">O</span>k { env with start = true }
-        | <span data-count="5956">I</span>mport i -&gt;
+          else <span data-count="501">O</span>k { env with start = true }
+        | <span data-count="7241">I</span>mport i -&gt;
           if env.funcs then <span data-count="4">E</span>rror `Import_after_function
-          else <span data-count="5952">i</span>f env.declared_memory then <span data-count="4">E</span>rror `Import_after_memory
-          else <span data-count="5948">i</span>f env.tables then <span data-count="4">E</span>rror `Import_after_table
-          else <span data-count="5944">i</span>f env.globals then <span data-count="4">E</span>rror `Import_after_global
+          else <span data-count="7237">i</span>f env.declared_memory then <span data-count="4">E</span>rror `Import_after_memory
+          else <span data-count="7233">i</span>f env.tables then <span data-count="4">E</span>rror `Import_after_table
+          else <span data-count="7229">i</span>f env.globals then <span data-count="4">E</span>rror `Import_after_global
           else
-            <span data-count="5940">b</span>egin match i.typ with
-            | <span data-count="315">M</span>em (id, _) -&gt;
-              let* () = add_memor<span data-count="315">y</span> id in
-              <span data-count="314">O</span>k env
-            | <span data-count="5173">F</span>unc _ -&gt; Ok env
-            | <span data-count="271">G</span>lobal (id, _) -&gt;
-              let+ () = add_globa<span data-count="271">l</span> id in
-              <span data-count="270">e</span>nv
-            | <span data-count="167">T</span>able (id, ty) -&gt;
-              let+ () = add_tabl<span data-count="167">e</span> id ty in
-              <span data-count="166">e</span>nv
+            <span data-count="7225">b</span>egin match i.typ with
+            | <span data-count="291">M</span>em (id, _) -&gt;
+              let* () = add_memor<span data-count="291">y</span> id in
+              <span data-count="290">O</span>k env
+            | <span data-count="6510">F</span>unc _ -&gt; Ok env
+            | <span data-count="275">G</span>lobal (id, _) -&gt;
+              let+ () = add_globa<span data-count="275">l</span> id in
+              <span data-count="274">e</span>nv
+            | <span data-count="135">T</span>able (id, ty) -&gt;
+              let+ () = add_tabl<span data-count="135">e</span> id ty in
+              <span data-count="134">e</span>nv
             | <span data-count="14">T</span>ag _ -&gt; Ok env
             end
-        | <span data-count="1068">D</span>ata _d -&gt; Ok env
+        | <span data-count="1154">D</span>ata _d -&gt; Ok env
         | <span data-count="10">T</span>ag _t -&gt; Ok env
-        | <span data-count="1697">E</span>lem { typ; mode; explicit_typ; init; _ } -&gt;
-          let* env = elem_check_typ<span data-count="1697">e</span> env typ mode explicit_typ in
-          <span data-count="1688">l</span>et* () = elem_check_ini<span data-count="1688">t</span> init in
-          <span data-count="1688">O</span>k env
-        | <span data-count="2037">M</span>em (id, limits) -&gt;
-          let* () = check_mem_limit<span data-count="2037">s</span> limits in
-          <span data-count="2027">l</span>et* () = add_memor<span data-count="2027">y</span> id in
-          <span data-count="2025">O</span>k { env with declared_memory = true }
-        | <span data-count="791">T</span>ypedef _t -&gt; Ok env
-        | <span data-count="1993">G</span>lobal { id; _ } -&gt;
-          let+ () = add_globa<span data-count="1993">l</span> id in
-          <span data-count="1991">{</span> env with globals = true }
-        | <span data-count="1507">T</span>able { id; typ; init } -&gt;
-          let* () = add_tabl<span data-count="1507">e</span> id typ in
-          <span data-count="1505">l</span>et* () = match init with <span data-count="1462">N</span>one -&gt; Ok () | <span data-count="43">S</span>ome e -&gt; check_exp<span data-count="43">r</span> e in
-          <span data-count="1505">O</span>k { env with tables = true } )
-      (empty_en<span data-count="7712">v</span> ()) m.fields
+        | <span data-count="1773">E</span>lem { typ; mode; explicit_typ; init; _ } -&gt;
+          let* env = elem_check_typ<span data-count="1773">e</span> env typ mode explicit_typ in
+          <span data-count="1764">l</span>et* () = elem_check_ini<span data-count="1764">t</span> init in
+          <span data-count="1764">O</span>k env
+        | <span data-count="2427">M</span>em (id, limits) -&gt;
+          let* () = check_mem_limit<span data-count="2427">s</span> limits in
+          <span data-count="2417">l</span>et* () = add_memor<span data-count="2417">y</span> id in
+          <span data-count="2415">O</span>k { env with declared_memory = true }
+        | <span data-count="1538">T</span>ypedef _t -&gt; Ok env
+        | <span data-count="2554">G</span>lobal { id; _ } -&gt;
+          let+ () = add_globa<span data-count="2554">l</span> id in
+          <span data-count="2552">{</span> env with globals = true }
+        | <span data-count="1643">T</span>able { id; typ; init } -&gt;
+          let* () = add_tabl<span data-count="1643">e</span> id typ in
+          <span data-count="1641">l</span>et* () = match init with <span data-count="1596">N</span>one -&gt; Ok () | <span data-count="45">S</span>ome e -&gt; check_exp<span data-count="45">r</span> e in
+          <span data-count="1641">O</span>k { env with tables = true } )
+      (empty_en<span data-count="9772">v</span> ()) m.fields
   in
 
-  <span data-count="7667">m</span>
+  <span data-count="9727">m</span>
 </code></pre>
       </div>
     </div>

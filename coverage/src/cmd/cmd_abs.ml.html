@@ -30,24 +30,20 @@
 <a id="L6"></a><span > </span>
 <a id="L7"></a><span > </span>
 <a id="L8"></a><span class="visited"> </span>
-<a id="L9"></a><span class="visited"> </span>
+<a id="L9"></a><span > </span>
 <a id="L10"></a><span > </span>
 <a id="L11"></a><span > </span>
 <a id="L12"></a><span class="visited"> </span>
 <a id="L13"></a><span class="visited"> </span>
 <a id="L14"></a><span class="visited"> </span>
-<a id="L15"></a><span > </span>
+<a id="L15"></a><span class="visited"> </span>
 <a id="L16"></a><span class="visited"> </span>
 <a id="L17"></a><span > </span>
-<a id="L18"></a><span > </span>
-<a id="L19"></a><span class="visited"> </span>
-<a id="L20"></a><span > </span>
-<a id="L21"></a><span > </span>
+<a id="L18"></a><span class="visited"> </span>
+<a id="L19"></a><span > </span>
+<a id="L20"></a><span class="visited"> </span>
+<a id="L21"></a><span class="visited"> </span>
 <a id="L22"></a><span class="visited"> </span>
-<a id="L23"></a><span class="visited"> </span>
-<a id="L24"></a><span class="visited"> </span>
-<a id="L25"></a><span > </span>
-<a id="L26"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -74,10 +70,6 @@
 <a href="#L20">20</a>
 <a href="#L21">21</a>
 <a href="#L22">22</a>
-<a href="#L23">23</a>
-<a href="#L24">24</a>
-<a href="#L25">25</a>
-<a href="#L26">26</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2026 OCamlPro *)
@@ -85,26 +77,22 @@
 
 open Syntax
 
-let link_state () =
-  <span data-count="9">L</span>ink.State.empty ()
-  |&gt; <span data-count="9">L</span>ink.Extern.modul ~name:"owi" Abstract_wasm_ffi.symbolic_extern_module
+let env () =
+  <span data-count="16">E</span>nv.Abstract.link_extern_module ~env:Env.Abstract.empty ~name:"owi"
+    Abstract_wasm_ffi.owi
 
-let cmd ~source_file ~unsafe =
-  <span data-count="8">l</span>et link_state = link_state () in
-  <span data-count="8">l</span>et+ m, link_state =
-    Compile.File.until_lin<span data-count="8">k</span> ~unsafe ~name:None link_state source_file
+let cmd ~source_file ~entry_point ~unsafe =
+  <span data-count="15">l</span>et* env = en<span data-count="15">v</span> () in
+  <span data-count="15">l</span>et* modul = Compile.File.until_binar<span data-count="15">y</span> ~unsafe source_file in
+  <span data-count="15">l</span>et* modul = Cmd_utils.set_entry_poin<span data-count="15">t</span> entry_point false modul in
+  <span data-count="15">l</span>et+ modul, env =
+    Compile.Binary.until_abstract_lin<span data-count="15">k</span> ~unsafe ~name:None env modul
   in
-  <span data-count="8">l</span>et (_abstract_invariant : Abstract_invariant.t) =
-    Abstract_driver.expr link_state m
-  in
-  <span data-count="8">(</span>)
-
-let from_binary m ~unsafe =
-  <span data-count="1">l</span>et link_state = link_state () in
-  <span data-count="1">l</span>et+ m, link_state =
-    Compile.Binary.until_lin<span data-count="1">k</span> ~unsafe ~name:None link_state m
-  in
-  <span data-count="1">A</span>bstract_driver.expr link_state m
+  <span data-count="14">t</span>ry
+    let state = Abstract_interpreter_control_flow.modul ~env ~modul in
+    Abstract_checker.check_modul<span data-count="13">e</span> ~env ~modul state.invariant
+  with <span data-count="1">A</span>bstract_interpreter_control_flow.RecursiveFunctionCall -&gt;
+    Log.err (fun m -&gt; <span data-count="1">m</span> "Recursive function calls are not supported yet")
 </code></pre>
       </div>
     </div>

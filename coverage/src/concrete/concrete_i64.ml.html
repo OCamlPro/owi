@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>concrete_i64.ml &mdash; Coverage report</title>
-    <meta name="description" content="98.73% coverage in src/concrete/concrete_i64.ml">
+    <meta name="description" content="98.85% coverage in src/concrete/concrete_i64.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,11 +15,11 @@
           <span class="dirname">src/concrete/</span>concrete_i64.ml
         </a>
       </h1>
-      <h2>98.73%</h2>
+      <h2>98.85%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="bottom:8.08%"></span>
-      <span class="unvisited" style="bottom:6.06%"></span>
+      <span class="unvisited" style="bottom:29.46%"></span>
+      <span class="unvisited" style="bottom:27.91%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -123,109 +123,169 @@
 <a id="L97"></a><span class="visited"> </span>
 <a id="L98"></a><span > </span>
 <a id="L99"></a><span class="visited"> </span>
+<a id="L100"></a><span > </span>
+<a id="L101"></a><span > </span>
+<a id="L102"></a><span > </span>
+<a id="L103"></a><span class="visited"> </span>
+<a id="L104"></a><span > </span>
+<a id="L105"></a><span > </span>
+<a id="L106"></a><span > </span>
+<a id="L107"></a><span > </span>
+<a id="L108"></a><span > </span>
+<a id="L109"></a><span > </span>
+<a id="L110"></a><span > </span>
+<a id="L111"></a><span > </span>
+<a id="L112"></a><span > </span>
+<a id="L113"></a><span > </span>
+<a id="L114"></a><span class="visited"> </span>
+<a id="L115"></a><span class="visited"> </span>
+<a id="L116"></a><span class="visited"> </span>
+<a id="L117"></a><span > </span>
+<a id="L118"></a><span > </span>
+<a id="L119"></a><span class="visited"> </span>
+<a id="L120"></a><span > </span>
+<a id="L121"></a><span > </span>
+<a id="L122"></a><span class="visited"> </span>
+<a id="L123"></a><span > </span>
+<a id="L124"></a><span > </span>
+<a id="L125"></a><span class="visited"> </span>
+<a id="L126"></a><span class="visited"> </span>
+<a id="L127"></a><span class="visited"> </span>
+<a id="L128"></a><span > </span>
+<a id="L129"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
         <pre id="line-numbers">
-<a href="#L1"> 1</a>
-<a href="#L2"> 2</a>
-<a href="#L3"> 3</a>
-<a href="#L4"> 4</a>
-<a href="#L5"> 5</a>
-<a href="#L6"> 6</a>
-<a href="#L7"> 7</a>
-<a href="#L8"> 8</a>
-<a href="#L9"> 9</a>
-<a href="#L10">10</a>
-<a href="#L11">11</a>
-<a href="#L12">12</a>
-<a href="#L13">13</a>
-<a href="#L14">14</a>
-<a href="#L15">15</a>
-<a href="#L16">16</a>
-<a href="#L17">17</a>
-<a href="#L18">18</a>
-<a href="#L19">19</a>
-<a href="#L20">20</a>
-<a href="#L21">21</a>
-<a href="#L22">22</a>
-<a href="#L23">23</a>
-<a href="#L24">24</a>
-<a href="#L25">25</a>
-<a href="#L26">26</a>
-<a href="#L27">27</a>
-<a href="#L28">28</a>
-<a href="#L29">29</a>
-<a href="#L30">30</a>
-<a href="#L31">31</a>
-<a href="#L32">32</a>
-<a href="#L33">33</a>
-<a href="#L34">34</a>
-<a href="#L35">35</a>
-<a href="#L36">36</a>
-<a href="#L37">37</a>
-<a href="#L38">38</a>
-<a href="#L39">39</a>
-<a href="#L40">40</a>
-<a href="#L41">41</a>
-<a href="#L42">42</a>
-<a href="#L43">43</a>
-<a href="#L44">44</a>
-<a href="#L45">45</a>
-<a href="#L46">46</a>
-<a href="#L47">47</a>
-<a href="#L48">48</a>
-<a href="#L49">49</a>
-<a href="#L50">50</a>
-<a href="#L51">51</a>
-<a href="#L52">52</a>
-<a href="#L53">53</a>
-<a href="#L54">54</a>
-<a href="#L55">55</a>
-<a href="#L56">56</a>
-<a href="#L57">57</a>
-<a href="#L58">58</a>
-<a href="#L59">59</a>
-<a href="#L60">60</a>
-<a href="#L61">61</a>
-<a href="#L62">62</a>
-<a href="#L63">63</a>
-<a href="#L64">64</a>
-<a href="#L65">65</a>
-<a href="#L66">66</a>
-<a href="#L67">67</a>
-<a href="#L68">68</a>
-<a href="#L69">69</a>
-<a href="#L70">70</a>
-<a href="#L71">71</a>
-<a href="#L72">72</a>
-<a href="#L73">73</a>
-<a href="#L74">74</a>
-<a href="#L75">75</a>
-<a href="#L76">76</a>
-<a href="#L77">77</a>
-<a href="#L78">78</a>
-<a href="#L79">79</a>
-<a href="#L80">80</a>
-<a href="#L81">81</a>
-<a href="#L82">82</a>
-<a href="#L83">83</a>
-<a href="#L84">84</a>
-<a href="#L85">85</a>
-<a href="#L86">86</a>
-<a href="#L87">87</a>
-<a href="#L88">88</a>
-<a href="#L89">89</a>
-<a href="#L90">90</a>
-<a href="#L91">91</a>
-<a href="#L92">92</a>
-<a href="#L93">93</a>
-<a href="#L94">94</a>
-<a href="#L95">95</a>
-<a href="#L96">96</a>
-<a href="#L97">97</a>
-<a href="#L98">98</a>
-<a href="#L99">99</a>
+<a href="#L1">  1</a>
+<a href="#L2">  2</a>
+<a href="#L3">  3</a>
+<a href="#L4">  4</a>
+<a href="#L5">  5</a>
+<a href="#L6">  6</a>
+<a href="#L7">  7</a>
+<a href="#L8">  8</a>
+<a href="#L9">  9</a>
+<a href="#L10"> 10</a>
+<a href="#L11"> 11</a>
+<a href="#L12"> 12</a>
+<a href="#L13"> 13</a>
+<a href="#L14"> 14</a>
+<a href="#L15"> 15</a>
+<a href="#L16"> 16</a>
+<a href="#L17"> 17</a>
+<a href="#L18"> 18</a>
+<a href="#L19"> 19</a>
+<a href="#L20"> 20</a>
+<a href="#L21"> 21</a>
+<a href="#L22"> 22</a>
+<a href="#L23"> 23</a>
+<a href="#L24"> 24</a>
+<a href="#L25"> 25</a>
+<a href="#L26"> 26</a>
+<a href="#L27"> 27</a>
+<a href="#L28"> 28</a>
+<a href="#L29"> 29</a>
+<a href="#L30"> 30</a>
+<a href="#L31"> 31</a>
+<a href="#L32"> 32</a>
+<a href="#L33"> 33</a>
+<a href="#L34"> 34</a>
+<a href="#L35"> 35</a>
+<a href="#L36"> 36</a>
+<a href="#L37"> 37</a>
+<a href="#L38"> 38</a>
+<a href="#L39"> 39</a>
+<a href="#L40"> 40</a>
+<a href="#L41"> 41</a>
+<a href="#L42"> 42</a>
+<a href="#L43"> 43</a>
+<a href="#L44"> 44</a>
+<a href="#L45"> 45</a>
+<a href="#L46"> 46</a>
+<a href="#L47"> 47</a>
+<a href="#L48"> 48</a>
+<a href="#L49"> 49</a>
+<a href="#L50"> 50</a>
+<a href="#L51"> 51</a>
+<a href="#L52"> 52</a>
+<a href="#L53"> 53</a>
+<a href="#L54"> 54</a>
+<a href="#L55"> 55</a>
+<a href="#L56"> 56</a>
+<a href="#L57"> 57</a>
+<a href="#L58"> 58</a>
+<a href="#L59"> 59</a>
+<a href="#L60"> 60</a>
+<a href="#L61"> 61</a>
+<a href="#L62"> 62</a>
+<a href="#L63"> 63</a>
+<a href="#L64"> 64</a>
+<a href="#L65"> 65</a>
+<a href="#L66"> 66</a>
+<a href="#L67"> 67</a>
+<a href="#L68"> 68</a>
+<a href="#L69"> 69</a>
+<a href="#L70"> 70</a>
+<a href="#L71"> 71</a>
+<a href="#L72"> 72</a>
+<a href="#L73"> 73</a>
+<a href="#L74"> 74</a>
+<a href="#L75"> 75</a>
+<a href="#L76"> 76</a>
+<a href="#L77"> 77</a>
+<a href="#L78"> 78</a>
+<a href="#L79"> 79</a>
+<a href="#L80"> 80</a>
+<a href="#L81"> 81</a>
+<a href="#L82"> 82</a>
+<a href="#L83"> 83</a>
+<a href="#L84"> 84</a>
+<a href="#L85"> 85</a>
+<a href="#L86"> 86</a>
+<a href="#L87"> 87</a>
+<a href="#L88"> 88</a>
+<a href="#L89"> 89</a>
+<a href="#L90"> 90</a>
+<a href="#L91"> 91</a>
+<a href="#L92"> 92</a>
+<a href="#L93"> 93</a>
+<a href="#L94"> 94</a>
+<a href="#L95"> 95</a>
+<a href="#L96"> 96</a>
+<a href="#L97"> 97</a>
+<a href="#L98"> 98</a>
+<a href="#L99"> 99</a>
+<a href="#L100">100</a>
+<a href="#L101">101</a>
+<a href="#L102">102</a>
+<a href="#L103">103</a>
+<a href="#L104">104</a>
+<a href="#L105">105</a>
+<a href="#L106">106</a>
+<a href="#L107">107</a>
+<a href="#L108">108</a>
+<a href="#L109">109</a>
+<a href="#L110">110</a>
+<a href="#L111">111</a>
+<a href="#L112">112</a>
+<a href="#L113">113</a>
+<a href="#L114">114</a>
+<a href="#L115">115</a>
+<a href="#L116">116</a>
+<a href="#L117">117</a>
+<a href="#L118">118</a>
+<a href="#L119">119</a>
+<a href="#L120">120</a>
+<a href="#L121">121</a>
+<a href="#L122">122</a>
+<a href="#L123">123</a>
+<a href="#L124">124</a>
+<a href="#L125">125</a>
+<a href="#L126">126</a>
+<a href="#L127">127</a>
+<a href="#L128">128</a>
+<a href="#L129">129</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2026 OCamlPro *)
@@ -237,7 +297,7 @@ type t = int64
 
 let extend_i32_s x = <span data-count="10">I</span>nt64.of_int32 x
 
-let extend_i32_u x = <span data-count="1075149">I</span>nt64.logand (Int64.of_int3<span data-count="1075149">2</span> x) 0x0000_0000_ffff_ffffL
+let extend_i32_u x = <span data-count="1077882">I</span>nt64.logand (Int64.of_int3<span data-count="1077882">2</span> x) 0x0000_0000_ffff_ffffL
 
 let trunc_f32_s x =
   <span data-count="29">i</span>f Float32.ne x x then <span data-count="5">E</span>rror `Conversion_to_integer
@@ -323,9 +383,39 @@ let eq_concrete (v1 : t) (v2 : Int64.t) = <span data-count="0">e</span>q v1 v2
 
 let pp = Fmt.int64
 
-let of_int64 (v : int64) : t = <span data-count="6231093">v</span>
+let of_int64 (v : int64) : t = <span data-count="11240550">v</span>
 
 let to_int64 (v : t) : int64 = <span data-count="1">v</span>
+
+let min_int = Int64.min_int
+
+let eqz (v : t) = <span data-count="10004354">e</span>q v zero
+
+let ( = ) = eq
+
+let ( + ) = add
+
+let ( * ) = mul
+
+let ( / ) = div
+
+let of_i32x2 a b =
+  <span data-count="52320">l</span>et lower = logand (Concrete_i32.to_int6<span data-count="52320">4</span> a) 0xFFFFFFFFL in
+  <span data-count="52320">l</span>et upper = shl (Concrete_i32.to_int6<span data-count="52320">4</span> b) 32L in
+  <span data-count="52320">l</span>ogor lower upper
+
+let of_i16x4 a b c d =
+  <span data-count="11308">o</span>f_i32x2 (Concrete_i32.of_i16x<span data-count="11308">2</span> a b) (Concrete_i32.of_i16x<span data-count="11308">2</span> c d)
+
+let of_i8x8 a b c d e f g h =
+  <span data-count="9700">o</span>f_i32x2 (Concrete_i32.of_i8x<span data-count="9700">4</span> a b c d) (Concrete_i32.of_i8x<span data-count="9700">4</span> e f g h)
+
+let to_i32x2 a =
+  <span data-count="25326">l</span>et low = to_int32 a in
+  <span data-count="25326">l</span>et high = to_int32 (shift_right_logica<span data-count="25326">l</span> a 32) in
+  <span data-count="25326">(</span>low, high)
+
+let neg x = <span data-count="36">s</span>ub 0L x
 </code></pre>
       </div>
     </div>

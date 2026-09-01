@@ -479,40 +479,40 @@ open Syntax
 (* Test-case generation *)
 
 let out_testcase ~dst testcase =
-  <span data-count="133">l</span>et o = Xmlm.make_output ~nl:true ~indent:(Some 2) dst in
-  <span data-count="133">l</span>et tag atts name = <span data-count="315">(</span>("", name), atts) in
+  <span data-count="131">l</span>et o = Xmlm.make_output ~nl:true ~indent:(Some 2) dst in
+  <span data-count="131">l</span>et tag atts name = <span data-count="312">(</span>("", name), atts) in
   let atts = [ (("", "coversError"), "true") ] in
-  let to_string v = <span data-count="182">F</span>mt.str "%a" Smtml.Value.pp v in
-  let input v = <span data-count="182">`</span>El (ta<span data-count="182">g</span> [] "input", [ `Data (to_strin<span data-count="182">g</span> v) ]) in
-  let testcase = `El (ta<span data-count="133">g</span> atts "testcase", List.ma<span data-count="133">p</span> input testcase) in
+  let to_string v = <span data-count="181">F</span>mt.str "%a" Smtml.Value.pp v in
+  let input v = <span data-count="181">`</span>El (ta<span data-count="181">g</span> [] "input", [ `Data (to_strin<span data-count="181">g</span> v) ]) in
+  let testcase = `El (ta<span data-count="131">g</span> atts "testcase", List.ma<span data-count="131">p</span> input testcase) in
   let dtd =
     {|&lt;!DOCTYPE testcase PUBLIC "+//IDN sosy-lab.org//DTD test-format testcase 1.1//EN" "https://sosy-lab.org/test-format/testcase-1.1.dtd"&gt;|}
   in
   Xmlm.output o (`Dtd (Some dtd));
-  <span data-count="133">X</span>mlm.output_tree Fun.id o testcase
+  <span data-count="131">X</span>mlm.output_tree Fun.id o testcase
 
 let write_testcase =
   let cnt = ref 0 in
   fun ~dir testcase -&gt;
-    <span data-count="133">i</span>ncr cnt;
-    <span data-count="133">l</span>et name = Fmt.kstr Fpath.v "testcase-%d.xml" !cnt in
-    <span data-count="133">l</span>et path = Fpath.append dir name in
-    <span data-count="133">l</span>et* res =
-      Bos.OS.File.with_o<span data-count="133">c</span> path
-        (fun chan () -&gt; <span data-count="133">O</span>k (out_testcas<span data-count="133">e</span> ~dst:(`Channel chan) testcase))
+    <span data-count="131">i</span>ncr cnt;
+    <span data-count="131">l</span>et name = Fmt.kstr Fpath.v "testcase-%d.xml" !cnt in
+    <span data-count="131">l</span>et path = Fpath.append dir name in
+    <span data-count="131">l</span>et* res =
+      Bos.OS.File.with_o<span data-count="131">c</span> path
+        (fun chan () -&gt; <span data-count="131">O</span>k (out_testcas<span data-count="131">e</span> ~dst:(`Channel chan) testcase))
         ()
     in
-    <span data-count="133">r</span>es
+    <span data-count="131">r</span>es
 
 (* Entry-point *)
 
 let dummy_value_of_t = function
-  | <span data-count="404">B</span>inary.Num_type I32 -&gt; Ok (Binary.I32 (Const 0l))
-  | <span data-count="0">N</span>um_type I64 -&gt; Ok (Binary.I64 (Const 0L))
-  | <span data-count="0">N</span>um_type F32 -&gt; Ok (Binary.F32 (Const (Float32.of_floa<span data-count="0">t</span> 0.)))
-  | <span data-count="0">N</span>um_type F64 -&gt; Ok (Binary.F64 (Const (Float64.of_floa<span data-count="0">t</span> 0.)))
-  | <span data-count="0">N</span>um_type V128 -&gt; Ok (Binary.V128 (Const (Concrete_v128.of_i64x<span data-count="0">2</span> 0L 0L)))
-  | <span data-count="0">R</span>ef_type (Text.Null, t) -&gt; Ok (Binary.Ref (Null t))
+  | <span data-count="404">B</span>inary.Num_type I32 -&gt; Ok (Binary.Simple (I32 (Const 0l)))
+  | <span data-count="0">N</span>um_type I64 -&gt; Ok (Simple (I64 (Const 0L)))
+  | <span data-count="0">N</span>um_type F32 -&gt; Ok (Simple (F32 (Const (Float32.of_floa<span data-count="0">t</span> 0.))))
+  | <span data-count="0">N</span>um_type F64 -&gt; Ok (Simple (F64 (Const (Float64.of_floa<span data-count="0">t</span> 0.))))
+  | <span data-count="0">N</span>um_type V128 -&gt; Ok (Simple (V128 (Const (Concrete_v128.of_i64x<span data-count="0">2</span> 0L 0L))))
+  | <span data-count="0">R</span>ef_type (Text.Null, t) -&gt; Ok (Simple (Ref (Null t)))
   | <span data-count="0">R</span>ef_type (Text.No_null, t) -&gt;
     Fmt.error_msg "can not create default value of type %a" Binary.pp_heap_type
       t
@@ -522,27 +522,27 @@ let default_symbol_of_t m =
   <span data-count="239">l</span>et modul_name = "owi" in
   let m =
     let func_name = "i32_symbol" in
-    let typ = Binary.Bt_raw (None, ([], [ Binary.Num_type Text.I32 ])) in
+    let typ = (None, ([], [ Binary.Num_type Text.I32 ])) in
     Binary.Module.add_import_if_not_presen<span data-count="239">t</span> ~modul_name ~func_name ~typ m
   in
   let m =
     let func_name = "i64_symbol" in
-    let typ = Binary.Bt_raw (None, ([], [ Binary.Num_type Text.I64 ])) in
+    let typ = (None, ([], [ Binary.Num_type Text.I64 ])) in
     Binary.Module.add_import_if_not_presen<span data-count="239">t</span> ~modul_name ~func_name ~typ m
   in
   let m =
     let func_name = "f32_symbol" in
-    let typ = Binary.Bt_raw (None, ([], [ Binary.Num_type Text.F32 ])) in
+    let typ = (None, ([], [ Binary.Num_type Text.F32 ])) in
     Binary.Module.add_import_if_not_presen<span data-count="239">t</span> ~modul_name ~func_name ~typ m
   in
   let m =
     let func_name = "f64_symbol" in
-    let typ = Binary.Bt_raw (None, ([], [ Binary.Num_type Text.F64 ])) in
+    let typ = (None, ([], [ Binary.Num_type Text.F64 ])) in
     Binary.Module.add_import_if_not_presen<span data-count="239">t</span> ~modul_name ~func_name ~typ m
   in
   let m =
     let func_name = "v128_symbol" in
-    let typ = Binary.Bt_raw (None, ([], [ Binary.Num_type Text.V128 ])) in
+    let typ = (None, ([], [ Binary.Num_type Text.V128 ])) in
     Binary.Module.add_import_if_not_presen<span data-count="239">t</span> ~modul_name ~func_name ~typ m
   in
   let i32_symbol =
@@ -598,12 +598,12 @@ let default_symbol_of_t m =
 
 let set_entry_point entry_point invoke_with_symbols (m : Binary.Module.t) =
   (* We are checking if there's a start function *)
-  <span data-count="438">i</span>f Option.is_some m.start then
-    <span data-count="199">i</span>f Option.is_some entry_point then
+  <span data-count="453">i</span>f Option.is_some m.start then
+    <span data-count="214">i</span>f Option.is_some entry_point then
       <span data-count="0">F</span>mt.error_msg
         "We don't know how to handle a custom entry point when there is a \
          start function for now. Please open a bug report."
-    else <span data-count="199">O</span>k m
+    else <span data-count="214">O</span>k m
   else
     <span data-count="239">l</span>et m, default_symbol_of_t = default_symbol_of_t m in
     (* If there is none and we have an entry point passed in argument we search for it *)
@@ -625,7 +625,7 @@ let set_entry_point entry_point invoke_with_symbols (m : Binary.Module.t) =
     (* We found an entry point, so we check its type and build a start function that put the right values on the stack (be it symbols or dummy values), call the entry function and drop the result. *)
     <span data-count="238">m</span>atch Binary.Module.get_func_type export.id m with
     | <span data-count="0">N</span>one -&gt; Fmt.error_msg "can't find a main function"
-    | <span data-count="238">S</span>ome (Bt_raw main_type) -&gt;
+    | <span data-count="238">S</span>ome main_type -&gt;
       let+ body =
         let pt, rt = snd main_type in
         <span data-count="238">l</span>et+ args =
@@ -639,12 +639,12 @@ let set_entry_point entry_point invoke_with_symbols (m : Binary.Module.t) =
             pt
         in
         <span data-count="238">l</span>et after_call =
-          List.map (fun (_ : Binary.val_type) -&gt; <span data-count="215">B</span>inary.Drop) rt
+          List.map (fun (_ : Binary.val_type) -&gt; <span data-count="215">B</span>inary.Simple Drop) rt
         in
         <span data-count="238">a</span>rgs @ [ Binary.Call export.id ] @ after_call
         |&gt; Annotated.dummies |&gt; <span data-count="238">A</span>nnotated.dummy
       in
-      <span data-count="238">l</span>et type_f : Binary.block_type = Binary.Bt_raw (None, ([], [])) in
+      <span data-count="238">l</span>et type_f : Binary.block_type = (None, ([], [])) in
       let start_code = { Binary.Func.type_f; locals = []; body; id = None } in
       let start_func = Origin.Local start_code in
 
@@ -654,11 +654,11 @@ let set_entry_point entry_point invoke_with_symbols (m : Binary.Module.t) =
 
 (* Installed files  *)
 
-let c_files_location = List.ma<span data-count="800">p</span> Fpath.v Share.Sites.c_files
+let c_files_location = List.ma<span data-count="858">p</span> Fpath.v Share.Sites.c_files
 
-let rust_files_location = List.ma<span data-count="800">p</span> Fpath.v Share.Sites.rust_files
+let rust_files_location = List.ma<span data-count="858">p</span> Fpath.v Share.Sites.rust_files
 
-let zig_files_location = List.ma<span data-count="800">p</span> Fpath.v Share.Sites.zig_files
+let zig_files_location = List.ma<span data-count="858">p</span> Fpath.v Share.Sites.zig_files
 
 let find location file : Fpath.t Result.t =
   <span data-count="440">l</span>et* l =

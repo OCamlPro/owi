@@ -88,6 +88,16 @@
 <a id="L64"></a><span > </span>
 <a id="L65"></a><span > </span>
 <a id="L66"></a><span > </span>
+<a id="L67"></a><span > </span>
+<a id="L68"></a><span > </span>
+<a id="L69"></a><span > </span>
+<a id="L70"></a><span > </span>
+<a id="L71"></a><span > </span>
+<a id="L72"></a><span > </span>
+<a id="L73"></a><span > </span>
+<a id="L74"></a><span > </span>
+<a id="L75"></a><span > </span>
+<a id="L76"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -158,6 +168,16 @@
 <a href="#L64">64</a>
 <a href="#L65">65</a>
 <a href="#L66">66</a>
+<a href="#L67">67</a>
+<a href="#L68">68</a>
+<a href="#L69">69</a>
+<a href="#L70">70</a>
+<a href="#L71">71</a>
+<a href="#L72">72</a>
+<a href="#L73">73</a>
+<a href="#L74">74</a>
+<a href="#L75">75</a>
+<a href="#L76">76</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2026 OCamlPro *)
@@ -211,9 +231,15 @@ module type T = sig
        and type i64 := i64
 
   module V128 :
-    V128_intf.T with type t := v128 and type i32 := i32 and type i64 := i64
+    V128_intf.T
+      with type t := v128
+       and type boolean := boolean
+       and type i32 := i32
+       and type i64 := i64
+       and type f32 := f32
+       and type f64 := f64
 
-  module Ref : Ref_intf.T
+  module Ref : Ref_intf.T with type i32 = i32
 
   type t =
     | I32 of i32
@@ -221,9 +247,13 @@ module type T = sig
     | F32 of f32
     | F64 of f64
     | V128 of v128
-    | Ref of Ref.t
+    | Ref of t Ref.t
 
   val pp : t Fmt.t
+
+  val of_script_const : ty:int Type.Id.t -&gt; Wast.const -&gt; t
+
+  val equal_script_result : ty:int Type.Id.t -&gt; Wast.result -&gt; t -&gt; bool
 end
 </code></pre>
       </div>

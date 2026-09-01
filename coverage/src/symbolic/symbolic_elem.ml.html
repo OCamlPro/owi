@@ -28,12 +28,13 @@
 <a id="L4"></a><span > </span>
 <a id="L5"></a><span > </span>
 <a id="L6"></a><span > </span>
-<a id="L7"></a><span > </span>
-<a id="L8"></a><span class="visited"> </span>
-<a id="L9"></a><span > </span>
-<a id="L10"></a><span class="visited"> </span>
-<a id="L11"></a><span > </span>
-<a id="L12"></a><span class="visited"> </span>
+<a id="L7"></a><span class="visited"> </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span class="visited"> </span>
+<a id="L10"></a><span > </span>
+<a id="L11"></a><span class="visited"> </span>
+<a id="L12"></a><span > </span>
+<a id="L13"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -50,19 +51,21 @@
 <a href="#L10">10</a>
 <a href="#L11">11</a>
 <a href="#L12">12</a>
+<a href="#L13">13</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type t = Concrete_elem.t
+type t = Symbolic_value.t Symbolic_ref.t Iarray.t
 
-let get (elem : t) i : Symbolic_ref.t =
-  <span data-count="703">m</span>atch elem.value.(i) with <span data-count="703">F</span>unc f -&gt; Func f | _ -&gt; assert false
+let get (e : t) i = <span data-count="710">I</span>array.get e i
 
-let size (elem : t) = <span data-count="176">A</span>rray.length elem.value
+let size (e : t) = <span data-count="176">I</span>array.length e
 
-let drop (e : t) = <span data-count="176">e</span>.value &lt;- [||]
+let drop (_e : t) = <span data-count="176">I</span>array.of_list []
+
+let init l = <span data-count="176">I</span>array.of_list l
 </code></pre>
       </div>
     </div>

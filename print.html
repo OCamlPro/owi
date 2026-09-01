@@ -15,8 +15,8 @@
 
         <link rel="shortcut icon" href="favicon-bb18a52c.png">
         <link rel="stylesheet" href="css/variables-8adf115d.css">
-        <link rel="stylesheet" href="css/general-2459343d.css">
-        <link rel="stylesheet" href="css/chrome-ae938929.css">
+        <link rel="stylesheet" href="css/general-e96d0476.css">
+        <link rel="stylesheet" href="css/chrome-d279d366.css">
         <link rel="stylesheet" href="css/print-9e4910d8.css" media="print">
 
         <!-- Fonts -->
@@ -37,10 +37,10 @@
             const path_to_root = "";
             const default_light_theme = "frappe";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-99916102.js";
+            window.path_to_searchindex_js = "searchindex-72d2e499.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-f5ed29f3.js"></script>
+        <script src="toc-008df27c.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -994,7 +994,7 @@ owi: [INFO] typechecking ...
 owi: [INFO] linking      ...
 owi: [INFO] interpreting ...
 owi: [INFO] stack         : [  ]
-owi: [INFO] running instr : call 1 (executed 0 times)
+owi: [INFO] running instr : call 18 (executed 0 times)
 owi: [INFO] calling func  : func start
 owi: [INFO] stack         : [  ]
 owi: [INFO] running instr : call 0 (executed 0 times)
@@ -1077,21 +1077,21 @@ owi: [INFO] typechecking ...
 owi: [INFO] linking      ...
 owi: [INFO] interpreting ...
 owi: [INFO] stack         : [  ]
-owi: [INFO] running instr : call 8 (executed 0 times)
+owi: [INFO] running instr : call 39 (executed 0 times)
 owi: [INFO] calling func  : func start
 owi: [INFO] stack         : [  ]
-owi: [INFO] running instr : call 3 (executed 0 times)
+owi: [INFO] running instr : call 0 (executed 0 times)
 owi: [INFO] stack         : [ symbol_0 ]
-owi: [INFO] running instr : call 3 (executed 0 times)
+owi: [INFO] running instr : call 0 (executed 0 times)
 owi: [INFO] stack         : [ symbol_1 ; symbol_0 ]
-owi: [INFO] running instr : call 7 (executed 0 times)
+owi: [INFO] running instr : call 38 (executed 0 times)
 owi: [INFO] calling func  : func check_iso_func
 owi: [INFO] stack         : [  ]
 owi: [INFO] running instr : local.get 0 (executed 0 times)
 owi: [INFO] stack         : [ symbol_0 ]
 owi: [INFO] running instr : local.get 1 (executed 0 times)
 owi: [INFO] stack         : [ symbol_1 ; symbol_0 ]
-owi: [INFO] running instr : call 0 (executed 0 times)
+owi: [INFO] running instr : call 28 (executed 0 times)
 owi: [INFO] calling func  : func anonymous
 owi: [INFO] stack         : [  ]
 owi: [INFO] running instr : local.get 0 (executed 0 times)
@@ -1105,7 +1105,7 @@ owi: [INFO] stack         : [ symbol_0 ; (i32.mul symbol_0 symbol_1) ]
 owi: [INFO] running instr : local.get 1 (executed 0 times)
 owi: [INFO] stack         : [ symbol_1 ; symbol_0 ; (i32.mul symbol_0
                                                      symbol_1) ]
-owi: [INFO] running instr : call 1 (executed 0 times)
+owi: [INFO] running instr : call 30 (executed 0 times)
 owi: [INFO] calling func  : func anonymous
 owi: [INFO] stack         : [  ]
 owi: [INFO] running instr : local.get 1 (executed 0 times)
@@ -1123,7 +1123,7 @@ owi: [INFO] running instr : i32.eq (executed 0 times)
 owi: [INFO] stack         : [ (i32.of_bool
                                (bool.eq (i32.mul symbol_0 symbol_1)
                                 (i32.add (i32.mul symbol_1 symbol_0) 1))) ]
-owi: [INFO] running instr : call 2 (executed 0 times)
+owi: [INFO] running instr : call 8 (executed 0 times)
 owi: [ERROR] Assert failure: (bool.eq (i32.mul symbol_0 symbol_1)
                               (i32.add (i32.mul symbol_1 symbol_0) 1))
 model {
@@ -1668,6 +1668,58 @@ owi: [ERROR] Reached problem!
 [13]
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
+<h1 id="rust-cargo-owi"><a class="header" href="#rust-cargo-owi">Rust: <code>cargo owi</code></a></h1>
+<p>A Cargo subcommand to run Rust programs through <a href="https://ocamlpro.github.io/owi/">Owi</a>’s symbolic execution engine for automated bug finding.</p>
+<p><code>cargo-owi</code> compiles your crate to WebAssembly and passes it to <code>owi</code> for symbolic analysis.</p>
+<h2 id="prerequisites"><a class="header" href="#prerequisites">Prerequisites</a></h2>
+<ul>
+<li><a href="https://ocamlpro.github.io/owi/">owi</a> must be installed and available on <code>$PATH</code></li>
+<li>The <code>wasm32-unknown-unknown</code> target must be installed: <code>rustup target add wasm32-unknown-unknown</code></li>
+<li>Your crate should use the <a href="https://crates.io/crates/owi"><code>owi</code></a> library to declare symbolic values and assumptions</li>
+</ul>
+<h2 id="installation-1"><a class="header" href="#installation-1">Installation</a></h2>
+<pre><code class="language-shell-session">$ cargo install cargo-owi
+</code></pre>
+<h2 id="usage"><a class="header" href="#usage">Usage</a></h2>
+<pre><code>cargo owi sym [OPTIONS] [-- [OWI_OPTIONS]]
+</code></pre>
+<p>Run symbolic execution on the current package:</p>
+<pre><code class="language-shell-session">$ cargo owi sym
+</code></pre>
+<p>Pass extra options to owi after <code>--</code>:</p>
+<pre><code class="language-shell-session">$ cargo owi sym -- --timeout 60
+</code></pre>
+<h3 id="options"><a class="header" href="#options">Options</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Flag</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>--manifest-path &lt;PATH&gt;</code></td><td>Path to <code>Cargo.toml</code></td></tr>
+<tr><td><code>--features &lt;FEATURES&gt;</code></td><td>Space- or comma-separated list of features to activate</td></tr>
+<tr><td><code>-p</code>, <code>--package &lt;SPEC&gt;</code></td><td>Package to analyze (see <code>cargo help pkgid</code>)</td></tr>
+</tbody>
+</table>
+</div>
+<p>Any arguments after <code>--</code> are forwarded verbatim to <code>owi sym</code>.</p>
+<h2 id="example-1"><a class="header" href="#example-1">Example</a></h2>
+<p>Add symbolic inputs to your code using the <code>owi</code> crate:</p>
+<pre class="playground"><code class="language-rust">fn add(a: i32, b: i32) -&gt; i32 {
+    a + b
+}
+
+fn main() {
+    let x: i32 = owi::symbolic();
+    let y: i32 = owi::symbolic();
+    owi::assume(x &gt; 0 &amp;&amp; y &gt; 0);
+    assert!(add(x, y) &gt; 0);
+}</code></pre>
+<p>Then run:</p>
+<pre><code class="language-sh">cargo owi sym
+</code></pre>
+<p>Owi will explore execution paths symbolically and report any path that violates an assertion or triggers undefined behavior.</p>
+<div style="break-before: page; page-break-before: always;"></div>
 <h1 id="concrete-interpreter-1"><a href="#concrete-interpreter-1" class="header">Concrete Interpreter</a></h1>
 <h2 id="concrete-interpreter"><a class="header" href="#concrete-interpreter">Concrete Interpreter</a></h2>
 <p>Given a file <code>42.wat</code> with the following content:</p>
@@ -1877,7 +1929,7 @@ i32.lt_s
 <p>You can then create a file <code>useless.dot</code> containing the call graph of the programm:</p>
 <pre><code class="language-sh">$ owi analyze cg useless.wat
 </code></pre>
-<p><img src="wasm-toolkit/call_graph.svg" alt="image"></p>
+<p><label class="checkbox-label"><input class="checkbox-img" type="checkbox"><img src="wasm-toolkit/call_graph.svg" alt="image"><span class="img-wrapper"><img src="wasm-toolkit/call_graph.svg" alt="image"></span></label></p>
 <h2 id="control-flow-graph"><a class="header" href="#control-flow-graph">Control-Flow Graph</a></h2>
 <p>Given a file <code>useless.wat</code> with the following content:</p>
 <pre><code class="language-wat">(module
@@ -1909,7 +1961,7 @@ i32.lt_s
 <p>You can then create a file <code>useless.dot</code> containing the control flow graph of the function foo:</p>
 <pre><code class="language-sh">$ owi analyze cfg useless.wat --entry-point=foo
 </code></pre>
-<p><img src="wasm-toolkit/control-flow_graph.svg" alt="image"></p>
+<p><label class="checkbox-label"><input class="checkbox-img" type="checkbox"><img src="wasm-toolkit/control-flow_graph.svg" alt="image"><span class="img-wrapper"><img src="wasm-toolkit/control-flow_graph.svg" alt="image"></span></label></p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="script-interpreter"><a href="#script-interpreter" class="header">Script Interpreter</a></h1>
 <h2 id="script-interpreter-using-the-spectest-module"><a class="header" href="#script-interpreter-using-the-spectest-module">Script Interpreter using the <code>spectest</code> module</a></h2>
@@ -1928,7 +1980,7 @@ i32.lt_s
 )
 </code></pre>
 <p>You can print the value thanks to the <code>print_i32</code> function imported from the <code>spectest</code> module:</p>
-<pre><code class="language-sh">$ owi script ./print.wast
+<pre><code class="language-sh">$ owi script concrete ./print.wast
 42
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
@@ -1970,7 +2022,7 @@ SYNOPSIS
        owi [COMMAND] …
 
 COMMANDS
-       abs [--unsafe] [OPTION]… FILE
+       abs [--entry-point=FUNCTION] [--unsafe] [OPTION]… FILE
            Run the abstract interpreter
 
        analyze COMMAND …
@@ -1981,9 +2033,6 @@ COMMANDS
 
        c++ [OPTION]… FILE…
            Compile a C++ file to Wasm and run the symbolic interpreter on it
-
-       drun [--interactive] [--unsafe] [OPTION]… FILE
-           Run the denotational interpreter
 
        fmt [--inplace] [OPTION]… FILE…
            Format a .wat or .wast file
@@ -2016,7 +2065,7 @@ COMMANDS
        rust [OPTION]… FILE…
            Compile a Rust file to Wasm and run the symbolic interpreter on it
 
-       script [--no-exhaustion] [OPTION]… FILE…
+       script COMMAND …
            Run a reference test suite script
 
        sym [OPTION]… FILE
@@ -2064,7 +2113,7 @@ EXIT STATUS
        125 on unexpected internal errors (bugs).
 
 BUGS
-       Email them to &lt;contact@ndrs.fr&gt;.
+       Email them to &lt;owi.wildcat119@passmail.com&gt;.
 
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
@@ -2104,7 +2153,7 @@ EXIT STATUS
        125 on unexpected internal errors (bugs).
 
 BUGS
-       Email them to &lt;contact@ndrs.fr&gt;.
+       Email them to &lt;owi.wildcat119@passmail.com&gt;.
 
 SEE ALSO
        owi(1)
@@ -2267,7 +2316,7 @@ ENVIRONMENT
            See option --verbosity.
 
 BUGS
-       Email them to &lt;contact@ndrs.fr&gt;.
+       Email them to &lt;owi.wildcat119@passmail.com&gt;.
 
 SEE ALSO
        owi(1)
@@ -2419,7 +2468,7 @@ ENVIRONMENT
            See option --verbosity.
 
 BUGS
-       Email them to &lt;contact@ndrs.fr&gt;.
+       Email them to &lt;owi.wildcat119@passmail.com&gt;.
 
 SEE ALSO
        owi(1)
@@ -2486,7 +2535,7 @@ ENVIRONMENT
            See option --verbosity.
 
 BUGS
-       Email them to &lt;contact@ndrs.fr&gt;.
+       Email them to &lt;owi.wildcat119@passmail.com&gt;.
 
 SEE ALSO
        owi(1)
@@ -2527,7 +2576,7 @@ EXIT STATUS
        125 on unexpected internal errors (bugs).
 
 BUGS
-       Email them to &lt;contact@ndrs.fr&gt;.
+       Email them to &lt;owi.wildcat119@passmail.com&gt;.
 
 SEE ALSO
        owi(1)
@@ -2648,7 +2697,7 @@ ENVIRONMENT
            See option --verbosity.
 
 BUGS
-       Email them to &lt;contact@ndrs.fr&gt;.
+       Email them to &lt;owi.wildcat119@passmail.com&gt;.
 
 SEE ALSO
        owi(1)
@@ -2791,7 +2840,7 @@ ENVIRONMENT
            See option --verbosity.
 
 BUGS
-       Email them to &lt;contact@ndrs.fr&gt;.
+       Email them to &lt;owi.wildcat119@passmail.com&gt;.
 
 SEE ALSO
        owi(1)
@@ -2869,7 +2918,7 @@ ENVIRONMENT
            See option --verbosity.
 
 BUGS
-       Email them to &lt;contact@ndrs.fr&gt;.
+       Email them to &lt;owi.wildcat119@passmail.com&gt;.
 
 SEE ALSO
        owi(1)
@@ -2942,7 +2991,7 @@ ENVIRONMENT
            See option --verbosity.
 
 BUGS
-       Email them to &lt;contact@ndrs.fr&gt;.
+       Email them to &lt;owi.wildcat119@passmail.com&gt;.
 
 SEE ALSO
        owi(1)
@@ -3094,7 +3143,7 @@ ENVIRONMENT
            See option --verbosity.
 
 BUGS
-       Email them to &lt;contact@ndrs.fr&gt;.
+       Email them to &lt;owi.wildcat119@passmail.com&gt;.
 
 SEE ALSO
        owi(1)
@@ -3107,38 +3156,23 @@ NAME
        owi-script - Run a reference test suite script
 
 SYNOPSIS
-       owi script [--no-exhaustion] [OPTION]… FILE…
+       owi script COMMAND …
 
-ARGUMENTS
-       FILE (required)
-           source files
+COMMANDS
+       abstract [--no-exhaustion] [OPTION]… FILE…
+           Run a reference test suite script using the abstract interpreter
 
-OPTIONS
-       --no-exhaustion
-           no exhaustion tests
+       concrete [--no-exhaustion] [OPTION]… FILE…
+           Run a reference test suite script using the concrete interpreter
+
+       symbolic [--no-exhaustion] [OPTION]… FILE…
+           Run a reference test suite script using the symbolic interpreter
 
 COMMON OPTIONS
-       --bench
-           enable benchmarks
-
-       --color=WHEN (absent=auto)
-           Colorize the output. WHEN must be one of auto, always or never.
-
        --help[=FMT] (default=auto)
            Show this help in format FMT. The value FMT must be one of auto,
            pager, groff or plain. With auto, the format is pager or plain
            whenever the TERM env var is dumb or undefined.
-
-       -q, --quiet
-           Be quiet. Takes over -v and --verbosity.
-
-       -v, --verbose
-           Increase verbosity. Repeatable, but more than twice does not bring
-           more.
-
-       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
-           Be more or less verbose. LEVEL must be one of quiet, error,
-           warning, info or debug. Takes over -v.
 
        --version
            Show version information.
@@ -3154,14 +3188,8 @@ EXIT STATUS
 
        125 on unexpected internal errors (bugs).
 
-ENVIRONMENT
-       These environment variables affect the execution of owi script:
-
-       OWI_VERBOSITY
-           See option --verbosity.
-
 BUGS
-       Email them to &lt;contact@ndrs.fr&gt;.
+       Email them to &lt;owi.wildcat119@passmail.com&gt;.
 
 SEE ALSO
        owi(1)
@@ -3300,7 +3328,7 @@ ENVIRONMENT
            See option --verbosity.
 
 BUGS
-       Email them to &lt;contact@ndrs.fr&gt;.
+       Email them to &lt;owi.wildcat119@passmail.com&gt;.
 
 SEE ALSO
        owi(1)
@@ -3363,7 +3391,7 @@ ENVIRONMENT
            See option --verbosity.
 
 BUGS
-       Email them to &lt;contact@ndrs.fr&gt;.
+       Email them to &lt;owi.wildcat119@passmail.com&gt;.
 
 SEE ALSO
        owi(1)
@@ -3422,7 +3450,7 @@ ENVIRONMENT
            See option --verbosity.
 
 BUGS
-       Email them to &lt;contact@ndrs.fr&gt;.
+       Email them to &lt;owi.wildcat119@passmail.com&gt;.
 
 SEE ALSO
        owi(1)
@@ -3493,7 +3521,7 @@ ENVIRONMENT
            See option --verbosity.
 
 BUGS
-       Email them to &lt;contact@ndrs.fr&gt;.
+       Email them to &lt;owi.wildcat119@passmail.com&gt;.
 
 SEE ALSO
        owi(1)
@@ -3564,7 +3592,7 @@ ENVIRONMENT
            See option --verbosity.
 
 BUGS
-       Email them to &lt;contact@ndrs.fr&gt;.
+       Email them to &lt;owi.wildcat119@passmail.com&gt;.
 
 SEE ALSO
        owi(1)
@@ -3710,7 +3738,7 @@ ENVIRONMENT
            See option --verbosity.
 
 BUGS
-       Email them to &lt;contact@ndrs.fr&gt;.
+       Email them to &lt;owi.wildcat119@passmail.com&gt;.
 
 SEE ALSO
        owi(1)
@@ -3735,8 +3763,8 @@ val filename : Fpath.t = &lt;abstr&gt;
     | Error e -&gt; assert false;;
 mdx_gen.bc.exe: [INFO] parsing      ...
 ...
-# let module_to_run, link_state =
-    match Compile.Text.until_link (Link.State.empty ()) ~unsafe:false ~name:None m with
+# let modul, env =
+    match Compile.Text.until_concrete_link Env.Concrete.empty ~unsafe:false ~name:None m with
     | Ok v -&gt; v
     | Error _ -&gt; assert false;;
 mdx_gen.bc.exe: [INFO] checking     ...
@@ -3749,12 +3777,12 @@ mdx_gen.bc.exe: [INFO] linking      ...
 module I :
   sig
     val modul :
-      Concrete_extern_func.extern_func Link.State.t -&gt;
-      Concrete_extern_func.extern_func Linked.Module.t -&gt; unit Owi.Result.t
+      env:Env.Concrete.t -&gt;
+      modul:Env.Concrete.modul -&gt; Env.Concrete.t Owi__Concrete_choice.t
   end
 # let () =
-    match I.modul link_state module_to_run with
-    | Ok () -&gt; ()
+    match I.modul ~env ~modul with
+    | Ok _env -&gt; ()
     | Error _ -&gt; assert false;;
 mdx_gen.bc.exe: [INFO] interpreting ...
 mdx_gen.bc.exe: [INFO] stack         : [  ]
@@ -3812,7 +3840,7 @@ mdx_gen.bc.exe: [INFO] running instr : drop (executed 0 times)
 <pre><code class="language-ocaml">open Owi
 
 (* an extern module that will be linked with a wasm module *)
-let extern_module : Concrete_extern_func.extern_func Extern.Module.t =
+let extern_module : Concrete_extern.Module.t =
   (* some custom functions *)
   let rint : Concrete_i32.t ref Type.Id.t = Type.Id.make () in
   let fresh i = Ok (ref i) in
@@ -3826,45 +3854,34 @@ let extern_module : Concrete_extern_func.extern_func Extern.Module.t =
     Ok ()
   in
   (* we need to describe their types *)
-  let open Concrete_extern_func.Syntax in
-  let functions =
-    [ ("print_i32", Concrete_extern_func.Extern_func (i32 ^-&gt;. unit, print_i32))
-    ; ( "fresh"
-      , Concrete_extern_func.Extern_func (i32 ^-&gt;. externref rint, fresh) )
-    ; ( "set_i32r"
-      , Concrete_extern_func.Extern_func (externref rint ^-&gt; i32 ^-&gt;. unit, set)
-      )
-    ; ( "get_i32r"
-      , Concrete_extern_func.Extern_func (externref rint ^-&gt;. i32, get) )
-    ]
-  in
-  { functions; func_type = Concrete_extern_func.extern_type }
+  let open Concrete_extern.Func in
+  let open Concrete_extern.Func.Syntax in
+  [ ("print_i32", Extern_func (i32 ^-&gt;. unit, print_i32))
+  ; ("fresh", Extern_func (i32 ^-&gt;. externref rint, fresh))
+  ; ("set_i32r", Extern_func (externref rint ^-&gt; i32 ^-&gt;. unit, set))
+  ; ("get_i32r", Extern_func (externref rint ^-&gt;. i32, get))
+  ]
 
-(* a link state that contains our custom module, available under the name `sausage` *)
-let link_state =
-  Link.State.empty () |&gt; Link.Extern.modul ~name:"sausage" extern_module
+(* an environment that contains our custom module, available under the name `sausage` *)
+let env =
+  let env = Env.Concrete.empty in
+  Env.Concrete.link_extern_module ~env ~name:"sausage" extern_module
+  |&gt; Stdlib.Result.get_ok
 
 (* a pure wasm module refering to `sausage` *)
 let pure_wasm_module =
-  match Parse.Text.Module.from_file (Fpath.v "extern.wat") with
-  | Error _ -&gt; assert false
-  | Ok modul -&gt; modul
+  Parse.Text.Module.from_file (Fpath.v "extern.wat") |&gt; Stdlib.Result.get_ok
 
 (* our pure wasm module, linked with `sausage` *)
-let module_to_run, link_state =
-  match
-    Compile.Text.until_link link_state ~unsafe:false ~name:None pure_wasm_module
-  with
-  | Error _ -&gt; assert false
-  | Ok v -&gt; v
+let modul, env =
+  Compile.Text.until_concrete_link env ~unsafe:false ~name:None pure_wasm_module
+  |&gt; Stdlib.Result.get_ok
 
 module I = Interpret.Concrete (Interpret.Default_parameters)
 
 (* let's run it ! it will print the values as defined in the print_i32 function *)
 let () =
-  match I.modul link_state module_to_run with
-  | Error _o -&gt; assert false
-  | Ok () -&gt; ()
+  match I.modul ~env ~modul with Error _o -&gt; assert false | Ok _env -&gt; ()
 </code></pre>
 <p>You’ll get the expected result:</p>
 <pre><code class="language-sh">$ ./extern.exe
@@ -3918,7 +3935,7 @@ memset as:</p>
 <pre><code class="language-ocaml">open Owi
 
 (* an extern module that will be linked with a wasm module *)
-let extern_module : Concrete_extern_func.extern_func Extern.Module.t =
+let extern_module : Concrete_extern.Module.t =
   (* some custom functions *)
   let memset m start byte length =
     let rec loop offset =
@@ -3928,7 +3945,7 @@ let extern_module : Concrete_extern_func.extern_func Extern.Module.t =
           Concrete_memory.store_8 m ~addr:(Concrete_i32.add start offset) byte
         with
         | Error _ as e -&gt; e
-        | Ok () -&gt; loop (Concrete_i32.add offset (Concrete_i32.of_int 1))
+        | Ok _mem -&gt; loop (Concrete_i32.add offset (Concrete_i32.of_int 1))
         end
       else Ok ()
     in
@@ -3940,19 +3957,17 @@ let extern_module : Concrete_extern_func.extern_func Extern.Module.t =
     Ok ()
   in
   (* we need to describe their types *)
-  let open Concrete_extern_func in
-  let open Concrete_extern_func.Syntax in
-  let functions =
-    [ ("print_x64", Extern_func (i64 ^-&gt;. unit, print_x64))
-    ; ( "memset"
-      , Extern_func (memory 0 ^-&gt; i32 ^-&gt; i32 ^-&gt; i32 ^-&gt;. unit, memset) )
-    ]
-  in
-  { Extern.Module.functions; func_type = Concrete_extern_func.extern_type }
+  let open Concrete_extern.Func in
+  let open Concrete_extern.Func.Syntax in
+  [ ("print_x64", Extern_func (i64 ^-&gt;. unit, print_x64))
+  ; ("memset", Extern_func (memory 0 ^-&gt; i32 ^-&gt; i32 ^-&gt; i32 ^-&gt;. unit, memset))
+  ]
 
-(* a link state that contains our custom module, available under the name `chorizo` *)
-let link_state =
-  Link.State.empty () |&gt; Link.Extern.modul ~name:"chorizo" extern_module
+(* an environment that contains our custom module, available under the name `chorizo` *)
+let env =
+  let env = Env.Concrete.empty in
+  Env.Concrete.link_extern_module ~env ~name:"chorizo" extern_module
+  |&gt; Stdlib.Result.get_ok
 
 (* a pure wasm module refering to `$extern_mem` *)
 let pure_wasm_module =
@@ -3961,9 +3976,10 @@ let pure_wasm_module =
   | Ok modul -&gt; modul
 
 (* our pure wasm module, linked with `chorizo` *)
-let module_to_run, link_state =
+let modul, env =
   match
-    Compile.Text.until_link link_state ~unsafe:false ~name:None pure_wasm_module
+    Compile.Text.until_concrete_link env ~unsafe:false ~name:None
+      pure_wasm_module
   with
   | Error _ -&gt; assert false
   | Ok v -&gt; v
@@ -3972,9 +3988,7 @@ module I = Interpret.Concrete (Interpret.Default_parameters)
 
 (* let's run it ! it will print the values as defined in the print_i64 function *)
 let () =
-  match I.modul link_state module_to_run with
-  | Error _ -&gt; assert false
-  | Ok () -&gt; ()
+  match I.modul ~env ~modul with Error _ -&gt; assert false | Ok _env -&gt; ()
 </code></pre>
 <p>Running the above program should yield:</p>
 <pre><code class="language-sh">$ ./extern_mem.exe
@@ -4013,11 +4027,11 @@ let () =
 
         <script src="elasticlunr-ef4e11c1.min.js"></script>
         <script src="mark-09e88c2c.min.js"></script>
-        <script src="searcher-c2a407aa.js"></script>
+        <script src="searcher-09f2665d.js"></script>
 
         <script src="clipboard-1626706a.min.js"></script>
         <script src="highlight-490ccf04.js"></script>
-        <script src="book-a0b12cfe.js"></script>
+        <script src="book-609e4cb8.js"></script>
 
         <!-- Custom JS scripts -->
         <script src="theme/tabs-0c8cb93b.js"></script>

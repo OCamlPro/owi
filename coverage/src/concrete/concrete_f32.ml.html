@@ -153,18 +153,18 @@ include Float32
 type t = Float32.t
 
 let demote_f64 x =
-  <span data-count="114">i</span>f Float64.eq x x then <span data-count="108">F</span>loat32.of_float @@ Float64.to_floa<span data-count="108">t</span> x
+  <span data-count="218">i</span>f Float64.eq x x then <span data-count="204">F</span>loat32.of_float @@ Float64.to_floa<span data-count="204">t</span> x
   else
-    <span data-count="6">l</span>et nan64bits = Float64.to_bits x in
-    <span data-count="6">l</span>et sign_field = Int64.(shift_lef<span data-count="6">t</span> (shift_right_logica<span data-count="6">l</span> nan64bits 63) 31) in
+    <span data-count="14">l</span>et nan64bits = Float64.to_bits x in
+    <span data-count="14">l</span>et sign_field = Int64.(shift_lef<span data-count="14">t</span> (shift_right_logica<span data-count="14">l</span> nan64bits 63) 31) in
     let significand_field =
-      Int64.(shift_right_logica<span data-count="6">l</span> (shift_lef<span data-count="6">t</span> nan64bits 12) 41)
+      Int64.(shift_right_logica<span data-count="14">l</span> (shift_lef<span data-count="14">t</span> nan64bits 12) 41)
     in
     let fields = Int64.logor sign_field significand_field in
-    <span data-count="6">l</span>et nan32bits = Int32.logor 0x7fc0_0000l (Concrete_i32.wrap_i6<span data-count="6">4</span> fields) in
-    <span data-count="6">F</span>loat32.of_bits nan32bits
+    <span data-count="14">l</span>et nan32bits = Int32.logor 0x7fc0_0000l (Concrete_i32.wrap_i6<span data-count="14">4</span> fields) in
+    <span data-count="14">F</span>loat32.of_bits nan32bits
 
-let convert_i32_s x = <span data-count="22">F</span>loat32.of_float (Int32.to_floa<span data-count="22">t</span> x)
+let convert_i32_s x = <span data-count="86">F</span>loat32.of_float (Int32.to_floa<span data-count="86">t</span> x)
 
 (*
  * Similar to convert_i64_u below, the high half of the i32 range are beyond
@@ -172,10 +172,10 @@ let convert_i32_s x = <span data-count="22">F</span>loat32.of_float (Int32.to_fl
  * the least significant bit to round correctly.
  *)
 let convert_i32_u x =
-  <span data-count="21">F</span>loat32.of_float
+  <span data-count="97">F</span>loat32.of_float
     Int32.(
-      if Int32.le zero x then <span data-count="11">t</span>o_floa<span data-count="11">t</span> x
-      else <span data-count="10">t</span>o_floa<span data-count="10">t</span> (logo<span data-count="10">r</span> (shift_right_logica<span data-count="10">l</span> x 1) (logan<span data-count="10">d</span> x 1l)) *. 2.0 )
+      if Int32.le zero x then <span data-count="49">t</span>o_floa<span data-count="49">t</span> x
+      else <span data-count="48">t</span>o_floa<span data-count="48">t</span> (logo<span data-count="48">r</span> (shift_right_logica<span data-count="48">l</span> x 1) (logan<span data-count="48">d</span> x 1l)) *. 2.0 )
 
 (*
  * Values that are too large would get rounded when represented in f64,
@@ -201,7 +201,7 @@ let convert_i64_u x =
 
 let reinterpret_i32 = Float32.of_bits
 
-let of_float32 v = <span data-count="57500">v</span>
+let of_float32 v = <span data-count="57783">v</span>
 </code></pre>
       </div>
     </div>

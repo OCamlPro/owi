@@ -54,7 +54,6 @@
 <a id="L30"></a><span > </span>
 <a id="L31"></a><span > </span>
 <a id="L32"></a><span > </span>
-<a id="L33"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -91,7 +90,6 @@
 <a href="#L30">30</a>
 <a href="#L31">31</a>
 <a href="#L32">32</a>
-<a href="#L33">33</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2026 OCamlPro *)
@@ -100,31 +98,30 @@
 module type T = sig
   type reference
 
-  type 'a choice
-
   type t
 
   val get : t -&gt; int -&gt; reference
 
-  val set : t -&gt; int -&gt; reference -&gt; unit choice
+  val set : t -&gt; int -&gt; reference -&gt; t
 
   val size : t -&gt; int
 
   val typ : t -&gt; Binary.ref_type
 
+  val get_type : t -&gt; Binary.Table.Type.t
+
   val max_size : t -&gt; int option
 
-  val grow : t -&gt; Int32.t -&gt; reference -&gt; unit choice
+  val grow : t -&gt; Int32.t -&gt; reference -&gt; t
 
-  val fill : t -&gt; Int32.t -&gt; Int32.t -&gt; reference -&gt; unit choice
+  val fill : t -&gt; Int32.t -&gt; Int32.t -&gt; reference -&gt; t
 
   val copy :
-       t_src:t
-    -&gt; t_dst:t
-    -&gt; src:Int32.t
-    -&gt; dst:Int32.t
-    -&gt; len:Int32.t
-    -&gt; unit choice
+    t_src:t -&gt; t_dst:t -&gt; src:Int32.t -&gt; dst:Int32.t -&gt; len:Int32.t -&gt; t
+
+  val init : Binary.Table.Type.t -&gt; t
+
+  val pp : t Fmt.t
 end
 </code></pre>
       </div>

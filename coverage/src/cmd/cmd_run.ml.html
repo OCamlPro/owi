@@ -18,7 +18,7 @@
       <h2>80.00%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="bottom:6.67%"></span>
+      <span class="unvisited" style="bottom:5.88%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -32,7 +32,7 @@
 <a id="L7"></a><span > </span>
 <a id="L8"></a><span class="visited"> </span>
 <a id="L9"></a><span > </span>
-<a id="L10"></a><span class="visited"> </span>
+<a id="L10"></a><span > </span>
 <a id="L11"></a><span class="visited"> </span>
 <a id="L12"></a><span > </span>
 <a id="L13"></a><span class="visited"> </span>
@@ -47,12 +47,16 @@
 <a id="L22"></a><span class="visited"> </span>
 <a id="L23"></a><span > </span>
 <a id="L24"></a><span > </span>
-<a id="L25"></a><span class="visited"> </span>
-<a id="L26"></a><span class="visited"> </span>
-<a id="L27"></a><span > </span>
-<a id="L28"></a><span class="unvisited"> </span>
+<a id="L25"></a><span > </span>
+<a id="L26"></a><span > </span>
+<a id="L27"></a><span class="visited"> </span>
+<a id="L28"></a><span class="visited"> </span>
 <a id="L29"></a><span > </span>
 <a id="L30"></a><span class="visited"> </span>
+<a id="L31"></a><span > </span>
+<a id="L32"></a><span class="unvisited"> </span>
+<a id="L33"></a><span > </span>
+<a id="L34"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -87,6 +91,10 @@
 <a href="#L28">28</a>
 <a href="#L29">29</a>
 <a href="#L30">30</a>
+<a href="#L31">31</a>
+<a href="#L32">32</a>
+<a href="#L33">33</a>
+<a href="#L34">34</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2026 OCamlPro *)
@@ -96,9 +104,9 @@ open Syntax
 
 let cmd ~unsafe ~timeout ~timeout_instr ~source_file =
   <span data-count="19">l</span>et name = None in
-  let link_state = Link.State.empty () in
-  <span data-count="19">l</span>et* m, link_state =
-    Compile.File.until_lin<span data-count="19">k</span> ~unsafe ~name link_state source_file
+  let env = Env.Concrete.empty in
+  let* modul, env =
+    Compile.File.until_concrete_lin<span data-count="19">k</span> env ~unsafe ~name source_file
   in
   <span data-count="19">l</span>et module Parameters = struct
     let timeout = timeout
@@ -112,7 +120,11 @@ let cmd ~unsafe ~timeout ~timeout_instr ~source_file =
     let abstract_invariant = Abstract_invariant.empt<span data-count="19">y</span> ()
   end in
   let module I = Interpret.Concrete (Parameters) in
-  let res, run_time = Benchmark.with_utime @@ fun () -&gt; <span data-count="19">I</span>.modul link_state m in
+  let res, run_time =
+    Benchmark.with_utime @@ fun () -&gt;
+    <span data-count="19">l</span>et* _env = I.modul ~env ~modul in
+    <span data-count="15">O</span>k ()
+  in
   <span data-count="19">L</span>og.bench (fun m -&gt;
     (* run_time shouldn't be none in bench mode *)
     <span data-count="0">l</span>et run_time = match run_time with None -&gt; assert false | <span data-count="0">S</span>ome t -&gt; t in

@@ -471,21 +471,21 @@ let print_and_count_bugs ~format ~out_file ~no_value
 
   <span data-count="430">l</span>et rec aux count results =
     <span data-count="614">m</span>atch results () with
-    | <span data-count="360">S</span>eq.Nil -&gt; Ok count
-    | <span data-count="254">S</span>eq.Cons (bug, tl) -&gt;
+    | <span data-count="364">S</span>eq.Nil -&gt; Ok count
+    | <span data-count="250">S</span>eq.Cons (bug, tl) -&gt;
       let* () =
-        Model.prin<span data-count="254">t</span> ~format ~out_file ~id:count ~no_value ~no_stop_at_failure
+        Model.prin<span data-count="250">t</span> ~format ~out_file ~id:count ~no_value ~no_stop_at_failure
           ~no_assert_failure_expression_printing ~with_breadcrumbs bug
       in
-      <span data-count="254">l</span>et* () =
+      <span data-count="250">l</span>et* () =
         if not no_value then
-          <span data-count="133">l</span>et model = Bug.get_model bug in
-          <span data-count="133">l</span>et testcase = Smtml.Model.get_bindings model |&gt; <span data-count="133">L</span>ist.map snd in
-          <span data-count="133">C</span>md_utils.write_testcas<span data-count="133">e</span> ~dir:test_suite_dir testcase
-        else <span data-count="121">O</span>k ()
+          <span data-count="131">l</span>et model = Bug.get_model bug in
+          <span data-count="131">l</span>et testcase = Smtml.Model.get_bindings model |&gt; <span data-count="131">L</span>ist.map snd in
+          <span data-count="131">C</span>md_utils.write_testcas<span data-count="131">e</span> ~dir:test_suite_dir testcase
+        else <span data-count="119">O</span>k ()
       in
-      <span data-count="254">l</span>et count = succ count in
-      <span data-count="254">i</span>f no_stop_at_failure then <span data-count="184">a</span>ux count tl else <span data-count="70">O</span>k count
+      <span data-count="250">l</span>et count = succ count in
+      <span data-count="250">i</span>f no_stop_at_failure then <span data-count="184">a</span>ux count tl else <span data-count="66">O</span>k count
   in
   aux 0 results
 
@@ -496,21 +496,21 @@ let compute_number_of_workers workers =
    *)
   <span data-count="430">l</span>et workers =
     match workers with
-    | <span data-count="400">N</span>one -&gt;
+    | <span data-count="399">N</span>one -&gt;
       let n = Domainpc.get_available_cores () in
-      <span data-count="400">a</span>ssert <span data-count="400">(</span>n &gt; 0);
+      <span data-count="399">a</span>ssert <span data-count="399">(</span>n &gt; 0);
       n
-    | <span data-count="30">S</span>ome n -&gt;
-      assert <span data-count="30">(</span>n &gt; 0);
+    | <span data-count="31">S</span>ome n -&gt;
+      assert <span data-count="31">(</span>n &gt; 0);
       n
   in
-  if workers &gt; 1 then <span data-count="400">L</span>ogs_threaded.enabl<span data-count="400">e</span> ();
+  if workers &gt; 1 then <span data-count="399">L</span>ogs_threaded.enabl<span data-count="399">e</span> ();
   <span data-count="430">w</span>orkers
 
 let run ~exploration_strategy ~workers ~no_worker_isolation ~no_stop_at_failure
   ~no_value ~no_assert_failure_expression_printing ~deterministic_result_order
   ~fail_mode ~workspace ~seed ~solver ~model_format ~model_out_file
-  ~with_breadcrumbs ~run_time (to_run : unit Symbolic_choice.t) =
+  ~with_breadcrumbs ~run_time (to_run : Env.Symbolic.t Symbolic_choice.t) =
   (* Various initializations *)
   <span data-count="430">l</span>et bug_stack = Bugs.make () in
   <span data-count="430">l</span>et path_count = Atomic.make 0 in
@@ -530,7 +530,7 @@ let run ~exploration_strategy ~workers ~no_worker_isolation ~no_stop_at_failure
 
   (* Setup the bug stack so it knows if more bugs may arrive *)
   <span data-count="430">f</span>or _i = 1 to workers do
-    <span data-count="830">B</span>ugs.new_pledg<span data-count="830">e</span> bug_stack
+    <span data-count="829">B</span>ugs.new_pledg<span data-count="829">e</span> bug_stack
   done;
 
   Solver.solver_to_use := Some solver;
@@ -539,15 +539,15 @@ let run ~exploration_strategy ~workers ~no_worker_isolation ~no_stop_at_failure
   let domains =
     (* Decides what to push in the bug stack and close the scheduler if needed. *)
     let at_bug (bug : [ `Trap of Bug.trap | `Assertion of Bug.assertion ]) =
-      <span data-count="257">l</span>et should_be_added =
+      <span data-count="254">l</span>et should_be_added =
         match fail_mode with
-        | <span data-count="250">S</span>ymbolic_parameters.Both -&gt; true
+        | <span data-count="247">S</span>ymbolic_parameters.Both -&gt; true
         | <span data-count="5">A</span>ssertion_only -&gt; Bug.is_assertio<span data-count="5">n</span> bug
         | <span data-count="2">T</span>rap_only -&gt; Bug.is_tra<span data-count="2">p</span> bug
       in
-      if should_be_added then <span data-count="254">b</span>egin
+      if should_be_added then <span data-count="251">b</span>egin
         Bugs.push bug Prio.dummy bug_stack;
-        <span data-count="254">i</span>f not no_stop_at_failure then <span data-count="70">b</span>egin
+        <span data-count="251">i</span>f not no_stop_at_failure then <span data-count="67">b</span>egin
           Scheduler.close sched
         end
       end
@@ -555,25 +555,25 @@ let run ~exploration_strategy ~workers ~no_worker_isolation ~no_stop_at_failure
 
     (* Handles final values from the monad and reschedule them if needed. *)
     let rec at_schedulable (t : _ Symex.Monad.schedulable) write_back =
-      <span data-count="55279">m</span>atch t with
-      | <span data-count="1654">O</span>k _ | <span data-count="12432">E</span>rror `Prune -&gt; Atomic.incr path_count
-      | Error ((<span data-count="67">`</span>Assertion _ | <span data-count="190">`</span>Trap _) as bug) -&gt;
+      <span data-count="54356">m</span>atch t with
+      | <span data-count="1427">O</span>k _ | <span data-count="12374">E</span>rror `Prune -&gt; Atomic.incr path_count
+      | Error ((<span data-count="68">`</span>Assertion _ | <span data-count="186">`</span>Trap _) as bug) -&gt;
         Atomic.incr path_count;
-        <span data-count="257">a</span>t_bug bug
-      | <span data-count="26961">Y</span>ield (prio, f) -&gt; write_back (prio, f)
-      | <span data-count="13975">C</span>hoice (m1, m2) -&gt;
+        <span data-count="254">a</span>t_bug bug
+      | <span data-count="26621">Y</span>ield (prio, f) -&gt; write_back (prio, f)
+      | <span data-count="13680">C</span>hoice (m1, m2) -&gt;
         at_schedulable m1 write_back;
-        <span data-count="13975">a</span>t_schedulable m2 write_back
+        <span data-count="13680">a</span>t_schedulable m2 write_back
     in
 
     let run_worker () =
-      <span data-count="830">F</span>un.protect
-        ~finally:(fun () -&gt; <span data-count="826">B</span>ugs.end_pledge bug_stack)
+      <span data-count="829">F</span>un.protect
+        ~finally:(fun () -&gt; <span data-count="827">B</span>ugs.end_pledge bug_stack)
         (fun () -&gt;
-          <span data-count="830">t</span>ry
+          <span data-count="829">t</span>ry
             (* Pull work from the queue as long as it's possible *)
-            Scheduler.work_whil<span data-count="826">e</span>
-              (fun f write_back -&gt; <span data-count="27333">a</span>t_schedulable (<span data-count="27329">f</span> ()) write_back)
+            Scheduler.work_whil<span data-count="827">e</span>
+              (fun f write_back -&gt; <span data-count="26998">a</span>t_schedulable (<span data-count="26996">f</span> ()) write_back)
               sched
           with
           | <span data-count="0">Z</span>3.Error _ when Solver.was_interrupte<span data-count="0">d</span> () -&gt;
@@ -654,8 +654,8 @@ let run ~exploration_strategy ~workers ~no_worker_isolation ~no_stop_at_failure
 
   Log.info (fun m -&gt; <span data-count="2">m</span> "Completed paths: %d" (Atomic.ge<span data-count="2">t</span> path_count));
 
-  <span data-count="430">i</span>f count &gt; 0 then <span data-count="239">E</span>rror (`Found_bug count)
-  else <span data-count="191">O</span>k (Log.ap<span data-count="191">p</span> (fun m -&gt; <span data-count="190">m</span> "All OK!"))
+  <span data-count="430">i</span>f count &gt; 0 then <span data-count="235">E</span>rror (`Found_bug count)
+  else <span data-count="195">O</span>k (Log.ap<span data-count="195">p</span> (fun m -&gt; <span data-count="194">m</span> "All OK!"))
 </code></pre>
       </div>
     </div>
