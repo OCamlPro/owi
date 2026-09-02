@@ -1676,9 +1676,15 @@ and typecheck_expr env expr ~is_loop (block_type : block_type option)
   let jump_type = if is_loop then pt else rt in
   let env = { env with blocks = jump_type :: env.blocks } in
   let* env, stack =
-    list_fold_left
-      (fun (env, stack) -> typecheck_instr env stack)
-      (env, pt) expr.raw
+    let exception Dead_code of Env.t * stack in
+    try
+      list_fold_left
+        (fun (env, stack) -> function
+          | { Annotated.raw = Simple Unreachable; _ } ->
+            raise (Dead_code (env, [ any ]))
+          | instruction -> typecheck_instr env stack instruction )
+        (env, pt) expr.raw
+    with Dead_code (env, stack) -> Ok (env, stack)
   in
   let* b = Stack.equal env.modul rt stack in
   if not b then
