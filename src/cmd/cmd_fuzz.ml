@@ -10,9 +10,7 @@ let cmd ~rounds ~seed ~source_file ~timeout ~timeout_instr ~unsafe =
     Env.Concrete.link_extern_module ~env:Env.Concrete.empty ~name:"owi"
       Fuzz_wasm_ffi.owi
   in
-  let* modul, env =
-    Compile.File.until_concrete_link ~unsafe ~name:None env source_file
-  in
+  let* modul = Compile.File.until_validate ~unsafe source_file in
   let module Parameters = struct
     let timeout = timeout
 
@@ -28,7 +26,9 @@ let cmd ~rounds ~seed ~source_file ~timeout ~timeout_instr ~unsafe =
   let res, run_time =
     Benchmark.with_utime @@ fun () ->
     Fuzz_driver.run ~rounds (fun () ->
-      (* TODO: check if we should regenerate the link state *)
+      (* TODO: for now we have to regenerate the environment on each round because the concrete environment still is mutable, this should be avoided in the future *)
+      let* env = Env.Concrete.link_binary_module ~env ~name:None ~modul in
+      let* modul = Env.Concrete.get_last_module ~env in
       let* _env = I.modul ~env ~modul in
       Ok () )
   in

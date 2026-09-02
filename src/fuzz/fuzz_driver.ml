@@ -14,6 +14,6 @@ let rec run ~rounds f =
     | Some 0 -> Ok ()
     | Some n -> run ~rounds:(Some (pred n)) f
     end
-  | Error _ as e ->
+  | Error _ ->
     Log.app (fun m -> m "Found a bug with model: %a" pp_model !Fuzz_state.model);
-    e
+    Error (`Found_bug 1)
