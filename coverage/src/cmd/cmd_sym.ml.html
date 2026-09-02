@@ -288,7 +288,7 @@ let run_file ~parameters ~source_file =
     else <span data-count="426">O</span>k (Abstract_invariant.empt<span data-count="426">y</span> ())
   in
 
-  <span data-count="427">l</span>et env = Env.Symbolic.empty in
+  <span data-count="427">l</span>et env = Env.Symbolic.empty ~context:() in
   let* env =
     Env.Symbolic.link_extern_modul<span data-count="427">e</span> ~env ~name:"wasi_snapshot_preview1"
       Symbolic_wasm_ffi.wasi_snapshot_preview1

@@ -104,7 +104,7 @@ open Syntax
 
 let cmd ~unsafe ~timeout ~timeout_instr ~source_file =
   <span data-count="19">l</span>et name = None in
-  let env = Env.Concrete.empty in
+  let env = Env.Concrete.empty ~context:() in
   let* modul, env =
     Compile.File.until_concrete_lin<span data-count="19">k</span> env ~unsafe ~name source_file
   in

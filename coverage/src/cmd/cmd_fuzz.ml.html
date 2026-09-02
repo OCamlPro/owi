@@ -32,8 +32,8 @@
 <a id="L7"></a><span > </span>
 <a id="L8"></a><span class="visited"> </span>
 <a id="L9"></a><span class="visited"> </span>
-<a id="L10"></a><span class="visited"> </span>
-<a id="L11"></a><span > </span>
+<a id="L10"></a><span > </span>
+<a id="L11"></a><span class="visited"> </span>
 <a id="L12"></a><span > </span>
 <a id="L13"></a><span class="visited"> </span>
 <a id="L14"></a><span class="visited"> </span>
@@ -114,9 +114,9 @@ open Syntax
 
 let cmd ~rounds ~seed ~source_file ~timeout ~timeout_instr ~unsafe =
   <span data-count="2">I</span>nit.random_state seed;
-  <span data-count="2">l</span>et* env =
-    Env.Concrete.link_extern_modul<span data-count="2">e</span> ~env:Env.Concrete.empty ~name:"owi"
-      Fuzz_wasm_ffi.owi
+  <span data-count="2">l</span>et env = Env.Concrete.empty ~context:() in
+  let* env =
+    Env.Concrete.link_extern_modul<span data-count="2">e</span> ~env ~name:"owi" Fuzz_wasm_ffi.owi
   in
   <span data-count="2">l</span>et* modul = Compile.File.until_validat<span data-count="2">e</span> ~unsafe source_file in
   <span data-count="2">l</span>et module Parameters = struct

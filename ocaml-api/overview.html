@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "frappe";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-72d2e499.js";
+            window.path_to_searchindex_js = "../searchindex-4fd98f09.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-008df27c.js"></script>
@@ -193,8 +193,10 @@ val filename : Fpath.t = &lt;abstr&gt;
     | Error e -&gt; assert false;;
 mdx_gen.bc.exe: [INFO] parsing      ...
 ...
+# let env = Env.Concrete.empty ~context:()
+val env : Env.Concrete.t = &lt;abstr&gt;
 # let modul, env =
-    match Compile.Text.until_concrete_link Env.Concrete.empty ~unsafe:false ~name:None m with
+    match Compile.Text.until_concrete_link env ~unsafe:false ~name:None m with
     | Ok v -&gt; v
     | Error _ -&gt; assert false;;
 mdx_gen.bc.exe: [INFO] checking     ...

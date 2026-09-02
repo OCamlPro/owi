@@ -986,7 +986,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
         match List.length pt with <span data-count="0">1</span> -&gt; false | <span data-count="0">_</span>n -&gt; true ) )
   in
 
-  let env = Env.Symbolic.empty in
+  let env = Env.Symbolic.empty ~context:() in
   let* env =
     Env.Symbolic.link_extern_modul<span data-count="3">e</span> ~env ~name:"owi" Symbolic_wasm_ffi.owi
   in
