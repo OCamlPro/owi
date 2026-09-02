@@ -114,7 +114,7 @@ let bench_src = Logs.Src.creat<span data-count="858">e</span> "owi-bench" ~doc:"
 include (val Logs.src_lo<span data-count="858">g</span> main_src : Logs.LOG)
 
 let is_bench_enabled () =
-  <span data-count="30149">m</span>atch Logs.Src.level bench_src with <span data-count="30134">N</span>one -&gt; false | <span data-count="16">S</span>ome _ -&gt; true
+  <span data-count="30501">m</span>atch Logs.Src.level bench_src with <span data-count="30485">N</span>one -&gt; false | <span data-count="16">S</span>ome _ -&gt; true
 
 let is_debug_enabled () =
   <span data-count="430">m</span>atch Logs.Src.level main_src with
@@ -122,8 +122,8 @@ let is_debug_enabled () =
   | <span data-count="1">N</span>one | <span data-count="428">S</span>ome _ -&gt; false
 
 let bench_fn str fn =
-  <span data-count="6368">m</span>atch Logs.Src.level bench_src with
-  | <span data-count="6360">N</span>one -&gt; fn ()
+  <span data-count="6370">m</span>atch Logs.Src.level bench_src with
+  | <span data-count="6362">N</span>one -&gt; fn ()
   | <span data-count="8">S</span>ome _ -&gt;
     let c = Mtime_clock.counter () in
     <span data-count="8">l</span>et r = fn () in

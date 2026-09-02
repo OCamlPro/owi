@@ -456,8 +456,8 @@ module Func = struct
     type t = Extern_func : 'a func_type * 'a -&gt; t
 
     let elt_type (type t) (e : t telt) : Binary.val_type =
-      <span data-count="4892">m</span>atch e with
-      | <span data-count="2289">I</span>32 -&gt; Num_type I32
+      <span data-count="14892">m</span>atch e with
+      | <span data-count="12289">I</span>32 -&gt; Num_type I32
       | <span data-count="536">I</span>64 -&gt; Num_type I64
       | <span data-count="791">F</span>32 -&gt; Num_type F32
       | <span data-count="1035">F</span>64 -&gt; Num_type F64
@@ -465,9 +465,9 @@ module Func = struct
       | <span data-count="3">E</span>xternref _ -&gt; Ref_type (Null, Extern_ht)
 
     let res_type (type t) (r : t rtype) : Binary.result_type =
-      <span data-count="4621">m</span>atch r with
+      <span data-count="14621">m</span>atch r with
       | <span data-count="2671">R</span>0 -&gt; []
-      | <span data-count="1950">R</span>1 a -&gt; [ elt_typ<span data-count="1950">e</span> a ]
+      | <span data-count="11950">R</span>1 a -&gt; [ elt_typ<span data-count="11950">e</span> a ]
       | <span data-count="0">R</span>2 (a, b) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b ]
       | <span data-count="0">R</span>3 (a, b, c) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b; elt_typ<span data-count="0">e</span> c ]
       | <span data-count="0">R</span>4 (a, b, c, d) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b; elt_typ<span data-count="0">e</span> c; elt_typ<span data-count="0">e</span> d ]
@@ -475,15 +475,15 @@ module Func = struct
     let arg_type =
       let rec aux : type t r. (t, r) atype -&gt; Binary.param_type = function
         | <span data-count="18">M</span>em (_, tl) -&gt; aux tl
-        | <span data-count="2194">U</span>Arg tl -&gt; aux tl
+        | <span data-count="12194">U</span>Arg tl -&gt; aux tl
         | <span data-count="2942">A</span>rg (hd, tl) -&gt; (None, elt_typ<span data-count="2942">e</span> hd) :: au<span data-count="2942">x</span> tl
-        | <span data-count="4621">R</span>es -&gt; []
+        | <span data-count="14621">R</span>es -&gt; []
       in
       aux
 
     (* TODO: we could move this out, as it does not really depend on the functor's parameters *)
     let to_func_type (Extern_func (Func (arg, res), _)) : Binary.func_type =
-      <span data-count="4621">(</span>arg_typ<span data-count="4621">e</span> arg, res_typ<span data-count="4621">e</span> res)
+      <span data-count="14621">(</span>arg_typ<span data-count="14621">e</span> arg, res_typ<span data-count="14621">e</span> res)
 
     let fresh =
       let r = ref ~<span data-count="2574">-</span>1 in

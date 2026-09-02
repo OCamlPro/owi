@@ -83,9 +83,9 @@ let rec run ~rounds f =
     | <span data-count="1">S</span>ome 0 -&gt; Ok ()
     | <span data-count="10000">S</span>ome n -&gt; run ~rounds:(Some (pre<span data-count="10000">d</span> n)) f
     end
-  | <span data-count="1">E</span>rror _ as e -&gt;
+  | <span data-count="1">E</span>rror _ -&gt;
     Log.app (fun m -&gt; <span data-count="1">m</span> "Found a bug with model: %a" pp_model !Fuzz_state.model);
-    <span data-count="1">e</span>
+    <span data-count="1">E</span>rror (`Found_bug 1)
 </code></pre>
       </div>
     </div>

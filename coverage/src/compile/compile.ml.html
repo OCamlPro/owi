@@ -381,10 +381,10 @@ module Text = struct
       <span data-count="2572">m</span>
 
   let until_concrete_link ~unsafe ~name env m =
-    <span data-count="4617">l</span>et* modul = until_validat<span data-count="4617">e</span> ~unsafe m in
-    <span data-count="2349">l</span>et* env = Env.Concrete.link_binary_module ~env ~name ~modul in
-    <span data-count="2171">l</span>et+ modul = Env.Concrete.get_last_module ~env in
-    <span data-count="2171">(</span>modul, env)
+    <span data-count="4615">l</span>et* modul = until_validat<span data-count="4615">e</span> ~unsafe m in
+    <span data-count="2347">l</span>et* env = Env.Concrete.link_binary_module ~env ~name ~modul in
+    <span data-count="2169">l</span>et+ modul = Env.Concrete.get_last_module ~env in
+    <span data-count="2169">(</span>modul, env)
 
   let until_symbolic_link ~unsafe ~name env m =
     <span data-count="0">l</span>et* modul = until_validat<span data-count="0">e</span> ~unsafe m in
@@ -466,17 +466,17 @@ module File = struct
     | Wast _ | Extern _ -&gt; assert false
 
   let until_validate ~unsafe filename =
-    <span data-count="449">l</span>et* m = Parse.guess_from_fil<span data-count="449">e</span> filename in
-    <span data-count="448">L</span>og.bench_fn "validation time" @@ fun () -&gt;
-    <span data-count="448">m</span>atch m with
-    | <span data-count="215">K</span>ind.Wat m -&gt; Text.until_validate ~unsafe m
+    <span data-count="451">l</span>et* m = Parse.guess_from_fil<span data-count="451">e</span> filename in
+    <span data-count="450">L</span>og.bench_fn "validation time" @@ fun () -&gt;
+    <span data-count="450">m</span>atch m with
+    | <span data-count="217">K</span>ind.Wat m -&gt; Text.until_validate ~unsafe m
     | <span data-count="233">W</span>asm m -&gt; Binary.until_validate ~unsafe m
     | Wast _ | Extern _ -&gt; assert false
 
   let until_concrete_link ~unsafe ~name env filename =
-    <span data-count="21">l</span>et* m = Parse.guess_from_fil<span data-count="21">e</span> filename in
-    <span data-count="21">m</span>atch m with
-    | <span data-count="11">K</span>ind.Wat m -&gt; Text.until_concrete_link ~unsafe ~name env m
+    <span data-count="19">l</span>et* m = Parse.guess_from_fil<span data-count="19">e</span> filename in
+    <span data-count="19">m</span>atch m with
+    | <span data-count="9">K</span>ind.Wat m -&gt; Text.until_concrete_link ~unsafe ~name env m
     | <span data-count="10">W</span>asm m -&gt; Binary.until_concrete_link ~unsafe ~name env m
     | Wast _ | Extern _ -&gt; assert false
 

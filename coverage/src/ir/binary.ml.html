@@ -3576,8 +3576,8 @@ let pp_val_type fmt = function
   | <span data-count="6">R</span>ef_type t -&gt; pp_ref_type fmt t
 
 let val_type_eq t1 t2 =
-  <span data-count="11648">m</span>atch (t1, t2) with
-  | <span data-count="11618">N</span>um_type t1, Num_type t2 -&gt; Text.num_type_eq t1 t2
+  <span data-count="21597">m</span>atch (t1, t2) with
+  | <span data-count="21567">N</span>um_type t1, Num_type t2 -&gt; Text.num_type_eq t1 t2
   | <span data-count="30">R</span>ef_type t1, Ref_type t2 -&gt; ref_type_eq t1 t2
   | <span data-count="0">_</span>, _ -&gt; false
 
@@ -3614,17 +3614,17 @@ type param = string option * val_type
 let pp_param ppf ((id, vt) : param) =
   <span data-count="31">p</span>f ppf "(param%a %a)" pp_str_opt id pp_val_type vt
 
-let param_eq (_, t1) (_, t2) = <span data-count="8174">v</span>al_type_eq t1 t2
+let param_eq (_, t1) (_, t2) = <span data-count="8140">v</span>al_type_eq t1 t2
 
 type param_type = param list
 
 let pp_param_type ppf (params : param_type) = <span data-count="29">l</span>ist ~sep:sp pp_param ppf params
 
-let param_type_eq t1 t2 = <span data-count="8607">L</span>ist.equal param_eq t1 t2
+let param_type_eq t1 t2 = <span data-count="18590">L</span>ist.equal param_eq t1 t2
 
 type result_type = val_type list
 
-let result_type_eq t1 t2 = <span data-count="8596">L</span>ist.equal val_type_eq t1 t2
+let result_type_eq t1 t2 = <span data-count="18579">L</span>ist.equal val_type_eq t1 t2
 
 let pp_result_ ppf vt = <span data-count="29">p</span>f ppf "(result %a)" pp_val_type vt
 
@@ -3643,7 +3643,7 @@ let pp_func_type ppf (params, results) =
     results
 
 let func_type_eq (pt1, rt1) (pt2, rt2) =
-  <span data-count="8607">p</span>aram_type_e<span data-count="8606">q</span> pt1 pt2 &amp;&amp; <span data-count="8595">r</span>esult_type_eq rt1 rt2
+  <span data-count="18590">p</span>aram_type_e<span data-count="18590">q</span> pt1 pt2 &amp;&amp; <span data-count="18579">r</span>esult_type_eq rt1 rt2
 
 type field_type = Text.mut * storage_type
 
@@ -4712,21 +4712,21 @@ end
 
     TODO: use iarray? *)
 let compute_type_groups (type_defs : Typedef.t array) types_len =
-  <span data-count="3320">l</span>et groups = Array.make types_len (0, 1) in
-  <span data-count="3320">l</span>et _ =
+  <span data-count="13320">l</span>et groups = Array.make types_len (0, 1) in
+  <span data-count="13320">l</span>et _ =
     Array.fold_left
       (fun pos typedef -&gt;
-        <span data-count="10069">m</span>atch typedef with
-        | <span data-count="9815">T</span>ypedef.SimpleType _ -&gt;
+        <span data-count="30069">m</span>atch typedef with
+        | <span data-count="29815">T</span>ypedef.SimpleType _ -&gt;
           groups.(pos) &lt;- (pos, 1);
-          <span data-count="9815">p</span>os + 1
+          <span data-count="29815">p</span>os + 1
         | <span data-count="254">T</span>ypedef.RecType members -&gt;
           let size = List.length members in
           <span data-count="254">L</span>ist.iteri (fun i _ -&gt; <span data-count="540">g</span>roups.(pos + i) &lt;- (pos, size)) members;
           <span data-count="254">p</span>os + size )
       0 type_defs
   in
-  <span data-count="3320">g</span>roups
+  <span data-count="13320">g</span>roups
 
 module Table = struct
   module Type = struct

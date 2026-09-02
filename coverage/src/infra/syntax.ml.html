@@ -470,9 +470,9 @@ let[@inline] list_fold_left_map f acc l =
   <span data-count="0">(</span>acc, List.re<span data-count="0">v</span> l)
 
 let[@inline] array_iter f a =
-  <span data-count="74473">l</span>et err = ref None in
+  <span data-count="124473">l</span>et err = ref None in
   try
-    for i = 0 to Array.lengt<span data-count="74473">h</span> a - 1 do
+    for i = 0 to Array.lengt<span data-count="124473">h</span> a - 1 do
       <span data-count="69349">m</span>atch f (Array.unsafe_ge<span data-count="69349">t</span> a i) with
       | <span data-count="2244">E</span>rror _e as e -&gt;
         err := Some e;
@@ -568,12 +568,12 @@ let[@inline] array_fold_left f acc l =
     (Ok acc) l
 
 let[@inline] array_fold_lefti f acc l =
-  <span data-count="16862">s</span>nd
-  @@ Array.fold_lef<span data-count="16862">t</span>
+  <span data-count="76862">s</span>nd
+  @@ Array.fold_lef<span data-count="76862">t</span>
        (fun (i, acc) v -&gt;
-         <span data-count="20567">(</span> suc<span data-count="20567">c</span> i
+         <span data-count="40567">(</span> suc<span data-count="40567">c</span> i
          , let* acc in
-           <span data-count="20558">f</span> i acc v ) )
+           <span data-count="40558">f</span> i acc v ) )
        (0, Ok acc) l
 
 let[@inline] dynarray_fold_left f acc l =
