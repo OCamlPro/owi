@@ -479,11 +479,11 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
       (state, jt_if)
     | Br_table (cases, default) ->
       let v, stack = Stack.pop_i32 stack in
-      let nb_cases = Array.length cases in
+      let nb_cases = Array.length cases |> Int32.of_int in
       let default =
         match
           Abstract_domain.assume ctx
-            (Abstract_i32.ge_u ctx v (Abstract_i32.of_int ctx nb_cases))
+            (Abstract_i32.ge_u ctx v (Abstract_i32.of_int32 ctx nb_cases))
         with
         | Some ctx ->
           let abs_state = { abs_state with ctx; stack } in
@@ -496,7 +496,8 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
           (fun i ->
             ( i
             , Abstract_domain.assume ctx
-                (Abstract_i32.eq ctx v (Abstract_i32.of_int ctx i)) ) )
+                (Abstract_i32.eq ctx v
+                   (Abstract_i32.of_int32 ctx (Int32.of_int i)) ) ) )
           cases
       in
       let all_cases =
