@@ -310,56 +310,213 @@ let symbolic_parameters default_entry_point =
   ; workspace
   }
 
-(* owi abs *)
+(* owi wasm *)
 
-let abs_info =
-  let doc = "Run the abstract interpreter" in
-  let man = [] @ shared_man in
-  Cmd.info "abs" ~version ~doc ~sdocs ~man
+module Wasm = struct
+  (* owi wasm abs *)
+  module Abs = struct
+    let cmd =
+      let+ source_file
+      and+ () = setup_log
+      and+ entry_point = entry_point None
+      and+ unsafe in
+      Cmd_abs.cmd ~source_file ~entry_point ~unsafe
+  end
 
-let abs_cmd =
-  let+ source_file
-  and+ () = setup_log
-  and+ entry_point = entry_point None
-  and+ unsafe in
-  Cmd_abs.cmd ~source_file ~entry_point ~unsafe
+  (* owi wasm analyze *)
+  module Analyze = struct
+    (* owi wasm analyze cfg *)
+    module Cfg = struct
+      let cmd =
+        let+ source_file
+        and+ entry_point = entry_point None
+        and+ () = setup_log in
+        Cmd_cfg.cmd ~source_file ~entry_point
+    end
 
-(* owi analyze *)
+    (* owi wasm analyze cg *)
+    module Cg = struct
+      let cmd =
+        let+ call_graph_mode
+        and+ source_file
+        and+ entry_point = entry_point None
+        and+ () = setup_log in
+        Cmd_call_graph.cmd ~call_graph_mode ~source_file ~entry_point
+    end
+  end
 
-let analyze_info =
-  let doc = "Analyze a program in different possible ways" in
-  let man = [] @ shared_man in
-  Cmd.info "analyze" ~version ~doc ~sdocs ~man
+  (* owi wasm fmt *)
+  module Fmt = struct
+    let cmd =
+      let+ inplace =
+        let doc = "Format in-place, overwriting input file" in
+        Arg.(value & flag & info [ "inplace"; "i" ] ~doc)
+      and+ files
+      and+ () = setup_log in
+      Cmd_fmt.cmd ~inplace ~files
+  end
 
-(* owi analyze cfg *)
+  (* owi wasm fuzz *)
+  module Fuzz = struct
+    let cmd =
+      let+ unsafe
+      and+ rounds
+      and+ timeout
+      and+ timeout_instr
+      and+ () = setup_log
+      and+ seed
+      and+ source_file in
+      Cmd_fuzz.cmd ~rounds ~seed ~source_file ~timeout ~timeout_instr ~unsafe
+  end
 
-let cfg_info =
-  let doc = "Build a Control-Flow Graph" in
-  let man = [] @ shared_man in
-  Cmd.info "cfg" ~version ~doc ~sdocs ~man
+  (* owi wasm instrument *)
+  module Instrument = struct
+    (* owi wasm instrument label *)
+    module Label = struct
+      let cmd =
+        let+ unsafe
+        and+ coverage_criteria
+        and+ () = setup_log
+        and+ source_file in
+        Cmd_instrument_label.cmd ~unsafe ~source_file ~coverage_criteria
+    end
+  end
 
-let cfg_cmd =
-  let+ source_file
-  and+ entry_point = entry_point None
-  and+ () = setup_log in
-  Cmd_cfg.cmd ~source_file ~entry_point
+  (* owi wasm iso *)
+  module Iso = struct
+    let cmd =
+      (* TODO: this is actually almost `symbolic_parameters` (with `entry_point` removed), we should use it... it'll simplify the signature a lot! *)
+      let+ deterministic_result_order
+      and+ fail_mode
+      and+ exploration_strategy
+      and+ files
+      and+ model_format
+      and+ no_assert_failure_expression_printing
+      and+ no_stop_at_failure
+      and+ no_value
+      and+ () = setup_log
+      and+ seed
+      and+ solver
+      and+ unsafe
+      and+ workers
+      and+ no_worker_isolation
+      and+ model_out_file
+      and+ with_breadcrumbs
+      and+ workspace in
 
-(* owi analyze cg *)
+      Cmd_iso.cmd ~deterministic_result_order ~fail_mode ~exploration_strategy
+        ~files ~model_format ~no_assert_failure_expression_printing
+        ~no_stop_at_failure ~no_value ~seed ~solver ~unsafe ~workers
+        ~no_worker_isolation ~workspace ~model_out_file ~with_breadcrumbs
+  end
 
-let cg_info =
-  let doc = "Build a call graph" in
+  (* owi wasm replay *)
+  module Replay = struct
+    let cmd =
+      let+ unsafe
+      and+ replay_file =
+        let doc = "Which replay file to use" in
+        Arg.(
+          required
+          & opt (some existing_file_conv) None
+          & info [ "replay-file" ] ~doc ~docv:"FILE" )
+      and+ () = setup_log
+      and+ source_file
+      and+ invoke_with_symbols
+      and+ entry_point = entry_point None in
+      Cmd_replay.cmd ~unsafe ~replay_file ~source_file ~entry_point
+        ~invoke_with_symbols
+  end
 
-  let man = [] @ shared_man in
+  (* owi wasm run *)
+  module Run = struct
+    let cmd =
+      let+ unsafe
+      and+ timeout
+      and+ timeout_instr
+      and+ () = setup_log
+      and+ source_file in
+      Cmd_run.cmd ~unsafe ~timeout ~timeout_instr ~source_file
+  end
 
-  Cmd.info "cg" ~version ~doc ~sdocs ~man
+  (* owi wasm script *)
+  module Script = struct
+    (* owi wasm script abstract *)
+    module Abstract = struct
+      let cmd =
+        let+ files
+        and+ () = setup_log
+        and+ no_exhaustion =
+          let doc = "no exhaustion tests" in
+          Arg.(value & flag & info [ "no-exhaustion" ] ~doc)
+        in
+        Cmd_script.cmd_abstract ~files ~no_exhaustion
+    end
 
-let cg_cmd =
-  let+ call_graph_mode
-  and+ source_file
-  and+ entry_point = entry_point None
-  and+ () = setup_log in
+    (* owi wasm script concrete *)
+    module Concrete = struct
+      let cmd =
+        let+ files
+        and+ () = setup_log
+        and+ no_exhaustion =
+          let doc = "no exhaustion tests" in
+          Arg.(value & flag & info [ "no-exhaustion" ] ~doc)
+        in
+        Cmd_script.cmd_concrete ~files ~no_exhaustion
+    end
 
-  Cmd_call_graph.cmd ~call_graph_mode ~source_file ~entry_point
+    (* owi wasm script symbolic *)
+    module Symbolic = struct
+      let cmd =
+        let+ files
+        and+ () = setup_log
+        and+ no_exhaustion =
+          let doc = "no exhaustion tests" in
+          Arg.(value & flag & info [ "no-exhaustion" ] ~doc)
+        in
+        Cmd_script.cmd_symbolic ~files ~no_exhaustion
+    end
+  end
+
+  (* owi wasm sym *)
+  module Sym = struct
+    let cmd =
+      let+ source_file
+      and+ () = setup_log
+      and+ parameters = symbolic_parameters None in
+      Cmd_sym.cmd ~parameters ~source_file
+  end
+
+  (* owi wasm to_wat *)
+  module To_wat = struct
+    let cmd =
+      let+ source_file
+      and+ emit_file =
+        let doc = "Emit (.wat) files from corresponding (.wasm) files." in
+        Arg.(value & flag & info [ "emit-file" ] ~doc)
+      and+ () = setup_log
+      and+ out_file in
+      Cmd_wasm2wat.cmd ~source_file ~emit_file ~out_file
+  end
+
+  (* owi wasm of_wat *)
+  module Of_wat = struct
+    let cmd =
+      let+ unsafe
+      and+ out_file
+      and+ () = setup_log
+      and+ source_file in
+      Cmd_wat2wasm.cmd ~unsafe ~out_file ~source_file
+  end
+
+  (* owi wasm validate *)
+  module Validate = struct
+    let cmd =
+      let+ files
+      and+ () = setup_log in
+      Cmd_validate.cmd ~files
+  end
+end
 
 (* owi c *)
 
@@ -416,38 +573,6 @@ let cpp_cmd =
 
   Cmd_cpp.cmd ~symbolic_parameters ~out_file ~arch ~includes ~opt_lvl ~files
 
-(* owi fmt *)
-
-let fmt_info =
-  let doc = "Format a .wat or .wast file" in
-  let man = [] @ shared_man in
-  Cmd.info "fmt" ~version ~doc ~sdocs ~man
-
-let fmt_cmd =
-  let+ inplace =
-    let doc = "Format in-place, overwriting input file" in
-    Arg.(value & flag & info [ "inplace"; "i" ] ~doc)
-  and+ files
-  and+ () = setup_log in
-  Cmd_fmt.cmd ~inplace ~files
-
-(* owi fuzz *)
-
-let fuzz_info =
-  let doc = "Run the fuzzer" in
-  let man = [] @ shared_man in
-  Cmd.info "fuzz" ~version ~doc ~sdocs ~man
-
-let fuzz_cmd =
-  let+ unsafe
-  and+ rounds
-  and+ timeout
-  and+ timeout_instr
-  and+ () = setup_log
-  and+ seed
-  and+ source_file in
-  Cmd_fuzz.cmd ~rounds ~seed ~source_file ~timeout ~timeout_instr ~unsafe
-
 (* owi haskell *)
 
 let haskell_info =
@@ -464,64 +589,6 @@ let haskell_cmd =
   and+ symbolic_parameters = symbolic_parameters (Some "_start") in
   Cmd_haskell.cmd ~symbolic_parameters ~files ~out_file
 
-(* owi instrument *)
-
-let instrument_info =
-  let doc = "Instrument a program in various ways" in
-  let man = [] @ shared_man in
-  Cmd.info "instrument" ~version ~doc ~sdocs ~man
-
-(* owi instrument label *)
-let instrument_label_info =
-  let doc =
-    "Generate an instrumented file with labels corresponding to test \
-     objectives for a given coverage criteria."
-  in
-  let man = [] @ shared_man in
-  Cmd.info "label" ~version ~doc ~sdocs ~man
-
-let instrument_label_cmd =
-  let+ unsafe
-  and+ coverage_criteria
-  and+ () = setup_log
-  and+ source_file in
-  Cmd_instrument_label.cmd ~unsafe ~source_file ~coverage_criteria
-
-(* owi iso *)
-
-let iso_info =
-  let doc =
-    "Check the iso-functionnality of two Wasm modules by comparing the output \
-     when calling their exports."
-  in
-  let man = [] @ shared_man in
-  Cmd.info "iso" ~version ~doc ~sdocs ~man
-
-let iso_cmd =
-  (* TODO: this is actually almost `symbolic_parameters` (with `entry_point` removed), we should use it... it'll simplify the signature a lot! *)
-  let+ deterministic_result_order
-  and+ fail_mode
-  and+ exploration_strategy
-  and+ files
-  and+ model_format
-  and+ no_assert_failure_expression_printing
-  and+ no_stop_at_failure
-  and+ no_value
-  and+ () = setup_log
-  and+ seed
-  and+ solver
-  and+ unsafe
-  and+ workers
-  and+ no_worker_isolation
-  and+ model_out_file
-  and+ with_breadcrumbs
-  and+ workspace in
-
-  Cmd_iso.cmd ~deterministic_result_order ~fail_mode ~exploration_strategy
-    ~files ~model_format ~no_assert_failure_expression_printing
-    ~no_stop_at_failure ~no_value ~seed ~solver ~unsafe ~workers
-    ~no_worker_isolation ~workspace ~model_out_file ~with_breadcrumbs
-
 (* owi llvm *)
 
 let llvm_info =
@@ -537,46 +604,6 @@ let llvm_cmd =
   and+ () = setup_log
   and+ symbolic_parameters = symbolic_parameters None in
   Cmd_llvm.cmd ~symbolic_parameters ~files ~out_file
-
-(* owi replay *)
-
-let replay_info =
-  let doc =
-    "Replay a module containing symbols with concrete values in a replay file \
-     containing a model"
-  in
-  let man = [] @ shared_man in
-  Cmd.info "replay" ~version ~doc ~sdocs ~man
-
-let replay_cmd =
-  let+ unsafe
-  and+ replay_file =
-    let doc = "Which replay file to use" in
-    Arg.(
-      required
-      & opt (some existing_file_conv) None
-      & info [ "replay-file" ] ~doc ~docv:"FILE" )
-  and+ () = setup_log
-  and+ source_file
-  and+ invoke_with_symbols
-  and+ entry_point = entry_point None in
-  Cmd_replay.cmd ~unsafe ~replay_file ~source_file ~entry_point
-    ~invoke_with_symbols
-
-(* owi run *)
-
-let run_info =
-  let doc = "Run the concrete interpreter" in
-  let man = [] @ shared_man in
-  Cmd.info "run" ~version ~doc ~sdocs ~man
-
-let run_cmd =
-  let+ unsafe
-  and+ timeout
-  and+ timeout_instr
-  and+ () = setup_log
-  and+ source_file in
-  Cmd_run.cmd ~unsafe ~timeout ~timeout_instr ~source_file
 
 (* owi rust *)
 
@@ -598,81 +625,6 @@ let rust_cmd =
 
   Cmd_rust.cmd ~symbolic_parameters ~arch ~opt_lvl ~includes ~files ~out_file
 
-(* owi script *)
-
-let script_info =
-  let doc = "Run a reference test suite script" in
-  let man = [] @ shared_man in
-  Cmd.info "script" ~version ~doc ~sdocs ~man
-
-(* owi script abstract *)
-
-let script_abstract_info =
-  let doc =
-    "Run a reference test suite script using the abstract interpreter"
-  in
-  let man = [] @ shared_man in
-  Cmd.info "abstract" ~version ~doc ~sdocs ~man
-
-let script_abstract_cmd =
-  let+ files
-  and+ () = setup_log
-  and+ no_exhaustion =
-    let doc = "no exhaustion tests" in
-    Arg.(value & flag & info [ "no-exhaustion" ] ~doc)
-  in
-  Cmd_script.cmd_abstract ~files ~no_exhaustion
-
-(* owi script concrete *)
-
-let script_concrete_info =
-  let doc =
-    "Run a reference test suite script using the concrete interpreter"
-  in
-  let man = [] @ shared_man in
-  Cmd.info "concrete" ~version ~doc ~sdocs ~man
-
-let script_concrete_cmd =
-  let+ files
-  and+ () = setup_log
-  and+ no_exhaustion =
-    let doc = "no exhaustion tests" in
-    Arg.(value & flag & info [ "no-exhaustion" ] ~doc)
-  in
-  Cmd_script.cmd_concrete ~files ~no_exhaustion
-
-(* owi script symbolic *)
-
-let script_symbolic_info =
-  let doc =
-    "Run a reference test suite script using the symbolic interpreter"
-  in
-  let man = [] @ shared_man in
-  Cmd.info "symbolic" ~version ~doc ~sdocs ~man
-
-let script_symbolic_cmd =
-  let+ files
-  and+ () = setup_log
-  and+ no_exhaustion =
-    let doc = "no exhaustion tests" in
-    Arg.(value & flag & info [ "no-exhaustion" ] ~doc)
-  in
-  Cmd_script.cmd_symbolic ~files ~no_exhaustion
-
-(* owi sym *)
-
-let sym_info =
-  let doc = "Run the symbolic interpreter" in
-  let man = [] @ shared_man in
-  Cmd.info "sym" ~version ~doc ~sdocs ~man
-
-let sym_cmd =
-  let+ source_file
-  and+ () = setup_log
-  and+ parameters = symbolic_parameters None in
-
-  Cmd_sym.cmd ~parameters ~source_file
-
 (* owi tinygo *)
 
 let tinygo_info =
@@ -689,18 +641,6 @@ let tinygo_cmd =
   and+ symbolic_parameters = symbolic_parameters (Some "_start") in
   Cmd_tinygo.cmd ~symbolic_parameters ~files ~out_file
 
-(* owi validate *)
-
-let validate_info =
-  let doc = "Validate a module" in
-  let man = [] @ shared_man in
-  Cmd.info "validate" ~version ~doc ~sdocs ~man
-
-let validate_cmd =
-  let+ files
-  and+ () = setup_log in
-  Cmd_validate.cmd ~files
-
 (* owi version *)
 
 let version_info =
@@ -712,40 +652,6 @@ let version_cmd =
   let+ () = Term.const ()
   and+ () = setup_log in
   Cmd_version.cmd ()
-
-(* owi wasm2wat *)
-
-let wasm2wat_info =
-  let doc =
-    "Generate a text format file (.wat) from a binary format file (.wasm)"
-  in
-  let man = [] @ shared_man in
-  Cmd.info "wasm2wat" ~version ~doc ~sdocs ~man
-
-let wasm2wat_cmd =
-  let+ source_file
-  and+ emit_file =
-    let doc = "Emit (.wat) files from corresponding (.wasm) files." in
-    Arg.(value & flag & info [ "emit-file" ] ~doc)
-  and+ () = setup_log
-  and+ out_file in
-  Cmd_wasm2wat.cmd ~source_file ~emit_file ~out_file
-
-(* owi wat2wasm *)
-
-let wat2wasm_info =
-  let doc =
-    "Generate a binary format file (.wasm) from a text format file (.wat)"
-  in
-  let man = [] @ shared_man in
-  Cmd.info "wat2wasm" ~version ~doc ~sdocs ~man
-
-let wat2wasm_cmd =
-  let+ unsafe
-  and+ out_file
-  and+ () = setup_log
-  and+ source_file in
-  Cmd_wat2wasm.cmd ~unsafe ~out_file ~source_file
 
 (* owi zig *)
 
@@ -766,9 +672,11 @@ let zig_cmd =
 
 (* owi *)
 
+let info name ~doc = Cmd.info name ~doc ~version ~sdocs ~man:shared_man
+
 let cli =
-  let info =
-    let doc = "OCaml WebAssembly Interpreter" in
+  let owi_info =
+    let doc = "Seamless program analysis for C, C++, Go, Rust, Wasm and Zig." in
     let man =
       [ `S Manpage.s_bugs; `P "Email them to <owi.wildcat119@passmail.com>." ]
     in
@@ -777,33 +685,87 @@ let cli =
   let default =
     Term.(ret (const (fun (_ : _ list) -> `Help (`Plain, None)) $ copts_t))
   in
-  Cmd.group info ~default
-    [ Cmd.group analyze_info [ Cmd.v cg_info cg_cmd; Cmd.v cfg_info cfg_cmd ]
-    ; Cmd.v abs_info abs_cmd
-    ; Cmd.v c_info c_cmd
+
+  Cmd.group owi_info ~default
+    [ Cmd.v c_info c_cmd
     ; Cmd.v cpp_info cpp_cmd
-    ; Cmd.v fmt_info fmt_cmd
-    ; Cmd.v fuzz_info fuzz_cmd
-    ; Cmd.group instrument_info
-        [ Cmd.v instrument_label_info instrument_label_cmd ]
     ; Cmd.v haskell_info haskell_cmd
-    ; Cmd.v iso_info iso_cmd
     ; Cmd.v llvm_info llvm_cmd
-    ; Cmd.v replay_info replay_cmd
-    ; Cmd.v run_info run_cmd
     ; Cmd.v rust_info rust_cmd
-    ; Cmd.group script_info
-        [ Cmd.v script_concrete_info script_concrete_cmd
-        ; Cmd.v script_symbolic_info script_symbolic_cmd
-        ; Cmd.v script_abstract_info script_abstract_cmd
-        ]
-    ; Cmd.v sym_info sym_cmd
     ; Cmd.v tinygo_info tinygo_cmd
-    ; Cmd.v validate_info validate_cmd
-    ; Cmd.v version_info version_cmd
-    ; Cmd.v wasm2wat_info wasm2wat_cmd
-    ; Cmd.v wat2wasm_info wat2wasm_cmd
     ; Cmd.v zig_info zig_cmd
+      (* ======================================================================================================================================================================================================================================== *)
+      (* new API *)
+    ; Cmd.v version_info version_cmd
+    ; Cmd.group
+        (info "wasm" ~doc:"Work with Wasm programs.")
+        ~default
+        [ Cmd.v (info "abs" ~doc:"Run the abstract interpreter.") Wasm.Abs.cmd
+        ; Cmd.group
+            (info "analyze" ~doc:"Visualize and get statistics.")
+            [ Cmd.v (info "cg" ~doc:"Build a call graph.") Wasm.Analyze.Cg.cmd
+            ; Cmd.v
+                (info "cfg" ~doc:"Build a control-flow graph.")
+                Wasm.Analyze.Cfg.cmd
+            ]
+        ; Cmd.v (info "fmt" ~doc:"Format a .wat or .wast file.") Wasm.Fmt.cmd
+        ; Cmd.v (info "fuzz" ~doc:"Run the fuzzer.") Wasm.Fuzz.cmd
+        ; Cmd.group
+            (info "instrument" ~doc:"Instrument a program in various ways.")
+            [ Cmd.v
+                (info "label"
+                   ~doc:
+                     "Generate an instrumented file with labels corresponding \
+                      to test objectives for a given coverage criteria." )
+                Wasm.Instrument.Label.cmd
+            ]
+        ; Cmd.v
+            (info "iso"
+               ~doc:
+                 "Check the iso-functionnality of two modules by comparing the \
+                  output when calling their exports." )
+            Wasm.Iso.cmd
+        ; Cmd.v
+            (info "replay"
+               ~doc:
+                 "Replay a module by replacing symbols with concrete values \
+                  from a model." )
+            Wasm.Replay.cmd
+        ; Cmd.v (info "run" ~doc:"Run the concrete interpreter.") Wasm.Run.cmd
+        ; Cmd.group
+            (info "script" ~doc:"Run a reference test suite script (.wast).")
+            [ Cmd.v
+                (info "concrete"
+                   ~doc:
+                     "Run a reference test suite (.wast) using the concrete \
+                      interpreter." )
+                Wasm.Script.Concrete.cmd
+            ; Cmd.v
+                (info "symbolic"
+                   ~doc:
+                     "Run a reference test suite (.wast) using the symbolic \
+                      interpreter." )
+                Wasm.Script.Symbolic.cmd
+            ; Cmd.v
+                (info "abstract"
+                   ~doc:
+                     "Run a reference test suite (.wast) using the abstract \
+                      interpreter." )
+                Wasm.Script.Abstract.cmd
+            ]
+        ; Cmd.v
+            (info "sym" ~doc:"Run the symbolic execution engine.")
+            Wasm.Sym.cmd
+        ; Cmd.v (info "validate" ~doc:"Validate a module.") Wasm.Validate.cmd
+        ; Cmd.v
+            (info "to_wat"
+               ~doc:"Generate a text file (.wat) from a binary file (.wasm)." )
+            Wasm.To_wat.cmd
+        ; Cmd.v
+            (info "of_wat"
+               ~doc:"Generate a binary file (.wasm) from a text file (.wat)." )
+            Wasm.Of_wat.cmd
+        ]
     ]
 
 let exit_code =
