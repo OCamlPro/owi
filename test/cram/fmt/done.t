@@ -1,2 +1,2 @@
 inplace:
-  $ owi fmt --inplace done.wat
+  $ owi wasm fmt --inplace done.wat

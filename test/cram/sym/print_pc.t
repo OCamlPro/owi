@@ -1,4 +1,4 @@
-  $ owi sym --invoke-with-symbols --entry-point=f -w1 ./print_pc.wat -vv 2>&1 | grep -v "Completed"
+  $ owi wasm sym --invoke-with-symbols --entry-point=f -w1 ./print_pc.wat -vv 2>&1 | grep -v "Completed"
   owi: [INFO] parsing      ...
   owi: [INFO] checking     ...
   owi: [INFO] checking     ...
@@ -162,3 +162,4 @@
     symbol symbol_0 i32 0
   }
   owi: [ERROR] Reached problem!
+

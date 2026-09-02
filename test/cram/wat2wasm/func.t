@@ -1,5 +1,5 @@
-  $ owi wat2wasm func.wat
-  $ owi run func.wasm -v
+  $ owi wasm of_wat func.wat
+  $ owi wasm run func.wasm -v
   owi: [INFO] typechecking ...
   owi: [INFO] linking      ...
   owi: [INFO] interpreting ...
@@ -21,7 +21,7 @@
   owi: [INFO] running instr : f32.add (executed 0 times)
   owi: [INFO] stack         : [ f32.const 42.420_001_983_642_578 ]
   owi: [INFO] running instr : drop (executed 0 times)
-  $ owi wasm2wat func.wasm
+  $ owi wasm to_wat func.wasm
   (module
     (type (func (param f32) (result f32)))
     (type (func))

@@ -1,5 +1,5 @@
-  $ owi wat2wasm symbolic.wat
-  $ owi wasm2wat symbolic.wasm
+  $ owi wasm of_wat symbolic.wat
+  $ owi wasm to_wat symbolic.wasm
   (module
     (import "owi" "i32_symbol" (func  (result i32)))
     (type (func (result i32)))

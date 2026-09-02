@@ -1,5 +1,5 @@
 table stuff:
-  $ owi sym table.wat --deterministic-result-order --no-value
+  $ owi wasm sym table.wat --deterministic-result-order --no-value
   owi: [ERROR] Trap: unreachable
   model {
     symbol symbol_0 i32
@@ -14,3 +14,5 @@ table stuff:
   
   owi: [ERROR] Reached 2 problems!
   [13]
+
+

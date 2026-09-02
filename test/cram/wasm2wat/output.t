@@ -1,5 +1,5 @@
-  $ owi wasm2wat done.wasm -o bar.wat
-  $ owi fmt bar.wat
+  $ owi wasm to_wat done.wasm -o bar.wat
+  $ owi wasm fmt bar.wat
   (module
     (type (func (param i32) (param i32) (result i32)))
     (type (func))

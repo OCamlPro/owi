@@ -1,78 +1,38 @@
 no subcommand should print help
   $ owi
   NAME
-         owi - OCaml WebAssembly Interpreter
+         owi - Seamless program analysis for C, C++, Go, Rust, Wasm and Zig.
   
   SYNOPSIS
          owi [COMMAND] …
   
   COMMANDS
-         abs [--entry-point=FUNCTION] [--unsafe] [OPTION]… FILE
-             Run the abstract interpreter
-  
-         analyze COMMAND …
-             Analyze a program in different possible ways
-  
          c [OPTION]… FILE…
              Compile a C file to Wasm and run the symbolic interpreter on it
   
          c++ [OPTION]… FILE…
              Compile a C++ file to Wasm and run the symbolic interpreter on it
   
-         fmt [--inplace] [OPTION]… FILE…
-             Format a .wat or .wast file
-  
-         fuzz [OPTION]… FILE
-             Run the fuzzer
-  
          haskell [OPTION]… FILE…
              Compile a Haskell file to Wasm and run the symbolic interpreter on
              it
-  
-         instrument COMMAND …
-             Instrument a program in various ways
-  
-         iso [OPTION]… FILE…
-             Check the iso-functionnality of two Wasm modules by comparing the
-             output when calling their exports.
   
          llvm [OPTION]… FILE…
              Compile LLVM IR/bitcode to Wasm and run the symbolic interpreter
              on it
   
-         replay [OPTION]… FILE
-             Replay a module containing symbols with concrete values in a
-             replay file containing a model
-  
-         run [--timeout=S] [--timeout-instr=I] [--unsafe] [OPTION]… FILE
-             Run the concrete interpreter
-  
          rust [OPTION]… FILE…
              Compile a Rust file to Wasm and run the symbolic interpreter on it
-  
-         script COMMAND …
-             Run a reference test suite script
-  
-         sym [OPTION]… FILE
-             Run the symbolic interpreter
   
          tinygo [OPTION]… FILE…
              Compile a TinyGo file to Wasm and run the symbolic interpreter on
              it
   
-         validate [OPTION]… FILE…
-             Validate a module
-  
          version [OPTION]…
              Print some version informations
   
-         wasm2wat [--emit-file] [--output=FILE] [OPTION]… FILE
-             Generate a text format file (.wat) from a binary format file
-             (.wasm)
-  
-         wat2wasm [--output=FILE] [--unsafe] [OPTION]… FILE
-             Generate a binary format file (.wasm) from a text format file
-             (.wat)
+         wasm [COMMAND] …
+             Work with Wasm programs.
   
          zig [OPTION]… FILE…
              Compile a Zig file to Wasm and run the symbolic interpreter on it

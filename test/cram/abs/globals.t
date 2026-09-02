@@ -1,4 +1,4 @@
-  $ owi abs globals.wat -v
+  $ owi wasm abs globals.wat -v
   owi: [INFO] parsing      ...
   owi: [INFO] checking     ...
   owi: [INFO] typechecking ...
@@ -37,5 +37,3 @@
   owi: [INFO] stack         : [ i32 {42} ]
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : drop
-
-

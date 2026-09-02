@@ -1,5 +1,5 @@
 print symbolic:
-  $ owi wasm2wat m.wasm
+  $ owi wasm to_wat m.wasm
   (module
     (type (func (param i32) (param i32) (result i32)))
     (type (func))

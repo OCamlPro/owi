@@ -1,5 +1,5 @@
 symbolic extern module (assume and assert test):
-  $ owi sym mean.wat -w1 --no-value --no-stop-at-failure --deterministic-result-order
+  $ owi wasm sym mean.wat -w1 --no-value --no-stop-at-failure --deterministic-result-order
   owi: [ERROR] Trap: unreachable
   model {
     symbol symbol_0 i32
@@ -8,3 +8,4 @@ symbolic extern module (assume and assert test):
   
   owi: [ERROR] Reached problem!
   [13]
+

@@ -1,4 +1,4 @@
-  $ owi abs non_rec.wat -v
+  $ owi wasm abs non_rec.wat -v
   owi: [INFO] parsing      ...
   owi: [INFO] checking     ...
   owi: [INFO] typechecking ...
@@ -40,7 +40,7 @@
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : drop
 
-  $ owi abs rec.wat -v
+  $ owi wasm abs rec.wat -v
   owi: [INFO] parsing      ...
   owi: [INFO] checking     ...
   owi: [INFO] typechecking ...
@@ -69,4 +69,3 @@
   owi: [INFO] locals        : [ (0 -> i32 {1}) ]
   owi: [INFO] running instr : call 19
   owi: [ERROR] Recursive function calls are not supported yet
-

@@ -1,1 +1,1 @@
-  $ owi fuzz rounds.wat --rounds 10000
+  $ owi wasm fuzz rounds.wat --rounds 10000

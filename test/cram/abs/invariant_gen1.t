@@ -1,11 +1,11 @@
-  $ owi sym --generate-abstract-invariant ./invariant_gen1.wat
+  $ owi wasm sym --generate-abstract-invariant ./invariant_gen1.wat
   owi: [ERROR] Trap: integer divide by zero
   model {
     symbol symbol_0 i32 4242
   }
   owi: [ERROR] Reached problem!
   [13]
-  $ owi abs ./invariant_gen1.wat -v
+  $ owi wasm abs ./invariant_gen1.wat -v
   owi: [INFO] parsing      ...
   owi: [INFO] checking     ...
   owi: [INFO] typechecking ...

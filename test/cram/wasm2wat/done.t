@@ -1,4 +1,4 @@
-  $ owi wasm2wat done.wasm
+  $ owi wasm to_wat done.wasm
   (module
     (type (func (param i32) (param i32) (result i32)))
     (type (func))

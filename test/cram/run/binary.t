@@ -1,1 +1,1 @@
-  $ owi run binary_loop.wasm
+  $ owi wasm run binary_loop.wasm

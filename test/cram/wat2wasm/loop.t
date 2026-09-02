@@ -1,5 +1,5 @@
-  $ owi wat2wasm loop.wat
-  $ owi run loop.wasm -v
+  $ owi wasm of_wat loop.wat
+  $ owi wasm run loop.wasm -v
   owi: [INFO] typechecking ...
   owi: [INFO] linking      ...
   owi: [INFO] interpreting ...
@@ -69,7 +69,7 @@
   owi: [INFO] running instr : i64.const 42 (executed 0 times)
   owi: [INFO] stack         : [ i64.const 42 ]
   owi: [INFO] running instr : drop (executed 0 times)
-  $ owi wasm2wat loop.wasm
+  $ owi wasm to_wat loop.wasm
   (module
     (type (func (param i32) (result i64)))
     (type (func (result i64)))

@@ -1,7 +1,7 @@
-  $ owi replay --replay-file simple.scfg simple.wat
+  $ owi wasm replay --replay-file simple.scfg simple.wat
   owi: [ERROR] unreachable
   [96]
-  $ owi replay --replay-file simple.scfg simple.wat -v
+  $ owi wasm replay --replay-file simple.scfg simple.wat -v
   owi: [INFO] parsing      ...
   owi: [INFO] checking     ...
   owi: [INFO] typechecking ...

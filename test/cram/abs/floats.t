@@ -1,4 +1,4 @@
-  $ owi abs floats.wat -v
+  $ owi wasm abs floats.wat -v
   owi: [INFO] parsing      ...
   owi: [INFO] checking     ...
   owi: [INFO] typechecking ...
@@ -43,5 +43,3 @@
   owi: [INFO] stack         : [ f64 ... ]
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : return
-
-

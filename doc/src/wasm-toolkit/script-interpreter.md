@@ -20,6 +20,6 @@ Given the following `print.wast` file:
 You can print the value thanks to the `print_i32` function imported from the `spectest` module:
 
 ```sh
-$ owi script concrete ./print.wast
+$ owi wasm script concrete ./print.wast
 42
 ```

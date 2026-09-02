@@ -1,5 +1,5 @@
-test that we can emit to a file: 
-  $ owi wasm2wat m.wasm --emit-file
+test that we can emit to a file:
+  $ owi wasm to_wat m.wasm --emit-file
   $ cat m.wat
   (module
     (type (func (param i32) (param i32) (result i32)))

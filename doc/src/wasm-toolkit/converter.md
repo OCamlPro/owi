@@ -5,7 +5,7 @@
 Given a file `42.wasm`, you can convert it to `result.wat` and then run it:
 
 ```sh
-$ owi wasm2wat 42.wasm -o result.wat
+$ owi wasm to_wat 42.wasm -o result.wat
 $ cat result.wat
 (module
   (type (func))
@@ -17,7 +17,7 @@ $ cat result.wat
   )
   (start 0)
 )
-$ owi run result.wat -v
+$ owi wasm run result.wat -v
 owi: [INFO] parsing      ...
 owi: [INFO] checking     ...
 owi: [INFO] checking     ...
@@ -42,8 +42,8 @@ owi: [INFO] running instr : drop (executed 0 times)
 Given a file `42.wat`, you can convert it to `result.wasm` and then run it:
 
 ```sh
-$ owi wat2wasm 42.wat -o result.wasm
-$ owi run result.wasm -v
+$ owi wasm of_wat 42.wat -o result.wasm
+$ owi wasm run result.wasm -v
 owi: [INFO] typechecking ...
 owi: [INFO] linking      ...
 owi: [INFO] interpreting ...

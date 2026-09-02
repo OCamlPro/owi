@@ -1,4 +1,4 @@
-  $ owi abs loop.wat -v
+  $ owi wasm abs loop.wat -v
   owi: [INFO] parsing      ...
   owi: [INFO] checking     ...
   owi: [INFO] typechecking ...
@@ -87,7 +87,7 @@
   owi: [INFO] running instr : br_if 0
 
 
-  $ owi abs loop2.wat -v
+  $ owi wasm abs loop2.wat -v
   owi: [INFO] parsing      ...
   owi: [INFO] checking     ...
   owi: [INFO] typechecking ...
@@ -174,5 +174,3 @@
   owi: [INFO] stack         : [ i32 BottomMod ; i32 {0} ]
   owi: [INFO] locals        : [ (0 -> i32 BottomMod) ]
   owi: [INFO] running instr : br_if 0
-
-

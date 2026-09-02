@@ -26,7 +26,7 @@ Given the following `mini.wat` file containing symbols:
 You can get a model like this:
 
 ```sh
-$ owi sym ./mini.wat > mini.scfg
+$ owi wasm sym ./mini.wat > mini.scfg
 owi: [ERROR] Trap: unreachable
 owi: [ERROR] Reached problem!
 [13]
@@ -35,7 +35,7 @@ owi: [ERROR] Reached problem!
 Then you can replay the module execution with the values in the model like this:
 
 ```sh
-$ owi replay --replay-file mini.scfg mini.wat -v
+$ owi wasm replay --replay-file mini.scfg mini.wat -v
 owi: [INFO] parsing      ...
 owi: [INFO] checking     ...
 owi: [INFO] typechecking ...
