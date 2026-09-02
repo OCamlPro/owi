@@ -98,16 +98,21 @@
 
 #### Fundings & Sponsors
 
-This project was partly funded through the [NGI0 Core] Fund, a fund established by [NLnet] with financial support from the European Commission's [Next Generation Internet] program :
+This project was partly funded through the [NGI0 Core] Fund and the [NGI0 Commons Fund], established by [NLnet] with financial support from the European Commission's [Next Generation Internet] program :
 
 1. [First grant].
 2. [Second grant].
+3. [Third grant].
+4. [Fourth grant].
 
 [Next Generation Internet]: https://ngi.eu
 [NGI0 Core]: https://nlnet.nl/core
+[NGI0 Commons Fund]: https://nlnet.nl/commonsfund
 [NLnet]: https://nlnet.nl
 [First grant]: https://nlnet.nl/project/OWI
-[Second grant]: https://nlnet.nl/project/OWI-2/
+[Second grant]: https://nlnet.nl/project/OWI-2
+[Third grant]: https://nlnet.nl/project/owi-opt
+[Fourth grant]: https://nlnet.nl/project/wasm2ml2unikernel
 
 #### Spelling and pronunciation
 
