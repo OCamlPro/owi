@@ -151,31 +151,31 @@ let rotate_right = ext_rotate_right
 let rotate_left = ext_rotate_left
 
 let to_boolean (e : t) : Symbolic_boolean.t =
-  <span data-count="320773">m</span>atch Smtml.Typed.view e with
-  | <span data-count="307413">V</span>al (Bitv bv) -&gt;
-    if Smtml.Bitvector.eqz bv then <span data-count="111962">S</span>ymbolic_boolean.false_
-    else <span data-count="195451">S</span>ymbolic_boolean.true_
+  <span data-count="320839">m</span>atch Smtml.Typed.view e with
+  | <span data-count="307471">V</span>al (Bitv bv) -&gt;
+    if Smtml.Bitvector.eqz bv then <span data-count="111967">S</span>ymbolic_boolean.false_
+    else <span data-count="195505">S</span>ymbolic_boolean.true_
   | <span data-count="0">S</span>ymbol { ty = Ty_bool; _ } -&gt; Smtml.Typed.Bitv32.to_bool e
-  | <span data-count="12648">C</span>vtop (_, OfBool, cond) -&gt; Smtml.Typed.Unsafe.wrap cond
-  | <span data-count="712">_</span> -&gt; Smtml.Typed.Bitv32.to_bool e
+  | <span data-count="12652">C</span>vtop (_, OfBool, cond) -&gt; Smtml.Typed.Unsafe.wrap cond
+  | <span data-count="716">_</span> -&gt; Smtml.Typed.Bitv32.to_bool e
 
 let of_boolean (e : Symbolic_boolean.t) : t =
-  <span data-count="243615">m</span>atch Smtml.Typed.view e with
-  | <span data-count="120934">V</span>al True -&gt; one
-  | <span data-count="108354">V</span>al False -&gt; zero
-  | <span data-count="14327">_</span> -&gt; Smtml.Typed.Bitv32.of_bool e
+  <span data-count="243647">m</span>atch Smtml.Typed.view e with
+  | <span data-count="120962">V</span>al True -&gt; one
+  | <span data-count="108355">V</span>al False -&gt; zero
+  | <span data-count="14330">_</span> -&gt; Smtml.Typed.Bitv32.of_bool e
 
 let boolify e =
-  <span data-count="39998">m</span>atch Smtml.Typed.view e with
-  | <span data-count="38903">V</span>al (Bitv bv) when Smtml.Bitvector.eq<span data-count="38902">z</span> bv -&gt; <span data-count="258">S</span>ome Symbolic_boolean.false_
-  | <span data-count="38644">V</span>al (Bitv bv) when Smtml.Bitvector.eq_on<span data-count="38644">e</span> bv -&gt; <span data-count="652">S</span>ome Symbolic_boolean.true_
+  <span data-count="40014">m</span>atch Smtml.Typed.view e with
+  | <span data-count="38916">V</span>al (Bitv bv) when Smtml.Bitvector.eq<span data-count="38916">z</span> bv -&gt; <span data-count="258">S</span>ome Symbolic_boolean.false_
+  | <span data-count="38658">V</span>al (Bitv bv) when Smtml.Bitvector.eq_on<span data-count="38658">e</span> bv -&gt; <span data-count="654">S</span>ome Symbolic_boolean.true_
   | <span data-count="616">C</span>vtop (_, OfBool, cond) -&gt; Some (Smtml.Typed.Unsafe.wra<span data-count="616">p</span> cond)
-  | <span data-count="38471">_</span> -&gt; None
+  | <span data-count="38486">_</span> -&gt; None
 
 let logand e1 e2 =
-  <span data-count="19918">m</span>atch (boolif<span data-count="19917">y</span> e1, boolif<span data-count="19918">y</span> e2) with
+  <span data-count="19926">m</span>atch (boolif<span data-count="19926">y</span> e1, boolif<span data-count="19926">y</span> e2) with
   | <span data-count="569">S</span>ome b1, Some b2 -&gt; of_boolean (Symbolic_boolean.and<span data-count="569">_</span> b1 b2)
-  | <span data-count="19349">_</span> -&gt; Smtml.Typed.Bitv32.logand e1 e2
+  | <span data-count="19357">_</span> -&gt; Smtml.Typed.Bitv32.logand e1 e2
 
 let logor e1 e2 =
   <span data-count="81">m</span>atch (boolif<span data-count="81">y</span> e1, boolif<span data-count="81">y</span> e2) with
@@ -183,12 +183,12 @@ let logor e1 e2 =
   | <span data-count="58">_</span> -&gt; Smtml.Typed.Bitv32.logor e1 e2
 
 let eq_concrete (e : t) (c : Int32.t) : Symbolic_boolean.t =
-  <span data-count="910">l</span>et c = of_int32 c in
-  <span data-count="910">S</span>mtml.Typed.Bitv32.eq c e
+  <span data-count="867">l</span>et c = of_int32 c in
+  <span data-count="867">S</span>mtml.Typed.Bitv32.eq c e
 
 let min_int = of_int3<span data-count="858">2</span> Int32.min_int
 
-let eqz (v : t) = <span data-count="201114">e</span>q v zero
+let eqz (v : t) = <span data-count="201132">e</span>q v zero
 
 let ( = ) = eq
 
