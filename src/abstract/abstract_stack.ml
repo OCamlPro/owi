@@ -124,7 +124,7 @@ let pop_bool s ctx =
 
 let pop_n s n = (List.take n s, List.drop n s)
 
-let keep s n = List.filteri (fun i _hd -> i < n) s
+let keep s n = List.take n s
 
 let rec drop_n s n =
   if n = 0 then s
