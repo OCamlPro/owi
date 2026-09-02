@@ -2,9 +2,9 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type t = |
+type t = unit
 
-let init _ = assert false
+let init _ = ()
 
 let size _ = assert false
 

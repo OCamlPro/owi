@@ -13,4 +13,5 @@
   local_func.wat
   loop.wat
   loop2.wat
-  return.wat))
+  return.wat
+  select.wat))

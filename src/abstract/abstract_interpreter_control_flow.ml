@@ -6,6 +6,8 @@ module Stack = Abstract_stack
 module JumpMap = Abstract_jump_map
 module Value = Abstract_value
 
+let max_recursive_calls = 10
+
 exception RecursiveFunctionCall
 
 let gen_new_value ~widens a b state_a state_b
@@ -274,7 +276,12 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
 
   and eval_func ({ abs_state; _ } as state : Abstract_interpreter_state.t) idx
     (func : Binary.Func.t) =
-    if List.mem idx abs_state.call_stack then raise RecursiveFunctionCall;
+    let nb_recursive_calls =
+      List.fold_left
+        (fun acc call_frame -> acc + if call_frame = idx then 1 else 0)
+        0 abs_state.call_stack
+    in
+    if nb_recursive_calls > max_recursive_calls then raise RecursiveFunctionCall;
     Log.info (fun m ->
       m "calling func  : func %s" (Option.value func.id ~default:"anonymous") );
     let (None | Some _), (param_type, result_type) = func.type_f in
@@ -290,8 +297,7 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
     in
 
     let locals =
-      args @ List.map (fun (_str_opt, vt) -> init_value vt) func.locals
-      |> List.rev
+      List.rev args @ List.map (fun (_str_opt, vt) -> init_value vt) func.locals
       |> List.mapi (fun i x -> (i, x))
       |> Abstract_locals.of_list
     in
@@ -367,7 +373,8 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
       let next_state, jt = eval_expr state expr in
       let stack_size =
         match bt with
-        | Some (_i, (params, _res)) -> List.length params
+        | Some (_i, (_params, res)) ->
+          List.length state.abs_state.stack + List.length res
         | None -> 0
       in
       let jumps_br0 = join_jts stack_size (JumpMap.find_opt (I 0) jt) in
@@ -474,11 +481,11 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
       (state, jt_if)
     | Br_table (cases, default) ->
       let v, stack = Stack.pop_i32 stack in
-      let nb_cases = Array.length cases in
+      let nb_cases = Array.length cases |> Int32.of_int in
       let default =
         match
           Abstract_domain.assume ctx
-            (Abstract_i32.ge_u ctx v (Abstract_i32.of_int ctx nb_cases))
+            (Abstract_i32.ge_u ctx v (Abstract_i32.of_int32 ctx nb_cases))
         with
         | Some ctx ->
           let abs_state = { abs_state with ctx; stack } in
@@ -491,7 +498,8 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
           (fun i ->
             ( i
             , Abstract_domain.assume ctx
-                (Abstract_i32.eq ctx v (Abstract_i32.of_int ctx i)) ) )
+                (Abstract_i32.eq ctx v
+                   (Abstract_i32.of_int32 ctx (Int32.of_int i)) ) ) )
           cases
       in
       let all_cases =
@@ -545,17 +553,12 @@ let modul ~(env : Env.Abstract.t) ~(modul : Env.Abstract.modul) =
   let abs_state = Abstract_state.empty () in
   eval_exprs ~env ~modul abs_state
 
-let exec_vfunc_from_outside ~env ~ctx ~locals
+let exec_vfunc_from_outside ~env ~ctx ~stack
   (func : Abstract_extern.Func.t Kind.func) =
-  let abs_state = Abstract_state.empty_exec_state ~ctx ~locals in
+  let abs_state = Abstract_state.empty_exec_state ~ctx ~stack in
   try
     match func with
     | Kind.Wasm func -> (
-      let stack =
-        Abstract_locals.to_list locals
-        |> List.sort (fun (i1, _) (i2, _) -> compare i1 i2)
-        |> List.map snd
-      in
       let abs_state = { abs_state with stack } in
       match
         ConcreteFixpoint.eval_func { abs_state; env }

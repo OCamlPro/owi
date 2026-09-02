@@ -2083,7 +2083,6 @@ let eval_instr
     let (v1, v2), stack = Stack.pop2 stack in
     begin match Abstract_domain.query_boolean abs_state.ctx b with
     | Top ->
-      (* TODO test *)
       let init_res =
         Abstract_domain.Context.Result
           ( true
@@ -2099,11 +2098,11 @@ let eval_instr
       let abs_state = { abs_state with stack } in
       State { abs_state; env }
     | True ->
-      let stack = Stack.push stack v1 in
+      let stack = Stack.push stack v2 in
       let abs_state = { abs_state with stack } in
       State { abs_state; env }
     | False ->
-      let stack = Stack.push stack v2 in
+      let stack = Stack.push stack v1 in
       let abs_state = { abs_state with stack } in
       State { abs_state; env }
     | Bottom -> Unreachable

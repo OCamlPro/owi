@@ -2,7 +2,7 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type t
+type t = unit
 
 type i32
 
@@ -52,4 +52,4 @@ let get_limit_max _m = assert false
 
 let get_limits _ = assert false
 
-let init _ = assert false
+let init _ = ()

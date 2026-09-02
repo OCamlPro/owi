@@ -27,7 +27,7 @@ let to_boolean ctx x =
 let of_int ctx i = Abstract_domain.Binary_Forward.biconst ~size (Z.of_int i) ctx
 
 let of_int64 ctx i =
-  Abstract_domain.Binary_Forward.biconst ~size (Z.of_int64 i) ctx
+  Abstract_domain.Binary_Forward.biconst ~size (Z.of_int64_unsigned i) ctx
 
 let zero ctx = Abstract_domain.Binary_Forward.biconst ~size Z.zero ctx
 
@@ -46,7 +46,7 @@ let sub ctx x1 x2 =
   Abstract_domain.Binary_Forward.bisub ~flags ~size ctx x1 x2
 
 let mul ctx x1 x2 =
-  let flags = Operator.Flags.Bimul.pack ~nsw:true ~nuw:true in
+  let flags = Operator.Flags.Bimul.pack ~nsw:false ~nuw:false in
   Abstract_domain.Binary_Forward.bimul ~flags ~size ctx x1 x2
 
 let div_s ctx x1 x2 = Abstract_domain.Binary_Forward.bisdiv ~size ctx x1 x2
@@ -80,7 +80,9 @@ let gt_s ctx x1 x2 = lt_s ctx x2 x1
 let gt_u ctx x1 x2 = lt_u ctx x2 x1
 
 let shl ctx x1 x2 =
-  let flags = Operator.Flags.Bshl.pack ~nsw:true ~nuw:true in
+  let mask = of_int64 ctx 63L in
+  let x2 = and_ ctx x2 mask in
+  let flags = Operator.Flags.Bshl.pack ~nsw:false ~nuw:false in
   Abstract_domain.Binary_Forward.bshl ~flags ~size ctx x1 x2
 
 let extend_s ctx n x =

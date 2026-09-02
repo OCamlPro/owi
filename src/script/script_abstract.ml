@@ -19,12 +19,8 @@ let do_action env = function
         module_name func_name Wast.pp_consts args );
     let* f = Env.Abstract.get_exported_func ~env ~module_name ~func_name in
     let ctx = Env.Abstract.get_context ~env in
-    let stack =
-      List.rev_map (Abstract_value.of_script_const ctx ~ty) args
-      |> List.mapi (fun i v -> (i, v))
-    in
-    let locals = Abstract_locals.of_list stack in
-    I.exec_vfunc_from_outside ~ctx ~locals ~env f
+    let stack = List.rev_map (Abstract_value.of_script_const ctx ~ty) args in
+    I.exec_vfunc_from_outside ~ctx ~stack ~env f
     end
   | Get (_module_name, _name) ->
     Log.info (fun m -> m "get...");
@@ -55,12 +51,23 @@ let run_one ~no_exhaustion:_ (state : Env.Abstract.t Result.t) cmd =
                  ~ty )
               res stack )
     then begin
-      (* Log.err (fun m -> *)
-      (*   m "got:      %a@.expected: %a" Stack.pp stack Wast.pp_results res ); *)
+      let ctx = Env.Abstract.get_context ~env in
+      Log.err (fun m ->
+        m "got:      %a@;expected: %a"
+          (Fmt.Dump.list (Abstract_value.pp_with_ctx ctx))
+          stack Wast.pp_results res );
       Error `Bad_result
     end
     else Ok env
-  | _ -> assert false
+  | Assert assertion ->
+    Log.warn (fun m -> m "%a is not handled" Wast.pp_assertion assertion);
+    Ok env
+  | Register (name, modid) ->
+    let+ env = Env.Abstract.register_module ~env ~name ~modid in
+    env
+  | action ->
+    Log.err (fun m -> m "Unhandled command : %a" Wast.pp_cmd action);
+    assert false
 
 let run ~no_exhaustion script =
   let context = Abstract_domain.root_context () in
