@@ -1,1 +1,17 @@
 (data_only_dirs book)
+
+(executable
+ (name mdofcmdliner)
+ (modules mdofcmdliner)
+ (libraries bos cmdliner fmt.cli fmt.tty fpath logs.cli logs.fmt prelude)
+ (flags
+  (:standard -open Prelude)))
+
+(rule
+ (alias runtest)
+ (target
+  (dir manpages))
+ (deps %{bin:owi} ./mdofcmdliner.exe)
+ (action
+  (run ./mdofcmdliner.exe --executable %{bin:owi} --output %{target}))
+ (mode promote))
