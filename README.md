@@ -89,7 +89,7 @@
 
 ### References
 
-- TODO: man pages
+- [Manpages](./doc/manpages/owi.md)
 - TODO: high-level API for each language
 - TODO: Wasm API
 - [OCaml library API](https://ocamlpro.github.io/owi/ocaml-library-api/local/owi/index.html)
