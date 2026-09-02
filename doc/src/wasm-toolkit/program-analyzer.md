@@ -30,7 +30,7 @@ Given a file `useless.wat` with the following content:
 You can then create a file `useless.dot` containing the call graph of the programm:
 
 ```sh
-$ owi analyze cg useless.wat
+$ owi wasm analyze cg useless.wat
 ```
 ![image](call_graph.svg)
 
@@ -68,7 +68,7 @@ Given a file `useless.wat` with the following content:
 You can then create a file `useless.dot` containing the control flow graph of the function foo:
 
 ```sh
-$ owi analyze cfg useless.wat --entry-point=foo
+$ owi wasm analyze cfg useless.wat --entry-point=foo
 ```
 
 ![image](control-flow_graph.svg)

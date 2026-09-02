@@ -1,4 +1,4 @@
-  $ owi abs br_table.wat -v
+  $ owi wasm abs br_table.wat -v
   owi: [INFO] parsing      ...
   owi: [INFO] checking     ...
   owi: [INFO] typechecking ...
@@ -28,5 +28,3 @@
   owi: [INFO] stack         : [ i32 {1} ]
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : return
-
-

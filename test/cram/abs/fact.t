@@ -1,4 +1,4 @@
-  $ owi abs fact.wat -v
+  $ owi wasm abs fact.wat -v
   owi: [INFO] parsing      ...
   owi: [INFO] checking     ...
   owi: [INFO] typechecking ...
@@ -82,5 +82,3 @@
   owi: [INFO] stack         : [ i32 {2} ]
   owi: [INFO] locals        : [ (0 -> i32 {1});  (1 -> i32 {2}) ]
   owi: [INFO] running instr : drop
-
-

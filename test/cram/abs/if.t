@@ -1,4 +1,4 @@
-  $ owi abs if.wat -v
+  $ owi wasm abs if.wat -v
   owi: [INFO] parsing      ...
   owi: [INFO] checking     ...
   owi: [INFO] typechecking ...
@@ -28,5 +28,3 @@
   owi: [INFO] stack         : [ i32 {14} ]
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : drop
-
-

@@ -1,4 +1,4 @@
-  $ owi analyze cg ./call.wat
+  $ owi wasm analyze cg ./call.wat
   $ cat call.dot
   digraph call_graph {
     -1
@@ -29,7 +29,20 @@
     
     }
 
-  $ owi analyze cg ./call.wat --entry-point=a
+
+
+
+
+
+
+
+
+
+
+
+
+
+  $ owi wasm analyze cg ./call.wat --entry-point=a
   $ cat call.dot
   digraph call_graph {
     -1
@@ -59,7 +72,32 @@
     
     }
 
-  $ owi analyze cg ./indirect_call.wat --call-graph-mode=sound
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  $ owi wasm analyze cg ./indirect_call.wat --call-graph-mode=sound
   $ cat indirect_call.dot
   digraph call_graph {
     -1
@@ -83,7 +121,28 @@
     
     }
 
-  $ owi analyze cg ./indirect_call.wat --call-graph-mode=complete
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  $ owi wasm analyze cg ./indirect_call.wat --call-graph-mode=complete
   $ cat indirect_call.dot
   digraph call_graph {
     -1
@@ -108,3 +167,14 @@
     4 -> 3
     
     }
+
+
+
+
+
+
+
+
+
+
+

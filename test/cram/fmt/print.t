@@ -1,5 +1,5 @@
 print symbolic:
-  $ owi fmt m.wat
+  $ owi wasm fmt m.wat
   (module
     (func $f (param $x i32) (param $y i32) (result i32)
       local.get $x

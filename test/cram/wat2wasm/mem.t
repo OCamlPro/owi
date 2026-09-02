@@ -1,6 +1,6 @@
-  $ owi wat2wasm mem.wat
-  $ owi run mem.wasm
-  $ owi wasm2wat mem.wasm
+  $ owi wasm of_wat mem.wat
+  $ owi wasm run mem.wasm
+  $ owi wasm to_wat mem.wasm
   (module
     (type (func))
     (type (func (param i32) (param i32)))

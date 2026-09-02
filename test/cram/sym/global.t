@@ -1,3 +1,3 @@
 global vars stuff:
-  $ owi sym global.wat --deterministic-result-order
+  $ owi wasm sym global.wat --deterministic-result-order
   All OK!

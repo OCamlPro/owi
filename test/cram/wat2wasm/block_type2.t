@@ -1,5 +1,5 @@
-  $ owi wat2wasm block_type2.wat
-  $ owi wasm2wat block_type2.wasm
+  $ owi wasm of_wat block_type2.wat
+  $ owi wasm to_wat block_type2.wasm
   (module
     (type (func (result i32)))
     (type (func (param i32) (result i32)))
@@ -22,5 +22,5 @@
     )
     (start 1)
   )
-  $ owi sym block_type2.wasm
+  $ owi wasm sym block_type2.wasm
   All OK!

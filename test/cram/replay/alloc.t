@@ -6,5 +6,5 @@
   owi: [ERROR] Reached problem!
   [13]
 
-  $ owi replay --replay-file alloc.scfg alloc.wasm --entry-point=main
+  $ owi wasm replay --replay-file alloc.scfg alloc.wasm --entry-point=main
   Assertion failure was correctly reached!

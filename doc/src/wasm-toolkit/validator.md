@@ -19,7 +19,7 @@ Given a file `type_error.wat` with the following content:
 Running the validator is as simple as:
 
 ```sh
-$ owi validate ./type_error.wat
+$ owi wasm validate ./type_error.wat
 owi: [ERROR] type mismatch (expected [i32 i32] but stack is [i32])
 [35]
 ```
@@ -27,7 +27,7 @@ owi: [ERROR] type mismatch (expected [i32 i32] but stack is [i32])
 You can also print a more detailed trace with the `-v` option:
 
 ```sh
-$ owi validate ./type_error.wat -v
+$ owi wasm validate ./type_error.wat -v
 owi: [INFO] parsing      ...
 owi: [INFO] checking     ...
 owi: [INFO] checking     ...

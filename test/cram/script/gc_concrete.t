@@ -1,20 +1,20 @@
-  $ owi script concrete --no-exhaustion reference/array_copy.wast
-  $ owi script concrete --no-exhaustion reference/array_fill.wast
-  $ owi script concrete --no-exhaustion reference/array_init_data.wast
-  $ owi script concrete --no-exhaustion reference/array_init_elem.wast
-  $ owi script concrete --no-exhaustion reference/array_new_data.wast
-  $ owi script concrete --no-exhaustion reference/array_new_elem.wast
-  $ owi script concrete --no-exhaustion reference/array.wast
-  $ owi script concrete --no-exhaustion reference/br_on_cast_fail.wast
-  $ owi script concrete --no-exhaustion reference/br_on_cast.wast
-  $ owi script concrete --no-exhaustion reference/br_on_non_null.wast
-  $ owi script concrete --no-exhaustion reference/br_on_null.wast
-  $ owi script concrete --no-exhaustion reference/call_ref.wast
-  $ owi script concrete --no-exhaustion reference/extern.wast
-  $ owi script concrete --no-exhaustion reference/i31.wast
-  $ owi script concrete --no-exhaustion reference/ref_cast.wast
-  $ owi script concrete --no-exhaustion reference/ref_eq.wast
-  $ owi script concrete --no-exhaustion reference/ref_test.wast
-  $ owi script concrete --no-exhaustion reference/return_call_ref.wast
-  $ owi script concrete --no-exhaustion reference/struct.wast
-  $ owi script concrete --no-exhaustion reference/type-subtyping.wast
+  $ owi wasm script concrete --no-exhaustion reference/array_copy.wast
+  $ owi wasm script concrete --no-exhaustion reference/array_fill.wast
+  $ owi wasm script concrete --no-exhaustion reference/array_init_data.wast
+  $ owi wasm script concrete --no-exhaustion reference/array_init_elem.wast
+  $ owi wasm script concrete --no-exhaustion reference/array_new_data.wast
+  $ owi wasm script concrete --no-exhaustion reference/array_new_elem.wast
+  $ owi wasm script concrete --no-exhaustion reference/array.wast
+  $ owi wasm script concrete --no-exhaustion reference/br_on_cast_fail.wast
+  $ owi wasm script concrete --no-exhaustion reference/br_on_cast.wast
+  $ owi wasm script concrete --no-exhaustion reference/br_on_non_null.wast
+  $ owi wasm script concrete --no-exhaustion reference/br_on_null.wast
+  $ owi wasm script concrete --no-exhaustion reference/call_ref.wast
+  $ owi wasm script concrete --no-exhaustion reference/extern.wast
+  $ owi wasm script concrete --no-exhaustion reference/i31.wast
+  $ owi wasm script concrete --no-exhaustion reference/ref_cast.wast
+  $ owi wasm script concrete --no-exhaustion reference/ref_eq.wast
+  $ owi wasm script concrete --no-exhaustion reference/ref_test.wast
+  $ owi wasm script concrete --no-exhaustion reference/return_call_ref.wast
+  $ owi wasm script concrete --no-exhaustion reference/struct.wast
+  $ owi wasm script concrete --no-exhaustion reference/type-subtyping.wast

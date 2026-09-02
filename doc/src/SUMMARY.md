@@ -37,27 +37,6 @@
 - [Script Interpreter](wasm-toolkit/script-interpreter.md)
 - [Validator](wasm-toolkit/validator.md)
 
-# Man pages
-
-- [`owi`](manpages/owi.md)
-    - [`owi analyze`](manpages/owi-analyze.md)
-    - [`owi c`](manpages/owi-c.md)
-    - [`owi c++`](manpages/owi-cpp.md)
-    - [`owi fmt`](manpages/owi-fmt.md)
-    - [`owi instrument`](manpages/owi-instrument.md)
-    - [`owi iso`](manpages/owi-iso.md)
-    - [`owi llvm`](manpages/owi-llvm.md)
-    - [`owi replay`](manpages/owi-replay.md)
-    - [`owi run`](manpages/owi-run.md)
-    - [`owi rust`](manpages/owi-rust.md)
-    - [`owi script`](manpages/owi-script.md)
-    - [`owi sym`](manpages/owi-sym.md)
-    - [`owi validate`](manpages/owi-validate.md)
-    - [`owi version`](manpages/owi-version.md)
-    - [`owi wasm2wat`](manpages/owi-wasm2wat.md)
-    - [`owi wat2wasm`](manpages/owi-wat2wasm.md)
-    - [`owi zig`](manpages/owi-zig.md)
-
 # Public OCaml API
 
 - [Overview](ocaml-api/overview.md)

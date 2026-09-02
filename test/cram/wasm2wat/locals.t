@@ -1,4 +1,4 @@
-  $ owi wasm2wat locals.wasm
+  $ owi wasm to_wat locals.wasm
   (module
     (type (func (param i32) (param i32) (param i32)))
     (type (func))

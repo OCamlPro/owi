@@ -185,7 +185,7 @@ owi: [ERROR] Reached problem!
 {{#endtab }}
 {{#tab name="Wasm" }}
 ```sh
-$ owi sym ./f.wat --entry-point=f --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
+$ owi wasm sym ./f.wat --entry-point=f --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
 owi: [ERROR] Trap: integer divide by zero
 model {
   symbol symbol_0 i32 2
@@ -431,7 +431,7 @@ owi: [ERROR] Reached problem!
 {{#endtab }}
 {{#tab name="Wasm" }}
 ```sh
-$ owi sym ./f_byhand.wat --entry-point=check --no-assert-failure-expression-printing --verbosity=error
+$ owi wasm sym ./f_byhand.wat --entry-point=check --no-assert-failure-expression-printing --verbosity=error
 owi: [ERROR] Trap: integer divide by zero
 model {
   symbol symbol_0 i32 2
@@ -661,7 +661,7 @@ owi: [ERROR] Reached problem!
 {{#endtab }}
 {{#tab name="Wasm" }}
 ```sh
-$ owi sym ./mean.wat --entry-point=check --invoke-with-symbols
+$ owi wasm sym ./mean.wat --entry-point=check --invoke-with-symbols
 owi: [ERROR] Trap: unreachable
 model {
   symbol symbol_0 i32 -2147483648

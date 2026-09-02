@@ -48,7 +48,7 @@ And the following `mul2.wat` file:
 Owi can find an input for which the `mul` function of these two modules is not equivalent:
 
 ```sh
-$ owi iso ./mul1.wat ./mul2.wat -v -w1
+$ owi wasm iso ./mul1.wat ./mul2.wat -v -w1
 owi: [INFO] comparing ./mul1.wat and ./mul2.wat
 owi: [INFO] module owi_iso_module1 is ./mul1.wat
 owi: [INFO] module owi_iso_module2 is ./mul2.wat

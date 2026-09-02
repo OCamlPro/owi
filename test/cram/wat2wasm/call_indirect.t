@@ -1,5 +1,5 @@
-  $ owi wat2wasm call_indirect.wat
-  $ owi run call_indirect.wasm -v
+  $ owi wasm of_wat call_indirect.wat
+  $ owi wasm run call_indirect.wasm -v
   owi: [INFO] typechecking ...
   owi: [INFO] linking      ...
   owi: [INFO] interpreting ...
@@ -31,7 +31,7 @@
   owi: [INFO] running instr : i64.add (executed 0 times)
   owi: [INFO] stack         : [ i64.const 0 ]
   owi: [INFO] running instr : drop (executed 0 times)
-  $ owi wasm2wat call_indirect.wasm
+  $ owi wasm to_wat call_indirect.wasm
   (module
     (type (func (param i64) (result i64)))
     (type (func))

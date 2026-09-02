@@ -18,13 +18,13 @@ Given a file `42.wat` with the following content:
 Running the interpreter is as simple as:
 
 ```sh
-$ owi run ./42.wat
+$ owi wasm run ./42.wat
 ```
 
 Nothing is happening, so you can add the `-v` option to print an execution trace:
 
 ```sh
-$ owi run ./42.wat -v
+$ owi wasm run ./42.wat -v
 owi: [INFO] parsing      ...
 owi: [INFO] checking     ...
 owi: [INFO] checking     ...

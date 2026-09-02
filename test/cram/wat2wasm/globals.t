@@ -1,5 +1,5 @@
-  $ owi wat2wasm globals.wat
-  $ owi run globals.wasm -v
+  $ owi wasm of_wat globals.wat
+  $ owi wasm run globals.wasm -v
   owi: [INFO] typechecking ...
   owi: [INFO] linking      ...
   owi: [INFO] interpreting ...
@@ -18,7 +18,7 @@
   owi: [INFO] running instr : global.get 1 (executed 0 times)
   owi: [INFO] stack         : [ i64.const 42 ]
   owi: [INFO] running instr : drop (executed 0 times)
-  $ owi wasm2wat globals.wasm
+  $ owi wasm to_wat globals.wasm
   (module
     (type (func))
     (global i32 i32.const 42)

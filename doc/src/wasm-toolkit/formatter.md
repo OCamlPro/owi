@@ -43,7 +43,7 @@ i32.lt_s
 Owi will format it like this:
 
 ```sh
-$ owi fmt horrible.wat
+$ owi wasm fmt horrible.wat
 (module
   (memory 10)
   (func $f (param $n i32) (result i32)

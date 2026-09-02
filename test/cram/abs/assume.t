@@ -1,4 +1,4 @@
-  $ owi abs assume.wat -v
+  $ owi wasm abs assume.wat -v
   owi: [INFO] parsing      ...
   owi: [INFO] checking     ...
   owi: [INFO] typechecking ...
@@ -42,5 +42,3 @@
   owi: [INFO] running instr : call 7
   [Single_value_abstraction.Noop] Warning: No backpropagation for 'bisdiv'owi: [INFO] Passed division by zero check for expression:(uuid: 7) i32.div_s
   
-
-

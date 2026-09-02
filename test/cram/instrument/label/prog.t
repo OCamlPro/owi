@@ -1,4 +1,4 @@
-  $ owi instrument label --criteria=fc prog.wat
+  $ owi wasm instrument label --criteria=fc prog.wat
   generated 1 labels!
   $ cat prog.instrumented.wat
   (module
@@ -22,7 +22,7 @@
       unreachable
     )
   )
-  $ owi instrument label --criteria=sc prog.wat
+  $ owi wasm instrument label --criteria=sc prog.wat
   generated 7 labels!
   $ cat prog.instrumented.wat
   (module
@@ -58,7 +58,7 @@
       unreachable
     )
   )
-  $ owi instrument label --criteria=dc prog.wat
+  $ owi wasm instrument label --criteria=dc prog.wat
   generated 2 labels!
   $ cat prog.instrumented.wat
   (module

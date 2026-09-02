@@ -1,6 +1,6 @@
-  $ owi wat2wasm rec.wat
-  $ owi run rec.wasm
-  $ owi wasm2wat rec.wasm
+  $ owi wasm of_wat rec.wat
+  $ owi wasm run rec.wasm
+  $ owi wasm to_wat rec.wasm
   (module
     (type (func (param i32) (result i32)))
     (type (func))
@@ -58,4 +58,3 @@
     )
     (start 1)
   )
-

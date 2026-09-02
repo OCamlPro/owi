@@ -1,4 +1,4 @@
-  $ owi sym breadcrumbs.wat --with-breadcrumbs
+  $ owi wasm sym breadcrumbs.wat --with-breadcrumbs
   owi: [ERROR] Assert failure: false
   model {
     symbol symbol_0 i32 255
