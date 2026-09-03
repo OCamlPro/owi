@@ -26,7 +26,7 @@ let run_file ~parameters ~source_file =
 
   let* abstract_invariant =
     if parameters.generate_abstract_invariant then
-      let* env = Cmd_abs.env () in
+      let* env = Cmd_wasm_abs.env () in
       let+ modul, env =
         Compile.Binary.until_abstract_link ~unsafe ~name:None env modul
       in

@@ -65,7 +65,7 @@ let build_graph mode tables funcs (g, i) (f : (Binary.Func.t, 'a) Origin.t) =
   match f with
   | Origin.Local x ->
     let s = find_children mode tables funcs S.empty x.body.raw in
-    let cfg = Cmd_cfg.build_cfg_from_func x in
+    let cfg = Cmd_wasm_analyze_cfg.build_cfg_from_func x in
     ((i, Some cfg, s) :: g, i + 1)
   | Origin.Imported _ -> ((i, None, S.empty) :: g, i + 1)
 

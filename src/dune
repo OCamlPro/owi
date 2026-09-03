@@ -42,29 +42,29 @@
   bug
   choice_intf
   call_graph
-  cmd_abs
+  cmd_wasm_abs
   cmd_utils
-  cmd_c
-  cmd_call_graph
-  cmd_cfg
-  cmd_cpp
-  cmd_fmt
-  cmd_fuzz
-  cmd_go
-  cmd_haskell
-  cmd_instrument_label
-  cmd_iso
-  cmd_llvm
-  cmd_replay
-  cmd_run
-  cmd_rust
-  cmd_script
-  cmd_sym
-  cmd_validate
+  cmd_c_sym
+  cmd_wasm_analyze_cg
+  cmd_wasm_analyze_cfg
+  cmd_cpp_sym
+  cmd_wasm_fmt
+  cmd_wasm_fuzz
+  cmd_go_sym
+  cmd_haskell_sym
+  cmd_wasm_instrument_label
+  cmd_wasm_iso
+  cmd_llvm_sym
+  cmd_wasm_replay
+  cmd_wasm_run
+  cmd_rust_sym
+  cmd_wasm_script
+  cmd_wasm_sym
+  cmd_wasm_validate
   cmd_version
-  cmd_wasm2wat
-  cmd_wat2wasm
-  cmd_zig
+  cmd_wasm_to_wat
+  cmd_wasm_of_wat
+  cmd_zig_sym
   collection
   compile
   concrete_array

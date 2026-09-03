@@ -6,8 +6,8 @@ open Bos
 open Syntax
 
 let compile ~workspace ~out_file (files : Fpath.t list) : Fpath.t Result.t =
-  let* haskell_bin =
-    let name = "wasm32-wasi-ghc" in
+  let* tinygo_bin =
+    let name = "tinygo" in
     match OS.Cmd.resolve @@ Cmd.v name with
     | Error _ ->
       Fmt.error_msg
@@ -17,14 +17,18 @@ let compile ~workspace ~out_file (files : Fpath.t list) : Fpath.t Result.t =
   in
 
   let out = Option.value ~default:Fpath.(workspace / "out.wasm") out_file in
-  let haskell : Cmd.t =
+  let tinygo : Cmd.t =
     Cmd.(
-      haskell_bin
+      tinygo_bin % "build" % "-target" % "wasm" % "-no-debug" % "-opt" % "2"
+      % "-panic" % "trap"
+      (* initialization time is way too slow otherwise *)
+      % "-gc"
+      % "leaking"
       (* output and input *)
       % "-o"
       % p out
       %% Cmd.of_list (List.map p files)
-      (* % p libhaskell *) )
+      (* % p libtinygo *) )
   in
 
   let err =
@@ -35,12 +39,12 @@ let compile ~workspace ~out_file (files : Fpath.t list) : Fpath.t Result.t =
 
   let+ () =
     Log.bench_fn "compiling time" @@ fun () ->
-    match OS.Cmd.run ~err haskell with
+    match OS.Cmd.run ~err tinygo with
     | Ok _ as v -> v
     | Error (`Msg e) ->
-      Log.debug (fun m -> m "haskell failed: %s" e);
+      Log.debug (fun m -> m "tinygo failed: %s" e);
       Fmt.error_msg
-        "haskell failed: run with -vv to get the full error message if it was \
+        "tinygo failed: run with -vv to get the full error message if it was \
          not displayed above"
   in
 
@@ -51,7 +55,7 @@ let cmd ~(symbolic_parameters : Symbolic_parameters.t) ~files ~out_file :
   let* workspace =
     match symbolic_parameters.workspace with
     | Some path -> Ok path
-    | None -> OS.Dir.tmp "cmd_haskell_%s"
+    | None -> OS.Dir.tmp "cmd_tinygo_%s"
   in
   let* _did_create : bool = OS.Dir.create workspace in
 
@@ -60,4 +64,4 @@ let cmd ~(symbolic_parameters : Symbolic_parameters.t) ~files ~out_file :
 
   let parameters = { symbolic_parameters with workspace } in
 
-  Cmd_sym.cmd ~parameters ~source_file
+  Cmd_wasm_sym.cmd ~parameters ~source_file

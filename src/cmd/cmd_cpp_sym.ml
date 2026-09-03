@@ -127,4 +127,4 @@ let cmd ~(symbolic_parameters : Symbolic_parameters.t) ~arch:_ ~opt_lvl
 
   let parameters = { symbolic_parameters with workspace } in
 
-  Cmd_sym.cmd ~parameters ~source_file
+  Cmd_wasm_sym.cmd ~parameters ~source_file

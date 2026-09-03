@@ -1990,7 +1990,7 @@ module Symbolic_driver : sig
     -> unit Result.t
 end
 
-module Cmd_abs : sig
+module Cmd_wasm_abs : sig
   val cmd :
        source_file:Fpath.t
     -> entry_point:string option
@@ -1998,12 +1998,12 @@ module Cmd_abs : sig
     -> unit Result.t
 end
 
-module Cmd_sym : sig
+module Cmd_wasm_sym : sig
   val cmd :
     parameters:Symbolic_parameters.t -> source_file:Fpath.t -> unit Result.t
 end
 
-module Cmd_c : sig
+module Cmd_c_sym : sig
   val cmd :
        symbolic_parameters:Symbolic_parameters.t
     -> arch:int
@@ -2017,7 +2017,7 @@ module Cmd_c : sig
     -> unit Result.t
 end
 
-module Cmd_call_graph : sig
+module Cmd_wasm_analyze_cg : sig
   type mode =
     | Complete
     | Sound
@@ -2029,11 +2029,11 @@ module Cmd_call_graph : sig
     -> unit Result.t
 end
 
-module Cmd_cfg : sig
+module Cmd_wasm_analyze_cfg : sig
   val cmd : source_file:Fpath.t -> entry_point:string option -> unit Result.t
 end
 
-module Cmd_cpp : sig
+module Cmd_cpp_sym : sig
   val cmd :
        symbolic_parameters:Symbolic_parameters.t
     -> arch:int
@@ -2044,11 +2044,11 @@ module Cmd_cpp : sig
     -> unit Result.t
 end
 
-module Cmd_fmt : sig
+module Cmd_wasm_fmt : sig
   val cmd : inplace:bool -> files:Fpath.t list -> unit Result.t
 end
 
-module Cmd_fuzz : sig
+module Cmd_wasm_fuzz : sig
   val cmd :
        rounds:int option
     -> seed:int option
@@ -2059,7 +2059,7 @@ module Cmd_fuzz : sig
     -> unit Result.t
 end
 
-module Cmd_haskell : sig
+module Cmd_haskell_sym : sig
   val cmd :
        symbolic_parameters:Symbolic_parameters.t
     -> files:Fpath.t list
@@ -2067,7 +2067,7 @@ module Cmd_haskell : sig
     -> unit Result.t
 end
 
-module Cmd_instrument_label : sig
+module Cmd_wasm_instrument_label : sig
   val cmd :
        unsafe:bool
     -> coverage_criteria:Label.Coverage_criteria.t
@@ -2075,7 +2075,7 @@ module Cmd_instrument_label : sig
     -> unit Result.t
 end
 
-module Cmd_iso : sig
+module Cmd_wasm_iso : sig
   val cmd :
        deterministic_result_order:bool
     -> fail_mode:Symbolic_parameters.fail_mode
@@ -2096,7 +2096,7 @@ module Cmd_iso : sig
     -> unit Result.t
 end
 
-module Cmd_llvm : sig
+module Cmd_llvm_sym : sig
   val cmd :
        symbolic_parameters:Symbolic_parameters.t
     -> files:Fpath.t list
@@ -2104,7 +2104,7 @@ module Cmd_llvm : sig
     -> unit Result.t
 end
 
-module Cmd_replay : sig
+module Cmd_wasm_replay : sig
   val cmd :
        unsafe:bool
     -> replay_file:Fpath.t
@@ -2114,7 +2114,7 @@ module Cmd_replay : sig
     -> unit Result.t
 end
 
-module Cmd_run : sig
+module Cmd_wasm_run : sig
   val cmd :
        unsafe:bool
     -> timeout:float option
@@ -2123,7 +2123,7 @@ module Cmd_run : sig
     -> unit Result.t
 end
 
-module Cmd_rust : sig
+module Cmd_rust_sym : sig
   val cmd :
        symbolic_parameters:Symbolic_parameters.t
     -> arch:int
@@ -2134,7 +2134,7 @@ module Cmd_rust : sig
     -> unit Result.t
 end
 
-module Cmd_script : sig
+module Cmd_wasm_script : sig
   val cmd_concrete : files:Fpath.t list -> no_exhaustion:bool -> unit Result.t
 
   val cmd_symbolic : files:Fpath.t list -> no_exhaustion:bool -> unit Result.t
@@ -2142,7 +2142,7 @@ module Cmd_script : sig
   val cmd_abstract : files:Fpath.t list -> no_exhaustion:bool -> unit Result.t
 end
 
-module Cmd_go : sig
+module Cmd_go_sym : sig
   val cmd :
        symbolic_parameters:Symbolic_parameters.t
     -> files:Fpath.t list
@@ -2150,7 +2150,7 @@ module Cmd_go : sig
     -> unit Result.t
 end
 
-module Cmd_validate : sig
+module Cmd_wasm_validate : sig
   val cmd : files:Fpath.t list -> unit Result.t
 end
 
@@ -2160,7 +2160,7 @@ module Cmd_version : sig
   val cmd : unit -> unit Result.t
 end
 
-module Cmd_wasm2wat : sig
+module Cmd_wasm_to_wat : sig
   val cmd :
        source_file:Fpath.t
     -> emit_file:bool
@@ -2168,7 +2168,7 @@ module Cmd_wasm2wat : sig
     -> unit Result.t
 end
 
-module Cmd_wat2wasm : sig
+module Cmd_wasm_of_wat : sig
   val cmd :
        unsafe:bool
     -> out_file:Fpath.t option
@@ -2176,7 +2176,7 @@ module Cmd_wat2wasm : sig
     -> unit Result.t
 end
 
-module Cmd_zig : sig
+module Cmd_zig_sym : sig
   val cmd :
        symbolic_parameters:Symbolic_parameters.t
     -> includes:Fpath.t list
