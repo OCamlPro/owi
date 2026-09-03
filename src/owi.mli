@@ -2070,7 +2070,8 @@ end
 
 module Cmd_wasm_fuzz : sig
   val cmd :
-       rounds:int option
+       entry_point:string option
+    -> rounds:int option
     -> seed:int option
     -> source_file:Fpath.t
     -> timeout:float option

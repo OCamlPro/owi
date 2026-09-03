@@ -3,7 +3,8 @@
 (* Written by the Owi programmers *)
 
 val cmd :
-     rounds:int option
+     entry_point:string option
+  -> rounds:int option
   -> seed:int option
   -> source_file:Fpath.t
   -> timeout:float option
