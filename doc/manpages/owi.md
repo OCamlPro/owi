@@ -54,7 +54,7 @@ COMMANDS
            Work with C programs.
 
        c++ [COMMAND] …
-           Work with C programs.
+           Work with C++ programs.
 
        go [COMMAND] …
            Work with Go programs.

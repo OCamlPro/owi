@@ -679,7 +679,7 @@ let cli =
         [ cmd "sym" "Run the symbolic execution engine on a C program."
             C.Sym.cmd
         ]
-    ; group "c++" "Work with C programs."
+    ; group "c++" "Work with C++ programs."
         [ cmd "sym" "Run the symbolic execution engine on a C++ program."
             Cpp.Sym.cmd
         ]
