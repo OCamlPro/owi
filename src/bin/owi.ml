@@ -312,6 +312,44 @@ let symbolic_parameters default_entry_point =
 
 (* owi c *)
 module C = struct
+  module Fuzz = struct
+    let cmd =
+      let+ arch
+      and+ property =
+        let doc = "property file" in
+        Arg.(
+          value
+          & opt (some existing_file_conv) None
+          & info [ "property" ] ~doc ~docv:"FILE" )
+      and+ includes
+      and+ opt_lvl
+      and+ testcomp =
+        let doc = "test-comp mode" in
+        Arg.(value & flag & info [ "testcomp" ] ~doc)
+      and+ files
+      and+ () = setup_log
+      and+ eacsl =
+        let doc =
+          "e-acsl mode, refer to \
+           https://frama-c.com/download/e-acsl/e-acsl-implementation.pdf for \
+           Frama-C's current language feature implementations"
+        in
+        Arg.(value & flag & info [ "e-acsl" ] ~doc)
+      and+ out_file
+      and+ unsafe
+      and+ rounds
+      and+ timeout
+      and+ timeout_instr
+      and+ () = setup_log
+      and+ seed
+      and+ workspace
+      and+ entry_point = entry_point (Some "main") in
+
+      Cmd_c_fuzz.cmd ~rounds ~seed ~workspace ~entry_point ~arch ~property
+        ~testcomp ~opt_lvl ~includes ~files ~eacsl ~out_file ~timeout
+        ~timeout_instr ~unsafe
+  end
+
   (* owi c sym *)
   module Sym = struct
     let cmd =
@@ -676,7 +714,8 @@ let cli =
 
   Cmd.group ~default owi_info
     [ group "c" "Work with C programs."
-        [ cmd "sym" "Run the symbolic execution engine on a C program."
+        [ cmd "fuzz" "Run the fuzzer." C.Fuzz.cmd
+        ; cmd "sym" "Run the symbolic execution engine on a C program."
             C.Sym.cmd
         ]
     ; group "c++" "Work with C++ programs."

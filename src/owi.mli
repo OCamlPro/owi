@@ -2017,6 +2017,26 @@ module Cmd_c_sym : sig
     -> unit Result.t
 end
 
+module Cmd_c_fuzz : sig
+  val cmd :
+       rounds:int option
+    -> seed:int option
+    -> workspace:Fpath.t option
+    -> entry_point:string option
+    -> arch:int
+    -> property:Fpath.t option
+    -> testcomp:bool
+    -> opt_lvl:string
+    -> includes:Fpath.t list
+    -> files:Fpath.t list
+    -> eacsl:bool
+    -> out_file:Fpath.t option
+    -> timeout:float option
+    -> timeout_instr:int option
+    -> unsafe:bool
+    -> unit Result.t
+end
+
 module Cmd_wasm_analyze_cg : sig
   type mode =
     | Complete

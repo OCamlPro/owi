@@ -15,7 +15,7 @@
 
 <hr />
 
-**Owi** is a tool to perform seamless program analysis of C, C++, Go, Haskell, LLVM, Rust, Wasm and Zig programs.
+Owi is a tool to perform seamless program analysis of C, C++, Go, Haskell, LLVM, Rust, Wasm and Zig programs.
 
 Owi analyzes Wasm programs, and we have built-in supports for compiling higher-level sources languages to Wasm and analyzing them.
 This way, we are even able to analyze cross-languages programs, for instance, a Rust program calling into a C library.
