@@ -312,91 +312,110 @@ let symbolic_parameters default_entry_point =
 
 (* owi c *)
 module C = struct
-  let cmd =
-    let+ arch
-    and+ property =
-      let doc = "property file" in
-      Arg.(
-        value
-        & opt (some existing_file_conv) None
-        & info [ "property" ] ~doc ~docv:"FILE" )
-    and+ includes
-    and+ opt_lvl
-    and+ testcomp =
-      let doc = "test-comp mode" in
-      Arg.(value & flag & info [ "testcomp" ] ~doc)
-    and+ files
-    and+ () = setup_log
-    and+ eacsl =
-      let doc =
-        "e-acsl mode, refer to \
-         https://frama-c.com/download/e-acsl/e-acsl-implementation.pdf for \
-         Frama-C's current language feature implementations"
-      in
-      Arg.(value & flag & info [ "e-acsl" ] ~doc)
-    and+ out_file
-    and+ symbolic_parameters = symbolic_parameters (Some "main") in
+  (* owi c sym *)
+  module Sym = struct
+    let cmd =
+      let+ arch
+      and+ property =
+        let doc = "property file" in
+        Arg.(
+          value
+          & opt (some existing_file_conv) None
+          & info [ "property" ] ~doc ~docv:"FILE" )
+      and+ includes
+      and+ opt_lvl
+      and+ testcomp =
+        let doc = "test-comp mode" in
+        Arg.(value & flag & info [ "testcomp" ] ~doc)
+      and+ files
+      and+ () = setup_log
+      and+ eacsl =
+        let doc =
+          "e-acsl mode, refer to \
+           https://frama-c.com/download/e-acsl/e-acsl-implementation.pdf for \
+           Frama-C's current language feature implementations"
+        in
+        Arg.(value & flag & info [ "e-acsl" ] ~doc)
+      and+ out_file
+      and+ symbolic_parameters = symbolic_parameters (Some "main") in
 
-    Cmd_c.cmd ~symbolic_parameters ~arch ~property ~includes ~opt_lvl ~out_file
-      ~testcomp ~files ~eacsl
+      Cmd_c.cmd ~symbolic_parameters ~arch ~property ~includes ~opt_lvl
+        ~out_file ~testcomp ~files ~eacsl
+  end
 end
 
-(* owi cpp *)
+(* owi c++ *)
 module Cpp = struct
-  let cmd =
-    let+ arch
-    and+ includes
-    and+ opt_lvl
-    and+ files
-    and+ out_file
-    and+ () = setup_log
-    and+ symbolic_parameters = symbolic_parameters (Some "main") in
+  (* owi c++ sym *)
+  module Sym = struct
+    let cmd =
+      let+ arch
+      and+ includes
+      and+ opt_lvl
+      and+ files
+      and+ out_file
+      and+ () = setup_log
+      and+ symbolic_parameters = symbolic_parameters (Some "main") in
 
-    Cmd_cpp.cmd ~symbolic_parameters ~out_file ~arch ~includes ~opt_lvl ~files
+      Cmd_cpp.cmd ~symbolic_parameters ~out_file ~arch ~includes ~opt_lvl ~files
+  end
 end
 
 (* owi haskell *)
 module Haskell = struct
-  let cmd =
-    let+ files
-    and+ out_file
-    and+ () = setup_log
-    and+ symbolic_parameters = symbolic_parameters (Some "_start") in
-    Cmd_haskell.cmd ~symbolic_parameters ~files ~out_file
+  (* owi haskell sym *)
+  module Sym = struct
+    let cmd =
+      let+ files
+      and+ out_file
+      and+ () = setup_log
+      and+ symbolic_parameters = symbolic_parameters (Some "_start") in
+      Cmd_haskell.cmd ~symbolic_parameters ~files ~out_file
+  end
 end
 
 (* owi llvm *)
 module Llvm = struct
-  let cmd =
-    let+ files
-    and+ out_file
-    and+ () = setup_log
-    and+ symbolic_parameters = symbolic_parameters None in
-    Cmd_llvm.cmd ~symbolic_parameters ~files ~out_file
+  (* owi llvm sym *)
+  module Sym = struct
+    let cmd =
+      let+ files
+      and+ out_file
+      and+ () = setup_log
+      and+ symbolic_parameters = symbolic_parameters None in
+      Cmd_llvm.cmd ~symbolic_parameters ~files ~out_file
+  end
 end
 
 (* owi rust *)
 module Rust = struct
-  let cmd =
-    let+ arch
-    and+ includes
-    and+ opt_lvl
-    and+ files
-    and+ out_file
-    and+ () = setup_log
-    and+ symbolic_parameters = symbolic_parameters (Some "main") in
+  (* owi rust sym *)
+  module Sym = struct
+    let cmd =
+      let+ arch
+      and+ includes
+      and+ opt_lvl
+      and+ files
+      and+ out_file
+      and+ () = setup_log
+      and+ symbolic_parameters = symbolic_parameters (Some "main") in
 
-    Cmd_rust.cmd ~symbolic_parameters ~arch ~opt_lvl ~includes ~files ~out_file
+      Cmd_rust.cmd ~symbolic_parameters ~arch ~opt_lvl ~includes ~files
+        ~out_file
+  end
 end
 
 (* owi go *)
 module Go = struct
-  let cmd =
-    let+ files
-    and+ out_file
-    and+ () = setup_log
-    and+ symbolic_parameters = symbolic_parameters (Some "_start") in
-    Cmd_tinygo.cmd ~symbolic_parameters ~files ~out_file
+  (* owi go sym *)
+  module Sym = struct
+    let cmd =
+      let+ files
+      and+ out_file
+      and+ () = setup_log
+      and+ symbolic_parameters = symbolic_parameters (Some "_start") in
+      Cmd_go.cmd ~symbolic_parameters ~files ~out_file
+  end
 end
 
 (* owi version *)
@@ -617,124 +636,115 @@ end
 
 (* owi zig *)
 module Zig = struct
-  let cmd =
-    let+ includes
-    and+ files
-    and+ out_file
-    and+ () = setup_log
-    and+ symbolic_parameters = symbolic_parameters (Some "_start") in
-    Cmd_zig.cmd ~symbolic_parameters ~includes ~files ~out_file
+  (* owi zig sym *)
+  module Sym = struct
+    let cmd =
+      let+ includes
+      and+ files
+      and+ out_file
+      and+ () = setup_log
+      and+ symbolic_parameters = symbolic_parameters (Some "_start") in
+      Cmd_zig.cmd ~symbolic_parameters ~includes ~files ~out_file
+  end
 end
 
 (* owi *)
 
-let info name ~doc = Cmd.info name ~doc ~version ~sdocs ~man:shared_man
+let info name doc = Cmd.info name ~doc ~version ~sdocs ~man:shared_man
+
+let default =
+  Term.(ret (const (fun (_ : _ list) -> `Help (`Plain, None)) $ copts_t))
+
+let group name doc group = Cmd.group ~default (info name doc) group
+
+let cmd name doc cmd = Cmd.v (info name doc) cmd
 
 let cli =
   let owi_info =
-    let doc = "Seamless program analysis for C, C++, Go, Rust, Wasm and Zig." in
+    let doc =
+      "Seamless program analysis for C, C++, Go, Haskell, LLVM, Rust, Wasm and \
+       Zig."
+    in
     let man =
       [ `S Manpage.s_bugs; `P "Email them to <owi.wildcat119@passmail.com>." ]
     in
     Cmd.info "owi" ~version ~doc ~sdocs ~man
   in
-  let default =
-    Term.(ret (const (fun (_ : _ list) -> `Help (`Plain, None)) $ copts_t))
-  in
 
-  Cmd.group owi_info ~default
-    [ Cmd.v
-        (info "c" ~doc:"Run the symbolic execution engine on a C program.")
-        C.cmd
-    ; Cmd.v
-        (info "c++" ~doc:"Run the symbolic execution engine on a C++ program.")
-        Cpp.cmd
-    ; Cmd.v
-        (info "go" ~doc:"Run the symbolic execution engine on a Go program.")
-        Go.cmd
-    ; Cmd.v
-        (info "haskell"
-           ~doc:"Run the symbolic execution engine on a Haskell program." )
-        Haskell.cmd
-    ; Cmd.v
-        (info "llvm" ~doc:"Run the symbolic execution engine on a LLVM program.")
-        Llvm.cmd
-    ; Cmd.v
-        (info "rust" ~doc:"Run the symbolic execution engine on a Rust program.")
-        Rust.cmd
-    ; Cmd.v (info "version" ~doc:"Print some version informations.") Version.cmd
-    ; Cmd.group
-        (info "wasm" ~doc:"Work with Wasm programs.")
-        ~default
-        [ Cmd.v (info "abs" ~doc:"Run the abstract interpreter.") Wasm.Abs.cmd
-        ; Cmd.group
-            (info "analyze" ~doc:"Visualize and get statistics.")
-            [ Cmd.v (info "cg" ~doc:"Build a call graph.") Wasm.Analyze.Cg.cmd
-            ; Cmd.v
-                (info "cfg" ~doc:"Build a control-flow graph.")
-                Wasm.Analyze.Cfg.cmd
+  Cmd.group ~default owi_info
+    [ group "c" "Work with C programs."
+        [ cmd "sym" "Run the symbolic execution engine on a C program."
+            C.Sym.cmd
+        ]
+    ; group "c++" "Work with C programs."
+        [ cmd "sym" "Run the symbolic execution engine on a C++ program."
+            Cpp.Sym.cmd
+        ]
+    ; group "go" "Work with Go programs."
+        [ cmd "sym" "Run the symbolic execution engine on a Go program."
+            Go.Sym.cmd
+        ]
+    ; group "haskell" "Work with Haskell programs."
+        [ cmd "sym" "Run the symbolic execution engine on a Haskell program."
+            Haskell.Sym.cmd
+        ]
+    ; group "llvm" "Work with LLVM programs."
+        [ cmd "sym" "Run the symbolic execution engine on a LLVM program."
+            Llvm.Sym.cmd
+        ]
+    ; group "rust" "Work with Rust programs."
+        [ cmd "sym" "Run the symbolic execution engine on a Rust program."
+            Rust.Sym.cmd
+        ]
+    ; cmd "version" "Print some version informations." Version.cmd
+    ; group "wasm" "Work with Wasm programs."
+        [ cmd "abs" "Run the abstract interpreter." Wasm.Abs.cmd
+        ; group "analyze" "Visualize and get statistics."
+            [ cmd "cg" "Build a call graph." Wasm.Analyze.Cg.cmd
+            ; cmd "cfg" "Build a control-flow graph." Wasm.Analyze.Cfg.cmd
             ]
-        ; Cmd.v (info "fmt" ~doc:"Format a .wat or .wast file.") Wasm.Fmt.cmd
-        ; Cmd.v (info "fuzz" ~doc:"Run the fuzzer.") Wasm.Fuzz.cmd
-        ; Cmd.group
-            (info "instrument" ~doc:"Instrument a program in various ways.")
-            [ Cmd.v
-                (info "label"
-                   ~doc:
-                     "Generate an instrumented file with labels corresponding \
-                      to test objectives for a given coverage criteria." )
+        ; cmd "fmt" "Format a .wat or .wast file." Wasm.Fmt.cmd
+        ; cmd "fuzz" "Run the fuzzer." Wasm.Fuzz.cmd
+        ; group "instrument" "Instrument a program in various ways."
+            [ cmd "label"
+                "Generate an instrumented file with labels corresponding to \
+                 test objectives for a given coverage criteria."
                 Wasm.Instrument.Label.cmd
             ]
-        ; Cmd.v
-            (info "iso"
-               ~doc:
-                 "Check the iso-functionnality of two modules by comparing the \
-                  output when calling their exports." )
+        ; cmd "iso"
+            "Check the iso-functionnality of two modules by comparing the \
+             output when calling their exports."
             Wasm.Iso.cmd
-        ; Cmd.v
-            (info "replay"
-               ~doc:
-                 "Replay a module by replacing symbols with concrete values \
-                  from a model." )
+        ; cmd "replay"
+            "Replay a module by replacing symbols with concrete values from a \
+             model."
             Wasm.Replay.cmd
-        ; Cmd.v (info "run" ~doc:"Run the concrete interpreter.") Wasm.Run.cmd
-        ; Cmd.group
-            (info "script" ~doc:"Run a reference test suite script (.wast).")
-            [ Cmd.v
-                (info "concrete"
-                   ~doc:
-                     "Run a reference test suite (.wast) using the concrete \
-                      interpreter." )
+        ; cmd "run" "Run the concrete interpreter." Wasm.Run.cmd
+        ; group "script" "Run a reference test suite script (.wast)."
+            [ cmd "concrete"
+                "Run a reference test suite (.wast) using the concrete \
+                 interpreter."
                 Wasm.Script.Concrete.cmd
-            ; Cmd.v
-                (info "symbolic"
-                   ~doc:
-                     "Run a reference test suite (.wast) using the symbolic \
-                      interpreter." )
+            ; cmd "symbolic"
+                "Run a reference test suite (.wast) using the symbolic \
+                 interpreter."
                 Wasm.Script.Symbolic.cmd
-            ; Cmd.v
-                (info "abstract"
-                   ~doc:
-                     "Run a reference test suite (.wast) using the abstract \
-                      interpreter." )
+            ; cmd "abstract"
+                "Run a reference test suite (.wast) using the abstract \
+                 interpreter."
                 Wasm.Script.Abstract.cmd
             ]
-        ; Cmd.v
-            (info "sym" ~doc:"Run the symbolic execution engine.")
-            Wasm.Sym.cmd
-        ; Cmd.v (info "validate" ~doc:"Validate a module.") Wasm.Validate.cmd
-        ; Cmd.v
-            (info "to_wat"
-               ~doc:"Generate a text file (.wat) from a binary file (.wasm)." )
+        ; cmd "sym" "Run the symbolic execution engine." Wasm.Sym.cmd
+        ; cmd "validate" "Validate a module." Wasm.Validate.cmd
+        ; cmd "to_wat" "Generate a text file (.wat) from a binary file (.wasm)."
             Wasm.To_wat.cmd
-        ; Cmd.v
-            (info "of_wat"
-               ~doc:"Generate a binary file (.wasm) from a text file (.wat)." )
+        ; cmd "of_wat" "Generate a binary file (.wasm) from a text file (.wat)."
             Wasm.Of_wat.cmd
         ]
-    ; Cmd.v
-        (info "zig" ~doc:"Run the symbolic execution engine on a Zig program.")
-        Zig.cmd
+    ; group "zig" "Work with Zig programs."
+        [ cmd "sym" "Run the symbolic execution engine on a Zig program."
+            Zig.Sym.cmd
+        ]
     ]
 
 let exit_code =

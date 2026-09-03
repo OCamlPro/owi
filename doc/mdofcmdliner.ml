@@ -261,7 +261,7 @@ let exit_code_of_outcome = function
   | Error `Exn -> Cmdliner.Cmd.Exit.internal_error
 
 let print_outcome = function
-  | Ok () -> Logs.app (fun m -> m "OK!")
+  | Ok () -> Logs.info (fun m -> m "OK!")
   | Error (`Msg msg) -> Logs.err (fun m -> m "%s" msg)
   | Error `Exn -> Logs.err (fun m -> m "unhandled exception")
   | Error (`Term | `Parse) -> Logs.err (fun m -> m "command line parsing error")

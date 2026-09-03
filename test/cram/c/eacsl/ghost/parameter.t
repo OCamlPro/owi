@@ -1,2 +1,2 @@
-  $ owi c --e-acsl ./parameter.c
+  $ owi c sym --e-acsl ./parameter.c
   All OK!

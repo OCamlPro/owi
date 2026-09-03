@@ -1,16 +1,15 @@
-[owi](owi.md) › **owi tinygo**
+[owi](owi.md) › [owi zig](owi-zig.md) › **owi zig sym**
 
-# owi tinygo
+# owi zig sym
 
 ## Help
 
 ```text
 NAME
-       owi-tinygo - Compile a TinyGo file to Wasm and run the symbolic
-       interpreter on it
+       owi-zig-sym - Run the symbolic execution engine on a Zig program.
 
 SYNOPSIS
-       owi tinygo [OPTION]… FILE…
+       owi zig sym [OPTION]… FILE…
 
 ARGUMENTS
        FILE (required)
@@ -38,6 +37,9 @@ OPTIONS
 
        --generate-abstract-invariant
            Generate invariants by running the abstract interpretation engine.
+
+       -I VALUE
+           headers path
 
        --invoke-with-symbols
            Invoke the entry point of the program with symbolic values instead
@@ -122,7 +124,7 @@ COMMON OPTIONS
            Show version information.
 
 EXIT STATUS
-       owi tinygo exits with:
+       owi zig sym exits with:
 
        0   on success.
 
@@ -133,7 +135,7 @@ EXIT STATUS
        125 on unexpected internal errors (bugs).
 
 ENVIRONMENT
-       These environment variables affect the execution of owi tinygo:
+       These environment variables affect the execution of owi zig sym:
 
        OWI_VERBOSITY
            See option --verbosity.

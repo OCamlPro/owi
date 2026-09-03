@@ -2142,7 +2142,7 @@ module Cmd_script : sig
   val cmd_abstract : files:Fpath.t list -> no_exhaustion:bool -> unit Result.t
 end
 
-module Cmd_tinygo : sig
+module Cmd_go : sig
   val cmd :
        symbolic_parameters:Symbolic_parameters.t
     -> files:Fpath.t list

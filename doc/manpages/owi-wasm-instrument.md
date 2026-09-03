@@ -13,7 +13,7 @@ NAME
        owi-wasm-instrument - Instrument a program in various ways.
 
 SYNOPSIS
-       owi wasm instrument COMMAND …
+       owi wasm instrument [COMMAND] …
 
 COMMANDS
        label [--criteria=VALUE] [--unsafe] [OPTION]… FILE

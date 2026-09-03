@@ -6,7 +6,7 @@
 
 ```text
 NAME
-       owi-version - Print some version informations
+       owi-version - Print some version informations.
 
 SYNOPSIS
        owi version [OPTION]…

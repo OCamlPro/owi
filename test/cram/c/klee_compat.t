@@ -1,2 +1,2 @@
-  $ owi c ./klee_compat.c
+  $ owi c sym ./klee_compat.c
   All OK!

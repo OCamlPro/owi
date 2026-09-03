@@ -50,6 +50,7 @@
   cmd_cpp
   cmd_fmt
   cmd_fuzz
+  cmd_go
   cmd_haskell
   cmd_instrument_label
   cmd_iso
@@ -59,7 +60,6 @@
   cmd_rust
   cmd_script
   cmd_sym
-  cmd_tinygo
   cmd_validate
   cmd_version
   cmd_wasm2wat

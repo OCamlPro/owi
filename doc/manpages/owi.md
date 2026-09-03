@@ -4,11 +4,17 @@
 ## Subcommands
 
 - [`owi c`](owi-c.md)
+  - [`owi c sym`](owi-c-sym.md)
 - [`owi c++`](owi-c--.md)
+  - [`owi c++ sym`](owi-c---sym.md)
+- [`owi go`](owi-go.md)
+  - [`owi go sym`](owi-go-sym.md)
 - [`owi haskell`](owi-haskell.md)
+  - [`owi haskell sym`](owi-haskell-sym.md)
 - [`owi llvm`](owi-llvm.md)
+  - [`owi llvm sym`](owi-llvm-sym.md)
 - [`owi rust`](owi-rust.md)
-- [`owi tinygo`](owi-tinygo.md)
+  - [`owi rust sym`](owi-rust-sym.md)
 - [`owi version`](owi-version.md)
 - [`owi wasm`](owi-wasm.md)
   - [`owi wasm abs`](owi-wasm-abs.md)
@@ -31,46 +37,45 @@
   - [`owi wasm to_wat`](owi-wasm-to_wat.md)
   - [`owi wasm validate`](owi-wasm-validate.md)
 - [`owi zig`](owi-zig.md)
+  - [`owi zig sym`](owi-zig-sym.md)
 
 ## Help
 
 ```text
 NAME
-       owi - Seamless program analysis for C, C++, Go, Rust, Wasm and Zig.
+       owi - Seamless program analysis for C, C++, Go, Haskell, LLVM, Rust,
+       Wasm and Zig.
 
 SYNOPSIS
        owi [COMMAND] …
 
 COMMANDS
-       c [OPTION]… FILE…
-           Compile a C file to Wasm and run the symbolic interpreter on it
+       c [COMMAND] …
+           Work with C programs.
 
-       c++ [OPTION]… FILE…
-           Compile a C++ file to Wasm and run the symbolic interpreter on it
+       c++ [COMMAND] …
+           Work with C programs.
 
-       haskell [OPTION]… FILE…
-           Compile a Haskell file to Wasm and run the symbolic interpreter on
-           it
+       go [COMMAND] …
+           Work with Go programs.
 
-       llvm [OPTION]… FILE…
-           Compile LLVM IR/bitcode to Wasm and run the symbolic interpreter
-           on it
+       haskell [COMMAND] …
+           Work with Haskell programs.
 
-       rust [OPTION]… FILE…
-           Compile a Rust file to Wasm and run the symbolic interpreter on it
+       llvm [COMMAND] …
+           Work with LLVM programs.
 
-       tinygo [OPTION]… FILE…
-           Compile a TinyGo file to Wasm and run the symbolic interpreter on
-           it
+       rust [COMMAND] …
+           Work with Rust programs.
 
        version [OPTION]…
-           Print some version informations
+           Print some version informations.
 
        wasm [COMMAND] …
            Work with Wasm programs.
 
-       zig [OPTION]… FILE…
-           Compile a Zig file to Wasm and run the symbolic interpreter on it
+       zig [COMMAND] …
+           Work with Zig programs.
 
 COMMON OPTIONS
        --help[=FMT] (default=auto)

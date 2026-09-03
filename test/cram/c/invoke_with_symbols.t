@@ -1,4 +1,4 @@
-  $ owi c --entry-point=f --invoke-with-symbols --no-assert-failure-expression-printing ./invoke_with_symbols.c
+  $ owi c sym --entry-point=f --invoke-with-symbols --no-assert-failure-expression-printing ./invoke_with_symbols.c
   owi: [ERROR] Assert failure
   model {
     symbol symbol_0 i32 1

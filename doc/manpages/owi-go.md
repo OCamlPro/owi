@@ -1,23 +1,23 @@
-[owi](owi.md) › **owi haskell**
+[owi](owi.md) › **owi go**
 
-# owi haskell
+# owi go
 
 ## Subcommands
 
-- [`owi haskell sym`](owi-haskell-sym.md)
+- [`owi go sym`](owi-go-sym.md)
 
 ## Help
 
 ```text
 NAME
-       owi-haskell - Work with Haskell programs.
+       owi-go - Work with Go programs.
 
 SYNOPSIS
-       owi haskell [COMMAND] …
+       owi go [COMMAND] …
 
 COMMANDS
        sym [OPTION]… FILE…
-           Run the symbolic execution engine on a Haskell program.
+           Run the symbolic execution engine on a Go program.
 
 COMMON OPTIONS
        --help[=FMT] (default=auto)
@@ -29,7 +29,7 @@ COMMON OPTIONS
            Show version information.
 
 EXIT STATUS
-       owi haskell exits with:
+       owi go exits with:
 
        0   on success.
 

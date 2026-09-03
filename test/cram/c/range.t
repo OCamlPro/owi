@@ -1,4 +1,4 @@
-  $ owi c ./range.c
+  $ owi c sym ./range.c
   owi: [ERROR] Assert failure: (i32.lt_s 100 symbol_1)
   model {
     symbol symbol_0 i32 10
@@ -6,4 +6,3 @@
   }
   owi: [ERROR] Reached problem!
   [13]
-

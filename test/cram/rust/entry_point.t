@@ -1,5 +1,5 @@
 entry_point:
-  $ owi rust entry_point.rs --entry-point=fun
+  $ owi rust sym entry_point.rs --entry-point=fun
   owi: [ERROR] Assert failure: false
   model {
     symbol symbol_0 i32 2
@@ -7,6 +7,6 @@ entry_point:
   owi: [ERROR] Reached problem!
   [13]
 
-  $ owi rust entry_point.rs --entry-point=main
+  $ owi rust sym entry_point.rs --entry-point=main
   owi: [ERROR] rustc failed: run with -vv to get the full error message if it was not displayed above
   [26]

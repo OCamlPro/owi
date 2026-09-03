@@ -34,7 +34,7 @@ We are defining one symbolic variable `x` using the function `owi_i32(void)`. Th
 Then we use `owi_assert(poly != 0)`. Which should fail as this polynomial has multiple roots. Let's see what owi says about it:
 
 ```sh
-$ owi c ./poly.c -w1 --no-assert-failure-expression-printing
+$ owi c sym ./poly.c -w1 --no-assert-failure-expression-printing
 owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32 4
@@ -80,7 +80,7 @@ Let's run owi on this new input:
 
 
 ```sh
-$ owi c ./poly2.c --no-assert-failure-expression-printing
+$ owi c sym ./poly2.c --no-assert-failure-expression-printing
 owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32 -2147483644
@@ -131,7 +131,7 @@ We are defining one symbolic variable `x` using the function `owi_i32(void)`. Th
 Then we use `owi_assert(p.getPoly() != 0)`. Which should fail as this polynomial has multiple roots. Let's see what owi says about it:
 
 ```sh
-$ owi c++ ./poly.cpp -w1 --no-assert-failure-expression-printing
+$ owi c++ sym ./poly.cpp -w1 --no-assert-failure-expression-printing
 owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32 2
@@ -177,7 +177,7 @@ Let's run owi on this new input:
 
 
 ```sh
-$ owi c++ ./poly2.cpp --no-assert-failure-expression-printing
+$ owi c++ sym ./poly2.cpp --no-assert-failure-expression-printing
 owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32 -2147483644
@@ -274,7 +274,7 @@ int main (void) {
 ```
 
 ```sh
-$ owi c ./maze.c --no-value --no-assert-failure-expression-printing
+$ owi c sym ./maze.c --no-value --no-assert-failure-expression-printing
 owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32
@@ -359,9 +359,8 @@ int main() {
 }
 ```
 
-<!-- TODO: remove `-O1` once symbolic popcnt is implemented -->
 ```sh
-$ owi c -O1 ./dobble.c -w1 --no-value --no-assert-failure-expression-printing
+$ owi c sym ./dobble.c -w1 --no-value --no-assert-failure-expression-printing
 owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32

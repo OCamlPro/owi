@@ -1,2 +1,2 @@
-  $ owi c ./malloc_aligned.c -w1
+  $ owi c sym ./malloc_aligned.c -w1
   All OK!
