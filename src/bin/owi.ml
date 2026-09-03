@@ -515,14 +515,15 @@ module Wasm = struct
   module Fuzz = struct
     let cmd =
       let+ unsafe
+      and+ entry_point = entry_point None
       and+ rounds
       and+ timeout
       and+ timeout_instr
       and+ () = setup_log
       and+ seed
       and+ source_file in
-      Cmd_wasm_fuzz.cmd ~rounds ~seed ~source_file ~timeout ~timeout_instr
-        ~unsafe
+      Cmd_wasm_fuzz.cmd ~entry_point ~rounds ~seed ~source_file ~timeout
+        ~timeout_instr ~unsafe
   end
 
   (* owi wasm instrument *)

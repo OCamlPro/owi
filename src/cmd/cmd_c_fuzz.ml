@@ -27,4 +27,5 @@ let cmd ~rounds ~seed ~workspace ~entry_point ~arch ~property ~testcomp ~opt_lvl
   (* TODO: use this! *)
   let _workspace = Some workspace in
 
-  Cmd_wasm_fuzz.cmd ~rounds ~seed ~source_file ~timeout ~timeout_instr ~unsafe
+  Cmd_wasm_fuzz.cmd ~entry_point ~rounds ~seed ~source_file ~timeout
+    ~timeout_instr ~unsafe

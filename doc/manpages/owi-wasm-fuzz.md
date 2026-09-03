@@ -16,6 +16,9 @@ ARGUMENTS
            source file
 
 OPTIONS
+       --entry-point=FUNCTION
+           entry point of the executable
+
        --rounds=I
            Stop after a number of fuzzing rounds.
 
