@@ -10,7 +10,7 @@
 
 ```text
 NAME
-       owi-c++ - Work with C programs.
+       owi-c++ - Work with C++ programs.
 
 SYNOPSIS
        owi c++ [COMMAND] …
