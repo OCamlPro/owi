@@ -10,13 +10,13 @@ open Cmdliner
 let call_graph_mode_conv =
   let of_string s =
     match String.lowercase_ascii s with
-    | "complete" -> Ok Cmd_call_graph.Complete
-    | "sound" -> Ok Cmd_call_graph.Sound
+    | "complete" -> Ok Cmd_wasm_analyze_cg.Complete
+    | "sound" -> Ok Cmd_wasm_analyze_cg.Sound
     | _ -> Fmt.error_msg {|Expected "complete" or "sound" but got "%s"|} s
   in
   let pp fmt = function
-    | Cmd_call_graph.Complete -> Fmt.string fmt "complete"
-    | Cmd_call_graph.Sound -> Fmt.string fmt "sound"
+    | Cmd_wasm_analyze_cg.Complete -> Fmt.string fmt "complete"
+    | Cmd_wasm_analyze_cg.Sound -> Fmt.string fmt "sound"
   in
   Arg.conv (of_string, pp)
 
@@ -339,7 +339,7 @@ module C = struct
       and+ out_file
       and+ symbolic_parameters = symbolic_parameters (Some "main") in
 
-      Cmd_c.cmd ~symbolic_parameters ~arch ~property ~includes ~opt_lvl
+      Cmd_c_sym.cmd ~symbolic_parameters ~arch ~property ~includes ~opt_lvl
         ~out_file ~testcomp ~files ~eacsl
   end
 end
@@ -357,7 +357,8 @@ module Cpp = struct
       and+ () = setup_log
       and+ symbolic_parameters = symbolic_parameters (Some "main") in
 
-      Cmd_cpp.cmd ~symbolic_parameters ~out_file ~arch ~includes ~opt_lvl ~files
+      Cmd_cpp_sym.cmd ~symbolic_parameters ~out_file ~arch ~includes ~opt_lvl
+        ~files
   end
 end
 
@@ -370,7 +371,7 @@ module Haskell = struct
       and+ out_file
       and+ () = setup_log
       and+ symbolic_parameters = symbolic_parameters (Some "_start") in
-      Cmd_haskell.cmd ~symbolic_parameters ~files ~out_file
+      Cmd_haskell_sym.cmd ~symbolic_parameters ~files ~out_file
   end
 end
 
@@ -383,7 +384,7 @@ module Llvm = struct
       and+ out_file
       and+ () = setup_log
       and+ symbolic_parameters = symbolic_parameters None in
-      Cmd_llvm.cmd ~symbolic_parameters ~files ~out_file
+      Cmd_llvm_sym.cmd ~symbolic_parameters ~files ~out_file
   end
 end
 
@@ -400,7 +401,7 @@ module Rust = struct
       and+ () = setup_log
       and+ symbolic_parameters = symbolic_parameters (Some "main") in
 
-      Cmd_rust.cmd ~symbolic_parameters ~arch ~opt_lvl ~includes ~files
+      Cmd_rust_sym.cmd ~symbolic_parameters ~arch ~opt_lvl ~includes ~files
         ~out_file
   end
 end
@@ -414,7 +415,7 @@ module Go = struct
       and+ out_file
       and+ () = setup_log
       and+ symbolic_parameters = symbolic_parameters (Some "_start") in
-      Cmd_go.cmd ~symbolic_parameters ~files ~out_file
+      Cmd_go_sym.cmd ~symbolic_parameters ~files ~out_file
   end
 end
 
@@ -436,7 +437,7 @@ module Wasm = struct
       and+ () = setup_log
       and+ entry_point = entry_point None
       and+ unsafe in
-      Cmd_abs.cmd ~source_file ~entry_point ~unsafe
+      Cmd_wasm_abs.cmd ~source_file ~entry_point ~unsafe
   end
 
   (* owi wasm analyze *)
@@ -447,7 +448,7 @@ module Wasm = struct
         let+ source_file
         and+ entry_point = entry_point None
         and+ () = setup_log in
-        Cmd_cfg.cmd ~source_file ~entry_point
+        Cmd_wasm_analyze_cfg.cmd ~source_file ~entry_point
     end
 
     (* owi wasm analyze cg *)
@@ -457,7 +458,7 @@ module Wasm = struct
         and+ source_file
         and+ entry_point = entry_point None
         and+ () = setup_log in
-        Cmd_call_graph.cmd ~call_graph_mode ~source_file ~entry_point
+        Cmd_wasm_analyze_cg.cmd ~call_graph_mode ~source_file ~entry_point
     end
   end
 
@@ -469,7 +470,7 @@ module Wasm = struct
         Arg.(value & flag & info [ "inplace"; "i" ] ~doc)
       and+ files
       and+ () = setup_log in
-      Cmd_fmt.cmd ~inplace ~files
+      Cmd_wasm_fmt.cmd ~inplace ~files
   end
 
   (* owi wasm fuzz *)
@@ -482,7 +483,8 @@ module Wasm = struct
       and+ () = setup_log
       and+ seed
       and+ source_file in
-      Cmd_fuzz.cmd ~rounds ~seed ~source_file ~timeout ~timeout_instr ~unsafe
+      Cmd_wasm_fuzz.cmd ~rounds ~seed ~source_file ~timeout ~timeout_instr
+        ~unsafe
   end
 
   (* owi wasm instrument *)
@@ -494,7 +496,7 @@ module Wasm = struct
         and+ coverage_criteria
         and+ () = setup_log
         and+ source_file in
-        Cmd_instrument_label.cmd ~unsafe ~source_file ~coverage_criteria
+        Cmd_wasm_instrument_label.cmd ~unsafe ~source_file ~coverage_criteria
     end
   end
 
@@ -520,10 +522,11 @@ module Wasm = struct
       and+ with_breadcrumbs
       and+ workspace in
 
-      Cmd_iso.cmd ~deterministic_result_order ~fail_mode ~exploration_strategy
-        ~files ~model_format ~no_assert_failure_expression_printing
-        ~no_stop_at_failure ~no_value ~seed ~solver ~unsafe ~workers
-        ~no_worker_isolation ~workspace ~model_out_file ~with_breadcrumbs
+      Cmd_wasm_iso.cmd ~deterministic_result_order ~fail_mode
+        ~exploration_strategy ~files ~model_format
+        ~no_assert_failure_expression_printing ~no_stop_at_failure ~no_value
+        ~seed ~solver ~unsafe ~workers ~no_worker_isolation ~workspace
+        ~model_out_file ~with_breadcrumbs
   end
 
   (* owi wasm replay *)
@@ -540,7 +543,7 @@ module Wasm = struct
       and+ source_file
       and+ invoke_with_symbols
       and+ entry_point = entry_point None in
-      Cmd_replay.cmd ~unsafe ~replay_file ~source_file ~entry_point
+      Cmd_wasm_replay.cmd ~unsafe ~replay_file ~source_file ~entry_point
         ~invoke_with_symbols
   end
 
@@ -552,7 +555,7 @@ module Wasm = struct
       and+ timeout_instr
       and+ () = setup_log
       and+ source_file in
-      Cmd_run.cmd ~unsafe ~timeout ~timeout_instr ~source_file
+      Cmd_wasm_run.cmd ~unsafe ~timeout ~timeout_instr ~source_file
   end
 
   (* owi wasm script *)
@@ -566,7 +569,7 @@ module Wasm = struct
           let doc = "no exhaustion tests" in
           Arg.(value & flag & info [ "no-exhaustion" ] ~doc)
         in
-        Cmd_script.cmd_abstract ~files ~no_exhaustion
+        Cmd_wasm_script.cmd_abstract ~files ~no_exhaustion
     end
 
     (* owi wasm script concrete *)
@@ -578,7 +581,7 @@ module Wasm = struct
           let doc = "no exhaustion tests" in
           Arg.(value & flag & info [ "no-exhaustion" ] ~doc)
         in
-        Cmd_script.cmd_concrete ~files ~no_exhaustion
+        Cmd_wasm_script.cmd_concrete ~files ~no_exhaustion
     end
 
     (* owi wasm script symbolic *)
@@ -590,7 +593,7 @@ module Wasm = struct
           let doc = "no exhaustion tests" in
           Arg.(value & flag & info [ "no-exhaustion" ] ~doc)
         in
-        Cmd_script.cmd_symbolic ~files ~no_exhaustion
+        Cmd_wasm_script.cmd_symbolic ~files ~no_exhaustion
     end
   end
 
@@ -600,7 +603,7 @@ module Wasm = struct
       let+ source_file
       and+ () = setup_log
       and+ parameters = symbolic_parameters None in
-      Cmd_sym.cmd ~parameters ~source_file
+      Cmd_wasm_sym.cmd ~parameters ~source_file
   end
 
   (* owi wasm to_wat *)
@@ -612,7 +615,7 @@ module Wasm = struct
         Arg.(value & flag & info [ "emit-file" ] ~doc)
       and+ () = setup_log
       and+ out_file in
-      Cmd_wasm2wat.cmd ~source_file ~emit_file ~out_file
+      Cmd_wasm_to_wat.cmd ~source_file ~emit_file ~out_file
   end
 
   (* owi wasm of_wat *)
@@ -622,7 +625,7 @@ module Wasm = struct
       and+ out_file
       and+ () = setup_log
       and+ source_file in
-      Cmd_wat2wasm.cmd ~unsafe ~out_file ~source_file
+      Cmd_wasm_of_wat.cmd ~unsafe ~out_file ~source_file
   end
 
   (* owi wasm validate *)
@@ -630,7 +633,7 @@ module Wasm = struct
     let cmd =
       let+ files
       and+ () = setup_log in
-      Cmd_validate.cmd ~files
+      Cmd_wasm_validate.cmd ~files
   end
 end
 
@@ -644,7 +647,7 @@ module Zig = struct
       and+ out_file
       and+ () = setup_log
       and+ symbolic_parameters = symbolic_parameters (Some "_start") in
-      Cmd_zig.cmd ~symbolic_parameters ~includes ~files ~out_file
+      Cmd_zig_sym.cmd ~symbolic_parameters ~includes ~files ~out_file
   end
 end
 
