@@ -1,4 +1,4 @@
-  $ owi c scopes.c -O0 --no-value
+  $ owi c sym scopes.c -O0 --no-value
   owi: [ERROR] Assert failure: false
   model {
     symbol symbol_0 i32

@@ -1,5 +1,5 @@
 file doesn't exist:
-  $ owi c idontexist.c
-  Usage: owi c [--help] [OPTION]… FILE…
+  $ owi c sym idontexist.c
+  Usage: owi c sym [--help] [OPTION]… FILE…
   owi: FILE… arguments: no file 'idontexist.c'
   [124]

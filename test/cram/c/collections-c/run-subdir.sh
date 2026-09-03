@@ -11,7 +11,7 @@ run_once() {
   mode=$1
   test=$2
 
-  owi c \
+  owi c sym \
     $OPT \
     $mode \
     -I ./files/normal/include \

@@ -37,7 +37,7 @@ COMMANDS
        abs [--entry-point=FUNCTION] [--unsafe] [OPTION]… FILE
            Run the abstract interpreter.
 
-       analyze COMMAND …
+       analyze [COMMAND] …
            Visualize and get statistics.
 
        fmt [--inplace] [OPTION]… FILE…
@@ -46,7 +46,7 @@ COMMANDS
        fuzz [OPTION]… FILE
            Run the fuzzer.
 
-       instrument COMMAND …
+       instrument [COMMAND] …
            Instrument a program in various ways.
 
        iso [OPTION]… FILE…
@@ -63,7 +63,7 @@ COMMANDS
        run [--timeout=S] [--timeout-instr=I] [--unsafe] [OPTION]… FILE
            Run the concrete interpreter.
 
-       script COMMAND …
+       script [COMMAND] …
            Run a reference test suite script (.wast).
 
        sym [OPTION]… FILE

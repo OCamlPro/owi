@@ -96,7 +96,7 @@ int main(void) {
 ```
 
 ```sh
-$ owi c --e-acsl primes.c -w1
+$ owi c sym --e-acsl primes.c -w1
 owi: [ERROR] Assert failure: false
 model {
   symbol symbol_0 i32 2 n
@@ -150,7 +150,7 @@ int main(void) {
 ```
 
 ```sh
-$ owi c --e-acsl primes2.c -w1
+$ owi c sym --e-acsl primes2.c -w1
 All OK!
 ```
 

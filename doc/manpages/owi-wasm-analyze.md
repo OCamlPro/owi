@@ -14,7 +14,7 @@ NAME
        owi-wasm-analyze - Visualize and get statistics.
 
 SYNOPSIS
-       owi wasm analyze COMMAND …
+       owi wasm analyze [COMMAND] …
 
 COMMANDS
        cfg [--entry-point=FUNCTION] [OPTION]… FILE

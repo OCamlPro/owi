@@ -130,7 +130,7 @@ All the others parameters are only here to make the output deterministic while g
 {{#tabs global="lang" }}
 {{#tab name="C" }}
 ```sh
-$ owi c ./f.c --entry-point=f --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
+$ owi c sym ./f.c --entry-point=f --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
 owi: [ERROR] Trap: integer divide by zero
 model {
   symbol symbol_0 i32 2
@@ -141,7 +141,7 @@ owi: [ERROR] Reached problem!
 {{#endtab }}
 {{#tab name="C++" }}
 ```sh
-$ owi c++ ./f.cpp --entry-point=f --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
+$ owi c++ sym ./f.cpp --entry-point=f --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
 owi: [ERROR] Trap: integer divide by zero
 model {
   symbol symbol_0 i32 2
@@ -152,7 +152,7 @@ owi: [ERROR] Reached problem!
 {{#endtab }}
 {{#tab name="Go" }}
 ```sh
-$ owi tinygo ./f.go --entry-point=f --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
+$ owi go sym ./f.go --entry-point=f --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
 owi: [ERROR] Trap: unreachable
 model {
   symbol symbol_0 i32 2
@@ -163,7 +163,7 @@ owi: [ERROR] Reached problem!
 {{#endtab }}
 {{#tab name="Rust" }}
 ```sh
-$ owi rust ./f.rs --entry-point=f --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
+$ owi rust sym ./f.rs --entry-point=f --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
 owi: [ERROR] Trap: unreachable
 model {
   symbol symbol_0 i32 2
@@ -174,7 +174,7 @@ owi: [ERROR] Reached problem!
 {{#endtab }}
 {{#tab name="Zig" }}
 ```sh
-$ owi zig ./f.zig --entry-point=f --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
+$ owi zig sym ./f.zig --entry-point=f --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
 owi: [ERROR] Trap: unreachable
 model {
   symbol symbol_0 i32 2
@@ -376,7 +376,7 @@ The invokation on Owi is the same as in the previous example, we simply removed 
 {{#tabs global="lang" }}
 {{#tab name="C" }}
 ```sh
-$ owi c ./f_byhand.c --entry-point=check --no-assert-failure-expression-printing --verbosity=error
+$ owi c sym ./f_byhand.c --entry-point=check --no-assert-failure-expression-printing --verbosity=error
 owi: [ERROR] Trap: integer divide by zero
 model {
   symbol symbol_0 i32 2
@@ -387,7 +387,7 @@ owi: [ERROR] Reached problem!
 {{#endtab }}
 {{#tab name="C++" }}
 ```sh
-$ owi c++ ./f_byhand.cpp --entry-point=check --no-assert-failure-expression-printing --verbosity=error
+$ owi c++ sym ./f_byhand.cpp --entry-point=check --no-assert-failure-expression-printing --verbosity=error
 owi: [ERROR] Trap: integer divide by zero
 model {
   symbol symbol_0 i32 2
@@ -398,7 +398,7 @@ owi: [ERROR] Reached problem!
 {{#endtab }}
 {{#tab name="Go" }}
 ```sh
-$ owi tinygo ./f_byhand.go --entry-point=check --no-assert-failure-expression-printing --verbosity=error
+$ owi go sym ./f_byhand.go --entry-point=check --no-assert-failure-expression-printing --verbosity=error
 owi: [ERROR] Trap: unreachable
 model {
   symbol symbol_0 i32 2
@@ -409,7 +409,7 @@ owi: [ERROR] Reached problem!
 {{#endtab }}
 {{#tab name="Rust" }}
 ```sh
-$ owi rust ./f_byhand.rs --entry-point=check --no-assert-failure-expression-printing --verbosity=error
+$ owi rust sym ./f_byhand.rs --entry-point=check --no-assert-failure-expression-printing --verbosity=error
 owi: [ERROR] Trap: unreachable
 model {
   symbol symbol_0 i32 2
@@ -420,7 +420,7 @@ owi: [ERROR] Reached problem!
 {{#endtab }}
 {{#tab name="Zig" }}
 ```sh
-$ owi zig ./f_byhand.zig --entry-point=check --no-assert-failure-expression-printing --verbosity=error
+$ owi zig sym ./f_byhand.zig --entry-point=check --no-assert-failure-expression-printing --verbosity=error
 owi: [ERROR] Trap: unreachable
 model {
   symbol symbol_0 i32 2
@@ -599,7 +599,7 @@ We can now run Owi on our program to check if they are the same:
 {{#tabs global="lang" }}
 {{#tab name="C" }}
 ```sh
-$ owi c ./mean.c --entry-point=check --invoke-with-symbols --no-assert-failure-expression-printing
+$ owi c sym ./mean.c --entry-point=check --invoke-with-symbols --no-assert-failure-expression-printing
 owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32 -1570748002
@@ -611,7 +611,7 @@ owi: [ERROR] Reached problem!
 {{#endtab }}
 {{#tab name="C++" }}
 ```sh
-$ owi c++ ./mean.cpp --entry-point=check --invoke-with-symbols --no-assert-failure-expression-printing
+$ owi c++ sym ./mean.cpp --entry-point=check --invoke-with-symbols --no-assert-failure-expression-printing
 owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32 -1570748002
@@ -623,7 +623,7 @@ owi: [ERROR] Reached problem!
 {{#endtab }}
 {{#tab name="Go" }}
 ```sh
-$ owi tinygo ./mean.go --entry-point=check --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
+$ owi go sym ./mean.go --entry-point=check --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
 owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32 -2147483648
@@ -635,7 +635,7 @@ owi: [ERROR] Reached problem!
 {{#endtab }}
 {{#tab name="Rust" }}
 ```sh
-$ owi rust ./mean.rs --entry-point=check --invoke-with-symbols -w1 --fail-on-assertion-only --no-assert-failure-expression-printing --deterministic-result-order
+$ owi rust sym ./mean.rs --entry-point=check --invoke-with-symbols -w1 --fail-on-assertion-only --no-assert-failure-expression-printing --deterministic-result-order
 owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32 755812345
@@ -648,7 +648,7 @@ owi: [ERROR] Reached problem!
 {{#endtab }}
 {{#tab name="Zig" }}
 ```sh
-$ owi zig ./mean.zig --entry-point=check --invoke-with-symbols -w1 --fail-on-assertion-only --no-assert-failure-expression-printing --deterministic-result-order
+$ owi zig sym ./mean.zig --entry-point=check --invoke-with-symbols -w1 --fail-on-assertion-only --no-assert-failure-expression-printing --deterministic-result-order
 owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32 -1001584422

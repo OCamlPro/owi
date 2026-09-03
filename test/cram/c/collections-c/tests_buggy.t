@@ -1,8 +1,8 @@
 Bug-triggering tests:
-  $ owi c -I files/bugs/include files/bugs/src/array.c files/bugs/src/common.c \
+  $ owi c sym -I files/bugs/include files/bugs/src/array.c files/bugs/src/common.c \
   > files/bugs/src/utils.c files/bugs/testsuite/array_test_remove.c
   All OK!
-  $ owi c -I files/bugs/include files/bugs/src/list.c files/bugs/src/common.c \
+  $ owi c sym -I files/bugs/include files/bugs/src/list.c files/bugs/src/common.c \
   > files/bugs/src/utils.c files/bugs/testsuite/list_test_zipIterAdd.c --no-value
   owi: [ERROR] Assert failure: false
   model {

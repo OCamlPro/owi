@@ -1,2 +1,2 @@
-  $ owi c ./char.c
+  $ owi c sym ./char.c
   All OK!

@@ -1,4 +1,4 @@
-  $ owi c ./main.c --no-value
+  $ owi c sym ./main.c --no-value
   owi: [ERROR] Assert failure: false
   model {
     symbol symbol_0 i32
