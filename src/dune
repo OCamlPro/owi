@@ -42,28 +42,30 @@
   bug
   choice_intf
   call_graph
-  cmd_wasm_abs
   cmd_utils
+  cmd_c
+  cmd_c_fuzz
   cmd_c_sym
-  cmd_wasm_analyze_cg
-  cmd_wasm_analyze_cfg
   cmd_cpp_sym
-  cmd_wasm_fmt
-  cmd_wasm_fuzz
   cmd_go_sym
   cmd_haskell_sym
+  cmd_llvm_sym
+  cmd_rust_sym
+  cmd_version
+  cmd_wasm_abs
+  cmd_wasm_analyze_cg
+  cmd_wasm_analyze_cfg
+  cmd_wasm_fmt
+  cmd_wasm_fuzz
   cmd_wasm_instrument_label
   cmd_wasm_iso
-  cmd_llvm_sym
+  cmd_wasm_of_wat
   cmd_wasm_replay
   cmd_wasm_run
-  cmd_rust_sym
   cmd_wasm_script
   cmd_wasm_sym
-  cmd_wasm_validate
-  cmd_version
   cmd_wasm_to_wat
-  cmd_wasm_of_wat
+  cmd_wasm_validate
   cmd_zig_sym
   collection
   compile

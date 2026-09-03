@@ -9,6 +9,7 @@ module Binary_validate = Binary_validate
 module Binary_to_text = Binary_to_text
 module Cmd_wasm_abs = Cmd_wasm_abs
 module Cmd_wasm_sym = Cmd_wasm_sym
+module Cmd_c_fuzz = Cmd_c_fuzz
 module Cmd_c_sym = Cmd_c_sym
 module Cmd_wasm_analyze_cg = Cmd_wasm_analyze_cg
 module Cmd_wasm_analyze_cfg = Cmd_wasm_analyze_cfg

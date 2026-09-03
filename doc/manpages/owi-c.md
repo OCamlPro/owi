@@ -4,6 +4,7 @@
 
 ## Subcommands
 
+- [`owi c fuzz`](owi-c-fuzz.md)
 - [`owi c sym`](owi-c-sym.md)
 
 ## Help
@@ -16,6 +17,9 @@ SYNOPSIS
        owi c [COMMAND] …
 
 COMMANDS
+       fuzz [OPTION]… FILE…
+           Run the fuzzer.
+
        sym [OPTION]… FILE…
            Run the symbolic execution engine on a C program.
 
