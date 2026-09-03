@@ -310,6 +310,103 @@ let symbolic_parameters default_entry_point =
   ; workspace
   }
 
+(* owi c *)
+module C = struct
+  let cmd =
+    let+ arch
+    and+ property =
+      let doc = "property file" in
+      Arg.(
+        value
+        & opt (some existing_file_conv) None
+        & info [ "property" ] ~doc ~docv:"FILE" )
+    and+ includes
+    and+ opt_lvl
+    and+ testcomp =
+      let doc = "test-comp mode" in
+      Arg.(value & flag & info [ "testcomp" ] ~doc)
+    and+ files
+    and+ () = setup_log
+    and+ eacsl =
+      let doc =
+        "e-acsl mode, refer to \
+         https://frama-c.com/download/e-acsl/e-acsl-implementation.pdf for \
+         Frama-C's current language feature implementations"
+      in
+      Arg.(value & flag & info [ "e-acsl" ] ~doc)
+    and+ out_file
+    and+ symbolic_parameters = symbolic_parameters (Some "main") in
+
+    Cmd_c.cmd ~symbolic_parameters ~arch ~property ~includes ~opt_lvl ~out_file
+      ~testcomp ~files ~eacsl
+end
+
+(* owi cpp *)
+module Cpp = struct
+  let cmd =
+    let+ arch
+    and+ includes
+    and+ opt_lvl
+    and+ files
+    and+ out_file
+    and+ () = setup_log
+    and+ symbolic_parameters = symbolic_parameters (Some "main") in
+
+    Cmd_cpp.cmd ~symbolic_parameters ~out_file ~arch ~includes ~opt_lvl ~files
+end
+
+(* owi haskell *)
+module Haskell = struct
+  let cmd =
+    let+ files
+    and+ out_file
+    and+ () = setup_log
+    and+ symbolic_parameters = symbolic_parameters (Some "_start") in
+    Cmd_haskell.cmd ~symbolic_parameters ~files ~out_file
+end
+
+(* owi llvm *)
+module Llvm = struct
+  let cmd =
+    let+ files
+    and+ out_file
+    and+ () = setup_log
+    and+ symbolic_parameters = symbolic_parameters None in
+    Cmd_llvm.cmd ~symbolic_parameters ~files ~out_file
+end
+
+(* owi rust *)
+module Rust = struct
+  let cmd =
+    let+ arch
+    and+ includes
+    and+ opt_lvl
+    and+ files
+    and+ out_file
+    and+ () = setup_log
+    and+ symbolic_parameters = symbolic_parameters (Some "main") in
+
+    Cmd_rust.cmd ~symbolic_parameters ~arch ~opt_lvl ~includes ~files ~out_file
+end
+
+(* owi go *)
+module Go = struct
+  let cmd =
+    let+ files
+    and+ out_file
+    and+ () = setup_log
+    and+ symbolic_parameters = symbolic_parameters (Some "_start") in
+    Cmd_tinygo.cmd ~symbolic_parameters ~files ~out_file
+end
+
+(* owi version *)
+module Version = struct
+  let cmd =
+    let+ () = Term.const ()
+    and+ () = setup_log in
+    Cmd_version.cmd ()
+end
+
 (* owi wasm *)
 
 module Wasm = struct
@@ -518,157 +615,16 @@ module Wasm = struct
   end
 end
 
-(* owi c *)
-
-let c_info =
-  let doc = "Compile a C file to Wasm and run the symbolic interpreter on it" in
-  let man = [] @ shared_man in
-  Cmd.info "c" ~version ~doc ~sdocs ~man
-
-let c_cmd =
-  let+ arch
-  and+ property =
-    let doc = "property file" in
-    Arg.(
-      value
-      & opt (some existing_file_conv) None
-      & info [ "property" ] ~doc ~docv:"FILE" )
-  and+ includes
-  and+ opt_lvl
-  and+ testcomp =
-    let doc = "test-comp mode" in
-    Arg.(value & flag & info [ "testcomp" ] ~doc)
-  and+ files
-  and+ () = setup_log
-  and+ eacsl =
-    let doc =
-      "e-acsl mode, refer to \
-       https://frama-c.com/download/e-acsl/e-acsl-implementation.pdf for \
-       Frama-C's current language feature implementations"
-    in
-    Arg.(value & flag & info [ "e-acsl" ] ~doc)
-  and+ out_file
-  and+ symbolic_parameters = symbolic_parameters (Some "main") in
-
-  Cmd_c.cmd ~symbolic_parameters ~arch ~property ~includes ~opt_lvl ~out_file
-    ~testcomp ~files ~eacsl
-
-(* owi cpp *)
-
-let cpp_info =
-  let doc =
-    "Compile a C++ file to Wasm and run the symbolic interpreter on it"
-  in
-  let man = [] @ shared_man in
-  Cmd.info "c++" ~version ~doc ~sdocs ~man
-
-let cpp_cmd =
-  let+ arch
-  and+ includes
-  and+ opt_lvl
-  and+ files
-  and+ out_file
-  and+ () = setup_log
-  and+ symbolic_parameters = symbolic_parameters (Some "main") in
-
-  Cmd_cpp.cmd ~symbolic_parameters ~out_file ~arch ~includes ~opt_lvl ~files
-
-(* owi haskell *)
-
-let haskell_info =
-  let doc =
-    "Compile a Haskell file to Wasm and run the symbolic interpreter on it"
-  in
-  let man = [] @ shared_man in
-  Cmd.info "haskell" ~version ~doc ~sdocs ~man
-
-let haskell_cmd =
-  let+ files
-  and+ out_file
-  and+ () = setup_log
-  and+ symbolic_parameters = symbolic_parameters (Some "_start") in
-  Cmd_haskell.cmd ~symbolic_parameters ~files ~out_file
-
-(* owi llvm *)
-
-let llvm_info =
-  let doc =
-    "Compile LLVM IR/bitcode to Wasm and run the symbolic interpreter on it"
-  in
-  let man = [] @ shared_man in
-  Cmd.info "llvm" ~version ~doc ~sdocs ~man
-
-let llvm_cmd =
-  let+ files
-  and+ out_file
-  and+ () = setup_log
-  and+ symbolic_parameters = symbolic_parameters None in
-  Cmd_llvm.cmd ~symbolic_parameters ~files ~out_file
-
-(* owi rust *)
-
-let rust_info =
-  let doc =
-    "Compile a Rust file to Wasm and run the symbolic interpreter on it"
-  in
-  let man = [] @ shared_man in
-  Cmd.info "rust" ~version ~doc ~sdocs ~man
-
-let rust_cmd =
-  let+ arch
-  and+ includes
-  and+ opt_lvl
-  and+ files
-  and+ out_file
-  and+ () = setup_log
-  and+ symbolic_parameters = symbolic_parameters (Some "main") in
-
-  Cmd_rust.cmd ~symbolic_parameters ~arch ~opt_lvl ~includes ~files ~out_file
-
-(* owi tinygo *)
-
-let tinygo_info =
-  let doc =
-    "Compile a TinyGo file to Wasm and run the symbolic interpreter on it"
-  in
-  let man = [] @ shared_man in
-  Cmd.info "tinygo" ~version ~doc ~sdocs ~man
-
-let tinygo_cmd =
-  let+ files
-  and+ out_file
-  and+ () = setup_log
-  and+ symbolic_parameters = symbolic_parameters (Some "_start") in
-  Cmd_tinygo.cmd ~symbolic_parameters ~files ~out_file
-
-(* owi version *)
-
-let version_info =
-  let doc = "Print some version informations" in
-  let man = [] @ shared_man in
-  Cmd.info "version" ~version ~doc ~sdocs ~man
-
-let version_cmd =
-  let+ () = Term.const ()
-  and+ () = setup_log in
-  Cmd_version.cmd ()
-
 (* owi zig *)
-
-let zig_info =
-  let doc =
-    "Compile a Zig file to Wasm and run the symbolic interpreter on it"
-  in
-  let man = [] @ shared_man in
-  Cmd.info "zig" ~version ~doc ~sdocs ~man
-
-let zig_cmd =
-  let+ includes
-  and+ files
-  and+ out_file
-  and+ () = setup_log
-  and+ symbolic_parameters = symbolic_parameters (Some "_start") in
-  Cmd_zig.cmd ~symbolic_parameters ~includes ~files ~out_file
+module Zig = struct
+  let cmd =
+    let+ includes
+    and+ files
+    and+ out_file
+    and+ () = setup_log
+    and+ symbolic_parameters = symbolic_parameters (Some "_start") in
+    Cmd_zig.cmd ~symbolic_parameters ~includes ~files ~out_file
+end
 
 (* owi *)
 
@@ -687,16 +643,26 @@ let cli =
   in
 
   Cmd.group owi_info ~default
-    [ Cmd.v c_info c_cmd
-    ; Cmd.v cpp_info cpp_cmd
-    ; Cmd.v haskell_info haskell_cmd
-    ; Cmd.v llvm_info llvm_cmd
-    ; Cmd.v rust_info rust_cmd
-    ; Cmd.v tinygo_info tinygo_cmd
-    ; Cmd.v zig_info zig_cmd
-      (* ======================================================================================================================================================================================================================================== *)
-      (* new API *)
-    ; Cmd.v version_info version_cmd
+    [ Cmd.v
+        (info "c" ~doc:"Run the symbolic execution engine on a C program.")
+        C.cmd
+    ; Cmd.v
+        (info "c++" ~doc:"Run the symbolic execution engine on a C++ program.")
+        Cpp.cmd
+    ; Cmd.v
+        (info "go" ~doc:"Run the symbolic execution engine on a Go program.")
+        Go.cmd
+    ; Cmd.v
+        (info "haskell"
+           ~doc:"Run the symbolic execution engine on a Haskell program." )
+        Haskell.cmd
+    ; Cmd.v
+        (info "llvm" ~doc:"Run the symbolic execution engine on a LLVM program.")
+        Llvm.cmd
+    ; Cmd.v
+        (info "rust" ~doc:"Run the symbolic execution engine on a Rust program.")
+        Rust.cmd
+    ; Cmd.v (info "version" ~doc:"Print some version informations.") Version.cmd
     ; Cmd.group
         (info "wasm" ~doc:"Work with Wasm programs.")
         ~default
@@ -766,6 +732,9 @@ let cli =
                ~doc:"Generate a binary file (.wasm) from a text file (.wat)." )
             Wasm.Of_wat.cmd
         ]
+    ; Cmd.v
+        (info "zig" ~doc:"Run the symbolic execution engine on a Zig program.")
+        Zig.cmd
     ]
 
 let exit_code =
