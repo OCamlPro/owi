@@ -15,24 +15,46 @@
 
 <hr />
 
-Owi is a tool to perform seamless program analysis of C, C++, Go, Haskell, LLVM, Rust, Wasm and Zig programs.
+Owi provides seamless program analysis for C, C++, Go, Haskell, LLVM, Rust, Wasm and Zig.
 
-Owi analyzes Wasm programs, and we have built-in supports for compiling higher-level sources languages to Wasm and analyzing them.
-This way, we are even able to analyze cross-languages programs, for instance, a Rust program calling into a C library.
+Owi operates at the Wasm level.
+It provides built-in support for compiling programs written in higher-level languages to Wasm and analyzing the resulting code.
+This also makes it possible to analyze cross-language programs.
+For example, you can use Owi on a Rust program calling into a C library.
 
-Owi's main capability is automatic bug-finding, thanks to its multi-core symbolic execution engine.
-There is also a fuzzer being worked on.
-We plan to combine the fuzzer with the symbolic execution engine to be able to find some bugs earlier in the analysis.
-Moreover, the tools developed for bug-finding can be used for automated test-case generation of advanced code coverage criteria, but also solver-aided programming!
+#### Bug-finding
 
-A more recent direction has been the exploration of automatic proof of programs with Owi.
-This part is still experimental, but is being actively worked on.
-In particular, we have a prototype abstract interpreter that is able to perform proof of programs.
+Owi's main capability is automatic bug-finding, powered by its multicore symbolic execution engine.
+Owi also includes a basic fuzzer.
+We are currently working on improving the fuzzer, and in particular, on combining fuzzing with symbolic execution to discover some bugs earlier and explore programs more efficiently.
 
-Owi works at the WebAssembly level, and thus incidentally provides a Wasm Swiss Army Knife: a formatter, an interpreter, a validator, a converter between `.wasm` and `.wat`, but also a fuzzer (generating well-typed Wasm programs, which differs from the fuzzer for Wasm programs mentionned earlier)!
-We are also currently working on a Wasm to Wasm optimizer, based on our abstract interpreter.
+The same bug-finding infrastructure can be used for other purposes, including automated test-case generation for advanced code-coverage criteria, and solver-aided programming.
 
-Owi being written in OCaml, you can also use it as an OCaml library for many purposes.
+#### Program verification
+
+A more recent direction is the exploration of automatic program verification with Owi.
+This work is still experimental but actively developed.
+In particular, we have a prototype abstract interpreter that can generate invariants statically and prove some properties of Wasm programs.
+
+The abstract interpreter is also being used as the basis for a Wasm-to-Wasm optimizer, currently under development.
+We are also exploring how to reuse generated invariants in the symbolic execution engine to eliminate many SMT checks.
+
+#### Wasm Swiss Army Knife
+
+Because Owi works at the Wasm level, it also serves as a Wasm Swiss Army knife.
+It includes a formatter, interpreter, validator, and tools for converting between `.wasm` and `.wat` formats.
+
+Owi also includes a Wasm fuzzer that generates well-typed Wasm programs.
+This is distinct from the program fuzzer described above: the Wasm fuzzer generates Wasm programs, while the program fuzzer is intended to find bugs in programs compiled to Wasm.
+
+#### OCaml library
+
+Since Owi is written in OCaml, it can also be used as an OCaml library.
+This makes its analysis and Wasm-related capabilities available for integration into other tools and workflows.
+
+For instance, we are currently working on a Wasm-to-OCaml compiler.
+Our goal is to build unikernels from any program that can be compiled to Wasm.
+This compiler could also be used to efficiently embed Wasm programs into OCaml applications.
 
 ### Key resources
 
