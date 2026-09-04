@@ -162,10 +162,10 @@ let cmd ~entry_point ~rounds ~seed ~source_file ~timeout ~timeout_instr ~unsafe
     Benchmark.with_utime @@ fun () -&gt;
     <span data-count="2">F</span>uzz_driver.run ~rounds (fun () -&gt;
       (* TODO: for now we have to regenerate the environment on each round because the concrete environment still is mutable, this should be avoided in the future *)
-      <span data-count="10002">l</span>et* env = Env.Concrete.link_binary_module ~env ~name:None ~modul in
-      <span data-count="10002">l</span>et* modul = Env.Concrete.get_last_module ~env in
-      <span data-count="10002">l</span>et* _env = I.modul ~env ~modul in
-      <span data-count="10001">O</span>k () )
+      <span data-count="101">l</span>et* env = Env.Concrete.link_binary_module ~env ~name:None ~modul in
+      <span data-count="101">l</span>et* modul = Env.Concrete.get_last_module ~env in
+      <span data-count="101">l</span>et* _env = I.modul ~env ~modul in
+      <span data-count="100">O</span>k () )
   in
   <span data-count="2">L</span>og.bench (fun m -&gt;
     (* run_time shouldn't be none in bench mode *)

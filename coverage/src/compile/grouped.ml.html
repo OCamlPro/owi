@@ -626,15 +626,15 @@ let add_func_type decl_types type_checks = function
     <span data-count="14368">O</span>ption.iter (fun id -&gt; <span data-count="41">D</span>ynarray.add_last type_checks (id, typ)) id
 
 let rec extract_block_types expr =
-  <span data-count="12975">l</span>et aux = <span data-count="44604">f</span>unction
+  <span data-count="12973">l</span>et aux = <span data-count="44601">f</span>unction
     | <span data-count="1571">B</span>lock (_str_opt, bt, expr1) | <span data-count="300">L</span>oop (_str_opt, bt, expr1) -&gt;
       Option.to_lis<span data-count="1871">t</span> bt @ extract_block_type<span data-count="1871">s</span> expr1
-    | <span data-count="644">I</span>f_else (_str_opt, bt, expr1, expr2) -&gt;
-      Option.to_lis<span data-count="644">t</span> bt @ extract_block_type<span data-count="644">s</span> expr1 @ extract_block_type<span data-count="644">s</span> expr2
+    | <span data-count="643">I</span>f_else (_str_opt, bt, expr1, expr2) -&gt;
+      Option.to_lis<span data-count="643">t</span> bt @ extract_block_type<span data-count="643">s</span> expr1 @ extract_block_type<span data-count="643">s</span> expr2
     | <span data-count="56">R</span>eturn_call_indirect (_, bt) | <span data-count="46">R</span>eturn_call_ref bt | <span data-count="331">C</span>all_indirect (_, bt)
       -&gt;
       [ bt ]
-    | <span data-count="41656">_</span> -&gt; []
+    | <span data-count="41654">_</span> -&gt; []
   in
   List.concat_map aux expr
 

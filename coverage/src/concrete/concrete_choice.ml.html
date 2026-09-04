@@ -113,13 +113,13 @@
 
 type 'a t = 'a Result.t
 
-let[@inline] return x = <span data-count="349802221">O</span>k x
+let[@inline] return x = <span data-count="349476896">O</span>k x
 
-let[@inline] ( let* ) x f = <span data-count="364351219">R</span>esult.bind x f
+let[@inline] ( let* ) x f = <span data-count="364015893">R</span>esult.bind x f
 
-let[@inline] ( let+ ) v f = <span data-count="38226">R</span>esult.map f v
+let[@inline] ( let+ ) v f = <span data-count="8523">R</span>esult.map f v
 
-let[@inline] select b ~instr_counter_true:_ ~instr_counter_false:_ = <span data-count="13252152">O</span>k b
+let[@inline] select b ~instr_counter_true:_ ~instr_counter_false:_ = <span data-count="13242151">O</span>k b
 
 let[@inline] select_i32 i = <span data-count="806020">O</span>k i
 

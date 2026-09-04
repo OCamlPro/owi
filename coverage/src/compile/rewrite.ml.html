@@ -2282,7 +2282,7 @@ let rewrite_memarg ({ offset; align } : Text.memarg) : Binary.memarg Result.t =
 
 let rewrite_i32_instr assigned : Text.i32_instr -&gt; Binary.i32_instr Result.t =
   function
-  | <span data-count="11906">C</span>onst i -&gt; Ok (Binary.Const i : Binary.i32_instr)
+  | <span data-count="11905">C</span>onst i -&gt; Ok (Binary.Const i : Binary.i32_instr)
   | <span data-count="6">C</span>lz -&gt; Ok Clz
   | <span data-count="33">C</span>tz -&gt; Ok Ctz
   | <span data-count="2">P</span>opcnt -&gt; Ok Popcnt
@@ -2302,7 +2302,7 @@ let rewrite_i32_instr assigned : Text.i32_instr -&gt; Binary.i32_instr Result.t 
   | <span data-count="5">R</span>otl -&gt; Ok Rotl
   | <span data-count="5">R</span>otr -&gt; Ok Rotr
   | <span data-count="216">E</span>qz -&gt; Ok Eqz
-  | <span data-count="136">E</span>q -&gt; Ok Eq
+  | <span data-count="135">E</span>q -&gt; Ok Eq
   | <span data-count="19">N</span>e -&gt; Ok Ne
   | <span data-count="27">L</span>t_s -&gt; Ok Lt_s
   | <span data-count="32">L</span>t_u -&gt; Ok Lt_u
@@ -2728,7 +2728,7 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
     | <span data-count="1449">S</span>ome bt -&gt;
       let+ _, bt = rewrite_block_typ<span data-count="1449">e</span> assigned bt in
       <span data-count="1449">S</span>ome bt
-    | <span data-count="1054">N</span>one -&gt; Ok None
+    | <span data-count="1053">N</span>one -&gt; Ok None
   in
 
   let seen_locals = Hashtbl.create 64 in
@@ -2845,9 +2845,9 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
 
   let rec rewrite_instr (loop_count, block_ids) :
     Text.instr -&gt; Binary.instr Result.t = function
-    | <span data-count="13877">T</span>ext.I32 i -&gt;
-      let+ i = rewrite_i32_inst<span data-count="13877">r</span> assigned i in
-      <span data-count="13876">B</span>inary.Simple (I32 i)
+    | <span data-count="13875">T</span>ext.I32 i -&gt;
+      let+ i = rewrite_i32_inst<span data-count="13875">r</span> assigned i in
+      <span data-count="13874">B</span>inary.Simple (I32 i)
     | <span data-count="4246">I</span>64 i -&gt;
       let+ i = rewrite_i64_inst<span data-count="4246">r</span> assigned i in
       <span data-count="4246">B</span>inary.Simple (I64 i)
@@ -2927,12 +2927,12 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
     | <span data-count="37">R</span>eturn_call id -&gt;
       let+ id = Assigned.find_fun<span data-count="37">c</span> assigned id in
       <span data-count="37">B</span>inary.Return_call id
-    | <span data-count="640">I</span>f_else (id, bt, e1, e2) -&gt;
-      let* bt = block_ty_opt_rewrit<span data-count="640">e</span> bt in
-      <span data-count="640">l</span>et block_ids = id :: block_ids in
-      let* e1 = exp<span data-count="640">r</span> e1 (loop_count, block_ids) in
-      <span data-count="639">l</span>et+ e2 = exp<span data-count="639">r</span> e2 (loop_count, block_ids) in
-      <span data-count="639">B</span>inary.If_else (id, bt, e1, e2)
+    | <span data-count="639">I</span>f_else (id, bt, e1, e2) -&gt;
+      let* bt = block_ty_opt_rewrit<span data-count="639">e</span> bt in
+      <span data-count="639">l</span>et block_ids = id :: block_ids in
+      let* e1 = exp<span data-count="639">r</span> e1 (loop_count, block_ids) in
+      <span data-count="638">l</span>et+ e2 = exp<span data-count="638">r</span> e2 (loop_count, block_ids) in
+      <span data-count="638">B</span>inary.If_else (id, bt, e1, e2)
     | <span data-count="296">L</span>oop (id, bt, e) -&gt;
       let* bt = block_ty_opt_rewrit<span data-count="296">e</span> bt in
       <span data-count="296">l</span>et+ e = exp<span data-count="296">r</span> e (loop_count + 1, id :: block_ids) in
@@ -2963,22 +2963,22 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
         <span data-count="12">B</span>inary.Simple (Select (Some [ t ]))
       | <span data-count="1">S</span>ome [] | <span data-count="1">S</span>ome (_ :: _ :: _) -&gt; Error `Invalid_result_arity
       end
-    | <span data-count="489">U</span>nreachable -&gt; Ok (Simple Unreachable)
-    | <span data-count="1460">D</span>rop -&gt; Ok (Simple Drop)
+    | <span data-count="488">U</span>nreachable -&gt; Ok (Simple Unreachable)
+    | <span data-count="1461">D</span>rop -&gt; Ok (Simple Drop)
     | <span data-count="332">N</span>op -&gt; Ok (Simple Nop)
     | <span data-count="391">R</span>eturn -&gt; Ok Binary.Return
     | <span data-count="9">A</span>ny_convert_extern -&gt; Ok (Simple Any_convert_extern)
     | <span data-count="7">E</span>xtern_convert_any -&gt; Ok (Simple Extern_convert_any)
   and expr (e : Text.expr) (loop_count, block_ids) :
     Binary.expr Annotated.t Result.t =
-    <span data-count="17299">l</span>et+ e =
-      list_ma<span data-count="17299">p</span>
+    <span data-count="17297">l</span>et+ e =
+      list_ma<span data-count="17297">p</span>
         (fun i -&gt;
-          <span data-count="49041">l</span>et+ i = rewrite_inst<span data-count="49041">r</span> (loop_count, block_ids) i in
-          <span data-count="48997">A</span>nnotated.dummy i )
+          <span data-count="49038">l</span>et+ i = rewrite_inst<span data-count="49038">r</span> (loop_count, block_ids) i in
+          <span data-count="48994">A</span>nnotated.dummy i )
         e
     in
-    <span data-count="17255">A</span>nnotated.dummy e
+    <span data-count="17253">A</span>nnotated.dummy e
   in
   expr iexpr (0, [])
 
