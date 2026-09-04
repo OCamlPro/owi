@@ -36,10 +36,10 @@
             const path_to_root = "../";
             const default_light_theme = "frappe";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-4fd98f09.js";
+            window.path_to_searchindex_js = "../searchindex-97168be4.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-008df27c.js"></script>
+        <script src="../toc-d72c18f8.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -214,7 +214,7 @@ Then, for every common exports between these two modules, Owi will check their e
 )
 </code></pre>
 <p>Owi can find an input for which the <code>mul</code> function of these two modules is not equivalent:</p>
-<pre><code class="language-sh">$ owi iso ./mul1.wat ./mul2.wat -v -w1
+<pre><code class="language-sh">$ owi wasm iso ./mul1.wat ./mul2.wat -v -w1
 owi: [INFO] comparing ./mul1.wat and ./mul2.wat
 owi: [INFO] module owi_iso_module1 is ./mul1.wat
 owi: [INFO] module owi_iso_module2 is ./mul2.wat

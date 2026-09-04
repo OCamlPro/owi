@@ -2027,15 +2027,15 @@ let keywords : (string * Text_parser.token) Array.t =
    ; ("(", LPAR)
   |]
 
-let string_to_token = Hashtbl.creat<span data-count="858">e</span> 512
+let string_to_token = Hashtbl.creat<span data-count="895">e</span> 512
 
-let token_to_string = Hashtbl.creat<span data-count="858">e</span> 512
+let token_to_string = Hashtbl.creat<span data-count="895">e</span> 512
 
 let () =
-  Array.ite<span data-count="858">r</span>
+  Array.ite<span data-count="895">r</span>
     (fun (k, v) -&gt;
-      <span data-count="485628">H</span>ashtbl.add string_to_token k v;
-      <span data-count="485628">H</span>ashtbl.add token_to_string v k )
+      <span data-count="506570">H</span>ashtbl.add string_to_token k v;
+      <span data-count="506570">H</span>ashtbl.add token_to_string v k )
     keywords
 
 let token_to_string t =

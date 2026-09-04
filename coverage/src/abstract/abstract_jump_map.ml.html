@@ -105,7 +105,7 @@ module Key = struct
   let map : (int -&gt; int) -&gt; t -&gt; t =
    fun f key -&gt; <span data-count="3">m</span>atch key with <span data-count="2">I</span> i -&gt; I (<span data-count="2">f</span> i) | <span data-count="1">R</span>et -&gt; Ret
 
-  let decr = ma<span data-count="858">p</span> Int.pred
+  let decr = ma<span data-count="895">p</span> Int.pred
 
   let to_int = function <span data-count="80">I</span> i -&gt; i | <span data-count="43">R</span>et -&gt; -1
 

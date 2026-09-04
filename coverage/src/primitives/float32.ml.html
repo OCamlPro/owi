@@ -778,13 +778,13 @@ let neg_nan = 0xffc0_0000l
 
 let bare_nan = 0x7f80_0000l
 
-let to_hex_string = Fmt.st<span data-count="858">r</span> "%lx"
+let to_hex_string = Fmt.st<span data-count="895">r</span> "%lx"
 
 type t = Int32.t
 
-let pos_inf = Int32.bits_of_floa<span data-count="858">t</span> (1.0 /. 0.0)
+let pos_inf = Int32.bits_of_floa<span data-count="895">t</span> (1.0 /. 0.0)
 
-let neg_inf = Int32.bits_of_floa<span data-count="858">t</span> (-<span data-count="858">.</span>(1.0 /. 0.0))
+let neg_inf = Int32.bits_of_floa<span data-count="895">t</span> (-<span data-count="895">.</span>(1.0 /. 0.0))
 
 let of_float = Int32.bits_of_float
 
@@ -849,7 +849,7 @@ let unary op x =
   <span data-count="725">l</span>et t = op (to_floa<span data-count="725">t</span> x) in
   <span data-count="725">i</span>f not @@ Float.is_na<span data-count="725">n</span> t then <span data-count="621">o</span>f_float t else <span data-count="104">d</span>etermine_unary_nan x
 
-let zero = of_floa<span data-count="858">t</span> 0.0
+let zero = of_floa<span data-count="895">t</span> 0.0
 
 let add x y = <span data-count="14941">b</span>inary x ( +. ) y
 
@@ -1121,7 +1121,7 @@ let to_string' convert is_digit n x =
           (if Char.equal s.[String.lengt<span data-count="52">h</span> s - 1] '.' then <span data-count="0">F</span>mt.st<span data-count="0">r</span> "%s0" s else <span data-count="52">s</span>)
     )
 
-let to_string = to_string<span data-count="858">'</span> (Fmt.st<span data-count="858">r</span> "%.17g") is_digit 3
+let to_string = to_string<span data-count="895">'</span> (Fmt.st<span data-count="895">r</span> "%.17g") is_digit 3
 
 let pp fmt v = <span data-count="52">F</span>mt.string fmt (to_strin<span data-count="52">g</span> v)
 

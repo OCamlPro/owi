@@ -37,10 +37,10 @@
             const path_to_root = "";
             const default_light_theme = "frappe";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-4fd98f09.js";
+            window.path_to_searchindex_js = "searchindex-97168be4.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-008df27c.js"></script>
+        <script src="toc-d72c18f8.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -392,7 +392,7 @@ pub extern "C" fn f(x: usize) -&gt; i32 {
 <button class="mdbook-tab" data-tabname="Wasm">Wasm</button>
 </nav>
 <div class="mdbook-tab-content" data-tabname="C">
-<pre><code class="language-sh">$ owi c ./f.c --entry-point=f --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
+<pre><code class="language-sh">$ owi c sym ./f.c --entry-point=f --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
 owi: [ERROR] Trap: integer divide by zero
 model {
   symbol symbol_0 i32 2
@@ -403,7 +403,7 @@ owi: [ERROR] Reached problem!
 </div>
 
 <div class="mdbook-tab-content hidden" data-tabname="C++">
-<pre><code class="language-sh">$ owi c++ ./f.cpp --entry-point=f --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
+<pre><code class="language-sh">$ owi c++ sym ./f.cpp --entry-point=f --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
 owi: [ERROR] Trap: integer divide by zero
 model {
   symbol symbol_0 i32 2
@@ -414,7 +414,7 @@ owi: [ERROR] Reached problem!
 </div>
 
 <div class="mdbook-tab-content hidden" data-tabname="Go">
-<pre><code class="language-sh">$ owi tinygo ./f.go --entry-point=f --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
+<pre><code class="language-sh">$ owi go sym ./f.go --entry-point=f --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
 owi: [ERROR] Trap: unreachable
 model {
   symbol symbol_0 i32 2
@@ -425,7 +425,7 @@ owi: [ERROR] Reached problem!
 </div>
 
 <div class="mdbook-tab-content hidden" data-tabname="Rust">
-<pre><code class="language-sh">$ owi rust ./f.rs --entry-point=f --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
+<pre><code class="language-sh">$ owi rust sym ./f.rs --entry-point=f --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
 owi: [ERROR] Trap: unreachable
 model {
   symbol symbol_0 i32 2
@@ -436,7 +436,7 @@ owi: [ERROR] Reached problem!
 </div>
 
 <div class="mdbook-tab-content hidden" data-tabname="Zig">
-<pre><code class="language-sh">$ owi zig ./f.zig --entry-point=f --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
+<pre><code class="language-sh">$ owi zig sym ./f.zig --entry-point=f --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
 owi: [ERROR] Trap: unreachable
 model {
   symbol symbol_0 i32 2
@@ -447,7 +447,7 @@ owi: [ERROR] Reached problem!
 </div>
 
 <div class="mdbook-tab-content hidden" data-tabname="Wasm">
-<pre><code class="language-sh">$ owi sym ./f.wat --entry-point=f --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
+<pre><code class="language-sh">$ owi wasm sym ./f.wat --entry-point=f --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
 owi: [ERROR] Trap: integer divide by zero
 model {
   symbol symbol_0 i32 2
@@ -648,7 +648,7 @@ export fn check() void {
 <button class="mdbook-tab" data-tabname="Wasm">Wasm</button>
 </nav>
 <div class="mdbook-tab-content" data-tabname="C">
-<pre><code class="language-sh">$ owi c ./f_byhand.c --entry-point=check --no-assert-failure-expression-printing --verbosity=error
+<pre><code class="language-sh">$ owi c sym ./f_byhand.c --entry-point=check --no-assert-failure-expression-printing --verbosity=error
 owi: [ERROR] Trap: integer divide by zero
 model {
   symbol symbol_0 i32 2
@@ -659,7 +659,7 @@ owi: [ERROR] Reached problem!
 </div>
 
 <div class="mdbook-tab-content hidden" data-tabname="C++">
-<pre><code class="language-sh">$ owi c++ ./f_byhand.cpp --entry-point=check --no-assert-failure-expression-printing --verbosity=error
+<pre><code class="language-sh">$ owi c++ sym ./f_byhand.cpp --entry-point=check --no-assert-failure-expression-printing --verbosity=error
 owi: [ERROR] Trap: integer divide by zero
 model {
   symbol symbol_0 i32 2
@@ -670,7 +670,7 @@ owi: [ERROR] Reached problem!
 </div>
 
 <div class="mdbook-tab-content hidden" data-tabname="Go">
-<pre><code class="language-sh">$ owi tinygo ./f_byhand.go --entry-point=check --no-assert-failure-expression-printing --verbosity=error
+<pre><code class="language-sh">$ owi go sym ./f_byhand.go --entry-point=check --no-assert-failure-expression-printing --verbosity=error
 owi: [ERROR] Trap: unreachable
 model {
   symbol symbol_0 i32 2
@@ -681,7 +681,7 @@ owi: [ERROR] Reached problem!
 </div>
 
 <div class="mdbook-tab-content hidden" data-tabname="Rust">
-<pre><code class="language-sh">$ owi rust ./f_byhand.rs --entry-point=check --no-assert-failure-expression-printing --verbosity=error
+<pre><code class="language-sh">$ owi rust sym ./f_byhand.rs --entry-point=check --no-assert-failure-expression-printing --verbosity=error
 owi: [ERROR] Trap: unreachable
 model {
   symbol symbol_0 i32 2
@@ -692,7 +692,7 @@ owi: [ERROR] Reached problem!
 </div>
 
 <div class="mdbook-tab-content hidden" data-tabname="Zig">
-<pre><code class="language-sh">$ owi zig ./f_byhand.zig --entry-point=check --no-assert-failure-expression-printing --verbosity=error
+<pre><code class="language-sh">$ owi zig sym ./f_byhand.zig --entry-point=check --no-assert-failure-expression-printing --verbosity=error
 owi: [ERROR] Trap: unreachable
 model {
   symbol symbol_0 i32 2
@@ -703,7 +703,7 @@ owi: [ERROR] Reached problem!
 </div>
 
 <div class="mdbook-tab-content hidden" data-tabname="Wasm">
-<pre><code class="language-sh">$ owi sym ./f_byhand.wat --entry-point=check --no-assert-failure-expression-printing --verbosity=error
+<pre><code class="language-sh">$ owi wasm sym ./f_byhand.wat --entry-point=check --no-assert-failure-expression-printing --verbosity=error
 owi: [ERROR] Trap: integer divide by zero
 model {
   symbol symbol_0 i32 2
@@ -883,7 +883,7 @@ export fn check(x: i32, y: i32) void {
 <button class="mdbook-tab" data-tabname="Wasm">Wasm</button>
 </nav>
 <div class="mdbook-tab-content" data-tabname="C">
-<pre><code class="language-sh">$ owi c ./mean.c --entry-point=check --invoke-with-symbols --no-assert-failure-expression-printing
+<pre><code class="language-sh">$ owi c sym ./mean.c --entry-point=check --invoke-with-symbols --no-assert-failure-expression-printing
 owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32 -1570748002
@@ -895,7 +895,7 @@ owi: [ERROR] Reached problem!
 </div>
 
 <div class="mdbook-tab-content hidden" data-tabname="C++">
-<pre><code class="language-sh">$ owi c++ ./mean.cpp --entry-point=check --invoke-with-symbols --no-assert-failure-expression-printing
+<pre><code class="language-sh">$ owi c++ sym ./mean.cpp --entry-point=check --invoke-with-symbols --no-assert-failure-expression-printing
 owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32 -1570748002
@@ -907,7 +907,7 @@ owi: [ERROR] Reached problem!
 </div>
 
 <div class="mdbook-tab-content hidden" data-tabname="Go">
-<pre><code class="language-sh">$ owi tinygo ./mean.go --entry-point=check --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
+<pre><code class="language-sh">$ owi go sym ./mean.go --entry-point=check --invoke-with-symbols --no-assert-failure-expression-printing --verbosity=error
 owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32 -2147483648
@@ -919,7 +919,7 @@ owi: [ERROR] Reached problem!
 </div>
 
 <div class="mdbook-tab-content hidden" data-tabname="Rust">
-<pre><code class="language-sh">$ owi rust ./mean.rs --entry-point=check --invoke-with-symbols -w1 --fail-on-assertion-only --no-assert-failure-expression-printing --deterministic-result-order
+<pre><code class="language-sh">$ owi rust sym ./mean.rs --entry-point=check --invoke-with-symbols -w1 --fail-on-assertion-only --no-assert-failure-expression-printing --deterministic-result-order
 owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32 755812345
@@ -932,7 +932,7 @@ owi: [ERROR] Reached problem!
 </div>
 
 <div class="mdbook-tab-content hidden" data-tabname="Zig">
-<pre><code class="language-sh">$ owi zig ./mean.zig --entry-point=check --invoke-with-symbols -w1 --fail-on-assertion-only --no-assert-failure-expression-printing --deterministic-result-order
+<pre><code class="language-sh">$ owi zig sym ./mean.zig --entry-point=check --invoke-with-symbols -w1 --fail-on-assertion-only --no-assert-failure-expression-printing --deterministic-result-order
 owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32 -1001584422
@@ -945,7 +945,7 @@ owi: [ERROR] Reached problem!
 </div>
 
 <div class="mdbook-tab-content hidden" data-tabname="Wasm">
-<pre><code class="language-sh">$ owi sym ./mean.wat --entry-point=check --invoke-with-symbols
+<pre><code class="language-sh">$ owi wasm sym ./mean.wat --entry-point=check --invoke-with-symbols
 owi: [ERROR] Trap: unreachable
 model {
   symbol symbol_0 i32 -2147483648
@@ -981,13 +981,13 @@ Given the following <code>mini.wat</code> file containing symbols:</p>
   (start $start))
 </code></pre>
 <p>You can get a model like this:</p>
-<pre><code class="language-sh">$ owi sym ./mini.wat &gt; mini.scfg
+<pre><code class="language-sh">$ owi wasm sym ./mini.wat &gt; mini.scfg
 owi: [ERROR] Trap: unreachable
 owi: [ERROR] Reached problem!
 [13]
 </code></pre>
 <p>Then you can replay the module execution with the values in the model like this:</p>
-<pre><code class="language-sh">$ owi replay --replay-file mini.scfg mini.wat -v
+<pre><code class="language-sh">$ owi wasm replay --replay-file mini.scfg mini.wat -v
 owi: [INFO] parsing      ...
 owi: [INFO] checking     ...
 owi: [INFO] typechecking ...
@@ -1053,7 +1053,7 @@ Then, for every common exports between these two modules, Owi will check their e
 )
 </code></pre>
 <p>Owi can find an input for which the <code>mul</code> function of these two modules is not equivalent:</p>
-<pre><code class="language-sh">$ owi iso ./mul1.wat ./mul2.wat -v -w1
+<pre><code class="language-sh">$ owi wasm iso ./mul1.wat ./mul2.wat -v -w1
 owi: [INFO] comparing ./mul1.wat and ./mul2.wat
 owi: [INFO] module owi_iso_module1 is ./mul1.wat
 owi: [INFO] module owi_iso_module2 is ./mul2.wat
@@ -1288,7 +1288,7 @@ int main(void) {
   return 0;
 }
 </code></pre>
-<pre><code class="language-sh">$ owi c --e-acsl primes.c -w1
+<pre><code class="language-sh">$ owi c sym --e-acsl primes.c -w1
 owi: [ERROR] Assert failure: false
 model {
   symbol symbol_0 i32 2 n
@@ -1336,7 +1336,7 @@ int main(void) {
   return 0;
 }
 </code></pre>
-<pre><code class="language-sh">$ owi c --e-acsl primes2.c -w1
+<pre><code class="language-sh">$ owi c sym --e-acsl primes2.c -w1
 All OK!
 </code></pre>
 <p>All the specified properties have been satisfied during the execution.</p>
@@ -1368,7 +1368,7 @@ int main() {
 </code></pre>
 <p>We are defining one symbolic variable <code>x</code> using the function <code>owi_i32(void)</code>. Then we build a polynomial <code>poly</code> equal to $x^3 - 7x^2 + 14x - 8$.</p>
 <p>Then we use <code>owi_assert(poly != 0)</code>. Which should fail as this polynomial has multiple roots. Let’s see what owi says about it:</p>
-<pre><code class="language-sh">$ owi c ./poly.c -w1 --no-assert-failure-expression-printing
+<pre><code class="language-sh">$ owi c sym ./poly.c -w1 --no-assert-failure-expression-printing
 owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32 4
@@ -1406,7 +1406,7 @@ int main() {
 }
 </code></pre>
 <p>Let’s run owi on this new input:</p>
-<pre><code class="language-sh">$ owi c ./poly2.c --no-assert-failure-expression-printing
+<pre><code class="language-sh">$ owi c sym ./poly2.c --no-assert-failure-expression-printing
 owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32 -2147483644
@@ -1445,7 +1445,7 @@ int main() {
 </code></pre>
 <p>We are defining one symbolic variable <code>x</code> using the function <code>owi_i32(void)</code>. Then we build a polynomial <code>poly</code> equal to $x^3 - 7x^2 + 14x - 8$.</p>
 <p>Then we use <code>owi_assert(p.getPoly() != 0)</code>. Which should fail as this polynomial has multiple roots. Let’s see what owi says about it:</p>
-<pre><code class="language-sh">$ owi c++ ./poly.cpp -w1 --no-assert-failure-expression-printing
+<pre><code class="language-sh">$ owi c++ sym ./poly.cpp -w1 --no-assert-failure-expression-printing
 owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32 2
@@ -1483,7 +1483,7 @@ int main() {
 }
 </code></pre>
 <p>Let’s run owi on this new input:</p>
-<pre><code class="language-sh">$ owi c++ ./poly2.cpp --no-assert-failure-expression-printing
+<pre><code class="language-sh">$ owi c++ sym ./poly2.cpp --no-assert-failure-expression-printing
 owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32 -2147483644
@@ -1571,7 +1571,7 @@ int main (void) {
   return 1;
 }
 </code></pre>
-<pre><code class="language-sh">$ owi c ./maze.c --no-value --no-assert-failure-expression-printing
+<pre><code class="language-sh">$ owi c sym ./maze.c --no-value --no-assert-failure-expression-printing
 owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32
@@ -1652,8 +1652,7 @@ int main() {
     owi_assert(!acc);
 }
 </code></pre>
-<!-- TODO: remove `-O1` once symbolic popcnt is implemented -->
-<pre><code class="language-sh">$ owi c -O1 ./dobble.c -w1 --no-value --no-assert-failure-expression-printing
+<pre><code class="language-sh">$ owi c sym ./dobble.c -w1 --no-value --no-assert-failure-expression-printing
 owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32
@@ -1735,10 +1734,10 @@ fn main() {
 )
 </code></pre>
 <p>Running the interpreter is as simple as:</p>
-<pre><code class="language-sh">$ owi run ./42.wat
+<pre><code class="language-sh">$ owi wasm run ./42.wat
 </code></pre>
 <p>Nothing is happening, so you can add the <code>-v</code> option to print an execution trace:</p>
-<pre><code class="language-sh">$ owi run ./42.wat -v
+<pre><code class="language-sh">$ owi wasm run ./42.wat -v
 owi: [INFO] parsing      ...
 owi: [INFO] checking     ...
 owi: [INFO] checking     ...
@@ -1761,7 +1760,7 @@ owi: [INFO] running instr : drop (executed 0 times)
 <h1 id="converter"><a class="header" href="#converter">Converter</a></h1>
 <h2 id="wasm2wat"><a class="header" href="#wasm2wat">Wasm2wat</a></h2>
 <p>Given a file <code>42.wasm</code>, you can convert it to <code>result.wat</code> and then run it:</p>
-<pre><code class="language-sh">$ owi wasm2wat 42.wasm -o result.wat
+<pre><code class="language-sh">$ owi wasm to_wat 42.wasm -o result.wat
 $ cat result.wat
 (module
   (type (func))
@@ -1773,7 +1772,7 @@ $ cat result.wat
   )
   (start 0)
 )
-$ owi run result.wat -v
+$ owi wasm run result.wat -v
 owi: [INFO] parsing      ...
 owi: [INFO] checking     ...
 owi: [INFO] checking     ...
@@ -1794,8 +1793,8 @@ owi: [INFO] running instr : drop (executed 0 times)
 </code></pre>
 <h2 id="wat2wasm"><a class="header" href="#wat2wasm">Wat2wasm</a></h2>
 <p>Given a file <code>42.wat</code>, you can convert it to <code>result.wasm</code> and then run it:</p>
-<pre><code class="language-sh">$ owi wat2wasm 42.wat -o result.wasm
-$ owi run result.wasm -v
+<pre><code class="language-sh">$ owi wasm of_wat 42.wat -o result.wasm
+$ owi wasm run result.wasm -v
 owi: [INFO] typechecking ...
 owi: [INFO] linking      ...
 owi: [INFO] interpreting ...
@@ -1849,7 +1848,7 @@ i32.lt_s
 </code></pre>
 </details>
 <p>Owi will format it like this:</p>
-<pre><code class="language-sh">$ owi fmt horrible.wat
+<pre><code class="language-sh">$ owi wasm fmt horrible.wat
 (module
   (memory 10)
   (func $f (param $n i32) (result i32)
@@ -1927,7 +1926,7 @@ i32.lt_s
   (start $start))
 </code></pre>
 <p>You can then create a file <code>useless.dot</code> containing the call graph of the programm:</p>
-<pre><code class="language-sh">$ owi analyze cg useless.wat
+<pre><code class="language-sh">$ owi wasm analyze cg useless.wat
 </code></pre>
 <p><label class="checkbox-label"><input class="checkbox-img" type="checkbox"><img src="wasm-toolkit/call_graph.svg" alt="image"><span class="img-wrapper"><img src="wasm-toolkit/call_graph.svg" alt="image"></span></label></p>
 <h2 id="control-flow-graph"><a class="header" href="#control-flow-graph">Control-Flow Graph</a></h2>
@@ -1959,7 +1958,7 @@ i32.lt_s
 )
 </code></pre>
 <p>You can then create a file <code>useless.dot</code> containing the control flow graph of the function foo:</p>
-<pre><code class="language-sh">$ owi analyze cfg useless.wat --entry-point=foo
+<pre><code class="language-sh">$ owi wasm analyze cfg useless.wat --entry-point=foo
 </code></pre>
 <p><label class="checkbox-label"><input class="checkbox-img" type="checkbox"><img src="wasm-toolkit/control-flow_graph.svg" alt="image"><span class="img-wrapper"><img src="wasm-toolkit/control-flow_graph.svg" alt="image"></span></label></p>
 <div style="break-before: page; page-break-before: always;"></div>
@@ -1980,7 +1979,7 @@ i32.lt_s
 )
 </code></pre>
 <p>You can print the value thanks to the <code>print_i32</code> function imported from the <code>spectest</code> module:</p>
-<pre><code class="language-sh">$ owi script concrete ./print.wast
+<pre><code class="language-sh">$ owi wasm script concrete ./print.wast
 42
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
@@ -1999,1750 +1998,18 @@ i32.lt_s
 )
 </code></pre>
 <p>Running the validator is as simple as:</p>
-<pre><code class="language-sh">$ owi validate ./type_error.wat
+<pre><code class="language-sh">$ owi wasm validate ./type_error.wat
 owi: [ERROR] type mismatch (expected [i32 i32] but stack is [i32])
 [35]
 </code></pre>
 <p>You can also print a more detailed trace with the <code>-v</code> option:</p>
-<pre><code class="language-sh">$ owi validate ./type_error.wat -v
+<pre><code class="language-sh">$ owi wasm validate ./type_error.wat -v
 owi: [INFO] parsing      ...
 owi: [INFO] checking     ...
 owi: [INFO] checking     ...
 owi: [INFO] typechecking ...
 owi: [ERROR] type mismatch (expected [i32 i32] but stack is [i32])
 [35]
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="owi"><a class="header" href="#owi"><code>owi</code></a></h1>
-<pre><code class="language-sh">$ owi --help=plain
-NAME
-       owi - OCaml WebAssembly Interpreter
-
-SYNOPSIS
-       owi [COMMAND] …
-
-COMMANDS
-       abs [--entry-point=FUNCTION] [--unsafe] [OPTION]… FILE
-           Run the abstract interpreter
-
-       analyze COMMAND …
-           Analyze a program in different possible ways
-
-       c [OPTION]… FILE…
-           Compile a C file to Wasm and run the symbolic interpreter on it
-
-       c++ [OPTION]… FILE…
-           Compile a C++ file to Wasm and run the symbolic interpreter on it
-
-       fmt [--inplace] [OPTION]… FILE…
-           Format a .wat or .wast file
-
-       fuzz [OPTION]… FILE
-           Run the fuzzer
-
-       haskell [OPTION]… FILE…
-           Compile a Haskell file to Wasm and run the symbolic interpreter on
-           it
-
-       instrument COMMAND …
-           Instrument a program in various ways
-
-       iso [OPTION]… FILE…
-           Check the iso-functionnality of two Wasm modules by comparing the
-           output when calling their exports.
-
-       llvm [OPTION]… FILE…
-           Compile LLVM IR/bitcode to Wasm and run the symbolic interpreter
-           on it
-
-       replay [OPTION]… FILE
-           Replay a module containing symbols with concrete values in a
-           replay file containing a model
-
-       run [--timeout=S] [--timeout-instr=I] [--unsafe] [OPTION]… FILE
-           Run the concrete interpreter
-
-       rust [OPTION]… FILE…
-           Compile a Rust file to Wasm and run the symbolic interpreter on it
-
-       script COMMAND …
-           Run a reference test suite script
-
-       sym [OPTION]… FILE
-           Run the symbolic interpreter
-
-       tinygo [OPTION]… FILE…
-           Compile a TinyGo file to Wasm and run the symbolic interpreter on
-           it
-
-       validate [OPTION]… FILE…
-           Validate a module
-
-       version [OPTION]…
-           Print some version informations
-
-       wasm2wat [--emit-file] [--output=FILE] [OPTION]… FILE
-           Generate a text format file (.wat) from a binary format file
-           (.wasm)
-
-       wat2wasm [--output=FILE] [--unsafe] [OPTION]… FILE
-           Generate a binary format file (.wasm) from a text format file
-           (.wat)
-
-       zig [OPTION]… FILE…
-           Compile a Zig file to Wasm and run the symbolic interpreter on it
-
-COMMON OPTIONS
-       --help[=FMT] (default=auto)
-           Show this help in format FMT. The value FMT must be one of auto,
-           pager, groff or plain. With auto, the format is pager or plain
-           whenever the TERM env var is dumb or undefined.
-
-       --version
-           Show version information.
-
-EXIT STATUS
-       owi exits with:
-
-       0   on success.
-
-       123 on indiscriminate errors reported on standard error.
-
-       124 on command line parsing errors.
-
-       125 on unexpected internal errors (bugs).
-
-BUGS
-       Email them to &lt;owi.wildcat119@passmail.com&gt;.
-
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="owi-analyze"><a class="header" href="#owi-analyze"><code>owi analyze</code></a></h1>
-<pre><code class="language-sh">$ owi analyze --help=plain
-NAME
-       owi-analyze - Analyze a program in different possible ways
-
-SYNOPSIS
-       owi analyze COMMAND …
-
-COMMANDS
-       cfg [--entry-point=FUNCTION] [OPTION]… FILE
-           Build a Control-Flow Graph
-
-       cg [--call-graph-mode=VALUE] [--entry-point=FUNCTION] [OPTION]… FILE
-           Build a call graph
-
-COMMON OPTIONS
-       --help[=FMT] (default=auto)
-           Show this help in format FMT. The value FMT must be one of auto,
-           pager, groff or plain. With auto, the format is pager or plain
-           whenever the TERM env var is dumb or undefined.
-
-       --version
-           Show version information.
-
-EXIT STATUS
-       owi analyze exits with:
-
-       0   on success.
-
-       123 on indiscriminate errors reported on standard error.
-
-       124 on command line parsing errors.
-
-       125 on unexpected internal errors (bugs).
-
-BUGS
-       Email them to &lt;owi.wildcat119@passmail.com&gt;.
-
-SEE ALSO
-       owi(1)
-
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="owi-c"><a class="header" href="#owi-c"><code>owi c</code></a></h1>
-<pre><code class="language-sh">$ owi c --help=plain
-NAME
-       owi-c - Compile a C file to Wasm and run the symbolic interpreter on
-       it
-
-SYNOPSIS
-       owi c [OPTION]… FILE…
-
-ARGUMENTS
-       FILE (required)
-           source files
-
-OPTIONS
-       --deterministic-result-order
-           Guarantee a fixed deterministic order of found failures. This
-           implies --no-stop-at-failure.
-
-       --e-acsl
-           e-acsl mode, refer to
-           https://frama-c.com/download/e-acsl/e-acsl-implementation.pdf for
-           Frama-C's current language feature implementations
-
-       --entry-point=FUNCTION (absent=main)
-           entry point of the executable
-
-       --exploration=VALUE (absent=fifo)
-           exploration strategy to use ("fifo", "lifo", "random",
-           "random-unseen-then-random", "rarity", "hot-path-penalty",
-           "rarity-aging", "rarity-depth-aging", "rarity-depth-loop-aging",
-           "rarity-depth-loop-aging-random")
-
-       --fail-on-assertion-only
-           ignore traps and only report assertion violations
-
-       --fail-on-trap-only
-           ignore assertion violations and only report traps
-
-       --generate-abstract-invariant
-           Generate invariants by running the abstract interpretation engine.
-
-       -I VALUE
-           headers path
-
-       --invoke-with-symbols
-           Invoke the entry point of the program with symbolic values instead
-           of dummy constants.
-
-       -m INT, --arch=INT (absent=32)
-           data model
-
-       --model-format=VALUE (absent=scfg)
-            The format of the model ("json" or "scfg")
-
-       --model-out-file=FILE
-           Output the generated model to FILE. if --no-stop-at-failure is
-           given this is used as a prefix and the ouputed files would have
-           PREFIX_%d.
-
-       --no-assert-failure-expression-printing
-           do not display the expression in the assert failure
-
-       --no-ite-for-select
-           do not use ite for select
-
-       --no-stop-at-failure
-           do not stop when a program failure is encountered
-
-       --no-value
-           do not display a value for each symbol
-
-       --no-worker-isolation
-           Do not force each worker to run on an isolated physical core.
-
-       -o FILE, --output=FILE
-           Output the generated .wasm or .wat to FILE.
-
-       -O VAL (absent=3)
-           specify which optimization level to use
-
-       --property=FILE
-           property file
-
-       -s VALUE, --solver=VALUE (absent=Z3)
-           SMT solver to use. VALUE must be one of the 6 available solvers:
-           Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo, SMTZilla
-
-       --seed=I
-           Initial seed for the PRNG state
-
-       --testcomp
-           test-comp mode
-
-       --timeout=S
-           Stop execution after S seconds.
-
-       --timeout-instr=I
-           Stop execution after running I instructions.
-
-       -u, --unsafe
-           skip typechecking pass
-
-       -w INT, --workers=INT (absent=n)
-           Number of workers for symbolic execution. Defaults to the number
-           of physical cores.
-
-       --with-breadcrumbs
-           add breadcrumbs to the generated model
-
-       --workspace=DIR
-           write results and intermediate compilation artifacts to dir
-
-COMMON OPTIONS
-       --bench
-           enable benchmarks
-
-       --color=WHEN (absent=auto)
-           Colorize the output. WHEN must be one of auto, always or never.
-
-       --help[=FMT] (default=auto)
-           Show this help in format FMT. The value FMT must be one of auto,
-           pager, groff or plain. With auto, the format is pager or plain
-           whenever the TERM env var is dumb or undefined.
-
-       -q, --quiet
-           Be quiet. Takes over -v and --verbosity.
-
-       -v, --verbose
-           Increase verbosity. Repeatable, but more than twice does not bring
-           more.
-
-       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
-           Be more or less verbose. LEVEL must be one of quiet, error,
-           warning, info or debug. Takes over -v.
-
-       --version
-           Show version information.
-
-EXIT STATUS
-       owi c exits with:
-
-       0   on success.
-
-       123 on indiscriminate errors reported on standard error.
-
-       124 on command line parsing errors.
-
-       125 on unexpected internal errors (bugs).
-
-ENVIRONMENT
-       These environment variables affect the execution of owi c:
-
-       OWI_VERBOSITY
-           See option --verbosity.
-
-BUGS
-       Email them to &lt;owi.wildcat119@passmail.com&gt;.
-
-SEE ALSO
-       owi(1)
-
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="owi-c-1"><a class="header" href="#owi-c-1"><code>owi c++</code></a></h1>
-<pre><code class="language-sh">$ owi c++ --help=plain
-NAME
-       owi-c++ - Compile a C++ file to Wasm and run the symbolic interpreter
-       on it
-
-SYNOPSIS
-       owi c++ [OPTION]… FILE…
-
-ARGUMENTS
-       FILE (required)
-           source files
-
-OPTIONS
-       --deterministic-result-order
-           Guarantee a fixed deterministic order of found failures. This
-           implies --no-stop-at-failure.
-
-       --entry-point=FUNCTION (absent=main)
-           entry point of the executable
-
-       --exploration=VALUE (absent=fifo)
-           exploration strategy to use ("fifo", "lifo", "random",
-           "random-unseen-then-random", "rarity", "hot-path-penalty",
-           "rarity-aging", "rarity-depth-aging", "rarity-depth-loop-aging",
-           "rarity-depth-loop-aging-random")
-
-       --fail-on-assertion-only
-           ignore traps and only report assertion violations
-
-       --fail-on-trap-only
-           ignore assertion violations and only report traps
-
-       --generate-abstract-invariant
-           Generate invariants by running the abstract interpretation engine.
-
-       -I VALUE
-           headers path
-
-       --invoke-with-symbols
-           Invoke the entry point of the program with symbolic values instead
-           of dummy constants.
-
-       -m INT, --arch=INT (absent=32)
-           data model
-
-       --model-format=VALUE (absent=scfg)
-            The format of the model ("json" or "scfg")
-
-       --model-out-file=FILE
-           Output the generated model to FILE. if --no-stop-at-failure is
-           given this is used as a prefix and the ouputed files would have
-           PREFIX_%d.
-
-       --no-assert-failure-expression-printing
-           do not display the expression in the assert failure
-
-       --no-ite-for-select
-           do not use ite for select
-
-       --no-stop-at-failure
-           do not stop when a program failure is encountered
-
-       --no-value
-           do not display a value for each symbol
-
-       --no-worker-isolation
-           Do not force each worker to run on an isolated physical core.
-
-       -o FILE, --output=FILE
-           Output the generated .wasm or .wat to FILE.
-
-       -O VAL (absent=3)
-           specify which optimization level to use
-
-       -s VALUE, --solver=VALUE (absent=Z3)
-           SMT solver to use. VALUE must be one of the 6 available solvers:
-           Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo, SMTZilla
-
-       --seed=I
-           Initial seed for the PRNG state
-
-       --timeout=S
-           Stop execution after S seconds.
-
-       --timeout-instr=I
-           Stop execution after running I instructions.
-
-       -u, --unsafe
-           skip typechecking pass
-
-       -w INT, --workers=INT (absent=n)
-           Number of workers for symbolic execution. Defaults to the number
-           of physical cores.
-
-       --with-breadcrumbs
-           add breadcrumbs to the generated model
-
-       --workspace=DIR
-           write results and intermediate compilation artifacts to dir
-
-COMMON OPTIONS
-       --bench
-           enable benchmarks
-
-       --color=WHEN (absent=auto)
-           Colorize the output. WHEN must be one of auto, always or never.
-
-       --help[=FMT] (default=auto)
-           Show this help in format FMT. The value FMT must be one of auto,
-           pager, groff or plain. With auto, the format is pager or plain
-           whenever the TERM env var is dumb or undefined.
-
-       -q, --quiet
-           Be quiet. Takes over -v and --verbosity.
-
-       -v, --verbose
-           Increase verbosity. Repeatable, but more than twice does not bring
-           more.
-
-       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
-           Be more or less verbose. LEVEL must be one of quiet, error,
-           warning, info or debug. Takes over -v.
-
-       --version
-           Show version information.
-
-EXIT STATUS
-       owi c++ exits with:
-
-       0   on success.
-
-       123 on indiscriminate errors reported on standard error.
-
-       124 on command line parsing errors.
-
-       125 on unexpected internal errors (bugs).
-
-ENVIRONMENT
-       These environment variables affect the execution of owi c++:
-
-       OWI_VERBOSITY
-           See option --verbosity.
-
-BUGS
-       Email them to &lt;owi.wildcat119@passmail.com&gt;.
-
-SEE ALSO
-       owi(1)
-
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="owi-fmt"><a class="header" href="#owi-fmt"><code>owi fmt</code></a></h1>
-<pre><code class="language-sh">$ owi fmt --help=plain
-NAME
-       owi-fmt - Format a .wat or .wast file
-
-SYNOPSIS
-       owi fmt [--inplace] [OPTION]… FILE…
-
-ARGUMENTS
-       FILE (required)
-           source files
-
-OPTIONS
-       -i, --inplace
-           Format in-place, overwriting input file
-
-COMMON OPTIONS
-       --bench
-           enable benchmarks
-
-       --color=WHEN (absent=auto)
-           Colorize the output. WHEN must be one of auto, always or never.
-
-       --help[=FMT] (default=auto)
-           Show this help in format FMT. The value FMT must be one of auto,
-           pager, groff or plain. With auto, the format is pager or plain
-           whenever the TERM env var is dumb or undefined.
-
-       -q, --quiet
-           Be quiet. Takes over -v and --verbosity.
-
-       -v, --verbose
-           Increase verbosity. Repeatable, but more than twice does not bring
-           more.
-
-       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
-           Be more or less verbose. LEVEL must be one of quiet, error,
-           warning, info or debug. Takes over -v.
-
-       --version
-           Show version information.
-
-EXIT STATUS
-       owi fmt exits with:
-
-       0   on success.
-
-       123 on indiscriminate errors reported on standard error.
-
-       124 on command line parsing errors.
-
-       125 on unexpected internal errors (bugs).
-
-ENVIRONMENT
-       These environment variables affect the execution of owi fmt:
-
-       OWI_VERBOSITY
-           See option --verbosity.
-
-BUGS
-       Email them to &lt;owi.wildcat119@passmail.com&gt;.
-
-SEE ALSO
-       owi(1)
-
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="owi-instrument"><a class="header" href="#owi-instrument"><code>owi instrument</code></a></h1>
-<pre><code class="language-sh">$ owi instrument --help=plain
-NAME
-       owi-instrument - Instrument a program in various ways
-
-SYNOPSIS
-       owi instrument COMMAND …
-
-COMMANDS
-       label [--criteria=VALUE] [--unsafe] [OPTION]… FILE
-           Generate an instrumented file with labels corresponding to test
-           objectives for a given coverage criteria.
-
-COMMON OPTIONS
-       --help[=FMT] (default=auto)
-           Show this help in format FMT. The value FMT must be one of auto,
-           pager, groff or plain. With auto, the format is pager or plain
-           whenever the TERM env var is dumb or undefined.
-
-       --version
-           Show version information.
-
-EXIT STATUS
-       owi instrument exits with:
-
-       0   on success.
-
-       123 on indiscriminate errors reported on standard error.
-
-       124 on command line parsing errors.
-
-       125 on unexpected internal errors (bugs).
-
-BUGS
-       Email them to &lt;owi.wildcat119@passmail.com&gt;.
-
-SEE ALSO
-       owi(1)
-
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="owi-iso"><a class="header" href="#owi-iso"><code>owi iso</code></a></h1>
-<pre><code class="language-sh">$ owi iso --help=plain
-NAME
-       owi-iso - Check the iso-functionnality of two Wasm modules by
-       comparing the output when calling their exports.
-
-SYNOPSIS
-       owi iso [OPTION]… FILE…
-
-ARGUMENTS
-       FILE (required)
-           source files
-
-OPTIONS
-       --deterministic-result-order
-           Guarantee a fixed deterministic order of found failures. This
-           implies --no-stop-at-failure.
-
-       --exploration=VALUE (absent=fifo)
-           exploration strategy to use ("fifo", "lifo", "random",
-           "random-unseen-then-random", "rarity", "hot-path-penalty",
-           "rarity-aging", "rarity-depth-aging", "rarity-depth-loop-aging",
-           "rarity-depth-loop-aging-random")
-
-       --fail-on-assertion-only
-           ignore traps and only report assertion violations
-
-       --fail-on-trap-only
-           ignore assertion violations and only report traps
-
-       --model-format=VALUE (absent=scfg)
-            The format of the model ("json" or "scfg")
-
-       --model-out-file=FILE
-           Output the generated model to FILE. if --no-stop-at-failure is
-           given this is used as a prefix and the ouputed files would have
-           PREFIX_%d.
-
-       --no-assert-failure-expression-printing
-           do not display the expression in the assert failure
-
-       --no-stop-at-failure
-           do not stop when a program failure is encountered
-
-       --no-value
-           do not display a value for each symbol
-
-       --no-worker-isolation
-           Do not force each worker to run on an isolated physical core.
-
-       -s VALUE, --solver=VALUE (absent=Z3)
-           SMT solver to use. VALUE must be one of the 6 available solvers:
-           Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo, SMTZilla
-
-       --seed=I
-           Initial seed for the PRNG state
-
-       -u, --unsafe
-           skip typechecking pass
-
-       -w INT, --workers=INT (absent=n)
-           Number of workers for symbolic execution. Defaults to the number
-           of physical cores.
-
-       --with-breadcrumbs
-           add breadcrumbs to the generated model
-
-       --workspace=DIR
-           write results and intermediate compilation artifacts to dir
-
-COMMON OPTIONS
-       --bench
-           enable benchmarks
-
-       --color=WHEN (absent=auto)
-           Colorize the output. WHEN must be one of auto, always or never.
-
-       --help[=FMT] (default=auto)
-           Show this help in format FMT. The value FMT must be one of auto,
-           pager, groff or plain. With auto, the format is pager or plain
-           whenever the TERM env var is dumb or undefined.
-
-       -q, --quiet
-           Be quiet. Takes over -v and --verbosity.
-
-       -v, --verbose
-           Increase verbosity. Repeatable, but more than twice does not bring
-           more.
-
-       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
-           Be more or less verbose. LEVEL must be one of quiet, error,
-           warning, info or debug. Takes over -v.
-
-       --version
-           Show version information.
-
-EXIT STATUS
-       owi iso exits with:
-
-       0   on success.
-
-       123 on indiscriminate errors reported on standard error.
-
-       124 on command line parsing errors.
-
-       125 on unexpected internal errors (bugs).
-
-ENVIRONMENT
-       These environment variables affect the execution of owi iso:
-
-       OWI_VERBOSITY
-           See option --verbosity.
-
-BUGS
-       Email them to &lt;owi.wildcat119@passmail.com&gt;.
-
-SEE ALSO
-       owi(1)
-
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="owi-llvm"><a class="header" href="#owi-llvm"><code>owi llvm</code></a></h1>
-<pre><code class="language-sh">$ owi llvm --help=plain
-NAME
-       owi-llvm - Compile LLVM IR/bitcode to Wasm and run the symbolic
-       interpreter on it
-
-SYNOPSIS
-       owi llvm [OPTION]… FILE…
-
-ARGUMENTS
-       FILE (required)
-           source files
-
-OPTIONS
-       --deterministic-result-order
-           Guarantee a fixed deterministic order of found failures. This
-           implies --no-stop-at-failure.
-
-       --entry-point=FUNCTION
-           entry point of the executable
-
-       --exploration=VALUE (absent=fifo)
-           exploration strategy to use ("fifo", "lifo", "random",
-           "random-unseen-then-random", "rarity", "hot-path-penalty",
-           "rarity-aging", "rarity-depth-aging", "rarity-depth-loop-aging",
-           "rarity-depth-loop-aging-random")
-
-       --fail-on-assertion-only
-           ignore traps and only report assertion violations
-
-       --fail-on-trap-only
-           ignore assertion violations and only report traps
-
-       --generate-abstract-invariant
-           Generate invariants by running the abstract interpretation engine.
-
-       --invoke-with-symbols
-           Invoke the entry point of the program with symbolic values instead
-           of dummy constants.
-
-       --model-format=VALUE (absent=scfg)
-            The format of the model ("json" or "scfg")
-
-       --model-out-file=FILE
-           Output the generated model to FILE. if --no-stop-at-failure is
-           given this is used as a prefix and the ouputed files would have
-           PREFIX_%d.
-
-       --no-assert-failure-expression-printing
-           do not display the expression in the assert failure
-
-       --no-ite-for-select
-           do not use ite for select
-
-       --no-stop-at-failure
-           do not stop when a program failure is encountered
-
-       --no-value
-           do not display a value for each symbol
-
-       --no-worker-isolation
-           Do not force each worker to run on an isolated physical core.
-
-       -o FILE, --output=FILE
-           Output the generated .wasm or .wat to FILE.
-
-       -s VALUE, --solver=VALUE (absent=Z3)
-           SMT solver to use. VALUE must be one of the 6 available solvers:
-           Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo, SMTZilla
-
-       --seed=I
-           Initial seed for the PRNG state
-
-       --timeout=S
-           Stop execution after S seconds.
-
-       --timeout-instr=I
-           Stop execution after running I instructions.
-
-       -u, --unsafe
-           skip typechecking pass
-
-       -w INT, --workers=INT (absent=n)
-           Number of workers for symbolic execution. Defaults to the number
-           of physical cores.
-
-       --with-breadcrumbs
-           add breadcrumbs to the generated model
-
-       --workspace=DIR
-           write results and intermediate compilation artifacts to dir
-
-COMMON OPTIONS
-       --bench
-           enable benchmarks
-
-       --color=WHEN (absent=auto)
-           Colorize the output. WHEN must be one of auto, always or never.
-
-       --help[=FMT] (default=auto)
-           Show this help in format FMT. The value FMT must be one of auto,
-           pager, groff or plain. With auto, the format is pager or plain
-           whenever the TERM env var is dumb or undefined.
-
-       -q, --quiet
-           Be quiet. Takes over -v and --verbosity.
-
-       -v, --verbose
-           Increase verbosity. Repeatable, but more than twice does not bring
-           more.
-
-       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
-           Be more or less verbose. LEVEL must be one of quiet, error,
-           warning, info or debug. Takes over -v.
-
-       --version
-           Show version information.
-
-EXIT STATUS
-       owi llvm exits with:
-
-       0   on success.
-
-       123 on indiscriminate errors reported on standard error.
-
-       124 on command line parsing errors.
-
-       125 on unexpected internal errors (bugs).
-
-ENVIRONMENT
-       These environment variables affect the execution of owi llvm:
-
-       OWI_VERBOSITY
-           See option --verbosity.
-
-BUGS
-       Email them to &lt;owi.wildcat119@passmail.com&gt;.
-
-SEE ALSO
-       owi(1)
-
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="owi-replay"><a class="header" href="#owi-replay"><code>owi replay</code></a></h1>
-<pre><code class="language-sh">$ owi replay --help=plain
-NAME
-       owi-replay - Replay a module containing symbols with concrete values
-       in a replay file containing a model
-
-SYNOPSIS
-       owi replay [OPTION]… FILE
-
-ARGUMENTS
-       FILE (required)
-           source file
-
-OPTIONS
-       --entry-point=FUNCTION
-           entry point of the executable
-
-       --invoke-with-symbols
-           Invoke the entry point of the program with symbolic values instead
-           of dummy constants.
-
-       --replay-file=FILE (required)
-           Which replay file to use
-
-       -u, --unsafe
-           skip typechecking pass
-
-COMMON OPTIONS
-       --bench
-           enable benchmarks
-
-       --color=WHEN (absent=auto)
-           Colorize the output. WHEN must be one of auto, always or never.
-
-       --help[=FMT] (default=auto)
-           Show this help in format FMT. The value FMT must be one of auto,
-           pager, groff or plain. With auto, the format is pager or plain
-           whenever the TERM env var is dumb or undefined.
-
-       -q, --quiet
-           Be quiet. Takes over -v and --verbosity.
-
-       -v, --verbose
-           Increase verbosity. Repeatable, but more than twice does not bring
-           more.
-
-       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
-           Be more or less verbose. LEVEL must be one of quiet, error,
-           warning, info or debug. Takes over -v.
-
-       --version
-           Show version information.
-
-EXIT STATUS
-       owi replay exits with:
-
-       0   on success.
-
-       123 on indiscriminate errors reported on standard error.
-
-       124 on command line parsing errors.
-
-       125 on unexpected internal errors (bugs).
-
-ENVIRONMENT
-       These environment variables affect the execution of owi replay:
-
-       OWI_VERBOSITY
-           See option --verbosity.
-
-BUGS
-       Email them to &lt;owi.wildcat119@passmail.com&gt;.
-
-SEE ALSO
-       owi(1)
-
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="owi-run"><a class="header" href="#owi-run"><code>owi run</code></a></h1>
-<pre><code class="language-sh">$ owi run --help=plain
-NAME
-       owi-run - Run the concrete interpreter
-
-SYNOPSIS
-       owi run [--timeout=S] [--timeout-instr=I] [--unsafe] [OPTION]… FILE
-
-ARGUMENTS
-       FILE (required)
-           source file
-
-OPTIONS
-       --timeout=S
-           Stop execution after S seconds.
-
-       --timeout-instr=I
-           Stop execution after running I instructions.
-
-       -u, --unsafe
-           skip typechecking pass
-
-COMMON OPTIONS
-       --bench
-           enable benchmarks
-
-       --color=WHEN (absent=auto)
-           Colorize the output. WHEN must be one of auto, always or never.
-
-       --help[=FMT] (default=auto)
-           Show this help in format FMT. The value FMT must be one of auto,
-           pager, groff or plain. With auto, the format is pager or plain
-           whenever the TERM env var is dumb or undefined.
-
-       -q, --quiet
-           Be quiet. Takes over -v and --verbosity.
-
-       -v, --verbose
-           Increase verbosity. Repeatable, but more than twice does not bring
-           more.
-
-       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
-           Be more or less verbose. LEVEL must be one of quiet, error,
-           warning, info or debug. Takes over -v.
-
-       --version
-           Show version information.
-
-EXIT STATUS
-       owi run exits with:
-
-       0   on success.
-
-       123 on indiscriminate errors reported on standard error.
-
-       124 on command line parsing errors.
-
-       125 on unexpected internal errors (bugs).
-
-ENVIRONMENT
-       These environment variables affect the execution of owi run:
-
-       OWI_VERBOSITY
-           See option --verbosity.
-
-BUGS
-       Email them to &lt;owi.wildcat119@passmail.com&gt;.
-
-SEE ALSO
-       owi(1)
-
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="owi-rust"><a class="header" href="#owi-rust"><code>owi rust</code></a></h1>
-<pre><code class="language-sh">$ owi rust --help=plain
-NAME
-       owi-rust - Compile a Rust file to Wasm and run the symbolic
-       interpreter on it
-
-SYNOPSIS
-       owi rust [OPTION]… FILE…
-
-ARGUMENTS
-       FILE (required)
-           source files
-
-OPTIONS
-       --deterministic-result-order
-           Guarantee a fixed deterministic order of found failures. This
-           implies --no-stop-at-failure.
-
-       --entry-point=FUNCTION (absent=main)
-           entry point of the executable
-
-       --exploration=VALUE (absent=fifo)
-           exploration strategy to use ("fifo", "lifo", "random",
-           "random-unseen-then-random", "rarity", "hot-path-penalty",
-           "rarity-aging", "rarity-depth-aging", "rarity-depth-loop-aging",
-           "rarity-depth-loop-aging-random")
-
-       --fail-on-assertion-only
-           ignore traps and only report assertion violations
-
-       --fail-on-trap-only
-           ignore assertion violations and only report traps
-
-       --generate-abstract-invariant
-           Generate invariants by running the abstract interpretation engine.
-
-       -I VALUE
-           headers path
-
-       --invoke-with-symbols
-           Invoke the entry point of the program with symbolic values instead
-           of dummy constants.
-
-       -m INT, --arch=INT (absent=32)
-           data model
-
-       --model-format=VALUE (absent=scfg)
-            The format of the model ("json" or "scfg")
-
-       --model-out-file=FILE
-           Output the generated model to FILE. if --no-stop-at-failure is
-           given this is used as a prefix and the ouputed files would have
-           PREFIX_%d.
-
-       --no-assert-failure-expression-printing
-           do not display the expression in the assert failure
-
-       --no-ite-for-select
-           do not use ite for select
-
-       --no-stop-at-failure
-           do not stop when a program failure is encountered
-
-       --no-value
-           do not display a value for each symbol
-
-       --no-worker-isolation
-           Do not force each worker to run on an isolated physical core.
-
-       -o FILE, --output=FILE
-           Output the generated .wasm or .wat to FILE.
-
-       -O VAL (absent=3)
-           specify which optimization level to use
-
-       -s VALUE, --solver=VALUE (absent=Z3)
-           SMT solver to use. VALUE must be one of the 6 available solvers:
-           Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo, SMTZilla
-
-       --seed=I
-           Initial seed for the PRNG state
-
-       --timeout=S
-           Stop execution after S seconds.
-
-       --timeout-instr=I
-           Stop execution after running I instructions.
-
-       -u, --unsafe
-           skip typechecking pass
-
-       -w INT, --workers=INT (absent=n)
-           Number of workers for symbolic execution. Defaults to the number
-           of physical cores.
-
-       --with-breadcrumbs
-           add breadcrumbs to the generated model
-
-       --workspace=DIR
-           write results and intermediate compilation artifacts to dir
-
-COMMON OPTIONS
-       --bench
-           enable benchmarks
-
-       --color=WHEN (absent=auto)
-           Colorize the output. WHEN must be one of auto, always or never.
-
-       --help[=FMT] (default=auto)
-           Show this help in format FMT. The value FMT must be one of auto,
-           pager, groff or plain. With auto, the format is pager or plain
-           whenever the TERM env var is dumb or undefined.
-
-       -q, --quiet
-           Be quiet. Takes over -v and --verbosity.
-
-       -v, --verbose
-           Increase verbosity. Repeatable, but more than twice does not bring
-           more.
-
-       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
-           Be more or less verbose. LEVEL must be one of quiet, error,
-           warning, info or debug. Takes over -v.
-
-       --version
-           Show version information.
-
-EXIT STATUS
-       owi rust exits with:
-
-       0   on success.
-
-       123 on indiscriminate errors reported on standard error.
-
-       124 on command line parsing errors.
-
-       125 on unexpected internal errors (bugs).
-
-ENVIRONMENT
-       These environment variables affect the execution of owi rust:
-
-       OWI_VERBOSITY
-           See option --verbosity.
-
-BUGS
-       Email them to &lt;owi.wildcat119@passmail.com&gt;.
-
-SEE ALSO
-       owi(1)
-
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="owi-script"><a class="header" href="#owi-script"><code>owi script</code></a></h1>
-<pre><code class="language-sh">$ owi script --help=plain
-NAME
-       owi-script - Run a reference test suite script
-
-SYNOPSIS
-       owi script COMMAND …
-
-COMMANDS
-       abstract [--no-exhaustion] [OPTION]… FILE…
-           Run a reference test suite script using the abstract interpreter
-
-       concrete [--no-exhaustion] [OPTION]… FILE…
-           Run a reference test suite script using the concrete interpreter
-
-       symbolic [--no-exhaustion] [OPTION]… FILE…
-           Run a reference test suite script using the symbolic interpreter
-
-COMMON OPTIONS
-       --help[=FMT] (default=auto)
-           Show this help in format FMT. The value FMT must be one of auto,
-           pager, groff or plain. With auto, the format is pager or plain
-           whenever the TERM env var is dumb or undefined.
-
-       --version
-           Show version information.
-
-EXIT STATUS
-       owi script exits with:
-
-       0   on success.
-
-       123 on indiscriminate errors reported on standard error.
-
-       124 on command line parsing errors.
-
-       125 on unexpected internal errors (bugs).
-
-BUGS
-       Email them to &lt;owi.wildcat119@passmail.com&gt;.
-
-SEE ALSO
-       owi(1)
-
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="owi-sym"><a class="header" href="#owi-sym"><code>owi sym</code></a></h1>
-<pre><code class="language-sh">$ owi sym --help=plain
-NAME
-       owi-sym - Run the symbolic interpreter
-
-SYNOPSIS
-       owi sym [OPTION]… FILE
-
-ARGUMENTS
-       FILE (required)
-           source file
-
-OPTIONS
-       --deterministic-result-order
-           Guarantee a fixed deterministic order of found failures. This
-           implies --no-stop-at-failure.
-
-       --entry-point=FUNCTION
-           entry point of the executable
-
-       --exploration=VALUE (absent=fifo)
-           exploration strategy to use ("fifo", "lifo", "random",
-           "random-unseen-then-random", "rarity", "hot-path-penalty",
-           "rarity-aging", "rarity-depth-aging", "rarity-depth-loop-aging",
-           "rarity-depth-loop-aging-random")
-
-       --fail-on-assertion-only
-           ignore traps and only report assertion violations
-
-       --fail-on-trap-only
-           ignore assertion violations and only report traps
-
-       --generate-abstract-invariant
-           Generate invariants by running the abstract interpretation engine.
-
-       --invoke-with-symbols
-           Invoke the entry point of the program with symbolic values instead
-           of dummy constants.
-
-       --model-format=VALUE (absent=scfg)
-            The format of the model ("json" or "scfg")
-
-       --model-out-file=FILE
-           Output the generated model to FILE. if --no-stop-at-failure is
-           given this is used as a prefix and the ouputed files would have
-           PREFIX_%d.
-
-       --no-assert-failure-expression-printing
-           do not display the expression in the assert failure
-
-       --no-ite-for-select
-           do not use ite for select
-
-       --no-stop-at-failure
-           do not stop when a program failure is encountered
-
-       --no-value
-           do not display a value for each symbol
-
-       --no-worker-isolation
-           Do not force each worker to run on an isolated physical core.
-
-       -s VALUE, --solver=VALUE (absent=Z3)
-           SMT solver to use. VALUE must be one of the 6 available solvers:
-           Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo, SMTZilla
-
-       --seed=I
-           Initial seed for the PRNG state
-
-       --timeout=S
-           Stop execution after S seconds.
-
-       --timeout-instr=I
-           Stop execution after running I instructions.
-
-       -u, --unsafe
-           skip typechecking pass
-
-       -w INT, --workers=INT (absent=n)
-           Number of workers for symbolic execution. Defaults to the number
-           of physical cores.
-
-       --with-breadcrumbs
-           add breadcrumbs to the generated model
-
-       --workspace=DIR
-           write results and intermediate compilation artifacts to dir
-
-COMMON OPTIONS
-       --bench
-           enable benchmarks
-
-       --color=WHEN (absent=auto)
-           Colorize the output. WHEN must be one of auto, always or never.
-
-       --help[=FMT] (default=auto)
-           Show this help in format FMT. The value FMT must be one of auto,
-           pager, groff or plain. With auto, the format is pager or plain
-           whenever the TERM env var is dumb or undefined.
-
-       -q, --quiet
-           Be quiet. Takes over -v and --verbosity.
-
-       -v, --verbose
-           Increase verbosity. Repeatable, but more than twice does not bring
-           more.
-
-       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
-           Be more or less verbose. LEVEL must be one of quiet, error,
-           warning, info or debug. Takes over -v.
-
-       --version
-           Show version information.
-
-EXIT STATUS
-       owi sym exits with:
-
-       0   on success.
-
-       123 on indiscriminate errors reported on standard error.
-
-       124 on command line parsing errors.
-
-       125 on unexpected internal errors (bugs).
-
-ENVIRONMENT
-       These environment variables affect the execution of owi sym:
-
-       OWI_VERBOSITY
-           See option --verbosity.
-
-BUGS
-       Email them to &lt;owi.wildcat119@passmail.com&gt;.
-
-SEE ALSO
-       owi(1)
-
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="owi-validate"><a class="header" href="#owi-validate"><code>owi validate</code></a></h1>
-<pre><code class="language-sh">$ owi validate --help=plain
-NAME
-       owi-validate - Validate a module
-
-SYNOPSIS
-       owi validate [OPTION]… FILE…
-
-ARGUMENTS
-       FILE (required)
-           source files
-
-COMMON OPTIONS
-       --bench
-           enable benchmarks
-
-       --color=WHEN (absent=auto)
-           Colorize the output. WHEN must be one of auto, always or never.
-
-       --help[=FMT] (default=auto)
-           Show this help in format FMT. The value FMT must be one of auto,
-           pager, groff or plain. With auto, the format is pager or plain
-           whenever the TERM env var is dumb or undefined.
-
-       -q, --quiet
-           Be quiet. Takes over -v and --verbosity.
-
-       -v, --verbose
-           Increase verbosity. Repeatable, but more than twice does not bring
-           more.
-
-       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
-           Be more or less verbose. LEVEL must be one of quiet, error,
-           warning, info or debug. Takes over -v.
-
-       --version
-           Show version information.
-
-EXIT STATUS
-       owi validate exits with:
-
-       0   on success.
-
-       123 on indiscriminate errors reported on standard error.
-
-       124 on command line parsing errors.
-
-       125 on unexpected internal errors (bugs).
-
-ENVIRONMENT
-       These environment variables affect the execution of owi validate:
-
-       OWI_VERBOSITY
-           See option --verbosity.
-
-BUGS
-       Email them to &lt;owi.wildcat119@passmail.com&gt;.
-
-SEE ALSO
-       owi(1)
-
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="owi-version"><a class="header" href="#owi-version"><code>owi version</code></a></h1>
-<pre><code class="language-sh">$ owi version --help=plain
-NAME
-       owi-version - Print some version informations
-
-SYNOPSIS
-       owi version [OPTION]…
-
-COMMON OPTIONS
-       --bench
-           enable benchmarks
-
-       --color=WHEN (absent=auto)
-           Colorize the output. WHEN must be one of auto, always or never.
-
-       --help[=FMT] (default=auto)
-           Show this help in format FMT. The value FMT must be one of auto,
-           pager, groff or plain. With auto, the format is pager or plain
-           whenever the TERM env var is dumb or undefined.
-
-       -q, --quiet
-           Be quiet. Takes over -v and --verbosity.
-
-       -v, --verbose
-           Increase verbosity. Repeatable, but more than twice does not bring
-           more.
-
-       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
-           Be more or less verbose. LEVEL must be one of quiet, error,
-           warning, info or debug. Takes over -v.
-
-       --version
-           Show version information.
-
-EXIT STATUS
-       owi version exits with:
-
-       0   on success.
-
-       123 on indiscriminate errors reported on standard error.
-
-       124 on command line parsing errors.
-
-       125 on unexpected internal errors (bugs).
-
-ENVIRONMENT
-       These environment variables affect the execution of owi version:
-
-       OWI_VERBOSITY
-           See option --verbosity.
-
-BUGS
-       Email them to &lt;owi.wildcat119@passmail.com&gt;.
-
-SEE ALSO
-       owi(1)
-
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="owi-wasm2wat"><a class="header" href="#owi-wasm2wat"><code>owi wasm2wat</code></a></h1>
-<pre><code class="language-sh">$ owi wasm2wat --help=plain
-NAME
-       owi-wasm2wat - Generate a text format file (.wat) from a binary format
-       file (.wasm)
-
-SYNOPSIS
-       owi wasm2wat [--emit-file] [--output=FILE] [OPTION]… FILE
-
-ARGUMENTS
-       FILE (required)
-           source file
-
-OPTIONS
-       --emit-file
-           Emit (.wat) files from corresponding (.wasm) files.
-
-       -o FILE, --output=FILE
-           Output the generated .wasm or .wat to FILE.
-
-COMMON OPTIONS
-       --bench
-           enable benchmarks
-
-       --color=WHEN (absent=auto)
-           Colorize the output. WHEN must be one of auto, always or never.
-
-       --help[=FMT] (default=auto)
-           Show this help in format FMT. The value FMT must be one of auto,
-           pager, groff or plain. With auto, the format is pager or plain
-           whenever the TERM env var is dumb or undefined.
-
-       -q, --quiet
-           Be quiet. Takes over -v and --verbosity.
-
-       -v, --verbose
-           Increase verbosity. Repeatable, but more than twice does not bring
-           more.
-
-       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
-           Be more or less verbose. LEVEL must be one of quiet, error,
-           warning, info or debug. Takes over -v.
-
-       --version
-           Show version information.
-
-EXIT STATUS
-       owi wasm2wat exits with:
-
-       0   on success.
-
-       123 on indiscriminate errors reported on standard error.
-
-       124 on command line parsing errors.
-
-       125 on unexpected internal errors (bugs).
-
-ENVIRONMENT
-       These environment variables affect the execution of owi wasm2wat:
-
-       OWI_VERBOSITY
-           See option --verbosity.
-
-BUGS
-       Email them to &lt;owi.wildcat119@passmail.com&gt;.
-
-SEE ALSO
-       owi(1)
-
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="owi-wat2wasm"><a class="header" href="#owi-wat2wasm"><code>owi wat2wasm</code></a></h1>
-<pre><code class="language-sh">$ owi wat2wasm --help=plain
-NAME
-       owi-wat2wasm - Generate a binary format file (.wasm) from a text
-       format file (.wat)
-
-SYNOPSIS
-       owi wat2wasm [--output=FILE] [--unsafe] [OPTION]… FILE
-
-ARGUMENTS
-       FILE (required)
-           source file
-
-OPTIONS
-       -o FILE, --output=FILE
-           Output the generated .wasm or .wat to FILE.
-
-       -u, --unsafe
-           skip typechecking pass
-
-COMMON OPTIONS
-       --bench
-           enable benchmarks
-
-       --color=WHEN (absent=auto)
-           Colorize the output. WHEN must be one of auto, always or never.
-
-       --help[=FMT] (default=auto)
-           Show this help in format FMT. The value FMT must be one of auto,
-           pager, groff or plain. With auto, the format is pager or plain
-           whenever the TERM env var is dumb or undefined.
-
-       -q, --quiet
-           Be quiet. Takes over -v and --verbosity.
-
-       -v, --verbose
-           Increase verbosity. Repeatable, but more than twice does not bring
-           more.
-
-       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
-           Be more or less verbose. LEVEL must be one of quiet, error,
-           warning, info or debug. Takes over -v.
-
-       --version
-           Show version information.
-
-EXIT STATUS
-       owi wat2wasm exits with:
-
-       0   on success.
-
-       123 on indiscriminate errors reported on standard error.
-
-       124 on command line parsing errors.
-
-       125 on unexpected internal errors (bugs).
-
-ENVIRONMENT
-       These environment variables affect the execution of owi wat2wasm:
-
-       OWI_VERBOSITY
-           See option --verbosity.
-
-BUGS
-       Email them to &lt;owi.wildcat119@passmail.com&gt;.
-
-SEE ALSO
-       owi(1)
-
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="owi-zig"><a class="header" href="#owi-zig"><code>owi zig</code></a></h1>
-<pre><code class="language-sh">$ owi zig --help=plain
-NAME
-       owi-zig - Compile a Zig file to Wasm and run the symbolic interpreter
-       on it
-
-SYNOPSIS
-       owi zig [OPTION]… FILE…
-
-ARGUMENTS
-       FILE (required)
-           source files
-
-OPTIONS
-       --deterministic-result-order
-           Guarantee a fixed deterministic order of found failures. This
-           implies --no-stop-at-failure.
-
-       --entry-point=FUNCTION (absent=_start)
-           entry point of the executable
-
-       --exploration=VALUE (absent=fifo)
-           exploration strategy to use ("fifo", "lifo", "random",
-           "random-unseen-then-random", "rarity", "hot-path-penalty",
-           "rarity-aging", "rarity-depth-aging", "rarity-depth-loop-aging",
-           "rarity-depth-loop-aging-random")
-
-       --fail-on-assertion-only
-           ignore traps and only report assertion violations
-
-       --fail-on-trap-only
-           ignore assertion violations and only report traps
-
-       --generate-abstract-invariant
-           Generate invariants by running the abstract interpretation engine.
-
-       -I VALUE
-           headers path
-
-       --invoke-with-symbols
-           Invoke the entry point of the program with symbolic values instead
-           of dummy constants.
-
-       --model-format=VALUE (absent=scfg)
-            The format of the model ("json" or "scfg")
-
-       --model-out-file=FILE
-           Output the generated model to FILE. if --no-stop-at-failure is
-           given this is used as a prefix and the ouputed files would have
-           PREFIX_%d.
-
-       --no-assert-failure-expression-printing
-           do not display the expression in the assert failure
-
-       --no-ite-for-select
-           do not use ite for select
-
-       --no-stop-at-failure
-           do not stop when a program failure is encountered
-
-       --no-value
-           do not display a value for each symbol
-
-       --no-worker-isolation
-           Do not force each worker to run on an isolated physical core.
-
-       -o FILE, --output=FILE
-           Output the generated .wasm or .wat to FILE.
-
-       -s VALUE, --solver=VALUE (absent=Z3)
-           SMT solver to use. VALUE must be one of the 6 available solvers:
-           Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo, SMTZilla
-
-       --seed=I
-           Initial seed for the PRNG state
-
-       --timeout=S
-           Stop execution after S seconds.
-
-       --timeout-instr=I
-           Stop execution after running I instructions.
-
-       -u, --unsafe
-           skip typechecking pass
-
-       -w INT, --workers=INT (absent=n)
-           Number of workers for symbolic execution. Defaults to the number
-           of physical cores.
-
-       --with-breadcrumbs
-           add breadcrumbs to the generated model
-
-       --workspace=DIR
-           write results and intermediate compilation artifacts to dir
-
-COMMON OPTIONS
-       --bench
-           enable benchmarks
-
-       --color=WHEN (absent=auto)
-           Colorize the output. WHEN must be one of auto, always or never.
-
-       --help[=FMT] (default=auto)
-           Show this help in format FMT. The value FMT must be one of auto,
-           pager, groff or plain. With auto, the format is pager or plain
-           whenever the TERM env var is dumb or undefined.
-
-       -q, --quiet
-           Be quiet. Takes over -v and --verbosity.
-
-       -v, --verbose
-           Increase verbosity. Repeatable, but more than twice does not bring
-           more.
-
-       --verbosity=LEVEL (absent=warning or OWI_VERBOSITY env)
-           Be more or less verbose. LEVEL must be one of quiet, error,
-           warning, info or debug. Takes over -v.
-
-       --version
-           Show version information.
-
-EXIT STATUS
-       owi zig exits with:
-
-       0   on success.
-
-       123 on indiscriminate errors reported on standard error.
-
-       124 on command line parsing errors.
-
-       125 on unexpected internal errors (bugs).
-
-ENVIRONMENT
-       These environment variables affect the execution of owi zig:
-
-       OWI_VERBOSITY
-           See option --verbosity.
-
-BUGS
-       Email them to &lt;owi.wildcat119@passmail.com&gt;.
-
-SEE ALSO
-       owi(1)
-
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="overview"><a class="header" href="#overview">Overview</a></h1>

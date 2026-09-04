@@ -195,8 +195,8 @@ type t =
   }
 
 let pp_data =
-  Fmt.brace<span data-count="858">s</span>
-    (Fmt.iter_binding<span data-count="858">s</span> ~sep:Fmt.semi Array.iteri (fun ppf (i, v) -&gt;
+  Fmt.brace<span data-count="895">s</span>
+    (Fmt.iter_binding<span data-count="895">s</span> ~sep:Fmt.semi Array.iteri (fun ppf (i, v) -&gt;
        <span data-count="0">F</span>mt.pf ppf "%d -&gt; %a" i Concrete_ref.pp v ) )
 
 let pp ppf t = <span data-count="0">F</span>mt.pf ppf "%a" pp_data t.data

@@ -107,14 +107,14 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-let main_src = Logs.Src.creat<span data-count="858">e</span> "owi" ~doc:"Owi's main logs"
+let main_src = Logs.Src.creat<span data-count="895">e</span> "owi" ~doc:"Owi's main logs"
 
-let bench_src = Logs.Src.creat<span data-count="858">e</span> "owi-bench" ~doc:"Owi's benchmark logs"
+let bench_src = Logs.Src.creat<span data-count="895">e</span> "owi-bench" ~doc:"Owi's benchmark logs"
 
-include (val Logs.src_lo<span data-count="858">g</span> main_src : Logs.LOG)
+include (val Logs.src_lo<span data-count="895">g</span> main_src : Logs.LOG)
 
 let is_bench_enabled () =
-  <span data-count="30283">m</span>atch Logs.Src.level bench_src with <span data-count="30268">N</span>one -&gt; false | <span data-count="16">S</span>ome _ -&gt; true
+  <span data-count="30070">m</span>atch Logs.Src.level bench_src with <span data-count="30054">N</span>one -&gt; false | <span data-count="16">S</span>ome _ -&gt; true
 
 let is_debug_enabled () =
   <span data-count="430">m</span>atch Logs.Src.level main_src with

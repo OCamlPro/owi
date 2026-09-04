@@ -36,10 +36,10 @@
             const path_to_root = "../";
             const default_light_theme = "frappe";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-4fd98f09.js";
+            window.path_to_searchindex_js = "../searchindex-97168be4.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-008df27c.js"></script>
+        <script src="../toc-d72c18f8.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -200,7 +200,7 @@
   (start $start))
 </code></pre>
 <p>You can then create a file <code>useless.dot</code> containing the call graph of the programm:</p>
-<pre><code class="language-sh">$ owi analyze cg useless.wat
+<pre><code class="language-sh">$ owi wasm analyze cg useless.wat
 </code></pre>
 <p><label class="checkbox-label"><input class="checkbox-img" type="checkbox"><img src="call_graph.svg" alt="image"><span class="img-wrapper"><img src="call_graph.svg" alt="image"></span></label></p>
 <h2 id="control-flow-graph"><a class="header" href="#control-flow-graph">Control-Flow Graph</a></h2>
@@ -232,7 +232,7 @@
 )
 </code></pre>
 <p>You can then create a file <code>useless.dot</code> containing the control flow graph of the function foo:</p>
-<pre><code class="language-sh">$ owi analyze cfg useless.wat --entry-point=foo
+<pre><code class="language-sh">$ owi wasm analyze cfg useless.wat --entry-point=foo
 </code></pre>
 <p><label class="checkbox-label"><input class="checkbox-img" type="checkbox"><img src="control-flow_graph.svg" alt="image"><span class="img-wrapper"><img src="control-flow_graph.svg" alt="image"></span></label></p>
 

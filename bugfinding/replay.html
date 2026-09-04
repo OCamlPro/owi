@@ -36,10 +36,10 @@
             const path_to_root = "../";
             const default_light_theme = "frappe";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-4fd98f09.js";
+            window.path_to_searchindex_js = "../searchindex-97168be4.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-008df27c.js"></script>
+        <script src="../toc-d72c18f8.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -196,13 +196,13 @@ Given the following <code>mini.wat</code> file containing symbols:</p>
   (start $start))
 </code></pre>
 <p>You can get a model like this:</p>
-<pre><code class="language-sh">$ owi sym ./mini.wat &gt; mini.scfg
+<pre><code class="language-sh">$ owi wasm sym ./mini.wat &gt; mini.scfg
 owi: [ERROR] Trap: unreachable
 owi: [ERROR] Reached problem!
 [13]
 </code></pre>
 <p>Then you can replay the module execution with the values in the model like this:</p>
-<pre><code class="language-sh">$ owi replay --replay-file mini.scfg mini.wat -v
+<pre><code class="language-sh">$ owi wasm replay --replay-file mini.scfg mini.wat -v
 owi: [INFO] parsing      ...
 owi: [INFO] checking     ...
 owi: [INFO] typechecking ...

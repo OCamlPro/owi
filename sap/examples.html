@@ -36,10 +36,10 @@
             const path_to_root = "../";
             const default_light_theme = "frappe";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-4fd98f09.js";
+            window.path_to_searchindex_js = "../searchindex-97168be4.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-008df27c.js"></script>
+        <script src="../toc-d72c18f8.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -202,7 +202,7 @@ int main() {
 </code></pre>
 <p>We are defining one symbolic variable <code>x</code> using the function <code>owi_i32(void)</code>. Then we build a polynomial <code>poly</code> equal to $x^3 - 7x^2 + 14x - 8$.</p>
 <p>Then we use <code>owi_assert(poly != 0)</code>. Which should fail as this polynomial has multiple roots. Let’s see what owi says about it:</p>
-<pre><code class="language-sh">$ owi c ./poly.c -w1 --no-assert-failure-expression-printing
+<pre><code class="language-sh">$ owi c sym ./poly.c -w1 --no-assert-failure-expression-printing
 owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32 4
@@ -240,7 +240,7 @@ int main() {
 }
 </code></pre>
 <p>Let’s run owi on this new input:</p>
-<pre><code class="language-sh">$ owi c ./poly2.c --no-assert-failure-expression-printing
+<pre><code class="language-sh">$ owi c sym ./poly2.c --no-assert-failure-expression-printing
 owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32 -2147483644
@@ -279,7 +279,7 @@ int main() {
 </code></pre>
 <p>We are defining one symbolic variable <code>x</code> using the function <code>owi_i32(void)</code>. Then we build a polynomial <code>poly</code> equal to $x^3 - 7x^2 + 14x - 8$.</p>
 <p>Then we use <code>owi_assert(p.getPoly() != 0)</code>. Which should fail as this polynomial has multiple roots. Let’s see what owi says about it:</p>
-<pre><code class="language-sh">$ owi c++ ./poly.cpp -w1 --no-assert-failure-expression-printing
+<pre><code class="language-sh">$ owi c++ sym ./poly.cpp -w1 --no-assert-failure-expression-printing
 owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32 2
@@ -317,7 +317,7 @@ int main() {
 }
 </code></pre>
 <p>Let’s run owi on this new input:</p>
-<pre><code class="language-sh">$ owi c++ ./poly2.cpp --no-assert-failure-expression-printing
+<pre><code class="language-sh">$ owi c++ sym ./poly2.cpp --no-assert-failure-expression-printing
 owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32 -2147483644
@@ -405,7 +405,7 @@ int main (void) {
   return 1;
 }
 </code></pre>
-<pre><code class="language-sh">$ owi c ./maze.c --no-value --no-assert-failure-expression-printing
+<pre><code class="language-sh">$ owi c sym ./maze.c --no-value --no-assert-failure-expression-printing
 owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32
@@ -486,8 +486,7 @@ int main() {
     owi_assert(!acc);
 }
 </code></pre>
-<!-- TODO: remove `-O1` once symbolic popcnt is implemented -->
-<pre><code class="language-sh">$ owi c -O1 ./dobble.c -w1 --no-value --no-assert-failure-expression-printing
+<pre><code class="language-sh">$ owi c sym ./dobble.c -w1 --no-value --no-assert-failure-expression-printing
 owi: [ERROR] Assert failure
 model {
   symbol symbol_0 i32

@@ -251,8 +251,8 @@ type t =
   }
 
 let pp_map =
-  Fmt.brace<span data-count="858">s</span>
-    (Fmt.iter_binding<span data-count="858">s</span> ~sep:Fmt.semi IntMap.iter (fun ppf (k, v) -&gt;
+  Fmt.brace<span data-count="895">s</span>
+    (Fmt.iter_binding<span data-count="895">s</span> ~sep:Fmt.semi IntMap.iter (fun ppf (k, v) -&gt;
        <span data-count="0">F</span>mt.pf ppf "%d -&gt; %a" k Symbolic_ref.pp v ) )
 
 let pp ppf t = <span data-count="0">F</span>mt.pf ppf "%a" pp_map t.data
@@ -264,9 +264,9 @@ let set tbl i v =
   <span data-count="710">l</span>et data = IntMap.add i v tbl.data in
   <span data-count="710">{</span> tbl with data }
 
-let size t = <span data-count="4119">I</span>ntMap.cardinal t.data
+let size t = <span data-count="4121">I</span>ntMap.cardinal t.data
 
-let typ t = <span data-count="3944">t</span>.typ
+let typ t = <span data-count="3945">t</span>.typ
 
 let max_size t =
   <span data-count="0">m</span>atch t.limits with

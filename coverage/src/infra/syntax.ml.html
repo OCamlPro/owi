@@ -452,10 +452,10 @@ let[@inline] list_concat_map f l =
   aux [] l
 
 let[@inline] list_fold_left f acc l =
-  <span data-count="59315">l</span>et rec aux acc = function
-    | <span data-count="56916">[</span>] -&gt; Ok acc
-    | <span data-count="408864">v</span> :: tl -&gt; (
-      match f acc v with <span data-count="406465">O</span>k acc -&gt; aux acc tl | <span data-count="2399">E</span>rror _ as e -&gt; e )
+  <span data-count="59309">l</span>et rec aux acc = function
+    | <span data-count="56910">[</span>] -&gt; Ok acc
+    | <span data-count="409303">v</span> :: tl -&gt; (
+      match f acc v with <span data-count="406904">O</span>k acc -&gt; aux acc tl | <span data-count="2399">E</span>rror _ as e -&gt; e )
   in
   aux acc l
 

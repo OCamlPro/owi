@@ -307,11 +307,11 @@ let to_int64 n = <span data-count="104640">I</span>nt64.of_int32 n [@@inline]
 
 let eq (x : int32) y = <span data-count="2179046">e</span>qual x y [@@inline]
 
-let ne (x : int32) y = <span data-count="41344">c</span>ompar<span data-count="41344">e</span> x y &lt;&gt; 0 [@@inline]
+let ne (x : int32) y = <span data-count="41340">c</span>ompar<span data-count="41340">e</span> x y &lt;&gt; 0 [@@inline]
 
-let lt (x : int32) y = <span data-count="224705">c</span>ompar<span data-count="224705">e</span> x y &lt; 0 [@@inline]
+let lt (x : int32) y = <span data-count="224701">c</span>ompar<span data-count="224701">e</span> x y &lt; 0 [@@inline]
 
-let le (x : int32) y = <span data-count="66228">c</span>ompar<span data-count="66228">e</span> x y &lt;= 0 [@@inline]
+let le (x : int32) y = <span data-count="66224">c</span>ompar<span data-count="66224">e</span> x y &lt;= 0 [@@inline]
 
 let lt_u (x : int32) y = <span data-count="292724">u</span>nsigned_compar<span data-count="292724">e</span> x y &lt; 0 [@@inline]
 
@@ -341,9 +341,9 @@ let extend_s n x =
 
 (* String conversion that allows leading signs and unsigned values *)
 
-let max_upper = unsigned_di<span data-count="858">v</span> minus_one 10l
+let max_upper = unsigned_di<span data-count="895">v</span> minus_one 10l
 
-let max_lower = unsigned_re<span data-count="858">m</span> minus_one 10l
+let max_lower = unsigned_re<span data-count="895">m</span> minus_one 10l
 
 let sign_extend i =
   <span data-count="195905">l</span>et sign_bit = logand (of_in<span data-count="195905">t</span> (1 lsl (32 - 1))) i in
@@ -403,7 +403,7 @@ let of_string_exn s =
 
 let of_string s = <span data-count="27107">t</span>ry Some (of_string_ex<span data-count="27106">n</span> s) with <span data-count="1">F</span>ailure _ -&gt; None
 
-let to_string_u = Fmt.st<span data-count="858">r</span> "%lu"
+let to_string_u = Fmt.st<span data-count="895">r</span> "%lu"
 </code></pre>
       </div>
     </div>

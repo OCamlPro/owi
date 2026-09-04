@@ -774,27 +774,27 @@ let empty =
                                  We look what is the env address of this global in the map, by looking the global map at (module_id, 0).
                                  If the env address is say, 42, we rewrite the instruction to be global.get 42. *)
 let get_unsafe k tbl =
-  <span data-count="79802">m</span>atch IntMap.find_opt k tbl with <span data-count="79802">S</span>ome v -&gt; v | None -&gt; assert false
+  <span data-count="79838">m</span>atch IntMap.find_opt k tbl with <span data-count="79838">S</span>ome v -&gt; v | None -&gt; assert false
 
 let rewrite_global_instruction ~map : Binary.global_instr -&gt; Binary.global_instr
     = function
-  | <span data-count="3979">G</span>et i -&gt; Get (get_unsaf<span data-count="3979">e</span> i map.globals)
-  | <span data-count="1121">S</span>et i -&gt; Set (get_unsaf<span data-count="1121">e</span> i map.globals)
+  | <span data-count="3978">G</span>et i -&gt; Get (get_unsaf<span data-count="3978">e</span> i map.globals)
+  | <span data-count="1119">S</span>et i -&gt; Set (get_unsaf<span data-count="1119">e</span> i map.globals)
 
-let rewrite_i32_instruction ~map = <span data-count="128787">f</span>unction
-  | (( <span data-count="55801">C</span>onst _ | <span data-count="361">C</span>lz | <span data-count="36">C</span>tz | <span data-count="10">P</span>opcnt | <span data-count="11871">A</span>dd | <span data-count="1813">S</span>ub | <span data-count="707">M</span>ul | <span data-count="48">D</span>iv_s | <span data-count="42">D</span>iv_u | <span data-count="11">R</span>em_s
-     | <span data-count="29">R</span>em_u | <span data-count="3185">A</span>nd | <span data-count="903">O</span>r | <span data-count="987">X</span>or | <span data-count="1522">S</span>hl | <span data-count="16">S</span>hr_s | <span data-count="449">S</span>hr_u | <span data-count="227">R</span>otl | <span data-count="2">R</span>otr | <span data-count="3862">E</span>qz | <span data-count="12042">E</span>q
-     | <span data-count="1350">N</span>e | <span data-count="330">L</span>t_s | <span data-count="988">L</span>t_u | <span data-count="349">G</span>t_s | <span data-count="319">G</span>t_u | <span data-count="40">L</span>e_s | <span data-count="275">L</span>e_u | <span data-count="70">G</span>e_s | <span data-count="406">G</span>e_u | <span data-count="32">E</span>xtend8_s
+let rewrite_i32_instruction ~map = <span data-count="129108">f</span>unction
+  | (( <span data-count="55899">C</span>onst _ | <span data-count="361">C</span>lz | <span data-count="36">C</span>tz | <span data-count="31">P</span>opcnt | <span data-count="11899">A</span>dd | <span data-count="1812">S</span>ub | <span data-count="707">M</span>ul | <span data-count="48">D</span>iv_s | <span data-count="42">D</span>iv_u | <span data-count="11">R</span>em_s
+     | <span data-count="29">R</span>em_u | <span data-count="3253">A</span>nd | <span data-count="922">O</span>r | <span data-count="987">X</span>or | <span data-count="1520">S</span>hl | <span data-count="16">S</span>hr_s | <span data-count="490">S</span>hr_u | <span data-count="227">R</span>otl | <span data-count="2">R</span>otr | <span data-count="3860">E</span>qz | <span data-count="12048">E</span>q
+     | <span data-count="1389">N</span>e | <span data-count="330">L</span>t_s | <span data-count="994">L</span>t_u | <span data-count="349">G</span>t_s | <span data-count="323">G</span>t_u | <span data-count="40">L</span>e_s | <span data-count="275">L</span>e_u | <span data-count="70">G</span>e_s | <span data-count="406">G</span>e_u | <span data-count="32">E</span>xtend8_s
      | <span data-count="2">E</span>xtend16_s | <span data-count="68">W</span>rap_i64 | <span data-count="19">T</span>runc_f_s _ | <span data-count="19">T</span>runc_f_u _ | <span data-count="4">T</span>runc_sat_f_s _
      | <span data-count="36">T</span>runc_sat_f_u _ | <span data-count="78">R</span>einterpret_f _ ) :
       Binary.i32_instr ) as i -&gt;
     i
-  | <span data-count="15164">L</span>oad (i, memarg) -&gt; Load (get_unsaf<span data-count="15164">e</span> i map.memories, memarg)
+  | <span data-count="15161">L</span>oad (i, memarg) -&gt; Load (get_unsaf<span data-count="15161">e</span> i map.memories, memarg)
   | <span data-count="163">L</span>oad8_s (i, memarg) -&gt; Load8_s (get_unsaf<span data-count="163">e</span> i map.memories, memarg)
   | <span data-count="1820">L</span>oad8_u (i, memarg) -&gt; Load8_u (get_unsaf<span data-count="1820">e</span> i map.memories, memarg)
   | <span data-count="23">L</span>oad16_s (i, memarg) -&gt; Load16_s (get_unsaf<span data-count="23">e</span> i map.memories, memarg)
   | <span data-count="98">L</span>oad16_u (i, memarg) -&gt; Load16_u (get_unsaf<span data-count="98">e</span> i map.memories, memarg)
-  | <span data-count="10970">S</span>tore (i, memarg) -&gt; Store (get_unsaf<span data-count="10970">e</span> i map.memories, memarg)
+  | <span data-count="10969">S</span>tore (i, memarg) -&gt; Store (get_unsaf<span data-count="10969">e</span> i map.memories, memarg)
   | <span data-count="2188">S</span>tore8 (i, memarg) -&gt; Store8 (get_unsaf<span data-count="2188">e</span> i map.memories, memarg)
   | <span data-count="52">S</span>tore16 (i, memarg) -&gt; Store16 (get_unsaf<span data-count="52">e</span> i map.memories, memarg)
 
@@ -1029,10 +1029,10 @@ let rewrite_array_instruction ~map : Binary.array_instr -&gt; Binary.array_instr
     Init_elem (rewrite_type_i<span data-count="5">d</span> ~map ty, get_unsaf<span data-count="5">e</span> elem map.elems)
   | <span data-count="7">L</span>en as i -&gt; i
 
-let rewrite_simple_instruction ~map = <span data-count="256278">f</span>unction
-  | <span data-count="5100">(</span>Global i : Binary.simple_instruction) -&gt;
-    Binary.Global (rewrite_global_instructio<span data-count="5100">n</span> ~map i)
-  | <span data-count="128787">I</span>32 i -&gt; I32 (rewrite_i32_instructio<span data-count="128787">n</span> ~map i)
+let rewrite_simple_instruction ~map = <span data-count="256686">f</span>unction
+  | <span data-count="5097">(</span>Global i : Binary.simple_instruction) -&gt;
+    Binary.Global (rewrite_global_instructio<span data-count="5097">n</span> ~map i)
+  | <span data-count="129108">I</span>32 i -&gt; I32 (rewrite_i32_instructio<span data-count="129108">n</span> ~map i)
   | <span data-count="5913">I</span>64 i -&gt; I64 (rewrite_i64_instructio<span data-count="5913">n</span> ~map i)
   | <span data-count="1554">F</span>32 i -&gt; F32 (rewrite_f32_instructio<span data-count="1554">n</span> ~map i)
   | <span data-count="1533">F</span>64 i -&gt; F64 (rewrite_f64_instructio<span data-count="1533">n</span> ~map i)
@@ -1048,24 +1048,24 @@ let rewrite_simple_instruction ~map = <span data-count="256278">f</span>unction
   | <span data-count="587">E</span>lem i -&gt; Elem (rewrite_elem_instructio<span data-count="587">n</span> ~map i)
   | <span data-count="1039">M</span>emory i -&gt; Memory (rewrite_memory_instructio<span data-count="1039">n</span> ~map i)
   | <span data-count="514">D</span>ata i -&gt; Data (rewrite_data_instructio<span data-count="514">n</span> ~map i)
-  | ( <span data-count="232">N</span>op | <span data-count="87355">L</span>ocal _ | <span data-count="3229">D</span>rop | <span data-count="11033">U</span>nreachable | <span data-count="9">A</span>ny_convert_extern
-    | <span data-count="7">E</span>xtern_convert_any | <span data-count="1579">S</span>elect _ | <span data-count="60">I</span>31 _ ) as i -&gt;
+  | ( <span data-count="232">N</span>op | <span data-count="87447">L</span>ocal _ | <span data-count="3229">D</span>rop | <span data-count="11033">U</span>nreachable | <span data-count="9">A</span>ny_convert_extern
+    | <span data-count="7">E</span>xtern_convert_any | <span data-count="1577">S</span>elect _ | <span data-count="60">I</span>31 _ ) as i -&gt;
     i
   | <span data-count="88">S</span>truct i -&gt; Struct (rewrite_struct_instructio<span data-count="88">n</span> ~map i)
   | <span data-count="150">A</span>rray i -&gt; Array (rewrite_array_instructio<span data-count="150">n</span> ~map i)
 
 let rewrite_block_type ~map : Binary.block_type -&gt; Binary.block_type =
  fun (type_id_opt, ft) -&gt;
-  <span data-count="33712">(</span> Option.ma<span data-count="33712">p</span> (rewrite_type_id ~map) type_id_opt
-  , ( List.ma<span data-count="33712">p</span> (fun (id, vt) -&gt; <span data-count="12631">(</span>id, rewrite_val_typ<span data-count="12631">e</span> ~map vt)) (fs<span data-count="33712">t</span> ft)
-    , List.ma<span data-count="33712">p</span> (rewrite_val_type ~map) (sn<span data-count="33712">d</span> ft) ) )
+  <span data-count="33706">(</span> Option.ma<span data-count="33706">p</span> (rewrite_type_id ~map) type_id_opt
+  , ( List.ma<span data-count="33706">p</span> (fun (id, vt) -&gt; <span data-count="12631">(</span>id, rewrite_val_typ<span data-count="12631">e</span> ~map vt)) (fs<span data-count="33706">t</span> ft)
+    , List.ma<span data-count="33706">p</span> (rewrite_val_type ~map) (sn<span data-count="33706">d</span> ft) ) )
 
-let rec rewrite_instruction ~map = <span data-count="322306">f</span>unction
-  | <span data-count="256278">B</span>inary.Simple i -&gt; Binary.Simple (rewrite_simple_instructio<span data-count="256278">n</span> ~map i)
-  | <span data-count="8167">B</span>lock (a, b, e) -&gt;
-    Block (a, Option.ma<span data-count="8167">p</span> (rewrite_block_type ~map) b, rewrite_expressio<span data-count="8167">n</span> ~map e)
-  | <span data-count="1331">L</span>oop (a, b, e) -&gt;
-    Loop (a, Option.ma<span data-count="1331">p</span> (rewrite_block_type ~map) b, rewrite_expressio<span data-count="1331">n</span> ~map e)
+let rec rewrite_instruction ~map = <span data-count="322745">f</span>unction
+  | <span data-count="256686">B</span>inary.Simple i -&gt; Binary.Simple (rewrite_simple_instructio<span data-count="256686">n</span> ~map i)
+  | <span data-count="8165">B</span>lock (a, b, e) -&gt;
+    Block (a, Option.ma<span data-count="8165">p</span> (rewrite_block_type ~map) b, rewrite_expressio<span data-count="8165">n</span> ~map e)
+  | <span data-count="1327">L</span>oop (a, b, e) -&gt;
+    Loop (a, Option.ma<span data-count="1327">p</span> (rewrite_block_type ~map) b, rewrite_expressio<span data-count="1327">n</span> ~map e)
   | <span data-count="12209">I</span>f_else (a, b, e1, e2) -&gt;
     If_else
       ( a
@@ -1073,7 +1073,7 @@ let rec rewrite_instruction ~map = <span data-count="322306">f</span>unction
       , rewrite_expressio<span data-count="12209">n</span> e1 ~map
       , rewrite_expressio<span data-count="12209">n</span> e2 ~map )
   | <span data-count="23">R</span>eturn_call i -&gt; Return_call (get_unsaf<span data-count="23">e</span> i map.functions)
-  | <span data-count="30014">C</span>all i -&gt; Call (get_unsaf<span data-count="30014">e</span> i map.functions)
+  | <span data-count="30057">C</span>all i -&gt; Call (get_unsaf<span data-count="30057">e</span> i map.functions)
   | <span data-count="1493">C</span>all_indirect (i, typ) -&gt;
     Call_indirect (get_unsaf<span data-count="1493">e</span> i map.tables, rewrite_block_typ<span data-count="1493">e</span> ~map typ)
   | <span data-count="36">R</span>eturn_call_indirect (i, typ) -&gt;
@@ -1082,7 +1082,7 @@ let rec rewrite_instruction ~map = <span data-count="322306">f</span>unction
     Br_on_cast (id, rewrite_ref_typ<span data-count="55">e</span> ~map rt1, rewrite_ref_typ<span data-count="55">e</span> ~map rt2)
   | <span data-count="66">B</span>r_on_cast_fail (id, rt1, rt2) -&gt;
     Br_on_cast_fail (id, rewrite_ref_typ<span data-count="66">e</span> ~map rt1, rewrite_ref_typ<span data-count="66">e</span> ~map rt2)
-  | ( <span data-count="1684">R</span>eturn | <span data-count="2786">B</span>r _ | <span data-count="7881">B</span>r_if _ | <span data-count="210">B</span>r_table _ | <span data-count="10">B</span>r_on_null _ | <span data-count="9">B</span>r_on_non_null _
+  | ( <span data-count="1684">R</span>eturn | <span data-count="2786">B</span>r _ | <span data-count="7875">B</span>r_if _ | <span data-count="210">B</span>r_table _ | <span data-count="10">B</span>r_on_null _ | <span data-count="9">B</span>r_on_non_null _
     (* TODO: It's weird that return_call_ref is not using an indice like call_ref does... *)
     | <span data-count="29">R</span>eturn_call_ref _
     (* TODO: check that call_ref is taking a raw type and not a typed index *)
@@ -1090,7 +1090,7 @@ let rec rewrite_instruction ~map = <span data-count="322306">f</span>unction
     i
 
 and rewrite_expression ~map expr =
-  <span data-count="72048">A</span>nnotated.map (List.ma<span data-count="72048">p</span> (Annotated.ma<span data-count="72048">p</span> (rewrite_instruction ~map))) expr
+  <span data-count="72042">A</span>nnotated.map (List.ma<span data-count="72042">p</span> (Annotated.ma<span data-count="72042">p</span> (rewrite_instruction ~map))) expr
 
 let rewrite_binary_func ~map (func : Binary.Func.t) : _ Kind.func =
   <span data-count="21167">l</span>et body = rewrite_expression ~map func.body in

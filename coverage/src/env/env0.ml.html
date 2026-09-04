@@ -1217,29 +1217,29 @@ let table_types_are_compatible ~imported_data_size
   &amp;&amp; <span data-count="47">B</span>inary.ref_type_eq t1 t2
 
 let get_global ~env id =
-  <span data-count="5024917">m</span>atch Allocator.find_opt id env.globals with
-  | <span data-count="5024917">S</span>ome { value = v; _ } -&gt; v
+  <span data-count="5024918">m</span>atch Allocator.find_opt id env.globals with
+  | <span data-count="5024918">S</span>ome { value = v; _ } -&gt; v
   | None -&gt; assert false
 
 let set_global ~env id value =
-  <span data-count="2166">m</span>atch Allocator.find_opt id env.globals with
-  | <span data-count="2166">S</span>ome { typ; _ } -&gt;
+  <span data-count="2063">m</span>atch Allocator.find_opt id env.globals with
+  | <span data-count="2063">S</span>ome { typ; _ } -&gt;
     let global = { value; typ } in
     let globals = Allocator.add_manual id global env.globals in
-    <span data-count="2166">{</span> env with globals }
+    <span data-count="2063">{</span> env with globals }
   | None -&gt; assert false
 
 let get_memory ~env id =
-  <span data-count="1223938">m</span>atch Allocator.find_opt id env.memories with
-  | <span data-count="1223937">S</span>ome m -&gt; m
+  <span data-count="1223793">m</span>atch Allocator.find_opt id env.memories with
+  | <span data-count="1223797">S</span>ome m -&gt; m
   | None -&gt; assert false
 
 let set_memory ~env id memory =
-  <span data-count="597539">l</span>et memories = Allocator.add_manual id memory env.memories in
-  <span data-count="597536">{</span> env with memories }
+  <span data-count="597499">l</span>et memories = Allocator.add_manual id memory env.memories in
+  <span data-count="597496">{</span> env with memories }
 
 let get_table ~env id =
-  <span data-count="808586">m</span>atch Allocator.find_opt id env.tables with
+  <span data-count="808587">m</span>atch Allocator.find_opt id env.tables with
   | <span data-count="808587">S</span>ome m -&gt; m
   | None -&gt; assert false
 
@@ -1267,8 +1267,8 @@ let set_data ~env id data =
   <span data-count="480">{</span> env with datas }
 
 let get_func ~env id =
-  <span data-count="11224388">m</span>atch Allocator.find_opt id env.functions with
-  | <span data-count="11224389">S</span>ome v -&gt; v
+  <span data-count="11238726">m</span>atch Allocator.find_opt id env.functions with
+  | <span data-count="11238727">S</span>ome v -&gt; v
   | None -&gt; assert false
 
 let get_types ~env = <span data-count="1602584">e</span>nv.types

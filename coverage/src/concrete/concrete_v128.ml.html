@@ -2848,7 +2848,7 @@ let of_i16x8 a b c d e f g h =
 
 let of_i32x4 a b c d = <span data-count="10555">I</span>32x4 (a, b, c, d)
 
-let of_i64x2 a b = <span data-count="9224">I</span>64x2 (a, b)
+let of_i64x2 a b = <span data-count="9261">I</span>64x2 (a, b)
 
 let of_f32x4 a b c d = <span data-count="25423">F</span>32x4 (a, b, c, d)
 
@@ -3269,7 +3269,7 @@ module I16x8 = struct
     <span data-count="20">l</span>et s = Concrete_i32.to_in<span data-count="20">t</span> s land 15 in
     map (fun x -&gt; <span data-count="160">C</span>oncrete_i16.shr_u x s) v
 
-  let avgr_u = map<span data-count="858">2</span> Concrete_i16.avgr_u
+  let avgr_u = map<span data-count="895">2</span> Concrete_i16.avgr_u
 
   let narrow_i32x4_s u v =
     <span data-count="33">l</span>et a0, a1, a2, a3 = to_i32x4 u in
@@ -3289,9 +3289,9 @@ module I16x8 = struct
     <span data-count="46">l</span>et a = Array.map (fun x -&gt; <span data-count="368">C</span>oncrete_i16.of_int (<span data-count="368">f</span> x)) a in
     <span data-count="46">o</span>f_i16x8 a.(0) a.(1) a.(2) a.(3) a.(4) a.(5) a.(6) a.(7)
 
-  let extend_low_i8x16_s = extend_i8x1<span data-count="858">6</span> Concrete_i8.to_int_s
+  let extend_low_i8x16_s = extend_i8x1<span data-count="895">6</span> Concrete_i8.to_int_s
 
-  let extend_low_i8x16_u = extend_i8x1<span data-count="858">6</span> Concrete_i8.to_int_u
+  let extend_low_i8x16_u = extend_i8x1<span data-count="895">6</span> Concrete_i8.to_int_u
 
   let extend_high_i8x16_s v =
     <span data-count="19">l</span>et a = I8x16.to_array v in
@@ -3416,7 +3416,7 @@ module I64x2 = struct
 
   let sub x y = <span data-count="60">m</span>ap2 Concrete_i64.sub x y
 
-  let cmp f = <span data-count="939">m</span>ap2 (fun a b -&gt; <span data-count="204">i</span>f f a b then <span data-count="100">-</span>1L else <span data-count="104">0</span>L)
+  let cmp f = <span data-count="976">m</span>ap2 (fun a b -&gt; <span data-count="204">i</span>f f a b then <span data-count="100">-</span>1L else <span data-count="104">0</span>L)
 
   let eq u v = <span data-count="9">c</span>mp Concrete_i64.eq u v
 
@@ -3432,7 +3432,7 @@ module I64x2 = struct
     <span data-count="9">C</span>oncrete_i32.of_boolean
       (fold_lef<span data-count="9">t</span> (fun acc x -&gt; <span data-count="18">a</span>cc &amp;&amp; <span data-count="15">C</span>oncrete_i64.ne x 0L) true v)
 
-  let lt_s = cm<span data-count="858">p</span> Concrete_i64.lt
+  let lt_s = cm<span data-count="895">p</span> Concrete_i64.lt
 
   let gt_s x y = <span data-count="21">c</span>mp Concrete_i64.lt y x
 
@@ -3557,7 +3557,7 @@ module I32x4 = struct
 
   let sub x y = <span data-count="59">m</span>ap2 Concrete_i32.sub x y
 
-  let ne = map<span data-count="858">2</span> (fun a b -&gt; <span data-count="204">i</span>f Concrete_i32.ne a b then <span data-count="32">-</span>1l else <span data-count="172">0</span>l)
+  let ne = map<span data-count="895">2</span> (fun a b -&gt; <span data-count="204">i</span>f Concrete_i32.ne a b then <span data-count="32">-</span>1l else <span data-count="172">0</span>l)
 
   let mul x y = <span data-count="58">m</span>ap2 Concrete_i32.mul x y
 
@@ -3794,7 +3794,7 @@ module I32x4 = struct
     | _ -&gt; assert false
 end
 
-let zero = of_i64x<span data-count="858">2</span> 0L 0L
+let zero = of_i64x<span data-count="895">2</span> 0L 0L
 
 let eq a b =
   <span data-count="9886">l</span>et a1, a2 = to_i64x2 a in

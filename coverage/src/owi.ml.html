@@ -83,6 +83,7 @@
 <a id="L59"></a><span > </span>
 <a id="L60"></a><span > </span>
 <a id="L61"></a><span > </span>
+<a id="L62"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -148,6 +149,7 @@
 <a href="#L59">59</a>
 <a href="#L60">60</a>
 <a href="#L61">61</a>
+<a href="#L62">62</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2026 OCamlPro *)
@@ -158,28 +160,29 @@ module Annotated = Annotated
 module Binary = Binary
 module Binary_validate = Binary_validate
 module Binary_to_text = Binary_to_text
-module Cmd_abs = Cmd_abs
-module Cmd_sym = Cmd_sym
-module Cmd_c = Cmd_c
-module Cmd_call_graph = Cmd_call_graph
-module Cmd_cfg = Cmd_cfg
-module Cmd_cpp = Cmd_cpp
-module Cmd_fmt = Cmd_fmt
-module Cmd_fuzz = Cmd_fuzz
-module Cmd_haskell = Cmd_haskell
-module Cmd_instrument_label = Cmd_instrument_label
-module Cmd_iso = Cmd_iso
-module Cmd_llvm = Cmd_llvm
-module Cmd_replay = Cmd_replay
-module Cmd_run = Cmd_run
-module Cmd_rust = Cmd_rust
-module Cmd_script = Cmd_script
-module Cmd_tinygo = Cmd_tinygo
-module Cmd_validate = Cmd_validate
+module Cmd_wasm_abs = Cmd_wasm_abs
+module Cmd_wasm_sym = Cmd_wasm_sym
+module Cmd_c_fuzz = Cmd_c_fuzz
+module Cmd_c_sym = Cmd_c_sym
+module Cmd_wasm_analyze_cg = Cmd_wasm_analyze_cg
+module Cmd_wasm_analyze_cfg = Cmd_wasm_analyze_cfg
+module Cmd_cpp_sym = Cmd_cpp_sym
+module Cmd_wasm_fmt = Cmd_wasm_fmt
+module Cmd_wasm_fuzz = Cmd_wasm_fuzz
+module Cmd_haskell_sym = Cmd_haskell_sym
+module Cmd_wasm_instrument_label = Cmd_wasm_instrument_label
+module Cmd_wasm_iso = Cmd_wasm_iso
+module Cmd_llvm_sym = Cmd_llvm_sym
+module Cmd_wasm_replay = Cmd_wasm_replay
+module Cmd_wasm_run = Cmd_wasm_run
+module Cmd_rust_sym = Cmd_rust_sym
+module Cmd_wasm_script = Cmd_wasm_script
+module Cmd_go_sym = Cmd_go_sym
+module Cmd_wasm_validate = Cmd_wasm_validate
 module Cmd_version = Cmd_version
-module Cmd_wasm2wat = Cmd_wasm2wat
-module Cmd_wat2wasm = Cmd_wat2wasm
-module Cmd_zig = Cmd_zig
+module Cmd_wasm_to_wat = Cmd_wasm_to_wat
+module Cmd_wasm_of_wat = Cmd_wasm_of_wat
+module Cmd_zig_sym = Cmd_zig_sym
 module Compile = Compile
 module Concrete_extern = Concrete_extern
 module Concrete_boolean = Concrete_boolean
