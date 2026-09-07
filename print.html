@@ -37,10 +37,10 @@
             const path_to_root = "";
             const default_light_theme = "frappe";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-97168be4.js";
+            window.path_to_searchindex_js = "searchindex-fb29a22c.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-d72c18f8.js"></script>
+        <script src="toc-b696a57f.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -176,64 +176,10 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="welcome-to-owi"><a class="header" href="#welcome-to-owi">Welcome to Owi</a></h1>
-<p><strong>Owi</strong> is an open-source framework for advanced <a href="https://webassembly.org">WebAssembly</a> analysis and manipulation, with a focus on practical symbolic execution and robust tooling.
-It is designed for researchers, engineers, programming language enthusiasts and practitioners requiring precise, flexible, and extensible support program reasoning.</p>
-<p>Owi provides three primary components:</p>
-<h3 id="-symbolic-execution-engine-for-wasm-c-c-rust-and-zig"><a class="header" href="#-symbolic-execution-engine-for-wasm-c-c-rust-and-zig">🔬 <a href="symex/overview.html">Symbolic Execution Engine</a> for <a href="symex/quickstart/wasm.html">Wasm</a>, <a href="symex/quickstart/c.html">C</a>, <a href="symex/quickstart/cpp.html">C++</a>, <a href="symex/quickstart/rust.html">Rust</a>, and <a href="symex/quickstart/zig.html">Zig</a></a></h3>
-<p>Owi includes a cross-language symbolic execution engine supporting:</p>
-<ul>
-<li><a href="symex/bugfinding.html"><strong>Automated testing, bug finding and pentesting</strong></a> through symbolic testing and constraint solving;</li>
-<li><a href="symex/sap.html"><strong>Solver-aided programming</strong></a> for problem solving and synthesis tasks;</li>
-<li><a href="symex/testcase_generation.html"><strong>Test case generation</strong></a> aligned with advanced coverage criteria;</li>
-<li><a href="symex/verification.html"><strong>Formal verification</strong></a>: prove properties or find counterexamples in real-world programs.</li>
-</ul>
-<p>The engine is designed for precision, scalability, interoperability across languages, and extensibility toward both experimental and applied verification use-cases.
-It offers a practical path from fuzzing to formal proofs.</p>
-<h3 id="-the-wasm-swiss-army-knife"><a class="header" href="#-the-wasm-swiss-army-knife">🔧 The <a href="wasm-toolkit/overview.html">Wasm Swiss Army Knife</a></a></h3>
-<p>Owi offers a set of practical tools for Wasm development and analysis:</p>
-<ul>
-<li><strong>Formatter</strong> and <strong>optimizer</strong> for Wasm modules;</li>
-<li><strong>Interpreter</strong> for <code>.wasm</code>, <code>.wat</code>, and even <a href="https://github.com/WebAssembly/spec/tree/main/interpreter#scripts">Wasm scripts</a>  (<code>.wast</code>) files that are used in the <a href="https://github.com/WebAssembly/spec/blob/main/interpreter/README.md#scripts">reference test suite</a>;</li>
-<li><strong>Specification-compliant validator</strong>;</li>
-<li><strong>Bidirectional translation</strong> between binary (<code>.wasm</code>) and text (<code>.wat</code>) formats;</li>
-<li><strong>Randomized fuzzer</strong> generating valid (well-typed) Wasm modules.</li>
-</ul>
-<p>These tools aim to support everyday development tasks as well as research on program analysis, fuzzing, and program transformation.</p>
-<h3 id="--native-ocaml-library-for-wasm-integration"><a class="header" href="#--native-ocaml-library-for-wasm-integration">🐪  Native <a href="#overview">OCaml Library for Wasm</a> Integration</a></h3>
-<p>Owi is written in <a href="https://ocaml.org">OCaml</a>, thus it also provides a library for:</p>
-<ul>
-<li><strong>Embedding Wasm modules</strong> into OCaml applications;</li>
-<li><strong>Importing OCaml functions</strong> into Wasm modules with full type safety.</li>
-</ul>
-<p>This allows for tightly integrating Wasm-based computation within OCaml-based systems while maintaining strong type guarantees.</p>
-<h3 id="want-to-join-us"><a class="header" href="#want-to-join-us">🧑‍🎓Want to join us?</a></h3>
-<p>We are looking for interns, have a look at the <a href="https://github.com/OCamlPro/owi/labels/internship">internship labeled issues</a>.</p>
-<div style="break-before: page; page-break-before: always;"></div>
-<h1 id="installation"><a class="header" href="#installation">Installation</a></h1>
-<h2 id="install-from-your-package-manager"><a class="header" href="#install-from-your-package-manager">Install from your package manager</a></h2>
-<p>Check on <a href="https://repology.org/project/ocaml%3Aowi/versions">repology</a> if Owi is available in your package manager.</p>
-<h3 id="nixos"><a class="header" href="#nixos">NixOS</a></h3>
-<pre><code class="language-shell-session">$ nix-shell -p owi
-</code></pre>
-<h2 id="install-from-sources"><a class="header" href="#install-from-sources">Install from sources</a></h2>
-<p><code>owi</code> can be installed with <a href="https://opam.ocaml.org">opam</a>:</p>
-<pre><code class="language-shell-session">$ opam install owi
-# if you intend to use symbolic execution you must install one solver
-# you can choose any solver supported by smtml
-# z3, colibri2, bitwuzla-cxx or cvc5 for instance
-$ opam install z3
-</code></pre>
-<p>If you don’t have <code>opam</code>, you can install it following the <a href="https://opam.ocaml.org/doc/Install.html">how to install opam</a> guide.</p>
-<p>If you can’t or don’t want to use <code>opam</code>, you can build the package with <code>dune build -p owi @install</code> but you’ll first have to install the dependencies by yourself. You can find the list of dependencies in the <code>dune-project</code> file.</p>
-<h3 id="development-version"><a class="header" href="#development-version">Development version</a></h3>
-<p>To get the development version:</p>
-<pre><code class="language-shell-session">$ git clone git@github.com:OCamlPro/owi.git
-$ cd owi
-$ opam install . --deps-only
-$ dune build -p owi @install
-$ dune install
-</code></pre>
+                        <h1 id="owi-users-manual"><a class="header" href="#owi-users-manual">Owi User’s Manual</a></h1>
+<p>This is the user manual of <a href="https://github.com/ocamlpro/owi">Owi</a>.
+For more general information, have a look at <a href="https://github.com/ocamlpro.owi">Owi’s git repository</a>.</p>
+<p>If it looks interesting to you, you can check out the <a href="https://ocamlpro.github.io/owi/symex/quickstart.html">Quickstart</a>.</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="comparison-with-other-tools"><a class="header" href="#comparison-with-other-tools">Comparison with other tools</a></h1>
 <div class="table-wrapper">
@@ -1676,7 +1622,7 @@ owi: [ERROR] Reached problem!
 <li>The <code>wasm32-unknown-unknown</code> target must be installed: <code>rustup target add wasm32-unknown-unknown</code></li>
 <li>Your crate should use the <a href="https://crates.io/crates/owi"><code>owi</code></a> library to declare symbolic values and assumptions</li>
 </ul>
-<h2 id="installation-1"><a class="header" href="#installation-1">Installation</a></h2>
+<h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
 <pre><code class="language-shell-session">$ cargo install cargo-owi
 </code></pre>
 <h2 id="usage"><a class="header" href="#usage">Usage</a></h2>
