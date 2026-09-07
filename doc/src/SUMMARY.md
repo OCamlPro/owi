@@ -1,7 +1,6 @@
 # Summary
 
 [Home](index.md)
-[Installation](installation.md)
 [Comparison with other tools](comparison.md)
 [Quickstart](symex/quickstart.md)
 
