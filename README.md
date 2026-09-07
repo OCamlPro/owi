@@ -51,18 +51,25 @@ This is distinct from the program fuzzer described above: the Wasm fuzzer genera
 
 Since Owi is written in OCaml, it can also be used as an OCaml library.
 This makes its analysis and Wasm-related capabilities available for integration into other tools and workflows.
+In particular, it can be used to embed Wasm modules into OCaml applications, and define OCaml host function that can be imported into Wasm with static type safety guarantees.
 
-For instance, we are currently working on a Wasm-to-OCaml compiler.
+We are currently working on a Wasm-to-OCaml compiler.
 Our goal is to build unikernels from any program that can be compiled to Wasm.
 This compiler could also be used to efficiently embed Wasm programs into OCaml applications.
+
+#### Want to join us?
+
+We are looking for interns, have a look at the [internship labeled issues].
+If you're interested in contributing to Owi, please, [get in touch on Zulip](https://owi.zulipchat.com).
+
+[internship labeled issues]: https://github.com/OCamlPro/owi/labels/internship
 
 ### Key resources
 
 - [Install Owi](./INSTALL.md)
-- 📘 [User Manual](https://ocamlpro.github.io/owi)
-  - [Install Owi](https://ocamlpro.github.io/owi/installation.html)
-  - [Quickstart](https://ocamlpro.github.io/owi/symex/quickstart.html)
-- 💬 [Zulip community](https://owi.zulipchat.com)
+- [Quickstart](https://ocamlpro.github.io/owi/symex/quickstart.html)
+- [User Manual](https://ocamlpro.github.io/owi)
+- [Zulip community](https://owi.zulipchat.com)
 - [List of supported Wasm proposals](https://webassembly.org/features)
 - [Changelog](./CHANGES.md)
 - [Hacking on Owi](./HACKING.md)
