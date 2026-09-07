@@ -58,6 +58,7 @@ This compiler could also be used to efficiently embed Wasm programs into OCaml a
 
 ### Key resources
 
+- [Install Owi](./INSTALL.md)
 - 📘 [User Manual](https://ocamlpro.github.io/owi)
   - [Install Owi](https://ocamlpro.github.io/owi/installation.html)
   - [Quickstart](https://ocamlpro.github.io/owi/symex/quickstart.html)
