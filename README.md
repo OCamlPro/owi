@@ -97,11 +97,15 @@ This compiler could also be used to efficiently embed Wasm programs into OCaml a
 - [Exécution symbolique pour tous ou Compilation d'OCaml vers WebAssembly], 2024
 - [Cross-Language Symbolic Runtime Annotation Checking], 2025
 - [Exécution symbolique pour la génération de tests ciblant des labels], 2026
+- [Smt.ml: A Multi-Backend Frontend for SMT Solvers in OCaml], 2026
+- [Modular Relational Abstract Interpretation of WebAssembly], 2026
 
 [Cross-Language Symbolic Runtime Annotation Checking]: https://inria.hal.science/hal-04798756/file/cross_language_symbolic_runtime_annotation_checking.pdf
 [Exécution symbolique pour la génération de tests ciblant des labels]: https://hal.science/hal-05427949
 [Exécution symbolique pour tous ou Compilation d'OCaml vers WebAssembly]: https://fs.zapashcanon.fr/pdf/manuscrit_these_leo_andres.pdf
 [Owi: Performant Parallel Symbolic Execution Made Easy, an Application to WebAssembly]: https://hal.science/hal-04627413
+[Smt.ml: A Multi-Backend Frontend for SMT Solvers in OCaml]: https://inria.hal.science/hal-04761767
+[Modular Relational Abstract Interpretation of WebAssembly]: https://conf.researchr.org/details/aplas-atva-2026/aplas-2026/3/Modular-Relational-Abstract-Interpretation-of-WebAssembly
 
 [september 2023]: https://youtu.be/IM76cMP3Eqo
 [october 2023]: https://youtu.be/os_pknmiqmU
