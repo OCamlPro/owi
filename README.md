@@ -76,7 +76,7 @@ This compiler could also be used to efficiently embed Wasm programs into OCaml a
 - [october 2023]: Wasm Research Day organized by the [WebAssembly Research Center] @ Google - Munich
 - april 2024: [OUPS (OCaml UserS in Paris)] @ Sorbonne Université - Paris
 - [november 2024]: [LVP working group] day of the [GdR GPL] @ Université Paris-Cité - Paris
-- [december 2024]: Léo Andrès' PhD defense @ Université Paris-Saclay - Gif-sur-Yvette
+- december 2024: Léo Andrès' PhD defense @ Université Paris-Saclay - Gif-sur-Yvette
 - january 2025: [JFLA 2025] @ Domaine de Roiffé - Roiffé
 - [february 2025]: [Wasm Research Day 2025] (remote) @ Fastly - San Francisco
 - february 2025: [PPS Seminar] @ Université Paris-Cité - Paris
@@ -102,7 +102,7 @@ This compiler could also be used to efficiently embed Wasm programs into OCaml a
 
 [Cross-Language Symbolic Runtime Annotation Checking]: https://inria.hal.science/hal-04798756/file/cross_language_symbolic_runtime_annotation_checking.pdf
 [Exécution symbolique pour la génération de tests ciblant des labels]: https://hal.science/hal-05427949
-[Exécution symbolique pour tous ou Compilation d'OCaml vers WebAssembly]: https://fs.zapashcanon.fr/pdf/manuscrit_these_leo_andres.pdf
+[Exécution symbolique pour tous ou Compilation d'OCaml vers WebAssembly]: https://theses.hal.science/tel-04995610
 [Owi: Performant Parallel Symbolic Execution Made Easy, an Application to WebAssembly]: https://hal.science/hal-04627413
 [Smt.ml: A Multi-Backend Frontend for SMT Solvers in OCaml]: https://inria.hal.science/hal-04761767
 [Modular Relational Abstract Interpretation of WebAssembly]: https://conf.researchr.org/details/aplas-atva-2026/aplas-2026/3/Modular-Relational-Abstract-Interpretation-of-WebAssembly
@@ -110,7 +110,6 @@ This compiler could also be used to efficiently embed Wasm programs into OCaml a
 [september 2023]: https://youtu.be/IM76cMP3Eqo
 [october 2023]: https://youtu.be/os_pknmiqmU
 [november 2024]: https://groupes.renater.fr/wiki/lvp/public/journee_lvp_novembre2024
-[december 2024]: https://fs.zapashcanon.fr/mp4/phd_defense.mp4
 [february 2025]: https://youtu.be/x6V-NJ9agjg
 
 [15th MirageOS hack retreat]: https://retreat.mirage.io
