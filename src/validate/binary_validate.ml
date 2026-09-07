@@ -2096,16 +2096,18 @@ let check_comp_type_depth modul ct_sub ct_super =
   | _ -> false
 
 let check_sub_type_decl (modul : Module.t) (st : sub_type) =
-  list_iter
-    (fun super_id ->
-      if super_id >= Array.length modul.types then Error (`Msg "sub type")
-      else
-        let super_st = modul.types.(super_id) in
-        if super_st.final then Error (`Msg "sub type")
-        else if not (check_comp_type_depth modul st.ct super_st.ct) then
-          Error (`Msg "sub type")
-        else Ok () )
-    st.ids
+  if List.length st.ids > 1 then Error (`Msg "multiple supertypes")
+  else
+    list_iter
+      (fun super_id ->
+        if super_id >= Array.length modul.types then Error (`Msg "sub type")
+        else
+          let super_st = modul.types.(super_id) in
+          if super_st.final then Error (`Msg "sub type")
+          else if not (check_comp_type_depth modul st.ct super_st.ct) then
+            Error (`Msg "sub type")
+          else Ok () )
+      st.ids
 
 let validate_type_defs (modul : Module.t) =
   array_iter
