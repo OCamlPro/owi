@@ -513,7 +513,7 @@ let run ~no_exhaustion script =
   let registered = ref false in
   let curr_module = ref 0 in
   list_fold_left
-    (fun (env : Env.Concrete.t) -&gt; <span data-count="56711">f</span>unction
+    (fun (env : Env.Concrete.t) -&gt; <span data-count="56718">f</span>unction
       | <span data-count="2109">W</span>ast.Text_module (false, modul) -&gt;
         if !curr_module = 0 then
           (* TODO: disable printing*)
@@ -586,13 +586,13 @@ let run ~no_exhaustion script =
             end
         in
         <span data-count="11">e</span>nv
-      | <span data-count="2289">A</span>ssert (Assert_invalid (modul, expected)) -&gt;
+      | <span data-count="2296">A</span>ssert (Assert_invalid (modul, expected)) -&gt;
         Log.info (fun m -&gt; <span data-count="0">m</span> "*** assert_invalid");
-        <span data-count="2289">l</span>et got =
+        <span data-count="2296">l</span>et got =
           Compile.Text.until_concrete_link env ~unsafe ~name:None modul
         in
-        <span data-count="2289">l</span>et+ () = Script_error.check_result ~expected ~got in
-        <span data-count="2288">e</span>nv
+        <span data-count="2296">l</span>et+ () = Script_error.check_result ~expected ~got in
+        <span data-count="2295">e</span>nv
       | <span data-count="6">A</span>ssert (Assert_invalid_quote (modul, expected)) -&gt;
         Log.info (fun m -&gt; <span data-count="0">m</span> "*** assert_invalid_quote");
         <span data-count="6">l</span>et got = Parse.Text.Script.from_string modul in

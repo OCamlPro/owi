@@ -696,13 +696,13 @@ module Typetbl = Hashtbl.Make (struct
 end)
 
 let add_sub_type ~name ~sub_type ~declared_types ~named_types ~field_names =
-  <span data-count="908">l</span>et id = Dynarray.length declared_types in
-  <span data-count="908">O</span>ption.iter (fun n -&gt; <span data-count="705">H</span>ashtbl.add named_types n id) name;
-  <span data-count="908">m</span>atch sub_type with
-  | <span data-count="186">T</span>ext.{ ct = Def_struct_t fields; _ } -&gt;
+  <span data-count="915">l</span>et id = Dynarray.length declared_types in
+  <span data-count="915">O</span>ption.iter (fun n -&gt; <span data-count="712">H</span>ashtbl.add named_types n id) name;
+  <span data-count="915">m</span>atch sub_type with
+  | <span data-count="189">T</span>ext.{ ct = Def_struct_t fields; _ } -&gt;
     let tbl = Hashtbl.create 16 in
-    <span data-count="186">l</span>et* _idx =
-      list_fold_lef<span data-count="186">t</span>
+    <span data-count="189">l</span>et* _idx =
+      list_fold_lef<span data-count="189">t</span>
         (fun idx (field_id, _) -&gt;
           <span data-count="242">l</span>et* () =
             match field_id with
@@ -716,36 +716,36 @@ let add_sub_type ~name ~sub_type ~declared_types ~named_types ~field_names =
           <span data-count="241">O</span>k (idx + 1) )
         0 fields
     in
-    <span data-count="185">i</span>f Hashtbl.lengt<span data-count="185">h</span> tbl &gt; 0 then <span data-count="8">H</span>ashtbl.ad<span data-count="8">d</span> field_names id tbl;
-    <span data-count="185">D</span>ynarray.add_last declared_types sub_type;
-    <span data-count="185">O</span>k ()
-  | <span data-count="722">_</span> -&gt;
+    <span data-count="188">i</span>f Hashtbl.lengt<span data-count="188">h</span> tbl &gt; 0 then <span data-count="8">H</span>ashtbl.ad<span data-count="8">d</span> field_names id tbl;
+    <span data-count="188">D</span>ynarray.add_last declared_types sub_type;
+    <span data-count="188">O</span>k ()
+  | <span data-count="726">_</span> -&gt;
     Dynarray.add_last declared_types sub_type;
-    <span data-count="722">O</span>k ()
+    <span data-count="726">O</span>k ()
 
 let assign_types (typ : Text.Typedef.t array) decl_types :
   ( Text.sub_type Array.t
   * (string, int) Hashtbl.t
   * (int, (string, int) Hashtbl.t) Hashtbl.t )
   Result.t =
-  <span data-count="4897">l</span>et all_func_types = Typetbl.create 64 in
-  <span data-count="4897">l</span>et named_types = Hashtbl.create 64 in
-  <span data-count="4897">l</span>et field_names : (int, (string, int) Hashtbl.t) Hashtbl.t =
+  <span data-count="4904">l</span>et all_func_types = Typetbl.create 64 in
+  <span data-count="4904">l</span>et named_types = Hashtbl.create 64 in
+  <span data-count="4904">l</span>et field_names : (int, (string, int) Hashtbl.t) Hashtbl.t =
     Hashtbl.create 16
   in
-  <span data-count="4897">l</span>et declared_types : Text.sub_type Dynarray.t = Dynarray.create () in
-  <span data-count="4897">l</span>et* () =
-    array_ite<span data-count="4897">r</span>
+  <span data-count="4904">l</span>et declared_types : Text.sub_type Dynarray.t = Dynarray.create () in
+  <span data-count="4904">l</span>et* () =
+    array_ite<span data-count="4904">r</span>
       (fun typedef -&gt;
-        <span data-count="783">m</span>atch typedef with
-        | <span data-count="404">T</span>ext.Typedef.SimpleType
+        <span data-count="790">m</span>atch typedef with
+        | <span data-count="408">T</span>ext.Typedef.SimpleType
             ( name
             , ( { Text.final = true; ids = []; ct = Text.Def_func_t ft } as
                 sub_type ) ) -&gt;
           let id = Dynarray.length declared_types in
-          <span data-count="404">T</span>ypetbl.add all_func_types ft id;
-          <span data-count="404">a</span>dd_sub_type ~name ~sub_type ~declared_types ~named_types ~field_names
-        | <span data-count="259">T</span>ext.Typedef.SimpleType (name, sub_type) -&gt;
+          <span data-count="408">T</span>ypetbl.add all_func_types ft id;
+          <span data-count="408">a</span>dd_sub_type ~name ~sub_type ~declared_types ~named_types ~field_names
+        | <span data-count="262">T</span>ext.Typedef.SimpleType (name, sub_type) -&gt;
           add_sub_type ~name ~sub_type ~declared_types ~named_types ~field_names
         | <span data-count="120">T</span>ext.Typedef.RecType members -&gt;
           list_iter
@@ -755,44 +755,44 @@ let assign_types (typ : Text.Typedef.t array) decl_types :
             members )
       typ
   in
-  <span data-count="4896">A</span>rray.iter
+  <span data-count="4903">A</span>rray.iter
     (fun func_type -&gt;
-      <span data-count="14368">m</span>atch Typetbl.find_opt all_func_types func_type with
+      <span data-count="14376">m</span>atch Typetbl.find_opt all_func_types func_type with
       | <span data-count="6641">S</span>ome _id -&gt; ()
-      | <span data-count="7727">N</span>one -&gt;
+      | <span data-count="7735">N</span>one -&gt;
         let id = Dynarray.length declared_types in
-        <span data-count="7727">l</span>et sub_type =
+        <span data-count="7735">l</span>et sub_type =
           { Text.final = true; ids = []; ct = Text.Def_func_t func_type }
         in
         Dynarray.add_last declared_types sub_type;
-        <span data-count="7727">T</span>ypetbl.add all_func_types func_type id )
+        <span data-count="7735">T</span>ypetbl.add all_func_types func_type id )
     decl_types;
   (* decl_types contains implicitly declared function types *)
-  <span data-count="4896">O</span>k (Dynarray.to_arra<span data-count="4896">y</span> declared_types, named_types, field_names)
+  <span data-count="4903">O</span>k (Dynarray.to_arra<span data-count="4903">y</span> declared_types, named_types, field_names)
 
 let get_origin_name (get_name : 'a -&gt; string option) (elt : ('a, 'b) Origin.t) :
   string option =
-  <span data-count="16741">m</span>atch elt with
-  | <span data-count="13121">L</span>ocal v -&gt; get_name v
-  | <span data-count="3620">I</span>mported { assigned_name; _ } -&gt; assigned_name
+  <span data-count="16751">m</span>atch elt with
+  | <span data-count="13129">L</span>ocal v -&gt; get_name v
+  | <span data-count="3622">I</span>mported { assigned_name; _ } -&gt; assigned_name
 
 let name kind ~get_name values =
-  <span data-count="34263">l</span>et named = Hashtbl.create 64 in
-  <span data-count="34263">l</span>et+ () =
-    array_iter<span data-count="34263">i</span>
+  <span data-count="34312">l</span>et named = Hashtbl.create 64 in
+  <span data-count="34312">l</span>et+ () =
+    array_iter<span data-count="34312">i</span>
       (fun i elt_v -&gt;
-        <span data-count="18200">m</span>atch get_name elt_v with
+        <span data-count="18210">m</span>atch get_name elt_v with
         | <span data-count="10531">N</span>one -&gt; Ok ()
-        | <span data-count="7669">S</span>ome name -&gt;
+        | <span data-count="7679">S</span>ome name -&gt;
           if Hashtbl.mem named name then
             <span data-count="3">F</span>mt.error_msg "duplicate %s %s" kind name
-          else <span data-count="7666">b</span>egin
+          else <span data-count="7676">b</span>egin
             Hashtbl.add named name i;
-            <span data-count="7666">O</span>k ()
+            <span data-count="7676">O</span>k ()
           end )
       values
   in
-  <span data-count="34260">n</span>amed
+  <span data-count="34309">n</span>amed
 
 let check_type_id (types : Text.sub_type Array.t)
   (typ_names : (string, int) Hashtbl.t) (id, func_type) =
@@ -827,42 +827,42 @@ let of_grouped
    ; _
    } :
     Grouped.t ) : t Result.t =
-  <span data-count="4897">L</span>og.debug (fun m -&gt; <span data-count="1">m</span> "assigning    ...");
-  <span data-count="4897">l</span>et* typ, typ_names, field_names = assign_type<span data-count="4897">s</span> typ decl_types in
-  <span data-count="4896">l</span>et* global_names =
-    nam<span data-count="4896">e</span> "global"
-      ~get_name:(get_origin_nam<span data-count="4896">e</span> (fun ({ id; _ } : Text.Global.t) -&gt; <span data-count="1274">i</span>d))
+  <span data-count="4904">L</span>og.debug (fun m -&gt; <span data-count="1">m</span> "assigning    ...");
+  <span data-count="4904">l</span>et* typ, typ_names, field_names = assign_type<span data-count="4904">s</span> typ decl_types in
+  <span data-count="4903">l</span>et* global_names =
+    nam<span data-count="4903">e</span> "global"
+      ~get_name:(get_origin_nam<span data-count="4903">e</span> (fun ({ id; _ } : Text.Global.t) -&gt; <span data-count="1274">i</span>d))
       global
   in
-  <span data-count="4896">l</span>et* table_names =
-    nam<span data-count="4896">e</span> "table"
-      ~get_name:(get_origin_nam<span data-count="4896">e</span> (fun ({ id; _ } : Text.Table.t) -&gt; <span data-count="821">i</span>d))
+  <span data-count="4903">l</span>et* table_names =
+    nam<span data-count="4903">e</span> "table"
+      ~get_name:(get_origin_nam<span data-count="4903">e</span> (fun ({ id; _ } : Text.Table.t) -&gt; <span data-count="821">i</span>d))
       table
   in
-  <span data-count="4896">l</span>et* mem_names =
-    nam<span data-count="4896">e</span> "mem"
-      ~get_name:(get_origin_nam<span data-count="4896">e</span> (fun ((id, _) : Text.Mem.t) -&gt; <span data-count="1205">i</span>d))
+  <span data-count="4903">l</span>et* mem_names =
+    nam<span data-count="4903">e</span> "mem"
+      ~get_name:(get_origin_nam<span data-count="4903">e</span> (fun ((id, _) : Text.Mem.t) -&gt; <span data-count="1205">i</span>d))
       mem
   in
-  <span data-count="4896">l</span>et* func_names =
-    nam<span data-count="4896">e</span> "func"
-      ~get_name:(get_origin_nam<span data-count="4896">e</span> (fun ({ id; _ } : Text.Func.t) -&gt; <span data-count="9816">i</span>d))
+  <span data-count="4903">l</span>et* func_names =
+    nam<span data-count="4903">e</span> "func"
+      ~get_name:(get_origin_nam<span data-count="4903">e</span> (fun ({ id; _ } : Text.Func.t) -&gt; <span data-count="9824">i</span>d))
       func
   in
-  <span data-count="4893">l</span>et* elem_names =
-    nam<span data-count="4893">e</span> "elem" ~get_name:(fun (elem : Text.Elem.t) -&gt; <span data-count="882">e</span>lem.id) elem
+  <span data-count="4900">l</span>et* elem_names =
+    nam<span data-count="4900">e</span> "elem" ~get_name:(fun (elem : Text.Elem.t) -&gt; <span data-count="882">e</span>lem.id) elem
   in
-  <span data-count="4893">l</span>et* data_names =
-    nam<span data-count="4893">e</span> "data" ~get_name:(fun (data : Text.Data.t) -&gt; <span data-count="577">d</span>ata.id) data
+  <span data-count="4900">l</span>et* data_names =
+    nam<span data-count="4900">e</span> "data" ~get_name:(fun (data : Text.Data.t) -&gt; <span data-count="577">d</span>ata.id) data
   in
-  <span data-count="4893">l</span>et* tag_names =
-    nam<span data-count="4893">e</span> "tag"
-      ~get_name:(get_origin_nam<span data-count="4893">e</span> (fun ({ id; _ } : Text.Tag.t) -&gt; <span data-count="5">i</span>d))
+  <span data-count="4900">l</span>et* tag_names =
+    nam<span data-count="4900">e</span> "tag"
+      ~get_name:(get_origin_nam<span data-count="4900">e</span> (fun ({ id; _ } : Text.Tag.t) -&gt; <span data-count="5">i</span>d))
       tag
   in
-  <span data-count="4893">l</span>et+ () = array_ite<span data-count="4893">r</span> (check_type_i<span data-count="4893">d</span> typ typ_names) type_checks in
+  <span data-count="4900">l</span>et+ () = array_ite<span data-count="4900">r</span> (check_type_i<span data-count="4900">d</span> typ typ_names) type_checks in
 
-  <span data-count="4868">l</span>et modul =
+  <span data-count="4875">l</span>et modul =
     { typ
     ; typ_names
     ; field_names
@@ -876,48 +876,48 @@ let of_grouped
     }
   in
   Log.debug (fun m -&gt; <span data-count="1">m</span> "%a" pp modul);
-  <span data-count="4868">m</span>odul
+  <span data-count="4875">m</span>odul
 
 let find (names : (string, int) Hashtbl.t) err : _ -&gt; Binary.indice Result.t =
   function
   | <span data-count="13952">T</span>ext.Raw i -&gt; Ok i
-  | <span data-count="10899">T</span>ext name -&gt; (
-    match Hashtbl.find_opt names name with <span data-count="1">N</span>one -&gt; Error err | <span data-count="10898">S</span>ome i -&gt; Ok i )
+  | <span data-count="10915">T</span>ext name -&gt; (
+    match Hashtbl.find_opt names name with <span data-count="1">N</span>one -&gt; Error err | <span data-count="10914">S</span>ome i -&gt; Ok i )
 
-let find_func modul id = <span data-count="12971">f</span>ind modul.func_names (`Unknown_func id) id
+let find_func modul id = <span data-count="12973">f</span>ind modul.func_names (`Unknown_func id) id
 
 let find_global modul id = <span data-count="1538">f</span>ind modul.global_names (`Unknown_global id) id
 
 let find_memory modul id = <span data-count="5817">f</span>ind modul.mem_names (`Unknown_memory id) id
 
-let find_table modul id = <span data-count="1758">f</span>ind modul.table_names (`Unknown_table id) id
+let find_table modul id = <span data-count="1760">f</span>ind modul.table_names (`Unknown_table id) id
 
 let find_data modul id = <span data-count="167">f</span>ind modul.data_names (`Unknown_data id) id
 
 let find_elem modul id = <span data-count="158">f</span>ind modul.elem_names (`Unknown_elem id) id
 
-let find_type modul id = <span data-count="2437">f</span>ind modul.typ_names (`Unknown_type id) id
+let find_type modul id = <span data-count="2449">f</span>ind modul.typ_names (`Unknown_type id) id
 
 let find_tag modul id = <span data-count="5">f</span>ind modul.tag_names (`Unknown_tag id) id
 
 let get_func_type modul idx =
-  <span data-count="621">i</span>f idx &gt;= Array.lengt<span data-count="621">h</span> modul.typ then <span data-count="11">N</span>one
+  <span data-count="625">i</span>f idx &gt;= Array.lengt<span data-count="625">h</span> modul.typ then <span data-count="11">N</span>one
   else
-    <span data-count="610">m</span>atch Array.unsafe_get modul.typ idx with
-    | <span data-count="610">T</span>ext.{ ct = Def_func_t ft; _ } -&gt; Some ft
+    <span data-count="614">m</span>atch Array.unsafe_get modul.typ idx with
+    | <span data-count="614">T</span>ext.{ ct = Def_func_t ft; _ } -&gt; Some ft
     | <span data-count="0">_</span> -&gt; None
 
-let get_types modul = <span data-count="4826">m</span>odul.typ
+let get_types modul = <span data-count="4833">m</span>odul.typ
 
 let find_raw_func_type modul func_type =
-  <span data-count="14314">l</span>et ty_opt =
+  <span data-count="14322">l</span>et ty_opt =
     Array.find_index
       (function
-        | <span data-count="36379">T</span>ext.{ ct = Def_func_t ft; _ } -&gt; Text.func_type_eq func_type ft
+        | <span data-count="36393">T</span>ext.{ ct = Def_func_t ft; _ } -&gt; Text.func_type_eq func_type ft
         | <span data-count="955">_</span> -&gt; false )
       modul.typ
   in
-  <span data-count="14314">m</span>atch ty_opt with None -&gt; assert false | <span data-count="14314">S</span>ome idx -&gt; idx
+  <span data-count="14322">m</span>atch ty_opt with None -&gt; assert false | <span data-count="14322">S</span>ome idx -&gt; idx
 
 let find_field modul type_idx field_id =
   <span data-count="39">m</span>atch field_id with
