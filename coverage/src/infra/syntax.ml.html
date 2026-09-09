@@ -427,17 +427,17 @@ open Prelude.Result
 include Syntax
 
 let[@inline] list_iter f l =
-  <span data-count="30878">l</span>et rec aux = function
-    | <span data-count="30837">[</span>] -&gt; Ok ()
-    | <span data-count="16021">x</span> :: xs -&gt; ( match f x with <span data-count="15980">O</span>k () -&gt; aux xs | <span data-count="41">E</span>rror _ as e -&gt; e )
+  <span data-count="30884">l</span>et rec aux = function
+    | <span data-count="30843">[</span>] -&gt; Ok ()
+    | <span data-count="16022">x</span> :: xs -&gt; ( match f x with <span data-count="15981">O</span>k () -&gt; aux xs | <span data-count="41">E</span>rror _ as e -&gt; e )
   in
   aux l
 
 let[@inline] list_map f l =
-  <span data-count="86117">l</span>et rec aux acc = function
-    | <span data-count="86072">[</span>] -&gt; Ok (List.re<span data-count="86072">v</span> acc)
-    | <span data-count="82983">x</span> :: xs -&gt; (
-      match f x with <span data-count="82938">O</span>k v -&gt; aux (v :: acc) xs | <span data-count="45">E</span>rror _ as e -&gt; e )
+  <span data-count="86129">l</span>et rec aux acc = function
+    | <span data-count="86084">[</span>] -&gt; Ok (List.re<span data-count="86084">v</span> acc)
+    | <span data-count="82995">x</span> :: xs -&gt; (
+      match f x with <span data-count="82950">O</span>k v -&gt; aux (v :: acc) xs | <span data-count="45">E</span>rror _ as e -&gt; e )
   in
   aux [] l
 
@@ -452,10 +452,10 @@ let[@inline] list_concat_map f l =
   aux [] l
 
 let[@inline] list_fold_left f acc l =
-  <span data-count="59340">l</span>et rec aux acc = function
-    | <span data-count="56935">[</span>] -&gt; Ok acc
-    | <span data-count="409357">v</span> :: tl -&gt; (
-      match f acc v with <span data-count="406952">O</span>k acc -&gt; aux acc tl | <span data-count="2405">E</span>rror _ as e -&gt; e )
+  <span data-count="59344">l</span>et rec aux acc = function
+    | <span data-count="56939">[</span>] -&gt; Ok acc
+    | <span data-count="409388">v</span> :: tl -&gt; (
+      match f acc v with <span data-count="406983">O</span>k acc -&gt; aux acc tl | <span data-count="2405">E</span>rror _ as e -&gt; e )
   in
   aux acc l
 
@@ -470,27 +470,27 @@ let[@inline] list_fold_left_map f acc l =
   <span data-count="0">(</span>acc, List.re<span data-count="0">v</span> l)
 
 let[@inline] array_iter f a =
-  <span data-count="75043">l</span>et err = ref None in
+  <span data-count="75060">l</span>et err = ref None in
   try
-    for i = 0 to Array.lengt<span data-count="75043">h</span> a - 1 do
-      <span data-count="69379">m</span>atch f (Array.unsafe_ge<span data-count="69379">t</span> a i) with
+    for i = 0 to Array.lengt<span data-count="75060">h</span> a - 1 do
+      <span data-count="69383">m</span>atch f (Array.unsafe_ge<span data-count="69383">t</span> a i) with
       | <span data-count="2251">E</span>rror _e as e -&gt;
         err := Some e;
         raise Exit
-      | <span data-count="67128">O</span>k () -&gt; ()
+      | <span data-count="67132">O</span>k () -&gt; ()
     done;
     Ok ()
   with <span data-count="2251">E</span>xit -&gt; ( match !err with None -&gt; assert false | <span data-count="2251">S</span>ome e -&gt; e )
 
 let[@inline] array_iteri f a =
-  <span data-count="44519">l</span>et err = ref None in
+  <span data-count="44528">l</span>et err = ref None in
   try
-    for i = 0 to Array.lengt<span data-count="44519">h</span> a - 1 do
-      <span data-count="20923">m</span>atch f i (Array.unsafe_ge<span data-count="20923">t</span> a i) with
+    for i = 0 to Array.lengt<span data-count="44528">h</span> a - 1 do
+      <span data-count="20925">m</span>atch f i (Array.unsafe_ge<span data-count="20925">t</span> a i) with
       | <span data-count="40">E</span>rror _e as e -&gt;
         err := Some e;
         raise Exit
-      | <span data-count="20883">O</span>k () -&gt; ()
+      | <span data-count="20885">O</span>k () -&gt; ()
     done;
     Ok ()
   with <span data-count="40">E</span>xit -&gt; ( match !err with None -&gt; assert false | <span data-count="40">S</span>ome e -&gt; e )
@@ -522,16 +522,16 @@ let[@inline] dynarray_iteri f a =
   with <span data-count="0">E</span>xit -&gt; ( match !err with None -&gt; assert false | <span data-count="0">S</span>ome e -&gt; e )
 
 let[@inline] array_map f a =
-  <span data-count="68302">l</span>et err = ref None in
+  <span data-count="68316">l</span>et err = ref None in
   try
-    o<span data-count="68258">k</span>
-    @@ Array.ini<span data-count="68258">t</span> (Array.lengt<span data-count="68302">h</span> a) (fun i -&gt;
-      <span data-count="54238">l</span>et v = Array.get a i in
-      <span data-count="54238">m</span>atch f v with
+    o<span data-count="68272">k</span>
+    @@ Array.ini<span data-count="68272">t</span> (Array.lengt<span data-count="68316">h</span> a) (fun i -&gt;
+      <span data-count="54242">l</span>et v = Array.get a i in
+      <span data-count="54242">m</span>atch f v with
       | <span data-count="44">E</span>rror _e as e -&gt;
         err := Some e;
         raise Exit
-      | <span data-count="54194">O</span>k v -&gt; v )
+      | <span data-count="54198">O</span>k v -&gt; v )
   with <span data-count="44">E</span>xit -&gt; ( match !err with None -&gt; assert false | <span data-count="44">S</span>ome e -&gt; e )
 
 let[@inline] array_mapi f a =
@@ -568,12 +568,12 @@ let[@inline] array_fold_left f acc l =
     (Ok acc) l
 
 let[@inline] array_fold_lefti f acc l =
-  <span data-count="17456">s</span>nd
-  @@ Array.fold_lef<span data-count="17456">t</span>
+  <span data-count="17462">s</span>nd
+  @@ Array.fold_lef<span data-count="17462">t</span>
        (fun (i, acc) v -&gt;
-         <span data-count="20765">(</span> suc<span data-count="20765">c</span> i
+         <span data-count="20767">(</span> suc<span data-count="20767">c</span> i
          , let* acc in
-           <span data-count="20756">f</span> i acc v ) )
+           <span data-count="20758">f</span> i acc v ) )
        (0, Ok acc) l
 
 let[@inline] dynarray_fold_left f acc l =

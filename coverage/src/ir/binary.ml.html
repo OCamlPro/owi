@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>binary.ml &mdash; Coverage report</title>
-    <meta name="description" content="52.23% coverage in src/ir/binary.ml">
+    <meta name="description" content="52.52% coverage in src/ir/binary.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">src/ir/</span>binary.ml
         </a>
       </h1>
-      <h2>52.23%</h2>
+      <h2>52.52%</h2>
     </div>
     <div id="navbar">
       <span class="some-visited" style="top:0.96%"></span>
@@ -280,8 +280,6 @@
       <span class="unvisited" style="bottom:29.27%"></span>
       <span class="unvisited" style="bottom:29.20%"></span>
       <span class="unvisited" style="bottom:29.14%"></span>
-      <span class="unvisited" style="bottom:29.01%"></span>
-      <span class="unvisited" style="bottom:28.88%"></span>
       <span class="unvisited" style="bottom:28.82%"></span>
       <span class="unvisited" style="bottom:28.50%"></span>
       <span class="unvisited" style="bottom:28.43%"></span>
@@ -1443,9 +1441,9 @@
 <a id="L1108"></a><span class="unvisited"> </span>
 <a id="L1109"></a><span class="unvisited"> </span>
 <a id="L1110"></a><span class="visited"> </span>
-<a id="L1111"></a><span class="unvisited"> </span>
+<a id="L1111"></a><span class="visited"> </span>
 <a id="L1112"></a><span > </span>
-<a id="L1113"></a><span class="unvisited"> </span>
+<a id="L1113"></a><span class="visited"> </span>
 <a id="L1114"></a><span class="unvisited"> </span>
 <a id="L1115"></a><span > </span>
 <a id="L1116"></a><span > </span>
@@ -3480,7 +3478,7 @@ let sp ppf () = <span data-count="4">F</span>mt.char ppf ' '
 
 type indice = int
 
-let pp_indice ppf i = <span data-count="246">i</span>nt ppf i
+let pp_indice ppf i = <span data-count="278">i</span>nt ppf i
 
 let pp_indice_not0 ppf i = <span data-count="8">i</span>f i &lt;&gt; 0 then <span data-count="0">F</span>mt.pf ppf " %d" i
 
@@ -3576,8 +3574,8 @@ let pp_val_type fmt = function
   | <span data-count="6">R</span>ef_type t -&gt; pp_ref_type fmt t
 
 let val_type_eq t1 t2 =
-  <span data-count="11717">m</span>atch (t1, t2) with
-  | <span data-count="11687">N</span>um_type t1, Num_type t2 -&gt; Text.num_type_eq t1 t2
+  <span data-count="11697">m</span>atch (t1, t2) with
+  | <span data-count="11667">N</span>um_type t1, Num_type t2 -&gt; Text.num_type_eq t1 t2
   | <span data-count="30">R</span>ef_type t1, Ref_type t2 -&gt; ref_type_eq t1 t2
   | <span data-count="0">_</span>, _ -&gt; false
 
@@ -3614,17 +3612,17 @@ type param = string option * val_type
 let pp_param ppf ((id, vt) : param) =
   <span data-count="31">p</span>f ppf "(param%a %a)" pp_str_opt id pp_val_type vt
 
-let param_eq (_, t1) (_, t2) = <span data-count="8154">v</span>al_type_eq t1 t2
+let param_eq (_, t1) (_, t2) = <span data-count="8140">v</span>al_type_eq t1 t2
 
 type param_type = param list
 
 let pp_param_type ppf (params : param_type) = <span data-count="29">l</span>ist ~sep:sp pp_param ppf params
 
-let param_type_eq t1 t2 = <span data-count="8696">L</span>ist.equal param_eq t1 t2
+let param_type_eq t1 t2 = <span data-count="8690">L</span>ist.equal param_eq t1 t2
 
 type result_type = val_type list
 
-let result_type_eq t1 t2 = <span data-count="8685">L</span>ist.equal val_type_eq t1 t2
+let result_type_eq t1 t2 = <span data-count="8679">L</span>ist.equal val_type_eq t1 t2
 
 let pp_result_ ppf vt = <span data-count="29">p</span>f ppf "(result %a)" pp_val_type vt
 
@@ -3643,7 +3641,7 @@ let pp_func_type ppf (params, results) =
     results
 
 let func_type_eq (pt1, rt1) (pt2, rt2) =
-  <span data-count="8696">p</span>aram_type_e<span data-count="8696">q</span> pt1 pt2 &amp;&amp; <span data-count="8685">r</span>esult_type_eq rt1 rt2
+  <span data-count="8690">p</span>aram_type_e<span data-count="8690">q</span> pt1 pt2 &amp;&amp; <span data-count="8679">r</span>esult_type_eq rt1 rt2
 
 type field_type = Text.mut * storage_type
 
@@ -3967,11 +3965,11 @@ type i32_instr =
   | Store16 of indice * memarg
 
 let pp_i32_instr ppf = function
-  | <span data-count="139">C</span>onst i -&gt; pf ppf "i32.const %ld" i
+  | <span data-count="164">C</span>onst i -&gt; pf ppf "i32.const %ld" i
   | <span data-count="0">C</span>lz -&gt; pf ppf "i32.clz"
   | <span data-count="0">C</span>tz -&gt; pf ppf "i32.ctz"
   | <span data-count="0">P</span>opcnt -&gt; pf ppf "i32.popcnt"
-  | <span data-count="26">A</span>dd -&gt; pf ppf "i32.add"
+  | <span data-count="36">A</span>dd -&gt; pf ppf "i32.add"
   | <span data-count="12">S</span>ub -&gt; pf ppf "i32.sub"
   | <span data-count="8">M</span>ul -&gt; pf ppf "i32.mul"
   | <span data-count="8">D</span>iv_s -&gt; pf ppf "i32.div_s"
@@ -4381,7 +4379,7 @@ type local_instr =
   | Tee of indice
 
 let pp_local_instr ppf = function
-  | <span data-count="80">G</span>et indice -&gt; pf ppf "local.get %a" pp_indice indice
+  | <span data-count="90">G</span>et indice -&gt; pf ppf "local.get %a" pp_indice indice
   | <span data-count="24">S</span>et indice -&gt; pf ppf "local.set %a" pp_indice indice
   | <span data-count="14">T</span>ee indice -&gt; pf ppf "local.tee %a" pp_indice indice
 
@@ -4556,7 +4554,7 @@ and expr = instr Annotated.t list
 let pp_newline ppf () = <span data-count="0">p</span>f ppf "@\n"
 
 let pp_simple_instruction ppf = function
-  | <span data-count="235">I</span>32 i -&gt; pp_i32_instr ppf i
+  | <span data-count="270">I</span>32 i -&gt; pp_i32_instr ppf i
   | <span data-count="16">I</span>64 i -&gt; pp_i64_instr ppf i
   | <span data-count="11">F</span>32 i -&gt; pp_f32_instr ppf i
   | <span data-count="5">F</span>64 i -&gt; pp_f64_instr ppf i
@@ -4568,7 +4566,7 @@ let pp_simple_instruction ppf = function
   | <span data-count="0">F</span>32x4 i -&gt; Text.pp_f32x4_instr ppf i
   | <span data-count="0">F</span>64x2 i -&gt; Text.pp_f64x2_instr ppf i
   | <span data-count="0">R</span>ef i -&gt; pp_ref_instr ppf i
-  | <span data-count="118">L</span>ocal i -&gt; pp_local_instr ppf i
+  | <span data-count="128">L</span>ocal i -&gt; pp_local_instr ppf i
   | <span data-count="8">G</span>lobal i -&gt; pp_global_instr ppf i
   | <span data-count="1">T</span>able i -&gt; pp_table_instr ppf i
   | <span data-count="1">E</span>lem i -&gt; pp_elem_instr ppf i
@@ -4577,10 +4575,10 @@ let pp_simple_instruction ppf = function
   | <span data-count="0">I</span>31 i -&gt; Text.pp_i31_instr ppf i
   | <span data-count="0">S</span>truct i -&gt; pp_struct_instr ppf i
   | <span data-count="0">A</span>rray i -&gt; pp_array_instr ppf i
-  | <span data-count="49">D</span>rop -&gt; pf ppf "drop"
-  | <span data-count="0">S</span>elect vt -&gt;
+  | <span data-count="51">D</span>rop -&gt; pf ppf "drop"
+  | <span data-count="2">S</span>elect vt -&gt;
     begin match vt with
-    | <span data-count="0">N</span>one -&gt; pf ppf "select"
+    | <span data-count="2">N</span>one -&gt; pf ppf "select"
     | <span data-count="0">S</span>ome vt -&gt; pf ppf "select (%a)" pp_result_type vt
     (* TODO: are the parens needed ? *)
     end
@@ -4590,7 +4588,7 @@ let pp_simple_instruction ppf = function
   | <span data-count="0">E</span>xtern_convert_any -&gt; pf ppf "extern.convert_any"
 
 let rec pp_instr ~short ppf = function
-  | <span data-count="450">S</span>imple i -&gt; pp_simple_instruction ppf i
+  | <span data-count="499">S</span>imple i -&gt; pp_simple_instruction ppf i
   | <span data-count="8">B</span>lock (id, bt, e) -&gt;
     if short then <span data-count="8">p</span>f ppf "block%a%a" Text.pp_id_opt id pp_block_type_opt bt
     else
@@ -4629,7 +4627,7 @@ let rec pp_instr ~short ppf = function
   | <span data-count="0">R</span>eturn_call_indirect (tbl_id, ty_id) -&gt;
     pf ppf "return_call_indirect %a %a" pp_indice tbl_id pp_block_type ty_id
   | <span data-count="0">R</span>eturn_call_ref ty_id -&gt; pf ppf "return_call_ref %a" pp_block_type ty_id
-  | <span data-count="55">C</span>all id -&gt; pf ppf "call %a" pp_indice id
+  | <span data-count="77">C</span>all id -&gt; pf ppf "call %a" pp_indice id
   | <span data-count="1">C</span>all_indirect (tbl_id, ty_id) -&gt;
     pf ppf "call_indirect %a %a" pp_indice tbl_id pp_block_type ty_id
   | <span data-count="0">C</span>all_ref ty_id -&gt; pf ppf "call_ref %a" pp_indice ty_id
@@ -4712,21 +4710,21 @@ end
 
     TODO: use iarray? *)
 let compute_type_groups (type_defs : Typedef.t array) types_len =
-  <span data-count="3419">l</span>et groups = Array.make types_len (0, 1) in
-  <span data-count="3419">l</span>et _ =
+  <span data-count="3420">l</span>et groups = Array.make types_len (0, 1) in
+  <span data-count="3420">l</span>et _ =
     Array.fold_left
       (fun pos typedef -&gt;
-        <span data-count="10267">m</span>atch typedef with
-        | <span data-count="10013">T</span>ypedef.SimpleType _ -&gt;
+        <span data-count="10269">m</span>atch typedef with
+        | <span data-count="10015">T</span>ypedef.SimpleType _ -&gt;
           groups.(pos) &lt;- (pos, 1);
-          <span data-count="10013">p</span>os + 1
+          <span data-count="10015">p</span>os + 1
         | <span data-count="254">T</span>ypedef.RecType members -&gt;
           let size = List.length members in
           <span data-count="254">L</span>ist.iteri (fun i _ -&gt; <span data-count="540">g</span>roups.(pos + i) &lt;- (pos, size)) members;
           <span data-count="254">p</span>os + size )
       0 type_defs
   in
-  <span data-count="3419">g</span>roups
+  <span data-count="3420">g</span>roups
 
 module Table = struct
   module Type = struct

@@ -87,24 +87,24 @@ open Syntax
 
 (* TODO: rename this... *)
 let env () =
-  <span data-count="16">l</span>et env =
+  <span data-count="17">l</span>et env =
     let context = Abstract_domain.root_context () in
-    <span data-count="16">E</span>nv.Abstract.empty ~context
+    <span data-count="17">E</span>nv.Abstract.empty ~context
   in
   Env.Abstract.link_extern_module ~env ~name:"owi" Abstract_wasm_ffi.owi
 
 let cmd ~source_file ~entry_point ~unsafe =
-  <span data-count="15">l</span>et* env = en<span data-count="15">v</span> () in
-  <span data-count="15">l</span>et* modul = Compile.File.until_binar<span data-count="15">y</span> ~unsafe source_file in
-  <span data-count="15">l</span>et* modul = Cmd_utils.set_entry_poin<span data-count="15">t</span> entry_point false modul in
-  <span data-count="15">l</span>et+ modul, env =
-    Compile.Binary.until_abstract_lin<span data-count="15">k</span> ~unsafe ~name:None env modul
+  <span data-count="16">l</span>et* env = en<span data-count="16">v</span> () in
+  <span data-count="16">l</span>et* modul = Compile.File.until_binar<span data-count="16">y</span> ~unsafe source_file in
+  <span data-count="16">l</span>et* modul = Cmd_utils.set_entry_poin<span data-count="16">t</span> entry_point false modul in
+  <span data-count="16">l</span>et+ modul, env =
+    Compile.Binary.until_abstract_lin<span data-count="16">k</span> ~unsafe ~name:None env modul
   in
-  <span data-count="14">t</span>ry
+  <span data-count="15">t</span>ry
     let state = Abstract_interpreter_control_flow.modul ~env ~modul in
-    Abstract_checker.check_modul<span data-count="13">e</span> ~env ~modul state.invariant
+    Abstract_checker.check_modul<span data-count="14">e</span> ~env ~modul state.invariant
   with <span data-count="1">A</span>bstract_interpreter_control_flow.RecursiveFunctionCall -&gt;
-    Log.err (fun m -&gt; <span data-count="1">m</span> "Recursive function calls are not supported yet")
+    Log.err (fun m -&gt; <span data-count="1">m</span> "Too many recursive calls")
 </code></pre>
       </div>
     </div>

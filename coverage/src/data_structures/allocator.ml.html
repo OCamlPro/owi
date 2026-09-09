@@ -71,14 +71,14 @@
 
 include Map.Make (Int)
 
-let next_key map = <span data-count="36142">c</span>ardinal map
+let next_key map = <span data-count="36161">c</span>ardinal map
 
-let add_manual k v map = <span data-count="617545">a</span>dd k v map
+let add_manual k v map = <span data-count="617497">a</span>dd k v map
 
 let add v map =
-  <span data-count="19905">l</span>et key = next_key map in
-  <span data-count="19905">l</span>et map = add key v map in
-  <span data-count="19905">(</span>map, key)
+  <span data-count="19923">l</span>et key = next_key map in
+  <span data-count="19923">l</span>et map = add key v map in
+  <span data-count="19923">(</span>map, key)
 
 let pp pp_v =
   <span data-count="6">F</span>mt.braces

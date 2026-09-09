@@ -18,12 +18,12 @@
       <h2>27.27%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:44.44%"></span>
-      <span class="unvisited" style="top:50.00%"></span>
-      <span class="unvisited" style="bottom:44.44%"></span>
-      <span class="unvisited" style="bottom:41.67%"></span>
-      <span class="unvisited" style="bottom:8.33%"></span>
-      <span class="unvisited" style="bottom:5.56%"></span>
+      <span class="unvisited" style="top:43.24%"></span>
+      <span class="unvisited" style="top:48.65%"></span>
+      <span class="unvisited" style="bottom:45.95%"></span>
+      <span class="unvisited" style="bottom:43.24%"></span>
+      <span class="unvisited" style="bottom:10.81%"></span>
+      <span class="unvisited" style="bottom:8.11%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -64,6 +64,7 @@
 <a id="L34"></a><span class="unvisited"> </span>
 <a id="L35"></a><span > </span>
 <a id="L36"></a><span > </span>
+<a id="L37"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -104,6 +105,7 @@
 <a href="#L34">34</a>
 <a href="#L35">35</a>
 <a href="#L36">36</a>
+<a href="#L37">37</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2026 OCamlPro *)
@@ -128,19 +130,20 @@ let pp : t Fmt.t =
     (Abstract_locals.to_list state.locals |&gt; <span data-count="0">L</span>ist.ma<span data-count="0">p</span> snd)
 
 let empty () =
-  <span data-count="15">l</span>et ctx = Abstract_domain.root_context () in
-  <span data-count="15">l</span>et stack = Abstract_stack.empty in
+  <span data-count="16">l</span>et ctx = Abstract_domain.root_context () in
+  <span data-count="16">l</span>et stack = Abstract_stack.empty in
   let locals = Abstract_locals.empty in
   let func_rt = [] in
   let invariant = Abstract_invariant.empty () in
-  <span data-count="15">l</span>et call_stack = [] in
+  <span data-count="16">l</span>et call_stack = [] in
   { ctx; stack; locals; func_rt; invariant; call_stack }
 
-let empty_exec_state ~ctx ~locals =
+let empty_exec_state ~ctx ~stack =
   <span data-count="0">l</span>et invariant = Abstract_invariant.empty () in
-  <span data-count="0">l</span>et stack = Abstract_stack.empty in
+  <span data-count="0">l</span>et locals = Abstract_locals.empty in
+  let func_rt = [] in
   let call_stack = [] in
-  { ctx; stack; locals; func_rt = []; invariant; call_stack }
+  { ctx; stack; locals; func_rt; invariant; call_stack }
 </code></pre>
       </div>
     </div>

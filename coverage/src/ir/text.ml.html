@@ -4331,8 +4331,8 @@ let pp_num_type ppf = function
   | <span data-count="1093">V</span>128 -&gt; pf ppf "v128"
 
 let num_type_eq t1 t2 =
-  <span data-count="1651339">m</span>atch (t1, t2) with
-  | <span data-count="1495116">I</span>32, I32 | <span data-count="47415">I</span>64, I64 | <span data-count="47179">F</span>32, F32 | <span data-count="47880">F</span>64, F64 | <span data-count="6232">V</span>128, V128 -&gt; true
+  <span data-count="1651320">m</span>atch (t1, t2) with
+  | <span data-count="1495097">I</span>32, I32 | <span data-count="47415">I</span>64, I64 | <span data-count="47179">F</span>32, F32 | <span data-count="47880">F</span>64, F64 | <span data-count="6232">V</span>128, V128 -&gt; true
   | <span data-count="7517">(</span><span data-count="2566">I</span>32 | <span data-count="1378">I</span>64 | <span data-count="1002">F</span>32 | <span data-count="2460">F</span>64 | <span data-count="111">V</span>128), _ -&gt; false
 
 let compare_num_type t1 t2 =
@@ -4548,8 +4548,8 @@ let pp_val_type fmt = function
   | <span data-count="0">R</span>ef_type t -&gt; pp_ref_type fmt t
 
 let val_type_eq t1 t2 =
-  <span data-count="37180">m</span>atch (t1, t2) with
-  | <span data-count="36042">N</span>um_type t1, Num_type t2 -&gt; num_type_eq t1 t2
+  <span data-count="37181">m</span>atch (t1, t2) with
+  | <span data-count="36043">N</span>um_type t1, Num_type t2 -&gt; num_type_eq t1 t2
   | <span data-count="776">R</span>ef_type t1, Ref_type t2 -&gt; ref_type_eq t1 t2
   | <span data-count="362">_</span>, _ -&gt; false
 
@@ -4591,7 +4591,7 @@ type nonrec param_type = param list
 
 let pp_param_type ppf params = <span data-count="122">l</span>ist ~sep:sp pp_param ppf params
 
-let param_type_eq t1 t2 = <span data-count="43719">L</span>ist.equal param_eq t1 t2
+let param_type_eq t1 t2 = <span data-count="43722">L</span>ist.equal param_eq t1 t2
 
 let compare_param_type t1 t2 = <span data-count="0">L</span>ist.compare compare_param t1 t2
 
@@ -4601,7 +4601,7 @@ let pp_result_ ppf vt = <span data-count="126">p</span>f ppf "(result %a)" pp_va
 
 let pp_result_type ppf results = <span data-count="126">l</span>ist ~sep:sp pp_result_ ppf results
 
-let result_type_eq t1 t2 = <span data-count="25341">L</span>ist.equal val_type_eq t1 t2
+let result_type_eq t1 t2 = <span data-count="25344">L</span>ist.equal val_type_eq t1 t2
 
 let compare_result_type t1 t2 = <span data-count="0">L</span>ist.compare compare_val_type t1 t2
 
@@ -4620,7 +4620,7 @@ let pp_func_type ppf (params, results) =
     results
 
 let func_type_eq (pt1, rt1) (pt2, rt2) =
-  <span data-count="43719">p</span>aram_type_e<span data-count="43719">q</span> pt1 pt2 &amp;&amp; <span data-count="25341">r</span>esult_type_eq rt1 rt2
+  <span data-count="43722">p</span>aram_type_e<span data-count="43722">q</span> pt1 pt2 &amp;&amp; <span data-count="25344">r</span>esult_type_eq rt1 rt2
 
 type field_type = mut * storage_type
 

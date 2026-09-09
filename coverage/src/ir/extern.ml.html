@@ -456,8 +456,8 @@ module Func = struct
     type t = Extern_func : 'a func_type * 'a -&gt; t
 
     let elt_type (type t) (e : t telt) : Binary.val_type =
-      <span data-count="4991">m</span>atch e with
-      | <span data-count="2388">I</span>32 -&gt; Num_type I32
+      <span data-count="4992">m</span>atch e with
+      | <span data-count="2389">I</span>32 -&gt; Num_type I32
       | <span data-count="536">I</span>64 -&gt; Num_type I64
       | <span data-count="791">F</span>32 -&gt; Num_type F32
       | <span data-count="1035">F</span>64 -&gt; Num_type F64
@@ -465,9 +465,9 @@ module Func = struct
       | <span data-count="3">E</span>xternref _ -&gt; Ref_type (Null, Extern_ht)
 
     let res_type (type t) (r : t rtype) : Binary.result_type =
-      <span data-count="4720">m</span>atch r with
+      <span data-count="4721">m</span>atch r with
       | <span data-count="2671">R</span>0 -&gt; []
-      | <span data-count="2049">R</span>1 a -&gt; [ elt_typ<span data-count="2049">e</span> a ]
+      | <span data-count="2050">R</span>1 a -&gt; [ elt_typ<span data-count="2050">e</span> a ]
       | <span data-count="0">R</span>2 (a, b) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b ]
       | <span data-count="0">R</span>3 (a, b, c) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b; elt_typ<span data-count="0">e</span> c ]
       | <span data-count="0">R</span>4 (a, b, c, d) -&gt; [ elt_typ<span data-count="0">e</span> a; elt_typ<span data-count="0">e</span> b; elt_typ<span data-count="0">e</span> c; elt_typ<span data-count="0">e</span> d ]
@@ -475,18 +475,18 @@ module Func = struct
     let arg_type =
       let rec aux : type t r. (t, r) atype -&gt; Binary.param_type = function
         | <span data-count="18">M</span>em (_, tl) -&gt; aux tl
-        | <span data-count="2293">U</span>Arg tl -&gt; aux tl
+        | <span data-count="2294">U</span>Arg tl -&gt; aux tl
         | <span data-count="2942">A</span>rg (hd, tl) -&gt; (None, elt_typ<span data-count="2942">e</span> hd) :: au<span data-count="2942">x</span> tl
-        | <span data-count="4720">R</span>es -&gt; []
+        | <span data-count="4721">R</span>es -&gt; []
       in
       aux
 
     (* TODO: we could move this out, as it does not really depend on the functor's parameters *)
     let to_func_type (Extern_func (Func (arg, res), _)) : Binary.func_type =
-      <span data-count="4720">(</span>arg_typ<span data-count="4720">e</span> arg, res_typ<span data-count="4720">e</span> res)
+      <span data-count="4721">(</span>arg_typ<span data-count="4721">e</span> arg, res_typ<span data-count="4721">e</span> res)
 
     let fresh =
-      let r = ref ~<span data-count="2685">-</span>1 in
+      let r = ref ~<span data-count="2688">-</span>1 in
       fun () -&gt;
         <span data-count="0">i</span>ncr r;
         <span data-count="0">!</span>r
@@ -503,11 +503,11 @@ module Func = struct
         | Memory : int -&gt; (l, memory, memory) t
         | Elt : 'a telt -&gt; (lr, elt, 'a) t
 
-      let return r = <span data-count="77956">F</span>unc (Res, r)
+      let return r = <span data-count="78043">F</span>unc (Res, r)
 
-      let r0 = R0 |&gt; retur<span data-count="2685">n</span>
+      let r0 = R0 |&gt; retur<span data-count="2688">n</span>
 
-      let r1 (Elt a) = <span data-count="75271">R</span>1 a |&gt; return
+      let r1 (Elt a) = <span data-count="75355">R</span>1 a |&gt; return
 
       let r2 (Elt a) (Elt b) = <span data-count="0">R</span>2 (a, b) |&gt; return
 
@@ -529,23 +529,23 @@ module Func = struct
 
       let unit = Unit
 
-      let memory id = <span data-count="8981">M</span>emory id
+      let memory id = <span data-count="8991">M</span>emory id
 
       let ( ^-&gt; ) =
         let aux : type lr k a b.
           (lr, k, a) t -&gt; b func_type -&gt; (a -&gt; b) func_type =
          fun a (Func (b, r)) -&gt;
-          <span data-count="237448">m</span>atch a with
-          | <span data-count="194374">E</span>lt a -&gt; Func (Arg (a, b), r)
-          | <span data-count="34093">U</span>nit -&gt; Func (UArg b, r)
-          | <span data-count="8981">M</span>emory id -&gt; Func (Mem (id, b), r)
+          <span data-count="237713">m</span>atch a with
+          | <span data-count="194591">E</span>lt a -&gt; Func (Arg (a, b), r)
+          | <span data-count="34131">U</span>nit -&gt; Func (UArg b, r)
+          | <span data-count="8991">M</span>emory id -&gt; Func (Mem (id, b), r)
         in
         aux
 
       let ( ^-&gt;. ) =
         let aux : type ll k kk a b.
           (ll, k, a) t -&gt; (lr, kk, b) t -&gt; (a -&gt; b m) func_type =
-         fun a b -&gt; <span data-count="126398">m</span>atch b with <span data-count="75271">E</span>lt _ -&gt; a ^-&gt; r<span data-count="75271">1</span> b | <span data-count="51127">U</span>nit -&gt; a ^-&gt; r0
+         fun a b -&gt; <span data-count="126539">m</span>atch b with <span data-count="75355">E</span>lt _ -&gt; a ^-&gt; r<span data-count="75355">1</span> b | <span data-count="51184">U</span>nit -&gt; a ^-&gt; r0
         in
         aux
 

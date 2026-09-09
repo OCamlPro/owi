@@ -88,20 +88,20 @@ let return x = fun state -&gt; <span data-count="0">S</span>ome (x, state)
 
 let bind f m = fun state -&gt; <span data-count="0">O</span>ption.bind (<span data-count="0">m</span> state) (fun (x, state) -&gt; <span data-count="0">f</span> x state)
 
-let map f m = fun state -&gt; <span data-count="6">O</span>ption.map (fun (x, state) -&gt; <span data-count="6">(</span><span data-count="6">f</span> x, state)) (<span data-count="6">m</span> state)
+let map f m = fun state -&gt; <span data-count="7">O</span>ption.map (fun (x, state) -&gt; <span data-count="7">(</span><span data-count="7">f</span> x, state)) (<span data-count="7">m</span> state)
 
 let ( let* ) m f = <span data-count="0">b</span>ind f m
 
-let ( let+ ) m f = <span data-count="6">m</span>ap f m
+let ( let+ ) m f = <span data-count="7">m</span>ap f m
 
 let map_state f =
  fun state -&gt;
   <span data-count="2">l</span>et state = f state in
   <span data-count="2">O</span>ption.map (fun state -&gt; <span data-count="2">(</span>(), state)) state
 
-let fold_state f = fun state -&gt; <span data-count="4">S</span>ome (<span data-count="4">f</span> state, state)
+let fold_state f = fun state -&gt; <span data-count="5">S</span>ome (<span data-count="5">f</span> state, state)
 
-let run m state = <span data-count="6">m</span> state
+let run m state = <span data-count="7">m</span> state
 </code></pre>
       </div>
     </div>

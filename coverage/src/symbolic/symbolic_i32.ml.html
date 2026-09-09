@@ -151,19 +151,19 @@ let rotate_right = ext_rotate_right
 let rotate_left = ext_rotate_left
 
 let to_boolean (e : t) : Symbolic_boolean.t =
-  <span data-count="320599">m</span>atch Smtml.Typed.view e with
-  | <span data-count="307280">V</span>al (Bitv bv) -&gt;
-    if Smtml.Bitvector.eqz bv then <span data-count="111902">S</span>ymbolic_boolean.false_
-    else <span data-count="195378">S</span>ymbolic_boolean.true_
+  <span data-count="320577">m</span>atch Smtml.Typed.view e with
+  | <span data-count="307260">V</span>al (Bitv bv) -&gt;
+    if Smtml.Bitvector.eqz bv then <span data-count="111903">S</span>ymbolic_boolean.false_
+    else <span data-count="195356">S</span>ymbolic_boolean.true_
   | <span data-count="0">S</span>ymbol { ty = Ty_bool; _ } -&gt; Smtml.Typed.Bitv32.to_bool e
-  | <span data-count="12649">C</span>vtop (_, OfBool, cond) -&gt; Smtml.Typed.Unsafe.wrap cond
+  | <span data-count="12647">C</span>vtop (_, OfBool, cond) -&gt; Smtml.Typed.Unsafe.wrap cond
   | <span data-count="670">_</span> -&gt; Smtml.Typed.Bitv32.to_bool e
 
 let of_boolean (e : Symbolic_boolean.t) : t =
-  <span data-count="243586">m</span>atch Smtml.Typed.view e with
-  | <span data-count="120909">V</span>al True -&gt; one
-  | <span data-count="108308">V</span>al False -&gt; zero
-  | <span data-count="14369">_</span> -&gt; Smtml.Typed.Bitv32.of_bool e
+  <span data-count="243572">m</span>atch Smtml.Typed.view e with
+  | <span data-count="120896">V</span>al True -&gt; one
+  | <span data-count="108309">V</span>al False -&gt; zero
+  | <span data-count="14367">_</span> -&gt; Smtml.Typed.Bitv32.of_bool e
 
 let boolify e =
   <span data-count="39996">m</span>atch Smtml.Typed.view e with
@@ -183,12 +183,12 @@ let logor e1 e2 =
   | <span data-count="57">_</span> -&gt; Smtml.Typed.Bitv32.logor e1 e2
 
 let eq_concrete (e : t) (c : Int32.t) : Symbolic_boolean.t =
-  <span data-count="710">l</span>et c = of_int32 c in
-  <span data-count="710">S</span>mtml.Typed.Bitv32.eq c e
+  <span data-count="701">l</span>et c = of_int32 c in
+  <span data-count="701">S</span>mtml.Typed.Bitv32.eq c e
 
-let min_int = of_int3<span data-count="895">2</span> Int32.min_int
+let min_int = of_int3<span data-count="896">2</span> Int32.min_int
 
-let eqz (v : t) = <span data-count="201108">e</span>q v zero
+let eqz (v : t) = <span data-count="201106">e</span>q v zero
 
 let ( = ) = eq
 
