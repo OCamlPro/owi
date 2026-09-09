@@ -84,7 +84,4 @@ let run ~no_exhaustion script =
 
 let exec ~(no_exhaustion : bool) (script : Wast.script) =
   let res = run ~no_exhaustion script in
-  (* match Symex.Monad.run to_run (Thread.init ()) with *)
-  match res with
-  | Error _e -> Error (`Msg "script failed!")
-  | Ok _ -> Ok ()
+  match res with Error _e -> Error (`Msg "script failed!") | Ok _ -> Ok ()
