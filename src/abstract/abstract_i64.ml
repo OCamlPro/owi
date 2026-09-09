@@ -80,6 +80,8 @@ let gt_s ctx x1 x2 = lt_s ctx x2 x1
 let gt_u ctx x1 x2 = lt_u ctx x2 x1
 
 let shl ctx x1 x2 =
+  (* We use a mask to ensure x2 is within [0, 63] as we should be doing modulo 64 of the size as per official specs. *)
+  (* TODO : test how expensive they are globally, add a check before doing them if too expensive *)
   let mask = of_int64 ctx 63L in
   let x2 = and_ ctx x2 mask in
   let flags = Operator.Flags.Bshl.pack ~nsw:false ~nuw:false in
