@@ -84,6 +84,7 @@ let
       ppx_inline_test
       vdom
       zarith
+      yojson
     ];
 
 

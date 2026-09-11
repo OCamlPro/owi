@@ -34,7 +34,8 @@ SYNOPSIS
        owi wasm [COMMAND] …
 
 COMMANDS
-       abs [--entry-point=FUNCTION] [--unsafe] [OPTION]… FILE
+       abs [--debug-trace=FILE] [--entry-point=FUNCTION] [--unsafe] [OPTION]…
+       FILE
            Run the abstract interpreter.
 
        analyze [COMMAND] …

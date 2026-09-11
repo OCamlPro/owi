@@ -1,4 +1,4 @@
-  $ owi abs if_join.wat -v
+  $ owi wasm abs if_join.wat -v
   owi: [INFO] parsing      ...
   owi: [INFO] checking     ...
   owi: [INFO] typechecking ...
@@ -6,7 +6,6 @@
   owi: [INFO] stack         : [  ]
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : call 19
-  owi: [INFO] calling func  : func start
   owi: [INFO] calling func  : func start
   owi: [INFO] stack         : [  ]
   owi: [INFO] locals        : [ (0 -> i32 {0});  (1 -> i32 {0}) ]

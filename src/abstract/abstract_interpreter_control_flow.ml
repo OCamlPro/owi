@@ -261,9 +261,12 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
 
   let init_func ({ abs_state; _ } as state : Abstract_interpreter_state.t) idx
     (func : Binary.Func.t) : Abstract_interpreter_state.t * Value.t list =
-    if List.mem idx abs_state.call_stack then raise RecursiveFunctionCall;
-    Log.info (fun m ->
-      m "calling func  : func %s" (Option.value func.id ~default:"anonymous") );
+    let nb_recursive_calls =
+      List.fold_left
+        (fun acc call_frame -> acc + if call_frame = idx then 1 else 0)
+        0 abs_state.call_stack
+    in
+    if nb_recursive_calls > max_recursive_calls then raise RecursiveFunctionCall;
     let (None | Some _), (param_type, result_type) = func.type_f in
     let args, caller_popped_stack =
       Stack.pop_n abs_state.stack (List.length param_type)

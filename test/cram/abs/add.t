@@ -7,7 +7,6 @@
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : call 19
   owi: [INFO] calling func  : func start
-  owi: [INFO] calling func  : func start
   owi: [INFO] stack         : [  ]
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : i32.const 42

@@ -7,7 +7,6 @@
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : call 18
   owi: [INFO] calling func  : func start
-  owi: [INFO] calling func  : func start
   owi: [INFO] stack         : [  ]
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : block $b2
