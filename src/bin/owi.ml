@@ -262,6 +262,10 @@ let no_ite_for_select =
   let doc = "do not use ite for select" in
   Arg.(value & flag & info [ "no-ite-for-select" ] ~doc)
 
+let debug_trace =
+  let doc = "output debug traces to use with the debug GUI" in
+  Arg.(value & opt (some string) None & info [ "debug-trace" ] ~docv:"FILE" ~doc)
+
 (* shared symbolic parameters *)
 
 let symbolic_parameters default_entry_point =
@@ -474,8 +478,9 @@ module Wasm = struct
       let+ source_file
       and+ () = setup_log
       and+ entry_point = entry_point None
-      and+ unsafe in
-      Cmd_wasm_abs.cmd ~source_file ~entry_point ~unsafe
+      and+ unsafe
+      and+ debug_trace in
+      Cmd_wasm_abs.cmd ~source_file ~entry_point ~unsafe ~debug_trace
   end
 
   (* owi wasm analyze *)

@@ -9,13 +9,17 @@ NAME
        owi-wasm-abs - Run the abstract interpreter.
 
 SYNOPSIS
-       owi wasm abs [--entry-point=FUNCTION] [--unsafe] [OPTION]… FILE
+       owi wasm abs [--debug-trace=FILE] [--entry-point=FUNCTION] [--unsafe]
+       [OPTION]… FILE
 
 ARGUMENTS
        FILE (required)
            source file
 
 OPTIONS
+       --debug-trace=FILE
+           output debug traces to use with the debug GUI
+
        --entry-point=FUNCTION
            entry point of the executable
 
