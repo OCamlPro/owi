@@ -24,7 +24,7 @@
   owi: [INFO] locals        : [ (0 -> i32 {1}) ]
   owi: [INFO] running instr : i32.add
   owi: [INFO] stack         : [ i32 {2} ]
-  owi: [INFO] locals        : [  ]
+  owi: [INFO] locals        : [ (0 -> i32 {1}) ]
   owi: [INFO] running instr : call 18
   owi: [INFO] calling func  : func incr
   owi: [INFO] stack         : [  ]
@@ -37,7 +37,7 @@
   owi: [INFO] locals        : [ (0 -> i32 {2}) ]
   owi: [INFO] running instr : i32.add
   owi: [INFO] stack         : [ i32 {3} ]
-  owi: [INFO] locals        : [  ]
+  owi: [INFO] locals        : [ (0 -> i32 {2}) ]
   owi: [INFO] running instr : drop
 
   $ owi wasm abs rec.wat -v
