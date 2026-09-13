@@ -55,5 +55,10 @@ let check_error ~expected ~got : unit Result.t =
 
 let check_result ~expected ~got =
   match got with
-  | Ok _whatever -> Error (`Did_not_fail_but_expected expected)
-  | Error got -> check_error ~expected ~got
+  | Ok _whatever ->
+    Abstract_trace.record_wast_test_res Ok;
+    Ok ()
+  | Error got ->
+    Abstract_trace.record_wast_test_res
+      (Fail { expected; got = Result.err_to_string got });
+    check_error ~expected ~got

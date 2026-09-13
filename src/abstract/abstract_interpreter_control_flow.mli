@@ -12,12 +12,6 @@ val eval_exprs :
 
 val modul : env:Env.Abstract.t -> modul:Env.Abstract.modul -> Abstract_state.t
 
-val modul_with_ctx :
-     env:Env.Abstract.t
-  -> modul:Env.Abstract.modul
-  -> Abstract_domain.Context.t
-  -> Abstract_state.t
-
 val exec_vfunc_from_outside :
      env:Env.Abstract.t
   -> ctx:Abstract_domain.Context.t
