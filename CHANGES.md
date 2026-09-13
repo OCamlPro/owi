@@ -46,7 +46,7 @@
 - add `--no-ite-for-select` option
 - support the multi-memory proposal
 - add `script abstract`
-- add a gui for viewing execution traces
+- add `--debug-trace` option to `owi wasm script abstract` and `owi wasm abs`
 
 ## 0.2 - 2024-04-24
 

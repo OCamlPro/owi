@@ -137,7 +137,7 @@ let record_jt ~(jt : Abstract_jump_map.t) =
   if not !enabled then ()
   else
     match !events with
-    | [] -> ()
+    | [] -> assert false
     | ev :: rest ->
       let jts = Some (jump_targets_of_jt jt) in
       events := { ev with jts } :: rest
@@ -218,7 +218,17 @@ let json_of_event (ev : event) : Yojson.Safe.t =
 
 let write_json path =
   let sorted = List.rev !events in
-  let json = `List (List.map json_of_event sorted) in
+  let json : Yojson.Safe.t =
+    `Assoc
+      [ ( "metadata"
+        , `Assoc
+            [ ("version", `Float 1.)
+            ; ("mode", `String "abstract")
+            ; ("script", `Bool false)
+            ] )
+      ; ("events", `List (List.map json_of_event sorted))
+      ]
+  in
   let contents = Fmt.str "%s\n" (Yojson.Safe.pretty_to_string json) in
   match Bos.OS.File.write (Fpath.v path) contents with
   | Ok () -> ()
