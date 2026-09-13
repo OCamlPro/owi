@@ -7,7 +7,7 @@ module JumpMap = Abstract_jump_map
 module Value = Abstract_value
 module Trace = Abstract_trace
 
-let max_recursive_calls = 10
+let max_recursive_calls = 100
 
 exception RecursiveFunctionCall
 
@@ -328,8 +328,17 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
         caller_popped_stack
         @ Stack.keep fn_end_state.abs_state.stack fn_end_stack_size
       in
+      let call_stack =
+        match fn_end_state.abs_state.call_stack with
+        | [] -> assert false
+        | _ :: t -> t
+      in
       let abs_state =
-        { fn_state.abs_state with stack; ctx = fn_end_state.abs_state.ctx }
+        { fn_state.abs_state with
+          stack
+        ; ctx = fn_end_state.abs_state.ctx
+        ; call_stack
+        }
       in
       Some { fn_end_state with abs_state }
     | None ->
@@ -585,13 +594,9 @@ let eval_exprs ~env ~(modul : Env.Abstract.modul) abs_state =
   in
   state.abs_state
 
-let modul_with_ctx ~env ~(modul : Env.Abstract.modul) ctx =
+let modul ~env ~(modul : Env.Abstract.modul) =
   let abs_state = Abstract_state.empty () in
-  let abs_state = { abs_state with ctx } in
-  eval_exprs ~env ~modul abs_state
-
-let modul ~(env : Env.Abstract.t) ~(modul : Env.Abstract.modul) =
-  let abs_state = Abstract_state.empty () in
+  let abs_state = { abs_state with ctx = Env.Abstract.get_context ~env } in
   eval_exprs ~env ~modul abs_state
 
 let exec_vfunc_from_outside ~env ~ctx ~stack
@@ -601,9 +606,9 @@ let exec_vfunc_from_outside ~env ~ctx ~stack
     match func with
     | Kind.Wasm func -> (
       let abs_state = { abs_state with stack } in
-      match
-        ConcreteFixpoint.eval_func { abs_state; env } Abstract_stack.empty func
-      with
+      let state : Abstract_interpreter_state.t = { abs_state; env } in
+      let init_state, popped_stack = ConcreteFixpoint.init_func state 0 func in
+      match ConcreteFixpoint.eval_func init_state popped_stack func with
       | Some state -> Ok state.abs_state
       | None -> Fmt.error_msg "failed" )
     | Extern f -> (
