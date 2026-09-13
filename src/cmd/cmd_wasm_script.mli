@@ -6,4 +6,8 @@ val cmd_concrete : files:Fpath.t list -> no_exhaustion:bool -> unit Result.t
 
 val cmd_symbolic : files:Fpath.t list -> no_exhaustion:bool -> unit Result.t
 
-val cmd_abstract : files:Fpath.t list -> no_exhaustion:bool -> unit Result.t
+val cmd_abstract :
+     files:Fpath.t list
+  -> no_exhaustion:bool
+  -> debug_trace:string option
+  -> unit Result.t

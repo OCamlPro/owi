@@ -612,8 +612,8 @@ module Wasm = struct
         and+ no_exhaustion =
           let doc = "no exhaustion tests" in
           Arg.(value & flag & info [ "no-exhaustion" ] ~doc)
-        in
-        Cmd_wasm_script.cmd_abstract ~files ~no_exhaustion
+        and+ debug_trace in
+        Cmd_wasm_script.cmd_abstract ~files ~no_exhaustion ~debug_trace
     end
 
     (* owi wasm script concrete *)
