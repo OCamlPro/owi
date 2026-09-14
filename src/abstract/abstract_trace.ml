@@ -9,35 +9,26 @@ type kind =
   | Join
   | Widen
 
-type state_trace =
-  { stack : string list
-  ; locals : string list
-  ; call_stack : int list
-  ; globals : string list
-  }
-
-type jump_target =
-  { label : string
-  ; states : state_trace list
-  }
-
-type named_state =
-  { name : string
-  ; state : state_trace option
-  }
-
 type event =
   { id : int
   ; instr_id : int
   ; instr : string
   ; context : string option
-  ; state_trace : state_trace option
+      (* Context is mutable so we pretty print the current state directly *)
+  ; state : Abstract_interpreter_state.t option
   ; kind : kind
-  ; jts : jump_target list option
-  ; inputs : named_state list option
+  ; mutable jts : Abstract_jump_map.t
+  ; inputs : (string * Abstract_interpreter_state.t option) list
   ; converged : bool option
   ; warnings : string list
   }
+
+let string_of_kind = function
+  | Block_start -> "block_start"
+  | Block_end -> "block_end"
+  | Step -> "step"
+  | Join -> "join"
+  | Widen -> "widen"
 
 let enabled = ref false
 
@@ -51,68 +42,22 @@ let enable () = enabled := true
 
 let is_enabled () = !enabled
 
-let reset () =
-  events := [];
-  pending_warnings := [];
-  next_id := 0
-
-let string_of_stack ctx stack =
-  List.rev_map (fun v -> Fmt.str "%a" (Abstract_value.pp_with_ctx ctx) v) stack
-
-let string_of_locals ctx locals =
-  Abstract_locals.to_list locals
-  |> List.map (fun (idx, v) ->
-    Fmt.str "%i: %a" idx (Abstract_value.pp_with_ctx ctx) v )
-
-let string_of_globals _ctx _globals = []
-
-let trace_of_state (state : Abstract_state.t) =
-  { stack = string_of_stack state.ctx state.stack
-  ; locals = string_of_locals state.ctx state.locals
-  ; call_stack = state.call_stack
-  ; globals = string_of_globals state.ctx state
-  }
-
-let jump_targets_of_jt (jt : Abstract_jump_map.t) =
-  Abstract_jump_map.to_list jt
-  |> List.map (fun (k, v) ->
-    let label = Fmt.str "%a" Abstract_jump_map.Key.pp k in
-    let states =
-      List.map
-        (fun (istate : Abstract_interpreter_state.t) ->
-          trace_of_state istate.abs_state )
-        v
-    in
-    { label; states } )
-
-let string_of_kind = function
-  | Block_start -> "block_start"
-  | Block_end -> "block_end"
-  | Step -> "step"
-  | Join -> "join"
-  | Widen -> "widen"
-
-let record_step ~kind ~(instr : Binary.instr Annotated.t)
-  ~(inputs : (string * Abstract_state.t option) list option)
-  ~(converged : bool option) ~(state : Abstract_state.t option) =
+let record_step
+  ?(inputs : (string * Abstract_interpreter_state.t option) list = [])
+  ?(converged : bool option = None) kind
+  (state : Abstract_interpreter_state.t option)
+  (instr : Binary.instr Annotated.t) =
   if not !enabled then ()
   else
     let id = !next_id in
     incr next_id;
     let instr_id = instr.uuid in
     let instr = Fmt.str "%a" (Binary.pp_instr ~short:true) instr.raw in
-    let state_trace = Option.map trace_of_state state in
     let context =
       Option.map
-        (fun (state : Abstract_state.t) ->
-          Fmt.str "%a" Abstract_domain.context_pretty state.ctx )
+        (fun (state : Abstract_interpreter_state.t) ->
+          Fmt.str "%a" Abstract_domain.context_pretty state.abs_state.ctx )
         state
-    in
-    let inputs =
-      Option.map
-        (List.map (fun (name, state) ->
-           { name; state = Option.map trace_of_state state } ) )
-        inputs
     in
     let warnings, still_pending =
       List.partition (fun (id, _) -> id = instr_id) !pending_warnings
@@ -122,9 +67,11 @@ let record_step ~kind ~(instr : Binary.instr Annotated.t)
       { id
       ; instr_id
       ; instr
-      ; state_trace
+      ; state
       ; kind
-      ; jts = None
+        (* We record the jts separately as we want to trace the jump targets
+        after the current jump targets has been merged when existing jump targets *)
+      ; jts = Abstract_jump_map.empty
       ; context
       ; inputs
       ; converged
@@ -135,12 +82,7 @@ let record_step ~kind ~(instr : Binary.instr Annotated.t)
 
 let record_jt ~(jt : Abstract_jump_map.t) =
   if not !enabled then ()
-  else
-    match !events with
-    | [] -> assert false
-    | ev :: rest ->
-      let jts = Some (jump_targets_of_jt jt) in
-      events := { ev with jts } :: rest
+  else match !events with [] -> assert false | ev :: _ -> ev.jts <- jt
 
 let record_warning ~instr_id ~message =
   if not !enabled then ()
@@ -152,44 +94,61 @@ let json_of_string_list l : Yojson.Safe.t =
 let json_of_int_list l : Yojson.Safe.t =
   `List (List.rev_map (fun i -> `Int i) l)
 
-let json_of_state_trace (st : state_trace) : Yojson.Safe.t =
-  `Assoc
-    [ ("stack", json_of_string_list st.stack)
-    ; ("locals", json_of_string_list st.locals)
-    ; ("call_stack", json_of_int_list st.call_stack)
-    ; ("globals", json_of_string_list st.globals)
-    ]
+let assoc_of_state (state : Abstract_interpreter_state.t) :
+  (string * Yojson.Safe.t) list =
+  let stack =
+    List.rev_map
+      (fun s ->
+        `String
+          (Fmt.str "%a" (Abstract_value.pp_with_ctx state.abs_state.ctx) s) )
+      state.abs_state.stack
+  in
+  let stack = `List stack in
+  let locals =
+    List.map
+      (fun (idx, value) ->
+        let v =
+          Fmt.str "%a" (Abstract_value.pp_with_ctx state.abs_state.ctx) value
+        in
+        (string_of_int idx, `String v) )
+      (Abstract_locals.to_list state.abs_state.locals)
+  in
+  let locals = `Assoc locals in
+  [ ("stack", stack)
+  ; ("locals", locals)
+  ; ("call_stack", json_of_int_list state.abs_state.call_stack)
+  ; ("globals", `List [])
+  ]
 
-let json_of_jump_target (jt : jump_target) : Yojson.Safe.t =
-  `Assoc
-    [ ("label", `String jt.label)
-    ; ("states", `List (List.map json_of_state_trace jt.states))
-    ]
+let json_of_jump_map (jts : Abstract_jump_map.t) : Yojson.Safe.t =
+  let list =
+    Abstract_jump_map.to_list jts
+    |> List.map (fun (k, states) ->
+      ( Fmt.str "%a" Abstract_jump_map.Key.pp k
+      , `List (List.map (fun s -> `Assoc (assoc_of_state s)) states) ) )
+  in
+  `Assoc list
 
-let json_of_named_state (ns : named_state) : Yojson.Safe.t =
+let json_of_named_state
+  ((name, state) : string * Abstract_interpreter_state.t option) =
   `Assoc
-    [ ("name", `String ns.name)
+    [ ("name", `String name)
     ; ( "state"
-      , match ns.state with
+      , match state with
         | None -> `Null
-        | Some state -> json_of_state_trace state )
+        | Some state -> `Assoc (assoc_of_state state) )
     ]
 
 let json_of_event (ev : event) : Yojson.Safe.t =
   let state_fields =
-    match ev.state_trace with
+    match ev.state with
     | None ->
       [ ("stack", `Null)
       ; ("locals", `Null)
       ; ("call_stack", `Null)
       ; ("globals", `Null)
       ]
-    | Some st ->
-      [ ("stack", json_of_string_list st.stack)
-      ; ("locals", json_of_string_list st.locals)
-      ; ("call_stack", json_of_int_list st.call_stack)
-      ; ("globals", json_of_string_list st.globals)
-      ]
+    | Some st -> assoc_of_state st
   in
   `Assoc
     ( [ ("id", `Int ev.id)
@@ -200,14 +159,8 @@ let json_of_event (ev : event) : Yojson.Safe.t =
         , match ev.context with
           | None -> `Null
           | Some context -> `String context )
-      ; ( "jts"
-        , match ev.jts with
-          | None -> `Null
-          | Some jts -> `List (List.map json_of_jump_target jts) )
-      ; ( "inputs"
-        , match ev.inputs with
-          | None -> `Null
-          | Some inputs -> `List (List.map json_of_named_state inputs) )
+      ; ("jts", json_of_jump_map ev.jts)
+      ; ("inputs", `List (List.map json_of_named_state ev.inputs))
       ; ( "converged"
         , match ev.converged with
           | None -> `Null
