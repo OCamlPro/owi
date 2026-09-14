@@ -2,6 +2,8 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
+exception Abort
+
 module M :
   Wasm_ffi_intf.S0
     with type 'a t := 'a Result.t
@@ -12,13 +14,13 @@ module M :
      and type f64 := Concrete_value.f64
      and type v128 := Concrete_value.v128 = struct
   let assume b =
+    Log.debug (fun m -> m "ASSUME");
     if not @@ Prelude.Int32.equal 0l (Concrete_i32.to_int32 b) then Ok ()
-    else
-      (* TODO: stop current round properly *)
-      raise @@ Failure "TODO"
+    else raise Abort
 
   let assert' n =
-    if Prelude.Int32.equal 0l n then Error (`Msg "I found a bug") else Ok ()
+    Log.debug (fun m -> m "ASSERT");
+    if Prelude.Int32.equal 0l n then Error `Assert_failure else Ok ()
 
   let symbol_invisible_bool () = Ok (if Random.bool () then 1l else 0l)
 
@@ -33,10 +35,13 @@ module M :
   let symbol_v128 () = Ok (Fuzz_gen.v128 ())
 
   let abort () =
-    (* TODO: stop the round properly *)
-    Error (`Msg "abort")
+    Log.debug (fun m -> m "ABORT");
+    raise Abort
 
-  let exit (n : Concrete_value.i32) = exit (Int32.to_int n)
+  let exit (_n : Concrete_value.i32) =
+    (* TODO: handle n as a potential error? *)
+    Log.debug (fun m -> m "EXIT");
+    raise Abort
 
   let symbol_range min max =
     (* TODO: ensure min <= max *)
@@ -50,19 +55,28 @@ module M :
 
   let in_replay_mode () = Ok 0l
 
-  let _make_str_null_terminated _m _accu _i = raise @@ Failure "TODO"
+  let cov_label_is_covered _id =
+    (* TODO: implement properly *)
+    Ok 0l
 
-  let _make_str_of_length _m _accu _i _len = raise @@ Failure "TODO"
+  let cov_label_set _m _id _str_ptr =
+    (* TODO: implement properly *)
+    Ok ()
 
-  let cov_label_is_covered _id = raise @@ Failure "TODO"
+  let open_scope_null_terminated _m _strptr =
+    Log.debug (fun m -> m "OPEN SCOPE (NULL TERMINATED)");
+    (* TODO: implement properly *)
+    Ok ()
 
-  let cov_label_set _m _id _str_ptr = raise @@ Failure "TODO"
+  let open_scope_of_length _m _strptr _length =
+    Log.debug (fun m -> m "OPEN SCOPE (LENGTH)");
+    (* TODO: implement properly *)
+    Ok ()
 
-  let open_scope_null_terminated _m _strptr = raise @@ Failure "TODO"
-
-  let open_scope_of_length _m _strptr _length = raise @@ Failure "TODO"
-
-  let close_scope () = raise @@ Failure "TODO"
+  let close_scope () =
+    Log.debug (fun m -> m "CLOSE SCOPE");
+    (* TODO: implement properly *)
+    Ok ()
 end
 
 let owi =
