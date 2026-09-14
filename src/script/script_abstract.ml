@@ -33,40 +33,55 @@ let run_one ~no_exhaustion:_ (state : Env.Abstract.t Result.t) cmd =
   let* env = state in
   match cmd with
   | Wast.Text_module (false, m) ->
+    Abstract_trace.record_wast_cmd Block_start cmd;
     let* modul, env =
       Compile.Text.until_abstract_link env ~unsafe ~name:None m
     in
     let _state = I.modul_with_ctx ~env ~modul in
+    Abstract_trace.record_wast_cmd Block_end cmd;
     (* TODO: set context in env? Or isn't it necessary as it's supposed to be mutable? *)
     Ok env
   | Assert (Assert_return (action, res)) ->
+    Abstract_trace.record_wast_cmd Block_start cmd;
     let* state = do_action env action in
     let stack = List.rev state.stack in
-    if
-      List.compare_lengths res stack <> 0
-      || not
-           (List.for_all2
-              (Abstract_value.equal_script_result
-                 (Env.Abstract.get_context ~env)
-                 ~ty )
-              res stack )
-    then begin
-      let ctx = Env.Abstract.get_context ~env in
-      Log.err (fun m ->
-        m "got:      %a@;expected: %a"
-          (Fmt.Dump.list (Abstract_value.pp_with_ctx ctx))
-          stack Wast.pp_results res );
-      Error `Bad_result
-    end
-    else Ok env
+    let res =
+      if
+        List.compare_lengths res stack <> 0
+        || not
+           @@ List.for_all2
+                (Abstract_value.equal_script_result
+                   (Env.Abstract.get_context ~env)
+                   ~ty )
+                res stack
+      then begin
+        let ctx = Env.Abstract.get_context ~env in
+        Abstract_trace.record_wast_test_res
+          (Fail
+             { expected = Fmt.to_to_string Wast.pp_results res
+             ; got = Fmt.to_to_string (Abstract_stack.pp ctx) stack
+             } );
+        Log.err (fun m ->
+          m "got:      %a@;expected: %a"
+            (Fmt.Dump.list (Abstract_value.pp_with_ctx ctx))
+            stack Wast.pp_results res );
+        Error `Bad_result
+      end
+      else (
+        Abstract_trace.record_wast_test_res Ok;
+        Ok env )
+    in
+    Abstract_trace.record_wast_cmd Block_end cmd;
+    res
   | Assert assertion ->
     Log.warn (fun m -> m "%a is not handled" Wast.pp_assertion assertion);
     Ok env
   | Register (name, modid) ->
+    Abstract_trace.record_wast_cmd Step cmd;
     let+ env = Env.Abstract.register_module ~env ~name ~modid in
     env
-  | action ->
-    Log.err (fun m -> m "Unhandled command : %a" Wast.pp_cmd action);
+  | cmd ->
+    Log.err (fun m -> m "Unhandled command : %a" Wast.pp_cmd cmd);
     assert false
 
 let run ~no_exhaustion script =

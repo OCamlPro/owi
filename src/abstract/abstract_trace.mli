@@ -9,11 +9,18 @@ type kind =
   | Join
   | Widen
 
+type test_res =
+  | Ok
+  | Fail of
+      { expected : string
+      ; got : string
+      }
+
 val enable : unit -> unit
 
 val is_enabled : unit -> bool
 
-val record_step :
+val record_wasm_step :
      ?inputs:(string * Abstract_interpreter_state.t option) list
   -> ?converged:bool option
   -> kind
@@ -21,8 +28,12 @@ val record_step :
   -> Binary.instr Annotated.t
   -> unit
 
-val record_jt : jt:Abstract_jump_map.t -> unit
+val record_wasm_jt : jm:Abstract_jump_map.t -> unit
 
-val record_warning : instr_id:int -> message:string -> unit
+val record_wasm_warning : instr_id:int -> message:string -> unit
+
+val record_wast_cmd : kind -> Wast.cmd -> unit
+
+val record_wast_test_res : test_res -> unit
 
 val write_json : string -> unit
