@@ -16,7 +16,7 @@ let i32_can_be_zero ctx v =
 let add_divide_by_zero_invariant invariant ~uuid ~possible =
   Abstract_invariant.add_divide_by_zero_invariant invariant ~uuid ~possible;
   if possible then
-    Abstract_trace.record_warning ~instr_id:uuid
+    Abstract_trace.record_wasm_warning ~instr_id:uuid
       ~message:"Possible division by zero"
 
 let eval_i32 env ({ stack; ctx; invariant; _ } as abs_state : Abstract_state.t)
