@@ -20,7 +20,10 @@ let do_action env = function
     let* f = Env.Abstract.get_exported_func ~env ~module_name ~func_name in
     let ctx = Env.Abstract.get_context ~env in
     let stack = List.rev_map (Abstract_value.of_script_const ctx ~ty) args in
-    I.exec_vfunc_from_outside ~ctx ~stack ~env f
+    try I.exec_vfunc_from_outside ~ctx ~stack ~env f
+    with exn ->
+      Fmt.error_msg "%a@\n%a" Fmt.exn exn Fmt.exn_backtrace
+        (exn, Printexc.get_raw_backtrace ())
     end
   | Get (_module_name, _name) ->
     Log.info (fun m -> m "get...");
@@ -185,4 +188,4 @@ let run ~no_exhaustion script =
 
 let exec ~(no_exhaustion : bool) (script : Wast.script) =
   let res = run ~no_exhaustion script in
-  match res with Error _e -> Error (`Msg "script failed!") | Ok _ -> Ok ()
+  match res with Error e -> Error e | Ok _ -> Ok ()
