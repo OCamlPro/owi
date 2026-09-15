@@ -36,12 +36,9 @@ module I :
   sig
     val modul :
       env:Env.Concrete.t ->
-      modul:Env.Concrete.modul -> Env.Concrete.t Owi__Concrete_choice.t
+      modul:Env.Concrete.modul -> Env.Concrete.t Concrete_choice.t
   end
-# let () =
-    match I.modul ~env ~modul with
-    | Ok _env -> ()
-    | Error _ -> assert false;;
+# let to_run = I.modul ~env ~modul
 mdx_gen.bc.exe: [INFO] interpreting ...
 mdx_gen.bc.exe: [INFO] stack         : [  ]
 mdx_gen.bc.exe: [INFO] running instr : call 0 (executed 0 times)
@@ -54,4 +51,9 @@ mdx_gen.bc.exe: [INFO] stack         : [ i32.const 24 ; i32.const 24 ]
 mdx_gen.bc.exe: [INFO] running instr : i32.add (executed 0 times)
 mdx_gen.bc.exe: [INFO] stack         : [ i32.const 48 ]
 mdx_gen.bc.exe: [INFO] running instr : drop (executed 0 times)
+val to_run : Env.Concrete.t Concrete_choice.t = <abstr>
+# let () =
+    match Concrete_choice.run to_run with
+    | Ok _env -> ()
+    | Error _ -> assert false;;
 ```
