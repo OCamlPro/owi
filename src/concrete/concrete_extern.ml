@@ -2,7 +2,8 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-module Func = Extern.Func.Make (Concrete_value) (Result) (Concrete_memory)
+module Func =
+  Extern.Func.Make (Concrete_value) (Concrete_choice) (Concrete_memory)
 
 module Module = struct
   type t = (string * Func.t) list

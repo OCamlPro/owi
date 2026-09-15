@@ -31,6 +31,7 @@ module Cmd_wasm_to_wat = Cmd_wasm_to_wat
 module Cmd_wasm_of_wat = Cmd_wasm_of_wat
 module Cmd_zig_sym = Cmd_zig_sym
 module Compile = Compile
+module Concrete_choice = Concrete_choice
 module Concrete_extern = Concrete_extern
 module Concrete_boolean = Concrete_boolean
 module Concrete_memory = Concrete_memory

@@ -38,7 +38,8 @@ let cmd ~entry_point ~rounds ~seed ~source_file ~timeout ~timeout_instr ~unsafe
       (* TODO: for now we have to regenerate the environment on each round because the concrete environment still is mutable, this should be avoided in the future *)
       let* env = Env.Concrete.link_binary_module ~env ~name:None ~modul in
       let* modul = Env.Concrete.get_last_module ~env in
-      let* _env = I.modul ~env ~modul in
+      let to_run = I.modul ~env ~modul in
+      let* _env = Concrete_choice.run to_run in
       Ok () )
   in
   Log.bench (fun m ->

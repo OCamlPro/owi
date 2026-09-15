@@ -22,14 +22,14 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
 
   let module M :
     Wasm_ffi_intf.S0
-      with type 'a t := 'a Result.t
+      with type 'a t := 'a Concrete_choice.t
        and type memory := Concrete_memory.t
        and type i32 := Concrete_value.i32
        and type i64 := Concrete_value.i64
        and type f32 := Concrete_value.f32
        and type f64 := Concrete_value.f64
        and type v128 := Concrete_value.v128 = struct
-    let assume _ = Ok ()
+    let assume _ = Concrete_choice.return ()
 
     let assert' n =
       if Prelude.Int32.equal n 0l then begin
@@ -37,16 +37,16 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
         Log.app (fun m -> m "Assertion failure was correctly reached!");
         exit 0
       end;
-      Ok ()
+      Concrete_choice.return ()
 
-    let symbol_invisible_bool () = Ok 0l
+    let symbol_invisible_bool () = Concrete_choice.return 0l
 
     let symbol_i32 () =
       let i = next () in
       match model.(i) with
       | Concrete_value.I32 n ->
         add_sym i;
-        Ok n
+        Concrete_choice.return n
       | v ->
         Log.err (fun m ->
           m "Got value %a but expected a i32 value." Concrete_value.pp v );
@@ -57,7 +57,7 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
       match model.(i) with
       | Concrete_value.I64 n ->
         add_sym i;
-        Ok n
+        Concrete_choice.return n
       | v ->
         Log.err (fun m ->
           m "Got value %a but expected a i64 value." Concrete_value.pp v );
@@ -68,7 +68,7 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
       match model.(i) with
       | Concrete_value.F32 n ->
         add_sym i;
-        Ok n
+        Concrete_choice.return n
       | v ->
         Log.err (fun m ->
           m "Got value %a but expected a f32 value." Concrete_value.pp v );
@@ -79,7 +79,7 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
       match model.(i) with
       | Concrete_value.F64 n ->
         add_sym i;
-        Ok n
+        Concrete_choice.return n
       | v ->
         Log.err (fun m ->
           m "Got value %a but expected a f64 value." Concrete_value.pp v );
@@ -90,7 +90,7 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
       match model.(i) with
       | Concrete_value.V128 n ->
         add_sym i;
-        Ok n
+        Concrete_choice.return n
       | v ->
         Log.err (fun m ->
           m "Got value %a but expected a v128 value." Concrete_value.pp v );
@@ -107,7 +107,7 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
       match model.(i) with
       | Concrete_value.I32 n ->
         add_sym i;
-        Ok n
+        Concrete_choice.return n
       | v ->
         Log.err (fun m ->
           m "Got value %a but expected a i32 value." Concrete_value.pp v );
@@ -115,9 +115,9 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
 
     let print_char c =
       Log.app (fun m -> m "%c" (char_of_int (Int32.to_int c)));
-      Ok ()
+      Concrete_choice.return ()
 
-    let in_replay_mode () = Ok 1l
+    let in_replay_mode () = Concrete_choice.return 1l
 
     let rec make_str_null_terminated m accu i =
       let open Concrete_choice in
@@ -141,17 +141,20 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
       if Hashtbl.mem covered_labels id then 1l else 0l
 
     let cov_label_set m id str_ptr =
+      let open Concrete_choice in
       let+ chars = make_str_null_terminated m [] str_ptr in
       let str = String.init (Array.length chars) (Array.get chars) in
       Hashtbl.add covered_labels id str;
       Log.debug (fun m -> m "reached %ld@." id)
 
     let open_scope_null_terminated m strptr =
+      let open Concrete_choice in
       let+ chars = make_str_null_terminated m [] strptr in
       let str = String.init (Array.length chars) (Array.get chars) in
       scopes := Symbol_scope.open_scope str !scopes
 
     let open_scope_of_length m strptr length =
+      let open Concrete_choice in
       let+ chars = make_str_of_length m [] strptr length in
       let str = String.init (Array.length chars) (Array.get chars) in
       scopes := Symbol_scope.open_scope str !scopes
@@ -247,7 +250,8 @@ let cmd ~unsafe ~replay_file ~source_file ~entry_point ~invoke_with_symbols =
   let module I = Interpret.Concrete (Interpret.Default_parameters) in
   let r, run_time =
     Benchmark.with_utime @@ fun () ->
-    let* _env = I.modul ~env ~modul in
+    let to_run = I.modul ~env ~modul in
+    let* _env = Concrete_choice.run to_run in
     Ok ()
   in
   Log.bench (fun m ->

@@ -17,9 +17,12 @@ let action (env : Env.Concrete.t) = function
       m "invoke %a %s %a..."
         (Fmt.option ~none:Fmt.nop Fmt.string)
         module_name func_name Wast.pp_consts args );
-    let* f = Env.Concrete.get_exported_func ~env ~module_name ~func_name in
-    let locals = List.rev_map (Concrete_value.of_script_const ~ty) args in
-    let* env, stack = I.exec_vfunc_from_outside ~env ~locals f in
+    let* env, stack =
+      let* f = Env.Concrete.get_exported_func ~env ~module_name ~func_name in
+      let locals = List.rev_map (Concrete_value.of_script_const ~ty) args in
+      let to_run = I.exec_vfunc_from_outside ~env ~locals f in
+      Concrete_choice.run to_run
+    in
     Ok (env, stack)
     end
   | Get (module_name, global_name) ->
@@ -51,7 +54,8 @@ let run ~no_exhaustion script =
         let* modul, env =
           Compile.Text.until_concrete_link env ~unsafe ~name:None modul
         in
-        I.modul ~env ~modul
+        let to_run = I.modul ~env ~modul in
+        Concrete_choice.run to_run
       | Wast.Quoted_module (false, modul) ->
         Log.info (fun m -> m "*** quoted module");
         incr curr_module;
@@ -59,7 +63,8 @@ let run ~no_exhaustion script =
         let* modul, env =
           Compile.Text.until_concrete_link env ~unsafe ~name:None modul
         in
-        I.modul ~env ~modul
+        let to_run = I.modul ~env ~modul in
+        Concrete_choice.run to_run
       | Wast.Binary_module (false, id, modul) ->
         Log.info (fun m -> m "*** binary module");
         incr curr_module;
@@ -68,14 +73,18 @@ let run ~no_exhaustion script =
         let* modul, env =
           Compile.Binary.until_concrete_link env ~unsafe ~name:None modul
         in
-        I.modul ~env ~modul
+        let to_run = I.modul ~env ~modul in
+        Concrete_choice.run to_run
       | Assert (Assert_trap_module (modul, expected)) ->
         Log.info (fun m -> m "*** assert_trap");
         incr curr_module;
         let* modul, env =
           Compile.Text.until_concrete_link env ~unsafe ~name:None modul
         in
-        let got = I.modul ~env ~modul in
+        let got =
+          let to_run = I.modul ~env ~modul in
+          Concrete_choice.run to_run
+        in
         let+ () = Script_error.check_result ~expected ~got in
         (* TODO: this is wrong! we should get back the env after running modul? *)
         env
