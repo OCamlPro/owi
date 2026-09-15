@@ -25,12 +25,13 @@ let do_action env = function
       Fmt.error_msg "%a@\n%a" Fmt.exn exn Fmt.exn_backtrace
         (exn, Printexc.get_raw_backtrace ())
     end
-  | Get (_module_name, _name) ->
+  | Get (module_name, global_name) ->
     Log.info (fun m -> m "get...");
+    let+ _global =
+      Env.Abstract.get_exported_global ~env ~module_name ~global_name
+    in
+    (* (env, [ global ]) *)
     assert false
-(* let* global = Link.get_global_from_module env mod_id name in *)
-(* let v = Abstract_value.of_concrete ctx global.value in *)
-(* Ok [ v ] *)
 
 let run_one ~no_exhaustion:_ (state : Env.Abstract.t Result.t) cmd =
   let* env = state in
@@ -121,6 +122,7 @@ let run_one ~no_exhaustion:_ (state : Env.Abstract.t Result.t) cmd =
     let+ () = Script_error.check_result ~expected ~got in
     assert false
   | Assert (Assert_return (action, res)) ->
+    Log.info (fun m -> m "*** assert_return");
     Abstract_trace.record_wast_cmd Block_start cmd;
     let* state = do_action env action in
     let stack = List.rev state.stack in
