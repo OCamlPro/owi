@@ -310,7 +310,8 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
     in
     loop state JumpMap.empty expr.raw
 
-  and eval_func (fn_state : Abstract_interpreter_state.t) caller_popped_stack
+  and eval_func (old_state : Abstract_interpreter_state.t)
+    (fn_state : Abstract_interpreter_state.t) caller_popped_stack
     (func : Binary.Func.t) =
     let fn_end_state, jt = eval_expr fn_state func.body in
     (* The stack given to the function is empty so the returned stack should only contain the results *)
@@ -336,6 +337,7 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
       let abs_state =
         { fn_state.abs_state with
           stack
+        ; locals = old_state.abs_state.locals
         ; ctx = fn_end_state.abs_state.ctx
         ; call_stack
         }
@@ -371,7 +373,7 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
           m "calling func  : func %s"
             (Option.value func.id ~default:"anonymous") );
         Trace.record_wasm_step Block_start (Some fn_state) instr;
-        let res = eval_func fn_state caller_popped_stack func in
+        let res = eval_func state fn_state caller_popped_stack func in
         Trace.record_wasm_step Block_end res instr;
         (res, JumpMap.empty)
       | Extern func ->
@@ -612,10 +614,13 @@ let exec_vfunc_from_outside ~env ~ctx ~stack
   try
     match func with
     | Kind.Wasm func -> (
-      let abs_state = { abs_state with stack } in
+      let locals =
+        Abstract_locals.of_list (List.mapi (fun i v -> (i, v)) stack)
+      in
+      let abs_state = { abs_state with stack; locals } in
       let state : Abstract_interpreter_state.t = { abs_state; env } in
       let init_state, popped_stack = ConcreteFixpoint.init_func state 0 func in
-      match ConcreteFixpoint.eval_func init_state popped_stack func with
+      match ConcreteFixpoint.eval_func state init_state popped_stack func with
       | Some state -> Ok state.abs_state
       | None -> Fmt.error_msg "failed" )
     | Extern f -> (
