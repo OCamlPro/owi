@@ -252,8 +252,31 @@ let exec_extern_func ({ stack; _ } : Abstract_state.t)
     push_val t1 v1 stack |> push_val t2 v2 |> push_val t3 v3 |> push_val t4 v4
 
 module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
-  let init_func ({ abs_state; _ } as state : Abstract_interpreter_state.t) idx
-    (func : Binary.Func.t) : Abstract_interpreter_state.t * Value.t list =
+  let rec eval_expr :
+       Abstract_interpreter_state.t
+    -> Binary.expr Annotated.t
+    -> Abstract_interpreter_state.t option * JumpMap.t =
+   fun state expr ->
+    let rec loop (state : Abstract_interpreter_state.t) jt (expr : Binary.expr)
+        =
+      match expr with
+      | [] -> (Some state, jt)
+      | instr :: instrs -> (
+        let new_state, new_jt = eval_instr state instr in
+        let new_jt = JumpMap.append jt new_jt in
+        Trace.record_wasm_jt ~jm:new_jt;
+        Log.debug (fun m ->
+          m "jt after (%a) :  %a"
+            (Binary.pp_instr ~short:true)
+            instr.raw JumpMap.pp new_jt );
+        match new_state with
+        | None -> (None, new_jt)
+        | Some state -> loop state new_jt instrs )
+    in
+    loop state JumpMap.empty expr.raw
+
+  and eval_func ({ abs_state; _ } as state : Abstract_interpreter_state.t) idx
+    (func : Binary.Func.t) instr : Abstract_interpreter_state.t option =
     let nb_recursive_calls =
       List.fold_left
         (fun acc call_frame -> acc + if call_frame = idx then 1 else 0)
@@ -285,35 +308,12 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
     let fn_abs_state =
       { abs_state with stack = []; func_rt = result_type; locals; call_stack }
     in
-    ({ abs_state = fn_abs_state; env = state.env }, caller_popped_stack)
-
-  let rec eval_expr :
-       Abstract_interpreter_state.t
-    -> Binary.expr Annotated.t
-    -> Abstract_interpreter_state.t option * JumpMap.t =
-   fun state expr ->
-    let rec loop (state : Abstract_interpreter_state.t) jt (expr : Binary.expr)
-        =
-      match expr with
-      | [] -> (Some state, jt)
-      | instr :: instrs -> (
-        let new_state, new_jt = eval_instr state instr in
-        let new_jt = JumpMap.append jt new_jt in
-        Trace.record_wasm_jt ~jm:new_jt;
-        Log.debug (fun m ->
-          m "jt after (%a) :  %a"
-            (Binary.pp_instr ~short:true)
-            instr.raw JumpMap.pp new_jt );
-        match new_state with
-        | None -> (None, new_jt)
-        | Some state -> loop state new_jt instrs )
+    let fn_state : Abstract_interpreter_state.t =
+      { abs_state = fn_abs_state; env = state.env }
     in
-    loop state JumpMap.empty expr.raw
-
-  and eval_func (old_state : Abstract_interpreter_state.t)
-    (fn_state : Abstract_interpreter_state.t) caller_popped_stack
-    (func : Binary.Func.t) =
+    Trace.record_wasm_step Block_start (Some fn_state) instr;
     let fn_end_state, jt = eval_expr fn_state func.body in
+    Trace.record_wasm_step Block_end fn_end_state instr;
     (* The stack given to the function is empty so the returned stack should only contain the results *)
     let fn_end_stack_size = List.length fn_state.abs_state.func_rt in
     let jumps_ret = join_jts fn_end_stack_size (JumpMap.find_opt Ret jt) in
@@ -337,7 +337,7 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
       let abs_state =
         { fn_state.abs_state with
           stack
-        ; locals = old_state.abs_state.locals
+        ; locals = abs_state.locals
         ; ctx = fn_end_state.abs_state.ctx
         ; call_stack
         }
@@ -368,13 +368,10 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
       let func = Env.Abstract.get_func ~env call_idx in
       begin match func with
       | Wasm func ->
-        let fn_state, caller_popped_stack = init_func state call_idx func in
         Log.info (fun m ->
           m "calling func  : func %s"
             (Option.value func.id ~default:"anonymous") );
-        Trace.record_wasm_step Block_start (Some fn_state) instr;
-        let res = eval_func state fn_state caller_popped_stack func in
-        Trace.record_wasm_step Block_end res instr;
+        let res = eval_func state call_idx func instr in
         (res, JumpMap.empty)
       | Extern func ->
         let stack = exec_extern_func abs_state func in
@@ -619,8 +616,8 @@ let exec_vfunc_from_outside ~env ~ctx ~stack
       in
       let abs_state = { abs_state with stack; locals } in
       let state : Abstract_interpreter_state.t = { abs_state; env } in
-      let init_state, popped_stack = ConcreteFixpoint.init_func state 0 func in
-      match ConcreteFixpoint.eval_func state init_state popped_stack func with
+      let fake_instr = Annotated.dummy (Binary.Call 0) in
+      match ConcreteFixpoint.eval_func state 0 func fake_instr with
       | Some state -> Ok state.abs_state
       | None -> Fmt.error_msg "failed" )
     | Extern f -> (
