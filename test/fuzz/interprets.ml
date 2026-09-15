@@ -41,7 +41,10 @@ module Owi_regular : INTERPRET = struct
     in
     let module I = Owi.Interpret.Concrete (Owi.Interpret.Default_parameters) in
     timeout_call_run (fun () ->
-      match I.modul ~env ~modul with Ok _env -> Ok () | Error _ as e -> e )
+      let to_run = I.modul ~env ~modul in
+      match Owi.Concrete_choice.run to_run with
+      | Ok _env -> Ok ()
+      | Error _ as e -> e )
 
   let name = "owi_concrete"
 end
