@@ -284,6 +284,12 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
     in
     if nb_recursive_calls > max_recursive_calls then raise RecursiveFunctionCall;
     let (None | Some _), (param_type, result_type) = func.type_f in
+    Log.debug (fun m ->
+      m "params: %a, result: %a"
+        Fmt.(list ~sep:comma Binary.pp_val_type)
+        (List.map (fun (_, vt) -> vt) param_type)
+        Fmt.(list ~sep:comma Binary.pp_val_type)
+        result_type );
     let args, caller_popped_stack =
       Stack.pop_n abs_state.stack (List.length param_type)
     in
@@ -470,38 +476,43 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
       in
       let rec fixpoint state =
         let next_state, jt = eval_expr state body in
-        let next_state =
+        let widening_state =
           match join_jts stack_size (JumpMap.find_opt (I 0) jt) with
           | Some state -> Some state
           | None ->
             (* TODO: handle return too! *)
-            begin match next_state with
-            | Some state ->
-              let stack = Stack.keep stack stack_size in
-              let abs_state = { state.abs_state with stack } in
-              Some { state with abs_state }
-            | None -> None
-            end
+            Option.map
+              (fun (state : Abstract_interpreter_state.t) ->
+                let stack = Stack.keep state.abs_state.stack stack_size in
+                let abs_state = { state.abs_state with stack } in
+                { state with abs_state } )
+              next_state
         in
-        match next_state with
+        match widening_state with
         | None ->
           let jt = JumpMap.decr jt in
           (None, jt)
-        | Some next_state ->
-          let widened, included = widen widening_id state next_state in
+        | Some widening_state ->
+          let widened, included = widen widening_id state widening_state in
           Trace.record_wasm_step Widen None instr
-            ~inputs:[ ("previous", Some state); ("next", Some next_state) ]
+            ~inputs:[ ("previous", Some state); ("next", Some widening_state) ]
             ~converged:(Some included);
           if not included then fixpoint widened
           else
-            (* fixpoint reached: exit loop *)
+            (* fixpoint reached: exit loop. We don't reuse the widened state
+              as it has been shortened to the params size and not the result size *)
             let jt = JumpMap.decr jt in
-            let stack = next_state.abs_state.stack @ initial_state.stack in
-            let abs_state = { next_state.abs_state with stack } in
-            Log.info (fun m ->
-              m "%a" Abstract_interpreter_state.pp { next_state with abs_state } );
-            let next_state = Some { next_state with abs_state } in
-            (next_state, jt)
+            let exit_state =
+              Option.map
+                (fun (exit_state : Abstract_interpreter_state.t) ->
+                  let stack =
+                    exit_state.abs_state.stack @ initial_state.stack
+                  in
+                  let abs_state = { exit_state.abs_state with stack } in
+                  { exit_state with abs_state } )
+                next_state
+            in
+            (exit_state, jt)
       in
       let widened_state, jts = fixpoint state in
       Trace.record_wasm_step Block_end widened_state instr;
