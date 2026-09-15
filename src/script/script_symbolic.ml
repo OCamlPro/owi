@@ -13,7 +13,7 @@ open Syntax
 
 let run_monad ~to_run =
   let thread = Thread.init () in
-  match Symex.Monad.run to_run thread with
+  match Symbolic_choice.run to_run thread with
   | Ok (v, _monadic_state) -> Ok v
   | Error (`Trap t) -> Error t.Bug.err
   | Error _ -> Fmt.error_msg "unexpected error from the symbolic monad"
