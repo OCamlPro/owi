@@ -87,6 +87,17 @@ let add_sub_type ~name ~sub_type ~declared_types ~named_types ~field_names =
     Dynarray.add_last declared_types sub_type;
     Ok ()
 
+let check_val_type_index max_type_id = function
+  | Text.Ref_type (_, TypeUse (Text.Raw i)) when i >= max_type_id ->
+    Error (`Unknown_type (Text.Raw i))
+  | _ -> Ok ()
+
+let check_func_type_index max_type_id ((params, results) : Text.func_type) =
+  let* () =
+    list_iter (fun (_, vt) -> check_val_type_index max_type_id vt) params
+  in
+  list_iter (check_val_type_index max_type_id) results
+
 let assign_types (typ : Text.Typedef.t array) decl_types :
   ( Text.sub_type Array.t
   * (string, int) Hashtbl.t
@@ -119,20 +130,25 @@ let assign_types (typ : Text.Typedef.t array) decl_types :
             members )
       typ
   in
-  Array.iter
-    (fun func_type ->
-      match Typetbl.find_opt all_func_types func_type with
-      | Some _id -> ()
-      | None ->
-        let id = Dynarray.length declared_types in
-        let sub_type =
-          { Text.final = true; ids = []; ct = Text.Def_func_t func_type }
-        in
-        Dynarray.add_last declared_types sub_type;
-        Typetbl.add all_func_types func_type id )
-    decl_types;
+  let n = Dynarray.length declared_types in
+  let+ () =
+    array_iter
+      (fun func_type ->
+        match Typetbl.find_opt all_func_types func_type with
+        | Some _id -> Ok ()
+        | None ->
+          let* () = check_func_type_index n func_type in
+          let id = Dynarray.length declared_types in
+          let sub_type =
+            { Text.final = true; ids = []; ct = Text.Def_func_t func_type }
+          in
+          Dynarray.add_last declared_types sub_type;
+          Typetbl.add all_func_types func_type id;
+          Ok () )
+      decl_types
+  in
   (* decl_types contains implicitly declared function types *)
-  Ok (Dynarray.to_array declared_types, named_types, field_names)
+  (Dynarray.to_array declared_types, named_types, field_names)
 
 let get_origin_name (get_name : 'a -> string option) (elt : ('a, 'b) Origin.t) :
   string option =
