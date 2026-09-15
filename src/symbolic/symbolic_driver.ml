@@ -66,7 +66,7 @@ let run ~exploration_strategy ~workers ~no_worker_isolation ~no_stop_at_failure
   in
   let sched = Scheduler.make () in
   let thread = Thread.init () in
-  let initial_task = fun () -> Symex.Monad.run to_run thread in
+  let initial_task = fun () -> Symbolic_choice.run to_run thread in
 
   Scheduler.push initial_task Prio.dummy sched;
 

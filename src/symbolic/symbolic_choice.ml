@@ -253,3 +253,5 @@ let ite (c : Symbolic_boolean.t) ~(if_true : Symbolic_value.t)
     let+ b = select c ~instr_counter_true:None ~instr_counter_false:None in
     if b then if_true else if_false
   | _, _ -> assert false
+
+let run v = Symex.Monad.run v

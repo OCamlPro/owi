@@ -4,8 +4,7 @@
 
 include
   Choice_intf.S
-    with type 'a t = ('a, Bug.t, Prio.metrics, Thread.t) Symex.Monad.t
-     and type boolean := Symbolic_boolean.t
+    with type boolean := Symbolic_boolean.t
      and type i32 := Symbolic_i32.t
      and type value := Symbolic_value.t
 
@@ -26,3 +25,8 @@ val add_label : int * string -> unit t
 val open_scope : string -> unit t
 
 val close_scope : unit t
+
+val run :
+     'a t
+  -> Thread.t
+  -> ('a, Bug.t, Prio.metrics, Thread.t) Symex.Monad.schedulable
