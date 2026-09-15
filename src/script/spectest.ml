@@ -3,38 +3,39 @@
 (* Written by the Owi programmers *)
 
 let extern_m =
-  let open Syntax in
-  let print () = Ok () in
+  let print () = Concrete_choice.return () in
   let print_i32 i =
     Fmt.pr "%li@\n%!" i;
-    Ok ()
+    Concrete_choice.return ()
   in
   let print_i64 i =
     Fmt.pr "%Li@\n%!" i;
-    Ok ()
+    Concrete_choice.return ()
   in
   let print_f32 f =
     Fmt.pr "%a@\n%!" Float32.pp f;
-    Ok ()
+    Concrete_choice.return ()
   in
   let print_f64 f =
     Fmt.pr "%a@\n%!" Float64.pp f;
-    Ok ()
+    Concrete_choice.return ()
   in
   let print_i32_f32 i f =
+    let open Concrete_choice in
     let* () = print_i32 i in
     let* () = print_f32 f in
-    Ok ()
+    return ()
   in
   let print_f64_f64 f1 f2 =
+    let open Concrete_choice in
     let* () = print_f64 f1 in
     let* () = print_f64 f2 in
-    Ok ()
+    return ()
   in
-  let func () = Ok () in
-  let func_in_i32 (_i : int32) = Ok () in
-  let func_out_i32 () = Ok 1l in
-  let func_in_i32_out_i32 (_i : int32) = Ok 1l in
+  let func () = Concrete_choice.return () in
+  let func_in_i32 (_i : int32) = Concrete_choice.return () in
+  let func_out_i32 () = Concrete_choice.return 1l in
+  let func_in_i32_out_i32 (_i : int32) = Concrete_choice.return 1l in
   let open Concrete_extern.Func in
   let open Concrete_extern.Func.Syntax in
   [ ("print", Extern_func (unit ^->. unit, print))

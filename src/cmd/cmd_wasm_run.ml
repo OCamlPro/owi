@@ -24,7 +24,8 @@ let cmd ~unsafe ~timeout ~timeout_instr ~source_file =
   let module I = Interpret.Concrete (Parameters) in
   let res, run_time =
     Benchmark.with_utime @@ fun () ->
-    let* _env = I.modul ~env ~modul in
+    let to_run = I.modul ~env ~modul in
+    let* _env = Concrete_choice.run to_run in
     Ok ()
   in
   Log.bench (fun m ->

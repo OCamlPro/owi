@@ -117,6 +117,16 @@ module Annotated : sig
   val raw : 'a t -> 'a
 end
 
+module Concrete_choice : sig
+  type 'a t
+
+  val return : 'a -> 'a t
+
+  val run : 'a t -> 'a Result.t
+
+  val trap : Result.err -> _ t
+end
+
 module Concrete_boolean : sig
   type t
 
@@ -1608,7 +1618,8 @@ end
 module Concrete_memory : sig
   type t
 
-  val store_8 : t -> addr:Concrete_i32.t -> Concrete_i32.t -> t Result.t
+  val store_8 :
+    t -> addr:Concrete_i32.t -> Concrete_i32.t -> t Concrete_choice.t
 end
 
 module Concrete_extern : sig
@@ -1631,17 +1642,19 @@ module Concrete_extern : sig
       val ( ^-> ) : ('r, 'k, 'a) t -> 'b func_type -> ('a -> 'b) func_type
 
       val ( ^->. ) :
-        ('r, 'k, 'a) t -> (lr, 'kk, 'b) t -> ('a -> 'b Result.t) func_type
+           ('r, 'k, 'a) t
+        -> (lr, 'kk, 'b) t
+        -> ('a -> 'b Concrete_choice.t) func_type
 
       val ( ^->.. ) :
            ('ll, 'k, 'a) t
         -> (lr, elt, 'b1) t * (lr, elt, 'b2) t
-        -> ('a -> ('b1 * 'b2) Result.t) func_type
+        -> ('a -> ('b1 * 'b2) Concrete_choice.t) func_type
 
       val ( ^->... ) :
            ('ll, 'k, 'a) t
         -> (lr, elt, 'b1) t * (lr, elt, 'b2) t * (lr, elt, 'b3) t
-        -> ('a -> ('b1 * 'b2 * 'b3) Result.t) func_type
+        -> ('a -> ('b1 * 'b2 * 'b3) Concrete_choice.t) func_type
 
       val ( ^->.... ) :
            ('ll, 'k, 'a) t
@@ -1649,7 +1662,7 @@ module Concrete_extern : sig
            * (lr, elt, 'b2) t
            * (lr, elt, 'b3) t
            * (lr, elt, 'b4) t
-        -> ('a -> ('b1 * 'b2 * 'b3 * 'b4) Result.t) func_type
+        -> ('a -> ('b1 * 'b2 * 'b3 * 'b4) Concrete_choice.t) func_type
 
       val i32 : (lr, elt, Concrete_i32.t) t
 

@@ -6,7 +6,7 @@ exception Abort
 
 module M :
   Wasm_ffi_intf.S0
-    with type 'a t := 'a Result.t
+    with type 'a t := 'a Concrete_choice.t
      and type memory := Concrete_memory.t
      and type i32 := Concrete_value.i32
      and type i64 := Concrete_value.i64
@@ -15,24 +15,27 @@ module M :
      and type v128 := Concrete_value.v128 = struct
   let assume b =
     Log.debug (fun m -> m "ASSUME");
-    if not @@ Prelude.Int32.equal 0l (Concrete_i32.to_int32 b) then Ok ()
+    if not @@ Prelude.Int32.equal 0l (Concrete_i32.to_int32 b) then
+      Concrete_choice.return ()
     else raise Abort
 
   let assert' n =
     Log.debug (fun m -> m "ASSERT");
-    if Prelude.Int32.equal 0l n then Error `Assert_failure else Ok ()
+    if Prelude.Int32.equal 0l n then Concrete_choice.trap `Assert_failure
+    else Concrete_choice.return ()
 
-  let symbol_invisible_bool () = Ok (if Random.bool () then 1l else 0l)
+  let symbol_invisible_bool () =
+    Concrete_choice.return (if Random.bool () then 1l else 0l)
 
-  let symbol_i32 () = Ok (Fuzz_gen.i32 ())
+  let symbol_i32 () = Concrete_choice.return (Fuzz_gen.i32 ())
 
-  let symbol_i64 () = Ok (Fuzz_gen.i64 ())
+  let symbol_i64 () = Concrete_choice.return (Fuzz_gen.i64 ())
 
-  let symbol_f32 () = Ok (Fuzz_gen.f32 ())
+  let symbol_f32 () = Concrete_choice.return (Fuzz_gen.f32 ())
 
-  let symbol_f64 () = Ok (Fuzz_gen.f64 ())
+  let symbol_f64 () = Concrete_choice.return (Fuzz_gen.f64 ())
 
-  let symbol_v128 () = Ok (Fuzz_gen.v128 ())
+  let symbol_v128 () = Concrete_choice.return (Fuzz_gen.v128 ())
 
   let abort () =
     Log.debug (fun m -> m "ABORT");
@@ -47,36 +50,36 @@ module M :
     (* TODO: ensure min <= max *)
     let n = Random.int32_in_range ~min ~max in
     Fuzz_state.model := Concrete_value.I32 n :: !Fuzz_state.model;
-    Ok n
+    Concrete_choice.return n
 
   let print_char c =
     Log.app (fun m -> m "%c" (char_of_int (Int32.to_int c)));
-    Ok ()
+    Concrete_choice.return ()
 
-  let in_replay_mode () = Ok 0l
+  let in_replay_mode () = Concrete_choice.return 0l
 
   let cov_label_is_covered _id =
     (* TODO: implement properly *)
-    Ok 0l
+    Concrete_choice.return 0l
 
   let cov_label_set _m _id _str_ptr =
     (* TODO: implement properly *)
-    Ok ()
+    Concrete_choice.return ()
 
   let open_scope_null_terminated _m _strptr =
     Log.debug (fun m -> m "OPEN SCOPE (NULL TERMINATED)");
     (* TODO: implement properly *)
-    Ok ()
+    Concrete_choice.return ()
 
   let open_scope_of_length _m _strptr _length =
     Log.debug (fun m -> m "OPEN SCOPE (LENGTH)");
     (* TODO: implement properly *)
-    Ok ()
+    Concrete_choice.return ()
 
   let close_scope () =
     Log.debug (fun m -> m "CLOSE SCOPE");
     (* TODO: implement properly *)
-    Ok ()
+    Concrete_choice.return ()
 end
 
 let owi =
