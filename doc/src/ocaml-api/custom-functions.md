@@ -50,15 +50,15 @@ open Owi
 let extern_module : Concrete_extern.Module.t =
   (* some custom functions *)
   let rint : Concrete_i32.t ref Type.Id.t = Type.Id.make () in
-  let fresh i = Ok (ref i) in
+  let fresh i = Concrete_choice.return (ref i) in
   let set r (i : Concrete_i32.t) =
     r := i;
-    Ok ()
+    Concrete_choice.return ()
   in
-  let get r = Ok !r in
+  let get r = Concrete_choice.return !r in
   let print_i32 (i : Concrete_i32.t) =
     Format.printf "%a\n%!" Concrete_i32.pp i;
-    Ok ()
+    Concrete_choice.return ()
   in
   (* we need to describe their types *)
   let open Concrete_extern.Func in
@@ -86,9 +86,13 @@ let modul, env =
 
 module I = Interpret.Concrete (Interpret.Default_parameters)
 
+let to_run = I.modul ~env ~modul
+
 (* let's run it ! it will print the values as defined in the print_i32 function *)
 let () =
-  match I.modul ~env ~modul with Error _o -> assert false | Ok _env -> ()
+  match Concrete_choice.run to_run with
+  | Error _o -> assert false
+  | Ok _env -> ()
 ```
 
 You'll get the expected result:
@@ -161,24 +165,25 @@ open Owi
 (* an extern module that will be linked with a wasm module *)
 let extern_module : Concrete_extern.Module.t =
   (* some custom functions *)
-  let memset m start byte length =
-    let rec loop offset =
+  let memset m start byte length : _ Concrete_choice.t =
+    let rec loop offset : _ Concrete_choice.t =
       let b = Concrete_i32.le offset length |> Concrete_boolean.to_bool in
       if b then
-        begin match
+        let to_run =
           Concrete_memory.store_8 m ~addr:(Concrete_i32.add start offset) byte
-        with
-        | Error _ as e -> e
+        in
+        begin match Concrete_choice.run to_run with
+        | Error e -> Concrete_choice.trap e
         | Ok _mem -> loop (Concrete_i32.add offset (Concrete_i32.of_int 1))
         end
-      else Ok ()
+      else Concrete_choice.return ()
     in
     loop Concrete_i32.zero
   in
   let print_x64 (n : Concrete_i64.t) =
     let n = Concrete_i64.to_int64 n in
     Format.printf "0x%LX@\n" n;
-    Ok ()
+    Concrete_choice.return ()
   in
   (* we need to describe their types *)
   let open Concrete_extern.Func in
@@ -211,8 +216,12 @@ let modul, env =
 module I = Interpret.Concrete (Interpret.Default_parameters)
 
 (* let's run it ! it will print the values as defined in the print_i64 function *)
+let to_run = I.modul ~env ~modul
+
 let () =
-  match I.modul ~env ~modul with Error _ -> assert false | Ok _env -> ()
+  match Concrete_choice.run to_run with
+  | Error _ -> assert false
+  | Ok _env -> ()
 ```
 
 Running the above program should yield:
