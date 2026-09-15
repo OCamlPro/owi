@@ -10,13 +10,17 @@ NAME
        the abstract interpreter.
 
 SYNOPSIS
-       owi wasm script abstract [--no-exhaustion] [OPTION]… FILE…
+       owi wasm script abstract [--debug-trace=FILE] [--no-exhaustion]
+       [OPTION]… FILE…
 
 ARGUMENTS
        FILE (required)
            source files
 
 OPTIONS
+       --debug-trace=FILE
+           output debug traces to use with the debug GUI
+
        --no-exhaustion
            no exhaustion tests
 
