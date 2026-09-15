@@ -7,7 +7,7 @@ module JumpMap = Abstract_jump_map
 module Value = Abstract_value
 module Trace = Abstract_trace
 
-let max_recursive_calls = 100
+let max_recursive_calls = 10
 
 exception RecursiveFunctionCall
 
@@ -102,9 +102,9 @@ let serialize ~widens :
   Log.debug (fun m ->
     m "serializing stacks (%s) : @\n first : %a @\n second : %a"
       (if widens then "widen" else "join")
-      (Abstract_stack.pp state_a.abs_state.ctx)
+      (Stack.pp state_a.abs_state.ctx)
       state_a.abs_state.stack
-      (Abstract_stack.pp state_b.abs_state.ctx)
+      (Stack.pp state_b.abs_state.ctx)
       state_b.abs_state.stack );
 
   let (Abstract_domain.Context.Result (inc, in_tup, stack_continue)) =
@@ -352,8 +352,7 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
     let { ctx; stack; locals; _ } : Abstract_state.t = abs_state in
     Log.debug (fun m ->
       m "abstract state : %a" Abstract_interpreter_state.pp state );
-    Log.info (fun m ->
-      m "stack         : [ %a ]" (Abstract_stack.pp ctx) stack );
+    Log.info (fun m -> m "stack         : [ %a ]" (Stack.pp ctx) stack);
     (* Log.info (fun m -> *)
     (*   m "ctx           : [ %a ]" Abstract_domain.context_pretty ctx ); *)
     Log.info (fun m ->
@@ -390,14 +389,22 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
     | Block (_str_opt, bt, expr) ->
       Trace.record_wasm_step Block_start (Some state) instr;
       let next_state, jt = eval_expr state expr in
-      let stack_size =
+      let param_size, res_size =
         match bt with
-        | Some (_i, (_params, res)) ->
-          List.length state.abs_state.stack + List.length res
-        | None -> 0
+        | Some (_i, (_params, res)) -> (List.length _params, List.length res)
+        | None -> (0, 0)
       in
-      let jumps_br0 = join_jts stack_size (JumpMap.find_opt (I 0) jt) in
+      let jumps_br0 = join_jts res_size (JumpMap.find_opt (I 0) jt) in
       let joined_state = join_opt next_state jumps_br0 in
+      let joined_state =
+        Option.map
+          (fun (joined_state : Abstract_interpreter_state.t) ->
+            let stack = Stack.drop_n state.abs_state.stack param_size in
+            let stack = joined_state.abs_state.stack @ stack in
+            let abs_state = { joined_state.abs_state with stack } in
+            { joined_state with abs_state } )
+          joined_state
+      in
       begin match (next_state, jumps_br0) with
       | Some _, Some _ ->
         Trace.record_wasm_step Join joined_state instr
