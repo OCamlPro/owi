@@ -39,7 +39,7 @@ let cmd ~entry_point ~rounds ~seed ~source_file ~timeout ~timeout_instr ~unsafe
       let* env = Env.Concrete.link_binary_module ~env ~name:None ~modul in
       let* modul = Env.Concrete.get_last_module ~env in
       let to_run = I.modul ~env ~modul in
-      let* _env = Concrete_choice.run to_run in
+      let* _env = Concrete_choice.run to_run Concrete_state.empty in
       Ok () )
   in
   Log.bench (fun m ->

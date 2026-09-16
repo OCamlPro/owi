@@ -8,4 +8,4 @@ include
      and type i32 := Concrete_i32.t
      and type value := Concrete_value.t
 
-val run : 'a t -> 'a Result.t
+val run : 'a t -> Concrete_state.t -> ('a * Concrete_state.t) Result.t

@@ -17,11 +17,11 @@ let action (env : Env.Concrete.t) = function
       m "invoke %a %s %a..."
         (Fmt.option ~none:Fmt.nop Fmt.string)
         module_name func_name Wast.pp_consts args );
-    let* env, stack =
+    let* (env, stack), _state =
       let* f = Env.Concrete.get_exported_func ~env ~module_name ~func_name in
       let locals = List.rev_map (Concrete_value.of_script_const ~ty) args in
       let to_run = I.exec_vfunc_from_outside ~env ~locals f in
-      Concrete_choice.run to_run
+      Concrete_choice.run to_run Concrete_state.empty
     in
     Ok (env, stack)
     end
@@ -55,7 +55,8 @@ let run ~no_exhaustion script =
           Compile.Text.until_concrete_link env ~unsafe ~name:None modul
         in
         let to_run = I.modul ~env ~modul in
-        Concrete_choice.run to_run
+        let* res, _state = Concrete_choice.run to_run Concrete_state.empty in
+        Ok res
       | Wast.Quoted_module (false, modul) ->
         Log.info (fun m -> m "*** quoted module");
         incr curr_module;
@@ -64,7 +65,8 @@ let run ~no_exhaustion script =
           Compile.Text.until_concrete_link env ~unsafe ~name:None modul
         in
         let to_run = I.modul ~env ~modul in
-        Concrete_choice.run to_run
+        let* res, _state = Concrete_choice.run to_run Concrete_state.empty in
+        Ok res
       | Wast.Binary_module (false, id, modul) ->
         Log.info (fun m -> m "*** binary module");
         incr curr_module;
@@ -74,7 +76,8 @@ let run ~no_exhaustion script =
           Compile.Binary.until_concrete_link env ~unsafe ~name:None modul
         in
         let to_run = I.modul ~env ~modul in
-        Concrete_choice.run to_run
+        let* res, _state = Concrete_choice.run to_run Concrete_state.empty in
+        Ok res
       | Assert (Assert_trap_module (modul, expected)) ->
         Log.info (fun m -> m "*** assert_trap");
         incr curr_module;
@@ -83,7 +86,8 @@ let run ~no_exhaustion script =
         in
         let got =
           let to_run = I.modul ~env ~modul in
-          Concrete_choice.run to_run
+          let* got, _state = Concrete_choice.run to_run Concrete_state.empty in
+          Ok got
         in
         let+ () = Script_error.check_result ~expected ~got in
         (* TODO: this is wrong! we should get back the env after running modul? *)
@@ -202,9 +206,9 @@ let run ~no_exhaustion script =
       | Binary_module (true, _, _)
       | Quoted_module (true, _) ->
         (* TODO: differentiate between modules and module definitions in the
-            link state, ensure that we can instantiate a module from its module
-            definition, and that module definitions are not treated as "normal",
-            or instantiated module. *)
+             link state, ensure that we can instantiate a module from its module
+             definition, and that module definitions are not treated as "normal",
+             or instantiated module. *)
         Ok env
       | Instance (_name, _mod_name) ->
         Error (`Unimplemented "(module instance _)") )

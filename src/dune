@@ -84,6 +84,7 @@
   concrete_i64
   concrete_memory
   concrete_ref
+  concrete_state
   concrete_struct
   concrete_table
   concrete_value
