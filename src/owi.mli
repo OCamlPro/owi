@@ -117,12 +117,18 @@ module Annotated : sig
   val raw : 'a t -> 'a
 end
 
+module Concrete_state : sig
+  type t
+
+  val empty : t
+end
+
 module Concrete_choice : sig
   type 'a t
 
   val return : 'a -> 'a t
 
-  val run : 'a t -> 'a Result.t
+  val run : 'a t -> Concrete_state.t -> ('a * Concrete_state.t) Result.t
 
   val trap : Result.err -> _ t
 end

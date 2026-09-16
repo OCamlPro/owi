@@ -40,6 +40,11 @@ module I :
   end
 # let to_run = I.modul ~env ~modul
 mdx_gen.bc.exe: [INFO] interpreting ...
+val to_run : Env.Concrete.t Concrete_choice.t = <abstr>
+# let () =
+    match Concrete_choice.run to_run Concrete_state.empty with
+    | Ok (_env, _state) -> ()
+    | Error _ -> assert false;;
 mdx_gen.bc.exe: [INFO] stack         : [  ]
 mdx_gen.bc.exe: [INFO] running instr : call 0 (executed 0 times)
 mdx_gen.bc.exe: [INFO] calling func  : func f
@@ -51,9 +56,4 @@ mdx_gen.bc.exe: [INFO] stack         : [ i32.const 24 ; i32.const 24 ]
 mdx_gen.bc.exe: [INFO] running instr : i32.add (executed 0 times)
 mdx_gen.bc.exe: [INFO] stack         : [ i32.const 48 ]
 mdx_gen.bc.exe: [INFO] running instr : drop (executed 0 times)
-val to_run : Env.Concrete.t Concrete_choice.t = <abstr>
-# let () =
-    match Concrete_choice.run to_run with
-    | Ok _env -> ()
-    | Error _ -> assert false;;
 ```

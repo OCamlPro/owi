@@ -40,6 +40,7 @@ module Concrete_i32 = Concrete_i32
 module Concrete_i64 = Concrete_i64
 module Concrete_f32 = Concrete_f32
 module Concrete_f64 = Concrete_f64
+module Concrete_state = Concrete_state
 module Env = Env
 module Init = Init
 module Interpret = Interpret

@@ -44,6 +44,6 @@ let to_run = I.modul ~env ~modul
 
 (* let's run it ! it will print the values as defined in the print_i32 function *)
 let () =
-  match Concrete_choice.run to_run with
+  match Concrete_choice.run to_run Concrete_state.empty with
   | Error _o -> assert false
-  | Ok _env -> ()
+  | Ok (_env, _state) -> ()
