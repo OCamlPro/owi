@@ -59,8 +59,6 @@
   $ owi wasm script concrete --no-exhaustion reference/nop.wast
   $ owi wasm script concrete --no-exhaustion reference/ref_as_non_null.wast
   $ owi wasm script concrete --no-exhaustion reference/ref.wast
-  owi: [ERROR] expected unknown type but there was no error
-  [7]
   $ owi wasm script concrete --no-exhaustion reference/ref_func.wast
   $ owi wasm script concrete --no-exhaustion reference/ref_is_null.wast
   $ owi wasm script concrete --no-exhaustion reference/ref_null.wast
