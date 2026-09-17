@@ -25,8 +25,8 @@ let rec run ~rounds f : _ Result.t =
            right entry point and wrote your harness correctly?" );
       Ok ()
     end
-  | Error (state, e) -> begin
+  | Error (state, _e) -> begin
     let model = Concrete_state.get_model state in
     Log.app (fun m -> m "Found a bug with model: %a" pp_model model);
-    Error e
+    Error (`Found_bug 1)
     end
