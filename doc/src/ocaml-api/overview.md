@@ -42,8 +42,8 @@ module I :
 mdx_gen.bc.exe: [INFO] interpreting ...
 val to_run : Env.Concrete.t Concrete_choice.t = <abstr>
 # let () =
-    match Concrete_choice.run to_run Concrete_state.empty with
-    | Ok (_env, _state) -> ()
+    match Concrete_choice.run_and_drop_state to_run Concrete_state.empty with
+    | Ok _env -> ()
     | Error _ -> assert false;;
 mdx_gen.bc.exe: [INFO] stack         : [  ]
 mdx_gen.bc.exe: [INFO] running instr : call 0 (executed 0 times)
