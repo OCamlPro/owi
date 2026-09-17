@@ -128,7 +128,12 @@ module Concrete_choice : sig
 
   val return : 'a -> 'a t
 
-  val run : 'a t -> Concrete_state.t -> ('a * Concrete_state.t) Result.t
+  val run :
+       'a t
+    -> Concrete_state.t
+    -> (Concrete_state.t * 'a, Concrete_state.t * Result.err) Prelude.Result.t
+
+  val run_and_drop_state : 'a t -> Concrete_state.t -> 'a Result.t
 
   val trap : Result.err -> _ t
 end

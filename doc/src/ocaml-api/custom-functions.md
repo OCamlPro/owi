@@ -172,10 +172,11 @@ let extern_module : Concrete_extern.Module.t =
         let to_run =
           Concrete_memory.store_8 m ~addr:(Concrete_i32.add start offset) byte
         in
-        begin match Concrete_choice.run to_run Concrete_state.empty with
+        begin match
+          Concrete_choice.run_and_drop_state to_run Concrete_state.empty
+        with
         | Error e -> Concrete_choice.trap e
-        | Ok (_mem, _state) ->
-          loop (Concrete_i32.add offset (Concrete_i32.of_int 1))
+        | Ok _mem -> loop (Concrete_i32.add offset (Concrete_i32.of_int 1))
         end
       else Concrete_choice.return ()
     in

@@ -17,13 +17,12 @@ let action (env : Env.Concrete.t) = function
       m "invoke %a %s %a..."
         (Fmt.option ~none:Fmt.nop Fmt.string)
         module_name func_name Wast.pp_consts args );
-    let* (env, stack), _state =
+    begin
       let* f = Env.Concrete.get_exported_func ~env ~module_name ~func_name in
       let locals = List.rev_map (Concrete_value.of_script_const ~ty) args in
       let to_run = I.exec_vfunc_from_outside ~env ~locals f in
-      Concrete_choice.run to_run Concrete_state.empty
-    in
-    Ok (env, stack)
+      Concrete_choice.run_and_drop_state to_run Concrete_state.empty
+    end
     end
   | Get (module_name, global_name) ->
     Log.info (fun m -> m "get...");
@@ -55,8 +54,7 @@ let run ~no_exhaustion script =
           Compile.Text.until_concrete_link env ~unsafe ~name:None modul
         in
         let to_run = I.modul ~env ~modul in
-        let* res, _state = Concrete_choice.run to_run Concrete_state.empty in
-        Ok res
+        Concrete_choice.run_and_drop_state to_run Concrete_state.empty
       | Wast.Quoted_module (false, modul) ->
         Log.info (fun m -> m "*** quoted module");
         incr curr_module;
@@ -65,8 +63,7 @@ let run ~no_exhaustion script =
           Compile.Text.until_concrete_link env ~unsafe ~name:None modul
         in
         let to_run = I.modul ~env ~modul in
-        let* res, _state = Concrete_choice.run to_run Concrete_state.empty in
-        Ok res
+        Concrete_choice.run_and_drop_state to_run Concrete_state.empty
       | Wast.Binary_module (false, id, modul) ->
         Log.info (fun m -> m "*** binary module");
         incr curr_module;
@@ -76,8 +73,7 @@ let run ~no_exhaustion script =
           Compile.Binary.until_concrete_link env ~unsafe ~name:None modul
         in
         let to_run = I.modul ~env ~modul in
-        let* res, _state = Concrete_choice.run to_run Concrete_state.empty in
-        Ok res
+        Concrete_choice.run_and_drop_state to_run Concrete_state.empty
       | Assert (Assert_trap_module (modul, expected)) ->
         Log.info (fun m -> m "*** assert_trap");
         incr curr_module;
@@ -86,8 +82,7 @@ let run ~no_exhaustion script =
         in
         let got =
           let to_run = I.modul ~env ~modul in
-          let* got, _state = Concrete_choice.run to_run Concrete_state.empty in
-          Ok got
+          Concrete_choice.run_and_drop_state to_run Concrete_state.empty
         in
         let+ () = Script_error.check_result ~expected ~got in
         (* TODO: this is wrong! we should get back the env after running modul? *)
