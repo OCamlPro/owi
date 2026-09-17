@@ -14,7 +14,6 @@ let i32 () =
       Concrete_i32.of_int32 n
     end
   in
-  Fuzz_state.model := Concrete_value.I32 n :: !Fuzz_state.model;
   n
 
 let i64 () =
@@ -29,7 +28,6 @@ let i64 () =
       Concrete_i64.of_int64 n
     end
   in
-  Fuzz_state.model := Concrete_value.I64 n :: !Fuzz_state.model;
   n
 
 let f32 () =
@@ -46,7 +44,6 @@ let f32 () =
       Concrete_f32.of_float n
     end
   in
-  Fuzz_state.model := Concrete_value.F32 n :: !Fuzz_state.model;
   n
 
 let f64 () =
@@ -62,12 +59,10 @@ let f64 () =
       Concrete_f64.of_float n
     end
   in
-  Fuzz_state.model := Concrete_value.F64 n :: !Fuzz_state.model;
   n
 
 let v128 () =
   let n1 = Random.bits64 () in
   let n2 = Random.bits64 () in
   let n = Concrete_v128.of_i64x2 n1 n2 in
-  Fuzz_state.model := Concrete_value.V128 n :: !Fuzz_state.model;
   n

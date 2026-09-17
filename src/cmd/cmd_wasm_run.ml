@@ -22,14 +22,16 @@ let cmd ~unsafe ~timeout ~timeout_instr ~source_file =
     let abstract_invariant = Abstract_invariant.empty ()
   end in
   let module I = Interpret.Concrete (Parameters) in
-  let res, run_time =
+  let outcome, run_time =
     Benchmark.with_utime @@ fun () ->
     let to_run = I.modul ~env ~modul in
-    let* _env, _state = Concrete_choice.run to_run Concrete_state.empty in
+    let* _env =
+      Concrete_choice.run_and_drop_state to_run Concrete_state.empty
+    in
     Ok ()
   in
   Log.bench (fun m ->
     (* run_time shouldn't be none in bench mode *)
     let run_time = match run_time with None -> assert false | Some t -> t in
     m "Benchmarks:@\n@[<v>interpreter time: %fms@]" (run_time *. 1000.) );
-  res
+  outcome

@@ -2,7 +2,7 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-exception Abort
+exception Abort of Concrete_state.t
 
 module M :
   Wasm_ffi_intf.S0
@@ -13,11 +13,17 @@ module M :
      and type f32 := Concrete_value.f32
      and type f64 := Concrete_value.f64
      and type v128 := Concrete_value.v128 = struct
+  let abort () =
+    Log.debug (fun m -> m "ABORT");
+    let open Concrete_choice in
+    let* state = fold_state Fun.id in
+    raise (Abort state)
+
   let assume b =
     Log.debug (fun m -> m "ASSUME");
     if not @@ Prelude.Int32.equal 0l (Concrete_i32.to_int32 b) then
       Concrete_choice.return ()
-    else raise Abort
+    else abort ()
 
   let assert' n =
     Log.debug (fun m -> m "ASSERT");
@@ -27,29 +33,64 @@ module M :
   let symbol_invisible_bool () =
     Concrete_choice.return (if Random.bool () then 1l else 0l)
 
-  let symbol_i32 () = Concrete_choice.return (Fuzz_gen.i32 ())
+  let symbol_i32 () =
+    let open Concrete_choice in
+    let n = Fuzz_gen.i32 () in
+    let* () =
+      Concrete_choice.map_state
+        (Concrete_state.add_to_model (Concrete_value.I32 n))
+    in
+    Concrete_choice.return n
 
-  let symbol_i64 () = Concrete_choice.return (Fuzz_gen.i64 ())
+  let symbol_i64 () =
+    let open Concrete_choice in
+    let n = Fuzz_gen.i64 () in
+    let* () =
+      Concrete_choice.map_state
+        (Concrete_state.add_to_model (Concrete_value.I64 n))
+    in
+    Concrete_choice.return n
 
-  let symbol_f32 () = Concrete_choice.return (Fuzz_gen.f32 ())
+  let symbol_f32 () =
+    let open Concrete_choice in
+    let n = Fuzz_gen.f32 () in
+    let* () =
+      Concrete_choice.map_state
+        (Concrete_state.add_to_model (Concrete_value.F32 n))
+    in
+    Concrete_choice.return n
 
-  let symbol_f64 () = Concrete_choice.return (Fuzz_gen.f64 ())
+  let symbol_f64 () =
+    let open Concrete_choice in
+    let n = Fuzz_gen.f64 () in
+    let* () =
+      Concrete_choice.map_state
+        (Concrete_state.add_to_model (Concrete_value.F64 n))
+    in
+    Concrete_choice.return n
 
-  let symbol_v128 () = Concrete_choice.return (Fuzz_gen.v128 ())
-
-  let abort () =
-    Log.debug (fun m -> m "ABORT");
-    raise Abort
+  let symbol_v128 () =
+    let open Concrete_choice in
+    let n = Fuzz_gen.v128 () in
+    let* () =
+      Concrete_choice.map_state
+        (Concrete_state.add_to_model (Concrete_value.V128 n))
+    in
+    Concrete_choice.return n
 
   let exit (_n : Concrete_value.i32) =
     (* TODO: handle n as a potential error? *)
     Log.debug (fun m -> m "EXIT");
-    raise Abort
+    abort ()
 
   let symbol_range min max =
     (* TODO: ensure min <= max *)
+    let open Concrete_choice in
     let n = Random.int32_in_range ~min ~max in
-    Fuzz_state.model := Concrete_value.I32 n :: !Fuzz_state.model;
+    let* () =
+      Concrete_choice.map_state
+        (Concrete_state.add_to_model (Concrete_value.I32 n))
+    in
     Concrete_choice.return n
 
   let print_char c =

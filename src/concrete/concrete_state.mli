@@ -5,3 +5,9 @@
 type t
 
 val empty : t
+
+val add_to_model : Concrete_value.t -> t -> t
+
+val get_model : t -> Concrete_value.t list
+
+val model_is_empty : t -> bool
