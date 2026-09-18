@@ -25,6 +25,8 @@ module type T = sig
 
   val pp : t Fmt.t
 
+  val pp_globals : value Fmt.t -> t Fmt.t
+
   val get_last_module : env:t -> modul Result.t
 
   val register_module :

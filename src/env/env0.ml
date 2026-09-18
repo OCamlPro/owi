@@ -60,6 +60,10 @@ type ('extern_func, 'value, 'memory, 'table, 'data, 'elem, 'context) t =
       (* table of all type groups (with their bound ids shifted) *)
   }
 
+let pp_globals fmt pp_v env =
+  let pp_global ppf v = pp_v ppf v.value in
+  Fmt.pf fmt "%a" (Allocator.pp pp_global) env.globals
+
 let pp ~pp_global ~pp_table ppf
   { functions
   ; globals

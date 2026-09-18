@@ -154,10 +154,17 @@ let assoc_of_state (state : Abstract_interpreter_state.t) :
       (Abstract_locals.to_list state.abs_state.locals)
   in
   let locals = `Assoc locals in
+  let globals =
+    `String
+      (Fmt.to_to_string
+         (Env.Abstract.pp_globals
+            (Abstract_value.pp_with_ctx state.abs_state.ctx) )
+         state.env )
+  in
   [ ("stack", stack)
   ; ("locals", locals)
   ; ("call_stack", json_of_int_list state.abs_state.call_stack)
-  ; ("globals", `List [])
+  ; ("globals", globals)
   ]
 
 let json_of_jump_map (jts : Abstract_jump_map.t) : Yojson.Safe.t =

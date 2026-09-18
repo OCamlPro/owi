@@ -71,6 +71,8 @@ module Make
 
   val pp : t Fmt.t
 
+  val pp_globals : Value.t Fmt.t -> t Fmt.t
+
   type context = Context.t
 
   val link_binary_module :
@@ -95,6 +97,8 @@ end = struct
     Env0.t
 
   let pp = Env0.pp ~pp_global:Value.pp ~pp_table:Table.pp
+
+  let pp_globals pp_v : t Fmt.t = fun fmt env -> Env0.pp_globals fmt pp_v env
 
   type link_state =
     { rewrite_map : Env_rewriter.t
