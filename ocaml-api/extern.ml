@@ -4,15 +4,15 @@ open Owi
 let extern_module : Concrete_extern.Module.t =
   (* some custom functions *)
   let rint : Concrete_i32.t ref Type.Id.t = Type.Id.make () in
-  let fresh i = Ok (ref i) in
+  let fresh i = Concrete_choice.return (ref i) in
   let set r (i : Concrete_i32.t) =
     r := i;
-    Ok ()
+    Concrete_choice.return ()
   in
-  let get r = Ok !r in
+  let get r = Concrete_choice.return !r in
   let print_i32 (i : Concrete_i32.t) =
     Format.printf "%a\n%!" Concrete_i32.pp i;
-    Ok ()
+    Concrete_choice.return ()
   in
   (* we need to describe their types *)
   let open Concrete_extern.Func in
@@ -40,6 +40,10 @@ let modul, env =
 
 module I = Interpret.Concrete (Interpret.Default_parameters)
 
+let to_run = I.modul ~env ~modul
+
 (* let's run it ! it will print the values as defined in the print_i32 function *)
 let () =
-  match I.modul ~env ~modul with Error _o -> assert false | Ok _env -> ()
+  match Concrete_choice.run to_run Concrete_state.empty with
+  | Error _o -> assert false
+  | Ok (_env, _state) -> ()

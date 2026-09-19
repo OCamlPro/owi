@@ -2027,20 +2027,20 @@ let keywords : (string * Text_parser.token) Array.t =
    ; ("(", LPAR)
   |]
 
-let string_to_token = Hashtbl.creat<span data-count="896">e</span> 512
+let string_to_token = Hashtbl.creat<span data-count="922">e</span> 512
 
-let token_to_string = Hashtbl.creat<span data-count="896">e</span> 512
+let token_to_string = Hashtbl.creat<span data-count="922">e</span> 512
 
 let () =
-  Array.ite<span data-count="896">r</span>
+  Array.ite<span data-count="922">r</span>
     (fun (k, v) -&gt;
-      <span data-count="507136">H</span>ashtbl.add string_to_token k v;
-      <span data-count="507136">H</span>ashtbl.add token_to_string v k )
+      <span data-count="521852">H</span>ashtbl.add string_to_token k v;
+      <span data-count="521852">H</span>ashtbl.add token_to_string v k )
     keywords
 
 let token_to_string t =
-  <span data-count="109">m</span>atch Hashtbl.find_opt token_to_string t with
-  | <span data-count="88">S</span>ome s -&gt; s
+  <span data-count="114">m</span>atch Hashtbl.find_opt token_to_string t with
+  | <span data-count="93">S</span>ome s -&gt; s
   | <span data-count="21">N</span>one -&gt; (
     match t with
     | <span data-count="2">N</span>UM s -&gt; Fmt.str "%s" s
@@ -2166,7 +2166,7 @@ let token_to_string t =
     | ANY | ALIGN -&gt;
       assert false )
 
-let string_to_token s = <span data-count="439367">H</span>ashtbl.find_opt string_to_token s
+let string_to_token s = <span data-count="473460">H</span>ashtbl.find_opt string_to_token s
 </code></pre>
       </div>
     </div>

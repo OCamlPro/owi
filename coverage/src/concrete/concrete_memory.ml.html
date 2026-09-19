@@ -304,7 +304,7 @@ type t =
   }
 
 let get_min : Binary.Mem.Type.limits -&gt; int = function
-  | <span data-count="840">I</span>32 { min; _ } -&gt; Int32.to_int min
+  | <span data-count="841">I</span>32 { min; _ } -&gt; Int32.to_int min
   | <span data-count="0">I</span>64 { min; _ } -&gt; min
 
 let set_min (limits : Binary.Mem.Type.limits) new_min : Binary.Mem.Type.limits =
@@ -314,8 +314,8 @@ let set_min (limits : Binary.Mem.Type.limits) new_min : Binary.Mem.Type.limits =
 
 let init limits : t =
   (* TODO: overflow check? (page_size * limits.min) / page_size = limits.min? *)
-  <span data-count="774">l</span>et data = Bytes.make (page_size * get_mi<span data-count="774">n</span> limits) '\x00' in
-  <span data-count="774">{</span> limits; data }
+  <span data-count="775">l</span>et data = Bytes.make (page_size * get_mi<span data-count="775">n</span> limits) '\x00' in
+  <span data-count="775">{</span> limits; data }
 
 let update_memory mem data =
   <span data-count="66">l</span>et limits =
@@ -337,21 +337,21 @@ let fill mem ~pos ~len c =
   <span data-count="120">l</span>et pos = Int32.to_int pos in
   <span data-count="120">l</span>et len = Int32.to_int len in
   <span data-count="120">B</span>ytes.unsafe_fill mem.data pos len c;
-  <span data-count="120">O</span>k mem
+  <span data-count="120">C</span>oncrete_choice.return mem
 
 let blit ~src ~src_idx ~dst ~dst_idx ~len =
   <span data-count="137">l</span>et src_idx = Int32.to_int src_idx in
   <span data-count="137">l</span>et dst_idx = Int32.to_int dst_idx in
   <span data-count="137">l</span>et len = Int32.to_int len in
   <span data-count="137">B</span>ytes.unsafe_blit src.data src_idx dst.data dst_idx len;
-  <span data-count="137">O</span>k dst
+  <span data-count="137">C</span>oncrete_choice.return dst
 
 let blit_string mem str ~src ~dst ~len =
-  <span data-count="277">l</span>et src = Int32.to_int src in
-  <span data-count="277">l</span>et dst = Int32.to_int dst in
-  <span data-count="277">l</span>et len = Int32.to_int len in
-  <span data-count="277">B</span>ytes.unsafe_blit_string str src mem.data dst len;
-  <span data-count="277">O</span>k mem
+  <span data-count="279">l</span>et src = Int32.to_int src in
+  <span data-count="279">l</span>et dst = Int32.to_int dst in
+  <span data-count="279">l</span>et len = Int32.to_int len in
+  <span data-count="279">B</span>ytes.unsafe_blit_string str src mem.data dst len;
+  <span data-count="279">C</span>oncrete_choice.return mem
 
 let get_limit_max { limits; _ } =
   <span data-count="81">m</span>atch limits with
@@ -364,65 +364,65 @@ let store_8 mem ~addr n =
   <span data-count="1251">l</span>et addr = Int32.to_int addr in
   <span data-count="1251">l</span>et n = Int32.to_int n in
   <span data-count="1251">B</span>ytes.set_int8 mem.data addr n;
-  <span data-count="1251">O</span>k mem
+  <span data-count="1251">C</span>oncrete_choice.return mem
 
 let store_16 mem ~addr n =
   <span data-count="74">l</span>et addr = Int32.to_int addr in
   <span data-count="74">l</span>et n = Int32.to_int n in
   <span data-count="74">B</span>ytes.set_int16_le mem.data addr n;
-  <span data-count="74">O</span>k mem
+  <span data-count="74">C</span>oncrete_choice.return mem
 
 let store_32 mem ~addr n =
   <span data-count="279">l</span>et addr = Int32.to_int addr in
   <span data-count="279">B</span>ytes.set_int32_le mem.data addr n;
-  <span data-count="279">O</span>k mem
+  <span data-count="279">C</span>oncrete_choice.return mem
 
 let store_64 mem ~addr n =
   <span data-count="81">l</span>et addr = Int32.to_int addr in
   <span data-count="81">B</span>ytes.set_int64_le mem.data addr n;
-  <span data-count="81">O</span>k mem
+  <span data-count="81">C</span>oncrete_choice.return mem
 
 let store_128 mem ~addr n =
   <span data-count="151">l</span>et addr = Int32.to_int addr in
   <span data-count="151">l</span>et left, right = Concrete_v128.to_i64x2 n in
   <span data-count="151">B</span>ytes.set_int64_le mem.data addr left;
   <span data-count="151">B</span>ytes.set_int64_le mem.data (addr + 8) right;
-  <span data-count="151">O</span>k mem
+  <span data-count="151">C</span>oncrete_choice.return mem
 
 let load_8_s mem addr =
   <span data-count="193">l</span>et addr = Int32.to_int addr in
-  <span data-count="193">O</span>k (Int32.of_in<span data-count="193">t</span> @@ Bytes.get_int<span data-count="193">8</span> mem.data addr)
+  <span data-count="193">C</span>oncrete_choice.return (Int32.of_in<span data-count="193">t</span> @@ Bytes.get_int<span data-count="193">8</span> mem.data addr)
 
 let load_8_u mem addr =
-  <span data-count="529577">l</span>et addr = Int32.to_int addr in
-  <span data-count="529577">O</span>k (Int32.of_in<span data-count="529577">t</span> @@ Bytes.get_uint<span data-count="529577">8</span> mem.data addr)
+  <span data-count="529578">l</span>et addr = Int32.to_int addr in
+  <span data-count="529578">C</span>oncrete_choice.return (Int32.of_in<span data-count="529578">t</span> @@ Bytes.get_uint<span data-count="529578">8</span> mem.data addr)
 
 let load_16_s mem addr =
   <span data-count="182">l</span>et addr = Int32.to_int addr in
-  <span data-count="182">O</span>k (Int32.of_in<span data-count="182">t</span> @@ Bytes.get_int16_l<span data-count="182">e</span> mem.data addr)
+  <span data-count="182">C</span>oncrete_choice.return (Int32.of_in<span data-count="182">t</span> @@ Bytes.get_int16_l<span data-count="182">e</span> mem.data addr)
 
 let load_16_u mem addr =
   <span data-count="130">l</span>et addr = Int32.to_int addr in
-  <span data-count="130">O</span>k (Int32.of_in<span data-count="130">t</span> @@ Bytes.get_uint16_l<span data-count="130">e</span> mem.data addr)
+  <span data-count="130">C</span>oncrete_choice.return (Int32.of_in<span data-count="130">t</span> @@ Bytes.get_uint16_l<span data-count="130">e</span> mem.data addr)
 
 let load_32 mem addr =
   <span data-count="1655">l</span>et addr = Int32.to_int addr in
-  <span data-count="1655">O</span>k (Bytes.get_int32_l<span data-count="1655">e</span> mem.data addr)
+  <span data-count="1655">C</span>oncrete_choice.return (Bytes.get_int32_l<span data-count="1655">e</span> mem.data addr)
 
 let load_64 mem addr =
   <span data-count="825">l</span>et addr = Int32.to_int addr in
-  <span data-count="825">O</span>k (Bytes.get_int64_l<span data-count="825">e</span> mem.data addr)
+  <span data-count="825">C</span>oncrete_choice.return (Bytes.get_int64_l<span data-count="825">e</span> mem.data addr)
 
 let load_128 mem addr =
   <span data-count="530">l</span>et addr = Int32.to_int addr in
   <span data-count="530">l</span>et left = Bytes.get_int64_le mem.data addr in
   <span data-count="530">l</span>et right = Bytes.get_int64_le mem.data (addr + 8) in
   <span data-count="530">l</span>et v = Concrete_v128.of_i64x2 left right in
-  <span data-count="530">O</span>k v
+  <span data-count="530">C</span>oncrete_choice.return v
 
 let size_in_pages mem = <span data-count="112">I</span>nt32.of_int @@ (Bytes.lengt<span data-count="112">h</span> mem.data / page_size)
 
-let size mem = <span data-count="536042">I</span>nt32.of_int @@ Bytes.lengt<span data-count="536042">h</span> mem.data
+let size mem = <span data-count="536045">I</span>nt32.of_int @@ Bytes.lengt<span data-count="536045">h</span> mem.data
 </code></pre>
       </div>
     </div>

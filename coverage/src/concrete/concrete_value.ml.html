@@ -441,8 +441,8 @@ let equal_script_result =
       compare_f6<span data-count="6850">4</span> a a' &amp;&amp; <span data-count="6850">c</span>ompare_f64 b b'
   in
   fun ~ty script_result v -&gt;
-    <span data-count="46491">m</span>atch (script_result, v) with
-    | <span data-count="13750">W</span>ast.Result_I32 n, I32 n' -&gt; I32.eq n n'
+    <span data-count="46493">m</span>atch (script_result, v) with
+    | <span data-count="13752">W</span>ast.Result_I32 n, I32 n' -&gt; I32.eq n n'
     | <span data-count="1179">R</span>esult_I64 n, I64 n' -&gt; I64.eq n n'
     | <span data-count="3903">R</span>esult_F32 script_result, F32 v -&gt; compare_f32 script_result v
     | <span data-count="3925">R</span>esult_F64 script_result, F64 v -&gt; compare_f64 script_result v

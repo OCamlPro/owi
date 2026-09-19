@@ -478,14 +478,14 @@ module Stack = Stack.Make [@inlined hint] (Symbolic_value)
 
 type host_externref = int
 
-let ty : host_externref Type.Id.t = Type.Id.mak<span data-count="896">e</span> ()
+let ty : host_externref Type.Id.t = Type.Id.mak<span data-count="922">e</span> ()
 
 module I = Interpret.Symbolic (Interpret.Default_parameters)
 open Syntax
 
 let run_monad ~to_run =
   <span data-count="0">l</span>et thread = Thread.init () in
-  <span data-count="0">m</span>atch Symex.Monad.run to_run thread with
+  <span data-count="0">m</span>atch Symbolic_choice.run to_run thread with
   | <span data-count="0">O</span>k (v, _monadic_state) -&gt; Ok v
   | <span data-count="0">E</span>rror (`Trap t) -&gt; Error t.Bug.err
   | <span data-count="0">E</span>rror _ -&gt; Fmt.error_msg "unexpected error from the symbolic monad"

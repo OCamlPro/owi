@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "frappe";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-fb29a22c.js";
+            window.path_to_searchindex_js = "../searchindex-38dc5335.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-b696a57f.js"></script>
@@ -220,15 +220,15 @@
 let extern_module : Concrete_extern.Module.t =
   (* some custom functions *)
   let rint : Concrete_i32.t ref Type.Id.t = Type.Id.make () in
-  let fresh i = Ok (ref i) in
+  let fresh i = Concrete_choice.return (ref i) in
   let set r (i : Concrete_i32.t) =
     r := i;
-    Ok ()
+    Concrete_choice.return ()
   in
-  let get r = Ok !r in
+  let get r = Concrete_choice.return !r in
   let print_i32 (i : Concrete_i32.t) =
     Format.printf "%a\n%!" Concrete_i32.pp i;
-    Ok ()
+    Concrete_choice.return ()
   in
   (* we need to describe their types *)
   let open Concrete_extern.Func in
@@ -256,9 +256,13 @@ let modul, env =
 
 module I = Interpret.Concrete (Interpret.Default_parameters)
 
+let to_run = I.modul ~env ~modul
+
 (* let's run it ! it will print the values as defined in the print_i32 function *)
 let () =
-  match I.modul ~env ~modul with Error _o -&gt; assert false | Ok _env -&gt; ()
+  match Concrete_choice.run to_run Concrete_state.empty with
+  | Error _o -&gt; assert false
+  | Ok (_env, _state) -&gt; ()
 </code></pre>
 <p>You’ll get the expected result:</p>
 <pre><code class="language-sh">$ ./extern.exe
@@ -314,24 +318,27 @@ memset as:</p>
 (* an extern module that will be linked with a wasm module *)
 let extern_module : Concrete_extern.Module.t =
   (* some custom functions *)
-  let memset m start byte length =
-    let rec loop offset =
+  let memset m start byte length : _ Concrete_choice.t =
+    let rec loop offset : _ Concrete_choice.t =
       let b = Concrete_i32.le offset length |&gt; Concrete_boolean.to_bool in
       if b then
-        begin match
+        let to_run =
           Concrete_memory.store_8 m ~addr:(Concrete_i32.add start offset) byte
+        in
+        begin match
+          Concrete_choice.run_and_drop_state to_run Concrete_state.empty
         with
-        | Error _ as e -&gt; e
+        | Error e -&gt; Concrete_choice.trap e
         | Ok _mem -&gt; loop (Concrete_i32.add offset (Concrete_i32.of_int 1))
         end
-      else Ok ()
+      else Concrete_choice.return ()
     in
     loop Concrete_i32.zero
   in
   let print_x64 (n : Concrete_i64.t) =
     let n = Concrete_i64.to_int64 n in
     Format.printf "0x%LX@\n" n;
-    Ok ()
+    Concrete_choice.return ()
   in
   (* we need to describe their types *)
   let open Concrete_extern.Func in
@@ -364,8 +371,12 @@ let modul, env =
 module I = Interpret.Concrete (Interpret.Default_parameters)
 
 (* let's run it ! it will print the values as defined in the print_i64 function *)
+let to_run = I.modul ~env ~modul
+
 let () =
-  match I.modul ~env ~modul with Error _ -&gt; assert false | Ok _env -&gt; ()
+  match Concrete_choice.run to_run Concrete_state.empty with
+  | Error _ -&gt; assert false
+  | Ok (_env, _state) -&gt; ()
 </code></pre>
 <p>Running the above program should yield:</p>
 <pre><code class="language-sh">$ ./extern_mem.exe

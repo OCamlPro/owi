@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>constexpr_eval.ml &mdash; Coverage report</title>
-    <meta name="description" content="72.80% coverage in src/interpret/constexpr_eval.ml">
+    <meta name="description" content="94.40% coverage in src/interpret/constexpr_eval.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,30 +15,13 @@
           <span class="dirname">src/interpret/</span>constexpr_eval.ml
         </a>
       </h1>
-      <h2>72.80%</h2>
+      <h2>94.40%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:7.66%"></span>
       <span class="unvisited" style="top:8.13%"></span>
       <span class="unvisited" style="bottom:26.32%"></span>
-      <span class="unvisited" style="bottom:24.40%"></span>
-      <span class="unvisited" style="bottom:23.92%"></span>
-      <span class="unvisited" style="bottom:23.44%"></span>
-      <span class="unvisited" style="bottom:21.53%"></span>
-      <span class="unvisited" style="bottom:21.05%"></span>
-      <span class="unvisited" style="bottom:20.57%"></span>
-      <span class="unvisited" style="bottom:20.10%"></span>
-      <span class="unvisited" style="bottom:17.22%"></span>
-      <span class="unvisited" style="bottom:16.75%"></span>
-      <span class="unvisited" style="bottom:16.27%"></span>
-      <span class="unvisited" style="bottom:15.79%"></span>
       <span class="unvisited" style="bottom:15.31%"></span>
-      <span class="unvisited" style="bottom:14.83%"></span>
-      <span class="unvisited" style="bottom:14.35%"></span>
-      <span class="unvisited" style="bottom:12.92%"></span>
-      <span class="unvisited" style="bottom:11.96%"></span>
-      <span class="unvisited" style="bottom:1.44%"></span>
-      <span class="unvisited" style="bottom:0.96%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -200,33 +183,33 @@
 <a id="L155"></a><span > </span>
 <a id="L156"></a><span > </span>
 <a id="L157"></a><span class="visited"> </span>
-<a id="L158"></a><span class="unvisited"> </span>
-<a id="L159"></a><span class="unvisited"> </span>
-<a id="L160"></a><span class="unvisited"> </span>
+<a id="L158"></a><span class="visited"> </span>
+<a id="L159"></a><span class="visited"> </span>
+<a id="L160"></a><span class="visited"> </span>
 <a id="L161"></a><span > </span>
 <a id="L162"></a><span > </span>
 <a id="L163"></a><span > </span>
-<a id="L164"></a><span class="unvisited"> </span>
-<a id="L165"></a><span class="unvisited"> </span>
-<a id="L166"></a><span class="unvisited"> </span>
-<a id="L167"></a><span class="unvisited"> </span>
+<a id="L164"></a><span class="visited"> </span>
+<a id="L165"></a><span class="visited"> </span>
+<a id="L166"></a><span class="visited"> </span>
+<a id="L167"></a><span class="visited"> </span>
 <a id="L168"></a><span > </span>
 <a id="L169"></a><span > </span>
 <a id="L170"></a><span > </span>
 <a id="L171"></a><span > </span>
 <a id="L172"></a><span class="visited"> </span>
-<a id="L173"></a><span class="unvisited"> </span>
-<a id="L174"></a><span class="unvisited"> </span>
-<a id="L175"></a><span class="unvisited"> </span>
-<a id="L176"></a><span class="unvisited"> </span>
+<a id="L173"></a><span class="visited"> </span>
+<a id="L174"></a><span class="visited"> </span>
+<a id="L175"></a><span class="visited"> </span>
+<a id="L176"></a><span class="visited"> </span>
 <a id="L177"></a><span class="unvisited"> </span>
-<a id="L178"></a><span class="unvisited"> </span>
-<a id="L179"></a><span class="unvisited"> </span>
+<a id="L178"></a><span class="visited"> </span>
+<a id="L179"></a><span class="visited"> </span>
 <a id="L180"></a><span > </span>
 <a id="L181"></a><span > </span>
-<a id="L182"></a><span class="unvisited"> </span>
+<a id="L182"></a><span class="visited"> </span>
 <a id="L183"></a><span > </span>
-<a id="L184"></a><span class="unvisited"> </span>
+<a id="L184"></a><span class="visited"> </span>
 <a id="L185"></a><span > </span>
 <a id="L186"></a><span > </span>
 <a id="L187"></a><span > </span>
@@ -248,8 +231,8 @@
 <a id="L203"></a><span > </span>
 <a id="L204"></a><span > </span>
 <a id="L205"></a><span > </span>
-<a id="L206"></a><span class="unvisited"> </span>
-<a id="L207"></a><span class="unvisited"> </span>
+<a id="L206"></a><span class="visited"> </span>
+<a id="L207"></a><span class="visited"> </span>
 <a id="L208"></a><span > </span>
 <a id="L209"></a><span > </span>
 </pre>
@@ -508,7 +491,7 @@ module Make (Value : Value_intf.T) :
       Stack.push_f64 stack (Value.F64.of_floa<span data-count="256">t</span> (Float64.to_floa<span data-count="256">t</span> f))
     | <span data-count="14">V</span>128 (Const v) -&gt; Stack.push_v128 stack (Value.V128.of_concret<span data-count="14">e</span> v)
     | <span data-count="56">R</span>ef (Null t) -&gt; Stack.push_ref stack (Value.Ref.nul<span data-count="56">l</span> t)
-    | <span data-count="2768">R</span>ef (Func id) -&gt;
+    | <span data-count="2770">R</span>ef (Func id) -&gt;
       let value = Value.Ref (Func (Some id)) in
       Stack.push stack value
     | <span data-count="11">G</span>lobal (Get id) -&gt;
@@ -583,8 +566,8 @@ module Make (Value : Value_intf.T) :
       assert false
 
   let instr ~get_const_type ~get_const_global stack instr =
-    <span data-count="4315">m</span>atch instr.Annotated.raw with
-    | <span data-count="4315">B</span>inary.Simple i -&gt;
+    <span data-count="4317">m</span>atch instr.Annotated.raw with
+    | <span data-count="4317">B</span>inary.Simple i -&gt;
       simple_instruction ~get_const_type ~get_const_global stack i
     | _ -&gt;
       (* typechecking ensures this can not happen *)
@@ -592,19 +575,19 @@ module Make (Value : Value_intf.T) :
 
   (* TODO: the modul parameter can probably be removed *)
   let expr _ctx ~get_const_type ~get_const_global (e : Binary.expr) : Value.t =
-    <span data-count="4235">l</span>et stack =
+    <span data-count="4237">l</span>et stack =
       List.fold_left (instr ~get_const_type ~get_const_global) Stack.empty e
     in
-    <span data-count="4235">m</span>atch stack with
+    <span data-count="4237">m</span>atch stack with
     | [] | _ :: _ :: _ -&gt;
       (* typechecking ensures this can not happen *)
       assert false
-    | <span data-count="4235">[</span> result ] -&gt; result
+    | <span data-count="4237">[</span> result ] -&gt; result
 
   let ref_expr ctx ~get_const_type ~get_const_global (e : Binary.expr) :
     Value.t Value.Ref.t =
-    <span data-count="2768">m</span>atch expr ctx ~get_const_type ~get_const_global e with
-    | <span data-count="2768">R</span>ef v -&gt; v
+    <span data-count="2770">m</span>atch expr ctx ~get_const_type ~get_const_global e with
+    | <span data-count="2770">R</span>ef v -&gt; v
     | _ -&gt; assert false
 end
 
@@ -622,57 +605,57 @@ module Abstract :
   let default_gc_val _ = <span data-count="0">a</span>ssert false
 
   let i32_instr ctx stack : Binary.i32_instr -&gt; _ = function
-    | <span data-count="1">C</span>onst i -&gt; Stack.push_i32 stack (Value.I32.of_int3<span data-count="1">2</span> ctx i)
-    | <span data-count="0">A</span>dd -&gt; Stack.apply_i32_i32_i32 stack (Value.I32.ad<span data-count="0">d</span> ctx)
-    | <span data-count="0">S</span>ub -&gt; Stack.apply_i32_i32_i32 stack (Value.I32.su<span data-count="0">b</span> ctx)
-    | <span data-count="0">M</span>ul -&gt; Stack.apply_i32_i32_i32 stack (Value.I32.mu<span data-count="0">l</span> ctx)
+    | <span data-count="46">C</span>onst i -&gt; Stack.push_i32 stack (Value.I32.of_int3<span data-count="46">2</span> ctx i)
+    | <span data-count="2">A</span>dd -&gt; Stack.apply_i32_i32_i32 stack (Value.I32.ad<span data-count="2">d</span> ctx)
+    | <span data-count="1">S</span>ub -&gt; Stack.apply_i32_i32_i32 stack (Value.I32.su<span data-count="1">b</span> ctx)
+    | <span data-count="1">M</span>ul -&gt; Stack.apply_i32_i32_i32 stack (Value.I32.mu<span data-count="1">l</span> ctx)
     | _ -&gt; assert false
 
   let i64_instr ctx stack : Binary.i64_instr -&gt; _ = function
-    | <span data-count="0">C</span>onst i -&gt; Stack.push_i64 stack (Value.I64.of_int6<span data-count="0">4</span> ctx i)
-    | <span data-count="0">A</span>dd -&gt; Stack.apply_i64_i64_i64 stack (Value.I64.ad<span data-count="0">d</span> ctx)
-    | <span data-count="0">S</span>ub -&gt; Stack.apply_i64_i64_i64 stack (Value.I64.su<span data-count="0">b</span> ctx)
-    | <span data-count="0">M</span>ul -&gt; Stack.apply_i64_i64_i64 stack (Value.I64.mu<span data-count="0">l</span> ctx)
+    | <span data-count="31">C</span>onst i -&gt; Stack.push_i64 stack (Value.I64.of_int6<span data-count="31">4</span> ctx i)
+    | <span data-count="2">A</span>dd -&gt; Stack.apply_i64_i64_i64 stack (Value.I64.ad<span data-count="2">d</span> ctx)
+    | <span data-count="1">S</span>ub -&gt; Stack.apply_i64_i64_i64 stack (Value.I64.su<span data-count="1">b</span> ctx)
+    | <span data-count="1">M</span>ul -&gt; Stack.apply_i64_i64_i64 stack (Value.I64.mu<span data-count="1">l</span> ctx)
     | _ -&gt; assert false
 
   let simple_instruction ctx ~get_const_type:_ ~get_const_global stack =
     function
-    | <span data-count="1">B</span>inary.I32 i -&gt; i32_instr ctx stack i
-    | <span data-count="0">B</span>inary.I64 i -&gt; i64_instr ctx stack i
-    | <span data-count="0">F</span>32 (Const f) -&gt; Stack.push_f32 stack (Value.F32.of_float3<span data-count="0">2</span> ctx f)
-    | <span data-count="0">F</span>64 (Const f) -&gt;
-      Stack.push_f64 stack (Value.F64.of_floa<span data-count="0">t</span> ctx (Float64.to_floa<span data-count="0">t</span> f))
+    | <span data-count="50">B</span>inary.I32 i -&gt; i32_instr ctx stack i
+    | <span data-count="35">B</span>inary.I64 i -&gt; i64_instr ctx stack i
+    | <span data-count="27">F</span>32 (Const f) -&gt; Stack.push_f32 stack (Value.F32.of_float3<span data-count="27">2</span> ctx f)
+    | <span data-count="26">F</span>64 (Const f) -&gt;
+      Stack.push_f64 stack (Value.F64.of_floa<span data-count="26">t</span> ctx (Float64.to_floa<span data-count="26">t</span> f))
     | <span data-count="0">V</span>128 (Const v) -&gt; Stack.push_v128 stack (Value.V128.of_concret<span data-count="0">e</span> ctx v)
-    | <span data-count="0">R</span>ef (Null t) -&gt; Stack.push_ref stack (Value.Ref.nul<span data-count="0">l</span> ctx t)
-    | <span data-count="0">R</span>ef (Func id) -&gt;
+    | <span data-count="3">R</span>ef (Null t) -&gt; Stack.push_ref stack (Value.Ref.nul<span data-count="3">l</span> ctx t)
+    | <span data-count="15">R</span>ef (Func id) -&gt;
       let value = Value.Ref (Func (Some id)) in
       Stack.push stack value
-    | <span data-count="0">G</span>lobal (Get id) -&gt;
+    | <span data-count="4">G</span>lobal (Get id) -&gt;
       let g = get_const_global id in
-      <span data-count="0">S</span>tack.push stack g
+      <span data-count="4">S</span>tack.push stack g
     | _ -&gt; assert false
 
   let instr ctx ~get_const_type ~get_const_global stack instr =
-    <span data-count="1">m</span>atch instr.Annotated.raw with
-    | <span data-count="1">B</span>inary.Simple i -&gt;
+    <span data-count="160">m</span>atch instr.Annotated.raw with
+    | <span data-count="160">B</span>inary.Simple i -&gt;
       simple_instruction ctx ~get_const_type ~get_const_global stack i
     | _ -&gt; assert false
 
   (* TODO: the modul parameter can probably be removed *)
   let expr ctx ~get_const_type ~get_const_global (e : Binary.expr) : Value.t =
-    <span data-count="1">l</span>et stack =
-      List.fold_left (inst<span data-count="1">r</span> ctx ~get_const_type ~get_const_global) Stack.empty e
+    <span data-count="144">l</span>et stack =
+      List.fold_left (inst<span data-count="144">r</span> ctx ~get_const_type ~get_const_global) Stack.empty e
     in
-    <span data-count="1">m</span>atch stack with
+    <span data-count="144">m</span>atch stack with
     | [] | _ :: _ :: _ -&gt;
       (* typechecking *)
       assert false
-    | <span data-count="1">[</span> result ] -&gt; result
+    | <span data-count="144">[</span> result ] -&gt; result
 
   let ref_expr ctx ~get_const_type ~get_const_global (e : Binary.expr) :
     Value.t Value.Ref.t =
-    <span data-count="0">m</span>atch expr ctx ~get_const_type ~get_const_global e with
-    | <span data-count="0">R</span>ef v -&gt; v
+    <span data-count="15">m</span>atch expr ctx ~get_const_type ~get_const_global e with
+    | <span data-count="15">R</span>ef v -&gt; v
     | _ -&gt; assert false
 end
 </code></pre>

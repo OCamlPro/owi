@@ -195,14 +195,14 @@ type t =
   }
 
 let pp_data =
-  Fmt.brace<span data-count="896">s</span>
-    (Fmt.iter_binding<span data-count="896">s</span> ~sep:Fmt.semi Array.iteri (fun ppf (i, v) -&gt;
+  Fmt.brace<span data-count="922">s</span>
+    (Fmt.iter_binding<span data-count="922">s</span> ~sep:Fmt.semi Array.iteri (fun ppf (i, v) -&gt;
        <span data-count="0">F</span>mt.pf ppf "%d -&gt; %a" i Concrete_ref.pp v ) )
 
 let pp ppf t = <span data-count="0">F</span>mt.pf ppf "%a" pp_data t.data
 
 let get_min : Binary.Table.Type.limits -&gt; int = function
-  | <span data-count="641">I</span>32 { min; _ } -&gt; Int32.to_int min
+  | <span data-count="642">I</span>32 { min; _ } -&gt; Int32.to_int min
   | <span data-count="0">I</span>64 { min; _ } -&gt; Int64.to_int min
 
 let max_size t =
@@ -219,22 +219,22 @@ let max_size t =
 let get_type { limits; typ; _ } = <span data-count="53">(</span>limits, typ)
 
 let init (typ : Binary.Table.Type.t) : t =
-  <span data-count="641">l</span>et limits, ((_null, heap_type) as ref_type) = typ in
+  <span data-count="642">l</span>et limits, ((_null, heap_type) as ref_type) = typ in
   let null = Concrete_ref.null heap_type in
-  <span data-count="641">l</span>et table = Array.make (get_mi<span data-count="641">n</span> limits) null in
-  <span data-count="641">{</span> limits; typ = ref_type; data = table }
+  <span data-count="642">l</span>et table = Array.make (get_mi<span data-count="642">n</span> limits) null in
+  <span data-count="642">{</span> limits; typ = ref_type; data = table }
 
 let update table data = <span data-count="31">t</span>able.data &lt;- data
 
-let get t i = <span data-count="803584">t</span>.data.(i)
+let get t i = <span data-count="803585">t</span>.data.(i)
 
 let set t i v =
-  <span data-count="1404">t</span>.data.(i) &lt;- v;
-  <span data-count="1404">t</span>
+  <span data-count="1406">t</span>.data.(i) &lt;- v;
+  <span data-count="1406">t</span>
 
-let size t = <span data-count="804537">A</span>rray.length t.data
+let size t = <span data-count="804540">A</span>rray.length t.data
 
-let typ t = <span data-count="802862">t</span>.typ
+let typ t = <span data-count="802863">t</span>.typ
 
 let grow t new_size x =
   <span data-count="31">l</span>et new_size = Int32.to_int new_size in

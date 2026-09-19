@@ -4296,11 +4296,11 @@ type indice =
   | Text of string
   | Raw of int
 
-let pp_id ppf id = <span data-count="390">p</span>f ppf "$%s" id
+let pp_id ppf id = <span data-count="394">p</span>f ppf "$%s" id
 
-let pp_id_opt ppf = function <span data-count="913">N</span>one -&gt; () | <span data-count="254">S</span>ome i -&gt; pf ppf " %a" pp_id i
+let pp_id_opt ppf = function <span data-count="1000">N</span>one -&gt; () | <span data-count="254">S</span>ome i -&gt; pf ppf " %a" pp_id i
 
-let pp_indice ppf = function <span data-count="410">R</span>aw u -&gt; int ppf u | <span data-count="136">T</span>ext i -&gt; pp_id ppf i
+let pp_indice ppf = function <span data-count="601">R</span>aw u -&gt; int ppf u | <span data-count="140">T</span>ext i -&gt; pp_id ppf i
 
 let pp_indice_not0 ppf = function
   | <span data-count="0">T</span>ext i -&gt; pp_id ppf i
@@ -4310,8 +4310,8 @@ let pp_indice_not0 ppf = function
 let pp_indice_opt ppf = function <span data-count="32">N</span>one -&gt; () | <span data-count="3">S</span>ome i -&gt; pp_indice ppf i
 
 let compare_indice id1 id2 =
-  <span data-count="217">m</span>atch (id1, id2) with
-  | <span data-count="210">T</span>ext s1, Text s2 -&gt; String.compare s1 s2
+  <span data-count="232">m</span>atch (id1, id2) with
+  | <span data-count="225">T</span>ext s1, Text s2 -&gt; String.compare s1 s2
   | <span data-count="5">R</span>aw i1, Raw i2 -&gt; Int.compare i1 i2
   | <span data-count="2">T</span>ext _, Raw _ -&gt; 1
   | <span data-count="0">R</span>aw _, Text _ -&gt; -1
@@ -4324,16 +4324,16 @@ type nonrec num_type =
   | V128
 
 let pp_num_type ppf = function
-  | <span data-count="2841">I</span>32 -&gt; pf ppf "i32"
-  | <span data-count="539">I</span>64 -&gt; pf ppf "i64"
-  | <span data-count="644">F</span>32 -&gt; pf ppf "f32"
-  | <span data-count="382">F</span>64 -&gt; pf ppf "f64"
+  | <span data-count="3116">I</span>32 -&gt; pf ppf "i32"
+  | <span data-count="641">I</span>64 -&gt; pf ppf "i64"
+  | <span data-count="706">F</span>32 -&gt; pf ppf "f32"
+  | <span data-count="394">F</span>64 -&gt; pf ppf "f64"
   | <span data-count="1093">V</span>128 -&gt; pf ppf "v128"
 
 let num_type_eq t1 t2 =
-  <span data-count="1651320">m</span>atch (t1, t2) with
-  | <span data-count="1495097">I</span>32, I32 | <span data-count="47415">I</span>64, I64 | <span data-count="47179">F</span>32, F32 | <span data-count="47880">F</span>64, F64 | <span data-count="6232">V</span>128, V128 -&gt; true
-  | <span data-count="7517">(</span><span data-count="2566">I</span>32 | <span data-count="1378">I</span>64 | <span data-count="1002">F</span>32 | <span data-count="2460">F</span>64 | <span data-count="111">V</span>128), _ -&gt; false
+  <span data-count="1659608">m</span>atch (t1, t2) with
+  | <span data-count="1500289">I</span>32, I32 | <span data-count="48058">I</span>64, I64 | <span data-count="47536">F</span>32, F32 | <span data-count="48302">F</span>64, F64 | <span data-count="6232">V</span>128, V128 -&gt; true
+  | <span data-count="9191">(</span><span data-count="3146">I</span>32 | <span data-count="1750">I</span>64 | <span data-count="1314">F</span>32 | <span data-count="2870">F</span>64 | <span data-count="111">V</span>128), _ -&gt; false
 
 let compare_num_type t1 t2 =
   <span data-count="0">l</span>et to_int = function
@@ -4422,17 +4422,17 @@ let pp_heap_type fmt = function
   | <span data-count="0">S</span>truct_ht -&gt; pf fmt "struct"
   | <span data-count="0">A</span>rray_ht -&gt; pf fmt "array"
   | <span data-count="0">N</span>one_ht -&gt; pf fmt "none"
-  | <span data-count="11">F</span>unc_ht -&gt; pf fmt "func"
+  | <span data-count="13">F</span>unc_ht -&gt; pf fmt "func"
   | <span data-count="0">N</span>oFunc_ht -&gt; pf fmt "nofunc"
   | <span data-count="0">E</span>xn_ht -&gt; pf fmt "exn"
   | <span data-count="0">N</span>oExn_ht -&gt; pf fmt "noexn"
-  | <span data-count="1">E</span>xtern_ht -&gt; pf fmt "extern"
+  | <span data-count="3">E</span>xtern_ht -&gt; pf fmt "extern"
   | <span data-count="0">N</span>oExtern_ht -&gt; pf fmt "noextern"
 
 let heap_type_eq t1 t2 =
-  <span data-count="932">m</span>atch (t1, t2) with
-  | <span data-count="302">F</span>unc_ht, Func_ht
-  | <span data-count="77">E</span>xtern_ht, Extern_ht
+  <span data-count="1048">m</span>atch (t1, t2) with
+  | <span data-count="372">F</span>unc_ht, Func_ht
+  | <span data-count="89">E</span>xtern_ht, Extern_ht
   | <span data-count="51">A</span>ny_ht, Any_ht
   | <span data-count="0">E</span>q_ht, Eq_ht
   | <span data-count="4">I</span>31_ht, I31_ht
@@ -4444,11 +4444,11 @@ let heap_type_eq t1 t2 =
   | <span data-count="1">N</span>oExn_ht, NoExn_ht
   | <span data-count="7">N</span>oExtern_ht, NoExtern_ht -&gt;
     true
-  | <span data-count="217">T</span>ypeUse id1, TypeUse id2 -&gt; compare_indic<span data-count="217">e</span> id1 id2 = 0
-  | <span data-count="141">_</span>, _ -&gt; false
+  | <span data-count="232">T</span>ypeUse id1, TypeUse id2 -&gt; compare_indic<span data-count="232">e</span> id1 id2 = 0
+  | <span data-count="160">_</span>, _ -&gt; false
 
 let is_subtype_heap_type t1 t2 =
-  <span data-count="200">h</span>eap_type_e<span data-count="200">q</span> t1 t<span data-count="197">2</span>
+  <span data-count="244">h</span>eap_type_e<span data-count="244">q</span> t1 t<span data-count="241">2</span>
   ||
   match (t1, t2) with
   | <span data-count="0">N</span>one_ht, (<span data-count="0">I</span>31_ht | <span data-count="0">S</span>truct_ht | <span data-count="0">A</span>rray_ht | <span data-count="0">E</span>q_ht | <span data-count="0">A</span>ny_ht)
@@ -4511,9 +4511,9 @@ let pp_ref_type ppf (n, ht) =
   | <span data-count="10">N</span>ull -&gt; pf ppf "(ref null %a)" pp_heap_type ht
 
 let ref_type_eq t1 t2 =
-  <span data-count="776">m</span>atch (t1, t2) with
-  | <span data-count="533">(</span>Null, t1), (Null, t2) | <span data-count="199">(</span>No_null, t1), (No_null, t2) -&gt; heap_type_eq t1 t2
-  | <span data-count="44">_</span> -&gt; false
+  <span data-count="851">m</span>atch (t1, t2) with
+  | <span data-count="604">(</span>Null, t1), (Null, t2) | <span data-count="200">(</span>No_null, t1), (No_null, t2) -&gt; heap_type_eq t1 t2
+  | <span data-count="47">_</span> -&gt; false
 
 let is_subtype_ref_type t1 t2 =
   <span data-count="0">m</span>atch (t1, t2) with
@@ -4527,8 +4527,8 @@ let is_subtype_ref_type t1 t2 =
   | <span data-count="0">_</span> -&gt; false
 
 let compare_nullable n1 n2 =
-  <span data-count="475">m</span>atch (n1, n2) with
-  | <span data-count="282">N</span>ull, Null | <span data-count="8">N</span>o_null, No_null -&gt; 0
+  <span data-count="541">m</span>atch (n1, n2) with
+  | <span data-count="348">N</span>ull, Null | <span data-count="8">N</span>o_null, No_null -&gt; 0
   | <span data-count="180">N</span>ull, No_null -&gt; -1
   | <span data-count="5">N</span>o_null, Null -&gt; 1
 
@@ -4544,14 +4544,14 @@ type nonrec val_type =
   | Ref_type of ref_type
 
 let pp_val_type fmt = function
-  | <span data-count="453">N</span>um_type t -&gt; pp_num_type fmt t
+  | <span data-count="456">N</span>um_type t -&gt; pp_num_type fmt t
   | <span data-count="0">R</span>ef_type t -&gt; pp_ref_type fmt t
 
 let val_type_eq t1 t2 =
-  <span data-count="37181">m</span>atch (t1, t2) with
-  | <span data-count="36043">N</span>um_type t1, Num_type t2 -&gt; num_type_eq t1 t2
-  | <span data-count="776">R</span>ef_type t1, Ref_type t2 -&gt; ref_type_eq t1 t2
-  | <span data-count="362">_</span>, _ -&gt; false
+  <span data-count="45320">m</span>atch (t1, t2) with
+  | <span data-count="43907">N</span>um_type t1, Num_type t2 -&gt; num_type_eq t1 t2
+  | <span data-count="851">R</span>ef_type t1, Ref_type t2 -&gt; ref_type_eq t1 t2
+  | <span data-count="562">_</span>, _ -&gt; false
 
 let is_subtype_val_type t1 t2 =
   <span data-count="0">m</span>atch (t1, t2) with
@@ -4581,34 +4581,34 @@ let pp_storage_type fmt = function
 
 type nonrec param = string option * val_type
 
-let pp_param ppf (id, vt) = <span data-count="246">p</span>f ppf "(param%a %a)" pp_id_opt id pp_val_type vt
+let pp_param ppf (id, vt) = <span data-count="248">p</span>f ppf "(param%a %a)" pp_id_opt id pp_val_type vt
 
-let param_eq (_, t1) (_, t2) = <span data-count="20579">v</span>al_type_eq t1 t2
+let param_eq (_, t1) (_, t2) = <span data-count="24610">v</span>al_type_eq t1 t2
 
 let compare_param (_, t1) (_, t2) = <span data-count="0">c</span>ompare_val_type t1 t2
 
 type nonrec param_type = param list
 
-let pp_param_type ppf params = <span data-count="122">l</span>ist ~sep:sp pp_param ppf params
+let pp_param_type ppf params = <span data-count="124">l</span>ist ~sep:sp pp_param ppf params
 
-let param_type_eq t1 t2 = <span data-count="43722">L</span>ist.equal param_eq t1 t2
+let param_type_eq t1 t2 = <span data-count="55322">L</span>ist.equal param_eq t1 t2
 
 let compare_param_type t1 t2 = <span data-count="0">L</span>ist.compare compare_param t1 t2
 
 type nonrec result_type = val_type list
 
-let pp_result_ ppf vt = <span data-count="126">p</span>f ppf "(result %a)" pp_val_type vt
+let pp_result_ ppf vt = <span data-count="127">p</span>f ppf "(result %a)" pp_val_type vt
 
-let pp_result_type ppf results = <span data-count="126">l</span>ist ~sep:sp pp_result_ ppf results
+let pp_result_type ppf results = <span data-count="127">l</span>ist ~sep:sp pp_result_ ppf results
 
-let result_type_eq t1 t2 = <span data-count="25344">L</span>ist.equal val_type_eq t1 t2
+let result_type_eq t1 t2 = <span data-count="31338">L</span>ist.equal val_type_eq t1 t2
 
 let compare_result_type t1 t2 = <span data-count="0">L</span>ist.compare compare_val_type t1 t2
 
 (* wrap printer to print a space before a non empty list *)
 (* TODO or make it an optional arg of pp_list? *)
 let with_space_list printer ppf l =
-  <span data-count="776">m</span>atch l with <span data-count="485">[</span>] -&gt; () | <span data-count="291">_</span>l -&gt; pf ppf " %a" printer l
+  <span data-count="780">m</span>atch l with <span data-count="486">[</span>] -&gt; () | <span data-count="294">_</span>l -&gt; pf ppf " %a" printer l
 
 type nonrec func_type = param_type * result_type
 
@@ -4620,7 +4620,7 @@ let pp_func_type ppf (params, results) =
     results
 
 let func_type_eq (pt1, rt1) (pt2, rt2) =
-  <span data-count="43722">p</span>aram_type_e<span data-count="43722">q</span> pt1 pt2 &amp;&amp; <span data-count="25344">r</span>esult_type_eq rt1 rt2
+  <span data-count="55322">p</span>aram_type_e<span data-count="55322">q</span> pt1 pt2 &amp;&amp; <span data-count="31338">r</span>esult_type_eq rt1 rt2
 
 type field_type = mut * storage_type
 
@@ -4690,11 +4690,11 @@ type block_type =
 
 let pp_block_type ppf = function
   | <span data-count="3">B</span>t_ind ind -&gt; pf ppf "(type %a)" pp_indice ind
-  | <span data-count="228">B</span>t_raw (_ind, (pt, rt)) -&gt;
+  | <span data-count="230">B</span>t_raw (_ind, (pt, rt)) -&gt;
     pf ppf "%a%a"
-      (with_space_lis<span data-count="228">t</span> pp_param_type)
+      (with_space_lis<span data-count="230">t</span> pp_param_type)
       pt
-      (with_space_lis<span data-count="228">t</span> pp_result_type)
+      (with_space_lis<span data-count="230">t</span> pp_result_type)
       rt
 
 let pp_block_type_opt ppf = function
@@ -6041,7 +6041,7 @@ module Import = struct
       | Tag of string option * block_type
 
     let pp ppf = function
-      | <span data-count="6">F</span>unc (id, t) -&gt; pf ppf "(func%a %a)" pp_id_opt id pp_block_type t
+      | <span data-count="8">F</span>unc (id, t) -&gt; pf ppf "(func%a %a)" pp_id_opt id pp_block_type t
       | <span data-count="0">T</span>able (id, t) -&gt; pf ppf "(table%a %a)" pp_id_opt id Table.Type.pp t
       | <span data-count="0">M</span>em (id, t) -&gt; pf ppf "(memory%a %a)" pp_id_opt id pp_limits t
       | <span data-count="0">G</span>lobal (id, t) -&gt; pf ppf "(global%a %a)" pp_id_opt id Global.Type.pp t
@@ -6056,7 +6056,7 @@ module Import = struct
     }
 
   let pp ppf i =
-    <span data-count="6">p</span>f ppf {|(import "%a" "%a" %a)|} string i.modul_name string i.name Type.pp
+    <span data-count="8">p</span>f ppf {|(import "%a" "%a" %a)|} string i.modul_name string i.name Type.pp
       i.typ
 end
 
@@ -6112,7 +6112,7 @@ module Module = struct
       | <span data-count="1">D</span>ata d -&gt; Data.pp ppf d
       | <span data-count="0">T</span>ag t -&gt; Tag.pp ppf t
       | <span data-count="24">S</span>tart s -&gt; pp_start ppf s
-      | <span data-count="6">I</span>mport i -&gt; Import.pp ppf i
+      | <span data-count="8">I</span>mport i -&gt; Import.pp ppf i
       | <span data-count="33">E</span>xport e -&gt; Export.pp ppf e
   end
 
@@ -6122,10 +6122,10 @@ module Module = struct
     }
 
   let pp_fields ppf fields =
-    <span data-count="113">F</span>mt.pf ppf "%a" (lis<span data-count="113">t</span> ~sep:pp_newline Field.pp) fields
+    <span data-count="115">F</span>mt.pf ppf "%a" (lis<span data-count="115">t</span> ~sep:pp_newline Field.pp) fields
 
   let pp ppf m =
-    <span data-count="112">p</span>f ppf "(module%a@\n  @[&lt;v&gt;%a@]@\n)" pp_id_opt m.id pp_fields m.fields
+    <span data-count="114">p</span>f ppf "(module%a@\n  @[&lt;v&gt;%a@]@\n)" pp_id_opt m.id pp_fields m.fields
 end
 </code></pre>
       </div>

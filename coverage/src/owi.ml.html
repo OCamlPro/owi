@@ -84,6 +84,8 @@
 <a id="L60"></a><span > </span>
 <a id="L61"></a><span > </span>
 <a id="L62"></a><span > </span>
+<a id="L63"></a><span > </span>
+<a id="L64"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -150,6 +152,8 @@
 <a href="#L60">60</a>
 <a href="#L61">61</a>
 <a href="#L62">62</a>
+<a href="#L63">63</a>
+<a href="#L64">64</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2026 OCamlPro *)
@@ -184,6 +188,7 @@ module Cmd_wasm_to_wat = Cmd_wasm_to_wat
 module Cmd_wasm_of_wat = Cmd_wasm_of_wat
 module Cmd_zig_sym = Cmd_zig_sym
 module Compile = Compile
+module Concrete_choice = Concrete_choice
 module Concrete_extern = Concrete_extern
 module Concrete_boolean = Concrete_boolean
 module Concrete_memory = Concrete_memory
@@ -192,6 +197,7 @@ module Concrete_i32 = Concrete_i32
 module Concrete_i64 = Concrete_i64
 module Concrete_f32 = Concrete_f32
 module Concrete_f64 = Concrete_f64
+module Concrete_state = Concrete_state
 module Env = Env
 module Init = Init
 module Interpret = Interpret

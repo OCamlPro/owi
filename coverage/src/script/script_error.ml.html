@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>script_error.ml &mdash; Coverage report</title>
-    <meta name="description" content="71.05% coverage in src/script/script_error.ml">
+    <meta name="description" content="74.68% coverage in src/script/script_error.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,27 +15,25 @@
           <span class="dirname">src/script/</span>script_error.ml
         </a>
       </h1>
-      <h2>71.05%</h2>
+      <h2>74.68%</h2>
     </div>
     <div id="navbar">
-      <span class="some-visited" style="top:18.64%"></span>
-      <span class="unvisited" style="top:22.03%"></span>
-      <span class="unvisited" style="top:23.73%"></span>
-      <span class="some-visited" style="top:27.12%"></span>
-      <span class="some-visited" style="top:28.81%"></span>
-      <span class="unvisited" style="top:33.90%"></span>
-      <span class="some-visited" style="top:38.98%"></span>
-      <span class="some-visited" style="top:44.07%"></span>
-      <span class="some-visited" style="top:49.15%"></span>
-      <span class="some-visited" style="bottom:42.37%"></span>
-      <span class="unvisited" style="bottom:38.98%"></span>
-      <span class="unvisited" style="bottom:37.29%"></span>
-      <span class="some-visited" style="bottom:35.59%"></span>
-      <span class="unvisited" style="bottom:23.73%"></span>
-      <span class="unvisited" style="bottom:20.34%"></span>
-      <span class="unvisited" style="bottom:18.64%"></span>
-      <span class="some-visited" style="bottom:16.95%"></span>
-      <span class="unvisited" style="bottom:13.56%"></span>
+      <span class="some-visited" style="top:17.19%"></span>
+      <span class="unvisited" style="top:20.31%"></span>
+      <span class="unvisited" style="top:21.88%"></span>
+      <span class="some-visited" style="top:25.00%"></span>
+      <span class="some-visited" style="top:26.56%"></span>
+      <span class="unvisited" style="top:31.25%"></span>
+      <span class="some-visited" style="top:35.94%"></span>
+      <span class="some-visited" style="top:40.62%"></span>
+      <span class="some-visited" style="top:45.31%"></span>
+      <span class="some-visited" style="bottom:46.88%"></span>
+      <span class="unvisited" style="bottom:43.75%"></span>
+      <span class="unvisited" style="bottom:42.19%"></span>
+      <span class="some-visited" style="bottom:40.62%"></span>
+      <span class="unvisited" style="bottom:29.69%"></span>
+      <span class="unvisited" style="bottom:26.56%"></span>
+      <span class="unvisited" style="bottom:25.00%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -88,9 +86,9 @@
 <a id="L46"></a><span > </span>
 <a id="L47"></a><span class="unvisited"> </span>
 <a id="L48"></a><span class="unvisited"> </span>
-<a id="L49"></a><span class="some-visited"> </span>
+<a id="L49"></a><span class="visited"> </span>
 <a id="L50"></a><span > </span>
-<a id="L51"></a><span class="unvisited"> </span>
+<a id="L51"></a><span class="visited"> </span>
 <a id="L52"></a><span > </span>
 <a id="L53"></a><span > </span>
 <a id="L54"></a><span class="visited"> </span>
@@ -98,7 +96,12 @@
 <a id="L56"></a><span > </span>
 <a id="L57"></a><span class="visited"> </span>
 <a id="L58"></a><span class="visited"> </span>
-<a id="L59"></a><span class="visited"> </span>
+<a id="L59"></a><span > </span>
+<a id="L60"></a><span class="visited"> </span>
+<a id="L61"></a><span class="visited"> </span>
+<a id="L62"></a><span > </span>
+<a id="L63"></a><span class="visited"> </span>
+<a id="L64"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -162,15 +165,20 @@
 <a href="#L57">57</a>
 <a href="#L58">58</a>
 <a href="#L59">59</a>
+<a href="#L60">60</a>
+<a href="#L61">61</a>
+<a href="#L62">62</a>
+<a href="#L63">63</a>
+<a href="#L64">64</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
 let check_error ~expected ~got : unit Result.t =
-  <span data-count="7149">l</span>et ok =
-    String.equa<span data-count="7149">l</span> (Result.err_to_strin<span data-count="7149">g</span> got) expecte<span data-count="1736">d</span>
-    || String.starts_wit<span data-count="5413">h</span> ~prefix:expected (Result.err_to_strin<span data-count="5413">g</span> got<span data-count="5354">)</span>
+  <span data-count="7390">l</span>et ok =
+    String.equa<span data-count="7390">l</span> (Result.err_to_strin<span data-count="7390">g</span> got) expecte<span data-count="1736">d</span>
+    || String.starts_wit<span data-count="5654">h</span> ~prefix:expected (Result.err_to_strin<span data-count="5654">g</span> got<span data-count="5594">)</span>
     ||
     match got with
     | (<span data-count="0">`</span>Msg s | <span data-count="47">`</span>Parse_fail s)
@@ -211,17 +219,22 @@ let check_error ~expected ~got : unit Result.t =
       (* TODO: should be removed *)
       String.equa<span data-count="0">l</span> "alignment must not be larger than natural" expected
     | <span data-count="0">`</span>Msg got -&gt; String.equa<span data-count="0">l</span> got expected
-    | <span data-count="0">_</span> -&gt; fals<span data-count="59">e</span>
+    | <span data-count="1">_</span> -&gt; fals<span data-count="59">e</span>
   in
-  if not ok then <span data-count="0">b</span>egin
+  if not ok then <span data-count="1">b</span>egin
     Error (`Failed_with_but_expected (got, expected))
   end
-  else <span data-count="7149">O</span>k ()
+  else <span data-count="7389">O</span>k ()
 
 let check_result ~expected ~got =
-  <span data-count="6086">m</span>atch got with
-  | <span data-count="1">O</span>k _whatever -&gt; Error (`Did_not_fail_but_expected expected)
-  | <span data-count="6085">E</span>rror got -&gt; check_error ~expected ~got
+  <span data-count="6325">m</span>atch got with
+  | <span data-count="4">O</span>k _whatever -&gt;
+    Abstract_trace.record_wast_test_res Ok;
+    <span data-count="4">O</span>k ()
+  | <span data-count="6321">E</span>rror got -&gt;
+    Abstract_trace.record_wast_test_res
+      (Fail { expected; got = Result.err_to_strin<span data-count="6321">g</span> got });
+    <span data-count="6321">c</span>heck_error ~expected ~got
 </code></pre>
       </div>
     </div>

@@ -31,25 +31,28 @@
 <a id="L7"></a><span > </span>
 <a id="L8"></a><span > </span>
 <a id="L9"></a><span > </span>
+<a id="L10"></a><span > </span>
 </pre>
       </div>
       <div id="text-layer">
         <pre id="line-numbers">
-<a href="#L1">1</a>
-<a href="#L2">2</a>
-<a href="#L3">3</a>
-<a href="#L4">4</a>
-<a href="#L5">5</a>
-<a href="#L6">6</a>
-<a href="#L7">7</a>
-<a href="#L8">8</a>
-<a href="#L9">9</a>
+<a href="#L1"> 1</a>
+<a href="#L2"> 2</a>
+<a href="#L3"> 3</a>
+<a href="#L4"> 4</a>
+<a href="#L5"> 5</a>
+<a href="#L6"> 6</a>
+<a href="#L7"> 7</a>
+<a href="#L8"> 8</a>
+<a href="#L9"> 9</a>
+<a href="#L10">10</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-module Func = Extern.Func.Make (Concrete_value) (Result) (Concrete_memory)
+module Func =
+  Extern.Func.Make (Concrete_value) (Concrete_choice) (Concrete_memory)
 
 module Module = struct
   type t = (string * Func.t) list

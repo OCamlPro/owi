@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>abstract_interpreter_control_flow.ml &mdash; Coverage report</title>
-    <meta name="description" content="74.25% coverage in src/abstract/abstract_interpreter_control_flow.ml">
+    <meta name="description" content="81.14% coverage in src/abstract/abstract_interpreter_control_flow.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,67 +15,57 @@
           <span class="dirname">src/abstract/</span>abstract_interpreter_control_flow.ml
         </a>
       </h1>
-      <h2>74.25%</h2>
+      <h2>81.14%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="top:7.61%"></span>
-      <span class="unvisited" style="top:16.09%"></span>
-      <span class="unvisited" style="top:16.44%"></span>
-      <span class="unvisited" style="top:16.61%"></span>
-      <span class="unvisited" style="top:16.96%"></span>
-      <span class="unvisited" style="top:17.65%"></span>
-      <span class="unvisited" style="top:17.82%"></span>
-      <span class="unvisited" style="top:17.99%"></span>
-      <span class="unvisited" style="top:18.34%"></span>
-      <span class="unvisited" style="top:24.05%"></span>
-      <span class="unvisited" style="top:25.78%"></span>
-      <span class="unvisited" style="top:26.99%"></span>
-      <span class="unvisited" style="top:28.20%"></span>
-      <span class="unvisited" style="top:28.37%"></span>
-      <span class="some-visited" style="top:32.53%"></span>
-      <span class="unvisited" style="top:33.56%"></span>
-      <span class="unvisited" style="top:33.74%"></span>
-      <span class="unvisited" style="top:33.91%"></span>
-      <span class="unvisited" style="top:34.08%"></span>
-      <span class="unvisited" style="top:36.51%"></span>
-      <span class="unvisited" style="top:40.83%"></span>
-      <span class="unvisited" style="top:41.00%"></span>
-      <span class="unvisited" style="top:41.18%"></span>
-      <span class="unvisited" style="top:41.35%"></span>
-      <span class="unvisited" style="top:42.73%"></span>
-      <span class="unvisited" style="top:42.91%"></span>
-      <span class="unvisited" style="top:43.08%"></span>
-      <span class="unvisited" style="top:43.25%"></span>
-      <span class="unvisited" style="top:43.43%"></span>
-      <span class="unvisited" style="top:46.37%"></span>
-      <span class="unvisited" style="bottom:49.31%"></span>
-      <span class="unvisited" style="bottom:49.13%"></span>
-      <span class="unvisited" style="bottom:48.96%"></span>
-      <span class="unvisited" style="bottom:47.23%"></span>
-      <span class="unvisited" style="bottom:47.06%"></span>
-      <span class="unvisited" style="bottom:43.94%"></span>
-      <span class="unvisited" style="bottom:43.77%"></span>
-      <span class="unvisited" style="bottom:41.87%"></span>
-      <span class="unvisited" style="bottom:40.14%"></span>
-      <span class="unvisited" style="bottom:36.51%"></span>
-      <span class="unvisited" style="bottom:32.01%"></span>
-      <span class="unvisited" style="bottom:31.49%"></span>
-      <span class="unvisited" style="bottom:22.49%"></span>
-      <span class="unvisited" style="bottom:22.32%"></span>
-      <span class="unvisited" style="bottom:22.15%"></span>
-      <span class="unvisited" style="bottom:21.97%"></span>
-      <span class="unvisited" style="bottom:15.22%"></span>
-      <span class="unvisited" style="bottom:9.52%"></span>
-      <span class="unvisited" style="bottom:5.19%"></span>
-      <span class="unvisited" style="bottom:5.02%"></span>
-      <span class="unvisited" style="bottom:3.46%"></span>
-      <span class="unvisited" style="bottom:2.94%"></span>
-      <span class="unvisited" style="bottom:1.56%"></span>
-      <span class="unvisited" style="bottom:1.38%"></span>
-      <span class="unvisited" style="bottom:1.21%"></span>
-      <span class="unvisited" style="bottom:0.87%"></span>
-      <span class="unvisited" style="bottom:0.69%"></span>
-      <span class="unvisited" style="bottom:0.52%"></span>
+      <span class="some-visited" style="top:7.02%"></span>
+      <span class="unvisited" style="top:14.66%"></span>
+      <span class="unvisited" style="top:14.98%"></span>
+      <span class="unvisited" style="top:15.13%"></span>
+      <span class="unvisited" style="top:15.44%"></span>
+      <span class="unvisited" style="top:16.07%"></span>
+      <span class="unvisited" style="top:16.22%"></span>
+      <span class="unvisited" style="top:16.38%"></span>
+      <span class="unvisited" style="top:16.69%"></span>
+      <span class="unvisited" style="top:21.84%"></span>
+      <span class="unvisited" style="top:23.40%"></span>
+      <span class="unvisited" style="top:24.49%"></span>
+      <span class="unvisited" style="top:25.59%"></span>
+      <span class="unvisited" style="top:25.74%"></span>
+      <span class="some-visited" style="top:29.49%"></span>
+      <span class="unvisited" style="top:30.42%"></span>
+      <span class="unvisited" style="top:30.58%"></span>
+      <span class="unvisited" style="top:30.73%"></span>
+      <span class="unvisited" style="top:30.89%"></span>
+      <span class="unvisited" style="top:33.07%"></span>
+      <span class="unvisited" style="top:36.97%"></span>
+      <span class="unvisited" style="top:37.13%"></span>
+      <span class="unvisited" style="top:37.29%"></span>
+      <span class="unvisited" style="top:37.44%"></span>
+      <span class="unvisited" style="top:38.69%"></span>
+      <span class="unvisited" style="top:38.85%"></span>
+      <span class="unvisited" style="top:39.00%"></span>
+      <span class="unvisited" style="top:39.16%"></span>
+      <span class="unvisited" style="top:39.31%"></span>
+      <span class="unvisited" style="top:41.97%"></span>
+      <span class="unvisited" style="top:44.93%"></span>
+      <span class="unvisited" style="top:45.09%"></span>
+      <span class="unvisited" style="top:45.24%"></span>
+      <span class="unvisited" style="top:45.40%"></span>
+      <span class="unvisited" style="top:48.36%"></span>
+      <span class="unvisited" style="top:48.52%"></span>
+      <span class="unvisited" style="bottom:48.36%"></span>
+      <span class="unvisited" style="bottom:48.21%"></span>
+      <span class="unvisited" style="bottom:44.93%"></span>
+      <span class="unvisited" style="bottom:43.53%"></span>
+      <span class="unvisited" style="bottom:39.78%"></span>
+      <span class="unvisited" style="bottom:35.41%"></span>
+      <span class="unvisited" style="bottom:35.26%"></span>
+      <span class="some-visited" style="bottom:8.42%"></span>
+      <span class="unvisited" style="bottom:1.09%"></span>
+      <span class="unvisited" style="bottom:0.78%"></span>
+      <span class="unvisited" style="bottom:0.62%"></span>
+      <span class="unvisited" style="bottom:0.47%"></span>
       <span class="unvisited" style="bottom:0.00%"></span>
     </div>
     <div id="report">
@@ -96,24 +86,24 @@
 <a id="L13"></a><span > </span>
 <a id="L14"></a><span > </span>
 <a id="L15"></a><span > </span>
-<a id="L16"></a><span class="visited"> </span>
-<a id="L17"></a><span > </span>
+<a id="L16"></a><span > </span>
+<a id="L17"></a><span class="visited"> </span>
 <a id="L18"></a><span > </span>
 <a id="L19"></a><span > </span>
 <a id="L20"></a><span > </span>
-<a id="L21"></a><span class="visited"> </span>
-<a id="L22"></a><span > </span>
+<a id="L21"></a><span > </span>
+<a id="L22"></a><span class="visited"> </span>
 <a id="L23"></a><span > </span>
-<a id="L24"></a><span class="visited"> </span>
-<a id="L25"></a><span > </span>
-<a id="L26"></a><span class="visited"> </span>
-<a id="L27"></a><span > </span>
-<a id="L28"></a><span class="visited"> </span>
+<a id="L24"></a><span > </span>
+<a id="L25"></a><span class="visited"> </span>
+<a id="L26"></a><span > </span>
+<a id="L27"></a><span class="visited"> </span>
+<a id="L28"></a><span > </span>
 <a id="L29"></a><span class="visited"> </span>
 <a id="L30"></a><span class="visited"> </span>
 <a id="L31"></a><span class="visited"> </span>
 <a id="L32"></a><span class="visited"> </span>
-<a id="L33"></a><span > </span>
+<a id="L33"></a><span class="visited"> </span>
 <a id="L34"></a><span > </span>
 <a id="L35"></a><span > </span>
 <a id="L36"></a><span > </span>
@@ -121,40 +111,40 @@
 <a id="L38"></a><span > </span>
 <a id="L39"></a><span > </span>
 <a id="L40"></a><span > </span>
-<a id="L41"></a><span class="visited"> </span>
+<a id="L41"></a><span > </span>
 <a id="L42"></a><span class="visited"> </span>
 <a id="L43"></a><span class="visited"> </span>
-<a id="L44"></a><span class="unvisited"> </span>
-<a id="L45"></a><span > </span>
-<a id="L46"></a><span class="visited"> </span>
-<a id="L47"></a><span > </span>
-<a id="L48"></a><span class="visited"> </span>
-<a id="L49"></a><span > </span>
+<a id="L44"></a><span class="visited"> </span>
+<a id="L45"></a><span class="some-visited"> </span>
+<a id="L46"></a><span > </span>
+<a id="L47"></a><span class="visited"> </span>
+<a id="L48"></a><span > </span>
+<a id="L49"></a><span class="visited"> </span>
 <a id="L50"></a><span > </span>
 <a id="L51"></a><span > </span>
 <a id="L52"></a><span > </span>
 <a id="L53"></a><span > </span>
-<a id="L54"></a><span class="visited"> </span>
-<a id="L55"></a><span > </span>
+<a id="L54"></a><span > </span>
+<a id="L55"></a><span class="visited"> </span>
 <a id="L56"></a><span > </span>
-<a id="L57"></a><span class="visited"> </span>
-<a id="L58"></a><span > </span>
+<a id="L57"></a><span > </span>
+<a id="L58"></a><span class="visited"> </span>
 <a id="L59"></a><span > </span>
 <a id="L60"></a><span > </span>
-<a id="L61"></a><span class="visited"> </span>
-<a id="L62"></a><span > </span>
-<a id="L63"></a><span class="visited"> </span>
+<a id="L61"></a><span > </span>
+<a id="L62"></a><span class="visited"> </span>
+<a id="L63"></a><span > </span>
 <a id="L64"></a><span class="visited"> </span>
-<a id="L65"></a><span > </span>
-<a id="L66"></a><span class="visited"> </span>
+<a id="L65"></a><span class="visited"> </span>
+<a id="L66"></a><span > </span>
 <a id="L67"></a><span class="visited"> </span>
-<a id="L68"></a><span > </span>
+<a id="L68"></a><span class="visited"> </span>
 <a id="L69"></a><span > </span>
 <a id="L70"></a><span > </span>
 <a id="L71"></a><span > </span>
-<a id="L72"></a><span class="visited"> </span>
+<a id="L72"></a><span > </span>
 <a id="L73"></a><span class="visited"> </span>
-<a id="L74"></a><span > </span>
+<a id="L74"></a><span class="visited"> </span>
 <a id="L75"></a><span > </span>
 <a id="L76"></a><span > </span>
 <a id="L77"></a><span > </span>
@@ -172,80 +162,80 @@
 <a id="L89"></a><span > </span>
 <a id="L90"></a><span > </span>
 <a id="L91"></a><span > </span>
-<a id="L92"></a><span class="visited"> </span>
-<a id="L93"></a><span class="unvisited"> </span>
-<a id="L94"></a><span > </span>
-<a id="L95"></a><span class="unvisited"> </span>
+<a id="L92"></a><span > </span>
+<a id="L93"></a><span class="visited"> </span>
+<a id="L94"></a><span class="unvisited"> </span>
+<a id="L95"></a><span > </span>
 <a id="L96"></a><span class="unvisited"> </span>
-<a id="L97"></a><span > </span>
-<a id="L98"></a><span class="unvisited"> </span>
-<a id="L99"></a><span > </span>
+<a id="L97"></a><span class="unvisited"> </span>
+<a id="L98"></a><span > </span>
+<a id="L99"></a><span class="unvisited"> </span>
 <a id="L100"></a><span > </span>
-<a id="L101"></a><span class="visited"> </span>
-<a id="L102"></a><span class="unvisited"> </span>
+<a id="L101"></a><span > </span>
+<a id="L102"></a><span class="visited"> </span>
 <a id="L103"></a><span class="unvisited"> </span>
 <a id="L104"></a><span class="unvisited"> </span>
-<a id="L105"></a><span > </span>
-<a id="L106"></a><span class="unvisited"> </span>
-<a id="L107"></a><span > </span>
+<a id="L105"></a><span class="unvisited"> </span>
+<a id="L106"></a><span > </span>
+<a id="L107"></a><span class="unvisited"> </span>
 <a id="L108"></a><span > </span>
-<a id="L109"></a><span class="visited"> </span>
-<a id="L110"></a><span > </span>
+<a id="L109"></a><span > </span>
+<a id="L110"></a><span class="visited"> </span>
 <a id="L111"></a><span > </span>
-<a id="L112"></a><span class="visited"> </span>
-<a id="L113"></a><span > </span>
-<a id="L114"></a><span class="visited"> </span>
+<a id="L112"></a><span > </span>
+<a id="L113"></a><span class="visited"> </span>
+<a id="L114"></a><span > </span>
 <a id="L115"></a><span class="visited"> </span>
-<a id="L116"></a><span > </span>
+<a id="L116"></a><span class="visited"> </span>
 <a id="L117"></a><span > </span>
 <a id="L118"></a><span > </span>
-<a id="L119"></a><span class="visited"> </span>
+<a id="L119"></a><span > </span>
 <a id="L120"></a><span class="visited"> </span>
 <a id="L121"></a><span class="visited"> </span>
-<a id="L122"></a><span > </span>
+<a id="L122"></a><span class="visited"> </span>
 <a id="L123"></a><span > </span>
 <a id="L124"></a><span > </span>
 <a id="L125"></a><span > </span>
 <a id="L126"></a><span > </span>
 <a id="L127"></a><span > </span>
-<a id="L128"></a><span class="visited"> </span>
-<a id="L129"></a><span > </span>
+<a id="L128"></a><span > </span>
+<a id="L129"></a><span class="visited"> </span>
 <a id="L130"></a><span > </span>
-<a id="L131"></a><span class="visited"> </span>
-<a id="L132"></a><span > </span>
+<a id="L131"></a><span > </span>
+<a id="L132"></a><span class="visited"> </span>
 <a id="L133"></a><span > </span>
 <a id="L134"></a><span > </span>
-<a id="L135"></a><span class="visited"> </span>
-<a id="L136"></a><span > </span>
+<a id="L135"></a><span > </span>
+<a id="L136"></a><span class="visited"> </span>
 <a id="L137"></a><span > </span>
-<a id="L138"></a><span class="visited"> </span>
-<a id="L139"></a><span class="unvisited"> </span>
-<a id="L140"></a><span class="visited"> </span>
+<a id="L138"></a><span > </span>
+<a id="L139"></a><span class="visited"> </span>
+<a id="L140"></a><span class="unvisited"> </span>
 <a id="L141"></a><span class="visited"> </span>
-<a id="L142"></a><span > </span>
+<a id="L142"></a><span class="visited"> </span>
 <a id="L143"></a><span > </span>
-<a id="L144"></a><span class="visited"> </span>
+<a id="L144"></a><span > </span>
 <a id="L145"></a><span class="visited"> </span>
 <a id="L146"></a><span class="visited"> </span>
-<a id="L147"></a><span > </span>
-<a id="L148"></a><span class="visited"> </span>
-<a id="L149"></a><span class="unvisited"> </span>
-<a id="L150"></a><span > </span>
+<a id="L147"></a><span class="visited"> </span>
+<a id="L148"></a><span > </span>
+<a id="L149"></a><span class="visited"> </span>
+<a id="L150"></a><span class="unvisited"> </span>
 <a id="L151"></a><span > </span>
 <a id="L152"></a><span > </span>
-<a id="L153"></a><span class="visited"> </span>
+<a id="L153"></a><span > </span>
 <a id="L154"></a><span class="visited"> </span>
-<a id="L155"></a><span > </span>
-<a id="L156"></a><span class="unvisited"> </span>
-<a id="L157"></a><span class="visited"> </span>
-<a id="L158"></a><span > </span>
+<a id="L155"></a><span class="visited"> </span>
+<a id="L156"></a><span > </span>
+<a id="L157"></a><span class="unvisited"> </span>
+<a id="L158"></a><span class="visited"> </span>
 <a id="L159"></a><span > </span>
-<a id="L160"></a><span class="visited"> </span>
+<a id="L160"></a><span > </span>
 <a id="L161"></a><span class="visited"> </span>
-<a id="L162"></a><span > </span>
-<a id="L163"></a><span class="unvisited"> </span>
+<a id="L162"></a><span class="visited"> </span>
+<a id="L163"></a><span > </span>
 <a id="L164"></a><span class="unvisited"> </span>
-<a id="L165"></a><span > </span>
+<a id="L165"></a><span class="unvisited"> </span>
 <a id="L166"></a><span > </span>
 <a id="L167"></a><span > </span>
 <a id="L168"></a><span > </span>
@@ -253,86 +243,86 @@
 <a id="L170"></a><span > </span>
 <a id="L171"></a><span > </span>
 <a id="L172"></a><span > </span>
-<a id="L173"></a><span class="visited"> </span>
-<a id="L174"></a><span > </span>
+<a id="L173"></a><span > </span>
+<a id="L174"></a><span class="visited"> </span>
 <a id="L175"></a><span > </span>
-<a id="L176"></a><span class="visited"> </span>
-<a id="L177"></a><span > </span>
+<a id="L176"></a><span > </span>
+<a id="L177"></a><span class="visited"> </span>
 <a id="L178"></a><span > </span>
 <a id="L179"></a><span > </span>
 <a id="L180"></a><span > </span>
 <a id="L181"></a><span > </span>
-<a id="L182"></a><span class="visited"> </span>
+<a id="L182"></a><span > </span>
 <a id="L183"></a><span class="visited"> </span>
-<a id="L184"></a><span > </span>
+<a id="L184"></a><span class="visited"> </span>
 <a id="L185"></a><span > </span>
 <a id="L186"></a><span > </span>
 <a id="L187"></a><span > </span>
-<a id="L188"></a><span class="some-visited"> </span>
-<a id="L189"></a><span class="visited"> </span>
-<a id="L190"></a><span > </span>
+<a id="L188"></a><span > </span>
+<a id="L189"></a><span class="some-visited"> </span>
+<a id="L190"></a><span class="visited"> </span>
 <a id="L191"></a><span > </span>
-<a id="L192"></a><span class="visited"> </span>
+<a id="L192"></a><span > </span>
 <a id="L193"></a><span class="visited"> </span>
-<a id="L194"></a><span class="unvisited"> </span>
+<a id="L194"></a><span class="visited"> </span>
 <a id="L195"></a><span class="unvisited"> </span>
 <a id="L196"></a><span class="unvisited"> </span>
 <a id="L197"></a><span class="unvisited"> </span>
-<a id="L198"></a><span > </span>
+<a id="L198"></a><span class="unvisited"> </span>
 <a id="L199"></a><span > </span>
 <a id="L200"></a><span > </span>
 <a id="L201"></a><span > </span>
 <a id="L202"></a><span > </span>
 <a id="L203"></a><span > </span>
 <a id="L204"></a><span > </span>
-<a id="L205"></a><span class="visited"> </span>
+<a id="L205"></a><span > </span>
 <a id="L206"></a><span class="visited"> </span>
 <a id="L207"></a><span class="visited"> </span>
 <a id="L208"></a><span class="visited"> </span>
-<a id="L209"></a><span > </span>
+<a id="L209"></a><span class="visited"> </span>
 <a id="L210"></a><span > </span>
-<a id="L211"></a><span class="unvisited"> </span>
-<a id="L212"></a><span class="visited"> </span>
+<a id="L211"></a><span > </span>
+<a id="L212"></a><span class="unvisited"> </span>
 <a id="L213"></a><span class="visited"> </span>
 <a id="L214"></a><span class="visited"> </span>
-<a id="L215"></a><span > </span>
+<a id="L215"></a><span class="visited"> </span>
 <a id="L216"></a><span > </span>
 <a id="L217"></a><span > </span>
 <a id="L218"></a><span > </span>
-<a id="L219"></a><span class="visited"> </span>
-<a id="L220"></a><span > </span>
+<a id="L219"></a><span > </span>
+<a id="L220"></a><span class="visited"> </span>
 <a id="L221"></a><span > </span>
 <a id="L222"></a><span > </span>
-<a id="L223"></a><span class="visited"> </span>
-<a id="L224"></a><span > </span>
-<a id="L225"></a><span class="visited"> </span>
+<a id="L223"></a><span > </span>
+<a id="L224"></a><span class="visited"> </span>
+<a id="L225"></a><span > </span>
 <a id="L226"></a><span class="visited"> </span>
 <a id="L227"></a><span class="visited"> </span>
-<a id="L228"></a><span > </span>
+<a id="L228"></a><span class="visited"> </span>
 <a id="L229"></a><span > </span>
 <a id="L230"></a><span > </span>
-<a id="L231"></a><span class="visited"> </span>
+<a id="L231"></a><span > </span>
 <a id="L232"></a><span class="visited"> </span>
 <a id="L233"></a><span class="visited"> </span>
 <a id="L234"></a><span class="visited"> </span>
 <a id="L235"></a><span class="visited"> </span>
-<a id="L236"></a><span class="unvisited"> </span>
+<a id="L236"></a><span class="visited"> </span>
 <a id="L237"></a><span class="unvisited"> </span>
 <a id="L238"></a><span class="unvisited"> </span>
 <a id="L239"></a><span class="unvisited"> </span>
-<a id="L240"></a><span > </span>
+<a id="L240"></a><span class="unvisited"> </span>
 <a id="L241"></a><span > </span>
 <a id="L242"></a><span > </span>
 <a id="L243"></a><span > </span>
 <a id="L244"></a><span > </span>
-<a id="L245"></a><span class="visited"> </span>
+<a id="L245"></a><span > </span>
 <a id="L246"></a><span class="visited"> </span>
-<a id="L247"></a><span class="unvisited"> </span>
+<a id="L247"></a><span class="visited"> </span>
 <a id="L248"></a><span class="unvisited"> </span>
 <a id="L249"></a><span class="unvisited"> </span>
 <a id="L250"></a><span class="unvisited"> </span>
 <a id="L251"></a><span class="unvisited"> </span>
-<a id="L252"></a><span > </span>
+<a id="L252"></a><span class="unvisited"> </span>
 <a id="L253"></a><span > </span>
 <a id="L254"></a><span > </span>
 <a id="L255"></a><span > </span>
@@ -348,317 +338,380 @@
 <a id="L265"></a><span > </span>
 <a id="L266"></a><span class="visited"> </span>
 <a id="L267"></a><span class="visited"> </span>
-<a id="L268"></a><span class="unvisited"> </span>
-<a id="L269"></a><span > </span>
+<a id="L268"></a><span > </span>
+<a id="L269"></a><span class="unvisited"> </span>
 <a id="L270"></a><span > </span>
-<a id="L271"></a><span class="visited"> </span>
+<a id="L271"></a><span > </span>
 <a id="L272"></a><span class="visited"> </span>
 <a id="L273"></a><span class="visited"> </span>
-<a id="L274"></a><span > </span>
+<a id="L274"></a><span class="visited"> </span>
 <a id="L275"></a><span > </span>
 <a id="L276"></a><span > </span>
 <a id="L277"></a><span > </span>
 <a id="L278"></a><span > </span>
-<a id="L279"></a><span class="visited"> </span>
-<a id="L280"></a><span > </span>
-<a id="L281"></a><span class="visited"> </span>
-<a id="L282"></a><span > </span>
+<a id="L279"></a><span > </span>
+<a id="L280"></a><span class="visited"> </span>
+<a id="L281"></a><span > </span>
+<a id="L282"></a><span class="visited"> </span>
 <a id="L283"></a><span > </span>
-<a id="L284"></a><span class="visited"> </span>
+<a id="L284"></a><span > </span>
 <a id="L285"></a><span class="visited"> </span>
 <a id="L286"></a><span class="visited"> </span>
-<a id="L287"></a><span class="visited"> </span>
-<a id="L288"></a><span > </span>
-<a id="L289"></a><span class="visited"> </span>
-<a id="L290"></a><span > </span>
-<a id="L291"></a><span class="visited"> </span>
-<a id="L292"></a><span class="visited"> </span>
-<a id="L293"></a><span class="unvisited"> </span>
-<a id="L294"></a><span class="unvisited"> </span>
-<a id="L295"></a><span class="unvisited"> </span>
-<a id="L296"></a><span > </span>
-<a id="L297"></a><span > </span>
-<a id="L298"></a><span > </span>
-<a id="L299"></a><span > </span>
+<a id="L287"></a><span > </span>
+<a id="L288"></a><span class="unvisited"> </span>
+<a id="L289"></a><span class="unvisited"> </span>
+<a id="L290"></a><span class="unvisited"> </span>
+<a id="L291"></a><span class="unvisited"> </span>
+<a id="L292"></a><span > </span>
+<a id="L293"></a><span class="visited"> </span>
+<a id="L294"></a><span class="visited"> </span>
+<a id="L295"></a><span > </span>
+<a id="L296"></a><span class="visited"> </span>
+<a id="L297"></a><span class="visited"> </span>
+<a id="L298"></a><span class="visited"> </span>
+<a id="L299"></a><span class="visited"> </span>
 <a id="L300"></a><span class="visited"> </span>
-<a id="L301"></a><span class="visited"> </span>
-<a id="L302"></a><span class="visited"> </span>
+<a id="L301"></a><span > </span>
+<a id="L302"></a><span > </span>
 <a id="L303"></a><span > </span>
-<a id="L304"></a><span class="visited"> </span>
-<a id="L305"></a><span class="unvisited"> </span>
-<a id="L306"></a><span class="unvisited"> </span>
-<a id="L307"></a><span > </span>
-<a id="L308"></a><span class="visited"> </span>
-<a id="L309"></a><span > </span>
-<a id="L310"></a><span > </span>
-<a id="L311"></a><span > </span>
+<a id="L304"></a><span > </span>
+<a id="L305"></a><span class="visited"> </span>
+<a id="L306"></a><span class="visited"> </span>
+<a id="L307"></a><span class="visited"> </span>
+<a id="L308"></a><span > </span>
+<a id="L309"></a><span class="visited"> </span>
+<a id="L310"></a><span class="unvisited"> </span>
+<a id="L311"></a><span class="unvisited"> </span>
 <a id="L312"></a><span > </span>
-<a id="L313"></a><span > </span>
+<a id="L313"></a><span class="visited"> </span>
 <a id="L314"></a><span > </span>
 <a id="L315"></a><span > </span>
-<a id="L316"></a><span class="visited"> </span>
-<a id="L317"></a><span class="visited"> </span>
-<a id="L318"></a><span class="visited"> </span>
-<a id="L319"></a><span class="visited"> </span>
+<a id="L316"></a><span > </span>
+<a id="L317"></a><span > </span>
+<a id="L318"></a><span > </span>
+<a id="L319"></a><span > </span>
 <a id="L320"></a><span > </span>
 <a id="L321"></a><span class="visited"> </span>
 <a id="L322"></a><span class="visited"> </span>
 <a id="L323"></a><span > </span>
-<a id="L324"></a><span class="unvisited"> </span>
-<a id="L325"></a><span class="unvisited"> </span>
-<a id="L326"></a><span > </span>
+<a id="L324"></a><span class="visited"> </span>
+<a id="L325"></a><span class="visited"> </span>
+<a id="L326"></a><span class="visited"> </span>
 <a id="L327"></a><span class="visited"> </span>
-<a id="L328"></a><span > </span>
+<a id="L328"></a><span class="visited"> </span>
 <a id="L329"></a><span class="visited"> </span>
 <a id="L330"></a><span > </span>
-<a id="L331"></a><span > </span>
-<a id="L332"></a><span > </span>
+<a id="L331"></a><span class="unvisited"> </span>
+<a id="L332"></a><span class="unvisited"> </span>
 <a id="L333"></a><span > </span>
-<a id="L334"></a><span > </span>
-<a id="L335"></a><span class="visited"> </span>
-<a id="L336"></a><span class="unvisited"> </span>
-<a id="L337"></a><span class="visited"> </span>
+<a id="L334"></a><span class="visited"> </span>
+<a id="L335"></a><span > </span>
+<a id="L336"></a><span class="visited"> </span>
+<a id="L337"></a><span > </span>
 <a id="L338"></a><span > </span>
 <a id="L339"></a><span > </span>
 <a id="L340"></a><span > </span>
-<a id="L341"></a><span > </span>
+<a id="L341"></a><span class="visited"> </span>
 <a id="L342"></a><span > </span>
 <a id="L343"></a><span > </span>
-<a id="L344"></a><span class="visited"> </span>
+<a id="L344"></a><span > </span>
 <a id="L345"></a><span > </span>
-<a id="L346"></a><span class="unvisited"> </span>
-<a id="L347"></a><span class="visited"> </span>
-<a id="L348"></a><span class="visited"> </span>
+<a id="L346"></a><span > </span>
+<a id="L347"></a><span > </span>
+<a id="L348"></a><span > </span>
 <a id="L349"></a><span > </span>
 <a id="L350"></a><span > </span>
-<a id="L351"></a><span class="visited"> </span>
+<a id="L351"></a><span > </span>
 <a id="L352"></a><span class="visited"> </span>
-<a id="L353"></a><span class="visited"> </span>
-<a id="L354"></a><span > </span>
-<a id="L355"></a><span class="visited"> </span>
-<a id="L356"></a><span class="visited"> </span>
-<a id="L357"></a><span class="visited"> </span>
-<a id="L358"></a><span class="visited"> </span>
+<a id="L353"></a><span class="unvisited"> </span>
+<a id="L354"></a><span class="visited"> </span>
+<a id="L355"></a><span > </span>
+<a id="L356"></a><span > </span>
+<a id="L357"></a><span > </span>
+<a id="L358"></a><span > </span>
 <a id="L359"></a><span > </span>
 <a id="L360"></a><span class="visited"> </span>
-<a id="L361"></a><span class="visited"> </span>
-<a id="L362"></a><span > </span>
+<a id="L361"></a><span > </span>
+<a id="L362"></a><span class="unvisited"> </span>
 <a id="L363"></a><span class="visited"> </span>
-<a id="L364"></a><span class="visited"> </span>
+<a id="L364"></a><span > </span>
 <a id="L365"></a><span > </span>
 <a id="L366"></a><span class="visited"> </span>
-<a id="L367"></a><span class="unvisited"> </span>
+<a id="L367"></a><span class="visited"> </span>
 <a id="L368"></a><span class="visited"> </span>
 <a id="L369"></a><span > </span>
-<a id="L370"></a><span > </span>
-<a id="L371"></a><span > </span>
+<a id="L370"></a><span class="visited"> </span>
+<a id="L371"></a><span class="visited"> </span>
 <a id="L372"></a><span class="visited"> </span>
-<a id="L373"></a><span > </span>
-<a id="L374"></a><span class="visited"> </span>
-<a id="L375"></a><span > </span>
+<a id="L373"></a><span class="visited"> </span>
+<a id="L374"></a><span > </span>
+<a id="L375"></a><span class="visited"> </span>
 <a id="L376"></a><span class="visited"> </span>
-<a id="L377"></a><span class="visited"> </span>
+<a id="L377"></a><span > </span>
 <a id="L378"></a><span class="visited"> </span>
-<a id="L379"></a><span > </span>
+<a id="L379"></a><span class="visited"> </span>
 <a id="L380"></a><span class="visited"> </span>
 <a id="L381"></a><span class="visited"> </span>
 <a id="L382"></a><span class="visited"> </span>
 <a id="L383"></a><span > </span>
-<a id="L384"></a><span > </span>
+<a id="L384"></a><span class="visited"> </span>
 <a id="L385"></a><span > </span>
-<a id="L386"></a><span class="visited"> </span>
+<a id="L386"></a><span class="unvisited"> </span>
 <a id="L387"></a><span class="visited"> </span>
 <a id="L388"></a><span > </span>
-<a id="L389"></a><span class="visited"> </span>
-<a id="L390"></a><span class="visited"> </span>
-<a id="L391"></a><span class="visited"> </span>
-<a id="L392"></a><span > </span>
-<a id="L393"></a><span class="unvisited"> </span>
-<a id="L394"></a><span > </span>
+<a id="L389"></a><span > </span>
+<a id="L390"></a><span > </span>
+<a id="L391"></a><span > </span>
+<a id="L392"></a><span class="visited"> </span>
+<a id="L393"></a><span > </span>
+<a id="L394"></a><span class="visited"> </span>
 <a id="L395"></a><span > </span>
-<a id="L396"></a><span class="unvisited"> </span>
+<a id="L396"></a><span class="visited"> </span>
 <a id="L397"></a><span class="visited"> </span>
 <a id="L398"></a><span > </span>
-<a id="L399"></a><span > </span>
+<a id="L399"></a><span class="visited"> </span>
 <a id="L400"></a><span class="visited"> </span>
 <a id="L401"></a><span > </span>
 <a id="L402"></a><span class="visited"> </span>
-<a id="L403"></a><span > </span>
-<a id="L404"></a><span > </span>
+<a id="L403"></a><span class="visited"> </span>
+<a id="L404"></a><span class="visited"> </span>
 <a id="L405"></a><span > </span>
-<a id="L406"></a><span class="visited"> </span>
-<a id="L407"></a><span > </span>
+<a id="L406"></a><span > </span>
+<a id="L407"></a><span class="visited"> </span>
 <a id="L408"></a><span class="visited"> </span>
-<a id="L409"></a><span class="visited"> </span>
+<a id="L409"></a><span > </span>
 <a id="L410"></a><span > </span>
-<a id="L411"></a><span class="visited"> </span>
+<a id="L411"></a><span > </span>
 <a id="L412"></a><span > </span>
 <a id="L413"></a><span class="visited"> </span>
-<a id="L414"></a><span > </span>
-<a id="L415"></a><span > </span>
-<a id="L416"></a><span class="visited"> </span>
+<a id="L414"></a><span class="unvisited"> </span>
+<a id="L415"></a><span class="unvisited"> </span>
+<a id="L416"></a><span > </span>
 <a id="L417"></a><span class="visited"> </span>
 <a id="L418"></a><span > </span>
 <a id="L419"></a><span > </span>
 <a id="L420"></a><span > </span>
-<a id="L421"></a><span class="visited"> </span>
-<a id="L422"></a><span class="visited"> </span>
-<a id="L423"></a><span > </span>
-<a id="L424"></a><span > </span>
+<a id="L421"></a><span > </span>
+<a id="L422"></a><span > </span>
+<a id="L423"></a><span class="visited"> </span>
+<a id="L424"></a><span class="visited"> </span>
 <a id="L425"></a><span class="visited"> </span>
-<a id="L426"></a><span class="visited"> </span>
+<a id="L426"></a><span > </span>
 <a id="L427"></a><span class="visited"> </span>
 <a id="L428"></a><span class="visited"> </span>
-<a id="L429"></a><span class="visited"> </span>
-<a id="L430"></a><span > </span>
-<a id="L431"></a><span > </span>
-<a id="L432"></a><span class="visited"> </span>
-<a id="L433"></a><span > </span>
+<a id="L429"></a><span > </span>
+<a id="L430"></a><span class="visited"> </span>
+<a id="L431"></a><span class="visited"> </span>
+<a id="L432"></a><span > </span>
+<a id="L433"></a><span class="visited"> </span>
 <a id="L434"></a><span class="visited"> </span>
 <a id="L435"></a><span > </span>
 <a id="L436"></a><span class="visited"> </span>
-<a id="L437"></a><span > </span>
-<a id="L438"></a><span > </span>
+<a id="L437"></a><span class="visited"> </span>
+<a id="L438"></a><span class="visited"> </span>
 <a id="L439"></a><span > </span>
 <a id="L440"></a><span class="visited"> </span>
 <a id="L441"></a><span > </span>
 <a id="L442"></a><span class="visited"> </span>
-<a id="L443"></a><span class="visited"> </span>
+<a id="L443"></a><span > </span>
 <a id="L444"></a><span > </span>
-<a id="L445"></a><span class="visited"> </span>
+<a id="L445"></a><span > </span>
 <a id="L446"></a><span > </span>
 <a id="L447"></a><span > </span>
-<a id="L448"></a><span class="unvisited"> </span>
-<a id="L449"></a><span class="unvisited"> </span>
-<a id="L450"></a><span class="unvisited"> </span>
-<a id="L451"></a><span class="unvisited"> </span>
+<a id="L448"></a><span class="visited"> </span>
+<a id="L449"></a><span > </span>
+<a id="L450"></a><span class="visited"> </span>
+<a id="L451"></a><span > </span>
 <a id="L452"></a><span > </span>
-<a id="L453"></a><span > </span>
+<a id="L453"></a><span class="visited"> </span>
 <a id="L454"></a><span > </span>
-<a id="L455"></a><span > </span>
+<a id="L455"></a><span class="visited"> </span>
 <a id="L456"></a><span > </span>
 <a id="L457"></a><span > </span>
-<a id="L458"></a><span > </span>
+<a id="L458"></a><span class="visited"> </span>
 <a id="L459"></a><span > </span>
-<a id="L460"></a><span > </span>
+<a id="L460"></a><span class="visited"> </span>
 <a id="L461"></a><span > </span>
 <a id="L462"></a><span > </span>
-<a id="L463"></a><span class="visited"> </span>
+<a id="L463"></a><span > </span>
 <a id="L464"></a><span class="visited"> </span>
-<a id="L465"></a><span > </span>
-<a id="L466"></a><span class="visited"> </span>
-<a id="L467"></a><span > </span>
-<a id="L468"></a><span class="visited"> </span>
-<a id="L469"></a><span > </span>
-<a id="L470"></a><span > </span>
-<a id="L471"></a><span class="visited"> </span>
-<a id="L472"></a><span class="visited"> </span>
+<a id="L465"></a><span class="visited"> </span>
+<a id="L466"></a><span > </span>
+<a id="L467"></a><span class="visited"> </span>
+<a id="L468"></a><span > </span>
+<a id="L469"></a><span class="visited"> </span>
+<a id="L470"></a><span class="visited"> </span>
+<a id="L471"></a><span > </span>
+<a id="L472"></a><span > </span>
 <a id="L473"></a><span > </span>
-<a id="L474"></a><span > </span>
+<a id="L474"></a><span class="visited"> </span>
 <a id="L475"></a><span class="visited"> </span>
-<a id="L476"></a><span class="visited"> </span>
+<a id="L476"></a><span > </span>
 <a id="L477"></a><span > </span>
-<a id="L478"></a><span > </span>
+<a id="L478"></a><span class="visited"> </span>
 <a id="L479"></a><span class="visited"> </span>
-<a id="L480"></a><span > </span>
-<a id="L481"></a><span > </span>
+<a id="L480"></a><span class="visited"> </span>
+<a id="L481"></a><span class="visited"> </span>
 <a id="L482"></a><span class="visited"> </span>
 <a id="L483"></a><span > </span>
 <a id="L484"></a><span class="visited"> </span>
-<a id="L485"></a><span class="visited"> </span>
-<a id="L486"></a><span > </span>
-<a id="L487"></a><span > </span>
-<a id="L488"></a><span class="visited"> </span>
+<a id="L485"></a><span > </span>
+<a id="L486"></a><span class="visited"> </span>
+<a id="L487"></a><span class="visited"> </span>
+<a id="L488"></a><span > </span>
 <a id="L489"></a><span > </span>
-<a id="L490"></a><span class="unvisited"> </span>
+<a id="L490"></a><span > </span>
 <a id="L491"></a><span > </span>
-<a id="L492"></a><span > </span>
+<a id="L492"></a><span class="visited"> </span>
 <a id="L493"></a><span > </span>
 <a id="L494"></a><span class="visited"> </span>
-<a id="L495"></a><span > </span>
+<a id="L495"></a><span class="visited"> </span>
 <a id="L496"></a><span > </span>
-<a id="L497"></a><span > </span>
+<a id="L497"></a><span class="visited"> </span>
 <a id="L498"></a><span > </span>
-<a id="L499"></a><span class="visited"> </span>
+<a id="L499"></a><span > </span>
 <a id="L500"></a><span class="visited"> </span>
-<a id="L501"></a><span class="visited"> </span>
-<a id="L502"></a><span class="visited"> </span>
+<a id="L501"></a><span > </span>
+<a id="L502"></a><span > </span>
 <a id="L503"></a><span > </span>
-<a id="L504"></a><span > </span>
+<a id="L504"></a><span class="visited"> </span>
 <a id="L505"></a><span class="visited"> </span>
 <a id="L506"></a><span > </span>
 <a id="L507"></a><span > </span>
 <a id="L508"></a><span class="visited"> </span>
-<a id="L509"></a><span class="visited"> </span>
+<a id="L509"></a><span > </span>
 <a id="L510"></a><span > </span>
 <a id="L511"></a><span > </span>
 <a id="L512"></a><span > </span>
-<a id="L513"></a><span class="visited"> </span>
+<a id="L513"></a><span > </span>
 <a id="L514"></a><span > </span>
-<a id="L515"></a><span > </span>
-<a id="L516"></a><span class="visited"> </span>
-<a id="L517"></a><span class="visited"> </span>
+<a id="L515"></a><span class="visited"> </span>
+<a id="L516"></a><span > </span>
+<a id="L517"></a><span > </span>
 <a id="L518"></a><span class="visited"> </span>
-<a id="L519"></a><span > </span>
-<a id="L520"></a><span > </span>
-<a id="L521"></a><span class="visited"> </span>
-<a id="L522"></a><span class="visited"> </span>
-<a id="L523"></a><span class="unvisited"> </span>
-<a id="L524"></a><span > </span>
-<a id="L525"></a><span > </span>
+<a id="L519"></a><span class="visited"> </span>
+<a id="L520"></a><span class="visited"> </span>
+<a id="L521"></a><span > </span>
+<a id="L522"></a><span > </span>
+<a id="L523"></a><span class="visited"> </span>
+<a id="L524"></a><span class="visited"> </span>
+<a id="L525"></a><span class="visited"> </span>
 <a id="L526"></a><span > </span>
-<a id="L527"></a><span > </span>
+<a id="L527"></a><span class="visited"> </span>
 <a id="L528"></a><span > </span>
-<a id="L529"></a><span > </span>
+<a id="L529"></a><span class="visited"> </span>
 <a id="L530"></a><span > </span>
 <a id="L531"></a><span > </span>
-<a id="L532"></a><span > </span>
-<a id="L533"></a><span > </span>
+<a id="L532"></a><span class="visited"> </span>
+<a id="L533"></a><span class="visited"> </span>
 <a id="L534"></a><span > </span>
 <a id="L535"></a><span > </span>
-<a id="L536"></a><span > </span>
-<a id="L537"></a><span > </span>
-<a id="L538"></a><span class="visited"> </span>
+<a id="L536"></a><span class="visited"> </span>
+<a id="L537"></a><span class="visited"> </span>
+<a id="L538"></a><span > </span>
 <a id="L539"></a><span > </span>
-<a id="L540"></a><span > </span>
-<a id="L541"></a><span class="visited"> </span>
-<a id="L542"></a><span class="visited"> </span>
+<a id="L540"></a><span class="visited"> </span>
+<a id="L541"></a><span > </span>
+<a id="L542"></a><span > </span>
 <a id="L543"></a><span class="visited"> </span>
-<a id="L544"></a><span > </span>
+<a id="L544"></a><span class="visited"> </span>
 <a id="L545"></a><span > </span>
-<a id="L546"></a><span > </span>
-<a id="L547"></a><span > </span>
-<a id="L548"></a><span class="unvisited"> </span>
-<a id="L549"></a><span class="unvisited"> </span>
-<a id="L550"></a><span > </span>
+<a id="L546"></a><span class="visited"> </span>
+<a id="L547"></a><span class="visited"> </span>
+<a id="L548"></a><span > </span>
+<a id="L549"></a><span > </span>
+<a id="L550"></a><span class="visited"> </span>
 <a id="L551"></a><span > </span>
-<a id="L552"></a><span > </span>
-<a id="L553"></a><span class="visited"> </span>
-<a id="L554"></a><span class="visited"> </span>
+<a id="L552"></a><span class="visited"> </span>
+<a id="L553"></a><span > </span>
+<a id="L554"></a><span > </span>
 <a id="L555"></a><span > </span>
-<a id="L556"></a><span > </span>
+<a id="L556"></a><span class="visited"> </span>
 <a id="L557"></a><span > </span>
-<a id="L558"></a><span class="unvisited"> </span>
+<a id="L558"></a><span > </span>
 <a id="L559"></a><span > </span>
 <a id="L560"></a><span > </span>
-<a id="L561"></a><span class="unvisited"> </span>
-<a id="L562"></a><span > </span>
-<a id="L563"></a><span > </span>
-<a id="L564"></a><span > </span>
+<a id="L561"></a><span class="visited"> </span>
+<a id="L562"></a><span class="visited"> </span>
+<a id="L563"></a><span class="visited"> </span>
+<a id="L564"></a><span class="visited"> </span>
 <a id="L565"></a><span > </span>
 <a id="L566"></a><span > </span>
-<a id="L567"></a><span > </span>
+<a id="L567"></a><span class="visited"> </span>
 <a id="L568"></a><span > </span>
-<a id="L569"></a><span class="unvisited"> </span>
-<a id="L570"></a><span class="unvisited"> </span>
-<a id="L571"></a><span class="unvisited"> </span>
+<a id="L569"></a><span > </span>
+<a id="L570"></a><span class="visited"> </span>
+<a id="L571"></a><span class="visited"> </span>
 <a id="L572"></a><span > </span>
-<a id="L573"></a><span class="unvisited"> </span>
-<a id="L574"></a><span class="unvisited"> </span>
-<a id="L575"></a><span class="unvisited"> </span>
+<a id="L573"></a><span > </span>
+<a id="L574"></a><span > </span>
+<a id="L575"></a><span class="visited"> </span>
 <a id="L576"></a><span > </span>
 <a id="L577"></a><span > </span>
-<a id="L578"></a><span class="unvisited"> </span>
+<a id="L578"></a><span class="visited"> </span>
+<a id="L579"></a><span class="visited"> </span>
+<a id="L580"></a><span class="visited"> </span>
+<a id="L581"></a><span > </span>
+<a id="L582"></a><span class="visited"> </span>
+<a id="L583"></a><span class="visited"> </span>
+<a id="L584"></a><span > </span>
+<a id="L585"></a><span > </span>
+<a id="L586"></a><span class="visited"> </span>
+<a id="L587"></a><span class="some-visited"> </span>
+<a id="L588"></a><span > </span>
+<a id="L589"></a><span > </span>
+<a id="L590"></a><span class="visited"> </span>
+<a id="L591"></a><span > </span>
+<a id="L592"></a><span > </span>
+<a id="L593"></a><span > </span>
+<a id="L594"></a><span > </span>
+<a id="L595"></a><span > </span>
+<a id="L596"></a><span > </span>
+<a id="L597"></a><span > </span>
+<a id="L598"></a><span > </span>
+<a id="L599"></a><span > </span>
+<a id="L600"></a><span > </span>
+<a id="L601"></a><span > </span>
+<a id="L602"></a><span > </span>
+<a id="L603"></a><span > </span>
+<a id="L604"></a><span > </span>
+<a id="L605"></a><span class="visited"> </span>
+<a id="L606"></a><span > </span>
+<a id="L607"></a><span > </span>
+<a id="L608"></a><span class="visited"> </span>
+<a id="L609"></a><span class="visited"> </span>
+<a id="L610"></a><span class="visited"> </span>
+<a id="L611"></a><span > </span>
+<a id="L612"></a><span > </span>
+<a id="L613"></a><span > </span>
+<a id="L614"></a><span > </span>
+<a id="L615"></a><span class="visited"> </span>
+<a id="L616"></a><span class="visited"> </span>
+<a id="L617"></a><span > </span>
+<a id="L618"></a><span > </span>
+<a id="L619"></a><span > </span>
+<a id="L620"></a><span > </span>
+<a id="L621"></a><span class="visited"> </span>
+<a id="L622"></a><span > </span>
+<a id="L623"></a><span > </span>
+<a id="L624"></a><span class="visited"> </span>
+<a id="L625"></a><span > </span>
+<a id="L626"></a><span class="visited"> </span>
+<a id="L627"></a><span > </span>
+<a id="L628"></a><span class="visited"> </span>
+<a id="L629"></a><span > </span>
+<a id="L630"></a><span > </span>
+<a id="L631"></a><span class="visited"> </span>
+<a id="L632"></a><span class="visited"> </span>
+<a id="L633"></a><span class="visited"> </span>
+<a id="L634"></a><span class="unvisited"> </span>
+<a id="L635"></a><span > </span>
+<a id="L636"></a><span class="unvisited"> </span>
+<a id="L637"></a><span class="unvisited"> </span>
+<a id="L638"></a><span class="unvisited"> </span>
+<a id="L639"></a><span > </span>
+<a id="L640"></a><span > </span>
+<a id="L641"></a><span class="unvisited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -1241,6 +1294,69 @@
 <a href="#L576">576</a>
 <a href="#L577">577</a>
 <a href="#L578">578</a>
+<a href="#L579">579</a>
+<a href="#L580">580</a>
+<a href="#L581">581</a>
+<a href="#L582">582</a>
+<a href="#L583">583</a>
+<a href="#L584">584</a>
+<a href="#L585">585</a>
+<a href="#L586">586</a>
+<a href="#L587">587</a>
+<a href="#L588">588</a>
+<a href="#L589">589</a>
+<a href="#L590">590</a>
+<a href="#L591">591</a>
+<a href="#L592">592</a>
+<a href="#L593">593</a>
+<a href="#L594">594</a>
+<a href="#L595">595</a>
+<a href="#L596">596</a>
+<a href="#L597">597</a>
+<a href="#L598">598</a>
+<a href="#L599">599</a>
+<a href="#L600">600</a>
+<a href="#L601">601</a>
+<a href="#L602">602</a>
+<a href="#L603">603</a>
+<a href="#L604">604</a>
+<a href="#L605">605</a>
+<a href="#L606">606</a>
+<a href="#L607">607</a>
+<a href="#L608">608</a>
+<a href="#L609">609</a>
+<a href="#L610">610</a>
+<a href="#L611">611</a>
+<a href="#L612">612</a>
+<a href="#L613">613</a>
+<a href="#L614">614</a>
+<a href="#L615">615</a>
+<a href="#L616">616</a>
+<a href="#L617">617</a>
+<a href="#L618">618</a>
+<a href="#L619">619</a>
+<a href="#L620">620</a>
+<a href="#L621">621</a>
+<a href="#L622">622</a>
+<a href="#L623">623</a>
+<a href="#L624">624</a>
+<a href="#L625">625</a>
+<a href="#L626">626</a>
+<a href="#L627">627</a>
+<a href="#L628">628</a>
+<a href="#L629">629</a>
+<a href="#L630">630</a>
+<a href="#L631">631</a>
+<a href="#L632">632</a>
+<a href="#L633">633</a>
+<a href="#L634">634</a>
+<a href="#L635">635</a>
+<a href="#L636">636</a>
+<a href="#L637">637</a>
+<a href="#L638">638</a>
+<a href="#L639">639</a>
+<a href="#L640">640</a>
+<a href="#L641">641</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2026 OCamlPro *)
@@ -1249,6 +1365,7 @@
 module Stack = Abstract_stack
 module JumpMap = Abstract_jump_map
 module Value = Abstract_value
+module Trace = Abstract_trace
 
 let max_recursive_calls = 10
 
@@ -1257,23 +1374,23 @@ exception RecursiveFunctionCall
 let gen_new_value ~widens a b state_a state_b
   (Abstract_domain.Context.Result (inc, intup, cont))
   (f : Value.t -&gt; 'container -&gt; 'container) =
-  <span data-count="15">l</span>et size = Value.size_of a in
+  <span data-count="24">l</span>et size = Value.size_of a in
   (* inc : whether the new value is included in the old one
    * intup : symbolic repr of all variabls that will be created simultaneously
    * cont : continuation function
    *)
-  <span data-count="15">l</span>et (Abstract_domain.Context.Result (inc, in_tup, local_cont)) =
+  <span data-count="24">l</span>et (Abstract_domain.Context.Result (inc, in_tup, local_cont)) =
     Abstract_domain.serialize_binary ~size ~widens
       state_a.Abstract_interpreter_state.abs_state.Abstract_state.ctx
-      (Value.to_binar<span data-count="15">y</span> a)
+      (Value.to_binar<span data-count="24">y</span> a)
       state_b.Abstract_interpreter_state.abs_state.Abstract_state.ctx
-      (Value.to_binar<span data-count="15">y</span> b) (inc, intup)
+      (Value.to_binar<span data-count="24">y</span> b) (inc, intup)
   in
-  <span data-count="15">l</span>et cont ctx out_tuple =
-    <span data-count="15">l</span>et value, out_tuple = local_cont ctx out_tuple in
-    <span data-count="15">l</span>et container, out_tuple = cont ctx out_tuple in
-    <span data-count="15">l</span>et b = Value.of_binary size value in
-    <span data-count="15">(</span><span data-count="15">f</span> b container, out_tuple)
+  <span data-count="24">l</span>et cont ctx out_tuple =
+    <span data-count="24">l</span>et value, out_tuple = local_cont ctx out_tuple in
+    <span data-count="24">l</span>et container, out_tuple = cont ctx out_tuple in
+    <span data-count="24">l</span>et b = Value.of_binary size value in
+    <span data-count="24">(</span><span data-count="24">f</span> b container, out_tuple)
   in
   Abstract_domain.Context.Result (inc, in_tup, cont)
 
@@ -1282,39 +1399,39 @@ let serialize ~widens :
   -&gt; Abstract_interpreter_state.t
   -&gt; (Abstract_interpreter_state.t, 'a) Abstract_domain.Context.result =
  fun state_a state_b -&gt;
-  <span data-count="10">l</span>et rec serialize_stack lhs rhs acc_res =
-    <span data-count="14">m</span>atch (lhs, rhs) with
-    | <span data-count="10">[</span>], [] -&gt; acc_res
-    | <span data-count="0">[</span>], _ :: _ | <span data-count="0">_</span> :: _, [] -&gt;
+  <span data-count="66">l</span>et rec serialize_stack lhs rhs acc_res =
+    <span data-count="71">m</span>atch (lhs, rhs) with
+    | <span data-count="65">[</span>], [] -&gt; acc_res
+    | <span data-count="0">[</span>], _ :: _ | <span data-count="1">_</span> :: _, [] -&gt;
       Fmt.failwith "join on stacks of different sizes"
-    | <span data-count="4">v</span>1 :: rest_a, v2 :: rest_b -&gt; begin
+    | <span data-count="5">v</span>1 :: rest_a, v2 :: rest_b -&gt; begin
       let r = gen_new_value ~widens v1 v2 state_a state_b acc_res List.cons in
-      <span data-count="4">s</span>erialize_stack rest_a rest_b r
+      <span data-count="5">s</span>erialize_stack rest_a rest_b r
       end
   in
   let (Abstract_domain.Context.Result (included, in_tuple, locals_continue)) =
     Abstract_locals.fold_on_nonequal_union
       begin fun k v1 v2 res -&gt;
-        <span data-count="10">l</span>et size =
+        <span data-count="18">l</span>et size =
           (* v1 and v2 should have the same size *)
           match v1 with
-          | <span data-count="10">S</span>ome v -&gt; Value.size_o<span data-count="10">f</span> v
+          | <span data-count="18">S</span>ome v -&gt; Value.size_o<span data-count="18">f</span> v
           | None -&gt; assert false
         in
         let v1 =
-          Option.value v1 ~default:(Value.to<span data-count="10">p</span> size state_a.abs_state.ctx)
+          Option.value v1 ~default:(Value.to<span data-count="18">p</span> size state_a.abs_state.ctx)
         in
-        <span data-count="10">l</span>et v2 =
-          Option.value v2 ~default:(Value.to<span data-count="10">p</span> size state_b.abs_state.ctx)
+        <span data-count="18">l</span>et v2 =
+          Option.value v2 ~default:(Value.to<span data-count="18">p</span> size state_b.abs_state.ctx)
         in
-        <span data-count="10">l</span>et f = Abstract_locals.add k in
-        <span data-count="10">g</span>en_new_value ~widens v1 v2 state_a state_b res f
+        <span data-count="18">l</span>et f = Abstract_locals.add k in
+        <span data-count="18">g</span>en_new_value ~widens v1 v2 state_a state_b res f
       end
       state_a.abs_state.locals state_b.abs_state.locals
       (Abstract_domain.Context.Result
          ( true
-         , Abstract_domain.Context.empty_tupl<span data-count="10">e</span> ()
-         , fun _ctx out -&gt; <span data-count="10">(</span>state_a.abs_state.locals, out) ) )
+         , Abstract_domain.Context.empty_tupl<span data-count="66">e</span> ()
+         , fun _ctx out -&gt; <span data-count="65">(</span>state_a.abs_state.locals, out) ) )
   in
   (* TODO: fixme
   let (Abstract_domain.Context.Result (included, in_tuple, globals_continue)) =
@@ -1333,7 +1450,7 @@ let serialize ~widens :
          (included, in_tuple, fun _ctx out -&gt; (state_a.globals, out)) )
   in
   *)
-  <span data-count="10">L</span>og.debug (fun m -&gt;
+  <span data-count="66">L</span>og.debug (fun m -&gt;
     <span data-count="0">l</span>et pp_locals ctx = <span data-count="0">A</span>bstract_locals.pp (Value.pp_with_ct<span data-count="0">x</span> ctx) in
     m "serializing locals (%s) : @\n first : %a @\n second : %a"
       (if widens then <span data-count="0">"</span>widen" else <span data-count="0">"</span>join")
@@ -1342,67 +1459,67 @@ let serialize ~widens :
       (pp_local<span data-count="0">s</span> state_b.abs_state.ctx)
       state_b.abs_state.locals );
 
-  <span data-count="10">L</span>og.debug (fun m -&gt;
+  <span data-count="66">L</span>og.debug (fun m -&gt;
     <span data-count="0">m</span> "serializing stacks (%s) : @\n first : %a @\n second : %a"
       (if widens then <span data-count="0">"</span>widen" else <span data-count="0">"</span>join")
-      (Abstract_stack.p<span data-count="0">p</span> state_a.abs_state.ctx)
+      (Stack.p<span data-count="0">p</span> state_a.abs_state.ctx)
       state_a.abs_state.stack
-      (Abstract_stack.p<span data-count="0">p</span> state_b.abs_state.ctx)
+      (Stack.p<span data-count="0">p</span> state_b.abs_state.ctx)
       state_b.abs_state.stack );
 
-  <span data-count="10">l</span>et (Abstract_domain.Context.Result (inc, in_tup, stack_continue)) =
+  <span data-count="66">l</span>et (Abstract_domain.Context.Result (inc, in_tup, stack_continue)) =
     serialize_stack state_a.abs_state.stack state_b.abs_state.stack
       (Abstract_domain.Context.Result
-         (included, in_tuple, fun _ctx out -&gt; <span data-count="10">(</span>[], out)) )
+         (included, in_tuple, fun _ctx out -&gt; <span data-count="65">(</span>[], out)) )
   in
-  <span data-count="10">l</span>et cont ctx out =
-    <span data-count="10">l</span>et stack, out = stack_continue ctx out in
+  <span data-count="65">l</span>et cont ctx out =
+    <span data-count="65">l</span>et stack, out = stack_continue ctx out in
     (*
     let globals, out = globals_continue ctx out in
   *)
-    <span data-count="10">l</span>et locals, out = locals_continue ctx out in
-    <span data-count="10">l</span>et abs_state_a =
-      { state_a.abs_state with ctx; stack = List.re<span data-count="10">v</span> stack; locals }
+    <span data-count="65">l</span>et locals, out = locals_continue ctx out in
+    <span data-count="65">l</span>et abs_state_a =
+      { state_a.abs_state with ctx; stack = List.re<span data-count="65">v</span> stack; locals }
     in
     ({ state_a with abs_state = abs_state_a }, out)
   in
   Abstract_domain.Context.Result (inc, in_tup, cont)
 
 let join state_a state_b =
-  <span data-count="1">l</span>et (Abstract_domain.Context.Result (_inc, in_tuple, continue)) =
+  <span data-count="2">l</span>et (Abstract_domain.Context.Result (_inc, in_tuple, continue)) =
     serialize ~widens:false state_a state_b
   in
-  <span data-count="1">l</span>et ctx, out =
+  <span data-count="2">l</span>et ctx, out =
     Abstract_domain.typed_nondet2 state_a.abs_state.ctx state_b.abs_state.ctx
       in_tuple
   in
-  <span data-count="1">f</span>st @@ continu<span data-count="1">e</span> ctx out
+  <span data-count="2">f</span>st @@ continu<span data-count="2">e</span> ctx out
 
 let join_opt state_a state_b =
-  <span data-count="45">m</span>atch (state_a, state_b) with
+  <span data-count="3794">m</span>atch (state_a, state_b) with
   | <span data-count="0">S</span>ome state_a, Some state_b -&gt; Some (joi<span data-count="0">n</span> state_a state_b)
-  | <span data-count="22">N</span>one, Some state | <span data-count="11">S</span>ome state, None -&gt; Some state
-  | <span data-count="12">N</span>one, None -&gt; None
+  | <span data-count="1934">N</span>one, Some state | <span data-count="1784">S</span>ome state, None -&gt; Some state
+  | <span data-count="76">N</span>one, None -&gt; None
 
 let join_X (state_a, jt_a) (state_b, jt_b) =
-  <span data-count="1">l</span>et jt = JumpMap.append jt_a jt_b in
-  <span data-count="1">m</span>atch (state_a, state_b) with
-  | <span data-count="1">S</span>ome state_a, Some state_b -&gt;
+  <span data-count="2">l</span>et jt = JumpMap.append jt_a jt_b in
+  <span data-count="2">m</span>atch (state_a, state_b) with
+  | <span data-count="2">S</span>ome state_a, Some state_b -&gt;
     let state = join state_a state_b in
-    <span data-count="1">(</span>Some state, jt)
+    <span data-count="2">(</span>Some state, jt)
   | <span data-count="0">S</span>ome state, None | <span data-count="0">N</span>one, Some state -&gt; (Some state, jt)
   | _, _ -&gt; assert false
 
 let join_jts stack_size = function
-  | <span data-count="44">N</span>one -&gt; None
-  | <span data-count="15">S</span>ome jts -&gt; (
+  | <span data-count="3538">N</span>one -&gt; None
+  | <span data-count="337">S</span>ome jts -&gt; (
     match jts with
     | <span data-count="0">[</span>] -&gt; None
-    | <span data-count="15">(</span>h : Abstract_interpreter_state.t) :: t -&gt;
+    | <span data-count="337">(</span>h : Abstract_interpreter_state.t) :: t -&gt;
       let abs_state =
         let h_stack = Stack.keep h.abs_state.stack stack_size in
-        <span data-count="15">l</span>et h_abs_state = { h.abs_state with stack = h_stack } in
-        List.fold_lef<span data-count="15">t</span>
+        <span data-count="337">l</span>et h_abs_state = { h.abs_state with stack = h_stack } in
+        List.fold_lef<span data-count="337">t</span>
           (fun acc (state : Abstract_interpreter_state.t) -&gt;
             <span data-count="0">l</span>et stack = Stack.keep state.abs_state.stack stack_size in
             <span data-count="0">l</span>et abs_state = { state.abs_state with stack } in
@@ -1414,23 +1531,23 @@ let join_jts stack_size = function
       Some abs_state )
 
 let widen widening_id state_a state_b =
-  <span data-count="9">l</span>et (Abstract_domain.Context.Result (included, in_tuple, continue)) =
+  <span data-count="64">l</span>et (Abstract_domain.Context.Result (included, in_tuple, continue)) =
     serialize ~widens:true state_a state_b
   in
-  <span data-count="9">l</span>et ctx, included, out =
+  <span data-count="63">l</span>et ctx, included, out =
     Abstract_domain.widened_fixpoint_step ~widening_id
       ~previous:state_a.abs_state.ctx ~next:state_b.abs_state.ctx
       (included, in_tuple)
   in
   (* TODO find out why is the out tuple ignored *)
-  <span data-count="9">l</span>et state, _out_tuple = continue ctx out in
-  <span data-count="9">l</span>et abs_state = { state.abs_state with ctx } in
+  <span data-count="63">l</span>et state, _out_tuple = continue ctx out in
+  <span data-count="63">l</span>et abs_state = { state.abs_state with ctx } in
   ({ state with abs_state }, included)
 
 let exec_extern_func ({ stack; _ } : Abstract_state.t)
   (f : Abstract_extern.Func.t) =
-  <span data-count="7">L</span>og.debug (fun m -&gt; <span data-count="0">m</span> "executing extern func");
-  <span data-count="7">l</span>et open Abstract_extern.Func in
+  <span data-count="9">L</span>og.debug (fun m -&gt; <span data-count="0">m</span> "executing extern func");
+  <span data-count="9">l</span>et open Abstract_extern.Func in
   let pop_arg (type ty) stack (arg : ty Abstract_extern.Func.telt) :
     ty * Stack.t =
     <span data-count="2">m</span>atch arg with
@@ -1446,7 +1563,7 @@ let exec_extern_func ({ stack; _ } : Abstract_state.t)
   let rec split_args : type f r.
     Stack.t -&gt; (f, r) Abstract_extern.Func.atype -&gt; Stack.t * Stack.t =
    fun stack ty -&gt;
-    <span data-count="14">l</span>et[@local] split_one_arg args =
+    <span data-count="18">l</span>et[@local] split_one_arg args =
       <span data-count="2">l</span>et elt, stack = Stack.pop stack in
       <span data-count="2">l</span>et elts, stack = split_args stack args in
       <span data-count="2">(</span>elt :: elts, stack)
@@ -1454,29 +1571,29 @@ let exec_extern_func ({ stack; _ } : Abstract_state.t)
     match ty with
     | <span data-count="0">M</span>em (_, args) -&gt; split_args stack args
     | <span data-count="2">A</span>rg (_, args) -&gt; split_one_arg args
-    | <span data-count="5">U</span>Arg args -&gt; split_args stack args
-    | <span data-count="7">R</span>es -&gt; ([], stack)
+    | <span data-count="7">U</span>Arg args -&gt; split_args stack args
+    | <span data-count="9">R</span>es -&gt; ([], stack)
   in
   let rec apply : type f r.
     Stack.t -&gt; (f, r) Abstract_extern.Func.atype -&gt; f -&gt; r =
    fun stack ty f -&gt;
-    <span data-count="14">m</span>atch ty with
+    <span data-count="18">m</span>atch ty with
     | Mem (_memid, _args) -&gt;
       (* TODO: Handle correctly *)
       assert false
     | <span data-count="2">A</span>rg (arg, args) -&gt;
       let v, stack = pop_arg stack arg in
       <span data-count="2">a</span>pply stack args (<span data-count="2">f</span> v)
-    | <span data-count="5">U</span>Arg args -&gt; apply stack args (<span data-count="5">f</span> ())
-    | <span data-count="7">R</span>es -&gt; f
+    | <span data-count="7">U</span>Arg args -&gt; apply stack args (<span data-count="7">f</span> ())
+    | <span data-count="9">R</span>es -&gt; f
   in
   let (Abstract_extern.Func.Extern_func (Func (atype, rtype), func)) = f in
   let args, stack = split_args stack atype in
-  <span data-count="7">l</span>et open Abstract_monad in
-  let+ r = appl<span data-count="7">y</span> (List.re<span data-count="7">v</span> args) atype func in
-  <span data-count="7">l</span>et push_val (type ty) (arg : ty Abstract_extern.Func.telt) (v : ty) stack =
-    <span data-count="5">m</span>atch arg with
-    | <span data-count="5">I</span>32 -&gt; Stack.push_i32 stack v
+  <span data-count="9">l</span>et open Abstract_monad in
+  let+ r = appl<span data-count="9">y</span> (List.re<span data-count="9">v</span> args) atype func in
+  <span data-count="9">l</span>et push_val (type ty) (arg : ty Abstract_extern.Func.telt) (v : ty) stack =
+    <span data-count="7">m</span>atch arg with
+    | <span data-count="7">I</span>32 -&gt; Stack.push_i32 stack v
     | <span data-count="0">I</span>64 -&gt; Stack.push_i64 stack v
     | <span data-count="0">F</span>32 -&gt; Stack.push_f32 stack v
     | <span data-count="0">F</span>64 -&gt; Stack.push_f64 stack v
@@ -1487,7 +1604,7 @@ let exec_extern_func ({ stack; _ } : Abstract_state.t)
   in
   match (rtype, r) with
   | <span data-count="2">R</span>0, () -&gt; stack
-  | <span data-count="5">R</span>1 t1, v1 -&gt; push_val t1 v1 stack
+  | <span data-count="7">R</span>1 t1, v1 -&gt; push_val t1 v1 stack
   | <span data-count="0">R</span>2 (t1, t2), (v1, v2) -&gt; push_val t1 v1 stack |&gt; <span data-count="0">p</span>ush_val t2 v2
   | <span data-count="0">R</span>3 (t1, t2, t3), (v1, v2, v3) -&gt;
     push_val t1 v1 stack |&gt; <span data-count="0">p</span>ush_val t2 v2 |&gt; <span data-count="0">p</span>ush_val t3 v3
@@ -1498,273 +1615,339 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
   let rec eval_expr :
        Abstract_interpreter_state.t
     -&gt; Binary.expr Annotated.t
-    -&gt; Abstract_interpreter_state.t option
-       * Abstract_interpreter_state.t list JumpMap.t =
+    -&gt; Abstract_interpreter_state.t option * JumpMap.t =
    fun state expr -&gt;
-    <span data-count="79">l</span>et rec loop (state : Abstract_interpreter_state.t) jt (expr : Binary.expr)
+    <span data-count="2366">l</span>et rec loop (state : Abstract_interpreter_state.t) jt (expr : Binary.expr)
         =
-      <span data-count="381">m</span>atch expr with
-      | <span data-count="24">[</span>] -&gt; (Some state, jt)
-      | <span data-count="357">i</span>nstr :: instrs -&gt; (
+      <span data-count="7487">m</span>atch expr with
+      | <span data-count="1897">[</span>] -&gt; (Some state, jt)
+      | <span data-count="5590">i</span>nstr :: instrs -&gt; (
         let new_state, new_jt = eval_instr state instr in
-        <span data-count="334">l</span>et new_jt = JumpMap.append jt new_jt in
-        <span data-count="334">L</span>og.debug (fun m -&gt;
+        <span data-count="5534">l</span>et new_jt = JumpMap.append jt new_jt in
+        <span data-count="5534">T</span>race.record_wasm_jt ~jm:new_jt;
+        Log.debug (fun m -&gt;
           <span data-count="0">m</span> "jt after (%a) :  %a"
             (Binary.pp_instr ~short:true)
             instr.raw JumpMap.pp new_jt );
-        <span data-count="334">m</span>atch new_state with
-        | <span data-count="32">N</span>one -&gt; (None, new_jt)
-        | <span data-count="302">S</span>ome state -&gt; loop state new_jt instrs )
+        <span data-count="5534">m</span>atch new_state with
+        | <span data-count="413">N</span>one -&gt; (None, new_jt)
+        | <span data-count="5121">S</span>ome state -&gt; loop state new_jt instrs )
     in
     loop state JumpMap.empty expr.raw
 
   and eval_func ({ abs_state; _ } as state : Abstract_interpreter_state.t) idx
-    (func : Binary.Func.t) =
-    <span data-count="41">l</span>et nb_recursive_calls =
+    (func : Binary.Func.t) instr : Abstract_interpreter_state.t option =
+    <span data-count="1681">l</span>et nb_recursive_calls =
       List.fold_left
-        (fun acc call_frame -&gt; <span data-count="256">a</span>cc + if call_frame = idx then <span data-count="121">1</span> else <span data-count="135">0</span>)
+        (fun acc call_frame -&gt; <span data-count="617">a</span>cc + if call_frame = idx then <span data-count="197">1</span> else <span data-count="420">0</span>)
         0 abs_state.call_stack
     in
-    <span data-count="41">i</span>f nb_recursive_calls &gt; max_recursive_calls then <span data-count="1">r</span>aise RecursiveFunctionCall;
-    <span data-count="40">L</span>og.info (fun m -&gt;
-      <span data-count="39">m</span> "calling func  : func %s" (Option.valu<span data-count="39">e</span> func.id ~default:"anonymous") );
-    <span data-count="40">l</span>et (None | Some _), (param_type, result_type) = func.type_f in
-    let args, caller_popped_stack =
-      Stack.pop_n abs_state.stack (List.lengt<span data-count="40">h</span> param_type)
+    <span data-count="1681">i</span>f nb_recursive_calls &gt; max_recursive_calls then <span data-count="2">r</span>aise RecursiveFunctionCall;
+    <span data-count="1679">l</span>et (None | Some _), (param_type, result_type) = func.type_f in
+    Log.debug (fun m -&gt;
+      <span data-count="0">m</span> "params: %a, result: %a"
+        Fmt.(lis<span data-count="0">t</span> ~sep:comma Binary.pp_val_type)
+        (List.ma<span data-count="0">p</span> (fun (_, vt) -&gt; <span data-count="0">v</span>t) param_type)
+        Fmt.(lis<span data-count="0">t</span> ~sep:comma Binary.pp_val_type)
+        result_type );
+    <span data-count="1679">l</span>et args, caller_popped_stack =
+      Stack.pop_n abs_state.stack (List.lengt<span data-count="1679">h</span> param_type)
     in
-    <span data-count="40">l</span>et init_value : Binary.val_type -&gt; Value.t = function
-      | <span data-count="19">N</span>um_type I32 -&gt; I32 (Abstract_i32.zer<span data-count="19">o</span> abs_state.ctx)
-      | <span data-count="0">N</span>um_type I64 -&gt; I64 (Abstract_i64.zer<span data-count="0">o</span> abs_state.ctx)
-      | <span data-count="0">N</span>um_type F32 -&gt; F32 (Abstract_f32.unknow<span data-count="0">n</span> abs_state.ctx)
-      | <span data-count="0">N</span>um_type F64 -&gt; F64 (Abstract_f64.unknow<span data-count="0">n</span> abs_state.ctx)
+    <span data-count="1679">l</span>et init_value : Binary.val_type -&gt; Value.t = function
+      | <span data-count="36">N</span>um_type I32 -&gt; I32 (Abstract_i32.zer<span data-count="36">o</span> abs_state.ctx)
+      | <span data-count="16">N</span>um_type I64 -&gt; I64 (Abstract_i64.zer<span data-count="16">o</span> abs_state.ctx)
+      | <span data-count="14">N</span>um_type F32 -&gt; F32 (Abstract_f32.unknow<span data-count="14">n</span> abs_state.ctx)
+      | <span data-count="12">N</span>um_type F64 -&gt; F64 (Abstract_f64.unknow<span data-count="12">n</span> abs_state.ctx)
       | _ -&gt; assert false
     in
 
     let locals =
-      List.re<span data-count="40">v</span> args @ List.ma<span data-count="40">p</span> (fun (_str_opt, vt) -&gt; <span data-count="19">i</span>nit_value vt) func.locals
-      |&gt; List.mapi (fun i x -&gt; <span data-count="33">(</span>i, x))
-      |&gt; <span data-count="40">A</span>bstract_locals.of_list
+      List.re<span data-count="1679">v</span> args @ List.ma<span data-count="1679">p</span> (fun (_str_opt, vt) -&gt; <span data-count="78">i</span>nit_value vt) func.locals
+      |&gt; List.mapi (fun i x -&gt; <span data-count="1971">(</span>i, x))
+      |&gt; <span data-count="1679">A</span>bstract_locals.of_list
     in
-    <span data-count="40">L</span>og.debug (fun m -&gt;
+    <span data-count="1679">L</span>og.debug (fun m -&gt;
       <span data-count="0">m</span> "before call (%a): caller state : %a"
         (Fmt.optio<span data-count="0">n</span> ~none:(Fmt.an<span data-count="0">y</span> "$") Fmt.string)
         func.id Abstract_interpreter_state.pp state );
-    <span data-count="40">l</span>et call_stack = idx :: abs_state.call_stack in
+    <span data-count="1679">l</span>et call_stack = idx :: abs_state.call_stack in
     let fn_abs_state =
       { abs_state with stack = []; func_rt = result_type; locals; call_stack }
     in
-    let fn_end_state, jt =
-      eval_expr { state with abs_state = fn_abs_state } func.body
+    let fn_state : Abstract_interpreter_state.t =
+      { abs_state = fn_abs_state; env = state.env }
     in
+    Trace.record_wasm_step Block_start (Some fn_state) instr;
+    <span data-count="1679">l</span>et fn_end_state, jt = eval_expr fn_state func.body in
+    <span data-count="1639">T</span>race.record_wasm_step Block_end fn_end_state instr;
     (* The stack given to the function is empty so the returned stack should only contain the results *)
-    <span data-count="18">l</span>et fn_end_stack_size = List.length result_type in
-    <span data-count="18">l</span>et jumps_ret = join_jts fn_end_stack_size (JumpMap.find_op<span data-count="18">t</span> Ret jt) in
-    <span data-count="18">l</span>et jumps_br0 = join_jts fn_end_stack_size (JumpMap.find_op<span data-count="18">t</span> (I 0) jt) in
-    <span data-count="18">l</span>et fn_end_state = join_opt fn_end_state jumps_ret |&gt; <span data-count="18">j</span>oin_opt jumps_br0 in
-    (* We should probably copy state and join back the return values in the context here *)
-    <span data-count="18">m</span>atch fn_end_state with
-    | <span data-count="14">S</span>ome fn_end_state -&gt;
+    <span data-count="1639">l</span>et fn_end_stack_size = List.length fn_state.abs_state.func_rt in
+    <span data-count="1639">l</span>et jumps_ret = join_jts fn_end_stack_size (JumpMap.find_op<span data-count="1639">t</span> Ret jt) in
+    <span data-count="1639">l</span>et jumps_br0 = join_jts fn_end_stack_size (JumpMap.find_op<span data-count="1639">t</span> (I 0) jt) in
+    <span data-count="1639">l</span>et fn_end_state = join_opt fn_end_state jumps_ret |&gt; <span data-count="1639">j</span>oin_opt jumps_br0 in
+    <span data-count="1639">m</span>atch fn_end_state with
+    | <span data-count="1632">S</span>ome fn_end_state -&gt;
       Log.debug (fun m -&gt;
         <span data-count="0">m</span> "after call(%a): callee state : %a@."
           (Fmt.optio<span data-count="0">n</span> ~none:(Fmt.an<span data-count="0">y</span> "$") Fmt.string)
           func.id Abstract_interpreter_state.pp fn_end_state );
-      <span data-count="14">l</span>et stack =
+      <span data-count="1632">l</span>et stack =
         caller_popped_stack
-        @ Stack.kee<span data-count="14">p</span> fn_end_state.abs_state.stack fn_end_stack_size
+        @ Stack.kee<span data-count="1632">p</span> fn_end_state.abs_state.stack fn_end_stack_size
+      in
+      let call_stack =
+        match fn_end_state.abs_state.call_stack with
+        | [] -&gt; assert false
+        | <span data-count="1632">_</span> :: t -&gt; t
       in
       let abs_state =
-        { abs_state with stack; ctx = fn_end_state.abs_state.ctx }
+        { fn_state.abs_state with
+          stack
+        ; locals = abs_state.locals
+        ; ctx = fn_end_state.abs_state.ctx
+        ; call_stack
+        }
       in
       Some { fn_end_state with abs_state }
-    | <span data-count="4">N</span>one -&gt;
+    | <span data-count="7">N</span>one -&gt;
       Log.debug (fun m -&gt; <span data-count="0">m</span> "abstract state : None @.");
-      <span data-count="4">N</span>one
+      <span data-count="7">N</span>one
 
   and eval_instr ({ abs_state; env } as state : Abstract_interpreter_state.t) :
-       Binary.instr Annotated.t
-    -&gt; Abstract_interpreter_state.t option
-       * Abstract_interpreter_state.t list JumpMap.t =
+    Binary.instr Annotated.t -&gt; Abstract_interpreter_state.t option * JumpMap.t
+      =
    fun instr -&gt;
-    <span data-count="360">l</span>et { ctx; stack; locals; _ } : Abstract_state.t = abs_state in
+    <span data-count="5750">l</span>et { ctx; stack; locals; _ } : Abstract_state.t = abs_state in
     Log.debug (fun m -&gt;
       <span data-count="0">m</span> "abstract state : %a" Abstract_interpreter_state.pp state );
-    <span data-count="360">L</span>og.info (fun m -&gt;
-      <span data-count="302">m</span> "stack         : [ %a ]" (Abstract_stack.p<span data-count="302">p</span> ctx) stack );
+    <span data-count="5750">L</span>og.info (fun m -&gt; <span data-count="323">m</span> "stack         : [ %a ]" (Stack.p<span data-count="323">p</span> ctx) stack);
     (* Log.info (fun m -&gt; *)
     (*   m "ctx           : [ %a ]" Abstract_domain.context_pretty ctx ); *)
-    <span data-count="360">L</span>og.info (fun m -&gt;
-      <span data-count="302">m</span> "locals        : [ %a ]"
-        (Abstract_locals.p<span data-count="302">p</span> (Value.pp_with_ct<span data-count="302">x</span> ctx))
+    <span data-count="5750">L</span>og.info (fun m -&gt;
+      <span data-count="323">m</span> "locals        : [ %a ]"
+        (Abstract_locals.p<span data-count="323">p</span> (Value.pp_with_ct<span data-count="323">x</span> ctx))
         locals );
-    <span data-count="360">L</span>og.info (fun m -&gt;
-      <span data-count="302">m</span> "running instr : %a" (Binary.pp_instr ~short:true) instr.raw );
-    <span data-count="360">m</span>atch instr.raw with
-    | <span data-count="48">C</span>all call_idx -&gt;
+    <span data-count="5750">L</span>og.info (fun m -&gt;
+      <span data-count="323">m</span> "running instr : %a" (Binary.pp_instr ~short:true) instr.raw );
+    <span data-count="5750">m</span>atch instr.raw with
+    | <span data-count="336">C</span>all call_idx -&gt;
       let func = Env.Abstract.get_func ~env call_idx in
-      <span data-count="48">b</span>egin match func with
-      | <span data-count="41">W</span>asm func -&gt;
-        let r = eval_func state call_idx func in
-        <span data-count="18">(</span>r, JumpMap.empty)
-      | <span data-count="7">E</span>xtern func -&gt; (
+      <span data-count="336">b</span>egin match func with
+      | <span data-count="327">W</span>asm func -&gt;
+        Log.info (fun m -&gt;
+          <span data-count="42">m</span> "calling func  : func %s"
+            (Option.valu<span data-count="42">e</span> func.id ~default:"anonymous") );
+        <span data-count="327">l</span>et res = eval_func state call_idx func instr in
+        <span data-count="292">(</span>res, JumpMap.empty)
+      | <span data-count="9">E</span>xtern func -&gt;
         let stack = exec_extern_func abs_state func in
-        <span data-count="7">m</span>atch Abstract_monad.run stack abs_state with
-        | <span data-count="0">N</span>one -&gt; (None, JumpMap.empty)
-        | <span data-count="7">S</span>ome (stack, abs_state) -&gt;
-          let abs_state = { abs_state with stack } in
-          (Some { state with abs_state }, JumpMap.empty) )
+        <span data-count="9">l</span>et res, jts =
+          match Abstract_monad.run stack abs_state with
+          | <span data-count="0">N</span>one -&gt; (None, JumpMap.empty)
+          | <span data-count="9">S</span>ome (stack, abs_state) -&gt;
+            let abs_state = { abs_state with stack } in
+            (Some { state with abs_state }, JumpMap.empty)
+        in
+        Trace.record_wasm_step Step res instr;
+        <span data-count="9">(</span>res, jts)
       end
-    | <span data-count="9">B</span>lock (_str_opt, bt, expr) -&gt;
-      let next_state, jt = eval_expr state expr in
-      <span data-count="9">l</span>et stack_size =
+    | <span data-count="531">B</span>lock (_str_opt, bt, expr) -&gt;
+      Trace.record_wasm_step Block_start (Some state) instr;
+      <span data-count="531">l</span>et next_state, jt = eval_expr state expr in
+      <span data-count="516">l</span>et param_size, res_size =
         match bt with
-        | <span data-count="1">S</span>ome (_i, (_params, res)) -&gt;
-          List.lengt<span data-count="1">h</span> state.abs_state.stack + List.lengt<span data-count="1">h</span> res
-        | <span data-count="8">N</span>one -&gt; 0
+        | <span data-count="362">S</span>ome (_i, (_params, res)) -&gt; (List.lengt<span data-count="362">h</span> _params, List.lengt<span data-count="362">h</span> res)
+        | <span data-count="154">N</span>one -&gt; (0, 0)
       in
-      let jumps_br0 = join_jts stack_size (JumpMap.find_op<span data-count="9">t</span> (I 0) jt) in
-      <span data-count="9">l</span>et state = join_opt next_state jumps_br0 in
-      <span data-count="9">l</span>et jt =
+      let jumps_br0 = join_jts res_size (JumpMap.find_op<span data-count="516">t</span> (I 0) jt) in
+      <span data-count="516">l</span>et joined_state = join_opt next_state jumps_br0 in
+      <span data-count="516">l</span>et joined_state =
+        Option.map
+          (fun (joined_state : Abstract_interpreter_state.t) -&gt;
+            <span data-count="468">l</span>et stack = Stack.drop_n state.abs_state.stack param_size in
+            <span data-count="468">l</span>et stack = joined_state.abs_state.stack @ stack in
+            let abs_state = { joined_state.abs_state with stack } in
+            { joined_state with abs_state } )
+          joined_state
+      in
+      <span data-count="516">b</span>egin match (next_state, jumps_br0) with
+      | <span data-count="0">S</span>ome _, Some _ -&gt;
+        Trace.record_wasm_ste<span data-count="0">p</span> Join joined_state instr
+          ~inputs:[ ("fallthrough", next_state); ("br 0", jumps_br0) ]
+      | <span data-count="516">_</span>, _ -&gt; ()
+      end;
+      let jt =
         (* TODO on peut avoir une paire de (int * map) pour ne pas avoir à decr la liste immédiatement *)
         JumpMap.decr jt
       in
-      <span data-count="9">(</span>state, jt)
-    | <span data-count="2">I</span>f_else (_, bt, expr_then, expr_else) -&gt;
-      let b, stack = Stack.pop_bool stack ctx in
-      <span data-count="2">b</span>egin match
-        ( Abstract_domain.assum<span data-count="2">e</span> ctx b
-        , Abstract_domain.assum<span data-count="2">e</span> ctx (Abstract_boolean.no<span data-count="2">t</span> ctx b) )
-      with
-      | <span data-count="0">S</span>ome ctx, None -&gt;
-        eval_instr
-          { state with abs_state = { abs_state with stack; ctx } }
-          (Annotated.dumm<span data-count="0">y</span> (Binary.Block (None, bt, expr_then)))
-      | <span data-count="1">N</span>one, Some ctx -&gt;
-        eval_instr
-          { state with abs_state = { abs_state with stack; ctx } }
-          (Annotated.dumm<span data-count="1">y</span> (Binary.Block (None, bt, expr_else)))
-      | None, None -&gt; assert false
-      | <span data-count="1">S</span>ome ctx_true, Some ctx_false -&gt;
-        let strue = { abs_state with stack; ctx = ctx_true } in
-        let sfalse = { abs_state with stack; ctx = ctx_false } in
-        join_X
-          (eval_inst<span data-count="1">r</span>
-             { state with abs_state = strue }
-             (Annotated.dumm<span data-count="1">y</span> (Binary.Block (None, bt, expr_then))) )
-          (eval_inst<span data-count="1">r</span>
-             { state with abs_state = sfalse }
-             (Annotated.dumm<span data-count="1">y</span> (Binary.Block (None, bt, expr_else))) )
-      end
-    | <span data-count="5">L</span>oop (_str_opt, bt, body) -&gt;
-      let widening_id = Domains.Sig.Widening_Id.fresh () in
+      <span data-count="516">T</span>race.record_wasm_step Block_end joined_state instr;
+      <span data-count="516">(</span>joined_state, jt)
+    | <span data-count="158">I</span>f_else (_, bt, expr_then, expr_else) -&gt;
+      Trace.record_wasm_step Block_start (Some state) instr;
+      <span data-count="158">l</span>et b, stack = Stack.pop_bool stack ctx in
+      <span data-count="158">l</span>et joined_state, jt =
+        begin match
+          ( Abstract_domain.assum<span data-count="158">e</span> ctx b
+          , Abstract_domain.assum<span data-count="158">e</span> ctx (Abstract_boolean.no<span data-count="158">t</span> ctx b) )
+        with
+        | <span data-count="88">S</span>ome ctx, None -&gt;
+          eval_inst<span data-count="88">r</span>
+            { state with abs_state = { abs_state with stack; ctx } }
+            (Annotated.dumm<span data-count="88">y</span> (Binary.Block (None, bt, expr_then)))
+        | <span data-count="68">N</span>one, Some ctx -&gt;
+          eval_inst<span data-count="56">r</span>
+            { state with abs_state = { abs_state with stack; ctx } }
+            (Annotated.dumm<span data-count="68">y</span> (Binary.Block (None, bt, expr_else)))
+        | None, None -&gt; assert false
+        | <span data-count="2">S</span>ome ctx_true, Some ctx_false -&gt;
+          let strue = { abs_state with stack; ctx = ctx_true } in
+          let sfalse = { abs_state with stack; ctx = ctx_false } in
+          let then_state, then_jt =
+            eval_instr
+              { state with abs_state = strue }
+              (Annotated.dumm<span data-count="2">y</span> (Binary.Block (None, bt, expr_then)))
+          in
+          <span data-count="2">l</span>et else_state, else_jt =
+            eval_instr
+              { state with abs_state = sfalse }
+              (Annotated.dumm<span data-count="2">y</span> (Binary.Block (None, bt, expr_else)))
+          in
+          <span data-count="2">l</span>et joined_state, jt =
+            join_X (then_state, then_jt) (else_state, else_jt)
+          in
+          <span data-count="2">T</span>race.record_wasm_step Join joined_state instr
+            ~inputs:[ ("then", then_state); ("else", else_state) ];
+          <span data-count="2">(</span>joined_state, jt)
+        end
+      in
+      Trace.record_wasm_step Block_end joined_state instr;
+      <span data-count="146">(</span>joined_state, jt)
+    | <span data-count="68">L</span>oop (_str_opt, bt, body) -&gt;
+      Trace.record_wasm_step Block_start (Some state) instr;
+      <span data-count="68">l</span>et widening_id = Domains.Sig.Widening_Id.fresh () in
       (* TODO tester si on a besoin de copie *)
-      <span data-count="5">l</span>et initial_state =
-        { abs_state with ctx = Abstract_domain.Context.cop<span data-count="5">y</span> ctx }
+      <span data-count="68">l</span>et initial_state =
+        { abs_state with ctx = Abstract_domain.Context.cop<span data-count="68">y</span> ctx }
       in
       let stack_size =
         match bt with
-        | <span data-count="2">S</span>ome (_i, (params, _res)) -&gt; List.lengt<span data-count="2">h</span> params
-        | <span data-count="3">N</span>one -&gt; 0
+        | <span data-count="53">S</span>ome (_i, (params, _res)) -&gt; List.lengt<span data-count="53">h</span> params
+        | <span data-count="15">N</span>one -&gt; 0
       in
       let rec fixpoint state =
-        <span data-count="14">l</span>et next_state, jt = eval_expr state body in
-        <span data-count="14">l</span>et next_head =
-          match join_jts stack_size (JumpMap.find_op<span data-count="14">t</span> (I 0) jt) with
+        <span data-count="81">l</span>et next_state, jt = eval_expr state body in
+        <span data-count="81">l</span>et widening_state =
+          match join_jts stack_size (JumpMap.find_op<span data-count="81">t</span> (I 0) jt) with
           | <span data-count="7">S</span>ome state -&gt; Some state
-          | <span data-count="7">N</span>one -&gt;
+          | <span data-count="74">N</span>one -&gt;
             (* TODO: handle return too! *)
-            begin match next_state with
-            | <span data-count="2">S</span>ome state -&gt;
-              let stack = Stack.keep stack stack_size in
-              <span data-count="2">l</span>et abs_state = { state.abs_state with stack } in
-              Some { state with abs_state }
-            | <span data-count="5">N</span>one -&gt; None
-            end
+            Option.ma<span data-count="74">p</span>
+              (fun (state : Abstract_interpreter_state.t) -&gt;
+                <span data-count="57">l</span>et stack = Stack.keep state.abs_state.stack stack_size in
+                <span data-count="57">l</span>et abs_state = { state.abs_state with stack } in
+                { state with abs_state } )
+              next_state
         in
-        match next_head with
-        | <span data-count="5">N</span>one -&gt;
+        match widening_state with
+        | <span data-count="17">N</span>one -&gt;
           let jt = JumpMap.decr jt in
-          <span data-count="5">(</span>None, jt)
-        | <span data-count="9">S</span>ome next_head -&gt;
-          let widened, included = widen widening_id state next_head in
-          <span data-count="9">i</span>f not included then <span data-count="9">f</span>ixpoint widened
+          <span data-count="17">(</span>None, jt)
+        | <span data-count="64">S</span>ome widening_state -&gt;
+          let widened, included = widen widening_id state widening_state in
+          <span data-count="63">T</span>race.record_wasm_step Widen None instr
+            ~inputs:[ ("previous", Some state); ("next", Some widening_state) ]
+            ~converged:(Some included);
+          <span data-count="63">i</span>f not included then <span data-count="13">f</span>ixpoint widened
           else
-            (* fixpoint reached: exit loop, assume condition is false *)
-            <span data-count="0">l</span>et jt = JumpMap.decr jt in
-            <span data-count="0">b</span>egin match next_state with
-            | <span data-count="0">N</span>one -&gt; (next_state, jt)
-            | <span data-count="0">S</span>ome next_state -&gt;
-              let stack = next_state.abs_state.stack @ initial_state.stack in
-              let next_state =
-                Some
-                  { next_state with
-                    abs_state = { next_state.abs_state with stack }
-                  }
-              in
-              (next_state, jt)
-            end
+            (* fixpoint reached: exit loop. We don't reuse the widened state
+              as it has been shortened to the params size and not the result size *)
+            <span data-count="50">l</span>et jt = JumpMap.decr jt in
+            <span data-count="50">l</span>et exit_state =
+              Option.map
+                (fun (exit_state : Abstract_interpreter_state.t) -&gt;
+                  <span data-count="50">l</span>et stack =
+                    exit_state.abs_state.stack @ initial_state.stack
+                  in
+                  let abs_state = { exit_state.abs_state with stack } in
+                  { exit_state with abs_state } )
+                next_state
+            in
+            <span data-count="50">(</span>exit_state, jt)
       in
-      fixpoint state
-    | <span data-count="1">B</span>r i -&gt; (None, JumpMap.of_lis<span data-count="1">t</span> [ (I i, [ state ]) ])
-    | <span data-count="14">B</span>r_if i -&gt;
+      let widened_state, jts = fixpoint state in
+      <span data-count="67">T</span>race.record_wasm_step Block_end widened_state instr;
+      <span data-count="67">(</span>widened_state, jts)
+    | <span data-count="93">B</span>r i -&gt;
+      let res = None in
+      let jts = JumpMap.of_list [ (I i, [ state ]) ] in
+      <span data-count="93">T</span>race.record_wasm_step Step res instr;
+      <span data-count="93">(</span>res, jts)
+    | <span data-count="124">B</span>r_if i -&gt;
       let b, stack = Stack.pop_bool stack ctx in
-      <span data-count="14">l</span>et jt_if =
+      <span data-count="124">l</span>et jt_if =
         match Abstract_domain.assume ctx b with
-        | <span data-count="7">S</span>ome ctx -&gt;
+        | <span data-count="91">S</span>ome ctx -&gt;
           let abs_state = { abs_state with stack; ctx } in
           let state = { state with abs_state } in
-          JumpMap.of_lis<span data-count="7">t</span> [ (I i, [ state ]) ]
-        | <span data-count="7">N</span>one -&gt; JumpMap.empty
+          JumpMap.of_lis<span data-count="91">t</span> [ (I i, [ state ]) ]
+        | <span data-count="33">N</span>one -&gt; JumpMap.empty
       in
       let state =
-        match Abstract_domain.assume ctx (Abstract_boolean.no<span data-count="14">t</span> ctx b) with
-        | <span data-count="3">S</span>ome ctx -&gt;
+        match Abstract_domain.assume ctx (Abstract_boolean.no<span data-count="124">t</span> ctx b) with
+        | <span data-count="29">S</span>ome ctx -&gt;
           let abs_state = { abs_state with stack; ctx } in
           Some { state with abs_state }
-        | <span data-count="11">N</span>one -&gt; None
+        | <span data-count="95">N</span>one -&gt; None
       in
-      (state, jt_if)
-    | <span data-count="1">B</span>r_table (cases, default) -&gt;
+      Trace.record_wasm_step Step state instr;
+      <span data-count="124">(</span>state, jt_if)
+    | <span data-count="40">B</span>r_table (cases, default) -&gt;
       let v, stack = Stack.pop_i32 stack in
-      <span data-count="1">l</span>et nb_cases = Array.length cases |&gt; <span data-count="1">I</span>nt32.of_int in
-      <span data-count="1">l</span>et default =
+      <span data-count="40">l</span>et nb_cases = Array.length cases |&gt; <span data-count="40">I</span>nt32.of_int in
+      <span data-count="40">l</span>et default =
         match
           Abstract_domain.assume ctx
-            (Abstract_i32.ge_<span data-count="1">u</span> ctx v (Abstract_i32.of_int3<span data-count="1">2</span> ctx nb_cases))
+            (Abstract_i32.ge_<span data-count="40">u</span> ctx v (Abstract_i32.of_int3<span data-count="40">2</span> ctx nb_cases))
         with
-        | <span data-count="0">S</span>ome ctx -&gt;
+        | <span data-count="24">S</span>ome ctx -&gt;
           let abs_state = { abs_state with ctx; stack } in
           let state = { state with abs_state } in
           [ (JumpMap.Key.I default, [ state ]) ]
-        | <span data-count="1">N</span>one -&gt; []
+        | <span data-count="16">N</span>one -&gt; []
       in
       let cases =
         Array.map
           (fun i -&gt;
-            <span data-count="2">(</span> i
-            , Abstract_domain.assum<span data-count="2">e</span> ctx
-                (Abstract_i32.e<span data-count="2">q</span> ctx v
-                   (Abstract_i32.of_int3<span data-count="2">2</span> ctx (Int32.of_in<span data-count="2">t</span> i)) ) ) )
+            <span data-count="31">(</span> i
+            , Abstract_domain.assum<span data-count="31">e</span> ctx
+                (Abstract_i32.e<span data-count="31">q</span> ctx v
+                   (Abstract_i32.of_int3<span data-count="31">2</span> ctx (Int32.of_in<span data-count="31">t</span> i)) ) ) )
           cases
       in
-      <span data-count="1">l</span>et all_cases =
+      <span data-count="40">l</span>et all_cases =
         Array.fold_left
           (fun acc (i, c) -&gt;
-            <span data-count="2">m</span>atch c with
-            | <span data-count="1">S</span>ome ctx -&gt;
+            <span data-count="31">m</span>atch c with
+            | <span data-count="15">S</span>ome ctx -&gt;
               let abs_state = { abs_state with ctx; stack } in
               let state = { state with abs_state } in
               (JumpMap.Key.I i, [ state ]) :: acc
-            | <span data-count="1">N</span>one -&gt; acc )
+            | <span data-count="16">N</span>one -&gt; acc )
           default cases
       in
-      <span data-count="1">(</span>None, JumpMap.of_lis<span data-count="1">t</span> all_cases)
-    | <span data-count="6">R</span>eturn -&gt; (None, JumpMap.of_lis<span data-count="6">t</span> [ (Ret, [ state ]) ])
-    | <span data-count="274">S</span>imple i -&gt; (
+      <span data-count="40">T</span>race.record_wasm_step Step None instr;
+      <span data-count="40">(</span>None, JumpMap.of_lis<span data-count="40">t</span> all_cases)
+    | <span data-count="116">R</span>eturn -&gt;
+      Trace.record_wasm_step Step None instr;
+      <span data-count="116">(</span>None, JumpMap.of_lis<span data-count="116">t</span> [ (Ret, [ state ]) ])
+    | <span data-count="4281">S</span>imple i -&gt;
       let uuid = instr.uuid in
-      let res = S.eval_instr gen_new_value state ~uuid i in
-      <span data-count="274">m</span>atch res with
-      | <span data-count="274">S</span>tate state -&gt; (Some state, JumpMap.empty)
-      | <span data-count="0">U</span>nreachable -&gt; (None, JumpMap.empty) )
+      let state = S.eval_instr gen_new_value state ~uuid i in
+      <span data-count="4279">l</span>et state =
+        match state with <span data-count="4279">S</span>tate state -&gt; Some state | <span data-count="0">U</span>nreachable -&gt; None
+      in
+      Trace.record_wasm_step Step state instr;
+      <span data-count="4279">(</span>state, JumpMap.empty)
     | Br_on_non_null _
     | Br_on_cast (_, _, _)
     | Br_on_cast_fail (_, _, _)
@@ -1779,39 +1962,35 @@ module ConcreteFixpoint = DenotFixpoint (Abstract_interpreter_simple)
 
 let eval_exprs ~env ~(modul : Env.Abstract.modul) abs_state =
   (* TODO: init_code is no more an exprs, it's a regular expr now, this function can probably be removed and eval_expr could be used instead! *)
-  <span data-count="16">l</span>et init_code = Env.Abstract.get_initialization_code ~env ~modul in
+  <span data-count="75">l</span>et init_code = Env.Abstract.get_initialization_code ~env ~modul in
   let state = { Abstract_interpreter_state.abs_state; env } in
   let state =
-    match ConcreteFixpoint.eval_expr state (Annotated.dumm<span data-count="16">y</span> init_code) with
+    match ConcreteFixpoint.eval_expr state (Annotated.dumm<span data-count="75">y</span> init_code) with
     | <span data-count="4">N</span>one, _mapping -&gt; state
-    | <span data-count="11">S</span>ome state, _mapping -&gt; state
+    | <span data-count="70">S</span>ome state, _mapping -&gt; state
   in
   state.abs_state
 
-let modul_with_ctx ~env ~(modul : Env.Abstract.modul) ctx =
-  <span data-count="0">l</span>et abs_state = Abstract_state.empty () in
-  <span data-count="0">l</span>et abs_state = { abs_state with ctx } in
+let modul ~env ~(modul : Env.Abstract.modul) =
+  <span data-count="75">l</span>et abs_state = Abstract_state.empty () in
+  <span data-count="75">l</span>et abs_state = { abs_state with ctx = Env.Abstract.get_context ~env } in
   eval_exprs ~env ~modul abs_state
-
-let modul ~(env : Env.Abstract.t) ~(modul : Env.Abstract.modul) =
-  <span data-count="16">l</span>et abs_state = Abstract_state.empty () in
-  <span data-count="16">e</span>val_exprs ~env ~modul abs_state
 
 let exec_vfunc_from_outside ~env ~ctx ~stack
   (func : Abstract_extern.Func.t Kind.func) =
-  <span data-count="0">l</span>et abs_state = Abstract_state.empty_exec_state ~ctx ~stack in
+  <span data-count="1354">l</span>et abs_state = Abstract_state.empty_exec_state ~ctx ~stack in
   try
     match func with
-    | <span data-count="0">K</span>ind.Wasm func -&gt; (
-      let abs_state = { abs_state with stack } in
-      match
-        ConcreteFixpoint.eval_func { abs_state; env }
-          (* TODO: attach correct ID to this function to distinguish the call stack, 0 is incorrect here *)
-          0
-          func
-      with
-      | <span data-count="0">S</span>ome state -&gt; Ok state.abs_state
-      | <span data-count="0">N</span>one -&gt; Fmt.error_ms<span data-count="0">g</span> "failed" )
+    | <span data-count="1354">K</span>ind.Wasm func -&gt; (
+      let locals =
+        Abstract_locals.of_list (List.map<span data-count="1354">i</span> (fun i v -&gt; <span data-count="1819">(</span>i, v)) stack)
+      in
+      <span data-count="1354">l</span>et abs_state = { abs_state with stack; locals } in
+      let state : Abstract_interpreter_state.t = { abs_state; env } in
+      let fake_instr = Annotated.dummy (Binary.Call 0) in
+      <span data-count="1354">m</span>atch ConcreteFixpoint.eval_func state 0 func fake_instr with
+      | <span data-count="1344">S</span>ome state -&gt; Ok state.abs_state
+      | <span data-count="3">N</span>one -&gt; Fmt.error_ms<span data-count="3">g</span> "failed" )
     | <span data-count="0">E</span>xtern f -&gt; (
       let stack = exec_extern_func abs_state f in
       <span data-count="0">m</span>atch Abstract_monad.run stack abs_state with

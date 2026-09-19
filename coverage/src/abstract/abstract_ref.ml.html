@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>abstract_ref.ml &mdash; Coverage report</title>
-    <meta name="description" content="0.00% coverage in src/abstract/abstract_ref.ml">
+    <meta name="description" content="6.38% coverage in src/abstract/abstract_ref.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,7 +15,7 @@
           <span class="dirname">src/abstract/</span>abstract_ref.ml
         </a>
       </h1>
-      <h2>0.00%</h2>
+      <h2>6.38%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:12.96%"></span>
@@ -37,9 +37,8 @@
       <span class="unvisited" style="bottom:32.41%"></span>
       <span class="unvisited" style="bottom:31.48%"></span>
       <span class="unvisited" style="bottom:30.56%"></span>
-      <span class="unvisited" style="bottom:27.78%"></span>
-      <span class="unvisited" style="bottom:26.85%"></span>
-      <span class="unvisited" style="bottom:25.00%"></span>
+      <span class="some-visited" style="bottom:26.85%"></span>
+      <span class="some-visited" style="bottom:25.00%"></span>
       <span class="unvisited" style="bottom:21.30%"></span>
       <span class="unvisited" style="bottom:19.44%"></span>
       <span class="unvisited" style="bottom:17.59%"></span>
@@ -135,10 +134,10 @@
 <a id="L75"></a><span class="unvisited"> </span>
 <a id="L76"></a><span > </span>
 <a id="L77"></a><span > </span>
-<a id="L78"></a><span class="unvisited"> </span>
-<a id="L79"></a><span class="unvisited"> </span>
+<a id="L78"></a><span class="visited"> </span>
+<a id="L79"></a><span class="some-visited"> </span>
 <a id="L80"></a><span > </span>
-<a id="L81"></a><span class="unvisited"> </span>
+<a id="L81"></a><span class="some-visited"> </span>
 <a id="L82"></a><span > </span>
 <a id="L83"></a><span > </span>
 <a id="L84"></a><span > </span>
@@ -356,10 +355,10 @@ let pp fmt = function
   | <span data-count="0">N</span>ullRef -&gt; Fmt.pf fmt "nullref"
   | _ -&gt; assert false
 
-let null _ctx = <span data-count="0">f</span>unction
-  | <span data-count="0">B</span>inary.Func_ht | <span data-count="0">N</span>oFunc_ht | <span data-count="0">T</span>ypeUse _ -&gt; Func None
+let null _ctx = <span data-count="3">f</span>unction
+  | <span data-count="1">B</span>inary.Func_ht | <span data-count="0">N</span>oFunc_ht | <span data-count="0">T</span>ypeUse _ -&gt; Func None
   (* TODO: is this correct? Are all nulls equal? *)
-  | <span data-count="0">E</span>xtern_ht | <span data-count="0">N</span>oExtern_ht -&gt; Extern None
+  | <span data-count="2">E</span>xtern_ht | <span data-count="0">N</span>oExtern_ht -&gt; Extern None
   | Any_ht | None_ht | Exn_ht | NoExn_ht -&gt; assert false
   | Eq_ht | I31_ht | Struct_ht | Array_ht -&gt; assert false
 

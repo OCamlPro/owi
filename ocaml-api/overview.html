@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "frappe";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-fb29a22c.js";
+            window.path_to_searchindex_js = "../searchindex-38dc5335.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-b696a57f.js"></script>
@@ -210,13 +210,15 @@ module I :
   sig
     val modul :
       env:Env.Concrete.t -&gt;
-      modul:Env.Concrete.modul -&gt; Env.Concrete.t Owi__Concrete_choice.t
+      modul:Env.Concrete.modul -&gt; Env.Concrete.t Concrete_choice.t
   end
+# let to_run = I.modul ~env ~modul
+mdx_gen.bc.exe: [INFO] interpreting ...
+val to_run : Env.Concrete.t Concrete_choice.t = &lt;abstr&gt;
 # let () =
-    match I.modul ~env ~modul with
+    match Concrete_choice.run_and_drop_state to_run Concrete_state.empty with
     | Ok _env -&gt; ()
     | Error _ -&gt; assert false;;
-mdx_gen.bc.exe: [INFO] interpreting ...
 mdx_gen.bc.exe: [INFO] stack         : [  ]
 mdx_gen.bc.exe: [INFO] running instr : call 0 (executed 0 times)
 mdx_gen.bc.exe: [INFO] calling func  : func f

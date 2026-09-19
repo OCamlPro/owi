@@ -83,19 +83,29 @@
   <span><span class="label">inter</span>:<span>(<span><span class="type-var">'res</span> <span class="arrow">&#45;&gt;</span></span> <span><span class="type-var">'res</span> <span class="arrow">&#45;&gt;</span></span> <span class="type-var">'res</span>)</span> <span class="arrow">&#45;&gt;</span></span>
   <span><span class="label">old</span>:<span><span class="type-var">'res</span> <a href="#type-t">t</a></span> <span class="arrow">&#45;&gt;</span></span>
   <span><span class="type-var">'res</span> <a href="#type-t">t</a></span></span></code></div></div></details></div><div class="odoc-spec"><div class="spec value anchored" id="val-ar1"><a href="#val-ar1" class="anchor"></a><code><span><span class="keyword">val</span> ar1 : 
-  <span><span>(<span class="keyword">module</span> <a href="../module-type-SCONDITIONMAP_MTBDD/index.html">SCONDITIONMAP_MTBDD</a> <span class="keyword">with</span> <span class="keyword">type</span> <a href="../module-type-SCONDITIONMAP_MTBDD/index.html#type-value">value</a> = <span class="type-var">'a</span>)</span> <span class="arrow">&#45;&gt;</span></span>
-  <span><span>(<span class="keyword">module</span> <a href="../module-type-SCONDITIONMAP_MTBDD/index.html">SCONDITIONMAP_MTBDD</a> <span class="keyword">with</span> <span class="keyword">type</span> <a href="../module-type-SCONDITIONMAP_MTBDD/index.html#type-value">value</a> = <span class="type-var">'res</span>)</span> <span class="arrow">&#45;&gt;</span></span>
+  <span>(<span class="keyword">module</span> Ma : <a href="../module-type-SCONDITIONMAP_MTBDD/index.html">SCONDITIONMAP_MTBDD</a>
+  <span class="keyword">with</span> <span class="keyword">type</span> <a href="../module-type-SCONDITIONMAP_MTBDD/index.html#type-value">value</a> = <span class="type-var">'a</span>)</span>
+  <span class="arrow">&#45;&gt;</span>
+  <span>(<span class="keyword">module</span> Mres : <a href="../module-type-SCONDITIONMAP_MTBDD/index.html">SCONDITIONMAP_MTBDD</a>
+  <span class="keyword">with</span> <span class="keyword">type</span> <a href="../module-type-SCONDITIONMAP_MTBDD/index.html#type-value">value</a> = <span class="type-var">'res</span>)</span>
+  <span class="arrow">&#45;&gt;</span>
   <span><span class="type-var">'b</span> <span class="arrow">&#45;&gt;</span></span>
-  <span><span>(<span><span class="type-var">'a</span> <span class="arrow">&#45;&gt;</span></span> <span class="type-var">'res</span>)</span> <span class="arrow">&#45;&gt;</span></span>
-  <span><span><span><span class="type-var">'a</span> option</span> <a href="../Bed/index.html#type-mtbdd">Bed.mtbdd</a></span> <span class="arrow">&#45;&gt;</span></span>
-  <span><span><span><span class="type-var">'res</span> option</span> <a href="../Bed/index.html#type-mtbdd">Bed.mtbdd</a></span> <span class="arrow">&#45;&gt;</span></span>
-  <span><span><span class="type-var">'res</span> option</span> <a href="../Bed/index.html#type-mtbdd">Bed.mtbdd</a></span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-ar2"><a href="#val-ar2" class="anchor"></a><code><span><span class="keyword">val</span> ar2 : 
-  <span><span>(<span class="keyword">module</span> <a href="../module-type-SCONDITIONMAP_MTBDD/index.html">SCONDITIONMAP_MTBDD</a> <span class="keyword">with</span> <span class="keyword">type</span> <a href="../module-type-SCONDITIONMAP_MTBDD/index.html#type-value">value</a> = <span class="type-var">'a</span>)</span> <span class="arrow">&#45;&gt;</span></span>
-  <span><span>(<span class="keyword">module</span> <a href="../module-type-SCONDITIONMAP_MTBDD/index.html">SCONDITIONMAP_MTBDD</a> <span class="keyword">with</span> <span class="keyword">type</span> <a href="../module-type-SCONDITIONMAP_MTBDD/index.html#type-value">value</a> = <span class="type-var">'b</span>)</span> <span class="arrow">&#45;&gt;</span></span>
-  <span><span>(<span class="keyword">module</span> <a href="../module-type-SCONDITIONMAP_MTBDD/index.html">SCONDITIONMAP_MTBDD</a> <span class="keyword">with</span> <span class="keyword">type</span> <a href="../module-type-SCONDITIONMAP_MTBDD/index.html#type-value">value</a> = <span class="type-var">'res</span>)</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span>(<span><span class="xref-unresolved">Ma.value</span> <span class="arrow">&#45;&gt;</span></span> <span class="xref-unresolved">Mres.value</span>)</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span><span class="xref-unresolved">Ma.value</span> option</span> <a href="../Bed/index.html#type-mtbdd">Bed.mtbdd</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span><span class="xref-unresolved">Mres.value</span> option</span> <a href="../Bed/index.html#type-mtbdd">Bed.mtbdd</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span class="xref-unresolved">Mres.value</span> option</span> <a href="../Bed/index.html#type-mtbdd">Bed.mtbdd</a></span></span></code></div></div><div class="odoc-spec"><div class="spec value anchored" id="val-ar2"><a href="#val-ar2" class="anchor"></a><code><span><span class="keyword">val</span> ar2 : 
+  <span>(<span class="keyword">module</span> Ma : <a href="../module-type-SCONDITIONMAP_MTBDD/index.html">SCONDITIONMAP_MTBDD</a>
+  <span class="keyword">with</span> <span class="keyword">type</span> <a href="../module-type-SCONDITIONMAP_MTBDD/index.html#type-value">value</a> = <span class="type-var">'a</span>)</span>
+  <span class="arrow">&#45;&gt;</span>
+  <span>(<span class="keyword">module</span> Mb : <a href="../module-type-SCONDITIONMAP_MTBDD/index.html">SCONDITIONMAP_MTBDD</a>
+  <span class="keyword">with</span> <span class="keyword">type</span> <a href="../module-type-SCONDITIONMAP_MTBDD/index.html#type-value">value</a> = <span class="type-var">'b</span>)</span>
+  <span class="arrow">&#45;&gt;</span>
+  <span>(<span class="keyword">module</span> Mres : <a href="../module-type-SCONDITIONMAP_MTBDD/index.html">SCONDITIONMAP_MTBDD</a>
+  <span class="keyword">with</span> <span class="keyword">type</span> <a href="../module-type-SCONDITIONMAP_MTBDD/index.html#type-value">value</a> = <span class="type-var">'res</span>)</span>
+  <span class="arrow">&#45;&gt;</span>
   <span><span class="type-var">'c</span> <span class="arrow">&#45;&gt;</span></span>
-  <span><span>(<span><span class="type-var">'a</span> <span class="arrow">&#45;&gt;</span></span> <span><span class="type-var">'b</span> <span class="arrow">&#45;&gt;</span></span> <span class="type-var">'res</span>)</span> <span class="arrow">&#45;&gt;</span></span>
-  <span><span><span><span class="type-var">'a</span> option</span> <a href="../Bed/index.html#type-mtbdd">Bed.mtbdd</a></span> <span class="arrow">&#45;&gt;</span></span>
-  <span><span><span><span class="type-var">'b</span> option</span> <a href="../Bed/index.html#type-mtbdd">Bed.mtbdd</a></span> <span class="arrow">&#45;&gt;</span></span>
-  <span><span><span><span class="type-var">'res</span> option</span> <a href="../Bed/index.html#type-mtbdd">Bed.mtbdd</a></span> <span class="arrow">&#45;&gt;</span></span>
-  <span><span><span class="type-var">'res</span> option</span> <a href="../Bed/index.html#type-mtbdd">Bed.mtbdd</a></span></span></code></div></div></div></body></html>
+  <span><span>(<span><span class="xref-unresolved">Ma.value</span> <span class="arrow">&#45;&gt;</span></span> <span><span class="xref-unresolved">Mb.value</span> <span class="arrow">&#45;&gt;</span></span> <span class="xref-unresolved">Mres.value</span>)</span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span><span class="xref-unresolved">Ma.value</span> option</span> <a href="../Bed/index.html#type-mtbdd">Bed.mtbdd</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span><span class="xref-unresolved">Mb.value</span> option</span> <a href="../Bed/index.html#type-mtbdd">Bed.mtbdd</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span><span class="xref-unresolved">Mres.value</span> option</span> <a href="../Bed/index.html#type-mtbdd">Bed.mtbdd</a></span> <span class="arrow">&#45;&gt;</span></span>
+  <span><span><span class="xref-unresolved">Mres.value</span> option</span> <a href="../Bed/index.html#type-mtbdd">Bed.mtbdd</a></span></span></code></div></div></div></body></html>

@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>compile.ml &mdash; Coverage report</title>
-    <meta name="description" content="64.00% coverage in src/compile/compile.ml">
+    <meta name="description" content="69.00% coverage in src/compile/compile.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,17 +15,13 @@
           <span class="dirname">src/compile/</span>compile.ml
         </a>
       </h1>
-      <h2>64.00%</h2>
+      <h2>69.00%</h2>
     </div>
     <div id="navbar">
       <span class="unvisited" style="top:26.90%"></span>
       <span class="unvisited" style="top:27.59%"></span>
       <span class="unvisited" style="top:28.28%"></span>
       <span class="unvisited" style="top:28.97%"></span>
-      <span class="unvisited" style="top:31.03%"></span>
-      <span class="unvisited" style="top:31.72%"></span>
-      <span class="unvisited" style="top:32.41%"></span>
-      <span class="unvisited" style="top:33.10%"></span>
       <span class="unvisited" style="bottom:45.52%"></span>
       <span class="unvisited" style="bottom:44.83%"></span>
       <span class="unvisited" style="bottom:44.14%"></span>
@@ -98,10 +94,10 @@
 <a id="L42"></a><span class="unvisited"> </span>
 <a id="L43"></a><span > </span>
 <a id="L44"></a><span > </span>
-<a id="L45"></a><span class="unvisited"> </span>
-<a id="L46"></a><span class="unvisited"> </span>
-<a id="L47"></a><span class="unvisited"> </span>
-<a id="L48"></a><span class="unvisited"> </span>
+<a id="L45"></a><span class="visited"> </span>
+<a id="L46"></a><span class="visited"> </span>
+<a id="L47"></a><span class="visited"> </span>
+<a id="L48"></a><span class="visited"> </span>
 <a id="L49"></a><span > </span>
 <a id="L50"></a><span > </span>
 <a id="L51"></a><span > </span>
@@ -357,34 +353,34 @@ open Syntax
 
 module Text = struct
   let until_text_validate ~unsafe m =
-    <span data-count="9789">i</span>f unsafe then <span data-count="2">O</span>k m else <span data-count="9787">T</span>ext_validate.modul m
+    <span data-count="10387">i</span>f unsafe then <span data-count="2">O</span>k m else <span data-count="10385">T</span>ext_validate.modul m
 
   let until_group ~unsafe m =
-    <span data-count="4931">l</span>et+ m = until_text_validat<span data-count="4931">e</span> ~unsafe m in
-    <span data-count="4905">G</span>rouped.of_text m
+    <span data-count="5231">l</span>et+ m = until_text_validat<span data-count="5231">e</span> ~unsafe m in
+    <span data-count="5205">G</span>rouped.of_text m
 
   let until_assign ~unsafe m =
-    <span data-count="4931">l</span>et* m = until_grou<span data-count="4931">p</span> ~unsafe m in
-    <span data-count="4905">l</span>et+ assigned = Assigned.of_groupe<span data-count="4905">d</span> m in
-    <span data-count="4876">(</span>m, assigned)
+    <span data-count="5231">l</span>et* m = until_grou<span data-count="5231">p</span> ~unsafe m in
+    <span data-count="5205">l</span>et+ assigned = Assigned.of_groupe<span data-count="5205">d</span> m in
+    <span data-count="5171">(</span>m, assigned)
 
   let until_binary ~unsafe m =
-    <span data-count="4931">l</span>et* m, assigned = until_assig<span data-count="4931">n</span> ~unsafe m in
-    <span data-count="4876">R</span>ewrite.modul m assigned
+    <span data-count="5231">l</span>et* m, assigned = until_assig<span data-count="5231">n</span> ~unsafe m in
+    <span data-count="5171">R</span>ewrite.modul m assigned
 
   let until_validate ~unsafe m =
-    <span data-count="4858">l</span>et* m = until_text_validat<span data-count="4858">e</span> ~unsafe m in
-    <span data-count="4839">l</span>et* m = until_binar<span data-count="4839">y</span> ~unsafe m in
-    <span data-count="4804">i</span>f unsafe then <span data-count="1">O</span>k m
+    <span data-count="5156">l</span>et* m = until_text_validat<span data-count="5156">e</span> ~unsafe m in
+    <span data-count="5137">l</span>et* m = until_binar<span data-count="5137">y</span> ~unsafe m in
+    <span data-count="5091">i</span>f unsafe then <span data-count="1">O</span>k m
     else
-      <span data-count="4803">l</span>et+ () = Binary_validate.modu<span data-count="4803">l</span> m in
-      <span data-count="2572">m</span>
+      <span data-count="5090">l</span>et+ () = Binary_validate.modu<span data-count="5090">l</span> m in
+      <span data-count="2634">m</span>
 
   let until_concrete_link ~unsafe ~name env m =
-    <span data-count="4622">l</span>et* modul = until_validat<span data-count="4622">e</span> ~unsafe m in
-    <span data-count="2347">l</span>et* env = Env.Concrete.link_binary_module ~env ~name ~modul in
-    <span data-count="2169">l</span>et+ modul = Env.Concrete.get_last_module ~env in
-    <span data-count="2169">(</span>modul, env)
+    <span data-count="4632">l</span>et* modul = until_validat<span data-count="4632">e</span> ~unsafe m in
+    <span data-count="2352">l</span>et* env = Env.Concrete.link_binary_module ~env ~name ~modul in
+    <span data-count="2174">l</span>et+ modul = Env.Concrete.get_last_module ~env in
+    <span data-count="2174">(</span>modul, env)
 
   let until_symbolic_link ~unsafe ~name env m =
     <span data-count="0">l</span>et* modul = until_validat<span data-count="0">e</span> ~unsafe m in
@@ -393,18 +389,18 @@ module Text = struct
     <span data-count="0">(</span>modul, env)
 
   let until_abstract_link ~unsafe ~name env m =
-    <span data-count="0">l</span>et* modul = until_validat<span data-count="0">e</span> ~unsafe m in
-    <span data-count="0">l</span>et* env = Env.Abstract.link_binary_module ~env ~name ~modul in
-    <span data-count="0">l</span>et+ modul = Env.Abstract.get_last_module ~env in
-    <span data-count="0">(</span>modul, env)
+    <span data-count="288">l</span>et* modul = until_validat<span data-count="288">e</span> ~unsafe m in
+    <span data-count="57">l</span>et* env = Env.Abstract.link_binary_module ~env ~name ~modul in
+    <span data-count="57">l</span>et+ modul = Env.Abstract.get_last_module ~env in
+    <span data-count="57">(</span>modul, env)
 end
 
 module Binary = struct
   let until_validate ~unsafe m =
-    <span data-count="793">i</span>f unsafe then <span data-count="427">O</span>k m
+    <span data-count="795">i</span>f unsafe then <span data-count="427">O</span>k m
     else
-      <span data-count="366">l</span>et+ () = Binary_validate.modu<span data-count="366">l</span> m in
-      <span data-count="365">m</span>
+      <span data-count="368">l</span>et+ () = Binary_validate.modu<span data-count="368">l</span> m in
+      <span data-count="367">m</span>
 
   let until_concrete_link ~unsafe ~name env m =
     <span data-count="107">l</span>et* modul = until_validat<span data-count="107">e</span> ~unsafe m in
@@ -419,10 +415,10 @@ module Binary = struct
     <span data-count="436">(</span>modul, env)
 
   let until_abstract_link ~unsafe ~name env m =
-    <span data-count="17">l</span>et* modul = until_validat<span data-count="17">e</span> ~unsafe m in
-    <span data-count="16">l</span>et* env = Env.Abstract.link_binary_module ~env ~name ~modul in
-    <span data-count="16">l</span>et+ modul = Env.Abstract.get_last_module ~env in
-    <span data-count="16">(</span>modul, env)
+    <span data-count="19">l</span>et* modul = until_validat<span data-count="19">e</span> ~unsafe m in
+    <span data-count="18">l</span>et* env = Env.Abstract.link_binary_module ~env ~name ~modul in
+    <span data-count="18">l</span>et+ modul = Env.Abstract.get_last_module ~env in
+    <span data-count="18">(</span>modul, env)
 end
 
 module Any = struct
@@ -459,9 +455,9 @@ end
 
 module File = struct
   let until_binary ~unsafe filename =
-    <span data-count="29">l</span>et* m = Parse.guess_from_fil<span data-count="29">e</span> filename in
-    <span data-count="29">m</span>atch m with
-    | <span data-count="28">K</span>ind.Wat m -&gt; Text.until_binary ~unsafe m
+    <span data-count="31">l</span>et* m = Parse.guess_from_fil<span data-count="31">e</span> filename in
+    <span data-count="31">m</span>atch m with
+    | <span data-count="30">K</span>ind.Wat m -&gt; Text.until_binary ~unsafe m
     | <span data-count="1">W</span>asm m -&gt; Ok m
     | Wast _ | Extern _ -&gt; assert false
 

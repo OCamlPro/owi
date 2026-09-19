@@ -332,8 +332,8 @@ let pp fmt = function
   | <span data-count="0">A</span>nyAsExtern _ -&gt; pf fmt "externref"
 
 (* TODO: Is this the same as Symbolic_ref.null? *)
-let null = <span data-count="868">f</span>unction
-  | <span data-count="647">B</span>inary.Func_ht | <span data-count="5">N</span>oFunc_ht | <span data-count="77">T</span>ypeUse _ -&gt; Func None
+let null = <span data-count="869">f</span>unction
+  | <span data-count="648">B</span>inary.Func_ht | <span data-count="5">N</span>oFunc_ht | <span data-count="77">T</span>ypeUse _ -&gt; Func None
   (* TODO: is this correct? Are all nulls equal? *)
   | <span data-count="56">E</span>xtern_ht | <span data-count="4">N</span>oExtern_ht -&gt; Extern None
   | <span data-count="3">E</span>xn_ht | <span data-count="3">N</span>oExn_ht -&gt; NullExn
@@ -379,8 +379,8 @@ let rec ref_eq (r1 : 'value t) (r2 : 'value t) : bool =
     | <span data-count="32">_</span> -&gt; false
 
 let get_func (r : 'value t) : int get_ref =
-  <span data-count="5826771">m</span>atch r with
-  | <span data-count="5824998">F</span>unc (Some f) -&gt; Ref_value f
+  <span data-count="5826772">m</span>atch r with
+  | <span data-count="5824999">F</span>unc (Some f) -&gt; Ref_value f
   | <span data-count="1773">F</span>unc None -&gt; Null
   | <span data-count="0">_</span> -&gt; Type_mismatch
 
