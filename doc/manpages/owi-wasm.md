@@ -10,6 +10,7 @@
   - [`owi wasm analyze cg`](owi-wasm-analyze-cg.md)
 - [`owi wasm fmt`](owi-wasm-fmt.md)
 - [`owi wasm fuzz`](owi-wasm-fuzz.md)
+- [`owi wasm hunt`](owi-wasm-hunt.md)
 - [`owi wasm instrument`](owi-wasm-instrument.md)
   - [`owi wasm instrument label`](owi-wasm-instrument-label.md)
 - [`owi wasm iso`](owi-wasm-iso.md)
@@ -46,6 +47,10 @@ COMMANDS
 
        fuzz [OPTION]… FILE
            Run the fuzzer.
+
+       hunt [OPTION]… FILE
+           Hunt bugs by combining the fuzzer and the symbolic execution
+           engine.
 
        instrument [COMMAND] …
            Instrument a program in various ways.

@@ -544,6 +544,21 @@ module Wasm = struct
     end
   end
 
+  (* owi wasm hunt *)
+  module Hunt = struct
+    let cmd =
+      let+ rounds
+      and+ seed
+      and+ source_file
+      and+ symbolic_parameters = symbolic_parameters None
+      and+ timeout
+      and+ timeout_instr
+      and+ unsafe
+      and+ () = setup_log in
+      Cmd_wasm_hunt.cmd ~symbolic_parameters ~rounds ~seed ~source_file ~timeout
+        ~timeout_instr ~unsafe
+  end
+
   (* owi wasm iso *)
   module Iso = struct
     let cmd =
@@ -759,6 +774,10 @@ let cli =
                  test objectives for a given coverage criteria."
                 Wasm.Instrument.Label.cmd
             ]
+        ; cmd "hunt"
+            "Hunt bugs by combining the fuzzer and the symbolic execution \
+             engine."
+            Wasm.Hunt.cmd
         ; cmd "iso"
             "Check the iso-functionnality of two modules by comparing the \
              output when calling their exports."
