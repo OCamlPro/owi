@@ -2023,6 +2023,18 @@ module Cmd_wasm_abs : sig
     -> unit Result.t
 end
 
+module Cmd_wasm_hunt : sig
+  val cmd :
+       rounds:int option
+    -> seed:int option
+    -> source_file:Fpath.t
+    -> symbolic_parameters:Symbolic_parameters.t
+    -> timeout:float option
+    -> timeout_instr:int option
+    -> unsafe:bool
+    -> unit Result.t
+end
+
 module Cmd_wasm_sym : sig
   val cmd :
     parameters:Symbolic_parameters.t -> source_file:Fpath.t -> unit Result.t
