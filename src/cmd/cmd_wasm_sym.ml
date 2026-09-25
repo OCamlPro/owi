@@ -17,7 +17,7 @@ let run_file ~entry_point ~symbolic_parameters ~source_file =
       } =
     symbolic_parameters
   in
-  let* modul = Compile.File.until_validate ~unsafe source_file in
+  let* modul = Compile.Wasm.File.until_validate ~unsafe source_file in
   (* TODO: enable this once the smart strategy is fully implemented
   ( match exploration_strategy with
   | Smart -> Cmd_call_graph.compute_distances m entry_point
@@ -31,7 +31,7 @@ let run_file ~entry_point ~symbolic_parameters ~source_file =
     if generate_abstract_invariant then
       let* env = Cmd_wasm_abs.env () in
       let+ modul, env =
-        Compile.Binary.until_abstract_link ~unsafe ~name:None env modul
+        Compile.Wasm.Binary.until_abstract_link ~unsafe ~name:None env modul
       in
       try
         let state = Abstract_interpreter_control_flow.modul ~env ~modul in
@@ -51,7 +51,7 @@ let run_file ~entry_point ~symbolic_parameters ~source_file =
   in
   let+ modul, env =
     (* unsafe is set to true because the module was already validated before *)
-    Compile.Binary.until_symbolic_link env ~unsafe:true ~name:None modul
+    Compile.Wasm.Binary.until_symbolic_link env ~unsafe:true ~name:None modul
   in
   let module Parameters = struct
     let throw_away_trap =

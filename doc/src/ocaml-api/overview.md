@@ -22,7 +22,7 @@ mdx_gen.bc.exe: [INFO] parsing      ...
 # let env = Env.Concrete.empty ~context:()
 val env : Env.Concrete.t = <abstr>
 # let modul, env =
-    match Compile.Text.until_concrete_link env ~unsafe:false ~name:None m with
+    match Compile.Wasm.Text.until_concrete_link env ~unsafe:false ~name:None m with
     | Ok v -> v
     | Error _ -> assert false;;
 mdx_gen.bc.exe: [INFO] checking     ...

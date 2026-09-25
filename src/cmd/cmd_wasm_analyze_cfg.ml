@@ -151,7 +151,7 @@ let build_cfg instr =
   (nodes, edges)
 
 let build_cfg_from_text_module modul entry =
-  let m = Compile.Text.until_validate ~unsafe:false modul in
+  let m = Compile.Wasm.Text.until_validate ~unsafe:false modul in
   match m with
   | Ok m ->
     let f =
@@ -168,7 +168,7 @@ let build_cfg_from_func (f : Binary.Func.t) =
   Control_flow_graph.init nodes edges
 
 let cmd ~source_file ~entry_point =
-  let* m = Compile.File.until_validate ~unsafe:false source_file in
+  let* m = Compile.Wasm.File.until_validate ~unsafe:false source_file in
   let entry =
     Option.value
       (Option.bind entry_point (fun x ->

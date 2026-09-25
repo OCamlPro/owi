@@ -8,7 +8,7 @@ let cmd ~unsafe ~coverage_criteria ~source_file =
   let _dir, filename = Fpath.split_base source_file in
   let filename, ext = Fpath.split_ext filename in
 
-  let* m = Compile.File.until_binary ~unsafe source_file in
+  let* m = Compile.Wasm.File.until_binary ~unsafe source_file in
 
   let m = Label.annotate coverage_criteria m in
 

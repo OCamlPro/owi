@@ -37,7 +37,8 @@ module Owi_regular : INTERPRET = struct
   let parse_and_run modul =
     let env = Owi.Env.Concrete.empty ~context:() in
     let* modul, env =
-      Owi.Compile.Text.until_concrete_link ~name:None ~unsafe:false env modul
+      Owi.Compile.Wasm.Text.until_concrete_link ~name:None ~unsafe:false env
+        modul
     in
     let module I = Owi.Interpret.Concrete (Owi.Interpret.Default_parameters) in
     timeout_call_run (fun () ->

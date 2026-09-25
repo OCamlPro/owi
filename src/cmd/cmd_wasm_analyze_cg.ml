@@ -229,7 +229,7 @@ let build_call_graph call_graph_mode (m : Binary.Module.t) entry_point =
   Call_graph.init l entries
 
 let build_call_graph_from_text_module call_graph_mode modul entry_point =
-  let m = Compile.Text.until_validate ~unsafe:false modul in
+  let m = Compile.Wasm.Text.until_validate ~unsafe:false modul in
   match m with
   | Ok m -> build_call_graph call_graph_mode m entry_point
   | _ -> assert false
@@ -239,7 +239,7 @@ let compute_distances m entry_point =
   Exploration_smart.compute_distance_to_unreachable call_graph
 
 let cmd ~call_graph_mode ~source_file ~entry_point =
-  let* m = Compile.File.until_validate ~unsafe:false source_file in
+  let* m = Compile.Wasm.File.until_validate ~unsafe:false source_file in
   let call_graph = build_call_graph call_graph_mode m entry_point in
 
   Bos.OS.File.writef

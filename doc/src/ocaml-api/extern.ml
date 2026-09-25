@@ -35,7 +35,8 @@ let pure_wasm_module =
 
 (* our pure wasm module, linked with `sausage` *)
 let modul, env =
-  Compile.Text.until_concrete_link env ~unsafe:false ~name:None pure_wasm_module
+  Compile.Wasm.Text.until_concrete_link env ~unsafe:false ~name:None
+    pure_wasm_module
   |> Stdlib.Result.get_ok
 
 module I = Interpret.Concrete (Interpret.Default_parameters)
