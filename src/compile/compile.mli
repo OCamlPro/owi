@@ -2,7 +2,17 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-(** Utility functions to compile a module until a given step. *)
+module C : sig
+  val files_to_wasm_file :
+       eacsl:bool
+    -> entry_point:string option
+    -> includes:Fpath.t list
+    -> opt_lvl:string
+    -> out_file:Fpath.t option
+    -> workspace:Fpath.t
+    -> Fpath.t list
+    -> Fpath.t Result.t
+end
 
 module Wasm : sig
   module File : sig
