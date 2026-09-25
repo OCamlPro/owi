@@ -3,13 +3,14 @@
 (* Written by the Owi programmers *)
 
 val cmd :
-     symbolic_parameters:Symbolic_parameters.t
-  -> arch:int
-  -> property:Fpath.t option
-  -> testcomp:bool
-  -> opt_lvl:string
-  -> includes:Fpath.t list
-  -> files:Fpath.t list
+     arch:int
   -> eacsl:bool
+  -> entry_point:string option
+  -> files:Fpath.t list
+  -> includes:Fpath.t list
+  -> opt_lvl:string
   -> out_file:Fpath.t option
+  -> property:Fpath.t option
+  -> symbolic_parameters:Symbolic_parameters.t
+  -> testcomp:bool
   -> unit Result.t

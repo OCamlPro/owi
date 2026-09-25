@@ -3,4 +3,7 @@
 (* Written by the Owi programmers *)
 
 val cmd :
-  parameters:Symbolic_parameters.t -> source_file:Fpath.t -> unit Result.t
+     entry_point:string option
+  -> source_file:Fpath.t
+  -> symbolic_parameters:Symbolic_parameters.t
+  -> unit Result.t
