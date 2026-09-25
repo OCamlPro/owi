@@ -29,7 +29,6 @@ end
 
 type t =
   { deterministic_result_order : bool
-  ; entry_point : string option
   ; exploration_strategy : Exploration_strategy.t
   ; fail_mode : fail_mode
   ; generate_abstract_invariant : bool

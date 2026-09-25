@@ -51,7 +51,7 @@ let run ~no_exhaustion script =
         Log.info (fun m -> m "*** module");
         incr curr_module;
         let* modul, env =
-          Compile.Text.until_concrete_link env ~unsafe ~name:None modul
+          Compile.Wasm.Text.until_concrete_link env ~unsafe ~name:None modul
         in
         let to_run = I.modul ~env ~modul in
         Concrete_choice.run_and_drop_state to_run Concrete_state.empty
@@ -60,7 +60,7 @@ let run ~no_exhaustion script =
         incr curr_module;
         let* modul = Parse.Text.Inline_module.from_string modul in
         let* modul, env =
-          Compile.Text.until_concrete_link env ~unsafe ~name:None modul
+          Compile.Wasm.Text.until_concrete_link env ~unsafe ~name:None modul
         in
         let to_run = I.modul ~env ~modul in
         Concrete_choice.run_and_drop_state to_run Concrete_state.empty
@@ -70,7 +70,7 @@ let run ~no_exhaustion script =
         let* modul = Parse.Binary.Module.from_string modul in
         let modul = { modul with id } in
         let* modul, env =
-          Compile.Binary.until_concrete_link env ~unsafe ~name:None modul
+          Compile.Wasm.Binary.until_concrete_link env ~unsafe ~name:None modul
         in
         let to_run = I.modul ~env ~modul in
         Concrete_choice.run_and_drop_state to_run Concrete_state.empty
@@ -78,7 +78,7 @@ let run ~no_exhaustion script =
         Log.info (fun m -> m "*** assert_trap");
         incr curr_module;
         let* modul, env =
-          Compile.Text.until_concrete_link env ~unsafe ~name:None modul
+          Compile.Wasm.Text.until_concrete_link env ~unsafe ~name:None modul
         in
         let got =
           let to_run = I.modul ~env ~modul in
@@ -100,7 +100,7 @@ let run ~no_exhaustion script =
           match got with
           | Error got -> Script_error.check_error ~expected ~got
           | Ok [ Text_module (false, modul) ] ->
-            let got = Compile.Text.until_binary ~unsafe modul in
+            let got = Compile.Wasm.Text.until_binary ~unsafe modul in
             Script_error.check_result ~expected ~got
           | _ -> assert false
         in
@@ -125,7 +125,7 @@ let run ~no_exhaustion script =
       | Assert (Assert_invalid (modul, expected)) ->
         Log.info (fun m -> m "*** assert_invalid");
         let got =
-          Compile.Text.until_concrete_link env ~unsafe ~name:None modul
+          Compile.Wasm.Text.until_concrete_link env ~unsafe ~name:None modul
         in
         let+ () = Script_error.check_result ~expected ~got in
         env
@@ -136,7 +136,7 @@ let run ~no_exhaustion script =
           match got with
           | Error got -> Script_error.check_error ~expected ~got
           | Ok [ Text_module (false, modul) ] ->
-            let got = Compile.Text.until_validate ~unsafe modul in
+            let got = Compile.Wasm.Text.until_validate ~unsafe modul in
             Script_error.check_result ~expected ~got
           | _ -> assert false
         in
@@ -144,14 +144,14 @@ let run ~no_exhaustion script =
       | Assert (Assert_unlinkable (modul, expected)) ->
         Log.info (fun m -> m "*** assert_unlinkable");
         let got =
-          Compile.Text.until_concrete_link env ~unsafe ~name:None modul
+          Compile.Wasm.Text.until_concrete_link env ~unsafe ~name:None modul
         in
         let+ () = Script_error.check_result ~expected ~got in
         env
       | Assert (Assert_malformed (modul, expected)) ->
         Log.info (fun m -> m "*** assert_malformed");
         let got =
-          Compile.Text.until_concrete_link ~unsafe ~name:None env modul
+          Compile.Wasm.Text.until_concrete_link ~unsafe ~name:None env modul
         in
         let+ () = Script_error.check_result ~expected ~got in
         assert false

@@ -39,7 +39,7 @@ let run_one ~no_exhaustion:_ (state : Env.Abstract.t Result.t) cmd =
   | Wast.Text_module (false, m) ->
     Abstract_trace.record_wast_cmd Block_start cmd;
     let* modul, env =
-      Compile.Text.until_abstract_link env ~unsafe ~name:None m
+      Compile.Wasm.Text.until_abstract_link env ~unsafe ~name:None m
     in
     let _state = I.modul ~env ~modul in
     Abstract_trace.record_wast_cmd Block_end cmd;
@@ -50,7 +50,7 @@ let run_one ~no_exhaustion:_ (state : Env.Abstract.t Result.t) cmd =
     Abstract_trace.record_wast_cmd Block_start cmd;
     let* modul = Parse.Text.Inline_module.from_string modul in
     let* modul, env =
-      Compile.Text.until_abstract_link env ~unsafe ~name:None modul
+      Compile.Wasm.Text.until_abstract_link env ~unsafe ~name:None modul
     in
     let _state = I.modul ~env ~modul in
     Abstract_trace.record_wast_cmd Block_end cmd;
@@ -61,7 +61,7 @@ let run_one ~no_exhaustion:_ (state : Env.Abstract.t Result.t) cmd =
     let* modul = Parse.Binary.Module.from_string modul in
     let modul = { modul with id } in
     let* modul, env =
-      Compile.Binary.until_abstract_link env ~unsafe ~name:None modul
+      Compile.Wasm.Binary.until_abstract_link env ~unsafe ~name:None modul
     in
     let _state = I.modul ~env ~modul in
     Abstract_trace.record_wast_cmd Block_end cmd;
@@ -80,7 +80,7 @@ let run_one ~no_exhaustion:_ (state : Env.Abstract.t Result.t) cmd =
       match got with
       | Error got -> Script_error.check_error ~expected ~got
       | Ok modul ->
-        let got = Compile.Text.until_binary ~unsafe modul in
+        let got = Compile.Wasm.Text.until_binary ~unsafe modul in
         Script_error.check_result ~expected ~got
     in
     env
@@ -101,7 +101,9 @@ let run_one ~no_exhaustion:_ (state : Env.Abstract.t Result.t) cmd =
     env
   | Assert (Assert_invalid (modul, expected)) ->
     Log.info (fun m -> m "*** assert_invalid");
-    let got = Compile.Text.until_abstract_link env ~unsafe ~name:None modul in
+    let got =
+      Compile.Wasm.Text.until_abstract_link env ~unsafe ~name:None modul
+    in
     let+ () = Script_error.check_result ~expected ~got in
     env
   | Assert (Assert_invalid_quote (modul, expected)) ->
@@ -111,14 +113,16 @@ let run_one ~no_exhaustion:_ (state : Env.Abstract.t Result.t) cmd =
       match got with
       | Error got -> Script_error.check_error ~expected ~got
       | Ok [ Text_module (false, modul) ] ->
-        let got = Compile.Text.until_validate ~unsafe modul in
+        let got = Compile.Wasm.Text.until_validate ~unsafe modul in
         Script_error.check_result ~expected ~got
       | _ -> assert false
     in
     env
   | Assert (Assert_malformed (modul, expected)) ->
     Log.info (fun m -> m "*** assert_malformed");
-    let got = Compile.Text.until_abstract_link ~unsafe ~name:None env modul in
+    let got =
+      Compile.Wasm.Text.until_abstract_link ~unsafe ~name:None env modul
+    in
     let+ () = Script_error.check_result ~expected ~got in
     assert false
   | Assert (Assert_return (action, res)) ->

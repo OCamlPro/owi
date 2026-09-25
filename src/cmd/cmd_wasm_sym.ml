@@ -2,19 +2,22 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-open Bos
 open Syntax
 
-let run_file ~parameters ~source_file =
+let run_file ~entry_point ~symbolic_parameters ~source_file =
   let { Symbolic_parameters.unsafe
-      ; entry_point
       ; invoke_with_symbols
       ; exploration_strategy = _
+      ; generate_abstract_invariant
+      ; fail_mode
+      ; timeout
+      ; timeout_instr
+      ; use_ite_for_select
       ; _
       } =
-    parameters
+    symbolic_parameters
   in
-  let* modul = Compile.File.until_validate ~unsafe source_file in
+  let* modul = Compile.Wasm.File.until_validate ~unsafe source_file in
   (* TODO: enable this once the smart strategy is fully implemented
   ( match exploration_strategy with
   | Smart -> Cmd_call_graph.compute_distances m entry_point
@@ -25,10 +28,10 @@ let run_file ~parameters ~source_file =
   in
 
   let* abstract_invariant =
-    if parameters.generate_abstract_invariant then
+    if generate_abstract_invariant then
       let* env = Cmd_wasm_abs.env () in
       let+ modul, env =
-        Compile.Binary.until_abstract_link ~unsafe ~name:None env modul
+        Compile.Wasm.Binary.until_abstract_link ~unsafe ~name:None env modul
       in
       try
         let state = Abstract_interpreter_control_flow.modul ~env ~modul in
@@ -48,19 +51,17 @@ let run_file ~parameters ~source_file =
   in
   let+ modul, env =
     (* unsafe is set to true because the module was already validated before *)
-    Compile.Binary.until_symbolic_link env ~unsafe:true ~name:None modul
+    Compile.Wasm.Binary.until_symbolic_link env ~unsafe:true ~name:None modul
   in
   let module Parameters = struct
     let throw_away_trap =
-      match parameters.fail_mode with
-      | Assertion_only -> true
-      | Both | Trap_only -> false
+      match fail_mode with Assertion_only -> true | Both | Trap_only -> false
 
-    let timeout = parameters.timeout
+    let timeout = timeout
 
-    let timeout_instr = parameters.timeout_instr
+    let timeout_instr = timeout_instr
 
-    let use_ite_for_select = parameters.use_ite_for_select
+    let use_ite_for_select = use_ite_for_select
 
     let abstract_invariant = abstract_invariant
   end in
@@ -71,7 +72,26 @@ let run_file ~parameters ~source_file =
              during evaluation (OS, syntax error, etc.), except for Trap and Assert,
              which are handled here. Most of the computations are done in the Result
              monad, hence the let*. *)
-let cmd ~parameters ~source_file =
+let cmd ~entry_point ~source_file ~(symbolic_parameters : Symbolic_parameters.t)
+    =
+  (* deterministic_result_order implies no_stop_at_failure *)
+  let no_stop_at_failure =
+    (* TODO: move this somewhere else *)
+    symbolic_parameters.deterministic_result_order
+    || symbolic_parameters.no_stop_at_failure
+  in
+
+  (* TODO: can we handle this at the cmdliner level? *)
+  let* workspace =
+    match symbolic_parameters.workspace with
+    | Some path -> Ok path
+    | None -> Bos.OS.Dir.tmp "owi_sym_%s"
+  in
+
+  let* to_run, run_time =
+    run_file ~symbolic_parameters ~source_file ~entry_point
+  in
+
   let { Symbolic_parameters.exploration_strategy
       ; fail_mode
       ; workers
@@ -81,28 +101,13 @@ let cmd ~parameters ~source_file =
       ; model_format
       ; no_value
       ; no_assert_failure_expression_printing
-      ; seed
-      ; workspace
       ; model_out_file
       ; with_breadcrumbs
+      ; seed
       ; _
       } =
-    parameters
+    symbolic_parameters
   in
-
-  (* deterministic_result_order implies no_stop_at_failure *)
-  let no_stop_at_failure =
-    parameters.deterministic_result_order || parameters.no_stop_at_failure
-  in
-
-  (* TODO: can we handle this at the cmdliner level? *)
-  let* workspace =
-    match workspace with
-    | Some path -> Ok path
-    | None -> OS.Dir.tmp "owi_sym_%s"
-  in
-
-  let* to_run, run_time = run_file ~parameters ~source_file in
 
   Symbolic_driver.run ~exploration_strategy ~fail_mode ~workers
     ~no_worker_isolation ~solver ~deterministic_result_order ~model_format

@@ -268,9 +268,8 @@ let debug_trace =
 
 (* shared symbolic parameters *)
 
-let symbolic_parameters default_entry_point =
+let symbolic_parameters =
   let+ deterministic_result_order
-  and+ entry_point = entry_point default_entry_point
   and+ exploration_strategy
   and+ fail_mode
   and+ generate_abstract_invariant
@@ -292,7 +291,6 @@ let symbolic_parameters default_entry_point =
   and+ workspace in
   let use_ite_for_select = not no_ite_for_select in
   { Symbolic_parameters.deterministic_result_order
-  ; entry_point
   ; exploration_strategy
   ; fail_mode
   ; generate_abstract_invariant
@@ -358,6 +356,7 @@ module C = struct
   module Sym = struct
     let cmd =
       let+ arch
+      and+ entry_point = entry_point (Some "main")
       and+ property =
         let doc = "property file" in
         Arg.(
@@ -379,10 +378,10 @@ module C = struct
         in
         Arg.(value & flag & info [ "e-acsl" ] ~doc)
       and+ out_file
-      and+ symbolic_parameters = symbolic_parameters (Some "main") in
+      and+ symbolic_parameters in
 
-      Cmd_c_sym.cmd ~symbolic_parameters ~arch ~property ~includes ~opt_lvl
-        ~out_file ~testcomp ~files ~eacsl
+      Cmd_c_sym.cmd ~entry_point ~symbolic_parameters ~arch ~property ~includes
+        ~opt_lvl ~out_file ~testcomp ~files ~eacsl
   end
 end
 
@@ -392,15 +391,16 @@ module Cpp = struct
   module Sym = struct
     let cmd =
       let+ arch
+      and+ entry_point = entry_point (Some "main")
       and+ includes
       and+ opt_lvl
       and+ files
       and+ out_file
       and+ () = setup_log
-      and+ symbolic_parameters = symbolic_parameters (Some "main") in
+      and+ symbolic_parameters in
 
-      Cmd_cpp_sym.cmd ~symbolic_parameters ~out_file ~arch ~includes ~opt_lvl
-        ~files
+      Cmd_cpp_sym.cmd ~entry_point ~symbolic_parameters ~out_file ~arch
+        ~includes ~opt_lvl ~files
   end
 end
 
@@ -410,10 +410,11 @@ module Haskell = struct
   module Sym = struct
     let cmd =
       let+ files
+      and+ entry_point = entry_point (Some "_start")
       and+ out_file
       and+ () = setup_log
-      and+ symbolic_parameters = symbolic_parameters (Some "_start") in
-      Cmd_haskell_sym.cmd ~symbolic_parameters ~files ~out_file
+      and+ symbolic_parameters in
+      Cmd_haskell_sym.cmd ~entry_point ~symbolic_parameters ~files ~out_file
   end
 end
 
@@ -423,10 +424,11 @@ module Llvm = struct
   module Sym = struct
     let cmd =
       let+ files
+      and+ entry_point = entry_point None
       and+ out_file
       and+ () = setup_log
-      and+ symbolic_parameters = symbolic_parameters None in
-      Cmd_llvm_sym.cmd ~symbolic_parameters ~files ~out_file
+      and+ symbolic_parameters in
+      Cmd_llvm_sym.cmd ~entry_point ~symbolic_parameters ~files ~out_file
   end
 end
 
@@ -436,15 +438,16 @@ module Rust = struct
   module Sym = struct
     let cmd =
       let+ arch
+      and+ entry_point = entry_point (Some "main")
       and+ includes
       and+ opt_lvl
       and+ files
       and+ out_file
       and+ () = setup_log
-      and+ symbolic_parameters = symbolic_parameters (Some "main") in
+      and+ symbolic_parameters in
 
-      Cmd_rust_sym.cmd ~symbolic_parameters ~arch ~opt_lvl ~includes ~files
-        ~out_file
+      Cmd_rust_sym.cmd ~entry_point ~symbolic_parameters ~arch ~opt_lvl
+        ~includes ~files ~out_file
   end
 end
 
@@ -454,10 +457,11 @@ module Go = struct
   module Sym = struct
     let cmd =
       let+ files
+      and+ entry_point = entry_point (Some "_start")
       and+ out_file
       and+ () = setup_log
-      and+ symbolic_parameters = symbolic_parameters (Some "_start") in
-      Cmd_go_sym.cmd ~symbolic_parameters ~files ~out_file
+      and+ symbolic_parameters in
+      Cmd_go_sym.cmd ~entry_point ~symbolic_parameters ~files ~out_file
   end
 end
 
@@ -542,6 +546,22 @@ module Wasm = struct
         and+ source_file in
         Cmd_wasm_instrument_label.cmd ~unsafe ~source_file ~coverage_criteria
     end
+  end
+
+  (* owi wasm hunt *)
+  module Hunt = struct
+    let cmd =
+      let+ rounds
+      and+ seed
+      and+ source_file
+      and+ entry_point = entry_point None
+      and+ symbolic_parameters
+      and+ timeout
+      and+ timeout_instr
+      and+ unsafe
+      and+ () = setup_log in
+      Cmd_wasm_hunt.cmd ~entry_point ~symbolic_parameters ~rounds ~seed
+        ~source_file ~timeout ~timeout_instr ~unsafe
   end
 
   (* owi wasm iso *)
@@ -645,9 +665,10 @@ module Wasm = struct
   module Sym = struct
     let cmd =
       let+ source_file
+      and+ entry_point = entry_point None
       and+ () = setup_log
-      and+ parameters = symbolic_parameters None in
-      Cmd_wasm_sym.cmd ~parameters ~source_file
+      and+ symbolic_parameters in
+      Cmd_wasm_sym.cmd ~entry_point ~symbolic_parameters ~source_file
   end
 
   (* owi wasm to_wat *)
@@ -687,11 +708,13 @@ module Zig = struct
   module Sym = struct
     let cmd =
       let+ includes
+      and+ entry_point = entry_point (Some "_start")
       and+ files
       and+ out_file
       and+ () = setup_log
-      and+ symbolic_parameters = symbolic_parameters (Some "_start") in
-      Cmd_zig_sym.cmd ~symbolic_parameters ~includes ~files ~out_file
+      and+ symbolic_parameters in
+      Cmd_zig_sym.cmd ~entry_point ~symbolic_parameters ~includes ~files
+        ~out_file
   end
 end
 
@@ -759,6 +782,10 @@ let cli =
                  test objectives for a given coverage criteria."
                 Wasm.Instrument.Label.cmd
             ]
+        ; cmd "hunt"
+            "Hunt bugs by combining the fuzzer and the symbolic execution \
+             engine."
+            Wasm.Hunt.cmd
         ; cmd "iso"
             "Check the iso-functionnality of two modules by comparing the \
              output when calling their exports."
