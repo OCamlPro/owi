@@ -101,8 +101,8 @@ let compile ~workspace ~entry_point ~out_file (files : Fpath.t list) :
 
   out
 
-let cmd ~(symbolic_parameters : Symbolic_parameters.t) ~files ~out_file :
-  unit Result.t =
+let cmd ~entry_point ~files ~out_file
+  ~(symbolic_parameters : Symbolic_parameters.t) : unit Result.t =
   let* workspace =
     match symbolic_parameters.workspace with
     | Some path -> Ok path
@@ -110,12 +110,9 @@ let cmd ~(symbolic_parameters : Symbolic_parameters.t) ~files ~out_file :
   in
   let* _did_create : bool = OS.Dir.create ~path:true workspace in
 
-  let* source_file =
-    compile ~workspace ~entry_point:symbolic_parameters.entry_point ~out_file
-      files
-  in
+  let* source_file = compile ~workspace ~entry_point ~out_file files in
   let workspace = Some workspace in
 
-  let parameters = { symbolic_parameters with workspace } in
+  let symbolic_parameters = { symbolic_parameters with workspace } in
 
-  Cmd_wasm_sym.cmd ~parameters ~source_file
+  Cmd_wasm_sym.cmd ~entry_point ~source_file ~symbolic_parameters

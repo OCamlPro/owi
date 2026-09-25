@@ -53,8 +53,9 @@ let compile ~entry_point ~includes:_ ~opt_lvl:_ ~out_file (files : Fpath.t list)
 
   out
 
-let cmd ~(symbolic_parameters : Symbolic_parameters.t) ~arch:_ ~opt_lvl
-  ~includes ~files ~out_file : unit Result.t =
+(* TODO: use arch *)
+let cmd ~arch:_ ~entry_point ~files ~includes ~opt_lvl ~out_file
+  ~(symbolic_parameters : Symbolic_parameters.t) : unit Result.t =
   let* workspace =
     match symbolic_parameters.workspace with
     | Some path -> Ok path
@@ -62,12 +63,9 @@ let cmd ~(symbolic_parameters : Symbolic_parameters.t) ~arch:_ ~opt_lvl
   in
   let* _did_create : bool = OS.Dir.create workspace in
 
-  let* source_file =
-    compile ~entry_point:symbolic_parameters.entry_point ~includes ~opt_lvl
-      ~out_file files
-  in
+  let* source_file = compile ~entry_point ~includes ~opt_lvl ~out_file files in
   let workspace = Some workspace in
 
-  let parameters = { symbolic_parameters with workspace } in
+  let symbolic_parameters = { symbolic_parameters with workspace } in
 
-  Cmd_wasm_sym.cmd ~parameters ~source_file
+  Cmd_wasm_sym.cmd ~entry_point ~source_file ~symbolic_parameters

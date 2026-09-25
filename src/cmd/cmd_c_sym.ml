@@ -5,8 +5,9 @@
 open Bos
 open Syntax
 
-let cmd ~(symbolic_parameters : Symbolic_parameters.t) ~arch ~property
-  ~testcomp:_ ~opt_lvl ~includes ~files ~eacsl ~out_file : unit Result.t =
+(* TODO: use testcomp *)
+let cmd ~arch ~eacsl ~entry_point ~files ~includes ~opt_lvl ~out_file ~property
+  ~(symbolic_parameters : Symbolic_parameters.t) ~testcomp:_ : unit Result.t =
   let* workspace =
     match symbolic_parameters.workspace with
     | Some path -> Ok path
@@ -17,12 +18,11 @@ let cmd ~(symbolic_parameters : Symbolic_parameters.t) ~arch ~property
   let includes = Cmd_utils.c_files_location @ includes in
   let* files = Cmd_c.eacsl_instrument eacsl ~includes files in
   let* source_file =
-    Cmd_c.compile ~workspace ~entry_point:symbolic_parameters.entry_point
-      ~includes ~opt_lvl ~out_file files
+    Cmd_c.compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file files
   in
   let* () = Cmd_c.metadata ~workspace arch property files in
   let workspace = Some workspace in
 
-  let parameters = { symbolic_parameters with workspace } in
+  let symbolic_parameters = { symbolic_parameters with workspace } in
 
-  Cmd_wasm_sym.cmd ~parameters ~source_file
+  Cmd_wasm_sym.cmd ~entry_point ~source_file ~symbolic_parameters

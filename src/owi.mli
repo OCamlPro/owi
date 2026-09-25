@@ -1970,7 +1970,6 @@ module Symbolic_parameters : sig
 
   type t =
     { deterministic_result_order : bool
-    ; entry_point : string option
     ; exploration_strategy : Exploration_strategy.t
     ; fail_mode : fail_mode
     ; generate_abstract_invariant : bool
@@ -2025,7 +2024,8 @@ end
 
 module Cmd_wasm_hunt : sig
   val cmd :
-       rounds:int option
+       entry_point:string option
+    -> rounds:int option
     -> seed:int option
     -> source_file:Fpath.t
     -> symbolic_parameters:Symbolic_parameters.t
@@ -2037,20 +2037,24 @@ end
 
 module Cmd_wasm_sym : sig
   val cmd :
-    parameters:Symbolic_parameters.t -> source_file:Fpath.t -> unit Result.t
+       entry_point:string option
+    -> source_file:Fpath.t
+    -> symbolic_parameters:Symbolic_parameters.t
+    -> unit Result.t
 end
 
 module Cmd_c_sym : sig
   val cmd :
-       symbolic_parameters:Symbolic_parameters.t
-    -> arch:int
-    -> property:Fpath.t option
-    -> testcomp:bool
-    -> opt_lvl:string
-    -> includes:Fpath.t list
-    -> files:Fpath.t list
+       arch:int
     -> eacsl:bool
+    -> entry_point:string option
+    -> files:Fpath.t list
+    -> includes:Fpath.t list
+    -> opt_lvl:string
     -> out_file:Fpath.t option
+    -> property:Fpath.t option
+    -> symbolic_parameters:Symbolic_parameters.t
+    -> testcomp:bool
     -> unit Result.t
 end
 
@@ -2092,12 +2096,13 @@ end
 
 module Cmd_cpp_sym : sig
   val cmd :
-       symbolic_parameters:Symbolic_parameters.t
-    -> arch:int
-    -> opt_lvl:string
-    -> includes:Fpath.t list
+       arch:int
+    -> entry_point:string option
     -> files:Fpath.t list
+    -> includes:Fpath.t list
+    -> opt_lvl:string
     -> out_file:Fpath.t option
+    -> symbolic_parameters:Symbolic_parameters.t
     -> unit Result.t
 end
 
@@ -2119,9 +2124,10 @@ end
 
 module Cmd_haskell_sym : sig
   val cmd :
-       symbolic_parameters:Symbolic_parameters.t
+       entry_point:string option
     -> files:Fpath.t list
     -> out_file:Fpath.t option
+    -> symbolic_parameters:Symbolic_parameters.t
     -> unit Result.t
 end
 
@@ -2156,9 +2162,10 @@ end
 
 module Cmd_llvm_sym : sig
   val cmd :
-       symbolic_parameters:Symbolic_parameters.t
+       entry_point:string option
     -> files:Fpath.t list
     -> out_file:Fpath.t option
+    -> symbolic_parameters:Symbolic_parameters.t
     -> unit Result.t
 end
 
@@ -2183,12 +2190,13 @@ end
 
 module Cmd_rust_sym : sig
   val cmd :
-       symbolic_parameters:Symbolic_parameters.t
-    -> arch:int
-    -> opt_lvl:string
-    -> includes:Fpath.t list
+       arch:int
+    -> entry_point:string option
     -> files:Fpath.t list
+    -> includes:Fpath.t list
+    -> opt_lvl:string
     -> out_file:Fpath.t option
+    -> symbolic_parameters:Symbolic_parameters.t
     -> unit Result.t
 end
 
@@ -2206,9 +2214,10 @@ end
 
 module Cmd_go_sym : sig
   val cmd :
-       symbolic_parameters:Symbolic_parameters.t
+       entry_point:string option
     -> files:Fpath.t list
     -> out_file:Fpath.t option
+    -> symbolic_parameters:Symbolic_parameters.t
     -> unit Result.t
 end
 
@@ -2240,10 +2249,11 @@ end
 
 module Cmd_zig_sym : sig
   val cmd :
-       symbolic_parameters:Symbolic_parameters.t
-    -> includes:Fpath.t list
+       entry_point:string option
     -> files:Fpath.t list
+    -> includes:Fpath.t list
     -> out_file:Fpath.t option
+    -> symbolic_parameters:Symbolic_parameters.t
     -> unit Result.t
 end
 

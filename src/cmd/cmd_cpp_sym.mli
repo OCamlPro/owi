@@ -3,10 +3,11 @@
 (* Written by the Owi programmers *)
 
 val cmd :
-     symbolic_parameters:Symbolic_parameters.t
-  -> arch:int
-  -> opt_lvl:string
-  -> includes:Fpath.t list
+     arch:int
+  -> entry_point:string option
   -> files:Fpath.t list
+  -> includes:Fpath.t list
+  -> opt_lvl:string
   -> out_file:Fpath.t option
+  -> symbolic_parameters:Symbolic_parameters.t
   -> unit Result.t
