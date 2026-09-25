@@ -15,11 +15,11 @@ let cmd ~arch ~eacsl ~entry_point ~files ~includes ~opt_lvl ~out_file ~property
   in
   let* _did_create : bool = OS.Dir.create Fpath.(workspace / "test-suite") in
 
-  let includes = Cmd_utils.c_files_location @ includes in
-  let* files = Cmd_c.eacsl_instrument eacsl ~includes files in
   let* source_file =
-    Cmd_c.compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file files
+    Compile.C.files_to_wasm_file ~eacsl ~entry_point ~includes ~opt_lvl
+      ~out_file ~workspace files
   in
+  (* TODO: move the metadata generation to Compile.C.files_to_wasm_file *)
   let* () = Cmd_c.metadata ~workspace arch property files in
   let workspace = Some workspace in
 
