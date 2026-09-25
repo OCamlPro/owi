@@ -1622,7 +1622,7 @@ module Kind : sig
 end
 
 module Binary_to_text : sig
-  (* TODO: move this to Compile.Binary.to_text *)
+  (* TODO: move this to Compile.Wasm.Binary.to_text *)
   val modul : Binary.Module.t -> Text.Module.t
 end
 
@@ -1754,28 +1754,31 @@ module Env : sig
 end
 
 module Compile : sig
-  module File : sig
-    val until_binary : unsafe:bool -> Fpath.t -> Binary.Module.t Result.t
-  end
+  module Wasm : sig
+    module File : sig
+      val until_binary : unsafe:bool -> Fpath.t -> Binary.Module.t Result.t
+    end
 
-  module Text : sig
-    val until_binary : unsafe:bool -> Text.Module.t -> Binary.Module.t Result.t
+    module Text : sig
+      val until_binary :
+        unsafe:bool -> Text.Module.t -> Binary.Module.t Result.t
 
-    val until_concrete_link :
-         unsafe:bool
-      -> name:string option
-      -> Env.Concrete.t
-      -> Text.Module.t
-      -> (Env.Concrete.modul * Env.Concrete.t) Result.t
-  end
+      val until_concrete_link :
+           unsafe:bool
+        -> name:string option
+        -> Env.Concrete.t
+        -> Text.Module.t
+        -> (Env.Concrete.modul * Env.Concrete.t) Result.t
+    end
 
-  module Binary : sig
-    val until_concrete_link :
-         unsafe:bool
-      -> name:string option
-      -> Env.Concrete.t
-      -> Binary.Module.t
-      -> (Env.Concrete.modul * Env.Concrete.t) Result.t
+    module Binary : sig
+      val until_concrete_link :
+           unsafe:bool
+        -> name:string option
+        -> Env.Concrete.t
+        -> Binary.Module.t
+        -> (Env.Concrete.modul * Env.Concrete.t) Result.t
+    end
   end
 end
 

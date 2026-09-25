@@ -204,9 +204,9 @@ $ owi wasm script abstract --no-exhaustion reference/left-to-right.wast
        File "src/script/script_abstract.ml", line 34, characters 4-10: Assertion failed
        Raised at Owi__Script_abstract.do_action in file "src/script/script_abstract.ml", line 34, characters 4-16
        Called from Stdlib__Result.map in file "result.ml", line 27, characters 32-37
-       Called from Owi__Script_abstract.run_one in file "src/script/script_abstract.ml", line 127, characters 17-37
+       Called from Owi__Script_abstract.run_one in file "src/script/script_abstract.ml", line 131, characters 17-37
        Called from Stdlib__List.fold_left in file "list.ml", line 125, characters 24-34
-       Called from Owi__Script_abstract.exec in file "src/script/script_abstract.ml", line 192, characters 12-37
+       Called from Owi__Script_abstract.exec in file "src/script/script_abstract.ml", line 196, characters 12-37
        Called from Owi__Syntax.list_iter.aux in file "src/infra/syntax.ml", line 11, characters 25-28
        Called from Owi__Cmd_wasm_script.cmd_abstract in file "src/cmd/cmd_wasm_script.ml", line 22, characters 15-46
        Called from Cmdliner_term.app.(fun) in file "cmdliner_term.ml", line 22, characters 19-24

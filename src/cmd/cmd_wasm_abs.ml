@@ -13,11 +13,11 @@ let env () =
   Env.Abstract.link_extern_module ~env ~name:"owi" Abstract_wasm_ffi.owi
 
 let cmd ~source_file ~entry_point ~unsafe ~debug_trace =
-  let* env = env () in
-  let* modul = Compile.File.until_binary ~unsafe source_file in
-  let* modul = Cmd_utils.set_entry_point entry_point false modul in
   let+ modul, env =
-    Compile.Binary.until_abstract_link ~unsafe ~name:None env modul
+    let* env = env () in
+    let* modul = Compile.Wasm.File.until_binary ~unsafe source_file in
+    let* modul = Cmd_utils.set_entry_point entry_point false modul in
+    Compile.Wasm.Binary.until_abstract_link ~unsafe ~name:None env modul
   in
   if Option.is_some debug_trace then Abstract_trace.enable ();
   try

@@ -85,12 +85,12 @@ let check_iso ~unsafe export_name export_type module1 module2 =
       (emscripten_fuzzing_support_module ())
   in
   let* _module, env =
-    Compile.Binary.until_symbolic_link env ~name:(Some module_name1) ~unsafe
-      module1
+    Compile.Wasm.Binary.until_symbolic_link env ~name:(Some module_name1)
+      ~unsafe module1
   in
   let* _module, env =
-    Compile.Binary.until_symbolic_link env ~name:(Some module_name2) ~unsafe
-      module2
+    Compile.Wasm.Binary.until_symbolic_link env ~name:(Some module_name2)
+      ~unsafe module2
   in
 
   let typ = (None, export_type) in
@@ -287,7 +287,7 @@ let check_iso ~unsafe export_name export_type module1 module2 =
   Log.debug (fun m ->
     m "generated module:@\n  @[<v>%a@]" Text.Module.pp text_modul );
   let+ modul, env =
-    Compile.Binary.until_symbolic_link ~unsafe:false ~name:None env modul
+    Compile.Wasm.Binary.until_symbolic_link ~unsafe:false ~name:None env modul
   in
   let module I = Interpret.Symbolic (Interpret.Default_parameters) in
   I.modul ~env ~modul
@@ -315,7 +315,7 @@ let cmd ~deterministic_result_order ~fail_mode ~exploration_strategy ~files
   Log.info (fun m -> m "module %s is %a" module_name1 Fpath.pp file1);
   Log.info (fun m -> m "module %s is %a" module_name2 Fpath.pp file2);
 
-  let compile ~unsafe file = Compile.File.until_validate ~unsafe file in
+  let compile ~unsafe file = Compile.Wasm.File.until_validate ~unsafe file in
 
   Log.info (fun m -> m "compiling %a" Fpath.pp file1);
   let* module1 = compile ~unsafe file1 in

@@ -47,7 +47,7 @@ let pure_wasm_module =
 (* our pure wasm module, linked with `chorizo` *)
 let modul, env =
   match
-    Compile.Text.until_concrete_link env ~unsafe:false ~name:None
+    Compile.Wasm.Text.until_concrete_link env ~unsafe:false ~name:None
       pure_wasm_module
   with
   | Error _ -> assert false

@@ -72,7 +72,7 @@ let run_one ~no_exhaustion ~(env : Env.Symbolic.t) cmd : Env.Symbolic.t Result.t
   match cmd with
   | Wast.Text_module (false, m) ->
     let* modul, env =
-      Compile.Text.until_symbolic_link env ~unsafe ~name:None m
+      Compile.Wasm.Text.until_symbolic_link env ~unsafe ~name:None m
     in
     let to_run = I.modul ~env ~modul in
     let+ _got = run_monad ~to_run in
@@ -80,7 +80,7 @@ let run_one ~no_exhaustion ~(env : Env.Symbolic.t) cmd : Env.Symbolic.t Result.t
   | Wast.Quoted_module (false, m) ->
     let* m = Parse.Text.Inline_module.from_string m in
     let* modul, env =
-      Compile.Text.until_symbolic_link env ~unsafe ~name:None m
+      Compile.Wasm.Text.until_symbolic_link env ~unsafe ~name:None m
     in
     let to_run = I.modul ~env ~modul in
     let+ _got = run_monad ~to_run in
@@ -89,14 +89,14 @@ let run_one ~no_exhaustion ~(env : Env.Symbolic.t) cmd : Env.Symbolic.t Result.t
     let* m = Parse.Binary.Module.from_string m in
     let m = { m with id } in
     let* modul, env =
-      Compile.Binary.until_symbolic_link env ~unsafe ~name:None m
+      Compile.Wasm.Binary.until_symbolic_link env ~unsafe ~name:None m
     in
     let to_run = I.modul ~env ~modul in
     let+ _got = run_monad ~to_run in
     env
   | Assert (Assert_trap_module (m, expected)) ->
     let* modul, env =
-      Compile.Text.until_symbolic_link env ~unsafe ~name:None m
+      Compile.Wasm.Text.until_symbolic_link env ~unsafe ~name:None m
     in
     let to_run = I.modul ~env ~modul in
     begin match run_monad ~to_run with

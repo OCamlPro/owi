@@ -1321,6 +1321,6 @@ let write_file outfile filename content =
 
 let convert (outfile : Fpath.t option) (filename : Fpath.t) ~unsafe m =
   Log.info (fun m -> m "binary encoding ...");
-  let* m = Compile.Text.until_validate ~unsafe m in
+  let* m = Compile.Wasm.Text.until_validate ~unsafe m in
   let content = encode m in
   write_file outfile filename content

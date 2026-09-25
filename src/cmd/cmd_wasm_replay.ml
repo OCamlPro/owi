@@ -198,9 +198,9 @@ let compile_file ~unsafe ~entry_point ~invoke_with_symbols filename model =
       ~name:"owi" replay_extern_module
   in
 
-  let* m = Compile.File.until_binary ~unsafe filename in
+  let* m = Compile.Wasm.File.until_binary ~unsafe filename in
   let* m = Cmd_utils.set_entry_point entry_point invoke_with_symbols m in
-  Compile.Binary.until_concrete_link ~unsafe env ~name:None m
+  Compile.Wasm.Binary.until_concrete_link ~unsafe env ~name:None m
 
 let parse_model replay_file =
   let* parse_fn =
