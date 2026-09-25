@@ -16,10 +16,9 @@ let cmd ~rounds ~seed ~workspace ~entry_point ~arch ~property ~testcomp ~opt_lvl
     Bos.OS.Dir.create Fpath.(workspace / "test-suite")
   in
 
-  let includes = Cmd_utils.c_files_location @ includes in
-  let* files = Cmd_c.eacsl_instrument eacsl ~includes files in
   let* source_file =
-    Cmd_c.compile ~workspace ~entry_point ~includes ~opt_lvl ~out_file files
+    Compile.C.files_to_wasm_file ~eacsl ~entry_point ~includes ~opt_lvl
+      ~out_file ~workspace files
   in
   let* () = Cmd_c.metadata ~workspace arch property files in
   (* TODO: use this! *)
