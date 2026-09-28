@@ -11,5 +11,6 @@ fn mean2(x: i32, y: i32) -> i32 {
 fn main() {
     let x = i32::named_symbol("x");
     let y = i32::named_symbol("y");
+    owi_sym::assume(x == -1816735914);
     owi_sym::assert(mean1(x, y) == mean2(x, y))
 }
