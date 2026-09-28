@@ -5,6 +5,7 @@
 ## Subcommands
 
 - [`owi c fuzz`](owi-c-fuzz.md)
+- [`owi c hunt`](owi-c-hunt.md)
 - [`owi c sym`](owi-c-sym.md)
 
 ## Help
@@ -19,6 +20,10 @@ SYNOPSIS
 COMMANDS
        fuzz [OPTION]… FILE…
            Run the fuzzer.
+
+       hunt [OPTION]… FILE…
+           Hunt bugs by combining the fuzzer and the symbolic execution
+           engine.
 
        sym [OPTION]… FILE…
            Run the symbolic execution engine on a C program.

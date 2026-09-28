@@ -2046,8 +2046,40 @@ module Cmd_wasm_sym : sig
     -> unit Result.t
 end
 
-module Cmd_c_sym : sig
-  val cmd :
+module Cmd_c : sig
+  val fuzz :
+       arch:int
+    -> eacsl:bool
+    -> entry_point:string option
+    -> files:Fpath.t list
+    -> includes:Fpath.t list
+    -> opt_lvl:string
+    -> out_file:Fpath.t option
+    -> property:Fpath.t option
+    -> rounds:int option
+    -> seed:int option
+    -> testcomp:bool
+    -> timeout:float option
+    -> timeout_instr:int option
+    -> unsafe:bool
+    -> workspace:Fpath.t option
+    -> unit Result.t
+
+  val hunt :
+       arch:int
+    -> eacsl:bool
+    -> entry_point:string option
+    -> files:Fpath.t list
+    -> includes:Fpath.t list
+    -> opt_lvl:string
+    -> out_file:Fpath.t option
+    -> property:Fpath.t option
+    -> rounds:int option
+    -> seed:int option
+    -> symbolic_parameters:Symbolic_parameters.t
+    -> unit Result.t
+
+  val sym :
        arch:int
     -> eacsl:bool
     -> entry_point:string option
@@ -2058,26 +2090,6 @@ module Cmd_c_sym : sig
     -> property:Fpath.t option
     -> symbolic_parameters:Symbolic_parameters.t
     -> testcomp:bool
-    -> unit Result.t
-end
-
-module Cmd_c_fuzz : sig
-  val cmd :
-       rounds:int option
-    -> seed:int option
-    -> workspace:Fpath.t option
-    -> entry_point:string option
-    -> arch:int
-    -> property:Fpath.t option
-    -> testcomp:bool
-    -> opt_lvl:string
-    -> includes:Fpath.t list
-    -> files:Fpath.t list
-    -> eacsl:bool
-    -> out_file:Fpath.t option
-    -> timeout:float option
-    -> timeout_instr:int option
-    -> unsafe:bool
     -> unit Result.t
 end
 

@@ -44,8 +44,7 @@
   choice_intf
   call_graph
   cmd_utils
-  cmd_c_fuzz
-  cmd_c_sym
+  cmd_c
   cmd_cpp_sym
   cmd_go_sym
   cmd_haskell_sym
