@@ -12,11 +12,9 @@ let cmd ~arch ~eacsl ~entry_point ~files ~includes ~opt_lvl ~out_file ~property
   in
 
   let* source_file =
-    Compile.C.files_to_wasm_file ~eacsl ~entry_point ~includes ~opt_lvl
-      ~out_file ~workspace files
+    Compile.C.files_to_wasm_file ~arch ~eacsl ~entry_point ~includes ~opt_lvl
+      ~out_file ~property ~workspace files
   in
-  (* TODO: move the metadata generation to Compile.C.files_to_wasm_file *)
-  let* () = Cmd_c.metadata ~workspace arch property files in
   let workspace = Some workspace in
 
   let symbolic_parameters = { symbolic_parameters with workspace } in

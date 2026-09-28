@@ -4,18 +4,16 @@
 
 open Syntax
 
-let cmd ~rounds ~seed ~workspace ~entry_point ~arch ~property ~testcomp ~opt_lvl
-  ~includes ~files ~eacsl ~out_file ~timeout ~timeout_instr ~unsafe :
+(* TODO: use testcomp! *)
+let cmd ~rounds ~seed ~workspace ~entry_point ~arch ~property ~testcomp:_
+  ~opt_lvl ~includes ~files ~eacsl ~out_file ~timeout ~timeout_instr ~unsafe :
   unit Result.t =
   let* workspace = Cmd_utils.make_workspace ~workspace in
 
   let* source_file =
-    Compile.C.files_to_wasm_file ~eacsl ~entry_point ~includes ~opt_lvl
-      ~out_file ~workspace files
+    Compile.C.files_to_wasm_file ~arch ~eacsl ~entry_point ~includes ~opt_lvl
+      ~out_file ~property ~workspace files
   in
-  let* () = Cmd_c.metadata ~workspace arch property files in
-  (* TODO: use this! *)
-  let _ = testcomp in
   (* TODO: use this! *)
   let _workspace = Some workspace in
 

@@ -4,11 +4,13 @@
 
 module C : sig
   val files_to_wasm_file :
-       eacsl:bool
+       arch:int
+    -> eacsl:bool
     -> entry_point:string option
     -> includes:Fpath.t list
     -> opt_lvl:string
     -> out_file:Fpath.t option
+    -> property:Fpath.t option
     -> workspace:Fpath.t
     -> Fpath.t list
     -> Fpath.t Result.t
