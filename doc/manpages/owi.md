@@ -5,6 +5,7 @@
 
 - [`owi c`](owi-c.md)
   - [`owi c fuzz`](owi-c-fuzz.md)
+  - [`owi c hunt`](owi-c-hunt.md)
   - [`owi c sym`](owi-c-sym.md)
 - [`owi c++`](owi-c--.md)
   - [`owi c++ sym`](owi-c---sym.md)

@@ -109,12 +109,29 @@ let coverage_criteria =
     & opt coverage_criteria_conv Label.Coverage_criteria.Statement_coverage
     & info [ "criteria" ] ~doc )
 
+let eacsl =
+  let doc =
+    "e-acsl mode, refer to \
+     https://frama-c.com/download/e-acsl/e-acsl-implementation.pdf for \
+     Frama-C's current language feature implementations"
+  in
+  Arg.(value & flag & info [ "e-acsl" ] ~doc)
+
 let entry_point default =
   let doc = "entry point of the executable" in
   Arg.(
     value
     & opt (some string) default
     & info [ "entry-point" ] ~doc ~docv:"FUNCTION" )
+
+let exploration_strategy =
+  let doc =
+    {|exploration strategy to use ("fifo", "lifo", "random", "random-unseen-then-random", "rarity", "hot-path-penalty", "rarity-aging", "rarity-depth-aging", "rarity-depth-loop-aging", "rarity-depth-loop-aging-random")|}
+  in
+  Arg.(
+    value
+    & opt exploration_conv Symbolic_parameters.Exploration_strategy.FIFO
+    & info [ "exploration" ] ~doc )
 
 let fail_mode =
   let trap_doc = "ignore assertion violations and only report traps" in
@@ -125,15 +142,6 @@ let fail_mode =
         [ (Trap_only, info [ "fail-on-trap-only" ] ~doc:trap_doc)
         ; (Assertion_only, info [ "fail-on-assertion-only" ] ~doc:assert_doc)
         ] )
-
-let exploration_strategy =
-  let doc =
-    {|exploration strategy to use ("fifo", "lifo", "random", "random-unseen-then-random", "rarity", "hot-path-penalty", "rarity-aging", "rarity-depth-aging", "rarity-depth-loop-aging", "rarity-depth-loop-aging-random")|}
-  in
-  Arg.(
-    value
-    & opt exploration_conv Symbolic_parameters.Exploration_strategy.FIFO
-    & info [ "exploration" ] ~doc )
 
 let files =
   let doc = "source files" in
@@ -195,6 +203,13 @@ let model_out_file =
     & opt (some path_conv) None
     & info [ "model-out-file" ] ~docv:"FILE" ~doc )
 
+let property =
+  let doc = "property file" in
+  Arg.(
+    value
+    & opt (some existing_file_conv) None
+    & info [ "property" ] ~doc ~docv:"FILE" )
+
 let rounds =
   let doc = "Stop after a number of fuzzing rounds." in
   Arg.(value & opt (some int) None & info [ "rounds" ] ~doc ~docv:"I")
@@ -230,6 +245,10 @@ let setup_log =
   and+ log_level
   and+ style_renderer = Fmt_cli.style_renderer ~docs:sdocs () in
   Log.setup ~bench style_renderer log_level
+
+let testcomp =
+  let doc = "test-comp mode" in
+  Arg.(value & flag & info [ "testcomp" ] ~doc)
 
 let timeout =
   let doc = "Stop execution after S seconds." in
@@ -314,155 +333,134 @@ let symbolic_parameters =
 
 (* owi c *)
 module C = struct
-  module Fuzz = struct
-    let cmd =
-      let+ arch
-      and+ property =
-        let doc = "property file" in
-        Arg.(
-          value
-          & opt (some existing_file_conv) None
-          & info [ "property" ] ~doc ~docv:"FILE" )
-      and+ includes
-      and+ opt_lvl
-      and+ testcomp =
-        let doc = "test-comp mode" in
-        Arg.(value & flag & info [ "testcomp" ] ~doc)
-      and+ files
-      and+ () = setup_log
-      and+ eacsl =
-        let doc =
-          "e-acsl mode, refer to \
-           https://frama-c.com/download/e-acsl/e-acsl-implementation.pdf for \
-           Frama-C's current language feature implementations"
-        in
-        Arg.(value & flag & info [ "e-acsl" ] ~doc)
-      and+ out_file
-      and+ unsafe
-      and+ rounds
-      and+ timeout
-      and+ timeout_instr
-      and+ () = setup_log
-      and+ seed
-      and+ workspace
-      and+ entry_point = entry_point (Some "main") in
+  let entry_point = entry_point (Some "main")
 
-      Cmd_c_fuzz.cmd ~rounds ~seed ~workspace ~entry_point ~arch ~property
-        ~testcomp ~opt_lvl ~includes ~files ~eacsl ~out_file ~timeout
-        ~timeout_instr ~unsafe
-  end
+  (* owi c fuzz *)
+  let fuzz =
+    let+ arch
+    and+ eacsl
+    and+ entry_point
+    and+ files
+    and+ includes
+    and+ opt_lvl
+    and+ out_file
+    and+ property
+    and+ rounds
+    and+ testcomp
+    and+ timeout_instr
+    and+ timeout
+    and+ seed
+    and+ () = setup_log
+    and+ unsafe
+    and+ workspace in
+
+    Cmd_c.fuzz ~arch ~eacsl ~entry_point ~files ~includes ~opt_lvl ~out_file
+      ~property ~rounds ~seed ~testcomp ~timeout ~timeout_instr ~unsafe
+      ~workspace
+
+  (* owi c hunt *)
+  let hunt =
+    let+ arch
+    and+ eacsl
+    and+ entry_point
+    and+ files
+    and+ includes
+    and+ opt_lvl
+    and+ out_file
+    and+ property
+    and+ rounds
+    and+ seed
+    and+ () = setup_log
+    and+ symbolic_parameters in
+    Cmd_c.hunt ~arch ~eacsl ~entry_point ~files ~includes ~opt_lvl ~out_file
+      ~property ~rounds ~seed ~symbolic_parameters
 
   (* owi c sym *)
-  module Sym = struct
-    let cmd =
-      let+ arch
-      and+ entry_point = entry_point (Some "main")
-      and+ property =
-        let doc = "property file" in
-        Arg.(
-          value
-          & opt (some existing_file_conv) None
-          & info [ "property" ] ~doc ~docv:"FILE" )
-      and+ includes
-      and+ opt_lvl
-      and+ testcomp =
-        let doc = "test-comp mode" in
-        Arg.(value & flag & info [ "testcomp" ] ~doc)
-      and+ files
-      and+ () = setup_log
-      and+ eacsl =
-        let doc =
-          "e-acsl mode, refer to \
-           https://frama-c.com/download/e-acsl/e-acsl-implementation.pdf for \
-           Frama-C's current language feature implementations"
-        in
-        Arg.(value & flag & info [ "e-acsl" ] ~doc)
-      and+ out_file
-      and+ symbolic_parameters in
+  let sym =
+    let+ arch
+    and+ eacsl
+    and+ entry_point
+    and+ files
+    and+ includes
+    and+ opt_lvl
+    and+ out_file
+    and+ property
+    and+ () = setup_log
+    and+ testcomp
+    and+ symbolic_parameters in
 
-      Cmd_c_sym.cmd ~entry_point ~symbolic_parameters ~arch ~property ~includes
-        ~opt_lvl ~out_file ~testcomp ~files ~eacsl
-  end
+    Cmd_c.sym ~entry_point ~symbolic_parameters ~arch ~property ~includes
+      ~opt_lvl ~out_file ~testcomp ~files ~eacsl
 end
 
 (* owi c++ *)
 module Cpp = struct
   (* owi c++ sym *)
-  module Sym = struct
-    let cmd =
-      let+ arch
-      and+ entry_point = entry_point (Some "main")
-      and+ includes
-      and+ opt_lvl
-      and+ files
-      and+ out_file
-      and+ () = setup_log
-      and+ symbolic_parameters in
+  let sym =
+    let+ arch
+    and+ entry_point = entry_point (Some "main")
+    and+ includes
+    and+ opt_lvl
+    and+ files
+    and+ out_file
+    and+ () = setup_log
+    and+ symbolic_parameters in
 
-      Cmd_cpp_sym.cmd ~entry_point ~symbolic_parameters ~out_file ~arch
-        ~includes ~opt_lvl ~files
-  end
+    Cmd_cpp_sym.cmd ~entry_point ~symbolic_parameters ~out_file ~arch ~includes
+      ~opt_lvl ~files
 end
 
 (* owi haskell *)
 module Haskell = struct
   (* owi haskell sym *)
-  module Sym = struct
-    let cmd =
-      let+ files
-      and+ entry_point = entry_point (Some "_start")
-      and+ out_file
-      and+ () = setup_log
-      and+ symbolic_parameters in
-      Cmd_haskell_sym.cmd ~entry_point ~symbolic_parameters ~files ~out_file
-  end
+  let sym =
+    let+ files
+    and+ entry_point = entry_point (Some "_start")
+    and+ out_file
+    and+ () = setup_log
+    and+ symbolic_parameters in
+    Cmd_haskell_sym.cmd ~entry_point ~symbolic_parameters ~files ~out_file
 end
 
 (* owi llvm *)
 module Llvm = struct
   (* owi llvm sym *)
-  module Sym = struct
-    let cmd =
-      let+ files
-      and+ entry_point = entry_point None
-      and+ out_file
-      and+ () = setup_log
-      and+ symbolic_parameters in
-      Cmd_llvm_sym.cmd ~entry_point ~symbolic_parameters ~files ~out_file
-  end
+  let sym =
+    let+ files
+    and+ entry_point = entry_point None
+    and+ out_file
+    and+ () = setup_log
+    and+ symbolic_parameters in
+    Cmd_llvm_sym.cmd ~entry_point ~symbolic_parameters ~files ~out_file
 end
 
 (* owi rust *)
 module Rust = struct
   (* owi rust sym *)
-  module Sym = struct
-    let cmd =
-      let+ arch
-      and+ entry_point = entry_point (Some "main")
-      and+ includes
-      and+ opt_lvl
-      and+ files
-      and+ out_file
-      and+ () = setup_log
-      and+ symbolic_parameters in
+  let sym =
+    let+ arch
+    and+ entry_point = entry_point (Some "main")
+    and+ includes
+    and+ opt_lvl
+    and+ files
+    and+ out_file
+    and+ () = setup_log
+    and+ symbolic_parameters in
 
-      Cmd_rust_sym.cmd ~entry_point ~symbolic_parameters ~arch ~opt_lvl
-        ~includes ~files ~out_file
-  end
+    Cmd_rust_sym.cmd ~entry_point ~symbolic_parameters ~arch ~opt_lvl ~includes
+      ~files ~out_file
 end
 
 (* owi go *)
 module Go = struct
   (* owi go sym *)
-  module Sym = struct
-    let cmd =
-      let+ files
-      and+ entry_point = entry_point (Some "_start")
-      and+ out_file
-      and+ () = setup_log
-      and+ symbolic_parameters in
-      Cmd_go_sym.cmd ~entry_point ~symbolic_parameters ~files ~out_file
-  end
+  let sym =
+    let+ files
+    and+ entry_point = entry_point (Some "_start")
+    and+ out_file
+    and+ () = setup_log
+    and+ symbolic_parameters in
+    Cmd_go_sym.cmd ~entry_point ~symbolic_parameters ~files ~out_file
 end
 
 (* owi version *)
@@ -477,245 +475,208 @@ end
 
 module Wasm = struct
   (* owi wasm abs *)
-  module Abs = struct
-    let cmd =
-      let+ source_file
-      and+ () = setup_log
-      and+ entry_point = entry_point None
-      and+ unsafe
-      and+ debug_trace in
-      Cmd_wasm_abs.cmd ~source_file ~entry_point ~unsafe ~debug_trace
-  end
+  let abs =
+    let+ source_file
+    and+ () = setup_log
+    and+ entry_point = entry_point None
+    and+ unsafe
+    and+ debug_trace in
+    Cmd_wasm_abs.cmd ~source_file ~entry_point ~unsafe ~debug_trace
 
   (* owi wasm analyze *)
   module Analyze = struct
     (* owi wasm analyze cfg *)
-    module Cfg = struct
-      let cmd =
-        let+ source_file
-        and+ entry_point = entry_point None
-        and+ () = setup_log in
-        Cmd_wasm_analyze_cfg.cmd ~source_file ~entry_point
-    end
+    let cfg =
+      let+ source_file
+      and+ entry_point = entry_point None
+      and+ () = setup_log in
+      Cmd_wasm_analyze_cfg.cmd ~source_file ~entry_point
 
     (* owi wasm analyze cg *)
-    module Cg = struct
-      let cmd =
-        let+ call_graph_mode
-        and+ source_file
-        and+ entry_point = entry_point None
-        and+ () = setup_log in
-        Cmd_wasm_analyze_cg.cmd ~call_graph_mode ~source_file ~entry_point
-    end
+    let cg =
+      let+ call_graph_mode
+      and+ source_file
+      and+ entry_point = entry_point None
+      and+ () = setup_log in
+      Cmd_wasm_analyze_cg.cmd ~call_graph_mode ~source_file ~entry_point
   end
 
   (* owi wasm fmt *)
-  module Fmt = struct
-    let cmd =
-      let+ inplace =
-        let doc = "Format in-place, overwriting input file" in
-        Arg.(value & flag & info [ "inplace"; "i" ] ~doc)
-      and+ files
-      and+ () = setup_log in
-      Cmd_wasm_fmt.cmd ~inplace ~files
-  end
+  let fmt =
+    let+ inplace =
+      let doc = "Format in-place, overwriting input file" in
+      Arg.(value & flag & info [ "inplace"; "i" ] ~doc)
+    and+ files
+    and+ () = setup_log in
+    Cmd_wasm_fmt.cmd ~inplace ~files
 
   (* owi wasm fuzz *)
-  module Fuzz = struct
-    let cmd =
-      let+ unsafe
-      and+ entry_point = entry_point None
-      and+ rounds
-      and+ timeout
-      and+ timeout_instr
-      and+ () = setup_log
-      and+ seed
-      and+ source_file in
-      Cmd_wasm_fuzz.cmd ~entry_point ~rounds ~seed ~source_file ~timeout
-        ~timeout_instr ~unsafe
-  end
+  let fuzz =
+    let+ unsafe
+    and+ entry_point = entry_point None
+    and+ rounds
+    and+ timeout
+    and+ timeout_instr
+    and+ () = setup_log
+    and+ seed
+    and+ source_file in
+    Cmd_wasm_fuzz.cmd ~entry_point ~rounds ~seed ~source_file ~timeout
+      ~timeout_instr ~unsafe
 
   (* owi wasm instrument *)
   module Instrument = struct
     (* owi wasm instrument label *)
-    module Label = struct
-      let cmd =
-        let+ unsafe
-        and+ coverage_criteria
-        and+ () = setup_log
-        and+ source_file in
-        Cmd_wasm_instrument_label.cmd ~unsafe ~source_file ~coverage_criteria
-    end
+    let label =
+      let+ unsafe
+      and+ coverage_criteria
+      and+ () = setup_log
+      and+ source_file in
+      Cmd_wasm_instrument_label.cmd ~unsafe ~source_file ~coverage_criteria
   end
 
   (* owi wasm hunt *)
-  module Hunt = struct
-    let cmd =
-      let+ rounds
-      and+ seed
-      and+ source_file
-      and+ entry_point = entry_point None
-      and+ symbolic_parameters
-      and+ timeout
-      and+ timeout_instr
-      and+ unsafe
-      and+ () = setup_log in
-      Cmd_wasm_hunt.cmd ~entry_point ~symbolic_parameters ~rounds ~seed
-        ~source_file ~timeout ~timeout_instr ~unsafe
-  end
+  let hunt =
+    let+ rounds
+    and+ seed
+    and+ source_file
+    and+ entry_point = entry_point None
+    and+ symbolic_parameters
+    and+ timeout
+    and+ timeout_instr
+    and+ unsafe
+    and+ () = setup_log in
+    Cmd_wasm_hunt.cmd ~entry_point ~symbolic_parameters ~rounds ~seed
+      ~source_file ~timeout ~timeout_instr ~unsafe
 
   (* owi wasm iso *)
-  module Iso = struct
-    let cmd =
-      (* TODO: this is actually almost `symbolic_parameters` (with `entry_point` removed), we should use it... it'll simplify the signature a lot! *)
-      let+ deterministic_result_order
-      and+ fail_mode
-      and+ exploration_strategy
-      and+ files
-      and+ model_format
-      and+ no_assert_failure_expression_printing
-      and+ no_stop_at_failure
-      and+ no_value
-      and+ () = setup_log
-      and+ seed
-      and+ solver
-      and+ unsafe
-      and+ workers
-      and+ no_worker_isolation
-      and+ model_out_file
-      and+ with_breadcrumbs
-      and+ workspace in
+  let iso =
+    (* TODO: this is actually almost `symbolic_parameters` (with `entry_point` removed), we should use it... it'll simplify the signature a lot! *)
+    let+ deterministic_result_order
+    and+ fail_mode
+    and+ exploration_strategy
+    and+ files
+    and+ model_format
+    and+ no_assert_failure_expression_printing
+    and+ no_stop_at_failure
+    and+ no_value
+    and+ () = setup_log
+    and+ seed
+    and+ solver
+    and+ unsafe
+    and+ workers
+    and+ no_worker_isolation
+    and+ model_out_file
+    and+ with_breadcrumbs
+    and+ workspace in
 
-      Cmd_wasm_iso.cmd ~deterministic_result_order ~fail_mode
-        ~exploration_strategy ~files ~model_format
-        ~no_assert_failure_expression_printing ~no_stop_at_failure ~no_value
-        ~seed ~solver ~unsafe ~workers ~no_worker_isolation ~workspace
-        ~model_out_file ~with_breadcrumbs
-  end
+    Cmd_wasm_iso.cmd ~deterministic_result_order ~fail_mode
+      ~exploration_strategy ~files ~model_format
+      ~no_assert_failure_expression_printing ~no_stop_at_failure ~no_value ~seed
+      ~solver ~unsafe ~workers ~no_worker_isolation ~workspace ~model_out_file
+      ~with_breadcrumbs
 
   (* owi wasm replay *)
-  module Replay = struct
-    let cmd =
-      let+ unsafe
-      and+ replay_file =
-        let doc = "Which replay file to use" in
-        Arg.(
-          required
-          & opt (some existing_file_conv) None
-          & info [ "replay-file" ] ~doc ~docv:"FILE" )
-      and+ () = setup_log
-      and+ source_file
-      and+ invoke_with_symbols
-      and+ entry_point = entry_point None in
-      Cmd_wasm_replay.cmd ~unsafe ~replay_file ~source_file ~entry_point
-        ~invoke_with_symbols
-  end
+  let replay =
+    let+ unsafe
+    and+ replay_file =
+      let doc = "Which replay file to use" in
+      Arg.(
+        required
+        & opt (some existing_file_conv) None
+        & info [ "replay-file" ] ~doc ~docv:"FILE" )
+    and+ () = setup_log
+    and+ source_file
+    and+ invoke_with_symbols
+    and+ entry_point = entry_point None in
+    Cmd_wasm_replay.cmd ~unsafe ~replay_file ~source_file ~entry_point
+      ~invoke_with_symbols
 
   (* owi wasm run *)
-  module Run = struct
-    let cmd =
-      let+ unsafe
-      and+ timeout
-      and+ timeout_instr
-      and+ () = setup_log
-      and+ source_file in
-      Cmd_wasm_run.cmd ~unsafe ~timeout ~timeout_instr ~source_file
-  end
+  let run =
+    let+ unsafe
+    and+ timeout
+    and+ timeout_instr
+    and+ () = setup_log
+    and+ source_file in
+    Cmd_wasm_run.cmd ~unsafe ~timeout ~timeout_instr ~source_file
 
   (* owi wasm script *)
   module Script = struct
     (* owi wasm script abstract *)
-    module Abstract = struct
-      let cmd =
-        let+ files
-        and+ () = setup_log
-        and+ no_exhaustion =
-          let doc = "no exhaustion tests" in
-          Arg.(value & flag & info [ "no-exhaustion" ] ~doc)
-        and+ debug_trace in
-        Cmd_wasm_script.cmd_abstract ~files ~no_exhaustion ~debug_trace
-    end
+    let abstract =
+      let+ files
+      and+ () = setup_log
+      and+ no_exhaustion =
+        let doc = "no exhaustion tests" in
+        Arg.(value & flag & info [ "no-exhaustion" ] ~doc)
+      and+ debug_trace in
+      Cmd_wasm_script.cmd_abstract ~files ~no_exhaustion ~debug_trace
 
     (* owi wasm script concrete *)
-    module Concrete = struct
-      let cmd =
-        let+ files
-        and+ () = setup_log
-        and+ no_exhaustion =
-          let doc = "no exhaustion tests" in
-          Arg.(value & flag & info [ "no-exhaustion" ] ~doc)
-        in
-        Cmd_wasm_script.cmd_concrete ~files ~no_exhaustion
-    end
+    let concrete =
+      let+ files
+      and+ () = setup_log
+      and+ no_exhaustion =
+        let doc = "no exhaustion tests" in
+        Arg.(value & flag & info [ "no-exhaustion" ] ~doc)
+      in
+      Cmd_wasm_script.cmd_concrete ~files ~no_exhaustion
 
     (* owi wasm script symbolic *)
-    module Symbolic = struct
-      let cmd =
-        let+ files
-        and+ () = setup_log
-        and+ no_exhaustion =
-          let doc = "no exhaustion tests" in
-          Arg.(value & flag & info [ "no-exhaustion" ] ~doc)
-        in
-        Cmd_wasm_script.cmd_symbolic ~files ~no_exhaustion
-    end
+    let symbolic =
+      let+ files
+      and+ () = setup_log
+      and+ no_exhaustion =
+        let doc = "no exhaustion tests" in
+        Arg.(value & flag & info [ "no-exhaustion" ] ~doc)
+      in
+      Cmd_wasm_script.cmd_symbolic ~files ~no_exhaustion
   end
 
   (* owi wasm sym *)
-  module Sym = struct
-    let cmd =
-      let+ source_file
-      and+ entry_point = entry_point None
-      and+ () = setup_log
-      and+ symbolic_parameters in
-      Cmd_wasm_sym.cmd ~entry_point ~symbolic_parameters ~source_file
-  end
+  let sym =
+    let+ source_file
+    and+ entry_point = entry_point None
+    and+ () = setup_log
+    and+ symbolic_parameters in
+    Cmd_wasm_sym.cmd ~entry_point ~symbolic_parameters ~source_file
 
   (* owi wasm to_wat *)
-  module To_wat = struct
-    let cmd =
-      let+ source_file
-      and+ emit_file =
-        let doc = "Emit (.wat) files from corresponding (.wasm) files." in
-        Arg.(value & flag & info [ "emit-file" ] ~doc)
-      and+ () = setup_log
-      and+ out_file in
-      Cmd_wasm_to_wat.cmd ~source_file ~emit_file ~out_file
-  end
+  let to_wat =
+    let+ source_file
+    and+ emit_file =
+      let doc = "Emit (.wat) files from corresponding (.wasm) files." in
+      Arg.(value & flag & info [ "emit-file" ] ~doc)
+    and+ () = setup_log
+    and+ out_file in
+    Cmd_wasm_to_wat.cmd ~source_file ~emit_file ~out_file
 
   (* owi wasm of_wat *)
-  module Of_wat = struct
-    let cmd =
-      let+ unsafe
-      and+ out_file
-      and+ () = setup_log
-      and+ source_file in
-      Cmd_wasm_of_wat.cmd ~unsafe ~out_file ~source_file
-  end
+  let of_wat =
+    let+ unsafe
+    and+ out_file
+    and+ () = setup_log
+    and+ source_file in
+    Cmd_wasm_of_wat.cmd ~unsafe ~out_file ~source_file
 
   (* owi wasm validate *)
-  module Validate = struct
-    let cmd =
-      let+ files
-      and+ () = setup_log in
-      Cmd_wasm_validate.cmd ~files
-  end
+  let validate =
+    let+ files
+    and+ () = setup_log in
+    Cmd_wasm_validate.cmd ~files
 end
 
 (* owi zig *)
 module Zig = struct
   (* owi zig sym *)
-  module Sym = struct
-    let cmd =
-      let+ includes
-      and+ entry_point = entry_point (Some "_start")
-      and+ files
-      and+ out_file
-      and+ () = setup_log
-      and+ symbolic_parameters in
-      Cmd_zig_sym.cmd ~entry_point ~symbolic_parameters ~includes ~files
-        ~out_file
-  end
+  let sym =
+    let+ includes
+    and+ entry_point = entry_point (Some "_start")
+    and+ files
+    and+ out_file
+    and+ () = setup_log
+    and+ symbolic_parameters in
+    Cmd_zig_sym.cmd ~entry_point ~symbolic_parameters ~includes ~files ~out_file
 end
 
 (* owi *)
@@ -743,82 +704,84 @@ let cli =
 
   Cmd.group ~default owi_info
     [ group "c" "Work with C programs."
-        [ cmd "fuzz" "Run the fuzzer." C.Fuzz.cmd
-        ; cmd "sym" "Run the symbolic execution engine on a C program."
-            C.Sym.cmd
+        [ cmd "fuzz" "Run the fuzzer." C.fuzz
+        ; cmd "hunt"
+            "Hunt bugs by combining the fuzzer and the symbolic execution \
+             engine."
+            C.hunt
+        ; cmd "sym" "Run the symbolic execution engine on a C program." C.sym
         ]
     ; group "c++" "Work with C++ programs."
         [ cmd "sym" "Run the symbolic execution engine on a C++ program."
-            Cpp.Sym.cmd
+            Cpp.sym
         ]
     ; group "go" "Work with Go programs."
-        [ cmd "sym" "Run the symbolic execution engine on a Go program."
-            Go.Sym.cmd
+        [ cmd "sym" "Run the symbolic execution engine on a Go program." Go.sym
         ]
     ; group "haskell" "Work with Haskell programs."
         [ cmd "sym" "Run the symbolic execution engine on a Haskell program."
-            Haskell.Sym.cmd
+            Haskell.sym
         ]
     ; group "llvm" "Work with LLVM programs."
         [ cmd "sym" "Run the symbolic execution engine on a LLVM program."
-            Llvm.Sym.cmd
+            Llvm.sym
         ]
     ; group "rust" "Work with Rust programs."
         [ cmd "sym" "Run the symbolic execution engine on a Rust program."
-            Rust.Sym.cmd
+            Rust.sym
         ]
     ; cmd "version" "Print some version informations." Version.cmd
     ; group "wasm" "Work with Wasm programs."
-        [ cmd "abs" "Run the abstract interpreter." Wasm.Abs.cmd
+        [ cmd "abs" "Run the abstract interpreter." Wasm.abs
         ; group "analyze" "Visualize and get statistics."
-            [ cmd "cg" "Build a call graph." Wasm.Analyze.Cg.cmd
-            ; cmd "cfg" "Build a control-flow graph." Wasm.Analyze.Cfg.cmd
+            [ cmd "cg" "Build a call graph." Wasm.Analyze.cg
+            ; cmd "cfg" "Build a control-flow graph." Wasm.Analyze.cfg
             ]
-        ; cmd "fmt" "Format a .wat or .wast file." Wasm.Fmt.cmd
-        ; cmd "fuzz" "Run the fuzzer." Wasm.Fuzz.cmd
+        ; cmd "fmt" "Format a .wat or .wast file." Wasm.fmt
+        ; cmd "fuzz" "Run the fuzzer." Wasm.fuzz
         ; group "instrument" "Instrument a program in various ways."
             [ cmd "label"
                 "Generate an instrumented file with labels corresponding to \
                  test objectives for a given coverage criteria."
-                Wasm.Instrument.Label.cmd
+                Wasm.Instrument.label
             ]
         ; cmd "hunt"
             "Hunt bugs by combining the fuzzer and the symbolic execution \
              engine."
-            Wasm.Hunt.cmd
+            Wasm.hunt
         ; cmd "iso"
             "Check the iso-functionnality of two modules by comparing the \
              output when calling their exports."
-            Wasm.Iso.cmd
+            Wasm.iso
         ; cmd "replay"
             "Replay a module by replacing symbols with concrete values from a \
              model."
-            Wasm.Replay.cmd
-        ; cmd "run" "Run the concrete interpreter." Wasm.Run.cmd
+            Wasm.replay
+        ; cmd "run" "Run the concrete interpreter." Wasm.run
         ; group "script" "Run a reference test suite script (.wast)."
             [ cmd "concrete"
                 "Run a reference test suite (.wast) using the concrete \
                  interpreter."
-                Wasm.Script.Concrete.cmd
+                Wasm.Script.concrete
             ; cmd "symbolic"
                 "Run a reference test suite (.wast) using the symbolic \
                  interpreter."
-                Wasm.Script.Symbolic.cmd
+                Wasm.Script.symbolic
             ; cmd "abstract"
                 "Run a reference test suite (.wast) using the abstract \
                  interpreter."
-                Wasm.Script.Abstract.cmd
+                Wasm.Script.abstract
             ]
-        ; cmd "sym" "Run the symbolic execution engine." Wasm.Sym.cmd
-        ; cmd "validate" "Validate a module." Wasm.Validate.cmd
+        ; cmd "sym" "Run the symbolic execution engine." Wasm.sym
+        ; cmd "validate" "Validate a module." Wasm.validate
         ; cmd "to_wat" "Generate a text file (.wat) from a binary file (.wasm)."
-            Wasm.To_wat.cmd
+            Wasm.to_wat
         ; cmd "of_wat" "Generate a binary file (.wasm) from a text file (.wat)."
-            Wasm.Of_wat.cmd
+            Wasm.of_wat
         ]
     ; group "zig" "Work with Zig programs."
         [ cmd "sym" "Run the symbolic execution engine on a Zig program."
-            Zig.Sym.cmd
+            Zig.sym
         ]
     ]
 
