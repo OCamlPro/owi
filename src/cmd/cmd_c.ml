@@ -37,12 +37,8 @@ let hunt ~arch ~eacsl ~entry_point ~files ~includes ~opt_lvl ~out_file ~property
     symbolic_parameters
   in
 
-  let* () =
-    Cmd_wasm_fuzz.cmd ~entry_point ~rounds ~seed ~source_file ~timeout
-      ~timeout_instr ~unsafe
-  in
-
-  Cmd_wasm_sym.cmd ~entry_point ~source_file ~symbolic_parameters
+  Cmd_wasm_hunt.cmd ~entry_point ~rounds ~seed ~source_file ~symbolic_parameters
+    ~timeout ~timeout_instr ~unsafe
 
 (* TODO: use testcomp *)
 let sym ~arch ~eacsl ~entry_point ~files ~includes ~opt_lvl ~out_file ~property
