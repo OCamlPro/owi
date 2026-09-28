@@ -22,3 +22,5 @@ val find_installed_c_file : Fpath.t -> Fpath.t Result.t
 val find_installed_rust_file : Fpath.t -> Fpath.t Result.t
 
 val find_installed_zig_file : Fpath.t -> Fpath.t Result.t
+
+val make_workspace : workspace:Fpath.t option -> Fpath.t Result.t

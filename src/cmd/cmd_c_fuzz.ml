@@ -7,14 +7,7 @@ open Syntax
 let cmd ~rounds ~seed ~workspace ~entry_point ~arch ~property ~testcomp ~opt_lvl
   ~includes ~files ~eacsl ~out_file ~timeout ~timeout_instr ~unsafe :
   unit Result.t =
-  let* workspace =
-    match workspace with
-    | Some path -> Ok path
-    | None -> Bos.OS.Dir.tmp "owi_c_fuzz_%s"
-  in
-  let* _did_create : bool =
-    Bos.OS.Dir.create Fpath.(workspace / "test-suite")
-  in
+  let* workspace = Cmd_utils.make_workspace ~workspace in
 
   let* source_file =
     Compile.C.files_to_wasm_file ~eacsl ~entry_point ~includes ~opt_lvl

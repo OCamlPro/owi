@@ -298,12 +298,7 @@ let cmd ~deterministic_result_order ~fail_mode ~exploration_strategy ~files
   ~model_format ~no_assert_failure_expression_printing ~no_stop_at_failure
   ~no_value ~seed ~solver ~unsafe ~workers ~no_worker_isolation ~workspace
   ~model_out_file ~with_breadcrumbs =
-  let* workspace =
-    match workspace with
-    | Some path -> Ok path
-    | None -> Bos.OS.Dir.tmp "owi_iso_%s"
-  in
-  let* _created_dir = Bos.OS.Dir.create ~path:true ~mode:0o755 workspace in
+  let* workspace = Cmd_utils.make_workspace ~workspace in
   let* file1, file2 =
     match files with
     | [ file1; file2 ] -> Ok (file1, file2)
