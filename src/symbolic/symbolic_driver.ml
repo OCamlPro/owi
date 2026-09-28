@@ -2,7 +2,6 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-open Bos
 open Syntax
 module Bugs = Prio.Make (Prio.FIFO)
 
@@ -10,9 +9,6 @@ let print_and_count_bugs ~format ~out_file ~no_value
   ~no_assert_failure_expression_printing ~workspace ~no_stop_at_failure ~results
   ~with_breadcrumbs =
   let test_suite_dir = Fpath.(workspace / "test-suite") in
-  let* (_created : bool) =
-    if not no_value then OS.Dir.create test_suite_dir else Ok false
-  in
 
   let rec aux count results =
     match results () with

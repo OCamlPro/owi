@@ -81,11 +81,8 @@ let cmd ~entry_point ~source_file ~(symbolic_parameters : Symbolic_parameters.t)
     || symbolic_parameters.no_stop_at_failure
   in
 
-  (* TODO: can we handle this at the cmdliner level? *)
   let* workspace =
-    match symbolic_parameters.workspace with
-    | Some path -> Ok path
-    | None -> Bos.OS.Dir.tmp "owi_sym_%s"
+    Cmd_utils.make_workspace ~workspace:symbolic_parameters.workspace
   in
 
   let* to_run, run_time =

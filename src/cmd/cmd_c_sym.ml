@@ -2,18 +2,14 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-open Bos
 open Syntax
 
 (* TODO: use testcomp *)
 let cmd ~arch ~eacsl ~entry_point ~files ~includes ~opt_lvl ~out_file ~property
   ~(symbolic_parameters : Symbolic_parameters.t) ~testcomp:_ : unit Result.t =
   let* workspace =
-    match symbolic_parameters.workspace with
-    | Some path -> Ok path
-    | None -> Bos.OS.Dir.tmp "owi_c_%s"
+    Cmd_utils.make_workspace ~workspace:symbolic_parameters.workspace
   in
-  let* _did_create : bool = OS.Dir.create Fpath.(workspace / "test-suite") in
 
   let* source_file =
     Compile.C.files_to_wasm_file ~eacsl ~entry_point ~includes ~opt_lvl
