@@ -17,7 +17,7 @@ val fuzz :
   -> timeout:float option
   -> timeout_instr:int option
   -> unsafe:bool
-  -> workspace:Fpath.t option
+  -> workspace:Fpath.t
   -> unit Result.t
 
 val hunt :
@@ -32,6 +32,7 @@ val hunt :
   -> rounds:int option
   -> seed:int option
   -> symbolic_parameters:Symbolic_parameters.t
+  -> workspace:Fpath.t
   -> unit Result.t
 
 val sym :
@@ -45,4 +46,5 @@ val sym :
   -> property:Fpath.t option
   -> symbolic_parameters:Symbolic_parameters.t
   -> testcomp:bool
+  -> workspace:Fpath.t
   -> unit Result.t

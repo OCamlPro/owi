@@ -2,9 +2,10 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-val cmd :
+val sym :
      entry_point:string option
   -> files:Fpath.t list
   -> out_file:Fpath.t option
   -> symbolic_parameters:Symbolic_parameters.t
+  -> workspace:Fpath.t
   -> unit Result.t

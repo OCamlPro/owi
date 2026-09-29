@@ -269,9 +269,26 @@ let workers =
   in
   Arg.(value & opt (some int) None & info [ "workers"; "w" ] ~doc ~absent:"n")
 
-let workspace =
+let workspace : Fpath.t Cmdliner.Term.t =
   let doc = "write results and intermediate compilation artifacts to dir" in
-  Arg.(value & opt (some path_conv) None & info [ "workspace" ] ~doc ~docv:"DIR")
+  let aux =
+    Arg.(
+      value & opt (some path_conv) None & info [ "workspace" ] ~doc ~docv:"DIR" )
+  in
+  let open Term.Syntax in
+  Term.cli_parse_result
+  @@
+  let+ workspace = aux in
+  let open Prelude.Result.Syntax in
+  let* workspace =
+    match workspace with
+    | Some workspace -> Ok workspace
+    | None -> Bos.OS.Dir.tmp "owi_%s"
+  in
+  let* _created =
+    Bos.OS.Dir.create ~path:true ~mode:0o755 Fpath.(workspace / "test-suite")
+  in
+  Ok workspace
 
 let with_breadcrumbs =
   let doc = "add breadcrumbs to the generated model" in
@@ -306,8 +323,7 @@ let symbolic_parameters =
   and+ timeout_instr
   and+ unsafe
   and+ with_breadcrumbs
-  and+ workers
-  and+ workspace in
+  and+ workers in
   let use_ite_for_select = not no_ite_for_select in
   { Symbolic_parameters.deterministic_result_order
   ; exploration_strategy
@@ -328,7 +344,6 @@ let symbolic_parameters =
   ; use_ite_for_select
   ; with_breadcrumbs
   ; workers
-  ; workspace
   }
 
 (* owi c *)
@@ -371,9 +386,10 @@ module C = struct
     and+ rounds
     and+ seed
     and+ () = setup_log
-    and+ symbolic_parameters in
+    and+ symbolic_parameters
+    and+ workspace in
     Cmd_c.hunt ~arch ~eacsl ~entry_point ~files ~includes ~opt_lvl ~out_file
-      ~property ~rounds ~seed ~symbolic_parameters
+      ~property ~rounds ~seed ~symbolic_parameters ~workspace
 
   (* owi c sym *)
   let sym =
@@ -387,80 +403,97 @@ module C = struct
     and+ property
     and+ () = setup_log
     and+ testcomp
-    and+ symbolic_parameters in
+    and+ symbolic_parameters
+    and+ workspace in
 
-    Cmd_c.sym ~entry_point ~symbolic_parameters ~arch ~property ~includes
-      ~opt_lvl ~out_file ~testcomp ~files ~eacsl
+    Cmd_c.sym ~arch ~eacsl ~entry_point ~files ~includes ~opt_lvl ~out_file
+      ~property ~symbolic_parameters ~testcomp ~workspace
 end
 
 (* owi c++ *)
 module Cpp = struct
+  let entry_point = entry_point (Some "main")
+
   (* owi c++ sym *)
   let sym =
     let+ arch
-    and+ entry_point = entry_point (Some "main")
+    and+ entry_point
+    and+ files
     and+ includes
     and+ opt_lvl
-    and+ files
     and+ out_file
     and+ () = setup_log
-    and+ symbolic_parameters in
+    and+ symbolic_parameters
+    and+ workspace in
 
-    Cmd_cpp_sym.cmd ~entry_point ~symbolic_parameters ~out_file ~arch ~includes
-      ~opt_lvl ~files
+    Cmd_cpp.sym ~arch ~entry_point ~files ~includes ~opt_lvl ~out_file
+      ~symbolic_parameters ~workspace
 end
 
 (* owi haskell *)
 module Haskell = struct
+  let entry_point = entry_point (Some "_start")
+
   (* owi haskell sym *)
   let sym =
-    let+ files
-    and+ entry_point = entry_point (Some "_start")
+    let+ entry_point
+    and+ files
     and+ out_file
     and+ () = setup_log
-    and+ symbolic_parameters in
-    Cmd_haskell_sym.cmd ~entry_point ~symbolic_parameters ~files ~out_file
+    and+ symbolic_parameters
+    and+ workspace in
+    Cmd_haskell.sym ~entry_point ~files ~out_file ~symbolic_parameters
+      ~workspace
 end
 
 (* owi llvm *)
 module Llvm = struct
+  let entry_point = entry_point None
+
   (* owi llvm sym *)
   let sym =
-    let+ files
-    and+ entry_point = entry_point None
+    let+ entry_point
+    and+ files
     and+ out_file
     and+ () = setup_log
-    and+ symbolic_parameters in
-    Cmd_llvm_sym.cmd ~entry_point ~symbolic_parameters ~files ~out_file
+    and+ symbolic_parameters
+    and+ workspace in
+    Cmd_llvm.sym ~entry_point ~files ~out_file ~symbolic_parameters ~workspace
 end
 
 (* owi rust *)
 module Rust = struct
+  let entry_point = entry_point (Some "main")
+
   (* owi rust sym *)
   let sym =
     let+ arch
-    and+ entry_point = entry_point (Some "main")
+    and+ entry_point
+    and+ files
     and+ includes
     and+ opt_lvl
-    and+ files
     and+ out_file
     and+ () = setup_log
-    and+ symbolic_parameters in
+    and+ symbolic_parameters
+    and+ workspace in
 
-    Cmd_rust_sym.cmd ~entry_point ~symbolic_parameters ~arch ~opt_lvl ~includes
-      ~files ~out_file
+    Cmd_rust.sym ~arch ~entry_point ~files ~includes ~opt_lvl ~out_file
+      ~symbolic_parameters ~workspace
 end
 
 (* owi go *)
 module Go = struct
+  let entry_point = entry_point (Some "_start")
+
   (* owi go sym *)
   let sym =
-    let+ files
-    and+ entry_point = entry_point (Some "_start")
+    let+ entry_point
+    and+ files
     and+ out_file
     and+ () = setup_log
-    and+ symbolic_parameters in
-    Cmd_go_sym.cmd ~entry_point ~symbolic_parameters ~files ~out_file
+    and+ symbolic_parameters
+    and+ workspace in
+    Cmd_go.sym ~entry_point ~files ~out_file ~symbolic_parameters ~workspace
 end
 
 (* owi version *)
@@ -474,11 +507,13 @@ end
 (* owi wasm *)
 
 module Wasm = struct
+  let entry_point = entry_point None
+
   (* owi wasm abs *)
   let abs =
     let+ source_file
     and+ () = setup_log
-    and+ entry_point = entry_point None
+    and+ entry_point
     and+ unsafe
     and+ debug_trace in
     Cmd_wasm_abs.cmd ~source_file ~entry_point ~unsafe ~debug_trace
@@ -488,7 +523,7 @@ module Wasm = struct
     (* owi wasm analyze cfg *)
     let cfg =
       let+ source_file
-      and+ entry_point = entry_point None
+      and+ entry_point
       and+ () = setup_log in
       Cmd_wasm_analyze_cfg.cmd ~source_file ~entry_point
 
@@ -496,7 +531,7 @@ module Wasm = struct
     let cg =
       let+ call_graph_mode
       and+ source_file
-      and+ entry_point = entry_point None
+      and+ entry_point
       and+ () = setup_log in
       Cmd_wasm_analyze_cg.cmd ~call_graph_mode ~source_file ~entry_point
   end
@@ -513,7 +548,7 @@ module Wasm = struct
   (* owi wasm fuzz *)
   let fuzz =
     let+ unsafe
-    and+ entry_point = entry_point None
+    and+ entry_point
     and+ rounds
     and+ timeout
     and+ timeout_instr
@@ -536,17 +571,18 @@ module Wasm = struct
 
   (* owi wasm hunt *)
   let hunt =
-    let+ rounds
+    let+ entry_point
+    and+ rounds
     and+ seed
+    and+ () = setup_log
     and+ source_file
-    and+ entry_point = entry_point None
     and+ symbolic_parameters
     and+ timeout
     and+ timeout_instr
     and+ unsafe
-    and+ () = setup_log in
+    and+ workspace in
     Cmd_wasm_hunt.cmd ~entry_point ~symbolic_parameters ~rounds ~seed
-      ~source_file ~timeout ~timeout_instr ~unsafe
+      ~source_file ~timeout ~timeout_instr ~unsafe ~workspace
 
   (* owi wasm iso *)
   let iso =
@@ -587,7 +623,7 @@ module Wasm = struct
     and+ () = setup_log
     and+ source_file
     and+ invoke_with_symbols
-    and+ entry_point = entry_point None in
+    and+ entry_point in
     Cmd_wasm_replay.cmd ~unsafe ~replay_file ~source_file ~entry_point
       ~invoke_with_symbols
 
@@ -635,11 +671,12 @@ module Wasm = struct
 
   (* owi wasm sym *)
   let sym =
-    let+ source_file
-    and+ entry_point = entry_point None
+    let+ entry_point
     and+ () = setup_log
-    and+ symbolic_parameters in
-    Cmd_wasm_sym.cmd ~entry_point ~symbolic_parameters ~source_file
+    and+ source_file
+    and+ symbolic_parameters
+    and+ workspace in
+    Cmd_wasm_sym.cmd ~entry_point ~source_file ~symbolic_parameters ~workspace
 
   (* owi wasm to_wat *)
   let to_wat =
@@ -668,15 +705,19 @@ end
 
 (* owi zig *)
 module Zig = struct
+  let entry_point = entry_point (Some "_start")
+
   (* owi zig sym *)
   let sym =
-    let+ includes
-    and+ entry_point = entry_point (Some "_start")
+    let+ entry_point
+    and+ includes
     and+ files
     and+ out_file
     and+ () = setup_log
-    and+ symbolic_parameters in
-    Cmd_zig_sym.cmd ~entry_point ~symbolic_parameters ~includes ~files ~out_file
+    and+ symbolic_parameters
+    and+ workspace in
+    Cmd_zig.sym ~entry_point ~files ~includes ~out_file ~symbolic_parameters
+      ~workspace
 end
 
 (* owi *)

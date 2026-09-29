@@ -16,6 +16,17 @@ module C : sig
     -> Fpath.t Result.t
 end
 
+module Cpp : sig
+  val files_to_wasm_file :
+       entry_point:string option
+    -> includes:Fpath.t list
+    -> files:Fpath.t list
+    -> opt_lvl:string
+    -> out_file:Fpath.t option
+    -> workspace:Fpath.t
+    -> Fpath.t Result.t
+end
+
 module Wasm : sig
   module File : sig
     val until_binary : unsafe:bool -> Fpath.t -> Binary.Module.t Result.t

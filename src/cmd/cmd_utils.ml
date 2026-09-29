@@ -211,17 +211,3 @@ let find_installed_c_file filename = find c_files_location filename
 let find_installed_rust_file filename = find rust_files_location filename
 
 let find_installed_zig_file filename = find zig_files_location filename
-
-let make_workspace ~workspace =
-  let* workspace =
-    match workspace with
-    | Some path -> Ok path
-    | None -> Bos.OS.Dir.tmp "owi_%s"
-  in
-  let+ _did_create : bool =
-    (* TODO: should be created only in testcomp mode?
-       TODO: should this be done for any language?
-       TODO: should we still run this so that the parent (workspace) is still created? *)
-    Bos.OS.Dir.create ~path:true ~mode:0o755 Fpath.(workspace / "test-suite")
-  in
-  workspace

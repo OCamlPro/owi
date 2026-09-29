@@ -73,16 +73,12 @@ let run_file ~entry_point ~symbolic_parameters ~source_file =
              which are handled here. Most of the computations are done in the Result
              monad, hence the let*. *)
 let cmd ~entry_point ~source_file ~(symbolic_parameters : Symbolic_parameters.t)
-    =
+  ~workspace =
   (* deterministic_result_order implies no_stop_at_failure *)
   let no_stop_at_failure =
     (* TODO: move this somewhere else *)
     symbolic_parameters.deterministic_result_order
     || symbolic_parameters.no_stop_at_failure
-  in
-
-  let* workspace =
-    Cmd_utils.make_workspace ~workspace:symbolic_parameters.workspace
   in
 
   let* to_run, run_time =

@@ -6,4 +6,5 @@ val cmd :
      entry_point:string option
   -> source_file:Fpath.t
   -> symbolic_parameters:Symbolic_parameters.t
+  -> workspace:Fpath.t
   -> unit Result.t
