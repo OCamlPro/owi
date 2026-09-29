@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "frappe";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-38dc5335.js";
+            window.path_to_searchindex_js = "../searchindex-2433ccfd.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-b696a57f.js"></script>
@@ -251,7 +251,8 @@ let pure_wasm_module =
 
 (* our pure wasm module, linked with `sausage` *)
 let modul, env =
-  Compile.Text.until_concrete_link env ~unsafe:false ~name:None pure_wasm_module
+  Compile.Wasm.Text.until_concrete_link env ~unsafe:false ~name:None
+    pure_wasm_module
   |&gt; Stdlib.Result.get_ok
 
 module I = Interpret.Concrete (Interpret.Default_parameters)
@@ -362,7 +363,7 @@ let pure_wasm_module =
 (* our pure wasm module, linked with `chorizo` *)
 let modul, env =
   match
-    Compile.Text.until_concrete_link env ~unsafe:false ~name:None
+    Compile.Wasm.Text.until_concrete_link env ~unsafe:false ~name:None
       pure_wasm_module
   with
   | Error _ -&gt; assert false

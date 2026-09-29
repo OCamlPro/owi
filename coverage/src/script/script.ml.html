@@ -495,7 +495,7 @@ module Stack = Stack.Make [@inlined hint] (Concrete_value)
 
 type host_externref = int
 
-let ty : host_externref Type.Id.t = Type.Id.mak<span data-count="922">e</span> ()
+let ty : host_externref Type.Id.t = Type.Id.mak<span data-count="926">e</span> ()
 
 module I = Interpret.Concrete (Interpret.Default_parameters)
 
@@ -539,7 +539,7 @@ let run ~no_exhaustion script =
         <span data-count="2111">L</span>og.info (fun m -&gt; <span data-count="0">m</span> "*** module");
         <span data-count="2111">i</span>ncr curr_module;
         <span data-count="2111">l</span>et* modul, env =
-          Compile.Text.until_concrete_lin<span data-count="2111">k</span> env ~unsafe ~name:None modul
+          Compile.Wasm.Text.until_concrete_lin<span data-count="2111">k</span> env ~unsafe ~name:None modul
         in
         <span data-count="2111">l</span>et to_run = I.modul ~env ~modul in
         Concrete_choice.run_and_drop_state to_run Concrete_state.empty
@@ -548,7 +548,7 @@ let run ~no_exhaustion script =
         <span data-count="2">i</span>ncr curr_module;
         <span data-count="2">l</span>et* modul = Parse.Text.Inline_module.from_strin<span data-count="2">g</span> modul in
         <span data-count="2">l</span>et* modul, env =
-          Compile.Text.until_concrete_lin<span data-count="2">k</span> env ~unsafe ~name:None modul
+          Compile.Wasm.Text.until_concrete_lin<span data-count="2">k</span> env ~unsafe ~name:None modul
         in
         <span data-count="2">l</span>et to_run = I.modul ~env ~modul in
         Concrete_choice.run_and_drop_state to_run Concrete_state.empty
@@ -558,7 +558,7 @@ let run ~no_exhaustion script =
         <span data-count="87">l</span>et* modul = Parse.Binary.Module.from_strin<span data-count="87">g</span> modul in
         <span data-count="87">l</span>et modul = { modul with id } in
         let* modul, env =
-          Compile.Binary.until_concrete_lin<span data-count="87">k</span> env ~unsafe ~name:None modul
+          Compile.Wasm.Binary.until_concrete_lin<span data-count="87">k</span> env ~unsafe ~name:None modul
         in
         <span data-count="87">l</span>et to_run = I.modul ~env ~modul in
         Concrete_choice.run_and_drop_state to_run Concrete_state.empty
@@ -566,7 +566,7 @@ let run ~no_exhaustion script =
         Log.info (fun m -&gt; <span data-count="0">m</span> "*** assert_trap");
         <span data-count="45">i</span>ncr curr_module;
         <span data-count="45">l</span>et* modul, env =
-          Compile.Text.until_concrete_lin<span data-count="45">k</span> env ~unsafe ~name:None modul
+          Compile.Wasm.Text.until_concrete_lin<span data-count="45">k</span> env ~unsafe ~name:None modul
         in
         <span data-count="45">l</span>et got =
           let to_run = I.modul ~env ~modul in
@@ -588,7 +588,7 @@ let run ~no_exhaustion script =
           match got with
           | <span data-count="1053">E</span>rror got -&gt; Script_error.check_error ~expected ~got
           | <span data-count="62">O</span>k [ Text_module (false, modul) ] -&gt;
-            let got = Compile.Text.until_binary ~unsafe modul in
+            let got = Compile.Wasm.Text.until_binary ~unsafe modul in
             <span data-count="62">S</span>cript_error.check_result ~expected ~got
           | _ -&gt; assert false
         in
@@ -613,7 +613,7 @@ let run ~no_exhaustion script =
       | <span data-count="2304">A</span>ssert (Assert_invalid (modul, expected)) -&gt;
         Log.info (fun m -&gt; <span data-count="0">m</span> "*** assert_invalid");
         <span data-count="2304">l</span>et got =
-          Compile.Text.until_concrete_link env ~unsafe ~name:None modul
+          Compile.Wasm.Text.until_concrete_link env ~unsafe ~name:None modul
         in
         <span data-count="2304">l</span>et+ () = Script_error.check_result ~expected ~got in
         <span data-count="2304">e</span>nv
@@ -624,7 +624,7 @@ let run ~no_exhaustion script =
           match got with
           | <span data-count="0">E</span>rror got -&gt; Script_error.check_error ~expected ~got
           | <span data-count="6">O</span>k [ Text_module (false, modul) ] -&gt;
-            let got = Compile.Text.until_validate ~unsafe modul in
+            let got = Compile.Wasm.Text.until_validate ~unsafe modul in
             <span data-count="6">S</span>cript_error.check_result ~expected ~got
           | _ -&gt; assert false
         in
@@ -632,14 +632,14 @@ let run ~no_exhaustion script =
       | <span data-count="158">A</span>ssert (Assert_unlinkable (modul, expected)) -&gt;
         Log.info (fun m -&gt; <span data-count="0">m</span> "*** assert_unlinkable");
         <span data-count="158">l</span>et got =
-          Compile.Text.until_concrete_link env ~unsafe ~name:None modul
+          Compile.Wasm.Text.until_concrete_link env ~unsafe ~name:None modul
         in
         <span data-count="158">l</span>et+ () = Script_error.check_result ~expected ~got in
         <span data-count="158">e</span>nv
       | <span data-count="0">A</span>ssert (Assert_malformed (modul, expected)) -&gt;
         Log.info (fun m -&gt; <span data-count="0">m</span> "*** assert_malformed");
         <span data-count="0">l</span>et got =
-          Compile.Text.until_concrete_link ~unsafe ~name:None env modul
+          Compile.Wasm.Text.until_concrete_link ~unsafe ~name:None env modul
         in
         <span data-count="0">l</span>et+ () = Script_error.check_result ~expected ~got in
         <span data-count="0">a</span>ssert false

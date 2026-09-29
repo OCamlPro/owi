@@ -94,7 +94,7 @@ let cmd ~unsafe ~coverage_criteria ~source_file =
   <span data-count="3">l</span>et _dir, filename = Fpath.split_base source_file in
   <span data-count="3">l</span>et filename, ext = Fpath.split_ext filename in
 
-  <span data-count="3">l</span>et* m = Compile.File.until_binar<span data-count="3">y</span> ~unsafe source_file in
+  <span data-count="3">l</span>et* m = Compile.Wasm.File.until_binar<span data-count="3">y</span> ~unsafe source_file in
 
   <span data-count="3">l</span>et m = Label.annotate coverage_criteria m in
 

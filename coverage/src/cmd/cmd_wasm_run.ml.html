@@ -112,7 +112,7 @@ let cmd ~unsafe ~timeout ~timeout_instr ~source_file =
   <span data-count="19">l</span>et name = None in
   let env = Env.Concrete.empty ~context:() in
   let* modul, env =
-    Compile.File.until_concrete_lin<span data-count="19">k</span> env ~unsafe ~name source_file
+    Compile.Wasm.File.until_concrete_lin<span data-count="19">k</span> env ~unsafe ~name source_file
   in
   <span data-count="19">l</span>et module Parameters = struct
     let timeout = timeout

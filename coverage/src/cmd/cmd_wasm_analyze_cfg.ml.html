@@ -581,7 +581,7 @@ let build_cfg instr =
   <span data-count="30">(</span>nodes, edges)
 
 let build_cfg_from_text_module modul entry =
-  <span data-count="0">l</span>et m = Compile.Text.until_validate ~unsafe:false modul in
+  <span data-count="0">l</span>et m = Compile.Wasm.Text.until_validate ~unsafe:false modul in
   <span data-count="0">m</span>atch m with
   | <span data-count="0">O</span>k m -&gt;
     let f =
@@ -598,7 +598,7 @@ let build_cfg_from_func (f : Binary.Func.t) =
   <span data-count="25">C</span>ontrol_flow_graph.init nodes edges
 
 let cmd ~source_file ~entry_point =
-  <span data-count="5">l</span>et* m = Compile.File.until_validat<span data-count="5">e</span> ~unsafe:false source_file in
+  <span data-count="5">l</span>et* m = Compile.Wasm.File.until_validat<span data-count="5">e</span> ~unsafe:false source_file in
   <span data-count="5">l</span>et entry =
     Option.value
       (Option.bin<span data-count="5">d</span> entry_point (fun x -&gt;

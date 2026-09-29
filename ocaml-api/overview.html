@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "frappe";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-38dc5335.js";
+            window.path_to_searchindex_js = "../searchindex-2433ccfd.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-b696a57f.js"></script>
@@ -196,7 +196,7 @@ mdx_gen.bc.exe: [INFO] parsing      ...
 # let env = Env.Concrete.empty ~context:()
 val env : Env.Concrete.t = &lt;abstr&gt;
 # let modul, env =
-    match Compile.Text.until_concrete_link env ~unsafe:false ~name:None m with
+    match Compile.Wasm.Text.until_concrete_link env ~unsafe:false ~name:None m with
     | Ok v -&gt; v
     | Error _ -&gt; assert false;;
 mdx_gen.bc.exe: [INFO] checking     ...

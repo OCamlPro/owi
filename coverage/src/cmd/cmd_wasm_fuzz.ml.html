@@ -135,7 +135,7 @@ let cmd ~entry_point ~rounds ~seed ~source_file ~timeout ~timeout_instr ~unsafe
   let* env =
     Env.Concrete.link_extern_modul<span data-count="2">e</span> ~env ~name:"owi" Fuzz_wasm_ffi.owi
   in
-  <span data-count="2">l</span>et* modul = Compile.File.until_validat<span data-count="2">e</span> ~unsafe source_file in
+  <span data-count="2">l</span>et* modul = Compile.Wasm.File.until_validat<span data-count="2">e</span> ~unsafe source_file in
 
   (* TODO: add this as a parameter? *)
   <span data-count="2">l</span>et invoke_with_symbols = false in

@@ -789,7 +789,7 @@ let build_call_graph call_graph_mode (m : Binary.Module.t) entry_point =
   <span data-count="5">C</span>all_graph.init l entries
 
 let build_call_graph_from_text_module call_graph_mode modul entry_point =
-  <span data-count="0">l</span>et m = Compile.Text.until_validate ~unsafe:false modul in
+  <span data-count="0">l</span>et m = Compile.Wasm.Text.until_validate ~unsafe:false modul in
   <span data-count="0">m</span>atch m with
   | <span data-count="0">O</span>k m -&gt; build_call_graph call_graph_mode m entry_point
   | _ -&gt; assert false
@@ -799,7 +799,7 @@ let compute_distances m entry_point =
   <span data-count="0">E</span>xploration_smart.compute_distance_to_unreachable call_graph
 
 let cmd ~call_graph_mode ~source_file ~entry_point =
-  <span data-count="5">l</span>et* m = Compile.File.until_validat<span data-count="5">e</span> ~unsafe:false source_file in
+  <span data-count="5">l</span>et* m = Compile.Wasm.File.until_validat<span data-count="5">e</span> ~unsafe:false source_file in
   <span data-count="5">l</span>et call_graph = build_call_graph call_graph_mode m entry_point in
 
   <span data-count="5">B</span>os.OS.File.writef

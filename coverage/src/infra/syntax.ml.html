@@ -452,10 +452,10 @@ let[@inline] list_concat_map f l =
   aux [] l
 
 let[@inline] list_fold_left f acc l =
-  <span data-count="64064">l</span>et rec aux acc = function
-    | <span data-count="61360">[</span>] -&gt; Ok acc
-    | <span data-count="423739">v</span> :: tl -&gt; (
-      match f acc v with <span data-count="421035">O</span>k acc -&gt; aux acc tl | <span data-count="2704">E</span>rror _ as e -&gt; e )
+  <span data-count="63261">l</span>et rec aux acc = function
+    | <span data-count="60557">[</span>] -&gt; Ok acc
+    | <span data-count="418853">v</span> :: tl -&gt; (
+      match f acc v with <span data-count="416149">O</span>k acc -&gt; aux acc tl | <span data-count="2704">E</span>rror _ as e -&gt; e )
   in
   aux acc l
 
@@ -473,11 +473,11 @@ let[@inline] array_iter f a =
   <span data-count="84206">l</span>et err = ref None in
   try
     for i = 0 to Array.lengt<span data-count="84206">h</span> a - 1 do
-      <span data-count="107751">m</span>atch f (Array.unsafe_ge<span data-count="107751">t</span> a i) with
+      <span data-count="107747">m</span>atch f (Array.unsafe_ge<span data-count="107747">t</span> a i) with
       | <span data-count="2481">E</span>rror _e as e -&gt;
         err := Some e;
         raise Exit
-      | <span data-count="105270">O</span>k () -&gt; ()
+      | <span data-count="105266">O</span>k () -&gt; ()
     done;
     Ok ()
   with <span data-count="2481">E</span>xit -&gt; ( match !err with None -&gt; assert false | <span data-count="2481">S</span>ome e -&gt; e )
@@ -571,9 +571,9 @@ let[@inline] array_fold_lefti f acc l =
   <span data-count="17846">s</span>nd
   @@ Array.fold_lef<span data-count="17846">t</span>
        (fun (i, acc) v -&gt;
-         <span data-count="22390">(</span> suc<span data-count="22390">c</span> i
+         <span data-count="22386">(</span> suc<span data-count="22386">c</span> i
          , let* acc in
-           <span data-count="22381">f</span> i acc v ) )
+           <span data-count="22377">f</span> i acc v ) )
        (0, Ok acc) l
 
 let[@inline] dynarray_fold_left f acc l =

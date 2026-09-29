@@ -1486,8 +1486,8 @@ end = struct
     }
 
   let link_function ~(env : t) id (link_state : link_state) = function
-    | <span data-count="12390">O</span>rigin.Local func -&gt;
-      let address = Allocator.next_ke<span data-count="12390">y</span> env.functions + id in
+    | <span data-count="12385">O</span>rigin.Local func -&gt;
+      let address = Allocator.next_ke<span data-count="12385">y</span> env.functions + id in
       let functions =
         let func : _ Kind.func = Kind.Wasm func in
         (address, func) :: link_state.functions
@@ -1496,34 +1496,34 @@ end = struct
         let functions =
           IntMap.add id address link_state.rewrite_map.functions
         in
-        <span data-count="12390">{</span> link_state.rewrite_map with functions }
+        <span data-count="12385">{</span> link_state.rewrite_map with functions }
       in
       Ok { link_state with rewrite_map; functions }
-    | <span data-count="5193">I</span>mported ({ name; typ; _ } as import) -&gt;
+    | <span data-count="5194">I</span>mported ({ name; typ; _ } as import) -&gt;
       let* func, address =
-        load_impor<span data-count="5193">t</span> ~(env : t) ~import env.exported_functions env.functions
+        load_impor<span data-count="5194">t</span> ~(env : t) ~import env.exported_functions env.functions
       in
       (* comparing their types *)
-      <span data-count="5181">l</span>et* () =
+      <span data-count="5182">l</span>et* () =
         let expected_type_id =
           Option.map
             (fun id -&gt; <span data-count="3604">i</span>d + link_state.rewrite_map.type_base_id)
-            (fs<span data-count="5181">t</span> typ)
+            (fs<span data-count="5182">t</span> typ)
         in
-        <span data-count="5181">l</span>et _, expected_ft = typ in
+        <span data-count="5182">l</span>et _, expected_ft = typ in
         let got_type_id, got_ft =
           match (func : _ Kind.func) with
           | <span data-count="197">K</span>ind.Wasm f -&gt; f.type_f
-          | <span data-count="4984">K</span>ind.Extern f -&gt; (None, Extern_func.to_func_typ<span data-count="4984">e</span> f)
+          | <span data-count="4985">K</span>ind.Extern f -&gt; (None, Extern_func.to_func_typ<span data-count="4985">e</span> f)
         in
         let type_matches =
           match (expected_type_id, got_type_id) with
           | <span data-count="191">S</span>ome expected, Some got -&gt;
             Binary.is_subtyp<span data-count="191">e</span> env.types env.type_groups env.types
               env.type_groups ~got ~expected
-          | <span data-count="4990">_</span> -&gt; Binary.func_type_e<span data-count="4990">q</span> expected_ft got_ft
+          | <span data-count="4991">_</span> -&gt; Binary.func_type_e<span data-count="4991">q</span> expected_ft got_ft
         in
-        if type_matches then <span data-count="5155">O</span>k ()
+        if type_matches then <span data-count="5156">O</span>k ()
         else
           <span data-count="26">l</span>et msg =
             Fmt.str "%s: expected: %a got: %a" name Binary.pp_func_type
@@ -1531,11 +1531,11 @@ end = struct
           in
           <span data-count="26">E</span>rror (`Incompatible_import_type msg)
       in
-      <span data-count="5155">l</span>et rewrite_map =
+      <span data-count="5156">l</span>et rewrite_map =
         let functions =
           IntMap.add id address link_state.rewrite_map.functions
         in
-        <span data-count="5155">{</span> link_state.rewrite_map with functions }
+        <span data-count="5156">{</span> link_state.rewrite_map with functions }
       in
       Ok { link_state with rewrite_map }
 
@@ -1865,13 +1865,13 @@ end = struct
     let env =
       List.fold_left
         (fun (env : t) (address, func) -&gt;
-          <span data-count="12389">m</span>atch (func : Extern_func.t Kind.func) with
-          | <span data-count="12389">K</span>ind.Wasm func -&gt;
+          <span data-count="12384">m</span>atch (func : Extern_func.t Kind.func) with
+          | <span data-count="12384">K</span>ind.Wasm func -&gt;
             let func =
               Env_rewriter.rewrite_binary_func ~map:link_state.rewrite_map func
             in
-            <span data-count="12389">l</span>et functions = Allocator.add_manual address func env.functions in
-            <span data-count="12389">{</span> env with functions }
+            <span data-count="12384">l</span>et functions = Allocator.add_manual address func env.functions in
+            <span data-count="12384">{</span> env with functions }
           | Kind.Extern _idx -&gt; assert false )
         env link_state.functions
     in

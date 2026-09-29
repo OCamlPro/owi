@@ -478,7 +478,7 @@ module Stack = Stack.Make [@inlined hint] (Symbolic_value)
 
 type host_externref = int
 
-let ty : host_externref Type.Id.t = Type.Id.mak<span data-count="922">e</span> ()
+let ty : host_externref Type.Id.t = Type.Id.mak<span data-count="926">e</span> ()
 
 module I = Interpret.Symbolic (Interpret.Default_parameters)
 open Syntax
@@ -544,7 +544,7 @@ let run_one ~no_exhaustion ~(env : Env.Symbolic.t) cmd : Env.Symbolic.t Result.t
   <span data-count="0">m</span>atch cmd with
   | <span data-count="0">W</span>ast.Text_module (false, m) -&gt;
     let* modul, env =
-      Compile.Text.until_symbolic_lin<span data-count="0">k</span> env ~unsafe ~name:None m
+      Compile.Wasm.Text.until_symbolic_lin<span data-count="0">k</span> env ~unsafe ~name:None m
     in
     <span data-count="0">l</span>et to_run = I.modul ~env ~modul in
     let+ _got = run_monad ~to_run in
@@ -552,7 +552,7 @@ let run_one ~no_exhaustion ~(env : Env.Symbolic.t) cmd : Env.Symbolic.t Result.t
   | <span data-count="0">W</span>ast.Quoted_module (false, m) -&gt;
     let* m = Parse.Text.Inline_module.from_strin<span data-count="0">g</span> m in
     <span data-count="0">l</span>et* modul, env =
-      Compile.Text.until_symbolic_lin<span data-count="0">k</span> env ~unsafe ~name:None m
+      Compile.Wasm.Text.until_symbolic_lin<span data-count="0">k</span> env ~unsafe ~name:None m
     in
     <span data-count="0">l</span>et to_run = I.modul ~env ~modul in
     let+ _got = run_monad ~to_run in
@@ -561,14 +561,14 @@ let run_one ~no_exhaustion ~(env : Env.Symbolic.t) cmd : Env.Symbolic.t Result.t
     let* m = Parse.Binary.Module.from_strin<span data-count="0">g</span> m in
     <span data-count="0">l</span>et m = { m with id } in
     let* modul, env =
-      Compile.Binary.until_symbolic_lin<span data-count="0">k</span> env ~unsafe ~name:None m
+      Compile.Wasm.Binary.until_symbolic_lin<span data-count="0">k</span> env ~unsafe ~name:None m
     in
     <span data-count="0">l</span>et to_run = I.modul ~env ~modul in
     let+ _got = run_monad ~to_run in
     <span data-count="0">e</span>nv
   | <span data-count="0">A</span>ssert (Assert_trap_module (m, expected)) -&gt;
     let* modul, env =
-      Compile.Text.until_symbolic_lin<span data-count="0">k</span> env ~unsafe ~name:None m
+      Compile.Wasm.Text.until_symbolic_lin<span data-count="0">k</span> env ~unsafe ~name:None m
     in
     <span data-count="0">l</span>et to_run = I.modul ~env ~modul in
     begin match run_monad ~to_run with
