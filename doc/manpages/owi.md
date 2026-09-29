@@ -4,6 +4,7 @@
 ## Subcommands
 
 - [`owi c`](owi-c.md)
+  - [`owi c abs`](owi-c-abs.md)
   - [`owi c fuzz`](owi-c-fuzz.md)
   - [`owi c hunt`](owi-c-hunt.md)
   - [`owi c run`](owi-c-run.md)

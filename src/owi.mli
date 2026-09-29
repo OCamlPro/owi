@@ -2017,10 +2017,10 @@ end
 
 module Cmd_wasm_abs : sig
   val cmd :
-       source_file:Fpath.t
+       debug_trace:string option
     -> entry_point:string option
+    -> source_file:Fpath.t
     -> unsafe:bool
-    -> debug_trace:string option
     -> unit Result.t
 end
 
@@ -2048,6 +2048,20 @@ module Cmd_wasm_sym : sig
 end
 
 module Cmd_c : sig
+  val abs :
+       arch:int
+    -> debug_trace:string option
+    -> eacsl:bool
+    -> entry_point:string option
+    -> files:Fpath.t list
+    -> includes:Fpath.t list
+    -> opt_lvl:string
+    -> out_file:Fpath.t option
+    -> property:Fpath.t option
+    -> unsafe:bool
+    -> workspace:Fpath.t
+    -> unit Result.t
+
   val fuzz :
        arch:int
     -> eacsl:bool

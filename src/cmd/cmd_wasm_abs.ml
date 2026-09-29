@@ -12,7 +12,7 @@ let env () =
   in
   Env.Abstract.link_extern_module ~env ~name:"owi" Abstract_wasm_ffi.owi
 
-let cmd ~source_file ~entry_point ~unsafe ~debug_trace =
+let cmd ~debug_trace ~entry_point ~source_file ~unsafe =
   let+ modul, env =
     let* env = env () in
     let* modul = Compile.Wasm.File.until_binary ~unsafe source_file in

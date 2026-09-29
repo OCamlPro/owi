@@ -5,8 +5,8 @@
 val env : unit -> Env.Abstract.t Result.t
 
 val cmd :
-     source_file:Fpath.t
+     debug_trace:string option
   -> entry_point:string option
+  -> source_file:Fpath.t
   -> unsafe:bool
-  -> debug_trace:string option
   -> unit Result.t
