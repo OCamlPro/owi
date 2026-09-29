@@ -27,6 +27,41 @@ module Cpp : sig
     -> Fpath.t Result.t
 end
 
+module Go : sig
+  val files_to_wasm_file :
+       files:Fpath.t list
+    -> out_file:Fpath.t option
+    -> workspace:Fpath.t
+    -> Fpath.t Result.t
+end
+
+module Haskell : sig
+  val files_to_wasm_file :
+       files:Fpath.t list
+    -> out_file:Fpath.t option
+    -> workspace:Fpath.t
+    -> Fpath.t Result.t
+end
+
+module Llvm : sig
+  val files_to_wasm_file :
+       entry_point:string option
+    -> files:Fpath.t list
+    -> out_file:Fpath.t option
+    -> workspace:Fpath.t
+    -> Fpath.t Result.t
+end
+
+module Rust : sig
+  val files_to_wasm_file :
+       entry_point:string option
+    -> files:Fpath.t list
+    -> includes:'a
+    -> opt_lvl:'b
+    -> out_file:Fpath.t option
+    -> Fpath.t Result.t
+end
+
 module Wasm : sig
   module File : sig
     val until_binary : unsafe:bool -> Fpath.t -> Binary.Module.t Result.t
@@ -126,4 +161,14 @@ module Wasm : sig
       -> Binary.Module.t
       -> (Env.Abstract.modul * Env.Abstract.t) Result.t
   end
+end
+
+module Zig : sig
+  val files_to_wasm_file :
+       entry_point:string option
+    -> files:Fpath.t list
+    -> includes:Fpath.t list
+    -> out_file:Fpath.t option
+    -> workspace:Fpath.t
+    -> Fpath.t Result.t
 end

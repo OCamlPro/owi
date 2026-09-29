@@ -4,57 +4,12 @@
 
 open Syntax
 
-(* TODO: investigate which parameters makes sense *)
-let compile ~entry_point ~includes:_ ~opt_lvl:_ ~out_file (files : Fpath.t list)
-  : Fpath.t Result.t =
-  let* rustc_bin = Bos.OS.Cmd.resolve @@ Bos.Cmd.v "rustc" in
-
-  let* libowi_sym_rlib =
-    Cmd_utils.find_installed_rust_file (Fpath.v "libowi_sym.rlib")
-  in
-
-  let* tmp = Bos.OS.Dir.tmp "owi_rust_%s" in
-  let out = Option.value ~default:Fpath.(tmp / "a.out.wasm") out_file in
-
-  let rustc_cmd : Bos.Cmd.t =
-    Bos.Cmd.(
-      rustc_bin % "--target=wasm32-unknown-unknown" % "--edition=2021"
-      % "--extern"
-      % Fmt.str "owi_sym=%a" Fpath.pp libowi_sym_rlib
-      % "-o" % Bos.Cmd.p out
-      (* link args parameters must be space separated *)
-      % "-C"
-      % ( match entry_point with
-        | Some entry_point -> Fmt.str "link-args=--entry=%s" entry_point
-        | None -> (* TODO: meh *) "" )
-      %% Bos.Cmd.of_list (List.map Bos.Cmd.p files) )
-  in
-
-  let err =
-    match Logs.Src.level Log.main_src with
-    | Some (Logs.Debug | Logs.Info) -> Bos.OS.Cmd.err_run_out
-    | None | Some _ -> Bos.OS.Cmd.err_null
-  in
-
-  (* TODO: does not seem to work, once it does, we can remove the `#![no_main]` in many documentation examples
-  let* () = Bos.OS.Env.set_var "RUSTFLAGS" (Some "-Zcrate-attr=no_main") in
-  *)
-  let+ () =
-    Log.bench_fn "compiling time" @@ fun () ->
-    match Bos.OS.Cmd.run ~err rustc_cmd with
-    | Ok _ as v -> v
-    | Error (`Msg e) ->
-      Log.debug (fun m -> m "rustc failed: %s" e);
-      Fmt.error_msg
-        "rustc failed: run with -vv to get the full error message if it was \
-         not displayed above"
-  in
-
-  out
-
 (* TODO: use arch *)
 let sym ~arch:_ ~entry_point ~files ~includes ~opt_lvl ~out_file
   ~symbolic_parameters ~workspace : unit Result.t =
-  let* source_file = compile ~entry_point ~includes ~opt_lvl ~out_file files in
+  let* source_file =
+    Compile.Rust.files_to_wasm_file ~entry_point ~files ~includes ~opt_lvl
+      ~out_file
+  in
 
   Cmd_wasm_sym.cmd ~entry_point ~source_file ~symbolic_parameters ~workspace
