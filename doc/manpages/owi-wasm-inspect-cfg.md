@@ -1,25 +1,21 @@
-[owi](owi.md) › [owi wasm](owi-wasm.md) › [owi wasm analyze](owi-wasm-analyze.md) › **owi wasm analyze cg**
+[owi](owi.md) › [owi wasm](owi-wasm.md) › [owi wasm inspect](owi-wasm-inspect.md) › **owi wasm inspect cfg**
 
-# owi wasm analyze cg
+# owi wasm inspect cfg
 
 ## Help
 
 ```text
 NAME
-       owi-wasm-analyze-cg - Build a call graph.
+       owi-wasm-inspect-cfg - Build a control-flow graph.
 
 SYNOPSIS
-       owi wasm analyze cg [--call-graph-mode=VALUE] [--entry-point=FUNCTION]
-       [OPTION]… FILE
+       owi wasm inspect cfg [--entry-point=FUNCTION] [OPTION]… FILE
 
 ARGUMENTS
        FILE (required)
            source file
 
 OPTIONS
-       --call-graph-mode=VALUE (absent=sound)
-            The call graph is either "complete" or "sound" 
-
        --entry-point=FUNCTION
            entry point of the executable
 
@@ -50,7 +46,7 @@ COMMON OPTIONS
            Show version information.
 
 EXIT STATUS
-       owi wasm analyze cg exits with:
+       owi wasm inspect cfg exits with:
 
        0   on success.
 
@@ -61,8 +57,8 @@ EXIT STATUS
        125 on unexpected internal errors (bugs).
 
 ENVIRONMENT
-       These environment variables affect the execution of owi wasm analyze
-       cg:
+       These environment variables affect the execution of owi wasm inspect
+       cfg:
 
        OWI_VERBOSITY
            See option --verbosity.

@@ -12,6 +12,6 @@
   concrete-interpreter.md
   converter.md
   formatter.md
-  program-analyzer.md
+  inspect.md
   script-interpreter.md
   validator.md))
