@@ -391,6 +391,24 @@ module C = struct
     Cmd_c.hunt ~arch ~eacsl ~entry_point ~files ~includes ~opt_lvl ~out_file
       ~property ~rounds ~seed ~symbolic_parameters ~workspace
 
+  (* owi c run *)
+  let run =
+    let+ arch
+    and+ eacsl
+    and+ entry_point
+    and+ files
+    and+ includes
+    and+ opt_lvl
+    and+ out_file
+    and+ property
+    and+ () = setup_log
+    and+ timeout
+    and+ timeout_instr
+    and+ unsafe
+    and+ workspace in
+    Cmd_c.run ~arch ~eacsl ~entry_point ~files ~includes ~opt_lvl ~out_file
+      ~property ~timeout ~timeout_instr ~unsafe ~workspace
+
   (* owi c sym *)
   let sym =
     let+ arch
@@ -750,6 +768,7 @@ let cli =
             "Hunt bugs by combining the fuzzer and the symbolic execution \
              engine."
             C.hunt
+        ; cmd "run" "Run the concrete interpreter." C.run
         ; cmd "sym" "Run the symbolic execution engine on a C program." C.sym
         ]
     ; group "c++" "Work with C++ programs."
@@ -774,22 +793,22 @@ let cli =
     ; cmd "version" "Print some version informations." Version.cmd
     ; group "wasm" "Work with Wasm programs."
         [ cmd "abs" "Run the abstract interpreter." Wasm.abs
+        ; cmd "fmt" "Format a .wat or .wast file." Wasm.fmt
+        ; cmd "fuzz" "Run the fuzzer." Wasm.fuzz
+        ; cmd "hunt"
+            "Hunt bugs by combining the fuzzer and the symbolic execution \
+             engine."
+            Wasm.hunt
         ; group "inspect" "Visualize and get statistics."
             [ cmd "cg" "Build a call graph." Wasm.Inspect.cg
             ; cmd "cfg" "Build a control-flow graph." Wasm.Inspect.cfg
             ]
-        ; cmd "fmt" "Format a .wat or .wast file." Wasm.fmt
-        ; cmd "fuzz" "Run the fuzzer." Wasm.fuzz
         ; group "instrument" "Instrument a program in various ways."
             [ cmd "label"
                 "Generate an instrumented file with labels corresponding to \
                  test objectives for a given coverage criteria."
                 Wasm.Instrument.label
             ]
-        ; cmd "hunt"
-            "Hunt bugs by combining the fuzzer and the symbolic execution \
-             engine."
-            Wasm.hunt
         ; cmd "iso"
             "Check the iso-functionnality of two modules by comparing the \
              output when calling their exports."

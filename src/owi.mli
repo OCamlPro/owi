@@ -2081,6 +2081,21 @@ module Cmd_c : sig
     -> workspace:Fpath.t
     -> unit Result.t
 
+  val run :
+       arch:int
+    -> eacsl:bool
+    -> entry_point:string option
+    -> files:Fpath.t list
+    -> includes:Fpath.t list
+    -> opt_lvl:string
+    -> out_file:Fpath.t option
+    -> property:Fpath.t option
+    -> timeout:float option
+    -> timeout_instr:int option
+    -> unsafe:bool
+    -> workspace:Fpath.t
+    -> unit Result.t
+
   val sym :
        arch:int
     -> eacsl:bool
@@ -2202,10 +2217,10 @@ end
 
 module Cmd_wasm_run : sig
   val cmd :
-       unsafe:bool
+       source_file:Fpath.t
     -> timeout:float option
     -> timeout_instr:int option
-    -> source_file:Fpath.t
+    -> unsafe:bool
     -> unit Result.t
 end
 

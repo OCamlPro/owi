@@ -3,8 +3,8 @@
 (* Written by the Owi programmers *)
 
 val cmd :
-     unsafe:bool
+     source_file:Fpath.t
   -> timeout:float option
   -> timeout_instr:int option
-  -> source_file:Fpath.t
+  -> unsafe:bool
   -> unit Result.t
