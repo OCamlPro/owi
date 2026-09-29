@@ -10,13 +10,13 @@ open Cmdliner
 let call_graph_mode_conv =
   let of_string s =
     match String.lowercase_ascii s with
-    | "complete" -> Ok Cmd_wasm_analyze_cg.Complete
-    | "sound" -> Ok Cmd_wasm_analyze_cg.Sound
+    | "complete" -> Ok Cmd_wasm_inspect_cg.Complete
+    | "sound" -> Ok Cmd_wasm_inspect_cg.Sound
     | _ -> Fmt.error_msg {|Expected "complete" or "sound" but got "%s"|} s
   in
   let pp fmt = function
-    | Cmd_wasm_analyze_cg.Complete -> Fmt.string fmt "complete"
-    | Cmd_wasm_analyze_cg.Sound -> Fmt.string fmt "sound"
+    | Cmd_wasm_inspect_cg.Complete -> Fmt.string fmt "complete"
+    | Cmd_wasm_inspect_cg.Sound -> Fmt.string fmt "sound"
   in
   Arg.conv (of_string, pp)
 
@@ -518,22 +518,22 @@ module Wasm = struct
     and+ debug_trace in
     Cmd_wasm_abs.cmd ~source_file ~entry_point ~unsafe ~debug_trace
 
-  (* owi wasm analyze *)
-  module Analyze = struct
-    (* owi wasm analyze cfg *)
+  (* owi wasm inspect *)
+  module Inspect = struct
+    (* owi wasm inspect cfg *)
     let cfg =
       let+ source_file
       and+ entry_point
       and+ () = setup_log in
-      Cmd_wasm_analyze_cfg.cmd ~source_file ~entry_point
+      Cmd_wasm_inspect_cfg.cmd ~source_file ~entry_point
 
-    (* owi wasm analyze cg *)
+    (* owi wasm inspect cg *)
     let cg =
       let+ call_graph_mode
       and+ source_file
       and+ entry_point
       and+ () = setup_log in
-      Cmd_wasm_analyze_cg.cmd ~call_graph_mode ~source_file ~entry_point
+      Cmd_wasm_inspect_cg.cmd ~call_graph_mode ~source_file ~entry_point
   end
 
   (* owi wasm fmt *)
@@ -774,9 +774,9 @@ let cli =
     ; cmd "version" "Print some version informations." Version.cmd
     ; group "wasm" "Work with Wasm programs."
         [ cmd "abs" "Run the abstract interpreter." Wasm.abs
-        ; group "analyze" "Visualize and get statistics."
-            [ cmd "cg" "Build a call graph." Wasm.Analyze.cg
-            ; cmd "cfg" "Build a control-flow graph." Wasm.Analyze.cfg
+        ; group "inspect" "Visualize and get statistics."
+            [ cmd "cg" "Build a call graph." Wasm.Inspect.cg
+            ; cmd "cfg" "Build a control-flow graph." Wasm.Inspect.cfg
             ]
         ; cmd "fmt" "Format a .wat or .wast file." Wasm.fmt
         ; cmd "fuzz" "Run the fuzzer." Wasm.fuzz

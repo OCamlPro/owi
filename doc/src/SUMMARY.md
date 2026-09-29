@@ -32,7 +32,7 @@
 - [Concrete Interpreter](wasm-toolkit/concrete-interpreter.md)
 - [Converter (`wasm2wat` and `wat2wasm`)](wasm-toolkit/converter.md)
 - [Formatter](wasm-toolkit/formatter.md)
-- [Program Analyzer](wasm-toolkit/program-analyzer.md)
+- [Inspect](wasm-toolkit/inspect.md)
 - [Script Interpreter](wasm-toolkit/script-interpreter.md)
 - [Validator](wasm-toolkit/validator.md)
 

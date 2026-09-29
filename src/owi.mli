@@ -2096,7 +2096,7 @@ module Cmd_c : sig
     -> unit Result.t
 end
 
-module Cmd_wasm_analyze_cg : sig
+module Cmd_wasm_inspect_cg : sig
   type mode =
     | Complete
     | Sound
@@ -2108,7 +2108,7 @@ module Cmd_wasm_analyze_cg : sig
     -> unit Result.t
 end
 
-module Cmd_wasm_analyze_cfg : sig
+module Cmd_wasm_inspect_cfg : sig
   val cmd : source_file:Fpath.t -> entry_point:string option -> unit Result.t
 end
 

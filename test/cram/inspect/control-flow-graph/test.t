@@ -1,4 +1,4 @@
-  $ owi wasm analyze cfg test_cfg.wat
+  $ owi wasm inspect cfg test_cfg.wat
   $ cat test_cfg.dot
   digraph cfg {
     rankdir=LR;
@@ -44,7 +44,20 @@
 
 
 
-  $ owi wasm analyze cfg loop.wat
+
+
+
+
+
+
+
+
+
+
+
+
+
+  $ owi wasm inspect cfg loop.wat
   $ cat loop.dot
   digraph cfg {
     rankdir=LR;
@@ -79,7 +92,16 @@
 
 
 
-  $ owi wasm analyze cfg fib.wat
+
+
+
+
+
+
+
+
+
+  $ owi wasm inspect cfg fib.wat
   $ cat fib.dot
   digraph cfg {
     rankdir=LR;
@@ -163,7 +185,32 @@
 
 
 
-  $ owi wasm analyze cfg br_table.wat
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  $ owi wasm inspect cfg br_table.wat
   $ cat br_table.dot
   digraph cfg {
     rankdir=LR;

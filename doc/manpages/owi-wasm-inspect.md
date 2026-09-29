@@ -1,20 +1,20 @@
-[owi](owi.md) › [owi wasm](owi-wasm.md) › **owi wasm analyze**
+[owi](owi.md) › [owi wasm](owi-wasm.md) › **owi wasm inspect**
 
-# owi wasm analyze
+# owi wasm inspect
 
 ## Subcommands
 
-- [`owi wasm analyze cfg`](owi-wasm-analyze-cfg.md)
-- [`owi wasm analyze cg`](owi-wasm-analyze-cg.md)
+- [`owi wasm inspect cfg`](owi-wasm-inspect-cfg.md)
+- [`owi wasm inspect cg`](owi-wasm-inspect-cg.md)
 
 ## Help
 
 ```text
 NAME
-       owi-wasm-analyze - Visualize and get statistics.
+       owi-wasm-inspect - Visualize and get statistics.
 
 SYNOPSIS
-       owi wasm analyze [COMMAND] …
+       owi wasm inspect [COMMAND] …
 
 COMMANDS
        cfg [--entry-point=FUNCTION] [OPTION]… FILE
@@ -33,7 +33,7 @@ COMMON OPTIONS
            Show version information.
 
 EXIT STATUS
-       owi wasm analyze exits with:
+       owi wasm inspect exits with:
 
        0   on success.
 

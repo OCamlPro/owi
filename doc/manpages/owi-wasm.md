@@ -5,12 +5,12 @@
 ## Subcommands
 
 - [`owi wasm abs`](owi-wasm-abs.md)
-- [`owi wasm analyze`](owi-wasm-analyze.md)
-  - [`owi wasm analyze cfg`](owi-wasm-analyze-cfg.md)
-  - [`owi wasm analyze cg`](owi-wasm-analyze-cg.md)
 - [`owi wasm fmt`](owi-wasm-fmt.md)
 - [`owi wasm fuzz`](owi-wasm-fuzz.md)
 - [`owi wasm hunt`](owi-wasm-hunt.md)
+- [`owi wasm inspect`](owi-wasm-inspect.md)
+  - [`owi wasm inspect cfg`](owi-wasm-inspect-cfg.md)
+  - [`owi wasm inspect cg`](owi-wasm-inspect-cg.md)
 - [`owi wasm instrument`](owi-wasm-instrument.md)
   - [`owi wasm instrument label`](owi-wasm-instrument-label.md)
 - [`owi wasm iso`](owi-wasm-iso.md)
@@ -39,9 +39,6 @@ COMMANDS
        FILE
            Run the abstract interpreter.
 
-       analyze [COMMAND] …
-           Visualize and get statistics.
-
        fmt [--inplace] [OPTION]… FILE…
            Format a .wat or .wast file.
 
@@ -51,6 +48,9 @@ COMMANDS
        hunt [OPTION]… FILE
            Hunt bugs by combining the fuzzer and the symbolic execution
            engine.
+
+       inspect [COMMAND] …
+           Visualize and get statistics.
 
        instrument [COMMAND] …
            Instrument a program in various ways.
