@@ -2,6 +2,20 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
+val abs :
+     arch:int
+  -> debug_trace:string option
+  -> eacsl:bool
+  -> entry_point:string option
+  -> files:Fpath.t list
+  -> includes:Fpath.t list
+  -> opt_lvl:string
+  -> out_file:Fpath.t option
+  -> property:Fpath.t option
+  -> unsafe:bool
+  -> workspace:Fpath.t
+  -> unit Result.t
+
 val fuzz :
      arch:int
   -> eacsl:bool

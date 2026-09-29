@@ -4,6 +4,15 @@
 
 open Syntax
 
+let abs ~arch ~debug_trace ~eacsl ~entry_point ~files ~includes ~opt_lvl
+  ~out_file ~property ~unsafe ~workspace =
+  let* source_file =
+    (* TODO: I guess property is not needed in abstract mode, it could be removed ? *)
+    Compile.C.files_to_wasm_file ~arch ~eacsl ~entry_point ~includes ~opt_lvl
+      ~out_file ~property ~workspace files
+  in
+  Cmd_wasm_abs.cmd ~debug_trace ~entry_point ~source_file ~unsafe
+
 (* TODO: use testcomp! *)
 let fuzz ~arch ~eacsl ~entry_point ~files ~includes ~opt_lvl ~out_file ~property
   ~rounds ~seed ~testcomp:_ ~timeout ~timeout_instr ~unsafe ~workspace :

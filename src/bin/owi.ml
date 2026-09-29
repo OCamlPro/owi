@@ -350,6 +350,23 @@ let symbolic_parameters =
 module C = struct
   let entry_point = entry_point (Some "main")
 
+  (* owi c abs *)
+  let abs =
+    let+ arch
+    and+ debug_trace
+    and+ eacsl
+    and+ entry_point
+    and+ files
+    and+ includes
+    and+ opt_lvl
+    and+ out_file
+    and+ property
+    and+ () = setup_log
+    and+ unsafe
+    and+ workspace in
+    Cmd_c.abs ~arch ~debug_trace ~eacsl ~entry_point ~files ~includes ~opt_lvl
+      ~out_file ~property ~unsafe ~workspace
+
   (* owi c fuzz *)
   let fuzz =
     let+ arch
@@ -763,7 +780,8 @@ let cli =
 
   Cmd.group ~default owi_info
     [ group "c" "Work with C programs."
-        [ cmd "fuzz" "Run the fuzzer." C.fuzz
+        [ cmd "abs" "Run the abstract interpreter." C.abs
+        ; cmd "fuzz" "Run the fuzzer." C.fuzz
         ; cmd "hunt"
             "Hunt bugs by combining the fuzzer and the symbolic execution \
              engine."
