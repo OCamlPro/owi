@@ -35,6 +35,21 @@ val hunt :
   -> workspace:Fpath.t
   -> unit Result.t
 
+val run :
+     arch:int
+  -> eacsl:bool
+  -> entry_point:string option
+  -> files:Fpath.t list
+  -> includes:Fpath.t list
+  -> opt_lvl:string
+  -> out_file:Fpath.t option
+  -> property:Fpath.t option
+  -> timeout:float option
+  -> timeout_instr:int option
+  -> unsafe:bool
+  -> workspace:Fpath.t
+  -> unit Result.t
+
 val sym :
      arch:int
   -> eacsl:bool

@@ -4,7 +4,8 @@
 
 open Syntax
 
-let cmd ~unsafe ~timeout ~timeout_instr ~source_file =
+(* TODO: add entry_point *)
+let cmd ~source_file ~timeout ~timeout_instr ~unsafe =
   let name = None in
   let env = Env.Concrete.empty ~context:() in
   let* modul, env =

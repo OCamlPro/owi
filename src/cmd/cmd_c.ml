@@ -32,6 +32,15 @@ let hunt ~arch ~eacsl ~entry_point ~files ~includes ~opt_lvl ~out_file ~property
   Cmd_wasm_hunt.cmd ~entry_point ~rounds ~seed ~source_file ~symbolic_parameters
     ~timeout ~timeout_instr ~unsafe ~workspace
 
+let run ~arch ~eacsl ~entry_point ~files ~includes ~opt_lvl ~out_file ~property
+  ~timeout ~timeout_instr ~unsafe ~workspace =
+  let* source_file =
+    (* TODO: I guess property is not needed in concrete run mode, it could be removed ? *)
+    Compile.C.files_to_wasm_file ~arch ~eacsl ~entry_point ~includes ~opt_lvl
+      ~out_file ~property ~workspace files
+  in
+  Cmd_wasm_run.cmd ~source_file ~timeout ~timeout_instr ~unsafe
+
 (* TODO: use testcomp *)
 let sym ~arch ~eacsl ~entry_point ~files ~includes ~opt_lvl ~out_file ~property
   ~(symbolic_parameters : Symbolic_parameters.t) ~testcomp:_ ~workspace :
