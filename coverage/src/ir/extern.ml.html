@@ -486,7 +486,7 @@ module Func = struct
       <span data-count="4989">(</span>arg_typ<span data-count="4989">e</span> arg, res_typ<span data-count="4989">e</span> res)
 
     let fresh =
-      let r = ref ~<span data-count="2778">-</span>1 in
+      let r = ref ~<span data-count="2790">-</span>1 in
       fun () -&gt;
         <span data-count="0">i</span>ncr r;
         <span data-count="0">!</span>r
@@ -503,11 +503,11 @@ module Func = struct
         | Memory : int -&gt; (l, memory, memory) t
         | Elt : 'a telt -&gt; (lr, elt, 'a) t
 
-      let return r = <span data-count="80653">F</span>unc (Res, r)
+      let return r = <span data-count="81001">F</span>unc (Res, r)
 
-      let r0 = R0 |&gt; retur<span data-count="2778">n</span>
+      let r0 = R0 |&gt; retur<span data-count="2790">n</span>
 
-      let r1 (Elt a) = <span data-count="77875">R</span>1 a |&gt; return
+      let r1 (Elt a) = <span data-count="78211">R</span>1 a |&gt; return
 
       let r2 (Elt a) (Elt b) = <span data-count="0">R</span>2 (a, b) |&gt; return
 
@@ -529,23 +529,23 @@ module Func = struct
 
       let unit = Unit
 
-      let memory id = <span data-count="9291">M</span>emory id
+      let memory id = <span data-count="9331">M</span>emory id
 
       let ( ^-&gt; ) =
         let aux : type lr k a b.
           (lr, k, a) t -&gt; b func_type -&gt; (a -&gt; b) func_type =
          fun a (Func (b, r)) -&gt;
-          <span data-count="245663">m</span>atch a with
-          | <span data-count="201101">E</span>lt a -&gt; Func (Arg (a, b), r)
-          | <span data-count="35271">U</span>nit -&gt; Func (UArg b, r)
-          | <span data-count="9291">M</span>emory id -&gt; Func (Mem (id, b), r)
+          <span data-count="246723">m</span>atch a with
+          | <span data-count="201969">E</span>lt a -&gt; Func (Arg (a, b), r)
+          | <span data-count="35423">U</span>nit -&gt; Func (UArg b, r)
+          | <span data-count="9331">M</span>emory id -&gt; Func (Mem (id, b), r)
         in
         aux
 
       let ( ^-&gt;. ) =
         let aux : type ll k kk a b.
           (ll, k, a) t -&gt; (lr, kk, b) t -&gt; (a -&gt; b m) func_type =
-         fun a b -&gt; <span data-count="130769">m</span>atch b with <span data-count="77875">E</span>lt _ -&gt; a ^-&gt; r<span data-count="77875">1</span> b | <span data-count="52894">U</span>nit -&gt; a ^-&gt; r0
+         fun a b -&gt; <span data-count="131333">m</span>atch b with <span data-count="78211">E</span>lt _ -&gt; a ^-&gt; r<span data-count="78211">1</span> b | <span data-count="53122">U</span>nit -&gt; a ^-&gt; r0
         in
         aux
 

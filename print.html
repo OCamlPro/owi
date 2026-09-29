@@ -37,10 +37,10 @@
             const path_to_root = "";
             const default_light_theme = "frappe";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-2433ccfd.js";
+            window.path_to_searchindex_js = "searchindex-8eec2347.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-b696a57f.js"></script>
+        <script src="toc-653e0b4c.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -1847,7 +1847,7 @@ i32.lt_s
 </code></pre>
 <p>Are you able to recognize the program now?</p>
 <div style="break-before: page; page-break-before: always;"></div>
-<h1 id="program-analyzer"><a class="header" href="#program-analyzer">Program Analyzer</a></h1>
+<h1 id="inspect"><a class="header" href="#inspect">Inspect</a></h1>
 <h2 id="call-graph"><a class="header" href="#call-graph">Call Graph</a></h2>
 <p>Given a file <code>useless.wat</code> with the following content:</p>
 <pre><code class="language-wat">(module
@@ -1872,7 +1872,7 @@ i32.lt_s
   (start $start))
 </code></pre>
 <p>You can then create a file <code>useless.dot</code> containing the call graph of the programm:</p>
-<pre><code class="language-sh">$ owi wasm analyze cg useless.wat
+<pre><code class="language-sh">$ owi wasm inspect cg useless.wat
 </code></pre>
 <p><label class="checkbox-label"><input class="checkbox-img" type="checkbox"><img src="wasm-toolkit/call_graph.svg" alt="image"><span class="img-wrapper"><img src="wasm-toolkit/call_graph.svg" alt="image"></span></label></p>
 <h2 id="control-flow-graph"><a class="header" href="#control-flow-graph">Control-Flow Graph</a></h2>
@@ -1904,7 +1904,7 @@ i32.lt_s
 )
 </code></pre>
 <p>You can then create a file <code>useless.dot</code> containing the control flow graph of the function foo:</p>
-<pre><code class="language-sh">$ owi wasm analyze cfg useless.wat --entry-point=foo
+<pre><code class="language-sh">$ owi wasm inspect cfg useless.wat --entry-point=foo
 </code></pre>
 <p><label class="checkbox-label"><input class="checkbox-img" type="checkbox"><img src="wasm-toolkit/control-flow_graph.svg" alt="image"><span class="img-wrapper"><img src="wasm-toolkit/control-flow_graph.svg" alt="image"></span></label></p>
 <div style="break-before: page; page-break-before: always;"></div>

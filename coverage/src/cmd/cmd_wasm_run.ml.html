@@ -18,7 +18,7 @@
       <h2>81.82%</h2>
     </div>
     <div id="navbar">
-      <span class="unvisited" style="bottom:5.41%"></span>
+      <span class="unvisited" style="bottom:5.26%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -30,13 +30,13 @@
 <a id="L5"></a><span > </span>
 <a id="L6"></a><span > </span>
 <a id="L7"></a><span > </span>
-<a id="L8"></a><span class="visited"> </span>
-<a id="L9"></a><span > </span>
+<a id="L8"></a><span > </span>
+<a id="L9"></a><span class="visited"> </span>
 <a id="L10"></a><span > </span>
-<a id="L11"></a><span class="visited"> </span>
-<a id="L12"></a><span > </span>
-<a id="L13"></a><span class="visited"> </span>
-<a id="L14"></a><span > </span>
+<a id="L11"></a><span > </span>
+<a id="L12"></a><span class="visited"> </span>
+<a id="L13"></a><span > </span>
+<a id="L14"></a><span class="visited"> </span>
 <a id="L15"></a><span > </span>
 <a id="L16"></a><span > </span>
 <a id="L17"></a><span > </span>
@@ -44,22 +44,23 @@
 <a id="L19"></a><span > </span>
 <a id="L20"></a><span > </span>
 <a id="L21"></a><span > </span>
-<a id="L22"></a><span class="visited"> </span>
-<a id="L23"></a><span > </span>
+<a id="L22"></a><span > </span>
+<a id="L23"></a><span class="visited"> </span>
 <a id="L24"></a><span > </span>
 <a id="L25"></a><span > </span>
 <a id="L26"></a><span > </span>
-<a id="L27"></a><span class="visited"> </span>
-<a id="L28"></a><span > </span>
-<a id="L29"></a><span class="visited"> </span>
-<a id="L30"></a><span > </span>
-<a id="L31"></a><span class="visited"> </span>
-<a id="L32"></a><span > </span>
-<a id="L33"></a><span class="visited"> </span>
-<a id="L34"></a><span > </span>
-<a id="L35"></a><span class="unvisited"> </span>
-<a id="L36"></a><span > </span>
-<a id="L37"></a><span class="visited"> </span>
+<a id="L27"></a><span > </span>
+<a id="L28"></a><span class="visited"> </span>
+<a id="L29"></a><span > </span>
+<a id="L30"></a><span class="visited"> </span>
+<a id="L31"></a><span > </span>
+<a id="L32"></a><span class="visited"> </span>
+<a id="L33"></a><span > </span>
+<a id="L34"></a><span class="visited"> </span>
+<a id="L35"></a><span > </span>
+<a id="L36"></a><span class="unvisited"> </span>
+<a id="L37"></a><span > </span>
+<a id="L38"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -101,6 +102,7 @@
 <a href="#L35">35</a>
 <a href="#L36">36</a>
 <a href="#L37">37</a>
+<a href="#L38">38</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2026 OCamlPro *)
@@ -108,7 +110,8 @@
 
 open Syntax
 
-let cmd ~unsafe ~timeout ~timeout_instr ~source_file =
+(* TODO: add entry_point *)
+let cmd ~source_file ~timeout ~timeout_instr ~unsafe =
   <span data-count="19">l</span>et name = None in
   let env = Env.Concrete.empty ~context:() in
   let* modul, env =
