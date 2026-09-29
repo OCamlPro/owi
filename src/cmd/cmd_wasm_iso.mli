@@ -16,7 +16,7 @@ val cmd :
   -> unsafe:bool
   -> workers:Int.t Option.t
   -> no_worker_isolation:Bool.t
-  -> workspace:Fpath.t option
+  -> workspace:Fpath.t
   -> model_out_file:Fpath.t option
   -> with_breadcrumbs:bool
   -> unit Result.t

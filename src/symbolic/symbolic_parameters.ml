@@ -87,5 +87,4 @@ type t =
   ; use_ite_for_select : bool
   ; with_breadcrumbs : bool
   ; workers : Int.t Option.t
-  ; workspace : Fpath.t option
   }

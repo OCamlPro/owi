@@ -45,11 +45,11 @@
   call_graph
   cmd_utils
   cmd_c
-  cmd_cpp_sym
-  cmd_go_sym
-  cmd_haskell_sym
-  cmd_llvm_sym
-  cmd_rust_sym
+  cmd_cpp
+  cmd_go
+  cmd_haskell
+  cmd_llvm
+  cmd_rust
   cmd_version
   cmd_wasm_abs
   cmd_wasm_analyze_cg
@@ -66,7 +66,7 @@
   cmd_wasm_sym
   cmd_wasm_to_wat
   cmd_wasm_validate
-  cmd_zig_sym
+  cmd_zig
   collection
   compile
   concrete_array

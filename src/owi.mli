@@ -1991,7 +1991,6 @@ module Symbolic_parameters : sig
     ; use_ite_for_select : bool
     ; with_breadcrumbs : bool
     ; workers : Int.t Option.t
-    ; workspace : Fpath.t option
     }
 end
 
@@ -2035,6 +2034,7 @@ module Cmd_wasm_hunt : sig
     -> timeout:float option
     -> timeout_instr:int option
     -> unsafe:bool
+    -> workspace:Fpath.t
     -> unit Result.t
 end
 
@@ -2043,6 +2043,7 @@ module Cmd_wasm_sym : sig
        entry_point:string option
     -> source_file:Fpath.t
     -> symbolic_parameters:Symbolic_parameters.t
+    -> workspace:Fpath.t
     -> unit Result.t
 end
 
@@ -2062,7 +2063,7 @@ module Cmd_c : sig
     -> timeout:float option
     -> timeout_instr:int option
     -> unsafe:bool
-    -> workspace:Fpath.t option
+    -> workspace:Fpath.t
     -> unit Result.t
 
   val hunt :
@@ -2077,6 +2078,7 @@ module Cmd_c : sig
     -> rounds:int option
     -> seed:int option
     -> symbolic_parameters:Symbolic_parameters.t
+    -> workspace:Fpath.t
     -> unit Result.t
 
   val sym :
@@ -2090,6 +2092,7 @@ module Cmd_c : sig
     -> property:Fpath.t option
     -> symbolic_parameters:Symbolic_parameters.t
     -> testcomp:bool
+    -> workspace:Fpath.t
     -> unit Result.t
 end
 
@@ -2109,8 +2112,8 @@ module Cmd_wasm_analyze_cfg : sig
   val cmd : source_file:Fpath.t -> entry_point:string option -> unit Result.t
 end
 
-module Cmd_cpp_sym : sig
-  val cmd :
+module Cmd_cpp : sig
+  val sym :
        arch:int
     -> entry_point:string option
     -> files:Fpath.t list
@@ -2118,6 +2121,7 @@ module Cmd_cpp_sym : sig
     -> opt_lvl:string
     -> out_file:Fpath.t option
     -> symbolic_parameters:Symbolic_parameters.t
+    -> workspace:Fpath.t
     -> unit Result.t
 end
 
@@ -2137,12 +2141,13 @@ module Cmd_wasm_fuzz : sig
     -> unit Result.t
 end
 
-module Cmd_haskell_sym : sig
-  val cmd :
+module Cmd_haskell : sig
+  val sym :
        entry_point:string option
     -> files:Fpath.t list
     -> out_file:Fpath.t option
     -> symbolic_parameters:Symbolic_parameters.t
+    -> workspace:Fpath.t
     -> unit Result.t
 end
 
@@ -2169,18 +2174,19 @@ module Cmd_wasm_iso : sig
     -> unsafe:bool
     -> workers:Int.t Option.t
     -> no_worker_isolation:Bool.t
-    -> workspace:Fpath.t option
+    -> workspace:Fpath.t
     -> model_out_file:Fpath.t option
     -> with_breadcrumbs:bool
     -> unit Result.t
 end
 
-module Cmd_llvm_sym : sig
-  val cmd :
+module Cmd_llvm : sig
+  val sym :
        entry_point:string option
     -> files:Fpath.t list
     -> out_file:Fpath.t option
     -> symbolic_parameters:Symbolic_parameters.t
+    -> workspace:Fpath.t
     -> unit Result.t
 end
 
@@ -2203,8 +2209,8 @@ module Cmd_wasm_run : sig
     -> unit Result.t
 end
 
-module Cmd_rust_sym : sig
-  val cmd :
+module Cmd_rust : sig
+  val sym :
        arch:int
     -> entry_point:string option
     -> files:Fpath.t list
@@ -2212,6 +2218,7 @@ module Cmd_rust_sym : sig
     -> opt_lvl:string
     -> out_file:Fpath.t option
     -> symbolic_parameters:Symbolic_parameters.t
+    -> workspace:Fpath.t
     -> unit Result.t
 end
 
@@ -2227,12 +2234,13 @@ module Cmd_wasm_script : sig
     -> unit Result.t
 end
 
-module Cmd_go_sym : sig
-  val cmd :
+module Cmd_go : sig
+  val sym :
        entry_point:string option
     -> files:Fpath.t list
     -> out_file:Fpath.t option
     -> symbolic_parameters:Symbolic_parameters.t
+    -> workspace:Fpath.t
     -> unit Result.t
 end
 
@@ -2262,13 +2270,14 @@ module Cmd_wasm_of_wat : sig
     -> unit Result.t
 end
 
-module Cmd_zig_sym : sig
-  val cmd :
+module Cmd_zig : sig
+  val sym :
        entry_point:string option
     -> files:Fpath.t list
     -> includes:Fpath.t list
     -> out_file:Fpath.t option
     -> symbolic_parameters:Symbolic_parameters.t
+    -> workspace:Fpath.t
     -> unit Result.t
 end
 

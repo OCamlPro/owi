@@ -7,6 +7,13 @@ open Syntax
 let compile ~workspace ~entry_point ~includes ~out_file (files : Fpath.t list) :
   Fpath.t Result.t =
   let includes =
+    (* TODO: disabled until zig is properly packaged
+       Cmd_utils.zig_files_location @
+    *)
+    includes
+  in
+
+  let includes =
     Bos.Cmd.of_list (List.map (fun p -> Fmt.str "-I%a" Fpath.pp p) includes)
   in
 
@@ -57,23 +64,10 @@ let compile ~workspace ~entry_point ~includes ~out_file (files : Fpath.t list) :
 
   out
 
-let cmd ~entry_point ~files ~includes ~out_file
-  ~(symbolic_parameters : Symbolic_parameters.t) : unit Result.t =
-  let* workspace =
-    Cmd_utils.make_workspace ~workspace:symbolic_parameters.workspace
-  in
-
-  let includes =
-    (* TODO: disabled until zig is properly packaged
-       Cmd_utils.zig_files_location @
-    *)
-    includes
-  in
+let sym ~entry_point ~files ~includes ~out_file ~symbolic_parameters ~workspace
+  : unit Result.t =
   let* source_file =
     compile ~workspace ~entry_point ~includes ~out_file files
   in
-  let workspace = Some workspace in
 
-  let symbolic_parameters = { symbolic_parameters with workspace } in
-
-  Cmd_wasm_sym.cmd ~entry_point ~symbolic_parameters ~source_file
+  Cmd_wasm_sym.cmd ~entry_point ~source_file ~symbolic_parameters ~workspace

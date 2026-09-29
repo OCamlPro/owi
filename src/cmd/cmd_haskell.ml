@@ -45,15 +45,8 @@ let compile ~workspace ~out_file (files : Fpath.t list) : Fpath.t Result.t =
 
   out
 
-let cmd ~entry_point ~files ~out_file
-  ~(symbolic_parameters : Symbolic_parameters.t) : unit Result.t =
-  let* workspace =
-    Cmd_utils.make_workspace ~workspace:symbolic_parameters.workspace
-  in
-
+let sym ~entry_point ~files ~out_file ~symbolic_parameters ~workspace :
+  unit Result.t =
   let* source_file = compile ~workspace ~out_file files in
-  let workspace = Some workspace in
 
-  let symbolic_parameters = { symbolic_parameters with workspace } in
-
-  Cmd_wasm_sym.cmd ~entry_point ~symbolic_parameters ~source_file
+  Cmd_wasm_sym.cmd ~entry_point ~symbolic_parameters ~source_file ~workspace

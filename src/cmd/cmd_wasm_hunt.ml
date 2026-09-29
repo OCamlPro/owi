@@ -5,9 +5,9 @@
 open Syntax
 
 let cmd ~entry_point ~rounds ~seed ~source_file ~symbolic_parameters ~timeout
-  ~timeout_instr ~unsafe =
+  ~timeout_instr ~unsafe ~workspace =
   let* () =
     Cmd_wasm_fuzz.cmd ~entry_point ~rounds ~seed ~source_file ~timeout
       ~timeout_instr ~unsafe
   in
-  Cmd_wasm_sym.cmd ~entry_point ~source_file ~symbolic_parameters
+  Cmd_wasm_sym.cmd ~entry_point ~source_file ~symbolic_parameters ~workspace
