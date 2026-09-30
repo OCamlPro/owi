@@ -22,6 +22,7 @@
   - [`owi llvm run`](owi-llvm-run.md)
   - [`owi llvm sym`](owi-llvm-sym.md)
 - [`owi rust`](owi-rust.md)
+  - [`owi rust run`](owi-rust-run.md)
   - [`owi rust sym`](owi-rust-sym.md)
 - [`owi version`](owi-version.md)
 - [`owi wasm`](owi-wasm.md)

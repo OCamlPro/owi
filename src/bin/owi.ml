@@ -538,6 +538,20 @@ end
 module Rust = struct
   let entry_point = entry_point (Some "main")
 
+  (* owi rust run *)
+  let run =
+    let+ entry_point
+    and+ files
+    and+ includes
+    and+ opt_lvl
+    and+ out_file
+    and+ () = setup_log
+    and+ timeout
+    and+ timeout_instr
+    and+ unsafe in
+    Cmd_rust.run ~entry_point ~files ~includes ~opt_lvl ~out_file ~timeout
+      ~timeout_instr ~unsafe
+
   (* owi rust sym *)
   let sym =
     let+ arch
@@ -858,7 +872,8 @@ let cli =
             Llvm.sym
         ]
     ; group "rust" "Work with Rust programs."
-        [ cmd "sym" "Run the symbolic execution engine on a Rust program."
+        [ cmd "run" "Run the concrete interpreter." Rust.run
+        ; cmd "sym" "Run the symbolic execution engine on a Rust program."
             Rust.sym
         ]
     ; cmd "version" "Print some version informations." Version.cmd

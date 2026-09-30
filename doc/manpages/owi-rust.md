@@ -4,6 +4,7 @@
 
 ## Subcommands
 
+- [`owi rust run`](owi-rust-run.md)
 - [`owi rust sym`](owi-rust-sym.md)
 
 ## Help
@@ -16,6 +17,9 @@ SYNOPSIS
        owi rust [COMMAND] …
 
 COMMANDS
+       run [OPTION]… FILE…
+           Run the concrete interpreter.
+
        sym [OPTION]… FILE…
            Run the symbolic execution engine on a Rust program.
 
