@@ -4,6 +4,9 @@
 
 ## Subcommands
 
+- [`owi haskell abs`](owi-haskell-abs.md)
+- [`owi haskell fuzz`](owi-haskell-fuzz.md)
+- [`owi haskell hunt`](owi-haskell-hunt.md)
 - [`owi haskell run`](owi-haskell-run.md)
 - [`owi haskell sym`](owi-haskell-sym.md)
 
@@ -17,6 +20,16 @@ SYNOPSIS
        owi haskell [COMMAND] …
 
 COMMANDS
+       abs [OPTION]… FILE…
+           Run the abstract interpreter.
+
+       fuzz [OPTION]… FILE…
+           Run the fuzzer.
+
+       hunt [OPTION]… FILE…
+           Hunt bugs by combining the fuzzer and the symbolic execution
+           engine.
+
        run [OPTION]… FILE…
            Run the concrete interpreter.
 
