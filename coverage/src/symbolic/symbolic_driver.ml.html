@@ -543,25 +543,25 @@ let run ~exploration_strategy ~workers ~no_worker_isolation ~no_stop_at_failure
 
     (* Handles final values from the monad and reschedule them if needed. *)
     let rec at_schedulable (t : _ Symex.Monad.schedulable) write_back =
-      <span data-count="54458">m</span>atch t with
-      | <span data-count="1456">O</span>k _ | <span data-count="12381">E</span>rror `Prune -&gt; Atomic.incr path_count
+      <span data-count="55071">m</span>atch t with
+      | <span data-count="1648">O</span>k _ | <span data-count="12385">E</span>rror `Prune -&gt; Atomic.incr path_count
       | Error ((<span data-count="68">`</span>Assertion _ | <span data-count="186">`</span>Trap _) as bug) -&gt;
         Atomic.incr path_count;
         <span data-count="254">a</span>t_bug bug
-      | <span data-count="26655">Y</span>ield (prio, f) -&gt; write_back (prio, f)
-      | <span data-count="13712">C</span>hoice (m1, m2) -&gt;
+      | <span data-count="26869">Y</span>ield (prio, f) -&gt; write_back (prio, f)
+      | <span data-count="13915">C</span>hoice (m1, m2) -&gt;
         at_schedulable m1 write_back;
-        <span data-count="13712">a</span>t_schedulable m2 write_back
+        <span data-count="13915">a</span>t_schedulable m2 write_back
     in
 
     let run_worker () =
       <span data-count="829">F</span>un.protect
-        ~finally:(fun () -&gt; <span data-count="827">B</span>ugs.end_pledge bug_stack)
+        ~finally:(fun () -&gt; <span data-count="828">B</span>ugs.end_pledge bug_stack)
         (fun () -&gt;
           <span data-count="829">t</span>ry
             (* Pull work from the queue as long as it's possible *)
-            Scheduler.work_whil<span data-count="827">e</span>
-              (fun f write_back -&gt; <span data-count="27035">a</span>t_schedulable (<span data-count="27034">f</span> ()) write_back)
+            Scheduler.work_whil<span data-count="828">e</span>
+              (fun f write_back -&gt; <span data-count="27242">a</span>t_schedulable (<span data-count="27241">f</span> ()) write_back)
               sched
           with
           | <span data-count="0">Z</span>3.Error _ when Solver.was_interrupte<span data-count="0">d</span> () -&gt;

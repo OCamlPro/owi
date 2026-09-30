@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8"/>
     <title>cmd_zig.ml &mdash; Coverage report</title>
-    <meta name="description" content="100.00% coverage in src/cmd/cmd_zig.ml">
+    <meta name="description" content="20.00% coverage in src/cmd/cmd_zig.ml">
     <link rel="stylesheet" href="../../coverage.css"/>
     <script src="../../highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
@@ -15,9 +15,17 @@
           <span class="dirname">src/cmd/</span>cmd_zig.ml
         </a>
       </h1>
-      <h2>100.00%</h2>
+      <h2>20.00%</h2>
     </div>
     <div id="navbar">
+      <span class="unvisited" style="top:17.65%"></span>
+      <span class="unvisited" style="top:25.49%"></span>
+      <span class="unvisited" style="top:33.33%"></span>
+      <span class="unvisited" style="top:41.18%"></span>
+      <span class="unvisited" style="bottom:49.02%"></span>
+      <span class="unvisited" style="bottom:39.22%"></span>
+      <span class="unvisited" style="bottom:23.53%"></span>
+      <span class="unvisited" style="bottom:15.69%"></span>
     </div>
     <div id="report">
       <div id="lines-layer">
@@ -30,12 +38,49 @@
 <a id="L6"></a><span > </span>
 <a id="L7"></a><span > </span>
 <a id="L8"></a><span > </span>
-<a id="L9"></a><span class="visited"> </span>
+<a id="L9"></a><span class="unvisited"> </span>
 <a id="L10"></a><span > </span>
 <a id="L11"></a><span > </span>
 <a id="L12"></a><span > </span>
-<a id="L13"></a><span > </span>
-<a id="L14"></a><span class="visited"> </span>
+<a id="L13"></a><span class="unvisited"> </span>
+<a id="L14"></a><span > </span>
+<a id="L15"></a><span > </span>
+<a id="L16"></a><span > </span>
+<a id="L17"></a><span class="unvisited"> </span>
+<a id="L18"></a><span > </span>
+<a id="L19"></a><span > </span>
+<a id="L20"></a><span > </span>
+<a id="L21"></a><span class="unvisited"> </span>
+<a id="L22"></a><span > </span>
+<a id="L23"></a><span > </span>
+<a id="L24"></a><span > </span>
+<a id="L25"></a><span > </span>
+<a id="L26"></a><span class="unvisited"> </span>
+<a id="L27"></a><span > </span>
+<a id="L28"></a><span > </span>
+<a id="L29"></a><span > </span>
+<a id="L30"></a><span > </span>
+<a id="L31"></a><span class="unvisited"> </span>
+<a id="L32"></a><span > </span>
+<a id="L33"></a><span > </span>
+<a id="L34"></a><span > </span>
+<a id="L35"></a><span > </span>
+<a id="L36"></a><span > </span>
+<a id="L37"></a><span > </span>
+<a id="L38"></a><span > </span>
+<a id="L39"></a><span class="unvisited"> </span>
+<a id="L40"></a><span > </span>
+<a id="L41"></a><span > </span>
+<a id="L42"></a><span > </span>
+<a id="L43"></a><span class="unvisited"> </span>
+<a id="L44"></a><span > </span>
+<a id="L45"></a><span > </span>
+<a id="L46"></a><span > </span>
+<a id="L47"></a><span class="visited"> </span>
+<a id="L48"></a><span > </span>
+<a id="L49"></a><span > </span>
+<a id="L50"></a><span > </span>
+<a id="L51"></a><span class="visited"> </span>
 </pre>
       </div>
       <div id="text-layer">
@@ -54,6 +99,43 @@
 <a href="#L12">12</a>
 <a href="#L13">13</a>
 <a href="#L14">14</a>
+<a href="#L15">15</a>
+<a href="#L16">16</a>
+<a href="#L17">17</a>
+<a href="#L18">18</a>
+<a href="#L19">19</a>
+<a href="#L20">20</a>
+<a href="#L21">21</a>
+<a href="#L22">22</a>
+<a href="#L23">23</a>
+<a href="#L24">24</a>
+<a href="#L25">25</a>
+<a href="#L26">26</a>
+<a href="#L27">27</a>
+<a href="#L28">28</a>
+<a href="#L29">29</a>
+<a href="#L30">30</a>
+<a href="#L31">31</a>
+<a href="#L32">32</a>
+<a href="#L33">33</a>
+<a href="#L34">34</a>
+<a href="#L35">35</a>
+<a href="#L36">36</a>
+<a href="#L37">37</a>
+<a href="#L38">38</a>
+<a href="#L39">39</a>
+<a href="#L40">40</a>
+<a href="#L41">41</a>
+<a href="#L42">42</a>
+<a href="#L43">43</a>
+<a href="#L44">44</a>
+<a href="#L45">45</a>
+<a href="#L46">46</a>
+<a href="#L47">47</a>
+<a href="#L48">48</a>
+<a href="#L49">49</a>
+<a href="#L50">50</a>
+<a href="#L51">51</a>
 </pre>
 <pre><code class="ocaml">(* SPDX-License-Identifier: AGPL-3.0-or-later *)
 (* Copyright © 2021-2026 OCamlPro *)
@@ -61,13 +143,50 @@
 
 open Syntax
 
+let abs ~debug_trace ~entry_point ~files ~includes ~out_file ~unsafe ~workspace
+    =
+  <span data-count="0">l</span>et* source_file =
+    Compile.Zig.files_to_wasm_file ~entry_point ~files ~includes ~out_file
+      ~workspace
+  in
+  <span data-count="0">C</span>md_wasm_abs.cmd ~debug_trace ~entry_point ~source_file ~unsafe
+
+let fuzz ~entry_point ~files ~includes ~out_file ~rounds ~seed ~timeout
+  ~timeout_instr ~unsafe ~workspace =
+  <span data-count="0">l</span>et* source_file =
+    Compile.Zig.files_to_wasm_file ~entry_point ~files ~includes ~out_file
+      ~workspace
+  in
+  <span data-count="0">C</span>md_wasm_fuzz.cmd ~entry_point ~rounds ~seed ~source_file ~timeout
+    ~timeout_instr ~unsafe
+
+let hunt ~entry_point ~files ~includes ~out_file ~rounds ~seed
+  ~symbolic_parameters ~workspace =
+  <span data-count="0">l</span>et* source_file =
+    Compile.Zig.files_to_wasm_file ~entry_point ~files ~includes ~out_file
+      ~workspace
+  in
+  (* TODO: move these 3 out of symbolic param and put them in a dedicated monadic_interpreter_parameters ? *)
+  <span data-count="0">l</span>et { Symbolic_parameters.timeout; timeout_instr; unsafe; _ } =
+    symbolic_parameters
+  in
+  Cmd_wasm_hunt.cmd ~entry_point ~rounds ~seed ~source_file ~symbolic_parameters
+    ~timeout ~timeout_instr ~unsafe ~workspace
+
+let run ~entry_point ~files ~includes ~out_file ~timeout ~timeout_instr ~unsafe
+  ~workspace =
+  <span data-count="0">l</span>et* source_file =
+    Compile.Zig.files_to_wasm_file ~entry_point ~files ~includes ~out_file
+      ~workspace
+  in
+  <span data-count="0">C</span>md_wasm_run.cmd ~source_file ~timeout ~timeout_instr ~unsafe
+
 let sym ~entry_point ~files ~includes ~out_file ~symbolic_parameters ~workspace
-  : unit Result.t =
+    =
   <span data-count="5">l</span>et* source_file =
     Compile.Zig.files_to_wasm_file ~entry_point ~files ~includes ~out_file
       ~workspace
   in
-
   <span data-count="4">C</span>md_wasm_sym.cmd ~entry_point ~source_file ~symbolic_parameters ~workspace
 </code></pre>
       </div>
