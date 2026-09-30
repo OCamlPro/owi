@@ -4,6 +4,9 @@
 
 ## Subcommands
 
+- [`owi go abs`](owi-go-abs.md)
+- [`owi go fuzz`](owi-go-fuzz.md)
+- [`owi go hunt`](owi-go-hunt.md)
 - [`owi go run`](owi-go-run.md)
 - [`owi go sym`](owi-go-sym.md)
 
@@ -17,6 +20,16 @@ SYNOPSIS
        owi go [COMMAND] …
 
 COMMANDS
+       abs [OPTION]… FILE…
+           Run the abstract interpreter.
+
+       fuzz [OPTION]… FILE…
+           Run the fuzzer.
+
+       hunt [OPTION]… FILE…
+           Hunt bugs by combining the fuzzer and the symbolic execution
+           engine.
+
        run [OPTION]… FILE…
            Run the concrete interpreter.
 
