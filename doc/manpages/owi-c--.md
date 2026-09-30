@@ -4,6 +4,7 @@
 
 ## Subcommands
 
+- [`owi c++ run`](owi-c---run.md)
 - [`owi c++ sym`](owi-c---sym.md)
 
 ## Help
@@ -16,6 +17,9 @@ SYNOPSIS
        owi c++ [COMMAND] …
 
 COMMANDS
+       run [OPTION]… FILE…
+           Run the concrete interpreter.
+
        sym [OPTION]… FILE…
            Run the symbolic execution engine on a C++ program.
 

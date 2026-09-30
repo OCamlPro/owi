@@ -449,6 +449,20 @@ end
 module Cpp = struct
   let entry_point = entry_point (Some "main")
 
+  let run =
+    let+ entry_point
+    and+ files
+    and+ includes
+    and+ opt_lvl
+    and+ out_file
+    and+ () = setup_log
+    and+ timeout
+    and+ timeout_instr
+    and+ unsafe
+    and+ workspace in
+    Cmd_cpp.run ~entry_point ~files ~includes ~opt_lvl ~out_file ~timeout
+      ~timeout_instr ~unsafe ~workspace
+
   (* owi c++ sym *)
   let sym =
     let+ arch
@@ -790,7 +804,8 @@ let cli =
         ; cmd "sym" "Run the symbolic execution engine on a C program." C.sym
         ]
     ; group "c++" "Work with C++ programs."
-        [ cmd "sym" "Run the symbolic execution engine on a C++ program."
+        [ cmd "run" "Run the concrete interpreter." Cpp.run
+        ; cmd "sym" "Run the symbolic execution engine on a C++ program."
             Cpp.sym
         ]
     ; group "go" "Work with Go programs."
