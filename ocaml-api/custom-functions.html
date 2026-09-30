@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "frappe";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-8eec2347.js";
+            window.path_to_searchindex_js = "../searchindex-fddf6089.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-653e0b4c.js"></script>
@@ -220,7 +220,7 @@
 let extern_module : Concrete_extern.Module.t =
   (* some custom functions *)
   let rint : Concrete_i32.t ref Type.Id.t = Type.Id.make () in
-  let fresh i = Concrete_choice.return (ref i) in
+  let fresh_rint i = Concrete_choice.return (ref i) in
   let set r (i : Concrete_i32.t) =
     r := i;
     Concrete_choice.return ()
@@ -234,7 +234,7 @@ let extern_module : Concrete_extern.Module.t =
   let open Concrete_extern.Func in
   let open Concrete_extern.Func.Syntax in
   [ ("print_i32", Extern_func (i32 ^-&gt;. unit, print_i32))
-  ; ("fresh", Extern_func (i32 ^-&gt;. externref rint, fresh))
+  ; ("fresh", Extern_func (i32 ^-&gt;. externref rint, fresh_rint))
   ; ("set_i32r", Extern_func (externref rint ^-&gt; i32 ^-&gt;. unit, set))
   ; ("get_i32r", Extern_func (externref rint ^-&gt;. i32, get))
   ]

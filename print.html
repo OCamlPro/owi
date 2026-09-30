@@ -37,7 +37,7 @@
             const path_to_root = "";
             const default_light_theme = "frappe";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-8eec2347.js";
+            window.path_to_searchindex_js = "searchindex-fddf6089.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-653e0b4c.js"></script>
@@ -1994,6 +1994,11 @@ module I :
     val modul :
       env:Env.Concrete.t -&gt;
       modul:Env.Concrete.modul -&gt; Env.Concrete.t Concrete_choice.t
+    val exec_vfunc_from_outside :
+      env:Env.Concrete.t -&gt;
+      locals:Owi.Concrete_value.t list -&gt;
+      Concrete_extern.Func.t Kind.func -&gt;
+      (Env.Concrete.t * Owi.Concrete_value.t list) Concrete_choice.t
   end
 # let to_run = I.modul ~env ~modul
 mdx_gen.bc.exe: [INFO] interpreting ...
@@ -2060,7 +2065,7 @@ mdx_gen.bc.exe: [INFO] running instr : drop (executed 0 times)
 let extern_module : Concrete_extern.Module.t =
   (* some custom functions *)
   let rint : Concrete_i32.t ref Type.Id.t = Type.Id.make () in
-  let fresh i = Concrete_choice.return (ref i) in
+  let fresh_rint i = Concrete_choice.return (ref i) in
   let set r (i : Concrete_i32.t) =
     r := i;
     Concrete_choice.return ()
@@ -2074,7 +2079,7 @@ let extern_module : Concrete_extern.Module.t =
   let open Concrete_extern.Func in
   let open Concrete_extern.Func.Syntax in
   [ ("print_i32", Extern_func (i32 ^-&gt;. unit, print_i32))
-  ; ("fresh", Extern_func (i32 ^-&gt;. externref rint, fresh))
+  ; ("fresh", Extern_func (i32 ^-&gt;. externref rint, fresh_rint))
   ; ("set_i32r", Extern_func (externref rint ^-&gt; i32 ^-&gt;. unit, set))
   ; ("get_i32r", Extern_func (externref rint ^-&gt;. i32, get))
   ]

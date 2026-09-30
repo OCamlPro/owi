@@ -36,7 +36,7 @@
             const path_to_root = "../";
             const default_light_theme = "frappe";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-8eec2347.js";
+            window.path_to_searchindex_js = "../searchindex-fddf6089.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-653e0b4c.js"></script>
@@ -211,6 +211,11 @@ module I :
     val modul :
       env:Env.Concrete.t -&gt;
       modul:Env.Concrete.modul -&gt; Env.Concrete.t Concrete_choice.t
+    val exec_vfunc_from_outside :
+      env:Env.Concrete.t -&gt;
+      locals:Owi.Concrete_value.t list -&gt;
+      Concrete_extern.Func.t Kind.func -&gt;
+      (Env.Concrete.t * Owi.Concrete_value.t list) Concrete_choice.t
   end
 # let to_run = I.modul ~env ~modul
 mdx_gen.bc.exe: [INFO] interpreting ...
