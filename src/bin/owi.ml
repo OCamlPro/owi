@@ -809,7 +809,6 @@ module Version = struct
 end
 
 (* owi wasm *)
-
 module Wasm = struct
   let entry_point = entry_point None
 
@@ -1011,11 +1010,56 @@ end
 module Zig = struct
   let entry_point = entry_point (Some "_start")
 
+  (* owi zig abs *)
+  let abs =
+    let+ debug_trace
+    and+ entry_point
+    and+ files
+    and+ includes
+    and+ out_file
+    and+ () = setup_log
+    and+ unsafe
+    and+ workspace in
+    Cmd_zig.abs ~debug_trace ~entry_point ~files ~includes ~out_file ~unsafe
+      ~workspace
+
+  (* owi zig fuzz *)
+  let fuzz =
+    let+ entry_point
+    and+ files
+    and+ includes
+    and+ out_file
+    and+ rounds
+    and+ seed
+    and+ () = setup_log
+    and+ timeout
+    and+ timeout_instr
+    and+ unsafe
+    and+ workspace in
+    Cmd_zig.fuzz ~entry_point ~files ~includes ~out_file ~rounds ~seed ~timeout
+      ~timeout_instr ~unsafe ~workspace
+
+  (* owi zig hunt *)
+  let hunt =
+    let+ entry_point
+    and+ files
+    and+ includes
+    and+ out_file
+    and+ rounds
+    and+ seed
+    and+ () = setup_log
+    and+ symbolic_parameters
+    and+ workspace in
+    Cmd_zig.hunt ~entry_point ~files ~includes ~out_file ~rounds ~seed
+      ~symbolic_parameters ~workspace
+
+  (* owi zig run *)
   let run =
     let+ entry_point
     and+ files
     and+ includes
     and+ out_file
+    and+ () = setup_log
     and+ timeout
     and+ timeout_instr
     and+ unsafe
@@ -1174,7 +1218,13 @@ let cli =
             Wasm.of_wat
         ]
     ; group "zig" "Work with Zig programs."
-        [ cmd "run" "Run the concrete interpreter." Zig.run
+        [ cmd "abs" "Run the abstract interpreter." Zig.abs
+        ; cmd "fuzz" "Run the fuzzer." Zig.fuzz
+        ; cmd "hunt"
+            "Hunt bugs by combining the fuzzer and the symbolic execution \
+             engine."
+            Zig.hunt
+        ; cmd "run" "Run the concrete interpreter." Zig.run
         ; cmd "sym" "Run the symbolic execution engine on a Zig program."
             Zig.sym
         ]

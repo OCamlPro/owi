@@ -1,15 +1,15 @@
-[owi](owi.md) › [owi zig](owi-zig.md) › **owi zig run**
+[owi](owi.md) › [owi zig](owi-zig.md) › **owi zig fuzz**
 
-# owi zig run
+# owi zig fuzz
 
 ## Help
 
 ```text
 NAME
-       owi-zig-run - Run the concrete interpreter.
+       owi-zig-fuzz - Run the fuzzer.
 
 SYNOPSIS
-       owi zig run [OPTION]… FILE…
+       owi zig fuzz [OPTION]… FILE…
 
 ARGUMENTS
        FILE (required)
@@ -24,6 +24,12 @@ OPTIONS
 
        -o FILE, --output=FILE
            Output the generated .wasm or .wat to FILE.
+
+       --rounds=I
+           Stop after a number of fuzzing rounds.
+
+       --seed=I
+           Initial seed for the PRNG state
 
        --timeout=S
            Stop execution after S seconds.
@@ -64,7 +70,7 @@ COMMON OPTIONS
            Show version information.
 
 EXIT STATUS
-       owi zig run exits with:
+       owi zig fuzz exits with:
 
        0   on success.
 
@@ -75,7 +81,7 @@ EXIT STATUS
        125 on unexpected internal errors (bugs).
 
 ENVIRONMENT
-       These environment variables affect the execution of owi zig run:
+       These environment variables affect the execution of owi zig fuzz:
 
        OWI_VERBOSITY
            See option --verbosity.

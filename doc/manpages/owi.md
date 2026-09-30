@@ -62,6 +62,9 @@
   - [`owi wasm to_wat`](owi-wasm-to_wat.md)
   - [`owi wasm validate`](owi-wasm-validate.md)
 - [`owi zig`](owi-zig.md)
+  - [`owi zig abs`](owi-zig-abs.md)
+  - [`owi zig fuzz`](owi-zig-fuzz.md)
+  - [`owi zig hunt`](owi-zig-hunt.md)
   - [`owi zig run`](owi-zig-run.md)
   - [`owi zig sym`](owi-zig-sym.md)
 

@@ -1,21 +1,24 @@
-[owi](owi.md) › [owi zig](owi-zig.md) › **owi zig run**
+[owi](owi.md) › [owi zig](owi-zig.md) › **owi zig abs**
 
-# owi zig run
+# owi zig abs
 
 ## Help
 
 ```text
 NAME
-       owi-zig-run - Run the concrete interpreter.
+       owi-zig-abs - Run the abstract interpreter.
 
 SYNOPSIS
-       owi zig run [OPTION]… FILE…
+       owi zig abs [OPTION]… FILE…
 
 ARGUMENTS
        FILE (required)
            source files
 
 OPTIONS
+       --debug-trace=FILE
+           output debug traces to use with the debug GUI
+
        --entry-point=FUNCTION (absent=_start)
            entry point of the executable
 
@@ -24,12 +27,6 @@ OPTIONS
 
        -o FILE, --output=FILE
            Output the generated .wasm or .wat to FILE.
-
-       --timeout=S
-           Stop execution after S seconds.
-
-       --timeout-instr=I
-           Stop execution after running I instructions.
 
        -u, --unsafe
            skip typechecking pass
@@ -64,7 +61,7 @@ COMMON OPTIONS
            Show version information.
 
 EXIT STATUS
-       owi zig run exits with:
+       owi zig abs exits with:
 
        0   on success.
 
@@ -75,7 +72,7 @@ EXIT STATUS
        125 on unexpected internal errors (bugs).
 
 ENVIRONMENT
-       These environment variables affect the execution of owi zig run:
+       These environment variables affect the execution of owi zig abs:
 
        OWI_VERBOSITY
            See option --verbosity.
