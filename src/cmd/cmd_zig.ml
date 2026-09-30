@@ -4,11 +4,18 @@
 
 open Syntax
 
-let sym ~entry_point ~files ~includes ~out_file ~symbolic_parameters ~workspace
-  : unit Result.t =
+let run ~entry_point ~files ~includes ~out_file ~timeout ~timeout_instr ~unsafe
+  ~workspace =
   let* source_file =
     Compile.Zig.files_to_wasm_file ~entry_point ~files ~includes ~out_file
       ~workspace
   in
+  Cmd_wasm_run.cmd ~source_file ~timeout ~timeout_instr ~unsafe
 
+let sym ~entry_point ~files ~includes ~out_file ~symbolic_parameters ~workspace
+    =
+  let* source_file =
+    Compile.Zig.files_to_wasm_file ~entry_point ~files ~includes ~out_file
+      ~workspace
+  in
   Cmd_wasm_sym.cmd ~entry_point ~source_file ~symbolic_parameters ~workspace
