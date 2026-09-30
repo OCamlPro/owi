@@ -4,6 +4,9 @@
 
 ## Subcommands
 
+- [`owi c++ abs`](owi-c---abs.md)
+- [`owi c++ fuzz`](owi-c---fuzz.md)
+- [`owi c++ hunt`](owi-c---hunt.md)
 - [`owi c++ run`](owi-c---run.md)
 - [`owi c++ sym`](owi-c---sym.md)
 
@@ -17,6 +20,16 @@ SYNOPSIS
        owi c++ [COMMAND] …
 
 COMMANDS
+       abs [OPTION]… FILE…
+           Run the abstract interpreter.
+
+       fuzz [OPTION]… FILE…
+           Run the fuzzer.
+
+       hunt [OPTION]… FILE…
+           Hunt bugs by combining the fuzzer and the symbolic execution
+           engine.
+
        run [OPTION]… FILE…
            Run the concrete interpreter.
 

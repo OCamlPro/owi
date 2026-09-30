@@ -1,0 +1,132 @@
+[owi](owi.md) › [owi c++](owi-c--.md) › **owi c++ hunt**
+
+# owi c++ hunt
+
+## Help
+
+```text
+NAME
+       owi-c++-hunt - Hunt bugs by combining the fuzzer and the symbolic
+       execution engine.
+
+SYNOPSIS
+       owi c++ hunt [OPTION]… FILE…
+
+ARGUMENTS
+       FILE (required)
+           source files
+
+OPTIONS
+       --deterministic-result-order
+           Guarantee a fixed deterministic order of found failures. This
+           implies --no-stop-at-failure.
+
+       --entry-point=FUNCTION (absent=main)
+           entry point of the executable
+
+       --exploration=VALUE (absent=fifo)
+           exploration strategy to use ("fifo", "lifo", "random",
+           "random-unseen-then-random", "rarity", "hot-path-penalty",
+           "rarity-aging", "rarity-depth-aging", "rarity-depth-loop-aging",
+           "rarity-depth-loop-aging-random")
+
+       --fail-on-assertion-only
+           ignore traps and only report assertion violations
+
+       --fail-on-trap-only
+           ignore assertion violations and only report traps
+
+       --generate-abstract-invariant
+           Generate invariants by running the abstract interpretation engine.
+
+       -I VALUE
+           headers path
+
+       --invoke-with-symbols
+           Invoke the entry point of the program with symbolic values instead
+           of dummy constants.
+
+       --model-format=VALUE (absent=scfg)
+            The format of the model ("json" or "scfg") 
+
+       --model-out-file=FILE
+           Output the generated model to FILE. if --no-stop-at-failure is
+           given this is used as a prefix and the ouputed files would have
+           PREFIX_%d.
+
+       --no-assert-failure-expression-printing
+           do not display the expression in the assert failure
+
+       --no-ite-for-select
+           do not use ite for select
+
+       --no-stop-at-failure
+           do not stop when a program failure is encountered
+
+       --no-value
+           do not display a value for each symbol
+
+       --no-worker-isolation
+           Do not force each worker to run on an isolated physical core.
+
+       -o FILE, --output=FILE
+           Output the generated .wasm or .wat to FILE.
+
+       -O VAL (absent=3)
+           specify which optimization level to use
+
+       --rounds=I
+           Stop after a number of fuzzing rounds.
+
+       -s VALUE, --solver=VALUE (absent=Z3)
+           SMT solver to use. VALUE must be one of the 6 available solvers:
+           Z3, Bitwuzla, Colibri2, cvc5, Alt-Ergo, SMTZilla
+
+       --seed=I
+           Initial seed for the PRNG state
+
+       --timeout=S
+           Stop execution after S seconds.
+
+       --timeout-instr=I
+           Stop execution after running I instructions.
+
+       -u, --unsafe
+           skip typechecking pass
+
+       -w INT, --workers=INT (absent=n)
+           Number of workers for symbolic execution. Defaults to the number
+           of physical cores.
+
+       --with-breadcrumbs
+           add breadcrumbs to the generated model
+
+       --workspace=DIR
+           write results and intermediate compilation artifacts to dir
+
+COMMON OPTIONS
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
+           whenever the TERM env var is dumb or undefined.
+
+       --version
+           Show version information.
+
+EXIT STATUS
+       owi c++ hunt exits with:
+
+       0   on success.
+
+       123 on indiscriminate errors reported on standard error.
+
+       124 on command line parsing errors.
+
+       125 on unexpected internal errors (bugs).
+
+BUGS
+       Email them to <owi.wildcat119@passmail.com>.
+
+SEE ALSO
+       owi(1)
+```
