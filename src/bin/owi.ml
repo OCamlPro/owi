@@ -523,6 +523,71 @@ module Cpp = struct
       ~symbolic_parameters ~workspace
 end
 
+(* owi go *)
+module Go = struct
+  let entry_point = entry_point (Some "_start")
+
+  (* owi go abs *)
+  let abs =
+    let+ debug_trace
+    and+ entry_point
+    and+ files
+    and+ out_file
+    and+ () = setup_log
+    and+ unsafe
+    and+ workspace in
+    Cmd_go.abs ~debug_trace ~entry_point ~files ~out_file ~unsafe ~workspace
+
+  (* owi go fuzz *)
+  let fuzz =
+    let+ entry_point
+    and+ files
+    and+ out_file
+    and+ rounds
+    and+ seed
+    and+ () = setup_log
+    and+ timeout
+    and+ timeout_instr
+    and+ unsafe
+    and+ workspace in
+    Cmd_go.fuzz ~entry_point ~files ~out_file ~rounds ~seed ~timeout
+      ~timeout_instr ~unsafe ~workspace
+
+  (* owi go hunt *)
+  let hunt =
+    let+ entry_point
+    and+ files
+    and+ out_file
+    and+ rounds
+    and+ seed
+    and+ () = setup_log
+    and+ symbolic_parameters
+    and+ workspace in
+    Cmd_go.hunt ~entry_point ~files ~out_file ~rounds ~seed ~symbolic_parameters
+      ~workspace
+
+  (* owi go run *)
+  let run =
+    let+ files
+    and+ out_file
+    and+ () = setup_log
+    and+ timeout
+    and+ timeout_instr
+    and+ unsafe
+    and+ workspace in
+    Cmd_go.run ~files ~out_file ~timeout ~timeout_instr ~unsafe ~workspace
+
+  (* owi go sym *)
+  let sym =
+    let+ entry_point
+    and+ files
+    and+ out_file
+    and+ () = setup_log
+    and+ symbolic_parameters
+    and+ workspace in
+    Cmd_go.sym ~entry_point ~files ~out_file ~symbolic_parameters ~workspace
+end
+
 (* owi haskell *)
 module Haskell = struct
   let entry_point = entry_point (Some "_start")
@@ -609,32 +674,6 @@ module Rust = struct
 
     Cmd_rust.sym ~arch ~entry_point ~files ~includes ~opt_lvl ~out_file
       ~symbolic_parameters ~workspace
-end
-
-(* owi go *)
-module Go = struct
-  let entry_point = entry_point (Some "_start")
-
-  (* owi go run *)
-  let run =
-    let+ files
-    and+ out_file
-    and+ () = setup_log
-    and+ timeout
-    and+ timeout_instr
-    and+ unsafe
-    and+ workspace in
-    Cmd_go.run ~files ~out_file ~timeout ~timeout_instr ~unsafe ~workspace
-
-  (* owi go sym *)
-  let sym =
-    let+ entry_point
-    and+ files
-    and+ out_file
-    and+ () = setup_log
-    and+ symbolic_parameters
-    and+ workspace in
-    Cmd_go.sym ~entry_point ~files ~out_file ~symbolic_parameters ~workspace
 end
 
 (* owi version *)
@@ -919,7 +958,13 @@ let cli =
             Cpp.sym
         ]
     ; group "go" "Work with Go programs."
-        [ cmd "run" "Run the concrete interpreter." Go.run
+        [ cmd "abs" "Run the abstract interpreter." Go.abs
+        ; cmd "fuzz" "Run the fuzzer." Go.fuzz
+        ; cmd "hunt"
+            "Hunt bugs by combining the fuzzer and the symbolic execution \
+             engine."
+            Go.hunt
+        ; cmd "run" "Run the concrete interpreter." Go.run
         ; cmd "sym" "Run the symbolic execution engine on a Go program." Go.sym
         ]
     ; group "haskell" "Work with Haskell programs."
