@@ -534,6 +534,16 @@ end
 module Go = struct
   let entry_point = entry_point (Some "_start")
 
+  let run =
+    let+ files
+    and+ out_file
+    and+ () = setup_log
+    and+ timeout
+    and+ timeout_instr
+    and+ unsafe
+    and+ workspace in
+    Cmd_go.run ~files ~out_file ~timeout ~timeout_instr ~unsafe ~workspace
+
   (* owi go sym *)
   let sym =
     let+ entry_point
@@ -809,7 +819,8 @@ let cli =
             Cpp.sym
         ]
     ; group "go" "Work with Go programs."
-        [ cmd "sym" "Run the symbolic execution engine on a Go program." Go.sym
+        [ cmd "run" "Run the concrete interpreter." Go.run
+        ; cmd "sym" "Run the symbolic execution engine on a Go program." Go.sym
         ]
     ; group "haskell" "Work with Haskell programs."
         [ cmd "sym" "Run the symbolic execution engine on a Haskell program."

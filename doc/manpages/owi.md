@@ -13,6 +13,7 @@
   - [`owi c++ run`](owi-c---run.md)
   - [`owi c++ sym`](owi-c---sym.md)
 - [`owi go`](owi-go.md)
+  - [`owi go run`](owi-go-run.md)
   - [`owi go sym`](owi-go-sym.md)
 - [`owi haskell`](owi-haskell.md)
   - [`owi haskell sym`](owi-haskell-sym.md)
