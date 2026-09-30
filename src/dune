@@ -128,7 +128,6 @@
   model
   multicore
   origin
-  owi
   parse
   prio
   priority_queue

@@ -217,6 +217,10 @@
 
 %{
 
+(* dune sucks, see: https://github.com/ocaml/dune/issues/2450 *)
+module Owi = struct end
+include Owi
+
 open Wast
 open Text
 

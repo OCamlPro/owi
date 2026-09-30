@@ -37,6 +37,11 @@ module I :
     val modul :
       env:Env.Concrete.t ->
       modul:Env.Concrete.modul -> Env.Concrete.t Concrete_choice.t
+    val exec_vfunc_from_outside :
+      env:Env.Concrete.t ->
+      locals:Owi.Concrete_value.t list ->
+      Concrete_extern.Func.t Kind.func ->
+      (Env.Concrete.t * Owi.Concrete_value.t list) Concrete_choice.t
   end
 # let to_run = I.modul ~env ~modul
 mdx_gen.bc.exe: [INFO] interpreting ...

@@ -4,7 +4,7 @@ open Owi
 let extern_module : Concrete_extern.Module.t =
   (* some custom functions *)
   let rint : Concrete_i32.t ref Type.Id.t = Type.Id.make () in
-  let fresh i = Concrete_choice.return (ref i) in
+  let fresh_rint i = Concrete_choice.return (ref i) in
   let set r (i : Concrete_i32.t) =
     r := i;
     Concrete_choice.return ()
@@ -18,7 +18,7 @@ let extern_module : Concrete_extern.Module.t =
   let open Concrete_extern.Func in
   let open Concrete_extern.Func.Syntax in
   [ ("print_i32", Extern_func (i32 ^->. unit, print_i32))
-  ; ("fresh", Extern_func (i32 ^->. externref rint, fresh))
+  ; ("fresh", Extern_func (i32 ^->. externref rint, fresh_rint))
   ; ("set_i32r", Extern_func (externref rint ^-> i32 ^->. unit, set))
   ; ("get_i32r", Extern_func (externref rint ^->. i32, get))
   ]
