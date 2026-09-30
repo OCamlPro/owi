@@ -19,6 +19,7 @@
   - [`owi haskell run`](owi-haskell-run.md)
   - [`owi haskell sym`](owi-haskell-sym.md)
 - [`owi llvm`](owi-llvm.md)
+  - [`owi llvm run`](owi-llvm-run.md)
   - [`owi llvm sym`](owi-llvm-sym.md)
 - [`owi rust`](owi-rust.md)
   - [`owi rust sym`](owi-rust-sym.md)

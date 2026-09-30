@@ -510,6 +510,19 @@ end
 module Llvm = struct
   let entry_point = entry_point None
 
+  (* owi llvm run *)
+  let run =
+    let+ entry_point
+    and+ files
+    and+ out_file
+    and+ () = setup_log
+    and+ timeout
+    and+ timeout_instr
+    and+ unsafe
+    and+ workspace in
+    Cmd_llvm.run ~entry_point ~files ~out_file ~timeout ~timeout_instr ~unsafe
+      ~workspace
+
   (* owi llvm sym *)
   let sym =
     let+ entry_point
@@ -840,7 +853,8 @@ let cli =
             Haskell.sym
         ]
     ; group "llvm" "Work with LLVM programs."
-        [ cmd "sym" "Run the symbolic execution engine on a LLVM program."
+        [ cmd "run" "Run the concrete interpreter." Llvm.run
+        ; cmd "sym" "Run the symbolic execution engine on a LLVM program."
             Llvm.sym
         ]
     ; group "rust" "Work with Rust programs."
