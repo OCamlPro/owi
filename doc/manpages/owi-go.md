@@ -4,6 +4,7 @@
 
 ## Subcommands
 
+- [`owi go run`](owi-go-run.md)
 - [`owi go sym`](owi-go-sym.md)
 
 ## Help
@@ -16,6 +17,9 @@ SYNOPSIS
        owi go [COMMAND] …
 
 COMMANDS
+       run [OPTION]… FILE…
+           Run the concrete interpreter.
+
        sym [OPTION]… FILE…
            Run the symbolic execution engine on a Go program.
 
