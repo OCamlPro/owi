@@ -726,6 +726,50 @@ end
 module Rust = struct
   let entry_point = entry_point (Some "main")
 
+  (* owi rust abs *)
+  let abs =
+    let+ debug_trace
+    and+ entry_point
+    and+ files
+    and+ includes
+    and+ opt_lvl
+    and+ out_file
+    and+ () = setup_log
+    and+ unsafe in
+    Cmd_rust.abs ~debug_trace ~entry_point ~files ~includes ~opt_lvl ~out_file
+      ~unsafe
+
+  (* owi rust fuzz *)
+  let fuzz =
+    let+ entry_point
+    and+ files
+    and+ includes
+    and+ opt_lvl
+    and+ out_file
+    and+ rounds
+    and+ seed
+    and+ () = setup_log
+    and+ timeout
+    and+ timeout_instr
+    and+ unsafe in
+    Cmd_rust.fuzz ~entry_point ~files ~includes ~opt_lvl ~out_file ~rounds ~seed
+      ~timeout ~timeout_instr ~unsafe
+
+  (* owi rust hunt *)
+  let hunt =
+    let+ entry_point
+    and+ files
+    and+ includes
+    and+ opt_lvl
+    and+ out_file
+    and+ rounds
+    and+ seed
+    and+ () = setup_log
+    and+ symbolic_parameters
+    and+ workspace in
+    Cmd_rust.hunt ~entry_point ~files ~includes ~opt_lvl ~out_file ~rounds ~seed
+      ~symbolic_parameters ~workspace
+
   (* owi rust run *)
   let run =
     let+ entry_point
@@ -1070,7 +1114,13 @@ let cli =
             Llvm.sym
         ]
     ; group "rust" "Work with Rust programs."
-        [ cmd "run" "Run the concrete interpreter." Rust.run
+        [ cmd "abs" "Run the abstract interpreter." Rust.abs
+        ; cmd "fuzz" "Run the fuzzer." Rust.fuzz
+        ; cmd "hunt"
+            "Hunt bugs by combining the fuzzer and the symbolic execution \
+             engine."
+            Rust.hunt
+        ; cmd "run" "Run the concrete interpreter." Rust.run
         ; cmd "sym" "Run the symbolic execution engine on a Rust program."
             Rust.sym
         ]
