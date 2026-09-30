@@ -1,23 +1,32 @@
-[owi](owi.md) › [owi haskell](owi-haskell.md) › **owi haskell run**
+[owi](owi.md) › [owi haskell](owi-haskell.md) › **owi haskell fuzz**
 
-# owi haskell run
+# owi haskell fuzz
 
 ## Help
 
 ```text
 NAME
-       owi-haskell-run - Run the concrete interpreter.
+       owi-haskell-fuzz - Run the fuzzer.
 
 SYNOPSIS
-       owi haskell run [OPTION]… FILE…
+       owi haskell fuzz [OPTION]… FILE…
 
 ARGUMENTS
        FILE (required)
            source files
 
 OPTIONS
+       --entry-point=FUNCTION (absent=_start)
+           entry point of the executable
+
        -o FILE, --output=FILE
            Output the generated .wasm or .wat to FILE.
+
+       --rounds=I
+           Stop after a number of fuzzing rounds.
+
+       --seed=I
+           Initial seed for the PRNG state
 
        --timeout=S
            Stop execution after S seconds.
@@ -58,7 +67,7 @@ COMMON OPTIONS
            Show version information.
 
 EXIT STATUS
-       owi haskell run exits with:
+       owi haskell fuzz exits with:
 
        0   on success.
 
@@ -69,7 +78,7 @@ EXIT STATUS
        125 on unexpected internal errors (bugs).
 
 ENVIRONMENT
-       These environment variables affect the execution of owi haskell run:
+       These environment variables affect the execution of owi haskell fuzz:
 
        OWI_VERBOSITY
            See option --verbosity.

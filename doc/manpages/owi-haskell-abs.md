@@ -1,29 +1,29 @@
-[owi](owi.md) › [owi haskell](owi-haskell.md) › **owi haskell run**
+[owi](owi.md) › [owi haskell](owi-haskell.md) › **owi haskell abs**
 
-# owi haskell run
+# owi haskell abs
 
 ## Help
 
 ```text
 NAME
-       owi-haskell-run - Run the concrete interpreter.
+       owi-haskell-abs - Run the abstract interpreter.
 
 SYNOPSIS
-       owi haskell run [OPTION]… FILE…
+       owi haskell abs [OPTION]… FILE…
 
 ARGUMENTS
        FILE (required)
            source files
 
 OPTIONS
+       --debug-trace=FILE
+           output debug traces to use with the debug GUI
+
+       --entry-point=FUNCTION (absent=_start)
+           entry point of the executable
+
        -o FILE, --output=FILE
            Output the generated .wasm or .wat to FILE.
-
-       --timeout=S
-           Stop execution after S seconds.
-
-       --timeout-instr=I
-           Stop execution after running I instructions.
 
        -u, --unsafe
            skip typechecking pass
@@ -58,7 +58,7 @@ COMMON OPTIONS
            Show version information.
 
 EXIT STATUS
-       owi haskell run exits with:
+       owi haskell abs exits with:
 
        0   on success.
 
@@ -69,7 +69,7 @@ EXIT STATUS
        125 on unexpected internal errors (bugs).
 
 ENVIRONMENT
-       These environment variables affect the execution of owi haskell run:
+       These environment variables affect the execution of owi haskell abs:
 
        OWI_VERBOSITY
            See option --verbosity.

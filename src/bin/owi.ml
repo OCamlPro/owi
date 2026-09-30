@@ -592,10 +592,51 @@ end
 module Haskell = struct
   let entry_point = entry_point (Some "_start")
 
+  (* owi haskell abs *)
+  let abs =
+    let+ debug_trace
+    and+ entry_point
+    and+ files
+    and+ out_file
+    and+ () = setup_log
+    and+ unsafe
+    and+ workspace in
+    Cmd_haskell.abs ~debug_trace ~entry_point ~files ~out_file ~unsafe
+      ~workspace
+
+  (* owi haskell fuzz *)
+  let fuzz =
+    let+ entry_point
+    and+ files
+    and+ out_file
+    and+ rounds
+    and+ seed
+    and+ () = setup_log
+    and+ timeout
+    and+ timeout_instr
+    and+ unsafe
+    and+ workspace in
+    Cmd_haskell.fuzz ~entry_point ~files ~out_file ~rounds ~seed ~timeout
+      ~timeout_instr ~unsafe ~workspace
+
+  (* owi haskell hunt*)
+  let hunt =
+    let+ entry_point
+    and+ files
+    and+ out_file
+    and+ rounds
+    and+ seed
+    and+ () = setup_log
+    and+ symbolic_parameters
+    and+ workspace in
+    Cmd_haskell.hunt ~entry_point ~files ~out_file ~rounds ~seed
+      ~symbolic_parameters ~workspace
+
   (* owi haskell run *)
   let run =
     let+ files
     and+ out_file
+    and+ () = setup_log
     and+ timeout
     and+ timeout_instr
     and+ unsafe
@@ -968,7 +1009,13 @@ let cli =
         ; cmd "sym" "Run the symbolic execution engine on a Go program." Go.sym
         ]
     ; group "haskell" "Work with Haskell programs."
-        [ cmd "run" "Run the concrete interpreter." Haskell.run
+        [ cmd "abs" "Run the abstract interpreter." Haskell.abs
+        ; cmd "fuzz" "Run the fuzzer." Haskell.fuzz
+        ; cmd "hunt"
+            "Hunt bugs by combining the fuzzer and the symbolic execution \
+             engine."
+            Haskell.hunt
+        ; cmd "run" "Run the concrete interpreter." Haskell.run
         ; cmd "sym" "Run the symbolic execution engine on a Haskell program."
             Haskell.sym
         ]
