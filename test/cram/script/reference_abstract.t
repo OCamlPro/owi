@@ -20,8 +20,8 @@ $ owi wasm script abstract --no-exhaustion reference/binary-leb128.wast
 $ owi wasm script abstract --no-exhaustion reference/bulk.wast
 $ owi wasm script abstract --no-exhaustion reference/call_indirect.wast
   $ owi wasm script abstract --no-exhaustion reference/call.wast
-  owi: [ERROR] Owi__Abstract_interpreter_control_flow.RecursiveFunctionCall
-  Exception: Owi__Abstract_interpreter_control_flow.RecursiveFunctionCall
+  owi: [ERROR] Owi.Abstract_interpreter_control_flow.RecursiveFunctionCall
+  Exception: Owi.Abstract_interpreter_control_flow.RecursiveFunctionCall
   Raised at Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_func in file "src/abstract/abstract_interpreter_control_flow.ml", line 285, characters 53-80
   Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 380, characters 18-53
   Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 265, characters 32-54
