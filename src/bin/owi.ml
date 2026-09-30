@@ -659,6 +659,45 @@ end
 module Llvm = struct
   let entry_point = entry_point None
 
+  (* owi llvm abs *)
+  let abs =
+    let+ debug_trace
+    and+ entry_point
+    and+ files
+    and+ out_file
+    and+ () = setup_log
+    and+ unsafe
+    and+ workspace in
+    Cmd_llvm.abs ~debug_trace ~entry_point ~files ~out_file ~unsafe ~workspace
+
+  (* owi llvm fuzz *)
+  let fuzz =
+    let+ entry_point
+    and+ files
+    and+ out_file
+    and+ rounds
+    and+ seed
+    and+ () = setup_log
+    and+ timeout
+    and+ timeout_instr
+    and+ unsafe
+    and+ workspace in
+    Cmd_llvm.fuzz ~entry_point ~files ~out_file ~rounds ~seed ~timeout
+      ~timeout_instr ~unsafe ~workspace
+
+  (* owi llvm hunt *)
+  let hunt =
+    let+ entry_point
+    and+ files
+    and+ out_file
+    and+ rounds
+    and+ seed
+    and+ () = setup_log
+    and+ symbolic_parameters
+    and+ workspace in
+    Cmd_llvm.hunt ~entry_point ~files ~out_file ~rounds ~seed
+      ~symbolic_parameters ~workspace
+
   (* owi llvm run *)
   let run =
     let+ entry_point
@@ -1020,7 +1059,13 @@ let cli =
             Haskell.sym
         ]
     ; group "llvm" "Work with LLVM programs."
-        [ cmd "run" "Run the concrete interpreter." Llvm.run
+        [ cmd "abs" "Run the abstract interpreter." Llvm.abs
+        ; cmd "fuzz" "Run the fuzzer." Llvm.fuzz
+        ; cmd "hunt"
+            "Hunt bugs by combining the fuzzer and the symbolic execution \
+             engine."
+            Llvm.hunt
+        ; cmd "run" "Run the concrete interpreter." Llvm.run
         ; cmd "sym" "Run the symbolic execution engine on a LLVM program."
             Llvm.sym
         ]

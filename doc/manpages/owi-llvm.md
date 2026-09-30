@@ -4,6 +4,9 @@
 
 ## Subcommands
 
+- [`owi llvm abs`](owi-llvm-abs.md)
+- [`owi llvm fuzz`](owi-llvm-fuzz.md)
+- [`owi llvm hunt`](owi-llvm-hunt.md)
 - [`owi llvm run`](owi-llvm-run.md)
 - [`owi llvm sym`](owi-llvm-sym.md)
 
@@ -17,6 +20,16 @@ SYNOPSIS
        owi llvm [COMMAND] …
 
 COMMANDS
+       abs [OPTION]… FILE…
+           Run the abstract interpreter.
+
+       fuzz [OPTION]… FILE…
+           Run the fuzzer.
+
+       hunt [OPTION]… FILE…
+           Hunt bugs by combining the fuzzer and the symbolic execution
+           engine.
+
        run [OPTION]… FILE…
            Run the concrete interpreter.
 
