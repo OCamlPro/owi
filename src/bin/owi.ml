@@ -449,6 +449,49 @@ end
 module Cpp = struct
   let entry_point = entry_point (Some "main")
 
+  (* owi c++ abs *)
+  let abs =
+    let+ debug_trace
+    and+ entry_point
+    and+ files
+    and+ includes
+    and+ opt_lvl
+    and+ out_file
+    and+ unsafe
+    and+ workspace in
+    Cmd_cpp.abs ~debug_trace ~entry_point ~files ~includes ~opt_lvl ~out_file
+      ~unsafe ~workspace
+
+  (* owi c++ fuzz *)
+  let fuzz =
+    let+ entry_point
+    and+ files
+    and+ includes
+    and+ opt_lvl
+    and+ out_file
+    and+ rounds
+    and+ seed
+    and+ timeout
+    and+ timeout_instr
+    and+ unsafe
+    and+ workspace in
+    Cmd_cpp.fuzz ~entry_point ~files ~includes ~opt_lvl ~out_file ~rounds ~seed
+      ~timeout ~timeout_instr ~unsafe ~workspace
+
+  (* owi c++ hunt *)
+  let hunt =
+    let+ entry_point
+    and+ files
+    and+ includes
+    and+ opt_lvl
+    and+ out_file
+    and+ rounds
+    and+ seed
+    and+ symbolic_parameters
+    and+ workspace in
+    Cmd_cpp.hunt ~entry_point ~files ~includes ~opt_lvl ~out_file ~rounds ~seed
+      ~symbolic_parameters ~workspace
+
   (* owi c++ run *)
   let run =
     let+ entry_point
@@ -865,7 +908,13 @@ let cli =
         ; cmd "sym" "Run the symbolic execution engine on a C program." C.sym
         ]
     ; group "c++" "Work with C++ programs."
-        [ cmd "run" "Run the concrete interpreter." Cpp.run
+        [ cmd "abs" "Run the abstract interpreter." Cpp.abs
+        ; cmd "fuzz" "Run the fuzzer." Cpp.fuzz
+        ; cmd "hunt"
+            "Hunt bugs by combining the fuzzer and the symbolic execution \
+             engine."
+            Cpp.hunt
+        ; cmd "run" "Run the concrete interpreter." Cpp.run
         ; cmd "sym" "Run the symbolic execution engine on a C++ program."
             Cpp.sym
         ]
