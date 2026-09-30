@@ -4,6 +4,9 @@
 
 ## Subcommands
 
+- [`owi rust abs`](owi-rust-abs.md)
+- [`owi rust fuzz`](owi-rust-fuzz.md)
+- [`owi rust hunt`](owi-rust-hunt.md)
 - [`owi rust run`](owi-rust-run.md)
 - [`owi rust sym`](owi-rust-sym.md)
 
@@ -17,6 +20,16 @@ SYNOPSIS
        owi rust [COMMAND] …
 
 COMMANDS
+       abs [OPTION]… FILE…
+           Run the abstract interpreter.
+
+       fuzz [OPTION]… FILE…
+           Run the fuzzer.
+
+       hunt [OPTION]… FILE…
+           Hunt bugs by combining the fuzzer and the symbolic execution
+           engine.
+
        run [OPTION]… FILE…
            Run the concrete interpreter.
 
