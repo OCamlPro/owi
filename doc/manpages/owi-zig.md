@@ -4,6 +4,9 @@
 
 ## Subcommands
 
+- [`owi zig abs`](owi-zig-abs.md)
+- [`owi zig fuzz`](owi-zig-fuzz.md)
+- [`owi zig hunt`](owi-zig-hunt.md)
 - [`owi zig run`](owi-zig-run.md)
 - [`owi zig sym`](owi-zig-sym.md)
 
@@ -17,6 +20,16 @@ SYNOPSIS
        owi zig [COMMAND] …
 
 COMMANDS
+       abs [OPTION]… FILE…
+           Run the abstract interpreter.
+
+       fuzz [OPTION]… FILE…
+           Run the fuzzer.
+
+       hunt [OPTION]… FILE…
+           Hunt bugs by combining the fuzzer and the symbolic execution
+           engine.
+
        run [OPTION]… FILE…
            Run the concrete interpreter.
 
