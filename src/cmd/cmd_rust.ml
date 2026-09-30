@@ -4,9 +4,17 @@
 
 open Syntax
 
+let run ~entry_point ~files ~includes ~opt_lvl ~out_file ~timeout ~timeout_instr
+  ~unsafe =
+  let* source_file =
+    Compile.Rust.files_to_wasm_file ~entry_point ~files ~includes ~opt_lvl
+      ~out_file
+  in
+  Cmd_wasm_run.cmd ~source_file ~timeout ~timeout_instr ~unsafe
+
 (* TODO: use arch *)
 let sym ~arch:_ ~entry_point ~files ~includes ~opt_lvl ~out_file
-  ~symbolic_parameters ~workspace : unit Result.t =
+  ~symbolic_parameters ~workspace =
   let* source_file =
     Compile.Rust.files_to_wasm_file ~entry_point ~files ~includes ~opt_lvl
       ~out_file
