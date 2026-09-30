@@ -16,6 +16,7 @@
   - [`owi go run`](owi-go-run.md)
   - [`owi go sym`](owi-go-sym.md)
 - [`owi haskell`](owi-haskell.md)
+  - [`owi haskell run`](owi-haskell-run.md)
   - [`owi haskell sym`](owi-haskell-sym.md)
 - [`owi llvm`](owi-llvm.md)
   - [`owi llvm sym`](owi-llvm-sym.md)

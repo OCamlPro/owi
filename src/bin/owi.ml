@@ -449,6 +449,7 @@ end
 module Cpp = struct
   let entry_point = entry_point (Some "main")
 
+  (* owi c++ run *)
   let run =
     let+ entry_point
     and+ files
@@ -482,6 +483,16 @@ end
 (* owi haskell *)
 module Haskell = struct
   let entry_point = entry_point (Some "_start")
+
+  (* owi haskell run *)
+  let run =
+    let+ files
+    and+ out_file
+    and+ timeout
+    and+ timeout_instr
+    and+ unsafe
+    and+ workspace in
+    Cmd_haskell.run ~files ~out_file ~timeout ~timeout_instr ~unsafe ~workspace
 
   (* owi haskell sym *)
   let sym =
@@ -534,6 +545,7 @@ end
 module Go = struct
   let entry_point = entry_point (Some "_start")
 
+  (* owi go run *)
   let run =
     let+ files
     and+ out_file
@@ -823,7 +835,8 @@ let cli =
         ; cmd "sym" "Run the symbolic execution engine on a Go program." Go.sym
         ]
     ; group "haskell" "Work with Haskell programs."
-        [ cmd "sym" "Run the symbolic execution engine on a Haskell program."
+        [ cmd "run" "Run the concrete interpreter." Haskell.run
+        ; cmd "sym" "Run the symbolic execution engine on a Haskell program."
             Haskell.sym
         ]
     ; group "llvm" "Work with LLVM programs."

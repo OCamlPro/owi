@@ -4,6 +4,7 @@
 
 ## Subcommands
 
+- [`owi haskell run`](owi-haskell-run.md)
 - [`owi haskell sym`](owi-haskell-sym.md)
 
 ## Help
@@ -16,6 +17,9 @@ SYNOPSIS
        owi haskell [COMMAND] …
 
 COMMANDS
+       run [OPTION]… FILE…
+           Run the concrete interpreter.
+
        sym [OPTION]… FILE…
            Run the symbolic execution engine on a Haskell program.
 
