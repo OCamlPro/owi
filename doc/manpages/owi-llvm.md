@@ -4,6 +4,7 @@
 
 ## Subcommands
 
+- [`owi llvm run`](owi-llvm-run.md)
 - [`owi llvm sym`](owi-llvm-sym.md)
 
 ## Help
@@ -16,6 +17,9 @@ SYNOPSIS
        owi llvm [COMMAND] …
 
 COMMANDS
+       run [OPTION]… FILE…
+           Run the concrete interpreter.
+
        sym [OPTION]… FILE…
            Run the symbolic execution engine on a LLVM program.
 
