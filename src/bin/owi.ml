@@ -805,6 +805,18 @@ end
 module Zig = struct
   let entry_point = entry_point (Some "_start")
 
+  let run =
+    let+ entry_point
+    and+ files
+    and+ includes
+    and+ out_file
+    and+ timeout
+    and+ timeout_instr
+    and+ unsafe
+    and+ workspace in
+    Cmd_zig.run ~entry_point ~files ~includes ~out_file ~timeout ~timeout_instr
+      ~unsafe ~workspace
+
   (* owi zig sym *)
   let sym =
     let+ entry_point
@@ -926,7 +938,8 @@ let cli =
             Wasm.of_wat
         ]
     ; group "zig" "Work with Zig programs."
-        [ cmd "sym" "Run the symbolic execution engine on a Zig program."
+        [ cmd "run" "Run the concrete interpreter." Zig.run
+        ; cmd "sym" "Run the symbolic execution engine on a Zig program."
             Zig.sym
         ]
     ]

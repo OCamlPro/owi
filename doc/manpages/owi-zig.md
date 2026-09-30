@@ -4,6 +4,7 @@
 
 ## Subcommands
 
+- [`owi zig run`](owi-zig-run.md)
 - [`owi zig sym`](owi-zig-sym.md)
 
 ## Help
@@ -16,6 +17,9 @@ SYNOPSIS
        owi zig [COMMAND] …
 
 COMMANDS
+       run [OPTION]… FILE…
+           Run the concrete interpreter.
+
        sym [OPTION]… FILE…
            Run the symbolic execution engine on a Zig program.
 
