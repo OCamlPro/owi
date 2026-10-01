@@ -1,0 +1,35 @@
+name: build-alpine
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: kumikode/owi-ci:alpine-latest
+      options: --user root
+    steps:
+      - name: test
+        run: |
+          set -x
+
+          git clone https://github.com/${{ github.repository }}.git
+          cd $(basename ${{ github.repository }})
+
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch origin pull/${{ github.event.pull_request.number }}/head:pr-${{ github.event.pull_request.number }}
+            git checkout pr-${{ github.event.pull_request.number }}
+          else
+            git checkout ${{ github.ref_name }}
+          fi
+
+          # Build and test
+          dune build @install
+          dune build @quicktest
