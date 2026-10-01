@@ -1,4 +1,4 @@
-name: Update WebAssembly testsuite submodule
+name: Update Wasm testsuite submodule
 
 on:
   schedule:
@@ -10,7 +10,7 @@ permissions:
   pull-requests: write
 
 env:
-  TESTSUITE_SUBMODULE_PATH: test/cram/script/reference
+  TESTSUITE_SUBMODULE_PATH: test/cram/wasm/script/reference
 
 jobs:
   update:
@@ -49,7 +49,7 @@ jobs:
           branch="update-wasm-testsuite"
 
           git checkout -B "$branch"
-          git commit -am "Update WebAssembly testsuite submodule ($time)"
+          git commit -am "update wasm testsuite ($time)"
 
           git -c http.https://github.com/.extraHeader="" \
             push "https://x-access-token:${GH_TOKEN}@github.com/${{ github.repository }}.git" \
@@ -57,7 +57,7 @@ jobs:
 
           if ! gh pr list --head "$branch" --state open --json number --jq '.[0].number' | grep -q .; then
             gh pr create \
-              --title "Update testsuite subrepo ($time)" \
+              --title "update wasm testsuite ($time)" \
               --body "Automated update check for \`$TESTSUITE_SUBMODULE_PATH/\`." \
               --label "no changelog" \
               --base main \
