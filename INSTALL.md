@@ -10,6 +10,23 @@ Check on [repology] if Owi is available in your package manager.
 $ nix-shell -p owi
 ```
 
+## Install the static binary
+
+Pre-built static binaries are available for Linux amd64 (musl).
+They are standalone binaries and do not require an OCaml installation or any shared library.
+The latest version can be downloaded [from the nightly release page](https://github.com/ocamlpro/owi/releases/tag/nightly).
+Once you downloaded the archive:
+
+```shell-session
+$ tar -xzf owi-linux-x86_64-musl.tar.gz
+```
+
+You can install it system-wide with:
+
+```shell-session
+$ sudo cp -r bin lib share doc /usr/local
+```
+
 ## Install from sources
 
 `owi` can be installed with [opam]:

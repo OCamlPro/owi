@@ -9,6 +9,8 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+permissions:
+  contents: write
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -18,26 +20,32 @@ jobs:
     steps:
       - name: build
         run: |
-          set -x
+          set -eux
 
-          git clone https://github.com/${{ github.repository }}.git
-          cd $(basename ${{ github.repository }})
+          git clone https://github.com/${{ github.repository }}.git repo
+          cd repo
 
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             git fetch origin pull/${{ github.event.pull_request.number }}/head:pr-${{ github.event.pull_request.number }}
             git checkout pr-${{ github.event.pull_request.number }}
           else
-            git checkout ${{ github.ref_name }}
+            git checkout "${{ github.ref_name }}"
           fi
 
           dune build @install --profile staticlink
           dune install --prefix /tmp/owi-install --profile staticlink
 
           mkdir -p "$GITHUB_WORKSPACE/dist"
+
           tar -C /tmp/owi-install -czf "$GITHUB_WORKSPACE/dist/owi-linux-x86_64-musl.tar.gz" .
-      - name: upload artifact
+
+      - name: publish nightly release
         if: github.event_name == 'push'
-        uses: actions/upload-artifact@v4
+        uses: softprops/action-gh-release@v2
         with:
-          name: owi-linux-x86_64-musl
-          path: dist/owi-linux-x86_64-musl.tar.gz
+          tag_name: nightly
+          name: Nightly build
+          prerelease: true
+          make_latest: false
+          files: |
+            dist/owi-linux-x86_64-musl.tar.gz
