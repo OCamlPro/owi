@@ -13,18 +13,23 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: ubuntu:latest
+      image: kumikode/owi-ci:ubuntu-latest
+      options: --user root
     steps:
+      - name: Check Rust
+        run: |
+          set -x
+          whoami
+          echo "HOME=$HOME"
+          echo "RUSTUP_HOME=$RUSTUP_HOME"
+          echo "CARGO_HOME=$CARGO_HOME"
+          rustup show
+          rustup toolchain list
+          rustc --version
+          rustup target list --installed
       - name: test
         run: |
           set -x
-
-          # GitHub sucks
-          export HOME=/root
-          cd $HOME
-
-          apt update -yqq
-          apt install git opam -yqq
 
           git clone https://github.com/${{ github.repository }}.git
           cd $(basename ${{ github.repository }})
@@ -35,24 +40,6 @@ jobs:
           else
             git checkout ${{ github.ref_name }}
           fi
-
-          # Prepare OCaml stuff
-          opam init --disable-sandboxing --bare -ya
-          opam switch create ocaml ocaml-base-compiler --criteria="-notuptodate"
-          eval "$(opam env)"
-          export OPAMCONFIRMLEVEL=unsafe-yes
-          opam update
-
-          # install tinygo
-          wget -nv https://github.com/tinygo-org/tinygo/releases/download/v0.40.1/tinygo_0.40.1_amd64.deb
-          dpkg -i tinygo_0.40.1_amd64.deb > /dev/null
-
-          # Install system and opam-repo dependencies
-          opam install . --depext-only --with-test
-          opam install . --deps-only --with-test
-
-          rustup default stable
-          rustup target add wasm32-unknown-unknown
 
           # Build and test
           dune build @install
