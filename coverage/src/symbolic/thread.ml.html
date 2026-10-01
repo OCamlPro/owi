@@ -208,18 +208,18 @@ let add_symbol s t =
   <span data-count="1450">{</span> t with symbol_scopes; num_symbols }
 
 let add_already_checked_condition_to_pc c t =
-  <span data-count="26207">l</span>et pc = Symex.Path_condition.add_checked_sat_condition c t.pc in
-  <span data-count="26207">{</span> t with pc }
+  <span data-count="26212">l</span>et pc = Symex.Path_condition.add_checked_sat_condition c t.pc in
+  <span data-count="26212">{</span> t with pc }
 
 let add_breadcrumb crumb t =
-  <span data-count="25915">l</span>et breadcrumbs = crumb :: t.breadcrumbs in
+  <span data-count="25918">l</span>et breadcrumbs = crumb :: t.breadcrumbs in
   let depth = t.depth + 1 in
   Benchmark.set_max_depth t.bench_stats depth;
-  <span data-count="25915">{</span> t with breadcrumbs; depth }
+  <span data-count="25918">{</span> t with breadcrumbs; depth }
 
 let incr_num_symbols t =
-  <span data-count="153">l</span>et num_symbols = succ t.num_symbols in
-  <span data-count="153">{</span> t with num_symbols }
+  <span data-count="156">l</span>et num_symbols = succ t.num_symbols in
+  <span data-count="156">{</span> t with num_symbols }
 
 let add_label label t = <span data-count="2">{</span> t with labels = label :: t.labels }
 
@@ -233,7 +233,7 @@ let close_scope t =
 
 let incr_path_count t = <span data-count="13853">A</span>tomic.incr t.bench_stats.path_count
 
-let set_priority priority thread = <span data-count="13810">{</span> thread with priority }
+let set_priority priority thread = <span data-count="13817">{</span> thread with priority }
 </code></pre>
       </div>
     </div>
