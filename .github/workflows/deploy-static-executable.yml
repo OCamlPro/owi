@@ -1,4 +1,4 @@
-name: build-alpine
+name: deploy-static-executable
 on:
   pull_request:
     branches:
@@ -13,7 +13,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: kumikode/owi-ci:alpine-latest
+      image: kumikode/owi-ci:alpine-static-latest
       options: --user root
     steps:
       - name: build
@@ -30,6 +30,14 @@ jobs:
             git checkout ${{ github.ref_name }}
           fi
 
-          # Build and test
-          dune build @install
-          dune build @quicktest
+          dune build @install --profile staticlink
+          dune install --prefix /tmp/owi-install --profile staticlink
+
+          mkdir -p dist
+          tar -C /tmp/owi-install -czf dist/owi-linux-x86_64-musl.tar.gz .
+      - name: upload artifact
+        if: github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: owi-linux-x86_64-musl
+          path: dist/owi-linux-x86_64-musl.tar.gz
