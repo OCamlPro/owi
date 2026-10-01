@@ -8,6 +8,7 @@ depexts: [
   # it forces user to install the target by hand for now...
   ["clang" "lld" "llvm" "rust-std-static-wasm32-unknown-unknown" "tinygo" "zig"] {os-distribution = "fedora"}
   ["clang" "lld" "llvm" "rust" "rust-wasm" "tinygo" "zig"] {os-distribution = "arch"}
+  ["clang" "lld" "llvm" "rust" "rust-wasm" "zig"] {os-distribution = "alpine"}
 ]
 post-messages: [
   "Thank you for installing Owi!"
