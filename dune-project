@@ -105,6 +105,7 @@
    (and
     (>= 0.2.2)
     :with-dev-setup))
+  (landmarks :with-dev-setup)
   (landmarks-ppx :with-dev-setup)
   (ocamlformat
    (and
