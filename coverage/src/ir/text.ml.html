@@ -4331,8 +4331,8 @@ let pp_num_type ppf = function
   | <span data-count="1093">V</span>128 -&gt; pf ppf "v128"
 
 let num_type_eq t1 t2 =
-  <span data-count="1659615">m</span>atch (t1, t2) with
-  | <span data-count="1500296">I</span>32, I32 | <span data-count="48058">I</span>64, I64 | <span data-count="47536">F</span>32, F32 | <span data-count="48302">F</span>64, F64 | <span data-count="6232">V</span>128, V128 -&gt; true
+  <span data-count="1659636">m</span>atch (t1, t2) with
+  | <span data-count="1500317">I</span>32, I32 | <span data-count="48058">I</span>64, I64 | <span data-count="47536">F</span>32, F32 | <span data-count="48302">F</span>64, F64 | <span data-count="6232">V</span>128, V128 -&gt; true
   | <span data-count="9191">(</span><span data-count="3146">I</span>32 | <span data-count="1750">I</span>64 | <span data-count="1314">F</span>32 | <span data-count="2870">F</span>64 | <span data-count="111">V</span>128), _ -&gt; false
 
 let compare_num_type t1 t2 =
