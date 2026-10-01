@@ -1,8 +1,13 @@
 (include_subdirs no)
 
+(env
+ (staticlink
+  (link_flags
+   (:standard -cclib -static -cclib -no-pie))))
+
 (executable
  (public_name owi)
- (modes byte exe)
+ (modes exe)
  (modules owi)
  (package owi)
  (libraries cmdliner owi prelude sedlex)
