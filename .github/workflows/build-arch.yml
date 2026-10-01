@@ -13,15 +13,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: archlinux:latest
+      image: kumikode/owi-ci:arch-latest
+      options: --user root
     steps:
       - name: test
         run: |
           set -x
-
-          # Update system and install base dependencies
-          pacman -Syu --noconfirm
-          pacman -S --noconfirm git base-devel opam wget
 
           git clone https://github.com/${{ github.repository }}.git
           cd $(basename ${{ github.repository }})
@@ -32,17 +29,6 @@ jobs:
           else
             git checkout ${{ github.ref_name }}
           fi
-
-          # Prepare OCaml stuff
-          opam init --disable-sandboxing --bare -ya
-          opam switch create ocaml ocaml-base-compiler --criteria="-notuptodate"
-          eval "$(opam env)"
-          export OPAMCONFIRMLEVEL=unsafe-yes
-          opam update
-
-          # Install system and opam-repo dependencies
-          opam install . --depext-only --with-test
-          opam install . --deps-only --with-test
 
           # Build and test
           dune build @install
