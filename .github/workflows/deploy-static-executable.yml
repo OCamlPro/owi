@@ -33,7 +33,7 @@ jobs:
           fi
 
           dune build @install --profile staticlink
-          dune install --prefix /tmp/owi-install --profile staticlink
+          dune install --relocatable --prefix /tmp/owi-install --profile staticlink
 
           mkdir -p "$GITHUB_WORKSPACE/dist"
 
