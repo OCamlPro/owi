@@ -16,17 +16,6 @@ jobs:
       image: kumikode/owi-ci:ubuntu-latest
       options: --user root
     steps:
-      - name: Check Rust
-        run: |
-          set -x
-          whoami
-          echo "HOME=$HOME"
-          echo "RUSTUP_HOME=$RUSTUP_HOME"
-          echo "CARGO_HOME=$CARGO_HOME"
-          rustup show
-          rustup toolchain list
-          rustc --version
-          rustup target list --installed
       - name: test
         run: |
           set -x
