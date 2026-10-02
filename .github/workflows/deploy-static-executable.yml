@@ -33,11 +33,14 @@ jobs:
           fi
 
           dune build @install --profile staticlink
-          dune install --relocatable --prefix /tmp/owi-install --profile staticlink
 
+          # needs to be a relative path: https://github.com/ocaml/dune/issues/5749
+          mkdir -p dist/owi
+          dune install --relocatable --prefix dist/owi --profile staticlink
+
+          # it must be in the GH workspace because this is where the action will look
           mkdir -p "$GITHUB_WORKSPACE/dist"
-
-          tar -C /tmp/owi-install -czf "$GITHUB_WORKSPACE/dist/owi-linux-x86_64-musl.tar.gz" .
+          tar -C dist/owi -czf "$GITHUB_WORKSPACE/dist/owi-linux-x86_64-musl.tar.gz" .
 
       - name: publish nightly release
         if: github.event_name == 'push'
