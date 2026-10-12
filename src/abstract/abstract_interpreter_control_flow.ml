@@ -21,10 +21,9 @@ let gen_new_value ~widens a b state_a state_b
    *)
   let (Abstract_domain.Context.Result (inc, in_tup, local_cont)) =
     Abstract_domain.serialize_binary ~size ~widens
-      state_a.Abstract_interpreter_state.abs_state.Abstract_state.ctx
-      (Value.to_binary a)
-      state_b.Abstract_interpreter_state.abs_state.Abstract_state.ctx
-      (Value.to_binary b) (inc, intup)
+      state_a.Abstract_interpreter_state.abs_state.ctx (Value.to_binary a)
+      state_b.Abstract_interpreter_state.abs_state.ctx (Value.to_binary b)
+      (inc, intup)
   in
   let cont ctx out_tuple =
     let value, out_tuple = local_cont ctx out_tuple in
@@ -51,21 +50,21 @@ let serialize ~widens :
   in
   let (Abstract_domain.Context.Result (included, in_tuple, locals_continue)) =
     Abstract_locals.fold_on_nonequal_union
-      begin fun k v1 v2 res ->
+      begin fun k a b res ->
         let size =
-          (* v1 and v2 should have the same size *)
-          match v1 with
+          (* a and b should have the same size *)
+          match a with
           | Some v -> Value.size_of v
           | None -> assert false
         in
-        let v1 =
-          Option.value v1 ~default:(Value.top size state_a.abs_state.ctx)
+        let a =
+          Option.value a ~default:(Value.top size state_a.abs_state.ctx)
         in
-        let v2 =
-          Option.value v2 ~default:(Value.top size state_b.abs_state.ctx)
+        let b =
+          Option.value b ~default:(Value.top size state_b.abs_state.ctx)
         in
         let f = Abstract_locals.add k in
-        gen_new_value ~widens v1 v2 state_a state_b res f
+        gen_new_value ~widens a b state_a state_b res f
       end
       state_a.abs_state.locals state_b.abs_state.locals
       (Abstract_domain.Context.Result
@@ -467,7 +466,10 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
       let widening_id = Domains.Sig.Widening_Id.fresh () in
       (* TODO tester si on a besoin de copie *)
       let initial_state =
-        { abs_state with ctx = Abstract_domain.Context.copy ctx }
+        let abs_state =
+          { abs_state with ctx = Abstract_domain.Context.copy ctx }
+        in
+        { state with abs_state }
       in
       let stack_size =
         match bt with
@@ -493,6 +495,16 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
           let jt = JumpMap.decr jt in
           (None, jt)
         | Some widening_state ->
+          let widening_state = join initial_state widening_state in
+          (*
+            TODO:
+            Wasm loops are do while loops.
+            We probably want to use codex's widen_hints to widen to a value like max_int - 1 or max_int - 2
+            We have to then check if we have already widened even if included is false.
+            PS. parts of my notes that I don't understand now but might later:
+              - min_int - 2 doit suffir pour tous les programmes normalement .
+              - sinon on ajoute un widen int à la main ou on widen à (max int-1).
+          *)
           let widened, included = widen widening_id state widening_state in
           Trace.record_wasm_step Widen None instr
             ~inputs:[ ("previous", Some state); ("next", Some widening_state) ]
@@ -506,7 +518,7 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
               Option.map
                 (fun (exit_state : Abstract_interpreter_state.t) ->
                   let stack =
-                    exit_state.abs_state.stack @ initial_state.stack
+                    exit_state.abs_state.stack @ initial_state.abs_state.stack
                   in
                   let abs_state = { exit_state.abs_state with stack } in
                   { exit_state with abs_state } )
