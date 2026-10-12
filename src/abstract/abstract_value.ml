@@ -103,7 +103,7 @@ let of_concrete ctx : Concrete_value.t -> t = function
   | F32 v -> F32 (F32.of_float32 ctx v)
   | F64 v -> F64 (F64.of_float ctx (Concrete_f64.to_float v))
   | V128 v -> V128 (V128.of_concrete ctx v)
-  | _ -> assert false
+  | Ref _ -> assert false
 
 let equal_script_result ctx =
   let compare_f32 (script_result : Wast.result_f32) v =
