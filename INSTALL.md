@@ -24,7 +24,7 @@ $ tar -xzf owi-linux-x86_64-musl.tar.gz
 You can install it system-wide with:
 
 ```shell-session
-$ sudo sudo tar -xzf owi-linux-x86_64-musl.tar.gz -C /usr/local/
+$ sudo tar -xzf owi-linux-x86_64-musl.tar.gz -C /usr/local/
 ```
 
 ## Install from sources
