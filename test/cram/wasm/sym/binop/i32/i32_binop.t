@@ -112,7 +112,7 @@ i32:
   $ owi wasm sym i32_rem_s.wat --no-stop-at-failure --deterministic-result-order
   owi: [ERROR] Trap: unreachable
   model {
-    symbol symbol_0 i32 -1
+    symbol symbol_0 i32 1
   }
   
   owi: [ERROR] Trap: integer divide by zero

@@ -117,7 +117,7 @@ i64:
   
   owi: [ERROR] Trap: unreachable
   model {
-    symbol symbol_0 i64 -1
+    symbol symbol_0 i64 1
   }
   
   owi: [ERROR] Reached 2 problems!
