@@ -471,7 +471,7 @@ type env =
   }
 
 let empty_env () =
-  <span data-count="10385">{</span> start = false
+  <span data-count="10387">{</span> start = false
   ; declared_memory = false
   ; funcs = false
   ; tables = false
@@ -479,7 +479,7 @@ let empty_env () =
   }
 
 let check_mem_limits { is_i64; min; max } =
-  <span data-count="2535">i</span>f is_i64 then
+  <span data-count="2537">i</span>f is_i64 then
     <span data-count="0">l</span>et* min =
       match int_of_string_opt min with
       | <span data-count="0">S</span>ome min -&gt; Ok min
@@ -497,13 +497,13 @@ let check_mem_limits { is_i64; min; max } =
         else <span data-count="0">O</span>k ()
       | <span data-count="0">N</span>one -&gt; Error `Constant_out_of_range )
   else
-    <span data-count="2535">l</span>et* min =
-      try Ok (Int32.of_string_ex<span data-count="2533">n</span> min)
+    <span data-count="2537">l</span>et* min =
+      try Ok (Int32.of_string_ex<span data-count="2535">n</span> min)
       with <span data-count="2">F</span>ailure _ -&gt; Error `Constant_out_of_range
     in
-    <span data-count="2533">m</span>atch max with
-    | <span data-count="1416">N</span>one -&gt;
-      if Int32.lt_u 0x1_0000l min then <span data-count="3">E</span>rror `Memory_size_too_large else <span data-count="1413">O</span>k ()
+    <span data-count="2535">m</span>atch max with
+    | <span data-count="1418">N</span>one -&gt;
+      if Int32.lt_u 0x1_0000l min then <span data-count="3">E</span>rror `Memory_size_too_large else <span data-count="1415">O</span>k ()
     | <span data-count="1117">S</span>ome max -&gt;
       let* max =
         try Ok (Int32.of_string_ex<span data-count="1116">n</span> max)
@@ -515,10 +515,10 @@ let check_mem_limits { is_i64; min; max } =
       else <span data-count="1112">O</span>k ()
 
 let modul m =
-  <span data-count="10385">L</span>og.info (fun m -&gt; <span data-count="36">m</span> "checking     ...");
-  <span data-count="10385">l</span>et add_global, global_exists =
+  <span data-count="10387">L</span>og.info (fun m -&gt; <span data-count="38">m</span> "checking     ...");
+  <span data-count="10387">l</span>et add_global, global_exists =
     let seen = Hashtbl.create 512 in
-    <span data-count="10385">l</span>et add_global = function
+    <span data-count="10387">l</span>et add_global = function
       | <span data-count="526">N</span>one -&gt; Ok ()
       | <span data-count="2577">S</span>ome id -&gt;
         if Hashtbl.mem seen id then <span data-count="3">E</span>rror (`Duplicate_global id)
@@ -530,8 +530,8 @@ let modul m =
   let add_table, get_table =
     let cnt = ref 0 in
     let names2ids = Hashtbl.create 512 in
-    <span data-count="10385">l</span>et seen = Hashtbl.create 512 in
-    <span data-count="10385">l</span>et add_table name ty =
+    <span data-count="10387">l</span>et seen = Hashtbl.create 512 in
+    <span data-count="10387">l</span>et add_table name ty =
       <span data-count="1874">m</span>atch name with
       | <span data-count="808">N</span>one -&gt;
         Hashtbl.replace seen !cnt ty;
@@ -603,23 +603,23 @@ let modul m =
   in
   let add_memory =
     let seen = Hashtbl.create 512 in
-    <span data-count="10385">f</span>unction
-    | <span data-count="2058">N</span>one -&gt; Ok ()
+    <span data-count="10387">f</span>unction
+    | <span data-count="2060">N</span>one -&gt; Ok ()
     | <span data-count="758">S</span>ome id -&gt;
       if Hashtbl.mem seen id then <span data-count="3">E</span>rror (`Duplicate_memory id)
       else <span data-count="755">O</span>k (Hashtbl.ad<span data-count="755">d</span> seen id ())
   in
   let+ (_env : env) =
     let open Module in
-    list_fold_lef<span data-count="10385">t</span>
+    list_fold_lef<span data-count="10387">t</span>
       (fun env -&gt;
-        <span data-count="65955">l</span>et open Field in
+        <span data-count="65961">l</span>et open Field in
         function
         | <span data-count="23632">E</span>xport _e -&gt; Ok env
-        | <span data-count="22311">F</span>unc _f -&gt; Ok { env with funcs = true }
-        | <span data-count="505">S</span>tart _start -&gt;
+        | <span data-count="22313">F</span>unc _f -&gt; Ok { env with funcs = true }
+        | <span data-count="507">S</span>tart _start -&gt;
           if env.start then <span data-count="1">E</span>rror `Multiple_start_sections
-          else <span data-count="504">O</span>k { env with start = true }
+          else <span data-count="506">O</span>k { env with start = true }
         | <span data-count="7794">I</span>mport i -&gt;
           if env.funcs then <span data-count="4">E</span>rror `Import_after_function
           else <span data-count="7790">i</span>f env.declared_memory then <span data-count="4">E</span>rror `Import_after_memory
@@ -645,10 +645,10 @@ let modul m =
           let* env = elem_check_typ<span data-count="1823">e</span> env typ mode explicit_typ in
           <span data-count="1814">l</span>et* () = elem_check_ini<span data-count="1814">t</span> init in
           <span data-count="1814">O</span>k env
-        | <span data-count="2535">M</span>em (id, limits) -&gt;
-          let* () = check_mem_limit<span data-count="2535">s</span> limits in
-          <span data-count="2525">l</span>et* () = add_memor<span data-count="2525">y</span> id in
-          <span data-count="2523">O</span>k { env with declared_memory = true }
+        | <span data-count="2537">M</span>em (id, limits) -&gt;
+          let* () = check_mem_limit<span data-count="2537">s</span> limits in
+          <span data-count="2527">l</span>et* () = add_memor<span data-count="2527">y</span> id in
+          <span data-count="2525">O</span>k { env with declared_memory = true }
         | <span data-count="1632">T</span>ypedef _t -&gt; Ok env
         | <span data-count="2820">G</span>lobal { id; _ } -&gt;
           let+ () = add_globa<span data-count="2820">l</span> id in
@@ -657,10 +657,10 @@ let modul m =
           let* () = add_tabl<span data-count="1735">e</span> id typ in
           <span data-count="1733">l</span>et* () = match init with <span data-count="1688">N</span>one -&gt; Ok () | <span data-count="45">S</span>ome e -&gt; check_exp<span data-count="45">r</span> e in
           <span data-count="1733">O</span>k { env with tables = true } )
-      (empty_en<span data-count="10385">v</span> ()) m.fields
+      (empty_en<span data-count="10387">v</span> ()) m.fields
   in
 
-  <span data-count="10340">m</span>
+  <span data-count="10342">m</span>
 </code></pre>
       </div>
     </div>

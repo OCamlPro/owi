@@ -1966,7 +1966,7 @@ module Llvm = struct
   let err_output =
     match Logs.Src.level Log.main_src with
     | Some (<span data-count="0">L</span>ogs.Debug | <span data-count="0">L</span>ogs.Info) -&gt; Bos.OS.Cmd.err_run_out
-    | <span data-count="0">N</span>one | <span data-count="978">S</span>ome _ -&gt; Bos.OS.Cmd.err_null
+    | <span data-count="0">N</span>one | <span data-count="979">S</span>ome _ -&gt; Bos.OS.Cmd.err_null
 
   let bitcode_of_input ~workspace ~llvm_as_bin file : Fpath.t Result.t =
     <span data-count="5">m</span>atch Fpath.get_ext ~multi:false file with
@@ -2109,34 +2109,34 @@ end
 module Wasm = struct
   module Text = struct
     let until_text_validate ~unsafe m =
-      <span data-count="10387">i</span>f unsafe then <span data-count="2">O</span>k m else <span data-count="10385">T</span>ext_validate.modul m
+      <span data-count="10389">i</span>f unsafe then <span data-count="2">O</span>k m else <span data-count="10387">T</span>ext_validate.modul m
 
     let until_group ~unsafe m =
-      <span data-count="5231">l</span>et+ m = until_text_validat<span data-count="5231">e</span> ~unsafe m in
-      <span data-count="5205">G</span>rouped.of_text m
+      <span data-count="5232">l</span>et+ m = until_text_validat<span data-count="5232">e</span> ~unsafe m in
+      <span data-count="5206">G</span>rouped.of_text m
 
     let until_assign ~unsafe m =
-      <span data-count="5231">l</span>et* m = until_grou<span data-count="5231">p</span> ~unsafe m in
-      <span data-count="5205">l</span>et+ assigned = Assigned.of_groupe<span data-count="5205">d</span> m in
-      <span data-count="5171">(</span>m, assigned)
+      <span data-count="5232">l</span>et* m = until_grou<span data-count="5232">p</span> ~unsafe m in
+      <span data-count="5206">l</span>et+ assigned = Assigned.of_groupe<span data-count="5206">d</span> m in
+      <span data-count="5172">(</span>m, assigned)
 
     let until_binary ~unsafe m =
-      <span data-count="5231">l</span>et* m, assigned = until_assig<span data-count="5231">n</span> ~unsafe m in
-      <span data-count="5171">R</span>ewrite.modul m assigned
+      <span data-count="5232">l</span>et* m, assigned = until_assig<span data-count="5232">n</span> ~unsafe m in
+      <span data-count="5172">R</span>ewrite.modul m assigned
 
     let until_validate ~unsafe m =
-      <span data-count="5156">l</span>et* m = until_text_validat<span data-count="5156">e</span> ~unsafe m in
-      <span data-count="5137">l</span>et* m = until_binar<span data-count="5137">y</span> ~unsafe m in
-      <span data-count="5091">i</span>f unsafe then <span data-count="1">O</span>k m
+      <span data-count="5157">l</span>et* m = until_text_validat<span data-count="5157">e</span> ~unsafe m in
+      <span data-count="5138">l</span>et* m = until_binar<span data-count="5138">y</span> ~unsafe m in
+      <span data-count="5092">i</span>f unsafe then <span data-count="1">O</span>k m
       else
-        <span data-count="5090">l</span>et+ () = Binary_validate.modu<span data-count="5090">l</span> m in
-        <span data-count="2634">m</span>
+        <span data-count="5091">l</span>et+ () = Binary_validate.modu<span data-count="5091">l</span> m in
+        <span data-count="2635">m</span>
 
     let until_concrete_link ~unsafe ~name env m =
-      <span data-count="4632">l</span>et* modul = until_validat<span data-count="4632">e</span> ~unsafe m in
-      <span data-count="2352">l</span>et* env = Env.Concrete.link_binary_module ~env ~name ~modul in
-      <span data-count="2174">l</span>et+ modul = Env.Concrete.get_last_module ~env in
-      <span data-count="2174">(</span>modul, env)
+      <span data-count="4633">l</span>et* modul = until_validat<span data-count="4633">e</span> ~unsafe m in
+      <span data-count="2353">l</span>et* env = Env.Concrete.link_binary_module ~env ~name ~modul in
+      <span data-count="2175">l</span>et+ modul = Env.Concrete.get_last_module ~env in
+      <span data-count="2175">(</span>modul, env)
 
     let until_symbolic_link ~unsafe ~name env m =
       <span data-count="0">l</span>et* modul = until_validat<span data-count="0">e</span> ~unsafe m in
@@ -2194,9 +2194,9 @@ module Wasm = struct
       | Wast _ | Extern _ -&gt; assert false
 
     let until_concrete_link ~unsafe ~name env filename =
-      <span data-count="19">l</span>et* m = Parse.guess_from_fil<span data-count="19">e</span> filename in
-      <span data-count="19">m</span>atch m with
-      | <span data-count="9">K</span>ind.Wat m -&gt; Text.until_concrete_link ~unsafe ~name env m
+      <span data-count="20">l</span>et* m = Parse.guess_from_fil<span data-count="20">e</span> filename in
+      <span data-count="20">m</span>atch m with
+      | <span data-count="10">K</span>ind.Wat m -&gt; Text.until_concrete_link ~unsafe ~name env m
       | <span data-count="10">W</span>asm m -&gt; Binary.until_concrete_link ~unsafe ~name env m
       | Wast _ | Extern _ -&gt; assert false
 

@@ -148,17 +148,17 @@ type 'a t =
   }
 
 let uuid =
-  let uuid = ref ~<span data-count="978">-</span>1 in
+  let uuid = ref ~<span data-count="979">-</span>1 in
   fun () -&gt;
-    <span data-count="95955516">i</span>ncr uuid;
-    <span data-count="95955492">!</span>uuid
+    <span data-count="95924940">i</span>ncr uuid;
+    <span data-count="95924943">!</span>uuid
 
 let raw { raw; _ } = <span data-count="0">r</span>aw
 
 let dummy raw =
-  <span data-count="95955588">{</span> raw
-  ; uuid = uui<span data-count="95955560">d</span> ()
-  ; instr_counter = Atomic.mak<span data-count="95955538">e</span> 0
+  <span data-count="95924985">{</span> raw
+  ; uuid = uui<span data-count="95924969">d</span> ()
+  ; instr_counter = Atomic.mak<span data-count="95924944">e</span> 0
   ; functions_called = S.empty
   ; d_true = ref None
   ; d_false = ref None
@@ -171,8 +171,8 @@ let dummy_deep raw =
   <span data-count="719">d</span>ummy raw
 
 let map f { raw; instr_counter; uuid; functions_called; d_true; d_false } =
-  <span data-count="1245844">l</span>et raw = f raw in
-  <span data-count="1245844">{</span> raw; instr_counter; uuid; functions_called; d_true; d_false }
+  <span data-count="1245859">l</span>et raw = f raw in
+  <span data-count="1245859">{</span> raw; instr_counter; uuid; functions_called; d_true; d_false }
 
 let iter f { raw; _ } = <span data-count="356748">f</span> raw
 

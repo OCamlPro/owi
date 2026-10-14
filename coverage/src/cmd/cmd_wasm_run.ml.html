@@ -112,12 +112,12 @@ open Syntax
 
 (* TODO: add entry_point *)
 let cmd ~source_file ~timeout ~timeout_instr ~unsafe =
-  <span data-count="19">l</span>et name = None in
+  <span data-count="20">l</span>et name = None in
   let env = Env.Concrete.empty ~context:() in
   let* modul, env =
-    Compile.Wasm.File.until_concrete_lin<span data-count="19">k</span> env ~unsafe ~name source_file
+    Compile.Wasm.File.until_concrete_lin<span data-count="20">k</span> env ~unsafe ~name source_file
   in
-  <span data-count="19">l</span>et module Parameters = struct
+  <span data-count="20">l</span>et module Parameters = struct
     let timeout = timeout
 
     let timeout_instr = timeout_instr
@@ -126,22 +126,22 @@ let cmd ~source_file ~timeout ~timeout_instr ~unsafe =
 
     let throw_away_trap = false
 
-    let abstract_invariant = Abstract_invariant.empt<span data-count="19">y</span> ()
+    let abstract_invariant = Abstract_invariant.empt<span data-count="20">y</span> ()
   end in
   let module I = Interpret.Concrete (Parameters) in
   let outcome, run_time =
     Benchmark.with_utime @@ fun () -&gt;
-    <span data-count="19">l</span>et to_run = I.modul ~env ~modul in
+    <span data-count="20">l</span>et to_run = I.modul ~env ~modul in
     let* _env =
-      Concrete_choice.run_and_drop_stat<span data-count="19">e</span> to_run Concrete_state.empty
+      Concrete_choice.run_and_drop_stat<span data-count="20">e</span> to_run Concrete_state.empty
     in
-    <span data-count="15">O</span>k ()
+    <span data-count="16">O</span>k ()
   in
-  <span data-count="19">L</span>og.bench (fun m -&gt;
+  <span data-count="20">L</span>og.bench (fun m -&gt;
     (* run_time shouldn't be none in bench mode *)
     <span data-count="0">l</span>et run_time = match run_time with None -&gt; assert false | <span data-count="0">S</span>ome t -&gt; t in
     m "Benchmarks:@\n@[&lt;v&gt;interpreter time: %fms@]" (run_time *. 1000.) );
-  <span data-count="19">o</span>utcome
+  <span data-count="20">o</span>utcome
 </code></pre>
       </div>
     </div>

@@ -144,21 +144,21 @@
 
 type 'a t = Concrete_state.t -&gt; Concrete_state.t * 'a Result.t
 
-let[@inline] return v = fun state -&gt; <span data-count="364122273">(</span>state, Ok v)
+let[@inline] return v = fun state -&gt; <span data-count="364030165">(</span>state, Ok v)
 
 let[@inline] ( let* ) v f =
  fun state -&gt;
-  <span data-count="364077578">l</span>et state, result = v state in
-  <span data-count="364077570">m</span>atch result with <span data-count="364072997">O</span>k v -&gt; f v state | <span data-count="4573">E</span>rror e -&gt; (state, Error e)
+  <span data-count="363985469">l</span>et state, result = v state in
+  <span data-count="363985461">m</span>atch result with <span data-count="363980888">O</span>k v -&gt; f v state | <span data-count="4573">E</span>rror e -&gt; (state, Error e)
 
 let[@inline] ( let+ ) v f =
  fun state -&gt;
-  <span data-count="8537">l</span>et state, result = v state in
-  <span data-count="8529">m</span>atch result with <span data-count="8475">O</span>k v -&gt; (state, Ok (<span data-count="8475">f</span> v)) | <span data-count="54">E</span>rror e -&gt; (state, Error e)
+  <span data-count="8539">l</span>et state, result = v state in
+  <span data-count="8531">m</span>atch result with <span data-count="8477">O</span>k v -&gt; (state, Ok (<span data-count="8477">f</span> v)) | <span data-count="54">E</span>rror e -&gt; (state, Error e)
 
-let[@inline] select b ~instr_counter_true:_ ~instr_counter_false:_ = <span data-count="13242157">r</span>eturn b
+let[@inline] select b ~instr_counter_true:_ ~instr_counter_false:_ = <span data-count="13242160">r</span>eturn b
 
-let[@inline] select_i32 i = <span data-count="806027">r</span>eturn i
+let[@inline] select_i32 i = <span data-count="806028">r</span>eturn i
 
 let[@inline] trap t = fun state -&gt; <span data-count="2865">(</span>state, Error t)
 
@@ -167,8 +167,8 @@ let[@inline] run m state =
   <span data-count="103">m</span>atch outcome with <span data-count="102">O</span>k v -&gt; Ok (state, v) | <span data-count="1">E</span>rror e -&gt; Error (state, e)
 
 let[@inline] run_and_drop_state m state =
-  <span data-count="52143">l</span>et _state, outcome = m state in
-  <span data-count="52139">o</span>utcome
+  <span data-count="52144">l</span>et _state, outcome = m state in
+  <span data-count="52140">o</span>utcome
 
 let[@inline] get_pc () = <span data-count="0">r</span>eturn Smtml.Expr.Set.empty
 

@@ -2586,20 +2586,20 @@ let call_graph_mode_conv =
     | <span data-count="0">C</span>md_wasm_inspect_cg.Complete -&gt; Fmt.string fmt "complete"
     | <span data-count="1">C</span>md_wasm_inspect_cg.Sound -&gt; Fmt.string fmt "sound"
   in
-  Arg.con<span data-count="961">v</span> (of_string, pp)
+  Arg.con<span data-count="962">v</span> (of_string, pp)
 
 let coverage_criteria_conv =
   let open Label.Coverage_criteria in
-  Arg.con<span data-count="961">v</span> (of_string, pp)
+  Arg.con<span data-count="962">v</span> (of_string, pp)
 
 let existing_file_conv =
   let open Prelude.Result.Syntax in
   let parse s =
-    <span data-count="3065">l</span>et* path = Fpath.of_strin<span data-count="3065">g</span> s in
-    <span data-count="3065">l</span>et* exists = Bos.OS.File.exist<span data-count="3065">s</span> path in
-    <span data-count="3065">i</span>f exists then <span data-count="3056">O</span>k path else <span data-count="9">F</span>mt.error_msg "no file '%a'" Fpath.pp path
+    <span data-count="3066">l</span>et* path = Fpath.of_strin<span data-count="3066">g</span> s in
+    <span data-count="3066">l</span>et* exists = Bos.OS.File.exist<span data-count="3066">s</span> path in
+    <span data-count="3066">i</span>f exists then <span data-count="3057">O</span>k path else <span data-count="9">F</span>mt.error_msg "no file '%a'" Fpath.pp path
   in
-  Arg.con<span data-count="961">v</span> (parse, Fpath.pp)
+  Arg.con<span data-count="962">v</span> (parse, Fpath.pp)
 
 let existing_dir_conv =
   let open Prelude.Result.Syntax in
@@ -2608,14 +2608,14 @@ let existing_dir_conv =
     <span data-count="161">l</span>et* exists = Bos.OS.Dir.exist<span data-count="161">s</span> path in
     <span data-count="161">i</span>f exists then <span data-count="161">O</span>k path else <span data-count="0">F</span>mt.error_msg "no directory '%a'" Fpath.pp path
   in
-  Arg.con<span data-count="961">v</span> (parse, Fpath.pp)
+  Arg.con<span data-count="962">v</span> (parse, Fpath.pp)
 
-let path_conv = Arg.con<span data-count="961">v</span> (Fpath.of_string, Fpath.pp)
+let path_conv = Arg.con<span data-count="962">v</span> (Fpath.of_string, Fpath.pp)
 
-let solver_conv = Arg.con<span data-count="961">v</span> (Smtml.Solver_type.of_string, Smtml.Solver_type.pp)
+let solver_conv = Arg.con<span data-count="962">v</span> (Smtml.Solver_type.of_string, Smtml.Solver_type.pp)
 
 let exploration_conv =
-  Arg.con<span data-count="961">v</span>
+  Arg.con<span data-count="962">v</span>
     ( Symbolic_parameters.Exploration_strategy.of_string
     , Symbolic_parameters.Exploration_strategy.pp )
 
@@ -2630,26 +2630,26 @@ let model_format_conv =
     | <span data-count="17">M</span>odel.Scfg -&gt; Fmt.string fmt "scfg"
     | <span data-count="0">J</span>son -&gt; Fmt.string fmt "json"
   in
-  Arg.con<span data-count="961">v</span> (of_string, pp)
+  Arg.con<span data-count="962">v</span> (of_string, pp)
 
 (* Common options *)
 
-let copts_t = Term.(cons<span data-count="961">t</span> [])
+let copts_t = Term.(cons<span data-count="962">t</span> [])
 
 let sdocs = Manpage.s_common_options
 
 let shared_man =
   [ `S Manpage.s_bugs; `P "Email them to &lt;owi.wildcat119@passmail.com&gt;." ]
 
-let version = Cmd_version.owi_versio<span data-count="961">n</span> ()
+let version = Cmd_version.owi_versio<span data-count="962">n</span> ()
 
 let log_level =
   let env = Cmd.Env.info "OWI_VERBOSITY" in
-  <span data-count="961">L</span>ogs_cli.leve<span data-count="961">l</span> ~env ~docs:sdocs ()
+  <span data-count="962">L</span>ogs_cli.leve<span data-count="962">l</span> ~env ~docs:sdocs ()
 
 let bench =
   let doc = "enable benchmarks" in
-  Arg.(value &amp; <span data-count="961">f</span>lag &amp; <span data-count="961">i</span>nf<span data-count="961">o</span> [ "bench" ] ~doc ~docs:sdocs)
+  Arg.(value &amp; <span data-count="962">f</span>lag &amp; <span data-count="962">i</span>nf<span data-count="962">o</span> [ "bench" ] ~doc ~docs:sdocs)
 
 (* Common terms *)
 
@@ -2657,25 +2657,25 @@ open Term.Syntax
 
 let arch =
   let doc = "data model" in
-  Arg.(value &amp; <span data-count="961">o</span>p<span data-count="961">t</span> int 32 &amp; <span data-count="961">i</span>nf<span data-count="961">o</span> [ "arch"; "m" ] ~doc)
+  Arg.(value &amp; <span data-count="962">o</span>p<span data-count="962">t</span> int 32 &amp; <span data-count="962">i</span>nf<span data-count="962">o</span> [ "arch"; "m" ] ~doc)
 
 let deterministic_result_order =
   let doc =
     "Guarantee a fixed deterministic order of found failures. This implies \
      --no-stop-at-failure."
   in
-  Arg.(value &amp; <span data-count="961">f</span>lag &amp; <span data-count="961">i</span>nf<span data-count="961">o</span> [ "deterministic-result-order" ] ~doc)
+  Arg.(value &amp; <span data-count="962">f</span>lag &amp; <span data-count="962">i</span>nf<span data-count="962">o</span> [ "deterministic-result-order" ] ~doc)
 
 let call_graph_mode =
   let doc = {| The call graph is either "complete" or "sound" |} in
-  Arg.(value &amp; <span data-count="961">o</span>p<span data-count="961">t</span> call_graph_mode_conv Sound &amp; <span data-count="961">i</span>nf<span data-count="961">o</span> [ "call-graph-mode" ] ~doc)
+  Arg.(value &amp; <span data-count="962">o</span>p<span data-count="962">t</span> call_graph_mode_conv Sound &amp; <span data-count="962">i</span>nf<span data-count="962">o</span> [ "call-graph-mode" ] ~doc)
 
 let coverage_criteria =
   let doc = {|Coverage criteria to use ("fc", "sc" or "dc").|} in
   Arg.(
     value
-    &amp; <span data-count="961">o</span>p<span data-count="961">t</span> coverage_criteria_conv Label.Coverage_criteria.Statement_coverage
-    &amp; <span data-count="961">i</span>nf<span data-count="961">o</span> [ "criteria" ] ~doc )
+    &amp; <span data-count="962">o</span>p<span data-count="962">t</span> coverage_criteria_conv Label.Coverage_criteria.Statement_coverage
+    &amp; <span data-count="962">i</span>nf<span data-count="962">o</span> [ "criteria" ] ~doc )
 
 let eacsl =
   let doc =
@@ -2683,14 +2683,14 @@ let eacsl =
      https://frama-c.com/download/e-acsl/e-acsl-implementation.pdf for \
      Frama-C's current language feature implementations"
   in
-  Arg.(value &amp; <span data-count="961">f</span>lag &amp; <span data-count="961">i</span>nf<span data-count="961">o</span> [ "e-acsl" ] ~doc)
+  Arg.(value &amp; <span data-count="962">f</span>lag &amp; <span data-count="962">i</span>nf<span data-count="962">o</span> [ "e-acsl" ] ~doc)
 
 let entry_point default =
-  <span data-count="7688">l</span>et doc = "entry point of the executable" in
+  <span data-count="7696">l</span>et doc = "entry point of the executable" in
   Arg.(
     value
-    &amp; <span data-count="7688">o</span>p<span data-count="7688">t</span> (som<span data-count="7688">e</span> string) default
-    &amp; <span data-count="7688">i</span>nfo [ "entry-point" ] ~doc ~docv:"FUNCTION" )
+    &amp; <span data-count="7696">o</span>p<span data-count="7696">t</span> (som<span data-count="7696">e</span> string) default
+    &amp; <span data-count="7696">i</span>nfo [ "entry-point" ] ~doc ~docv:"FUNCTION" )
 
 let exploration_strategy =
   let doc =
@@ -2698,68 +2698,68 @@ let exploration_strategy =
   in
   Arg.(
     value
-    &amp; <span data-count="961">o</span>p<span data-count="961">t</span> exploration_conv Symbolic_parameters.Exploration_strategy.FIFO
-    &amp; <span data-count="961">i</span>nf<span data-count="961">o</span> [ "exploration" ] ~doc )
+    &amp; <span data-count="962">o</span>p<span data-count="962">t</span> exploration_conv Symbolic_parameters.Exploration_strategy.FIFO
+    &amp; <span data-count="962">i</span>nf<span data-count="962">o</span> [ "exploration" ] ~doc )
 
 let fail_mode =
   let trap_doc = "ignore assertion violations and only report traps" in
   let assert_doc = "ignore traps and only report assertion violations" in
   Arg.(
     value
-    &amp; <span data-count="961">v</span>fla<span data-count="961">g</span> Symbolic_parameters.Both
-        [ (Trap_only, inf<span data-count="961">o</span> [ "fail-on-trap-only" ] ~doc:trap_doc)
-        ; (Assertion_only, inf<span data-count="961">o</span> [ "fail-on-assertion-only" ] ~doc:assert_doc)
+    &amp; <span data-count="962">v</span>fla<span data-count="962">g</span> Symbolic_parameters.Both
+        [ (Trap_only, inf<span data-count="962">o</span> [ "fail-on-trap-only" ] ~doc:trap_doc)
+        ; (Assertion_only, inf<span data-count="962">o</span> [ "fail-on-assertion-only" ] ~doc:assert_doc)
         ] )
 
 let files =
   let doc = "source files" in
-  Arg.(non_empty &amp; <span data-count="961">p</span>os_al<span data-count="961">l</span> existing_file_conv [] (inf<span data-count="961">o</span> [] ~doc ~docv:"FILE"))
+  Arg.(non_empty &amp; <span data-count="962">p</span>os_al<span data-count="962">l</span> existing_file_conv [] (inf<span data-count="962">o</span> [] ~doc ~docv:"FILE"))
 
 let generate_abstract_invariant =
   let doc =
     "Generate invariants by running the abstract interpretation engine."
   in
-  Arg.(value &amp; <span data-count="961">f</span>lag &amp; <span data-count="961">i</span>nf<span data-count="961">o</span> [ "generate-abstract-invariant" ] ~doc)
+  Arg.(value &amp; <span data-count="962">f</span>lag &amp; <span data-count="962">i</span>nf<span data-count="962">o</span> [ "generate-abstract-invariant" ] ~doc)
 
 let includes =
   let doc = "headers path" in
-  Arg.(value &amp; <span data-count="961">o</span>pt_al<span data-count="961">l</span> existing_dir_conv [] &amp; <span data-count="961">i</span>nf<span data-count="961">o</span> [ "I" ] ~doc)
+  Arg.(value &amp; <span data-count="962">o</span>pt_al<span data-count="962">l</span> existing_dir_conv [] &amp; <span data-count="962">i</span>nf<span data-count="962">o</span> [ "I" ] ~doc)
 
 let invoke_with_symbols =
   let doc =
     "Invoke the entry point of the program with symbolic values instead of \
      dummy constants."
   in
-  Arg.(value &amp; <span data-count="961">f</span>lag &amp; <span data-count="961">i</span>nf<span data-count="961">o</span> [ "invoke-with-symbols" ] ~doc)
+  Arg.(value &amp; <span data-count="962">f</span>lag &amp; <span data-count="962">i</span>nf<span data-count="962">o</span> [ "invoke-with-symbols" ] ~doc)
 
 let model_format =
   let doc = {| The format of the model ("json" or "scfg") |} in
-  Arg.(value &amp; <span data-count="961">o</span>p<span data-count="961">t</span> model_format_conv Scfg &amp; <span data-count="961">i</span>nf<span data-count="961">o</span> [ "model-format" ] ~doc)
+  Arg.(value &amp; <span data-count="962">o</span>p<span data-count="962">t</span> model_format_conv Scfg &amp; <span data-count="962">i</span>nf<span data-count="962">o</span> [ "model-format" ] ~doc)
 
 let no_assert_failure_expression_printing =
   let doc = "do not display the expression in the assert failure" in
-  Arg.(value &amp; <span data-count="961">f</span>lag &amp; <span data-count="961">i</span>nf<span data-count="961">o</span> [ "no-assert-failure-expression-printing" ] ~doc)
+  Arg.(value &amp; <span data-count="962">f</span>lag &amp; <span data-count="962">i</span>nf<span data-count="962">o</span> [ "no-assert-failure-expression-printing" ] ~doc)
 
 let no_stop_at_failure =
   let doc = "do not stop when a program failure is encountered" in
-  Arg.(value &amp; <span data-count="961">f</span>lag &amp; <span data-count="961">i</span>nf<span data-count="961">o</span> [ "no-stop-at-failure" ] ~doc)
+  Arg.(value &amp; <span data-count="962">f</span>lag &amp; <span data-count="962">i</span>nf<span data-count="962">o</span> [ "no-stop-at-failure" ] ~doc)
 
 let no_value =
   let doc = "do not display a value for each symbol" in
-  Arg.(value &amp; <span data-count="961">f</span>lag &amp; <span data-count="961">i</span>nf<span data-count="961">o</span> [ "no-value" ] ~doc)
+  Arg.(value &amp; <span data-count="962">f</span>lag &amp; <span data-count="962">i</span>nf<span data-count="962">o</span> [ "no-value" ] ~doc)
 
 let no_worker_isolation =
   let doc = "Do not force each worker to run on an isolated physical core." in
-  Arg.(value &amp; <span data-count="961">f</span>lag &amp; <span data-count="961">i</span>nf<span data-count="961">o</span> [ "no-worker-isolation" ] ~doc)
+  Arg.(value &amp; <span data-count="962">f</span>lag &amp; <span data-count="962">i</span>nf<span data-count="962">o</span> [ "no-worker-isolation" ] ~doc)
 
 let opt_lvl =
   let doc = "specify which optimization level to use" in
-  Arg.(value &amp; <span data-count="961">o</span>p<span data-count="961">t</span> string "3" &amp; <span data-count="961">i</span>nf<span data-count="961">o</span> [ "O" ] ~doc)
+  Arg.(value &amp; <span data-count="962">o</span>p<span data-count="962">t</span> string "3" &amp; <span data-count="962">i</span>nf<span data-count="962">o</span> [ "O" ] ~doc)
 
 let out_file =
   let doc = "Output the generated .wasm or .wat to FILE." in
   Arg.(
-    value &amp; <span data-count="961">o</span>p<span data-count="961">t</span> (som<span data-count="961">e</span> path_conv) None &amp; <span data-count="961">i</span>nf<span data-count="961">o</span> [ "o"; "output" ] ~docv:"FILE" ~doc )
+    value &amp; <span data-count="962">o</span>p<span data-count="962">t</span> (som<span data-count="962">e</span> path_conv) None &amp; <span data-count="962">i</span>nf<span data-count="962">o</span> [ "o"; "output" ] ~docv:"FILE" ~doc )
 
 let model_out_file =
   let doc =
@@ -2768,83 +2768,83 @@ let model_out_file =
   in
   Arg.(
     value
-    &amp; <span data-count="961">o</span>p<span data-count="961">t</span> (som<span data-count="961">e</span> path_conv) None
-    &amp; <span data-count="961">i</span>nf<span data-count="961">o</span> [ "model-out-file" ] ~docv:"FILE" ~doc )
+    &amp; <span data-count="962">o</span>p<span data-count="962">t</span> (som<span data-count="962">e</span> path_conv) None
+    &amp; <span data-count="962">i</span>nf<span data-count="962">o</span> [ "model-out-file" ] ~docv:"FILE" ~doc )
 
 let property =
   let doc = "property file" in
   Arg.(
     value
-    &amp; <span data-count="961">o</span>p<span data-count="961">t</span> (som<span data-count="961">e</span> existing_file_conv) None
-    &amp; <span data-count="961">i</span>nf<span data-count="961">o</span> [ "property" ] ~doc ~docv:"FILE" )
+    &amp; <span data-count="962">o</span>p<span data-count="962">t</span> (som<span data-count="962">e</span> existing_file_conv) None
+    &amp; <span data-count="962">i</span>nf<span data-count="962">o</span> [ "property" ] ~doc ~docv:"FILE" )
 
 let rounds =
   let doc = "Stop after a number of fuzzing rounds." in
-  Arg.(value &amp; <span data-count="961">o</span>p<span data-count="961">t</span> (som<span data-count="961">e</span> int) None &amp; <span data-count="961">i</span>nf<span data-count="961">o</span> [ "rounds" ] ~doc ~docv:"I")
+  Arg.(value &amp; <span data-count="962">o</span>p<span data-count="962">t</span> (som<span data-count="962">e</span> int) None &amp; <span data-count="962">i</span>nf<span data-count="962">o</span> [ "rounds" ] ~doc ~docv:"I")
 
 let seed =
   let doc = "Initial seed for the PRNG state" in
-  Arg.(value &amp; <span data-count="961">o</span>p<span data-count="961">t</span> (som<span data-count="961">e</span> int) None &amp; <span data-count="961">i</span>nf<span data-count="961">o</span> [ "seed" ] ~doc ~docv:"I")
+  Arg.(value &amp; <span data-count="962">o</span>p<span data-count="962">t</span> (som<span data-count="962">e</span> int) None &amp; <span data-count="962">i</span>nf<span data-count="962">o</span> [ "seed" ] ~doc ~docv:"I")
 
 let solver =
   let docv = Arg.conv_docv solver_conv in
-  <span data-count="961">l</span>et doc =
-    let pp_bold_solver fmt ty = <span data-count="5766">F</span>mt.pf fmt "$(b,%a)" Smtml.Solver_type.pp ty in
+  <span data-count="962">l</span>et doc =
+    let pp_bold_solver fmt ty = <span data-count="5772">F</span>mt.pf fmt "$(b,%a)" Smtml.Solver_type.pp ty in
     let supported_solvers = Smtml.Solver_type.supported_solvers in
-    Fmt.st<span data-count="961">r</span>
+    Fmt.st<span data-count="962">r</span>
       "SMT solver to use. $(i,%s) must be one of the %d available solvers: %a"
       docv
-      (List.lengt<span data-count="961">h</span> supported_solvers)
-      (Fmt.lis<span data-count="961">t</span> ~sep:Fmt.comma pp_bold_solver)
+      (List.lengt<span data-count="962">h</span> supported_solvers)
+      (Fmt.lis<span data-count="962">t</span> ~sep:Fmt.comma pp_bold_solver)
       supported_solvers
   in
   Arg.(
     value
-    &amp; <span data-count="961">o</span>p<span data-count="961">t</span> solver_conv Smtml.Solver_type.Z3_solver
-    &amp; <span data-count="961">i</span>nf<span data-count="961">o</span> [ "solver"; "s" ] ~doc ~docv )
+    &amp; <span data-count="962">o</span>p<span data-count="962">t</span> solver_conv Smtml.Solver_type.Z3_solver
+    &amp; <span data-count="962">i</span>nf<span data-count="962">o</span> [ "solver"; "s" ] ~doc ~docv )
 
 let source_file =
   let doc = "source file" in
   Arg.(
-    required &amp; <span data-count="961">p</span>o<span data-count="961">s</span> 0 (som<span data-count="961">e</span> existing_file_conv) None (inf<span data-count="961">o</span> [] ~doc ~docv:"FILE") )
+    required &amp; <span data-count="962">p</span>o<span data-count="962">s</span> 0 (som<span data-count="962">e</span> existing_file_conv) None (inf<span data-count="962">o</span> [] ~doc ~docv:"FILE") )
 
 let setup_log =
   let+ bench
   and+ log_level
-  and+ style_renderer = Fmt_cli.style_rendere<span data-count="961">r</span> ~docs:sdocs () in
-  <span data-count="814">L</span>og.setup ~bench style_renderer log_level
+  and+ style_renderer = Fmt_cli.style_rendere<span data-count="962">r</span> ~docs:sdocs () in
+  <span data-count="815">L</span>og.setup ~bench style_renderer log_level
 
 let testcomp =
   let doc = "test-comp mode" in
-  Arg.(value &amp; <span data-count="961">f</span>lag &amp; <span data-count="961">i</span>nf<span data-count="961">o</span> [ "testcomp" ] ~doc)
+  Arg.(value &amp; <span data-count="962">f</span>lag &amp; <span data-count="962">i</span>nf<span data-count="962">o</span> [ "testcomp" ] ~doc)
 
 let timeout =
   let doc = "Stop execution after S seconds." in
-  Arg.(value &amp; <span data-count="961">o</span>p<span data-count="961">t</span> (som<span data-count="961">e</span> float) None &amp; <span data-count="961">i</span>nf<span data-count="961">o</span> [ "timeout" ] ~doc ~docv:"S")
+  Arg.(value &amp; <span data-count="962">o</span>p<span data-count="962">t</span> (som<span data-count="962">e</span> float) None &amp; <span data-count="962">i</span>nf<span data-count="962">o</span> [ "timeout" ] ~doc ~docv:"S")
 
 let timeout_instr =
   let doc = "Stop execution after running I instructions." in
-  Arg.(value &amp; <span data-count="961">o</span>p<span data-count="961">t</span> (som<span data-count="961">e</span> int) None &amp; <span data-count="961">i</span>nf<span data-count="961">o</span> [ "timeout-instr" ] ~doc ~docv:"I")
+  Arg.(value &amp; <span data-count="962">o</span>p<span data-count="962">t</span> (som<span data-count="962">e</span> int) None &amp; <span data-count="962">i</span>nf<span data-count="962">o</span> [ "timeout-instr" ] ~doc ~docv:"I")
 
 let unsafe =
   let doc = "skip typechecking pass" in
-  Arg.(value &amp; <span data-count="961">f</span>lag &amp; <span data-count="961">i</span>nf<span data-count="961">o</span> [ "unsafe"; "u" ] ~doc)
+  Arg.(value &amp; <span data-count="962">f</span>lag &amp; <span data-count="962">i</span>nf<span data-count="962">o</span> [ "unsafe"; "u" ] ~doc)
 
 let workers =
   let doc =
     "Number of workers for symbolic execution. Defaults to the number of \
      physical cores."
   in
-  Arg.(value &amp; <span data-count="961">o</span>p<span data-count="961">t</span> (som<span data-count="961">e</span> int) None &amp; <span data-count="961">i</span>nf<span data-count="961">o</span> [ "workers"; "w" ] ~doc ~absent:"n")
+  Arg.(value &amp; <span data-count="962">o</span>p<span data-count="962">t</span> (som<span data-count="962">e</span> int) None &amp; <span data-count="962">i</span>nf<span data-count="962">o</span> [ "workers"; "w" ] ~doc ~absent:"n")
 
 let workspace : Fpath.t Cmdliner.Term.t =
   let doc = "write results and intermediate compilation artifacts to dir" in
   let aux =
     Arg.(
-      value &amp; <span data-count="961">o</span>p<span data-count="961">t</span> (som<span data-count="961">e</span> path_conv) None &amp; <span data-count="961">i</span>nf<span data-count="961">o</span> [ "workspace" ] ~doc ~docv:"DIR" )
+      value &amp; <span data-count="962">o</span>p<span data-count="962">t</span> (som<span data-count="962">e</span> path_conv) None &amp; <span data-count="962">i</span>nf<span data-count="962">o</span> [ "workspace" ] ~doc ~docv:"DIR" )
   in
   let open Term.Syntax in
-  Term.cli_parse_resul<span data-count="961">t</span>
+  Term.cli_parse_resul<span data-count="962">t</span>
   @@
   let+ workspace = aux in
   <span data-count="437">l</span>et open Prelude.Result.Syntax in
@@ -2860,15 +2860,15 @@ let workspace : Fpath.t Cmdliner.Term.t =
 
 let with_breadcrumbs =
   let doc = "add breadcrumbs to the generated model" in
-  Arg.(value &amp; <span data-count="961">f</span>lag &amp; <span data-count="961">i</span>nf<span data-count="961">o</span> [ "with-breadcrumbs" ] ~doc)
+  Arg.(value &amp; <span data-count="962">f</span>lag &amp; <span data-count="962">i</span>nf<span data-count="962">o</span> [ "with-breadcrumbs" ] ~doc)
 
 let no_ite_for_select =
   let doc = "do not use ite for select" in
-  Arg.(value &amp; <span data-count="961">f</span>lag &amp; <span data-count="961">i</span>nf<span data-count="961">o</span> [ "no-ite-for-select" ] ~doc)
+  Arg.(value &amp; <span data-count="962">f</span>lag &amp; <span data-count="962">i</span>nf<span data-count="962">o</span> [ "no-ite-for-select" ] ~doc)
 
 let debug_trace =
   let doc = "output debug traces to use with the debug GUI" in
-  Arg.(value &amp; <span data-count="961">o</span>p<span data-count="961">t</span> (som<span data-count="961">e</span> string) None &amp; <span data-count="961">i</span>nf<span data-count="961">o</span> [ "debug-trace" ] ~docv:"FILE" ~doc)
+  Arg.(value &amp; <span data-count="962">o</span>p<span data-count="962">t</span> (som<span data-count="962">e</span> string) None &amp; <span data-count="962">i</span>nf<span data-count="962">o</span> [ "debug-trace" ] ~docv:"FILE" ~doc)
 
 (* shared symbolic parameters *)
 
@@ -2916,7 +2916,7 @@ let symbolic_parameters =
 
 (* owi c *)
 module C = struct
-  let entry_point = entry_poin<span data-count="961">t</span> (Some "main")
+  let entry_point = entry_poin<span data-count="962">t</span> (Some "main")
 
   (* owi c abs *)
   let abs =
@@ -3015,7 +3015,7 @@ end
 
 (* owi c++ *)
 module Cpp = struct
-  let entry_point = entry_poin<span data-count="961">t</span> (Some "main")
+  let entry_point = entry_poin<span data-count="962">t</span> (Some "main")
 
   (* owi c++ abs *)
   let abs =
@@ -3093,7 +3093,7 @@ end
 
 (* owi go *)
 module Go = struct
-  let entry_point = entry_poin<span data-count="961">t</span> (Some "_start")
+  let entry_point = entry_poin<span data-count="962">t</span> (Some "_start")
 
   (* owi go abs *)
   let abs =
@@ -3158,7 +3158,7 @@ end
 
 (* owi haskell *)
 module Haskell = struct
-  let entry_point = entry_poin<span data-count="961">t</span> (Some "_start")
+  let entry_point = entry_poin<span data-count="962">t</span> (Some "_start")
 
   (* owi haskell abs *)
   let abs =
@@ -3225,7 +3225,7 @@ end
 
 (* owi llvm *)
 module Llvm = struct
-  let entry_point = entry_poin<span data-count="961">t</span> None
+  let entry_point = entry_poin<span data-count="962">t</span> None
 
   (* owi llvm abs *)
   let abs =
@@ -3292,7 +3292,7 @@ end
 
 (* owi rust *)
 module Rust = struct
-  let entry_point = entry_poin<span data-count="961">t</span> (Some "main")
+  let entry_point = entry_poin<span data-count="962">t</span> (Some "main")
 
   (* owi rust abs *)
   let abs =
@@ -3371,14 +3371,14 @@ end
 (* owi version *)
 module Version = struct
   let cmd =
-    let+ () = Term.cons<span data-count="961">t</span> ()
+    let+ () = Term.cons<span data-count="962">t</span> ()
     and+ () = setup_log in
     <span data-count="0">C</span>md_version.cmd ()
 end
 
 (* owi wasm *)
 module Wasm = struct
-  let entry_point = entry_poin<span data-count="961">t</span> None
+  let entry_point = entry_poin<span data-count="962">t</span> None
 
   (* owi wasm abs *)
   let abs =
@@ -3411,7 +3411,7 @@ module Wasm = struct
   let fmt =
     let+ inplace =
       let doc = "Format in-place, overwriting input file" in
-      Arg.(value &amp; <span data-count="961">f</span>lag &amp; <span data-count="961">i</span>nf<span data-count="961">o</span> [ "inplace"; "i" ] ~doc)
+      Arg.(value &amp; <span data-count="962">f</span>lag &amp; <span data-count="962">i</span>nf<span data-count="962">o</span> [ "inplace"; "i" ] ~doc)
     and+ files
     and+ () = setup_log in
     <span data-count="7">C</span>md_wasm_fmt.cmd ~inplace ~files
@@ -3489,8 +3489,8 @@ module Wasm = struct
       let doc = "Which replay file to use" in
       Arg.(
         required
-        &amp; <span data-count="961">o</span>p<span data-count="961">t</span> (som<span data-count="961">e</span> existing_file_conv) None
-        &amp; <span data-count="961">i</span>nf<span data-count="961">o</span> [ "replay-file" ] ~doc ~docv:"FILE" )
+        &amp; <span data-count="962">o</span>p<span data-count="962">t</span> (som<span data-count="962">e</span> existing_file_conv) None
+        &amp; <span data-count="962">i</span>nf<span data-count="962">o</span> [ "replay-file" ] ~doc ~docv:"FILE" )
     and+ () = setup_log
     and+ source_file
     and+ invoke_with_symbols
@@ -3505,7 +3505,7 @@ module Wasm = struct
     and+ timeout_instr
     and+ () = setup_log
     and+ source_file in
-    <span data-count="19">C</span>md_wasm_run.cmd ~unsafe ~timeout ~timeout_instr ~source_file
+    <span data-count="20">C</span>md_wasm_run.cmd ~unsafe ~timeout ~timeout_instr ~source_file
 
   (* owi wasm script *)
   module Script = struct
@@ -3515,7 +3515,7 @@ module Wasm = struct
       and+ () = setup_log
       and+ no_exhaustion =
         let doc = "no exhaustion tests" in
-        Arg.(value &amp; <span data-count="961">f</span>lag &amp; <span data-count="961">i</span>nf<span data-count="961">o</span> [ "no-exhaustion" ] ~doc)
+        Arg.(value &amp; <span data-count="962">f</span>lag &amp; <span data-count="962">i</span>nf<span data-count="962">o</span> [ "no-exhaustion" ] ~doc)
       and+ debug_trace in
       <span data-count="24">C</span>md_wasm_script.cmd_abstract ~files ~no_exhaustion ~debug_trace
 
@@ -3525,7 +3525,7 @@ module Wasm = struct
       and+ () = setup_log
       and+ no_exhaustion =
         let doc = "no exhaustion tests" in
-        Arg.(value &amp; <span data-count="961">f</span>lag &amp; <span data-count="961">i</span>nf<span data-count="961">o</span> [ "no-exhaustion" ] ~doc)
+        Arg.(value &amp; <span data-count="962">f</span>lag &amp; <span data-count="962">i</span>nf<span data-count="962">o</span> [ "no-exhaustion" ] ~doc)
       in
       <span data-count="244">C</span>md_wasm_script.cmd_concrete ~files ~no_exhaustion
 
@@ -3535,7 +3535,7 @@ module Wasm = struct
       and+ () = setup_log
       and+ no_exhaustion =
         let doc = "no exhaustion tests" in
-        Arg.(value &amp; <span data-count="961">f</span>lag &amp; <span data-count="961">i</span>nf<span data-count="961">o</span> [ "no-exhaustion" ] ~doc)
+        Arg.(value &amp; <span data-count="962">f</span>lag &amp; <span data-count="962">i</span>nf<span data-count="962">o</span> [ "no-exhaustion" ] ~doc)
       in
       <span data-count="0">C</span>md_wasm_script.cmd_symbolic ~files ~no_exhaustion
   end
@@ -3554,7 +3554,7 @@ module Wasm = struct
     let+ source_file
     and+ emit_file =
       let doc = "Emit (.wat) files from corresponding (.wasm) files." in
-      Arg.(value &amp; <span data-count="961">f</span>lag &amp; <span data-count="961">i</span>nf<span data-count="961">o</span> [ "emit-file" ] ~doc)
+      Arg.(value &amp; <span data-count="962">f</span>lag &amp; <span data-count="962">i</span>nf<span data-count="962">o</span> [ "emit-file" ] ~doc)
     and+ () = setup_log
     and+ out_file in
     <span data-count="19">C</span>md_wasm_to_wat.cmd ~source_file ~emit_file ~out_file
@@ -3576,7 +3576,7 @@ end
 
 (* owi zig *)
 module Zig = struct
-  let entry_point = entry_poin<span data-count="961">t</span> (Some "_start")
+  let entry_point = entry_poin<span data-count="962">t</span> (Some "_start")
 
   (* owi zig abs *)
   let abs =
@@ -3650,14 +3650,14 @@ end
 
 (* owi *)
 
-let info name doc = <span data-count="61504">C</span>md.info name ~doc ~version ~sdocs ~man:shared_man
+let info name doc = <span data-count="61568">C</span>md.info name ~doc ~version ~sdocs ~man:shared_man
 
 let default =
-  Term.(re<span data-count="961">t</span> (cons<span data-count="961">t</span> (fun (_ : _ list) -&gt; <span data-count="0">`</span>Help (`Plain, None)) <span data-count="961">$</span> copts_t))
+  Term.(re<span data-count="962">t</span> (cons<span data-count="962">t</span> (fun (_ : _ list) -&gt; <span data-count="0">`</span>Help (`Plain, None)) <span data-count="962">$</span> copts_t))
 
-let group name doc group = <span data-count="10571">C</span>md.group ~default (inf<span data-count="10571">o</span> name doc) group
+let group name doc group = <span data-count="10582">C</span>md.group ~default (inf<span data-count="10582">o</span> name doc) group
 
-let cmd name doc cmd = <span data-count="50933">C</span>md.v (inf<span data-count="50933">o</span> name doc) cmd
+let cmd name doc cmd = <span data-count="50986">C</span>md.v (inf<span data-count="50986">o</span> name doc) cmd
 
 let cli =
   let owi_info =
@@ -3668,132 +3668,132 @@ let cli =
     let man =
       [ `S Manpage.s_bugs; `P "Email them to &lt;owi.wildcat119@passmail.com&gt;." ]
     in
-    Cmd.inf<span data-count="961">o</span> "owi" ~version ~doc ~sdocs ~man
+    Cmd.inf<span data-count="962">o</span> "owi" ~version ~doc ~sdocs ~man
   in
 
-  Cmd.grou<span data-count="961">p</span> ~default owi_info
-    [ grou<span data-count="961">p</span> "c" "Work with C programs."
-        [ cm<span data-count="961">d</span> "abs" "Run the abstract interpreter." C.abs
-        ; cm<span data-count="961">d</span> "fuzz" "Run the fuzzer." C.fuzz
-        ; cm<span data-count="961">d</span> "hunt"
+  Cmd.grou<span data-count="962">p</span> ~default owi_info
+    [ grou<span data-count="962">p</span> "c" "Work with C programs."
+        [ cm<span data-count="962">d</span> "abs" "Run the abstract interpreter." C.abs
+        ; cm<span data-count="962">d</span> "fuzz" "Run the fuzzer." C.fuzz
+        ; cm<span data-count="962">d</span> "hunt"
             "Hunt bugs by combining the fuzzer and the symbolic execution \
              engine."
             C.hunt
-        ; cm<span data-count="961">d</span> "run" "Run the concrete interpreter." C.run
-        ; cm<span data-count="961">d</span> "sym" "Run the symbolic execution engine on a C program." C.sym
+        ; cm<span data-count="962">d</span> "run" "Run the concrete interpreter." C.run
+        ; cm<span data-count="962">d</span> "sym" "Run the symbolic execution engine on a C program." C.sym
         ]
-    ; grou<span data-count="961">p</span> "c++" "Work with C++ programs."
-        [ cm<span data-count="961">d</span> "abs" "Run the abstract interpreter." Cpp.abs
-        ; cm<span data-count="961">d</span> "fuzz" "Run the fuzzer." Cpp.fuzz
-        ; cm<span data-count="961">d</span> "hunt"
+    ; grou<span data-count="962">p</span> "c++" "Work with C++ programs."
+        [ cm<span data-count="962">d</span> "abs" "Run the abstract interpreter." Cpp.abs
+        ; cm<span data-count="962">d</span> "fuzz" "Run the fuzzer." Cpp.fuzz
+        ; cm<span data-count="962">d</span> "hunt"
             "Hunt bugs by combining the fuzzer and the symbolic execution \
              engine."
             Cpp.hunt
-        ; cm<span data-count="961">d</span> "run" "Run the concrete interpreter." Cpp.run
-        ; cm<span data-count="961">d</span> "sym" "Run the symbolic execution engine on a C++ program."
+        ; cm<span data-count="962">d</span> "run" "Run the concrete interpreter." Cpp.run
+        ; cm<span data-count="962">d</span> "sym" "Run the symbolic execution engine on a C++ program."
             Cpp.sym
         ]
-    ; grou<span data-count="961">p</span> "go" "Work with Go programs."
-        [ cm<span data-count="961">d</span> "abs" "Run the abstract interpreter." Go.abs
-        ; cm<span data-count="961">d</span> "fuzz" "Run the fuzzer." Go.fuzz
-        ; cm<span data-count="961">d</span> "hunt"
+    ; grou<span data-count="962">p</span> "go" "Work with Go programs."
+        [ cm<span data-count="962">d</span> "abs" "Run the abstract interpreter." Go.abs
+        ; cm<span data-count="962">d</span> "fuzz" "Run the fuzzer." Go.fuzz
+        ; cm<span data-count="962">d</span> "hunt"
             "Hunt bugs by combining the fuzzer and the symbolic execution \
              engine."
             Go.hunt
-        ; cm<span data-count="961">d</span> "run" "Run the concrete interpreter." Go.run
-        ; cm<span data-count="961">d</span> "sym" "Run the symbolic execution engine on a Go program." Go.sym
+        ; cm<span data-count="962">d</span> "run" "Run the concrete interpreter." Go.run
+        ; cm<span data-count="962">d</span> "sym" "Run the symbolic execution engine on a Go program." Go.sym
         ]
-    ; grou<span data-count="961">p</span> "haskell" "Work with Haskell programs."
-        [ cm<span data-count="961">d</span> "abs" "Run the abstract interpreter." Haskell.abs
-        ; cm<span data-count="961">d</span> "fuzz" "Run the fuzzer." Haskell.fuzz
-        ; cm<span data-count="961">d</span> "hunt"
+    ; grou<span data-count="962">p</span> "haskell" "Work with Haskell programs."
+        [ cm<span data-count="962">d</span> "abs" "Run the abstract interpreter." Haskell.abs
+        ; cm<span data-count="962">d</span> "fuzz" "Run the fuzzer." Haskell.fuzz
+        ; cm<span data-count="962">d</span> "hunt"
             "Hunt bugs by combining the fuzzer and the symbolic execution \
              engine."
             Haskell.hunt
-        ; cm<span data-count="961">d</span> "run" "Run the concrete interpreter." Haskell.run
-        ; cm<span data-count="961">d</span> "sym" "Run the symbolic execution engine on a Haskell program."
+        ; cm<span data-count="962">d</span> "run" "Run the concrete interpreter." Haskell.run
+        ; cm<span data-count="962">d</span> "sym" "Run the symbolic execution engine on a Haskell program."
             Haskell.sym
         ]
-    ; grou<span data-count="961">p</span> "llvm" "Work with LLVM programs."
-        [ cm<span data-count="961">d</span> "abs" "Run the abstract interpreter." Llvm.abs
-        ; cm<span data-count="961">d</span> "fuzz" "Run the fuzzer." Llvm.fuzz
-        ; cm<span data-count="961">d</span> "hunt"
+    ; grou<span data-count="962">p</span> "llvm" "Work with LLVM programs."
+        [ cm<span data-count="962">d</span> "abs" "Run the abstract interpreter." Llvm.abs
+        ; cm<span data-count="962">d</span> "fuzz" "Run the fuzzer." Llvm.fuzz
+        ; cm<span data-count="962">d</span> "hunt"
             "Hunt bugs by combining the fuzzer and the symbolic execution \
              engine."
             Llvm.hunt
-        ; cm<span data-count="961">d</span> "run" "Run the concrete interpreter." Llvm.run
-        ; cm<span data-count="961">d</span> "sym" "Run the symbolic execution engine on a LLVM program."
+        ; cm<span data-count="962">d</span> "run" "Run the concrete interpreter." Llvm.run
+        ; cm<span data-count="962">d</span> "sym" "Run the symbolic execution engine on a LLVM program."
             Llvm.sym
         ]
-    ; grou<span data-count="961">p</span> "rust" "Work with Rust programs."
-        [ cm<span data-count="961">d</span> "abs" "Run the abstract interpreter." Rust.abs
-        ; cm<span data-count="961">d</span> "fuzz" "Run the fuzzer." Rust.fuzz
-        ; cm<span data-count="961">d</span> "hunt"
+    ; grou<span data-count="962">p</span> "rust" "Work with Rust programs."
+        [ cm<span data-count="962">d</span> "abs" "Run the abstract interpreter." Rust.abs
+        ; cm<span data-count="962">d</span> "fuzz" "Run the fuzzer." Rust.fuzz
+        ; cm<span data-count="962">d</span> "hunt"
             "Hunt bugs by combining the fuzzer and the symbolic execution \
              engine."
             Rust.hunt
-        ; cm<span data-count="961">d</span> "run" "Run the concrete interpreter." Rust.run
-        ; cm<span data-count="961">d</span> "sym" "Run the symbolic execution engine on a Rust program."
+        ; cm<span data-count="962">d</span> "run" "Run the concrete interpreter." Rust.run
+        ; cm<span data-count="962">d</span> "sym" "Run the symbolic execution engine on a Rust program."
             Rust.sym
         ]
-    ; cm<span data-count="961">d</span> "version" "Print some version informations." Version.cmd
-    ; grou<span data-count="961">p</span> "wasm" "Work with Wasm programs."
-        [ cm<span data-count="961">d</span> "abs" "Run the abstract interpreter." Wasm.abs
-        ; cm<span data-count="961">d</span> "fmt" "Format a .wat or .wast file." Wasm.fmt
-        ; cm<span data-count="961">d</span> "fuzz" "Run the fuzzer." Wasm.fuzz
-        ; cm<span data-count="961">d</span> "hunt"
+    ; cm<span data-count="962">d</span> "version" "Print some version informations." Version.cmd
+    ; grou<span data-count="962">p</span> "wasm" "Work with Wasm programs."
+        [ cm<span data-count="962">d</span> "abs" "Run the abstract interpreter." Wasm.abs
+        ; cm<span data-count="962">d</span> "fmt" "Format a .wat or .wast file." Wasm.fmt
+        ; cm<span data-count="962">d</span> "fuzz" "Run the fuzzer." Wasm.fuzz
+        ; cm<span data-count="962">d</span> "hunt"
             "Hunt bugs by combining the fuzzer and the symbolic execution \
              engine."
             Wasm.hunt
-        ; grou<span data-count="961">p</span> "inspect" "Visualize and get statistics."
-            [ cm<span data-count="961">d</span> "cg" "Build a call graph." Wasm.Inspect.cg
-            ; cm<span data-count="961">d</span> "cfg" "Build a control-flow graph." Wasm.Inspect.cfg
+        ; grou<span data-count="962">p</span> "inspect" "Visualize and get statistics."
+            [ cm<span data-count="962">d</span> "cg" "Build a call graph." Wasm.Inspect.cg
+            ; cm<span data-count="962">d</span> "cfg" "Build a control-flow graph." Wasm.Inspect.cfg
             ]
-        ; grou<span data-count="961">p</span> "instrument" "Instrument a program in various ways."
-            [ cm<span data-count="961">d</span> "label"
+        ; grou<span data-count="962">p</span> "instrument" "Instrument a program in various ways."
+            [ cm<span data-count="962">d</span> "label"
                 "Generate an instrumented file with labels corresponding to \
                  test objectives for a given coverage criteria."
                 Wasm.Instrument.label
             ]
-        ; cm<span data-count="961">d</span> "iso"
+        ; cm<span data-count="962">d</span> "iso"
             "Check the iso-functionnality of two modules by comparing the \
              output when calling their exports."
             Wasm.iso
-        ; cm<span data-count="961">d</span> "replay"
+        ; cm<span data-count="962">d</span> "replay"
             "Replay a module by replacing symbols with concrete values from a \
              model."
             Wasm.replay
-        ; cm<span data-count="961">d</span> "run" "Run the concrete interpreter." Wasm.run
-        ; grou<span data-count="961">p</span> "script" "Run a reference test suite script (.wast)."
-            [ cm<span data-count="961">d</span> "concrete"
+        ; cm<span data-count="962">d</span> "run" "Run the concrete interpreter." Wasm.run
+        ; grou<span data-count="962">p</span> "script" "Run a reference test suite script (.wast)."
+            [ cm<span data-count="962">d</span> "concrete"
                 "Run a reference test suite (.wast) using the concrete \
                  interpreter."
                 Wasm.Script.concrete
-            ; cm<span data-count="961">d</span> "symbolic"
+            ; cm<span data-count="962">d</span> "symbolic"
                 "Run a reference test suite (.wast) using the symbolic \
                  interpreter."
                 Wasm.Script.symbolic
-            ; cm<span data-count="961">d</span> "abstract"
+            ; cm<span data-count="962">d</span> "abstract"
                 "Run a reference test suite (.wast) using the abstract \
                  interpreter."
                 Wasm.Script.abstract
             ]
-        ; cm<span data-count="961">d</span> "sym" "Run the symbolic execution engine." Wasm.sym
-        ; cm<span data-count="961">d</span> "validate" "Validate a module." Wasm.validate
-        ; cm<span data-count="961">d</span> "to_wat" "Generate a text file (.wat) from a binary file (.wasm)."
+        ; cm<span data-count="962">d</span> "sym" "Run the symbolic execution engine." Wasm.sym
+        ; cm<span data-count="962">d</span> "validate" "Validate a module." Wasm.validate
+        ; cm<span data-count="962">d</span> "to_wat" "Generate a text file (.wat) from a binary file (.wasm)."
             Wasm.to_wat
-        ; cm<span data-count="961">d</span> "of_wat" "Generate a binary file (.wasm) from a text file (.wat)."
+        ; cm<span data-count="962">d</span> "of_wat" "Generate a binary file (.wasm) from a text file (.wat)."
             Wasm.of_wat
         ]
-    ; grou<span data-count="961">p</span> "zig" "Work with Zig programs."
-        [ cm<span data-count="961">d</span> "abs" "Run the abstract interpreter." Zig.abs
-        ; cm<span data-count="961">d</span> "fuzz" "Run the fuzzer." Zig.fuzz
-        ; cm<span data-count="961">d</span> "hunt"
+    ; grou<span data-count="962">p</span> "zig" "Work with Zig programs."
+        [ cm<span data-count="962">d</span> "abs" "Run the abstract interpreter." Zig.abs
+        ; cm<span data-count="962">d</span> "fuzz" "Run the fuzzer." Zig.fuzz
+        ; cm<span data-count="962">d</span> "hunt"
             "Hunt bugs by combining the fuzzer and the symbolic execution \
              engine."
             Zig.hunt
-        ; cm<span data-count="961">d</span> "run" "Run the concrete interpreter." Zig.run
-        ; cm<span data-count="961">d</span> "sym" "Run the symbolic execution engine on a Zig program."
+        ; cm<span data-count="962">d</span> "run" "Run the concrete interpreter." Zig.run
+        ; cm<span data-count="962">d</span> "sym" "Run the symbolic execution engine on a Zig program."
             Zig.sym
         ]
     ]
@@ -3802,9 +3802,9 @@ let exit_code =
   let open Cmd.Exit in
   match Cmd.eval_value cli with
   | Ok (<span data-count="130">`</span>Help | <span data-count="0">`</span>Version) -&gt; ok
-  | <span data-count="806">O</span>k (`Ok result) -&gt;
+  | <span data-count="807">O</span>k (`Ok result) -&gt;
     begin match result with
-    | <span data-count="531">O</span>k () -&gt; ok
+    | <span data-count="532">O</span>k () -&gt; ok
     | <span data-count="275">E</span>rror e -&gt; begin
       Log.err (fun m -&gt; <span data-count="275">m</span> "%s" (Result.err_to_strin<span data-count="275">g</span> e));
       <span data-count="275">R</span>esult.err_to_exit_cod<span data-count="275">e</span> e

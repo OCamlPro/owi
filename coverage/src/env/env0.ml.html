@@ -1044,7 +1044,7 @@ let pp ~pp_global ~pp_table ppf
     registered_modules pp_types types pp_type_groups type_groups
 
 let empty ~context =
-  <span data-count="750">l</span>et functions = Allocator.empty in
+  <span data-count="751">l</span>et functions = Allocator.empty in
   let globals = Allocator.empty in
   let memories = Allocator.empty in
   let tables = Allocator.empty in
@@ -1086,9 +1086,9 @@ let empty ~context =
 type modul = int
 
 let get_last_module ~env =
-  <span data-count="54039">m</span>atch env.last_module with
+  <span data-count="54040">m</span>atch env.last_module with
   | <span data-count="0">N</span>one -&gt; Error (`Unknown_module "there was no last module")
-  | <span data-count="54039">S</span>ome modul -&gt; Ok modul
+  | <span data-count="54040">S</span>ome modul -&gt; Ok modul
 
 open Syntax
 
@@ -1111,11 +1111,11 @@ let get_registered_module ~env ~name =
   | <span data-count="5513">S</span>ome modul -&gt; Ok modul
 
 let get_next_module ~env =
-  <span data-count="4234">m</span>atch env.last_module with <span data-count="750">N</span>one -&gt; 0 | <span data-count="3484">S</span>ome modul -&gt; succ modul
+  <span data-count="4235">m</span>atch env.last_module with <span data-count="751">N</span>one -&gt; 0 | <span data-count="3484">S</span>ome modul -&gt; succ modul
 
 let get_initialization_code ~env ~modul : Binary.expr =
-  <span data-count="2899">m</span>atch IntMap.find_opt modul env.initialization_codes with
-  | <span data-count="2899">S</span>ome expr -&gt; expr
+  <span data-count="2900">m</span>atch IntMap.find_opt modul env.initialization_codes with
+  | <span data-count="2900">S</span>ome expr -&gt; expr
   | <span data-count="0">N</span>one -&gt; []
 
 let load_exported_key exported ~env ~modul_name ~name =
@@ -1221,25 +1221,25 @@ let get_global ~env id =
   | None -&gt; assert false
 
 let set_global ~env id value =
-  <span data-count="1999">m</span>atch Allocator.find_opt id env.globals with
-  | <span data-count="1999">S</span>ome { typ; _ } -&gt;
+  <span data-count="1957">m</span>atch Allocator.find_opt id env.globals with
+  | <span data-count="1957">S</span>ome { typ; _ } -&gt;
     let global = { value; typ } in
     let globals = Allocator.add_manual id global env.globals in
-    <span data-count="1999">{</span> env with globals }
+    <span data-count="1957">{</span> env with globals }
   | None -&gt; assert false
 
 let get_memory ~env id =
-  <span data-count="1223816">m</span>atch Allocator.find_opt id env.memories with
-  | <span data-count="1223820">S</span>ome m -&gt; m
+  <span data-count="1223813">m</span>atch Allocator.find_opt id env.memories with
+  | <span data-count="1223816">S</span>ome m -&gt; m
   | None -&gt; assert false
 
 let set_memory ~env id memory =
-  <span data-count="597504">l</span>et memories = Allocator.add_manual id memory env.memories in
-  <span data-count="597506">{</span> env with memories }
+  <span data-count="597507">l</span>et memories = Allocator.add_manual id memory env.memories in
+  <span data-count="597508">{</span> env with memories }
 
 let get_table ~env id =
-  <span data-count="808596">m</span>atch Allocator.find_opt id env.tables with
-  | <span data-count="808597">S</span>ome m -&gt; m
+  <span data-count="808590">m</span>atch Allocator.find_opt id env.tables with
+  | <span data-count="808590">S</span>ome m -&gt; m
   | None -&gt; assert false
 
 let set_table ~env id table =
@@ -1266,8 +1266,8 @@ let set_data ~env id data =
   <span data-count="481">{</span> env with datas }
 
 let get_func ~env id =
-  <span data-count="11214131">m</span>atch Allocator.find_opt id env.functions with
-  | <span data-count="11214133">S</span>ome v -&gt; v
+  <span data-count="11183402">m</span>atch Allocator.find_opt id env.functions with
+  | <span data-count="11183403">S</span>ome v -&gt; v
   | None -&gt; assert false
 
 let get_types ~env = <span data-count="1602586">e</span>nv.types
