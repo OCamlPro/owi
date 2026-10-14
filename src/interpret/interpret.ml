@@ -1938,8 +1938,8 @@ struct
       (* TODO: should we have something like select_i8 here? or rather, mask it correctly before calling select_i32? *)
       let* c = Choice.select_i32 c in
       let c =
+        let c = Int32.logand c 0xFFl in
         let c = Int32.to_int c in
-        let c = Int.abs c mod 256 in
         Char.chr c
       in
       let+ mem = Memory.fill mem ~pos ~len c in
