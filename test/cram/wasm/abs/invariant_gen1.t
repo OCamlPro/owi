@@ -192,112 +192,227 @@
   owi: [INFO] stack         : [  ]
   owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
               (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
-              (5 -> i32 {1});  (6 -> i32 {0x2710}) ]
+              (5 -> i32 {0; 1});  (6 -> i32 {0x2710}) ]
   owi: [INFO] running instr : i32.const 100
   owi: [INFO] stack         : [ i32 {100} ]
   owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
               (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
-              (5 -> i32 {1});  (6 -> i32 {0x2710}) ]
+              (5 -> i32 {0; 1});  (6 -> i32 {0x2710}) ]
   owi: [INFO] running instr : local.get 4
   owi: [INFO] stack         : [ i32 {1} ; i32 {100} ]
   owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
               (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
-              (5 -> i32 {1});  (6 -> i32 {0x2710}) ]
+              (5 -> i32 {0; 1});  (6 -> i32 {0x2710}) ]
   owi: [INFO] running instr : i32.div_s
   owi: [INFO] stack         : [ i32 {100} ]
   owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
               (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
-              (5 -> i32 {1});  (6 -> i32 {0x2710}) ]
+              (5 -> i32 {0; 1});  (6 -> i32 {0x2710}) ]
   owi: [INFO] running instr : drop
   owi: [INFO] stack         : [  ]
   owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
               (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
-              (5 -> i32 {1});  (6 -> i32 {0x2710}) ]
+              (5 -> i32 {0; 1});  (6 -> i32 {0x2710}) ]
   owi: [INFO] running instr : local.get 5
-  owi: [INFO] stack         : [ i32 {1} ]
+  owi: [INFO] stack         : [ i32 {0; 1} ]
   owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
               (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
-              (5 -> i32 {1});  (6 -> i32 {0x2710}) ]
+              (5 -> i32 {0; 1});  (6 -> i32 {0x2710}) ]
   owi: [INFO] running instr : i32.const 1
-  owi: [INFO] stack         : [ i32 {1} ; i32 {1} ]
+  owi: [INFO] stack         : [ i32 {1} ; i32 {0; 1} ]
   owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
               (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
-              (5 -> i32 {1});  (6 -> i32 {0x2710}) ]
+              (5 -> i32 {0; 1});  (6 -> i32 {0x2710}) ]
   owi: [INFO] running instr : i32.add
-  owi: [INFO] stack         : [ i32 {2} ]
+  owi: [INFO] stack         : [ i32 {1; 2} ]
   owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
               (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
-              (5 -> i32 {1});  (6 -> i32 {0x2710}) ]
+              (5 -> i32 {0; 1});  (6 -> i32 {0x2710}) ]
   owi: [INFO] running instr : local.tee 5
-  owi: [INFO] stack         : [ i32 {2} ]
+  owi: [INFO] stack         : [ i32 {1; 2} ]
   owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
               (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
-              (5 -> i32 {2});  (6 -> i32 {0x2710}) ]
+              (5 -> i32 {1; 2});  (6 -> i32 {0x2710}) ]
   owi: [INFO] running instr : local.get 6
-  owi: [INFO] stack         : [ i32 {0x2710} ; i32 {2} ]
+  owi: [INFO] stack         : [ i32 {0x2710} ; i32 {1; 2} ]
   owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
               (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
-              (5 -> i32 {2});  (6 -> i32 {0x2710}) ]
+              (5 -> i32 {1; 2});  (6 -> i32 {0x2710}) ]
   owi: [INFO] running instr : i32.lt_s
   owi: [INFO] stack         : [ i32 {1} ]
   owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
               (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
-              (5 -> i32 {2});  (6 -> i32 {0x2710}) ]
+              (5 -> i32 {1; 2});  (6 -> i32 {0x2710}) ]
   owi: [INFO] running instr : br_if 0
   owi: [INFO] stack         : [  ]
   owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
               (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
-              (5 -> i32 {2});  (6 -> i32 {0x2710}) ]
+              (5 -> i32 [0..0x7FFFFFFF]);  (6 -> i32 {0x2710}) ]
   owi: [INFO] running instr : i32.const 100
   owi: [INFO] stack         : [ i32 {100} ]
   owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
               (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
-              (5 -> i32 {2});  (6 -> i32 {0x2710}) ]
+              (5 -> i32 [0..0x7FFFFFFF]);  (6 -> i32 {0x2710}) ]
   owi: [INFO] running instr : local.get 4
   owi: [INFO] stack         : [ i32 {1} ; i32 {100} ]
   owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
               (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
-              (5 -> i32 {2});  (6 -> i32 {0x2710}) ]
+              (5 -> i32 [0..0x7FFFFFFF]);  (6 -> i32 {0x2710}) ]
   owi: [INFO] running instr : i32.div_s
   owi: [INFO] stack         : [ i32 {100} ]
   owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
               (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
-              (5 -> i32 {2});  (6 -> i32 {0x2710}) ]
+              (5 -> i32 [0..0x7FFFFFFF]);  (6 -> i32 {0x2710}) ]
   owi: [INFO] running instr : drop
   owi: [INFO] stack         : [  ]
   owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
               (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
-              (5 -> i32 {2});  (6 -> i32 {0x2710}) ]
+              (5 -> i32 [0..0x7FFFFFFF]);  (6 -> i32 {0x2710}) ]
   owi: [INFO] running instr : local.get 5
-  owi: [INFO] stack         : [ i32 {2} ]
+  owi: [INFO] stack         : [ i32 [0..0x7FFFFFFF] ]
   owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
               (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
-              (5 -> i32 {2});  (6 -> i32 {0x2710}) ]
+              (5 -> i32 [0..0x7FFFFFFF]);  (6 -> i32 {0x2710}) ]
   owi: [INFO] running instr : i32.const 1
-  owi: [INFO] stack         : [ i32 {1} ; i32 {2} ]
+  owi: [INFO] stack         : [ i32 {1} ; i32 [0..0x7FFFFFFF] ]
   owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
               (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
-              (5 -> i32 {2});  (6 -> i32 {0x2710}) ]
+              (5 -> i32 [0..0x7FFFFFFF]);  (6 -> i32 {0x2710}) ]
   owi: [INFO] running instr : i32.add
-  owi: [INFO] stack         : [ i32 BottomMod ]
+  owi: [INFO] stack         : [ i32 [1..0x80000000] ]
   owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
               (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
-              (5 -> i32 {2});  (6 -> i32 {0x2710}) ]
+              (5 -> i32 [0..0x7FFFFFFF]);  (6 -> i32 {0x2710}) ]
   owi: [INFO] running instr : local.tee 5
-  owi: [INFO] stack         : [ i32 BottomMod ]
+  owi: [INFO] stack         : [ i32 [1..0x80000000] ]
   owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
               (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
-              (5 -> i32 BottomMod);  (6 -> i32 {0x2710}) ]
+              (5 -> i32 [1..0x80000000]);  (6 -> i32 {0x2710}) ]
   owi: [INFO] running instr : local.get 6
-  owi: [INFO] stack         : [ i32 {0x2710} ; i32 BottomMod ]
+  owi: [INFO] stack         : [ i32 {0x2710} ; i32 [1..0x80000000] ]
   owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
               (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
-              (5 -> i32 BottomMod);  (6 -> i32 {0x2710}) ]
+              (5 -> i32 [1..0x80000000]);  (6 -> i32 {0x2710}) ]
   owi: [INFO] running instr : i32.lt_s
-  owi: [INFO] stack         : [ i32 BottomMod ]
+  owi: [INFO] stack         : [ i32 {0; 1} ]
   owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
               (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
-              (5 -> i32 BottomMod);  (6 -> i32 {0x2710}) ]
+              (5 -> i32 [1..0x80000000]);  (6 -> i32 {0x2710}) ]
   owi: [INFO] running instr : br_if 0
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
+              (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
+              (5 -> i32 [--..--]);  (6 -> i32 {0x2710}) ]
+  owi: [INFO] running instr : i32.const 100
+  owi: [INFO] stack         : [ i32 {100} ]
+  owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
+              (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
+              (5 -> i32 [--..--]);  (6 -> i32 {0x2710}) ]
+  owi: [INFO] running instr : local.get 4
+  owi: [INFO] stack         : [ i32 {1} ; i32 {100} ]
+  owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
+              (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
+              (5 -> i32 [--..--]);  (6 -> i32 {0x2710}) ]
+  owi: [INFO] running instr : i32.div_s
+  owi: [INFO] stack         : [ i32 {100} ]
+  owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
+              (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
+              (5 -> i32 [--..--]);  (6 -> i32 {0x2710}) ]
+  owi: [INFO] running instr : drop
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
+              (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
+              (5 -> i32 [--..--]);  (6 -> i32 {0x2710}) ]
+  owi: [INFO] running instr : local.get 5
+  owi: [INFO] stack         : [ i32 [--..--] ]
+  owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
+              (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
+              (5 -> i32 [--..--]);  (6 -> i32 {0x2710}) ]
+  owi: [INFO] running instr : i32.const 1
+  owi: [INFO] stack         : [ i32 {1} ; i32 [--..--] ]
+  owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
+              (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
+              (5 -> i32 [--..--]);  (6 -> i32 {0x2710}) ]
+  owi: [INFO] running instr : i32.add
+  owi: [INFO] stack         : [ i32 [--..--] ]
+  owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
+              (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
+              (5 -> i32 [--..--]);  (6 -> i32 {0x2710}) ]
+  owi: [INFO] running instr : local.tee 5
+  owi: [INFO] stack         : [ i32 [--..--] ]
+  owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
+              (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
+              (5 -> i32 [--..--]);  (6 -> i32 {0x2710}) ]
+  owi: [INFO] running instr : local.get 6
+  owi: [INFO] stack         : [ i32 {0x2710} ; i32 [--..--] ]
+  owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
+              (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
+              (5 -> i32 [--..--]);  (6 -> i32 {0x2710}) ]
+  owi: [INFO] running instr : i32.lt_s
+  owi: [INFO] stack         : [ i32 {0; 1} ]
+  owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
+              (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
+              (5 -> i32 [--..--]);  (6 -> i32 {0x2710}) ]
+  owi: [INFO] running instr : br_if 0
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
+              (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
+              (5 -> i32 [0x2710..0x7FFFFFFF]);  (6 -> i32 {0x2710}) ]
+  owi: [INFO] running instr : local.get 0
+  owi: [INFO] stack         : [ i32 [--..--] ]
+  owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
+              (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
+              (5 -> i32 [0x2710..0x7FFFFFFF]);  (6 -> i32 {0x2710}) ]
+  owi: [INFO] running instr : i32.const 4242
+  owi: [INFO] stack         : [ i32 {4242} ; i32 [--..--] ]
+  owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
+              (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
+              (5 -> i32 [0x2710..0x7FFFFFFF]);  (6 -> i32 {0x2710}) ]
+  owi: [INFO] running instr : i32.eq
+  owi: [INFO] stack         : [ i32 {0; 1} ]
+  owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
+              (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
+              (5 -> i32 [0x2710..0x7FFFFFFF]);  (6 -> i32 {0x2710}) ]
+  owi: [INFO] running instr : if
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] locals        : [ (0 -> i32 {4242});  (1 -> i32 [--..--]); 
+              (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
+              (5 -> i32 [0x2710..0x7FFFFFFF]);  (6 -> i32 {0x2710}) ]
+  owi: [INFO] running instr : block
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] locals        : [ (0 -> i32 {4242});  (1 -> i32 [--..--]); 
+              (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
+              (5 -> i32 [0x2710..0x7FFFFFFF]);  (6 -> i32 {0x2710}) ]
+  owi: [INFO] running instr : i32.const 0
+  owi: [INFO] stack         : [ i32 {0} ]
+  owi: [INFO] locals        : [ (0 -> i32 {4242});  (1 -> i32 [--..--]); 
+              (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
+              (5 -> i32 [0x2710..0x7FFFFFFF]);  (6 -> i32 {0x2710}) ]
+  owi: [INFO] running instr : local.set 4
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
+              (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {1}); 
+              (5 -> i32 [0x2710..0x7FFFFFFF]);  (6 -> i32 {0x2710}) ]
+  owi: [INFO] running instr : block
+  owi: [INFO] stack         : [  ]
+  owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
+              (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {0; 1}); 
+              (5 -> i32 [0x2710..0x7FFFFFFF]);  (6 -> i32 {0x2710}) ]
+  owi: [INFO] running instr : i32.const 42
+  owi: [INFO] stack         : [ i32 {42} ]
+  owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
+              (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {0; 1}); 
+              (5 -> i32 [0x2710..0x7FFFFFFF]);  (6 -> i32 {0x2710}) ]
+  owi: [INFO] running instr : local.get 4
+  owi: [INFO] stack         : [ i32 {0; 1} ; i32 {42} ]
+  owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
+              (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {0; 1}); 
+              (5 -> i32 [0x2710..0x7FFFFFFF]);  (6 -> i32 {0x2710}) ]
+  owi: [INFO] running instr : i32.div_s
+  owi: [INFO] stack         : [ i32 {42} ]
+  owi: [INFO] locals        : [ (0 -> i32 [--..--]);  (1 -> i32 [--..--]); 
+              (2 -> i32 [--..--]);  (3 -> i32 {30});  (4 -> i32 {0; 1}); 
+              (5 -> i32 [0x2710..0x7FFFFFFF]);  (6 -> i32 {0x2710}) ]
+  owi: [INFO] running instr : drop
   owi: [INFO] Passed division by zero check for expression:(uuid: 24) i32.div_s
   owi: [WARNING] Possible division by zero for expression:(uuid: 47) i32.div_s
