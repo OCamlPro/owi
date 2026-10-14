@@ -111,7 +111,7 @@ module Key = struct
 
   let decr = ma<span data-count="979">p</span> Int.pred
 
-  let to_int = function <span data-count="3137">I</span> i -&gt; i | <span data-count="2183">R</span>et -&gt; -1
+  let to_int = function <span data-count="3197">I</span> i -&gt; i | <span data-count="2183">R</span>et -&gt; -1
 
   let pp fmt = function <span data-count="0">I</span> i -&gt; Fmt.pf fmt "%i" i | <span data-count="0">R</span>et -&gt; Fmt.pf fmt "ret"
 end
@@ -120,11 +120,11 @@ include PatriciaTree.MakeMap (Key)
 
 type nonrec t = Abstract_interpreter_state.t list t
 
-let append v1 v2 = <span data-count="5536">i</span>dempotent_union (fun _ v1 v2 -&gt; <span data-count="0">L</span>ist.append v1 v2) v1 v2
+let append v1 v2 = <span data-count="5638">i</span>dempotent_union (fun _ v1 v2 -&gt; <span data-count="0">L</span>ist.append v1 v2) v1 v2
 
 let decr map =
-  <span data-count="583">f</span>old
-    (fun k v acc -&gt; <span data-count="256">m</span>atch k with <span data-count="200">I</span> 0 -&gt; acc | <span data-count="56">k</span> -&gt; add (Key.dec<span data-count="56">r</span> k) v acc)
+  <span data-count="587">f</span>old
+    (fun k v acc -&gt; <span data-count="261">m</span>atch k with <span data-count="205">I</span> 0 -&gt; acc | <span data-count="56">k</span> -&gt; add (Key.dec<span data-count="56">r</span> k) v acc)
     map empty
 
 let pp fmt =

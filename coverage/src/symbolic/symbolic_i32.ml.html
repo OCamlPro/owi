@@ -151,31 +151,31 @@ let rotate_right = ext_rotate_right
 let rotate_left = ext_rotate_left
 
 let to_boolean (e : t) : Symbolic_boolean.t =
-  <span data-count="320603">m</span>atch Smtml.Typed.view e with
-  | <span data-count="307282">V</span>al (Bitv bv) -&gt;
-    if Smtml.Bitvector.eqz bv then <span data-count="111912">S</span>ymbolic_boolean.false_
-    else <span data-count="195370">S</span>ymbolic_boolean.true_
+  <span data-count="320709">m</span>atch Smtml.Typed.view e with
+  | <span data-count="307383">V</span>al (Bitv bv) -&gt;
+    if Smtml.Bitvector.eqz bv then <span data-count="111952">S</span>ymbolic_boolean.false_
+    else <span data-count="195432">S</span>ymbolic_boolean.true_
   | <span data-count="0">S</span>ymbol { ty = Ty_bool; _ } -&gt; Smtml.Typed.Bitv32.to_bool e
   | <span data-count="12651">C</span>vtop (_, OfBool, cond) -&gt; Smtml.Typed.Unsafe.wrap cond
-  | <span data-count="670">_</span> -&gt; Smtml.Typed.Bitv32.to_bool e
+  | <span data-count="673">_</span> -&gt; Smtml.Typed.Bitv32.to_bool e
 
 let of_boolean (e : Symbolic_boolean.t) : t =
-  <span data-count="243589">m</span>atch Smtml.Typed.view e with
-  | <span data-count="120905">V</span>al True -&gt; one
-  | <span data-count="108314">V</span>al False -&gt; zero
-  | <span data-count="14371">_</span> -&gt; Smtml.Typed.Bitv32.of_bool e
+  <span data-count="243666">m</span>atch Smtml.Typed.view e with
+  | <span data-count="120943">V</span>al True -&gt; one
+  | <span data-count="108351">V</span>al False -&gt; zero
+  | <span data-count="14372">_</span> -&gt; Smtml.Typed.Bitv32.of_bool e
 
 let boolify e =
-  <span data-count="39996">m</span>atch Smtml.Typed.view e with
-  | <span data-count="38901">V</span>al (Bitv bv) when Smtml.Bitvector.eq<span data-count="38901">z</span> bv -&gt; <span data-count="256">S</span>ome Symbolic_boolean.false_
-  | <span data-count="38645">V</span>al (Bitv bv) when Smtml.Bitvector.eq_on<span data-count="38645">e</span> bv -&gt; <span data-count="654">S</span>ome Symbolic_boolean.true_
+  <span data-count="40005">m</span>atch Smtml.Typed.view e with
+  | <span data-count="38909">V</span>al (Bitv bv) when Smtml.Bitvector.eq<span data-count="38909">z</span> bv -&gt; <span data-count="255">S</span>ome Symbolic_boolean.false_
+  | <span data-count="38654">V</span>al (Bitv bv) when Smtml.Bitvector.eq_on<span data-count="38654">e</span> bv -&gt; <span data-count="654">S</span>ome Symbolic_boolean.true_
   | <span data-count="658">C</span>vtop (_, OfBool, cond) -&gt; Some (Smtml.Typed.Unsafe.wra<span data-count="658">p</span> cond)
-  | <span data-count="38428">_</span> -&gt; None
+  | <span data-count="38437">_</span> -&gt; None
 
 let logand e1 e2 =
-  <span data-count="19899">m</span>atch (boolif<span data-count="19899">y</span> e1, boolif<span data-count="19899">y</span> e2) with
+  <span data-count="19903">m</span>atch (boolif<span data-count="19904">y</span> e1, boolif<span data-count="19904">y</span> e2) with
   | <span data-count="571">S</span>ome b1, Some b2 -&gt; of_boolean (Symbolic_boolean.and<span data-count="571">_</span> b1 b2)
-  | <span data-count="19328">_</span> -&gt; Smtml.Typed.Bitv32.logand e1 e2
+  | <span data-count="19333">_</span> -&gt; Smtml.Typed.Bitv32.logand e1 e2
 
 let logor e1 e2 =
   <span data-count="99">m</span>atch (boolif<span data-count="99">y</span> e1, boolif<span data-count="99">y</span> e2) with
@@ -183,12 +183,12 @@ let logor e1 e2 =
   | <span data-count="57">_</span> -&gt; Smtml.Typed.Bitv32.logor e1 e2
 
 let eq_concrete (e : t) (c : Int32.t) : Symbolic_boolean.t =
-  <span data-count="724">l</span>et c = of_int32 c in
-  <span data-count="724">S</span>mtml.Typed.Bitv32.eq c e
+  <span data-count="934">l</span>et c = of_int32 c in
+  <span data-count="934">S</span>mtml.Typed.Bitv32.eq c e
 
 let min_int = of_int3<span data-count="979">2</span> Int32.min_int
 
-let eqz (v : t) = <span data-count="201105">e</span>q v zero
+let eqz (v : t) = <span data-count="201120">e</span>q v zero
 
 let ( = ) = eq
 

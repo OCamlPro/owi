@@ -238,47 +238,47 @@ type t = Abstract_domain.binary
 
 let size = Units.In_bits.s32
 
-let pp ctx = <span data-count="907">A</span>bstract_domain.binary_pretty ctx ~size
+let pp ctx = <span data-count="1259">A</span>bstract_domain.binary_pretty ctx ~size
 
-let[@inline] of_binary x = <span data-count="60">x</span>
+let[@inline] of_binary x = <span data-count="220">x</span>
 
-let[@inline] to_binary x = <span data-count="61">x</span>
+let[@inline] to_binary x = <span data-count="181">x</span>
 
 let unknown ctx = <span data-count="96">A</span>bstract_domain.binary_unknown ~size ctx
 
-let eq ctx i1 i2 = <span data-count="1050">A</span>bstract_domain.Binary_Forward.beq ~size ctx i1 i2
+let eq ctx i1 i2 = <span data-count="1056">A</span>bstract_domain.Binary_Forward.beq ~size ctx i1 i2
 
 let ne ctx i1 i2 = <span data-count="16">A</span>bstract_boolean.not ctx (e<span data-count="16">q</span> ctx i1 i2)
 
 let of_boolean ctx boolean =
-  <span data-count="353">A</span>bstract_domain.Binary_Forward.bofbool ~size ctx boolean
+  <span data-count="361">A</span>bstract_domain.Binary_Forward.bofbool ~size ctx boolean
 
 let to_boolean ctx x =
-  <span data-count="330">l</span>et zero = Abstract_domain.Binary_Forward.biconst ~size Z.zero ctx in
-  <span data-count="330">l</span>et b = Abstract_domain.Binary_Forward.beq ~size ctx x zero in
-  <span data-count="330">A</span>bstract_boolean.not ctx b
+  <span data-count="338">l</span>et zero = Abstract_domain.Binary_Forward.biconst ~size Z.zero ctx in
+  <span data-count="338">l</span>et b = Abstract_domain.Binary_Forward.beq ~size ctx x zero in
+  <span data-count="338">A</span>bstract_boolean.not ctx b
 
 let of_int32 ctx i =
-  <span data-count="2776">A</span>bstract_domain.Binary_Forward.biconst ~size (Z.of_int32_unsigne<span data-count="2776">d</span> i) ctx
+  <span data-count="2795">A</span>bstract_domain.Binary_Forward.biconst ~size (Z.of_int32_unsigne<span data-count="2795">d</span> i) ctx
 
 let of_int ctx i = <span data-count="0">A</span>bstract_domain.Binary_Forward.biconst ~size (Z.of_in<span data-count="0">t</span> i) ctx
 
-let zero ctx = <span data-count="122">A</span>bstract_domain.Binary_Forward.biconst ~size Z.zero ctx
+let zero ctx = <span data-count="126">A</span>bstract_domain.Binary_Forward.biconst ~size Z.zero ctx
 
-let eqz ctx i = <span data-count="86">e</span>q ctx (zer<span data-count="86">o</span> ctx) i
+let eqz ctx i = <span data-count="90">e</span>q ctx (zer<span data-count="90">o</span> ctx) i
 
 (* TODO: proper handling of overflow *)
 
 let add ctx x1 x2 =
-  <span data-count="77">l</span>et flags = Operator.Flags.Biadd.no_overflow in
+  <span data-count="80">l</span>et flags = Operator.Flags.Biadd.no_overflow in
   Abstract_domain.Binary_Forward.biadd ~flags ~size ctx x1 x2
 
 let sub ctx x1 x2 =
-  <span data-count="20">l</span>et flags = Operator.Flags.Bisub.no_overflow in
+  <span data-count="24">l</span>et flags = Operator.Flags.Bisub.no_overflow in
   Abstract_domain.Binary_Forward.bisub ~flags ~size ctx x1 x2
 
 let mul ctx x1 x2 =
-  <span data-count="12">l</span>et flags = Operator.Flags.Bimul.pack ~nsw:false ~nuw:false in
+  <span data-count="16">l</span>et flags = Operator.Flags.Bimul.pack ~nsw:false ~nuw:false in
   Abstract_domain.Binary_Forward.bimul ~flags ~size ctx x1 x2
 
 let div_s = Abstract_domain.Binary_Forward.bisdiv ~size
@@ -295,15 +295,15 @@ let or_ ctx x1 x2 = <span data-count="8">A</span>bstract_domain.Binary_Forward.b
 
 let xor ctx x1 x2 = <span data-count="10">A</span>bstract_domain.Binary_Forward.bxor ctx ~size x1 x2
 
-let le_s ctx x1 x2 = <span data-count="75">A</span>bstract_domain.Binary_Forward.bisle ~size ctx x1 x2
+let le_s ctx x1 x2 = <span data-count="81">A</span>bstract_domain.Binary_Forward.bisle ~size ctx x1 x2
 
 let le_u ctx x1 x2 = <span data-count="98">A</span>bstract_domain.Binary_Forward.biule ~size ctx x1 x2
 
-let ge_s ctx x1 x2 = <span data-count="52">l</span>e_s ctx x2 x1
+let ge_s ctx x1 x2 = <span data-count="54">l</span>e_s ctx x2 x1
 
 let ge_u ctx x1 x2 = <span data-count="84">l</span>e_u ctx x2 x1
 
-let lt_s ctx x1 x2 = <span data-count="38">A</span>bstract_boolean.not ctx (ge_<span data-count="38">s</span> ctx x1 x2)
+let lt_s ctx x1 x2 = <span data-count="40">A</span>bstract_boolean.not ctx (ge_<span data-count="40">s</span> ctx x1 x2)
 
 let lt_u ctx x1 x2 = <span data-count="30">A</span>bstract_boolean.not ctx (ge_<span data-count="30">u</span> ctx x1 x2)
 

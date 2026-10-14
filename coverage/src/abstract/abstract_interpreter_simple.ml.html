@@ -5289,42 +5289,42 @@ type t =
   | Unreachable
 
 let i32_can_be_zero ctx v =
-  <span data-count="70">m</span>atch Abstract_domain.query_boolean ctx (Abstract_i32.eq<span data-count="70">z</span> ctx v) with
-  | <span data-count="0">T</span>rue | <span data-count="1">T</span>op -&gt; true
-  | <span data-count="69">F</span>alse | <span data-count="0">B</span>ottom -&gt; false
+  <span data-count="74">m</span>atch Abstract_domain.query_boolean ctx (Abstract_i32.eq<span data-count="74">z</span> ctx v) with
+  | <span data-count="0">T</span>rue | <span data-count="3">T</span>op -&gt; true
+  | <span data-count="71">F</span>alse | <span data-count="0">B</span>ottom -&gt; false
 
 let add_divide_by_zero_invariant invariant ~uuid ~possible =
-  <span data-count="132">A</span>bstract_invariant.add_divide_by_zero_invariant invariant ~uuid ~possible;
-  <span data-count="132">i</span>f possible then
-    <span data-count="1">A</span>bstract_trace.record_wasm_warning ~instr_id:uuid
+  <span data-count="136">A</span>bstract_invariant.add_divide_by_zero_invariant invariant ~uuid ~possible;
+  <span data-count="136">i</span>f possible then
+    <span data-count="3">A</span>bstract_trace.record_wasm_warning ~instr_id:uuid
       ~message:"Possible division by zero"
 
 let eval_i32 env ({ stack; ctx; invariant; _ } as abs_state : Abstract_state.t)
-  uuid = <span data-count="1214">f</span>unction
-  | <span data-count="721">(</span>Const i : Binary.i32_instr) -&gt;
-    let stack = Stack.push_i32 stack (Abstract_i32.of_int3<span data-count="721">2</span> ctx i) in
-    <span data-count="721">l</span>et abs_state = { abs_state with stack } in
+  uuid = <span data-count="1256">f</span>unction
+  | <span data-count="740">(</span>Const i : Binary.i32_instr) -&gt;
+    let stack = Stack.push_i32 stack (Abstract_i32.of_int3<span data-count="740">2</span> ctx i) in
+    <span data-count="740">l</span>et abs_state = { abs_state with stack } in
     State { abs_state; env }
-  | <span data-count="75">A</span>dd -&gt;
-    let stack = Stack.apply_i32_i32_i32 stack (Abstract_i32.ad<span data-count="75">d</span> ctx) in
-    <span data-count="75">l</span>et abs_state = { abs_state with stack } in
+  | <span data-count="78">A</span>dd -&gt;
+    let stack = Stack.apply_i32_i32_i32 stack (Abstract_i32.ad<span data-count="78">d</span> ctx) in
+    <span data-count="78">l</span>et abs_state = { abs_state with stack } in
     State { abs_state; env }
-  | <span data-count="19">S</span>ub -&gt;
-    let stack = Stack.apply_i32_i32_i32 stack (Abstract_i32.su<span data-count="19">b</span> ctx) in
-    <span data-count="19">l</span>et abs_state = { abs_state with stack } in
+  | <span data-count="23">S</span>ub -&gt;
+    let stack = Stack.apply_i32_i32_i32 stack (Abstract_i32.su<span data-count="23">b</span> ctx) in
+    <span data-count="23">l</span>et abs_state = { abs_state with stack } in
     State { abs_state; env }
-  | <span data-count="11">M</span>ul -&gt;
-    let stack = Stack.apply_i32_i32_i32 stack (Abstract_i32.mu<span data-count="11">l</span> ctx) in
-    <span data-count="11">l</span>et abs_state = { abs_state with stack } in
+  | <span data-count="15">M</span>ul -&gt;
+    let stack = Stack.apply_i32_i32_i32 stack (Abstract_i32.mu<span data-count="15">l</span> ctx) in
+    <span data-count="15">l</span>et abs_state = { abs_state with stack } in
     State { abs_state; env }
-  | <span data-count="24">D</span>iv_s -&gt;
+  | <span data-count="28">D</span>iv_s -&gt;
     let (hd1, hd2), stack = Stack.pop2_i32 stack in
-    <span data-count="24">l</span>et () =
+    <span data-count="28">l</span>et () =
       let possible = i32_can_be_zero ctx hd2 in
-      <span data-count="24">a</span>dd_divide_by_zero_invarian<span data-count="24">t</span> invariant ~uuid ~possible
+      <span data-count="28">a</span>dd_divide_by_zero_invarian<span data-count="28">t</span> invariant ~uuid ~possible
     in
-    let stack = Stack.push_i32 stack (Abstract_i32.div_<span data-count="24">s</span> ctx hd1 hd2) in
-    <span data-count="24">l</span>et abs_state = { abs_state with stack } in
+    let stack = Stack.push_i32 stack (Abstract_i32.div_<span data-count="28">s</span> ctx hd1 hd2) in
+    <span data-count="28">l</span>et abs_state = { abs_state with stack } in
     State { abs_state; env }
   | <span data-count="14">D</span>iv_u -&gt;
     let (hd1, hd2), stack = Stack.pop2_i32 stack in
@@ -5369,9 +5369,9 @@ let eval_i32 env ({ stack; ctx; invariant; _ } as abs_state : Abstract_state.t)
     let stack = Stack.apply_i32_i32_i32 stack (Abstract_i32.sh<span data-count="11">l</span> ctx) in
     <span data-count="11">l</span>et abs_state = { abs_state with stack } in
     State { abs_state; env }
-  | <span data-count="21">L</span>t_s -&gt;
-    let stack = Stack.apply_i32_i32_boolean stack ctx (Abstract_i32.lt_<span data-count="21">s</span> ctx) in
-    <span data-count="21">l</span>et abs_state = { abs_state with stack } in
+  | <span data-count="23">L</span>t_s -&gt;
+    let stack = Stack.apply_i32_i32_boolean stack ctx (Abstract_i32.lt_<span data-count="23">s</span> ctx) in
+    <span data-count="23">l</span>et abs_state = { abs_state with stack } in
     State { abs_state; env }
   | <span data-count="17">G</span>t_s -&gt;
     let stack = Stack.apply_i32_i32_boolean stack ctx (Abstract_i32.gt_<span data-count="17">s</span> ctx) in
@@ -5385,9 +5385,9 @@ let eval_i32 env ({ stack; ctx; invariant; _ } as abs_state : Abstract_state.t)
     let stack = Stack.apply_i32_i32_boolean stack ctx (Abstract_i32.gt_<span data-count="14">u</span> ctx) in
     <span data-count="14">l</span>et abs_state = { abs_state with stack } in
     State { abs_state; env }
-  | <span data-count="23">L</span>e_s -&gt;
-    let stack = Stack.apply_i32_i32_boolean stack ctx (Abstract_i32.le_<span data-count="23">s</span> ctx) in
-    <span data-count="23">l</span>et abs_state = { abs_state with stack } in
+  | <span data-count="27">L</span>e_s -&gt;
+    let stack = Stack.apply_i32_i32_boolean stack ctx (Abstract_i32.le_<span data-count="27">s</span> ctx) in
+    <span data-count="27">l</span>et abs_state = { abs_state with stack } in
     State { abs_state; env }
   | <span data-count="14">G</span>e_s -&gt;
     let stack = Stack.apply_i32_i32_boolean stack ctx (Abstract_i32.ge_<span data-count="14">s</span> ctx) in
@@ -5409,9 +5409,9 @@ let eval_i32 env ({ stack; ctx; invariant; _ } as abs_state : Abstract_state.t)
     let stack = Stack.apply_i32_boolean stack ctx (Abstract_i32.eq<span data-count="16">z</span> ctx) in
     <span data-count="16">l</span>et abs_state = { abs_state with stack } in
     State { abs_state; env }
-  | <span data-count="14">E</span>q -&gt;
-    let stack = Stack.apply_i32_i32_boolean stack ctx (Abstract_i32.e<span data-count="14">q</span> ctx) in
-    <span data-count="14">l</span>et abs_state = { abs_state with stack } in
+  | <span data-count="16">E</span>q -&gt;
+    let stack = Stack.apply_i32_i32_boolean stack ctx (Abstract_i32.e<span data-count="16">q</span> ctx) in
+    <span data-count="16">l</span>et abs_state = { abs_state with stack } in
     State { abs_state; env }
   | <span data-count="0">S</span>tore (_memid, _) | <span data-count="0">S</span>tore8 (_memid, _) | <span data-count="0">S</span>tore16 (_memid, _) -&gt;
     (* TODO: handle this correctly *)
@@ -7190,21 +7190,21 @@ let eval_f64x2 env ({ stack; ctx; _ } as abs_state : Abstract_state.t) :
 
 let eval_local env ({ stack; locals; _ } as abs_state : Abstract_state.t) :
   Binary.local_instr -&gt; _ = function
-  | <span data-count="2013">G</span>et i -&gt;
+  | <span data-count="2040">G</span>et i -&gt;
     let v = Abstract_locals.find i locals in
-    <span data-count="2013">l</span>et stack = Stack.push stack v in
-    <span data-count="2013">l</span>et abs_state = { abs_state with stack } in
+    <span data-count="2040">l</span>et stack = Stack.push stack v in
+    <span data-count="2040">l</span>et abs_state = { abs_state with stack } in
     State { abs_state; env }
-  | <span data-count="64">S</span>et i -&gt;
+  | <span data-count="75">S</span>et i -&gt;
     let e, stack = Stack.pop stack in
-    <span data-count="64">l</span>et locals = Abstract_locals.add i e locals in
-    <span data-count="64">l</span>et abs_state = { abs_state with stack; locals } in
+    <span data-count="75">l</span>et locals = Abstract_locals.add i e locals in
+    <span data-count="75">l</span>et abs_state = { abs_state with stack; locals } in
     State { abs_state; env }
-  | <span data-count="31">T</span>ee i -&gt;
+  | <span data-count="33">T</span>ee i -&gt;
     let e, stack = Stack.pop stack in
-    <span data-count="31">l</span>et stack = Stack.push stack e in
-    <span data-count="31">l</span>et locals = Abstract_locals.add i e locals in
-    <span data-count="31">l</span>et abs_state = { abs_state with stack; locals } in
+    <span data-count="33">l</span>et stack = Stack.push stack e in
+    <span data-count="33">l</span>et locals = Abstract_locals.add i e locals in
+    <span data-count="33">l</span>et abs_state = { abs_state with stack; locals } in
     State { abs_state; env }
 
 let eval_global env ({ stack; _ } as abs_state : Abstract_state.t) :
@@ -7340,7 +7340,7 @@ let eval_instr
     -&gt; (Abstract_value.t, 'c) Abstract_domain.Context.result )
   ({ abs_state; env } as state : Abstract_interpreter_state.t) ~uuid :
   Binary.simple_instruction -&gt; t = function
-  | <span data-count="1214">I</span>32 instr -&gt; eval_i32 env abs_state uuid instr
+  | <span data-count="1256">I</span>32 instr -&gt; eval_i32 env abs_state uuid instr
   | <span data-count="535">I</span>64 instr -&gt; eval_i64 env abs_state uuid instr
   | <span data-count="37">F</span>32 instr -&gt; eval_f32 env abs_state uuid instr
   | <span data-count="69">F</span>64 instr -&gt; eval_f64 env abs_state uuid instr
@@ -7351,7 +7351,7 @@ let eval_instr
   | <span data-count="0">I</span>64x2 instr -&gt; eval_i64x2 env abs_state instr
   | <span data-count="0">F</span>32x4 instr -&gt; eval_f32x4 env abs_state instr
   | <span data-count="0">F</span>64x2 instr -&gt; eval_f64x2 env abs_state instr
-  | <span data-count="2108">L</span>ocal instr -&gt; eval_local env abs_state instr
+  | <span data-count="2148">L</span>ocal instr -&gt; eval_local env abs_state instr
   | <span data-count="7">G</span>lobal instr -&gt; eval_global env abs_state instr
   | <span data-count="3">M</span>emory instr -&gt; eval_memory env abs_state instr
   | <span data-count="0">D</span>ata instr -&gt; eval_data env abs_state instr
@@ -7360,9 +7360,9 @@ let eval_instr
   | <span data-count="15">T</span>able instr -&gt; eval_table env abs_state instr
   | <span data-count="0">U</span>nreachable -&gt; Unreachable
   | <span data-count="150">N</span>op -&gt; State { env; abs_state }
-  | <span data-count="82">D</span>rop -&gt;
+  | <span data-count="88">D</span>rop -&gt;
     let _, stack = Stack.pop abs_state.stack in
-    <span data-count="82">l</span>et abs_state = { abs_state with stack } in
+    <span data-count="88">l</span>et abs_state = { abs_state with stack } in
     State { abs_state; env }
   | <span data-count="46">S</span>elect _t -&gt;
     let b, stack = Stack.pop_bool abs_state.stack abs_state.ctx in

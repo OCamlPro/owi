@@ -129,22 +129,22 @@ let empty () =
   <span data-count="2856">{</span> can_divide_by_zero }
 
 let can_divide_by_zero { can_divide_by_zero } ~uuid =
-  <span data-count="96833">l</span>et possible = Hashtbl.find_opt can_divide_by_zero uuid in
+  <span data-count="96832">l</span>et possible = Hashtbl.find_opt can_divide_by_zero uuid in
   (* by default, we don't know, and assume it is possible to be on the safe-side *)
-  <span data-count="96833">O</span>ption.value ~default:true possible
+  <span data-count="96832">O</span>ption.value ~default:true possible
 
 let add_divide_by_zero_invariant { can_divide_by_zero } ~uuid ~possible =
-  <span data-count="132">L</span>og.debug (fun m -&gt;
+  <span data-count="136">L</span>og.debug (fun m -&gt;
     <span data-count="0">m</span> "marked %d as %s divide by zero" uuid
       (if possible then <span data-count="0">"</span>POSSIBLE" else <span data-count="0">"</span>IMPOSSIBLE") );
-  <span data-count="132">m</span>atch Hashtbl.find_opt can_divide_by_zero uuid with
-  | <span data-count="128">N</span>one -&gt; begin Hashtbl.add can_divide_by_zero uuid possible end
-  | <span data-count="4">S</span>ome false -&gt;
+  <span data-count="136">m</span>atch Hashtbl.find_opt can_divide_by_zero uuid with
+  | <span data-count="130">N</span>one -&gt; begin Hashtbl.add can_divide_by_zero uuid possible end
+  | <span data-count="6">S</span>ome false -&gt;
     if possible then <span data-count="0">b</span>egin
       (* it was impossible but it is now possible *)
       Hashtbl.add can_divide_by_zero uuid true
     end
-    else <span data-count="4">b</span>egin
+    else <span data-count="6">b</span>egin
       (* it was impossible and it is still impossible *)
       ()
     end
