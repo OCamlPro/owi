@@ -13,9 +13,9 @@ $ owi wasm script abstract --no-exhaustion reference/binary-leb128.wast
   Called from Owi__Script_abstract.do_action in file "src/script/script_abstract.ml", line 23, characters 8-52
   [26]
   $ owi wasm script abstract --no-exhaustion reference/br_if.wast
-  $ owi wasm script abstract --no-exhaustion reference/br_table.wast
-  owi: [ERROR] failed
-  [26]
+$ owi wasm script abstract --no-exhaustion reference/br_table.wast
+owi: [ERROR] failed
+[26]
   $ owi wasm script abstract --no-exhaustion reference/br.wast
 $ owi wasm script abstract --no-exhaustion reference/bulk.wast
 $ owi wasm script abstract --no-exhaustion reference/call_indirect.wast

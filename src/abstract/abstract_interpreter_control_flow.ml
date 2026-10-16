@@ -36,7 +36,7 @@ let gen_new_value ~widens a b state_a state_b
 let serialize ~widens :
      Abstract_interpreter_state.t
   -> Abstract_interpreter_state.t
-  -> (Abstract_interpreter_state.t, 'a) Abstract_domain.Context.result =
+  -> Abstract_interpreter_state.t Abstract_domain.Context.result =
  fun state_a state_b ->
   let rec serialize_stack lhs rhs acc_res =
     match (lhs, rhs) with
@@ -69,7 +69,7 @@ let serialize ~widens :
       state_a.abs_state.locals state_b.abs_state.locals
       (Abstract_domain.Context.Result
          ( true
-         , Abstract_domain.Context.empty_tuple ()
+         , Abstract_domain.Context.Phi_args.empty ()
          , fun _ctx out -> (state_a.abs_state.locals, out) ) )
   in
   (* TODO: fixme

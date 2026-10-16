@@ -2053,11 +2053,9 @@ let eval_instr
     -> Abstract_stack.Value.t
     -> Abstract_interpreter_state.t
     -> Abstract_interpreter_state.t
-    -> ( Abstract_value.t
-       , Abstract_domain.Context.empty_tuple )
-       Abstract_domain.Context.result
+    -> Abstract_value.t Abstract_domain.Context.result
     -> ('a -> 'b -> 'a)
-    -> (Abstract_value.t, 'c) Abstract_domain.Context.result )
+    -> Abstract_value.t Abstract_domain.Context.result )
   ({ abs_state; env } as state : Abstract_interpreter_state.t) ~uuid :
   Binary.simple_instruction -> t = function
   | I32 instr -> eval_i32 env abs_state uuid instr
@@ -2092,7 +2090,7 @@ let eval_instr
       let init_res =
         Abstract_domain.Context.Result
           ( true
-          , Abstract_domain.Context.empty_tuple ()
+          , Abstract_domain.Context.Phi_args.empty ()
           , fun _ctx out -> (v1, out) )
       in
       let (Abstract_domain.Context.Result (_inc, intup, cont)) =

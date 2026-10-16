@@ -20,16 +20,16 @@ let of_boolean ctx boolean =
   Abstract_domain.Binary_Forward.bofbool ~size ctx boolean
 
 let to_boolean ctx x =
-  let zero = Abstract_domain.Binary_Forward.biconst ~size Z.zero ctx in
+  let zero = Abstract_domain.Binary_Forward.biconst ~size ~k:Z.zero ctx in
   let b = Abstract_domain.Binary_Forward.beq ~size ctx x zero in
   Abstract_boolean.not ctx b
 
-let of_int ctx i = Abstract_domain.Binary_Forward.biconst ~size (Z.of_int i) ctx
+let of_int ctx i = Abstract_domain.Binary_Forward.biconst ~size ~k:(Z.of_int i) ctx
 
 let of_int64 ctx i =
-  Abstract_domain.Binary_Forward.biconst ~size (Z.of_int64_unsigned i) ctx
+  Abstract_domain.Binary_Forward.biconst ~size ~k:(Z.of_int64_unsigned i) ctx
 
-let zero ctx = Abstract_domain.Binary_Forward.biconst ~size Z.zero ctx
+let zero ctx = Abstract_domain.Binary_Forward.biconst ~size ~k:Z.zero ctx
 
 let unknown ctx = Abstract_domain.binary_unknown ~size ctx
 
