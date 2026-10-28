@@ -94,6 +94,7 @@ If you're interested in contributing to Owi, please, [get in touch on Zulip](htt
 - october 2025: [Wasm Research Day October 2025] @ Google - Munich
 - february 2026: [JFLA 2026] @ Hôtellerie du Couvent - Vosges du Nord
 - april 2026: [ETAPS 2026 Industry Day] @ Lingotto Congress Center - Turin
+- october 2026: [Bière Sécu Rennes #13](https://bieresecu.bzh) @ [Uzine](https://uzine.bar) - Rennes
 
 </details>
 
