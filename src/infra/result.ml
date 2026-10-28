@@ -31,6 +31,7 @@ type err =
   | `Invalid_result_arity
   | `Lexer_illegal_character of string
   | `Lexer_unknown_operator of string
+  | `Malformed_utf8_codepoint of string
   | `Malformed_utf8_encoding of string
   | `Memory_size_too_large
   | `Msg of string
@@ -128,6 +129,7 @@ let rec err_to_string = function
   | `Invalid_result_arity -> "invalid result arity"
   | `Lexer_illegal_character c -> Fmt.str "%s" c
   | `Lexer_unknown_operator op -> Fmt.str "%s" op
+  | `Malformed_utf8_codepoint txt -> Fmt.str "malformed UTF-8 codepoint %S" txt
   | `Malformed_utf8_encoding txt -> Fmt.str "malformed UTF-8 encoding %S" txt
   | `Memory_size_too_large -> "memory size must be at most 65536 pages (4GiB)"
   | `Msg msg -> msg
@@ -220,6 +222,7 @@ let err_to_exit_code = function
   | `Lexer_illegal_character _c -> 23
   | `Lexer_unknown_operator _op -> 23
   | `Malformed_utf8_encoding _txt -> 24
+  | `Malformed_utf8_codepoint _txt -> 102
   | `Memory_size_too_large -> 25
   | `Msg _msg -> 26
   | `Multiple_start_sections -> 28

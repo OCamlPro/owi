@@ -13,6 +13,8 @@ exception Illegal_character of string
 
 exception Illegal_escape of string
 
+exception Malformed_utf8_codepoint of string
+
 exception Unclosed_annotation
 
 exception Unclosed_comment
@@ -60,6 +62,11 @@ let mk_string buf s =
               int_of_string_opt (Fmt.str "0x%s" (String.sub s j (!i - j)))
             in
             let n = match n with None -> assert false | Some n -> n in
+            (* A [\u{N}] escape must denote a valid Unicode scalar value, i.e.
+               [N < 0xD800] or [0xE000 <= N <= 0x10FFFF] (surrogates and
+               out-of-range code points are forbidden). *)
+            if n > 0x10FFFF || (n >= 0xD800 && n <= 0xDFFF) then
+              raise @@ Malformed_utf8_codepoint (Fmt.str "%x" n);
             let bs = Wutf8.encode [ n ] in
             Buffer.add_substring b bs 0 (String.length bs - 1);
             bs.[String.length bs - 1]

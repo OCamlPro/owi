@@ -38,6 +38,8 @@ struct
       | Text_lexer.Empty_annotation_id -> Error `Empty_annotation_id
       | Text_lexer.Empty_identifier -> Error `Empty_identifier
       | Text_lexer.Illegal_escape msg -> Error (`Illegal_escape msg)
+      | Text_lexer.Malformed_utf8_codepoint msg ->
+        Error (`Malformed_utf8_codepoint msg)
       | Text_lexer.Illegal_character msg -> Error (`Lexer_illegal_character msg)
       | Text_lexer.Unclosed_annotation -> Error `Unclosed_annotation
       | Text_lexer.Unclosed_comment -> Error `Unclosed_comment
