@@ -500,16 +500,16 @@ let ty : host_externref Type.Id.t = Type.Id.mak<span data-count="979">e</span> (
 module I = Interpret.Concrete (Interpret.Default_parameters)
 
 let action (env : Env.Concrete.t) = function
-  | <span data-count="49859">W</span>ast.Invoke (module_name, func_name, args) -&gt; begin
+  | <span data-count="49861">W</span>ast.Invoke (module_name, func_name, args) -&gt; begin
     Log.info (fun m -&gt;
       <span data-count="0">m</span> "invoke %a %s %a..."
         (Fmt.optio<span data-count="0">n</span> ~none:Fmt.nop Fmt.string)
         module_name func_name Wast.pp_consts args );
-    <span data-count="49859">b</span>egin
+    <span data-count="49861">b</span>egin
       let* f = Env.Concrete.get_exported_func ~env ~module_name ~func_name in
-      <span data-count="49859">l</span>et locals = List.rev_map (Concrete_value.of_script_const ~ty) args in
-      <span data-count="49859">l</span>et to_run = I.exec_vfunc_from_outside ~env ~locals f in
-      <span data-count="49859">C</span>oncrete_choice.run_and_drop_state to_run Concrete_state.empty
+      <span data-count="49861">l</span>et locals = List.rev_map (Concrete_value.of_script_const ~ty) args in
+      <span data-count="49861">l</span>et to_run = I.exec_vfunc_from_outside ~env ~locals f in
+      <span data-count="49861">C</span>oncrete_choice.run_and_drop_state to_run Concrete_state.empty
     end
     end
   | <span data-count="10">G</span>et (module_name, global_name) -&gt;
@@ -531,26 +531,26 @@ let run ~no_exhaustion script =
   let registered = ref false in
   let curr_module = ref 0 in
   list_fold_left
-    (fun (env : Env.Concrete.t) -&gt; <span data-count="56732">f</span>unction
-      | <span data-count="2111">W</span>ast.Text_module (false, modul) -&gt;
+    (fun (env : Env.Concrete.t) -&gt; <span data-count="56744">f</span>unction
+      | <span data-count="2112">W</span>ast.Text_module (false, modul) -&gt;
         if !curr_module = 0 then
           (* TODO: disable printing*)
           <span data-count="243">(</span>);
-        <span data-count="2111">L</span>og.info (fun m -&gt; <span data-count="0">m</span> "*** module");
-        <span data-count="2111">i</span>ncr curr_module;
-        <span data-count="2111">l</span>et* modul, env =
-          Compile.Wasm.Text.until_concrete_lin<span data-count="2111">k</span> env ~unsafe ~name:None modul
+        <span data-count="2112">L</span>og.info (fun m -&gt; <span data-count="0">m</span> "*** module");
+        <span data-count="2112">i</span>ncr curr_module;
+        <span data-count="2112">l</span>et* modul, env =
+          Compile.Wasm.Text.until_concrete_lin<span data-count="2112">k</span> env ~unsafe ~name:None modul
         in
-        <span data-count="2111">l</span>et to_run = I.modul ~env ~modul in
+        <span data-count="2112">l</span>et to_run = I.modul ~env ~modul in
         Concrete_choice.run_and_drop_state to_run Concrete_state.empty
-      | <span data-count="2">W</span>ast.Quoted_module (false, modul) -&gt;
+      | <span data-count="5">W</span>ast.Quoted_module (false, modul) -&gt;
         Log.info (fun m -&gt; <span data-count="0">m</span> "*** quoted module");
-        <span data-count="2">i</span>ncr curr_module;
-        <span data-count="2">l</span>et* modul = Parse.Text.Inline_module.from_strin<span data-count="2">g</span> modul in
-        <span data-count="2">l</span>et* modul, env =
-          Compile.Wasm.Text.until_concrete_lin<span data-count="2">k</span> env ~unsafe ~name:None modul
+        <span data-count="5">i</span>ncr curr_module;
+        <span data-count="5">l</span>et* modul = Parse.Text.Inline_module.from_strin<span data-count="5">g</span> modul in
+        <span data-count="5">l</span>et* modul, env =
+          Compile.Wasm.Text.until_concrete_lin<span data-count="5">k</span> env ~unsafe ~name:None modul
         in
-        <span data-count="2">l</span>et to_run = I.modul ~env ~modul in
+        <span data-count="5">l</span>et to_run = I.modul ~env ~modul in
         Concrete_choice.run_and_drop_state to_run Concrete_state.empty
       | <span data-count="87">W</span>ast.Binary_module (false, id, modul) -&gt;
         Log.info (fun m -&gt; <span data-count="0">m</span> "*** binary module");
@@ -575,33 +575,33 @@ let run ~no_exhaustion script =
         let+ () = Script_error.check_result ~expected ~got in
         (* TODO: this is wrong! we should get back the env after running modul? *)
         <span data-count="45">e</span>nv
-      | <span data-count="709">A</span>ssert (Assert_malformed_binary (modul, expected)) -&gt;
+      | <span data-count="710">A</span>ssert (Assert_malformed_binary (modul, expected)) -&gt;
         Log.info (fun m -&gt; <span data-count="0">m</span> "*** assert_malformed_binary");
-        <span data-count="709">l</span>et got = Parse.Binary.Module.from_string modul in
-        <span data-count="709">l</span>et+ () = Script_error.check_result ~expected ~got in
-        <span data-count="709">e</span>nv
-      | <span data-count="1115">A</span>ssert (Assert_malformed_quote (modul, expected)) -&gt;
+        <span data-count="710">l</span>et got = Parse.Binary.Module.from_string modul in
+        <span data-count="710">l</span>et+ () = Script_error.check_result ~expected ~got in
+        <span data-count="710">e</span>nv
+      | <span data-count="1119">A</span>ssert (Assert_malformed_quote (modul, expected)) -&gt;
         Log.info (fun m -&gt; <span data-count="0">m</span> "*** assert_malformed_quote");
         (* TODO: use Parse.Text.Module.from_string instead *)
-        <span data-count="1115">l</span>et got = Parse.Text.Script.from_string modul in
-        <span data-count="1115">l</span>et+ () =
+        <span data-count="1119">l</span>et got = Parse.Text.Script.from_string modul in
+        <span data-count="1119">l</span>et+ () =
           match got with
-          | <span data-count="1053">E</span>rror got -&gt; Script_error.check_error ~expected ~got
+          | <span data-count="1057">E</span>rror got -&gt; Script_error.check_error ~expected ~got
           | <span data-count="62">O</span>k [ Text_module (false, modul) ] -&gt;
             let got = Compile.Wasm.Text.until_binary ~unsafe modul in
             <span data-count="62">S</span>cript_error.check_result ~expected ~got
           | _ -&gt; assert false
         in
-        <span data-count="1115">e</span>nv
-      | <span data-count="11">A</span>ssert (Assert_invalid_binary (modul, expected)) -&gt;
+        <span data-count="1119">e</span>nv
+      | <span data-count="12">A</span>ssert (Assert_invalid_binary (modul, expected)) -&gt;
         Log.info (fun m -&gt; <span data-count="0">m</span> "*** assert_invalid_binary");
-        <span data-count="11">l</span>et got = Parse.Binary.Module.from_string modul in
-        <span data-count="11">l</span>et+ () =
+        <span data-count="12">l</span>et got = Parse.Binary.Module.from_string modul in
+        <span data-count="12">l</span>et+ () =
           match got with
           | <span data-count="2">E</span>rror got -&gt; Script_error.check_error ~expected ~got
-          | <span data-count="9">O</span>k modul -&gt;
+          | <span data-count="10">O</span>k modul -&gt;
             begin match Binary_validate.modul modul with
-            | <span data-count="9">E</span>rror got -&gt; Script_error.check_error ~expected ~got
+            | <span data-count="10">E</span>rror got -&gt; Script_error.check_error ~expected ~got
             | <span data-count="0">O</span>k () -&gt;
               let got =
                 Env.Concrete.link_binary_module ~env ~name:None ~modul
@@ -609,7 +609,7 @@ let run ~no_exhaustion script =
               Script_error.check_result ~expected ~got
             end
         in
-        <span data-count="11">e</span>nv
+        <span data-count="12">e</span>nv
       | <span data-count="2304">A</span>ssert (Assert_invalid (modul, expected)) -&gt;
         Log.info (fun m -&gt; <span data-count="0">m</span> "*** assert_invalid");
         <span data-count="2304">l</span>et got =
@@ -643,14 +643,14 @@ let run ~no_exhaustion script =
         in
         <span data-count="0">l</span>et+ () = Script_error.check_result ~expected ~got in
         <span data-count="0">a</span>ssert false
-      | <span data-count="46827">A</span>ssert (Assert_return (a, res)) -&gt;
+      | <span data-count="46829">A</span>ssert (Assert_return (a, res)) -&gt;
         Log.info (fun m -&gt; <span data-count="0">m</span> "*** assert_return");
-        <span data-count="46827">l</span>et* env, stack = actio<span data-count="46827">n</span> env a in
-        <span data-count="46826">l</span>et stack = List.rev stack in
-        <span data-count="46826">i</span>f
-          List.compare_length<span data-count="46826">s</span> res stack &lt;&gt; <span data-count="0">0</span>
+        <span data-count="46829">l</span>et* env, stack = actio<span data-count="46829">n</span> env a in
+        <span data-count="46828">l</span>et stack = List.rev stack in
+        <span data-count="46828">i</span>f
+          List.compare_length<span data-count="46828">s</span> res stack &lt;&gt; <span data-count="0">0</span>
           || not
-               (List.for_all<span data-count="46826">2</span>
+               (List.for_all<span data-count="46828">2</span>
                   (Concrete_value.equal_script_result ~ty)
                   res stack <span data-count="2">)</span>
         then <span data-count="2">b</span>egin
@@ -658,7 +658,7 @@ let run ~no_exhaustion script =
             <span data-count="2">m</span> "got:      %a@.expected: %a" Stack.pp stack Wast.pp_results res );
           <span data-count="2">E</span>rror `Bad_result
         end
-        else <span data-count="46824">O</span>k env
+        else <span data-count="46826">O</span>k env
       | <span data-count="2810">A</span>ssert (Assert_trap (a, expected)) -&gt;
         Log.info (fun m -&gt; <span data-count="0">m</span> "*** assert_trap");
         (* TODO: this is wrong! we should get back the env after running action! *)

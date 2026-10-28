@@ -385,8 +385,8 @@ let pp ppf =
   | <span data-count="0">V</span>128 v -&gt; pf ppf "v128.const %a" V128.pp v
   | <span data-count="0">R</span>ef r -&gt; pf ppf "ref %a" Ref.pp r
 
-let of_script_const ~ty = <span data-count="82252">f</span>unction
-  | <span data-count="12292">(</span>Const_I32 v : Wast.const) -&gt; (I32 v : t)
+let of_script_const ~ty = <span data-count="82253">f</span>unction
+  | <span data-count="12293">(</span>Const_I32 v : Wast.const) -&gt; (I32 v : t)
   | <span data-count="1257">C</span>onst_I64 v -&gt; I64 v
   | <span data-count="11795">C</span>onst_F32 v -&gt; F32 v
   | <span data-count="11983">C</span>onst_F64 v -&gt; F64 v
@@ -441,8 +441,8 @@ let equal_script_result =
       compare_f6<span data-count="6850">4</span> a a' &amp;&amp; <span data-count="6850">c</span>ompare_f64 b b'
   in
   fun ~ty script_result v -&gt;
-    <span data-count="46493">m</span>atch (script_result, v) with
-    | <span data-count="13752">W</span>ast.Result_I32 n, I32 n' -&gt; I32.eq n n'
+    <span data-count="46495">m</span>atch (script_result, v) with
+    | <span data-count="13754">W</span>ast.Result_I32 n, I32 n' -&gt; I32.eq n n'
     | <span data-count="1179">R</span>esult_I64 n, I64 n' -&gt; I64.eq n n'
     | <span data-count="3903">R</span>esult_F32 script_result, F32 v -&gt; compare_f32 script_result v
     | <span data-count="3925">R</span>esult_F64 script_result, F64 v -&gt; compare_f64 script_result v

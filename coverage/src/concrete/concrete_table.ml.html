@@ -202,12 +202,12 @@ let pp_data =
 let pp ppf t = <span data-count="0">F</span>mt.pf ppf "%a" pp_data t.data
 
 let get_min : Binary.Table.Type.limits -&gt; int = function
-  | <span data-count="642">I</span>32 { min; _ } -&gt; Int32.to_int min
+  | <span data-count="643">I</span>32 { min; _ } -&gt; Int32.to_int min
   | <span data-count="0">I</span>64 { min; _ } -&gt; Int64.to_int min
 
 let max_size t =
-  <span data-count="37">m</span>atch t.limits with
-  | <span data-count="37">I</span>32 { max; _ } -&gt; Option.map (fun maxv -&gt; <span data-count="20">I</span>nt32.to_int maxv) max
+  <span data-count="38">m</span>atch t.limits with
+  | <span data-count="38">I</span>32 { max; _ } -&gt; Option.map (fun maxv -&gt; <span data-count="20">I</span>nt32.to_int maxv) max
   | <span data-count="0">I</span>64 { max; _ } -&gt;
     Option.map
       (fun maxv -&gt;
@@ -219,10 +219,10 @@ let max_size t =
 let get_type { limits; typ; _ } = <span data-count="53">(</span>limits, typ)
 
 let init (typ : Binary.Table.Type.t) : t =
-  <span data-count="642">l</span>et limits, ((_null, heap_type) as ref_type) = typ in
+  <span data-count="643">l</span>et limits, ((_null, heap_type) as ref_type) = typ in
   let null = Concrete_ref.null heap_type in
-  <span data-count="642">l</span>et table = Array.make (get_mi<span data-count="642">n</span> limits) null in
-  <span data-count="642">{</span> limits; typ = ref_type; data = table }
+  <span data-count="643">l</span>et table = Array.make (get_mi<span data-count="643">n</span> limits) null in
+  <span data-count="643">{</span> limits; typ = ref_type; data = table }
 
 let update table data = <span data-count="31">t</span>able.data &lt;- data
 
@@ -232,7 +232,7 @@ let set t i v =
   <span data-count="1406">t</span>.data.(i) &lt;- v;
   <span data-count="1406">t</span>
 
-let size t = <span data-count="804540">A</span>rray.length t.data
+let size t = <span data-count="804542">A</span>rray.length t.data
 
 let typ t = <span data-count="802863">t</span>.typ
 

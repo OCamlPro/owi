@@ -1100,9 +1100,9 @@ let empty ~context =
 type modul = int
 
 let get_last_module ~env =
-  <span data-count="54040">m</span>atch env.last_module with
+  <span data-count="54046">m</span>atch env.last_module with
   | <span data-count="0">N</span>one -&gt; Error (`Unknown_module "there was no last module")
-  | <span data-count="54040">S</span>ome modul -&gt; Ok modul
+  | <span data-count="54046">S</span>ome modul -&gt; Ok modul
 
 open Syntax
 
@@ -1125,11 +1125,11 @@ let get_registered_module ~env ~name =
   | <span data-count="5513">S</span>ome modul -&gt; Ok modul
 
 let get_next_module ~env =
-  <span data-count="4235">m</span>atch env.last_module with <span data-count="751">N</span>one -&gt; 0 | <span data-count="3484">S</span>ome modul -&gt; succ modul
+  <span data-count="4239">m</span>atch env.last_module with <span data-count="751">N</span>one -&gt; 0 | <span data-count="3488">S</span>ome modul -&gt; succ modul
 
 let get_initialization_code ~env ~modul : Binary.expr =
-  <span data-count="2900">m</span>atch IntMap.find_opt modul env.initialization_codes with
-  | <span data-count="2900">S</span>ome expr -&gt; expr
+  <span data-count="2904">m</span>atch IntMap.find_opt modul env.initialization_codes with
+  | <span data-count="2904">S</span>ome expr -&gt; expr
   | <span data-count="0">N</span>one -&gt; []
 
 let load_exported_key exported ~env ~modul_name ~name =
@@ -1235,25 +1235,25 @@ let get_global ~env id =
   | None -&gt; assert false
 
 let set_global ~env id value =
-  <span data-count="2169">m</span>atch Allocator.find_opt id env.globals with
-  | <span data-count="2170">S</span>ome { typ; _ } -&gt;
+  <span data-count="2177">m</span>atch Allocator.find_opt id env.globals with
+  | <span data-count="2177">S</span>ome { typ; _ } -&gt;
     let global = { value; typ } in
     let globals = Allocator.add_manual id global env.globals in
-    <span data-count="2170">{</span> env with globals }
+    <span data-count="2177">{</span> env with globals }
   | None -&gt; assert false
 
 let get_memory ~env id =
-  <span data-count="1223984">m</span>atch Allocator.find_opt id env.memories with
-  | <span data-count="1223984">S</span>ome m -&gt; m
+  <span data-count="1223877">m</span>atch Allocator.find_opt id env.memories with
+  | <span data-count="1223876">S</span>ome m -&gt; m
   | None -&gt; assert false
 
 let set_memory ~env id memory =
-  <span data-count="597558">l</span>et memories = Allocator.add_manual id memory env.memories in
-  <span data-count="597556">{</span> env with memories }
+  <span data-count="597527">l</span>et memories = Allocator.add_manual id memory env.memories in
+  <span data-count="597526">{</span> env with memories }
 
 let get_table ~env id =
-  <span data-count="808607">m</span>atch Allocator.find_opt id env.tables with
-  | <span data-count="808607">S</span>ome m -&gt; m
+  <span data-count="808592">m</span>atch Allocator.find_opt id env.tables with
+  | <span data-count="808592">S</span>ome m -&gt; m
   | None -&gt; assert false
 
 let set_table ~env id table =
@@ -1271,17 +1271,17 @@ let set_elem ~env id elem =
   <span data-count="573">{</span> env with elems }
 
 let get_data ~env id =
-  <span data-count="1101">m</span>atch Allocator.find_opt id env.datas with
-  | <span data-count="1101">S</span>ome m -&gt; m
+  <span data-count="1111">m</span>atch Allocator.find_opt id env.datas with
+  | <span data-count="1111">S</span>ome m -&gt; m
   | None -&gt; assert false
 
 let set_data ~env id data =
-  <span data-count="481">l</span>et datas = Allocator.add_manual id data env.datas in
-  <span data-count="481">{</span> env with datas }
+  <span data-count="486">l</span>et datas = Allocator.add_manual id data env.datas in
+  <span data-count="486">{</span> env with datas }
 
 let get_func ~env id =
-  <span data-count="11189576">m</span>atch Allocator.find_opt id env.functions with
-  | <span data-count="11189578">S</span>ome v -&gt; v
+  <span data-count="11177266">m</span>atch Allocator.find_opt id env.functions with
+  | <span data-count="11177267">S</span>ome v -&gt; v
   | None -&gt; assert false
 
 let get_types ~env = <span data-count="1602586">e</span>nv.types
@@ -1319,26 +1319,26 @@ let get_modul_from_modid ~env ~modid =
   | <span data-count="0">S</span>ome v -&gt; Ok v
 
 let get_exported_func ~env ~module_name ~func_name =
-  <span data-count="51213">l</span>et* modul =
+  <span data-count="51215">l</span>et* modul =
     match module_name with
-    | <span data-count="51110">N</span>one -&gt; get_last_module ~env
+    | <span data-count="51112">N</span>one -&gt; get_last_module ~env
     | <span data-count="103">S</span>ome module_name -&gt; (
       match StringMap.find_opt module_name env.raw_names with
       | <span data-count="0">N</span>one -&gt; Error (`Unbound_module module_name)
       | <span data-count="103">S</span>ome modul -&gt; Ok modul )
   in
-  <span data-count="51213">l</span>et functions =
+  <span data-count="51215">l</span>et functions =
     match IntMap.find_opt modul env.exported_functions with
     | None -&gt; assert false
-    | <span data-count="51213">S</span>ome functions -&gt; functions
+    | <span data-count="51215">S</span>ome functions -&gt; functions
   in
   let* address =
     match StringMap.find_opt func_name functions with
     | <span data-count="0">N</span>one -&gt; Error (`Unbound_name func_name)
-    | <span data-count="51213">S</span>ome v -&gt; Ok v
+    | <span data-count="51215">S</span>ome v -&gt; Ok v
   in
-  <span data-count="51213">m</span>atch Allocator.find_opt address env.functions with
-  | <span data-count="51213">S</span>ome func -&gt; Ok func
+  <span data-count="51215">m</span>atch Allocator.find_opt address env.functions with
+  | <span data-count="51215">S</span>ome func -&gt; Ok func
   | None -&gt; assert false
 
 let link_extern_module ~env ~name m =

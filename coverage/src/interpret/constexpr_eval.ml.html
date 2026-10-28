@@ -491,7 +491,7 @@ module Make (Value : Value_intf.T) :
       Stack.push_f64 stack (Value.F64.of_floa<span data-count="256">t</span> (Float64.to_floa<span data-count="256">t</span> f))
     | <span data-count="14">V</span>128 (Const v) -&gt; Stack.push_v128 stack (Value.V128.of_concret<span data-count="14">e</span> v)
     | <span data-count="56">R</span>ef (Null t) -&gt; Stack.push_ref stack (Value.Ref.nul<span data-count="56">l</span> t)
-    | <span data-count="2770">R</span>ef (Func id) -&gt;
+    | <span data-count="2785">R</span>ef (Func id) -&gt;
       let value = Value.Ref (Func (Some id)) in
       Stack.push stack value
     | <span data-count="11">G</span>lobal (Get id) -&gt;
@@ -566,8 +566,8 @@ module Make (Value : Value_intf.T) :
       assert false
 
   let instr ~get_const_type ~get_const_global stack instr =
-    <span data-count="4317">m</span>atch instr.Annotated.raw with
-    | <span data-count="4317">B</span>inary.Simple i -&gt;
+    <span data-count="4332">m</span>atch instr.Annotated.raw with
+    | <span data-count="4332">B</span>inary.Simple i -&gt;
       simple_instruction ~get_const_type ~get_const_global stack i
     | _ -&gt;
       (* typechecking ensures this can not happen *)
@@ -575,19 +575,19 @@ module Make (Value : Value_intf.T) :
 
   (* TODO: the modul parameter can probably be removed *)
   let expr _ctx ~get_const_type ~get_const_global (e : Binary.expr) : Value.t =
-    <span data-count="4237">l</span>et stack =
+    <span data-count="4252">l</span>et stack =
       List.fold_left (instr ~get_const_type ~get_const_global) Stack.empty e
     in
-    <span data-count="4237">m</span>atch stack with
+    <span data-count="4252">m</span>atch stack with
     | [] | _ :: _ :: _ -&gt;
       (* typechecking ensures this can not happen *)
       assert false
-    | <span data-count="4237">[</span> result ] -&gt; result
+    | <span data-count="4252">[</span> result ] -&gt; result
 
   let ref_expr ctx ~get_const_type ~get_const_global (e : Binary.expr) :
     Value.t Value.Ref.t =
-    <span data-count="2770">m</span>atch expr ctx ~get_const_type ~get_const_global e with
-    | <span data-count="2770">R</span>ef v -&gt; v
+    <span data-count="2785">m</span>atch expr ctx ~get_const_type ~get_const_global e with
+    | <span data-count="2785">R</span>ef v -&gt; v
     | _ -&gt; assert false
 end
 

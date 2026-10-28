@@ -2204,7 +2204,7 @@ open Syntax
 
 let rewrite_heap_type (assigned : Assigned.t) (ht : Text.heap_type) :
   Binary.heap_type Result.t =
-  <span data-count="4114">m</span>atch ht with
+  <span data-count="4116">m</span>atch ht with
   | <span data-count="1162">T</span>ext.TypeUse id -&gt;
     let* id = Assigned.find_typ<span data-count="1162">e</span> assigned id in
     <span data-count="1162">O</span>k (Binary.TypeUse id)
@@ -2214,7 +2214,7 @@ let rewrite_heap_type (assigned : Assigned.t) (ht : Text.heap_type) :
   | <span data-count="210">S</span>truct_ht -&gt; Ok Struct_ht
   | <span data-count="32">A</span>rray_ht -&gt; Ok Array_ht
   | <span data-count="31">N</span>one_ht -&gt; Ok None_ht
-  | <span data-count="2133">F</span>unc_ht -&gt; Ok Func_ht
+  | <span data-count="2135">F</span>unc_ht -&gt; Ok Func_ht
   | <span data-count="22">N</span>oFunc_ht -&gt; Ok NoFunc_ht
   | <span data-count="10">E</span>xn_ht -&gt; Ok Exn_ht
   | <span data-count="7">N</span>oExn_ht -&gt; Ok NoExn_ht
@@ -2223,27 +2223,27 @@ let rewrite_heap_type (assigned : Assigned.t) (ht : Text.heap_type) :
 
 let rewrite_val_type (assigned : Assigned.t) (vt : Text.val_type) :
   Binary.val_type Result.t =
-  <span data-count="36309">m</span>atch vt with
+  <span data-count="36315">m</span>atch vt with
   | <span data-count="1615">T</span>ext.Ref_type (n, ht) -&gt;
     let* ht = rewrite_heap_typ<span data-count="1615">e</span> assigned ht in
     <span data-count="1615">O</span>k (Binary.Ref_type (n, ht))
-  | <span data-count="34694">N</span>um_type nt -&gt; Ok (Num_type nt)
+  | <span data-count="34700">N</span>um_type nt -&gt; Ok (Num_type nt)
 
 let rewrite_func_type (assigned : Assigned.t) ((param, res) : Text.func_type) :
   Binary.func_type Result.t =
-  <span data-count="26945">l</span>et* param' =
-    list_ma<span data-count="26945">p</span>
+  <span data-count="26955">l</span>et* param' =
+    list_ma<span data-count="26955">p</span>
       (fun (n, vt) -&gt;
-        <span data-count="14937">l</span>et* vt = rewrite_val_typ<span data-count="14937">e</span> assigned vt in
-        <span data-count="14937">O</span>k (n, vt) )
+        <span data-count="14939">l</span>et* vt = rewrite_val_typ<span data-count="14939">e</span> assigned vt in
+        <span data-count="14939">O</span>k (n, vt) )
       param
   in
-  <span data-count="26945">l</span>et* res' = list_ma<span data-count="26945">p</span> (rewrite_val_typ<span data-count="26945">e</span> assigned) res in
-  <span data-count="26945">O</span>k (param', res')
+  <span data-count="26955">l</span>et* res' = list_ma<span data-count="26955">p</span> (rewrite_val_typ<span data-count="26955">e</span> assigned) res in
+  <span data-count="26955">O</span>k (param', res')
 
 let rewrite_block_type (assigned : Assigned.t) (block_type : Text.block_type) :
   (Text.param list * Binary.block_type) Result.t =
-  <span data-count="17338">m</span>atch block_type with
+  <span data-count="17343">m</span>atch block_type with
   | <span data-count="698">B</span>t_ind id -&gt;
     let* idx = Assigned.find_typ<span data-count="698">e</span> assigned id in
     <span data-count="698">l</span>et* ((params, _) as t) =
@@ -2253,10 +2253,10 @@ let rewrite_block_type (assigned : Assigned.t) (block_type : Text.block_type) :
     in
     <span data-count="687">l</span>et* t = rewrite_func_typ<span data-count="687">e</span> assigned t in
     <span data-count="687">O</span>k (params, (Some idx, t))
-  | <span data-count="16640">B</span>t_raw (_, ((params, _) as func_type)) -&gt;
+  | <span data-count="16645">B</span>t_raw (_, ((params, _) as func_type)) -&gt;
     let idx = Assigned.find_raw_func_type assigned func_type in
-    <span data-count="16640">l</span>et* func_type = rewrite_func_typ<span data-count="16640">e</span> assigned func_type in
-    <span data-count="16640">O</span>k (params, (Some idx, func_type))
+    <span data-count="16645">l</span>et* func_type = rewrite_func_typ<span data-count="16645">e</span> assigned func_type in
+    <span data-count="16645">O</span>k (params, (Some idx, func_type))
 
 let rewrite_memarg ({ offset; align } : Text.memarg) : Binary.memarg Result.t =
   <span data-count="4483">l</span>et* offset =
@@ -2617,9 +2617,9 @@ let rewrite_v128_instr assigned : Text.v128_instr -&gt; Binary.v128_instr Result
 
 let rewrite_ref_instr assigned : Text.ref_instr -&gt; Binary.ref_instr Result.t =
   function
-  | <span data-count="214">N</span>ull heap_type -&gt;
-    let+ heap_type = rewrite_heap_typ<span data-count="214">e</span> assigned heap_type in
-    <span data-count="214">B</span>inary.Null heap_type
+  | <span data-count="215">N</span>ull heap_type -&gt;
+    let+ heap_type = rewrite_heap_typ<span data-count="215">e</span> assigned heap_type in
+    <span data-count="215">B</span>inary.Null heap_type
   | <span data-count="19">I</span>s_null -&gt; Ok Binary.Is_null
   | <span data-count="13">A</span>s_non_null -&gt; Ok Binary.As_non_null
   | <span data-count="2487">F</span>unc indice -&gt;
@@ -2644,18 +2644,18 @@ let rewrite_global_instr assigned :
 
 let rewrite_table_instr assigned :
   Text.table_instr -&gt; Binary.table_instr Result.t = function
-  | <span data-count="11">S</span>ize indice -&gt;
-    let+ indice = Assigned.find_tabl<span data-count="11">e</span> assigned indice in
-    <span data-count="11">(</span>Size indice : Binary.table_instr)
+  | <span data-count="12">S</span>ize indice -&gt;
+    let+ indice = Assigned.find_tabl<span data-count="12">e</span> assigned indice in
+    <span data-count="12">(</span>Size indice : Binary.table_instr)
   | <span data-count="266">G</span>et indice -&gt;
     let+ indice = Assigned.find_tabl<span data-count="266">e</span> assigned indice in
     <span data-count="266">(</span>Binary.Get indice : Binary.table_instr)
   | <span data-count="107">S</span>et indice -&gt;
     let+ indice = Assigned.find_tabl<span data-count="107">e</span> assigned indice in
     <span data-count="107">(</span>Binary.Set indice : Binary.table_instr)
-  | <span data-count="21">G</span>row indice -&gt;
-    let+ indice = Assigned.find_tabl<span data-count="21">e</span> assigned indice in
-    <span data-count="21">(</span>Grow indice : Binary.table_instr)
+  | <span data-count="22">G</span>row indice -&gt;
+    let+ indice = Assigned.find_tabl<span data-count="22">e</span> assigned indice in
+    <span data-count="22">(</span>Grow indice : Binary.table_instr)
   | <span data-count="119">I</span>nit (indice, indice') -&gt;
     let* table = Assigned.find_tabl<span data-count="119">e</span> assigned indice in
     <span data-count="119">l</span>et+ elem = Assigned.find_ele<span data-count="119">m</span> assigned indice' in
@@ -2703,7 +2703,7 @@ let rewrite_data_instr assigned : Text.data_instr -&gt; Binary.data_instr Result
 let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
   (iexpr : Text.expr) : Binary.expr Annotated.t Result.t =
   (* block_ids handling *)
-  <span data-count="15710">l</span>et block_id_to_raw (loop_count, block_ids) id =
+  <span data-count="15715">l</span>et block_id_to_raw (loop_count, block_ids) id =
     <span data-count="34460">l</span>et* id =
       match id with
       | <span data-count="434">T</span>ext.Text id -&gt;
@@ -2734,11 +2734,11 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
   let seen_locals = Hashtbl.create 64 in
 
   (* Fill locals *)
-  <span data-count="15710">l</span>et* (_ : int) =
-    list_fold_lef<span data-count="15710">t</span>
+  <span data-count="15715">l</span>et* (_ : int) =
+    list_fold_lef<span data-count="15715">t</span>
       (fun next_free_int ((name, _type) : Text.param) -&gt;
-        <span data-count="7718">m</span>atch name with
-        | <span data-count="4594">N</span>one -&gt; Ok (next_free_int + 1)
+        <span data-count="7719">m</span>atch name with
+        | <span data-count="4595">N</span>one -&gt; Ok (next_free_int + 1)
         | <span data-count="3124">S</span>ome name -&gt;
           if Hashtbl.mem seen_locals name then <span data-count="3">E</span>rror (`Duplicate_local name)
           else <span data-count="3121">b</span>egin
@@ -2748,8 +2748,8 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
       0 locals
   in
 
-  <span data-count="15707">l</span>et find_local : Text.indice -&gt; Binary.indice = function
-    | <span data-count="5727">R</span>aw i -&gt; i
+  <span data-count="15712">l</span>et find_local : Text.indice -&gt; Binary.indice = function
+    | <span data-count="5728">R</span>aw i -&gt; i
     | <span data-count="4534">T</span>ext name -&gt; (
       match Hashtbl.find_opt seen_locals name with
       | <span data-count="4534">S</span>ome id -&gt; id
@@ -2760,9 +2760,9 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
     | <span data-count="2050">S</span>et id -&gt;
       let id = find_local id in
       <span data-count="2050">S</span>et id
-    | <span data-count="7934">G</span>et id -&gt;
+    | <span data-count="7935">G</span>et id -&gt;
       let id = find_local id in
-      <span data-count="7934">G</span>et id
+      <span data-count="7935">G</span>et id
     | <span data-count="277">T</span>ee id -&gt;
       let id = find_local id in
       <span data-count="277">T</span>ee id
@@ -2866,18 +2866,18 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
     | <span data-count="157">I</span>64x2 i -&gt; Ok (Simple (I64x2 i))
     | <span data-count="255">F</span>32x4 i -&gt; Ok (Simple (F32x4 i))
     | <span data-count="259">F</span>64x2 i -&gt; Ok (Simple (F64x2 i))
-    | <span data-count="2929">R</span>ef i -&gt;
-      let+ i = rewrite_ref_inst<span data-count="2929">r</span> assigned i in
-      <span data-count="2929">B</span>inary.Simple (Ref i)
-    | <span data-count="10261">L</span>ocal i -&gt;
+    | <span data-count="2930">R</span>ef i -&gt;
+      let+ i = rewrite_ref_inst<span data-count="2930">r</span> assigned i in
+      <span data-count="2930">B</span>inary.Simple (Ref i)
+    | <span data-count="10262">L</span>ocal i -&gt;
       let i = rewrite_local_instr i in
-      <span data-count="10261">O</span>k (Binary.Simple (Local i))
+      <span data-count="10262">O</span>k (Binary.Simple (Local i))
     | <span data-count="596">G</span>lobal i -&gt;
       let+ i = rewrite_global_inst<span data-count="596">r</span> assigned i in
       <span data-count="596">B</span>inary.Simple (Global i)
-    | <span data-count="601">T</span>able i -&gt;
-      let+ i = rewrite_table_inst<span data-count="601">r</span> assigned i in
-      <span data-count="601">B</span>inary.Simple (Table i)
+    | <span data-count="603">T</span>able i -&gt;
+      let+ i = rewrite_table_inst<span data-count="603">r</span> assigned i in
+      <span data-count="603">B</span>inary.Simple (Table i)
     | <span data-count="20">E</span>lem i -&gt;
       let+ i = rewrite_elem_inst<span data-count="20">r</span> assigned i in
       <span data-count="20">B</span>inary.Simple (Elem i)
@@ -2971,20 +2971,20 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
     | <span data-count="7">E</span>xtern_convert_any -&gt; Ok (Simple Extern_convert_any)
   and expr (e : Text.expr) (loop_count, block_ids) :
     Binary.expr Annotated.t Result.t =
-    <span data-count="19890">l</span>et+ e =
-      list_ma<span data-count="19890">p</span>
+    <span data-count="19895">l</span>et+ e =
+      list_ma<span data-count="19895">p</span>
         (fun i -&gt;
-          <span data-count="55758">l</span>et+ i = rewrite_inst<span data-count="55758">r</span> (loop_count, block_ids) i in
-          <span data-count="55704">A</span>nnotated.dummy i )
+          <span data-count="55762">l</span>et+ i = rewrite_inst<span data-count="55762">r</span> (loop_count, block_ids) i in
+          <span data-count="55708">A</span>nnotated.dummy i )
         e
     in
-    <span data-count="19836">A</span>nnotated.dummy e
+    <span data-count="19841">A</span>nnotated.dummy e
   in
   expr iexpr (0, [])
 
 let rewrite_table_limits ({ is_i64; min; max } : Text.limits) :
   Binary.Table.Type.limits Result.t =
-  <span data-count="927">i</span>f is_i64 then
+  <span data-count="928">i</span>f is_i64 then
     <span data-count="0">l</span>et* min =
       try Ok (Int64.of_string_ex<span data-count="0">n</span> min) with <span data-count="0">F</span>ailure _ -&gt; Error `Table_size
     in
@@ -2994,23 +2994,23 @@ let rewrite_table_limits ({ is_i64; min; max } : Text.limits) :
     in
     <span data-count="0">O</span>k (Binary.Table.Type.I64 { min; max })
   else
-    <span data-count="927">l</span>et* min =
-      try Ok (Int32.of_string_ex<span data-count="925">n</span> min) with <span data-count="2">F</span>ailure _ -&gt; Error `Table_size
+    <span data-count="928">l</span>et* min =
+      try Ok (Int32.of_string_ex<span data-count="926">n</span> min) with <span data-count="2">F</span>ailure _ -&gt; Error `Table_size
     in
-    <span data-count="925">l</span>et* max =
-      try Ok (Option.ma<span data-count="924">p</span> Int32.of_string_exn max)
+    <span data-count="926">l</span>et* max =
+      try Ok (Option.ma<span data-count="925">p</span> Int32.of_string_exn max)
       with <span data-count="1">F</span>ailure _ -&gt; Error `Table_size
     in
-    <span data-count="924">O</span>k (Binary.Table.Type.I32 { min; max })
+    <span data-count="925">O</span>k (Binary.Table.Type.I32 { min; max })
 
 let rewrite_table (assigned : Assigned.t)
   ({ id; typ = limits, (null, ht); init } : Text.Table.t) :
   Binary.Table.t Result.t =
-  <span data-count="859">m</span>atch init with
-  | <span data-count="837">N</span>one -&gt;
-    let* ht = rewrite_heap_typ<span data-count="837">e</span> assigned ht in
-    <span data-count="837">l</span>et+ limits = rewrite_table_limit<span data-count="837">s</span> limits in
-    <span data-count="834">{</span> Binary.Table.id; typ = (limits, (null, ht)); init = None }
+  <span data-count="860">m</span>atch init with
+  | <span data-count="838">N</span>one -&gt;
+    let* ht = rewrite_heap_typ<span data-count="838">e</span> assigned ht in
+    <span data-count="838">l</span>et+ limits = rewrite_table_limit<span data-count="838">s</span> limits in
+    <span data-count="835">{</span> Binary.Table.id; typ = (limits, (null, ht)); init = None }
   | <span data-count="22">S</span>ome e -&gt;
     let* ht = rewrite_heap_typ<span data-count="22">e</span> assigned ht in
     <span data-count="22">l</span>et* e = rewrite_exp<span data-count="22">r</span> assigned [] e in
@@ -3093,38 +3093,38 @@ let rewrite_data (assigned : Assigned.t) (data : Text.Data.t) :
 
 let rewrite_export find assigned (exports : Grouped.opt_export Array.t) :
   Binary.Export.t Array.t Result.t =
-  <span data-count="25830">a</span>rray_map
+  <span data-count="25850">a</span>rray_map
     (fun { Grouped.name; id } -&gt;
-      <span data-count="11816">m</span>atch find assigned id with
+      <span data-count="11821">m</span>atch find assigned id with
       | <span data-count="0">E</span>rror _ -&gt; Error (`Unknown_export id)
-      | <span data-count="11816">O</span>k id -&gt; Ok { Binary.Export.name; id } )
+      | <span data-count="11821">O</span>k id -&gt; Ok { Binary.Export.name; id } )
     exports
 
 let rewrite_exports (modul : Grouped.t) (assigned : Assigned.t) :
   Binary.Module.Exports.t Result.t =
-  <span data-count="5166">l</span>et* global =
-    rewrite_expor<span data-count="5166">t</span> Assigned.find_global assigned modul.global_exports
+  <span data-count="5170">l</span>et* global =
+    rewrite_expor<span data-count="5170">t</span> Assigned.find_global assigned modul.global_exports
   in
-  <span data-count="5166">l</span>et* mem = rewrite_expor<span data-count="5166">t</span> Assigned.find_memory assigned modul.mem_exports in
-  <span data-count="5166">l</span>et* table =
-    rewrite_expor<span data-count="5166">t</span> Assigned.find_table assigned modul.table_exports
+  <span data-count="5170">l</span>et* mem = rewrite_expor<span data-count="5170">t</span> Assigned.find_memory assigned modul.mem_exports in
+  <span data-count="5170">l</span>et* table =
+    rewrite_expor<span data-count="5170">t</span> Assigned.find_table assigned modul.table_exports
   in
-  <span data-count="5166">l</span>et* func = rewrite_expor<span data-count="5166">t</span> Assigned.find_func assigned modul.func_exports in
-  <span data-count="5166">l</span>et+ tag = rewrite_expor<span data-count="5166">t</span> Assigned.find_tag assigned modul.tag_exports in
-  <span data-count="5166">{</span> Binary.Module.Exports.global; mem; table; func; tag }
+  <span data-count="5170">l</span>et* func = rewrite_expor<span data-count="5170">t</span> Assigned.find_func assigned modul.func_exports in
+  <span data-count="5170">l</span>et+ tag = rewrite_expor<span data-count="5170">t</span> Assigned.find_tag assigned modul.tag_exports in
+  <span data-count="5170">{</span> Binary.Module.Exports.global; mem; table; func; tag }
 
 let rewrite_func (assigned : Assigned.t)
   ({ id; type_f; locals; body; _ } : Text.Func.t) : Binary.Func.t Result.t =
-  <span data-count="11155">l</span>et* params, type_f = rewrite_block_typ<span data-count="11155">e</span> assigned type_f in
-  <span data-count="11151">l</span>et* body = rewrite_exp<span data-count="11151">r</span> assigned (params @ locals) body in
-  <span data-count="11115">l</span>et+ locals : Binary.param_type =
-    list_ma<span data-count="11115">p</span>
+  <span data-count="11160">l</span>et* params, type_f = rewrite_block_typ<span data-count="11160">e</span> assigned type_f in
+  <span data-count="11156">l</span>et* body = rewrite_exp<span data-count="11156">r</span> assigned (params @ locals) body in
+  <span data-count="11120">l</span>et+ locals : Binary.param_type =
+    list_ma<span data-count="11120">p</span>
       (fun (_n, vt) -&gt;
         <span data-count="2005">l</span>et* vt = rewrite_val_typ<span data-count="2005">e</span> assigned vt in
         <span data-count="2005">O</span>k (None, vt) )
       locals
   in
-  <span data-count="11115">{</span> Binary.Func.body; type_f; id; locals }
+  <span data-count="11120">{</span> Binary.Func.body; type_f; id; locals }
 
 let rewrite_tag (assigned : Assigned.t) ({ id; typ } : Text.Tag.t) :
   Binary.Tag.t Result.t =
@@ -3150,9 +3150,9 @@ let rewrite_field (assigned : Assigned.t) ((_, ft) : Text.field) :
 
 let rewrite_comp_type (assigned : Assigned.t) :
   Text.comp_type -&gt; Binary.comp_type Result.t = function
-  | <span data-count="9618">T</span>ext.Def_func_t ft -&gt;
-    let+ ft = rewrite_func_typ<span data-count="9618">e</span> assigned ft in
-    <span data-count="9618">B</span>inary.Def_func_t ft
+  | <span data-count="9623">T</span>ext.Def_func_t ft -&gt;
+    let+ ft = rewrite_func_typ<span data-count="9623">e</span> assigned ft in
+    <span data-count="9623">B</span>inary.Def_func_t ft
   | <span data-count="376">T</span>ext.Def_struct_t fields -&gt;
     let+ fields = list_ma<span data-count="376">p</span> (rewrite_fiel<span data-count="376">d</span> assigned) fields in
     <span data-count="376">B</span>inary.Def_struct_t fields
@@ -3162,9 +3162,9 @@ let rewrite_comp_type (assigned : Assigned.t) :
 
 let rewrite_sub_type (assigned : Assigned.t)
   ({ Text.final; ids; ct } : Text.sub_type) : Binary.sub_type Result.t =
-  <span data-count="10214">l</span>et* ct = rewrite_comp_typ<span data-count="10214">e</span> assigned ct in
-  <span data-count="10214">l</span>et* ids = list_ma<span data-count="10214">p</span> (Assigned.find_typ<span data-count="10214">e</span> assigned) ids in
-  <span data-count="10214">O</span>k { Binary.final; ids; ct }
+  <span data-count="10219">l</span>et* ct = rewrite_comp_typ<span data-count="10219">e</span> assigned ct in
+  <span data-count="10219">l</span>et* ids = list_ma<span data-count="10219">p</span> (Assigned.find_typ<span data-count="10219">e</span> assigned) ids in
+  <span data-count="10219">O</span>k { Binary.final; ids; ct }
 
 let rewrite_typedef (assigned : Assigned.t) :
   Text.Typedef.t -&gt; Binary.Typedef.t Result.t = function
@@ -3183,79 +3183,79 @@ let rewrite_typedef (assigned : Assigned.t) :
 
 let modul (modul : Grouped.t) (assigned : Assigned.t) : Binary.Module.t Result.t
     =
-  <span data-count="5172">L</span>og.debug (fun m -&gt; <span data-count="1">m</span> "rewriting    ...");
-  <span data-count="5172">l</span>et* global =
+  <span data-count="5176">L</span>og.debug (fun m -&gt; <span data-count="1">m</span> "rewriting    ...");
+  <span data-count="5176">l</span>et* global =
     let f_local g = <span data-count="1407">r</span>ewrite_global assigned g in
     let f_imported (m, val_type) =
       <span data-count="140">l</span>et+ val_type = rewrite_val_typ<span data-count="140">e</span> assigned val_type in
       <span data-count="140">(</span>m, val_type)
     in
-    array_ma<span data-count="5172">p</span> (Origin.monadic_map ~f_local ~f_imported) modul.global
+    array_ma<span data-count="5176">p</span> (Origin.monadic_map ~f_local ~f_imported) modul.global
   in
-  <span data-count="5172">l</span>et* table =
-    let f_local g = <span data-count="859">r</span>ewrite_table assigned g in
+  <span data-count="5176">l</span>et* table =
+    let f_local g = <span data-count="860">r</span>ewrite_table assigned g in
     let f_imported (l, (n, ht)) =
       <span data-count="68">l</span>et* l = rewrite_table_limit<span data-count="68">s</span> l in
       <span data-count="68">l</span>et+ ht = rewrite_heap_typ<span data-count="68">e</span> assigned ht in
       <span data-count="68">(</span>l, (n, ht))
     in
-    array_ma<span data-count="5172">p</span> (Origin.monadic_map ~f_local ~f_imported) modul.table
+    array_ma<span data-count="5176">p</span> (Origin.monadic_map ~f_local ~f_imported) modul.table
   in
-  <span data-count="5169">l</span>et* mem =
+  <span data-count="5173">l</span>et* mem =
     let f_local g = <span data-count="1260">r</span>ewrite_memory g in
     let f_imported = rewrite_memory_limits in
-    array_ma<span data-count="5169">p</span> (Origin.monadic_map ~f_local ~f_imported) modul.mem
+    array_ma<span data-count="5173">p</span> (Origin.monadic_map ~f_local ~f_imported) modul.mem
   in
-  <span data-count="5166">l</span>et* elem = array_ma<span data-count="5166">p</span> (rewrite_ele<span data-count="5166">m</span> assigned) modul.elem in
-  <span data-count="5166">l</span>et* data = array_ma<span data-count="5166">p</span> (rewrite_dat<span data-count="5166">a</span> assigned) modul.data in
-  <span data-count="5166">l</span>et* exports = rewrite_export<span data-count="5166">s</span> modul assigned in
-  <span data-count="5166">l</span>et* func =
+  <span data-count="5170">l</span>et* elem = array_ma<span data-count="5170">p</span> (rewrite_ele<span data-count="5170">m</span> assigned) modul.elem in
+  <span data-count="5170">l</span>et* data = array_ma<span data-count="5170">p</span> (rewrite_dat<span data-count="5170">a</span> assigned) modul.data in
+  <span data-count="5170">l</span>et* exports = rewrite_export<span data-count="5170">s</span> modul assigned in
+  <span data-count="5170">l</span>et* func =
     let f_imported bt =
       <span data-count="3536">l</span>et+ _, rt = rewrite_block_typ<span data-count="3536">e</span> assigned bt in
       <span data-count="3534">r</span>t
     in
     let f_local = rewrite_func assigned in
-    <span data-count="5166">l</span>et runtime = Origin.monadic_map ~f_local ~f_imported in
-    array_ma<span data-count="5166">p</span> runtime modul.func
+    <span data-count="5170">l</span>et runtime = Origin.monadic_map ~f_local ~f_imported in
+    array_ma<span data-count="5170">p</span> runtime modul.func
   in
-  <span data-count="5124">l</span>et* tag =
+  <span data-count="5128">l</span>et* tag =
     let f_imported bt =
       <span data-count="7">l</span>et+ _, rt = rewrite_block_typ<span data-count="7">e</span> assigned bt in
       <span data-count="7">r</span>t
     in
     let f_local = rewrite_tag assigned in
-    <span data-count="5124">l</span>et runtime = Origin.monadic_map ~f_local ~f_imported in
-    array_ma<span data-count="5124">p</span> runtime modul.tag
+    <span data-count="5128">l</span>et runtime = Origin.monadic_map ~f_local ~f_imported in
+    array_ma<span data-count="5128">p</span> runtime modul.tag
   in
   (* TODO: should be factorized, we rewrite the types twice, as flat types and
      as type definitions, and the implicit types are added manually to
      type_defs. *)
-  <span data-count="5124">l</span>et* types =
-    array_ma<span data-count="5124">p</span> (rewrite_sub_typ<span data-count="5124">e</span> assigned) (Assigned.get_type<span data-count="5124">s</span> assigned)
+  <span data-count="5128">l</span>et* types =
+    array_ma<span data-count="5128">p</span> (rewrite_sub_typ<span data-count="5128">e</span> assigned) (Assigned.get_type<span data-count="5128">s</span> assigned)
   in
-  <span data-count="5124">l</span>et explicit_count =
+  <span data-count="5128">l</span>et explicit_count =
     Array.fold_left
       (fun acc -&gt; function
         | <span data-count="681">T</span>ext.Typedef.SimpleType _ -&gt; acc + 1
         | <span data-count="120">T</span>ext.Typedef.RecType members -&gt; acc + List.lengt<span data-count="120">h</span> members )
       0 modul.typ
   in
-  <span data-count="5124">l</span>et* explicit_type_defs = array_ma<span data-count="5124">p</span> (rewrite_typede<span data-count="5124">f</span> assigned) modul.typ in
-  <span data-count="5124">l</span>et implicit_type_defs =
+  <span data-count="5128">l</span>et* explicit_type_defs = array_ma<span data-count="5128">p</span> (rewrite_typede<span data-count="5128">f</span> assigned) modul.typ in
+  <span data-count="5128">l</span>et implicit_type_defs =
     Array.init
-      (Array.lengt<span data-count="5124">h</span> types - explicit_count)
-      (fun i -&gt; <span data-count="8362">B</span>inary.Typedef.SimpleType (None, types.(explicit_count + i)))
+      (Array.lengt<span data-count="5128">h</span> types - explicit_count)
+      (fun i -&gt; <span data-count="8367">B</span>inary.Typedef.SimpleType (None, types.(explicit_count + i)))
   in
-  <span data-count="5124">l</span>et type_defs = Array.append explicit_type_defs implicit_type_defs in
-  <span data-count="5124">l</span>et+ start =
+  <span data-count="5128">l</span>et type_defs = Array.append explicit_type_defs implicit_type_defs in
+  <span data-count="5128">l</span>et+ start =
     match modul.start with
-    | <span data-count="4856">N</span>one -&gt; Ok None
+    | <span data-count="4860">N</span>one -&gt; Ok None
     | <span data-count="268">S</span>ome id -&gt;
       let+ id = Assigned.find_fun<span data-count="268">c</span> assigned id in
       <span data-count="268">S</span>ome id
   in
 
-  <span data-count="5124">{</span> Binary.Module.id = modul.id
+  <span data-count="5128">{</span> Binary.Module.id = modul.id
   ; mem
   ; table
   ; type_defs

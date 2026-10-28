@@ -1499,8 +1499,8 @@ end = struct
     }
 
   let link_function ~(env : t) id (link_state : link_state) = function
-    | <span data-count="12386">O</span>rigin.Local func -&gt;
-      let address = Allocator.next_ke<span data-count="12386">y</span> env.functions + id in
+    | <span data-count="12411">O</span>rigin.Local func -&gt;
+      let address = Allocator.next_ke<span data-count="12411">y</span> env.functions + id in
       let functions =
         let func : _ Kind.func = Kind.Wasm func in
         (address, func) :: link_state.functions
@@ -1509,7 +1509,7 @@ end = struct
         let functions =
           IntMap.add id address link_state.rewrite_map.functions
         in
-        <span data-count="12386">{</span> link_state.rewrite_map with functions }
+        <span data-count="12411">{</span> link_state.rewrite_map with functions }
       in
       Ok { link_state with rewrite_map; functions }
     | <span data-count="5194">I</span>mported ({ name; typ; _ } as import) -&gt;
@@ -1627,17 +1627,17 @@ end = struct
       Ok { link_state with rewrite_map }
 
   let link_table ~(env : t) id link_state = function
-    | <span data-count="861">O</span>rigin.Local { Binary.Table.typ; init; _ } -&gt;
-      let address = Allocator.next_ke<span data-count="861">y</span> env.tables + id in
+    | <span data-count="862">O</span>rigin.Local { Binary.Table.typ; init; _ } -&gt;
+      let address = Allocator.next_ke<span data-count="862">y</span> env.tables + id in
       let table = Table.init typ in
-      <span data-count="861">l</span>et tables = (address, table) :: link_state.tables in
+      <span data-count="862">l</span>et tables = (address, table) :: link_state.tables in
       let rewrite_map =
         let tables = IntMap.add id address link_state.rewrite_map.tables in
-        <span data-count="861">{</span> link_state.rewrite_map with tables }
+        <span data-count="862">{</span> link_state.rewrite_map with tables }
       in
       let initialization_code =
         match init with
-        | <span data-count="837">N</span>one -&gt; link_state.initialization_code
+        | <span data-count="838">N</span>one -&gt; link_state.initialization_code
         | <span data-count="24">S</span>ome expr -&gt;
           let len = Int32.of_int (Table.siz<span data-count="24">e</span> table) in
           <span data-count="24">l</span>ink_state.initialization_code
@@ -1666,21 +1666,21 @@ end = struct
       Ok { link_state with rewrite_map }
 
   let link_data ~(env : t) id link_state { Binary.Data.init; mode; _ } =
-    <span data-count="719">l</span>et address = Allocator.next_ke<span data-count="719">y</span> env.datas + id in
+    <span data-count="724">l</span>et address = Allocator.next_ke<span data-count="724">y</span> env.datas + id in
     let datas = (address, init) :: link_state.datas in
     let rewrite_map =
       let datas = IntMap.add id address link_state.rewrite_map.datas in
-      <span data-count="719">{</span> link_state.rewrite_map with datas }
+      <span data-count="724">{</span> link_state.rewrite_map with datas }
     in
     match mode with
     | <span data-count="226">P</span>assive -&gt; { link_state with datas; rewrite_map }
-    | <span data-count="493">A</span>ctive (mem, offset) -&gt;
+    | <span data-count="498">A</span>ctive (mem, offset) -&gt;
       let initialization_code =
         (* Jean-Christophe, I'm sorry for writing this, please forgive me... *)
         link_state.initialization_code @ offset.raw
-        @ Annotated.dummie<span data-count="493">s</span>
+        @ Annotated.dummie<span data-count="498">s</span>
             [ Binary.Simple (I32 (Const 0l))
-            ; Simple (I32 (Const (String.length init |&gt; <span data-count="493">C</span>oncrete_i32.of_in<span data-count="493">t</span>)))
+            ; Simple (I32 (Const (String.length init |&gt; <span data-count="498">C</span>oncrete_i32.of_in<span data-count="498">t</span>)))
             ; Simple (Memory (Init (mem, id)))
             ; Simple (Data (Drop id))
             ]
@@ -1706,11 +1706,11 @@ end = struct
           let init =
             List.map
               (fun expr -&gt;
-                <span data-count="2785">l</span>et expr =
+                <span data-count="2800">l</span>et expr =
                   Env_rewriter.rewrite_expression expr
                     ~map:link_state.rewrite_map
                 in
-                <span data-count="2785">C</span>onstexpr_eval.ref_expr ctx ~get_const_type ~get_const_global
+                <span data-count="2800">C</span>onstexpr_eval.ref_expr ctx ~get_const_type ~get_const_global
                   expr.Annotated.raw )
               init
           in
@@ -1765,16 +1765,16 @@ end = struct
 
   let link_binary_module ~(env : t) ~name ~(modul : Binary.Module.t) :
     t Result.t =
-    <span data-count="3072">L</span>og.info (fun m -&gt; <span data-count="35">m</span> "linking      ...");
+    <span data-count="3076">L</span>og.info (fun m -&gt; <span data-count="35">m</span> "linking      ...");
 
     (* This is the first step where we simply allocate the env values for functions, globals, memories etc.
      Each one is given a unique address in a global space, and we maintain a map from (module id, {func,global,...} id) to env address. *)
-    <span data-count="3072">l</span>et new_module = get_next_module ~env in
+    <span data-count="3076">l</span>et new_module = get_next_module ~env in
 
     (* type_base_id: the number all previously identified types from the modules
      that were treated before *)
     let type_base_id = Array.length env.types in
-    <span data-count="3072">l</span>et link_state : link_state =
+    <span data-count="3076">l</span>et link_state : link_state =
       let rewrite_map : Env_rewriter.t =
         { Env_rewriter.empty with type_base_id }
       in
@@ -1786,32 +1786,32 @@ end = struct
         (Env_rewriter.rewrite_sub_type ~map:link_state.rewrite_map)
         modul.types
     in
-    <span data-count="3072">l</span>et type_groups =
+    <span data-count="3076">l</span>et type_groups =
       let module_groups =
-        Binary.compute_type_groups modul.type_defs (Array.lengt<span data-count="3072">h</span> modul.types)
+        Binary.compute_type_groups modul.type_defs (Array.lengt<span data-count="3076">h</span> modul.types)
       in
-      <span data-count="3072">A</span>rray.ma<span data-count="3072">p</span>
+      <span data-count="3076">A</span>rray.ma<span data-count="3076">p</span>
         (fun (lo, size) -&gt;
-          <span data-count="8100">(</span>Env_rewriter.rewrite_type_i<span data-count="8100">d</span> ~map:link_state.rewrite_map lo, size) )
+          <span data-count="8105">(</span>Env_rewriter.rewrite_type_i<span data-count="8105">d</span> ~map:link_state.rewrite_map lo, size) )
         module_groups
     in
 
     let types = Array.append env.types types in
-    <span data-count="3072">l</span>et type_groups = Array.append env.type_groups type_groups in
+    <span data-count="3076">l</span>et type_groups = Array.append env.type_groups type_groups in
     (* We need to compute the updated environment with the new types and type
      groups earlier so that we can use it for imported functions *)
-    <span data-count="3072">l</span>et env = { env with types; type_groups } in
+    <span data-count="3076">l</span>et env = { env with types; type_groups } in
 
     (* functions *)
     let* link_state =
-      array_fold_left<span data-count="3072">i</span> (link_function ~env) link_state modul.func
+      array_fold_left<span data-count="3076">i</span> (link_function ~env) link_state modul.func
     in
 
     (* tags *)
     (* TODO *)
 
     (* TODO: I'm not sure about this *)
-    <span data-count="3034">l</span>et get_const_type id = <span data-count="16">A</span>rray.get types id in
+    <span data-count="3038">l</span>et get_const_type id = <span data-count="16">A</span>rray.get types id in
 
     let get_const_global ~(env : t) globals id =
       (* we should only make visible previously defined immutable globals and imported immutable globals. *)
@@ -1827,7 +1827,7 @@ end = struct
 
     (* globals *)
     let* link_state =
-      array_fold_left<span data-count="3034">i</span>
+      array_fold_left<span data-count="3038">i</span>
         (fun id link_state -&gt;
           <span data-count="1707">l</span>ink_global env.context ~get_const_type
             ~get_const_global:(get_const_globa<span data-count="1707">l</span> ~env link_state.globals)
@@ -1835,38 +1835,38 @@ end = struct
         link_state modul.global
     in
     (* memories *)
-    <span data-count="2979">l</span>et* link_state =
-      array_fold_left<span data-count="2979">i</span> (link_memory ~env) link_state modul.mem
+    <span data-count="2983">l</span>et* link_state =
+      array_fold_left<span data-count="2983">i</span> (link_memory ~env) link_state modul.mem
     in
     (* tables *)
-    <span data-count="2934">l</span>et* link_state =
-      array_fold_left<span data-count="2934">i</span> (link_table ~env) link_state modul.table
+    <span data-count="2938">l</span>et* link_state =
+      array_fold_left<span data-count="2938">i</span> (link_table ~env) link_state modul.table
     in
     (* tags *)
     (* TODO: rewrite tags later using tags_map, it has not been done for now... *)
-    <span data-count="2919">l</span>et* link_state = array_fold_left<span data-count="2919">i</span> (link_tag ~env) link_state modul.tag in
+    <span data-count="2923">l</span>et* link_state = array_fold_left<span data-count="2923">i</span> (link_tag ~env) link_state modul.tag in
 
     (* initialization code *)
     (* 1. data *)
-    <span data-count="2914">l</span>et _n, link_state =
+    <span data-count="2918">l</span>et _n, link_state =
       Array.fold_left
-        (fun (i, link_state) data -&gt; <span data-count="719">(</span>i + 1, link_dat<span data-count="719">a</span> ~env i link_state data))
+        (fun (i, link_state) data -&gt; <span data-count="724">(</span>i + 1, link_dat<span data-count="724">a</span> ~env i link_state data))
         (0, link_state) modul.data
     in
 
     (* 2. elem *)
-    <span data-count="2914">l</span>et* link_state : link_state =
-      array_fold_left<span data-count="2914">i</span>
-        (link_ele<span data-count="2914">m</span> env.context ~get_const_type
-           ~get_const_global:(get_const_globa<span data-count="2914">l</span> ~env link_state.globals)
+    <span data-count="2918">l</span>et* link_state : link_state =
+      array_fold_left<span data-count="2918">i</span>
+        (link_ele<span data-count="2918">m</span> env.context ~get_const_type
+           ~get_const_global:(get_const_globa<span data-count="2918">l</span> ~env link_state.globals)
            ~env )
         link_state modul.elem
     in
 
     (* 3. start function *)
-    <span data-count="2914">l</span>et initialization_code =
+    <span data-count="2918">l</span>et initialization_code =
       match modul.Binary.Module.start with
-      | <span data-count="2320">N</span>one -&gt; link_state.initialization_code
+      | <span data-count="2324">N</span>one -&gt; link_state.initialization_code
       | <span data-count="594">S</span>ome func -&gt;
         link_state.initialization_code @ [ Annotated.dumm<span data-count="594">y</span> (Binary.Call func) ]
     in
@@ -1878,17 +1878,17 @@ end = struct
     let env =
       List.fold_left
         (fun (env : t) (address, func) -&gt;
-          <span data-count="12385">m</span>atch (func : Extern_func.t Kind.func) with
-          | <span data-count="12385">K</span>ind.Wasm func -&gt;
+          <span data-count="12410">m</span>atch (func : Extern_func.t Kind.func) with
+          | <span data-count="12410">K</span>ind.Wasm func -&gt;
             let func =
               Env_rewriter.rewrite_binary_func ~map:link_state.rewrite_map func
             in
-            <span data-count="12385">l</span>et functions = Allocator.add_manual address func env.functions in
-            <span data-count="12385">{</span> env with functions }
+            <span data-count="12410">l</span>et functions = Allocator.add_manual address func env.functions in
+            <span data-count="12410">{</span> env with functions }
           | Kind.Extern _idx -&gt; assert false )
         env link_state.functions
     in
-    <span data-count="2914">l</span>et env =
+    <span data-count="2918">l</span>et env =
       List.fold_left
         (fun (env : t) (address, global) -&gt;
           <span data-count="1596">l</span>et globals = Allocator.add_manual address global env.globals in
@@ -1896,23 +1896,23 @@ end = struct
         env link_state.globals
     in
 
-    <span data-count="2914">l</span>et env =
+    <span data-count="2918">l</span>et env =
       List.fold_left
         (fun (env : t) (address, memory) -&gt;
           <span data-count="1051">l</span>et memories = Allocator.add_manual address memory env.memories in
           <span data-count="1051">{</span> env with memories } )
         env link_state.memories
     in
-    <span data-count="2914">l</span>et env =
+    <span data-count="2918">l</span>et env =
       List.fold_left
         (fun (env : t) (address, data) -&gt;
-          <span data-count="719">l</span>et data = Data.of_string data in
-          <span data-count="719">l</span>et datas = Allocator.add_manual address data env.datas in
-          <span data-count="719">{</span> env with datas } )
+          <span data-count="724">l</span>et data = Data.of_string data in
+          <span data-count="724">l</span>et datas = Allocator.add_manual address data env.datas in
+          <span data-count="724">{</span> env with datas } )
         env link_state.datas
     in
 
-    <span data-count="2914">l</span>et env =
+    <span data-count="2918">l</span>et env =
       List.fold_left
         (fun (env : t) (address, elem) -&gt;
           <span data-count="967">l</span>et elem = Elem.init elem in
@@ -1921,16 +1921,16 @@ end = struct
         env link_state.elems
     in
 
-    <span data-count="2914">l</span>et env =
+    <span data-count="2918">l</span>et env =
       List.fold_left
         (fun (env : t) (address, table) -&gt;
           (* TODO: missing rewriting here! *)
-          <span data-count="861">l</span>et tables = Allocator.add_manual address table env.tables in
-          <span data-count="861">{</span> env with tables } )
+          <span data-count="862">l</span>et tables = Allocator.add_manual address table env.tables in
+          <span data-count="862">{</span> env with tables } )
         env link_state.tables
     in
 
-    <span data-count="2914">l</span>et env =
+    <span data-count="2918">l</span>et env =
       List.fold_left
         (fun (env : t) (address, tag) -&gt;
           (* TODO: missing rewriting here! *)
@@ -1940,74 +1940,74 @@ end = struct
     in
 
     (* check that there is not two exports with the same names *)
-    <span data-count="2914">l</span>et* () =
+    <span data-count="2918">l</span>et* () =
       let names = Hashtbl.create 512 in
-      <span data-count="2914">l</span>et check_one { Binary.Export.name; _ } =
-        <span data-count="12074">i</span>f Hashtbl.mem names name then <span data-count="20">E</span>rror `Duplicate_export_name
-        else <span data-count="12054">b</span>egin
+      <span data-count="2918">l</span>et check_one { Binary.Export.name; _ } =
+        <span data-count="12079">i</span>f Hashtbl.mem names name then <span data-count="20">E</span>rror `Duplicate_export_name
+        else <span data-count="12059">b</span>egin
           Hashtbl.add names name ();
-          <span data-count="12054">O</span>k ()
+          <span data-count="12059">O</span>k ()
         end
       in
-      let check exports = <span data-count="14532">a</span>rray_iter check_one exports in
-      let* () = chec<span data-count="2914">k</span> modul.exports.func in
-      <span data-count="2912">l</span>et* () = chec<span data-count="2912">k</span> modul.exports.global in
-      <span data-count="2908">l</span>et* () = chec<span data-count="2908">k</span> modul.exports.mem in
-      <span data-count="2903">l</span>et* () = chec<span data-count="2903">k</span> modul.exports.table in
-      <span data-count="2895">l</span>et* () = chec<span data-count="2895">k</span> modul.exports.tag in
-      <span data-count="2894">O</span>k ()
+      let check exports = <span data-count="14552">a</span>rray_iter check_one exports in
+      let* () = chec<span data-count="2918">k</span> modul.exports.func in
+      <span data-count="2916">l</span>et* () = chec<span data-count="2916">k</span> modul.exports.global in
+      <span data-count="2912">l</span>et* () = chec<span data-count="2912">k</span> modul.exports.mem in
+      <span data-count="2907">l</span>et* () = chec<span data-count="2907">k</span> modul.exports.table in
+      <span data-count="2899">l</span>et* () = chec<span data-count="2899">k</span> modul.exports.tag in
+      <span data-count="2898">O</span>k ()
     in
 
-    <span data-count="2894">l</span>et export_array_to_string_map a address_map =
-      <span data-count="14470">A</span>rray.fold_left
+    <span data-count="2898">l</span>et export_array_to_string_map a address_map =
+      <span data-count="14490">A</span>rray.fold_left
         (fun map { Binary.Export.name; id } -&gt;
-          <span data-count="12034">m</span>atch IntMap.find_opt id address_map with
+          <span data-count="12039">m</span>atch IntMap.find_opt id address_map with
           | None -&gt; assert false
-          | <span data-count="12034">S</span>ome addr -&gt; StringMap.add name addr map )
+          | <span data-count="12039">S</span>ome addr -&gt; StringMap.add name addr map )
         StringMap.empty a
     in
     let add_exports new_module exports exported_map =
-      <span data-count="14470">i</span>f StringMap.is_empty exports then <span data-count="11564">e</span>xported_map
-      else <span data-count="2906">I</span>ntMap.add new_module exports exported_map
+      <span data-count="14490">i</span>f StringMap.is_empty exports then <span data-count="11580">e</span>xported_map
+      else <span data-count="2910">I</span>ntMap.add new_module exports exported_map
     in
     let exported_functions =
       add_exports new_module
-        (export_array_to_string_ma<span data-count="2894">p</span> modul.exports.func
+        (export_array_to_string_ma<span data-count="2898">p</span> modul.exports.func
            link_state.rewrite_map.functions )
         env.exported_functions
     in
-    <span data-count="2894">l</span>et exported_globals =
+    <span data-count="2898">l</span>et exported_globals =
       add_exports new_module
-        (export_array_to_string_ma<span data-count="2894">p</span> modul.exports.global
+        (export_array_to_string_ma<span data-count="2898">p</span> modul.exports.global
            link_state.rewrite_map.globals )
         env.exported_globals
     in
-    <span data-count="2894">l</span>et exported_memories =
+    <span data-count="2898">l</span>et exported_memories =
       add_exports new_module
-        (export_array_to_string_ma<span data-count="2894">p</span> modul.exports.mem
+        (export_array_to_string_ma<span data-count="2898">p</span> modul.exports.mem
            link_state.rewrite_map.memories )
         env.exported_memories
     in
-    <span data-count="2894">l</span>et exported_tables =
+    <span data-count="2898">l</span>et exported_tables =
       add_exports new_module
-        (export_array_to_string_ma<span data-count="2894">p</span> modul.exports.table
+        (export_array_to_string_ma<span data-count="2898">p</span> modul.exports.table
            link_state.rewrite_map.tables )
         env.exported_tables
     in
-    <span data-count="2894">l</span>et exported_tags =
+    <span data-count="2898">l</span>et exported_tags =
       add_exports new_module
-        (export_array_to_string_ma<span data-count="2894">p</span> modul.exports.tag
+        (export_array_to_string_ma<span data-count="2898">p</span> modul.exports.tag
            link_state.rewrite_map.tags )
         (* TODO: use rewrite_map.tags instead *)
         env.exported_tags
     in
-    <span data-count="2894">l</span>et last_module = Some new_module in
+    <span data-count="2898">l</span>et last_module = Some new_module in
     let initialization_codes =
       let initialization_code =
         Env_rewriter.rewrite_expression ~map:link_state.rewrite_map
-          (Annotated.dumm<span data-count="2894">y</span> initialization_code)
+          (Annotated.dumm<span data-count="2898">y</span> initialization_code)
       in
-      <span data-count="2894">I</span>ntMap.ad<span data-count="2894">d</span> new_module initialization_code.Annotated.raw
+      <span data-count="2898">I</span>ntMap.ad<span data-count="2898">d</span> new_module initialization_code.Annotated.raw
         env.initialization_codes
     in
 
@@ -2025,7 +2025,7 @@ end = struct
 
     let env =
       match name with
-      | <span data-count="2888">N</span>one -&gt; env
+      | <span data-count="2892">N</span>one -&gt; env
       | <span data-count="6">S</span>ome name -&gt;
         let registered_modules =
           StringMap.add name new_module env.registered_modules
@@ -2035,14 +2035,14 @@ end = struct
 
     let env =
       match modul.id with
-      | <span data-count="2563">N</span>one -&gt; env
+      | <span data-count="2567">N</span>one -&gt; env
       | <span data-count="331">S</span>ome id -&gt;
         let raw_names = StringMap.add id new_module env.raw_names in
         <span data-count="331">{</span> env with raw_names }
     in
 
     Log.debug (fun m -&gt; <span data-count="1">m</span> "env is: %a" pp env);
-    <span data-count="2894">O</span>k env
+    <span data-count="2898">O</span>k env
 end
 </code></pre>
       </div>
