@@ -13,6 +13,8 @@ exception Illegal_character of string
 
 exception Illegal_escape of string
 
+exception Malformed_utf8_codepoint of string
+
 exception Unclosed_annotation
 
 exception Unclosed_comment

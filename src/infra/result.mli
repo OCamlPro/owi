@@ -31,6 +31,7 @@ type err =
   | `Invalid_result_arity
   | `Lexer_illegal_character of string
   | `Lexer_unknown_operator of string
+  | `Malformed_utf8_codepoint of string
   | `Malformed_utf8_encoding of string
   | `Memory_size_too_large
   | `Msg of string
