@@ -237,7 +237,7 @@ let read_vectype input =
     Error (`Unimplemented "simd binary parsing")
   | b -> parse_fail "malformed vector type: %d" b
 
-let read_heap_type ?(abs = false) input b =
+let read_abs_heap_type b input =
   match b with
   | -0x17 -> Ok (Exn_ht, input)
   | -0x16 -> Ok (Array_ht, input)
@@ -251,11 +251,16 @@ let read_heap_type ?(abs = false) input b =
   | -0x0E -> Ok (NoExtern_ht, input)
   | -0x0D -> Ok (NoFunc_ht, input)
   | -0x0C -> Ok (NoExn_ht, input)
-  | _ when not abs ->
-    let* id, input = read_indice input in
-    if id >= 0 then Ok (TypeUse id, input)
-    else parse_fail "malformed reference type: %d" b
   | _ -> parse_fail "malformed reference type: %d" b
+
+let read_heap_type input =
+  match read_SN 33 input with
+  | Ok (i, input) when not (Int64.lt i 0L) ->
+    let id = Int64.to_int (Int64.logand i 0xFFFF_FFFFL) in
+    Ok (TypeUse id, input)
+  | _ ->
+    let* b, input = read_S7 input in
+    read_abs_heap_type b input
 
 let read_reftype input : ((Text.nullable * Binary.heap_type) * Input.t) Result.t
     =
@@ -263,16 +268,14 @@ let read_reftype input : ((Text.nullable * Binary.heap_type) * Input.t) Result.t
   match b1 with
   | -0x1d ->
     (* 0x63 *)
-    let* b2, input = read_S7 input in
-    let* ht, input = read_heap_type input b2 in
+    let* ht, input = read_heap_type input in
     Ok (((Text.Null : Text.nullable), ht), input)
   | -0x1c ->
     (* 0x64 *)
-    let* b2, input = read_S7 input in
-    let* ht, input = read_heap_type input b2 in
+    let* ht, input = read_heap_type input in
     Ok ((Text.No_null, ht), input)
   | _ ->
-    let* ht, input = read_heap_type ~abs:true input b1 in
+    let* ht, input = read_abs_heap_type b1 input in
     Ok (((Text.Null : Text.nullable), ht), input)
 
 let read_valtype input =
@@ -448,36 +451,28 @@ let read_FB input =
     let+ id2, input = read_indice input in
     (Simple (Array (Init_elem (id1, id2))), input)
   | 20 ->
-    let* b, input = read_S7 input in
-    let+ ht, input = read_heap_type input b in
+    let+ ht, input = read_heap_type input in
     (Simple (Ref (Test (No_null, ht))), input)
   | 21 ->
-    let* b, input = read_S7 input in
-    let+ ht, input = read_heap_type input b in
+    let+ ht, input = read_heap_type input in
     (Simple (Ref (Test (Null, ht))), input)
   | 22 ->
-    let* b, input = read_S7 input in
-    let+ ht, input = read_heap_type input b in
+    let+ ht, input = read_heap_type input in
     (Simple (Ref (Cast (No_null, ht))), input)
   | 23 ->
-    let* b, input = read_S7 input in
-    let+ ht, input = read_heap_type input b in
+    let+ ht, input = read_heap_type input in
     (Simple (Ref (Cast (Null, ht))), input)
   | 24 ->
     let* n1, n2, input = read_castop input in
     let* id, input = read_indice input in
-    let* b, input = read_S7 input in
-    let* ht1, input = read_heap_type input b in
-    let* b, input = read_S7 input in
-    let+ ht2, input = read_heap_type input b in
+    let* ht1, input = read_heap_type input in
+    let+ ht2, input = read_heap_type input in
     (Br_on_cast (id, (n1, ht1), (n2, ht2)), input)
   | 25 ->
     let* n1, n2, input = read_castop input in
     let* id, input = read_indice input in
-    let* b, input = read_S7 input in
-    let* ht1, input = read_heap_type input b in
-    let* b, input = read_S7 input in
-    let+ ht2, input = read_heap_type input b in
+    let* ht1, input = read_heap_type input in
+    let+ ht2, input = read_heap_type input in
     (Br_on_cast_fail (id, (n1, ht1), (n2, ht2)), input)
   | 26 -> Ok (Simple Any_convert_extern, input)
   | 27 -> Ok (Simple Extern_convert_any, input)
