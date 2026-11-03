@@ -2649,7 +2649,8 @@ struct
         if idx' < 0 || idx' >= Int32.to_int len then
           Choice.trap (`Msg "out of bounds array access")
         else begin
-          Ref.Array.set_elem a idx v;
+          let array = Ref.Array.set_elem a idx v in
+          (* TODO: store array in heap *)
           ret state.stack
         end
       | r when Ref.is_null r -> Choice.trap (`Msg "null array reference")
@@ -2690,7 +2691,9 @@ struct
       in
       let gv = v in
       for i = 0 to n - 1 do
-        Ref.Array.set_elem arr (I32.of_int (dst_off + i)) gv
+        let array = Ref.Array.set_elem arr (I32.of_int (dst_off + i)) gv in
+        (* TODO: store array in heap *)
+        ()
       done;
       ret state.stack
     | Array (Copy (_dst_id, _src_id)) ->
@@ -2717,12 +2720,20 @@ struct
       if d_off <= s_off then
         for i = 0 to n - 1 do
           let elt = Ref.Array.get_elem s_arr (I32.of_int @@ (s_off + i)) in
-          Ref.Array.set_elem d_arr (I32.of_int @@ (d_off + i)) elt
+          let array =
+            Ref.Array.set_elem d_arr (I32.of_int @@ (d_off + i)) elt
+          in
+          (* TODO: store array in heap *)
+          ()
         done
       else
         for i = n - 1 downto 0 do
           let elt = Ref.Array.get_elem s_arr (I32.of_int @@ (s_off + i)) in
-          Ref.Array.set_elem d_arr (I32.of_int @@ (d_off + i)) elt
+          let array =
+            Ref.Array.set_elem d_arr (I32.of_int @@ (d_off + i)) elt
+          in
+          (* TODO: store array in heap *)
+          ()
         done;
       ret state.stack
     | Array (New_data (arr_id, data_id)) ->
@@ -2787,7 +2798,9 @@ struct
       in
       for i = 0 to n - 1 do
         let v = read_data_gc_val st data_str (s_off + (i * elem_size)) in
-        Ref.Array.set_elem arr (I32.of_int @@ (d_off + i)) v
+        let array = Ref.Array.set_elem arr (I32.of_int @@ (d_off + i)) v in
+        (* TODO: store array in heap *)
+        ()
       done;
       ret state.stack
     | Array (Init_elem (_arr_id, elem_id)) ->
@@ -2810,7 +2823,9 @@ struct
       in
       for i = 0 to n - 1 do
         let v = Ref (Elem.get elem (s_off + i)) in
-        Ref.Array.set_elem arr (I32.of_int @@ (d_off + i)) v
+        let array = Ref.Array.set_elem arr (I32.of_int @@ (d_off + i)) v in
+        (* TODO: store array in heap *)
+        ()
       done;
       ret state.stack
 

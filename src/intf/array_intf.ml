@@ -17,7 +17,7 @@ module type T = sig
 
   val get_elem : 'value t -> i32 -> 'value
 
-  val set_elem : 'value t -> i32 -> 'value -> unit
+  val set_elem : 'value t -> i32 -> 'value -> 'value t
 
   val length : 'value t -> i32
 
