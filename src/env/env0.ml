@@ -25,7 +25,7 @@ module StringMap = struct
          Fmt.pf ppf "%S -> %a" k pp_v v ) )
 end
 
-type ('extern_func, 'value, 'memory, 'table, 'data, 'elem, 'context) t =
+type ('extern_func, 'value, 'heap, 'memory, 'table, 'data, 'elem, 'context) t =
   { functions : 'extern_func Kind.func Allocator.t
       (* map from runtime address to runtime functions *)
   ; globals : 'value global Allocator.t
@@ -35,6 +35,7 @@ type ('extern_func, 'value, 'memory, 'table, 'data, 'elem, 'context) t =
   ; tables : 'table Allocator.t (* map from runtime address to runtime tables *)
   ; datas : 'data Allocator.t (* map from runtime address to runtime datas *)
   ; elems : 'elem Allocator.t (* map from runtime address to runtime elems *)
+  ; heap : 'heap
   ; tags :
       Binary.Tag.t Allocator.t (* map from runtime address to runtime tags *)
   ; initialization_codes : Binary.expr IntMap.t
@@ -71,6 +72,7 @@ let pp ~pp_global ~pp_table ppf
   ; tables
   ; datas
   ; elems
+  ; heap = _
   ; tags = _
   ; initialization_codes
   ; exported_functions
@@ -126,7 +128,7 @@ let pp ~pp_global ~pp_table ppf
     exported_tables (Fmt.option pp_modul) last_module (StringMap.pp pp_modul)
     registered_modules pp_types types pp_type_groups type_groups
 
-let empty ~context =
+let empty ~context ~heap =
   let functions = Allocator.empty in
   let globals = Allocator.empty in
   let memories = Allocator.empty in
@@ -152,6 +154,7 @@ let empty ~context =
   ; datas
   ; elems
   ; tags
+  ; heap
   ; initialization_codes
   ; exported_functions
   ; exported_globals

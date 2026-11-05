@@ -21,6 +21,8 @@ module type T = sig
 
   type context
 
+  type heap
+
   val empty : context:context -> t
 
   val pp : t Fmt.t
@@ -44,6 +46,10 @@ module type T = sig
   val get_memory : env:t -> int -> memory
 
   val set_memory : env:t -> int -> memory -> t
+
+  val get_heap : env:t -> heap
+
+  val set_heap : env:t -> heap -> t
 
   val get_elem : env:t -> int -> elem
 
