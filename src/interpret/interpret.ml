@@ -2261,7 +2261,9 @@ struct
     | Val_type (Num_type F64) ->
       F64 (F64.of_bits @@ I64.of_int64 (read_le64 data off))
     | Val_type (Num_type V128) ->
-      Fmt.failwith "array data instruction: v128 element type not yet supported"
+      let high = read_le64 data off in
+      let low = read_le64 data (off + 8) in
+      V128 (V128.of_i64x2 (I64.of_int64 high) (I64.of_int64 low))
     | Val_type (Ref_type _) -> assert false
 
   let select_int x =
