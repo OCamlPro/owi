@@ -208,7 +208,7 @@ $ owi wasm script abstract --no-exhaustion reference/left-to-right.wast
        Called from Stdlib__List.fold_left in file "list.ml", line 125, characters 24-34
        Called from Owi__Script_abstract.exec in file "src/script/script_abstract.ml", line 196, characters 12-37
        Called from Owi__Syntax.list_iter.aux in file "src/infra/syntax.ml", line 11, characters 25-28
-       Called from Owi__Cmd_wasm_script.cmd_abstract in file "src/cmd/cmd_wasm_script.ml", line 22, characters 15-46
+       Called from Owi__Cmd_wasm_script.cmd_abstract in file "src/cmd/cmd_wasm_script.ml", line 25, characters 15-46
        Called from Cmdliner_term.app.(fun) in file "cmdliner_term.ml", line 22, characters 19-24
        Called from Cmdliner_eval.run_parser in file "cmdliner_eval.ml", line 41, characters 7-16
   [125]

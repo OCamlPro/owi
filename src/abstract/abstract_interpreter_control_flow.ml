@@ -263,7 +263,7 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
       | instr :: instrs -> (
         let new_state, new_jt = eval_instr state instr in
         let new_jt = JumpMap.append jt new_jt in
-        Trace.record_wasm_jt ~jm:new_jt;
+        Trace.trace_wasm_jt ~jm:new_jt;
         Log.debug (fun m ->
           m "jt after (%a) :  %a"
             (Binary.pp_instr ~short:true)
@@ -316,9 +316,9 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
     let fn_state : Abstract_interpreter_state.t =
       { abs_state = fn_abs_state; env = state.env }
     in
-    Trace.record_wasm_step Block_start (Some fn_state) instr;
+    Trace.trace_wasm_step Block_start (Some fn_state) instr;
     let fn_end_state, jt = eval_expr fn_state func.body in
-    Trace.record_wasm_step Block_end fn_end_state instr;
+    Trace.trace_wasm_step Block_end fn_end_state instr;
     (* The stack given to the function is empty so the returned stack should only contain the results *)
     let fn_end_stack_size = List.length fn_state.abs_state.func_rt in
     let jumps_ret = join_jts fn_end_stack_size (JumpMap.find_opt Ret jt) in
@@ -387,11 +387,11 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
             let abs_state = { abs_state with stack } in
             (Some { state with abs_state }, JumpMap.empty)
         in
-        Trace.record_wasm_step Step res instr;
+        Trace.trace_wasm_step Step res instr;
         (res, jts)
       end
     | Block (_str_opt, bt, expr) ->
-      Trace.record_wasm_step Block_start (Some state) instr;
+      Trace.trace_wasm_step Block_start (Some state) instr;
       let next_state, jt = eval_expr state expr in
       let param_size, res_size =
         match bt with
@@ -411,7 +411,7 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
       in
       begin match (next_state, jumps_br0) with
       | Some _, Some _ ->
-        Trace.record_wasm_step Join joined_state instr
+        Trace.trace_wasm_step Join joined_state instr
           ~inputs:[ ("fallthrough", next_state); ("br 0", jumps_br0) ]
       | _, _ -> ()
       end;
@@ -419,10 +419,10 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
         (* TODO on peut avoir une paire de (int * map) pour ne pas avoir à decr la liste immédiatement *)
         JumpMap.decr jt
       in
-      Trace.record_wasm_step Block_end joined_state instr;
+      Trace.trace_wasm_step Block_end joined_state instr;
       (joined_state, jt)
     | If_else (_, bt, expr_then, expr_else) ->
-      Trace.record_wasm_step Block_start (Some state) instr;
+      Trace.trace_wasm_step Block_start (Some state) instr;
       let b, stack = Stack.pop_bool stack ctx in
       let joined_state, jt =
         begin match
@@ -454,15 +454,15 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
           let joined_state, jt =
             join_X (then_state, then_jt) (else_state, else_jt)
           in
-          Trace.record_wasm_step Join joined_state instr
+          Trace.trace_wasm_step Join joined_state instr
             ~inputs:[ ("then", then_state); ("else", else_state) ];
           (joined_state, jt)
         end
       in
-      Trace.record_wasm_step Block_end joined_state instr;
+      Trace.trace_wasm_step Block_end joined_state instr;
       (joined_state, jt)
     | Loop (_str_opt, bt, body) ->
-      Trace.record_wasm_step Block_start (Some state) instr;
+      Trace.trace_wasm_step Block_start (Some state) instr;
       let widening_id = Domains.Sig.Widening_Id.fresh () in
       (* TODO tester si on a besoin de copie *)
       let initial_state =
@@ -506,7 +506,7 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
               - sinon on ajoute un widen int à la main ou on widen à (max int-1).
           *)
           let widened, included = widen widening_id state widening_state in
-          Trace.record_wasm_step Widen None instr
+          Trace.trace_wasm_step Widen None instr
             ~inputs:[ ("previous", Some state); ("next", Some widening_state) ]
             ~converged:(Some included);
           if not included then fixpoint widened
@@ -527,12 +527,12 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
             (exit_state, jt)
       in
       let widened_state, jts = fixpoint state in
-      Trace.record_wasm_step Block_end widened_state instr;
+      Trace.trace_wasm_step Block_end widened_state instr;
       (widened_state, jts)
     | Br i ->
       let res = None in
       let jts = JumpMap.of_list [ (I i, [ state ]) ] in
-      Trace.record_wasm_step Step res instr;
+      Trace.trace_wasm_step Step res instr;
       (res, jts)
     | Br_if i ->
       let b, stack = Stack.pop_bool stack ctx in
@@ -551,7 +551,7 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
           Some { state with abs_state }
         | None -> None
       in
-      Trace.record_wasm_step Step state instr;
+      Trace.trace_wasm_step Step state instr;
       (state, jt_if)
     | Br_table (cases, default) ->
       let v, stack = Stack.pop_i32 stack in
@@ -587,10 +587,10 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
             | None -> acc )
           default cases
       in
-      Trace.record_wasm_step Step None instr;
+      Trace.trace_wasm_step Step None instr;
       (None, JumpMap.of_list all_cases)
     | Return ->
-      Trace.record_wasm_step Step None instr;
+      Trace.trace_wasm_step Step None instr;
       (None, JumpMap.of_list [ (Ret, [ state ]) ])
     | Simple i ->
       let uuid = instr.uuid in
@@ -598,7 +598,7 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
       let state =
         match state with State state -> Some state | Unreachable -> None
       in
-      Trace.record_wasm_step Step state instr;
+      Trace.trace_wasm_step Step state instr;
       (state, JumpMap.empty)
     | Br_on_non_null _
     | Br_on_cast (_, _, _)
