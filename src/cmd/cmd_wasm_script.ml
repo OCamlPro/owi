@@ -17,10 +17,11 @@ let cmd_symbolic ~files ~no_exhaustion =
   list_iter (run_file exec) files
 
 let cmd_abstract ~files ~no_exhaustion ~debug_trace =
-  if Option.is_some debug_trace then Abstract_trace.enable ();
+  begin match debug_trace with
+  | Some path -> Abstract_trace.enable path
+  | None -> ()
+  end;
   let exec = Script_abstract.exec ~no_exhaustion in
   let result = list_iter (run_file exec) files in
-  ( match debug_trace with
-  | None -> ()
-  | Some path -> Abstract_trace.write_json path );
+  Abstract_trace.close ();
   result

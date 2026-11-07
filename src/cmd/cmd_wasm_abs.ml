@@ -19,12 +19,10 @@ let cmd ~debug_trace ~entry_point ~source_file ~unsafe =
     let* modul = Cmd_utils.set_entry_point entry_point false modul in
     Compile.Wasm.Binary.until_abstract_link ~unsafe ~name:None env modul
   in
-  if Option.is_some debug_trace then Abstract_trace.enable ();
+  Option.iter Abstract_trace.enable debug_trace;
   try
     let state = Abstract_interpreter_control_flow.modul ~env ~modul in
     Abstract_checker.check_module ~env ~modul state.invariant;
-    match debug_trace with
-    | None -> ()
-    | Some path -> Abstract_trace.write_json path
+    Abstract_trace.close ()
   with Abstract_interpreter_control_flow.RecursiveFunctionCall ->
     Log.err (fun m -> m "Too many recursive calls")

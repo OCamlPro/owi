@@ -37,40 +37,40 @@ let run_one ~no_exhaustion:_ (state : Env.Abstract.t Result.t) cmd =
   let* env = state in
   match cmd with
   | Wast.Text_module (false, m) ->
-    Abstract_trace.record_wast_cmd Block_start cmd;
+    Abstract_trace.trace_wast_cmd Block_start cmd;
     let* modul, env =
       Compile.Wasm.Text.until_abstract_link env ~unsafe ~name:None m
     in
     let _state = I.modul ~env ~modul in
-    Abstract_trace.record_wast_cmd Block_end cmd;
+    Abstract_trace.trace_wast_cmd Block_end cmd;
     (* TODO: set context in env? Or isn't it necessary as it's supposed to be mutable? *)
     Ok env
   | Quoted_module (false, modul) ->
     Log.info (fun m -> m "*** quoted module");
-    Abstract_trace.record_wast_cmd Block_start cmd;
+    Abstract_trace.trace_wast_cmd Block_start cmd;
     let* modul = Parse.Text.Inline_module.from_string modul in
     let* modul, env =
       Compile.Wasm.Text.until_abstract_link env ~unsafe ~name:None modul
     in
     let _state = I.modul ~env ~modul in
-    Abstract_trace.record_wast_cmd Block_end cmd;
+    Abstract_trace.trace_wast_cmd Block_end cmd;
     Ok env
   | Binary_module (false, id, modul) ->
     Log.info (fun m -> m "*** binary module");
-    Abstract_trace.record_wast_cmd Block_start cmd;
+    Abstract_trace.trace_wast_cmd Block_start cmd;
     let* modul = Parse.Binary.Module.from_string modul in
     let modul = { modul with id } in
     let* modul, env =
       Compile.Wasm.Binary.until_abstract_link env ~unsafe ~name:None modul
     in
     let _state = I.modul ~env ~modul in
-    Abstract_trace.record_wast_cmd Block_end cmd;
+    Abstract_trace.trace_wast_cmd Block_end cmd;
     Ok env
   | Assert (Assert_malformed_binary (modul, expected)) ->
     Log.info (fun m -> m "*** assert_malformed_binary");
     let got = Parse.Binary.Module.from_string modul in
     let res = Script_error.check_result ~expected ~got in
-    Abstract_trace.record_wast_cmd Step cmd;
+    Abstract_trace.trace_wast_cmd Step cmd;
     let+ () = res in
     env
   | Assert (Assert_malformed_quote (modul, expected)) ->
@@ -127,7 +127,7 @@ let run_one ~no_exhaustion:_ (state : Env.Abstract.t Result.t) cmd =
     assert false
   | Assert (Assert_return (action, res)) ->
     Log.info (fun m -> m "*** assert_return");
-    Abstract_trace.record_wast_cmd Block_start cmd;
+    Abstract_trace.trace_wast_cmd Block_start cmd;
     let* state = do_action env action in
     let stack = List.rev state.stack in
     let res =
@@ -141,7 +141,7 @@ let run_one ~no_exhaustion:_ (state : Env.Abstract.t Result.t) cmd =
                 res stack
       then begin
         let ctx = Env.Abstract.get_context ~env in
-        Abstract_trace.record_wast_test_res
+        Abstract_trace.trace_wast_test_res
           (Fail
              { expected = Fmt.to_to_string Wast.pp_results res
              ; got = Fmt.to_to_string (Abstract_stack.pp ctx) stack
@@ -153,30 +153,30 @@ let run_one ~no_exhaustion:_ (state : Env.Abstract.t Result.t) cmd =
         Error `Bad_result
       end
       else (
-        Abstract_trace.record_wast_test_res Ok;
+        Abstract_trace.trace_wast_test_res Ok;
         Ok env )
     in
-    Abstract_trace.record_wast_cmd Block_end cmd;
+    Abstract_trace.trace_wast_cmd Block_end cmd;
     res
   | Assert assertion ->
     Log.warn (fun m -> m "%a is not handled" Wast.pp_assertion assertion);
     Ok env
   | Register (name, modid) ->
-    Abstract_trace.record_wast_cmd Step cmd;
+    Abstract_trace.trace_wast_cmd Step cmd;
     let+ env = Env.Abstract.register_module ~env ~name ~modid in
     env
   | Instance _ ->
-    Abstract_trace.record_wast_cmd Step cmd;
+    Abstract_trace.trace_wast_cmd Step cmd;
     Log.err (fun m -> m "(module instance) is not handled");
     assert false
   | Text_module (true, _) | Binary_module (true, _, _) | Quoted_module (true, _)
     ->
-    Abstract_trace.record_wast_cmd Step cmd;
+    Abstract_trace.trace_wast_cmd Step cmd;
     Ok env
   | Action action ->
-    Abstract_trace.record_wast_cmd Block_start cmd;
+    Abstract_trace.trace_wast_cmd Block_start cmd;
     let* _state = do_action env action in
-    Abstract_trace.record_wast_cmd Block_end cmd;
+    Abstract_trace.trace_wast_cmd Block_end cmd;
     Ok env
 
 let run ~no_exhaustion script =

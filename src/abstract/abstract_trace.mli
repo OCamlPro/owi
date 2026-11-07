@@ -16,11 +16,13 @@ type test_res =
       ; got : string
       }
 
-val enable : unit -> unit
+val enable : string -> unit
+
+val close : unit -> unit
 
 val is_enabled : unit -> bool
 
-val record_wasm_step :
+val trace_wasm_step :
      ?inputs:(string * Abstract_interpreter_state.t option) list
   -> ?converged:bool option
   -> kind
@@ -28,12 +30,10 @@ val record_wasm_step :
   -> Binary.instr Annotated.t
   -> unit
 
-val record_wasm_jt : jm:Abstract_jump_map.t -> unit
+val trace_wasm_jt : jm:Abstract_jump_map.t -> unit
 
-val record_wasm_warning : instr_id:int -> message:string -> unit
+val trace_wasm_warning : instr_id:int -> message:string -> unit
 
-val record_wast_cmd : kind -> Wast.cmd -> unit
+val trace_wast_cmd : kind -> Wast.cmd -> unit
 
-val record_wast_test_res : test_res -> unit
-
-val write_json : string -> unit
+val trace_wast_test_res : test_res -> unit

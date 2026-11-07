@@ -2,6 +2,10 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
+(* The trace is written as JSON Lines: the first line is the metadata, every
+   following line is one event. Each event is written as soon as it is traced
+   so that the trace is usable even if the analysis does not terminate. *)
+
 type kind =
   | Block_start
   | Block_end
@@ -14,7 +18,6 @@ type wasm_event =
   ; instr_id : int
   ; instr : string
   ; context : string option
-      (* Context is mutable so we pretty print the current state directly *)
   ; state : Abstract_interpreter_state.t option
   ; kind : kind
   ; mutable jm : Abstract_jump_map.t
@@ -48,83 +51,15 @@ let string_of_kind = function
   | Join -> "join"
   | Widen -> "widen"
 
-let enabled = ref false
+let out_chan : out_channel option ref = ref None
 
-let events = ref []
+let is_enabled () = Option.is_some !out_chan
 
 let pending_warnings = ref []
 
 let pending_test_res = ref None
 
 let next_id = ref 0
-
-let enable () = enabled := true
-
-let is_enabled () = !enabled
-
-let record_wasm_step
-  ?(inputs : (string * Abstract_interpreter_state.t option) list = [])
-  ?(converged : bool option = None) (kind : kind)
-  (state : Abstract_interpreter_state.t option)
-  (instr : Binary.instr Annotated.t) =
-  if not !enabled then ()
-  else
-    let id = !next_id in
-    incr next_id;
-    let instr_id = instr.uuid in
-    let instr = Fmt.to_to_string (Binary.pp_instr ~short:true) instr.raw in
-    let context =
-      Option.map
-        (fun (state : Abstract_interpreter_state.t) ->
-          Fmt.to_to_string Abstract_domain.context_pretty state.abs_state.ctx )
-        state
-    in
-    let warnings, still_pending =
-      List.partition (fun (id, _) -> id = instr_id) !pending_warnings
-    in
-    pending_warnings := still_pending;
-    let ev =
-      { id
-      ; instr_id
-      ; instr
-      ; state
-      ; kind
-        (* We record the jts separately as we want to trace the jump targets
-        after the current jump targets has been merged with existing jump targets *)
-      ; jm = Abstract_jump_map.empty
-      ; context
-      ; inputs
-      ; converged
-      ; warnings = List.map snd warnings
-      }
-    in
-    events := Wasm ev :: !events
-
-let record_wasm_jt ~(jm : Abstract_jump_map.t) =
-  if not !enabled then ()
-  else match !events with Wasm ev :: _ -> ev.jm <- jm | _ -> assert false
-
-let record_wasm_warning ~instr_id ~message =
-  if not !enabled then ()
-  else pending_warnings := (instr_id, message) :: !pending_warnings
-
-let record_wast_cmd kind cmd =
-  if not !enabled then ()
-  else
-    let id = !next_id in
-    incr next_id;
-    let cmd =
-      match kind with Block_end -> "" | _ -> Fmt.to_to_string Wast.pp_cmd cmd
-    in
-    let test_res =
-      match !pending_test_res with Some test_res -> test_res | None -> Ok
-    in
-    let ev = { id; kind; cmd; test_res } in
-    events := Wast ev :: !events;
-    pending_test_res := None
-
-let record_wast_test_res test_res =
-  if not !enabled then () else pending_test_res := Some test_res
 
 let json_of_string_list l : Yojson.Safe.t =
   `List (List.map (fun s -> `String s) l)
@@ -225,20 +160,126 @@ let json_of_event (ev : event) : Yojson.Safe.t =
       ; ("test_res", json_of_test_res test_res)
       ]
 
-let write_json path =
-  let reved = List.rev !events in
-  let json : Yojson.Safe.t =
-    `Assoc
-      [ ( "metadata"
-        , `Assoc
-            [ ("version", `Float 1.)
-            ; ("mode", `String "abstract")
-            ; ("script", `Bool false)
-            ] )
-      ; ("events", `List (List.map json_of_event reved))
-      ]
+let write_line (json : Yojson.Safe.t) =
+  match !out_chan with
+  | None -> ()
+  | Some oc ->
+    Yojson.Safe.to_channel oc json;
+    Out_channel.output_char oc '\n';
+    Out_channel.flush oc
+
+let pending_event : wasm_event option ref = ref None
+
+let flush_pending () =
+  match !pending_event with
+  | None -> ()
+  | Some ev ->
+    pending_event := None;
+    write_line (json_of_event (Wasm ev))
+
+let close () =
+  flush_pending ();
+  match !out_chan with
+  | None -> ()
+  | Some oc ->
+    out_chan := None;
+    Out_channel.close oc
+
+let confirm_overwrite path =
+  Log.warn (fun m -> m "trace file %s already exists" path);
+  Fmt.epr "Replace %s? [y/N] %!" path;
+  match In_channel.input_line stdin with
+  | None -> false
+  | Some answer -> (
+    match String.lowercase_ascii (String.trim answer) with
+    | "y" | "yes" -> true
+    | _ -> false )
+
+let enable path =
+  close ();
+  let exists =
+    match Bos.OS.File.exists (Fpath.v path) with Ok b -> b | Error _ -> false
   in
-  let contents = Fmt.str "%s\n" (Yojson.Safe.pretty_to_string json) in
-  match Bos.OS.File.write (Fpath.v path) contents with
-  | Ok () -> ()
-  | Error (`Msg msg) -> Log.err (fun m -> m "Failed to write trace: %s" msg)
+  if exists && not (confirm_overwrite path) then
+    Log.warn (fun m -> m "keeping existing %s, tracing is disabled" path)
+  else
+    match
+      Out_channel.open_gen [ Open_wronly; Open_creat; Open_trunc ] 0o644 path
+    with
+    | exception Sys_error msg ->
+      Log.err (fun m -> m "Failed to open trace file: %s" msg)
+    | chan ->
+      out_chan := Some chan;
+      at_exit close;
+      write_line
+        (`Assoc
+           [ ("version", `Float 1.)
+           ; ("mode", `String "abstract")
+           ; ("script", `Bool false)
+           ] )
+
+let fresh_id () =
+  let id = !next_id in
+  incr next_id;
+  id
+
+let trace_wasm_step
+  ?(inputs : (string * Abstract_interpreter_state.t option) list = [])
+  ?(converged : bool option = None) (kind : kind)
+  (state : Abstract_interpreter_state.t option)
+  (instr : Binary.instr Annotated.t) =
+  if is_enabled () then begin
+    flush_pending ();
+    let id = fresh_id () in
+    let instr_id = instr.uuid in
+    let instr = Fmt.to_to_string (Binary.pp_instr ~short:true) instr.raw in
+    let context =
+      Option.map
+        (fun (state : Abstract_interpreter_state.t) ->
+          Fmt.to_to_string Abstract_domain.context_pretty state.abs_state.ctx )
+        state
+    in
+    let warnings, still_pending =
+      List.partition (fun (id, _) -> id = instr_id) !pending_warnings
+    in
+    pending_warnings := still_pending;
+    pending_event :=
+      Some
+        { id
+        ; instr_id
+        ; instr
+        ; state
+        ; kind
+          (* We trace the jts separately as we want to trace the jump targets
+             after the current jump targets has been merged with existing jump
+             targets *)
+        ; jm = Abstract_jump_map.empty
+        ; context
+        ; inputs
+        ; converged
+        ; warnings = List.map snd warnings
+        }
+  end
+
+let trace_wasm_jt ~(jm : Abstract_jump_map.t) =
+  if is_enabled () then
+    match !pending_event with Some ev -> ev.jm <- jm | None -> assert false
+
+let trace_wasm_warning ~instr_id ~message =
+  if is_enabled () then
+    pending_warnings := (instr_id, message) :: !pending_warnings
+
+let trace_wast_cmd kind cmd =
+  if is_enabled () then begin
+    flush_pending ();
+    let id = fresh_id () in
+    let cmd =
+      match kind with Block_end -> "" | _ -> Fmt.to_to_string Wast.pp_cmd cmd
+    in
+    let test_res = Option.value !pending_test_res ~default:Ok in
+    pending_test_res := None;
+    write_line (json_of_event (Wast { id; kind; cmd; test_res }))
+  end
+
+let trace_wast_test_res test_res =
+  if is_enabled () then pending_test_res := Some test_res
