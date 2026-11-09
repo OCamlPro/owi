@@ -44,7 +44,7 @@ module type T = sig
 
   val func : int -> 'value t
 
-  val int_of_fun_id : fun_id -> int 
+  val int_of_fun_id : fun_id -> int
 
   val extern : 'x Type.Id.t -> 'x -> 'value t
 
