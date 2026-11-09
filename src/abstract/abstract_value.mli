@@ -100,7 +100,7 @@ module Ref : sig
     | ExternAsAny of Extern.t option
     | AnyAsExtern of 'value t
 
-  val null : Abstract_domain.Context.t -> Binary.heap_type -> 'value t
+  val null : Binary.heap_type -> 'value t
 
   val func : fun_id -> 'value t
 

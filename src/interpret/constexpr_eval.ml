@@ -175,7 +175,7 @@ module Abstract :
     | F64 (Const f) ->
       Stack.push_f64 stack (Value.F64.of_float ctx (Float64.to_float f))
     | V128 (Const v) -> Stack.push_v128 stack (Value.V128.of_concrete ctx v)
-    | Ref (Null t) -> Stack.push_ref stack (Value.Ref.null ctx t)
+    | Ref (Null t) -> Stack.push_ref stack (Value.Ref.null t)
     | Ref (Func id) ->
       let enum = Abstract_domain.Enum_Forward.enum_const ~case:id ctx in
       let value = Value.Ref (Func (Some enum)) in

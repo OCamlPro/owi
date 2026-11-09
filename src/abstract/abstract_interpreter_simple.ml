@@ -1984,20 +1984,26 @@ let eval_elem env (abs_state : Abstract_state.t) : Binary.elem_instr -> _ =
 (* TODO: handle this correctly *)
 let eval_ref env ({ stack; ctx; _ } as abs_state : Abstract_state.t) :
   Binary.ref_instr -> _ = function
-  | Null _ ->
-    let stack = Stack.push_ref stack Abstract_ref.NullRef in
+  | Null ht ->
+    let stack = Stack.push_ref stack (Abstract_ref.null ht) in
     let abs_state = { abs_state with stack } in
     State { abs_state; env }
   | Is_null ->
-    let _v, stack = Stack.pop_ref stack in
-    let stack = Stack.push_bool stack ctx (Abstract_boolean.unknown ctx) in
+    let ref, stack = Stack.pop_as_ref stack in
+    let bool = Abstract_ref.is_null ref in
+    let stack = Stack.push_bool stack ctx (Abstract_boolean.of_bool ctx bool) in
     let abs_state = { abs_state with stack } in
     State { abs_state; env }
   | As_non_null ->
-    let _v, stack = Stack.pop_ref stack in
-    let stack = Stack.push_ref stack Abstract_ref.NullRef in
-    let abs_state = { abs_state with stack } in
-    State { abs_state; env }
+    let ref, stack = Stack.pop_as_ref stack in
+    if Abstract_ref.is_null ref then (
+      (* TODO: alarm *)
+      Log.err (fun m -> m "as_non_null on a null value");
+      assert false )
+    else
+      let stack = Stack.push_ref stack ref in
+      let abs_state = { abs_state with stack } in
+      State { abs_state; env }
   | Func i ->
     let enum = Abstract_domain.Enum_Forward.enum_const ~case:i ctx in
     let stack = Stack.push_ref stack (Abstract_ref.func enum) in
