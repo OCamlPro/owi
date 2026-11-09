@@ -11,6 +11,7 @@
   abstract_extern
   abstract_f32
   abstract_f64
+  abstract_heap
   abstract_i32
   abstract_i64
   abstract_interpreter_simple
@@ -77,6 +78,7 @@
   concrete_extern
   concrete_f32
   concrete_f64
+  concrete_heap
   concrete_i8
   concrete_i16
   concrete_i32
@@ -151,6 +153,7 @@
   symbolic_extern
   symbolic_f32
   symbolic_f64
+  symbolic_heap
   symbolic_i8
   symbolic_i16
   symbolic_i32

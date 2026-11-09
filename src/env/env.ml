@@ -47,6 +47,9 @@ module Make
 
       val init : Binary.Mem.Type.limits -> t
     end)
+    (Heap : sig
+      type t
+    end)
     (Table : Table_intf.T with type reference := Value.t Value.Ref.t)
     (Elem : Elem_intf.T with type reference := Value.t Value.Ref.t)
     (Extern_func : sig
@@ -62,6 +65,7 @@ module Make
      and type data := Data.t
      and type table := Table.t
      and type memory := Memory.t
+     and type heap := Heap.t
      and type context = Context.t = struct
   include Env0
   include
@@ -79,6 +83,7 @@ end
 module Concrete =
   Make (Dummmy_context) (Concrete_value) (Constexpr_eval.Concrete)
     (Concrete_memory)
+    (Concrete_heap)
     (Concrete_table)
     (Concrete_elem)
     (Concrete_extern.Func)
@@ -86,6 +91,7 @@ module Concrete =
 module Symbolic =
   Make (Dummmy_context) (Symbolic_value) (Constexpr_eval.Symbolic)
     (Symbolic_memory)
+    (Symbolic_heap)
     (Symbolic_table)
     (Symbolic_elem)
     (Symbolic_extern.Func)
@@ -100,6 +106,7 @@ module Abstract = struct
 
   include
     Make (Context) (Abstract_value) (Constexpr_eval.Abstract) (Abstract_memory)
+      (Abstract_heap)
       (Abstract_table)
       (Abstract_elem)
       (Abstract_extern.Func)

@@ -33,7 +33,7 @@ let
     smtml = super.smtml.overrideAttrs (old: {
       src = fetchGit {
         url = "https://github.com/formalsec/smtml";
-        rev = "d9fd454829a14225593fee8966b2aff16af1b543";
+        rev = "c6f4b25e66353da1197bbb0044bc2a6ecb1c0702";
       };
     });
     symex = super.symex.overrideAttrs (old: {

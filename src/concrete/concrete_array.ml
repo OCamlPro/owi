@@ -2,6 +2,8 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
+module Map = Map.Make (Concrete_i32)
+
 type i32 = Concrete_i32.t
 
 type boolean = Concrete_boolean.t
@@ -9,7 +11,9 @@ type boolean = Concrete_boolean.t
 type 'value t =
   { obj_id : int
   ; type_id : int
-  ; fields : 'value array
+  ; fields : 'value Map.t
+  ; length : Concrete_i32.t
+  ; default : 'value option
   }
 
 let get_type { type_id; _ } = Some type_id
@@ -20,23 +24,38 @@ let fresh_id =
     incr obj_id_counter;
     !obj_id_counter
 
-let new_fill type_id v n =
+let new_fill type_id v length =
   let obj_id = fresh_id () in
-  let fields = Array.init (Concrete_i32.to_int n) (fun _i -> v) in
-  { obj_id; type_id; fields }
+  let fields = Map.empty in
+  let default = Some v in
+  { obj_id; type_id; fields; length; default }
 
-let new_fixed_with type_id fields = { obj_id = fresh_id (); type_id; fields }
+let new_fixed_with type_id fields =
+  let obj_id = fresh_id () in
+  let default = None in
+  let fields, length =
+    Array.fold_left
+      (fun (fields, index) v ->
+        let fields = Map.add index v fields in
+        let index = Concrete_i32.add index 1l in
+        (fields, index) )
+      (Map.empty, 0l) fields
+  in
+  { obj_id; type_id; fields; length; default }
 
-let get_elem { fields; _ } index =
-  let index = Concrete_i32.to_int index in
-  fields.(index)
+let get_elem { fields; default; _ } index =
+  match Map.find_opt index fields with
+  | Some v -> v
+  | None ->
+    begin match default with
+    | Some v -> v
+    | None -> (* checked by the interpreter directly *) assert false
+    end
 
 let set_elem a index v =
-  let index = Concrete_i32.to_int index in
-  a.fields.(index) <- v
+  let fields = Map.add index v a.fields in
+  { a with fields }
 
-let length { fields; _ } =
-  let length = Array.length fields in
-  Concrete_i32.of_int length
+let length { length; _ } = length
 
 let phys_equal a1 a2 = Int.equal a1.obj_id a2.obj_id
