@@ -13,6 +13,8 @@ end
 
 module NonRelationalDomain = Domains.Term_based.Nonrelational.Make (Terms) (SVA)
 
-include (
-  Domains.Term_domain.Make (Terms) (NonRelationalDomain) :
-      Codex.Domains.Sig.BASE_WITH_INTEGER )
+(* Rewriting_domain.Make(TermsCudd) *)
+module TermDomain = Domains.Term_domain.Make (Terms) (NonRelationalDomain)
+module RewritingTermDomain = Domains.Rewriting_domain.Make (Terms) (TermDomain)
+
+include (RewritingTermDomain : Codex.Domains.Sig.BASE_WITH_INTEGER)

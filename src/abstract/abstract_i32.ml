@@ -29,7 +29,8 @@ let to_boolean ctx x =
 let of_int32 ctx i =
   Abstract_domain.Binary_Forward.biconst ~size ~k:(Z.of_int32_unsigned i) ctx
 
-let of_int ctx i = Abstract_domain.Binary_Forward.biconst ~size ~k:(Z.of_int i) ctx
+let of_int ctx i =
+  Abstract_domain.Binary_Forward.biconst ~size ~k:(Z.of_int i) ctx
 
 let zero ctx = Abstract_domain.Binary_Forward.biconst ~size ~k:Z.zero ctx
 

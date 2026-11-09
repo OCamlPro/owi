@@ -464,71 +464,58 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
     | Loop (_str_opt, bt, body) ->
       Trace.record_wasm_step Block_start (Some state) instr;
       let widening_id = Domains.Sig.Widening_Id.fresh () in
-      (* TODO tester si on a besoin de copie *)
-      let initial_state =
-        let abs_state =
-          { abs_state with ctx = Abstract_domain.Context.copy ctx }
-        in
-        { state with abs_state }
-      in
-      let stack_size =
+      let nb_params =
         match bt with
         | Some (_i, (params, _res)) -> List.length params
         | None -> 0
       in
-      let rec fixpoint state =
-        let next_state, jt = eval_expr state body in
-        let widening_state =
-          match join_jts stack_size (JumpMap.find_opt (I 0) jt) with
-          | Some state -> Some state
-          | None ->
-            (* TODO: handle return too! *)
-            Option.map
-              (fun (state : Abstract_interpreter_state.t) ->
-                let stack = Stack.keep state.abs_state.stack stack_size in
-                let abs_state = { state.abs_state with stack } in
-                { state with abs_state } )
-              next_state
-        in
-        match widening_state with
-        | None ->
-          let jt = JumpMap.decr jt in
-          (None, jt)
-        | Some widening_state ->
-          let widening_state = join initial_state widening_state in
-          (*
-            TODO:
-            Wasm loops are do while loops.
-            We probably want to use codex's widen_hints to widen to a value like max_int - 1 or max_int - 2
-            We have to then check if we have already widened even if included is false.
-            PS. parts of my notes that I don't understand now but might later:
-              - min_int - 2 doit suffir pour tous les programmes normalement .
-              - sinon on ajoute un widen int à la main ou on widen à (max int-1).
-          *)
-          let widened, included = widen widening_id state widening_state in
-          Trace.record_wasm_step Widen None instr
-            ~inputs:[ ("previous", Some state); ("next", Some widening_state) ]
-            ~converged:(Some included);
-          if not included then fixpoint widened
-          else
-            (* fixpoint reached: exit loop. We don't reuse the widened state
-              as it has been shortened to the params size and not the result size *)
-            let jt = JumpMap.decr jt in
-            let exit_state =
-              Option.map
-                (fun (exit_state : Abstract_interpreter_state.t) ->
-                  let stack =
-                    exit_state.abs_state.stack @ initial_state.abs_state.stack
-                  in
-                  let abs_state = { exit_state.abs_state with stack } in
-                  { exit_state with abs_state } )
-                next_state
-            in
-            (exit_state, jt)
+      let outer_stack = Stack.drop_n stack nb_params in
+      let head0 =
+        let stack = Stack.keep stack nb_params in
+        { state with abs_state = { state.abs_state with stack } }
       in
-      let widened_state, jts = fixpoint state in
-      Trace.record_wasm_step Block_end widened_state instr;
-      (widened_state, jts)
+      (* returns 
+       - state at the end of the iteration
+       - jump targets
+       - state at the end of the iteration joined with jump targets at zero 
+          (This is always None for the case of a loop with no feedback state) *)
+      let fixpoint_step head =
+        let next_state, jt = eval_expr head body in
+        let feedback_state = join_jts nb_params (JumpMap.find_opt (I 0) jt) in
+        (next_state, jt, Option.map (join head0) feedback_state)
+      in
+      let rec fixpoint head =
+        let ((_, _, new_head) as res) = fixpoint_step head in
+        match new_head with
+        | None -> (head, res)
+        | Some new_head ->
+          let widened, included = widen widening_id head new_head in
+          Trace.record_wasm_step Widen None instr
+            ~inputs:
+              [ ("init", Some head0)
+              ; ("previous", Some head)
+              ; ("next", Some new_head)
+              ]
+            ~converged:(Some included);
+          if included then (head, res) else fixpoint widened
+      in
+      let narrow (head, ((_, _, new_head) as res)) =
+        match new_head with
+        | Some new_head -> (new_head, fixpoint_step new_head)
+        | _ -> (head, res)
+      in
+      let widened = fixpoint head0 in
+      let _head, (final_state, final_jts, _) = narrow widened in
+      let exit_state =
+        Option.map
+          (fun (s : Abstract_interpreter_state.t) ->
+            let stack = s.abs_state.stack @ outer_stack in
+            { s with abs_state = { s.abs_state with stack } } )
+          final_state
+      in
+      let jts = JumpMap.decr final_jts in
+      Trace.record_wasm_step Block_end exit_state instr;
+      (exit_state, jts)
     | Br i ->
       let res = None in
       let jts = JumpMap.of_list [ (I i, [ state ]) ] in
