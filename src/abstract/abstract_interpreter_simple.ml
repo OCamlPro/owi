@@ -1998,8 +1998,9 @@ let eval_ref env ({ stack; ctx; _ } as abs_state : Abstract_state.t) :
     let stack = Stack.push_ref stack Abstract_ref.NullRef in
     let abs_state = { abs_state with stack } in
     State { abs_state; env }
-  | Func _ ->
-    let stack = Stack.push_ref stack Abstract_ref.NullRef in
+  | Func i ->
+    let enum = Abstract_domain.Enum_Forward.enum_const ~case:i ctx in
+    let stack = Stack.push_ref stack (Abstract_ref.func enum) in
     let abs_state = { abs_state with stack } in
     State { abs_state; env }
   | Eq | Test _ | Cast _ -> (* TODO *) assert false

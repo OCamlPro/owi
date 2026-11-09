@@ -83,6 +83,11 @@ module Ref : sig
 
   type fun_id = Abstract_domain.enum
 
+  type 'a get_ref =
+    | Null
+    | Ref_value of 'a
+    | Type_mismatch
+
   type 'value t = 'value Abstract_ref.t =
     | Extern of Extern.t option
     | Func of fun_id option
@@ -96,6 +101,10 @@ module Ref : sig
     | AnyAsExtern of 'value t
 
   val null : Abstract_domain.Context.t -> Binary.heap_type -> 'value t
+
+  val func : fun_id -> 'value t
+
+  val get_func : 'value t -> fun_id get_ref
 end
 
 val pp : t Fmt.t

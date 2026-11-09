@@ -2,14 +2,12 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type reference = Abstract_value.t Abstract_ref.t
+type t = Abstract_value.t Abstract_ref.t Iarray.t
 
-type t = unit
+let get (e : t) i = Iarray.get e i
 
-let get _ = assert false
+let size e = Iarray.length e
 
-let size _ = assert false
+let drop (_e : t) = Iarray.of_list []
 
-let drop _ = assert false
-
-let init _ = ()
+let init l = Iarray.of_list l

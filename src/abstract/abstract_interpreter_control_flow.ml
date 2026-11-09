@@ -8,6 +8,7 @@ module JumpMap = Abstract_jump_map
 module Value = Abstract_value
 module Trace = Abstract_trace
 module Context = Abstract_domain.Context
+module Env = Env.Abstract
 
 let max_recursive_calls = 10
 
@@ -268,6 +269,26 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
     in
     loop state JumpMap.empty expr.raw
 
+  and eval_vfunc (state : State.t) (func : Abstract_extern.Func.t Kind.func)
+    call_idx instr =
+    begin match func with
+    | Wasm func ->
+      Log.info (fun m ->
+        m "calling func  : func %s" (Option.value func.id ~default:"anonymous") );
+      eval_func state call_idx func instr
+    | Extern func ->
+      let stack = exec_extern_func state.abs_state func in
+      let res =
+        match Abstract_monad.run stack state.abs_state with
+        | None -> None
+        | Some (stack, abs_state) ->
+          let abs_state = { abs_state with stack } in
+          Some { state with abs_state }
+      in
+      Trace.record_wasm_step Step res instr;
+      res
+    end
+
   and eval_func ({ abs_state; _ } as state : State.t) idx (func : Binary.Func.t)
     instr : State.t option =
     let nb_recursive_calls =
@@ -344,6 +365,31 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
       Log.debug (fun m -> m "abstract state : None @.");
       None
 
+  and call_ref (state : State.t) _type_i instr =
+    begin
+      let fun_ref, stack = Stack.pop_as_ref state.abs_state.stack in
+      let state = { state with abs_state = { state.abs_state with stack } } in
+      match Value.Ref.get_func fun_ref with
+      | Null ->
+        (* TODO : alarm *)
+        Log.warn (fun m -> m "call_ref on null");
+        None
+      | Type_mismatch ->
+        (* TODO : alarm *)
+        Log.warn (fun m -> m "call_ref with type mismatch");
+        None
+      | Ref_value fun_id ->
+        let lattice = Abstract_domain.Query.enum state.abs_state.ctx fun_id in
+        Log.err (fun m -> m "hereo");
+        Abstract_domain.Query.Enum_Lattice.fold_on_cases lattice None
+          (fun enum_case acc_state ->
+          let func = Env.get_func ~env:state.env enum_case in
+          Log.err (fun m -> m "hereo");
+          let next_state = eval_vfunc state func enum_case instr in
+          Log.err (fun m -> m "hereo");
+          join_opt next_state acc_state )
+    end
+
   and eval_instr ({ abs_state; env } as state : State.t) :
     Binary.instr Annotated.t -> State.t option * JumpMap.t =
    fun instr ->
@@ -360,26 +406,9 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
       m "running instr : %a" (Binary.pp_instr ~short:true) instr.raw );
     match instr.raw with
     | Call call_idx ->
-      let func = Env.Abstract.get_func ~env call_idx in
-      begin match func with
-      | Wasm func ->
-        Log.info (fun m ->
-          m "calling func  : func %s"
-            (Option.value func.id ~default:"anonymous") );
-        let res = eval_func state call_idx func instr in
-        (res, JumpMap.empty)
-      | Extern func ->
-        let stack = exec_extern_func abs_state func in
-        let res, jts =
-          match Abstract_monad.run stack abs_state with
-          | None -> (None, JumpMap.empty)
-          | Some (stack, abs_state) ->
-            let abs_state = { abs_state with stack } in
-            (Some { state with abs_state }, JumpMap.empty)
-        in
-        Trace.record_wasm_step Step res instr;
-        (res, jts)
-      end
+      let func = Env.get_func ~env call_idx in
+      let new_state = eval_vfunc state func call_idx instr in
+      (new_state, JumpMap.empty)
     | Block (_str_opt, bt, expr) ->
       Trace.record_wasm_step Block_start (Some state) instr;
       let next_state, jt = eval_expr state expr in
@@ -577,21 +606,24 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
       in
       Trace.record_wasm_step Step state instr;
       (state, JumpMap.empty)
+    | Call_ref type_i ->
+      let state = call_ref state type_i instr in
+      (state, JumpMap.empty)
     | Br_on_non_null _
     | Br_on_cast (_, _, _)
     | Br_on_cast_fail (_, _, _)
     | Return_call _
     | Return_call_indirect (_, _)
-    | Return_call_ref _ | Br_on_null _ | Call_ref _
+    | Return_call_ref _ | Br_on_null _
     | Call_indirect (_, _) ->
       (* TODO! *) assert false
 end
 
 module ConcreteFixpoint = DenotFixpoint (Abstract_interpreter_simple)
 
-let eval_exprs ~env ~(modul : Env.Abstract.modul) abs_state =
+let eval_exprs ~env ~(modul : Env.modul) abs_state =
   (* TODO: init_code is no more an exprs, it's a regular expr now, this function can probably be removed and eval_expr could be used instead! *)
-  let init_code = Env.Abstract.get_initialization_code ~env ~modul in
+  let init_code = Env.get_initialization_code ~env ~modul in
   let state = { State.abs_state; env } in
   let state =
     match ConcreteFixpoint.eval_expr state (Annotated.dummy init_code) with
@@ -600,9 +632,9 @@ let eval_exprs ~env ~(modul : Env.Abstract.modul) abs_state =
   in
   state.abs_state
 
-let modul ~env ~(modul : Env.Abstract.modul) =
+let modul ~env ~(modul : Env.modul) =
   let abs_state = Abstract_state.empty () in
-  let abs_state = { abs_state with ctx = Env.Abstract.get_context ~env } in
+  let abs_state = { abs_state with ctx = Env.get_context ~env } in
   eval_exprs ~env ~modul abs_state
 
 let exec_vfunc_from_outside ~env ~ctx ~stack
