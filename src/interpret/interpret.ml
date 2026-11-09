@@ -1631,11 +1631,11 @@ struct
       | _ -> false )
     | Ref.NullExn when is_null -> (
       match ht with Exn_ht | NoExn_ht -> true | _ -> false )
-    | Ref.Func (Some func) -> (
+    | Ref.Func (Some fun_id) -> (
       match ht with
       | Func_ht -> true
       | TypeUse expected -> (
-        let func = Env.get_func ~env func in
+        let func = Env.get_func ~env (Ref.int_of_fun_id fun_id) in
         let func_type = get_func_type func in
         match func_type with
         | Some got, _ ->
@@ -2184,8 +2184,8 @@ struct
     match Ref.get_func fun_ref with
     | Null -> Choice.trap `Null_function_reference
     | Type_mismatch -> Choice.trap `Element_type_error
-    | Ref_value func ->
-      let func = Env.get_func ~env:state.env func in
+    | Ref_value fun_id ->
+      let func = Env.get_func ~env:state.env (Ref.int_of_fun_id fun_id) in
       exec_vfunc ~return state func
 
   let call_indirect ~env ~return (state : State.t)
@@ -2209,8 +2209,8 @@ struct
       begin match Ref.get_func f_ref with
       | Null -> Choice.trap (`Uninitialized_element fun_i)
       | Type_mismatch -> Choice.trap `Element_type_error
-      | Ref_value func ->
-        let func = Env.get_func ~env func in
+      | Ref_value fun_id ->
+        let func = Env.get_func ~env (Ref.int_of_fun_id fun_id) in
         let func_type = get_func_type func in
         let type_matches =
           match (call_type_idx, func_type) with

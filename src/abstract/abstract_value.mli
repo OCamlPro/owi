@@ -81,9 +81,11 @@ module Ref : sig
 
   type i32 = Abstract_ref.i32
 
+  type fun_id = Abstract_domain.enum
+
   type 'value t = 'value Abstract_ref.t =
     | Extern of Extern.t option
-    | Func of int option
+    | Func of fun_id option
     | NullExn
     | NullRef
     | I31 of i32

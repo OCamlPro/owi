@@ -41,7 +41,7 @@ module Make (Value : Value_intf.T) :
     | V128 (Const v) -> Stack.push_v128 stack (Value.V128.of_concrete v)
     | Ref (Null t) -> Stack.push_ref stack (Value.Ref.null t)
     | Ref (Func id) ->
-      let value = Value.Ref (Func (Some id)) in
+      let value = Value.Ref (Value.Ref.func id) in
       Stack.push stack value
     | Global (Get id) ->
       let g = get_const_global id in
@@ -177,7 +177,8 @@ module Abstract :
     | V128 (Const v) -> Stack.push_v128 stack (Value.V128.of_concrete ctx v)
     | Ref (Null t) -> Stack.push_ref stack (Value.Ref.null ctx t)
     | Ref (Func id) ->
-      let value = Value.Ref (Func (Some id)) in
+      let enum = Abstract_domain.Enum_Forward.enum_const ~case:id ctx in
+      let value = Value.Ref (Func (Some enum)) in
       Stack.push stack value
     | Global (Get id) ->
       let g = get_const_global id in

@@ -56,9 +56,11 @@ end
 
 type i32
 
+type fun_id = Abstract_domain.enum
+
 type 'value t =
   | Extern of Extern.t option
-  | Func of int option
+  | Func of fun_id option
   | NullExn
   | NullRef
   | I31 of i32
@@ -82,7 +84,7 @@ let null _ctx = function
   | Any_ht | None_ht | Exn_ht | NoExn_ht -> assert false
   | Eq_ht | I31_ht | Struct_ht | Array_ht -> assert false
 
-let func (f : int) = Func (Some f)
+let func (f : Abstract_domain.enum) = Func (Some f)
 
 let extern (type x) (t : x Type.Id.t) (v : x) : _ t = Extern (Some (E (t, v)))
 
@@ -93,7 +95,7 @@ let is_null = function
   | I31 _ | Array _ | Struct _ | ExternAsAny _ | AnyAsExtern _ ->
     false
 
-let get_func (r : _ t) : int get_ref =
+let get_func (r : _ t) : Abstract_domain.Enum.t get_ref =
   match r with
   | Func (Some f) -> Ref_value f
   | Func None -> Null
