@@ -99,3 +99,9 @@ let extend_s ctx n x =
 let wrap_i64 ctx x =
   Abstract_domain.Binary_Forward.bextract ~index:Units.In_bits.zero
     ~size:Units.In_bits.s32 ~oldsize:(Units.In_bits.of_int 64) ctx x
+
+let get_singleton_int ctx x =
+  let query = Abstract_domain.Query.binary ~size ctx x in
+  match Abstract_domain.Query.Binary_Lattice.is_singleton ~size query with
+  | Some z -> Z.to_int z
+  | None -> assert false

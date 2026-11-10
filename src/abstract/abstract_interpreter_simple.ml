@@ -3,6 +3,9 @@
 (* Written by the Owi programmers *)
 
 module Stack = Abstract_stack
+module Env = Env.Abstract
+module Elem = Abstract_elem
+module Table = Abstract_table
 
 type t =
   | State of Abstract_interpreter_state.t
@@ -1932,11 +1935,11 @@ let eval_global env ({ stack; _ } as abs_state : Abstract_state.t) :
   Binary.global_instr -> _ = function
   | Set i ->
     let e, stack = Stack.pop stack in
-    let env = Env.Abstract.set_global ~env i e in
+    let env = Env.set_global ~env i e in
     let abs_state = { abs_state with stack } in
     State { env; abs_state }
   | Get i ->
-    let v = Env.Abstract.get_global ~env i in
+    let v = Env.get_global ~env i in
     let stack = Stack.push stack v in
     let abs_state = { abs_state with stack } in
     State { env; abs_state }
@@ -2015,27 +2018,40 @@ let eval_ref env ({ stack; ctx; _ } as abs_state : Abstract_state.t) :
 (* TODO: handle this correctly *)
 let eval_table env ({ stack; ctx; _ } as abs_state : Abstract_state.t) :
   Binary.table_instr -> _ = function
-  | Get _ ->
-    let _v, stack = Stack.pop_i32 stack in
-    let stack = Stack.push_ref stack Abstract_ref.NullRef in
-    let abs_state = { abs_state with stack } in
-    State { abs_state; env }
-  | Set _ ->
-    let _v, stack = Stack.pop_ref stack in
-    let _v, stack = Stack.pop_i32 stack in
-    let abs_state = { abs_state with stack } in
-    State { abs_state; env }
-  | Size _ ->
+  | Get tbl_i ->
+    let i, stack = Stack.pop_i32 stack in
+    let i = Abstract_i32.get_singleton_int ctx i in
+    Log.err (fun m -> m "i = %i" i);
+    let tbl = Env.get_table ~env tbl_i in
+    let size = Abstract_table.size tbl in
+    if i < 0 || i >= size then assert false
+    else
+      let ref = Abstract_table.get tbl i in
+      let stack = Stack.push_ref stack ref in
+      let abs_state = { abs_state with stack } in
+      State { abs_state; env }
+  | Set tbl_i ->
+    let v, stack = Stack.pop_as_ref stack in
+    let i, stack = Stack.pop_i32 stack in
+    let i = Abstract_i32.get_singleton_int ctx i in
+    let t = Env.get_table ~env tbl_i in
+    if i < 0 || i >= Abstract_table.size t then assert false
+    else
+      let tbl = Abstract_table.set t i v in
+      let env = Env.set_table ~env tbl_i tbl in
+      let abs_state = { abs_state with stack } in
+      State { abs_state; env }
+  | Size _tbl_i ->
     let stack = Stack.push_i32 stack (Abstract_i32.unknown ctx) in
     let abs_state = { abs_state with stack } in
     State { abs_state; env }
-  | Grow _ ->
+  | Grow _tbl_i ->
     let _v, stack = Stack.pop_i32 stack in
     let _v, stack = Stack.pop_ref stack in
     let stack = Stack.push_i32 stack (Abstract_i32.unknown ctx) in
     let abs_state = { abs_state with stack } in
     State { abs_state; env }
-  | Fill _ ->
+  | Fill _tbl_i ->
     let _v, stack = Stack.pop_i32 stack in
     let _v, stack = Stack.pop_ref stack in
     let _v, stack = Stack.pop_i32 stack in
@@ -2047,10 +2063,27 @@ let eval_table env ({ stack; ctx; _ } as abs_state : Abstract_state.t) :
     let _v, stack = Stack.pop_i32 stack in
     let abs_state = { abs_state with stack } in
     State { abs_state; env }
-  | Init _ ->
-    let _v, stack = Stack.pop_i32 stack in
-    let _v, stack = Stack.pop_i32 stack in
-    let _v, stack = Stack.pop_i32 stack in
+  | Init (tbl_i, elem_i) ->
+    let t = Env.get_table ~env tbl_i in
+    let elem = Env.get_elem ~env elem_i in
+    let len, stack = Stack.pop_i32 stack in
+    let pos_x, stack = Stack.pop_i32 stack in
+    let pos, stack = Stack.pop_i32 stack in
+
+    let len = Abstract_i32.get_singleton_int ctx len in
+    let pos_x = Abstract_i32.get_singleton_int ctx pos_x in
+    let pos = Abstract_i32.get_singleton_int ctx pos in
+
+    (* stuff *)
+    let rec loop i t =
+      if i = len then t
+      else
+        let elt = Elem.get elem (pos_x + i) in
+        let t = Table.set t (pos + i) elt in
+        loop (i + 1) t
+    in
+    let t = loop 0 t in
+    let env = Env.set_table ~env tbl_i t in
     let abs_state = { abs_state with stack } in
     State { abs_state; env }
 

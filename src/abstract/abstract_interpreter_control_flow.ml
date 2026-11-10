@@ -9,6 +9,8 @@ module Value = Abstract_value
 module Trace = Abstract_trace
 module Context = Abstract_domain.Context
 module Env = Env.Abstract
+module Table = Abstract_table
+module Ref = Abstract_ref
 
 let max_recursive_calls = 10
 
@@ -248,6 +250,11 @@ let exec_extern_func ({ stack; _ } : Abstract_state.t)
   | R4 (t1, t2, t3, t4), (v1, v2, v3, v4) ->
     push_val t1 v1 stack |> push_val t2 v2 |> push_val t3 v3 |> push_val t4 v4
 
+let get_func_type (f : Abstract_extern.Func.t Kind.func) =
+  match f with
+  | Wasm func -> func.type_f
+  | Extern func -> (None, Abstract_extern.Func.to_func_type func)
+
 module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
   let rec eval_expr :
     State.t -> Binary.expr Annotated.t -> State.t option * JumpMap.t =
@@ -389,6 +396,50 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
           Log.err (fun m -> m "hereo");
           join_opt next_state acc_state )
     end
+
+  and call_indirect ~(env : Env.t) (state : State.t) instr
+    (tbl_i, ((call_type_idx, typ_i) : Binary.block_type)) =
+    let fun_i, stack = Stack.pop_i32 state.abs_state.stack in
+    let state = { state with abs_state = { state.abs_state with stack } } in
+    let t = Env.get_table ~env tbl_i in
+    let _null, ref_kind = Table.typ t in
+    match ref_kind with
+    | Func_ht | TypeUse _ ->
+      (* let size = Table.typ t in *)
+      let fun_i = Abstract_i32.get_singleton_int state.abs_state.ctx fun_i in
+      let fun_ref = Table.get t fun_i in
+      begin match Ref.get_func fun_ref with
+      | Null | Type_mismatch ->
+        (* TODO: warn but continue *)
+        assert false
+      | Ref_value fun_id ->
+        let enum_query =
+          Abstract_domain.Query.enum state.abs_state.ctx fun_id
+        in
+        let fun_id =
+          match Abstract_domain.Query.Enum_Lattice.is_singleton enum_query with
+          | Some id -> id
+          | None -> assert false
+        in
+        let func = Env.get_func ~env fun_id in
+        let func_type = get_func_type func in
+        let type_matches =
+          match (call_type_idx, func_type) with
+          | Some expected, (Some got, _) ->
+            let types = Env.get_types ~env:state.env in
+            let type_groups = Env.get_type_groups ~env:state.env in
+            Binary.is_subtype types type_groups types type_groups ~got ~expected
+          | Some _expected, (None, ft) -> Binary.func_type_eq ft typ_i
+          | _, _ -> Binary.func_type_eq (snd func_type) typ_i
+        in
+        if not type_matches then
+          (* TODO: warn *)
+          assert false
+        else eval_vfunc state func fun_id instr
+      end
+    | _ ->
+      (* TODO: warn, type mismatch *)
+      assert false
 
   and eval_instr ({ abs_state; env } as state : State.t) :
     Binary.instr Annotated.t -> State.t option * JumpMap.t =
@@ -610,13 +661,15 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
     | Call_ref type_i ->
       let state = call_ref state type_i instr in
       (state, JumpMap.empty)
+    | Call_indirect (tbl_i, typ_i) ->
+      let state = call_indirect ~env state instr (tbl_i, typ_i) in
+      (state, JumpMap.empty)
     | Br_on_non_null _
     | Br_on_cast (_, _, _)
     | Br_on_cast_fail (_, _, _)
     | Return_call _
     | Return_call_indirect (_, _)
-    | Return_call_ref _ | Br_on_null _
-    | Call_indirect (_, _) ->
+    | Return_call_ref _ | Br_on_null _ ->
       (* TODO! *) assert false
 end
 

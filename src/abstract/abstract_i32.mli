@@ -75,3 +75,5 @@ val shl : Abstract_domain.Context.t -> t -> t -> t
 val extend_s : Abstract_domain.Context.t -> int -> t -> t
 
 val wrap_i64 : Abstract_domain.Context.t -> Abstract_domain.Binary.t -> t
+
+val get_singleton_int : Abstract_domain.Context.t -> t -> int
