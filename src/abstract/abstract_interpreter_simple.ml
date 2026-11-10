@@ -176,7 +176,9 @@ let eval_i32 env ({ stack; ctx; invariant; _ } as abs_state : Abstract_state.t)
     let abs_state = { abs_state with stack } in
     State { abs_state; env }
   | Wrap_i64 ->
-    let stack = Stack.apply_i32_i32 stack (Abstract_i32.wrap_i64 ctx) in
+    let b, stack = Stack.pop_i64 stack in
+    let i32 = Abstract_i64.to_binary b |> Abstract_i32.of_binary in
+    let stack = Stack.push_i32 stack i32 in
     let abs_state = { abs_state with stack } in
     State { abs_state; env }
   | Trunc_f_s nn | Trunc_f_u nn | Trunc_sat_f_s nn | Trunc_sat_f_u nn ->
