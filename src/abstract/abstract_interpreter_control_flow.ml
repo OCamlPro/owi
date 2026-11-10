@@ -574,9 +574,9 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
         | None -> []
       in
       let cases =
-        Array.map
-          (fun i ->
-            ( i
+        Array.mapi
+          (fun i jump_i ->
+            ( jump_i
             , Abstract_domain.assume ctx
                 (Abstract_i32.eq ctx v
                    (Abstract_i32.of_int32 ctx (Int32.of_int i)) ) ) )
