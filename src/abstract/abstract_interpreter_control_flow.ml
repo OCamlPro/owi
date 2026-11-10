@@ -570,8 +570,8 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
         | Some ctx ->
           let abs_state = { abs_state with ctx; stack } in
           let state = { state with abs_state } in
-          [ (JumpMap.Key.I default, [ state ]) ]
-        | None -> []
+          JumpMap.of_list [ (JumpMap.Key.I default, [ state ]) ]
+        | None -> JumpMap.empty
       in
       let cases =
         Array.mapi
@@ -589,12 +589,13 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
             | Some ctx ->
               let abs_state = { abs_state with ctx; stack } in
               let state = { state with abs_state } in
-              (JumpMap.Key.I i, [ state ]) :: acc
+              JumpMap.append acc
+              @@ JumpMap.singleton (JumpMap.Key.I i) [ state ]
             | None -> acc )
           default cases
       in
       Trace.record_wasm_step Step None instr;
-      (None, JumpMap.of_list all_cases)
+      (None, all_cases)
     | Return ->
       Trace.record_wasm_step Step None instr;
       (None, JumpMap.of_list [ (Ret, [ state ]) ])

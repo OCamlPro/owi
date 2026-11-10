@@ -135,8 +135,7 @@ let eval_i32 env ({ stack; ctx; invariant; _ } as abs_state : Abstract_state.t)
     State { abs_state; env }
   | Store (_memid, _) | Store8 (_memid, _) | Store16 (_memid, _) ->
     (* TODO: handle this correctly *)
-    let _, stack = Stack.pop2_i32 stack in
-    let stack = Stack.push_i32 stack (Abstract_i32.unknown ctx) in
+    let (_n, _pos), stack = Stack.pop2_i32 stack in
     let abs_state = { abs_state with stack } in
     State { abs_state; env }
   | Load (_memid, _)
@@ -145,7 +144,7 @@ let eval_i32 env ({ stack; ctx; invariant; _ } as abs_state : Abstract_state.t)
   | Load16_s (_memid, _)
   | Load16_u (_memid, _) ->
     (* TODO: handle it correctly *)
-    let _, stack = Stack.pop_i32 stack in
+    let _pos, stack = Stack.pop_i32 stack in
     let stack = Stack.push_i32 stack (Abstract_i32.unknown ctx) in
     let abs_state = { abs_state with stack } in
     State { abs_state; env }
@@ -177,8 +176,8 @@ let eval_i32 env ({ stack; ctx; invariant; _ } as abs_state : Abstract_state.t)
     State { abs_state; env }
   | Wrap_i64 ->
     let b, stack = Stack.pop_i64 stack in
-    let i32 = Abstract_i64.to_binary b |> Abstract_i32.of_binary in
-    let stack = Stack.push_i32 stack i32 in
+    let b = Abstract_i64.to_binary b in
+    let stack = Stack.push_i32 stack (Abstract_i32.wrap_i64 ctx b) in
     let abs_state = { abs_state with stack } in
     State { abs_state; env }
   | Trunc_f_s nn | Trunc_f_u nn | Trunc_sat_f_s nn | Trunc_sat_f_u nn ->
@@ -342,8 +341,8 @@ let eval_i64 env ({ stack; ctx; invariant; _ } as abs_state : Abstract_state.t)
   | Store16 (_memid, _)
   | Store32 (_memid, _) ->
     (* TODO: handle this correctly *)
-    let (_n, _pos), stack = Stack.pop2_i64 stack in
-    let stack = Stack.push_i64 stack (Abstract_i64.unknown ctx) in
+    let _n, stack = Stack.pop_i64 stack in
+    let _pos, stack = Stack.pop_i32 stack in
     let abs_state = { abs_state with stack } in
     State { abs_state; env }
   | Load (_memid, _)
@@ -354,7 +353,7 @@ let eval_i64 env ({ stack; ctx; invariant; _ } as abs_state : Abstract_state.t)
   | Load32_s (_memid, _)
   | Load32_u (_memid, _) ->
     (* TODO: handle this correctly *)
-    let _pos, stack = Stack.pop_i64 stack in
+    let _pos, stack = Stack.pop_i32 stack in
     let stack = Stack.push_i64 stack (Abstract_i64.unknown ctx) in
     let abs_state = { abs_state with stack } in
     State { abs_state; env }
