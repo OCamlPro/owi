@@ -64,7 +64,6 @@ let
       js_of_ocaml
       # tests
       mdx
-      mdx.bin
       qcheck-core
     ];
     buildInputs = with ocamlPackages; [
