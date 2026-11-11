@@ -293,9 +293,9 @@ struct
     <span data-count="2937">f</span>un buf -&gt;
       <span data-count="1687">L</span>og.info (fun m -&gt; <span data-count="29">m</span> "parsing      ...");
       <span data-count="1687">l</span>et provider () =
-        <span data-count="1711321">l</span>et tok = Text_lexer.token buf in
-        <span data-count="1710764">l</span>et start, stop = Sedlexing.lexing_positions buf in
-        <span data-count="1710764">(</span>tok, start, stop)
+        <span data-count="1711782">l</span>et tok = Text_lexer.token buf in
+        <span data-count="1711225">l</span>et start, stop = Sedlexing.lexing_positions buf in
+        <span data-count="1711225">(</span>tok, start, stop)
       in
       try Ok (parse<span data-count="623">r</span> provider) with
       | <span data-count="393">T</span>ext.Parse_fail msg -&gt; Error (`Parse_fail msg)

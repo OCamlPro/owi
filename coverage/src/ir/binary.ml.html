@@ -3517,12 +3517,12 @@ let pp_heap_type fmt = function
   | <span data-count="6">N</span>oExtern_ht -&gt; pf fmt "noextern"
 
 let heap_type_eq t1 t2 =
-  <span data-count="933">m</span>atch (t1, t2) with
+  <span data-count="942">m</span>atch (t1, t2) with
   | <span data-count="799">F</span>unc_ht, Func_ht
   | <span data-count="7">E</span>xtern_ht, Extern_ht
   | <span data-count="3">A</span>ny_ht, Any_ht
   | <span data-count="0">E</span>q_ht, Eq_ht
-  | <span data-count="6">I</span>31_ht, I31_ht
+  | <span data-count="15">I</span>31_ht, I31_ht
   | <span data-count="1">S</span>truct_ht, Struct_ht
   | <span data-count="15">A</span>rray_ht, Array_ht
   | <span data-count="0">N</span>one_ht, None_ht
@@ -3535,7 +3535,7 @@ let heap_type_eq t1 t2 =
   | <span data-count="55">_</span>, _ -&gt; false
 
 let is_subtype_heap_type t1 t2 =
-  <span data-count="733">h</span>eap_type_e<span data-count="733">q</span> t1 t<span data-count="662">2</span>
+  <span data-count="735">h</span>eap_type_e<span data-count="735">q</span> t1 t<span data-count="664">2</span>
   ||
   match (t1, t2) with
   | <span data-count="0">N</span>one_ht, (<span data-count="0">I</span>31_ht | <span data-count="0">S</span>truct_ht | <span data-count="0">A</span>rray_ht | <span data-count="0">E</span>q_ht | <span data-count="0">A</span>ny_ht)
@@ -3571,8 +3571,8 @@ let pp_val_type fmt = function
   | <span data-count="6">R</span>ef_type t -&gt; pp_ref_type fmt t
 
 let val_type_eq t1 t2 =
-  <span data-count="11990">m</span>atch (t1, t2) with
-  | <span data-count="11960">N</span>um_type t1, Num_type t2 -&gt; Text.num_type_eq t1 t2
+  <span data-count="11989">m</span>atch (t1, t2) with
+  | <span data-count="11959">N</span>um_type t1, Num_type t2 -&gt; Text.num_type_eq t1 t2
   | <span data-count="30">R</span>ef_type t1, Ref_type t2 -&gt; ref_type_eq t1 t2
   | <span data-count="0">_</span>, _ -&gt; false
 
@@ -3586,7 +3586,7 @@ let pp_storage_type fmt = function
   | <span data-count="0">P</span>ack_type I16 -&gt; Fmt.pf fmt "i16"
 
 let is_subtype_ref_type t1 t2 =
-  <span data-count="24">m</span>atch (t1, t2) with
+  <span data-count="26">m</span>atch (t1, t2) with
   | <span data-count="4">(</span>Text.No_null, ht1), ((Text.Null : Text.nullable), ht2)
     when is_subtype_heap_typ<span data-count="4">e</span> ht1 ht2 -&gt;
     <span data-count="3">t</span>rue
@@ -3594,14 +3594,14 @@ let is_subtype_ref_type t1 t2 =
   | <span data-count="1">(</span>No_null, TypeUse _), (No_null, Func_ht)
   | <span data-count="1">(</span>Null, TypeUse _), (Null, Func_ht) -&gt;
     true
-  | <span data-count="7">(</span>Null, t1), (Null, t2) | <span data-count="5">(</span>No_null, t1), (No_null, t2) -&gt;
+  | <span data-count="9">(</span>Null, t1), (Null, t2) | <span data-count="5">(</span>No_null, t1), (No_null, t2) -&gt;
     is_subtype_heap_type t1 t2
   | <span data-count="7">_</span> -&gt; false
 
 let is_subtype_val_type t1 t2 =
-  <span data-count="65">m</span>atch (t1, t2) with
+  <span data-count="67">m</span>atch (t1, t2) with
   | <span data-count="41">N</span>um_type t1, Num_type t2 -&gt; Text.num_type_eq t1 t2
-  | <span data-count="24">R</span>ef_type t1, Ref_type t2 -&gt; is_subtype_ref_type t1 t2
+  | <span data-count="26">R</span>ef_type t1, Ref_type t2 -&gt; is_subtype_ref_type t1 t2
   | <span data-count="0">_</span>, _ -&gt; false
 
 type param = string option * val_type
@@ -3609,7 +3609,7 @@ type param = string option * val_type
 let pp_param ppf ((id, vt) : param) =
   <span data-count="31">p</span>f ppf "(param%a %a)" pp_str_opt id pp_val_type vt
 
-let param_eq (_, t1) (_, t2) = <span data-count="8382">v</span>al_type_eq t1 t2
+let param_eq (_, t1) (_, t2) = <span data-count="8380">v</span>al_type_eq t1 t2
 
 type param_type = param list
 
@@ -3708,7 +3708,7 @@ end)
 (** [iso_group_bounds types type_groups i] returns [(group_start, group_size)]
     for the rec group that contains [i]. *)
 let iso_group_bounds types groups i =
-  <span data-count="1604816">i</span>f i &lt; Array.lengt<span data-count="1604816">h</span> groups then <span data-count="1604816">g</span>roups.(i)
+  <span data-count="1604838">i</span>f i &lt; Array.lengt<span data-count="1604838">h</span> groups then <span data-count="1604838">g</span>roups.(i)
   else <span data-count="0">i</span>f i &lt; Array.lengt<span data-count="0">h</span> types then <span data-count="0">(</span>i, 1)
   else <span data-count="0">(</span>i, 1)
 
@@ -3716,40 +3716,40 @@ let iso_group_bounds types groups i =
     whether the types identified by indices [a] (in [exp_types]) and [b] (in
     [imp_types]) are structurally equivalent. *)
 let rec is_iso_equiv_aux exp_types exp_tg imp_types imp_tg visited a b =
-  <span data-count="802418">i</span>f PairSet.mem (a, b) visited then <span data-count="10">(</span>true, visited)
+  <span data-count="802429">i</span>f PairSet.mem (a, b) visited then <span data-count="10">(</span>true, visited)
   else
-    <span data-count="802408">l</span>et visited = PairSet.add (a, b) visited in
-    <span data-count="802408">l</span>et ga, gsize_a = iso_group_bounds exp_types exp_tg a in
-    <span data-count="802408">l</span>et gb, gsize_b = iso_group_bounds imp_types imp_tg b in
-    <span data-count="802408">i</span>f gsize_a &lt;&gt; gsize_<span data-count="9">b</span> || a - ga &lt;&gt; b - g<span data-count="12">b</span> then <span data-count="21">(</span>false, visited)
-    else <span data-count="802387">i</span>so_groups exp_types exp_tg imp_types imp_tg visited ga gb gsize_a
+    <span data-count="802419">l</span>et visited = PairSet.add (a, b) visited in
+    <span data-count="802419">l</span>et ga, gsize_a = iso_group_bounds exp_types exp_tg a in
+    <span data-count="802419">l</span>et gb, gsize_b = iso_group_bounds imp_types imp_tg b in
+    <span data-count="802419">i</span>f gsize_a &lt;&gt; gsize_<span data-count="9">b</span> || a - ga &lt;&gt; b - g<span data-count="12">b</span> then <span data-count="21">(</span>false, visited)
+    else <span data-count="802398">i</span>so_groups exp_types exp_tg imp_types imp_tg visited ga gb gsize_a
 
 (** [iso_groups exp_types exp_tg imp_types imp_tg visited ga gb size] checks
     that all [size] member pairs [(ga+i, gb+i)] are pairwise equivalent via
     [iso_sub_type]. *)
 and iso_groups exp_types exp_tg imp_types imp_tg visited ga gb size =
-  <span data-count="802387">l</span>et rec aux i visited =
-    <span data-count="1604546">i</span>f i &gt;= size then <span data-count="802002">(</span>true, visited)
+  <span data-count="802398">l</span>et rec aux i visited =
+    <span data-count="1604568">i</span>f i &gt;= size then <span data-count="802013">(</span>true, visited)
     else
-      <span data-count="802544">l</span>et id_a = ga + i
+      <span data-count="802555">l</span>et id_a = ga + i
       and id_b = gb + i in
-      if id_a &gt;= Array.lengt<span data-count="802544">h</span> exp_type<span data-count="0">s</span> || id_b &gt;= Array.lengt<span data-count="802544">h</span> imp_type<span data-count="0">s</span> then
+      if id_a &gt;= Array.lengt<span data-count="802555">h</span> exp_type<span data-count="0">s</span> || id_b &gt;= Array.lengt<span data-count="802555">h</span> imp_type<span data-count="0">s</span> then
         <span data-count="0">(</span>false, visited)
       else
-        <span data-count="802544">l</span>et ok, visited =
+        <span data-count="802555">l</span>et ok, visited =
           iso_sub_type exp_types exp_tg imp_types imp_tg visited ga gb size
             exp_types.(id_a) imp_types.(id_b)
         in
-        <span data-count="802544">i</span>f ok then <span data-count="802159">a</span>ux (i + 1) visited else <span data-count="385">(</span>false, visited)
+        <span data-count="802555">i</span>f ok then <span data-count="802170">a</span>ux (i + 1) visited else <span data-count="385">(</span>false, visited)
   in
   aux 0 visited
 
 and iso_sub_type exp_types exp_tg imp_types imp_tg visited ga gb size st_a st_b
     =
-  <span data-count="802544">i</span>f not (Bool.equa<span data-count="802544">l</span> st_a.final st_b.final) then <span data-count="8">(</span>false, visited)
-  else <span data-count="802536">i</span>f List.lengt<span data-count="802536">h</span> st_a.ids &lt;&gt; List.lengt<span data-count="802536">h</span> st_b.ids then <span data-count="235">(</span>false, visited)
+  <span data-count="802555">i</span>f not (Bool.equa<span data-count="802555">l</span> st_a.final st_b.final) then <span data-count="8">(</span>false, visited)
+  else <span data-count="802547">i</span>f List.lengt<span data-count="802547">h</span> st_a.ids &lt;&gt; List.lengt<span data-count="802547">h</span> st_b.ids then <span data-count="235">(</span>false, visited)
   else
-    <span data-count="802301">l</span>et ok, visited =
+    <span data-count="802312">l</span>et ok, visited =
       List.fold_left2
         (fun (ok, visited) id_a id_b -&gt;
           <span data-count="348">i</span>f not ok then <span data-count="0">(</span>false, visited)
@@ -3758,14 +3758,14 @@ and iso_sub_type exp_types exp_tg imp_types imp_tg visited ga gb size st_a st_b
               (TypeUse id_a) (TypeUse id_b) )
         (true, visited) st_a.ids st_b.ids
     in
-    <span data-count="802301">i</span>f not ok then <span data-count="82">(</span>false, visited)
+    <span data-count="802312">i</span>f not ok then <span data-count="82">(</span>false, visited)
     else
-      <span data-count="802219">i</span>so_comp_type exp_types exp_tg imp_types imp_tg visited ga gb size st_a.ct
+      <span data-count="802230">i</span>so_comp_type exp_types exp_tg imp_types imp_tg visited ga gb size st_a.ct
         st_b.ct
 
 and iso_comp_type exp_types exp_tg imp_types imp_tg visited ga gb size ct_a ct_b
     =
-  <span data-count="802219">m</span>atch (ct_a, ct_b) with
+  <span data-count="802230">m</span>atch (ct_a, ct_b) with
   | <span data-count="801691">D</span>ef_func_t (pt_a, rt_a), Def_func_t (pt_b, rt_b) -&gt;
     if
       List.lengt<span data-count="801691">h</span> pt_a &lt;&gt; List.lengt<span data-count="801691">h</span> pt_<span data-count="19">b</span>
@@ -3800,36 +3800,36 @@ and iso_comp_type exp_types exp_tg imp_types imp_tg visited ga gb size ct_a ct_b
             <span data-count="350">i</span>so_field_type exp_types exp_tg imp_types imp_tg visited ga gb size
               ft_a ft_b )
         (true, visited) fl_a fl_b
-  | <span data-count="147">D</span>ef_array_t ft_a, Def_array_t ft_b -&gt;
+  | <span data-count="158">D</span>ef_array_t ft_a, Def_array_t ft_b -&gt;
     iso_field_type exp_types exp_tg imp_types imp_tg visited ga gb size ft_a
       ft_b
   | <span data-count="0">_</span> -&gt; (false, visited)
 
 and iso_field_type exp_types exp_tg imp_types imp_tg visited ga gb size
   (mut_a, st_a) (mut_b, st_b) =
-  <span data-count="497">i</span>f not (Bool.equa<span data-count="497">l</span> (Text.is_mu<span data-count="497">t</span> mut_a) (Text.is_mu<span data-count="497">t</span> mut_b)) then
+  <span data-count="508">i</span>f not (Bool.equa<span data-count="508">l</span> (Text.is_mu<span data-count="508">t</span> mut_a) (Text.is_mu<span data-count="508">t</span> mut_b)) then
     <span data-count="0">(</span>false, visited)
   else
-    <span data-count="497">i</span>so_storage_type exp_types exp_tg imp_types imp_tg visited ga gb size st_a
+    <span data-count="508">i</span>so_storage_type exp_types exp_tg imp_types imp_tg visited ga gb size st_a
       st_b
 
 and iso_storage_type exp_types exp_tg imp_types imp_tg visited ga gb size st_a
   st_b =
-  <span data-count="497">m</span>atch (st_a, st_b) with
+  <span data-count="508">m</span>atch (st_a, st_b) with
   | <span data-count="116">P</span>ack_type Text.I8, Pack_type Text.I8
   | <span data-count="58">P</span>ack_type Text.I16, Pack_type Text.I16 -&gt;
     (true, visited)
-  | <span data-count="323">V</span>al_type vt_a, Val_type vt_b -&gt;
+  | <span data-count="334">V</span>al_type vt_a, Val_type vt_b -&gt;
     iso_val_type exp_types exp_tg imp_types imp_tg visited ga gb size vt_a vt_b
   | <span data-count="0">_</span> -&gt; (false, visited)
 
 and iso_val_type exp_types exp_tg imp_types imp_tg visited ga gb size vt_a vt_b
     =
-  <span data-count="1602540">m</span>atch (vt_a, vt_b) with
-  | <span data-count="1602152">N</span>um_type nt_a, Num_type nt_b -&gt; (Text.num_type_e<span data-count="1602152">q</span> nt_a nt_b, visited)
-  | <span data-count="388">R</span>ef_type (null_a, ht_a), Ref_type (null_b, ht_b) -&gt; (
+  <span data-count="1602551">m</span>atch (vt_a, vt_b) with
+  | <span data-count="1602156">N</span>um_type nt_a, Num_type nt_b -&gt; (Text.num_type_e<span data-count="1602156">q</span> nt_a nt_b, visited)
+  | <span data-count="395">R</span>ef_type (null_a, ht_a), Ref_type (null_b, ht_b) -&gt; (
     match (null_a, null_b) with
-    | <span data-count="122">T</span>ext.Null, Text.Null | <span data-count="266">T</span>ext.No_null, Text.No_null -&gt;
+    | <span data-count="129">T</span>ext.Null, Text.Null | <span data-count="266">T</span>ext.No_null, Text.No_null -&gt;
       iso_heap_type exp_types exp_tg imp_types imp_tg visited ga gb size ht_a
         ht_b
     | <span data-count="0">_</span> -&gt; (false, visited) )
@@ -3837,7 +3837,7 @@ and iso_val_type exp_types exp_tg imp_types imp_tg visited ga gb size vt_a vt_b
 
 and iso_heap_type exp_types exp_tg imp_types imp_tg visited ga gb size ht_a ht_b
     =
-  <span data-count="736">m</span>atch (ht_a, ht_b) with
+  <span data-count="743">m</span>atch (ht_a, ht_b) with
   | <span data-count="601">T</span>ypeUse id_a, TypeUse id_b -&gt;
     let a_in = id_a &gt;= ga &amp;&amp; <span data-count="280">i</span>d_a &lt; ga + size in
     let b_in = id_b &gt;= gb &amp;&amp; <span data-count="289">i</span>d_b &lt; gb + size in
@@ -3845,20 +3845,20 @@ and iso_heap_type exp_types exp_tg imp_types imp_tg visited ga gb size ht_a ht_b
     else <span data-count="321">i</span>f (not a_in) &amp;&amp; <span data-count="321">n</span>ot b_in then
       <span data-count="312">i</span>s_iso_equiv_aux exp_types exp_tg imp_types imp_tg visited id_a id_b
     else <span data-count="9">(</span>false, visited)
-  | <span data-count="135">_</span> -&gt; (heap_type_e<span data-count="135">q</span> ht_a ht_b, visited)
+  | <span data-count="142">_</span> -&gt; (heap_type_e<span data-count="142">q</span> ht_a ht_b, visited)
 
 (** iso-equivalence: checks whether type [a] in [(exp_types, exp_tg)] and type
     [b] in [(imp_types, imp_tg)] are structurally equivalent — same rec-group
     size, same relative position, pairwise equivalent members. *)
 let is_iso_equiv exp_types exp_tg imp_types imp_tg a b =
-  <span data-count="802106">f</span>st (is_iso_equiv_au<span data-count="802106">x</span> exp_types exp_tg imp_types imp_tg PairSet.empty a b)
+  <span data-count="802117">f</span>st (is_iso_equiv_au<span data-count="802117">x</span> exp_types exp_tg imp_types imp_tg PairSet.empty a b)
 
 (** Subtype check across modules: is [exp_types[got]] a structural subtype of
     [imp_types[expected]]? Checks iso-equivalence first, then follows the [ids]
     supertype chain in [exp_types]. *)
 let is_subtype exp_types exp_tg imp_types imp_tg ~got ~expected =
-  <span data-count="801884">l</span>et rec aux a b =
-    <span data-count="802106">i</span>s_iso_equi<span data-count="802106">v</span> exp_types exp_tg imp_types imp_tg a <span data-count="801776">b</span>
+  <span data-count="801895">l</span>et rec aux a b =
+    <span data-count="802117">i</span>s_iso_equi<span data-count="802117">v</span> exp_types exp_tg imp_types imp_tg a <span data-count="801787">b</span>
     ||
     if a &gt;= Array.lengt<span data-count="330">h</span> exp_types then <span data-count="0">f</span>alse
     else
@@ -4638,24 +4638,24 @@ and pp_expr ~short ppf instrs =
     instrs
 
 let rec iter_expr f (e : expr Annotated.t) =
-  <span data-count="7688">A</span>nnotated.iter (List.ite<span data-count="7688">r</span> (iter_inst<span data-count="7688">r</span> f)) e
+  <span data-count="7680">A</span>nnotated.iter (List.ite<span data-count="7680">r</span> (iter_inst<span data-count="7680">r</span> f)) e
 
 and iter_instr f instr =
-  <span data-count="175969">A</span>nnotated.iter f instr;
-  <span data-count="175969">A</span>nnotated.iter
-    (<span data-count="175969">f</span>unction
-      | <span data-count="149836">S</span>imple _ | <span data-count="2249">B</span>r _ | <span data-count="6607">B</span>r_if _
-      | <span data-count="27">B</span>r_table (_, _)
+  <span data-count="175286">A</span>nnotated.iter f instr;
+  <span data-count="175286">A</span>nnotated.iter
+    (<span data-count="175286">f</span>unction
+      | <span data-count="149207">S</span>imple _ | <span data-count="2223">B</span>r _ | <span data-count="6596">B</span>r_if _
+      | <span data-count="32">B</span>r_table (_, _)
       | <span data-count="0">B</span>r_on_null _ | <span data-count="0">B</span>r_on_non_null _
       | <span data-count="0">B</span>r_on_cast (_, _, _)
       | <span data-count="0">B</span>r_on_cast_fail (_, _, _)
-      | <span data-count="1248">R</span>eturn | <span data-count="0">R</span>eturn_call _
+      | <span data-count="1270">R</span>eturn | <span data-count="0">R</span>eturn_call _
       | <span data-count="0">R</span>eturn_call_indirect (_, _)
-      | <span data-count="0">R</span>eturn_call_ref _ | <span data-count="7453">C</span>all _
+      | <span data-count="0">R</span>eturn_call_ref _ | <span data-count="7417">C</span>all _
       | <span data-count="1073">C</span>all_indirect (_, _)
       | <span data-count="0">C</span>all_ref _ -&gt;
         ()
-      | <span data-count="6554">B</span>lock (_, _, e) | <span data-count="922">L</span>oop (_, _, e) -&gt; iter_expr f e
+      | <span data-count="6544">B</span>lock (_, _, e) | <span data-count="924">L</span>oop (_, _, e) -&gt; iter_expr f e
       | <span data-count="0">I</span>f_else (_, _, e1, e2) -&gt;
         iter_expr f e1;
         <span data-count="0">i</span>ter_expr f e2 )
@@ -4707,21 +4707,21 @@ end
 
     TODO: use iarray? *)
 let compute_type_groups (type_defs : Typedef.t array) types_len =
-  <span data-count="3500">l</span>et groups = Array.make types_len (0, 1) in
-  <span data-count="3500">l</span>et _ =
+  <span data-count="3514">l</span>et groups = Array.make types_len (0, 1) in
+  <span data-count="3514">l</span>et _ =
     Array.fold_left
       (fun pos typedef -&gt;
-        <span data-count="10902">m</span>atch typedef with
-        | <span data-count="10648">T</span>ypedef.SimpleType _ -&gt;
+        <span data-count="10946">m</span>atch typedef with
+        | <span data-count="10692">T</span>ypedef.SimpleType _ -&gt;
           groups.(pos) &lt;- (pos, 1);
-          <span data-count="10648">p</span>os + 1
+          <span data-count="10692">p</span>os + 1
         | <span data-count="254">T</span>ypedef.RecType members -&gt;
           let size = List.length members in
           <span data-count="254">L</span>ist.iteri (fun i _ -&gt; <span data-count="540">g</span>roups.(pos + i) &lt;- (pos, size)) members;
           <span data-count="254">p</span>os + size )
       0 type_defs
   in
-  <span data-count="3500">g</span>roups
+  <span data-count="3514">g</span>roups
 
 module Table = struct
   module Type = struct
@@ -4883,44 +4883,44 @@ module Module = struct
     Log.warn (fun m -&gt;
       m "insert_func_at_idx is still incomplete and you may run into issues" );
     *)
-    <span data-count="996">l</span>et update_idx idx = <span data-count="36644">i</span>f idx &gt;= i then <span data-count="31593">i</span>dx + 1 else <span data-count="5051">i</span>dx in
+    <span data-count="996">l</span>et update_idx idx = <span data-count="36492">i</span>f idx &gt;= i then <span data-count="31441">i</span>dx + 1 else <span data-count="5051">i</span>dx in
 
     let rec handle_instr instr =
-      <span data-count="909055">A</span>nnotated.map
+      <span data-count="906123">A</span>nnotated.map
         (function
-          | <span data-count="32251">C</span>all idx -&gt; Call (update_id<span data-count="32251">x</span> idx)
+          | <span data-count="32099">C</span>all idx -&gt; Call (update_id<span data-count="32099">x</span> idx)
           | <span data-count="0">R</span>eturn_call idx -&gt; Return_call (update_id<span data-count="0">x</span> idx)
           | <span data-count="2941">S</span>imple (Ref (Func idx)) -&gt; Simple (Ref (Func (update_id<span data-count="2941">x</span> idx)))
-          | <span data-count="29846">B</span>lock (id, typ, body) -&gt;
+          | <span data-count="29801">B</span>lock (id, typ, body) -&gt;
             let body = handle_expr body in
-            <span data-count="29846">B</span>lock (id, typ, body)
-          | <span data-count="4711">L</span>oop (id, typ, body) -&gt;
+            <span data-count="29801">B</span>lock (id, typ, body)
+          | <span data-count="4719">L</span>oop (id, typ, body) -&gt;
             let body = handle_expr body in
-            <span data-count="4711">L</span>oop (id, typ, body)
+            <span data-count="4719">L</span>oop (id, typ, body)
           | <span data-count="7115">I</span>f_else (id, typ, true_branch, false_branch) -&gt;
             let true_branch = handle_expr true_branch in
             <span data-count="7115">l</span>et false_branch = handle_expr false_branch in
             <span data-count="7115">I</span>f_else (id, typ, true_branch, false_branch)
-          | <span data-count="832191">i</span>nstr -&gt;
+          | <span data-count="829448">i</span>nstr -&gt;
             (* TODO: make this match non fragile *)
             instr )
         instr
     and handle_expr expr =
-      <span data-count="66968">A</span>nnotated.map (fun expr -&gt; <span data-count="66968">L</span>ist.map handle_instr expr) expr
+      <span data-count="66906">A</span>nnotated.map (fun expr -&gt; <span data-count="66906">L</span>ist.map handle_instr expr) expr
     in
     let update_function = function
       | <span data-count="4917">O</span>rigin.Imported _ as f -&gt; f
-      | <span data-count="14224">O</span>rigin.Local (f : Func.t) -&gt;
+      | <span data-count="14199">O</span>rigin.Local (f : Func.t) -&gt;
         let body = handle_expr f.body in
-        <span data-count="14224">O</span>rigin.Local { f with body }
+        <span data-count="14199">O</span>rigin.Local { f with body }
     in
     let func =
       Array.init
         (Array.lengt<span data-count="996">h</span> m.func + 1)
         (fun j -&gt;
-          <span data-count="19141">i</span>f i = j then <span data-count="996">i</span>f update_function_itself then <span data-count="996">u</span>pdate_function f else <span data-count="0">f</span>
-          else <span data-count="18145">b</span>egin
-            update_function @@ if i &lt; j then <span data-count="14224">m</span>.func.(j - 1) else <span data-count="3921">m</span>.func.(j)
+          <span data-count="19116">i</span>f i = j then <span data-count="996">i</span>f update_function_itself then <span data-count="996">u</span>pdate_function f else <span data-count="0">f</span>
+          else <span data-count="18120">b</span>egin
+            update_function @@ if i &lt; j then <span data-count="14199">m</span>.func.(j - 1) else <span data-count="3921">m</span>.func.(j)
           end )
     in
     <span data-count="996">l</span>et elem =
@@ -4962,7 +4962,7 @@ module Module = struct
     <span data-count="265">l</span>et func =
       Array.init
         (Array.lengt<span data-count="265">h</span> m.func + 1)
-        (fun i -&gt; <span data-count="5396">i</span>f i = len then <span data-count="265">f</span> else <span data-count="5131">m</span>.func.(i))
+        (fun i -&gt; <span data-count="5390">i</span>f i = len then <span data-count="265">f</span> else <span data-count="5125">m</span>.func.(i))
     in
 
     <span data-count="265">(</span>{ m with func }, len)
@@ -4976,7 +4976,7 @@ module Module = struct
       | <span data-count="0">I</span>mported i -&gt; Some i.typ
 
   let get_type id m =
-    <span data-count="2942">i</span>f id &gt;= Array.lengt<span data-count="2942">h</span> m.types then <span data-count="0">N</span>one else <span data-count="2942">S</span>ome m.types.(id)
+    <span data-count="2954">i</span>f id &gt;= Array.lengt<span data-count="2954">h</span> m.types then <span data-count="0">N</span>one else <span data-count="2954">S</span>ome m.types.(id)
 
   (** Exports *)
 
@@ -5001,7 +5001,7 @@ module Module = struct
             ; typ = _
             } -&gt;
           String.equa<span data-count="9722">l</span> modul_name modul_name' &amp;&amp; <span data-count="9606">S</span>tring.equal func_name name
-        | <span data-count="14230">L</span>ocal _ -&gt; false )
+        | <span data-count="14205">L</span>ocal _ -&gt; false )
       m.func
 
   (** Finds the index of the last imported function. Will be `~-1` if there are
@@ -5010,7 +5010,7 @@ module Module = struct
     <span data-count="996">l</span>et _i, last =
       Array.fold_left
         (fun (i, last) -&gt; function
-          | <span data-count="3921">O</span>rigin.Imported _ -&gt; (suc<span data-count="3921">c</span> i, i) | <span data-count="14224">O</span>rigin.Local _ -&gt; (suc<span data-count="14224">c</span> i, last) )
+          | <span data-count="3921">O</span>rigin.Imported _ -&gt; (suc<span data-count="3921">c</span> i, i) | <span data-count="14199">O</span>rigin.Local _ -&gt; (suc<span data-count="14199">c</span> i, last) )
         (0, ~<span data-count="996">-</span>1) m.func
     in
     <span data-count="996">l</span>ast

@@ -151,18 +151,18 @@ let rotate_right = ext_rotate_right
 let rotate_left = ext_rotate_left
 
 let to_boolean (e : t) : Symbolic_boolean.t =
-  <span data-count="320657">m</span>atch Smtml.Typed.view e with
-  | <span data-count="307334">V</span>al (Bitv bv) -&gt;
-    if Smtml.Bitvector.eqz bv then <span data-count="111945">S</span>ymbolic_boolean.false_
-    else <span data-count="195390">S</span>ymbolic_boolean.true_
+  <span data-count="320706">m</span>atch Smtml.Typed.view e with
+  | <span data-count="307383">V</span>al (Bitv bv) -&gt;
+    if Smtml.Bitvector.eqz bv then <span data-count="111970">S</span>ymbolic_boolean.false_
+    else <span data-count="195416">S</span>ymbolic_boolean.true_
   | <span data-count="0">S</span>ymbol { ty = Ty_bool; _ } -&gt; Smtml.Typed.Bitv32.to_bool e
   | <span data-count="12652">C</span>vtop (_, OfBool, cond) -&gt; Smtml.Typed.Unsafe.wrap cond
   | <span data-count="670">_</span> -&gt; Smtml.Typed.Bitv32.to_bool e
 
 let of_boolean (e : Symbolic_boolean.t) : t =
-  <span data-count="243645">m</span>atch Smtml.Typed.view e with
-  | <span data-count="120924">V</span>al True -&gt; one
-  | <span data-count="108344">V</span>al False -&gt; zero
+  <span data-count="243697">m</span>atch Smtml.Typed.view e with
+  | <span data-count="120951">V</span>al True -&gt; one
+  | <span data-count="108370">V</span>al False -&gt; zero
   | <span data-count="14376">_</span> -&gt; Smtml.Typed.Bitv32.of_bool e
 
 let boolify e =
@@ -183,12 +183,12 @@ let logor e1 e2 =
   | <span data-count="57">_</span> -&gt; Smtml.Typed.Bitv32.logor e1 e2
 
 let eq_concrete (e : t) (c : Int32.t) : Symbolic_boolean.t =
-  <span data-count="941">l</span>et c = of_int32 c in
-  <span data-count="941">S</span>mtml.Typed.Bitv32.eq c e
+  <span data-count="1095">l</span>et c = of_int32 c in
+  <span data-count="1095">S</span>mtml.Typed.Bitv32.eq c e
 
 let min_int = of_int3<span data-count="979">2</span> Int32.min_int
 
-let eqz (v : t) = <span data-count="201106">e</span>q v zero
+let eqz (v : t) = <span data-count="201105">e</span>q v zero
 
 let ( = ) = eq
 
