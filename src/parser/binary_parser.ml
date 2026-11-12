@@ -1057,7 +1057,7 @@ let version_check str =
     else parse_fail "unknown binary version"
 
 let check_section_id = function
-  | '\x00' .. '\x0C' -> Ok ()
+  | '\x00' .. '\x0D' -> Ok ()
   | c -> parse_fail "malformed section id %s" (Char.escaped c)
 
 let section_parse input ~expected_id default section_content_parse =
@@ -1481,6 +1481,13 @@ let sections_iterate (input : Input.t) =
   let* custom_sections', input = parse_many_custom_section input in
   let custom_sections = custom_sections @ custom_sections' in
 
+  let* tag_section, input =
+    section_parse input ~expected_id:'\x0D' [] (vector_no_id read_tag)
+  in
+
+  let* custom_sections', input = parse_many_custom_section input in
+  let custom_sections = custom_sections @ custom_sections' in
+
   (* Globals *)
   let* global_section, input =
     section_parse input ~expected_id:'\x06' []
@@ -1548,13 +1555,8 @@ let sections_iterate (input : Input.t) =
   let custom_sections = custom_sections @ custom_sections' in
 
   (* Data *)
-  let* data, input =
+  let+ data, input =
     section_parse input ~expected_id:'\x0B' [] (vector_no_id (read_data types))
-  in
-
-  (* Tag *)
-  let+ tag_section, input =
-    section_parse input ~expected_id:'\x0D' [] (vector_no_id read_tag)
   in
 
   (* Data *)
