@@ -179,13 +179,14 @@ module Collect = struct
   let rec from_instr collect (instr : Binary.instr Annotated.t) =
     match instr.Annotated.raw with
     | Simple instr -> from_simple_instruction collect instr
-    | Block (_, _, e) | Loop (_, _, e) -> from_expr collect e
+    | Block (_, _, e) | Loop (_, _, e) | Try_table (_, _, _, e) ->
+      from_expr collect e
     | If_else (_, _, e1, e2) ->
       let collect = from_expr collect e1 in
       from_expr collect e2
     | Br _ | Br_if _ | Br_table _ | Br_on_null _ | Br_on_non_null _ | Return
     | Return_call _ | Return_call_ref _ | Return_call_indirect _ | Call _
-    | Call_indirect _ | Call_ref _
+    | Call_indirect _ | Call_ref _ | Throw _
     | Br_on_cast (_, _, _)
     | Br_on_cast_fail (_, _, _) ->
       collect

@@ -569,6 +569,19 @@ let rec convert_instr : Binary.instr -> Text.instr = function
     let bt = Option.map convert_block_type bt in
     let e = convert_expr e in
     Block (id, bt, e)
+  | Try_table (id, bt, catches, e) ->
+    let bt = Option.map convert_block_type bt in
+    let catches =
+      List.map
+        (function
+          | Binary.Catch (tag, label) ->
+            Text.Catch (convert_indice tag, convert_indice label)
+          | Catch_all label -> Catch_all (convert_indice label) )
+        catches
+    in
+    let e = convert_expr e in
+    Try_table (id, bt, catches, e)
+  | Throw tag -> Throw (convert_indice tag)
   | Call_indirect (tbl_i, bt) ->
     let tbl_i = convert_indice tbl_i in
     let bt = convert_block_type bt in

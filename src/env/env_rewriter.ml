@@ -331,6 +331,21 @@ let rec rewrite_instruction ~map = function
       , rewrite_expression e2 ~map )
   | Return_call i -> Return_call (get_unsafe i map.functions)
   | Call i -> Call (get_unsafe i map.functions)
+  | Try_table (a, b, catches, e) ->
+    let catches =
+      List.map
+        (function
+          | Binary.Catch (tag, label) ->
+            Binary.Catch (get_unsafe tag map.tags, label)
+          | Catch_all _ as c -> c )
+        catches
+    in
+    Try_table
+      ( a
+      , Option.map (rewrite_block_type ~map) b
+      , catches
+      , rewrite_expression ~map e )
+  | Throw tag -> Throw (get_unsafe tag map.tags)
   | Call_indirect (i, typ) ->
     Call_indirect (get_unsafe i map.tables, rewrite_block_type ~map typ)
   | Return_call_indirect (i, typ) ->

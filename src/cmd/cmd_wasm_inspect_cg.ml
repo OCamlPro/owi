@@ -52,7 +52,11 @@ let rec find_children mode tables (funcs : 'a array) acc (l : Binary.expr) =
       Annotated.update_functions_called instr (S.singleton f);
       find_children mode tables funcs (S.add f acc) l
     | None -> find_children mode tables funcs acc l )
-  | { raw = Block (_, _, exp) | Loop (_, _, exp); _ } :: l, _ ->
+  | ( { raw = Block (_, _, exp) | Loop (_, _, exp) | Try_table (_, _, _, exp)
+      ; _
+      }
+      :: l
+    , _ ) ->
     let x = find_children mode tables funcs acc exp.raw in
     find_children mode tables funcs x l
   | { raw = If_else (_, _, e1, e2); _ } :: l, _ ->
@@ -150,7 +154,7 @@ let build_env (env, n) (global : (Binary.Global.t, 'a) Origin.t) =
 let rec find_tables acc (e : Binary.instr Annotated.t) =
   match e.raw with
   | Simple (Table (Set i | Fill i | Copy (i, _))) -> i :: acc
-  | Block (_, _, exp) | Loop (_, _, exp) ->
+  | Block (_, _, exp) | Loop (_, _, exp) | Try_table (_, _, _, exp) ->
     List.fold_left find_tables acc exp.raw
   | If_else (_, _, e1, e2) ->
     let acc = List.fold_left find_tables acc e1.raw in

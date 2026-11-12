@@ -11,6 +11,8 @@ let max_recursive_calls = 10
 
 exception RecursiveFunctionCall
 
+exception Unsupported_instruction of string
+
 let gen_new_value ~widens a b state_a state_b
   (Abstract_domain.Context.Result (inc, intup, cont))
   (f : Value.t -> 'container -> 'container) =
@@ -589,6 +591,10 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
       in
       Trace.record_wasm_step Step None instr;
       (None, JumpMap.of_list all_cases)
+    | Try_table _ | Throw _ ->
+      raise
+        (Unsupported_instruction
+           (Fmt.str "%a" (Binary.pp_instr ~short:true) instr.raw) )
     | Return ->
       Trace.record_wasm_step Step None instr;
       (None, JumpMap.of_list [ (Ret, [ state ]) ])

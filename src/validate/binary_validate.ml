@@ -1513,6 +1513,27 @@ let rec typecheck_instr (env : Env.t) (stack : stack) (instr : instr Annotated.t
   | Loop (_, bt, expr) ->
     let+ stack = typecheck_expr env expr ~is_loop:true bt ~stack in
     (env, stack)
+  | Try_table (_, bt, catches, expr) ->
+    let* () =
+      list_iter
+        (function
+          | Catch (tag, label) ->
+            let* _, (pt, _) = Env.tag_get tag env.modul in
+            let* jt = Env.block_type_get label env in
+            let* b = Stack.equal env.modul jt (List.rev_map typ_of_pt pt) in
+            if b then Ok () else Error (`Type_mismatch "try_table catch")
+          | Catch_all label ->
+            let* jt = Env.block_type_get label env in
+            if List.is_empty jt then Ok ()
+            else Error (`Type_mismatch "try_table catch_all") )
+        catches
+    in
+    let+ stack = typecheck_expr env expr ~is_loop:false bt ~stack in
+    (env, stack)
+  | Throw tag ->
+    let* _, (pt, _) = Env.tag_get tag env.modul in
+    let+ _stack = Stack.pop env.modul (List.rev_map typ_of_pt pt) stack in
+    (env, [ any ])
   | Call_indirect (tbl_id, bt) ->
     let* _tbl_type = Env.table_type_get tbl_id env.modul in
     let* () =

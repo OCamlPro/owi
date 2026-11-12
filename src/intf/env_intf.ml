@@ -63,6 +63,8 @@ module type T = sig
 
   val get_func : env:t -> int -> extern_func Kind.func
 
+  val get_tag : env:t -> int -> Binary.Tag.t
+
   val get_exported_func :
        env:t
     -> module_name:string option

@@ -1515,9 +1515,15 @@ type instr =
   | Call of indice
   | Call_indirect of indice * block_type
   | Call_ref of indice
+  | Try_table of string option * block_type option * catch list * expr
+  | Throw of indice
   (* GC convesion instructions *)
   | Any_convert_extern
   | Extern_convert_any
+
+and catch =
+  | Catch of indice * indice
+  | Catch_all of indice
 
 and expr = instr list
 
@@ -1594,6 +1600,19 @@ let rec pp_instr ~short ppf = function
   | Call_indirect (tbl_id, ty_id) ->
     pf ppf "call_indirect %a %a" pp_indice tbl_id pp_block_type ty_id
   | Call_ref ty_id -> pf ppf "call_ref %a" pp_indice ty_id
+  | Try_table (id, bt, catches, e) ->
+    let pp_catch ppf = function
+      | Catch (tag, label) ->
+        pf ppf " (catch %a %a)" pp_indice tag pp_indice label
+      | Catch_all label -> pf ppf " (catch_all %a)" pp_indice label
+    in
+    if short then
+      pf ppf "try_table%a%a%a" pp_id_opt id pp_block_type_opt bt
+        (list ~sep:nop pp_catch) catches
+    else
+      pf ppf "(try_table%a%a%a@\n  @[<v>%a@])" pp_id_opt id pp_block_type_opt bt
+        (list ~sep:nop pp_catch) catches (pp_expr ~short) e
+  | Throw tag -> pf ppf "throw %a" pp_indice tag
   (* convesion *)
   | Any_convert_extern -> pf ppf "any.convert_extern"
   | Extern_convert_any -> pf ppf "extern.convert_any"

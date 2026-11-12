@@ -711,6 +711,31 @@ let rec read_instr types input =
     let+ input = check_end_opcode input in
     (If_else (None, Some bt, expr1, expr2), input)
   | '\x05' -> parse_fail "misplaced ELSE opcode"
+  | '\x08' ->
+    let+ tagidx, input = read_indice input in
+    (Throw tagidx, input)
+  | '\x0A' -> parse_fail "throw_ref is not supported (exception references)"
+  | '\x1F' ->
+    let* bt, input = read_block_type types input in
+    let read_catch input =
+      let* b, input = read_byte ~msg:"read_catch" input in
+      match b with
+      | '\x00' ->
+        let* tagidx, input = read_indice input in
+        let+ labelidx, input = read_indice input in
+        (Catch (tagidx, labelidx), input)
+      | '\x02' ->
+        let+ labelidx, input = read_indice input in
+        (Catch_all labelidx, input)
+      | '\x01' | '\x03' ->
+        parse_fail
+          "catch_ref and catch_all_ref are not supported (exception references)"
+      | c -> parse_fail "illegal catch clause 0x%02X" (Char.code c)
+    in
+    let* catches, input = vector_no_id read_catch input in
+    let* expr, input = read_expr types input in
+    let+ input = check_end_opcode input in
+    (Try_table (None, Some bt, catches, expr), input)
   | '\x0B' -> parse_fail "misplaced END opcode"
   | '\x0C' ->
     let+ labelidx, input = read_indice input in

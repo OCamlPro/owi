@@ -743,6 +743,25 @@ let rewrite_expr (assigned : Assigned.t) (locals : Text.param list)
       let* bt = block_ty_opt_rewrite bt in
       let+ e = expr e (loop_count, id :: block_ids) in
       Binary.Block (id, bt, e)
+    | Try_table (id, bt, catches, e) ->
+      let* bt = block_ty_opt_rewrite bt in
+      let* catches =
+        list_map
+          (function
+            | Text.Catch (tag, label) ->
+              let* tag = Assigned.find_tag assigned tag in
+              let+ label = block_id_to_raw (loop_count, block_ids) label in
+              Binary.Catch (tag, label)
+            | Catch_all label ->
+              let+ label = block_id_to_raw (loop_count, block_ids) label in
+              Binary.Catch_all label )
+          catches
+      in
+      let+ e = expr e (loop_count, id :: block_ids) in
+      Binary.Try_table (id, bt, catches, e)
+    | Throw tag ->
+      let+ tag = Assigned.find_tag assigned tag in
+      Binary.Throw tag
     | Call_indirect (tbl_i, bt) ->
       let* tbl_i = Assigned.find_table assigned tbl_i in
       let+ _, bt = rewrite_block_type assigned bt in

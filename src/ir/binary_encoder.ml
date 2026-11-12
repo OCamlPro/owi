@@ -1009,6 +1009,24 @@ let rec write_instr buf instr =
   | Return_call_indirect _ -> raise @@ Failure "TODO: Return_call_indirect _ "
   | Return_call_ref _ -> raise @@ Failure "TODO: Return_call_ref _ "
   | Call_ref _ -> raise @@ Failure "TODO: call_ref"
+  | Try_table (_str, bt, catches, expr) ->
+    Buffer.add_char buf '\x1F';
+    write_block_type buf bt;
+    write_u32_of_int buf (List.length catches);
+    List.iter
+      (function
+        | Catch (tag, label) ->
+          Buffer.add_char buf '\x00';
+          write_indice buf tag;
+          write_indice buf label
+        | Catch_all label ->
+          Buffer.add_char buf '\x02';
+          write_indice buf label )
+      catches;
+    write_expr buf expr ~end_op_code:None
+  | Throw tag ->
+    Buffer.add_char buf '\x08';
+    write_indice buf tag
 
 and write_expr buf expr ~end_op_code =
   List.iter (write_instr buf) expr.Annotated.raw;

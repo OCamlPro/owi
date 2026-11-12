@@ -94,6 +94,7 @@ type err =
   | `Offset_out_of_range
   | `Table_size
   | `Cast_failure
+  | `Uncaught_exception
   ]
 
 type 'a t = ('a, err) Prelude.Result.t

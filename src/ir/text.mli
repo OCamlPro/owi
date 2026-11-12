@@ -737,9 +737,15 @@ type instr =
   | Call of indice
   | Call_indirect of indice * block_type
   | Call_ref of indice
+  | Try_table of string option * block_type option * catch list * expr
+  | Throw of indice
   (* GC convesion instructions *)
   | Any_convert_extern
   | Extern_convert_any
+
+and catch =
+  | Catch of indice * indice
+  | Catch_all of indice
 
 and expr = instr list
 

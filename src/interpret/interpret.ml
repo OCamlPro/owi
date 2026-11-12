@@ -141,6 +141,7 @@ struct
       ; continue_rt : Binary.result_type
       ; stack : Stack.t
       ; is_loop : Prelude.Bool.t
+      ; handlers : Binary.catch list
       }
 
     type block_stack = block list
@@ -199,6 +200,30 @@ struct
         let stack = args @ block.stack in
         Choice.return
           (Continue { state with block_stack; pc = block.continue; stack })
+
+    let throw (state : t) tag payload =
+      let rec unwind (state : t) = function
+        | [] -> (
+          match state.return_state with
+          | None -> None
+          | Some caller ->
+            let caller = { caller with env = state.env } in
+            unwind caller caller.block_stack )
+        | (block : block) :: outer -> (
+          let caught =
+            List.find_map
+              (function
+                | Binary.Catch (t, label) when t = tag -> Some (label, payload)
+                | Catch _ -> None
+                | Catch_all label -> Some (label, []) )
+              block.handlers
+          in
+          match caught with
+          | None -> unwind state outer
+          | Some (label, stack) ->
+            Some (branch { state with block_stack = outer; stack } label) )
+      in
+      unwind state state.block_stack
   end
 
   let mk_addr access_size ~(state : State.t) memid ~pos ~offset instr_counter =
@@ -2119,6 +2144,7 @@ struct
         ; continue_rt = []
         ; stack = []
         ; is_loop
+        ; handlers = []
         }
       in
       loop { state with pc = expr; block_stack = block :: state.block_stack }
@@ -2128,7 +2154,8 @@ struct
       | Some i -> Some (Atomic.get i.Annotated.instr_counter)
   end
 
-  let exec_block (state : State.t) ~is_loop (bt : block_type option) expr =
+  let exec_block ?(handlers = []) (state : State.t) ~is_loop
+    (bt : block_type option) expr =
     let pt, rt =
       match bt with
       | None -> ([], [])
@@ -2142,6 +2169,7 @@ struct
       ; continue_rt = rt
       ; stack = Stack.drop_n state.stack (List.length pt)
       ; is_loop
+      ; handlers
       }
     in
     Choice.return
@@ -2955,6 +2983,14 @@ struct
       else Choice.return (State.Continue state)
     | Loop (_id, bt, e) -> exec_block state ~is_loop:true bt e
     | Block (_id, bt, e) -> exec_block state ~is_loop:false bt e
+    | Try_table (_id, bt, handlers, e) ->
+      exec_block ~handlers state ~is_loop:false bt e
+    | Throw tag -> (
+      let Binary.Tag.{ typ = _, (pt, _); _ } = Env.get_tag ~env tag in
+      let payload, stack = Stack.pop_n stack (List.length pt) in
+      match State.throw { state with stack } tag payload with
+      | Some next -> next
+      | None -> Choice.trap `Uncaught_exception )
     | Br_table (inds, i) ->
       let target, stack = Stack.pop_i32 stack in
       let> out = I32.(le_u (I32.of_int (Array.length inds)) target) in

@@ -40,7 +40,7 @@ let rec build_graph (l : Binary.expr) nodes n node edges
       (nodes, edges, n + 1, edges_to_add, true) )
   | instr :: l -> (
     match instr.raw with
-    | Block (_, _, exp) ->
+    | Block (_, _, exp) | Try_table (_, _, _, exp) ->
       let nodes, edges, n, edges_to_add, continue =
         build_graph exp.raw nodes n node edges
           (List.map increase edges_to_add)
