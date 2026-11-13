@@ -1735,7 +1735,7 @@ let sections_iterate (input : Input.t) =
       | '\x01' -> Stack.push export table_exports
       | '\x02' -> Stack.push export mem_exports
       | '\x03' -> Stack.push export global_exports
-      | '\x04' -> Stack.push export global_exports
+      | '\x04' -> Stack.push export tag_exports
       | _ -> Fmt.failwith "read_exportdesc error" )
     export_section;
   let stack_to_array s =
