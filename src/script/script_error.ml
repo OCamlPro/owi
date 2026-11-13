@@ -53,6 +53,14 @@ let check_error ~expected ~got : unit Result.t =
   end
   else Ok ()
 
+let check_exception ~got =
+  match got with
+  | Ok _ ->
+    Abstract_trace.record_wast_test_res
+      (Fail { expected = "uncaught exception"; got = "no exception" });
+    Error `Bad_result
+  | Error got -> check_error ~expected:"uncaught exception" ~got
+
 let check_result ~expected ~got =
   match got with
   | Ok _whatever ->

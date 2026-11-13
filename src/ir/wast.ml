@@ -145,6 +145,7 @@ type assertion =
   | Assert_invalid_quote of string * string
   | Assert_invalid_binary of string * string
   | Assert_exhaustion of action * string
+  | Assert_exception of action
   | Assert_unlinkable of Module.t * string
 
 let pp_assertion fmt = function
@@ -153,6 +154,7 @@ let pp_assertion fmt = function
   | Assert_exhaustion (a, msg) ->
     pf fmt "(assert_exhaustion %a %s)" pp_action a msg
   | Assert_trap (a, f) -> pf fmt {|(assert_trap %a "%s")|} pp_action a f
+  | Assert_exception a -> pf fmt "(assert_exception %a)" pp_action a
   | Assert_trap_module (m, f) ->
     pf fmt {|(assert_trap_module %a "%s")|} Module.pp m f
   | Assert_invalid (m, msg) ->

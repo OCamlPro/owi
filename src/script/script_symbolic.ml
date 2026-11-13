@@ -60,6 +60,7 @@ let log_cmd : Wast.cmd -> unit =
     | Assert (Assert_return _) -> "assert_return"
     | Assert (Assert_trap _) -> "assert_trap"
     | Assert (Assert_exhaustion _) -> "assert_exhaustion"
+    | Assert (Assert_exception _) -> "assert_exception"
     | Register _ -> "register"
     | Action _ -> "action"
     | Instance (_name, _mod_name) -> "instance"
@@ -128,6 +129,12 @@ let run_one ~no_exhaustion ~(env : Env.Symbolic.t) cmd : Env.Symbolic.t Result.t
   | Assert (Assert_trap (a, expected)) ->
     let got = action env a in
     begin match Script_error.check_result ~expected ~got with
+    | Error e -> Error e
+    | Ok () -> Ok env
+    end
+  | Assert (Assert_exception a) ->
+    let got = action env a in
+    begin match Script_error.check_exception ~got with
     | Error e -> Error e
     | Ok () -> Ok env
     end
