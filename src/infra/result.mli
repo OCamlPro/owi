@@ -62,6 +62,7 @@ type err =
   | `Unknown_table of Text.indice
   | `Unknown_type of Text.indice
   | `Unknown_tag of Text.indice
+  | `Non_empty_tag_result_type
   | `Unsupported_file_extension of string
   | `Contract_unknown_func of Text.indice
   | `Empty_annotation_id
@@ -94,6 +95,7 @@ type err =
   | `Offset_out_of_range
   | `Table_size
   | `Cast_failure
+  | `Uncaught_exception
   ]
 
 type 'a t = ('a, err) Prelude.Result.t

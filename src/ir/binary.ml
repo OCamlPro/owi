@@ -1080,6 +1080,13 @@ type instr =
   | Call of indice
   | Call_indirect of indice * block_type
   | Call_ref of indice
+  | Try_table of
+      string option * block_type option * catch list * expr Annotated.t
+  | Throw of indice
+
+and catch =
+  | Catch of indice * indice
+  | Catch_all of indice
 
 and expr = instr Annotated.t list
 
@@ -1163,6 +1170,19 @@ let rec pp_instr ~short ppf = function
   | Call_indirect (tbl_id, ty_id) ->
     pf ppf "call_indirect %a %a" pp_indice tbl_id pp_block_type ty_id
   | Call_ref ty_id -> pf ppf "call_ref %a" pp_indice ty_id
+  | Try_table (id, bt, catches, e) ->
+    let pp_catch ppf = function
+      | Catch (tag, label) ->
+        pf ppf " (catch %a %a)" pp_indice tag pp_indice label
+      | Catch_all label -> pf ppf " (catch_all %a)" pp_indice label
+    in
+    if short then
+      pf ppf "try_table%a%a%a" Text.pp_id_opt id pp_block_type_opt bt
+        (list ~sep:nop pp_catch) catches
+    else
+      pf ppf "(try_table%a%a%a@\n  @[<v>%a@])" Text.pp_id_opt id
+        pp_block_type_opt bt (list ~sep:nop pp_catch) catches (pp_expr ~short) e
+  | Throw tag -> pf ppf "throw %a" pp_indice tag
 
 and pp_expr ~short ppf instrs =
   Annotated.iter
@@ -1188,9 +1208,10 @@ and iter_instr f instr =
       | Return_call_indirect (_, _)
       | Return_call_ref _ | Call _
       | Call_indirect (_, _)
-      | Call_ref _ ->
+      | Call_ref _ | Throw _ ->
         ()
-      | Block (_, _, e) | Loop (_, _, e) -> iter_expr f e
+      | Block (_, _, e) | Loop (_, _, e) | Try_table (_, _, _, e) ->
+        iter_expr f e
       | If_else (_, _, e1, e2) ->
         iter_expr f e1;
         iter_expr f e2 )
@@ -1432,6 +1453,9 @@ module Module = struct
           | Loop (id, typ, body) ->
             let body = handle_expr body in
             Loop (id, typ, body)
+          | Try_table (id, typ, catches, body) ->
+            let body = handle_expr body in
+            Try_table (id, typ, catches, body)
           | If_else (id, typ, true_branch, false_branch) ->
             let true_branch = handle_expr true_branch in
             let false_branch = handle_expr false_branch in

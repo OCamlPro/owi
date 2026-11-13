@@ -178,6 +178,11 @@ let run ~no_exhaustion script =
         let+ () = Script_error.check_result ~expected ~got in
         (* TODO: this is wrong! we should get back the env after running modul? *)
         env
+      | Assert (Assert_exception a) ->
+        Log.info (fun m -> m "*** assert_exception");
+        let got = action env a in
+        let+ () = Script_error.check_exception ~got in
+        env
       | Assert (Assert_exhaustion (a, expected)) ->
         Log.info (fun m -> m "*** assert_exhaustion");
         let+ () =

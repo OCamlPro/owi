@@ -77,6 +77,9 @@ let annotate_sc m cov_label_set_idx =
                   | Binary.Loop (id, typ, body) ->
                     let body = handle_expr body in
                     Binary.Loop (id, typ, body)
+                  | Binary.Try_table (id, typ, catches, body) ->
+                    let body = handle_expr body in
+                    Binary.Try_table (id, typ, catches, body)
                   | Binary.If_else (id, typ, true_branch, false_branch) ->
                     let true_branch = handle_expr true_branch in
                     let false_branch = handle_expr false_branch in
@@ -167,6 +170,9 @@ let annotate_dc m cov_label_set_idx =
                   | Binary.Loop (id, typ, body) ->
                     let body = handle_expr body in
                     Binary.Loop (id, typ, body)
+                  | Binary.Try_table (id, typ, catches, body) ->
+                    let body = handle_expr body in
+                    Binary.Try_table (id, typ, catches, body)
                   | instr ->
                     (* TODO: make this match non fragile? *)
                     instr )

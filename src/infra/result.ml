@@ -62,6 +62,7 @@ type err =
   | `Unknown_table of Text.indice
   | `Unknown_type of Text.indice
   | `Unknown_tag of Text.indice
+  | `Non_empty_tag_result_type
   | `Unsupported_file_extension of string
   | `Contract_unknown_func of Text.indice
   | `Empty_annotation_id
@@ -93,6 +94,7 @@ type err =
   | `Offset_out_of_range
   | `Table_size
   | `Cast_failure
+  | `Uncaught_exception
   ]
 
 type 'a t = ('a, err) Prelude.Result.t
@@ -161,6 +163,7 @@ let rec err_to_string = function
   | `Unknown_table id -> Fmt.str "unknown table %a" Text.pp_indice id
   | `Unknown_type id -> Fmt.str "unknown type %a" Text.pp_indice id
   | `Unknown_tag id -> Fmt.str "unknown tag %a" Text.pp_indice id
+  | `Non_empty_tag_result_type -> "non-empty tag result type"
   | `Unsupported_file_extension ext ->
     Fmt.str "unsupported file_extension %S" ext
   | `Contract_unknown_func id ->
@@ -194,6 +197,7 @@ let rec err_to_string = function
   | `Null_i31_reference -> "null i31 reference"
   | `Table_size -> "table size"
   | `Cast_failure -> "cast failure"
+  | `Uncaught_exception -> "uncaught exception"
 
 let err_to_exit_code = function
   | `No_error -> Cmdliner.Cmd.Exit.ok
@@ -250,6 +254,7 @@ let err_to_exit_code = function
   | `Unknown_table _id -> 51
   | `Unknown_type _id -> 52
   | `Unknown_tag _id -> 53
+  | `Non_empty_tag_result_type -> 103
   | `Unsupported_file_extension _ext -> 54
   | `Failed_with_but_expected (_got, _expected) -> 55
   | `Spec_invalid_int32 _i32 -> 57
@@ -299,3 +304,4 @@ let err_to_exit_code = function
   | `Table_size -> 99
   | `Proc_exit _n -> 100
   | `Cast_failure -> 101
+  | `Uncaught_exception -> 101

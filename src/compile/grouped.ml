@@ -109,7 +109,9 @@ let add_func_type decl_types type_checks = function
 
 let rec extract_block_types expr =
   let aux = function
-    | Block (_str_opt, bt, expr1) | Loop (_str_opt, bt, expr1) ->
+    | Block (_str_opt, bt, expr1)
+    | Loop (_str_opt, bt, expr1)
+    | Try_table (_str_opt, bt, _, expr1) ->
       Option.to_list bt @ extract_block_types expr1
     | If_else (_str_opt, bt, expr1, expr2) ->
       Option.to_list bt @ extract_block_types expr1 @ extract_block_types expr2

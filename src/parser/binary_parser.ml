@@ -711,6 +711,31 @@ let rec read_instr types input =
     let+ input = check_end_opcode input in
     (If_else (None, Some bt, expr1, expr2), input)
   | '\x05' -> parse_fail "misplaced ELSE opcode"
+  | '\x08' ->
+    let+ tagidx, input = read_indice input in
+    (Throw tagidx, input)
+  | '\x0A' -> parse_fail "throw_ref is not supported (exception references)"
+  | '\x1F' ->
+    let* bt, input = read_block_type types input in
+    let read_catch input =
+      let* b, input = read_byte ~msg:"read_catch" input in
+      match b with
+      | '\x00' ->
+        let* tagidx, input = read_indice input in
+        let+ labelidx, input = read_indice input in
+        (Catch (tagidx, labelidx), input)
+      | '\x02' ->
+        let+ labelidx, input = read_indice input in
+        (Catch_all labelidx, input)
+      | '\x01' | '\x03' ->
+        parse_fail
+          "catch_ref and catch_all_ref are not supported (exception references)"
+      | c -> parse_fail "illegal catch clause 0x%02X" (Char.code c)
+    in
+    let* catches, input = vector_no_id read_catch input in
+    let* expr, input = read_expr types input in
+    let+ input = check_end_opcode input in
+    (Try_table (None, Some bt, catches, expr), input)
   | '\x0B' -> parse_fail "misplaced END opcode"
   | '\x0C' ->
     let+ labelidx, input = read_indice input in
@@ -1057,7 +1082,7 @@ let version_check str =
     else parse_fail "unknown binary version"
 
 let check_section_id = function
-  | '\x00' .. '\x0C' -> Ok ()
+  | '\x00' .. '\x0D' -> Ok ()
   | c -> parse_fail "malformed section id %s" (Char.escaped c)
 
 let section_parse input ~expected_id default section_content_parse =
@@ -1211,6 +1236,7 @@ let read_import input =
     let+ (mut, val_type), input = read_global_type input in
     ((modul, name, Global (mut, val_type)), input)
   | '\x04' ->
+    let* input = check_zero_opcode ~msg:"read_import tag" input in
     let+ typeidx, input = read_U32 input in
     ((modul, name, Tag typeidx), input)
   | _c -> parse_fail "malformed import kind"
@@ -1481,6 +1507,13 @@ let sections_iterate (input : Input.t) =
   let* custom_sections', input = parse_many_custom_section input in
   let custom_sections = custom_sections @ custom_sections' in
 
+  let* tag_section, input =
+    section_parse input ~expected_id:'\x0D' [] (vector_no_id read_tag)
+  in
+
+  let* custom_sections', input = parse_many_custom_section input in
+  let custom_sections = custom_sections @ custom_sections' in
+
   (* Globals *)
   let* global_section, input =
     section_parse input ~expected_id:'\x06' []
@@ -1548,13 +1581,8 @@ let sections_iterate (input : Input.t) =
   let custom_sections = custom_sections @ custom_sections' in
 
   (* Data *)
-  let* data, input =
+  let+ data, input =
     section_parse input ~expected_id:'\x0B' [] (vector_no_id (read_data types))
-  in
-
-  (* Tag *)
-  let+ tag_section, input =
-    section_parse input ~expected_id:'\x0D' [] (vector_no_id read_tag)
   in
 
   (* Data *)
@@ -1708,7 +1736,7 @@ let sections_iterate (input : Input.t) =
       | '\x01' -> Stack.push export table_exports
       | '\x02' -> Stack.push export mem_exports
       | '\x03' -> Stack.push export global_exports
-      | '\x04' -> Stack.push export global_exports
+      | '\x04' -> Stack.push export tag_exports
       | _ -> Fmt.failwith "read_exportdesc error" )
     export_section;
   let stack_to_array s =

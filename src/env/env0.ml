@@ -353,6 +353,9 @@ let get_func ~env id =
   | Some v -> v
   | None -> assert false
 
+let get_tag ~env id =
+  match Allocator.find_opt id env.tags with Some v -> v | None -> assert false
+
 let get_types ~env = env.types
 
 let get_type_groups ~env = env.type_groups

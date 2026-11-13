@@ -4,4 +4,6 @@
 
 val check_result : expected:string -> got:'a Result.t -> unit Result.t
 
+val check_exception : got:'a Result.t -> unit Result.t
+
 val check_error : expected:string -> got:Result.err -> unit Result.t

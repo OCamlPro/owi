@@ -446,6 +446,13 @@ type instr =
   | Call of indice
   | Call_indirect of indice * block_type
   | Call_ref of indice
+  | Try_table of
+      string option * block_type option * catch list * expr Annotated.t
+  | Throw of indice
+
+and catch =
+  | Catch of indice * indice
+  | Catch_all of indice
 
 and expr = instr Annotated.t list
 

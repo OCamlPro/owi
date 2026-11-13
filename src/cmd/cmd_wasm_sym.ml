@@ -36,7 +36,10 @@ let run_file ~entry_point ~symbolic_parameters ~source_file =
       try
         let state = Abstract_interpreter_control_flow.modul ~env ~modul in
         state.invariant
-      with Abstract_interpreter_control_flow.RecursiveFunctionCall ->
+      with
+      | Abstract_interpreter_control_flow.RecursiveFunctionCall
+      | Abstract_interpreter_control_flow.Unsupported_instruction _
+      ->
         Abstract_invariant.empty ()
     else Ok (Abstract_invariant.empty ())
   in

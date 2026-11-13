@@ -74,7 +74,9 @@ and check_instr ({ raw; uuid; _ } : Binary.instr Annotated.t)
   | If_else (_str_opt, _bt, expr_then, expr_else) ->
     check_expr ~invariants ~env expr_then;
     check_expr ~invariants ~env expr_else
-  | Loop (_str_opt, _bt, expr) -> check_expr ~invariants ~env expr
+  | Loop (_str_opt, _bt, expr) | Try_table (_str_opt, _bt, _, expr) ->
+    check_expr ~invariants ~env expr
+  | Throw _ -> ()
   | Call idx ->
     let func = Env.Abstract.get_func ~env idx in
     begin match func with

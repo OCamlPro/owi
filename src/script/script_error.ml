@@ -42,6 +42,7 @@ let check_error ~expected ~got : unit Result.t =
            || String.equal s "malformed section id" ->
       String.equal expected "unexpected content after last section"
     | `Empty_identifier -> String.equal expected "unknown operator"
+    | `Type_mismatch _ -> String.starts_with ~prefix:"type mismatch:" expected
     | `Offset_out_of_range ->
       (* TODO: should be removed *)
       String.equal "alignment must not be larger than natural" expected
@@ -52,6 +53,14 @@ let check_error ~expected ~got : unit Result.t =
     Error (`Failed_with_but_expected (got, expected))
   end
   else Ok ()
+
+let check_exception ~got =
+  match got with
+  | Ok _ ->
+    Abstract_trace.record_wast_test_res
+      (Fail { expected = "uncaught exception"; got = "no exception" });
+    Error `Bad_result
+  | Error got -> check_error ~expected:"uncaught exception" ~got
 
 let check_result ~expected ~got =
   match got with

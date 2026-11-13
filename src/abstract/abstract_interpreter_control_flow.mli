@@ -4,6 +4,8 @@
 
 exception RecursiveFunctionCall
 
+exception Unsupported_instruction of string
+
 val eval_exprs :
      env:Env.Abstract.t
   -> modul:Env.Abstract.modul
