@@ -1656,6 +1656,9 @@ let tag_fields :=
   | ~ = tag_type; {
     [ Module.Field.Tag { id = None; typ = Bt_raw (None, tag_type) } ]
   }
+  | (modul_name, name) = inline_import; ~ = type_use; {
+     [ Import { modul_name; name; typ = Tag (None, Bt_ind type_use) }]
+  }
   | (modul_name, name) = inline_import; ~ = tag_type; {
      [ Import { modul_name; name; typ = Tag (None, Bt_raw (None, tag_type)) }]
   }
