@@ -289,8 +289,6 @@
   owi: [INFO] stack         : [ ref ... ; i32 {1} ]
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : call_ref 0
-  owi: [ERROR] hereo
-  owi: [ERROR] hereo
   owi: [INFO] calling func  : func incr
   owi: [INFO] stack         : [  ]
   owi: [INFO] locals        : [ (0 -> i32 {1}) ]
@@ -301,7 +299,6 @@
   owi: [INFO] stack         : [ i32 {1} ; i32 {1} ]
   owi: [INFO] locals        : [ (0 -> i32 {1}) ]
   owi: [INFO] running instr : i32.add
-  owi: [ERROR] hereo
   owi: [INFO] stack         : [ i32 {2} ]
   owi: [INFO] locals        : [  ]
   owi: [INFO] running instr : drop

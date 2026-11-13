@@ -387,13 +387,10 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
         None
       | Ref_value fun_id ->
         let lattice = Abstract_domain.Query.enum state.abs_state.ctx fun_id in
-        Log.err (fun m -> m "hereo");
         Abstract_domain.Query.Enum_Lattice.fold_on_cases lattice None
           (fun enum_case acc_state ->
           let func = Env.get_func ~env:state.env enum_case in
-          Log.err (fun m -> m "hereo");
           let next_state = eval_vfunc state func enum_case instr in
-          Log.err (fun m -> m "hereo");
           join_opt next_state acc_state )
     end
 
@@ -409,9 +406,13 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
       let fun_i = Abstract_i32.get_singleton_int state.abs_state.ctx fun_i in
       let fun_ref = Table.get t fun_i in
       begin match Ref.get_func fun_ref with
-      | Null | Type_mismatch ->
-        (* TODO: warn but continue *)
-        assert false
+      (* TODO: warn *)
+      | Null ->
+        Log.err (fun m -> m "Call indirect on null");
+        None
+      | Type_mismatch ->
+        Log.err (fun m -> m "Type mismatch on call indirect");
+        None
       | Ref_value fun_id ->
         let enum_query =
           Abstract_domain.Query.enum state.abs_state.ctx fun_id
@@ -432,14 +433,12 @@ module DenotFixpoint (S : module type of Abstract_interpreter_simple) = struct
           | Some _expected, (None, ft) -> Binary.func_type_eq ft typ_i
           | _, _ -> Binary.func_type_eq (snd func_type) typ_i
         in
-        if not type_matches then
-          (* TODO: warn *)
-          assert false
-        else eval_vfunc state func fun_id instr
+        if not type_matches then None else eval_vfunc state func fun_id instr
       end
-    | _ ->
+    | ht ->
       (* TODO: warn, type mismatch *)
-      assert false
+      Log.err (fun m -> m "Call indirect on %a" Binary.pp_heap_type ht);
+      None
 
   and eval_instr ({ abs_state; env } as state : State.t) :
     Binary.instr Annotated.t -> State.t option * JumpMap.t =
