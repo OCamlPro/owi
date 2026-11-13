@@ -2145,6 +2145,15 @@ let validate_type_defs (modul : Module.t) =
       | Def_array_t (_, st) -> validate_storage_type modul st )
     modul.types
 
+let validate_tags (modul : Module.t) =
+  array_iter
+    (fun (tag : (Tag.t, block_type) Origin.t) ->
+      let _, (_, rt) =
+        match tag with Local { typ; _ } -> typ | Imported { typ; _ } -> typ
+      in
+      if List.is_empty rt then Ok () else Error `Non_empty_tag_result_type )
+    modul.tag
+
 let modul (modul : Module.t) =
   Log.info (fun m -> m "typechecking ...");
   Log.bench_fn "typechecking time" @@ fun () ->
@@ -2155,6 +2164,7 @@ let modul (modul : Module.t) =
   let* () = array_iter (typecheck_data modul refs) modul.data in
   let* () = typecheck_start modul in
   let* () = validate_exports modul in
+  let* () = validate_tags modul in
   let* () = validate_tables modul refs in
   let* () = validate_mem modul in
   Array.iter

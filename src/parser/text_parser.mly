@@ -1670,7 +1670,11 @@ let tag_type :=
   | LPAR; PARAM; ~ = id; ~ = val_type; RPAR; (ins, out) = tag_type; {
     ((Some id, val_type) :: ins, out)
   }
-  | { [], [] }
+  | ~ = tag_results; { [], tag_results }
+
+let tag_results :=
+  | LPAR; RESULT; l = list(val_type); RPAR; r = tag_results; { l @ r }
+  | { [] }
 
 (* Modules *)
 
