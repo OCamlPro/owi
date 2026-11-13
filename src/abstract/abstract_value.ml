@@ -80,7 +80,7 @@ let size_of = function
 
 let to_boolean ctx x =
   let size = Size.b32 in
-  let zero = Abstract_domain.Binary_Forward.biconst ~size Z.zero ctx in
+  let zero = Abstract_domain.Binary_Forward.biconst ~size ~k:Z.zero ctx in
   Abstract_domain.Binary_Forward.beq ~size ctx (to_binary x) zero
 
 let top size ctx = of_binary size @@ Abstract_domain.binary_empty ~size ctx

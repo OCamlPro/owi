@@ -4,7 +4,7 @@
 
 type t = Abstract_domain.binary
 
-let size = Units.In_bits.of_int 32
+let size = Units.In_bits.of_int 64
 
 let unknown ctx = Abstract_domain.binary_unknown ~size ctx
 

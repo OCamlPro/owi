@@ -3,6 +3,9 @@
 (* Written by the Owi programmers *)
 
 module Stack = Abstract_stack
+module Env = Env.Abstract
+module Elem = Abstract_elem
+module Table = Abstract_table
 
 type t =
   | State of Abstract_interpreter_state.t
@@ -135,8 +138,7 @@ let eval_i32 env ({ stack; ctx; invariant; _ } as abs_state : Abstract_state.t)
     State { abs_state; env }
   | Store (_memid, _) | Store8 (_memid, _) | Store16 (_memid, _) ->
     (* TODO: handle this correctly *)
-    let _, stack = Stack.pop2_i32 stack in
-    let stack = Stack.push_i32 stack (Abstract_i32.unknown ctx) in
+    let (_n, _pos), stack = Stack.pop2_i32 stack in
     let abs_state = { abs_state with stack } in
     State { abs_state; env }
   | Load (_memid, _)
@@ -145,7 +147,7 @@ let eval_i32 env ({ stack; ctx; invariant; _ } as abs_state : Abstract_state.t)
   | Load16_s (_memid, _)
   | Load16_u (_memid, _) ->
     (* TODO: handle it correctly *)
-    let _, stack = Stack.pop_i32 stack in
+    let _pos, stack = Stack.pop_i32 stack in
     let stack = Stack.push_i32 stack (Abstract_i32.unknown ctx) in
     let abs_state = { abs_state with stack } in
     State { abs_state; env }
@@ -176,7 +178,9 @@ let eval_i32 env ({ stack; ctx; invariant; _ } as abs_state : Abstract_state.t)
     let abs_state = { abs_state with stack } in
     State { abs_state; env }
   | Wrap_i64 ->
-    let stack = Stack.apply_i32_i32 stack (Abstract_i32.wrap_i64 ctx) in
+    let b, stack = Stack.pop_i64 stack in
+    let b = Abstract_i64.to_binary b in
+    let stack = Stack.push_i32 stack (Abstract_i32.wrap_i64 ctx b) in
     let abs_state = { abs_state with stack } in
     State { abs_state; env }
   | Trunc_f_s nn | Trunc_f_u nn | Trunc_sat_f_s nn | Trunc_sat_f_u nn ->
@@ -340,8 +344,8 @@ let eval_i64 env ({ stack; ctx; invariant; _ } as abs_state : Abstract_state.t)
   | Store16 (_memid, _)
   | Store32 (_memid, _) ->
     (* TODO: handle this correctly *)
-    let (_n, _pos), stack = Stack.pop2_i64 stack in
-    let stack = Stack.push_i64 stack (Abstract_i64.unknown ctx) in
+    let _n, stack = Stack.pop_i64 stack in
+    let _pos, stack = Stack.pop_i32 stack in
     let abs_state = { abs_state with stack } in
     State { abs_state; env }
   | Load (_memid, _)
@@ -352,7 +356,7 @@ let eval_i64 env ({ stack; ctx; invariant; _ } as abs_state : Abstract_state.t)
   | Load32_s (_memid, _)
   | Load32_u (_memid, _) ->
     (* TODO: handle this correctly *)
-    let _pos, stack = Stack.pop_i64 stack in
+    let _pos, stack = Stack.pop_i32 stack in
     let stack = Stack.push_i64 stack (Abstract_i64.unknown ctx) in
     let abs_state = { abs_state with stack } in
     State { abs_state; env }
@@ -1931,11 +1935,11 @@ let eval_global env ({ stack; _ } as abs_state : Abstract_state.t) :
   Binary.global_instr -> _ = function
   | Set i ->
     let e, stack = Stack.pop stack in
-    let env = Env.Abstract.set_global ~env i e in
+    let env = Env.set_global ~env i e in
     let abs_state = { abs_state with stack } in
     State { env; abs_state }
   | Get i ->
-    let v = Env.Abstract.get_global ~env i in
+    let v = Env.get_global ~env i in
     let stack = Stack.push stack v in
     let abs_state = { abs_state with stack } in
     State { env; abs_state }
@@ -1984,22 +1988,29 @@ let eval_elem env (abs_state : Abstract_state.t) : Binary.elem_instr -> _ =
 (* TODO: handle this correctly *)
 let eval_ref env ({ stack; ctx; _ } as abs_state : Abstract_state.t) :
   Binary.ref_instr -> _ = function
-  | Null _ ->
-    let stack = Stack.push_ref stack Abstract_ref.NullRef in
+  | Null ht ->
+    let stack = Stack.push_ref stack (Abstract_ref.null ht) in
     let abs_state = { abs_state with stack } in
     State { abs_state; env }
   | Is_null ->
-    let _v, stack = Stack.pop_ref stack in
-    let stack = Stack.push_bool stack ctx (Abstract_boolean.unknown ctx) in
+    let ref, stack = Stack.pop_as_ref stack in
+    let bool = Abstract_ref.is_null ref in
+    let stack = Stack.push_bool stack ctx (Abstract_boolean.of_bool ctx bool) in
     let abs_state = { abs_state with stack } in
     State { abs_state; env }
   | As_non_null ->
-    let _v, stack = Stack.pop_ref stack in
-    let stack = Stack.push_ref stack Abstract_ref.NullRef in
-    let abs_state = { abs_state with stack } in
-    State { abs_state; env }
-  | Func _ ->
-    let stack = Stack.push_ref stack Abstract_ref.NullRef in
+    let ref, stack = Stack.pop_as_ref stack in
+    if Abstract_ref.is_null ref then (
+      (* TODO: alarm *)
+      Log.err (fun m -> m "as_non_null on a null value");
+      assert false )
+    else
+      let stack = Stack.push_ref stack ref in
+      let abs_state = { abs_state with stack } in
+      State { abs_state; env }
+  | Func i ->
+    let enum = Abstract_domain.Enum_Forward.enum_const ~case:i ctx in
+    let stack = Stack.push_ref stack (Abstract_ref.func enum) in
     let abs_state = { abs_state with stack } in
     State { abs_state; env }
   | Eq | Test _ | Cast _ -> (* TODO *) assert false
@@ -2007,27 +2018,40 @@ let eval_ref env ({ stack; ctx; _ } as abs_state : Abstract_state.t) :
 (* TODO: handle this correctly *)
 let eval_table env ({ stack; ctx; _ } as abs_state : Abstract_state.t) :
   Binary.table_instr -> _ = function
-  | Get _ ->
-    let _v, stack = Stack.pop_i32 stack in
-    let stack = Stack.push_ref stack Abstract_ref.NullRef in
-    let abs_state = { abs_state with stack } in
-    State { abs_state; env }
-  | Set _ ->
-    let _v, stack = Stack.pop_ref stack in
-    let _v, stack = Stack.pop_i32 stack in
-    let abs_state = { abs_state with stack } in
-    State { abs_state; env }
-  | Size _ ->
+  | Get tbl_i ->
+    let i, stack = Stack.pop_i32 stack in
+    let i = Abstract_i32.get_singleton_int ctx i in
+    Log.err (fun m -> m "i = %i" i);
+    let tbl = Env.get_table ~env tbl_i in
+    let size = Abstract_table.size tbl in
+    if i < 0 || i >= size then assert false
+    else
+      let ref = Abstract_table.get tbl i in
+      let stack = Stack.push_ref stack ref in
+      let abs_state = { abs_state with stack } in
+      State { abs_state; env }
+  | Set tbl_i ->
+    let v, stack = Stack.pop_as_ref stack in
+    let i, stack = Stack.pop_i32 stack in
+    let i = Abstract_i32.get_singleton_int ctx i in
+    let t = Env.get_table ~env tbl_i in
+    if i < 0 || i >= Abstract_table.size t then assert false
+    else
+      let tbl = Abstract_table.set t i v in
+      let env = Env.set_table ~env tbl_i tbl in
+      let abs_state = { abs_state with stack } in
+      State { abs_state; env }
+  | Size _tbl_i ->
     let stack = Stack.push_i32 stack (Abstract_i32.unknown ctx) in
     let abs_state = { abs_state with stack } in
     State { abs_state; env }
-  | Grow _ ->
+  | Grow _tbl_i ->
     let _v, stack = Stack.pop_i32 stack in
     let _v, stack = Stack.pop_ref stack in
     let stack = Stack.push_i32 stack (Abstract_i32.unknown ctx) in
     let abs_state = { abs_state with stack } in
     State { abs_state; env }
-  | Fill _ ->
+  | Fill _tbl_i ->
     let _v, stack = Stack.pop_i32 stack in
     let _v, stack = Stack.pop_ref stack in
     let _v, stack = Stack.pop_i32 stack in
@@ -2039,10 +2063,27 @@ let eval_table env ({ stack; ctx; _ } as abs_state : Abstract_state.t) :
     let _v, stack = Stack.pop_i32 stack in
     let abs_state = { abs_state with stack } in
     State { abs_state; env }
-  | Init _ ->
-    let _v, stack = Stack.pop_i32 stack in
-    let _v, stack = Stack.pop_i32 stack in
-    let _v, stack = Stack.pop_i32 stack in
+  | Init (tbl_i, elem_i) ->
+    let t = Env.get_table ~env tbl_i in
+    let elem = Env.get_elem ~env elem_i in
+    let len, stack = Stack.pop_i32 stack in
+    let pos_x, stack = Stack.pop_i32 stack in
+    let pos, stack = Stack.pop_i32 stack in
+
+    let len = Abstract_i32.get_singleton_int ctx len in
+    let pos_x = Abstract_i32.get_singleton_int ctx pos_x in
+    let pos = Abstract_i32.get_singleton_int ctx pos in
+
+    (* stuff *)
+    let rec loop i t =
+      if i = len then t
+      else
+        let elt = Elem.get elem (pos_x + i) in
+        let t = Table.set t (pos + i) elt in
+        loop (i + 1) t
+    in
+    let t = loop 0 t in
+    let env = Env.set_table ~env tbl_i t in
     let abs_state = { abs_state with stack } in
     State { abs_state; env }
 
@@ -2053,11 +2094,9 @@ let eval_instr
     -> Abstract_stack.Value.t
     -> Abstract_interpreter_state.t
     -> Abstract_interpreter_state.t
-    -> ( Abstract_value.t
-       , Abstract_domain.Context.empty_tuple )
-       Abstract_domain.Context.result
+    -> Abstract_value.t Abstract_domain.Context.result
     -> ('a -> 'b -> 'a)
-    -> (Abstract_value.t, 'c) Abstract_domain.Context.result )
+    -> Abstract_value.t Abstract_domain.Context.result )
   ({ abs_state; env } as state : Abstract_interpreter_state.t) ~uuid :
   Binary.simple_instruction -> t = function
   | I32 instr -> eval_i32 env abs_state uuid instr
@@ -2092,7 +2131,7 @@ let eval_instr
       let init_res =
         Abstract_domain.Context.Result
           ( true
-          , Abstract_domain.Context.empty_tuple ()
+          , Abstract_domain.Context.Phi_args.empty ()
           , fun _ctx out -> (v1, out) )
       in
       let (Abstract_domain.Context.Result (_inc, intup, cont)) =

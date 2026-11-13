@@ -1,117 +1,214 @@
-$ owi wasm script abstract --no-exhaustion reference/address.wast
-$ owi wasm script abstract --no-exhaustion reference/align.wast
-$ owi wasm script abstract --no-exhaustion reference/binary-leb128.wast
+  $ owi wasm script abstract --no-exhaustion reference/address.wast
+  owi: [WARNING] (assert_trap (invoke "32_good5" (i32.const 65508)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "8u_good3" (i32.const -1)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "8s_good3" (i32.const -1)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "16u_good3" (i32.const -1)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "16s_good3" (i32.const -1)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "32_good3" (i32.const -1)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "32_good3" (i32.const -1)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "8u_bad" (i32.const 0)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "8s_bad" (i32.const 0)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "16u_bad" (i32.const 0)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "16s_bad" (i32.const 0)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "32_bad" (i32.const 0)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "8u_bad" (i32.const 1)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "8s_bad" (i32.const 1)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "16u_bad" (i32.const 1)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "16s_bad" (i32.const 1)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "32_bad" (i32.const 1)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "64_good5" (i32.const 65504)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "8u_good3" (i32.const -1)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "8s_good3" (i32.const -1)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "16u_good3" (i32.const -1)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "16s_good3" (i32.const -1)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "32u_good3" (i32.const -1)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "32s_good3" (i32.const -1)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "64_good3" (i32.const -1)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "8u_bad" (i32.const 0)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "8s_bad" (i32.const 0)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "16u_bad" (i32.const 0)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "16s_bad" (i32.const 0)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "32u_bad" (i32.const 0)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "32s_bad" (i32.const 0)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "64_bad" (i32.const 0)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "8u_bad" (i32.const 1)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "8s_bad" (i32.const 1)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "16u_bad" (i32.const 1)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "16s_bad" (i32.const 1)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "32u_bad" (i32.const 0)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "32s_bad" (i32.const 0)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "64_bad" (i32.const 1)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "32_good5" (i32.const 65525)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "32_good3" (i32.const -1)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "32_good3" (i32.const -1)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "32_bad" (i32.const 0)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "32_bad" (i32.const 1)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "64_good5" (i32.const 65511)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "64_good3" (i32.const -1)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "64_good3" (i32.const -1)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "64_bad" (i32.const 0)) "out of bounds memory access") is not handled
+  owi: [WARNING] (assert_trap (invoke "64_bad" (i32.const 1)) "out of bounds memory access") is not handled
+  $ owi wasm script abstract --no-exhaustion reference/align.wast
+  owi: [WARNING] (assert_trap (invoke "store" (i32.const 65532) (i64.const -1)) "out of bounds memory access") is not handled
+  $ owi wasm script abstract --no-exhaustion reference/binary-leb128.wast
   $ owi wasm script abstract --no-exhaustion reference/block.wast
-  owi: [ERROR] File "src/abstract/abstract_interpreter_control_flow.ml", line 610, characters 18-24: Assertion failed
-  Exception: File "src/abstract/abstract_interpreter_control_flow.ml", line 610, characters 18-24: Assertion failed
-  Raised at Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 610, characters 18-30
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 264, characters 32-54
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 395, characters 27-47
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 264, characters 32-54
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_func in file "src/abstract/abstract_interpreter_control_flow.ml", line 320, characters 27-55
-  Called from Owi__Abstract_interpreter_control_flow.exec_vfunc_from_outside in file "src/abstract/abstract_interpreter_control_flow.ml", line 643, characters 12-62
-  Called from Owi__Script_abstract.do_action in file "src/script/script_abstract.ml", line 23, characters 8-52
-  [26]
-  $ owi wasm script abstract --no-exhaustion reference/br_if.wast
-  $ owi wasm script abstract --no-exhaustion reference/br_table.wast
+  owi: [ERROR] Call indirect on null
   owi: [ERROR] failed
   [26]
+  $ owi wasm script abstract --no-exhaustion reference/br_if.wast
+$ owi wasm script abstract --no-exhaustion reference/br_table.wast
   $ owi wasm script abstract --no-exhaustion reference/br.wast
 $ owi wasm script abstract --no-exhaustion reference/bulk.wast
 $ owi wasm script abstract --no-exhaustion reference/call_indirect.wast
   $ owi wasm script abstract --no-exhaustion reference/call.wast
   owi: [ERROR] Owi.Abstract_interpreter_control_flow.RecursiveFunctionCall
   Exception: Owi.Abstract_interpreter_control_flow.RecursiveFunctionCall
-  Raised at Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_func in file "src/abstract/abstract_interpreter_control_flow.ml", line 284, characters 53-80
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 379, characters 18-53
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 264, characters 32-54
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 395, characters 27-47
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", lines 437-439, characters 10-66
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 264, characters 32-54
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_func in file "src/abstract/abstract_interpreter_control_flow.ml", line 320, characters 27-55
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 379, characters 18-53
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 264, characters 32-54
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 395, characters 27-47
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", lines 437-439, characters 10-66
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 264, characters 32-54
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_func in file "src/abstract/abstract_interpreter_control_flow.ml", line 320, characters 27-55
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 379, characters 18-53
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 264, characters 32-54
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 395, characters 27-47
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", lines 437-439, characters 10-66
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 264, characters 32-54
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_func in file "src/abstract/abstract_interpreter_control_flow.ml", line 320, characters 27-55
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 379, characters 18-53
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 264, characters 32-54
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 395, characters 27-47
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", lines 437-439, characters 10-66
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 264, characters 32-54
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_func in file "src/abstract/abstract_interpreter_control_flow.ml", line 320, characters 27-55
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 379, characters 18-53
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 264, characters 32-54
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 395, characters 27-47
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", lines 437-439, characters 10-66
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 264, characters 32-54
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_func in file "src/abstract/abstract_interpreter_control_flow.ml", line 320, characters 27-55
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 379, characters 18-53
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 264, characters 32-54
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 395, characters 27-47
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", lines 437-439, characters 10-66
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 264, characters 32-54
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_func in file "src/abstract/abstract_interpreter_control_flow.ml", line 320, characters 27-55
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 379, characters 18-53
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 264, characters 32-54
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 395, characters 27-47
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", lines 437-439, characters 10-66
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 264, characters 32-54
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_func in file "src/abstract/abstract_interpreter_control_flow.ml", line 320, characters 27-55
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 379, characters 18-53
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 264, characters 32-54
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 395, characters 27-47
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", lines 437-439, characters 10-66
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 264, characters 32-54
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_func in file "src/abstract/abstract_interpreter_control_flow.ml", line 320, characters 27-55
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 379, characters 18-53
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 264, characters 32-54
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 395, characters 27-47
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", lines 437-439, characters 10-66
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 264, characters 32-54
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_func in file "src/abstract/abstract_interpreter_control_flow.ml", line 320, characters 27-55
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 379, characters 18-53
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 264, characters 32-54
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 395, characters 27-47
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", lines 437-439, characters 10-66
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 264, characters 32-54
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_func in file "src/abstract/abstract_interpreter_control_flow.ml", line 320, characters 27-55
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 379, characters 18-53
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 264, characters 32-54
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 395, characters 27-47
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", lines 437-439, characters 10-66
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 264, characters 32-54
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_func in file "src/abstract/abstract_interpreter_control_flow.ml", line 320, characters 27-55
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 379, characters 18-53
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 264, characters 32-54
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 395, characters 27-47
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", lines 437-439, characters 10-66
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 264, characters 32-54
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_func in file "src/abstract/abstract_interpreter_control_flow.ml", line 320, characters 27-55
-  Called from Owi__Abstract_interpreter_control_flow.exec_vfunc_from_outside in file "src/abstract/abstract_interpreter_control_flow.ml", line 643, characters 12-62
+  Raised at Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_func in file "src/abstract/abstract_interpreter_control_flow.ml", line 306, characters 53-80
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 460, characters 22-58
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 266, characters 32-54
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 464, characters 27-47
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", lines 506-508, characters 10-66
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 266, characters 32-54
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_func in file "src/abstract/abstract_interpreter_control_flow.ml", line 340, characters 27-55
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 460, characters 22-58
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 266, characters 32-54
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 464, characters 27-47
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", lines 506-508, characters 10-66
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 266, characters 32-54
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_func in file "src/abstract/abstract_interpreter_control_flow.ml", line 340, characters 27-55
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 460, characters 22-58
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 266, characters 32-54
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 464, characters 27-47
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", lines 506-508, characters 10-66
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 266, characters 32-54
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_func in file "src/abstract/abstract_interpreter_control_flow.ml", line 340, characters 27-55
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 460, characters 22-58
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 266, characters 32-54
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 464, characters 27-47
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", lines 506-508, characters 10-66
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 266, characters 32-54
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_func in file "src/abstract/abstract_interpreter_control_flow.ml", line 340, characters 27-55
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 460, characters 22-58
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 266, characters 32-54
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 464, characters 27-47
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", lines 506-508, characters 10-66
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 266, characters 32-54
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_func in file "src/abstract/abstract_interpreter_control_flow.ml", line 340, characters 27-55
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 460, characters 22-58
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 266, characters 32-54
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 464, characters 27-47
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", lines 506-508, characters 10-66
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 266, characters 32-54
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_func in file "src/abstract/abstract_interpreter_control_flow.ml", line 340, characters 27-55
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 460, characters 22-58
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 266, characters 32-54
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 464, characters 27-47
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", lines 506-508, characters 10-66
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 266, characters 32-54
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_func in file "src/abstract/abstract_interpreter_control_flow.ml", line 340, characters 27-55
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 460, characters 22-58
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 266, characters 32-54
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 464, characters 27-47
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", lines 506-508, characters 10-66
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 266, characters 32-54
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_func in file "src/abstract/abstract_interpreter_control_flow.ml", line 340, characters 27-55
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 460, characters 22-58
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 266, characters 32-54
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 464, characters 27-47
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", lines 506-508, characters 10-66
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 266, characters 32-54
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_func in file "src/abstract/abstract_interpreter_control_flow.ml", line 340, characters 27-55
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 460, characters 22-58
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 266, characters 32-54
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 464, characters 27-47
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", lines 506-508, characters 10-66
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 266, characters 32-54
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_func in file "src/abstract/abstract_interpreter_control_flow.ml", line 340, characters 27-55
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 460, characters 22-58
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 266, characters 32-54
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 464, characters 27-47
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", lines 506-508, characters 10-66
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 266, characters 32-54
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_func in file "src/abstract/abstract_interpreter_control_flow.ml", line 340, characters 27-55
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 460, characters 22-58
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 266, characters 32-54
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 464, characters 27-47
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", lines 506-508, characters 10-66
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 266, characters 32-54
+  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_func in file "src/abstract/abstract_interpreter_control_flow.ml", line 340, characters 27-55
+  Called from Owi__Abstract_interpreter_control_flow.exec_vfunc_from_outside in file "src/abstract/abstract_interpreter_control_flow.ml", line 705, characters 12-62
   Called from Owi__Script_abstract.do_action in file "src/script/script_abstract.ml", line 23, characters 8-52
   [26]
   $ owi wasm script abstract --no-exhaustion reference/comments.wast
 $ owi wasm script abstract --no-exhaustion reference/const.wast
   $ owi wasm script abstract --no-exhaustion reference/conversions.wast
-  owi: [ERROR] File "src/abstract/abstract_stack.ml", line 58, characters 46-52: Assertion failed
-  Exception: File "src/abstract/abstract_stack.ml", line 58, characters 46-52: Assertion failed
-  Raised at Owi__Abstract_stack.pop_i32 in file "src/abstract/abstract_stack.ml", line 58, characters 46-58
-  Called from Owi__Abstract_stack.apply_i32_i32 in file "src/abstract/abstract_stack.ml", line 138, characters 15-24
-  Called from Owi__Abstract_interpreter_simple.eval_i32 in file "src/abstract/abstract_interpreter_simple.ml", line 179, characters 16-69
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 597, characters 18-58
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 264, characters 32-54
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_func in file "src/abstract/abstract_interpreter_control_flow.ml", line 320, characters 27-55
-  Called from Owi__Abstract_interpreter_control_flow.exec_vfunc_from_outside in file "src/abstract/abstract_interpreter_control_flow.ml", line 643, characters 12-62
-  Called from Owi__Script_abstract.do_action in file "src/script/script_abstract.ml", line 23, characters 8-52
-  [26]
+  owi: [WARNING] (assert_trap (invoke "i32.trunc_f32_s" (f32.const 2_147_483_648)) "integer overflow") is not handled
+  owi: [WARNING] (assert_trap (invoke "i32.trunc_f32_s" (f32.const -2_147_483_904)) "integer overflow") is not handled
+  owi: [WARNING] (assert_trap (invoke "i32.trunc_f32_s" (f32.const inf)) "integer overflow") is not handled
+  owi: [WARNING] (assert_trap (invoke "i32.trunc_f32_s" (f32.const -inf)) "integer overflow") is not handled
+  owi: [WARNING] (assert_trap (invoke "i32.trunc_f32_s" (f32.const nan:0x40_0000)) "invalid conversion to integer") is not handled
+  owi: [WARNING] (assert_trap (invoke "i32.trunc_f32_s" (f32.const nan:0x20_0000)) "invalid conversion to integer") is not handled
+  owi: [WARNING] (assert_trap (invoke "i32.trunc_f32_s" (f32.const -nan:0x40_0000)) "invalid conversion to integer") is not handled
+  owi: [WARNING] (assert_trap (invoke "i32.trunc_f32_s" (f32.const -nan:0x20_0000)) "invalid conversion to integer") is not handled
+  owi: [WARNING] (assert_trap (invoke "i32.trunc_f32_u" (f32.const 4_294_967_296)) "integer overflow") is not handled
+  owi: [WARNING] (assert_trap (invoke "i32.trunc_f32_u" (f32.const -1)) "integer overflow") is not handled
+  owi: [WARNING] (assert_trap (invoke "i32.trunc_f32_u" (f32.const inf)) "integer overflow") is not handled
+  owi: [WARNING] (assert_trap (invoke "i32.trunc_f32_u" (f32.const -inf)) "integer overflow") is not handled
+  owi: [WARNING] (assert_trap (invoke "i32.trunc_f32_u" (f32.const nan:0x40_0000)) "invalid conversion to integer") is not handled
+  owi: [WARNING] (assert_trap (invoke "i32.trunc_f32_u" (f32.const nan:0x20_0000)) "invalid conversion to integer") is not handled
+  owi: [WARNING] (assert_trap (invoke "i32.trunc_f32_u" (f32.const -nan:0x40_0000)) "invalid conversion to integer") is not handled
+  owi: [WARNING] (assert_trap (invoke "i32.trunc_f32_u" (f32.const -nan:0x20_0000)) "invalid conversion to integer") is not handled
+  owi: [WARNING] (assert_trap (invoke "i32.trunc_f64_s" (f64.const 2_147_483_648)) "integer overflow") is not handled
+  owi: [WARNING] (assert_trap (invoke "i32.trunc_f64_s" (f64.const -2_147_483_649)) "integer overflow") is not handled
+  owi: [WARNING] (assert_trap (invoke "i32.trunc_f64_s" (f64.const inf)) "integer overflow") is not handled
+  owi: [WARNING] (assert_trap (invoke "i32.trunc_f64_s" (f64.const -inf)) "integer overflow") is not handled
+  owi: [WARNING] (assert_trap (invoke "i32.trunc_f64_s" (f64.const nan:0x8000000000000)) "invalid conversion to integer") is not handled
+  owi: [WARNING] (assert_trap (invoke "i32.trunc_f64_s" (f64.const nan:0x4000000000000)) "invalid conversion to integer") is not handled
+  owi: [WARNING] (assert_trap (invoke "i32.trunc_f64_s" (f64.const -nan:0x8000000000000)) "invalid conversion to integer") is not handled
+  owi: [WARNING] (assert_trap (invoke "i32.trunc_f64_s" (f64.const -nan:0x4000000000000)) "invalid conversion to integer") is not handled
+  owi: [WARNING] (assert_trap (invoke "i32.trunc_f64_u" (f64.const 4_294_967_296)) "integer overflow") is not handled
+  owi: [WARNING] (assert_trap (invoke "i32.trunc_f64_u" (f64.const -1)) "integer overflow") is not handled
+  owi: [WARNING] (assert_trap (invoke "i32.trunc_f64_u" (f64.const 10_000_000_000_000_000)) "integer overflow") is not handled
+  owi: [WARNING] (assert_trap (invoke "i32.trunc_f64_u" (f64.const 1e+30)) "integer overflow") is not handled
+  owi: [WARNING] (assert_trap (invoke "i32.trunc_f64_u" (f64.const 9.223_372_036_854_775_8e+18)) "integer overflow") is not handled
+  owi: [WARNING] (assert_trap (invoke "i32.trunc_f64_u" (f64.const inf)) "integer overflow") is not handled
+  owi: [WARNING] (assert_trap (invoke "i32.trunc_f64_u" (f64.const -inf)) "integer overflow") is not handled
+  owi: [WARNING] (assert_trap (invoke "i32.trunc_f64_u" (f64.const nan:0x8000000000000)) "invalid conversion to integer") is not handled
+  owi: [WARNING] (assert_trap (invoke "i32.trunc_f64_u" (f64.const nan:0x4000000000000)) "invalid conversion to integer") is not handled
+  owi: [WARNING] (assert_trap (invoke "i32.trunc_f64_u" (f64.const -nan:0x8000000000000)) "invalid conversion to integer") is not handled
+  owi: [WARNING] (assert_trap (invoke "i32.trunc_f64_u" (f64.const -nan:0x4000000000000)) "invalid conversion to integer") is not handled
+  owi: [WARNING] (assert_trap (invoke "i64.trunc_f32_s" (f32.const 9.223_372_036_854_775_8e+18)) "integer overflow") is not handled
+  owi: [WARNING] (assert_trap (invoke "i64.trunc_f32_s" (f32.const -9.223_373_136_366_403_6e+18)) "integer overflow") is not handled
+  owi: [WARNING] (assert_trap (invoke "i64.trunc_f32_s" (f32.const inf)) "integer overflow") is not handled
+  owi: [WARNING] (assert_trap (invoke "i64.trunc_f32_s" (f32.const -inf)) "integer overflow") is not handled
+  owi: [WARNING] (assert_trap (invoke "i64.trunc_f32_s" (f32.const nan:0x40_0000)) "invalid conversion to integer") is not handled
+  owi: [WARNING] (assert_trap (invoke "i64.trunc_f32_s" (f32.const nan:0x20_0000)) "invalid conversion to integer") is not handled
+  owi: [WARNING] (assert_trap (invoke "i64.trunc_f32_s" (f32.const -nan:0x40_0000)) "invalid conversion to integer") is not handled
+  owi: [WARNING] (assert_trap (invoke "i64.trunc_f32_s" (f32.const -nan:0x20_0000)) "invalid conversion to integer") is not handled
+  owi: [WARNING] (assert_trap (invoke "i64.trunc_f32_u" (f32.const 1.844_674_407_370_955_2e+19)) "integer overflow") is not handled
+  owi: [WARNING] (assert_trap (invoke "i64.trunc_f32_u" (f32.const -1)) "integer overflow") is not handled
+  owi: [WARNING] (assert_trap (invoke "i64.trunc_f32_u" (f32.const inf)) "integer overflow") is not handled
+  owi: [WARNING] (assert_trap (invoke "i64.trunc_f32_u" (f32.const -inf)) "integer overflow") is not handled
+  owi: [WARNING] (assert_trap (invoke "i64.trunc_f32_u" (f32.const nan:0x40_0000)) "invalid conversion to integer") is not handled
+  owi: [WARNING] (assert_trap (invoke "i64.trunc_f32_u" (f32.const nan:0x20_0000)) "invalid conversion to integer") is not handled
+  owi: [WARNING] (assert_trap (invoke "i64.trunc_f32_u" (f32.const -nan:0x40_0000)) "invalid conversion to integer") is not handled
+  owi: [WARNING] (assert_trap (invoke "i64.trunc_f32_u" (f32.const -nan:0x20_0000)) "invalid conversion to integer") is not handled
+  owi: [WARNING] (assert_trap (invoke "i64.trunc_f64_s" (f64.const 9.223_372_036_854_775_8e+18)) "integer overflow") is not handled
+  owi: [WARNING] (assert_trap (invoke "i64.trunc_f64_s" (f64.const -9.223_372_036_854_777_9e+18)) "integer overflow") is not handled
+  owi: [WARNING] (assert_trap (invoke "i64.trunc_f64_s" (f64.const inf)) "integer overflow") is not handled
+  owi: [WARNING] (assert_trap (invoke "i64.trunc_f64_s" (f64.const -inf)) "integer overflow") is not handled
+  owi: [WARNING] (assert_trap (invoke "i64.trunc_f64_s" (f64.const nan:0x8000000000000)) "invalid conversion to integer") is not handled
+  owi: [WARNING] (assert_trap (invoke "i64.trunc_f64_s" (f64.const nan:0x4000000000000)) "invalid conversion to integer") is not handled
+  owi: [WARNING] (assert_trap (invoke "i64.trunc_f64_s" (f64.const -nan:0x8000000000000)) "invalid conversion to integer") is not handled
+  owi: [WARNING] (assert_trap (invoke "i64.trunc_f64_s" (f64.const -nan:0x4000000000000)) "invalid conversion to integer") is not handled
+  owi: [WARNING] (assert_trap (invoke "i64.trunc_f64_u" (f64.const 1.844_674_407_370_955_2e+19)) "integer overflow") is not handled
+  owi: [WARNING] (assert_trap (invoke "i64.trunc_f64_u" (f64.const -1)) "integer overflow") is not handled
+  owi: [WARNING] (assert_trap (invoke "i64.trunc_f64_u" (f64.const inf)) "integer overflow") is not handled
+  owi: [WARNING] (assert_trap (invoke "i64.trunc_f64_u" (f64.const -inf)) "integer overflow") is not handled
+  owi: [WARNING] (assert_trap (invoke "i64.trunc_f64_u" (f64.const nan:0x8000000000000)) "invalid conversion to integer") is not handled
+  owi: [WARNING] (assert_trap (invoke "i64.trunc_f64_u" (f64.const nan:0x4000000000000)) "invalid conversion to integer") is not handled
+  owi: [WARNING] (assert_trap (invoke "i64.trunc_f64_u" (f64.const -nan:0x8000000000000)) "invalid conversion to integer") is not handled
+  owi: [WARNING] (assert_trap (invoke "i64.trunc_f64_u" (f64.const -nan:0x4000000000000)) "invalid conversion to integer") is not handled
 $ owi wasm script abstract --no-exhaustion reference/custom.wast
 $ owi wasm script abstract --no-exhaustion reference/elem.wast
 $ owi wasm script abstract --no-exhaustion reference/endianness.wast
@@ -130,8 +227,8 @@ $ owi wasm script abstract --no-exhaustion reference/float_misc.wast
 $ owi wasm script abstract --no-exhaustion reference/forward.wast
 $ owi wasm script abstract --no-exhaustion reference/func_ptrs.wast
   $ owi wasm script abstract --no-exhaustion reference/func.wast
-  owi: [ERROR] failed
-  [26]
+  owi: [ERROR] expected unknown type but got (unexpected token "$f" in line 1, character 6-8)
+  [55]
   $ owi wasm script abstract --no-exhaustion reference/global.wast
   owi: [ERROR] got:      [ref ...] expected: (ref.null extern)
   owi: [ERROR] bad result
@@ -159,29 +256,26 @@ $ owi wasm script abstract --no-exhaustion reference/func_ptrs.wast
   owi: [WARNING] (assert_trap (invoke "rem_u" (i64.const 1) (i64.const 0)) "integer divide by zero") is not handled
   owi: [WARNING] (assert_trap (invoke "rem_u" (i64.const 0) (i64.const 0)) "integer divide by zero") is not handled
   $ owi wasm script abstract --no-exhaustion reference/if.wast
-  owi: [ERROR] File "src/abstract/abstract_interpreter_control_flow.ml", line 610, characters 18-24: Assertion failed
-  Exception: File "src/abstract/abstract_interpreter_control_flow.ml", line 610, characters 18-24: Assertion failed
-  Raised at Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 610, characters 18-30
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 264, characters 32-54
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 395, characters 27-47
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 264, characters 32-54
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_func in file "src/abstract/abstract_interpreter_control_flow.ml", line 320, characters 27-55
-  Called from Owi__Abstract_interpreter_control_flow.exec_vfunc_from_outside in file "src/abstract/abstract_interpreter_control_flow.ml", line 643, characters 12-62
-  Called from Owi__Script_abstract.do_action in file "src/script/script_abstract.ml", line 23, characters 8-52
+  owi: [ERROR] Call indirect on null
+  owi: [ERROR] failed
   [26]
   $ owi wasm script abstract --no-exhaustion reference/inline-module.wast
   $ owi wasm script abstract --no-exhaustion reference/int_exprs.wast
-  owi: [ERROR] File "src/abstract/abstract_stack.ml", line 58, characters 46-52: Assertion failed
-  Exception: File "src/abstract/abstract_stack.ml", line 58, characters 46-52: Assertion failed
-  Raised at Owi__Abstract_stack.pop_i32 in file "src/abstract/abstract_stack.ml", line 58, characters 46-58
-  Called from Owi__Abstract_stack.apply_i32_i32 in file "src/abstract/abstract_stack.ml", line 138, characters 15-24
-  Called from Owi__Abstract_interpreter_simple.eval_i32 in file "src/abstract/abstract_interpreter_simple.ml", line 179, characters 16-69
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 597, characters 18-58
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 264, characters 32-54
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_func in file "src/abstract/abstract_interpreter_control_flow.ml", line 320, characters 27-55
-  Called from Owi__Abstract_interpreter_control_flow.exec_vfunc_from_outside in file "src/abstract/abstract_interpreter_control_flow.ml", line 643, characters 12-62
-  Called from Owi__Script_abstract.do_action in file "src/script/script_abstract.ml", line 23, characters 8-52
-  [26]
+  [Single_value_abstraction.Noop] Warning: No backpropagation for 'bshl'owi: [WARNING] (assert_trap (invoke "i32.no_fold_div_s_self" (i32.const 0)) "integer divide by zero") is not handled
+  owi: [WARNING] (assert_trap (invoke "i32.no_fold_div_u_self" (i32.const 0)) "integer divide by zero") is not handled
+  owi: [WARNING] (assert_trap (invoke "i64.no_fold_div_s_self" (i64.const 0)) "integer divide by zero") is not handled
+  owi: [WARNING] (assert_trap (invoke "i64.no_fold_div_u_self" (i64.const 0)) "integer divide by zero") is not handled
+  owi: [WARNING] (assert_trap (invoke "i32.no_fold_rem_s_self" (i32.const 0)) "integer divide by zero") is not handled
+  owi: [WARNING] (assert_trap (invoke "i32.no_fold_rem_u_self" (i32.const 0)) "integer divide by zero") is not handled
+  owi: [WARNING] (assert_trap (invoke "i64.no_fold_rem_s_self" (i64.const 0)) "integer divide by zero") is not handled
+  owi: [WARNING] (assert_trap (invoke "i64.no_fold_rem_u_self" (i64.const 0)) "integer divide by zero") is not handled
+  owi: [WARNING] (assert_trap (invoke "i32.div_s_0" (i32.const 71)) "integer divide by zero") is not handled
+  owi: [WARNING] (assert_trap (invoke "i32.div_u_0" (i32.const 71)) "integer divide by zero") is not handled
+  owi: [WARNING] (assert_trap (invoke "i64.div_s_0" (i64.const 71)) "integer divide by zero") is not handled
+  owi: [WARNING] (assert_trap (invoke "i64.div_u_0" (i64.const 71)) "integer divide by zero") is not handled
+  owi: [WARNING] (assert_trap (invoke "i32.no_fold_div_neg1" (i32.const -2147483648)) "integer overflow") is not handled
+  owi: [WARNING] (assert_trap (invoke "i64.no_fold_div_neg1" (i64.const -9223372036854775808)) "integer overflow") is not handled
+  
   $ owi wasm script abstract --no-exhaustion reference/int_literals.wast
   owi: [ERROR] expected unknown operator but got (unexpected token "i32" in line 1, character 8-11)
   [55]
@@ -215,20 +309,12 @@ $ owi wasm script abstract --no-exhaustion reference/left-to-right.wast
   $ owi wasm script abstract --no-exhaustion reference/local_get.wast
   $ owi wasm script abstract --no-exhaustion reference/local_set.wast
   $ owi wasm script abstract --no-exhaustion reference/local_tee.wast
+  owi: [ERROR] Call indirect on null
   owi: [ERROR] failed
   [26]
   $ owi wasm script abstract --no-exhaustion reference/loop.wast
-  owi: [ERROR] Failure("join on stacks of different sizes")
-  Exception: Failure("join on stacks of different sizes")
-  Raised at Stdlib.failwith in file "stdlib.ml", line 29, characters 17-33
-  Called from Owi__Abstract_interpreter_control_flow.serialize.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", lines 110-112, characters 4-58
-  Called from Owi__Abstract_interpreter_control_flow.join in file "src/abstract/abstract_interpreter_control_flow.ml", line 129, characters 4-43
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun).fixpoint in file "src/abstract/abstract_interpreter_control_flow.ml", line 498, characters 31-64
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 529, characters 31-45
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 264, characters 32-54
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_func in file "src/abstract/abstract_interpreter_control_flow.ml", line 320, characters 27-55
-  Called from Owi__Abstract_interpreter_control_flow.exec_vfunc_from_outside in file "src/abstract/abstract_interpreter_control_flow.ml", line 643, characters 12-62
-  Called from Owi__Script_abstract.do_action in file "src/script/script_abstract.ml", line 23, characters 8-52
+  owi: [ERROR] Call indirect on null
+  owi: [ERROR] failed
   [26]
 $ owi wasm script abstract --no-exhaustion reference/memory_copy.wast
 $ owi wasm script abstract --no-exhaustion reference/memory_fill.wast
@@ -237,15 +323,8 @@ $ owi wasm script abstract --no-exhaustion reference/memory_redundancy.wast
 $ owi wasm script abstract --no-exhaustion reference/memory_trap.wast
 $ owi wasm script abstract --no-exhaustion reference/names.wast
   $ owi wasm script abstract --no-exhaustion reference/nop.wast
-  owi: [ERROR] File "src/abstract/abstract_interpreter_control_flow.ml", line 610, characters 18-24: Assertion failed
-  Exception: File "src/abstract/abstract_interpreter_control_flow.ml", line 610, characters 18-24: Assertion failed
-  Raised at Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 610, characters 18-30
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 264, characters 32-54
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_instr.(fun) in file "src/abstract/abstract_interpreter_control_flow.ml", line 395, characters 27-47
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_expr.loop in file "src/abstract/abstract_interpreter_control_flow.ml", line 264, characters 32-54
-  Called from Owi__Abstract_interpreter_control_flow.DenotFixpoint.eval_func in file "src/abstract/abstract_interpreter_control_flow.ml", line 320, characters 27-55
-  Called from Owi__Abstract_interpreter_control_flow.exec_vfunc_from_outside in file "src/abstract/abstract_interpreter_control_flow.ml", line 643, characters 12-62
-  Called from Owi__Script_abstract.do_action in file "src/script/script_abstract.ml", line 23, characters 8-52
+  owi: [ERROR] Call indirect on null
+  owi: [ERROR] failed
   [26]
 $ owi wasm script abstract --no-exhaustion reference/ref_as_non_null.wast
 $ owi wasm script abstract --no-exhaustion reference/ref.wast

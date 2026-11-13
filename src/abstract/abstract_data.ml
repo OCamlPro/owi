@@ -2,14 +2,18 @@
 (* Copyright © 2021-2026 OCamlPro *)
 (* Written by the Owi programmers *)
 
-type t = |
+type t = string option
 
-let of_string _ = assert false
+let value = function
+  | Some s -> s
+  | None ->
+    (* TODO: is this correct? *)
+    ""
 
-let size _ = assert false
+let size = function None -> 0 | Some s -> String.length s
 
-let drop _ = assert false
+let drop _data = None
 
-let to_string _ = assert false
+let of_string s = Some s
 
-let value _ = assert false
+let to_string s = s

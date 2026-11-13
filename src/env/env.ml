@@ -16,6 +16,8 @@ module Make
           type t
         end
 
+        type fun_id
+
         type i32
 
         module Array : Array_intf.T
@@ -24,7 +26,7 @@ module Make
 
         type 'value t =
           | Extern of Extern.t option
-          | Func of int option
+          | Func of fun_id option
           | NullExn
           | NullRef
           | I31 of i32

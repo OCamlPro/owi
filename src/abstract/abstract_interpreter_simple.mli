@@ -12,11 +12,9 @@ val eval_instr :
       -> Abstract_stack.Value.t
       -> Abstract_interpreter_state.t
       -> Abstract_interpreter_state.t
-      -> ( Abstract_value.t
-         , Abstract_domain.Context.empty_tuple )
-         Abstract_domain.Context.result
+      -> Abstract_value.t Abstract_domain.Context.result
       -> ('a -> 'b -> 'a)
-      -> (Abstract_value.t, 'c) Abstract_domain.Context.result )
+      -> Abstract_value.t Abstract_domain.Context.result )
   -> Abstract_interpreter_state.t
   -> uuid:int
   -> Binary.simple_instruction

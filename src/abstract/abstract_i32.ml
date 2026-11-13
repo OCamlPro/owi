@@ -22,16 +22,17 @@ let of_boolean ctx boolean =
   Abstract_domain.Binary_Forward.bofbool ~size ctx boolean
 
 let to_boolean ctx x =
-  let zero = Abstract_domain.Binary_Forward.biconst ~size Z.zero ctx in
+  let zero = Abstract_domain.Binary_Forward.biconst ~size ~k:Z.zero ctx in
   let b = Abstract_domain.Binary_Forward.beq ~size ctx x zero in
   Abstract_boolean.not ctx b
 
 let of_int32 ctx i =
-  Abstract_domain.Binary_Forward.biconst ~size (Z.of_int32_unsigned i) ctx
+  Abstract_domain.Binary_Forward.biconst ~size ~k:(Z.of_int32_unsigned i) ctx
 
-let of_int ctx i = Abstract_domain.Binary_Forward.biconst ~size (Z.of_int i) ctx
+let of_int ctx i =
+  Abstract_domain.Binary_Forward.biconst ~size ~k:(Z.of_int i) ctx
 
-let zero ctx = Abstract_domain.Binary_Forward.biconst ~size Z.zero ctx
+let zero ctx = Abstract_domain.Binary_Forward.biconst ~size ~k:Z.zero ctx
 
 let eqz ctx i = eq ctx (zero ctx) i
 
@@ -98,3 +99,9 @@ let extend_s ctx n x =
 let wrap_i64 ctx x =
   Abstract_domain.Binary_Forward.bextract ~index:Units.In_bits.zero
     ~size:Units.In_bits.s32 ~oldsize:(Units.In_bits.of_int 64) ctx x
+
+let get_singleton_int ctx x =
+  let query = Abstract_domain.Query.binary ~size ctx x in
+  match Abstract_domain.Query.Binary_Lattice.is_singleton ~size query with
+  | Some z -> Z.to_int z
+  | None -> assert false

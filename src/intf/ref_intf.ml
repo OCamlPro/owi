@@ -18,6 +18,8 @@ module type T = sig
 
   type i32
 
+  type fun_id
+
   module Array : Array_intf.T with type i32 = i32 and type boolean = boolean
 
   module Struct : Struct_intf.T with type boolean = boolean
@@ -25,7 +27,7 @@ module type T = sig
   (* TODO; make this private and even opaque at some point *)
   type 'value t =
     | Extern of Extern.t option
-    | Func of int option
+    | Func of fun_id option
     (* TODO: Not sure about these two. *)
     | NullExn
     | NullRef
@@ -42,6 +44,8 @@ module type T = sig
 
   val func : int -> 'value t
 
+  val int_of_fun_id : fun_id -> int
+
   val extern : 'x Type.Id.t -> 'x -> 'value t
 
   val make_i31 : i32 -> 'value t
@@ -54,7 +58,7 @@ module type T = sig
 
   val ref_eq : 'value t -> 'value t -> bool
 
-  val get_func : 'value t -> int get_ref
+  val get_func : 'value t -> fun_id get_ref
 
   val get_i31 : 'value t -> i32 get_ref
 

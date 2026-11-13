@@ -25,9 +25,11 @@ type i32 = Concrete_i32.t
 module Array = Concrete_array
 module Struct = Concrete_struct
 
+type fun_id = int
+
 type 'value t =
   | Extern of Extern.t option
-  | Func of int option
+  | Func of fun_id option
   | NullExn
   | NullRef
   | I31 of i32
@@ -61,6 +63,8 @@ let null = function
   | Eq_ht | I31_ht -> NullI31
 
 let func (f : int) = Func (Some f)
+
+let int_of_fun_id (f : fun_id) : int = f
 
 let extern (type x) (t : x Type.Id.t) (v : x) : _ t = Extern (Some (E (t, v)))
 
