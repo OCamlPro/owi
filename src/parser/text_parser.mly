@@ -2,7 +2,7 @@
 %token <String.t> ID NAME
 %token ALIGN ANY_REF ARRAY ARRAY_FILL ARRAY_COPY ARRAY_GET ARRAY_GET_S ARRAY_GET_U ARRAY_LEN ARRAY_NEW_CANON ARRAY_NEW_CANON_DATA ARRAY_NEW_CANON_DEFAULT ARRAY_NEW_CANON_ELEM ARRAY_NEW_CANON_FIXED ARRAY_REF ARRAY_SET ARRAY_INIT_DATA ARRAY_INIT_ELEM ASSERT_EXHAUSTION ASSERT_INVALID ASSERT_MALFORMED ASSERT_RETURN ASSERT_TRAP ASSERT_UNLINKABLE ANY ANY_CONVERT_EXTERN EXTERN_CONVERT_ANY
 %token BINARY BLOCK BR BR_IF BR_ON_CAST BR_ON_CAST_FAIL BR_ON_NON_NULL BR_ON_NULL BR_TABLE
-%token CALL CALL_INDIRECT CALL_REF
+%token CALL CALL_INDIRECT CALL_REF CATCH CATCH_ALL
 %token DATA DATA_DROP DECLARE DROP
 %token ELEM ELEM_DROP ELSE END EOF EQ EQ_REF EQUAL EXPORT EXTERN EXTERN_REF
 %token F32 F32_ABS F32_ADD F32_CEIL F32_CONST F32_CONVERT_I32_S F32_CONVERT_I32_U F32_CONVERT_I64_S F32_CONVERT_I64_U F32_COPYSIGN F32_DEMOTE_F64 F32_DIV F32_EQ F32_FLOOR F32_GE F32_GT F32_LE F32_LOAD F32_LT F32_MAX F32_MIN F32_MUL F32_NE F32_NEAREST F32_NEG F32_REINTERPRET_I32 F32_REINTERPRET_I64 F32_SQRT F32_STORE F32_SUB F32_TRUNC
@@ -29,7 +29,7 @@
 %token QUOTE
 %token REC REF REF_ARRAY REF_AS_NON_NULL REF_CAST REF_EQ REF_EXTERN REF_FUNC REF_HOST REF_I31 REF_IS_NULL REF_NULL REF_STRUCT REF_TEST REGISTER RESULT RETURN RETURN_CALL RETURN_CALL_INDIRECT RETURN_CALL_REF RPAR
 %token SELECT START STRUCT STRUCT_GET STRUCT_GET_S STRUCT_GET_U STRUCT_NEW_CANON STRUCT_NEW_CANON_DEFAULT STRUCT_REF STRUCT_SET SUB
-%token TABLE TABLE_COPY TABLE_FILL TABLE_GET TABLE_GROW TABLE_INIT TABLE_SET TABLE_SIZE THEN TYPE
+%token TABLE TABLE_COPY TABLE_FILL TABLE_GET TABLE_GROW TABLE_INIT TABLE_SET TABLE_SIZE THEN THROW TRY_TABLE TYPE
 %token UNREACHABLE
 %token
  V128_LOAD8X8_U
@@ -566,6 +566,7 @@ let plain_instr :=
   | RETURN_CALL_REF; ~ = indice; { Return_call_ref (Bt_ind indice) }
   | CALL; ~ = indice; <Call>
   | CALL_REF; ~ = indice; { Call_ref (indice) }
+  | THROW; ~ = indice; <Throw>
   | LOCAL_GET; ~ = indice; { Local (Get indice)}
   | LOCAL_SET; ~ = indice; { Local (Set indice) }
   | LOCAL_TEE; ~ = indice; { Local (Tee indice) }
@@ -1139,6 +1140,11 @@ let block_instr ==
     then failwith "mismatching label";
     If_else (id, bt, es, [])
   }
+  | TRY_TABLE; id = option(id); (bt, (catches, es)) = try_block; END; id2 = option(id); {
+    if Option.is_some id2 && not @@ Option.equal String.equal id id2
+    then failwith "mismatching label";
+    Try_table (id, bt, catches, es)
+  }
   | IF; id = option(id); (bt, es1) = block; ELSE; id2 = option(id); ~ = instr_list; END; id3 = option(id); {
     if (Option.is_some id2 && not @@ Option.equal String.equal id id2)
     || (Option.is_some id3 && not @@ Option.equal String.equal id id3)
@@ -1160,6 +1166,43 @@ let block ==
       | (pt, rt) -> Some (Bt_raw (None, (List.map (fun t -> None, t) pt, rt)))
     in
     block_type, r
+  }
+
+let try_block ==
+  | ~ = type_use; (l, r) = try_param_body; {
+    let block_type = match l with
+    | ([], []) -> Bt_ind type_use
+    | (pt, rt) -> Bt_raw ((Some type_use), (List.map (fun t -> None, t) pt, rt))
+    in
+    Some block_type, r
+  }
+  | (l, r) = try_param_body; {
+    let block_type = match l with
+      | [], [] -> None
+      | (pt, rt) -> Some (Bt_raw (None, (List.map (fun t -> None, t) pt, rt)))
+    in
+    block_type, r
+  }
+
+let try_param_body :=
+  | ~ = try_result_body; <>
+  | LPAR; PARAM; l = list(val_type); RPAR; ((ins, out), body) = try_param_body; {
+    (l @ ins, out), body
+  }
+
+let try_result_body :=
+  | ~ = catches_body; { ([], []), catches_body }
+  | LPAR; RESULT; l = list(val_type); RPAR; ((ins, out), body) = try_result_body; {
+    (ins, l @ out), body
+  }
+
+let catches_body :=
+  | ~ = instr_list; { [], instr_list }
+  | LPAR; CATCH; tag = indice; label = indice; RPAR; (catches, es) = catches_body; {
+    Catch (tag, label) :: catches, es
+  }
+  | LPAR; CATCH_ALL; label = indice; RPAR; (catches, es) = catches_body; {
+    Catch_all label :: catches, es
   }
 
 let block_param_body :=
@@ -1192,6 +1235,9 @@ let expr_aux ==
   }
   | LOOP; id = option(id); (bt, es) = block; {
     [], Loop (id, bt, es)
+  }
+  | TRY_TABLE; id = option(id); (bt, (catches, es)) = try_block; {
+    [], Try_table (id, bt, catches, es)
   }
   | IF; id = option(id); (bt, ((pt, rt), (es, es1, es2))) = if_block; {
     let bt = match pt, rt with
