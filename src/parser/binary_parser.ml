@@ -1236,6 +1236,7 @@ let read_import input =
     let+ (mut, val_type), input = read_global_type input in
     ((modul, name, Global (mut, val_type)), input)
   | '\x04' ->
+    let* input = check_zero_opcode ~msg:"read_import tag" input in
     let+ typeidx, input = read_U32 input in
     ((modul, name, Tag typeidx), input)
   | _c -> parse_fail "malformed import kind"
