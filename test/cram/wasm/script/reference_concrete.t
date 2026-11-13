@@ -143,6 +143,8 @@
   $ owi wasm script concrete --no-exhaustion reference/table_size.wast
   $ owi wasm script concrete --no-exhaustion reference/table-sub.wast
   $ owi wasm script concrete --no-exhaustion reference/table.wast
+  $ owi wasm script concrete --no-exhaustion reference/tag.wast
+  $ owi wasm script concrete --no-exhaustion reference/throw.wast
   $ owi wasm script concrete --no-exhaustion reference/token.wast
   $ owi wasm script concrete --no-exhaustion reference/token.wast
   $ owi wasm script concrete --no-exhaustion reference/traps.wast
