@@ -42,6 +42,7 @@ let check_error ~expected ~got : unit Result.t =
            || String.equal s "malformed section id" ->
       String.equal expected "unexpected content after last section"
     | `Empty_identifier -> String.equal expected "unknown operator"
+    | `Type_mismatch _ -> String.starts_with ~prefix:"type mismatch:" expected
     | `Offset_out_of_range ->
       (* TODO: should be removed *)
       String.equal "alignment must not be larger than natural" expected
